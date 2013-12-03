@@ -1,0 +1,31 @@
+@footnote {
+	margin: 0.5em 8px;
+}
+
+@footnote ::before {
+	display: block;
+	border-top: 2px solid black;
+	margin-bottom: 0.4em;
+	width: 40%;
+}
+
+/* default page master */
+@-epubx-page-master :background-host {
+    @-epubx-partition :layout-host {
+        -epubx-flow-from: body;
+        top: 0px;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+    }
+    @-epubx-partition :oeb-page-foot {
+    	-epubx-flow-from: oeb-page-foot;
+    	bottom: 0px;
+    	width: 100%;
+    }
+    @-epubx-partition :oeb-page-head {
+    	-epubx-flow-from: oeb-page-head;
+    	top: 0px;
+    	width: 100%;
+    }
+}
