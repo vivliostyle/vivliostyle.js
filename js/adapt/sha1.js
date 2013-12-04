@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Calculate SHA1 hash of the given content.
  */
 goog.provide("adapt.sha1");

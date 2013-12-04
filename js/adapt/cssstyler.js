@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Apply CSS cascade to a document incrementally and cache the result.
  */
 goog.provide('adapt.cssstyler');

@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview View tree generator.
  */
 goog.provide('adapt.vgen');

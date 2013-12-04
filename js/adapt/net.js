@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Fetch resource from a URL.
  */
 goog.provide('adapt.net');

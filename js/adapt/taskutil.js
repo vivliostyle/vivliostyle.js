@@ -1,3 +1,7 @@
+/**
+ * Copyright 2013 Google, Inc.
+ * @fileoverview Utilities asynchronous execution and cooperative multitasking.
+ */
 goog.provide('adapt.taskutil');
 
 goog.require('adapt.task');

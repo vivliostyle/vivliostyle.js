@@ -1,8 +1,8 @@
-@footnote {
+@-adapt-footnote-area {
 	margin: 0.5em 8px;
 }
 
-@footnote ::before {
+@-adapt-footnote-area ::before {
 	display: block;
 	border-top: 2px solid black;
 	margin-bottom: 0.4em;

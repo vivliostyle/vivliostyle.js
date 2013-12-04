@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview CSS Parser.
  */
 goog.require('adapt.base');
@@ -1988,8 +1989,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                             continue;
                         }
                         break;
-                    case "footnote":
-                    case "-adapt-footnote":
+                    case "-adapt-footnote-area":
                         tokenizer.consume();
                 		token = tokenizer.token();
                 		switch (token.type) {

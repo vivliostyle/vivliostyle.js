@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Fills a region with styled content. This file does not communicate with
  * the styling system directly. Instead it goes through the layout interface that gives it one
  * view tree node at a time.
@@ -321,7 +322,7 @@ adapt.layout.Column.prototype.openAllViews = function(position) {
 };
 
 adapt.layout.firstCharPattern = 
-	/^[^A-Za-z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]*([A-Za-z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527][^A-Za-z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]*)?/;
+	/^[^A-Za-z0-9_\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]*([A-Za-z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527][^A-Za-z0-9_\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]*)?/;
 
 /**
  * @param {adapt.vtree.NodeContext} position
@@ -1002,13 +1003,19 @@ adapt.layout.Column.prototype.findAcceptableBreakInside = function(checkPoints, 
 	    } else {
 	    	// Character with index low is the last one that fits.
 	        viewIndex = low - nodeContext.boxOffset;
-	        if (textNode.data.charCodeAt(viewIndex) == 0xAD) {
+	        var text = textNode.data;
+	        if (text.charCodeAt(viewIndex) == 0xAD) {
 	        	// convert trailing soft hyphen to a real hyphen
-		        textNode.replaceData(viewIndex, textNode.data.length - viewIndex, "-");	        	
+		        textNode.replaceData(viewIndex, text.length - viewIndex, "-");
+		        viewIndex++;
 	        } else {
 	        	// keep the trailing character (it may be a space or not)
+	        	var ch0 = text.charAt(viewIndex);
 	        	viewIndex++;
-		        textNode.replaceData(viewIndex, textNode.data.length - viewIndex, "");	        	
+	        	var ch1 = text.charAt(viewIndex);
+	        	// If automatic hyphen was inserted here, add a real hyphen.
+		        textNode.replaceData(viewIndex, text.length - viewIndex, 
+		        		adapt.base.isLetter(ch0) && adapt.base.isLetter(ch1) ? "-" : "");	        	
 	        }
 	        if (viewIndex > 0) {
 		        nodeContext = nodeContext.modify();

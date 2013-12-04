@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Utility functions to work with XML (mostly XHTML) documents.
  */
 
@@ -24,7 +25,7 @@ adapt.xmldoc.XMLDocHolder = function(store, url, document) {
 	/** @const */ this.store = store;
 	/** @const */ this.url = url;
 	/** @const */ this.document = document;
-	/** @type {string} */ this.lang = "";
+	/** @type {?string} */ this.lang = null;
 	/**
 	 * @type {Element}
 	 * @const
@@ -48,6 +49,7 @@ adapt.xmldoc.XMLDocHolder = function(store, url, document) {
 				}
 			}
 		}
+		this.lang = this.root.getAttribute("lang");
 	} else if (this.root.namespaceURI == adapt.base.NS.FB2){
 		head = this.root;
 		for (var child = this.root.firstChild; child; child = child.nextSibling) {
@@ -60,6 +62,11 @@ adapt.xmldoc.XMLDocHolder = function(store, url, document) {
 				}
 			}
 		}
+		var langs = this.doc().child("FictionBook").child("description")
+				.child("title-info").child("lang").textContent();
+		if (langs.length > 0) {
+			this.lang = langs[0];
+		}		
 	}
 	/** 
 	 * @type {Element}
@@ -486,10 +493,19 @@ adapt.xmldoc.NodeList.prototype.child = function(tag) {
  * @return {Array.<?string>}
  */
 adapt.xmldoc.NodeList.prototype.attribute = function(name) {
-	return /** @type {Array.<?string>} */ (this.forEach(function(node) {
+	return this.forEach(function(node) {
 		if (node.nodeType == 1) {
 			return (/** @type {Element} */ (node)).getAttribute(name);
 		}
 		return null;
-	}));
+	});
+};
+
+/**
+ * @return {Array.<?string>}
+ */
+adapt.xmldoc.NodeList.prototype.textContent = function() {
+	return this.forEach(function(node) {
+		return node.textContent;
+	});
 };

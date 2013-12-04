@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Basic view tree data structures and support utilities.
  */
 goog.require('adapt.base');

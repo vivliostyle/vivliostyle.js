@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview CSS Cascade.
  */
 goog.provide('adapt.csscasc');

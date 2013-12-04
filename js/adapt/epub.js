@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Deal with META-INF/ and .opf files in EPUB container.
  */
 goog.provide('adapt.epub');
@@ -193,6 +194,7 @@ adapt.epub.OPFDoc = function(store, epubURL) {
 	/** @const */ this.epubURL = epubURL;
 	/** @type {?string} */ this.uid = null;
 	/** @type {Object.<string,string>} */ this.bindings = {};
+	/** @type {?string} */ this.lang = null;
 };
 
 /**
@@ -249,6 +251,10 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML) {
         if (mediaType && handlerId && this.itemMap[handlerId]) {
         	this.bindings[mediaType] = this.itemMap[handlerId].src;
         }
+	}
+	var langs = pkg.child("metadata").child("language").textContent();
+	if (langs.length > 0) {
+		this.lang = langs[0];
 	}
 };
 
@@ -667,7 +673,7 @@ adapt.epub.OPFView.prototype.getPageViewItem = function() {
     		viewport = new adapt.vgen.Viewport(viewport.window, viewportSize.fontSize, viewport.root,
     				viewportSize.width, viewportSize.height);
     	}
-        var instance = new adapt.ops.StyleInstance(style, xmldoc, 
+        var instance = new adapt.ops.StyleInstance(style, xmldoc, self.opf.lang,
         		viewport, self.clientLayout, self.fontMapper, customRenderer);
         instance.init().then(function() {
 			viewItem = {item: item, xmldoc: xmldoc, instance: instance,

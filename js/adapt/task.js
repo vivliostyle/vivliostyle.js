@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Support for asynchronous execution and cooperative multitasking.
  */
 goog.require('adapt.base');

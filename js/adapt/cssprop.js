@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Support utilities to extract information from various (parsed) CSS values.
  */
 goog.provide('adapt.cssprop');

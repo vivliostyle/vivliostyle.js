@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Render EPUB content files by applying page masters, styling and layout.
  */
 goog.provide('adapt.ops');
@@ -100,6 +101,7 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
 /**
  * @param {adapt.ops.Style} style
  * @param {adapt.xmldoc.XMLDocHolder} xmldoc
+ * @param {?string} defaultLang
  * @param {adapt.vgen.Viewport} viewport
  * @param {adapt.vtree.ClientLayout} clientLayout
  * @param {adapt.font.Mapper} fontMapper
@@ -110,11 +112,12 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @implements {adapt.pm.InstanceHolder}
  * @implements {adapt.vgen.StylerProducer}
  */
-adapt.ops.StyleInstance = function(style, xmldoc, viewport, clientLayout, 
+adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientLayout, 
 		fontMapper, customRenderer) {
 	adapt.expr.Context.call(this, style.rootScope, viewport.width, viewport.height, viewport.fontSize);
 	/** @const */ this.style = style;
 	/** @const */ this.xmldoc = xmldoc;
+	/** @const */ this.lang = xmldoc.lang || defaultLang;
 	/** @const */ this.viewport = viewport;
     /** @const */ this.primaryFlows = /** @type {Object.<string,boolean>} */ ({ "body": true });
     /** @const */ this.clientLayout = clientLayout;
@@ -159,7 +162,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     var docElementStyle = self.styler.getTopContainerStyle();
     var rootBox = this.style.rootBox;
     this.rootPageBoxInstance = new adapt.pm.RootPageBoxInstance(rootBox);
-    var cascadeInstance = this.style.cascade.createInstance(self, this.xmldoc.lang);
+    var cascadeInstance = this.style.cascade.createInstance(self, this.lang);
     this.rootPageBoxInstance.applyCascadeAndInit(cascadeInstance, docElementStyle);
     var srcFaces = /** @type {Array.<adapt.font.Face>} */ ([]);
     for (var i = 0; i < self.style.fontFaces.length; i++) {
@@ -637,6 +640,9 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     } else {
         self.currentLayoutPosition = new adapt.vtree.LayoutPosition();
         self.styler.replayFlowElementsFromOffset(-1);
+    }
+    if (this.lang) {
+    	page.container.setAttribute("lang", this.lang);
     }
     cp = self.currentLayoutPosition;
     cp.page++;

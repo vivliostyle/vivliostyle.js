@@ -1,3 +1,7 @@
+/*
+ * Copyright 2013 Google, Inc.
+ * CSS property validation.
+ */
 NUM = POS_NUM | ZERO | NEGATIVE;
 NNEG_NUM = POS_NUM | ZERO;
 INT = POS_INT | ZERO | NEGATIVE;

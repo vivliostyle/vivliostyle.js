@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Deal with page masters, partition groups, and partitions.
  */
 goog.provide('adapt.pm');

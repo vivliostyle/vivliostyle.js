@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Deal with embedded fonts.
  */
 goog.provide('adapt.font');

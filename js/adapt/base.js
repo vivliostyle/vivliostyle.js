@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Common utilities.
  */
 goog.provide('adapt.base');
@@ -273,7 +274,7 @@ adapt.base.makePropNameMap = function(list) {
  * @const
  */
 adapt.base.propNameMap = adapt.base.makePropNameMap([
-	"transform", "transform-origin"
+	"transform", "transform-origin", "hyphens"
 ]);
 
 
@@ -289,6 +290,20 @@ adapt.base.setCSSProperty = function(elem, prop, value) {
         		adapt.base.propNameMap[prop] || prop, value);
     } catch (err) {
     }
+};
+
+/**
+ * @param {Element} elem
+ * @param {string} prop
+ * @return {string}
+ */
+adapt.base.getCSSProperty = function(elem, prop, value) {
+    try {
+        return (/** @type {HTMLElement} */ (elem)).style.getPropertyValue(
+        		adapt.base.propNameMap[prop] || prop);
+    } catch (err) {
+    }
+    return "";
 };
 
 /**
@@ -328,7 +343,7 @@ adapt.base.StringBuffer.prototype.toString = function() {
  * @param {string} str
  * @return {string}
  */
-function escapeChar(str) {
+adapt.base.escapeChar = function(str) {
     // not called for surrogate pairs, no need to worry about them
     return '\\' + str.charCodeAt(0).toString(16) + ' ';
 }
@@ -338,7 +353,7 @@ function escapeChar(str) {
  * @return {string}
  */
 adapt.base.escapeCSSIdent = function(name) {
-    return name.replace(/[^-_a-zA-Z0-9\u0080-\uFFFF]/g, escapeChar);
+    return name.replace(/[^-_a-zA-Z0-9\u0080-\uFFFF]/g, adapt.base.escapeChar);
 };
 
 /**
@@ -346,7 +361,7 @@ adapt.base.escapeCSSIdent = function(name) {
  * @return {string}
  */
 adapt.base.escapeCSSStr = function(str) {
-    return str.replace(/[\u0000-\u001F"]/g, escapeChar);
+    return str.replace(/[\u0000-\u001F"]/g, adapt.base.escapeChar);
 };
 
 /**
@@ -355,6 +370,14 @@ adapt.base.escapeCSSStr = function(str) {
  */
 adapt.base.lightURLEncode = function(str) {
     return str.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
+};
+
+/**
+ * @param {string} ch
+ * @return {boolean}
+ */
+adapt.base.isLetter = function(ch) {
+	return !!ch.match(/^[a-zA-Z\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]$/);
 };
 
 /**

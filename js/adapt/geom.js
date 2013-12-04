@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Geometric utilities.
  */
 goog.provide('adapt.geom');

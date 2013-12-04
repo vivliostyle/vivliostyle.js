@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Sample EPUB rendering application.
  */
 goog.provide('adapt.sampleapp');

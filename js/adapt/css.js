@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview CSS Values and utilities to handle them.
  */
 goog.provide('adapt.css');

@@ -1,4 +1,5 @@
 /**
+ * Copyright 2013 Google, Inc.
  * @fileoverview Support for EPUB Canonical Fragment Identifiers.
  */
 goog.provide('adapt.cfi');
