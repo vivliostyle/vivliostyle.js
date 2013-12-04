@@ -494,10 +494,12 @@ adapt.layout.Column.prototype.createFloats = function() {
         		ref, "left", band.x1 - this.box.x1, height);        
         band.right = this.createFloat(
         		ref, "right", this.box.x2 - band.x2, height);
+        /*
         if (ri == 0 && this.paddingTop > 0) {
         	adapt.base.setCSSProperty(band.left, "margin-top", this.paddingTop + "px");
         	adapt.base.setCSSProperty(band.right, "margin-top", this.paddingTop + "px");
         }
+        */
     }
 };
 

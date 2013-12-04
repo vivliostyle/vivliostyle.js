@@ -466,7 +466,7 @@ adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
     var marginRight = adapt.pm.toExprAuto(scope, style["margin-right"], parentWidth);
     var right = adapt.pm.toExprAuto(scope, style["right"], parentWidth);
     var leftBP = adapt.expr.add(scope, borderLeftWidth, paddingLeft);
-    var rightBP = adapt.expr.add(scope, borderLeftWidth, paddingLeft);
+    var rightBP = adapt.expr.add(scope, borderLeftWidth, paddingRight);
     if (left && right && width) {
         var extra = adapt.expr.sub(scope, parentWidth, adapt.expr.add(scope, width,
         		adapt.expr.add(scope, adapt.expr.add(scope, left, leftBP), rightBP)));
