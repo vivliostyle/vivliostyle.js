@@ -19,13 +19,27 @@ goog.require('adapt.font');
  * @const
  * @type {!Object.<string,string>}
  */
-adapt.vgen.frontEdgeBlackList = {
+adapt.vgen.frontEdgeBlackListHor = {
     "text-indent": "0px",
     "margin-top": "0px",
     "padding-top": "0px",
     "border-top-width": "0px",
     "border-top-style": "none",
     "border-top-color": "transparent"
+};
+
+/**
+ * @private
+ * @const
+ * @type {!Object.<string,string>}
+ */
+adapt.vgen.frontEdgeBlackListVert = {
+    "text-indent": "0px",
+    "margin-right": "0px",
+    "padding-right": "0px",
+    "border-right-width": "0px",
+    "border-right-style": "none",
+    "border-right-color": "transparent"
 };
 
 
@@ -41,6 +55,29 @@ adapt.vgen.CustomRenderer;
  * @type {Object.<string,string>}
  */
 adapt.vgen.namespacePrefixMap = {};
+
+
+/**
+ * Creates an epubReadingSystem object in the iframe.contentWindow.navigator when
+ * load event fires.
+ * @param {HTMLIFrameElement} iframe
+ */
+adapt.vgen.initIFrame = function(iframe) {
+	iframe.addEventListener("load", function() {
+		iframe.contentWindow.navigator["epubReadingSystem"] = {
+			"name": "adapt",
+			"version": "0.1",
+			"layoutStyle": "paginated",
+			"hasFeature": function(name, version) {
+				switch(name) {
+				case "mouse-events":
+					return true;
+				}
+				return false;
+			}
+		};
+	}, false);
+};
 
 /**
  * @interface
@@ -312,12 +349,13 @@ adapt.vgen.ViewFactory.prototype.setViewRoot = function(viewRoot, isFootnote) {
 	this.isFootnote = isFootnote;
 };
 
-/**                                                                                                                                      
+/**                            
+ * @param {adapt.vtree.NodeContext} nodeContext                                                                                                          
  * @param {adapt.csscasc.ElementStyle} style                                                                                             
  * @param {Object.<string,adapt.css.Val>} computedStyle                                                                                  
  * @return {void}                                                                                                                        
  */
-adapt.vgen.ViewFactory.prototype.computeStyle = function(style, computedStyle) {
+adapt.vgen.ViewFactory.prototype.computeStyle = function(nodeContext, style, computedStyle) {
     var cascMap = /** @type {Object.<string,adapt.csscasc.CascadeValue>} */ ({});
     var context = this.context;
     for (var n in style) {
@@ -347,12 +385,36 @@ adapt.vgen.ViewFactory.prototype.computeStyle = function(style, computedStyle) {
             }
         }
     }
+    var writingModeCasc = cascMap["writing-mode"];
+    var vertical = nodeContext ? nodeContext.vertical : false;
+    if (writingModeCasc) {
+    	var writingMode = writingModeCasc.evaluate(context, "writing-mode");
+    	if (writingMode && writingMode !== adapt.css.ident.inherit) {
+	    	vertical = writingMode === adapt.css.ident.vertical_rl;
+	    	if (nodeContext) {
+	    		nodeContext.vertical = vertical;
+	    	}
+    	}
+    }
+    var couplingMap = vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
     for (var name in cascMap) {
-        var value = cascMap[name].evaluate(context, name);
+    	var cascVal = cascMap[name];
+    	var coupledName = couplingMap[name];
+    	var targetName;
+    	if (coupledName) {
+    		var coupledCascVal = cascMap[coupledName];
+    		if (coupledCascVal && coupledCascVal.priority > cascVal.priority) {
+    			continue;
+    		}
+    		targetName = adapt.csscasc.geomNames[coupledName] ? coupledName : name;
+    	} else {
+    		targetName = name;
+    	}
+        var value = cascVal.evaluate(context, name);
         if (name == "font-family") {
             value = this.docFaces.filterFontFamily(value);
         }
-        computedStyle[name] = value;
+        computedStyle[targetName] = value;
     }
 };
 
@@ -447,7 +509,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
     if (!self.nodeContext.parent) {
     	elementStyle = self.inheritFromSourceParent(elementStyle);
     }
-	self.computeStyle(elementStyle, computedStyle);
+	self.computeStyle(self.nodeContext, elementStyle, computedStyle);
     // Sort out the properties
     var flow = computedStyle["flow-into"];
     if (flow && flow.toString() != self.flowName) {
@@ -596,14 +658,16 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 	    } else {
 	    	elemResult = adapt.task.newResult(self.createElement(ns, tag));
 	    }
-	    elemResult.then(function(resultParam) {
-	    	var result = /** @type {Element} */ (resultParam);
+	    elemResult.then(function(result) {
 	    	if (tag == "a") {
 	    		result.addEventListener("click", self.page.hrefHandler, false);
 	    	}
 		    if (inner) {
 				self.applyPseudoelementStyle(self.nodeContext, "inner", inner);
 		    	result.appendChild(inner);
+		    }
+		    if (result.localName == "iframe" && result.namespaceURI == adapt.base.NS.XHTML) {
+		    	adapt.vgen.initIFrame(/** @type {HTMLIFrameElement} */ (result));   	
 		    }
 			if (element.namespaceURI != adapt.base.NS.FB2 || tag == "td") {
 			    var attributes = element.attributes;
@@ -671,9 +735,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 		    	}
 		    }
 		    if (!firstTime && !self.nodeContext.inline) {
-		        for (var propName in adapt.vgen.frontEdgeBlackList) {
-		            adapt.base.setCSSProperty(result,
-		            		propName, adapt.vgen.frontEdgeBlackList[propName]);
+		    	var blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeBlackListVert : adapt.vgen.frontEdgeBlackListHor;
+		        for (var propName in blackList) {
+		            adapt.base.setCSSProperty(result, propName, blackList[propName]);
 		        }
 		    }
 		    if (listItem) {
@@ -928,7 +992,7 @@ adapt.vgen.ViewFactory.prototype.applyPseudoelementStyle = function(nodeContext,
     	return;
     elementStyle = pseudoMap[pseudoName];
     var computedStyle = {};
-	this.computeStyle(elementStyle, computedStyle);
+	this.computeStyle(nodeContext, elementStyle, computedStyle);
     var content = computedStyle["content"];
     if (adapt.vtree.nonTrivialContent(content)) {
         content.visit(new adapt.vtree.ContentPropertyHandler(target));
@@ -1009,12 +1073,12 @@ adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(target) {
     if (pseudoMap && pseudoMap["before"]) {
     	var span = this.createElement(adapt.base.NS.XHTML, "span");
     	target.appendChild(span);
-    	this.computeStyle(pseudoMap["before"], computedStyle);
+    	this.computeStyle(null, pseudoMap["before"], computedStyle);
     	delete computedStyle["content"];
     	this.applyComputedStyles(span, computedStyle);
     	computedStyle = {};
     }
-	this.computeStyle(this.footnoteStyle, computedStyle);
+	this.computeStyle(null, this.footnoteStyle, computedStyle);
 	delete computedStyle["content"];
 	this.applyComputedStyles(target, computedStyle);
 };

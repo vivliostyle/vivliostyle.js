@@ -235,7 +235,7 @@ adapt.base.cssToJSProp = function(cssPropName) {
 /**
  * @const
  */
-adapt.base.knownPrefixes = ["", "-webkit-", "-moz-", "-ms-", "-o-"];
+adapt.base.knownPrefixes = ["-webkit-", "-moz-", "-ms-", "-o-", "-epub-", ""];
 
 /**
  * @return {Object.<string,string>}
@@ -274,7 +274,7 @@ adapt.base.makePropNameMap = function(list) {
  * @const
  */
 adapt.base.propNameMap = adapt.base.makePropNameMap([
-	"transform", "transform-origin", "hyphens"
+	"transform", "transform-origin", "hyphens", "writing-mode"
 ]);
 
 
@@ -641,4 +641,40 @@ adapt.base.checkLShapeFloatBug = function(body) {
 		body.removeChild(container);
 	}
 	return adapt.base.hasLShapeFloatBug;
+};
+
+/**
+ * @type {boolean|null}
+ */
+adapt.base.hasVerticalBBoxBug = null;
+
+/**
+ * Check if there is a bug with the bounding boxes of vertical text characters.
+ * @param {HTMLElement} body
+ * @return {boolean}
+ */
+adapt.base.checkVerticalBBoxBug = function(body) {
+	if (adapt.base.hasVerticalBBoxBug == null) {
+		var doc = body.ownerDocument;
+		var container = /** @type {HTMLElement} */ (doc.createElement("div"));
+		container.style.position = "absolute";
+		container.style.top = "0px";
+		container.style.left = "0px";
+		container.style.width = "100px";
+		container.style.height = "100px";
+		container.style.overflow = "hidden";
+		container.style.lineHeight = "16px";
+		container.style.fontSize = "16px";
+		adapt.base.setCSSProperty(container, "writing-mode", "vertical-rl");
+		body.appendChild(container);
+		var t = doc.createTextNode("a a a a a a a a a a a a a a a a");
+		container.appendChild(t);
+		var range = doc.createRange();
+		range.setStart(t, 0);
+		range.setEnd(t, 1);
+		var leftEdge = range.getBoundingClientRect().left;
+		adapt.base.hasVerticalBBoxBug = leftEdge < 50;
+		body.removeChild(container);
+	}
+	return adapt.base.hasVerticalBBoxBug;
 };

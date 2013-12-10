@@ -291,18 +291,19 @@ adapt.pm.PageBoxInstance = function(parentInstance, pageBox) {
      */
     this.cascaded = /** @type {adapt.csscasc.ElementStyle} */ ({});
     /** @const */ this.style = /** @type {Object.<string,adapt.css.Val>} */ ({});
-    /** @type {adapt.expr.Native} */ this.shrinkToFit = null;
+    /** @type {adapt.expr.Native} */ this.autoWidth = null;
     /** @type {adapt.expr.Native} */ this.autoHeight = null;
     /** @type {!Array.<adapt.pm.PageBoxInstance>} */ this.children = [];
-    /** @type {boolean} */ this.isShrinkToFit = false;
+    /** @type {boolean} */ this.isAutoWidth = false;
     /** @type {boolean} */ this.isAutoHeight = false;
     /** @type {boolean} */ this.isTopDependentOnAutoHeight = false;
-    /** @type {boolean} */ this.isLeftDependentOnAutoWidth = false;
+    /** @type {boolean} */ this.isRightDependentOnAutoWidth = false;
     /** @type {number} */ this.calculatedWidth = 0;
     /** @type {number} */ this.calculatedHeight = 0;
     /** @type {adapt.pm.PageMasterInstance} */ this.pageMasterInstance = null;
     /** @type {Object.<string,adapt.expr.Val>} */ this.namedValues = {};
     /** @type {Object.<string,adapt.expr.Val>} */ this.namedFuncs = {};
+    /** @type {boolean} */ this.vertical = false;
     if (parentInstance) {
     	parentInstance.children.push(this);
     }
@@ -494,27 +495,27 @@ adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
         if (!left && !right && !width)
             left = scope.zero;
         if (!left && !width) {
-            width = this.shrinkToFit;
-            this.isShrinkToFit = true;
+            width = this.autoWidth;
+            this.isAutoWidth = true;
         } else if (!left && !right) {
             left = scope.zero;
         } else if (!width && !right) {
-            width = this.shrinkToFit;
-            this.isShrinkToFit = true;
+            width = this.autoWidth;
+            this.isAutoWidth = true;
         }
         var remains = adapt.expr.sub(scope, parentWidth, 
         		adapt.expr.add(scope, adapt.expr.add(scope, marginLeft, leftBP),
         				adapt.expr.add(scope, marginRight, rightBP)));
-        if (this.isShrinkToFit) {
+        if (this.isAutoWidth) {
             if (!maxWidth) {
                 // TODO: handle the case when right/left depends on width
                 maxWidth = adapt.expr.sub(scope, remains, (left ? left : right));
             }
             // For multi-column layout, width is max-width.
-            if (adapt.pm.toExprAuto(scope, style["column-width"], null) || 
-            		adapt.pm.toExprAuto(scope, style["column-count"], null)) {
+            if (!this.vertical && (adapt.pm.toExprAuto(scope, style["column-width"], null) ||
+            		adapt.pm.toExprAuto(scope, style["column-count"], null))) {
                 width = maxWidth;
-                this.isShrinkToFit = false;
+                this.isAutoWidth = false;
             }
         }
         if (!left) {
@@ -602,9 +603,17 @@ adapt.pm.PageBoxInstance.prototype.initVertical = function() {
         var remains = adapt.expr.sub(scope, parentHeight, 
         		adapt.expr.add(scope, adapt.expr.add(scope, marginTop, topBP), 
         				adapt.expr.add(scope, marginBottom, bottomBP)));
-        if (this.isAutoHeight && !maxHeight) {
-            // TODO: handle the case when top/bottom depends on height
-            maxHeight = adapt.expr.sub(scope, remains, (top ? top : bottom));
+        if (this.isAutoHeight) {
+        	if (!maxHeight) {
+	            // TODO: handle the case when top/bottom depends on height
+	            maxHeight = adapt.expr.sub(scope, remains, (top ? top : bottom));
+	        }
+            // For multi-column layout in vertical writing, height is max-height.
+            if (this.vertical && (adapt.pm.toExprAuto(scope, style["column-width"], null) ||
+            		adapt.pm.toExprAuto(scope, style["column-count"], null))) {
+                height = maxHeight;
+                this.isAutoHeight = false;
+            }
         }
         if (!top) {
             top = adapt.expr.sub(scope, remains, adapt.expr.add(scope, bottom, height));
@@ -635,7 +644,7 @@ adapt.pm.PageBoxInstance.prototype.initVertical = function() {
 adapt.pm.PageBoxInstance.prototype.initColumns = function() {
     var scope = this.pageBox.scope;
     var style = this.style;
-    var width = adapt.pm.toExprAuto(scope, style["width"], null);
+    var width = adapt.pm.toExprAuto(scope, style[this.vertical ? "height" : "width"], null);
     var columnWidth = adapt.pm.toExprAuto(scope, style["column-width"], width);
     var columnCount = adapt.pm.toExprAuto(scope, style["column-count"], null);
     var columnGap = adapt.pm.toExprNormal(scope, style["column-gap"], null);
@@ -688,10 +697,11 @@ adapt.pm.PageBoxInstance.prototype.init = function(context) {
         }
     }
     var self = this;
-    this.shrinkToFit = new adapt.expr.Native(scope, 
+    this.vertical = this.getProp(context, "writing-mode") == adapt.css.ident.vertical_rl;
+    this.autoWidth = new adapt.expr.Native(scope, 
     		function() { 
     			return self.calculatedWidth;
-    		}, "shrinkToFit");
+    		}, "autoWidth");
     this.autoHeight = new adapt.expr.Native(scope, 
     		function() {
     			return self.calculatedHeight;
@@ -701,11 +711,11 @@ adapt.pm.PageBoxInstance.prototype.init = function(context) {
     this.initColumns();
     this.initEnabled();
     // all implicit dependencies are set up at this point
-    if (this.isShrinkToFit) {
-        this.isLeftDependentOnAutoWidth = this.depends("left", this.shrinkToFit, context) ||
-            this.depends("margin-left", this.shrinkToFit, context) ||
-            this.depends("border-left-width", this.shrinkToFit, context) ||
-            this.depends("padding-left", this.shrinkToFit, context);
+    if (this.isAutoWidth) {
+        this.isRightDependentOnAutoWidth = this.depends("right", this.autoWidth, context) ||
+            this.depends("margin-right", this.autoWidth, context) ||
+            this.depends("border-right-width", this.autoWidth, context) ||
+            this.depends("padding-right", this.autoWidth, context);
     }
     if (this.isAutoHeight) {
         this.isTopDependentOnAutoHeight = this.depends("top", this.autoHeight, context) ||
@@ -807,6 +817,55 @@ adapt.pm.PageBoxInstance.prototype.propagateDelayedProperty = function(context, 
  * @param {adapt.vtree.Container} container
  * @return {void}
  */
+adapt.pm.PageBoxInstance.prototype.assignLeftPosition = function(context, container) {
+    var left = this.getPropAsNumber(context, "left");
+    var marginLeft = this.getPropAsNumber(context, "margin-left");
+    var paddingLeft = this.getPropAsNumber(context, "padding-left");
+    var borderLeftWidth = this.getPropAsNumber(context, "border-left-width");
+    var width = this.getPropAsNumber(context, "width");
+    container.setHorizontalPosition(left, width);
+    adapt.base.setCSSProperty(container.element, "margin-left", marginLeft + "px");
+    adapt.base.setCSSProperty(container.element, "padding-left", paddingLeft + "px");
+    adapt.base.setCSSProperty(container.element, "border-left-width", borderLeftWidth + "px");
+    container.marginLeft = marginLeft;
+    container.borderLeft = borderLeftWidth;
+    container.paddingLeft = paddingLeft;
+};
+
+
+/**
+ * @param {adapt.expr.Context} context
+ * @param {adapt.vtree.Container} container
+ * @return {void}
+ */
+adapt.pm.PageBoxInstance.prototype.assignRightPosition = function(context, container) {
+    var right = this.getPropAsNumber(context, "right");
+	var snapWidth = this.getPropAsNumber(context, "snap-height");
+    var marginRight = this.getPropAsNumber(context, "margin-right");
+    var paddingRight = this.getPropAsNumber(context, "padding-right");
+    var borderRightWidth = this.getPropAsNumber(context, "border-right-width");
+    adapt.base.setCSSProperty(container.element, "margin-right", marginRight + "px");
+    adapt.base.setCSSProperty(container.element, "padding-right", paddingRight + "px");
+    adapt.base.setCSSProperty(container.element, "border-right-width", borderRightWidth + "px");
+    container.marginRight = marginRight;
+    container.borderRight = borderRightWidth;
+    if (this.vertical && snapWidth > 0) {
+    	var xpos = right + container.getInsetRight();
+    	var r = xpos - Math.floor(xpos / snapWidth) * snapWidth;
+    	if (r > 0) {
+    		container.snapOffsetX = snapWidth - r;
+    		paddingRight += container.snapOffsetX;
+    	}
+    }    
+    container.paddingRight = paddingRight;
+    container.snapWidth = snapWidth;
+};
+
+/**
+ * @param {adapt.expr.Context} context
+ * @param {adapt.vtree.Container} container
+ * @return {void}
+ */
 adapt.pm.PageBoxInstance.prototype.assignTopPosition = function(context, container) {
 	var snapHeight = this.getPropAsNumber(context, "snap-height");
     var top = this.getPropAsNumber(context, "top");
@@ -817,7 +876,7 @@ adapt.pm.PageBoxInstance.prototype.assignTopPosition = function(context, contain
     container.marginTop = marginTop;
     container.borderTop = borderTopWidth;
     container.snapHeight = snapHeight;
-    if (snapHeight > 0) {
+    if (!this.vertical && snapHeight > 0) {
     	var ypos = top + container.getInsetTop();
     	var r = ypos - Math.floor(ypos / snapHeight) * snapHeight;
     	if (r > 0) {
@@ -852,34 +911,44 @@ adapt.pm.PageBoxInstance.prototype.assignBottomPosition = function(context, cont
     container.paddingBottom = paddingBottom;
 };
 
+
 /**
  * @param {adapt.expr.Context} context
  * @param {adapt.vtree.Container} container
  * @return {void}
  */
-adapt.pm.PageBoxInstance.prototype.assignHorizontalPosition = function(context, container) {
-    var left = this.getPropAsNumber(context, "left");
-    var marginLeft = this.getPropAsNumber(context, "margin-left");
-    var marginRight = this.getPropAsNumber(context, "margin-right");
-    var paddingLeft = this.getPropAsNumber(context, "padding-left");
-    var paddingRight = this.getPropAsNumber(context, "padding-right");
-    var borderLeftWidth = this.getPropAsNumber(context, "border-left-width");
-    var borderRightWidth = this.getPropAsNumber(context, "border-right-width");
-    var width = this.getPropAsNumber(context, "width");
-    container.setHorizontalPosition(left, width);
-    adapt.base.setCSSProperty(container.element, "margin-left", marginLeft + "px");
-    adapt.base.setCSSProperty(container.element, "margin-right", marginRight + "px");
-    adapt.base.setCSSProperty(container.element, "padding-left", paddingLeft + "px");
-    adapt.base.setCSSProperty(container.element, "padding-right", paddingRight + "px");
-    adapt.base.setCSSProperty(container.element, "border-left-width", borderLeftWidth + "px");
-    adapt.base.setCSSProperty(container.element, "border-right-width", borderRightWidth + "px");
-    container.marginLeft = marginLeft;
-    container.borderLeft = borderLeftWidth;
-    container.paddingLeft = paddingLeft;
-    container.marginRight = marginRight;
-    container.borderRight = borderRightWidth;
-    container.paddingRight = paddingRight;
-    container.snapWidth = this.getPropAsNumber(context, "snap-width");
+adapt.pm.PageBoxInstance.prototype.assignBeforePosition = function(context, container) {
+	if (this.vertical)
+		this.assignRightPosition(context, container);
+	else
+		this.assignTopPosition(context, container);
+};
+
+/**
+ * @param {adapt.expr.Context} context
+ * @param {adapt.vtree.Container} container
+ * @return {void}
+ */
+adapt.pm.PageBoxInstance.prototype.assignAfterPosition = function(context, container) {
+	if (this.vertical)
+		this.assignLeftPosition(context, container);
+	else
+		this.assignBottomPosition(context, container);
+};
+
+/**
+ * @param {adapt.expr.Context} context
+ * @param {adapt.vtree.Container} container
+ * @return {void}
+ */
+adapt.pm.PageBoxInstance.prototype.assignStartEndPosition = function(context, container) {
+	if (this.vertical) {
+		this.assignTopPosition(context, container);
+		this.assignBottomPosition(context, container);
+	} else {
+		this.assignRightPosition(context, container);
+		this.assignLeftPosition(context, container);		
+	}
 };
 
 /**
@@ -890,13 +959,13 @@ adapt.pm.PageBoxInstance.prototype.assignHorizontalPosition = function(context, 
 adapt.pm.PageBoxInstance.prototype.sizeWithMaxHeight = function(context, container) {
     adapt.base.setCSSProperty(container.element, "border-top-width", "0px");
     var height = this.getPropAsNumber(context, "max-height");
-    if (!this.isTopDependentOnAutoHeight) {
+    if (this.isTopDependentOnAutoHeight) {
+        container.setVerticalPosition(0, height);
+    } else {
         this.assignTopPosition(context, container);
         height -= container.snapOffsetY;
         container.height = height;
         adapt.base.setCSSProperty(container.element, "height", height + "px");
-    } else {
-        container.setVerticalPosition(0, height);
 	}
 };
 
@@ -906,10 +975,18 @@ adapt.pm.PageBoxInstance.prototype.sizeWithMaxHeight = function(context, contain
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.sizeWithMaxWidth = function(context, container) {
-    // TODO: calculate left position if possible
     adapt.base.setCSSProperty(container.element, "border-left-width", "0px");
     var width = this.getPropAsNumber(context, "max-width");
-    container.setHorizontalPosition(0, width);
+    if (this.isRightDependentOnAutoWidth) {
+    	container.setHorizontalPosition(0, width);
+    } else {
+        this.assignRightPosition(context, container);
+        width -= container.snapOffsetX;
+        container.width = width;
+        var right = this.getPropAsNumber(context, "right");
+        adapt.base.setCSSProperty(container.element, "right", right + "px");    	
+        adapt.base.setCSSProperty(container.element, "width", width + "px");    	
+    }
 };
 
 /**
@@ -973,16 +1050,26 @@ adapt.pm.delayedProperties = [
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, container, page) {
-    if (this.isAutoHeight) {
-        this.sizeWithMaxHeight(context, container);
+	if (this.vertical) {
+		adapt.base.setCSSProperty(container.element, "writing-mode", "vertical-rl");
+	}
+    if (this.vertical ? this.isAutoWidth : this.isAutoHeight) {
+    	if (this.vertical)
+            this.sizeWithMaxWidth(context, container);
+    	else
+    		this.sizeWithMaxHeight(context, container);
     } else {
-        this.assignTopPosition(context, container);
-        this.assignBottomPosition(context, container);
+        this.assignBeforePosition(context, container);
+        this.assignAfterPosition(context, container);
     }
-    if (this.isShrinkToFit)
-        this.sizeWithMaxWidth(context, container);
-    else
-        this.assignHorizontalPosition(context, container);
+    if (this.vertical ? this.isAutoHeight : this.isAutoWidth) {
+    	if (this.vertical)
+            this.sizeWithMaxHeight(context, container);
+    	else
+    		this.sizeWithMaxWidth(context, container);
+    } else {
+        this.assignStartEndPosition(context, container);
+    }
     for (var i = 0; i < adapt.pm.passProperties.length; i++) {
         this.propagateProperty(context, container, adapt.pm.passProperties[i]);    	
     }
@@ -1013,9 +1100,12 @@ adapt.pm.PageBoxInstance.prototype.transferContentProps = function(context, cont
  */
 adapt.pm.PageBoxInstance.prototype.finishContainer = function(
 		context, container, column, columnCount, clientLayout) {
-    this.calculatedHeight = container.computedHeight + container.snapOffsetY;
-    var readHeight = !column && this.isAutoHeight;
-    var readWidth = this.isShrinkToFit;
+	if (this.vertical)
+	    this.calculatedWidth = container.computedBlockSize + container.snapOffsetX;
+	else
+		this.calculatedHeight = container.computedBlockSize + container.snapOffsetY;
+    var readHeight = (this.vertical || !column) && this.isAutoHeight;
+    var readWidth = (!this.vertical || !column) && this.isAutoWidth;
     var bbox = null;
     if (readWidth || readHeight) {
     	if (readWidth) {
@@ -1029,21 +1119,24 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
         	this.calculatedWidth = bbox.right - bbox.left
         		- container.paddingLeft - container.borderLeft
         		- container.paddingRight - container.borderRight;
+        	if (this.vertical)
+        	    this.calculatedWidth += container.snapOffsetX;
         }
         if (readHeight) {
-        	container.computedHeight = bbox.bottom - bbox.top 
+        	container.calculatedHeight = bbox.bottom - bbox.top 
         		- container.paddingTop - container.borderTop
         		- container.paddingBottom - container.borderBottom;
-        	this.calculatedHeight = container.computedHeight + container.snapOffsetY;
+        	if (!this.vertical)
+        		this.calculatedHeight += container.snapOffsetY;
         }
     }
-    if (this.isShrinkToFit) {
-    	this.assignHorizontalPosition(context, container);    	
+    if (this.vertical ? this.isAutoHeight : this.isAutoWidth) {
+    	this.assignStartEndPosition(context, container);    	
     }
-    if (this.isAutoHeight) {
-        if (this.isTopDependentOnAutoHeight)
-            this.assignTopPosition(context, container);
-        this.assignBottomPosition(context, container);
+    if (this.vertical ? this.isAutoWidth : this.isAutoHeight) {
+        if (this.vertical ? this.isRightDependentOnAutoWidth : this.isTopDependentOnAutoHeight)
+            this.assignBeforePosition(context, container);
+        this.assignAfterPosition(context, container);
     }
     if (columnCount > 1) {
     	var ruleWidth = this.getPropAsNumber(context, "column-rule-width");
@@ -1052,21 +1145,20 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
     	if (ruleWidth > 0 && ruleStyle && ruleStyle != adapt.css.ident.none &&
     			ruleColor != adapt.css.ident.transparent) {
         	var columnGap = this.getPropAsNumber(context, "column-gap");
+        	var containerSize = this.vertical ? container.height : container.width;
+        	var border = this.vertical ? "border-top" : "border-left";
     		for (var i = 1; i < columnCount; i++) {
-    			var pos = (container.width + columnGap) * i / columnCount - columnGap/2
+    			var pos = (containerSize + columnGap) * i / columnCount - columnGap/2
     				+ container.paddingLeft - ruleWidth/2;
     			var size = container.height + container.paddingTop + container.paddingBottom;
     			var rule = container.element.ownerDocument.createElement("div");
     			adapt.base.setCSSProperty(rule, "position", "absolute");
-    			adapt.base.setCSSProperty(rule, "top", "0px");
-    			adapt.base.setCSSProperty(rule, "left", pos + "px");
-    			adapt.base.setCSSProperty(rule, "width", "0px");
-    			adapt.base.setCSSProperty(rule, "height", size + "px");
-    			adapt.base.setCSSProperty(rule, "border-left-width", ruleWidth + "px");
-    			adapt.base.setCSSProperty(rule, "border-left-style", ruleStyle.toString());
-    			if (ruleColor) {
-    				adapt.base.setCSSProperty(rule, "border-left-color", ruleColor.toString());
-    			}
+    			adapt.base.setCSSProperty(rule, this.vertical ? "left" : "top", "0px");
+    			adapt.base.setCSSProperty(rule, this.vertical ? "top" : "left", pos + "px");
+    			adapt.base.setCSSProperty(rule, this.vertical ? "height" : "width", "0px");
+    			adapt.base.setCSSProperty(rule, this.vertical ? "width" : "height", size + "px");
+    			adapt.base.setCSSProperty(rule, border, 
+    					ruleWidth + "px " + ruleStyle.toString() + (ruleColor ? " " + ruleColor.toString() : ""));
     			container.element.insertBefore(rule, container.element.firstChild);
     		}
     	}

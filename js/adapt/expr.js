@@ -7,6 +7,35 @@ goog.provide('adapt.expr');
 goog.require('adapt.base');
 
 /**
+ * @typedef {{fontFamily:string, lineHeight:number, margin:number,
+ *   	columnWidth:number, horizontal:boolean, nightMode:boolean}}
+ *  }}
+ */
+adapt.expr.Preferences;
+
+/**
+ * @return {adapt.expr.Preferences}
+ */
+adapt.expr.defaultPreferences = function() {
+	return {fontFamily:"serif", lineHeight:1.25, margin:8, columnWidth:25,
+				horizontal:false, nightMode:false};
+};
+
+/**
+ * @param {adapt.expr.Preferences} pref
+ * @return {adapt.expr.Preferences}
+ */
+adapt.expr.clonePreferences = function(pref) {
+	return {fontFamily:pref.fontFamily, lineHeight:pref.lineHeight, margin:pref.margin,
+		columnWidth:pref.columnWidth, horizontal:pref.horizontal, nightMode:pref.nightMode};
+};
+
+/**
+ * @const
+ */
+adapt.expr.defaultPreferencesInstance = adapt.expr.defaultPreferences();
+
+/**
  * Special marker value that indicates that the expression result is being
  * calculated.
  * @enum {!Object}
@@ -113,11 +142,25 @@ adapt.expr.LexicalScope = function(parent, resolver) {
         builtIns["css-string"] = adapt.expr.cssString;
         builtIns["css-name"] = adapt.expr.cssIdent;
         builtIns["typeof"] = function(x) { return typeof(x); };
-        this.values["page-width"] =
-        	new adapt.expr.Native(this, function() { return this.pageWidth; }, "page-width");
-        this.values["page-height"] = 
-        	new adapt.expr.Native(this, function() { return this.pageHeight; }, "page-height");
+        this.defineBuiltInName("page-width", function() { return this.pageWidth; });
+        this.defineBuiltInName("page-height", function() { return this.pageHeight; });
+        this.defineBuiltInName("perf-font-family", function() { return this.pref.fontFamily; });
+        this.defineBuiltInName("pref-night-mode", function() { return this.pref.nightMode; });
+        this.defineBuiltInName("pref-margin", function() { return this.pref.margin; });
+        this.defineBuiltInName("pref-line-height", function() { return this.pref.lineHeight; });
+        this.defineBuiltInName("pref-column-width", function() { return this.pref.columnWidth * this.fontSize; });
+        this.defineBuiltInName("pref-horizontal", function() {
+        	return this.pref.horizontal;
+        });
     }
+};
+
+/**
+ * @param {string} name
+ * @param {function(this:adapt.expr.Context):adapt.expr.Result} fn
+ */
+adapt.expr.LexicalScope.prototype.defineBuiltInName = function(name, fn) {
+	this.values[name] = new adapt.expr.Native(this, fn, name);
 };
 
 /**
@@ -178,10 +221,11 @@ adapt.expr.ScopeContext;
  * @constructor
  */
 adapt.expr.Context = function(rootScope, pageWidth, pageHeight, fontSize) {
-	this.rootScope = rootScope;
-	this.pageWidth = pageWidth;
-	this.pageHeight = pageHeight;
-	this.fontSize = fontSize;
+	/** @const */ this.rootScope = rootScope;
+	/** @const */ this.pageWidth = pageWidth;
+	/** @const */ this.pageHeight = pageHeight;
+	/** @const */ this.fontSize = fontSize;
+	this.pref = adapt.expr.defaultPreferencesInstance;
 	/** @type {Object.<string,adapt.expr.ScopeContext>} */ this.scopes = {};
 };
 

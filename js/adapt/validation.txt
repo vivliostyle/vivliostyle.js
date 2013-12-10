@@ -178,6 +178,13 @@ word-spacing = normal | LENGTH;
 z-index = auto | INT;
 
 [epub]hyphens = auto | none;
+[epub]writing-mode = horizontal-tb | vertical-rl;
+[epub]text-orientation = vertical-right | upright | rotate-right | rotate-left | rotate-normal | auto;
+[adapt]margin-before = APLENGTH;
+[adapt]margin-after = APLENGTH;
+[adapt]margin-start = APLENGTH;
+[adapt]margin-end = APLENGTH;
+
 
 SHAPE = auto | rectangle( PLENGTH{4} ) |  ellipse( PLENGTH{4} ) |  circle( PLENGTH{3} ) | 
     polygon( SPACE(PLENGTH+)+ );

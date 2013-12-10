@@ -1546,6 +1546,8 @@ adapt.cssvalid.ValidatorSet.prototype.addReplacement = function(val, token) {
         cssval = new adapt.css.Numeric(token.num, token.text);
     } else if (token.type == adapt.csstok.TokenType.HASH) {
         cssval = adapt.cssparse.colorFromHash(token.text);
+    } else if (token.type == adapt.csstok.TokenType.IDENT) {
+        cssval = adapt.css.getName(token.text);
     } else {
         throw new Error("unexpected replacement");
     }
@@ -2100,7 +2102,7 @@ adapt.cssvalid.ValidatorSet.prototype.parse = function(text) {
     this.parseShorthands(tok);
     this.backgroundProps = this.makePropSet(["background"]);
     this.layoutProps = this.makePropSet(["margin", "border", "padding",
-          "columns", "column-gap", "column-rule", "column-fill"]);
+                                         "columns", "column-gap", "column-rule", "column-fill"]);
 };
 
 /**

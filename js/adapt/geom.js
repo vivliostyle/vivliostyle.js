@@ -301,16 +301,45 @@ adapt.geom.floor = function(v, unit) {
 };
 
 /**
+ * @param {adapt.geom.Point} point
+ * @return {adapt.geom.Point}
+ */
+adapt.geom.rotatePoint = function(point) {
+	return new adapt.geom.Point(point.y, -point.x);
+};
+
+/**
+ * @param {adapt.geom.Rect} box
+ * @return {adapt.geom.Rect}
+ */
+adapt.geom.rotateBox = function(box) {
+	return new adapt.geom.Rect(box.y1, -box.x2, box.y2, -box.x1);
+};
+
+/**
+ * @param {adapt.geom.Shape} shape
+ * @return {adapt.geom.Shape}
+ */
+adapt.geom.rotateShape = function(shape) {
+	return new adapt.geom.Shape(adapt.base.map(shape.points, adapt.geom.rotatePoint));
+};
+
+/**
  * @param {adapt.geom.Rect} box
  * @param {Array.<adapt.geom.Shape>} include
  * @param {Array.<adapt.geom.Shape>} exclude
  * @param {number} granularity
  * @param {number} snapHeight
- * @param {boolean} keepNonExcludingAtBottom
+ * @param {boolean} vertical
  * @return {Array.<adapt.geom.Band>}
  */
 adapt.geom.shapesToBands = function(box, include, exclude,
-        granularity, snapHeight, keepNonExcludingAtBottom) {
+        granularity, snapHeight, vertical) {
+	if (vertical) {
+		box = adapt.geom.rotateBox(box);
+		include = adapt.base.map(include, adapt.geom.rotateShape);
+		exclude = adapt.base.map(exclude, adapt.geom.rotateShape);
+	}
     var includeCount = include.length;
     var excludeCount = exclude ? exclude.length : 0;
     /** @type {!Array.<adapt.geom.Band>} */ var result = [];
@@ -436,7 +465,7 @@ adapt.geom.shapesToBands = function(box, include, exclude,
             }
         }
     }
-    adapt.geom.normalize(box, result, keepNonExcludingAtBottom);
+    adapt.geom.normalize(box, result, false);
     return result;
 };
 

@@ -49,14 +49,67 @@ adapt.csscasc.inheritedProps = {
 	"volume": true,
 	"white-space": true,
 	"widows": true,
-	"word-spacing": true
+	"word-spacing": true,
+	"writing-mode": true
 };
 
+/** @const */
 adapt.csscasc.supportedNamespaces = {
 	"http://www.idpf.org/2007/ops": true,
 	"http://www.w3.org/1999/xhtml": true,
 	"http://www.w3.org/2000/svg": true
 };
+
+/** @const */
+adapt.csscasc.coupledPatterns = ["margin-%", "padding-%", "border-%-width", "border-%-style",
+                                "border-%-color"];
+
+/**
+ * @const 
+ * @type {Object.<string,boolean>}
+ */
+adapt.csscasc.geomNames = (function() {
+	var sides = ["left", "right", "top", "bottom"];
+	var names = {};
+	for (var i = 0; i < adapt.csscasc.coupledPatterns.length; i++) {
+		for (var k = 0; k < sides.length; k++) {
+			var name = adapt.csscasc.coupledPatterns[i].replace("%", sides[k]);
+			names[name] = true;
+		}
+	}
+	return names;
+});
+
+/**
+ * @param {Object.<string,string>} sideMap
+ * @return {Object.<string,string>}
+ */
+adapt.csscasc.buildCouplingMap = function(sideMap) {
+	var map = {};
+	for (var i = 0; i < adapt.csscasc.coupledPatterns.length; i++) {
+		for (var side in sideMap) {
+			var name1 = adapt.csscasc.coupledPatterns[i].replace("%", side);
+			var name2 = adapt.csscasc.coupledPatterns[i].replace("%", sideMap[side]);
+			map[name1] = name2;
+			map[name2] = name1;
+		}
+	}
+	return map;
+};
+
+/** @const */
+adapt.csscasc.couplingMapVert = adapt.csscasc.buildCouplingMap({
+	"before": "right",
+	"after": "left",
+	"start": "top",
+	"end": "bottom"});
+
+/** @const */
+adapt.csscasc.couplingMapHor = adapt.csscasc.buildCouplingMap({
+	"before": "top",
+	"after": "bottom",
+	"start": "left",
+	"end": "right"});
 
 /**
  * @param {adapt.css.Val} value
@@ -174,7 +227,6 @@ adapt.csscasc.cascadeValues = function(context, tv, av) {
 	}
 	return tv;
 };
-
 
 /**
  * @dict
@@ -2611,7 +2663,7 @@ adapt.csscasc.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(function() {
 	    		validatorSet, true);
 	    handler.startStylesheet(adapt.cssparse.StylesheetFlavor.USER_AGENT);
 	    adapt.csscasc.uaBaseCascade = handler.cascade;
-	    adapt.cssparse.parseStylesheetFromURL(url, handler).thenFinish(frame);
+	    adapt.cssparse.parseStylesheetFromURL(url, handler, null, null).thenFinish(frame);
 	});
     return frame.result();	
 }, "uaStylesheetBaseFetcher");

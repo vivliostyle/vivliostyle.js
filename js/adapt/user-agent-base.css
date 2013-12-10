@@ -55,34 +55,46 @@ html|body {
 }
 html|h1 {
     font-size: 2em;
-    margin: .67em 0;
+	-adapt-margin-before: 0.67em;
+	-adapt-margin-after: 0.67em;
+	-adapt-margin-start: 0em;
+	-adapt-margin-end: 0em;
 }
 html|h2 {
     font-size: 1.5em;
-    margin: .75em 0;
+	-adapt-margin-before: 0.75em;
+	-adapt-margin-after: 0.75em;
+	-adapt-margin-start: 0em;
+	-adapt-margin-end: 0em;
 }
 html|h3 {
     font-size: 1.17em;
-    margin: .83em 0;
+	-adapt-margin-before: 0.83em;
+	-adapt-margin-after: 0.83em;
+	-adapt-margin-start: 0em;
+	-adapt-margin-end: 0em;
 }
 html|h4, html|p, html|blockquote, html|ul, html|fieldset,
-html|form, html|ol, html|dl, html|dir, html|menu {
-    margin: 1em 0;
+html|form, html|ol, html|dl, html|dir, html|menu, html|h5, html|h6 {
+	-adapt-margin-before: 1em;
+	-adapt-margin-after: 1em;
+	-adapt-margin-start: 0em;
+	-adapt-margin-end: 0em;
 }
 html|h5 {
     font-size: .83em;
-    margin: 1em 0;
 }
 html|h6 {
     font-size: .75em;
-    margin: 1em 0;
 }
 html|h1, html|h2, html|h3, html|h4, html|h5, html|h6, html|b, html|strong {
     font-weight: bolder;
 }
 html|blockquote {
-    margin-left: 40px;
-    margin-right: 40px;
+    -adapt-margin-before: 0px;
+    -adapt-margin-after: 0px;
+    -adapt-margin-start: 40px;
+    -adapt-margin-end: 40px;
 }
 html|i, html|cite, html|em, html|var, html|address {
     font-style: italic;
@@ -121,7 +133,8 @@ html|hr {
     border: 1px inset;
 }
 html|ol, html|ul, html|dir, html|menu, html|dd {
-    margin-left: 40px;
+	margin: 0px;
+    -adapt-margin-start: 40px;
 }
 html|ol { 
     list-style-type: decimal;

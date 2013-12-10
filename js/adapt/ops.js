@@ -441,6 +441,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     adapt.base.setCSSProperty(boxContainer, "position", "absolute");
     parentContainer.insertBefore(boxContainer, parentContainer.firstChild);
     var layoutContainer = new adapt.vtree.Container(boxContainer);
+    layoutContainer.vertical = boxInstance.vertical;
     boxInstance.prepareContainer(self, layoutContainer, page);
     layoutContainer.originX = offsetX;
     layoutContainer.originY = offsetY;
@@ -460,13 +461,14 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     } else if (!self.pageBreaks[flowName.toString()]) {
     	/** @type {!adapt.task.Frame.<boolean>} */ var innerFrame = adapt.task.newFrame("layoutContainer.inner");
         var flowNameStr = flowName.toString();
+        // for now only a single column in vertical case
         var columnCount = boxInstance.getPropAsNumber(self, "column-count");
         var columnGap = boxInstance.getPropAsNumber(self, "column-gap");
         // Don't query columnWidth when it's not needed, so that width calculation can be delayed
         // for width: auto columns.
         var columnWidth = (columnCount > 1 ? boxInstance.getPropAsNumber(self, "column-width") : layoutContainer.width);
         var regionIds = boxInstance.getActiveRegions(self);
-        var computedHeight = 0;
+        var computedBlockSize = 0;
         var innerShapeVal = boxInstance.getProp(self, "shape-inside");
         var innerShape = adapt.cssprop.toShape(innerShapeVal, 0, 0,
         		layoutContainer.width, layoutContainer.height, self);
@@ -483,12 +485,22 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	                adapt.base.setCSSProperty(columnContainer, "position", "absolute");
 	                boxContainer.appendChild(columnContainer);
 	                region = new adapt.layout.Column(columnContainer, layoutContext, self.clientLayout);
+	                region.vertical = layoutContainer.vertical;
 	                region.snapHeight = layoutContainer.snapHeight;
-	                adapt.base.setCSSProperty(columnContainer, "margin-top", layoutContainer.paddingTop + "px");
-	                adapt.base.setCSSProperty(columnContainer, "margin-bottom", layoutContainer.paddingBottom + "px");
-	                var columnX = column * (columnWidth + columnGap) + layoutContainer.paddingLeft;
-	                region.setVerticalPosition(0, layoutContainer.height);
-	                region.setHorizontalPosition(columnX, columnWidth);
+	                region.snapWidth = layoutContainer.snapWidth;
+	                if (layoutContainer.vertical) {
+		                adapt.base.setCSSProperty(columnContainer, "margin-left", layoutContainer.paddingLeft + "px");
+		                adapt.base.setCSSProperty(columnContainer, "margin-right", layoutContainer.paddingRight + "px");
+		                var columnY = column * (columnWidth + columnGap) + layoutContainer.paddingTop;
+		                region.setHorizontalPosition(0, layoutContainer.width);
+		                region.setVerticalPosition(columnY, columnWidth);	                	
+	                } else {
+		                adapt.base.setCSSProperty(columnContainer, "margin-top", layoutContainer.paddingTop + "px");
+		                adapt.base.setCSSProperty(columnContainer, "margin-bottom", layoutContainer.paddingBottom + "px");
+		                var columnX = column * (columnWidth + columnGap) + layoutContainer.paddingLeft;
+		                region.setVerticalPosition(0, layoutContainer.height);
+		                region.setHorizontalPosition(columnX, columnWidth);
+	                }
 	                region.originX = offsetX + layoutContainer.paddingLeft;
 	                region.originY = offsetY + layoutContainer.paddingTop;
 	            } else {
@@ -521,17 +533,17 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	            }
 	            if (lr.isPending()) {
 		            lr.then(function() {
-		            	computedHeight = Math.max(computedHeight, region.computedHeight);
+		            	computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);
 		            	loopFrame.continueLoop();
 		            });
 		            return;
 	            } else {
-	            	computedHeight = Math.max(computedHeight, region.computedHeight);	            	
+	            	computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);	            	
 	            }
 	        }
 	        loopFrame.breakLoop();
         }).then(function() {
-	        layoutContainer.computedHeight = computedHeight;
+	        layoutContainer.computedBlockSize = computedBlockSize;
 	        boxInstance.finishContainer(self, layoutContainer, region, 
 	        		columnCount, self.clientLayout);
 	        innerFrame.finish(true);
@@ -541,7 +553,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     	cont = adapt.task.newResult(true);
     }
     cont.then(function() {
-        if (!boxInstance.isAutoHeight || Math.floor(layoutContainer.computedHeight) > 0) {
+        if (!boxInstance.isAutoHeight || Math.floor(layoutContainer.computedBlockSize) > 0) {
         	if (!dontExclude) {
 	            var outerX = layoutContainer.originX + layoutContainer.left;
 	            var outerY = layoutContainer.originY + layoutContainer.top;
@@ -854,7 +866,13 @@ adapt.ops.StyleParserHandler.prototype.error = function(mnemonics, token) {
 };
 
 /**
- * @typedef {{url:string, text:?string, flavor:adapt.cssparse.StylesheetFlavor}}
+ * @typedef {{
+ * 		url: string,
+ * 		text: ?string,
+ *      flavor: adapt.cssparse.StylesheetFlavor,
+ *      classes: ?string,
+ *      media: ?string
+ * }}
  */
 adapt.ops.StyleSource;
 
@@ -931,7 +949,8 @@ adapt.ops.OPSDocStore.prototype.initXMLDocument = function(url, xml) {
     	self.triggersByDocURL[url] = triggers;
 		var sources = /** @type {Array.<adapt.ops.StyleSource>} */ ([]);
 	    var userAgentURL = adapt.base.resolveURL("user-agent-page.css", adapt.base.resourceBaseURL);
-		sources.push({url: userAgentURL, text:null, flavor:adapt.cssparse.StylesheetFlavor.USER_AGENT});
+		sources.push({url: userAgentURL, text:null,
+			flavor:adapt.cssparse.StylesheetFlavor.USER_AGENT, classes: null, media: null});
 	    var head = xmldoc.head;
 	    if (head) {
 	        for (var c = head.firstChild ; c ; c = c.nextSibling) {
@@ -943,20 +962,25 @@ adapt.ops.OPSDocStore.prototype.initXMLDocument = function(url, xml) {
 	        	if (ns == adapt.base.NS.XHTML) {
 		            if (localName == "style") {
 		                sources.push({url:url, text:child.textContent, 
-		                	flavor:adapt.cssparse.StylesheetFlavor.AUTHOR});
-		            } else if (localName == "link" && child.getAttribute("rel") == "stylesheet") {
-		            	var src = child.getAttribute("href");
-		            	src = adapt.base.resolveURL(src, url);
-		            	sources.push({url:src, text:null,
-		            		flavor:adapt.cssparse.StylesheetFlavor.AUTHOR});
+		                	flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
+		            } else if (localName == "link") {
+		            	var rel = child.getAttribute("rel");
+		            	var classes = child.getAttribute("class")
+		            	var media = child.getAttribute("media")
+		            	if (rel == "stylesheet" || (rel == "alternate stylesheet" && classes)) {
+			            	var src = child.getAttribute("href");
+			            	src = adapt.base.resolveURL(src, url);
+			            	sources.push({url:src, text:null, classes: classes, media: media,
+			            		flavor:adapt.cssparse.StylesheetFlavor.AUTHOR});
+		            	}
 		            } else if (localName == "meta" && child.getAttribute("name") == "viewport") {
 		            	sources.push({url:url, text: adapt.ops.processViewportMeta(child),
-		            		flavor:adapt.cssparse.StylesheetFlavor.AUTHOR});
+		            		flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, condition: null, media: null});
 		            }
 	        	} else if (ns == adapt.base.NS.FB2) {
 		            if (localName == "stylesheet" && child.getAttribute("type") == "text/css") {
 		                sources.push({url:url, text:child.textContent, 
-		                	flavor:adapt.cssparse.StylesheetFlavor.AUTHOR});
+		                	flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
 		            }        		
 	        	}
 	        }
@@ -988,9 +1012,9 @@ adapt.ops.OPSDocStore.prototype.initXMLDocument = function(url, xml) {
 		                var source = sources[index++];
 		                sph.startStylesheet(source.flavor);
 		                if (source.text) {
-		                    return adapt.cssparse.parseStylesheetFromText(source.text, sph, source.url);
+		                    return adapt.cssparse.parseStylesheetFromText(source.text, sph, source.url, source.classes, source.media);
 		                } else {
-		                    return adapt.cssparse.parseStylesheetFromURL(source.url, sph);
+		                    return adapt.cssparse.parseStylesheetFromURL(source.url, sph, source.classes, source.media);
 		                }
 		            }
 		            return adapt.task.newResult(false);

@@ -1329,6 +1329,44 @@ adapt.cssparse.Parser.prototype.readPseudoParams = function() {
 };
 
 /**
+ * @param {?string} classes
+ * @param {?string} media
+ * @return {adapt.css.Expr}
+ */
+adapt.cssparse.Parser.prototype.makeCondition = function(classes, media) {
+	var scope = this.handler.getScope();
+	if (!scope)
+		return null;
+	var condition = scope._true;
+	if (classes) {
+		var classList = classes.split(/\s+/);
+		for (var i = 0; i < classList.length; i++) {
+			var className = classList[i];
+			switch(className) {
+			case "vertical":
+				condition = adapt.expr.and(scope, condition, new adapt.expr.Not(scope, new adapt.expr.Named(scope, "pref-horizontal")));
+				break;
+			case "horizontal":
+				condition = adapt.expr.and(scope, condition, new adapt.expr.Named(scope, "pref-horizontal"));
+				break;
+			case "day":
+				condition = adapt.expr.and(scope, condition, new adapt.expr.Not(scope, new adapt.expr.Named(scope, "pref-night-mode")));
+				break;
+			case "night":
+				condition = adapt.expr.and(scope, condition, new adapt.expr.Named(scope, "pref-night-mode"));
+				break;
+			default:
+				condition = scope._false;
+			}
+		}
+	}
+	if (condition === scope._true) {
+		return null;
+	}
+	return new adapt.css.Expr(condition);
+};
+
+/**
  * @param {number} count
  * @param {boolean} parsingStyleAttr
  * @return {boolean} 
@@ -2183,12 +2221,19 @@ adapt.cssparse.ErrorHandler.prototype.getScope = function() {
  * @param {adapt.csstok.Tokenizer} tokenizer
  * @param {adapt.cssparse.ParserHandler} handler
  * @param {string} baseURL
+ * @param {?string} classes
+ * @param {?string} media
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL) {
+adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL, classes, media) {
 	/** @type {adapt.task.Frame.<boolean>} */ var frame =
 		adapt.task.newFrame("parseStylesheet");
 	var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsBase, tokenizer, handler, baseURL);
+	var condition = parser.makeCondition(classes, media);
+	if (condition) {
+		handler.startMediaRule(condition);
+		handler.startRuleBody();		
+	}
 	frame.loop(function() {
 		while (!parser.runParser(100, false, false)) {
 			if (parser.importReady) {
@@ -2199,7 +2244,7 @@ adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL) {
 				}
 				/** @type {adapt.task.Frame.<boolean>} */ var innerFrame =
 					adapt.task.newFrame("parseStylesheet.import");
-				adapt.cssparse.parseStylesheetFromURL(resolvedURL, handler).then(function() {
+				adapt.cssparse.parseStylesheetFromURL(resolvedURL, handler, null, null).then(function() {
 					if (parser.importCondition) {
 						handler.endRule();
 					}					
@@ -2216,6 +2261,9 @@ adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL) {
 		}
 		return adapt.task.newResult(false);
 	}).then(function() {
+		if (condition) {
+			handler.endRule();
+		}					
 		frame.finish(true);
 	});
 	return frame.result();
@@ -2225,19 +2273,23 @@ adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL) {
  * @param {string} text
  * @param {adapt.cssparse.ParserHandler} handler
  * @param {string} baseURL
+ * @param {?string} classes
+ * @param {?string} media
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.cssparse.parseStylesheetFromText = function(text, handler, baseURL) {
+adapt.cssparse.parseStylesheetFromText = function(text, handler, baseURL, classes, media) {
     var tok = new adapt.csstok.Tokenizer(text, handler);
-    return adapt.cssparse.parseStylesheet(tok, handler, baseURL);
+    return adapt.cssparse.parseStylesheet(tok, handler, baseURL, classes, media);
 };
 
 /**
  * @param {string} url
  * @param {adapt.cssparse.ParserHandler} handler
+ * @param {?string} classes
+ * @param {?string} media
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.cssparse.parseStylesheetFromURL = function(url, handler) {
+adapt.cssparse.parseStylesheetFromURL = function(url, handler, classes, media) {
     return adapt.task.handle("parseStylesheetFromURL", 
     	/**
     	 * @param {!adapt.task.Frame.<boolean>} frame
@@ -2249,8 +2301,8 @@ adapt.cssparse.parseStylesheetFromURL = function(url, handler) {
 		        if (!xhr.responseText) {
 		            frame.finish(true);
 		        } else {
-		        	adapt.cssparse.parseStylesheetFromText(xhr.responseText, handler, url)
-		        	    .thenFinish(frame);
+		        	adapt.cssparse.parseStylesheetFromText(xhr.responseText,
+		        			handler, url, classes, media).thenFinish(frame);
 		        }
 		    });
     	},

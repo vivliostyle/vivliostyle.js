@@ -203,7 +203,10 @@ adapt.cssstyler.Styler.prototype.transferPropsToRoot = function(srcStyle, map) {
 			this.rootStyle[pname] = cascval;
 			delete srcStyle[pname];
 		} else {
-			this.rootStyle[pname] = new adapt.csscasc.CascadeValue(map[pname], adapt.cssparse.SPECIFICITY_AUTHOR);
+			var val = map[pname];
+			if (val) {
+				this.rootStyle[pname] = new adapt.csscasc.CascadeValue(val, adapt.cssparse.SPECIFICITY_AUTHOR);
+			}
 		}
 	}
 };
@@ -216,6 +219,10 @@ adapt.cssstyler.Styler.prototype.transferPropsToRoot = function(srcStyle, map) {
  * @return {void}
  */
 adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBody) {
+	if (!isBody && elemStyle["writing-mode"]) {
+		// Copy it over, but keep it at the root element as well.
+		this.rootStyle["writing-mode"] = elemStyle["writing-mode"];
+	}
 	if (!this.rootBackgroundAssigned) {
 		if (this.hasProp(elemStyle, this.validatorSet.backgroundProps, "background-color")
 			|| this.hasProp(elemStyle, this.validatorSet.backgroundProps, "background-image")) {

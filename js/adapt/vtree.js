@@ -240,6 +240,15 @@ adapt.vtree.clientrectIncreasingTop = function(r1, r2) {
 };
 
 /**
+ * @param {adapt.vtree.ClientRect} r1
+ * @param {adapt.vtree.ClientRect} r2
+ * @return {number}
+ */
+adapt.vtree.clientrectDecreasingRight = function(r1, r2) {
+	return r2.right - r1.right;
+};
+
+/**
  * Interface to read the position assigned to the elements and ranges by the
  * browser.
  * @interface
@@ -458,6 +467,7 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {?string} */ this.breakAfter = null;
     /** @type {Node} */ this.viewNode = null;
     /** @type {Object.<string,number|string>} */ this.inheritedProps = parent ? parent.inheritedProps : {};
+    /** @type {boolean} */ this.vertical = parent ? parent.vertical : false;
     /** @type {adapt.vtree.FirstPseudo} */ this.firstPseudo = parent ? parent.firstPseudo : null;
 };
 
@@ -475,6 +485,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.breakAfter = null;	
     this.nodeShadow = null;
     this.floatContainer = this.parent ? this.parent.floatContainer : false;
+    this.vertical = this.parent ? this.parent.vertical : false;
     this.nodeShadow = null;
 };
 
@@ -502,6 +513,7 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.breakAfter = this.breakAfter;
     np.viewNode = this.viewNode;
     np.firstPseudo = this.firstPseudo;
+    np.vertical = this.vertical;
     return np;
 };
 
@@ -734,11 +746,12 @@ adapt.vtree.Container = function(element) {
     /** @type {number} */ this.originY = 0;
     /** @type {Array.<adapt.geom.Shape>} */ this.exclusions = null;
     /** @type {adapt.geom.Shape} */ this.innerShape = null;
-    /** @type {number} */ this.computedHeight = 0;
-    /** @type {number} */ this.computedWidth = 0;
+    /** @type {number} */ this.computedBlockSize = 0;
     /** @type {number} */ this.snapWidth = 0;
     /** @type {number} */ this.snapHeight = 0;
+    /** @type {number} */ this.snapOffsetX = 0;
     /** @type {number} */ this.snapOffsetY = 0;
+    /** @type {boolean} */ this.vertical = false;  // vertical writing
 };
 
 adapt.vtree.Container.prototype.getInsetTop = function() {
@@ -756,6 +769,97 @@ adapt.vtree.Container.prototype.getInsetLeft = function() {
 adapt.vtree.Container.prototype.getInsetRight = function() {
 	return this.marginRight + this.borderRight + this.paddingRight;
 };
+
+adapt.vtree.Container.prototype.getInsetBefore = function() {
+	if (this.vertical)
+		return this.getInsetRight();
+	else
+		return this.getInsetTop();
+};
+
+adapt.vtree.Container.prototype.getInsetAfter = function() {
+	if (this.vertical)
+		return this.getInsetLeft();
+	else
+		return this.getInsetBottom();
+};
+
+adapt.vtree.Container.prototype.getInsetStart = function() {
+	if (this.vertical)
+		return this.getInsetTop();
+	else
+		return this.getInsetLeft();
+};
+
+adapt.vtree.Container.prototype.getInsetEnd = function() {
+	if (this.vertical)
+		return this.getInsetBottom();
+	else
+		return this.getInsetRight();
+};
+
+/**
+ * @param {adapt.vtree.ClientRect} box
+ * @return {number}
+ */
+adapt.vtree.Container.prototype.getBeforeEdge = function(box) {
+	return this.vertical ? box.right : box.top;
+};
+
+/**
+ * @param {adapt.vtree.ClientRect} box
+ * @return {number}
+ */
+adapt.vtree.Container.prototype.getAfterEdge = function(box) {
+	return this.vertical ? box.left : box.bottom;
+};
+
+/**
+ * @param {adapt.vtree.ClientRect} box
+ * @return {number}
+ */
+adapt.vtree.Container.prototype.getStartEdge = function(box) {
+	return this.vertical ? box.top : box.left;
+};
+
+/**
+ * @param {adapt.vtree.ClientRect} box
+ * @return {number}
+ */
+adapt.vtree.Container.prototype.getEndEdge = function(box) {
+	return this.vertical ? box.bottom : box.right;
+};
+
+/**
+ * @param {adapt.vtree.ClientRect} box
+ * @return {number}
+ */
+adapt.vtree.Container.prototype.getInlineSize = function(box) {
+	return this.vertical ? box.bottom - box.top : box.right - box.left;
+};
+
+/**
+ * @param {adapt.vtree.ClientRect} box
+ * @return {number}
+ */
+adapt.vtree.Container.prototype.getBoxSize = function(box) {
+	return this.vertical ? box.right - box.left : box.bottom - box.top;
+};
+
+/**
+ * @return {number}
+ */
+adapt.vtree.Container.prototype.getBoxDir = function() {
+	return this.vertical ? -1 : 1;
+};
+
+/**
+ * @return {number}
+ */
+adapt.vtree.Container.prototype.getInlineDir = function() {
+	return 1;
+};
+
 
 /**
  * @param {adapt.vtree.Container} other
@@ -783,10 +887,10 @@ adapt.vtree.Container.prototype.copyFrom = function(other) {
     this.originY = other.originY;
     this.innerShape = other.innerShape;
     this.exclusions = other.exclusions;
-    this.computedHeight = other.computedHeight;
-    this.computedWidth = other.computedWidth;
+    this.computedBlockSize = other.computedBlockSize;
     this.snapWidth = other.snapWidth;
     this.snapHeight = other.snapHeight;
+    this.vertical = other.vertical;
 };
 
 /**

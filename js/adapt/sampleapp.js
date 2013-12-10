@@ -6,6 +6,7 @@ goog.provide('adapt.sampleapp');
 
 goog.require('adapt.task');
 goog.require('adapt.vgen');
+goog.require('adapt.expr');
 goog.require('adapt.epub');
 
 
@@ -24,6 +25,7 @@ adapt.sampleapp.Viewer = function(opf) {
     /** @type {?adapt.epub.Position} */ this.pagePosition = null;
     /** @type {adapt.task.EventSource} */ this.eventSource = null;
     /** @type {number} */ this.fontSize = 16;
+    /** @const */ this.pref = adapt.expr.defaultPreferences();
 };
 
 /**
@@ -135,6 +137,16 @@ adapt.sampleapp.Viewer.prototype.keydown = function(evt) {
     	self.fontSize = 16;
     	self.resize().thenFinish(frame);
     	break;
+    case 78:  // N - night toggle
+    	self.pref.nightMode = !self.pref.nightMode;
+    	self.viewport = null;
+    	self.resize().thenFinish(frame);
+    	break;
+    case 86:  // V - vertical toggle
+    	self.pref.horizontal = !self.pref.horizontal;
+    	self.viewport = null;
+    	self.resize().thenFinish(frame);
+    	break;
     case 187:  // plus
     	self.fontSize = Math.round(self.fontSize * 1.2);
     	self.resize().thenFinish(frame);
@@ -214,20 +226,30 @@ adapt.sampleapp.Viewer.prototype.touch = function(evt) {
 };
 
 /**
+ * @return {adapt.vgen.Viewport}
+ */
+adapt.sampleapp.Viewer.prototype.createViewport = function() {
+    var viewportRoot = document.getElementById("adapt_viewport");
+    return new adapt.vgen.Viewport(window, this.fontSize, viewportRoot);	
+};
+
+/**
  * @return {boolean}
  */
 adapt.sampleapp.Viewer.prototype.sizeIsGood = function() {
-	return this.viewport && window.innerWidth == this.viewport.width && 
-			window.innerHeight == this.viewport.height && this.fontSize == this.viewport.fontSize;
+	if (!this.viewport || this.viewport.fontSize != this.fontSize) {
+		return false;
+	}
+	var viewport = this.createViewport();
+	return viewport.width == this.viewport.width && viewport.height == this.viewport.height;
 };
 
 /**
  * @return {void}
  */
 adapt.sampleapp.Viewer.prototype.reset = function() {
-    var viewportRoot = document.getElementById("adapt_viewport");
-    this.viewport = new adapt.vgen.Viewport(window, this.fontSize, viewportRoot);
-    this.opfView = new adapt.epub.OPFView(this.opf, this.viewport, this.fontMapper);
+	this.viewport = this.createViewport();
+    this.opfView = new adapt.epub.OPFView(this.opf, this.viewport, this.fontMapper, this.pref);
 };
 
 /**
@@ -359,8 +381,11 @@ adapt.sampleapp.loadAndRun = function() {
             (new adapt.sampleapp.Viewer(opf)).init(fragment).thenFinish(frame);
             return;
 	    }
-	    document.body.textContent = "Neither b nor x parameter is given";
-	    document.body.textContent += " " + adapt.base.checkLShapeFloatBug(document.body);
+	    document.body.appendChild(document.createTextNode("Neither b nor x parameter is given"));
+	    document.body.appendChild(document.createElement("br"));
+	    document.body.appendChild(document.createTextNode("LShapeBug: " + adapt.base.checkLShapeFloatBug(document.body)));
+	    document.body.appendChild(document.createElement("br"));
+	    document.body.appendChild(document.createTextNode("VertBBoxBug: " + adapt.base.checkVerticalBBoxBug(document.body)));
 	    frame.finish(true);
     });
     return frame.result();

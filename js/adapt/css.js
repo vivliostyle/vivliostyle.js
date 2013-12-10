@@ -892,6 +892,7 @@ adapt.css.ident = {
 	table: adapt.css.getName("table"),
 	table_row: adapt.css.getName("table-row"),
 	transparent: adapt.css.getName("transparent"),
+	vertical_rl: adapt.css.getName("vertical-rl"),
     _true: adapt.css.getName("true")
 };
 

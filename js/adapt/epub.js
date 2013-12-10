@@ -369,8 +369,9 @@ adapt.epub.OPFViewItem;
  * @param {adapt.epub.OPFDoc} opf
  * @param {adapt.vgen.Viewport} viewport
  * @param {adapt.font.Mapper} fontMapper
+ * @param {adapt.expr.Preferences} pref
  */
-adapt.epub.OPFView = function(opf, viewport, fontMapper) {
+adapt.epub.OPFView = function(opf, viewport, fontMapper, pref) {
 	/** @const */ this.opf = opf;
 	/** @const */ this.viewport = viewport;
 	/** @const */ this.fontMapper = fontMapper;
@@ -378,6 +379,7 @@ adapt.epub.OPFView = function(opf, viewport, fontMapper) {
 	/** @type {number} */ this.spineIndex = 0;
 	/** @type {number} */ this.pageIndex = 0;
 	/** @type {number} */ this.offsetInItem = 0;
+	/** @const */ this.pref = adapt.expr.clonePreferences(pref);
 	/** @const */ this.clientLayout = new adapt.vgen.DefaultClientLayout(viewport.window);
 };
 
@@ -675,6 +677,7 @@ adapt.epub.OPFView.prototype.getPageViewItem = function() {
     	}
         var instance = new adapt.ops.StyleInstance(style, xmldoc, self.opf.lang,
         		viewport, self.clientLayout, self.fontMapper, customRenderer);
+        instance.pref = self.pref;
         instance.init().then(function() {
 			viewItem = {item: item, xmldoc: xmldoc, instance: instance,
 					layoutPositions: [null], complete: false};
