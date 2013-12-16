@@ -309,11 +309,21 @@ adapt.geom.rotatePoint = function(point) {
 };
 
 /**
+ * Vertical box to pseudo-horizontal coords.
  * @param {adapt.geom.Rect} box
  * @return {adapt.geom.Rect}
  */
 adapt.geom.rotateBox = function(box) {
 	return new adapt.geom.Rect(box.y1, -box.x2, box.y2, -box.x1);
+};
+
+/**
+ * Pseudo-horizontal coords to vertical.
+ * @param {adapt.geom.Rect} box
+ * @return {adapt.geom.Rect}
+ */
+adapt.geom.unrotateBox = function(box) {
+	return new adapt.geom.Rect(-box.y2, box.x1, -box.y1, box.x2);
 };
 
 /**

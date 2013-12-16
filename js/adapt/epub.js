@@ -195,6 +195,7 @@ adapt.epub.OPFDoc = function(store, epubURL) {
 	/** @type {?string} */ this.uid = null;
 	/** @type {Object.<string,string>} */ this.bindings = {};
 	/** @type {?string} */ this.lang = null;
+	/** @type {Object} */ this.toolData = null;  // see adapt.devel	
 };
 
 /**
@@ -381,6 +382,7 @@ adapt.epub.OPFView = function(opf, viewport, fontMapper, pref) {
 	/** @type {number} */ this.offsetInItem = 0;
 	/** @const */ this.pref = adapt.expr.clonePreferences(pref);
 	/** @const */ this.clientLayout = new adapt.vgen.DefaultClientLayout(viewport.window);
+	/** @type {Object} */ this.tools = null;  // see adapt.devel
 };
 
 /**

@@ -350,52 +350,15 @@ adapt.vgen.ViewFactory.prototype.setViewRoot = function(viewRoot, isFootnote) {
 };
 
 /**                            
- * @param {adapt.vtree.NodeContext} nodeContext                                                                                                          
+ * @param {boolean} vertical                                                                                                          
  * @param {adapt.csscasc.ElementStyle} style                                                                                             
  * @param {Object.<string,adapt.css.Val>} computedStyle                                                                                  
- * @return {void}                                                                                                                        
+ * @return {boolean} vertical                                                                                                                        
  */
-adapt.vgen.ViewFactory.prototype.computeStyle = function(nodeContext, style, computedStyle) {
-    var cascMap = /** @type {Object.<string,adapt.csscasc.CascadeValue>} */ ({});
+adapt.vgen.ViewFactory.prototype.computeStyle = function(vertical, style, computedStyle) {
     var context = this.context;
-    for (var n in style) {
-        if (adapt.csscasc.isPropName(n))
-            cascMap[n] = adapt.csscasc.getProp(style, n);
-    }
-    var regions = adapt.csscasc.getStyleMap(style, "_regions");
-    if ((this.regionIds || this.isFootnote) && regions) {
-    	var regionIds = this.regionIds;
-    	if (this.isFootnote) {
-    		var footnoteRegion = ["footnote"];
-    		if (!regionIds)
-    			regionIds = footnoteRegion;
-    		else
-    			regionIds = regionIds.concat(footnoteRegion);
-    	}
-        for (var i = 0; i < regionIds.length; i++) {
-            var regionId = regionIds[i];
-            var regionStyle = regions[regionId];
-            for (var rn in regionStyle) {
-                if (adapt.csscasc.isPropName(rn)) {
-                    var newVal = adapt.csscasc.getProp(regionStyle, rn);
-                    var oldVal = cascMap[rn];
-                    cascMap[rn] = adapt.csscasc.cascadeValues(context, oldVal,
-                                /** @type {!adapt.csscasc.CascadeValue} */ (newVal));
-                }
-            }
-        }
-    }
-    var writingModeCasc = cascMap["writing-mode"];
-    var vertical = nodeContext ? nodeContext.vertical : false;
-    if (writingModeCasc) {
-    	var writingMode = writingModeCasc.evaluate(context, "writing-mode");
-    	if (writingMode && writingMode !== adapt.css.ident.inherit) {
-	    	vertical = writingMode === adapt.css.ident.vertical_rl;
-	    	if (nodeContext) {
-	    		nodeContext.vertical = vertical;
-	    	}
-    	}
-    }
+    var cascMap = adapt.csscasc.flattenCascadedStyle(style, context, this.regionIds, this.isFootnote);
+    vertical = adapt.csscasc.isVertical(cascMap, context, vertical);
     var couplingMap = vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
     for (var name in cascMap) {
     	var cascVal = cascMap[name];
@@ -416,6 +379,7 @@ adapt.vgen.ViewFactory.prototype.computeStyle = function(nodeContext, style, com
         }
         computedStyle[targetName] = value;
     }
+    return vertical;
 };
 
 /**
@@ -509,7 +473,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
     if (!self.nodeContext.parent) {
     	elementStyle = self.inheritFromSourceParent(elementStyle);
     }
-	self.computeStyle(self.nodeContext, elementStyle, computedStyle);
+    self.nodeContext.vertical = self.computeStyle(self.nodeContext.vertical, elementStyle, computedStyle);
     // Sort out the properties
     var flow = computedStyle["flow-into"];
     if (flow && flow.toString() != self.flowName) {
@@ -992,7 +956,7 @@ adapt.vgen.ViewFactory.prototype.applyPseudoelementStyle = function(nodeContext,
     	return;
     elementStyle = pseudoMap[pseudoName];
     var computedStyle = {};
-	this.computeStyle(nodeContext, elementStyle, computedStyle);
+	nodeContext.vertical = this.computeStyle(nodeContext.vertical, elementStyle, computedStyle);
     var content = computedStyle["content"];
     if (adapt.vtree.nonTrivialContent(content)) {
         content.visit(new adapt.vtree.ContentPropertyHandler(target));
@@ -1067,20 +1031,21 @@ adapt.vgen.ViewFactory.prototype.createElement = function(ns, tag) {
 /**
  * @override
  */
-adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(target) {
+adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target) {
     var computedStyle = {};
     var pseudoMap = adapt.csscasc.getStyleMap(this.footnoteStyle, "_pseudos");
+    vertical = this.computeStyle(vertical, this.footnoteStyle, computedStyle);
     if (pseudoMap && pseudoMap["before"]) {
+    	var childComputedStyle = {};
     	var span = this.createElement(adapt.base.NS.XHTML, "span");
     	target.appendChild(span);
-    	this.computeStyle(null, pseudoMap["before"], computedStyle);
-    	delete computedStyle["content"];
-    	this.applyComputedStyles(span, computedStyle);
-    	computedStyle = {};
+    	this.computeStyle(vertical, pseudoMap["before"], childComputedStyle);
+    	delete childComputedStyle["content"];
+    	this.applyComputedStyles(span, childComputedStyle);
     }
-	this.computeStyle(null, this.footnoteStyle, computedStyle);
 	delete computedStyle["content"];
 	this.applyComputedStyles(target, computedStyle);
+	return vertical;
 };
 
 /**

@@ -184,7 +184,22 @@ z-index = auto | INT;
 [adapt]margin-after = APLENGTH;
 [adapt]margin-start = APLENGTH;
 [adapt]margin-end = APLENGTH;
-
+[adapt]before = APLENGTH;
+[adapt]after = APLENGTH;
+[adapt]start = APLENGTH;
+[adapt]end = APLENGTH;
+[adapt]border-before-color = BORDER_SIDE_COLOR;
+[adapt]border-after-color = BORDER_SIDE_COLOR;
+[adapt]border-start-color = BORDER_SIDE_COLOR;
+[adapt]border-end-color = BORDER_SIDE_COLOR;
+[adapt]border-before-style = BORDER_SIDE_STYLE;
+[adapt]border-after-style = BORDER_SIDE_STYLE;
+[adapt]border-start-style = BORDER_SIDE_STYLE;
+[adapt]border-end-style = BORDER_SIDE_STYLE;
+[adapt]border-before-width = BORDER_SIDE_WIDTH;
+[adapt]border-after-width = BORDER_SIDE_WIDTH;
+[adapt]border-start-width = BORDER_SIDE_WIDTH;
+[adapt]border-end-width = BORDER_SIDE_WIDTH;
 
 SHAPE = auto | rectangle( PLENGTH{4} ) |  ellipse( PLENGTH{4} ) |  circle( PLENGTH{3} ) | 
     polygon( SPACE(PLENGTH+)+ );
@@ -203,6 +218,7 @@ background-size = COMMA( SPACE( [PLENGTH | auto ]{1,2} | cover | contain)+ );
 background-origin = COMMA( BOX+ );
 background-clip = COMMA( BOX+ );
 box-shadow = none | COMMA( SHADOW+ );
+text-shadow = none |  COMMA( SHADOW+ );
 box-decoration-break = slice | clone;
 
 opacity = NUM;

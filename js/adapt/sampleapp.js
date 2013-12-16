@@ -8,6 +8,7 @@ goog.require('adapt.task');
 goog.require('adapt.vgen');
 goog.require('adapt.expr');
 goog.require('adapt.epub');
+goog.require('adapt.devel');
 
 
 /**
@@ -136,6 +137,10 @@ adapt.sampleapp.Viewer.prototype.keydown = function(evt) {
     case 48:  // zero
     	self.fontSize = 16;
     	self.resize().thenFinish(frame);
+    	break;
+    case 68:  // D - developer tool
+    	adapt.devel.showTools(self.opfView);
+    	frame.finish(true);    	
     	break;
     case 78:  // N - night toggle
     	self.pref.nightMode = !self.pref.nightMode;

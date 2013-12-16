@@ -203,13 +203,11 @@ adapt.layout.EdgeBreakPosition.prototype.getMinBreakPenalty = function() {
  * @param {number} boxOffset
  * @param {adapt.vtree.NodePosition} startPosition
  * @param {?adapt.vtree.NodePosition} overflowPosition
- * @param {number} footnodeEdgeOffset
  */
-adapt.layout.FootnoteItem = function(boxOffset, startPosition, overflowPosition, footnodeEdgeOffset) {
+adapt.layout.FootnoteItem = function(boxOffset, startPosition, overflowPosition) {
 	/** @const */ this.boxOffset = boxOffset;
 	/** @const */ this.startPosition = startPosition;
 	/** @const */ this.overflowPosition = overflowPosition;
-	/** @const */ this.footnodeEdgeOffset = footnodeEdgeOffset;
 };
 
 /**
@@ -310,14 +308,17 @@ adapt.layout.Column.prototype.removeFollowingSiblings = function(parentNode, vie
 
 /**
  * @param {adapt.vtree.NodePositionStep} step
+ * @param {adapt.vtree.NodeContext} parent
+ * @return {adapt.vtree.NodeContext}
  * @private
  */
-adapt.layout.Column.prototype.makeNodeContext = function(step) {
-	var nodeContext = new adapt.vtree.NodeContext(step.node, null, 0);
+adapt.layout.Column.prototype.makeNodeContext = function(step, parent) {
+	var nodeContext = new adapt.vtree.NodeContext(step.node, parent, 0);
 	nodeContext.shadowType = step.shadowType;
 	nodeContext.shadowContext = step.shadowContext,
 	nodeContext.nodeShadow = step.nodeShadow;
-	nodeContext.shadowSibling = step.shadowSibling ? this.makeNodeContext(step.shadowSibling) : null;
+	nodeContext.shadowSibling = step.shadowSibling ?
+			this.makeNodeContext(step.shadowSibling, parent.copy()) : null;
 	return nodeContext;
 };
 
@@ -330,40 +331,29 @@ adapt.layout.Column.prototype.openAllViews = function(position) {
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
 		adapt.task.newFrame("openAllViews");
 	var steps = position.steps;
-	var path = [];
-	var prevContext = null;
-	for (var stepIndex = 0; stepIndex < steps.length; stepIndex++) {
-		var step = steps[stepIndex];
-		// TODO: create containers top-to-bottom to transfer properties from parent correctly
-		var nodeContext = self.makeNodeContext(step);
-		if (path.length == 0) {
-			nodeContext.offsetInNode = position.offsetInNode;
-			nodeContext.after = position.after;
-		}
-		if (prevContext) {
-			prevContext.parent = nodeContext;
-			while ((prevContext = prevContext.shadowSibling) != null) {
-				prevContext.parent = nodeContext.copy();
-			}
-		}
-		prevContext = nodeContext;		
-    	path.push(nodeContext);
-    };
     self.layoutContext.setViewRoot(self.element, self.isFootnote);
-    var i = path.length - 1;
+    var stepIndex = steps.length - 1;
+    var nodeContext = null;
     frame.loop(function() {
-	    while (i >= 0) {
-	    	var nc = path[i];
-	    	if (nc.after)
-	    		break;
-	    	var r = self.layoutContext.setCurrent(nc, i == 0 && nc.offsetInNode == 0);
-	    	i--;
+	    while (stepIndex >= 0) {
+	    	var prevContext = nodeContext;
+			var step = steps[stepIndex];
+			nodeContext = self.makeNodeContext(step, prevContext);
+			if (stepIndex == 0) {
+				nodeContext.offsetInNode = position.offsetInNode;
+				nodeContext.after = position.after;
+		    	if (nodeContext.after) {
+		    		break;
+		    	}
+			}
+	    	var r = self.layoutContext.setCurrent(nodeContext, stepIndex == 0 && nodeContext.offsetInNode == 0);
+	    	stepIndex--;
 	    	if (r.isPending())
 	    		return r;
 	    }
 	    return adapt.task.newResult(false);
     }).then(function() {
-	    frame.finish(path[0]);
+	    frame.finish(nodeContext);
     });
     return frame.result();
 };
@@ -653,7 +643,7 @@ adapt.layout.Column.prototype.layoutUnbreakable = function(nodeContextIn) {
 adapt.layout.Column.prototype.processFullyOverflownFootnote = function(boxOffset, footnoteNodePosition) {
 	// already have overflowing footnotes, just add to the list
 	var footnoteItem = new adapt.layout.FootnoteItem(boxOffset, footnoteNodePosition,
-			footnoteNodePosition, this.footnoteEdge - this.beforeEdge);
+			footnoteNodePosition);
 	if (this.footnoteItems) {
 		this.footnoteItems.push(footnoteItem);
 	} else {
@@ -664,10 +654,10 @@ adapt.layout.Column.prototype.processFullyOverflownFootnote = function(boxOffset
 /**
  * @param {number} boxOffset
  * @param {adapt.vtree.NodePosition} footnoteNodePosition
- * @param {number} minY
+ * @param {number} boundingEdge
  * @return {!adapt.task.Result.<boolean>} holding true
  */
-adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnoteNodePosition, minY) {
+adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnoteNodePosition, boundingEdge) {
 	var self = this;
 	if (self.footnoteItems) {
 		var lastItem = self.footnoteItems[self.footnoteItems.length - 1];
@@ -676,34 +666,47 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
 			return adapt.task.newResult(true);
 		}
 	}
-	minY += 40; // Avoid having it too high.
+	boundingEdge += self.getBoxDir() * 40; // Leave some space
 	var footnoteArea = self.footnoteArea;
 	var firstFootnoteInColumn = !footnoteArea;
     if (firstFootnoteInColumn) {
     	var footnoteContainer = self.element.ownerDocument.createElement("div");
-    	self.layoutContext.applyFootnoteStyle(footnoteContainer);
         adapt.base.setCSSProperty(footnoteContainer, "position", "absolute");
         var layoutContext = self.layoutContext.clone();
     	footnoteArea = new adapt.layout.Column(footnoteContainer,
     			layoutContext, self.clientLayout);
     	self.footnoteArea = footnoteArea;
+    	footnoteArea.vertical = self.layoutContext.applyFootnoteStyle(self.vertical, footnoteContainer);
     	footnoteArea.isFootnote = true;
-    	footnoteArea.top = self.afterEdge;
-    	adapt.base.setCSSProperty(footnoteArea.element, "height", "2em");
+    	if (self.vertical) {
+	    	footnoteArea.left = 0;    		
+	    	adapt.base.setCSSProperty(footnoteArea.element, "width", "2em");
+    	} else {
+	    	footnoteArea.top = self.afterEdge;
+	    	adapt.base.setCSSProperty(footnoteArea.element, "height", "2em");
+    	}
     }
 	self.element.appendChild(footnoteArea.element);
 	self.readComputedInsets(footnoteArea.element, footnoteArea);
-	var top = minY - self.beforeEdge;
-	footnoteArea.width = self.box.x2 - self.box.x1
-		- footnoteArea.getInsetLeft() - footnoteArea.getInsetRight();
-	var height = self.afterEdge - minY - footnoteArea.getInsetTop() - footnoteArea.getInsetBottom();
-	if (firstFootnoteInColumn && height < 18) {
+	var before = self.getBoxDir() * (boundingEdge - self.beforeEdge);
+	if (self.vertical) {
+		footnoteArea.height = self.box.y2 - self.box.y1
+			- footnoteArea.getInsetTop() - footnoteArea.getInsetBottom();		
+	} else {
+		footnoteArea.width = self.box.x2 - self.box.x1
+			- footnoteArea.getInsetLeft() - footnoteArea.getInsetRight();
+	}
+	var blockDirInsets = self.vertical ? 
+			footnoteArea.getInsetLeft() - footnoteArea.getInsetRight() :
+			footnoteArea.getInsetTop() + footnoteArea.getInsetBottom();
+	var extent = self.getBoxDir() * (self.afterEdge - boundingEdge) - blockDirInsets;
+	if (firstFootnoteInColumn && extent < 18) {
 		self.element.removeChild(footnoteArea.element);
 		self.footnoteArea = null;
 		self.processFullyOverflownFootnote(boxOffset, footnoteNodePosition);
 		return adapt.task.newResult(true);
 	}
-	if (footnoteArea.top < top) {
+	if (!self.vertical && footnoteArea.top < before) {  // Can be removed???
 		self.element.removeChild(footnoteArea.element);
 		self.processFullyOverflownFootnote(boxOffset, footnoteNodePosition);
 		return adapt.task.newResult(true);
@@ -711,7 +714,11 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
 	
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame
 		= adapt.task.newFrame("layoutFootnoteInner");
-    footnoteArea.setVerticalPosition(top, height);
+	if (self.vertical) {
+		footnoteArea.setHorizontalPosition(0, extent);		
+	} else {
+		footnoteArea.setVerticalPosition(before, extent);
+	}
     footnoteArea.originX = self.originX + self.left + self.getInsetLeft();
     footnoteArea.originY = self.originY + self.top + self.getInsetTop();    
     footnoteArea.exclusions = self.exclusions;
@@ -731,12 +738,18 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
     initResult.then(function() {
 		footnoteArea.layout(footnotePosition).then(function(footnoteOverflowParam) {
 			var footnoteOverflow = /** @type {adapt.vtree.ChunkPosition} */ (footnoteOverflowParam);
-			self.footnoteEdge = self.afterEdge - footnoteArea.computedBlockSize
-				- footnoteArea.getInsetTop() - footnoteArea.getInsetBottom();
-			var footnoteEdgeOffset = self.footnoteEdge - self.beforeEdge;
-			footnoteArea.setVerticalPosition(footnoteEdgeOffset, footnoteArea.computedBlockSize);
+			if (self.vertical) {
+				self.footnoteEdge = self.afterEdge + (footnoteArea.computedBlockSize
+						+ footnoteArea.getInsetLeft() + footnoteArea.getInsetRight());
+				footnoteArea.setHorizontalPosition(0, footnoteArea.computedBlockSize);				
+			} else {
+				self.footnoteEdge = self.afterEdge - (footnoteArea.computedBlockSize
+						+ footnoteArea.getInsetTop() + footnoteArea.getInsetBottom());
+				var footnoteTop = self.footnoteEdge - self.beforeEdge;
+				footnoteArea.setVerticalPosition(footnoteTop, footnoteArea.computedBlockSize);
+			}
 			var redoResult;
-			if (footnoteArea.exclusions.length > 0) {
+			if (!self.vertical && footnoteArea.exclusions.length > 0) {
 				redoResult = footnoteArea.redoLayout();
 			} else {
 				redoResult = adapt.task.newResult(footnoteOverflow);
@@ -744,7 +757,7 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
 			redoResult.then(function(footnoteOverflow) {
 				var overflowPosition = footnoteOverflow ? footnoteOverflow.primary : null;
 				var footnoteItem = new adapt.layout.FootnoteItem(boxOffset, footnoteNodePosition,
-						overflowPosition, footnoteEdgeOffset);
+						overflowPosition);
 				if (self.footnoteItems) {
 					self.footnoteItems.push(footnoteItem);
 				} else {
@@ -772,7 +785,7 @@ adapt.layout.Column.prototype.layoutFootnote = function(nodeContext) {
     adapt.base.setCSSProperty(element, "display", "inline-block");
     element.textContent = "M";  // To measure position
     var callBox = self.clientLayout.getElementClientRect(element);
-    var callBoxBottom = callBox.bottom;
+    var callBoxAfter = self.getAfterEdge(callBox);
     element.textContent = "";
     // Defaults for footnote-call, can be overriden by the stylesheet.
     self.layoutContext.applyPseudoelementStyle(nodeContext, "footnote-call", element);
@@ -783,11 +796,11 @@ adapt.layout.Column.prototype.layoutFootnote = function(nodeContext) {
     var boxOffset = nodeContext.boxOffset;
     nodeContext = nodeContext.modify();
     nodeContext.after = true;
-    self.layoutFootnoteInner(boxOffset, footnoteNodePosition, callBoxBottom).then(function() {
+    self.layoutFootnoteInner(boxOffset, footnoteNodePosition, callBoxAfter).then(function() {
 	    if (self.footnoteArea && self.footnoteArea.element.parentNode) {
 	    	self.element.removeChild(self.footnoteArea.element);
 	    }
-	    if (!self.isOverflown(callBoxBottom) || self.breakPositions.length == 0) {
+	    if (!self.isOverflown(callBoxAfter) || self.breakPositions.length == 0) {
 	    	frame.finish(nodeContext);
 	    } else {
 	    	frame.finish(adapt.vtree.OVERFLOW);
@@ -815,14 +828,15 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
     // TODO: position where a real float would have been positioned
     adapt.base.setCSSProperty(element, "left", "auto");
     adapt.base.setCSSProperty(element, "right", "auto");
+    adapt.base.setCSSProperty(element, "top", "auto");
     self.buildDeepElementView(nodeContext).then(function(nodeContextAfter) {
 	    var floatBBox = self.clientLayout.getElementClientRect(element);
 	    var margin = self.getComputedMargin(element);
 	    var floatBox = new adapt.geom.Rect(floatBBox.left - margin.left,
 	    		floatBBox.top - margin.top, floatBBox.right + margin.right,
 	    		floatBBox.bottom + margin.bottom);
-	    var x1 = self.box.x1;
-	    var x2 = self.box.x2;
+	    var x1 = self.vertical ? self.box.y1 : self.box.x1;
+	    var x2 = self.vertical ? self.box.y2 : self.box.x2;
 	    var parent = nodeContext.parent;
 	    while (parent && parent.inline) {
 	    	parent = parent.parent;
@@ -834,30 +848,46 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    	var probe = parent.viewNode.ownerDocument.createElement("div");
 	    	probe.style.left = "0px";
 	    	probe.style.top = "0px";
-	    	probe.style.right = "0px";
-	    	probe.style.height = "1px";
+	    	if (self.vertical) {
+		    	probe.style.bottom = "0px";
+		    	probe.style.width = "1px";	    		
+	    	} else {
+		    	probe.style.right = "0px";
+		    	probe.style.height = "1px";
+	    	}
 	    	parent.viewNode.appendChild(probe);
 	        var parentBox = self.clientLayout.getElementClientRect(probe);
-	    	x1 = Math.max(parentBox.left, x1);
-	    	x2 = Math.min(parentBox.right, x2);
-	    	parent.viewNode.removeChild(probe);        
+	    	x1 = Math.max(self.getStartEdge(parentBox), x1);
+	    	x2 = Math.min(self.getEndEdge(parentBox), x2);	    	
+	    	parent.viewNode.removeChild(probe);
+	    	var floatBoxMeasure = self.vertical ? floatBox.y2 - floatBox.y1 : floatBox.x2 - floatBox.x1;
 	    	if (floatSide == "left")
-	    		x2 = Math.max(x2, x1 + floatBox.x2 - floatBox.x1);
+	    		x2 = Math.max(x2, x1 + floatBoxMeasure);
 	    	else
-	    		x1 = Math.min(x1, x2 - (floatBox.x2 - floatBox.x1));
+	    		x1 = Math.min(x1, x2 - floatBoxMeasure);
 	    }
-	    var box = new adapt.geom.Rect(x1, self.box.y1, x2, self.box.y2);
-	    adapt.geom.positionFloat(box, self.bands, floatBox, floatSide);
+	    // box is rotated for vertical orientation
+	    var box = new adapt.geom.Rect(x1, self.getBoxDir() * self.box.y1, x2, self.getBoxDir() * self.box.y2);
+	    var floatHorBox = floatBox;
+	    if (self.vertical) {
+	    	floatHorBox = adapt.geom.rotateBox(floatBox);
+	    }
+	    adapt.geom.positionFloat(box, self.bands, floatHorBox, floatSide);
+	    if (self.vertical) {
+	    	floatBox = adapt.geom.unrotateBox(floatHorBox);
+	    }
 	    adapt.base.setCSSProperty(element, "left",
 	    		(floatBox.x1 - self.box.x1 + self.paddingLeft) + "px");
 	    adapt.base.setCSSProperty(element, "top",
 	    		(floatBox.y1 - self.box.y1 + self.paddingTop) + "px");
-	    if (!self.isOverflown(floatBox.y2) || self.breakPositions.length == 0) {
+	    var floatBoxEdge = self.vertical ? floatBox.x1 : floatBox.y2;
+	    if (!self.isOverflown(floatBoxEdge) || self.breakPositions.length == 0) {
 	    	self.killFloats();
-	        adapt.geom.addFloatToBands(self.box, self.bands, floatBox, null, floatSide);
+	    	box = self.vertical ? adapt.geom.rotateBox(self.box) : self.box;
+	        adapt.geom.addFloatToBands(box, self.bands, floatHorBox, null, floatSide);
 	        self.createFloats();
 	        // no overflow
-	    	self.updateMaxReachedAfterEdge(floatBox.y2);
+	    	self.updateMaxReachedAfterEdge(floatBoxEdge);
 	        frame.finish(nodeContextAfter);
 	    } else {
 	    	frame.finish(adapt.vtree.OVERFLOW);
@@ -936,16 +966,17 @@ adapt.layout.Column.prototype.processLineStyling = function(nodeContext, resNode
 			return;
 		}
 		var lineBreak = self.findAcceptableBreakInside(lastCheckPoints, linePositions[count-1]);
-		self.finishBreak(lineBreak, false);
-		totalLineCount += count;
-		self.layoutContext.peelOff(lineBreak, 0).then(function(resNodeContextParam) {
-			nodeContext = resNodeContextParam;
-	    	self.fixJustificationIfNeeded(nodeContext, false);		
-			firstPseudo = nodeContext.firstPseudo;
-			lastCheckPoints = [];  // Wipe out line breaks inside pseudoelements
-			self.buildViewToNextBlockEdge(nodeContext, lastCheckPoints).then(function(resNodeContextParam) {
-				resNodeContext = resNodeContextParam;
-				loopFrame.continueLoop();
+		self.finishBreak(lineBreak, false).then(function() {
+			totalLineCount += count;
+			self.layoutContext.peelOff(lineBreak, 0).then(function(resNodeContextParam) {
+				nodeContext = resNodeContextParam;
+		    	self.fixJustificationIfNeeded(nodeContext, false);		
+				firstPseudo = nodeContext.firstPseudo;
+				lastCheckPoints = [];  // Wipe out line breaks inside pseudoelements
+				self.buildViewToNextBlockEdge(nodeContext, lastCheckPoints).then(function(resNodeContextParam) {
+					resNodeContext = resNodeContextParam;
+					loopFrame.continueLoop();
+				});
 			});
 		});
 	}).then(function() {
@@ -1287,7 +1318,7 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
 	edge = linePositions[lineIndex-1];
 	var nodeContext = this.findAcceptableBreakInside(bp.checkPoints, edge);	
 	if (nodeContext) {
-		this.computedBlockSize = edge - this.beforeEdge;		
+		this.computedBlockSize = this.getBoxDir() * (edge - this.beforeEdge);		
 	}
 	return nodeContext;
 };
@@ -1316,9 +1347,11 @@ adapt.layout.Column.prototype.finishBreak = function(nodeContext, endOfRegion) {
 };
 
 /**
- * @returns {adapt.vtree.NodeContext}
+ * @returns {adapt.task.Result.<adapt.vtree.NodeContext>}
  */
-adapt.layout.Column.prototype.findAcceptableBreak = function() {	
+adapt.layout.Column.prototype.findAcceptableBreak = function() {
+	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
+		adapt.task.newFrame("findAcceptableBreak");
 	var nodeContext = null;
 	var penalty = 0;
 	var nextPenalty = 0;
@@ -1335,10 +1368,13 @@ adapt.layout.Column.prototype.findAcceptableBreak = function() {
 	} while(nextPenalty > penalty && !nodeContext)
 	if (!nodeContext) {
 		adapt.base.log("Could not find any page breaks?!!");
+	    frame.finish(nodeContext);
 	} else {
-		this.finishBreak(nodeContext, true);
+		this.finishBreak(nodeContext, true).then(function() {
+		    frame.finish(nodeContext);
+		});
 	}
-    return nodeContext;
+	return frame.result();
 };
 
 /**
@@ -1535,7 +1571,7 @@ adapt.layout.Column.prototype.layoutNext = function(nodeContext) {
 		if (!nodeContext || self.pageBreakType || nodeContext === adapt.vtree.OVERFLOW) {
 			// finished all content, explicit page break or overflow (automatic page break)
 			frame.finish(nodeContext);
-	    } else if (nodeContext.floatSide && !self.vertical) {
+	    } else if (nodeContext.floatSide) {
 	    	// TODO: implement floats and footnotes properly for vertical writing
 	    	self.layoutFloatOrFootnote(nodeContext).thenFinish(frame);
 		} else if (self.isBreakable(nodeContext)) {
@@ -1679,14 +1715,16 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
 			        // fill a single block
 			    	var pending = true;
 			        self.layoutNext(nodeContext).then(function(nodeContextParam) {
-						nodeContext = /** @type {adapt.vtree.NodeContext} */ (nodeContextParam);
+						nodeContext = nodeContextParam;
 						if (self.pageBreakType) {
 							// explicit page break
 				            loopFrame.breakLoop(); // Loop end							
 						} else if (nodeContext === adapt.vtree.OVERFLOW) {
 				        	// overflow (implicit page break): back up and find a page break
-				        	nodeContext = self.findAcceptableBreak();
-				            loopFrame.breakLoop(); // Loop end
+				        	self.findAcceptableBreak().then(function(nodeContextParam) {
+				        		nodeContext = nodeContextParam;
+				        		loopFrame.breakLoop(); // Loop end
+				        	});
 				        } else {
 				        	if (pending) {
 				        		// Sync case
@@ -1709,8 +1747,12 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
 				var footnoteArea = self.footnoteArea;
 			    if (footnoteArea) {
 			    	self.element.appendChild(footnoteArea.element);
-			    	self.computedBlockSize = footnoteArea.top + footnoteArea.getInsetTop() +
-			    		footnoteArea.computedBlockSize + footnoteArea.getInsetBottom();
+			    	if (self.vertical) {
+				    	self.computedBlockSize = this.beforeEdge - this.afterEdge;
+			    	} else {
+				    	self.computedBlockSize = footnoteArea.top + footnoteArea.getInsetTop() +
+	    					footnoteArea.computedBlockSize + footnoteArea.getInsetBottom();	
+			    	}
 			    }
 			    // TODO: look at footnotes and floats as well
 			    if (!nodeContext) {

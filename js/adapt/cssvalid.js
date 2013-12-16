@@ -683,7 +683,21 @@ adapt.cssvalid.ListValidator.prototype.validateList = function(arr, slice, start
             }
             current = success ? current.success : current.failure; 
         } else {
-            outval = inval.visit(current.validator);
+        	if (index == 0 && !slice
+        			&& current.validator instanceof adapt.cssvalid.CommaListValidator 
+        			&& this instanceof adapt.cssvalid.SpaceListValidator) {
+        		// Special nesting case: validate the input space list as a whole.
+        		// Space lists cannot contain comma lists, so the only way for this
+        		// space list to match is to be the single-element space list.
+        		outval = (new adapt.css.SpaceList(arr)).visit(current.validator);
+        		if (outval) {
+        			index = arr.length;
+        			current = current.success;
+        			continue;
+        		}
+        	} else {
+        		outval = inval.visit(current.validator);
+        	}
             if (!outval) {
                 current = current.failure;
                 continue;

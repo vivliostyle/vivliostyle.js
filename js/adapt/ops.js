@@ -164,6 +164,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     this.rootPageBoxInstance = new adapt.pm.RootPageBoxInstance(rootBox);
     var cascadeInstance = this.style.cascade.createInstance(self, this.lang);
     this.rootPageBoxInstance.applyCascadeAndInit(cascadeInstance, docElementStyle);
+    this.rootPageBoxInstance.resolveAutoSizing(self);
     var srcFaces = /** @type {Array.<adapt.font.Face>} */ ([]);
     for (var i = 0; i < self.style.fontFaces.length; i++) {
     	var fontFace = self.style.fontFaces[i++];
@@ -435,7 +436,9 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 		= adapt.task.newFrame("layoutContainer");
     var wrapFlow = boxInstance.getProp(self, "wrap-flow");
     var dontExclude = wrapFlow === adapt.css.ident.auto;
-    var dontApplyExclusions = boxInstance.isAutoHeight && boxInstance.isTopDependentOnAutoHeight;
+    var dontApplyExclusions = boxInstance.vertical
+    	? boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth
+    	: boxInstance.isAutoHeight && boxInstance.isTopDependentOnAutoHeight;
     var flowName = boxInstance.getProp(self, "flow-from");
     var boxContainer = self.viewport.document.createElement("div");
     adapt.base.setCSSProperty(boxContainer, "position", "absolute");
@@ -454,9 +457,9 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	    	if (adapt.vtree.nonTrivialContent(contentVal)) {
 	    		contentVal.visit(new adapt.vtree.ContentPropertyHandler(boxContainer));
 	    		boxInstance.transferContentProps(self, layoutContainer, page);
-		        boxInstance.finishContainer(self, layoutContainer, null, 1, self.clientLayout);	    		
 	    	}
 	    } 	
+        boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);	    		
     	cont = adapt.task.newResult(true);
     } else if (!self.pageBreaks[flowName.toString()]) {
     	/** @type {!adapt.task.Frame.<boolean>} */ var innerFrame = adapt.task.newFrame("layoutContainer.inner");
@@ -544,12 +547,13 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	        loopFrame.breakLoop();
         }).then(function() {
 	        layoutContainer.computedBlockSize = computedBlockSize;
-	        boxInstance.finishContainer(self, layoutContainer, region, 
+	        boxInstance.finishContainer(self, layoutContainer, page, region, 
 	        		columnCount, self.clientLayout);
 	        innerFrame.finish(true);
         });
         cont = innerFrame.result();
     } else {
+        boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);	    		
     	cont = adapt.task.newResult(true);
     }
     cont.then(function() {

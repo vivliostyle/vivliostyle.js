@@ -62,7 +62,7 @@ adapt.csscasc.supportedNamespaces = {
 
 /** @const */
 adapt.csscasc.coupledPatterns = ["margin-%", "padding-%", "border-%-width", "border-%-style",
-                                "border-%-color"];
+                                "border-%-color", "%"];
 
 /**
  * @const 
@@ -70,7 +70,7 @@ adapt.csscasc.coupledPatterns = ["margin-%", "padding-%", "border-%-width", "bor
  */
 adapt.csscasc.geomNames = (function() {
 	var sides = ["left", "right", "top", "bottom"];
-	var names = {};
+	var names = {"width": true, "height": true};
 	for (var i = 0; i < adapt.csscasc.coupledPatterns.length; i++) {
 		for (var k = 0; k < sides.length; k++) {
 			var name = adapt.csscasc.coupledPatterns[i].replace("%", sides[k]);
@@ -78,7 +78,7 @@ adapt.csscasc.geomNames = (function() {
 		}
 	}
 	return names;
-});
+})();
 
 /**
  * @param {Object.<string,string>} sideMap
@@ -2673,4 +2673,59 @@ adapt.csscasc.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(function() {
  */
 adapt.csscasc.loadUABase = function() {
 	return adapt.csscasc.uaStylesheetBaseFetcher.get();
+};
+
+/**
+ * @param {Object.<string,adapt.csscasc.CascadeValue>} cascaded
+ * @param {adapt.expr.Context} context
+ * @param {boolean} vertical
+ * @return {boolean}
+ */
+adapt.csscasc.isVertical = function(cascaded, context, vertical) {
+    var writingModeCasc = cascaded["writing-mode"];
+    if (writingModeCasc) {
+    	var writingMode = writingModeCasc.evaluate(context, "writing-mode");
+    	if (writingMode && writingMode !== adapt.css.ident.inherit) {
+	    	return writingMode === adapt.css.ident.vertical_rl;
+    	}
+    }
+    return vertical;
+};
+
+/**
+ * @param {adapt.csscasc.ElementStyle} style
+ * @param {adapt.expr.Context} context
+ * @param {Array.<string>} regionIds
+ * @param {boolean} isFootnote
+ * @return {Object.<string,adapt.csscasc.CascadeValue>}
+ */
+adapt.csscasc.flattenCascadedStyle = function(style, context, regionIds, isFootnote) {
+    var cascMap = /** @type {Object.<string,adapt.csscasc.CascadeValue>} */ ({});
+    for (var n in style) {
+        if (adapt.csscasc.isPropName(n))
+            cascMap[n] = adapt.csscasc.getProp(style, n);
+    }
+    var regions = adapt.csscasc.getStyleMap(style, "_regions");
+    if ((regionIds || isFootnote) && regions) {
+    	if (isFootnote) {
+    		var footnoteRegion = ["footnote"];
+    		if (!regionIds)
+    			regionIds = footnoteRegion;
+    		else
+    			regionIds = regionIds.concat(footnoteRegion);
+    	}
+        for (var i = 0; i < regionIds.length; i++) {
+            var regionId = regionIds[i];
+            var regionStyle = regions[regionId];
+            for (var rn in regionStyle) {
+                if (adapt.csscasc.isPropName(rn)) {
+                    var newVal = adapt.csscasc.getProp(regionStyle, rn);
+                    var oldVal = cascMap[rn];
+                    cascMap[rn] = adapt.csscasc.cascadeValues(context, oldVal,
+                                /** @type {!adapt.csscasc.CascadeValue} */ (newVal));
+                }
+            }
+        }
+    }
+    return cascMap;
 };

@@ -384,6 +384,23 @@ adapt.pm.PageBoxInstance.prototype.resolveName = function(name) {
 		expr = this.addNamedValues("top-edge", "height");
 		break;
 	}
+	if (!expr) {
+		var altName;
+		if (name == "extent") {
+			altName = this.vertical ? "width" : "height";
+		} else if (name == "measure") {
+			altName = this.vertical ? "height" : "width";
+		} else {
+			var map = this.vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
+			altName = name;
+			for (var key in map) {
+				altName = altName.replace(key, map[key]);
+			}
+		}
+		if (altName != name) {
+			expr = this.resolveName(altName);
+		}
+	}
 	if (expr)
 		this.namedValues[name] = expr;
 	return expr;
@@ -686,18 +703,28 @@ adapt.pm.PageBoxInstance.prototype.init = function(context) {
 	var holder = /** @type {adapt.pm.InstanceHolder} */ (context);
 	holder.registerInstance(this.pageBox.key, this);
     var scope = this.pageBox.scope;
-    var cascaded = this.cascaded;
     var style = this.style;
-    for (var propName in cascaded) {
-        if (adapt.csscasc.isPropName(propName)) {
-	        var propVal = adapt.csscasc.getProp(cascaded, propName);
-	        if (propVal) {
-	            style[propName] = propVal.value;
-	        }
-        }
-    }
     var self = this;
-    this.vertical = this.getProp(context, "writing-mode") == adapt.css.ident.vertical_rl;
+
+    var regionIds = this.parentInstance ? this.parentInstance.getActiveRegions(context) : null;
+    var cascMap = adapt.csscasc.flattenCascadedStyle(this.cascaded, context, regionIds, false);
+    this.vertical = adapt.csscasc.isVertical(cascMap, context, this.parentInstance ? this.parentInstance.vertical : false);
+    var couplingMap = this.vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
+    for (var propName in cascMap) {
+        var cascVal = cascMap[propName];
+    	var coupledName = couplingMap[propName];
+    	var targetName;
+    	if (coupledName) {
+    		var coupledCascVal = cascMap[coupledName];
+    		if (coupledCascVal && coupledCascVal.priority > cascVal.priority) {
+    			continue;
+    		}
+    		targetName = adapt.csscasc.geomNames[coupledName] ? coupledName : propName;
+    	} else {
+    		targetName = propName;
+    	}
+        style[targetName] = cascVal.value;
+    }    
     this.autoWidth = new adapt.expr.Native(scope, 
     		function() { 
     			return self.calculatedWidth;
@@ -710,19 +737,6 @@ adapt.pm.PageBoxInstance.prototype.init = function(context) {
     this.initVertical();
     this.initColumns();
     this.initEnabled();
-    // all implicit dependencies are set up at this point
-    if (this.isAutoWidth) {
-        this.isRightDependentOnAutoWidth = this.depends("right", this.autoWidth, context) ||
-            this.depends("margin-right", this.autoWidth, context) ||
-            this.depends("border-right-width", this.autoWidth, context) ||
-            this.depends("padding-right", this.autoWidth, context);
-    }
-    if (this.isAutoHeight) {
-        this.isTopDependentOnAutoHeight = this.depends("top", this.autoHeight, context) ||
-            this.depends("margin-top", this.autoHeight, context) ||
-            this.depends("border-top-width", this.autoHeight, context) ||
-            this.depends("padding-top", this.autoHeight, context);
-    }
 };
 
 /**
@@ -990,9 +1004,10 @@ adapt.pm.PageBoxInstance.prototype.sizeWithMaxWidth = function(context, containe
 };
 
 /**
+ * Properties that are passed through before the layout.
  * @const
  */
-adapt.pm.passProperties = [
+adapt.pm.passPreProperties = [
 	"border-left-style",
 	"border-right-style",
 	"border-top-style",
@@ -1001,7 +1016,15 @@ adapt.pm.passProperties = [
 	"border-right-color",
 	"border-top-color",
 	"border-bottom-color",
-	"border-top-left-radius",
+	"overflow"
+];
+
+/**
+ * Properties that are passed through after the layout.
+ * @const
+ */
+adapt.pm.passPostProperties = [
+   	"border-top-left-radius",
 	"border-top-right-radius",
 	"border-bottom-right-radius",
 	"border-bottom-left-radius",
@@ -1019,7 +1042,6 @@ adapt.pm.passProperties = [
 	"background-origin",
 	"background-size",
 	"opacity",
-	"overflow",
 	"z-index"
 ];
 
@@ -1050,8 +1072,8 @@ adapt.pm.delayedProperties = [
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, container, page) {
-	if (this.vertical) {
-		adapt.base.setCSSProperty(container.element, "writing-mode", "vertical-rl");
+	if (!this.parentInstance || this.vertical != this.parentInstance.vertical) {
+		adapt.base.setCSSProperty(container.element, "writing-mode", (this.vertical ? "vertical-rl" : "horizontal-tb"));
 	}
     if (this.vertical ? this.isAutoWidth : this.isAutoHeight) {
     	if (this.vertical)
@@ -1070,11 +1092,8 @@ adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, containe
     } else {
         this.assignStartEndPosition(context, container);
     }
-    for (var i = 0; i < adapt.pm.passProperties.length; i++) {
-        this.propagateProperty(context, container, adapt.pm.passProperties[i]);    	
-    }
-    for (var i = 0; i < adapt.pm.delayedProperties.length; i++) {
-        this.propagateDelayedProperty(context, container, adapt.pm.delayedProperties[i], page.delayedItems);    	
+    for (var i = 0; i < adapt.pm.passPreProperties.length; i++) {
+        this.propagateProperty(context, container, adapt.pm.passPreProperties[i]);    	
     }
 };
 
@@ -1093,13 +1112,14 @@ adapt.pm.PageBoxInstance.prototype.transferContentProps = function(context, cont
 /**
  * @param {adapt.expr.Context} context
  * @param {adapt.vtree.Container} container
+ * @param {adapt.vtree.Page} page
  * @param {adapt.vtree.Container} column (null when content comes from the content property)
  * @param {number} columnCount
  * @param {adapt.vtree.ClientLayout} clientLayout
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.finishContainer = function(
-		context, container, column, columnCount, clientLayout) {
+		context, container, page, column, columnCount, clientLayout) {
 	if (this.vertical)
 	    this.calculatedWidth = container.computedBlockSize + container.snapOffsetX;
 	else
@@ -1163,6 +1183,12 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
     		}
     	}
     }
+    for (var i = 0; i < adapt.pm.passPostProperties.length; i++) {
+        this.propagateProperty(context, container, adapt.pm.passPostProperties[i]);    	
+    }
+    for (var i = 0; i < adapt.pm.delayedProperties.length; i++) {
+        this.propagateDelayedProperty(context, container, adapt.pm.delayedProperties[i], page.delayedItems);    	
+    }    
 };
 
 /**
@@ -1180,14 +1206,14 @@ adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit = function(cascade, docEl
 	}
 	if (this.pageBox.pseudoName == "background-host") {
 		for (var name in docElementStyle) {
-			if (name.match(/^background-/)) {
+			if (name.match(/^background-/) || name == "writing-mode") {
 				style[name] = docElementStyle[name];
 			}
 		}
 	}
 	if (this.pageBox.pseudoName == "layout-host") {
 		for (var name in docElementStyle) {
-			if (!name.match(/^background-/)) {
+			if (!name.match(/^background-/) && name != "writing-mode") {
 				style[name] = docElementStyle[name];
 			}
 		}
@@ -1200,6 +1226,30 @@ adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit = function(cascade, docEl
 	    childInstance.applyCascadeAndInit(cascade, docElementStyle);
 	}
 	cascade.popRule();
+};
+
+/**
+ * @param {adapt.expr.Context} context
+ * @return {void}
+ */
+adapt.pm.PageBoxInstance.prototype.resolveAutoSizing = function(context) {
+    // all implicit dependencies are set up at this point
+    if (this.isAutoWidth) {
+        this.isRightDependentOnAutoWidth = this.depends("right", this.autoWidth, context) ||
+            this.depends("margin-right", this.autoWidth, context) ||
+            this.depends("border-right-width", this.autoWidth, context) ||
+            this.depends("padding-right", this.autoWidth, context);
+    }
+    if (this.isAutoHeight) {
+        this.isTopDependentOnAutoHeight = this.depends("top", this.autoHeight, context) ||
+            this.depends("margin-top", this.autoHeight, context) ||
+            this.depends("border-top-width", this.autoHeight, context) ||
+            this.depends("padding-top", this.autoHeight, context);
+    }
+	for (var i = 0; i < this.children.length ; i++) {
+		var childInstance = this.children[i];
+	    childInstance.resolveAutoSizing(context);
+	}
 };
 
 

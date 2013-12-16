@@ -296,9 +296,10 @@ adapt.expr.Context.prototype.evalName = function(scope, qualifiedName) {
  * @param {adapt.expr.LexicalScope} scope
  * @param {string} qualifiedName
  * @param {Array.<adapt.expr.Val>} params
+ * @param {boolean} noBuiltInEval don't evaluate built-ins (for dependency calculations)
  * @return {adapt.expr.Val}
  */
-adapt.expr.Context.prototype.evalCall = function(scope, qualifiedName, params) {
+adapt.expr.Context.prototype.evalCall = function(scope, qualifiedName, params, noBuiltInEval) {
     do {
         var body = scope.funcs[qualifiedName];
         if (body)
@@ -310,6 +311,8 @@ adapt.expr.Context.prototype.evalCall = function(scope, qualifiedName, params) {
         }        
         var fn = scope.builtIns[qualifiedName];
         if (fn) {
+        	if (noBuiltInEval)
+        		return scope.zero;
             var args = Array(params.length);
             for (var i = 0; i < params.length; i++) {
                 args[i] = params[i].evaluate(this);
@@ -1398,7 +1401,7 @@ adapt.expr.Call.prototype.appendTo = function(buf, priority) {
  * @override
  */
 adapt.expr.Call.prototype.evaluateCore = function(context) {
-    var body = context.evalCall(this.scope, this.qualifiedName, this.params);
+    var body = context.evalCall(this.scope, this.qualifiedName, this.params, false);
     return body.expand(context, this.params).evaluate(context);
 };
 
@@ -1412,7 +1415,7 @@ adapt.expr.Call.prototype.dependCore = function(other, context, dependencyCache)
         if (this.params[i].dependOuter(other, context, dependencyCache))
             return true;
     }
-    var body = context.evalCall(this.scope, this.qualifiedName, this.params);
+    var body = context.evalCall(this.scope, this.qualifiedName, this.params, true);
     // No expansion here!
     return body.dependOuter(other, context, dependencyCache);
 };

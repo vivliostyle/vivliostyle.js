@@ -245,6 +245,16 @@ adapt.base.makePropNameMap = function(list) {
 	var probe = document.createElement("span");
 	var style = probe.style;
 	var lastPrefix = null;
+	try {
+		probe.style.setProperty("-ms-transform-origin", "0% 0%");
+		if (probe.style.getPropertyValue("-ms-transform-origin") == "0% 0%") {
+			for (var i = 0; i < list.length; i++) {
+				map[list[i]] = "-ms-" + list[i];
+			}
+			return map;
+		}
+	} catch (err) {
+	}
 	for (var i = 0; i < list.length; i++) {
 		var cssName = list[i];
 		var prefixedName = null;
@@ -286,8 +296,12 @@ adapt.base.propNameMap = adapt.base.makePropNameMap([
  */
 adapt.base.setCSSProperty = function(elem, prop, value) {
     try {
-        (/** @type {HTMLElement} */ (elem)).style.setProperty(
-        		adapt.base.propNameMap[prop] || prop, value);
+    	prop = adapt.base.propNameMap[prop] || prop;
+    	if (prop == "-ms-writing-mode" && value == "vertical-rl") {
+    		value = "tb-rl";
+     	}
+    	// adapt.base.log(prop + ": " + value);
+        (/** @type {HTMLElement} */ (elem)).style.setProperty(prop, value);
     } catch (err) {
     }
 };
