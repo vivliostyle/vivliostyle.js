@@ -990,6 +990,18 @@ adapt.layout.Column.prototype.processLineStyling = function(nodeContext, resNode
 };
 
 /**
+ * @param {Array.<adapt.vtree.NodeContext>} checkPoints
+ * @return {boolean}
+ */
+adapt.layout.Column.prototype.isLoneImage = function(checkPoints) {
+	if (checkPoints.length != 2 && this.breakPositions.length > 0) {
+		return false;
+	}
+	return checkPoints[0].sourceNode == checkPoints[1].sourceNode
+		&& (/** @type {Element} */(checkPoints[0].sourceNode).localName) == "img";
+};
+
+/**
  * Layout a single CSS box.
  * @param {adapt.vtree.NodeContext} nodeContext
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
@@ -1024,7 +1036,7 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
 	    lineCont.then(function(nodeContext) {
 		    if (checkPoints.length > 0) {
 		    	self.saveBoxBreakPosition(checkPoints);
-		    	if (overflown) {
+		    	if (overflown && !self.isLoneImage(checkPoints)) {
 		    		nodeContext = adapt.vtree.OVERFLOW;
 		    	}
 		    }
@@ -1347,9 +1359,10 @@ adapt.layout.Column.prototype.finishBreak = function(nodeContext, endOfRegion) {
 };
 
 /**
- * @returns {adapt.task.Result.<adapt.vtree.NodeContext>}
+ * @param {adapt.vtree.NodeContext} initialNodeContext
+ * @return {adapt.task.Result.<adapt.vtree.NodeContext>}
  */
-adapt.layout.Column.prototype.findAcceptableBreak = function() {
+adapt.layout.Column.prototype.findAcceptableBreak = function(initialNodeContext) {
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
 		adapt.task.newFrame("findAcceptableBreak");
 	var nodeContext = null;
@@ -1368,7 +1381,7 @@ adapt.layout.Column.prototype.findAcceptableBreak = function() {
 	} while(nextPenalty > penalty && !nodeContext)
 	if (!nodeContext) {
 		adapt.base.log("Could not find any page breaks?!!");
-	    frame.finish(nodeContext);
+	    frame.finish(initialNodeContext);
 	} else {
 		this.finishBreak(nodeContext, true).then(function() {
 		    frame.finish(nodeContext);
@@ -1707,6 +1720,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
 	self.layoutOverflownFootnotes(chunkPosition).then(function() {
 	    // ------ start the column -----------
 	    self.openAllViews(chunkPosition.primary).then(function(nodeContext) {
+	    	var initialNodeContext = nodeContext;
 		    // ------ init backtracking list -----
 			self.breakPositions = [];
 		    // ------- fill the column -------------
@@ -1721,7 +1735,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
 				            loopFrame.breakLoop(); // Loop end							
 						} else if (nodeContext === adapt.vtree.OVERFLOW) {
 				        	// overflow (implicit page break): back up and find a page break
-				        	self.findAcceptableBreak().then(function(nodeContextParam) {
+				        	self.findAcceptableBreak(initialNodeContext).then(function(nodeContextParam) {
 				        		nodeContext = nodeContextParam;
 				        		loopFrame.breakLoop(); // Loop end
 				        	});

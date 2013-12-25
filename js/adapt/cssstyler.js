@@ -402,15 +402,15 @@ adapt.cssstyler.Styler.prototype.encounteredFlowElement = function(flowName, sty
 adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
     var targetSlippedOffset = -1;
     var slippedOffset;
-    if (this.last == null) {
-        if (startOffset <= this.lastOffset) {
-            slippedOffset = this.offsetMap.slippedByFixed(startOffset);
-            targetSlippedOffset = slippedOffset + lookup;
-            if (targetSlippedOffset < this.offsetMap.getMaxSlipped()) {
-                // got to the desired point
-                return this.offsetMap.fixedBySlipped(targetSlippedOffset);
-            }
+    if (startOffset <= this.lastOffset) {
+        slippedOffset = this.offsetMap.slippedByFixed(startOffset);
+        targetSlippedOffset = slippedOffset + lookup;
+        if (targetSlippedOffset < this.offsetMap.getMaxSlipped()) {
+            // got to the desired point
+            return this.offsetMap.fixedBySlipped(targetSlippedOffset);
         }
+    }
+    if (this.last == null) {
         return Number.POSITIVE_INFINITY;
     }
     var context = this.context;
@@ -428,6 +428,16 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
                 this.last = this.last.parentNode;
                 if (this.last === this.root) {
                     this.last = null;
+                    if (startOffset < this.lastOffset) {
+	                    if (targetSlippedOffset < 0) {
+	                        slippedOffset = this.offsetMap.slippedByFixed(startOffset);
+	                        targetSlippedOffset = slippedOffset + lookup;
+	                    }
+	                    if (targetSlippedOffset <= this.offsetMap.getMaxSlipped()) {
+	                        // got to the desired point
+	                        return this.offsetMap.fixedBySlipped(targetSlippedOffset);
+	                    }
+                    }
                     return Number.POSITIVE_INFINITY;
                 }
             }

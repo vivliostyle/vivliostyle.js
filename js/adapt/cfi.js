@@ -369,11 +369,13 @@ adapt.cfi.Fragment.prototype.navigate = function(doc) {
 
 /**
  * @param {string} text
+ * @param {boolean} after
  * @return {string}
  */
-adapt.cfi.Fragment.prototype.trim = function(text) {
-	return text.replace(/\s+/g, " ").match(/[ -\uD7FF\uE000-\uFFFF]{0,8}$/)[0]
-		.replace(/^\s/, "").replace(/\s$/, "");
+adapt.cfi.Fragment.prototype.trim = function(text, after) {
+	return text.replace(/\s+/g, " ").match(
+			after ? /^[ -\uD7FF\uE000-\uFFFF]{0,8}/ : /[ -\uD7FF\uE000-\uFFFF]{0,8}$/
+		)[0].replace(/^\s/, "").replace(/\s$/, "");
 };
 
 /**
@@ -416,8 +418,8 @@ adapt.cfi.Fragment.prototype.prependPathFromNode = function(node, offset, after,
 		break;
 	}
 	if (offset > 0 || textBefore || textAfter) {
-		textBefore = this.trim(textBefore);
-		textAfter = this.trim(textAfter);
+		textBefore = this.trim(textBefore, false);
+		textAfter = this.trim(textAfter, true);
  		steps.push(new adapt.cfi.OffsetStep(offset, textBefore, textAfter, sideBias));
  		sideBias = null;
 	}

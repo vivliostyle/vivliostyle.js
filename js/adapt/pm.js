@@ -1136,9 +1136,9 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
     	}
         bbox = clientLayout.getElementClientRect(column ? column.element : container.element);
         if (readWidth) {
-        	this.calculatedWidth = bbox.right - bbox.left
+        	this.calculatedWidth = Math.ceil(bbox.right - bbox.left
         		- container.paddingLeft - container.borderLeft
-        		- container.paddingRight - container.borderRight;
+        		- container.paddingRight - container.borderRight);
         	if (this.vertical)
         	    this.calculatedWidth += container.snapOffsetX;
         }
