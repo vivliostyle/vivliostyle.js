@@ -264,6 +264,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout) {
 	/** @type {Array.<adapt.layout.BreakPosition>} */ this.breakPositions = null;
 	/** @type {Array.<adapt.layout.FootnoteItem>} */ this.footnoteItems = null;
 	/** @type {?string} */ this.pageBreakType = null;
+	/** @type {boolean} */ this.forceNonfitting = true;
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
 
@@ -410,7 +411,7 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
 		        	// TODO: implement floats and footnotes properly
 		        	self.layoutFloatOrFootnote(position).then(function(positionParam) {
 			        	position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
-			        	if (!position || position === adapt.vtree.OVERFLOW) {
+			        	if (!position || position.overflow) {
 				        	bodyFrame.breakLoop();
 				            return;
 			        	}
@@ -800,11 +801,10 @@ adapt.layout.Column.prototype.layoutFootnote = function(nodeContext) {
 	    if (self.footnoteArea && self.footnoteArea.element.parentNode) {
 	    	self.element.removeChild(self.footnoteArea.element);
 	    }
-	    if (!self.isOverflown(callBoxAfter) || self.breakPositions.length == 0) {
-	    	frame.finish(nodeContext);
-	    } else {
-	    	frame.finish(adapt.vtree.OVERFLOW);
+	    if (self.isOverflown(callBoxAfter) && self.breakPositions.length != 0) {
+	    	nodeContext.overflow = true;
 	    }
+    	frame.finish(nodeContext);
     });
     return frame.result();
 };
@@ -890,7 +890,9 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    	self.updateMaxReachedAfterEdge(floatBoxEdge);
 	        frame.finish(nodeContextAfter);
 	    } else {
-	    	frame.finish(adapt.vtree.OVERFLOW);
+	    	nodeContext = nodeContext.modify();
+	    	nodeContext.overflow = true;
+	        frame.finish(nodeContext);	    	
 	    }
     });
     return frame.result();
@@ -966,7 +968,7 @@ adapt.layout.Column.prototype.processLineStyling = function(nodeContext, resNode
 			return;
 		}
 		var lineBreak = self.findAcceptableBreakInside(lastCheckPoints, linePositions[count-1]);
-		self.finishBreak(lineBreak, false).then(function() {
+		self.finishBreak(lineBreak, false, false).then(function() {
 			totalLineCount += count;
 			self.layoutContext.peelOff(lineBreak, 0).then(function(resNodeContextParam) {
 				nodeContext = resNodeContextParam;
@@ -1037,7 +1039,8 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
 		    if (checkPoints.length > 0) {
 		    	self.saveBoxBreakPosition(checkPoints);
 		    	if (overflown && !self.isLoneImage(checkPoints)) {
-		    		nodeContext = adapt.vtree.OVERFLOW;
+		    		nodeContext = nodeContext.modify();
+		    		nodeContext.overflow = true;
 		    	}
 		    }
 		    frame.finish(nodeContext);
@@ -1347,11 +1350,12 @@ adapt.layout.Column.prototype.findEdgeBreakPosition = function(bp) {
 /**
  * Finalize a line break.
  * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {boolean} forceRemoveSelf
  * @param {boolean} endOfRegion
  * @return {!adapt.task.Result.<boolean>} holing true
  */
-adapt.layout.Column.prototype.finishBreak = function(nodeContext, endOfRegion) {
-	var removeSelf = nodeContext.viewNode != null && nodeContext.viewNode.nodeType == 1 && !nodeContext.after;
+adapt.layout.Column.prototype.finishBreak = function(nodeContext, forceRemoveSelf, endOfRegion) {
+	var removeSelf = forceRemoveSelf || (nodeContext.viewNode != null && nodeContext.viewNode.nodeType == 1 && !nodeContext.after);
     this.clearOverflownViewNodes(nodeContext, removeSelf);
     if (endOfRegion)
     	this.fixJustificationIfNeeded(nodeContext, true);
@@ -1359,10 +1363,11 @@ adapt.layout.Column.prototype.finishBreak = function(nodeContext, endOfRegion) {
 };
 
 /**
+ * @param {adapt.vtree.NodeContext} overflownNodeContext
  * @param {adapt.vtree.NodeContext} initialNodeContext
  * @return {adapt.task.Result.<adapt.vtree.NodeContext>}
  */
-adapt.layout.Column.prototype.findAcceptableBreak = function(initialNodeContext) {
+adapt.layout.Column.prototype.findAcceptableBreak = function(overflownNodeContext, initialNodeContext) {
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
 		adapt.task.newFrame("findAcceptableBreak");
 	var nodeContext = null;
@@ -1379,14 +1384,21 @@ adapt.layout.Column.prototype.findAcceptableBreak = function(initialNodeContext)
 			}
 		}
 	} while(nextPenalty > penalty && !nodeContext)
+	var forceRemoveSelf = false;
 	if (!nodeContext) {
 		adapt.base.log("Could not find any page breaks?!!");
-	    frame.finish(initialNodeContext);
-	} else {
-		this.finishBreak(nodeContext, true).then(function() {
-		    frame.finish(nodeContext);
-		});
+		// Last resort
+		if (this.forceNonfitting) {
+			nodeContext = overflownNodeContext.modify();
+			nodeContext.overflow = false;
+		} else {
+			nodeContext = initialNodeContext;
+			forceRemoveSelf = true;
+		}
 	}
+	this.finishBreak(nodeContext, forceRemoveSelf, true).then(function() {
+	    frame.finish(nodeContext);
+	});
 	return frame.result();
 };
 
@@ -1464,8 +1476,8 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext) {
 					if (!nodeContext.after) {
 						// Leading edge of non-empty block
 						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, true, breakAtTheEdge)) {
-							// overflow
-					    	nodeContext = adapt.vtree.OVERFLOW;
+							nodeContext = (lastAfterNodeContext || nodeContext).modify();
+					    	nodeContext.overflow = true;
 						} else {
 							nodeContext = nodeContext.modify();
 							nodeContext.breakBefore = breakAtTheEdge;
@@ -1478,7 +1490,8 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext) {
 					// float
 					if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, true, breakAtTheEdge)) {
 						// overflow
-				    	nodeContext = adapt.vtree.OVERFLOW;
+				    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
+				    	nodeContext.overflow = true;
 					}
 					loopFrame.breakLoop();
 					return;
@@ -1497,7 +1510,8 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext) {
 						// Non-zero trailing inset.
 						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, true, breakAtTheEdge)) {
 							// overflow
-					    	nodeContext = adapt.vtree.OVERFLOW;
+					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
+					    	nodeContext.overflow = true;
 							loopFrame.breakLoop();
 							return;
 						}
@@ -1518,7 +1532,8 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext) {
 						// elements that have inherent content
 						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, true, breakAtTheEdge)) {
 							// overflow
-					    	nodeContext = adapt.vtree.OVERFLOW;
+					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
+					    	nodeContext.overflow = true;
 						}
 						loopFrame.breakLoop();
 						return;
@@ -1528,7 +1543,8 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext) {
 						// Non-sero leading inset
 						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, true, breakAtTheEdge)) {
 							// overflow
-					    	nodeContext = adapt.vtree.OVERFLOW;
+					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
+					    	nodeContext.overflow = true;
 							loopFrame.breakLoop();
 							return;
 						}
@@ -1548,9 +1564,14 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext) {
 				nodeContext = nextResult.get();
 			}
 		}
-		if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, false, breakAtTheEdge)) {
-			// overflow
-	    	nodeContext = adapt.vtree.OVERFLOW;
+		if (self.breakPositions.length != 0 &&
+				self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, false, breakAtTheEdge)) {
+			if (lastAfterNodeContext) {
+		    	nodeContext = lastAfterNodeContext.modify();
+		    	nodeContext.overflow = true;
+			} else {
+				// TODO: what to return here??
+			}
 		}
 		loopFrame.breakLoop();
 	}).then(function() {
@@ -1581,7 +1602,7 @@ adapt.layout.Column.prototype.layoutNext = function(nodeContext) {
 		= adapt.task.newFrame("layoutNext");
 	this.skipEdges(nodeContext).then(function(nodeContextParam) {
 		nodeContext = /** @type {adapt.vtree.NodeContext} */ (nodeContextParam);
-		if (!nodeContext || self.pageBreakType || nodeContext === adapt.vtree.OVERFLOW) {
+		if (!nodeContext || self.pageBreakType || nodeContext.overflow) {
 			// finished all content, explicit page break or overflow (automatic page break)
 			frame.finish(nodeContext);
 	    } else if (nodeContext.floatSide) {
@@ -1733,9 +1754,9 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
 						if (self.pageBreakType) {
 							// explicit page break
 				            loopFrame.breakLoop(); // Loop end							
-						} else if (nodeContext === adapt.vtree.OVERFLOW) {
+						} else if (nodeContext && nodeContext.overflow) {
 				        	// overflow (implicit page break): back up and find a page break
-				        	self.findAcceptableBreak(initialNodeContext).then(function(nodeContextParam) {
+				        	self.findAcceptableBreak(nodeContext, initialNodeContext).then(function(nodeContextParam) {
 				        		nodeContext = nodeContextParam;
 				        		loopFrame.breakLoop(); // Loop end
 				        	});

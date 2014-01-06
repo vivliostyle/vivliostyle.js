@@ -96,6 +96,20 @@ adapt.sha1.bytesToSHA1Int32 = function(bytes) {
 
 /**
  * @param {string} bytes chars with codes 0 - 255 that represent message byte values
+ * @return {Array.<number>} uint8 numbers representing sha1 hash
+ */
+adapt.sha1.bytesToSHA1Int8 = function(bytes) {
+	var h = adapt.sha1.bytesToSHA1Int32(bytes);	
+	var res = [];
+	for (var i = 0; i < h.length; i++) {
+		var n = h[i];
+		res.push((n >>> 24)&0xFF, (n >>> 16)&0xFF, (n >>> 8)&0xFF, n&0xFF);
+	}
+	return res;
+};
+
+/**
+ * @param {string} bytes chars with codes 0 - 255 that represent message byte values
  * @return {string} chars with codes 0 - 255 equal to SHA1 hash of the input
  */
 adapt.sha1.bytesToSHA1Bytes = function(bytes) {

@@ -104,6 +104,12 @@ adapt.sampleapp.Viewer.prototype.startEventLoop = function() {
 	    				innerFrame.finish(true);
 	    			});
 	    			break;
+	    		case "adapt-command":
+	    			var command = /** @type {string} */ (/** @type {*} */ (event.detail));
+	    			self.command(command).then(function() {
+	    				innerFrame.finish(true);
+	    			});
+	    			break;
 	    		default:
 		    		innerFrame.finish(true);
 	    		}
@@ -115,6 +121,45 @@ adapt.sampleapp.Viewer.prototype.startEventLoop = function() {
 };
 
 /**
+ * @param {string} command
+ * @return {!adapt.task.Result.<boolean>}
+ */
+adapt.sampleapp.Viewer.prototype.command = function(command) {
+	var self = this;
+	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("command");
+    switch (command) {
+    case "firstPage":
+    	self.firstPage().then(function() {
+        	self.showPage();
+        	self.showPosition().thenFinish(frame);
+        });
+    	break;
+    case "lastPage":
+    	self.lastPage().then(function() {
+        	self.showPage();
+        	self.showPosition().thenFinish(frame);
+        });
+    	break;
+    case "nextPage":
+    	self.nextPage().then(function() {
+        	self.showPage();
+        	self.showPosition().thenFinish(frame);
+        });
+    	break;
+    case "previousPage":
+    	self.previousPage().then(function() {
+        	self.showPage();
+        	self.showPosition().thenFinish(frame);
+        });
+    	break;
+    default:
+    	adapt.base.log("Unknown command: " + command);
+    	frame.finish(true);
+    }
+    return frame.result();
+};
+
+/**
  * @param {KeyboardEvent} evt
  * @return {!adapt.task.Result.<boolean>}
  */
@@ -122,6 +167,18 @@ adapt.sampleapp.Viewer.prototype.keydown = function(evt) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("keydown");
     switch (evt.keyCode) {
+    case 35:  // end
+    	self.lastPage().then(function() {
+        	self.showPage();
+        	self.showPosition().thenFinish(frame);
+        });
+    	break;
+    case 36:  // home
+    	self.firstPage().then(function() {
+        	self.showPage();
+        	self.showPosition().thenFinish(frame);
+        });
+    	break;
     case 39:  // right arrow
         self.nextPage().then(function() {
         	self.showPage();
@@ -306,6 +363,34 @@ adapt.sampleapp.Viewer.prototype.nextPage = function() {
 /**
  * @return {!adapt.task.Result.<boolean>}
  */
+adapt.sampleapp.Viewer.prototype.firstPage = function() {
+	var self = this;
+	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("firstPage");
+	self.opfView.firstPage().then(function(page) {
+		self.pagePosition = null;
+		self.setNewPage(page);
+		frame.finish(true);
+	});
+	return frame.result();
+};
+
+/**
+ * @return {!adapt.task.Result.<boolean>}
+ */
+adapt.sampleapp.Viewer.prototype.lastPage = function() {
+	var self = this;
+	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("lastPage");
+	self.opfView.lastPage().then(function(page) {
+		self.pagePosition = null;
+		self.setNewPage(page);
+		frame.finish(true);
+	});
+	return frame.result();
+};
+
+/**
+ * @return {!adapt.task.Result.<boolean>}
+ */
 adapt.sampleapp.Viewer.prototype.previousPage = function() {
 	var self = this;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("previousPage");
@@ -350,6 +435,7 @@ adapt.sampleapp.Viewer.prototype.init = function(fragment) {
     this.eventSource.attach(window, "touchstart", true);
     this.eventSource.attach(window, "touchmove", true);
     this.eventSource.attach(window, "touchend", true);
+    this.eventSource.attach(window, "adapt-command");
     self.opf.resolveFragment(fragment).then(function(position) {
     	self.pagePosition = position;
 	    self.resize().then(function() {
@@ -409,6 +495,11 @@ adapt.sampleapp.main = function() {
     	});
     	return frame.result();
     });
+};
+
+window["executeCommand"] = function(command) {
+	var evt = new CustomEvent("adapt-command", {detail: command});
+	window.dispatchEvent(evt);
 };
 
 if(window["__loaded"])

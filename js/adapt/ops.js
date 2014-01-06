@@ -351,6 +351,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
     var flowPosition = this.currentLayoutPosition.flowPositions[flowName];
     if (!flowPosition)
         return adapt.task.newResult(true);
+    region.forceNonfitting = !this.primaryFlows[flowName];
     region.init();
     var self = this;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("layoutColumn");
@@ -881,13 +882,13 @@ adapt.ops.StyleParserHandler.prototype.error = function(mnemonics, token) {
 adapt.ops.StyleSource;
 
 /**
- * @param {?function(string):?function(string):string} fontDeobfuscator
+ * @param {?function(string):?function(Blob):adapt.task.Result.<Blob>} fontDeobfuscator
  * @constructor
  * @extends {adapt.xmldoc.XMLDocStore}
  */
 adapt.ops.OPSDocStore = function(fontDeobfuscator) {
 	adapt.xmldoc.XMLDocStore.call(this);
-	/** @type {?function(string):?function(string):string} */ this.fontDeobfuscator = fontDeobfuscator;
+	/** @type {?function(string):?function(Blob):adapt.task.Result.<Blob>} */ this.fontDeobfuscator = fontDeobfuscator;
 	/** @type {Object.<string,adapt.ops.Style>} */ this.styleByKey = {};
 	/** @type {Object.<string,adapt.taskutil.Fetcher.<adapt.ops.Style>>} */ this.styleFetcherByKey = {};
 	/** @type {Object.<string,adapt.ops.Style>} */ this.styleByDocURL = {};

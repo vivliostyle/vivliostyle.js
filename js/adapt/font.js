@@ -77,6 +77,8 @@ adapt.font.Face = function(properties) {
 	/** @const */ this.properties = properties;
 	/** @const */ this.fontTraitKey = adapt.font.makeFontTraitKey(this.properties);
 	/** @const */ this.src = adapt.cssprop.toFontSrcURL(this.properties["src"]);
+	/** @type {Array.<string>} */ this.blobURLs = [];
+	/** @type {Array.<Blob>} */ this.blobs = [];
 	var family = this.properties["font-family"];
 	/** @const */ this.family = family ? family.stringValue() : null;
 };
@@ -93,7 +95,7 @@ adapt.font.Face.prototype.traitsEqual = function(other) {
 /**
  * Create "at" font-face rule.
  * @param {string} src
- * @param {?string} fontBytes
+ * @param {Blob} fontBytes
  * @return {string}
  */
 adapt.font.Face.prototype.makeAtRule = function(src, fontBytes) {
@@ -108,8 +110,11 @@ adapt.font.Face.prototype.makeAtRule = function(src, fontBytes) {
 		sb.append(';\n  ');
 	}
 	if (fontBytes) {
-		sb.append('src: url("data:application/octet-stream;base64,');
-		adapt.base.appendBase64(sb, fontBytes);
+		sb.append('src: url("');
+		var blobURL = adapt.net.createObjectURL(fontBytes);
+		sb.append(blobURL);
+		this.blobURLs.push(blobURL);
+		this.blobs.push(fontBytes);
 	} else {
 		sb.append('src: url("');
 		sb.append(adapt.base.escapeCSSStr(src));
@@ -120,8 +125,8 @@ adapt.font.Face.prototype.makeAtRule = function(src, fontBytes) {
 
 /**
  * Set of the fonts declared in all stylesheets of a document.
- * @param {?function(string):?function(string):string} deobfuscator function that takes url
- *     and returns data deobfuscator
+ * @param {?function(string):?function(Blob):adapt.task.Result.<Blob>} deobfuscator function
+ *     that takes url and returns data deobfuscator
  * @constructor
  */
 adapt.font.DocumentFaces = function(deobfuscator) {
@@ -216,7 +221,7 @@ adapt.font.Mapper.prototype.getViewFontFamily = function(srcFace, documentFaces)
 /**
  * @private
  * @param {adapt.font.Face} srcFace
- * @param {?string} fontBytes deobfuscated font bytes (if deobfuscation is needed)
+ * @param {Blob} fontBytes deobfuscated font bytes (if deobfuscation is needed)
  * @param {adapt.font.DocumentFaces} documentFaces
  * @return {!adapt.task.Result.<adapt.font.Face>}
  */
@@ -237,7 +242,7 @@ adapt.font.Mapper.prototype.initFont = function(srcFace, fontBytes, documentFace
 	var killTime = (new Date()).valueOf() + 1000;
 	var style = self.head.ownerDocument.createElement("style");
 	var bogusData = adapt.font.bogusFontData + (adapt.font.bogusFontCounter++);
-	style.textContent = viewFontFace.makeAtRule("", bogusData);
+	style.textContent = viewFontFace.makeAtRule("", adapt.net.makeBlob([bogusData]));
 	self.head.appendChild(style);
 	self.body.appendChild(probe);
 	probe.style.visibility = "hidden";
@@ -300,10 +305,14 @@ adapt.font.Mapper.prototype.loadFont = function(srcFace, documentFaces) {
 				adapt.task.newFrame("loadFont");
 			var deobfuscator = documentFaces.deobfuscator ? documentFaces.deobfuscator(src) : null;
 			if (deobfuscator) {
-				adapt.net.ajax(src, true).then(function(xhrParam) {
-					var xhr = /** @type {XMLHttpRequest} */ (xhrParam);
-					var fontBytes = deobfuscator(xhr.responseText);
-					self.initFont(srcFace, fontBytes, documentFaces).thenFinish(frame);
+				adapt.net.ajax(src, true).then(function(xhr) {
+					if (!xhr.responseBlob) {
+						frame.finish(null);
+						return;
+					}
+					deobfuscator(xhr.responseBlob).then(function(fontBytes) {
+						self.initFont(srcFace, fontBytes, documentFaces).thenFinish(frame);
+					});
 				});
 			} else {
 				self.initFont(srcFace, null, documentFaces).thenFinish(frame);

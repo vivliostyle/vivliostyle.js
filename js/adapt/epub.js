@@ -22,18 +22,18 @@ adapt.epub.EPUBDocStore = function() {
 	/** @type {Object.<string,boolean>} */ this.noStyling = {};
 	/** @type {Object.<string,adapt.epub.OPFDoc>} */ this.opfByURL = {};
 	/** @type {Object.<string,adapt.epub.OPFDoc>} */ this.primaryOPFByEPubURL = {};
-	/** @type {Object.<string,function(string):string>} */ this.deobfuscators = {};
+	/** @type {Object.<string,function(Blob):adapt.task.Result.<Blob>>} */ this.deobfuscators = {};
 };
 goog.inherits(adapt.epub.EPUBDocStore, adapt.ops.OPSDocStore);
 
 /**
- * @return {?function(string):?function(string):string}
+ * @return {?function(string):?function(Blob):adapt.task.Result.<Blob>}
  */
 adapt.epub.EPUBDocStore.prototype.makeDeobfuscatorFactory = function() {
 	var self = this;
 	/**
 	 * @param {string} url
-	 * @return {?function(string):string}
+	 * @return {?function(Blob):adapt.task.Result.<Blob>}
 	 */
 	return function(url) {
 		return self.deobfuscators[url];
@@ -160,22 +160,32 @@ adapt.epub.getOPFSrc = function(item) {
 
 /**
  * @param {string} uid
- * @return {function(string):string}
+ * @return {function(Blob):adapt.task.Result.<Blob>}
  */
 adapt.epub.makeDeobfuscator = function(uid) {
 	// TODO: use UTF8 of uid
-	var sha1 = adapt.sha1.bytesToSHA1Int32(uid);
-	return function(input) {
-		var sb = new adapt.base.StringBuffer();
-		var k = 0;
-		while(k < 1040) {
-			var word = adapt.sha1.decode32(input.substr(k, 4));
-			word ^= sha1[(k / 4) % 5];
-			sb.append(adapt.sha1.encode32(word));
-			k += 4;
+	var sha1 = adapt.sha1.bytesToSHA1Int8(uid);
+	return /** @param {Blob} blob */ function(blob) {
+		var frame = /** @type {adapt.task.Frame.<Blob>} */ (adapt.task.newFrame("deobfuscator"));
+		var head;
+		var tail;
+		if (blob.slice) {
+			head = blob.slice(0, 1040);
+			tail = blob.slice(1040, blob.size);
+		} else {
+			head = blob["webkitSlice"](0, 1040);
+			tail = blob["webkitSlice"](1040, blob.size - 1040);			
 		}
-		sb.append(input.substr(1040));
-		return sb.toString().substr(0, input.length);
+		adapt.net.readBlob(head).then(function(buf) {
+			var dataView = new DataView(buf);
+			for (var k = 0; k < dataView.byteLength; k++) {
+				var b = dataView.getUint8(k);
+				b ^= sha1[k % 20];
+				dataView.setUint8(k, b);
+			}
+			frame.finish(adapt.net.makeBlob([dataView, tail]));
+		});
+		return frame.result();
 	};
 };
 
@@ -474,6 +484,26 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 		});		    
 	});
 	return frame.result();
+};
+
+/**
+ * Move to the first page and render it.
+ * @return {!adapt.task.Result.<adapt.vtree.Page>}
+ */
+adapt.epub.OPFView.prototype.firstPage = function() {
+	this.spineIndex = 0;
+	this.pageIndex = 0;
+	return this.renderPage();
+};
+
+/**
+ * Move to the last page and render it.
+ * @return {!adapt.task.Result.<adapt.vtree.Page>}
+ */
+adapt.epub.OPFView.prototype.lastPage = function() {
+	this.spineIndex = this.opf.spine.length - 1;
+	this.pageIndex = Number.POSITIVE_INFINITY;
+	return this.renderPage();
 };
 
 /**

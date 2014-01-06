@@ -460,6 +460,7 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     // other stuff
     /** @type {boolean} */ this.shared = false;
     /** @type {boolean} */ this.inline = true;
+    /** @type {boolean} */ this.overflow = false;
     /** @type {number} */ this.breakPenalty = parent ? parent.breakPenalty : 0;
     /** @type {?string} */ this.floatSide = null;
     /** @type {adapt.vtree.Whitespace} */ this.whitespace = parent ? parent.whitespace : adapt.vtree.Whitespace.IGNORE;
@@ -495,9 +496,6 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
  * @return {adapt.vtree.NodeContext}
  */
 adapt.vtree.NodeContext.prototype.cloneItem = function() {
-	if (this === adapt.vtree.OVERFLOW) {
-		return this;
-	}
     var np = new adapt.vtree.NodeContext(this.sourceNode, this.parent, this.boxOffset);
     np.offsetInNode = this.offsetInNode;
     np.after = this.after;
@@ -515,22 +513,14 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.viewNode = this.viewNode;
     np.firstPseudo = this.firstPseudo;
     np.vertical = this.vertical;
+    np.overflow = this.overflow;
     return np;
 };
-
-/**
- * Special value
- * @const
- */
-adapt.vtree.OVERFLOW = new adapt.vtree.NodeContext(null, null, 0);
 
 /**
  * @return {adapt.vtree.NodeContext}
  */
 adapt.vtree.NodeContext.prototype.modify = function() {
-	if (this === adapt.vtree.OVERFLOW) {
-		throw new Error("Illegal call");
-	}
     if (!this.shared)
         return this;
     return this.cloneItem();
