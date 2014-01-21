@@ -7,17 +7,18 @@
 #define MINIZ_HEADER_FILE_ONLY
 #include "third_party/miniz/miniz.c"
 
-#include "clang/generated/adapt_resources.h"
+#include "clang/resources/adapt_resources.h"
 
 static const char adapt_driver[] =
-"<html xmlns='http://www.w3.org/1999/xhtml' style='position:absolute;left:0px;top:0px;width:100%;height:100%;margin:0px;'>"
+"<html xmlns='http://www.w3.org/1999/xhtml' "
+    "style='position:absolute;left:0px;top:0px;width:100%;height:100%;margin:0px;overflow:hidden;'>"
 "<head>"
 "<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no'/>"
 "<meta name='apple-mobile-web-app-capable' content='yes'/>"
 "<script>adapt_embedded=true;</script>"
 "<script src='adapt.js'></script>"
 "</head>"
-"<body style='position:absolute;left:0px;top:0px;width:100%;height:100%;margin:0px;padding:0px;overflow:hidden'>"
+"<body style='position:absolute;left:0px;top:0px;width:100%;height:100%;margin:0px;padding:0px;overflow:hidden;'>"
 "</body>"
 "</html>\r\n";
 
@@ -57,31 +58,88 @@ static size_t adapt_write_resource(void *pOpaque, mz_uint64 file_ofs, const void
     return mg_write(connection, pBuf, n);
 }
 
+static int adapt_serve_zip_entry(struct mg_connection* connection, adapt_serving_context* context,
+                                 const char* file_name) {
+    int file_index = mz_zip_reader_locate_file(&context->zip, file_name, NULL,
+                                               MZ_ZIP_FLAG_CASE_SENSITIVE);
+    mz_zip_archive_file_stat file_info;
+    if (mz_zip_reader_file_stat(&context->zip, file_index, &file_info)) {
+        if (file_index >= 0) {
+            mg_printf(connection,
+                      "HTTP/1.1 200 Success\r\n"
+                      "Content-Length: %d\r\n"
+                      "\r\n",
+                      (int)file_info.m_uncomp_size);
+            mz_zip_reader_extract_to_callback(&context->zip, file_index, adapt_write_resource, connection,
+                                              MZ_ZIP_FLAG_CASE_SENSITIVE);
+            return 1;
+        }
+        mg_printf(connection,
+                  "HTTP/1.1 404 Not found\r\n"
+                  "Content-Length: 0\r\n"
+                  "\r\n");
+        return 1;
+    }
+    return 0;
+}
+
+static void url_encode_name(const char* in, char* out, int out_size) {
+    char* last = out + out_size - 4;
+    while (out < last && *in) {
+        int c = (*in) & 0xFF;
+        if ( c <= ' ' || c >= 127 || c == '%' || c == '"' || c == ':' || c == '?' || c == '#' || c == '&') {
+            sprintf(out, "%%%02X", c);
+            out += 3;
+        } else {
+            *out = c;
+            ++out;
+        }
+        ++in;
+    }
+    *out = '\0';
+}
+
+static int adapt_serve_zip_metadata(struct mg_connection* connection, adapt_serving_context* context,
+                                 const char* item) {
+    if (strcmp(item, "list") == 0) {
+        mg_printf(connection,
+                  "HTTP/1.1 200 Success\r\n"
+                  "Content-Type: text/plain\r\n"
+                  "\r\n[");
+        // URL-encoding may turn one character into three.
+        char name_buffer[MZ_ZIP_MAX_ARCHIVE_FILENAME_SIZE * 3 + 4];
+        int file_index = 0;
+        mz_zip_archive_file_stat file_info;
+        const char* sep = "";
+        while (mz_zip_reader_file_stat(&context->zip, file_index, &file_info)) {
+            ++file_index;
+            url_encode_name(file_info.m_filename, name_buffer, sizeof name_buffer);
+            mg_printf(connection, "%s{\"n\":\"%s\",\"m\":%d,\"c\":%llu,\"u\":%llu}",
+                      sep, name_buffer, file_info.m_method, file_info.m_comp_size, file_info.m_uncomp_size);
+            sep = ",";
+        }
+        mg_printf(connection, "]\r\n");
+        return 1;
+    }
+    return 0;
+}
+
 static int adapt_serve(struct mg_connection* connection) {
     struct mg_request_info* request = mg_get_request_info(connection);
     adapt_serving_context* context = (adapt_serving_context*)request->user_data;
     const char* uri = request->uri;
     if (strncmp(uri, context->content_prefix, strlen(context->content_prefix)) == 0) {
         const char* file_name = uri + strlen(context->content_prefix);
-        int file_index = mz_zip_reader_locate_file(&context->zip, file_name, NULL,
-                                               MZ_ZIP_FLAG_CASE_SENSITIVE);
-        mz_zip_archive_file_stat file_info;
-        if (mz_zip_reader_file_stat(&context->zip, file_index, &file_info)) {
-            if (file_index >= 0) {
-                mg_printf(connection,
-                          "HTTP/1.1 200 Success\r\n"
-                          "Content-Length: %d\r\n"
-                          "\r\n",
-                          (int)file_info.m_uncomp_size);
-                mz_zip_reader_extract_to_callback(&context->zip, file_index, adapt_write_resource, connection,
-                                          MZ_ZIP_FLAG_CASE_SENSITIVE);
+        if (*file_name == '\0') {
+            // Special case, query about file structure
+            const char * r = strstr(request->query_string, "r=");
+            if (r && adapt_serve_zip_metadata(connection, context, r+2)) {
                 return 1;
             }
-            mg_printf(connection,
-                      "HTTP/1.1 404 Not found\r\n"
-                      "Content-Length: 0\r\n"
-                      "\r\n");
-            return 1;
+        } else {
+            if (adapt_serve_zip_entry(connection, context, file_name)) {
+                return 1;
+            }
         }
     } else if (strcmp(uri, context->msg_url) == 0) {
         char* buf = NULL;
@@ -198,20 +256,23 @@ const char* adapt_get_bootstrap_url(adapt_serving_context* context) {
     return context->bootstrap_url;
 }
 
-const char* adapt_get_init_call(adapt_serving_context* context, const char* instance_id) {
+const char* adapt_get_init_call(adapt_serving_context* context, const char* instance_id, const char* config) {
     if (context->init_call) {
         free(context->init_call);
     }
-    size_t size = 256 + (context->content ? strlen(context->content) : 0) + strlen(instance_id);
+    size_t size = 256 + (context->content ? strlen(context->content) : 0) +
+       (config ? strlen(config) : 0) + strlen(instance_id);
     context->init_call = calloc(size, 1);
     if (context->content_type == TYPE_EPUB) {
         sprintf(context->init_call,
-                "adapt_initEmbed('%s', '%s', {a:'loadEPUB',url:'%s'});",
-                context->msg_url, instance_id, context->content_prefix);
+                "adapt_initEmbed('%s', '%s', {a:'loadEPUB',url:'%s',zipmeta:true%s%s});",
+                context->msg_url, instance_id, context->content_prefix,
+                config ? "," : "", config ? config : "");
     } else {
         sprintf(context->init_call,
-                "adapt_initEmbed('%s', '%s', {a:'loadFB2',url:'%s%s'});",
-                context->msg_url, instance_id, context->content_prefix, context->content);
+                "adapt_initEmbed('%s', '%s', {a:'loadXML',url:'%s%s'%s%s});",
+                context->msg_url, instance_id, context->content_prefix, context->content,
+                config ? "," : "", config ? config : "");
     }
     return context->init_call;
 }

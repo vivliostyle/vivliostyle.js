@@ -9,9 +9,9 @@ typedef struct adapt_callback {
 
 typedef struct adapt_serving_context adapt_serving_context;
 
-adapt_serving_context* adapt_start_serving(epub_callback* callback);
+adapt_serving_context* adapt_start_serving(adapt_callback* callback);
 const char* adapt_get_bootstrap_url(adapt_serving_context* context);
-const char* adapt_get_init_call(adapt_serving_context* context, const char* instance_id);
+const char* adapt_get_init_call(adapt_serving_context* context, const char* instance_id, const char* extra_config);
 void adapt_stop_serving(adapt_serving_context*);
 
 #endif /* ADAPT_CLANG_SERVICE__ADAPT_SERVICE_H */

@@ -6,8 +6,13 @@
 - (void)processMessageFromContent:(id)message;
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame;
 
+@property (weak) IBOutlet NSSlider* readingPosition;
+@property (weak) IBOutlet NSTextField* ePageCurrent;
+@property (weak) IBOutlet NSTextField* ePageTotal;
+@property (weak) IBOutlet NSView* ePageView;
 @property (weak) IBOutlet WebView* mainView;
 @property (weak) IBOutlet WebView* pdfView;
+@property (weak) IBOutlet NSToolbarItem* ePageToolbarItem;
 @property NSData* input;
 @property NSString* bootstrapURL;
 @property struct adapt_callback* callback;
@@ -37,6 +42,11 @@
 @property (weak) IBOutlet NSTextField* pdfMarginLeftPt;
 @property (weak) IBOutlet NSTextField* pdfMarginBottomPt;
 @property (weak) IBOutlet NSTextField* pdfMarginRightPt;
+@property (weak) IBOutlet NSComboBox* pdfFontSizePt;
+
+@property IBOutlet NSWindow* pdfProgressWindow;
+@property (weak) IBOutlet NSTextField* pdfProgressLabel;
+
 
 // For PDF conversion processing
 @property CGContextRef pdfContext;
@@ -48,5 +58,8 @@
 @property float pdfBottomMargin;
 @property float pdfLeftMargin;
 @property float pdfRightMargin;
+@property float pdfFontSize;
+@property int pdfCurrentPage;
+@property BOOL pdfCancel;
 
 @end

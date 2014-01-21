@@ -60,12 +60,14 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
     [super windowControllerDidLoadNib:aController];
     [[self.mainView mainFrame] loadRequest: [NSURLRequest requestWithURL:[NSURL URLWithString:self.bootstrapURL]]];
     [self.mainView setFrameLoadDelegate: self];
-    //[self.docwindow setDelegate: self];
+    [self.ePageToolbarItem setView:self.ePageView];
+    [self.ePageToolbarItem setMinSize: NSMakeSize(100, 32)];
+    [self.ePageToolbarItem setMaxSize: NSMakeSize(100, 32)];
 }
 
 + (BOOL)autosavesInPlace
 {
-    return YES;
+    return NO;
 }
 
 - (BOOL)readFromData:(NSData *)data ofType:(NSString *)typeName error:(NSError **)outError
@@ -84,6 +86,7 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
 
 - (void)close
 {
+    [super close];
     adapt_stop_serving(self.serving_context);
     free(self.callback);
     self.bootstrapURL = @"";
@@ -110,6 +113,12 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
     }
     if ([[dict objectForKey:@"i"] isEqualToString:@"main"]) {
         if ([type isEqualToString:@"nav"]) {
+            double epage = [[dict objectForKey:@"epage"] doubleValue];
+            double epageCount = [[dict objectForKey:@"epageCount"] doubleValue];
+            [self.readingPosition setMaxValue:epageCount];
+            [self.readingPosition setDoubleValue:epage];
+            [self.ePageCurrent setIntValue: (int)(epage + 1)];
+            [self.ePageTotal setStringValue: [NSString stringWithFormat:@"/%d", (int)epageCount]];
             self.isAtLastPage = [[dict objectForKey:@"last"] boolValue];
             self.isAtFirstPage = [[dict objectForKey:@"first"] boolValue];
             [self.toolbarFirstPage setEnabled:!self.isAtFirstPage];
@@ -118,6 +127,9 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
             [self.toolbarNextPage setEnabled:!self.isAtLastPage];
         }
     } else if ([[dict objectForKey:@"i"] isEqualToString:@"pdf"]) {
+        if (self.pdfCancel) {
+            return;
+        }
         if ([type isEqualToString:@"loaded"]) {
             [self startExport];
             [self exportPage];
@@ -160,10 +172,16 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
         float marginBottom = self.pdfBottomMargin * 4 / 3;
         float width = self.pdfWidth * 4 / 3 - marginLeft - marginRight;
         float height = self.pdfHeight * 4 / 3 - marginTop - marginBottom;
-        float fontSize = 16;
+        float fontSize = round(self.pdfFontSize * 4 / 3);
+        if (fontSize < 6) {
+            fontSize = 6;
+        } else if (fontSize > 24) {
+            fontSize = 24;
+        }
         sprintf(viewportStr,
-            "viewport:{'margin-left':%f,'margin-right':%f,'margin-top':%f,'margin-bottom':%f,width:%f,height:%f,'font-size':%f}",
-                marginLeft, marginRight, marginTop, marginBottom, width, height, fontSize);
+            "viewport:{'margin-left':%f,'margin-right':%f,'margin-top':%f,"
+            "'margin-bottom':%f,width:%f,height:%f,'font-size':%f}",
+            marginLeft, marginRight, marginTop, marginBottom, width, height, fontSize);
         const char* initCall = adapt_get_init_call(self.serving_context, "pdf", viewportStr);
         NSString* init = [NSString stringWithCString:initCall encoding:NSUTF8StringEncoding];
         [[self.pdfView windowScriptObject] evaluateWebScript:init];
@@ -176,8 +194,19 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
 	CGRect mediaBox = CGRectMake( 0, 0, self.pdfWidth, self.pdfHeight );
 	self.pdfContext = CGPDFContextCreate(consumer, &mediaBox, NULL);
 	CGDataConsumerRelease(consumer);
-    
 	NSAssert( self.pdfContext != NULL, @"could not create PDF context");
+    if (self.pdfProgressWindow == nil) {
+        [NSBundle loadNibNamed: @"PDFProgress" owner: self];
+    }
+    [NSApp beginSheet: self.pdfProgressWindow modalForWindow: self.windowForSheet modalDelegate: self
+       didEndSelector: @selector(didEndExport:returnCode:contextInfo:) contextInfo: nil];
+    self.pdfCurrentPage = 0;
+    [self.pdfProgressLabel setStringValue: @"Preparing to render PDF"];
+}
+
+- (void)didEndExport:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+{
+    [self.pdfProgressWindow orderOut:self];    
 }
 
 - (void) finishExport {
@@ -185,12 +214,24 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
 	CGContextRelease(self.pdfContext);
     self.pdfContext = nil;
     [self.pdfData writeToURL:self.pdfURL atomically:YES];
+    [self endExport];
+}
+
+- (void) endExport {
+    if (self.pdfContext) {
+        CGPDFContextClose(self.pdfContext);
+        CGContextRelease(self.pdfContext);
+        self.pdfContext = nil;
+    }
     self.pdfData = nil;
     [[self.pdfView mainFrame] loadRequest: [NSURLRequest requestWithURL:[NSURL URLWithString:@"about:"]]];
+    [NSApp endSheet:self.pdfProgressWindow];
 }
 
 - (void) exportPage
 {
+    self.pdfCurrentPage++;
+    [self.pdfProgressLabel setStringValue: [NSString stringWithFormat:@"Page: %d", self.pdfCurrentPage]];
 	CGPDFContextBeginPage(self.pdfContext, NULL);
     CGContextScaleCTM(self.pdfContext, 0.75, 0.75);
     NSGraphicsContext *gc = [NSGraphicsContext graphicsContextWithGraphicsPort:self.pdfContext flipped:YES];
@@ -207,11 +248,18 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
     self.pdfRightMargin = [self.pdfMarginRightPt floatValue];
     self.pdfWidth = [self.pdfWidthPt floatValue];
     self.pdfHeight = [self.pdfHeightPt floatValue];
+    self.pdfFontSize = atof([[self.pdfFontSizePt stringValue] cStringUsingEncoding:NSUTF8StringEncoding]);
+    self.pdfCancel = NO;
     
     float contentWidth = self.pdfWidth - self.pdfLeftMargin - self.pdfRightMargin;
     float contentHeight = self.pdfHeight - self.pdfTopMargin - self.pdfBottomMargin;
     if (contentWidth < 200 || contentHeight < 200) {
-        // TODO: alert
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert addButtonWithTitle:@"Dismiss"];
+        [alert setMessageText:@"Page size is too small!"];
+        [alert setInformativeText:@"Content area dimensions must be 200pt or larger."];
+        [alert setAlertStyle:NSCriticalAlertStyle];
+        [alert beginSheetModalForWindow:self.windowForSheet modalDelegate:nil didEndSelector:nil contextInfo:NULL];
         return;
     }
     
@@ -220,6 +268,12 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
     [self.pdfView setFrame:NSMakeRect(-width, 0, width, height)];
     [[self.pdfView mainFrame] loadRequest: [NSURLRequest requestWithURL:[NSURL URLWithString:self.bootstrapURL]]];
     [self.pdfView setFrameLoadDelegate: self];
+}
+
+- (IBAction)cancelPDFExport:(id)sender
+{
+    self.pdfCancel = YES;
+    [self endExport];
 }
 
 - (IBAction)exportToPDF:(id)sender

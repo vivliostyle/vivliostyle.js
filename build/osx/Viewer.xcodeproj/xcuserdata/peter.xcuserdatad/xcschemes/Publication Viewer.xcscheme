@@ -45,7 +45,7 @@
             BlueprintIdentifier = "D00BBA4C18878F8200D4E578"
             BuildableName = "Publication Viewer.app"
             BlueprintName = "Publication Viewer"
-            ReferencedContainer = "container:Publication Viewer.xcodeproj">
+            ReferencedContainer = "container:Viewer.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </TestAction>
@@ -64,7 +64,7 @@
             BlueprintIdentifier = "D00BBA4C18878F8200D4E578"
             BuildableName = "Publication Viewer.app"
             BlueprintName = "Publication Viewer"
-            ReferencedContainer = "container:Publication Viewer.xcodeproj">
+            ReferencedContainer = "container:Viewer.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>

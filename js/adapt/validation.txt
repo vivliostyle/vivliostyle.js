@@ -15,6 +15,7 @@ PLENGTH = LENGTH | PERCENTAGE;
 PPLENGTH = POS_LENGTH | ZERO | POS_PERCENTAGE;
 ALENGTH = LENGTH | auto;
 APLENGTH = PLENGTH | auto;
+PAPLENGTH = PPLENGTH | auto;
 ANGLE = POS_ANGLE | ZERO | NEGATIVE;
 SCOLOR = HASHCOLOR | aliceblue: #F0F8FF | antiquewhite: #FAEBD7 | aqua: #00FFFF | aquamarine: #7FFFD4 | azure: #F0FFFF |
     beige: #F5F5DC | bisque: #FFE4C4 | black: #000000 | blanchedalmond: #FFEBCD | blue: #0000FF | blueviolet: #8A2BE2 | brown: #A52A2A |
@@ -116,7 +117,7 @@ font-size = xx-small | x-small | small | medium | large | x-large | xx-large | l
 font-style = normal | italic | oblique;
 font-variant = normal | small-caps;
 font-weight = normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
-height = APLENGTH;
+height = PAPLENGTH;
 left = APLENGTH;
 letter-spacing = normal | LENGTH;
 line-height = normal | POS_NUM | PPLENGTH;
@@ -173,7 +174,7 @@ voice-family = FAMILY_LIST;
 volume = NUM | PERCENTAGE | silent | x-soft | soft | medium | loud | x-loud;
 white-space = normal | pre | nowrap | pre-wrap | pre-line;
 widows = POS_INT;
-width = APLENGTH;
+width = PAPLENGTH;
 word-spacing = normal | LENGTH; 
 z-index = auto | INT;
 

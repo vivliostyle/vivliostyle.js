@@ -8,8 +8,13 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="Publication">
             <connections>
+                <outlet property="ePageCurrent" destination="YWM-gN-eo2" id="g1z-Ai-ecU"/>
+                <outlet property="ePageToolbarItem" destination="Ftl-I0-6BK" id="Tjo-Qi-aIr"/>
+                <outlet property="ePageTotal" destination="RJG-Ni-ycK" id="wEw-hz-eeb"/>
+                <outlet property="ePageView" destination="FEx-uT-vCz" id="Ztu-fB-JEI"/>
                 <outlet property="mainView" destination="nnS-te-k2c" id="u3l-D2-Cak"/>
                 <outlet property="pdfExportAccessiory" destination="g7s-Pn-50A" id="zTq-Fk-hdh"/>
+                <outlet property="pdfFontSizePt" destination="iKO-ah-2KL" id="2cg-XI-n5g"/>
                 <outlet property="pdfHeightPt" destination="RhS-cc-FRf" id="0yj-pi-7DP"/>
                 <outlet property="pdfMarginBottomPt" destination="tHH-J8-gri" id="21L-x9-FFn"/>
                 <outlet property="pdfMarginLeftPt" destination="aby-mE-meo" id="lfg-Zb-H3X"/>
@@ -19,14 +24,45 @@
                 <outlet property="pdfPageSize" destination="eA5-ay-MPy" id="eOA-Fy-CZY"/>
                 <outlet property="pdfView" destination="XLm-QP-uMg" id="Xyd-C6-MTR"/>
                 <outlet property="pdfWidthPt" destination="ODx-vr-3z4" id="vi3-o0-kjC"/>
+                <outlet property="readingPosition" destination="wK2-bN-hOs" id="2yN-Bo-EsE"/>
                 <outlet property="toolbarFirstPage" destination="6xl-Po-DpH" id="ka8-tE-a4S"/>
                 <outlet property="toolbarLastPage" destination="8Ky-qS-WdK" id="wTV-Rq-yN7"/>
                 <outlet property="toolbarNextPage" destination="4Ob-0M-dB8" id="jOu-k8-A3W"/>
                 <outlet property="toolbarPreviousPage" destination="Nu8-SU-afZ" id="Oal-qr-bxr"/>
-                <outlet property="window" destination="5" id="18"/>
+                <outlet property="window" destination="5" id="ekY-I2-EMt"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customView id="FEx-uT-vCz">
+            <rect key="frame" x="0.0" y="0.0" width="100" height="32"/>
+            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <textField verticalHuggingPriority="750" id="YWM-gN-eo2">
+                    <rect key="frame" x="4" y="5" width="44" height="22"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="right" drawsBackground="YES" id="F3O-Qx-YLw">
+                        <numberFormatter key="formatter" formatterBehavior="default10_4" positiveFormat="#,##0.###" negativeFormat="#,##0.###" numberStyle="decimal" minimumIntegerDigits="1" maximumIntegerDigits="309" minimumFractionDigits="0" maximumFractionDigits="3" id="9Gg-BE-wbt">
+                            <real key="roundingIncrement" value="0.0"/>
+                            <metadata>
+                                <bool key="localizesFormat" value="YES"/>
+                            </metadata>
+                        </numberFormatter>
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="RJG-Ni-ycK">
+                    <rect key="frame" x="45" y="7" width="38" height="17"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="/XXX" id="DiK-1U-KFF">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+            </subviews>
+        </customView>
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" wantsToBeColor="NO" visibleAtLaunch="NO" animationBehavior="default" id="5" userLabel="Window">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
@@ -56,7 +92,6 @@
             <toolbar key="toolbar" implicitIdentifier="92906252-78FE-4B14-A618-D2151C673C8D" autosavesConfiguration="NO" displayMode="iconAndLabel" sizeMode="regular" id="rtL-2c-6R5">
                 <allowedToolbarItems>
                     <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="vA4-JC-IdE"/>
-                    <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="KA6-wl-Ucx"/>
                     <toolbarItem implicitItemIdentifier="49219576-1E4D-4BA0-887D-81AD67382A1C" label="First" paletteLabel="First page" tag="-1" image="first" id="6xl-Po-DpH">
                         <connections>
                             <action selector="firstPage:" target="-2" id="LB7-ba-p8u"/>
@@ -82,13 +117,34 @@
                             <action selector="exportToPDF:" target="-2" id="Pyg-xT-hI4"/>
                         </connections>
                     </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="8DC2AEA2-BE6D-42CB-A606-C0601DBEA310" label="Reading position" paletteLabel="Reading position" id="PXk-bb-CLO">
+                        <nil key="toolTip"/>
+                        <size key="minSize" width="96" height="21"/>
+                        <size key="maxSize" width="20000" height="32"/>
+                        <slider key="view" verticalHuggingPriority="750" id="wK2-bN-hOs">
+                            <rect key="frame" x="1" y="14" width="96" height="21"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                            <sliderCell key="cell" state="on" alignment="left" maxValue="100" doubleValue="50" tickMarkPosition="above" sliderType="linear" id="HXX-Cu-FS3"/>
+                        </slider>
+                    </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="KA6-wl-Ucx"/>
+                    <toolbarItem implicitItemIdentifier="CD6DB933-2A9E-45AD-8305-43DA5F9D238F" label="ePage" paletteLabel="ePage" tag="-1" id="Ftl-I0-6BK">
+                        <nil key="toolTip"/>
+                        <size key="minSize" width="100" height="32"/>
+                        <size key="maxSize" width="100" height="32"/>
+                        <customView key="view" id="ocT-o5-D9b">
+                            <rect key="frame" x="0.0" y="14" width="100" height="32"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                        </customView>
+                    </toolbarItem>
                 </allowedToolbarItems>
                 <defaultToolbarItems>
                     <toolbarItem reference="6xl-Po-DpH"/>
                     <toolbarItem reference="Nu8-SU-afZ"/>
                     <toolbarItem reference="4Ob-0M-dB8"/>
                     <toolbarItem reference="8Ky-qS-WdK"/>
-                    <toolbarItem reference="KA6-wl-Ucx"/>
+                    <toolbarItem reference="PXk-bb-CLO"/>
+                    <toolbarItem reference="Ftl-I0-6BK"/>
                     <toolbarItem reference="uz1-tJ-LBg"/>
                 </defaultToolbarItems>
             </toolbar>
@@ -97,12 +153,12 @@
             </connections>
         </window>
         <customObject id="-3" userLabel="Application"/>
-        <tabView id="g7s-Pn-50A">
+        <tabView initialItem="Ase-cV-SGB" id="g7s-Pn-50A">
             <rect key="frame" x="0.0" y="0.0" width="476" height="127"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <font key="font" metaFont="system"/>
             <tabViewItems>
-                <tabViewItem label="Page size" identifier="1" id="Ase-cV-SGB">
+                <tabViewItem label="Page" identifier="1" id="Ase-cV-SGB">
                     <view key="view" id="ojP-hq-kZS">
                         <rect key="frame" x="10" y="33" width="456" height="81"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -315,6 +371,37 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                        </subviews>
+                    </view>
+                </tabViewItem>
+                <tabViewItem label="Text" identifier="3" id="a1K-Rd-csQ">
+                    <view key="view" id="bGx-s2-D3K">
+                        <rect key="frame" x="10" y="33" width="456" height="81"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="jUV-qP-cUo">
+                                <rect key="frame" x="4" y="53" width="91" height="17"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Font size (pt):" id="9jS-mx-4nV">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <comboBox verticalHuggingPriority="750" id="iKO-ah-2KL">
+                                <rect key="frame" x="100" y="49" width="99" height="26"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" title="12" drawsBackground="YES" completes="NO" numberOfVisibleItems="5" id="Daa-qR-8JH">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <objectValues>
+                                        <string>9</string>
+                                        <string>12</string>
+                                        <string>15</string>
+                                    </objectValues>
+                                </comboBoxCell>
+                            </comboBox>
                         </subviews>
                     </view>
                 </tabViewItem>

@@ -1,5 +1,5 @@
-#ifndef EPUBViewer_adapt_h
-#define EPUBViewer_adapt_h
+#ifndef ADAPT_CLANG_RESOURCES__ADAPT_RESOURCES_H
+#define ADAPT_CLANG_RESOURCES__ADAPT_RESOURCES_H
 
 struct adapt_resource {
     const char* name;
@@ -11,4 +11,4 @@ struct adapt_resource {
 
 extern const struct adapt_resource adapt_resources[];
 
-#endif
+#endif /* ADAPT_CLANG_RESOURCES__ADAPT_RESOURCES_H */
