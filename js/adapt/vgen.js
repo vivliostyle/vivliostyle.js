@@ -667,13 +667,14 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 			                attributeName = attributePrefix + ":" + attributeName;
 			        }
 			        if (attributeName == "src" && !attributeNS && tag == "img" && ns == adapt.base.NS.XHTML) {
+			        	var imageFetcher = adapt.taskutil.loadImage(
+		    					/** @type {HTMLImageElement} */ (result), attributeValue);
 			        	if (computedStyle["width"] && computedStyle["height"]) {
 			        		// No need to wait for the image, does not affect layout
 			        		// TODO: add a fetcher for the page?
-			        		(/** @type {HTMLImageElement} */ (result)).src = attributeValue;
+			        		self.page.fetchers.push(imageFetcher);
 			        	} else {
-			    			fetchers.push(adapt.taskutil.loadImage(
-			    					/** @type {HTMLImageElement} */ (result), attributeValue));
+			    			fetchers.push(imageFetcher);
 			        	}
 			        } else {
 				        result.setAttributeNS(attributeNS, attributeName, attributeValue);
@@ -1098,9 +1099,9 @@ adapt.vgen.Viewport = function(window, fontSize, opt_root, opt_width, opt_height
 	    var style = window.getComputedStyle(opt_root, null);
 	    var r = style["width"].match(/^(-?[0-9]*(\.[0-9]*)?)px$/);
 	    if (r)
-		this.width = parseFloat(r[0]);
+	    	this.width = parseFloat(r[0]);
 	    r = style["height"].match(/^(-?[0-9]*(\.[0-9]*)?)px$/);
 	    if (r)
-		this.height = parseFloat(r[0]);
+	    	this.height = parseFloat(r[0]);
 	}
 };

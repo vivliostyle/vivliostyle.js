@@ -5,6 +5,27 @@
 goog.provide('adapt.base');
 
 /**
+ * @typedef {*}
+ */
+adapt.base.JSON;
+
+/**
+ * @param {adapt.base.JSON} json
+ * @return {string}
+ */
+adapt.base.jsonToString = function(json) {
+	return JSON.stringify(json);
+};
+
+/**
+ * @param {string} str
+ * @return {adapt.base.JSON}
+ */
+adapt.base.stringToJSON = function(str) {
+	return JSON.parse(str);
+};
+
+/**
  * @param {string} url
  * @return {string}
  */

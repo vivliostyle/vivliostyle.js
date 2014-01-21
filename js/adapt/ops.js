@@ -882,12 +882,21 @@ adapt.ops.StyleParserHandler.prototype.error = function(mnemonics, token) {
 adapt.ops.StyleSource;
 
 /**
+ * @param {adapt.net.Response} response
+ * @param {adapt.xmldoc.XMLDocStore} store
+ * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
+ */
+adapt.ops.parseOPSResource = function(response, store) {
+	return (/** @type {adapt.ops.OPSDocStore} */ (store)).parseOPSResource(response);
+};
+
+/**
  * @param {?function(string):?function(Blob):adapt.task.Result.<Blob>} fontDeobfuscator
  * @constructor
  * @extends {adapt.xmldoc.XMLDocStore}
  */
 adapt.ops.OPSDocStore = function(fontDeobfuscator) {
-	adapt.xmldoc.XMLDocStore.call(this);
+	adapt.net.ResourceStore.call(this, adapt.ops.parseOPSResource, false);
 	/** @type {?function(string):?function(Blob):adapt.task.Result.<Blob>} */ this.fontDeobfuscator = fontDeobfuscator;
 	/** @type {Object.<string,adapt.ops.Style>} */ this.styleByKey = {};
 	/** @type {Object.<string,adapt.taskutil.Fetcher.<adapt.ops.Style>>} */ this.styleFetcherByKey = {};
@@ -895,7 +904,7 @@ adapt.ops.OPSDocStore = function(fontDeobfuscator) {
 	/** @type {Object.<string,Array.<adapt.vtree.Trigger>>} */ this.triggersByDocURL = {};
 	/** @type {adapt.cssvalid.ValidatorSet} */ this.validatorSet = null;
 };
-goog.inherits(adapt.ops.OPSDocStore, adapt.xmldoc.XMLDocStore);
+goog.inherits(adapt.ops.OPSDocStore, adapt.net.ResourceStore);
 
 /**
  * @return {!adapt.task.Result.<boolean>}
@@ -932,13 +941,15 @@ adapt.ops.OPSDocStore.prototype.getTriggersForDoc = function(xmldoc) {
 };
 
 /**
- * @override
+ * @param {adapt.net.Response} response
+ * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
  */
-adapt.ops.OPSDocStore.prototype.initXMLDocument = function(url, xml) {
+adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
     /** @type {!adapt.task.Frame.<adapt.xmldoc.XMLDocHolder>} */ var frame
     	= adapt.task.newFrame("OPSDocStore.load");
 	var self = this;
-	adapt.xmldoc.XMLDocStore.prototype.initXMLDocument.call(self, url, xml).then(function(xmldoc) {
+	var url = response.url;
+	adapt.xmldoc.parseXMLResource(response, self).then(function(xmldoc) {
 		var triggers = [];
 		var triggerList = xmldoc.document.getElementsByTagNameNS(adapt.base.NS.epub, "trigger");
 		for (var i = 0; i < triggerList.length; i++) {

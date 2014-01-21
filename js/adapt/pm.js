@@ -1422,14 +1422,14 @@ adapt.pm.PageBoxParserHandler.prototype.property = function(name, value, importa
  * @override
  */
 adapt.pm.PageBoxParserHandler.prototype.unknownProperty = function(name, value) {
-    this.reportAndSkip("E_INVALID_PROPERTY " + name + ": " + value.toString());
+    this.report("E_INVALID_PROPERTY " + name + ": " + value.toString());
 };
 
 /**
  * @override
  */
 adapt.pm.PageBoxParserHandler.prototype.invalidPropertyValue = function(name, value) {
-    this.reportAndSkip("E_INVALID_PROPERTY_VALUE " + name + ": " + value.toString());
+    this.report("E_INVALID_PROPERTY_VALUE " + name + ": " + value.toString());
 };
 
 /**

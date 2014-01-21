@@ -10,6 +10,10 @@ goog.require('adapt.expr');
 goog.require('adapt.epub');
 goog.require('adapt.devel');
 
+/**
+ * @const
+ */
+adapt.sampleapp.embedded = !!window["adapt_embedded"];
 
 /**
  * @param {adapt.epub.OPFDoc} opf
@@ -24,7 +28,7 @@ adapt.sampleapp.Viewer = function(opf) {
     /** @type {adapt.vtree.Page} */ this.newPage = null;
     /** @type {adapt.vtree.Page} */ this.currentPage = null;
     /** @type {?adapt.epub.Position} */ this.pagePosition = null;
-    /** @type {adapt.task.EventSource} */ this.eventSource = null;
+    /** @type {adapt.task.EventSource} */ this.eventSource = adapt.task.newEventSource();
     /** @type {number} */ this.fontSize = 16;
     /** @const */ this.pref = adapt.expr.defaultPreferences();
 };
@@ -429,7 +433,6 @@ adapt.sampleapp.Viewer.prototype.navigateTo = function(href) {
 adapt.sampleapp.Viewer.prototype.init = function(fragment) {
     var self = this;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("main");
-    this.eventSource = adapt.task.newEventSource();
     this.eventSource.attach(window, "keydown", true);
     this.eventSource.attach(window, "resize");
     this.eventSource.attach(window, "touchstart", true);
@@ -441,6 +444,20 @@ adapt.sampleapp.Viewer.prototype.init = function(fragment) {
 	    self.resize().then(function() {
 	    	self.startEventLoop();  // Must be the last thing to do.
 	    });
+    });
+    return frame.result();
+};
+
+/**
+ * @param {?string} fragment
+ * @return {!adapt.task.Result.<boolean>}
+ */
+adapt.sampleapp.Viewer.prototype.initEmbed = function(fragment) {
+    var self = this;
+	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("initEmbedViewer");
+    self.opf.resolveFragment(fragment).then(function(position) {
+    	self.pagePosition = position;
+	    self.resize().thenFinish(frame);
     });
     return frame.result();
 };
@@ -497,12 +514,114 @@ adapt.sampleapp.main = function() {
     });
 };
 
-window["executeCommand"] = function(command) {
-	var evt = new CustomEvent("adapt-command", {detail: command});
-	window.dispatchEvent(evt);
+/**
+ * @constructor
+ */
+adapt.sampleapp.EmbedContext = function(callbackURI) {
+	/**
+	 * @param {string} name
+	 * @param {string} body
+	 * @return {adapt.task.Result.<adapt.net.Response>}
+	 */
+	this.callback = function(name, body) {
+		return adapt.net.ajax(callbackURI + name, false, "POST", body);
+	};
+	/** @type {adapt.sampleapp.Viewer} */ this.viewer = null;	
 };
 
-if(window["__loaded"])
-	adapt.sampleapp.main();
-else
-    window.onload = adapt.sampleapp.main;
+/**
+ * @param {string} name
+ * @param {?string} body
+ * @return {adapt.task.Result.<boolean>}
+ */
+adapt.sampleapp.EmbedContext.prototype.runCommand = function(name, body) {
+	var self = this;
+	return adapt.task.handle("runCommand", function(frame) {
+		(/** @type {adapt.task.Result.<boolean>} */ (self[name](name, body))).thenFinish(frame);
+	}, function(frame, err) {
+		self.callback("Error", "" + err).thenFinish(frame);
+	});
+};
+
+/**
+ * @param {string} name
+ * @param {?string} body
+ * @return {adapt.task.Result.<boolean>}
+ */
+adapt.sampleapp.EmbedContext.prototype["loadEPUB"] = function(name, body) {
+	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadEPUB");
+	var args = body.split(/\s+/);  // URL CFI
+	var store = new adapt.epub.EPUBDocStore();
+	store.init().then(function() {
+	    var epubURL = adapt.base.resolveURL(args[0], window.location.href);
+	    store.loadEPUBDoc(epubURL).then(function (opf) {
+	        self.viewer = new adapt.sampleapp.Viewer(opf);
+	    	self.viewer.initEmbed(args[1] || "").thenFinish(frame);
+	    });
+	});
+    return frame.result();
+};
+
+/**
+ * @param {string} name
+ * @param {?string} body
+ * @return {adapt.task.Result.<boolean>}
+ */
+adapt.sampleapp.EmbedContext.prototype["resize"] = function(name, body) {
+    return self.viewer.resize();
+};
+
+/**
+ * @param {string} callbackURI
+ */
+adapt.sampleapp.initEmbed = function(callbackURI) {
+	/** @type {?string} */ var commandName = null;
+	/** @type {?string} */ var commandBody = null;
+	var continuation = null;
+	var context = new adapt.sampleapp.EmbedContext(callbackURI);
+	adapt.task.start(function() {
+    	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("mainLoop");
+		frame.loopWithFrame(function(loopFrame) {
+			if (commandName) {
+				var cmdName = commandName;
+				var cmdBody = commandBody;
+				commandName = null;
+				commandBody = null;
+				context.runCommand(cmdName, cmdBody).then(function() {
+					loopFrame.continueLoop();
+				});
+			} else {
+	        	/** @type {!adapt.task.Frame.<boolean>} */ var frameInternal =
+	                adapt.task.newFrame('waitForCommand');
+	            continuation = frameInternal.suspend(self);
+	            frameInternal.result().then(function() {
+					loopFrame.continueLoop();
+				});
+			}
+		}).thenFinish(frame);
+		return frame.result();
+	});
+	
+	window["adapt_command"] = function(name, body) {
+		if (commandName) {
+			return false;
+		}
+		commandName = name;
+		commandBody = body;
+		var cont = continuation;
+		continuation = null;
+		cont.schedule();
+		return true;
+	};
+};
+
+if (adapt.sampleapp.embedded) {
+	// Embedded mode: export entry points for UI.
+	window["adapt_init"] = adapt.sampleapp.initEmbed;
+} else {
+	// App mode: initialize.
+	if(window["__loaded"])
+		adapt.sampleapp.main();
+	else
+	    window.onload = adapt.sampleapp.main;
+}

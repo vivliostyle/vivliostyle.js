@@ -21,6 +21,7 @@ adapt.layout.combineBreaks = function(break1, break2) {
 		return break2;
 	if (!break2)
 		return break1;
+	// It is important to prioritize "avoid" to prevent breaking after a page/region break.
 	if (break1 == "avoid" || break2 == "avoid")
 		return "avoid";
 	return break1;
@@ -1452,13 +1453,14 @@ adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext
  * Also sets breakBefore on the result combining break-before and break-after
  * properties from all elements that meet at the edge. 
  * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {boolean} leadingEdge
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
-adapt.layout.Column.prototype.skipEdges = function(nodeContext) {
+adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
 		= adapt.task.newFrame("skipEdges");
-	var breakAtTheEdge = null;
+	var breakAtTheEdge = leadingEdge ? "avoid" : null;
 	var lastAfterNodeContext = null;
 	frame.loopWithFrame(function(loopFrame) {
 		while (nodeContext) {
@@ -1594,13 +1596,14 @@ adapt.layout.Column.prototype.layoutFloatOrFootnote = function(nodeContext) {
 /**
  * Layout next portion of the source.
  * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {boolean} leadingEdge
  * @return {adapt.task.Result.<adapt.vtree.NodeContext>}
  */
-adapt.layout.Column.prototype.layoutNext = function(nodeContext) {
+adapt.layout.Column.prototype.layoutNext = function(nodeContext, leadingEdge) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
 		= adapt.task.newFrame("layoutNext");
-	this.skipEdges(nodeContext).then(function(nodeContextParam) {
+	this.skipEdges(nodeContext, leadingEdge).then(function(nodeContextParam) {
 		nodeContext = /** @type {adapt.vtree.NodeContext} */ (nodeContextParam);
 		if (!nodeContext || self.pageBreakType || nodeContext.overflow) {
 			// finished all content, explicit page break or overflow (automatic page break)
@@ -1742,6 +1745,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
 	    // ------ start the column -----------
 	    self.openAllViews(chunkPosition.primary).then(function(nodeContext) {
 	    	var initialNodeContext = nodeContext;
+	    	var leadingEdge = true;
 		    // ------ init backtracking list -----
 			self.breakPositions = [];
 		    // ------- fill the column -------------
@@ -1749,7 +1753,8 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
 			    while (nodeContext) {
 			        // fill a single block
 			    	var pending = true;
-			        self.layoutNext(nodeContext).then(function(nodeContextParam) {
+			        self.layoutNext(nodeContext, leadingEdge).then(function(nodeContextParam) {
+			        	leadingEdge = false;
 						nodeContext = nodeContextParam;
 						if (self.pageBreakType) {
 							// explicit page break

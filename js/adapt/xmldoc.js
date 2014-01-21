@@ -26,6 +26,7 @@ adapt.xmldoc.XMLDocHolder = function(store, url, document) {
 	/** @const */ this.url = url;
 	/** @const */ this.document = document;
 	/** @type {?string} */ this.lang = null;
+	/** @type {number} */ this.totalOffset = -1;
 	/**
 	 * @type {Element}
 	 * @const
@@ -171,6 +172,16 @@ adapt.xmldoc.XMLDocHolder.prototype.getNodeOffset = function(srcNode, offsetInNo
 };
 
 /**
+ * @return {number}
+ */
+adapt.xmldoc.XMLDocHolder.prototype.getTotalOffset = function() {
+	if (this.totalOffset < 0) {
+		this.totalOffset = this.getNodeOffset(this.root, 0, true);
+	}
+	return this.totalOffset;
+};
+
+/**
  * @param {number} offset
  * @return {Node} last node such that its offset is less or equal to the given
  */
@@ -272,87 +283,38 @@ adapt.xmldoc.XMLDocHolder.prototype.getElement = function(url) {
 	return r;
 };
 
+/**
+ * @typedef {adapt.net.ResourceStore.<!adapt.xmldoc.XMLDocHolder>}
+ */
+adapt.xmldoc.XMLDocStore;
 
 /**
- * @constructor
+ * @param {adapt.net.Response} response
+ * @param {adapt.xmldoc.XMLDocStore} store
+ * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
  */
-adapt.xmldoc.XMLDocStore = function() {
-	/** @type {Object.<string,adapt.xmldoc.XMLDocHolder>} */ this.docHolders = {};
-	/** @type {Object.<string,adapt.taskutil.Fetcher.<adapt.xmldoc.XMLDocHolder>>} */ this.docFetchers = {};
-};
-
-/**
- * @param {string} url
- * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>} holding doc for the given URL
- */
-adapt.xmldoc.XMLDocStore.prototype.load = function(url) {
-	url = adapt.base.stripFragment(url);
-	var docHolder = this.docHolders[url];
-	if (docHolder) {
-		return /** @type {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>} */ (adapt.task.newResult(docHolder));
+adapt.xmldoc.parseXMLResource = function(response, store) {
+	var xml = response.responseXML;
+	if (!xml) {
+		var parser = new DOMParser();
+		var text = response.responseText || "<not-found/>";
+		xml = parser.parseFromString(text, "text/xml");
+		if (!xml) {
+			parser.parseFromString("<error/>", "text/xml");
+		}
+		if (response.responseText) {
+			adapt.base.log("XML served with non-XML media type: " + response.url);
+		}
 	}
-	return this.fetch(url).get();
+    var xmldoc = new adapt.xmldoc.XMLDocHolder(store, response.url, xml);
+    return adapt.task.newResult(xmldoc);
 };
 
 /**
- * @param {string} url
- * @return {adapt.taskutil.Fetcher.<adapt.xmldoc.XMLDocHolder>} fetcher for the doc for the given URL
+ * @return {adapt.xmldoc.XMLDocStore}
  */
-adapt.xmldoc.XMLDocStore.prototype.fetch = function(url) {
-	url = adapt.base.stripFragment(url);
-	var docHolder = this.docHolders[url];
-	if (docHolder) {
-		return null;
-	}
-	var fetcher = this.docFetchers[url];
-	if (!fetcher) {
-		var self = this;
-		fetcher = new adapt.taskutil.Fetcher(function() {
-			/** @type {adapt.task.Frame.<adapt.xmldoc.XMLDocHolder>} */ var frame
-				= adapt.task.newFrame("fetchXML");
-			adapt.net.ajax(url).then(function(xhr) {
-	        	var xml = xhr.responseXML;
-	        	if (!xml) {
-	        		var parser = new DOMParser();
-	        		var text = xhr.responseText || "<not-found/>";
-	        		xml = parser.parseFromString(text, "text/xml");
-	        		if (!xml) {
-	        			parser.parseFromString("<error/>", "text/xml");
-	        		}
-	        		if (xhr.responseText) {
-	        			adapt.base.log("XML served with non-XML media type: " + url);
-	        		}
-	        	}
-            	self.initXMLDocument(url, xml).then(function(xmldoc) {
-	                delete self.docFetchers[url];
-	                frame.finish(xmldoc);
-            	});
-			});
-			return frame.result();
-		}, "FetchXML " + url);
-		fetcher.start();
-	}
-	return fetcher;
-};
-
-/**
- * @protected
- * @param {string} url
- * @param {Document} xml
- * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>} holding adapt.xmldoc.XMLDoc
- */
-adapt.xmldoc.XMLDocStore.prototype.initXMLDocument = function(url, xml) {
-    var xmldoc = new adapt.xmldoc.XMLDocHolder(this, url, xml);
-    this.docHolders[url] = xmldoc;
-    return /** @type {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>} */ (adapt.task.newResult(xmldoc));
-};
-
-/**
- * @param {string} url
- * @return {adapt.xmldoc.XMLDocHolder}
- */
-adapt.xmldoc.XMLDocStore.prototype.get = function(url) {
-	return this.docHolders[adapt.base.stripFragment(url)];
+adapt.xmldoc.newXMLDocStore = function() {
+	return new adapt.net.ResourceStore(adapt.xmldoc.parseXMLResource, false);
 };
 
 /**

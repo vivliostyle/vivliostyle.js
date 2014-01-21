@@ -5,6 +5,7 @@
 goog.require('adapt.base');
 goog.require('adapt.geom');
 goog.require('adapt.task');
+goog.require('adapt.taskutil');
 goog.require('adapt.xmldoc');
 goog.require('adapt.css');
 
@@ -104,6 +105,12 @@ adapt.vtree.Page = function(container) {
 		}
 	};
 	/** @type {Object.<string,Array.<Element>>} */ this.elementsById = {};
+	/** @type {boolean} */ this.isFirstPage = false;
+	/** @type {boolean} */ this.isLastPage = false;
+	/** @type {number} */ this.spineIndex = 0;
+	/** @type {adapt.vtree.LayoutPosition} */ this.position = null;
+	/** @type {number} */ this.offset = -1;
+	/** @type {Array.<adapt.taskutil.Fetcher>} */ this.fetchers = [];
 };
 goog.inherits(adapt.vtree.Page, adapt.base.SimpleEventTarget);
 

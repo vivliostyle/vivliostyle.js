@@ -6,7 +6,7 @@ goog.provide('adapt.net');
 
 goog.require('adapt.task');
 
-/** @typedef {{status:number, responseText:?string, responseXML:Document, responseBlob:Blob}} */
+/** @typedef {{status:number, url:string, responseText:?string, responseXML:Document, responseBlob:Blob}} */
 adapt.net.Response;
 
 /**
@@ -23,7 +23,7 @@ adapt.net.ajax = function(url, opt_binary, opt_method, opt_data, opt_contentType
     var request = new XMLHttpRequest();
     var continuation = frame.suspend(request);
     /** @type {adapt.net.Response} */ var response =
-    	{status: 0, responseText: null, responseXML: null, responseBlob: null};
+    	{status: 0, url: url, responseText: null, responseXML: null, responseBlob: null};
     request.open(opt_method || "GET", url, true);
     if (opt_binary) {
     	request.responseType = "blob";
@@ -109,4 +109,100 @@ adapt.net.revokeObjectURL = function(url) {
  */
 adapt.net.createObjectURL = function(blob) {
 	return (window["URL"] || window["webkitURL"]).createObjectURL(blob);
+};
+
+/**
+ * @template Resource
+ * @constructor
+ * @param {function(adapt.net.Response,adapt.net.ResourceStore.<Resource>):adapt.task.Result.<Resource>} parser
+ * @param {boolean} binary
+ */
+adapt.net.ResourceStore = function(parser, binary) {
+	/** @const */ this.parser = parser;
+	/** @const */ this.binary = binary;
+	/** @type {Object.<string,Resource>} */ this.resources = {};
+	/** @type {Object.<string,adapt.taskutil.Fetcher.<Resource>>} */ this.fetchers = {};
+};
+
+/**
+ * @param {string} url
+ * @return {!adapt.task.Result.<Resource>} resource for the given URL
+ */
+adapt.net.ResourceStore.prototype.load = function(url) {
+	url = adapt.base.stripFragment(url);
+	var resource = this.resources[url];
+	if (typeof resource != "undefined") {
+		return adapt.task.newResult(resource);
+	}
+	return this.fetch(url).get();
+};
+
+/**
+ * @private
+ * @param {string} url
+ * @return {!adapt.task.Result.<Resource>}
+ */
+adapt.net.ResourceStore.prototype.fetchInner = function(url) {
+	var self = this;
+	/** @type {adapt.task.Frame.<Resource>} */ var frame = adapt.task.newFrame("fetch");
+	adapt.net.ajax(url, self.binary).then(function(response) {
+    	self.parser(response, self).then(function(resource) {
+            delete self.fetchers[url];
+            self.resources[url] = resource;
+            frame.finish(resource);
+    	});
+	});
+	return frame.result();
+};
+
+/**
+ * @param {string} url
+ * @return {adapt.taskutil.Fetcher.<Resource>} fetcher for the resource for the given URL
+ */
+adapt.net.ResourceStore.prototype.fetch = function(url) {
+	url = adapt.base.stripFragment(url);
+	var resource = this.resources[url];
+	if (resource) {
+		return null;
+	}
+	var fetcher = this.fetchers[url];
+	if (!fetcher) {
+		var self = this;
+		fetcher = new adapt.taskutil.Fetcher(function() {
+			return self.fetchInner(url);
+		}, "Fetch " + url);
+		self.fetchers[url] = fetcher;
+		fetcher.start();
+	}
+	return fetcher;
+};
+
+/**
+ * @param {string} url
+ * @return {adapt.xmldoc.XMLDocHolder}
+ */
+adapt.net.ResourceStore.prototype.get = function(url) {
+	return this.resources[adapt.base.stripFragment(url)];
+};
+
+/**
+ * @typedef adapt.net.ResourceStore.<adapt.base.JSON>
+ */
+adapt.net.JSONStore;
+
+/**
+ * @param {adapt.net.Response} response
+ * @param {adapt.net.JSONStore} store
+ * @return {!adapt.task.Result.<adapt.base.JSON>}
+ */
+adapt.net.parseJSONResource = function(response, store) {
+	var text = response.responseText;
+	return adapt.task.newResult(text ? adapt.base.stringToJSON(text) : null);
+};
+
+/**
+ * return {adapt.net.JSONStore}
+ */
+adapt.net.newJSONStore = function() {
+	return new adapt.net.ResourceStore(adapt.net.parseJSONResource, false);
 };

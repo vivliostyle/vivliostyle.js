@@ -408,6 +408,7 @@ adapt.cssparse.DispatchParserHandler.prototype.error = function(mnemonics, token
  * @return {void}
  */
 adapt.cssparse.DispatchParserHandler.prototype.errorMsg = function(mnemonics, token) {
+	adapt.base.log(mnemonics);
 };
 
 /**

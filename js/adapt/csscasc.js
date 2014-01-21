@@ -1998,7 +1998,10 @@ adapt.csscasc.CascadeInstance.prototype.applyActions = function() {
     }
     this.applyAction(this.code.ids, this.currentId);
     this.applyAction(this.code.tags, this.currentLocalName);
-    this.applyAction(this.code.tags, "*");
+    if (this.currentLocalName != "") {
+    	// Universal selector does not apply to page-master-related rules. 
+    	this.applyAction(this.code.tags, "*");
+    }
     this.applyAction(this.code.nstags, this.currentNSTag);
     this.currentElement = null;
     this.currentDoc = null;
@@ -2153,13 +2156,16 @@ adapt.csscasc.CascadeParserHandler.prototype.isInsideSelectorRule = function(mne
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.tagSelector = function(ns, name) {
+	if (!name && !ns) {
+		return;
+	}
     this.specificity += 1;
     if (name && ns) {
     	this.chain.push(new adapt.csscasc.CheckNSTagAction(ns, name));
     } else if (name) {
     	this.chain.push(new adapt.csscasc.CheckLocalNameAction(name));
-    } else if (ns) {
-        this.chain.push(new adapt.csscasc.CheckNamespaceAction(ns));
+    } else {
+        this.chain.push(new adapt.csscasc.CheckNamespaceAction(/** @type {string} */ (ns)));
     }
 };
 
