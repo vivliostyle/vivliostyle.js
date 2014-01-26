@@ -476,7 +476,7 @@ adapt.sampleapp.loadAndRun = function() {
 	    var epubURL = adapt.base.getURLParam("b");
 	    if (epubURL) {
 	        epubURL = adapt.base.resolveURL(epubURL, window.location.href);
-	        store.loadEPUBDoc(epubURL).then(function (opf) {
+	        store.loadEPUBDoc(epubURL, false).then(function (opf) {
 	            (new adapt.sampleapp.Viewer(opf)).init(fragment).thenFinish(frame);
 	        });
 	        return;
@@ -554,7 +554,7 @@ adapt.sampleapp.EmbedContext.prototype["loadEPUB"] = function(name, body) {
 	var store = new adapt.epub.EPUBDocStore();
 	store.init().then(function() {
 	    var epubURL = adapt.base.resolveURL(args[0], window.location.href);
-	    store.loadEPUBDoc(epubURL).then(function (opf) {
+	    store.loadEPUBDoc(epubURL, false).then(function (opf) {
 	        self.viewer = new adapt.sampleapp.Viewer(opf);
 	    	self.viewer.initEmbed(args[1] || "").thenFinish(frame);
 	    });

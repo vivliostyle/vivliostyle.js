@@ -31,6 +31,8 @@
 		D07334731889FEC500E58094 /* Publication.xib in Resources */ = {isa = PBXBuildFile; fileRef = D073346E1889FEC500E58094 /* Publication.xib */; };
 		D07334741889FEC500E58094 /* Viewer.plist in Resources */ = {isa = PBXBuildFile; fileRef = D073346F1889FEC500E58094 /* Viewer.plist */; };
 		D0733476188B79D600E58094 /* PDFProgress.xib in Resources */ = {isa = PBXBuildFile; fileRef = D0733475188B79D600E58094 /* PDFProgress.xib */; };
+		D0B8E9791891EF3B00886BFA /* bigtext.png in Resources */ = {isa = PBXBuildFile; fileRef = D0B8E9771891EF3B00886BFA /* bigtext.png */; };
+		D0B8E97A1891EF3B00886BFA /* smalltext.png in Resources */ = {isa = PBXBuildFile; fileRef = D0B8E9781891EF3B00886BFA /* smalltext.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +78,8 @@
 		D073346E1889FEC500E58094 /* Publication.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = Publication.xib; path = ../../objc/osx_viewer/Publication.xib; sourceTree = "<group>"; };
 		D073346F1889FEC500E58094 /* Viewer.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Viewer.plist; path = ../../objc/osx_viewer/Viewer.plist; sourceTree = "<group>"; };
 		D0733475188B79D600E58094 /* PDFProgress.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PDFProgress.xib; path = ../../objc/osx_viewer/PDFProgress.xib; sourceTree = "<group>"; };
+		D0B8E9771891EF3B00886BFA /* bigtext.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = bigtext.png; path = ../../resources/images/bigtext.png; sourceTree = "<group>"; };
+		D0B8E9781891EF3B00886BFA /* smalltext.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = smalltext.png; path = ../../resources/images/smalltext.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -231,6 +235,8 @@
 		D00BBABA1887B55E00D4E578 /* images */ = {
 			isa = PBXGroup;
 			children = (
+				D0B8E9771891EF3B00886BFA /* bigtext.png */,
+				D0B8E9781891EF3B00886BFA /* smalltext.png */,
 				D073346818891B4600E58094 /* epub_icon_256x256@2x.png */,
 				D073346418890D9800E58094 /* magazine.png */,
 				D00BBABB1887B58F00D4E578 /* first.png */,
@@ -337,6 +343,7 @@
 				D07334731889FEC500E58094 /* Publication.xib in Resources */,
 				D00BBAC21887B58F00D4E578 /* next.png in Resources */,
 				D00BBAC41887B58F00D4E578 /* previous.png in Resources */,
+				D0B8E9791891EF3B00886BFA /* bigtext.png in Resources */,
 				D0733476188B79D600E58094 /* PDFProgress.xib in Resources */,
 				D073346918891B4600E58094 /* epub_icon_256x256@2x.png in Resources */,
 				D073346518890D9800E58094 /* magazine.png in Resources */,
@@ -347,6 +354,7 @@
 				D073346718890F6700E58094 /* Images.xcassets in Resources */,
 				D00BBAC01887B58F00D4E578 /* first.png in Resources */,
 				D07334711889FEC500E58094 /* MainMenu.xib in Resources */,
+				D0B8E97A1891EF3B00886BFA /* smalltext.png in Resources */,
 				D00BBAC11887B58F00D4E578 /* last.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

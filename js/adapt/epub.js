@@ -216,6 +216,22 @@ adapt.epub.OPFDoc = function(store, epubURL) {
 	/** @type {?string} */ this.lang = null;
 	/** @type {Object} */ this.toolData = null;  // see adapt.devel
 	/** @type {number} */ this.epageCount = 0;
+	/** @type {adapt.base.JSON} */ this.metadata = {};
+};
+
+/**
+ * Metadata is organized in the following way: fully-expanded property names (with IRI
+ * prefixes prepended) point to an array of values. Array contains at least one element.
+ * First element is primary and should be used by default.
+ * Element values are objects have the following keys:
+ * - "v" - item value as string,
+ * - "s" - scheme,
+ * - "o" - index in the order of appearing in the source,
+ * - "r" - refinement submetadata (organized just like the top-level metadata).
+ * @return {adapt.base.JSON}
+ */
+adapt.epub.OPFDoc.prototype.getMetadata = function() {
+	return this.metadata;
 };
 
 /**
@@ -229,6 +245,197 @@ adapt.epub.OPFDoc.prototype.getPathFromURL = function(url) {
 	} else {
 		return url;
 	}
+};
+
+/**
+ * @typedef {{
+ *   name: string,
+ *   value: string,
+ *   id: ?string,
+ *   refines: ?string,
+ *   scheme: ?string,
+ *   lang: ?string,
+ *   order: number
+ * }}
+ */
+adapt.epub.RawMetaItem;
+
+/**
+ * @const
+ */
+adapt.epub.predefinedPrefixes = {
+	"dcterms": "http://purl.org/dc/terms/",
+	"marc": "http://id.loc.gov/vocabulary/",
+	"media": "http://www.idpf.org/epub/vocab/overlays/#",
+	"onix":	"http://www.editeur.org/ONIX/book/codelists/current.html#",
+	"xsd": "http://www.w3.org/2001/XMLSchema#"
+};
+
+/**
+ * @const
+ */
+adapt.epub.defaultIRI = "http://idpf.org/epub/vocab/package/#";
+
+
+/**
+ * @const
+ */
+adapt.epub.metaTerms = {
+	language: adapt.epub.predefinedPrefixes["dcterms"] + "language",
+	title: adapt.epub.predefinedPrefixes["dcterms"] + "title",
+	creator: adapt.epub.predefinedPrefixes["dcterms"] + "creator",
+	titleType: adapt.epub.defaultIRI + "title-type",
+	displaySeq: adapt.epub.defaultIRI + "display-seq",
+	alternateScript: adapt.epub.defaultIRI + "alternate-script"
+};
+
+/**
+ * @param {string} term
+ * @param {string} lang
+ * @return {function(adapt.base.JSON,adapt.base.JSON):number}
+ */
+adapt.epub.getMetadataComparator = function(term, lang) {
+	var empty = {};
+	return function(item1, item2) {
+		var m1, m2;
+		var r1 = item1["r"] || empty;
+		var r2 = item2["r"] || empty;
+		if (term == adapt.epub.metaTerms.title) {
+			m1 = r1[adapt.epub.metaTerms.titleType] == "main";
+			m2 = r2[adapt.epub.metaTerms.titleType] == "main";			
+			if (m1 != m2) {
+				return m1 ? -1 : 1;
+			}
+		}
+		var i1 = parseInt(r1[adapt.epub.metaTerms.displaySeq], 10);
+		if (isNaN(i1)) {
+			i1 = Number.MAX_VALUE;
+		}
+		var i2 = parseInt(r2[adapt.epub.metaTerms.displaySeq], 10);			
+		if (isNaN(i2)) {
+			i2 = Number.MAX_VALUE;
+		}
+		if (i1 != i2) {
+			return i1 - i2;
+		}
+		if (term != adapt.epub.metaTerms.language && lang) {
+			m1 = (r1[adapt.epub.metaTerms.language] || r1[adapt.epub.metaTerms.alternateScript]) == lang;
+			m2 = (r2[adapt.epub.metaTerms.language] || r2[adapt.epub.metaTerms.alternateScript]) == lang;
+			if (m1 != m2) {
+				return m1 ? -1 : 1;
+			}
+		}
+		return item1["o"] - item2["o"];
+	};
+};
+
+
+/**
+ * @param {adapt.xmldoc.NodeList} mroot
+ * @param {?string} prefixes
+ * @return {adapt.base.JSON}
+ */
+adapt.epub.readMetadata = function(mroot, prefixes) {
+	// Parse prefix map (if any)
+	var prefixMap;
+	if (!prefixes) {
+		prefixMap = adapt.epub.predefinedPrefixes;
+	} else {
+		prefixMap = {};
+		for (var pn in adapt.epub.predefinedPrefixes) {
+			prefixMap[pn] = adapt.epub.predefinedPrefixes[pn];
+		}
+		var r;
+		// This code permits any non-ASCII characters in the name to avoid bloating the pattern.
+		while ((r = prefixes.match(/(^\s*[A-Z_a-z\u007F-\uFFFF][-.A-Z_a-z0-9\u007F-\uFFFF]*):\s*(\S+)/)) != null) {
+			prefixes = prefixes.substr(r[0].length);
+			prefixMap[r[1]] = r[2];
+		}
+	}
+	/**
+	 * @param {?string} val 
+	 * @return {?string}
+	 */
+	var resolveProperty = function(val) {
+		if (val) {
+			var r = val.match(/^\s*(([^:]*):)?(\S+)\s*$/);
+			if (r) {
+				var iri = r[1] ? prefixMap[r[1]] : adapt.epub.defaultIRI;
+				if (iri) {
+					return iri + r[3];
+				}
+			}
+		}
+		return null;
+	};
+	var order = 1;
+	var rawItems = mroot.childElements().forEachNonNull(/** @return {?adapt.epub.RawMetaItem} */ function(node) {
+		if (node.localName == "meta") {
+			var p = resolveProperty(node.getAttribute("property"));
+			if (p) {
+				return {name: p,
+					value: node.textContent, id: node.getAttribute("id"), order: order++,
+					refines: node.getAttribute("refines"), lang:null,
+					scheme: resolveProperty(node.getAttribute("scheme"))};
+			}
+		} else if (node.namespaceURI == adapt.base.NS.DC) {
+			return {name: adapt.epub.predefinedPrefixes["dcterms"] + node.localName, order: order++,
+				lang: node.getAttribute("xml:lang"),
+				value: node.textContent, id: node.getAttribute("id"), refines:null, scheme:null};
+		}
+		return null;
+	});
+	var rawItemsByTarget = adapt.base.multiIndexArray(rawItems,
+			function(rawItem) { return rawItem.refines; });
+	var makeMetadata = function(map) {
+		return adapt.base.mapObj(map, /** @return {Array} */ function(rawItemArr, itemName) {
+			var result = adapt.base.map(rawItemArr, function(rawItem) {
+				var entry = {"v": rawItem.value, "o": rawItem.order};
+				if (rawItem.schema) {
+					entry["s"] = rawItem.scheme;
+				}
+				if (rawItem.id || rawItem.lang) {
+					var refs = rawItemsByTarget[rawItem.id];
+					if (refs || rawItem.lang) {
+						if (rawItem.lang) {
+							// Special handling for xml:lang
+							var langItem = {name:adapt.epub.metaTerms.language, value:rawItem.lang,
+									lang:null, id:null, refines:rawItem.id, scheme:null,
+									order: rawItem.order};
+							if (refs) {
+								refs.push(langItem);
+							} else {
+								refs = [langItem];
+							}
+						}
+						entry["r"] = makeMetadata(refs);
+					}
+				}
+				return entry;
+			});
+			return result;
+		});
+	};
+	var metadata = makeMetadata(adapt.base.multiIndexArray(rawItems,
+			function(rawItem) { return rawItem.refines ? null : rawItem.name; }));
+	var lang = null;
+	if (metadata[adapt.epub.metaTerms.language]) {
+		lang = metadata[adapt.epub.metaTerms.language][0]["v"];
+	}
+	var sortMetadata = function(metadata) {
+		for (var term in metadata) {
+			var arr = /** @type {Array} */ (metadata[term]);
+			arr.sort(adapt.epub.getMetadataComparator(term, lang));
+			for (var i = 0; i < arr.length; i++) {
+				var r = arr[i]["r"];
+				if (r) {
+					sortMetadata(r);
+				}
+			}
+		}
+	};
+	sortMetadata(metadata);
+	return metadata;
 };
 
 /**
@@ -290,9 +497,9 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
         	this.bindings[mediaType] = this.itemMap[handlerId].src;
         }
 	}
-	var langs = pkg.child("metadata").child("language").textContent();
-	if (langs.length > 0) {
-		this.lang = langs[0];
+	this.metadata = adapt.epub.readMetadata(pkg.child("metadata"), pkg.attribute("prefix")[0]);
+	if (this.metadata[adapt.epub.metaTerms.language]) {
+		this.lang = this.metadata[adapt.epub.metaTerms.language][0]["v"];
 	}
 	if (zipMetadata) {
 		for (var i = 0; i < zipMetadata.length; i++) {
@@ -422,18 +629,66 @@ adapt.epub.OPFDoc.prototype.resolveFragment = function(fragstr) {
 };
 
 /**
- * @param {number} spineIndex
- * @param {number} offset
+ * @param {number} epage
+ * @return {!adapt.task.Result.<?adapt.epub.Position>}
+ */
+adapt.epub.OPFDoc.prototype.resolveEPage = function(epage) {
+	var self = this;
+	return adapt.task.handle("resolveEPage",
+    	/**
+    	 * @param {!adapt.task.Frame.<?adapt.epub.Position>} frame
+    	 * @return {void}
+    	 */			
+		function(frame) {
+			if (epage <= 0) {
+				frame.finish({spineIndex: 0, offsetInItem: 0, pageIndex: -1});
+				return;
+			}
+			var spineIndex = adapt.base.binarySearch(self.spine.length, function(index) {
+				var item = self.spine[index];
+				return item.epage + item.epageCount > epage;
+			});
+			var item = self.spine[spineIndex];
+			self.store.load(item.src).then(function (xmldoc) {
+				epage -= item.epage;
+				if (epage > item.epageCount) {
+					epage = item.epageCount;
+				}
+				var offset = 0;
+				if (epage > 0) {
+					var totalOffset = xmldoc.getTotalOffset();
+					offset = Math.round(totalOffset * epage / item.epageCount);
+					if (offset == totalOffset) {
+						offset--;
+					}
+				}
+				frame.finish({spineIndex: spineIndex, offsetInItem: offset, pageIndex: -1});
+			});
+		},
+    	/**
+    	 * @param {!adapt.task.Frame.<?adapt.epub.Position>} frame
+    	 * @param {Error} err
+    	 * @return {void}
+    	 */					
+		function(frame, err) {
+			adapt.base.log("Error resolving epage: " + epage);
+			frame.finish(null);
+		});
+};
+
+/**
+ * @param {adapt.epub.Position} position
  * @return {!adapt.task.Result.<number>}
  */
-adapt.epub.OPFDoc.prototype.getEPageFromIndices = function(spineIndex, offset) {
-	var item = this.spine[spineIndex];
-	if (offset == 0) {
+adapt.epub.OPFDoc.prototype.getEPageFromPosition = function(position) {
+	var item = this.spine[position.spineIndex];
+	if (position.offsetInItem <= 0) {
 		return adapt.task.newResult(item.epage);
 	}
 	/** @type {!adapt.task.Frame.<number>} */ var frame = adapt.task.newFrame("getEPage");
 	this.store.load(item.src).then(function (xmldoc) {
 		var totalOffset = xmldoc.getTotalOffset();
+		var offset = Math.min(totalOffset, position.offsetInItem);
 		frame.finish(item.epage + offset * item.epageCount / totalOffset);
 	});
 	return frame.result();
@@ -535,14 +790,12 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 			    if (pos) {
 			    	viewItem.layoutPositions.push(pos);
-			    	var offsetInItem = viewItem.instance.getPosition(pos);
 			    	if (seekOffset >= 0) {
 			    		// Searching for offset, don't know the page number.
 			    		var offset = viewItem.instance.getPosition(pos);
 			    		if (offset > seekOffset) {
 					    	resultPage = page;
 					    	self.pageIndex = viewItem.layoutPositions.length - 2;
-					    	self.offsetInItem = offsetInItem;
 							page.isFirstPage = viewItem.item.spineIndex == 0 && self.pageIndex == 0;
 							loopFrame.breakLoop();
 			    			return;
@@ -553,7 +806,9 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 			    } else {
 			    	resultPage = page;
 			    	self.pageIndex = viewItem.layoutPositions.length - 1;
-			    	self.offsetInItem = Number.POSITIVE_INFINITY;
+			    	if (seekOffset < 0) {
+			    		self.offsetInItem = page.offset;
+			    	}
 			    	viewItem.complete = true;
 					page.isFirstPage = viewItem.item.spineIndex == 0 && self.pageIndex == 0;
 					page.isLastPage = viewItem.item.spineIndex == self.opf.spine.length - 1;
@@ -566,7 +821,9 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 			    return;
 			}
 			var pos = viewItem.layoutPositions[self.pageIndex];
-	    	self.offsetInItem = viewItem.instance.getPosition(pos);
+	    	if (seekOffset < 0) {
+	    		self.offsetInItem = viewItem.instance.getPosition(pos);
+	    	}
 			var page = self.makePage(viewItem, pos);
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
@@ -650,7 +907,28 @@ adapt.epub.OPFView.prototype.previousPage = function() {
 };
 
 /**
+ * Move to the epage specified by the given number (zero-based) and render it.
+ * @param {number} epage
+ * @return {!adapt.task.Result.<adapt.vtree.Page>}
+ */
+adapt.epub.OPFView.prototype.navigateToEPage = function(epage) {
+	/** @type {!adapt.task.Frame.<adapt.vtree.Page>} */ var frame
+		= adapt.task.newFrame("navigateToEPage");
+	var self = this;
+	this.opf.resolveEPage(epage).then(function(position) {
+		if (position) {
+			self.spineIndex = position.spineIndex;
+			self.pageIndex = position.pageIndex;
+			self.offsetInItem = position.offsetInItem;
+		}
+		self.renderPage().thenFinish(frame);
+	});
+	return frame.result();
+};
+
+/**
  * Move to the page specified by the given URL and render it.
+ * TODO: accept CFI
  * @param {string} href
  * @return {!adapt.task.Result.<adapt.vtree.Page>}
  */
@@ -668,7 +946,7 @@ adapt.epub.OPFView.prototype.navigateTo = function(href) {
 	if (!item) {
 		return adapt.task.newResult(/** @type {adapt.vtree.Page} */ (null));
 	}
-	// Commited to navigate. If not moving to a different item, current
+	// Committed to navigate. If not moving to a different item, current
 	// page is good enough.
 	if (item.spineIndex != this.spineIndex) {
 		this.spineIndex = item.spineIndex;

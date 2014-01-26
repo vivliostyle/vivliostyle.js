@@ -22,8 +22,7 @@ adapt.viewer.Action;
  * 	marginTop: number,
  * 	marginBottom: number,
  * 	width: number,
- * 	height: number,
- * 	fontSize: number
+ * 	height: number
  * }}
  */
 adapt.viewer.ViewportSize;
@@ -52,6 +51,7 @@ adapt.viewer.Viewer = function(window, instanceId, callbackFn) {
     /** @type {adapt.vtree.Page} */ this.currentPage = null;
     /** @type {?adapt.epub.Position} */ this.pagePosition = null;
     /** @type {number} */ this.fontSize = 16;
+    /** @type {boolean} */ this.waitForLoading = false;
     /** @const */ this.pref = adapt.expr.defaultPreferences();
     /** @type {function():void} */ this.kick = function(){};
     /** @const */ this.resizeListener = function() {
@@ -69,7 +69,7 @@ adapt.viewer.Viewer = function(window, instanceId, callbackFn) {
         "loadEPUB": this.loadEPUB,
         "loadXML": this.loadXML,
         "configure": this.configure,
-    	"moveToPage": this.moveToPage
+    	"moveTo": this.moveTo
     };
 };
 
@@ -101,7 +101,7 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
 	        	self.pagePosition = position;
 	        	self.configure(command).then(function() {
 	        		self.resize().then(function() {
-		    	    	self.callback({"t":"loaded"});
+		    	    	self.callback({"t":"loaded", "metadata": self.opf.getMetadata()});
 		    	    	frame.finish(true);
 	        		});
 	        	});
@@ -128,8 +128,8 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
         self.opf.resolveFragment(fragment).then(function(position) {
         	self.pagePosition = position;
         	self.configure(command).then(function() {
+    	    	self.callback({"t":"loaded"});
         		self.resize().then(function() {
-	    	    	self.callback({"t":"loaded"});
 	    	    	frame.finish(true);
         		});
         	});
@@ -160,14 +160,23 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 			marginTop: parseFloat(vp["margin-top"]) || 0,
 			marginBottom: parseFloat(vp["margin-bottom"]) || 0,
 			width: parseFloat(vp["width"]) || 0,
-			height: parseFloat(vp["height"]) || 0,
-			fontSize: parseFloat(vp["font-size"]) || 16
+			height: parseFloat(vp["height"]) || 0
 		};
 		if (viewportSize.width >= 200 || viewportSize.height >= 200) {
 			this.window.removeEventListener("resize", this.resizeListener, false);			
 			this.viewportSize = viewportSize;
 			this.needResize = true;
 		}
+	}
+	if (typeof command["fontSize"] == "number") {
+		var fontSize = /** @type {number} */ (command["fontSize"]);
+		if (fontSize >= 5 && fontSize <= 72 && this.fontSize != fontSize) {
+			this.fontSize = fontSize;
+			this.needResize = true;
+		}
+	}
+	if (typeof command["load"] == "boolean") {
+		this.waitForLoading = command["load"];  // Load images (and other resources) on the page.		
 	}
 	return adapt.task.newResult(true);
 };
@@ -222,7 +231,7 @@ adapt.viewer.Viewer.prototype.createViewport = function() {
 		body.style.marginBottom = vs.marginBottom + "px";
 		body.style.width = vs.width + "px";
 		body.style.height = vs.height + "px";
-		return new adapt.vgen.Viewport(this.window, vs.fontSize, body, vs.width, vs.height);			
+		return new adapt.vgen.Viewport(this.window, this.fontSize, body, vs.width, vs.height);			
 	} else {
 		return new adapt.vgen.Viewport(this.window, this.fontSize);	
 	}
@@ -274,7 +283,11 @@ adapt.viewer.Viewer.prototype.resize = function() {
 		self.setNewPage(page);
 		self.showPage();
 		self.showPosition().then(function() {
-			self.sendLocationNotification(page).thenFinish(frame);
+    		var r = self.waitForLoading && page.fetchers.length > 0 
+				? adapt.taskutil.waitForFetchers(page.fetchers) : adapt.task.newResult(true);
+			r.then(function() {
+				self.sendLocationNotification(page).thenFinish(frame);
+			});
 		});
 	});
 	return frame.result();
@@ -289,7 +302,7 @@ adapt.viewer.Viewer.prototype.sendLocationNotification = function(page) {
 	var notification = {"t": "nav", "first": page.isFirstPage,
 			"last": page.isLastPage};
 	var self = this;
-	this.opf.getEPageFromIndices(page.spineIndex, page.offset).then(function(epage) {
+	this.opf.getEPageFromPosition(self.opfView.getPagePosition()).then(function(epage) {
 		notification["epage"] = epage;
 		notification["epageCount"] = self.opf.epageCount;
 		self.callback(notification);
@@ -302,34 +315,47 @@ adapt.viewer.Viewer.prototype.sendLocationNotification = function(page) {
  * @param {adapt.base.JSON} command
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.viewer.Viewer.prototype.moveToPage = function(command) {
+adapt.viewer.Viewer.prototype.moveTo = function(command) {
 	var method;
-	var waitForLoading = !!command["load"];  // Load images (and other resources) on the page.
-	switch (command["where"]) {
-	case "next":
-		method = this.opfView.nextPage;
-		break;
-	case "previous":
-		method = this.opfView.previousPage;
-		break;
-	case "last":
-		method = this.opfView.lastPage;
-		break;
-	case "first":
-		method = this.opfView.firstPage;
-		break;
-	default:
+	var self = this;
+	if (typeof command["where"] == "string") {
+		switch (command["where"]) {
+		case "next":
+			method = this.opfView.nextPage;
+			break;
+		case "previous":
+			method = this.opfView.previousPage;
+			break;
+		case "last":
+			method = this.opfView.lastPage;
+			break;
+		case "first":
+			method = this.opfView.firstPage;
+			break;
+		default:
+			return adapt.task.newResult(true);
+		}
+	} else if (typeof command["epage"] == "number") {
+		var epage = /** @type {number} */ (command["epage"]);
+		method = function() {
+			return self.opfView.navigateToEPage(epage);
+		};
+	} else if (typeof command["url"] == "string") {
+		var url = /** @type {string} */ (command["url"]);
+		method = function() {
+			return self.opfView.navigateTo(url);
+		};
+	} else {
 		return adapt.task.newResult(true);
 	}
-	var self = this;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("nextPage");
-	method.call(self.opfView).then(function(page) {
+	method.call(self.opfView).then(/** @param {adapt.vtree.Page} page */ function(page) {
 		if (page) {
 			self.pagePosition = null;
 			self.setNewPage(page);
 	    	self.showPage();
 	    	self.showPosition().then(function() {
-	    		var r = waitForLoading && page.fetchers.length > 0 
+	    		var r = self.waitForLoading && page.fetchers.length > 0 
 	    			? adapt.taskutil.waitForFetchers(page.fetchers) : adapt.task.newResult(true);
 	    		r.then(function() {
 	    			self.sendLocationNotification(page).thenFinish(frame);
@@ -337,28 +363,6 @@ adapt.viewer.Viewer.prototype.moveToPage = function(command) {
 	    	});
 		} else {
 			frame.finish(true);
-		}
-	});
-	return frame.result();
-};
-
-/**
- * @param {string} href
- * @return {!adapt.task.Result.<boolean>}
- */
-adapt.viewer.Viewer.prototype.navigateTo = function(href) {
-	var self = this;
-	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("navigateTo");
-	self.opfView.navigateTo(href).then(function(page) {
-		if (page) {
-			self.setNewPage(page);
-			self.showPage();
-			self.pagePosition = self.opfView.getPagePosition();
-	    	self.showPosition().then(function() {
-    			self.sendLocationNotification(page).thenFinish(frame);
-	    	});
-		} else {
-			frame.finish(true);			
 		}
 	});
 	return frame.result();

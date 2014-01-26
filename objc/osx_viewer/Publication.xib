@@ -25,6 +25,8 @@
                 <outlet property="pdfView" destination="XLm-QP-uMg" id="Xyd-C6-MTR"/>
                 <outlet property="pdfWidthPt" destination="ODx-vr-3z4" id="vi3-o0-kjC"/>
                 <outlet property="readingPosition" destination="wK2-bN-hOs" id="2yN-Bo-EsE"/>
+                <outlet property="textSizeToolbarItem" destination="LjA-7w-5WH" id="h69-cj-CSg"/>
+                <outlet property="textSizeView" destination="bZr-ni-phr" id="d1s-UY-n2k"/>
                 <outlet property="toolbarFirstPage" destination="6xl-Po-DpH" id="ka8-tE-a4S"/>
                 <outlet property="toolbarLastPage" destination="8Ky-qS-WdK" id="wTV-Rq-yN7"/>
                 <outlet property="toolbarNextPage" destination="4Ob-0M-dB8" id="jOu-k8-A3W"/>
@@ -37,10 +39,10 @@
             <rect key="frame" x="0.0" y="0.0" width="100" height="32"/>
             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
             <subviews>
-                <textField verticalHuggingPriority="750" id="YWM-gN-eo2">
-                    <rect key="frame" x="4" y="5" width="44" height="22"/>
+                <textField toolTip="ePage - click to edit" verticalHuggingPriority="750" id="YWM-gN-eo2">
+                    <rect key="frame" x="3" y="3" width="46" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="right" drawsBackground="YES" id="F3O-Qx-YLw">
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" alignment="right" title="1" id="F3O-Qx-YLw">
                         <numberFormatter key="formatter" formatterBehavior="default10_4" positiveFormat="#,##0.###" negativeFormat="#,##0.###" numberStyle="decimal" minimumIntegerDigits="1" maximumIntegerDigits="309" minimumFractionDigits="0" maximumFractionDigits="3" id="9Gg-BE-wbt">
                             <real key="roundingIncrement" value="0.0"/>
                             <metadata>
@@ -49,13 +51,16 @@
                         </numberFormatter>
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="windowBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
+                    <connections>
+                        <action selector="navigationEPageChanged:" target="-2" id="meZ-YN-uLo"/>
+                    </connections>
                 </textField>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="RJG-Ni-ycK">
-                    <rect key="frame" x="45" y="7" width="38" height="17"/>
+                    <rect key="frame" x="45" y="8" width="47" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="/XXX" id="DiK-1U-KFF">
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="/1" id="DiK-1U-KFF">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -92,27 +97,27 @@
             <toolbar key="toolbar" implicitIdentifier="92906252-78FE-4B14-A618-D2151C673C8D" autosavesConfiguration="NO" displayMode="iconAndLabel" sizeMode="regular" id="rtL-2c-6R5">
                 <allowedToolbarItems>
                     <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="vA4-JC-IdE"/>
-                    <toolbarItem implicitItemIdentifier="49219576-1E4D-4BA0-887D-81AD67382A1C" label="First" paletteLabel="First page" tag="-1" image="first" id="6xl-Po-DpH">
+                    <toolbarItem implicitItemIdentifier="49219576-1E4D-4BA0-887D-81AD67382A1C" label="First" paletteLabel="First page" tag="-1" image="first" visibilityPriority="-2" id="6xl-Po-DpH">
                         <connections>
                             <action selector="firstPage:" target="-2" id="LB7-ba-p8u"/>
                         </connections>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="5C10773D-6ADF-46F9-8BDE-DB394BEE48B2" label="Previous" paletteLabel="Previous page" tag="-1" image="previous" id="Nu8-SU-afZ">
+                    <toolbarItem implicitItemIdentifier="5C10773D-6ADF-46F9-8BDE-DB394BEE48B2" label="Previous" paletteLabel="Previous page" tag="-1" image="previous" visibilityPriority="2" id="Nu8-SU-afZ">
                         <connections>
                             <action selector="previousPage:" target="-2" id="xQa-2U-e3s"/>
                         </connections>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="842F8108-3B28-4C1C-8ACB-DBE149B55B68" label="Next" paletteLabel="Next page" tag="-1" image="next" id="4Ob-0M-dB8">
+                    <toolbarItem implicitItemIdentifier="842F8108-3B28-4C1C-8ACB-DBE149B55B68" label="Next" paletteLabel="Next page" tag="-1" image="next" visibilityPriority="2" id="4Ob-0M-dB8">
                         <connections>
                             <action selector="nextPage:" target="-2" id="Vni-xC-8T0"/>
                         </connections>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="3504FA61-9FC7-4167-9C9B-EE715B9FF122" label="Last page" paletteLabel="Last" tag="-1" image="last" id="8Ky-qS-WdK">
+                    <toolbarItem implicitItemIdentifier="3504FA61-9FC7-4167-9C9B-EE715B9FF122" label="Last" paletteLabel="Last page" tag="-1" image="last" visibilityPriority="-3" id="8Ky-qS-WdK">
                         <connections>
                             <action selector="lastPage:" target="-2" id="oWu-rP-pAS"/>
                         </connections>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="C2472CB0-45C6-4747-81F0-8D864F552548" label="PDF" paletteLabel="Export to PDF" tag="-1" image="pdf" id="uz1-tJ-LBg">
+                    <toolbarItem implicitItemIdentifier="C2472CB0-45C6-4747-81F0-8D864F552548" label="PDF" paletteLabel="Export to PDF" tag="-1" image="pdf" visibilityPriority="-1" id="uz1-tJ-LBg">
                         <connections>
                             <action selector="exportToPDF:" target="-2" id="Pyg-xT-hI4"/>
                         </connections>
@@ -125,16 +130,28 @@
                             <rect key="frame" x="1" y="14" width="96" height="21"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                             <sliderCell key="cell" state="on" alignment="left" maxValue="100" doubleValue="50" tickMarkPosition="above" sliderType="linear" id="HXX-Cu-FS3"/>
+                            <connections>
+                                <action selector="navigationSliderChanged:" target="-2" id="L1O-fK-99u"/>
+                            </connections>
                         </slider>
                     </toolbarItem>
                     <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="KA6-wl-Ucx"/>
-                    <toolbarItem implicitItemIdentifier="CD6DB933-2A9E-45AD-8305-43DA5F9D238F" label="ePage" paletteLabel="ePage" tag="-1" id="Ftl-I0-6BK">
+                    <toolbarItem implicitItemIdentifier="CD6DB933-2A9E-45AD-8305-43DA5F9D238F" label="ePage" paletteLabel="ePage" tag="-1" visibilityPriority="-1" id="Ftl-I0-6BK">
                         <nil key="toolTip"/>
                         <size key="minSize" width="100" height="32"/>
                         <size key="maxSize" width="100" height="32"/>
                         <customView key="view" id="ocT-o5-D9b">
                             <rect key="frame" x="0.0" y="14" width="100" height="32"/>
                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                        </customView>
+                    </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="7B90A034-5CDD-469A-9727-C81984853B98" label="Text size" paletteLabel="Text size" tag="-1" id="LjA-7w-5WH">
+                        <nil key="toolTip"/>
+                        <size key="minSize" width="64" height="32"/>
+                        <size key="maxSize" width="64" height="96"/>
+                        <customView key="view" id="ijO-05-uca">
+                            <rect key="frame" x="0.0" y="14" width="64" height="32"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         </customView>
                     </toolbarItem>
                 </allowedToolbarItems>
@@ -145,6 +162,7 @@
                     <toolbarItem reference="8Ky-qS-WdK"/>
                     <toolbarItem reference="PXk-bb-CLO"/>
                     <toolbarItem reference="Ftl-I0-6BK"/>
+                    <toolbarItem reference="LjA-7w-5WH"/>
                     <toolbarItem reference="uz1-tJ-LBg"/>
                 </defaultToolbarItems>
             </toolbar>
@@ -407,12 +425,42 @@
                 </tabViewItem>
             </tabViewItems>
         </tabView>
+        <customView id="bZr-ni-phr">
+            <rect key="frame" x="0.0" y="0.0" width="64" height="32"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <button toolTip="Increase text size" id="Djf-F3-GCr">
+                    <rect key="frame" x="0.0" y="0.0" width="32" height="32"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="bigtext" imagePosition="only" alignment="center" imageScaling="proportionallyDown" inset="2" id="955-HA-BAP">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="increaseFontSize:" target="-2" id="Y0y-Ac-iVN"/>
+                    </connections>
+                </button>
+                <button toolTip="Decrease text size" id="5EZ-ZC-zyg">
+                    <rect key="frame" x="32" y="0.0" width="32" height="32"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="smalltext" imagePosition="only" alignment="center" imageScaling="proportionallyDown" inset="2" id="F5s-Zz-B30">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="decreaseFontSize:" target="-2" id="EDl-Sd-AXJ"/>
+                    </connections>
+                </button>
+            </subviews>
+        </customView>
     </objects>
     <resources>
+        <image name="bigtext" width="128" height="128"/>
         <image name="first" width="128" height="128"/>
         <image name="last" width="128" height="128"/>
         <image name="next" width="128" height="128"/>
         <image name="pdf" width="128" height="128"/>
         <image name="previous" width="128" height="128"/>
+        <image name="smalltext" width="128" height="128"/>
     </resources>
 </document>

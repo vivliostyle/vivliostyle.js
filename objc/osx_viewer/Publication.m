@@ -36,14 +36,17 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
     return &d->super_;
 }
 
+// In pixels
+static const int fontSizes[] = {12, 14, 16, 19, 23, 28};
+static const int defaultFontSizeIndex = 2;
+static const int maxFontSizeIndex = sizeof fontSizes / sizeof(int) - 1;
+
 @implementation Publication
 
 - (id)init
 {
     self = [super init];
-    if (self) {
-        
-    }
+    self.fontSizeIndex = defaultFontSizeIndex;
     self.bootstrapURL = @"";
     [[NSUserDefaults standardUserDefaults] setBool:TRUE forKey:@"WebKitDeveloperExtras"];
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -63,6 +66,9 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
     [self.ePageToolbarItem setView:self.ePageView];
     [self.ePageToolbarItem setMinSize: NSMakeSize(100, 32)];
     [self.ePageToolbarItem setMaxSize: NSMakeSize(100, 32)];
+    [self.textSizeToolbarItem setView:self.textSizeView];
+    [self.textSizeToolbarItem setMinSize: NSMakeSize(64, 32)];
+    [self.textSizeToolbarItem setMaxSize: NSMakeSize(64, 32)];
 }
 
 + (BOOL)autosavesInPlace
@@ -94,12 +100,25 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
     self.serving_context = NULL;
 }
 
-- (void)restoreDocumentWindowWithIdentifier:(NSString *)identifier state:(NSCoder *)state
-                          completionHandler:(void (^)(NSWindow *, NSError *))completionHandler
-{
-    [super restoreDocumentWindowWithIdentifier:identifier state:state completionHandler:completionHandler];
+- (NSString*)getMetadataValue:(NSString*)name {
+    if (self.metadata) {
+        id items = [self.metadata objectForKey:name];
+        if ([items isKindOfClass:[NSArray class]]) {
+            NSArray* itemList = items;
+            if ([itemList count] > 0) {
+                id itemObj = [itemList firstObject];
+                if ([itemObj isKindOfClass:[NSDictionary class]]) {
+                    NSDictionary* itemDict = itemObj;
+                    id value = [itemDict objectForKey:@"v"];
+                    if ([value isKindOfClass:[NSString class]]) {
+                        return value;
+                    }
+                }
+            }
+        }
+    }
+    return nil;
 }
-
 
 - (void)processMessageFromContent:(id)message
 {
@@ -111,20 +130,28 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
     if (![type isKindOfClass:[NSString class]]) {
         return;
     }
+    if ([type isEqualToString:@"error"] && [[dict objectForKey:@"content"] isKindOfClass:[NSString class]]) {
+        NSString* content = [dict objectForKey:@"content"];
+        printf("Error: %s\n", [content cStringUsingEncoding:NSUTF8StringEncoding]);
+    }
     if ([[dict objectForKey:@"i"] isEqualToString:@"main"]) {
-        if ([type isEqualToString:@"nav"]) {
+        if ([type isEqualToString:@"loaded"]) {
+            id metadataObj = [dict objectForKey:@"metadata"];
+            if ([metadataObj isKindOfClass:[NSDictionary class]]) {
+                self.metadata = metadataObj;
+            }
+        } else if ([type isEqualToString:@"nav"]) {
             double epage = [[dict objectForKey:@"epage"] doubleValue];
             double epageCount = [[dict objectForKey:@"epageCount"] doubleValue];
             [self.readingPosition setMaxValue:epageCount];
             [self.readingPosition setDoubleValue:epage];
-            [self.ePageCurrent setIntValue: (int)(epage + 1)];
+            // +1 to convert to one-based index, +0.05 to deal with round-off errors near integer
+            // epage values (which occur when navigating to an epage).
+            int epageHuman = (int)(epage + 1.05);
+            [self.ePageCurrent setIntValue: epageHuman];
             [self.ePageTotal setStringValue: [NSString stringWithFormat:@"/%d", (int)epageCount]];
             self.isAtLastPage = [[dict objectForKey:@"last"] boolValue];
             self.isAtFirstPage = [[dict objectForKey:@"first"] boolValue];
-            [self.toolbarFirstPage setEnabled:!self.isAtFirstPage];
-            [self.toolbarPreviousPage setEnabled:!self.isAtFirstPage];
-            [self.toolbarLastPage setEnabled:!self.isAtLastPage];
-            [self.toolbarNextPage setEnabled:!self.isAtLastPage];
         }
     } else if ([[dict objectForKey:@"i"] isEqualToString:@"pdf"]) {
         if (self.pdfCancel) {
@@ -132,15 +159,13 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
         }
         if ([type isEqualToString:@"loaded"]) {
             [self startExport];
-            [self exportPage];
-            [self sendExportCommand: @"a:'moveToPage',where:'next',load:true"];
         }
         if ([type isEqualToString:@"nav"]) {
             [self exportPage];
             if ([[dict objectForKey:@"last"] boolValue]) {
                 [self finishExport];
             } else {
-                [self sendExportCommand: @"a:'moveToPage',where:'next',load:true"];
+                [self sendExportCommand: @"a:'moveTo',where:'next'"];
             }
         }
     }
@@ -180,7 +205,7 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
         }
         sprintf(viewportStr,
             "viewport:{'margin-left':%f,'margin-right':%f,'margin-top':%f,"
-            "'margin-bottom':%f,width:%f,height:%f,'font-size':%f}",
+            "'margin-bottom':%f,width:%f,height:%f},fontSize:%f,load:true",
             marginLeft, marginRight, marginTop, marginBottom, width, height, fontSize);
         const char* initCall = adapt_get_init_call(self.serving_context, "pdf", viewportStr);
         NSString* init = [NSString stringWithCString:initCall encoding:NSUTF8StringEncoding];
@@ -192,7 +217,23 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
 	self.pdfData = [NSMutableData data];
 	CGDataConsumerRef consumer = CGDataConsumerCreateWithCFData((CFMutableDataRef) self.pdfData);
 	CGRect mediaBox = CGRectMake( 0, 0, self.pdfWidth, self.pdfHeight );
-	self.pdfContext = CGPDFContextCreate(consumer, &mediaBox, NULL);
+    NSMutableDictionary* pdfMetadata = [[NSMutableDictionary alloc] init];
+    NSString* title = [self getMetadataValue:@"http://purl.org/dc/terms/title"];
+    if (title) {
+        [pdfMetadata setObject:title forKey:(NSString*)kCGPDFContextTitle];
+    }
+    NSString* creator = [self getMetadataValue:@"http://purl.org/dc/terms/creator"];
+    if (creator) {
+        [pdfMetadata setObject:creator forKey:(NSString*)kCGPDFContextAuthor];
+    }
+    NSString* subject = [self getMetadataValue:@"http://purl.org/dc/terms/subject"];
+    if (subject) {
+        [pdfMetadata setObject:subject forKey:(NSString*)kCGPDFContextSubject];
+    }
+    // "Creator" is an app that produced PDF.
+    [pdfMetadata setObject:@"Publication Viewer - Adaptive Layout" forKey:(NSString*)kCGPDFContextCreator];
+
+	self.pdfContext = CGPDFContextCreate(consumer, &mediaBox, (CFDictionaryRef)pdfMetadata);
 	CGDataConsumerRelease(consumer);
 	NSAssert( self.pdfContext != NULL, @"could not create PDF context");
     if (self.pdfProgressWindow == nil) {
@@ -230,6 +271,9 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
 
 - (void) exportPage
 {
+    if (!self.pdfContext) {
+        return;
+    }
     self.pdfCurrentPage++;
     [self.pdfProgressLabel setStringValue: [NSString stringWithFormat:@"Page: %d", self.pdfCurrentPage]];
 	CGPDFContextBeginPage(self.pdfContext, NULL);
@@ -268,6 +312,101 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
     [self.pdfView setFrame:NSMakeRect(-width, 0, width, height)];
     [[self.pdfView mainFrame] loadRequest: [NSURLRequest requestWithURL:[NSURL URLWithString:self.bootstrapURL]]];
     [self.pdfView setFrameLoadDelegate: self];
+}
+
+- (void)removeDocumentProperties:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+{
+    [self.documentPropertiesWindow orderOut:self];
+    self.documentPropertiesWindow = nil;
+}
+
+- (NSTextField*)makeLabel:(NSString*)text withFrame:(NSRect)rect align:(NSTextAlignment) alignment
+{
+    NSTextField* textField = [[NSTextField alloc] initWithFrame:rect];
+    [textField setStringValue:text];
+    [textField setBezeled:NO];
+    [textField setDrawsBackground:NO];
+    [textField setEditable:NO];
+    [textField setSelectable:NO];
+    [textField setAlignment: alignment];
+    [[textField cell] setUsesSingleLineMode:YES];
+    return textField;
+}
+
+- (void)endDocumentProperties:(id)sender
+{
+    [NSApp endSheet:self.documentPropertiesWindow];
+}
+
+- (NSArray*)makeDisplayMetadata
+{
+    NSMutableArray* displayMetadata = [[NSMutableArray alloc] init];
+    NSArray* simpleNames = @[
+        @[@"http://purl.org/dc/terms/title", @"Title:"],
+        @[@"http://purl.org/dc/terms/creator", @"Author:"],
+        @[@"http://purl.org/dc/terms/language", @"Language:"],
+        @[@"http://purl.org/dc/terms/identifier", @"Identifier:"]
+    ];
+    for (NSArray* termAndName in simpleNames) {
+        id items = [self.metadata objectForKey:[termAndName firstObject]];
+        if ([items isKindOfClass:[NSArray class]]) {
+            NSArray* itemList = items;
+            if ([itemList count] > 0) {
+                id item = [itemList firstObject];
+                if ([item isKindOfClass:[NSDictionary class]]) {
+                    id value = [item objectForKey:@"v"];
+                    if ([value isKindOfClass:[NSString class]]) {
+                        [displayMetadata addObject:@[[termAndName lastObject], value]];
+                    }
+                }
+            }
+        }
+    }
+    return displayMetadata;
+}
+
+- (IBAction)showDocumentProperties:(id)sender
+{
+    if (self.documentPropertiesWindow || !self.metadata)
+        return;
+    NSArray* displayMetadata = [self makeDisplayMetadata];
+    unsigned long itemHeight = 22;
+    unsigned long rowHeight = 25;
+    unsigned long height = (2 + [displayMetadata count]) * rowHeight + 5;
+    unsigned long width = 500;
+    unsigned int labelWidth = 100;
+    unsigned long y = height - rowHeight;
+    NSRect rect = NSMakeRect(0, 0, width, height);
+    self.documentPropertiesWindow = [[NSWindow alloc] initWithContentRect:rect
+            styleMask:NSTitledWindowMask backing:NSBackingStoreBuffered defer:YES];
+    NSView* view = self.documentPropertiesWindow.contentView;
+    NSTextField* label = [self makeLabel:@"Document Properties" withFrame:NSMakeRect(0, y, width, itemHeight)
+                                   align:NSCenterTextAlignment];
+    [view addSubview:label];
+    y -= rowHeight;
+    
+    for (NSArray* nameValuePair in displayMetadata) {
+        NSString* propName = [nameValuePair firstObject];
+        NSString* propValue = [nameValuePair lastObject];
+        label = [self makeLabel:propName withFrame:NSMakeRect(0, y, labelWidth, itemHeight)
+                          align:NSRightTextAlignment];
+        [view addSubview:label];
+        label = [self makeLabel:propValue withFrame:NSMakeRect(labelWidth, y, width - labelWidth, itemHeight)
+                          align:NSLeftTextAlignment];
+        [view addSubview:label];
+        y -= rowHeight;
+    }
+    
+    NSButton* button = [[NSButton alloc] initWithFrame:NSMakeRect((width - 100)/2, 0, 100, 22)];
+    [button setButtonType:NSMomentaryPushInButton];
+    [button setBezelStyle: NSRoundedBezelStyle];
+    [button setTitle:@"Dismiss"];
+    [button setTarget:self];
+    [button setAction:@selector(endDocumentProperties:)];
+    [view addSubview:button];
+    
+    [NSApp beginSheet: self.documentPropertiesWindow modalForWindow: self.windowForSheet modalDelegate: self
+       didEndSelector: @selector(removeDocumentProperties:returnCode:contextInfo:) contextInfo: nil];
 }
 
 - (IBAction)cancelPDFExport:(id)sender
@@ -331,20 +470,53 @@ static struct adapt_callback* MakeContentCallback(Publication* publication) {
     }
 }
 
+- (IBAction)navigationSliderChanged:(id)sender
+{
+    double pos = [self.readingPosition doubleValue];
+    [self sendCommand: [NSString stringWithFormat:@"a:'moveTo',epage:%f", pos]];
+}
+
+- (IBAction)navigationEPageChanged:(id)sender
+{
+    double pos = [self.ePageCurrent intValue] - 1;
+    [self sendCommand: [NSString stringWithFormat:@"a:'moveTo',epage:%f", pos]];
+}
+
+- (IBAction)increaseFontSize:(id)sender {
+    if (self.fontSizeIndex < maxFontSizeIndex) {
+        self.fontSizeIndex++;
+        [self sendCommand: [NSString stringWithFormat:@"a:'configure',fontSize:%d", fontSizes[self.fontSizeIndex]]];
+    }
+}
+
+- (IBAction)decreaseFontSize:(id)sender {
+    if (self.fontSizeIndex > 0) {
+        self.fontSizeIndex--;
+        [self sendCommand: [NSString stringWithFormat:@"a:'configure',fontSize:%d", fontSizes[self.fontSizeIndex]]];
+    }
+}
+
+- (IBAction)resetFontSize:(id)sender {
+    if (self.fontSizeIndex != defaultFontSizeIndex) {
+        self.fontSizeIndex = defaultFontSizeIndex;
+        [self sendCommand: [NSString stringWithFormat:@"a:'configure',fontSize:%d", fontSizes[self.fontSizeIndex]]];
+    }
+}
+
 - (IBAction)firstPage:(id)sender {
-    [self sendCommand: @"a:'moveToPage',where:'first'"];
+    [self sendCommand: @"a:'moveTo',where:'first'"];
 }
 
 - (IBAction)lastPage:(id)sender {
-    [self sendCommand: @"a:'moveToPage',where:'last'"];
+    [self sendCommand: @"a:'moveTo',where:'last'"];
 }
 
 - (IBAction)previousPage:(id)sender {
-    [self sendCommand: @"a:'moveToPage',where:'previous'"];
+    [self sendCommand: @"a:'moveTo',where:'previous'"];
 }
 
 - (IBAction)nextPage:(id)sender {
-    [self sendCommand: @"a:'moveToPage',where:'next'"];
+    [self sendCommand: @"a:'moveTo',where:'next'"];
 }
 
 @end

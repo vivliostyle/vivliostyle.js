@@ -113,31 +113,45 @@ adapt.taskutil.waitForFetchers = function(fetchers) {
 };
 
 /**
- * @param {HTMLImageElement} img
+ * @param {Element} elem
  * @param {string} src
  * @return {!adapt.taskutil.Fetcher.<string>} holding event type (load/error/abort)
  */
-adapt.taskutil.loadImage = function(img, src) {
-	var width = img.getAttribute("width");
-	var height = img.getAttribute("height");
-	return new adapt.taskutil.Fetcher(function() {
+adapt.taskutil.loadElement = function(elem, src) {
+	var width = null;
+	var height = null;
+	if (elem.localName == "img") {
+		width = elem.getAttribute("width");
+		height = elem.getAttribute("height");
+	}
+	var fetcher = new adapt.taskutil.Fetcher(function() {
 	    /** @type {!adapt.task.Frame.<string>} */ var frame = adapt.task.newFrame("loadImage");
-	    var continuation = frame.suspend(img);
+	    var continuation = frame.suspend(elem);
 	    /** @param {Event} evt */
 		var handler = function(evt) {
-			// IE puts these bogus attributes, even if they were not present
-			if (!width) {
-				img.removeAttribute("width");
+			if (elem.localName == "img") {
+				// IE puts these bogus attributes, even if they were not present
+				if (!width) {
+					elem.removeAttribute("width");
+				}
+				if (!height) {
+					elem.removeAttribute("height");
+				}
 			}
-			if (!height) {
-				img.removeAttribute("height");
-			}
-			continuation.schedule(evt.type);
+			continuation.schedule(evt ? evt.type : "timeout");
 		};
-		img.addEventListener("load", handler, false);
-		img.addEventListener("error", handler, false);
-		img.addEventListener("abort", handler, false);
-		img.src = src;
+		elem.addEventListener("load", handler, false);
+		elem.addEventListener("error", handler, false);
+		elem.addEventListener("abort", handler, false);
+		if (elem.namespaceURI == adapt.base.NS.SVG) {
+			elem.setAttributeNS(adapt.base.NS.XLINK, "xlink:href", src);
+			// SVG handlers are not reliable
+			setTimeout(handler, 300);
+		} else {
+			elem.src = src;
+		}
 		return frame.result();
-	}, "loadImage " + src);
+	}, "loadElement " + src);
+	fetcher.start();
+	return fetcher;
 };

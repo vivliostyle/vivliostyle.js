@@ -437,6 +437,22 @@ adapt.xmldoc.NodeList.prototype.forEach = function(fn) {
 };
 
 /**
+ * @template T
+ * @param {function(!Node):T} fn
+ * @return {Array.<T>}
+ */ 
+adapt.xmldoc.NodeList.prototype.forEachNonNull = function(fn) {
+	var arr = [];
+	for (var i = 0; i < this.nodes.length; i++) {
+		var t = fn(this.nodes[i]);
+		if (t != null) {
+			arr.push(t);
+		}
+	}
+	return arr;
+};
+
+/**
  * @param {string} tag
  * @return {adapt.xmldoc.NodeList}
  */
@@ -451,11 +467,24 @@ adapt.xmldoc.NodeList.prototype.child = function(tag) {
 };
 
 /**
+ * @return {adapt.xmldoc.NodeList}
+ */
+adapt.xmldoc.NodeList.prototype.childElements = function() {
+	return this.forEachNode(function(node, add) {
+		for (var c = node.firstChild; c; c = c.nextSibling) {
+			if (c.nodeType == 1) {
+				add(c);
+			}
+		}
+	});
+};
+
+/**
  * @param {string} name
  * @return {Array.<?string>}
  */
 adapt.xmldoc.NodeList.prototype.attribute = function(name) {
-	return this.forEach(function(node) {
+	return this.forEachNonNull(function(node) {
 		if (node.nodeType == 1) {
 			return (/** @type {Element} */ (node)).getAttribute(name);
 		}

@@ -94,6 +94,14 @@
                             <menuItem isSeparatorItem="YES" id="79">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
+                            <menuItem title="Properties..." keyEquivalent="d" id="XKf-8L-uTx">
+                                <connections>
+                                    <action selector="showDocumentProperties:" target="-1" id="VCC-gY-Iv1"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="w8C-vD-U0x">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                            </menuItem>
                             <menuItem title="Close" keyEquivalent="w" id="73">
                                 <connections>
                                     <action selector="performClose:" target="-1" id="193"/>
@@ -164,8 +172,30 @@
                         </items>
                     </menu>
                 </menuItem>
-                <menuItem title="Navigate" id="295">
-                    <menu key="submenu" title="Navigate" id="296">
+                <menuItem title="Text" id="hvE-Xc-hvb">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <menu key="submenu" title="Text" id="o9k-W2-dr7">
+                        <items>
+                            <menuItem title="Increase Size" keyEquivalent="=" id="cXF-Ui-2Sf">
+                                <connections>
+                                    <action selector="increaseFontSize:" target="-1" id="noq-xH-QzY"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Decrease Size" keyEquivalent="-" id="8Mv-7f-aKm">
+                                <connections>
+                                    <action selector="decreaseFontSize:" target="-1" id="LaL-Z2-hSB"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Default Size" keyEquivalent="0" id="qd5-pn-0bV">
+                                <connections>
+                                    <action selector="resetFontSize:" target="-1" id="YHL-RP-kHT"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
+                <menuItem title="Go" id="295">
+                    <menu key="submenu" title="Go" id="296">
                         <items>
                             <menuItem title="First page" keyEquivalent="" id="297">
                                 <modifierMask key="keyEquivalentModifierMask"/>
@@ -179,13 +209,13 @@
                                     <action selector="lastPage:" target="-1" id="OFX-FV-kxd"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Previous page" keyEquivalent="" id="1Bk-aC-44H">
+                            <menuItem title="Previous page" keyEquivalent="" id="1Bk-aC-44H">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="previousPage:" target="-1" id="rQ6-ar-SEZ"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Next page" keyEquivalent="" id="76t-3r-KhS">
+                            <menuItem title="Next page" keyEquivalent="" id="76t-3r-KhS">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="nextPage:" target="-1" id="HtR-j1-cj6"/>

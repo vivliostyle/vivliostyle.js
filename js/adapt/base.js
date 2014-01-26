@@ -109,7 +109,8 @@ adapt.base.NS = {
 	XHTML: "http://www.w3.org/1999/xhtml",
 	XLINK: "http://www.w3.org/1999/xlink",
 	SHADOW: "http://www.pyroxy.com/ns/shadow",
-	SVG: "http://www.w3.org/2000/svg"
+	SVG: "http://www.w3.org/2000/svg",
+	DC: "http://purl.org/dc/elements/1.1/"
 };
 
 
@@ -381,7 +382,7 @@ adapt.base.StringBuffer.prototype.toString = function() {
 adapt.base.escapeChar = function(str) {
     // not called for surrogate pairs, no need to worry about them
     return '\\' + str.charCodeAt(0).toString(16) + ' ';
-}
+};
 
 /**
  * @param {string} name
@@ -544,6 +545,30 @@ adapt.base.indexArray = function(arr, key) {
 };
 
 /**
+ * Index array using key function. Repeated indices are all combined into arrays. Elements with
+ * empty and null keys are dropped. Ordering of the elements in arrays is preserved.
+ * @template T
+ * @param {Array.<T>} arr
+ * @param {function(T):?string} key
+ * @return {Object.<string,Array.<T>>}
+ */
+adapt.base.multiIndexArray = function(arr, key) {
+	var map = {};
+	for (var i = 0; i < arr.length; i++) {
+		var v = arr[i];
+		var k = key(v);
+		if (k) {
+			if (map[k]) {
+				map[k].push(v);
+			} else {
+				map[k] = [v];
+			}
+		}
+	}
+	return map;
+};
+
+/**
  * Apply function to each element of the array
  * @template P, R
  * @param {Array.<P>} arr
@@ -554,6 +579,21 @@ adapt.base.map = function(arr, fn) {
 	var res = Array(arr.length);
 	for (var i = 0; i < arr.length; i++) {
 		res[i] = fn(arr[i], i);
+	}
+	return res;
+};
+
+/**
+ * Apply function to each value of the object
+ * @template P, R
+ * @param {Object.<string, P>} obj
+ * @param {function(P,string):R} fn second parameter is the key
+ * @return {Object.<string, R>}
+ */
+adapt.base.mapObj = function(obj, fn) {
+	var res = {};
+	for (var n in obj) {
+		res[n] = fn(obj[n], n);
 	}
 	return res;
 };

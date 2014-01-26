@@ -585,7 +585,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 	    				var mediaType = imageBinary.getAttribute("content-type") || "image/jpeg";
 		    			var innerSrc = "data:" + mediaType + ";base64," + 
 							imageBinary.textContent.replace(/[ \t\n\t]/g, "");
-		    			fetchers.push(adapt.taskutil.loadImage(/** @type {HTMLImageElement} */ (inner), innerSrc));
+		    			fetchers.push(adapt.taskutil.loadElement(inner, innerSrc));
 	    			}
 				}
 			} else {
@@ -666,18 +666,18 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 			            if (attributePrefix)
 			                attributeName = attributePrefix + ":" + attributeName;
 			        }
-			        if (attributeName == "src" && !attributeNS && tag == "img" && ns == adapt.base.NS.XHTML) {
-			        	var imageFetcher = adapt.taskutil.loadImage(
-		    					/** @type {HTMLImageElement} */ (result), attributeValue);
+				    if (attributeName == "src" && !attributeNS && tag == "img" && ns == adapt.base.NS.XHTML) {
+			        	var imageFetcher = adapt.taskutil.loadElement(result, attributeValue);
 			        	if (computedStyle["width"] && computedStyle["height"]) {
 			        		// No need to wait for the image, does not affect layout
-			        		// TODO: add a fetcher for the page?
 			        		self.page.fetchers.push(imageFetcher);
 			        	} else {
 			    			fetchers.push(imageFetcher);
 			        	}
+				    } else if (attributeName == "href" && tag == "image" && ns == adapt.base.NS.SVG && attributeNS == adapt.base.NS.XLINK) {
+			        	self.page.fetchers.push(adapt.taskutil.loadElement(result, attributeValue));
 			        } else {
-				        result.setAttributeNS(attributeNS, attributeName, attributeValue);
+			        	result.setAttributeNS(attributeNS, attributeName, attributeValue);
 			        }
 			    }
 			}

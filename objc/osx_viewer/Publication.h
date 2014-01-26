@@ -10,27 +10,22 @@
 @property (weak) IBOutlet NSTextField* ePageCurrent;
 @property (weak) IBOutlet NSTextField* ePageTotal;
 @property (weak) IBOutlet NSView* ePageView;
+@property (weak) IBOutlet NSView* textSizeView;
 @property (weak) IBOutlet WebView* mainView;
 @property (weak) IBOutlet WebView* pdfView;
 @property (weak) IBOutlet NSToolbarItem* ePageToolbarItem;
+@property (weak) IBOutlet NSToolbarItem* textSizeToolbarItem;
 @property NSData* input;
 @property NSString* bootstrapURL;
 @property struct adapt_callback* callback;
 @property struct adapt_serving_context* serving_context;
 
+@property NSWindow* documentPropertiesWindow;
+
 @property BOOL isAtFirstPage;
 @property BOOL isAtLastPage;
 
-// Navigation buttons/medu items
-@property (weak) IBOutlet NSMenuItem* menuFirstPage;
-@property (weak) IBOutlet NSMenuItem* menuLastPage;
-@property (weak) IBOutlet NSMenuItem* menuPreviousPage;
-@property (weak) IBOutlet NSMenuItem* menuNextPage;
-
-@property (weak) IBOutlet NSToolbarItem* toolbarFirstPage;
-@property (weak) IBOutlet NSToolbarItem* toolbarLastPage;
-@property (weak) IBOutlet NSToolbarItem* toolbarPreviousPage;
-@property (weak) IBOutlet NSToolbarItem* toolbarNextPage;
+@property int fontSizeIndex;
 
 // For PDF Conversion UI
 @property IBOutlet NSView* pdfExportAccessiory;
@@ -47,6 +42,7 @@
 @property IBOutlet NSWindow* pdfProgressWindow;
 @property (weak) IBOutlet NSTextField* pdfProgressLabel;
 
+@property NSDictionary* metadata;
 
 // For PDF conversion processing
 @property CGContextRef pdfContext;
