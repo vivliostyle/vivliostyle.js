@@ -132,15 +132,15 @@ static int adapt_serve_zip_metadata(struct mg_connection* connection, adapt_serv
 
 static const char adapt_http_error[] = "HTTP/1.1 500 Unrecognized request\r\n\r\n";
 
-void __stdcall OutputDebugStringA(const char* s);
+// void __stdcall OutputDebugStringA(const char* s);
 
 static int adapt_serve(struct mg_connection* connection) {
     struct mg_request_info* request = mg_get_request_info(connection);
     adapt_serving_context* context = (adapt_serving_context*)request->user_data;
     const char* uri = request->uri;
-	char buf[1024];
-	sprintf(buf, "Requested uri '%s'\n", uri);
-	OutputDebugStringA(buf);
+	// char buf[1024];
+	// sprintf(buf, "Requested uri '%s'\n", uri);
+	// OutputDebugStringA(buf);
     if (strncmp(uri, context->content_prefix, strlen(context->content_prefix)) == 0) {
         const char* file_name = uri + strlen(context->content_prefix);
         if (*file_name == '\0') {

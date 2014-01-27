@@ -36,6 +36,7 @@ adapt.viewer.ViewportSize;
  */
 adapt.viewer.Viewer = function(window, instanceId, callbackFn) {
 	var self = this;
+	/** @type {string} */ this.packageURL = "";
 	/** @const */ this.window = window;
 	/** @const */ this.instanceId = instanceId;
 	/** @const */ this.callbackFn = callbackFn;
@@ -58,10 +59,7 @@ adapt.viewer.Viewer = function(window, instanceId, callbackFn) {
     	self.needResize = true;
     	self.kick();
     };
-    /** @const {adapt.base.EventListener} */ this.hyperlinkListener = function(evt) {
-		var hrefEvent = /** @type {adapt.vtree.PageHyperlinkEvent} */ (evt);
-    	callbackFn({"t":"hyperlink", "href":hrefEvent.href, "i": instanceId});
-    };
+    /** @const {adapt.base.EventListener} */ this.hyperlinkListener = null;
     /**
      * @type {Object.<string, adapt.viewer.Action>}
      */
@@ -95,6 +93,7 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
 	var store = new adapt.epub.EPUBDocStore();
 	store.init().then(function() {
 	    var epubURL = adapt.base.resolveURL(url, self.window.location.href);
+	    self.packageURL = epubURL;
 	    store.loadEPUBDoc(epubURL, haveZipMetadata).then(function (opf) {
 	        self.opf = opf;
 	        self.opf.resolveFragment(fragment).then(function(position) {
@@ -123,6 +122,7 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
 	var store = new adapt.epub.EPUBDocStore();
 	store.init().then(function() {
 	    var xmlURL = adapt.base.resolveURL(url, self.window.location.href);
+	    self.packageURL = xmlURL;
 	    self.opf = new adapt.epub.OPFDoc(store, "");
 	    self.opf.initWithSingleChapter(xmlURL);
         self.opf.resolveFragment(fragment).then(function(position) {
@@ -404,7 +404,7 @@ adapt.viewer.maybeParse = function (cmd) {
 };
 
 /**
- * @param {adapt.base.JSON} command
+ * @param {adapt.base.JSON|string} cmd
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.initEmbed = function (cmd) {
@@ -413,6 +413,16 @@ adapt.viewer.Viewer.prototype.initEmbed = function (cmd) {
 	var viewer = this;
 	adapt.task.start(function() {
     	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("commandLoop");
+        var scheduler = adapt.task.currentTask().getScheduler();
+        viewer.hyperlinkListener = function(evt) {
+    		var hrefEvent = /** @type {adapt.vtree.PageHyperlinkEvent} */ (evt);
+    		var internal = hrefEvent.href.substr(0, viewer.packageURL.length) == viewer.packageURL;
+    		var msg = {"t":"hyperlink", "href":hrefEvent.href, "internal": internal};
+    		scheduler.run(function() {
+    			viewer.callback(msg);
+    			return adapt.task.newResult(true);
+    		});
+        };    	
 		frame.loopWithFrame(function(loopFrame) {
 			if (viewer.needResize) {
 				viewer.resize().then(function() {

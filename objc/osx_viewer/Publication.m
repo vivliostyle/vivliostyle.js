@@ -152,6 +152,16 @@ static const int maxFontSizeIndex = sizeof fontSizes / sizeof(int) - 1;
             [self.ePageTotal setStringValue: [NSString stringWithFormat:@"/%d", (int)epageCount]];
             self.isAtLastPage = [[dict objectForKey:@"last"] boolValue];
             self.isAtFirstPage = [[dict objectForKey:@"first"] boolValue];
+        } else if ([type isEqualToString:@"hyperlink"]) {
+            id urlObj = [dict objectForKey:@"href"];
+            if ([urlObj isKindOfClass:[NSString class]]) {
+                NSString* url = urlObj;
+                if ([[dict objectForKey:@"internal"] boolValue]) {
+                    [self sendCommand: [NSString stringWithFormat:@"a:'moveTo',url:'%@'", url]];
+                } else {
+                    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:url]];
+                }
+            }
         }
     } else if ([[dict objectForKey:@"i"] isEqualToString:@"pdf"]) {
         if (self.pdfCancel) {

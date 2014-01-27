@@ -11,6 +11,8 @@ extern "C" {
 #else
 #define ADAPT_SERVICE_API __declspec(dllimport)
 #endif
+#else
+#define ADAPT_SERVICE_API
 #endif
 
 typedef struct adapt_callback {
