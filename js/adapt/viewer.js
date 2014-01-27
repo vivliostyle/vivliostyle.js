@@ -393,10 +393,22 @@ adapt.viewer.Viewer.prototype.runCommand = function(command) {
 };
 
 /**
+ * @param {*} cmd
+ * @return {adapt.base.JSON}
+ */
+adapt.viewer.maybeParse = function (cmd) {
+    if (typeof cmd == "string") {
+        return adapt.base.stringToJSON(cmd);
+    }
+    return cmd;
+};
+
+/**
  * @param {adapt.base.JSON} command
  * @return {void}
  */
-adapt.viewer.Viewer.prototype.initEmbed = function(command) {
+adapt.viewer.Viewer.prototype.initEmbed = function (cmd) {
+    var command = adapt.viewer.maybeParse(cmd);
 	var continuation = null;
 	var viewer = this;
 	adapt.task.start(function() {
@@ -436,7 +448,7 @@ adapt.viewer.Viewer.prototype.initEmbed = function(command) {
 		if (command) {
 			return false;
 		}
-		command = cmd;
+		command = adapt.viewer.maybeParse(cmd);
 		viewer.kick();
 		return true;
 	};	

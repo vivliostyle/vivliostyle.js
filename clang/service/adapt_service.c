@@ -1,5 +1,11 @@
+#if defined(_WIN32)
+#define ADAPT_SERVICE_DLL
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <stdio.h>
 #include <string.h>
+
 #include "clang/service/adapt_service.h"
 
 #include "third_party/mongoose/mongoose.h"
@@ -15,7 +21,7 @@ static const char adapt_driver[] =
 "<head>"
 "<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no'/>"
 "<meta name='apple-mobile-web-app-capable' content='yes'/>"
-"<script>adapt_embedded=true;</script>"
+"<script>CLOSURE_NO_DEPS = true;adapt_embedded=true;</script>"
 "<script src='adapt.js'></script>"
 "</head>"
 "<body style='position:absolute;left:0px;top:0px;width:100%;height:100%;margin:0px;padding:0px;overflow:hidden;'>"
@@ -102,15 +108,15 @@ static void url_encode_name(const char* in, char* out, int out_size) {
 static int adapt_serve_zip_metadata(struct mg_connection* connection, adapt_serving_context* context,
                                  const char* item) {
     if (strcmp(item, "list") == 0) {
-        mg_printf(connection,
-                  "HTTP/1.1 200 Success\r\n"
-                  "Content-Type: text/plain\r\n"
-                  "\r\n[");
         // URL-encoding may turn one character into three.
         char name_buffer[MZ_ZIP_MAX_ARCHIVE_FILENAME_SIZE * 3 + 4];
         int file_index = 0;
         mz_zip_archive_file_stat file_info;
         const char* sep = "";
+        mg_printf(connection,
+                  "HTTP/1.1 200 Success\r\n"
+                  "Content-Type: text/plain\r\n"
+                  "\r\n[");
         while (mz_zip_reader_file_stat(&context->zip, file_index, &file_info)) {
             ++file_index;
             url_encode_name(file_info.m_filename, name_buffer, sizeof name_buffer);
@@ -124,10 +130,17 @@ static int adapt_serve_zip_metadata(struct mg_connection* connection, adapt_serv
     return 0;
 }
 
+static const char adapt_http_error[] = "HTTP/1.1 500 Unrecognized request\r\n\r\n";
+
+void __stdcall OutputDebugStringA(const char* s);
+
 static int adapt_serve(struct mg_connection* connection) {
     struct mg_request_info* request = mg_get_request_info(connection);
     adapt_serving_context* context = (adapt_serving_context*)request->user_data;
     const char* uri = request->uri;
+	char buf[1024];
+	sprintf(buf, "Requested uri '%s'\n", uri);
+	OutputDebugStringA(buf);
     if (strncmp(uri, context->content_prefix, strlen(context->content_prefix)) == 0) {
         const char* file_name = uri + strlen(context->content_prefix);
         if (*file_name == '\0') {
@@ -145,7 +158,7 @@ static int adapt_serve(struct mg_connection* connection) {
         char* buf = NULL;
         int len = 0;
         if (strcmp(request->request_method, "POST") == 0) {
-            buf = malloc(4096);
+            buf = (char*)malloc(4096);
             len = mg_read(connection, buf, 4096);
             if (len < 0) {
                 len = 0;
@@ -190,8 +203,7 @@ static int adapt_serve(struct mg_connection* connection) {
             }
         }
     }
-    const char* error = "HTTP/1.1 500 Unrecognized request\r\n\r\n";
-    mg_write(connection, error, strlen(error));
+    mg_write(connection, adapt_http_error, strlen(adapt_http_error));
     return 1;
 }
 
@@ -199,6 +211,7 @@ static int adapt_port = 12345;
 
 adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
     int tries;
+	int file_index;
     adapt_serving_context* context = (adapt_serving_context*)calloc(sizeof(adapt_serving_context), 1);
     time_t timeval;
     time(&timeval);
@@ -213,7 +226,7 @@ adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
         return NULL;
     }
     // Check if this is an epub file.
-    int file_index = mz_zip_reader_locate_file(&context->zip, "META-INF/container.xml", NULL,
+    file_index = mz_zip_reader_locate_file(&context->zip, "META-INF/container.xml", NULL,
                                                MZ_ZIP_FLAG_CASE_SENSITIVE);
     context->content_type = TYPE_UNKNOWN;
     if (file_index >= 0) {
@@ -228,7 +241,7 @@ adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
             if (len > 4 && strcmp(filename + len - 4, ".fb2") == 0) {
                 // This is FB2 file
                 context->content_type = TYPE_FB2;
-                context->content = strdup(filename);
+                context->content = strcpy((char*)malloc(strlen(filename) + 1), filename);
             }
         }
     }
@@ -237,9 +250,9 @@ adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
         return NULL;
     }
     context->server_callbacks.begin_request = adapt_serve;
-    context->options = calloc(sizeof(char*), 3);
-    context->options[0] = strdup("listening_ports");
-    context->options[1] = calloc(100, 1);
+    context->options = (char**)calloc(sizeof(char*), 3);
+    context->options[0] = strcpy((char*)malloc(16), "listening_ports");
+    context->options[1] = (char*)calloc(100, 1);
     tries = 0;
     do {
         sprintf(context->options[1], "%d", adapt_port);
@@ -257,20 +270,21 @@ const char* adapt_get_bootstrap_url(adapt_serving_context* context) {
 }
 
 const char* adapt_get_init_call(adapt_serving_context* context, const char* instance_id, const char* config) {
+	size_t size;
     if (context->init_call) {
         free(context->init_call);
     }
-    size_t size = 256 + (context->content ? strlen(context->content) : 0) +
+    size = 256 + (context->content ? strlen(context->content) : 0) +
        (config ? strlen(config) : 0) + strlen(instance_id);
-    context->init_call = calloc(size, 1);
+    context->init_call = (char*)calloc(size, 1);
     if (context->content_type == TYPE_EPUB) {
         sprintf(context->init_call,
-                "adapt_initEmbed('%s', '%s', {a:'loadEPUB',url:'%s',zipmeta:true%s%s});",
+                "adapt_initEmbed('%s','%s',{\"a\":\"loadEPUB\",\"url\":\"%s\",\"zipmeta\":true%s%s});",
                 context->msg_url, instance_id, context->content_prefix,
                 config ? "," : "", config ? config : "");
     } else {
         sprintf(context->init_call,
-                "adapt_initEmbed('%s', '%s', {a:'loadXML',url:'%s%s'%s%s});",
+                "adapt_initEmbed('%s','%s',{\"a\":\"loadXML\",\"url\":\"%s%s\"%s%s});",
                 context->msg_url, instance_id, context->content_prefix, context->content,
                 config ? "," : "", config ? config : "");
     }

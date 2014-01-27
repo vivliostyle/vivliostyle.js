@@ -29,6 +29,8 @@ function bindump() {
     echo
 }
 
+mkdir -p ../clang/generated
+
 (echo "#include \"clang/resources/adapt_resources.h\""
 echo
 compile | bindump 1 adapt.js application/javascript 1
