@@ -3,6 +3,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#include <sys/stat.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -29,8 +30,8 @@ static const char adapt_driver[] =
 "</html>\r\n";
 
 #define TYPE_UNKNOWN 0
-#define TYPE_EPUB 1
-#define TYPE_FB2 2
+#define TYPE_OPF 1
+#define TYPE_XML 2
 
 struct adapt_serving_context {
     adapt_callback* callback;
@@ -143,25 +144,55 @@ static int adapt_serve(struct mg_connection* connection) {
 	// OutputDebugStringA(buf);
     if (strncmp(uri, context->content_prefix, strlen(context->content_prefix)) == 0) {
         const char* file_name = uri + strlen(context->content_prefix);
-        if (*file_name == '\0') {
-            // Special case, query about file structure
-            const char * r = strstr(request->query_string, "r=");
-            if (r && adapt_serve_zip_metadata(connection, context, r+2)) {
+        if (context->callback->packaging_type == ADAPT_PACKAGE_ZIP) {
+            if (*file_name == '\0') {
+                // Special case, query about file structure
+                const char * r = strstr(request->query_string, "r=");
+                if (r && adapt_serve_zip_metadata(connection, context, r+2)) {
+                    return 1;
+                }
+            } else if (adapt_serve_zip_entry(connection, context, file_name)) {
                 return 1;
             }
-        } else {
-            if (adapt_serve_zip_entry(connection, context, file_name)) {
+        } else if (context->callback->packaging_type == ADAPT_PACKAGE_SINGLE_FILE) {
+            // plain fb2 file, no external resources
+            if (strcmp(file_name, "file.fb2") == 0) {
+                char buf[4096];
+                size_t p = 0;
+                mg_printf(connection,
+                    "HTTP/1.1 200 Success\r\n"
+                    "Content-Type: text/xml\r\n"
+                    "Content-Length: %ld\r\n"
+                    "\r\n",
+                context->callback->content_length);
+                do {
+                    size_t len = context->callback->content_length - p;
+                    if (len > sizeof buf) {
+                        len = sizeof buf;
+                    }
+                    context->callback->read_bytes(context->callback, buf, p, len);
+                    mg_write(connection, buf, len);
+                    p += len;
+                } while (p < context->callback->content_length);
                 return 1;
+            }
+        } else if (context->callback->packaging_type == ADAPT_PACKAGE_FILE_SYSTEM) {
+            if (*file_name != '\0') {
+                return 0;
             }
         }
     } else if (strcmp(uri, context->msg_url) == 0) {
-        char* buf = NULL;
+        int buf_size = 256;
+        char* buf = (char*)malloc(buf_size);
         int len = 0;
         if (strcmp(request->request_method, "POST") == 0) {
-            buf = (char*)malloc(4096);
-            len = mg_read(connection, buf, 4096);
-            if (len < 0) {
-                len = 0;
+            int r;
+            while((r = mg_read(connection, buf, buf_size - len)) > 0) {
+                len += r;
+                if (len == buf_size) {
+                    buf_size *= 2;
+                    buf = (char*)realloc(buf, buf_size);
+                }
             }
         }
         context->callback->process_message(context->callback, buf, len);
@@ -209,6 +240,14 @@ static int adapt_serve(struct mg_connection* connection) {
 
 static int adapt_port = 12345;
 
+static int file_exists(const char* path) {
+    struct stat st;
+    if (stat(path, &st) == 0) {
+        return S_ISREG(st.st_mode);
+    }
+    return 0;
+}
+
 adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
     int tries;
 	int file_index;
@@ -219,40 +258,91 @@ adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
     sprintf(context->html_prefix, "/H%lx/", timeval);
     sprintf(context->msg_url, "/M%lx", timeval);
     context->callback = callback;
-    context->zip.m_pRead = adapt_file_read_func;
-    context->zip.m_pIO_opaque = callback;
-    if (!mz_zip_reader_init(&context->zip, callback->content_length, MZ_ZIP_FLAG_CASE_SENSITIVE)) {
-        free(context);
-        return NULL;
-    }
-    // Check if this is an epub file.
-    file_index = mz_zip_reader_locate_file(&context->zip, "META-INF/container.xml", NULL,
+    char* rewrites = 0;
+    char* document_root = 0;
+    if (callback->packaging_type == ADAPT_PACKAGE_ZIP) {
+        context->zip.m_pRead = adapt_file_read_func;
+        context->zip.m_pIO_opaque = callback;
+        if (!mz_zip_reader_init(&context->zip, callback->content_length, MZ_ZIP_FLAG_CASE_SENSITIVE)) {
+            free(context);
+            return NULL;
+        }
+        // Check if this is an epub file.
+        file_index = mz_zip_reader_locate_file(&context->zip, "META-INF/container.xml", NULL,
                                                MZ_ZIP_FLAG_CASE_SENSITIVE);
-    context->content_type = TYPE_UNKNOWN;
-    if (file_index >= 0) {
-        // This looks like epub
-        context->content_type = TYPE_EPUB;
-    } else {
-        // This is not an epub. Maybe fb2.zip?
-        mz_zip_archive_file_stat file_info;
-        if (mz_zip_reader_file_stat(&context->zip, 0, &file_info)) {
-            const char* filename = file_info.m_filename;
-            size_t len = strlen(filename);
-            if (len > 4 && strcmp(filename + len - 4, ".fb2") == 0) {
-                // This is FB2 file
-                context->content_type = TYPE_FB2;
-                context->content = strcpy((char*)malloc(strlen(filename) + 1), filename);
+        context->content_type = TYPE_UNKNOWN;
+        if (file_index >= 0) {
+            // This looks like epub
+            context->content_type = TYPE_OPF;
+        } else {
+            // This is not an epub. Maybe fb2.zip?
+            mz_zip_archive_file_stat file_info;
+            if (mz_zip_reader_file_stat(&context->zip, 0, &file_info)) {
+                const char* filename = file_info.m_filename;
+                size_t len = strlen(filename);
+                if (len > 4 && strcmp(filename + len - 4, ".fb2") == 0) {
+                    // This is FB2 file
+                    context->content_type = TYPE_XML;
+                    context->content = strcpy((char*)malloc(strlen(filename) + 1), filename);
+                }
             }
         }
+    } else if (callback->packaging_type == ADAPT_PACKAGE_FILE_SYSTEM) {
+        if (!callback->base_path) {
+            free(context);
+            return NULL;
+        }
+        // Go through the parent folder chain trying to find META-INF/container.xml (that will serve as
+        // the package root)
+        size_t len = strlen(callback->base_path);
+        char* container_name = malloc(len + 25);
+        strcpy(container_name, callback->base_path);
+        char* end = container_name + len;
+        do {
+            char * q = end - 1;
+            while (container_name + 3 < q && *q != '/') {
+                q--;
+            }
+            if (*q != '/') {
+                break;
+            }
+            end = q;
+            strcpy(end + 1, "META-INF/container.xml");
+        } while (!file_exists(container_name));
+        if (*end != '/') {
+            free(context);
+            return NULL;
+        }
+        if (len < 4 || strcmp(callback->base_path + len - 4, ".opf") == 0) {
+            context->content_type = TYPE_OPF;
+        } else {
+            context->content_type = TYPE_XML;
+            const char* path = callback->base_path + (end - container_name + 1);
+            context->content = strcpy((char*)malloc(strlen(path)), path);
+        }
+        end[1] = '\0';
+        rewrites = malloc(strlen(container_name) + strlen(context->content_prefix) + 2);
+        sprintf(rewrites, "%s=%s", context->content_prefix, container_name);
+        document_root = container_name;
+    } else if (callback->packaging_type == ADAPT_PACKAGE_SINGLE_FILE) {
+        // Assume it's FB2
+        context->content_type = TYPE_XML;
+        context->content = strcpy((char*)malloc(9), "file.fb2");
     }
     if (context->content_type == TYPE_UNKNOWN) {
         adapt_stop_serving(context);
         return NULL;
     }
     context->server_callbacks.begin_request = adapt_serve;
-    context->options = (char**)calloc(sizeof(char*), 3);
+    context->options = (char**)calloc(sizeof(char*), 7);
     context->options[0] = strcpy((char*)malloc(16), "listening_ports");
     context->options[1] = (char*)calloc(100, 1);
+    if (rewrites) {
+        context->options[2] = strcpy((char*)malloc(24), "url_rewrite_patterns");
+        context->options[3] = rewrites;
+        context->options[4] = strcpy((char*)malloc(24), "document_root");
+        context->options[5] = document_root;
+    }
     tries = 0;
     do {
         sprintf(context->options[1], "%d", adapt_port);
@@ -277,7 +367,7 @@ const char* adapt_get_init_call(adapt_serving_context* context, const char* inst
     size = 256 + (context->content ? strlen(context->content) : 0) +
        (config ? strlen(config) : 0) + strlen(instance_id);
     context->init_call = (char*)calloc(size, 1);
-    if (context->content_type == TYPE_EPUB) {
+    if (context->content_type == TYPE_OPF) {
         sprintf(context->init_call,
                 "adapt_initEmbed('%s','%s',{\"a\":\"loadEPUB\",\"url\":\"%s\",\"zipmeta\":true%s%s});",
                 context->msg_url, instance_id, context->content_prefix,

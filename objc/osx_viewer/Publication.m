@@ -28,7 +28,7 @@ static void process_message(struct adapt_callback * self, const void* data, size
 }
 
 static struct adapt_callback* MakeContentCallback(Publication* publication) {
-    struct publication_callback* d = (struct publication_callback*)malloc(sizeof(struct publication_callback));
+    struct publication_callback* d = calloc(sizeof(struct publication_callback), 1);
     d->publication = publication;
     d->super_.content_length = [publication.input length];
     d->super_.read_bytes = read_bytes;
@@ -76,16 +76,52 @@ static const int maxFontSizeIndex = sizeof fontSizes / sizeof(int) - 1;
     return NO;
 }
 
+- (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)typeName error:(NSError **)outError
+{
+    if ([typeName isEqual:@"EPUB Publication"] || [typeName isEqual:@"Zip Archive"] || [typeName isEqual:@"FictionBook 2.0 eBook"]) {
+        return [super readFromURL:absoluteURL ofType:typeName error:outError];
+    }
+    absoluteURL = [absoluteURL filePathURL];
+    if (absoluteURL) {
+        // it'd be nice to use this, but it's only available in 10.9:
+        // char* path = malloc(PATH_MAX + 1);
+        // [absoluteURL getFileSystemRepresentation:path maxLength:PATH_MAX]
+        NSString* pathStr = [absoluteURL path];
+        if (pathStr) {
+            const char * path = [pathStr cStringUsingEncoding:NSUTF8StringEncoding];
+            adapt_callback* callback = MakeContentCallback(self);
+            callback->packaging_type = ADAPT_PACKAGE_FILE_SYSTEM;
+            callback->base_path = strcpy(malloc(strlen(path)+1), path);
+            self.callback = callback;
+            return [self finishReading];
+        }
+    }
+    return NO;
+}
+
 - (BOOL)readFromData:(NSData *)data ofType:(NSString *)typeName error:(NSError **)outError
 {
-    self.input = data;
-    adapt_callback* callback = MakeContentCallback(self);
-    adapt_serving_context* context = adapt_start_serving(callback);
-    const char* url = adapt_get_bootstrap_url(context);
-    if (url) {
-        self.bootstrapURL = [NSString stringWithCString:url encoding:NSUTF8StringEncoding];
+    if ([typeName isEqual:@"EPUB Publication"] || [typeName isEqual:@"Zip Archive"] || [typeName isEqual:@"FictionBook 2.0 eBook"]) {
+        self.input = data;
+        adapt_callback* callback = MakeContentCallback(self);
+        callback->packaging_type = [typeName isEqual:@"FictionBook 2.0 eBook"] ? ADAPT_PACKAGE_SINGLE_FILE : ADAPT_PACKAGE_ZIP;
+        self.callback = callback;
+        return [self finishReading];
     }
-    self.callback = callback;
+    return NO;
+}
+
+- (BOOL)finishReading
+{
+    adapt_serving_context* context = adapt_start_serving(self.callback);
+    if (!context) {
+        return NO;
+    }
+    const char* url = adapt_get_bootstrap_url(context);
+    if (!url) {
+        return NO;
+    }
+    self.bootstrapURL = [NSString stringWithCString:url encoding:NSUTF8StringEncoding];
     self.serving_context = context;
     return YES;
 }
@@ -94,6 +130,9 @@ static const int maxFontSizeIndex = sizeof fontSizes / sizeof(int) - 1;
 {
     [super close];
     adapt_stop_serving(self.serving_context);
+    if (self.callback->base_path) {
+        free((char *)self.callback->base_path);
+    }
     free(self.callback);
     self.bootstrapURL = @"";
     self.callback = NULL;

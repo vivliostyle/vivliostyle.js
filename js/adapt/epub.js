@@ -1086,6 +1086,12 @@ adapt.epub.OPFView.prototype.getPageViewItem = function() {
 	/** @type {!adapt.task.Frame.<adapt.epub.OPFViewItem>} */ var frame
 		= adapt.task.newFrame("getPageViewItem");
     store.load(item.src).then(function (xmldoc) {
+    	if (item.epageCount == 0 && self.opf.spine.length == 1) {
+    		// Single-chapter doc without epages (e.g. FB2).
+    		// Estimate that offset=2700 roughly corresponds to 1024 bytes of compressed size. 
+    		item.epageCount = Math.ceil(xmldoc.getTotalOffset() / 2700);
+    		self.opf.epageCount = item.epageCount;
+    	}
     	var style = store.getStyleForDoc(xmldoc);
     	var customRenderer = self.makeCustomRenderer(xmldoc);
     	var viewport = self.viewport;

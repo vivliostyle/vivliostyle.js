@@ -15,8 +15,14 @@ extern "C" {
 #define ADAPT_SERVICE_API
 #endif
 
+#define ADAPT_PACKAGE_ZIP 0
+#define ADAPT_PACKAGE_SINGLE_FILE 1
+#define ADAPT_PACKAGE_FILE_SYSTEM 2
+    
 typedef struct adapt_callback {
     unsigned long content_length;
+    int packaging_type;
+    const char* base_path;  /* File types that reference other resources, i.e. OPF and XHTML */
     void (*read_bytes)(struct adapt_callback* self, void* buffer, size_t offset, size_t length);
     void (*process_message)(struct adapt_callback* self, const void* buffer, size_t length);
 } adapt_callback;

@@ -5,7 +5,7 @@
 
 @-adapt-footnote-area ::before {
 	display: block;
-	-adapt-border-before-width: 2px;
+	-adapt-border-before-width: 1px;
 	-adapt-border-before-style: solid;
 	-adapt-border-before-color: black;
 	-adapt-margin-after: 0.4em;
