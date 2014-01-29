@@ -51,13 +51,14 @@ namespace AdaptServiceWrapper
 			Close();
 		}
 
-        bool Open(String^ fileName, MessageHandler^ messageHandler) 
+        bool OpenContainer(String^ fileName, bool zipped, MessageHandler^ messageHandler) 
         {
 			Close();
 			
 			IntPtr fileNamePtr = Marshal::StringToHGlobalUni(fileName);
 			HANDLE file = CreateFile( (wchar_t*)(void*)fileNamePtr,
 				GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL );
+			Marshal::FreeHGlobal(fileNamePtr);
 			if (file == INVALID_HANDLE_VALUE)
 			{
     			return false;
@@ -92,11 +93,50 @@ namespace AdaptServiceWrapper
 			callback->file = file;
 			callback->map = map;
 			callback->callback.content_length = size;
+			callback->callback.packaging_type = zipped ? ADAPT_PACKAGE_ZIP : ADAPT_PACKAGE_SINGLE_FILE;
+			callback->callback.base_path = NULL;
 			callback->callback.read_bytes = ReadBytes;
 			callback->callback.process_message = ProcessMessage;
 			context = adapt_start_serving(&callback->callback);
-			return true;
+			return context != NULL;
         }
+
+        bool OpenPath(String^ fileName, MessageHandler^ messageHandler) 
+        {
+			Close();
+
+			IntPtr fileNamePtr = Marshal::StringToHGlobalUni(fileName);
+			const wchar_t* fileNameW = (wchar_t*)(void*)fileNamePtr;
+			int fileNameLen = 4 * wcslen(fileNameW);
+			char* fileNameUTF8 = new char[fileNameLen+1];
+			WideCharToMultiByte(CP_UTF8, 0, fileNameW, -1, fileNameUTF8, fileNameLen, 0, 0);
+			for (char* s = fileNameUTF8; *s; ++s) {
+				if (*s == '\\') {
+					*s = '/';
+				}
+			}
+			WIN32_FILE_ATTRIBUTE_DATA info;
+			BOOL result = GetFileAttributesExW(fileNameW, GetFileExInfoStandard, &info);
+			Marshal::FreeHGlobal(fileNamePtr);
+			if (info.nFileSizeHigh != 0)
+			{
+				delete[] fileNameUTF8;
+				return false;
+			}
+
+			callback = new AdaptCallback();
+			callback->messageHandler = messageHandler;
+			callback->content = NULL;
+			callback->file = NULL;
+			callback->map = NULL;
+			callback->callback.content_length = info.nFileSizeLow;
+			callback->callback.packaging_type = ADAPT_PACKAGE_FILE_SYSTEM;
+			callback->callback.base_path = fileNameUTF8;
+			callback->callback.read_bytes = NULL;
+			callback->callback.process_message = ProcessMessage;
+			context = adapt_start_serving(&callback->callback);
+			return context != NULL;
+		}
 
 		void Close()
         { 

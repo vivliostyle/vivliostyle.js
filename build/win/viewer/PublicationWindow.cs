@@ -18,18 +18,34 @@ namespace Viewer
         AdaptService service;
         string initCommand;
         Dictionary<string, object> metadata;
+        string file;
+        bool selfContained;
+        bool zipped;
 
         public PublicationWindow()
         {
             InitializeComponent();
         }
 
-        public bool Open(string file)
+        public bool Open(string file, bool selfContained, bool zipped)
         {
+            this.file = file;
+            this.selfContained = selfContained;
+            this.zipped = zipped;
             service = new AdaptService();
-            if (!service.Open(file, ProcessMessageAsync))
+            if (selfContained)
             {
-                return false;
+                if (!service.OpenContainer(file, zipped, ProcessMessageAsync))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (!service.OpenPath(file, ProcessMessageAsync))
+                {
+                    return false;
+                }
             }
             String url = service.GetBootstrapURL();
             String init = service.GetInitCall("main", "\"autoresize\":true");
@@ -77,12 +93,38 @@ namespace Viewer
                         if (metadata is Dictionary<string,object>)
                         {
                             this.metadata = (Dictionary<string, object>)metadata;
+                            UpdateTitle();
                         }
                     }
                 }
                 else if (type.Equals("nav"))
                 {
 
+                }
+            }
+        }
+
+        private void UpdateTitle()
+        {
+            string titleTerm = "http://purl.org/dc/terms/title";
+            if (metadata.ContainsKey(titleTerm))
+            {
+                object titleList = metadata[titleTerm];
+                if (titleList is Array)
+                {
+                    object[] titles = (object[])titleList;
+                    if (titles.Length > 0 && titles[0] is Dictionary<string, object>)
+                    {
+                        Dictionary<string, object> titleDict = (Dictionary<string, object>)(titles[0]);
+                        if (titleDict.ContainsKey("v"))
+                        {
+                            object title = titleDict["v"];
+                            if (title is string)
+                            {
+                                Text = (string)title;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -105,6 +147,51 @@ namespace Viewer
         protected void GoLastPage_Click(object sender, System.EventArgs e)
         {
             SendCommand("{\"a\":\"moveTo\",\"where\":\"last\"}");
+        }
+
+        private void GoReload_Click(object sender, EventArgs e)
+        {
+            if (service != null)
+            {
+                service.Close();
+                initCommand = null;
+            }
+            Open(file, selfContained, zipped);
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Home)
+            {
+                SendCommand("{\"a\":\"moveTo\",\"where\":\"first\"}");
+                return true;
+            }
+            if (keyData == Keys.End)
+            {
+                SendCommand("{\"a\":\"moveTo\",\"where\":\"last\"}");
+                return true;
+            }
+            if (keyData == Keys.Right || keyData == Keys.PageDown)
+            {
+                SendCommand("{\"a\":\"moveTo\",\"where\":\"next\"}");
+                return true;
+            }
+            if (keyData == Keys.Left || keyData == Keys.PageUp)
+            {
+                SendCommand("{\"a\":\"moveTo\",\"where\":\"previous\"}");
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void PublicationWindow_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (service != null)
+            {
+                service.Close();
+                service = null;
+                initCommand = null;
+            }
         }
     }
 }

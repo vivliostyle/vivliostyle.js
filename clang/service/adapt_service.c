@@ -1,6 +1,7 @@
 #if defined(_WIN32)
 #define ADAPT_SERVICE_DLL
 #define _CRT_SECURE_NO_WARNINGS
+#include <windows.h>
 #endif
 
 #include <sys/stat.h>
@@ -187,7 +188,7 @@ static int adapt_serve(struct mg_connection* connection) {
         int len = 0;
         if (strcmp(request->request_method, "POST") == 0) {
             int r;
-            while((r = mg_read(connection, buf, buf_size - len)) > 0) {
+            while((r = mg_read(connection, buf + len, buf_size - len)) > 0) {
                 len += r;
                 if (len == buf_size) {
                     buf_size *= 2;
@@ -241,16 +242,31 @@ static int adapt_serve(struct mg_connection* connection) {
 static int adapt_port = 12345;
 
 static int file_exists(const char* path) {
+#if defined(_WIN32)
+	int lenW = strlen(path);
+	wchar_t * pathW = (wchar_t*)calloc(sizeof(wchar_t) * (lenW + 1), 1);
+	WIN32_FILE_ATTRIBUTE_DATA info;
+	BOOL result;
+	MultiByteToWideChar(CP_UTF8, 0, path, -1, pathW, lenW);
+	result = GetFileAttributesExW(pathW, GetFileExInfoStandard, &info);
+	free(pathW);
+	if (result) {
+		return (info.dwFileAttributes & FILE_ATTRIBUTE_NORMAL) != 0;
+	}
+#else
     struct stat st;
     if (stat(path, &st) == 0) {
         return S_ISREG(st.st_mode);
     }
+#endif
     return 0;
 }
 
 adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
     int tries;
 	int file_index;
+    char* rewrites = 0;
+    char* document_root = 0;
     adapt_serving_context* context = (adapt_serving_context*)calloc(sizeof(adapt_serving_context), 1);
     time_t timeval;
     time(&timeval);
@@ -258,8 +274,6 @@ adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
     sprintf(context->html_prefix, "/H%lx/", timeval);
     sprintf(context->msg_url, "/M%lx", timeval);
     context->callback = callback;
-    char* rewrites = 0;
-    char* document_root = 0;
     if (callback->packaging_type == ADAPT_PACKAGE_ZIP) {
         context->zip.m_pRead = adapt_file_read_func;
         context->zip.m_pIO_opaque = callback;
@@ -288,16 +302,19 @@ adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
             }
         }
     } else if (callback->packaging_type == ADAPT_PACKAGE_FILE_SYSTEM) {
+		size_t len;
+		char* container_name;
+		char* end;
         if (!callback->base_path) {
             free(context);
             return NULL;
         }
         // Go through the parent folder chain trying to find META-INF/container.xml (that will serve as
         // the package root)
-        size_t len = strlen(callback->base_path);
-        char* container_name = malloc(len + 25);
+        len = strlen(callback->base_path);
+        container_name = (char*)malloc(len + 25);
         strcpy(container_name, callback->base_path);
-        char* end = container_name + len;
+        end = container_name + len;
         do {
             char * q = end - 1;
             while (container_name + 3 < q && *q != '/') {
@@ -316,12 +333,12 @@ adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
         if (len < 4 || strcmp(callback->base_path + len - 4, ".opf") == 0) {
             context->content_type = TYPE_OPF;
         } else {
-            context->content_type = TYPE_XML;
             const char* path = callback->base_path + (end - container_name + 1);
             context->content = strcpy((char*)malloc(strlen(path)), path);
+            context->content_type = TYPE_XML;
         }
         end[1] = '\0';
-        rewrites = malloc(strlen(container_name) + strlen(context->content_prefix) + 2);
+        rewrites = (char*)malloc(strlen(container_name) + strlen(context->content_prefix) + 2);
         sprintf(rewrites, "%s=%s", context->content_prefix, container_name);
         document_root = container_name;
     } else if (callback->packaging_type == ADAPT_PACKAGE_SINGLE_FILE) {
@@ -345,7 +362,7 @@ adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
     }
     tries = 0;
     do {
-        sprintf(context->options[1], "%d", adapt_port);
+        sprintf(context->options[1], "127.0.0.1:%d", adapt_port);
         context->server_context = mg_start(&context->server_callbacks, context, (const char**)context->options);
         sprintf(context->bootstrap_url, "http://127.0.0.1:%d%sdriver.xhtml",
                 adapt_port, context->html_prefix);

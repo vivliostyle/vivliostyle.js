@@ -35,6 +35,8 @@
             this.lastPageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.previousPageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nextPageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.reloadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -43,9 +45,9 @@
             this.view.Dock = System.Windows.Forms.DockStyle.Fill;
             this.view.Location = new System.Drawing.Point(0, 0);
             this.view.Margin = new System.Windows.Forms.Padding(0);
-            this.view.MinimumSize = new System.Drawing.Size(200, 200);
+            this.view.MinimumSize = new System.Drawing.Size(300, 300);
             this.view.Name = "view";
-            this.view.Size = new System.Drawing.Size(1222, 830);
+            this.view.Size = new System.Drawing.Size(1100, 651);
             this.view.TabIndex = 0;
             // 
             // menuStrip1
@@ -54,7 +56,7 @@
             this.goToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1222, 40);
+            this.menuStrip1.Size = new System.Drawing.Size(1100, 40);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             this.menuStrip1.Visible = false;
@@ -65,7 +67,9 @@
             this.firstPageToolStripMenuItem,
             this.lastPageToolStripMenuItem,
             this.previousPageToolStripMenuItem,
-            this.nextPageToolStripMenuItem});
+            this.nextPageToolStripMenuItem,
+            this.toolStripMenuItem1,
+            this.reloadToolStripMenuItem});
             this.goToolStripMenuItem.Name = "goToolStripMenuItem";
             this.goToolStripMenuItem.Size = new System.Drawing.Size(57, 36);
             this.goToolStripMenuItem.Text = "&Go";
@@ -73,42 +77,60 @@
             // firstPageToolStripMenuItem
             // 
             this.firstPageToolStripMenuItem.Name = "firstPageToolStripMenuItem";
-            this.firstPageToolStripMenuItem.Size = new System.Drawing.Size(240, 36);
+            this.firstPageToolStripMenuItem.ShortcutKeyDisplayString = "Home";
+            this.firstPageToolStripMenuItem.Size = new System.Drawing.Size(312, 36);
             this.firstPageToolStripMenuItem.Text = "First page";
             this.firstPageToolStripMenuItem.Click += new System.EventHandler(this.GoFirstPage_Click);
             // 
             // lastPageToolStripMenuItem
             // 
             this.lastPageToolStripMenuItem.Name = "lastPageToolStripMenuItem";
-            this.lastPageToolStripMenuItem.Size = new System.Drawing.Size(240, 36);
+            this.lastPageToolStripMenuItem.ShortcutKeyDisplayString = "End";
+            this.lastPageToolStripMenuItem.Size = new System.Drawing.Size(312, 36);
             this.lastPageToolStripMenuItem.Text = "Last page";
             this.lastPageToolStripMenuItem.Click += new System.EventHandler(this.GoLastPage_Click);
             // 
             // previousPageToolStripMenuItem
             // 
             this.previousPageToolStripMenuItem.Name = "previousPageToolStripMenuItem";
-            this.previousPageToolStripMenuItem.Size = new System.Drawing.Size(240, 36);
+            this.previousPageToolStripMenuItem.ShortcutKeyDisplayString = "PgUp";
+            this.previousPageToolStripMenuItem.Size = new System.Drawing.Size(312, 36);
             this.previousPageToolStripMenuItem.Text = "Previous page";
             this.previousPageToolStripMenuItem.Click += new System.EventHandler(this.GoPreviousPage_Click);
             // 
             // nextPageToolStripMenuItem
             // 
             this.nextPageToolStripMenuItem.Name = "nextPageToolStripMenuItem";
-            this.nextPageToolStripMenuItem.Size = new System.Drawing.Size(240, 36);
+            this.nextPageToolStripMenuItem.ShortcutKeyDisplayString = "PgDown";
+            this.nextPageToolStripMenuItem.Size = new System.Drawing.Size(312, 36);
             this.nextPageToolStripMenuItem.Text = "Next page";
             this.nextPageToolStripMenuItem.Click += new System.EventHandler(this.GoNextPage_Click);
             // 
-            // PublicationForm
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(309, 6);
+            // 
+            // reloadToolStripMenuItem
+            // 
+            this.reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
+            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(312, 36);
+            this.reloadToolStripMenuItem.Text = "Reload";
+            this.reloadToolStripMenuItem.Click += new System.EventHandler(this.GoReload_Click);
+            // 
+            // PublicationWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1222, 830);
+            this.ClientSize = new System.Drawing.Size(1100, 651);
             this.Controls.Add(this.view);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "PublicationForm";
+            this.MinimumSize = new System.Drawing.Size(400, 400);
+            this.Name = "PublicationWindow";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Publication";
-            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PublicationWindow_FormClosing);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -125,5 +147,7 @@
         private System.Windows.Forms.ToolStripMenuItem lastPageToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem previousPageToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem nextPageToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem reloadToolStripMenuItem;
     }
 }
