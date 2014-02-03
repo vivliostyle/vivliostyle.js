@@ -154,6 +154,11 @@
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         </customView>
                     </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="711ADBF3-3E99-44A7-8FDA-583FC1CBD6B3" label="Reload" paletteLabel="Reload" tag="-1" image="reload" id="DgP-PO-P3l">
+                        <connections>
+                            <action selector="reloadPage:" target="-2" id="1Di-T8-OYc"/>
+                        </connections>
+                    </toolbarItem>
                 </allowedToolbarItems>
                 <defaultToolbarItems>
                     <toolbarItem reference="6xl-Po-DpH"/>
@@ -163,6 +168,7 @@
                     <toolbarItem reference="PXk-bb-CLO"/>
                     <toolbarItem reference="Ftl-I0-6BK"/>
                     <toolbarItem reference="LjA-7w-5WH"/>
+                    <toolbarItem reference="DgP-PO-P3l"/>
                     <toolbarItem reference="uz1-tJ-LBg"/>
                 </defaultToolbarItems>
             </toolbar>
@@ -461,6 +467,7 @@
         <image name="next" width="128" height="128"/>
         <image name="pdf" width="128" height="128"/>
         <image name="previous" width="128" height="128"/>
+        <image name="reload" width="128" height="128"/>
         <image name="smalltext" width="128" height="128"/>
     </resources>
 </document>

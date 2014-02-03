@@ -238,6 +238,12 @@
                                     <action selector="runToolbarCustomizationPalette:" target="-1" id="UZD-qN-k4R"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Reload Page" id="Pva-Li-kx6" userLabel="Menu Item - Reload Page">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="reloadPage:" target="-1" id="qwW-HW-b6o"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>

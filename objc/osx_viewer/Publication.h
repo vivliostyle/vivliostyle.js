@@ -27,6 +27,9 @@
 
 @property int fontSizeIndex;
 
+@property NSURL * absoluteURL;
+@property NSString* typeName;
+
 // For PDF Conversion UI
 @property IBOutlet NSView* pdfExportAccessiory;
 @property (weak) IBOutlet NSPopUpButton* pdfPageSize;

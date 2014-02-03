@@ -105,6 +105,7 @@ adapt.base.NS = {
 	FB2: "http://www.gribuser.ru/xml/fictionbook/2.0",
 	epub: "http://www.idpf.org/2007/ops",
 	EV: "http://www.w3.org/2001/xml-events",
+	MATHML: "http://www.w3.org/1998/Math/MathML",
 	XML: "http://www.w3.org/XML/1998/namespace",
 	XHTML: "http://www.w3.org/1999/xhtml",
 	XLINK: "http://www.w3.org/1999/xlink",

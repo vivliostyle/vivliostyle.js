@@ -1643,7 +1643,16 @@ adapt.layout.Column.prototype.clearOverflownViewNodes = function(nodePosition, r
  * @return {void}
  */
 adapt.layout.Column.prototype.initGeom = function() {
-    var columnBBox = this.clientLayout.getElementClientRect(this.element);
+	// TODO: we should be able to avoid querying the layout engine at this point.
+	// Create an element that fills the content area and query its size. Calling
+	// getElementClientRect on the container element includes element padding
+	// which is wrong for our purposes.
+	var probe = /** @type {HTMLElement} */ (this.element.ownerDocument.createElement("div"));
+	probe.style.width = "100%";
+	probe.style.height = "100%";
+	this.element.appendChild(probe);
+    var columnBBox = this.clientLayout.getElementClientRect(probe);
+    this.element.removeChild(probe);
     var offsetX = this.originX + this.left + this.getInsetLeft();
     var offsetY = this.originY + this.top + this.getInsetTop();
     this.box = new adapt.geom.Rect(offsetX, offsetY, offsetX + this.width,

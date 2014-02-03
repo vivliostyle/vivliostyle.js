@@ -458,10 +458,11 @@ adapt.vgen.fb2Remap = {
 /**
  * @param {boolean} firstTime
  * @private
- * @return {!adapt.task.Result.<boolean>} holding true
+ * @return {!adapt.task.Result.<boolean>} holding true if children should be processed
  */
 adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 	var self = this;
+	var needToProcessChildren = true;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame
 		= adapt.task.newFrame("createElementView");
 	// Figure out element's styles
@@ -478,14 +479,14 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
     var flow = computedStyle["flow-into"];
     if (flow && flow.toString() != self.flowName) {
         // foreign flow, don't create a view
-    	frame.finish(true);
+    	frame.finish(false);
     	return frame.result();
     }
     // var position = computedStyle["position"]; // TODO: take it into account
     var display = computedStyle["display"];
     if (display === adapt.css.ident.none) {
         // no content
-    	frame.finish(true);
+    	frame.finish(false);
     	return frame.result();
     }
     self.createShadows(element, self.nodeContext.parent == null, elementStyle, computedStyle, styler,
@@ -597,6 +598,8 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 		} else if (ns == adapt.base.NS.SHADOW) {
 		    ns = adapt.base.NS.XHTML;
 			tag = self.nodeContext.inline ? "span" : "div";		
+		} else {
+			custom = !!self.customRenderer;			
 		}
 	    if (listItem) {
 	        if (firstTime) {
@@ -620,9 +623,14 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 	    if (custom) {
 	    	elemResult = self.customRenderer(element, self.nodeContext.parent.viewNode, computedStyle);
 	    } else {
-	    	elemResult = adapt.task.newResult(self.createElement(ns, tag));
+	    	elemResult = adapt.task.newResult(null);
 	    }
-	    elemResult.then(function(result) {
+	    elemResult.then(/** @param {Element} result */ function(result) {
+	    	if (result) {
+	    		needToProcessChildren = !custom;
+	    	} else {
+	    		result = self.createElement(ns, tag);
+	    	}
 	    	if (tag == "a") {
 	    		result.addEventListener("click", self.page.hrefHandler, false);
 	    	}
@@ -711,10 +719,12 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 		    self.viewNode = result;
 		    if (fetchers.length) {
 		    	adapt.taskutil.waitForFetchers(fetchers).then(function() {
-		    		frame.finish(true);
+		    		frame.finish(needToProcessChildren);
 		    	});
 		    } else {
-		    	frame.timeSlice().thenFinish(frame);
+		    	frame.timeSlice().then(function() {
+		    		frame.finish(needToProcessChildren);
+		    	});
 		    }
 	    });
     });
@@ -723,13 +733,14 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 
 /**
  * @param {boolean} firstTime
- * @return {!adapt.task.Result.<boolean>} holding true
+ * @return {!adapt.task.Result.<boolean>} holding true if children should be processed
  */
 adapt.vgen.ViewFactory.prototype.createNodeView = function(firstTime) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame
 		= adapt.task.newFrame("createNodeView");
 	var result;
+	var needToProcessChildren = true;
     if (self.sourceNode.nodeType == 1) {
         result = self.createElementView(firstTime);
     } else {
@@ -741,7 +752,8 @@ adapt.vgen.ViewFactory.prototype.createNodeView = function(firstTime) {
 	    }
     	result = adapt.task.newResult(true);
     }
-    result.then(function() {
+    result.then(function(processChildren) {
+    	needToProcessChildren = processChildren;
 	    self.nodeContext.viewNode = self.viewNode;
 	    if (self.viewNode) {
 		    var parent = self.nodeContext.parent ? self.nodeContext.parent.viewNode : self.viewRoot;
@@ -749,7 +761,7 @@ adapt.vgen.ViewFactory.prototype.createNodeView = function(firstTime) {
 		    	parent.appendChild(self.viewNode);
 		    }
 	    }
-	    frame.finish(true);
+	    frame.finish(needToProcessChildren);
     });
     return frame.result();
 };
@@ -912,11 +924,13 @@ adapt.vgen.ViewFactory.prototype.nextInTree = function(nodeContext) {
 	}
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
 		= adapt.task.newFrame("nextInTree");
-	this.setCurrent(nodeContext, true).then(function() {
-	    if (!nodeContext.viewNode) {
+	this.setCurrent(nodeContext, true).then(function(processChildren) {
+	    if (!nodeContext.viewNode || !processChildren) {
 	    	nodeContext = nodeContext.modify();
 	    	nodeContext.after = true; // skip
-	    	nodeContext.inline = true;
+	    	if (!nodeContext.viewNode) {
+	    		nodeContext.inline = true;
+	    	}
 	    }
 		frame.finish(nodeContext);
 	});

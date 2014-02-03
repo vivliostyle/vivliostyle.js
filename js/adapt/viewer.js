@@ -201,20 +201,21 @@ adapt.viewer.Viewer.prototype.showPage = function() {
 /**
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.viewer.Viewer.prototype.showPosition = function() {
-    if (!this.pagePosition) {
-		this.pagePosition = this.opfView.getPagePosition();
-		if (!this.pagePosition) {
-			return adapt.task.newResult(false);
-		}
+adapt.viewer.Viewer.prototype.reportPosition = function() {
+    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("reportPosition");
+    var self = this;
+    if (!self.pagePosition) {
+		self.pagePosition = self.opfView.getPagePosition();
     }
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame =
-    		adapt.task.newFrame("showPosition");
-    this.opf.getCFI(this.pagePosition.spineIndex, 
+    self.opf.getCFI(this.pagePosition.spineIndex, 
 		this.pagePosition.offsetInItem).then(function(cfi) {
-			// Report CFI
-			frame.finish(true);
-		});
+			var page = self.currentPage;
+			var r = self.waitForLoading && page.fetchers.length > 0 
+				? adapt.taskutil.waitForFetchers(page.fetchers) : adapt.task.newResult(true);
+			r.then(function() {
+				self.sendLocationNotification(page, cfi).thenFinish(frame);
+			});
+		});    
     return frame.result();
 };
 
@@ -282,29 +283,25 @@ adapt.viewer.Viewer.prototype.resize = function() {
 	self.opfView.setPagePosition(self.pagePosition).then(function(page) {
 		self.setNewPage(page);
 		self.showPage();
-		self.showPosition().then(function() {
-    		var r = self.waitForLoading && page.fetchers.length > 0 
-				? adapt.taskutil.waitForFetchers(page.fetchers) : adapt.task.newResult(true);
-			r.then(function() {
-				self.sendLocationNotification(page).thenFinish(frame);
-			});
-		});
+		self.reportPosition().thenFinish(frame);
 	});
 	return frame.result();
 };
 
 /**
  * @param {adapt.vtree.Page} page
+ * @param {string} cfi
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.viewer.Viewer.prototype.sendLocationNotification = function(page) {
+adapt.viewer.Viewer.prototype.sendLocationNotification = function(page, cfi) {
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("sendLocationNotification");
 	var notification = {"t": "nav", "first": page.isFirstPage,
 			"last": page.isLastPage};
 	var self = this;
-	this.opf.getEPageFromPosition(self.opfView.getPagePosition()).then(function(epage) {
+	this.opf.getEPageFromPosition(self.pagePosition).then(function(epage) {
 		notification["epage"] = epage;
 		notification["epageCount"] = self.opf.epageCount;
+		notification["cfi"] = cfi;
 		self.callback(notification);
 		frame.finish(true);
 	});
@@ -354,13 +351,7 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
 			self.pagePosition = null;
 			self.setNewPage(page);
 	    	self.showPage();
-	    	self.showPosition().then(function() {
-	    		var r = self.waitForLoading && page.fetchers.length > 0 
-	    			? adapt.taskutil.waitForFetchers(page.fetchers) : adapt.task.newResult(true);
-	    		r.then(function() {
-	    			self.sendLocationNotification(page).thenFinish(frame);
-	    		});
-	    	});
+			self.reportPosition().thenFinish(frame);
 		} else {
 			frame.finish(true);
 		}

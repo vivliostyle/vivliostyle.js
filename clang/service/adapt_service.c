@@ -17,14 +17,20 @@
 
 #include "clang/resources/adapt_resources.h"
 
+// This will need to be adjusted if we have too many resources.
+#define MAX_RESOURCES 2048
+
 static const char adapt_driver[] =
 "<html xmlns='http://www.w3.org/1999/xhtml' "
     "style='position:absolute;left:0px;top:0px;width:100%;height:100%;margin:0px;overflow:hidden;'>"
 "<head>"
 "<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no'/>"
 "<meta name='apple-mobile-web-app-capable' content='yes'/>"
-"<script>CLOSURE_NO_DEPS = true;adapt_embedded=true;</script>"
+"<script>CLOSURE_NO_DEPS=true;adapt_embedded=true;</script>"
 "<script src='adapt.js'></script>"
+"<script src='MathJax/MathJax.js?config=MML_HTMLorMML'></script>"
+"<script>if(MathJax&amp;&amp;MathJax.Hub)MathJax.Hub.Config({jax:['input/MathML','output/HTML-CSS'],"
+"showProcessingMessages:false,messageStyle:'none'});</script>"
 "</head>"
 "<body style='position:absolute;left:0px;top:0px;width:100%;height:100%;margin:0px;padding:0px;overflow:hidden;'>"
 "</body>"
@@ -134,8 +140,6 @@ static int adapt_serve_zip_metadata(struct mg_connection* connection, adapt_serv
 
 static const char adapt_http_error[] = "HTTP/1.1 500 Unrecognized request\r\n\r\n";
 
-// void __stdcall OutputDebugStringA(const char* s);
-
 static int adapt_serve(struct mg_connection* connection) {
     struct mg_request_info* request = mg_get_request_info(connection);
     adapt_serving_context* context = (adapt_serving_context*)request->user_data;
@@ -217,21 +221,18 @@ static int adapt_serve(struct mg_connection* connection) {
             mg_write(connection, adapt_driver, sizeof adapt_driver);
             return 1;
         } else {
-            int i = 0;
-            while (adapt_resources[i].name) {
-                if (strcmp(file_name, adapt_resources[i].name) == 0) {
-                    mg_printf(connection,
-                              "HTTP/1.1 200 Success\r\n"
-                              "Content-Type: %s\r\n"
-                              "Content-Length: %d\r\n"
-                              "%s"
-                              "\r\n",
-                              adapt_resources[i].type, adapt_resources[i].size,
-                              adapt_resources[i].compressed ? "Content-Encoding: gzip\r\n" : "");
-                    mg_write(connection, adapt_resources[i].data, adapt_resources[i].size);
-                    return 1;
-                }
-                i++;
+            const struct adapt_resource* resource = adapt_resource_find(file_name);
+            if (resource) {
+                mg_printf(connection,
+                        "HTTP/1.1 200 Success\r\n"
+                        "Content-Type: %s\r\n"
+                        "Content-Length: %d\r\n"
+                        "%s"
+                        "\r\n",
+                        resource->type, resource->size,
+                        resource->compressed ? "Content-Encoding: gzip\r\n" : "");
+                mg_write(connection, resource->data, resource->size);
+                return 1;
             }
         }
     }
@@ -269,6 +270,7 @@ adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
     char* document_root = 0;
     adapt_serving_context* context = (adapt_serving_context*)calloc(sizeof(adapt_serving_context), 1);
     time_t timeval;
+    adapt_resource_init();
     time(&timeval);
     sprintf(context->content_prefix, "/E%lx/", timeval);
     sprintf(context->html_prefix, "/H%lx/", timeval);

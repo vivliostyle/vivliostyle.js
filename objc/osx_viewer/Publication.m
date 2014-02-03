@@ -93,6 +93,8 @@ static const int maxFontSizeIndex = sizeof fontSizes / sizeof(int) - 1;
             callback->packaging_type = ADAPT_PACKAGE_FILE_SYSTEM;
             callback->base_path = strcpy(malloc(strlen(path)+1), path);
             self.callback = callback;
+            self.absoluteURL = absoluteURL;
+            self.typeName = typeName;
             return [self finishReading];
         }
     }
@@ -103,6 +105,7 @@ static const int maxFontSizeIndex = sizeof fontSizes / sizeof(int) - 1;
 {
     if ([typeName isEqual:@"EPUB Publication"] || [typeName isEqual:@"Zip Archive"] || [typeName isEqual:@"FictionBook 2.0 eBook"]) {
         self.input = data;
+        self.typeName = typeName;
         adapt_callback* callback = MakeContentCallback(self);
         callback->packaging_type = [typeName isEqual:@"FictionBook 2.0 eBook"] ? ADAPT_PACKAGE_SINGLE_FILE : ADAPT_PACKAGE_ZIP;
         self.callback = callback;
@@ -123,12 +126,20 @@ static const int maxFontSizeIndex = sizeof fontSizes / sizeof(int) - 1;
     }
     self.bootstrapURL = [NSString stringWithCString:url encoding:NSUTF8StringEncoding];
     self.serving_context = context;
+    if (self.mainView) {
+        [[self.mainView mainFrame] loadRequest: [NSURLRequest requestWithURL:[NSURL URLWithString:self.bootstrapURL]]];
+    }
     return YES;
 }
 
 - (void)close
 {
+    [self closeFile];
     [super close];
+}
+
+- (void)closeFile
+{
     adapt_stop_serving(self.serving_context);
     if (self.callback->base_path) {
         free((char *)self.callback->base_path);
@@ -566,6 +577,17 @@ static const int maxFontSizeIndex = sizeof fontSizes / sizeof(int) - 1;
 
 - (IBAction)nextPage:(id)sender {
     [self sendCommand: @"a:'moveTo',where:'next'"];
+}
+
+- (IBAction)reloadPage:(id)sender {
+    if (self.typeName) {
+        [self closeFile];
+        if (self.absoluteURL) {
+            [self readFromURL: self.absoluteURL ofType: self.typeName error:nil];
+        } else {
+            [self readFromData: self.input ofType:self.typeName error:nil];
+        }
+    }
 }
 
 @end

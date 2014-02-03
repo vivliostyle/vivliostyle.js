@@ -299,7 +299,7 @@ adapt.vtree.LayoutContext.prototype.clone = function() {};
  * the previous page.
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {boolean} firstTime
- * @return {!adapt.task.Result.<boolean>}
+ * @return {!adapt.task.Result.<boolean>} true if children should be processed as well
  */
 adapt.vtree.LayoutContext.prototype.setCurrent = function(nodeContext, firstTime) {};
 

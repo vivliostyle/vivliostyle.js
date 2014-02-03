@@ -11,4 +11,7 @@ struct adapt_resource {
 
 extern const struct adapt_resource adapt_resources[];
 
-#endif /* ADAPT_CLANG_RESOURCES__ADAPT_RESOURCES_H */
+extern const struct adapt_resource* adapt_resource_find(const char* name);
+extern void adapt_resource_init();
+
+#endif  /* ADAPT_CLANG_RESOURCES__ADAPT_RESOURCES_H */

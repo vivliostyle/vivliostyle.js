@@ -996,6 +996,103 @@ adapt.epub.OPFView.prototype.makePage = function(viewItem, pos) {
 
 /**
  * @param {adapt.xmldoc.XMLDocHolder} xmldoc
+ * @param {Element} srcElem
+ * @param {Node} viewParent
+ * @return {!adapt.task.Result.<Element>}
+ */
+adapt.epub.OPFView.prototype.makeObjectView = function(xmldoc, srcElem, viewParent, computedStyle) {
+	var data = srcElem.getAttribute("data");
+	if (data) {
+		data = adapt.base.resolveURL(data, xmldoc.url);
+		var mediaType = srcElem.getAttribute("media-type");
+		if (!mediaType) {
+			var path = self.opf.getPathFromURL(data);
+			if (path) {
+				var item = self.opf.itemMapByPath[path];
+				if (item) {
+					mediaType = item.mediaType;
+				}
+			}
+		}
+		if (mediaType) {
+			var handlerSrc = self.opf.bindings[mediaType];
+			if (handlerSrc) {
+				result = self.viewport.document.createElement("iframe");
+				result.style.border = "none";
+				var srcParam = adapt.base.lightURLEncode(data);
+				var typeParam = adapt.base.lightURLEncode(mediaType);
+				var sb = new adapt.base.StringBuffer();
+				sb.append(handlerSrc);
+				sb.append("?src=");
+				sb.append(srcParam);
+				sb.append("&type=");
+				sb.append(typeParam);
+				for (var c = srcElem.firstChild; c; c = c.nextSibling) {
+					if (c.nodeType == 1) {
+						var ce = /** @type {Element} */ (c);
+						if (ce.localName == "param" && ce.namespaceURI == adapt.base.NS.XHTML) {
+							var pname = ce.getAttribute("name");
+							var pvalue = ce.getAttribute("value");
+							if (pname && pvalue) {
+								sb.append("&");
+								sb.append(encodeURIComponent(pname));
+								sb.append("=");
+								sb.append(encodeURIComponent(pvalue));
+							}
+						}
+					}
+				}
+				result.setAttribute("src", sb.toString());
+				var width = srcElem.getAttribute("width");
+				if (width) {
+					result.setAttribute("width", width);
+				}
+				var height = srcElem.getAttribute("height");
+				if (height) {
+					result.setAttribute("height", height);
+				}
+			}
+		}
+	}
+	if (!result) {
+		result = self.viewport.document.createElement("span");
+	}
+	return adapt.task.newResult(element);
+};
+
+/**
+ * @param {adapt.xmldoc.XMLDocHolder} xmldoc
+ * @param {Element} srcElem
+ * @param {Node} viewParent
+ * @return {!adapt.task.Result.<Element>}
+ */
+adapt.epub.OPFView.prototype.makeMathMLView = function(xmldoc, srcElem, viewParent, computedStyle) {
+	// See if MathJax installed, use it if it is.
+	var math = window["MathJax"];
+	if (math) {
+		var hub = math["Hub"];
+		if (hub) {
+			var doc = viewParent.ownerDocument;
+			var span = doc.createElement("span");
+			viewParent.appendChild(span);
+			var clonedMath = doc.importNode(srcElem, true);
+			span.appendChild(clonedMath);
+			var queue = hub["queue"];
+			queue["Push"](["Typeset", hub, span]);
+			/** @type {!adapt.task.Frame.<Element>} */ var frame
+						= adapt.task.newFrame("navigateToEPage");
+			var continuation = frame.suspend();
+			queue["Push"](function() {
+				continuation.schedule(span);
+			});
+			return frame.result();
+		}
+	}
+	return adapt.task.newResult(null);
+};
+
+/**
+ * @param {adapt.xmldoc.XMLDocHolder} xmldoc
  * @return {adapt.vgen.CustomRenderer}
  */
 adapt.epub.OPFView.prototype.makeCustomRenderer = function(xmldoc) {
@@ -1006,66 +1103,12 @@ adapt.epub.OPFView.prototype.makeCustomRenderer = function(xmldoc) {
 	 * @return {!adapt.task.Result.<Element>}
 	 */
 	return function(srcElem, viewParent, computedStyle) {
-		var result = null;
 		if (srcElem.localName == "object" && srcElem.namespaceURI == adapt.base.NS.XHTML) {
-			var data = srcElem.getAttribute("data");
-			if (data) {
-				data = adapt.base.resolveURL(data, xmldoc.url);
-				var mediaType = srcElem.getAttribute("media-type");
-				if (!mediaType) {
-					var path = self.opf.getPathFromURL(data);
-					if (path) {
-						var item = self.opf.itemMapByPath[data];
-						if (item) {
-							mediaType = item.mediaType;
-						}
-					}
-				}
-				if (mediaType) {
-					var handlerSrc = self.opf.bindings[mediaType];
-					if (handlerSrc) {
-						result = self.viewport.document.createElement("iframe");
-						result.style.border = "none";
-						var srcParam = adapt.base.lightURLEncode(data);
-						var typeParam = adapt.base.lightURLEncode(mediaType);
-						var sb = new adapt.base.StringBuffer();
-						sb.append(handlerSrc);
-						sb.append("?src=");
-						sb.append(srcParam);
-						sb.append("&type=");
-						sb.append(typeParam);
-						for (var c = srcElem.firstChild; c; c = c.nextSibling) {
-							if (c.nodeType == 1) {
-								var ce = /** @type {Element} */ (c);
-								if (ce.localName == "param" && ce.namespaceURI == adapt.base.NS.XHTML) {
-									var pname = ce.getAttribute("name");
-									var pvalue = ce.getAttribute("value");
-									if (pname && pvalue) {
-										sb.append("&");
-										sb.append(encodeURIComponent(pname));
-										sb.append("=");
-										sb.append(encodeURIComponent(pvalue));
-									}
-								}
-							}
-						}
-						result.setAttribute("src", sb.toString());
-						var width = srcElem.getAttribute("width");
-						if (width) {
-							result.setAttribute("width", width);
-						}
-						var height = srcElem.getAttribute("height");
-						if (height) {
-							result.setAttribute("height", height);
-						}
-					}
-				}
-			}
+			return self.makeObjectView(xmldoc, srcElem, viewParent, computedStyle);
+		} else if (srcElem.namespaceURI == adapt.base.NS.MATHML) {
+			return self.makeMathMLView(xmldoc, srcElem, viewParent, computedStyle);
 		}
-		if (!result) {
-			result = self.viewport.document.createElement("span");
-		}
-		return adapt.task.newResult(/** @type {Element} */ (result));
+		return adapt.task.newResult(null);
 	};
 };
 

@@ -543,7 +543,10 @@ adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
             right = adapt.expr.sub(scope, remains, adapt.expr.add(scope, left, width));
         }
     }
-    var snapWidth = adapt.pm.toExprZero(scope, style["snap-width"], parentWidth);
+    // snap-width is inherited
+    var snapWidthVal = style["snap-width"] || 
+    	(this.parentInstance ? this.parentInstance.style["snap-width"] : null);
+    var snapWidth = adapt.pm.toExprZero(scope, snapWidthVal, parentWidth);
     style["left"] = new adapt.css.Expr(left);
     style["margin-left"] = new adapt.css.Expr(marginLeft);
     style["border-left-width"] = new adapt.css.Expr(borderLeftWidth);
@@ -640,7 +643,10 @@ adapt.pm.PageBoxInstance.prototype.initVertical = function() {
             bottom = adapt.expr.sub(scope, remains, adapt.expr.add(scope, top, height));
         }
     }
-    var snapHeight = adapt.pm.toExprZero(scope, style["snap-height"], parentWidth);
+    // snap-height is inherited
+    var snapHeightVal = style["snap-height"] || 
+    	(this.parentInstance ? this.parentInstance.style["snap-height"] : null);
+    var snapHeight = adapt.pm.toExprZero(scope, snapHeightVal, parentWidth);
     style["top"] = new adapt.css.Expr(top);
     style["margin-top"] = new adapt.css.Expr(marginTop);
     style["border-top-width"] = new adapt.css.Expr(borderTopWidth);
