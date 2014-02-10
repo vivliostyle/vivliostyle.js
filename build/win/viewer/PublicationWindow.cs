@@ -101,6 +101,16 @@ namespace Viewer
                 {
 
                 }
+                else if (type.Equals("hyperlink"))
+                {
+                    if (jsonMessage.ContainsKey("internal") && jsonMessage.ContainsKey("href"))
+                    {
+                        if (jsonMessage["internal"].Equals(true))
+                        {
+                            NavigateTo(jsonMessage["href"].ToString());
+                        }
+                    }
+                }
             }
         }
 
@@ -131,25 +141,43 @@ namespace Viewer
 
         protected void GoNextPage_Click(object sender, System.EventArgs e)
         {
-            SendCommand("{\"a\":\"moveTo\",\"where\":\"next\"}");
+            NextPage();
         }
 
         protected void GoPreviousPage_Click(object sender, System.EventArgs e)
         {
-            SendCommand("{\"a\":\"moveTo\",\"where\":\"previous\"}");
+            PreviousPage();
         }
 
         protected void GoFirstPage_Click(object sender, System.EventArgs e)
         {
-            SendCommand("{\"a\":\"moveTo\",\"where\":\"first\"}");
+            FirstPage();
         }
 
         protected void GoLastPage_Click(object sender, System.EventArgs e)
         {
-            SendCommand("{\"a\":\"moveTo\",\"where\":\"last\"}");
+            LastPage();
         }
 
         private void GoReload_Click(object sender, EventArgs e)
+        {
+            Reload();
+        }
+
+
+        // ------------------- Actions -----------------------------
+
+        public void NavigateTo(string url)
+        {
+            SendCommand("{\"a\":\"moveTo\",\"url\":\"" + url + "\"}");
+        }
+
+        public void ToggleTOC()
+        {
+            SendCommand("{\"a\":\"toc\",\"v\":\"toggle\",\"autohide\":true}");
+        }
+
+        public void Reload()
         {
             if (service != null)
             {
@@ -158,6 +186,28 @@ namespace Viewer
             }
             Open(file, selfContained, zipped);
         }
+
+        public void NextPage()
+        {
+            SendCommand("{\"a\":\"moveTo\",\"where\":\"next\"}");
+        }
+
+        public void PreviousPage()
+        {
+            SendCommand("{\"a\":\"moveTo\",\"where\":\"previous\"}");
+        }
+
+        public void FirstPage()
+        {
+            SendCommand("{\"a\":\"moveTo\",\"where\":\"first\"}");
+        }
+
+        public void LastPage()
+        {
+            SendCommand("{\"a\":\"moveTo\",\"where\":\"last\"}");
+        }
+
+        //-------------------------------------------------------------
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {

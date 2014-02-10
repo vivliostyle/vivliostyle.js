@@ -75,7 +75,7 @@ echo "{0}};"
 echo "#define hash_table_size (2 * $count + 1)"
 cat << EOF
 
-static struct adapt_resource* hash_table[hash_table_size];
+static const struct adapt_resource* hash_table[hash_table_size];
 static int hash_table_initialized;
 
 static unsigned int string_hash(const char* s) {
@@ -111,10 +111,10 @@ const struct adapt_resource* adapt_resource_find(const char* file_name) {
 }
 
 void adapt_resource_init() {
+    int i = 0;
     if (hash_table_initialized) {
         return;
     }
-    int i = 0;
     while (adapt_resources[i].name) {
         unsigned int hash = string_hash(adapt_resources[i].name);
         int k = hash % hash_table_size;

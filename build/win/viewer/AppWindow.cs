@@ -56,5 +56,56 @@ namespace Viewer
             //Icon icon = new Icon("resources/magazine.ico");
             //this.Icon = icon;
         }
+
+        private void ToggleTOC_Click(object sender, EventArgs e)
+        {
+            Form activeChild = ActiveMdiChild;
+            if (activeChild != null)
+            {
+                ((PublicationWindow)activeChild).ToggleTOC();
+            }
+        }
+
+        private void NextPage_Click(object sender, EventArgs e)
+        {
+            Form activeChild = ActiveMdiChild;
+            if (activeChild != null)
+            {
+                ((PublicationWindow)activeChild).NextPage();
+            }
+        }
+
+        private void FirstPage_Click(object sender, EventArgs e)
+        {
+            Form activeChild = ActiveMdiChild;
+            if (activeChild != null)
+            {
+                ((PublicationWindow)activeChild).FirstPage();
+            }
+        }
+        private void PreviousPage_Click(object sender, EventArgs e)
+        {
+            Form activeChild = ActiveMdiChild;
+            if (activeChild != null)
+            {
+                ((PublicationWindow)activeChild).PreviousPage();
+            }
+        }
+        private void LastPage_Click(object sender, EventArgs e)
+        {
+            Form activeChild = ActiveMdiChild;
+            if (activeChild != null)
+            {
+                ((PublicationWindow)activeChild).LastPage();
+            }
+        }
+        private void Reload_Click(object sender, EventArgs e)
+        {
+            Form activeChild = ActiveMdiChild;
+            if (activeChild != null)
+            {
+                ((PublicationWindow)activeChild).Reload();
+            }
+        }
     }
 }

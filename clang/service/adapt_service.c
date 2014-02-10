@@ -29,7 +29,7 @@ static const char adapt_driver[] =
 "<script>CLOSURE_NO_DEPS=true;adapt_embedded=true;</script>"
 "<script src='adapt.js'></script>"
 "<script src='MathJax/MathJax.js?config=MML_HTMLorMML'></script>"
-"<script>if(MathJax&amp;&amp;MathJax.Hub)MathJax.Hub.Config({jax:['input/MathML','output/HTML-CSS'],"
+"<script>if(window['MathJax']&amp;&amp;window['MathJax'].Hub)MathJax.Hub.Config({jax:['input/MathML','output/HTML-CSS'],"
 "showProcessingMessages:false,messageStyle:'none'});</script>"
 "</head>"
 "<body style='position:absolute;left:0px;top:0px;width:100%;height:100%;margin:0px;padding:0px;overflow:hidden;'>"
