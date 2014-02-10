@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="12F45" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment defaultVersion="1070" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
@@ -97,6 +97,11 @@
             <toolbar key="toolbar" implicitIdentifier="92906252-78FE-4B14-A618-D2151C673C8D" autosavesConfiguration="NO" displayMode="iconAndLabel" sizeMode="regular" id="rtL-2c-6R5">
                 <allowedToolbarItems>
                     <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="vA4-JC-IdE"/>
+                    <toolbarItem implicitItemIdentifier="23AB91B6-C468-46E4-B149-282571A9EA39" label="ToC" paletteLabel="Table of Contents" tag="-1" image="toc" visibilityPriority="3" id="9Yd-Kf-er3">
+                        <connections>
+                            <action selector="toggleTOC:" target="-2" id="to9-AM-jNT"/>
+                        </connections>
+                    </toolbarItem>
                     <toolbarItem implicitItemIdentifier="49219576-1E4D-4BA0-887D-81AD67382A1C" label="First" paletteLabel="First page" tag="-1" image="first" visibilityPriority="-2" id="6xl-Po-DpH">
                         <connections>
                             <action selector="firstPage:" target="-2" id="LB7-ba-p8u"/>
@@ -161,6 +166,7 @@
                     </toolbarItem>
                 </allowedToolbarItems>
                 <defaultToolbarItems>
+                    <toolbarItem reference="9Yd-Kf-er3"/>
                     <toolbarItem reference="6xl-Po-DpH"/>
                     <toolbarItem reference="Nu8-SU-afZ"/>
                     <toolbarItem reference="4Ob-0M-dB8"/>
@@ -469,5 +475,6 @@
         <image name="previous" width="128" height="128"/>
         <image name="reload" width="128" height="128"/>
         <image name="smalltext" width="128" height="128"/>
+        <image name="toc" width="128" height="128"/>
     </resources>
 </document>

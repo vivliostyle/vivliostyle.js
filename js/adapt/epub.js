@@ -7,6 +7,7 @@ goog.provide('adapt.epub');
 goog.require('adapt.font');
 goog.require('adapt.ops');
 goog.require('adapt.cfi');
+goog.require('adapt.toc');
 
 /**
  * @typedef {{spineIndex:number,pageIndex:number,offsetInItem:number}}
@@ -138,7 +139,7 @@ adapt.epub.EPUBDocStore.prototype.loadOPF = function(epubURL, root, haveZipMetad
  */
 adapt.epub.OPFItem = function() {
 	/** @type {?string} */ this.id = null;
-	/** @type {?string} */ this.src = null;
+	/** @type {string} */ this.src = "";
 	/** @type {?string} */ this.mediaType = null;
 	/** @type {Element} */ this.itemRefElement = null;
 	/** @type {number} */ this.spineIndex = -1;
@@ -146,6 +147,7 @@ adapt.epub.OPFItem = function() {
 	/** @type {?boolean} */ this.compressed = null;
 	/** @type {number} */ this.epage = 0;
 	/** @type {number} */ this.epageCount = 0;
+	/** @type {Object.<string,boolean>} */ this.itemProperties = adapt.base.emptyObj;
 };
 
 /**
@@ -157,6 +159,10 @@ adapt.epub.OPFItem.prototype.initWithElement = function(itemElem, opfURL) {
 	this.id = itemElem.getAttribute("id");
 	this.src = adapt.base.resolveURL(itemElem.getAttribute("href"), opfURL);
 	this.mediaType = itemElem.getAttribute("media-type");
+	var propStr = itemElem.getAttribute("properties");
+	if (propStr) {
+		this.itemProperties = adapt.base.arrayToSet(propStr.split(/\s+/));
+	}
 };
 
 /**
@@ -208,6 +214,7 @@ adapt.epub.OPFDoc = function(store, epubURL) {
 	/** @type {adapt.xmldoc.XMLDocHolder} */ this.opfXML = null;
 	/** @type {adapt.xmldoc.XMLDocHolder} */ this.encXML = null;
 	/** @type {Array.<adapt.epub.OPFItem>} */ this.items = null;
+	/** @type {Array.<adapt.epub.OPFItem>} */ this.spine = null;
 	/** @type {Object.<string,adapt.epub.OPFItem>} */ this.itemMap = null;
 	/** @type {Object.<string,adapt.epub.OPFItem>} */ this.itemMapByPath = null;
 	/** @const */ this.epubURL = epubURL;
@@ -217,6 +224,9 @@ adapt.epub.OPFDoc = function(store, epubURL) {
 	/** @type {Object} */ this.toolData = null;  // see adapt.devel
 	/** @type {number} */ this.epageCount = 0;
 	/** @type {adapt.base.JSON} */ this.metadata = {};
+	/** @type {adapt.epub.OPFItem} */ this.ncxToc = null;
+	/** @type {adapt.epub.OPFItem} */ this.xhtmlToc = null;
+	/** @type {adapt.epub.OPFItem} */ this.cover = null;
 };
 
 /**
@@ -369,6 +379,7 @@ adapt.epub.readMetadata = function(mroot, prefixes) {
 		return null;
 	};
 	var order = 1;
+	// List of metadata items.
 	var rawItems = mroot.childElements().forEachNonNull(/** @return {?adapt.epub.RawMetaItem} */ function(node) {
 		if (node.localName == "meta") {
 			var p = resolveProperty(node.getAttribute("property"));
@@ -385,6 +396,7 @@ adapt.epub.readMetadata = function(mroot, prefixes) {
 		}
 		return null;
 	});
+	// Items grouped by their target id.
 	var rawItemsByTarget = adapt.base.multiIndexArray(rawItems,
 			function(rawItem) { return rawItem.refines; });
 	var makeMetadata = function(map) {
@@ -460,10 +472,16 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
 		function(elem) {
 			var item = new adapt.epub.OPFItem();
 			item.initWithElement( /** @type {Element} */ (elem), opfXML.url);
+			if (!self.xhtmlToc && item.itemProperties["nav"]) {
+				self.xhtmlToc = item;
+			}
+			if (!self.cover && item.itemProperties["cover-image"]) {
+				self.cover = item;
+			}
 			return item;
 		});
 	this.itemMap = adapt.base.indexArray(this.items,
-			/** @type {function(*):?string} */ (adapt.epub.getOPFItemId));
+			/** @type {function(adapt.epub.OPFItem):?string} */ (adapt.epub.getOPFItemId));
 	this.itemMapByPath = adapt.base.indexArray(this.items, function(item) {
 				return self.getPathFromURL(item.src);
 			});
@@ -478,6 +496,10 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
 				}
 				return item;
 			});
+	var tocAttr = pkg.child("spine").attribute("toc")[0];
+	if (tocAttr) {
+		this.ncxToc = this.itemMap[tocAttr];
+	}
 	var idpfObfURLs = encXML.doc().child("encryption").child("EncryptedData")
 		.predicate(adapt.xmldoc.predicate.withChild("EncryptionMethod",
 				adapt.xmldoc.predicate.withAttribute("Algorithm",
@@ -711,6 +733,7 @@ adapt.epub.OPFViewItem;
  * @param {adapt.vgen.Viewport} viewport
  * @param {adapt.font.Mapper} fontMapper
  * @param {adapt.expr.Preferences} pref
+ * @implements {adapt.vgen.CustomRendererFactory}
  */
 adapt.epub.OPFView = function(opf, viewport, fontMapper, pref) {
 	/** @const */ this.opf = opf;
@@ -997,27 +1020,28 @@ adapt.epub.OPFView.prototype.makePage = function(viewItem, pos) {
 /**
  * @param {adapt.xmldoc.XMLDocHolder} xmldoc
  * @param {Element} srcElem
- * @param {Node} viewParent
+ * @param {Element} viewParent
  * @return {!adapt.task.Result.<Element>}
  */
 adapt.epub.OPFView.prototype.makeObjectView = function(xmldoc, srcElem, viewParent, computedStyle) {
 	var data = srcElem.getAttribute("data");
+	/** @type {Element} */ var result = null;
 	if (data) {
 		data = adapt.base.resolveURL(data, xmldoc.url);
 		var mediaType = srcElem.getAttribute("media-type");
 		if (!mediaType) {
-			var path = self.opf.getPathFromURL(data);
+			var path = this.opf.getPathFromURL(data);
 			if (path) {
-				var item = self.opf.itemMapByPath[path];
+				var item = this.opf.itemMapByPath[path];
 				if (item) {
 					mediaType = item.mediaType;
 				}
 			}
 		}
 		if (mediaType) {
-			var handlerSrc = self.opf.bindings[mediaType];
+			var handlerSrc = this.opf.bindings[mediaType];
 			if (handlerSrc) {
-				result = self.viewport.document.createElement("iframe");
+				result = this.viewport.document.createElement("iframe");
 				result.style.border = "none";
 				var srcParam = adapt.base.lightURLEncode(data);
 				var typeParam = adapt.base.lightURLEncode(mediaType);
@@ -1055,15 +1079,16 @@ adapt.epub.OPFView.prototype.makeObjectView = function(xmldoc, srcElem, viewPare
 		}
 	}
 	if (!result) {
-		result = self.viewport.document.createElement("span");
+		result = this.viewport.document.createElement("span");
 	}
-	return adapt.task.newResult(element);
+	// Need to cast because we need {Element}, not {!Element}
+	return adapt.task.newResult(/** @type {Element} */ (result));
 };
 
 /**
  * @param {adapt.xmldoc.XMLDocHolder} xmldoc
  * @param {Element} srcElem
- * @param {Node} viewParent
+ * @param {Element} viewParent
  * @return {!adapt.task.Result.<Element>}
  */
 adapt.epub.OPFView.prototype.makeMathMLView = function(xmldoc, srcElem, viewParent, computedStyle) {
@@ -1088,18 +1113,19 @@ adapt.epub.OPFView.prototype.makeMathMLView = function(xmldoc, srcElem, viewPare
 			return frame.result();
 		}
 	}
-	return adapt.task.newResult(null);
+	return adapt.task.newResult(/** @type {Element} */ (null));
 };
 
 /**
  * @param {adapt.xmldoc.XMLDocHolder} xmldoc
  * @return {adapt.vgen.CustomRenderer}
+ * @override
  */
 adapt.epub.OPFView.prototype.makeCustomRenderer = function(xmldoc) {
 	var self = this;
 	/**
 	 * @param {Element} srcElem
-	 * @param {Node} viewParent
+	 * @param {Element} viewParent
 	 * @return {!adapt.task.Result.<Element>}
 	 */
 	return function(srcElem, viewParent, computedStyle) {
@@ -1108,7 +1134,7 @@ adapt.epub.OPFView.prototype.makeCustomRenderer = function(xmldoc) {
 		} else if (srcElem.namespaceURI == adapt.base.NS.MATHML) {
 			return self.makeMathMLView(xmldoc, srcElem, viewParent, computedStyle);
 		}
-		return adapt.task.newResult(null);
+		return adapt.task.newResult(/** @type {Element} */ (null));
 	};
 };
 
@@ -1179,5 +1205,61 @@ adapt.epub.OPFView.prototype.setPagePosition = function(pos) {
 		this.offsetInItem = 0;		
 	}
 	return this.renderPage();
+};
+
+/**
+ * @param {boolean} autohide
+ * @return {!adapt.task.Result.<adapt.vtree.Page>}
+ */
+adapt.epub.OPFView.prototype.showTOC = function(autohide) {
+	var opf = this.opf;
+	var toc = opf.xhtmlToc || opf.ncxToc;
+	if (!toc) {
+		return adapt.task.newResult(/** @type {adapt.vtree.Page} */ (null));
+	}
+	/** @type {!adapt.task.Frame.<adapt.vtree.Page>} */ var frame
+			= adapt.task.newFrame("showTOC");
+	if (!this.tocView) {
+		this.tocView = new adapt.toc.TOCView(opf.store, toc.src, opf.lang, 
+				this.clientLayout, this.fontMapper, this.pref, this);
+	}
+	var viewport = this.viewport;
+	var tocWidth = Math.min(350, Math.round(0.67 * viewport.width) - 16);
+	var tocHeight = viewport.height - 6;
+    var pageCont = /** @type {HTMLElement} */ (viewport.document.createElement("div"));
+    viewport.root.appendChild(pageCont);
+    pageCont.style.position = "absolute";
+    pageCont.style.visibility = "hidden";
+    pageCont.style.left = "3px";
+    pageCont.style.top = "3px";
+    pageCont.style.width = (tocWidth + 10) + "px";
+    pageCont.style.maxHeight = tocHeight + "px";
+    pageCont.style.overflow = "scroll";
+    pageCont.style.overflowX = "hidden";
+    pageCont.style.background = "#EEE";
+    pageCont.style.border = "1px outset #999";
+    pageCont.style["borderRadius"] = "2px";
+    pageCont.style["boxShadow"] = " 5px 5px rgba(128,128,128,0.3)";
+	this.tocView.showTOC(pageCont, viewport, tocWidth, tocHeight, this.viewport.fontSize).then(function(page) {
+	    pageCont.style.visibility = "visible";
+	    frame.finish(page);
+	});
+	return frame.result();
+};
+
+/**
+ * @return {void}
+ */
+adapt.epub.OPFView.prototype.hideTOC = function() {
+	if (this.tocView) {
+		this.tocView.hideTOC();
+	}
+};
+
+/**
+ * @return {boolean}
+ */
+adapt.epub.OPFView.prototype.isTOCVisible = function(autohide) {
+	return this.tocView && this.tocView.isTOCVisible();
 };
 

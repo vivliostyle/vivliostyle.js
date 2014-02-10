@@ -579,6 +579,10 @@ static const int maxFontSizeIndex = sizeof fontSizes / sizeof(int) - 1;
     [self sendCommand: @"a:'moveTo',where:'next'"];
 }
 
+- (IBAction)toggleTOC:(id)sender {
+    [self sendCommand: @"a:'toc',v:'toggle',autohide:true"];
+}
+
 - (IBAction)reloadPage:(id)sender {
     if (self.typeName) {
         [self closeFile];

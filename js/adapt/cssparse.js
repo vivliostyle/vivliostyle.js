@@ -833,6 +833,12 @@ adapt.cssparse.actionsError = [];
 adapt.cssparse.actionsErrorDecl = [];
 
 /**
+ * @type {!Array.<adapt.cssparse.Action>}
+ * @const
+ */
+adapt.cssparse.actionsErrorSelector = [];
+
+/**
  * @type {!Array.<number>}
  * @const
  */
@@ -1017,6 +1023,14 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsErrorDecl[adapt.csstok.TokenType.O_PAR] = adapt.cssparse.Action.ERROR_PUSH;
     actionsErrorDecl[adapt.csstok.TokenType.C_PAR] = adapt.cssparse.Action.ERROR_POP;
     actionsErrorDecl[adapt.csstok.TokenType.SEMICOL] = adapt.cssparse.Action.ERROR_SEMICOL;
+    var actionsErrorSelector = adapt.cssparse.actionsErrorSelector;
+    actionsErrorSelector[adapt.csstok.TokenType.EOF] = adapt.cssparse.Action.DONE;
+    actionsErrorSelector[adapt.csstok.TokenType.O_BRC] = adapt.cssparse.Action.ERROR_PUSH;
+    actionsErrorSelector[adapt.csstok.TokenType.C_BRC] = adapt.cssparse.Action.ERROR_POP;
+    actionsErrorSelector[adapt.csstok.TokenType.O_BRK] = adapt.cssparse.Action.ERROR_PUSH;
+    actionsErrorSelector[adapt.csstok.TokenType.C_BRK] = adapt.cssparse.Action.ERROR_POP;
+    actionsErrorSelector[adapt.csstok.TokenType.O_PAR] = adapt.cssparse.Action.ERROR_PUSH;
+    actionsErrorSelector[adapt.csstok.TokenType.C_PAR] = adapt.cssparse.Action.ERROR_POP;
 
     var priority = adapt.cssparse.priority;
     priority[adapt.csstok.TokenType.C_PAR] = 0;
@@ -1415,7 +1429,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
 	            // figure out if this is a property assignment or selector
 	            if (tokenizer.nthToken(1).type != adapt.csstok.TokenType.COLON) {
 	                // cannot be property assignment
-                    this.actions = adapt.cssparse.actionsError;
+                    this.actions = adapt.cssparse.actionsErrorSelector;
                     handler.error("E_CSS_COLON_EXPECTED", token);
 	                continue;
 	            }
@@ -1583,7 +1597,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 } else if (token.type == adapt.csstok.TokenType.BAR) {
                     text = "";
                 } else {
-                    this.actions = adapt.cssparse.actionsError;
+                    this.actions = adapt.cssparse.actionsErrorSelector;
                     handler.error("E_CSS_ATTR", token);
                     tokenizer.consume();
                     continue;
@@ -1592,7 +1606,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 if (token.type == adapt.csstok.TokenType.BAR) {
                     ns = text ? this.namespacePrefixToURI[text] : text;
                     if (ns == null) {
-                        this.actions = adapt.cssparse.actionsError;
+                        this.actions = adapt.cssparse.actionsErrorSelector;
                         handler.error("E_CSS_UNDECLARED_PREFIX", token);
                         tokenizer.consume();
                         continue;
@@ -1600,7 +1614,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     tokenizer.consume();
                     token = tokenizer.token();
                     if (token.type != adapt.csstok.TokenType.IDENT) {
-                        this.actions = adapt.cssparse.actionsError;
+                        this.actions = adapt.cssparse.actionsErrorSelector;
                         handler.error("E_CSS_ATTR_NAME_EXPECTED", token);
                         continue;
                     }
@@ -1627,7 +1641,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         tokenizer.consume();
                         continue;
                     default:
-                        this.actions = adapt.cssparse.actionsError;
+                        this.actions = adapt.cssparse.actionsErrorSelector;
                         handler.error("E_CSS_ATTR_OP_EXPECTED", token);
                         continue;
                 }
@@ -1640,12 +1654,12 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         token = tokenizer.token();
                         break;
                     default:
-                        this.actions = adapt.cssparse.actionsError;
+                        this.actions = adapt.cssparse.actionsErrorSelector;
                         handler.error("E_CSS_ATTR_VAL_EXPECTED", token);
                         continue;
                 }
                 if (token.type != adapt.csstok.TokenType.C_BRK) {
-                    this.actions = adapt.cssparse.actionsError;
+                    this.actions = adapt.cssparse.actionsErrorSelector;
                     handler.error("E_CSS_ATTR", token);
                     continue;
                 }
@@ -2128,6 +2142,12 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                             continue;
                         }
                         break;
+					case "":
+						// No text after @
+                        handler.error("E_CSS_UNEXPECTED_AT" + text, token);
+                        // Error recovery using selector rules.
+                        this.actions = adapt.cssparse.actionsErrorSelector;
+						continue;
                     default:
                         handler.error("E_CSS_AT_UNKNOWN " + text, token);
                         this.actions = adapt.cssparse.actionsError;
@@ -2180,10 +2200,12 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     handler.startSelectorRule();
                     continue;
                 }
-                if (this.actions !== adapt.cssparse.actionsError && 
+                if (this.actions !== adapt.cssparse.actionsError &&
+                		this.actions !== adapt.cssparse.actionsErrorSelector && 
                 		this.actions !== adapt.cssparse.actionsErrorDecl) {
-                    this.exprError("E_CSS_SYNTAX", token);
-                    continue;  // Let error-recovery to process the offending token
+                	handler.error("E_CSS_SYNTAX", token);
+                	this.actions = adapt.cssparse.actionsErrorSelector;
+                    continue;  // Let error-recovery to re-process the offending token
                 }
                 tokenizer.consume();
                 continue;

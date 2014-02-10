@@ -111,7 +111,8 @@ adapt.base.NS = {
 	XLINK: "http://www.w3.org/1999/xlink",
 	SHADOW: "http://www.pyroxy.com/ns/shadow",
 	SVG: "http://www.w3.org/2000/svg",
-	DC: "http://purl.org/dc/elements/1.1/"
+	DC: "http://purl.org/dc/elements/1.1/",
+	NCX: "http://www.daisy.org/z3986/2005/ncx/"
 };
 
 
@@ -526,6 +527,13 @@ adapt.base.appendBase64 = function(sb, data) {
 };
 
 /**
+ * @template T
+ * @param {T} param
+ * @return {T}
+ */
+adapt.base.identity = function(param) {return param;};
+
+/**
  * Index array using key function. First encountered item wins on collision. Elements with
  * empty and null keys are dropped.
  * @template T
@@ -543,6 +551,22 @@ adapt.base.indexArray = function(arr, key) {
 		}
 	}
 	return map;
+};
+
+/** @const */
+adapt.base.emptyObj = {};
+
+/**
+ * Convert array of strings to an object with the values in the array set to true.
+ * @param {Array.<string>} arr
+ * @return {Object.<string,boolean>}
+ */
+adapt.base.arrayToSet = function(arr) {
+	var set = {};
+	for (var i = 0; i < arr.length; i++) {
+		set[arr[i]] = true;
+	}
+	return set;
 };
 
 /**
@@ -624,10 +648,12 @@ adapt.base.SimpleEventTarget = function() {
  */
 adapt.base.SimpleEventTarget.prototype.dispatchEvent = function(evt) {
 	var list = this.listeners[evt.type];
-	evt.target = this;
-	evt.currentTarget = this;
-	for (var i = 0; i < list.length; i++) {
-		list[i](evt);
+	if (list) {
+		evt.target = this;
+		evt.currentTarget = this;
+		for (var i = 0; i < list.length; i++) {
+			list[i](evt);
+		}
 	}
 };
 

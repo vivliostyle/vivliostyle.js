@@ -55,6 +55,9 @@ adapt.sampleapp.keydown = function(evt) {
     	self.resize().thenFinish(frame);
     	break;
     	*/
+    case 84: // 'T' - show TOC
+    	adapt.sampleapp.sendCommand({"a": "toc", "v": "toggle", "autohide": true});
+    	break;    	
     case 187:  // plus
     	adapt.sampleapp.fontSize *= 1.2;
     	adapt.sampleapp.sendCommand({"a": "configure", "fontSize": Math.round(adapt.sampleapp.fontSize)});
@@ -128,6 +131,10 @@ adapt.sampleapp.callback = function(msg) {
 				"f", adapt.base.lightURLEncode(cfi || "")));
 		}
 		break;
+	case "hyperlink" :
+		if (msg["internal"]) {
+	    	adapt.sampleapp.sendCommand({"a": "moveTo", "url": msg["href"]});			
+		}
 	}
 };
 
@@ -144,10 +151,10 @@ adapt.sampleapp.main = function() {
 	} else {
 		viewer.initEmbed({"a": "loadXML", "url": xmlURL, "autoresize": true, "fragment": fragment});
 	}
-    window.addEventListener("keydown", adapt.sampleapp.keydown, false);
-    window.addEventListener("touchstart", adapt.sampleapp.touch, false);
-    window.addEventListener("touchmove", adapt.sampleapp.touch, false);
-    window.addEventListener("touchend", adapt.sampleapp.touch, false);	
+    window.addEventListener("keydown", /** @type {Function} */ (adapt.sampleapp.keydown), false);
+    window.addEventListener("touchstart", /** @type {Function} */ (adapt.sampleapp.touch), false);
+    window.addEventListener("touchmove", /** @type {Function} */ (adapt.sampleapp.touch), false);
+    window.addEventListener("touchend", /** @type {Function} */ (adapt.sampleapp.touch), false);	
 };
 
 if(window["__loaded"])

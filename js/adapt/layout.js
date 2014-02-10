@@ -545,17 +545,23 @@ adapt.layout.Column.prototype.createFloats = function() {
 };
 
 /**
- * @param {Array.<adapt.vtree.NodeContext>} checkPoints array of
- *                      possible breaking points.
+ * @param {adapt.vtree.NodeContext} nodeContext position after the block
+ * @param {Array.<adapt.vtree.NodeContext>} checkPoints array of possible breaking points.
  * @param {number} index index of the breaking point
  * @param {number} boxOffset box offset
  * @return {number} edge position
  */
-adapt.layout.Column.prototype.calculateEdge = function(checkPoints, index, boxOffset) {
-    var nodePosition = checkPoints[index];
-    var offset = boxOffset - nodePosition.boxOffset;
+adapt.layout.Column.prototype.calculateEdge = function(nodeContext, checkPoints, index, boxOffset) {
+	var edge;
+	if (nodeContext && nodeContext.after && !nodeContext.inline) {
+		edge = adapt.layout.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
+		if (!isNaN(edge))
+			return edge;
+	}
+    nodeContext = checkPoints[index];
+    var offset = boxOffset - nodeContext.boxOffset;
     while(true) {
-        var edge = adapt.layout.calculateEdge(nodePosition, this.clientLayout, offset, this.vertical);
+        edge = adapt.layout.calculateEdge(nodeContext, this.clientLayout, offset, this.vertical);
         if (!isNaN(edge))
             return edge;
         if (offset > 0) {
@@ -565,9 +571,9 @@ adapt.layout.Column.prototype.calculateEdge = function(checkPoints, index, boxOf
         index--;
         if (index < 0)
             return this.beforeEdge;
-        nodePosition = checkPoints[index];
-        if (nodePosition.viewNode.nodeType != 1)
-            offset = nodePosition.viewNode.textContent.length;
+        nodeContext = checkPoints[index];
+        if (nodeContext.viewNode.nodeType != 1)
+            offset = nodeContext.viewNode.textContent.length;
     }
 };
 
@@ -1025,7 +1031,7 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
 	    	return;
 	    }
 	    // record the height
-	    var edge = self.calculateEdge(checkPoints, checkPointIndex,
+	    var edge = self.calculateEdge(resNodeContext, checkPoints, checkPointIndex,
                 checkPoints[checkPointIndex].boxOffset);
 	    var overflown = self.isOverflown(edge);
 	    self.updateMaxReachedAfterEdge(edge);
@@ -1039,7 +1045,8 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
 	    lineCont.then(function(nodeContext) {
 		    if (checkPoints.length > 0) {
 		    	self.saveBoxBreakPosition(checkPoints);
-		    	if (overflown && !self.isLoneImage(checkPoints)) {
+		    	// TODO: how to signal overflow in the last pagargaph???
+		    	if (overflown && !self.isLoneImage(checkPoints) && nodeContext) {
 		    		nodeContext = nodeContext.modify();
 		    		nodeContext.overflow = true;
 		    	}
@@ -1079,7 +1086,7 @@ adapt.layout.Column.prototype.findAcceptableBreakInside = function(checkPoints, 
             else
                 low1 = mid1;
         }
-        var edge = this.calculateEdge(checkPoints, low1, mid);
+        var edge = this.calculateEdge(null, checkPoints, low1, mid);
         if (this.vertical ? edge < edgePosition : edge > edgePosition) {
             high = mid - 1;
             while (checkPoints[low1].boxOffset == mid)

@@ -156,7 +156,7 @@ html|q:after {
     content: close-quote;
 }
 
-/* epub-specific */
+/*------------------ epub-specific ---------------------*/
 
 @namespace epub "http://www.idpf.org/2007/ops";
 
@@ -210,7 +210,45 @@ epub|case[required-namespace::supported] ~ epub|default {
 	display: none;
 }
 
-/*--------- fb2 -----------------*/
+nav[epub|type=toc] li {
+	margin: 0px;
+    -adapt-margin-start: 20px;
+    -adapt-behavior: toc-node;	
+}
+
+nav[epub|type=toc] ol {
+    -adapt-behavior: toc-container;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+/*--------------- ncx ----------------------*/
+
+@namespace ncx "http://www.daisy.org/z3986/2005/ncx/";
+
+ncx|ncx {
+	display: block;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+ncx|navPoint {
+	display: block;
+	margin: 0px;
+    -adapt-margin-start: 20px;
+    -adapt-behavior: toc-node;
+}
+
+ncx|navLabel {
+	color: black;
+	text-decoration: none;
+}
+
+ncx|content {
+	display: none;
+}
+
+/*---------------- fb2 ---------------------*/
 
 @namespace fb2 "http://www.gribuser.ru/xml/fictionbook/2.0";
 

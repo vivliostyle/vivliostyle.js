@@ -59,7 +59,7 @@ adapt.viewer.Viewer = function(window, instanceId, callbackFn) {
     	self.needResize = true;
     	self.kick();
     };
-    /** @const {adapt.base.EventListener} */ this.hyperlinkListener = null;
+    /** @type {adapt.base.EventListener} */ this.hyperlinkListener = function(evt) {};
     /**
      * @type {Object.<string, adapt.viewer.Action>}
      */
@@ -67,7 +67,8 @@ adapt.viewer.Viewer = function(window, instanceId, callbackFn) {
         "loadEPUB": this.loadEPUB,
         "loadXML": this.loadXML,
         "configure": this.configure,
-    	"moveTo": this.moveTo
+    	"moveTo": this.moveTo,
+    	"toc": this.showTOC
     };
 };
 
@@ -253,6 +254,9 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.reset = function() {
+	if (this.opfView) {
+		this.opfView.hideTOC();
+	}
 	this.viewport = this.createViewport();
     this.opfView = new adapt.epub.OPFView(this.opf, this.viewport, this.fontMapper, this.pref);
 };
@@ -290,7 +294,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
 
 /**
  * @param {adapt.vtree.Page} page
- * @param {string} cfi
+ * @param {?string} cfi
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.sendLocationNotification = function(page, cfi) {
@@ -298,10 +302,12 @@ adapt.viewer.Viewer.prototype.sendLocationNotification = function(page, cfi) {
 	var notification = {"t": "nav", "first": page.isFirstPage,
 			"last": page.isLastPage};
 	var self = this;
-	this.opf.getEPageFromPosition(self.pagePosition).then(function(epage) {
+	this.opf.getEPageFromPosition(/** @type {adapt.epub.Position} */(self.pagePosition)).then(function(epage) {
 		notification["epage"] = epage;
 		notification["epageCount"] = self.opf.epageCount;
-		notification["cfi"] = cfi;
+		if (cfi) {
+			notification["cfi"] = cfi;
+		}
 		self.callback(notification);
 		frame.finish(true);
 	});
@@ -357,6 +363,44 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
 		}
 	});
 	return frame.result();
+};
+
+/**
+ * @param {adapt.base.JSON} command
+ * @return {!adapt.task.Result.<boolean>}
+ */
+adapt.viewer.Viewer.prototype.showTOC = function(command) {
+	var autohide = !!command["autohide"];
+	var visibility = command["v"];
+	var currentVisibility = this.opfView.isTOCVisible();
+	if (currentVisibility) {
+		if (visibility == "show") {
+			return adapt.task.newResult(true);			
+		}
+	} else {
+		if (visibility == "hide") {
+			return adapt.task.newResult(true);			
+		}		
+	}
+	if (currentVisibility) {
+		this.opfView.hideTOC();
+		return adapt.task.newResult(true);
+	} else {
+		var self = this;
+		/** @type {adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("showTOC");
+		this.opfView.showTOC(autohide).then(function(page) {
+			if (page) {
+				if (autohide) {
+					var hideTOC = function() {self.opfView.hideTOC();};
+					page.addEventListener("hyperlink", hideTOC, false);
+					page.container.addEventListener("click", hideTOC, false);
+				}
+				page.addEventListener("hyperlink", self.hyperlinkListener, false);
+			}
+			frame.finish(true);
+		});
+		return frame.result();
+	}
 };
 
 /**

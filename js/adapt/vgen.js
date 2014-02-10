@@ -46,9 +46,20 @@ adapt.vgen.frontEdgeBlackListVert = {
 /**
  * Function taking source element, parent view node and CSS properties and returning
  * Result holding view element.
- * @typedef function(Element,Node,Object.<string,adapt.css.Val>):!adapt.task.Result.<Element>
+ * @typedef function(Element,Element,Object.<string,adapt.css.Val>):!adapt.task.Result.<Element>
  */
 adapt.vgen.CustomRenderer;
+
+/**
+ * @interface
+ */
+adapt.vgen.CustomRendererFactory = function() {};
+
+/**
+ * @param {adapt.xmldoc.XMLDocHolder} xmldoc
+ * @return {adapt.vgen.CustomRenderer}
+ */
+adapt.vgen.CustomRendererFactory.prototype.makeCustomRenderer = function(xmldoc) {};
 
 
 /**
@@ -494,8 +505,12 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
     	self.nodeContext.nodeShadow = shadowParam;    			
 	    var inFloatContainer = self.nodeContext.parent && self.nodeContext.parent.floatContainer;
 	    var floatSide = computedStyle["float"];
-	    if ((inFloatContainer || computedStyle["position"] === adapt.css.ident.absolute) &&
-	    		floatSide !== adapt.css.ident.footnote) {
+	    if (computedStyle["position"] === adapt.css.ident.absolute || 
+	    		computedStyle["position"] === adapt.css.ident.relative) {
+	    	self.nodeContext.floatContainer = true;
+	    	floatSide = null;
+	    }
+	    if (inFloatContainer && floatSide !== adapt.css.ident.footnote) {
 	    	floatSide = null;
 	    }
 	    var floating = floatSide === adapt.css.ident.left || 
@@ -595,6 +610,38 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 			if (!tag) {
 				tag = self.nodeContext.inline ? "span" : "div";
 			}
+		} else if (ns == adapt.base.NS.NCX) {
+			ns = adapt.base.NS.XHTML;
+			if (tag == "ncx" || tag == "navPoint") {
+				tag = "div";
+			} else if (tag == "navLabel") {
+				// Cheat here. Translate source to HTML, so it will plug in into the rest of the
+				// pipeline.
+				tag = "span";
+				var navParent = element.parentNode;
+				if (navParent) {
+					// find the content element
+					var href = null;
+					for (var c = navParent.firstChild; c; c = c.nextSibling) {
+						if (c.nodeType != 1) {
+							continue;
+						}
+						var childElement = /** @type {Element} */ (c);
+						if (childElement.namespaceURI == adapt.base.NS.NCX 
+								&& childElement.localName == "content") {
+							href = childElement.getAttribute("src");
+							break;
+						}
+					}
+					if (href) {
+						tag = "a";
+						element = element.ownerDocument.createElementNS(ns, "a");
+						element.setAttribute("href", href);
+					}
+				}
+			} else {
+				tag = "span";
+			}
 		} else if (ns == adapt.base.NS.SHADOW) {
 		    ns = adapt.base.NS.XHTML;
 			tag = self.nodeContext.inline ? "span" : "div";		
@@ -619,15 +666,24 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 	    		tag = "span";
 	    	}
 	    }
+	    if (computedStyle["behavior"]) {
+	    	var behavior = computedStyle["behavior"].toString();
+	    	if (behavior != "none" && self.customRenderer) {
+	    		custom = true;
+	    	}
+	    }
 	    var elemResult;
 	    if (custom) {
-	    	elemResult = self.customRenderer(element, self.nodeContext.parent.viewNode, computedStyle);
+	    	var parentNode = self.nodeContext.parent ? self.nodeContext.parent.viewNode : null;
+	    	elemResult = self.customRenderer(element, /** @type {Element} */ (parentNode), computedStyle);
 	    } else {
 	    	elemResult = adapt.task.newResult(null);
 	    }
 	    elemResult.then(/** @param {Element} result */ function(result) {
 	    	if (result) {
-	    		needToProcessChildren = !custom;
+	    		if (custom) {
+	    			needToProcessChildren = result.getAttribute("data-adapt-process-children") == "true";
+	    		}
 	    	} else {
 	    		result = self.createElement(ns, tag);
 	    	}
