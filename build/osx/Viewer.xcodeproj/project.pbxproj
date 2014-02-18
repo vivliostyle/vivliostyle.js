@@ -8,18 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		D00BBA5118878F8200D4E578 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00BBA5018878F8200D4E578 /* Cocoa.framework */; };
-		D00BBA7318878F8200D4E578 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00BBA7218878F8200D4E578 /* XCTest.framework */; };
-		D00BBA7418878F8200D4E578 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00BBA5018878F8200D4E578 /* Cocoa.framework */; };
-		D00BBAA91887939C00D4E578 /* adapt_service.c in Sources */ = {isa = PBXBuildFile; fileRef = D00BBAA71887939C00D4E578 /* adapt_service.c */; };
-		D00BBAAF188793DB00D4E578 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = D00BBAAC188793DB00D4E578 /* LICENSE */; };
-		D00BBAB0188793DB00D4E578 /* mongoose.c in Sources */ = {isa = PBXBuildFile; fileRef = D00BBAAD188793DB00D4E578 /* mongoose.c */; };
-		D00BBAB3188793FA00D4E578 /* miniz.c in Sources */ = {isa = PBXBuildFile; fileRef = D00BBAB2188793FA00D4E578 /* miniz.c */; };
 		D00BBAC01887B58F00D4E578 /* first.png in Resources */ = {isa = PBXBuildFile; fileRef = D00BBABB1887B58F00D4E578 /* first.png */; };
 		D00BBAC11887B58F00D4E578 /* last.png in Resources */ = {isa = PBXBuildFile; fileRef = D00BBABC1887B58F00D4E578 /* last.png */; };
 		D00BBAC21887B58F00D4E578 /* next.png in Resources */ = {isa = PBXBuildFile; fileRef = D00BBABD1887B58F00D4E578 /* next.png */; };
 		D00BBAC31887B58F00D4E578 /* pdf.png in Resources */ = {isa = PBXBuildFile; fileRef = D00BBABE1887B58F00D4E578 /* pdf.png */; };
 		D00BBAC41887B58F00D4E578 /* previous.png in Resources */ = {isa = PBXBuildFile; fileRef = D00BBABF1887B58F00D4E578 /* previous.png */; };
-		D00BBAC71887BA1300D4E578 /* adapt_resources.c in Sources */ = {isa = PBXBuildFile; fileRef = D00BBAC61887BA1300D4E578 /* adapt_resources.c */; };
 		D00BBAC91887BC0200D4E578 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00BBAC81887BC0200D4E578 /* WebKit.framework */; };
 		D06818501899E9DA00C858A7 /* reload.png in Resources */ = {isa = PBXBuildFile; fileRef = D068184F1899E9DA00C858A7 /* reload.png */; };
 		D0723D1C18A4AAA600566844 /* toc.png in Resources */ = {isa = PBXBuildFile; fileRef = D0723D1B18A4AAA600566844 /* toc.png */; };
@@ -33,19 +26,10 @@
 		D07334731889FEC500E58094 /* Publication.xib in Resources */ = {isa = PBXBuildFile; fileRef = D073346E1889FEC500E58094 /* Publication.xib */; };
 		D07334741889FEC500E58094 /* Viewer.plist in Resources */ = {isa = PBXBuildFile; fileRef = D073346F1889FEC500E58094 /* Viewer.plist */; };
 		D0733476188B79D600E58094 /* PDFProgress.xib in Resources */ = {isa = PBXBuildFile; fileRef = D0733475188B79D600E58094 /* PDFProgress.xib */; };
+		D0A4E82618B13A3C00CAAA51 /* libViewerLib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A4E82518B13A3C00CAAA51 /* libViewerLib.a */; };
 		D0B8E9791891EF3B00886BFA /* bigtext.png in Resources */ = {isa = PBXBuildFile; fileRef = D0B8E9771891EF3B00886BFA /* bigtext.png */; };
 		D0B8E97A1891EF3B00886BFA /* smalltext.png in Resources */ = {isa = PBXBuildFile; fileRef = D0B8E9781891EF3B00886BFA /* smalltext.png */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		D00BBA7518878F8200D4E578 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D00BBA4518878F8200D4E578 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D00BBA4C18878F8200D4E578;
-			remoteInfo = "Publication Viewer";
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		D00BBA4D18878F8200D4E578 /* Publication Viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Publication Viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -53,21 +37,12 @@
 		D00BBA5318878F8200D4E578 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		D00BBA5418878F8200D4E578 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		D00BBA5518878F8200D4E578 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		D00BBA7118878F8200D4E578 /* Publication ViewerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Publication ViewerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D00BBA7218878F8200D4E578 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		D00BBAA71887939C00D4E578 /* adapt_service.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = adapt_service.c; path = ../../clang/service/adapt_service.c; sourceTree = "<group>"; };
-		D00BBAA81887939C00D4E578 /* adapt_service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = adapt_service.h; path = ../../clang/service/adapt_service.h; sourceTree = "<group>"; };
-		D00BBAAC188793DB00D4E578 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LICENSE; path = ../../third_party/mongoose/LICENSE; sourceTree = "<group>"; };
-		D00BBAAD188793DB00D4E578 /* mongoose.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mongoose.c; path = ../../third_party/mongoose/mongoose.c; sourceTree = "<group>"; };
-		D00BBAAE188793DB00D4E578 /* mongoose.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mongoose.h; path = ../../third_party/mongoose/mongoose.h; sourceTree = "<group>"; };
-		D00BBAB2188793FA00D4E578 /* miniz.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = miniz.c; path = ../../third_party/miniz/miniz.c; sourceTree = "<group>"; };
-		D00BBAB81887B4BA00D4E578 /* adapt_resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = adapt_resources.h; path = ../../clang/resources/adapt_resources.h; sourceTree = "<group>"; };
 		D00BBABB1887B58F00D4E578 /* first.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = first.png; path = ../../resources/images/first.png; sourceTree = "<group>"; };
 		D00BBABC1887B58F00D4E578 /* last.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = last.png; path = ../../resources/images/last.png; sourceTree = "<group>"; };
 		D00BBABD1887B58F00D4E578 /* next.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = next.png; path = ../../resources/images/next.png; sourceTree = "<group>"; };
 		D00BBABE1887B58F00D4E578 /* pdf.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = pdf.png; path = ../../resources/images/pdf.png; sourceTree = "<group>"; };
 		D00BBABF1887B58F00D4E578 /* previous.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = previous.png; path = ../../resources/images/previous.png; sourceTree = "<group>"; };
-		D00BBAC61887BA1300D4E578 /* adapt_resources.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = adapt_resources.c; path = ../../clang/generated/adapt_resources.c; sourceTree = "<group>"; };
 		D00BBAC81887BC0200D4E578 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		D068184F1899E9DA00C858A7 /* reload.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = reload.png; path = ../../resources/images/reload.png; sourceTree = "<group>"; };
 		D0723D1B18A4AAA600566844 /* toc.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = toc.png; path = ../../resources/images/toc.png; sourceTree = "<group>"; };
@@ -82,6 +57,7 @@
 		D073346E1889FEC500E58094 /* Publication.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = Publication.xib; path = ../../objc/osx_viewer/Publication.xib; sourceTree = "<group>"; };
 		D073346F1889FEC500E58094 /* Viewer.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Viewer.plist; path = ../../objc/osx_viewer/Viewer.plist; sourceTree = "<group>"; };
 		D0733475188B79D600E58094 /* PDFProgress.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PDFProgress.xib; path = ../../objc/osx_viewer/PDFProgress.xib; sourceTree = "<group>"; };
+		D0A4E82518B13A3C00CAAA51 /* libViewerLib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libViewerLib.a; path = "../../../../Library/Developer/Xcode/DerivedData/Viewer-gnfytyqmfhrblcgtrvzlrdvqaifz/Build/Products/Debug/libViewerLib.a"; sourceTree = "<group>"; };
 		D0B8E9771891EF3B00886BFA /* bigtext.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = bigtext.png; path = ../../resources/images/bigtext.png; sourceTree = "<group>"; };
 		D0B8E9781891EF3B00886BFA /* smalltext.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = smalltext.png; path = ../../resources/images/smalltext.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -91,17 +67,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D0A4E82618B13A3C00CAAA51 /* libViewerLib.a in Frameworks */,
 				D00BBAC91887BC0200D4E578 /* WebKit.framework in Frameworks */,
 				D00BBA5118878F8200D4E578 /* Cocoa.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D00BBA6E18878F8200D4E578 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				D00BBA7418878F8200D4E578 /* Cocoa.framework in Frameworks */,
-				D00BBA7318878F8200D4E578 /* XCTest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,8 +80,6 @@
 			isa = PBXGroup;
 			children = (
 				D00BBAB91887B54B00D4E578 /* resources */,
-				D00BBAAA188793BA00D4E578 /* third_party */,
-				D00BBAA51887937900D4E578 /* clang */,
 				D00BBA941887911D00D4E578 /* objc */,
 				D00BBA4F18878F8200D4E578 /* Frameworks */,
 				D00BBA4E18878F8200D4E578 /* Products */,
@@ -124,7 +90,6 @@
 			isa = PBXGroup;
 			children = (
 				D00BBA4D18878F8200D4E578 /* Publication Viewer.app */,
-				D00BBA7118878F8200D4E578 /* Publication ViewerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -132,6 +97,7 @@
 		D00BBA4F18878F8200D4E578 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D0A4E82518B13A3C00CAAA51 /* libViewerLib.a */,
 				D00BBAC81887BC0200D4E578 /* WebKit.framework */,
 				D00BBA5018878F8200D4E578 /* Cocoa.framework */,
 				D00BBA7218878F8200D4E578 /* XCTest.framework */,
@@ -173,60 +139,6 @@
 			name = osx_viewer;
 			sourceTree = "<group>";
 		};
-		D00BBAA51887937900D4E578 /* clang */ = {
-			isa = PBXGroup;
-			children = (
-				D00BBAC51887B9F700D4E578 /* generated */,
-				D00BBAB71887B4A900D4E578 /* resources */,
-				D00BBAA61887938400D4E578 /* service */,
-			);
-			name = clang;
-			sourceTree = "<group>";
-		};
-		D00BBAA61887938400D4E578 /* service */ = {
-			isa = PBXGroup;
-			children = (
-				D00BBAA71887939C00D4E578 /* adapt_service.c */,
-				D00BBAA81887939C00D4E578 /* adapt_service.h */,
-			);
-			name = service;
-			sourceTree = "<group>";
-		};
-		D00BBAAA188793BA00D4E578 /* third_party */ = {
-			isa = PBXGroup;
-			children = (
-				D00BBAB1188793E600D4E578 /* miniz */,
-				D00BBAAB188793C300D4E578 /* mongoose */,
-			);
-			name = third_party;
-			sourceTree = "<group>";
-		};
-		D00BBAAB188793C300D4E578 /* mongoose */ = {
-			isa = PBXGroup;
-			children = (
-				D00BBAAC188793DB00D4E578 /* LICENSE */,
-				D00BBAAD188793DB00D4E578 /* mongoose.c */,
-				D00BBAAE188793DB00D4E578 /* mongoose.h */,
-			);
-			name = mongoose;
-			sourceTree = "<group>";
-		};
-		D00BBAB1188793E600D4E578 /* miniz */ = {
-			isa = PBXGroup;
-			children = (
-				D00BBAB2188793FA00D4E578 /* miniz.c */,
-			);
-			name = miniz;
-			sourceTree = "<group>";
-		};
-		D00BBAB71887B4A900D4E578 /* resources */ = {
-			isa = PBXGroup;
-			children = (
-				D00BBAB81887B4BA00D4E578 /* adapt_resources.h */,
-			);
-			name = resources;
-			sourceTree = "<group>";
-		};
 		D00BBAB91887B54B00D4E578 /* resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -252,14 +164,6 @@
 				D00BBABF1887B58F00D4E578 /* previous.png */,
 			);
 			name = images;
-			sourceTree = "<group>";
-		};
-		D00BBAC51887B9F700D4E578 /* generated */ = {
-			isa = PBXGroup;
-			children = (
-				D00BBAC61887BA1300D4E578 /* adapt_resources.c */,
-			);
-			name = generated;
 			sourceTree = "<group>";
 		};
 		D07334611888FBDF00E58094 /* about */ = {
@@ -290,24 +194,6 @@
 			productReference = D00BBA4D18878F8200D4E578 /* Publication Viewer.app */;
 			productType = "com.apple.product-type.application";
 		};
-		D00BBA7018878F8200D4E578 /* Publication ViewerTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D00BBA8418878F8200D4E578 /* Build configuration list for PBXNativeTarget "Publication ViewerTests" */;
-			buildPhases = (
-				D00BBA6D18878F8200D4E578 /* Sources */,
-				D00BBA6E18878F8200D4E578 /* Frameworks */,
-				D00BBA6F18878F8200D4E578 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				D00BBA7618878F8200D4E578 /* PBXTargetDependency */,
-			);
-			name = "Publication ViewerTests";
-			productName = "Publication ViewerTests";
-			productReference = D00BBA7118878F8200D4E578 /* Publication ViewerTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -316,11 +202,6 @@
 			attributes = {
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = Google;
-				TargetAttributes = {
-					D00BBA7018878F8200D4E578 = {
-						TestTargetID = D00BBA4C18878F8200D4E578;
-					};
-				};
 			};
 			buildConfigurationList = D00BBA4818878F8200D4E578 /* Build configuration list for PBXProject "Viewer" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -336,7 +217,6 @@
 			projectRoot = "";
 			targets = (
 				D00BBA4C18878F8200D4E578 /* Publication Viewer */,
-				D00BBA7018878F8200D4E578 /* Publication ViewerTests */,
 			);
 		};
 /* End PBXProject section */
@@ -356,7 +236,6 @@
 				D00BBAC31887B58F00D4E578 /* pdf.png in Resources */,
 				D07334741889FEC500E58094 /* Viewer.plist in Resources */,
 				D07334631888FC9300E58094 /* credits.rtf in Resources */,
-				D00BBAAF188793DB00D4E578 /* LICENSE in Resources */,
 				D073346718890F6700E58094 /* Images.xcassets in Resources */,
 				D0723D1C18A4AAA600566844 /* toc.png in Resources */,
 				D00BBAC01887B58F00D4E578 /* first.png in Resources */,
@@ -367,13 +246,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D00BBA6F18878F8200D4E578 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -381,31 +253,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D00BBAB3188793FA00D4E578 /* miniz.c in Sources */,
-				D00BBAA91887939C00D4E578 /* adapt_service.c in Sources */,
 				D07334721889FEC500E58094 /* Publication.m in Sources */,
-				D00BBAB0188793DB00D4E578 /* mongoose.c in Sources */,
-				D00BBAC71887BA1300D4E578 /* adapt_resources.c in Sources */,
 				D07334701889FEC500E58094 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D00BBA6D18878F8200D4E578 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		D00BBA7618878F8200D4E578 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D00BBA4C18878F8200D4E578 /* Publication Viewer */;
-			targetProxy = D00BBA7518878F8200D4E578 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		D00BBA8018878F8200D4E578 /* Release */ = {
@@ -449,27 +302,13 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = "$(SRCROOT)/../../objc/osx_viewer/Viewer.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(USER_LIBRARY_DIR)/Developer/Xcode/DerivedData/Viewer-gnfytyqmfhrblcgtrvzlrdvqaifz/Build/Products/Debug",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
-			};
-			name = Release;
-		};
-		D00BBA8618878F8200D4E578 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Publication Viewer.app/Contents/MacOS/Publication Viewer";
-				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-					"$(inherited)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "Publication Viewer/Publication Viewer-Prefix.pch";
-				INFOPLIST_FILE = "Publication ViewerTests/Publication ViewerTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;
 		};
@@ -515,27 +354,13 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = "$(SRCROOT)/../../objc/osx_viewer/Viewer.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(USER_LIBRARY_DIR)/Developer/Xcode/DerivedData/Viewer-gnfytyqmfhrblcgtrvzlrdvqaifz/Build/Products/Debug",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
-			};
-			name = Debug;
-		};
-		D00BBAB6188795C900D4E578 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Publication Viewer.app/Contents/MacOS/Publication Viewer";
-				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-					"$(inherited)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "Publication Viewer/Publication Viewer-Prefix.pch";
-				INFOPLIST_FILE = "Publication ViewerTests/Publication ViewerTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = xctest;
 			};
 			name = Debug;
 		};
@@ -556,15 +381,6 @@
 			buildConfigurations = (
 				D00BBA8318878F8200D4E578 /* Release */,
 				D00BBAB5188795C900D4E578 /* Debug */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		D00BBA8418878F8200D4E578 /* Build configuration list for PBXNativeTarget "Publication ViewerTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D00BBA8618878F8200D4E578 /* Release */,
-				D00BBAB6188795C900D4E578 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

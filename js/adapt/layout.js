@@ -27,6 +27,14 @@ adapt.layout.combineBreaks = function(break1, break2) {
 	return break1;
 };
 
+/** @const */
+adapt.layout.mediaTags = {
+	"img": true,
+	"svg": true,
+	"audio": true,
+	"video": true
+};
+
 /**
  * Chrome bug workaround.
  * @param {adapt.vtree.ClientLayout} clientLayout
@@ -266,6 +274,8 @@ adapt.layout.Column = function(element, layoutContext, clientLayout) {
 	/** @type {Array.<adapt.layout.FootnoteItem>} */ this.footnoteItems = null;
 	/** @type {?string} */ this.pageBreakType = null;
 	/** @type {boolean} */ this.forceNonfitting = true;
+	/** @type {number} */ this.leftFloatEdge = 0;  // bottom of the bottommost left float
+	/** @type {number} */ this.rightFloatEdge = 0;  // bottom of the bottommost right float
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
 
@@ -888,12 +898,18 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    adapt.base.setCSSProperty(element, "top",
 	    		(floatBox.y1 - self.box.y1 + self.paddingTop) + "px");
 	    var floatBoxEdge = self.vertical ? floatBox.x1 : floatBox.y2;
+	    // TODO: subtract after margin when determining overflow.
 	    if (!self.isOverflown(floatBoxEdge) || self.breakPositions.length == 0) {
+	        // no overflow
 	    	self.killFloats();
 	    	box = self.vertical ? adapt.geom.rotateBox(self.box) : self.box;
 	        adapt.geom.addFloatToBands(box, self.bands, floatHorBox, null, floatSide);
 	        self.createFloats();
-	        // no overflow
+	        if (floatSide == "left") {
+	        	self.leftFloatEdge = floatBoxEdge;
+	        } else {
+	        	self.rightFloatEdge = floatBoxEdge;	        	
+	        }
 	    	self.updateMaxReachedAfterEdge(floatBoxEdge);
 	        frame.finish(nodeContextAfter);
 	    } else {
@@ -1007,7 +1023,32 @@ adapt.layout.Column.prototype.isLoneImage = function(checkPoints) {
 		return false;
 	}
 	return checkPoints[0].sourceNode == checkPoints[1].sourceNode
-		&& (/** @type {Element} */(checkPoints[0].sourceNode).localName) == "img";
+		&& adapt.layout.mediaTags[/** @type {Element} */(checkPoints[0].sourceNode).localName];
+};
+
+/**
+ * @param {Array.<adapt.vtree.NodeContext>} trailingEdgeContexts
+ * @return {number}
+ */
+adapt.layout.Column.prototype.getTrailingMarginEdgeAdjustment = function(trailingEdgeContexts) {
+	// Margins push the computed height, but are not counted as overflow. We need to find
+	// the overall collapsed margin from all enclosed blocks.
+	var maxPos = 0;
+	var minNeg = 0;
+	for (var i = trailingEdgeContexts.length - 1; i >= 0; i--) {
+		var nodeContext = trailingEdgeContexts[i];
+		if (!nodeContext.after || !nodeContext.viewNode || nodeContext.viewNode.nodeType != 1) {
+			break;
+		}
+		var margin = this.getComputedMargin(/** @type {Element} */ (nodeContext.viewNode));
+		var m = this.vertical ? -margin.left : margin.bottom;
+		if (m > 0) {
+			maxPos = Math.max(maxPos, m);
+		} else {
+			minNeg = Math.min(minNeg, m);		
+		}
+	}
+	return maxPos - minNeg;
 };
 
 /**
@@ -1030,10 +1071,14 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
 	    	frame.finish(resNodeContext);
 	    	return;
 	    }
-	    // record the height
+	    // Record the height
+	    // TODO: should this be done after first-line calculation?
 	    var edge = self.calculateEdge(resNodeContext, checkPoints, checkPointIndex,
                 checkPoints[checkPointIndex].boxOffset);
 	    var overflown = self.isOverflown(edge);
+	    if (resNodeContext == null) {
+	    	edge += self.getTrailingMarginEdgeAdjustment(checkPoints);
+	    }
 	    self.updateMaxReachedAfterEdge(edge);
 	    var lineCont;
 	    if (nodeContext.firstPseudo) {
@@ -1438,21 +1483,96 @@ adapt.layout.Column.prototype.zeroIndent = function(val) {
 /**
  * Save a possible page break position on a CSS block edge. Check if it overflows.
  * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {Array.<adapt.vtree.NodeContext>} trailingEdgeContexts
  * @param {boolean} saveEvenOverflown
  * @param {?string} breakAtTheEdge
  * @return {boolean} true if overflows
  */
-adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext, saveEvenOverflown, breakAtTheEdge) {
+adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext,
+		trailingEdgeContexts, saveEvenOverflown, breakAtTheEdge) {
 	if (!nodeContext) {
 		return false;
 	}
     var edge = adapt.layout.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
 	var overflown = this.isOverflown(edge);
+	if (trailingEdgeContexts) {
+		edge += this.getTrailingMarginEdgeAdjustment(trailingEdgeContexts);
+	}
 	this.updateMaxReachedAfterEdge(edge);
 	if (saveEvenOverflown || !overflown) {
 		this.saveEdgeBreakPosition(nodeContext, breakAtTheEdge, overflown);
 	}
     return overflown;
+};
+
+/**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ */
+adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
+	if (!nodeContext.viewNode.parentNode) {
+		// Cannot do ceralance for nodes without parents
+		return;
+	}
+	// measure where the edge of the element would be without clearance
+	var margin = this.getComputedMargin(/** @type {Element} */ (nodeContext.viewNode));
+	var spacer = nodeContext.viewNode.ownerDocument.createElement("div");
+	if (this.vertical) {
+    	spacer.style.bottom = "0px";
+    	spacer.style.width = "1px";	    		
+    	spacer.style.marginRight = margin.right + "px";	    		
+	} else {
+    	spacer.style.right = "0px";
+    	spacer.style.height = "1px";
+    	spacer.style.marginTop = margin.top + "px";	    		
+	}
+	nodeContext.viewNode.parentNode.insertBefore(spacer, nodeContext.viewNode);
+    var spacerBox = this.clientLayout.getElementClientRect(spacer);
+	var edge = this.getBeforeEdge(spacerBox);
+	var dir = this.getBoxDir();
+	var clearEdge;
+	switch (nodeContext.clearSide) {
+	case "left" :
+		clearEdge = this.leftFloatEdge;
+		break;
+	case "right" :
+		clearEdge = this.rightFloatEdge;
+		break;
+	default :
+		clearEdge = dir * Math.max(this.rightFloatEdge*dir, this.leftFloatEdge*dir);
+	}
+	// edge holds the position where element border "before" edge will be without clearance.
+	// clearEdge is the "after" edge of the float to clear.
+	if (edge * dir >= clearEdge * dir) {
+		// No need for clearance
+		nodeContext.viewNode.parentNode.removeChild(spacer);
+	} else {
+		// Need some clearance, determine how much. Add the clearance node, measure its after
+		// edge and adjust after margin (required due to possible margin collapse before
+		// clearance was introduced).
+		var height = Math.max(1, (clearEdge - edge) * dir);
+		if (this.vertical) {
+			spacer.style.width = height + "px";
+		} else {
+			spacer.style.height = height + "px";			
+		}
+		spacerBox = this.clientLayout.getElementClientRect(spacer);
+		var afterEdge = this.getAfterEdge(spacerBox);
+		if (this.vertical) {
+			var wAdj = (afterEdge + margin.right) - clearEdge;
+			if ((wAdj > 0) == (margin.right >= 0)) {
+				// In addition to collapsed portion
+				wAdj += margin.right;
+			}
+			spacer.style.marginLeft = wAdj + "px";			
+		} else {
+			var hAdj = clearEdge - (afterEdge + margin.top);
+			if ((hAdj > 0) == (margin.top >= 0)) {
+				// In addition to collapsed portion
+				hAdj += margin.top;
+			}
+			spacer.style.marginBottom = hAdj + "px";			
+		}
+	}
 };
 
 /**
@@ -1469,6 +1589,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 		= adapt.task.newFrame("skipEdges");
 	var breakAtTheEdge = leadingEdge ? "avoid" : null;
 	var lastAfterNodeContext = null;
+	var trailingEdgeContexts = [];
 	frame.loopWithFrame(function(loopFrame) {
 		while (nodeContext) {
 			// A code block to be able to use break. Break moves to the next node position.
@@ -1484,7 +1605,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 					}
 					if (!nodeContext.after) {
 						// Leading edge of non-empty block
-						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, true, breakAtTheEdge)) {
+						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
 							nodeContext = (lastAfterNodeContext || nodeContext).modify();
 					    	nodeContext.overflow = true;
 						} else {
@@ -1495,15 +1616,21 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 						return;
 					}
 				}
-				if (nodeContext.floatSide && !nodeContext.after) {
-					// float
-					if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, true, breakAtTheEdge)) {
-						// overflow
-				    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
-				    	nodeContext.overflow = true;
+				if (!nodeContext.after) {
+					if (nodeContext.clearSide) {
+						// clear
+						self.applyClearance(nodeContext);
 					}
-					loopFrame.breakLoop();
-					return;
+					if (nodeContext.floatSide) {
+						// float
+						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
+							// overflow
+					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
+					    	nodeContext.overflow = true;
+						}
+						loopFrame.breakLoop();
+						return;
+					}
 				}
 				if (nodeContext.viewNode.nodeType != 1) {
 					// not an element
@@ -1513,17 +1640,19 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 				if (nodeContext.after) {
 					// Trailing edge
 					lastAfterNodeContext = nodeContext.copy();
+					trailingEdgeContexts.push(lastAfterNodeContext);
 					breakAtTheEdge = adapt.layout.combineBreaks(nodeContext.breakAfter, breakAtTheEdge);
-					if (style && !(self.zeroIndent(style.marginBottom) && self.zeroIndent(style.paddingBottom) &&
-							self.zeroIndent(style.borderBottomWidth))) {
+					if (style && !(self.zeroIndent(style.paddingBottom) && self.zeroIndent(style.borderBottomWidth))) {
 						// Non-zero trailing inset.
-						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, true, breakAtTheEdge)) {
+						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
 							// overflow
 					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
 					    	nodeContext.overflow = true;
 							loopFrame.breakLoop();
 							return;
 						}
+						// Margins don't collapse across non-zero borders and paddings.
+						trailingEdgeContexts = [lastAfterNodeContext];
 						breakAtTheEdge = null;
 						lastAfterNodeContext = null;
 					}			
@@ -1537,9 +1666,9 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 						return;			
 					}
 					var viewTag = nodeContext.viewNode.localName;
-					if (viewTag == "img" || viewTag == "svg") {
+					if (adapt.layout.mediaTags[viewTag]) {
 						// elements that have inherent content
-						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, true, breakAtTheEdge)) {
+						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
 							// overflow
 					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
 					    	nodeContext.overflow = true;
@@ -1547,10 +1676,9 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 						loopFrame.breakLoop();
 						return;
 					}
-					if (style && !(self.zeroIndent(style.marginTop) && self.zeroIndent(style.paddingTop) &&
-							self.zeroIndent(style.borderTopWidth))) {
+					if (style && !(self.zeroIndent(style.paddingTop) && self.zeroIndent(style.borderTopWidth))) {
 						// Non-sero leading inset
-						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, true, breakAtTheEdge)) {
+						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
 							// overflow
 					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
 					    	nodeContext.overflow = true;
@@ -1559,6 +1687,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 						}
 						breakAtTheEdge = null;
 						lastAfterNodeContext = null;
+						trailingEdgeContexts = [];
 					}
 				}
 			} while(false);  // End of block of code to use break
@@ -1574,7 +1703,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 			}
 		}
 		if (self.breakPositions.length != 0 &&
-				self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, false, breakAtTheEdge)) {
+				self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, false, breakAtTheEdge)) {
 			if (lastAfterNodeContext) {
 		    	nodeContext = lastAfterNodeContext.modify();
 		    	nodeContext.overflow = true;
@@ -1666,6 +1795,8 @@ adapt.layout.Column.prototype.initGeom = function() {
     		offsetY + this.height);
     this.beforeEdge = columnBBox ? (this.vertical ? columnBBox.right : columnBBox.top) : 0;
     this.afterEdge = columnBBox ? (this.vertical ? columnBBox.left : columnBBox.bottom) : 0;
+    this.leftFloatEdge = this.beforeEdge;
+    this.rightFloatEdge = this.beforeEdge;
     this.footnoteEdge = this.afterEdge;
     this.bands = adapt.geom.shapesToBands(this.box, [this.getInnerShape()],
     		this.exclusions, 8, this.snapHeight, this.vertical);

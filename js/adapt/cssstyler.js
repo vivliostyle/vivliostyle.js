@@ -212,6 +212,11 @@ adapt.cssstyler.Styler.prototype.transferPropsToRoot = function(srcStyle, map) {
 };
 
 /**
+ * @const
+ */
+adapt.cssstyler.columnProps = ["column-count", "column-width"];
+
+/**
  * Transfer properties that should be applied on the container (partition) level
  * to this.rootStyle.
  * @param {adapt.csscasc.ElementStyle} elemStyle (source) element style
@@ -231,8 +236,8 @@ adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBod
 		}
 	}
 	if (!this.rootLayoutAssigned) {
-		for (var pname in this.validatorSet.layoutProps) {
-			if (this.hasProp(elemStyle, this.validatorSet.layoutProps, pname)) {
+		for (var i = 0; i < adapt.cssstyler.columnProps.length; i++) {
+			if (this.hasProp(elemStyle, this.validatorSet.layoutProps, adapt.cssstyler.columnProps[i])) {
 				this.transferPropsToRoot(elemStyle, this.validatorSet.layoutProps);
 				this.rootLayoutAssigned = true;
 				break;

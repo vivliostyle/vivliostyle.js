@@ -873,6 +873,7 @@ adapt.css.ident = {
 	auto: adapt.css.getName("auto"),
 	avoid: adapt.css.getName("avoid"),
     block: adapt.css.getName("block"),
+    both: adapt.css.getName("both"),
     exclusive: adapt.css.getName("exclusive"),
     _false: adapt.css.getName("false"),
     footnote: adapt.css.getName("footnote"),

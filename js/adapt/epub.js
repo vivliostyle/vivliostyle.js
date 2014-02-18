@@ -4,6 +4,7 @@
  */
 goog.provide('adapt.epub');
 
+goog.require('adapt.csscasc');
 goog.require('adapt.font');
 goog.require('adapt.ops');
 goog.require('adapt.cfi');
@@ -205,59 +206,6 @@ adapt.epub.makeDeobfuscator = function(uid) {
 };
 
 /**
- * @constructor
- * @param {adapt.epub.EPUBDocStore} store
- * @param {string} epubURL
- */
-adapt.epub.OPFDoc = function(store, epubURL) {
-	/** @const */ this.store = store;
-	/** @type {adapt.xmldoc.XMLDocHolder} */ this.opfXML = null;
-	/** @type {adapt.xmldoc.XMLDocHolder} */ this.encXML = null;
-	/** @type {Array.<adapt.epub.OPFItem>} */ this.items = null;
-	/** @type {Array.<adapt.epub.OPFItem>} */ this.spine = null;
-	/** @type {Object.<string,adapt.epub.OPFItem>} */ this.itemMap = null;
-	/** @type {Object.<string,adapt.epub.OPFItem>} */ this.itemMapByPath = null;
-	/** @const */ this.epubURL = epubURL;
-	/** @type {?string} */ this.uid = null;
-	/** @type {Object.<string,string>} */ this.bindings = {};
-	/** @type {?string} */ this.lang = null;
-	/** @type {Object} */ this.toolData = null;  // see adapt.devel
-	/** @type {number} */ this.epageCount = 0;
-	/** @type {adapt.base.JSON} */ this.metadata = {};
-	/** @type {adapt.epub.OPFItem} */ this.ncxToc = null;
-	/** @type {adapt.epub.OPFItem} */ this.xhtmlToc = null;
-	/** @type {adapt.epub.OPFItem} */ this.cover = null;
-};
-
-/**
- * Metadata is organized in the following way: fully-expanded property names (with IRI
- * prefixes prepended) point to an array of values. Array contains at least one element.
- * First element is primary and should be used by default.
- * Element values are objects have the following keys:
- * - "v" - item value as string,
- * - "s" - scheme,
- * - "o" - index in the order of appearing in the source,
- * - "r" - refinement submetadata (organized just like the top-level metadata).
- * @return {adapt.base.JSON}
- */
-adapt.epub.OPFDoc.prototype.getMetadata = function() {
-	return this.metadata;
-};
-
-/**
- * @param {string} url
- * @return {?string}
- */
-adapt.epub.OPFDoc.prototype.getPathFromURL = function(url) {
-	if (this.epubURL) {
-		return url.substr(0, this.epubURL.length) == this.epubURL ?
-				decodeURI(url.substr(this.epubURL.length)) : null;
-	} else {
-		return url;
-	}
-};
-
-/**
  * @typedef {{
  *   name: string,
  *   value: string,
@@ -420,7 +368,8 @@ adapt.epub.readMetadata = function(mroot, prefixes) {
 								refs = [langItem];
 							}
 						}
-						entry["r"] = makeMetadata(refs);
+						var entryMap = adapt.base.multiIndexArray(refs, function(rawItem) { return rawItem.name; });
+						entry["r"] = makeMetadata(entryMap);
 					}
 				}
 				return entry;
@@ -451,6 +400,91 @@ adapt.epub.readMetadata = function(mroot, prefixes) {
 };
 
 /**
+ * @return {Object}
+ */
+adapt.epub.getMathJaxHub = function() {
+	var math = window["MathJax"];
+	if (math) {
+		return math["Hub"];
+	}
+	return null;
+};
+
+/**
+ * @return {void}
+ */
+adapt.epub.checkMathJax = function() {
+	if (adapt.epub.getMathJaxHub()) {
+		adapt.csscasc.supportedNamespaces[adapt.base.NS.MATHML] = true;
+	}
+};
+
+/** @const */
+adapt.epub.supportedMediaTypes = {
+	"appliaction/xhtml+xml": true,
+	"image/jpeg": true,
+	"image/png": true,
+	"image/svg+xml": true,
+	"image/gif": true,
+	"audio/mp3": true
+};
+
+/**
+ * @constructor
+ * @param {adapt.epub.EPUBDocStore} store
+ * @param {string} epubURL
+ */
+adapt.epub.OPFDoc = function(store, epubURL) {
+	/** @const */ this.store = store;
+	/** @type {adapt.xmldoc.XMLDocHolder} */ this.opfXML = null;
+	/** @type {adapt.xmldoc.XMLDocHolder} */ this.encXML = null;
+	/** @type {Array.<adapt.epub.OPFItem>} */ this.items = null;
+	/** @type {Array.<adapt.epub.OPFItem>} */ this.spine = null;
+	/** @type {Object.<string,adapt.epub.OPFItem>} */ this.itemMap = null;
+	/** @type {Object.<string,adapt.epub.OPFItem>} */ this.itemMapByPath = null;
+	/** @const */ this.epubURL = epubURL;
+	/** @type {?string} */ this.uid = null;
+	/** @type {Object.<string,string>} */ this.bindings = {};
+	/** @type {?string} */ this.lang = null;
+	/** @type {Object} */ this.toolData = null;  // see adapt.devel
+	/** @type {number} */ this.epageCount = 0;
+	/** @type {adapt.base.JSON} */ this.metadata = {};
+	/** @type {adapt.epub.OPFItem} */ this.ncxToc = null;
+	/** @type {adapt.epub.OPFItem} */ this.xhtmlToc = null;
+	/** @type {adapt.epub.OPFItem} */ this.cover = null;
+	/** @type {Object.<string,string>} */ this.fallbackMap = {};
+	adapt.epub.checkMathJax();
+};
+
+/**
+ * Metadata is organized in the following way: fully-expanded property names (with IRI
+ * prefixes prepended) point to an array of values. Array contains at least one element.
+ * First element is primary and should be used by default.
+ * Element values are objects have the following keys:
+ * - "v" - item value as string,
+ * - "s" - scheme,
+ * - "o" - index in the order of appearing in the source,
+ * - "r" - refinement submetadata (organized just like the top-level metadata).
+ * @return {adapt.base.JSON}
+ */
+adapt.epub.OPFDoc.prototype.getMetadata = function() {
+	return this.metadata;
+};
+
+/**
+ * @param {string} url
+ * @return {?string}
+ */
+adapt.epub.OPFDoc.prototype.getPathFromURL = function(url) {
+	if (this.epubURL) {
+		return url.substr(0, this.epubURL.length) == this.epubURL ?
+				decodeURI(url.substr(this.epubURL.length)) : null;
+	} else {
+		return url;
+	}
+};
+
+/**
  * @param {adapt.xmldoc.XMLDocHolder} opfXML
  * @param {adapt.xmldoc.XMLDocHolder} encXML
  * @param {adapt.base.JSON} zipMetadata
@@ -468,10 +502,16 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
 			this.uid = uidElem.textContent.replace(/[ \n\r\t]/g, '');
 		}
 	}
+	var srcToFallbackId = {};
 	this.items = adapt.base.map(pkg.child("manifest").child("item").asArray(), 
-		function(elem) {
+		function(node) {
 			var item = new adapt.epub.OPFItem();
-			item.initWithElement( /** @type {Element} */ (elem), opfXML.url);
+			var elem = /** @type {Element} */ (node);
+			item.initWithElement(elem, opfXML.url);
+			var fallback = elem.getAttribute("fallback");
+			if (fallback && !adapt.epub.supportedMediaTypes[item.mediaType]) {
+				srcToFallbackId[item.src] = fallback;
+			}
 			if (!self.xhtmlToc && item.itemProperties["nav"]) {
 				self.xhtmlToc = item;
 			}
@@ -485,6 +525,20 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
 	this.itemMapByPath = adapt.base.indexArray(this.items, function(item) {
 				return self.getPathFromURL(item.src);
 			});
+	for (var src in srcToFallbackId) {
+		var fallbackSrc = src;
+		while(true) {
+			var item = this.itemMap[srcToFallbackId[fallbackSrc]];
+			if (!item) {
+				break;
+			}
+			if (adapt.epub.supportedMediaTypes[item.mediaType]) {
+				this.fallbackMap[src] = item.src;
+				break;
+			}
+			fallbackSrc = item.src;
+		}
+	}
 	this.spine = adapt.base.map(pkg.child("spine").child("itemref").asArray(),
 			function(node, index) {
 				var elem = /** @type {Element} */ (node);
@@ -1080,6 +1134,7 @@ adapt.epub.OPFView.prototype.makeObjectView = function(xmldoc, srcElem, viewPare
 	}
 	if (!result) {
 		result = this.viewport.document.createElement("span");
+		result.setAttribute("data-adapt-process-children", "true");
 	}
 	// Need to cast because we need {Element}, not {!Element}
 	return adapt.task.newResult(/** @type {Element} */ (result));
@@ -1093,25 +1148,22 @@ adapt.epub.OPFView.prototype.makeObjectView = function(xmldoc, srcElem, viewPare
  */
 adapt.epub.OPFView.prototype.makeMathMLView = function(xmldoc, srcElem, viewParent, computedStyle) {
 	// See if MathJax installed, use it if it is.
-	var math = window["MathJax"];
-	if (math) {
-		var hub = math["Hub"];
-		if (hub) {
-			var doc = viewParent.ownerDocument;
-			var span = doc.createElement("span");
-			viewParent.appendChild(span);
-			var clonedMath = doc.importNode(srcElem, true);
-			span.appendChild(clonedMath);
-			var queue = hub["queue"];
-			queue["Push"](["Typeset", hub, span]);
-			/** @type {!adapt.task.Frame.<Element>} */ var frame
-						= adapt.task.newFrame("navigateToEPage");
-			var continuation = frame.suspend();
-			queue["Push"](function() {
-				continuation.schedule(span);
-			});
-			return frame.result();
-		}
+	var hub = adapt.epub.getMathJaxHub();
+	if (hub) {
+		var doc = viewParent.ownerDocument;
+		var span = doc.createElement("span");
+		viewParent.appendChild(span);
+		var clonedMath = doc.importNode(srcElem, true);
+		span.appendChild(clonedMath);
+		var queue = hub["queue"];
+		queue["Push"](["Typeset", hub, span]);
+		/** @type {!adapt.task.Frame.<Element>} */ var frame
+					= adapt.task.newFrame("navigateToEPage");
+		var continuation = frame.suspend();
+		queue["Push"](function() {
+			continuation.schedule(span);
+		});
+		return frame.result();
 	}
 	return adapt.task.newResult(/** @type {Element} */ (null));
 };
@@ -1171,7 +1223,7 @@ adapt.epub.OPFView.prototype.getPageViewItem = function() {
     				viewportSize.width, viewportSize.height);
     	}
         var instance = new adapt.ops.StyleInstance(style, xmldoc, self.opf.lang,
-        		viewport, self.clientLayout, self.fontMapper, customRenderer);
+        		viewport, self.clientLayout, self.fontMapper, customRenderer, self.opf.fallbackMap);
         instance.pref = self.pref;
         instance.init().then(function() {
 			viewItem = {item: item, xmldoc: xmldoc, instance: instance,
@@ -1221,7 +1273,7 @@ adapt.epub.OPFView.prototype.showTOC = function(autohide) {
 			= adapt.task.newFrame("showTOC");
 	if (!this.tocView) {
 		this.tocView = new adapt.toc.TOCView(opf.store, toc.src, opf.lang, 
-				this.clientLayout, this.fontMapper, this.pref, this);
+				this.clientLayout, this.fontMapper, this.pref, this, opf.fallbackMap);
 	}
 	var viewport = this.viewport;
 	var tocWidth = Math.min(350, Math.round(0.67 * viewport.width) - 16);

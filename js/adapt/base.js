@@ -308,7 +308,9 @@ adapt.base.makePropNameMap = function(list) {
  * @const
  */
 adapt.base.propNameMap = adapt.base.makePropNameMap([
-	"transform", "transform-origin", "hyphens", "writing-mode"
+	"transform", "transform-origin", "hyphens", "writing-mode",
+	"column-count", "column-width", "column-rule-color",
+	"column-rule-style", "column-rule-width"
 ]);
 
 

@@ -25,10 +25,12 @@ adapt.toc.bulletEmpty = "\u25B9";
  * @param {adapt.font.Mapper} fontMapper
  * @param {adapt.expr.Preferences} pref
  * @param {adapt.vgen.CustomRendererFactory} rendererFactory
+ * @param {Object.<string,string>} fallbackMap
  * @constructor
  * @implements {adapt.vgen.CustomRendererFactory}
  */
-adapt.toc.TOCView = function(store, url, lang, clientLayout, fontMapper, pref, rendererFactory) {
+adapt.toc.TOCView = function(store, url, lang, clientLayout, fontMapper, pref,
+		rendererFactory, fallbackMap) {
 	/** @const */ this.store = store;
 	/** @const */ this.url = url;
 	/** @const */ this.lang = lang;	
@@ -36,6 +38,7 @@ adapt.toc.TOCView = function(store, url, lang, clientLayout, fontMapper, pref, r
 	/** @const */ this.fontMapper = fontMapper;	
 	/** @const */ this.pref = adapt.expr.clonePreferences(pref);
 	/** @const */ this.rendererFactory = rendererFactory;
+	/** @const */ this.fallbackMap = fallbackMap;
 	/** @type {adapt.vtree.Page} */ this.page = null;
 	/** @type {adapt.ops.StyleInstance} */ this.instance = null;
 };
@@ -119,11 +122,13 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
 		var element = viewParent.ownerDocument.createElement("div");
 		element.setAttribute("data-adapt-process-children", "true");
 		if (behavior.toString() == "toc-node") {
-			var button = viewParent.ownerDocument.createElement("span");
+			var button = viewParent.ownerDocument.createElement("div");
 			button.textContent = adapt.toc.bulletEmpty;
-			adapt.base.setCSSProperty(button, "margin-right", "0.375em");
+			// TODO: define pseudo-element for the button?
+			adapt.base.setCSSProperty(button, "margin-left", "-1em");
 			adapt.base.setCSSProperty(button, "display", "inline-block");
-			adapt.base.setCSSProperty(button, "width", "0.625em");
+			adapt.base.setCSSProperty(button, "width", "1em");
+			adapt.base.setCSSProperty(button, "text-align", "left");
 			adapt.base.setCSSProperty(button, "cursor", "default");
 			adapt.base.setCSSProperty(button, "font-family", "Menlo,sans-serif");
 			element.appendChild(button);
@@ -164,7 +169,7 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
     				viewportSize.width, viewportSize.height);
     	var customRenderer = self.makeCustomRenderer(xmldoc);
         var instance = new adapt.ops.StyleInstance(style, xmldoc, self.lang,
-        		viewport, self.clientLayout, self.fontMapper, customRenderer);
+        		viewport, self.clientLayout, self.fontMapper, customRenderer, self.fallbackMap);
         self.instance = instance;
         instance.pref = self.pref;
         instance.init().then(function() {

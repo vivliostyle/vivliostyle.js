@@ -1,6 +1,6 @@
 #import "Publication.h"
 
-#include "adapt_service.h"
+#include "clang/service/adapt_service.h"
 
 struct publication_callback {
     adapt_callback super_;
@@ -217,15 +217,20 @@ static const int maxFontSizeIndex = sizeof fontSizes / sizeof(int) - 1;
         if (self.pdfCancel) {
             return;
         }
-        if ([type isEqualToString:@"loaded"]) {
-            [self startExport];
-        }
-        if ([type isEqualToString:@"nav"]) {
-            [self exportPage];
-            if ([[dict objectForKey:@"last"] boolValue]) {
-                [self finishExport];
-            } else {
-                [self sendExportCommand: @"a:'moveTo',where:'next'"];
+        if ([type isEqualToString:@"nav"] || [type isEqualToString:@"loaded"]) {
+            if ([type isEqualToString:@"nav"]) {
+                self.pdfPageReady = YES;
+            }
+            if ([type isEqualToString:@"loaded"]) {
+                self.pdfLoaded = YES;
+            }
+            if (self.pdfLoaded && self.pdfPageReady) {
+                [self exportPage];
+                if ([[dict objectForKey:@"last"] boolValue]) {
+                    [self finishExport];
+                } else {
+                    [self sendExportCommand: @"a:'moveTo',where:'next'"];
+                }
             }
         }
     }
@@ -300,7 +305,7 @@ static const int maxFontSizeIndex = sizeof fontSizes / sizeof(int) - 1;
         [NSBundle loadNibNamed: @"PDFProgress" owner: self];
     }
     [NSApp beginSheet: self.pdfProgressWindow modalForWindow: self.windowForSheet modalDelegate: self
-       didEndSelector: @selector(didEndExport:returnCode:contextInfo:) contextInfo: nil];
+         didEndSelector: @selector(didEndExport:returnCode:contextInfo:) contextInfo: nil];
     self.pdfCurrentPage = 0;
     [self.pdfProgressLabel setStringValue: @"Preparing to render PDF"];
 }
@@ -331,8 +336,8 @@ static const int maxFontSizeIndex = sizeof fontSizes / sizeof(int) - 1;
 
 - (void) exportPage
 {
-    if (!self.pdfContext) {
-        return;
+    if (!self.pdfContext && self.pdfPageReady) {
+        [self startExport];
     }
     self.pdfCurrentPage++;
     [self.pdfProgressLabel setStringValue: [NSString stringWithFormat:@"Page: %d", self.pdfCurrentPage]];
@@ -367,6 +372,8 @@ static const int maxFontSizeIndex = sizeof fontSizes / sizeof(int) - 1;
         return;
     }
     
+    self.pdfLoaded = NO;
+    self.pdfPageReady = NO;
     float width = self.pdfWidth * 4 / 3;
     float height = self.pdfHeight * 4 / 3;
     [self.pdfView setFrame:NSMakeRect(-width, 0, width, height)];

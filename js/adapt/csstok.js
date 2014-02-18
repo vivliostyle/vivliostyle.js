@@ -632,11 +632,8 @@ adapt.csstok.Tokenizer.prototype.reallocate = function() {
 /**
  * @private
  */
-adapt.csstok.Tokenizer.prototype.error = function(position, mnemonics) {
+adapt.csstok.Tokenizer.prototype.error = function(position, token, mnemonics) {
 	if (this.handler) {
-		var token = this.buffer[this.tail];
-		token.position = position;
-		token.type = adapt.csstok.TokenType.INVALID;
 		this.handler.error(mnemonics, token);
 	}
 };
@@ -677,10 +674,15 @@ adapt.csstok.Tokenizer.prototype.fillBuffer = function() {
         var charCode = input.charCodeAt(position);
         switch (actions[charCode] || actions[65/*A*/]) {
             case adapt.csstok.Action.INVALID:
-                this.error(position, "E_CSS_UNEXPECTED_CHAR");
+        		tokenType = adapt.csstok.TokenType.INVALID;
+        		if (isNaN(charCode)) {
+        			tokenText = "E_CSS_UNEXPECTED_EOF";        			
+        		} else {
+        			tokenText = "E_CSS_UNEXPECTED_CHAR";
+        		}
                 actions = adapt.csstok.actionsNormal;
                 position++;
-                continue;
+                break;
             case adapt.csstok.Action.SPACE:
                 position++;
                 seenSpace = true;
@@ -1044,9 +1046,10 @@ adapt.csstok.Tokenizer.prototype.fillBuffer = function() {
                     }
                 }
                 // invalid token
-                this.error(position, "E_CSS_INVALID_NEWLINE");
+        		tokenType = adapt.csstok.TokenType.INVALID;
+        		tokenText = "E_CSS_UNEXPECTED_NEWLINE";
                 actions = adapt.csstok.actionsNormal;
-                continue;
+                break;
             case adapt.csstok.Action.CHKPOSS:
                 // space in identifier - check validity
                 if (position - backslashPos < 9) {
@@ -1072,7 +1075,9 @@ adapt.csstok.Tokenizer.prototype.fillBuffer = function() {
             default:
                 // EOF
                 if (actions !== adapt.csstok.actionsNormal) {
-                    this.error(position, "E_CSS_UNEXPECTED_STATE");
+            		tokenType = adapt.csstok.TokenType.INVALID;
+            		tokenText = "E_CSS_UNEXPECTED_STATE";
+            		break;
                 }
                 tokenPosition = position;
                 tokenType = adapt.csstok.TokenType.EOF;

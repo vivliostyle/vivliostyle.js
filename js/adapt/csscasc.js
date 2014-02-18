@@ -1431,7 +1431,13 @@ adapt.csscasc.additiveNumbering = {
 	             100, '\u10E0', 90, '\u10DF', 80, '\u10DE', 70, '\u10DD', 60, '\u10F2',
 	             50, '\u10DC', 40, '\u10DB', 30, '\u10DA', 20, '\u10D9', 10, '\u10D8',
 	             9, '\u10D7', 8, '\u10F1', 7, '\u10D6', 6, '\u10D5', 5, '\u10D4', 4, '\u10D3',
-	             3, '\u10D2', 2, '\u10D1', 1, '\u10D0']
+	             3, '\u10D2', 2, '\u10D1', 1, '\u10D0'],
+	"hebrew": [999, 400, '\u05EA', 300, '\u05E9', 200, '\u05E8', 100, '\u05E7', 90, '\u05E6',
+	           80, '\u05E4', 70, '\u05E2', 60, '\u05E1', 50, '\u05E0', 40, '\u05DE', 30, '\u05DC',
+	           20, '\u05DB', 19, '\u05D9\u05D8', 18, '\u05D9\u05D7', 17, '\u05D9\u05D6',
+	           16, '\u05D8\u05D6', 15, '\u05D8\u05D5', 10, '\u05D9', 9, '\u05D8', 8, '\u05D7',
+	           7, '\u05D6', 6, '\u05D5', 5, '\u05D4', 4, '\u05D3', 3, '\u05D2', 2, '\u05D1',
+	           1, '\u05D0']
 };
 
 /** @const */
@@ -1510,6 +1516,69 @@ adapt.csscasc.alphabeticFormat = function(alphabetStr, num) {
 };
 
 /**
+ * @typedef {{digits:string, markers:string, negative:string, formal:boolean}}
+ */
+adapt.csscasc.ChineseNumbering;
+
+/**
+ * From http://www.w3.org/TR/css3-lists/
+ * @const
+ * @type {adapt.csscasc.ChineseNumbering}
+ */
+adapt.csscasc.chineseTradInformal = {
+	formal: false,
+	digits: "\u96F6\u4E00\u4E8C\u4E09\u56DB\u4E94\u516D\u4E03\u516B\u4E5D",
+	markers: "\u5341\u767E\u5343",
+	negative: "\u8CA0"
+};
+
+/**
+ * @param {number} num
+ * @param {adapt.csscasc.ChineseNumbering} numbering
+ */
+adapt.csscasc.chineseCounter = function(num, numbering) {
+	if (num > 9999 || num < -9999)
+		return "" + num;  // TODO: should be cjk-decimal
+	if (num == 0)
+		return numbering.digits.charAt(0);
+	var res = new adapt.base.StringBuffer();
+	if (num < 0) {
+		res.append(numbering.negative);
+		num = -num;
+	}
+	if (num < 10) {
+		res.append(numbering.digits.charAt(num));
+	} else if (numbering.informal && num <= 19) {
+		res.append(numbering.markers.charAt(0));
+		if (num != 0) {
+			res.append(numbering.markers.charAt(num - 10));
+		}
+	} else {
+		var thousands = Math.floor(num/1000);
+		if (thousands) {
+			res.append(numbering.digits.charAt(thousands));
+			res.append(numbering.markers.charAt(2));
+		}
+		var hundreds = Math.floor(num/100) % 10;
+		if (hundreds) {
+			res.append(numbering.digits.charAt(hundreds));
+			res.append(numbering.markers.charAt(1));
+		}
+		var tens = Math.floor(num/10) % 10;
+		if (tens) {
+			res.append(numbering.digits.charAt(tens));
+			res.append(numbering.markers.charAt(0));
+		}
+		var ones = num % 10;
+		if (ones) {
+			res.append(numbering.digits.charAt(ones));
+		}
+	}
+	// res.append("\u3001");
+	return res.toString();
+};
+
+/**
  * @param {number} num
  * @param {string} type
  * @return {string}
@@ -1536,6 +1605,8 @@ adapt.csscasc.ContentPropVisitor.prototype.format = function(num, type) {
 		result = num + "";
 		if (result.length == 1)
 			result = "0" + result;
+	} else if (type == "cjk-ideographic" || type == "trad-chinese-informal") {
+		result = adapt.csscasc.chineseCounter(num, adapt.csscasc.chineseTradInformal);
 	} else {
 		result = num + "";		
 	}

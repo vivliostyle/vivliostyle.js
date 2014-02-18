@@ -21,6 +21,7 @@
         bottom: -epubx-expr(page-height - footer.margin-top-edge);
         left: 0px;
         right: 0px;
+    	column-width: 25em; 
     }
     @-epubx-partition footer :oeb-page-foot {
     	-epub-writing-mode: horizontal-tb;

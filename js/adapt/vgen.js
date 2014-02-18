@@ -178,11 +178,12 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
  * @param {adapt.vgen.StylerProducer} stylerProducer
  * @param {adapt.vtree.Page} page
  * @param {adapt.vgen.CustomRenderer} customRenderer
+ * @param {Object.<string,string>} fallbackMap
  * @constructor
  * @implements {adapt.vtree.LayoutContext}
  */
 adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds,
-		xmldoc, docFaces, footnoteStyle, stylerProducer, page, customRenderer) {
+		xmldoc, docFaces, footnoteStyle, stylerProducer, page, customRenderer, fallbackMap) {
 	// from constructor parameters
 	/** @const */ this.flowName = flowName;
 	/** @const */ this.context = context;
@@ -196,6 +197,7 @@ adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds
 	/** @const */ this.stylerProducer = stylerProducer;
 	/** @const */ this.page = page;
 	/** @const */ this.customRenderer = customRenderer;
+	/** @const */ this.fallbackMap = fallbackMap;
 	
     // provided by layout
 	/** @type {adapt.vtree.NodeContext} */ this.nodeContext = null;
@@ -216,7 +218,7 @@ adapt.vgen.ViewFactory.prototype.clone = function() {
 	return new adapt.vgen.ViewFactory(this.flowName, this.context, this.viewport,
 		this.styler, this.regionIds,
 		this.xmldoc, this.docFaces, this.footnoteStyle, this.stylerProducer,
-		this.page, this.customRenderer);
+		this.page, this.customRenderer, this.fallbackMap);
 };
 
 /**
@@ -467,6 +469,15 @@ adapt.vgen.fb2Remap = {
 };
 
 /**
+ * @param {string} url
+ * @return {string}
+ */
+adapt.vgen.ViewFactory.prototype.resolveURL = function(url) {
+    url = adapt.base.resolveURL(url, this.xmldoc.url);
+    return this.fallbackMap[url] || url;
+};
+
+/**
  * @param {boolean} firstTime
  * @private
  * @return {!adapt.task.Result.<boolean>} holding true if children should be processed
@@ -505,13 +516,17 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
     	self.nodeContext.nodeShadow = shadowParam;    			
 	    var inFloatContainer = self.nodeContext.parent && self.nodeContext.parent.floatContainer;
 	    var floatSide = computedStyle["float"];
+	    var clearSide = computedStyle["clear"];
 	    if (computedStyle["position"] === adapt.css.ident.absolute || 
 	    		computedStyle["position"] === adapt.css.ident.relative) {
 	    	self.nodeContext.floatContainer = true;
 	    	floatSide = null;
 	    }
-	    if (inFloatContainer && floatSide !== adapt.css.ident.footnote) {
-	    	floatSide = null;
+	    if (inFloatContainer) {
+	    	clearSide = null;
+	    	if (floatSide !== adapt.css.ident.footnote) {
+	    		floatSide = null;
+	    	}
 	    }
 	    var floating = floatSide === adapt.css.ident.left || 
 	    	floatSide === adapt.css.ident.right || floatSide === adapt.css.ident.footnote;
@@ -529,6 +544,20 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 		    	}
 		    }
 		    self.nodeContext.floatContainer = true;
+	    }
+	    if (clearSide) {
+	    	if (clearSide === adapt.css.ident.inherit) {
+	    		if (self.nodeContext.parent && self.nodeContext.parent.clearSide) {
+	    			clearSide = adapt.css.getName(self.nodeContext.parent.clearSide);
+	    		}
+	    	}
+	    	if (clearSide === adapt.css.ident.left || clearSide === adapt.css.ident.right ||
+	    		clearSide === adapt.css.ident.both) {
+		    	delete computedStyle["clear"];	    	
+		    	if (computedStyle["display"] && computedStyle["display"] != adapt.css.ident.inline) {
+		    		self.nodeContext.clearSide = clearSide.toString();
+		    	}
+		    }
 	    }
 	    if (computedStyle["overflow"] === adapt.css.ident.hidden) {
 		    self.nodeContext.floatContainer = true;
@@ -700,7 +729,6 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 			if (element.namespaceURI != adapt.base.NS.FB2 || tag == "td") {
 			    var attributes = element.attributes;
 			    var attributeCount = attributes.length;
-			    var baseURL = self.xmldoc.url;
 			    for (var i = 0 ; i < attributeCount ; i++) {
 			        var attribute = attributes[i];
 			        var attributeNS = attribute.namespaceURI;
@@ -716,14 +744,16 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 			            	self.page.registerElementWithId(result, attributeValue);
 			            	continue;
 			            }
-			            if (attributeName == "src" || attributeName == "href")
-			                attributeValue = adapt.base.resolveURL(attributeValue, baseURL);
+			            // TODO: understand the element we are working with.
+			            if (attributeName == "src" || attributeName == "href" || attributeName == "poster") {
+			                attributeValue = self.resolveURL(attributeValue);
+			            }
 			        }
 			        else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
 			            continue; //namespace declaration (in Firefox)
 			        } else if (attributeNS == adapt.base.NS.XLINK) {
 			            if (attributeName == "href")
-			                attributeValue = adapt.base.resolveURL(attributeValue, baseURL);		        	
+			                attributeValue = self.resolveURL(attributeValue);		        	
 			        }
 			        if (attributeNS) {
 			            var attributePrefix = adapt.vgen.namespacePrefixMap[attributeNS];

@@ -60,5 +60,7 @@
 @property float pdfFontSize;
 @property int pdfCurrentPage;
 @property BOOL pdfCancel;
+@property BOOL pdfPageReady;
+@property BOOL pdfLoaded;
 
 @end

@@ -86,11 +86,12 @@ border-image-repeat = [ stretch | repeat | round | space ]{1,2};
 bottom = APLENGTH;
 caption-side = top | bottom;
 clear = none | left | right | both;
-clip = rect(ALENGTH{4}) | auto;
+clip = rect(ALENGTH{4}) | rect(SPACE(ALENGTH{4})) | auto;
 color = COLOR;
 LIST_STYLE_TYPE = disc | circle | square | decimal | decimal-leading-zero | lower-roman |
     upper-roman | lower-greek | lower-latin | upper-latin | armenian | georgian | lower-alpha |
-    upper-alpha | russian | upper-russian | lower-russian | none;
+    upper-alpha | russian | upper-russian | lower-russian | cjk-ideographic | trad-chinese-informal |
+    hebrew | none;
 CONTENT = normal | none | 
     [ STRING | URI | counter(IDENT LIST_STYLE_TYPE?) | 
     counters(IDENT STRING LIST_STYLE_TYPE?) | attr(IDENT) |

@@ -106,6 +106,7 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @param {adapt.vtree.ClientLayout} clientLayout
  * @param {adapt.font.Mapper} fontMapper
  * @param {adapt.vgen.CustomRenderer} customRenderer
+ * @param {Object.<string,string>} fallbackMap
  * @constructor
  * @extends {adapt.expr.Context}
  * @implements {adapt.cssstyler.FlowListener}
@@ -113,7 +114,7 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @implements {adapt.vgen.StylerProducer}
  */
 adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientLayout, 
-		fontMapper, customRenderer) {
+		fontMapper, customRenderer, fallbackMap) {
 	adapt.expr.Context.call(this, style.rootScope, viewport.width, viewport.height, viewport.fontSize);
 	/** @const */ this.style = style;
 	/** @const */ this.xmldoc = xmldoc;
@@ -132,6 +133,7 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @type {boolean} */ this.regionBreak = false;
     /** @type {!Object.<string,boolean>} */ this.pageBreaks = {};
     /** @const */ this.customRenderer = customRenderer;
+    /** @const */ this.fallbackMap = fallbackMap;
     for (var flowName in style.flowProps) {
     	var flowStyle = style.flowProps[flowName];
     	var consume = adapt.csscasc.getProp(flowStyle, "flow-consume");
@@ -479,7 +481,8 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
         		layoutContainer.width, layoutContainer.height, self);
         var layoutContext = new adapt.vgen.ViewFactory(flowNameStr, self,
                 self.viewport, self.styler, regionIds, self.xmldoc, self.faces,
-                self.style.footnoteProps, self, page, self.customRenderer);
+                self.style.footnoteProps, self, page, self.customRenderer,
+                self.fallbackMap);
         var columnIndex = 0;
         var region = null;
         frame.loopWithFrame(function(loopFrame) {
@@ -982,8 +985,8 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
 		                	flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
 		            } else if (localName == "link") {
 		            	var rel = child.getAttribute("rel");
-		            	var classes = child.getAttribute("class")
-		            	var media = child.getAttribute("media")
+		            	var classes = child.getAttribute("class");
+		            	var media = child.getAttribute("media");
 		            	if (rel == "stylesheet" || (rel == "alternate stylesheet" && classes)) {
 			            	var src = child.getAttribute("href");
 			            	src = adapt.base.resolveURL(src, url);
