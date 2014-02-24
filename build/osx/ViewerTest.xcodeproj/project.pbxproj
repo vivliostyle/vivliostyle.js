@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D02D780418B592BE00CA2672 /* adapt_testsuite.c in Sources */ = {isa = PBXBuildFile; fileRef = D02D780218B592BE00CA2672 /* adapt_testsuite.c */; };
 		D03CFF4618B13E0E0084BE16 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D03CFF4518B13E0E0084BE16 /* main.m */; };
 		D03CFF4B18B13E1E0084BE16 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = D03CFF4718B13E1E0084BE16 /* MainMenu.xib */; };
 		D03CFF4C18B13E1E0084BE16 /* ViewerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D03CFF4918B13E1E0084BE16 /* ViewerTest.m */; };
@@ -17,6 +18,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D02D780218B592BE00CA2672 /* adapt_testsuite.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = adapt_testsuite.c; path = ../../clang/test/adapt_testsuite.c; sourceTree = "<group>"; };
+		D02D780318B592BE00CA2672 /* adapt_testsuite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = adapt_testsuite.h; path = ../../clang/test/adapt_testsuite.h; sourceTree = "<group>"; };
 		D03CFF4518B13E0E0084BE16 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = ../../objc/osx_test/main.m; sourceTree = "<group>"; };
 		D03CFF4718B13E1E0084BE16 /* MainMenu.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainMenu.xib; path = ../../objc/osx_test/MainMenu.xib; sourceTree = "<group>"; };
 		D03CFF4818B13E1E0084BE16 /* ViewerTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ViewerTest.h; path = ../../objc/osx_test/ViewerTest.h; sourceTree = "<group>"; };
@@ -46,6 +49,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D02D780018B5917A00CA2672 /* clang */ = {
+			isa = PBXGroup;
+			children = (
+				D02D780118B5918100CA2672 /* test */,
+			);
+			name = clang;
+			sourceTree = "<group>";
+		};
+		D02D780118B5918100CA2672 /* test */ = {
+			isa = PBXGroup;
+			children = (
+				D02D780218B592BE00CA2672 /* adapt_testsuite.c */,
+				D02D780318B592BE00CA2672 /* adapt_testsuite.h */,
+			);
+			name = test;
+			sourceTree = "<group>";
+		};
 		D03CFF2818B13DDA0084BE16 /* objc */ = {
 			isa = PBXGroup;
 			children = (
@@ -69,6 +89,7 @@
 		D0A4E82718B13B3000CAAA51 = {
 			isa = PBXGroup;
 			children = (
+				D02D780018B5917A00CA2672 /* clang */,
 				D03CFF2818B13DDA0084BE16 /* objc */,
 				D0A4E83218B13B3000CAAA51 /* Frameworks */,
 				D0A4E83118B13B3000CAAA51 /* Products */,
@@ -171,6 +192,7 @@
 			files = (
 				D03CFF4618B13E0E0084BE16 /* main.m in Sources */,
 				D03CFF4C18B13E1E0084BE16 /* ViewerTest.m in Sources */,
+				D02D780418B592BE00CA2672 /* adapt_testsuite.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

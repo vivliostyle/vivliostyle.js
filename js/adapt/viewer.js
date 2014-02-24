@@ -36,24 +36,12 @@ adapt.viewer.ViewportSize;
  */
 adapt.viewer.Viewer = function(window, instanceId, callbackFn) {
 	var self = this;
-	/** @type {string} */ this.packageURL = "";
 	/** @const */ this.window = window;
 	/** @const */ this.instanceId = instanceId;
 	/** @const */ this.callbackFn = callbackFn;
-	/** @type {adapt.epub.OPFDoc} */ this.opf = null;
+	var document = window.document;
     /** @const */ this.fontMapper = new adapt.font.Mapper(document.head, document.body);
-    /** @type {boolean} */ this.haveZipMetadata = false;
-    /** @type {boolean} */ this.touchActive = false;
-    /** @type {number} */ this.touchX = 0;
-    /** @type {number} */ this.touchY = 0;
-    /** @type {boolean} */ this.needResize = false;
-    /** @type {?adapt.viewer.ViewportSize} */ this.viewportSize = null;
-    /** @type {adapt.vtree.Page} */ this.newPage = null;
-    /** @type {adapt.vtree.Page} */ this.currentPage = null;
-    /** @type {?adapt.epub.Position} */ this.pagePosition = null;
-    /** @type {number} */ this.fontSize = 16;
-    /** @type {boolean} */ this.waitForLoading = false;
-    /** @const */ this.pref = adapt.expr.defaultPreferences();
+    this.init();
     /** @type {function():void} */ this.kick = function(){};
     /** @const */ this.resizeListener = function() {
     	self.needResize = true;
@@ -70,6 +58,37 @@ adapt.viewer.Viewer = function(window, instanceId, callbackFn) {
     	"moveTo": this.moveTo,
     	"toc": this.showTOC
     };
+};
+
+/**
+ * @return {void}
+ */
+adapt.viewer.Viewer.prototype.init = function() {
+	/** @type {string} */ this.packageURL = "";
+	/** @type {adapt.epub.OPFDoc} */ this.opf = null;
+    /** @type {boolean} */ this.haveZipMetadata = false;
+    /** @type {boolean} */ this.touchActive = false;
+    /** @type {number} */ this.touchX = 0;
+    /** @type {number} */ this.touchY = 0;
+    /** @type {boolean} */ this.needResize = false;
+    /** @type {?adapt.viewer.ViewportSize} */ this.viewportSize = null;
+    /** @type {adapt.vtree.Page} */ this.newPage = null;
+    /** @type {adapt.vtree.Page} */ this.currentPage = null;
+    /** @type {?adapt.epub.Position} */ this.pagePosition = null;
+    /** @type {number} */ this.fontSize = 16;
+    /** @type {boolean} */ this.waitForLoading = false;
+    /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();	
+};
+
+adapt.viewer.Viewer.prototype.clearPages = function() {
+    if (this.currentPage) {
+        this.viewport.root.removeChild(this.currentPage.container);
+        this.currentPage = null;
+    }
+	if (this.newPage) {
+        this.viewport.root.removeChild(this.newPage.container);		
+		this.newPage = null;
+	}
 };
 
 /**
@@ -506,14 +525,17 @@ if (window["adapt_embedded"]) {
 	 * @return {void}
 	 */
 	window["adapt_initEmbed"] = function(msgurl, instanceId, command) {
-		var viewer = new adapt.viewer.Viewer(window, instanceId,
-			/** @param {adapt.base.JSON} msg */ function(msg) {
-				var msgstr = adapt.base.jsonToString(msg);
-				var fetcher = new adapt.taskutil.Fetcher(function() {
-				    return adapt.net.ajax(msgurl, false, "POST", msgstr);
-				});
-				fetcher.start();
+		/**
+		 * @param {adapt.base.JSON} msg
+		 */
+		var postMessage = function(msg) {
+			var msgstr = adapt.base.jsonToString(msg);
+			var fetcher = new adapt.taskutil.Fetcher(function() {
+			    return adapt.net.ajax(msgurl, false, "POST", msgstr);
 			});
+			fetcher.start();	
+		};		
+		var viewer = new adapt.viewer.Viewer(window, instanceId, postMessage);
 		viewer.initEmbed(command);
 		delete window["adapt_initEmbed"];
 	};

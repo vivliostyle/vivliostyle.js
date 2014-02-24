@@ -50,7 +50,6 @@ html|script {
 }
 html|body {
     margin: 8px;
-    -epub-hyphens: auto;    
 }
 html|h1 {
     font-size: 2em;
@@ -255,7 +254,6 @@ fb2|body {
     font-family: serif;
     margin: 8px;
     column-width: 25em;
-    -epub-hyphens: auto;
 }
 
 fb2|a {

@@ -729,6 +729,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 			if (element.namespaceURI != adapt.base.NS.FB2 || tag == "td") {
 			    var attributes = element.attributes;
 			    var attributeCount = attributes.length;
+			    var delayedSrc = null;
 			    for (var i = 0 ; i < attributeCount ; i++) {
 			        var attribute = attributes[i];
 			        var attributeNS = attribute.namespaceURI;
@@ -761,21 +762,30 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 			                attributeName = attributePrefix + ":" + attributeName;
 			        }
 				    if (attributeName == "src" && !attributeNS && tag == "img" && ns == adapt.base.NS.XHTML) {
-			        	var imageFetcher = adapt.taskutil.loadElement(result, attributeValue);
-			        	if (computedStyle["width"] && computedStyle["height"]) {
-			        		// No need to wait for the image, does not affect layout
-			        		self.page.fetchers.push(imageFetcher);
-			        	} else {
-			    			fetchers.push(imageFetcher);
-			        	}
+				    	// HTML img element should start loading only once all attributes are assigned.
+				    	delayedSrc = attributeValue;
 				    } else if (attributeName == "href" && tag == "image" && ns == adapt.base.NS.SVG && attributeNS == adapt.base.NS.XLINK) {
 			        	self.page.fetchers.push(adapt.taskutil.loadElement(result, attributeValue));
 			        } else {
 			        	result.setAttributeNS(attributeNS, attributeName, attributeValue);
 			        }
 			    }
+			    if (delayedSrc) {
+		        	var imageFetcher = adapt.taskutil.loadElement(result, delayedSrc);
+		        	if (computedStyle["width"] && computedStyle["height"]) {
+		        		// No need to wait for the image, does not affect layout
+		        		self.page.fetchers.push(imageFetcher);
+		        	} else {
+		    			fetchers.push(imageFetcher);
+		        	}
+			    }			    
 			}
 		    delete computedStyle["content"];
+			var listStyleImage = computedStyle["list-style-image"];
+			if (listStyleImage && listStyleImage instanceof adapt.css.URL) {
+				var listStyleURL = (/** @type {adapt.css.URL} */ (listStyleImage)).url;
+    			fetchers.push(adapt.taskutil.loadElement(new Image(), listStyleURL));				
+			}
 			self.applyComputedStyles(result, computedStyle);
 		    var widows = computedStyle["widows"];
 		    var orphans = computedStyle["orphans"];
@@ -1023,11 +1033,28 @@ adapt.vgen.ViewFactory.prototype.nextInTree = function(nodeContext) {
 	return frame.result();
 };
 
+adapt.vgen.ViewFactory.prototype.addImageFetchers = function(bg) {
+	if (bg instanceof adapt.css.CommaList) {
+		var values = (/** @type {adapt.css.CommaList} */ (bg)).values;
+		for (var i = 0; i < values.length; i++) {
+			this.addImageFetchers(values[i]);
+		}
+	} else if (bg instanceof adapt.css.URL) {
+		var url = (/** @type {adapt.css.URL} */(bg)).url;
+		this.page.fetchers.push(adapt.taskutil.loadElement(new Image(), url));				
+	}
+};
+
+
 /**
  * @param {Element} target
  * @param {Object.<string,adapt.css.Val>} computedStyle
  */
 adapt.vgen.ViewFactory.prototype.applyComputedStyles = function(target, computedStyle) {
+	var bg = computedStyle["background-image"];
+	if (bg) {
+		this.addImageFetchers(bg);
+	}
 	for (var propName in computedStyle) {
 		var value = computedStyle[propName];
 		if (adapt.vtree.delayedProps[propName]) {

@@ -31,6 +31,7 @@ typedef struct adapt_serving_context adapt_serving_context;
 
 ADAPT_SERVICE_API adapt_serving_context* adapt_start_serving(adapt_callback* callback);
 ADAPT_SERVICE_API const char* adapt_get_bootstrap_url(adapt_serving_context* context);
+ADAPT_SERVICE_API void adapt_update_base_path_xml(adapt_serving_context* context);
 ADAPT_SERVICE_API const char* adapt_get_init_call(adapt_serving_context* context, const char* instance_id, const char* extra_config);
 ADAPT_SERVICE_API void adapt_stop_serving(adapt_serving_context*);
 

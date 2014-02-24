@@ -51,6 +51,7 @@ struct adapt_serving_context {
     char* content;
     char** options;
     int content_type;
+    size_t prefix_len;
     struct mg_callbacks server_callbacks;
     struct mg_context* server_context;
 };
@@ -335,9 +336,11 @@ adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
         if (len < 4 || strcmp(callback->base_path + len - 4, ".opf") == 0) {
             context->content_type = TYPE_OPF;
         } else {
-            const char* path = callback->base_path + (end - container_name + 1);
-            context->content = strcpy((char*)malloc(strlen(path)), path);
+            size_t prefix_len = (end - container_name + 1);
+            const char* path = callback->base_path + prefix_len;
+            context->content = strcpy((char*)malloc(strlen(path) + 1), path);
             context->content_type = TYPE_XML;
+            context->prefix_len = prefix_len;
         }
         end[1] = '\0';
         rewrites = (char*)malloc(strlen(container_name) + strlen(context->content_prefix) + 2);
@@ -376,6 +379,14 @@ adapt_serving_context* adapt_start_serving(adapt_callback* callback) {
 
 const char* adapt_get_bootstrap_url(adapt_serving_context* context) {
     return context->bootstrap_url;
+}
+
+void adapt_update_base_path_xml(adapt_serving_context* context) {
+    if (context->content_type == TYPE_XML && context->prefix_len > 0) {
+        const char* path = context->callback->base_path + context->prefix_len;
+        free(context->content);
+        context->content = strcpy((char*)malloc(strlen(path) + 1), path);
+    }
 }
 
 const char* adapt_get_init_call(adapt_serving_context* context, const char* instance_id, const char* config) {

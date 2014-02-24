@@ -7,7 +7,7 @@ goog.provide('adapt.expr');
 goog.require('adapt.base');
 
 /**
- * @typedef {{fontFamily:string, lineHeight:number, margin:number,
+ * @typedef {{fontFamily:string, lineHeight:number, margin:number, hyphenate:boolean,
  *   	columnWidth:number, horizontal:boolean, nightMode:boolean}}
  *  }}
  */
@@ -17,7 +17,7 @@ adapt.expr.Preferences;
  * @return {adapt.expr.Preferences}
  */
 adapt.expr.defaultPreferences = function() {
-	return {fontFamily:"serif", lineHeight:1.25, margin:8, columnWidth:25,
+	return {fontFamily:"serif", lineHeight:1.25, margin:8, hyphenate:true, columnWidth:25,
 				horizontal:false, nightMode:false};
 };
 
@@ -27,7 +27,8 @@ adapt.expr.defaultPreferences = function() {
  */
 adapt.expr.clonePreferences = function(pref) {
 	return {fontFamily:pref.fontFamily, lineHeight:pref.lineHeight, margin:pref.margin,
-		columnWidth:pref.columnWidth, horizontal:pref.horizontal, nightMode:pref.nightMode};
+		hyphenate:pref.hyphenate, columnWidth:pref.columnWidth, horizontal:pref.horizontal,
+		nightMode:pref.nightMode};
 };
 
 /**
@@ -146,6 +147,7 @@ adapt.expr.LexicalScope = function(parent, resolver) {
         this.defineBuiltInName("page-height", function() { return this.pageHeight; });
         this.defineBuiltInName("perf-font-family", function() { return this.pref.fontFamily; });
         this.defineBuiltInName("pref-night-mode", function() { return this.pref.nightMode; });
+        this.defineBuiltInName("pref-hyphenate", function() { return this.pref.hyphenate; });
         this.defineBuiltInName("pref-margin", function() { return this.pref.margin; });
         this.defineBuiltInName("pref-line-height", function() { return this.pref.lineHeight; });
         this.defineBuiltInName("pref-column-width", function() { return this.pref.columnWidth * this.fontSize; });

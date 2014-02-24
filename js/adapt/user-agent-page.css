@@ -1,3 +1,10 @@
+@namespace html "http://www.w3.org/1999/xhtml";
+@namespace fb2 "http://www.gribuser.ru/xml/fictionbook/2.0";
+
+html|body, fb2|body {
+    -epub-hyphens: -epubx-expr(pref-hyphenate?"auto":"manual");
+}
+
 @-adapt-footnote-area {
 	-adapt-margin-before: 0.5em;
 	-adapt-margin-after: 0.5em;
