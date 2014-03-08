@@ -43,6 +43,7 @@ static const char adapt_driver[] =
 struct adapt_serving_context {
     adapt_callback* callback;
     mz_zip_archive zip;
+    char** media_types;
     char bootstrap_url[64];
     char content_prefix[64];
     char html_prefix[64];
@@ -68,9 +69,116 @@ static size_t adapt_file_read_func(void *pOpaque, mz_uint64 file_ofs, void *pBuf
     return n;
 }
 
+struct adapt_write_data {
+    struct mg_connection* connection;
+    int state;
+};
+
+#define WORK_AROUND_SAFARI_MEDIA_BUG 1
+
 static size_t adapt_write_resource(void *pOpaque, mz_uint64 file_ofs, const void *pBuf, size_t n) {
-    struct mg_connection* connection = (struct mg_connection*)pOpaque;
-    return mg_write(connection, pBuf, n);
+    struct adapt_write_data* write_data = (struct adapt_write_data*)pOpaque;
+    if (write_data->state && WORK_AROUND_SAFARI_MEDIA_BUG) {
+        // Replace '<audio'/'<video' with '<audi_/<vide_' to avoid crash in Safari code.
+        size_t count = 0;
+        const char* buf = (const char*)pBuf;
+        int state = write_data->state;
+        int k = 0;
+        while (k < n) {
+            char c = buf[k];
+            switch (state){
+                case 1:
+                    if (c == '<') {
+                        state = 2;
+                    }
+                    break;
+                case 2:
+                    if (c == 'a') {
+                        state = 3;
+                    } else if (c == 'v') {
+                        state = 6;
+                    } else if (c == '!') {
+                        state = 10;
+                    } else if (c != '/') {
+                        state = 1;
+                    }
+                    break;
+                case 3:
+                    state = c == 'u' ? 4 : 1;
+                    break;
+                case 4:
+                    state = c == 'd' ? 5 : 1;
+                    break;
+                case 5:
+                    state = c == 'i' ? 9 : 1;
+                    break;
+                case 6:
+                    state = c == 'i' ? 7 : 1;
+                    break;
+                case 7:
+                    state = c == 'd' ? 8 : 1;
+                    break;
+                case 8:
+                    state = c == 'e' ? 9 : 1;
+                    break;
+                case 9:
+                    state = 1;
+                    if (c == 'o') {
+                        char out_ch = '_';
+                        if (k > 0) {
+                            count += mg_write(write_data->connection, buf, k);
+                        }
+                        count += mg_write(write_data->connection, &out_ch, 1);
+                        k++;
+                        n -= k;
+                        buf += k;
+                        k = 0;
+                        continue;
+                    }
+                    break;
+                case 10:
+                    state = c == '[' ? 11 : 1;
+                    break;
+                case 11:
+                    state = c == 'C' ? 12 : 1;
+                    break;
+                case 12:
+                    state = c == 'D' ? 13 : 1;
+                    break;
+                case 13:
+                    state = c == 'A' ? 14 : 1;
+                    break;
+                case 14:
+                    state = c == 'T' ? 15 : 1;
+                    break;
+                case 15:
+                    state = c == 'A' ? 16 : 1;
+                    break;
+                case 16:
+                    state = c == '[' ? 17 : 1;
+                    break;
+                case 17:
+                    if (c == ']') {
+                        state = 18;
+                    }
+                    break;
+                case 18:
+                    state = c == ']' ? 19 : 17;
+                    break;
+                case 19:
+                    state = c == '>' ? 1 : 17;
+                    break;
+            }
+            k++;
+        }
+        write_data->state = state;
+        if (n > 0) {
+            count += mg_write(write_data->connection, buf, n);
+        }
+        return count;
+    } else {
+        return mg_write(write_data->connection, pBuf, n);
+    }
 }
 
 static int adapt_serve_zip_entry(struct mg_connection* connection, adapt_serving_context* context,
@@ -80,13 +188,27 @@ static int adapt_serve_zip_entry(struct mg_connection* connection, adapt_serving
     mz_zip_archive_file_stat file_info;
     if (mz_zip_reader_file_stat(&context->zip, file_index, &file_info)) {
         if (file_index >= 0) {
+            char* media_type = context->media_types ? context->media_types[file_index] : NULL;
+            struct adapt_write_data write_data;
+            write_data.connection = connection;
+            write_data.state = 0;
             mg_printf(connection,
                       "HTTP/1.1 200 Success\r\n"
-                      "Content-Length: %d\r\n"
-                      "\r\n",
+                      "Content-Length: %d\r\n",
                       (int)file_info.m_uncomp_size);
-            mz_zip_reader_extract_to_callback(&context->zip, file_index, adapt_write_resource, connection,
-                                              MZ_ZIP_FLAG_CASE_SENSITIVE);
+            if (media_type) {
+                if (strcmp(media_type, "application/xhtml+xml") == 0) {
+                    write_data.state = 1;
+                }
+                mg_printf(connection,
+                          "Content-Type: %s\r\n\r\n",
+                          media_type);
+            } else {
+                mg_printf(connection, "\r\n");
+            }
+            mz_zip_reader_extract_to_callback(&context->zip, file_index,
+                                              adapt_write_resource,
+                                              &write_data, MZ_ZIP_FLAG_CASE_SENSITIVE);
             return 1;
         }
         mg_printf(connection,
@@ -114,9 +236,47 @@ static void url_encode_name(const char* in, char* out, int out_size) {
     *out = '\0';
 }
 
-static int adapt_serve_zip_metadata(struct mg_connection* connection, adapt_serving_context* context,
-                                 const char* item) {
-    if (strcmp(item, "list") == 0) {
+static void url_decode_name(const char* in, char* out, int out_size) {
+    char* last = out + out_size - 1;
+    while (out < last && *in) {
+        int c = (*in) & 0xFF;
+        if ( c == '%') {
+            int cc = -1;
+            sscanf(in, "%%%02X", &cc);
+            if (cc < 0) {
+                break;
+            }
+            *out = (char) cc;
+            in += 3;
+        } else {
+            *out = c;
+            ++out;
+        }
+        ++in;
+    }
+    *out = '\0';
+}
+
+static char* adapt_read_connection(struct mg_connection* connection, int* len_out) {
+    int buf_size = 256;
+    char* buf = (char*)malloc(buf_size + 1);
+    int len = 0;
+    int r;
+    while((r = mg_read(connection, buf + len, buf_size - len)) > 0) {
+        len += r;
+        if (len == buf_size) {
+            buf_size *= 2;
+            buf = (char*)realloc(buf, buf_size + 1);
+        }
+    }
+    buf[len] = '\0';
+    *len_out = len;
+    return buf;
+}
+
+static int adapt_serve_zip_metadata(const char* method, struct mg_connection* connection,
+                adapt_serving_context* context, const char* item) {
+    if (strcmp(item, "list") == 0 && strcmp(method, "GET") == 0) {
         // URL-encoding may turn one character into three.
         char name_buffer[MZ_ZIP_MAX_ARCHIVE_FILENAME_SIZE * 3 + 4];
         int file_index = 0;
@@ -135,6 +295,44 @@ static int adapt_serve_zip_metadata(struct mg_connection* connection, adapt_serv
         }
         mg_printf(connection, "]\r\n");
         return 1;
+    } else if (strcmp(item, "manifest") == 0 && strcmp(method, "POST") == 0) {
+        char file_name[MZ_ZIP_MAX_ARCHIVE_FILENAME_SIZE+1];
+        int len = 0;
+        char* buf = adapt_read_connection(connection, &len);
+        if (buf) {
+            char* s = buf;
+            int file_index;
+            if (!context->media_types) {
+                int file_count = mz_zip_reader_get_num_files(&context->zip);
+                context->media_types = calloc(sizeof(char*), file_count);
+            }
+            while (1) {
+                char* p = s;
+                s = strchr(s, ' ');
+                if (!s) {
+                    break;
+                }
+                *s = '\0';
+                s++;
+                url_decode_name(p, file_name, sizeof file_name);
+                p = s;
+                s = strchr(s, '\n');
+                if (!s) {
+                    break;
+                }
+                *s = '\0';
+                s++;
+                file_index = mz_zip_reader_locate_file(&context->zip, file_name, NULL,
+                                                   MZ_ZIP_FLAG_CASE_SENSITIVE);
+                if (file_index >= 0) {
+                    if (context->media_types[file_index]) {
+                        free(context->media_types[file_index]);
+                    }
+                    context->media_types[file_index] = strcpy(malloc(strlen(p)+1), p);
+                }
+            }
+            free(buf);
+        }
     }
     return 0;
 }
@@ -154,7 +352,7 @@ static int adapt_serve(struct mg_connection* connection) {
             if (*file_name == '\0') {
                 // Special case, query about file structure
                 const char * r = strstr(request->query_string, "r=");
-                if (r && adapt_serve_zip_metadata(connection, context, r+2)) {
+                if (r && adapt_serve_zip_metadata(request->request_method, connection, context, r+2)) {
                     return 1;
                 }
             } else if (adapt_serve_zip_entry(connection, context, file_name)) {
@@ -188,22 +386,13 @@ static int adapt_serve(struct mg_connection* connection) {
             }
         }
     } else if (strcmp(uri, context->msg_url) == 0) {
-        int buf_size = 256;
-        char* buf = (char*)malloc(buf_size);
-        int len = 0;
         if (strcmp(request->request_method, "POST") == 0) {
-            int r;
-            while((r = mg_read(connection, buf + len, buf_size - len)) > 0) {
-                len += r;
-                if (len == buf_size) {
-                    buf_size *= 2;
-                    buf = (char*)realloc(buf, buf_size);
-                }
+            int len = 0;
+            char* buf = adapt_read_connection(connection, &len);
+            if (buf) {
+                context->callback->process_message(context->callback, buf, len);
+                free(buf);
             }
-        }
-        context->callback->process_message(context->callback, buf, len);
-        if (buf) {
-            free(buf);
         }
         mg_printf(connection,
                   "HTTP/1.1 200 Success\r\n"
@@ -412,11 +601,11 @@ const char* adapt_get_init_call(adapt_serving_context* context, const char* inst
 }
 
 void adapt_stop_serving(adapt_serving_context* context) {
+    int i;
     if (context->server_context) {
         mg_stop(context->server_context);
     }
     if (context->options) {
-        int i;
         for (i = 0; context->options[i]; i++) {
             free(context->options[i]);
         }
@@ -427,6 +616,15 @@ void adapt_stop_serving(adapt_serving_context* context) {
     }
     if (context->content) {
         free(context->content);
+    }
+    if (context->media_types) {
+        int file_count = mz_zip_reader_get_num_files(&context->zip);
+        for (i = 0; i < file_count; i++) {
+            if (context->media_types[i]) {
+                free(context->media_types[i]);
+            }
+        }
+        free(context->media_types);
     }
     mz_zip_reader_end(&context->zip);
     free(context);

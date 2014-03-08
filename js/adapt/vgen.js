@@ -613,6 +613,10 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 		if (ns == adapt.base.NS.XHTML) {
 			if (tag == "html" || tag == "body" || tag == "script" || tag == "link" || tag == "meta")
 				tag = "div";
+			else if (tag == "vide_")
+				tag = "video";
+			else if (tag == "audi_")
+				tag = "audio";
 			else if (tag == "object")
 				custom = !!self.customRenderer;
 		} else if (ns == adapt.base.NS.epub) {

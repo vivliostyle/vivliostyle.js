@@ -1641,10 +1641,12 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounters = function(values) 
     var type = values.length > 2 ? values[2].stringValue() : "decimal";
     var arr = this.cascade.counters[counterName];
     var sb = new adapt.base.StringBuffer();
-    for (var i = 0; i < arr.length; i++) {
-    	if (i > 0)
-    		sb.append(separator);
-    	sb.append(this.format(arr[i], type));
+    if (arr) {
+	    for (var i = 0; i < arr.length; i++) {
+	    	if (i > 0)
+	    		sb.append(separator);
+	    	sb.append(this.format(arr[i], type));
+	    }
     }
     return new adapt.css.Str(sb.toString());
 };

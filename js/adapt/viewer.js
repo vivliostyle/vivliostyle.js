@@ -195,6 +195,30 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 			this.needResize = true;
 		}
 	}
+	if (typeof command["hyphenate"] == "boolean") {
+		this.pref.hyphenate = command["hyphenate"];
+		this.needResize = true;
+	}
+	if (typeof command["horizontal"] == "boolean") {
+		this.pref.horizontal = command["horizontal"];
+		this.needResize = true;
+	}
+	if (typeof command["nightMode"] == "boolean") {
+		this.pref.nightMode = command["nightMode"];
+		this.needResize = true;
+	}
+	if (typeof command["lineHeight"] == "number") {
+		this.pref.lineHeight = command["lineHeight"];
+		this.needResize = true;
+	}
+	if (typeof command["columnWidth"] == "number") {
+		this.pref.columnWidth = command["columnWidth"];
+		this.needResize = true;
+	}
+	if (typeof command["fontFamily"] == "string") {
+		this.pref.fontFamily = command["fontFamily"];
+		this.needResize = true;
+	}
 	if (typeof command["load"] == "boolean") {
 		this.waitForLoading = command["load"];  // Load images (and other resources) on the page.		
 	}

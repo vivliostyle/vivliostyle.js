@@ -84,7 +84,7 @@ static struct adapt_callback* MakeContentCallback(ViewerTest* owner, const char*
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
 {
     if (frame == [self.testWebView mainFrame]) {
-        const char* initCall = adapt_get_init_call(self.servingContext, "main", "autoresize:true,load:true");
+        const char* initCall = adapt_get_init_call(self.servingContext, "main", "autoresize:true,load:true,hyphenate:false");
         NSString* init = [NSString stringWithCString:initCall encoding:NSUTF8StringEncoding];
         [[self.testWebView windowScriptObject] evaluateWebScript:init];
     } else if (frame == [self.referenceWebView mainFrame]) {
@@ -153,7 +153,18 @@ static struct adapt_callback* MakeContentCallback(ViewerTest* owner, const char*
     NSBitmapImageRep* referenceImage = [self snapshotToBitmap:self.referenceWebView];
     NSBitmapImageRep* testImage = [self snapshotToBitmap:self.testWebView];
     [self closeAdaptFile];
-    char passed = [self compareImage: referenceImage with: testImage] ? 'P' : 'F';
+    char passed = 'F';
+    switch (testcase->test_type) {
+        case 'B':  // compare with browser
+            passed = [self compareImage: referenceImage with: testImage crop:0] ? 'P' : 'F';
+            break;
+        case 'C':  // compare with browser, crop
+            passed = [self compareImage: referenceImage with: testImage crop:20] ? 'P' : 'F';
+            break;
+        case 'R':  // no red must be present
+            passed = [self checkNoRed: testImage] ? 'P' : 'F';
+            break;
+    }
     if (passed != 'P') {
         NSString* base = [[NSString stringWithUTF8String:suite] stringByAppendingString:@"result-images/"];
         NSFileManager* fileManager = [NSFileManager defaultManager];
@@ -194,7 +205,32 @@ static struct adapt_callback* MakeContentCallback(ViewerTest* owner, const char*
     [self nextTest: relaunch];
 }
 
-- (BOOL)compareImage: (NSBitmapImageRep*)image1 with: (NSBitmapImageRep*)image2
+- (BOOL)checkNoRed: (NSBitmapImageRep*)image
+{
+    float width = image.pixelsWide;
+    float height = image.pixelsHigh;
+    float bitsPerPixel = image.bitsPerPixel;
+    float stride1 = image.bytesPerRow;
+    unsigned char* data = image.bitmapData;
+    int pixelWidth = (int) bitsPerPixel / 8;
+    int redIndex = pixelWidth - 1;
+    int rowLength = (int) width * pixelWidth;
+    int redCount = 0;
+    for (int row = 0; row < height; row++) {
+        for (int k = 0; k < rowLength; k += pixelWidth) {
+            if ((data[k + redIndex] & 0xFF) > 0xF0) {
+                redCount++;
+            }
+        }
+        data += (int)stride1;
+    }
+    if (redCount > 0) {
+        return NO;
+    }
+    return YES;
+}
+
+- (BOOL)compareImage: (NSBitmapImageRep*)image1 with: (NSBitmapImageRep*)image2 crop: (int)crop
 {
     float width = image1.pixelsWide;
     if (image2.pixelsWide != width) {
@@ -212,9 +248,9 @@ static struct adapt_callback* MakeContentCallback(ViewerTest* owner, const char*
     unsigned char* data1 = image1.bitmapData;
     float stride2 = image2.bytesPerRow;
     unsigned char* data2 = image2.bitmapData;
-    int rowLength = (int) width * (int) bitsPerPixel / 8;
+    int rowLength = ((int) width - crop) * (int) bitsPerPixel / 8;
     int diffCount = 0;
-    for (int row = 0; row < height; row++) {
+    for (int row = 0; row < height - crop; row++) {
         for (int k = 0; k < rowLength; k++) {
             if (data1[k] != data2[k]) {
                 diffCount++;

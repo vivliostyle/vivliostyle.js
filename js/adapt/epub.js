@@ -125,10 +125,11 @@ adapt.epub.EPUBDocStore.prototype.loadOPF = function(epubURL, root, haveZipMetad
 					self.loadAsJSON(epubURL + "?r=list") : adapt.task.newResult(null);
 			zipMetadataResult.then(function(zipMetadata) {
 				opf = new adapt.epub.OPFDoc(self, epubURL);
-				opf.initWithXMLDoc(opfXML, encXML, zipMetadata);
-				self.opfByURL[url] = opf;
-				self.primaryOPFByEPubURL[epubURL] = opf;
-				frame.finish(opf);
+				opf.initWithXMLDoc(opfXML, encXML, zipMetadata, epubURL + "?r=manifest").then(function() {
+					self.opfByURL[url] = opf;
+					self.primaryOPFByEPubURL[epubURL] = opf;
+					frame.finish(opf);			
+				});
 			});
 		});
 	});
@@ -488,9 +489,10 @@ adapt.epub.OPFDoc.prototype.getPathFromURL = function(url) {
  * @param {adapt.xmldoc.XMLDocHolder} opfXML
  * @param {adapt.xmldoc.XMLDocHolder} encXML
  * @param {adapt.base.JSON} zipMetadata
- * @return {void}
+ * @param {string} manifestURL
+ * @return {adapt.task.Result}
  */
-adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadata) {
+adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadata, manifestURL) {
 	var self = this;
 	this.opfXML = opfXML;
 	this.encXML = encXML;
@@ -577,21 +579,30 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
 	if (this.metadata[adapt.epub.metaTerms.language]) {
 		this.lang = this.metadata[adapt.epub.metaTerms.language][0]["v"];
 	}
-	if (zipMetadata) {
-		for (var i = 0; i < zipMetadata.length; i++) {
-			var entry = zipMetadata[i];
-			var encodedPath = entry["n"];
-			if (encodedPath) {
-				var path = decodeURI(encodedPath);
-				var item = this.itemMapByPath[path];
-				if (item) {
-					item.compressed = entry["m"] != 0;
-					item.compressedSize = entry["c"];
+	if (!zipMetadata) {
+		return adapt.task.newResult(true);
+	}
+	var manifestText = new adapt.base.StringBuffer();
+	for (var i = 0; i < zipMetadata.length; i++) {
+		var entry = zipMetadata[i];
+		var encodedPath = entry["n"];
+		if (encodedPath) {
+			var path = decodeURI(encodedPath);
+			var item = this.itemMapByPath[path];
+			if (item) {
+				item.compressed = entry["m"] != 0;
+				item.compressedSize = entry["c"];
+				if (item.mediaType) {
+					manifestText.append(encodedPath);
+					manifestText.append(' ');
+					manifestText.append(item.mediaType.replace(/\s+/g, ""));
+					manifestText.append('\n');
 				}
 			}
 		}
-		self.assignAutoPages();
 	}
+	self.assignAutoPages();
+	return adapt.net.ajax(manifestURL, false, "POST", manifestText.toString(), "text/plain");
 };
 
 /**
@@ -1004,23 +1015,52 @@ adapt.epub.OPFView.prototype.navigateToEPage = function(epage) {
 };
 
 /**
+ * Move to the page specified by the given CFI and render it.
+ * @param {string} fragment
+ * @return {!adapt.task.Result.<adapt.vtree.Page>}
+ */
+adapt.epub.OPFView.prototype.navigateToFragment = function(fragment) {
+	/** @type {!adapt.task.Frame.<adapt.vtree.Page>} */ var frame
+		= adapt.task.newFrame("navigateToCFI");
+	var self = this;
+	self.opf.resolveFragment(fragment).then(function(position) {
+		if (position) {
+			self.spineIndex = position.spineIndex;
+			self.pageIndex = position.pageIndex;
+			self.offsetInItem = position.offsetInItem;
+		}
+		self.renderPage().thenFinish(frame);		
+	});
+	return frame.result();
+};
+
+
+/**
  * Move to the page specified by the given URL and render it.
- * TODO: accept CFI
  * @param {string} href
  * @return {!adapt.task.Result.<adapt.vtree.Page>}
  */
 adapt.epub.OPFView.prototype.navigateTo = function(href) {
 	adapt.base.log("Navigate to " + href);
-	var fragmentIndex = href.indexOf("#");
-	if (fragmentIndex < 0) {
-		fragmentIndex = href.length;
-	}
 	var path = this.opf.getPathFromURL(adapt.base.stripFragment(href));
 	if (path == null) {
-		return adapt.task.newResult(/** @type {adapt.vtree.Page} */ (null));		
+		if (this.opf.opfXML && href.match(/^#epubcfi\(/)) {
+			// CFI fragment is "relative" to OPF.
+			path = this.opf.getPathFromURL(this.opf.opfXML.url);
+		}
+		if (path == null) {
+			return adapt.task.newResult(/** @type {adapt.vtree.Page} */ (null));		
+		}
 	}
 	var item = this.opf.itemMapByPath[path];
 	if (!item) {
+		if (this.opf.opfXML && path == this.opf.getPathFromURL(this.opf.opfXML.url)) {
+			// CFI link?
+			var fragmentIndex = href.indexOf("#");
+			if (fragmentIndex >= 0) {
+				return this.navigateToFragment(href.substr(fragmentIndex + 1));
+			}
+		}
 		return adapt.task.newResult(/** @type {adapt.vtree.Page} */ (null));
 	}
 	// Committed to navigate. If not moving to a different item, current

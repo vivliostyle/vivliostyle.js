@@ -1727,7 +1727,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 continue;
             case adapt.cssparse.Action.SELECTOR_NEXT:
                 handler.nextSelector();
-                this.actions = adapt.cssparse.actionsSelectorCont;
+                this.actions = adapt.cssparse.actionsSelectorStart;
                 tokenizer.consume();
                 continue;
             case adapt.cssparse.Action.VAL_IDENT:

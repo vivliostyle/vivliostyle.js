@@ -145,7 +145,7 @@ adapt.expr.LexicalScope = function(parent, resolver) {
         builtIns["typeof"] = function(x) { return typeof(x); };
         this.defineBuiltInName("page-width", function() { return this.pageWidth; });
         this.defineBuiltInName("page-height", function() { return this.pageHeight; });
-        this.defineBuiltInName("perf-font-family", function() { return this.pref.fontFamily; });
+        this.defineBuiltInName("pref-font-family", function() { return this.pref.fontFamily; });
         this.defineBuiltInName("pref-night-mode", function() { return this.pref.nightMode; });
         this.defineBuiltInName("pref-hyphenate", function() { return this.pref.hyphenate; });
         this.defineBuiltInName("pref-margin", function() { return this.pref.margin; });

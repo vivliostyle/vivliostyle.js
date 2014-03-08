@@ -291,7 +291,7 @@ adapt.cfi.Fragment = function() {
  * @return {void}
  */
 adapt.cfi.Fragment.prototype.fromString = function(fragstr) {
-	var r = fragstr.match(/epubcfi\((.*)\)/);
+	var r = fragstr.match(/^#?epubcfi\((.*)\)$/);
 	if (!r) {
 		throw new Error("E_CFI_NOT_CFI");
 	}
