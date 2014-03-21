@@ -917,8 +917,8 @@ adapt.ops.OPSDocStore.prototype.init = function() {
     var userAgentXML = adapt.base.resolveURL("user-agent.xml", window.location.href);
     var frame = adapt.task.newFrame("OPSDocStore.init");
 	var self = this;
-    adapt.cssvalid.loadValidatorSet().then(function(validatorSetParam) {
-    	self.validatorSet = /** @type {adapt.cssvalid.ValidatorSet} */ (validatorSetParam);
+    adapt.cssvalid.loadValidatorSet().then(function(validatorSet) {
+    	self.validatorSet = validatorSet;
     	adapt.csscasc.loadUABase().then(function() {
     		self.load(userAgentXML).then(function() {
     			frame.finish(true);

@@ -626,6 +626,18 @@ adapt.base.mapObj = function(obj, fn) {
 };
 
 /**
+ * @param {Object} obj
+ * @return {number}
+ */
+adapt.base.mapSize = function(obj) {
+	var n = 0;
+	for (var key in obj) {
+		n++;
+	}
+	return n;
+};
+
+/**
  * @typedef {{type:string, target, currentTarget}|Event}
  */
 adapt.base.Event;
