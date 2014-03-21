@@ -83,7 +83,7 @@ static size_t adapt_write_resource(void *pOpaque, mz_uint64 file_ofs, const void
         size_t count = 0;
         const char* buf = (const char*)pBuf;
         int state = write_data->state;
-        int k = 0;
+        size_t k = 0;
         while (k < n) {
             char c = buf[k];
             switch (state){
@@ -304,7 +304,7 @@ static int adapt_serve_zip_metadata(const char* method, struct mg_connection* co
             int file_index;
             if (!context->media_types) {
                 int file_count = mz_zip_reader_get_num_files(&context->zip);
-                context->media_types = calloc(sizeof(char*), file_count);
+                context->media_types = (char**)calloc(sizeof(char*), file_count);
             }
             while (1) {
                 char* p = s;
@@ -328,7 +328,7 @@ static int adapt_serve_zip_metadata(const char* method, struct mg_connection* co
                     if (context->media_types[file_index]) {
                         free(context->media_types[file_index]);
                     }
-                    context->media_types[file_index] = strcpy(malloc(strlen(p)+1), p);
+                    context->media_types[file_index] = strcpy((char*)malloc(strlen(p)+1), p);
                 }
             }
             free(buf);

@@ -16,7 +16,7 @@ namespace Viewer
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new AppWindow());
+            Application.Run(new PublicationWindow());
         }
     }
 }
