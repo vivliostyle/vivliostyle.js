@@ -27,8 +27,13 @@ namespace Viewer
             InitializeComponent();
         }
 
-        public bool Open(string file, bool selfContained, bool zipped)
+        private bool Open(string file, bool selfContained, bool zipped)
         {
+            if (service != null)
+            {
+                service.Close();
+                service = null;
+            }
             this.file = file;
             this.selfContained = selfContained;
             this.zipped = zipped;
@@ -137,6 +142,60 @@ namespace Viewer
                     }
                 }
             }
+        }
+
+        protected void FileOpen_Click(object sender, System.EventArgs e)
+        {
+            OpenFileDialog openDialog = new OpenFileDialog();
+            openDialog.Title = "Open Publication";
+            openDialog.Filter = "EPUB files|*.epub|XHTML files|*.xhtml|OPF files|*.opf|FB2 files|*.fb2|FB2 compressed files|*.fb2.zip";
+           // theDialog.InitialDirectory = @"C:\";
+            if (openDialog.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+            string file = openDialog.FileName;
+            bool unpackaged = file.EndsWith(".opf") || file.EndsWith(".xhtml");
+            bool not_zipped = file.EndsWith(".fb2");
+            Open(file, !unpackaged, !not_zipped);
+        }
+
+        private void FileExit_Click(object sender, EventArgs e)
+        {
+            Dispose();
+        }
+
+        private void AppWindow_Load(object sender, EventArgs e)
+        {
+            //Icon icon = new Icon("resources/magazine.ico");
+            //this.Icon = icon;
+        }
+
+        private void ToggleTOC_Click(object sender, EventArgs e)
+        {
+            ToggleTOC();
+        }
+
+        private void NextPage_Click(object sender, EventArgs e)
+        {
+            NextPage();
+        }
+
+        private void FirstPage_Click(object sender, EventArgs e)
+        {
+            FirstPage();
+        }
+        private void PreviousPage_Click(object sender, EventArgs e)
+        {
+            PreviousPage();
+        }
+        private void LastPage_Click(object sender, EventArgs e)
+        {
+            LastPage();
+        }
+        private void Reload_Click(object sender, EventArgs e)
+        {
+            Reload();
         }
 
         protected void GoNextPage_Click(object sender, System.EventArgs e)

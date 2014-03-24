@@ -121,6 +121,7 @@ struct adapt_sink_safari_bug {
     int state;
 };
 
+<<<<<<< HEAD
 static void adapt_sink_safari_bug_write(struct adapt_sink* sink, size_t file_offset,
                                         const unsigned char* buf, size_t length) {
     // Replace '<audio'/'<video' with '<audi_/<vide_' to avoid crash in Safari code.
@@ -145,6 +146,56 @@ static void adapt_sink_safari_bug_write(struct adapt_sink* sink, size_t file_off
                 } else if (c == '!') {
                     state = 10;
                 } else if (c != '/') {
+=======
+#define WORK_AROUND_SAFARI_MEDIA_BUG 1
+
+static size_t adapt_write_resource(void *pOpaque, mz_uint64 file_ofs, const void *pBuf, size_t n) {
+    struct adapt_write_data* write_data = (struct adapt_write_data*)pOpaque;
+    if (write_data->state && WORK_AROUND_SAFARI_MEDIA_BUG) {
+        // Replace '<audio'/'<video' with '<audi_/<vide_' to avoid crash in Safari code.
+        size_t count = 0;
+        const char* buf = (const char*)pBuf;
+        int state = write_data->state;
+        size_t k = 0;
+        while (k < n) {
+            char c = buf[k];
+            switch (state){
+                case 1:
+                    if (c == '<') {
+                        state = 2;
+                    }
+                    break;
+                case 2:
+                    if (c == 'a') {
+                        state = 3;
+                    } else if (c == 'v') {
+                        state = 6;
+                    } else if (c == '!') {
+                        state = 10;
+                    } else if (c != '/') {
+                        state = 1;
+                    }
+                    break;
+                case 3:
+                    state = c == 'u' ? 4 : 1;
+                    break;
+                case 4:
+                    state = c == 'd' ? 5 : 1;
+                    break;
+                case 5:
+                    state = c == 'i' ? 9 : 1;
+                    break;
+                case 6:
+                    state = c == 'i' ? 7 : 1;
+                    break;
+                case 7:
+                    state = c == 'd' ? 8 : 1;
+                    break;
+                case 8:
+                    state = c == 'e' ? 9 : 1;
+                    break;
+                case 9:
+>>>>>>> b4b74a4b0002a9f7fb84bef65cafb87d18b9d293
                     state = 1;
                 }
                 break;
@@ -525,7 +576,11 @@ static int adapt_serve_zip_metadata(const char* method, struct mg_connection* co
             int file_index;
             if (!context->file_info) {
                 int file_count = mz_zip_reader_get_num_files(&context->zip);
+<<<<<<< HEAD
                 context->file_info = calloc(sizeof(struct adapt_file_info), file_count);
+=======
+                context->media_types = (char**)calloc(sizeof(char*), file_count);
+>>>>>>> b4b74a4b0002a9f7fb84bef65cafb87d18b9d293
             }
             while (1) {
                 char* url = s;
@@ -595,6 +650,10 @@ static int adapt_serve_zip_metadata(const char* method, struct mg_connection* co
                             }
                         }
                     }
+<<<<<<< HEAD
+=======
+                    context->media_types[file_index] = strcpy((char*)malloc(strlen(p)+1), p);
+>>>>>>> b4b74a4b0002a9f7fb84bef65cafb87d18b9d293
                 }
             }
             free(buf);
