@@ -1,0 +1,442 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>WOFF File Format</title>
+
+  <style type="text/css">
+    .code { font-family: monospace; }
+    
+    col.type { width: 5em; }
+    col.name { width: 10em; }
+    
+    tr.header { text-align: left; }
+    
+    th { padding-left: .5em; padding-right: .5em; vertical-align: top; }
+    td { padding-left: .5em; padding-right: .5em; vertical-align: top; }
+    
+    .fnref { font-size: 70%; vertical-align: text-top; }
+    .footnotes { font-size: smaller; }
+    
+    dl.footnotes dt {
+      float: left;
+      clear: left;
+      width: 2em;
+      text-align: right;
+    }
+    dl.footnotes dd {
+      margin-left: 3em;
+    }
+    
+    dl.xmlspec dd {
+      margin-bottom: 1em;
+    }
+  </style>
+
+  <link type="text/css" rel="stylesheet"
+        href="http://www.w3.org/StyleSheets/TR/W3C-Member-SUBM" />
+
+  <script type="text/javascript">
+  //<![CDATA[
+    function stripeTables() {
+      var tables = document.getElementsByTagName("table");
+      for (var t = 0; t < tables.length; ++t) {
+        var even = false;
+        var bodies = tables[t].getElementsByTagName("tbody");
+        for (var b = 0; b < bodies.length; ++b) {
+          var rows = bodies[b].getElementsByTagName("tr");
+          for (var r = 0; r < rows.length; ++r) {
+            var row = rows[r];
+            if (row.getElementsByTagName("th").length > 0) {
+              row.style.backgroundColor = "#ddd";
+            } else {
+              row.style.backgroundColor = even ? "#eef" : "#efe";
+              even = !even;
+            }
+          }
+        }
+      }
+    }
+  //]]>
+  </script>
+</head>
+
+<body onload="stripeTables();">
+
+<div class="head">
+<h1>WOFF File Format<br/><small>(draft of 2009-10-03)</small></h1>
+
+<dl>
+  <dt>Authors:</dt>
+  <dd>Jonathan Kew (Mozilla Corporation)</dd>
+  <dd>Tal Leming (Type Supply)</dd>
+  <dd>Erik van Blokland (LettError)</dd>
+</dl>
+<p>Copyright &copy;2009 <a href="http://www.mozilla.com/">Mozilla Corporation</a>, <a href="http://www.typesupply.com/">Type Supply</a>, and <a href="http://www.letterror.com/">LettError</a>. All rights reserved.</p>
+</div>
+
+<hr/>
+
+<div>
+<h2>Version history</h2>
+<dl>
+<dt><a href="http://people.mozilla.org/~jkew/woff/woff-2009-10-03.html">Draft of 2009-10-03</a></dt>
+<dd>Corrected editing slip in Font Data Tables section; no change in the actual format specification.</dd>
+<dt><a href="http://people.mozilla.org/~jkew/woff/woff-2009-09-16.html">Draft of 2009-09-16</a></dt>
+<dd>First version posted on <a href="http://people.mozilla.org/~jkew/woff/">http://people.mozilla.org/~jkew/woff/</a>.</dd>
+</dl>
+<p>Some earlier drafts, now superseded, were circulated via the www-font mailing list and on http://www.jfkew.plus.com/woff/.</p>
+</div>
+
+<hr/>
+
+<div>
+<h2>Introduction</h2>
+
+<p>This document specifies a simple compressed file format for fonts, designed primarily for use on the web.  The WOFF format is directly based on the table-based sfnt structure used in TrueType<a id="fn-1-ref" href="#fn-1" title="footnote 1" class="fnref">[1]</a>, OpenType<a id="fn-2-ref" href="#fn-2" title="footnote 2" class="fnref">[2]</a> and Open Font Format<a id="fn-3-ref" href="#fn-3" title="footnote 3" class="fnref">[3]</a> fonts, which are collectively referred to as sfnt-based fonts. A WOFF font file is simply a repackaged version of a sfnt-based font in compressed form. The format also allows font metadata and private-use data to be included separately from the font data. WOFF encoding tools convert an existing sfnt-based font into a WOFF formatted file, and user agents restore the original sfnt-based font data for use with a webpage.</p>
+
+<p>In general, the structure and contents of decompressed font data should match that of the original font file. Tools producing WOFF font files may provide other font editing features such as glyph subsetting, validation or font feature additions but these are considered outside the scope of this format. Independent of these features, both tools and user agents must assure that the validity of the underlying font data is preserved.</p>
+
+<h3>Notational Conventions</h3>
+
+<p>The key words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended",  "may", and "optional" in this document are to be interpreted as described in RFC 2119<a id="fn-4-ref" href="#fn-4" title="footnote 4" class="fnref">[4]</a>.</p>
+</div>
+
+<div>
+<h2>Overall file structure</h2>
+
+<p>The structure of WOFF font files is similar to the structure of sfnt-based fonts: a table directory containing lengths and offsets to individual font data tables, followed by the data tables themselves. The sfnt structure is described fully in the TrueType<a href="#fn-1" title="footnote 1" class="fnref">[1]</a>, OpenType<a href="#fn-2" title="footnote 2" class="fnref">[2]</a> and Open Font Format<a href="#fn-3" title="footnote 3" class="fnref">[3]</a> specifications.</p>
+
+<p>The main body of the file consists of the same collection of tables as the original, uncompressed sfnt-based font, except that each table is individually compressed, and the sfnt table directory is replaced by the WOFF table directory.</p>
+
+<p>A WOFF font file consists of a 44-byte header, followed by a variable-size table directory, a variable number of font tables, an optional block of extended metadata, and an optional block of private data.</p>
+<table>
+<col class="name"/><col class="desc"/>
+<tr class="header"><th colspan="2">WOFF File</th></tr>
+<tr><td>WOFFHeader</td><td>File header with basic font type and version, along with offsets to metadata and private data blocks.</td></tr>
+<tr><td>TableDirectory</td><td>Directory of font tables, indicating the original size, compressed size and location of each table within the WOFF file.</td></tr>
+<tr><td>FontTables</td><td>The font data tables from the original sfnt-based font, compressed to reduce bandwidth requirements.</td></tr>
+<tr><td>ExtendedMetadata</td><td>An optional block of extended metadata, represented in XML format and compressed for storage in the WOFF file.</td></tr>
+<tr><td>PrivateData</td><td>An optional block of private data for the font designer, foundry, or vendor to use.</td></tr>
+</table>
+
+<p>Data values stored in the WOFF Header and WOFF Table Directory sections are stored in big-endian format, just as values are within sfnt-based fonts. The following basic data types are used in the description:</p>
+<table>
+<col class="type"/><col class="desc"/>
+<tr class="header"><th colspan="2">Data types</th></tr>
+<tr><td>UInt32</td><td>32-bit (4-byte) unsigned integer in big-endian format</td></tr>
+<tr><td>UInt16</td><td>16-bit (2-byte) unsigned integer in big-endian format</td></tr>
+</table>
+</div>
+
+<div>
+<h2>WOFF Header</h2>
+
+<p>The header includes an identifying signature and indicates the specific kind of font data included in the file (TrueType or CFF outline data); it also has a font version number, offsets to additional data chunks, and the number of entries in the table directory that immediately follows the header:</p>
+
+<table>
+<col class="type"/><col class="name"/><col class="desc"/>
+<tr class="header"><th colspan="3">WOFFHeader</th></tr>
+<tr><td>UInt32</td><td>signature</td><td>0x774F4646 <span class="code">'wOFF'</span></td></tr>
+<tr><td>UInt32</td><td>flavor</td><td>The "sfnt version" of the original file: 0x00010000 for TrueType flavored fonts or 0x4F54544F <span class="code">'OTTO'</span> for CFF flavored fonts.</td></tr>
+<tr><td>UInt32</td><td>length</td><td>Total size of the WOFF file.</td></tr>
+<tr><td>UInt16</td><td>numTables</td><td>Number of entries in directory of font tables.</td></tr>
+<tr><td>UInt16</td><td>reserved</td><td>Reserved, must be set to zero.</td></tr>
+<tr><td>UInt32</td><td>totalSfntSize</td><td>Total size needed for the uncompressed font data, including the sfnt header, directory, and tables.</td></tr>
+<tr><td>UInt16</td><td>majorVersion</td><td>Major version of the WOFF font, not necessarily the major version of the original sfnt font.</td></tr>
+<tr><td>UInt16</td><td>minorVersion</td><td>Minor version of the WOFF font, not necessarily the minor version of the original sfnt font.</td></tr>
+<tr><td>UInt32</td><td>metaOffset</td><td>Offset to metadata block, from beginning of WOFF file; zero if no metadata block is present.</td></tr>
+<tr><td>UInt32</td><td>metaLength</td><td>Length of compressed metadata block; zero if no metadata block is present.</td></tr>
+<tr><td>UInt32</td><td>metaOrigLength</td><td>Uncompressed size of metadata block; zero if no metadata block is present.</td></tr>
+<tr><td>UInt32</td><td>privOffset</td><td>Offset to private data block, from beginning of WOFF file; zero if no private data block is present.</td></tr>
+<tr><td>UInt32</td><td>privLength</td><td>Length of private data block; zero if no private data block is present.</td></tr>
+</table>
+
+<p>Although only fonts of type 0x00010000 (TrueType) and 0x4F54544F (CFF-based) are widely supported at present, it is not an error in the WOFF file if the <span class="code">flavor</span> field contains a different value, indicating a WOFF-packaged version of a different sfnt flavor. (The value 0x74727565 <span class="code">'true'</span> has been used for some TrueType-flavored fonts on Mac OS, for example.) Whether client software will actually support other types of sfnt-based font data is outside the scope of the WOFF specification, which simply describes how the sfnt is repackaged for Web use.</p>
+
+<p>The WOFF <span class="code">majorVersion</span> and <span class="code">minorVersion</span> fields specify the version number for a given font, which can be based on the version number of the original font but is not required to be. These fields have no effect on font loading or usage behavior in user agents.</p>
+
+<p>The header includes a <span class="code">reserved</span> field; this MUST be set to zero. If this field is non-zero, a WOFF processor conforming to this specification MUST reject the file as invalid.<p>
+</div>
+
+<div>
+<h2>Table directory</h2>
+
+<p>The table directory is an array of WOFF table directory entries, as defined below. The directory follows immediately after the WOFF file header; therefore, there is no explicit offset in the header pointing to this block. Its size is calculated by multiplying the <span class="code">numTables</span> value in the WOFF header times the size of a single WOFF table directory.  Each table directory entry specifies the size and location of a single font data table.</p>
+
+<table>
+<col class="type"/><col class="name"/><col class="desc"/>
+<tr class="header"><th colspan="3">WOFF TableDirectoryEntry</th></tr>
+<tr><td>UInt32</td><td>tag</td><td>4-byte sfnt table identifier.</td></tr>
+<tr><td>UInt32</td><td>offset</td><td>Offset to the data, from beginning of WOFF file.</td></tr>
+<tr><td>UInt32</td><td>compLength</td><td>Length of the compressed data, excluding padding.</td></tr>
+<tr><td>UInt32</td><td>origLength</td><td>Length of the uncompressed table, excluding padding.</td></tr>
+<tr><td>UInt32</td><td>origChecksum</td><td>Checksum of the uncompressed table.</td></tr>
+</table>
+
+<p>The format of <span class="code">tag</span> values are defined by the specifications for sfnt-based fonts. The <span class="code">offset</span> and <span class="code">compLength</span> fields identify the location of the compressed font table. The <span class="code">origLength</span> and <span class="code">origCheckSum</span> fields are the length and checksum of the original, uncompressed font table from the table directory of the original font.</p>
+
+<p>The sfnt-based format specifications require that font tables be aligned on 4-byte boundaries. Font tables whose length is not a multiple of 4 are padded with null bytes up to the next 4-byte boundary. WOFF font tables have the same requirement: they MUST begin on 4-byte boundaries and be padded with nulls to the next 4-byte boundary. The <span class="code">compLength</span> and <span class="code">origLength</span> fields in the header store the exact, unpadded length.</p>
+
+<p>If the length of a compressed font table would be the same as or greater than the length of the original font table, the font table MUST be stored uncompressed in the WOFF file and the <span class="code">compLength</span> set equal to the <span class="code">origLength</span>. Tools MAY also opt to leave other tables uncompressed (e.g. all tables less than a certain size), in which case <span class="code">compLength</span> will be equal to <span class="code">origLength</span> for these tables as well. WOFF font files containing table directory entries for which <span class="code">compLength</span> is greater than <span class="code">origLength</span> are considered invalid and MUST NOT be loaded by user agents. Fonts containing compressed font tables that decompress to a size larger than <span class="code">origLength</span> are also considered invalid and MUST NOT be loaded.</p>
+
+<p>The sfnt-based font specifications require that the table directory entries are sorted in ascending order of <span class="code">tag</span> value. To simplify processing, WOFF-producing tools MUST produce a table directory with entries in ascending <span class="code">tag</span> value order. User agents MUST likewise assure that the sfnt table directory is recreated in ascending <span class="code">tag</span> order when restoring the font data to its uncompressed state. The ordering of the font tables themselves is independent of the order of directory entries, as described below.</p>
+
+<p>sfnt-based fonts store a checksum for each table in the table directory, and an overall checksum for the entire font in the <span class="code">head</span> table (see the TrueType, OpenType or Open Font Format specifications for the definition of each calculation). Tools producing WOFF fonts MUST validate these checksums, and either correct the values or issue an error message if a discrepancy is found.</p>
+
+<p>In general, WOFF-producing tools generate a WOFF font file with the same set of tables as in the original font. This means that the overall font checksum of a font decompressed from a conformant WOFF file should always match the checksum in the original, valid sfnt-based font file.</p>
+
+<p>In cases where checksum recalculation is necessary or changes to the original font data are made, to subset the glyphs in the font or add special tables for example, conformant tools MUST either remove any digital signature (i.e., a <span class="code">DSIG</span> table) or regenerate the signature (if the necessary credentials are available), and MUST correct all affected checksum values and table offsets, both for individual tables and the overall font data checksum contained in the <span class="code">head</span> table.</p>
+</div>
+
+<div>
+<h2>Font Data Tables</h2>
+
+<p>The font data tables in the WOFF file are exactly the same as the tables in the original sfnt-based font file, except that each table MAY have been compressed by the <span class="code">compress2()</span> function of zlib<a id="fn-5-ref" href="#fn-5" title="footnote 5" class="fnref">[5]</a> (or an equivalent, compatible algorithm). User agents use a function equivalent to the <span class="code">uncompress</span> function of zlib<a id="fn-6-ref" href="#fn-6" title="footnote 6" class="fnref">[6]</a> to decompress each table. The underlying format these functions use is described in the ZLIB specification<a id="fn-7-ref" href="#fn-7" title="footnote 7" class="fnref">[7]</a>.</p>
+
+<p>The font data tables MUST be stored immediately following the table directory, without gaps except for the padding that may be required (up to three null bytes at the end of each table) to ensure 4-byte alignment.</p>
+
+<p>Font tables in WOFF files SHOULD be stored in the same order as the original sfnt-based font and user agents SHOULD restore the original uncompressed font table in identical order. The table order is implied by <span class="code">offset</span> values in the table directory, sorting table directory entries into ascending <span class="code">offset</span> value order produces a list of entries in an order equivalent to that of the font tables. If the table order is not preserved, either during WOFF font creation or during decompression by the user agent or other program, then the font checksum would be incorrect, and MUST be properly updated, and any digital signature recreated or removed.</p>
+
+<p>It is possible that font loading performance in some user agents may be improved by sorting the tables such that general font information, character mapping, and metrics are stored before the actual glyph data. The OpenType and Open Font Format specifications include specific recommendations for different types of fonts. However, such optimizations are an implementation detail and not within the scope of the WOFF specification. But if either a tool or a user agent reorders tables, it MUST recalculate the font checksum in the <span class="code">head</span> table, which will be affected by the changed offsets in the sfnt table directory, and remove any <span class="code">DSIG</span> table that is invalidated by the changes. A new signature MAY be added to the modified font, as described by the OpenType and Open Font Format specifications (if appropriate signing credentials are available to the tool involved).</p>
+</div>
+
+<div>
+<h2>Extended Metadata Block</h2>
+
+<p>The WOFF font file MAY include a block of extended metadata, allowing the inclusion of more extensive metadata than is present directly in the original sfnt-based font file. The metadata block consists of XML data compressed by zlib; the file header specifies both the size of the actual compressed and the original uncompressed size in order to facilitate memory allocation.</p>
+
+<p>If present, the metadata MUST be compressed; it is never stored in uncompressed form. If no extended metadata is present, the <span class="code">metaOffset</span>, <span class="code">metaLength</span> and  <span class="code">metaOrigLength</span> fields in the WOFF header MUST be set to zero.</p>
+
+<p>The metadata block MUST follow immediately after the last font table. As font tables MUST be padded with null bytes to a 4-byte boundary, the beginning of the metadata block will always be 4-byte aligned. The end of the metadata block is not padded to a 4-byte boundary unless it is followed by a private data block (below).</p>
+
+<p>If the extended metadata is invalid (for example, the offset/length indicate a range outside of the actual WOFF file, or the data cannot be decompressed, or it is not well-formed XML), the WOFF processor MUST proceed as if the metadata block is absent; the font itself remains valid and can still be used (provided its main content of font data tables is valid).</p>
+
+<p>The presence (or absence) and content of the metadata block MUST NOT affect font loading or rendering behavior of user agents; it is intended to be purely informative. However, if user agents provide a means for users to view information about fonts (such as a "Font Information" panel) then they SHOULD treat the metadata block as the primary source, falling back on the font's <span class="code">name</span> table entries when relevant extended metadata elements are not present.</p>
+
+<p><a href="#appendix-a">Appendix A</a> describes the format for XML metadata<a id="fn-8-ref" href="#fn-8" title="footnote 8" class="fnref">[8]</a>, and <a href="#appendix-b">appendix B</a> illustrates it with a brief example.</p>
+</div>
+
+<div>
+<h2>Private Data Block</h2>
+
+<p>The WOFF font file MAY include a block of arbitrary data, allowing font creators to include whatever information they wish. The content of this data MUST NOT affect font usage or load behavior. WOFF processors should make no assumptions about the content of a private block; it may (for example) contain ASCII or Unicode text, or some vendor-defined binary data, and it may be compressed or encrypted, but it has no publicly defined format. Conformant user agents will not assume anything about the structure of this data. Only the font developer or vendor responsible for the private block is expected to understand its contents.</p>
+
+<p>The private data block, if present, MUST be the last block in the WOFF file, following all the font tables and any extended metadata block. The private data block MUST begin on a 4-byte boundary in the WOFF file, with up to three null bytes inserted as padding if needed to ensure this. No padding is required at the end of the private data block; any following data does not form part of the WOFF font structure, and MUST be ignored.</p>
+
+<p>If no private data is present, the <span class="code">privOffset</span> and <span class="code">privLength</span> fields in the WOFF header MUST be set to zero. However, as a conforming WOFF processor does not interpret or even need to access the private data in any way, it will simply ignore these fields. Only a private vendor-specific tool would use them.</p>
+</div>
+
+<hr/>
+
+<div id="appendix-a">
+<h2>APPENDIX A: Extended Metadata Specification</h2>
+
+<p>The extended metadata must be well-formed XML. The use of UTF-8 encoding is recommended.</p>
+
+<p>Several elements store their data in <span class="code">text</span> subelements; this is to support localization. The <span class="code">text</span> elements may be given a <span class="code">lang</span> attribute. The possible values for the <span class="code">lang</span> attribute can be found in the IANA Subtag Registry<a id="fn-9-ref" href="#fn-9" title="footnote 9" class="fnref">[9]</a>. A user agent displaying metadata is expected to choose a preferred language from among those available, following RFC 4647<a id="fn-10-ref" href="#fn-10" title="footnote 10" class="fnref">[10]</a>, and falling back to a default (typically English) or to an unmarked <span class="code">text</span> element if no better match is found. Such elements are indicated by the statement "This element may be localized" in the description below; the internal structure of <span class="code">text</span> elements with <span class="code">lang</span> attributes is not repeated for each element type.</p>
+
+<dl class="xmlspec">
+<dt><span class="code">metadata</span> element</dt>
+<dd>
+<p>The main element. This element is required.</p>
+<table>
+<col class="name"/><col class="desc"/>
+<tr class="header"><th colspan="2">attributes</th></tr>
+<tr><td>version</td><td>A version number indicating the format version of the <span class="code>">metadata</span> element. This is currently <span class="code">1.0</span>. This attribute is required.</td></tr>
+</table>
+</dd>
+</dl>
+
+<p>All first-level subelements of the metadata are optional, and may occur in any order as children of the top-level <span class="code">metadata</span> element.</p>
+
+<p>Vendors may include additional types of metadata in new elements within the <span class="code">metadata</span> element, or as additional attributes of the elements specified here. Such additional elements or attributes may be ignored by conforming user agents, or may be used (e.g., displayed to the user on request).</p>
+
+<dl class="xmlspec">
+<dt><span class="code">uniqueid</span> element</dt>
+<dd>
+<p>A unique identifier string for the font. This element is recommended, but not required for the metadata to be valid. This element must be a child of the <span class="code">metadata</span> element. This is an empty element.</p>
+<table>
+<col class="name"/><col class="desc"/>
+<tr class="header"><th colspan="2">attributes</th></tr>
+<tr><td>id</td><td>The identification string.</td></tr>
+</table>
+<p>The string defined in the <span class="code">uniqueid</span> element is not guaranteed to be truly unique, as there is no central registry or authority to ensure this, but it is intended to allow vendors to reliably identify the exact version of a particular font. The use of "reverse-DNS" prefixes to provide a "namespace" is recommended; this can be augmented by additional identification data of the vendor's own design.</p>
+</dd>
+
+<dt><span class="code">vendor</span> element</dt>
+<dd>
+<p>Information about the font vendor. This element is recommended, but not required for the metadata to be valid. This element must be a child of the <span class="code">metadata</span> element. This is an empty element.</p>
+<table>
+<col class="name"/><col class="desc"/>
+<tr class="header"><th colspan="2">attributes</th></tr>
+<tr><td>name</td><td>The name of the font vendor. If the <span class="code">vendor</span> element is present in the metadata, this attribute must be present.</td></tr>
+<tr><td>url</td><td>The url for the font vendor. This attribute is optional.</td></tr>
+</table>
+</dd>
+
+<dt><span class="code">credits</span> element</dt>
+<dd>
+<p>Credit information for the font. This can include any type of credit the vendor desires: designer, hinter, and so on. This element is optional. If present, it must be a child of the <span class="code">metadata</span> element and it must contain at least one <span class="code">credit</span> element. This element has no attributes.</p>
+</dd>
+
+<dt><span class="code">credit</span> element</dt>
+<dd>
+<p>A single credit record. If present, it must be a child of the <span class="code">credits</span> element. This is an empty element.</p>
+<table>
+<col class="name"/><col class="desc"/>
+<tr class="header"><th colspan="2">attributes</th></tr>
+<tr><td>name</td><td>The name of the entity being credited. If the <span class="code">credit</span> element is present, this attribute must be present.</td></tr>
+<tr><td>url</td><td>The url for the entity being credited. This attribute is optional.</td></tr>
+<tr><td>role</td><td>The role of the entity being credited. This attribute is optional.</td></tr>
+</table>
+</dd>
+
+<dt><span class="code">description</span> element</dt>
+<dd>
+<p>An arbitrary text description of the font's design, its history, etc. This element is optional. If present, it must be a child of the <span class="code">metadata</span> element. This element may be localized.</p>
+</dd>
+
+<dt><span class="code">license</span> element</dt>
+<dd>
+<p>The license for the font. This element is optional. If present, it must be a child of the <span class="code">metadata</span> element. This element may be localized.</p>
+<table>
+<col class="name"/><col class="desc"/>
+<tr class="header"><th colspan="2">attributes</th></tr>
+<tr><td>url</td><td>The url for the license, more information about the license, etc. This attribute is optional.</td></tr>
+<tr><td>id</td><td>An identifying string for the license. This attribute is optional.</td></tr>
+</table>
+</dd>
+
+<dt><span class="code">copyright</span> element</dt>
+<dd>
+<p>The copyright for the font. This element is optional. If present, it must be a child of the <span class="code">metadata</span> element. This element may be localized. This element has no attributes.</p>
+</dd>
+
+<dt><span class="code">trademark</span> element</dt>
+<dd>
+<p>The trademark for the font. This element is optional. If present, it must be a child of the <span class="code">metadata</span> element. This element may be localized. This element has no attributes.</p>
+</dd>
+
+<dt><span class="code">licensee</span> element</dt>
+<dd>
+<p>The licensee of the font. This element is optional. If present, it must be a child of the <span class="code">metadata</span> element. This is an empty element.</p>
+<table>
+<col class="name"/><col class="desc"/>
+<tr class="header"><th colspan="2">attributes</th></tr>
+<tr><td>name</td><td>The name of the licensee. If the <span class="code">licensee</span> element is present in the metadata, this attribute must be present.</td></tr>
+</table>
+</dd>
+</dl>
+
+</div>
+
+<hr/>
+
+<div id="appendix-b">
+
+<h2>APPENDIX B: Extended Metadata Example</h2>
+
+<pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;metadata version="1.0"&gt;
+    &lt;uniqueid id="com.example.fontvendor.demofont.rev12345" /&gt;
+    &lt;vendor name="Font Vendor" url="http://fontvendor.example.com" /&gt;
+    &lt;credits&gt;
+        &lt;credit
+            name="Font Designer"
+            url="http://fontdesigner.example.com"
+            role="Lead" /&gt;
+        &lt;credit
+            name="Another Font Designer"
+            url="http://anotherdesigner.example.org"
+            role="Contributor" /&gt;
+        &lt;credit
+            name="Yet Another"
+            role="Hinting" /&gt;
+    &lt;/credits&gt;
+    &lt;description&gt;
+        &lt;text lang="en"&gt;
+            A member of the Demo font family.
+            This font is a humanist sans serif style designed
+            for optimal legibility in low-resolution environments.
+            It can be obtained from fontvendor.example.com.
+        &lt;/text&gt;
+    &lt;/description&gt;
+    &lt;license url="http://fontvendor.example.com/license"
+             id="fontvendor-web-corporate-v2"&gt;
+        &lt;text lang="en"&gt;A license goes here.&lt;/text&gt;
+        &lt;text lang="fr"&gt;Un permis va ici.&lt;/text&gt;
+    &lt;/license&gt;
+    &lt;copyright&gt;
+        &lt;text lang="en"&gt;Copyright ©2009 Font Vendor"&lt;/text&gt;
+        &lt;text lang="ko"&gt;저작권 ©2009 Font Vendor"&lt;/text&gt;
+    &lt;/copyright&gt;
+    &lt;trademark&gt;
+        &lt;text lang="en"&gt;Demo Font is a trademark of Font Vendor&lt;/text&gt;
+        &lt;text lang="fr"&gt;Demo Font est une marque déposée de Font Vendor&lt;/text&gt;
+        &lt;text lang="de"&gt;Demo Font ist ein eingetragenes Warenzeichen der Font Vendor&lt;/text&gt;
+        &lt;text lang="ja"&gt;Demo FontはFont Vendorの商標である&lt;/text&gt;
+    &lt;/trademark&gt;
+    &lt;licensee name="Wonderful Websites, Inc." /&gt;
+&lt;/metadata&gt;
+</pre>
+</div>
+
+<hr/>
+
+<div>
+<h2>Footnotes</h2>
+
+<dl class="footnotes">
+
+<dt>[<a href="#fn-1-ref" title="footnote 1 TrueType" id="fn-1">1</a>]</dt>
+<dd><p><a href="http://developer.apple.com/textfonts/TTRefMan/index.html">Apple TrueType specification</a>. TrueType is a registered trademark of Apple Inc.</p></dd>
+
+<dt>[<a href="#fn-2-ref" title="footnote 2 OpenType" id="fn-2">2</a>]</dt>
+<dd><p><a href="http://www.microsoft.com/typography/otspec/">Microsoft OpenType specification</a>. OpenType is a registered trademark of Microsoft Corporation.</p></dd>
+
+<dt>[<a href="#fn-3-ref" title="footnote 3 Open Font Format" id="fn-3">3</a>]</dt>
+<dd><p><a href="http://standards.iso.org/ittf/PubliclyAvailableStandards/c052136_ISO_IEC_14496-22_2009(E).zip">Open Font Format specification (ISO/IEC 14496-22:2009)</a>.</p></dd>
+
+<dt>[<a href="#fn-4-ref" title="footnote 4 RFC 2119" id="fn-4">4</a>]</dt>
+<dd><p><a href="http://tools.ietf.org/html/rfc2119">RFC 2119</a> (Key words for use in RFCs to Indicate Requirement Levels)</p></dd>
+
+<dt>[<a href="#fn-5-ref" title="footnote 5 compress2" id="fn-5">5</a>]</dt>
+<dd><p><a href="http://refspecs.freestandards.org/LSB_3.0.0/LSB-Core-generic/LSB-Core-generic/zlib-compress2-1.html">zlib compress2() function</a></p></dd>
+
+<dt>[<a href="#fn-6-ref" title="footnote 6 uncompress" id="fn-6">6</a>]</dt>
+<dd><p><a href="http://refspecs.freestandards.org/LSB_3.0.0/LSB-Core-generic/LSB-Core-generic/zlib-uncompress-1.html">zlib uncompress() function</a></p></dd>
+
+<dt>[<a href="#fn-7-ref" title="footnote 7 ZLIB" id="fn-7">7</a>]</dt>
+<dd><p><a href="http://tools.ietf.org/html/rfc1950">RFC 1950</a> (ZLIB Compressed Data Format Specification)</p></dd>
+
+<dt>[<a href="#fn-8-ref" title="footnote 8 XML metadata" id="fn-8">8</a>]</dt>
+<dd><p>It is intended that the XML metadata will not be constrained by a specific DTD, but may be extended by font vendors according to their requirements. However, only metadata elements that conform to a published definition will have the potential to be widely supported (e.g., presented to users on request by a typical user agent).</p></dd>
+
+<dt>[<a href="#fn-9-ref" title="footnote 9 language tags" id="fn-9">9</a>]</dt>
+<dd><p><a href="http://www.iana.org/assignments/language-subtag-registry">IANA Language Subtag Registry</a></p></dd>
+
+<dt>[<a href="#fn-10-ref" title="footnote 10 RFC 4647" id="fn-10">10</a>]</dt>
+<dd><p><a href="http://tools.ietf.org/html/rfc4647">RFC 4647</a> (Matching of Language Tags)</p></dd>
+
+</dl>
+</div>
+
+<hr/>
+
+<div>
+<p>
+<a href="http://validator.w3.org/check?uri=referer"><img
+    src="http://www.w3.org/Icons/valid-xhtml10"
+    alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
+<a href="http://jigsaw.w3.org/css-validator/check/referer">
+    <img style="border:0;width:88px;height:31px"
+        src="http://jigsaw.w3.org/css-validator/images/vcss"
+        alt="Valid CSS!" />
+</a>
+</p>
+</div>
+</body>
+</html>

@@ -6,11 +6,13 @@
 
 #include <sys/stat.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "clang/service/adapt_service.h"
 
 #include "third_party/mongoose/mongoose.h"
+#include "third_party/woff/woff.h"
 
 #define MINIZ_HEADER_FILE_ONLY
 #include "third_party/miniz/miniz.c"
@@ -19,6 +21,13 @@
 
 // This will need to be adjusted if we have too many resources.
 #define MAX_RESOURCES 2048
+
+#ifdef _WIN32
+// IE only takes WOFF
+static int adapt_convert_to_woff = 1;
+#else
+static int adapt_convert_to_woff = 0;
+#endif
 
 static const char adapt_driver[] =
 "<html xmlns='http://www.w3.org/1999/xhtml' "
@@ -40,10 +49,21 @@ static const char adapt_driver[] =
 #define TYPE_OPF 1
 #define TYPE_XML 2
 
+struct adapt_obfuscation {
+    unsigned char* mask;
+    unsigned int mask_length;
+    unsigned int length;
+};
+
+struct adapt_file_info {
+    char* media_type;
+    struct adapt_obfuscation* obfuscation;
+};
+
 struct adapt_serving_context {
     adapt_callback* callback;
     mz_zip_archive zip;
-    char** media_types;
+    struct adapt_file_info* file_info;
     char bootstrap_url[64];
     char content_prefix[64];
     char html_prefix[64];
@@ -69,117 +89,262 @@ static size_t adapt_file_read_func(void *pOpaque, mz_uint64 file_ofs, void *pBuf
     return n;
 }
 
-struct adapt_write_data {
+/*============================== Filter output ==============================*/
+
+struct adapt_sink;
+
+typedef void (*adapt_sink_write_fn)(struct adapt_sink* data, size_t file_offset, const unsigned char* buf, size_t length);
+
+struct adapt_sink {
+    adapt_sink_write_fn write;
+};
+
+/*---------------- connection writer ----------------*/
+
+struct adapt_sink_connection {
+    struct adapt_sink super;
     struct mg_connection* connection;
+};
+
+static void adapt_sink_connection_write(struct adapt_sink* sink, size_t file_offset,
+                                        const unsigned char* buf, size_t length) {
+    if (length > 0) {
+        mg_write(((struct adapt_sink_connection*)sink)->connection, buf, length);
+    }
+}
+
+/*---------------- safari bug filter ----------------*/
+
+struct adapt_sink_safari_bug {
+    struct adapt_sink super;
+    struct adapt_sink* next;
     int state;
 };
 
-#define WORK_AROUND_SAFARI_MEDIA_BUG 1
-
-static size_t adapt_write_resource(void *pOpaque, mz_uint64 file_ofs, const void *pBuf, size_t n) {
-    struct adapt_write_data* write_data = (struct adapt_write_data*)pOpaque;
-    if (write_data->state && WORK_AROUND_SAFARI_MEDIA_BUG) {
-        // Replace '<audio'/'<video' with '<audi_/<vide_' to avoid crash in Safari code.
-        size_t count = 0;
-        const char* buf = (const char*)pBuf;
-        int state = write_data->state;
-        int k = 0;
-        while (k < n) {
-            char c = buf[k];
-            switch (state){
-                case 1:
-                    if (c == '<') {
-                        state = 2;
-                    }
-                    break;
-                case 2:
-                    if (c == 'a') {
-                        state = 3;
-                    } else if (c == 'v') {
-                        state = 6;
-                    } else if (c == '!') {
-                        state = 10;
-                    } else if (c != '/') {
-                        state = 1;
-                    }
-                    break;
-                case 3:
-                    state = c == 'u' ? 4 : 1;
-                    break;
-                case 4:
-                    state = c == 'd' ? 5 : 1;
-                    break;
-                case 5:
-                    state = c == 'i' ? 9 : 1;
-                    break;
-                case 6:
-                    state = c == 'i' ? 7 : 1;
-                    break;
-                case 7:
-                    state = c == 'd' ? 8 : 1;
-                    break;
-                case 8:
-                    state = c == 'e' ? 9 : 1;
-                    break;
-                case 9:
+static void adapt_sink_safari_bug_write(struct adapt_sink* sink, size_t file_offset,
+                                        const unsigned char* buf, size_t length) {
+    // Replace '<audio'/'<video' with '<audi_/<vide_' to avoid crash in Safari code.
+    struct adapt_sink_safari_bug* self = (struct adapt_sink_safari_bug*)sink;
+    struct adapt_sink* next = self->next;
+    size_t count = 0;
+    int state = self->state;
+    int k = 0;
+    while (k < length) {
+        char c = buf[k];
+        switch (state){
+            case 1:
+                if (c == '<') {
+                    state = 2;
+                }
+                break;
+            case 2:
+                if (c == 'a') {
+                    state = 3;
+                } else if (c == 'v') {
+                    state = 6;
+                } else if (c == '!') {
+                    state = 10;
+                } else if (c != '/') {
                     state = 1;
-                    if (c == 'o') {
-                        char out_ch = '_';
-                        if (k > 0) {
-                            count += mg_write(write_data->connection, buf, k);
-                        }
-                        count += mg_write(write_data->connection, &out_ch, 1);
-                        k++;
-                        n -= k;
-                        buf += k;
-                        k = 0;
-                        continue;
+                }
+                break;
+            case 3:
+                state = c == 'u' ? 4 : 1;
+                break;
+            case 4:
+                state = c == 'd' ? 5 : 1;
+                break;
+            case 5:
+                state = c == 'i' ? 9 : 1;
+                break;
+            case 6:
+                state = c == 'i' ? 7 : 1;
+                break;
+            case 7:
+                state = c == 'd' ? 8 : 1;
+                break;
+            case 8:
+                state = c == 'e' ? 9 : 1;
+                break;
+            case 9:
+                state = 1;
+                if (c == 'o') {
+                    unsigned char out_ch = '_';
+                    if (k > 0) {
+                        next->write(next, file_offset + count, buf, k);
+                        count += k;
                     }
-                    break;
-                case 10:
-                    state = c == '[' ? 11 : 1;
-                    break;
-                case 11:
-                    state = c == 'C' ? 12 : 1;
-                    break;
-                case 12:
-                    state = c == 'D' ? 13 : 1;
-                    break;
-                case 13:
-                    state = c == 'A' ? 14 : 1;
-                    break;
-                case 14:
-                    state = c == 'T' ? 15 : 1;
-                    break;
-                case 15:
-                    state = c == 'A' ? 16 : 1;
-                    break;
-                case 16:
-                    state = c == '[' ? 17 : 1;
-                    break;
-                case 17:
-                    if (c == ']') {
-                        state = 18;
-                    }
-                    break;
-                case 18:
-                    state = c == ']' ? 19 : 17;
-                    break;
-                case 19:
-                    state = c == '>' ? 1 : 17;
-                    break;
-            }
-            k++;
+                    next->write(next, file_offset + count, &out_ch, 1);
+                    k++;
+                    length -= k;
+                    buf += k;
+                    k = 0;
+                    continue;
+                }
+                break;
+            case 10:
+                state = c == '[' ? 11 : 1;
+                break;
+            case 11:
+                state = c == 'C' ? 12 : 1;
+                break;
+            case 12:
+                state = c == 'D' ? 13 : 1;
+                break;
+            case 13:
+                state = c == 'A' ? 14 : 1;
+                break;
+            case 14:
+                state = c == 'T' ? 15 : 1;
+                break;
+            case 15:
+                state = c == 'A' ? 16 : 1;
+                break;
+            case 16:
+                state = c == '[' ? 17 : 1;
+                break;
+            case 17:
+                if (c == ']') {
+                    state = 18;
+                }
+                break;
+            case 18:
+                state = c == ']' ? 19 : 17;
+                break;
+            case 19:
+                state = c == '>' ? 1 : 17;
+                break;
         }
-        write_data->state = state;
-        if (n > 0) {
-            count += mg_write(write_data->connection, buf, n);
-        }
-        return count;
-    } else {
-        return mg_write(write_data->connection, pBuf, n);
+        k++;
+    }
+    self->state = state;
+    if (length > 0) {
+        next->write(next, file_offset + count, buf, length);
     }
 }
+
+/*---------------- deobfuscation filter ----------------*/
+
+struct adapt_sink_deobfuscate {
+    struct adapt_sink super;
+    struct adapt_sink* next;
+    const struct adapt_obfuscation* obfuscation;
+};
+
+static void adapt_sink_deobfuscate_write(struct adapt_sink* sink, size_t file_offset,
+                                        const unsigned char* buf, size_t length) {
+    struct adapt_sink_deobfuscate* self = (struct adapt_sink_deobfuscate*)sink;
+    struct adapt_sink* next = self->next;
+    size_t count = 0;
+    while (file_offset + count < self->obfuscation->length && count < length) {
+        unsigned char tmpbuf[2048];
+        int tmpindex = 0;
+        while (file_offset + count < self->obfuscation->length && tmpindex < sizeof tmpbuf && count < length) {
+            unsigned int mask_index = (file_offset + count) % self->obfuscation->mask_length;
+            tmpbuf[tmpindex++] = self->obfuscation->mask[mask_index] ^ buf[count++];
+        }
+        next->write(next, file_offset + count, tmpbuf, tmpindex);
+    }
+    next->write(next, file_offset + count, buf + count, length - count);
+}
+
+/*---------------- deflate filter ----------------*/
+
+struct adapt_sink_inflator {
+    struct adapt_sink super;
+    struct adapt_sink* next;
+    size_t inflated_file_offset;
+    tinfl_decompressor inflator;
+    unsigned char* buffer;
+    size_t buffer_offset;
+};
+
+#define INFLATOR_BUFFER_SIZE (32*1024)
+
+static void adapt_sink_inflator_write(struct adapt_sink* sink, size_t file_offset,
+                                     const unsigned char* buf, size_t length) {
+    struct adapt_sink_inflator* self = (struct adapt_sink_inflator*)sink;
+    struct adapt_sink* next = self->next;
+    size_t count = 0;
+    size_t buf_size;
+    size_t tmp_size;
+    int status;
+    if (!self->buffer && length > 0) {
+        self->buffer = malloc(INFLATOR_BUFFER_SIZE);
+    }
+    while (1) {
+        tmp_size = INFLATOR_BUFFER_SIZE - self->buffer_offset;
+        buf_size = length - count;
+        status = tinfl_decompress(&self->inflator, buf + count, &buf_size,
+                                  self->buffer, self->buffer + self->buffer_offset, &tmp_size,
+                                  length > 0 ? TINFL_FLAG_HAS_MORE_INPUT : 0);
+        if (buf_size > 0) {
+            count += buf_size;
+        }
+        if (tmp_size > 0 || length == 0) {
+            next->write(next, self->inflated_file_offset, self->buffer + self->buffer_offset, tmp_size);
+            self->inflated_file_offset += tmp_size;
+            self->buffer_offset = (self->buffer_offset + tmp_size + INFLATOR_BUFFER_SIZE) % INFLATOR_BUFFER_SIZE;
+        }
+        if (status == TINFL_STATUS_DONE || (buf_size == 0 && tmp_size == 0)) {
+            break;
+        }
+    }
+    if (self->buffer && length == 0) {
+        // End of stream
+        free(self->buffer);
+        self->buffer = NULL;
+    }
+}
+
+/*---------------- otf->woff filter ----------------*/
+
+struct adapt_sink_woff {
+    struct adapt_sink super;
+    struct adapt_sink* next;
+    uint8_t* buffer;
+    size_t buffer_used;
+    size_t buffer_size;
+};
+
+static void adapt_sink_woff_write(struct adapt_sink* sink, size_t file_offset,
+                                     const unsigned char* buf, size_t length) {
+    struct adapt_sink_woff* self = (struct adapt_sink_woff*)sink;
+    if (length > 0) {
+        if (self->buffer_used + length > self->buffer_size) {
+            size_t new_size = 2 * self->buffer_size + length;
+            self->buffer = (uint8_t*)realloc(self->buffer, new_size);
+            self->buffer_size = new_size;
+        }
+        memcpy(self->buffer + self->buffer_used, buf, length);
+        self->buffer_used += length;
+    } else if (self->buffer) {
+        // End of stream
+        uint32_t woffLen = 0;
+        uint32_t status = eWOFF_ok;
+        const uint8_t * woffData = woffEncode(self->buffer, (uint32_t)self->buffer_used,
+                                              0, 0, &woffLen, &status);
+        if (woffLen > 0) {
+            self->next->write(self->next, 0, woffData, woffLen);
+        }
+        free((void *) woffData);
+        free(self->buffer);
+        self->buffer = NULL;
+        self->buffer_used = 0;
+        self->buffer_size = 0;
+        self->next->write(self->next, woffLen, NULL, 0);
+    }
+}
+
+/*------------------ filter writer -----------------*/
+ 
+static size_t adapt_sink_write(void *pOpaque, mz_uint64 ofs, const void *pBuf, size_t n) {
+    struct adapt_sink* sink = (struct adapt_sink*)pOpaque;
+    sink->write(sink, (size_t)ofs, pBuf, n);
+    return n;
+}
+
+/*============================ end of filters =================================*/
 
 static int adapt_serve_zip_entry(struct mg_connection* connection, adapt_serving_context* context,
                                  const char* file_name) {
@@ -188,18 +353,61 @@ static int adapt_serve_zip_entry(struct mg_connection* connection, adapt_serving
     mz_zip_archive_file_stat file_info;
     if (mz_zip_reader_file_stat(&context->zip, file_index, &file_info)) {
         if (file_index >= 0) {
-            char* media_type = context->media_types ? context->media_types[file_index] : NULL;
-            struct adapt_write_data write_data;
-            write_data.connection = connection;
-            write_data.state = 0;
-            mg_printf(connection,
-                      "HTTP/1.1 200 Success\r\n"
-                      "Content-Length: %d\r\n",
-                      (int)file_info.m_uncomp_size);
-            if (media_type) {
-                if (strcmp(media_type, "application/xhtml+xml") == 0) {
-                    write_data.state = 1;
+            // Possible filters
+            struct adapt_sink_connection sink_connection;
+            struct adapt_sink_safari_bug filter_safari_bug;
+            struct adapt_sink_deobfuscate filter_deobfuscate;
+            struct adapt_sink_inflator filter_inflator;
+            struct adapt_sink_woff filter_woff;
+            // Build filter chain.
+            char* media_type = context->file_info ? context->file_info[file_index].media_type : NULL;
+            struct adapt_sink* sink = &sink_connection.super;
+            int known_length = 1;
+            int flush = 0;
+            sink_connection.super.write = adapt_sink_connection_write;
+            sink_connection.connection = connection;
+            if (media_type && strcmp(media_type, "application/xhtml+xml") == 0) {
+                filter_safari_bug.super.write = adapt_sink_safari_bug_write;
+                filter_safari_bug.state = 1;
+                filter_safari_bug.next = sink;
+                sink = &filter_safari_bug.super;
+            } else if (media_type && adapt_convert_to_woff &&
+                            (strcmp(media_type, "application/x-font-truetype") == 0
+                            || strcmp(media_type, "application/x-font-opentype") == 0
+                            || strcmp(media_type, "application/vnd.ms-opentype") == 0
+                            || strcmp(media_type, "font/truetype") == 0
+                            || strcmp(media_type, "font/opentype") == 0)) {
+                filter_woff.buffer = NULL;
+                filter_woff.buffer_size = 0;
+                filter_woff.buffer_used = 0;
+                filter_woff.super.write = adapt_sink_woff_write;
+                filter_woff.next = sink;
+                sink = &filter_woff.super;
+                known_length = 0;
+                flush = 1;
+            }
+            if (context->file_info && context->file_info[file_index].obfuscation) {
+                if (file_info.m_method == 0) {
+                    /* Stored and obfuscated: obfuscation applied after deflate. */
+                    filter_inflator.super.write = adapt_sink_inflator_write;
+                    tinfl_init(&filter_inflator.inflator);
+                    filter_inflator.inflated_file_offset = 0;
+                    filter_inflator.buffer_offset = 0;
+                    filter_inflator.next = sink;
+                    sink = &filter_inflator.super;
+                    known_length = 0;
+                    flush = 1;
                 }
+                filter_deobfuscate.super.write = adapt_sink_deobfuscate_write;
+                filter_deobfuscate.obfuscation = context->file_info[file_index].obfuscation;
+                filter_deobfuscate.next = sink;
+                sink = &filter_deobfuscate.super;
+            }
+            mg_printf(connection, "HTTP/1.1 200 Success\r\n");
+            if (known_length) {
+                mg_printf(connection, "Content-Length: %d\r\n", (int)file_info.m_uncomp_size);
+            }
+            if (media_type) {
                 mg_printf(connection,
                           "Content-Type: %s\r\n\r\n",
                           media_type);
@@ -207,8 +415,10 @@ static int adapt_serve_zip_entry(struct mg_connection* connection, adapt_serving
                 mg_printf(connection, "\r\n");
             }
             mz_zip_reader_extract_to_callback(&context->zip, file_index,
-                                              adapt_write_resource,
-                                              &write_data, MZ_ZIP_FLAG_CASE_SENSITIVE);
+                                              adapt_sink_write, sink, MZ_ZIP_FLAG_CASE_SENSITIVE);
+            if (flush) {
+                sink->write(sink, (size_t)file_info.m_uncomp_size, NULL, 0);
+            }
             return 1;
         }
         mg_printf(connection,
@@ -274,6 +484,17 @@ static char* adapt_read_connection(struct mg_connection* connection, int* len_ou
     return buf;
 }
 
+static void adapt_file_info_clear(struct adapt_file_info* file_info) {
+    if (file_info->media_type) {
+        free(file_info->media_type);
+    }
+    if (file_info->obfuscation) {
+        free(file_info->obfuscation->mask);
+        free(file_info->obfuscation);
+    }
+    memset(file_info, 0, sizeof(struct adapt_file_info));
+}
+
 static int adapt_serve_zip_metadata(const char* method, struct mg_connection* connection,
                 adapt_serving_context* context, const char* item) {
     if (strcmp(item, "list") == 0 && strcmp(method, "GET") == 0) {
@@ -302,33 +523,78 @@ static int adapt_serve_zip_metadata(const char* method, struct mg_connection* co
         if (buf) {
             char* s = buf;
             int file_index;
-            if (!context->media_types) {
+            if (!context->file_info) {
                 int file_count = mz_zip_reader_get_num_files(&context->zip);
-                context->media_types = calloc(sizeof(char*), file_count);
+                context->file_info = calloc(sizeof(struct adapt_file_info), file_count);
             }
             while (1) {
-                char* p = s;
-                s = strchr(s, ' ');
+                char* url = s;
+                char* media_type;
+                char* obfuscation_str = NULL;
+                s = strpbrk(s, " \n");
                 if (!s) {
                     break;
                 }
+                if (*s == '\n') {
+                    continue;
+                }
                 *s = '\0';
                 s++;
-                url_decode_name(p, file_name, sizeof file_name);
-                p = s;
-                s = strchr(s, '\n');
+                url_decode_name(url, file_name, sizeof file_name);
+                media_type = s;
+                s = strpbrk(s, " \n");
                 if (!s) {
                     break;
+                }
+                if (*s == ' ') {
+                    /* Have obfuscation data */
+                    *s = '\0';
+                    s++;
+                    obfuscation_str = s;
+                    s = strpbrk(s, " \n");
+                    if (!s) {
+                        break;
+                    }
+                    if (*s != '\n') {
+                        /* Need to reach end of line */
+                        *s = '\0';
+                        s = strchr(s, '\n');
+                        if (!s) {
+                            break;
+                        }
+                    }
                 }
                 *s = '\0';
                 s++;
                 file_index = mz_zip_reader_locate_file(&context->zip, file_name, NULL,
                                                    MZ_ZIP_FLAG_CASE_SENSITIVE);
                 if (file_index >= 0) {
-                    if (context->media_types[file_index]) {
-                        free(context->media_types[file_index]);
+                    struct adapt_file_info* file_info = &context->file_info[file_index];
+                    adapt_file_info_clear(file_info);
+                    file_info->media_type = strcpy((char *)malloc(strlen(media_type) + 1), media_type);
+                    if (obfuscation_str) {
+                        char* sep = strchr(obfuscation_str, ':');
+                        if (sep) {
+                            *sep = '\0';
+                            unsigned int length = atoi(obfuscation_str);
+                            if (length < 2048) { /* Sanity check */
+                                char* mask_hex = sep + 1;
+                                size_t mask_hex_length = strlen(mask_hex);
+                                if (mask_hex_length % 2 == 0 && mask_hex_length <= 128) { /* Sanity check */
+                                    struct adapt_obfuscation* obfuscation =
+                                        (struct adapt_obfuscation*)calloc(sizeof(struct adapt_obfuscation), 1);
+                                    obfuscation->length = length;
+                                    obfuscation->mask_length = (unsigned int)(mask_hex_length / 2);
+                                    obfuscation->mask = calloc(1, obfuscation->mask_length);
+                                    for (unsigned int k = 0; k < mask_hex_length; k += 2) {
+                                        char t[] = {mask_hex[k], mask_hex[k+1], '\0'};
+                                        obfuscation->mask[k/2] = (unsigned char)strtol(t, NULL, 16);
+                                    }
+                                    file_info->obfuscation = obfuscation;
+                                }
+                            }
+                        }
                     }
-                    context->media_types[file_index] = strcpy(malloc(strlen(p)+1), p);
                 }
             }
             free(buf);
@@ -617,14 +883,12 @@ void adapt_stop_serving(adapt_serving_context* context) {
     if (context->content) {
         free(context->content);
     }
-    if (context->media_types) {
+    if (context->file_info) {
         int file_count = mz_zip_reader_get_num_files(&context->zip);
         for (i = 0; i < file_count; i++) {
-            if (context->media_types[i]) {
-                free(context->media_types[i]);
-            }
+            adapt_file_info_clear(&context->file_info[i]);
         }
-        free(context->media_types);
+        free(context->file_info);
     }
     mz_zip_reader_end(&context->zip);
     free(context);

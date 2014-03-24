@@ -14,6 +14,9 @@
 		D0A4E81F18B139FC00CAAA51 /* miniz.c in Sources */ = {isa = PBXBuildFile; fileRef = D0A4E81E18B139FC00CAAA51 /* miniz.c */; };
 		D0A4E82318B13A0800CAAA51 /* mongoose.c in Sources */ = {isa = PBXBuildFile; fileRef = D0A4E82118B13A0800CAAA51 /* mongoose.c */; };
 		D0A4E82418B13A0800CAAA51 /* mongoose.h in Headers */ = {isa = PBXBuildFile; fileRef = D0A4E82218B13A0800CAAA51 /* mongoose.h */; };
+		D0D203AC18DFA1DB0030EF58 /* woff-private.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D203A818DFA1DB0030EF58 /* woff-private.h */; };
+		D0D203AD18DFA1DB0030EF58 /* woff.c in Sources */ = {isa = PBXBuildFile; fileRef = D0D203A918DFA1DB0030EF58 /* woff.c */; };
+		D0D203AE18DFA1DB0030EF58 /* woff.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D203AA18DFA1DB0030EF58 /* woff.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +29,9 @@
 		D0A4E82018B13A0800CAAA51 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LICENSE; path = ../third_party/mongoose/LICENSE; sourceTree = "<group>"; };
 		D0A4E82118B13A0800CAAA51 /* mongoose.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mongoose.c; path = ../third_party/mongoose/mongoose.c; sourceTree = "<group>"; };
 		D0A4E82218B13A0800CAAA51 /* mongoose.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mongoose.h; path = ../third_party/mongoose/mongoose.h; sourceTree = "<group>"; };
+		D0D203A818DFA1DB0030EF58 /* woff-private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "woff-private.h"; path = "../third_party/woff/woff-private.h"; sourceTree = "<group>"; };
+		D0D203A918DFA1DB0030EF58 /* woff.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = woff.c; path = ../third_party/woff/woff.c; sourceTree = "<group>"; };
+		D0D203AA18DFA1DB0030EF58 /* woff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = woff.h; path = ../third_party/woff/woff.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,11 +119,22 @@
 		D017DE3F18B12EFE006E80F2 /* third_party */ = {
 			isa = PBXGroup;
 			children = (
+				D0D203A518DFA1B00030EF58 /* woff */,
 				D017DE3A18B12EFE006E80F2 /* miniz */,
 				D017DE3E18B12EFE006E80F2 /* mongoose */,
 			);
 			name = third_party;
 			path = ..;
+			sourceTree = "<group>";
+		};
+		D0D203A518DFA1B00030EF58 /* woff */ = {
+			isa = PBXGroup;
+			children = (
+				D0D203A818DFA1DB0030EF58 /* woff-private.h */,
+				D0D203A918DFA1DB0030EF58 /* woff.c */,
+				D0D203AA18DFA1DB0030EF58 /* woff.h */,
+			);
+			name = woff;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -127,8 +144,10 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D0D203AE18DFA1DB0030EF58 /* woff.h in Headers */,
 				D0A4E80F18B139CA00CAAA51 /* adapt_resources.h in Headers */,
 				D0A4E81318B139DB00CAAA51 /* adapt_service.h in Headers */,
+				D0D203AC18DFA1DB0030EF58 /* woff-private.h in Headers */,
 				D0A4E82418B13A0800CAAA51 /* mongoose.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -186,6 +205,7 @@
 			files = (
 				D0A4E81F18B139FC00CAAA51 /* miniz.c in Sources */,
 				D0A4E80D18B139BC00CAAA51 /* adapt_resources.c in Sources */,
+				D0D203AD18DFA1DB0030EF58 /* woff.c in Sources */,
 				D0A4E82318B13A0800CAAA51 /* mongoose.c in Sources */,
 				D0A4E81218B139DB00CAAA51 /* adapt_service.c in Sources */,
 			);

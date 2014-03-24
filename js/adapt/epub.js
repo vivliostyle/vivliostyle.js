@@ -207,6 +207,14 @@ adapt.epub.makeDeobfuscator = function(uid) {
 };
 
 /**
+ * @param {string} uid
+ * @return {string}
+ */
+adapt.epub.makeObfuscationKey = function(uid) {
+	return "1040:" + adapt.sha1.bytesToSHA1Hex(uid);	
+};
+
+/**
  * @typedef {{
  *   name: string,
  *   value: string,
@@ -561,12 +569,6 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
 				adapt.xmldoc.predicate.withAttribute("Algorithm",
 						"http://www.idpf.org/2008/embedding")))
 		.child("CipherData").child("CipherReference").attribute("URI");
-	if (idpfObfURLs.length > 0 && this.uid) {
-		var deobfuscator = adapt.epub.makeDeobfuscator(this.uid);
-		for (var i = 0; i < idpfObfURLs.length; i++) {
-			this.store.deobfuscators[this.epubURL + idpfObfURLs[i]] = deobfuscator;
-		}
-	}
 	var mediaTypeElems = pkg.child("bindings").child("mediaType").asArray();
 	for (var i = 0; i < mediaTypeElems.length; i++) {
 		var handlerId = mediaTypeElems[i].getAttribute("handler");
@@ -580,24 +582,48 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
 		this.lang = this.metadata[adapt.epub.metaTerms.language][0]["v"];
 	}
 	if (!zipMetadata) {
+		if (idpfObfURLs.length > 0 && this.uid) {
+			// Have to deobfuscate in JavaScript
+			var deobfuscator = adapt.epub.makeDeobfuscator(this.uid);
+			for (var i = 0; i < idpfObfURLs.length; i++) {
+				this.store.deobfuscators[this.epubURL + idpfObfURLs[i]] = deobfuscator;
+			}
+		}
 		return adapt.task.newResult(true);
 	}
 	var manifestText = new adapt.base.StringBuffer();
+	var obfuscations = {};
+	if (idpfObfURLs.length > 0 && this.uid) {
+		// Deobfuscate in the server.
+		var obfuscationKey = adapt.epub.makeObfuscationKey(this.uid);
+		for (var i = 0; i < idpfObfURLs.length; i++) {
+			obfuscations[idpfObfURLs[i]] = obfuscationKey;
+		}
+	}
 	for (var i = 0; i < zipMetadata.length; i++) {
 		var entry = zipMetadata[i];
 		var encodedPath = entry["n"];
 		if (encodedPath) {
 			var path = decodeURI(encodedPath);
 			var item = this.itemMapByPath[path];
+			var mediaType = null;
 			if (item) {
 				item.compressed = entry["m"] != 0;
 				item.compressedSize = entry["c"];
 				if (item.mediaType) {
-					manifestText.append(encodedPath);
-					manifestText.append(' ');
-					manifestText.append(item.mediaType.replace(/\s+/g, ""));
-					manifestText.append('\n');
+					mediaType = item.mediaType.replace(/\s+/g, "");
 				}
+			}
+			var obfuscation = obfuscations[path];
+			if (mediaType || obfuscation) {
+				manifestText.append(encodedPath);
+				manifestText.append(' ');
+				manifestText.append(mediaType || "application/octet-stream");
+				if (obfuscation) {
+					manifestText.append(' ');
+					manifestText.append(obfuscation);				
+				}
+				manifestText.append('\n');
 			}
 		}
 	}
