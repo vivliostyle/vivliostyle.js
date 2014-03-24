@@ -90,12 +90,15 @@
     <ClInclude Include="..\..\..\clang\resources\adapt_resources.h" />
     <ClInclude Include="..\..\..\clang\service\adapt_service.h" />
     <ClInclude Include="..\..\..\third_party\mongoose\mongoose.h" />
+    <ClInclude Include="..\..\..\third_party\woff\woff-private.h" />
+    <ClInclude Include="..\..\..\third_party\woff\woff.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\clang\generated\adapt_resources.c" />
     <ClCompile Include="..\..\..\clang\service\adapt_service.c" />
     <ClCompile Include="..\..\..\third_party\miniz\miniz.c" />
     <ClCompile Include="..\..\..\third_party\mongoose\mongoose.c" />
+    <ClCompile Include="..\..\..\third_party\woff\woff.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\third_party\mongoose\LICENSE" />

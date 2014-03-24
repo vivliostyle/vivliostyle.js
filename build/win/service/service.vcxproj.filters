@@ -22,6 +22,9 @@
     <Filter Include="clang\generated">
       <UniqueIdentifier>{c873be3b-559f-4766-8637-12b249d2078a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="third_party\woff">
+      <UniqueIdentifier>{75a7709c-3de6-45d6-9675-1a2a8eacee7a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\clang\service\adapt_service.h">
@@ -32,6 +35,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\clang\resources\adapt_resources.h">
       <Filter>clang\resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\third_party\woff\woff.h">
+      <Filter>third_party\woff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\third_party\woff\woff-private.h">
+      <Filter>third_party\woff</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -46,6 +55,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\clang\generated\adapt_resources.c">
       <Filter>clang\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\third_party\woff\woff.c">
+      <Filter>third_party\woff</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
