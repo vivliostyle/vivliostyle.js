@@ -1423,6 +1423,7 @@ adapt.layout.Column.prototype.finishBreak = function(nodeContext, forceRemoveSel
 adapt.layout.Column.prototype.findAcceptableBreak = function(overflownNodeContext, initialNodeContext) {
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
 		adapt.task.newFrame("findAcceptableBreak");
+	var self = this;
 	var nodeContext = null;
 	var penalty = 0;
 	var nextPenalty = 0;
@@ -1442,8 +1443,18 @@ adapt.layout.Column.prototype.findAcceptableBreak = function(overflownNodeContex
 		adapt.base.log("Could not find any page breaks?!!");
 		// Last resort
 		if (this.forceNonfitting) {
-			nodeContext = overflownNodeContext.modify();
-			nodeContext.overflow = false;
+			self.skipTailEdges(overflownNodeContext).then(function(nodeContext) {
+				if (nodeContext) {
+					nodeContext = nodeContext.modify();
+					nodeContext.overflow = false;
+					self.finishBreak(nodeContext, forceRemoveSelf, true).then(function() {
+						frame.finish(nodeContext);
+					});
+				} else {
+					frame.finish(nodeContext);					
+				}
+			});
+			return frame.result();
 		} else {
 			nodeContext = initialNodeContext;
 			forceRemoveSelf = true;
@@ -1719,6 +1730,94 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 };
 
 /**
+ * Skips non-renderable positions until it hits the end of the flow or some renderable
+ * content. Returns the nodeContext that was passed in if some content remains and null
+ * if all content could be skipped.
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
+ */
+adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
+	var resultNodeContext = nodeContext;
+	var self = this;
+	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
+		= adapt.task.newFrame("skipEdges");
+	var breakAtTheEdge = null;
+	frame.loopWithFrame(function(loopFrame) {
+		while (nodeContext) {
+			// A code block to be able to use break. Break moves to the next node position.
+			do {
+				if (!nodeContext.viewNode) {
+					// Non-displayable content, skip
+					break;
+				}
+				if (nodeContext.inline && nodeContext.viewNode.nodeType != 1) {
+					if (adapt.vtree.canIgnore(nodeContext.viewNode, nodeContext.whitespace)) {
+						// Ignorable text content, skip
+						break;
+					}
+					if (!nodeContext.after) {
+						// Leading edge of non-empty block
+						loopFrame.breakLoop();
+						return;
+					}
+				}
+				if (!nodeContext.after) {
+					if (nodeContext.floatSide) {
+						// float
+						loopFrame.breakLoop();
+						return;
+					}
+				}
+				if (nodeContext.viewNode.nodeType != 1) {
+					// not an element
+					break;
+				}
+				var style = (/** @type {HTMLElement} */ (nodeContext.viewNode)).style;
+				if (nodeContext.after) {
+					// Trailing edge
+					breakAtTheEdge = adapt.layout.combineBreaks(nodeContext.breakAfter, breakAtTheEdge);
+				} else {
+					// Leading edge
+					breakAtTheEdge = adapt.layout.combineBreaks(nodeContext.breakBefore, breakAtTheEdge);
+					if (breakAtTheEdge && breakAtTheEdge != "avoid" && breakAtTheEdge != "auto") {
+						// explicit page break
+						loopFrame.breakLoop();
+						self.pageBreakType = breakAtTheEdge;
+						return;			
+					}
+					var viewTag = nodeContext.viewNode.localName;
+					if (adapt.layout.mediaTags[viewTag]) {
+						// elements that have inherent content
+						loopFrame.breakLoop();
+						return;
+					}
+					if (style && !(self.zeroIndent(style.paddingTop) && self.zeroIndent(style.borderTopWidth))) {
+						// Non-sero leading inset
+						loopFrame.breakLoop();
+						return;
+					}
+				}
+			} while(false);  // End of block of code to use break
+			var nextResult = self.layoutContext.nextInTree(nodeContext);
+			if (nextResult.isPending()) {
+				nextResult.then(function(nodeContextParam) {
+					nodeContext = nodeContextParam;
+					loopFrame.continueLoop();
+				});
+				return;
+			} else {
+				nodeContext = nextResult.get();
+			}
+		}
+		resultNodeContext = null;
+		loopFrame.breakLoop();
+	}).then(function() {
+		frame.finish(resultNodeContext);
+	});
+	return frame.result();
+};
+
+/**
  * @param {adapt.vtree.NodeContext} nodeContext
  * @return {adapt.task.Result.<adapt.vtree.NodeContext>}
  */
@@ -1784,6 +1883,10 @@ adapt.layout.Column.prototype.initGeom = function() {
 	// getElementClientRect on the container element includes element padding
 	// which is wrong for our purposes.
 	var probe = /** @type {HTMLElement} */ (this.element.ownerDocument.createElement("div"));
+	probe.style.position = "absolute";
+	// TODO: container padding???
+	probe.style.top = "0px";
+	probe.style.bottom = "0px";
 	probe.style.width = "100%";
 	probe.style.height = "100%";
 	this.element.appendChild(probe);
