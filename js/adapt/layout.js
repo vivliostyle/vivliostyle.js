@@ -838,11 +838,11 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
     var element = /** @type {Element} */ (nodeContext.viewNode);
     var floatSide = /** @type {string} */ (nodeContext.floatSide);
     adapt.base.setCSSProperty(element, "float", "none");
-    adapt.base.setCSSProperty(element, "position", "absolute");
     // special case in CSS: position:absolute with left/height: auto is
     // placed where position:static would be
     // TODO: review if it is good to rely on it
     // TODO: position where a real float would have been positioned
+    adapt.base.setCSSProperty(element, "position", "absolute");
     adapt.base.setCSSProperty(element, "left", "auto");
     adapt.base.setCSSProperty(element, "right", "auto");
     adapt.base.setCSSProperty(element, "top", "auto");

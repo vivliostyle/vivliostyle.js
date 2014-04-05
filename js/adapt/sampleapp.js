@@ -74,6 +74,9 @@ adapt.sampleapp.keydown = function(evt) {
  * @return {void}
  */
 adapt.sampleapp.touch = function(evt) {
+	if (evt.type == "touchmove") {
+		evt.preventDefault();
+	}
 	if (evt.touches.length == 1) {
 		var x = evt.touches[0].pageX;
 		var y = evt.touches[0].pageY;
@@ -87,7 +90,7 @@ adapt.sampleapp.touch = function(evt) {
 			if (evt.type == "touchend") {
 				adapt.sampleapp.touchActive = false;
 			}
-			if (dy < 10 && Math.abs(dx) > 25) {
+			if (Math.abs(dy) < 0.5 * Math.abs(dx) && Math.abs(dx) > 15) {
 				adapt.sampleapp.touchActive = false;
 				if (dx > 0) {
 			    	adapt.sampleapp.sendCommand({"a": "moveTo", "where": "previous"});					
