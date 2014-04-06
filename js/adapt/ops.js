@@ -353,8 +353,11 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
     var flowPosition = this.currentLayoutPosition.flowPositions[flowName];
     if (!flowPosition)
         return adapt.task.newResult(true);
-    // It is dangerous to not force non fitting!
-    // region.forceNonfitting = !this.primaryFlows[flowName];
+    if (this.primaryFlows[flowName] && region.exclusions.length > 0) {
+        // In general, we force non-fitting content. Exception is only for primary flow regions
+    	// that have exclusions.
+    	region.forceNonfitting = false;
+	}
     region.init();
     var self = this;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("layoutColumn");

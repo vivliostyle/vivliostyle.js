@@ -948,6 +948,10 @@ adapt.layout.Column.prototype.fixJustificationIfNeeded = function(nodeContext, e
     span.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
     var insertionPoint = endOfRegion && (nodeContext.after || node.nodeType != 1) ? node.nextSibling : node;
     var parent = node.parentNode;
+    if (!parent) {
+    	// Possible if nothing was added to the column
+    	return;
+    }
     parent.insertBefore(span, insertionPoint);
     if (!endOfRegion) {
     	var br = /** @type {HTMLElement} */ (doc.createElement("div"));
