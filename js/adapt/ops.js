@@ -52,7 +52,7 @@ adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
 	/** @const */ this.validatorSet = store.validatorSet;
     this.pageScope.defineBuiltIn("has-content", function(name) {
     	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
-    	return styleInstance.currentLayoutPosition.hasContent(name, styleInstance.lookupOffset);
+    	return styleInstance.currentLayoutPosition.hasContent(/** @type {string} */ (name), styleInstance.lookupOffset);
     });  
     this.pageScope.defineName("page-number", new adapt.expr.Native(this.pageScope, function() {    	
     	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);

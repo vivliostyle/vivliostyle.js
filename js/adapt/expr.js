@@ -127,7 +127,7 @@ adapt.expr.LexicalScope = function(parent, resolver) {
         parent.children.push(this);
     /** @type {Object.<string,adapt.expr.Val>} */ this.values = {};
     /** @type {Object.<string,adapt.expr.Val>} */ this.funcs = {};
-    /** @type {Object.<string,function(this:adapt.expr.Context):adapt.expr.Result>} */
+    /** @type {Object.<string,function(this:adapt.expr.Context,...adapt.expr.Result):adapt.expr.Result>} */
     this.builtIns = {};
     /** @const */ this.resolver = resolver;
     if (!parent) {
@@ -185,7 +185,7 @@ adapt.expr.LexicalScope.prototype.defineFunc = function(qualifiedName, val) {
 
 /**
  * @param {string} qualifiedName
- * @param {function(this:adapt.expr.Context):adapt.expr.Result} fn
+ * @param {function(this:adapt.expr.Context,...adapt.expr.Result):adapt.expr.Result} fn
  * @return {void}
  */
 adapt.expr.LexicalScope.prototype.defineBuiltIn = function(qualifiedName, fn) {

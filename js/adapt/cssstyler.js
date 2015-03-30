@@ -130,7 +130,7 @@ adapt.cssstyler.AbstractStyler.prototype.getStyle = function(element, deep) {};
 
 
 /**
- * @param {adapt.xmldoc.XMLDocHolder} xmldoc.
+ * @param {adapt.xmldoc.XMLDocHolder} xmldoc
  * @param {adapt.csscasc.Cascade} cascade
  * @param {adapt.expr.LexicalScope} scope
  * @param {adapt.expr.Context} context

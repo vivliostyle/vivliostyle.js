@@ -1619,7 +1619,7 @@ adapt.cssvalid.ValidatorSet.prototype.newGroup = function(op, vals) {
 
 /**
  * @private
- * @param adapt.cssvalid.ValidatingGroup val
+ * @param {adapt.cssvalid.ValidatingGroup} val
  * @param {number} min
  * @param {number} max
  * @return {adapt.cssvalid.ValidatingGroup}
@@ -1641,7 +1641,7 @@ adapt.cssvalid.ValidatorSet.prototype.addCounts = function(val, min, max) {
 
 /**
  * @private
- * @param adapt.cssvalid.PropertyValidator validator
+ * @param {adapt.cssvalid.PropertyValidator} validator
  * @return {adapt.cssvalid.ValidatingGroup}
  */
 adapt.cssvalid.ValidatorSet.prototype.primitive = function(validator) {

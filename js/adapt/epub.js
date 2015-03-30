@@ -34,13 +34,15 @@ goog.inherits(adapt.epub.EPUBDocStore, adapt.ops.OPSDocStore);
  */
 adapt.epub.EPUBDocStore.prototype.makeDeobfuscatorFactory = function() {
 	var self = this;
+	return (
 	/**
 	 * @param {string} url
 	 * @return {?function(Blob):adapt.task.Result.<Blob>}
 	 */
-	return function(url) {
+	function(url) {
 		return self.deobfuscators[url];
-	};
+	}
+	);
 };
 
 /**
@@ -1241,19 +1243,21 @@ adapt.epub.OPFView.prototype.makeMathMLView = function(xmldoc, srcElem, viewPare
  */
 adapt.epub.OPFView.prototype.makeCustomRenderer = function(xmldoc) {
 	var self = this;
+	return (
 	/**
 	 * @param {Element} srcElem
 	 * @param {Element} viewParent
 	 * @return {!adapt.task.Result.<Element>}
 	 */
-	return function(srcElem, viewParent, computedStyle) {
+	function(srcElem, viewParent, computedStyle) {
 		if (srcElem.localName == "object" && srcElem.namespaceURI == adapt.base.NS.XHTML) {
 			return self.makeObjectView(xmldoc, srcElem, viewParent, computedStyle);
 		} else if (srcElem.namespaceURI == adapt.base.NS.MATHML) {
 			return self.makeMathMLView(xmldoc, srcElem, viewParent, computedStyle);
 		}
 		return adapt.task.newResult(/** @type {Element} */ (null));
-	};
+	}
+	);
 };
 
 /**

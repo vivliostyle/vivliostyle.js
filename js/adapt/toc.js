@@ -100,12 +100,13 @@ adapt.toc.toggleNodeExpansion = function(evt) {
  */
 adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
 	var renderer = this.rendererFactory.makeCustomRenderer(xmldoc);
+	return (
 	/**
 	 * @param {Element} srcElem
 	 * @param {Element} viewParent
 	 * @return {!adapt.task.Result.<Element>}
 	 */
-	return function(srcElem, viewParent, computedStyle) {
+	function(srcElem, viewParent, computedStyle) {
 		var behavior = computedStyle["behavior"];
 		if (!behavior || (behavior.toString() != "toc-node" && behavior.toString() != "toc-container")) {
 			return renderer(srcElem, viewParent, computedStyle);
@@ -143,7 +144,7 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
 			}
 		}
 		return adapt.task.newResult(/** @type {Element} */ (element));
-	};
+	});
 };
 
 /**

@@ -28,7 +28,7 @@ adapt.xmldoc.XMLDocHolder = function(store, url, document) {
 	/** @type {?string} */ this.lang = null;
 	/** @type {number} */ this.totalOffset = -1;
 	/**
-	 * @type {Element}
+	 * @type {!Element}
 	 * @const
 	 */
 	this.root = document.documentElement;  // html element
