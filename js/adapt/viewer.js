@@ -159,6 +159,30 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
 };
 
 /**
+ * @param {string} specified
+ * @returns {number}
+ */
+adapt.viewer.Viewer.prototype.resolveLength = function (specified) {
+    var value = parseFloat(specified);
+    var unitPattern = /[a-z]+$/;
+    var matched;
+    if (typeof specified === "string" && (matched = specified.match(unitPattern))) {
+        var unit = matched[0];
+        if (unit === "em" || unit === "rem") {
+            return value * this.fontSize;
+        }
+        if (unit === "ex" || unit === "rex") {
+            return value * adapt.expr.defaultUnitSizes["ex"] * this.fontSize / adapt.expr.defaultUnitSizes["em"];
+        }
+        var unitSize = adapt.expr.defaultUnitSizes[unit];
+        if (unitSize) {
+            return value * unitSize;
+        }
+    }
+    return value;
+};
+
+/**
  * @param {adapt.base.JSON} command
  * @return {!adapt.task.Result.<boolean>}
  */
@@ -172,26 +196,26 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 			this.window.removeEventListener("resize", this.resizeListener, false);			
 		}
 	}
+    if (typeof command["fontSize"] == "number") {
+        var fontSize = /** @type {number} */ (command["fontSize"]);
+        if (fontSize >= 5 && fontSize <= 72 && this.fontSize != fontSize) {
+            this.fontSize = fontSize;
+            this.needResize = true;
+        }
+    }
 	if (typeof command["viewport"] == "object" && command["viewport"]) {
 		var vp = command["viewport"];
 		var viewportSize = {
-			marginLeft: parseFloat(vp["margin-left"]) || 0,
-			marginRight: parseFloat(vp["margin-right"]) || 0,
-			marginTop: parseFloat(vp["margin-top"]) || 0,
-			marginBottom: parseFloat(vp["margin-bottom"]) || 0,
-			width: parseFloat(vp["width"]) || 0,
-			height: parseFloat(vp["height"]) || 0
+			marginLeft: this.resolveLength(vp["margin-left"]) || 0,
+			marginRight: this.resolveLength(vp["margin-right"]) || 0,
+			marginTop: this.resolveLength(vp["margin-top"]) || 0,
+			marginBottom: this.resolveLength(vp["margin-bottom"]) || 0,
+			width: this.resolveLength(vp["width"]) || 0,
+			height: this.resolveLength(vp["height"]) || 0
 		};
 		if (viewportSize.width >= 200 || viewportSize.height >= 200) {
 			this.window.removeEventListener("resize", this.resizeListener, false);			
 			this.viewportSize = viewportSize;
-			this.needResize = true;
-		}
-	}
-	if (typeof command["fontSize"] == "number") {
-		var fontSize = /** @type {number} */ (command["fontSize"]);
-		if (fontSize >= 5 && fontSize <= 72 && this.fontSize != fontSize) {
-			this.fontSize = fontSize;
 			this.needResize = true;
 		}
 	}
