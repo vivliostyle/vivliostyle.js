@@ -149,12 +149,17 @@ adapt.vivliostyle.main = function() {
     var xmlURL = adapt.base.getURLParam("x");
 	var viewer = new adapt.viewer.Viewer(window, "main", adapt.vivliostyle.callback);
 	if (epubURL) {
-		viewer.initEmbed({"a": "loadEPUB", "url": epubURL, "autoresize": true, "fragment": fragment});
+		viewer.initEmbed({"a": "loadEPUB", "url": epubURL, "autoresize": false, "fragment": fragment,
+            // temporarily fix to A4 paper size
+            "viewport": {"width": "210mm", "height": "297mm"},
+            // render all pages on load and resize
+            "renderAllPages": true});
 	} else {
-		viewer.initEmbed({"a": "loadXML", "url": xmlURL, "autoresize": true, "fragment": fragment
-            // temporarily fix to A5 paper size
-            , "viewport": {"width": "148mm", "height": "210mm"}
-        });
+		viewer.initEmbed({"a": "loadXML", "url": xmlURL, "autoresize": false, "fragment": fragment,
+            // temporarily fix to A4 paper size
+            "viewport": {"width": "210mm", "height": "297mm"},
+            // render all pages on load and resize
+            "renderAllPages": true});
 	}
     window.addEventListener("keydown", /** @type {Function} */ (adapt.vivliostyle.keydown), false);
     window.addEventListener("touchstart", /** @type {Function} */ (adapt.vivliostyle.touch), false);

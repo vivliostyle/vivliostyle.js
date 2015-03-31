@@ -246,6 +246,9 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 	if (typeof command["load"] == "boolean") {
 		this.waitForLoading = command["load"];  // Load images (and other resources) on the page.		
 	}
+    if (typeof command["renderAllPages"] == "boolean") {
+        this.pref.renderAllPages = command["renderAllPages"];
+    }
 	return adapt.task.newResult(true);
 };
 
@@ -351,11 +354,17 @@ adapt.viewer.Viewer.prototype.resize = function() {
 		self.pagePosition = self.opfView.getPagePosition();
 	}
 	self.reset();
-	self.opfView.setPagePosition(self.pagePosition).then(function(page) {
-		self.setNewPage(page);
-		self.showPage();
-		self.reportPosition().thenFinish(frame);
-	});
+
+    // With renderAllPages option specified, the rendering is performed after the initial page display,
+    // otherwise users are forced to wait the rendering finish in front of a blank page.
+    self.opfView.setPagePosition(self.pagePosition).then(function(page) {
+        self.setNewPage(page);
+        self.showPage();
+        self.reportPosition().then(function(p) {
+            var r = self.pref.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
+            r.then(function() { frame.finish(p); })
+        })
+    });
 	return frame.result();
 };
 

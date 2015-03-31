@@ -892,6 +892,7 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 		}
 		var resultPage = viewItem.pages[self.pageIndex];
         if (resultPage) {
+            self.offsetInItem = resultPage.offset;
             frame.finish(resultPage);
             return;
         }
@@ -908,6 +909,8 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 			var pos = viewItem.layoutPositions[viewItem.layoutPositions.length - 1];
 			var page = self.makePage(viewItem, pos);
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
+                page.container.style.display = "none";
+                page.container.style.visibility = "visible";
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 			    if (pos) {
                     viewItem.pages[pos.page - 1] = page;
@@ -918,13 +921,11 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 			    		if (offset > seekOffset) {
 					    	resultPage = page;
 					    	self.pageIndex = viewItem.layoutPositions.length - 2;
-							page.isFirstPage = viewItem.item.spineIndex == 0 && self.pageIndex == 0;
 							loopFrame.breakLoop();
 			    			return;
 			    		}
 			    	}
-                    page.container.style.display = "none";
-                    page.container.style.visibility = "visible";
+                    page.isFirstPage = viewItem.item.spineIndex == 0 && pos.page - 1 == 0;
 			    	loopFrame.continueLoop();
 			    } else {
                     viewItem.pages.push(page);
@@ -950,6 +951,8 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 	    	}
 			var page = self.makePage(viewItem, pos);
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
+                page.container.style.display = "none";
+                page.container.style.visibility = "visible";
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 			    if (pos) {
                     viewItem.pages[pos.page - 1] = page;
@@ -965,6 +968,37 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 		});		    
 	});
 	return frame.result();
+};
+
+/**
+ * @returns {!adapt.task.Result.<adapt.vtree.Page>}
+ */
+adapt.epub.OPFView.prototype.renderAllPages = function() {
+    var self = this;
+    /** @type {!adapt.task.Frame.<adapt.vtree.Page>} */ var frame
+        = adapt.task.newFrame("renderAllPages");
+
+    // backup original values
+    var spineIndex = self.spineIndex;
+    var pageIndex = self.pageIndex;
+
+    var spineLength = self.opf.spine.length;
+    self.spineIndex = 0;
+    frame.loopWithFrame(function(loopFrame) {
+        self.pageIndex = Number.POSITIVE_INFINITY;
+        self.renderPage().then(function() {
+            if (++self.spineIndex >= spineLength) {
+                loopFrame.breakLoop();
+            } else {
+                loopFrame.continueLoop();
+            }
+        });
+    }).then(function() {
+        self.spineIndex = spineIndex;
+        self.pageIndex = pageIndex;
+        self.renderPage().thenFinish(frame);
+    });
+    return frame.result();
 };
 
 /**
