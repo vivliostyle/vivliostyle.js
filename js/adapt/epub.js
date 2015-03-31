@@ -815,6 +815,7 @@ adapt.epub.OPFDoc.prototype.getEPageFromPosition = function(position) {
  * 		xmldoc: adapt.xmldoc.XMLDocHolder,
  * 		instance: adapt.ops.StyleInstance,
  * 		layoutPositions: Array.<adapt.vtree.LayoutPosition>,
+ * 		pages: Array.<adapt.vtree.Page>,
  * 		complete: boolean
  * }}
  */
@@ -889,7 +890,11 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 				self.pageIndex = pageIndex - 1;
 			}
 		}
-		var resultPage = null;
+		var resultPage = viewItem.pages[self.pageIndex];
+        if (resultPage) {
+            frame.finish(resultPage);
+            return;
+        }
 		frame.loopWithFrame(function(loopFrame) {
 			if (self.pageIndex < viewItem.layoutPositions.length) {
 				loopFrame.breakLoop();
@@ -905,6 +910,7 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 			    if (pos) {
+                    viewItem.pages[pos.page - 1] = page;
 			    	viewItem.layoutPositions.push(pos);
 			    	if (seekOffset >= 0) {
 			    		// Searching for offset, don't know the page number.
@@ -917,9 +923,11 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 			    			return;
 			    		}
 			    	}
-			        self.viewport.root.removeChild(page.container);    	
+                    page.container.style.display = "none";
+                    page.container.style.visibility = "visible";
 			    	loopFrame.continueLoop();
 			    } else {
+                    viewItem.pages.push(page);
 			    	resultPage = page;
 			    	self.pageIndex = viewItem.layoutPositions.length - 1;
 			    	if (seekOffset < 0) {
@@ -944,8 +952,10 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 			    if (pos) {
+                    viewItem.pages[pos.page - 1] = page;
 			    	viewItem.layoutPositions[self.pageIndex + 1] = pos;
 			    } else {
+                    viewItem.pages.push(page);
 			    	viewItem.complete = true;
 			    	page.isLastPage = viewItem.item.spineIndex == self.opf.spine.length - 1;
 			    }
@@ -1120,7 +1130,7 @@ adapt.epub.OPFView.prototype.makePage = function(viewItem, pos) {
 	var viewport = viewItem.instance.viewport;
     var pageCont = /** @type {HTMLElement} */ (viewport.document.createElement("div"));
     viewport.root.appendChild(pageCont);
-    pageCont.style.position = "absolute";
+    pageCont.style.position = "relative";
     pageCont.style.visibility = "hidden";
     pageCont.style.left = "0px";
     pageCont.style.top = "0px";
@@ -1297,7 +1307,7 @@ adapt.epub.OPFView.prototype.getPageViewItem = function() {
         instance.pref = self.pref;
         instance.init().then(function() {
 			viewItem = {item: item, xmldoc: xmldoc, instance: instance,
-					layoutPositions: [null], complete: false};
+					layoutPositions: [null], pages: [], complete: false};
 			self.spineItems[self.spineIndex] = viewItem;
 			frame.finish(viewItem);
         });
@@ -1327,6 +1337,21 @@ adapt.epub.OPFView.prototype.setPagePosition = function(pos) {
 		this.offsetInItem = 0;		
 	}
 	return this.renderPage();
+};
+
+adapt.epub.OPFView.prototype.removeRenderedPages = function() {
+    var items = this.spineItems;
+    for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        if (item) {
+            var pages = item.pages;
+            var page;
+            while (page = pages.shift()) {
+                var container = page.container;
+                container.parentNode.removeChild(container);
+            }
+        }
+    }
 };
 
 /**

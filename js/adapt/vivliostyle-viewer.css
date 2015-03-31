@@ -1,0 +1,12 @@
+@media print {
+    body {
+        /* workaround for Chrome calculating page height incorrectly */
+        max-height: 100%;
+    }
+    body > div {
+        display: block !important;
+        /* workaround for Chrome calculating page height incorrectly */
+        max-height: 100%;
+        overflow: hidden;
+    }
+}

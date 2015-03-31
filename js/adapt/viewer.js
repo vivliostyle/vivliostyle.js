@@ -255,13 +255,12 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 adapt.viewer.Viewer.prototype.showPage = function() {
     if (this.newPage) {
 	    if (this.currentPage) {
-	        this.viewport.root.removeChild(this.currentPage.container);
-	    }
-	    if (this.currentPage) {
+            adapt.base.setCSSProperty(this.currentPage.container, "display", "none");
 	    	this.currentPage.removeEventListener("hyperlink", this.hyperlinkListener, false);
 	    }
 	    this.currentPage = this.newPage;
     	adapt.base.setCSSProperty(this.newPage.container, "visibility", "visible");
+        adapt.base.setCSSProperty(this.newPage.container, "display", "block");
 	    this.newPage = null;
     }
 };
@@ -323,6 +322,7 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
 adapt.viewer.Viewer.prototype.reset = function() {
 	if (this.opfView) {
 		this.opfView.hideTOC();
+        this.opfView.removeRenderedPages();
 	}
 	this.viewport = this.createViewport();
     this.opfView = new adapt.epub.OPFView(this.opf, this.viewport, this.fontMapper, this.pref);
