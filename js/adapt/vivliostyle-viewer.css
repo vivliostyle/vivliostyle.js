@@ -10,3 +10,12 @@
         overflow: hidden;
     }
 }
+
+@media screen {
+    html {
+        background: #AAAAAA;
+    }
+    body {
+        background: white;
+    }
+}
