@@ -112,7 +112,8 @@ adapt.base.NS = {
 	SHADOW: "http://www.pyroxy.com/ns/shadow",
 	SVG: "http://www.w3.org/2000/svg",
 	DC: "http://purl.org/dc/elements/1.1/",
-	NCX: "http://www.daisy.org/z3986/2005/ncx/"
+	NCX: "http://www.daisy.org/z3986/2005/ncx/",
+    SSE: "http://example.com/sse" // temporary dummy namespace
 };
 
 

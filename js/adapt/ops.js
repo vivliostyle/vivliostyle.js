@@ -1005,7 +1005,21 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
 		                sources.push({url:url, text:child.textContent, 
 		                	flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
 		            }        		
-	        	}
+	        	} else if (ns == adapt.base.NS.SSE && localName === "property") {
+                    // look for stylesheet specification like:
+                    // <property><name>stylesheet</name><value>style.css</value></property>
+                    var name = child.getElementsByTagName("name")[0];
+                    if (name && name.textContent === "stylesheet") {
+                        var value = child.getElementsByTagName("value")[0];
+                        if (value) {
+                            var src = adapt.base.resolveURL(value.textContent, url);
+                            sources.push({
+                                url: src, text: null, classes: null, media: null,
+                                flavor: adapt.cssparse.StylesheetFlavor.AUTHOR
+                            });
+                        }
+                    }
+                }
 	        }
 	    }
 	    var key = "";

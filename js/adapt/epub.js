@@ -1280,6 +1280,22 @@ adapt.epub.OPFView.prototype.makeMathMLView = function(xmldoc, srcElem, viewPare
 	return adapt.task.newResult(/** @type {Element} */ (null));
 };
 
+// TODO move makeSSEView to a more appropriate class (SSE XML content is not allowed in EPUB)
+/**
+ * @param {adapt.xmldoc.XMLDocHolder} xmldoc
+ * @param {Element} srcElem
+ * @param {Element} viewParent
+ * @param computedStyle
+ * @returns {!adapt.task.Result.<Element>}
+ */
+adapt.epub.OPFView.prototype.makeSSEView = function(xmldoc, srcElem, viewParent, computedStyle) {
+    var doc = viewParent ? viewParent.ownerDocument : this.viewport.document;
+    var result = doc.createElement("span");
+    result.setAttribute("data-adapt-process-children", "true");
+    // Need to cast because we need {Element}, not {!Element}
+    return adapt.task.newResult(/** @type {Element} */ (result));
+};
+
 /**
  * @param {adapt.xmldoc.XMLDocHolder} xmldoc
  * @return {adapt.vgen.CustomRenderer}
@@ -1298,7 +1314,9 @@ adapt.epub.OPFView.prototype.makeCustomRenderer = function(xmldoc) {
 			return self.makeObjectView(xmldoc, srcElem, viewParent, computedStyle);
 		} else if (srcElem.namespaceURI == adapt.base.NS.MATHML) {
 			return self.makeMathMLView(xmldoc, srcElem, viewParent, computedStyle);
-		}
+		} else if (srcElem.namespaceURI == adapt.base.NS.SSE) {
+            return self.makeSSEView(xmldoc, srcElem, viewParent, computedStyle);
+        }
 		return adapt.task.newResult(/** @type {Element} */ (null));
 	}
 	);

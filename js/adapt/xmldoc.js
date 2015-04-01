@@ -68,7 +68,17 @@ adapt.xmldoc.XMLDocHolder = function(store, url, document) {
 		if (langs.length > 0) {
 			this.lang = langs[0];
 		}		
-	}
+	} else if (this.root.namespaceURI == adapt.base.NS.SSE) {
+        // treat <meta> element as "head" of the document
+        for (var elem = this.root.firstElementChild; elem; elem = elem.nextElementSibling) {
+            var localName = elem.localName;
+            if (localName === "meta") {
+                head = elem;
+            } else if (localName === "body") {
+                body = elem;
+            }
+        }
+    }
 	/** 
 	 * @type {Element}
 	 * @const
