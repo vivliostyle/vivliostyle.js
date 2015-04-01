@@ -107,7 +107,7 @@ cursor = COMMA(URI* [ auto | crosshair | default | pointer | move | e-resize | n
 direction = ltr | rtl;
 display = inline | block | list-item | inline-block | table | inline-table | table-row-group |
     table-header-group | table-footer-group | table-row | table-column-group | table-column |
-    table-cell | table-caption | none | oeb-page-head | oeb-page-foot;
+    table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex;
 elevation = ANGLE | below | level | above | higher | lower;
 empty-cells = show | hide;
 float = left | right | none | footnote;
@@ -181,6 +181,8 @@ z-index = auto | INT;
 
 [epub]hyphens = auto | none;
 [epub]writing-mode = horizontal-tb | vertical-rl;
+[webkit]text-combine = none | horizontal;
+[webkit]text-emphasis-style = none | [ [ filled | open ] || [ dot | circle | double-circle | triangle | sesame ] ] | STRING;
 [epub]text-orientation = vertical-right | upright | rotate-right | rotate-left | rotate-normal | auto;
 [adapt]margin-before = APLENGTH;
 [adapt]margin-after = APLENGTH;
