@@ -1290,7 +1290,27 @@ adapt.epub.OPFView.prototype.makeMathMLView = function(xmldoc, srcElem, viewPare
  */
 adapt.epub.OPFView.prototype.makeSSEView = function(xmldoc, srcElem, viewParent, computedStyle) {
     var doc = viewParent ? viewParent.ownerDocument : this.viewport.document;
-    var result = doc.createElement("span");
+    var srcTagName = srcElem.localName;
+    var tagName;
+    switch (srcTagName) {
+        case "t":
+        case "tab":
+        case "ec":
+        case "nt":
+        case "fraction":
+        case "comment":
+        case "mark":
+            tagName = "span";
+            break;
+        case "ruby":
+        case "rp":
+        case "rt":
+            tagName = srcTagName;
+            break;
+        default:
+            tagName = "div";
+    }
+    var result = doc.createElement(tagName);
     result.setAttribute("data-adapt-process-children", "true");
     // Need to cast because we need {Element}, not {!Element}
     return adapt.task.newResult(/** @type {Element} */ (result));

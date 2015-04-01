@@ -263,10 +263,14 @@ adapt.cssstyler.Styler.prototype.getTopContainerStyle = function() {
  * @return {adapt.csscasc.ElementStyle}
  */
 adapt.cssstyler.Styler.prototype.getAttrStyle = function(elem) {
-    var styleAttrValue = elem.getAttribute("style");
-    if (styleAttrValue) {
-    	return adapt.csscasc.parseStyleAttribute(this.scope, this.validatorSet,
-    			this.xmldoc.url, styleAttrValue);
+    // skip cases in which elements for XML other than HTML or SVG
+    // have 'style' attribute not for CSS declaration
+    if (elem.style instanceof CSSStyleDeclaration) {
+        var styleAttrValue = elem.getAttribute("style");
+        if (styleAttrValue) {
+            return adapt.csscasc.parseStyleAttribute(this.scope, this.validatorSet,
+                this.xmldoc.url, styleAttrValue);
+        }
     }
 	return /** @type {adapt.csscasc.ElementStyle} */ ({});	
 };
