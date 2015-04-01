@@ -141,26 +141,82 @@ adapt.vivliostyle.callback = function(msg) {
 };
 
 /**
+ * @param {?string} width
+ * @param {?string} height
+ * @param {?string} size
+ * @param {?string} orientation
+ * @param {!Object.<string, *>} config
+ * @return {void}
+ */
+function setViewportSize(width, height, size, orientation, config) {
+    if (!width || !height) {
+        switch (size) {
+            case "A5":
+                width = "148mm";
+                height = "210mm";
+                break;
+            case "A4":
+                width = "210mm";
+                height = "297mm";
+                break;
+            case "B5":
+                width = "176mm";
+                height = "250mm";
+                break;
+            case "B4":
+                width = "250mm";
+                height = "353mm";
+                break;
+            case "letter":
+                width = "8.5in";
+                height = "11in";
+                break;
+            case "legal":
+                width = "8.5in";
+                height = "14in";
+                break;
+            case "ledger":
+                width = "11in";
+                height = "17in";
+                break;
+        }
+        if (orientation === "landscape") {
+            // swap
+            var tmp = width;
+            width = height;
+            height = tmp;
+        }
+    }
+    if (width && height) {
+        config.viewport = {"width": width, "height": height};
+    }
+}
+
+/**
  * @return {void}
  */
 adapt.vivliostyle.main = function() {
     var fragment = adapt.base.getURLParam("f");
     var epubURL = adapt.base.getURLParam("b");
     var xmlURL = adapt.base.getURLParam("x");
+    var width = adapt.base.getURLParam("w");
+    var height = adapt.base.getURLParam("h");
+    var size = adapt.base.getURLParam("size");
+    var orientation = adapt.base.getURLParam("orientation");
 	var viewer = new adapt.viewer.Viewer(window, "main", adapt.vivliostyle.callback);
-	if (epubURL) {
-		viewer.initEmbed({"a": "loadEPUB", "url": epubURL, "autoresize": false, "fragment": fragment,
-            // temporarily fix to A4 paper size
-            "viewport": {"width": "210mm", "height": "297mm"},
-            // render all pages on load and resize
-            "renderAllPages": true});
-	} else {
-		viewer.initEmbed({"a": "loadXML", "url": xmlURL, "autoresize": false, "fragment": fragment,
-            // temporarily fix to A4 paper size
-            "viewport": {"width": "210mm", "height": "297mm"},
-            // render all pages on load and resize
-            "renderAllPages": true});
-	}
+
+    var config = {
+        "autoresize": true,
+        "fragment": fragment,
+        // render all pages on load and resize
+        "renderAllPages": true
+    };
+    setViewportSize(width, height, size, orientation, config);
+    config["a"] = epubURL ? "loadEPUB" : "loadXML";
+    config["url"] = epubURL || xmlURL;
+
+    viewer.initEmbed(config);
+
     window.addEventListener("keydown", /** @type {Function} */ (adapt.vivliostyle.keydown), false);
     window.addEventListener("touchstart", /** @type {Function} */ (adapt.vivliostyle.touch), false);
     window.addEventListener("touchmove", /** @type {Function} */ (adapt.vivliostyle.touch), false);
