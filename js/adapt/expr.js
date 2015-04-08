@@ -192,6 +192,24 @@ adapt.expr.LexicalScope.prototype.defineBuiltIn = function(qualifiedName, fn) {
     this.builtIns[qualifiedName] = fn;
 };
 
+/**
+ * @param {string} unit
+ * @returns {boolean}
+ */
+adapt.expr.isAbsoluteLengthUnit = function(unit) {
+    switch (unit.toLowerCase()) {
+        case "px":
+        case "in":
+        case "pt":
+        case "pc":
+        case "cm":
+        case "mm":
+        case "q":
+            return true;
+        default:
+            return false;
+    }
+};
 
 /**
  * @const
@@ -201,8 +219,10 @@ adapt.expr.defaultUnitSizes = {
     "px": 1,
     "in": 96,
     "pt": 4/3,
+    "pc": 96/6,
     "cm": 96/2.54,
     "mm":  96/25.4,
+    "q": 96/2.54/40,
     "em": 16,
     "rem": 16,
     "ex": 8,
