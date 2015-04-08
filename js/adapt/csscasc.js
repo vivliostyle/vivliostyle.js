@@ -432,10 +432,10 @@ adapt.csscasc.InheritanceVisitor.prototype.setPropName = function(name) {
 adapt.csscasc.InheritanceVisitor.prototype.getFontSize = function() {
 	var cascval = adapt.csscasc.getProp(this.props, "font-size");
 	var n = /** @type {adapt.css.Numeric} */ (cascval.value);
-	if (n.unit != "px") {
+	if (!adapt.expr.isAbsoluteLengthUnit(n.unit)) {
 		throw new Error("Unexpected state");
 	}
-	return n.num;
+    return n.num * adapt.expr.defaultUnitSizes[n.unit];
 };
 
 /**
