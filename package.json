@@ -1,0 +1,20 @@
+{
+  "name": "vivliostyle",
+  "version": "0.1.0-alpha",
+  "description": "Library for web sites with rich paged viewing and EPUB support, shared with Vivliostyle Formatter & Browser",
+  "scripts": {
+    "build": "java -jar node_modules/google-closure-compiler/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --warning_level VERBOSE --js_output_file vivliostyle-viewer.min.js src/closure/goog/base.js src/adapt/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vivliostyle/vivliostyle.js.git"
+  },
+  "author": "Vivliostyle Inc.",
+  "bugs": {
+    "url": "https://github.com/vivliostyle/vivliostyle.js/issues"
+  },
+  "homepage": "https://github.com/vivliostyle/vivliostyle.js",
+  "devDependencies": {
+    "google-closure-compiler": "^20150315.0.2"
+  }
+}
