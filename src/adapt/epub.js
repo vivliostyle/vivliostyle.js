@@ -9,6 +9,7 @@ goog.require('adapt.csscasc');
 goog.require('adapt.font');
 goog.require('adapt.ops');
 goog.require('adapt.cfi');
+goog.require('adapt.sha1');
 goog.require('adapt.toc');
 
 /**
