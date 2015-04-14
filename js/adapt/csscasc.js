@@ -446,6 +446,9 @@ adapt.csscasc.InheritanceVisitor.prototype.visitNumeric = function(numeric) {
 		var ratio = this.context.queryUnitSize(numeric.unit) / this.context.queryUnitSize("em");
 		return new adapt.css.Numeric(numeric.num * ratio * this.getFontSize(), "px");
 	} else if (numeric.unit == "%") {
+        if (this.propName === "font-size") {
+            return new adapt.css.Numeric(numeric.num / 100 * this.getFontSize(), "px");
+        }
 		var unit = this.propName.match(/height|^(top|bottom)$/) ? "vh" : "vw";
 		return new adapt.css.Numeric(numeric.num, unit);
 	}
