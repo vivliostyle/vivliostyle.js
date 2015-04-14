@@ -917,7 +917,7 @@ goog.inherits(adapt.ops.OPSDocStore, adapt.net.ResourceStore);
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.ops.OPSDocStore.prototype.init = function() {
-    var userAgentXML = adapt.base.resolveURL("user-agent.xml", window.location.href);
+    var userAgentXML = adapt.base.resolveURL("user-agent.xml", adapt.base.resourceBaseURL);
     var frame = adapt.task.newFrame("OPSDocStore.init");
 	var self = this;
     adapt.cssvalid.loadValidatorSet().then(function(validatorSet) {

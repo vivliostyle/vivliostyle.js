@@ -249,6 +249,9 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
     if (typeof command["renderAllPages"] == "boolean") {
         this.pref.renderAllPages = command["renderAllPages"];
     }
+    if (typeof command["userAgentRootURL"] == "string") {
+        adapt.base.resourceBaseURL = command["userAgentRootURL"];
+    }
 	return adapt.task.newResult(true);
 };
 

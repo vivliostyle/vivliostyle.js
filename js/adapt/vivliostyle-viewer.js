@@ -203,13 +203,15 @@ adapt.vivliostyle.main = function(arg) {
     var height = (arg && arg.defaultPageHeight) || adapt.base.getURLParam("h");
     var size = (arg && arg.defaultPageSize) || adapt.base.getURLParam("size");
     var orientation = (arg && arg.orientation) || adapt.base.getURLParam("orientation");
+    var uaRoot = (arg && arg.uaRoot) || null;
 	var viewer = new adapt.viewer.Viewer(window, "main", adapt.vivliostyle.callback);
 
     var config = {
         "autoresize": true,
         "fragment": fragment,
         // render all pages on load and resize
-        "renderAllPages": true
+        "renderAllPages": true,
+        "userAgentRootURL": uaRoot
     };
     setViewportSize(width, height, size, orientation, config);
     config["a"] = epubURL ? "loadEPUB" : "loadXML";

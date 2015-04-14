@@ -50,7 +50,6 @@ adapt.base.stripFragmentAndQuery = function(url) {
 /**
  * Base URL relative to which URLs of resources such as validation.txt and
  * user-agent.css are resolved.
- * @const
  */
 adapt.base.resourceBaseURL = window.location.href;
 
