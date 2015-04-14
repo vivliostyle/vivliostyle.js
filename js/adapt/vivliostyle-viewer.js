@@ -195,14 +195,14 @@ function setViewportSize(width, height, size, orientation, config) {
 /**
  * @return {void}
  */
-adapt.vivliostyle.main = function() {
-    var fragment = adapt.base.getURLParam("f");
-    var epubURL = adapt.base.getURLParam("b");
-    var xmlURL = adapt.base.getURLParam("x");
-    var width = adapt.base.getURLParam("w");
-    var height = adapt.base.getURLParam("h");
-    var size = adapt.base.getURLParam("size");
-    var orientation = adapt.base.getURLParam("orientation");
+adapt.vivliostyle.main = function(arg) {
+    var fragment = (arg && arg.fragment) || adapt.base.getURLParam("f");
+    var epubURL = (arg && arg.epubURL) || adapt.base.getURLParam("b");
+    var xmlURL = (arg && arg.xmlURL) || adapt.base.getURLParam("x");
+    var width = (arg && arg.defaultPageWidth) || adapt.base.getURLParam("w");
+    var height = (arg && arg.defaultPageHeight) || adapt.base.getURLParam("h");
+    var size = (arg && arg.defaultPageSize) || adapt.base.getURLParam("size");
+    var orientation = (arg && arg.orientation) || adapt.base.getURLParam("orientation");
 	var viewer = new adapt.viewer.Viewer(window, "main", adapt.vivliostyle.callback);
 
     var config = {
