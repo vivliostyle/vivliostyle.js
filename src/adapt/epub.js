@@ -1,5 +1,6 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Deal with META-INF/ and .opf files in EPUB container.
  */
 goog.provide('adapt.epub');

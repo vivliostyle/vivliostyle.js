@@ -1,5 +1,6 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Support for EPUB Canonical Fragment Identifiers.
  */
 goog.provide('adapt.cfi');

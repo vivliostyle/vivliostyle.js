@@ -1,5 +1,6 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Utility functions to work with XML (mostly XHTML) documents.
  */
 

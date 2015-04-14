@@ -1,5 +1,6 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Parse validation rules (validation.txt), validate properties and shorthands.
  */
 goog.provide('adapt.cssvalid');

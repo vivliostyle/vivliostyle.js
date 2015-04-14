@@ -1,5 +1,6 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Render EPUB content files by applying page masters, styling and layout.
  */
 goog.provide('adapt.ops');

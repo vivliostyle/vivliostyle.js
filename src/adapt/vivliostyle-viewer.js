@@ -1,4 +1,6 @@
 /**
+ * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Vivliostyle page viewer base on adapt.sampleapp
  */
 goog.provide('adapt.vivliostyle');
