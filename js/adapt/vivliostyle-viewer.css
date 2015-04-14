@@ -1,10 +1,17 @@
+html[data-vivliostyle-paginated] {
+    text-rendering: geometricPrecision;
+}
+
 @media print {
-    body {
+    html[data-vivliostyle-paginated] {
+        height: 100%;
+    }
+    html[data-vivliostyle-paginated] > body {
         /* workaround for Chrome calculating page height incorrectly */
         max-height: 100%;
         height: 100% !important;
     }
-    body > div {
+    html[data-vivliostyle-paginated] > body > div {
         display: block !important;
         /* workaround for Chrome calculating page height incorrectly */
         max-height: 100%;
@@ -14,10 +21,10 @@
 }
 
 @media screen {
-    html {
+    html[data-vivliostyle-paginated] {
         background: #AAAAAA;
     }
-    body {
+    html[data-vivliostyle-paginated] > body {
         background: white;
     }
 }
