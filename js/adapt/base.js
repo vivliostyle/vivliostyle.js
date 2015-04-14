@@ -69,6 +69,12 @@ adapt.base.resolveURL = function(relURL, baseURL) {
     if (baseURL.match(/^\w{2,}:\/\/[^\/]+$/))
         baseURL = baseURL + '/';
     /** @type {Array.<string>} */ var r;
+    if (relURL.match(/^\/\//)) {
+        r = baseURL.match(/^(\w{2,}:)\/\//);
+        if (r)
+        return r[1] + relURL;
+        return relURL;
+    }
     if (relURL.match(/^\//)) {
         r = baseURL.match(/^(\w{2,}:\/\/[^\/]+)\//);
         if (r)
