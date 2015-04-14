@@ -136,25 +136,27 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
  */
 adapt.viewer.Viewer.prototype.loadXML = function(command) {
 	var url = /** @type {string} */ (command["url"]);
+    var doc = /** @type {Document} */ (command["document"]);
 	var fragment = /** @type {?string} */ (command["fragment"]);
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadXML");
 	var self = this;
+    self.configure(command).then(function() {
 	var store = new adapt.epub.EPUBDocStore();
 	store.init().then(function() {
 	    var xmlURL = adapt.base.resolveURL(url, self.window.location.href);
 	    self.packageURL = xmlURL;
 	    self.opf = new adapt.epub.OPFDoc(store, "");
-	    self.opf.initWithSingleChapter(xmlURL);
-        self.opf.resolveFragment(fragment).then(function(position) {
-        	self.pagePosition = position;
-        	self.configure(command).then(function() {
-    	    	self.callback({"t":"loaded"});
-        		self.resize().then(function() {
-	    	    	frame.finish(true);
-        		});
-        	});
+	    self.opf.initWithSingleChapter(xmlURL, doc).then(function() {
+            self.opf.resolveFragment(fragment).then(function(position) {
+                self.pagePosition = position;
+                self.callback({"t":"loaded"});
+                self.resize().then(function() {
+                    frame.finish(true);
+                });
+            });
         });
 	});
+    });
     return frame.result();
 };
 

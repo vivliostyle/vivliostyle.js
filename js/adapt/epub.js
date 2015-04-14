@@ -26,6 +26,7 @@ adapt.epub.EPUBDocStore = function() {
 	/** @type {Object.<string,adapt.epub.OPFDoc>} */ this.opfByURL = {};
 	/** @type {Object.<string,adapt.epub.OPFDoc>} */ this.primaryOPFByEPubURL = {};
 	/** @type {Object.<string,function(Blob):adapt.task.Result.<Blob>>} */ this.deobfuscators = {};
+    /** @type {Object.<string,!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>>} */ this.documents = {};
 };
 goog.inherits(adapt.epub.EPUBDocStore, adapt.ops.OPSDocStore);
 
@@ -136,6 +137,33 @@ adapt.epub.EPUBDocStore.prototype.loadOPF = function(epubURL, root, haveZipMetad
 		});
 	});
 	return frame.result();
+};
+
+/**
+ * @param {string} url
+ * @param {!Document} doc
+ */
+adapt.epub.EPUBDocStore.prototype.addDocument = function(url, doc) {
+    var frame = adapt.task.newFrame("EPUBDocStore.load");
+    var docURL = adapt.base.stripFragment(url);
+    var r = this.documents[docURL] = this.parseOPSResource(
+        {status: 200, url: docURL, responseText: null, responseXML: doc, responseBlob: null}
+    );
+    r.thenFinish(frame);
+    return frame.result();
+};
+
+/**
+ * @override
+ */
+adapt.epub.EPUBDocStore.prototype.load = function(url) {
+    var docURL = adapt.base.stripFragment(url);
+    var r = this.documents[docURL];
+    if (r) {
+        return r.isPending() ? r : adapt.task.newResult(r.get());
+    } else {
+        return adapt.epub.EPUBDocStore.superClass_.load.call(this, docURL);
+    }
 };
 
 /**
@@ -651,8 +679,9 @@ adapt.epub.OPFDoc.prototype.assignAutoPages = function() {
 /**
  * Creates a fake OPF "document" that contains a single OPS chapter.
  * @param url OPS (XHTML) document URL
+ * @param {?Document} doc
  */
-adapt.epub.OPFDoc.prototype.initWithSingleChapter = function(url) {
+adapt.epub.OPFDoc.prototype.initWithSingleChapter = function(url, doc) {
 	var item = new adapt.epub.OPFItem();
 	item.spineIndex = 0;
 	item.id = "item1";
@@ -662,6 +691,12 @@ adapt.epub.OPFDoc.prototype.initWithSingleChapter = function(url) {
 	this.itemMapByPath[url] = item;
 	this.items = [item];
 	this.spine = this.items;
+
+    if (doc) {
+        return this.store.addDocument(url, doc);
+    } else {
+        return adapt.task.newResult(null);
+    }
 };
 
 /**

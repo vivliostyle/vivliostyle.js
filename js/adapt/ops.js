@@ -891,7 +891,7 @@ adapt.ops.StyleSource;
 /**
  * @param {adapt.net.Response} response
  * @param {adapt.xmldoc.XMLDocStore} store
- * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
+ * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
  */
 adapt.ops.parseOPSResource = function(response, store) {
 	return (/** @type {adapt.ops.OPSDocStore} */ (store)).parseOPSResource(response);
@@ -949,10 +949,10 @@ adapt.ops.OPSDocStore.prototype.getTriggersForDoc = function(xmldoc) {
 
 /**
  * @param {adapt.net.Response} response
- * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
+ * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
  */
 adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
-    /** @type {!adapt.task.Frame.<adapt.xmldoc.XMLDocHolder>} */ var frame
+    /** @type {!adapt.task.Frame.<!adapt.xmldoc.XMLDocHolder>} */ var frame
     	= adapt.task.newFrame("OPSDocStore.load");
 	var self = this;
 	var url = response.url;

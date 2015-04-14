@@ -771,7 +771,13 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 				    } else if (attributeName == "href" && tag == "image" && ns == adapt.base.NS.SVG && attributeNS == adapt.base.NS.XLINK) {
 			        	self.page.fetchers.push(adapt.taskutil.loadElement(result, attributeValue));
 			        } else {
-			        	result.setAttributeNS(attributeNS, attributeName, attributeValue);
+                        // When the document is not XML document (e.g. non-XML HTML)
+                        // attributeNS can be null
+                        if (attributeNS) {
+                            result.setAttributeNS(attributeNS, attributeName, attributeValue);
+                        } else {
+                            result.setAttribute(attributeName, attributeValue);
+                        }
 			        }
 			    }
 			    if (delayedSrc) {
