@@ -891,7 +891,7 @@ adapt.ops.StyleSource;
 /**
  * @param {adapt.net.Response} response
  * @param {adapt.xmldoc.XMLDocStore} store
- * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
+ * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
  */
 adapt.ops.parseOPSResource = function(response, store) {
 	return (/** @type {adapt.ops.OPSDocStore} */ (store)).parseOPSResource(response);
@@ -917,7 +917,7 @@ goog.inherits(adapt.ops.OPSDocStore, adapt.net.ResourceStore);
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.ops.OPSDocStore.prototype.init = function() {
-    var userAgentXML = adapt.base.resolveURL("user-agent.xml", window.location.href);
+    var userAgentXML = adapt.base.resolveURL("user-agent.xml", adapt.base.resourceBaseURL);
     var frame = adapt.task.newFrame("OPSDocStore.init");
 	var self = this;
     adapt.cssvalid.loadValidatorSet().then(function(validatorSet) {
@@ -949,10 +949,10 @@ adapt.ops.OPSDocStore.prototype.getTriggersForDoc = function(xmldoc) {
 
 /**
  * @param {adapt.net.Response} response
- * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
+ * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
  */
 adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
-    /** @type {!adapt.task.Frame.<adapt.xmldoc.XMLDocHolder>} */ var frame
+    /** @type {!adapt.task.Frame.<!adapt.xmldoc.XMLDocHolder>} */ var frame
     	= adapt.task.newFrame("OPSDocStore.load");
 	var self = this;
 	var url = response.url;
@@ -1005,7 +1005,21 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
 		                sources.push({url:url, text:child.textContent, 
 		                	flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
 		            }        		
-	        	}
+	        	} else if (ns == adapt.base.NS.SSE && localName === "property") {
+                    // look for stylesheet specification like:
+                    // <property><name>stylesheet</name><value>style.css</value></property>
+                    var name = child.getElementsByTagName("name")[0];
+                    if (name && name.textContent === "stylesheet") {
+                        var value = child.getElementsByTagName("value")[0];
+                        if (value) {
+                            var src = adapt.base.resolveURL(value.textContent, url);
+                            sources.push({
+                                url: src, text: null, classes: null, media: null,
+                                flavor: adapt.cssparse.StylesheetFlavor.AUTHOR
+                            });
+                        }
+                    }
+                }
 	        }
 	    }
 	    var key = "";

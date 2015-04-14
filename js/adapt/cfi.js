@@ -413,6 +413,7 @@ adapt.cfi.Fragment.prototype.prependPathFromNode = function(node, offset, after,
 			node = node.previousSibling;
 			continue;
 		case 8:  // Comment Node
+            node = node.previousSibling;
 			continue;
 		}
 		break;

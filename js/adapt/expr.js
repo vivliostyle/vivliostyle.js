@@ -8,7 +8,7 @@ goog.require('adapt.base');
 
 /**
  * @typedef {{fontFamily:string, lineHeight:number, margin:number, hyphenate:boolean,
- *   	columnWidth:number, horizontal:boolean, nightMode:boolean}}
+ *   	columnWidth:number, horizontal:boolean, nightMode:boolean, renderAllPages:boolean}}
  *  }}
  */
 adapt.expr.Preferences;
@@ -18,7 +18,7 @@ adapt.expr.Preferences;
  */
 adapt.expr.defaultPreferences = function() {
 	return {fontFamily:"serif", lineHeight:1.25, margin:8, hyphenate:true, columnWidth:25,
-				horizontal:false, nightMode:false};
+				horizontal:false, nightMode:false, renderAllPages:false};
 };
 
 /**
@@ -28,7 +28,7 @@ adapt.expr.defaultPreferences = function() {
 adapt.expr.clonePreferences = function(pref) {
 	return {fontFamily:pref.fontFamily, lineHeight:pref.lineHeight, margin:pref.margin,
 		hyphenate:pref.hyphenate, columnWidth:pref.columnWidth, horizontal:pref.horizontal,
-		nightMode:pref.nightMode};
+		nightMode:pref.nightMode, renderAllPages:pref.renderAllPages};
 };
 
 /**
@@ -192,6 +192,24 @@ adapt.expr.LexicalScope.prototype.defineBuiltIn = function(qualifiedName, fn) {
     this.builtIns[qualifiedName] = fn;
 };
 
+/**
+ * @param {string} unit
+ * @returns {boolean}
+ */
+adapt.expr.isAbsoluteLengthUnit = function(unit) {
+    switch (unit.toLowerCase()) {
+        case "px":
+        case "in":
+        case "pt":
+        case "pc":
+        case "cm":
+        case "mm":
+        case "q":
+            return true;
+        default:
+            return false;
+    }
+};
 
 /**
  * @const
@@ -201,8 +219,10 @@ adapt.expr.defaultUnitSizes = {
     "px": 1,
     "in": 96,
     "pt": 4/3,
+    "pc": 96/6,
     "cm": 96/2.54,
     "mm":  96/25.4,
+    "q": 96/2.54/40,
     "em": 16,
     "rem": 16,
     "ex": 8,

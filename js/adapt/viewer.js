@@ -136,26 +136,52 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
  */
 adapt.viewer.Viewer.prototype.loadXML = function(command) {
 	var url = /** @type {string} */ (command["url"]);
+    var doc = /** @type {Document} */ (command["document"]);
 	var fragment = /** @type {?string} */ (command["fragment"]);
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadXML");
 	var self = this;
+    self.configure(command).then(function() {
 	var store = new adapt.epub.EPUBDocStore();
 	store.init().then(function() {
 	    var xmlURL = adapt.base.resolveURL(url, self.window.location.href);
 	    self.packageURL = xmlURL;
 	    self.opf = new adapt.epub.OPFDoc(store, "");
-	    self.opf.initWithSingleChapter(xmlURL);
-        self.opf.resolveFragment(fragment).then(function(position) {
-        	self.pagePosition = position;
-        	self.configure(command).then(function() {
-    	    	self.callback({"t":"loaded"});
-        		self.resize().then(function() {
-	    	    	frame.finish(true);
-        		});
-        	});
+	    self.opf.initWithSingleChapter(xmlURL, doc).then(function() {
+            self.opf.resolveFragment(fragment).then(function(position) {
+                self.pagePosition = position;
+                self.callback({"t":"loaded"});
+                self.resize().then(function() {
+                    frame.finish(true);
+                });
+            });
         });
 	});
+    });
     return frame.result();
+};
+
+/**
+ * @param {string} specified
+ * @returns {number}
+ */
+adapt.viewer.Viewer.prototype.resolveLength = function (specified) {
+    var value = parseFloat(specified);
+    var unitPattern = /[a-z]+$/;
+    var matched;
+    if (typeof specified === "string" && (matched = specified.match(unitPattern))) {
+        var unit = matched[0];
+        if (unit === "em" || unit === "rem") {
+            return value * this.fontSize;
+        }
+        if (unit === "ex" || unit === "rex") {
+            return value * adapt.expr.defaultUnitSizes["ex"] * this.fontSize / adapt.expr.defaultUnitSizes["em"];
+        }
+        var unitSize = adapt.expr.defaultUnitSizes[unit];
+        if (unitSize) {
+            return value * unitSize;
+        }
+    }
+    return value;
 };
 
 /**
@@ -172,26 +198,26 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 			this.window.removeEventListener("resize", this.resizeListener, false);			
 		}
 	}
+    if (typeof command["fontSize"] == "number") {
+        var fontSize = /** @type {number} */ (command["fontSize"]);
+        if (fontSize >= 5 && fontSize <= 72 && this.fontSize != fontSize) {
+            this.fontSize = fontSize;
+            this.needResize = true;
+        }
+    }
 	if (typeof command["viewport"] == "object" && command["viewport"]) {
 		var vp = command["viewport"];
 		var viewportSize = {
-			marginLeft: parseFloat(vp["margin-left"]) || 0,
-			marginRight: parseFloat(vp["margin-right"]) || 0,
-			marginTop: parseFloat(vp["margin-top"]) || 0,
-			marginBottom: parseFloat(vp["margin-bottom"]) || 0,
-			width: parseFloat(vp["width"]) || 0,
-			height: parseFloat(vp["height"]) || 0
+			marginLeft: this.resolveLength(vp["margin-left"]) || 0,
+			marginRight: this.resolveLength(vp["margin-right"]) || 0,
+			marginTop: this.resolveLength(vp["margin-top"]) || 0,
+			marginBottom: this.resolveLength(vp["margin-bottom"]) || 0,
+			width: this.resolveLength(vp["width"]) || 0,
+			height: this.resolveLength(vp["height"]) || 0
 		};
 		if (viewportSize.width >= 200 || viewportSize.height >= 200) {
 			this.window.removeEventListener("resize", this.resizeListener, false);			
 			this.viewportSize = viewportSize;
-			this.needResize = true;
-		}
-	}
-	if (typeof command["fontSize"] == "number") {
-		var fontSize = /** @type {number} */ (command["fontSize"]);
-		if (fontSize >= 5 && fontSize <= 72 && this.fontSize != fontSize) {
-			this.fontSize = fontSize;
 			this.needResize = true;
 		}
 	}
@@ -222,6 +248,12 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 	if (typeof command["load"] == "boolean") {
 		this.waitForLoading = command["load"];  // Load images (and other resources) on the page.		
 	}
+    if (typeof command["renderAllPages"] == "boolean") {
+        this.pref.renderAllPages = command["renderAllPages"];
+    }
+    if (typeof command["userAgentRootURL"] == "string") {
+        adapt.base.resourceBaseURL = command["userAgentRootURL"];
+    }
 	return adapt.task.newResult(true);
 };
 
@@ -231,13 +263,12 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 adapt.viewer.Viewer.prototype.showPage = function() {
     if (this.newPage) {
 	    if (this.currentPage) {
-	        this.viewport.root.removeChild(this.currentPage.container);
-	    }
-	    if (this.currentPage) {
+            adapt.base.setCSSProperty(this.currentPage.container, "display", "none");
 	    	this.currentPage.removeEventListener("hyperlink", this.hyperlinkListener, false);
 	    }
 	    this.currentPage = this.newPage;
     	adapt.base.setCSSProperty(this.newPage.container, "visibility", "visible");
+        adapt.base.setCSSProperty(this.newPage.container, "display", "block");
 	    this.newPage = null;
     }
 };
@@ -299,6 +330,7 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
 adapt.viewer.Viewer.prototype.reset = function() {
 	if (this.opfView) {
 		this.opfView.hideTOC();
+        this.opfView.removeRenderedPages();
 	}
 	this.viewport = this.createViewport();
     this.opfView = new adapt.epub.OPFView(this.opf, this.viewport, this.fontMapper, this.pref);
@@ -327,11 +359,17 @@ adapt.viewer.Viewer.prototype.resize = function() {
 		self.pagePosition = self.opfView.getPagePosition();
 	}
 	self.reset();
-	self.opfView.setPagePosition(self.pagePosition).then(function(page) {
-		self.setNewPage(page);
-		self.showPage();
-		self.reportPosition().thenFinish(frame);
-	});
+
+    // With renderAllPages option specified, the rendering is performed after the initial page display,
+    // otherwise users are forced to wait the rendering finish in front of a blank page.
+    self.opfView.setPagePosition(self.pagePosition).then(function(page) {
+        self.setNewPage(page);
+        self.showPage();
+        self.reportPosition().then(function(p) {
+            var r = self.pref.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
+            r.then(function() { frame.finish(p); })
+        })
+    });
 	return frame.result();
 };
 

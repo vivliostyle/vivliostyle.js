@@ -50,7 +50,6 @@ adapt.base.stripFragmentAndQuery = function(url) {
 /**
  * Base URL relative to which URLs of resources such as validation.txt and
  * user-agent.css are resolved.
- * @const
  */
 adapt.base.resourceBaseURL = window.location.href;
 
@@ -69,6 +68,12 @@ adapt.base.resolveURL = function(relURL, baseURL) {
     if (baseURL.match(/^\w{2,}:\/\/[^\/]+$/))
         baseURL = baseURL + '/';
     /** @type {Array.<string>} */ var r;
+    if (relURL.match(/^\/\//)) {
+        r = baseURL.match(/^(\w{2,}:)\/\//);
+        if (r)
+        return r[1] + relURL;
+        return relURL;
+    }
     if (relURL.match(/^\//)) {
         r = baseURL.match(/^(\w{2,}:\/\/[^\/]+)\//);
         if (r)
@@ -112,7 +117,8 @@ adapt.base.NS = {
 	SHADOW: "http://www.pyroxy.com/ns/shadow",
 	SVG: "http://www.w3.org/2000/svg",
 	DC: "http://purl.org/dc/elements/1.1/",
-	NCX: "http://www.daisy.org/z3986/2005/ncx/"
+	NCX: "http://www.daisy.org/z3986/2005/ncx/",
+    SSE: "http://example.com/sse" // temporary dummy namespace
 };
 
 
@@ -310,7 +316,8 @@ adapt.base.makePropNameMap = function(list) {
 adapt.base.propNameMap = adapt.base.makePropNameMap([
 	"transform", "transform-origin", "hyphens", "writing-mode",
 	"column-count", "column-width", "column-rule-color",
-	"column-rule-style", "column-rule-width"
+	"column-rule-style", "column-rule-width",
+    "text-combine", "text-emphasis-style"
 ]);
 
 

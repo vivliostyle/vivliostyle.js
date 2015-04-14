@@ -432,10 +432,10 @@ adapt.csscasc.InheritanceVisitor.prototype.setPropName = function(name) {
 adapt.csscasc.InheritanceVisitor.prototype.getFontSize = function() {
 	var cascval = adapt.csscasc.getProp(this.props, "font-size");
 	var n = /** @type {adapt.css.Numeric} */ (cascval.value);
-	if (n.unit != "px") {
+	if (!adapt.expr.isAbsoluteLengthUnit(n.unit)) {
 		throw new Error("Unexpected state");
 	}
-	return n.num;
+    return n.num * adapt.expr.defaultUnitSizes[n.unit];
 };
 
 /**
@@ -446,6 +446,9 @@ adapt.csscasc.InheritanceVisitor.prototype.visitNumeric = function(numeric) {
 		var ratio = this.context.queryUnitSize(numeric.unit) / this.context.queryUnitSize("em");
 		return new adapt.css.Numeric(numeric.num * ratio * this.getFontSize(), "px");
 	} else if (numeric.unit == "%") {
+        if (this.propName === "font-size") {
+            return new adapt.css.Numeric(numeric.num / 100 * this.getFontSize(), "px");
+        }
 		var unit = this.propName.match(/height|^(top|bottom)$/) ? "vh" : "vw";
 		return new adapt.css.Numeric(numeric.num, unit);
 	}

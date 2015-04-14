@@ -1772,17 +1772,13 @@ adapt.cssvalid.ValidatorSet.prototype.readNameAndPrefixes = function(tok, sectio
         // Finished normally
         return null;
     }
-    /** @type {Object.<string,boolean>} */ var rulePrefixes = null;
+    /** @type {!Object.<string,boolean>} */ var rulePrefixes = {"": true};
     if (token.type == adapt.csstok.TokenType.O_BRK) {
-        rulePrefixes = null;
         do {
             tok.consume();
             token = tok.token();
             if (token.type != adapt.csstok.TokenType.IDENT)
                 throw new Error("Prefix name expected");
-            if (!rulePrefixes) {
-                rulePrefixes = {};
-            }
             rulePrefixes[token.text] = true;
             tok.consume();
             token = tok.token();
@@ -1806,7 +1802,7 @@ adapt.cssvalid.ValidatorSet.prototype.readNameAndPrefixes = function(tok, sectio
             throw new Error("'=' expected");
         }
         if (!this.isBuiltIn(name)) {
-            this.prefixes[name] = rulePrefixes || { "": true };
+            this.prefixes[name] = rulePrefixes;
         }
     } else {
         if (tok.token().type != adapt.csstok.TokenType.COLON) {
