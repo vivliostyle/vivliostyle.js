@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+- '0.10'
+script:
+- npm run build
+after_success:
+- build/deploy.sh
+notifications:
+  email: false
+  slack:
+    secure: DH3sFqTLcvEzWEqBFVCpPf0emfq/z84J73YwTpwB0MCfJ4IUxllSJAeGAXmJWuTistW9qUg8ZIvV6xqibLqropTMxeQ1N+lDy+Qppd0dRfmFJExiuQYgrpzYcFNYRPzBFt+IStXqzj4ELZN5RtXJVYu7qeoP7/JRQ/PFcnouYq4=
