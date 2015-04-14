@@ -35,6 +35,12 @@ CLOSURE_NO_DEPS = true;
 <script src="devel.js"></script>
 <script src="viewer.js"></script>
 <script src="vivliostyle-viewer.js"></script>
+<script>
+    if(window["__loaded"])
+        adapt.vivliostyle.main();
+    else
+        window.onload = adapt.vivliostyle.main;
+</script>
 <!--- install MathJax -->
 <script src="../MathJax/MathJax.js?config=MML_HTMLorMML"></script>
 <script>

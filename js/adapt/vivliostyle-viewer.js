@@ -222,8 +222,3 @@ adapt.vivliostyle.main = function() {
     window.addEventListener("touchmove", /** @type {Function} */ (adapt.vivliostyle.touch), false);
     window.addEventListener("touchend", /** @type {Function} */ (adapt.vivliostyle.touch), false);	
 };
-
-if(window["__loaded"])
-	adapt.vivliostyle.main();
-else
-    window.onload = adapt.vivliostyle.main;
