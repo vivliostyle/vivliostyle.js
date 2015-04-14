@@ -12,7 +12,7 @@ Please send them to
 
 ## Using the code in a web application
 
-(This instruction is an edited version of [README.txt on the original adaptive-layout project](https://github.com/sorotokin/adaptive-layout/blob/deaf2e65b9726dd4e58b3a5d3d90e0968bb63792/README.txt)
+(This instruction is an edited version of [README.txt on the original adaptive-layout project](https://github.com/sorotokin/adaptive-layout/blob/deaf2e65b9726dd4e58b3a5d3d90e0968bb63792/README.txt))
 
 ### Running sample JavaScript web app without JavaScript compilation
 
