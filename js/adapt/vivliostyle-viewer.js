@@ -149,6 +149,7 @@ adapt.vivliostyle.callback = function(msg) {
  * @return {void}
  */
 function setViewportSize(width, height, size, orientation, config) {
+    var pageSpec;
     if (!width || !height) {
         switch (size) {
             case "A5":
@@ -158,6 +159,10 @@ function setViewportSize(width, height, size, orientation, config) {
             case "A4":
                 width = "210mm";
                 height = "297mm";
+                break;
+            case "A3":
+                width = "297mm";
+                height = "420mm";
                 break;
             case "B5":
                 width = "176mm";
@@ -180,15 +185,25 @@ function setViewportSize(width, height, size, orientation, config) {
                 height = "17in";
                 break;
         }
-        if (orientation === "landscape") {
-            // swap
-            var tmp = width;
-            width = height;
-            height = tmp;
+        if (width && height) {
+            pageSpec = size;
+            if (orientation === "landscape") {
+                pageSpec = pageSpec ? pageSpec + " landscape" : null;
+                // swap
+                var tmp = width;
+                width = height;
+                height = tmp;
+            }
         }
+    } else {
+        pageSpec = width + " " + height;
     }
+
     if (width && height) {
         config.viewport = {"width": width, "height": height};
+        var s = document.createElement("style");
+        s.textContent = "@page { size: " + pageSpec + "; margin: 0; }";
+        document.head.appendChild(s);
     }
 }
 
