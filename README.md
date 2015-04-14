@@ -7,7 +7,7 @@ Vivliostyle.js is implemented based on [Peter Sorotokin's EPUB Adaptive Layout i
 
 Please send them to
 
-- [GitHub Issues](https://github.com/vivliostyle/vivliostyle.js.experimental/issues)
+- [GitHub Issues](https://github.com/vivliostyle/vivliostyle.js/issues)
 - Mailing list ([Japanese](https://groups.google.com/forum/?hl=ja#!forum/vivliostyle-ja))
 
 ## Using the code in a web application
