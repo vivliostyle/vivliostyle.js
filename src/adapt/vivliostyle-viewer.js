@@ -243,3 +243,5 @@ adapt.vivliostyle.main = function(arg) {
     window.addEventListener("touchmove", /** @type {Function} */ (adapt.vivliostyle.touch), false);
     window.addEventListener("touchend", /** @type {Function} */ (adapt.vivliostyle.touch), false);	
 };
+
+goog.exportSymbol("adapt.vivliostyle.main", adapt.vivliostyle.main);
