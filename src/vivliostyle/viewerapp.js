@@ -3,23 +3,23 @@
  * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Vivliostyle page viewer base on adapt.sampleapp
  */
-goog.provide('adapt.vivliostyle');
+goog.provide('vivliostyle.viewerapp');
 
 goog.require('adapt.base');
 goog.require('adapt.viewer');
 
-/** @type {number} */ adapt.vivliostyle.fontSize = 16;
-/** @type {boolean} */ adapt.vivliostyle.touchActive = false;
-/** @type {number} */ adapt.vivliostyle.touchX = 0;
-/** @type {number} */ adapt.vivliostyle.touchY = 0;
-/** @type {boolean} */ adapt.vivliostyle.zoomActive = false;
-/** @type {number} */ adapt.vivliostyle.pinchDist = 0;
+/** @type {number} */ vivliostyle.viewerapp.fontSize = 16;
+/** @type {boolean} */ vivliostyle.viewerapp.touchActive = false;
+/** @type {number} */ vivliostyle.viewerapp.touchX = 0;
+/** @type {number} */ vivliostyle.viewerapp.touchY = 0;
+/** @type {boolean} */ vivliostyle.viewerapp.zoomActive = false;
+/** @type {number} */ vivliostyle.viewerapp.pinchDist = 0;
 
 
 /**
  * @param {adapt.base.JSON} cmd
  */
-adapt.vivliostyle.sendCommand = function(cmd) {
+vivliostyle.viewerapp.sendCommand = function(cmd) {
 	window["adapt_command"](cmd);
 };
 
@@ -27,22 +27,22 @@ adapt.vivliostyle.sendCommand = function(cmd) {
  * @param {KeyboardEvent} evt
  * @return {void}
  */
-adapt.vivliostyle.keydown = function(evt) {
+vivliostyle.viewerapp.keydown = function(evt) {
     switch (evt.keyCode) {
     case 35:  // end
-    	adapt.vivliostyle.sendCommand({"a": "moveTo", "where": "last"});
+    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "last"});
     	break;
     case 36:  // home
-    	adapt.vivliostyle.sendCommand({"a": "moveTo", "where": "first"});
+    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "first"});
     	break;
     case 39:  // right arrow
-    	adapt.vivliostyle.sendCommand({"a": "moveTo", "where": "next"});
+    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "next"});
         break;
     case 37:  // left arrow
-    	adapt.vivliostyle.sendCommand({"a": "moveTo", "where": "previous"});
+    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "previous"});
         break;
     case 48:  // zero
-    	adapt.vivliostyle.sendCommand({"a": "configure", "fontSize": Math.round(adapt.vivliostyle.fontSize)});
+    	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
     	break;
     	/*
     case 78:  // N - night toggle
@@ -57,15 +57,15 @@ adapt.vivliostyle.keydown = function(evt) {
     	break;
     	*/
     case 84: // 'T' - show TOC
-    	adapt.vivliostyle.sendCommand({"a": "toc", "v": "toggle", "autohide": true});
+    	vivliostyle.viewerapp.sendCommand({"a": "toc", "v": "toggle", "autohide": true});
     	break;    	
     case 187:  // plus
-    	adapt.vivliostyle.fontSize *= 1.2;
-    	adapt.vivliostyle.sendCommand({"a": "configure", "fontSize": Math.round(adapt.vivliostyle.fontSize)});
+    	vivliostyle.viewerapp.fontSize *= 1.2;
+    	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
     	break;
     case 189:  // minus
-    	adapt.vivliostyle.fontSize /= 1.2;
-    	adapt.vivliostyle.sendCommand({"a": "configure", "fontSize": Math.round(adapt.vivliostyle.fontSize)});
+    	vivliostyle.viewerapp.fontSize /= 1.2;
+    	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
     	break;
     }
 };
@@ -74,7 +74,7 @@ adapt.vivliostyle.keydown = function(evt) {
  * @param {TouchEvent} evt
  * @return {void}
  */
-adapt.vivliostyle.touch = function(evt) {
+vivliostyle.viewerapp.touch = function(evt) {
 	if (evt.type == "touchmove") {
 		evt.preventDefault();
 	}
@@ -82,21 +82,21 @@ adapt.vivliostyle.touch = function(evt) {
 		var x = evt.touches[0].pageX;
 		var y = evt.touches[0].pageY;
 		if (evt.type == "touchstart") {
-			adapt.vivliostyle.touchActive = true;
-			adapt.vivliostyle.touchX = x;
-			adapt.vivliostyle.touchY = y;
-		} else if (adapt.vivliostyle.touchActive) {
-			var dx = x - adapt.vivliostyle.touchX;
-			var dy = y - adapt.vivliostyle.touchY;
+			vivliostyle.viewerapp.touchActive = true;
+			vivliostyle.viewerapp.touchX = x;
+			vivliostyle.viewerapp.touchY = y;
+		} else if (vivliostyle.viewerapp.touchActive) {
+			var dx = x - vivliostyle.viewerapp.touchX;
+			var dy = y - vivliostyle.viewerapp.touchY;
 			if (evt.type == "touchend") {
-				adapt.vivliostyle.touchActive = false;
+				vivliostyle.viewerapp.touchActive = false;
 			}
 			if (Math.abs(dy) < 0.5 * Math.abs(dx) && Math.abs(dx) > 15) {
-				adapt.vivliostyle.touchActive = false;
+				vivliostyle.viewerapp.touchActive = false;
 				if (dx > 0) {
-			    	adapt.vivliostyle.sendCommand({"a": "moveTo", "where": "previous"});					
+			    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "previous"});					
 				} else {
-			    	adapt.vivliostyle.sendCommand({"a": "moveTo", "where": "next"});
+			    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "next"});
 				}
 			}
 		}
@@ -105,25 +105,25 @@ adapt.vivliostyle.touch = function(evt) {
 		var py = evt.touches[0].pageY - evt.touches[1].pageY;
 		var pinchDist = Math.sqrt(px*px + py*py);
 		if (evt.type == "touchstart") {
-			adapt.vivliostyle.zoomActive = true;
-			adapt.vivliostyle.zoomDist = pinchDist;
-		} else if (adapt.vivliostyle.zoomActive) {
+			vivliostyle.viewerapp.zoomActive = true;
+			vivliostyle.viewerapp.zoomDist = pinchDist;
+		} else if (vivliostyle.viewerapp.zoomActive) {
 			if (evt.type == "touchend") {
-				adapt.vivliostyle.zoomActive = false;
+				vivliostyle.viewerapp.zoomActive = false;
 			}
-			var scale = pinchDist / adapt.vivliostyle.zoomDist;
+			var scale = pinchDist / vivliostyle.viewerapp.zoomDist;
 			if (scale > 1.5) {
-		    	adapt.vivliostyle.fontSize *= 1.2;
-		    	adapt.vivliostyle.sendCommand({"a": "configure", "fontSize": Math.round(adapt.vivliostyle.fontSize)});
+		    	vivliostyle.viewerapp.fontSize *= 1.2;
+		    	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
 			} else if (scale < 1/1.5) {
-		    	adapt.vivliostyle.fontSize *= 1.2;
-		    	adapt.vivliostyle.sendCommand({"a": "configure", "fontSize": Math.round(adapt.vivliostyle.fontSize)});
+		    	vivliostyle.viewerapp.fontSize *= 1.2;
+		    	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
 			}
 		}
 	}
 };
 
-adapt.vivliostyle.callback = function(msg) {
+vivliostyle.viewerapp.callback = function(msg) {
 	switch (msg["t"]) {
 	case "error" :
 		adapt.base.log("Error: " + msg["content"]);
@@ -137,7 +137,7 @@ adapt.vivliostyle.callback = function(msg) {
 		break;
 	case "hyperlink" :
 		if (msg["internal"]) {
-	    	adapt.vivliostyle.sendCommand({"a": "moveTo", "url": msg["href"]});			
+	    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "url": msg["href"]});			
 		}
 	}
 };
@@ -212,7 +212,7 @@ function setViewportSize(width, height, size, orientation, config) {
 /**
  * @return {void}
  */
-adapt.vivliostyle.main = function(arg) {
+vivliostyle.viewerapp.main = function(arg) {
     var fragment = (arg && arg.fragment) || adapt.base.getURLParam("f");
     var epubURL = (arg && arg.epubURL) || adapt.base.getURLParam("b");
     var xmlURL = (arg && arg.xmlURL) || adapt.base.getURLParam("x");
@@ -222,7 +222,7 @@ adapt.vivliostyle.main = function(arg) {
     var orientation = (arg && arg.orientation) || adapt.base.getURLParam("orientation");
     var uaRoot = (arg && arg.uaRoot) || null;
     var doc = (arg && arg.document) || null;
-	var viewer = new adapt.viewer.Viewer(window, "main", adapt.vivliostyle.callback);
+	var viewer = new adapt.viewer.Viewer(window, "main", vivliostyle.viewerapp.callback);
 
     var config = {
         "autoresize": true,
@@ -238,10 +238,10 @@ adapt.vivliostyle.main = function(arg) {
 
     viewer.initEmbed(config);
 
-    window.addEventListener("keydown", /** @type {Function} */ (adapt.vivliostyle.keydown), false);
-    window.addEventListener("touchstart", /** @type {Function} */ (adapt.vivliostyle.touch), false);
-    window.addEventListener("touchmove", /** @type {Function} */ (adapt.vivliostyle.touch), false);
-    window.addEventListener("touchend", /** @type {Function} */ (adapt.vivliostyle.touch), false);	
+    window.addEventListener("keydown", /** @type {Function} */ (vivliostyle.viewerapp.keydown), false);
+    window.addEventListener("touchstart", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+    window.addEventListener("touchmove", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+    window.addEventListener("touchend", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);	
 };
 
-goog.exportSymbol("adapt.vivliostyle.main", adapt.vivliostyle.main);
+goog.exportSymbol("vivliostyle.viewerapp.main", vivliostyle.viewerapp.main);
