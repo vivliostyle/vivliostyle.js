@@ -1,7 +1,7 @@
 # Vivliostyle.js
 
 JavaScript library for web sites with rich paged viewing and EPUB support, shared with Vivliostyle Formatter & Browser.
-Vivliostyle.js is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout).
+Vivliostyle.js is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout) (licensed under Apache License 2.0).
 
 ## Bug reports & feature requests
 
