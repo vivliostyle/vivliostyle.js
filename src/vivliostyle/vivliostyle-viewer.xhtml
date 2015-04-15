@@ -37,10 +37,11 @@ CLOSURE_NO_DEPS = true;
 <script src="../adapt/viewer.js"></script>
 <script src="viewerapp.js"></script>
 <script>
+    var config = {uaRoot: "../adapt/"};
     if(window["__loaded"])
-        vivliostyle.viewerapp.main();
+        vivliostyle.viewerapp.main(config);
     else
-        window.onload = vivliostyle.viewerapp.main;
+        window.onload = vivliostyle.viewerapp.main.bind(null, config);
 </script>
 <!--- install MathJax -->
 <script src="../MathJax/MathJax.js?config=MML_HTMLorMML"></script>
