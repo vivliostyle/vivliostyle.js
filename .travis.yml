@@ -8,4 +8,4 @@ after_success:
 notifications:
   email: false
   slack:
-    secure: DH3sFqTLcvEzWEqBFVCpPf0emfq/z84J73YwTpwB0MCfJ4IUxllSJAeGAXmJWuTistW9qUg8ZIvV6xqibLqropTMxeQ1N+lDy+Qppd0dRfmFJExiuQYgrpzYcFNYRPzBFt+IStXqzj4ELZN5RtXJVYu7qeoP7/JRQ/PFcnouYq4=
+    secure: KMZdV6pnRPqcqxeZ0bHBM/4GXhBiJUPmONHWlrnCYaKnJyOvpBNHeL8ubdIKkYgc5X9LsHG7k5LGyfiRbmt/o1majMje/+Gadorb9DRJQ15ZbtPBllwOeLiFnr6WykSf7UbDnY5XgmD/eNRwU1KYSC+PvAJ53LlQy53BvZc7hcU=
