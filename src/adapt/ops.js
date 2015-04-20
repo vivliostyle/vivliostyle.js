@@ -20,6 +20,7 @@ goog.require('adapt.layout');
 goog.require('adapt.vgen');
 goog.require('adapt.xmldoc');
 goog.require('adapt.font');
+goog.require('vivliostyle.page');
 
 /**
  * @typedef {{properties:adapt.csscasc.ElementStyle,condition:adapt.expr.Val}}
@@ -804,6 +805,16 @@ adapt.ops.BaseParserHandler.prototype.startFootnoteRule = function(pseudoelement
 adapt.ops.BaseParserHandler.prototype.startRegionRule = function() {
     this.insideRegion = true;
     this.startSelectorRule();
+};
+
+/**
+ * @override
+ */
+adapt.ops.BaseParserHandler.prototype.startPageRule = function() {
+    var pageHandler = new vivliostyle.page.PageParserHandler(this.masterHandler.pageScope,
+        this.masterHandler, this.validatorSet);
+    this.masterHandler.pushHandler(pageHandler);
+    pageHandler.startSelectorRule();
 };
 
 /**

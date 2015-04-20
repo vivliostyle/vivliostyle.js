@@ -1715,6 +1715,7 @@ adapt.csscasc.Cascade = function() {
     /** @type {!adapt.csscasc.ActionTable} */ this.epubtypes = {};
     /** @type {!adapt.csscasc.ActionTable} */ this.classes = {};
     /** @type {!adapt.csscasc.ActionTable} */ this.ids = {};
+    /** @type {!adapt.csscasc.ActionTable} */ this.pagetypes = {};
     /** @type {number} */ this.order = 0;
 };
 
@@ -1732,6 +1733,7 @@ adapt.csscasc.Cascade.prototype.clone = function() {
 	adapt.csscasc.copyTable(this.epubtypes, r.epubtypes);
 	adapt.csscasc.copyTable(this.classes, r.classes);
 	adapt.csscasc.copyTable(this.ids, r.ids);
+    adapt.csscasc.copyTable(this.pagetypes, r.pagetypes);
 	r.order = this.order;
 	return r;
 };
@@ -1785,6 +1787,7 @@ adapt.csscasc.CascadeInstance = function(cascade, context, lang) {
     /** @type {string} */ this.currentXmlId = "";
     /** @type {string} */ this.currentNSTag = "";
     /** @type {Array.<string>} */ this.currentEpubTypes = null;
+    /** @type {?string} */ this.currentPageType = null;
     /** @type {boolean} */ this.isFirst = true;
     /** @type {Object.<string,Array.<number>>} */ this.counters = {};
     /** @type {Array.<Object.<string,boolean>>} */ this.counterScoping = [{}];
@@ -1983,6 +1986,8 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
 	if (goog.DEBUG) {
 		this.elementStack.push(element);
 	}
+    // do not apply page rules
+    this.currentPageType = null;
     this.currentElement = element;
     this.currentStyle = baseStyle;
     this.currentNamespace = element.namespaceURI;
@@ -2080,6 +2085,12 @@ adapt.csscasc.CascadeInstance.prototype.applyActions = function() {
     	this.applyAction(this.code.tags, "*");
     }
     this.applyAction(this.code.nstags, this.currentNSTag);
+    // Apply page rules only when currentPageType is not null
+    if (this.currentPageType !== null) {
+        this.applyAction(this.code.pagetypes, this.currentPageType);
+        // We represent page rules without selectors by *, though it is illegal in CSS
+        this.applyAction(this.code.pagetypes, "*");
+    }
     this.currentElement = null;
     this.currentDoc = null;
     this.stack.push([]);
@@ -2190,6 +2201,15 @@ adapt.csscasc.CascadeParserHandler = function(scope, owner, condition, parent, r
 goog.inherits(adapt.csscasc.CascadeParserHandler, adapt.cssparse.SlaveParserHandler);
 
 /**
+ * @protected
+ * @param {adapt.csscasc.CascadeAction} action
+ * @return {void}
+ */
+adapt.csscasc.CascadeParserHandler.prototype.insertNonPrimary = function(action) {
+    this.cascade.insertInTable(this.cascade.tags, "*", action);
+};
+
+/**
  * @param {adapt.csscasc.CascadeAction} action
  * @return {void}
  */
@@ -2214,7 +2234,7 @@ adapt.csscasc.CascadeParserHandler.prototype.processChain = function(action) {
         if (chained.makePrimary(this.cascade))
             return;
     }
-    this.cascade.insertInTable(this.cascade.tags, "*", action);
+    this.insertNonPrimary(action);
 };
 
 /**
