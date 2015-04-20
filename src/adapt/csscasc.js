@@ -1842,10 +1842,11 @@ adapt.csscasc.EMPTY = [];
 
 /**
  * @param {Array.<string>} classes
+ * @param {?string} pageType
  * @param {adapt.csscasc.ElementStyle} baseStyle
  * @return {void}
  */
-adapt.csscasc.CascadeInstance.prototype.pushRule = function(classes, baseStyle) {
+adapt.csscasc.CascadeInstance.prototype.pushRule = function(classes, pageType, baseStyle) {
     this.currentElement = null;
     this.currentStyle = baseStyle;
     this.currentNamespace = "";
@@ -1855,6 +1856,7 @@ adapt.csscasc.CascadeInstance.prototype.pushRule = function(classes, baseStyle) 
     this.currentClassNames = classes;
     this.currentNSTag = "";
     this.currentEpubTypes = adapt.csscasc.EMPTY;
+    this.currentPageType = pageType;
     this.applyActions();
 };
 

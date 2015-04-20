@@ -132,6 +132,7 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @const */ this.fontMapper = fontMapper;
     /** @const */ this.faces = new adapt.font.DocumentFaces(this.style.fontDeobfuscator);
     /** @type {Object.<string,adapt.pm.PageBoxInstance>} */ this.pageBoxInstances = {};
+    /** @type {vivliostyle.page.PageManager} */ this.pageManager = null;
     /** @type {boolean} */ this.regionBreak = false;
     /** @type {!Object.<string,boolean>} */ this.pageBreaks = {};
     /** @const */ this.customRenderer = customRenderer;
@@ -169,6 +170,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     var cascadeInstance = this.style.cascade.createInstance(self, this.lang);
     this.rootPageBoxInstance.applyCascadeAndInit(cascadeInstance, docElementStyle);
     this.rootPageBoxInstance.resolveAutoSizing(self);
+    this.pageManager = new vivliostyle.page.PageManager(cascadeInstance, rootBox.scope, self, docElementStyle);
     var srcFaces = /** @type {Array.<adapt.font.Face>} */ ([]);
     for (var i = 0; i < self.style.fontFaces.length; i++) {
     	var fontFace = self.style.fontFaces[i++];
@@ -678,6 +680,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     	// end of primary content
     	return adapt.task.newResult(/** @type {adapt.vtree.LayoutPosition}*/ (null));
     }
+    pageMaster = this.pageManager.getPageRuleAppliedPageMaster(pageMaster);
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
     	= adapt.task.newFrame("layoutNextPage");
     self.layoutContainer(page, pageMaster, page.container, 0, 0, []).then(function() {
@@ -812,7 +815,7 @@ adapt.ops.BaseParserHandler.prototype.startRegionRule = function() {
  */
 adapt.ops.BaseParserHandler.prototype.startPageRule = function() {
     var pageHandler = new vivliostyle.page.PageParserHandler(this.masterHandler.pageScope,
-        this.masterHandler, this.validatorSet);
+        this.masterHandler, this, this.validatorSet);
     this.masterHandler.pushHandler(pageHandler);
     pageHandler.startSelectorRule();
 };

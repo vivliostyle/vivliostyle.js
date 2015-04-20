@@ -880,6 +880,7 @@ adapt.css.ident = {
     hidden: adapt.css.getName("hidden"),
     inherit: adapt.css.getName("inherit"),
     inline: adapt.css.getName("inline"),
+    landscape: adapt.css.getName("landscape"),
     left: adapt.css.getName("left"),
     list_item: adapt.css.getName("list-item"),
     none: adapt.css.getName("none"),
@@ -905,13 +906,13 @@ adapt.css.hundredPercent = new adapt.css.Numeric(100, "%");
 
 /**
  * @const
- * @type {adapt.css.Numeric}
+ * @type {!adapt.css.Numeric}
  */
 adapt.css.fullWidth = new adapt.css.Numeric(100, "vw");
 
 /**
  * @const
- * @type {adapt.css.Numeric}
+ * @type {!adapt.css.Numeric}
  */
 adapt.css.fullHeight = new adapt.css.Numeric(100, "vh");
 

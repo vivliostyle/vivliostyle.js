@@ -1224,7 +1224,7 @@ adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit = function(cascade, docEl
 			}
 		}
 	}
-	cascade.pushRule(this.pageBox.classes, style);
+	cascade.pushRule(this.pageBox.classes, null, style);
 	this.init(cascade.context);
 	for (var i = 0; i < this.pageBox.children.length ; i++) {
 		var child = this.pageBox.children[i];
