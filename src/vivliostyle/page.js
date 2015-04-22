@@ -111,6 +111,7 @@ vivliostyle.page.PageRuleMaster = function(scope, parent, style) {
     /** @const @private */ this.style = style;
     var partition = new vivliostyle.page.PageRulePartition(this.scope, this, style);
     /** @const @private */ this.bodyPartitionKey = partition.key;
+    this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.relative, 0);
 };
 goog.inherits(vivliostyle.page.PageRuleMaster, adapt.pm.PageMaster);
 
@@ -251,8 +252,12 @@ vivliostyle.page.PageRuleMasterInstance.prototype.adjustContainingBlock = functi
     var partitionInstance = holder.lookupInstance(this.pageBox.bodyPartitionKey);
 
     var style = this.style;
-    style["width"] = new adapt.css.Expr(partitionInstance.fullWidth);
-    style["height"] = new adapt.css.Expr(partitionInstance.fullHeight);
+    style["width"] = new adapt.css.Expr(partitionInstance.borderBoxWidth);
+    style["height"] = new adapt.css.Expr(partitionInstance.borderBoxHeight);
+    style["padding-left"] = new adapt.css.Expr(partitionInstance.marginLeft);
+    style["padding-right"] = new adapt.css.Expr(partitionInstance.marginRight);
+    style["padding-top"] = new adapt.css.Expr(partitionInstance.marginTop);
+    style["padding-bottom"] = new adapt.css.Expr(partitionInstance.marginBottom);
 };
 
 /**
@@ -263,8 +268,12 @@ vivliostyle.page.PageRuleMasterInstance.prototype.adjustContainingBlock = functi
  */
 vivliostyle.page.PageRulePartitionInstance = function(parentInstance, pageRulePartition) {
     adapt.pm.PartitionInstance.call(this, parentInstance, pageRulePartition);
-    /** @type {adapt.expr.Val} */ this.fullWidth = null;
-    /** @type {adapt.expr.Val} */ this.fullHeight = null;
+    /** @type {adapt.expr.Val} */ this.borderBoxWidth = null;
+    /** @type {adapt.expr.Val} */ this.borderBoxHeight = null;
+    /** @type {adapt.expr.Val} */ this.marginTop = null;
+    /** @type {adapt.expr.Val} */ this.marginRight = null;
+    /** @type {adapt.expr.Val} */ this.marginBottom = null;
+    /** @type {adapt.expr.Val} */ this.marginLeft = null;
 };
 goog.inherits(vivliostyle.page.PageRulePartitionInstance, adapt.pm.PartitionInstance);
 
@@ -288,29 +297,36 @@ vivliostyle.page.PageRulePartitionInstance.prototype.applyCascadeAndInit = funct
  * @override
  */
 vivliostyle.page.PageRulePartitionInstance.prototype.initHorizontal = function() {
-    this.fullWidth = this.resolvePageBoxDimensions({
+    var dim = this.resolvePageBoxDimensions({
         start: "left",
         end: "right",
         extent: "width"
     });
+    this.borderBoxWidth = dim.borderBoxExtent;
+    this.marginLeft = dim.marginStart;
+    this.marginRight = dim.marginEnd;
 };
 
 /**
  * @override
  */
 vivliostyle.page.PageRulePartitionInstance.prototype.initVertical = function() {
-    this.fullHeight = this.resolvePageBoxDimensions({
+    var dim = this.resolvePageBoxDimensions({
         start: "top",
         end: "bottom",
         extent: "height"
     });
+    this.borderBoxHeight = dim.borderBoxExtent;
+    this.marginTop = dim.marginStart;
+    this.marginBottom = dim.marginEnd;
 };
 
 /**
  * Calculate page dimensions as specified in CSS Paged Media (http://dev.w3.org/csswg/css-page/#page-model)
  * @private
  * @param {!{start: string, end: string, extent: string}} names
- * @return {!adapt.expr.Val} Full page extent. Since the containing block can be resized in the over-constrained case, this value is not necessarily same to the original page dimension specified in the page at-rules.
+ * @return {{borderBoxExtent: adapt.expr.Val, marginStart: adapt.expr.Val, marginEnd: adapt.expr.Val}}
+ *         Page border box extent and margins. Since the containing block can be resized in the over-constrained case, the sum of these values is not necessarily same to the original page dimension specified in the page at-rules.
  */
 vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = function(names) {
     var style = this.style;
@@ -358,8 +374,8 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
 
     style[startSide] = adapt.css.numericZero;
     style[endSide] = adapt.css.numericZero;
-    style["margin-" + startSide] = new adapt.css.Expr(marginStart);
-    style["margin-" + endSide] = new adapt.css.Expr(marginEnd);
+    style["margin-" + startSide] = adapt.css.numericZero;
+    style["margin-" + endSide] = adapt.css.numericZero;
     style["padding-" + startSide] = new adapt.css.Expr(paddingStart);
     style["padding-" + endSide] = new adapt.css.Expr(paddingEnd);
     style["border-" + startSide + "-width"] = new adapt.css.Expr(borderStartWidth);
@@ -367,7 +383,11 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
     style[extentName] = new adapt.css.Expr(extent);
     style["max-" + extentName] = new adapt.css.Expr(extent);
 
-    return pageExtent;
+    return {
+        borderBoxExtent: adapt.expr.sub(scope, pageExtent, adapt.expr.add(scope, marginStart, marginEnd)),
+        marginStart: marginStart,
+        marginEnd: marginEnd
+    };
 };
 
 /**

@@ -460,7 +460,8 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     	: boxInstance.isAutoHeight && boxInstance.isTopDependentOnAutoHeight;
     var flowName = boxInstance.getProp(self, "flow-from");
     var boxContainer = self.viewport.document.createElement("div");
-    adapt.base.setCSSProperty(boxContainer, "position", "absolute");
+    var position = boxInstance.getProp(self, "position");
+    adapt.base.setCSSProperty(boxContainer, "position", position ? position.name : "absolute");
     parentContainer.insertBefore(boxContainer, parentContainer.firstChild);
     var layoutContainer = new adapt.vtree.Container(boxContainer);
     layoutContainer.vertical = boxInstance.vertical;
