@@ -196,6 +196,16 @@ goog.inherits(vivliostyle.page.PageRuleMasterInstance, adapt.pm.PageMasterInstan
 /**
  * @override
  */
+vivliostyle.page.PageRuleMasterInstance.prototype.applyCascadeAndInit = function(cascade, docElementStyle) {
+    var style = this.cascaded;
+    style["writing-mode"] = docElementStyle["writing-mode"];
+
+    adapt.pm.PageMasterInstance.prototype.applyCascadeAndInit.call(this, cascade, docElementStyle);
+};
+
+/**
+ * @override
+ */
 vivliostyle.page.PageRuleMasterInstance.prototype.initHorizontal = function() {
     var style = this.style;
     style["left"] = adapt.css.numericZero;
@@ -248,6 +258,22 @@ vivliostyle.page.PageRulePartitionInstance = function(parentInstance, pageRulePa
     /** @type {adapt.expr.Val} */ this.fullHeight = null;
 };
 goog.inherits(vivliostyle.page.PageRulePartitionInstance, adapt.pm.PartitionInstance);
+
+/**
+ * @override
+ */
+vivliostyle.page.PageRulePartitionInstance.prototype.applyCascadeAndInit = function(cascade, docElementStyle) {
+    var style = this.cascaded;
+    for (var name in docElementStyle) {
+        if (Object.prototype.hasOwnProperty.call(docElementStyle, name)) {
+            if (name.match(/^column.*$/)) {
+                style[name] = docElementStyle[name];
+            }
+        }
+    }
+
+    adapt.pm.PartitionInstance.prototype.applyCascadeAndInit.call(this, cascade, docElementStyle);
+};
 
 /**
  * @override
