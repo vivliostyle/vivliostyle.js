@@ -170,7 +170,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     var cascadeInstance = this.style.cascade.createInstance(self, this.lang);
     this.rootPageBoxInstance.applyCascadeAndInit(cascadeInstance, docElementStyle);
     this.rootPageBoxInstance.resolveAutoSizing(self);
-    this.pageManager = new vivliostyle.page.PageManager(cascadeInstance, rootBox.scope, self, docElementStyle);
+    this.pageManager = new vivliostyle.page.PageManager(cascadeInstance, this.style.pageScope, this.rootPageBoxInstance, self, docElementStyle);
     var srcFaces = /** @type {Array.<adapt.font.Face>} */ ([]);
     for (var i = 0; i < self.style.fontFaces.length; i++) {
     	var fontFace = self.style.fontFaces[i++];
@@ -305,7 +305,6 @@ adapt.ops.StyleInstance.prototype.dumpLocation = function(position) {
 adapt.ops.StyleInstance.prototype.selectPageMaster = function() {
 	var self = this;
     var cp = this.currentLayoutPosition;
-    var pageMasters = /** @type {Array.<adapt.pm.PageMasterInstance>} */ (this.rootPageBoxInstance.children);
     // 3.5. Page Layout Processing Model
     // 1. Determine current position in the document: Find the minimal consumed-offset for all elements
     // not fully-consumed in each primary flow. Current position is maximum of the results among all
@@ -315,9 +314,18 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function() {
     	// end of primary content is reached
     	return null;
     }
+    // If there is a page master generated for @page rules, use it.
+    var pageMaster = this.pageManager.getPageRulePageMaster();
+    if (pageMaster) {
+        return pageMaster;
+    }
     // 2. Page master selection: for each page master:
+    var pageMasters = /** @type {Array.<adapt.pm.PageMasterInstance>} */ (this.rootPageBoxInstance.children);
     for (var i = 0; i < pageMasters.length; i++) {
-        var pageMaster = pageMasters[i];
+        pageMaster = pageMasters[i];
+        // Skip a page master generated for @page rules
+        if (pageMaster.pageBox.pseudoName === vivliostyle.page.pageRuleMasterPseudoName)
+            continue;
         var coeff = 1;
         // A. Calculate lookup position using current position and utilization
         // (see -epubx-utilization property)
@@ -680,7 +688,6 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     	// end of primary content
     	return adapt.task.newResult(/** @type {adapt.vtree.LayoutPosition}*/ (null));
     }
-    pageMaster = this.pageManager.getPageRuleAppliedPageMaster(pageMaster);
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
     	= adapt.task.newFrame("layoutNextPage");
     self.layoutContainer(page, pageMaster, page.container, 0, 0, []).then(function() {

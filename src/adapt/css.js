@@ -916,6 +916,12 @@ adapt.css.fullWidth = new adapt.css.Numeric(100, "vw");
  */
 adapt.css.fullHeight = new adapt.css.Numeric(100, "vh");
 
+/**
+ * @const
+ * @type {!adapt.css.Numeric}
+ */
+adapt.css.numericZero = new adapt.css.Numeric(0, "px");
+
 adapt.css.processingOrder = {
 	"font-size": 1,
 	"color": 2

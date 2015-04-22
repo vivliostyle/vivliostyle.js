@@ -465,7 +465,7 @@ adapt.pm.PageBoxInstance.prototype.boxSpecificEnabled = function(enabled) {
 };
 
 /**
- * @private
+ * @protected
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
@@ -561,7 +561,7 @@ adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
 };
 
 /**
- * @private
+ * @protected
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.initVertical = function() {
