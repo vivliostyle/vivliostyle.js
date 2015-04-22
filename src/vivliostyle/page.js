@@ -198,7 +198,16 @@ goog.inherits(vivliostyle.page.PageRuleMasterInstance, adapt.pm.PageMasterInstan
  */
 vivliostyle.page.PageRuleMasterInstance.prototype.applyCascadeAndInit = function(cascade, docElementStyle) {
     var style = this.cascaded;
-    style["writing-mode"] = docElementStyle["writing-mode"];
+
+    for (var name in docElementStyle) {
+        if (Object.prototype.hasOwnProperty.call(docElementStyle, name)) {
+            switch (name) {
+                case "writing-mode":
+                case "direction":
+                    style[name] = docElementStyle[name];
+            }
+        }
+    }
 
     adapt.pm.PageMasterInstance.prototype.applyCascadeAndInit.call(this, cascade, docElementStyle);
 };
@@ -377,6 +386,50 @@ vivliostyle.page.PageManager = function(cascadeInstance, pageScope, rootPageBoxI
     /** @const @private */ this.context = context;
     /** @const @private */ this.docElementStyle = docElementStyle;
     /** @const @private */ this.pageMasterCache = /** @type {Object.<string, vivliostyle.page.PageRuleMasterInstance>} */ ({});
+    this.definePageProgression();
+};
+
+/**
+ * Determine the page progression and define left/right/recto/verso pages.
+ * @private
+ */
+vivliostyle.page.PageManager.prototype.definePageProgression = function() {
+    var docElementStyle = this.docElementStyle;
+    /** @type {adapt.css.Val} */ var writingMode;
+    /** @type {adapt.css.Val} */ var direction;
+    for (var name in docElementStyle) {
+        if (Object.prototype.hasOwnProperty.call(docElementStyle, name)) {
+            var cascVal = docElementStyle[name];
+            switch (name) {
+                case "writing-mode":
+                    writingMode = cascVal.value;
+                    break;
+                case "direction":
+                    direction = cascVal.value;
+                    break;
+            }
+        }
+    }
+    writingMode = writingMode || adapt.css.ident.horizontal_tb;
+    direction = direction || adapt.css.ident.ltr;
+
+    // TODO If a page break is forced before the root element, recto/verso pages are no longer odd/even pages. left/right are reversed too.
+    var scope = this.pageScope;
+    var pageNumber = new adapt.expr.Named(scope, "page-number");
+    var isEvenPage = new adapt.expr.Eq(scope,
+        new adapt.expr.Modulo(scope, pageNumber, new adapt.expr.Const(scope, 2)),
+        scope.zero
+    );
+    scope.defineName("recto-page", new adapt.expr.Not(scope, isEvenPage));
+    scope.defineName("verso-page", isEvenPage);
+    if (writingMode === adapt.css.ident.vertical_lr ||
+        (writingMode === adapt.css.ident.horizontal_tb && direction === adapt.css.ident.ltr)) {
+        scope.defineName("left-page", isEvenPage);
+        scope.defineName("right-page", new adapt.expr.Not(scope, isEvenPage));
+    } else {
+        scope.defineName("left-page", new adapt.expr.Not(scope, isEvenPage));
+        scope.defineName("right-page", isEvenPage);
+    }
 };
 
 /**
@@ -457,7 +510,7 @@ vivliostyle.page.CheckPageTypeAction.prototype.apply = function(cascadeInstance)
  * @override
  */
 vivliostyle.page.CheckPageTypeAction.prototype.getPriority = function() {
-    return 0;
+    return 3;
 };
 
 /**
@@ -468,6 +521,146 @@ vivliostyle.page.CheckPageTypeAction.prototype.makePrimary = function(cascade) {
         cascade.insertInTable(cascade.pagetypes, this.pageType, this.chained);
     }
     return true;
+};
+
+/**
+ * @param {adapt.expr.LexicalScope} scope
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+vivliostyle.page.IsFirstPageAction = function(scope) {
+    adapt.csscasc.ChainedAction.call(this);
+    /** @const */ this.scope = scope;
+};
+goog.inherits(vivliostyle.page.IsFirstPageAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+vivliostyle.page.IsFirstPageAction.prototype.apply = function(cascadeInstace) {
+    var pageNumber = new adapt.expr.Named(this.scope, "page-number");
+    if (pageNumber.evaluate(cascadeInstace.context) === 1) {
+        this.chained.apply(cascadeInstace);
+    }
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.IsFirstPageAction.prototype.getPriority = function() {
+    return 2;
+};
+
+/**
+ * @param {adapt.expr.LexicalScope} scope
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+vivliostyle.page.IsLeftPageAction = function(scope) {
+    adapt.csscasc.ChainedAction.call(this);
+    /** @const */ this.scope = scope;
+};
+goog.inherits(vivliostyle.page.IsLeftPageAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+vivliostyle.page.IsLeftPageAction.prototype.apply = function(cascadeInstace) {
+    var leftPage = new adapt.expr.Named(this.scope, "left-page");
+    if (leftPage.evaluate(cascadeInstace.context)) {
+        this.chained.apply(cascadeInstace);
+    }
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.IsLeftPageAction.prototype.getPriority = function() {
+    return 1;
+};
+
+/**
+ * @param {adapt.expr.LexicalScope} scope
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+vivliostyle.page.IsRightPageAction = function(scope) {
+    adapt.csscasc.ChainedAction.call(this);
+    /** @const */ this.scope = scope;
+};
+goog.inherits(vivliostyle.page.IsRightPageAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+vivliostyle.page.IsRightPageAction.prototype.apply = function(cascadeInstace) {
+    var rightPage = new adapt.expr.Named(this.scope, "right-page");
+    if (rightPage.evaluate(cascadeInstace.context)) {
+        this.chained.apply(cascadeInstace);
+    }
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.IsRightPageAction.prototype.getPriority = function() {
+    return 1;
+};
+
+/**
+ * @param {adapt.expr.LexicalScope} scope
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+vivliostyle.page.IsRectoPageAction = function(scope) {
+    adapt.csscasc.ChainedAction.call(this);
+    /** @const */ this.scope = scope;
+};
+goog.inherits(vivliostyle.page.IsRectoPageAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+vivliostyle.page.IsRectoPageAction.prototype.apply = function(cascadeInstace) {
+    var rectoPage = new adapt.expr.Named(this.scope, "recto-page");
+    if (rectoPage.evaluate(cascadeInstace.context)) {
+        this.chained.apply(cascadeInstace);
+    }
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.IsRectoPageAction.prototype.getPriority = function() {
+    return 1;
+};
+
+/**
+ * @param {adapt.expr.LexicalScope} scope
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+vivliostyle.page.IsVersoPageAction = function(scope) {
+    adapt.csscasc.ChainedAction.call(this);
+    /** @const */ this.scope = scope;
+};
+goog.inherits(vivliostyle.page.IsVersoPageAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+vivliostyle.page.IsVersoPageAction.prototype.apply = function(cascadeInstace) {
+    var versoPage = new adapt.expr.Named(this.scope, "verso-page");
+    if (versoPage.evaluate(cascadeInstace.context)) {
+        this.chained.apply(cascadeInstace);
+    }
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.IsVersoPageAction.prototype.getPriority = function() {
+    return 1;
 };
 
 /**
@@ -498,7 +691,34 @@ vivliostyle.page.PageParserHandler.prototype.tagSelector = function(ns, name) {
  * @override
  */
 vivliostyle.page.PageParserHandler.prototype.pseudoclassSelector = function(name, params) {
-    // TODO
+    if (params) {
+        this.reportAndSkip("E_INVALID_PAGE_SELECTOR :" + name + "(" + params.join("") + ")");
+    }
+    switch (name.toLowerCase()) {
+        case "first":
+            this.chain.push(new vivliostyle.page.IsFirstPageAction(this.scope));
+            this.specificity += 0x100;
+            break;
+        case "left":
+            this.chain.push(new vivliostyle.page.IsLeftPageAction(this.scope));
+            this.specificity += 0x1;
+            break;
+        case "right":
+            this.chain.push(new vivliostyle.page.IsRightPageAction(this.scope));
+            this.specificity += 0x1;
+            break;
+        case "recto":
+            this.chain.push(new vivliostyle.page.IsRectoPageAction(this.scope))
+            this.specificity += 0x1;
+            break;
+        case "verso":
+            this.chain.push(new vivliostyle.page.IsVersoPageAction(this.scope));
+            this.specificity += 0x1;
+            break;
+        default:
+            this.reportAndSkip("E_INVALID_PAGE_SELECTOR :" + name);
+            break;
+    }
 };
 
 /**
