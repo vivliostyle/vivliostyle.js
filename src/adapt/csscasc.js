@@ -2802,10 +2802,10 @@ adapt.csscasc.isVertical = function(cascaded, context, vertical) {
  * @param {adapt.expr.Context} context
  * @param {Array.<string>} regionIds
  * @param {boolean} isFootnote
- * @return {Object.<string,adapt.csscasc.CascadeValue>}
+ * @return {!Object.<string,adapt.csscasc.CascadeValue>}
  */
 adapt.csscasc.flattenCascadedStyle = function(style, context, regionIds, isFootnote) {
-    var cascMap = /** @type {Object.<string,adapt.csscasc.CascadeValue>} */ ({});
+    var cascMap = /** @type {!Object.<string,adapt.csscasc.CascadeValue>} */ ({});
     for (var n in style) {
         if (adapt.csscasc.isPropName(n))
             cascMap[n] = adapt.csscasc.getProp(style, n);
@@ -2833,4 +2833,34 @@ adapt.csscasc.flattenCascadedStyle = function(style, context, regionIds, isFootn
         }
     }
     return cascMap;
+};
+
+/**
+ * Convert logical properties to physical ones, taking specificity into account.
+ * @param {!Object.<string, adapt.csscasc.CascadeValue>} src Source properties map
+ * @param {!Object.<string, T>} dest Destination map
+ * @param {boolean} vertical
+ * @param {function(string, !adapt.csscasc.CascadeValue): T} transform If supplied, property values are transformed by this function before inserted into the destination map. The first parameter is the property name and the second one is the property value.
+ * @template T
+ */
+adapt.csscasc.convertToPhysical = function(src, dest, vertical, transform) {
+    var couplingMap = vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
+    for (var propName in src) {
+        if (src.hasOwnProperty(propName)) {
+            var cascVal = src[propName];
+            if (!cascVal) continue;
+            var coupledName = couplingMap[propName];
+            var targetName;
+            if (coupledName) {
+                var coupledCascVal = src[coupledName];
+                if (coupledCascVal && coupledCascVal.priority > cascVal.priority) {
+                    continue;
+                }
+                targetName = adapt.csscasc.geomNames[coupledName] ? coupledName : propName;
+            } else {
+                targetName = propName;
+            }
+            dest[targetName] = transform(propName, cascVal);
+        }
+    }
 };

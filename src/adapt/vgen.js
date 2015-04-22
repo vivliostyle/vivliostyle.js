@@ -366,33 +366,21 @@ adapt.vgen.ViewFactory.prototype.setViewRoot = function(viewRoot, isFootnote) {
 /**                            
  * @param {boolean} vertical                                                                                                          
  * @param {adapt.csscasc.ElementStyle} style                                                                                             
- * @param {Object.<string,adapt.css.Val>} computedStyle                                                                                  
+ * @param {!Object.<string,adapt.css.Val>} computedStyle
  * @return {boolean} vertical                                                                                                                        
  */
 adapt.vgen.ViewFactory.prototype.computeStyle = function(vertical, style, computedStyle) {
     var context = this.context;
     var cascMap = adapt.csscasc.flattenCascadedStyle(style, context, this.regionIds, this.isFootnote);
     vertical = adapt.csscasc.isVertical(cascMap, context, vertical);
-    var couplingMap = vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
-    for (var name in cascMap) {
-    	var cascVal = cascMap[name];
-    	var coupledName = couplingMap[name];
-    	var targetName;
-    	if (coupledName) {
-    		var coupledCascVal = cascMap[coupledName];
-    		if (coupledCascVal && coupledCascVal.priority > cascVal.priority) {
-    			continue;
-    		}
-    		targetName = adapt.csscasc.geomNames[coupledName] ? coupledName : name;
-    	} else {
-    		targetName = name;
-    	}
+    var self = this;
+    adapt.csscasc.convertToPhysical(cascMap, computedStyle, vertical, function(name, cascVal) {
         var value = cascVal.evaluate(context, name);
         if (name == "font-family") {
-            value = this.docFaces.filterFontFamily(value);
+            value = self.docFaces.filterFontFamily(value);
         }
-        computedStyle[targetName] = value;
-    }
+        return value;
+    });
     return vertical;
 };
 
