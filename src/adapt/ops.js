@@ -20,6 +20,7 @@ goog.require('adapt.layout');
 goog.require('adapt.vgen');
 goog.require('adapt.xmldoc');
 goog.require('adapt.font');
+goog.require('vivliostyle.page');
 
 /**
  * @typedef {{properties:adapt.csscasc.ElementStyle,condition:adapt.expr.Val}}
@@ -131,6 +132,7 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @const */ this.fontMapper = fontMapper;
     /** @const */ this.faces = new adapt.font.DocumentFaces(this.style.fontDeobfuscator);
     /** @type {Object.<string,adapt.pm.PageBoxInstance>} */ this.pageBoxInstances = {};
+    /** @type {vivliostyle.page.PageManager} */ this.pageManager = null;
     /** @type {boolean} */ this.regionBreak = false;
     /** @type {!Object.<string,boolean>} */ this.pageBreaks = {};
     /** @const */ this.customRenderer = customRenderer;
@@ -168,6 +170,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     var cascadeInstance = this.style.cascade.createInstance(self, this.lang);
     this.rootPageBoxInstance.applyCascadeAndInit(cascadeInstance, docElementStyle);
     this.rootPageBoxInstance.resolveAutoSizing(self);
+    this.pageManager = new vivliostyle.page.PageManager(cascadeInstance, this.style.pageScope, this.rootPageBoxInstance, self, docElementStyle);
     var srcFaces = /** @type {Array.<adapt.font.Face>} */ ([]);
     for (var i = 0; i < self.style.fontFaces.length; i++) {
     	var fontFace = self.style.fontFaces[i++];
@@ -302,7 +305,6 @@ adapt.ops.StyleInstance.prototype.dumpLocation = function(position) {
 adapt.ops.StyleInstance.prototype.selectPageMaster = function() {
 	var self = this;
     var cp = this.currentLayoutPosition;
-    var pageMasters = /** @type {Array.<adapt.pm.PageMasterInstance>} */ (this.rootPageBoxInstance.children);
     // 3.5. Page Layout Processing Model
     // 1. Determine current position in the document: Find the minimal consumed-offset for all elements
     // not fully-consumed in each primary flow. Current position is maximum of the results among all
@@ -312,9 +314,18 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function() {
     	// end of primary content is reached
     	return null;
     }
+    // If there is a page master generated for @page rules, use it.
+    var pageMaster = this.pageManager.getPageRulePageMaster();
+    if (pageMaster) {
+        return pageMaster;
+    }
     // 2. Page master selection: for each page master:
+    var pageMasters = /** @type {Array.<adapt.pm.PageMasterInstance>} */ (this.rootPageBoxInstance.children);
     for (var i = 0; i < pageMasters.length; i++) {
-        var pageMaster = pageMasters[i];
+        pageMaster = pageMasters[i];
+        // Skip a page master generated for @page rules
+        if (pageMaster.pageBox.pseudoName === vivliostyle.page.pageRuleMasterPseudoName)
+            continue;
         var coeff = 1;
         // A. Calculate lookup position using current position and utilization
         // (see -epubx-utilization property)
@@ -449,7 +460,8 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     	: boxInstance.isAutoHeight && boxInstance.isTopDependentOnAutoHeight;
     var flowName = boxInstance.getProp(self, "flow-from");
     var boxContainer = self.viewport.document.createElement("div");
-    adapt.base.setCSSProperty(boxContainer, "position", "absolute");
+    var position = boxInstance.getProp(self, "position");
+    adapt.base.setCSSProperty(boxContainer, "position", position ? position.name : "absolute");
     parentContainer.insertBefore(boxContainer, parentContainer.firstChild);
     var layoutContainer = new adapt.vtree.Container(boxContainer);
     layoutContainer.vertical = boxInstance.vertical;
@@ -804,6 +816,16 @@ adapt.ops.BaseParserHandler.prototype.startFootnoteRule = function(pseudoelement
 adapt.ops.BaseParserHandler.prototype.startRegionRule = function() {
     this.insideRegion = true;
     this.startSelectorRule();
+};
+
+/**
+ * @override
+ */
+adapt.ops.BaseParserHandler.prototype.startPageRule = function() {
+    var pageHandler = new vivliostyle.page.PageParserHandler(this.masterHandler.pageScope,
+        this.masterHandler, this, this.validatorSet);
+    this.masterHandler.pushHandler(pageHandler);
+    pageHandler.startSelectorRule();
 };
 
 /**

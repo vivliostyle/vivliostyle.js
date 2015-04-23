@@ -264,6 +264,10 @@ src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */
 [adapt]template = URI_OR_NONE;
 [adapt]behavior = IDENT;
 
+/* paged media */
+PAGE_SIZE = a5 | a4 | a3 | b5 | b4 | letter | legal | ledger;
+size = POS_LENGTH{1,2} | auto | [ PAGE_SIZE || [ portrait | landscape ] ];
+
 DEFAULTS
 
 background-attachment: scroll;
@@ -322,6 +326,7 @@ padding-bottom: auto;
 padding-left: auto;
 padding-right: auto;
 padding-top: auto;
+size: auto;
 
 SHORTHANDS
 

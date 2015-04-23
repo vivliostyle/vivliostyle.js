@@ -244,6 +244,12 @@ adapt.cssparse.ParserHandler.prototype.startRegionRule = function() {
 };
 
 /**
+ * @return {void}
+ */
+adapt.cssparse.ParserHandler.prototype.startPageRule = function() {
+};
+
+/**
  * @param {adapt.css.Expr} expr
  * @return {void}
  */
@@ -546,6 +552,13 @@ adapt.cssparse.DispatchParserHandler.prototype.startRegionRule = function() {
 /**
  * @override
  */
+adapt.cssparse.DispatchParserHandler.prototype.startPageRule = function() {
+    this.slave.startPageRule();
+};
+
+/**
+ * @override
+ */
 adapt.cssparse.DispatchParserHandler.prototype.startWhenRule = function(expr) {
     this.slave.startWhenRule(expr);
 };
@@ -720,6 +733,13 @@ adapt.cssparse.SlaveParserHandler.prototype.startDefineRule = function() {
  */
 adapt.cssparse.SlaveParserHandler.prototype.startRegionRule = function() {
     this.reportAndSkip("E_CSS_UNEXPECTED_REGION");
+};
+
+/**
+ * @override
+ */
+adapt.cssparse.SlaveParserHandler.prototype.startPageRule = function() {
+    this.reportAndSkip("E_CSS_UNEXPECTED_PAGE");
 };
 
 /**
@@ -1090,6 +1110,7 @@ adapt.cssparse.Parser = function(actions, tokenizer, handler, baseURL) {
     /** @type {Array.<number>} */ this.errorBrackets = [];
     /** @type {Array.<string>} */ this.ruleStack = [];
     /** @type {boolean} */ this.regionRule = false;
+    /** @type {boolean} */ this.pageRule = false;
 };
 
 /**
@@ -1718,6 +1739,9 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
             	if (this.regionRule) {
                 	this.ruleStack.push("-epubx-region");            		
                 	this.regionRule = false;
+                } else if (this.pageRule) {
+                    this.ruleStack.push("page");
+                    this.pageRule = false;
             	} else {
             		this.ruleStack.push("[selector]");
             	}
@@ -2117,6 +2141,12 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         handler.startRegionRule();
                         this.regionRule = true;
                         this.actions = adapt.cssparse.actionsSelectorStart;
+                        continue;
+                    case "page":
+                        tokenizer.consume();
+                        handler.startPageRule();
+                        this.pageRule = true;
+                        this.actions = adapt.cssparse.actionsSelectorCont;
                         continue;
                     case "-epubx-when":
                         tokenizer.consume();

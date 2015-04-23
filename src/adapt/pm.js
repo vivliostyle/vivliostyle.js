@@ -290,7 +290,7 @@ adapt.pm.PageBoxInstance = function(parentInstance, pageBox) {
      * @const
      */
     this.cascaded = /** @type {adapt.csscasc.ElementStyle} */ ({});
-    /** @const */ this.style = /** @type {Object.<string,adapt.css.Val>} */ ({});
+    /** @const */ this.style = /** @type {!Object.<string,adapt.css.Val>} */ ({});
     /** @type {adapt.expr.Native} */ this.autoWidth = null;
     /** @type {adapt.expr.Native} */ this.autoHeight = null;
     /** @type {!Array.<adapt.pm.PageBoxInstance>} */ this.children = [];
@@ -465,7 +465,7 @@ adapt.pm.PageBoxInstance.prototype.boxSpecificEnabled = function(enabled) {
 };
 
 /**
- * @private
+ * @protected
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
@@ -561,7 +561,7 @@ adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
 };
 
 /**
- * @private
+ * @protected
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.initVertical = function() {
@@ -715,23 +715,10 @@ adapt.pm.PageBoxInstance.prototype.init = function(context) {
     var regionIds = this.parentInstance ? this.parentInstance.getActiveRegions(context) : null;
     var cascMap = adapt.csscasc.flattenCascadedStyle(this.cascaded, context, regionIds, false);
     this.vertical = adapt.csscasc.isVertical(cascMap, context, this.parentInstance ? this.parentInstance.vertical : false);
-    var couplingMap = this.vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
-    for (var propName in cascMap) {
-        var cascVal = cascMap[propName];
-    	var coupledName = couplingMap[propName];
-    	var targetName;
-    	if (coupledName) {
-    		var coupledCascVal = cascMap[coupledName];
-    		if (coupledCascVal && coupledCascVal.priority > cascVal.priority) {
-    			continue;
-    		}
-    		targetName = adapt.csscasc.geomNames[coupledName] ? coupledName : propName;
-    	} else {
-    		targetName = propName;
-    	}
-        style[targetName] = cascVal.value;
-    }    
-    this.autoWidth = new adapt.expr.Native(scope, 
+    adapt.csscasc.convertToPhysical(cascMap, style, this.vertical, function(name, cascVal) {
+        return cascVal.value;
+    });
+    this.autoWidth = new adapt.expr.Native(scope,
     		function() { 
     			return self.calculatedWidth;
     		}, "autoWidth");
@@ -1224,7 +1211,7 @@ adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit = function(cascade, docEl
 			}
 		}
 	}
-	cascade.pushRule(this.pageBox.classes, style);
+	cascade.pushRule(this.pageBox.classes, null, style);
 	this.init(cascade.context);
 	for (var i = 0; i < this.pageBox.children.length ; i++) {
 		var child = this.pageBox.children[i];
