@@ -112,6 +112,7 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadEPUB");
 	var self = this;
+    self.configure(command).then(function() {
 	var store = new adapt.epub.EPUBDocStore();
     if (userStyleSheet) {
         for (var i = 0; i < userStyleSheet.length; i++) {
@@ -125,15 +126,14 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
 	        self.opf = opf;
 	        self.opf.resolveFragment(fragment).then(function(position) {
 	        	self.pagePosition = position;
-	        	self.configure(command).then(function() {
-	        		self.resize().then(function() {
-		    	    	self.callback({"t":"loaded", "metadata": self.opf.getMetadata()});
-		    	    	frame.finish(true);
-	        		});
-	        	});
+                self.resize().then(function() {
+                    self.callback({"t":"loaded", "metadata": self.opf.getMetadata()});
+                    frame.finish(true);
+                });
 	        });
 	    });
 	});
+    });
     return frame.result();
 };
 
