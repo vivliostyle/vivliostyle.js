@@ -222,6 +222,7 @@ vivliostyle.viewerapp.main = function(arg) {
     var orientation = (arg && arg.orientation) || adapt.base.getURLParam("orientation");
     var uaRoot = (arg && arg.uaRoot) || null;
     var doc = (arg && arg.document) || null;
+    var userStyleSheet = (arg && arg.userStyleSheet) || null;
 	var viewer = new adapt.viewer.Viewer(window, "main", vivliostyle.viewerapp.callback);
 
     var config = {
@@ -230,7 +231,8 @@ vivliostyle.viewerapp.main = function(arg) {
         // render all pages on load and resize
         "renderAllPages": true,
         "userAgentRootURL": uaRoot,
-        "document": doc
+        "document": doc,
+        "userStyleSheet": userStyleSheet
     };
     setViewportSize(width, height, size, orientation, config);
     config["a"] = epubURL ? "loadEPUB" : "loadXML";

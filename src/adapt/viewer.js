@@ -109,9 +109,15 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
 	var url = /** @type {string} */ (command["url"]);
 	var fragment = /** @type {?string} */ (command["fragment"]);
 	var haveZipMetadata = !!command["zipmeta"];
+    var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadEPUB");
 	var self = this;
 	var store = new adapt.epub.EPUBDocStore();
+    if (userStyleSheet) {
+        for (var i = 0; i < userStyleSheet.length; i++) {
+            store.addUserStyleSheet(userStyleSheet[i]);
+        }
+    }
 	store.init().then(function() {
 	    var epubURL = adapt.base.resolveURL(url, self.window.location.href);
 	    self.packageURL = epubURL;
@@ -139,10 +145,16 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
 	var url = /** @type {string} */ (command["url"]);
     var doc = /** @type {Document} */ (command["document"]);
 	var fragment = /** @type {?string} */ (command["fragment"]);
+    var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadXML");
 	var self = this;
     self.configure(command).then(function() {
 	var store = new adapt.epub.EPUBDocStore();
+    if (userStyleSheet) {
+        for (var i = 0; i < userStyleSheet.length; i++) {
+            store.addUserStyleSheet(userStyleSheet[i]);
+        }
+    }
 	store.init().then(function() {
 	    var xmlURL = adapt.base.resolveURL(url, self.window.location.href);
 	    self.packageURL = xmlURL;
