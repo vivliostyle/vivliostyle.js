@@ -1,5 +1,6 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview CSS Values and utilities to handle them.
  */
 goog.provide('adapt.css');
