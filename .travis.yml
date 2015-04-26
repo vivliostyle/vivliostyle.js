@@ -1,8 +1,11 @@
 language: node_js
 node_js:
 - '0.10'
+before_install:
+- gem install compass
 script:
 - npm run build
+- npm run build-css
 after_success:
 - build/deploy.sh
 notifications:

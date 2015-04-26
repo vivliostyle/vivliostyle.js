@@ -1,3 +1,6 @@
+.sass-cache
 node_modules
 
 build/vivliostyle-viewer.min.js
+
+viewer/res/css/*

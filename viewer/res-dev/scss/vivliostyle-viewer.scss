@@ -5,6 +5,11 @@ html[data-vivliostyle-paginated] {
     text-rendering: geometricPrecision;
 }
 
+html[data-vivliostyle-paginated], html[data-vivliostyle-paginated] body {
+    margin: 0;
+    padding: 0;
+}
+
 @media print {
     html[data-vivliostyle-paginated] {
         height: 100%;
