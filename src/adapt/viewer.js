@@ -100,6 +100,7 @@ adapt.viewer.Viewer.prototype.clearPages = function() {
  */
 adapt.viewer.Viewer.prototype.callback = function(message) {
 	message["i"] = this.instanceId;
+    message["viewer"] = this;
 	this.callbackFn(message);
 };
 
@@ -164,8 +165,8 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
 	    self.opf.initWithSingleChapter(xmlURL, doc).then(function() {
             self.opf.resolveFragment(fragment).then(function(position) {
                 self.pagePosition = position;
-                self.callback({"t":"loaded"});
                 self.resize().then(function() {
+                    self.callback({"t":"loaded"});
                     frame.finish(true);
                 });
             });

@@ -5,6 +5,7 @@
  */
 goog.provide('vivliostyle.viewerapp');
 
+goog.require('vivliostyle.constants');
 goog.require('adapt.base');
 goog.require('adapt.viewer');
 
@@ -14,7 +15,7 @@ goog.require('adapt.viewer');
 /** @type {number} */ vivliostyle.viewerapp.touchY = 0;
 /** @type {boolean} */ vivliostyle.viewerapp.zoomActive = false;
 /** @type {number} */ vivliostyle.viewerapp.pinchDist = 0;
-
+/** @type {vivliostyle.constants.PageProgression} */ vivliostyle.viewerapp.currentPageProgression = vivliostyle.constants.PageProgression.LTR;
 
 /**
  * @param {adapt.base.JSON} cmd
@@ -35,12 +36,30 @@ vivliostyle.viewerapp.keydown = function(evt) {
     case 36:  // home
     	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "first"});
     	break;
-    case 39:  // right arrow
-    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "next"});
+    case 38:  // up arrow
+    	vivliostyle.viewerapp.sendCommand({
+            "a": "moveTo",
+            "where": "previous"
+        });
         break;
-    case 37:  // left arrow
-    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "previous"});
+    case 40:  // down arrow
+    	vivliostyle.viewerapp.sendCommand({
+            "a": "moveTo",
+            "where": "next"
+        });
         break;
+        case 39:  // right arrow
+            vivliostyle.viewerapp.sendCommand({
+                "a": "moveTo",
+                "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "next" : "previous"
+            });
+            break;
+        case 37:  // left arrow
+            vivliostyle.viewerapp.sendCommand({
+                "a": "moveTo",
+                "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "previous" : "next"
+            });
+            break;
     case 48:  // zero
     	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
     	break;
@@ -94,9 +113,15 @@ vivliostyle.viewerapp.touch = function(evt) {
 			if (Math.abs(dy) < 0.5 * Math.abs(dx) && Math.abs(dx) > 15) {
 				vivliostyle.viewerapp.touchActive = false;
 				if (dx > 0) {
-			    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "previous"});					
+			    	vivliostyle.viewerapp.sendCommand({
+                        "a": "moveTo",
+                        "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "previous" : "next"
+                    });
 				} else {
-			    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "next"});
+			    	vivliostyle.viewerapp.sendCommand({
+                        "a": "moveTo",
+                        "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "next" : "previous"
+                    });
 				}
 			}
 		}
@@ -125,6 +150,9 @@ vivliostyle.viewerapp.touch = function(evt) {
 
 vivliostyle.viewerapp.callback = function(msg) {
 	switch (msg["t"]) {
+	case "loaded" :
+		vivliostyle.viewerapp.currentPageProgression = msg["viewer"].getCurrentPageProgression();
+		break;
 	case "error" :
 		adapt.base.log("Error: " + msg["content"]);
 		break;
