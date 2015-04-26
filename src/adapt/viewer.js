@@ -62,6 +62,7 @@ adapt.viewer.Viewer = function(window, instanceId, callbackFn) {
 };
 
 /**
+ * @private
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.init = function() {
@@ -93,6 +94,7 @@ adapt.viewer.Viewer.prototype.clearPages = function() {
 };
 
 /**
+ * @private
  * @param {adapt.base.JSON} message
  * @return {void}
  */
@@ -174,6 +176,7 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
 };
 
 /**
+ * @private
  * @param {string} specified
  * @returns {number}
  */
@@ -271,6 +274,7 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 };
 
 /**
+ * @private
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.showPage = function() {
@@ -287,6 +291,7 @@ adapt.viewer.Viewer.prototype.showPage = function() {
 };
 
 /**
+ * @private
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.reportPosition = function() {
@@ -308,6 +313,7 @@ adapt.viewer.Viewer.prototype.reportPosition = function() {
 };
 
 /**
+ * @private
  * @return {adapt.vgen.Viewport}
  */
 adapt.viewer.Viewer.prototype.createViewport = function() {
@@ -327,6 +333,7 @@ adapt.viewer.Viewer.prototype.createViewport = function() {
 };
 
 /**
+ * @private
  * @return {boolean}
  */
 adapt.viewer.Viewer.prototype.sizeIsGood = function() {
@@ -338,6 +345,7 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
 };
 
 /**
+ * @private
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.reset = function() {
@@ -350,6 +358,7 @@ adapt.viewer.Viewer.prototype.reset = function() {
 };
 
 /**
+ * @private
  * @param {adapt.vtree.Page} page
  * @return {void}
  */
@@ -387,6 +396,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
 };
 
 /**
+ * @private
  * @param {adapt.vtree.Page} page
  * @param {?string} cfi
  * @return {!adapt.task.Result.<boolean>}
@@ -406,6 +416,13 @@ adapt.viewer.Viewer.prototype.sendLocationNotification = function(page, cfi) {
 		frame.finish(true);
 	});
 	return frame.result();
+};
+
+/**
+ * @returns {?vivliostyle.constants.PageProgression}
+ */
+adapt.viewer.Viewer.prototype.getCurrentPageProgression = function() {
+    return this.opfView ? this.opfView.getCurrentPageProgression() : null;
 };
 
 /**
@@ -522,6 +539,7 @@ adapt.viewer.Viewer.prototype.runCommand = function(command) {
 };
 
 /**
+ * @private
  * @param {*} cmd
  * @return {adapt.base.JSON}
  */

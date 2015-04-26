@@ -148,7 +148,7 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
 	/** @const */ this.context = context;
 	/** @const */ this.validatorSet = validatorSet;
     /** @type {Node} */ this.last = this.root;
-    /** @const */ this.rootStyle = /** @type {adapt.csscasc.ElementStyle} */ ({});
+    /** @const */ this.rootStyle = /** @type {!adapt.csscasc.ElementStyle} */ ({});
     /** @type {Object.<string,adapt.csscasc.ElementStyle>} */ this.styleMap = {};
     /** @const */ this.flowChunks = /** @type {Array.<adapt.vtree.FlowChunk>} */ ([]);
     /** @type {adapt.cssstyler.FlowListener} */ this.flowListener = null;
@@ -225,10 +225,14 @@ adapt.cssstyler.columnProps = ["column-count", "column-width"];
  * @return {void}
  */
 adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBody) {
-	if (!isBody && elemStyle["writing-mode"]) {
-		// Copy it over, but keep it at the root element as well.
-		this.rootStyle["writing-mode"] = elemStyle["writing-mode"];
-	}
+    if (!isBody) {
+        ["writing-mode", "direction"].forEach(function (propName) {
+            if (elemStyle[propName]) {
+                // Copy it over, but keep it at the root element as well.
+                this.rootStyle[propName] = elemStyle[propName];
+            }
+        }, this);
+    }
 	if (!this.rootBackgroundAssigned) {
 		if (this.hasProp(elemStyle, this.validatorSet.backgroundProps, "background-color")
 			|| this.hasProp(elemStyle, this.validatorSet.backgroundProps, "background-image")) {
@@ -248,7 +252,7 @@ adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBod
 };
 
 /**
- * @return {adapt.csscasc.ElementStyle}
+ * @return {!adapt.csscasc.ElementStyle}
  */
 adapt.cssstyler.Styler.prototype.getTopContainerStyle = function() {
     var offset = 0;

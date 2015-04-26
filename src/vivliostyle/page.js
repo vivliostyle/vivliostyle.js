@@ -4,12 +4,31 @@
  */
 goog.provide("vivliostyle.page");
 
+goog.require("vivliostyle.constants");
 goog.require("adapt.expr");
 goog.require("adapt.css");
 goog.require("adapt.cssparse");
 goog.require("adapt.csscasc");
 goog.require("adapt.cssvalid");
 goog.require("adapt.pm");
+
+/**
+ * Resolve page progression direction from writing-mode and direction.
+ * @param {!adapt.csscasc.ElementStyle} style
+ * @returns {vivliostyle.constants.PageProgression}
+ */
+vivliostyle.page.resolvePageProgression = function(style) {
+    var writingMode = style["writing-mode"];
+    writingMode = writingMode && writingMode.value;
+    var direction = style["direction"];
+    direction = direction && direction.value;
+    if (writingMode === adapt.css.ident.vertical_lr ||
+        (writingMode !== adapt.css.ident.vertical_rl && direction !== adapt.css.ident.rtl)) {
+        return vivliostyle.constants.PageProgression.LTR;
+    } else {
+        return vivliostyle.constants.PageProgression.RTL;
+    }
+};
 
 /**
  * Represent page size.
@@ -396,7 +415,7 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
  * @param {adapt.expr.LexicalScope} pageScope
  * @param {!adapt.pm.RootPageBoxInstance} rootPageBoxInstance
  * @param {!adapt.expr.Context} context
- * @param {adapt.csscasc.ElementStyle} docElementStyle
+ * @param {!adapt.csscasc.ElementStyle} docElementStyle
  * @constructor
  */
 vivliostyle.page.PageManager = function(cascadeInstance, pageScope, rootPageBoxInstance, context, docElementStyle) {
@@ -414,25 +433,6 @@ vivliostyle.page.PageManager = function(cascadeInstance, pageScope, rootPageBoxI
  * @private
  */
 vivliostyle.page.PageManager.prototype.definePageProgression = function() {
-    var docElementStyle = this.docElementStyle;
-    /** @type {adapt.css.Val} */ var writingMode;
-    /** @type {adapt.css.Val} */ var direction;
-    for (var name in docElementStyle) {
-        if (Object.prototype.hasOwnProperty.call(docElementStyle, name)) {
-            var cascVal = docElementStyle[name];
-            switch (name) {
-                case "writing-mode":
-                    writingMode = cascVal.value;
-                    break;
-                case "direction":
-                    direction = cascVal.value;
-                    break;
-            }
-        }
-    }
-    writingMode = writingMode || adapt.css.ident.horizontal_tb;
-    direction = direction || adapt.css.ident.ltr;
-
     // TODO If a page break is forced before the root element, recto/verso pages are no longer odd/even pages. left/right are reversed too.
     var scope = this.pageScope;
     var pageNumber = new adapt.expr.Named(scope, "page-number");
@@ -442,8 +442,9 @@ vivliostyle.page.PageManager.prototype.definePageProgression = function() {
     );
     scope.defineName("recto-page", new adapt.expr.Not(scope, isEvenPage));
     scope.defineName("verso-page", isEvenPage);
-    if (writingMode === adapt.css.ident.vertical_lr ||
-        (writingMode === adapt.css.ident.horizontal_tb && direction === adapt.css.ident.ltr)) {
+
+    var pageProgression = vivliostyle.page.resolvePageProgression(this.docElementStyle);
+    if (pageProgression === vivliostyle.constants.PageProgression.LTR) {
         scope.defineName("left-page", isEvenPage);
         scope.defineName("right-page", new adapt.expr.Not(scope, isEvenPage));
     } else {

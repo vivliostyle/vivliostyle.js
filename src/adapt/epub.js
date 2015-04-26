@@ -5,6 +5,7 @@
  */
 goog.provide('adapt.epub');
 
+goog.require("vivliostyle.constants");
 goog.require('adapt.csscasc');
 goog.require('adapt.font');
 goog.require('adapt.ops');
@@ -895,6 +896,14 @@ adapt.epub.OPFView.prototype.isAtTheLastPage = function() {
 	}
 	var viewItem = this.spineItems[this.spineIndex];
 	return viewItem && !viewItem.complete && this.pageIndex == viewItem.layoutPositions.length - 1;	
+};
+
+/**
+ * @returns {?vivliostyle.constants.PageProgression}
+ */
+adapt.epub.OPFView.prototype.getCurrentPageProgression = function() {
+    var viewItem = this.spineItems[this.spineIndex];
+    return viewItem ? viewItem.instance.pageProgression : null;
 };
 
 /**
