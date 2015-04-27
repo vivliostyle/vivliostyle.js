@@ -113,6 +113,24 @@ hr {
         hr-line-width: 1pt;
     }
 
+    /* 以下自動計算 */
+    html {
+        font-size: -epubx-expr(font-size);
+        line-height: -epubx-expr(body-line-height);
+        column-count: -epubx-expr(column-count);
+        column-gap: -epubx-expr(column-gap);
+    }
+
+    @page {
+        size: -epubx-expr(page-width) -epubx-expr(page-height);
+        width: -epubx-expr(font-size * line-length * 2 + column-gap * (column-count - 1));
+        height: -epubx-expr(body-line-height * line-count);
+        margin-top: -epubx-expr(page-margin-top);
+        margin-bottom: auto;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
     h1 {
         width: -epubx-expr(h1-block-size - h1-padding);
         line-height: 1em;
@@ -125,32 +143,11 @@ hr {
         padding-right: -epubx-expr(h2-author-padding);
     }
 
-    /* 以下自動計算 */
-    html {
-        font-size: -epubx-expr(font-size);
-        line-height: -epubx-expr(body-line-height);
-        column-count: -epubx-expr(column-count);
-        column-gap: -epubx-expr(column-gap);
-    }
-
     hr {
         margin-right: -epubx-expr((body-line-height - hr-line-width) / 2);
         margin-left: -epubx-expr((body-line-height - hr-line-width) / 2);
         margin-top: auto;
         margin-bottom: auto;
-    }
-
-    @-epubx-page-master {
-        @-epubx-partition {
-            -epubx-flow-from: body;
-            width: -epubx-expr(body-line-height * line-count);
-            height: -epubx-expr(font-size * line-length * 2 + column-gap * (column-count - 1));
-            top: -epubx-expr(page-margin-top);
-            left: -epubx-expr((page-width - body-line-height * line-count) / 2);
-            -epub-writing-mode: vertical-rl;
-            column-count: -epubx-expr(column-count);
-            column-gap: -epubx-expr(column-gap);
-        }
     }
 
 }

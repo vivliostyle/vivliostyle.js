@@ -1,6 +1,6 @@
 @charset "UTF-8";
 
-:root {
+html {
     /* ページサイズ */
     --page-width: 123mm;
     --page-height: 188mm;
@@ -10,9 +10,9 @@
     font-family: "游明朝", "YuMincho", serif;
     font-weight: normal;
     /* フォントサイズ */
-    --font-size: 14Q;
+    --font-size: 10pt;
     /* 行送り */
-    --body-line-height: 24.64Q;
+    --body-line-height: 18pt;
     /* 行長（文字数） */
     --line-length: 13;
     /* 行数 */
@@ -29,9 +29,14 @@
     text-align: justify;
 }
 
+* {
+    margin: 0;
+    padding: 0;
+}
+
 @media screen {
-    :root {
-        max-inline-size: 40em;
+    html {
+        max-width: 40em;
         margin: 30px auto;
     }
 }
@@ -71,55 +76,79 @@ h2.author {
     /* 直後の改ページ・改段禁止 */
     break-after: avoid;
     /* 右揃え */
-    text-align: end;
+    /*text-align: end;*/
+    text-align: right;
 }
 
 hr {
     border: none;
     --line-width: 1pt;
-    border-block-start: var(--line-width) solid black;
-    inline-size: 6em;
-    margin: logical calc((var(--body-line-height) - var(--line-width)) / 2) auto;
+    /*border-block-start: var(--line-width) solid black;*/
+    border-top: 1pt solid black;
+    /*inline-size: 6em;*/
+    width: 6em;
+    /*margin: logical calc((var(--body-line-height) - var(--line-width)) / 2) auto;*/
+    margin: 8.5pt auto;
 }
 
-/* 以下自動計算 */
-* {
-    margin: 0;
-    padding: 0;
-}
-
-:root {
-    font-size: var(--font-size);
-    line-height: var(--body-line-height);
+html {
+    /*font-size: var(--font-size);*/
+    font-size: 10pt;
+    /*line-height: var(--body-line-height);*/
+    line-height: 18pt;
 }
 
 /* 印刷用のみ段組にする */
 @media print {
-    column-count: var(--column-count);
-    column-gap: var(--column-gap);
+    html {
+        /*column-count: var(--column-count);*/
+        column-count: 2;
+        /*column-gap: var(--column-gap);*/
+        column-gap: 1em;
+    }
 }
 
 @page {
-    size: var(--page-width) var(--page-height);
-    margin-top: var(--page-margin-top);
-    margin-bottom: calc(var(--page-height) - var(--page-margin-top) - var(--body-line-height) * var(--line-count));
-    margin-bottom: calc(var(--page-height) - var(--page-margin-top) - var(--font-size) * var(--line-length) * var(--column-count) - var(--column-gap) * (var(--column-count) - 1));
+    /*size: var(--page-width) var(--page-height);*/
+    size: 123mm 188mm;
+    /*height: calc(var(--body-line-height) * var(--line-count));*/
+    height: 432pt;
+    /*width: var(--font-size) * var(--line-length) * var(--column-count) + var(--column-gap) * (var(--column-count) - 1);*/
+    width: 270pt;
+    /*margin-top: var(--page-margin-top);*/
+    margin-top: 17mm;
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 @page :left {
-    margin-left: var(--page-margin-outside);
-    margin-right: calc(var(--page-width) - var(--page-margin-outside) - var(--font-size) * var(--line-length) * var(--column-count) - var(--column-gap) * (var(--column-count) - 1));
+    /*margin-left: var(--page-margin-outside);*/
+    margin-left: 20mm;
 }
 
 @page :right {
-    margin-right: var(--page-margin-outside);
-    margin-left: calc(var(--page-width) - var(--page-margin-outside) - var(--font-size) * var(--line-length) * var(--column-count) - var(--column-gap) * (var(--column-count) - 1));
+    /*margin-right: var(--page-margin-outside);*/
+    margin-right: 20mm;
 }
 
-h1, h2 {
+h1 {
     box-sizing: border-box;
     --block-size: calc(var(--body-line-height) * var(--lines));
-    block-size: var(--block-size);
-    line-height: var(--line-height);
-    padding-block-start: calc((var(--block-size) - var(--line-height)) / 2);
+    /*block-size: var(--block-size);*/
+    height: 54pt;
+    /*line-height: var(--line-height);*/
+    line-height: 1em;
+    /*padding-block-start: calc((var(--block-size) - var(--line-height)) / 2);*/
+    padding-top: 17pt;
+}
+h2 {
+    box-sizing: border-box;
+    --block-size: calc(var(--body-line-height) * var(--lines));
+    /*block-size: var(--block-size);*/
+    height: 18pt;
+    /*line-height: var(--line-height);*/
+    line-height: 18pt;
+    /*padding-block-start: calc((var(--block-size) - var(--line-height)) / 2);*/
+    padding-top: 0pt;
 }
