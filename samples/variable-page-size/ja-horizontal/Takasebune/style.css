@@ -1,0 +1,103 @@
+@charset "UTF-8";
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    /* 組み方向 */
+    writing-mode: horizontal-tb;
+    /* フォント */
+    font-family: "游明朝", "YuMincho", serif;
+    font-weight: normal;
+    /* フォントサイズ */
+    --font-size: 10.5pt;
+    /* 行送り */
+    --body-line-height: 18pt;
+    /* 段幅 */
+    --column-width: 20;
+    /* 段間 */
+    --column-gap: 2em;
+    /* 基本版面の天からの距離 */
+    --page-margin-top: 17mm;
+    /* 基本版面の小口からの距離 */
+    --page-margin-outside: 20mm;
+    /* 行末揃え */
+    text-align: justify;
+}
+
+@media screen {
+    :root {
+        margin: 30px 30px;
+    }
+}
+
+h1 {
+    /* 段抜き */
+    column-span: all;
+    /* 行取り */
+    --lines: 3;
+    /* フォント */
+    font-family: "游ゴシック", "YuGothic", sans-serif;
+    font-weight: bold;
+    /* フォントサイズ */
+    font-size: 2em;
+    /* 行送り */
+    --line-height: 1em;
+    /* 字下げ */
+    text-indent: 0;
+    /* 直後の改ページ・改段禁止 */
+    break-after: avoid;
+}
+
+h2.author {
+    /* 段抜き */
+    column-span: all;
+    /* 行取り */
+    --lines: 1;
+    /* フォント */
+    font-family: "游ゴシック", "YuGothic", sans-serif;
+    font-weight: normal;
+    /* フォントサイズ */
+    font-size: 1em;
+    /* 行送り */
+    --line-height: var(--body-line-height);
+    /* 字下げ */
+    text-indent: 0;
+    /* 直後の改ページ・改段禁止 */
+    break-after: avoid;
+    /* 右揃え */
+    text-align: end;
+}
+
+/* 以下自動計算 */
+:root {
+    font-size: var(--font-size);
+    line-height: var(--body-line-height);
+    column-width: var(--column-width);
+    column-gap: var(--column-gap);
+}
+
+@page {
+    margin-top: var(--page-margin-top);
+    margin-bottom: var(--page-margin-top);
+    margin-left: var(--page-margin-outside);
+    margin-right: var(--page-margin-outside);
+}
+
+h1, h2 {
+    box-sizing: border-box;
+    --block-size: calc(var(--body-line-height) * var(--lines));
+    block-size: var(--block-size);
+    line-height: var(--line-height);
+    padding-block-start: calc((var(--block-size) - var(--line-height)) / 2);
+}
+
+hr {
+    border: none;
+    --line-width: 1pt;
+    border-block-start: var(--line-width) solid black;
+    inline-size: 6em;
+    margin: logical calc((var(--body-line-height) - var(--line-width)) / 2) auto;
+}
