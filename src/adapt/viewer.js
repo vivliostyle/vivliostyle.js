@@ -76,23 +76,13 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {number} */ this.touchY = 0;
     /** @type {boolean} */ this.needResize = false;
     /** @type {?adapt.viewer.ViewportSize} */ this.viewportSize = null;
-    /** @type {adapt.vtree.Page} */ this.newPage = null;
     /** @type {adapt.vtree.Page} */ this.currentPage = null;
+    /** @type {?adapt.vtree.Spread} */ this.currentSpread = null;
     /** @type {?adapt.epub.Position} */ this.pagePosition = null;
     /** @type {number} */ this.fontSize = 16;
     /** @type {boolean} */ this.waitForLoading = false;
+    /** @type {boolean} */ this.spreadView = true;
     /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();	
-};
-
-adapt.viewer.Viewer.prototype.clearPages = function() {
-    if (this.currentPage) {
-        this.viewport.root.removeChild(this.currentPage.container);
-        this.currentPage = null;
-    }
-	if (this.newPage) {
-        this.viewport.root.removeChild(this.newPage.container);		
-		this.newPage = null;
-	}
 };
 
 /**
@@ -273,23 +263,68 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
     if (typeof command["userAgentRootURL"] == "string") {
         adapt.base.resourceBaseURL = command["userAgentRootURL"];
     }
+    if (typeof command["spreadView"] == "boolean") {
+        this.spreadView = command["spreadView"];
+    }
 	return adapt.task.newResult(true);
 };
 
 /**
+ * Hide current pages (this.currentPage, this.currentSpread)
  * @private
+ */
+adapt.viewer.Viewer.prototype.hidePages = function() {
+    var pages = [];
+    if (this.currentPage) {
+        pages.push(this.currentPage);
+        this.currentPage = null;
+    }
+    if (this.currentSpread) {
+        pages.push(this.currentSpread.left);
+        pages.push(this.currentSpread.right);
+        this.currentSpread = null;
+    }
+    pages.forEach(function(page) {
+        if (page) {
+            adapt.base.setCSSProperty(page.container, "display", "none");
+            page.removeEventListener("hyperlink", this.hyperlinkListener, false);
+        }
+    });
+};
+
+/**
+ * @private
+ * @param {!adapt.vtree.Page} page
+ */
+adapt.viewer.Viewer.prototype.showSinglePage = function(page) {
+    page.addEventListener("hyperlink", this.hyperlinkListener, false);
+    adapt.base.setCSSProperty(page.container, "visibility", "visible");
+    adapt.base.setCSSProperty(page.container, "display", "block");
+};
+
+/**
+ * @private
+ * @param {!adapt.vtree.Page} page
  * @return {void}
  */
-adapt.viewer.Viewer.prototype.showPage = function() {
-    if (this.newPage) {
-	    if (this.currentPage) {
-            adapt.base.setCSSProperty(this.currentPage.container, "display", "none");
-	    	this.currentPage.removeEventListener("hyperlink", this.hyperlinkListener, false);
-	    }
-	    this.currentPage = this.newPage;
-    	adapt.base.setCSSProperty(this.newPage.container, "visibility", "visible");
-        adapt.base.setCSSProperty(this.newPage.container, "display", "block");
-	    this.newPage = null;
+adapt.viewer.Viewer.prototype.showPage = function(page) {
+    this.hidePages();
+    this.currentPage = page;
+    this.showSinglePage(page);
+};
+
+/**
+ * @private
+ * @param {adapt.vtree.Spread} spread
+ */
+adapt.viewer.Viewer.prototype.showSpread = function(spread) {
+    this.hidePages();
+    this.currentSpread = spread;
+    if (spread.left) {
+        this.showSinglePage(spread.left);
+    }
+    if (spread.right) {
+        this.showSinglePage(spread.right);
     }
 };
 
@@ -359,13 +394,24 @@ adapt.viewer.Viewer.prototype.reset = function() {
 };
 
 /**
+ * Show current page or spread depending on the setting (this.spreadView).
  * @private
- * @param {adapt.vtree.Page} page
- * @return {void}
+ * @param {!adapt.vtree.Page} page
+ * @returns {!adapt.task.Result}
  */
-adapt.viewer.Viewer.prototype.setNewPage = function(page) {
-	this.newPage = page;
-	page.addEventListener("hyperlink", this.hyperlinkListener, false);
+adapt.viewer.Viewer.prototype.showCurrent = function(page) {
+    var self = this;
+    if (this.spreadView) {
+        return this.opfView.getCurrentSpread().thenAsync(function(spread) {
+            self.showSpread(spread);
+            self.currentPage = page;
+            return adapt.task.newResult(null);
+        });
+    } else {
+        this.showPage(page);
+        this.currentPage = page;
+        return adapt.task.newResult(null);
+    }
 };
 
 /**
@@ -386,12 +432,12 @@ adapt.viewer.Viewer.prototype.resize = function() {
     // With renderAllPages option specified, the rendering is performed after the initial page display,
     // otherwise users are forced to wait the rendering finish in front of a blank page.
     self.opfView.setPagePosition(self.pagePosition).then(function(page) {
-        self.setNewPage(page);
-        self.showPage();
-        self.reportPosition().then(function(p) {
-            var r = self.pref.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
-            r.then(function() { frame.finish(p); })
-        })
+        self.showCurrent(page).then(function() {
+            self.reportPosition().then(function(p) {
+                var r = self.pref.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
+                r.then(function() { frame.finish(p); })
+            });
+        });
     });
 	return frame.result();
 };
@@ -436,10 +482,10 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
 	if (typeof command["where"] == "string") {
 		switch (command["where"]) {
 		case "next":
-			method = this.opfView.nextPage;
+			method = this.spreadView ? this.opfView.nextSpread : this.opfView.nextPage;
 			break;
 		case "previous":
-			method = this.opfView.previousPage;
+			method = this.spreadView ? this.opfView.previousSpread : this.opfView.previousPage;
 			break;
 		case "last":
 			method = this.opfView.lastPage;
@@ -467,9 +513,9 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
 	method.call(self.opfView).then(/** @param {adapt.vtree.Page} page */ function(page) {
 		if (page) {
 			self.pagePosition = null;
-			self.setNewPage(page);
-	    	self.showPage();
-			self.reportPosition().thenFinish(frame);
+	    	self.showCurrent(page).then(function() {
+                self.reportPosition().thenFinish(frame);
+            });
 		} else {
 			frame.finish(true);
 		}

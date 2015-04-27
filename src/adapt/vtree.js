@@ -155,6 +155,11 @@ adapt.vtree.Page.prototype.finish = function(triggers) {
 };
 
 /**
+ * @typedef {{left: adapt.vtree.Page, right: adapt.vtree.Page}}
+ */
+adapt.vtree.Spread;
+
+/**
  * Marks an element as "special". It should not be used in bbox calculations.
  * @const
  */
