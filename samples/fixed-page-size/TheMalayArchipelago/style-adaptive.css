@@ -88,7 +88,9 @@ figcaption {
 @-epubx-page-template {
 
     @-epubx-define {
-        page-margin-top: 0.7in;
+        fixed-page-width: 5.8in;
+        fixed-page-height: 8.3in;
+        page-margin-top: 0.5in;
         page-margin-side: 0.5in;
         body-line-height: 14pt;
         column-count: 2;
@@ -144,13 +146,16 @@ figcaption {
     }
 
     @-epubx-page-master {
+        width: -epubx-expr(fixed-page-width);
+        height: -epubx-expr(fixed-page-height);
+
         @-epubx-partition-group {
             margin-top: -epubx-expr(page-margin-top);
             margin-bottom: -epubx-expr(page-margin-top);
             margin-left: -epubx-expr(page-margin-side);
             margin-right: -epubx-expr(page-margin-side);
-            width: -epubx-expr(page-width - page-margin-side * 2);
-            height: -epubx-expr(page-height - page-margin-top * 2);
+            width: -epubx-expr(fixed-page-width - page-margin-side * 2);
+            height: -epubx-expr(fixed-page-height - page-margin-top * 2);
 
             @-epubx-partition {
                 -epubx-flow-from: body;
