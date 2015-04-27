@@ -1,0 +1,99 @@
+@charset "utf-8";
+
+@import "compass";
+
+@import "./lib/_mixins";
+
+@import "../../../node_modules/font-awesome/scss/_variables";
+@include at-font-face("FontAwesome", "../fonts/fontawesome-webfont", "#fontawesomeregular");
+
+$button-size: 40px;
+$button-offset: 5px;
+
+.ui-arrow {
+	position: absolute;
+	width: $button-size;
+	height: $button-size;
+	color: transparent;
+	background: transparent;
+	&:before {
+		display: block;
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		font-size: $button-size;
+		line-height: 1;
+		text-align: center;
+		vertical-align: middle;
+		color: black;
+		@include font-icon("FontAwesome");
+		opacity: .25;
+		@include transition(.2s linear);
+	}
+	&:hover {
+		cursor: pointer;
+		&:before {
+			opacity: 1;
+			@include transform(scale(1.125));
+			@include transition(.1s linear);
+		}
+	}
+	&:active {
+		&:before {
+			opacity: .25;
+			@include transition(.1s linear);
+		}
+	}
+}
+
+.ui-arrow-vertical {
+	left: 50%;
+	margin-left: $button-size * -0.5;
+}
+.ui-arrow-btt {
+	top: $button-offset;
+	&:before {
+		content: $fa-var-arrow-circle-o-up;
+	//	@include transform-origin_(50% 100%);
+	}
+	&:hover {
+		cursor: n-resize;
+	}
+}
+.ui-arrow-ttb {
+	bottom: $button-offset;
+	&:before {
+		content: $fa-var-arrow-circle-o-down;
+	//	@include transform-origin_(50% 0);
+	}
+	&:hover {
+		cursor: s-resize;
+	}
+}
+
+.ui-arrow-horizontal {
+	top: 50%;
+	margin-top: $button-size * -0.5;
+}
+.ui-arrow-rtl {
+	left: $button-offset;
+	&:before {
+		content: $fa-var-arrow-circle-o-left;
+	//	@include transform-origin_(100% 50%);
+	}
+	&:hover {
+		cursor: w-resize;
+	}
+}
+.ui-arrow-ltr {
+	right: $button-offset;
+	&:before {
+		content: $fa-var-arrow-circle-o-right;
+	//	@include transform-origin_(0 50%);
+	}
+	&:hover {
+		cursor: e-resize;
+	}
+}

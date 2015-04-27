@@ -31,17 +31,19 @@ adapt.viewer.ViewportSize;
 
 /**
  * @param {Window} window
+ * @param {!HTMLElement} viewportElement
  * @param {string} instanceId
  * @param {function(adapt.base.JSON):void} callbackFn
  * @constructor
  */
-adapt.viewer.Viewer = function(window, instanceId, callbackFn) {
+adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) {
 	var self = this;
 	/** @const */ this.window = window;
+    /** @const */ this.viewportElement = viewportElement;
 	/** @const */ this.instanceId = instanceId;
 	/** @const */ this.callbackFn = callbackFn;
 	var document = window.document;
-    /** @const */ this.fontMapper = new adapt.font.Mapper(document.head, document.body);
+    /** @const */ this.fontMapper = new adapt.font.Mapper(document.head, viewportElement);
     this.init();
     /** @type {function():void} */ this.kick = function(){};
     /** @const */ this.resizeListener = function() {
@@ -62,6 +64,7 @@ adapt.viewer.Viewer = function(window, instanceId, callbackFn) {
 };
 
 /**
+ * @private
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.init = function() {
@@ -93,11 +96,13 @@ adapt.viewer.Viewer.prototype.clearPages = function() {
 };
 
 /**
+ * @private
  * @param {adapt.base.JSON} message
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.callback = function(message) {
 	message["i"] = this.instanceId;
+    message["viewer"] = this;
 	this.callbackFn(message);
 };
 
@@ -162,8 +167,8 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
 	    self.opf.initWithSingleChapter(xmlURL, doc).then(function() {
             self.opf.resolveFragment(fragment).then(function(position) {
                 self.pagePosition = position;
-                self.callback({"t":"loaded"});
                 self.resize().then(function() {
+                    self.callback({"t":"loaded"});
                     frame.finish(true);
                 });
             });
@@ -174,6 +179,7 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
 };
 
 /**
+ * @private
  * @param {string} specified
  * @returns {number}
  */
@@ -271,6 +277,7 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 };
 
 /**
+ * @private
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.showPage = function() {
@@ -287,6 +294,7 @@ adapt.viewer.Viewer.prototype.showPage = function() {
 };
 
 /**
+ * @private
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.reportPosition = function() {
@@ -308,25 +316,25 @@ adapt.viewer.Viewer.prototype.reportPosition = function() {
 };
 
 /**
+ * @private
  * @return {adapt.vgen.Viewport}
  */
 adapt.viewer.Viewer.prototype.createViewport = function() {
+    var viewportElement = this.viewportElement;
 	if (this.viewportSize) {
 		var vs = this.viewportSize;
-		var body = this.window.document.body;
-		body.style.marginLeft = vs.marginLeft + "px";
-		body.style.marginRight = vs.marginRight + "px";
-		body.style.marginTop = vs.marginTop + "px";
-		body.style.marginBottom = vs.marginBottom + "px";
-		body.style.width = vs.width + "px";
-		body.style.height = vs.height + "px";
-		return new adapt.vgen.Viewport(this.window, this.fontSize, body, vs.width, vs.height);			
+		viewportElement.style.marginLeft = vs.marginLeft + "px";
+		viewportElement.style.marginRight = vs.marginRight + "px";
+		viewportElement.style.marginTop = vs.marginTop + "px";
+		viewportElement.style.marginBottom = vs.marginBottom + "px";
+		return new adapt.vgen.Viewport(this.window, this.fontSize, viewportElement, vs.width, vs.height);
 	} else {
-		return new adapt.vgen.Viewport(this.window, this.fontSize);	
+		return new adapt.vgen.Viewport(this.window, this.fontSize, viewportElement);
 	}
 };
 
 /**
+ * @private
  * @return {boolean}
  */
 adapt.viewer.Viewer.prototype.sizeIsGood = function() {
@@ -338,6 +346,7 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
 };
 
 /**
+ * @private
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.reset = function() {
@@ -350,6 +359,7 @@ adapt.viewer.Viewer.prototype.reset = function() {
 };
 
 /**
+ * @private
  * @param {adapt.vtree.Page} page
  * @return {void}
  */
@@ -387,6 +397,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
 };
 
 /**
+ * @private
  * @param {adapt.vtree.Page} page
  * @param {?string} cfi
  * @return {!adapt.task.Result.<boolean>}
@@ -406,6 +417,13 @@ adapt.viewer.Viewer.prototype.sendLocationNotification = function(page, cfi) {
 		frame.finish(true);
 	});
 	return frame.result();
+};
+
+/**
+ * @returns {?vivliostyle.constants.PageProgression}
+ */
+adapt.viewer.Viewer.prototype.getCurrentPageProgression = function() {
+    return this.opfView ? this.opfView.getCurrentPageProgression() : null;
 };
 
 /**
@@ -522,6 +540,7 @@ adapt.viewer.Viewer.prototype.runCommand = function(command) {
 };
 
 /**
+ * @private
  * @param {*} cmd
  * @return {adapt.base.JSON}
  */
@@ -610,7 +629,7 @@ if (window["adapt_embedded"]) {
 			});
 			fetcher.start();	
 		};		
-		var viewer = new adapt.viewer.Viewer(window, instanceId, postMessage);
+		var viewer = new adapt.viewer.Viewer(window, /** @type {!HTMLElement} */ (document.body), instanceId, postMessage);
 		viewer.initEmbed(command);
 		delete window["adapt_initEmbed"];
 	};

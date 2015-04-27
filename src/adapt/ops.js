@@ -5,6 +5,7 @@
  */
 goog.provide('adapt.ops');
 
+goog.require("vivliostyle.constants");
 goog.require('adapt.task');
 goog.require('adapt.geom');
 goog.require('adapt.expr');
@@ -135,6 +136,7 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @type {vivliostyle.page.PageManager} */ this.pageManager = null;
     /** @type {boolean} */ this.regionBreak = false;
     /** @type {!Object.<string,boolean>} */ this.pageBreaks = {};
+    /** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = null;
     /** @const */ this.customRenderer = customRenderer;
     /** @const */ this.fallbackMap = fallbackMap;
     for (var flowName in style.flowProps) {
@@ -165,6 +167,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     self.stylerMap = {};
     self.stylerMap[self.xmldoc.url] = self.styler;
     var docElementStyle = self.styler.getTopContainerStyle();
+    self.pageProgression = vivliostyle.page.resolvePageProgression(docElementStyle);
     var rootBox = this.style.rootBox;
     this.rootPageBoxInstance = new adapt.pm.RootPageBoxInstance(rootBox);
     var cascadeInstance = this.style.cascade.createInstance(self, this.lang);

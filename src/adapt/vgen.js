@@ -1224,10 +1224,12 @@ adapt.vgen.Viewport = function(window, fontSize, opt_root, opt_width, opt_height
 	if (opt_root && (!opt_width || !opt_height)) {
 	    var style = window.getComputedStyle(opt_root, null);
 	    var r = style["width"].match(/^(-?[0-9]*(\.[0-9]*)?)px$/);
-	    if (r)
-	    	this.width = parseFloat(r[0]);
+	    if (r && parseFloat(r[1]) > 0)
+            this.width = parseFloat(r[1]);
 	    r = style["height"].match(/^(-?[0-9]*(\.[0-9]*)?)px$/);
-	    if (r)
+	    if (r && parseFloat(r[1]) > 0)
 	    	this.height = parseFloat(r[0]);
 	}
+    this.root.style["min-width"] = this.width + "px";
+    this.root.style["min-height"] = this.height + "px";
 };

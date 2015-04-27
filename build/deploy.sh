@@ -18,7 +18,7 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" -a "${TRAVIS_BRANCH}" = "master" ]; then
 
     # update gh-pages branch
     master=../vivliostyle/vivliostyle.js
-    cp ${master}/build/vivliostyle-viewer.min.js ${master}/src/adapt/*.{css,txt,xml} ${master}/src/vivliostyle/*.css viewer/
+    cp -R ${master}/build/vivliostyle-viewer.min.js ${master}/src/adapt/*.{css,txt,xml} ${master}/viewer/res viewer/
     git add viewer
     git commit -m "Update built vivliostyle-viewer.min.js (original commit: $TRAVIS_COMMIT)"
     git push origin gh-pages
