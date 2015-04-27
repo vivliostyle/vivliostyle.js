@@ -81,7 +81,7 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {?adapt.epub.Position} */ this.pagePosition = null;
     /** @type {number} */ this.fontSize = 16;
     /** @type {boolean} */ this.waitForLoading = false;
-    /** @type {boolean} */ this.spreadView = true;
+    /** @type {boolean} */ this.spreadView = false;
     /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();	
 };
 
