@@ -16,7 +16,6 @@ $button-offset: 5px;
 	height: $button-size;
 	color: transparent;
 	background: transparent;
-	z-index: 9999;
 	&:before {
 		display: block;
 		position: absolute;

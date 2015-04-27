@@ -24,6 +24,20 @@ vivliostyle.viewerapp.sendCommand = function(cmd) {
 	window["adapt_command"](cmd);
 };
 
+vivliostyle.viewerapp.navigateToLeftPage = function() {
+    vivliostyle.viewerapp.sendCommand({
+        "a": "moveTo",
+        "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "previous" : "next"
+    });
+};
+
+vivliostyle.viewerapp.navigateToRightPage = function() {
+    vivliostyle.viewerapp.sendCommand({
+        "a": "moveTo",
+        "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "next" : "previous"
+    });
+};
+
 /**
  * @param {KeyboardEvent} evt
  * @return {void}
@@ -49,16 +63,10 @@ vivliostyle.viewerapp.keydown = function(evt) {
         });
         break;
         case 39:  // right arrow
-            vivliostyle.viewerapp.sendCommand({
-                "a": "moveTo",
-                "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "next" : "previous"
-            });
+            vivliostyle.viewerapp.navigateToRightPage();
             break;
         case 37:  // left arrow
-            vivliostyle.viewerapp.sendCommand({
-                "a": "moveTo",
-                "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "previous" : "next"
-            });
+            vivliostyle.viewerapp.navigateToLeftPage();
             break;
     case 48:  // zero
     	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
@@ -152,6 +160,17 @@ vivliostyle.viewerapp.callback = function(msg) {
 	switch (msg["t"]) {
 	case "loaded" :
 		vivliostyle.viewerapp.currentPageProgression = msg["viewer"].getCurrentPageProgression();
+
+        window.addEventListener("keydown", /** @type {Function} */ (vivliostyle.viewerapp.keydown), false);
+        window.addEventListener("touchstart", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+        window.addEventListener("touchmove", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+        window.addEventListener("touchend", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+
+        var leftButton = document.getElementById("vivliostyle-page-navigation-left");
+        leftButton.addEventListener("click", /** @type {Function} */ (vivliostyle.viewerapp.navigateToLeftPage), false);
+        var rightButton = document.getElementById("vivliostyle-page-navigation-right");
+        rightButton.addEventListener("click", /** @type {Function} */ (vivliostyle.viewerapp.navigateToRightPage), false);
+
 		break;
 	case "error" :
 		adapt.base.log("Error: " + msg["content"]);
@@ -251,9 +270,11 @@ vivliostyle.viewerapp.main = function(arg) {
     var uaRoot = (arg && arg.uaRoot) || null;
     var doc = (arg && arg.document) || null;
     var userStyleSheet = (arg && arg.userStyleSheet) || null;
-	var viewer = new adapt.viewer.Viewer(window, "main", vivliostyle.viewerapp.callback);
+    var viewportElement = (arg && arg.viewportElement) || document.body;
 
     var config = {
+        "a": epubURL ? "loadEPUB" : "loadXML",
+        "url": epubURL || xmlURL,
         "autoresize": true,
         "fragment": fragment,
         // render all pages on load and resize
@@ -263,15 +284,9 @@ vivliostyle.viewerapp.main = function(arg) {
         "userStyleSheet": userStyleSheet
     };
     setViewportSize(width, height, size, orientation, config);
-    config["a"] = epubURL ? "loadEPUB" : "loadXML";
-    config["url"] = epubURL || xmlURL;
 
+    var viewer = new adapt.viewer.Viewer(window, viewportElement, "main", vivliostyle.viewerapp.callback);
     viewer.initEmbed(config);
-
-    window.addEventListener("keydown", /** @type {Function} */ (vivliostyle.viewerapp.keydown), false);
-    window.addEventListener("touchstart", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
-    window.addEventListener("touchmove", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
-    window.addEventListener("touchend", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);	
 };
 
 goog.exportSymbol("vivliostyle.viewerapp.main", vivliostyle.viewerapp.main);

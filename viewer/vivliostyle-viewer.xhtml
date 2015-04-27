@@ -39,11 +39,18 @@ CLOSURE_NO_DEPS = true;
 <script src="../src/adapt/viewer.js"></script>
 <script src="../src/vivliostyle/viewerapp.js"></script>
 <script>
-    var config = {uaRoot: "../src/adapt/"};
-    if(window["__loaded"])
+    function startViewer() {
+        var config = {
+            uaRoot: "../src/adapt/",
+            viewportElement: document.getElementById("vivliostyle-viewer-viewport")
+        };
         vivliostyle.viewerapp.main(config);
+    }
+
+    if(window["__loaded"])
+        startViewer();
     else
-        window.onload = vivliostyle.viewerapp.main.bind(null, config);
+        window.onload = startViewer;
 </script>
 <!--- install MathJax -->
 <script src="../src/MathJax/MathJax.js?config=MML_HTMLorMML"></script>
@@ -58,7 +65,8 @@ MathJax.Hub.Config({
 <link rel="stylesheet" href="res/css/ui.arrows.css"/>
 </head>
 <body style="position:absolute;left:0px;top:0px;margin:0px;padding:0px">
-<span class="ui-arrow ui-arrow-horizontal ui-arrow-rtl">← Left / 左へ</span>
-<span class="ui-arrow ui-arrow-horizontal ui-arrow-ltr">→ Right / 右へ</span>
+<div id="vivliostyle-viewer-viewport"></div>
+<span id="vivliostyle-page-navigation-left" class="ui-arrow ui-arrow-horizontal ui-arrow-rtl">← Left / 左へ</span>
+<span id="vivliostyle-page-navigation-right" class="ui-arrow ui-arrow-horizontal ui-arrow-ltr">→ Right / 右へ</span>
 </body>
 </html>

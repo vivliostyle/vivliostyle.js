@@ -31,17 +31,19 @@ adapt.viewer.ViewportSize;
 
 /**
  * @param {Window} window
+ * @param {!HTMLElement} viewportElement
  * @param {string} instanceId
  * @param {function(adapt.base.JSON):void} callbackFn
  * @constructor
  */
-adapt.viewer.Viewer = function(window, instanceId, callbackFn) {
+adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) {
 	var self = this;
 	/** @const */ this.window = window;
+    /** @const */ this.viewportElement = viewportElement;
 	/** @const */ this.instanceId = instanceId;
 	/** @const */ this.callbackFn = callbackFn;
 	var document = window.document;
-    /** @const */ this.fontMapper = new adapt.font.Mapper(document.head, document.body);
+    /** @const */ this.fontMapper = new adapt.font.Mapper(document.head, viewportElement);
     this.init();
     /** @type {function():void} */ this.kick = function(){};
     /** @const */ this.resizeListener = function() {
@@ -318,18 +320,16 @@ adapt.viewer.Viewer.prototype.reportPosition = function() {
  * @return {adapt.vgen.Viewport}
  */
 adapt.viewer.Viewer.prototype.createViewport = function() {
+    var viewportElement = this.viewportElement;
 	if (this.viewportSize) {
 		var vs = this.viewportSize;
-		var body = this.window.document.body;
-		body.style.marginLeft = vs.marginLeft + "px";
-		body.style.marginRight = vs.marginRight + "px";
-		body.style.marginTop = vs.marginTop + "px";
-		body.style.marginBottom = vs.marginBottom + "px";
-		body.style.width = vs.width + "px";
-		body.style.height = vs.height + "px";
-		return new adapt.vgen.Viewport(this.window, this.fontSize, body, vs.width, vs.height);			
+		viewportElement.style.marginLeft = vs.marginLeft + "px";
+		viewportElement.style.marginRight = vs.marginRight + "px";
+		viewportElement.style.marginTop = vs.marginTop + "px";
+		viewportElement.style.marginBottom = vs.marginBottom + "px";
+		return new adapt.vgen.Viewport(this.window, this.fontSize, viewportElement, vs.width, vs.height);
 	} else {
-		return new adapt.vgen.Viewport(this.window, this.fontSize);	
+		return new adapt.vgen.Viewport(this.window, this.fontSize, viewportElement);
 	}
 };
 
@@ -629,7 +629,7 @@ if (window["adapt_embedded"]) {
 			});
 			fetcher.start();	
 		};		
-		var viewer = new adapt.viewer.Viewer(window, instanceId, postMessage);
+		var viewer = new adapt.viewer.Viewer(window, /** @type {!HTMLElement} */ (document.body), instanceId, postMessage);
 		viewer.initEmbed(command);
 		delete window["adapt_initEmbed"];
 	};
