@@ -12,3 +12,12 @@ vivliostyle.constants.PageProgression = {
     LTR: "ltr",
     RTL: "rtl"
 };
+
+/**
+ * Page side (left/right).
+ * @enum {string}
+ */
+vivliostyle.constants.PageSide = {
+    LEFT: "left",
+    RIGHT: "right"
+};

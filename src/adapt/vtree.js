@@ -2,6 +2,7 @@
  * Copyright 2013 Google, Inc.
  * @fileoverview Basic view tree data structures and support utilities.
  */
+goog.require('vivliostyle.constants');
 goog.require('adapt.base');
 goog.require('adapt.geom');
 goog.require('adapt.task');
@@ -110,6 +111,7 @@ adapt.vtree.Page = function(container) {
 	/** @type {number} */ this.spineIndex = 0;
 	/** @type {adapt.vtree.LayoutPosition} */ this.position = null;
 	/** @type {number} */ this.offset = -1;
+    /** @type {?vivliostyle.constants.PageSide} */ this.side = null;
 	/** @type {Array.<adapt.taskutil.Fetcher>} */ this.fetchers = [];
 };
 goog.inherits(adapt.vtree.Page, adapt.base.SimpleEventTarget);
