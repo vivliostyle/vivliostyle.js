@@ -966,6 +966,7 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
                 page.container.style.display = "none";
                 page.container.style.visibility = "visible";
+                page.container.setAttribute("data-vivliostyle-page-side", /** @type {string} */ (page.side));
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 			    if (pos) {
                     viewItem.pages[pos.page - 1] = page;
@@ -1008,6 +1009,7 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
                 page.container.style.display = "none";
                 page.container.style.visibility = "visible";
+                page.container.setAttribute("data-vivliostyle-page-side", /** @type {string} */ (page.side));
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 			    if (pos) {
                     viewItem.pages[pos.page - 1] = page;

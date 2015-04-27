@@ -322,9 +322,15 @@ adapt.viewer.Viewer.prototype.showSpread = function(spread) {
     this.currentSpread = spread;
     if (spread.left) {
         this.showSinglePage(spread.left);
+        if (!spread.right) {
+            spread.left.container.setAttribute("data-vivliostyle-unpaired-page", true);
+        }
     }
     if (spread.right) {
         this.showSinglePage(spread.right);
+        if (!spread.left) {
+            spread.right.container.setAttribute("data-vivliostyle-unpaired-page", true);
+        }
     }
 };
 

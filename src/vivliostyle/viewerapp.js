@@ -159,7 +159,11 @@ vivliostyle.viewerapp.touch = function(evt) {
 vivliostyle.viewerapp.callback = function(msg) {
 	switch (msg["t"]) {
 	case "loaded" :
-		vivliostyle.viewerapp.currentPageProgression = msg["viewer"].getCurrentPageProgression();
+        var viewer = msg["viewer"];
+        var pageProgression = vivliostyle.viewerapp.currentPageProgression
+            = viewer.getCurrentPageProgression();
+        viewer.viewportElement.setAttribute("data-vivliostyle-page-progression", pageProgression);
+        viewer.viewportElement.setAttribute("data-vivliostyle-spread-view", viewer.spreadView);
 
         window.addEventListener("keydown", /** @type {Function} */ (vivliostyle.viewerapp.keydown), false);
         window.addEventListener("touchstart", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
