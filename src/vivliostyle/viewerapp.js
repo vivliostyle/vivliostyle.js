@@ -260,17 +260,17 @@ function setViewportSize(width, height, size, orientation, config) {
  * @return {void}
  */
 vivliostyle.viewerapp.main = function(arg) {
-    var fragment = (arg && arg.fragment) || adapt.base.getURLParam("f");
-    var epubURL = (arg && arg.epubURL) || adapt.base.getURLParam("b");
-    var xmlURL = (arg && arg.xmlURL) || adapt.base.getURLParam("x");
-    var width = (arg && arg.defaultPageWidth) || adapt.base.getURLParam("w");
-    var height = (arg && arg.defaultPageHeight) || adapt.base.getURLParam("h");
-    var size = (arg && arg.defaultPageSize) || adapt.base.getURLParam("size");
-    var orientation = (arg && arg.orientation) || adapt.base.getURLParam("orientation");
-    var uaRoot = (arg && arg.uaRoot) || null;
-    var doc = (arg && arg.document) || null;
-    var userStyleSheet = (arg && arg.userStyleSheet) || null;
-    var viewportElement = (arg && arg.viewportElement) || document.body;
+    var fragment = (arg && arg["fragment"]) || adapt.base.getURLParam("f");
+    var epubURL = (arg && arg["epubURL"]) || adapt.base.getURLParam("b");
+    var xmlURL = (arg && arg["xmlURL"]) || adapt.base.getURLParam("x");
+    var width = (arg && arg["defaultPageWidth"]) || adapt.base.getURLParam("w");
+    var height = (arg && arg["defaultPageHeight"]) || adapt.base.getURLParam("h");
+    var size = (arg && arg["defaultPageSize"]) || adapt.base.getURLParam("size");
+    var orientation = (arg && arg["orientation"]) || adapt.base.getURLParam("orientation");
+    var uaRoot = (arg && arg["uaRoot"]) || null;
+    var doc = (arg && arg["document"]) || null;
+    var userStyleSheet = (arg && arg["userStyleSheet"]) || null;
+    var viewportElement = (arg && arg["viewportElement"]) || document.body;
 
     var config = {
         "a": epubURL ? "loadEPUB" : "loadXML",
