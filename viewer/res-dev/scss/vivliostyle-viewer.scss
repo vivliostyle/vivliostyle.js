@@ -49,8 +49,27 @@ html[data-vivliostyle-paginated] {
     #vivliostyle-viewer-viewport {
         display: flex;
 
+        &[data-vivliostyle-page-progression=ltr] {
+            flex-direction: row;
+        }
+        &[data-vivliostyle-page-progression=rtl] {
+            flex-direction: row-reverse;
+        }
+
         & > div {
             margin: auto;
         }
+
+        &[data-vivliostyle-spread-view=true] {
+            & > div[data-vivliostyle-page-side=left] {
+                margin-right: 1px;
+            }
+            & > div[data-vivliostyle-page-side=right] {
+                margin-left: 1px;
+            }
+            & > div[data-vivliostyle-unpaired-page=true] {
+                margin: auto;
+            }
+      }
     }
 }

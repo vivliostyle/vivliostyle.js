@@ -695,6 +695,8 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
     	= adapt.task.newFrame("layoutNextPage");
     self.layoutContainer(page, pageMaster, page.container, 0, 0, []).then(function() {
+        var isLeftPage = new adapt.expr.Named(pageMaster.pageBox.scope, "left-page");
+        page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;
 	    self.processLinger();
 	    self.currentLayoutPosition = null;
 	    cp.highestSeenOffset = self.styler.getReachedOffset();

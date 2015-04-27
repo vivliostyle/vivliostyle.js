@@ -899,6 +899,15 @@ adapt.epub.OPFView.prototype.isAtTheLastPage = function() {
 };
 
 /**
+ * @private
+ * @returns {adapt.vtree.Page}
+ */
+adapt.epub.OPFView.prototype.getCurrentPage = function() {
+    var viewItem = this.spineItems[this.spineIndex];
+    return viewItem ? viewItem.pages[this.pageIndex] : null;
+};
+
+/**
  * @returns {?vivliostyle.constants.PageProgression}
  */
 adapt.epub.OPFView.prototype.getCurrentPageProgression = function() {
@@ -957,6 +966,7 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
                 page.container.style.display = "none";
                 page.container.style.visibility = "visible";
+                page.container.setAttribute("data-vivliostyle-page-side", /** @type {string} */ (page.side));
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 			    if (pos) {
                     viewItem.pages[pos.page - 1] = page;
@@ -999,6 +1009,7 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
                 page.container.style.display = "none";
                 page.container.style.visibility = "visible";
+                page.container.setAttribute("data-vivliostyle-page-side", /** @type {string} */ (page.side));
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 			    if (pos) {
                     viewItem.pages[pos.page - 1] = page;
@@ -1110,6 +1121,100 @@ adapt.epub.OPFView.prototype.previousPage = function() {
 		this.pageIndex--;
 	}
 	return this.renderPage();
+};
+
+/**
+ * @private
+ * @param {adapt.vtree.Page} page This page should be a currently displayed page.
+ * @returns {boolean}
+ */
+adapt.epub.OPFView.prototype.isRectoPage = function(page) {
+    var isLeft = page.side === vivliostyle.constants.PageSide.LEFT;
+    var isLTR = this.getCurrentPageProgression() === vivliostyle.constants.PageProgression.LTR;
+    return (!isLeft && isLTR) || (isLeft && !isLTR);
+};
+
+/**
+ * Get a spread containing the currently displayed page.
+ * @return {!adapt.task.Result.<!adapt.vtree.Spread>}
+ */
+adapt.epub.OPFView.prototype.getCurrentSpread = function() {
+    var self = this;
+    /** @type {!adapt.task.Frame.<adapt.vtree.Spread>} */ var frame
+        = adapt.task.newFrame("getCurrentSpread");
+
+    var page = this.getCurrentPage();
+    if (!page) {
+        return adapt.task.newResult(/** @type adapt.vtree.Spread */ ({left: null, right: null}));
+    }
+
+    // backup original values
+    var spineIndex = self.spineIndex;
+    var pageIndex = self.pageIndex;
+
+    var isLeft = page.side === vivliostyle.constants.PageSide.LEFT;
+    var other;
+    if (this.isRectoPage(page)) {
+        other = this.previousPage();
+    } else {
+        other = this.nextPage();
+    }
+    other.then(function(otherPage) {
+        // restore original values
+        self.spineIndex = spineIndex;
+        self.pageIndex = pageIndex;
+        self.renderPage().then(function() {
+            if (isLeft) {
+                frame.finish({left: page, right: otherPage});
+            } else {
+                frame.finish({left: otherPage, right: page});
+            }
+        });
+    });
+
+    return frame.result();
+};
+
+/**
+ * Move to the next spread and render pages.
+ * @returns {!adapt.task.Result.<adapt.vtree.Page>} The 'verso' page of the next spread.
+ */
+adapt.epub.OPFView.prototype.nextSpread = function() {
+    var page = this.getCurrentPage();
+    if (!page) {
+        return adapt.task.newResult(/** @type {adapt.vtree.Page} */ (null));
+    }
+    var isRecto = this.isRectoPage(page);
+    var next = this.nextPage();
+    if (isRecto) {
+        return next;
+    } else {
+        var self = this;
+        return next.thenAsync(function(page) {
+            return self.nextPage();
+        });
+    }
+};
+
+/**
+ * Move to the previous spread and render pages.
+ * @returns {!adapt.task.Result.<adapt.vtree.Page>} The 'recto' page of the previous spread.
+ */
+adapt.epub.OPFView.prototype.previousSpread = function() {
+    var page = this.getCurrentPage();
+    if (!page) {
+        return adapt.task.newResult(/** @type {adapt.vtree.Page} */ (null));
+    }
+    var isRecto = this.isRectoPage(page);
+    var prev = this.previousPage();
+    if (isRecto) {
+        var self = this;
+        return prev.thenAsync(function(page) {
+            return self.previousPage();
+        });
+    } else {
+        return prev;
+    }
 };
 
 /**

@@ -729,7 +729,7 @@ vivliostyle.page.PageParserHandler.prototype.pseudoclassSelector = function(name
             this.specificity += 0x1;
             break;
         case "recto":
-            this.chain.push(new vivliostyle.page.IsRectoPageAction(this.scope))
+            this.chain.push(new vivliostyle.page.IsRectoPageAction(this.scope));
             this.specificity += 0x1;
             break;
         case "verso":

@@ -159,7 +159,11 @@ vivliostyle.viewerapp.touch = function(evt) {
 vivliostyle.viewerapp.callback = function(msg) {
 	switch (msg["t"]) {
 	case "loaded" :
-		vivliostyle.viewerapp.currentPageProgression = msg["viewer"].getCurrentPageProgression();
+        var viewer = msg["viewer"];
+        var pageProgression = vivliostyle.viewerapp.currentPageProgression
+            = viewer.getCurrentPageProgression();
+        viewer.viewportElement.setAttribute("data-vivliostyle-page-progression", pageProgression);
+        viewer.viewportElement.setAttribute("data-vivliostyle-spread-view", viewer.spreadView);
 
         window.addEventListener("keydown", /** @type {Function} */ (vivliostyle.viewerapp.keydown), false);
         window.addEventListener("touchstart", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
@@ -267,6 +271,8 @@ vivliostyle.viewerapp.main = function(arg) {
     var height = (arg && arg["defaultPageHeight"]) || adapt.base.getURLParam("h");
     var size = (arg && arg["defaultPageSize"]) || adapt.base.getURLParam("size");
     var orientation = (arg && arg["orientation"]) || adapt.base.getURLParam("orientation");
+    var spreadView = adapt.base.getURLParam("spread");
+    spreadView = (arg && arg["spreadView"]) || (!!spreadView && spreadView != "false");
     var uaRoot = (arg && arg["uaRoot"]) || null;
     var doc = (arg && arg["document"]) || null;
     var userStyleSheet = (arg && arg["userStyleSheet"]) || null;
@@ -281,7 +287,8 @@ vivliostyle.viewerapp.main = function(arg) {
         "renderAllPages": true,
         "userAgentRootURL": uaRoot,
         "document": doc,
-        "userStyleSheet": userStyleSheet
+        "userStyleSheet": userStyleSheet,
+        "spreadView": spreadView
     };
     setViewportSize(width, height, size, orientation, config);
 
