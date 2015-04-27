@@ -10,7 +10,10 @@
 $button-size: 40px;
 $button-offset: 5px;
 
-.ui-arrow {
+#vivliostyle-page-navigation-btt, #vivliostyle-page-navigation-up,
+#vivliostyle-page-navigation-ttb, #vivliostyle-page-navigation-down,
+#vivliostyle-page-navigation-rtl, #vivliostyle-page-navigation-left,
+#vivliostyle-page-navigation-ltr, #vivliostyle-page-navigation-right {
 	position: absolute;
 	width: $button-size;
 	height: $button-size;
@@ -48,50 +51,48 @@ $button-offset: 5px;
 	}
 }
 
-.ui-arrow-vertical {
+#vivliostyle-page-navigation-btt, #vivliostyle-page-navigation-up,
+#vivliostyle-page-navigation-ttb, #vivliostyle-page-navigation-down {
 	left: 50%;
 	margin-left: $button-size * -0.5;
 }
-.ui-arrow-btt {
+#vivliostyle-page-navigation-btt, #vivliostyle-page-navigation-up {
 	top: $button-offset;
 	&:before {
 		content: $fa-var-arrow-circle-o-up;
-	//	@include transform-origin_(50% 100%);
 	}
 	&:hover {
 		cursor: n-resize;
 	}
 }
-.ui-arrow-ttb {
+#vivliostyle-page-navigation-ttb, #vivliostyle-page-navigation-down {
 	bottom: $button-offset;
 	&:before {
 		content: $fa-var-arrow-circle-o-down;
-	//	@include transform-origin_(50% 0);
 	}
 	&:hover {
 		cursor: s-resize;
 	}
 }
 
-.ui-arrow-horizontal {
+#vivliostyle-page-navigation-rtl, #vivliostyle-page-navigation-left,
+#vivliostyle-page-navigation-ltr, #vivliostyle-page-navigation-right {
 	top: 50%;
 	margin-top: $button-size * -0.5;
 }
-.ui-arrow-rtl {
+#vivliostyle-page-navigation-rtl, #vivliostyle-page-navigation-left {
 	left: $button-offset;
 	&:before {
 		content: $fa-var-arrow-circle-o-left;
-	//	@include transform-origin_(100% 50%);
 	}
 	&:hover {
 		cursor: w-resize;
 	}
 }
-.ui-arrow-ltr {
+#vivliostyle-page-navigation-ltr, #vivliostyle-page-navigation-right {
 	right: $button-offset;
 	&:before {
 		content: $fa-var-arrow-circle-o-right;
-	//	@include transform-origin_(0 50%);
 	}
 	&:hover {
 		cursor: e-resize;
