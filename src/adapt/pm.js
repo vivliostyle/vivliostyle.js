@@ -116,6 +116,7 @@ adapt.pm.PageMaster = function(scope, name, pseudoName, classes, parent, conditi
     this.specified["height"] = new adapt.csscasc.CascadeValue(adapt.css.fullHeight, 0);
     this.specified["wrap-flow"] =  new adapt.csscasc.CascadeValue(adapt.css.ident.auto, 0);
     this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.relative, 0);
+    this.specified["overflow"] = new adapt.csscasc.CascadeValue(adapt.css.ident.hidden, 0);
     /** @type {Object.<string,string>} */ this.keyMap = {};
 };
 goog.inherits(adapt.pm.PageMaster, adapt.pm.PageBox);
