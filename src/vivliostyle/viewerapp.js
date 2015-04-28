@@ -166,9 +166,9 @@ vivliostyle.viewerapp.callback = function(msg) {
         viewer.viewportElement.setAttribute("data-vivliostyle-spread-view", viewer.spreadView);
 
         window.addEventListener("keydown", /** @type {Function} */ (vivliostyle.viewerapp.keydown), false);
-        window.addEventListener("touchstart", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
-        window.addEventListener("touchmove", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
-        window.addEventListener("touchend", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+//        window.addEventListener("touchstart", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+//        window.addEventListener("touchmove", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+//        window.addEventListener("touchend", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
 
         var leftButton = document.getElementById("vivliostyle-page-navigation-left");
         leftButton.addEventListener("click", /** @type {Function} */ (vivliostyle.viewerapp.navigateToLeftPage), false);
