@@ -175,6 +175,7 @@ vivliostyle.page.PageRulePartition.sides = [
 vivliostyle.page.PageRulePartition.prototype.applySpecified = function(style) {
     this.specified["flow-from"] = new adapt.csscasc.CascadeValue(adapt.css.getName("body"), 0);
     this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.relative, 0);
+    this.specified["overflow"] = new adapt.csscasc.CascadeValue(adapt.css.ident.visible, 0);
 
     var self = this;
     function copy(name) {

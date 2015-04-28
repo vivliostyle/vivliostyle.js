@@ -900,6 +900,7 @@ adapt.css.ident = {
 	transparent: adapt.css.getName("transparent"),
     vertical_lr: adapt.css.getName("vertical-lr"),
 	vertical_rl: adapt.css.getName("vertical-rl"),
+    visible: adapt.css.getName("visible"),
     _true: adapt.css.getName("true")
 };
 
