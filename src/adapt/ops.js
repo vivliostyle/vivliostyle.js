@@ -830,7 +830,7 @@ adapt.ops.BaseParserHandler.prototype.startPageRule = function() {
     var pageHandler = new vivliostyle.page.PageParserHandler(this.masterHandler.pageScope,
         this.masterHandler, this, this.validatorSet);
     this.masterHandler.pushHandler(pageHandler);
-    pageHandler.startSelectorRule();
+    pageHandler.startPageRule();
 };
 
 /**
