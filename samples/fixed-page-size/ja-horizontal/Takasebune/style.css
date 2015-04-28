@@ -2,8 +2,8 @@
 
 html {
     /* ページサイズ */
-    --page-width: 123mm;
-    --page-height: 188mm;
+    --page-width: 148mm;
+    --page-height: 210mm;
     /* 組み方向 */
     writing-mode: horizontal-tb;
     /* フォント */
@@ -14,13 +14,13 @@ html {
     /* 行送り */
     --body-line-height: 18pt;
     /* 行長（文字数） */
-    --line-length: 13;
+    --line-length: 15;
     /* 行数 */
-    --line-count: 24;
+    --line-count: 27;
     /* 段数 */
     --column-count: 2;
     /* 段間 */
-    --column-gap: 1em;
+    --column-gap: 2em;
     /* 基本版面の天からの距離 */
     --page-margin-top: 17mm;
     /* 基本版面の小口からの距離 */
@@ -104,17 +104,17 @@ html {
         /*column-count: var(--column-count);*/
         column-count: 2;
         /*column-gap: var(--column-gap);*/
-        column-gap: 1em;
+        column-gap: 2em;
     }
 }
 
 @page {
     /*size: var(--page-width) var(--page-height);*/
-    size: 123mm 188mm;
+    size: 148mm 210mm;
     /*height: calc(var(--body-line-height) * var(--line-count));*/
-    height: 432pt;
+    height: 486pt;
     /*width: var(--font-size) * var(--line-length) * var(--column-count) + var(--column-gap) * (var(--column-count) - 1);*/
-    width: 270pt;
+    width: 320pt;
     /*margin-top: var(--page-margin-top);*/
     margin-top: 17mm;
     margin-bottom: auto;
@@ -133,17 +133,18 @@ html {
 }
 
 h1 {
-    box-sizing: border-box;
+    /*box-sizing: border-box;*/
     --block-size: calc(var(--body-line-height) * var(--lines));
     /*block-size: var(--block-size);*/
-    height: 54pt;
+    /*height: 54pt;*/
+    height: 37pt;
     /*line-height: var(--line-height);*/
     line-height: 1em;
     /*padding-block-start: calc((var(--block-size) - var(--line-height)) / 2);*/
     padding-top: 17pt;
 }
 h2 {
-    box-sizing: border-box;
+    /*box-sizing: border-box;*/
     --block-size: calc(var(--body-line-height) * var(--lines));
     /*block-size: var(--block-size);*/
     height: 18pt;

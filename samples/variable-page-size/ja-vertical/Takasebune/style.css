@@ -9,7 +9,7 @@ html {
     font-family: "游明朝", "YuMincho", serif;
     font-weight: normal;
     /* フォントサイズ */
-    --font-size: 10.5pt;
+    --font-size: 10pt;
     /* 行送り */
     --body-line-height: 18pt;
     /* 段幅 */
@@ -114,17 +114,18 @@ html {
 }
 
 h1 {
-    box-sizing: border-box;
+    /*box-sizing: border-box;*/
     --block-size: calc(var(--body-line-height) * var(--lines));
     /*block-size: var(--block-size);*/
-    width: 54pt;
+    /*width: 54pt;*/
+    width: 37pt;
     /*line-height: var(--line-height);*/
     line-height: 1em;
     /*padding-block-start: calc((var(--block-size) - var(--line-height)) / 2);*/
     padding-right: 17pt;
 }
 h2 {
-    box-sizing: border-box;
+    /*box-sizing: border-box;*/
     --block-size: calc(var(--body-line-height) * var(--lines));
     /*block-size: var(--block-size);*/
     width: 18pt;
