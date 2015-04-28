@@ -47,12 +47,15 @@ html[data-vivliostyle-paginated] {
     }
 
     #vivliostyle-viewer-viewport {
+        display: -webkit-flex;
         display: flex;
 
         &[data-vivliostyle-page-progression=ltr] {
+            -webkit-flex-direction: row;
             flex-direction: row;
         }
         &[data-vivliostyle-page-progression=rtl] {
+            -webkit-flex-direction: row-reverse;
             flex-direction: row-reverse;
         }
 
