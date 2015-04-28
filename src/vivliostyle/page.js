@@ -696,13 +696,23 @@ vivliostyle.page.IsVersoPageAction.prototype.getPriority = function() {
  */
 vivliostyle.page.PageParserHandler = function(scope, owner, parent, validatorSet) {
     adapt.csscasc.CascadeParserHandler.call(this, scope, owner, null, parent, null, validatorSet, false);
+    /** @type {string} */ this.pageSizeRules = "";
 };
 goog.inherits(vivliostyle.page.PageParserHandler, adapt.csscasc.CascadeParserHandler);
 
 /**
  * @override
  */
+vivliostyle.page.PageParserHandler.prototype.startPageRule = function() {
+    this.pageSizeRules += "@page ";
+    this.startSelectorRule();
+};
+
+/**
+ * @override
+ */
 vivliostyle.page.PageParserHandler.prototype.tagSelector = function(ns, name) {
+    this.pageSizeRules += name;
     if (name) {
         this.chain.push(new vivliostyle.page.CheckPageTypeAction(name));
         this.specificity += 0x10000;
@@ -716,6 +726,7 @@ vivliostyle.page.PageParserHandler.prototype.pseudoclassSelector = function(name
     if (params) {
         this.reportAndSkip("E_INVALID_PAGE_SELECTOR :" + name + "(" + params.join("") + ")");
     }
+    this.pageSizeRules += ":" + name;
     switch (name.toLowerCase()) {
         case "first":
             this.chain.push(new vivliostyle.page.IsFirstPageAction(this.scope));
@@ -741,6 +752,36 @@ vivliostyle.page.PageParserHandler.prototype.pseudoclassSelector = function(name
             this.reportAndSkip("E_INVALID_PAGE_SELECTOR :" + name);
             break;
     }
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageParserHandler.prototype.startRuleBody = function() {
+    this.pageSizeRules += "{";
+    adapt.csscasc.CascadeParserHandler.prototype.startRuleBody.call(this);
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageParserHandler.prototype.endRule = function() {
+    this.pageSizeRules += "}";
+
+    // TODO This output to the style element should be done in an upper (view) layer
+    document.getElementById("vivliostyle-page-rules").textContent += this.pageSizeRules;
+
+    adapt.csscasc.CascadeParserHandler.prototype.endRule.call(this);
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageParserHandler.prototype.property = function(name, value, important) {
+    if (name === "size") {
+        this.pageSizeRules += "size: " + value.toString() + (important ? "!important" : "") + ";";
+    }
+    adapt.csscasc.CascadeParserHandler.prototype.property.call(this, name, value, important);
 };
 
 /**
