@@ -170,10 +170,18 @@ vivliostyle.viewerapp.callback = function(msg) {
         window.addEventListener("touchmove", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
         window.addEventListener("touchend", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
 
+        document.body.setAttribute("data-vivliostyle-viewer-status", "complete");
+
         var leftButton = document.getElementById("vivliostyle-page-navigation-left");
         leftButton.addEventListener("click", /** @type {Function} */ (vivliostyle.viewerapp.navigateToLeftPage), false);
         var rightButton = document.getElementById("vivliostyle-page-navigation-right");
         rightButton.addEventListener("click", /** @type {Function} */ (vivliostyle.viewerapp.navigateToRightPage), false);
+        [leftButton, rightButton].forEach(function(button) {
+            button.setAttribute("data-vivliostyle-ui-state", "attention");
+            window.setTimeout(function() {
+                button.removeAttribute("data-vivliostyle-ui-state");
+            }, 1000);
+        });
 
 		break;
 	case "error" :
