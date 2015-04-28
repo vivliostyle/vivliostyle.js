@@ -53,15 +53,15 @@ vivliostyle-viewer.xhtml.
 can be used to make the code faster and much more compact. Use of the
 Closure compiler for web apps is optional.
 
-To use Closure compiler, install it as a sibling to this folder. In
-particular, make sure that closure jar file is available as
-../closure/compiler.jar from this folder.
+Closure compiler can be installed via npm. To compile JavaScipt, run
 
-Then go to js folder and run
-
-```
-./BUILD.sh > vivliostyle-viewer.js
+```sh
+npm install
+npm run build
 ```
 
-Modify vivliostyle-viewer.xhtml to reference only vivliostyle-viewer.js (goog/base.js is not
-needed, but MathJax-related files can be kept if desired).
+Then the compiled JavaScript file appears at `build/vivliostyle-viewer.min.js`.
+Modify vivliostyle-viewer.xhtml to reference only vivliostyle-viewer.min.js
+(goog/base.js is not needed, but MathJax-related files can be kept if desired).
+You might need to modify `uaRoot` parameter in vivliostyle-viewer.xhtml to
+point the location of user agent resources (user-agent-* and validation.txt files).
