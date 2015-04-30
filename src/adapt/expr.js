@@ -120,10 +120,6 @@ adapt.expr.LexicalScope = function(parent, resolver) {
     /** @type {adapt.expr.Const} */ this.one = new adapt.expr.Const(this, 1);
     /** @type {adapt.expr.Const} */ this._true = new adapt.expr.Const(this, true);
     /** @type {adapt.expr.Const} */ this._false = new adapt.expr.Const(this, false);
-    /** @type {adapt.expr.Numeric} */ this.viewportWidth =
-    	new adapt.expr.Numeric(this, 100, "vw");
-    /** @type {adapt.expr.Numeric} */ this.viewportHeight =
-    	new adapt.expr.Numeric(this, 100, "vh");
     if (parent)
         parent.children.push(this);
     /** @type {Object.<string,adapt.expr.Val>} */ this.values = {};
@@ -144,8 +140,8 @@ adapt.expr.LexicalScope = function(parent, resolver) {
         builtIns["css-string"] = adapt.expr.cssString;
         builtIns["css-name"] = adapt.expr.cssIdent;
         builtIns["typeof"] = function(x) { return typeof(x); };
-        this.defineBuiltInName("page-width", function() { return this.pageWidth; });
-        this.defineBuiltInName("page-height", function() { return this.pageHeight; });
+        this.defineBuiltInName("page-width", function() { return this.pageWidth(); });
+        this.defineBuiltInName("page-height", function() { return this.pageHeight(); });
         this.defineBuiltInName("pref-font-family", function() { return this.pref.fontFamily; });
         this.defineBuiltInName("pref-night-mode", function() { return this.pref.nightMode; });
         this.defineBuiltInName("pref-hyphenate", function() { return this.pref.hyphenate; });
@@ -155,6 +151,7 @@ adapt.expr.LexicalScope = function(parent, resolver) {
         this.defineBuiltInName("pref-horizontal", function() {
         	return this.pref.horizontal;
         });
+        this.defineBuiltInName("pref-spread-view", function() { return this.pref.spreadView; });
     }
 };
 
@@ -238,15 +235,19 @@ adapt.expr.ScopeContext;
 /**
  * Run-time instance of a scope and its children.
  * @param {adapt.expr.LexicalScope} rootScope
- * @param {number} pageWidth
- * @param {number} pageHeight
+ * @param {number} viewportWidth
+ * @param {number} viewportHeight
  * @param {number} fontSize
  * @constructor
  */
-adapt.expr.Context = function(rootScope, pageWidth, pageHeight, fontSize) {
+adapt.expr.Context = function(rootScope, viewportWidth, viewportHeight, fontSize) {
 	/** @const */ this.rootScope = rootScope;
-	/** @const */ this.pageWidth = pageWidth;
-	/** @const */ this.pageHeight = pageHeight;
+    /** @const @type {function(this:adapt.expr.Context): number} */
+    this.pageWidth = function() {
+        return this.pref.spreadView ? Math.floor(viewportWidth / 2) : viewportWidth;
+    };
+    /** @const @type {function(this:adapt.expr.Context): number} */
+    this.pageHeight = function() { return viewportHeight; };
 	/** @const */ this.fontSize = fontSize;
 	this.pref = adapt.expr.defaultPreferencesInstance;
 	/** @type {Object.<string,adapt.expr.ScopeContext>} */ this.scopes = {};
@@ -283,9 +284,9 @@ adapt.expr.Context.prototype.clearScope = function(scope) {
  */
 adapt.expr.Context.prototype.queryUnitSize = function(unit) {
     if (unit == "vw")
-        return this.pageWidth / 100;
+        return this.pageWidth() / 100;
     if (unit == "vh")
-        return this.pageHeight / 100;
+        return this.pageHeight() / 100;
     if (unit == "em" || unit == "rem")
         return this.fontSize;
     if (unit == "ex" || unit == "rex")
@@ -373,10 +374,10 @@ adapt.expr.Context.prototype.evalMediaTest = function(feature, value) {
     }
     switch (feature) {
         case "width":
-            actual = this.pageWidth;
+            actual = this.pageWidth();
             break;
         case "height":
-            actual = this.pageHeight;
+            actual = this.pageHeight();
             break;
         case "device-width":
             actual = window.screen.availWidth;
