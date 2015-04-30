@@ -20,6 +20,7 @@ $button-offset: 5px;
 	background: transparent;
 	cursor: pointer;
 	opacity: 0;
+	z-index: 1000;
 	[data-vivliostyle-viewer-status="loading"] & {
 		opacity: 0;
 	}
