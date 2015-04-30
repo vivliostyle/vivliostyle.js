@@ -81,6 +81,7 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {?adapt.epub.Position} */ this.pagePosition = null;
     /** @type {number} */ this.fontSize = 16;
     /** @type {boolean} */ this.waitForLoading = false;
+    /** @type {boolean} */ this.renderAllPages = true;
     /** @type {boolean} */ this.spreadView = false;
     /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();	
 };
@@ -258,7 +259,7 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 		this.waitForLoading = command["load"];  // Load images (and other resources) on the page.		
 	}
     if (typeof command["renderAllPages"] == "boolean") {
-        this.pref.renderAllPages = command["renderAllPages"];
+        this.renderAllPages = command["renderAllPages"];
     }
     if (typeof command["userAgentRootURL"] == "string") {
         adapt.base.resourceBaseURL = command["userAgentRootURL"];
@@ -440,7 +441,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
     self.opfView.setPagePosition(self.pagePosition).then(function(page) {
         self.showCurrent(page).then(function() {
             self.reportPosition().then(function(p) {
-                var r = self.pref.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
+                var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
                 r.then(function() { frame.finish(p); })
             });
         });

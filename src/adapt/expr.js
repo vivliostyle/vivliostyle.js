@@ -9,7 +9,7 @@ goog.require('adapt.base');
 
 /**
  * @typedef {{fontFamily:string, lineHeight:number, margin:number, hyphenate:boolean,
- *   	columnWidth:number, horizontal:boolean, nightMode:boolean, renderAllPages:boolean}}
+ *   	columnWidth:number, horizontal:boolean, nightMode:boolean}}
  *  }}
  */
 adapt.expr.Preferences;
@@ -19,7 +19,7 @@ adapt.expr.Preferences;
  */
 adapt.expr.defaultPreferences = function() {
 	return {fontFamily:"serif", lineHeight:1.25, margin:8, hyphenate:true, columnWidth:25,
-				horizontal:false, nightMode:false, renderAllPages:false};
+				horizontal:false, nightMode:false};
 };
 
 /**
@@ -29,7 +29,7 @@ adapt.expr.defaultPreferences = function() {
 adapt.expr.clonePreferences = function(pref) {
 	return {fontFamily:pref.fontFamily, lineHeight:pref.lineHeight, margin:pref.margin,
 		hyphenate:pref.hyphenate, columnWidth:pref.columnWidth, horizontal:pref.horizontal,
-		nightMode:pref.nightMode, renderAllPages:pref.renderAllPages};
+		nightMode:pref.nightMode};
 };
 
 /**
