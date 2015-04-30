@@ -128,9 +128,12 @@ vivliostyle.page.PageRuleMaster = function(scope, parent, style) {
     adapt.pm.PageMaster.call(this, scope, null, vivliostyle.page.pageRuleMasterPseudoName, [],
         parent, null, 0);
     /** @const @private */ this.style = style;
-    var partition = new vivliostyle.page.PageRulePartition(this.scope, this, style);
+    var pageSize = vivliostyle.page.resolvePageSize(style);
+    var partition = new vivliostyle.page.PageRulePartition(this.scope, this, style, pageSize);
     /** @const @private */ this.bodyPartitionKey = partition.key;
     this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.relative, 0);
+    this.specified["width"] = new adapt.csscasc.CascadeValue(pageSize.width, 0);
+    this.specified["height"] = new adapt.csscasc.CascadeValue(pageSize.height, 0);
 };
 goog.inherits(vivliostyle.page.PageRuleMaster, adapt.pm.PageMaster);
 
@@ -147,12 +150,13 @@ vivliostyle.page.PageRuleMaster.prototype.createInstance = function(parentInstan
  * @param {adapt.expr.LexicalScope} scope
  * @param {vivliostyle.page.PageRuleMaster} parent
  * @param {!adapt.csscasc.ElementStyle} style Cascaded style for @page rules
+ * !param {!vivliostyle.page.PageSize} pageSize
  * @constructor
  * @extends {adapt.pm.Partition}
  */
-vivliostyle.page.PageRulePartition = function(scope, parent, style) {
+vivliostyle.page.PageRulePartition = function(scope, parent, style, pageSize) {
     adapt.pm.Partition.call(this, scope, null, null, [], parent);
-    /** @const */ this.pageSize = vivliostyle.page.resolvePageSize(style);
+    /** @const */ this.pageSize = pageSize;
     this.applySpecified(style);
 };
 goog.inherits(vivliostyle.page.PageRulePartition, adapt.pm.Partition);

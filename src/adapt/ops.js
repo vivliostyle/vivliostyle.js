@@ -195,7 +195,7 @@ adapt.ops.StyleInstance.prototype.getStylerForDoc = function(xmldoc) {
 	if (!styler) {
 		var style = this.style.store.getStyleForDoc(xmldoc);
 		// We need a separate content, so that variables can get potentially different values.
-		var context = new adapt.expr.Context(style.rootScope, this.pageWidth, this.pageHeight, this.fontSize);
+		var context = new adapt.expr.Context(style.rootScope, this.pageWidth(), this.pageHeight(), this.fontSize);
 		styler = new adapt.cssstyler.Styler(xmldoc, style.cascade, 
         		style.rootScope, context, this.primaryFlows, style.validatorSet);
 		this.stylerMap[xmldoc.url] = styler;
@@ -336,7 +336,7 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function() {
         if (utilization && utilization.isNum())
             coeff = (/** @type {adapt.css.Num} */ (utilization)).num;
         var em = self.queryUnitSize("em");
-        var pageArea = self.pageWidth * self.pageHeight;
+        var pageArea = self.pageWidth() * self.pageHeight();
         var lookup = Math.ceil(coeff * pageArea / (em * em));
         // B. Determine element eligibility. Each element in a flow is considered eligible if
         // it is is not marked as fully consumed and it comes in the document before the lookup position.
@@ -691,6 +691,12 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     if (!pageMaster) {
     	// end of primary content
     	return adapt.task.newResult(/** @type {adapt.vtree.LayoutPosition}*/ (null));
+    }
+    if (pageMaster.pageBox.specified["width"].value === adapt.css.fullWidth) {
+        page.container.setAttribute("data-vivliostyle-auto-page-width", true);
+    }
+    if (pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight) {
+        page.container.setAttribute("data-vivliostyle-auto-page-height", true);
     }
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
     	= adapt.task.newFrame("layoutNextPage");

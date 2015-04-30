@@ -163,7 +163,7 @@ vivliostyle.viewerapp.callback = function(msg) {
         var pageProgression = vivliostyle.viewerapp.currentPageProgression
             = viewer.getCurrentPageProgression();
         viewer.viewportElement.setAttribute("data-vivliostyle-page-progression", pageProgression);
-        viewer.viewportElement.setAttribute("data-vivliostyle-spread-view", viewer.spreadView);
+        viewer.viewportElement.setAttribute("data-vivliostyle-spread-view", viewer.pref.spreadView);
 
         window.addEventListener("keydown", /** @type {Function} */ (vivliostyle.viewerapp.keydown), false);
 //        window.addEventListener("touchstart", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);

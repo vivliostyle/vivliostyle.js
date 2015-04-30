@@ -81,8 +81,8 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {?adapt.epub.Position} */ this.pagePosition = null;
     /** @type {number} */ this.fontSize = 16;
     /** @type {boolean} */ this.waitForLoading = false;
-    /** @type {boolean} */ this.spreadView = false;
-    /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();	
+    /** @type {boolean} */ this.renderAllPages = true;
+    /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();
 };
 
 /**
@@ -258,13 +258,13 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 		this.waitForLoading = command["load"];  // Load images (and other resources) on the page.		
 	}
     if (typeof command["renderAllPages"] == "boolean") {
-        this.pref.renderAllPages = command["renderAllPages"];
+        this.renderAllPages = command["renderAllPages"];
     }
     if (typeof command["userAgentRootURL"] == "string") {
         adapt.base.resourceBaseURL = command["userAgentRootURL"];
     }
     if (typeof command["spreadView"] == "boolean") {
-        this.spreadView = command["spreadView"];
+        this.pref.spreadView = command["spreadView"];
     }
 	return adapt.task.newResult(true);
 };
@@ -400,14 +400,14 @@ adapt.viewer.Viewer.prototype.reset = function() {
 };
 
 /**
- * Show current page or spread depending on the setting (this.spreadView).
+ * Show current page or spread depending on the setting (this.pref.spreadView).
  * @private
  * @param {!adapt.vtree.Page} page
  * @returns {!adapt.task.Result}
  */
 adapt.viewer.Viewer.prototype.showCurrent = function(page) {
     var self = this;
-    if (this.spreadView) {
+    if (this.pref.spreadView) {
         return this.opfView.getCurrentSpread().thenAsync(function(spread) {
             self.showSpread(spread);
             self.currentPage = page;
@@ -440,7 +440,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
     self.opfView.setPagePosition(self.pagePosition).then(function(page) {
         self.showCurrent(page).then(function() {
             self.reportPosition().then(function(p) {
-                var r = self.pref.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
+                var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
                 r.then(function() { frame.finish(p); })
             });
         });
@@ -488,10 +488,10 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
 	if (typeof command["where"] == "string") {
 		switch (command["where"]) {
 		case "next":
-			method = this.spreadView ? this.opfView.nextSpread : this.opfView.nextPage;
+			method = this.pref.spreadView ? this.opfView.nextSpread : this.opfView.nextPage;
 			break;
 		case "previous":
-			method = this.spreadView ? this.opfView.previousSpread : this.opfView.previousPage;
+			method = this.pref.spreadView ? this.opfView.previousSpread : this.opfView.previousPage;
 			break;
 		case "last":
 			method = this.opfView.lastPage;
