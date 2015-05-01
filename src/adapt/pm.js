@@ -1139,7 +1139,7 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
         	    this.calculatedWidth += container.snapOffsetX;
         }
         if (readHeight) {
-        	container.calculatedHeight = bbox.bottom - bbox.top 
+        	this.calculatedHeight = bbox.bottom - bbox.top
         		- container.paddingTop - container.borderTop
         		- container.paddingBottom - container.borderBottom;
         	if (!this.vertical)
