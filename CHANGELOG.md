@@ -5,7 +5,7 @@
 ### Fixed
 - [viewer] Fixed incorrect page size calculation when content with 'auto' page size is viewed in the spread view mode.
 
-## 0.1.0 - 2015-04-28
+## [0.1.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.1.0) - 2015-04-28
 Initial alpha release. Following features are added while keeping the original Adaptive Layout features.
 
 ### Added
