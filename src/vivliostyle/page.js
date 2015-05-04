@@ -63,7 +63,6 @@ vivliostyle.page.fitToViewportSize = {
 };
 
 /**
- * @private
  * @param {!Object.<string, adapt.css.Val>} style
  * @return {!vivliostyle.page.PageSize}
  */
@@ -459,33 +458,41 @@ vivliostyle.page.PageManager.prototype.definePageProgression = function() {
 };
 
 /**
+ * Get cascaded page style specified in page context for the current page.
+ * @returns {!adapt.csscasc.ElementStyle}
+ */
+vivliostyle.page.PageManager.prototype.getCascadedPageStyle = function() {
+    var style = /** @type {!adapt.csscasc.ElementStyle} */ ({});
+    this.cascadeInstance.pushRule([], "", style);
+    return style;
+};
+
+/**
  * Return a PageMasterInstance with page rules applied. Return a cached instance if there already exists one with the same styles.
- * @param {!adapt.pm.PageMasterInstance} pageMasterInstance
+ * @param {!adapt.pm.PageMasterInstance} pageMasterInstance The original page master instance.
+ * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle Cascaded page style specified in page context.
  * @return {!adapt.pm.PageMasterInstance}
  */
-vivliostyle.page.PageManager.prototype.getPageRulePageMaster = function(pageMasterInstance) {
+vivliostyle.page.PageManager.prototype.getPageRulePageMaster = function(pageMasterInstance, cascadedPageStyle) {
     var pageMaster = /** @type {!adapt.pm.PageMaster} */ (pageMasterInstance.pageBox);
 
-    /** @const */ var style = /** @type {!adapt.csscasc.ElementStyle} */ ({});
-    this.cascadeInstance.pushRule([], "", style);
-
     // If no properies are specified in @page rules, use the original page master.
-    if (Object.keys(style).length === 0) {
+    if (Object.keys(cascadedPageStyle).length === 0) {
         pageMaster.resetScope();
         return pageMasterInstance;
     }
 
-    /** @const */ var key = this.makeCacheKey(style, pageMaster);
+    /** @const */ var key = this.makeCacheKey(cascadedPageStyle, pageMaster);
     var applied = this.pageMasterCache[key];
 
     if (!applied) {
         if (pageMaster.pseudoName === adapt.pm.userAgentPageMasterPseudo) {
             // If the passed page master is a UA page master,
             // ignore it and generate a new page master from @page rules.
-            applied = this.generatePageRuleMaster(style);
+            applied = this.generatePageRuleMaster(cascadedPageStyle);
         } else {
             // Otherwise cascade some properties from @page rules to the page master.
-            applied = this.generateCascadedPageMaster(style, pageMaster);
+            applied = this.generateCascadedPageMaster(cascadedPageStyle, pageMaster);
         }
         this.pageMasterCache[key] = applied;
     }
