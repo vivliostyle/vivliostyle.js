@@ -208,8 +208,8 @@ vivliostyle.page.PageRulePartition.prototype.createInstance = function(parentIns
 };
 
 /**
- * @param {adapt.pm.PageBoxInstance} parentInstance
- * @param {vivliostyle.page.PageRuleMaster} pageRuleMaster
+ * @param {!adapt.pm.PageBoxInstance} parentInstance
+ * @param {!vivliostyle.page.PageRuleMaster} pageRuleMaster
  * @constructor
  * @extends {adapt.pm.PageMasterInstance}
  */
@@ -285,8 +285,8 @@ vivliostyle.page.PageRuleMasterInstance.prototype.adjustContainingBlock = functi
 };
 
 /**
- * @param {adapt.pm.PageBoxInstance} parentInstance
- * @param {vivliostyle.page.PageRulePartition} pageRulePartition
+ * @param {!adapt.pm.PageBoxInstance} parentInstance
+ * @param {!vivliostyle.page.PageRulePartition} pageRulePartition
  * @constructor
  * @extends {adapt.pm.PartitionInstance}
  */
@@ -429,7 +429,7 @@ vivliostyle.page.PageManager = function(cascadeInstance, pageScope, rootPageBoxI
     /** @const @private */ this.rootPageBoxInstance = rootPageBoxInstance;
     /** @const @private */ this.context = context;
     /** @const @private */ this.docElementStyle = docElementStyle;
-    /** @const @private */ this.pageMasterCache = /** @type {Object.<string, vivliostyle.page.PageRuleMasterInstance>} */ ({});
+    /** @const @private */ this.pageMasterCache = /** @type {Object.<string, !adapt.pm.PageMasterInstance>} */ ({});
     this.definePageProgression();
 };
 
@@ -460,31 +460,48 @@ vivliostyle.page.PageManager.prototype.definePageProgression = function() {
 
 /**
  * Return a PageMasterInstance with page rules applied. Return a cached instance if there already exists one with the same styles.
- * @return {adapt.pm.PageMasterInstance}
+ * @param {!adapt.pm.PageMasterInstance} pageMasterInstance
+ * @return {!adapt.pm.PageMasterInstance}
  */
-vivliostyle.page.PageManager.prototype.getPageRulePageMaster = function() {
+vivliostyle.page.PageManager.prototype.getPageRulePageMaster = function(pageMasterInstance) {
+    var pageMaster = /** @type {!adapt.pm.PageMaster} */ (pageMasterInstance.pageBox);
+
     /** @const */ var style = /** @type {!adapt.csscasc.ElementStyle} */ ({});
     this.cascadeInstance.pushRule([], "", style);
-    /** @const */ var key = this.makeCacheKey(style);
-    if (!key)
-        return null;
-    var applied = this.pageMasterCache[key];
-    if (applied) {
-        return applied;
-    } else {
-        applied = this.generatePageRuleMaster(style);
-        this.pageMasterCache[key] = applied;
-        return applied;
+
+    // If no properies are specified in @page rules, use the original page master.
+    if (Object.keys(style).length === 0) {
+        pageMaster.resetScope();
+        return pageMasterInstance;
     }
+
+    /** @const */ var key = this.makeCacheKey(style, pageMaster);
+    var applied = this.pageMasterCache[key];
+
+    if (!applied) {
+        if (pageMaster.pseudoName === adapt.pm.userAgentPageMasterPseudo) {
+            // If the passed page master is a UA page master,
+            // ignore it and generate a new page master from @page rules.
+            applied = this.generatePageRuleMaster(style);
+        } else {
+            // Otherwise cascade some properties from @page rules to the page master.
+            applied = this.generateCascadedPageMaster(style, pageMaster);
+        }
+        this.pageMasterCache[key] = applied;
+    }
+
+    applied.pageBox.resetScope();
+    return applied;
 };
 
 /**
  * Generate a cache key from the specified styles and the original page master key.
  * @private
  * @param {!adapt.csscasc.ElementStyle} style
+ * @param {!adapt.pm.PageMaster} pageMaster
  * @return {string}
  */
-vivliostyle.page.PageManager.prototype.makeCacheKey = function(style) {
+vivliostyle.page.PageManager.prototype.makeCacheKey = function(style, pageMaster) {
     /** @const */ var props = /** @type {Array.<string>} */ ([]);
     for (var prop in style) {
         if (Object.prototype.hasOwnProperty.call(style, prop)) {
@@ -492,6 +509,7 @@ vivliostyle.page.PageManager.prototype.makeCacheKey = function(style) {
             props.push(prop + val.value + val.priority);
         }
     }
+    props.push(pageMaster.key);
     return props.sort().join("^");
 };
 
@@ -508,6 +526,35 @@ vivliostyle.page.PageManager.prototype.generatePageRuleMaster = function(style) 
     // Do the same initialization as in adapt.ops.StyleInstance.prototype.init
     pageMasterInstance.applyCascadeAndInit(this.cascadeInstance, this.docElementStyle);
     pageMasterInstance.adjustContainingBlock(this.context);
+    pageMasterInstance.resolveAutoSizing(this.context);
+    return pageMasterInstance;
+};
+
+/**
+ * Cascade some properties from @page rules to a page master.
+ * For now, only 'width' and 'height' resolved from 'size' value are cascaded.
+ * @private
+ * @param {!adapt.csscasc.ElementStyle} style Cascaded style in the page context
+ * @param {!adapt.pm.PageMaster} pageMaster The original page master
+ * @returns {!adapt.pm.PageMasterInstance}
+ */
+vivliostyle.page.PageManager.prototype.generateCascadedPageMaster = function(style, pageMaster) {
+    var newPageMaster = pageMaster.clone({pseudoName: vivliostyle.page.pageRuleMasterPseudoName});
+    var size = style["size"];
+    if (size) {
+        var pageSize = vivliostyle.page.resolvePageSize(style);
+        var priority = size.priority;
+        newPageMaster.specified["width"] = adapt.csscasc.cascadeValues(
+            this.context, newPageMaster.specified["width"],
+            new adapt.csscasc.CascadeValue(pageSize.width, priority));
+        newPageMaster.specified["height"] = adapt.csscasc.cascadeValues(
+            this.context, newPageMaster.specified["height"],
+            new adapt.csscasc.CascadeValue(pageSize.height, priority));
+    }
+
+    var pageMasterInstance = newPageMaster.createInstance(this.rootPageBoxInstance);
+    // Do the same initialization as in adapt.ops.StyleInstance.prototype.init
+    pageMasterInstance.applyCascadeAndInit(this.cascadeInstance, this.docElementStyle);
     pageMasterInstance.resolveAutoSizing(this.context);
     return pageMasterInstance;
 };

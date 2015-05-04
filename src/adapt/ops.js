@@ -33,7 +33,7 @@ adapt.ops.FontFace;
  * @param {adapt.expr.LexicalScope} rootScope
  * @param {adapt.expr.LexicalScope} pageScope
  * @param {adapt.csscasc.Cascade} cascade
- * @param {adapt.pm.RootPageBox} rootBox
+ * @param {!adapt.pm.RootPageBox} rootBox
  * @param {Array.<adapt.ops.FontFace>} fontFaces
  * @param {adapt.csscasc.ElementStyle} footnoteProps
  * @param {Object.<string,adapt.csscasc.ElementStyle>} flowProps
@@ -317,13 +317,9 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function() {
     	// end of primary content is reached
     	return null;
     }
-    // If there is a page master generated for @page rules, use it.
-    var pageMaster = this.pageManager.getPageRulePageMaster();
-    if (pageMaster) {
-        return pageMaster;
-    }
     // 2. Page master selection: for each page master:
     var pageMasters = /** @type {Array.<adapt.pm.PageMasterInstance>} */ (this.rootPageBoxInstance.children);
+    var pageMaster;
     for (var i = 0; i < pageMasters.length; i++) {
         pageMaster = pageMasters[i];
         // Skip a page master generated for @page rules
@@ -352,7 +348,8 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function() {
             if (goog.DEBUG) {
             	this.dumpLocation(currentPosition);
             }
-            return pageMaster;
+            // Apply @page rules
+            return this.pageManager.getPageRulePageMaster(pageMaster);
         }
     }
     throw new Error("No enabled page masters");
