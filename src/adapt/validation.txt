@@ -180,15 +180,13 @@ width = PAPLENGTH;
 word-spacing = normal | LENGTH; 
 z-index = auto | INT;
 
-[epub]hyphens = auto | none;
-[epub]writing-mode = horizontal-tb | vertical-rl;
-[webkit]text-combine = none | horizontal;
-[webkit]text-emphasis-style = none | [ [ filled | open ] || [ dot | circle | double-circle | triangle | sesame ] ] | STRING;
-[epub]text-orientation = vertical-right | upright | rotate-right | rotate-left | rotate-normal | auto;
-[adapt]margin-before = APLENGTH;
-[adapt]margin-after = APLENGTH;
-[adapt]margin-start = APLENGTH;
-[adapt]margin-end = APLENGTH;
+[epub,moz,ms,webkit]hyphens = auto | none;
+[epub,webkit]writing-mode = horizontal-tb | vertical-rl;
+[epub,webkit]text-orientation = vertical-right | upright | rotate-right | rotate-left | rotate-normal | auto;
+[adapt,webkit]margin-before = APLENGTH;
+[adapt,webkit]margin-after = APLENGTH;
+[adapt,webkit]margin-start = APLENGTH;
+[adapt,webkit]margin-end = APLENGTH;
 [adapt]before = APLENGTH;
 [adapt]after = APLENGTH;
 [adapt]start = APLENGTH;
@@ -209,42 +207,42 @@ z-index = auto | INT;
 SHAPE = auto | rectangle( PLENGTH{4} ) |  ellipse( PLENGTH{4} ) |  circle( PLENGTH{3} ) | 
     polygon( SPACE(PLENGTH+)+ );
 [epubx]shape-inside = SHAPE;
-[epubx]shape-outside = SHAPE;
-[epubx]wrap-flow = auto | both | start | end | maximum | clear | around /* epub al */;
+[epubx,webkit]shape-outside = SHAPE;
+[epubx,ms]wrap-flow = auto | both | start | end | maximum | clear | around /* epub al */;
 
 TRANSFORM_FUNCTION = matrix(NUM{6}) | translate(PLENGTH{1,2}) | translateX(PLENGTH) | translateY(PLENGTH) |
  scale(NUM{1,2}) | scaleX(NUM) | scaleY(NUM) | rotate(ANGLE) | skewX(ANGLE) | skewY(ANGLE);
-[epub]transform = none | TRANSFORM_FUNCTION+;
-[epub]transform-origin = [[[ top | bottom | left | right] PLENGTH?] | center | PLENGTH]{1,2}; /* relaxed */
+[epub,ms]transform = none | TRANSFORM_FUNCTION+;
+[epub,ms]transform-origin = [[[ top | bottom | left | right] PLENGTH?] | center | PLENGTH]{1,2}; /* relaxed */
 
 BOX = border-box | padding-box | content-box;
 SHADOW = SPACE(inset || LENGTH{2,4} || COLOR); /* relaxed */
-background-size = COMMA( SPACE( [PLENGTH | auto ]{1,2} | cover | contain)+ );
-background-origin = COMMA( BOX+ );
-background-clip = COMMA( BOX+ );
-box-shadow = none | COMMA( SHADOW+ );
+[webkit]background-size = COMMA( SPACE( [PLENGTH | auto ]{1,2} | cover | contain)+ );
+[webkit]background-origin = COMMA( BOX+ );
+[webkit]background-clip = COMMA( BOX+ );
+[webkit]box-shadow = none | COMMA( SHADOW+ );
 text-shadow = none |  COMMA( SHADOW+ );
-box-decoration-break = slice | clone;
+[webkit]box-decoration-break = slice | clone;
 
 opacity = NUM;
 
-column-width = LENGTH | auto;
-column-count = INT | auto;
-column-gap = LENGTH | normal;
-column-rule-color = COLOR;
-column-rule-style = BORDER_SIDE_STYLE;
-column-rule-width = BORDER_SIDE_WIDTH;
+[moz,webkit]column-width = LENGTH | auto;
+[moz,webkit]column-count = INT | auto;
+[moz,webkit]column-gap = LENGTH | normal;
+[moz,webkit]column-rule-color = COLOR;
+[moz,webkit]column-rule-style = BORDER_SIDE_STYLE;
+[moz,webkit]column-rule-width = BORDER_SIDE_WIDTH;
 BREAK = auto | always | avoid | left | right | page | column | region;
 break-before = BREAK;
 break-after = BREAK;
 break-inside = auto | avoid | avoid-page | avoid-column;
-column-span = none | all;
-column-fill = auto | balance;
+[webkit]column-span = none | all;
+[moz]column-fill = auto | balance;
 
 src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */
 
-[epubx]flow-from = IDENT;
-[epubx]flow-into = IDENT;
+[epubx,webkit]flow-from = IDENT;
+[epubx,webkit]flow-into = IDENT;
 [epubx]flow-linger = INT | none;
 [epubx]flow-priority = INT;
 [epubx]flow-options = none | [ exclusive || last || static ];
@@ -264,9 +262,57 @@ src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */
 [adapt]template = URI_OR_NONE;
 [adapt]behavior = IDENT;
 
-/* paged media */
+/* CSS Fonts */
+[webkit]font-kerning = auto | normal | none;
+
+/* CSS Images */
+object-fit = fill | contain | cover | none | scale-down;
+object-position = COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */
+
+/* CSS Paged Media */
 PAGE_SIZE = a5 | a4 | a3 | b5 | b4 | letter | legal | ledger;
 size = POS_LENGTH{1,2} | auto | [ PAGE_SIZE || [ portrait | landscape ] ];
+
+/* CSS Ruby */
+ruby-align = start | center | space-between | space-around;
+ruby-position = over | under | inter-character;
+
+/* CSS Size Adjust */
+[moz,ms]text-size-adjust = auto | none | POS_PERCENTAGE;
+
+/* CSS Text */
+[ms,webkit]line-break = auto | loose | normal | strict;
+overflow-wrap = normal | break-word;
+[moz]tab-size = NNEG_INT | NNEG_LENGTH;
+[moz,ms]text-align-last = auto | start | end | left | right | center | justify;
+[ms]text-justify = auto | none | inter-word | inter-character | inter-ideograph /* specified in UA stylesheet for IE */;
+[ms]word-break = normal | keep-all | break-all;
+[ms]word-wrap = normal | break-word;
+
+/* CSS Text Decoration */
+[webkit]text-decoration-color = COLOR;
+[webkit]text-decoration-line = none | [ underline || overline || line-through || blink ];
+[webkit]text-decoration-skip = none | [ objects || spaces || ink || edges || box-decoration ];
+[webkit]text-decoration-style = solid | double | dotted | dashed | wavy;
+[webkit]text-emphasis-color = COLOR;
+[webkit]text-emphasis-position = [ over | under ] [ right | left ];
+[webkit]text-emphasis-style = none | [[ filled | open ] || [ dot | circle | double-circle | triangle | sesame ]] | STRING;
+[ms,webkit]text-underline-position = auto | [ under || [ left | right ]];
+
+/* CSS Transforms */
+[ms,webkit]backface-visibility = visible | hidden;
+
+/* CSS UI */
+box-sizing = content-box | padding-box | border-box;
+[ms]text-overflow = [clip | ellipsis | STRING]{1,2};
+
+/* CSS Writing Modes */
+[webkit]text-combine = none | horizontal;
+text-combine-upright = none | all | [ digits POS_INT? ]; /* relaxed */
+
+/* Pointer Events */
+[ms]touch-action = auto | none | [ pan-x || pan-y ] | manipulation;
+
 
 DEFAULTS
 
@@ -326,7 +372,8 @@ padding-bottom: auto;
 padding-left: auto;
 padding-right: auto;
 padding-top: auto;
-size: auto;
+text-emphasis-color: currentColor;
+text-emphasis-style: none;
 
 SHORTHANDS
 
@@ -353,3 +400,4 @@ margin = INSETS margin-top margin-right margin-bottom margin-left;
 padding = INSETS padding-top padding-right padding-bottom padding-left;
 pause = INSETS pause-before pause-after;
 font = FONT font-style font-variant font-weight /* font-size line-height font-family are special-cased */;
+[webkit]text-emphasis = text-emphasis-style text-emphasis-color;

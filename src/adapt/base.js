@@ -316,9 +316,15 @@ adapt.base.makePropNameMap = function(list) {
  */
 adapt.base.propNameMap = adapt.base.makePropNameMap([
 	"transform", "transform-origin", "hyphens", "writing-mode",
+    "text-orientation", "box-decoration-break",
 	"column-count", "column-width", "column-rule-color",
 	"column-rule-style", "column-rule-width",
-    "text-combine", "text-emphasis-style"
+
+    "font-kerning", "text-size-adjust", "line-break", "tab-size",
+    "text-align-last", "text-justify", "word-break", "word-wrap",
+    "text-decoration-color", "text-decoration-line", "text-decoration-skip", "text-decoration-style",
+    "text-emphasis-color", "text-emphasis-position", "text-emphasis-style", "text-underline-position",
+    "backface-visibility", "text-overflow", "text-combine", "text-combine-upright", "touch-action"
 ]);
 
 
