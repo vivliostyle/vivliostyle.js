@@ -5,6 +5,7 @@
 ### Added
 - [core] Cascade page size specified in @page rules to page masters defined by @-epubx-page-master rules
   - When @page rules and @-epubx-page-master rules are both specified, the page size specified by 'size' property in @page rules is applied to the selected page master. This behavior is not defined in the related specs. We added this behavior for a use case in which one wants to print content styled with Adaptive Layout on a paper sheet and wants to specify the sheet size by adding a (user) stylesheet containing @page rules with 'size' property.
+- [core] Support [:root](http://www.w3.org/TR/selectors/#root-pseudo) pseudo-class selector
 
 ### Fixed
 - [core] Fixed incorrect page layout when non-zero padding is specified in page context.

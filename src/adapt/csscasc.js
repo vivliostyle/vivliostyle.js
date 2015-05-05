@@ -674,7 +674,7 @@ adapt.csscasc.CheckIdAction.prototype.apply = function(cascadeInstance) {
  * @override
  */
 adapt.csscasc.CheckIdAction.prototype.getPriority = function() {
-    return 11; // id is the first thing to check
+    return 11; // id should be checked after :root
 };
 
 /**
@@ -1002,6 +1002,29 @@ adapt.csscasc.IsFirstAction.prototype.getPriority = function() {
     return 6;
 };
 
+/**
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.IsRootAction = function() {
+    adapt.csscasc.ChainedAction.call(this);
+};
+goog.inherits(adapt.csscasc.IsRootAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsRootAction.prototype.apply = function(cascadeInstance) {
+    if (cascadeInstance.isRoot)
+        this.chained.apply(cascadeInstance);
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsRootAction.prototype.getPriority = function() {
+    return 12; // :root is the first thing to check
+};
 
 /**
  * @param {string} condition
@@ -1789,6 +1812,7 @@ adapt.csscasc.CascadeInstance = function(cascade, context, lang) {
     /** @type {Array.<string>} */ this.currentEpubTypes = null;
     /** @type {?string} */ this.currentPageType = null;
     /** @type {boolean} */ this.isFirst = true;
+    /** @type {boolean} */ this.isRoot = true;
     /** @type {Object.<string,Array.<number>>} */ this.counters = {};
     /** @type {Array.<Object.<string,boolean>>} */ this.counterScoping = [{}];
     /** @type {Array.<adapt.css.Str>} */ this.quotes = 
@@ -2108,7 +2132,8 @@ adapt.csscasc.CascadeInstance.prototype.applyActions = function() {
 	        }
 	    }
     }
-    this.isFirst = true;    
+    this.isFirst = true;
+    this.isRoot = false;
 };
 
 /**
@@ -2293,6 +2318,9 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
     switch (name.toLowerCase()) {
         case "first-child":
             this.chain.push(new adapt.csscasc.IsFirstAction());
+            break;
+        case "root":
+            this.chain.push(new adapt.csscasc.IsRootAction());
             break;
         case "link":
             this.chain.push(new adapt.csscasc.CheckLocalNameAction("a"));
