@@ -296,7 +296,8 @@ vivliostyle.viewerapp.main = function(arg) {
         "userAgentRootURL": uaRoot,
         "document": doc,
         "userStyleSheet": userStyleSheet,
-        "spreadView": spreadView
+        "spreadView": spreadView,
+        "pageBorder": 1
     };
     setViewportSize(width, height, size, orientation, config);
 

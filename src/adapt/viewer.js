@@ -266,6 +266,9 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
     if (typeof command["spreadView"] == "boolean") {
         this.pref.spreadView = command["spreadView"];
     }
+    if (typeof command["pageBorder"] == "number") {
+        this.pref.pageBorder = command["pageBorder"];
+    }
 	return adapt.task.newResult(true);
 };
 

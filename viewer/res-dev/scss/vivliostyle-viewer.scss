@@ -71,15 +71,9 @@ html[data-vivliostyle-paginated] {
         &[data-vivliostyle-spread-view=true] {
             & > div[data-vivliostyle-page-side=left] {
                 margin-right: 1px;
-                &[data-vivliostyle-auto-page-width] {
-                    margin-right: auto;
-                }
             }
             & > div[data-vivliostyle-page-side=right] {
                 margin-left: 1px;
-                &[data-vivliostyle-auto-page-width] {
-                    margin-left: auto;
-                }
             }
             & > div[data-vivliostyle-unpaired-page=true] {
                 margin: auto;

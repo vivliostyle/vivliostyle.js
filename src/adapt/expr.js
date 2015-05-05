@@ -9,8 +9,8 @@ goog.require('adapt.base');
 
 /**
  * @typedef {{fontFamily:string, lineHeight:number, margin:number, hyphenate:boolean,
- *   	columnWidth:number, horizontal:boolean, nightMode:boolean, spreadView:boolean}}
- *  }}
+ *   	columnWidth:number, horizontal:boolean, nightMode:boolean, spreadView:boolean,
+ *      pageBorder:number}}
  */
 adapt.expr.Preferences;
 
@@ -19,7 +19,7 @@ adapt.expr.Preferences;
  */
 adapt.expr.defaultPreferences = function() {
 	return {fontFamily:"serif", lineHeight:1.25, margin:8, hyphenate:true, columnWidth:25,
-				horizontal:false, nightMode:false, spreadView:false};
+				horizontal:false, nightMode:false, spreadView:false, pageBorder:1};
 };
 
 /**
@@ -29,7 +29,7 @@ adapt.expr.defaultPreferences = function() {
 adapt.expr.clonePreferences = function(pref) {
 	return {fontFamily:pref.fontFamily, lineHeight:pref.lineHeight, margin:pref.margin,
 		hyphenate:pref.hyphenate, columnWidth:pref.columnWidth, horizontal:pref.horizontal,
-		nightMode:pref.nightMode, spreadView:pref.spreadView};
+		nightMode:pref.nightMode, spreadView:pref.spreadView, pageBorder:pref.pageBorder};
 };
 
 /**
@@ -248,7 +248,7 @@ adapt.expr.Context = function(rootScope, viewportWidth, viewportHeight, fontSize
         if (this.actualPageWidth)
             return this.actualPageWidth;
         else
-            return this.pref.spreadView ? Math.floor(viewportWidth / 2) : viewportWidth;
+            return this.pref.spreadView ? Math.floor(viewportWidth / 2) - this.pref.pageBorder : viewportWidth;
     };
     /** @protected @type {?number} */ this.actualPageHeight = null;
     /** @const @type {function(this:adapt.expr.Context): number} */
