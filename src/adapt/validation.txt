@@ -181,8 +181,6 @@ word-spacing = normal | LENGTH;
 z-index = auto | INT;
 
 [epub,moz,ms,webkit]hyphens = auto | none;
-[epub,webkit]writing-mode = horizontal-tb | vertical-rl;
-[epub,webkit]text-orientation = vertical-right | upright | rotate-right | rotate-left | rotate-normal | auto;
 [adapt,webkit]margin-before = APLENGTH;
 [adapt,webkit]margin-after = APLENGTH;
 [adapt,webkit]margin-start = APLENGTH;
@@ -310,6 +308,8 @@ box-sizing = content-box | padding-box | border-box;
 [webkit]text-combine = none | horizontal;
 [epub,ms]text-combine-horizontal = none | all | [ digits POS_INT? ]; /* relaxed */
 text-combine-upright = none | all | [ digits POS_INT? ]; /* relaxed */
+[epub,webkit]text-orientation = mixed | upright | sideways-right | sideways-left | sideways | use-glyph-orientation /* the following values are kept for backward-compatibility */ | vertical-right | rotate-right | rotate-left | rotate-normal | auto;
+[epub,webkit]writing-mode = horizontal-tb | vertical-rl;
 
 /* Pointer Events */
 [ms]touch-action = auto | none | [ pan-x || pan-y ] | manipulation;
