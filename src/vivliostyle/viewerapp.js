@@ -289,7 +289,7 @@ vivliostyle.viewerapp.main = function(arg) {
     var config = {
         "a": epubURL ? "loadEPUB" : "loadXML",
         "url": epubURL || xmlURL,
-        "autoresize": true,
+        "autoresize": false,
         "fragment": fragment,
         // render all pages on load and resize
         "renderAllPages": true,
