@@ -464,6 +464,7 @@ vivliostyle.page.PageManager.prototype.definePageProgression = function() {
 vivliostyle.page.PageManager.prototype.getCascadedPageStyle = function() {
     var style = /** @type {!adapt.csscasc.ElementStyle} */ ({});
     this.cascadeInstance.pushRule([], "", style);
+    this.cascadeInstance.popRule();
     return style;
 };
 
