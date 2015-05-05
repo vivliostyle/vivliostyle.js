@@ -1888,11 +1888,10 @@ adapt.layout.Column.prototype.initGeom = function() {
 	// which is wrong for our purposes.
 	var probe = /** @type {HTMLElement} */ (this.element.ownerDocument.createElement("div"));
 	probe.style.position = "absolute";
-	// TODO: container padding???
-	probe.style.top = "0px";
-	probe.style.bottom = "0px";
-	probe.style.width = "100%";
-	probe.style.height = "100%";
+    probe.style.top = this.paddingTop + "px";
+    probe.style.right = this.paddingRight + "px";
+    probe.style.bottom = this.paddingBottom + "px";
+    probe.style.left = this.paddingLeft + "px";
 	this.element.appendChild(probe);
     var columnBBox = this.clientLayout.getElementClientRect(probe);
     this.element.removeChild(probe);
