@@ -46,30 +46,37 @@ vivliostyle.viewerapp.keydown = function(evt) {
     switch (evt.keyCode) {
     case 35:  // end
     	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "last"});
+        evt.preventDefault();
     	break;
     case 36:  // home
     	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "first"});
+        evt.preventDefault();
     	break;
     case 38:  // up arrow
     	vivliostyle.viewerapp.sendCommand({
             "a": "moveTo",
             "where": "previous"
         });
+        evt.preventDefault();
         break;
     case 40:  // down arrow
     	vivliostyle.viewerapp.sendCommand({
             "a": "moveTo",
             "where": "next"
         });
+        evt.preventDefault();
         break;
-        case 39:  // right arrow
-            vivliostyle.viewerapp.navigateToRightPage();
-            break;
-        case 37:  // left arrow
-            vivliostyle.viewerapp.navigateToLeftPage();
-            break;
+    case 39:  // right arrow
+        vivliostyle.viewerapp.navigateToRightPage();
+        evt.preventDefault();
+        break;
+    case 37:  // left arrow
+        vivliostyle.viewerapp.navigateToLeftPage();
+        evt.preventDefault();
+        break;
     case 48:  // zero
     	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
+        evt.preventDefault();
     	break;
     	/*
     case 78:  // N - night toggle
@@ -85,14 +92,17 @@ vivliostyle.viewerapp.keydown = function(evt) {
     	*/
     case 84: // 'T' - show TOC
     	vivliostyle.viewerapp.sendCommand({"a": "toc", "v": "toggle", "autohide": true});
-    	break;    	
+        evt.preventDefault();
+    	break;
     case 187:  // plus
     	vivliostyle.viewerapp.fontSize *= 1.2;
     	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
+        evt.preventDefault();
     	break;
     case 189:  // minus
     	vivliostyle.viewerapp.fontSize /= 1.2;
     	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
+        evt.preventDefault();
     	break;
     }
 };
