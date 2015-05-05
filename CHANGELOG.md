@@ -2,7 +2,12 @@
 
 ## Unreleased
 
+### Added
+- [core] Cascade page size specified in @page rules to page masters defined by @-epubx-page-master rules
+  - When @page rules and @-epubx-page-master rules are both specified, the page size specified by 'size' property in @page rules is applied to the selected page master. This behavior is not defined in the related specs. We added this behavior for a use case in which one wants to print content styled with Adaptive Layout on a paper sheet and wants to specify the sheet size by adding a (user) stylesheet containing @page rules with 'size' property.
+
 ### Fixed
+- [core] 'page-width', 'page-height' variables (used in -epubx-expr) are now correctly reflect the page size specified by @page rules
 - [viewer] Fixed incorrect page size calculation when content with 'auto' page size is viewed in the spread view mode.
 
 ## [0.1.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.1.0) - 2015-04-28

@@ -33,7 +33,7 @@ adapt.ops.FontFace;
  * @param {adapt.expr.LexicalScope} rootScope
  * @param {adapt.expr.LexicalScope} pageScope
  * @param {adapt.csscasc.Cascade} cascade
- * @param {adapt.pm.RootPageBox} rootBox
+ * @param {!adapt.pm.RootPageBox} rootBox
  * @param {Array.<adapt.ops.FontFace>} fontFaces
  * @param {adapt.csscasc.ElementStyle} footnoteProps
  * @param {Object.<string,adapt.csscasc.ElementStyle>} flowProps
@@ -303,9 +303,10 @@ adapt.ops.StyleInstance.prototype.dumpLocation = function(position) {
 };
 
 /**
+ * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle Cascaded page style specified in page context
  * @return {adapt.pm.PageMasterInstance}
  */
-adapt.ops.StyleInstance.prototype.selectPageMaster = function() {
+adapt.ops.StyleInstance.prototype.selectPageMaster = function(cascadedPageStyle) {
 	var self = this;
     var cp = this.currentLayoutPosition;
     // 3.5. Page Layout Processing Model
@@ -317,13 +318,9 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function() {
     	// end of primary content is reached
     	return null;
     }
-    // If there is a page master generated for @page rules, use it.
-    var pageMaster = this.pageManager.getPageRulePageMaster();
-    if (pageMaster) {
-        return pageMaster;
-    }
     // 2. Page master selection: for each page master:
     var pageMasters = /** @type {Array.<adapt.pm.PageMasterInstance>} */ (this.rootPageBoxInstance.children);
+    var pageMaster;
     for (var i = 0; i < pageMasters.length; i++) {
         pageMaster = pageMasters[i];
         // Skip a page master generated for @page rules
@@ -352,7 +349,8 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function() {
             if (goog.DEBUG) {
             	this.dumpLocation(currentPosition);
             }
-            return pageMaster;
+            // Apply @page rules
+            return this.pageManager.getPageRulePageMaster(pageMaster, cascadedPageStyle);
         }
     }
     throw new Error("No enabled page masters");
@@ -687,11 +685,16 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     cp = self.currentLayoutPosition;
     cp.page++;
     self.clearScope(self.style.pageScope);
-    var pageMaster = self.selectPageMaster();
+
+    // Resolve page size before page master selection.
+    var cascadedPageStyle = self.pageManager.getCascadedPageStyle();
+    self.setPageSize(cascadedPageStyle);
+    var pageMaster = self.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
     	// end of primary content
     	return adapt.task.newResult(/** @type {adapt.vtree.LayoutPosition}*/ (null));
     }
+
     if (pageMaster.pageBox.specified["width"].value === adapt.css.fullWidth) {
         page.container.setAttribute("data-vivliostyle-auto-page-width", true);
     }
@@ -714,6 +717,27 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 	    frame.finish(cp);
     });
     return frame.result();
+};
+
+/**
+ * Set actual page width & height from style specified in page context.
+ * @private
+ * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle
+ */
+adapt.ops.StyleInstance.prototype.setPageSize = function(cascadedPageStyle) {
+    var pageSize = vivliostyle.page.resolvePageSize(cascadedPageStyle);
+    var width = pageSize.width;
+    if (width === adapt.css.fullWidth) {
+        this.actualPageWidth = null;
+    } else {
+        this.actualPageWidth = width.num * this.queryUnitSize(width.unit);
+    }
+    var height = pageSize.height;
+    if (height === adapt.css.fullHeight) {
+        this.actualPageHeight = null;
+    } else {
+        this.actualPageHeight = height.num * this.queryUnitSize(height.unit);
+    }
 };
 
 /**

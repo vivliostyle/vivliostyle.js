@@ -242,12 +242,22 @@ adapt.expr.ScopeContext;
  */
 adapt.expr.Context = function(rootScope, viewportWidth, viewportHeight, fontSize) {
 	/** @const */ this.rootScope = rootScope;
+    /** @protected @type {?number} */ this.actualPageWidth = null;
     /** @const @type {function(this:adapt.expr.Context): number} */
     this.pageWidth = function() {
-        return this.pref.spreadView ? Math.floor(viewportWidth / 2) : viewportWidth;
+        if (this.actualPageWidth)
+            return this.actualPageWidth;
+        else
+            return this.pref.spreadView ? Math.floor(viewportWidth / 2) : viewportWidth;
     };
+    /** @protected @type {?number} */ this.actualPageHeight = null;
     /** @const @type {function(this:adapt.expr.Context): number} */
-    this.pageHeight = function() { return viewportHeight; };
+    this.pageHeight = function() {
+        if (this.actualPageHeight)
+            return this.actualPageHeight;
+        else
+            return viewportHeight;
+    };
 	/** @const */ this.fontSize = fontSize;
 	this.pref = adapt.expr.defaultPreferencesInstance;
 	/** @type {Object.<string,adapt.expr.ScopeContext>} */ this.scopes = {};

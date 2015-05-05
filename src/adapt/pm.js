@@ -44,11 +44,47 @@ adapt.pm.PageBox = function(scope, name, pseudoName, classes, parent) {
 };
 
 /**
- * @param {adapt.pm.PageBoxInstance} parentInstance
- * @return {adapt.pm.PageBoxInstance}
+ * @param {!adapt.pm.PageBoxInstance} parentInstance
+ * @return {!adapt.pm.PageBoxInstance}
  */
 adapt.pm.PageBox.prototype.createInstance = function(parentInstance) {
 	throw new Error("E_UNEXPECTED_CALL");
+};
+
+/**
+ * Clone the PageBox.
+ * @param {{parent: (!adapt.pm.PageBox|undefined), pseudoName: (string|undefined)}} param parent: The parent of the cloned PageBox. pseudoName: Assign this value as the pseudoName of the cloned PageBox.
+ * @return {adapt.pm.PageBox}
+ */
+adapt.pm.PageBox.prototype.clone = function(param) {
+    throw new Error("E_UNEXPECTED_CALL");
+};
+
+/**
+ * Copy 'specified' properties to another instance.
+ * @protected
+ * @param {!adapt.pm.PageBox} dest The PageBox into which 'specified' properties are copied
+ */
+adapt.pm.PageBox.prototype.copySpecified = function(dest) {
+    var specified = this.specified;
+    var destSpecified = dest.specified;
+    for (var prop in specified) {
+        if (Object.prototype.hasOwnProperty.call(specified, prop)) {
+            destSpecified[prop] = specified[prop];
+        }
+    }
+};
+
+/**
+ * Clone children with the specified PageBox as their parent.
+ * @protected
+ * @param {!adapt.pm.PageBox} parent
+ */
+adapt.pm.PageBox.prototype.cloneChildren = function(parent) {
+    for (var i = 0; i < this.children.length; i++) {
+        // the cloned child is added to parent.children in the child constructor.
+        this.children[i].clone({parent: parent});
+    }
 };
 
 /**
@@ -66,33 +102,34 @@ goog.inherits(adapt.pm.RootPageBox, adapt.pm.PageBox);
 
 
 /**
+ * @private
  * @param {adapt.expr.LexicalScope} scope
  * @param {adapt.pm.PageMaster} pageMaster
+ * @constructor
+ * @extends {adapt.expr.LexicalScope}
  */
-adapt.pm.makePageMasterScope = function(scope, pageMaster) {
-	return new adapt.expr.LexicalScope(scope, 
-		/**
-		 * @param {string} qualifiedName
-		 * @return {adapt.expr.Val}
-		 */
-		function(qualifiedName, isFunc) {
-			var r = qualifiedName.match(/^([^.]+)\.([^.]+)$/);
-			if (r) {
-				var key = pageMaster.keyMap[r[1]];
-				if (key) {
-					var holder = /** @type {adapt.pm.InstanceHolder} */ (this);
-					var boxInstance = holder.lookupInstance(key);
-					if (boxInstance) {
-						if (isFunc)
-							return boxInstance.resolveFunc(r[2]);
-						else
-							return boxInstance.resolveName(r[2]);
-					}
-				}
-			}
-			return null;
-		});
+adapt.pm.PageMasterScope = function(scope, pageMaster) {
+    this.pageMaster = pageMaster;
+    var self = this;
+    adapt.expr.LexicalScope.call(this, scope, function(qualifiedName, isFunc) {
+        var r = qualifiedName.match(/^([^.]+)\.([^.]+)$/);
+        if (r) {
+            var key = self.pageMaster.keyMap[r[1]];
+            if (key) {
+                var holder = /** @type {adapt.pm.InstanceHolder} */ (this);
+                var boxInstance = holder.lookupInstance(key);
+                if (boxInstance) {
+                    if (isFunc)
+                        return boxInstance.resolveFunc(r[2]);
+                    else
+                        return boxInstance.resolveName(r[2]);
+                }
+            }
+        }
+        return null;
+    });
 };
+goog.inherits(adapt.pm.PageMasterScope, adapt.expr.LexicalScope);
 
 /**
  * Represent a page-master rule
@@ -107,8 +144,14 @@ adapt.pm.makePageMasterScope = function(scope, pageMaster) {
  * @extends {adapt.pm.PageBox}
  */
 adapt.pm.PageMaster = function(scope, name, pseudoName, classes, parent, condition, specificity) {
-    adapt.pm.PageBox.call(this, adapt.pm.makePageMasterScope(scope, this), name,
-    		pseudoName, classes, parent);
+    var pageMasterScope;
+    if (scope instanceof adapt.pm.PageMasterScope) {
+        // if PageMasterScope object is passed, use (share) it.
+        pageMasterScope = scope;
+    } else {
+        pageMasterScope = new adapt.pm.PageMasterScope(scope, this);
+    }
+    adapt.pm.PageBox.call(this, pageMasterScope, name, pseudoName, classes, parent);
     /** @const */ this.pageMaster = this;
     /** @const */ this.condition = condition;
     /** @const */ this.specificity = specificity;
@@ -123,11 +166,32 @@ goog.inherits(adapt.pm.PageMaster, adapt.pm.PageBox);
 
 /**
  * @override
+ * @return {!adapt.pm.PageMasterInstance}
  */
 adapt.pm.PageMaster.prototype.createInstance = function(parentInstance) {
 	return new adapt.pm.PageMasterInstance(parentInstance, this);
 };
 
+/**
+ * @override
+ * @returns {adapt.pm.PageMaster}
+ */
+adapt.pm.PageMaster.prototype.clone = function(param) {
+    // The cloned page master shares the same scope object with the original one.
+    var cloned = new adapt.pm.PageMaster(this.scope, this.name, param.pseudoName || this.pseudoName, this.classes, /** @type {adapt.pm.RootPageBox} */ (this.parent), this.condition, this.specificity);
+    this.copySpecified(cloned);
+    this.cloneChildren(cloned);
+    return cloned;
+};
+
+/**
+ * Point the pageMaster reference in the PageMasterScope to the current page master.
+ * This is needed when a page master is cloned and shares a common scope with the original page master.
+ * Since every adapt.expr.Val which the page master holds has a reference to the scope and uses it for variable resolution, this reference must be updated properly before the page master instance is used.
+ */
+adapt.pm.PageMaster.prototype.resetScope = function() {
+    this.scope.pageMaster = this;
+};
 
 /**
  * Represent a partition-group rule
@@ -156,6 +220,17 @@ adapt.pm.PartitionGroup.prototype.createInstance = function(parentInstance) {
 	return new adapt.pm.PartitionGroupInstance(parentInstance, this);
 };
 
+/**
+ * @override
+ * @returns {adapt.pm.PartitionGroup}
+ */
+adapt.pm.PartitionGroup.prototype.clone = function(param) {
+    var cloned = new adapt.pm.PartitionGroup(param.parent.scope, this.name, this.pseudoName, this.classes, param.parent);
+    this.copySpecified(cloned);
+    this.cloneChildren(cloned);
+    return cloned;
+};
+
 
 /**
  * Represent a partition rule
@@ -181,6 +256,17 @@ goog.inherits(adapt.pm.Partition, adapt.pm.PageBox);
  */
 adapt.pm.Partition.prototype.createInstance = function(parentInstance) {
 	return new adapt.pm.PartitionInstance(parentInstance, this);
+};
+
+/**
+ * @override
+ * @returns {adapt.pm.Partition}
+ */
+adapt.pm.Partition.prototype.clone = function(param) {
+    var cloned = new adapt.pm.Partition(param.parent.scope, this.name, this.pseudoName, this.classes, param.parent);
+    this.copySpecified(cloned);
+    this.cloneChildren(cloned);
+    return cloned;
 };
 
 //---------------------------- Instance --------------------------------
@@ -282,7 +368,7 @@ adapt.pm.InstanceHolder.prototype.lookupInstance = function(key) {};
 
 /**
  * @param {adapt.pm.PageBoxInstance} parentInstance
- * @param {adapt.pm.PageBox} pageBox
+ * @param {!adapt.pm.PageBox} pageBox
  * @constructor
  */
 adapt.pm.PageBoxInstance = function(parentInstance, pageBox) {
@@ -1187,6 +1273,8 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
     }    
 };
 
+adapt.pm.userAgentPageMasterPseudo = "background-host";
+
 /**
  * @param {adapt.csscasc.CascadeInstance} cascade
  * @param {adapt.csscasc.ElementStyle} docElementStyle
@@ -1200,7 +1288,7 @@ adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit = function(cascade, docEl
 			adapt.csscasc.setProp(style, name, adapt.csscasc.getProp(specified, name));
 		}
 	}
-	if (this.pageBox.pseudoName == "background-host") {
+	if (this.pageBox.pseudoName == adapt.pm.userAgentPageMasterPseudo) {
 		for (var name in docElementStyle) {
 			if (name.match(/^background-/) || name == "writing-mode") {
 				style[name] = docElementStyle[name];
@@ -1250,7 +1338,7 @@ adapt.pm.PageBoxInstance.prototype.resolveAutoSizing = function(context) {
 
 
 /**
- * @param {adapt.pm.RootPageBox} pageBox
+ * @param {!adapt.pm.RootPageBox} pageBox
  * @constructor
  * @extends {adapt.pm.PageBoxInstance}
  */
@@ -1280,7 +1368,7 @@ adapt.pm.RootPageBoxInstance.prototype.applyCascadeAndInit = function(cascade, d
 
 /**
  * @param {adapt.pm.PageBoxInstance} parentInstance
- * @param {adapt.pm.PageBox} pageBox
+ * @param {!adapt.pm.PageBox} pageBox
  * @constructor
  * @extends {adapt.pm.PageBoxInstance}
  */
@@ -1303,7 +1391,7 @@ adapt.pm.PageMasterInstance.prototype.boxSpecificEnabled = function(enabled) {
 
 /**
  * @param {adapt.pm.PageBoxInstance} parentInstance
- * @param {adapt.pm.PageBox} pageBox
+ * @param {!adapt.pm.PageBox} pageBox
  * @constructor
  * @extends {adapt.pm.PageBoxInstance}
  */
@@ -1316,7 +1404,7 @@ goog.inherits(adapt.pm.PartitionGroupInstance, adapt.pm.PageBoxInstance);
 
 /**
  * @param {adapt.pm.PageBoxInstance} parentInstance
- * @param {adapt.pm.PageBox} pageBox
+ * @param {!adapt.pm.PageBox} pageBox
  * @constructor
  * @extends {adapt.pm.PageBoxInstance}
  */
