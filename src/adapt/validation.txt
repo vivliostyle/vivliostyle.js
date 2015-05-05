@@ -308,6 +308,7 @@ box-sizing = content-box | padding-box | border-box;
 
 /* CSS Writing Modes */
 [webkit]text-combine = none | horizontal;
+[epub,ms]text-combine-horizontal = none | all | [ digits POS_INT? ]; /* relaxed */
 text-combine-upright = none | all | [ digits POS_INT? ]; /* relaxed */
 
 /* Pointer Events */

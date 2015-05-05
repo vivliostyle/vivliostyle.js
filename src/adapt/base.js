@@ -324,7 +324,9 @@ adapt.base.propNameMap = adapt.base.makePropNameMap([
     "text-align-last", "text-justify", "word-break", "word-wrap",
     "text-decoration-color", "text-decoration-line", "text-decoration-skip", "text-decoration-style",
     "text-emphasis-color", "text-emphasis-position", "text-emphasis-style", "text-underline-position",
-    "backface-visibility", "text-overflow", "text-combine", "text-combine-upright", "touch-action"
+    "backface-visibility", "text-overflow",
+    "text-combine", "text-combine-horizontal", "text-combine-upright",
+    "touch-action"
 ]);
 
 
