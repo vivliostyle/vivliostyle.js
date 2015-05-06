@@ -3,6 +3,7 @@
 ## Unreleased
 
 ## [0.1.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.1.1) - 2015-05-06
+Minor update with several changes and bug fixes.
 
 ### Added
 - [core] Support [:root](http://www.w3.org/TR/selectors/#root-pseudo) pseudo-class selector
