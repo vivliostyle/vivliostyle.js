@@ -2,14 +2,18 @@
 
 ## Unreleased
 
+## [0.1.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.1.1) - 2015-05-06
+
 ### Added
-- [core] Cascade page size specified in @page rules to page masters defined by @-epubx-page-master rules
-  - <https://github.com/vivliostyle/vivliostyle.js/pull/17>
-  - When @page rules and @-epubx-page-master rules are both specified, the page size specified by 'size' property in @page rules is applied to the selected page master. This behavior is not defined in the related specs. We added this behavior for a use case in which one wants to print content styled with Adaptive Layout on a paper sheet and wants to specify the sheet size by adding a (user) stylesheet containing @page rules with 'size' property.
 - [core] Support [:root](http://www.w3.org/TR/selectors/#root-pseudo) pseudo-class selector
   - <https://github.com/vivliostyle/vivliostyle.js/commit/3e9c21002400ac90b09f996ca35187dbf7a3eaca>
 - [core] Support CSS properties currently implemented by browsers
   - See <https://github.com/vivliostyle/vivliostyle.js/pull/18> for details.
+
+### Changed
+- [core] Cascade page size specified in @page rules to page masters defined by @-epubx-page-master rules
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/17>
+  - When @page rules and @-epubx-page-master rules are both specified, the page size specified by 'size' property in @page rules is applied to the selected page master. This behavior is not defined in the related specs. We added this behavior for a use case in which one wants to print content styled with Adaptive Layout on a paper sheet and wants to specify the sheet size by adding a (user) stylesheet containing @page rules with 'size' property.
 
 ### Fixed
 - [core] Fixed incorrect page layout when non-zero padding is specified in page context.
