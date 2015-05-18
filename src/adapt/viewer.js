@@ -689,3 +689,6 @@ if (window["adapt_embedded"]) {
 		delete window["adapt_initEmbed"];
 	};
 }
+
+goog.exportSymbol("adapt.viewer.Viewer", adapt.viewer.Viewer);
+goog.exportSymbol("adapt.viewer.Viewer.prototype.initEmbed", adapt.viewer.Viewer.prototype.initEmbed);
