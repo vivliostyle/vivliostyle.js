@@ -25,7 +25,7 @@ key = ${SAUCE_ACCESS_KEY}
 EOS
 
 # setup environment
-pip install virtualenv
+sudo pip install virtualenv
 virtualenv .
 source bin/activate
 pip install -e wptrunner
