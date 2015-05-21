@@ -31,4 +31,4 @@ pip install -e wptrunner
 pip install -r wptrunner/requirements_sauce.txt
 
 # run tests
-wptrunner --metadata=csswg-test/metadata --tests=csswg-test --product=sauceconnect --ssl-type=none --run-vivliostyle --log-mach - --sauce-config=csswg-test/vivliostyle.js/test/wpt/sauce.ini --processes=3
+wptrunner --metadata=csswg-test/metadata --tests=csswg-test --product=sauceconnect --ssl-type=none --run-vivliostyle --log-mach - --sauce-config=csswg-test/vivliostyle.js/test/wpt/sauce.ini --processes=3 --no-pause-after-test
