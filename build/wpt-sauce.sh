@@ -22,6 +22,9 @@ cat << EOS > csswg-test/vivliostyle.js/test/wpt/sauce-credentials.ini
 [credentials]
 username = ${SAUCE_USERNAME}
 key = ${SAUCE_ACCESS_KEY}
+
+[sauceconnect]
+tunnelIdentifier = ${TRAVIS_JOB_NUMBER}
 EOS
 
 # setup environment
