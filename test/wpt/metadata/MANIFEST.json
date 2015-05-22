@@ -1,0 +1,312 @@
+{
+  "items": {
+    "manual": [
+      {
+        "path": "css21/page-box/page-container-011.xht",
+        "url": "/css21/page-box/page-container-011.xht"
+      },
+      {
+        "path": "css21/page-box/page-props-100-a.xht",
+        "url": "/css21/page-box/page-props-100-a.xht"
+      },
+      {
+        "path": "css21/page-box/page-props-100-b.xht",
+        "url": "/css21/page-box/page-props-100-b.xht"
+      },
+      {
+        "path": "css21/page-box/page-props-103.xht",
+        "url": "/css21/page-box/page-props-103.xht"
+      },
+      {
+        "path": "css21/page-box/page-selectors-001.xht",
+        "url": "/css21/page-box/page-selectors-001.xht"
+      },
+      {
+        "path": "css21/page-box/page-selectors-002.xht",
+        "url": "/css21/page-box/page-selectors-002.xht"
+      },
+      {
+        "path": "css21/pagination/allowed-page-breaks-001a.xht",
+        "url": "/css21/pagination/allowed-page-breaks-001a.xht"
+      },
+      {
+        "path": "css21/pagination/allowed-page-breaks-002.xht",
+        "url": "/css21/pagination/allowed-page-breaks-002.xht"
+      },
+      {
+        "path": "css21/pagination/allowed-page-breaks-003.xht",
+        "url": "/css21/pagination/allowed-page-breaks-003.xht"
+      },
+      {
+        "path": "css21/pagination/allowed-page-breaks-005.xht",
+        "url": "/css21/pagination/allowed-page-breaks-005.xht"
+      },
+      {
+        "path": "css21/pagination/allowed-page-breaks-006.xht",
+        "url": "/css21/pagination/allowed-page-breaks-006.xht"
+      },
+      {
+        "path": "css21/pagination/orphans-002.xht",
+        "url": "/css21/pagination/orphans-002.xht"
+      },
+      {
+        "path": "css21/pagination/orphans-003.xht",
+        "url": "/css21/pagination/orphans-003.xht"
+      },
+      {
+        "path": "css21/pagination/orphans-004a.xht",
+        "url": "/css21/pagination/orphans-004a.xht"
+      },
+      {
+        "path": "css21/pagination/orphans-004b.xht",
+        "url": "/css21/pagination/orphans-004b.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-after-000.xht",
+        "url": "/css21/pagination/page-break-after-000.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-after-002.xht",
+        "url": "/css21/pagination/page-break-after-002.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-after-003.xht",
+        "url": "/css21/pagination/page-break-after-003.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-after-004.xht",
+        "url": "/css21/pagination/page-break-after-004.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-after-005.xht",
+        "url": "/css21/pagination/page-break-after-005.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-after-006.xht",
+        "url": "/css21/pagination/page-break-after-006.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-after-007.xht",
+        "url": "/css21/pagination/page-break-after-007.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-after-009.xht",
+        "url": "/css21/pagination/page-break-after-009.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-before-000.xht",
+        "url": "/css21/pagination/page-break-before-000.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-before-006.xht",
+        "url": "/css21/pagination/page-break-before-006.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-before-007-b.xht",
+        "url": "/css21/pagination/page-break-before-007-b.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-before-008.xht",
+        "url": "/css21/pagination/page-break-before-008.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-before-010.xht",
+        "url": "/css21/pagination/page-break-before-010.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-before-011.xht",
+        "url": "/css21/pagination/page-break-before-011.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-inside-000.xht",
+        "url": "/css21/pagination/page-break-inside-000.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-inside-001.xht",
+        "url": "/css21/pagination/page-break-inside-001.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-inside-003.xht",
+        "url": "/css21/pagination/page-break-inside-003.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-inside-004.xht",
+        "url": "/css21/pagination/page-break-inside-004.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-inside-005.xht",
+        "url": "/css21/pagination/page-break-inside-005.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-inside-006.xht",
+        "url": "/css21/pagination/page-break-inside-006.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-margins-001.xht",
+        "url": "/css21/pagination/page-break-margins-001.xht"
+      },
+      {
+        "path": "css21/pagination/page-breaks-100.xht",
+        "url": "/css21/pagination/page-breaks-100.xht"
+      },
+      {
+        "path": "css21/pagination/widows-002.xht",
+        "url": "/css21/pagination/widows-002.xht"
+      },
+      {
+        "path": "css21/pagination/widows-003.xht",
+        "url": "/css21/pagination/widows-003.xht"
+      },
+      {
+        "path": "css21/pagination/widows-004b.xht",
+        "url": "/css21/pagination/widows-004b.xht"
+      },
+      {
+        "path": "css21/positioning/abspos-paged-002.xht",
+        "url": "/css21/positioning/abspos-paged-002.xht"
+      },
+      {
+        "path": "css-page-3/page-size-000.xht",
+        "url": "/css-page-3/page-size-000.xht"
+      },
+      {
+        "path": "css-page-3/page-size-001.xht",
+        "url": "/css-page-3/page-size-001.xht"
+      },
+      {
+        "path": "css-page-3/page-size-002.xht",
+        "url": "/css-page-3/page-size-002.xht"
+      },
+      {
+        "path": "css-page-3/page-size-003.xht",
+        "url": "/css-page-3/page-size-003.xht"
+      },
+      {
+        "path": "css-page-3/page-size-004.xht",
+        "url": "/css-page-3/page-size-004.xht"
+      },
+      {
+        "path": "css-page-3/page-size-005.xht",
+        "url": "/css-page-3/page-size-005.xht"
+      },
+      {
+        "path": "css-page-3/page-size-006.xht",
+        "url": "/css-page-3/page-size-006.xht"
+      },
+      {
+        "path": "css-page-3/page-size-007.xht",
+        "url": "/css-page-3/page-size-007.xht"
+      },
+      {
+        "path": "css-page-3/page-size-008.xht",
+        "url": "/css-page-3/page-size-008.xht"
+      },
+      {
+        "path": "css-page-3/page-size-009.xht",
+        "url": "/css-page-3/page-size-009.xht"
+      },
+      {
+        "path": "css-writing-modes-3/page-flow-direction-002.xht",
+        "url": "/css-writing-modes-3/page-flow-direction-002.xht"
+      }
+    ],
+    "reftest": [
+      {
+        "path": "css21/page-box/first-page-selectors-001.xht",
+        "references": [
+          ["/css21/page-box/vivliostyle/first-page-selectors-ltr-ref.html", "=="]
+        ],
+        "url": "/css21/page-box/first-page-selectors-001.xht"
+      },
+      {
+        "path": "css21/page-box/page-container-002.xht",
+        "references": [
+          ["css21/page-box/vivliostyle/page-container-002-ref.html", "=="]
+        ],
+        "url": "/css21/page-box/page-container-002.xht"
+      },
+      {
+        "path": "css21/page-box/page-container-006.xht",
+        "references": [
+          ["css21/page-box/vivliostyle/page-container-006-ref.html", "=="]
+        ],
+        "url": "/css21/page-box/page-container-006.xht"
+      },
+      {
+        "path": "css21/page-box/page-container-010.xht",
+        "references": [
+          ["css21/page-box/vivliostyle/page-container-010-ref.html", "=="]
+        ],
+        "url": "/css21/page-box/page-container-010.xht"
+      },
+      {
+        "path": "css21/page-box/page-selectors-004.xht",
+        "references": [
+          ["css21/page-box/vivliostyle/page-selectors-004-ref.html", "=="]
+        ],
+        "url": "/css21/page-box/page-selectors-004.xht"
+      },
+      {
+        "path": "css21/page-box/page-selectors-006.xht",
+        "references": [
+          ["css21/page-box/vivliostyle/page-selectors-006-ref.html", "=="]
+        ],
+        "url": "/css21/page-box/page-selectors-006.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-after-001.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/page-break-after-001-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/page-break-after-001.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-before-001.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/page-break-after-001-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/page-break-before-001.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-before-002.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/page-break-after-001-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/page-break-before-002.xht"
+      },
+      {
+        "path": "css21/pagination/page-break-before-004.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/page-break-before-004-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/page-break-before-004.xht"
+      },
+      {
+        "path": "css-page-3/page-size-010.xht",
+        "references": [
+          ["/css-page-3/vivliostyle/page-size-010-ref.html", "=="]
+        ],
+        "url": "/css-page-3/page-size-010.xht"
+      },
+      {
+        "path": "css-page-3/page-borders-000.xht",
+        "references": [
+          ["/css-page-3/vivliostyle/page-borders-000-ref.html", "=="]
+        ],
+        "url": "/css-page-3/page-borders-000.xht"
+      }
+    ],
+    "stub": [],
+    "testharness": [],
+    "wdspec": []
+  },
+  "local_changes": {
+    "deleted": [],
+    "items": {},
+    "reftest_nodes": {}
+  },
+  "reftest_nodes": {},
+  "rev": null,
+  "url_base": "/",
+  "version": 2
+}

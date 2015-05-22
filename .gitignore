@@ -2,5 +2,5 @@
 node_modules
 
 build/vivliostyle-viewer.min.js
-
+test/wpt/sauce-credentials.ini
 viewer/res/css/*

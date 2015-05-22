@@ -305,19 +305,21 @@ adapt.xmldoc.XMLDocStore;
  * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
  */
 adapt.xmldoc.parseXMLResource = function(response, store) {
-	var xml = response.responseXML;
-	if (!xml) {
+	var doc = response.responseXML;
+	if (!doc) {
 		var parser = new DOMParser();
 		var text = response.responseText || "<not-found/>";
-		xml = parser.parseFromString(text, "text/xml");
-		if (!xml) {
-			parser.parseFromString("<error/>", "text/xml");
-		}
-		if (response.responseText) {
-			adapt.base.log("XML served with non-XML media type: " + response.url);
+		// If responseXML is absent, try to parse as text/html
+		doc = parser.parseFromString(text, "text/html");
+		if (!doc) {
+			// If HTML parsing fails, try to parse as text/xml
+			doc = parser.parseFromString(text, "text/xml");
+			if (!doc) {
+				parser.parseFromString("<error/>", "text/xml");
+			}
 		}
 	}
-    var xmldoc = new adapt.xmldoc.XMLDocHolder(store, response.url, xml);
+    var xmldoc = new adapt.xmldoc.XMLDocHolder(store, response.url, doc);
     return adapt.task.newResult(xmldoc);
 };
 
