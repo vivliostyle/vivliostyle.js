@@ -7,7 +7,8 @@ metadata/ directory contains manifest files which wptrunner uses. `MANIFEST.json
 You can automatically run CSSWG test suites on Vivliostyle.js as following:
 
 ```sh
-# Make sure that your system has Python installed, and virtualenv package is installed. If you are using HomeBrew on Mac:
+# Make sure that your system has Python installed, and virtualenv package is installed.
+# If you are using HomeBrew on Mac:
 brew install python
 pip install virtualenv
 
@@ -16,15 +17,19 @@ mkdir work
 cd work
 
 # Fetch necessary repositories
-git clone --depth=1 --branch=vivliostyle-master --recursive https://github.com/vivliostyle/wptrunner.git
-git clone --depth=1 --branch=vivliostyle-master --recursive https://github.com/vivliostyle/csswg-test.git
-git clone --depth=1 --branch=vivliostyle-master --recursive https://github.com/vivliostyle/wpt-tools.git csswg-test/wpt_tools
+git clone --depth=1 --branch=vivliostyle-master --recursive \
+  https://github.com/vivliostyle/wptrunner.git
+git clone --depth=1 --branch=vivliostyle-master --recursive \
+  https://github.com/vivliostyle/csswg-test.git
+git clone --depth=1 --branch=vivliostyle-master --recursive \
+  https://github.com/vivliostyle/wpt-tools.git csswg-test/wpt_tools
 
 # Copy Vivliostyle.js files
 mkdir csswg-test/vivliostyle.js
 cp -R (Vivliostyle.js repository)/{src,test} csswg-test/vivliostyle.js/
-# Or, you can clone from GitHub directory
-# git clone --depth=1 --branch=master https://github.com/vivliostyle/vivliostyle.js.git csswg-test/vivliostyle.js
+# Or, you can clone from GitHub directly
+# git clone --depth=1 --branch=master \
+#   https://github.com/vivliostyle/vivliostyle.js.git csswg-test/vivliostyle.js
 
 # Setup environment
 virtualenv .
