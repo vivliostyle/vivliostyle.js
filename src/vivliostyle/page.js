@@ -177,7 +177,8 @@ vivliostyle.page.PageRulePartition.sides = [
  */
 vivliostyle.page.PageRulePartition.prototype.applySpecified = function(style) {
     this.specified["flow-from"] = new adapt.csscasc.CascadeValue(adapt.css.getName("body"), 0);
-    this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.relative, 0);
+    // Use absolute positioning so that this partition's margins don't collapse with its parent's margins
+    this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.absolute, 0);
     this.specified["overflow"] = new adapt.csscasc.CascadeValue(adapt.css.ident.visible, 0);
 
     var self = this;
@@ -395,8 +396,8 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
     // "if the values are over-constrained, instead of ignoring any margins, the containing block is resized to coincide with the margin edges of the page box."
     // (CSS Paged Media http://dev.w3.org/csswg/css-page/#page-model)
 
-    style[startSide] = adapt.css.numericZero;
-    style[endSide] = adapt.css.numericZero;
+    style[startSide] = new adapt.css.Expr(marginStart);
+    style[endSide] = new adapt.css.Expr(marginEnd);
     style["margin-" + startSide] = adapt.css.numericZero;
     style["margin-" + endSide] = adapt.css.numericZero;
     style["padding-" + startSide] = new adapt.css.Expr(paddingStart);
