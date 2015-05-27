@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Added
+- [core] Support page background and document canvas background color 
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/33>
+  - Node: only simple background color is supported.
+
 ### Fixed
 - [core] Avoid incorrect margin collapse of the page area
   - <https://github.com/vivliostyle/vivliostyle.js/pull/32>

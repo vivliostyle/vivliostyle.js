@@ -126,13 +126,18 @@ vivliostyle.page.pageRuleMasterPseudoName = "vivliostyle-page-rule-master";
 vivliostyle.page.PageRuleMaster = function(scope, parent, style) {
     adapt.pm.PageMaster.call(this, scope, null, vivliostyle.page.pageRuleMasterPseudoName, [],
         parent, null, 0);
-    /** @const @private */ this.style = style;
     var pageSize = vivliostyle.page.resolvePageSize(style);
     var partition = new vivliostyle.page.PageRulePartition(this.scope, this, style, pageSize);
     /** @const @private */ this.bodyPartitionKey = partition.key;
     this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.relative, 0);
     this.specified["width"] = new adapt.csscasc.CascadeValue(pageSize.width, 0);
     this.specified["height"] = new adapt.csscasc.CascadeValue(pageSize.height, 0);
+    for (var name in style) {
+        if (name.match(/^background-/)
+            && name !== "background-clip") {
+            this.specified[name] = style[name];
+        }
+    }
 };
 goog.inherits(vivliostyle.page.PageRuleMaster, adapt.pm.PageMaster);
 
@@ -149,7 +154,7 @@ vivliostyle.page.PageRuleMaster.prototype.createInstance = function(parentInstan
  * @param {adapt.expr.LexicalScope} scope
  * @param {vivliostyle.page.PageRuleMaster} parent
  * @param {!adapt.csscasc.ElementStyle} style Cascaded style for @page rules
- * !param {!vivliostyle.page.PageSize} pageSize
+ * @param {!vivliostyle.page.PageSize} pageSize
  * @constructor
  * @extends {adapt.pm.Partition}
  */
@@ -308,7 +313,8 @@ vivliostyle.page.PageRulePartitionInstance.prototype.applyCascadeAndInit = funct
     var style = this.cascaded;
     for (var name in docElementStyle) {
         if (Object.prototype.hasOwnProperty.call(docElementStyle, name)) {
-            if (name.match(/^column.*$/)) {
+            if (name.match(/^column.*$/) ||
+                name.match(/^background-/)) {
                 style[name] = docElementStyle[name];
             }
         }
