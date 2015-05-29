@@ -171,13 +171,6 @@
         "url": "/css21/page-box/page-container-001.xht"
       },
       {
-        "path": "css21/page-box/page-container-009.xht",
-        "references": [
-          ["/css21/page-box/vivliostyle/page-container-008-ref.html", "=="]
-        ],
-        "url": "/css21/page-box/page-container-009.xht"
-      },
-      {
         "path": "css21/positioning/abspos-paged-001.xht",
         "references": [
           [

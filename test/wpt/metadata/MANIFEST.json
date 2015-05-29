@@ -275,6 +275,13 @@
         "url": "/css21/page-box/page-container-008.xht"
       },
       {
+        "path": "css21/page-box/page-container-009.xht",
+        "references": [
+          ["/css21/page-box/vivliostyle/page-container-008-ref.html", "=="]
+        ],
+        "url": "/css21/page-box/page-container-009.xht"
+      },
+      {
         "path": "css21/page-box/page-container-010.xht",
         "references": [
           ["css21/page-box/vivliostyle/page-container-010-ref.html", "=="]
