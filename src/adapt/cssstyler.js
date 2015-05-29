@@ -234,8 +234,14 @@ adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBod
         }, this);
     }
 	if (!this.rootBackgroundAssigned) {
-		if (this.hasProp(elemStyle, this.validatorSet.backgroundProps, "background-color")
-			|| this.hasProp(elemStyle, this.validatorSet.backgroundProps, "background-image")) {
+        var backgroundColor = /** @type {adapt.css.Val} */
+            (this.hasProp(elemStyle, this.validatorSet.backgroundProps, "background-color") ?
+                elemStyle["background-color"].evaluate(this.context) : null);
+        var backgroundImage = /** @type {adapt.css.Val} */
+            (this.hasProp(elemStyle, this.validatorSet.backgroundProps, "background-image") ?
+                elemStyle["background-image"].evaluate(this.context) : null);
+		if ((backgroundColor && backgroundColor !== adapt.css.ident.inherit) ||
+            (backgroundImage && backgroundImage !== adapt.css.ident.inherit)) {
 			this.transferPropsToRoot(elemStyle, this.validatorSet.backgroundProps);
 			this.rootBackgroundAssigned = true;
 		}
