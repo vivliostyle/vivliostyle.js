@@ -10,6 +10,8 @@
 ### Fixed
 - [core] Avoid incorrect margin collapse of the page area
   - <https://github.com/vivliostyle/vivliostyle.js/pull/32>
+- [core] Fix incorrect positioning of floats
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/35>
 
 ## [0.1.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.1.1) - 2015-05-06
 Minor update with several changes and bug fixes.

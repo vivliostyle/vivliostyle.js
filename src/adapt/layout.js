@@ -262,6 +262,8 @@ adapt.layout.Column = function(element, layoutContext, clientLayout) {
 	/** @type {adapt.vtree.ClientLayout} */ this.clientLayout = clientLayout;
 	/** @type {Document} */ this.viewDocument = element.ownerDocument;
     /** @type {boolean} */ this.isFootnote = false;
+	/** @type {number} */ this.startEdge = 0;
+	/** @type {number} */ this.endEdge = 0;
 	/** @type {number} */ this.beforeEdge = 0;
 	/** @type {number} */ this.afterEdge = 0;
 	/** @type {number} */ this.footnoteEdge = 0;
@@ -291,6 +293,51 @@ adapt.layout.Column.prototype.clone = function() {
 	copy.footnoteArea = (this.footnoteArea ? this.footnoteArea.clone() : null);
 	copy.chunkPositions = this.chunkPositions.concat();  // Make a copy
 	return copy;
+};
+
+/**
+ * @returns {number}
+ */
+adapt.layout.Column.prototype.getTopEdge = function() {
+	return this.vertical ? this.startEdge : this.beforeEdge;
+};
+
+/**
+ * @returns {number}
+ */
+adapt.layout.Column.prototype.getBottomEdge = function() {
+	return this.vertical ? this.endEdge : this.afterEdge;
+};
+
+/**
+ * @returns {number}
+ */
+adapt.layout.Column.prototype.getLeftEdge = function() {
+	return this.vertical ? this.afterEdge : this.startEdge;
+};
+
+/**
+ * @returns {number}
+ */
+adapt.layout.Column.prototype.getRightEdge = function() {
+	return this.vertical ? this.beforeEdge : this.endEdge;
+};
+
+/**
+ * Returns the element's client rect measured from edges of the page.
+ * @param {Element} element
+ * @returns {adapt.vtree.ClientRect}
+ */
+adapt.layout.Column.prototype.getElementRelativeClientRect = function(element) {
+	var rect = this.clientLayout.getElementClientRect(element);
+	var offsetX = this.getLeftEdge() - this.box.x1;
+	var offsetY = this.getTopEdge() - this.box.y1;
+	return /** @type {adapt.vtree.ClientRect} */ ({
+		left: rect.left - offsetX,
+		top: rect.top - offsetY,
+		right: rect.right - offsetX,
+		bottom: rect.bottom - offsetY
+	});
 };
 
 /**
@@ -847,7 +894,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
     adapt.base.setCSSProperty(element, "right", "auto");
     adapt.base.setCSSProperty(element, "top", "auto");
     self.buildDeepElementView(nodeContext).then(function(nodeContextAfter) {
-	    var floatBBox = self.clientLayout.getElementClientRect(element);
+		var floatBBox = self.getElementRelativeClientRect(element);
 	    var margin = self.getComputedMargin(element);
 	    var floatBox = new adapt.geom.Rect(floatBBox.left - margin.left,
 	    		floatBBox.top - margin.top, floatBBox.right + margin.right,
@@ -873,7 +920,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 		    	probe.style.height = "1px";
 	    	}
 	    	parent.viewNode.appendChild(probe);
-	        var parentBox = self.clientLayout.getElementClientRect(probe);
+	        var parentBox = self.getElementRelativeClientRect(probe);
 	    	x1 = Math.max(self.getStartEdge(parentBox), x1);
 	    	x2 = Math.min(self.getEndEdge(parentBox), x2);	    	
 	    	parent.viewNode.removeChild(probe);
@@ -1899,6 +1946,8 @@ adapt.layout.Column.prototype.initGeom = function() {
     var offsetY = this.originY + this.top + this.getInsetTop();
     this.box = new adapt.geom.Rect(offsetX, offsetY, offsetX + this.width,
     		offsetY + this.height);
+	this.startEdge = columnBBox ? (this.vertical ? columnBBox.top : columnBBox.left) : 0;
+	this.endEdge = columnBBox ? (this.vertical ? columnBBox.bottom : columnBBox.right) : 0;
     this.beforeEdge = columnBBox ? (this.vertical ? columnBBox.right : columnBBox.top) : 0;
     this.afterEdge = columnBBox ? (this.vertical ? columnBBox.left : columnBBox.bottom) : 0;
     this.leftFloatEdge = this.beforeEdge;
