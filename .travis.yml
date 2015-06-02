@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-- '0.10'
+- stable
 before_install:
 - gem install compass
 - sudo pip install virtualenv
