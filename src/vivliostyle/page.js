@@ -754,14 +754,15 @@ vivliostyle.page.IsVersoPageAction.prototype.getPriority = function() {
 /**
  * @param {!adapt.expr.LexicalScope} scope
  * @param {!adapt.cssparse.DispatchParserHandler} owner
+ * @param {adapt.expr.Val} condition
  * @param {!adapt.csscasc.CascadeParserHandler} parent
  * @param {adapt.cssvalid.ValidatorSet} validatorSet
  * @constructor
  * @extends {adapt.csscasc.CascadeParserHandler}
  * @implements {adapt.cssvalid.PropertyReceiver}
  */
-vivliostyle.page.PageParserHandler = function(scope, owner, parent, validatorSet) {
-    adapt.csscasc.CascadeParserHandler.call(this, scope, owner, null, parent, null, validatorSet, false);
+vivliostyle.page.PageParserHandler = function(scope, owner, condition, parent, validatorSet) {
+    adapt.csscasc.CascadeParserHandler.call(this, scope, owner, condition, parent, null, validatorSet, false);
     /** @type {string} */ this.pageSizeRules = "";
 };
 goog.inherits(vivliostyle.page.PageParserHandler, adapt.csscasc.CascadeParserHandler);

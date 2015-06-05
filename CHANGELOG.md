@@ -20,6 +20,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/35>
 - [viewer] Make keyboard shortcuts work on various browsers
   - <https://github.com/vivliostyle/vivliostyle.js/pull/38>
+- [core] Make at-page rules inside media queries effective only when the condition of the media query is satisfied
+  - Note that this behavior is not spec compliant. CSS Paged Media 3 says that ['size' property inside media queries must be ignored](http://dev.w3.org/csswg/css-page/#page-size-prop) and that ['width'/'height' media queries are evaluated with respect to the page size](http://dev.w3.org/csswg/css-page/#page-size-media-query).
 
 ## [0.1.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.1.1) - 2015-05-06
 Minor update with several changes and bug fixes.
