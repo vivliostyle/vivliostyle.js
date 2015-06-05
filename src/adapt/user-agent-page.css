@@ -5,6 +5,10 @@ html|body, fb2|body {
     -epub-hyphens: -epubx-expr(pref-hyphenate?"auto":"manual");
 }
 
+@page {
+	size: auto;
+}
+
 @-adapt-footnote-area {
 	-adapt-margin-before: 0.5em;
 	-adapt-margin-after: 0.5em;

@@ -38,10 +38,11 @@ adapt.ops.FontFace;
  * @param {adapt.csscasc.ElementStyle} footnoteProps
  * @param {Object.<string,adapt.csscasc.ElementStyle>} flowProps
  * @param {Array.<adapt.csscasc.ElementStyle>} viewportProps
+ * @param {Array.<!vivliostyle.page.PageRuleSize>} pageSizes
  * @constructor
  */
 adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
-		fontFaces, footnoteProps, flowProps, viewportProps) {
+		fontFaces, footnoteProps, flowProps, viewportProps, pageSizes) {
 	/** @const */ this.store = store;
 	/** @const */ this.rootScope = rootScope;
 	/** @const */ this.pageScope = pageScope;
@@ -52,6 +53,7 @@ adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
 	/** @const */ this.footnoteProps = footnoteProps;
 	/** @const */ this.flowProps = flowProps;
 	/** @const */ this.viewportProps = viewportProps;
+	/** @const */ this.pageSizes = pageSizes.sort(function(a, b) { return a.specificity - b.specificity; });
 	/** @const */ this.validatorSet = store.validatorSet;
     this.pageScope.defineBuiltIn("has-content", function(name) {
     	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
@@ -156,6 +158,34 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
 goog.inherits(adapt.ops.StyleInstance, adapt.expr.Context);
 
 /**
+ * Write page size specification to the viewer's style element so that Chrome can choose a correct paper size on PDF output.
+ */
+adapt.ops.StyleInstance.prototype.writePageSizes = function() {
+	var self = this;
+	var str = "";
+	var autoSize = this.pageWidth() + "px " + this.pageHeight() + "px";
+	this.style.pageSizes.forEach(function(s) {
+		if (!s.condition || s.condition.evaluate(self)) {
+			str += "@page ";
+			str += s.selector;
+			str += "{size:";
+			if (s.size === adapt.css.ident.auto) {
+				str += autoSize;
+			} else {
+				str += s.size.toString();
+			}
+			str += ";}"
+		}
+	});
+	var styleElem = document.getElementById("vivliostyle-page-rules");
+	if (styleElem) {
+		styleElem.textContent = str;
+	} else {
+		adapt.base.log("style element with id 'vivliostyle-page-rules' not found!");
+	}
+};
+
+/**
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.ops.StyleInstance.prototype.init = function() {
@@ -168,6 +198,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     self.stylerMap = {};
     self.stylerMap[self.xmldoc.url] = self.styler;
     var docElementStyle = self.styler.getTopContainerStyle();
+	self.writePageSizes();
     self.pageProgression = vivliostyle.page.resolvePageProgression(docElementStyle);
     var rootBox = this.style.rootBox;
     this.rootPageBoxInstance = new adapt.pm.RootPageBoxInstance(rootBox);
@@ -926,6 +957,7 @@ adapt.ops.StyleParserHandler = function(validatorSet) {
 	/** @const */ this.footnoteProps = /** @type {adapt.csscasc.ElementStyle} */ ({});
 	/** @const */ this.flowProps = /** @type {Object.<string,adapt.csscasc.ElementStyle>} */ ({});
 	/** @const */ this.viewportProps = /** @type {Array.<adapt.csscasc.ElementStyle>} */ ([]);
+	/** @const */ this.pageSizes = /** @type {Array.<vivliostyle.page.PageRuleSize>} */ ([]);
 
     this.slave = this.cascadeParserHandler;
 };
@@ -1131,7 +1163,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
 		        }).then(function() {
 		        	var cascade = sph.cascadeParserHandler.finish();
 		        	style = new adapt.ops.Style(self, sph.rootScope, sph.pageScope, cascade, sph.rootBox,
-		        			sph.fontFaces, sph.footnoteProps, sph.flowProps, sph.viewportProps);
+		        			sph.fontFaces, sph.footnoteProps, sph.flowProps, sph.viewportProps, sph.pageSizes);
 			    	self.styleByKey[key] = style;
 			    	delete self.styleFetcherByKey[key];
 		        	innerFrame.finish(style);

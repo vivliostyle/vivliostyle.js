@@ -752,8 +752,14 @@ vivliostyle.page.IsVersoPageAction.prototype.getPriority = function() {
 };
 
 /**
+ * Represent 'size' property declaration inside @page rules.
+ * @typedef {{selector: string, size: adapt.css.Val, specificity: number, condition: adapt.expr.Val}}
+ */
+vivliostyle.page.PageRuleSize;
+
+/**
  * @param {!adapt.expr.LexicalScope} scope
- * @param {!adapt.cssparse.DispatchParserHandler} owner
+ * @param {!adapt.ops.StyleParserHandler} owner
  * @param {adapt.expr.Val} condition
  * @param {!adapt.csscasc.CascadeParserHandler} parent
  * @param {adapt.cssvalid.ValidatorSet} validatorSet
@@ -763,7 +769,13 @@ vivliostyle.page.IsVersoPageAction.prototype.getPriority = function() {
  */
 vivliostyle.page.PageParserHandler = function(scope, owner, condition, parent, validatorSet) {
     adapt.csscasc.CascadeParserHandler.call(this, scope, owner, condition, parent, null, validatorSet, false);
-    /** @type {string} */ this.pageSizeRules = "";
+    /** @type {!adapt.ops.StyleParserHandler} */ this.styleParserHandler = owner;
+    /** @const @type {!vivliostyle.page.PageRuleSize} */ this.pageSize = {
+        selector: "",
+        size: null,
+        specificity: this.getBaseSpecificity(),
+        condition: condition
+    };
 };
 goog.inherits(vivliostyle.page.PageParserHandler, adapt.csscasc.CascadeParserHandler);
 
@@ -771,15 +783,22 @@ goog.inherits(vivliostyle.page.PageParserHandler, adapt.csscasc.CascadeParserHan
  * @override
  */
 vivliostyle.page.PageParserHandler.prototype.startPageRule = function() {
-    this.pageSizeRules += "@page ";
     this.startSelectorRule();
 };
 
 /**
  * @override
  */
+vivliostyle.page.PageParserHandler.prototype.nextSelector = function() {
+    this.pageSize.selector += ",";
+    adapt.csscasc.CascadeParserHandler.prototype.nextSelector.call(this);
+};
+
+/**
+ * @override
+ */
 vivliostyle.page.PageParserHandler.prototype.tagSelector = function(ns, name) {
-    this.pageSizeRules += name;
+    this.pageSize.selector += name;
     if (name) {
         this.chain.push(new vivliostyle.page.CheckPageTypeAction(name));
         this.specificity += 0x10000;
@@ -793,7 +812,7 @@ vivliostyle.page.PageParserHandler.prototype.pseudoclassSelector = function(name
     if (params) {
         this.reportAndSkip("E_INVALID_PAGE_SELECTOR :" + name + "(" + params.join("") + ")");
     }
-    this.pageSizeRules += ":" + name;
+    this.pageSize.selector += ":" + name;
     switch (name.toLowerCase()) {
         case "first":
             this.chain.push(new vivliostyle.page.IsFirstPageAction(this.scope));
@@ -825,7 +844,6 @@ vivliostyle.page.PageParserHandler.prototype.pseudoclassSelector = function(name
  * @override
  */
 vivliostyle.page.PageParserHandler.prototype.startRuleBody = function() {
-    this.pageSizeRules += "{";
     adapt.csscasc.CascadeParserHandler.prototype.startRuleBody.call(this);
 };
 
@@ -833,10 +851,9 @@ vivliostyle.page.PageParserHandler.prototype.startRuleBody = function() {
  * @override
  */
 vivliostyle.page.PageParserHandler.prototype.endRule = function() {
-    this.pageSizeRules += "}";
-
-    // TODO This output to the style element should be done in an upper (view) layer
-    document.getElementById("vivliostyle-page-rules").textContent += this.pageSizeRules;
+    if (this.pageSize.size) {
+        this.styleParserHandler.pageSizes.push(this.pageSize);
+    }
 
     adapt.csscasc.CascadeParserHandler.prototype.endRule.call(this);
 };
@@ -846,7 +863,10 @@ vivliostyle.page.PageParserHandler.prototype.endRule = function() {
  */
 vivliostyle.page.PageParserHandler.prototype.property = function(name, value, important) {
     if (name === "size") {
-        this.pageSizeRules += "size: " + value.toString() + (important ? "!important" : "") + ";";
+        this.pageSize.size = value;
+        if (important) {
+            this.pageSize.specificity = this.getImportantSpecificity();
+        }
     }
     adapt.csscasc.CascadeParserHandler.prototype.property.call(this, name, value, important);
 };

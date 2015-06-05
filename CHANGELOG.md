@@ -12,6 +12,7 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/39>
   - Spec: [CSS Paged Media Module Level 3 - Page-based counters](http://dev.w3.org/csswg/css-page/#page-based-counters)
   - See [the above pull request](https://github.com/vivliostyle/vivliostyle.js/pull/39) for a detailed description of its behavior and limitation.
+- [core] Chrome PDF output now respects the correct page size even if the page size is 'auto'
 
 ### Fixed
 - [core] Avoid incorrect margin collapse of the page area
