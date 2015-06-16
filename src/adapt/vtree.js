@@ -108,6 +108,8 @@ adapt.vtree.Page = function(container) {
 	/** @type {Object.<string,Array.<Element>>} */ this.elementsById = {};
 	/** @type {boolean} */ this.isFirstPage = false;
 	/** @type {boolean} */ this.isLastPage = false;
+	/** @type {boolean} */ this.isAutoWidth = false;
+	/** @type {boolean} */ this.isAutoHeight = false;
 	/** @type {number} */ this.spineIndex = 0;
 	/** @type {adapt.vtree.LayoutPosition} */ this.position = null;
 	/** @type {number} */ this.offset = -1;
@@ -115,6 +117,44 @@ adapt.vtree.Page = function(container) {
 	/** @type {Array.<adapt.taskutil.Fetcher>} */ this.fetchers = [];
 };
 goog.inherits(adapt.vtree.Page, adapt.base.SimpleEventTarget);
+
+/**
+ * @private
+ * @const
+ * @type {string}
+ */
+adapt.vtree.Page.AUTO_PAGE_WIDTH_ATTRIBUTE = "data-vivliostyle-auto-page-width";
+
+/**
+ * @private
+ * @const
+ * @type {string}
+ */
+adapt.vtree.Page.AUTO_PAGE_HEIGHT_ATTRIBUTE = "data-vivliostyle-auto-page-height";
+
+/**
+ * @param {boolean} isAuto
+ */
+adapt.vtree.Page.prototype.setAutoPageWidth = function(isAuto) {
+	this.isAutoPageWidth = isAuto;
+	if (isAuto) {
+		this.container.setAttribute(adapt.vtree.Page.AUTO_PAGE_WIDTH_ATTRIBUTE, true);
+	} else {
+		this.container.removeAttribute(adapt.vtree.Page.AUTO_PAGE_WIDTH_ATTRIBUTE);
+	}
+};
+
+/**
+ * @param {boolean} isAuto
+ */
+adapt.vtree.Page.prototype.setAutoPageHeight = function(isAuto) {
+	this.isAutoPageHeight = isAuto;
+	if (isAuto) {
+		this.container.setAttribute(adapt.vtree.Page.AUTO_PAGE_HEIGHT_ATTRIBUTE, true);
+	} else {
+		this.container.removeAttribute(adapt.vtree.Page.AUTO_PAGE_HEIGHT_ATTRIBUTE);
+	}
+};
 
 /**
  * @param {Element} element

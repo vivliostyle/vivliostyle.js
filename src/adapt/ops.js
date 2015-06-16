@@ -696,10 +696,10 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     }
 
     if (pageMaster.pageBox.specified["width"].value === adapt.css.fullWidth) {
-        page.container.setAttribute("data-vivliostyle-auto-page-width", true);
+		page.setAutoPageWidth(true);
     }
     if (pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight) {
-        page.container.setAttribute("data-vivliostyle-auto-page-height", true);
+		page.setAutoPageHeight(true);
     }
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
     	= adapt.task.newFrame("layoutNextPage");

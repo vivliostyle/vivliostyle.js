@@ -1576,6 +1576,27 @@ adapt.epub.OPFView.prototype.removeRenderedPages = function() {
 };
 
 /**
+ * Returns if at least one page has 'auto' size
+ * @returns {boolean}
+ */
+adapt.epub.OPFView.prototype.hasAutoSizedPages = function() {
+	var items = this.spineItems;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		if (item) {
+			var pages = item.pages;
+			for (var j = 0; j < pages.length; j++) {
+				var page = pages[j];
+				if (page.isAutoPageWidth && page.isAutoPageHeight) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+};
+
+/**
  * @param {boolean} autohide
  * @return {!adapt.task.Result.<adapt.vtree.Page>}
  */
