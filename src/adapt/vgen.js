@@ -1221,15 +1221,6 @@ adapt.vgen.Viewport = function(window, fontSize, opt_root, opt_width, opt_height
 	/** @type {HTMLElement} */ this.root = opt_root || this.document.body;
 	/** @type {number} */ this.width = opt_width || window.innerWidth;
 	/** @type {number} */ this.height = opt_height || window.innerHeight;
-	if (opt_root && (!opt_width || !opt_height)) {
-	    var style = window.getComputedStyle(opt_root, null);
-	    var r = style["width"].match(/^(-?[0-9]*(\.[0-9]*)?)px$/);
-	    if (r && parseFloat(r[1]) > 0)
-            this.width = parseFloat(r[1]);
-	    r = style["height"].match(/^(-?[0-9]*(\.[0-9]*)?)px$/);
-	    if (r && parseFloat(r[1]) > 0)
-	    	this.height = parseFloat(r[0]);
-	}
     this.root.style["min-width"] = this.width + "px";
     this.root.style["min-height"] = this.height + "px";
 };

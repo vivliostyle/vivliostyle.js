@@ -386,7 +386,8 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
 		return false;
 	}
 	var viewport = this.createViewport();
-	return viewport.width == this.viewport.width && viewport.height == this.viewport.height;
+	return (viewport.width == this.viewport.width && viewport.height == this.viewport.height) ||
+        (this.opfView && !this.opfView.hasAutoSizedPages());
 };
 
 /**
