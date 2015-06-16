@@ -6,6 +6,8 @@
 - [core] Support page background and document canvas background color 
   - <https://github.com/vivliostyle/vivliostyle.js/pull/33>
   - Node: only simple background color is supported.
+- [core, viewer] Layout is automatically updated when the window size is changed
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/37>
 
 ### Fixed
 - [core] Avoid incorrect margin collapse of the page area
