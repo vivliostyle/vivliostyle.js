@@ -43,67 +43,60 @@ vivliostyle.viewerapp.navigateToRightPage = function() {
  * @return {void}
  */
 vivliostyle.viewerapp.keydown = function(evt) {
-    switch (evt.keyCode) {
-    case 35:  // end
-    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "last"});
+    var key = evt.key;
+    var keyIdentifier = evt.keyIdentifier;
+    var location = evt.location;
+    if (key === "End" || keyIdentifier === "End") {
+        vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "last"});
         evt.preventDefault();
-    	break;
-    case 36:  // home
-    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "first"});
+    } else if (key === "Home" || keyIdentifier === "Home") {
+        vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "first"});
         evt.preventDefault();
-    	break;
-    case 38:  // up arrow
-    	vivliostyle.viewerapp.sendCommand({
+    } else if (key === "ArrowUp" || key === "Up" || keyIdentifier === "Up") {
+        vivliostyle.viewerapp.sendCommand({
             "a": "moveTo",
             "where": "previous"
         });
         evt.preventDefault();
-        break;
-    case 40:  // down arrow
-    	vivliostyle.viewerapp.sendCommand({
+    } else if (key === "ArrowDown" || key === "Down" || keyIdentifier === "Down") {
+        vivliostyle.viewerapp.sendCommand({
             "a": "moveTo",
             "where": "next"
         });
         evt.preventDefault();
-        break;
-    case 39:  // right arrow
+    } else if (key === "ArrowRight" || key === "Right" || keyIdentifier === "Right") {
         vivliostyle.viewerapp.navigateToRightPage();
         evt.preventDefault();
-        break;
-    case 37:  // left arrow
+    } else if (key === "ArrowLeft" || key === "Left" || keyIdentifier === "Left") {
         vivliostyle.viewerapp.navigateToLeftPage();
         evt.preventDefault();
-        break;
-    case 48:  // zero
-    	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
+    } else if (key === "0" || keyIdentifier === "U+0030") {
+        vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
         evt.preventDefault();
-    	break;
-    	/*
-    case 78:  // N - night toggle
-    	self.pref.nightMode = !self.pref.nightMode;
-    	self.viewport = null;
-    	self.resize().thenFinish(frame);
-    	break;
-    case 86:  // V - vertical toggle
-    	self.pref.horizontal = !self.pref.horizontal;
-    	self.viewport = null;
-    	self.resize().thenFinish(frame);
-    	break;
-    	*/
-    case 84: // 'T' - show TOC
-    	vivliostyle.viewerapp.sendCommand({"a": "toc", "v": "toggle", "autohide": true});
+        /*
+    } else if (key === "n" || keyIdentifier === "U+004E") {
+        // N - night toggle
+        self.pref.nightMode = !self.pref.nightMode;
+        self.viewport = null;
+        self.resize().thenFinish(frame);
+    } else if (key === "v" || keyIdentifier === "U+0056") {
+        self.pref.horizontal = !self.pref.horizontal;
+        self.viewport = null;
+        self.resize().thenFinish(frame);
+        */
+    } else if (key === "t" || keyIdentifier === "U+0054") {
+        vivliostyle.viewerapp.sendCommand({"a": "toc", "v": "toggle", "autohide": true});
         evt.preventDefault();
-    	break;
-    case 187:  // plus
-    	vivliostyle.viewerapp.fontSize *= 1.2;
-    	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
+    } else if (key === "+" || key === "Add" || keyIdentifier === "U+002B"
+        || keyIdentifier === "U+00BB" || (keyIdentifier === "U+004B" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD) /* workaround for Chrome for Windows */) {
+        vivliostyle.viewerapp.fontSize *= 1.2;
+        vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
         evt.preventDefault();
-    	break;
-    case 189:  // minus
-    	vivliostyle.viewerapp.fontSize /= 1.2;
-    	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
+    } else if (key === "-" || key === "Subtract" || keyIdentifier === "U+002D"
+        || keyIdentifier === "U+00BD" || (keyIdentifier === "U+004D" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD) /* workaround for Chrome for Windows */) {
+        vivliostyle.viewerapp.fontSize /= 1.2;
+        vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
         evt.preventDefault();
-    	break;
     }
 };
 
