@@ -137,10 +137,11 @@ adapt.cssstyler.AbstractStyler.prototype.getStyle = function(element, deep) {};
  * @param {adapt.expr.Context} context
  * @param {Object.<string,boolean>} primaryFlows
  * @param {adapt.cssvalid.ValidatorSet} validatorSet
+ * @param {adapt.csscasc.PageCounterResolver} pageCounterResolver
  * @constructor
  * @implements {adapt.cssstyler.AbstractStyler}
  */
-adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows, validatorSet) {
+adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows, validatorSet, pageCounterResolver) {
 	/** @const */ this.xmldoc = xmldoc;
 	/** @const */ this.root = xmldoc.root;
 	/** @const */ this.cascadeHolder = cascade;
@@ -153,7 +154,7 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
     /** @const */ this.flowChunks = /** @type {Array.<adapt.vtree.FlowChunk>} */ ([]);
     /** @type {adapt.cssstyler.FlowListener} */ this.flowListener = null;
     /** @type {?string} */ this.flowToReach = null;
-    /** @const */ this.cascade = cascade.createInstance(context, xmldoc.lang);
+    /** @const */ this.cascade = cascade.createInstance(context, pageCounterResolver, xmldoc.lang);
     /** @const */ this.offsetMap = new adapt.cssstyler.SlipMap();
     /** @type {boolean} */ this.primary = true;
     /** @const */ this.primaryStack = /** @type {Array.<boolean>} */ ([]);
