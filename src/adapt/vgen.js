@@ -150,7 +150,7 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
 	    if (content) {
 	    	var contentVal = content.evaluate(this.context);
 	    	if (adapt.vtree.nonTrivialContent(contentVal))
-	    		contentVal.visit(new adapt.vtree.ContentPropertyHandler(element));
+	    		contentVal.visit(new adapt.vtree.ContentPropertyHandler(element, this.context));
 	    }    	
 	}
 	if (className.match(/^first-/) && !style["x-first-pseudo"]) {
@@ -1086,7 +1086,7 @@ adapt.vgen.ViewFactory.prototype.applyPseudoelementStyle = function(nodeContext,
 	nodeContext.vertical = this.computeStyle(nodeContext.vertical, elementStyle, computedStyle);
     var content = computedStyle["content"];
     if (adapt.vtree.nonTrivialContent(content)) {
-        content.visit(new adapt.vtree.ContentPropertyHandler(target));
+        content.visit(new adapt.vtree.ContentPropertyHandler(target, this.context));
         delete computedStyle["content"];
     }
     this.applyComputedStyles(target, computedStyle);

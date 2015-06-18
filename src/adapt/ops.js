@@ -476,7 +476,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	    var contentVal = boxInstance.getProp(self, "content");
 	    if (contentVal) {
 	    	if (adapt.vtree.nonTrivialContent(contentVal)) {
-	    		contentVal.visit(new adapt.vtree.ContentPropertyHandler(boxContainer));
+	    		contentVal.visit(new adapt.vtree.ContentPropertyHandler(boxContainer, self));
 	    		boxInstance.transferContentProps(self, layoutContainer, page);
 	    	}
 	    } 	

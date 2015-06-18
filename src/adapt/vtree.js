@@ -981,17 +981,27 @@ adapt.vtree.Container.prototype.getInnerShape = function() {
 /**
  * @constructor
  * @param {Element} elem
+ * @param {adapt.expr.Context} context
  * @extends {adapt.css.Visitor}
  */
-adapt.vtree.ContentPropertyHandler = function(elem) {
+adapt.vtree.ContentPropertyHandler = function(elem, context) {
 	adapt.css.Visitor.call(this);
     /** @const */ this.elem = elem;
+	/** @const */ this.context = context;
 };
 goog.inherits(adapt.vtree.ContentPropertyHandler, adapt.css.Visitor);
 
+/**
+ * @private
+ * @param {string} str
+ */
+adapt.vtree.ContentPropertyHandler.prototype.visitStrInner = function(str) {
+	this.elem.appendChild(this.elem.ownerDocument.createTextNode(str));
+};
+
 /** @override */
 adapt.vtree.ContentPropertyHandler.prototype.visitStr = function(str) {
-    this.elem.appendChild(this.elem.ownerDocument.createTextNode(str.str));
+	this.visitStrInner(str.str);
     return null;
 };
     
@@ -1007,6 +1017,15 @@ adapt.vtree.ContentPropertyHandler.prototype.visitURL = function(url) {
 adapt.vtree.ContentPropertyHandler.prototype.visitSpaceList = function(list) {
     this.visitValues(list.values);
     return null;
+};
+
+/** @override */
+adapt.vtree.ContentPropertyHandler.prototype.visitExpr = function(expr) {
+	var val = expr.toExpr().evaluate(this.context);
+	if (typeof val === "string") {
+		this.visitStrInner(val);
+	}
+	return null;
 };
 
 /**
