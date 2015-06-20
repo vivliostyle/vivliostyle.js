@@ -896,3 +896,62 @@ vivliostyle.page.PageCounterStore.prototype.getCountersVal = function(name, form
         return format(getCounterNumbers());
     }, "page-counters-" + name)
 };
+
+/**
+ * @private
+ * @param {string} counterName
+ * @param {number} value
+ */
+vivliostyle.page.PageCounterStore.prototype.defineCounter = function(counterName, value) {
+    if (this.counters[counterName]) {
+        this.counters[counterName].push(value);
+    } else {
+        this.counters[counterName] = [value];
+    }
+};
+
+/**
+ * Update the page-based counters with 'counter-reset' and 'counter-increment' properties within the page context. Call before starting layout of the page.
+ * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle
+ * @param {!adapt.expr.Context} context
+ */
+vivliostyle.page.PageCounterStore.prototype.updatePageCounters = function(cascadedPageStyle, context) {
+    var resetMap;
+    var reset = cascadedPageStyle["counter-reset"];
+    if (reset) {
+        var resetVal = reset.evaluate(context);
+        if (resetVal) {
+            resetMap = adapt.cssprop.toCounters(resetVal, true);
+        }
+    }
+    if (resetMap) {
+        for (var resetCounterName in resetMap) {
+            this.defineCounter(resetCounterName, resetMap[resetCounterName]);
+        }
+    }
+
+    var incrementMap;
+    var increment = cascadedPageStyle["counter-increment"];
+    if (increment) {
+        var incrementVal = increment.evaluate(context);
+        if (incrementVal) {
+            incrementMap = adapt.cssprop.toCounters(incrementVal, false);
+        }
+    }
+    // If 'counter-increment' for the builtin 'page' counter is absent, add it with value 1.
+    if (incrementMap) {
+        if (!("page" in incrementMap)) {
+            incrementMap["page"] = 1;
+        }
+    } else {
+        incrementMap = {};
+        incrementMap["page"] = 1;
+    }
+    for (var incrementCounterName in incrementMap) {
+        if (!this.counters[incrementCounterName]) {
+            this.defineCounter(incrementCounterName, 0);
+        }
+        var counterValues = this.counters[incrementCounterName];
+        counterValues[counterValues.length - 1] += incrementMap[incrementCounterName];
+    }
+};
