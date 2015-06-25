@@ -8,6 +8,10 @@
   - Node: only simple background color is supported.
 - [core, viewer] Layout is automatically updated when the window size is changed
   - <https://github.com/vivliostyle/vivliostyle.js/pull/37>
+- [core] Support page-based counters
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/39>
+  - Spec: [CSS Paged Media Module Level 3 - Page-based counters](http://dev.w3.org/csswg/css-page/#page-based-counters)
+  - See [the above pull request](https://github.com/vivliostyle/vivliostyle.js/pull/39) for a detailed description of its behavior and limitation.
 
 ### Fixed
 - [core] Avoid incorrect margin collapse of the page area

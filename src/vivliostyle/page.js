@@ -857,3 +857,101 @@ vivliostyle.page.PageParserHandler.prototype.insertNonPrimary = function(action)
     // We represent page rules without selectors by *, though it is illegal in CSS
     this.cascade.insertInTable(this.cascade.pagetypes, "*", action);
 };
+
+/**
+ * Object storing page-based counters.
+ * @param {adapt.expr.LexicalScope} pageScope Scope in which a page-based counter's adapt.expr.Val is defined. Since the page-based counters are updated per page, the scope should be a page scope, which is cleared per page.
+ * @constructor
+ * @implements {adapt.csscasc.PageCounterResolver}
+ */
+vivliostyle.page.PageCounterStore = function(pageScope) {
+    /** @const */ this.pageScope = pageScope;
+    /** @const @type {Object.<string,!Array.<number>>} */ this.counters = {};
+    this.counters["page"] = [0];
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageCounterStore.prototype.getCounterVal = function(name, format) {
+    var self = this;
+    function getCounterNumber() {
+        var values = self.counters[name];
+        return (values && values.length) ? values[values.length - 1] : null;
+    }
+    return new adapt.expr.Native(this.pageScope, function() {
+        return format(getCounterNumber());
+    }, "page-counter-" + name);
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageCounterStore.prototype.getCountersVal = function(name, format) {
+    var self = this;
+    function getCounterNumbers() {
+        return self.counters[name] || [];
+    }
+    return new adapt.expr.Native(this.pageScope, function() {
+        return format(getCounterNumbers());
+    }, "page-counters-" + name)
+};
+
+/**
+ * @private
+ * @param {string} counterName
+ * @param {number} value
+ */
+vivliostyle.page.PageCounterStore.prototype.defineCounter = function(counterName, value) {
+    if (this.counters[counterName]) {
+        this.counters[counterName].push(value);
+    } else {
+        this.counters[counterName] = [value];
+    }
+};
+
+/**
+ * Update the page-based counters with 'counter-reset' and 'counter-increment' properties within the page context. Call before starting layout of the page.
+ * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle
+ * @param {!adapt.expr.Context} context
+ */
+vivliostyle.page.PageCounterStore.prototype.updatePageCounters = function(cascadedPageStyle, context) {
+    var resetMap;
+    var reset = cascadedPageStyle["counter-reset"];
+    if (reset) {
+        var resetVal = reset.evaluate(context);
+        if (resetVal) {
+            resetMap = adapt.cssprop.toCounters(resetVal, true);
+        }
+    }
+    if (resetMap) {
+        for (var resetCounterName in resetMap) {
+            this.defineCounter(resetCounterName, resetMap[resetCounterName]);
+        }
+    }
+
+    var incrementMap;
+    var increment = cascadedPageStyle["counter-increment"];
+    if (increment) {
+        var incrementVal = increment.evaluate(context);
+        if (incrementVal) {
+            incrementMap = adapt.cssprop.toCounters(incrementVal, false);
+        }
+    }
+    // If 'counter-increment' for the builtin 'page' counter is absent, add it with value 1.
+    if (incrementMap) {
+        if (!("page" in incrementMap)) {
+            incrementMap["page"] = 1;
+        }
+    } else {
+        incrementMap = {};
+        incrementMap["page"] = 1;
+    }
+    for (var incrementCounterName in incrementMap) {
+        if (!this.counters[incrementCounterName]) {
+            this.defineCounter(incrementCounterName, 0);
+        }
+        var counterValues = this.counters[incrementCounterName];
+        counterValues[counterValues.length - 1] += incrementMap[incrementCounterName];
+    }
+};

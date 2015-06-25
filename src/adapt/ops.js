@@ -134,6 +134,7 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @const */ this.faces = new adapt.font.DocumentFaces(this.style.fontDeobfuscator);
     /** @type {Object.<string,adapt.pm.PageBoxInstance>} */ this.pageBoxInstances = {};
     /** @type {vivliostyle.page.PageManager} */ this.pageManager = null;
+	/** @const @type {vivliostyle.page.PageCounterStore} */ this.pageCounterStore = new vivliostyle.page.PageCounterStore(style.pageScope);
     /** @type {boolean} */ this.regionBreak = false;
     /** @type {!Object.<string,boolean>} */ this.pageBreaks = {};
     /** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = null;
@@ -162,7 +163,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     /** @type {!adapt.task.Frame.<boolean>} */ var frame
     	= adapt.task.newFrame("StyleInstance.init");
     self.styler = new adapt.cssstyler.Styler(self.xmldoc, self.style.cascade, 
-    		self.style.rootScope, self, this.primaryFlows, self.style.validatorSet);
+    		self.style.rootScope, self, this.primaryFlows, self.style.validatorSet, this.pageCounterStore);
     self.styler.resetFlowChunkStream(self);
     self.stylerMap = {};
     self.stylerMap[self.xmldoc.url] = self.styler;
@@ -170,7 +171,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     self.pageProgression = vivliostyle.page.resolvePageProgression(docElementStyle);
     var rootBox = this.style.rootBox;
     this.rootPageBoxInstance = new adapt.pm.RootPageBoxInstance(rootBox);
-    var cascadeInstance = this.style.cascade.createInstance(self, this.lang);
+    var cascadeInstance = this.style.cascade.createInstance(self, this.pageCounterStore, this.lang);
     this.rootPageBoxInstance.applyCascadeAndInit(cascadeInstance, docElementStyle);
     this.rootPageBoxInstance.resolveAutoSizing(self);
     this.pageManager = new vivliostyle.page.PageManager(cascadeInstance, this.style.pageScope, this.rootPageBoxInstance, self, docElementStyle);
@@ -197,7 +198,7 @@ adapt.ops.StyleInstance.prototype.getStylerForDoc = function(xmldoc) {
 		// We need a separate content, so that variables can get potentially different values.
 		var context = new adapt.expr.Context(style.rootScope, this.pageWidth(), this.pageHeight(), this.fontSize);
 		styler = new adapt.cssstyler.Styler(xmldoc, style.cascade, 
-        		style.rootScope, context, this.primaryFlows, style.validatorSet);
+        		style.rootScope, context, this.primaryFlows, style.validatorSet, this.pageCounterStore);
 		this.stylerMap[xmldoc.url] = styler;
 	}
 	return styler;
@@ -476,7 +477,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	    var contentVal = boxInstance.getProp(self, "content");
 	    if (contentVal) {
 	    	if (adapt.vtree.nonTrivialContent(contentVal)) {
-	    		contentVal.visit(new adapt.vtree.ContentPropertyHandler(boxContainer));
+	    		contentVal.visit(new adapt.vtree.ContentPropertyHandler(boxContainer, self));
 	    		boxInstance.transferContentProps(self, layoutContainer, page);
 	    	}
 	    } 	
@@ -701,6 +702,8 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     if (pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight) {
 		page.setAutoPageHeight(true);
     }
+	self.pageCounterStore.updatePageCounters(cascadedPageStyle, self);
+
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
     	= adapt.task.newFrame("layoutNextPage");
     self.layoutContainer(page, pageMaster, page.container, 0, 0, []).then(function() {
