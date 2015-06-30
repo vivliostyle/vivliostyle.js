@@ -1696,9 +1696,10 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounter = function(values) {
 		return new adapt.css.Str(this.format(numval, type));
 	} else {
 		var self = this;
-		return new adapt.css.Expr(this.cascade.pageCounterResolver.getCounterVal(counterName, function(numval) {
+		var c = new adapt.css.Expr(this.cascade.pageCounterResolver.getCounterVal(counterName, function(numval) {
 			return self.format(numval || 0, type);
 		}));
+		return new adapt.css.SpaceList([c]);
 	}
 };
 
@@ -1720,7 +1721,7 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounters = function(values) 
 	    }
 	}
 	var self = this;
-	return new adapt.css.Expr(this.cascade.pageCounterResolver.getCountersVal(counterName, function(numvals) {
+	var c = new adapt.css.Expr(this.cascade.pageCounterResolver.getCountersVal(counterName, function(numvals) {
 		var parts = /** @type {Array.<string>} */ ([]);
 		if (numvals.length) {
 			for (var i = 0; i < numvals.length; i++) {
@@ -1737,6 +1738,7 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounters = function(values) 
 			return self.format(0, type);
 		}
 	}));
+	return new adapt.css.SpaceList([c]);
 };
 
 /**
