@@ -752,6 +752,52 @@ vivliostyle.page.IsVersoPageAction.prototype.getPriority = function() {
 };
 
 /**
+ * Action applying an at-page rule
+ * @param {adapt.csscasc.ElementStyle} style
+ * @param {number} specificity
+ * @constructor
+ * @extends {adapt.csscasc.ApplyRuleAction}
+ */
+vivliostyle.page.ApplyPageRuleAction = function(style, specificity) {
+    adapt.csscasc.ApplyRuleAction.call(this, style, specificity, null, null);
+};
+goog.inherits(vivliostyle.page.ApplyPageRuleAction, adapt.csscasc.ApplyRuleAction);
+
+/**
+ * @override
+ */
+vivliostyle.page.ApplyPageRuleAction.prototype.apply = function(cascadeInstance) {
+    vivliostyle.page.mergeInPageRule(cascadeInstance.context, cascadeInstance.currentStyle,
+        this.style, this.specificity);
+};
+
+/**
+ * Merge page styles, including styles specified on page-margin boxes, considering specificity.
+ * Intended to be used in place of adapt.csscasc.mergeIn, which is for element styles.
+ * @param {adapt.expr.Context} context
+ * @param {adapt.csscasc.ElementStyle} target
+ * @param {adapt.csscasc.ElementStyle} style
+ * @param {number} specificity
+ */
+vivliostyle.page.mergeInPageRule = function(context, target, style, specificity) {
+    adapt.csscasc.mergeIn(context, target, style, specificity, null, null);
+    var marginBoxes = style["_marginBoxes"];
+    if (marginBoxes) {
+        var targetMap = adapt.csscasc.getMutableStyleMap(target, "_marginBoxes");
+        for (var boxName in marginBoxes) {
+            if (marginBoxes.hasOwnProperty(boxName)) {
+                var targetBox = targetMap[boxName];
+                if (!targetBox) {
+                    targetBox = /** @type {adapt.csscasc.ElementStyle} */ ({});
+                    targetMap[boxName] = targetBox;
+                }
+                adapt.csscasc.mergeIn(context, targetBox, marginBoxes[boxName], specificity, null, null);
+            }
+        }
+    }
+};
+
+/**
  * @param {!adapt.expr.LexicalScope} scope
  * @param {!adapt.cssparse.DispatchParserHandler} owner
  * @param {!adapt.csscasc.CascadeParserHandler} parent
@@ -857,6 +903,77 @@ vivliostyle.page.PageParserHandler.prototype.insertNonPrimary = function(action)
     // We represent page rules without selectors by *, though it is illegal in CSS
     this.cascade.insertInTable(this.cascade.pagetypes, "*", action);
 };
+
+/**
+ * @override
+ */
+vivliostyle.page.PageParserHandler.prototype.makeApplyRuleAction = function(specificity) {
+    return new vivliostyle.page.ApplyPageRuleAction(this.elementStyle, specificity);
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageParserHandler.prototype.startPageMarginBoxRule = function(name) {
+    // styles in the page-margin box rule are stored in this.elementStyle["_marginBoxes"][(margin box's name)].
+    var marginBoxMap = adapt.csscasc.getMutableStyleMap(this.elementStyle, "_marginBoxes");
+    var boxStyle = marginBoxMap[name];
+    if (!boxStyle) {
+        boxStyle = /** @type {!adapt.csscasc.ElementStyle} */ ({});
+        marginBoxMap[name] = boxStyle;
+    }
+    var handler = new vivliostyle.page.PageMarginBoxParserHandler(this.scope, this.owner,
+        this.validatorSet, boxStyle);
+    this.owner.pushHandler(handler);
+};
+
+/**
+ * Parser handler for a page-margin box rule.
+ * @param {adapt.expr.LexicalScope} scope
+ * @param {adapt.cssparse.DispatchParserHandler} owner
+ * @param {adapt.cssvalid.ValidatorSet} validatorSet
+ * @param {!adapt.csscasc.ElementStyle} boxStyle
+ * @constructor
+ * @extends {adapt.cssparse.SlaveParserHandler}
+ * @implements {adapt.cssvalid.PropertyReceiver}
+ */
+vivliostyle.page.PageMarginBoxParserHandler = function(scope, owner, validatorSet, boxStyle) {
+    adapt.cssparse.SlaveParserHandler.call(this, scope, owner, false);
+    /** @const */ this.validatorSet = validatorSet;
+    /** @const */ this.boxStyle = boxStyle;
+};
+goog.inherits(vivliostyle.page.PageMarginBoxParserHandler, adapt.cssparse.SlaveParserHandler);
+
+/**
+ * @override
+ */
+vivliostyle.page.PageMarginBoxParserHandler.prototype.property = function(name, value, important) {
+    this.validatorSet.validatePropertyAndHandleShorthand(name, value, important, this);
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageMarginBoxParserHandler.prototype.invalidPropertyValue = function(name, value) {
+    this.report("E_INVALID_PROPERTY_VALUE " + name + ": " + value.toString());
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageMarginBoxParserHandler.prototype.unknownProperty = function(name, value) {
+    this.report("E_INVALID_PROPERTY " + name + ": " + value.toString());
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageMarginBoxParserHandler.prototype.simpleProperty = function(name, value, important) {
+    var specificity = important ? this.getImportantSpecificity() : this.getBaseSpecificity();
+    var cascval = new adapt.csscasc.CascadeValue(value, specificity);
+    adapt.csscasc.setProp(this.boxStyle, name, cascval);
+};
+
 
 /**
  * Object storing page-based counters.

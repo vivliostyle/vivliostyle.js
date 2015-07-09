@@ -251,6 +251,13 @@ adapt.cssparse.ParserHandler.prototype.startPageRule = function() {
 };
 
 /**
+ * @param {string} name
+ * @return {void}
+ */
+adapt.cssparse.ParserHandler.prototype.startPageMarginBoxRule = function(name) {
+};
+
+/**
  * @param {adapt.css.Expr} expr
  * @return {void}
  */
@@ -555,6 +562,13 @@ adapt.cssparse.DispatchParserHandler.prototype.startRegionRule = function() {
  */
 adapt.cssparse.DispatchParserHandler.prototype.startPageRule = function() {
     this.slave.startPageRule();
+};
+
+/**
+ * @override
+ */
+adapt.cssparse.DispatchParserHandler.prototype.startPageMarginBoxRule = function(name) {
+    this.slave.startPageMarginBoxRule(name);
 };
 
 /**
@@ -2149,6 +2163,32 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         this.pageRule = true;
                         this.actions = adapt.cssparse.actionsSelectorCont;
                         continue;
+                    case "top-left-corner":
+                    case "top-left":
+                    case "top-center":
+                    case "top-right":
+                    case "top-right-corner":
+                    case "right-top":
+                    case "right-middle":
+                    case "right-bottom":
+                    case "bottom-right-corner":
+                    case "bottom-right":
+                    case "bottom-center":
+                    case "bottom-left":
+                    case "bottom-left-corner":
+                    case "left-bottom":
+                    case "left-middle":
+                    case "left-top":
+                        tokenizer.consume();
+                        token = tokenizer.token();
+                        if (token.type == adapt.csstok.TokenType.O_BRC) {
+                            tokenizer.consume();
+                            handler.startPageMarginBoxRule(text);
+                            this.ruleStack.push(text);
+                            handler.startRuleBody();
+                            continue;
+                        }
+                        break;
                     case "-epubx-when":
                         tokenizer.consume();
                         this.propName = null; // signals @ rule

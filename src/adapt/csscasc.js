@@ -2625,20 +2625,30 @@ adapt.csscasc.CascadeParserHandler.prototype.endRule = function() {
  */
 adapt.csscasc.CascadeParserHandler.prototype.finishChain = function() {
     if (this.chain) {
-    	var regionId = this.regionId;
-    	if (this.footnoteContent) {
-    		if (regionId)
-    			regionId = "xxx-bogus-xxx";
-    		else
-    			regionId = "footnote";
-    	}
-        this.processChain(new adapt.csscasc.ApplyRuleAction(this.elementStyle, 
-            this.specificity + this.cascade.nextOrder(), this.pseudoelement, regionId));
+		/** @type {number} */ var specificity = this.specificity + this.cascade.nextOrder();
+        this.processChain(this.makeApplyRuleAction(specificity));
         this.chain = null;
         this.pseudoelement = null;
         this.footnoteContent = false;
         this.specificity = 0;
     }
+};
+
+/**
+ * @protected
+ * @param {number} specificity
+ * @return {adapt.csscasc.ApplyRuleAction}
+ */
+adapt.csscasc.CascadeParserHandler.prototype.makeApplyRuleAction = function(specificity) {
+	var regionId = this.regionId;
+	if (this.footnoteContent) {
+		if (regionId)
+			regionId = "xxx-bogus-xxx";
+		else
+			regionId = "footnote";
+	}
+	return new adapt.csscasc.ApplyRuleAction(this.elementStyle, specificity,
+		this.pseudoelement, regionId);
 };
 
 /**
