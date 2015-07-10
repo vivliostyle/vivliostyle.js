@@ -144,10 +144,44 @@ vivliostyle.page.propertiesAppliedToPartition = (function() {
 })();
 
 /**
+ * Names for page-margin boxes order in the default painting order.
+ * @private
+ * @const
+ * @type {!Array.<string>}
+ */
+vivliostyle.page.pageMarginBoxNames = [
+    "top-left-corner",
+    "top-left",
+    "top-center",
+    "top-right",
+    "top-right-corner",
+    "right-top",
+    "right-middle",
+    "right-bottom",
+    "bottom-right-corner",
+    "bottom-right",
+    "bottom-center",
+    "bottom-left",
+    "bottom-left-corner",
+    "left-bottom",
+    "left-middle",
+    "left-top"
+];
+
+/**
  * Indicates that the page master is generated for @page rules.
  * @const
  */
 vivliostyle.page.pageRuleMasterPseudoName = "vivliostyle-page-rule-master";
+
+/**
+ * Key for properties in margin contexts.
+ * Styles in margin contexts are stored in pageStyle["_marginBoxes"][(margin box's name)].
+ * @private
+ * @const
+ * @type {string}
+ */
+vivliostyle.page.marginBoxesKey = "_marginBoxes";
 
 /**
  * Represent a page master generated for @page rules
@@ -160,22 +194,44 @@ vivliostyle.page.pageRuleMasterPseudoName = "vivliostyle-page-rule-master";
 vivliostyle.page.PageRuleMaster = function(scope, parent, style) {
     adapt.pm.PageMaster.call(this, scope, null, vivliostyle.page.pageRuleMasterPseudoName, [],
         parent, null, 0);
+
     var pageSize = vivliostyle.page.resolvePageSize(style);
     var partition = new vivliostyle.page.PageRulePartition(this.scope, this, style, pageSize);
     /** @const @private */ this.bodyPartitionKey = partition.key;
-    this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.relative, 0);
-    this.specified["width"] = new adapt.csscasc.CascadeValue(pageSize.width, 0);
-    this.specified["height"] = new adapt.csscasc.CascadeValue(pageSize.height, 0);
-    this.applySpecified(style);
+
+    /** @const @private */ this.pageMarginBoxes = /** @type {Object.<string, !vivliostyle.page.PageMarginBoxPartition>} */ ({});
+    this.createPageMarginBoxes(style);
+
+    this.applySpecified(style, pageSize);
 };
 goog.inherits(vivliostyle.page.PageRuleMaster, adapt.pm.PageMaster);
+
+/**
+ * Create page-margin boxes
+ * @param {!adapt.csscasc.ElementStyle} style
+ */
+vivliostyle.page.PageRuleMaster.prototype.createPageMarginBoxes = function(style) {
+    var marginBoxesMap = style[vivliostyle.page.marginBoxesKey];
+    if (marginBoxesMap) {
+        var self = this;
+        vivliostyle.page.pageMarginBoxNames.forEach(function(name) {
+            if (marginBoxesMap[name]) {
+                self.pageMarginBoxes[name] = new vivliostyle.page.PageMarginBoxPartition(self.scope, self, name, style);
+            }
+        });
+    }
+};
 
 /**
  * Transfer cascaded style for @page rules to 'specified' style of this PageBox
  * @private
  * @param {!adapt.csscasc.ElementStyle} style
+ * @param {!vivliostyle.page.PageSize} pageSize
  */
-vivliostyle.page.PageRuleMaster.prototype.applySpecified = function(style) {
+vivliostyle.page.PageRuleMaster.prototype.applySpecified = function(style, pageSize) {
+    this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.relative, 0);
+    this.specified["width"] = new adapt.csscasc.CascadeValue(pageSize.width, 0);
+    this.specified["height"] = new adapt.csscasc.CascadeValue(pageSize.height, 0);
     for (var name in style) {
         if (!vivliostyle.page.propertiesAppliedToPartition[name] && name !== "background-clip") {
             this.specified[name] = style[name];
@@ -231,6 +287,48 @@ vivliostyle.page.PageRulePartition.prototype.applySpecified = function(style) {
 vivliostyle.page.PageRulePartition.prototype.createInstance = function(parentInstance) {
     return new vivliostyle.page.PageRulePartitionInstance(parentInstance, this);
 };
+
+/**
+ * Represent a partition for a page-margin box
+ * @param {adapt.expr.LexicalScope} scope
+ * @param {!vivliostyle.page.PageRuleMaster} parent
+ * @param {string} marginBoxName
+ * @param {!adapt.csscasc.ElementStyle} style
+ * @constructor
+ * @extends {adapt.pm.Partition}
+ */
+vivliostyle.page.PageMarginBoxPartition = function(scope, parent, marginBoxName, style) {
+    adapt.pm.Partition.call(this, scope, null, null, [], parent);
+    /** @const */ this.marginBoxName = marginBoxName;
+    this.applySpecified(style);
+};
+goog.inherits(vivliostyle.page.PageMarginBoxPartition, adapt.pm.Partition);
+
+/**
+ * Transfer cascaded style for @page rules to 'specified' style of this PageMarginBox
+ * @param {!adapt.csscasc.ElementStyle} style
+ */
+vivliostyle.page.PageMarginBoxPartition.prototype.applySpecified = function(style) {
+    var ownStyle = /** @type {!adapt.csscasc.ElementStyle} */
+        (style[vivliostyle.page.marginBoxesKey][this.marginBoxName]);
+    // Inherit properties in the page context to the page-margin context
+    for (var prop in style) {
+        var val = /** @type {adapt.csscasc.CascadeValue} */ (ownStyle[prop]);
+        if (adapt.csscasc.inheritedProps[prop] || (val && val.value === adapt.css.ident.inherit)) {
+            this.specified[prop] = val;
+        }
+    }
+    for (var prop in ownStyle) {
+        if (Object.prototype.hasOwnProperty.call(ownStyle, prop)) {
+            var val = /** @type {adapt.csscasc.CascadeValue} */ (ownStyle[prop]);
+            if (val && val.value !== adapt.css.ident.inherit) {
+                this.specified[prop] = val;
+            }
+        }
+    }
+};
+
+//---------------------------- Instance --------------------------------
 
 /**
  * @param {!adapt.pm.PageBoxInstance} parentInstance
@@ -801,9 +899,9 @@ vivliostyle.page.ApplyPageRuleAction.prototype.apply = function(cascadeInstance)
  */
 vivliostyle.page.mergeInPageRule = function(context, target, style, specificity) {
     adapt.csscasc.mergeIn(context, target, style, specificity, null, null);
-    var marginBoxes = style["_marginBoxes"];
+    var marginBoxes = style[vivliostyle.page.marginBoxesKey];
     if (marginBoxes) {
-        var targetMap = adapt.csscasc.getMutableStyleMap(target, "_marginBoxes");
+        var targetMap = adapt.csscasc.getMutableStyleMap(target, vivliostyle.page.marginBoxesKey);
         for (var boxName in marginBoxes) {
             if (marginBoxes.hasOwnProperty(boxName)) {
                 var targetBox = targetMap[boxName];
@@ -935,8 +1033,7 @@ vivliostyle.page.PageParserHandler.prototype.makeApplyRuleAction = function(spec
  * @override
  */
 vivliostyle.page.PageParserHandler.prototype.startPageMarginBoxRule = function(name) {
-    // styles in the page-margin box rule are stored in this.elementStyle["_marginBoxes"][(margin box's name)].
-    var marginBoxMap = adapt.csscasc.getMutableStyleMap(this.elementStyle, "_marginBoxes");
+    var marginBoxMap = adapt.csscasc.getMutableStyleMap(this.elementStyle, vivliostyle.page.marginBoxesKey);
     var boxStyle = marginBoxMap[name];
     if (!boxStyle) {
         boxStyle = /** @type {!adapt.csscasc.ElementStyle} */ ({});
