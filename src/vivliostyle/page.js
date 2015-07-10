@@ -110,6 +110,40 @@ vivliostyle.page.resolvePageSize = function(style) {
 };
 
 /**
+ * Properties transfered from the PageRuleMaster to the PageRulePartition
+ * @private
+ * @const
+ */
+vivliostyle.page.propertiesAppliedToPartition = (function() {
+    var sides = [
+        "left", "right", "top", "bottom",
+        "before", "after", "start", "end",
+        "block-start", "block-end", "inline-start", "inline-end"
+    ];
+    var props = {
+        "width": true,
+        "height": true,
+        "block-size": true,
+        "inline-size": true,
+        "margin": true,
+        "padding": true,
+        "border": true,
+        "outline": true,
+        "outline-width": true,
+        "outline-style": true,
+        "outline-color": true
+    };
+    sides.forEach(function(side) {
+        props["margin-" + side] = true;
+        props["padding-" + side] = true;
+        props["border-" + side + "-width"] = true;
+        props["border-" + side + "-style"] = true;
+        props["border-" + side + "-color"] = true;
+    });
+    return props;
+})();
+
+/**
  * Indicates that the page master is generated for @page rules.
  * @const
  */
@@ -132,14 +166,22 @@ vivliostyle.page.PageRuleMaster = function(scope, parent, style) {
     this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.relative, 0);
     this.specified["width"] = new adapt.csscasc.CascadeValue(pageSize.width, 0);
     this.specified["height"] = new adapt.csscasc.CascadeValue(pageSize.height, 0);
+    this.applySpecified(style);
+};
+goog.inherits(vivliostyle.page.PageRuleMaster, adapt.pm.PageMaster);
+
+/**
+ * Transfer cascaded style for @page rules to 'specified' style of this PageBox
+ * @private
+ * @param {!adapt.csscasc.ElementStyle} style
+ */
+vivliostyle.page.PageRuleMaster.prototype.applySpecified = function(style) {
     for (var name in style) {
-        if (name.match(/^background-/)
-            && name !== "background-clip") {
+        if (!vivliostyle.page.propertiesAppliedToPartition[name] && name !== "background-clip") {
             this.specified[name] = style[name];
         }
     }
 };
-goog.inherits(vivliostyle.page.PageRuleMaster, adapt.pm.PageMaster);
 
 /**
  * @return {!vivliostyle.page.PageRuleMasterInstance}
@@ -166,16 +208,6 @@ vivliostyle.page.PageRulePartition = function(scope, parent, style, pageSize) {
 goog.inherits(vivliostyle.page.PageRulePartition, adapt.pm.Partition);
 
 /**
- * @private
- * @const
- */
-vivliostyle.page.PageRulePartition.sides = [
-    "left", "right", "top", "bottom",
-    "before", "after", "start", "end",
-    "block-start", "block-end", "inline-start", "inline-end"
-];
-
-/**
  * Transfer cascaded style for @page rules to 'specified' style of this PageBox
  * @private
  * @param {!adapt.csscasc.ElementStyle} style
@@ -185,22 +217,10 @@ vivliostyle.page.PageRulePartition.prototype.applySpecified = function(style) {
     // Use absolute positioning so that this partition's margins don't collapse with its parent's margins
     this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.absolute, 0);
     this.specified["overflow"] = new adapt.csscasc.CascadeValue(adapt.css.ident.visible, 0);
-
-    var self = this;
-    function copy(name) {
-        self.specified[name] = style[name];
-    }
-    copy("width");
-    copy("height");
-    copy("block-size");
-    copy("inline-size");
-    for (var i = 0; i < vivliostyle.page.PageRulePartition.sides.length; i++) {
-        var side = vivliostyle.page.PageRulePartition.sides[i];
-        copy("margin-" + side);
-        copy("padding-" + side);
-        copy("border-" + side + "-width");
-        copy("border-" + side + "-style");
-        copy("border-" + side + "-color");
+    for (var prop in vivliostyle.page.propertiesAppliedToPartition) {
+        if (vivliostyle.page.propertiesAppliedToPartition.hasOwnProperty(prop)) {
+            this.specified[prop] = style[prop];
+        }
     }
 };
 

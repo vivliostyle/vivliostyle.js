@@ -1098,6 +1098,9 @@ adapt.pm.passPreProperties = [
 	"border-right-color",
 	"border-top-color",
 	"border-bottom-color",
+    "outline-style",
+    "outline-color",
+    "outline-width",
 	"overflow"
 ];
 
