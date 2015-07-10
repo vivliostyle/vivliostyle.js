@@ -259,6 +259,7 @@ vivliostyle.page.PageRuleMaster.prototype.createInstance = function(parentInstan
 vivliostyle.page.PageRulePartition = function(scope, parent, style, pageSize) {
     adapt.pm.Partition.call(this, scope, null, null, [], parent);
     /** @const */ this.pageSize = pageSize;
+    this.specified["z-index"] = new adapt.csscasc.CascadeValue(new adapt.css.Int(0), 0);
     this.applySpecified(style);
 };
 goog.inherits(vivliostyle.page.PageRulePartition, adapt.pm.Partition);
