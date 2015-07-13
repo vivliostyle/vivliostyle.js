@@ -1643,6 +1643,7 @@ adapt.csscasc.chineseCounter = function(num, numbering) {
 };
 
 /**
+ * @private
  * @param {number} num
  * @param {string} type
  * @return {string}
@@ -1748,7 +1749,7 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFunc = function(func) {
     switch (func.name) {
         case "attr" :
             if (func.values.length == 1) {
-                return new adapt.css.Str(this.element.getAttribute(func.values[0].stringValue()) || "");
+                return new adapt.css.Str((this.element && this.element.getAttribute(func.values[0].stringValue())) || "");
             }
             break;
         case "counter" :

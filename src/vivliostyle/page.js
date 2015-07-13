@@ -887,7 +887,7 @@ goog.inherits(vivliostyle.page.ApplyPageRuleAction, adapt.csscasc.ApplyRuleActio
  */
 vivliostyle.page.ApplyPageRuleAction.prototype.apply = function(cascadeInstance) {
     vivliostyle.page.mergeInPageRule(cascadeInstance.context, cascadeInstance.currentStyle,
-        this.style, this.specificity);
+        this.style, this.specificity, cascadeInstance);
 };
 
 /**
@@ -897,8 +897,9 @@ vivliostyle.page.ApplyPageRuleAction.prototype.apply = function(cascadeInstance)
  * @param {adapt.csscasc.ElementStyle} target
  * @param {adapt.csscasc.ElementStyle} style
  * @param {number} specificity
+ * @param {!adapt.csscasc.CascadeInstance} cascadeInstance
  */
-vivliostyle.page.mergeInPageRule = function(context, target, style, specificity) {
+vivliostyle.page.mergeInPageRule = function(context, target, style, specificity, cascadeInstance) {
     adapt.csscasc.mergeIn(context, target, style, specificity, null, null);
     var marginBoxes = style[vivliostyle.page.marginBoxesKey];
     if (marginBoxes) {
@@ -911,6 +912,10 @@ vivliostyle.page.mergeInPageRule = function(context, target, style, specificity)
                     targetMap[boxName] = targetBox;
                 }
                 adapt.csscasc.mergeIn(context, targetBox, marginBoxes[boxName], specificity, null, null);
+                if (targetBox["content"]) {
+                    targetBox["content"] = targetBox["content"].filterValue(
+                        new adapt.csscasc.ContentPropVisitor(cascadeInstance, null));
+                }
             }
         }
     }
