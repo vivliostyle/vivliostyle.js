@@ -2,6 +2,9 @@
   "name": "vivliostyle-js-viewer",
   "version": "0.1.1",
   "description": "Paged viewer using Vivliostyle.js as its layout engine",
+  "scripts": {
+    "build-css": "cd res-dev && compass compile -e production"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/vivliostyle/vivliostyle-js-viewer.git"
@@ -12,6 +15,7 @@
   },
   "homepage": "https://github.com/vivliostyle/vivliostyle-js-viewer",
   "dependencies": {
+    "font-awesome": "^4.3.0",
     "vivliostyle": "vivliostyle/vivliostyle.js#master"
   }
 }
