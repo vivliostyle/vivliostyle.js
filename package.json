@@ -22,6 +22,7 @@
     "vivliostyle": "vivliostyle/vivliostyle.js#master"
   },
   "devDependencies": {
+    "browser-sync": "^2.8.0",
     "gulp": "^3.9.0",
     "gulp-changed": "^1.2.1",
     "gulp-compass": "^2.1.0",
