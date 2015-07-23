@@ -45,7 +45,7 @@
     function startViewer() {
         var config = {
             viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
-            uaRoot: "../../src/adapt/"
+            uaRoot: "../../resources/"
         };
         main(config);
     }
