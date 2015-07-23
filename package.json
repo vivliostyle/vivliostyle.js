@@ -2,6 +2,11 @@
   "name": "vivliostyle-js-viewer",
   "version": "0.1.1",
   "description": "Paged viewer using Vivliostyle.js as its layout engine",
+  "scripts": {
+    "postinstall": "npm run build-vivliostyle && npm run copy-vivliostyle",
+    "build-vivliostyle": "cd node_modules/vivliostyle && npm install && npm run build",
+    "copy-vivliostyle": "node scripts/copy-vivliostyle-files.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/vivliostyle/vivliostyle-js-viewer.git"
@@ -13,6 +18,7 @@
   "homepage": "https://github.com/vivliostyle/vivliostyle-js-viewer",
   "dependencies": {
     "font-awesome": "^4.3.0",
+    "fs-extra": "^0.22.1",
     "vivliostyle": "vivliostyle/vivliostyle.js#master"
   },
   "devDependencies": {
