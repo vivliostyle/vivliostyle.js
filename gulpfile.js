@@ -1,7 +1,7 @@
 "use strict";
 
 var gulp = require("gulp");
-var browserSync = require('browser-sync');
+var browserSync = require('browser-sync').create();
 var changed = require("gulp-changed");
 var compass = require("gulp-compass");
 var path = require("path");
@@ -14,22 +14,12 @@ var SRC_FILES = {
     scss: "src/scss/*.scss"
 };
 
-var serving = false;
-
-function reload(stream) {
-    if (serving) {
-        stream.pipe(browserSync.reload({stream: true}));
-    }
-}
-
 function copyTask(name, dest) {
     dest = "build/" + dest;
     return gulp.task("build:" + name, function() {
-        reload(
-            gulp.src(SRC_FILES[name])
-                .pipe(changed(dest))
-                .pipe(gulp.dest(dest))
-        );
+        gulp.src(SRC_FILES[name])
+            .pipe(changed(dest))
+            .pipe(gulp.dest(dest));
     });
 }
 
@@ -38,17 +28,15 @@ copyTask("html", "");
 copyTask("fonts", "fonts");
 
 gulp.task("build:css", function() {
-    reload(
-        gulp.src(SRC_FILES["scss"])
-            .pipe(plumber({
-                errorHandler: notify.onError("Error: <%= error.message %>")
-            }))
-            .pipe(compass({
-                config_file: "src/config.rb",
-                css: path.resolve("build/css"),
-                sass: path.resolve("src/scss")
-            }))
-    );
+    gulp.src(SRC_FILES["scss"])
+        .pipe(plumber({
+            errorHandler: notify.onError("Error: <%= error.message %>")
+        }))
+        .pipe(compass({
+            config_file: "src/config.rb",
+            css: path.resolve("build/css"),
+            sass: path.resolve("src/scss")
+        }));
 });
 
 gulp.task("build", [
@@ -64,12 +52,13 @@ gulp.task("watch", ["build"], function() {
 });
 
 gulp.task("serve", ["watch"], function() {
-    browserSync({
+    browserSync.init({
         server: {
-            baseDir: "build"
+            baseDir: "./"
         },
-        startPath: "/vivliostyle-viewer.xhtml"
+        startPath: "/build/vivliostyle-viewer.html#x=/test/empty.html"
     });
+    gulp.watch("build/**/*").on("change", browserSync.reload);
 });
 
 gulp.task("default", ["watch"]);
