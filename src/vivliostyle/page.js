@@ -160,8 +160,10 @@ vivliostyle.page.MarginBoxPositionAlongVariableDimension = {
 /**
  * Information associated with a page-margin box.
  * order: the default order in which page-margin boxes are painted (defined in css-page spec)
- * isInHorizontalRow: indicates if the margin box is in a horizontal row, i.e., @top-* or @bottom-* margin box (including corner boxes)
- * isInVerticalColumn: indicates if the margin box is in a vertical row, i.e., a corner or @left-* or @right-* margin box
+ * isInTopRow: indicates if the margin box is in the top row, i.e., @top-* margin box (including corner boxes)
+ * isInBottomRow: indicates if the margin box is in the bottom row, i.e., @bottom-* margin box (including corner boxes)
+ * isInLeftColumn: indicates if the margin box is in the left column, i.e., a @*-left-corner or @left-* margin box
+ * isInRightColumn: indicates if the margin box is in the right column, i.e., a @*-right-corner or @right-* margin box
  * positionAlongVariableDimension: position of the margin box along the variable dimension of the page
  * @private
  * @typedef {{order: number, isInHorizontalRow: boolean, isInVerticalColumn: boolean, positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension}}
@@ -178,98 +180,130 @@ vivliostyle.page.PageMarginBoxInformation;
 vivliostyle.page.pageMarginBoxes = {
     "top-left-corner": {
         order: 1,
-        isInHorizontalRow: true,
-        isInVerticalColumn: true,
+        isInTopRow: true,
+        isInBottomRow: false,
+        isInLeftColumn: true,
+        isInRightColumn: true,
         positionAlongVariableDimension: null
     },
     "top-left": {
         order: 2,
-        isInHorizontalRow: true,
-        isInVerticalColumn: false,
+        isInTopRow: true,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: false,
         positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.START
     },
     "top-center": {
         order: 3,
-        isInHorizontalRow: true,
-        isInVerticalColumn: false,
+        isInTopRow: true,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: false,
         positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER
     },
     "top-right": {
         order: 4,
-        isInHorizontalRow: true,
-        isInVerticalColumn: false,
+        isInTopRow: true,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: false,
         positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.END
     },
     "top-right-corner": {
         order: 5,
-        isInHorizontalRow: true,
-        isInVerticalColumn: true,
+        isInTopRow: true,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: true,
         positionAlongVariableDimension: null
     },
     "right-top": {
         order: 6,
-        isInHorizontalRow: false,
-        isInVerticalColumn: true,
+        isInTopRow: false,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: true,
         positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.START
     },
     "right-middle": {
         order: 7,
-        isInHorizontalRow: false,
-        isInVerticalColumn: true,
+        isInTopRow: false,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: true,
         positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER
     },
     "right-bottom": {
         order: 8,
-        isInHorizontalRow: false,
-        isInVerticalColumn: true,
+        isInTopRow: false,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: true,
         positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.END
     },
     "bottom-right-corner": {
         order: 9,
-        isInHorizontalRow: true,
-        isInVerticalColumn: true,
+        isInTopRow: false,
+        isInBottomRow: true,
+        isInLeftColumn: false,
+        isInRightColumn: true,
         positionAlongVariableDimension: null
     },
     "bottom-right": {
         order: 10,
-        isInHorizontalRow: true,
-        isInVerticalColumn: false,
+        isInTopRow: false,
+        isInBottomRow: true,
+        isInLeftColumn: false,
+        isInRightColumn: false,
         positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.END
     },
     "bottom-center": {
         order: 11,
-        isInHorizontalRow: true,
-        isInVerticalColumn: false,
+        isInTopRow: false,
+        isInBottomRow: true,
+        isInLeftColumn: false,
+        isInRightColumn: false,
         positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER
     },
     "bottom-left": {
         order: 12,
-        isInHorizontalRow: true,
-        isInVerticalColumn: false,
+        isInTopRow: false,
+        isInBottomRow: true,
+        isInLeftColumn: false,
+        isInRightColumn: false,
         positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.START
     },
     "bottom-left-corner": {
         order: 13,
-        isInHorizontalRow: true,
-        isInVerticalColumn: true,
+        isInTopRow: false,
+        isInBottomRow: true,
+        isInLeftColumn: true,
+        isInRightColumn: false,
         positionAlongVariableDimension: null
     },
     "left-bottom": {
         order: 14,
-        isInHorizontalRow: false,
-        isInVerticalColumn: true,
+        isInTopRow: false,
+        isInBottomRow: false,
+        isInLeftColumn: true,
+        isInRightColumn: false,
         positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.END
     },
     "left-middle": {
         order: 15,
-        isInHorizontalRow: false,
-        isInVerticalColumn: true,
+        isInTopRow: false,
+        isInBottomRow: false,
+        isInLeftColumn: true,
+        isInRightColumn: false,
         positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER
     },
     "left-top": {
         order: 16,
-        isInHorizontalRow: false,
-        isInVerticalColumn: true,
+        isInTopRow: false,
+        isInBottomRow: false,
+        isInLeftColumn: true,
+        isInRightColumn: false,
         positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.START
     }
 };
@@ -761,14 +795,109 @@ vivliostyle.page.PageMarginBoxPartitionInstance.prototype.positionAlongVariableD
 };
 
 /**
+ * Calculate page-margin boxes positions along the fixed dimension of the page.
+ * @private
+ * @param {vivliostyle.page.PageMarginBoxInformation} boxInfo
+ * @param {!{inside: string, outside: string, extent: string}} names
+ * @param {vivliostyle.page.PageAreaDimension} dim
+ */
+vivliostyle.page.PageMarginBoxPartitionInstance.prototype.positionAndSizeAlongFixedDimension =
+    function(boxInfo, names, dim) {
+        var style = this.style;
+        var scope = this.pageBox.scope;
+        var insideName = names.inside;
+        var outsideName = names.outside;
+        var extentName = names.extent;
+        var pageMargin = dim["margin" + outsideName.charAt(0).toUpperCase() + outsideName.substring(1)];
+        var marginInside = adapt.pm.toExprAuto(scope, style["margin-" + insideName], pageMargin);
+        var marginOutside = adapt.pm.toExprAuto(scope, style["margin-" + outsideName], pageMargin);
+        var paddingInside = adapt.pm.toExprZero(scope, style["padding-" + insideName], pageMargin);
+        var paddingOutside = adapt.pm.toExprZero(scope, style["padding-" + outsideName], pageMargin);
+        var borderInsideWidth = adapt.pm.toExprZeroBorder(scope, style["border-" + insideName + "-width"], style["border-" + insideName + "-style"], pageMargin);
+        var borderOutsideWidth = adapt.pm.toExprZeroBorder(scope, style["border-" + outsideName + "-width"], style["border-" + outsideName + "-style"], pageMargin);
+        var extent = adapt.pm.toExprAuto(scope, style[extentName], pageMargin);
+        var result = null;
+        /**
+         * @param {adapt.expr.Context} context
+         * @returns {{extent: (adapt.expr.Result|null), marginInside: (adapt.expr.Result|null), marginOutside: (adapt.expr.Result|null)}}
+         */
+        function getComputedValues(context) {
+            if (result) {
+                return result;
+            }
+            result = {
+                extent: extent ? extent.evaluate(context) : null,
+                marginInside: marginInside ? marginInside.evaluate(context) : null,
+                marginOutside: marginOutside ? marginOutside.evaluate(context) : null
+            };
+            var pageMarginValue = pageMargin.evaluate(context);
+            var borderAndPadding = 0;
+            [borderInsideWidth, paddingInside, paddingOutside, borderOutsideWidth].forEach(function(x) {
+                if (x) {
+                    borderAndPadding += x.evaluate(context);
+                }
+            });
+            if (result.marginInside === null || result.marginOutside === null) {
+                var total = borderAndPadding + result.extent + result.marginInside + result.marginOutside;
+                if (total > pageMarginValue) {
+                    if (result.marginInside === null) {
+                        result.marginInside = 0;
+                    }
+                    if (result.marginOutside === null) {
+                        result.marginoutside = 0;
+                    }
+                }
+            }
+            if (result.extent !== null && result.marginInside !== null && result.marginOutside !== null) {
+                // over-constrained
+                result.marginOutside = null;
+            }
+            if (result.extent === null && result.marginInside !== null && result.marginOutside !== null) {
+                result.extent = pageMarginValue - borderAndPadding - result.marginInside - result.marginOutside;
+            } else if (result.extent !== null && result.marginInside === null && result.marginOutside !== null) {
+                result.marginInside = pageMarginValue - borderAndPadding - result.extent - result.marginOutside;
+            } else if (result.extent !== null && result.marginInside !== null && result.marginOutside === null) {
+                result.marginOutside = pageMarginValue - borderAndPadding - result.extent - result.marginInside;
+            } else if (result.extent === null) {
+                result.marginInside = result.marginOutside = 0;
+                result.extent = pageMarginValue - borderAndPadding;
+            } else {
+                result.marginInside = result.marginOutside = (pageMarginValue - borderAndPadding - result.extent) / 2;
+            }
+            return result;
+        }
+
+        style[extentName] = new adapt.css.Expr(new adapt.expr.Native(scope, function() {
+            var value = getComputedValues(this).extent;
+            return value === null ? 0 : value;
+        }, extentName));
+        style["margin-" + insideName] = new adapt.css.Expr(new adapt.expr.Native(scope, function() {
+            var value = getComputedValues(this).marginInside;
+            return value === null ? 0 : value;
+        }, "margin-" + insideName));
+        style["margin-" + outsideName] = new adapt.css.Expr(new adapt.expr.Native(scope, function() {
+            var value = getComputedValues(this).marginOutside;
+            return value === null ? 0 : value;
+        }, "margin-" + outsideName));
+
+        if (insideName === "left") {
+            style["left"] = new adapt.css.Expr(adapt.expr.add(scope, dim.marginLeft, dim.borderBoxWidth));
+        } else if (insideName === "top") {
+            style["top"] = new adapt.css.Expr(adapt.expr.add(scope, dim.marginTop, dim.borderBoxHeight));
+        }
+};
+
+/**
  * @override
  */
 vivliostyle.page.PageMarginBoxPartitionInstance.prototype.initHorizontal = function() {
     var pageRuleMasterInstance = /** @type {!vivliostyle.page.PageRuleMasterInstance} */ (this.parentInstance);
     var dim = pageRuleMasterInstance.pageAreaDimension;
     var boxInfo = vivliostyle.page.pageMarginBoxes[this.pageBox.marginBoxName];
-    if (boxInfo.isInVerticalColumn) {
-        // TODO
+    if (boxInfo.isInLeftColumn) {
+        this.positionAndSizeAlongFixedDimension(boxInfo, {inside: "right", outside: "left", extent: "width"}, dim);
+    } else if (boxInfo.isInRightColumn) {
+        this.positionAndSizeAlongFixedDimension(boxInfo, {inside: "left", outside: "right", extent: "width"}, dim);
     } else {
         this.positionAlongVariableDimension(boxInfo, {start: "left", end: "right", extent: "width"}, dim);
     }
@@ -781,8 +910,10 @@ vivliostyle.page.PageMarginBoxPartitionInstance.prototype.initVertical = functio
     var pageRuleMasterInstance = /** @type {!vivliostyle.page.PageRuleMasterInstance} */ (this.parentInstance);
     var dim = pageRuleMasterInstance.pageAreaDimension;
     var boxInfo = vivliostyle.page.pageMarginBoxes[this.pageBox.marginBoxName];
-    if (boxInfo.isInHorizontalRow) {
-        // TODO
+    if (boxInfo.isInTopRow) {
+        this.positionAndSizeAlongFixedDimension(boxInfo, {inside: "bottom", outside: "top", extent: "height"}, dim);
+    } else if (boxInfo.isInBottomRow) {
+        this.positionAndSizeAlongFixedDimension(boxInfo, {inside: "top", outside: "bottom", extent: "height"}, dim);
     } else {
         this.positionAlongVariableDimension(boxInfo, {start: "top", end: "bottom", extent: "height"}, dim);
     }
