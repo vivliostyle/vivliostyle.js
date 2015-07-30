@@ -21,6 +21,7 @@ adapt.pm.keyCount = 1;
  * and partition-group).
  * @param {adapt.expr.LexicalScope} scope
  * @param {?string} name
+ * @param {?string} pseudoName
  * @param {Array.<string>} classes
  * @param {adapt.pm.PageBox} parent
  * @constructor
@@ -28,7 +29,7 @@ adapt.pm.keyCount = 1;
 adapt.pm.PageBox = function(scope, name, pseudoName, classes, parent) {
     // styles specified in the at-rule
     /** @const */ this.specified = /** @type {adapt.csscasc.ElementStyle} */ ({});
-    /** @const */ this.children = /** @type {Array.<adapt.pm.PageBox>} */ ([]);
+    /** @private @const */ this.children = /** @type {Array.<adapt.pm.PageBox>} */ ([]);
     /** @type {adapt.pm.PageMaster} */ this.pageMaster = null;
     /** @type {number} */ this.index = 0;
     /** @const */ this.scope = scope;
@@ -376,19 +377,19 @@ adapt.pm.PageBoxInstance = function(parentInstance, pageBox) {
 	/** @const */ this.pageBox = pageBox;
     /**
      * cascaded styles, geometric ones converted to adapt.css.Expr
-     * @const
+     * @protected @const
      */
     this.cascaded = /** @type {adapt.csscasc.ElementStyle} */ ({});
-    /** @const */ this.style = /** @type {!Object.<string,adapt.css.Val>} */ ({});
-    /** @type {adapt.expr.Native} */ this.autoWidth = null;
-    /** @type {adapt.expr.Native} */ this.autoHeight = null;
+    /** @protected @const */ this.style = /** @type {!Object.<string,adapt.css.Val>} */ ({});
+    /** @private @type {adapt.expr.Native} */ this.autoWidth = null;
+    /** @private @type {adapt.expr.Native} */ this.autoHeight = null;
     /** @type {!Array.<adapt.pm.PageBoxInstance>} */ this.children = [];
     /** @type {boolean} */ this.isAutoWidth = false;
     /** @type {boolean} */ this.isAutoHeight = false;
     /** @type {boolean} */ this.isTopDependentOnAutoHeight = false;
     /** @type {boolean} */ this.isRightDependentOnAutoWidth = false;
-    /** @type {number} */ this.calculatedWidth = 0;
-    /** @type {number} */ this.calculatedHeight = 0;
+    /** @private @type {number} */ this.calculatedWidth = 0;
+    /** @private @type {number} */ this.calculatedHeight = 0;
     /** @type {adapt.pm.PageMasterInstance} */ this.pageMasterInstance = null;
     /** @type {Object.<string,adapt.expr.Val>} */ this.namedValues = {};
     /** @type {Object.<string,adapt.expr.Val>} */ this.namedFuncs = {};
