@@ -475,13 +475,13 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     var cont;
     if (!flowName || !flowName.isIdent()) {
 	    var contentVal = boxInstance.getProp(self, "content");
-	    if (contentVal) {
-	    	if (adapt.vtree.nonTrivialContent(contentVal)) {
-	    		contentVal.visit(new adapt.vtree.ContentPropertyHandler(boxContainer, self));
-	    		boxInstance.transferContentProps(self, layoutContainer, page);
-	    	}
-	    } 	
-        boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);	    		
+	    if (contentVal && adapt.vtree.nonTrivialContent(contentVal)) {
+			contentVal.visit(new adapt.vtree.ContentPropertyHandler(boxContainer, self));
+			boxInstance.transferContentProps(self, layoutContainer, page);
+			boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);
+		} else if (boxInstance.suppressEmptyBoxGeneration) {
+			parentContainer.removeChild(boxContainer);
+		}
     	cont = adapt.task.newResult(true);
     } else if (!self.pageBreaks[flowName.toString()]) {
     	/** @type {!adapt.task.Frame.<boolean>} */ var innerFrame = adapt.task.newFrame("layoutContainer.inner");

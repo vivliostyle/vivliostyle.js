@@ -413,6 +413,7 @@ adapt.pm.PageBoxInstance = function(parentInstance, pageBox) {
     /** @type {Object.<string,adapt.expr.Val>} */ this.namedValues = {};
     /** @type {Object.<string,adapt.expr.Val>} */ this.namedFuncs = {};
     /** @type {boolean} */ this.vertical = false;
+    /** @type {boolean} */ this.suppressEmptyBoxGeneration = false;
     if (parentInstance) {
     	parentInstance.children.push(this);
     }

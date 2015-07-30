@@ -731,6 +731,7 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
  */
 vivliostyle.page.PageMarginBoxPartitionInstance = function(parentInstance, pageMarginBoxPartition) {
     adapt.pm.PartitionInstance.call(this, parentInstance, pageMarginBoxPartition);
+    this.suppressEmptyBoxGeneration = true;
 };
 goog.inherits(vivliostyle.page.PageMarginBoxPartitionInstance, adapt.pm.PartitionInstance);
 
