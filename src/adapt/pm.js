@@ -321,6 +321,25 @@ adapt.pm.toExprZero = function(scope, val, ref) {
 };
 
 /**
+ * If the value is not specified (null), returns zero.
+ * If the value is 'auto', returns null.
+ * Otherwise, return the value itself.
+ * @param {adapt.expr.LexicalScope} scope
+ * @param {adapt.css.Val} val
+ * @param {adapt.expr.Val} ref
+ * @returns {adapt.expr.Val}
+ */
+adapt.pm.toExprZeroAuto = function(scope, val, ref) {
+    if (!val) {
+        return scope.zero;
+    } else if (val === adapt.css.ident.auto) {
+        return null;
+    } else {
+        return val.toExpr(scope, ref);
+    }
+};
+
+/**
  * @param {adapt.expr.LexicalScope} scope
  * @param {adapt.css.Val} val
  * @param {adapt.css.Val} styleVal

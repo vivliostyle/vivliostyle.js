@@ -809,8 +809,8 @@ vivliostyle.page.PageMarginBoxPartitionInstance.prototype.positionAndSizeAlongFi
         var outsideName = names.outside;
         var extentName = names.extent;
         var pageMargin = dim["margin" + outsideName.charAt(0).toUpperCase() + outsideName.substring(1)];
-        var marginInside = adapt.pm.toExprAuto(scope, style["margin-" + insideName], pageMargin);
-        var marginOutside = adapt.pm.toExprAuto(scope, style["margin-" + outsideName], pageMargin);
+        var marginInside = adapt.pm.toExprZeroAuto(scope, style["margin-" + insideName], pageMargin);
+        var marginOutside = adapt.pm.toExprZeroAuto(scope, style["margin-" + outsideName], pageMargin);
         var paddingInside = adapt.pm.toExprZero(scope, style["padding-" + insideName], pageMargin);
         var paddingOutside = adapt.pm.toExprZero(scope, style["padding-" + outsideName], pageMargin);
         var borderInsideWidth = adapt.pm.toExprZeroBorder(scope, style["border-" + insideName + "-width"], style["border-" + insideName + "-style"], pageMargin);
