@@ -166,7 +166,7 @@ vivliostyle.page.MarginBoxPositionAlongVariableDimension = {
  * isInRightColumn: indicates if the margin box is in the right column, i.e., a @*-right-corner or @right-* margin box
  * positionAlongVariableDimension: position of the margin box along the variable dimension of the page
  * @private
- * @typedef {{order: number, isInHorizontalRow: boolean, isInVerticalColumn: boolean, positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension}}
+ * @typedef {{order: number, isInTopRow: boolean, isInBottomRow: boolean, isInLeftColumn: boolean, isInRightColumn: boolean, positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension}}
  */
 vivliostyle.page.PageMarginBoxInformation;
 
