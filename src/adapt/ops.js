@@ -475,12 +475,16 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     var cont;
     if (!flowName || !flowName.isIdent()) {
 	    var contentVal = boxInstance.getProp(self, "content");
+		var removed = false;
 	    if (contentVal && adapt.vtree.nonTrivialContent(contentVal)) {
 			contentVal.visit(new adapt.vtree.ContentPropertyHandler(boxContainer, self));
 			boxInstance.transferContentProps(self, layoutContainer, page);
-			boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);
 		} else if (boxInstance.suppressEmptyBoxGeneration) {
 			parentContainer.removeChild(boxContainer);
+			removed = true;
+		}
+		if (!removed) {
+			boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);
 		}
     	cont = adapt.task.newResult(true);
     } else if (!self.pageBreaks[flowName.toString()]) {
