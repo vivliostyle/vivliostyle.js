@@ -115,6 +115,13 @@ adapt.vtree.Page = function(container) {
 	/** @type {number} */ this.offset = -1;
     /** @type {?vivliostyle.constants.PageSide} */ this.side = null;
 	/** @type {Array.<adapt.taskutil.Fetcher>} */ this.fetchers = [];
+	/** @const @type {{top: !Object.<string, adapt.vtree.Container>, bottom: !Object.<string, adapt.vtree.Container>, left: !Object.<string, adapt.vtree.Container>, right: !Object.<string, adapt.vtree.Container>}} */
+	this.marginBoxes = {
+		top: {},
+		bottom: {},
+		left: {},
+		right: {}
+	};
 };
 goog.inherits(adapt.vtree.Page, adapt.base.SimpleEventTarget);
 

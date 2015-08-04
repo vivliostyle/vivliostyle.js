@@ -1414,6 +1414,16 @@ adapt.pm.PageMasterInstance.prototype.boxSpecificEnabled = function(enabled) {
 };
 
 /**
+ * Called after layout of contents of the page has done to adjust the overall page layout.
+ * Override in subclasses.
+ * @param {adapt.expr.Context} context
+ * @param {adapt.vtree.Page} page
+ * @param {adapt.vtree.ClientLayout} clientLayout
+ */
+adapt.pm.PageMasterInstance.prototype.adjustPageLayout = function(context, page, clientLayout) {
+};
+
+/**
  * @param {adapt.pm.PageBoxInstance} parentInstance
  * @param {!adapt.pm.PageBox} pageBox
  * @constructor
