@@ -117,7 +117,7 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
 
     var result = /** @type {!Object.<vivliostyle.sizing.Size, number>} */ ({});
     sizes.forEach(function(size) {
-        var r;
+        /** @type {string} */ var r;
         switch (size) {
             case vivliostyle.sizing.Size.FILL_AVAILABLE_INLINE_SIZE:
                 r = getFillAvailableInline();
@@ -149,13 +149,13 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
                 r = isVertical ? getIdealBlock() : getMaxContentInline();
                 break;
             case vivliostyle.sizing.Size.MAX_CONTENT_HEIGHT:
-                r = isVertical ? getMaxContentInline : getIdealBlock();
+                r = isVertical ? getMaxContentInline() : getIdealBlock();
                 break;
             case vivliostyle.sizing.Size.MIN_CONTENT_WIDTH:
                 r = isVertical ? getIdealBlock() : getMinContentInline();
                 break;
             case vivliostyle.sizing.Size.MIN_CONTENT_HEIGHT:
-                r = isVertical ? getMinContentInline : getIdealBlock();
+                r = isVertical ? getMinContentInline() : getIdealBlock();
                 break;
             case vivliostyle.sizing.Size.FIT_CONTENT_WIDTH:
                 r = isVertical ? getIdealBlock() : getFitContentInline();
