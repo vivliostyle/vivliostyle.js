@@ -40,7 +40,9 @@ vivliostyle.sizing.Size = {
 vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
     var original = {
         display: element.style.display,
-        position: element.style.position
+        position: element.style.position,
+        width: /** @type {string} */ (element.style.width),
+        height: /** @type {string} */ (element.style.height)
     };
     var doc = element.ownerDocument;
     var parent = element.parentNode;
@@ -50,6 +52,9 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
     adapt.base.setCSSProperty(container, "position", original.position);
     parent.insertBefore(container, element);
     container.appendChild(element);
+
+    adapt.base.setCSSProperty(element, "width", "auto");
+    adapt.base.setCSSProperty(element, "height", "auto");
 
     /**
      * @param {string} name
@@ -157,11 +162,15 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
                 break;
             case vivliostyle.sizing.Size.FIT_CONTENT_HEIGHT:
                 r = isVertical ? getFitContentInline() : getIdealBlock();
+                break;
         }
         result[size] = parseFloat(r);
         adapt.base.setCSSProperty(element, "position", original.position);
         adapt.base.setCSSProperty(element, "display", original.display);
     });
+
+    adapt.base.setCSSProperty(element, "width", original.width);
+    adapt.base.setCSSProperty(element, "height", original.height);
 
     parent.insertBefore(element, container);
     parent.removeChild(container);
