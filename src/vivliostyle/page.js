@@ -1064,6 +1064,36 @@ vivliostyle.page.PageMarginBoxPartitionInstance = function(parentInstance, pageM
 goog.inherits(vivliostyle.page.PageMarginBoxPartitionInstance, adapt.pm.PartitionInstance);
 
 /**
+ * @override
+ */
+vivliostyle.page.PageMarginBoxPartitionInstance.prototype.prepareContainer = function(context, container, page) {
+    this.applyVerticalAlign(context, container.element);
+    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page);
+};
+
+/**
+ * @private
+ * @param {adapt.expr.Context} context
+ * @param {Element} element
+ */
+vivliostyle.page.PageMarginBoxPartitionInstance.prototype.applyVerticalAlign = function(context, element) {
+    adapt.base.setCSSProperty(element, "display", "flex");
+    /** @type {adapt.css.Val} */ var verticalAlign = this.getProp(context, "vertical-align");
+    /** @type {string?} */ var flexAlign = null;
+    if (verticalAlign === adapt.css.getName("middle")) {
+        flexAlign = "center";
+    } else if (verticalAlign === adapt.css.getName("top")) {
+        flexAlign = "flex-start";
+    } else if (verticalAlign === adapt.css.getName("bottom")) {
+        flexAlign = "flex-end";
+    }
+    if (flexAlign) {
+        adapt.base.setCSSProperty(element, "flex-flow", this.vertical ? "row" : "column");
+        adapt.base.setCSSProperty(element, "justify-content", flexAlign);
+    }
+};
+
+/**
  * Calculate page-margin boxes positions along the variable dimension of the page.
  * For CENTER and END margin boxes, the position is calculated only if the dimension (width or height) is non-auto, so that it can be resolved at this point. If the dimension is auto, the calculation is deffered.
  * @private
