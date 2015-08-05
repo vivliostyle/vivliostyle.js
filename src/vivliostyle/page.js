@@ -592,19 +592,19 @@ vivliostyle.page.PageRuleMasterInstance.prototype.setPageAreaDimension = functio
 vivliostyle.page.PageRuleMasterInstance.prototype.adjustPageLayout = function(context, page, clientLayout) {
     var marginBoxContainers = page.marginBoxes;
     var horizontalDimensions = {
-        start: /** @type {number} */ (this.pageAreaDimension.marginLeft.evaluate(context)),
-        end: /** @type {number} */ (this.pageAreaDimension.marginRight.evaluate(context)),
-        extent: /** @type {number} */ (this.pageAreaDimension.borderBoxWidth.evaluate(context))
+        start: this.pageAreaDimension.marginLeft,
+        end: this.pageAreaDimension.marginRight,
+        extent: this.pageAreaDimension.borderBoxWidth
     };
     var verticalDimensions = {
-        start: /** @type {number} */ (this.pageAreaDimension.marginTop.evaluate(context)),
-        end: /** @type {number} */ (this.pageAreaDimension.marginBottom.evaluate(context)),
-        extent: /** @type {number} */ (this.pageAreaDimension.borderBoxHeight.evaluate(context))
+        start: this.pageAreaDimension.marginTop,
+        end: this.pageAreaDimension.marginBottom,
+        extent: this.pageAreaDimension.borderBoxHeight
     };
-    this.sizeMarginBoxesAlongVariableDimension(marginBoxContainers.top, true, horizontalDimensions, clientLayout);
-    this.sizeMarginBoxesAlongVariableDimension(marginBoxContainers.bottom, true, horizontalDimensions, clientLayout);
-    this.sizeMarginBoxesAlongVariableDimension(marginBoxContainers.left, false, verticalDimensions, clientLayout);
-    this.sizeMarginBoxesAlongVariableDimension(marginBoxContainers.right, false, verticalDimensions, clientLayout);
+    this.sizeMarginBoxesAlongVariableDimension(marginBoxContainers.top, true, horizontalDimensions, context, clientLayout);
+    this.sizeMarginBoxesAlongVariableDimension(marginBoxContainers.bottom, true, horizontalDimensions, context, clientLayout);
+    this.sizeMarginBoxesAlongVariableDimension(marginBoxContainers.left, false, verticalDimensions, context, clientLayout);
+    this.sizeMarginBoxesAlongVariableDimension(marginBoxContainers.right, false, verticalDimensions, context, clientLayout);
 };
 
 /**
@@ -645,7 +645,7 @@ vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam.prototype.getOuterS
  * @implements {vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam}
  */
 vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam = function(container, style, isHorizontal, scope, clientLayout) {
-    /** @private @const */ this.container = container;
+    /** @protected @const */ this.container = container;
     /** @private @const */ this.clientLayout = clientLayout;
     /** @private @const @type {boolean} */ this.isHorizontal = isHorizontal;
     /** @private @const @type {boolean} */ this.hasAutoSize_ = !adapt.pm.toExprAuto(scope, style[isHorizontal ? "width" : "height"], new adapt.expr.Numeric(scope, 0, "px"));
@@ -759,97 +759,201 @@ vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam.protot
 };
 
 /**
+ * MarginBoxSizingParam for a single page-margin box with a fixed size along the variable dimension.
+ * @param {adapt.vtree.Container} container A container corresponding to the target margin box.
+ * @param {!Object.<string,adapt.css.Val>} style Styles specified to the target margin box.
+ * @param {boolean} isHorizontal
+ * @param {adapt.expr.LexicalScope} scope
+ * @param {adapt.vtree.ClientLayout} clientLayout
+ * @param {number} size The fixed size (width or height) along the variable dimension.
+ * @constructor
+ * @extends {vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam}
+ */
+vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam = function(container, style, isHorizontal, scope, clientLayout, size) {
+    vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam.call(this, container, style, isHorizontal, scope, clientLayout);
+    /** @private @const */ this.fixedSize = size;
+};
+goog.inherits(vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam, vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam);
+
+/**
+ * @override
+ */
+vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam.prototype.hasAutoSize = function() {
+    return false;
+};
+
+/**
+ *  @override
+ */
+vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam.prototype.getOuterMaxContentSize = function() {
+    return this.getOuterSize();
+};
+
+/**
+ *  @override
+ */
+vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam.prototype.getOuterMinContentSize = function() {
+    return this.getOuterSize();
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam.prototype.getOuterSize = function() {
+    if (this.isHorizontal) {
+        return this.container.getInsetLeft() + this.fixedSize + this.container.getInsetRight();
+    } else {
+        return this.container.getInsetTop() + this.fixedSize + this.container.getInsetBottom();
+    }
+};
+
+/**
  * Determine and set margin boxes' sizes along variable dimension using an algorithm specified in CSS Paged Media spec.
  * @private
  * @param {!Object.<string, adapt.vtree.Container>} marginBoxContainers Containers corresponding to the target margin boxes in one page edge (top, bottom, left, right)
  * @param {boolean} isHorizontal Indicates if the target margin boxes are on the horizontal edge (top or bottom) or not (left or right).
- * @param {!{start: number, end: number, extent: number}} dimensions Page dimensions. start: margin-left or margin-top. end: margin-right or margin-bottom. extent: border-box width or height of the page area (= available width or height for the target margin boxes)
+ * @param {!{start: adapt.expr.Val, end: adapt.expr.Val, extent: adapt.expr.Val}} dimensions Page dimensions. start: margin-left or margin-top. end: margin-right or margin-bottom. extent: border-box width or height of the page area (= available width or height for the target margin boxes)
+ * @param {adapt.expr.Context} context
  * @param {adapt.vtree.ClientLayout} clientLayout
  */
-vivliostyle.page.PageRuleMasterInstance.prototype.sizeMarginBoxesAlongVariableDimension = function(marginBoxContainers, isHorizontal, dimensions, clientLayout) {
+vivliostyle.page.PageRuleMasterInstance.prototype.sizeMarginBoxesAlongVariableDimension = function(marginBoxContainers, isHorizontal, dimensions, context, clientLayout) {
+    /** @const */ var START = vivliostyle.page.MarginBoxPositionAlongVariableDimension.START;
+    /** @const */ var CENTER = vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER;
+    /** @const */ var END = vivliostyle.page.MarginBoxPositionAlongVariableDimension.END;
+
     // prepare parameters
     var scope = this.pageBox.scope;
-    /** @type {?{container: adapt.vtree.Container, boxInstance: vivliostyle.page.PageMarginBoxPartitionInstance}} */ var startBox = null;
-    /** @type {?vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam} */ var startBoxParam = null;
-    /** @type {?{container: adapt.vtree.Container, boxInstance: vivliostyle.page.PageMarginBoxPartitionInstance}} */ var centerBox = null;
-    /** @type {?vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam} */ var centerBoxParam = null;
-    /** @type {?{container: adapt.vtree.Container, boxInstance: vivliostyle.page.PageMarginBoxPartitionInstance}} */ var endBox = null;
-    /** @type {?vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam} */ var endBoxParam = null;
+    /** @const @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, adapt.vtree.Container>} */ var containers = {};
+    /** @const @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, vivliostyle.page.PageMarginBoxPartitionInstance>} */ var boxInstances = {};
+    /** @const @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam>} */var boxParams = {};
     for (var name in marginBoxContainers) {
         var boxInfo = vivliostyle.page.pageMarginBoxes[name];
         if (boxInfo) {
-            var box = {
-                container: marginBoxContainers[name],
-                boxInstance: this.pageMarginBoxInstances[name]
-            };
-            var boxParam = new vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam(box.container, box.boxInstance.style, isHorizontal, scope, clientLayout);
-            switch (boxInfo.positionAlongVariableDimension) {
-                case vivliostyle.page.MarginBoxPositionAlongVariableDimension.START:
-                    startBox = box;
-                    startBoxParam = boxParam;
-                    break;
-                case vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER:
-                    centerBox = box;
-                    centerBoxParam = boxParam;
-                    break;
-                case vivliostyle.page.MarginBoxPositionAlongVariableDimension.END:
-                    endBox = box;
-                    endBoxParam = boxParam;
-                    break;
-            }
+            var container = marginBoxContainers[name];
+            var boxInstance = this.pageMarginBoxInstances[name];
+            var boxParam = new vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam(container, boxInstance.style, isHorizontal, scope, clientLayout);
+            containers[boxInfo.positionAlongVariableDimension] = container;
+            boxInstances[boxInfo.positionAlongVariableDimension] = boxInstance;
+            boxParams[boxInfo.positionAlongVariableDimension] = boxParam;
         }
     }
 
     // determine sizes
-    var sizes = {};
-    if (!centerBox) {
-        var startEndSizes = this.distributeAutoMarginBoxSizes(startBoxParam, endBoxParam, dimensions.extent);
-        if (startEndSizes.xSize) {
-            sizes.startSize = startEndSizes.xSize;
+    var evaluatedDim = {
+        start: /** @type {number} */ (dimensions.start.evaluate(context)),
+        end: /** @type {number} */ (dimensions.end.evaluate(context)),
+        extent: /** @type {number} */ (dimensions.extent.evaluate(context))
+    };
+    var sizes = this.getSizesOfMarginBoxesAlongVariableDimension(boxParams, evaluatedDim.extent);
+
+    /** @type {boolean} */ var needRecalculate = false;
+
+    // Check max-width/max-height
+    /** @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, number>} */ var maxOuterSizes = {};
+    Object.keys(containers).forEach(function(n) {
+        var name = /** @type {vivliostyle.page.MarginBoxPositionAlongVariableDimension} */ (n);
+        var maxSize = adapt.pm.toExprAuto(scope, boxInstances[name].style[isHorizontal ? "max-width" : "max-height"], dimensions.extent);
+        if (maxSize) {
+            var evaluatedMaxSize = /** @type {number} */ (maxSize.evaluate(context));
+            if (sizes[name] > evaluatedMaxSize) {
+                var p = boxParams[name] = new vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam(containers[name], boxInstances[name].style, isHorizontal, scope, clientLayout, evaluatedMaxSize);
+                maxOuterSizes[name] = p.getOuterSize();
+                needRecalculate = true;
+            }
         }
-        if (startEndSizes.ySize) {
-            sizes.endSize = startEndSizes.ySize;
+    });
+    if (needRecalculate) {
+        sizes = this.getSizesOfMarginBoxesAlongVariableDimension(boxParams, evaluatedDim.extent);
+        needRecalculate = false;
+        [START, CENTER, END].forEach(function(name) {
+            sizes[name] = maxOuterSizes[name] || sizes[name];
+        });
+    }
+
+    // Check min-width/min-height
+    /** @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, number>} */ var minOuterSizes = {};
+    Object.keys(containers).forEach(function(n) {
+        var name = /** @type {vivliostyle.page.MarginBoxPositionAlongVariableDimension} */ (n);
+        var minSize = adapt.pm.toExprAuto(scope, boxInstances[name].style[isHorizontal ? "min-width" : "min-height"], dimensions.extent);
+        if (minSize) {
+            var evaluatedMinSize = /** @type {number} */ (minSize.evaluate(context));
+            if (sizes[name] < evaluatedMinSize) {
+                var p = boxParams[name] = new vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam(containers[name], boxInstances[name].style, isHorizontal, scope, clientLayout, evaluatedMinSize);
+                minOuterSizes[name] = p.getOuterSize();
+                needRecalculate = true;
+            }
         }
-    } else {
-        var startEndBoxParam = new vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam([startBoxParam, endBoxParam]);
-        var centerSizes = this.distributeAutoMarginBoxSizes(centerBoxParam, startEndBoxParam, dimensions.extent);
-        if (centerSizes.xSize) {
-            sizes.centerSize = centerSizes.xSize;
-        }
-        var centerSize = centerSizes.xSize || centerBoxParam.getOuterSize();
-        var startEndAutoSize = (dimensions.extent - centerSize) / 2;
-        if (startBoxParam.hasAutoSize()) {
-            sizes.startSize = startEndAutoSize;
-        }
-        if (endBoxParam.hasAutoSize()) {
-            sizes.endSize = startEndAutoSize;
-        }
+    });
+    if (needRecalculate) {
+        sizes = this.getSizesOfMarginBoxesAlongVariableDimension(boxParams, evaluatedDim.extent);
+        [START, CENTER, END].forEach(function(name) {
+            sizes[name] = minOuterSizes[name] || sizes[name];
+        });
     }
 
     // set sizes
-    var endEdge = dimensions.start + dimensions.extent;
-    var startEndSum = dimensions.start + (dimensions.start + dimensions.extent);
-    if (isHorizontal) {
-        if (sizes.startSize) {
-            startBox.container.setHorizontalPosition(startBox.container.left, sizes.startSize - startBox.container.getInsetLeft() - startBox.container.getInsetRight());
+    var endEdge = evaluatedDim.start + evaluatedDim.extent;
+    var startEndSum = evaluatedDim.start + (evaluatedDim.start + evaluatedDim.extent);
+    [START, CENTER, END].forEach(function(name) {
+        var outerSize = sizes[name];
+        if (outerSize) {
+            var container = containers[name];
+            var offset = 0;
+            switch (name) {
+                case START:
+                    offset = isHorizontal ? container.left : container.top;
+                    break;
+                case CENTER:
+                    offset = (startEndSum - outerSize) /2;
+                    break;
+                case END:
+                    offset = endEdge - outerSize;
+                    break;
+            }
+            if (isHorizontal) {
+                container.setHorizontalPosition(offset, outerSize - container.getInsetLeft() - container.getInsetRight());
+            } else {
+                container.setVerticalPosition(offset, outerSize - container.getInsetTop() - container.getInsetBottom());
+            }
         }
-        if (sizes.centerSize) {
-            centerBox.container.setHorizontalPosition((startEndSum - sizes.centerSize) / 2, sizes.centerSize - centerBox.container.getInsetLeft() - centerBox.container.getInsetRight());
+    });
+};
+
+/**
+ * @private
+ * @param {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam>} boxParams
+ * @param {number} availableSize
+ * @returns {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, number>}
+ */
+vivliostyle.page.PageRuleMasterInstance.prototype.getSizesOfMarginBoxesAlongVariableDimension = function(boxParams, availableSize) {
+    var startBoxParam = boxParams[vivliostyle.page.MarginBoxPositionAlongVariableDimension.START];
+    var centerBoxParam = boxParams[vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER];
+    var endBoxParam = boxParams[vivliostyle.page.MarginBoxPositionAlongVariableDimension.END];
+    /** @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, number>} */ var sizes = {};
+    if (!centerBoxParam) {
+        var startEndSizes = this.distributeAutoMarginBoxSizes(startBoxParam, endBoxParam, availableSize);
+        if (startEndSizes.xSize) {
+            sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.START] = startEndSizes.xSize;
         }
-        if (sizes.endSize) {
-            endBox.container.setHorizontalPosition(endEdge - sizes.endSize, sizes.endSize - endBox.container.getInsetLeft() - endBox.container.getInsetRight());
+        if (startEndSizes.ySize) {
+            sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.END] = startEndSizes.ySize;
         }
     } else {
-        if (sizes.startSize) {
-            startBox.container.setVerticalPosition(startBox.container.top, sizes.startSize - startBox.container.getInsetTop() - startBox.container.getInsetBottom());
+        var startEndBoxParam = new vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam([startBoxParam, endBoxParam]);
+        var centerSizes = this.distributeAutoMarginBoxSizes(centerBoxParam, startEndBoxParam, availableSize);
+        if (centerSizes.xSize) {
+            sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER] = centerSizes.xSize;
         }
-        if (sizes.centerSize) {
-            centerBox.container.setVerticalPosition((startEndSum - sizes.centerSize) / 2, sizes.centerSize - centerBox.container.getInsetTop() - centerBox.container.getInsetBottom());
+        var centerSize = centerSizes.xSize || centerBoxParam.getOuterSize();
+        var startEndAutoSize = (availableSize - centerSize) / 2;
+        if (startBoxParam.hasAutoSize()) {
+            sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.START] = startEndAutoSize;
         }
-        if (sizes.endSize) {
-            endBox.container.setVerticalPosition(endEdge - sizes.endSize, sizes.endSize - endBox.container.getInsetTop() - endBox.container.getInsetBottom());
+        if (endBoxParam.hasAutoSize()) {
+            sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.END] = startEndAutoSize;
         }
     }
+    return sizes;
 };
 
 /**
