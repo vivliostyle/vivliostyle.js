@@ -469,8 +469,9 @@ vivliostyle.page.PageMarginBoxPartition.prototype.applySpecified = function(styl
         (style[vivliostyle.page.marginBoxesKey][this.marginBoxName]);
     // Inherit properties in the page context to the page-margin context
     for (var prop in style) {
-        var val = /** @type {adapt.csscasc.CascadeValue} */ (ownStyle[prop]);
-        if (adapt.csscasc.inheritedProps[prop] || (val && val.value === adapt.css.ident.inherit)) {
+        var val = /** @type {adapt.csscasc.CascadeValue} */ (style[prop]);
+        var ownVal = /** @type {adapt.csscasc.CascadeValue} */ (ownStyle[prop]);
+        if (adapt.csscasc.inheritedProps[prop] || (ownVal && ownVal.value === adapt.css.ident.inherit)) {
             this.specified[prop] = val;
         }
     }
