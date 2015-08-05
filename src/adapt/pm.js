@@ -1122,7 +1122,8 @@ adapt.pm.passPreProperties = [
     "outline-style",
     "outline-color",
     "outline-width",
-	"overflow"
+	"overflow",
+    "visibility"
 ];
 
 /**
@@ -1160,7 +1161,16 @@ adapt.pm.passContentProperties = [
     "font-family",
     "font-size",
     "font-style",
-    "font-weight"
+    "font-weight",
+    "font-variant",
+    "line-height",
+    "letter-spacing",
+    "text-align",
+    "text-decoration",
+    "text-indent",
+    "text-transform",
+    "white-space",
+    "word-spacing"
 ];
 
 /**
