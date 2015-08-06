@@ -12,6 +12,10 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/39>
   - Spec: [CSS Paged Media Module Level 3 - Page-based counters](http://dev.w3.org/csswg/css-page/#page-based-counters)
   - See [the above pull request](https://github.com/vivliostyle/vivliostyle.js/pull/39) for a detailed description of its behavior and limitation.
+- [core] Support page-margin boxes
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/42>
+  - Spec: [CSS Paged Media Module Level 3 - Page-Margin boxes](https://drafts.csswg.org/css-page/#margin-boxes)
+  - Note: For now, 'quotes' property specified within the page/margin context is ignored. This issue will be tracked at <https://github.com/vivliostyle/vivliostyle.js/issues/43>.
 
 ### Fixed
 - [core] Avoid incorrect margin collapse of the page area

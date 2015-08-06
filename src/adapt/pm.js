@@ -21,6 +21,7 @@ adapt.pm.keyCount = 1;
  * and partition-group).
  * @param {adapt.expr.LexicalScope} scope
  * @param {?string} name
+ * @param {?string} pseudoName
  * @param {Array.<string>} classes
  * @param {adapt.pm.PageBox} parent
  * @constructor
@@ -28,7 +29,7 @@ adapt.pm.keyCount = 1;
 adapt.pm.PageBox = function(scope, name, pseudoName, classes, parent) {
     // styles specified in the at-rule
     /** @const */ this.specified = /** @type {adapt.csscasc.ElementStyle} */ ({});
-    /** @const */ this.children = /** @type {Array.<adapt.pm.PageBox>} */ ([]);
+    /** @private @const */ this.children = /** @type {Array.<adapt.pm.PageBox>} */ ([]);
     /** @type {adapt.pm.PageMaster} */ this.pageMaster = null;
     /** @type {number} */ this.index = 0;
     /** @const */ this.scope = scope;
@@ -320,6 +321,25 @@ adapt.pm.toExprZero = function(scope, val, ref) {
 };
 
 /**
+ * If the value is not specified (null), returns zero.
+ * If the value is 'auto', returns null.
+ * Otherwise, return the value itself.
+ * @param {adapt.expr.LexicalScope} scope
+ * @param {adapt.css.Val} val
+ * @param {adapt.expr.Val} ref
+ * @returns {adapt.expr.Val}
+ */
+adapt.pm.toExprZeroAuto = function(scope, val, ref) {
+    if (!val) {
+        return scope.zero;
+    } else if (val === adapt.css.ident.auto) {
+        return null;
+    } else {
+        return val.toExpr(scope, ref);
+    }
+};
+
+/**
  * @param {adapt.expr.LexicalScope} scope
  * @param {adapt.css.Val} val
  * @param {adapt.css.Val} styleVal
@@ -376,23 +396,24 @@ adapt.pm.PageBoxInstance = function(parentInstance, pageBox) {
 	/** @const */ this.pageBox = pageBox;
     /**
      * cascaded styles, geometric ones converted to adapt.css.Expr
-     * @const
+     * @protected @const
      */
     this.cascaded = /** @type {adapt.csscasc.ElementStyle} */ ({});
-    /** @const */ this.style = /** @type {!Object.<string,adapt.css.Val>} */ ({});
-    /** @type {adapt.expr.Native} */ this.autoWidth = null;
-    /** @type {adapt.expr.Native} */ this.autoHeight = null;
+    /** @protected @const */ this.style = /** @type {!Object.<string,adapt.css.Val>} */ ({});
+    /** @private @type {adapt.expr.Native} */ this.autoWidth = null;
+    /** @private @type {adapt.expr.Native} */ this.autoHeight = null;
     /** @type {!Array.<adapt.pm.PageBoxInstance>} */ this.children = [];
     /** @type {boolean} */ this.isAutoWidth = false;
     /** @type {boolean} */ this.isAutoHeight = false;
     /** @type {boolean} */ this.isTopDependentOnAutoHeight = false;
     /** @type {boolean} */ this.isRightDependentOnAutoWidth = false;
-    /** @type {number} */ this.calculatedWidth = 0;
-    /** @type {number} */ this.calculatedHeight = 0;
+    /** @private @type {number} */ this.calculatedWidth = 0;
+    /** @private @type {number} */ this.calculatedHeight = 0;
     /** @type {adapt.pm.PageMasterInstance} */ this.pageMasterInstance = null;
     /** @type {Object.<string,adapt.expr.Val>} */ this.namedValues = {};
     /** @type {Object.<string,adapt.expr.Val>} */ this.namedFuncs = {};
     /** @type {boolean} */ this.vertical = false;
+    /** @type {boolean} */ this.suppressEmptyBoxGeneration = false;
     if (parentInstance) {
     	parentInstance.children.push(this);
     }
@@ -1098,7 +1119,11 @@ adapt.pm.passPreProperties = [
 	"border-right-color",
 	"border-top-color",
 	"border-bottom-color",
-	"overflow"
+    "outline-style",
+    "outline-color",
+    "outline-width",
+	"overflow",
+    "visibility"
 ];
 
 /**
@@ -1136,7 +1161,16 @@ adapt.pm.passContentProperties = [
     "font-family",
     "font-size",
     "font-style",
-    "font-weight"
+    "font-weight",
+    "font-variant",
+    "line-height",
+    "letter-spacing",
+    "text-align",
+    "text-decoration",
+    "text-indent",
+    "text-transform",
+    "white-space",
+    "word-spacing"
 ];
 
 /**
@@ -1387,6 +1421,16 @@ adapt.pm.PageMasterInstance.prototype.boxSpecificEnabled = function(enabled) {
         enabled = adapt.expr.and(pageMaster.scope, enabled, pageMaster.condition);
     }
     return enabled;
+};
+
+/**
+ * Called after layout of contents of the page has done to adjust the overall page layout.
+ * Override in subclasses.
+ * @param {adapt.expr.Context} context
+ * @param {adapt.vtree.Page} page
+ * @param {adapt.vtree.ClientLayout} clientLayout
+ */
+adapt.pm.PageMasterInstance.prototype.adjustPageLayout = function(context, page, clientLayout) {
 };
 
 /**

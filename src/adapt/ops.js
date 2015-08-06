@@ -475,13 +475,17 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     var cont;
     if (!flowName || !flowName.isIdent()) {
 	    var contentVal = boxInstance.getProp(self, "content");
-	    if (contentVal) {
-	    	if (adapt.vtree.nonTrivialContent(contentVal)) {
-	    		contentVal.visit(new adapt.vtree.ContentPropertyHandler(boxContainer, self));
-	    		boxInstance.transferContentProps(self, layoutContainer, page);
-	    	}
-	    } 	
-        boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);	    		
+		var removed = false;
+	    if (contentVal && adapt.vtree.nonTrivialContent(contentVal)) {
+			contentVal.visit(new adapt.vtree.ContentPropertyHandler(boxContainer, self));
+			boxInstance.transferContentProps(self, layoutContainer, page);
+		} else if (boxInstance.suppressEmptyBoxGeneration) {
+			parentContainer.removeChild(boxContainer);
+			removed = true;
+		}
+		if (!removed) {
+			boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);
+		}
     	cont = adapt.task.newResult(true);
     } else if (!self.pageBreaks[flowName.toString()]) {
     	/** @type {!adapt.task.Frame.<boolean>} */ var innerFrame = adapt.task.newFrame("layoutContainer.inner");
@@ -707,6 +711,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
     	= adapt.task.newFrame("layoutNextPage");
     self.layoutContainer(page, pageMaster, page.container, 0, 0, []).then(function() {
+		pageMaster.adjustPageLayout(self, page, self.clientLayout);
         var isLeftPage = new adapt.expr.Named(pageMaster.pageBox.scope, "left-page");
         page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;
 	    self.processLinger();

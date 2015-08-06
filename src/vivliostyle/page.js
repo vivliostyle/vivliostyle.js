@@ -10,6 +10,8 @@ goog.require("adapt.css");
 goog.require("adapt.cssparse");
 goog.require("adapt.csscasc");
 goog.require("adapt.cssvalid");
+goog.require("adapt.vtree");
+goog.require("vivliostyle.sizing");
 goog.require("adapt.pm");
 
 /**
@@ -110,10 +112,231 @@ vivliostyle.page.resolvePageSize = function(style) {
 };
 
 /**
+ * Properties transfered from the PageRuleMaster to the PageRulePartition
+ * @private
+ * @const
+ */
+vivliostyle.page.propertiesAppliedToPartition = (function() {
+    var sides = [
+        "left", "right", "top", "bottom",
+        "before", "after", "start", "end",
+        "block-start", "block-end", "inline-start", "inline-end"
+    ];
+    var props = {
+        "width": true,
+        "height": true,
+        "block-size": true,
+        "inline-size": true,
+        "margin": true,
+        "padding": true,
+        "border": true,
+        "outline": true,
+        "outline-width": true,
+        "outline-style": true,
+        "outline-color": true
+    };
+    sides.forEach(function(side) {
+        props["margin-" + side] = true;
+        props["padding-" + side] = true;
+        props["border-" + side + "-width"] = true;
+        props["border-" + side + "-style"] = true;
+        props["border-" + side + "-color"] = true;
+    });
+    return props;
+})();
+
+/**
+ * Represents position of a margin box along the variable dimension of the page.
+ * START and END can be interpreted as 'inline-start' and 'inline-end' in horizontal and vertical writing modes.
+ * For example, for top margin boxes (@top-left-corner, @top-left, @top-center, @top-right, @top-right-corner), @top-left corresponds to START, @top-center to CENTER, and @top-right to END.
+ * The corner boxes (@top-left-corner and @top-right-corner) have a 'null' position.
+ * @private
+ * @enum {string}
+ */
+vivliostyle.page.MarginBoxPositionAlongVariableDimension = {
+    START: "start",
+    CENTER: "center",
+    END: "end"
+};
+
+/**
+ * Information associated with a page-margin box.
+ * order: the default order in which page-margin boxes are painted (defined in css-page spec)
+ * isInTopRow: indicates if the margin box is in the top row, i.e., @top-* margin box (including corner boxes)
+ * isInBottomRow: indicates if the margin box is in the bottom row, i.e., @bottom-* margin box (including corner boxes)
+ * isInLeftColumn: indicates if the margin box is in the left column, i.e., a @*-left-corner or @left-* margin box
+ * isInRightColumn: indicates if the margin box is in the right column, i.e., a @*-right-corner or @right-* margin box
+ * positionAlongVariableDimension: position of the margin box along the variable dimension of the page
+ * @private
+ * @typedef {{order: number, isInTopRow: boolean, isInBottomRow: boolean, isInLeftColumn: boolean, isInRightColumn: boolean, positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension}}
+ */
+vivliostyle.page.PageMarginBoxInformation;
+
+/**
+ * Page-margin boxes.
+ * @private
+ * @const
+ * @dict
+ * @type {!Object.<string, vivliostyle.page.PageMarginBoxInformation>}
+ */
+vivliostyle.page.pageMarginBoxes = {
+    "top-left-corner": {
+        order: 1,
+        isInTopRow: true,
+        isInBottomRow: false,
+        isInLeftColumn: true,
+        isInRightColumn: true,
+        positionAlongVariableDimension: null
+    },
+    "top-left": {
+        order: 2,
+        isInTopRow: true,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: false,
+        positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.START
+    },
+    "top-center": {
+        order: 3,
+        isInTopRow: true,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: false,
+        positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER
+    },
+    "top-right": {
+        order: 4,
+        isInTopRow: true,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: false,
+        positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.END
+    },
+    "top-right-corner": {
+        order: 5,
+        isInTopRow: true,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: true,
+        positionAlongVariableDimension: null
+    },
+    "right-top": {
+        order: 6,
+        isInTopRow: false,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: true,
+        positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.START
+    },
+    "right-middle": {
+        order: 7,
+        isInTopRow: false,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: true,
+        positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER
+    },
+    "right-bottom": {
+        order: 8,
+        isInTopRow: false,
+        isInBottomRow: false,
+        isInLeftColumn: false,
+        isInRightColumn: true,
+        positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.END
+    },
+    "bottom-right-corner": {
+        order: 9,
+        isInTopRow: false,
+        isInBottomRow: true,
+        isInLeftColumn: false,
+        isInRightColumn: true,
+        positionAlongVariableDimension: null
+    },
+    "bottom-right": {
+        order: 10,
+        isInTopRow: false,
+        isInBottomRow: true,
+        isInLeftColumn: false,
+        isInRightColumn: false,
+        positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.END
+    },
+    "bottom-center": {
+        order: 11,
+        isInTopRow: false,
+        isInBottomRow: true,
+        isInLeftColumn: false,
+        isInRightColumn: false,
+        positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER
+    },
+    "bottom-left": {
+        order: 12,
+        isInTopRow: false,
+        isInBottomRow: true,
+        isInLeftColumn: false,
+        isInRightColumn: false,
+        positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.START
+    },
+    "bottom-left-corner": {
+        order: 13,
+        isInTopRow: false,
+        isInBottomRow: true,
+        isInLeftColumn: true,
+        isInRightColumn: false,
+        positionAlongVariableDimension: null
+    },
+    "left-bottom": {
+        order: 14,
+        isInTopRow: false,
+        isInBottomRow: false,
+        isInLeftColumn: true,
+        isInRightColumn: false,
+        positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.END
+    },
+    "left-middle": {
+        order: 15,
+        isInTopRow: false,
+        isInBottomRow: false,
+        isInLeftColumn: true,
+        isInRightColumn: false,
+        positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER
+    },
+    "left-top": {
+        order: 16,
+        isInTopRow: false,
+        isInBottomRow: false,
+        isInLeftColumn: true,
+        isInRightColumn: false,
+        positionAlongVariableDimension: vivliostyle.page.MarginBoxPositionAlongVariableDimension.START
+    }
+};
+
+/**
+ * Names for page-margin boxes order in the default painting order.
+ * @private
+ * @const
+ * @type {!Array.<string>}
+ */
+vivliostyle.page.pageMarginBoxNames = (function() {
+    var boxes = vivliostyle.page.pageMarginBoxes;
+    return Object.keys(boxes).sort(function(a, b) {
+        return boxes[a].order - boxes[b].order;
+    });
+})();
+
+/**
  * Indicates that the page master is generated for @page rules.
  * @const
  */
 vivliostyle.page.pageRuleMasterPseudoName = "vivliostyle-page-rule-master";
+
+/**
+ * Key for properties in margin contexts.
+ * Styles in margin contexts are stored in pageStyle["_marginBoxes"][(margin box's name)].
+ * @private
+ * @const
+ * @type {string}
+ */
+vivliostyle.page.marginBoxesKey = "_marginBoxes";
 
 /**
  * Represent a page master generated for @page rules
@@ -126,20 +349,50 @@ vivliostyle.page.pageRuleMasterPseudoName = "vivliostyle-page-rule-master";
 vivliostyle.page.PageRuleMaster = function(scope, parent, style) {
     adapt.pm.PageMaster.call(this, scope, null, vivliostyle.page.pageRuleMasterPseudoName, [],
         parent, null, 0);
+
     var pageSize = vivliostyle.page.resolvePageSize(style);
     var partition = new vivliostyle.page.PageRulePartition(this.scope, this, style, pageSize);
     /** @const @private */ this.bodyPartitionKey = partition.key;
+
+    /** @const @private */ this.pageMarginBoxes = /** @type {Object.<string, !vivliostyle.page.PageMarginBoxPartition>} */ ({});
+    this.createPageMarginBoxes(style);
+
+    this.applySpecified(style, pageSize);
+};
+goog.inherits(vivliostyle.page.PageRuleMaster, adapt.pm.PageMaster);
+
+/**
+ * Create page-margin boxes
+ * @param {!adapt.csscasc.ElementStyle} style
+ */
+vivliostyle.page.PageRuleMaster.prototype.createPageMarginBoxes = function(style) {
+    var marginBoxesMap = style[vivliostyle.page.marginBoxesKey];
+    if (marginBoxesMap) {
+        var self = this;
+        vivliostyle.page.pageMarginBoxNames.forEach(function(name) {
+            if (marginBoxesMap[name]) {
+                self.pageMarginBoxes[name] = new vivliostyle.page.PageMarginBoxPartition(self.scope, self, name, style);
+            }
+        });
+    }
+};
+
+/**
+ * Transfer cascaded style for @page rules to 'specified' style of this PageBox
+ * @private
+ * @param {!adapt.csscasc.ElementStyle} style
+ * @param {!vivliostyle.page.PageSize} pageSize
+ */
+vivliostyle.page.PageRuleMaster.prototype.applySpecified = function(style, pageSize) {
     this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.relative, 0);
     this.specified["width"] = new adapt.csscasc.CascadeValue(pageSize.width, 0);
     this.specified["height"] = new adapt.csscasc.CascadeValue(pageSize.height, 0);
     for (var name in style) {
-        if (name.match(/^background-/)
-            && name !== "background-clip") {
+        if (!vivliostyle.page.propertiesAppliedToPartition[name] && name !== "background-clip") {
             this.specified[name] = style[name];
         }
     }
 };
-goog.inherits(vivliostyle.page.PageRuleMaster, adapt.pm.PageMaster);
 
 /**
  * @return {!vivliostyle.page.PageRuleMasterInstance}
@@ -161,19 +414,10 @@ vivliostyle.page.PageRuleMaster.prototype.createInstance = function(parentInstan
 vivliostyle.page.PageRulePartition = function(scope, parent, style, pageSize) {
     adapt.pm.Partition.call(this, scope, null, null, [], parent);
     /** @const */ this.pageSize = pageSize;
+    this.specified["z-index"] = new adapt.csscasc.CascadeValue(new adapt.css.Int(0), 0);
     this.applySpecified(style);
 };
 goog.inherits(vivliostyle.page.PageRulePartition, adapt.pm.Partition);
-
-/**
- * @private
- * @const
- */
-vivliostyle.page.PageRulePartition.sides = [
-    "left", "right", "top", "bottom",
-    "before", "after", "start", "end",
-    "block-start", "block-end", "inline-start", "inline-end"
-];
 
 /**
  * Transfer cascaded style for @page rules to 'specified' style of this PageBox
@@ -185,22 +429,10 @@ vivliostyle.page.PageRulePartition.prototype.applySpecified = function(style) {
     // Use absolute positioning so that this partition's margins don't collapse with its parent's margins
     this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.absolute, 0);
     this.specified["overflow"] = new adapt.csscasc.CascadeValue(adapt.css.ident.visible, 0);
-
-    var self = this;
-    function copy(name) {
-        self.specified[name] = style[name];
-    }
-    copy("width");
-    copy("height");
-    copy("block-size");
-    copy("inline-size");
-    for (var i = 0; i < vivliostyle.page.PageRulePartition.sides.length; i++) {
-        var side = vivliostyle.page.PageRulePartition.sides[i];
-        copy("margin-" + side);
-        copy("padding-" + side);
-        copy("border-" + side + "-width");
-        copy("border-" + side + "-style");
-        copy("border-" + side + "-color");
+    for (var prop in vivliostyle.page.propertiesAppliedToPartition) {
+        if (vivliostyle.page.propertiesAppliedToPartition.hasOwnProperty(prop)) {
+            this.specified[prop] = style[prop];
+        }
     }
 };
 
@@ -213,6 +445,70 @@ vivliostyle.page.PageRulePartition.prototype.createInstance = function(parentIns
 };
 
 /**
+ * Represent a partition for a page-margin box
+ * @param {adapt.expr.LexicalScope} scope
+ * @param {!vivliostyle.page.PageRuleMaster} parent
+ * @param {string} marginBoxName
+ * @param {!adapt.csscasc.ElementStyle} style
+ * @constructor
+ * @extends {adapt.pm.Partition}
+ */
+vivliostyle.page.PageMarginBoxPartition = function(scope, parent, marginBoxName, style) {
+    adapt.pm.Partition.call(this, scope, null, null, [], parent);
+    /** @const */ this.marginBoxName = marginBoxName;
+    this.applySpecified(style);
+};
+goog.inherits(vivliostyle.page.PageMarginBoxPartition, adapt.pm.Partition);
+
+/**
+ * Transfer cascaded style for @page rules to 'specified' style of this PageMarginBox
+ * @param {!adapt.csscasc.ElementStyle} style
+ */
+vivliostyle.page.PageMarginBoxPartition.prototype.applySpecified = function(style) {
+    var ownStyle = /** @type {!adapt.csscasc.ElementStyle} */
+        (style[vivliostyle.page.marginBoxesKey][this.marginBoxName]);
+    // Inherit properties in the page context to the page-margin context
+    for (var prop in style) {
+        var val = /** @type {adapt.csscasc.CascadeValue} */ (style[prop]);
+        var ownVal = /** @type {adapt.csscasc.CascadeValue} */ (ownStyle[prop]);
+        if (adapt.csscasc.inheritedProps[prop] || (ownVal && ownVal.value === adapt.css.ident.inherit)) {
+            this.specified[prop] = val;
+        }
+    }
+    for (var prop in ownStyle) {
+        if (Object.prototype.hasOwnProperty.call(ownStyle, prop)) {
+            var val = /** @type {adapt.csscasc.CascadeValue} */ (ownStyle[prop]);
+            if (val && val.value !== adapt.css.ident.inherit) {
+                this.specified[prop] = val;
+            }
+        }
+    }
+};
+
+/**
+ * @return {!vivliostyle.page.PageMarginBoxPartitionInstance}
+ * @override
+ */
+vivliostyle.page.PageMarginBoxPartition.prototype.createInstance = function(parentInstance) {
+    return new vivliostyle.page.PageMarginBoxPartitionInstance(parentInstance, this);
+};
+
+//---------------------------- Instance --------------------------------
+
+/**
+ * @private
+ * @typedef {{
+ *     borderBoxWidth: adapt.expr.Val,
+ *     borderBoxHeight: adapt.expr.Val,
+ *     marginTop: adapt.expr.Val,
+ *     marginBottom: adapt.expr.Val,
+ *     marginLeft: adapt.expr.Val,
+ *     marginRight: adapt.expr.Val
+ * }}
+ */
+vivliostyle.page.PageAreaDimension;
+
+/**
  * @param {!adapt.pm.PageBoxInstance} parentInstance
  * @param {!vivliostyle.page.PageRuleMaster} pageRuleMaster
  * @constructor
@@ -220,6 +516,8 @@ vivliostyle.page.PageRulePartition.prototype.createInstance = function(parentIns
  */
 vivliostyle.page.PageRuleMasterInstance = function(parentInstance, pageRuleMaster) {
     adapt.pm.PageMasterInstance.call(this, parentInstance, pageRuleMaster);
+    /** @type {?vivliostyle.page.PageAreaDimension} */ this.pageAreaDimension = null;
+    /** @type {Object.<string, !vivliostyle.page.PageMarginBoxPartitionInstance>} */ this.pageMarginBoxInstances = {};
 };
 goog.inherits(vivliostyle.page.PageRuleMasterInstance, adapt.pm.PageMasterInstance);
 
@@ -273,20 +571,442 @@ vivliostyle.page.PageRuleMasterInstance.prototype.initVertical = function() {
 };
 
 /**
- * Adjust width and height using the actual dimensions calculated by the PageRuleParitionInstance.
- * @param {!adapt.expr.Context} context
+ * @private
+ * @param {!vivliostyle.page.PageAreaDimension} dim
  */
-vivliostyle.page.PageRuleMasterInstance.prototype.adjustContainingBlock = function(context) {
-    var holder = /** {!adapt.pm.InstanceHolder} */ (context);
-    var partitionInstance = holder.lookupInstance(this.pageBox.bodyPartitionKey);
+vivliostyle.page.PageRuleMasterInstance.prototype.setPageAreaDimension = function(dim) {
+    this.pageAreaDimension = dim;
 
     var style = this.style;
-    style["width"] = new adapt.css.Expr(partitionInstance.borderBoxWidth);
-    style["height"] = new adapt.css.Expr(partitionInstance.borderBoxHeight);
-    style["padding-left"] = new adapt.css.Expr(partitionInstance.marginLeft);
-    style["padding-right"] = new adapt.css.Expr(partitionInstance.marginRight);
-    style["padding-top"] = new adapt.css.Expr(partitionInstance.marginTop);
-    style["padding-bottom"] = new adapt.css.Expr(partitionInstance.marginBottom);
+    style["width"] = new adapt.css.Expr(dim.borderBoxWidth);
+    style["height"] = new adapt.css.Expr(dim.borderBoxHeight);
+    style["padding-left"] = new adapt.css.Expr(dim.marginLeft);
+    style["padding-right"] = new adapt.css.Expr(dim.marginRight);
+    style["padding-top"] = new adapt.css.Expr(dim.marginTop);
+    style["padding-bottom"] = new adapt.css.Expr(dim.marginBottom);
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageRuleMasterInstance.prototype.adjustPageLayout = function(context, page, clientLayout) {
+    var marginBoxContainers = page.marginBoxes;
+    var horizontalDimensions = {
+        start: this.pageAreaDimension.marginLeft,
+        end: this.pageAreaDimension.marginRight,
+        extent: this.pageAreaDimension.borderBoxWidth
+    };
+    var verticalDimensions = {
+        start: this.pageAreaDimension.marginTop,
+        end: this.pageAreaDimension.marginBottom,
+        extent: this.pageAreaDimension.borderBoxHeight
+    };
+    this.sizeMarginBoxesAlongVariableDimension(marginBoxContainers.top, true, horizontalDimensions, context, clientLayout);
+    this.sizeMarginBoxesAlongVariableDimension(marginBoxContainers.bottom, true, horizontalDimensions, context, clientLayout);
+    this.sizeMarginBoxesAlongVariableDimension(marginBoxContainers.left, false, verticalDimensions, context, clientLayout);
+    this.sizeMarginBoxesAlongVariableDimension(marginBoxContainers.right, false, verticalDimensions, context, clientLayout);
+};
+
+/**
+ * Interface used for parameters passed to distributeAutoMarginBoxSizes method.
+ * @private
+ * @interface
+ */
+vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam = function() {};
+
+/**
+ *  @returns {boolean}
+ */
+vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam.prototype.hasAutoSize = function() {};
+
+/**
+ *  @returns {number}
+ */
+vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam.prototype.getOuterMaxContentSize = function() {};
+
+/**
+ *  @returns {number}
+ */
+vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam.prototype.getOuterMinContentSize = function() {};
+
+/**
+ *  @returns {number}
+ */
+vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam.prototype.getOuterSize = function() {};
+
+/**
+ * MarginBoxSizingParam for a single page-margin box.
+ * @param {adapt.vtree.Container} container A container corresponding to the target margin box.
+ * @param {!Object.<string,adapt.css.Val>} style Styles specified to the target margin box.
+ * @param {boolean} isHorizontal
+ * @param {adapt.expr.LexicalScope} scope
+ * @param {adapt.vtree.ClientLayout} clientLayout
+ * @constructor
+ * @implements {vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam}
+ */
+vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam = function(container, style, isHorizontal, scope, clientLayout) {
+    /** @protected @const */ this.container = container;
+    /** @private @const */ this.clientLayout = clientLayout;
+    /** @private @const @type {boolean} */ this.isHorizontal = isHorizontal;
+    /** @private @const @type {boolean} */ this.hasAutoSize_ = !adapt.pm.toExprAuto(scope, style[isHorizontal ? "width" : "height"], new adapt.expr.Numeric(scope, 0, "px"));
+    /** @private @type {Object.<vivliostyle.sizing.Size, number>} */ this.size = null;
+};
+
+/**
+ *  @override
+ */
+vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam.prototype.hasAutoSize = function() {
+    return this.hasAutoSize_;
+};
+
+/**
+ * @private
+ * @returns {!Object.<vivliostyle.sizing.Size, number>}
+ */
+vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam.prototype.getSize = function() {
+    if (!this.size) {
+        var sizes = this.isHorizontal ?
+            [vivliostyle.sizing.Size.MAX_CONTENT_WIDTH, vivliostyle.sizing.Size.MIN_CONTENT_WIDTH] :
+            [vivliostyle.sizing.Size.MAX_CONTENT_HEIGHT, vivliostyle.sizing.Size.MIN_CONTENT_HEIGHT];
+        this.size = vivliostyle.sizing.getSize(this.clientLayout, this.container.element, sizes);
+    }
+    return this.size;
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam.prototype.getOuterMaxContentSize = function() {
+    var size = this.getSize();
+    if (this.isHorizontal) {
+        return this.container.getInsetLeft() + size[vivliostyle.sizing.Size.MAX_CONTENT_WIDTH] + this.container.getInsetRight();
+    } else {
+        return this.container.getInsetTop() + size[vivliostyle.sizing.Size.MAX_CONTENT_HEIGHT] + this.container.getInsetBottom();
+    }
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam.prototype.getOuterMinContentSize = function() {
+    var size = this.getSize();
+    if (this.isHorizontal) {
+        return this.container.getInsetLeft() + size[vivliostyle.sizing.Size.MIN_CONTENT_WIDTH] + this.container.getInsetRight();
+    } else {
+        return this.container.getInsetTop() + size[vivliostyle.sizing.Size.MIN_CONTENT_HEIGHT] + this.container.getInsetBottom();
+    }
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam.prototype.getOuterSize = function() {
+    if (this.isHorizontal) {
+        return this.container.getInsetLeft() + this.container.width + this.container.getInsetRight();
+    } else {
+        return this.container.getInsetTop() + this.container.height + this.container.getInsetBottom();
+    }
+};
+
+/**
+ * MarginBoxSizingParam with which multiple margin boxes are treated as one margin box.
+ * Each method querying a dimension returns the maximum of the boxes multiplied by the number of the boxes.
+ * @param {!Array.<!vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam>} params MarginBoxSizingParam's of the target margin boxes.
+ * @constructor
+ * @implements {vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam}
+ */
+vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam = function(params) {
+    /** @private @const */ this.params = params;
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam.prototype.hasAutoSize = function() {
+    return this.params.some(function(p) {
+        return p.hasAutoSize();
+    });
+};
+
+/**
+ *  @override
+ */
+vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam.prototype.getOuterMaxContentSize = function() {
+    var sizes = this.params.map(function(p) {
+        return p.getOuterMaxContentSize();
+    });
+    return Math.max.apply(null, sizes) * sizes.length;
+};
+
+/**
+ *  @override
+ */
+vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam.prototype.getOuterMinContentSize = function() {
+    var sizes = this.params.map(function(p) {
+        return p.getOuterMinContentSize();
+    });
+    return Math.max.apply(null, sizes) * sizes.length;
+};
+
+/**
+ *  @override
+ */
+vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam.prototype.getOuterSize = function() {
+    var sizes = this.params.map(function(p) {
+        return p.getOuterSize();
+    });
+    return Math.max.apply(null, sizes) * sizes.length;
+};
+
+/**
+ * MarginBoxSizingParam for a single page-margin box with a fixed size along the variable dimension.
+ * @param {adapt.vtree.Container} container A container corresponding to the target margin box.
+ * @param {!Object.<string,adapt.css.Val>} style Styles specified to the target margin box.
+ * @param {boolean} isHorizontal
+ * @param {adapt.expr.LexicalScope} scope
+ * @param {adapt.vtree.ClientLayout} clientLayout
+ * @param {number} size The fixed size (width or height) along the variable dimension.
+ * @constructor
+ * @extends {vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam}
+ */
+vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam = function(container, style, isHorizontal, scope, clientLayout, size) {
+    vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam.call(this, container, style, isHorizontal, scope, clientLayout);
+    /** @private @const */ this.fixedSize = size;
+};
+goog.inherits(vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam, vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam);
+
+/**
+ * @override
+ */
+vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam.prototype.hasAutoSize = function() {
+    return false;
+};
+
+/**
+ *  @override
+ */
+vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam.prototype.getOuterMaxContentSize = function() {
+    return this.getOuterSize();
+};
+
+/**
+ *  @override
+ */
+vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam.prototype.getOuterMinContentSize = function() {
+    return this.getOuterSize();
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam.prototype.getOuterSize = function() {
+    if (this.isHorizontal) {
+        return this.container.getInsetLeft() + this.fixedSize + this.container.getInsetRight();
+    } else {
+        return this.container.getInsetTop() + this.fixedSize + this.container.getInsetBottom();
+    }
+};
+
+/**
+ * Determine and set margin boxes' sizes along variable dimension using an algorithm specified in CSS Paged Media spec.
+ * @private
+ * @param {!Object.<string, adapt.vtree.Container>} marginBoxContainers Containers corresponding to the target margin boxes in one page edge (top, bottom, left, right)
+ * @param {boolean} isHorizontal Indicates if the target margin boxes are on the horizontal edge (top or bottom) or not (left or right).
+ * @param {!{start: adapt.expr.Val, end: adapt.expr.Val, extent: adapt.expr.Val}} dimensions Page dimensions. start: margin-left or margin-top. end: margin-right or margin-bottom. extent: border-box width or height of the page area (= available width or height for the target margin boxes)
+ * @param {adapt.expr.Context} context
+ * @param {adapt.vtree.ClientLayout} clientLayout
+ */
+vivliostyle.page.PageRuleMasterInstance.prototype.sizeMarginBoxesAlongVariableDimension = function(marginBoxContainers, isHorizontal, dimensions, context, clientLayout) {
+    /** @const */ var START = vivliostyle.page.MarginBoxPositionAlongVariableDimension.START;
+    /** @const */ var CENTER = vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER;
+    /** @const */ var END = vivliostyle.page.MarginBoxPositionAlongVariableDimension.END;
+
+    // prepare parameters
+    var scope = this.pageBox.scope;
+    /** @const @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, adapt.vtree.Container>} */ var containers = {};
+    /** @const @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, vivliostyle.page.PageMarginBoxPartitionInstance>} */ var boxInstances = {};
+    /** @const @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam>} */var boxParams = {};
+    for (var name in marginBoxContainers) {
+        var boxInfo = vivliostyle.page.pageMarginBoxes[name];
+        if (boxInfo) {
+            var container = marginBoxContainers[name];
+            var boxInstance = this.pageMarginBoxInstances[name];
+            var boxParam = new vivliostyle.page.PageRuleMasterInstance.SingleBoxMarginBoxSizingParam(container, boxInstance.style, isHorizontal, scope, clientLayout);
+            containers[boxInfo.positionAlongVariableDimension] = container;
+            boxInstances[boxInfo.positionAlongVariableDimension] = boxInstance;
+            boxParams[boxInfo.positionAlongVariableDimension] = boxParam;
+        }
+    }
+
+    // determine sizes
+    var evaluatedDim = {
+        start: /** @type {number} */ (dimensions.start.evaluate(context)),
+        end: /** @type {number} */ (dimensions.end.evaluate(context)),
+        extent: /** @type {number} */ (dimensions.extent.evaluate(context))
+    };
+    var sizes = this.getSizesOfMarginBoxesAlongVariableDimension(boxParams, evaluatedDim.extent);
+
+    /** @type {boolean} */ var needRecalculate = false;
+
+    // Check max-width/max-height
+    /** @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, number>} */ var maxOuterSizes = {};
+    Object.keys(containers).forEach(function(n) {
+        var name = /** @type {vivliostyle.page.MarginBoxPositionAlongVariableDimension} */ (n);
+        var maxSize = adapt.pm.toExprAuto(scope, boxInstances[name].style[isHorizontal ? "max-width" : "max-height"], dimensions.extent);
+        if (maxSize) {
+            var evaluatedMaxSize = /** @type {number} */ (maxSize.evaluate(context));
+            if (sizes[name] > evaluatedMaxSize) {
+                var p = boxParams[name] = new vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam(containers[name], boxInstances[name].style, isHorizontal, scope, clientLayout, evaluatedMaxSize);
+                maxOuterSizes[name] = p.getOuterSize();
+                needRecalculate = true;
+            }
+        }
+    });
+    if (needRecalculate) {
+        sizes = this.getSizesOfMarginBoxesAlongVariableDimension(boxParams, evaluatedDim.extent);
+        needRecalculate = false;
+        [START, CENTER, END].forEach(function(name) {
+            sizes[name] = maxOuterSizes[name] || sizes[name];
+        });
+    }
+
+    // Check min-width/min-height
+    /** @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, number>} */ var minOuterSizes = {};
+    Object.keys(containers).forEach(function(n) {
+        var name = /** @type {vivliostyle.page.MarginBoxPositionAlongVariableDimension} */ (n);
+        var minSize = adapt.pm.toExprAuto(scope, boxInstances[name].style[isHorizontal ? "min-width" : "min-height"], dimensions.extent);
+        if (minSize) {
+            var evaluatedMinSize = /** @type {number} */ (minSize.evaluate(context));
+            if (sizes[name] < evaluatedMinSize) {
+                var p = boxParams[name] = new vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam(containers[name], boxInstances[name].style, isHorizontal, scope, clientLayout, evaluatedMinSize);
+                minOuterSizes[name] = p.getOuterSize();
+                needRecalculate = true;
+            }
+        }
+    });
+    if (needRecalculate) {
+        sizes = this.getSizesOfMarginBoxesAlongVariableDimension(boxParams, evaluatedDim.extent);
+        [START, CENTER, END].forEach(function(name) {
+            sizes[name] = minOuterSizes[name] || sizes[name];
+        });
+    }
+
+    // set sizes
+    var endEdge = evaluatedDim.start + evaluatedDim.extent;
+    var startEndSum = evaluatedDim.start + (evaluatedDim.start + evaluatedDim.extent);
+    [START, CENTER, END].forEach(function(name) {
+        var outerSize = sizes[name];
+        if (outerSize) {
+            var container = containers[name];
+            var offset = 0;
+            switch (name) {
+                case START:
+                    offset = isHorizontal ? container.left : container.top;
+                    break;
+                case CENTER:
+                    offset = (startEndSum - outerSize) /2;
+                    break;
+                case END:
+                    offset = endEdge - outerSize;
+                    break;
+            }
+            if (isHorizontal) {
+                container.setHorizontalPosition(offset, outerSize - container.getInsetLeft() - container.getInsetRight());
+            } else {
+                container.setVerticalPosition(offset, outerSize - container.getInsetTop() - container.getInsetBottom());
+            }
+        }
+    });
+};
+
+/**
+ * @private
+ * @param {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam>} boxParams
+ * @param {number} availableSize
+ * @returns {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, number>}
+ */
+vivliostyle.page.PageRuleMasterInstance.prototype.getSizesOfMarginBoxesAlongVariableDimension = function(boxParams, availableSize) {
+    var startBoxParam = boxParams[vivliostyle.page.MarginBoxPositionAlongVariableDimension.START];
+    var centerBoxParam = boxParams[vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER];
+    var endBoxParam = boxParams[vivliostyle.page.MarginBoxPositionAlongVariableDimension.END];
+    /** @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, number>} */ var sizes = {};
+    if (!centerBoxParam) {
+        var startEndSizes = this.distributeAutoMarginBoxSizes(startBoxParam, endBoxParam, availableSize);
+        if (startEndSizes.xSize) {
+            sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.START] = startEndSizes.xSize;
+        }
+        if (startEndSizes.ySize) {
+            sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.END] = startEndSizes.ySize;
+        }
+    } else {
+        var startEndBoxParam = new vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam([startBoxParam, endBoxParam]);
+        var centerSizes = this.distributeAutoMarginBoxSizes(centerBoxParam, startEndBoxParam, availableSize);
+        if (centerSizes.xSize) {
+            sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER] = centerSizes.xSize;
+        }
+        var centerSize = centerSizes.xSize || centerBoxParam.getOuterSize();
+        var startEndAutoSize = (availableSize - centerSize) / 2;
+        if (startBoxParam.hasAutoSize()) {
+            sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.START] = startEndAutoSize;
+        }
+        if (endBoxParam.hasAutoSize()) {
+            sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.END] = startEndAutoSize;
+        }
+    }
+    return sizes;
+};
+
+/**
+ * Distribute auto margin sizes among two margin boxes using an algorithm specified in CSS Paged Media spec.
+ * @private
+ * @param {vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam} x Parameter for the first margin box. null if the box is not generated.
+ * @param {vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam} y Parameter for the second margin box. null if the box is not generated.
+ * @param {number} availableSize Available size for the margin boxes.
+ * @returns {!{xSize: number?, ySize: number?}} Determined sizes for the two boxes. Each value is present only when the size of the corresponding box is 'auto'.
+ */
+vivliostyle.page.PageRuleMasterInstance.prototype.distributeAutoMarginBoxSizes = function(x, y, availableSize) {
+    /** @type {!{xSize: number?, ySize: number?}} */ var result = {xSize: null, ySize: null};
+    if (x && y) {
+        if (x.hasAutoSize() && y.hasAutoSize()) {
+            var xOuterMaxContentSize = x.getOuterMaxContentSize();
+            var yOuterMaxContentSize = y.getOuterMaxContentSize();
+            if (xOuterMaxContentSize > 0 && yOuterMaxContentSize > 0) {
+                var maxContentSizeSum = xOuterMaxContentSize + yOuterMaxContentSize;
+                if (maxContentSizeSum < availableSize) {
+                    result.xSize = availableSize * xOuterMaxContentSize / maxContentSizeSum;
+                } else {
+                    var xOuterMinContentSize = x.getOuterMinContentSize();
+                    var yOuterMinContentSize = y.getOuterMinContentSize();
+                    var minContentSizeSum = xOuterMinContentSize + yOuterMinContentSize;
+                    if (minContentSizeSum < availableSize) {
+                        result.xSize = xOuterMinContentSize + (availableSize - minContentSizeSum) * (xOuterMaxContentSize - xOuterMinContentSize) / (maxContentSizeSum - minContentSizeSum);
+                    } else if (minContentSizeSum > 0) {
+                        result.xSize = availableSize * xOuterMinContentSize / minContentSizeSum;
+                    }
+                }
+                if (result.xSize > 0) {
+                    result.ySize = availableSize - result.xSize;
+                }
+            } else if (xOuterMaxContentSize > 0) {
+                result.xSize = availableSize;
+            } else if (yOuterMaxContentSize > 0) {
+                result.ySize = availableSize;
+            }
+        } else if (x.hasAutoSize()) {
+            result.xSize = Math.max(availableSize - y.getOuterSize(), 0);
+        } else if (y.hasAutoSize()) {
+            result.ySize = Math.max(availableSize - x.getOuterSize(), 0);
+        }
+    } else if (x) {
+        if (x.hasAutoSize()) {
+            result.xSize = availableSize;
+        }
+    } else if (y) {
+        if (y.hasAutoSize()) {
+            result.ySize = availableSize;
+        }
+    }
+    return result;
 };
 
 /**
@@ -321,6 +1041,16 @@ vivliostyle.page.PageRulePartitionInstance.prototype.applyCascadeAndInit = funct
     }
 
     adapt.pm.PartitionInstance.prototype.applyCascadeAndInit.call(this, cascade, docElementStyle);
+
+    var pageRuleMasterInstance = /** @type {vivliostyle.page.PageRuleMasterInstance} */ (this.parentInstance);
+    pageRuleMasterInstance.setPageAreaDimension({
+        borderBoxWidth: this.borderBoxWidth,
+        borderBoxHeight: this.borderBoxHeight,
+        marginTop: this.marginTop,
+        marginRight: this.marginRight,
+        marginBottom: this.marginBottom,
+        marginLeft: this.marginLeft
+    });
 };
 
 /**
@@ -418,6 +1148,263 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
         marginStart: marginStart,
         marginEnd: marginEnd
     };
+};
+
+/**
+ * @param {!adapt.pm.PageBoxInstance} parentInstance
+ * @param {!vivliostyle.page.PageMarginBoxPartition} pageMarginBoxPartition
+ * @constructor
+ * @extends {adapt.pm.PartitionInstance}
+ */
+vivliostyle.page.PageMarginBoxPartitionInstance = function(parentInstance, pageMarginBoxPartition) {
+    adapt.pm.PartitionInstance.call(this, parentInstance, pageMarginBoxPartition);
+    var name = pageMarginBoxPartition.marginBoxName;
+    /** @type {vivliostyle.page.PageMarginBoxInformation} */ this.boxInfo =
+        vivliostyle.page.pageMarginBoxes[name];
+    var pageRuleMasterInstance = /** @type {vivliostyle.page.PageRuleMasterInstance} */ (parentInstance);
+    pageRuleMasterInstance.pageMarginBoxInstances[name] = this;
+    this.suppressEmptyBoxGeneration = true;
+};
+goog.inherits(vivliostyle.page.PageMarginBoxPartitionInstance, adapt.pm.PartitionInstance);
+
+/**
+ * @override
+ */
+vivliostyle.page.PageMarginBoxPartitionInstance.prototype.prepareContainer = function(context, container, page) {
+    this.applyVerticalAlign(context, container.element);
+    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page);
+};
+
+/**
+ * @private
+ * @param {adapt.expr.Context} context
+ * @param {Element} element
+ */
+vivliostyle.page.PageMarginBoxPartitionInstance.prototype.applyVerticalAlign = function(context, element) {
+    adapt.base.setCSSProperty(element, "display", "flex");
+    /** @type {adapt.css.Val} */ var verticalAlign = this.getProp(context, "vertical-align");
+    /** @type {string?} */ var flexAlign = null;
+    if (verticalAlign === adapt.css.getName("middle")) {
+        flexAlign = "center";
+    } else if (verticalAlign === adapt.css.getName("top")) {
+        flexAlign = "flex-start";
+    } else if (verticalAlign === adapt.css.getName("bottom")) {
+        flexAlign = "flex-end";
+    }
+    if (flexAlign) {
+        adapt.base.setCSSProperty(element, "flex-flow", this.vertical ? "row" : "column");
+        adapt.base.setCSSProperty(element, "justify-content", flexAlign);
+    }
+};
+
+/**
+ * Calculate page-margin boxes positions along the variable dimension of the page.
+ * For CENTER and END margin boxes, the position is calculated only if the dimension (width or height) is non-auto, so that it can be resolved at this point. If the dimension is auto, the calculation is deffered.
+ * @private
+ * @param {!{start: string, end: string, extent: string}} names
+ * @param {?vivliostyle.page.PageAreaDimension} dim
+ */
+vivliostyle.page.PageMarginBoxPartitionInstance.prototype.positionAlongVariableDimension = function(names, dim) {
+    var style = this.style;
+    var scope = this.pageBox.scope;
+    var startSide = names.start;
+    var endSide = names.end;
+    var extentName = names.extent;
+    var isHorizontal = startSide === "left";
+    var availableExtent = isHorizontal ? dim.borderBoxWidth : dim.borderBoxHeight;
+    var extent = adapt.pm.toExprAuto(scope, style[extentName], availableExtent);
+    var startOffset = isHorizontal ? dim.marginLeft : dim.marginTop;
+    if (this.boxInfo.positionAlongVariableDimension === vivliostyle.page.MarginBoxPositionAlongVariableDimension.START) {
+        style[startSide] = new adapt.css.Expr(startOffset);
+    } else if (extent) {
+        var marginStart = adapt.pm.toExprZero(scope, style["margin-" + startSide], availableExtent);
+        var marginEnd = adapt.pm.toExprZero(scope, style["margin-" + endSide], availableExtent);
+        var paddingStart = adapt.pm.toExprZero(scope, style["padding-" + startSide], availableExtent);
+        var paddingEnd = adapt.pm.toExprZero(scope, style["padding-" + endSide], availableExtent);
+        var borderStartWidth = adapt.pm.toExprZeroBorder(scope, style["border-" + startSide + "-width"], style["border-" + startSide + "-style"], availableExtent);
+        var borderEndWidth = adapt.pm.toExprZeroBorder(scope, style["border-" + endSide + "-width"], style["border-" + endSide + "-style"], availableExtent);
+        var outerExtent = adapt.expr.add(scope, extent,
+            adapt.expr.add(scope,
+                adapt.expr.add(scope, paddingStart, paddingEnd),
+                adapt.expr.add(scope,
+                    adapt.expr.add(scope, borderStartWidth, borderEndWidth),
+                    adapt.expr.add(scope, marginStart, marginEnd)
+                )
+            )
+        );
+        switch (this.boxInfo.positionAlongVariableDimension) {
+            case vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER:
+                style[startSide] = new adapt.css.Expr(
+                    adapt.expr.add(scope,
+                        startOffset,
+                        adapt.expr.div(scope,
+                            adapt.expr.sub(scope, availableExtent, outerExtent),
+                            new adapt.expr.Const(scope, 2)
+                        )
+                    )
+                );
+                break;
+            case vivliostyle.page.MarginBoxPositionAlongVariableDimension.END:
+                style[startSide] = new adapt.css.Expr(
+                    adapt.expr.sub(scope,
+                        adapt.expr.add(scope, startOffset, availableExtent),
+                        outerExtent
+                    )
+                );
+                break;
+        }
+    }
+};
+
+/**
+ * Calculate page-margin boxes positions along the fixed dimension of the page.
+ * @private
+ * @param {!{inside: string, outside: string, extent: string}} names
+ * @param {?vivliostyle.page.PageAreaDimension} dim
+ */
+vivliostyle.page.PageMarginBoxPartitionInstance.prototype.positionAndSizeAlongFixedDimension =
+    function(names, dim) {
+        var style = this.style;
+        var scope = this.pageBox.scope;
+        var insideName = names.inside;
+        var outsideName = names.outside;
+        var extentName = names.extent;
+        var pageMargin = dim["margin" + outsideName.charAt(0).toUpperCase() + outsideName.substring(1)];
+        var marginInside = adapt.pm.toExprZeroAuto(scope, style["margin-" + insideName], pageMargin);
+        var marginOutside = adapt.pm.toExprZeroAuto(scope, style["margin-" + outsideName], pageMargin);
+        var paddingInside = adapt.pm.toExprZero(scope, style["padding-" + insideName], pageMargin);
+        var paddingOutside = adapt.pm.toExprZero(scope, style["padding-" + outsideName], pageMargin);
+        var borderInsideWidth = adapt.pm.toExprZeroBorder(scope, style["border-" + insideName + "-width"], style["border-" + insideName + "-style"], pageMargin);
+        var borderOutsideWidth = adapt.pm.toExprZeroBorder(scope, style["border-" + outsideName + "-width"], style["border-" + outsideName + "-style"], pageMargin);
+        var extent = adapt.pm.toExprAuto(scope, style[extentName], pageMargin);
+        var result = null;
+        /**
+         * @param {adapt.expr.Context} context
+         * @returns {{extent: (adapt.expr.Result|null), marginInside: (adapt.expr.Result|null), marginOutside: (adapt.expr.Result|null)}}
+         */
+        function getComputedValues(context) {
+            if (result) {
+                return result;
+            }
+            result = {
+                extent: extent ? extent.evaluate(context) : null,
+                marginInside: marginInside ? marginInside.evaluate(context) : null,
+                marginOutside: marginOutside ? marginOutside.evaluate(context) : null
+            };
+            var pageMarginValue = pageMargin.evaluate(context);
+            var borderAndPadding = 0;
+            [borderInsideWidth, paddingInside, paddingOutside, borderOutsideWidth].forEach(function(x) {
+                if (x) {
+                    borderAndPadding += x.evaluate(context);
+                }
+            });
+            if (result.marginInside === null || result.marginOutside === null) {
+                var total = borderAndPadding + result.extent + result.marginInside + result.marginOutside;
+                if (total > pageMarginValue) {
+                    if (result.marginInside === null) {
+                        result.marginInside = 0;
+                    }
+                    if (result.marginOutside === null) {
+                        result.marginoutside = 0;
+                    }
+                }
+            }
+            if (result.extent !== null && result.marginInside !== null && result.marginOutside !== null) {
+                // over-constrained
+                result.marginOutside = null;
+            }
+            if (result.extent === null && result.marginInside !== null && result.marginOutside !== null) {
+                result.extent = pageMarginValue - borderAndPadding - result.marginInside - result.marginOutside;
+            } else if (result.extent !== null && result.marginInside === null && result.marginOutside !== null) {
+                result.marginInside = pageMarginValue - borderAndPadding - result.extent - result.marginOutside;
+            } else if (result.extent !== null && result.marginInside !== null && result.marginOutside === null) {
+                result.marginOutside = pageMarginValue - borderAndPadding - result.extent - result.marginInside;
+            } else if (result.extent === null) {
+                result.marginInside = result.marginOutside = 0;
+                result.extent = pageMarginValue - borderAndPadding;
+            } else {
+                result.marginInside = result.marginOutside = (pageMarginValue - borderAndPadding - result.extent) / 2;
+            }
+            return result;
+        }
+
+        style[extentName] = new adapt.css.Expr(new adapt.expr.Native(scope, function() {
+            var value = getComputedValues(this).extent;
+            return value === null ? 0 : value;
+        }, extentName));
+        style["margin-" + insideName] = new adapt.css.Expr(new adapt.expr.Native(scope, function() {
+            var value = getComputedValues(this).marginInside;
+            return value === null ? 0 : value;
+        }, "margin-" + insideName));
+        style["margin-" + outsideName] = new adapt.css.Expr(new adapt.expr.Native(scope, function() {
+            var value = getComputedValues(this).marginOutside;
+            return value === null ? 0 : value;
+        }, "margin-" + outsideName));
+
+        if (insideName === "left") {
+            style["left"] = new adapt.css.Expr(adapt.expr.add(scope, dim.marginLeft, dim.borderBoxWidth));
+        } else if (insideName === "top") {
+            style["top"] = new adapt.css.Expr(adapt.expr.add(scope, dim.marginTop, dim.borderBoxHeight));
+        }
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageMarginBoxPartitionInstance.prototype.initHorizontal = function() {
+    var pageRuleMasterInstance = /** @type {!vivliostyle.page.PageRuleMasterInstance} */ (this.parentInstance);
+    var dim = pageRuleMasterInstance.pageAreaDimension;
+    if (this.boxInfo.isInLeftColumn) {
+        this.positionAndSizeAlongFixedDimension({inside: "right", outside: "left", extent: "width"}, dim);
+    } else if (this.boxInfo.isInRightColumn) {
+        this.positionAndSizeAlongFixedDimension({inside: "left", outside: "right", extent: "width"}, dim);
+    } else {
+        this.positionAlongVariableDimension({start: "left", end: "right", extent: "width"}, dim);
+    }
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageMarginBoxPartitionInstance.prototype.initVertical = function() {
+    var pageRuleMasterInstance = /** @type {!vivliostyle.page.PageRuleMasterInstance} */ (this.parentInstance);
+    var dim = pageRuleMasterInstance.pageAreaDimension;
+    if (this.boxInfo.isInTopRow) {
+        this.positionAndSizeAlongFixedDimension({inside: "bottom", outside: "top", extent: "height"}, dim);
+    } else if (this.boxInfo.isInBottomRow) {
+        this.positionAndSizeAlongFixedDimension({inside: "top", outside: "bottom", extent: "height"}, dim);
+    } else {
+        this.positionAlongVariableDimension({start: "top", end: "bottom", extent: "height"}, dim);
+    }
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageMarginBoxPartitionInstance.prototype.finishContainer = function(
+    context, container, page, column, columnCount, clientLayout) {
+    adapt.pm.PartitionInstance.prototype.finishContainer.call(this,
+        context, container, page, column, columnCount, clientLayout);
+
+    // finishContainer is called only when the margin box is generated.
+    // In this case, store the generated container for the margin box in the page object.
+    // (except when it is a corner margin box, because size of a corner margin box does not need to be adjusted after the layout)
+    var marginBoxes = page.marginBoxes;
+    var name = this.pageBox.marginBoxName;
+    var boxInfo = this.boxInfo;
+    if (!boxInfo.isInLeftColumn && !boxInfo.isInRightColumn) {
+        if (boxInfo.isInTopRow) {
+            marginBoxes.top[name] = container;
+        } else if (boxInfo.isInBottomRow) {
+            marginBoxes.bottom[name] = container;
+        }
+    } else if (!boxInfo.isInTopRow && !boxInfo.isInBottomRow) {
+        if (boxInfo.isInLeftColumn) {
+            marginBoxes.left[name] = container;
+        } else if (boxInfo.isInRightColumn) {
+            marginBoxes.right[name] = container;
+        }
+    }
 };
 
 /**
@@ -540,7 +1527,6 @@ vivliostyle.page.PageManager.prototype.generatePageRuleMaster = function(style) 
     var pageMasterInstance = pageMaster.createInstance(this.rootPageBoxInstance);
     // Do the same initialization as in adapt.ops.StyleInstance.prototype.init
     pageMasterInstance.applyCascadeAndInit(this.cascadeInstance, this.docElementStyle);
-    pageMasterInstance.adjustContainingBlock(this.context);
     pageMasterInstance.resolveAutoSizing(this.context);
     return pageMasterInstance;
 };
@@ -752,6 +1738,57 @@ vivliostyle.page.IsVersoPageAction.prototype.getPriority = function() {
 };
 
 /**
+ * Action applying an at-page rule
+ * @param {adapt.csscasc.ElementStyle} style
+ * @param {number} specificity
+ * @constructor
+ * @extends {adapt.csscasc.ApplyRuleAction}
+ */
+vivliostyle.page.ApplyPageRuleAction = function(style, specificity) {
+    adapt.csscasc.ApplyRuleAction.call(this, style, specificity, null, null);
+};
+goog.inherits(vivliostyle.page.ApplyPageRuleAction, adapt.csscasc.ApplyRuleAction);
+
+/**
+ * @override
+ */
+vivliostyle.page.ApplyPageRuleAction.prototype.apply = function(cascadeInstance) {
+    vivliostyle.page.mergeInPageRule(cascadeInstance.context, cascadeInstance.currentStyle,
+        this.style, this.specificity, cascadeInstance);
+};
+
+/**
+ * Merge page styles, including styles specified on page-margin boxes, considering specificity.
+ * Intended to be used in place of adapt.csscasc.mergeIn, which is for element styles.
+ * @param {adapt.expr.Context} context
+ * @param {adapt.csscasc.ElementStyle} target
+ * @param {adapt.csscasc.ElementStyle} style
+ * @param {number} specificity
+ * @param {!adapt.csscasc.CascadeInstance} cascadeInstance
+ */
+vivliostyle.page.mergeInPageRule = function(context, target, style, specificity, cascadeInstance) {
+    adapt.csscasc.mergeIn(context, target, style, specificity, null, null);
+    var marginBoxes = style[vivliostyle.page.marginBoxesKey];
+    if (marginBoxes) {
+        var targetMap = adapt.csscasc.getMutableStyleMap(target, vivliostyle.page.marginBoxesKey);
+        for (var boxName in marginBoxes) {
+            if (marginBoxes.hasOwnProperty(boxName)) {
+                var targetBox = targetMap[boxName];
+                if (!targetBox) {
+                    targetBox = /** @type {adapt.csscasc.ElementStyle} */ ({});
+                    targetMap[boxName] = targetBox;
+                }
+                adapt.csscasc.mergeIn(context, targetBox, marginBoxes[boxName], specificity, null, null);
+                if (targetBox["content"]) {
+                    targetBox["content"] = targetBox["content"].filterValue(
+                        new adapt.csscasc.ContentPropVisitor(cascadeInstance, null));
+                }
+            }
+        }
+    }
+};
+
+/**
  * @param {!adapt.expr.LexicalScope} scope
  * @param {!adapt.cssparse.DispatchParserHandler} owner
  * @param {!adapt.csscasc.CascadeParserHandler} parent
@@ -857,6 +1894,76 @@ vivliostyle.page.PageParserHandler.prototype.insertNonPrimary = function(action)
     // We represent page rules without selectors by *, though it is illegal in CSS
     this.cascade.insertInTable(this.cascade.pagetypes, "*", action);
 };
+
+/**
+ * @override
+ */
+vivliostyle.page.PageParserHandler.prototype.makeApplyRuleAction = function(specificity) {
+    return new vivliostyle.page.ApplyPageRuleAction(this.elementStyle, specificity);
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageParserHandler.prototype.startPageMarginBoxRule = function(name) {
+    var marginBoxMap = adapt.csscasc.getMutableStyleMap(this.elementStyle, vivliostyle.page.marginBoxesKey);
+    var boxStyle = marginBoxMap[name];
+    if (!boxStyle) {
+        boxStyle = /** @type {!adapt.csscasc.ElementStyle} */ ({});
+        marginBoxMap[name] = boxStyle;
+    }
+    var handler = new vivliostyle.page.PageMarginBoxParserHandler(this.scope, this.owner,
+        this.validatorSet, boxStyle);
+    this.owner.pushHandler(handler);
+};
+
+/**
+ * Parser handler for a page-margin box rule.
+ * @param {adapt.expr.LexicalScope} scope
+ * @param {adapt.cssparse.DispatchParserHandler} owner
+ * @param {adapt.cssvalid.ValidatorSet} validatorSet
+ * @param {!adapt.csscasc.ElementStyle} boxStyle
+ * @constructor
+ * @extends {adapt.cssparse.SlaveParserHandler}
+ * @implements {adapt.cssvalid.PropertyReceiver}
+ */
+vivliostyle.page.PageMarginBoxParserHandler = function(scope, owner, validatorSet, boxStyle) {
+    adapt.cssparse.SlaveParserHandler.call(this, scope, owner, false);
+    /** @const */ this.validatorSet = validatorSet;
+    /** @const */ this.boxStyle = boxStyle;
+};
+goog.inherits(vivliostyle.page.PageMarginBoxParserHandler, adapt.cssparse.SlaveParserHandler);
+
+/**
+ * @override
+ */
+vivliostyle.page.PageMarginBoxParserHandler.prototype.property = function(name, value, important) {
+    this.validatorSet.validatePropertyAndHandleShorthand(name, value, important, this);
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageMarginBoxParserHandler.prototype.invalidPropertyValue = function(name, value) {
+    this.report("E_INVALID_PROPERTY_VALUE " + name + ": " + value.toString());
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageMarginBoxParserHandler.prototype.unknownProperty = function(name, value) {
+    this.report("E_INVALID_PROPERTY " + name + ": " + value.toString());
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageMarginBoxParserHandler.prototype.simpleProperty = function(name, value, important) {
+    var specificity = important ? this.getImportantSpecificity() : this.getBaseSpecificity();
+    var cascval = new adapt.csscasc.CascadeValue(value, specificity);
+    adapt.csscasc.setProp(this.boxStyle, name, cascval);
+};
+
 
 /**
  * Object storing page-based counters.
