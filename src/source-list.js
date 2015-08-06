@@ -5,6 +5,7 @@
     "use strict";
 
     var list = [
+        "debug-param.js",
         "closure/goog/base.js",
         "vivliostyle/constants.js",
         "adapt/base.js",
