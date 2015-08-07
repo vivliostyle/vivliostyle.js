@@ -939,17 +939,19 @@ vivliostyle.page.PageRuleMasterInstance.prototype.getSizesOfMarginBoxesAlongVari
             sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.END] = startEndSizes.ySize;
         }
     } else {
-        var startEndBoxParam = new vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam([startBoxParam, endBoxParam]);
+        var params = [startBoxParam, endBoxParam].filter(function(p) { return p; });
+        var startEndBoxParam = params.length ?
+            new vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam(params) : null;
         var centerSizes = this.distributeAutoMarginBoxSizes(centerBoxParam, startEndBoxParam, availableSize);
         if (centerSizes.xSize) {
             sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.CENTER] = centerSizes.xSize;
         }
         var centerSize = centerSizes.xSize || centerBoxParam.getOuterSize();
         var startEndAutoSize = (availableSize - centerSize) / 2;
-        if (startBoxParam.hasAutoSize()) {
+        if (startBoxParam && startBoxParam.hasAutoSize()) {
             sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.START] = startEndAutoSize;
         }
-        if (endBoxParam.hasAutoSize()) {
+        if (endBoxParam && endBoxParam.hasAutoSize()) {
             sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.END] = startEndAutoSize;
         }
     }
