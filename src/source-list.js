@@ -7,6 +7,7 @@
     var list = [
         "debug-param.js",
         "closure/goog/base.js",
+        "vivliostyle/namespace.js",
         "vivliostyle/constants.js",
         "adapt/base.js",
         "adapt/sha1.js",

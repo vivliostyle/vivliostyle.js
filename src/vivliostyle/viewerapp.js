@@ -5,6 +5,7 @@
  */
 goog.provide('vivliostyle.viewerapp');
 
+goog.require("vivliostyle.namespace");
 goog.require('vivliostyle.constants');
 goog.require('adapt.base');
 goog.require('adapt.viewer');
@@ -308,4 +309,4 @@ vivliostyle.viewerapp.main = function(arg) {
     viewer.initEmbed(config);
 };
 
-goog.exportSymbol("vivliostyle.viewerapp.main", vivliostyle.viewerapp.main);
+vivliostyle.namespace.exportSymbol("vivliostyle.viewerapp.main", vivliostyle.viewerapp.main);

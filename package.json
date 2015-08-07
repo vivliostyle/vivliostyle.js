@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "description": "Library for web sites with rich paged viewing and EPUB support, shared with Vivliostyle Formatter & Browser",
   "scripts": {
-    "build": "java -jar node_modules/google-closure-compiler/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --warning_level VERBOSE --js_output_file build/vivliostyle.min.js src/license.js src/closure/goog/base.js src/adapt/*.js src/vivliostyle/*.js",
+    "build": "java -jar node_modules/google-closure-compiler/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --warning_level VERBOSE --output_wrapper_file src/wrapper.js --externs src/externs.js --js_output_file build/vivliostyle.min.js src/closure/goog/base.js src/adapt/*.js src/vivliostyle/*.js",
     "build-css": "cd viewer/res-dev && compass compile -e production",
     "pretest": "npm run build",
     "test": "karma start test/conf/karma-sauce.conf.js",
