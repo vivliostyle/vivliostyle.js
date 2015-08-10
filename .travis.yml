@@ -6,6 +6,7 @@ before_install:
 - sudo pip install virtualenv
 script:
 - npm run build-css
+- npm run build
 - npm test
 - build/wpt-sauce.sh
 after_success:
