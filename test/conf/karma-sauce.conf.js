@@ -24,9 +24,6 @@ module.exports = function(config) {
     };
 
     var options = {
-        files: [
-            "build/vivliostyle.min.js"
-        ].concat(commonConfig.testFiles),
         reporters: ["verbose", "saucelabs"],
         sauceLabs: {
             testName: "Vivliostyle.js",
