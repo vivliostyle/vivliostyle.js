@@ -7,23 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <title>Vivliostyle.js viewer</title>
+<script src="js/viewer.js"></script>
 <script>
-CLOSURE_NO_DEPS = true;
-</script>
-<script src="js/lib/vivliostyle-viewer.min.js"></script>
-<script>
-    function startViewer() {
-        var config = {
-            uaRoot: "resources/",
-            viewportElement: document.getElementById("vivliostyle-viewer-viewport")
-        };
-        vivliostyle.viewerapp.main(config);
-    }
-
-    if(window["__loaded"])
-        startViewer();
-    else
-        window.onload = startViewer;
 </script>
 <!--- install MathJax -->
 <script src="../src/MathJax/MathJax.js?config=MML_HTMLorMML"></script>
