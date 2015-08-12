@@ -3,9 +3,8 @@
   "version": "0.1.1",
   "description": "Paged viewer using Vivliostyle.js as its layout engine",
   "scripts": {
-    "postinstall": "npm run build-vivliostyle && npm run copy-vivliostyle",
+    "postinstall": "npm run build-vivliostyle",
     "build-vivliostyle": "cd node_modules/vivliostyle && npm install && npm run build",
-    "copy-vivliostyle": "node scripts/copy-vivliostyle-files.js",
     "setup-debug": "node scripts/setup-debug-vivliostyle.js"
   },
   "repository": {
@@ -29,8 +28,10 @@
     "gulp": "^3.9.0",
     "gulp-changed": "^1.2.1",
     "gulp-compass": "^2.1.0",
+    "gulp-ejs": "^1.1.1",
     "gulp-notify": "^2.2.0",
     "gulp-plumber": "^1.0.1",
+    "gulp-rename": "^1.2.2",
     "gulp-util": "^3.0.6",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.3.1"
