@@ -5,7 +5,8 @@
   "scripts": {
     "postinstall": "npm run build-vivliostyle && npm run copy-vivliostyle",
     "build-vivliostyle": "cd node_modules/vivliostyle && npm install && npm run build",
-    "copy-vivliostyle": "node scripts/copy-vivliostyle-files.js"
+    "copy-vivliostyle": "node scripts/copy-vivliostyle-files.js",
+    "setup-debug": "node scripts/setup-debug-vivliostyle.js"
   },
   "repository": {
     "type": "git",
