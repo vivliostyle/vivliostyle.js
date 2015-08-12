@@ -5,7 +5,11 @@
   "scripts": {
     "postinstall": "npm run build-vivliostyle",
     "build-vivliostyle": "cd node_modules/vivliostyle && npm install && npm run build",
-    "setup-debug": "node scripts/setup-debug-vivliostyle.js"
+    "setup-debug": "node scripts/setup-debug-vivliostyle.js",
+    "build": "gulp build",
+    "build-dev": "gulp build-dev",
+    "serve": "gulp serve",
+    "serve-dev": "gulp serve-dev"
   },
   "repository": {
     "type": "git",
