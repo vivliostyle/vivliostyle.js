@@ -2,10 +2,8 @@ language: node_js
 node_js:
 - stable
 before_install:
-- gem install compass
 - sudo pip install virtualenv
 script:
-- npm run build-css
 - npm run build
 - npm test
 - build/wpt-sauce.sh
