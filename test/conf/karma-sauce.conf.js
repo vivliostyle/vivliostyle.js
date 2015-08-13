@@ -9,7 +9,8 @@ module.exports = function(config) {
         sl_firefox: {
             base: "SauceLabs",
             browserName: "firefox",
-            platform: "Windows 8.1"
+            platform: "Windows 8.1",
+            version: "beta"
         },
         sl_safari: {
             base: "SauceLabs",
