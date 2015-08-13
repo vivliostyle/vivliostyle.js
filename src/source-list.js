@@ -9,6 +9,7 @@
         "closure/goog/base.js",
         "vivliostyle/namespace.js",
         "vivliostyle/constants.js",
+        "vivliostyle/util.js",
         "adapt/base.js",
         "adapt/sha1.js",
         "adapt/geom.js",
