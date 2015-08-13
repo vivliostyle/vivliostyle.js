@@ -37,7 +37,8 @@
         "adapt/toc.js",
         "adapt/epub.js",
         "adapt/devel.js",
-        "adapt/viewer.js"
+        "adapt/viewer.js",
+        "vivliostyle/viewer.js"
     ];
 
     if (typeof window === "object" && typeof window.vivliostyleCallback === "function") {

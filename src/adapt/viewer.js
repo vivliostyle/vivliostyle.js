@@ -46,6 +46,7 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
     /** @const */ this.fontMapper = new adapt.font.Mapper(document.head, viewportElement);
     this.init();
     /** @type {function():void} */ this.kick = function(){};
+    /** @type {function((adapt.base.JSON|string)):void} */ this.sendCommand = function(){};
     /** @const */ this.resizeListener = function() {
     	self.needResize = true;
     	self.kick();
@@ -92,7 +93,6 @@ adapt.viewer.Viewer.prototype.init = function() {
  */
 adapt.viewer.Viewer.prototype.callback = function(message) {
 	message["i"] = this.instanceId;
-    message["viewer"] = this;
 	this.callbackFn(message);
 };
 
@@ -265,9 +265,11 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
     }
     if (typeof command["spreadView"] == "boolean") {
         this.pref.spreadView = command["spreadView"];
+        this.needResize = true;
     }
     if (typeof command["pageBorder"] == "number") {
         this.pref.pageBorder = command["pageBorder"];
+        this.needResize = true;
     }
 	return adapt.task.newResult(true);
 };
@@ -292,7 +294,7 @@ adapt.viewer.Viewer.prototype.hidePages = function() {
             adapt.base.setCSSProperty(page.container, "display", "none");
             page.removeEventListener("hyperlink", this.hyperlinkListener, false);
         }
-    });
+    }, this);
 };
 
 /**
@@ -657,39 +659,15 @@ adapt.viewer.Viewer.prototype.initEmbed = function (cmd) {
 			cont.schedule();
 		}
 	};
-	
-	this.window["adapt_command"] = function(cmd) {
-		if (command) {
-			return false;
-		}
-		command = adapt.viewer.maybeParse(cmd);
-		viewer.kick();
-		return true;
-	};	
+
+    viewer.sendCommand = function(cmd) {
+        if (command) {
+            return false;
+        }
+        command = adapt.viewer.maybeParse(cmd);
+        viewer.kick();
+        return true;
+    };
+
+    this.window["adapt_command"] = viewer.sendCommand;
 };
-
-if (window["adapt_embedded"]) {
-	/**
-	 * @param {string} msgurl
-	 * @param {adapt.base.JSON} command
-	 * @return {void}
-	 */
-	window["adapt_initEmbed"] = function(msgurl, instanceId, command) {
-		/**
-		 * @param {adapt.base.JSON} msg
-		 */
-		var postMessage = function(msg) {
-			var msgstr = adapt.base.jsonToString(msg);
-			var fetcher = new adapt.taskutil.Fetcher(function() {
-			    return adapt.net.ajax(msgurl, false, "POST", msgstr);
-			});
-			fetcher.start();	
-		};		
-		var viewer = new adapt.viewer.Viewer(window, /** @type {!HTMLElement} */ (document.body), instanceId, postMessage);
-		viewer.initEmbed(command);
-		delete window["adapt_initEmbed"];
-	};
-}
-
-goog.exportSymbol("adapt.viewer.Viewer", adapt.viewer.Viewer);
-goog.exportSymbol("adapt.viewer.Viewer.prototype.initEmbed", adapt.viewer.Viewer.prototype.initEmbed);
