@@ -4,6 +4,7 @@ module.exports = function(config) {
     });
     var testFiles = [
         "test/util/dom.js",
+        "test/util/matchers.js",
         "test/spec/**/*.js"
     ];
     return {
