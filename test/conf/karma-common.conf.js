@@ -3,6 +3,7 @@ module.exports = function(config) {
         return "src/" + src;
     });
     var testFiles = [
+        "test/util/dom.js",
         "test/spec/**/*.js"
     ];
     return {
