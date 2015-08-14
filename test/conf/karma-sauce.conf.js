@@ -6,12 +6,11 @@ module.exports = function(config) {
             browserName: "chrome",
             platform: "Windows 8.1"
         },
-        sl_firefox: {
-            base: "SauceLabs",
-            browserName: "firefox",
-            platform: "Windows 8.1",
-            version: "dev"
-        },
+        //sl_firefox: {
+        //    base: "SauceLabs",
+        //    browserName: "firefox",
+        //    platform: "Windows 8.1"
+        //},
         sl_safari: {
             base: "SauceLabs",
             browserName: "safari",
