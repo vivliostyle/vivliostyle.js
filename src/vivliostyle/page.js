@@ -1506,14 +1506,29 @@ vivliostyle.page.PageManager.prototype.getPageRulePageMaster = function(pageMast
  * @return {string}
  */
 vivliostyle.page.PageManager.prototype.makeCacheKey = function(style, pageMaster) {
+    /** @const */ var propsStr = this.makeCascadeValueObjectKey(style);
+    return pageMaster.key + "^" + propsStr;
+};
+
+/**
+ * @private
+ * @param {!adapt.csscasc.ElementStyle} object
+ * @returns {string}
+ */
+vivliostyle.page.PageManager.prototype.makeCascadeValueObjectKey = function(object) {
     /** @const */ var props = /** @type {Array.<string>} */ ([]);
-    for (var prop in style) {
-        if (Object.prototype.hasOwnProperty.call(style, prop)) {
-            var val = style[prop];
-            props.push(prop + val.value + val.priority);
+    for (var prop in object) {
+        if (Object.prototype.hasOwnProperty.call(object, prop)) {
+            var val = object[prop];
+            /** @type {string} */ var str;
+            if (val instanceof adapt.csscasc.CascadeValue) {
+                str = val.value + "";
+            } else {
+                str = this.makeCascadeValueObjectKey(val);
+            }
+            props.push(prop + str + (val.priority || ""));
         }
     }
-    props.push(pageMaster.key);
     return props.sort().join("^");
 };
 
