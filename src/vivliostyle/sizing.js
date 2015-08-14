@@ -102,8 +102,19 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
 
     /** @returns {string} */
     function getFitContentInline() {
-        adapt.base.setCSSProperty(element, "display", "inline-block");
-        return getComputedValue(inlineSizeName);
+        var fillAvailableInline = getFillAvailableInline();
+        var minContentInline = getMinContentInline();
+        var parsedFillAvailable = parseFloat(fillAvailableInline);
+        if (parsedFillAvailable <= parseFloat(minContentInline)) {
+            return minContentInline;
+        } else {
+            var maxContentInline = getMaxContentInline();
+            if (parsedFillAvailable <= parseFloat(maxContentInline)) {
+                return fillAvailableInline;
+            } else {
+                return maxContentInline;
+            }
+        }
     }
 
     /** @returns {string} */
