@@ -21,7 +21,7 @@ To run the viewer, you need to generate CSS files using [Compass](http://compass
 ```sh
 # Ensure Ruby and Node.js is installed in your system
 gem install compass
-npm run install
+npm install
 npm run build-css
 ```
 
@@ -31,25 +31,25 @@ Then you need a web server that can serve the following resources:
 - `viewer` directory (contains viewer resources like HTML/CSS/web fonts)
 - Content files you want to view in the viewer (see below)
 
-The viewer can display XHTML files, as well as unpackaged EPUB and FB2 publications.
+The viewer can display HTML files, as well as unpackaged EPUB and FB2 publications.
 Note that the viewer may not be able to display contents on servers different
 from one hosting the viewer files due to security restriction on cross-origin resources.
 
 To display the content, a URL should be constructed in the following way:
-start by creating a URL that references vivliostyle-viewer.xhtml.
-Then append '#' and one of the following parameters (x for XHTML/FB2, b for EPUB's OPF file).
+start by creating a URL that references vivliostyle-viewer.html.
+Then append '#' and one of the following parameters (x for HTML/FB2, b for EPUB's OPF file).
 
-- x=[path-to-xhtml-or-fb2-content]
+- x=[path-to-html-or-fb2-content]
 - b=[path-to-opf-file]
 
 Path could either be absolute in the server context (starting with /)
-or relative to vivliostyle-viewer.xhtml file.
+or relative to vivliostyle-viewer.html file.
 
 ### MathML support
 
 Vivliostyle viewer can utilize MathJax to render MathML content in modern browsers.
 To use MathJax, ensure that the path to MathJax script is correct in
-vivliostyle-viewer.xhtml.
+vivliostyle-viewer.html.
 
 ### Compiling JavaScript using Google Closure compiler
 
@@ -64,8 +64,8 @@ npm install
 npm run build
 ```
 
-Then the compiled JavaScript file appears at `build/vivliostyle-viewer.min.js`.
-Modify vivliostyle-viewer.xhtml to reference only vivliostyle-viewer.min.js
+Then the compiled JavaScript file appears at `build/vivliostyle.min.js`.
+Modify vivliostyle-viewer.html to reference only vivliostyle-viewer.min.js
 (goog/base.js is not needed, but MathJax-related files can be kept if desired).
-You might need to modify `uaRoot` parameter in vivliostyle-viewer.xhtml to
+You might need to modify `uaRoot` parameter in vivliostyle-viewer.html to
 point the location of user agent resources (user-agent-* and validation.txt files).
