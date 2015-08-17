@@ -26,8 +26,8 @@ var DIRS = {
     resources: {src: "../node_modules/vivliostyle/resources", dest: "resources"}
 };
 var JS_ENTRIES = {
-    production: "viewer.js",
-    development: "viewer-dev.js"
+    production: "main.js",
+    development: "main-dev.js"
 };
 var VIVLIOSTYLE_JS_SRC_DIR = "node_modules/vivliostyle/src";
 var HTML_FILENAMES = {
