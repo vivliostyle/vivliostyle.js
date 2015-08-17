@@ -22,7 +22,7 @@ To run the viewer, you need to generate CSS files using [Compass](http://compass
 # Ensure Ruby and Node.js is installed in your system
 gem install compass
 npm install
-npm run build-css
+npm run build-css  <- this command not find.
 ```
 
 Then you need a web server that can serve the following resources:
