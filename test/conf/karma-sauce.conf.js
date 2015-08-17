@@ -6,11 +6,11 @@ module.exports = function(config) {
             browserName: "chrome",
             platform: "Windows 8.1"
         },
-        sl_firefox: {
-            base: "SauceLabs",
-            browserName: "firefox",
-            platform: "Windows 8.1"
-        },
+        //sl_firefox: {
+        //    base: "SauceLabs",
+        //    browserName: "firefox",
+        //    platform: "Windows 8.1"
+        //},
         sl_safari: {
             base: "SauceLabs",
             browserName: "safari",
@@ -26,6 +26,7 @@ module.exports = function(config) {
     var options = {
         reporters: ["verbose", "saucelabs"],
         sauceLabs: {
+            build: process.env.TRAVIS_BUILD_NUMBER,
             testName: "Vivliostyle.js",
             recordScreenshots: false,
             startConnect: false, // Sauce Connect is started by Travis CI

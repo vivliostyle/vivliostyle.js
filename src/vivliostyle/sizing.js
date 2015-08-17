@@ -64,9 +64,10 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
         return clientLayout.getElementComputedStyle(element).getPropertyValue(name);
     }
 
-    var writingMode = getComputedValue(
-        adapt.base.propNameMap["writing-mode"] || "writing-mode");
-    var isVertical = writingMode === "vertical-rl" || writingMode === "vertical-lr";
+    var writingMode = getComputedValue(adapt.base.propNameMap["writing-mode"]) ||
+            getComputedValue("writing-mode");
+    var isVertical = writingMode === "vertical-rl" || writingMode === "tb-rl" ||
+                     writingMode === "vertical-lr" || writingMode === "tb-lr";
     var inlineSizeName = isVertical ? "height" : "width";
     var blockSizeName = isVertical ? "width" : "height";
 
@@ -101,8 +102,19 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
 
     /** @returns {string} */
     function getFitContentInline() {
-        adapt.base.setCSSProperty(element, "display", "inline-block");
-        return getComputedValue(inlineSizeName);
+        var fillAvailableInline = getFillAvailableInline();
+        var minContentInline = getMinContentInline();
+        var parsedFillAvailable = parseFloat(fillAvailableInline);
+        if (parsedFillAvailable <= parseFloat(minContentInline)) {
+            return minContentInline;
+        } else {
+            var maxContentInline = getMaxContentInline();
+            if (parsedFillAvailable <= parseFloat(maxContentInline)) {
+                return fillAvailableInline;
+            } else {
+                return maxContentInline;
+            }
+        }
     }
 
     /** @returns {string} */
