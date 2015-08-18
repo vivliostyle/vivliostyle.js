@@ -45,6 +45,7 @@
     "karma-jasmine": "^0.3.6",
     "karma-sauce-launcher": "^0.2.14",
     "karma-verbose-reporter": "0.0.3",
+    "knockout": "^3.3.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.3.1"
   }
