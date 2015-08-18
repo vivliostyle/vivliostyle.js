@@ -8,6 +8,7 @@ var compass = require("gulp-compass");
 var ejs = require("gulp-ejs");
 var gulp = require("gulp");
 var gutil = require("gulp-util");
+var KarmaServer = require("karma").Server;
 var notify = require("gulp-notify");
 var path = require("path");
 var plumber = require("gulp-plumber");
@@ -198,3 +199,21 @@ gulp.task("serve-dev", ["watch-dev"], function() {
 });
 
 gulp.task("default", ["serve-dev"]);
+
+// test
+gulp.task("test-local", function(done) {
+    var server = new KarmaServer({
+        configFile: process.cwd() + "/test/conf/karma-local.conf"
+    }, function(exitStatus) {
+        done(exitStatus ? "Some tests failed" : undefined);
+    });
+    server.start();
+});
+gulp.task("test-sauce", function(done) {
+    var server = new KarmaServer({
+        configFile: process.cwd() + "/test/conf/karma-sauce.conf"
+    }, function(exitStatus) {
+        done(exitStatus ? "Some tests failed" : undefined);
+    });
+    server.start();
+});
