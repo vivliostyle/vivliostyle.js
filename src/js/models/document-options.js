@@ -13,6 +13,12 @@ function DocumentOptions() {
     var urlOptions = getDocumentOptionsFromURL();
     this.url = ko.observable(urlOptions.url || "");
     this.fragment = ko.observable(urlOptions.fragment || "");
+
+    // write fragment back to URL when updated
+    this.fragment.subscribe(function(fragment) {
+        var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
+        urlParameters.setParameter("f", encoded);
+    });
 }
 
 DocumentOptions.prototype.toObject = function() {
