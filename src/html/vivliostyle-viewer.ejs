@@ -26,9 +26,9 @@ MathJax.Hub.Config({
 <link rel="stylesheet" href="css/ui.arrows.css"/>
 <style id="vivliostyle-page-rules"></style>
 </head>
-<body data-vivliostyle-viewer-status="loading" style="position:absolute;left:0px;top:0px;margin:0px;padding:0px">
-<div id="vivliostyle-viewer-viewport"></div>
-<span id="vivliostyle-page-navigation-left" title="navigate to left"></span>
-<span id="vivliostyle-page-navigation-right" title="navigate to right"></span>
+<body data-vivliostyle-viewer-status="loading" data-bind="attr: {'data-vivliostyle-viewer-status': viewer.state.status}" style="position:absolute;left:0px;top:0px;margin:0px;padding:0px">
+<div id="vivliostyle-viewer-viewport" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, event: {keypress: viewer.onKeydown}"></div>
+<span id="vivliostyle-page-navigation-left" title="navigate to left" data-bind="click: viewer.navigateToLeft"></span>
+<span id="vivliostyle-page-navigation-right" title="navigate to right" data-bind="click: viewer.navigateToRight"></span>
 </body>
 </html>

@@ -1,13 +1,11 @@
+"use strict";
+import ko from "knockout";
+import ViewerApp from "./viewmodels/viewer-app";
+
 export default {
     start: function(vivliostyle) {
-        "use strict";
         function startViewer() {
-            var viewerSettings = {
-                userAgentRootURL: "resources/",
-                viewportElement: document.getElementById("vivliostyle-viewer-viewport")
-            };
-            var viewer = new vivliostyle.viewer.Viewer(viewerSettings);
-            viewer.loadDocument("/test/test.html");
+            ko.applyBindings(new ViewerApp(vivliostyle));
         }
 
         if(window["__loaded"])
