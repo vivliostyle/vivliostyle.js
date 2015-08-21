@@ -300,6 +300,39 @@ adapt.xmldoc.XMLDocHolder.prototype.getElement = function(url) {
 adapt.xmldoc.XMLDocStore;
 
 /**
+ * Parse a string with a DOMParser and returns the document.
+ * If a parse error occurs, return null.
+ * @param {string} str
+ * @param {string} type
+ * @param {DOMParser=} opt_parser
+ * @returns {Document}
+ */
+adapt.xmldoc.parseAndReturnNullIfError = function(str, type, opt_parser) {
+	var parser = opt_parser || new DOMParser();
+	var doc;
+	try {
+		doc = parser.parseFromString(str, type);
+	} catch (e) {}
+
+	if (!doc) {
+		return null;
+	} else {
+		var docElement = doc.documentElement;
+		var errorTagName = "parsererror";
+		if (docElement.localName === errorTagName) {
+			return null;
+		} else {
+			for (var c = docElement.firstChild; c; c = c.nextSibling) {
+				if (c.localName === errorTagName) {
+					return null;
+				}
+			}
+		}
+	}
+	return doc;
+};
+
+/**
  * @param {adapt.net.Response} response
  * @param {adapt.xmldoc.XMLDocStore} store
  * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
@@ -309,11 +342,11 @@ adapt.xmldoc.parseXMLResource = function(response, store) {
 	if (!doc) {
 		var parser = new DOMParser();
 		var text = response.responseText || "<not-found/>";
-		// If responseXML is absent, try to parse as text/html
-		doc = parser.parseFromString(text, "text/html");
+		// If responseXML is absent, try to parse as text/xml
+		doc = adapt.xmldoc.parseAndReturnNullIfError(text, "text/xml", parser);
 		if (!doc) {
-			// If HTML parsing fails, try to parse as text/xml
-			doc = parser.parseFromString(text, "text/xml");
+			// If HTML parsing fails, try to parse as text/html
+			doc = adapt.xmldoc.parseAndReturnNullIfError(text, "text/html", parser);
 			if (!doc) {
 				parser.parseFromString("<error/>", "text/xml");
 			}
