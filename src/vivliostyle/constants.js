@@ -31,5 +31,5 @@ goog.scope(function() {
     var PageSide = vivliostyle.constants.PageSide;
     vivliostyle.namespace.exportSymbol("vivliostyle.constants.PageSide", PageSide);
     goog.exportProperty(PageSide, "LEFT", PageSide.LEFT);
-    goog.exportProperty(PageSide, "RIGHT", PageSide.RTL);
+    goog.exportProperty(PageSide, "RIGHT", PageSide.RIGHT);
 });
