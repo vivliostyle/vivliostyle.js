@@ -2,8 +2,6 @@
  * Copyright 2015 Vivliostyle Inc.
  */
 html[data-vivliostyle-paginated] {
-    text-rendering: geometricPrecision;
-
     &, & body, & #vivliostyle-viewer-viewport {
       margin: 0;
       padding: 0;
