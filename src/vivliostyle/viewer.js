@@ -15,12 +15,12 @@ goog.scope(function() {
 
     /**
      * Viewer settings that must be passed to Viewer's constructor.
-     * - userAgentRoot: URL of a directory from which viewer resource files (under resources/ directory in the source repository) are served.
+     * - userAgentRootURL: URL of a directory from which viewer resource files (under resources/ directory in the source repository) are served.
      * - viewportElement: An element used as the viewport of the displayed contents.
      * - window: Window object. If omitted, current `window` is used.
      * @dict
      * @typedef {{
-     *     userAgentRoot: string,
+     *     userAgentRootURL: string,
      *     viewportElement: !HTMLElement,
      *     window: (!Window|undefined)
      * }}
