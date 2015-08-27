@@ -15,6 +15,12 @@ $icon-offset-y: 2px;
 $icon-width: 36px;
 $icon-height: 36px;
 
+@media screen {
+	#vivliostyle-viewer-viewport {
+		margin-top: $icon-height;
+	}
+}
+
 #vivliostyle-menu-bar {
 	@include box-sizing(border-box);
 	position: fixed;

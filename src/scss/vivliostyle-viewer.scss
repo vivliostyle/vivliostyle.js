@@ -2,7 +2,7 @@
  * Copyright 2015 Vivliostyle Inc.
  */
 html[data-vivliostyle-paginated] {
-    &, & body, & #vivliostyle-viewer-viewport {
+    &, & body {
       margin: 0;
       padding: 0;
     }
@@ -44,6 +44,11 @@ html[data-vivliostyle-paginated] {
 @media screen {
     html[data-vivliostyle-paginated] {
         background: #AAAAAA;
+        body {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
     }
     #vivliostyle-viewer-viewport > div > div {
         background: white;
