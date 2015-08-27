@@ -10,8 +10,12 @@ describe("Navigation", function() {
     beforeEach(function() {
         viewer = {
             state: {navigatable: ko.observable(false)},
+            navigateToPrevious: function() {},
+            navigateToNext: function() {},
             navigateToLeft: function() {},
-            navigateToRight: function() {}
+            navigateToRight: function() {},
+            navigateToFirst: function() {},
+            navigateToLast: function() {}
         };
         viewerOptions = new ViewerOptions();
         navigation = new Navigation(viewerOptions, viewer);
@@ -35,23 +39,69 @@ describe("Navigation", function() {
         });
     });
 
+    describe("navigateToPrevious", function() {
+        beforeEach(function() {
+            spyOn(viewer, "navigateToPrevious");
+        });
+
+        it("calls viewer's navigateToPrevious and returns true", function() {
+            setDisabled(false);
+            var ret = navigation.navigateToPrevious();
+
+            expect(viewer.navigateToPrevious).toHaveBeenCalled();
+            expect(ret).toBe(true);
+        });
+
+        it("do nothing and returns false when navigation is disabled", function() {
+            setDisabled(true);
+            var ret = navigation.navigateToPrevious();
+
+            expect(viewer.navigateToPrevious).not.toHaveBeenCalled();
+            expect(ret).toBe(false);
+        });
+    });
+
+    describe("navigateToNext", function() {
+        beforeEach(function() {
+            spyOn(viewer, "navigateToNext");
+        });
+
+        it("calls viewer's navigateToNext and returns true", function() {
+            setDisabled(false);
+            var ret = navigation.navigateToNext();
+
+            expect(viewer.navigateToNext).toHaveBeenCalled();
+            expect(ret).toBe(true);
+        });
+
+        it("do nothing and returns false when navigation is disabled", function() {
+            setDisabled(true);
+            var ret = navigation.navigateToNext();
+
+            expect(viewer.navigateToNext).not.toHaveBeenCalled();
+            expect(ret).toBe(false);
+        });
+    });
+
     describe("navigateToLeft", function() {
         beforeEach(function() {
             spyOn(viewer, "navigateToLeft");
         });
 
-        it("calls viewer's navigateToLeft", function() {
+        it("calls viewer's navigateToLeft and returns true", function() {
             setDisabled(false);
-            navigation.navigateToLeft();
+            var ret = navigation.navigateToLeft();
 
             expect(viewer.navigateToLeft).toHaveBeenCalled();
+            expect(ret).toBe(true);
         });
 
-        it("do nothing when navigation is disabled", function() {
+        it("do nothing and returns false when navigation is disabled", function() {
             setDisabled(true);
-            navigation.navigateToLeft();
+            var ret = navigation.navigateToLeft();
 
             expect(viewer.navigateToLeft).not.toHaveBeenCalled();
+            expect(ret).toBe(false);
         });
     });
 
@@ -60,62 +110,114 @@ describe("Navigation", function() {
             spyOn(viewer, "navigateToRight");
         });
 
-        it("calls viewer's navigateToRight", function() {
+        it("calls viewer's navigateToRight and returns true", function() {
             setDisabled(false);
-            navigation.navigateToRight();
+            var ret = navigation.navigateToRight();
 
             expect(viewer.navigateToRight).toHaveBeenCalled();
+            expect(ret).toBe(true);
         });
 
-        it("do nothing when navigation is disabled", function() {
+        it("do nothing and returns false when navigation is disabled", function() {
             setDisabled(true);
-            navigation.navigateToRight();
+            var ret = navigation.navigateToRight();
 
             expect(viewer.navigateToRight).not.toHaveBeenCalled();
+            expect(ret).toBe(false);
+        });
+    });
+
+    describe("navigateToFirst", function() {
+        beforeEach(function() {
+            spyOn(viewer, "navigateToFirst");
+        });
+
+        it("calls viewer's navigateToFirst and returns true", function() {
+            setDisabled(false);
+            var ret = navigation.navigateToFirst();
+
+            expect(viewer.navigateToFirst).toHaveBeenCalled();
+            expect(ret).toBe(true);
+        });
+
+        it("do nothing and returns false when navigation is disabled", function() {
+            setDisabled(true);
+            var ret = navigation.navigateToFirst();
+
+            expect(viewer.navigateToFirst).not.toHaveBeenCalled();
+            expect(ret).toBe(false);
+        });
+    });
+
+    describe("navigateToLast", function() {
+        beforeEach(function() {
+            spyOn(viewer, "navigateToLast");
+        });
+
+        it("calls viewer's navigateToLast and returns true", function() {
+            setDisabled(false);
+            var ret = navigation.navigateToLast();
+
+            expect(viewer.navigateToLast).toHaveBeenCalled();
+            expect(ret).toBe(true);
+        });
+
+        it("do nothing and returns false when navigation is disabled", function() {
+            setDisabled(true);
+            var ret = navigation.navigateToLast();
+
+            expect(viewer.navigateToLast).not.toHaveBeenCalled();
+            expect(ret).toBe(false);
         });
     });
 
     describe("increaseFontSize", function() {
-        it("increases font size stored in ViewerOptions model", function () {
+        it("increases font size stored in ViewerOptions model and returns true", function () {
             setDisabled(false);
             var fontSize = viewerOptions.fontSize();
-            navigation.increaseFontSize();
+            var ret = navigation.increaseFontSize();
 
             expect(viewerOptions.fontSize()).toBe(fontSize * 1.25);
+            expect(ret).toBe(true);
 
-            navigation.increaseFontSize();
+            ret = navigation.increaseFontSize();
 
             expect(viewerOptions.fontSize()).toBe(fontSize * 1.25 * 1.25);
+            expect(ret).toBe(true);
         });
 
-        it("do nothing when navigation is disabled", function() {
+        it("do nothing and returns false when navigation is disabled", function() {
             setDisabled(true);
             var fontSize = viewerOptions.fontSize();
-            navigation.increaseFontSize();
+            var ret = navigation.increaseFontSize();
 
             expect(viewerOptions.fontSize()).toBe(fontSize);
+            expect(ret).toBe(false);
         });
     });
 
     describe("decreaseFontSize", function() {
-        it("decreases font size stored in ViewerOptions model", function() {
+        it("decreases font size stored in ViewerOptions model and returns true", function() {
             setDisabled(false);
             var fontSize = viewerOptions.fontSize();
-            navigation.decreaseFontSize();
+            var ret = navigation.decreaseFontSize();
 
             expect(viewerOptions.fontSize()).toBe(fontSize * 0.8);
+            expect(ret).toBe(true);
 
             navigation.decreaseFontSize();
 
             expect(viewerOptions.fontSize()).toBe(fontSize * 0.8 * 0.8);
+            expect(ret).toBe(true);
         });
 
-        it("do nothing when navigation is disabled", function() {
+        it("do nothing and returns false when navigation is disabled", function() {
             setDisabled(true);
             var fontSize = viewerOptions.fontSize();
-            navigation.decreaseFontSize();
+            var ret = navigation.decreaseFontSize();
 
             expect(viewerOptions.fontSize()).toBe(fontSize);
+            expect(ret).toBe(false);
         });
     })
 });

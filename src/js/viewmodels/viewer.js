@@ -50,12 +50,28 @@ Viewer.prototype.loadDocument = function(documentOptions) {
     this.viewer_.loadDocument(documentOptions.url(), documentOptions.toObject());
 };
 
+Viewer.prototype.navigateToPrevious = function() {
+    this.viewer_.navigateToPage("previous");
+};
+
+Viewer.prototype.navigateToNext = function() {
+    this.viewer_.navigateToPage("next");
+};
+
 Viewer.prototype.navigateToLeft = function() {
     this.viewer_.navigateToPage("left");
 };
 
 Viewer.prototype.navigateToRight = function() {
     this.viewer_.navigateToPage("right");
+};
+
+Viewer.prototype.navigateToFirst = function() {
+    this.viewer_.navigateToPage("first");
+};
+
+Viewer.prototype.navigateToLast = function() {
+    this.viewer_.navigateToPage("last");
 };
 
 export default Viewer;

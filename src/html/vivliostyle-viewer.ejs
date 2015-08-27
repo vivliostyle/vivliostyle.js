@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="css/ui.menu-bar.css"/>
 <style id="vivliostyle-page-rules"></style>
 </head>
-<body style="position:absolute;left:0px;top:0px;margin:0px;padding:0px;">
+<body style="position:absolute;left:0px;top:0px;margin:0px;padding:0px;" data-bind="event: {keydown: handleKey}">
 <div id="vivliostyle-viewer-viewport" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, event: {keypress: viewer.onKeydown}" style="width:100vw;height:100vh;"></div>
 <span id="vivliostyle-page-navigation-left" title="navigate to left" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToLeftDisabled()}"></span>
 <span id="vivliostyle-page-navigation-right" title="navigate to right" data-bind="click: navigation.navigateToRight, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToRightDisabled()}"></span>

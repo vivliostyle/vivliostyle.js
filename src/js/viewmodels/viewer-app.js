@@ -3,6 +3,7 @@ import ViewerOptions from "../models/viewer-options";
 import Viewer from "./viewer";
 import Navigation from "./navigation";
 import SettingsPanel from "./settings-panel";
+import keyUtil from "../utils/key-util";
 
 function ViewerApp(vivliostyle) {
     this.documentOptions = new DocumentOptions();
@@ -14,6 +15,11 @@ function ViewerApp(vivliostyle) {
     this.viewer = new Viewer(vivliostyle, this.viewerSettings, this.viewerOptions);
     this.navigation = new Navigation(this.viewerOptions, this.viewer);
     this.settingsPanel = new SettingsPanel();
+
+    this.handleKey = function(data, event) {
+        var key = keyUtil.identifyKeyFromEvent(event);
+        return this.navigation.handleKey(key);
+    }.bind(this);
 
     this.viewer.loadDocument(this.documentOptions);
 }
