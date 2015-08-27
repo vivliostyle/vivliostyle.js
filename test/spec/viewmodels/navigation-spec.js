@@ -205,7 +205,7 @@ describe("Navigation", function() {
             expect(viewerOptions.fontSize()).toBe(fontSize * 0.8);
             expect(ret).toBe(true);
 
-            navigation.decreaseFontSize();
+            ret = navigation.decreaseFontSize();
 
             expect(viewerOptions.fontSize()).toBe(fontSize * 0.8 * 0.8);
             expect(ret).toBe(true);
@@ -219,5 +219,33 @@ describe("Navigation", function() {
             expect(viewerOptions.fontSize()).toBe(fontSize);
             expect(ret).toBe(false);
         });
-    })
+    });
+
+    describe("defaultFontSize", function() {
+        it("set font size stored in ViewerOptions model to default and returns true", function() {
+            setDisabled(false);
+            var fontSize = ViewerOptions.getDefaultValues().fontSize;
+            viewerOptions.fontSize(20);
+            var ret = navigation.defaultFontSize();
+
+            expect(viewerOptions.fontSize()).toBe(fontSize);
+            expect(ret).toBe(true);
+
+            viewerOptions.fontSize(20);
+            ret = navigation.defaultFontSize();
+
+            expect(viewerOptions.fontSize()).toBe(fontSize);
+            expect(ret).toBe(true);
+        });
+
+        it("do nothing and returns false when navigation is disabled", function() {
+            setDisabled(true);
+            var fontSize = 20;
+            viewerOptions.fontSize(20);
+            var ret = navigation.defaultFontSize();
+
+            expect(viewerOptions.fontSize()).toBe(fontSize);
+            expect(ret).toBe(false);
+        });
+    });
 });

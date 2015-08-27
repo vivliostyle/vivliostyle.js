@@ -7,10 +7,18 @@ function getViewerOptionsFromURL() {
     };
 }
 
+function getDefaultValues() {
+    return {
+        fontSize: 16,
+        spreadView: false
+    };
+}
+
 function ViewerOptions() {
+    var defaultValues = getDefaultValues();
     var urlOptions = getViewerOptionsFromURL();
-    this.fontSize = ko.observable(16);
-    this.spreadView = ko.observable(urlOptions.spreadView || false);
+    this.fontSize = ko.observable(defaultValues.fontSize);
+    this.spreadView = ko.observable(urlOptions.spreadView || defaultValues.spreadView);
 }
 
 ViewerOptions.prototype.toObject = function() {
@@ -19,5 +27,7 @@ ViewerOptions.prototype.toObject = function() {
         spreadView: this.spreadView()
     }
 };
+
+ViewerOptions.getDefaultValues = getDefaultValues;
 
 export default ViewerOptions;

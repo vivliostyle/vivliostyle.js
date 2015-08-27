@@ -1,4 +1,5 @@
 import ko from "knockout";
+import ViewerOptions from "../models/viewer-options";
 import {Keys} from "../utils/key-util";
 
 function Navigation(viewerOptions, viewer) {
@@ -19,6 +20,7 @@ function Navigation(viewerOptions, viewer) {
     this.isZoomDefaultDisabled = this.isDisabled;
     this.isIncreaseFontSizeDisabled = this.isDisabled;
     this.isDecreaseFontSizeDisabled = this.isDisabled;
+    this.isDefaultFontSizeDisabled = this.isDisabled;
 
     [
         "navigateToPrevious",
@@ -29,6 +31,7 @@ function Navigation(viewerOptions, viewer) {
         "navigateToLast",
         "increaseFontSize",
         "decreaseFontSize",
+        "defaultFontSize",
         "handleKey"
     ].forEach(function(methodName) {
         this[methodName] = this[methodName].bind(this);
@@ -109,6 +112,16 @@ Navigation.prototype.decreaseFontSize = function() {
     }
 };
 
+Navigation.prototype.defaultFontSize = function() {
+    if (!this.isDefaultFontSizeDisabled()) {
+        var fontSize = ViewerOptions.getDefaultValues().fontSize;
+        this.viewerOptions_.fontSize(fontSize);
+        return true;
+    } else {
+        return false;
+    }
+};
+
 Navigation.prototype.handleKey = function(key) {
     switch (key) {
         case Keys.ArrowDown:
@@ -130,8 +143,7 @@ Navigation.prototype.handleKey = function(key) {
         case "-":
             return !this.decreaseFontSize();
         case "0":
-            // default font size
-            return true;
+            return !this.defaultFontSize();
         default:
             return true;
     }
