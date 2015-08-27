@@ -43,9 +43,9 @@
 			<div class="vivliostyle-menu-detail">
 				<div class="vivliostyle-menu-detail-main">
 					<div class="vivliostyle-menu-detail-group">
-						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate" checked /> <span>Paginate</span></label></div>
+						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate" checked disabled /> <span>Paginate</span></label></div>
 						<div class="vivliostyle-menu-detail-group">
-							<div><label><input type="checkbox" name="vivliostyle-misc_paginate_spread-view" /> <span>Spread View</span></label></div>
+							<div><label><input type="checkbox" name="vivliostyle-misc_paginate_spread-view" data-bind="checked: settingsPanel.state.viewerOptions.spreadView" /> <span>Spread View</span></label></div>
 						</div>
 						<div class="vivliostyle-menu-detail-group">
 							<div class="vivliostyle-menu-detail-group-heading"><span>Page Size</span></div>
@@ -96,8 +96,8 @@
 						</div>
 					</div>
 					<div class="vivliostyle-menu-detail-group vivliostyle-menu-detail-group-buttons vivliostyle-menu-detail-group-inline">
-						<div><span class="vivliostyle-menu-button vivliostyle-menu-button-positive" id="vivliostyle-menu-button_apply" data-bind="menuButton: true">Apply</span></div>
-						<div><span class="vivliostyle-menu-button vivliostyle-menu-button-negative" id="vivliostyle-menu-button_reset" data-bind="menuButton: true">Reset</span></div>
+						<div><span class="vivliostyle-menu-button vivliostyle-menu-button-positive" id="vivliostyle-menu-button_apply" data-bind="menuButton: true, click: settingsPanel.apply">Apply</span></div>
+						<div><span class="vivliostyle-menu-button vivliostyle-menu-button-negative" id="vivliostyle-menu-button_reset" data-bind="menuButton: true, click: settingsPanel.reset">Reset</span></div>
 					</div>
 				</div>
 				<div class="vivliostyle-menu-detail-aside">

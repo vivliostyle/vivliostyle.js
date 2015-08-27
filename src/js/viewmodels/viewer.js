@@ -39,10 +39,9 @@ Viewer.prototype.setupViewerEventHandler = function() {
 };
 
 Viewer.prototype.setupViewerOptionSubscriptions = function() {
-    function applyOptions() {
+    ko.computed(function() {
         this.viewer_.setOptions(this.viewerOptions_.toObject());
-    }
-    this.viewerOptions_.fontSize.subscribe(applyOptions, this);
+    }, this).extend({rateLimit: 0});
 };
 
 Viewer.prototype.loadDocument = function(documentOptions) {

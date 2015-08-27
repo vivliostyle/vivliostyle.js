@@ -24,6 +24,31 @@ describe("ViewerOptions", function() {
 
             expect(options.spreadView()).toBe(false);
         });
+
+        it("copies parameters from the argument", function() {
+            var other = new ViewerOptions();
+            other.spreadView(false);
+            other.fontSize(20);
+            var options = new ViewerOptions(other);
+
+            expect(options.spreadView()).toBe(false);
+            expect(options.fontSize()).toBe(20);
+        });
+    });
+
+    describe("copyFrom", function() {
+        it("copies parameters from the argument to itself", function() {
+            var options = new ViewerOptions();
+            options.spreadView(true);
+            options.fontSize(10);
+            var other = new ViewerOptions();
+            other.spreadView(false);
+            other.fontSize(20);
+            options.copyFrom(other);
+
+            expect(options.spreadView()).toBe(false);
+            expect(options.fontSize()).toBe(20);
+        });
     });
 
     describe("toObject", function() {

@@ -14,12 +14,23 @@ function getDefaultValues() {
     };
 }
 
-function ViewerOptions() {
-    var defaultValues = getDefaultValues();
-    var urlOptions = getViewerOptionsFromURL();
-    this.fontSize = ko.observable(defaultValues.fontSize);
-    this.spreadView = ko.observable(urlOptions.spreadView || defaultValues.spreadView);
+function ViewerOptions(options) {
+    this.fontSize = ko.observable();
+    this.spreadView = ko.observable();
+    if (options) {
+        this.copyFrom(options);
+    } else {
+        var defaultValues = getDefaultValues();
+        var urlOptions = getViewerOptionsFromURL();
+        this.fontSize(defaultValues.fontSize);
+        this.spreadView(urlOptions.spreadView || defaultValues.spreadView);
+    }
 }
+
+ViewerOptions.prototype.copyFrom = function(other) {
+    this.fontSize(other.fontSize());
+    this.spreadView(other.spreadView());
+};
 
 ViewerOptions.prototype.toObject = function() {
     return {
