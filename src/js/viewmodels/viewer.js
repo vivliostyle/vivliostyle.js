@@ -1,11 +1,17 @@
 import ko from "knockout";
+import obs from "../utils/observable-util";
 
 function Viewer(vivliostyle, viewerSettings, opt_viewerOptions) {
     this.viewer_ = new vivliostyle.viewer.Viewer(viewerSettings, opt_viewerOptions);
+    var state_ = this.state_= {
+        cfi: obs.readonlyObservable(""),
+        status: obs.readonlyObservable("loading"),
+        pageProgression: obs.readonlyObservable(vivliostyle.constants.LTR)
+    };
     this.state = {
-        cfi: ko.observable(""),
-        status: ko.observable("loading"),
-        pageProgression: ko.observable(vivliostyle.constants.LTR)
+        cfi: state_.cfi.getter,
+        status: state_.status.getter,
+        pageProgression: state_.pageProgression.getter
     };
 
     this.setupViewerEventHandler();
@@ -16,14 +22,17 @@ function Viewer(vivliostyle, viewerSettings, opt_viewerOptions) {
 }
 
 Viewer.prototype.setupViewerEventHandler = function() {
+    this.viewer_.addListener("error", function(payload) {
+        console.error(payload.content);
+    });
     this.viewer_.addListener("loaded", function() {
-        this.state.pageProgression(this.viewer_.getCurrentPageProgression());
-        this.state.status("complete");
+        this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
+        this.state_.status.value("complete");
     }.bind(this));
     this.viewer_.addListener("nav", function(payload) {
         var cfi = payload.cfi;
         if (cfi) {
-            this.state.cfi(cfi);
+            this.state_.cfi.value(cfi);
         }
     }.bind(this));
 };
