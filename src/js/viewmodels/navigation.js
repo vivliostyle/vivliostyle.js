@@ -21,21 +21,29 @@ function Navigation(viewerOptions, viewer) {
 }
 
 Navigation.prototype.navigateToLeft = function() {
-    this.viewer_.navigateToLeft();
+    if (!this.isNavigateToLeftDisabled()) {
+        this.viewer_.navigateToLeft();
+    }
 };
 
 Navigation.prototype.navigateToRight = function() {
+    if (!this.isNavigateToRightDisabled()) {
     this.viewer_.navigateToRight();
+    }
 };
 
 Navigation.prototype.increaseFontSize = function() {
-    var fontSize = this.viewerOptions_.fontSize();
-    this.viewerOptions_.fontSize(fontSize * 1.25);
+    if (!this.isIncreaseFontSizeDisabled()) {
+        var fontSize = this.viewerOptions_.fontSize();
+        this.viewerOptions_.fontSize(fontSize * 1.25);
+    }
 };
 
 Navigation.prototype.decreaseFontSize = function() {
-    var fontSize = this.viewerOptions_.fontSize();
-    this.viewerOptions_.fontSize(fontSize * 0.8);
+    if (!this.isDecreaseFontSizeDisabled()) {
+        var fontSize = this.viewerOptions_.fontSize();
+        this.viewerOptions_.fontSize(fontSize * 0.8);
+    }
 };
 
 export default Navigation;
