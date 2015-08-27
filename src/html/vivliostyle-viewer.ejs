@@ -40,12 +40,12 @@
 		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-larger" data-bind="click: navigation.increaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isIncreaseFontSizeDisabled}"><span class="vivliostyle-menu-icon-button" title="Text: Larger" data-bind="menuButton: true">Text Size: Larger</span></li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_misc">
-		<li class="vivliostyle-menu-item vivliostyle-menu-item_detail-opened" id="vivliostyle-menu-item_misc-toggle"><span class="vivliostyle-menu-icon-button" title="Setting" data-bind="menuButton: true">Setting</span>
+		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_misc-toggle" data-bind="click: settingsPanel.toggle, css: {'vivliostyle-menu-item_detail-opened': settingsPanel.opened}"><span class="vivliostyle-menu-icon-button" title="Setting" data-bind="menuButton: true">Setting</span>
 			<!-- MENU DETAIL -->
 			<div class="vivliostyle-menu-detail">
 				<div class="vivliostyle-menu-detail-main">
 					<div class="vivliostyle-menu-detail-group">
-						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate" /> <span>Paginate</span></label></div>
+						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate" checked /> <span>Paginate</span></label></div>
 						<div class="vivliostyle-menu-detail-group">
 							<div><label><input type="checkbox" name="vivliostyle-misc_paginate_spread-view" /> <span>Spread View</span></label></div>
 						</div>
@@ -109,22 +109,5 @@
 		</li>
 	</ul>
 </div>
-
-<!-- FOR MENU BAR DEMONSTRATION -->
-<script>
-	var LIs = document.querySelectorAll('.vivliostyle-menu-item');
-	for(var i = 0, L = LIs.length; i < L; i++) {
-		var Detail = LIs[i].querySelector('.vivliostyle-menu-detail');
-		if(Detail) {
-			LIs[i].querySelector('span').addEventListener("click", function() {
-				// className "vivliostyle-menu-item_detail-opened" of <li.vivliostyle-menu-item /> is the switch for the display of its child <div.vivliostyle-menu-detail />.
-				var RE = / vivliostyle-menu-item_detail-opened$/;
-				var LI = this.parentNode;
-				LI.className = RE.test(LI.className) ? LI.className.replace(RE, "") : LI.className + " vivliostyle-menu-item_detail-opened";
-			});
-		}
-	}
-</script>
-
 </body>
 </html>

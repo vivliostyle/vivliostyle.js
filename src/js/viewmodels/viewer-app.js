@@ -2,6 +2,7 @@ import DocumentOptions from "../models/document-options";
 import ViewerOptions from "../models/viewer-options";
 import Viewer from "./viewer";
 import Navigation from "./navigation";
+import SettingsPanel from "./settings-panel";
 
 function ViewerApp(vivliostyle) {
     this.documentOptions = new DocumentOptions();
@@ -12,6 +13,7 @@ function ViewerApp(vivliostyle) {
     };
     this.viewer = new Viewer(vivliostyle, this.viewerSettings, this.viewerOptions);
     this.navigation = new Navigation(this.viewerOptions, this.viewer);
+    this.settingsPanel = new SettingsPanel();
 
     this.viewer.loadDocument(this.documentOptions);
 }
