@@ -13,8 +13,8 @@ function ViewerApp(vivliostyle) {
         viewportElement: document.getElementById("vivliostyle-viewer-viewport")
     };
     this.viewer = new Viewer(vivliostyle, this.viewerSettings, this.viewerOptions);
-    this.navigation = new Navigation(this.viewerOptions, this.viewer);
     this.settingsPanel = new SettingsPanel();
+    this.navigation = new Navigation(this.viewerOptions, this.viewer, this.settingsPanel);
 
     this.handleKey = function(data, event) {
         var key = keyUtil.identifyKeyFromEvent(event);

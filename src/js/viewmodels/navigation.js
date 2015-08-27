@@ -2,12 +2,13 @@ import ko from "knockout";
 import ViewerOptions from "../models/viewer-options";
 import {Keys} from "../utils/key-util";
 
-function Navigation(viewerOptions, viewer) {
+function Navigation(viewerOptions, viewer, settingsPanel) {
     this.viewerOptions_ = viewerOptions;
     this.viewer_ = viewer;
+    this.settingsPanel_ = settingsPanel;
 
     this.isDisabled = ko.pureComputed(function() {
-        return !this.viewer_.state.navigatable();
+        return this.settingsPanel_.opened() || !this.viewer_.state.navigatable();
     }, this);
     this.isNavigateToPreviousDisabled = this.isDisabled;
     this.isNavigateToNextDisabled = this.isDisabled;

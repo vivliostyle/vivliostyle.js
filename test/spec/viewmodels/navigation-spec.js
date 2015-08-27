@@ -4,10 +4,12 @@ import Navigation from "../../../src/js/viewmodels/navigation";
 
 describe("Navigation", function() {
     var navigation;
-    var viewer;
     var viewerOptions;
+    var viewer;
+    var settingsPanel;
 
     beforeEach(function() {
+        viewerOptions = new ViewerOptions();
         viewer = {
             state: {navigatable: ko.observable(false)},
             navigateToPrevious: function() {},
@@ -17,8 +19,8 @@ describe("Navigation", function() {
             navigateToFirst: function() {},
             navigateToLast: function() {}
         };
-        viewerOptions = new ViewerOptions();
-        navigation = new Navigation(viewerOptions, viewer);
+        settingsPanel = {opened: ko.observable(false)};
+        navigation = new Navigation(viewerOptions, viewer, settingsPanel);
     });
 
     function setDisabled(val) {
@@ -26,7 +28,7 @@ describe("Navigation", function() {
     }
 
     describe("isDisabled", function() {
-        it("is true iff viewer.state.navigatable is false", function() {
+        it("is true if viewer.state.navigatable is false", function() {
             expect(navigation.isDisabled()).toBe(true);
 
             var isDisabled = true;
@@ -36,6 +38,16 @@ describe("Navigation", function() {
             viewer.state.navigatable(true);
 
             expect(isDisabled).toBe(false);
+        });
+
+        it("is true if settingsPanel.opened is true", function() {
+            viewer.state.navigatable(true);
+
+            expect(navigation.isDisabled()).toBe(false);
+
+            settingsPanel.opened(true);
+
+            expect(navigation.isDisabled()).toBe(true);
         });
     });
 
