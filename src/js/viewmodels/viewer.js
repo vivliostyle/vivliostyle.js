@@ -4,14 +4,13 @@ import logger from "../logging/logger";
 
 function Viewer(vivliostyle, viewerSettings, viewerOptions) {
     this.viewerOptions_ = viewerOptions;
+    this.documentOptions_ = null;
     this.viewer_ = new vivliostyle.viewer.Viewer(viewerSettings, viewerOptions.toObject());
     var state_ = this.state_= {
-        cfi: obs.readonlyObservable(""),
         status: obs.readonlyObservable("loading"),
         pageProgression: obs.readonlyObservable(vivliostyle.constants.LTR)
     };
     this.state = {
-        cfi: state_.cfi.getter,
         status: state_.status.getter,
         pageProgression: state_.pageProgression.getter
     };
@@ -31,7 +30,7 @@ Viewer.prototype.setupViewerEventHandler = function() {
     this.viewer_.addListener("nav", function(payload) {
         var cfi = payload.cfi;
         if (cfi) {
-            this.state_.cfi.value(cfi);
+            this.documentOptions_.fragment(cfi);
         }
     }.bind(this));
 };
@@ -43,8 +42,9 @@ Viewer.prototype.setupViewerOptionSubscriptions = function() {
     this.viewerOptions_.fontSize.subscribe(applyOptions, this);
 };
 
-Viewer.prototype.loadDocument = function(url, opt_documentOptions) {
-    this.viewer_.loadDocument(url, opt_documentOptions);
+Viewer.prototype.loadDocument = function(documentOptions) {
+    this.documentOptions_ = documentOptions;
+    this.viewer_.loadDocument(documentOptions.url(), documentOptions.toObject());
 };
 
 Viewer.prototype.navigateToLeft = function() {

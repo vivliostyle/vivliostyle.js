@@ -13,16 +13,7 @@ function ViewerApp(vivliostyle) {
     this.viewer = new Viewer(vivliostyle, this.viewerSettings, this.viewerOptions);
     this.navigation = new Navigation(this.viewerOptions, this.viewer);
 
-    this.setupActions();
-
-    this.viewer.loadDocument(this.documentOptions.url(), this.documentOptions.toObject());
+    this.viewer.loadDocument(this.documentOptions);
 }
-
-ViewerApp.prototype.setupActions = function() {
-    var viewerState = this.viewer.state;
-    viewerState.cfi.subscribe(function(cfi) {
-        this.documentOptions.fragment(cfi);
-    }, this);
-};
 
 export default ViewerApp;
