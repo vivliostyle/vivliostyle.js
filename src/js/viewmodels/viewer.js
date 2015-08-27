@@ -1,7 +1,7 @@
 import ko from "knockout";
 
 function Viewer(vivliostyle, viewerSettings, opt_viewerOptions) {
-    this.viewer = new vivliostyle.viewer.Viewer(viewerSettings, opt_viewerOptions);
+    this.viewer_ = new vivliostyle.viewer.Viewer(viewerSettings, opt_viewerOptions);
     this.state = {
         cfi: ko.observable(""),
         status: ko.observable("loading"),
@@ -16,11 +16,11 @@ function Viewer(vivliostyle, viewerSettings, opt_viewerOptions) {
 }
 
 Viewer.prototype.setupViewerEventHandler = function() {
-    this.viewer.addListener("loaded", function() {
-        this.state.pageProgression(this.viewer.getCurrentPageProgression());
+    this.viewer_.addListener("loaded", function() {
+        this.state.pageProgression(this.viewer_.getCurrentPageProgression());
         this.state.status("complete");
     }.bind(this));
-    this.viewer.addListener("nav", function(payload) {
+    this.viewer_.addListener("nav", function(payload) {
         var cfi = payload.cfi;
         if (cfi) {
             this.state.cfi(cfi);
@@ -29,15 +29,15 @@ Viewer.prototype.setupViewerEventHandler = function() {
 };
 
 Viewer.prototype.loadDocument = function(url, opt_documentOptions) {
-    this.viewer.loadDocument(url, opt_documentOptions);
+    this.viewer_.loadDocument(url, opt_documentOptions);
 };
 
 Viewer.prototype.navigateToLeft = function() {
-    this.viewer.navigateToPage("left");
+    this.viewer_.navigateToPage("left");
 };
 
 Viewer.prototype.navigateToRight = function() {
-    this.viewer.navigateToPage("right");
+    this.viewer_.navigateToPage("right");
 };
 
 export default Viewer;
