@@ -1,4 +1,3 @@
-"use strict";
 import DocumentOptions from "../models/document-options";
 import ViewerOptions from "../models/viewer-options";
 import Viewer from "./viewer";

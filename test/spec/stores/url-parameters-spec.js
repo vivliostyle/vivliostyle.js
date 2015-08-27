@@ -1,4 +1,3 @@
-"use strict";
 import stringUtil from "../../../src/js/utils/string-util";
 import urlParameters from "../../../src/js/stores/url-parameters";
 

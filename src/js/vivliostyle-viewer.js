@@ -1,4 +1,3 @@
-"use strict";
 import ko from "knockout";
 import ViewerApp from "./viewmodels/viewer-app";
 

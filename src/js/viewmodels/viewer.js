@@ -1,4 +1,3 @@
-"use strict";
 import ko from "knockout";
 
 function Viewer(vivliostyle, viewerSettings, opt_viewerOptions) {

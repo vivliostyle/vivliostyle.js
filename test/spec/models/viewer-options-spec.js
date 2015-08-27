@@ -1,4 +1,3 @@
-"use strict";
 import ViewerOptions from "../../../src/js/models/viewer-options";
 import urlParameters from "../../../src/js/stores/url-parameters";
 

@@ -1,4 +1,3 @@
-"use strict";
 import DocumentOptions from "../../../src/js/models/document-options";
 import urlParameters from "../../../src/js/stores/url-parameters"
 
