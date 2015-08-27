@@ -303,7 +303,8 @@ adapt.cssprop.FontSrcVisitor.prototype.visitURL = function(url) {
 adapt.cssprop.supportedFontFormats = {
 	"opentype": true,
 	"truetype": true,
-	"woff": true
+	"woff": true,
+	"woff2": true
 };
 
 /** @override */
