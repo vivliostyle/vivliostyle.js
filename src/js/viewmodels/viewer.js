@@ -16,10 +16,6 @@ function Viewer(vivliostyle, viewerSettings, opt_viewerOptions) {
     };
 
     this.setupViewerEventHandler();
-
-    ["navigateToLeft", "navigateToRight"].forEach(function(methodName) {
-        this[methodName] = this[methodName].bind(this);
-    }, this);
 }
 
 Viewer.prototype.setupViewerEventHandler = function() {

@@ -20,14 +20,14 @@
 </head>
 <body data-vivliostyle-viewer-status="loading" data-bind="attr: {'data-vivliostyle-viewer-status': viewer.state.status}" style="position:absolute;left:0px;top:0px;margin:0px;padding:0px;">
 <div id="vivliostyle-viewer-viewport" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, event: {keypress: viewer.onKeydown}" style="width:100vw;height:100vh;"></div>
-<span id="vivliostyle-page-navigation-left" title="navigate to left" data-bind="click: viewer.navigateToLeft"></span>
-<span id="vivliostyle-page-navigation-right" title="navigate to right" data-bind="click: viewer.navigateToRight"></span>
+<span id="vivliostyle-page-navigation-left" title="navigate to left" data-bind="click: navigation.navigateToLeft"></span>
+<span id="vivliostyle-page-navigation-right" title="navigate to right" data-bind="click: navigation.navigateToRight"></span>
 
 <!-- MENU BAR -->
 <div id="vivliostyle-menu-bar">
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_move">
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_move-left" data-bind="click: viewer.navigateToLeft"><span class="vivliostyle-menu-icon-button" title="Move: Left">Move: Left</span></li>
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_move-right" data-bind="click: viewer.navigateToRight"><span class="vivliostyle-menu-icon-button" title="Move: Right">Move: Right</span></li>
+		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_move-left" data-bind="click: navigation.navigateToLeft"><span class="vivliostyle-menu-icon-button" title="Move: Left">Move: Left</span></li>
+		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_move-right" data-bind="click: navigation.navigateToRight"><span class="vivliostyle-menu-icon-button" title="Move: Right">Move: Right</span></li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_zoom">
 		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_zoom-out"><span class="vivliostyle-menu-icon-button" title="Zoom: Out">Zoom: Out</span></li>
