@@ -1,16 +1,34 @@
+import ko from "knockout";
 import ViewerOptions from "../../../src/js/models/viewer-options";
 import Navigation from "../../../src/js/viewmodels/navigation";
 
 describe("Navigation", function() {
-    var navigation;
-    var viewerOptions;
+    describe("isDisabled", function() {
+        it("is true iff viewer.state.navigatable is false", function() {
+            var viewer = {state: {navigatable: ko.observable(false)}};
+            var navigation = new Navigation(null, viewer);
 
-    beforeEach(function() {
-        viewerOptions = new ViewerOptions();
-        navigation = new Navigation(viewerOptions);
+            expect(navigation.isDisabled()).toBe(true);
+
+            var isDisabled = true;
+            navigation.isDisabled.subscribe(function(value) {
+                isDisabled = value;
+            });
+            viewer.state.navigatable(true);
+
+            expect(isDisabled).toBe(false);
+        });
     });
 
     describe("increaseFontSize", function() {
+        var navigation;
+        var viewerOptions;
+
+        beforeEach(function() {
+            viewerOptions = new ViewerOptions();
+            navigation = new Navigation(viewerOptions);
+        });
+
         it("increases font size stored in ViewerOptions model", function() {
             var fontSize = viewerOptions.fontSize();
             navigation.increaseFontSize();

@@ -12,6 +12,9 @@ function Viewer(vivliostyle, viewerSettings, viewerOptions) {
     };
     this.state = {
         status: state_.status.getter,
+        navigatable: ko.pureComputed(function() {
+            return state_.status.value() === "complete";
+        }),
         pageProgression: state_.pageProgression.getter
     };
 

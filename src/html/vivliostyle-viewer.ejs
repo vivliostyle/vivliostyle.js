@@ -26,18 +26,18 @@
 <!-- MENU BAR -->
 <div id="vivliostyle-menu-bar">
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_move">
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_move-left" data-bind="click: navigation.navigateToLeft"><span class="vivliostyle-menu-icon-button" title="Move: Left" data-bind="menuButton: true">Move: Left</span></li>
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_move-right" data-bind="click: navigation.navigateToRight"><span class="vivliostyle-menu-icon-button" title="Move: Right" data-bind="menuButton: true">Move: Right</span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-left" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-disabled': navigation.isNavigateToLeftDisabled}"><span class="vivliostyle-menu-icon-button" title="Move: Left" data-bind="menuButton: true">Move: Left</span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-right" data-bind="click: navigation.navigateToRight, css: {'vivliostyle-menu-disabled': navigation.isNavigateToRightDisabled}"><span class="vivliostyle-menu-icon-button" title="Move: Right" data-bind="menuButton: true">Move: Right</span></li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_zoom">
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_zoom-out"><span class="vivliostyle-menu-icon-button" title="Zoom: Out" data-bind="menuButton: true">Zoom: Out</span></li>
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_zoom-in"><span class="vivliostyle-menu-icon-button" title="Zoom: In" data-bind="menuButton: true">Zoom: In</span></li>
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_zoom-default"><span class="vivliostyle-menu-icon-button" title="Zoom: Default" data-bind="menuButton: true">Zoom: Default</span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-out" data-bind="css: {'vivliostyle-menu-disabled': navigation.isZoomOutDisabled}"><span class="vivliostyle-menu-icon-button" title="Zoom: Out" data-bind="menuButton: true">Zoom: Out</span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-in" data-bind="css: {'vivliostyle-menu-disabled': navigation.isZoomInDisabled}"><span class="vivliostyle-menu-icon-button" title="Zoom: In" data-bind="menuButton: true">Zoom: In</span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-default" data-bind="css: {'vivliostyle-menu-disabled': navigation.isZoomDefaultDisabled}"><span class="vivliostyle-menu-icon-button" title="Zoom: Default" data-bind="menuButton: true">Zoom: Default</span></li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_text-size">
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_text-size-smaller" data-bind="click: navigation.decreaseFontSize"><span class="vivliostyle-menu-icon-button" title="Text: Smaller" data-bind="menuButton: true">Text Size: Smaller</span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-smaller" data-bind="click: navigation.decreaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isDecreaseFontSizeDisabled}"><span class="vivliostyle-menu-icon-button" title="Text: Smaller" data-bind="menuButton: true">Text Size: Smaller</span></li>
 		<!-- <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-default"><span class="vivliostyle-menu-icon-button" title="Text Size: Default" data-bind="menuButton: true">Text: Default</span></li> -->
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_text-size-larger" data-bind="click: navigation.increaseFontSize"><span class="vivliostyle-menu-icon-button" title="Text: Larger" data-bind="menuButton: true">Text Size: Larger</span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-larger" data-bind="click: navigation.increaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isIncreaseFontSizeDisabled}"><span class="vivliostyle-menu-icon-button" title="Text: Larger" data-bind="menuButton: true">Text Size: Larger</span></li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_misc">
 		<li class="vivliostyle-menu-item vivliostyle-menu-item_detail-opened" id="vivliostyle-menu-item_misc-toggle"><span class="vivliostyle-menu-icon-button" title="Setting" data-bind="menuButton: true">Setting</span>
