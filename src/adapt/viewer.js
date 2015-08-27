@@ -264,10 +264,14 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
         adapt.base.resourceBaseURL = command["userAgentRootURL"];
     }
     if (typeof command["spreadView"] == "boolean") {
+        // Force relayout
+        this.viewport = null;
         this.pref.spreadView = command["spreadView"];
         this.needResize = true;
     }
     if (typeof command["pageBorder"] == "number") {
+        // Force relayout
+        this.viewport = null;
         this.pref.pageBorder = command["pageBorder"];
         this.needResize = true;
     }
