@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html
+   style="position:relative;left:0px;top:0px;width:100%;height:100%;margin:0px;padding:0px"
+   data-vivliostyle-paginated="true">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>Vivliostyle.js viewer</title>
+<% if (development) { %>
+    <script src="../node_modules/vivliostyle/src/vivliostyle.js"></script>
+    <script src="js/main-dev.js"></script>
+<% } else { %>
+    <script src="js/main.js"></script>
+<% } %>
+<!--- install MathJax -->
+<script src="../src/MathJax/MathJax.js?config=MML_HTMLorMML"></script>
+<script>
+MathJax.Hub.Config({
+  jax: ["input/MathML","output/HTML-CSS"],
+  showProcessingMessages: false,
+  messageStyle: "none"
+});
+</script>
+<link rel="stylesheet" href="css/vivliostyle-viewer.css"/>
+<link rel="stylesheet" href="css/ui.arrows.css"/>
+<style id="vivliostyle-page-rules"></style>
+</head>
+<body data-vivliostyle-viewer-status="loading" data-bind="attr: {'data-vivliostyle-viewer-status': viewer.state.status}" style="position:absolute;left:0px;top:0px;margin:0px;padding:0px">
+<div id="vivliostyle-viewer-viewport" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, event: {keypress: viewer.onKeydown}"></div>
+<span id="vivliostyle-page-navigation-left" title="navigate to left" data-bind="click: viewer.navigateToLeft"></span>
+<span id="vivliostyle-page-navigation-right" title="navigate to right" data-bind="click: viewer.navigateToRight"></span>
+</body>
+</html>
