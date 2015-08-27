@@ -1,5 +1,6 @@
 import ko from "knockout";
 import obs from "../utils/observable-util";
+import logger from "../logging/logger";
 
 function Viewer(vivliostyle, viewerSettings, opt_viewerOptions) {
     this.viewer_ = new vivliostyle.viewer.Viewer(viewerSettings, opt_viewerOptions);
@@ -23,7 +24,7 @@ function Viewer(vivliostyle, viewerSettings, opt_viewerOptions) {
 
 Viewer.prototype.setupViewerEventHandler = function() {
     this.viewer_.addListener("error", function(payload) {
-        console.error(payload.content);
+        logger.error(payload.content);
     });
     this.viewer_.addListener("loaded", function() {
         this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
