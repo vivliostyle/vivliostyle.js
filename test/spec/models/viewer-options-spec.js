@@ -30,8 +30,10 @@ describe("ViewerOptions", function() {
         it("converts parameters to an object", function() {
             var options = new ViewerOptions();
             options.spreadView(true);
+            options.fontSize(20);
 
             expect(options.toObject()).toEqual({
+                fontSize: 20,
                 spreadView: true
             });
         });

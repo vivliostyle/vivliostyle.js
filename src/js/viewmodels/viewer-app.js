@@ -10,8 +10,8 @@ function ViewerApp(vivliostyle) {
         userAgentRootURL: "resources/",
         viewportElement: document.getElementById("vivliostyle-viewer-viewport")
     };
-    this.viewer = new Viewer(vivliostyle, this.viewerSettings, this.viewerOptions.toObject());
-    this.navigation = new Navigation(this.viewer);
+    this.viewer = new Viewer(vivliostyle, this.viewerSettings, this.viewerOptions);
+    this.navigation = new Navigation(this.viewerOptions, this.viewer);
 
     this.setupActions();
 

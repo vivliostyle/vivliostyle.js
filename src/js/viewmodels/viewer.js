@@ -2,8 +2,9 @@ import ko from "knockout";
 import obs from "../utils/observable-util";
 import logger from "../logging/logger";
 
-function Viewer(vivliostyle, viewerSettings, opt_viewerOptions) {
-    this.viewer_ = new vivliostyle.viewer.Viewer(viewerSettings, opt_viewerOptions);
+function Viewer(vivliostyle, viewerSettings, viewerOptions) {
+    this.viewerOptions_ = viewerOptions;
+    this.viewer_ = new vivliostyle.viewer.Viewer(viewerSettings, viewerOptions.toObject());
     var state_ = this.state_= {
         cfi: obs.readonlyObservable(""),
         status: obs.readonlyObservable("loading"),
@@ -16,6 +17,7 @@ function Viewer(vivliostyle, viewerSettings, opt_viewerOptions) {
     };
 
     this.setupViewerEventHandler();
+    this.setupViewerOptionSubscriptions();
 }
 
 Viewer.prototype.setupViewerEventHandler = function() {
@@ -32,6 +34,13 @@ Viewer.prototype.setupViewerEventHandler = function() {
             this.state_.cfi.value(cfi);
         }
     }.bind(this));
+};
+
+Viewer.prototype.setupViewerOptionSubscriptions = function() {
+    function applyOptions() {
+        this.viewer_.setOptions(this.viewerOptions_.toObject());
+    }
+    this.viewerOptions_.fontSize.subscribe(applyOptions, this);
 };
 
 Viewer.prototype.loadDocument = function(url, opt_documentOptions) {

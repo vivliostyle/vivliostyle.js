@@ -9,11 +9,13 @@ function getViewerOptionsFromURL() {
 
 function ViewerOptions() {
     var urlOptions = getViewerOptionsFromURL();
+    this.fontSize = ko.observable(16);
     this.spreadView = ko.observable(urlOptions.spreadView || false);
 }
 
 ViewerOptions.prototype.toObject = function() {
     return {
+        fontSize: this.fontSize(),
         spreadView: this.spreadView()
     }
 };
