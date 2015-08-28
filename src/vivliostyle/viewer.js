@@ -50,11 +50,11 @@ goog.scope(function() {
      */
     function getDefaultViewerOptions() {
         return {
-            autoResize: true,
-            fontSize: 16,
-            pageBorderWidth: 1,
-            renderAllPages: true,
-            spreadView: false
+            "autoResize": true,
+            "fontSize": 16,
+            "pageBorderWidth": 1,
+            "renderAllPages": true,
+            "spreadView": false
         };
     }
 
