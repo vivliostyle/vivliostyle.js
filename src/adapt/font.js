@@ -275,6 +275,7 @@ adapt.font.Mapper.prototype.initFont = function(srcFace, fontBytes, documentFace
 		} else {
 			adapt.base.log("Failed to load font: " + src);
 		}
+		self.body.removeChild(probe);
 		frame.finish(viewFontFace);
 	});
 	return frame.result();
