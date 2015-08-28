@@ -38,6 +38,7 @@ SettingsPanel.prototype.apply = function() {
 
 SettingsPanel.prototype.reset = function() {
     this.state.viewerOptions.copyFrom(this.viewerOptions_);
+    this.state.pageSize.copyFrom(this.documentOptions_.pageSize);
 };
 
 SettingsPanel.prototype.handleKey = function(key) {
