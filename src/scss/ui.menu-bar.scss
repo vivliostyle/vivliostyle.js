@@ -18,8 +18,9 @@ $icon-height: 36px;
 @media screen {
 	#vivliostyle-viewer-viewport {
 		margin-top: $icon-height;
-		min-height: calc(100vh - #{$icon-height});
-		min-width: 100vw;
+		height: calc(100vh - #{$icon-height});
+		width: 100vw;
+		overflow: auto;
 	}
 }
 
