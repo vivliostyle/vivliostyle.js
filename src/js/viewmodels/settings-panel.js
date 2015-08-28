@@ -1,6 +1,7 @@
 import ko from "knockout";
 import ViewerOptions from "../models/viewer-options";
 import PageSize from "../models/page-size";
+import {Keys} from "../utils/key-util";
 
 function SettingsPanel(viewerOptions, documentOptions, viewer) {
     this.viewerOptions_ = viewerOptions;
@@ -13,10 +14,14 @@ function SettingsPanel(viewerOptions, documentOptions, viewer) {
         pageSize: new PageSize(documentOptions.pageSize)
     };
 
-    ["toggle", "apply", "reset"].forEach(function(methodName) {
+    ["close", "toggle", "apply", "reset"].forEach(function(methodName) {
         this[methodName] = this[methodName].bind(this);
     }, this);
 }
+
+SettingsPanel.prototype.close = function() {
+    this.opened(false);
+};
 
 SettingsPanel.prototype.toggle = function() {
     this.opened(!this.opened());
@@ -33,6 +38,16 @@ SettingsPanel.prototype.apply = function() {
 
 SettingsPanel.prototype.reset = function() {
     this.state.viewerOptions.copyFrom(this.viewerOptions_);
+};
+
+SettingsPanel.prototype.handleKey = function(key) {
+    switch (key) {
+        case Keys.Escape:
+            this.close();
+            return true;
+        default:
+            return true;
+    }
 };
 
 export default SettingsPanel;

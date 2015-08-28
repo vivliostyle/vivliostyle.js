@@ -8,7 +8,8 @@ var Keys = {
     Home: "Home",
     End: "End",
     PageDown: "PageDown",
-    PageUp: "PageUp"
+    PageUp: "PageUp",
+    Escape: "Escape"
 };
 
 // CAUTION: This function covers only part of common keys on a keyboard. Keys not covered by the implementation are identified as KeyboardEvent.key, KeyboardEvent.keyIdentifier, or "Unidentified".
@@ -24,6 +25,8 @@ function identifyKeyFromEvent(event) {
         return Keys.ArrowRight;
     } else if (key === Keys.ArrowUp || key === "Up" || keyIdentifier === "Up") {
         return Keys.ArrowUp;
+    } else if (key === Keys.Escape || key === "Esc" || keyIdentifier === "U+001B") {
+        return Keys.Escape;
     } else if (key === "0" || keyIdentifier === "U+0030") {
         return "0";
     } else if (key === "+" || key === "Add" || keyIdentifier === "U+002B"

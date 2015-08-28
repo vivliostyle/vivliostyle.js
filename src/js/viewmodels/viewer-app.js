@@ -18,7 +18,11 @@ function ViewerApp(vivliostyle) {
 
     this.handleKey = function(data, event) {
         var key = keyUtil.identifyKeyFromEvent(event);
-        return this.navigation.handleKey(key);
+        var ret = this.settingsPanel.handleKey(key);
+        if (ret) {
+            ret = this.navigation.handleKey(key);
+        }
+        return ret;
     }.bind(this);
 
     this.viewer.loadDocument(this.documentOptions);
