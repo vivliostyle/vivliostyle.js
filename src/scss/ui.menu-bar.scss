@@ -121,8 +121,10 @@ $icon-height: 36px;
 				cursor: default;
 				&:before, &:after { color: rgb(128,128,128) !important; } background: transparent !important;
 			}
-			&#vivliostyle-menu-item_move-left         >.vivliostyle-menu-icon-button:before { content: $fa-var-arrow-left; }
-			&#vivliostyle-menu-item_move-right        >.vivliostyle-menu-icon-button:before { content: $fa-var-arrow-right; }
+		//	&#vivliostyle-menu-item_move-left         >.vivliostyle-menu-icon-button:before { content: $fa-var-arrow-left; }
+			&#vivliostyle-menu-item_move-previous     >.vivliostyle-menu-icon-button:before { content: $fa-var-chevron-up; }
+		//	&#vivliostyle-menu-item_move-right        >.vivliostyle-menu-icon-button:before { content: $fa-var-arrow-right; }
+			&#vivliostyle-menu-item_move-next         >.vivliostyle-menu-icon-button:before { content: $fa-var-chevron-down; }
 			&#vivliostyle-menu-item_zoom-out          >.vivliostyle-menu-icon-button:before { content: $fa-var-search-minus; }
 		//	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:before { content: $fa-var-search; }
 			&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:before { content: $fa-var-arrows-alt/*$fa-var-search*/; top: .05em; /*font-size: $icon-height * 0.36;*/ }
