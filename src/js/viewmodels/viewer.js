@@ -40,13 +40,20 @@ Viewer.prototype.setupViewerEventHandler = function() {
 
 Viewer.prototype.setupViewerOptionSubscriptions = function() {
     ko.computed(function() {
-        this.viewer_.setOptions(this.viewerOptions_.toObject());
+        var viewerOptions = this.viewerOptions_.toObject();
+        if (this.state.status() === "complete") {
+            this.viewer_.setOptions(viewerOptions);
+        }
     }, this).extend({rateLimit: 0});
 };
 
-Viewer.prototype.loadDocument = function(documentOptions) {
+Viewer.prototype.loadDocument = function(documentOptions, viewerOptions) {
+    this.state_.status.value("loading");
+    if (viewerOptions) {
+        this.viewerOptions_.copyFrom(viewerOptions);
+    }
     this.documentOptions_ = documentOptions;
-    this.viewer_.loadDocument(documentOptions.url(), documentOptions.toObject());
+    this.viewer_.loadDocument(documentOptions.url(), documentOptions.toObject(), this.viewerOptions_.toObject());
 };
 
 Viewer.prototype.navigateToPrevious = function() {

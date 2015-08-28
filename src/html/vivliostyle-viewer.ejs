@@ -52,20 +52,19 @@
 						<div class="vivliostyle-menu-detail-group">
 							<div class="vivliostyle-menu-detail-group-heading"><span>Page Size</span></div>
 							<ul class="vivliostyle-menu-detail-group">
-								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="vivliostyle-misc_paginate_page-size_auto" /> <span>Auto</span> <small>(Use entire window area)</small></label></li>
-								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="vivliostyle-misc_paginate_page-size_preset" /> <span>Preset</span></label>
+								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="auto" required data-bind="checked: settingsPanel.state.pageSize.mode" /> <span>Auto</span> <small>(Use entire window area)</small></label></li>
+								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="preset" required data-bind="checked: settingsPanel.state.pageSize.mode" /> <span>Preset</span></label>
 									<small>
-										<select name="vivliostyle-misc_paginate_page-size_preset-select">
-											<option>A5</option>
-											<option>B5 (ISO)</option>
+										<select name="vivliostyle-misc_paginate_page-size_preset-select" data-bind="foreach: settingsPanel.state.pageSize.PresetSize, value: settingsPanel.state.pageSize.presetSize">
+											<option data-bind="value: $data, text: description"></option>
 										</select>
-										<label><input type="checkbox" name="vivliostyle-misc_paginate_page-size_preset-landscape" /> - <span>Landscape</span></label>
+										<label><input type="checkbox" name="vivliostyle-misc_paginate_page-size_preset-landscape" data-bind="checked: settingsPanel.state.pageSize.isLandscape" /> - <span>Landscape</span></label>
 									</small>
 								</li>
-								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="vivliostyle-misc_paginate_page-size_custom" /> <span>Custom</span></label> -
+								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="custom" required data-bind="checked: settingsPanel.state.pageSize.mode" /> <span>Custom</span></label> -
 									<small>
-										<label>Width: <input type="text" name="vivliostyle-misc_paginate_page-size_custom-width" /></label> /
-										<label>Height: <input type="text" name="vivliostyle-misc_paginate_page-size_custom-height" /></label>
+										<label>Width: <input type="text" name="vivliostyle-misc_paginate_page-size_custom-width" data-bind="textInput: settingsPanel.state.pageSize.customWidth" /></label> /
+										<label>Height: <input type="text" name="vivliostyle-misc_paginate_page-size_custom-height" data-bind="textInput: settingsPanel.state.pageSize.customHeight" /></label>
 									</small>
 								</li>
 							</ul>

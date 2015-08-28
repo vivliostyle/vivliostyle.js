@@ -1,12 +1,16 @@
 import ko from "knockout";
 import ViewerOptions from "../models/viewer-options";
+import PageSize from "../models/page-size";
 
-function SettingsPanel(viewerOptions) {
+function SettingsPanel(viewerOptions, documentOptions, viewer) {
     this.viewerOptions_ = viewerOptions;
+    this.documentOptions_ = documentOptions;
+    this.viewer_ = viewer;
 
     this.opened = ko.observable(false);
     this.state = {
-        viewerOptions: new ViewerOptions(viewerOptions)
+        viewerOptions: new ViewerOptions(viewerOptions),
+        pageSize: new PageSize(documentOptions.pageSize)
     };
 
     ["toggle", "apply", "reset"].forEach(function(methodName) {
@@ -19,7 +23,12 @@ SettingsPanel.prototype.toggle = function() {
 };
 
 SettingsPanel.prototype.apply = function() {
-    this.viewerOptions_.copyFrom(this.state.viewerOptions);
+    if (this.state.pageSize.equivalentTo(this.documentOptions_.pageSize)) {
+        this.viewerOptions_.copyFrom(this.state.viewerOptions);
+    } else {
+        this.documentOptions_.pageSize.copyFrom(this.state.pageSize);
+        this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
+    }
 };
 
 SettingsPanel.prototype.reset = function() {
