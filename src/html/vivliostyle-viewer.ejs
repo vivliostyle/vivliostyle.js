@@ -6,9 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <title>Vivliostyle.js viewer</title>
 <% if (development) { %>
+<script src="../node_modules/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script src="../node_modules/vivliostyle/src/vivliostyle.js"></script>
 <script src="js/main-dev.js"></script>
 <% } else { %>
+<script src="mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script src="js/main.js"></script>
 <% } %>
 <link rel="stylesheet" href="css/vivliostyle-viewer.css"/>
