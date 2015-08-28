@@ -1219,8 +1219,8 @@ adapt.vgen.Viewport = function(window, fontSize, opt_root, opt_width, opt_height
 	/** @const */ this.fontSize = fontSize;
 	/** @const */ this.document = window.document;
 	/** @type {HTMLElement} */ this.root = opt_root || this.document.body;
-	/** @type {number} */ this.width = opt_width || window.innerWidth;
-	/** @type {number} */ this.height = opt_height || window.innerHeight;
-    this.root.style["min-width"] = this.width + "px";
-    this.root.style["min-height"] = this.height + "px";
+	var clientLayout = new adapt.vgen.DefaultClientLayout(window);
+	var computedStyle = clientLayout.getElementComputedStyle(this.root);
+	/** @type {number} */ this.width = opt_width || parseFloat(computedStyle["width"]) || window.innerWidth;
+	/** @type {number} */ this.height = opt_height || parseFloat(computedStyle["height"]) || window.innerHeight;
 };
