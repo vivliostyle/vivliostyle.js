@@ -29,6 +29,7 @@ function PageSize(pageSize) {
     }
 }
 
+PageSize.Mode = Mode;
 PageSize.PresetSize = PageSize.prototype.PresetSize = PresetSize;
 
 PageSize.prototype.copyFrom = function(other) {
@@ -81,7 +82,7 @@ PageSize.prototype.toCSSDeclarationString = function() {
     }
 
     if (this.isImportant()) {
-        declaration += "!important";
+        declaration += " !important";
     }
 
     return declaration + ";";

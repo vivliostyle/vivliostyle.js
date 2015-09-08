@@ -37,7 +37,10 @@ describe("DocumentOptions", function() {
             options.fragment("ghi");
 
             expect(options.toObject()).toEqual({
-               fragment: "ghi"
+                fragment: "ghi",
+                userStyleSheet: [{
+                    text: "@page {size: auto;}"
+                }]
             });
         });
     });
