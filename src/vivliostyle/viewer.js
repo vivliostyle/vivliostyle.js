@@ -160,8 +160,9 @@ goog.scope(function() {
      * Load a HTML or an XML document.
      * @param {string} url
      * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
+     * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
      */
-    Viewer.prototype.loadDocument = function(url, opt_documentOptions) {
+    Viewer.prototype.loadDocument = function(url, opt_documentOptions, opt_viewerOptions) {
         if (!url) {
             this.eventTarget.dispatchEvent({"type": "error", "content": "No URL specified"});
         }
@@ -173,6 +174,10 @@ goog.scope(function() {
             userStyleSheet = uss.map(function(s) {
                 return { url: s.url || null, text: s.text || null};
             });
+        }
+
+        if (opt_viewerOptions) {
+            Object.assign(this.options, opt_viewerOptions);
         }
 
         var command = Object.assign({
