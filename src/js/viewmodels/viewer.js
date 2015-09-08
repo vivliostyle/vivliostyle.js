@@ -26,6 +26,15 @@ Viewer.prototype.setupViewerEventHandler = function() {
     this.viewer_.addListener("error", function(payload) {
         logger.error(payload.content);
     });
+    this.viewer_.addListener("resizestart", function() {
+        var status = this.state.status();
+        if (status === "complete") {
+            this.state_.status.value("resizing");
+        }
+    }.bind(this));
+    this.viewer_.addListener("resizeend", function() {
+        this.state_.status.value("complete");
+    }.bind(this));
     this.viewer_.addListener("loaded", function() {
         this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
         this.state_.status.value("complete");
@@ -41,7 +50,7 @@ Viewer.prototype.setupViewerEventHandler = function() {
 Viewer.prototype.setupViewerOptionSubscriptions = function() {
     ko.computed(function() {
         var viewerOptions = this.viewerOptions_.toObject();
-        if (this.state.status() === "complete") {
+        if (this.state.status.peek() === "complete") {
             this.viewer_.setOptions(viewerOptions);
         }
     }, this).extend({rateLimit: 0});

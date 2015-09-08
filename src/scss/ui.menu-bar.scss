@@ -20,7 +20,9 @@ $icon-height: 36px;
 		margin-top: $icon-height;
 		height: calc(100vh - #{$icon-height});
 		width: 100vw;
-		overflow: auto;
+		&[data-vivliostyle-viewer-status=complete] {
+			overflow: auto;
+		}
 	}
 }
 
