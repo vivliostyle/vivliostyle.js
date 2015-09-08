@@ -439,6 +439,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
 		return adapt.task.newResult(true);
 	}
 	var self = this;
+	self.callback({"t": "resizestart"});
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("resize");
 	if (self.opfView && !self.pagePosition) {
 		self.pagePosition = self.opfView.getPagePosition();
@@ -451,7 +452,10 @@ adapt.viewer.Viewer.prototype.resize = function() {
         self.showCurrent(page).then(function() {
             self.reportPosition().then(function(p) {
                 var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
-                r.then(function() { frame.finish(p); })
+                r.then(function() {
+                    self.callback({"t": "resizeend"});
+                    frame.finish(p);
+                });
             });
         });
     });
