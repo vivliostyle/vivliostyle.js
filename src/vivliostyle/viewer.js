@@ -34,13 +34,15 @@ goog.scope(function() {
      * - pageBorderWidth: Width of a border between two pages in a single spread (px). Effective only when spreadView option is true. default: 1
      * - renderAllPages: Render all pages at the document load time. default: true
      * - spreadView: Display two pages in a single spread at a time. default: false
+     * - zoom: Zoom factor with which pages are displayed. default: 1
      * @dict
      * @typedef {{
      *     autoResize: (boolean|undefined),
      *     fontSize: (number|undefined),
      *     pageBorderWidth: (number|undefined),
      *     renderAllPages: (boolean|undefined),
-     *     spreadView: (boolean|undefined)
+     *     spreadView: (boolean|undefined),
+     *     zoom: (number|undefined)
      * }}
      */
     vivliostyle.viewer.ViewerOptions;
@@ -54,7 +56,8 @@ goog.scope(function() {
             "fontSize": 16,
             "pageBorderWidth": 1,
             "renderAllPages": true,
-            "spreadView": false
+            "spreadView": false,
+            "zoom": 1
         };
     }
 

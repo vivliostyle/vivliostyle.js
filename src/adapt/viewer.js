@@ -77,6 +77,7 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {number} */ this.touchX = 0;
     /** @type {number} */ this.touchY = 0;
     /** @type {boolean} */ this.needResize = false;
+    /** @type {boolean} */ this.needRefresh = false;
     /** @type {?adapt.viewer.ViewportSize} */ this.viewportSize = null;
     /** @type {adapt.vtree.Page} */ this.currentPage = null;
     /** @type {?adapt.vtree.Spread} */ this.currentSpread = null;
@@ -265,17 +266,21 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
     if (typeof command["userAgentRootURL"] == "string") {
         adapt.base.resourceBaseURL = command["userAgentRootURL"];
     }
-    if (typeof command["spreadView"] == "boolean") {
+    if (typeof command["spreadView"] == "boolean" && command["spreadView"] !== this.pref.spreadView) {
         // Force relayout
         this.viewport = null;
         this.pref.spreadView = command["spreadView"];
         this.needResize = true;
     }
-    if (typeof command["pageBorder"] == "number") {
+    if (typeof command["pageBorder"] == "number" && command["pageBorder"] !== this.pref.pageBorder) {
         // Force relayout
         this.viewport = null;
         this.pref.pageBorder = command["pageBorder"];
         this.needResize = true;
+    }
+    if (typeof command["zoom"] == "number") {
+        this.zoom = command["zoom"];
+        this.needRefresh = true;
     }
 	return adapt.task.newResult(true);
 };
@@ -419,6 +424,7 @@ adapt.viewer.Viewer.prototype.reset = function() {
  * @returns {!adapt.task.Result}
  */
 adapt.viewer.Viewer.prototype.showCurrent = function(page) {
+    this.needRefresh = false;
     var self = this;
     if (this.pref.spreadView) {
         return this.opfView.getCurrentSpread().thenAsync(function(spread) {
@@ -690,6 +696,12 @@ adapt.viewer.Viewer.prototype.initEmbed = function (cmd) {
 				viewer.resize().then(function() {
 					loopFrame.continueLoop();
 				});
+            } else if (viewer.needRefresh) {
+                if (viewer.currentPage) {
+                    viewer.showCurrent(viewer.currentPage).then(function () {
+                        loopFrame.continueLoop();
+                    });
+                }
 			} else if (command) {
 				var cmd = command;
 				command = null;
