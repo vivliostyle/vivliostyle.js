@@ -30,6 +30,8 @@ function Navigation(viewerOptions, viewer, settingsPanel) {
         "navigateToRight",
         "navigateToFirst",
         "navigateToLast",
+        "zoomIn",
+        "zoomOut",
         "increaseFontSize",
         "decreaseFontSize",
         "defaultFontSize",
@@ -87,6 +89,26 @@ Navigation.prototype.navigateToFirst = function() {
 Navigation.prototype.navigateToLast = function() {
     if (!this.isNavigateToLastDisabled()) {
         this.viewer_.navigateToLast();
+        return true;
+    } else {
+        return false;
+    }
+};
+
+Navigation.prototype.zoomIn = function() {
+    if (!this.isZoomInDisabled()) {
+        var zoom = this.viewerOptions_.zoom();
+        this.viewerOptions_.zoom(zoom * 1.25);
+        return true;
+    } else {
+        return false;
+    }
+};
+
+Navigation.prototype.zoomOut = function() {
+    if (!this.isZoomOutDisabled()) {
+        var zoom = this.viewerOptions_.zoom();
+        this.viewerOptions_.zoom(zoom * 0.8);
         return true;
     } else {
         return false;

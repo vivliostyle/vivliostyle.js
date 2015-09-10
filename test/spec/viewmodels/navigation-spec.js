@@ -183,6 +183,56 @@ describe("Navigation", function() {
         });
     });
 
+    describe("zoomIn", function() {
+        it("increases zoom factor stored in ViewerOptions model and returns true", function () {
+            setDisabled(false);
+            var zoom = viewerOptions.zoom();
+            var ret = navigation.zoomIn();
+
+            expect(viewerOptions.zoom()).toBe(zoom * 1.25);
+            expect(ret).toBe(true);
+
+            ret = navigation.zoomIn();
+
+            expect(viewerOptions.zoom()).toBe(zoom * 1.25 * 1.25);
+            expect(ret).toBe(true);
+        });
+
+        it("do nothing and returns false when navigation is disabled", function() {
+            setDisabled(true);
+            var zoom = viewerOptions.zoom();
+            var ret = navigation.zoomIn();
+
+            expect(viewerOptions.zoom()).toBe(zoom);
+            expect(ret).toBe(false);
+        });
+    });
+
+    describe("zoomOut", function() {
+        it("decreases zoom factor stored in ViewerOptions model and returns true", function() {
+            setDisabled(false);
+            var zoom = viewerOptions.zoom();
+            var ret = navigation.zoomOut();
+
+            expect(viewerOptions.zoom()).toBe(zoom * 0.8);
+            expect(ret).toBe(true);
+
+            ret = navigation.zoomOut();
+
+            expect(viewerOptions.zoom()).toBe(zoom * 0.8 * 0.8);
+            expect(ret).toBe(true);
+        });
+
+        it("do nothing and returns false when navigation is disabled", function() {
+            setDisabled(true);
+            var zoom = viewerOptions.zoom();
+            var ret = navigation.zoomOut();
+
+            expect(viewerOptions.zoom()).toBe(zoom);
+            expect(ret).toBe(false);
+        });
+    });
+
     describe("increaseFontSize", function() {
         it("increases font size stored in ViewerOptions model and returns true", function () {
             setDisabled(false);

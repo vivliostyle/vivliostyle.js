@@ -10,13 +10,15 @@ function getViewerOptionsFromURL() {
 function getDefaultValues() {
     return {
         fontSize: 16,
-        spreadView: false
+        spreadView: false,
+        zoom: 1
     };
 }
 
 function ViewerOptions(options) {
     this.fontSize = ko.observable();
     this.spreadView = ko.observable();
+    this.zoom = ko.observable();
     if (options) {
         this.copyFrom(options);
     } else {
@@ -24,18 +26,21 @@ function ViewerOptions(options) {
         var urlOptions = getViewerOptionsFromURL();
         this.fontSize(defaultValues.fontSize);
         this.spreadView(urlOptions.spreadView || defaultValues.spreadView);
+        this.zoom(defaultValues.zoom);
     }
 }
 
 ViewerOptions.prototype.copyFrom = function(other) {
     this.fontSize(other.fontSize());
     this.spreadView(other.spreadView());
+    this.zoom(other.zoom());
 };
 
 ViewerOptions.prototype.toObject = function() {
     return {
         fontSize: this.fontSize(),
-        spreadView: this.spreadView()
+        spreadView: this.spreadView(),
+        zoom: this.zoom()
     }
 };
 

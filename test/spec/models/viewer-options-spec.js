@@ -29,10 +29,12 @@ describe("ViewerOptions", function() {
             var other = new ViewerOptions();
             other.spreadView(false);
             other.fontSize(20);
+            other.zoom(1.2);
             var options = new ViewerOptions(other);
 
             expect(options.spreadView()).toBe(false);
             expect(options.fontSize()).toBe(20);
+            expect(options.zoom()).toBe(1.2);
         });
     });
 
@@ -41,13 +43,16 @@ describe("ViewerOptions", function() {
             var options = new ViewerOptions();
             options.spreadView(true);
             options.fontSize(10);
+            options.zoom(1.4);
             var other = new ViewerOptions();
             other.spreadView(false);
             other.fontSize(20);
+            other.zoom(1.2);
             options.copyFrom(other);
 
             expect(options.spreadView()).toBe(false);
             expect(options.fontSize()).toBe(20);
+            expect(options.zoom()).toBe(1.2);
         });
     });
 
@@ -56,10 +61,12 @@ describe("ViewerOptions", function() {
             var options = new ViewerOptions();
             options.spreadView(true);
             options.fontSize(20);
+            options.zoom(1.2);
 
             expect(options.toObject()).toEqual({
                 fontSize: 20,
-                spreadView: true
+                spreadView: true,
+                zoom: 1.2
             });
         });
     });
