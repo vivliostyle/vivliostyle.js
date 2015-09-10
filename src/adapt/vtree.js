@@ -106,6 +106,7 @@ adapt.vtree.Page = function(container) {
 		}
 	};
 	/** @type {Object.<string,Array.<Element>>} */ this.elementsById = {};
+	/** @const @type {{width: number, height: number}} */ this.dimensions = {width: 0, height: 0};
 	/** @type {boolean} */ this.isFirstPage = false;
 	/** @type {boolean} */ this.isLastPage = false;
 	/** @type {boolean} */ this.isAutoWidth = false;
@@ -178,14 +179,21 @@ adapt.vtree.Page.prototype.registerElementWithId = function(element, id) {
 
 /**
  * @param {Array.<adapt.vtree.Trigger>} triggers
+ * @param {adapt.vtree.ClientLayout} clientLayout
  * @return {void}
  */
-adapt.vtree.Page.prototype.finish = function(triggers) {
+adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
 	var list = this.delayedItems;
 	for (var i = 0; i < list.length; i++) {
 		var item = list[i];
 		adapt.base.setCSSProperty(item.target, item.name, item.value.toString());
 	}
+
+	// use size of the container of the PageMasterInstance
+	var rect = clientLayout.getElementClientRect(this.container.firstElementChild);
+	this.dimensions.width = rect.width;
+	this.dimensions.height = rect.height;
+
 	for (var i = 0; i < triggers.length; i++) {
 		var trigger = triggers[i];
 		var refs = this.elementsById[trigger.ref];
@@ -199,6 +207,14 @@ adapt.vtree.Page.prototype.finish = function(triggers) {
 			}
 		}
 	}
+};
+
+/**
+ * Zoom page.
+ * @param {number} scale Factor to which the page will be scaled.
+ */
+adapt.vtree.Page.prototype.zoom = function(scale) {
+	adapt.base.setCSSProperty(this.container, "transform", "scale(" + scale + ")");
 };
 
 /**

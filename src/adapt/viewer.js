@@ -40,6 +40,7 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
 	var self = this;
 	/** @const */ this.window = window;
     /** @const */ this.viewportElement = viewportElement;
+    viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
 	/** @const */ this.instanceId = instanceId;
 	/** @const */ this.callbackFn = callbackFn;
 	var document = window.document;
@@ -81,6 +82,7 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {?adapt.vtree.Spread} */ this.currentSpread = null;
     /** @type {?adapt.epub.Position} */ this.pagePosition = null;
     /** @type {number} */ this.fontSize = 16;
+    /** @type {number} */ this.zoom = 1;
     /** @type {boolean} */ this.waitForLoading = false;
     /** @type {boolean} */ this.renderAllPages = true;
     /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();
@@ -406,6 +408,7 @@ adapt.viewer.Viewer.prototype.reset = function() {
         this.opfView.removeRenderedPages();
 	}
 	this.viewport = this.createViewport();
+    this.viewport.resetZoomBox();
     this.opfView = new adapt.epub.OPFView(this.opf, this.viewport, this.fontMapper, this.pref);
 };
 
@@ -420,14 +423,59 @@ adapt.viewer.Viewer.prototype.showCurrent = function(page) {
     if (this.pref.spreadView) {
         return this.opfView.getCurrentSpread().thenAsync(function(spread) {
             self.showSpread(spread);
+            self.setSpreadZoom(spread);
             self.currentPage = page;
             return adapt.task.newResult(null);
         });
     } else {
         this.showPage(page);
+        this.setPageZoom(page);
         this.currentPage = page;
         return adapt.task.newResult(null);
     }
+};
+
+/**
+ * @param {!adapt.vtree.Page} page
+ */
+adapt.viewer.Viewer.prototype.setPageZoom = function(page) {
+    this.viewport.sizeZoomBox(page.dimensions.width * this.zoom, page.dimensions.height * this.zoom);
+    page.zoom(this.zoom);
+};
+
+/**
+ * @param {!adapt.vtree.Spread} spread
+ */
+adapt.viewer.Viewer.prototype.setSpreadZoom = function(spread) {
+    var dim = this.getSpreadDimensions(spread);
+    this.viewport.sizeZoomBox(dim.width * this.zoom, dim.height * this.zoom);
+    if (spread.left) {
+        spread.left.zoom(this.zoom);
+    }
+    if (spread.right) {
+        spread.right.zoom(this.zoom);
+    }
+};
+
+/**
+ * Returns width and height of the spread, including the margin between pages.
+ * @param {!adapt.vtree.Spread} spread
+ * @returns {!{width: number, height: number}}
+ */
+adapt.viewer.Viewer.prototype.getSpreadDimensions = function(spread) {
+    var width = 0, height = 0;
+    if (spread.left) {
+        width += spread.left.dimensions.width;
+        height = spread.left.dimensions.height;
+    }
+    if (spread.right) {
+        width += spread.right.dimensions.width;
+        height = Math.max(height, spread.right.dimensions.height);
+    }
+    if (spread.left && spread.right) {
+        width += this.pref.pageBorder * 2;
+    }
+    return {width: width, height: height};
 };
 
 /**

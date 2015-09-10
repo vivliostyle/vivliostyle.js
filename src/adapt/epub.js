@@ -1314,7 +1314,7 @@ adapt.epub.OPFView.prototype.navigateTo = function(href) {
 adapt.epub.OPFView.prototype.makePage = function(viewItem, pos) {
 	var viewport = viewItem.instance.viewport;
     var pageCont = /** @type {HTMLElement} */ (viewport.document.createElement("div"));
-    viewport.root.appendChild(pageCont);
+    viewport.zoomBox.appendChild(pageCont);
     pageCont.style.position = "relative";
     pageCont.style.visibility = "hidden";
     pageCont.style.left = "0px";
