@@ -37,6 +37,8 @@
         display: flex;
         -webkit-flex-shrink: 0;
         flex-shrink: 0;
+        -webkit-justify-content: center;
+        justify-content: center;
         overflow: hidden;
     }
 
@@ -58,7 +60,6 @@
         -webkit-transform-origin: center top;
         transform-origin: center top;
     }
-
     [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] > div > div[data-vivliostyle-page-side=left] {
         margin-right: 1px;
         -moz-transform-origin: right top;
@@ -72,5 +73,13 @@
         -ms-transform-origin: left top;
         -webkit-transform-origin: left top;
         transform-origin: left top;
+    }
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] > div > div[data-vivliostyle-unpaired-page=true] {
+        margin-left: auto;
+        margin-right: auto;
+        -moz-transform-origin: center top;
+        -ms-transform-origin: center top;
+        -webkit-transform-origin: center top;
+        transform-origin: center top;
     }
 }
