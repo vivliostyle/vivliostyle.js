@@ -5,6 +5,7 @@
  */
 goog.provide('adapt.viewer');
 
+goog.require('goog.asserts');
 goog.require('adapt.task');
 goog.require('adapt.vgen');
 goog.require('adapt.expr');
@@ -486,6 +487,39 @@ adapt.viewer.Viewer.prototype.getSpreadDimensions = function(spread) {
         width += this.pref.pageBorder * 2;
     }
     return {width: width, height: height};
+};
+
+/**
+ * @enum {string}
+ */
+adapt.viewer.ZoomType = {
+    FIT_INSIDE_VIEWPORT: "fit inside viewport"
+};
+
+/**
+ * Returns zoom factor corresponding to the specified zoom type.
+ * @param {adapt.viewer.ZoomType} type
+ * @returns {number}
+ */
+adapt.viewer.Viewer.prototype.queryZoomFactor = function(type) {
+    if (!this.currentPage) {
+        throw new Error("no page exists.");
+    }
+    switch (type) {
+        case adapt.viewer.ZoomType.FIT_INSIDE_VIEWPORT:
+            var pageDim;
+            if (this.pref.spreadView) {
+                goog.asserts.assert(this.currentSpread);
+                pageDim = this.getSpreadDimensions(this.currentSpread);
+            } else {
+                pageDim = this.currentPage.dimensions;
+            }
+            var widthZoom = this.viewport.width / pageDim.width;
+            var heightZoom = this.viewport.height / pageDim.height;
+            return Math.min(widthZoom, heightZoom);
+        default:
+            throw new Error("unknown zoom type: " + type);
+    }
 };
 
 /**

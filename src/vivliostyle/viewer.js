@@ -249,6 +249,21 @@ goog.scope(function() {
         this.adaptViewer.sendCommand({"a": "moveTo", "url": url});
     };
 
+    /**
+     * @enum {string}
+     */
+    vivliostyle.viewer.ZoomType = adapt.viewer.ZoomType;
+    /** @const */ var ZoomType = vivliostyle.viewer.ZoomType;
+
+    /**
+     * Returns zoom factor corresponding to the specified zoom type.
+     * @param {vivliostyle.viewer.ZoomType} type
+     * @returns {number}
+     */
+    Viewer.prototype.queryZoomFactor = function(type) {
+        return this.adaptViewer.queryZoomFactor(type);
+    };
+
     vivliostyle.namespace.exportSymbol("vivliostyle.viewer.Viewer", Viewer);
     goog.exportProperty(Viewer.prototype, "setOptions", Viewer.prototype.setOptions);
     goog.exportProperty(Viewer.prototype, "addListener", Viewer.prototype.addListener);
@@ -257,4 +272,7 @@ goog.scope(function() {
     goog.exportProperty(Viewer.prototype, "getCurrentPageProgression", Viewer.prototype.getCurrentPageProgression);
     goog.exportProperty(Viewer.prototype, "navigateToPage", Viewer.prototype.navigateToPage);
     goog.exportProperty(Viewer.prototype, "navigateToInternalUrl", Viewer.prototype.navigateToInternalUrl);
+    goog.exportProperty(Viewer.prototype, "queryZoomFactor", Viewer.prototype.queryZoomFactor);
+    vivliostyle.namespace.exportSymbol("vivliostyle.viewer.ZoomType", ZoomType);
+    goog.exportProperty(ZoomType, "FIT_INSIDE_VIEWPORT", ZoomType.FIT_INSIDE_VIEWPORT);
 });
