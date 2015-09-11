@@ -2,6 +2,8 @@ sudo: false
 language: node_js
 node_js:
 - stable
+before_install:
+- npm install vivliostyle@next
 script:
 - npm run build
 - npm test-sauce
