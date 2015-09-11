@@ -1,4 +1,4 @@
 node_modules
 
-build/vivliostyle.min.js
+lib/vivliostyle.min.js
 test/wpt/sauce-credentials.ini

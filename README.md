@@ -64,7 +64,7 @@ npm install
 npm run build
 ```
 
-Then the compiled JavaScript file appears at `build/vivliostyle.min.js`.
+Then the compiled JavaScript file appears at `lib/vivliostyle.min.js`.
 Modify vivliostyle-viewer.html to reference only vivliostyle-viewer.min.js
 (goog/base.js is not needed, but MathJax-related files can be kept if desired).
 You might need to modify `uaRoot` parameter in vivliostyle-viewer.html to
