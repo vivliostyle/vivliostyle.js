@@ -6,7 +6,13 @@
 
     var list = [
         "debug-param.js",
+
         "closure/goog/base.js",
+        "closure/goog/debug/error.js",
+        "closure/goog/dom/nodetype.js",
+        "closure/goog/string/string.js",
+        "closure/goog/asserts/asserts.js",
+
         "vivliostyle/namespace.js",
         "vivliostyle/constants.js",
         "adapt/base.js",
