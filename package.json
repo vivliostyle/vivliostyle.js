@@ -23,7 +23,7 @@
   "homepage": "https://github.com/vivliostyle/vivliostyle-js-viewer",
   "dependencies": {
     "font-awesome": "^4.3.0",
-    "vivliostyle": "^0.2.0"
+    "vivliostyle": "next"
   },
   "devDependencies": {
     "babelify": "^6.1.3",
