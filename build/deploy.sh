@@ -2,11 +2,14 @@
 set -ev
 
 if [ "${TRAVIS_PULL_REQUEST}" = "false" -a "${TRAVIS_BRANCH}" = "master" ]; then
+
     # publish to npm
-    echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
-    npm --no-git-tag-version version minor
-    npm --no-git-tag-version version $(grep '^ *"version":' package.json | sed -e 's/^.*"\([^"]*\)",$/\1/')-pre.$(date -u "+%Y%m%d%H%M%S")
-    npm publish --tag next
+    version=$(grep '^ *"version":' package.json | sed -e 's/^.*"\([^"]*\)",$/\1/')
+    if [ $(echo ${version} | grep -- '-pre$') ]; then
+        echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
+        npm --no-git-tag-version version ${version}.$(date -u "+%Y%m%d%H%M%S")
+        npm publish --tag next
+    fi
 
     # setup ssh key
     echo -e "Host github.com\n\tStrictHostKeyChecking no\nIdentityFile ~/.ssh/deploy.key\n" >> ~/.ssh/config
