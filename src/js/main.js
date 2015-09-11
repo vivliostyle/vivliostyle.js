@@ -1,4 +1,4 @@
-import vivliostyleInstance from "vivliostyle/build/vivliostyle.min.js";
+import vivliostyleInstance from "vivliostyle";
 import vivliostyle from "./models/vivliostyle";
 import vivliostyleViewer from "./vivliostyle-viewer";
 
