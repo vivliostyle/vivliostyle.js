@@ -282,7 +282,7 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
         this.pref.pageBorder = command["pageBorder"];
         this.needResize = true;
     }
-    if (typeof command["zoom"] == "number") {
+    if (typeof command["zoom"] == "number" && command["zoom"] !== this.zoom) {
         this.zoom = command["zoom"];
         this.needRefresh = true;
     }
