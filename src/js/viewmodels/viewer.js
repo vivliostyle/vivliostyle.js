@@ -1,8 +1,9 @@
 import ko from "knockout";
 import obs from "../utils/observable-util";
 import logger from "../logging/logger";
+import vivliostyle from "../models/vivliostyle";
 
-function Viewer(vivliostyle, viewerSettings, viewerOptions) {
+function Viewer(viewerSettings, viewerOptions) {
     this.viewerOptions_ = viewerOptions;
     this.documentOptions_ = null;
     this.viewer_ = new vivliostyle.viewer.Viewer(viewerSettings, viewerOptions.toObject());

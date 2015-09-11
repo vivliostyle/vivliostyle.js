@@ -3,9 +3,9 @@ import menuButtonBinding from "./bindings/menuButton.js";
 import ViewerApp from "./viewmodels/viewer-app";
 
 export default {
-    start: function(vivliostyle) {
+    start: function() {
         function startViewer() {
-            ko.applyBindings(new ViewerApp(vivliostyle));
+            ko.applyBindings(new ViewerApp());
         }
 
         if(window["__loaded"])
