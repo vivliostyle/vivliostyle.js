@@ -2,9 +2,11 @@ sudo: false
 language: node_js
 node_js:
 - stable
+before_install:
+- gem install compass
 script:
 - npm run build
-- npm test-sauce
+- npm run test-sauce
 notifications:
   email: false
   slack:
