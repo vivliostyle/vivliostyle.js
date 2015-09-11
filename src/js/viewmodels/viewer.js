@@ -90,4 +90,8 @@ Viewer.prototype.navigateToLast = function() {
     this.viewer_.navigateToPage("last");
 };
 
+Viewer.prototype.queryZoomFactor = function(type) {
+    return this.viewer_.queryZoomFactor(type);
+};
+
 export default Viewer;

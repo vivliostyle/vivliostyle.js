@@ -1,12 +1,16 @@
 import ko from "knockout";
+import vivliostyle from "../../../src/js/models/vivliostyle";
 import ViewerOptions from "../../../src/js/models/viewer-options";
 import Navigation from "../../../src/js/viewmodels/navigation";
+import vivliostyleMock from "../../mock/models/vivliostyle";
 
 describe("Navigation", function() {
     var navigation;
     var viewerOptions;
     var viewer;
     var settingsPanel;
+
+    vivliostyleMock();
 
     beforeEach(function() {
         viewerOptions = new ViewerOptions();
@@ -17,7 +21,8 @@ describe("Navigation", function() {
             navigateToLeft: function() {},
             navigateToRight: function() {},
             navigateToFirst: function() {},
-            navigateToLast: function() {}
+            navigateToLast: function() {},
+            queryZoomFactor: function() {}
         };
         settingsPanel = {opened: ko.observable(false)};
         navigation = new Navigation(viewerOptions, viewer, settingsPanel);
@@ -230,6 +235,50 @@ describe("Navigation", function() {
 
             expect(viewerOptions.zoom()).toBe(zoom);
             expect(ret).toBe(false);
+        });
+    });
+
+    describe("zoomDefault", function() {
+        beforeEach(function() {
+            spyOn(viewer, "queryZoomFactor").and.returnValue(1.2);
+        });
+
+        it("query zoom factor for 'fit inside viewport' to the viewer and set returned zoom factor in ViewerOptions model and returns true", function() {
+            setDisabled(false);
+            viewerOptions.zoom(1);
+            var ret = navigation.zoomDefault();
+
+            expect(viewer.queryZoomFactor).toHaveBeenCalledWith("fit inside viewport");
+            expect(viewerOptions.zoom()).toBe(1.2);
+            expect(ret).toBe(true);
+        });
+
+        it("do nothing and returns false when navigation is disabled", function() {
+            setDisabled(true);
+            viewerOptions.zoom(1);
+            var ret = navigation.zoomDefault();
+
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
+            expect(viewerOptions.zoom()).toBe(1);
+            expect(ret).toBe(false);
+        });
+
+        it("if force=true is specified, do the zoom even if navigation is disabled", function() {
+            setDisabled(true);
+            viewerOptions.zoom(1);
+
+            // if the argument not equals to 'true' (compared using ===), do nothing
+            var ret = navigation.zoomDefault({});
+
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
+            expect(viewerOptions.zoom()).toBe(1);
+            expect(ret).toBe(false);
+
+            ret = navigation.zoomDefault(true);
+
+            expect(viewer.queryZoomFactor).toHaveBeenCalledWith(vivliostyle.viewer.ZoomType.FIT_INSIDE_VIEWPORT);
+            expect(viewerOptions.zoom()).toBe(1.2);
+            expect(ret).toBe(true);
         });
     });
 

@@ -1,4 +1,5 @@
 import ko from "knockout";
+import vivliostyle from "../models/vivliostyle";
 import ViewerOptions from "../models/viewer-options";
 import {Keys} from "../utils/key-util";
 
@@ -32,6 +33,7 @@ function Navigation(viewerOptions, viewer, settingsPanel) {
         "navigateToLast",
         "zoomIn",
         "zoomOut",
+        "zoomDefault",
         "increaseFontSize",
         "decreaseFontSize",
         "defaultFontSize",
@@ -109,6 +111,16 @@ Navigation.prototype.zoomOut = function() {
     if (!this.isZoomOutDisabled()) {
         var zoom = this.viewerOptions_.zoom();
         this.viewerOptions_.zoom(zoom * 0.8);
+        return true;
+    } else {
+        return false;
+    }
+};
+
+Navigation.prototype.zoomDefault = function(force) {
+    if (force === true || !this.isZoomDefaultDisabled()) {
+        var zoom = this.viewer_.queryZoomFactor(vivliostyle.viewer.ZoomType.FIT_INSIDE_VIEWPORT);
+        this.viewerOptions_.zoom(zoom);
         return true;
     } else {
         return false;
