@@ -108,6 +108,8 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
 	var fragment = /** @type {?string} */ (command["fragment"]);
 	var haveZipMetadata = !!command["zipmeta"];
     var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
+    // force relayout
+    this.viewport = null;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadEPUB");
 	var self = this;
     self.configure(command).then(function() {
@@ -144,6 +146,8 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
     var doc = /** @type {Document} */ (command["document"]);
 	var fragment = /** @type {?string} */ (command["fragment"]);
     var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
+    // force relayout
+    this.viewport = null;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadXML");
 	var self = this;
     self.configure(command).then(function() {
