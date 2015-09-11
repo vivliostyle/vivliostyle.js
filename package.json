@@ -21,6 +21,7 @@
     "lib",
     "resources"
   ],
+  "main": "lib/vivliostyle.min.js",
   "homepage": "https://github.com/vivliostyle/vivliostyle.js",
   "devDependencies": {
     "font-awesome": "^4.3.0",
