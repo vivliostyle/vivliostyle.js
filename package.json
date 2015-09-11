@@ -24,7 +24,6 @@
   "homepage": "https://github.com/vivliostyle/vivliostyle-js-viewer",
   "dependencies": {
     "font-awesome": "^4.3.0",
-    "fs-extra": "^0.22.1",
     "vivliostyle": "vivliostyle/vivliostyle.js#master"
   },
   "devDependencies": {
