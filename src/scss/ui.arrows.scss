@@ -7,8 +7,8 @@
 @import "../../node_modules/font-awesome/scss/_variables";
 @include at-font-face("FontAwesome", "../fonts/fontawesome-webfont", "#fontawesomeregular");
 
-$button-size: 40px;
-$button-offset: 5px;
+$button-size: 36px;
+$button-offset: 0;
 
 #vivliostyle-page-navigation-up,
 #vivliostyle-page-navigation-down,
@@ -19,28 +19,30 @@ $button-offset: 5px;
 	color: transparent;
 	background: transparent;
 	cursor: pointer;
-	opacity: 0;
 	z-index: 1000;
-	[data-vivliostyle-viewer-status="loading"] & {
-		opacity: 0;
-	}
-	[data-vivliostyle-viewer-status="complete"] & {
-		opacity: .2;
+	color: rgba(255, 255, 255, 0.00);
+	background: rgba(0, 0, 0, 0.00);
+	&.vivliostyle-menu-enabled {
+		color: rgba(0, 0, 0, 0.50);
+		background: rgba(0, 0, 0, 0.00);
 		@include transition(.25s ease-out);
 	}
 	&[data-vivliostyle-ui-state="attention"] {
-		opacity: 1.0;
+		color: rgba(255, 255, 255, 0.75);
+		background: rgba(0, 0, 0, 0.25);
 		@include transition(.25s ease-in);
 	}
 	&:hover {
-		opacity: 1;
+		color: rgba(255, 255, 255, 0.75);
+		background: rgba(0, 0, 0, 0.25);
 		@include transition(.1s linear !important);
 	}
 	&:active {
-		opacity: .5;
+		color: rgba(255, 255, 255, 1.00);
+		background: rgba(0, 0, 0, 0.50);
 		@include transition(.1s linear !important);
 	}
-	&:before, &:after {
+	&:after {
 		@include box-sizing(content-box);
 		display: block;
 		position: absolute;
@@ -50,23 +52,12 @@ $button-offset: 5px;
 		bottom: 0;
 		margin: auto;
 		border-radius: 50%;
-	}
-	&:before {
-		content: "";
-		width: $button-size;
-		height: $button-size;
-		border: solid .2em white;
-		background: black;
-	}
-	&:after {
-		width: $button-size * .8;
-		height: $button-size * .8;
-		font-size: $button-size * .5;
-		line-height: 1.55;
+		width: $button-size * .6;
+		height: $button-size * .6;
+		font-size: $button-size * .64;
+		line-height: 1;
 		text-align: center;
 		vertical-align: middle;
-		color: black;
-		background: white;
 		@include font-icon("FontAwesome");
 	}
 }
@@ -76,12 +67,12 @@ $button-offset: 5px;
 	left: 0;
 	right: 0;
 	width: 100%;
-	height: $button-size + $button-offset * 2;
+	height: ($button-size + $button-offset * 2) * 1.0;
 }
 #vivliostyle-page-navigation-up {
 	top: 0;
 	&:after {
-		content: $fa-var-arrow-up;
+		content: $fa-var-arrow-circle-up;
 	}
 	&:hover {
 		cursor: n-resize;
@@ -91,7 +82,7 @@ $button-offset: 5px;
 	bottom: 0;
 	cursor: s-resize;
 	&:after {
-		content: $fa-var-arrow-down;
+		content: $fa-var-arrow-circle-down;
 	}
 }
 
@@ -99,21 +90,21 @@ $button-offset: 5px;
 #vivliostyle-page-navigation-right {
 	top: 0;
 	bottom: 0;
-	width: $button-size + $button-offset * 2;
+	width: ($button-size + $button-offset * 2) * 1.0;
 	height: 100%;
 }
 #vivliostyle-page-navigation-left {
 	left: 0;
 	cursor: w-resize;
 	&:after {
-		content: $fa-var-arrow-left;
+		content: $fa-var-chevron-left;
 	}
 }
 #vivliostyle-page-navigation-right {
 	right: 0;
 	cursor: e-resize;
 	&:after {
-		content: $fa-var-arrow-right;
+		content: $fa-var-chevron-right;
 		text-indent: .125em;
 	}
 }

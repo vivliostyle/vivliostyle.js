@@ -1,3 +1,5 @@
+import vivliostyle from "./models/vivliostyle";
 import vivliostyleViewer from "./vivliostyle-viewer";
 
-vivliostyleViewer.start(window.vivliostyle);
+vivliostyle.setInstance(window.vivliostyle);
+vivliostyleViewer.start();

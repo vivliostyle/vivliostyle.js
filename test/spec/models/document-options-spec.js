@@ -1,4 +1,3 @@
-"use strict";
 import DocumentOptions from "../../../src/js/models/document-options";
 import urlParameters from "../../../src/js/stores/url-parameters"
 
@@ -38,7 +37,10 @@ describe("DocumentOptions", function() {
             options.fragment("ghi");
 
             expect(options.toObject()).toEqual({
-               fragment: "ghi"
+                fragment: "ghi",
+                userStyleSheet: [{
+                    text: "@page {size: auto;}"
+                }]
             });
         });
     });

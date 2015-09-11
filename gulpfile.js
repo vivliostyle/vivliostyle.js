@@ -24,7 +24,8 @@ var DIRS = {
     html: {src: "html", dest: "", srcPattern: "*.ejs"},
     js: {src: "js"},
     css: {src: "scss", dest: "css", srcPattern: "*.scss"},
-    resources: {src: "../node_modules/vivliostyle/resources", dest: "resources"}
+    resources: {src: "../node_modules/vivliostyle/resources", dest: "resources"},
+    mathjax: {src: "../node_modules/mathjax", dest: "mathjax"}
 };
 var JS_ENTRIES = {
     production: "main.js",
@@ -46,7 +47,7 @@ function destDir(type) {
     return DEST_DIR + "/" + (typeof dirs.dest === "string" ? dirs.dest : dirs.src);
 }
 function srcPattern(type) {
-    return SRC_DIR + "/" + DIRS[type].src + "/" + (DIRS[type].srcPattern || "*");
+    return SRC_DIR + "/" + DIRS[type].src + "/" + (DIRS[type].srcPattern || "**/*");
 }
 function serverStartPath(development) {
     var name = development ? HTML_FILENAMES.development : HTML_FILENAMES.production;
@@ -97,13 +98,14 @@ gulp.task("build:js-dev", function() {
 function copyTask(type) {
     var dest = destDir(type);
     return gulp.task("build:" + type, function() {
-        gulp.src(srcPattern(type))
+        return gulp.src(srcPattern(type))
             .pipe(changed(dest))
             .pipe(gulp.dest(dest));
     });
 }
 copyTask("fonts");
 copyTask("resources");
+copyTask("mathjax");
 
 // HTML build
 function buildHtml(development) {
@@ -148,6 +150,7 @@ gulp.task("build", [
     "build:html",
     "build:fonts",
     "build:resources",
+    "build:mathjax",
     "build:css"
 ]);
 gulp.task("build-dev", [
@@ -167,6 +170,7 @@ gulp.task("watch", ["start-watching", "build"], function() {
     gulp.watch(srcPattern("html"), ["build:html"]);
     gulp.watch(srcPattern("fonts"), ["build:fonts"]);
     gulp.watch(srcPattern("resources"), ["build:resources"]);
+    gulp.watch(srcPattern("mathjax"), ["build:mathjax"]);
     gulp.watch(srcPattern("css"), ["build:css"]);
 });
 gulp.task("watch-dev", ["start-watching", "build-dev"], function() {

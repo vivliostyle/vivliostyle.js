@@ -1,44 +1,97 @@
-"use strict";
 import ko from "knockout";
+import obs from "../utils/observable-util";
+import logger from "../logging/logger";
+import vivliostyle from "../models/vivliostyle";
 
-function Viewer(vivliostyle, viewerSettings, opt_viewerOptions) {
-    this.viewer = new vivliostyle.viewer.Viewer(viewerSettings, opt_viewerOptions);
+function Viewer(viewerSettings, viewerOptions) {
+    this.viewerOptions_ = viewerOptions;
+    this.documentOptions_ = null;
+    this.viewer_ = new vivliostyle.viewer.Viewer(viewerSettings, viewerOptions.toObject());
+    var state_ = this.state_= {
+        status: obs.readonlyObservable("loading"),
+        pageProgression: obs.readonlyObservable(vivliostyle.constants.LTR)
+    };
     this.state = {
-        cfi: ko.observable(""),
-        status: ko.observable("loading"),
-        pageProgression: ko.observable(vivliostyle.constants.LTR)
+        status: state_.status.getter,
+        navigatable: ko.pureComputed(function() {
+            return state_.status.value() === "complete";
+        }),
+        pageProgression: state_.pageProgression.getter
     };
 
     this.setupViewerEventHandler();
-
-    ["navigateToLeft", "navigateToRight"].forEach(function(methodName) {
-        this[methodName] = this[methodName].bind(this);
-    }, this);
+    this.setupViewerOptionSubscriptions();
 }
 
 Viewer.prototype.setupViewerEventHandler = function() {
-    this.viewer.addListener("loaded", function() {
-        this.state.pageProgression(this.viewer.getCurrentPageProgression());
-        this.state.status("complete");
+    this.viewer_.addListener("error", function(payload) {
+        logger.error(payload.content);
+    });
+    this.viewer_.addListener("resizestart", function() {
+        var status = this.state.status();
+        if (status === "complete") {
+            this.state_.status.value("resizing");
+        }
     }.bind(this));
-    this.viewer.addListener("nav", function(payload) {
+    this.viewer_.addListener("resizeend", function() {
+        this.state_.status.value("complete");
+    }.bind(this));
+    this.viewer_.addListener("loaded", function() {
+        this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
+        this.state_.status.value("complete");
+    }.bind(this));
+    this.viewer_.addListener("nav", function(payload) {
         var cfi = payload.cfi;
         if (cfi) {
-            this.state.cfi(cfi);
+            this.documentOptions_.fragment(cfi);
         }
     }.bind(this));
 };
 
-Viewer.prototype.loadDocument = function(url, opt_documentOptions) {
-    this.viewer.loadDocument(url, opt_documentOptions);
+Viewer.prototype.setupViewerOptionSubscriptions = function() {
+    ko.computed(function() {
+        var viewerOptions = this.viewerOptions_.toObject();
+        if (this.state.status.peek() === "complete") {
+            this.viewer_.setOptions(viewerOptions);
+        }
+    }, this).extend({rateLimit: 0});
+};
+
+Viewer.prototype.loadDocument = function(documentOptions, viewerOptions) {
+    this.state_.status.value("loading");
+    if (viewerOptions) {
+        this.viewerOptions_.copyFrom(viewerOptions);
+    }
+    this.documentOptions_ = documentOptions;
+    this.viewer_.loadDocument(documentOptions.url(), documentOptions.toObject(), this.viewerOptions_.toObject());
+};
+
+Viewer.prototype.navigateToPrevious = function() {
+    this.viewer_.navigateToPage("previous");
+};
+
+Viewer.prototype.navigateToNext = function() {
+    this.viewer_.navigateToPage("next");
 };
 
 Viewer.prototype.navigateToLeft = function() {
-    this.viewer.navigateToPage("left");
+    this.viewer_.navigateToPage("left");
 };
 
 Viewer.prototype.navigateToRight = function() {
-    this.viewer.navigateToPage("right");
+    this.viewer_.navigateToPage("right");
+};
+
+Viewer.prototype.navigateToFirst = function() {
+    this.viewer_.navigateToPage("first");
+};
+
+Viewer.prototype.navigateToLast = function() {
+    this.viewer_.navigateToPage("last");
+};
+
+Viewer.prototype.queryZoomFactor = function(type) {
+    return this.viewer_.queryZoomFactor(type);
 };
 
 export default Viewer;

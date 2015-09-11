@@ -1,0 +1,310 @@
+@charset "utf-8";
+
+@import "compass";
+
+@import "./lib/_mixins";
+
+@import "../../node_modules/font-awesome/scss/_variables";
+@include at-font-face("FontAwesome", "../fonts/fontawesome-webfont", "#fontawesomeregular");
+
+$sans-serif: "游ゴシック", "Yu Gothic", "YuGothic", "ヒラギノ角ゴ ProN W3", "HiraKakuProN-W3", "ヒラギノ角ゴ Pro W3", "HiraKakuPro-W3", "メイリオ", "Meiryo", "ＭＳ ゴシック", "MS Gothic", sans-serif;
+$serif: "游明朝", "Yu Mincho", "YuMincho", "ヒラギノ明朝 ProN W3", "HiraMinProN-W3", "ヒラギノ明朝 Pro W3", "HiraMinPro-W3", "ＭＳ 明朝", "MS Mincho", sans-serif;
+
+$icon-offset-x: 2px;
+$icon-offset-y: 2px;
+$icon-width: 36px;
+$icon-height: 36px;
+
+@media screen {
+	#vivliostyle-viewer-viewport {
+		margin-top: $icon-height;
+		height: calc(100vh - #{$icon-height});
+		width: 100vw;
+		&[data-vivliostyle-viewer-status=complete] {
+			overflow: auto;
+		}
+	}
+}
+
+#vivliostyle-menu-bar {
+	@include box-sizing(border-box);
+	position: fixed;
+	z-index: 88888888;
+	left: 0;
+	top: 0;
+	width: 100vw;
+	height: $icon-height;
+	font-family: $sans-serif;
+	font-size: 14px;
+	line-height: 1;
+	color: white;
+	background: black;
+	box-shadow: 0 2px 2px rgba(0,0,0,.4);
+	-webkit-font-smoothing: subpixel-antialiased;
+	-webkit-text-size-adjust: 100%;
+	* {
+		margin: 0;
+		padding: 0;
+		border: none 0;
+	}
+	ul {
+		li {
+			list-style: none outside;
+			display: block;
+		}
+	}
+	ul.vivliostyle-menu {
+		position: relative;
+		float: left;
+		padding-left: 1px;
+		&:before {
+			content: "";
+			display: block;
+			position: absolute;
+			left: 0;
+			top: 1px;
+			width: 1px;
+			height: $icon-height - 2px;
+			background: rgb(64,64,64);
+		}
+		&:first-child/*, &#vivliostyle-menu_misc*/ { padding-left: 0; &:before { display: none; } }
+		&#vivliostyle-menu_misc { position: absolute; right: 0; }
+		li.vivliostyle-menu-item {
+			display: table-cell;
+			position: relative;
+			width: $icon-width;
+			height: $icon-height;
+			>.vivliostyle-menu-icon-button, >.vivliostyle-menu-icon-button:before, >.vivliostyle-menu-icon-button:after {
+				@include box-sizing(border-box);
+				display: block;
+				position: absolute;
+			}
+			>.vivliostyle-menu-icon-button {
+				left: $icon-offset-x;
+				top: $icon-offset-y;
+				width: $icon-width - $icon-offset-x * 2;
+				height: $icon-height - $icon-offset-y * 2;
+				border-radius: 2px;
+				color: transparent;
+				cursor: pointer;
+				&, &:before, &:after {
+					@include transition(linear .1s);
+				}
+				&:before, &:after {
+					color: white;
+				}
+				&:before {
+					left: 0;
+					top: 0;
+					width: 100%;
+					height: 100%;
+					line-height: $icon-height - $icon-offset-y * 2;
+					font-size: $icon-height * 0.45;
+					text-align: center;
+					@include font-icon("FontAwesome");
+				}
+				&:after {
+					width: 1em;
+					height: 1em;
+					line-height: $icon-height * 0.25;
+					text-align: center;
+					font-family: Verdana;
+					font-size: $icon-height * 0.25;
+					//font-weight: bold;
+				}
+				&.hover  { &:before, &:after { color: black; } background: rgba(255,255,255,0.75); }
+				&.active { &:before, &:after { color: black; } background: rgba(255,255,255,1); }
+			}
+			&.vivliostyle-menu-item_detail-opened >span {
+				&:before, &:after            { color: black; } background: rgba(255,255,255,1);
+				&.hover  { &:before, &:after { color: black; } background: rgba(255,255,255,0.75); }
+				&.active { &:before, &:after { color: white; } background: transparent; }
+			}
+			&.vivliostyle-menu-disabled >span {
+				cursor: default;
+				&:before, &:after { color: rgb(128,128,128) !important; } background: transparent !important;
+			}
+		//	&#vivliostyle-menu-item_move-left         >.vivliostyle-menu-icon-button:before { content: $fa-var-arrow-left; }
+			&#vivliostyle-menu-item_move-previous     >.vivliostyle-menu-icon-button:before { content: $fa-var-chevron-up; }
+		//	&#vivliostyle-menu-item_move-right        >.vivliostyle-menu-icon-button:before { content: $fa-var-arrow-right; }
+			&#vivliostyle-menu-item_move-next         >.vivliostyle-menu-icon-button:before { content: $fa-var-chevron-down; }
+			&#vivliostyle-menu-item_zoom-out          >.vivliostyle-menu-icon-button:before { content: $fa-var-search-minus; }
+		//	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:before { content: $fa-var-search; }
+			&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:before { content: $fa-var-arrows-alt/*$fa-var-search*/; top: .05em; /*font-size: $icon-height * 0.36;*/ }
+			&#vivliostyle-menu-item_zoom-in           >.vivliostyle-menu-icon-button:before { content: $fa-var-search-plus; }
+			&#vivliostyle-menu-item_text-size-smaller >.vivliostyle-menu-icon-button:before { content: $fa-var-font; }
+			&#vivliostyle-menu-item_text-size-default >.vivliostyle-menu-icon-button:before { content: $fa-var-font; }
+			&#vivliostyle-menu-item_text-size-larger  >.vivliostyle-menu-icon-button:before { content: $fa-var-font; }
+		//	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:after  { content: "="; left: $icon-width * 0.2625; top: $icon-height * 0.2; }
+		//	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:after  { content: ""; border: solid 1px; border-radius: 2px; width: 2.1em; height: 2.1em; left: $icon-width * 0.17; top: $icon-height * 0.18; }
+			&#vivliostyle-menu-item_text-size-smaller >.vivliostyle-menu-icon-button:after  { content: "-"; }
+			&#vivliostyle-menu-item_text-size-default >.vivliostyle-menu-icon-button:after  { content: "=" }
+			&#vivliostyle-menu-item_text-size-larger  >.vivliostyle-menu-icon-button:after  { content: "+"; }
+			&#vivliostyle-menu-item_text-size-smaller >.vivliostyle-menu-icon-button:after,
+			&#vivliostyle-menu-item_text-size-default >.vivliostyle-menu-icon-button:after,
+			&#vivliostyle-menu-item_text-size-larger  >.vivliostyle-menu-icon-button:after  {               right: $icon-width * 0.01; top: $icon-height * 0.15; }
+			&#vivliostyle-menu-item_misc-toggle       >.vivliostyle-menu-icon-button:before { content: $fa-var-bars; }
+			&#vivliostyle-menu-item_misc-toggle.vivliostyle-menu-item_detail-opened >.vivliostyle-menu-icon-button:before { content: $fa-var-times; }
+			.vivliostyle-menu-detail {
+				@include box-sizing(border-box);
+				display: none;
+				position: fixed;
+				right: 0;
+				top: $icon-height;
+				padding: 0 2px;
+				width: 100vw;
+				max-width: 320px;
+				height: calc(100% - #{$icon-height});
+				line-height: 1;
+				color: rgb(32,32,32); .vivliostyle-menu-disabled { color: rgb(160,160,160); }
+				background: rgba(248,248,248,0.9);
+				box-shadow: 0 2px 2px rgba(0,0,0,.4);
+				input, select {
+					display: inline-block;
+				}
+				input[type="text"] {
+					width: 4em;
+				}
+				input[type="radio"]:checked + span,
+				input[type="checkbox"]:checked + span {
+					text-decoration: underline;
+				}
+				button,
+				.vivliostyle-menu-button {
+					display: inline-block;
+					position: relative;
+					@include box-sizing(border-box);
+					padding: .6em 1.5em 0;
+					border: solid 1px rgb(128,128,128);
+					border-radius: 1.5em;
+					height: 2.5em;
+					line-height: 1em;
+					font-size: 12px;
+					font-weight: bold;
+					cursor: pointer;
+					&.vivliostyle-menu-button-positive {
+						color: black;
+						background: white;
+					}
+					&.vivliostyle-menu-button-negative {
+						color: black;
+						background: rgb(200,200,200);
+					}
+					&.hover {
+						color: white !important;
+						background: black !important;
+						@include transition(.1s linear);
+					}
+					&.active {
+						background: rgb(128,128,128) !important;
+						@include transition(0 linear);
+					}
+					@include transition(.15s linear);
+				}
+				small {
+					display: inline-block;
+					font-size: .9em;
+					//opacity: .9;
+				}
+				>.vivliostyle-menu-detail-main {
+					overflow-y: auto;
+					height: calc(100% - 2.5em * 12/14);
+					font-size: 14px;
+					-webkit-overflow-scrolling: touch;
+					.vivliostyle-menu-detail-group {
+						position: relative;
+						.vivliostyle-menu-detail-group-heading {
+							font-weight: bold;
+						}
+					}
+					.vivliostyle-menu-detail-group-buttons {
+						text-align: center;
+						>div, >li {
+							text-align: center;
+						}
+					}
+					.vivliostyle-menu-detail-group-inline {
+						>div, >li {
+							display: inline-block;
+							margin-left: 10px; &:first-child { margin-left: 0; }
+						}
+					}
+					>.vivliostyle-menu-detail-group {
+						border-top: solid 1px rgba(255,255,255,1);
+						padding: 15px 8px;
+						 &:first-child { border-top: none 0; }
+						>.vivliostyle-menu-detail-group {
+							font-size: .9em;
+						}
+						.vivliostyle-menu-detail-group {
+							padding-left: 1.3em;
+						}
+						div.vivliostyle-menu-detail-group {
+							margin-top: .8em;/*
+							padding-left: 1.2em;
+							&:before {
+								content: "";
+								display: block;
+								position: absolute;
+								left: .4em;
+								top: .4em;
+								border-radius: 50%;
+								width: .25em;
+								height: .25em;
+								background: rgb(128,128,128);
+							}*/
+						}
+						ul.vivliostyle-menu-detail-group {
+							padding-bottom: .1em;
+							&:before {
+								content: "";
+								display: block;
+								position: absolute;
+								left: .5em;
+								top: 0;
+								width: 1px;
+								height: 100%;
+								border-left: solid 1px rgb(160,160,160);
+							}
+							li {
+								margin-top: .5em;
+							}
+						}
+					}
+				}
+				>.vivliostyle-menu-detail-aside {
+					@include box-sizing(border-box);
+					position: absolute;
+					left: 0;
+					bottom: 0;
+					border-top: solid 1px rgba(255,255,255,0.8);
+					padding: .75em 10px 0;
+					height: 2.5em;
+					width: 100%;
+					text-align: center;
+					color: rgb(128,128,128);
+					background: rgba(255,255,255,.75);
+					font-size: 12px;
+					small {
+						font-size: 10px;
+						letter-spacing: -.05em;
+					}
+					a {
+						color: rgb(128,128,128);
+						text-decoration: none;
+						border-bottom: solid 1px rgb(192,192,192);
+						@include transition(linear .1s);
+						&:hover {
+							color: black;
+							border-bottom-color: black;
+						}
+						small {
+							letter-spacing: 0;
+						}
+					}
+				}
+			}
+			&.vivliostyle-menu-item_detail-opened .vivliostyle-menu-detail { display: block; }
+		}
+	}
+}

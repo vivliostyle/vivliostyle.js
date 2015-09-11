@@ -1,4 +1,3 @@
-"use strict";
 import stringUtil from "../utils/string-util"
 
 function getRegExpForParameter(name) {

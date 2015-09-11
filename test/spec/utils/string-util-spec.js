@@ -1,5 +1,3 @@
-"use strict";
-
 import stringUtil from "../../../src/js/utils/string-util";
 
 describe("String Utils", function() {
