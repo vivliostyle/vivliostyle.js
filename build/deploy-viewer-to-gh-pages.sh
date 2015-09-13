@@ -6,10 +6,6 @@ echo -e "Host github.com\n\tStrictHostKeyChecking no\nIdentityFile ~/.ssh/deploy
 echo -e "$GITHUB_DEPLOY_KEY" | base64 -d > ~/.ssh/deploy.key
 chmod 600 ~/.ssh/deploy.key
 
-# git configuration
-git config user.email "kwkbtr@vivliostyle.com"
-git config user.name "kwkbtr (Travis CI)"
-
 cd ../
 
 # fetch and build vivliostyle-js-viewer
@@ -26,6 +22,10 @@ cd ../
 # fetch gh-pages branch
 git clone --depth=1 --branch=gh-pages git@github.com:vivliostyle/vivliostyle.js.git gh-pages
 cd gh-pages
+
+# git configuration
+git config user.email "kwkbtr@vivliostyle.com"
+git config user.name "kwkbtr (Travis CI)"
 
 # update gh-pages branch
 cp -R ../vivliostyle-js-viewer/build/* viewer/
