@@ -29,7 +29,7 @@ module.exports = function(config) {
             build: process.env.TRAVIS_BUILD_NUMBER,
             testName: "vivliostyle-js-viewer",
             recordScreenshots: false,
-            startConnect: true, // start Sauce Connect
+            startConnect: false, // Sauce Connect is started by Travis CI
             tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER
         },
         captureTimeout: 120000,
