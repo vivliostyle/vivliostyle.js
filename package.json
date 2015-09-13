@@ -1,11 +1,9 @@
 {
   "name": "vivliostyle-js-viewer",
-  "version": "0.1.1",
+  "version": "0.2.0-pre",
   "description": "Paged viewer using Vivliostyle.js as its layout engine",
   "scripts": {
-    "postinstall": "npm run build-vivliostyle",
-    "build-vivliostyle": "cd node_modules/vivliostyle && npm install && npm run build",
-    "setup-debug": "node scripts/setup-debug-vivliostyle.js",
+    "setup-local-vivliostyle": "node scripts/setup-local-vivliostyle.js",
     "build": "gulp build",
     "build-dev": "gulp build-dev",
     "serve": "gulp serve",
@@ -21,11 +19,11 @@
   "bugs": {
     "url": "https://github.com/vivliostyle/vivliostyle-js-viewer/issues"
   },
+  "license": "Apache-2.0",
   "homepage": "https://github.com/vivliostyle/vivliostyle-js-viewer",
   "dependencies": {
     "font-awesome": "^4.3.0",
-    "fs-extra": "^0.22.1",
-    "vivliostyle": "vivliostyle/vivliostyle.js#master"
+    "vivliostyle": "next"
   },
   "devDependencies": {
     "babelify": "^6.1.3",
