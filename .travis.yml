@@ -8,7 +8,7 @@ script:
 - npm test
 - build/wpt-sauce.sh
 after_success:
-- build/deploy.sh
+- build/travis-after-success.sh
 notifications:
   email: false
   slack:
