@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html data-vivliostyle-paginated="true">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>Vivliostyle.js viewer</title>
+
+<script src="mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="js/main.js"></script>
+
+<link rel="stylesheet" href="resources/vivliostyle-viewport.css"/>
+<link rel="stylesheet" href="css/vivliostyle-viewer.css"/>
+<link rel="stylesheet" href="css/ui.arrows.css"/>
+<link rel="stylesheet" href="css/ui.menu-bar.css"/>
+<style id="vivliostyle-page-rules"></style>
+</head>
+<body data-bind="event: {keydown: handleKey}">
+<div id="vivliostyle-viewer-viewport" data-bind="attr: {'data-vivliostyle-viewer-status': viewer.state.status, 'data-vivliostyle-page-progression': viewer.state.pageProgression, 'data-vivliostyle-spread-view': viewerOptions.spreadView}, click: settingsPanel.close"></div>
+<span id="vivliostyle-page-navigation-left" title="navigate to left" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToLeftDisabled()}"></span>
+<span id="vivliostyle-page-navigation-right" title="navigate to right" data-bind="click: navigation.navigateToRight, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToRightDisabled()}"></span>
+
+<!-- MENU BAR -->
+<div id="vivliostyle-menu-bar">
+	<ul class="vivliostyle-menu" id="vivliostyle-menu_move">
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-previous" data-bind="click: navigation.navigateToPrevious, css: {'vivliostyle-menu-disabled': navigation.isNavigateToPreviousDisabled}"><span class="vivliostyle-menu-icon-button" title="Move: Previous" data-bind="menuButton: true">Move: Previous</span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-next" data-bind="click: navigation.navigateToNext, css: {'vivliostyle-menu-disabled': navigation.isNavigateToNextDisabled}"><span class="vivliostyle-menu-icon-button" title="Move: Next" data-bind="menuButton: true">Move: Next</span></li>
+	</ul>
+	<ul class="vivliostyle-menu" id="vivliostyle-menu_zoom">
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-out" data-bind="click: navigation.zoomOut, css: {'vivliostyle-menu-disabled': navigation.isZoomOutDisabled}"><span class="vivliostyle-menu-icon-button" title="Zoom: Out" data-bind="menuButton: true">Zoom: Out</span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-in" data-bind="click: navigation.zoomIn, css: {'vivliostyle-menu-disabled': navigation.isZoomInDisabled}"><span class="vivliostyle-menu-icon-button" title="Zoom: In" data-bind="menuButton: true">Zoom: In</span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-default" data-bind="click: navigation.zoomDefault, css: {'vivliostyle-menu-disabled': navigation.isZoomDefaultDisabled}"><span class="vivliostyle-menu-icon-button" title="Zoom: Default" data-bind="menuButton: true">Zoom: Default</span></li>
+	</ul>
+	<ul class="vivliostyle-menu" id="vivliostyle-menu_text-size">
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-smaller" data-bind="click: navigation.decreaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isDecreaseFontSizeDisabled}"><span class="vivliostyle-menu-icon-button" title="Text: Smaller" data-bind="menuButton: true">Text Size: Smaller</span></li>
+		<!-- <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-default"><span class="vivliostyle-menu-icon-button" title="Text Size: Default" data-bind="menuButton: true">Text: Default</span></li> -->
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-larger" data-bind="click: navigation.increaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isIncreaseFontSizeDisabled}"><span class="vivliostyle-menu-icon-button" title="Text: Larger" data-bind="menuButton: true">Text Size: Larger</span></li>
+	</ul>
+	<ul class="vivliostyle-menu" id="vivliostyle-menu_misc">
+		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_misc-toggle" data-bind="css: {'vivliostyle-menu-item_detail-opened': settingsPanel.opened}"><span class="vivliostyle-menu-icon-button" title="Setting" data-bind="menuButton: true, click: settingsPanel.toggle">Setting</span>
+			<!-- MENU DETAIL -->
+			<div class="vivliostyle-menu-detail">
+				<div class="vivliostyle-menu-detail-main">
+					<div class="vivliostyle-menu-detail-group">
+						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate" checked disabled /> <span>Paginate</span></label></div>
+						<div class="vivliostyle-menu-detail-group">
+							<div><label><input type="checkbox" name="vivliostyle-misc_paginate_spread-view" data-bind="checked: settingsPanel.state.viewerOptions.spreadView" /> <span>Spread View</span></label></div>
+						</div>
+						<div class="vivliostyle-menu-detail-group">
+							<div class="vivliostyle-menu-detail-group-heading"><span>Page Size</span></div>
+							<ul class="vivliostyle-menu-detail-group">
+								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="auto" required data-bind="checked: settingsPanel.state.pageSize.mode" /> <span>Auto</span> <small>(Use entire window area)</small></label></li>
+								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="preset" required data-bind="checked: settingsPanel.state.pageSize.mode" /> <span>Preset</span></label>
+									<small>
+										<select name="vivliostyle-misc_paginate_page-size_preset-select" data-bind="foreach: settingsPanel.state.pageSize.PresetSize, value: settingsPanel.state.pageSize.presetSize">
+											<option data-bind="value: $data, text: description"></option>
+										</select>
+										<label><input type="checkbox" name="vivliostyle-misc_paginate_page-size_preset-landscape" data-bind="checked: settingsPanel.state.pageSize.isLandscape" /> - <span>Landscape</span></label>
+									</small>
+								</li>
+								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="custom" required data-bind="checked: settingsPanel.state.pageSize.mode" /> <span>Custom</span></label> -
+									<small>
+										<label>Width: <input type="text" name="vivliostyle-misc_paginate_page-size_custom-width" data-bind="textInput: settingsPanel.state.pageSize.customWidth" /></label> /
+										<label>Height: <input type="text" name="vivliostyle-misc_paginate_page-size_custom-height" data-bind="textInput: settingsPanel.state.pageSize.customHeight" /></label>
+									</small>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<div class="vivliostyle-menu-detail-group">
+						<div><label><input type="checkbox" name="vivliostyle-misc_paginate_override-document-stylesheets" data-bind="checked: settingsPanel.state.pageSize.isImportant" /> <span>Override Document StyleSheets</span></label></div>
+					</div>
+					<!--
+					<div class="vivliostyle-menu-detail-group">
+						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate_override-xxxx" /> <span>Menu-Detail Item</span> <small>(Sample)</small></label></div>
+						<ul class="vivliostyle-menu-detail-group">
+							<li><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-a" /> <span>Sample A</span> <small>(Abc De Fg.)</small></label></li>
+							<li class="vivliostyle-menu-disabled"><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-b" disabled /> <span>Sample B</span></label>
+								<ul class="vivliostyle-menu-detail-group">
+									<li><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-c" disabled /> <span>Sample C</span></label></li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+					<div class="vivliostyle-menu-detail-group">
+						<div class="vivliostyle-menu-detail-group-heading"><span>Menu-Detail Item</span> <small>(Sample)</small></div>
+						<ul class="vivliostyle-menu-detail-group vivliostyle-menu-disabled">
+							<li><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-d" disabled /> <span>Sample D</span> <small>(Abc De Fg.)</small></label></li>
+						</ul>
+					</div>
+					<div class="vivliostyle-menu-detail-group">
+						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate" /> <span>Paginate</span></label></div>
+						<div class="vivliostyle-menu-detail-group vivliostyle-menu-disabled">
+							<div><label><input type="checkbox" name="vivliostyle-misc_paginate_spread-view" disabled /> <span>Spread View</span></label></div>
+						</div>
+					</div>
+					-->
+					<div class="vivliostyle-menu-detail-group vivliostyle-menu-detail-group-buttons vivliostyle-menu-detail-group-inline">
+						<div><span class="vivliostyle-menu-button vivliostyle-menu-button-positive" id="vivliostyle-menu-button_apply" data-bind="menuButton: true, click: settingsPanel.apply">Apply</span></div>
+						<div><span class="vivliostyle-menu-button vivliostyle-menu-button-negative" id="vivliostyle-menu-button_reset" data-bind="menuButton: true, click: settingsPanel.reset">Reset</span></div>
+					</div>
+				</div>
+				<div class="vivliostyle-menu-detail-aside">
+					<div><small>Powered by</small> <a href=""><strong>Vivliostyle.js</strong></a> - <a href=""><small>Credit</small></a></div>
+				</div>
+			</div>
+		</li>
+	</ul>
+</div>
+</body>
+</html>
