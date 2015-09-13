@@ -34,4 +34,4 @@
     enclosingObject = enclosingObject || {};
     %output%
     return enclosingObject.vivliostyle;
-});
+}.bind(window));

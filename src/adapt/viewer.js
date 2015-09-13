@@ -5,6 +5,7 @@
  */
 goog.provide('adapt.viewer');
 
+goog.require('goog.asserts');
 goog.require('adapt.task');
 goog.require('adapt.vgen');
 goog.require('adapt.expr');
@@ -40,12 +41,14 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
 	var self = this;
 	/** @const */ this.window = window;
     /** @const */ this.viewportElement = viewportElement;
+    viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
 	/** @const */ this.instanceId = instanceId;
 	/** @const */ this.callbackFn = callbackFn;
 	var document = window.document;
     /** @const */ this.fontMapper = new adapt.font.Mapper(document.head, viewportElement);
     this.init();
     /** @type {function():void} */ this.kick = function(){};
+    /** @type {function((adapt.base.JSON|string)):void} */ this.sendCommand = function(){};
     /** @const */ this.resizeListener = function() {
     	self.needResize = true;
     	self.kick();
@@ -75,11 +78,13 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {number} */ this.touchX = 0;
     /** @type {number} */ this.touchY = 0;
     /** @type {boolean} */ this.needResize = false;
+    /** @type {boolean} */ this.needRefresh = false;
     /** @type {?adapt.viewer.ViewportSize} */ this.viewportSize = null;
     /** @type {adapt.vtree.Page} */ this.currentPage = null;
     /** @type {?adapt.vtree.Spread} */ this.currentSpread = null;
     /** @type {?adapt.epub.Position} */ this.pagePosition = null;
     /** @type {number} */ this.fontSize = 16;
+    /** @type {number} */ this.zoom = 1;
     /** @type {boolean} */ this.waitForLoading = false;
     /** @type {boolean} */ this.renderAllPages = true;
     /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();
@@ -92,7 +97,6 @@ adapt.viewer.Viewer.prototype.init = function() {
  */
 adapt.viewer.Viewer.prototype.callback = function(message) {
 	message["i"] = this.instanceId;
-    message["viewer"] = this;
 	this.callbackFn(message);
 };
 
@@ -105,6 +109,8 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
 	var fragment = /** @type {?string} */ (command["fragment"]);
 	var haveZipMetadata = !!command["zipmeta"];
     var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
+    // force relayout
+    this.viewport = null;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadEPUB");
 	var self = this;
     self.configure(command).then(function() {
@@ -141,6 +147,8 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
     var doc = /** @type {Document} */ (command["document"]);
 	var fragment = /** @type {?string} */ (command["fragment"]);
     var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
+    // force relayout
+    this.viewport = null;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadXML");
 	var self = this;
     self.configure(command).then(function() {
@@ -263,11 +271,21 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
     if (typeof command["userAgentRootURL"] == "string") {
         adapt.base.resourceBaseURL = command["userAgentRootURL"];
     }
-    if (typeof command["spreadView"] == "boolean") {
+    if (typeof command["spreadView"] == "boolean" && command["spreadView"] !== this.pref.spreadView) {
+        // Force relayout
+        this.viewport = null;
         this.pref.spreadView = command["spreadView"];
+        this.needResize = true;
     }
-    if (typeof command["pageBorder"] == "number") {
+    if (typeof command["pageBorder"] == "number" && command["pageBorder"] !== this.pref.pageBorder) {
+        // Force relayout
+        this.viewport = null;
         this.pref.pageBorder = command["pageBorder"];
+        this.needResize = true;
+    }
+    if (typeof command["zoom"] == "number" && command["zoom"] !== this.zoom) {
+        this.zoom = command["zoom"];
+        this.needRefresh = true;
     }
 	return adapt.task.newResult(true);
 };
@@ -292,7 +310,7 @@ adapt.viewer.Viewer.prototype.hidePages = function() {
             adapt.base.setCSSProperty(page.container, "display", "none");
             page.removeEventListener("hyperlink", this.hyperlinkListener, false);
         }
-    });
+    }, this);
 };
 
 /**
@@ -400,6 +418,7 @@ adapt.viewer.Viewer.prototype.reset = function() {
         this.opfView.removeRenderedPages();
 	}
 	this.viewport = this.createViewport();
+    this.viewport.resetZoomBox();
     this.opfView = new adapt.epub.OPFView(this.opf, this.viewport, this.fontMapper, this.pref);
 };
 
@@ -410,17 +429,96 @@ adapt.viewer.Viewer.prototype.reset = function() {
  * @returns {!adapt.task.Result}
  */
 adapt.viewer.Viewer.prototype.showCurrent = function(page) {
+    this.needRefresh = false;
     var self = this;
     if (this.pref.spreadView) {
         return this.opfView.getCurrentSpread().thenAsync(function(spread) {
             self.showSpread(spread);
+            self.setSpreadZoom(spread);
             self.currentPage = page;
             return adapt.task.newResult(null);
         });
     } else {
         this.showPage(page);
+        this.setPageZoom(page);
         this.currentPage = page;
         return adapt.task.newResult(null);
+    }
+};
+
+/**
+ * @param {!adapt.vtree.Page} page
+ */
+adapt.viewer.Viewer.prototype.setPageZoom = function(page) {
+    this.viewport.sizeZoomBox(page.dimensions.width * this.zoom, page.dimensions.height * this.zoom);
+    page.zoom(this.zoom);
+};
+
+/**
+ * @param {!adapt.vtree.Spread} spread
+ */
+adapt.viewer.Viewer.prototype.setSpreadZoom = function(spread) {
+    var dim = this.getSpreadDimensions(spread);
+    this.viewport.sizeZoomBox(dim.width * this.zoom, dim.height * this.zoom);
+    if (spread.left) {
+        spread.left.zoom(this.zoom);
+    }
+    if (spread.right) {
+        spread.right.zoom(this.zoom);
+    }
+};
+
+/**
+ * Returns width and height of the spread, including the margin between pages.
+ * @param {!adapt.vtree.Spread} spread
+ * @returns {!{width: number, height: number}}
+ */
+adapt.viewer.Viewer.prototype.getSpreadDimensions = function(spread) {
+    var width = 0, height = 0;
+    if (spread.left) {
+        width += spread.left.dimensions.width;
+        height = spread.left.dimensions.height;
+    }
+    if (spread.right) {
+        width += spread.right.dimensions.width;
+        height = Math.max(height, spread.right.dimensions.height);
+    }
+    if (spread.left && spread.right) {
+        width += this.pref.pageBorder * 2;
+    }
+    return {width: width, height: height};
+};
+
+/**
+ * @enum {string}
+ */
+adapt.viewer.ZoomType = {
+    FIT_INSIDE_VIEWPORT: "fit inside viewport"
+};
+
+/**
+ * Returns zoom factor corresponding to the specified zoom type.
+ * @param {adapt.viewer.ZoomType} type
+ * @returns {number}
+ */
+adapt.viewer.Viewer.prototype.queryZoomFactor = function(type) {
+    if (!this.currentPage) {
+        throw new Error("no page exists.");
+    }
+    switch (type) {
+        case adapt.viewer.ZoomType.FIT_INSIDE_VIEWPORT:
+            var pageDim;
+            if (this.pref.spreadView) {
+                goog.asserts.assert(this.currentSpread);
+                pageDim = this.getSpreadDimensions(this.currentSpread);
+            } else {
+                pageDim = this.currentPage.dimensions;
+            }
+            var widthZoom = this.viewport.width / pageDim.width;
+            var heightZoom = this.viewport.height / pageDim.height;
+            return Math.min(widthZoom, heightZoom);
+        default:
+            throw new Error("unknown zoom type: " + type);
     }
 };
 
@@ -433,6 +531,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
 		return adapt.task.newResult(true);
 	}
 	var self = this;
+	self.callback({"t": "resizestart"});
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("resize");
 	if (self.opfView && !self.pagePosition) {
 		self.pagePosition = self.opfView.getPagePosition();
@@ -445,7 +544,10 @@ adapt.viewer.Viewer.prototype.resize = function() {
         self.showCurrent(page).then(function() {
             self.reportPosition().then(function(p) {
                 var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
-                r.then(function() { frame.finish(p); })
+                r.then(function() {
+                    self.callback({"t": "resizeend"});
+                    frame.finish(p);
+                });
             });
         });
     });
@@ -632,6 +734,12 @@ adapt.viewer.Viewer.prototype.initEmbed = function (cmd) {
 				viewer.resize().then(function() {
 					loopFrame.continueLoop();
 				});
+            } else if (viewer.needRefresh) {
+                if (viewer.currentPage) {
+                    viewer.showCurrent(viewer.currentPage).then(function () {
+                        loopFrame.continueLoop();
+                    });
+                }
 			} else if (command) {
 				var cmd = command;
 				command = null;
@@ -657,39 +765,15 @@ adapt.viewer.Viewer.prototype.initEmbed = function (cmd) {
 			cont.schedule();
 		}
 	};
-	
-	this.window["adapt_command"] = function(cmd) {
-		if (command) {
-			return false;
-		}
-		command = adapt.viewer.maybeParse(cmd);
-		viewer.kick();
-		return true;
-	};	
+
+    viewer.sendCommand = function(cmd) {
+        if (command) {
+            return false;
+        }
+        command = adapt.viewer.maybeParse(cmd);
+        viewer.kick();
+        return true;
+    };
+
+    this.window["adapt_command"] = viewer.sendCommand;
 };
-
-if (window["adapt_embedded"]) {
-	/**
-	 * @param {string} msgurl
-	 * @param {adapt.base.JSON} command
-	 * @return {void}
-	 */
-	window["adapt_initEmbed"] = function(msgurl, instanceId, command) {
-		/**
-		 * @param {adapt.base.JSON} msg
-		 */
-		var postMessage = function(msg) {
-			var msgstr = adapt.base.jsonToString(msg);
-			var fetcher = new adapt.taskutil.Fetcher(function() {
-			    return adapt.net.ajax(msgurl, false, "POST", msgstr);
-			});
-			fetcher.start();	
-		};		
-		var viewer = new adapt.viewer.Viewer(window, /** @type {!HTMLElement} */ (document.body), instanceId, postMessage);
-		viewer.initEmbed(command);
-		delete window["adapt_initEmbed"];
-	};
-}
-
-goog.exportSymbol("adapt.viewer.Viewer", adapt.viewer.Viewer);
-goog.exportSymbol("adapt.viewer.Viewer.prototype.initEmbed", adapt.viewer.Viewer.prototype.initEmbed);
