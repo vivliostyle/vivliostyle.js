@@ -177,7 +177,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     this.pageManager = new vivliostyle.page.PageManager(cascadeInstance, this.style.pageScope, this.rootPageBoxInstance, self, docElementStyle);
     var srcFaces = /** @type {Array.<adapt.font.Face>} */ ([]);
     for (var i = 0; i < self.style.fontFaces.length; i++) {
-    	var fontFace = self.style.fontFaces[i++];
+    	var fontFace = self.style.fontFaces[i];
     	if (fontFace.condition && !fontFace.condition.evaluate(self))
     		continue;
     	var properties = adapt.font.prepareProperties(fontFace.properties, self);
