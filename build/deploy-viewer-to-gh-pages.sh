@@ -17,6 +17,10 @@ npm install
 npm run build
 npm run test-sauce
 
+# make distribution package
+version=$(grep '^ *"version":' node_modules/vivliostyle/package.json | sed -e 's/^.*"\([^"]*\)",$/\1/')
+scripts/make-dist-package.sh ${version}
+
 cd ../
 
 # fetch gh-pages branch
@@ -29,6 +33,12 @@ git config user.name "kwkbtr (Travis CI)"
 
 # update gh-pages branch
 cp -R ../vivliostyle-js-viewer/build/* viewer/
+
+zip="../vivliostyle-js-viewer/vivliostyle-js-viewer-latest.zip"
+if [ -e ${zip} ]; then
+    mv ${zip} downloads/
+fi
+
 git add viewer
 git commit -m "Update vivliostyle.js (original commit: $TRAVIS_COMMIT)"
 git push origin gh-pages
