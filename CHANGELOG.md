@@ -17,6 +17,10 @@
   - Spec: [CSS Paged Media Module Level 3 - Page-Margin boxes](https://drafts.csswg.org/css-page/#margin-boxes)
   - Note: For now, 'quotes' property specified within the page/margin context is ignored. This issue will be tracked at <https://github.com/vivliostyle/vivliostyle.js/issues/43>.
 
+### Changed
+- Viewer UI is separated to a new repository [vivliostyle-js-viewer](https://github.com/vivliostyle/vivliostyle-js-viewer).
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/53>
+
 ### Fixed
 - [core] Avoid incorrect margin collapse of the page area
   - <https://github.com/vivliostyle/vivliostyle.js/pull/32>
