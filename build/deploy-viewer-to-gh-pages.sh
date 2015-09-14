@@ -39,6 +39,7 @@ if [ -e ${zip} ]; then
     mv ${zip} downloads/
 fi
 
-git add viewer
+git add .
+git status
 git commit -m "Update vivliostyle.js (original commit: $TRAVIS_COMMIT)"
 git push origin gh-pages
