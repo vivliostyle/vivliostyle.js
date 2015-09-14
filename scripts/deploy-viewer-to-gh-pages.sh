@@ -21,7 +21,7 @@ cp -R ../vivliostyle-js-viewer/build/* viewer/
 
 zip="../vivliostyle-js-viewer/vivliostyle-js-viewer-latest.zip"
 if [ -e ${zip} ]; then
-    mv ${zip} .
+    mv ${zip} downloads/
 fi
 
 git add .
