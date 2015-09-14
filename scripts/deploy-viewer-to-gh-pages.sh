@@ -25,5 +25,6 @@ if [ -e ${zip} ]; then
 fi
 
 git add .
+git status
 git commit -m "Update vivliostyle-js-viewer (original commit: $TRAVIS_COMMIT)"
 git push origin gh-pages
