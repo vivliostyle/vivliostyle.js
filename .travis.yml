@@ -7,6 +7,8 @@ before_install:
 script:
 - npm run build
 - npm run test-sauce
+after_success:
+- scripts/travis-after-success.sh
 notifications:
   email: false
   slack:
