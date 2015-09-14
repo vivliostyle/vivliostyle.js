@@ -997,6 +997,7 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 			    }
 		    });
 		}).then(function() {
+			resultPage = resultPage || viewItem.pages[self.pageIndex];
 			if (resultPage) {
 			    frame.finish(resultPage);
 			    return;

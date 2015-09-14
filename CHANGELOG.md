@@ -28,6 +28,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/35>
 - [viewer] Make keyboard shortcuts work on various browsers
   - <https://github.com/vivliostyle/vivliostyle.js/pull/38>
+- [core] Fix duplicating page when navigate to the last page of each spine
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/55>
 
 ## [0.1.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.1.1) - 2015-05-06
 Minor update with several changes and bug fixes.
