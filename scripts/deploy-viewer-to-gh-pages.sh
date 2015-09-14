@@ -18,6 +18,12 @@ git config user.name "kwkbtr (Travis CI)"
 
 # update gh-pages branch
 cp -R ../vivliostyle-js-viewer/build/* viewer/
-git add viewer
+
+zip="../vivliostyle-js-viewer/vivliostyle-js-viewer-latest.zip"
+if [ -e ${zip} ]; then
+    mv ${zip} .
+fi
+
+git add .
 git commit -m "Update vivliostyle-js-viewer (original commit: $TRAVIS_COMMIT)"
 git push origin gh-pages
