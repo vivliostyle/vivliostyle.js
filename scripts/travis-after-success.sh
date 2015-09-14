@@ -2,10 +2,8 @@
 set -ev
 
 if [ "${TRAVIS_PULL_REQUEST}" = "false" -a "${TRAVIS_BRANCH}" = "master" ]; then
-    version=$(grep '^ *"version":' package.json | sed -e 's/^.*"\([^"]*\)",$/\1/')
-    if [ $(echo ${version} | grep -- '-pre$') ]; then
-        scripts/make-dist-package.sh ${version}.$(date -u "+%Y%m%d%H%M%S")
-    fi
+    version=$(grep '^ *"version":' node_modules/vivliostyle/package.json | sed -e 's/^.*"\([^"]*\)",$/\1/')
+    scripts/make-dist-package.sh ${version}
 
     scripts/deploy-viewer-to-gh-pages.sh
 fi
