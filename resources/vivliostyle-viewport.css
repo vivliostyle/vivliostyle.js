@@ -8,6 +8,11 @@
         height: 100% !important;
     }
 
+    /* Workaround for Chrome printing problem */
+    [data-vivliostyle-viewer-viewport] > div > div {
+        height: 99.99% !important;
+    }
+
     [data-vivliostyle-viewer-viewport] > div > div {
         display: block !important;
         -moz-transform: none !important;
