@@ -18,7 +18,8 @@
   "license": "Apache-2.0",
   "files": [
     "lib",
-    "resources"
+    "resources",
+    "samples"
   ],
   "main": "lib/vivliostyle.min.js",
   "homepage": "https://github.com/vivliostyle/vivliostyle.js",
