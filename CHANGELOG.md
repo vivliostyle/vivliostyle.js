@@ -16,6 +16,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/42>
   - Spec: [CSS Paged Media Module Level 3 - Page-Margin boxes](https://drafts.csswg.org/css-page/#margin-boxes)
   - Note: For now, 'quotes' property specified within the page/margin context is ignored. This issue will be tracked at <https://github.com/vivliostyle/vivliostyle.js/issues/43>.
+- [core] Accept WOFF2 web fonts
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/51>
 
 ### Changed
 - Viewer UI is separated to a new repository [vivliostyle-js-viewer](https://github.com/vivliostyle/vivliostyle-js-viewer).
@@ -30,6 +32,9 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/38>
 - [core] Fix duplicating page when navigate to the last page of each spine
   - <https://github.com/vivliostyle/vivliostyle.js/pull/55>
+- [core] Fix several problems on web font loading
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/52>
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/56>
 
 ## [0.1.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.1.1) - 2015-05-06
 Minor update with several changes and bug fixes.
