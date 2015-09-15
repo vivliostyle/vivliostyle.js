@@ -32,6 +32,7 @@ git config user.email "kwkbtr@vivliostyle.com"
 git config user.name "kwkbtr (Travis CI)"
 
 # update gh-pages branch
+cp -R ../vivliostyle.js/samples/* samples/
 cp -R ../vivliostyle-js-viewer/build/* viewer/
 
 zip="../vivliostyle-js-viewer/vivliostyle-js-viewer-latest.zip"
