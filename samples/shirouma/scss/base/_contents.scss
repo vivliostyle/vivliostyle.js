@@ -1,0 +1,45 @@
+@charset "UTF-8";
+
+.topimg {
+  width: 640px;
+  img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+.figure {
+  width: 320px;
+  img {
+    width: auto;
+    height: 100%;
+  }
+}
+
+.author {
+  text-align: right;
+  line-height: $base-line-height * 4 / 3;
+}
+
+.note {
+  font-size: 9pt;
+  line-height: 15pt;
+  background-color: #f3f3f3;
+  padding: 1em;
+}
+
+.linespace {
+  margin: 0 26pt 0 0;
+}
+
+.linespace-right {
+  margin-right: 1em;
+}
+
+.bibliographical_information {
+  font-size: 9pt;
+  line-height: 15pt;
+  margin-right: 44pt;
+  border-right: 1pt solid #000;
+  padding-right: 3pt;
+}
