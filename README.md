@@ -4,7 +4,7 @@ JavaScript library for web sites with rich paged viewing and EPUB support, share
 
 ## Try Vivliostyle.js
 
-http://vivliostyle.com/en/sample/
+<http://vivliostyle.com/en/sample/>
 
 ## Bug reports & feature requests
 
