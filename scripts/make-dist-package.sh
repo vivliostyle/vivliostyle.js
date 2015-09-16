@@ -3,6 +3,7 @@ set -ev
 
 dist=vivliostyle-js-viewer-$1
 mkdir ${dist}
+cp README.* ${dist}/
 cp -R dist/* ${dist}/
 mkdir ${dist}/viewer/
 cp -R build/* ${dist}/viewer/
