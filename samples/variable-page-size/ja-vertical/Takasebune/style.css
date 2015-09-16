@@ -1,0 +1,136 @@
+@charset "UTF-8";
+
+html {
+    /* 組み方向 */
+    -epub-writing-mode: vertical-rl;
+    -ms-writing-mode: tb-rl;
+    writing-mode: vertical-rl;
+    /* フォント */
+    font-family: "游明朝", "YuMincho", serif;
+    font-weight: normal;
+    /* フォントサイズ */
+    --font-size: 10pt;
+    /* 行送り */
+    --body-line-height: 18pt;
+    /* 段幅 */
+    --column-width: 16em;
+    /* 段間 */
+    --column-gap: 2em;
+    /* 基本版面の天からの距離 */
+    --page-margin-top: 17mm;
+    /* 基本版面の小口からの距離 */
+    --page-margin-outside: 20mm;
+    /* 行末揃え */
+    text-align: justify;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+@media screen {
+    html {
+        margin: 30px;
+    }
+}
+
+h1 {
+    /* 段抜き */
+    column-span: all;
+    /* 行取り */
+    --lines: 3;
+    /* フォント */
+    font-family: "游ゴシック", "YuGothic", sans-serif;
+    font-weight: bold;
+    /* フォントサイズ */
+    font-size: 2em;
+    /* 行送り */
+    --line-height: 1em;
+    /* 字下げ */
+    text-indent: 0;
+    /* 直後の改ページ・改段禁止 */
+    break-after: avoid;
+}
+
+h2.author {
+    /* 段抜き */
+    column-span: all;
+    /* 行取り */
+    --lines: 1;
+    /* フォント */
+    font-family: "游ゴシック", "YuGothic", sans-serif;
+    font-weight: normal;
+    /* フォントサイズ */
+    font-size: 1em;
+    /* 行送り */
+    --line-height: var(--body-line-height);
+    /* 字下げ */
+    text-indent: 0;
+    /* 直後の改ページ・改段禁止 */
+    break-after: avoid;
+    /* 右揃え */
+    /*text-align: end;*/
+    text-align: right;
+}
+
+hr {
+    border: none;
+    --line-width: 1pt;
+    /*border-block-start: var(--line-width) solid black;*/
+    border-right: 1pt solid black;
+    /*inline-size: 6em;*/
+    height: 6em;
+    /*margin: logical calc((var(--body-line-height) - var(--line-width)) / 2) auto;*/
+    margin: auto 8.5pt;
+}
+
+html {
+    /*font-size: var(--font-size);*/
+    font-size: 10pt;
+    /*line-height: var(--body-line-height);*/
+    line-height: 18pt;
+}
+
+/* 印刷用のみ段組にする */
+@media print {
+    html {
+        /*column-width: var(--column-width);*/
+        column-width: 16em;
+        /*column-gap: var(--column-gap);*/
+        column-gap: 2em;
+    }
+}
+
+@page {
+    /*margin-top: var(--page-margin-top);*/
+    margin-top: 17mm;
+    /*margin-bottom: var(--page-margin-top);*/
+    margin-bottom: 17mm;
+    /*margin-left: var(--page-margin-outside);*/
+    margin-left: 20mm;
+    /*margin-right: var(--page-margin-outside);*/
+    margin-right: 20mm;
+}
+
+h1 {
+    /*box-sizing: border-box;*/
+    --block-size: calc(var(--body-line-height) * var(--lines));
+    /*block-size: var(--block-size);*/
+    /*width: 54pt;*/
+    width: 37pt;
+    /*line-height: var(--line-height);*/
+    line-height: 1em;
+    /*padding-block-start: calc((var(--block-size) - var(--line-height)) / 2);*/
+    padding-right: 17pt;
+}
+h2 {
+    /*box-sizing: border-box;*/
+    --block-size: calc(var(--body-line-height) * var(--lines));
+    /*block-size: var(--block-size);*/
+    width: 18pt;
+    /*line-height: var(--line-height);*/
+    line-height: 18pt;
+    /*padding-block-start: calc((var(--block-size) - var(--line-height)) / 2);*/
+    padding-right: 0pt;
+}
