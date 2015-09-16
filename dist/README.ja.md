@@ -1,6 +1,6 @@
-# Vivliostyle.js viewer
+# Vivliostyle.js Viewer
 
-Vivliostyle.js viewerは、Vivliostyle.jsを使ってHTML(XML)/CSS文書を組版・表示するWebアプリケーションです。
+Vivliostyle.js Viewerは、Vivliostyle.jsを使ってHTML(XML)/CSS文書を組版・表示するWebアプリケーションです。
 
 - オンラインでサンプルを見る <http://vivliostyle.com/ja/sample/>
 - リリース版（ベータ）のダウンロード <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-viewer-0.2.0.zip>
@@ -16,9 +16,9 @@ Vivliostyle.js viewerは、Vivliostyle.jsを使ってHTML(XML)/CSS文書を組�
 
   ```
   （Mac OS X, Linuxなど、シェルがある環境）
-  > scripts/start-webserver
+  > ./start-webserver
   （Windows）
-  > scripts\start-webserver
+  > .\start-webserver
   ```
 
   Node.js, Ruby, Pythonのいずれかがインストールされている場合、このコマンドでwebサーバーが起動します。
@@ -40,7 +40,7 @@ Vivliostyle.js viewerは、Vivliostyle.jsを使ってHTML(XML)/CSS文書を組�
 ## ソースコード
 
 - Vivliostyle.js on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
-- Vivliostyle.js viewer on GitHub: <https://github.com/vivliostyle/vivliostyle-js-viewer>
+- Vivliostyle.js Viewer on GitHub: <https://github.com/vivliostyle/vivliostyle-js-viewer>
 
 ## ライセンス
 

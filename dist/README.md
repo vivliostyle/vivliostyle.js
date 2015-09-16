@@ -1,12 +1,12 @@
-# Vivliostyle.js viewer
+# Vivliostyle.js Viewer
 
-Vivliostyle.js viewer is a web application displaying and typesetting HTML(XML)/CSS documents with Vivliostyle.js.
+Vivliostyle.js Viewer is a web application displaying and typesetting HTML(XML)/CSS documents with Vivliostyle.js.
 
 - View samples online: <http://vivliostyle.com/en/sample/>
 - Download release version (beta): <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-viewer-0.2.0.zip>
 - Download latest development version: <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-viewer-latest.zip>
 
-## Usage
+## How to use
 
 1. Unzip the downloaded ZIP file.
 
@@ -16,9 +16,9 @@ Vivliostyle.js viewer is a web application displaying and typesetting HTML(XML)/
 
   ```
   (Shell environment like Mac OS X or Linux)
-  > scripts/start-webserver
+  > ./start-webserver
   (Windows)
-  > scripts\start-webserver
+  > .\start-webserver
   ```
 
   This command starts a web server if either of Node.js, Ruby, Python is installed.
@@ -41,7 +41,7 @@ Please send them to
 ## Source code
 
 - Vivliostyle.js on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
-- Vivliostyle.js viewer on GitHub: <https://github.com/vivliostyle/vivliostyle-js-viewer>
+- Vivliostyle.js Viewer on GitHub: <https://github.com/vivliostyle/vivliostyle-js-viewer>
 
 ## License
 
