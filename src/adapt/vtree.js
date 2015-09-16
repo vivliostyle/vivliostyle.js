@@ -1,5 +1,6 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Basic view tree data structures and support utilities.
  */
 goog.require('vivliostyle.constants');
