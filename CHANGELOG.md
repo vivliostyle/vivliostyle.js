@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
+Beta release.
+
 ### Added
 - [core] Support page background and document canvas background color 
   - <https://github.com/vivliostyle/vivliostyle.js/pull/33>
