@@ -2,13 +2,16 @@ import stringUtil from "../../../src/js/utils/string-util";
 import urlParameters from "../../../src/js/stores/url-parameters";
 
 describe("URLParameterStore", function() {
-    var location;
+    var history, location;
 
-    beforeEach(function () {
+    beforeEach(function() {
+        history = urlParameters.history;
+        urlParameters.history = {};
         location = urlParameters.location;
     });
 
     afterEach(function() {
+        urlParameters.history = history;
         urlParameters.location = location;
     });
 
@@ -63,6 +66,17 @@ describe("URLParameterStore", function() {
             urlParameters.setParameter("あいうえお", "さしすせそ");
 
             expect(urlParameters.location.href).toBe("http://example.com#あいうえお=さしすせそ");
+        });
+
+        it("use history.replaceState if available", function() {
+            urlParameters.history.replaceState = function() {};
+            spyOn(urlParameters.history, "replaceState");
+            urlParameters.location = {href: "http://example.com"};
+            urlParameters.setParameter("cc", "dd");
+
+            // dummy location.href does not change
+            expect(urlParameters.location.href).toBe("http://example.com");
+            expect(urlParameters.history.replaceState).toHaveBeenCalledWith(null, "", "http://example.com#cc=dd");
         });
     });
 });
