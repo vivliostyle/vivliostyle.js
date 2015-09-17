@@ -2,13 +2,16 @@ import DocumentOptions from "../../../src/js/models/document-options";
 import urlParameters from "../../../src/js/stores/url-parameters"
 
 describe("DocumentOptions", function() {
-    var location;
+    var history, location;
 
     beforeEach(function() {
+        history = urlParameters.history;
+        urlParameters.history = {};
         location = urlParameters.location;
     });
 
     afterEach(function() {
+        urlParameters.history = history;
         urlParameters.location = location;
     });
 
