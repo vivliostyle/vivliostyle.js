@@ -1,6 +1,6 @@
 {
   "name": "vivliostyle-js-viewer",
-  "version": "0.2.0",
+  "version": "0.2.1-pre",
   "description": "Paged viewer using Vivliostyle.js as its layout engine",
   "scripts": {
     "setup-local-vivliostyle": "node scripts/setup-local-vivliostyle.js",
