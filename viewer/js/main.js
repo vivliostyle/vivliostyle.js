@@ -6361,6 +6361,7 @@ function getRegExpForParameter(name) {
 }
 
 function URLParameterStore() {
+    this.history = window ? window.history : {};
     this.location = window ? window.location : { url: "" };
 }
 
@@ -6387,7 +6388,11 @@ URLParameterStore.prototype.setParameter = function (name, value) {
     } else {
         updated = url + (url.match(/#/) ? "&" : "#") + name + "=" + value;
     }
-    this.location.href = updated;
+    if (this.history.replaceState) {
+        this.history.replaceState(null, "", updated);
+    } else {
+        this.location.href = updated;
+    }
 };
 
 exports["default"] = new URLParameterStore();
