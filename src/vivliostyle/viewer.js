@@ -160,7 +160,7 @@ goog.scope(function() {
     };
 
     /**
-     * Load a HTML or an XML document.
+     * Load an HTML or XML document.
      * @param {string} url
      * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
@@ -169,7 +169,31 @@ goog.scope(function() {
         if (!url) {
             this.eventTarget.dispatchEvent({"type": "error", "content": "No URL specified"});
         }
+        this.loadDocumentOrEPUB(url, null, opt_documentOptions, opt_viewerOptions);
+    };
 
+    /**
+     * Load an EPUB document.
+     * @param {string} epubUrl
+     * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
+     * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
+     */
+    Viewer.prototype.loadEPUB = function(epubUrl, opt_documentOptions, opt_viewerOptions) {
+        if (!epubUrl) {
+            this.eventTarget.dispatchEvent({"type": "error", "content": "No URL specified"});
+        }
+        this.loadDocumentOrEPUB(null, epubUrl, opt_documentOptions, opt_viewerOptions);
+    };
+
+    /**
+     * Load an HTML or XML document, or an EPUB document.
+     * @private
+     * @param {?string} url
+     * @param {?string} epubUrl
+     * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
+     * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
+     */
+    Viewer.prototype.loadDocumentOrEPUB = function(url, epubUrl, opt_documentOptions, opt_viewerOptions) {
         var documentOptions = opt_documentOptions || {};
         var userStyleSheet;
         var uss = documentOptions["userStyleSheet"];
@@ -184,11 +208,11 @@ goog.scope(function() {
         }
 
         var command = Object.assign({
-            "a": "loadXML",
+            "a": url ? "loadXML" : "loadEPUB",
 
             "userAgentRootURL": this.settings["userAgentRootURL"],
 
-            "url": url,
+            "url": url || epubUrl,
             "document": documentOptions["documentObject"],
             "fragment": documentOptions["fragment"],
             "userStyleSheet": userStyleSheet
