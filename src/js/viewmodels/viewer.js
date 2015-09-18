@@ -63,7 +63,11 @@ Viewer.prototype.loadDocument = function(documentOptions, viewerOptions) {
         this.viewerOptions_.copyFrom(viewerOptions);
     }
     this.documentOptions_ = documentOptions;
-    this.viewer_.loadDocument(documentOptions.url(), documentOptions.toObject(), this.viewerOptions_.toObject());
+    if (documentOptions.url()) {
+        this.viewer_.loadDocument(documentOptions.url(), documentOptions.toObject(), this.viewerOptions_.toObject());
+    } else if (documentOptions.epubUrl()) {
+        this.viewer_.loadEPUB(documentOptions.epubUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+    }
 };
 
 Viewer.prototype.navigateToPrevious = function() {
