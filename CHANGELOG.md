@@ -7,6 +7,10 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/60>
   - `loadEPUB` method of `Viewer` class loads an unzipped EPUB directory.
 
+### Fixed
+- Fix zoom problem when viewport is specified by the document
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/61>
+
 ## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
 Beta release.
 
