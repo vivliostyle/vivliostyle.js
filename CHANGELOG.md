@@ -2,13 +2,18 @@
 
 ## Unreleased
 
+### Added
+- Support EPUB loading
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/60>
+  - `loadEPUB` method of `Viewer` class loads an unzipped EPUB directory.
+
 ## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
 Beta release.
 
 ### Added
 - [core] Support page background and document canvas background color 
   - <https://github.com/vivliostyle/vivliostyle.js/pull/33>
-  - Node: only simple background color is supported.
+  - Note: only simple background color is supported.
 - [core, viewer] Layout is automatically updated when the window size is changed
   - <https://github.com/vivliostyle/vivliostyle.js/pull/37>
 - [core] Support page-based counters
