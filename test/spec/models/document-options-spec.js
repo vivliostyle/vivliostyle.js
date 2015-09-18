@@ -20,7 +20,15 @@ describe("DocumentOptions", function() {
             urlParameters.location = {href: "http://example.com#x=abc/def.html&f=ghi"};
             var options = new DocumentOptions();
 
+            expect(options.epubUrl()).toBe("");
             expect(options.url()).toBe("abc/def.html");
+            expect(options.fragment()).toBe("ghi");
+
+            urlParameters.location = {href: "http://example.com#b=abc/&f=ghi"};
+            options = new DocumentOptions();
+
+            expect(options.epubUrl()).toBe("abc/");
+            expect(options.url()).toBe("");
             expect(options.fragment()).toBe("ghi");
         });
     });

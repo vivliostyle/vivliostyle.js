@@ -4,6 +4,7 @@ import PageSize from "./page-size";
 
 function getDocumentOptionsFromURL() {
     return {
+        epubUrl: urlParameters.getParameter("b"),
         url: urlParameters.getParameter("x"),
         fragment: urlParameters.getParameter("f")
     };
@@ -11,6 +12,7 @@ function getDocumentOptionsFromURL() {
 
 function DocumentOptions() {
     var urlOptions = getDocumentOptionsFromURL();
+    this.epubUrl = ko.observable(urlOptions.epubUrl || "");
     this.url = ko.observable(urlOptions.url || "");
     this.fragment = ko.observable(urlOptions.fragment || "");
     this.pageSize = new PageSize();
