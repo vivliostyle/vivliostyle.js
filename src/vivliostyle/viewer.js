@@ -293,6 +293,7 @@ goog.scope(function() {
     goog.exportProperty(Viewer.prototype, "addListener", Viewer.prototype.addListener);
     goog.exportProperty(Viewer.prototype, "removeListener", Viewer.prototype.removeListener);
     goog.exportProperty(Viewer.prototype, "loadDocument", Viewer.prototype.loadDocument);
+    goog.exportProperty(Viewer.prototype, "loadEPUB", Viewer.prototype.loadEPUB);
     goog.exportProperty(Viewer.prototype, "getCurrentPageProgression", Viewer.prototype.getCurrentPageProgression);
     goog.exportProperty(Viewer.prototype, "navigateToPage", Viewer.prototype.navigateToPage);
     goog.exportProperty(Viewer.prototype, "navigateToInternalUrl", Viewer.prototype.navigateToInternalUrl);
