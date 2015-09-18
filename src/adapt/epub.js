@@ -495,6 +495,7 @@ adapt.epub.OPFDoc = function(store, epubURL) {
 	/** @type {adapt.epub.OPFItem} */ this.xhtmlToc = null;
 	/** @type {adapt.epub.OPFItem} */ this.cover = null;
 	/** @type {Object.<string,string>} */ this.fallbackMap = {};
+	/** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = null;
 	adapt.epub.checkMathJax();
 };
 
@@ -596,6 +597,10 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
 	var tocAttr = pkg.child("spine").attribute("toc")[0];
 	if (tocAttr) {
 		this.ncxToc = this.itemMap[tocAttr];
+	}
+	var pageProgressionAttr = pkg.child("spine").attribute("page-progression-direction")[0];
+	if (pageProgressionAttr) {
+		this.pageProgression = vivliostyle.constants.PageProgression.of(pageProgressionAttr);
 	}
 	var idpfObfURLs = encXML.doc().child("encryption").child("EncryptedData")
 		.predicate(adapt.xmldoc.predicate.withChild("EncryptionMethod",
@@ -911,8 +916,12 @@ adapt.epub.OPFView.prototype.getCurrentPage = function() {
  * @returns {?vivliostyle.constants.PageProgression}
  */
 adapt.epub.OPFView.prototype.getCurrentPageProgression = function() {
-    var viewItem = this.spineItems[this.spineIndex];
-    return viewItem ? viewItem.instance.pageProgression : null;
+	if (this.opf.pageProgression) {
+		return this.opf.pageProgression;
+	} else {
+		var viewItem = this.spineItems[this.spineIndex];
+		return viewItem ? viewItem.instance.pageProgression : null;
+	}
 };
 
 /**

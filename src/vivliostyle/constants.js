@@ -16,6 +16,23 @@ goog.scope(function() {
         RTL: "rtl"
     };
     var PageProgression = vivliostyle.constants.PageProgression;
+
+    /**
+     * Return PageProgressino corresponding to the specified string
+     * @param {string} str
+     * @returns {vivliostyle.constants.PageProgression}
+     */
+    vivliostyle.constants.PageProgression.of = function(str) {
+        switch (str) {
+            case "ltr":
+                return PageProgression.LTR;
+            case "rtl":
+                return PageProgression.RTL;
+            default:
+                throw new Error("unknown PageProgression: " + str);
+        }
+    };
+
     vivliostyle.namespace.exportSymbol("vivliostyle.constants.PageProgression", PageProgression);
     goog.exportProperty(PageProgression, "LTR", PageProgression.LTR);
     goog.exportProperty(PageProgression, "RTL", PageProgression.RTL);

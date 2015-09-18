@@ -6,6 +6,10 @@
 - Support EPUB loading
   - <https://github.com/vivliostyle/vivliostyle.js/pull/60>
   - `loadEPUB` method of `Viewer` class loads an unzipped EPUB directory.
+- Support some EPUB features
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/62>
+  - Support `page-progression-direction` attribute of `spine` element in OPF
+  - Accept `-epub-` prefixed `text-emphasis-*` properties
 
 ### Fixed
 - Fix zoom problem when viewport is specified by the document

@@ -292,9 +292,9 @@ overflow-wrap = normal | break-word;
 [webkit]text-decoration-line = none | [ underline || overline || line-through || blink ];
 [webkit]text-decoration-skip = none | [ objects || spaces || ink || edges || box-decoration ];
 [webkit]text-decoration-style = solid | double | dotted | dashed | wavy;
-[webkit]text-emphasis-color = COLOR;
+[epub,webkit]text-emphasis-color = COLOR;
 [webkit]text-emphasis-position = [ over | under ] [ right | left ];
-[webkit]text-emphasis-style = none | [[ filled | open ] || [ dot | circle | double-circle | triangle | sesame ]] | STRING;
+[epub,webkit]text-emphasis-style = none | [[ filled | open ] || [ dot | circle | double-circle | triangle | sesame ]] | STRING;
 [ms,webkit]text-underline-position = auto | [ under || [ left | right ]];
 
 /* CSS Transforms */
@@ -401,4 +401,4 @@ margin = INSETS margin-top margin-right margin-bottom margin-left;
 padding = INSETS padding-top padding-right padding-bottom padding-left;
 pause = INSETS pause-before pause-after;
 font = FONT font-style font-variant font-weight /* font-size line-height font-family are special-cased */;
-[webkit]text-emphasis = text-emphasis-style text-emphasis-color;
+[epub,webkit]text-emphasis = text-emphasis-style text-emphasis-color;
