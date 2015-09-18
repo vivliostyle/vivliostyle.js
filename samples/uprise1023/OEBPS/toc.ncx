@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+	<head>
+		<meta name="dtb:uid" content="urn:uuid:85B1994C-59CB-11E4-BAF7-6601082F58B9" />
+		<meta name="dtb:depth" content="1" />
+		<meta name="dtb:totalPageCount" content="0" />
+		<meta name="dtb:maxPageNumber" content="0" />
+	</head>
+	<docTitle>
+		<text>ストラタジェム；ニードレスリーフ；巻ノ零；アプライズ</text>
+	</docTitle>
+	<docAuthor>
+		<text>波野　發作</text>
+	</docAuthor>
+	<navMap>
+		<navPoint id="navPoint-1" playOrder="1">
+			<navLabel>
+				<text>ストラタジェム；ニードレスリーフ；巻ノ零；アプライズ</text>
+			</navLabel>
+			<content src="text/book_0000.xhtml" />
+			<navPoint id="navPoint-2" playOrder="2">
+				<navLabel>
+					<text>はじめに</text>
+				</navLabel>
+				<content src="text/book_0003.xhtml#toc-001" />
+			</navPoint>
+			<navPoint id="navPoint-3" playOrder="3">
+				<navLabel>
+					<text>アンギッシュ</text>
+				</navLabel>
+				<content src="text/book_0004.xhtml#toc-002" />
+			</navPoint>
+			<navPoint id="navPoint-4" playOrder="4">
+				<navLabel>
+					<text>第▲２章　秀吉の遺産</text>
+				</navLabel>
+				<content src="text/book_0005.xhtml#toc-003" />
+			</navPoint>
+			<navPoint id="navPoint-5" playOrder="5">
+				<navLabel>
+					<text>ディフラワー</text>
+				</navLabel>
+				<content src="text/book_0006.xhtml#toc-004" />
+			</navPoint>
+			<navPoint id="navPoint-6" playOrder="6">
+				<navLabel>
+					<text>第▲１章　階段の途中</text>
+				</navLabel>
+				<content src="text/book_0007.xhtml#toc-005" />
+			</navPoint>
+			<navPoint id="navPoint-7" playOrder="7">
+				<navLabel>
+					<text>コンフィデンス</text>
+				</navLabel>
+				<content src="text/book_0008.xhtml#toc-006" />
+			</navPoint>
+			<navPoint id="navPoint-8" playOrder="8">
+				<navLabel>
+					<text>本編の予告</text>
+				</navLabel>
+				<content src="text/book_0009.xhtml#toc-007" />
+			</navPoint>
+			<navPoint id="navPoint-9" playOrder="9">
+				<navLabel>
+					<text>人物紹介</text>
+				</navLabel>
+				<content src="text/book_0010.xhtml#toc-008" />
+			</navPoint>
+			<navPoint id="navPoint-10" playOrder="10">
+				<navLabel>
+					<text>参考文献</text>
+				</navLabel>
+				<content src="text/book_0011.xhtml#toc-009" />
+			</navPoint>
+			<navPoint id="navPoint-11" playOrder="11">
+				<navLabel>
+					<text>奥付</text>
+				</navLabel>
+				<content src="text/book_0012.xhtml#toc-010" />
+			</navPoint>
+		</navPoint>
+	</navMap>
+</ncx>
