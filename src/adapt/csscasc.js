@@ -2458,7 +2458,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
 	    	break;
 		case "nth-child":
 			if (params && params.length == 1 && typeof params[0] == "number") {
-				this.chain.push(new adapt.csscasc.IsNthSiblingAction(params[0]));
+				this.chain.push(new adapt.csscasc.IsNthSiblingAction(/** @type {number} */ (params[0])));
 			} else {
 				this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
 			}
