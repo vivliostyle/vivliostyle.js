@@ -1044,6 +1044,32 @@ adapt.csscasc.IsRootAction.prototype.getPriority = function() {
 };
 
 /**
+ * @param {number} n
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.IsNthSiblingAction = function(n) {
+	adapt.csscasc.ChainedAction.call(this);
+	/** @const */ this.n = n;
+};
+goog.inherits(adapt.csscasc.IsNthSiblingAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthSiblingAction.prototype.apply = function(cascadeInstance) {
+	if (cascadeInstance.currentSiblingOrder === this.n)
+		this.chained.apply(cascadeInstance);
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthSiblingAction.prototype.getPriority = function() {
+	return 5;
+};
+
+/**
  * @param {string} condition
  * @constructor
  * @extends {adapt.csscasc.ChainedAction}
@@ -1887,6 +1913,8 @@ adapt.csscasc.CascadeInstance = function(cascade, context, pageCounterResolver, 
     	  new adapt.css.Str("\u2018"), new adapt.css.Str("\u2019")];
     /** @type {number} */ this.quoteDepth = 0;
     /** @type {string} */ this.lang = "";
+	/** @type {Array.<number>} */ this.siblingOrderStack = [0];
+	/** @type {number} */ this.currentSiblingOrder = 0;
     if (goog.DEBUG) {
     	/** @type {Array.<Element>} */ this.elementStack = [];
     }
@@ -2119,6 +2147,10 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
         		new adapt.csscasc.RestoreLangItem(this.lang));
     	this.lang = lang.toLowerCase();
     }
+	var siblingOrderStack = this.siblingOrderStack;
+	this.currentSiblingOrder = ++siblingOrderStack[siblingOrderStack.length - 1];
+	siblingOrderStack.push([0]);
+
     this.applyActions();
     var quotesCasc = baseStyle["quotes"];
     var itemToPushLast = null; 
@@ -2242,6 +2274,7 @@ adapt.csscasc.CascadeInstance.prototype.popElement = function(element) {
 			throw new Error("Invalid call to popElement");
 		}
 	}
+	this.siblingOrderStack.pop();
 	this.pop();
 	this.popCounters();
 };
@@ -2423,6 +2456,13 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
 	            this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fais	    		
 	    	}
 	    	break;
+		case "nth-child":
+			if (params && params.length == 1 && typeof params[0] == "number") {
+				this.chain.push(new adapt.csscasc.IsNthSiblingAction(params[0]));
+			} else {
+				this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
+			}
+			break;
         case "before":
         case "after":
         case "first-line":
