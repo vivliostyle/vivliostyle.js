@@ -10,6 +10,9 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/62>
   - Support `page-progression-direction` attribute of `spine` element in OPF
   - Accept `-epub-` prefixed `text-emphasis-*` properties
+- Support `:nth-child()` pseudo-class selector (only an integer argument can be used)
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/69>
+  - Spec: [Selectors Level 3 - :nth-child() pseudo-class](http://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
 
 ### Fixed
 - Fix zoom problem when viewport is specified by the document
