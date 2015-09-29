@@ -46,6 +46,13 @@ Viewer.prototype.setupViewerEventHandler = function() {
             this.documentOptions_.fragment(cfi);
         }
     }.bind(this));
+    this.viewer_.addListener("hyperlink", function(payload) {
+        if (payload.internal) {
+            this.viewer_.navigateToInternalUrl(payload.href);
+        } else {
+            window.location.href = payload.href;
+        }
+    }.bind(this));
 };
 
 Viewer.prototype.setupViewerOptionSubscriptions = function() {
