@@ -40,6 +40,14 @@
                 <p>Input the document file path (or URL) in the text box; the Viewer URL of the document is displayed below: <input id="file-path-input" type="text" value="samples/wood/index.html" size="30"></p>
                 <div class="code"><a id="input-file-path-link" class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#x=../samples/wood/index.html"><code><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#x=<span id="input-file-path-fragment">../samples/wood/index.html</span></code></a></div>
 
+                <p>You can display an unzipped EPUB file in the Viewer. In that case, use <code>#b=[path of the unzipped EPUB folder (relative to the Viewer file)]/</code> instead of <code>#x=...</code>.</p>
+
+                <p>Example: If you want to display an unzipped EPUB folder <code>test.epub/</code>: </p>
+                <div class="code"><a class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#b=../test.epub/"><code><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=../test.epub/</code></a></div>
+
+                <p>Input the EPUB folder path (or URL) in the text box; the Viewer URL of the EPUB document is displayed below: <input id="epub-path-input" type="text" value="test.epub" size="30"></p>
+                <div class="code"><a id="input-epub-path-link" class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#b=../test.epub/"><code><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=<span id="input-epub-path-fragment">../test.epub/</span></code></a></div>
+
                 <h3>How to Print/Save as PDF from Vivliostyle.js</h3>
 
                 <p>Use your browser’s print/save as PDF feature. For example, to save as PDF with Google Chrome, select Print from menu, set Destination to “Save as PDF”, set Margins to “None”, check “Background graphics”, and “Save” to PDF.</p>

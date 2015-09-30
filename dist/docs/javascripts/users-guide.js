@@ -13,15 +13,31 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    function makeEventListener(input, fragment, link, isEpub) {
+        return function() {
+            var filePath = input.value;
+            if (!filePath.match(/^https?:\/\//)) {
+                filePath = "../" + filePath.replace(/^\//, "");
+            }
+            if (isEpub && filePath.substring(filePath.length-1) !== "/") {
+                filePath += "/";
+            }
+            fragment.textContent = filePath;
+            var regexp = isEpub ? /#b=.*$/ : /#x=.*$/;
+            var f = isEpub ? "#b=" : "#x=";
+            link.href = link.href.replace(regexp, f + filePath);
+        }
+    }
+
     var filePathInput = document.getElementById("file-path-input");
     var inputFilePathFragment = document.getElementById("input-file-path-fragment");
     var inputFilePathLink = document.getElementById("input-file-path-link");
-    filePathInput.addEventListener("input", function() {
-        var filePath = filePathInput.value;
-        if (!filePath.match(/^https?:\/\//)) {
-            filePath = "../" + filePath.replace(/^\//, "");
-        }
-        inputFilePathFragment.textContent = filePath;
-        inputFilePathLink.href = inputFilePathLink.href.replace(/#x=.*$/, "#x=" + filePath);
-    });
+    filePathInput.addEventListener("input",
+        makeEventListener(filePathInput, inputFilePathFragment, inputFilePathLink, false));
+
+    var epubPathInput = document.getElementById("epub-path-input");
+    var inputEpubPathFragment = document.getElementById("input-epub-path-fragment");
+    var inputEpubPathLink = document.getElementById("input-epub-path-link");
+    epubPathInput.addEventListener("input",
+        makeEventListener(epubPathInput, inputEpubPathFragment, inputEpubPathLink, true));
 });

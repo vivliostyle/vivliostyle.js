@@ -40,6 +40,14 @@
                 <p>テキストボックスに文書ファイルのパス（またはURL）を入力すると、その文書を表示するViewerのURLを下に表示します: <input id="file-path-input" type="text" value="samples/gon/index.html" size="30"></p>
                 <div class="code"><a id="input-file-path-link" class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#x=../samples/gon/index.html"><code><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#x=<span id="input-file-path-fragment">../samples/gon/index.html</span></code></a></div>
 
+                <p>ZIP展開済みのEPUBファイルを表示することもできます。その場合、 <code>#x=...</code> のかわりに <code>#b=[表示する展開済みEPUBフォルダの（Viewerファイルからの相対）URL]/</code> を使用します。</p>
+
+                <p>例: <code>test.epub/</code> フォルダに展開済みのEPUBファイルを表示する場合: </p>
+                <div class="code"><code><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=../test.epub/</code></div>
+
+                <p>テキストボックスにEPUBフォルダのパス（またはURL）を入力すると、その文書を表示するViewerのURLを下に表示します: <input id="epub-path-input" type="text" value="test.epub" size="30"></p>
+                <div class="code"><a id="input-epub-path-link" class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#b=../test.epub/"><code><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=<span id="input-epub-path-fragment">../test.epub/</span></code></a></div>
+
                 <h3>Vivliostyle.js から印刷・PDF出力を行うには</h3>
 
                 <p>ブラウザの印刷・PDF出力機能を利用できます。例えば、Google Chrome で PDF に出力するには、メニューから「印刷」を開き、出力先として「PDFに保存」、余白なし、背景のグラフィック ON と指定して「保存」します。</p>
