@@ -1990,8 +1990,18 @@ vivliostyle.page.PageMarginBoxParserHandler.prototype.simpleProperty = function(
  */
 vivliostyle.page.PageCounterStore = function(pageScope) {
     /** @const */ this.pageScope = pageScope;
-    /** @const @type {Object.<string,!Array.<number>>} */ this.counters = {};
+    /** @const @type {!Object.<string,!Array.<number>>} */ this.counters = {};
     this.counters["page"] = [0];
+};
+
+/**
+ * Copy (and override) counter states from another PageCounterstore.
+ * @param {!vivliostyle.page.PageCounterStore} pageCounterStore
+ */
+vivliostyle.page.PageCounterStore.prototype.copyFrom = function(pageCounterStore) {
+    Object.keys(pageCounterStore.counters).forEach(function(key) {
+        this.counters[key] = Array.from(pageCounterStore.counters[key]);
+    }, this);
 };
 
 /**
