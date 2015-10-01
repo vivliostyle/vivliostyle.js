@@ -59,7 +59,7 @@ adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
     });  
     this.pageScope.defineName("page-number", new adapt.expr.Native(this.pageScope, function() {    	
     	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
-    	return styleInstance.currentLayoutPosition.page;
+    	return styleInstance.pageNumberOffset + styleInstance.currentLayoutPosition.page;
     }, "page-number"));
 };
 
@@ -110,6 +110,7 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @param {adapt.font.Mapper} fontMapper
  * @param {adapt.vgen.CustomRenderer} customRenderer
  * @param {Object.<string,string>} fallbackMap
+ * @param {number} pageNumberOffset
  * @constructor
  * @extends {adapt.expr.Context}
  * @implements {adapt.cssstyler.FlowListener}
@@ -117,7 +118,7 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @implements {adapt.vgen.StylerProducer}
  */
 adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientLayout, 
-		fontMapper, customRenderer, fallbackMap) {
+		fontMapper, customRenderer, fallbackMap, pageNumberOffset) {
 	adapt.expr.Context.call(this, style.rootScope, viewport.width, viewport.height, viewport.fontSize);
 	/** @const */ this.style = style;
 	/** @const */ this.xmldoc = xmldoc;
@@ -134,12 +135,13 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @const */ this.faces = new adapt.font.DocumentFaces(this.style.fontDeobfuscator);
     /** @type {Object.<string,adapt.pm.PageBoxInstance>} */ this.pageBoxInstances = {};
     /** @type {vivliostyle.page.PageManager} */ this.pageManager = null;
-	/** @const @type {vivliostyle.page.PageCounterStore} */ this.pageCounterStore = new vivliostyle.page.PageCounterStore(style.pageScope);
+	/** @const @type {!vivliostyle.page.PageCounterStore} */ this.pageCounterStore = new vivliostyle.page.PageCounterStore(style.pageScope);
     /** @type {boolean} */ this.regionBreak = false;
     /** @type {!Object.<string,boolean>} */ this.pageBreaks = {};
     /** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = null;
     /** @const */ this.customRenderer = customRenderer;
     /** @const */ this.fallbackMap = fallbackMap;
+	/** @const @type {number} */ this.pageNumberOffset = pageNumberOffset;
     for (var flowName in style.flowProps) {
     	var flowStyle = style.flowProps[flowName];
     	var consume = adapt.csscasc.getProp(flowStyle, "flow-consume");

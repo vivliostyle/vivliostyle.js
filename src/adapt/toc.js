@@ -174,7 +174,7 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
     				viewportSize.width, viewportSize.height);
     	var customRenderer = self.makeCustomRenderer(xmldoc);
         var instance = new adapt.ops.StyleInstance(style, xmldoc, self.lang,
-        		viewport, self.clientLayout, self.fontMapper, customRenderer, self.fallbackMap);
+        		viewport, self.clientLayout, self.fontMapper, customRenderer, self.fallbackMap, 0);
         self.instance = instance;
         instance.pref = self.pref;
         instance.init().then(function() {

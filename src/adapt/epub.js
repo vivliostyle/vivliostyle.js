@@ -1542,8 +1542,16 @@ adapt.epub.OPFView.prototype.getPageViewItem = function() {
     		viewport = new adapt.vgen.Viewport(viewport.window, viewportSize.fontSize, viewport.root,
     				viewportSize.width, viewportSize.height);
     	}
+		var previousViewItem = self.spineItems[self.spineIndex - 1];
+		var pageNumberOffset = previousViewItem ?
+			previousViewItem.instance.pageNumberOffset + previousViewItem.pages.length : 0;
+
         var instance = new adapt.ops.StyleInstance(style, xmldoc, self.opf.lang,
-        		viewport, self.clientLayout, self.fontMapper, customRenderer, self.opf.fallbackMap);
+			viewport, self.clientLayout, self.fontMapper, customRenderer, self.opf.fallbackMap, pageNumberOffset);
+
+		if (previousViewItem) {
+			instance.pageCounterStore.copyFrom(previousViewItem.instance.pageCounterStore);
+		}
         instance.pref = self.pref;
         instance.init().then(function() {
 			viewItem = {item: item, xmldoc: xmldoc, instance: instance,
