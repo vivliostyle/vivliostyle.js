@@ -1041,28 +1041,37 @@ adapt.epub.OPFView.prototype.renderPage = function() {
  * @returns {!adapt.task.Result.<adapt.vtree.Page>}
  */
 adapt.epub.OPFView.prototype.renderAllPages = function() {
+	return this.renderPagesUpto(this.opf.spine.length - 1, Number.POSITIVE_INFINITY);
+};
+
+/**
+ * Render pages from (spineIndex=0, pageIndex=0) to the specified (spineIndex, pageIndex).
+ * @param {number} spineIndex
+ * @param {number} pageIndex
+ * @returns {!adapt.task.Result.<adapt.vtree.Page>}
+ */
+adapt.epub.OPFView.prototype.renderPagesUpto = function(spineIndex, pageIndex) {
     var self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.Page>} */ var frame
         = adapt.task.newFrame("renderAllPages");
 
     // backup original values
-    var spineIndex = self.spineIndex;
-    var pageIndex = self.pageIndex;
+    var origSpineIndex = self.spineIndex;
+    var origPageIndex = self.pageIndex;
 
-    var spineLength = self.opf.spine.length;
     self.spineIndex = 0;
     frame.loopWithFrame(function(loopFrame) {
-        self.pageIndex = Number.POSITIVE_INFINITY;
+        self.pageIndex = self.spineIndex == spineIndex ? pageIndex : Number.POSITIVE_INFINITY;
         self.renderPage().then(function() {
-            if (++self.spineIndex >= spineLength) {
+            if (++self.spineIndex > spineIndex) {
                 loopFrame.breakLoop();
             } else {
                 loopFrame.continueLoop();
             }
         });
     }).then(function() {
-        self.spineIndex = spineIndex;
-        self.pageIndex = pageIndex;
+        self.spineIndex = origSpineIndex;
+        self.pageIndex = origPageIndex;
         self.renderPage().thenFinish(frame);
     });
     return frame.result();
@@ -1567,7 +1576,7 @@ adapt.epub.OPFView.prototype.setPagePosition = function(pos) {
 		this.pageIndex = 0;
 		this.offsetInItem = 0;		
 	}
-	return this.renderPage();
+	return this.renderPagesUpto(this.spineIndex, this.pageIndex);
 };
 
 adapt.epub.OPFView.prototype.removeRenderedPages = function() {
