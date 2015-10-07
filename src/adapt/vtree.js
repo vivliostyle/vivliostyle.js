@@ -416,6 +416,19 @@ adapt.vtree.LayoutContext.prototype.applyFootnoteStyle = function(vertical, elem
 adapt.vtree.LayoutContext.prototype.peelOff = function(nodeContext, nodeOffset) {};
 
 /**
+ * Returns if two NodePositions represents the same position in the document.
+ * @param {!adapt.vtree.NodePosition} nodePosition1
+ * @param {!adapt.vtree.NodePosition} nodePosition2
+ * @return {boolean}
+ */
+adapt.vtree.LayoutContext.prototype.isSameNodePosition = function(nodePosition1, nodePosition2) {};
+
+/**
+ * @return {!vivliostyle.pagefloat.FloatHolder}
+ */
+adapt.vtree.LayoutContext.prototype.getPageFloatHolder = function() {};
+
+/**
  * @typedef {{
  * 		node:Node,
  *      shadowType:adapt.vtree.ShadowType,
@@ -540,6 +553,7 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {boolean} */ this.inline = true;
     /** @type {boolean} */ this.overflow = false;
     /** @type {number} */ this.breakPenalty = parent ? parent.breakPenalty : 0;
+	/** @type {?string} */ this.floatReference = null;
     /** @type {?string} */ this.floatSide = null;
     /** @type {?string} */ this.clearSide = null;
     /** @type {adapt.vtree.Whitespace} */ this.whitespace = parent ? parent.whitespace : adapt.vtree.Whitespace.IGNORE;
@@ -573,7 +587,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
 
 /**
  * @private
- * @return {adapt.vtree.NodeContext}
+ * @return {!adapt.vtree.NodeContext}
  */
 adapt.vtree.NodeContext.prototype.cloneItem = function() {
     var np = new adapt.vtree.NodeContext(this.sourceNode, this.parent, this.boxOffset);
@@ -599,7 +613,7 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
 };
 
 /**
- * @return {adapt.vtree.NodeContext}
+ * @return {!adapt.vtree.NodeContext}
  */
 adapt.vtree.NodeContext.prototype.modify = function() {
     if (!this.shared)

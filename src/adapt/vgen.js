@@ -13,7 +13,7 @@ goog.require('adapt.cssstyler');
 goog.require('adapt.vtree');
 goog.require('adapt.xmldoc');
 goog.require('adapt.font');
-
+goog.require('vivliostyle.pagefloat');
 
 /**
  * @private
@@ -115,6 +115,21 @@ adapt.vgen.pseudoNames = ["footnote-marker", "first-5-lines", "first-4-lines",
                           "first-3-lines", "first-2-lines", "first-line", "first-letter", "before",
                              "" /* content */, "after"];
 
+/**
+ * @param {Element} element
+ * @returns {string}
+ */
+adapt.vgen.getPseudoName = function(element) {
+	return element.getAttribute("class") || "";
+};
+
+/**
+ * @param {!Element} element
+ * @param {string} name
+ */
+adapt.vgen.setPseudoName = function(element, name) {
+	element.setAttribute("class", name);
+};
 
 /**
  * @param {Element} element
@@ -136,16 +151,16 @@ adapt.vgen.PseudoelementStyler = function(element, style, styler, context) {
  * @override
  */
 adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
-	var className = element.getAttribute("class") || "";
-	if (this.styler && className && className.match(/after$/)) {
+	var pseudoName = adapt.vgen.getPseudoName(element);
+	if (this.styler && pseudoName && pseudoName.match(/after$/)) {
 		// after content: update style
 		this.style = this.styler.getStyle(this.element, true);
 		this.styler = null;
 	}
     var pseudoMap = adapt.csscasc.getStyleMap(this.style, "_pseudos");
-	var style = pseudoMap[className] || /** @type {adapt.csscasc.ElementStyle} */ ({});
-	if (!this.contentProcessed[className]) {
-		this.contentProcessed[className] = true;
+	var style = pseudoMap[pseudoName] || /** @type {adapt.csscasc.ElementStyle} */ ({});
+	if (!this.contentProcessed[pseudoName]) {
+		this.contentProcessed[pseudoName] = true;
 	    var content = style["content"];
 	    if (content) {
 	    	var contentVal = content.evaluate(this.context);
@@ -153,12 +168,12 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
 	    		contentVal.visit(new adapt.vtree.ContentPropertyHandler(element, this.context));
 	    }    	
 	}
-	if (className.match(/^first-/) && !style["x-first-pseudo"]) {
+	if (pseudoName.match(/^first-/) && !style["x-first-pseudo"]) {
 		var nest = 1;
 		var r;
-		if (className == "first-letter") {
+		if (pseudoName == "first-letter") {
 			nest = 0;
-		} else if ((r = className.match(/^first-([0-9]+)-lines$/)) != null) {
+		} else if ((r = pseudoName.match(/^first-([0-9]+)-lines$/)) != null) {
 			nest = r[1] - 0;
 		}
 		style["x-first-pseudo"] = new adapt.csscasc.CascadeValue(new adapt.css.Int(nest), 0);
@@ -180,11 +195,13 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
  * @param {adapt.vtree.Page} page
  * @param {adapt.vgen.CustomRenderer} customRenderer
  * @param {Object.<string,string>} fallbackMap
+ * @param {!vivliostyle.pagefloat.FloatHolder} pageFloatHolder
  * @constructor
  * @implements {adapt.vtree.LayoutContext}
  */
 adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds,
-		xmldoc, docFaces, footnoteStyle, stylerProducer, page, customRenderer, fallbackMap) {
+		xmldoc, docFaces, footnoteStyle, stylerProducer, page, customRenderer, fallbackMap,
+		pageFloatHolder) {
 	// from constructor parameters
 	/** @const */ this.flowName = flowName;
 	/** @const */ this.context = context;
@@ -199,6 +216,7 @@ adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds
 	/** @const */ this.page = page;
 	/** @const */ this.customRenderer = customRenderer;
 	/** @const */ this.fallbackMap = fallbackMap;
+	/** @const */ this.pageFloatHolder = pageFloatHolder;
 	
     // provided by layout
 	/** @type {adapt.vtree.NodeContext} */ this.nodeContext = null;
@@ -219,7 +237,7 @@ adapt.vgen.ViewFactory.prototype.clone = function() {
 	return new adapt.vgen.ViewFactory(this.flowName, this.context, this.viewport,
 		this.styler, this.regionIds,
 		this.xmldoc, this.docFaces, this.footnoteStyle, this.stylerProducer,
-		this.page, this.customRenderer, this.fallbackMap);
+		this.page, this.customRenderer, this.fallbackMap, this.pageFloatHolder);
 };
 
 /**
@@ -258,7 +276,7 @@ adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, i
         		}
         	}
     		elem = adapt.vgen.pseudoelementDoc.createElementNS(adapt.base.NS.XHTML, "span");
-    		elem.setAttribute("class", name);
+			adapt.vgen.setPseudoName(elem, name);
     	} else {
     		elem = adapt.vgen.pseudoelementDoc.createElementNS(adapt.base.NS.SHADOW, "content");
     	}
@@ -504,6 +522,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
     		self.context, self.nodeContext.shadowContext).then(function(shadowParam) {
     	self.nodeContext.nodeShadow = shadowParam;    			
 	    var inFloatContainer = self.nodeContext.parent && self.nodeContext.parent.floatContainer;
+		var floatReference = computedStyle["float-reference"];
 	    var floatSide = computedStyle["float"];
 	    var clearSide = computedStyle["clear"];
 	    if (computedStyle["position"] === adapt.css.ident.absolute || 
@@ -518,7 +537,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 	    	}
 	    }
 	    var floating = floatSide === adapt.css.ident.left || 
-	    	floatSide === adapt.css.ident.right || floatSide === adapt.css.ident.footnote;
+	    	floatSide === adapt.css.ident.right ||
+			floatSide === adapt.css.ident.top ||
+			floatSide === adapt.css.ident.footnote;
 	    if (floatSide) {
 	    	// Don't want to set it in view DOM CSS.
 	    	delete computedStyle["float"];
@@ -561,6 +582,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 	    }
 	    self.nodeContext.inline = !floating && !display || display === adapt.css.ident.inline;
 	    self.nodeContext.floatSide = floating ? floatSide.toString() : null;
+		self.nodeContext.floatReference = floatReference ? floatReference.toString() : null;
 	    if (!self.nodeContext.inline) {
 		    var breakAfter = computedStyle["break-after"] || computedStyle["page-break-after"];
 		    if (breakAfter) {
@@ -1173,6 +1195,46 @@ adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target)
 	delete computedStyle["content"];
 	this.applyComputedStyles(target, computedStyle);
 	return vertical;
+};
+
+/**
+ * Returns if two NodePositionStep are equivalent.
+ * @param {!adapt.vtree.NodePositionStep} step1
+ * @param {!adapt.vtree.NodePositionStep} step2
+ * @returns {boolean}
+ */
+adapt.vgen.ViewFactory.prototype.isSameNodePositionStep = function(step1, step2) {
+	if (step1.shadowContext) {
+		if (!step2.shadowContext) {
+			return false;
+		}
+		var elem1 = step1.node.nodeType === 1 ? /** @type {Element} */ (step1.node) : step1.node.parentElement;
+		var elem2 = step2.node.nodeType === 1 ? /** @type {Element} */ (step2.node) : step2.node.parentElement;
+		return step1.shadowContext.owner === step2.shadowContext.owner
+			&& adapt.vgen.getPseudoName(elem1) === adapt.vgen.getPseudoName(elem2);
+	} else {
+		return step1.node === step2.node;
+	}
+};
+
+/**
+ * @override
+ */
+adapt.vgen.ViewFactory.prototype.isSameNodePosition = function(nodePosition1, nodePosition2) {
+	return nodePosition1.offsetInNode === nodePosition2.offsetInNode
+		&& nodePosition1.after == nodePosition2.after
+		&& nodePosition1.steps.length === nodePosition2.steps.length
+		&& nodePosition1.steps.every(function(step1, i) {
+			var step2 = nodePosition2.steps[i];
+			return this.isSameNodePositionStep(step1, step2);
+		}.bind(this));
+};
+
+/**
+ * @override
+ */
+adapt.vgen.ViewFactory.prototype.getPageFloatHolder = function() {
+	return this.pageFloatHolder;
 };
 
 /**

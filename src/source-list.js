@@ -35,6 +35,7 @@
         "adapt/cssstyler.js",
         "adapt/font.js",
         "adapt/pm.js",
+        "vivliostyle/pagefloat.js",
         "adapt/vgen.js",
         "adapt/layout.js",
         "vivliostyle/page.js",
