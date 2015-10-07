@@ -16,6 +16,7 @@
         "vivliostyle/namespace.js",
         "vivliostyle/constants.js",
         "vivliostyle/util.js",
+        "vivliostyle/logical.js",
         "adapt/base.js",
         "adapt/sha1.js",
         "adapt/geom.js",
