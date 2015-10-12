@@ -563,6 +563,7 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {Node} */ this.viewNode = null;
     /** @type {Object.<string,number|string>} */ this.inheritedProps = parent ? parent.inheritedProps : {};
     /** @type {boolean} */ this.vertical = parent ? parent.vertical : false;
+	/** @type {string} */ this.direction = parent ? parent.direction : "ltr";
     /** @type {adapt.vtree.FirstPseudo} */ this.firstPseudo = parent ? parent.firstPseudo : null;
 };
 

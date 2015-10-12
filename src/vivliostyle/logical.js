@@ -129,4 +129,46 @@ goog.scope(function() {
     vivliostyle.logical.toLogical = function(value, writingMode, direction) {
         return convert(value, writingMode, direction || null, toLogicalMaps);
     };
+
+    /**
+     * @type {!Object.<string, !Array.<!{logical: string, physical: string}>>}
+     */
+    var lineRelativeValues = {
+        "horizontal-tb": [
+            {logical: "line-left", physical: "left"},
+            {logical: "line-right", physical: "right"},
+            {logical: "over", physical: "top"},
+            {logical: "under", physical: "bottom"}
+        ],
+        "vertical-rl": [
+            {logical: "line-left", physical: "top"},
+            {logical: "line-right", physical: "bottom"},
+            {logical: "over", physical: "right"},
+            {logical: "under", physical: "left"}
+        ],
+        "vertical-lr": [
+            {logical: "line-left", physical: "top"},
+            {logical: "line-right", physical: "bottom"},
+            {logical: "over", physical: "right"},
+            {logical: "under", physical: "left"}
+        ]
+    };
+
+    /**
+     * @param {string} value
+     * @param {string} writingMode
+     * @returns {string}
+     */
+    vivliostyle.logical.toLineRelative = function(value, writingMode) {
+        var maps = lineRelativeValues[writingMode];
+        if (!maps) {
+            throw new Error("unknown writing-mode: " + writingMode);
+        }
+        for (var i = 0; i < maps.length; i++) {
+            if (maps[i].physical === value) {
+                return maps[i].logical;
+            }
+        }
+        return value;
+    }
 });

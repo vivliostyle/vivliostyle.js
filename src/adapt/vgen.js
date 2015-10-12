@@ -504,6 +504,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
     	elementStyle = self.inheritFromSourceParent(elementStyle);
     }
     self.nodeContext.vertical = self.computeStyle(self.nodeContext.vertical, elementStyle, computedStyle);
+	if (computedStyle["direction"]) {
+		self.nodeContext.direction = computedStyle["direction"].toString();
+	}
     // Sort out the properties
     var flow = computedStyle["flow-into"];
     if (flow && flow.toString() != self.flowName) {
@@ -539,6 +542,11 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 	    var floating = floatSide === adapt.css.ident.left || 
 	    	floatSide === adapt.css.ident.right ||
 			floatSide === adapt.css.ident.top ||
+			floatSide === adapt.css.ident.bottom ||
+			floatSide === adapt.css.ident.inline_start ||
+			floatSide === adapt.css.ident.inline_end ||
+			floatSide === adapt.css.ident.block_start ||
+			floatSide === adapt.css.ident.block_end ||
 			floatSide === adapt.css.ident.footnote;
 	    if (floatSide) {
 	    	// Don't want to set it in view DOM CSS.

@@ -893,6 +893,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
     var element = /** @type {!Element} */ (nodeContext.viewNode);
 	var floatSide = /** @type {string} */ (nodeContext.floatSide);
 	var floatReference = /** @type {string} */ (nodeContext.floatReference);
+	var direction = nodeContext.parent ? nodeContext.parent.direction : "ltr";
 
     adapt.base.setCSSProperty(element, "float", "none");
     // special case in CSS: position:absolute with left/height: auto is
@@ -925,6 +926,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 			return;
 		}
 
+		floatSide = vivliostyle.pagefloat.resolveInlineFloatDirection(floatSide, self.vertical, direction);
 	    var x1 = self.vertical ? self.box.y1 : self.box.x1;
 	    var x2 = self.vertical ? self.box.y2 : self.box.x2;
 	    var parent = nodeContext.parent;
