@@ -140,6 +140,8 @@ ul {
 
 .topimg {
   width: 640px;
+  float-reference: page;
+  float: top;
 }
 .topimg img {
   width: 100%;
