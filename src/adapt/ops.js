@@ -716,7 +716,9 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     }
 	self.pageCounterStore.updatePageCounters(cascadedPageStyle, self);
 
-	var pageFloatHolder = new vivliostyle.pagefloat.FloatHolder();
+	var writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
+	var direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
+	var pageFloatHolder = new vivliostyle.pagefloat.FloatHolder(page.getPageAreaElement.bind(page), writingMode, direction);
 	var currentLayoutPosition = cp.clone();
 	var exclusions = [];
 

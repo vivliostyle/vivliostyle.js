@@ -87,6 +87,7 @@ adapt.vtree.makeListener = function(refs, action) {
 adapt.vtree.Page = function(container) {
 	adapt.base.SimpleEventTarget.call(this);
 	/** @const */ this.container = container;
+	/** @type {HTMLElement} */ this.pageAreaElement = null;
 	/** @type {Array.<adapt.vtree.DelayedItem>} */ this.delayedItems = [];
 	var self = this;
 	/** @param {Event} e */
@@ -216,6 +217,14 @@ adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
  */
 adapt.vtree.Page.prototype.zoom = function(scale) {
 	adapt.base.setCSSProperty(this.container, "transform", "scale(" + scale + ")");
+};
+
+/**
+ * Returns the page area element.
+ * @returns {!HTMLElement}
+ */
+adapt.vtree.Page.prototype.getPageAreaElement = function() {
+	return this.pageAreaElement || this.container;
 };
 
 /**

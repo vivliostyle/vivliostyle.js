@@ -5,6 +5,7 @@
  * the styling system directly. Instead it goes through the layout interface that gives it one
  * view tree node at a time.
  */
+goog.require('goog.asserts');
 goog.require('adapt.base');
 goog.require('adapt.geom');
 goog.require('adapt.task');
@@ -894,16 +895,21 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	var floatSide = /** @type {string} */ (nodeContext.floatSide);
 	var floatReference = /** @type {string} */ (nodeContext.floatReference);
 	var direction = nodeContext.parent ? nodeContext.parent.direction : "ltr";
+	var floatHolder = self.layoutContext.getPageFloatHolder();
 
-    adapt.base.setCSSProperty(element, "float", "none");
-    // special case in CSS: position:absolute with left/height: auto is
-    // placed where position:static would be
-    // TODO: review if it is good to rely on it
-    // TODO: position where a real float would have been positioned
-    adapt.base.setCSSProperty(element, "position", "absolute");
-    adapt.base.setCSSProperty(element, "left", "auto");
-    adapt.base.setCSSProperty(element, "right", "auto");
-    adapt.base.setCSSProperty(element, "top", "auto");
+	if (floatReference === "page") {
+		floatHolder.prepareFloatElement(element, floatSide);
+	} else {
+		adapt.base.setCSSProperty(element, "float", "none");
+		// special case in CSS: position:absolute with left/height: auto is
+		// placed where position:static would be
+		// TODO: review if it is good to rely on it
+		// TODO: position where a real float would have been positioned
+		adapt.base.setCSSProperty(element, "position", "absolute");
+		adapt.base.setCSSProperty(element, "left", "auto");
+		adapt.base.setCSSProperty(element, "right", "auto");
+		adapt.base.setCSSProperty(element, "top", "auto");
+	}
     self.buildDeepElementView(nodeContext).then(function(nodeContextAfter) {
 		var floatBBox = self.getElementRelativeClientRect(element);
 	    var margin = self.getComputedMargin(element);
@@ -914,7 +920,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 		// page floats
 		// TODO do actual layout
 		if (floatReference === "page") {
-			var floatHolder = self.layoutContext.getPageFloatHolder();
+			goog.asserts.assert(self.layoutContext);
 			var pageFloat = floatHolder.getFloat(nodeContext, self.layoutContext);
 			if (pageFloat) {
 				frame.finish(nodeContextAfter);

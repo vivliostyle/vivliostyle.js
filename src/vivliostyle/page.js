@@ -1153,6 +1153,14 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
 };
 
 /**
+ * @override
+ */
+vivliostyle.page.PageRulePartitionInstance.prototype.prepareContainer = function(context, container, page) {
+    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page);
+    page.pageAreaElement = /** @type {HTMLElement} */ (container.element);
+};
+
+/**
  * @param {!adapt.pm.PageBoxInstance} parentInstance
  * @param {!vivliostyle.page.PageMarginBoxPartition} pageMarginBoxPartition
  * @constructor

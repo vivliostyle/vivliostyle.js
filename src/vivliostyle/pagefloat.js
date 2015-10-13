@@ -4,6 +4,7 @@
  */
 goog.provide("vivliostyle.pagefloat");
 
+goog.require("goog.asserts");
 goog.require("adapt.base");
 goog.require("adapt.task");
 goog.require("adapt.geom");
@@ -57,13 +58,55 @@ goog.scope(function() {
     /** @const */ var PageFloat = vivliostyle.pagefloat.PageFloat;
 
     /**
+     * @param {function():!HTMLElement} containerGetter
+     * @param {!adapt.css.Val} writingMode
+     * @param {!adapt.css.Val} direction
      * @constructor
      */
-    vivliostyle.pagefloat.FloatHolder = function() {
+    vivliostyle.pagefloat.FloatHolder = function(containerGetter, writingMode, direction) {
+        /** @private @const */ this.containerGetter = containerGetter;
+        /** @private @const */ this.writingMode = writingMode;
+        /** @private @const */ this.direction = direction;
         /** @private @const @type {!Array.<vivliostyle.pagefloat.PageFloat>} */ this.floats = [];
         /** @private @const @type {!Array.<vivliostyle.pagefloat.PageFloat>} */ this.newlyAddedFloats = [];
     };
     /** @const */ var FloatHolder = vivliostyle.pagefloat.FloatHolder;
+
+    FloatHolder.prototype.prepareFloatElement = function(element, floatSide) {
+        if (element.parentNode) {
+            element.parentNode.removeChild(element);
+        }
+
+        adapt.base.setCSSProperty(element, "float", "none");
+        adapt.base.setCSSProperty(element, "position", "absolute");
+
+        var writingMode = this.writingMode.toString();
+        var direction = this.direction.toString();
+        var physicalFloatSide = vivliostyle.logical.toPhysical(floatSide, writingMode, direction);
+        var logicalFloatSide = vivliostyle.logical.toLogical(floatSide, writingMode, direction);
+        adapt.base.setCSSProperty(element, physicalFloatSide, "0");
+        switch (logicalFloatSide) {
+            case "inline-start":
+            case "inline-end":
+                // TODO Calculate and set correct block-dimension position
+                var blockStartPhysical = vivliostyle.logical.toPhysical("block-start", writingMode, direction);
+                adapt.base.setCSSProperty(element, blockStartPhysical, "0");
+                break;
+            case "block-start":
+            case "block-end":
+                var inlineStartPhysical = vivliostyle.logical.toPhysical("inline-start", writingMode, direction);
+                adapt.base.setCSSProperty(element, inlineStartPhysical, "0");
+                var physicalMaxInlineSize = vivliostyle.logical.toPhysical("max-inline-size", writingMode, direction);
+                if (!adapt.base.getCSSProperty(element, physicalMaxInlineSize)) {
+                    adapt.base.setCSSProperty(element, physicalMaxInlineSize, "100%");
+                }
+                break;
+            default:
+                throw new Error("unknown float direction: " + floatSide);
+        }
+
+        this.containerGetter().appendChild(element);
+    };
 
     /**
      * @param {!adapt.vtree.NodeContext} nodeContext
