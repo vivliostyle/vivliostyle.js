@@ -13,6 +13,8 @@ describe("logical", function() {
             expect(l.toPhysical("border-inline-end-width", "horizontal-tb")).toBe("border-right-width");
             expect(l.toPhysical("border-block-start-width", "horizontal-tb")).toBe("border-top-width");
             expect(l.toPhysical("border-block-end-width", "horizontal-tb")).toBe("border-bottom-width");
+            expect(l.toPhysical("inline-size", "horizontal-tb")).toBe("width");
+            expect(l.toPhysical("block-size", "horizontal-tb")).toBe("height");
         });
 
         it("converts logical properties to physical properties (horizontal-tb, rtl)", function() {
@@ -35,6 +37,8 @@ describe("logical", function() {
             expect(l.toPhysical("border-inline-end-width", "vertical-rl")).toBe("border-bottom-width");
             expect(l.toPhysical("border-block-start-width", "vertical-rl")).toBe("border-right-width");
             expect(l.toPhysical("border-block-end-width", "vertical-rl")).toBe("border-left-width");
+            expect(l.toPhysical("inline-size", "vertical-rl")).toBe("height");
+            expect(l.toPhysical("block-size", "vertical-rl")).toBe("width");
         });
 
         it("converts logical properties to physical properties (vertical-rl, rtl)", function() {
@@ -57,6 +61,8 @@ describe("logical", function() {
             expect(l.toPhysical("border-inline-end-width", "vertical-lr")).toBe("border-bottom-width");
             expect(l.toPhysical("border-block-start-width", "vertical-lr")).toBe("border-left-width");
             expect(l.toPhysical("border-block-end-width", "vertical-lr")).toBe("border-right-width");
+            expect(l.toPhysical("inline-size", "vertical-lr")).toBe("height");
+            expect(l.toPhysical("block-size", "vertical-lr")).toBe("width");
         });
 
         it("converts logical properties to physical properties (vertical-lr, rtl)", function() {
@@ -88,6 +94,8 @@ describe("logical", function() {
             expect(l.toLogical("border-right-width", "horizontal-tb")).toBe("border-inline-end-width");
             expect(l.toLogical("border-top-width", "horizontal-tb")).toBe("border-block-start-width");
             expect(l.toLogical("border-bottom-width", "horizontal-tb")).toBe("border-block-end-width");
+            expect(l.toLogical("width", "horizontal-tb")).toBe("inline-size");
+            expect(l.toLogical("height", "horizontal-tb")).toBe("block-size");
         });
 
         it("converts physical properties to logical properties (horizontal-tb, rtl)", function() {
@@ -110,6 +118,8 @@ describe("logical", function() {
             expect(l.toLogical("border-right-width", "vertical-rl")).toBe("border-block-start-width");
             expect(l.toLogical("border-top-width", "vertical-rl")).toBe("border-inline-start-width");
             expect(l.toLogical("border-bottom-width", "vertical-rl")).toBe("border-inline-end-width");
+            expect(l.toLogical("width", "vertical-rl")).toBe("block-size");
+            expect(l.toLogical("height", "vertical-rl")).toBe("inline-size");
         });
 
         it("converts physical properties to logical properties (vertical-rl, rtl)", function() {
@@ -132,6 +142,8 @@ describe("logical", function() {
             expect(l.toLogical("border-right-width", "vertical-lr")).toBe("border-block-end-width");
             expect(l.toLogical("border-top-width", "vertical-lr")).toBe("border-inline-start-width");
             expect(l.toLogical("border-bottom-width", "vertical-lr")).toBe("border-inline-end-width");
+            expect(l.toLogical("width", "vertical-lr")).toBe("block-size");
+            expect(l.toLogical("height", "vertical-lr")).toBe("inline-size");
         });
 
         it("converts logical properties to physical properties (vertical-lr, rtl)", function() {

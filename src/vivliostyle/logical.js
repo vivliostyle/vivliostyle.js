@@ -69,13 +69,17 @@ goog.scope(function() {
                 {logical: "inline-start", physical: "left"},
                 {logical: "inline-end", physical: "right"},
                 {logical: "block-start", physical: "top"},
-                {logical: "block-end", physical: "bottom"}
+                {logical: "block-end", physical: "bottom"},
+                {logical: "inline-size", physical: "width"},
+                {logical: "block-size", physical: "height"}
             ],
             "rtl": [
                 {logical: "inline-start", physical: "right"},
                 {logical: "inline-end", physical: "left"},
                 {logical: "block-start", physical: "top"},
-                {logical: "block-end", physical: "bottom"}
+                {logical: "block-end", physical: "bottom"},
+                {logical: "inline-size", physical: "width"},
+                {logical: "block-size", physical: "height"}
             ]
         },
         "vertical-rl": {
@@ -83,13 +87,17 @@ goog.scope(function() {
                 {logical: "inline-start", physical: "top"},
                 {logical: "inline-end", physical: "bottom"},
                 {logical: "block-start", physical: "right"},
-                {logical: "block-end", physical: "left"}
+                {logical: "block-end", physical: "left"},
+                {logical: "inline-size", physical: "height"},
+                {logical: "block-size", physical: "width"}
             ],
             "rtl": [
                 {logical: "inline-start", physical: "bottom"},
                 {logical: "inline-end", physical: "top"},
                 {logical: "block-start", physical: "right"},
-                {logical: "block-end", physical: "left"}
+                {logical: "block-end", physical: "left"},
+                {logical: "inline-size", physical: "height"},
+                {logical: "block-size", physical: "width"}
             ]
         },
         "vertical-lr": {
@@ -97,13 +105,17 @@ goog.scope(function() {
                 {logical: "inline-start", physical: "top"},
                 {logical: "inline-end", physical: "bottom"},
                 {logical: "block-start", physical: "left"},
-                {logical: "block-end", physical: "right"}
+                {logical: "block-end", physical: "right"},
+                {logical: "inline-size", physical: "height"},
+                {logical: "block-size", physical: "width"}
             ],
             "rtl": [
                 {logical: "inline-start", physical: "bottom"},
                 {logical: "inline-end", physical: "top"},
                 {logical: "block-start", physical: "left"},
-                {logical: "block-end", physical: "right"}
+                {logical: "block-end", physical: "right"},
+                {logical: "inline-size", physical: "height"},
+                {logical: "block-size", physical: "width"}
             ]
         }
     };
