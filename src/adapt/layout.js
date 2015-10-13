@@ -1969,7 +1969,7 @@ adapt.layout.Column.prototype.clearOverflownViewNodes = function(nodePosition, r
 };
 
 /**
- * @return {void}
+ * @return {boolean} false indicates that the column cannot contain any contents since the exclusions cover the entire column.
  */
 adapt.layout.Column.prototype.initGeom = function() {
 	// TODO: we should be able to avoid querying the layout engine at this point.
@@ -1998,21 +1998,37 @@ adapt.layout.Column.prototype.initGeom = function() {
     this.footnoteEdge = this.afterEdge;
     this.bands = adapt.geom.shapesToBands(this.box, [this.getInnerShape()],
     		this.exclusions, 8, this.snapHeight, this.vertical);
+	// Check if the column is entirely covered by exclusions and returns false if it is the case.
+	// In that case, we don't layout this column and remove it.
+	if (this.bands.length > 0) {
+		var maxAvailableInlineSize = Math.max.apply(null,
+			this.bands.map(function(b) { return b.x2 - b.x1; })
+		);
+		if (maxAvailableInlineSize <= 0) {
+			return false;
+		}
+	}
 	this.createFloats();
 	this.footnoteItems = null;
+	return true;
 };
 
 /**
- * @return {void}
+ * @return {boolean}
  */
 adapt.layout.Column.prototype.init = function() {
 	this.chunkPositions = [];
     adapt.base.setCSSProperty(this.element, "width", this.width + "px");
     adapt.base.setCSSProperty(this.element, "height", this.height + "px");
-    this.initGeom();
-    this.computedBlockSize = 0;
-    this.overflown = false;
-    this.pageBreakType = null;
+	var initResult = this.initGeom();
+	if (!initResult) {
+		return false;
+	} else {
+		this.computedBlockSize = 0;
+		this.overflown = false;
+		this.pageBreakType = null;
+		return true;
+	}
 };
 
 /**

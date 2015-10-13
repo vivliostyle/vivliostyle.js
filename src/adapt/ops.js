@@ -364,7 +364,7 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function(cascadedPageStyle)
  * @param {adapt.layout.Column} region
  * @param {string} flowName
  * @param {Array.<string>} regionIds
- * @return {adapt.task.Result.<boolean>} holding true
+ * @return {adapt.task.Result.<boolean>} false if the column has no content and should be removed
  */
 adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regionIds) {
     var flowPosition = this.currentLayoutPosition.flowPositions[flowName];
@@ -375,7 +375,10 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
     	// that have exclusions.
     	region.forceNonfitting = false;
 	}
-    region.init();
+	var initResult = region.init();
+	if (!initResult) {
+		return adapt.task.newResult(false);
+	}
     var self = this;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("layoutColumn");
     var repeated = /** @type {Array.<adapt.vtree.FlowChunkPosition>} */ ([]);
@@ -548,34 +551,42 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	            if (region.width >= 0) {
 	                // region.element.style.outline = "1px dotted green";
 	            	/** @type {!adapt.task.Frame.<boolean>} */ var innerFrame = adapt.task.newFrame("inner");
-	                self.layoutColumn(region, flowNameStr, regionIds).then(function() {
-		                if (region.pageBreakType) {
-		                	if (region.pageBreakType != "column") {
-		                		// skip remaining columns
-		                		columnIndex = columnCount;
-		                		if (region.pageBreakType != "region") {
-		                			// skip remaining regions
-		                			self.pageBreaks[flowNameStr] = true;
-		                		}
-		                	}
-		                }
-		                innerFrame.finish(true);
+	                self.layoutColumn(region, flowNameStr, regionIds).then(function(layoutColumnResult) {
+						if (!layoutColumnResult) {
+							// Since the column cannot contain any contents, remove the column and proceed to the next column.
+							boxContainer.removeChild(columnContainer);
+							innerFrame.finish(false);
+						} else {
+							if (region.pageBreakType) {
+								if (region.pageBreakType != "column") {
+									// skip remaining columns
+									columnIndex = columnCount;
+									if (region.pageBreakType != "region") {
+										// skip remaining regions
+										self.pageBreaks[flowNameStr] = true;
+									}
+								}
+							}
+							innerFrame.finish(true);
+						}
 	                });
 	                lr = innerFrame.result();
 	            } else {
 	            	lr = adapt.task.newResult(true);
 	            }
 	            if (lr.isPending()) {
-					lr.then(function () {
+					lr.then(function (result) {
 						if (pageFloatHolder.hasNewlyAddedFloats()) {
 							loopFrame.breakLoop();
 						} else {
-							computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);
+							if (result) {
+								computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);
+							}
 							loopFrame.continueLoop();
 						}
 					});
 					return;
-				} else if (!pageFloatHolder.hasNewlyAddedFloats()) {
+				} else if (lr.get() && !pageFloatHolder.hasNewlyAddedFloats()) {
 	            	computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);
 	            }
 	        }
