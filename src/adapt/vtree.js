@@ -80,7 +80,7 @@ adapt.vtree.makeListener = function(refs, action) {
 };
 
 /**
- * @param {HTMLElement} container
+ * @param {!HTMLElement} container
  * @constructor
  * @extends {adapt.base.SimpleEventTarget}
  */
