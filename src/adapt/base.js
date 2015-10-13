@@ -351,15 +351,16 @@ adapt.base.setCSSProperty = function(elem, prop, value) {
 /**
  * @param {Element} elem
  * @param {string} prop
+ * @param {string=} opt_value
  * @return {string}
  */
-adapt.base.getCSSProperty = function(elem, prop, value) {
+adapt.base.getCSSProperty = function(elem, prop, opt_value) {
     try {
         return (/** @type {HTMLElement} */ (elem)).style.getPropertyValue(
         		adapt.base.propNameMap[prop] || prop);
     } catch (err) {
     }
-    return "";
+    return opt_value || "";
 };
 
 /**

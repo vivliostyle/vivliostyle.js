@@ -13,6 +13,10 @@
 - Support `:nth-child()` pseudo-class selector (only an integer argument can be used)
   - <https://github.com/vivliostyle/vivliostyle.js/pull/69>
   - Spec: [Selectors Level 3 - :nth-child() pseudo-class](http://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
+- Basic CSS Page Floats support
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/72>
+  - Spec: [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
+  - Only basic float placement without stacking or collision avoidance is supported.
 
 ### Fixed
 - Fix zoom problem when viewport is specified by the document

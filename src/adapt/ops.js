@@ -17,6 +17,7 @@ goog.require('adapt.csscasc');
 goog.require('adapt.cssstyler');
 goog.require('adapt.pm');
 goog.require('adapt.vtree');
+goog.require('vivliostyle.pagefloat');
 goog.require('adapt.layout');
 goog.require('adapt.vgen');
 goog.require('adapt.xmldoc');
@@ -397,7 +398,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 	        var pending = true;
 	        region.layout(selected.chunkPosition).then(function(newPosition) {
 		        // static: add back to the flow
-		        if (selected.flowChunk.repeated && (newPosition == null || flowChunk.exclusive))
+		        if (selected.flowChunk.repeated && (newPosition === null || flowChunk.exclusive))
 		            repeated.push(selected);
 		        if (flowChunk.exclusive) {
 		            // exclusive, only can have one, remove from the flow even if it did not fit
@@ -446,10 +447,11 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
  * @param {number} offsetX
  * @param {number} offsetY
  * @param {Array.<adapt.geom.Shape>} exclusions
+ * @param {!vivliostyle.pagefloat.FloatHolder} pageFloatHolder
  * @return {adapt.task.Result.<boolean>} holding true
  */
 adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
-		parentContainer, offsetX, offsetY, exclusions) {
+		parentContainer, offsetX, offsetY, exclusions, pageFloatHolder) {
 	var self = this;
     var enabled = boxInstance.getProp(self, "enabled");
     if (enabled && enabled !== adapt.css.ident._true) {
@@ -506,7 +508,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
         var layoutContext = new adapt.vgen.ViewFactory(flowNameStr, self,
                 self.viewport, self.styler, regionIds, self.xmldoc, self.faces,
                 self.style.footnoteProps, self, page, self.customRenderer,
-                self.fallbackMap);
+                self.fallbackMap, pageFloatHolder);
         var columnIndex = 0;
         var region = null;
         frame.loopWithFrame(function(loopFrame) {
@@ -564,13 +566,17 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	            	lr = adapt.task.newResult(true);
 	            }
 	            if (lr.isPending()) {
-		            lr.then(function() {
-		            	computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);
-		            	loopFrame.continueLoop();
-		            });
-		            return;
-	            } else {
-	            	computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);	            	
+					lr.then(function () {
+						if (pageFloatHolder.hasNewlyAddedFloats()) {
+							loopFrame.breakLoop();
+						} else {
+							computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);
+							loopFrame.continueLoop();
+						}
+					});
+					return;
+				} else if (!pageFloatHolder.hasNewlyAddedFloats()) {
+	            	computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);
 	            }
 	        }
 	        loopFrame.breakLoop();
@@ -611,7 +617,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	    	while (i >= 0) {
 	    		var child = boxInstance.children[i--];
 		        var r = self.layoutContainer(page, child, /** @type {HTMLElement} */ (boxContainer),
-		             offsetX, offsetY, exclusions);
+		             offsetX, offsetY, exclusions, pageFloatHolder);
 		        if (r.isPending()) {
 		        	return r;
 		        }
@@ -710,9 +716,30 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     }
 	self.pageCounterStore.updatePageCounters(cascadedPageStyle, self);
 
+	var writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
+	var direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
+	var pageFloatHolder = new vivliostyle.pagefloat.FloatHolder(page.getPageAreaElement.bind(page), writingMode, direction);
+	var currentLayoutPosition = cp.clone();
+	var exclusions = [];
+
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
     	= adapt.task.newFrame("layoutNextPage");
-    self.layoutContainer(page, pageMaster, page.container, 0, 0, []).then(function() {
+	frame.loopWithFrame(function(loopFrame) {
+		self.layoutContainer(page, pageMaster, page.container, 0, 0, exclusions.concat(), pageFloatHolder).then(function() {
+			if (pageFloatHolder.hasNewlyAddedFloats()) {
+				exclusions = exclusions.concat(pageFloatHolder.getShapesOfNewlyAddedFloats());
+				pageFloatHolder.clearNewlyAddedFloats();
+				cp = self.currentLayoutPosition = currentLayoutPosition.clone();
+				var c;
+				while (c = page.container.lastChild) {
+					page.container.removeChild(c);
+				}
+				loopFrame.continueLoop();
+			} else {
+				loopFrame.breakLoop();
+			}
+		});
+	}).then(function() {
 		pageMaster.adjustPageLayout(self, page, self.clientLayout);
         var isLeftPage = new adapt.expr.Named(pageMaster.pageBox.scope, "left-page");
         page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;

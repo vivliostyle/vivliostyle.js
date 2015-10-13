@@ -2,6 +2,8 @@
 
 .topimg {
   width: 640px;
+  float-reference: page;
+  float: top;
   img {
     width: 100%;
     height: auto;

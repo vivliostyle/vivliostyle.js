@@ -5,6 +5,7 @@
  * the styling system directly. Instead it goes through the layout interface that gives it one
  * view tree node at a time.
  */
+goog.require('goog.asserts');
 goog.require('adapt.base');
 goog.require('adapt.geom');
 goog.require('adapt.task');
@@ -325,6 +326,13 @@ adapt.layout.Column.prototype.getRightEdge = function() {
 };
 
 /**
+ * @returns {boolean}
+ */
+adapt.layout.Column.prototype.hasNewlyAddedPageFloats = function() {
+	return this.layoutContext.getPageFloatHolder().hasNewlyAddedFloats();
+};
+
+/**
  * Returns the element's client rect measured from edges of the page.
  * @param {Element} element
  * @returns {adapt.vtree.ClientRect}
@@ -470,7 +478,7 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
 		        	// TODO: implement floats and footnotes properly
 		        	self.layoutFloatOrFootnote(position).then(function(positionParam) {
 			        	position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
-			        	if (!position || position.overflow) {
+			        	if (!position || position.overflow || self.hasNewlyAddedPageFloats()) {
 				        	bodyFrame.breakLoop();
 				            return;
 			        	}
@@ -876,30 +884,65 @@ adapt.layout.Column.prototype.layoutFootnote = function(nodeContext) {
 
 /**
  * Layout a single float element.
- * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {!adapt.vtree.NodeContext} nodeContext
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
 		= adapt.task.newFrame("layoutFloat");
-    var element = /** @type {Element} */ (nodeContext.viewNode);
-    var floatSide = /** @type {string} */ (nodeContext.floatSide);
-    adapt.base.setCSSProperty(element, "float", "none");
-    // special case in CSS: position:absolute with left/height: auto is
-    // placed where position:static would be
-    // TODO: review if it is good to rely on it
-    // TODO: position where a real float would have been positioned
-    adapt.base.setCSSProperty(element, "position", "absolute");
-    adapt.base.setCSSProperty(element, "left", "auto");
-    adapt.base.setCSSProperty(element, "right", "auto");
-    adapt.base.setCSSProperty(element, "top", "auto");
+    var element = /** @type {!Element} */ (nodeContext.viewNode);
+	var floatSide = /** @type {string} */ (nodeContext.floatSide);
+	var floatReference = /** @type {string} */ (nodeContext.floatReference);
+	var direction = nodeContext.parent ? nodeContext.parent.direction : "ltr";
+	var floatHolder = self.layoutContext.getPageFloatHolder();
+
+	var originalViewNodeParent = nodeContext.viewNode.parentNode;
+
+	if (floatReference === "page") {
+		floatHolder.prepareFloatElement(element, floatSide);
+	} else {
+		adapt.base.setCSSProperty(element, "float", "none");
+		// special case in CSS: position:absolute with left/height: auto is
+		// placed where position:static would be
+		// TODO: review if it is good to rely on it
+		// TODO: position where a real float would have been positioned
+		adapt.base.setCSSProperty(element, "position", "absolute");
+		adapt.base.setCSSProperty(element, "left", "auto");
+		adapt.base.setCSSProperty(element, "right", "auto");
+		adapt.base.setCSSProperty(element, "top", "auto");
+	}
     self.buildDeepElementView(nodeContext).then(function(nodeContextAfter) {
 		var floatBBox = self.getElementRelativeClientRect(element);
 	    var margin = self.getComputedMargin(element);
 	    var floatBox = new adapt.geom.Rect(floatBBox.left - margin.left,
 	    		floatBBox.top - margin.top, floatBBox.right + margin.right,
 	    		floatBBox.bottom + margin.bottom);
+
+		// page floats
+		if (floatReference === "page") {
+			goog.asserts.assert(self.layoutContext);
+			var pageFloat = floatHolder.getFloat(nodeContext, self.layoutContext);
+			if (pageFloat) {
+				// Replace nodeContextAfter.viewNode with a dummy span.
+				// Since the actual viewNode is moved and attached to a parent node
+				// which is different from that of subsequent content nodes,
+				// clearOverflownViewNodes method does not work correctly without this replacement.
+				var dummy = originalViewNodeParent.ownerDocument.createElement("span");
+				adapt.base.setCSSProperty(dummy, "width", "0");
+				adapt.base.setCSSProperty(dummy, "height", "0");
+				originalViewNodeParent.appendChild(dummy);
+				nodeContextAfter.viewNode = dummy;
+				frame.finish(nodeContextAfter);
+			} else {
+				floatHolder.tryToAddFloat(nodeContext, element, floatBox, floatSide).then(function() {
+					frame.finish(null);
+				});
+			}
+			return;
+		}
+
+		floatSide = vivliostyle.pagefloat.resolveInlineFloatDirection(floatSide, self.vertical, direction);
 	    var x1 = self.vertical ? self.box.y1 : self.box.x1;
 	    var x2 = self.vertical ? self.box.y2 : self.box.x2;
 	    var parent = nodeContext.parent;
@@ -1052,7 +1095,11 @@ adapt.layout.Column.prototype.processLineStyling = function(nodeContext, resNode
 				lastCheckPoints = [];  // Wipe out line breaks inside pseudoelements
 				self.buildViewToNextBlockEdge(nodeContext, lastCheckPoints).then(function(resNodeContextParam) {
 					resNodeContext = resNodeContextParam;
-					loopFrame.continueLoop();
+					if (self.hasNewlyAddedPageFloats()) {
+						loopFrame.breakLoop();
+					} else {
+						loopFrame.continueLoop();
+					}
 				});
 			});
 		});
@@ -1114,6 +1161,11 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
 		= adapt.task.newFrame("layoutBreakableBlock");
     /** @type {Array.<adapt.vtree.NodeContext>} */ var checkPoints = [];
     self.buildViewToNextBlockEdge(nodeContext, checkPoints).then(function(resNodeContext) {
+		if (self.hasNewlyAddedPageFloats()) {
+			frame.finish(resNodeContext);
+			return;
+		}
+
 	    // at this point a single block was appended to the column
 	    // flowPosition is either null or 
 	    //  - if !after: contains view for the next block element
@@ -2059,6 +2111,12 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
 			        self.layoutNext(nodeContext, leadingEdge).then(function(nodeContextParam) {
 			        	leadingEdge = false;
 						nodeContext = nodeContextParam;
+
+						if (self.hasNewlyAddedPageFloats()) {
+							loopFrame.breakLoop();
+							return;
+						}
+
 						if (self.pageBreakType) {
 							// explicit page break
 				            loopFrame.breakLoop(); // Loop end							
@@ -2100,7 +2158,9 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
 			    // TODO: look at footnotes and floats as well
 			    if (!nodeContext) {
 			    	frame.finish(null);
-			    } else {
+			    } else if (self.hasNewlyAddedPageFloats()) {
+					frame.finish(null);
+				} else {
 				    self.overflown = true;
 				    var result = new adapt.vtree.ChunkPosition(nodeContext.toNodePosition());
 				    // Transfer overflown footnotes
