@@ -801,7 +801,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 			    }
 			    if (delayedSrc) {
 		        	var imageFetcher = adapt.taskutil.loadElement(result, delayedSrc);
-		        	if (computedStyle["width"] && computedStyle["height"]) {
+					var w = computedStyle["width"];
+					var h = computedStyle["height"];
+		        	if (w && w !== adapt.css.ident.auto && h && h !== adapt.css.ident.auto) {
 		        		// No need to wait for the image, does not affect layout
 		        		self.page.fetchers.push(imageFetcher);
 		        	} else {
