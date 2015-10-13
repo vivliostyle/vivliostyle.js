@@ -111,7 +111,6 @@ display = inline | block | list-item | inline-block | table | inline-table | tab
     table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex;
 elevation = ANGLE | below | level | above | higher | lower;
 empty-cells = show | hide;
-float = left | right | none | footnote;
 FAMILY = SPACE(IDENT+) | STRING;
 FAMILY_LIST = COMMA( FAMILY+ );
 font-family = FAMILY_LIST;
@@ -270,6 +269,10 @@ object-position = COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */
 /* CSS Paged Media */
 PAGE_SIZE = a5 | a4 | a3 | b5 | b4 | letter | legal | ledger;
 size = POS_LENGTH{1,2} | auto | [ PAGE_SIZE || [ portrait | landscape ] ];
+
+/* CSS Page Floats */
+float-reference = inline | column | region | page;
+float = block-start | block-end | inline-start | inline-end | snap-block | snap-inline | left | right | top | bottom | none | footnote;
 
 /* CSS Ruby */
 ruby-align = start | center | space-between | space-around;

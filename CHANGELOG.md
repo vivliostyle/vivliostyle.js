@@ -3,7 +3,16 @@
 ## Unreleased
 
 ### Added
-- [core] Support page background and document canvas background color 
+- Basic CSS Page Floats support
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/72>
+  - Spec: [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
+  - Only basic float placement without stacking or collision avoidance is supported.
+
+## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
+Beta release.
+
+### Added
+- [core] Support page background and document canvas background color
   - <https://github.com/vivliostyle/vivliostyle.js/pull/33>
   - Node: only simple background color is supported.
 - [core, viewer] Layout is automatically updated when the window size is changed

@@ -152,7 +152,7 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
 };
 
 /**
- * @param {HTMLElement} elem
+ * @param {!HTMLElement} elem
  * @param {adapt.vgen.Viewport} viewport
  * @param {number} width
  * @param {number} height

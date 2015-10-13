@@ -15,6 +15,7 @@
 
         "vivliostyle/namespace.js",
         "vivliostyle/constants.js",
+        "vivliostyle/logical.js",
         "adapt/base.js",
         "adapt/sha1.js",
         "adapt/geom.js",
@@ -34,6 +35,7 @@
         "adapt/cssstyler.js",
         "adapt/font.js",
         "adapt/pm.js",
+        "vivliostyle/pagefloat.js",
         "adapt/vgen.js",
         "adapt/layout.js",
         "vivliostyle/page.js",
