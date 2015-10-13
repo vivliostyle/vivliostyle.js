@@ -897,6 +897,8 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	var direction = nodeContext.parent ? nodeContext.parent.direction : "ltr";
 	var floatHolder = self.layoutContext.getPageFloatHolder();
 
+	var originalViewNodeParent = nodeContext.viewNode.parentNode;
+
 	if (floatReference === "page") {
 		floatHolder.prepareFloatElement(element, floatSide);
 	} else {
@@ -918,11 +920,19 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    		floatBBox.bottom + margin.bottom);
 
 		// page floats
-		// TODO do actual layout
 		if (floatReference === "page") {
 			goog.asserts.assert(self.layoutContext);
 			var pageFloat = floatHolder.getFloat(nodeContext, self.layoutContext);
 			if (pageFloat) {
+				// Replace nodeContextAfter.viewNode with a dummy span.
+				// Since the actual viewNode is moved and attached to a parent node
+				// which is different from that of subsequent content nodes,
+				// clearOverflownViewNodes method does not work correctly without this replacement.
+				var dummy = originalViewNodeParent.ownerDocument.createElement("span");
+				adapt.base.setCSSProperty(dummy, "width", "0");
+				adapt.base.setCSSProperty(dummy, "height", "0");
+				originalViewNodeParent.appendChild(dummy);
+				nodeContextAfter.viewNode = dummy;
 				frame.finish(nodeContextAfter);
 			} else {
 				floatHolder.tryToAddFloat(nodeContext, element, floatBox, floatSide).then(function() {
