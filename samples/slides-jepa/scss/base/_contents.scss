@@ -1,0 +1,148 @@
+@charset "UTF-8";
+
+/* 表組の基本形 */
+.border-simple {
+  border-collapse: collapse;
+  th, td {
+    box-sizing: border-box;
+    border: 1px solid #e6e6e6;
+    vertical-align: top;
+    font-size: $base-font-size * 0.75;
+    line-height: 1.5;
+    padding: 4px;
+  }
+  th {
+    text-align: left;
+    font-weight: bold;
+    background-color: #f6f6f6;
+  }
+}
+
+/* セルの改行抑止 */
+.nobr {
+  white-space: nowrap;
+}
+
+/* センタリング */
+.ct {
+  text-align: center;
+}
+
+/* float解除 */
+.cl {
+  overflow: hidden;
+}
+
+/* 右まわりこみ */
+.rs {
+  float: right;
+  margin: 0 0 1em 1em;
+}
+
+/* 左まわりこみ */
+.ls {
+  float: left;
+  margin: 0 1em 1em 0;
+}
+
+
+/* 改ページ */
+.pb {
+  page-break-before: always;
+  h2 {
+    margin-top: 0;
+  }
+}
+
+
+/* 目次の指定 */
+.toc {
+  ol {
+    li {
+      line-height: 2.5em;
+      border-bottom: 1px dotted #cccccc;
+      a {
+        text-decoration: none;
+      }
+    }
+    li:first-child {
+      border-top: 1px dotted #cccccc;
+    }
+  }
+}
+
+/* 表紙の指定 */
+.cover {
+  color: #fff;
+  section {
+    text-align: center;
+    h1 {
+      font-size: 2.5em;
+      text-align: center;
+      color: #fff;
+      margin-top: 1em;
+      margin-bottom: 0;
+    }
+    h2 {
+      font-size: 1.25em;
+      text-align: center;
+      margin-top: 0.5em;
+    }
+    p, time, address {
+      text-align: center;
+    }
+    time {
+      display: block;
+      margin-top: 2em;
+    }
+  }
+
+}
+
+/* もとの指定 */
+em.kenten {
+	-webkit-text-emphasis: sesame;
+	-ms-text-emphasis: sesame;
+	-moz-text-emphasis: sesame;
+	text-emphasis: sesame;
+	font-style: normal;
+}
+.vert {
+  -ms-writing-mode: tb-rl;
+  -webkit-writing-mode: vertical-rl;
+  writing-mode: vertical-rl;
+  h2 {
+    margin-top: 0;
+    margin-left: 1em;
+  }  
+}
+.horiz {
+  -ms-writing-mode: lr-tb;
+  -webkit-writing-mode: horizontal-tb;
+  writing-mode: horizontal-tb;
+}
+.float {
+  float: right;
+}
+figure {
+  text-align: center;
+}
+figure > img {
+  max-width: 100%;
+  max-height: 16em;
+}
+.multicol {
+  -webkit-column-width: 12em;
+  column-width: 12em;
+}
+section.vert {
+  width: 100%;
+}
+aside.vert {
+  float: right;
+}
+pre.sample {
+  padding: .5em;
+  margin: .5em;
+  background: #eeeeee;
+}

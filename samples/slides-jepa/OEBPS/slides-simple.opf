@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="pub-id" version="3.0" xml:lang="ja" prefix="rendition: http://www.idpf.org/vocab/rendition/# ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:title id="title">グーテンベルクから Vivliostyle へ</dc:title>
+    <dc:language id="language">ja</dc:language>
+    <dc:date id="date">2015-10-14</dc:date>
+    <dc:rights id="rights-0">Vivliostyle Inc.</dc:rights>
+    <meta property="dcterms:modified">2015-10-14T10:00:00Z</meta>
+    <dc:identifier id="BookId">BookID</dc:identifier>
+    <dc:creator id="aut-0">Vivliostyle</dc:creator>
+    <meta refines="#aut-0" property="role" scheme="marc:relators">aut</meta>
+    <dc:contributor id="edt-0">Vivliostyle</dc:contributor>
+    <meta refines="#edt-0" property="role" scheme="marc:relators">edt</meta>
+    <dc:contributor id="prt-0">Vivliostyle</dc:contributor>
+    <meta refines="#prt-0" property="role" scheme="marc:relators">prt</meta>
+    <dc:publisher id="pub-prt-0">Vivliostyle</dc:publisher>
+    <meta refines="#pub-prt-0" property="role" scheme="marc:relators">prt</meta>
+    <meta name="cover" content="my-cover-image" />
+    <meta property="ibooks:respect-image-size-class">gaiji</meta>
+    <meta property="ibooks:specified-fonts">true</meta>
+    <meta property="rendition:layout">reflowable</meta>
+    <meta property="rendition:spread">auto</meta>
+    <meta property="rendition:orientation">auto</meta>
+  </metadata>
+  <manifest>
+    <item id="toc" href="toc-simple.html" properties="nav" media-type="text/html"/>
+    <item properties="coverpage" id="coverpage" href="cover.html" media-type="text/html"/>
+    <item id="slide-intro" href="slide-intro.html" media-type="text/html" />
+    <item id="slide-history" href="slide-history.html" media-type="text/html" />
+    <item id="slide-css-type" href="slide-css-type.html" media-type="text/html" />
+    <item id="slide-products" href="slide-products.html" media-type="text/html" />
+    <item id="slide-team" href="slide-team.html" media-type="text/html" />
+<!--
+    <item id="slide001" href="slide-contents.html" media-type="text/html" />
+-->
+
+    <item id="stylesheet" href="css/style.css" media-type="text/css"/>
+  </manifest>
+  <spine page-progression-direction="ltr" toc="ncx">
+    <itemref idref="coverpage" />
+    <itemref idref="toc" />
+    <itemref idref="slide-intro" />
+    <itemref idref="slide-history" />
+    <itemref idref="slide-css-type" />
+    <itemref idref="slide-products" />
+    <itemref idref="slide-team" />
+<!--
+    <itemref idref="slide001" />
+-->
+  </spine>
+<!--
+  <guide>
+    <reference type="cover" title="表紙" href="cover.html"/>
+    <reference type="toc" title="目次" href="toc.html"/>
+    <reference type="Bodymatter" href="slide-intro.html"/>
+  </guide>
+-->
+</package>
