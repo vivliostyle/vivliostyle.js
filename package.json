@@ -1,7 +1,7 @@
 {
-  "name": "vivliostyle-js-viewer",
+  "name": "vivliostyle-ui",
   "version": "0.2.1-pre",
-  "description": "Paged viewer using Vivliostyle.js as its layout engine",
+  "description": "Paged viewer UI with Vivliostyle Engine as its layout engine",
   "scripts": {
     "setup-local-vivliostyle": "node scripts/setup-local-vivliostyle.js",
     "build": "gulp build",
