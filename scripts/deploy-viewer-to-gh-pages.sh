@@ -20,12 +20,12 @@ git config user.name "kwkbtr (Travis CI)"
 cp -R ../vivliostyle-js-viewer/node_modules/vivliostyle/samples/* samples/
 cp -R ../vivliostyle-js-viewer/build/* viewer/
 
-zip="../vivliostyle-js-viewer/vivliostyle-js-viewer-latest.zip"
+zip="../vivliostyle-js-viewer/vivliostyle-js-latest.zip"
 if [ -e ${zip} ]; then
     mv ${zip} downloads/
 fi
 
 git add .
 git status
-git commit -m "Update vivliostyle-js-viewer (original commit: $TRAVIS_COMMIT)"
+git commit -m "Update vivliostyle-js (original commit: $TRAVIS_COMMIT)"
 git push origin gh-pages
