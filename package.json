@@ -19,7 +19,7 @@
   "bugs": {
     "url": "https://github.com/vivliostyle/vivliostyle-js-viewer/issues"
   },
-  "license": "Apache-2.0",
+  "license": "GPL-3.0",
   "homepage": "https://github.com/vivliostyle/vivliostyle-js-viewer",
   "dependencies": {
     "font-awesome": "^4.3.0",
