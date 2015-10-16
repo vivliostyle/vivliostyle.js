@@ -1,6 +1,6 @@
-# Vivliostyle.js UI
+# Vivliostyle UI
 
-Vivliostyle.js UI is a UI component which can be used with with [Vivliostyle Engine](https://github.com/vivliostyle/vivliostyle.js).
+Vivliostyle UI is a UI component which can be used with with [Vivliostyle Engine](https://github.com/vivliostyle/vivliostyle.js).
 
 ## Bug reports & feature requests
 
