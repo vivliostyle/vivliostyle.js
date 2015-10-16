@@ -50,4 +50,4 @@ Vivliostyle.jsは、HTML(XML)/CSS文書を組版・表示するWebアプリケ�
 このパッケージは以下のライブラリーを同梱しています。
 
 - [Font Awesome](http://fontawesome.io/) （[SIL OFL 1.1](http://scripts.sil.org/OFL)でライセンスされているフォントファイルのみ同梱）
-- [MathJax](https://www.mathjax.org/) ([Apache License, Version 2.0](http://cdn.mathjax.org/mathjax/2.0-latest/LICENSE)
+- [MathJax](https://www.mathjax.org/) ([Apache License, Version 2.0](http://cdn.mathjax.org/mathjax/2.0-latest/LICENSE))

@@ -51,4 +51,4 @@ Licensed under [GPL Version 3](http://www.gnu.org/licenses/gpl.html).
 This package includes following libraries:
 
 - [Font Awesome](http://fontawesome.io/) (Only includes font files, which are licensed under [SIL OFL 1.1](http://scripts.sil.org/OFL))
-- [MathJax](https://www.mathjax.org/) ([Apache License, Version 2.0](http://cdn.mathjax.org/mathjax/2.0-latest/LICENSE)
+- [MathJax](https://www.mathjax.org/) ([Apache License, Version 2.0](http://cdn.mathjax.org/mathjax/2.0-latest/LICENSE))
