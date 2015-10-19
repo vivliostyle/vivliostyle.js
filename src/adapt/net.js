@@ -18,7 +18,7 @@ adapt.net.XMLHttpRequestResponseType = {
 	TEXT: "text"
 };
 
-/** @typedef {{status:number, url:string, responseText:?string, responseXML:Document, responseBlob:Blob}} */
+/** @typedef {{status:number, url:string, contentType:?string, responseText:?string, responseXML:Document, responseBlob:Blob}} */
 adapt.net.Response;
 
 /**
@@ -35,7 +35,7 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
     var request = new XMLHttpRequest();
     var continuation = frame.suspend(request);
     /** @type {adapt.net.Response} */ var response =
-    	{status: 0, url: url, responseText: null, responseXML: null, responseBlob: null};
+    	{status: 0, url: url, contentType: null, responseText: null, responseXML: null, responseBlob: null};
     request.open(opt_method || "GET", url, true);
     if (opt_type) {
     	request.responseType = opt_type;
@@ -46,6 +46,7 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
         	if (response.status == 200 || response.status == 0) {
 	        	if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.DOCUMENT) && request.responseXML) {
 	        		response.responseXML = request.responseXML;
+					response.contentType = request.responseXML.contentType;
 	        	} else {
 	        		var text = request.response;
 	        		if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.TEXT) && typeof text == "string") {
@@ -59,6 +60,10 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
         					response.responseBlob = /** @type {Blob} */ (text);
         				}
         			}
+					var contentTypeHeader = request.getResponseHeader("Content-Type");
+					if (contentTypeHeader) {
+						response.contentType = contentTypeHeader.replace(/(.*);.*$/, "$1");
+					}
 	        	}
         	}
             continuation.schedule(response);
