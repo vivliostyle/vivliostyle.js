@@ -35,7 +35,7 @@ git config user.name "kwkbtr (Travis CI)"
 cp -R ../vivliostyle.js/samples/* samples/
 cp -R ../vivliostyle-js-viewer/build/* viewer/
 
-zip="../vivliostyle-js-viewer/vivliostyle-js-viewer-latest.zip"
+zip="../vivliostyle-js-viewer/vivliostyle-js-latest.zip"
 if [ -e ${zip} ]; then
     mv ${zip} downloads/
 fi
