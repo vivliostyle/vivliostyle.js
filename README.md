@@ -6,7 +6,7 @@ Vivliostyle UI is a UI component which can be used with with [Vivliostyle Engine
 
 Please send them to
 
-- GitHub Issues: <https://github.com/vivliostyle/vivliostyle-js-viewer/issues>
+- GitHub Issues: <https://github.com/vivliostyle/vivliostyle-ui/issues>
 - Mailing list: <https://groups.google.com/forum/?hl=ja#!forum/vivliostyle>
 
 ## License

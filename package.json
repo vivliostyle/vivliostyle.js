@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/vivliostyle/vivliostyle-js-viewer.git"
+    "url": "https://github.com/vivliostyle/vivliostyle-ui.git"
   },
   "author": "Vivliostyle Inc.",
   "bugs": {
-    "url": "https://github.com/vivliostyle/vivliostyle-js-viewer/issues"
+    "url": "https://github.com/vivliostyle/vivliostyle-ui/issues"
   },
   "license": "GPL-3.0",
-  "homepage": "https://github.com/vivliostyle/vivliostyle-js-viewer",
+  "homepage": "https://github.com/vivliostyle/vivliostyle-ui",
   "dependencies": {
     "font-awesome": "^4.3.0",
     "vivliostyle": "next"

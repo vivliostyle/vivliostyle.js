@@ -1,7 +1,7 @@
 # Vivliostyle.js
 
 Vivliostyle.jsは、HTML(XML)/CSS文書を組版・表示するWebアプリケーションです。
-このパッケージは[Vivliostyle Engine](https://github.com/vivliostyle/vivliostyle.js)、[Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-js-viewer)およびその他の組版ライブラリーを組み合わせたものです。
+このパッケージは[Vivliostyle Engine](https://github.com/vivliostyle/vivliostyle.js)、[Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui)およびその他の組版ライブラリーを組み合わせたものです。
 
 - オンラインでサンプルを見る <http://vivliostyle.com/ja/sample/>
 - リリース版（ベータ）のダウンロード <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-viewer-0.2.0.zip>
@@ -41,7 +41,7 @@ Vivliostyle.jsは、HTML(XML)/CSS文書を組版・表示するWebアプリケ�
 ## ソースコード
 
 - Vivliostyle.js on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
-- Vivliostyle.js Viewer on GitHub: <https://github.com/vivliostyle/vivliostyle-js-viewer>
+- Vivliostyle UI on GitHub: <https://github.com/vivliostyle/vivliostyle-ui>
 
 ## ライセンス
 

@@ -1,7 +1,7 @@
 # Vivliostyle.js
 
 Vivliostyle.js is a web application displaying and typesetting HTML(XML)/CSS documents.
-This is a bundled package of [Vivliostyle Engine](https://github.com/vivliostyle/vivliostyle.js), [Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-js-viewer) and other typesetting libraries.
+This is a bundled package of [Vivliostyle Engine](https://github.com/vivliostyle/vivliostyle.js), [Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui) and other typesetting libraries.
 
 - View samples online: <http://vivliostyle.com/en/sample/>
 - Download release version (beta): <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-viewer-0.2.0.zip>
@@ -42,7 +42,7 @@ Please send them to
 ## Source code
 
 - Vivliostyle Engine on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
-- Vivliostyle UI on GitHub: <https://github.com/vivliostyle/vivliostyle-js-viewer>
+- Vivliostyle UI on GitHub: <https://github.com/vivliostyle/vivliostyle-ui>
 
 ## License
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, user-scalable=yes" />
-    <title>Vivliostyle.js Viewerユーザーガイド・サンプル</title>
+    <title>Vivliostyle.jsユーザーガイド・サンプル</title>
     <link rel="icon" type="image/x-icon" href="http://vivliostyle.com/images/summary/favicon.ico" />
     <link rel="apple-touch-icon-precomposed" href="http://vivliostyle.com/images/summary/touch-icon.png" />
     <link href="../stylesheets/summary/summary.css" rel="stylesheet" type="text/css" />
@@ -22,37 +22,35 @@
     <div class="section-body" id="page-body">
         <section>
             <div class="section-content">
-                <h2>Vivliostyle.js Viewerユーザーガイド</h2>
+                <h2>Vivliostyle.jsユーザーガイド</h2>
 
-                <p>Vivliostyle.js Viewerは、Vivliostyle.jsを使ってHTML(XML)/CSS文書を組版・表示するWebアプリケーションです。</p>
+                <p>Vivliostyle.jsは、HTML(XML)/CSS文書を組版・表示するWebアプリケーションです。</p>
 
                 <h3>使い方</h3>
 
-                <p>配布物同梱の<code>README.ja.md</code>（<a href="https://github.com/vivliostyle/vivliostyle-js-viewer/blob/master/README.ja.md">オンラインで読む</a>）に記載の「使い方」手順にしたがってwebサーバーを起動してください。</p>
+                <p>配布物同梱の<code>README.ja.md</code>（<a href="https://github.com/vivliostyle/vivliostyle-ui/blob/master/dist/README.ja.md">オンラインで読む</a>）に記載の「使い方」手順にしたがってwebサーバーを起動してください。</p>
 
-                <p><code>viewer</code>フォルダの下の<code>vivliostyle-viewer.html</code>がVivliostyle.js Viewer本体です。HTML(XML)ファイルをViewerで表示するには、webサーバーが読み込める場所（上記手順にしたがってwebサーバーを起動している場合は、配布物を展開してできたフォルダの下）にそのファイル（とそのファイルから読み込まれるCSSや画像ファイル）を置いた上で、ViewerのURLに <code>#x=[表示するファイルの（Viewerファイルからの相対）URL]</code> を追加したURLをブラウザで開きます。</p>
+                <p><code>viewer</code>フォルダの下の<code>vivliostyle-viewer.html</code>がVivliostyle.js本体です。HTML(XML)ファイルをVivliostyle.jsで表示するには、webサーバーが読み込める場所（上記手順にしたがってwebサーバーを起動している場合は、配布物を展開してできたフォルダの下）にそのファイル（とそのファイルから読み込まれるCSSや画像ファイル）を置いた上で、Vivliostyle.jsのURLに <code>#x=[表示するファイルの（Vivliostyle.jsファイルからの相対）URL]</code> を追加したURLをブラウザで開きます。</p>
 
-                <p>注: Viewer本体とは別ドメインの文書を読み込もうとする場合、文書があるwebサーバーの設定によって、文書が読み込めない場合があります。文書を読み込ませるためには、サーバー側でCORS (Cross-Origin Resource Sharing)の設定が必要です。</p>
+                <p>注: Vivliostyle.js本体とは別ドメインの文書を読み込もうとする場合、文書があるwebサーバーの設定によって、文書が読み込めない場合があります。文書を読み込ませるためには、サーバー側でCORS (Cross-Origin Resource Sharing)の設定が必要です。</p>
 
                 <p>例: HTMLファイル <a href="../../samples/gon/index.html"><code>samples/gon/index.html</code></a> を表示する場合: </p>
                 <div class="code"><a class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#x=../samples/gon/index.html"><code><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#x=../samples/gon/index.html</code></a></div>
 
-                <p>テキストボックスに文書ファイルのパス（またはURL）を入力すると、その文書を表示するViewerのURLを下に表示します: <input id="file-path-input" type="text" value="samples/gon/index.html" size="30"></p>
+                <p>テキストボックスに文書ファイルのパス（またはURL）を入力すると、その文書を表示するVivliostyle.jsのURLを下に表示します: <input id="file-path-input" type="text" value="samples/gon/index.html" size="30"></p>
                 <div class="code"><a id="input-file-path-link" class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#x=../samples/gon/index.html"><code><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#x=<span id="input-file-path-fragment">../samples/gon/index.html</span></code></a></div>
 
-                <p>ZIP展開済みのEPUBファイルを表示することもできます。その場合、 <code>#x=...</code> のかわりに <code>#b=[表示する展開済みEPUBフォルダの（Viewerファイルからの相対）URL]/</code> を使用します。</p>
+                <p>ZIP展開済みのEPUBファイルを表示することもできます。その場合、 <code>#x=...</code> のかわりに <code>#b=[表示する展開済みEPUBフォルダの（Vivliostyle.jsファイルからの相対）URL]/</code> を使用します。</p>
 
                 <p>例: <code>test.epub/</code> フォルダに展開済みのEPUBファイルを表示する場合: </p>
                 <div class="code"><code><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=../test.epub/</code></div>
 
-                <p>テキストボックスにEPUBフォルダのパス（またはURL）を入力すると、その文書を表示するViewerのURLを下に表示します: <input id="epub-path-input" type="text" value="test.epub" size="30"></p>
+                <p>テキストボックスにEPUBフォルダのパス（またはURL）を入力すると、その文書を表示するVivliostyle.jsのURLを下に表示します: <input id="epub-path-input" type="text" value="test.epub" size="30"></p>
                 <div class="code"><a id="input-epub-path-link" class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#b=../test.epub/"><code><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=<span id="input-epub-path-fragment">../test.epub/</span></code></a></div>
 
                 <h3>Vivliostyle.js から印刷・PDF出力を行うには</h3>
 
                 <p>ブラウザの印刷・PDF出力機能を利用できます。例えば、Google Chrome で PDF に出力するには、メニューから「印刷」を開き、出力先として「PDFに保存」、余白なし、背景のグラフィック ON と指定して「保存」します。</p>
-
-                <p>注: 最新のGoogle Chromeでは、縦組みの文書を印刷・PDF出力する際に版面が下にずれてしまう問題があります。その場合、<a href="http://vivliostyle.com/ja/vivliostyle-formatter/">Vivliostyle Formatter</a>を使ってPDF出力することをおすすめします。</p>
             </div>
         </section>
 
@@ -109,8 +107,8 @@
 
 
                 <ul class="note">
-                    <li><b>Page View</b>: ページ表示（online Vivliostyle viewer）</li>
-                    <li><b>Spread View</b>: 見開き表示（online Vivliostyle viewer）</li>
+                    <li><b>Page View</b>: ページ表示（online Vivliostyle.js）</li>
+                    <li><b>Spread View</b>: 見開き表示（online Vivliostyle.js）</li>
                     <li><b>Raw HTML</b>: 通常HTML表示または <a href="https://chrome.google.com/webstore/detail/vivliostyle/ffeiildjegeigkbobbakjjmfeacadbne">Vivliostyle Chrome 拡張</a> でページ表示</li>
                     <li><b>Source</b>: GitHub上のソースファイル（HTMLやCSS）へ</li>
                 </ul>

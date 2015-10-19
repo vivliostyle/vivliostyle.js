@@ -17,15 +17,15 @@ git config user.email "kwkbtr@vivliostyle.com"
 git config user.name "kwkbtr (Travis CI)"
 
 # update gh-pages branch
-cp -R ../vivliostyle-js-viewer/node_modules/vivliostyle/samples/* samples/
-cp -R ../vivliostyle-js-viewer/build/* viewer/
+cp -R ../vivliostyle-ui/node_modules/vivliostyle/samples/* samples/
+cp -R ../vivliostyle-ui/build/* viewer/
 
-zip="../vivliostyle-js-viewer/vivliostyle-js-latest.zip"
+zip="../vivliostyle-ui/vivliostyle-js-latest.zip"
 if [ -e ${zip} ]; then
     mv ${zip} downloads/
 fi
 
 git add .
 git status
-git commit -m "Update vivliostyle-js (original commit: $TRAVIS_COMMIT)"
+git commit -m "Update vivliostyle-ui (original commit: $TRAVIS_COMMIT)"
 git push origin gh-pages
