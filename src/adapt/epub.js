@@ -6,6 +6,7 @@
 goog.provide('adapt.epub');
 
 goog.require("vivliostyle.constants");
+goog.require('adapt.net');
 goog.require('adapt.csscasc');
 goog.require('adapt.font');
 goog.require('adapt.ops');
@@ -666,7 +667,7 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
 		}
 	}
 	self.assignAutoPages();
-	return adapt.net.ajax(manifestURL, false, "POST", manifestText.toString(), "text/plain");
+	return adapt.net.ajax(manifestURL, adapt.net.XMLHttpRequestResponseType.DEFAULT, "POST", manifestText.toString(), "text/plain");
 };
 
 /**

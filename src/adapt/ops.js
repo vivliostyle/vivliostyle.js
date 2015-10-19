@@ -998,7 +998,7 @@ adapt.ops.parseOPSResource = function(response, store) {
  * @extends {adapt.xmldoc.XMLDocStore}
  */
 adapt.ops.OPSDocStore = function(fontDeobfuscator) {
-	adapt.net.ResourceStore.call(this, adapt.ops.parseOPSResource, false);
+	adapt.net.ResourceStore.call(this, adapt.ops.parseOPSResource, adapt.net.XMLHttpRequestResponseType.DOCUMENT);
 	/** @type {?function(string):?function(Blob):adapt.task.Result.<Blob>} */ this.fontDeobfuscator = fontDeobfuscator;
 	/** @type {Object.<string,adapt.ops.Style>} */ this.styleByKey = {};
 	/** @type {Object.<string,adapt.taskutil.Fetcher.<adapt.ops.Style>>} */ this.styleFetcherByKey = {};

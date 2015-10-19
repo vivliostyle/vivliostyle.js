@@ -360,7 +360,7 @@ adapt.xmldoc.parseXMLResource = function(response, store) {
  * @return {adapt.xmldoc.XMLDocStore}
  */
 adapt.xmldoc.newXMLDocStore = function() {
-	return new adapt.net.ResourceStore(adapt.xmldoc.parseXMLResource, false);
+	return new adapt.net.ResourceStore(adapt.xmldoc.parseXMLResource, adapt.net.XMLHttpRequestResponseType.DOCUMENT);
 };
 
 /**
