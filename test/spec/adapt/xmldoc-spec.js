@@ -68,7 +68,7 @@ describe("xmldoc", function() {
             result = adapt.xmldoc.parseXMLResource({responseText: "<svg></svg>", contentType: "image/svg+xml"}, docStore);
             result.then(function(docHolder) {
                 var doc = docHolder.document;
-                expect(doc.contentType).toBe("image/svg+xml");
+                expect(doc.documentElement.localName).toBe("svg");
                 doneSvg = true;
                 complete();
             })
@@ -120,7 +120,7 @@ describe("xmldoc", function() {
                 responseText: "<svg></svg>", contentType: null, url: "foo.svg"}, docStore);
             result.then(function(docHolder) {
                 var doc = docHolder.document;
-                expect(doc.contentType).toBe("image/svg+xml");
+                expect(doc.documentElement.localName).toBe("svg");
                 doneSvg = true;
                 complete();
             });
@@ -160,7 +160,7 @@ describe("xmldoc", function() {
                 {responseText: "<svg></svg>", contentType: null, url: "foo/"}, docStore);
             result.then(function(docHolder) {
                 var doc = docHolder.document;
-                expect(doc.contentType).toBe("image/svg+xml");
+                expect(doc.documentElement.localName).toBe("svg");
                 doneSvg = true;
                 complete();
             });
