@@ -6,6 +6,7 @@
 goog.provide('adapt.epub');
 
 goog.require("vivliostyle.constants");
+goog.require('adapt.net');
 goog.require('adapt.csscasc');
 goog.require('adapt.font');
 goog.require('adapt.ops');
@@ -150,7 +151,7 @@ adapt.epub.EPUBDocStore.prototype.addDocument = function(url, doc) {
     var frame = adapt.task.newFrame("EPUBDocStore.load");
     var docURL = adapt.base.stripFragment(url);
     var r = this.documents[docURL] = this.parseOPSResource(
-        {status: 200, url: docURL, responseText: null, responseXML: doc, responseBlob: null}
+        {status: 200, url: docURL, contentType: doc.contentType, responseText: null, responseXML: doc, responseBlob: null}
     );
     r.thenFinish(frame);
     return frame.result();
@@ -666,7 +667,7 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
 		}
 	}
 	self.assignAutoPages();
-	return adapt.net.ajax(manifestURL, false, "POST", manifestText.toString(), "text/plain");
+	return adapt.net.ajax(manifestURL, adapt.net.XMLHttpRequestResponseType.DEFAULT, "POST", manifestText.toString(), "text/plain");
 };
 
 /**

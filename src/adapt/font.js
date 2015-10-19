@@ -307,7 +307,7 @@ adapt.font.Mapper.prototype.loadFont = function(srcFace, documentFaces) {
 				adapt.task.newFrame("loadFont");
 			var deobfuscator = documentFaces.deobfuscator ? documentFaces.deobfuscator(src) : null;
 			if (deobfuscator) {
-				adapt.net.ajax(src, true).then(function(xhr) {
+				adapt.net.ajax(src, adapt.net.XMLHttpRequestResponseType.BLOB).then(function(xhr) {
 					if (!xhr.responseBlob) {
 						frame.finish(null);
 						return;
