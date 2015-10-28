@@ -58,6 +58,9 @@ Viewer.prototype.setupViewerEventHandler = function() {
     this.viewer_.addListener("loaded", function() {
         this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
         this.state_.status.value("complete");
+        if (this.viewerOptions_.profile()) {
+            vivliostyle.profile.profiler.printTimings();
+        }
     }.bind(this));
     this.viewer_.addListener("nav", function(payload) {
         var cfi = payload.cfi;

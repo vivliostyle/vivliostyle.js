@@ -20,11 +20,13 @@
 function Vivliostyle() {
     this.viewer = null;
     this.constants = null;
+    this.profile = null;
 }
 
 Vivliostyle.prototype.setInstance = function(vivliostyle) {
     this.viewer = vivliostyle.viewer;
     this.constants = vivliostyle.constants;
+    this.profile = vivliostyle.profile;
 };
 
 export default new Vivliostyle();

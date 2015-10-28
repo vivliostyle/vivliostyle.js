@@ -22,6 +22,7 @@ import urlParameters from "../stores/url-parameters";
 
 function getViewerOptionsFromURL() {
     return {
+        profile: (urlParameters.getParameter("profile") === "true"),
         spreadView: (urlParameters.getParameter("spread") === "true")
     };
 }
@@ -29,6 +30,7 @@ function getViewerOptionsFromURL() {
 function getDefaultValues() {
     return {
         fontSize: 16,
+        profile: false,
         spreadView: false,
         zoom: 1
     };
@@ -36,6 +38,7 @@ function getDefaultValues() {
 
 function ViewerOptions(options) {
     this.fontSize = ko.observable();
+    this.profile = ko.observable();
     this.spreadView = ko.observable();
     this.zoom = ko.observable();
     if (options) {
@@ -44,6 +47,7 @@ function ViewerOptions(options) {
         var defaultValues = getDefaultValues();
         var urlOptions = getViewerOptionsFromURL();
         this.fontSize(defaultValues.fontSize);
+        this.profile(urlOptions.profile || defaultValues.profile);
         this.spreadView(urlOptions.spreadView || defaultValues.spreadView);
         this.zoom(defaultValues.zoom);
     }
@@ -51,6 +55,7 @@ function ViewerOptions(options) {
 
 ViewerOptions.prototype.copyFrom = function(other) {
     this.fontSize(other.fontSize());
+    this.profile(other.profile());
     this.spreadView(other.spreadView());
     this.zoom(other.zoom());
 };

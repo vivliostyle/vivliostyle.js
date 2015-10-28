@@ -36,7 +36,7 @@ var HTML_FILENAMES = {
     production: "vivliostyle-viewer.html",
     development: "vivliostyle-viewer-dev.html"
 };
-var SERVER_START_PATH = "/build/%viewer-html%#x=/test/empty.html";
+var SERVER_START_PATH = "/vivliostyle-ui/build/%viewer-html%#x=/vivliostyle.js/samples/gon/index.html";
 
 // Utility functions
 function srcDir(type) {
@@ -170,7 +170,6 @@ gulp.task("watch", ["start-watching", "build"], function() {
     gulp.watch(srcPattern("html"), ["build:html"]);
     gulp.watch(srcPattern("fonts"), ["build:fonts"]);
     gulp.watch(srcPattern("resources"), ["build:resources"]);
-    gulp.watch(srcPattern("mathjax"), ["build:mathjax"]);
     gulp.watch(srcPattern("css"), ["build:css"]);
 });
 gulp.task("watch-dev", ["start-watching", "build-dev"], function() {
@@ -185,7 +184,7 @@ gulp.task("watch-dev", ["start-watching", "build-dev"], function() {
 function serve(development) {
     browserSync.init({
         server: {
-            baseDir: "./"
+            baseDir: "../"
         },
         startPath: serverStartPath(development)
     });
