@@ -18,7 +18,7 @@
 <style id="vivliostyle-page-rules"></style>
 </head>
 <body data-bind="event: {keydown: handleKey}">
-<div id="vivliostyle-viewer-viewport" data-bind="attr: {'data-vivliostyle-viewer-status': viewer.state.status, 'data-vivliostyle-page-progression': viewer.state.pageProgression, 'data-vivliostyle-spread-view': viewerOptions.spreadView}, click: settingsPanel.close"></div>
+<div id="vivliostyle-viewer-viewport" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression, 'data-vivliostyle-spread-view': viewerOptions.spreadView}, click: settingsPanel.close"></div>
 <span id="vivliostyle-page-navigation-left" title="navigate to left" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToLeftDisabled()}"></span>
 <span id="vivliostyle-page-navigation-right" title="navigate to right" data-bind="click: navigation.navigateToRight, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToRightDisabled()}"></span>
 
