@@ -151,7 +151,7 @@ goog.scope(function() {
     var performanceInstance = window && window.performance;
     var profiler = vivliostyle.profile.profiler = new Profiler(performanceInstance || fallbackPerformanceInstance);
     profiler.forceRegisterStartTiming("load_vivliostyle");
-window["profiler"] = profiler;
+
     vivliostyle.namespace.exportSymbol("vivliostyle.profile.profiler", profiler);
     goog.exportProperty(Profiler.prototype, "printTimings", Profiler.prototype.printTimings);
     goog.exportProperty(Profiler.prototype, "disable", Profiler.prototype.disable);
