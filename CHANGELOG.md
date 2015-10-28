@@ -23,6 +23,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/61>
 - Fix incorrect layout of HTML which is well-formed as XML
   - https://github.com/vivliostyle/vivliostyle.js/issues/65
+- Fix viewport blinking while loading
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/77>
 
 ## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
 Beta release.
