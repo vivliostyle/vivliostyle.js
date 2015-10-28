@@ -8,10 +8,10 @@ chmod 600 ~/.ssh/deploy.key
 
 cd ../
 
-# fetch and build vivliostyle-js-viewer
+# fetch and build vivliostyle-ui
 gem install compass
-git clone --depth=1 --branch=master git@github.com:vivliostyle/vivliostyle-js-viewer.git vivliostyle-js-viewer
-cd vivliostyle-js-viewer
+git clone --depth=1 --branch=master git@github.com:vivliostyle/vivliostyle-ui.git vivliostyle-ui
+cd vivliostyle-ui
 npm run setup-local-vivliostyle ../vivliostyle.js
 npm install
 npm run build
@@ -33,9 +33,9 @@ git config user.name "kwkbtr (Travis CI)"
 
 # update gh-pages branch
 cp -R ../vivliostyle.js/samples/* samples/
-cp -R ../vivliostyle-js-viewer/build/* viewer/
+cp -R ../vivliostyle-ui/build/* viewer/
 
-zip="../vivliostyle-js-viewer/vivliostyle-js-latest.zip"
+zip="../vivliostyle-ui/vivliostyle-js-latest.zip"
 if [ -e ${zip} ]; then
     mv ${zip} downloads/
 fi
