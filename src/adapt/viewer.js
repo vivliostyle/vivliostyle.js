@@ -105,6 +105,8 @@ adapt.viewer.Viewer.prototype.callback = function(message) {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
+    vivliostyle.profile.profiler.registerStartTiming("loadEPUB");
+    vivliostyle.profile.profiler.registerStartTiming("loadFirstPage");
 	var url = /** @type {string} */ (command["url"]);
 	var fragment = /** @type {?string} */ (command["fragment"]);
 	var haveZipMetadata = !!command["zipmeta"];
@@ -128,6 +130,7 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
 	        self.opf.resolveFragment(fragment).then(function(position) {
 	        	self.pagePosition = position;
                 self.resize().then(function() {
+                    vivliostyle.profile.profiler.registerEndTiming("loadEPUB");
                     self.callback({"t":"loaded", "metadata": self.opf.getMetadata()});
                     frame.finish(true);
                 });
@@ -143,6 +146,8 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.loadXML = function(command) {
+    vivliostyle.profile.profiler.registerStartTiming("loadXML");
+    vivliostyle.profile.profiler.registerStartTiming("loadFirstPage");
 	var url = /** @type {string} */ (command["url"]);
     var doc = /** @type {Document} */ (command["document"]);
 	var fragment = /** @type {?string} */ (command["fragment"]);
@@ -166,6 +171,7 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
             self.opf.resolveFragment(fragment).then(function(position) {
                 self.pagePosition = position;
                 self.resize().then(function() {
+                    vivliostyle.profile.profiler.registerEndTiming("loadXML");
                     self.callback({"t":"loaded"});
                     frame.finish(true);
                 });
@@ -543,6 +549,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
     self.opfView.setPagePosition(self.pagePosition).then(function(page) {
         self.showCurrent(page).then(function() {
             self.reportPosition().then(function(p) {
+                vivliostyle.profile.profiler.registerEndTiming("loadFirstPage");
                 var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
                 r.then(function() {
                     self.callback({"t": "resizeend"});
