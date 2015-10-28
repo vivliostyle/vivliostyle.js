@@ -5,6 +5,7 @@
 goog.provide("vivliostyle.viewer");
 
 goog.require("vivliostyle.namespace");
+goog.require("vivliostyle.profile");
 goog.require("vivliostyle.constants");
 goog.require("vivliostyle.util");
 goog.require("adapt.base");
@@ -300,4 +301,6 @@ goog.scope(function() {
     goog.exportProperty(Viewer.prototype, "queryZoomFactor", Viewer.prototype.queryZoomFactor);
     vivliostyle.namespace.exportSymbol("vivliostyle.viewer.ZoomType", ZoomType);
     goog.exportProperty(ZoomType, "FIT_INSIDE_VIEWPORT", ZoomType.FIT_INSIDE_VIEWPORT);
+
+    vivliostyle.profile.profiler.forceRegisterEndTiming("load_vivliostyle");
 });
