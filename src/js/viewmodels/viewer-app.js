@@ -29,6 +29,9 @@ import keyUtil from "../utils/key-util";
 function ViewerApp() {
     this.documentOptions = new DocumentOptions();
     this.viewerOptions = new ViewerOptions();
+    if (this.viewerOptions.profile()) {
+        vivliostyle.profile.profiler.enable();
+    }
     this.viewerSettings = {
         userAgentRootURL: "resources/",
         viewportElement: document.getElementById("vivliostyle-viewer-viewport")
