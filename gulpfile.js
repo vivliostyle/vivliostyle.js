@@ -170,7 +170,6 @@ gulp.task("watch", ["start-watching", "build"], function() {
     gulp.watch(srcPattern("html"), ["build:html"]);
     gulp.watch(srcPattern("fonts"), ["build:fonts"]);
     gulp.watch(srcPattern("resources"), ["build:resources"]);
-    gulp.watch(srcPattern("mathjax"), ["build:mathjax"]);
     gulp.watch(srcPattern("css"), ["build:css"]);
 });
 gulp.task("watch-dev", ["start-watching", "build-dev"], function() {
