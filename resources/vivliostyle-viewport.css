@@ -38,13 +38,16 @@
 
     [data-vivliostyle-viewer-viewport] > div {
         margin: auto;
+        overflow: hidden;
+    }
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-viewer-status=complete] > div {
         display: -webkit-flex;
         display: flex;
         -webkit-flex-shrink: 0;
         flex-shrink: 0;
         -webkit-justify-content: center;
         justify-content: center;
-        overflow: hidden;
     }
 
     [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=ltr] > div {

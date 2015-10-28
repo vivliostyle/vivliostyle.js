@@ -29,6 +29,8 @@ adapt.viewer.Action;
  */
 adapt.viewer.ViewportSize;
 
+/** @const */
+adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE = "data-vivliostyle-viewer-status";
 
 /**
  * @param {Window} window
@@ -42,6 +44,7 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
 	/** @const */ this.window = window;
     /** @const */ this.viewportElement = viewportElement;
     viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
+    viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
 	/** @const */ this.instanceId = instanceId;
 	/** @const */ this.callbackFn = callbackFn;
 	var document = window.document;
@@ -107,6 +110,7 @@ adapt.viewer.Viewer.prototype.callback = function(message) {
 adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     vivliostyle.profile.profiler.registerStartTiming("loadEPUB");
     vivliostyle.profile.profiler.registerStartTiming("loadFirstPage");
+    this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
 	var url = /** @type {string} */ (command["url"]);
 	var fragment = /** @type {?string} */ (command["fragment"]);
 	var haveZipMetadata = !!command["zipmeta"];
@@ -130,6 +134,7 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
 	        self.opf.resolveFragment(fragment).then(function(position) {
 	        	self.pagePosition = position;
                 self.resize().then(function() {
+                    self.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "complete");
                     vivliostyle.profile.profiler.registerEndTiming("loadEPUB");
                     self.callback({"t":"loaded", "metadata": self.opf.getMetadata()});
                     frame.finish(true);
@@ -148,6 +153,7 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
 adapt.viewer.Viewer.prototype.loadXML = function(command) {
     vivliostyle.profile.profiler.registerStartTiming("loadXML");
     vivliostyle.profile.profiler.registerStartTiming("loadFirstPage");
+    this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
 	var url = /** @type {string} */ (command["url"]);
     var doc = /** @type {Document} */ (command["document"]);
 	var fragment = /** @type {?string} */ (command["fragment"]);
@@ -171,6 +177,7 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
             self.opf.resolveFragment(fragment).then(function(position) {
                 self.pagePosition = position;
                 self.resize().then(function() {
+                    self.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "complete");
                     vivliostyle.profile.profiler.registerEndTiming("loadXML");
                     self.callback({"t":"loaded"});
                     frame.finish(true);
@@ -537,6 +544,9 @@ adapt.viewer.Viewer.prototype.resize = function() {
 		return adapt.task.newResult(true);
 	}
 	var self = this;
+    if (this.viewportElement.getAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE) === "complete") {
+        this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "resizing");
+    }
 	self.callback({"t": "resizestart"});
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("resize");
 	if (self.opfView && !self.pagePosition) {
@@ -552,6 +562,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
                 vivliostyle.profile.profiler.registerEndTiming("loadFirstPage");
                 var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
                 r.then(function() {
+                    self.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "complete");
                     self.callback({"t": "resizeend"});
                     frame.finish(p);
                 });
