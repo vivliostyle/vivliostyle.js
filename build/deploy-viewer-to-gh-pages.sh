@@ -12,7 +12,7 @@ cd ../
 gem install compass
 git clone --depth=1 --branch=master git@github.com:vivliostyle/vivliostyle-ui.git vivliostyle-ui
 cd vivliostyle-ui
-npm run setup-local-vivliostyle ../vivliostyle.js
+npm install ../vivliostyle.js
 npm install
 npm run build
 npm run test-sauce
