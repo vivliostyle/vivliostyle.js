@@ -2009,6 +2009,8 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     	this.importCondition = /** @type {adapt.css.Expr} */ (valStack.pop());
                     	this.importReady = true;
                         this.actions = adapt.cssparse.actionsBase;
+                        tokenizer.consume();
+                        return false;
                     }
                 }
                 tokenizer.consume();
