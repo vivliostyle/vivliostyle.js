@@ -312,7 +312,9 @@ adapt.vtree.FlowChunk.prototype.isBetter = function(other) {
  *   left: number,
  *   top: number,
  *   right: number,
- *   bottom: number
+ *   bottom: number,
+ *   width: number,
+ *   height: number
  * }}
  */
 adapt.vtree.ClientRect;

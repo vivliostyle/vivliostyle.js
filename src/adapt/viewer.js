@@ -10,7 +10,6 @@ goog.require('adapt.task');
 goog.require('adapt.vgen');
 goog.require('adapt.expr');
 goog.require('adapt.epub');
-goog.require('adapt.devel');
 
 /**
  * @typedef {function(this:adapt.viewer.Viewer,adapt.base.JSON):adapt.task.Result.<boolean>}

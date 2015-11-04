@@ -1,5 +1,6 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Support utilities to extract information from various (parsed) CSS values.
  */
 goog.provide('adapt.cssprop');

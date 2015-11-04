@@ -45,7 +45,6 @@
         "adapt/cfi.js",
         "adapt/toc.js",
         "adapt/epub.js",
-        "adapt/devel.js",
         "adapt/viewer.js",
         "vivliostyle/viewer.js"
     ];
