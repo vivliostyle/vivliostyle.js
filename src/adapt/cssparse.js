@@ -1240,6 +1240,9 @@ adapt.cssparse.Parser.prototype.exprStackReduce = function(op, token) {
                 }
             }
             if (tok == adapt.csstok.TokenType.O_PAR) {
+                if (val.isMediaName()) {
+                    val = new adapt.expr.MediaTest(handler.getScope(), /** @type {!adapt.expr.MediaName} */(val), null);
+                }
                 op = adapt.csstok.TokenType.EOF;
                 continue;
             }

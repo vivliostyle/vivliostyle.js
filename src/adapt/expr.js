@@ -408,6 +408,8 @@ adapt.expr.Context.prototype.evalMediaTest = function(feature, value) {
             default:
                 return actual == req;
         }
+    } else if (actual != null && value == null) {
+        return actual !== 0;
     }
     return false;
 };
