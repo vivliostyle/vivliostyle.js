@@ -18,7 +18,7 @@ npm run build
 npm run test-sauce
 
 # make distribution package
-version=$(grep '^ *"version":' node_modules/vivliostyle/package.json | sed -e 's/^.*"\([^"]*\)",$/\1/')
+version=$(grep '^ *"version":' ../vivliostyle.js/package.json | sed -e 's/^.*"\([^"]*\)",$/\1/')
 scripts/make-dist-package.sh ${version}
 
 cd ../
