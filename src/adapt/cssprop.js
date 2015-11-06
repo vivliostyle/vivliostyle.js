@@ -168,7 +168,7 @@ adapt.cssprop.ShapeVisitor.prototype.getShape = function(x, y, width, height, co
                     ref = Math.sqrt((width * width + height * height) / 2);
                 numbers.push(coord.num * ref / 100);
             } else {
-                numbers.push(coord.num * context.queryUnitSize(coord.unit));
+                numbers.push(coord.num * context.queryUnitSize(coord.unit, false));
             }
         }
         switch (this.name) {

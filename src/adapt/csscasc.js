@@ -461,7 +461,7 @@ adapt.csscasc.InheritanceVisitor.prototype.getFontSize = function() {
  */
 adapt.csscasc.InheritanceVisitor.prototype.visitNumeric = function(numeric) {
 	if (numeric.unit == "em" || numeric.unit == "ex") {
-		var ratio = this.context.queryUnitSize(numeric.unit) / this.context.queryUnitSize("em");
+		var ratio = this.context.queryUnitSize(numeric.unit, false) / this.context.queryUnitSize("em", false);
 		return new adapt.css.Numeric(numeric.num * ratio * this.getFontSize(), "px");
 	} else if (numeric.unit == "%") {
         if (this.propName === "font-size") {

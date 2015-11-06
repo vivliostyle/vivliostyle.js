@@ -854,7 +854,7 @@ adapt.css.toNumber = function(val, context) {
 	if (val) {
 	    if (val.isNumeric()) {
 	        var numeric = /** @type {adapt.css.Numeric} */ (val);
-	        return context.queryUnitSize(numeric.unit) * numeric.num;
+	        return context.queryUnitSize(numeric.unit, false) * numeric.num;
 	    }
 	    if (val.isNum()) {
 	        return (/** @type {adapt.css.Num} */ (val)).num;

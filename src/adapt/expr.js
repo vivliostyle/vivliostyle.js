@@ -260,7 +260,14 @@ adapt.expr.Context = function(rootScope, viewportWidth, viewportHeight, fontSize
         else
             return viewportHeight;
     };
-	/** @const */ this.fontSize = fontSize;
+    /** @const */ this.initialFontSize = fontSize;
+    /** @type {?number} */ this.rootFontSize = null;
+	this.fontSize = function() {
+        if (this.rootFontSize)
+            return this.rootFontSize;
+        else
+            return fontSize;
+    };
 	this.pref = adapt.expr.defaultPreferencesInstance;
 	/** @type {Object.<string,adapt.expr.ScopeContext>} */ this.scopes = {};
 };
@@ -292,17 +299,18 @@ adapt.expr.Context.prototype.clearScope = function(scope) {
 
 /**
  * @param {string} unit
+ * @param {boolean} isRoot
  * @return {number}
  */
-adapt.expr.Context.prototype.queryUnitSize = function(unit) {
+adapt.expr.Context.prototype.queryUnitSize = function(unit, isRoot) {
     if (unit == "vw")
         return this.pageWidth() / 100;
     if (unit == "vh")
         return this.pageHeight() / 100;
     if (unit == "em" || unit == "rem")
-        return this.fontSize;
+        return isRoot ? this.initialFontSize : this.fontSize();
     if (unit == "ex" || unit == "rex")
-        return adapt.expr.defaultUnitSizes["ex"] * this.fontSize / adapt.expr.defaultUnitSizes["em"];
+        return adapt.expr.defaultUnitSizes["ex"] * (isRoot ? this.initialFontSize : this.fontSize()) / adapt.expr.defaultUnitSizes["em"];
     return adapt.expr.defaultUnitSizes[unit];
 };
 
@@ -1259,7 +1267,7 @@ adapt.expr.Numeric.prototype.appendTo = function(buf, priority) {
  * @override
  */
 adapt.expr.Numeric.prototype.evaluateCore = function(context) {
-    return this.num * context.queryUnitSize(this.unit);
+    return this.num * context.queryUnitSize(this.unit, false);
 };
 
 

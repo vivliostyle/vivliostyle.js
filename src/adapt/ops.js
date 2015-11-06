@@ -199,7 +199,7 @@ adapt.ops.StyleInstance.prototype.getStylerForDoc = function(xmldoc) {
 	if (!styler) {
 		var style = this.style.store.getStyleForDoc(xmldoc);
 		// We need a separate content, so that variables can get potentially different values.
-		var context = new adapt.expr.Context(style.rootScope, this.pageWidth(), this.pageHeight(), this.fontSize);
+		var context = new adapt.expr.Context(style.rootScope, this.pageWidth(), this.pageHeight(), this.initialFontSize);
 		styler = new adapt.cssstyler.Styler(xmldoc, style.cascade, 
         		style.rootScope, context, this.primaryFlows, style.validatorSet, this.pageCounterStore);
 		this.stylerMap[xmldoc.url] = styler;
@@ -336,7 +336,7 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function(cascadedPageStyle)
         var utilization = pageMaster.getProp(self, "utilization");
         if (utilization && utilization.isNum())
             coeff = (/** @type {adapt.css.Num} */ (utilization)).num;
-        var em = self.queryUnitSize("em");
+        var em = self.queryUnitSize("em", false);
         var pageArea = self.pageWidth() * self.pageHeight();
         var lookup = Math.ceil(coeff * pageArea / (em * em));
         // B. Determine element eligibility. Each element in a flow is considered eligible if
@@ -603,7 +603,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	            		outerWidth, outerHeight, self);
 	            if (adapt.base.checkLShapeFloatBug(self.viewport.root)) {
 	            	// Simplistic bug workaround: add a copy of the shape translated up.
-		            exclusions.push(outerShape.withOffset(0, -1.25 * self.queryUnitSize("em")));
+		            exclusions.push(outerShape.withOffset(0, -1.25 * self.queryUnitSize("em", false)));
 	            }
 	            exclusions.push(outerShape);
         	}
@@ -767,13 +767,13 @@ adapt.ops.StyleInstance.prototype.setPageSize = function(cascadedPageStyle) {
     if (width === adapt.css.fullWidth) {
         this.actualPageWidth = null;
     } else {
-        this.actualPageWidth = width.num * this.queryUnitSize(width.unit);
+        this.actualPageWidth = width.num * this.queryUnitSize(width.unit, false);
     }
     var height = pageSize.height;
     if (height === adapt.css.fullHeight) {
         this.actualPageHeight = null;
     } else {
-        this.actualPageHeight = height.num * this.queryUnitSize(height.unit);
+        this.actualPageHeight = height.num * this.queryUnitSize(height.unit, false);
     }
 };
 
