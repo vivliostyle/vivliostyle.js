@@ -77,7 +77,7 @@ adapt.font.prepareProperties = function(properties, context) {
 adapt.font.Face = function(properties) {
 	/** @const */ this.properties = properties;
 	/** @const */ this.fontTraitKey = adapt.font.makeFontTraitKey(this.properties);
-	/** @const */ this.src = adapt.cssprop.toFontSrcURL(this.properties["src"]);
+	/** @const */ this.src = this.properties["src"] ? this.properties["src"].toString() : null;
 	/** @type {Array.<string>} */ this.blobURLs = [];
 	/** @type {Array.<Blob>} */ this.blobs = [];
 	var family = this.properties["font-family"];
@@ -116,11 +116,12 @@ adapt.font.Face.prototype.makeAtRule = function(src, fontBytes) {
 		sb.append(blobURL);
 		this.blobURLs.push(blobURL);
 		this.blobs.push(fontBytes);
+		sb.append('")');
 	} else {
-		sb.append('src: url("');
-		sb.append(adapt.base.escapeCSSStr(src));
+		sb.append('src: ');
+		sb.append(src);
 	}
-	sb.append('");\n}\n');
+	sb.append(';\n}\n');
 	return sb.toString();
 };
 
