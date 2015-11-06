@@ -31,6 +31,7 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/77>
 - Fix media queries behavior
   - <https://github.com/vivliostyle/vivliostyle.js/pull/78>
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/80>
 
 ## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
 Beta release.
