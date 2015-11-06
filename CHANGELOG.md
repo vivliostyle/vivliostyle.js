@@ -17,6 +17,10 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/72>
   - Spec: [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
   - Only basic float placement without stacking or collision avoidance is supported.
+- Improve handling of @font-face rules
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/79>
+  - Spec: [CSS Fonts Module Level 3 - The @font-face rule](http://www.w3.org/TR/css-fonts-3/#font-face-rule)
+  - Add support for `local()` as well as `url()` to use local fonts.
 
 ### Fixed
 - Fix zoom problem when viewport is specified by the document
