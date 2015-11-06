@@ -112,3 +112,9 @@ html|body, fb2|body {
 		vertical-align: middle;
 	}
 }
+
+@media print {
+	@page {
+		margin: 19mm;
+	}
+}
