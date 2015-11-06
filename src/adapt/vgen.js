@@ -414,6 +414,7 @@ adapt.vgen.ViewFactory.prototype.inheritFromSourceParent = function(elementStyle
 	// have the full shadow tree structure at this point. This code handles coming out of the
 	// shadow trees, but does not go back in (through shadow:content element).
 	var shadowContext = this.nodeContext.shadowContext;
+	var steps = -1;
 	while (node && node.nodeType == 1) {
 		var shadowRoot = shadowContext && shadowContext.root == node;
 		if (!shadowRoot || shadowContext.type == adapt.vtree.ShadowType.ROOTLESS) {
@@ -427,9 +428,11 @@ adapt.vgen.ViewFactory.prototype.inheritFromSourceParent = function(elementStyle
 			shadowContext = shadowContext.parentShadow;
 		} else {
 			node = node.parentNode;
+			steps++;
 		}
 	}
-	var fontSize = this.context.queryUnitSize("em");
+	var isRoot = steps === 0;
+	var fontSize = this.context.queryUnitSize("em", isRoot);
 	var props = /** @type {adapt.csscasc.ElementStyle} */
 		({"font-size": new adapt.csscasc.CascadeValue(new adapt.css.Numeric(fontSize, "px"), 0)});
 	var inheritanceVisitor = new adapt.csscasc.InheritanceVisitor(props, this.context);
@@ -1095,6 +1098,10 @@ adapt.vgen.ViewFactory.prototype.applyComputedStyles = function(target, computed
 						new adapt.vtree.DelayedItem(target, propName, value));
 				continue;
 			}
+		}
+		if (value.isNumeric() && value.unit === "rem") {
+			// font-size for the root element is already converted to px
+			value = new adapt.css.Numeric(adapt.css.toNumber(value, this.context), "px");
 		}
 	    adapt.base.setCSSProperty(target, propName, value.toString());
 	}	
