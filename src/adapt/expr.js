@@ -20,7 +20,7 @@ adapt.expr.Preferences;
 adapt.expr.defaultPreferences = function() {
 	return {fontFamily:"serif", lineHeight:1.25, margin:8, hyphenate:true, columnWidth:25,
 				horizontal:false, nightMode:false, spreadView:false, pageBorder:1,
-                enabledMediaTypes:{"print": true, "projection": true, "screen": true}};
+                enabledMediaTypes:{"print": true}};
 };
 
 /**
