@@ -3,7 +3,9 @@
 html|html, html|address, html|blockquote, html|body, html|dd, html|div,
 html|dl, html|dt, html|fieldset, html|form, html|frame, html|frameset,
 html|h1, html|h2, html|h3, html|h4, html|h5, html|h6, html|noframes,
-html|ol, html|p, html|ul, html|center, html|dir, html|hr, html|menu, html|pre {
+html|ol, html|p, html|ul, html|center, html|dir, html|hr, html|menu, html|pre,
+html|article, html|section, html|nav, html|aside, html|hgroup, html|footer, html|header,
+html|figure, html|figcaption, html|main {
      display: block;
      unicode-bidi: embed;
 }
