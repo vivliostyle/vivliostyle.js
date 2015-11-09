@@ -226,13 +226,6 @@
         "url": "/css21/page-box/at-page-rule-002-b.xht"
       },
       {
-        "path": "css21/page-box/at-page-rule-002-c.xht",
-        "references": [
-          ["/css21/page-box/vivliostyle/at-page-rule-002-c-ref.html", "=="]
-        ],
-        "url": "/css21/page-box/at-page-rule-002-c.xht"
-      },
-      {
         "path": "css21/page-box/first-page-selectors-001.xht",
         "references": [
           ["/css21/page-box/vivliostyle/first-page-selectors-ltr-ref.html", "=="]
@@ -252,13 +245,6 @@
           ["/css21/page-box/vivliostyle/page-container-001-ref.html", "=="]
         ],
         "url": "/css21/page-box/page-container-001.xht"
-      },
-      {
-        "path": "css21/page-box/page-container-002.xht",
-        "references": [
-          ["css21/page-box/vivliostyle/page-container-002-ref.html", "=="]
-        ],
-        "url": "/css21/page-box/page-container-002.xht"
       },
       {
         "path": "css21/page-box/page-container-006.xht",
@@ -282,13 +268,6 @@
         "url": "/css21/page-box/page-container-009.xht"
       },
       {
-        "path": "css21/page-box/page-container-010.xht",
-        "references": [
-          ["css21/page-box/vivliostyle/page-container-010-ref.html", "=="]
-        ],
-        "url": "/css21/page-box/page-container-010.xht"
-      },
-      {
         "path": "css21/page-box/page-margin-000.xht",
         "references": [
           ["/css21/page-box/vivliostyle/page-margin-000-ref.html", "=="]
@@ -301,13 +280,6 @@
           ["/css21/page-box/vivliostyle/page-margin-001-ref.html", "=="]
         ],
         "url": "/css21/page-box/page-margin-001.xht"
-      },
-      {
-        "path": "css21/page-box/page-margin-002.xht",
-        "references": [
-          ["/css21/page-box/vivliostyle/page-margin-002-ref.html", "=="]
-        ],
-        "url": "/css21/page-box/page-margin-002.xht"
       },
       {
         "path": "css21/page-box/page-selectors-004.xht",

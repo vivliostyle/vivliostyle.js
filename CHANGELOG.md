@@ -22,6 +22,10 @@
   - Spec: [CSS Fonts Module Level 3 - The @font-face rule](http://www.w3.org/TR/css-fonts-3/#font-face-rule)
   - Add support for `local()` as well as `url()` to use local fonts.
 
+### Changed
+- Add default page margin
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/81>
+
 ### Fixed
 - Fix zoom problem when viewport is specified by the document
   - <https://github.com/vivliostyle/vivliostyle.js/pull/61>

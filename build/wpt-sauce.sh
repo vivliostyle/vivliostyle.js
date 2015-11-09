@@ -10,7 +10,7 @@ cd ${WORKDIR}
 
 # fetch necessary repositories
 git clone --depth=1 --branch=vivliostyle-master --recursive https://github.com/vivliostyle/wptrunner.git
-git clone --depth=1 --branch=vivliostyle-master --recursive https://github.com/vivliostyle/csswg-test.git
+git clone --depth=1 --branch=add_default_margin --recursive https://github.com/vivliostyle/csswg-test.git
 git clone --depth=1 --branch=vivliostyle-master --recursive https://github.com/vivliostyle/wpt-tools.git csswg-test/wpt_tools
 
 # copy Vivliostyle.js files
