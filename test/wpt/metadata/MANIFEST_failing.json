@@ -145,6 +145,13 @@
         "url": "/css21/page-box/at-page-rule-001.xht"
       },
       {
+        "path": "css21/page-box/at-page-rule-002-c.xht",
+        "references": [
+          ["/css21/page-box/vivliostyle/at-page-rule-002-c-ref.html", "=="]
+        ],
+        "url": "/css21/page-box/at-page-rule-002-c.xht"
+      },
+      {
         "path": "css21/page-box/first-page-selectors-002.xht",
         "references": [
           ["/css21/page-box/vivliostyle/first-page-selectors-rtl-ref.html", "=="]
@@ -171,6 +178,20 @@
         "url": "/css21/page-box/page-container-001.xht"
       },
       {
+        "path": "css21/page-box/page-container-002.xht",
+        "references": [
+          ["css21/page-box/vivliostyle/page-container-002-ref.html", "=="]
+        ],
+        "url": "/css21/page-box/page-container-002.xht"
+      },
+      {
+        "path": "css21/page-box/page-container-010.xht",
+        "references": [
+          ["css21/page-box/vivliostyle/page-container-010-ref.html", "=="]
+        ],
+        "url": "/css21/page-box/page-container-010.xht"
+      },
+      {
         "path": "css21/positioning/abspos-paged-001.xht",
         "references": [
           [
@@ -178,6 +199,13 @@
           ]
         ],
         "url": "/css21/positioning/abspos-paged-001.xht"
+      },
+      {
+        "path": "css21/page-box/page-margin-002.xht",
+        "references": [
+          ["/css21/page-box/vivliostyle/page-margin-002-ref.html", "=="]
+        ],
+        "url": "/css21/page-box/page-margin-002.xht"
       },
       {
         "path": "css-page-3/page-margin-003.xht",
