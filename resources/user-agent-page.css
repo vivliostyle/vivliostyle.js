@@ -115,6 +115,6 @@ html|body, fb2|body {
 
 @media print {
 	@page {
-		margin: 19mm;
+		margin: 10%;
 	}
 }
