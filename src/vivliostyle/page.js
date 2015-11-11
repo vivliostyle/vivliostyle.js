@@ -50,6 +50,8 @@ vivliostyle.page.pageSizes = {
     "a3": {width: new adapt.css.Numeric(297, "mm"), height: new adapt.css.Numeric(420, "mm")},
     "b5": {width: new adapt.css.Numeric(176, "mm"), height: new adapt.css.Numeric(250, "mm")},
     "b4": {width: new adapt.css.Numeric(250, "mm"), height: new adapt.css.Numeric(353, "mm")},
+    "jis-b5": {width: new adapt.css.Numeric(182, "mm"), height: new adapt.css.Numeric(257, "mm")},
+    "jis-b4": {width: new adapt.css.Numeric(257, "mm"), height: new adapt.css.Numeric(364, "mm")},
     "letter": {width: new adapt.css.Numeric(8.5, "in"), height: new adapt.css.Numeric(11, "in")},
     "legal": {width: new adapt.css.Numeric(8.5, "in"), height: new adapt.css.Numeric(14, "in")},
     "ledger": {width: new adapt.css.Numeric(11, "in"), height: new adapt.css.Numeric(17, "in")}
