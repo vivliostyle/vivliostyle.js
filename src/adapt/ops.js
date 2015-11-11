@@ -481,7 +481,9 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	    var contentVal = boxInstance.getProp(self, "content");
 		var removed = false;
 	    if (contentVal && adapt.vtree.nonTrivialContent(contentVal)) {
-			contentVal.visit(new adapt.vtree.ContentPropertyHandler(boxContainer, self));
+			var innerContainer = self.viewport.document.createElement("span");
+			contentVal.visit(new adapt.vtree.ContentPropertyHandler(innerContainer, self));
+			boxContainer.appendChild(innerContainer);
 			boxInstance.transferContentProps(self, layoutContainer, page);
 		} else if (boxInstance.suppressEmptyBoxGeneration) {
 			parentContainer.removeChild(boxContainer);
