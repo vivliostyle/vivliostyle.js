@@ -267,7 +267,7 @@ object-fit = fill | contain | cover | none | scale-down;
 object-position = COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */
 
 /* CSS Paged Media */
-PAGE_SIZE = a5 | a4 | a3 | b5 | b4 | letter | legal | ledger;
+PAGE_SIZE = a5 | a4 | a3 | b5 | b4 | jis-b5 | jis-b4 | letter | legal | ledger;
 size = POS_LENGTH{1,2} | auto | [ PAGE_SIZE || [ portrait | landscape ] ];
 
 /* CSS Page Floats */
