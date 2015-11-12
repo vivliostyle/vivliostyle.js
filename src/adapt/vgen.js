@@ -1121,6 +1121,8 @@ adapt.vgen.ViewFactory.prototype.applyPseudoelementStyle = function(nodeContext,
     if (!pseudoMap)
     	return;
     elementStyle = pseudoMap[pseudoName];
+	if (!elementStyle)
+		return;
     var computedStyle = {};
 	nodeContext.vertical = this.computeStyle(nodeContext.vertical, elementStyle, computedStyle);
     var content = computedStyle["content"];
