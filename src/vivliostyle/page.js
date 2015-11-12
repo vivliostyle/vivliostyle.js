@@ -1909,7 +1909,20 @@ vivliostyle.page.PageParserHandler.prototype.endRule = function() {
  */
 vivliostyle.page.PageParserHandler.prototype.property = function(name, value, important) {
     if (name === "size") {
-        this.pageSizeRules += "size: " + value.toString() + (important ? "!important" : "") + ";";
+        var valueStr = value.toString().toLowerCase();
+        var presetValue = vivliostyle.page.pageSizes[valueStr];
+        if (presetValue
+            && valueStr !== "a5"
+            && valueStr !== "a4"
+            && valueStr !== "a3"
+            && valueStr !== "b5"
+            && valueStr !== "b4"
+            && valueStr !== "letter"
+            && valueStr !== "legal"
+            && valueStr !== "ledger") {
+            valueStr = presetValue.width.stringValue() + " " + presetValue.height.stringValue();
+        }
+        this.pageSizeRules += "size: " + valueStr + (important ? "!important" : "") + ";";
     }
     adapt.csscasc.CascadeParserHandler.prototype.property.call(this, name, value, important);
 };
