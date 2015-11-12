@@ -31,6 +31,8 @@ var PresetSize = [
     {name: "A3", description: "A3"},
     {name: "B5", description: "B5 (ISO)"},
     {name: "B4", description: "B4 (ISO)"},
+    {name: "JIS-B5", description: "B5 (JIS)"},
+    {name: "JIS-B4", description: "B4 (JIS)"},
     {name: "letter", description: "letter"},
     {name: "legal", description: "legal"},
     {name: "ledger", description: "ledger"}
