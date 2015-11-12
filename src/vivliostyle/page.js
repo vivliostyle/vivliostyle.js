@@ -1909,20 +1909,32 @@ vivliostyle.page.PageParserHandler.prototype.endRule = function() {
  */
 vivliostyle.page.PageParserHandler.prototype.property = function(name, value, important) {
     if (name === "size") {
-        var valueStr = value.toString().toLowerCase();
+        var landscape = value.isSpaceList() && value.values[1] === adapt.css.ident.landscape;
+        var valueStr = (landscape ? value.values[0] : value).toString().toLowerCase();
         var presetValue = vivliostyle.page.pageSizes[valueStr];
-        if (presetValue
-            && valueStr !== "a5"
-            && valueStr !== "a4"
-            && valueStr !== "a3"
-            && valueStr !== "b5"
-            && valueStr !== "b4"
-            && valueStr !== "letter"
-            && valueStr !== "legal"
-            && valueStr !== "ledger") {
-            valueStr = presetValue.width.stringValue() + " " + presetValue.height.stringValue();
+        if (presetValue) {
+            if (valueStr === "a5"
+                || valueStr === "a4"
+                || valueStr === "a3"
+                || valueStr === "b5"
+                || valueStr === "b4"
+                || valueStr === "letter"
+                || valueStr === "legal"
+                || valueStr === "ledger") {
+                if (landscape) {
+                    valueStr += " landscape";
+                }
+            } else {
+                var width = presetValue.width.stringValue();
+                var height = presetValue.height.stringValue();
+                if (landscape) {
+                    valueStr = height + " " + width;
+                } else {
+                    valueStr = width + " " + height;
+                }
+            }
         }
-        this.pageSizeRules += "size: " + valueStr + (important ? "!important" : "") + ";";
+        this.pageSizeRules += "size: " + valueStr + (important ? " !important" : "") + ";";
     }
     adapt.csscasc.CascadeParserHandler.prototype.property.call(this, name, value, important);
 };
