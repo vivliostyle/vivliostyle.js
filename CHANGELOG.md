@@ -21,6 +21,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/79>
   - Spec: [CSS Fonts Module Level 3 - The @font-face rule](http://www.w3.org/TR/css-fonts-3/#font-face-rule)
   - Add support for `local()` as well as `url()` to use local fonts.
+- Support JIS-B5 and JIS-B4 page sizes
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/75>
 
 ### Changed
 - Add default page margin
