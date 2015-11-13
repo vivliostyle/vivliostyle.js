@@ -370,12 +370,12 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
     var flowPosition = this.currentLayoutPosition.flowPositions[flowName];
     if (!flowPosition)
         return adapt.task.newResult(true);
-    if (this.primaryFlows[flowName] && region.exclusions.length > 0) {
-        // In general, we force non-fitting content. Exception is only for primary flow regions
-    	// that have exclusions.
-    	region.forceNonfitting = false;
-	}
     region.init();
+    if (this.primaryFlows[flowName] && region.bands.length > 0) {
+        // In general, we force non-fitting content. Exception is only for primary flow regions
+        // that have exclusions.
+        region.forceNonfitting = false;
+    }
     var self = this;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("layoutColumn");
     var repeated = /** @type {Array.<adapt.vtree.FlowChunkPosition>} */ ([]);
