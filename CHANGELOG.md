@@ -23,6 +23,8 @@
   - Add support for `local()` as well as `url()` to use local fonts.
 - Support JIS-B5 and JIS-B4 page sizes
   - <https://github.com/vivliostyle/vivliostyle.js/issues/75>
+- Accept flexbox properties
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/90>
 
 ### Changed
 - Add default page margin
