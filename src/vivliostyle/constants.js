@@ -8,6 +8,13 @@ goog.require("vivliostyle.namespace");
 
 goog.scope(function() {
     /**
+     * Debug flag.
+     * @type {boolean}
+     */
+    vivliostyle.constants.isDebug = false;
+    vivliostyle.namespace.exportSymbol("vivliostyle.constants.isDebug", vivliostyle.constants.isDebug);
+
+    /**
      * Page progression direction.
      * @enum {string}
      */
