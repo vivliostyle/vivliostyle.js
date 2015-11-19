@@ -108,7 +108,7 @@ cursor = COMMA(URI* [ auto | crosshair | default | pointer | move | e-resize | n
 direction = ltr | rtl;
 display = inline | block | list-item | inline-block | table | inline-table | table-row-group |
     table-header-group | table-footer-group | table-row | table-column-group | table-column |
-    table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex;
+    table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex | inline-flex;
 elevation = ANGLE | below | level | above | higher | lower;
 empty-cells = show | hide;
 FAMILY = SPACE(IDENT+) | STRING;
@@ -132,8 +132,8 @@ margin-bottom = APLENGTH;
 NPLENGTH = none | PLENGTH;
 max-height = NPLENGTH;
 max-width = NPLENGTH;
-min-height = PLENGTH;
-min-width = PLENGTH;
+min-height = auto | PLENGTH;
+min-width = auto | PLENGTH;
 orphans = POS_INT;
 outline-color = COLOR | invert;
 outline-style = BORDER_SIDE_STYLE;
@@ -314,6 +314,20 @@ text-combine-upright = none | all | [ digits POS_INT? ]; /* relaxed */
 [epub,webkit]text-orientation = mixed | upright | sideways-right | sideways-left | sideways | use-glyph-orientation /* the following values are kept for backward-compatibility */ | vertical-right | rotate-right | rotate-left | rotate-normal | auto;
 [epub,webkit]writing-mode = horizontal-tb | vertical-rl;
 
+/* CSS Flex box */
+FLEX_BASIS = content | PAPLENGTH;
+flex-direction = row | row-reverse | column | column-reverse;
+flex-wrap = nowrap | wrap | wrap-reverse;
+order = INT;
+flex-grow = NNEG_NUM;
+flex-shrink = NNEG_NUM;
+flex-basis = FLEX_BASIS;
+flex = none | [ [ NNEG_NUM NNEG_NUM? ] || FLEX_BASIS ];
+justify-content = flex-start | flex-end | center | space-between | space-around;
+align-items = flex-start | flex-end | center | baseline | stretch;
+align-self = auto | flex-start | flex-end | center | baseline | stretch;
+align-content = flex-start | flex-end | center | space-between | space-around | stretch;
+
 /* Pointer Events */
 [ms]touch-action = auto | none | [ pan-x || pan-y ] | manipulation;
 
@@ -359,6 +373,8 @@ column-fill: auto;
 outline-color: currentColor;
 outline-style: none;
 outline-width: 3px;
+flex-direction: row;
+flex-wrap: nowrap;
 font-family: serif;
 font-style: normal;
 font-size: medium;
@@ -397,6 +413,7 @@ border-radius = INSETS_SLASH border-top-left-radius border-top-right-radius
      border-bottom-right-radius border-bottom-left-radius;
 columns = column-width column-count;
 column-rule = column-rule-width column-rule-style column-rule-color;
+flex-flow = flex-direction flex-wrap;
 oeb-column-number = column-count;
 outline = outline-width outline-style outline-color;
 list-style = list-style-type list-style-position list-style-image;
