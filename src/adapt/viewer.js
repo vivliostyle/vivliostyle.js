@@ -430,7 +430,7 @@ adapt.viewer.Viewer.prototype.reset = function() {
         this.opfView.removeRenderedPages();
 	}
 	this.viewport = this.createViewport();
-    this.viewport.resetZoomBox();
+    this.viewport.resetZoom();
     this.opfView = new adapt.epub.OPFView(this.opf, this.viewport, this.fontMapper, this.pref);
 };
 
@@ -462,8 +462,7 @@ adapt.viewer.Viewer.prototype.showCurrent = function(page) {
  * @param {!adapt.vtree.Page} page
  */
 adapt.viewer.Viewer.prototype.setPageZoom = function(page) {
-    this.viewport.sizeZoomBox(page.dimensions.width * this.zoom, page.dimensions.height * this.zoom);
-    page.zoom(this.zoom);
+    this.viewport.zoom(page.dimensions.width, page.dimensions.height, this.zoom);
 };
 
 /**
@@ -471,13 +470,7 @@ adapt.viewer.Viewer.prototype.setPageZoom = function(page) {
  */
 adapt.viewer.Viewer.prototype.setSpreadZoom = function(spread) {
     var dim = this.getSpreadDimensions(spread);
-    this.viewport.sizeZoomBox(dim.width * this.zoom, dim.height * this.zoom);
-    if (spread.left) {
-        spread.left.zoom(this.zoom);
-    }
-    if (spread.right) {
-        spread.right.zoom(this.zoom);
-    }
+    this.viewport.zoom(dim.width, dim.height, this.zoom);
 };
 
 /**
