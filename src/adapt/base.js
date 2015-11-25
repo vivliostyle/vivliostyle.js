@@ -364,6 +364,36 @@ adapt.base.getCSSProperty = function(elem, prop, opt_value) {
 };
 
 /**
+ * @private
+ * @param {string} value
+ * @returns {string}
+ */
+adapt.base.convertOldWritingModeValue = function(value) {
+    if (value === "lr-tb") {
+        value = "horizontal-tb";
+    } else if (value === "tb-rl") {
+        value = "vertical-rl";
+    } else if (value === "tb-lr") {
+        value = "vertical-lr";
+    }
+    return value;
+};
+
+/**
+ * @param {CSSStyleDeclaration} computedStyle
+ * @param {string} prop
+ * @param {string=} opt_value
+ * @returns {string}
+ */
+adapt.base.getComputedStyleValue = function(computedStyle, prop, opt_value) {
+    var value = computedStyle.getPropertyValue(adapt.base.propNameMap[prop] || prop) || opt_value || "";
+    if (value && prop === "writing-mode") {
+        value = adapt.base.convertOldWritingModeValue(value);
+    }
+    return value;
+};
+
+/**
  * @constructor
  */
 adapt.base.StringBuffer = function() {

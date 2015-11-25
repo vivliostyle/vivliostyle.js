@@ -61,13 +61,13 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
      * @returns {string}
      */
     function getComputedValue(name) {
-        return clientLayout.getElementComputedStyle(element).getPropertyValue(name);
+        var computedStyle = clientLayout.getElementComputedStyle(element);
+        return adapt.base.getComputedStyleValue(computedStyle, name);
     }
 
     var writingMode = getComputedValue(adapt.base.propNameMap["writing-mode"]) ||
             getComputedValue("writing-mode");
-    var isVertical = writingMode === "vertical-rl" || writingMode === "tb-rl" ||
-                     writingMode === "vertical-lr" || writingMode === "tb-lr";
+    var isVertical = writingMode === "vertical-rl" || writingMode === "vertical-lr";
     var inlineSizeName = isVertical ? "height" : "width";
     var blockSizeName = isVertical ? "width" : "height";
 
