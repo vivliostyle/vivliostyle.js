@@ -65,8 +65,7 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
         return adapt.base.getComputedStyleValue(computedStyle, name);
     }
 
-    var writingMode = getComputedValue(adapt.base.propNameMap["writing-mode"]) ||
-            getComputedValue("writing-mode");
+    var writingMode = getComputedValue("writing-mode");
     var isVertical = writingMode === "vertical-rl" || writingMode === "vertical-lr";
     var inlineSizeName = isVertical ? "height" : "width";
     var blockSizeName = isVertical ? "width" : "height";
