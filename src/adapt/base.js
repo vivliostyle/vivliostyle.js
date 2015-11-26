@@ -386,7 +386,9 @@ adapt.base.convertOldWritingModeValue = function(value) {
  * @returns {string}
  */
 adapt.base.getComputedStyleValue = function(computedStyle, prop, opt_value) {
-    var value = computedStyle.getPropertyValue(adapt.base.propNameMap[prop] || prop) || opt_value || "";
+    var value = computedStyle.getPropertyValue(adapt.base.propNameMap[prop]);
+    value = value || computedStyle.getPropertyValue(prop);
+    value = value || opt_value || "";
     if (value && prop === "writing-mode") {
         value = adapt.base.convertOldWritingModeValue(value);
     }
