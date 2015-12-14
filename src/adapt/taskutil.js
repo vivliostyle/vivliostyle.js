@@ -23,7 +23,7 @@ adapt.taskutil.Fetcher = function(fetch, opt_name) {
 	/** @type {boolean} */ this.arrived = false;
 	/** @type {T} */ this.resource = null;
 	/** @type {adapt.task.Task} */ this.task = null;
-	/** @type {?Array.<function(*):void>} */ this.piggybacks = null;
+	/** @type {?Array.<function(*):void>} */ this.piggybacks = [];
 };
 
 /**
@@ -40,7 +40,7 @@ adapt.taskutil.Fetcher.prototype.start = function() {
 				self.arrived = true;
 				self.resource = resource;
 				self.task = null;
-				self.piggybacks = null;
+				self.piggybacks = [];
 				if (piggibacks) {
 					for (var i = 0; i < piggibacks.length; i++) {
 						try {
