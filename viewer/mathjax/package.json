@@ -8,6 +8,7 @@
   "_from": "mathjax@>=2.5.1 <3.0.0",
   "_id": "mathjax@2.5.1",
   "_inCache": true,
+  "_installable": true,
   "_location": "/mathjax",
   "_nodeVersion": "0.12.0",
   "_npmUser": {
@@ -49,7 +50,6 @@
   },
   "gitHead": "fe92ec33f3b0bac54ca3238f7aad257bee5baa4f",
   "homepage": "https://github.com/mathjax/MathJax",
-  "installable": true,
   "keywords": [
     "asciimath",
     "latex",
@@ -66,9 +66,10 @@
   ],
   "name": "mathjax",
   "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mathjax/MathJax.git"
+    "url": "git+https://github.com/mathjax/MathJax.git"
   },
   "scripts": {},
   "version": "2.5.1"
