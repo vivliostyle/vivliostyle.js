@@ -18,7 +18,7 @@
     /* Workaround for Chrome printing problem */
     [data-vivliostyle-viewer-viewport] > div > div > div {
         display: block !important;
-        height: 99.99% !important;
+        page-break-after: always;
     }
 }
 

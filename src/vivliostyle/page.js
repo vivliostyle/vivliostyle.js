@@ -585,7 +585,12 @@ vivliostyle.page.PageRuleMasterInstance.prototype.setPageAreaDimension = functio
     style["padding-left"] = new adapt.css.Expr(dim.marginLeft);
     style["padding-right"] = new adapt.css.Expr(dim.marginRight);
     style["padding-top"] = new adapt.css.Expr(dim.marginTop);
-    style["padding-bottom"] = new adapt.css.Expr(dim.marginBottom);
+
+    // Rounding errors in vertical dimension calculations sometimes make the page size too large
+    // to fit within the actual page in printing (PDF) and cause extra blank pages.
+    // We subtract a small length from the padding-bottom value to avoid this problem.
+    var scope = dim.marginBottom.scope;
+    style["padding-bottom"] = new adapt.css.Expr(adapt.expr.sub(scope, dim.marginBottom, new adapt.expr.Const(scope, 0.75)));
 };
 
 /**
