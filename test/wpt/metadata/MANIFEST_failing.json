@@ -208,6 +208,15 @@
         "url": "/css21/page-box/page-margin-002.xht"
       },
       {
+        "path": "css-page-3/page-background-000.xht",
+        "references": [
+          [
+            "/css-page-3/vivliostyle/page-background-000-ref.html", "=="
+          ]
+        ],
+        "url": "/css-page-3/page-background-000.xht"
+      },
+      {
         "path": "css-page-3/page-margin-003.xht",
         "references": [
           [

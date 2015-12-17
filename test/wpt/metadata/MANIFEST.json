@@ -331,15 +331,6 @@
         "url": "/css-page-3/page-size-010.xht"
       },
       {
-        "path": "css-page-3/page-background-000.xht",
-        "references": [
-          [
-            "/css-page-3/vivliostyle/page-background-000-ref.html", "=="
-          ]
-        ],
-        "url": "/css-page-3/page-background-000.xht"
-      },
-      {
         "path": "css-page-3/page-borders-000.xht",
         "references": [
           ["/css-page-3/vivliostyle/page-borders-000-ref.html", "=="]
