@@ -183,10 +183,11 @@ gulp.task("watch-dev", ["start-watching", "build-dev"], function() {
 // serve
 function serve(development) {
     browserSync.init({
+        browser: "google chrome",
         server: {
             baseDir: "../"
         },
-        startPath: serverStartPath(development)
+        startPath: "/vivliostyle.js/test/files/"
     });
     var target = [DEST_DIR + "/**/*"];
     if (development) {
