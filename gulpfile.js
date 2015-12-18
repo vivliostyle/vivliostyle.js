@@ -183,7 +183,7 @@ gulp.task("watch-dev", ["start-watching", "build-dev"], function() {
 // serve
 function serve(development) {
     browserSync.init({
-        browser: "google chrome",
+        browser: process.platform === "darwin" ? "google chrome": "chromium-browser",
         server: {
             baseDir: "../"
         },
