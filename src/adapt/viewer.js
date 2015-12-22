@@ -96,6 +96,15 @@ adapt.viewer.Viewer.prototype.init = function() {
 
 adapt.viewer.Viewer.prototype.addLogListeners = function() {
     /** @const */ var LogLevel = vivliostyle.logging.LogLevel;
+    vivliostyle.logging.logger.addListener(LogLevel.DEBUG, function(info) {
+        this.callback({"t": "debug", "content": info});
+    }.bind(this));
+    vivliostyle.logging.logger.addListener(LogLevel.INFO, function(info) {
+        this.callback({"t": "info", "content": info});
+    }.bind(this));
+    vivliostyle.logging.logger.addListener(LogLevel.WARN, function(info) {
+        this.callback({"t": "warn", "content": info});
+    }.bind(this));
     vivliostyle.logging.logger.addListener(LogLevel.ERROR, function(info) {
         this.callback({"t": "error", "content": info});
     }.bind(this));
