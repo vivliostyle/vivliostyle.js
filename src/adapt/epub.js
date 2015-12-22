@@ -53,10 +53,12 @@ adapt.epub.EPUBDocStore.prototype.makeDeobfuscatorFactory = function() {
 
 /**
  * @param {string} url
+ * @param {boolean=} opt_required
+ * @param {string=} opt_message
  * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
  */
-adapt.epub.EPUBDocStore.prototype.loadAsPlainXML = function(url) {
-	return this.plainXMLStore.load(url);	
+adapt.epub.EPUBDocStore.prototype.loadAsPlainXML = function(url, opt_required, opt_message) {
+	return this.plainXMLStore.load(url, opt_required, opt_message);
 };
 
 /**
@@ -97,7 +99,7 @@ adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
 	}
 	self.startLoadingAsPlainXML(url + "META-INF/encryption.xml");
 	var containerURL = url + "META-INF/container.xml";
-	self.loadAsPlainXML(containerURL).then(function(containerXML){
+	self.loadAsPlainXML(containerURL, true, "Failed to fetch EPUB container.xml from " + containerURL).then(function(containerXML){
 		var roots = containerXML.doc().child("container").child("rootfiles")
 			.child("rootfile").attribute("full-path");
 		for (var i = 0; i < roots.length; i++) {
@@ -167,7 +169,7 @@ adapt.epub.EPUBDocStore.prototype.load = function(url) {
     if (r) {
         return r.isPending() ? r : adapt.task.newResult(r.get());
     } else {
-        return adapt.epub.EPUBDocStore.superClass_.load.call(this, docURL);
+        return adapt.epub.EPUBDocStore.superClass_.load.call(this, docURL, true, "Failed to fetch a source document from " + docURL);
     }
 };
 
