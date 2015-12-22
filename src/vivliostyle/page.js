@@ -1811,10 +1811,6 @@ vivliostyle.page.mergeInPageRule = function(context, target, style, specificity,
                     targetMap[boxName] = targetBox;
                 }
                 adapt.csscasc.mergeIn(context, targetBox, marginBoxes[boxName], specificity, null, null);
-                if (targetBox["content"]) {
-                    targetBox["content"] = targetBox["content"].filterValue(
-                        new adapt.csscasc.ContentPropVisitor(cascadeInstance, null));
-                }
             }
         }
     }

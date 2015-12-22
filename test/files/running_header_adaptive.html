@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>running header with adaptive layout</title>
+    <style>
+        @page {
+            size: A4;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        @-epubx-page-template {
+
+            /* Body partition */
+            .body-area {
+                -epubx-flow-from: body;
+                top: 2cm;
+                bottom: 2cm;
+                left: 2cm;
+                right: 2cm;
+                padding-top: 0.5cm;
+                padding-bottom: 0.5cm;
+            }
+
+            /* Page header with border */
+            .page-header-with-border {
+                top: 1cm;
+                height: 7.5mm;
+                border-bottom: 2mm solid #CCCCCC;
+            }
+
+            /* Page footer with border */
+            .page-footer-with-border {
+                bottom: 1cm;
+                height: 7.5mm;
+                border-top: 2mm solid #CCCCCC;
+            }
+
+            /* Text aligning */
+            @-epubx-region .text-align-left {
+                * {
+                    text-align: left;
+                }
+            }
+            @-epubx-region .text-align-center {
+                * {
+                    text-align: center;
+                }
+            }
+            @-epubx-region .text-align-right {
+                * {
+                    text-align: right;
+                }
+            }
+
+            /* Page logo */
+            #page-logo {
+                -epubx-flow-into: page-logo;
+                -epubx-flow-options: exclusive last static;
+            }
+            .logo-area {
+                -epubx-flow-from: page-logo;
+                top: 1cm;
+                height: 1.4cm;
+                width: 4cm;
+                background: #EEEEEE;
+            }
+            @-epubx-region .logo-area {
+                img {
+                    display: block;
+                    height: 100%;
+                }
+            }
+
+            /* Top center header */
+            #top-center-header {
+                -epubx-flow-into: top-center-header;
+                -epubx-flow-options: exclusive last static;
+                font-size: 70%;
+                font-weight: bold;
+                color: #666666;
+            }
+            .top-center-header-area {
+                -epubx-flow-from: top-center-header;
+                left: 6cm;
+                right: 6cm;
+            }
+
+            /* Top outside header */
+            #top-outside-header {
+                -epubx-flow-into: top-outside-header;
+                -epubx-flow-options: exclusive last static;
+                font-size: 50%;
+                font-weight: bold;
+                color: #333333;
+            }
+            .top-outside-header-area {
+                -epubx-flow-from: top-outside-header;
+                width: 4cm;
+            }
+
+            /* Bottom inside footer (right page) */
+            #right-page-bottom-inside-footer {
+                -epubx-flow-into: right-page-bottom-inside-footer;
+                -epubx-flow-options: exclusive last static;
+                font-size: 60%;
+                font-weight: bold;
+            }
+            .right-page-bottom-inside-footer-area {
+                -epubx-flow-from: right-page-bottom-inside-footer;
+                width: 4cm;
+            }
+
+            /* Bottom inside footer (left page) */
+            #left-page-bottom-inside-footer {
+                -epubx-flow-into: left-page-bottom-inside-footer;
+                -epubx-flow-options: exclusive last static;
+                font-size: 60%;
+                font-weight: bold;
+            }
+            .left-page-bottom-inside-footer-area {
+                -epubx-flow-from: left-page-bottom-inside-footer;
+                width: 4cm;
+            }
+
+            /* Bottom outside footer */
+            #bottom-outside-footer {
+                -epubx-flow-into: bottom-outside-footer;
+                -epubx-flow-options: exclusive last static;
+                font-size: 70%;
+                font-style: italic;
+            }
+            #bottom-outside-footer .foo {
+                font-style: normal;
+                font-weight: bold;
+            }
+            #bottom-outside-footer .bar {
+                font-style: normal;
+                font-weight: normal;
+            }
+            .bottom-outside-footer-area {
+                -epubx-flow-from: bottom-outside-footer;
+            }
+
+            /* Page number */
+            .page-number-area {
+                content: counter(page);
+                bottom: 1cm;
+                height: 1cm;
+                font-size: 70%;
+                font-style: italic;
+                font-weight: bold;
+            }
+
+            /* Page masters */
+            @-epubx-page-master right-page {
+                -epubx-enabled: -epubx-expr(page-number % 2 == 1);
+                @-epubx-partition class(body-area) {}
+                @-epubx-partition class(logo-area) class(text-align-left) {
+                    left: 2cm;
+                }
+                @-epubx-partition class(top-center-header-area) class(page-header-with-border) class(text-align-center) {}
+                @-epubx-partition class(top-outside-header-area) class(page-header-with-border) class(text-align-right) {
+                    right: 2cm;
+                }
+                @-epubx-partition class(right-page-bottom-inside-footer-area) class(page-footer-with-border) class(text-align-left) {
+                    left: 2cm;
+                }
+                @-epubx-partition class(bottom-outside-footer-area) class(page-footer-with-border) class(text-align-right) {
+                    left: 6cm;
+                    right: 2cm;
+                }
+                @-epubx-partition class(page-number-area) {
+                    right: 5mm;
+                    text-align: right;
+                }
+            }
+            @-epubx-page-master left-page {
+                -epubx-enabled: -epubx-expr(page-number % 2 == 0);
+                @-epubx-partition class(body-area) {}
+                @-epubx-partition class(logo-area) class(text-align-right) {
+                    right: 2cm;
+                }
+                @-epubx-partition class(top-center-header-area) class(page-header-with-border) class(text-align-center) {}
+                @-epubx-partition class(top-outside-header-area) class(page-header-with-border) class(text-align-left) {
+                    left: 2cm;
+                }
+                @-epubx-partition class(left-page-bottom-inside-footer-area) class(page-footer-with-border) class(text-align-right) {
+                    right: 2cm;
+                }
+                @-epubx-partition class(bottom-outside-footer-area) class(page-footer-with-border) class(text-align-left) {
+                    right: 6cm;
+                    left: 2cm;
+                }
+                @-epubx-partition class(page-number-area) {
+                    left: 5mm;
+                    text-align: left;
+                }
+            }
+        }
+
+    </style>
+</head>
+<body>
+<div id="page-logo"><img src="page-logo.png" alt="PAGE LOGO"></div>
+<div id="top-center-header">Top center header</div>
+<div id="top-outside-header">Top outside header</div>
+<div id="right-page-bottom-inside-footer">Bottom inside footer (right page)</div>
+<div id="left-page-bottom-inside-footer">Bottom inside footer (left page)</div>
+<div id="bottom-outside-footer">This is a <span class="foo">bottom</span> outside <span class="bar">footer</span></div>
+
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget blandit mi. Curabitur pulvinar semper elit, ac congue erat egestas euismod. Suspendisse potenti. Nunc tempor id lorem quis laoreet. Nullam faucibus, turpis a bibendum dapibus, lectus diam fringilla mauris, vel dapibus magna sem eget diam. Nunc a ipsum ac augue lobortis viverra. Duis placerat diam nec risus faucibus consequat. Duis ultrices volutpat condimentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus a arcu at diam efficitur sagittis id eget orci. Nulla risus lectus, maximus vel finibus a, sodales et nibh. Vivamus convallis ex leo, eget imperdiet arcu egestas at. Pellentesque ut finibus eros, ac varius tellus. Quisque rhoncus, est eu dapibus vulputate, justo risus tincidunt elit, a tempor sem risus eget enim. Mauris quis augue feugiat, sagittis quam sed, feugiat mauris. Vivamus viverra finibus vestibulum.</p>
+</body>
+</html>
