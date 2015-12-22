@@ -6,6 +6,7 @@
 goog.provide('adapt.epub');
 
 goog.require("vivliostyle.constants");
+goog.require("vivliostyle.logging");
 goog.require('adapt.net');
 goog.require('adapt.csscasc');
 goog.require('adapt.font');
@@ -781,7 +782,7 @@ adapt.epub.OPFDoc.prototype.resolveFragment = function(fragstr) {
     	 * @return {void}
     	 */					
 		function(frame, err) {
-			adapt.base.log("Error resolving fragment " + fragstr);
+			vivliostyle.logging.logger.error(err, "Error resolving fragment", fragstr);
 			frame.finish(null);
 		});
 };
@@ -829,7 +830,7 @@ adapt.epub.OPFDoc.prototype.resolveEPage = function(epage) {
     	 * @return {void}
     	 */					
 		function(frame, err) {
-			adapt.base.log("Error resolving epage: " + epage);
+			vivliostyle.logging.logger.error(err, "Error resolving epage:", epage);
 			frame.finish(null);
 		});
 };
@@ -1282,7 +1283,7 @@ adapt.epub.OPFView.prototype.navigateToFragment = function(fragment) {
  * @return {!adapt.task.Result.<adapt.vtree.Page>}
  */
 adapt.epub.OPFView.prototype.navigateTo = function(href) {
-	adapt.base.log("Navigate to " + href);
+	vivliostyle.logging.logger.debug("Navigate to", href);
 	var path = this.opf.getPathFromURL(adapt.base.stripFragment(href));
 	if (path == null) {
 		if (this.opf.opfXML && href.match(/^#epubcfi\(/)) {

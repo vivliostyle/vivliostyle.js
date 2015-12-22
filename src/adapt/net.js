@@ -5,6 +5,7 @@
  */
 goog.provide('adapt.net');
 
+goog.require('vivliostyle.logging');
 goog.require('adapt.task');
 
 /**
@@ -53,7 +54,7 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
 	        		if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.TEXT) && typeof text == "string") {
 	        			response.responseText = text;
 	        		} else if (!text) {
-        				adapt.base.log("Unexpected empty success response for " + url);
+						vivliostyle.logging.logger.warn("Unexpected empty success response for", url);
         			} else {
         				if (typeof text == "string") {
         					response.responseBlob = adapt.net.makeBlob([text]);

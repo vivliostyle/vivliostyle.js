@@ -187,18 +187,6 @@ adapt.task.start = function(func, opt_name) {
 };
 
 /**
- * @param {string} msg
- * @param {Error} err
- */
-adapt.task.report = function(msg, err) {	
-    var frameTrace = err['frameTrace'];
-    if (frameTrace)
-        adapt.base.log(msg + ":\n" + frameTrace);
-    else
-        adapt.base.log(msg + ":\n" + err.toString());    	
-};
-
-/**
  * Frame state.
  * @enum {number}
  */
@@ -562,8 +550,8 @@ adapt.task.Task.prototype.unwind = function() {
 		this.top.handler(this.top, err);
 	} else {
         if (this.exception) {
-            adapt.task.report('Unhandled exception in task ' + this.name, this.exception);
-        }		
+            vivliostyle.logging.logger.error(this.exception, 'Unhandled exception in task', this.name);
+        }
 	}
 };
 
@@ -864,7 +852,7 @@ adapt.task.Frame.prototype.timeSlice = function() {
     var frame = adapt.task.newFrame('Frame.timeSlice');
     var scheduler = frame.getScheduler();
     if (scheduler.isTimeSliceOver()) {
-    	adapt.base.log("-- time slice --");
+        vivliostyle.logging.logger.debug("-- time slice --");
         frame.suspend().schedule(true);
     } else {
         frame.finish(true);

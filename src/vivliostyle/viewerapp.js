@@ -189,7 +189,7 @@ vivliostyle.viewerapp.callback = function(msg) {
 
 		break;
 	case "error" :
-		adapt.base.log("Error: " + msg["content"]);
+        // adapt.base.log("Error: " + msg["content"]);
 		break;
 	case "nav" :
 		var cfi = msg["cfi"];

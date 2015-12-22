@@ -5,6 +5,7 @@
 goog.provide("vivliostyle.pagefloat");
 
 goog.require("goog.asserts");
+goog.require("vivliostyle.logging");
 goog.require("adapt.base");
 goog.require("adapt.task");
 goog.require("adapt.geom");
@@ -40,7 +41,7 @@ goog.scope(function() {
             }
         }
         if (floatSide !== "left" && floatSide !== "right") {
-            adapt.base.log("Invalid float value: " + floatSide + ". Fallback to left.");
+            vivliostyle.logging.logger.warn("Invalid float value: " + floatSide + ". Fallback to left.");
             floatSide = "left";
         }
         return floatSide;

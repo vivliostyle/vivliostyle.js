@@ -6,6 +6,7 @@
 goog.provide('adapt.ops');
 
 goog.require("vivliostyle.constants");
+goog.require("vivliostyle.logging");
 goog.require('adapt.task');
 goog.require('adapt.geom');
 goog.require('adapt.expr');
@@ -294,14 +295,14 @@ adapt.ops.StyleInstance.prototype.getPosition = function(layoutPosition) {
 };
 
 adapt.ops.StyleInstance.prototype.dumpLocation = function(position) {
-	adapt.base.log("Location - page " + this.currentLayoutPosition.page);
-	adapt.base.log("  currnt: " + position);
-	adapt.base.log("  lookup: " + this.lookupOffset);
+	vivliostyle.logging.logger.debug("Location - page", this.currentLayoutPosition.page);
+	vivliostyle.logging.logger.debug("  current:", position);
+	vivliostyle.logging.logger.debug("  lookup:", this.lookupOffset);
 	for (var flowName in this.currentLayoutPosition.flowPositions) {
 		var flowPosition = this.currentLayoutPosition.flowPositions[flowName];
 		for (var i = 0; i < flowPosition.positions.length; i++) {
 			var p = flowPosition.positions[i];
-			adapt.base.log("  Chunk " + flowName + ": " + p.flowChunk.startOffset);
+			vivliostyle.logging.logger.debug("  Chunk", flowName + ":", p.flowChunk.startOffset);
 		}
 	}
 };
@@ -971,7 +972,7 @@ goog.inherits(adapt.ops.StyleParserHandler, adapt.cssparse.DispatchParserHandler
  * @override
  */
 adapt.ops.StyleParserHandler.prototype.error = function(mnemonics, token) {
-    adapt.base.log("CSS parser: " + mnemonics);
+	vivliostyle.logging.logger.warn("CSS parser:", mnemonics);
 };
 
 /**

@@ -3,6 +3,7 @@
  * Copyright 2015 Vivliostyle Inc.
  * @fileoverview CSS Parser.
  */
+goog.require('vivliostyle.logging');
 goog.require('adapt.base');
 goog.require('adapt.expr');
 goog.require('adapt.css');
@@ -422,7 +423,7 @@ adapt.cssparse.DispatchParserHandler.prototype.error = function(mnemonics, token
  * @return {void}
  */
 adapt.cssparse.DispatchParserHandler.prototype.errorMsg = function(mnemonics, token) {
-	adapt.base.log(mnemonics);
+    vivliostyle.logging.logger.warn(mnemonics);
 };
 
 /**
@@ -2484,7 +2485,7 @@ adapt.cssparse.parseStylesheetFromURL = function(url, handler, classes, media) {
     	 * @return {void}
     	 */
     	function(frame, err) {
-	    	adapt.task.report("Exception while parsing: " + url, err);
+            vivliostyle.logging.logger.error(err, "Exception while parsing:", url);
 	    	frame.finish(true);
 	    });
 };
