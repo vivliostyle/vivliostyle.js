@@ -111,7 +111,7 @@ goog.scope(function() {
                 st += " => start: " + t["start"] + ", end: " + t["end"] + ", duration: " + (t["end"] - t["start"]) + "\n";
             }
         });
-        vivliostyle.logging.logger.debug(st);
+        vivliostyle.logging.logger.info(st);
     };
 
     /**
