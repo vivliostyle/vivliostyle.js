@@ -2385,7 +2385,7 @@ adapt.csscasc.CascadeParserHandler.prototype.tagSelector = function(ns, name) {
 	}
     this.specificity += 1;
     if (name && ns) {
-    	this.chain.push(new adapt.csscasc.CheckNSTagAction(ns, name));
+    	this.chain.push(new adapt.csscasc.CheckNSTagAction(ns, name.toLowerCase()));
     } else if (name) {
     	this.chain.push(new adapt.csscasc.CheckLocalNameAction(name.toLowerCase()));
     } else {
