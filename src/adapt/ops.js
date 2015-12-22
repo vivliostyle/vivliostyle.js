@@ -58,8 +58,8 @@ adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
     this.pageScope.defineBuiltIn("has-content", function(name) {
     	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
     	return styleInstance.currentLayoutPosition.hasContent(/** @type {string} */ (name), styleInstance.lookupOffset);
-    });  
-    this.pageScope.defineName("page-number", new adapt.expr.Native(this.pageScope, function() {    	
+    });
+    this.pageScope.defineName("page-number", new adapt.expr.Native(this.pageScope, function() {
     	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
     	return styleInstance.pageNumberOffset + styleInstance.currentLayoutPosition.page;
     }, "page-number"));
@@ -93,12 +93,12 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
 				var widthVal = adapt.css.toNumber(width.evaluate(context, "width"), context);
 				var heightVal = adapt.css.toNumber(height.evaluate(context, "height"), context);
 				if (widthVal > 0 && heightVal > 0) {
-					return {width:widthVal, height:heightVal, fontSize: fontSize};		
+					return {width:widthVal, height:heightVal, fontSize: fontSize};
 				}
 			}
 		}
 	}
-	return {width:viewportWidth, height:viewportHeight, fontSize:fontSize};	
+	return {width:viewportWidth, height:viewportHeight, fontSize:fontSize};
 };
 
 //-------------------------------------------------------------------------------
@@ -119,7 +119,7 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @implements {adapt.pm.InstanceHolder}
  * @implements {adapt.vgen.StylerProducer}
  */
-adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientLayout, 
+adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientLayout,
 		fontMapper, customRenderer, fallbackMap, pageNumberOffset) {
 	adapt.expr.Context.call(this, style.rootScope, viewport.width, viewport.height, viewport.fontSize);
 	/** @const */ this.style = style;
@@ -166,7 +166,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     var self = this;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame
     	= adapt.task.newFrame("StyleInstance.init");
-    self.styler = new adapt.cssstyler.Styler(self.xmldoc, self.style.cascade, 
+    self.styler = new adapt.cssstyler.Styler(self.xmldoc, self.style.cascade,
     		self.style.rootScope, self, this.primaryFlows, self.style.validatorSet, this.pageCounterStore);
     self.styler.resetFlowChunkStream(self);
     self.stylerMap = {};
@@ -175,7 +175,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     self.pageProgression = vivliostyle.page.resolvePageProgression(docElementStyle);
     var rootBox = this.style.rootBox;
     this.rootPageBoxInstance = new adapt.pm.RootPageBoxInstance(rootBox);
-    var cascadeInstance = this.style.cascade.createInstance(self, this.pageCounterStore, this.lang);
+    var cascadeInstance = this.style.cascade.createInstance(self, this.pageCounterStore);
     this.rootPageBoxInstance.applyCascadeAndInit(cascadeInstance, docElementStyle);
     this.rootPageBoxInstance.resolveAutoSizing(self);
     this.pageManager = new vivliostyle.page.PageManager(cascadeInstance, this.style.pageScope, this.rootPageBoxInstance, self, docElementStyle);
@@ -201,7 +201,7 @@ adapt.ops.StyleInstance.prototype.getStylerForDoc = function(xmldoc) {
 		var style = this.style.store.getStyleForDoc(xmldoc);
 		// We need a separate content, so that variables can get potentially different values.
 		var context = new adapt.expr.Context(style.rootScope, this.pageWidth(), this.pageHeight(), this.initialFontSize);
-		styler = new adapt.cssstyler.Styler(xmldoc, style.cascade, 
+		styler = new adapt.cssstyler.Styler(xmldoc, style.cascade,
         		style.rootScope, context, this.primaryFlows, style.validatorSet, this.pageCounterStore);
 		this.stylerMap[xmldoc.url] = styler;
 	}
@@ -427,7 +427,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 	        if (pending) {
 	        	// Async result
 	        	pending = false;
-	        	return; 
+	        	return;
 	        }
 	        // Sync result
 	    }
@@ -451,7 +451,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
  * @param {!vivliostyle.pagefloat.FloatHolder} pageFloatHolder
  * @return {adapt.task.Result.<boolean>} holding true
  */
-adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
+adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 		parentContainer, offsetX, offsetY, exclusions, pageFloatHolder) {
 	var self = this;
     var enabled = boxInstance.getProp(self, "enabled");
@@ -530,7 +530,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 		                adapt.base.setCSSProperty(columnContainer, "margin-right", layoutContainer.paddingRight + "px");
 		                var columnY = column * (columnWidth + columnGap) + layoutContainer.paddingTop;
 		                region.setHorizontalPosition(0, layoutContainer.width);
-		                region.setVerticalPosition(columnY, columnWidth);	                	
+		                region.setVerticalPosition(columnY, columnWidth);
 	                } else {
 		                adapt.base.setCSSProperty(columnContainer, "margin-top", layoutContainer.paddingTop + "px");
 		                adapt.base.setCSSProperty(columnContainer, "margin-bottom", layoutContainer.paddingBottom + "px");
@@ -585,13 +585,13 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	        loopFrame.breakLoop();
         }).then(function() {
 	        layoutContainer.computedBlockSize = computedBlockSize;
-	        boxInstance.finishContainer(self, layoutContainer, page, region, 
+	        boxInstance.finishContainer(self, layoutContainer, page, region,
 	        		columnCount, self.clientLayout);
 	        innerFrame.finish(true);
         });
         cont = innerFrame.result();
     } else {
-        boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);	    		
+        boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);
     	cont = adapt.task.newResult(true);
     }
     cont.then(function() {
@@ -642,7 +642,7 @@ adapt.ops.StyleInstance.prototype.processLinger = function() {
         var flowPosition = this.currentLayoutPosition.flowPositions[flowName];
         for (var i = flowPosition.positions.length - 1; i >= 0; i--) {
             var pos = flowPosition.positions[i];
-            if (pos.flowChunk.startPage >= 0 && 
+            if (pos.flowChunk.startPage >= 0 &&
             		pos.flowChunk.startPage + pos.flowChunk.linger - 1 <= pageNumber) {
                 flowPosition.positions.splice(i, 1);
             }
@@ -878,7 +878,7 @@ adapt.ops.BaseParserHandler.prototype.startFootnoteRule = function(pseudoelement
         if (!style) {
             style = /** @type {adapt.csscasc.ElementStyle} */ ({});
             pseudos[pseudoelement] = style;
-        }		
+        }
 	}
     this.masterHandler.pushHandler(new adapt.csscasc.PropSetParserHandler(
     		this.scope, this.owner, null, style,
@@ -913,7 +913,7 @@ adapt.ops.BaseParserHandler.prototype.startRuleBody = function() {
         var regionId = "R" + this.masterHandler.regionCount++;
         this.special("region-id", adapt.css.getName(regionId));
         this.endRule();
-        var regionHandler = new adapt.ops.BaseParserHandler(this.masterHandler, this.condition, 
+        var regionHandler = new adapt.ops.BaseParserHandler(this.masterHandler, this.condition,
         		this, regionId);
         this.masterHandler.pushHandler(regionHandler);
         regionHandler.startRuleBody();
@@ -1098,7 +1098,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
 	        	var localName = child.localName;
 	        	if (ns == adapt.base.NS.XHTML) {
 		            if (localName == "style") {
-		                sources.push({url:url, text:child.textContent, 
+		                sources.push({url:url, text:child.textContent,
 		                	flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
 		            } else if (localName == "link") {
 		            	var rel = child.getAttribute("rel");
@@ -1116,9 +1116,9 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
 		            }
 	        	} else if (ns == adapt.base.NS.FB2) {
 		            if (localName == "stylesheet" && child.getAttribute("type") == "text/css") {
-		                sources.push({url:url, text:child.textContent, 
+		                sources.push({url:url, text:child.textContent,
 		                	flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
-		            }        		
+		            }
 	        	} else if (ns == adapt.base.NS.SSE && localName === "property") {
                     // look for stylesheet specification like:
                     // <property><name>stylesheet</name><value>style.css</value></property>
@@ -1184,9 +1184,8 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
 		}
 		fetcher.get().then(function(style) {
 	    	self.styleByDocURL[url] = style;
-			frame.finish(xmldoc);			
+			frame.finish(xmldoc);
 		});
 	});
     return frame.result();
 };
-
