@@ -2,6 +2,7 @@
  * Copyright 2013 Google, Inc.
  * @fileoverview Support for asynchronous execution and cooperative multitasking.
  */
+goog.require('vivliostyle.logging');
 goog.require('adapt.base');
 
 goog.provide('adapt.task');
@@ -32,13 +33,6 @@ adapt.task.Timer.prototype.setTimeout = function(fn, delay) {};
  * @return {void}.
  */
 adapt.task.Timer.prototype.clearTimeout = function(token) {};
-
-/**
- * Print message to a (test) log.
- * @param {string} msg
- * @return {void}
- */
-adapt.task.Timer.prototype.log = function(msg) {};
 
 
 /**
@@ -243,14 +237,6 @@ adapt.task.TimerImpl.prototype.clearTimeout = function(token) {
 };
 
 /**
- * @override
- */
-adapt.task.TimerImpl.prototype.log = function(msg) {
-    if (window.console && window.console.log)
-        window.console.log(msg);
-};
-
-/**
  * A class to create tasks.
  * @private
  * @param {adapt.task.Timer} timer
@@ -367,6 +353,7 @@ adapt.task.Scheduler.prototype.doTimeSlice = function() {
                 break;
         }
     } catch (err) {
+        vivliostyle.logging.logger.error(err);
     }
     this.inTimeSlice = false;
     if (this.queue.length())
@@ -390,6 +377,7 @@ adapt.task.Scheduler.prototype.run = function(func, opt_name) {
                 try {
                     callback();
                 } catch (err) {
+                    vivliostyle.logging.logger.error(err);
                 }
             }
         };

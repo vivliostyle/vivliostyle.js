@@ -5,6 +5,7 @@
 goog.provide("vivliostyle.profile");
 
 goog.require("vivliostyle.namespace");
+goog.require("vivliostyle.logging");
 
 goog.scope(function() {
     /**
@@ -92,7 +93,7 @@ goog.scope(function() {
     };
 
     /**
-     * Print registered timings (start/end/duration) on console.
+     * Log registered timings (start/end/duration).
      * All values are printed in ms unit.
      */
     Profiler.prototype.printTimings = function() {
@@ -110,13 +111,7 @@ goog.scope(function() {
                 st += " => start: " + t["start"] + ", end: " + t["end"] + ", duration: " + (t["end"] - t["start"]) + "\n";
             }
         });
-        if (window && window.console) {
-            if (window.console.debug) {
-                window.console.debug(st);
-            } else if (window.console.log) {
-                window.console.log(st);
-            }
-        }
+        vivliostyle.logging.logger.debug(st);
     };
 
     /**
