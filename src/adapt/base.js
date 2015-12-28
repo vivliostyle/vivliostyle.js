@@ -5,6 +5,8 @@
  */
 goog.provide('adapt.base');
 
+goog.require('vivliostyle.logging');
+
 /**
  * @typedef {*}
  */
@@ -342,8 +344,11 @@ adapt.base.setCSSProperty = function(elem, prop, value) {
     	if (prop == "-ms-writing-mode" && value == "vertical-rl") {
     		value = "tb-rl";
      	}
-        (/** @type {HTMLElement} */ (elem)).style.setProperty(prop, value);
+        if (elem && elem.style) {
+            (/** @type {HTMLElement} */ (elem)).style.setProperty(prop, value);
+        }
     } catch (err) {
+        vivliostyle.logging.logger.warn(err);
     }
 };
 
