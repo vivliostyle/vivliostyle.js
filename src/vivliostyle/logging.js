@@ -99,12 +99,12 @@ goog.scope(function() {
     function buildMessageAndStackTrace(args) {
         var e = args.error;
         var stack = e && (e["frameTrace"] || e["stack"]);
-        var messages = [].concat(args.messages);
+        var messages = [].concat(args["messages"]);
         if (e) {
             if (messages.length > 0) {
                 messages = messages.concat(["\n"]);
             }
-            messages = messages.concat([e.toString()]);
+            messages = messages.concat([e["toString"]()]);
             if (stack) {
                 messages = messages.concat(["\n"]).concat(stack);
             }
