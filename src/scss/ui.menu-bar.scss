@@ -318,18 +318,36 @@ $menu-bg-color: rgba(248,248,248,0.9);
   color: $menu-fg-color;
   background: $menu-bg-color;
   @include box-shadow($menu-box-shadow);
-  position: fixed;
 
+  @include box-sizing(border-box);
   width: 100vw;
   max-width: 320px;
   height: 100vh;
   max-height: 240px;
 
+  position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
   margin: auto;
+  padding: 5px;
 
   overflow: auto;
+
+  font-family: $sans-serif;
+  font-size: 14px;
+
+  .error {
+	color: #C70000;
+  }
+  .warn {
+	color: #EC9900;
+  }
+  .info {
+	color: blue;
+  }
+  .debug {
+	color: black;
+  }
 }
