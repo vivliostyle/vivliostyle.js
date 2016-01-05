@@ -47,6 +47,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/82>
 - Improve MathJax performance
   - <https://github.com/vivliostyle/vivliostyle.js/pull/116>
+- Fix bug that rules above footnotes disappear
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/118>
 
 ## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
 Beta release.
