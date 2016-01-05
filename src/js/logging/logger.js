@@ -17,26 +17,71 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import messageQueue from "../models/message-queue";
+
+var LogLevel = {
+    DEBUG: "debug",
+    INFO: "info",
+    WARN: "warn",
+    ERROR: "error"
+};
+
 function Logger() {
-    this.console = window.console;
+    this.logLevel = LogLevel.ERROR;
 }
 
-Logger.prototype.log = function() {
-    if (this.console) {
-        if (typeof this.console.log === "function") {
-            this.console.log.apply(this.console, arguments);
-        }
+Logger.LogLevel = LogLevel;
+
+Logger.prototype.setLogLevel = function(logLevel) {
+    this.logLevel = logLevel;
+};
+
+Logger.prototype.debug = function(content) {
+    if (this.logLevel === LogLevel.DEBUG) {
+        messageQueue.push({
+            type: "debug",
+            content: content
+        });
     }
 };
 
-Logger.prototype.error = function() {
-    if (this.console) {
-        if (typeof this.console.error === "function") {
-            this.console.error.apply(this.console, arguments);
-        } else {
-            this.log.apply(this, arguments);
-        }
+Logger.prototype.info = function(content) {
+    if (this.logLevel === LogLevel.DEBUG ||
+        this.logLevel === LogLevel.INFO) {
+        messageQueue.push({
+            type: "info",
+            content: content
+        });
     }
 };
 
-export default new Logger();
+Logger.prototype.warn = function(content) {
+    if (this.logLevel === LogLevel.DEBUG ||
+        this.logLevel === LogLevel.INFO ||
+        this.logLevel === LogLevel.WARN) {
+        messageQueue.push({
+            type: "warn",
+            content: content
+        });
+    }
+};
+
+Logger.prototype.error = function(content) {
+    if (this.logLevel === LogLevel.DEBUG ||
+        this.logLevel === LogLevel.INFO ||
+        this.logLevel === LogLevel.WARN ||
+        this.logLevel === LogLevel.ERROR) {
+        messageQueue.push({
+            type: "error",
+            content: content
+        });
+    }
+};
+
+var instance = new Logger();
+
+Logger.getLogger = function() {
+    return instance;
+};
+
+export default Logger;

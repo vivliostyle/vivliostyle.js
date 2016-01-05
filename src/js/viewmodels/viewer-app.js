@@ -21,9 +21,11 @@ import ko from "knockout";
 import vivliostyle from "../models/vivliostyle";
 import DocumentOptions from "../models/document-options";
 import ViewerOptions from "../models/viewer-options";
+import messageQueue from "../models/message-queue";
 import Viewer from "./viewer";
 import Navigation from "./navigation";
 import SettingsPanel from "./settings-panel";
+import MessageDialog from "./message-dialog";
 import keyUtil from "../utils/key-util";
 
 function ViewerApp() {
@@ -39,6 +41,7 @@ function ViewerApp() {
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
     this.settingsPanel = new SettingsPanel(this.viewerOptions, this.documentOptions, this.viewer);
     this.navigation = new Navigation(this.viewerOptions, this.viewer, this.settingsPanel);
+    this.messageDialog = new MessageDialog(messageQueue);
 
     this.handleKey = function(data, event) {
         var key = keyUtil.identifyKeyFromEvent(event);
