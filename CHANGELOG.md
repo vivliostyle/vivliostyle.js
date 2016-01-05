@@ -25,6 +25,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/75>
 - Accept flexbox properties
   - <https://github.com/vivliostyle/vivliostyle.js/issues/90>
+- Support `srcset` attribute for `img` and `source` elements
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/117>
 
 ### Changed
 - Add default page margin

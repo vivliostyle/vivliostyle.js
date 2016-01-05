@@ -774,7 +774,11 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 			            // TODO: understand the element we are working with.
 			            if (attributeName == "src" || attributeName == "href" || attributeName == "poster") {
 			                attributeValue = self.resolveURL(attributeValue);
-			            }
+			            } else if (attributeName == "srcset") {
+							attributeValue = attributeValue.split(",").map(function(value) {
+								return self.resolveURL(value.trim());
+							}).join(",");
+						}
 			        }
 			        else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
 			            continue; //namespace declaration (in Firefox)
