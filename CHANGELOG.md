@@ -43,6 +43,8 @@
 - Fix calculation of `rem` unit values
   - Spec: [CSS Values and Units Module Level 3 - rem unit](https://drafts.csswg.org/css-values/#rem)
   - <https://github.com/vivliostyle/vivliostyle.js/pull/82>
+- Improve MathJax performance
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/116>
 
 ## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
 Beta release.
