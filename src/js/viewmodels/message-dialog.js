@@ -27,11 +27,10 @@ function MessageDialog(queue) {
 }
 
 MessageDialog.prototype.getDisplayMessage = function(errorInfo) {
-    var msg;
     var e = errorInfo.error;
-    var stack = e && (e.frameTrace || e.stack || e.toString());
-    if (stack) {
-        msg = stack.split("\n", 1)[0];
+    var msg = e && (e.toString() || e.frameTrace || e.stack);
+    if (msg) {
+        msg = msg.split("\n", 1)[0];
     }
     if (!msg) {
         msg = errorInfo.messages.join("\n");
