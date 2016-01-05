@@ -150,7 +150,7 @@ gulp.task("build", [
     "build:html",
     "build:fonts",
     "build:resources",
-    "build:mathjax",
+//    "build:mathjax",
     "build:css"
 ]);
 gulp.task("build-dev", [
