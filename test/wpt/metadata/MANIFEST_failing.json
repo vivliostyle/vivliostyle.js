@@ -70,10 +70,6 @@
         "url": "/css21/pagination/forced-page-breaks-001.xht"
       },
       {
-        "path": "css21/pagination/orphans-001.xht",
-        "url": "/css21/pagination/orphans-001.xht"
-      },
-      {
         "path": "css21/pagination/page-break-after-008.xht",
         "url": "/css21/pagination/page-break-after-008.xht"
       },
@@ -120,14 +116,6 @@
       {
         "path": "css21/pagination/page-breaks-101.xht",
         "url": "/css21/pagination/page-breaks-101.xht"
-      },
-      {
-        "path": "css21/pagination/widows-001.xht",
-        "url": "/css21/pagination/widows-001.xht"
-      },
-      {
-        "path": "css21/pagination/widows-004a.xht",
-        "url": "/css21/pagination/widows-004a.xht"
       },
       {
         "path": "css-page-3/forced-page-breaks-002.xht",
