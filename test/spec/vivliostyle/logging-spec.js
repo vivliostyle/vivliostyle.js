@@ -21,25 +21,26 @@ describe("logging", function() {
         var error = new Error("foo");
         var frameTrace = "This is a frame trace";
         error.frameTrace = frameTrace;
+        var msg = error.toString();
         var str1 = "aaa";
         var str2 = "bbb";
 
         it("calls corresponding methods of console when debug/info/warn/error methods are called", function() {
             logger.debug(error, str1, str2);
-            expect(dummyConsole.debug).toHaveBeenCalledWith(str1, str2, "\n", frameTrace);
+            expect(dummyConsole.debug).toHaveBeenCalledWith(str1, str2, "\n", msg, "\n", frameTrace);
             logger.debug(error);
-            expect(dummyConsole.debug).toHaveBeenCalledWith(frameTrace);
+            expect(dummyConsole.debug).toHaveBeenCalledWith(msg, "\n", frameTrace);
             logger.debug(str1, str2);
             expect(dummyConsole.debug).toHaveBeenCalledWith(str1, str2);
 
             logger.info(error, str1, str2);
-            expect(dummyConsole.info).toHaveBeenCalledWith(str1, str2, "\n", frameTrace);
+            expect(dummyConsole.info).toHaveBeenCalledWith(str1, str2, "\n", msg, "\n", frameTrace);
 
             logger.warn(error, str1, str2);
-            expect(dummyConsole.warn).toHaveBeenCalledWith(str1, str2, "\n", frameTrace);
+            expect(dummyConsole.warn).toHaveBeenCalledWith(str1, str2, "\n", msg, "\n", frameTrace);
 
             logger.error(error, str1, str2);
-            expect(dummyConsole.error).toHaveBeenCalledWith(str1, str2, "\n", frameTrace);
+            expect(dummyConsole.error).toHaveBeenCalledWith(str1, str2, "\n", msg, "\n", frameTrace);
         });
 
         it("calls log listners registered with addListener method", function() {
