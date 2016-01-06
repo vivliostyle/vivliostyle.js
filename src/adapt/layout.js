@@ -1473,8 +1473,8 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
 		while (block.parent && block.inline) {
 			block = block.parent;
 		}
-		widows = Math.max((block.inheritedProps["widows"] || 1) - 0, 1);
-		orphans = Math.max((block.inheritedProps["orphans"] || 1) - 0, 1);
+		widows = Math.max((block.inheritedProps["widows"] || 2) - 0, 1);
+		orphans = Math.max((block.inheritedProps["orphans"] || 2) - 0, 1);
 	}
 	// Select the first overflowing line break position
 	var linePositions = this.findLinePositions(checkPoints);
