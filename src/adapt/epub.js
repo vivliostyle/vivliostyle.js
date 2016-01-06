@@ -804,7 +804,7 @@ adapt.epub.OPFDoc.prototype.resolveFragment = function(fragstr) {
     	 * @return {void}
     	 */					
 		function(frame, err) {
-			vivliostyle.logging.logger.error(err, "Error resolving fragment", fragstr);
+			vivliostyle.logging.logger.warn(err, "Cannot resolve fragment:", fragstr);
 			frame.finish(null);
 		});
 };
@@ -852,7 +852,7 @@ adapt.epub.OPFDoc.prototype.resolveEPage = function(epage) {
     	 * @return {void}
     	 */					
 		function(frame, err) {
-			vivliostyle.logging.logger.error(err, "Error resolving epage:", epage);
+			vivliostyle.logging.logger.warn(err, "Cannot resolve epage:", epage);
 			frame.finish(null);
 		});
 };
