@@ -317,13 +317,6 @@
         "url": "/css21/pagination/orphans-003.xht"
       },
       {
-        "path": "css21/pagination/orphans-004a.xht",
-        "references": [
-          ["css21/pagination/vivliostyle/orphans-004a-ref.html", "=="]
-        ],
-        "url": "/css21/pagination/orphans-004a.xht"
-      },
-      {
         "path": "css21/pagination/orphans-004b.xht",
         "references": [
           ["css21/pagination/vivliostyle/orphans-004b-ref.html", "=="]
