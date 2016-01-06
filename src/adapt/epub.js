@@ -6,6 +6,7 @@
 goog.provide('adapt.epub');
 
 goog.require("vivliostyle.constants");
+goog.require("vivliostyle.logging");
 goog.require('adapt.net');
 goog.require('adapt.csscasc');
 goog.require('adapt.font');
@@ -30,7 +31,7 @@ adapt.epub.EPUBDocStore = function() {
 	/** @type {Object.<string,adapt.epub.OPFDoc>} */ this.opfByURL = {};
 	/** @type {Object.<string,adapt.epub.OPFDoc>} */ this.primaryOPFByEPubURL = {};
 	/** @type {Object.<string,function(Blob):adapt.task.Result.<Blob>>} */ this.deobfuscators = {};
-    /** @type {Object.<string,!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>>} */ this.documents = {};
+    /** @type {Object.<string,!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>>} */ this.documents = {};
 };
 goog.inherits(adapt.epub.EPUBDocStore, adapt.ops.OPSDocStore);
 
@@ -52,10 +53,12 @@ adapt.epub.EPUBDocStore.prototype.makeDeobfuscatorFactory = function() {
 
 /**
  * @param {string} url
- * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
+ * @param {boolean=} opt_required
+ * @param {string=} opt_message
+ * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
  */
-adapt.epub.EPUBDocStore.prototype.loadAsPlainXML = function(url) {
-	return this.plainXMLStore.load(url);	
+adapt.epub.EPUBDocStore.prototype.loadAsPlainXML = function(url, opt_required, opt_message) {
+	return this.plainXMLStore.load(url, opt_required, opt_message);
 };
 
 /**
@@ -96,17 +99,21 @@ adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
 	}
 	self.startLoadingAsPlainXML(url + "META-INF/encryption.xml");
 	var containerURL = url + "META-INF/container.xml";
-	self.loadAsPlainXML(containerURL).then(function(containerXML){
-		var roots = containerXML.doc().child("container").child("rootfiles")
-			.child("rootfile").attribute("full-path");
-		for (var i = 0; i < roots.length; i++) {
-			var root = roots[i];
-			if (root) {
-				self.loadOPF(url, root, haveZipMetadata).thenFinish(frame);
-				return;
+	self.loadAsPlainXML(containerURL, true, "Failed to fetch EPUB container.xml from " + containerURL).then(function(containerXML){
+		if (!containerXML) {
+			vivliostyle.logging.logger.error("Received an empty response for EPUB container.xml " + containerURL + ". This may be caused by the server not allowing cross origin requests.");
+		} else {
+			var roots = containerXML.doc().child("container").child("rootfiles")
+				.child("rootfile").attribute("full-path");
+			for (var i = 0; i < roots.length; i++) {
+				var root = roots[i];
+				if (root) {
+					self.loadOPF(url, root, haveZipMetadata).thenFinish(frame);
+					return;
+				}
 			}
+			frame.finish(null);
 		}
-		frame.finish(null);
 	});
 	return frame.result();
 };
@@ -127,18 +134,22 @@ adapt.epub.EPUBDocStore.prototype.loadOPF = function(epubURL, root, haveZipMetad
 	/** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ var frame
 		= adapt.task.newFrame("loadOPF");
 	self.loadAsPlainXML(url).then(function(opfXML){
-		self.loadAsPlainXML(epubURL + "META-INF/encryption.xml").then(function(encXML) {
-			var zipMetadataResult = haveZipMetadata ? 
+		if (!opfXML) {
+			vivliostyle.logging.logger.error("Received an empty response for EPUB OPF " + url + ". This may be caused by the server not allowing cross origin requests.");
+		} else {
+			self.loadAsPlainXML(epubURL + "META-INF/encryption.xml").then(function (encXML) {
+				var zipMetadataResult = haveZipMetadata ?
 					self.loadAsJSON(epubURL + "?r=list") : adapt.task.newResult(null);
-			zipMetadataResult.then(function(zipMetadata) {
-				opf = new adapt.epub.OPFDoc(self, epubURL);
-				opf.initWithXMLDoc(opfXML, encXML, zipMetadata, epubURL + "?r=manifest").then(function() {
-					self.opfByURL[url] = opf;
-					self.primaryOPFByEPubURL[epubURL] = opf;
-					frame.finish(opf);			
+				zipMetadataResult.then(function (zipMetadata) {
+					opf = new adapt.epub.OPFDoc(self, epubURL);
+					opf.initWithXMLDoc(opfXML, encXML, zipMetadata, epubURL + "?r=manifest").then(function () {
+						self.opfByURL[url] = opf;
+						self.primaryOPFByEPubURL[epubURL] = opf;
+						frame.finish(opf);
+					});
 				});
 			});
-		});
+		}
 	});
 	return frame.result();
 };
@@ -166,7 +177,16 @@ adapt.epub.EPUBDocStore.prototype.load = function(url) {
     if (r) {
         return r.isPending() ? r : adapt.task.newResult(r.get());
     } else {
-        return adapt.epub.EPUBDocStore.superClass_.load.call(this, docURL);
+		var frame = adapt.task.newFrame("EPUBDocStore.load");
+		r = adapt.epub.EPUBDocStore.superClass_.load.call(this, docURL, true, "Failed to fetch a source document from " + docURL);
+		r.then(function(xmldoc) {
+			if (!xmldoc) {
+				vivliostyle.logging.logger.error("Received an empty response for " + docURL + ". This may be caused by the server not allowing cross origin requests.");
+			} else {
+				frame.finish(xmldoc);
+			}
+		});
+		return frame.result();
     }
 };
 
@@ -602,7 +622,7 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
 	if (pageProgressionAttr) {
 		this.pageProgression = vivliostyle.constants.PageProgression.of(pageProgressionAttr);
 	}
-	var idpfObfURLs = encXML.doc().child("encryption").child("EncryptedData")
+	var idpfObfURLs = !encXML ? [] : encXML.doc().child("encryption").child("EncryptedData")
 		.predicate(adapt.xmldoc.predicate.withChild("EncryptionMethod",
 				adapt.xmldoc.predicate.withAttribute("Algorithm",
 						"http://www.idpf.org/2008/embedding")))
@@ -781,7 +801,7 @@ adapt.epub.OPFDoc.prototype.resolveFragment = function(fragstr) {
     	 * @return {void}
     	 */					
 		function(frame, err) {
-			adapt.base.log("Error resolving fragment " + fragstr);
+			vivliostyle.logging.logger.error(err, "Error resolving fragment", fragstr);
 			frame.finish(null);
 		});
 };
@@ -829,7 +849,7 @@ adapt.epub.OPFDoc.prototype.resolveEPage = function(epage) {
     	 * @return {void}
     	 */					
 		function(frame, err) {
-			adapt.base.log("Error resolving epage: " + epage);
+			vivliostyle.logging.logger.error(err, "Error resolving epage:", epage);
 			frame.finish(null);
 		});
 };
@@ -1282,7 +1302,7 @@ adapt.epub.OPFView.prototype.navigateToFragment = function(fragment) {
  * @return {!adapt.task.Result.<adapt.vtree.Page>}
  */
 adapt.epub.OPFView.prototype.navigateTo = function(href) {
-	adapt.base.log("Navigate to " + href);
+	vivliostyle.logging.logger.debug("Navigate to", href);
 	var path = this.opf.getPathFromURL(adapt.base.stripFragment(href));
 	if (path == null) {
 		if (this.opf.opfXML && href.match(/^#epubcfi\(/)) {

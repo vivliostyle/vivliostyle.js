@@ -5,6 +5,7 @@
  */
 goog.provide('adapt.font');
 
+goog.require('vivliostyle.logging');
 goog.require('adapt.task');
 goog.require('adapt.taskutil');
 goog.require('adapt.net');
@@ -256,7 +257,7 @@ adapt.font.Mapper.prototype.initFont = function(srcFace, fontBytes, documentFace
 	var initWidth = rect.right - rect.left;
 	var initHeight = rect.bottom - rect.top;
 	style.textContent = viewFontFace.makeAtRule(src, fontBytes);
-	adapt.base.log("Starting to load font: " + src);
+	vivliostyle.logging.logger.info("Starting to load font:", src);
 	var loaded = false;
 	frame.loop(function() {
 		var rect = probe.getBoundingClientRect();
@@ -273,9 +274,9 @@ adapt.font.Mapper.prototype.initFont = function(srcFace, fontBytes, documentFace
 		return frame.sleep(10);
 	}).then(function() {
 		if (loaded) {
-			adapt.base.log("Loaded font: " + src);
+			vivliostyle.logging.logger.info("Loaded font:", src);
 		} else {
-			adapt.base.log("Failed to load font: " + src);
+			vivliostyle.logging.logger.warn("Failed to load font:", src);
 		}
 		self.body.removeChild(probe);
 		frame.finish(viewFontFace);
@@ -296,10 +297,10 @@ adapt.font.Mapper.prototype.loadFont = function(srcFace, documentFaces) {
 		fetcher.piggyback(function(viewFaceParam) {
 			var viewFace = /** @type {adapt.font.Face} */ (viewFaceParam);
 			if (!viewFace.traitsEqual(srcFace)) {
-				adapt.base.log("E_FONT_FACE_INCOMPATIBLE " + srcFace.src);
+				vivliostyle.logging.logger.warn("E_FONT_FACE_INCOMPATIBLE", srcFace.src);
 			} else {
 				documentFaces.registerFamily(srcFace, viewFace);
-				adapt.base.log("Found already-loaded font: " + src);
+				vivliostyle.logging.logger.warn("Found already-loaded font:", src);
 			}			
 		});
 	} else {
@@ -338,7 +339,7 @@ adapt.font.Mapper.prototype.findOrLoadFonts = function(srcFaces, documentFaces) 
 	for (var i = 0; i < srcFaces.length; i++) {
 		var srcFace = srcFaces[i];
 		if (!srcFace.src || !srcFace.family) {
-			adapt.base.log("E_FONT_FACE_INVALID");
+			vivliostyle.logging.logger.warn("E_FONT_FACE_INVALID");
 			continue;
 		}
 		fetchers.push(this.loadFont(srcFace, documentFaces));

@@ -6,6 +6,7 @@
 goog.provide('adapt.viewer');
 
 goog.require('goog.asserts');
+goog.require('vivliostyle.logging');
 goog.require('adapt.task');
 goog.require('adapt.vgen');
 goog.require('adapt.expr');
@@ -66,6 +67,7 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
     	"moveTo": this.moveTo,
     	"toc": this.showTOC
     };
+    this.addLogListeners();
 };
 
 /**
@@ -90,6 +92,22 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {boolean} */ this.waitForLoading = false;
     /** @type {boolean} */ this.renderAllPages = true;
     /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();
+};
+
+adapt.viewer.Viewer.prototype.addLogListeners = function() {
+    /** @const */ var LogLevel = vivliostyle.logging.LogLevel;
+    vivliostyle.logging.logger.addListener(LogLevel.DEBUG, function(info) {
+        this.callback({"t": "debug", "content": info});
+    }.bind(this));
+    vivliostyle.logging.logger.addListener(LogLevel.INFO, function(info) {
+        this.callback({"t": "info", "content": info});
+    }.bind(this));
+    vivliostyle.logging.logger.addListener(LogLevel.WARN, function(info) {
+        this.callback({"t": "warn", "content": info});
+    }.bind(this));
+    vivliostyle.logging.logger.addListener(LogLevel.ERROR, function(info) {
+        this.callback({"t": "error", "content": info});
+    }.bind(this));
 };
 
 /**
@@ -698,11 +716,11 @@ adapt.viewer.Viewer.prototype.runCommand = function(command) {
 				frame.finish(true);
 			});
 		} else {
-			self.callback({"t": "error", "content": "No such action", "a": actionName});
+            vivliostyle.logging.logger.error("No such action:", actionName);
 			frame.finish(true);
 		}
 	}, function(frame, err) {
-		self.callback({"t": "error", "content": err.toString(), "a": actionName});
+        vivliostyle.logging.logger.error(err, "Error during action:", actionName);
 		frame.finish(true);
 	});
 };

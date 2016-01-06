@@ -5,6 +5,7 @@
  */
 goog.provide('adapt.net');
 
+goog.require('vivliostyle.logging');
 goog.require('adapt.task');
 
 /**
@@ -53,7 +54,7 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
 	        		if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.TEXT) && typeof text == "string") {
 	        			response.responseText = text;
 	        		} else if (!text) {
-        				adapt.base.log("Unexpected empty success response for " + url);
+						vivliostyle.logging.logger.warn("Unexpected empty success response for", url);
         			} else {
         				if (typeof text == "string") {
         					response.responseBlob = adapt.net.makeBlob([text]);
@@ -144,26 +145,33 @@ adapt.net.ResourceStore = function(parser, type) {
 
 /**
  * @param {string} url
+ * @param {boolean=} opt_required
+ * @param {string=} opt_message
  * @return {!adapt.task.Result.<Resource>} resource for the given URL
  */
-adapt.net.ResourceStore.prototype.load = function(url) {
+adapt.net.ResourceStore.prototype.load = function(url, opt_required, opt_message) {
 	url = adapt.base.stripFragment(url);
 	var resource = this.resources[url];
 	if (typeof resource != "undefined") {
 		return adapt.task.newResult(resource);
 	}
-	return this.fetch(url).get();
+	return this.fetch(url, opt_required, opt_message).get();
 };
 
 /**
  * @private
  * @param {string} url
+ * @param {boolean=} opt_required
+ * @param {string=} opt_message
  * @return {!adapt.task.Result.<Resource>}
  */
-adapt.net.ResourceStore.prototype.fetchInner = function(url) {
+adapt.net.ResourceStore.prototype.fetchInner = function(url, opt_required, opt_message) {
 	var self = this;
 	/** @type {adapt.task.Frame.<Resource>} */ var frame = adapt.task.newFrame("fetch");
 	adapt.net.ajax(url, self.type).then(function(response) {
+		if (opt_required && response.status >= 400) {
+			throw new Error(opt_message || ("Failed to fetch required resource: " + url));
+		}
     	self.parser(response, self).then(function(resource) {
             delete self.fetchers[url];
             self.resources[url] = resource;
@@ -175,9 +183,11 @@ adapt.net.ResourceStore.prototype.fetchInner = function(url) {
 
 /**
  * @param {string} url
+ * @param {boolean=} opt_required
+ * @param {string=} opt_message
  * @return {adapt.taskutil.Fetcher.<Resource>} fetcher for the resource for the given URL
  */
-adapt.net.ResourceStore.prototype.fetch = function(url) {
+adapt.net.ResourceStore.prototype.fetch = function(url, opt_required, opt_message) {
 	url = adapt.base.stripFragment(url);
 	var resource = this.resources[url];
 	if (resource) {
@@ -187,7 +197,7 @@ adapt.net.ResourceStore.prototype.fetch = function(url) {
 	if (!fetcher) {
 		var self = this;
 		fetcher = new adapt.taskutil.Fetcher(function() {
-			return self.fetchInner(url);
+			return self.fetchInner(url, opt_required, opt_message);
 		}, "Fetch " + url);
 		self.fetchers[url] = fetcher;
 		fetcher.start();

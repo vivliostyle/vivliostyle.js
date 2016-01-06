@@ -4,6 +4,8 @@
  */
 goog.provide('adapt.geom');
 
+goog.require('vivliostyle.logging');
+
 /**
  * @param {number} x1
  * @param {number} y1
@@ -204,7 +206,7 @@ adapt.geom.addBandIntersections = function(intersections, s, y1, y2) {
     /** @type {number} */ var x2;
     /** @type {number} */ var w2;
     if (s.high.y < y1) {
-    	adapt.base.log("Error: inconsistent segment (1)");
+    	vivliostyle.logging.logger.warn("Error: inconsistent segment (1)");
     }
     if (s.low.y <= y1) {
         // outside

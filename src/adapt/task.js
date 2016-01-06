@@ -2,6 +2,7 @@
  * Copyright 2013 Google, Inc.
  * @fileoverview Support for asynchronous execution and cooperative multitasking.
  */
+goog.require('vivliostyle.logging');
 goog.require('adapt.base');
 
 goog.provide('adapt.task');
@@ -32,13 +33,6 @@ adapt.task.Timer.prototype.setTimeout = function(fn, delay) {};
  * @return {void}.
  */
 adapt.task.Timer.prototype.clearTimeout = function(token) {};
-
-/**
- * Print message to a (test) log.
- * @param {string} msg
- * @return {void}
- */
-adapt.task.Timer.prototype.log = function(msg) {};
 
 
 /**
@@ -193,18 +187,6 @@ adapt.task.start = function(func, opt_name) {
 };
 
 /**
- * @param {string} msg
- * @param {Error} err
- */
-adapt.task.report = function(msg, err) {	
-    var frameTrace = err['frameTrace'];
-    if (frameTrace)
-        adapt.base.log(msg + ":\n" + frameTrace);
-    else
-        adapt.base.log(msg + ":\n" + err.toString());    	
-};
-
-/**
  * Frame state.
  * @enum {number}
  */
@@ -240,14 +222,6 @@ adapt.task.TimerImpl.prototype.setTimeout = function(fn, delay) {
  */
 adapt.task.TimerImpl.prototype.clearTimeout = function(token) {
     clearTimeout(token);
-};
-
-/**
- * @override
- */
-adapt.task.TimerImpl.prototype.log = function(msg) {
-    if (window.console && window.console.log)
-        window.console.log(msg);
 };
 
 /**
@@ -367,6 +341,7 @@ adapt.task.Scheduler.prototype.doTimeSlice = function() {
                 break;
         }
     } catch (err) {
+        vivliostyle.logging.logger.error(err);
     }
     this.inTimeSlice = false;
     if (this.queue.length())
@@ -390,6 +365,7 @@ adapt.task.Scheduler.prototype.run = function(func, opt_name) {
                 try {
                     callback();
                 } catch (err) {
+                    vivliostyle.logging.logger.error(err);
                 }
             }
         };
@@ -574,8 +550,8 @@ adapt.task.Task.prototype.unwind = function() {
 		this.top.handler(this.top, err);
 	} else {
         if (this.exception) {
-            adapt.task.report('Unhandled exception in task ' + this.name, this.exception);
-        }		
+            vivliostyle.logging.logger.error(this.exception, 'Unhandled exception in task', this.name);
+        }
 	}
 };
 
@@ -876,7 +852,7 @@ adapt.task.Frame.prototype.timeSlice = function() {
     var frame = adapt.task.newFrame('Frame.timeSlice');
     var scheduler = frame.getScheduler();
     if (scheduler.isTimeSliceOver()) {
-    	adapt.base.log("-- time slice --");
+        vivliostyle.logging.logger.debug("-- time slice --");
         frame.suspend().schedule(true);
     } else {
         frame.finish(true);
