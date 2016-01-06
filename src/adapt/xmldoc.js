@@ -295,7 +295,7 @@ adapt.xmldoc.XMLDocHolder.prototype.getElement = function(url) {
 };
 
 /**
- * @typedef {adapt.net.ResourceStore.<!adapt.xmldoc.XMLDocHolder>}
+ * @typedef {adapt.net.ResourceStore.<adapt.xmldoc.XMLDocHolder>}
  */
 adapt.xmldoc.XMLDocStore;
 
@@ -387,37 +387,36 @@ adapt.xmldoc.resolveContentType = function(response) {
 /**
  * @param {adapt.net.Response} response
  * @param {adapt.xmldoc.XMLDocStore} store
- * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
+ * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
  */
 adapt.xmldoc.parseXMLResource = function(response, store) {
 	var doc = response.responseXML;
 	if (!doc) {
 		var parser = new DOMParser();
-		var text = response.responseText || "<not-found/>";
-		var contentType = adapt.xmldoc.resolveContentType(response);
-		doc = adapt.xmldoc.parseAndReturnNullIfError(text, contentType || adapt.xmldoc.DOMParserSupportedType.APPLICATION_XML, parser);
+		var text = response.responseText;
+		if (text) {
+			var contentType = adapt.xmldoc.resolveContentType(response);
+			doc = adapt.xmldoc.parseAndReturnNullIfError(text, contentType || adapt.xmldoc.DOMParserSupportedType.APPLICATION_XML, parser);
 
-		// When contentType cannot be inferred from HTTP header and file extension,
-		// we use root element's tag name to infer the contentType.
-		// If it is html or svg, we re-parse the source with an appropriate contentType.
-		if (doc && !contentType) {
-			var root = doc.documentElement;
-			if (root.localName.toLowerCase() === "html" && !root.namespaceURI) {
-				doc = adapt.xmldoc.parseAndReturnNullIfError(text, adapt.xmldoc.DOMParserSupportedType.TEXT_HTML, parser);
-			} else if (root.localName.toLowerCase() === "svg" && doc.contentType !== adapt.xmldoc.DOMParserSupportedType.IMAGE_SVG_XML) {
-				doc = adapt.xmldoc.parseAndReturnNullIfError(text, adapt.xmldoc.DOMParserSupportedType.IMAGE_SVG_XML, parser);
+			// When contentType cannot be inferred from HTTP header and file extension,
+			// we use root element's tag name to infer the contentType.
+			// If it is html or svg, we re-parse the source with an appropriate contentType.
+			if (doc && !contentType) {
+				var root = doc.documentElement;
+				if (root.localName.toLowerCase() === "html" && !root.namespaceURI) {
+					doc = adapt.xmldoc.parseAndReturnNullIfError(text, adapt.xmldoc.DOMParserSupportedType.TEXT_HTML, parser);
+				} else if (root.localName.toLowerCase() === "svg" && doc.contentType !== adapt.xmldoc.DOMParserSupportedType.IMAGE_SVG_XML) {
+					doc = adapt.xmldoc.parseAndReturnNullIfError(text, adapt.xmldoc.DOMParserSupportedType.IMAGE_SVG_XML, parser);
+				}
 			}
-		}
 
-		if (!doc) {
-			// Fallback to HTML parsing
-			doc = adapt.xmldoc.parseAndReturnNullIfError(text, adapt.xmldoc.DOMParserSupportedType.TEXT_HTML, parser);
 			if (!doc) {
-				parser.parseFromString("<error/>", adapt.xmldoc.DOMParserSupportedType.TEXT_XML);
+				// Fallback to HTML parsing
+				doc = adapt.xmldoc.parseAndReturnNullIfError(text, adapt.xmldoc.DOMParserSupportedType.TEXT_HTML, parser);
 			}
 		}
 	}
-    var xmldoc = new adapt.xmldoc.XMLDocHolder(store, response.url, doc);
+    var xmldoc = doc ? new adapt.xmldoc.XMLDocHolder(store, response.url, doc) : null;
     return adapt.task.newResult(xmldoc);
 };
 
