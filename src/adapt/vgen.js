@@ -115,12 +115,14 @@ adapt.vgen.pseudoNames = ["footnote-marker", "first-5-lines", "first-4-lines",
                           "first-3-lines", "first-2-lines", "first-line", "first-letter", "before",
                              "" /* content */, "after"];
 
+adapt.vgen.PSEUDO_ATTR = "data-adapt-pseudo";
+
 /**
  * @param {Element} element
  * @returns {string}
  */
 adapt.vgen.getPseudoName = function(element) {
-	return element.getAttribute("class") || "";
+	return element.getAttribute(adapt.vgen.PSEUDO_ATTR) || "";
 };
 
 /**
@@ -128,7 +130,7 @@ adapt.vgen.getPseudoName = function(element) {
  * @param {string} name
  */
 adapt.vgen.setPseudoName = function(element, name) {
-	element.setAttribute("class", name);
+	element.setAttribute(adapt.vgen.PSEUDO_ATTR, name);
 };
 
 /**
@@ -774,7 +776,11 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 			            // TODO: understand the element we are working with.
 			            if (attributeName == "src" || attributeName == "href" || attributeName == "poster") {
 			                attributeValue = self.resolveURL(attributeValue);
-			            }
+			            } else if (attributeName == "srcset") {
+							attributeValue = attributeValue.split(",").map(function(value) {
+								return self.resolveURL(value.trim());
+							}).join(",");
+						}
 			        }
 			        else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
 			            continue; //namespace declaration (in Firefox)
@@ -1188,7 +1194,7 @@ adapt.vgen.ViewFactory.prototype.peelOff = function(nodeContext, nodeOffset) {
 /**
  * @param {string} ns
  * @param {string} tag
- * @return {Element}
+ * @return {!Element}
  */
 adapt.vgen.ViewFactory.prototype.createElement = function(ns, tag) {
 	if (ns == adapt.base.NS.XHTML)
@@ -1206,6 +1212,7 @@ adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target)
     if (pseudoMap && pseudoMap["before"]) {
     	var childComputedStyle = {};
     	var span = this.createElement(adapt.base.NS.XHTML, "span");
+		adapt.vgen.setPseudoName(span, "before");
     	target.appendChild(span);
     	this.computeStyle(vertical, pseudoMap["before"], childComputedStyle);
     	delete childComputedStyle["content"];
@@ -1254,6 +1261,10 @@ adapt.vgen.ViewFactory.prototype.isSameNodePosition = function(nodePosition1, no
  */
 adapt.vgen.ViewFactory.prototype.getPageFloatHolder = function() {
 	return this.pageFloatHolder;
+};
+
+adapt.vgen.ViewFactory.prototype.isPseudoelement = function(elem) {
+	return !!adapt.vgen.getPseudoName(elem);
 };
 
 /**

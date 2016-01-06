@@ -2190,8 +2190,13 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
  */
 adapt.layout.Column.prototype.redoLayout = function() {
 	var chunkPositions = this.chunkPositions;
-	while (this.element.lastChild != this.last) {
-		this.element.removeChild(this.element.lastChild);
+	var last = this.element.lastChild;
+	while (last != this.last) {
+		var prev = last.previousSibling;
+		if (!(this.element.isSameNode(last.parentNode) && this.layoutContext.isPseudoelement(last))) {
+			this.element.removeChild(last);
+		}
+		last = prev;
 	}
 	this.killFloats();
 	this.init();
