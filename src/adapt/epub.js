@@ -94,6 +94,9 @@ adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ var frame
 		= adapt.task.newFrame("loadEPUBDoc");
+	if (url.substring(url.length - 1) !== "/") {
+		url = url + "/";
+	}
 	if (haveZipMetadata) {
 		self.startLoadingAsJSON(url + "?r=list");
 	}
