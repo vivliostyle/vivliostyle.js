@@ -5,6 +5,8 @@
  */
 goog.provide('adapt.base');
 
+goog.require('vivliostyle.logging');
+
 /**
  * @typedef {*}
  */
@@ -342,9 +344,11 @@ adapt.base.setCSSProperty = function(elem, prop, value) {
     	if (prop == "-ms-writing-mode" && value == "vertical-rl") {
     		value = "tb-rl";
      	}
-    	// adapt.base.log(prop + ": " + value);
-        (/** @type {HTMLElement} */ (elem)).style.setProperty(prop, value);
+        if (elem && elem.style) {
+            (/** @type {HTMLElement} */ (elem)).style.setProperty(prop, value);
+        }
     } catch (err) {
+        vivliostyle.logging.logger.warn(err);
     }
 };
 
@@ -451,11 +455,6 @@ adapt.base.escapeRegexpChar = function(str) {
  */
 adapt.base.escapeRegExp = function(str) {
     return str.replace(/[^-a-zA-Z0-9_]/g, adapt.base.escapeRegexpChar);
-};
-
-adapt.base.log = function(message) {
-    if (window.console && window.console.log)
-        window.console.log(message);
 };
 
 /**

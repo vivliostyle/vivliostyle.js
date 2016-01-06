@@ -4,6 +4,7 @@
  */
 goog.provide('adapt.taskutil');
 
+goog.require('vivliostyle.logging');
 goog.require('adapt.task');
 
 
@@ -46,7 +47,7 @@ adapt.taskutil.Fetcher.prototype.start = function() {
 						try {
 							piggibacks[i](resource);
 						} catch (err) {
-							adapt.base.log("Error: " + err);
+							vivliostyle.logging.logger.error(err, "Error:");
 						}
 					}
 				}

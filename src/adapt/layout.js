@@ -6,6 +6,7 @@
  * view tree node at a time.
  */
 goog.require('goog.asserts');
+goog.require('vivliostyle.logging');
 goog.require('adapt.base');
 goog.require('adapt.geom');
 goog.require('adapt.task');
@@ -62,7 +63,7 @@ adapt.layout.fixBoxesForNode = function(clientLayout, boxes, node) {
 			}
 		}
 		if (k == fullBoxes.length) {
-			adapt.base.log("Could not fix character box");
+			vivliostyle.logging.logger.warn("Could not fix character box");
 			result.push(box);
 		}
 	}
@@ -229,20 +230,20 @@ adapt.layout.validateCheckPoints = function(checkPoints) {
 		var cp0 = checkPoints[i-1];
 		var cp1 = checkPoints[i];
 		if (cp0 === cp1) {
-			adapt.base.log("validateCheckPoints: duplicate entry");
+			vivliostyle.logging.logger.warn("validateCheckPoints: duplicate entry");
 		} else if (cp0.boxOffset >= cp1.boxOffset) {
-			adapt.base.log("validateCheckPoints: incorrect boxOffset");
+			vivliostyle.logging.logger.warn("validateCheckPoints: incorrect boxOffset");
 		} else if (cp0.sourceNode == cp1.sourceNode) {
 			if (cp1.after) {
 				if (cp0.after) {
-					adapt.base.log("validateCheckPoints: duplicate after points");					
+					vivliostyle.logging.logger.warn("validateCheckPoints: duplicate after points");
 				}
 			} else {
 				if (cp0.after) {
-					adapt.base.log("validateCheckPoints: inconsistent after point");					
+					vivliostyle.logging.logger.warn("validateCheckPoints: inconsistent after point");
 				} else {
 					if (cp1.boxOffset - cp0.boxOffset != cp1.offsetInNode - cp0.offsetInNode) {
-						adapt.base.log("validateCheckPoints: boxOffset inconsistent with offsetInNode");					
+						vivliostyle.logging.logger.warn("validateCheckPoints: boxOffset inconsistent with offsetInNode");
 					}
 				}
 			}
@@ -1472,8 +1473,8 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
 		while (block.parent && block.inline) {
 			block = block.parent;
 		}
-		widows = Math.max((block.inheritedProps["widows"] || 1) - 0, 1);
-		orphans = Math.max((block.inheritedProps["orphans"] || 1) - 0, 1);
+		widows = Math.max((block.inheritedProps["widows"] || 2) - 0, 1);
+		orphans = Math.max((block.inheritedProps["orphans"] || 2) - 0, 1);
 	}
 	// Select the first overflowing line break position
 	var linePositions = this.findLinePositions(checkPoints);
@@ -1544,7 +1545,7 @@ adapt.layout.Column.prototype.findAcceptableBreak = function(overflownNodeContex
 	} while(nextPenalty > penalty && !nodeContext)
 	var forceRemoveSelf = false;
 	if (!nodeContext) {
-		adapt.base.log("Could not find any page breaks?!!");
+		vivliostyle.logging.logger.warn("Could not find any page breaks?!!");
 		// Last resort
 		if (this.forceNonfitting) {
 			self.skipTailEdges(overflownNodeContext).then(function(nodeContext) {

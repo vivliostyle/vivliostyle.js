@@ -14,6 +14,7 @@
         "closure/goog/asserts/asserts.js",
 
         "vivliostyle/namespace.js",
+        "vivliostyle/logging.js",
         "vivliostyle/profile.js",
         "vivliostyle/constants.js",
         "vivliostyle/util.js",

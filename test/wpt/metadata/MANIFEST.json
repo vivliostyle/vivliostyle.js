@@ -296,6 +296,34 @@
         "url": "/css21/page-box/page-selectors-006.xht"
       },
       {
+        "path": "css21/pagination/orphans-001.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/orphans-001-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/orphans-001.xht"
+      },
+      {
+        "path": "css21/pagination/orphans-002.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/orphans-002-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/orphans-002.xht"
+      },
+      {
+        "path": "css21/pagination/orphans-003.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/orphans-002-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/orphans-003.xht"
+      },
+      {
+        "path": "css21/pagination/orphans-004b.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/orphans-004b-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/orphans-004b.xht"
+      },
+      {
         "path": "css21/pagination/page-break-after-001.xht",
         "references": [
           ["css21/pagination/vivliostyle/page-break-after-001-ref.html", "=="]
@@ -322,6 +350,41 @@
           ["css21/pagination/vivliostyle/page-break-before-004-ref.html", "=="]
         ],
         "url": "/css21/pagination/page-break-before-004.xht"
+      },
+      {
+        "path": "css21/pagination/widows-001.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/widows-001-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/widows-001.xht"
+      },
+      {
+        "path": "css21/pagination/widows-002.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/widows-002-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/widows-002.xht"
+      },
+      {
+        "path": "css21/pagination/widows-003.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/widows-002-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/widows-003.xht"
+      },
+      {
+        "path": "css21/pagination/widows-004a.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/widows-002-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/widows-004a.xht"
+      },
+      {
+        "path": "css21/pagination/widows-004b.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/widows-004b-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/widows-004b.xht"
       },
       {
         "path": "css-page-3/page-size-010.xht",

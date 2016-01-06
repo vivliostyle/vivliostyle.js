@@ -5,6 +5,7 @@
  */
 goog.provide('adapt.cssprop');
 
+goog.require('vivliostyle.logging');
 goog.require('adapt.base');
 goog.require('adapt.css');
 goog.require('adapt.csstok');
@@ -52,7 +53,7 @@ adapt.cssprop.toSet = function(val) {
             val.visit(visitor);
             return visitor.propSet;
         } catch (err) {
-        	adapt.base.log("toSet: " + err);
+            vivliostyle.logging.logger.warn(err, "toSet:");
         }
     }
     return {};
@@ -91,7 +92,7 @@ adapt.cssprop.toInt = function(val, def) {
             val.visit(visitor);
             return visitor.value;
         } catch (err) {
-        	adapt.base.log("toInt: " + err);
+            vivliostyle.logging.logger.warn(err, "toInt: ");
         }
     }
     return def;
@@ -218,7 +219,7 @@ adapt.cssprop.toShape = function(val, x, y, width, height, context) {
             val.visit(visitor);
             return visitor.getShape(x, y, width, height, context);
         } catch (err) {
-        	adapt.base.log("toShape: " + err);
+            vivliostyle.logging.logger.warn(err, "toShape:");
         }
     }
     return adapt.geom.shapeForRect(x, y, x + width, y + height);
@@ -272,7 +273,7 @@ adapt.cssprop.toCounters = function(val, reset) {
     try {
         val.visit(visitor);
     } catch (err) {
-    	adapt.base.log("toCounters: " + err);
+        vivliostyle.logging.logger.warn(err, "toCounters:");
     }
     return visitor.counters;
 };

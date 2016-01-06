@@ -5,6 +5,7 @@
  */
 goog.provide('adapt.cssvalid');
 
+goog.require('vivliostyle.logging');
 goog.require('adapt.base');
 goog.require('adapt.net');
 goog.require('adapt.task');
@@ -2129,7 +2130,7 @@ adapt.cssvalid.ValidatorSet.prototype.makePropSet = function(propList) {
 			var pname = list[k];
 			var pval = this.defaultValues[pname];
 			if (!pval) {
-				adapt.base.log("Unknown property in makePropSet: " + pname);
+                vivliostyle.logging.logger.warn("Unknown property in makePropSet:", pname);
 			} else {
 				map[pname] = pval;
 			}
@@ -2197,10 +2198,10 @@ adapt.cssvalid.validatorFetcher = new adapt.taskutil.Fetcher(function() {
         	if (xhr.responseText) {
         		validatorSet.parse(xhr.responseText);
         	} else {
-                adapt.base.log("Error: missing " + url);        		
+                vivliostyle.logging.logger.error("Error: missing", url);
         	}
         } catch (err) {
-            adapt.base.log("Error: " + err);
+            vivliostyle.logging.logger.error(err, "Error:");
         }
         frame.finish(validatorSet);
     });

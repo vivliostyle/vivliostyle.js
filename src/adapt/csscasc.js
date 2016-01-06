@@ -5,6 +5,7 @@
  */
 goog.provide('adapt.csscasc');
 
+goog.require('vivliostyle.logging');
 goog.require('adapt.expr');
 goog.require('adapt.css');
 goog.require('adapt.task');
@@ -1789,7 +1790,7 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFunc = function(func) {
             }
             break;
     }
-    adapt.base.log("E_CSS_CONTENT_PROP: " + func.toString());
+	vivliostyle.logging.logger.warn("E_CSS_CONTENT_PROP:", func.toString());
     return new adapt.css.Str("");
 };
 
@@ -2398,7 +2399,7 @@ adapt.csscasc.CascadeParserHandler.prototype.tagSelector = function(ns, name) {
  */
 adapt.csscasc.CascadeParserHandler.prototype.classSelector = function(name) {
     if (this.pseudoelement) {
-    	adapt.base.log("::" + this.pseudoelement + " followed by ." + name);
+		vivliostyle.logging.logger.warn("::" + this.pseudoelement, "followed by ." + name);
         this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
     	return;
     }
@@ -2411,8 +2412,13 @@ adapt.csscasc.CascadeParserHandler.prototype.classSelector = function(name) {
  */
 adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name, params) {
     if (this.pseudoelement) {
+<<<<<<< HEAD
     	adapt.base.log("::" + this.pseudoelement + " followed by :" + name);
         this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
+=======
+		vivliostyle.logging.logger.warn("::" + this.pseudoelement, "followed by :" + name);
+        this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
+>>>>>>> 96dc7ac652f9009e5e2e1f16cf12c46e54dcc0d3
     	return;
     }
     switch (name.toLowerCase()) {
@@ -2491,7 +2497,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
             if (!this.pseudoelement) {
                 this.pseudoelement = name;
             } else {
-	        	adapt.base.log("Double pseudoelement ::" + this.pseudoelement + "::" + name);
+				vivliostyle.logging.logger.warn("Double pseudoelement ::" + this.pseudoelement + "::" + name);
 	            this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
             }
             break;
@@ -2502,14 +2508,14 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
 	                if (!this.pseudoelement) {
 	                    this.pseudoelement = "first-" + n + "-lines";
 	                } else {
-	    	        	adapt.base.log("Double pseudoelement ::" + this.pseudoelement + "::" + name);
+	    	        	vivliostyle.logging.logger.warn("Double pseudoelement ::" + this.pseudoelement + "::" + name);
 	    	            this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
 	                }
 	    			break;
 	    		}
 	    	}
         default:
-        	adapt.base.log("Unrecognized pseudoelement: ::" + name);
+        	vivliostyle.logging.logger.warn("Unrecognized pseudoelement: ::" + name);
             this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
             break;
     }
@@ -2550,12 +2556,12 @@ adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, na
         	if (value == "supported") {
                 this.chain.push(new adapt.csscasc.CheckNamespaceSupportedAction(ns, name));
         	} else {
-                adapt.base.log("Unsupported :: attr selector op: " + value);
+				vivliostyle.logging.logger.warn("Unsupported :: attr selector op:", value);
         	}
         	break;
         case adapt.csstok.TokenType.STAR_EQ:
         default:
-            adapt.base.log("Unsupported attr selector: " + op);
+			vivliostyle.logging.logger.warn("Unsupported attr selector:", op);
     }
 };
 
@@ -2802,7 +2808,7 @@ goog.inherits(adapt.csscasc.PropSetParserHandler, adapt.cssparse.SlaveParserHand
  */
 adapt.csscasc.PropSetParserHandler.prototype.property = function(name, value, important) {
 	if (important)
-		adapt.base.log("E_IMPORTANT_NOT_ALLOWED");
+		vivliostyle.logging.logger.warn("E_IMPORTANT_NOT_ALLOWED");
 	else
 		this.validatorSet.validatePropertyAndHandleShorthand(name, value, important, this);
 };
@@ -2811,14 +2817,14 @@ adapt.csscasc.PropSetParserHandler.prototype.property = function(name, value, im
  * @override
  */
 adapt.csscasc.PropSetParserHandler.prototype.invalidPropertyValue = function(name, value) {
-	adapt.base.log("E_INVALID_PROPERTY_VALUE " + name + ": " + value.toString());
+	vivliostyle.logging.logger.warn("E_INVALID_PROPERTY_VALUE", name + ":", value.toString());
 };
 
 /**
  * @override
  */
 adapt.csscasc.PropSetParserHandler.prototype.unknownProperty = function(name, value) {
-	adapt.base.log("E_INVALID_PROPERTY " + name + ": " + value.toString());
+	vivliostyle.logging.logger.warn("E_INVALID_PROPERTY", name + ":", value.toString());
 };
 
 /**
@@ -2861,14 +2867,14 @@ adapt.csscasc.PropertyParserHandler.prototype.property = function(name, value, i
  * @override
  */
 adapt.csscasc.PropertyParserHandler.prototype.invalidPropertyValue = function(name, value) {
-	adapt.base.log("E_INVALID_PROPERTY_VALUE " + name + ": " + value.toString());
+	vivliostyle.logging.logger.warn("E_INVALID_PROPERTY_VALUE", name + ":", value.toString());
 };
 
 /**
  * @override
  */
 adapt.csscasc.PropertyParserHandler.prototype.unknownProperty = function(name, value) {
-	adapt.base.log("E_INVALID_PROPERTY " + name + ": " + value.toString());
+	vivliostyle.logging.logger.warn("E_INVALID_PROPERTY", name + ":", value.toString());
 };
 
 /**
@@ -2896,7 +2902,7 @@ adapt.csscasc.parseStyleAttribute = function(scope, validatorSet, baseURL, style
 	try {
 		adapt.cssparse.parseStyleAttribute(tokenizer, handler, baseURL);
 	} catch (err) {
-		adapt.base.log("Style attribute parse error: " + err);
+		vivliostyle.logging.logger.warn(err, "Style attribute parse error:");
 	}
 	return handler.elementStyle;
 };
