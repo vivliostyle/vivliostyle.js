@@ -90,8 +90,8 @@
         "url": "/css21/pagination/page-break-after-007.xht"
       },
       {
-        "path": "css21/pagination/page-break-after-009.xht",
-        "url": "/css21/pagination/page-break-after-009.xht"
+        "path": "css21/pagination/page-break-after-008.xht",
+        "url": "/css21/pagination/page-break-after-008.xht"
       },
       {
         "path": "css21/pagination/page-break-before-000.xht",
@@ -102,16 +102,16 @@
         "url": "/css21/pagination/page-break-before-006.xht"
       },
       {
+        "path": "css21/pagination/page-break-before-007.xht",
+        "url": "/css21/pagination/page-break-before-007.xht"
+      },
+      {
         "path": "css21/pagination/page-break-before-007-b.xht",
         "url": "/css21/pagination/page-break-before-007-b.xht"
       },
       {
         "path": "css21/pagination/page-break-before-008.xht",
         "url": "/css21/pagination/page-break-before-008.xht"
-      },
-      {
-        "path": "css21/pagination/page-break-before-010.xht",
-        "url": "/css21/pagination/page-break-before-010.xht"
       },
       {
         "path": "css21/pagination/page-break-before-011.xht",
@@ -128,10 +128,6 @@
       {
         "path": "css21/pagination/page-break-inside-003.xht",
         "url": "/css21/pagination/page-break-inside-003.xht"
-      },
-      {
-        "path": "css21/pagination/page-break-inside-004.xht",
-        "url": "/css21/pagination/page-break-inside-004.xht"
       },
       {
         "path": "css21/pagination/page-break-inside-005.xht",
