@@ -16,12 +16,6 @@ goog.require('adapt.net');
  */
 adapt.xmldoc.ELEMENT_OFFSET_ATTR = "data-adapt-eloff";
 
-
-/**
- * An array holding all xmldocs.
- */
-adapt.xmldoc.docs = [];
-
 /**
  * @param {adapt.xmldoc.XMLDocStore} store
  * @param {string} url

@@ -2530,7 +2530,6 @@ adapt.csscasc.CascadeParserHandler.prototype.idSelector = function(id) {
  */
 adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, name, op, value) {
     this.specificity += 0x100;
-		console.log([this,ns,name,op,value]);
 		name = name.toLowerCase();
     value = value || "";
     switch (op) {
