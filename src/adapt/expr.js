@@ -1251,7 +1251,7 @@ adapt.expr.Modulo.prototype.evalInfix = function(lhs, rhs) {
 adapt.expr.Numeric = function(scope, num, unit) {
     adapt.expr.Val.call(this, scope);
     /** @type {number} */ this.num = num;
-    /** @type {string} */ this.unit = unit;
+    /** @type {string} */ this.unit = unit.toLowerCase(); // units are case-insensitive in CSS
 };
 goog.inherits(adapt.expr.Numeric, adapt.expr.Val);
 
