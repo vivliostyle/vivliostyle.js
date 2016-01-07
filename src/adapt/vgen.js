@@ -587,7 +587,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 	    }
 	    var listItem = display === adapt.css.ident.list_item && computedStyle["ua-list-item-count"];
 	    if (floating ||
-				computedStyle["break-inside"] === adapt.css.ident.avoid) {
+			(computedStyle["break-inside"] && computedStyle["break-inside"] !== adapt.css.ident.auto)) {
 	    	self.nodeContext.breakPenalty++;
 	    } else if (display === adapt.css.ident.table_row) {
 	    	self.nodeContext.breakPenalty += 10;

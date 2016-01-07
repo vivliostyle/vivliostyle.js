@@ -232,7 +232,7 @@ opacity = NUM;
 BREAK = auto | always | avoid | left | right | page | column | region;
 break-before = BREAK;
 break-after = BREAK;
-break-inside = auto | avoid | avoid-page | avoid-column;
+break-inside = auto | avoid | avoid-page | avoid-column | avoid-region;
 [webkit]column-span = none | all;
 [moz]column-fill = auto | balance;
 
