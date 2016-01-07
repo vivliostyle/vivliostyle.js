@@ -283,7 +283,7 @@ adapt.xmldoc.XMLDocHolder.prototype.getElement = function(url) {
 		return null;
 	}
 	var id = m[2];
-	var r = this.document.getElementById(id);
+	var r = this.document.getElementById(id) || this.document.getElementsByName(id)[0];
 	if (!r) {
 		if (!this.idMap) {
 			this.idMap = {};
