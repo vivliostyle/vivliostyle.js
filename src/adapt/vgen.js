@@ -587,8 +587,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 	    }
 	    var listItem = display === adapt.css.ident.list_item && computedStyle["ua-list-item-count"];
 	    if (floating ||
-				computedStyle["break-inside"] === adapt.css.ident.avoid ||
-				computedStyle["page-break-inside"] === adapt.css.ident.avoid) {
+				computedStyle["break-inside"] === adapt.css.ident.avoid) {
 	    	self.nodeContext.breakPenalty++;
 	    } else if (display === adapt.css.ident.table_row) {
 	    	self.nodeContext.breakPenalty += 10;
@@ -597,11 +596,11 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 	    self.nodeContext.floatSide = floating ? floatSide.toString() : null;
 		self.nodeContext.floatReference = floatReference ? floatReference.toString() : null;
 	    if (!self.nodeContext.inline) {
-		    var breakAfter = computedStyle["break-after"] || computedStyle["page-break-after"];
+		    var breakAfter = computedStyle["break-after"];
 		    if (breakAfter) {
 		    	self.nodeContext.breakAfter = breakAfter.toString();
 		    }
-		    var breakBefore = computedStyle["break-before"] || computedStyle["page-break-before"];
+		    var breakBefore = computedStyle["break-before"];
 		    if (breakBefore) {
 		    	self.nodeContext.breakBefore = breakBefore.toString();
 		    }

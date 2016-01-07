@@ -871,6 +871,7 @@ adapt.css.toNumber = function(val, context) {
 adapt.css.ident = {
 	absolute: adapt.css.getName("absolute"),
 	all: adapt.css.getName("all"),
+    always: adapt.css.getName("always"),
 	auto: adapt.css.getName("auto"),
 	avoid: adapt.css.getName("avoid"),
     block: adapt.css.getName("block"),
@@ -895,6 +896,7 @@ adapt.css.ident = {
     normal: adapt.css.getName("normal"),
     oeb_page_foot: adapt.css.getName("oeb-page-foot"),
     oeb_page_head: adapt.css.getName("oeb-page-head"),
+    page: adapt.css.getName("page"),
     relative: adapt.css.getName("relative"),
     right: adapt.css.getName("right"),
     scale: adapt.css.getName("scale"),
