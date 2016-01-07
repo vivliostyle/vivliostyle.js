@@ -18,6 +18,7 @@
         "vivliostyle/profile.js",
         "vivliostyle/constants.js",
         "vivliostyle/util.js",
+        "vivliostyle/plugin.js",
         "vivliostyle/logical.js",
         "adapt/base.js",
         "adapt/sha1.js",
