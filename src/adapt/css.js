@@ -536,7 +536,7 @@ adapt.css.getName = function(name) {
 adapt.css.Numeric = function(num, unit) {
     adapt.css.Val.call(this);
     /** @type {number} */ this.num = num;
-    /** @type {string} */ this.unit = unit;
+    /** @type {string} */ this.unit = unit.toLowerCase(); // units are case-insensitive in CSS
 };
 goog.inherits(adapt.css.Numeric, adapt.css.Val);
 
@@ -871,6 +871,7 @@ adapt.css.toNumber = function(val, context) {
 adapt.css.ident = {
 	absolute: adapt.css.getName("absolute"),
 	all: adapt.css.getName("all"),
+    always: adapt.css.getName("always"),
 	auto: adapt.css.getName("auto"),
 	avoid: adapt.css.getName("avoid"),
     block: adapt.css.getName("block"),
@@ -895,6 +896,7 @@ adapt.css.ident = {
     normal: adapt.css.getName("normal"),
     oeb_page_foot: adapt.css.getName("oeb-page-foot"),
     oeb_page_head: adapt.css.getName("oeb-page-head"),
+    page: adapt.css.getName("page"),
     relative: adapt.css.getName("relative"),
     right: adapt.css.getName("right"),
     scale: adapt.css.getName("scale"),

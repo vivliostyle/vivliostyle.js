@@ -2,20 +2,15 @@ describe("logging", function() {
     "use strict";
 
     describe("Logger", function() {
-        var dummyConsole = {
-            debug: function() {},
-            info: function() {},
-            warn: function() {},
-            error: function() {}
-        };
-        var logger;
+        var logger = vivliostyle.logging.logger;
+        var mockConsole = vivliostyle.logging.mockConsole;
 
         beforeEach(function() {
-            spyOn(dummyConsole, "debug");
-            spyOn(dummyConsole, "info");
-            spyOn(dummyConsole, "warn");
-            spyOn(dummyConsole, "error");
-            logger = new vivliostyle.logging.Logger(dummyConsole);
+            spyOn(mockConsole, "debug");
+            spyOn(mockConsole, "info");
+            spyOn(mockConsole, "warn");
+            spyOn(mockConsole, "error");
+            logger = new vivliostyle.logging.Logger(mockConsole);
         });
 
         var error = new Error("foo");
@@ -27,20 +22,20 @@ describe("logging", function() {
 
         it("calls corresponding methods of console when debug/info/warn/error methods are called", function() {
             logger.debug(error, str1, str2);
-            expect(dummyConsole.debug).toHaveBeenCalledWith(str1, str2, "\n", msg, "\n", frameTrace);
+            expect(mockConsole.debug).toHaveBeenCalledWith(str1, str2, "\n", msg, "\n", frameTrace);
             logger.debug(error);
-            expect(dummyConsole.debug).toHaveBeenCalledWith(msg, "\n", frameTrace);
+            expect(mockConsole.debug).toHaveBeenCalledWith(msg, "\n", frameTrace);
             logger.debug(str1, str2);
-            expect(dummyConsole.debug).toHaveBeenCalledWith(str1, str2);
+            expect(mockConsole.debug).toHaveBeenCalledWith(str1, str2);
 
             logger.info(error, str1, str2);
-            expect(dummyConsole.info).toHaveBeenCalledWith(str1, str2, "\n", msg, "\n", frameTrace);
+            expect(mockConsole.info).toHaveBeenCalledWith(str1, str2, "\n", msg, "\n", frameTrace);
 
             logger.warn(error, str1, str2);
-            expect(dummyConsole.warn).toHaveBeenCalledWith(str1, str2, "\n", msg, "\n", frameTrace);
+            expect(mockConsole.warn).toHaveBeenCalledWith(str1, str2, "\n", msg, "\n", frameTrace);
 
             logger.error(error, str1, str2);
-            expect(dummyConsole.error).toHaveBeenCalledWith(str1, str2, "\n", msg, "\n", frameTrace);
+            expect(mockConsole.error).toHaveBeenCalledWith(str1, str2, "\n", msg, "\n", frameTrace);
         });
 
         it("calls log listners registered with addListener method", function() {
