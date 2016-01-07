@@ -536,7 +536,7 @@ adapt.css.getName = function(name) {
 adapt.css.Numeric = function(num, unit) {
     adapt.css.Val.call(this);
     /** @type {number} */ this.num = num;
-    /** @type {string} */ this.unit = unit;
+    /** @type {string} */ this.unit = unit.toLowerCase(); // units are case-insensitive in CSS
 };
 goog.inherits(adapt.css.Numeric, adapt.css.Val);
 
