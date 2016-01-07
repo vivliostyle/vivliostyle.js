@@ -6,6 +6,7 @@
 goog.provide('adapt.csscasc');
 
 goog.require('vivliostyle.logging');
+goog.require('vivliostyle.plugin');
 goog.require('adapt.expr');
 goog.require('adapt.css');
 goog.require('adapt.task');
@@ -2739,6 +2740,16 @@ adapt.csscasc.CascadeParserHandler.prototype.simpleProperty = function(name, val
 		this.simpleProperty("flow-into", value, important);
 		value = adapt.css.ident.block;
 	}
+
+	var hooks = vivliostyle.plugin.getHooksForName("SIMPLE_PROPERTY");
+	hooks.forEach(function(hook) {
+		var original = {"name": name, "value": value, "important": important};
+		var converted = hook(original);
+		name = converted["name"];
+		value = converted["value"];
+		important = converted["important"];
+	});
+
     var specificity = important ? this.getImportantSpecificity() : this.getBaseSpecificity();
     var cascval = this.condition
     		? new adapt.csscasc.ConditionalCascadeValue(value, specificity, this.condition)

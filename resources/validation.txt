@@ -229,10 +229,10 @@ opacity = NUM;
 [moz,webkit]column-rule-color = COLOR;
 [moz,webkit]column-rule-style = BORDER_SIDE_STYLE;
 [moz,webkit]column-rule-width = BORDER_SIDE_WIDTH;
-BREAK = auto | always | avoid | left | right | page | column | region;
+BREAK = auto | avoid | avoid-page | page | left | right | recto | verso | avoid-column | column | avoid-region | region;
 break-before = BREAK;
 break-after = BREAK;
-break-inside = auto | avoid | avoid-page | avoid-column;
+break-inside = auto | avoid | avoid-page | avoid-column | avoid-region;
 [webkit]column-span = none | all;
 [moz]column-fill = auto | balance;
 

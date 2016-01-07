@@ -10,25 +10,10 @@ goog.require('vivliostyle.logging');
 goog.require('adapt.base');
 goog.require('adapt.geom');
 goog.require('adapt.task');
+goog.require('vivliostyle.break');
 goog.require('adapt.vtree');
 
 goog.provide('adapt.layout');
-
-/**
- * @param {?string} break1
- * @param {?string} break2
- * @return {?string}
- */
-adapt.layout.combineBreaks = function(break1, break2) {
-	if (!break1)
-		return break2;
-	if (!break2)
-		return break1;
-	// It is important to prioritize "avoid" to prevent breaking after a page/region break.
-	if (break1 == "avoid" || break2 == "avoid")
-		return "avoid";
-	return break1;
-};
 
 /** @const */
 adapt.layout.mediaTags = {
@@ -203,7 +188,7 @@ adapt.layout.EdgeBreakPosition.prototype.findAcceptableBreak = function(column, 
  * @override
  */
 adapt.layout.EdgeBreakPosition.prototype.getMinBreakPenalty = function() {
-	return (this.breakOnEdge == "avoid" ? 1 : 0)
+	return (vivliostyle.break.isAvoidBreakValue(this.breakOnEdge) ? 1 : 0)
 		+ (this.overflows ? 3 : 0)
 		+ (this.position.parent ? this.position.parent.breakPenalty : 0);
 };
@@ -1703,7 +1688,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
 		= adapt.task.newFrame("skipEdges");
-	var breakAtTheEdge = leadingEdge ? "avoid" : null;
+	var breakAtTheEdge = null;
 	var lastAfterNodeContext = null;
 	var trailingEdgeContexts = [];
 	frame.loopWithFrame(function(loopFrame) {
@@ -1757,7 +1742,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 					// Trailing edge
 					lastAfterNodeContext = nodeContext.copy();
 					trailingEdgeContexts.push(lastAfterNodeContext);
-					breakAtTheEdge = adapt.layout.combineBreaks(nodeContext.breakAfter, breakAtTheEdge);
+					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakAfter);
 					if (style && !(self.zeroIndent(style.paddingBottom) && self.zeroIndent(style.borderBottomWidth))) {
 						// Non-zero trailing inset.
 						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
@@ -1774,8 +1759,10 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 					}			
 				} else {
 					// Leading edge
-					breakAtTheEdge = adapt.layout.combineBreaks(nodeContext.breakBefore, breakAtTheEdge);
-					if (breakAtTheEdge && breakAtTheEdge != "avoid" && breakAtTheEdge != "auto") {
+					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
+					// leadingEdge=true means that we are at the beginning of the new column and hence must avoid a break
+					// (Otherwise leading to an infinite loop)
+					if (!leadingEdge && vivliostyle.break.isForcedBreakValue(breakAtTheEdge)) {
 						// explicit page break
 						loopFrame.breakLoop();
 						self.pageBreakType = breakAtTheEdge;
@@ -1880,11 +1867,11 @@ adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
 				var style = (/** @type {HTMLElement} */ (nodeContext.viewNode)).style;
 				if (nodeContext.after) {
 					// Trailing edge
-					breakAtTheEdge = adapt.layout.combineBreaks(nodeContext.breakAfter, breakAtTheEdge);
+					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakAfter);
 				} else {
 					// Leading edge
-					breakAtTheEdge = adapt.layout.combineBreaks(nodeContext.breakBefore, breakAtTheEdge);
-					if (breakAtTheEdge && breakAtTheEdge != "avoid" && breakAtTheEdge != "auto") {
+					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
+					if (vivliostyle.break.isForcedBreakValue(breakAtTheEdge)) {
 						// explicit page break
 						loopFrame.breakLoop();
 						self.pageBreakType = breakAtTheEdge;

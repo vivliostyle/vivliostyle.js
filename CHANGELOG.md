@@ -59,6 +59,12 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/94>
 - Allow units spelled in upper case
   - <https://github.com/vivliostyle/vivliostyle.js/issues/36>
+- Fix handling of forced and avoid break values; update acceptable values for `break-*` properties
+  - Spec: [CSS Fragmentation Module Level 3](https://drafts.csswg.org/css-break/)
+  - Note that the current implementation treats all values of `break-inside` other than `auto` as the same as `avoid`. The fine-grained control (distinguishing `avoid`, `avoid-page`, `avoid-column` and `avoid-region`) will be a future task and tracked with a separate issue.
+  - Note that though the spec requires to honor multiple `break-before`/`break-after` values at a single break point, the current implementation choose one of them and discard the others. The fine-grained control of these break values will be a future task and tracked with a separate issue.
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/26>
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/103>
 
 ## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
 Beta release.

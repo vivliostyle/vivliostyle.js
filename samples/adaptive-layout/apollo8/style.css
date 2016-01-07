@@ -36,7 +36,7 @@ h2.subtitle {
 	font-style: italic;
 	font-family: serif;
 	color: white;
-	break-after: always;
+	break-after: page;
 }
 
 .cover {
