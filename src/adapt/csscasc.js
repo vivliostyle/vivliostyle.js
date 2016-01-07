@@ -2412,13 +2412,8 @@ adapt.csscasc.CascadeParserHandler.prototype.classSelector = function(name) {
  */
 adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name, params) {
     if (this.pseudoelement) {
-<<<<<<< HEAD
-    	adapt.base.log("::" + this.pseudoelement + " followed by :" + name);
-        this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
-=======
 		vivliostyle.logging.logger.warn("::" + this.pseudoelement, "followed by :" + name);
         this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
->>>>>>> 96dc7ac652f9009e5e2e1f16cf12c46e54dcc0d3
     	return;
     }
     switch (name.toLowerCase()) {
@@ -2535,6 +2530,7 @@ adapt.csscasc.CascadeParserHandler.prototype.idSelector = function(id) {
  */
 adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, name, op, value) {
     this.specificity += 0x100;
+		console.log([this,ns,name,op,value]);
 		name = name.toLowerCase();
     value = value || "";
     switch (op) {

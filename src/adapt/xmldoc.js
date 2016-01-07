@@ -16,16 +16,23 @@ goog.require('adapt.net');
  */
 adapt.xmldoc.ELEMENT_OFFSET_ATTR = "data-adapt-eloff";
 
+
+/**
+ * An array holding all xmldocs.
+ */
+adapt.xmldoc.docs = [];
+
 /**
  * @param {adapt.xmldoc.XMLDocStore} store
  * @param {string} url
  * @param {Document} document
  * @constructor
  */
-adapt.xmldoc.XMLDocHolder = function(store, url, document) {
+adapt.xmldoc.XMLDocHolder = function(store, url, document, contentType) {
 	/** @const */ this.store = store;
 	/** @const */ this.url = url;
 	/** @const */ this.document = document;
+	/** @const */ this.contentType = contentType;
 	/** @type {?string} */ this.lang = null;
 	/** @type {number} */ this.totalOffset = -1;
 	/**
@@ -68,7 +75,7 @@ adapt.xmldoc.XMLDocHolder = function(store, url, document) {
 				.child("title-info").child("lang").textContent();
 		if (langs.length > 0) {
 			this.lang = langs[0];
-		}		
+		}
 	} else if (this.root.namespaceURI == adapt.base.NS.SSE) {
         // treat <meta> element as "head" of the document
         for (var elem = this.root.firstElementChild; elem; elem = elem.nextElementSibling) {
@@ -80,7 +87,7 @@ adapt.xmldoc.XMLDocHolder = function(store, url, document) {
             }
         }
     }
-	/** 
+	/**
 	 * @type {Element}
 	 * @const
 	 */
@@ -391,11 +398,11 @@ adapt.xmldoc.resolveContentType = function(response) {
  */
 adapt.xmldoc.parseXMLResource = function(response, store) {
 	var doc = response.responseXML;
+	var contentType = adapt.xmldoc.resolveContentType(response);
 	if (!doc) {
 		var parser = new DOMParser();
 		var text = response.responseText;
 		if (text) {
-			var contentType = adapt.xmldoc.resolveContentType(response);
 			doc = adapt.xmldoc.parseAndReturnNullIfError(text, contentType || adapt.xmldoc.DOMParserSupportedType.APPLICATION_XML, parser);
 
 			// When contentType cannot be inferred from HTTP header and file extension,
@@ -416,7 +423,7 @@ adapt.xmldoc.parseXMLResource = function(response, store) {
 			}
 		}
 	}
-    var xmldoc = doc ? new adapt.xmldoc.XMLDocHolder(store, response.url, doc) : null;
+    var xmldoc = doc ? new adapt.xmldoc.XMLDocHolder(store, response.url, doc, contentType) : null;
     return adapt.task.newResult(xmldoc);
 };
 
@@ -508,7 +515,7 @@ adapt.xmldoc.NodeList.prototype.size = function() {
  * Filter with predicate
  * @param {adapt.xmldoc.Predicate} pr
  * @return {adapt.xmldoc.NodeList}
- */ 
+ */
 adapt.xmldoc.NodeList.prototype.predicate = function(pr) {
 	var arr = [];
 	for (var i = 0; i < this.nodes.length; i++) {
@@ -523,7 +530,7 @@ adapt.xmldoc.NodeList.prototype.predicate = function(pr) {
 /**
  * @param {function(!Node,function(!Node):void):void} fn
  * @return {adapt.xmldoc.NodeList}
- */ 
+ */
 adapt.xmldoc.NodeList.prototype.forEachNode = function(fn) {
 	var arr = [];
 	var add = /** @param {!Node} n */ function(n) {arr.push(n);};
@@ -537,7 +544,7 @@ adapt.xmldoc.NodeList.prototype.forEachNode = function(fn) {
  * @template T
  * @param {function(!Node):T} fn
  * @return {Array.<T>}
- */ 
+ */
 adapt.xmldoc.NodeList.prototype.forEach = function(fn) {
 	var arr = [];
 	for (var i = 0; i < this.nodes.length; i++) {
@@ -550,7 +557,7 @@ adapt.xmldoc.NodeList.prototype.forEach = function(fn) {
  * @template T
  * @param {function(!Node):T} fn
  * @return {Array.<T>}
- */ 
+ */
 adapt.xmldoc.NodeList.prototype.forEachNonNull = function(fn) {
 	var arr = [];
 	for (var i = 0; i < this.nodes.length; i++) {
