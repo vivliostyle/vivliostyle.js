@@ -20,6 +20,11 @@
         display: block !important;
         page-break-after: always;
     }
+    /* Workaround for Chrome printing problem */
+    [data-vivliostyle-page-box] {
+        padding-bottom: 0 !important;
+        overflow: visible !important;
+    }
 }
 
 @media screen {
