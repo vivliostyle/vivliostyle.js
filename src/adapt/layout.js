@@ -2181,7 +2181,7 @@ adapt.layout.Column.prototype.redoLayout = function() {
 	var last = this.element.lastChild;
 	while (last != this.last) {
 		var prev = last.previousSibling;
-		if (!(this.element.isSameNode(last.parentNode) && this.layoutContext.isPseudoelement(last))) {
+		if (!(this.element === last.parentNode && this.layoutContext.isPseudoelement(last))) {
 			this.element.removeChild(last);
 		}
 		last = prev;
