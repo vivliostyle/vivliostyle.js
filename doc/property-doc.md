@@ -240,468 +240,130 @@
 - [volume](http://www.w3.org/TR/CSS21/aural.html#propdef-volume)
   - Depends on browser's capability: Yes
 
-## [CSS Paged Media 3](http://www.w3.org/TR/css3-page/)
-- [page](http://www.w3.org/TR/css3-page/#page)
-  - TR
-      - [CSS Paged Media 3 - page](http://www.w3.org/TR/css3-page/#page)
-  - Drafts
-      - [CSS Paged Media 3 - page](https://drafts.csswg.org/css-page-3/#propdef-page)
-  - Allowed prefixes: epubx
-  - Values: `INT | auto;`
-- [size](http://www.w3.org/TR/css3-page/#size)
-  - TR
-      - [CSS Paged Media 3 - size](http://www.w3.org/TR/css3-page/#size)
-
-  - Values: `POS_LENGTH{1,2} | auto | [ PAGE_SIZE || [ portrait | landscape ] ];`
+## [CSS Paged Media 3](https://drafts.csswg.org/css-page-3/)
+- [size](https://drafts.csswg.org/css-page-3/#descdef-page-size)
+  - Depends on browser's capability: No
+  - Supports `JIS-B5` and `JIS-B4` values in the current editor's draft.
 
 ## [CSS Color 3](http://www.w3.org/TR/css3-color/)
-- [color](http://www.w3.org/TR/CSS21/colors.html#propdef-color)
-  - TR
-      - [CSS 2.1 - color](http://www.w3.org/TR/CSS21/colors.html#propdef-color)
-      - [CSS Color 3 - color](http://www.w3.org/TR/css3-color/#color0)
-  - Drafts
-      - [CSS 2.1 - color](https://drafts.csswg.org/css2/colors.html#propdef-color)
-      - [CSS Color 3 - color](https://drafts.csswg.org/css-color-3/#color0)
-      - [CSS Color 4 - color](https://drafts.csswg.org/css-color-4/#propdef-color)
-  - Values: `COLOR;`
+- [color](http://www.w3.org/TR/css3-color/#color0)
+  - Depends on browser's capability: Yes
 - [opacity](http://www.w3.org/TR/css3-color/#opacity)
-  - TR
-      - [CSS Color 3 - opacity](http://www.w3.org/TR/css3-color/#opacity)
-  - Drafts
-      - [CSS Color 3 - opacity](https://drafts.csswg.org/css-color-3/#opacity)
-      - [CSS Color 4 - opacity](https://drafts.csswg.org/css-color-4/#propdef-opacity)
-  - Values: `NUM;`
+  - Depends on browser's capability: Yes
 
-## [CSS Color 4](https://drafts.csswg.org/css-color-4/)
-- [color](http://www.w3.org/TR/CSS21/colors.html#propdef-color)
-  - TR
-      - [CSS 2.1 - color](http://www.w3.org/TR/CSS21/colors.html#propdef-color)
-      - [CSS Color 3 - color](http://www.w3.org/TR/css3-color/#color0)
-  - Drafts
-      - [CSS 2.1 - color](https://drafts.csswg.org/css2/colors.html#propdef-color)
-      - [CSS Color 3 - color](https://drafts.csswg.org/css-color-3/#color0)
-      - [CSS Color 4 - color](https://drafts.csswg.org/css-color-4/#propdef-color)
-  - Values: `COLOR;`
-- [opacity](http://www.w3.org/TR/css3-color/#opacity)
-  - TR
-      - [CSS Color 3 - opacity](http://www.w3.org/TR/css3-color/#opacity)
-  - Drafts
-      - [CSS Color 3 - opacity](https://drafts.csswg.org/css-color-3/#opacity)
-      - [CSS Color 4 - opacity](https://drafts.csswg.org/css-color-4/#propdef-opacity)
-  - Values: `NUM;`
-
-## [CSS Backgrounds 3](http://www.w3.org/TR/css3-background/)
-- [background](http://www.w3.org/TR/CSS21/colors.html#propdef-background)
-  - TR
-      - [CSS 2.1 - background](http://www.w3.org/TR/CSS21/colors.html#propdef-background)
-      - [CSS Backgrounds 3 - background](http://www.w3.org/TR/css3-background/#background)
-  - Drafts
-      - [CSS 2.1 - background](https://drafts.csswg.org/css2/colors.html#propdef-background)
-      - [CSS Backgrounds 3 - background](https://drafts.csswg.org/css-backgrounds-3/#background)
-  - Values: `COMMA background-image [background-position [ / background-size ]] background-repeat background-attachment [background-origin background-clip] background-color; /* background-color is a special case, see the code */`
-- [background-attachment](http://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment)
-  - TR
-      - [CSS 2.1 - background-attachment](http://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment)
-      - [CSS Backgrounds 3 - background-attachment](http://www.w3.org/TR/css3-background/#background-attachment)
-  - Drafts
-      - [CSS 2.1 - background-attachment](https://drafts.csswg.org/css2/colors.html#propdef-background-attachment)
-      - [CSS Backgrounds 3 - background-attachment](https://drafts.csswg.org/css-backgrounds-3/#background-attachment)
-  - Values: `COMMA( [scroll | fixed | local]+ );`
+## [CSS Backgrounds and Borders 3](http://www.w3.org/TR/css3-background/)
+- [background](http://www.w3.org/TR/css3-background/#background)
+  - Depends on browser's capability: Yes
+- [background-attachment](http://www.w3.org/TR/css3-background/#background-attachment)
+  - Depends on browser's capability: Yes
+  - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
 - [background-clip](http://www.w3.org/TR/css3-background/#background-clip)
-  - TR
-      - [CSS Backgrounds 3 - background-clip](http://www.w3.org/TR/css3-background/#background-clip)
-  - Drafts
-      - [CSS Backgrounds 3 - background-clip](https://drafts.csswg.org/css-backgrounds-3/#background-clip)
   - Allowed prefixes: webkit
-  - Values: `COMMA( BOX+ );`
-- [background-color](http://www.w3.org/TR/CSS21/colors.html#propdef-background-color)
-  - TR
-      - [CSS 2.1 - background-color](http://www.w3.org/TR/CSS21/colors.html#propdef-background-color)
-      - [CSS Backgrounds 3 - background-color](http://www.w3.org/TR/css3-background/#background-color)
-  - Drafts
-      - [CSS 2.1 - background-color](https://drafts.csswg.org/css2/colors.html#propdef-background-color)
-      - [CSS Backgrounds 3 - background-color](https://drafts.csswg.org/css-backgrounds-3/#background-color)
-  - Values: `COLOR;`
-- [background-image](http://www.w3.org/TR/CSS21/colors.html#propdef-background-image)
-  - TR
-      - [CSS 2.1 - background-image](http://www.w3.org/TR/CSS21/colors.html#propdef-background-image)
-      - [CSS Backgrounds 3 - background-image](http://www.w3.org/TR/css3-background/#background-image)
-  - Drafts
-      - [CSS 2.1 - background-image](https://drafts.csswg.org/css2/colors.html#propdef-background-image)
-      - [CSS Backgrounds 3 - background-image](https://drafts.csswg.org/css-backgrounds-3/#background-image)
-  - Values: `COMMA( URI_OR_NONE+ );`
+  - Depends on browser's capability: Yes
+  - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
+- [background-color](http://www.w3.org/TR/css3-background/#background-color)
+  - Depends on browser's capability: Yes
+- [background-image](http://www.w3.org/TR/css3-background/#background-image)
+  - Depends on browser's capability: Yes
+  - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
 - [background-origin](http://www.w3.org/TR/css3-background/#background-origin)
-  - TR
-      - [CSS Backgrounds 3 - background-origin](http://www.w3.org/TR/css3-background/#background-origin)
-  - Drafts
-      - [CSS Backgrounds 3 - background-origin](https://drafts.csswg.org/css-backgrounds-3/#background-origin)
   - Allowed prefixes: webkit
-  - Values: `COMMA( BOX+ );`
-- [background-position](http://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
-  - TR
-      - [CSS 2.1 - background-position](http://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
-      - [CSS Backgrounds 3 - background-position](http://www.w3.org/TR/css3-background/#background-position)
-  - Drafts
-      - [CSS 2.1 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
-      - [CSS Backgrounds 3 - background-position](https://drafts.csswg.org/css-backgrounds-3/#background-position)
-      - [CSS Backgrounds 4 - background-position](https://drafts.csswg.org/css-backgrounds-4/#propdef-background-position)
-  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */`
-- [background-repeat](http://www.w3.org/TR/CSS21/colors.html#propdef-background-repeat)
-  - TR
-      - [CSS 2.1 - background-repeat](http://www.w3.org/TR/CSS21/colors.html#propdef-background-repeat)
-      - [CSS Backgrounds 3 - background-repeat](http://www.w3.org/TR/css3-background/#background-repeat)
-  - Drafts
-      - [CSS 2.1 - background-repeat](https://drafts.csswg.org/css2/colors.html#propdef-background-repeat)
-      - [CSS Backgrounds 3 - background-repeat](https://drafts.csswg.org/css-backgrounds-3/#background-repeat)
-  - Values: `COMMA( [repeat | repeat-x | repeat-y | no-repeat]+ );`
+  - Depends on browser's capability: Yes
+  - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
+- [background-position](http://www.w3.org/TR/css3-background/#background-position)
+  - Depends on browser's capability: Yes
+  - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
+- [background-repeat](http://www.w3.org/TR/css3-background/#background-repeat)
+  - Depends on browser's capability: Yes
+  - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
 - [background-size](http://www.w3.org/TR/css3-background/#background-size)
-  - TR
-      - [CSS Backgrounds 3 - background-size](http://www.w3.org/TR/css3-background/#background-size)
-  - Drafts
-      - [CSS Backgrounds 3 - background-size](https://drafts.csswg.org/css-backgrounds-3/#background-size)
   - Allowed prefixes: webkit
-  - Values: `COMMA( SPACE( [PLENGTH | auto ]{1,2} | cover | contain)+ );`
-- [border](http://www.w3.org/TR/CSS21/box.html#propdef-border)
-  - TR
-      - [CSS 2.1 - border](http://www.w3.org/TR/CSS21/box.html#propdef-border)
-      - [CSS Backgrounds 3 - border](http://www.w3.org/TR/css3-background/#border)
-  - Drafts
-      - [CSS 2.1 - border](https://drafts.csswg.org/css2/box.html#propdef-border)
-      - [CSS Backgrounds 3 - border](https://drafts.csswg.org/css-backgrounds-3/#border)
-  - Values: `border-width border-style border-color;`
-- [border-bottom](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom)
-  - TR
-      - [CSS 2.1 - border-bottom](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom)
-      - [CSS Backgrounds 3 - border-bottom](http://www.w3.org/TR/css3-background/#border-bottom)
-  - Drafts
-      - [CSS 2.1 - border-bottom](https://drafts.csswg.org/css2/box.html#propdef-border-bottom)
-      - [CSS Backgrounds 3 - border-bottom](https://drafts.csswg.org/css-backgrounds-3/#border-bottom)
-  - Values: `border-bottom-width border-bottom-style border-bottom-color;`
-- [border-bottom-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-color)
-  - TR
-      - [CSS 2.1 - border-bottom-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-color)
-      - [CSS Backgrounds 3 - border-bottom-color](http://www.w3.org/TR/css3-background/#border-bottom-color)
-  - Drafts
-      - [CSS 2.1 - border-bottom-color](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-color)
-      - [CSS Backgrounds 3 - border-bottom-color](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-color)
-  - Values: `BORDER_SIDE_COLOR;`
+  - Depends on browser's capability: Yes
+  - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
+- [border](http://www.w3.org/TR/css3-background/#border)
+  - Depends on browser's capability: Yes
+- [border-bottom](http://www.w3.org/TR/css3-background/#border-bottom)
+  - Depends on browser's capability: Yes
+- [border-bottom-color](http://www.w3.org/TR/css3-background/#border-bottom-color)
+  - Depends on browser's capability: Yes
 - [border-bottom-left-radius](http://www.w3.org/TR/css3-background/#border-bottom-left-radius)
-  - TR
-      - [CSS Backgrounds 3 - border-bottom-left-radius](http://www.w3.org/TR/css3-background/#border-bottom-left-radius)
-  - Drafts
-      - [CSS Backgrounds 3 - border-bottom-left-radius](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-left-radius)
-  - Values: `BORDER_RADIUS;`
+  - Depends on browser's capability: Yes
 - [border-bottom-right-radius](http://www.w3.org/TR/css3-background/#border-bottom-right-radius)
-  - TR
-      - [CSS Backgrounds 3 - border-bottom-right-radius](http://www.w3.org/TR/css3-background/#border-bottom-right-radius)
-  - Drafts
-      - [CSS Backgrounds 3 - border-bottom-right-radius](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-right-radius)
-  - Values: `BORDER_RADIUS;`
-- [border-bottom-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-style)
-  - TR
-      - [CSS 2.1 - border-bottom-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-style)
-      - [CSS Backgrounds 3 - border-bottom-style](http://www.w3.org/TR/css3-background/#border-bottom-style)
-  - Drafts
-      - [CSS 2.1 - border-bottom-style](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-style)
-      - [CSS Backgrounds 3 - border-bottom-style](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-style)
-  - Values: `BORDER_SIDE_STYLE;`
-- [border-bottom-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-width)
-  - TR
-      - [CSS 2.1 - border-bottom-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-width)
-      - [CSS Backgrounds 3 - border-bottom-width](http://www.w3.org/TR/css3-background/#border-bottom-width)
-  - Drafts
-      - [CSS 2.1 - border-bottom-width](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-width)
-      - [CSS Backgrounds 3 - border-bottom-width](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-width)
-  - Values: `BORDER_SIDE_WIDTH;`
-- [border-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-color)
-  - TR
-      - [CSS 2.1 - border-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-color)
-      - [CSS Backgrounds 3 - border-color](http://www.w3.org/TR/css3-background/#border-color)
-  - Drafts
-      - [CSS 2.1 - border-color](https://drafts.csswg.org/css2/box.html#propdef-border-color)
-      - [CSS Backgrounds 3 - border-color](https://drafts.csswg.org/css-backgrounds-3/#border-color)
-  - Values: `INSETS border-top-color border-right-color border-bottom-color border-left-color;`
+  - Depends on browser's capability: Yes
+- [border-bottom-style](http://www.w3.org/TR/css3-background/#border-bottom-style)
+  - Depends on browser's capability: Yes
+- [border-bottom-width](http://www.w3.org/TR/css3-background/#border-bottom-width)
+  - Depends on browser's capability: Yes
+- [border-color](http://www.w3.org/TR/css3-background/#border-color)
+  - Depends on browser's capability: Yes
 - [border-image](http://www.w3.org/TR/css3-background/#border-image)
-  - TR
-      - [CSS Backgrounds 3 - border-image](http://www.w3.org/TR/css3-background/#border-image)
-  - Drafts
-      - [CSS Backgrounds 3 - border-image](https://drafts.csswg.org/css-backgrounds-3/#border-image)
-  - Values: `border-image-source border-image-slice [ / border-image-width [ / border-image-outset ] ] border-image-repeat;`
+  - Depends on browser's capability: Yes
 - [border-image-outset](http://www.w3.org/TR/css3-background/#border-image-outset)
-  - TR
-      - [CSS Backgrounds 3 - border-image-outset](http://www.w3.org/TR/css3-background/#border-image-outset)
-  - Drafts
-      - [CSS Backgrounds 3 - border-image-outset](https://drafts.csswg.org/css-backgrounds-3/#border-image-outset)
-  - Values: `[NUM | LENGTH]{1,4};`
+  - Depends on browser's capability: Yes
 - [border-image-repeat](http://www.w3.org/TR/css3-background/#border-image-repeat)
-  - TR
-      - [CSS Backgrounds 3 - border-image-repeat](http://www.w3.org/TR/css3-background/#border-image-repeat)
-  - Drafts
-      - [CSS Backgrounds 3 - border-image-repeat](https://drafts.csswg.org/css-backgrounds-3/#border-image-repeat)
-  - Values: `[ stretch | repeat | round | space ]{1,2};`
+  - Depends on browser's capability: Yes
 - [border-image-slice](http://www.w3.org/TR/css3-background/#border-image-slice)
-  - TR
-      - [CSS Backgrounds 3 - border-image-slice](http://www.w3.org/TR/css3-background/#border-image-slice)
-  - Drafts
-      - [CSS Backgrounds 3 - border-image-slice](https://drafts.csswg.org/css-backgrounds-3/#border-image-slice)
-  - Values: `[NUM | PERCENTAGE]{1,4} || fill; /* relaxed */`
+  - Depends on browser's capability: Yes
 - [border-image-source](http://www.w3.org/TR/css3-background/#border-image-source)
-  - TR
-      - [CSS Backgrounds 3 - border-image-source](http://www.w3.org/TR/css3-background/#border-image-source)
-  - Drafts
-      - [CSS Backgrounds 3 - border-image-source](https://drafts.csswg.org/css-backgrounds-3/#border-image-source)
-  - Values: `URI_OR_NONE;`
+  - Depends on browser's capability: Yes
 - [border-image-width](http://www.w3.org/TR/css3-background/#border-image-width)
-  - TR
-      - [CSS Backgrounds 3 - border-image-width](http://www.w3.org/TR/css3-background/#border-image-width)
-  - Drafts
-      - [CSS Backgrounds 3 - border-image-width](https://drafts.csswg.org/css-backgrounds-3/#border-image-width)
-  - Values: `[NUM | PLENGTH | auto]{1,4};`
-- [border-left](http://www.w3.org/TR/CSS21/box.html#propdef-border-left)
-  - TR
-      - [CSS 2.1 - border-left](http://www.w3.org/TR/CSS21/box.html#propdef-border-left)
-      - [CSS Backgrounds 3 - border-left](http://www.w3.org/TR/css3-background/#border-left)
-  - Drafts
-      - [CSS 2.1 - border-left](https://drafts.csswg.org/css2/box.html#propdef-border-left)
-      - [CSS Backgrounds 3 - border-left](https://drafts.csswg.org/css-backgrounds-3/#border-left)
-  - Values: `border-left-width border-left-style border-left-color;`
-- [border-left-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-color)
-  - TR
-      - [CSS 2.1 - border-left-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-color)
-      - [CSS Backgrounds 3 - border-left-color](http://www.w3.org/TR/css3-background/#border-left-color)
-  - Drafts
-      - [CSS 2.1 - border-left-color](https://drafts.csswg.org/css2/box.html#propdef-border-left-color)
-      - [CSS Backgrounds 3 - border-left-color](https://drafts.csswg.org/css-backgrounds-3/#border-left-color)
-  - Values: `BORDER_SIDE_COLOR;`
-- [border-left-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-style)
-  - TR
-      - [CSS 2.1 - border-left-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-style)
-      - [CSS Backgrounds 3 - border-left-style](http://www.w3.org/TR/css3-background/#border-left-style)
-  - Drafts
-      - [CSS 2.1 - border-left-style](https://drafts.csswg.org/css2/box.html#propdef-border-left-style)
-      - [CSS Backgrounds 3 - border-left-style](https://drafts.csswg.org/css-backgrounds-3/#border-left-style)
-  - Values: `BORDER_SIDE_STYLE;`
-- [border-left-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-width)
-  - TR
-      - [CSS 2.1 - border-left-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-width)
-      - [CSS Backgrounds 3 - border-left-width](http://www.w3.org/TR/css3-background/#border-left-width)
-  - Drafts
-      - [CSS 2.1 - border-left-width](https://drafts.csswg.org/css2/box.html#propdef-border-left-width)
-      - [CSS Backgrounds 3 - border-left-width](https://drafts.csswg.org/css-backgrounds-3/#border-left-width)
-  - Values: `BORDER_SIDE_WIDTH;`
+  - Depends on browser's capability: Yes
+- [border-left](http://www.w3.org/TR/css3-background/#border-left)
+  - Depends on browser's capability: Yes
+- [border-left-color](http://www.w3.org/TR/css3-background/#border-left-color)
+  - Depends on browser's capability: Yes
+- [border-left-style](http://www.w3.org/TR/css3-background/#border-left-style)
+  - Depends on browser's capability: Yes
+- [border-left-width](http://www.w3.org/TR/css3-background/#border-left-width)
+  - Depends on browser's capability: Yes
 - [border-radius](http://www.w3.org/TR/css3-background/#border-radius)
-  - TR
-      - [CSS Backgrounds 3 - border-radius](http://www.w3.org/TR/css3-background/#border-radius)
-  - Drafts
-      - [CSS Backgrounds 3 - border-radius](https://drafts.csswg.org/css-backgrounds-3/#border-radius)
-      - [CSS Backgrounds 4 - border-radius](https://drafts.csswg.org/css-backgrounds-4/#propdef-border-radius)
-  - Values: `INSETS_SLASH border-top-left-radius border-top-right-radius border-bottom-right-radius border-bottom-left-radius;`
-- [border-right](http://www.w3.org/TR/CSS21/box.html#propdef-border-right)
-  - TR
-      - [CSS 2.1 - border-right](http://www.w3.org/TR/CSS21/box.html#propdef-border-right)
-      - [CSS Backgrounds 3 - border-right](http://www.w3.org/TR/css3-background/#border-right)
-  - Drafts
-      - [CSS 2.1 - border-right](https://drafts.csswg.org/css2/box.html#propdef-border-right)
-      - [CSS Backgrounds 3 - border-right](https://drafts.csswg.org/css-backgrounds-3/#border-right)
-  - Values: `border-right-width border-right-style border-right-color;`
-- [border-right-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-color)
-  - TR
-      - [CSS 2.1 - border-right-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-color)
-      - [CSS Backgrounds 3 - border-right-color](http://www.w3.org/TR/css3-background/#border-right-color)
-  - Drafts
-      - [CSS 2.1 - border-right-color](https://drafts.csswg.org/css2/box.html#propdef-border-right-color)
-      - [CSS Backgrounds 3 - border-right-color](https://drafts.csswg.org/css-backgrounds-3/#border-right-color)
-  - Values: `BORDER_SIDE_COLOR;`
-- [border-right-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-style)
-  - TR
-      - [CSS 2.1 - border-right-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-style)
-      - [CSS Backgrounds 3 - border-right-style](http://www.w3.org/TR/css3-background/#border-right-style)
-  - Drafts
-      - [CSS 2.1 - border-right-style](https://drafts.csswg.org/css2/box.html#propdef-border-right-style)
-      - [CSS Backgrounds 3 - border-right-style](https://drafts.csswg.org/css-backgrounds-3/#border-right-style)
-  - Values: `BORDER_SIDE_STYLE;`
-- [border-right-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-width)
-  - TR
-      - [CSS 2.1 - border-right-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-width)
-      - [CSS Backgrounds 3 - border-right-width](http://www.w3.org/TR/css3-background/#border-right-width)
-  - Drafts
-      - [CSS 2.1 - border-right-width](https://drafts.csswg.org/css2/box.html#propdef-border-right-width)
-      - [CSS Backgrounds 3 - border-right-width](https://drafts.csswg.org/css-backgrounds-3/#border-right-width)
-  - Values: `BORDER_SIDE_WIDTH;`
-- [border-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-style)
-  - TR
-      - [CSS 2.1 - border-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-style)
-      - [CSS Backgrounds 3 - border-style](http://www.w3.org/TR/css3-background/#border-style)
-  - Drafts
-      - [CSS 2.1 - border-style](https://drafts.csswg.org/css2/box.html#propdef-border-style)
-      - [CSS Backgrounds 3 - border-style](https://drafts.csswg.org/css-backgrounds-3/#border-style)
-  - Values: `INSETS border-top-style border-right-style border-bottom-style border-left-style;`
-- [border-top](http://www.w3.org/TR/CSS21/box.html#propdef-border-top)
-  - TR
-      - [CSS 2.1 - border-top](http://www.w3.org/TR/CSS21/box.html#propdef-border-top)
-      - [CSS Backgrounds 3 - border-top](http://www.w3.org/TR/css3-background/#border-top)
-  - Drafts
-      - [CSS 2.1 - border-top](https://drafts.csswg.org/css2/box.html#propdef-border-top)
-      - [CSS Backgrounds 3 - border-top](https://drafts.csswg.org/css-backgrounds-3/#border-top)
-  - Values: `border-top-width border-top-style border-top-color;`
-- [border-top-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-color)
-  - TR
-      - [CSS 2.1 - border-top-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-color)
-      - [CSS Backgrounds 3 - border-top-color](http://www.w3.org/TR/css3-background/#border-top-color)
-  - Drafts
-      - [CSS 2.1 - border-top-color](https://drafts.csswg.org/css2/box.html#propdef-border-top-color)
-      - [CSS Backgrounds 3 - border-top-color](https://drafts.csswg.org/css-backgrounds-3/#border-top-color)
-  - Values: `BORDER_SIDE_COLOR;`
+  - Depends on browser's capability: Yes
+- [border-right](http://www.w3.org/TR/css3-background/#border-right)
+  - Depends on browser's capability: Yes
+- [border-right-color](http://www.w3.org/TR/css3-background/#border-right-color)
+  - Depends on browser's capability: Yes
+- [border-right-style](http://www.w3.org/TR/css3-background/#border-right-style)
+  - Depends on browser's capability: Yes
+- [border-right-width](http://www.w3.org/TR/css3-background/#border-right-width)
+  - Depends on browser's capability: Yes
+- [border-style](http://www.w3.org/TR/css3-background/#border-style)
+  - Depends on browser's capability: Yes
+- [border-top](http://www.w3.org/TR/css3-background/#border-top)
+  - Depends on browser's capability: Yes
+- [border-top-color](http://www.w3.org/TR/css3-background/#border-top-color)
+  - Depends on browser's capability: Yes
 - [border-top-left-radius](http://www.w3.org/TR/css3-background/#border-top-left-radius)
-  - TR
-      - [CSS Backgrounds 3 - border-top-left-radius](http://www.w3.org/TR/css3-background/#border-top-left-radius)
-  - Drafts
-      - [CSS Backgrounds 3 - border-top-left-radius](https://drafts.csswg.org/css-backgrounds-3/#border-top-left-radius)
-  - Values: `BORDER_RADIUS;`
+  - Depends on browser's capability: Yes
 - [border-top-right-radius](http://www.w3.org/TR/css3-background/#border-top-right-radius)
-  - TR
-      - [CSS Backgrounds 3 - border-top-right-radius](http://www.w3.org/TR/css3-background/#border-top-right-radius)
-  - Drafts
-      - [CSS Backgrounds 3 - border-top-right-radius](https://drafts.csswg.org/css-backgrounds-3/#border-top-right-radius)
-  - Values: `BORDER_RADIUS;`
-- [border-top-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-style)
-  - TR
-      - [CSS 2.1 - border-top-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-style)
-      - [CSS Backgrounds 3 - border-top-style](http://www.w3.org/TR/css3-background/#border-top-style)
-  - Drafts
-      - [CSS 2.1 - border-top-style](https://drafts.csswg.org/css2/box.html#propdef-border-top-style)
-      - [CSS Backgrounds 3 - border-top-style](https://drafts.csswg.org/css-backgrounds-3/#border-top-style)
-  - Values: `BORDER_SIDE_STYLE;`
-- [border-top-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-width)
-  - TR
-      - [CSS 2.1 - border-top-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-width)
-      - [CSS Backgrounds 3 - border-top-width](http://www.w3.org/TR/css3-background/#border-top-width)
-  - Drafts
-      - [CSS 2.1 - border-top-width](https://drafts.csswg.org/css2/box.html#propdef-border-top-width)
-      - [CSS Backgrounds 3 - border-top-width](https://drafts.csswg.org/css-backgrounds-3/#border-top-width)
-  - Values: `BORDER_SIDE_WIDTH;`
-- [border-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-width)
-  - TR
-      - [CSS 2.1 - border-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-width)
-      - [CSS Backgrounds 3 - border-width](http://www.w3.org/TR/css3-background/#border-width)
-  - Drafts
-      - [CSS 2.1 - border-width](https://drafts.csswg.org/css2/box.html#propdef-border-width)
-      - [CSS Backgrounds 3 - border-width](https://drafts.csswg.org/css-backgrounds-3/#border-width)
-  - Values: `INSETS border-top-width border-right-width border-bottom-width border-left-width;`
+  - Depends on browser's capability: Yes
+- [border-top-style](http://www.w3.org/TR/css3-background/#border-top-style)
+  - Depends on browser's capability: Yes
+- [border-top-width](http://www.w3.org/TR/css3-background/#border-top-width)
+  - Depends on browser's capability: Yes
+- [border-width](http://www.w3.org/TR/css3-background/#border-width)
+  - Depends on browser's capability: Yes
 - [box-shadow](http://www.w3.org/TR/css3-background/#box-shadow)
-  - TR
-      - [CSS Backgrounds 3 - box-shadow](http://www.w3.org/TR/css3-background/#box-shadow)
-  - Drafts
-      - [CSS Backgrounds 3 - box-shadow](https://drafts.csswg.org/css-backgrounds-3/#box-shadow)
   - Allowed prefixes: webkit
-  - Values: `none | COMMA( SHADOW+ );`
-
-## [CSS Backgrounds 4](https://drafts.csswg.org/css-backgrounds-4/)
-- [background-position](http://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
-  - TR
-      - [CSS 2.1 - background-position](http://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
-      - [CSS Backgrounds 3 - background-position](http://www.w3.org/TR/css3-background/#background-position)
-  - Drafts
-      - [CSS 2.1 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
-      - [CSS Backgrounds 3 - background-position](https://drafts.csswg.org/css-backgrounds-3/#background-position)
-      - [CSS Backgrounds 4 - background-position](https://drafts.csswg.org/css-backgrounds-4/#propdef-background-position)
-  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */`
-- [border-radius](http://www.w3.org/TR/css3-background/#border-radius)
-  - TR
-      - [CSS Backgrounds 3 - border-radius](http://www.w3.org/TR/css3-background/#border-radius)
-  - Drafts
-      - [CSS Backgrounds 3 - border-radius](https://drafts.csswg.org/css-backgrounds-3/#border-radius)
-      - [CSS Backgrounds 4 - border-radius](https://drafts.csswg.org/css-backgrounds-4/#propdef-border-radius)
-  - Values: `INSETS_SLASH border-top-left-radius border-top-right-radius border-bottom-right-radius border-bottom-left-radius;`
+  - Depends on browser's capability: Yes
 
 ## [CSS Images 3](http://www.w3.org/TR/css3-images/)
 - [object-fit](http://www.w3.org/TR/css3-images/#object-fit)
-  - TR
-      - [CSS Images 3 - object-fit](http://www.w3.org/TR/css3-images/#object-fit)
-      - [CSS Images 4 - object-fit](http://www.w3.org/TR/css4-images/#object-fit)
-  - Drafts
-      - [CSS Images 3 - object-fit](https://drafts.csswg.org/css-images-3/#propdef-object-fit)
-  - Values: `fill | contain | cover | none | scale-down;`
+  - Depends on browser's capability: Yes
 - [object-position](http://www.w3.org/TR/css3-images/#object-position)
-  - TR
-      - [CSS Images 3 - object-position](http://www.w3.org/TR/css3-images/#object-position)
-      - [CSS Images 4 - object-position](http://www.w3.org/TR/css4-images/#object-position)
-  - Drafts
-      - [CSS Images 3 - object-position](https://drafts.csswg.org/css-images-3/#propdef-object-position)
-  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */`
-
-## [CSS Images 4](http://www.w3.org/TR/css4-images/)
-- [object-fit](http://www.w3.org/TR/css3-images/#object-fit)
-  - TR
-      - [CSS Images 3 - object-fit](http://www.w3.org/TR/css3-images/#object-fit)
-      - [CSS Images 4 - object-fit](http://www.w3.org/TR/css4-images/#object-fit)
-  - Drafts
-      - [CSS Images 3 - object-fit](https://drafts.csswg.org/css-images-3/#propdef-object-fit)
-  - Values: `fill | contain | cover | none | scale-down;`
-- [object-position](http://www.w3.org/TR/css3-images/#object-position)
-  - TR
-      - [CSS Images 3 - object-position](http://www.w3.org/TR/css3-images/#object-position)
-      - [CSS Images 4 - object-position](http://www.w3.org/TR/css4-images/#object-position)
-  - Drafts
-      - [CSS Images 3 - object-position](https://drafts.csswg.org/css-images-3/#propdef-object-position)
-  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */`
+  - Depends on browser's capability: Yes
 
 ## [CSS Fonts 3](http://www.w3.org/TR/css-fonts-3/)
-- [font](http://www.w3.org/TR/CSS21/fonts.html#propdef-font)
-  - TR
-      - [CSS 2.1 - font](http://www.w3.org/TR/CSS21/fonts.html#propdef-font)
-      - [CSS Fonts 3 - font](http://www.w3.org/TR/css-fonts-3/#propdef-font)
-  - Drafts
-      - [CSS 2.1 - font](https://drafts.csswg.org/css2/fonts.html#propdef-font)
-      - [CSS Fonts 3 - font](https://drafts.csswg.org/css-fonts-3/#propdef-font)
-  - Values: `FONT font-style font-variant font-weight /* font-size line-height font-family are special-cased */;`
-- [font-family](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-family)
-  - TR
-      - [CSS 2.1 - font-family](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-family)
-      - [CSS Fonts 3 - font-family](http://www.w3.org/TR/css-fonts-3/#propdef-font-family)
-  - Drafts
-      - [CSS 2.1 - font-family](https://drafts.csswg.org/css2/fonts.html#propdef-font-family)
-      - [CSS Fonts 3 - font-family](https://drafts.csswg.org/css-fonts-3/#propdef-font-family)
-  - Values: `FAMILY_LIST;`
+- [font-family](http://www.w3.org/TR/css-fonts-3/#propdef-font-family)
+  - Depends on browser's capability: Yes
 - [font-kerning](http://www.w3.org/TR/css-fonts-3/#propdef-font-kerning)
-  - TR
-      - [CSS Fonts 3 - font-kerning](http://www.w3.org/TR/css-fonts-3/#propdef-font-kerning)
-  - Drafts
-      - [CSS Fonts 3 - font-kerning](https://drafts.csswg.org/css-fonts-3/#propdef-font-kerning)
   - Allowed prefixes: webkit
-  - Values: `auto | normal | none;`
-- [font-size](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-size)
-  - TR
-      - [CSS 2.1 - font-size](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-size)
-      - [CSS Fonts 3 - font-size](http://www.w3.org/TR/css-fonts-3/#propdef-font-size)
-  - Drafts
-      - [CSS 2.1 - font-size](https://drafts.csswg.org/css2/fonts.html#propdef-font-size)
-      - [CSS Fonts 3 - font-size](https://drafts.csswg.org/css-fonts-3/#propdef-font-size)
-  - Values: `xx-small | x-small | small | medium | large | x-large | xx-large | larger | smaller | PPLENGTH;`
-- [font-style](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-style)
-  - TR
-      - [CSS 2.1 - font-style](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-style)
-      - [CSS Fonts 3 - font-style](http://www.w3.org/TR/css-fonts-3/#propdef-font-style)
-  - Drafts
-      - [CSS 2.1 - font-style](https://drafts.csswg.org/css2/fonts.html#propdef-font-style)
-      - [CSS Fonts 3 - font-style](https://drafts.csswg.org/css-fonts-3/#propdef-font-style)
-  - Values: `normal | italic | oblique;`
-- [font-variant](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-variant)
-  - TR
-      - [CSS 2.1 - font-variant](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-variant)
-      - [CSS Fonts 3 - font-variant](http://www.w3.org/TR/css-fonts-3/#propdef-font-variant)
-  - Drafts
-      - [CSS 2.1 - font-variant](https://drafts.csswg.org/css2/fonts.html#propdef-font-variant)
-      - [CSS Fonts 3 - font-variant](https://drafts.csswg.org/css-fonts-3/#propdef-font-variant)
-  - Values: `normal | small-caps;`
-- [font-weight](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-weight)
-  - TR
-      - [CSS 2.1 - font-weight](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-weight)
-      - [CSS Fonts 3 - font-weight](http://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
-  - Drafts
-      - [CSS 2.1 - font-weight](https://drafts.csswg.org/css2/fonts.html#propdef-font-weight)
-      - [CSS Fonts 3 - font-weight](https://drafts.csswg.org/css-fonts-3/#propdef-font-weight)
-  - Values: `normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;`
+  - Depends on browser's capability: Yes
+- [font-size](http://www.w3.org/TR/css-fonts-3/#propdef-font-size)
+  - Depends on browser's capability: Yes
+- [font-style](http://www.w3.org/TR/css-fonts-3/#propdef-font-style)
+  - Depends on browser's capability: Yes
+- [font-weight](http://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
+  - Depends on browser's capability: Yes
 
 ## [CSS Text 3](http://www.w3.org/TR/css-text-3/)
 - [hyphens](http://www.w3.org/TR/css-text-3/#hyphens)
