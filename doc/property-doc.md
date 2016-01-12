@@ -71,6 +71,8 @@
   - Depends on browser's capability: Yes
 - [clear](http://www.w3.org/TR/CSS21/visuren.html#propdef-clear)
   - Depends on browser's capability: No
+- [clip](http://www.w3.org/TR/CSS21/visufx.html#propdef-clip)
+  - Depends on browser's capability: Yes
 - [color](http://www.w3.org/TR/CSS21/colors.html#propdef-color)
   - Depends on browser's capability: Yes
 - [content](http://www.w3.org/TR/CSS21/generate.html#propdef-content)
@@ -199,11 +201,6 @@
   - Depends on browser's capability: Yes
 - [z-index](http://www.w3.org/TR/CSS21/visuren.html#propdef-z-index)
   - Depends on browser's capability: Yes
-
-### Deprecated Properties
-- [clip](http://www.w3.org/TR/CSS21/visufx.html#propdef-clip)
-  - Depends on browser's capability: Yes
-  - This property is deprecated. See [CSS Masking 1](http://www.w3.org/TR/css-masking-1/#clip-property).
 
 ## [CSS Paged Media 3](https://drafts.csswg.org/css-page-3/)
 - [size](https://drafts.csswg.org/css-page-3/#descdef-page-size)
