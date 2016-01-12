@@ -626,74 +626,49 @@
 
 ## [EPUB Adaptive Layout](http://www.idpf.org/epub/pgt/)
 
-- [shape-outside](http://www.w3.org/TR/css-shapes-1/#propdef-shape-outside)
-  - Allowed prefixes: epubx, webkit
+Note: This spec is not on a W3C standards track. Future version of Vivliostyle may drop support for these properties.
+
+- [-epubx-conflicting-partitions](http://www.idpf.org/epub/pgt/#prop-conflicting-partitions)
   - Depends on browser's capability: No
-  - Note: only [old syntaxes from 3 May 2012 Working Draft](http://www.w3.org/TR/2012/WD-css3-exclusions-20120503/#supported-svg-shapes) are supported.
-- [shape-inside](https://drafts.csswg.org/css-shapes-2/#propdef-shape-inside)
-  - Allowed prefixes: epubx
+- [-epubx-enabled](http://www.idpf.org/epub/pgt/#prop-enabled)
   - Depends on browser's capability: No
+- [-epubx-flow-consume](http://www.idpf.org/epub/pgt/#prop-flow-consume)
+  - Depends on browser's capability: No
+- [-epubx-flow-from](http://www.idpf.org/epub/pgt/#prop-flow-from)
+  - Depends on browser's capability: No
+  - Only effective when specified to EPUB Adaptive Layout partitions.
+- [-epubx-flow-into](http://www.idpf.org/epub/pgt/#prop-flow-into)
+  - Depends on browser's capability: No
+- [-epubx-flow-linger](http://www.idpf.org/epub/pgt/#prop-flow-linger)
+  - Depends on browser's capability: No
+- [-epubx-flow-options](http://www.idpf.org/epub/pgt/#prop-flow-options)
+  - Depends on browser's capability: No
+- [-epubx-flow-priority](http://www.idpf.org/epub/pgt/#prop-flow-priority)
+  - Depends on browser's capability: No
+- [-epubx-min-page-height](http://www.idpf.org/epub/pgt/#prop-min-page-height)
+  - Depends on browser's capability: No
+- [-epubx-min-page-width](http://www.idpf.org/epub/pgt/#prop-min-page-width)
+  - Depends on browser's capability: No
+- [-epubx-required](http://www.idpf.org/epub/pgt/#prop-required)
+  - Depends on browser's capability: No
+- [-epubx-required-partitions](http://www.idpf.org/epub/pgt/#prop-required-partitions)
+  - Depends on browser's capability: No
+- [-epubx-shape-outside](http://www.idpf.org/epub/pgt/#prop-shape-outside)
+  - Depends on browser's capability: No
+  - Only effective when specified to EPUB Adaptive Layout partitions.
   - Note: only [old syntaxes from 3 May 2012 Working Draft](http://www.w3.org/TR/2012/WD-css3-exclusions-20120503/#supported-svg-shapes) are supported.
-- [flow-from](http://www.w3.org/TR/css3-regions/#propdef-flow-from)
-  - TR
-      - [CSS Regions 1 - flow-from](http://www.w3.org/TR/css3-regions/#propdef-flow-from)
-  - Drafts
-      - [CSS Regions 1 - flow-from](https://drafts.csswg.org/css-regions-1/#propdef-flow-from)
-  - Allowed prefixes: epubx, webkit
-  - Values: `IDENT;`
-- [flow-into](http://www.w3.org/TR/css3-regions/#propdef-flow-into)
-  - TR
-      - [CSS Regions 1 - flow-into](http://www.w3.org/TR/css3-regions/#propdef-flow-into)
-  - Drafts
-      - [CSS Regions 1 - flow-into](https://drafts.csswg.org/css-regions-1/#propdef-flow-into)
-  - Allowed prefixes: epubx, webkit
-  - Values: `IDENT;`
-- [wrap-flow](http://www.w3.org/TR/css3-exclusions/#propdef-wrap-flow)
-  - TR
-      - [CSS Exclusions 1 - wrap-flow](http://www.w3.org/TR/css3-exclusions/#propdef-wrap-flow)
-  - Drafts
-      - [CSS Exclusions 1 - wrap-flow](https://drafts.csswg.org/css-exclusions-1/#propdef-wrap-flow)
-  - Allowed prefixes: epubx, ms
-  - Values: `auto | both | start | end | maximum | clear | around /* epub al */;`
-- [conflicting-partitions]()
-  - Allowed prefixes: epubx
-  - Values: `COMMA(IDENT+);`
-- [enabled]()
-  - Allowed prefixes: epubx
-  - Values: `true | false;`
-- [flow-consume]()
-  - Allowed prefixes: epubx
-  - Values: `all | some;`
-- [flow-linger]()
-  - Allowed prefixes: epubx
-  - Values: `INT | none;`
-- [flow-options]()
-  - Allowed prefixes: epubx
-  - Values: `none | [ exclusive || last || static ];`
-- [flow-priority]()
-  - Allowed prefixes: epubx
-  - Values: `INT;`
-- [min-page-height]()
-  - Allowed prefixes: epubx
-  - Values: `LENGTH;`
-- [min-page-width]()
-  - Allowed prefixes: epubx
-  - Values: `LENGTH;`
-- [required]()
-  - Allowed prefixes: epubx
-  - Values: `true | false;`
-- [required-partitions]()
-  - Allowed prefixes: epubx
-  - Values: `COMMA(IDENT+);`
-- [snap-height]()
-  - Allowed prefixes: epubx
-  - Values: `LENGTH | none;`
-- [snap-width]()
-  - Allowed prefixes: epubx
-  - Values: `LENGTH | none;`
-- [text-zoom]()
-  - Allowed prefixes: epubx
-  - Values: `font-size | scale;`
-- [utilization]()
-  - Allowed prefixes: epubx
-  - Values: `NUM;`
+- [-epubx-shape-inside](http://www.idpf.org/epub/pgt/#prop-shape-inside)
+  - Depends on browser's capability: No
+  - Only effective when specified to EPUB Adaptive Layout partitions.
+  - Note: only [old syntaxes from 3 May 2012 Working Draft](http://www.w3.org/TR/2012/WD-css3-exclusions-20120503/#supported-svg-shapes) are supported.
+- [-epubx-snap-height](http://www.idpf.org/epub/pgt/#prop-snap-height)
+  - Depends on browser's capability: No
+- [-epubx-snap-width](http://www.idpf.org/epub/pgt/#prop-snap-width)
+  - Depends on browser's capability: No
+- [-epubx-text-zoom](http://www.idpf.org/epub/pgt/#prop-text-zoom)
+  - Depends on browser's capability: No
+- [-epubx-utilization](http://www.idpf.org/epub/pgt/#prop-utilization)
+  - Depends on browser's capability: No
+- [-epubx-wrap-flow](http://www.idpf.org/epub/pgt/#prop-wrap-flow)
+  - Depends on browser's capability: No
+  - Only effective when specified to EPUB Adaptive Layout partitions.
