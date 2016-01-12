@@ -78,7 +78,7 @@ for (var key in rawData) {
                 }
                 anchors.push(anchor);
                 anchors.sort(function(a1, a2) {
-                    return a1.spec.name.localeCompare(a2.spec.name);
+                    return orderedSpecs.indexOf(a1.spec.name) - orderedSpecs.indexOf(a2.spec.name);
                 });
             }
             if (anchor["children"]) {

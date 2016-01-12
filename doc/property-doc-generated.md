@@ -5,270 +5,270 @@
   - Drafts
       - [CSS 2.1 - azimuth](https://drafts.csswg.org/css2/aural.html#propdef-azimuth)
   - Values: ANGLE | [[ left-side | far-left | left | center-left | center | center-right | right | far-right | right-side ] || behind ] | leftwards | rightwards;
-- [background](http://www.w3.org/TR/css3-background/#background)
+- [background](http://www.w3.org/TR/CSS21/colors.html#propdef-background)
   - TR
-      - [CSS Backgrounds 3 - background](http://www.w3.org/TR/css3-background/#background)
       - [CSS 2.1 - background](http://www.w3.org/TR/CSS21/colors.html#propdef-background)
+      - [CSS Backgrounds 3 - background](http://www.w3.org/TR/css3-background/#background)
   - Drafts
-      - [CSS Backgrounds 3 - background](https://drafts.csswg.org/css-backgrounds-3/#background)
       - [CSS 2.1 - background](https://drafts.csswg.org/css2/colors.html#propdef-background)
+      - [CSS Backgrounds 3 - background](https://drafts.csswg.org/css-backgrounds-3/#background)
   - Values: COMMA background-image [background-position [ / background-size ]] background-repeat
-- [background-attachment](http://www.w3.org/TR/css3-background/#background-attachment)
+- [background-attachment](http://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment)
   - TR
-      - [CSS Backgrounds 3 - background-attachment](http://www.w3.org/TR/css3-background/#background-attachment)
       - [CSS 2.1 - background-attachment](http://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment)
+      - [CSS Backgrounds 3 - background-attachment](http://www.w3.org/TR/css3-background/#background-attachment)
   - Drafts
-      - [CSS Backgrounds 3 - background-attachment](https://drafts.csswg.org/css-backgrounds-3/#background-attachment)
       - [CSS 2.1 - background-attachment](https://drafts.csswg.org/css2/colors.html#propdef-background-attachment)
+      - [CSS Backgrounds 3 - background-attachment](https://drafts.csswg.org/css-backgrounds-3/#background-attachment)
   - Values: COMMA( [scroll | fixed | local]+ );
-- [background-color](http://www.w3.org/TR/css3-background/#background-color)
+- [background-color](http://www.w3.org/TR/CSS21/colors.html#propdef-background-color)
   - TR
-      - [CSS Backgrounds 3 - background-color](http://www.w3.org/TR/css3-background/#background-color)
       - [CSS 2.1 - background-color](http://www.w3.org/TR/CSS21/colors.html#propdef-background-color)
+      - [CSS Backgrounds 3 - background-color](http://www.w3.org/TR/css3-background/#background-color)
   - Drafts
-      - [CSS Backgrounds 3 - background-color](https://drafts.csswg.org/css-backgrounds-3/#background-color)
       - [CSS 2.1 - background-color](https://drafts.csswg.org/css2/colors.html#propdef-background-color)
+      - [CSS Backgrounds 3 - background-color](https://drafts.csswg.org/css-backgrounds-3/#background-color)
   - Values: COLOR;
-- [background-image](http://www.w3.org/TR/css3-background/#background-image)
+- [background-image](http://www.w3.org/TR/CSS21/colors.html#propdef-background-image)
   - TR
-      - [CSS Backgrounds 3 - background-image](http://www.w3.org/TR/css3-background/#background-image)
       - [CSS 2.1 - background-image](http://www.w3.org/TR/CSS21/colors.html#propdef-background-image)
+      - [CSS Backgrounds 3 - background-image](http://www.w3.org/TR/css3-background/#background-image)
   - Drafts
-      - [CSS Backgrounds 3 - background-image](https://drafts.csswg.org/css-backgrounds-3/#background-image)
       - [CSS 2.1 - background-image](https://drafts.csswg.org/css2/colors.html#propdef-background-image)
+      - [CSS Backgrounds 3 - background-image](https://drafts.csswg.org/css-backgrounds-3/#background-image)
   - Values: COMMA( URI_OR_NONE+ );
-- [background-position](http://www.w3.org/TR/css3-background/#background-position)
+- [background-position](http://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
   - TR
-      - [CSS Backgrounds 3 - background-position](http://www.w3.org/TR/css3-background/#background-position)
       - [CSS 2.1 - background-position](http://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
+      - [CSS Backgrounds 3 - background-position](http://www.w3.org/TR/css3-background/#background-position)
   - Drafts
+      - [CSS 2.1 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
       - [CSS Backgrounds 3 - background-position](https://drafts.csswg.org/css-backgrounds-3/#background-position)
       - [CSS Backgrounds 4 - background-position](https://drafts.csswg.org/css-backgrounds-4/#propdef-background-position)
-      - [CSS 2.1 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
   - Values: COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */
-- [background-repeat](http://www.w3.org/TR/css3-background/#background-repeat)
+- [background-repeat](http://www.w3.org/TR/CSS21/colors.html#propdef-background-repeat)
   - TR
-      - [CSS Backgrounds 3 - background-repeat](http://www.w3.org/TR/css3-background/#background-repeat)
       - [CSS 2.1 - background-repeat](http://www.w3.org/TR/CSS21/colors.html#propdef-background-repeat)
+      - [CSS Backgrounds 3 - background-repeat](http://www.w3.org/TR/css3-background/#background-repeat)
   - Drafts
-      - [CSS Backgrounds 3 - background-repeat](https://drafts.csswg.org/css-backgrounds-3/#background-repeat)
       - [CSS 2.1 - background-repeat](https://drafts.csswg.org/css2/colors.html#propdef-background-repeat)
+      - [CSS Backgrounds 3 - background-repeat](https://drafts.csswg.org/css-backgrounds-3/#background-repeat)
   - Values: COMMA( [repeat | repeat-x | repeat-y | no-repeat]+ );
-- [border](http://www.w3.org/TR/css3-background/#border)
+- [border](http://www.w3.org/TR/CSS21/box.html#propdef-border)
   - TR
-      - [CSS Backgrounds 3 - border](http://www.w3.org/TR/css3-background/#border)
       - [CSS 2.1 - border](http://www.w3.org/TR/CSS21/box.html#propdef-border)
+      - [CSS Backgrounds 3 - border](http://www.w3.org/TR/css3-background/#border)
   - Drafts
-      - [CSS Backgrounds 3 - border](https://drafts.csswg.org/css-backgrounds-3/#border)
       - [CSS 2.1 - border](https://drafts.csswg.org/css2/box.html#propdef-border)
+      - [CSS Backgrounds 3 - border](https://drafts.csswg.org/css-backgrounds-3/#border)
   - Values: border-width border-style border-color;
-- [border-bottom](http://www.w3.org/TR/css3-background/#border-bottom)
+- [border-bottom](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom)
   - TR
-      - [CSS Backgrounds 3 - border-bottom](http://www.w3.org/TR/css3-background/#border-bottom)
       - [CSS 2.1 - border-bottom](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom)
+      - [CSS Backgrounds 3 - border-bottom](http://www.w3.org/TR/css3-background/#border-bottom)
   - Drafts
-      - [CSS Backgrounds 3 - border-bottom](https://drafts.csswg.org/css-backgrounds-3/#border-bottom)
       - [CSS 2.1 - border-bottom](https://drafts.csswg.org/css2/box.html#propdef-border-bottom)
+      - [CSS Backgrounds 3 - border-bottom](https://drafts.csswg.org/css-backgrounds-3/#border-bottom)
   - Values: border-bottom-width border-bottom-style border-bottom-color;
-- [border-bottom-color](http://www.w3.org/TR/css3-background/#border-bottom-color)
+- [border-bottom-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-color)
   - TR
-      - [CSS Backgrounds 3 - border-bottom-color](http://www.w3.org/TR/css3-background/#border-bottom-color)
       - [CSS 2.1 - border-bottom-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-color)
+      - [CSS Backgrounds 3 - border-bottom-color](http://www.w3.org/TR/css3-background/#border-bottom-color)
   - Drafts
-      - [CSS Backgrounds 3 - border-bottom-color](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-color)
       - [CSS 2.1 - border-bottom-color](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-color)
+      - [CSS Backgrounds 3 - border-bottom-color](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-color)
   - Values: BORDER_SIDE_COLOR;
-- [border-bottom-style](http://www.w3.org/TR/css3-background/#border-bottom-style)
+- [border-bottom-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-style)
   - TR
-      - [CSS Backgrounds 3 - border-bottom-style](http://www.w3.org/TR/css3-background/#border-bottom-style)
       - [CSS 2.1 - border-bottom-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-style)
+      - [CSS Backgrounds 3 - border-bottom-style](http://www.w3.org/TR/css3-background/#border-bottom-style)
   - Drafts
-      - [CSS Backgrounds 3 - border-bottom-style](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-style)
       - [CSS 2.1 - border-bottom-style](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-style)
+      - [CSS Backgrounds 3 - border-bottom-style](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-style)
   - Values: BORDER_SIDE_STYLE;
-- [border-bottom-width](http://www.w3.org/TR/css3-background/#border-bottom-width)
+- [border-bottom-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-width)
   - TR
-      - [CSS Backgrounds 3 - border-bottom-width](http://www.w3.org/TR/css3-background/#border-bottom-width)
       - [CSS 2.1 - border-bottom-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-width)
+      - [CSS Backgrounds 3 - border-bottom-width](http://www.w3.org/TR/css3-background/#border-bottom-width)
   - Drafts
-      - [CSS Backgrounds 3 - border-bottom-width](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-width)
       - [CSS 2.1 - border-bottom-width](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-width)
+      - [CSS Backgrounds 3 - border-bottom-width](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-width)
   - Values: BORDER_SIDE_WIDTH;
 - [border-collapse](http://www.w3.org/TR/CSS21/tables.html#propdef-border-collapse)
   - TR
       - [CSS 2.1 - border-collapse](http://www.w3.org/TR/CSS21/tables.html#propdef-border-collapse)
   - Drafts
-      - [CSS 2.1 - border-collapse](https://drafts.csswg.org/css2/tables.html#propdef-border-collapse)
       - [CSS Tables 3 - border-collapse](https://drafts.csswg.org/css3-tables/#border-collapse)
       - [CSS Tables 3 - border-collapse](https://drafts.csswg.org/css3-tables/??#border-collapse)
+      - [CSS 2.1 - border-collapse](https://drafts.csswg.org/css2/tables.html#propdef-border-collapse)
   - Values: collapse | separate;
-- [border-color](http://www.w3.org/TR/css3-background/#border-color)
+- [border-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-color)
   - TR
-      - [CSS Backgrounds 3 - border-color](http://www.w3.org/TR/css3-background/#border-color)
       - [CSS 2.1 - border-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-color)
+      - [CSS Backgrounds 3 - border-color](http://www.w3.org/TR/css3-background/#border-color)
   - Drafts
-      - [CSS Backgrounds 3 - border-color](https://drafts.csswg.org/css-backgrounds-3/#border-color)
       - [CSS 2.1 - border-color](https://drafts.csswg.org/css2/box.html#propdef-border-color)
+      - [CSS Backgrounds 3 - border-color](https://drafts.csswg.org/css-backgrounds-3/#border-color)
   - Values: INSETS border-top-color border-right-color border-bottom-color border-left-color;
-- [border-left](http://www.w3.org/TR/css3-background/#border-left)
+- [border-left](http://www.w3.org/TR/CSS21/box.html#propdef-border-left)
   - TR
-      - [CSS Backgrounds 3 - border-left](http://www.w3.org/TR/css3-background/#border-left)
       - [CSS 2.1 - border-left](http://www.w3.org/TR/CSS21/box.html#propdef-border-left)
+      - [CSS Backgrounds 3 - border-left](http://www.w3.org/TR/css3-background/#border-left)
   - Drafts
-      - [CSS Backgrounds 3 - border-left](https://drafts.csswg.org/css-backgrounds-3/#border-left)
       - [CSS 2.1 - border-left](https://drafts.csswg.org/css2/box.html#propdef-border-left)
+      - [CSS Backgrounds 3 - border-left](https://drafts.csswg.org/css-backgrounds-3/#border-left)
   - Values: border-left-width border-left-style border-left-color;
-- [border-left-color](http://www.w3.org/TR/css3-background/#border-left-color)
+- [border-left-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-color)
   - TR
-      - [CSS Backgrounds 3 - border-left-color](http://www.w3.org/TR/css3-background/#border-left-color)
       - [CSS 2.1 - border-left-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-color)
+      - [CSS Backgrounds 3 - border-left-color](http://www.w3.org/TR/css3-background/#border-left-color)
   - Drafts
-      - [CSS Backgrounds 3 - border-left-color](https://drafts.csswg.org/css-backgrounds-3/#border-left-color)
       - [CSS 2.1 - border-left-color](https://drafts.csswg.org/css2/box.html#propdef-border-left-color)
+      - [CSS Backgrounds 3 - border-left-color](https://drafts.csswg.org/css-backgrounds-3/#border-left-color)
   - Values: BORDER_SIDE_COLOR;
-- [border-left-style](http://www.w3.org/TR/css3-background/#border-left-style)
+- [border-left-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-style)
   - TR
-      - [CSS Backgrounds 3 - border-left-style](http://www.w3.org/TR/css3-background/#border-left-style)
       - [CSS 2.1 - border-left-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-style)
+      - [CSS Backgrounds 3 - border-left-style](http://www.w3.org/TR/css3-background/#border-left-style)
   - Drafts
-      - [CSS Backgrounds 3 - border-left-style](https://drafts.csswg.org/css-backgrounds-3/#border-left-style)
       - [CSS 2.1 - border-left-style](https://drafts.csswg.org/css2/box.html#propdef-border-left-style)
+      - [CSS Backgrounds 3 - border-left-style](https://drafts.csswg.org/css-backgrounds-3/#border-left-style)
   - Values: BORDER_SIDE_STYLE;
-- [border-left-width](http://www.w3.org/TR/css3-background/#border-left-width)
+- [border-left-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-width)
   - TR
-      - [CSS Backgrounds 3 - border-left-width](http://www.w3.org/TR/css3-background/#border-left-width)
       - [CSS 2.1 - border-left-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-width)
+      - [CSS Backgrounds 3 - border-left-width](http://www.w3.org/TR/css3-background/#border-left-width)
   - Drafts
-      - [CSS Backgrounds 3 - border-left-width](https://drafts.csswg.org/css-backgrounds-3/#border-left-width)
       - [CSS 2.1 - border-left-width](https://drafts.csswg.org/css2/box.html#propdef-border-left-width)
+      - [CSS Backgrounds 3 - border-left-width](https://drafts.csswg.org/css-backgrounds-3/#border-left-width)
   - Values: BORDER_SIDE_WIDTH;
-- [border-right](http://www.w3.org/TR/css3-background/#border-right)
+- [border-right](http://www.w3.org/TR/CSS21/box.html#propdef-border-right)
   - TR
-      - [CSS Backgrounds 3 - border-right](http://www.w3.org/TR/css3-background/#border-right)
       - [CSS 2.1 - border-right](http://www.w3.org/TR/CSS21/box.html#propdef-border-right)
+      - [CSS Backgrounds 3 - border-right](http://www.w3.org/TR/css3-background/#border-right)
   - Drafts
-      - [CSS Backgrounds 3 - border-right](https://drafts.csswg.org/css-backgrounds-3/#border-right)
       - [CSS 2.1 - border-right](https://drafts.csswg.org/css2/box.html#propdef-border-right)
+      - [CSS Backgrounds 3 - border-right](https://drafts.csswg.org/css-backgrounds-3/#border-right)
   - Values: border-right-width border-right-style border-right-color;
-- [border-right-color](http://www.w3.org/TR/css3-background/#border-right-color)
+- [border-right-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-color)
   - TR
-      - [CSS Backgrounds 3 - border-right-color](http://www.w3.org/TR/css3-background/#border-right-color)
       - [CSS 2.1 - border-right-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-color)
+      - [CSS Backgrounds 3 - border-right-color](http://www.w3.org/TR/css3-background/#border-right-color)
   - Drafts
-      - [CSS Backgrounds 3 - border-right-color](https://drafts.csswg.org/css-backgrounds-3/#border-right-color)
       - [CSS 2.1 - border-right-color](https://drafts.csswg.org/css2/box.html#propdef-border-right-color)
+      - [CSS Backgrounds 3 - border-right-color](https://drafts.csswg.org/css-backgrounds-3/#border-right-color)
   - Values: BORDER_SIDE_COLOR;
-- [border-right-style](http://www.w3.org/TR/css3-background/#border-right-style)
+- [border-right-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-style)
   - TR
-      - [CSS Backgrounds 3 - border-right-style](http://www.w3.org/TR/css3-background/#border-right-style)
       - [CSS 2.1 - border-right-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-style)
+      - [CSS Backgrounds 3 - border-right-style](http://www.w3.org/TR/css3-background/#border-right-style)
   - Drafts
-      - [CSS Backgrounds 3 - border-right-style](https://drafts.csswg.org/css-backgrounds-3/#border-right-style)
       - [CSS 2.1 - border-right-style](https://drafts.csswg.org/css2/box.html#propdef-border-right-style)
+      - [CSS Backgrounds 3 - border-right-style](https://drafts.csswg.org/css-backgrounds-3/#border-right-style)
   - Values: BORDER_SIDE_STYLE;
-- [border-right-width](http://www.w3.org/TR/css3-background/#border-right-width)
+- [border-right-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-width)
   - TR
-      - [CSS Backgrounds 3 - border-right-width](http://www.w3.org/TR/css3-background/#border-right-width)
       - [CSS 2.1 - border-right-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-width)
+      - [CSS Backgrounds 3 - border-right-width](http://www.w3.org/TR/css3-background/#border-right-width)
   - Drafts
-      - [CSS Backgrounds 3 - border-right-width](https://drafts.csswg.org/css-backgrounds-3/#border-right-width)
       - [CSS 2.1 - border-right-width](https://drafts.csswg.org/css2/box.html#propdef-border-right-width)
+      - [CSS Backgrounds 3 - border-right-width](https://drafts.csswg.org/css-backgrounds-3/#border-right-width)
   - Values: BORDER_SIDE_WIDTH;
 - [border-spacing](http://www.w3.org/TR/CSS21/tables.html#propdef-border-spacing)
   - TR
       - [CSS 2.1 - border-spacing](http://www.w3.org/TR/CSS21/tables.html#propdef-border-spacing)
   - Drafts
-      - [CSS 2.1 - border-spacing](https://drafts.csswg.org/css2/tables.html#propdef-border-spacing)
       - [CSS Tables 3 - border-spacing](https://drafts.csswg.org/css3-tables/#border-spacing)
       - [CSS Tables 3 - border-spacing](https://drafts.csswg.org/css3-tables/??#border-spacing)
+      - [CSS 2.1 - border-spacing](https://drafts.csswg.org/css2/tables.html#propdef-border-spacing)
   - Values: LENGTH LENGTH?;
-- [border-style](http://www.w3.org/TR/css3-background/#border-style)
+- [border-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-style)
   - TR
-      - [CSS Backgrounds 3 - border-style](http://www.w3.org/TR/css3-background/#border-style)
       - [CSS 2.1 - border-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-style)
+      - [CSS Backgrounds 3 - border-style](http://www.w3.org/TR/css3-background/#border-style)
   - Drafts
-      - [CSS Backgrounds 3 - border-style](https://drafts.csswg.org/css-backgrounds-3/#border-style)
       - [CSS 2.1 - border-style](https://drafts.csswg.org/css2/box.html#propdef-border-style)
+      - [CSS Backgrounds 3 - border-style](https://drafts.csswg.org/css-backgrounds-3/#border-style)
   - Values: INSETS border-top-style border-right-style border-bottom-style border-left-style;
-- [border-top](http://www.w3.org/TR/css3-background/#border-top)
+- [border-top](http://www.w3.org/TR/CSS21/box.html#propdef-border-top)
   - TR
-      - [CSS Backgrounds 3 - border-top](http://www.w3.org/TR/css3-background/#border-top)
       - [CSS 2.1 - border-top](http://www.w3.org/TR/CSS21/box.html#propdef-border-top)
+      - [CSS Backgrounds 3 - border-top](http://www.w3.org/TR/css3-background/#border-top)
   - Drafts
-      - [CSS Backgrounds 3 - border-top](https://drafts.csswg.org/css-backgrounds-3/#border-top)
       - [CSS 2.1 - border-top](https://drafts.csswg.org/css2/box.html#propdef-border-top)
+      - [CSS Backgrounds 3 - border-top](https://drafts.csswg.org/css-backgrounds-3/#border-top)
   - Values: border-top-width border-top-style border-top-color;
-- [border-top-color](http://www.w3.org/TR/css3-background/#border-top-color)
+- [border-top-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-color)
   - TR
-      - [CSS Backgrounds 3 - border-top-color](http://www.w3.org/TR/css3-background/#border-top-color)
       - [CSS 2.1 - border-top-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-color)
+      - [CSS Backgrounds 3 - border-top-color](http://www.w3.org/TR/css3-background/#border-top-color)
   - Drafts
-      - [CSS Backgrounds 3 - border-top-color](https://drafts.csswg.org/css-backgrounds-3/#border-top-color)
       - [CSS 2.1 - border-top-color](https://drafts.csswg.org/css2/box.html#propdef-border-top-color)
+      - [CSS Backgrounds 3 - border-top-color](https://drafts.csswg.org/css-backgrounds-3/#border-top-color)
   - Values: BORDER_SIDE_COLOR;
-- [border-top-style](http://www.w3.org/TR/css3-background/#border-top-style)
+- [border-top-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-style)
   - TR
-      - [CSS Backgrounds 3 - border-top-style](http://www.w3.org/TR/css3-background/#border-top-style)
       - [CSS 2.1 - border-top-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-style)
+      - [CSS Backgrounds 3 - border-top-style](http://www.w3.org/TR/css3-background/#border-top-style)
   - Drafts
-      - [CSS Backgrounds 3 - border-top-style](https://drafts.csswg.org/css-backgrounds-3/#border-top-style)
       - [CSS 2.1 - border-top-style](https://drafts.csswg.org/css2/box.html#propdef-border-top-style)
+      - [CSS Backgrounds 3 - border-top-style](https://drafts.csswg.org/css-backgrounds-3/#border-top-style)
   - Values: BORDER_SIDE_STYLE;
-- [border-top-width](http://www.w3.org/TR/css3-background/#border-top-width)
+- [border-top-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-width)
   - TR
-      - [CSS Backgrounds 3 - border-top-width](http://www.w3.org/TR/css3-background/#border-top-width)
       - [CSS 2.1 - border-top-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-width)
+      - [CSS Backgrounds 3 - border-top-width](http://www.w3.org/TR/css3-background/#border-top-width)
   - Drafts
-      - [CSS Backgrounds 3 - border-top-width](https://drafts.csswg.org/css-backgrounds-3/#border-top-width)
       - [CSS 2.1 - border-top-width](https://drafts.csswg.org/css2/box.html#propdef-border-top-width)
+      - [CSS Backgrounds 3 - border-top-width](https://drafts.csswg.org/css-backgrounds-3/#border-top-width)
   - Values: BORDER_SIDE_WIDTH;
-- [border-width](http://www.w3.org/TR/css3-background/#border-width)
+- [border-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-width)
   - TR
-      - [CSS Backgrounds 3 - border-width](http://www.w3.org/TR/css3-background/#border-width)
       - [CSS 2.1 - border-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-width)
+      - [CSS Backgrounds 3 - border-width](http://www.w3.org/TR/css3-background/#border-width)
   - Drafts
-      - [CSS Backgrounds 3 - border-width](https://drafts.csswg.org/css-backgrounds-3/#border-width)
       - [CSS 2.1 - border-width](https://drafts.csswg.org/css2/box.html#propdef-border-width)
+      - [CSS Backgrounds 3 - border-width](https://drafts.csswg.org/css-backgrounds-3/#border-width)
   - Values: INSETS border-top-width border-right-width border-bottom-width border-left-width;
-- [bottom](http://www.w3.org/TR/css3-positioning/#propdef-bottom)
+- [bottom](http://www.w3.org/TR/CSS21/visuren.html#propdef-bottom)
   - TR
-      - [CSS Positioned Layout 3 - bottom](http://www.w3.org/TR/css3-positioning/#propdef-bottom)
       - [CSS 2.1 - bottom](http://www.w3.org/TR/CSS21/visuren.html#propdef-bottom)
+      - [CSS Positioned Layout 3 - bottom](http://www.w3.org/TR/css3-positioning/#propdef-bottom)
   - Drafts
-      - [CSS Positioned Layout 3 - bottom](https://drafts.csswg.org/css-position-3/#propdef-bottom)
       - [CSS 2.1 - bottom](https://drafts.csswg.org/css2/visuren.html#propdef-bottom)
+      - [CSS Positioned Layout 3 - bottom](https://drafts.csswg.org/css-position-3/#propdef-bottom)
   - Values: APLENGTH;
 - [caption-side](http://www.w3.org/TR/CSS21/tables.html#propdef-caption-side)
   - TR
       - [CSS 2.1 - caption-side](http://www.w3.org/TR/CSS21/tables.html#propdef-caption-side)
   - Drafts
-      - [CSS 2.1 - caption-side](https://drafts.csswg.org/css2/tables.html#propdef-caption-side)
       - [CSS Tables 3 - caption-side](https://drafts.csswg.org/css3-tables/#caption-side)
       - [CSS Tables 3 - caption-side](https://drafts.csswg.org/css3-tables/??#caption-side)
+      - [CSS 2.1 - caption-side](https://drafts.csswg.org/css2/tables.html#propdef-caption-side)
   - Values: top | bottom;
 - [clear](http://www.w3.org/TR/CSS21/visuren.html#propdef-clear)
   - TR
       - [CSS 2.1 - clear](http://www.w3.org/TR/CSS21/visuren.html#propdef-clear)
   - Drafts
-      - [CSS Page Floats 3 - clear](https://drafts.csswg.org/css-page-floats-3/#propdef-clear)
       - [CSS 2.1 - clear](https://drafts.csswg.org/css2/visuren.html#propdef-clear)
+      - [CSS Page Floats 3 - clear](https://drafts.csswg.org/css-page-floats-3/#propdef-clear)
   - Values: none | left | right | both;
-- [clip](http://www.w3.org/TR/css-masking-1/#propdef-clip)
+- [clip](http://www.w3.org/TR/CSS21/visufx.html#propdef-clip)
   - TR
-      - [CSS Masking 1 - clip](http://www.w3.org/TR/css-masking-1/#propdef-clip)
       - [CSS 2.1 - clip](http://www.w3.org/TR/CSS21/visufx.html#propdef-clip)
+      - [CSS Masking 1 - clip](http://www.w3.org/TR/css-masking-1/#propdef-clip)
   - Drafts
-      - [CSS Masking 1 - clip](https://drafts.fxtf.org/css-masking-1/#propdef-clip)
       - [CSS 2.1 - clip](https://drafts.csswg.org/css2/visufx.html#propdef-clip)
+      - [CSS Masking 1 - clip](https://drafts.fxtf.org/css-masking-1/#propdef-clip)
   - Values: rect(ALENGTH{4}) | rect(SPACE(ALENGTH{4})) | auto;
-- [color](http://www.w3.org/TR/css3-color/#color0)
+- [color](http://www.w3.org/TR/CSS21/colors.html#propdef-color)
   - TR
-      - [CSS Color 3 - color](http://www.w3.org/TR/css3-color/#color0)
       - [CSS 2.1 - color](http://www.w3.org/TR/CSS21/colors.html#propdef-color)
+      - [CSS Color 3 - color](http://www.w3.org/TR/css3-color/#color0)
   - Drafts
+      - [CSS 2.1 - color](https://drafts.csswg.org/css2/colors.html#propdef-color)
       - [CSS Color 3 - color](https://drafts.csswg.org/css-color-3/#color0)
       - [CSS Color 4 - color](https://drafts.csswg.org/css-color-4/#propdef-color)
-      - [CSS 2.1 - color](https://drafts.csswg.org/css2/colors.html#propdef-color)
   - Values: COLOR;
 - [content](http://www.w3.org/TR/CSS21/generate.html#propdef-content)
   - TR
@@ -277,62 +277,62 @@
       - [CSS Generated Content 3 - content](https://drafts.csswg.org/css-content-3/#propdef-content)
       - [CSS 2.1 - content](https://drafts.csswg.org/css2/generate.html#propdef-content)
   - Values: CONTENT;
-- [counter-increment](http://www.w3.org/TR/css3-lists/#propdef-counter-increment)
+- [counter-increment](http://www.w3.org/TR/CSS21/generate.html#propdef-counter-increment)
   - TR
-      - [CSS Lists 3 - counter-increment](http://www.w3.org/TR/css3-lists/#propdef-counter-increment)
       - [CSS 2.1 - counter-increment](http://www.w3.org/TR/CSS21/generate.html#propdef-counter-increment)
+      - [CSS Lists 3 - counter-increment](http://www.w3.org/TR/css3-lists/#propdef-counter-increment)
   - Drafts
-      - [CSS Lists 3 - counter-increment](https://drafts.csswg.org/css-lists-3/#propdef-counter-increment)
       - [CSS 2.1 - counter-increment](https://drafts.csswg.org/css2/generate.html#propdef-counter-increment)
+      - [CSS Lists 3 - counter-increment](https://drafts.csswg.org/css-lists-3/#propdef-counter-increment)
   - Values: COUNTER;
-- [counter-reset](http://www.w3.org/TR/css3-lists/#propdef-counter-reset)
+- [counter-reset](http://www.w3.org/TR/CSS21/generate.html#propdef-counter-reset)
   - TR
-      - [CSS Lists 3 - counter-reset](http://www.w3.org/TR/css3-lists/#propdef-counter-reset)
       - [CSS 2.1 - counter-reset](http://www.w3.org/TR/CSS21/generate.html#propdef-counter-reset)
+      - [CSS Lists 3 - counter-reset](http://www.w3.org/TR/css3-lists/#propdef-counter-reset)
   - Drafts
-      - [CSS Lists 3 - counter-reset](https://drafts.csswg.org/css-lists-3/#propdef-counter-reset)
       - [CSS 2.1 - counter-reset](https://drafts.csswg.org/css2/generate.html#propdef-counter-reset)
+      - [CSS Lists 3 - counter-reset](https://drafts.csswg.org/css-lists-3/#propdef-counter-reset)
   - Values: COUNTER;
-- [cue-after](http://www.w3.org/TR/css3-speech/#cue-after)
+- [cue-after](http://www.w3.org/TR/CSS21/aural.html#propdef-cue-after)
   - TR
-      - [CSS Speech 1 - cue-after](http://www.w3.org/TR/css3-speech/#cue-after)
       - [CSS 2.1 - cue-after](http://www.w3.org/TR/CSS21/aural.html#propdef-cue-after)
+      - [CSS Speech 1 - cue-after](http://www.w3.org/TR/css3-speech/#cue-after)
   - Drafts
-      - [CSS Speech 1 - cue-after](https://drafts.csswg.org/css-speech-1/#cue-after)
       - [CSS 2.1 - cue-after](https://drafts.csswg.org/css2/aural.html#propdef-cue-after)
+      - [CSS Speech 1 - cue-after](https://drafts.csswg.org/css-speech-1/#cue-after)
   - Values: URI_OR_NONE;
-- [cue-before](http://www.w3.org/TR/css3-speech/#cue-before)
+- [cue-before](http://www.w3.org/TR/CSS21/aural.html#propdef-cue-before)
   - TR
-      - [CSS Speech 1 - cue-before](http://www.w3.org/TR/css3-speech/#cue-before)
       - [CSS 2.1 - cue-before](http://www.w3.org/TR/CSS21/aural.html#propdef-cue-before)
+      - [CSS Speech 1 - cue-before](http://www.w3.org/TR/css3-speech/#cue-before)
   - Drafts
-      - [CSS Speech 1 - cue-before](https://drafts.csswg.org/css-speech-1/#cue-before)
       - [CSS 2.1 - cue-before](https://drafts.csswg.org/css2/aural.html#propdef-cue-before)
+      - [CSS Speech 1 - cue-before](https://drafts.csswg.org/css-speech-1/#cue-before)
   - Values: URI_OR_NONE;
-- [cursor](http://www.w3.org/TR/css3-ui/#propdef-cursor)
+- [cursor](http://www.w3.org/TR/CSS21/ui.html#propdef-cursor)
   - TR
-      - [CSS User Interface 3 - cursor](http://www.w3.org/TR/css3-ui/#propdef-cursor)
       - [CSS 2.1 - cursor](http://www.w3.org/TR/CSS21/ui.html#propdef-cursor)
+      - [CSS User Interface 3 - cursor](http://www.w3.org/TR/css3-ui/#propdef-cursor)
   - Drafts
-      - [CSS User Interface 3 - cursor](https://drafts.csswg.org/css-ui-3/#propdef-cursor)
       - [CSS 2.1 - cursor](https://drafts.csswg.org/css2/ui.html#propdef-cursor)
+      - [CSS User Interface 3 - cursor](https://drafts.csswg.org/css-ui-3/#propdef-cursor)
   - Values: COMMA(URI* [ auto | crosshair | default | pointer | move | e-resize | ne-resize | nw-resize | n-resize | se-resize | sw-resize | s-resize | w-resize | text | wait | help | progress ]);
-- [direction](http://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
+- [direction](http://www.w3.org/TR/CSS21/visuren.html#propdef-direction)
   - TR
-      - [CSS Writing Modes 3 - direction](http://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
       - [CSS 2.1 - direction](http://www.w3.org/TR/CSS21/visuren.html#propdef-direction)
+      - [CSS Writing Modes 3 - direction](http://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
   - Drafts
-      - [CSS Writing Modes 3 - direction](https://drafts.csswg.org/css-writing-modes-3/#propdef-direction)
       - [CSS 2.1 - direction](https://drafts.csswg.org/css2/visuren.html#propdef-direction)
+      - [CSS Writing Modes 3 - direction](https://drafts.csswg.org/css-writing-modes-3/#propdef-direction)
   - Values: ltr | rtl;
-- [display](http://www.w3.org/TR/css-ruby-1/#propdef-display)
+- [display](http://www.w3.org/TR/CSS21/visuren.html#propdef-display)
   - TR
-      - [CSS Ruby 1 - display](http://www.w3.org/TR/css-ruby-1/#propdef-display)
       - [CSS 2.1 - display](http://www.w3.org/TR/CSS21/visuren.html#propdef-display)
+      - [CSS Ruby 1 - display](http://www.w3.org/TR/css-ruby-1/#propdef-display)
   - Drafts
       - [CSS Display 3 - display](https://drafts.csswg.org/css-display-3/#propdef-display)
-      - [CSS Ruby 1 - display](https://drafts.csswg.org/css-ruby-1/#propdef-display)
       - [CSS 2.1 - display](https://drafts.csswg.org/css2/visuren.html#propdef-display)
+      - [CSS Ruby 1 - display](https://drafts.csswg.org/css-ruby-1/#propdef-display)
   - Values: inline | block | list-item | inline-block | table | inline-table | table-row-group | table-header-group | table-footer-group | table-row | table-column-group | table-column | table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex | inline-flex;
 - [elevation](http://www.w3.org/TR/CSS21/aural.html#propdef-elevation)
   - TR
@@ -344,64 +344,64 @@
   - TR
       - [CSS 2.1 - empty-cells](http://www.w3.org/TR/CSS21/tables.html#propdef-empty-cells)
   - Drafts
-      - [CSS 2.1 - empty-cells](https://drafts.csswg.org/css2/tables.html#propdef-empty-cells)
       - [CSS Tables 3 - empty-cells](https://drafts.csswg.org/css3-tables/#empty-cells0)
       - [CSS Tables 3 - empty-cells](https://drafts.csswg.org/css3-tables/??#empty-cells0)
+      - [CSS 2.1 - empty-cells](https://drafts.csswg.org/css2/tables.html#propdef-empty-cells)
   - Values: show | hide;
 - [float](http://www.w3.org/TR/CSS21/visuren.html#propdef-float)
   - TR
       - [CSS 2.1 - float](http://www.w3.org/TR/CSS21/visuren.html#propdef-float)
   - Drafts
-      - [CSS Page Floats 3 - float](https://drafts.csswg.org/css-page-floats-3/#propdef-float)
       - [CSS 2.1 - float](https://drafts.csswg.org/css2/visuren.html#propdef-float)
+      - [CSS Page Floats 3 - float](https://drafts.csswg.org/css-page-floats-3/#propdef-float)
   - Values: block-start | block-end | inline-start | inline-end | snap-block | snap-inline | left | right | top | bottom | none | footnote;
-- [font](http://www.w3.org/TR/css-fonts-3/#propdef-font)
+- [font](http://www.w3.org/TR/CSS21/fonts.html#propdef-font)
   - TR
-      - [CSS Fonts 3 - font](http://www.w3.org/TR/css-fonts-3/#propdef-font)
       - [CSS 2.1 - font](http://www.w3.org/TR/CSS21/fonts.html#propdef-font)
+      - [CSS Fonts 3 - font](http://www.w3.org/TR/css-fonts-3/#propdef-font)
   - Drafts
-      - [CSS Fonts 3 - font](https://drafts.csswg.org/css-fonts-3/#propdef-font)
       - [CSS 2.1 - font](https://drafts.csswg.org/css2/fonts.html#propdef-font)
+      - [CSS Fonts 3 - font](https://drafts.csswg.org/css-fonts-3/#propdef-font)
   - Values: FONT font-style font-variant font-weight /* font-size line-height font-family are special-cased */;
-- [font-family](http://www.w3.org/TR/css-fonts-3/#propdef-font-family)
+- [font-family](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-family)
   - TR
-      - [CSS Fonts 3 - font-family](http://www.w3.org/TR/css-fonts-3/#propdef-font-family)
       - [CSS 2.1 - font-family](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-family)
+      - [CSS Fonts 3 - font-family](http://www.w3.org/TR/css-fonts-3/#propdef-font-family)
   - Drafts
-      - [CSS Fonts 3 - font-family](https://drafts.csswg.org/css-fonts-3/#propdef-font-family)
       - [CSS 2.1 - font-family](https://drafts.csswg.org/css2/fonts.html#propdef-font-family)
+      - [CSS Fonts 3 - font-family](https://drafts.csswg.org/css-fonts-3/#propdef-font-family)
   - Values: FAMILY_LIST;
-- [font-size](http://www.w3.org/TR/css-fonts-3/#propdef-font-size)
+- [font-size](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-size)
   - TR
-      - [CSS Fonts 3 - font-size](http://www.w3.org/TR/css-fonts-3/#propdef-font-size)
       - [CSS 2.1 - font-size](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-size)
+      - [CSS Fonts 3 - font-size](http://www.w3.org/TR/css-fonts-3/#propdef-font-size)
   - Drafts
-      - [CSS Fonts 3 - font-size](https://drafts.csswg.org/css-fonts-3/#propdef-font-size)
       - [CSS 2.1 - font-size](https://drafts.csswg.org/css2/fonts.html#propdef-font-size)
+      - [CSS Fonts 3 - font-size](https://drafts.csswg.org/css-fonts-3/#propdef-font-size)
   - Values: xx-small | x-small | small | medium | large | x-large | xx-large | larger | smaller | PPLENGTH;
-- [font-style](http://www.w3.org/TR/css-fonts-3/#propdef-font-style)
+- [font-style](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-style)
   - TR
-      - [CSS Fonts 3 - font-style](http://www.w3.org/TR/css-fonts-3/#propdef-font-style)
       - [CSS 2.1 - font-style](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-style)
+      - [CSS Fonts 3 - font-style](http://www.w3.org/TR/css-fonts-3/#propdef-font-style)
   - Drafts
-      - [CSS Fonts 3 - font-style](https://drafts.csswg.org/css-fonts-3/#propdef-font-style)
       - [CSS 2.1 - font-style](https://drafts.csswg.org/css2/fonts.html#propdef-font-style)
+      - [CSS Fonts 3 - font-style](https://drafts.csswg.org/css-fonts-3/#propdef-font-style)
   - Values: normal | italic | oblique;
-- [font-variant](http://www.w3.org/TR/css-fonts-3/#propdef-font-variant)
+- [font-variant](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-variant)
   - TR
-      - [CSS Fonts 3 - font-variant](http://www.w3.org/TR/css-fonts-3/#propdef-font-variant)
       - [CSS 2.1 - font-variant](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-variant)
+      - [CSS Fonts 3 - font-variant](http://www.w3.org/TR/css-fonts-3/#propdef-font-variant)
   - Drafts
-      - [CSS Fonts 3 - font-variant](https://drafts.csswg.org/css-fonts-3/#propdef-font-variant)
       - [CSS 2.1 - font-variant](https://drafts.csswg.org/css2/fonts.html#propdef-font-variant)
+      - [CSS Fonts 3 - font-variant](https://drafts.csswg.org/css-fonts-3/#propdef-font-variant)
   - Values: normal | small-caps;
-- [font-weight](http://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
+- [font-weight](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-weight)
   - TR
-      - [CSS Fonts 3 - font-weight](http://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
       - [CSS 2.1 - font-weight](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-weight)
+      - [CSS Fonts 3 - font-weight](http://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
   - Drafts
-      - [CSS Fonts 3 - font-weight](https://drafts.csswg.org/css-fonts-3/#propdef-font-weight)
       - [CSS 2.1 - font-weight](https://drafts.csswg.org/css2/fonts.html#propdef-font-weight)
+      - [CSS Fonts 3 - font-weight](https://drafts.csswg.org/css-fonts-3/#propdef-font-weight)
   - Values: normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
 - [height](http://www.w3.org/TR/CSS21/visudet.html#propdef-height)
   - TR
@@ -409,21 +409,21 @@
   - Drafts
       - [CSS 2.1 - height](https://drafts.csswg.org/css2/visudet.html#propdef-height)
   - Values: PAPLENGTH;
-- [left](http://www.w3.org/TR/css3-positioning/#propdef-left)
+- [left](http://www.w3.org/TR/CSS21/visuren.html#propdef-left)
   - TR
-      - [CSS Positioned Layout 3 - left](http://www.w3.org/TR/css3-positioning/#propdef-left)
       - [CSS 2.1 - left](http://www.w3.org/TR/CSS21/visuren.html#propdef-left)
+      - [CSS Positioned Layout 3 - left](http://www.w3.org/TR/css3-positioning/#propdef-left)
   - Drafts
-      - [CSS Positioned Layout 3 - left](https://drafts.csswg.org/css-position-3/#propdef-left)
       - [CSS 2.1 - left](https://drafts.csswg.org/css2/visuren.html#propdef-left)
+      - [CSS Positioned Layout 3 - left](https://drafts.csswg.org/css-position-3/#propdef-left)
   - Values: APLENGTH;
-- [letter-spacing](http://www.w3.org/TR/css-text-3/#letter-spacing)
+- [letter-spacing](http://www.w3.org/TR/CSS21/text.html#propdef-letter-spacing)
   - TR
-      - [CSS Text 3 - letter-spacing](http://www.w3.org/TR/css-text-3/#letter-spacing)
       - [CSS 2.1 - letter-spacing](http://www.w3.org/TR/CSS21/text.html#propdef-letter-spacing)
+      - [CSS Text 3 - letter-spacing](http://www.w3.org/TR/css-text-3/#letter-spacing)
   - Drafts
-      - [CSS Text 3 - letter-spacing](https://drafts.csswg.org/css-text-3/#propdef-letter-spacing)
       - [CSS 2.1 - letter-spacing](https://drafts.csswg.org/css2/text.html#propdef-letter-spacing)
+      - [CSS Text 3 - letter-spacing](https://drafts.csswg.org/css-text-3/#propdef-letter-spacing)
   - Values: normal | LENGTH;
 - [line-height](http://www.w3.org/TR/CSS21/visudet.html#propdef-line-height)
   - TR
@@ -431,37 +431,37 @@
   - Drafts
       - [CSS 2.1 - line-height](https://drafts.csswg.org/css2/visudet.html#propdef-line-height)
   - Values: normal | POS_NUM | PPLENGTH;
-- [list-style](http://www.w3.org/TR/css3-lists/#propdef-list-style)
+- [list-style](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style)
   - TR
-      - [CSS Lists 3 - list-style](http://www.w3.org/TR/css3-lists/#propdef-list-style)
       - [CSS 2.1 - list-style](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style)
+      - [CSS Lists 3 - list-style](http://www.w3.org/TR/css3-lists/#propdef-list-style)
   - Drafts
-      - [CSS Lists 3 - list-style](https://drafts.csswg.org/css-lists-3/#propdef-list-style)
       - [CSS 2.1 - list-style](https://drafts.csswg.org/css2/generate.html#propdef-list-style)
+      - [CSS Lists 3 - list-style](https://drafts.csswg.org/css-lists-3/#propdef-list-style)
   - Values: list-style-type list-style-position list-style-image;
-- [list-style-image](http://www.w3.org/TR/css3-lists/#propdef-list-style-image)
+- [list-style-image](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-image)
   - TR
-      - [CSS Lists 3 - list-style-image](http://www.w3.org/TR/css3-lists/#propdef-list-style-image)
       - [CSS 2.1 - list-style-image](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-image)
+      - [CSS Lists 3 - list-style-image](http://www.w3.org/TR/css3-lists/#propdef-list-style-image)
   - Drafts
-      - [CSS Lists 3 - list-style-image](https://drafts.csswg.org/css-lists-3/#propdef-list-style-image)
       - [CSS 2.1 - list-style-image](https://drafts.csswg.org/css2/generate.html#propdef-list-style-image)
+      - [CSS Lists 3 - list-style-image](https://drafts.csswg.org/css-lists-3/#propdef-list-style-image)
   - Values: URI_OR_NONE;
-- [list-style-position](http://www.w3.org/TR/css3-lists/#propdef-list-style-position)
+- [list-style-position](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position)
   - TR
-      - [CSS Lists 3 - list-style-position](http://www.w3.org/TR/css3-lists/#propdef-list-style-position)
       - [CSS 2.1 - list-style-position](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position)
+      - [CSS Lists 3 - list-style-position](http://www.w3.org/TR/css3-lists/#propdef-list-style-position)
   - Drafts
-      - [CSS Lists 3 - list-style-position](https://drafts.csswg.org/css-lists-3/#propdef-list-style-position)
       - [CSS 2.1 - list-style-position](https://drafts.csswg.org/css2/generate.html#propdef-list-style-position)
+      - [CSS Lists 3 - list-style-position](https://drafts.csswg.org/css-lists-3/#propdef-list-style-position)
   - Values: inside | outside;
-- [list-style-type](http://www.w3.org/TR/css3-lists/#propdef-list-style-type)
+- [list-style-type](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-type)
   - TR
-      - [CSS Lists 3 - list-style-type](http://www.w3.org/TR/css3-lists/#propdef-list-style-type)
       - [CSS 2.1 - list-style-type](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-type)
+      - [CSS Lists 3 - list-style-type](http://www.w3.org/TR/css3-lists/#propdef-list-style-type)
   - Drafts
-      - [CSS Lists 3 - list-style-type](https://drafts.csswg.org/css-lists-3/#propdef-list-style-type)
       - [CSS 2.1 - list-style-type](https://drafts.csswg.org/css2/generate.html#propdef-list-style-type)
+      - [CSS Lists 3 - list-style-type](https://drafts.csswg.org/css-lists-3/#propdef-list-style-type)
   - Values: LIST_STYLE_TYPE;
 - [margin](http://www.w3.org/TR/CSS21/box.html#propdef-margin)
   - TR
@@ -517,53 +517,53 @@
   - Drafts
       - [CSS 2.1 - min-width](https://drafts.csswg.org/css2/visudet.html#propdef-min-width)
   - Values: auto | PLENGTH;
-- [orphans](http://www.w3.org/TR/css3-break/#orphans)
+- [orphans](http://www.w3.org/TR/CSS21/page.html#propdef-orphans)
   - TR
-      - [CSS Fragmentation 3 - orphans](http://www.w3.org/TR/css3-break/#orphans)
       - [CSS 2.1 - orphans](http://www.w3.org/TR/CSS21/page.html#propdef-orphans)
+      - [CSS Fragmentation 3 - orphans](http://www.w3.org/TR/css3-break/#orphans)
   - Drafts
-      - [CSS Fragmentation 3 - orphans](https://drafts.csswg.org/css-break-3/#propdef-orphans)
       - [CSS 2.1 - orphans](https://drafts.csswg.org/css2/page.html#propdef-orphans)
+      - [CSS Fragmentation 3 - orphans](https://drafts.csswg.org/css-break-3/#propdef-orphans)
   - Values: POS_INT;
-- [outline](http://www.w3.org/TR/css3-ui/#propdef-outline)
+- [outline](http://www.w3.org/TR/CSS21/ui.html#propdef-outline)
   - TR
-      - [CSS User Interface 3 - outline](http://www.w3.org/TR/css3-ui/#propdef-outline)
       - [CSS 2.1 - outline](http://www.w3.org/TR/CSS21/ui.html#propdef-outline)
+      - [CSS User Interface 3 - outline](http://www.w3.org/TR/css3-ui/#propdef-outline)
   - Drafts
-      - [CSS User Interface 3 - outline](https://drafts.csswg.org/css-ui-3/#propdef-outline)
       - [CSS 2.1 - outline](https://drafts.csswg.org/css2/ui.html#propdef-outline)
+      - [CSS User Interface 3 - outline](https://drafts.csswg.org/css-ui-3/#propdef-outline)
   - Values: outline-width outline-style outline-color;
-- [outline-color](http://www.w3.org/TR/css3-ui/#propdef-outline-color)
+- [outline-color](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-color)
   - TR
-      - [CSS User Interface 3 - outline-color](http://www.w3.org/TR/css3-ui/#propdef-outline-color)
       - [CSS 2.1 - outline-color](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-color)
+      - [CSS User Interface 3 - outline-color](http://www.w3.org/TR/css3-ui/#propdef-outline-color)
   - Drafts
-      - [CSS User Interface 3 - outline-color](https://drafts.csswg.org/css-ui-3/#propdef-outline-color)
       - [CSS 2.1 - outline-color](https://drafts.csswg.org/css2/ui.html#propdef-outline-color)
+      - [CSS User Interface 3 - outline-color](https://drafts.csswg.org/css-ui-3/#propdef-outline-color)
   - Values: COLOR | invert;
-- [outline-style](http://www.w3.org/TR/css3-ui/#propdef-outline-style)
+- [outline-style](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-style)
   - TR
-      - [CSS User Interface 3 - outline-style](http://www.w3.org/TR/css3-ui/#propdef-outline-style)
       - [CSS 2.1 - outline-style](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-style)
+      - [CSS User Interface 3 - outline-style](http://www.w3.org/TR/css3-ui/#propdef-outline-style)
   - Drafts
-      - [CSS User Interface 3 - outline-style](https://drafts.csswg.org/css-ui-3/#propdef-outline-style)
       - [CSS 2.1 - outline-style](https://drafts.csswg.org/css2/ui.html#propdef-outline-style)
+      - [CSS User Interface 3 - outline-style](https://drafts.csswg.org/css-ui-3/#propdef-outline-style)
   - Values: BORDER_SIDE_STYLE;
-- [outline-width](http://www.w3.org/TR/css3-ui/#propdef-outline-width)
+- [outline-width](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-width)
   - TR
-      - [CSS User Interface 3 - outline-width](http://www.w3.org/TR/css3-ui/#propdef-outline-width)
       - [CSS 2.1 - outline-width](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-width)
+      - [CSS User Interface 3 - outline-width](http://www.w3.org/TR/css3-ui/#propdef-outline-width)
   - Drafts
-      - [CSS User Interface 3 - outline-width](https://drafts.csswg.org/css-ui-3/#propdef-outline-width)
       - [CSS 2.1 - outline-width](https://drafts.csswg.org/css2/ui.html#propdef-outline-width)
+      - [CSS User Interface 3 - outline-width](https://drafts.csswg.org/css-ui-3/#propdef-outline-width)
   - Values: BORDER_SIDE_WIDTH;
-- [overflow](http://www.w3.org/TR/css-overflow-3/#overflow)
+- [overflow](http://www.w3.org/TR/CSS21/visufx.html#propdef-overflow)
   - TR
-      - [CSS Overflow 3 - overflow](http://www.w3.org/TR/css-overflow-3/#overflow)
       - [CSS 2.1 - overflow](http://www.w3.org/TR/CSS21/visufx.html#propdef-overflow)
+      - [CSS Overflow 3 - overflow](http://www.w3.org/TR/css-overflow-3/#overflow)
   - Drafts
-      - [CSS Overflow 3 - overflow](https://drafts.csswg.org/css-overflow-3/#propdef-overflow)
       - [CSS 2.1 - overflow](https://drafts.csswg.org/css2/visufx.html#propdef-overflow)
+      - [CSS Overflow 3 - overflow](https://drafts.csswg.org/css-overflow-3/#propdef-overflow)
   - Values: visible | hidden | scroll | auto;
 - [padding](http://www.w3.org/TR/CSS21/box.html#propdef-padding)
   - TR
@@ -613,29 +613,29 @@
   - Drafts
       - [CSS 2.1 - page-break-inside](https://drafts.csswg.org/css2/page.html#propdef-page-break-inside)
   - Values: avoid | auto;
-- [pause](http://www.w3.org/TR/css3-speech/#pause)
+- [pause](http://www.w3.org/TR/CSS21/aural.html#propdef-pause)
   - TR
-      - [CSS Speech 1 - pause](http://www.w3.org/TR/css3-speech/#pause)
       - [CSS 2.1 - pause](http://www.w3.org/TR/CSS21/aural.html#propdef-pause)
+      - [CSS Speech 1 - pause](http://www.w3.org/TR/css3-speech/#pause)
   - Drafts
-      - [CSS Speech 1 - pause](https://drafts.csswg.org/css-speech-1/#pause)
       - [CSS 2.1 - pause](https://drafts.csswg.org/css2/aural.html#propdef-pause)
+      - [CSS Speech 1 - pause](https://drafts.csswg.org/css-speech-1/#pause)
   - Values: INSETS pause-before pause-after;
-- [pause-after](http://www.w3.org/TR/css3-speech/#pause-after)
+- [pause-after](http://www.w3.org/TR/CSS21/aural.html#propdef-pause-after)
   - TR
-      - [CSS Speech 1 - pause-after](http://www.w3.org/TR/css3-speech/#pause-after)
       - [CSS 2.1 - pause-after](http://www.w3.org/TR/CSS21/aural.html#propdef-pause-after)
+      - [CSS Speech 1 - pause-after](http://www.w3.org/TR/css3-speech/#pause-after)
   - Drafts
-      - [CSS Speech 1 - pause-after](https://drafts.csswg.org/css-speech-1/#pause-after)
       - [CSS 2.1 - pause-after](https://drafts.csswg.org/css2/aural.html#propdef-pause-after)
+      - [CSS Speech 1 - pause-after](https://drafts.csswg.org/css-speech-1/#pause-after)
   - Values: PAUSE;
-- [pause-before](http://www.w3.org/TR/css3-speech/#pause-before)
+- [pause-before](http://www.w3.org/TR/CSS21/aural.html#propdef-pause-before)
   - TR
-      - [CSS Speech 1 - pause-before](http://www.w3.org/TR/css3-speech/#pause-before)
       - [CSS 2.1 - pause-before](http://www.w3.org/TR/CSS21/aural.html#propdef-pause-before)
+      - [CSS Speech 1 - pause-before](http://www.w3.org/TR/css3-speech/#pause-before)
   - Drafts
-      - [CSS Speech 1 - pause-before](https://drafts.csswg.org/css-speech-1/#pause-before)
       - [CSS 2.1 - pause-before](https://drafts.csswg.org/css2/aural.html#propdef-pause-before)
+      - [CSS Speech 1 - pause-before](https://drafts.csswg.org/css-speech-1/#pause-before)
   - Values: PAUSE;
 - [pitch](http://www.w3.org/TR/CSS21/aural.html#propdef-pitch)
   - TR
@@ -655,13 +655,13 @@
   - Drafts
       - [CSS 2.1 - play-during](https://drafts.csswg.org/css2/aural.html#propdef-play-during)
   - Values: [URI [ mix || repeat ]?] | auto | none;
-- [position](http://www.w3.org/TR/css3-positioning/#propdef-position)
+- [position](http://www.w3.org/TR/CSS21/visuren.html#propdef-position)
   - TR
-      - [CSS Positioned Layout 3 - position](http://www.w3.org/TR/css3-positioning/#propdef-position)
       - [CSS 2.1 - position](http://www.w3.org/TR/CSS21/visuren.html#propdef-position)
+      - [CSS Positioned Layout 3 - position](http://www.w3.org/TR/css3-positioning/#propdef-position)
   - Drafts
-      - [CSS Positioned Layout 3 - position](https://drafts.csswg.org/css-position-3/#propdef-position)
       - [CSS 2.1 - position](https://drafts.csswg.org/css2/visuren.html#propdef-position)
+      - [CSS Positioned Layout 3 - position](https://drafts.csswg.org/css-position-3/#propdef-position)
   - Values: static | relative | absolute | fixed;
 - [quotes](http://www.w3.org/TR/CSS21/generate.html#propdef-quotes)
   - TR
@@ -676,21 +676,21 @@
   - Drafts
       - [CSS 2.1 - richness](https://drafts.csswg.org/css2/aural.html#propdef-richness)
   - Values: NUM;
-- [right](http://www.w3.org/TR/css3-positioning/#propdef-right)
+- [right](http://www.w3.org/TR/CSS21/visuren.html#propdef-right)
   - TR
-      - [CSS Positioned Layout 3 - right](http://www.w3.org/TR/css3-positioning/#propdef-right)
       - [CSS 2.1 - right](http://www.w3.org/TR/CSS21/visuren.html#propdef-right)
+      - [CSS Positioned Layout 3 - right](http://www.w3.org/TR/css3-positioning/#propdef-right)
   - Drafts
-      - [CSS Positioned Layout 3 - right](https://drafts.csswg.org/css-position-3/#propdef-right)
       - [CSS 2.1 - right](https://drafts.csswg.org/css2/visuren.html#propdef-right)
+      - [CSS Positioned Layout 3 - right](https://drafts.csswg.org/css-position-3/#propdef-right)
   - Values: APLENGTH;
 - [speak-header](http://www.w3.org/TR/CSS21/aural.html#propdef-speak-header)
   - TR
       - [CSS 2.1 - speak-header](http://www.w3.org/TR/CSS21/aural.html#propdef-speak-header)
   - Drafts
-      - [CSS 2.1 - speak-header](https://drafts.csswg.org/css2/aural.html#propdef-speak-header)
       - [CSS Tables 3 - speak-header](https://drafts.csswg.org/css3-tables/#speak-header)
       - [CSS Tables 3 - speak-header](https://drafts.csswg.org/css3-tables/??#speak-header)
+      - [CSS 2.1 - speak-header](https://drafts.csswg.org/css2/aural.html#propdef-speak-header)
   - Values: once | always;
 - [speak-numeral](http://www.w3.org/TR/CSS21/aural.html#propdef-speak-numeral)
   - TR
@@ -720,65 +720,65 @@
   - TR
       - [CSS 2.1 - table-layout](http://www.w3.org/TR/CSS21/tables.html#propdef-table-layout)
   - Drafts
-      - [CSS 2.1 - table-layout](https://drafts.csswg.org/css2/tables.html#propdef-table-layout)
       - [CSS Tables 3 - table-layout](https://drafts.csswg.org/css3-tables/#table-layout)
       - [CSS Tables 3 - table-layout](https://drafts.csswg.org/css3-tables/??#table-layout)
+      - [CSS 2.1 - table-layout](https://drafts.csswg.org/css2/tables.html#propdef-table-layout)
   - Values: auto | fixed;
-- [text-align](http://www.w3.org/TR/css-text-3/#text-align)
+- [text-align](http://www.w3.org/TR/CSS21/text.html#propdef-text-align)
   - TR
-      - [CSS Text 3 - text-align](http://www.w3.org/TR/css-text-3/#text-align)
       - [CSS 2.1 - text-align](http://www.w3.org/TR/CSS21/text.html#propdef-text-align)
+      - [CSS Text 3 - text-align](http://www.w3.org/TR/css-text-3/#text-align)
   - Drafts
-      - [CSS Text 3 - text-align](https://drafts.csswg.org/css-text-3/#propdef-text-align)
       - [CSS 2.1 - text-align](https://drafts.csswg.org/css2/text.html#propdef-text-align)
+      - [CSS Text 3 - text-align](https://drafts.csswg.org/css-text-3/#propdef-text-align)
   - Values: left | right | center | justify;
-- [text-decoration](http://www.w3.org/TR/css-text-decor-3/#text-decoration)
+- [text-decoration](http://www.w3.org/TR/CSS21/text.html#propdef-text-decoration)
   - TR
-      - [CSS Text Decoration 3 - text-decoration](http://www.w3.org/TR/css-text-decor-3/#text-decoration)
       - [CSS 2.1 - text-decoration](http://www.w3.org/TR/CSS21/text.html#propdef-text-decoration)
+      - [CSS Text Decoration 3 - text-decoration](http://www.w3.org/TR/css-text-decor-3/#text-decoration)
   - Drafts
-      - [CSS Text Decoration 3 - text-decoration](https://drafts.csswg.org/css-text-decor-3/#propdef-text-decoration)
       - [CSS 2.1 - text-decoration](https://drafts.csswg.org/css2/text.html#propdef-text-decoration)
+      - [CSS Text Decoration 3 - text-decoration](https://drafts.csswg.org/css-text-decor-3/#propdef-text-decoration)
   - Values: none | [ underline || overline || line-through || blink ];
-- [text-indent](http://www.w3.org/TR/css-text-3/#text-indent)
+- [text-indent](http://www.w3.org/TR/CSS21/text.html#propdef-text-indent)
   - TR
-      - [CSS Text 3 - text-indent](http://www.w3.org/TR/css-text-3/#text-indent)
       - [CSS 2.1 - text-indent](http://www.w3.org/TR/CSS21/text.html#propdef-text-indent)
+      - [CSS Text 3 - text-indent](http://www.w3.org/TR/css-text-3/#text-indent)
   - Drafts
-      - [CSS Text 3 - text-indent](https://drafts.csswg.org/css-text-3/#propdef-text-indent)
       - [CSS 2.1 - text-indent](https://drafts.csswg.org/css2/text.html#propdef-text-indent)
+      - [CSS Text 3 - text-indent](https://drafts.csswg.org/css-text-3/#propdef-text-indent)
   - Values: PLENGTH;
-- [text-transform](http://www.w3.org/TR/css-text-3/#text-transform)
+- [text-transform](http://www.w3.org/TR/CSS21/text.html#propdef-text-transform)
   - TR
-      - [CSS Text 3 - text-transform](http://www.w3.org/TR/css-text-3/#text-transform)
       - [CSS 2.1 - text-transform](http://www.w3.org/TR/CSS21/text.html#propdef-text-transform)
+      - [CSS Text 3 - text-transform](http://www.w3.org/TR/css-text-3/#text-transform)
   - Drafts
-      - [CSS Text 3 - text-transform](https://drafts.csswg.org/css-text-3/#propdef-text-transform)
       - [CSS 2.1 - text-transform](https://drafts.csswg.org/css2/text.html#propdef-text-transform)
+      - [CSS Text 3 - text-transform](https://drafts.csswg.org/css-text-3/#propdef-text-transform)
   - Values: capitalize | uppercase | lowercase | none;
-- [top](http://www.w3.org/TR/css3-positioning/#propdef-top)
+- [top](http://www.w3.org/TR/CSS21/visuren.html#propdef-top)
   - TR
-      - [CSS Positioned Layout 3 - top](http://www.w3.org/TR/css3-positioning/#propdef-top)
       - [CSS 2.1 - top](http://www.w3.org/TR/CSS21/visuren.html#propdef-top)
+      - [CSS Positioned Layout 3 - top](http://www.w3.org/TR/css3-positioning/#propdef-top)
   - Drafts
-      - [CSS Positioned Layout 3 - top](https://drafts.csswg.org/css-position-3/#propdef-top)
       - [CSS 2.1 - top](https://drafts.csswg.org/css2/visuren.html#propdef-top)
+      - [CSS Positioned Layout 3 - top](https://drafts.csswg.org/css-position-3/#propdef-top)
   - Values: APLENGTH;
-- [unicode-bidi](http://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
+- [unicode-bidi](http://www.w3.org/TR/CSS21/visuren.html#propdef-unicode-bidi)
   - TR
-      - [CSS Writing Modes 3 - unicode-bidi](http://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
       - [CSS 2.1 - unicode-bidi](http://www.w3.org/TR/CSS21/visuren.html#propdef-unicode-bidi)
+      - [CSS Writing Modes 3 - unicode-bidi](http://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
   - Drafts
-      - [CSS Writing Modes 3 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-3/#propdef-unicode-bidi)
       - [CSS 2.1 - unicode-bidi](https://drafts.csswg.org/css2/visuren.html#propdef-unicode-bidi)
+      - [CSS Writing Modes 3 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-3/#propdef-unicode-bidi)
   - Values: normal | embed | bidi-override;
-- [vertical-align](http://www.w3.org/TR/css-inline-3/#propdef-vertical-align)
+- [vertical-align](http://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align)
   - TR
-      - [CSS Inline Layout 3 - vertical-align](http://www.w3.org/TR/css-inline-3/#propdef-vertical-align)
       - [CSS 2.1 - vertical-align](http://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align)
+      - [CSS Inline Layout 3 - vertical-align](http://www.w3.org/TR/css-inline-3/#propdef-vertical-align)
   - Drafts
-      - [CSS Inline Layout 3 - vertical-align](https://drafts.csswg.org/css-inline-3/#propdef-vertical-align)
       - [CSS 2.1 - vertical-align](https://drafts.csswg.org/css2/visudet.html#propdef-vertical-align)
+      - [CSS Inline Layout 3 - vertical-align](https://drafts.csswg.org/css-inline-3/#propdef-vertical-align)
   - Values: baseline | sub | super | top | text-top | middle | bottom | text-bottom | PLENGTH;
 - [visibility](http://www.w3.org/TR/CSS21/visufx.html#propdef-visibility)
   - TR
@@ -786,13 +786,13 @@
   - Drafts
       - [CSS 2.1 - visibility](https://drafts.csswg.org/css2/visufx.html#propdef-visibility)
   - Values: visible | hidden | collapse;
-- [voice-family](http://www.w3.org/TR/css3-speech/#voice-family)
+- [voice-family](http://www.w3.org/TR/CSS21/aural.html#propdef-voice-family)
   - TR
-      - [CSS Speech 1 - voice-family](http://www.w3.org/TR/css3-speech/#voice-family)
       - [CSS 2.1 - voice-family](http://www.w3.org/TR/CSS21/aural.html#propdef-voice-family)
+      - [CSS Speech 1 - voice-family](http://www.w3.org/TR/css3-speech/#voice-family)
   - Drafts
-      - [CSS Speech 1 - voice-family](https://drafts.csswg.org/css-speech-1/#voice-family)
       - [CSS 2.1 - voice-family](https://drafts.csswg.org/css2/aural.html#propdef-voice-family)
+      - [CSS Speech 1 - voice-family](https://drafts.csswg.org/css-speech-1/#voice-family)
   - Values: FAMILY_LIST;
 - [volume](http://www.w3.org/TR/CSS21/aural.html#propdef-volume)
   - TR
@@ -800,22 +800,22 @@
   - Drafts
       - [CSS 2.1 - volume](https://drafts.csswg.org/css2/aural.html#propdef-volume)
   - Values: NUM | PERCENTAGE | silent | x-soft | soft | medium | loud | x-loud;
-- [white-space](http://www.w3.org/TR/css-text-3/#white-space)
+- [white-space](http://www.w3.org/TR/CSS21/text.html#propdef-white-space)
   - TR
-      - [CSS Text 3 - white-space](http://www.w3.org/TR/css-text-3/#white-space)
       - [CSS 2.1 - white-space](http://www.w3.org/TR/CSS21/text.html#propdef-white-space)
+      - [CSS Text 3 - white-space](http://www.w3.org/TR/css-text-3/#white-space)
   - Drafts
+      - [CSS 2.1 - white-space](https://drafts.csswg.org/css2/text.html#propdef-white-space)
       - [CSS Text 3 - white-space](https://drafts.csswg.org/css-text-3/#propdef-white-space)
       - [CSS Text 4 - white-space](https://drafts.csswg.org/css-text-4/#propdef-white-space)
-      - [CSS 2.1 - white-space](https://drafts.csswg.org/css2/text.html#propdef-white-space)
   - Values: normal | pre | nowrap | pre-wrap | pre-line;
-- [widows](http://www.w3.org/TR/css3-break/#widows)
+- [widows](http://www.w3.org/TR/CSS21/page.html#propdef-widows)
   - TR
-      - [CSS Fragmentation 3 - widows](http://www.w3.org/TR/css3-break/#widows)
       - [CSS 2.1 - widows](http://www.w3.org/TR/CSS21/page.html#propdef-widows)
+      - [CSS Fragmentation 3 - widows](http://www.w3.org/TR/css3-break/#widows)
   - Drafts
-      - [CSS Fragmentation 3 - widows](https://drafts.csswg.org/css-break-3/#propdef-widows)
       - [CSS 2.1 - widows](https://drafts.csswg.org/css2/page.html#propdef-widows)
+      - [CSS Fragmentation 3 - widows](https://drafts.csswg.org/css-break-3/#propdef-widows)
   - Values: POS_INT;
 - [width](http://www.w3.org/TR/CSS21/visudet.html#propdef-width)
   - TR
@@ -823,21 +823,21 @@
   - Drafts
       - [CSS 2.1 - width](https://drafts.csswg.org/css2/visudet.html#propdef-width)
   - Values: PAPLENGTH;
-- [word-spacing](http://www.w3.org/TR/css-text-3/#word-spacing)
+- [word-spacing](http://www.w3.org/TR/CSS21/text.html#propdef-word-spacing)
   - TR
-      - [CSS Text 3 - word-spacing](http://www.w3.org/TR/css-text-3/#word-spacing)
       - [CSS 2.1 - word-spacing](http://www.w3.org/TR/CSS21/text.html#propdef-word-spacing)
+      - [CSS Text 3 - word-spacing](http://www.w3.org/TR/css-text-3/#word-spacing)
   - Drafts
-      - [CSS Text 3 - word-spacing](https://drafts.csswg.org/css-text-3/#propdef-word-spacing)
       - [CSS 2.1 - word-spacing](https://drafts.csswg.org/css2/text.html#propdef-word-spacing)
+      - [CSS Text 3 - word-spacing](https://drafts.csswg.org/css-text-3/#propdef-word-spacing)
   - Values: normal | LENGTH;
-- [z-index](http://www.w3.org/TR/css3-positioning/#propdef-z-index)
+- [z-index](http://www.w3.org/TR/CSS21/visuren.html#propdef-z-index)
   - TR
-      - [CSS Positioned Layout 3 - z-index](http://www.w3.org/TR/css3-positioning/#propdef-z-index)
       - [CSS 2.1 - z-index](http://www.w3.org/TR/CSS21/visuren.html#propdef-z-index)
+      - [CSS Positioned Layout 3 - z-index](http://www.w3.org/TR/css3-positioning/#propdef-z-index)
   - Drafts
-      - [CSS Positioned Layout 3 - z-index](https://drafts.csswg.org/css-position-3/#propdef-z-index)
       - [CSS 2.1 - z-index](https://drafts.csswg.org/css2/visuren.html#propdef-z-index)
+      - [CSS Positioned Layout 3 - z-index](https://drafts.csswg.org/css-position-3/#propdef-z-index)
   - Values: auto | INT;
 ## [CSS Paged Media 3](http://www.w3.org/TR/css3-page/)
 - [page](http://www.w3.org/TR/css3-page/#page)
@@ -853,14 +853,14 @@
 
   - Values: POS_LENGTH{1,2} | auto | [ PAGE_SIZE || [ portrait | landscape ] ];
 ## [CSS Color 3](http://www.w3.org/TR/css3-color/)
-- [color](http://www.w3.org/TR/css3-color/#color0)
+- [color](http://www.w3.org/TR/CSS21/colors.html#propdef-color)
   - TR
-      - [CSS Color 3 - color](http://www.w3.org/TR/css3-color/#color0)
       - [CSS 2.1 - color](http://www.w3.org/TR/CSS21/colors.html#propdef-color)
+      - [CSS Color 3 - color](http://www.w3.org/TR/css3-color/#color0)
   - Drafts
+      - [CSS 2.1 - color](https://drafts.csswg.org/css2/colors.html#propdef-color)
       - [CSS Color 3 - color](https://drafts.csswg.org/css-color-3/#color0)
       - [CSS Color 4 - color](https://drafts.csswg.org/css-color-4/#propdef-color)
-      - [CSS 2.1 - color](https://drafts.csswg.org/css2/colors.html#propdef-color)
   - Values: COLOR;
 - [opacity](http://www.w3.org/TR/css3-color/#opacity)
   - TR
@@ -870,14 +870,14 @@
       - [CSS Color 4 - opacity](https://drafts.csswg.org/css-color-4/#propdef-opacity)
   - Values: NUM;
 ## [CSS Color 4](https://drafts.csswg.org/css-color-4/)
-- [color](http://www.w3.org/TR/css3-color/#color0)
+- [color](http://www.w3.org/TR/CSS21/colors.html#propdef-color)
   - TR
-      - [CSS Color 3 - color](http://www.w3.org/TR/css3-color/#color0)
       - [CSS 2.1 - color](http://www.w3.org/TR/CSS21/colors.html#propdef-color)
+      - [CSS Color 3 - color](http://www.w3.org/TR/css3-color/#color0)
   - Drafts
+      - [CSS 2.1 - color](https://drafts.csswg.org/css2/colors.html#propdef-color)
       - [CSS Color 3 - color](https://drafts.csswg.org/css-color-3/#color0)
       - [CSS Color 4 - color](https://drafts.csswg.org/css-color-4/#propdef-color)
-      - [CSS 2.1 - color](https://drafts.csswg.org/css2/colors.html#propdef-color)
   - Values: COLOR;
 - [opacity](http://www.w3.org/TR/css3-color/#opacity)
   - TR
@@ -887,21 +887,21 @@
       - [CSS Color 4 - opacity](https://drafts.csswg.org/css-color-4/#propdef-opacity)
   - Values: NUM;
 ## [CSS Backgrounds 3](http://www.w3.org/TR/css3-background/)
-- [background](http://www.w3.org/TR/css3-background/#background)
+- [background](http://www.w3.org/TR/CSS21/colors.html#propdef-background)
   - TR
-      - [CSS Backgrounds 3 - background](http://www.w3.org/TR/css3-background/#background)
       - [CSS 2.1 - background](http://www.w3.org/TR/CSS21/colors.html#propdef-background)
+      - [CSS Backgrounds 3 - background](http://www.w3.org/TR/css3-background/#background)
   - Drafts
-      - [CSS Backgrounds 3 - background](https://drafts.csswg.org/css-backgrounds-3/#background)
       - [CSS 2.1 - background](https://drafts.csswg.org/css2/colors.html#propdef-background)
+      - [CSS Backgrounds 3 - background](https://drafts.csswg.org/css-backgrounds-3/#background)
   - Values: COMMA background-image [background-position [ / background-size ]] background-repeat
-- [background-attachment](http://www.w3.org/TR/css3-background/#background-attachment)
+- [background-attachment](http://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment)
   - TR
-      - [CSS Backgrounds 3 - background-attachment](http://www.w3.org/TR/css3-background/#background-attachment)
       - [CSS 2.1 - background-attachment](http://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment)
+      - [CSS Backgrounds 3 - background-attachment](http://www.w3.org/TR/css3-background/#background-attachment)
   - Drafts
-      - [CSS Backgrounds 3 - background-attachment](https://drafts.csswg.org/css-backgrounds-3/#background-attachment)
       - [CSS 2.1 - background-attachment](https://drafts.csswg.org/css2/colors.html#propdef-background-attachment)
+      - [CSS Backgrounds 3 - background-attachment](https://drafts.csswg.org/css-backgrounds-3/#background-attachment)
   - Values: COMMA( [scroll | fixed | local]+ );
 - [background-clip](http://www.w3.org/TR/css3-background/#background-clip)
   - TR
@@ -910,21 +910,21 @@
       - [CSS Backgrounds 3 - background-clip](https://drafts.csswg.org/css-backgrounds-3/#background-clip)
   - Allowed prefixes: webkit
   - Values: COMMA( BOX+ );
-- [background-color](http://www.w3.org/TR/css3-background/#background-color)
+- [background-color](http://www.w3.org/TR/CSS21/colors.html#propdef-background-color)
   - TR
-      - [CSS Backgrounds 3 - background-color](http://www.w3.org/TR/css3-background/#background-color)
       - [CSS 2.1 - background-color](http://www.w3.org/TR/CSS21/colors.html#propdef-background-color)
+      - [CSS Backgrounds 3 - background-color](http://www.w3.org/TR/css3-background/#background-color)
   - Drafts
-      - [CSS Backgrounds 3 - background-color](https://drafts.csswg.org/css-backgrounds-3/#background-color)
       - [CSS 2.1 - background-color](https://drafts.csswg.org/css2/colors.html#propdef-background-color)
+      - [CSS Backgrounds 3 - background-color](https://drafts.csswg.org/css-backgrounds-3/#background-color)
   - Values: COLOR;
-- [background-image](http://www.w3.org/TR/css3-background/#background-image)
+- [background-image](http://www.w3.org/TR/CSS21/colors.html#propdef-background-image)
   - TR
-      - [CSS Backgrounds 3 - background-image](http://www.w3.org/TR/css3-background/#background-image)
       - [CSS 2.1 - background-image](http://www.w3.org/TR/CSS21/colors.html#propdef-background-image)
+      - [CSS Backgrounds 3 - background-image](http://www.w3.org/TR/css3-background/#background-image)
   - Drafts
-      - [CSS Backgrounds 3 - background-image](https://drafts.csswg.org/css-backgrounds-3/#background-image)
       - [CSS 2.1 - background-image](https://drafts.csswg.org/css2/colors.html#propdef-background-image)
+      - [CSS Backgrounds 3 - background-image](https://drafts.csswg.org/css-backgrounds-3/#background-image)
   - Values: COMMA( URI_OR_NONE+ );
 - [background-origin](http://www.w3.org/TR/css3-background/#background-origin)
   - TR
@@ -933,22 +933,22 @@
       - [CSS Backgrounds 3 - background-origin](https://drafts.csswg.org/css-backgrounds-3/#background-origin)
   - Allowed prefixes: webkit
   - Values: COMMA( BOX+ );
-- [background-position](http://www.w3.org/TR/css3-background/#background-position)
+- [background-position](http://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
   - TR
-      - [CSS Backgrounds 3 - background-position](http://www.w3.org/TR/css3-background/#background-position)
       - [CSS 2.1 - background-position](http://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
+      - [CSS Backgrounds 3 - background-position](http://www.w3.org/TR/css3-background/#background-position)
   - Drafts
+      - [CSS 2.1 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
       - [CSS Backgrounds 3 - background-position](https://drafts.csswg.org/css-backgrounds-3/#background-position)
       - [CSS Backgrounds 4 - background-position](https://drafts.csswg.org/css-backgrounds-4/#propdef-background-position)
-      - [CSS 2.1 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
   - Values: COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */
-- [background-repeat](http://www.w3.org/TR/css3-background/#background-repeat)
+- [background-repeat](http://www.w3.org/TR/CSS21/colors.html#propdef-background-repeat)
   - TR
-      - [CSS Backgrounds 3 - background-repeat](http://www.w3.org/TR/css3-background/#background-repeat)
       - [CSS 2.1 - background-repeat](http://www.w3.org/TR/CSS21/colors.html#propdef-background-repeat)
+      - [CSS Backgrounds 3 - background-repeat](http://www.w3.org/TR/css3-background/#background-repeat)
   - Drafts
-      - [CSS Backgrounds 3 - background-repeat](https://drafts.csswg.org/css-backgrounds-3/#background-repeat)
       - [CSS 2.1 - background-repeat](https://drafts.csswg.org/css2/colors.html#propdef-background-repeat)
+      - [CSS Backgrounds 3 - background-repeat](https://drafts.csswg.org/css-backgrounds-3/#background-repeat)
   - Values: COMMA( [repeat | repeat-x | repeat-y | no-repeat]+ );
 - [background-size](http://www.w3.org/TR/css3-background/#background-size)
   - TR
@@ -957,29 +957,29 @@
       - [CSS Backgrounds 3 - background-size](https://drafts.csswg.org/css-backgrounds-3/#background-size)
   - Allowed prefixes: webkit
   - Values: COMMA( SPACE( [PLENGTH | auto ]{1,2} | cover | contain)+ );
-- [border](http://www.w3.org/TR/css3-background/#border)
+- [border](http://www.w3.org/TR/CSS21/box.html#propdef-border)
   - TR
-      - [CSS Backgrounds 3 - border](http://www.w3.org/TR/css3-background/#border)
       - [CSS 2.1 - border](http://www.w3.org/TR/CSS21/box.html#propdef-border)
+      - [CSS Backgrounds 3 - border](http://www.w3.org/TR/css3-background/#border)
   - Drafts
-      - [CSS Backgrounds 3 - border](https://drafts.csswg.org/css-backgrounds-3/#border)
       - [CSS 2.1 - border](https://drafts.csswg.org/css2/box.html#propdef-border)
+      - [CSS Backgrounds 3 - border](https://drafts.csswg.org/css-backgrounds-3/#border)
   - Values: border-width border-style border-color;
-- [border-bottom](http://www.w3.org/TR/css3-background/#border-bottom)
+- [border-bottom](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom)
   - TR
-      - [CSS Backgrounds 3 - border-bottom](http://www.w3.org/TR/css3-background/#border-bottom)
       - [CSS 2.1 - border-bottom](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom)
+      - [CSS Backgrounds 3 - border-bottom](http://www.w3.org/TR/css3-background/#border-bottom)
   - Drafts
-      - [CSS Backgrounds 3 - border-bottom](https://drafts.csswg.org/css-backgrounds-3/#border-bottom)
       - [CSS 2.1 - border-bottom](https://drafts.csswg.org/css2/box.html#propdef-border-bottom)
+      - [CSS Backgrounds 3 - border-bottom](https://drafts.csswg.org/css-backgrounds-3/#border-bottom)
   - Values: border-bottom-width border-bottom-style border-bottom-color;
-- [border-bottom-color](http://www.w3.org/TR/css3-background/#border-bottom-color)
+- [border-bottom-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-color)
   - TR
-      - [CSS Backgrounds 3 - border-bottom-color](http://www.w3.org/TR/css3-background/#border-bottom-color)
       - [CSS 2.1 - border-bottom-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-color)
+      - [CSS Backgrounds 3 - border-bottom-color](http://www.w3.org/TR/css3-background/#border-bottom-color)
   - Drafts
-      - [CSS Backgrounds 3 - border-bottom-color](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-color)
       - [CSS 2.1 - border-bottom-color](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-color)
+      - [CSS Backgrounds 3 - border-bottom-color](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-color)
   - Values: BORDER_SIDE_COLOR;
 - [border-bottom-left-radius](http://www.w3.org/TR/css3-background/#border-bottom-left-radius)
   - TR
@@ -993,29 +993,29 @@
   - Drafts
       - [CSS Backgrounds 3 - border-bottom-right-radius](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-right-radius)
   - Values: BORDER_RADIUS;
-- [border-bottom-style](http://www.w3.org/TR/css3-background/#border-bottom-style)
+- [border-bottom-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-style)
   - TR
-      - [CSS Backgrounds 3 - border-bottom-style](http://www.w3.org/TR/css3-background/#border-bottom-style)
       - [CSS 2.1 - border-bottom-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-style)
+      - [CSS Backgrounds 3 - border-bottom-style](http://www.w3.org/TR/css3-background/#border-bottom-style)
   - Drafts
-      - [CSS Backgrounds 3 - border-bottom-style](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-style)
       - [CSS 2.1 - border-bottom-style](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-style)
+      - [CSS Backgrounds 3 - border-bottom-style](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-style)
   - Values: BORDER_SIDE_STYLE;
-- [border-bottom-width](http://www.w3.org/TR/css3-background/#border-bottom-width)
+- [border-bottom-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-width)
   - TR
-      - [CSS Backgrounds 3 - border-bottom-width](http://www.w3.org/TR/css3-background/#border-bottom-width)
       - [CSS 2.1 - border-bottom-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-width)
+      - [CSS Backgrounds 3 - border-bottom-width](http://www.w3.org/TR/css3-background/#border-bottom-width)
   - Drafts
-      - [CSS Backgrounds 3 - border-bottom-width](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-width)
       - [CSS 2.1 - border-bottom-width](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-width)
+      - [CSS Backgrounds 3 - border-bottom-width](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-width)
   - Values: BORDER_SIDE_WIDTH;
-- [border-color](http://www.w3.org/TR/css3-background/#border-color)
+- [border-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-color)
   - TR
-      - [CSS Backgrounds 3 - border-color](http://www.w3.org/TR/css3-background/#border-color)
       - [CSS 2.1 - border-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-color)
+      - [CSS Backgrounds 3 - border-color](http://www.w3.org/TR/css3-background/#border-color)
   - Drafts
-      - [CSS Backgrounds 3 - border-color](https://drafts.csswg.org/css-backgrounds-3/#border-color)
       - [CSS 2.1 - border-color](https://drafts.csswg.org/css2/box.html#propdef-border-color)
+      - [CSS Backgrounds 3 - border-color](https://drafts.csswg.org/css-backgrounds-3/#border-color)
   - Values: INSETS border-top-color border-right-color border-bottom-color border-left-color;
 - [border-image](http://www.w3.org/TR/css3-background/#border-image)
   - TR
@@ -1053,37 +1053,37 @@
   - Drafts
       - [CSS Backgrounds 3 - border-image-width](https://drafts.csswg.org/css-backgrounds-3/#border-image-width)
   - Values: [NUM | PLENGTH | auto]{1,4};
-- [border-left](http://www.w3.org/TR/css3-background/#border-left)
+- [border-left](http://www.w3.org/TR/CSS21/box.html#propdef-border-left)
   - TR
-      - [CSS Backgrounds 3 - border-left](http://www.w3.org/TR/css3-background/#border-left)
       - [CSS 2.1 - border-left](http://www.w3.org/TR/CSS21/box.html#propdef-border-left)
+      - [CSS Backgrounds 3 - border-left](http://www.w3.org/TR/css3-background/#border-left)
   - Drafts
-      - [CSS Backgrounds 3 - border-left](https://drafts.csswg.org/css-backgrounds-3/#border-left)
       - [CSS 2.1 - border-left](https://drafts.csswg.org/css2/box.html#propdef-border-left)
+      - [CSS Backgrounds 3 - border-left](https://drafts.csswg.org/css-backgrounds-3/#border-left)
   - Values: border-left-width border-left-style border-left-color;
-- [border-left-color](http://www.w3.org/TR/css3-background/#border-left-color)
+- [border-left-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-color)
   - TR
-      - [CSS Backgrounds 3 - border-left-color](http://www.w3.org/TR/css3-background/#border-left-color)
       - [CSS 2.1 - border-left-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-color)
+      - [CSS Backgrounds 3 - border-left-color](http://www.w3.org/TR/css3-background/#border-left-color)
   - Drafts
-      - [CSS Backgrounds 3 - border-left-color](https://drafts.csswg.org/css-backgrounds-3/#border-left-color)
       - [CSS 2.1 - border-left-color](https://drafts.csswg.org/css2/box.html#propdef-border-left-color)
+      - [CSS Backgrounds 3 - border-left-color](https://drafts.csswg.org/css-backgrounds-3/#border-left-color)
   - Values: BORDER_SIDE_COLOR;
-- [border-left-style](http://www.w3.org/TR/css3-background/#border-left-style)
+- [border-left-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-style)
   - TR
-      - [CSS Backgrounds 3 - border-left-style](http://www.w3.org/TR/css3-background/#border-left-style)
       - [CSS 2.1 - border-left-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-style)
+      - [CSS Backgrounds 3 - border-left-style](http://www.w3.org/TR/css3-background/#border-left-style)
   - Drafts
-      - [CSS Backgrounds 3 - border-left-style](https://drafts.csswg.org/css-backgrounds-3/#border-left-style)
       - [CSS 2.1 - border-left-style](https://drafts.csswg.org/css2/box.html#propdef-border-left-style)
+      - [CSS Backgrounds 3 - border-left-style](https://drafts.csswg.org/css-backgrounds-3/#border-left-style)
   - Values: BORDER_SIDE_STYLE;
-- [border-left-width](http://www.w3.org/TR/css3-background/#border-left-width)
+- [border-left-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-width)
   - TR
-      - [CSS Backgrounds 3 - border-left-width](http://www.w3.org/TR/css3-background/#border-left-width)
       - [CSS 2.1 - border-left-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-width)
+      - [CSS Backgrounds 3 - border-left-width](http://www.w3.org/TR/css3-background/#border-left-width)
   - Drafts
-      - [CSS Backgrounds 3 - border-left-width](https://drafts.csswg.org/css-backgrounds-3/#border-left-width)
       - [CSS 2.1 - border-left-width](https://drafts.csswg.org/css2/box.html#propdef-border-left-width)
+      - [CSS Backgrounds 3 - border-left-width](https://drafts.csswg.org/css-backgrounds-3/#border-left-width)
   - Values: BORDER_SIDE_WIDTH;
 - [border-radius](http://www.w3.org/TR/css3-background/#border-radius)
   - TR
@@ -1092,61 +1092,61 @@
       - [CSS Backgrounds 3 - border-radius](https://drafts.csswg.org/css-backgrounds-3/#border-radius)
       - [CSS Backgrounds 4 - border-radius](https://drafts.csswg.org/css-backgrounds-4/#propdef-border-radius)
   - Values: INSETS_SLASH border-top-left-radius border-top-right-radius border-bottom-right-radius border-bottom-left-radius;
-- [border-right](http://www.w3.org/TR/css3-background/#border-right)
+- [border-right](http://www.w3.org/TR/CSS21/box.html#propdef-border-right)
   - TR
-      - [CSS Backgrounds 3 - border-right](http://www.w3.org/TR/css3-background/#border-right)
       - [CSS 2.1 - border-right](http://www.w3.org/TR/CSS21/box.html#propdef-border-right)
+      - [CSS Backgrounds 3 - border-right](http://www.w3.org/TR/css3-background/#border-right)
   - Drafts
-      - [CSS Backgrounds 3 - border-right](https://drafts.csswg.org/css-backgrounds-3/#border-right)
       - [CSS 2.1 - border-right](https://drafts.csswg.org/css2/box.html#propdef-border-right)
+      - [CSS Backgrounds 3 - border-right](https://drafts.csswg.org/css-backgrounds-3/#border-right)
   - Values: border-right-width border-right-style border-right-color;
-- [border-right-color](http://www.w3.org/TR/css3-background/#border-right-color)
+- [border-right-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-color)
   - TR
-      - [CSS Backgrounds 3 - border-right-color](http://www.w3.org/TR/css3-background/#border-right-color)
       - [CSS 2.1 - border-right-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-color)
+      - [CSS Backgrounds 3 - border-right-color](http://www.w3.org/TR/css3-background/#border-right-color)
   - Drafts
-      - [CSS Backgrounds 3 - border-right-color](https://drafts.csswg.org/css-backgrounds-3/#border-right-color)
       - [CSS 2.1 - border-right-color](https://drafts.csswg.org/css2/box.html#propdef-border-right-color)
+      - [CSS Backgrounds 3 - border-right-color](https://drafts.csswg.org/css-backgrounds-3/#border-right-color)
   - Values: BORDER_SIDE_COLOR;
-- [border-right-style](http://www.w3.org/TR/css3-background/#border-right-style)
+- [border-right-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-style)
   - TR
-      - [CSS Backgrounds 3 - border-right-style](http://www.w3.org/TR/css3-background/#border-right-style)
       - [CSS 2.1 - border-right-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-style)
+      - [CSS Backgrounds 3 - border-right-style](http://www.w3.org/TR/css3-background/#border-right-style)
   - Drafts
-      - [CSS Backgrounds 3 - border-right-style](https://drafts.csswg.org/css-backgrounds-3/#border-right-style)
       - [CSS 2.1 - border-right-style](https://drafts.csswg.org/css2/box.html#propdef-border-right-style)
+      - [CSS Backgrounds 3 - border-right-style](https://drafts.csswg.org/css-backgrounds-3/#border-right-style)
   - Values: BORDER_SIDE_STYLE;
-- [border-right-width](http://www.w3.org/TR/css3-background/#border-right-width)
+- [border-right-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-width)
   - TR
-      - [CSS Backgrounds 3 - border-right-width](http://www.w3.org/TR/css3-background/#border-right-width)
       - [CSS 2.1 - border-right-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-width)
+      - [CSS Backgrounds 3 - border-right-width](http://www.w3.org/TR/css3-background/#border-right-width)
   - Drafts
-      - [CSS Backgrounds 3 - border-right-width](https://drafts.csswg.org/css-backgrounds-3/#border-right-width)
       - [CSS 2.1 - border-right-width](https://drafts.csswg.org/css2/box.html#propdef-border-right-width)
+      - [CSS Backgrounds 3 - border-right-width](https://drafts.csswg.org/css-backgrounds-3/#border-right-width)
   - Values: BORDER_SIDE_WIDTH;
-- [border-style](http://www.w3.org/TR/css3-background/#border-style)
+- [border-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-style)
   - TR
-      - [CSS Backgrounds 3 - border-style](http://www.w3.org/TR/css3-background/#border-style)
       - [CSS 2.1 - border-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-style)
+      - [CSS Backgrounds 3 - border-style](http://www.w3.org/TR/css3-background/#border-style)
   - Drafts
-      - [CSS Backgrounds 3 - border-style](https://drafts.csswg.org/css-backgrounds-3/#border-style)
       - [CSS 2.1 - border-style](https://drafts.csswg.org/css2/box.html#propdef-border-style)
+      - [CSS Backgrounds 3 - border-style](https://drafts.csswg.org/css-backgrounds-3/#border-style)
   - Values: INSETS border-top-style border-right-style border-bottom-style border-left-style;
-- [border-top](http://www.w3.org/TR/css3-background/#border-top)
+- [border-top](http://www.w3.org/TR/CSS21/box.html#propdef-border-top)
   - TR
-      - [CSS Backgrounds 3 - border-top](http://www.w3.org/TR/css3-background/#border-top)
       - [CSS 2.1 - border-top](http://www.w3.org/TR/CSS21/box.html#propdef-border-top)
+      - [CSS Backgrounds 3 - border-top](http://www.w3.org/TR/css3-background/#border-top)
   - Drafts
-      - [CSS Backgrounds 3 - border-top](https://drafts.csswg.org/css-backgrounds-3/#border-top)
       - [CSS 2.1 - border-top](https://drafts.csswg.org/css2/box.html#propdef-border-top)
+      - [CSS Backgrounds 3 - border-top](https://drafts.csswg.org/css-backgrounds-3/#border-top)
   - Values: border-top-width border-top-style border-top-color;
-- [border-top-color](http://www.w3.org/TR/css3-background/#border-top-color)
+- [border-top-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-color)
   - TR
-      - [CSS Backgrounds 3 - border-top-color](http://www.w3.org/TR/css3-background/#border-top-color)
       - [CSS 2.1 - border-top-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-color)
+      - [CSS Backgrounds 3 - border-top-color](http://www.w3.org/TR/css3-background/#border-top-color)
   - Drafts
-      - [CSS Backgrounds 3 - border-top-color](https://drafts.csswg.org/css-backgrounds-3/#border-top-color)
       - [CSS 2.1 - border-top-color](https://drafts.csswg.org/css2/box.html#propdef-border-top-color)
+      - [CSS Backgrounds 3 - border-top-color](https://drafts.csswg.org/css-backgrounds-3/#border-top-color)
   - Values: BORDER_SIDE_COLOR;
 - [border-top-left-radius](http://www.w3.org/TR/css3-background/#border-top-left-radius)
   - TR
@@ -1160,29 +1160,29 @@
   - Drafts
       - [CSS Backgrounds 3 - border-top-right-radius](https://drafts.csswg.org/css-backgrounds-3/#border-top-right-radius)
   - Values: BORDER_RADIUS;
-- [border-top-style](http://www.w3.org/TR/css3-background/#border-top-style)
+- [border-top-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-style)
   - TR
-      - [CSS Backgrounds 3 - border-top-style](http://www.w3.org/TR/css3-background/#border-top-style)
       - [CSS 2.1 - border-top-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-style)
+      - [CSS Backgrounds 3 - border-top-style](http://www.w3.org/TR/css3-background/#border-top-style)
   - Drafts
-      - [CSS Backgrounds 3 - border-top-style](https://drafts.csswg.org/css-backgrounds-3/#border-top-style)
       - [CSS 2.1 - border-top-style](https://drafts.csswg.org/css2/box.html#propdef-border-top-style)
+      - [CSS Backgrounds 3 - border-top-style](https://drafts.csswg.org/css-backgrounds-3/#border-top-style)
   - Values: BORDER_SIDE_STYLE;
-- [border-top-width](http://www.w3.org/TR/css3-background/#border-top-width)
+- [border-top-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-width)
   - TR
-      - [CSS Backgrounds 3 - border-top-width](http://www.w3.org/TR/css3-background/#border-top-width)
       - [CSS 2.1 - border-top-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-width)
+      - [CSS Backgrounds 3 - border-top-width](http://www.w3.org/TR/css3-background/#border-top-width)
   - Drafts
-      - [CSS Backgrounds 3 - border-top-width](https://drafts.csswg.org/css-backgrounds-3/#border-top-width)
       - [CSS 2.1 - border-top-width](https://drafts.csswg.org/css2/box.html#propdef-border-top-width)
+      - [CSS Backgrounds 3 - border-top-width](https://drafts.csswg.org/css-backgrounds-3/#border-top-width)
   - Values: BORDER_SIDE_WIDTH;
-- [border-width](http://www.w3.org/TR/css3-background/#border-width)
+- [border-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-width)
   - TR
-      - [CSS Backgrounds 3 - border-width](http://www.w3.org/TR/css3-background/#border-width)
       - [CSS 2.1 - border-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-width)
+      - [CSS Backgrounds 3 - border-width](http://www.w3.org/TR/css3-background/#border-width)
   - Drafts
-      - [CSS Backgrounds 3 - border-width](https://drafts.csswg.org/css-backgrounds-3/#border-width)
       - [CSS 2.1 - border-width](https://drafts.csswg.org/css2/box.html#propdef-border-width)
+      - [CSS Backgrounds 3 - border-width](https://drafts.csswg.org/css-backgrounds-3/#border-width)
   - Values: INSETS border-top-width border-right-width border-bottom-width border-left-width;
 - [box-shadow](http://www.w3.org/TR/css3-background/#box-shadow)
   - TR
@@ -1192,14 +1192,14 @@
   - Allowed prefixes: webkit
   - Values: none | COMMA( SHADOW+ );
 ## [CSS Backgrounds 4](https://drafts.csswg.org/css-backgrounds-4/)
-- [background-position](http://www.w3.org/TR/css3-background/#background-position)
+- [background-position](http://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
   - TR
-      - [CSS Backgrounds 3 - background-position](http://www.w3.org/TR/css3-background/#background-position)
       - [CSS 2.1 - background-position](http://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
+      - [CSS Backgrounds 3 - background-position](http://www.w3.org/TR/css3-background/#background-position)
   - Drafts
+      - [CSS 2.1 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
       - [CSS Backgrounds 3 - background-position](https://drafts.csswg.org/css-backgrounds-3/#background-position)
       - [CSS Backgrounds 4 - background-position](https://drafts.csswg.org/css-backgrounds-4/#propdef-background-position)
-      - [CSS 2.1 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
   - Values: COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */
 - [border-radius](http://www.w3.org/TR/css3-background/#border-radius)
   - TR
@@ -1239,21 +1239,21 @@
       - [CSS Images 3 - object-position](https://drafts.csswg.org/css-images-3/#propdef-object-position)
   - Values: COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */
 ## [CSS Fonts 3](http://www.w3.org/TR/css-fonts-3/)
-- [font](http://www.w3.org/TR/css-fonts-3/#propdef-font)
+- [font](http://www.w3.org/TR/CSS21/fonts.html#propdef-font)
   - TR
-      - [CSS Fonts 3 - font](http://www.w3.org/TR/css-fonts-3/#propdef-font)
       - [CSS 2.1 - font](http://www.w3.org/TR/CSS21/fonts.html#propdef-font)
+      - [CSS Fonts 3 - font](http://www.w3.org/TR/css-fonts-3/#propdef-font)
   - Drafts
-      - [CSS Fonts 3 - font](https://drafts.csswg.org/css-fonts-3/#propdef-font)
       - [CSS 2.1 - font](https://drafts.csswg.org/css2/fonts.html#propdef-font)
+      - [CSS Fonts 3 - font](https://drafts.csswg.org/css-fonts-3/#propdef-font)
   - Values: FONT font-style font-variant font-weight /* font-size line-height font-family are special-cased */;
-- [font-family](http://www.w3.org/TR/css-fonts-3/#propdef-font-family)
+- [font-family](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-family)
   - TR
-      - [CSS Fonts 3 - font-family](http://www.w3.org/TR/css-fonts-3/#propdef-font-family)
       - [CSS 2.1 - font-family](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-family)
+      - [CSS Fonts 3 - font-family](http://www.w3.org/TR/css-fonts-3/#propdef-font-family)
   - Drafts
-      - [CSS Fonts 3 - font-family](https://drafts.csswg.org/css-fonts-3/#propdef-font-family)
       - [CSS 2.1 - font-family](https://drafts.csswg.org/css2/fonts.html#propdef-font-family)
+      - [CSS Fonts 3 - font-family](https://drafts.csswg.org/css-fonts-3/#propdef-font-family)
   - Values: FAMILY_LIST;
 - [font-kerning](http://www.w3.org/TR/css-fonts-3/#propdef-font-kerning)
   - TR
@@ -1262,37 +1262,37 @@
       - [CSS Fonts 3 - font-kerning](https://drafts.csswg.org/css-fonts-3/#propdef-font-kerning)
   - Allowed prefixes: webkit
   - Values: auto | normal | none;
-- [font-size](http://www.w3.org/TR/css-fonts-3/#propdef-font-size)
+- [font-size](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-size)
   - TR
-      - [CSS Fonts 3 - font-size](http://www.w3.org/TR/css-fonts-3/#propdef-font-size)
       - [CSS 2.1 - font-size](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-size)
+      - [CSS Fonts 3 - font-size](http://www.w3.org/TR/css-fonts-3/#propdef-font-size)
   - Drafts
-      - [CSS Fonts 3 - font-size](https://drafts.csswg.org/css-fonts-3/#propdef-font-size)
       - [CSS 2.1 - font-size](https://drafts.csswg.org/css2/fonts.html#propdef-font-size)
+      - [CSS Fonts 3 - font-size](https://drafts.csswg.org/css-fonts-3/#propdef-font-size)
   - Values: xx-small | x-small | small | medium | large | x-large | xx-large | larger | smaller | PPLENGTH;
-- [font-style](http://www.w3.org/TR/css-fonts-3/#propdef-font-style)
+- [font-style](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-style)
   - TR
-      - [CSS Fonts 3 - font-style](http://www.w3.org/TR/css-fonts-3/#propdef-font-style)
       - [CSS 2.1 - font-style](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-style)
+      - [CSS Fonts 3 - font-style](http://www.w3.org/TR/css-fonts-3/#propdef-font-style)
   - Drafts
-      - [CSS Fonts 3 - font-style](https://drafts.csswg.org/css-fonts-3/#propdef-font-style)
       - [CSS 2.1 - font-style](https://drafts.csswg.org/css2/fonts.html#propdef-font-style)
+      - [CSS Fonts 3 - font-style](https://drafts.csswg.org/css-fonts-3/#propdef-font-style)
   - Values: normal | italic | oblique;
-- [font-variant](http://www.w3.org/TR/css-fonts-3/#propdef-font-variant)
+- [font-variant](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-variant)
   - TR
-      - [CSS Fonts 3 - font-variant](http://www.w3.org/TR/css-fonts-3/#propdef-font-variant)
       - [CSS 2.1 - font-variant](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-variant)
+      - [CSS Fonts 3 - font-variant](http://www.w3.org/TR/css-fonts-3/#propdef-font-variant)
   - Drafts
-      - [CSS Fonts 3 - font-variant](https://drafts.csswg.org/css-fonts-3/#propdef-font-variant)
       - [CSS 2.1 - font-variant](https://drafts.csswg.org/css2/fonts.html#propdef-font-variant)
+      - [CSS Fonts 3 - font-variant](https://drafts.csswg.org/css-fonts-3/#propdef-font-variant)
   - Values: normal | small-caps;
-- [font-weight](http://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
+- [font-weight](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-weight)
   - TR
-      - [CSS Fonts 3 - font-weight](http://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
       - [CSS 2.1 - font-weight](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-weight)
+      - [CSS Fonts 3 - font-weight](http://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
   - Drafts
-      - [CSS Fonts 3 - font-weight](https://drafts.csswg.org/css-fonts-3/#propdef-font-weight)
       - [CSS 2.1 - font-weight](https://drafts.csswg.org/css2/fonts.html#propdef-font-weight)
+      - [CSS Fonts 3 - font-weight](https://drafts.csswg.org/css-fonts-3/#propdef-font-weight)
   - Values: normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
 ## [CSS Text 3](http://www.w3.org/TR/css-text-3/)
 - [hyphens](http://www.w3.org/TR/css-text-3/#hyphens)
@@ -1302,13 +1302,13 @@
       - [CSS Text 3 - hyphens](https://drafts.csswg.org/css-text-3/#propdef-hyphens)
   - Allowed prefixes: epub, moz, ms, webkit
   - Values: auto | none;
-- [letter-spacing](http://www.w3.org/TR/css-text-3/#letter-spacing)
+- [letter-spacing](http://www.w3.org/TR/CSS21/text.html#propdef-letter-spacing)
   - TR
-      - [CSS Text 3 - letter-spacing](http://www.w3.org/TR/css-text-3/#letter-spacing)
       - [CSS 2.1 - letter-spacing](http://www.w3.org/TR/CSS21/text.html#propdef-letter-spacing)
+      - [CSS Text 3 - letter-spacing](http://www.w3.org/TR/css-text-3/#letter-spacing)
   - Drafts
-      - [CSS Text 3 - letter-spacing](https://drafts.csswg.org/css-text-3/#propdef-letter-spacing)
       - [CSS 2.1 - letter-spacing](https://drafts.csswg.org/css2/text.html#propdef-letter-spacing)
+      - [CSS Text 3 - letter-spacing](https://drafts.csswg.org/css-text-3/#propdef-letter-spacing)
   - Values: normal | LENGTH;
 - [line-break](http://www.w3.org/TR/css-text-3/#line-break0)
   - TR
@@ -1330,13 +1330,13 @@
       - [CSS Text 3 - tab-size](https://drafts.csswg.org/css-text-3/#propdef-tab-size)
   - Allowed prefixes: moz
   - Values: NNEG_INT | NNEG_LENGTH;
-- [text-align](http://www.w3.org/TR/css-text-3/#text-align)
+- [text-align](http://www.w3.org/TR/CSS21/text.html#propdef-text-align)
   - TR
-      - [CSS Text 3 - text-align](http://www.w3.org/TR/css-text-3/#text-align)
       - [CSS 2.1 - text-align](http://www.w3.org/TR/CSS21/text.html#propdef-text-align)
+      - [CSS Text 3 - text-align](http://www.w3.org/TR/css-text-3/#text-align)
   - Drafts
-      - [CSS Text 3 - text-align](https://drafts.csswg.org/css-text-3/#propdef-text-align)
       - [CSS 2.1 - text-align](https://drafts.csswg.org/css2/text.html#propdef-text-align)
+      - [CSS Text 3 - text-align](https://drafts.csswg.org/css-text-3/#propdef-text-align)
   - Values: left | right | center | justify;
 - [text-align-last](http://www.w3.org/TR/css-text-3/#text-align-last)
   - TR
@@ -1345,13 +1345,13 @@
       - [CSS Text 3 - text-align-last](https://drafts.csswg.org/css-text-3/#propdef-text-align-last)
   - Allowed prefixes: moz, ms
   - Values: auto | start | end | left | right | center | justify;
-- [text-indent](http://www.w3.org/TR/css-text-3/#text-indent)
+- [text-indent](http://www.w3.org/TR/CSS21/text.html#propdef-text-indent)
   - TR
-      - [CSS Text 3 - text-indent](http://www.w3.org/TR/css-text-3/#text-indent)
       - [CSS 2.1 - text-indent](http://www.w3.org/TR/CSS21/text.html#propdef-text-indent)
+      - [CSS Text 3 - text-indent](http://www.w3.org/TR/css-text-3/#text-indent)
   - Drafts
-      - [CSS Text 3 - text-indent](https://drafts.csswg.org/css-text-3/#propdef-text-indent)
       - [CSS 2.1 - text-indent](https://drafts.csswg.org/css2/text.html#propdef-text-indent)
+      - [CSS Text 3 - text-indent](https://drafts.csswg.org/css-text-3/#propdef-text-indent)
   - Values: PLENGTH;
 - [text-justify](http://www.w3.org/TR/css-text-3/#text-justify)
   - TR
@@ -1360,22 +1360,22 @@
       - [CSS Text 3 - text-justify](https://drafts.csswg.org/css-text-3/#propdef-text-justify)
   - Allowed prefixes: ms
   - Values: auto | none | inter-word | inter-character | inter-ideograph /* specified in UA stylesheet for IE */;
-- [text-transform](http://www.w3.org/TR/css-text-3/#text-transform)
+- [text-transform](http://www.w3.org/TR/CSS21/text.html#propdef-text-transform)
   - TR
-      - [CSS Text 3 - text-transform](http://www.w3.org/TR/css-text-3/#text-transform)
       - [CSS 2.1 - text-transform](http://www.w3.org/TR/CSS21/text.html#propdef-text-transform)
+      - [CSS Text 3 - text-transform](http://www.w3.org/TR/css-text-3/#text-transform)
   - Drafts
-      - [CSS Text 3 - text-transform](https://drafts.csswg.org/css-text-3/#propdef-text-transform)
       - [CSS 2.1 - text-transform](https://drafts.csswg.org/css2/text.html#propdef-text-transform)
+      - [CSS Text 3 - text-transform](https://drafts.csswg.org/css-text-3/#propdef-text-transform)
   - Values: capitalize | uppercase | lowercase | none;
-- [white-space](http://www.w3.org/TR/css-text-3/#white-space)
+- [white-space](http://www.w3.org/TR/CSS21/text.html#propdef-white-space)
   - TR
-      - [CSS Text 3 - white-space](http://www.w3.org/TR/css-text-3/#white-space)
       - [CSS 2.1 - white-space](http://www.w3.org/TR/CSS21/text.html#propdef-white-space)
+      - [CSS Text 3 - white-space](http://www.w3.org/TR/css-text-3/#white-space)
   - Drafts
+      - [CSS 2.1 - white-space](https://drafts.csswg.org/css2/text.html#propdef-white-space)
       - [CSS Text 3 - white-space](https://drafts.csswg.org/css-text-3/#propdef-white-space)
       - [CSS Text 4 - white-space](https://drafts.csswg.org/css-text-4/#propdef-white-space)
-      - [CSS 2.1 - white-space](https://drafts.csswg.org/css2/text.html#propdef-white-space)
   - Values: normal | pre | nowrap | pre-wrap | pre-line;
 - [word-break](http://www.w3.org/TR/css-text-3/#word-break)
   - TR
@@ -1384,13 +1384,13 @@
       - [CSS Text 3 - word-break](https://drafts.csswg.org/css-text-3/#propdef-word-break)
   - Allowed prefixes: ms
   - Values: normal | keep-all | break-all;
-- [word-spacing](http://www.w3.org/TR/css-text-3/#word-spacing)
+- [word-spacing](http://www.w3.org/TR/CSS21/text.html#propdef-word-spacing)
   - TR
-      - [CSS Text 3 - word-spacing](http://www.w3.org/TR/css-text-3/#word-spacing)
       - [CSS 2.1 - word-spacing](http://www.w3.org/TR/CSS21/text.html#propdef-word-spacing)
+      - [CSS Text 3 - word-spacing](http://www.w3.org/TR/css-text-3/#word-spacing)
   - Drafts
-      - [CSS Text 3 - word-spacing](https://drafts.csswg.org/css-text-3/#propdef-word-spacing)
       - [CSS 2.1 - word-spacing](https://drafts.csswg.org/css2/text.html#propdef-word-spacing)
+      - [CSS Text 3 - word-spacing](https://drafts.csswg.org/css-text-3/#propdef-word-spacing)
   - Values: normal | LENGTH;
 - [word-wrap](http://www.w3.org/TR/css-text-3/#word-wrap)
   - TR
@@ -1400,23 +1400,23 @@
   - Allowed prefixes: ms
   - Values: normal | break-word;
 ## [CSS Text 4](https://drafts.csswg.org/css-text-4/)
-- [white-space](http://www.w3.org/TR/css-text-3/#white-space)
+- [white-space](http://www.w3.org/TR/CSS21/text.html#propdef-white-space)
   - TR
-      - [CSS Text 3 - white-space](http://www.w3.org/TR/css-text-3/#white-space)
       - [CSS 2.1 - white-space](http://www.w3.org/TR/CSS21/text.html#propdef-white-space)
+      - [CSS Text 3 - white-space](http://www.w3.org/TR/css-text-3/#white-space)
   - Drafts
+      - [CSS 2.1 - white-space](https://drafts.csswg.org/css2/text.html#propdef-white-space)
       - [CSS Text 3 - white-space](https://drafts.csswg.org/css-text-3/#propdef-white-space)
       - [CSS Text 4 - white-space](https://drafts.csswg.org/css-text-4/#propdef-white-space)
-      - [CSS 2.1 - white-space](https://drafts.csswg.org/css2/text.html#propdef-white-space)
   - Values: normal | pre | nowrap | pre-wrap | pre-line;
 ## [CSS Text Decoration 3](http://www.w3.org/TR/css-text-decor-3/)
-- [text-decoration](http://www.w3.org/TR/css-text-decor-3/#text-decoration)
+- [text-decoration](http://www.w3.org/TR/CSS21/text.html#propdef-text-decoration)
   - TR
-      - [CSS Text Decoration 3 - text-decoration](http://www.w3.org/TR/css-text-decor-3/#text-decoration)
       - [CSS 2.1 - text-decoration](http://www.w3.org/TR/CSS21/text.html#propdef-text-decoration)
+      - [CSS Text Decoration 3 - text-decoration](http://www.w3.org/TR/css-text-decor-3/#text-decoration)
   - Drafts
-      - [CSS Text Decoration 3 - text-decoration](https://drafts.csswg.org/css-text-decor-3/#propdef-text-decoration)
       - [CSS 2.1 - text-decoration](https://drafts.csswg.org/css2/text.html#propdef-text-decoration)
+      - [CSS Text Decoration 3 - text-decoration](https://drafts.csswg.org/css-text-decor-3/#propdef-text-decoration)
   - Values: none | [ underline || overline || line-through || blink ];
 - [text-decoration-color](http://www.w3.org/TR/css-text-decor-3/#text-decoration-color)
   - TR
@@ -1436,8 +1436,8 @@
   - TR
       - [CSS Text Decoration 3 - text-decoration-skip](http://www.w3.org/TR/css-text-decor-3/#text-decoration-skip)
   - Drafts
-      - [CSS Text Decoration 3 - text-decoration-skip](https://drafts.csswg.org/css-text-decor-3/#propdef-text-decoration-skip)
       - [CSS Text Decoration 4 - text-decoration-skip](https://drafts.csswg.org/css-text-decor-4/#propdef-text-decoration-skip)
+      - [CSS Text Decoration 3 - text-decoration-skip](https://drafts.csswg.org/css-text-decor-3/#propdef-text-decoration-skip)
   - Allowed prefixes: webkit
   - Values: none | [ objects || spaces || ink || edges || box-decoration ];
 - [text-decoration-style](http://www.w3.org/TR/css-text-decor-3/#text-decoration-style)
@@ -1489,28 +1489,28 @@
   - Allowed prefixes: ms, webkit
   - Values: auto | [ under || [ left | right ]];
 ## [CSS Multicol 1](http://www.w3.org/TR/css3-multicol/)
-- [break-after](http://www.w3.org/TR/css3-break/#break-after)
+- [break-after](http://www.w3.org/TR/css3-multicol/#break-after)
   - TR
-      - [CSS Fragmentation 3 - break-after](http://www.w3.org/TR/css3-break/#break-after)
       - [CSS Multicol 1 - break-after](http://www.w3.org/TR/css3-multicol/#break-after)
+      - [CSS Fragmentation 3 - break-after](http://www.w3.org/TR/css3-break/#break-after)
       - [CSS Regions 1 - break-after](http://www.w3.org/TR/css3-regions/#propdef-break-after)
   - Drafts
       - [CSS Fragmentation 3 - break-after](https://drafts.csswg.org/css-break-3/#propdef-break-after)
       - [CSS Regions 1 - break-after](https://drafts.csswg.org/css-regions-1/#propdef-break-after)
   - Values: BREAK;
-- [break-before](http://www.w3.org/TR/css3-break/#break-before)
+- [break-before](http://www.w3.org/TR/css3-multicol/#break-before)
   - TR
-      - [CSS Fragmentation 3 - break-before](http://www.w3.org/TR/css3-break/#break-before)
       - [CSS Multicol 1 - break-before](http://www.w3.org/TR/css3-multicol/#break-before)
+      - [CSS Fragmentation 3 - break-before](http://www.w3.org/TR/css3-break/#break-before)
       - [CSS Regions 1 - break-before](http://www.w3.org/TR/css3-regions/#propdef-break-before)
   - Drafts
       - [CSS Fragmentation 3 - break-before](https://drafts.csswg.org/css-break-3/#propdef-break-before)
       - [CSS Regions 1 - break-before](https://drafts.csswg.org/css-regions-1/#propdef-break-before)
   - Values: BREAK;
-- [break-inside](http://www.w3.org/TR/css3-break/#break-inside)
+- [break-inside](http://www.w3.org/TR/css3-multicol/#break-inside)
   - TR
-      - [CSS Fragmentation 3 - break-inside](http://www.w3.org/TR/css3-break/#break-inside)
       - [CSS Multicol 1 - break-inside](http://www.w3.org/TR/css3-multicol/#break-inside)
+      - [CSS Fragmentation 3 - break-inside](http://www.w3.org/TR/css3-break/#break-inside)
       - [CSS Regions 1 - break-inside](http://www.w3.org/TR/css3-regions/#propdef-break-inside)
   - Drafts
       - [CSS Fragmentation 3 - break-inside](https://drafts.csswg.org/css-break-3/#propdef-break-inside)
@@ -1601,45 +1601,45 @@
   - Drafts
       - [CSS User Interface 3 - box-sizing](https://drafts.csswg.org/css-ui-3/#propdef-box-sizing)
   - Values: content-box | padding-box | border-box;
-- [cursor](http://www.w3.org/TR/css3-ui/#propdef-cursor)
+- [cursor](http://www.w3.org/TR/CSS21/ui.html#propdef-cursor)
   - TR
-      - [CSS User Interface 3 - cursor](http://www.w3.org/TR/css3-ui/#propdef-cursor)
       - [CSS 2.1 - cursor](http://www.w3.org/TR/CSS21/ui.html#propdef-cursor)
+      - [CSS User Interface 3 - cursor](http://www.w3.org/TR/css3-ui/#propdef-cursor)
   - Drafts
-      - [CSS User Interface 3 - cursor](https://drafts.csswg.org/css-ui-3/#propdef-cursor)
       - [CSS 2.1 - cursor](https://drafts.csswg.org/css2/ui.html#propdef-cursor)
+      - [CSS User Interface 3 - cursor](https://drafts.csswg.org/css-ui-3/#propdef-cursor)
   - Values: COMMA(URI* [ auto | crosshair | default | pointer | move | e-resize | ne-resize | nw-resize | n-resize | se-resize | sw-resize | s-resize | w-resize | text | wait | help | progress ]);
-- [outline](http://www.w3.org/TR/css3-ui/#propdef-outline)
+- [outline](http://www.w3.org/TR/CSS21/ui.html#propdef-outline)
   - TR
-      - [CSS User Interface 3 - outline](http://www.w3.org/TR/css3-ui/#propdef-outline)
       - [CSS 2.1 - outline](http://www.w3.org/TR/CSS21/ui.html#propdef-outline)
+      - [CSS User Interface 3 - outline](http://www.w3.org/TR/css3-ui/#propdef-outline)
   - Drafts
-      - [CSS User Interface 3 - outline](https://drafts.csswg.org/css-ui-3/#propdef-outline)
       - [CSS 2.1 - outline](https://drafts.csswg.org/css2/ui.html#propdef-outline)
+      - [CSS User Interface 3 - outline](https://drafts.csswg.org/css-ui-3/#propdef-outline)
   - Values: outline-width outline-style outline-color;
-- [outline-color](http://www.w3.org/TR/css3-ui/#propdef-outline-color)
+- [outline-color](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-color)
   - TR
-      - [CSS User Interface 3 - outline-color](http://www.w3.org/TR/css3-ui/#propdef-outline-color)
       - [CSS 2.1 - outline-color](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-color)
+      - [CSS User Interface 3 - outline-color](http://www.w3.org/TR/css3-ui/#propdef-outline-color)
   - Drafts
-      - [CSS User Interface 3 - outline-color](https://drafts.csswg.org/css-ui-3/#propdef-outline-color)
       - [CSS 2.1 - outline-color](https://drafts.csswg.org/css2/ui.html#propdef-outline-color)
+      - [CSS User Interface 3 - outline-color](https://drafts.csswg.org/css-ui-3/#propdef-outline-color)
   - Values: COLOR | invert;
-- [outline-style](http://www.w3.org/TR/css3-ui/#propdef-outline-style)
+- [outline-style](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-style)
   - TR
-      - [CSS User Interface 3 - outline-style](http://www.w3.org/TR/css3-ui/#propdef-outline-style)
       - [CSS 2.1 - outline-style](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-style)
+      - [CSS User Interface 3 - outline-style](http://www.w3.org/TR/css3-ui/#propdef-outline-style)
   - Drafts
-      - [CSS User Interface 3 - outline-style](https://drafts.csswg.org/css-ui-3/#propdef-outline-style)
       - [CSS 2.1 - outline-style](https://drafts.csswg.org/css2/ui.html#propdef-outline-style)
+      - [CSS User Interface 3 - outline-style](https://drafts.csswg.org/css-ui-3/#propdef-outline-style)
   - Values: BORDER_SIDE_STYLE;
-- [outline-width](http://www.w3.org/TR/css3-ui/#propdef-outline-width)
+- [outline-width](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-width)
   - TR
-      - [CSS User Interface 3 - outline-width](http://www.w3.org/TR/css3-ui/#propdef-outline-width)
       - [CSS 2.1 - outline-width](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-width)
+      - [CSS User Interface 3 - outline-width](http://www.w3.org/TR/css3-ui/#propdef-outline-width)
   - Drafts
-      - [CSS User Interface 3 - outline-width](https://drafts.csswg.org/css-ui-3/#propdef-outline-width)
       - [CSS 2.1 - outline-width](https://drafts.csswg.org/css2/ui.html#propdef-outline-width)
+      - [CSS User Interface 3 - outline-width](https://drafts.csswg.org/css-ui-3/#propdef-outline-width)
   - Values: BORDER_SIDE_WIDTH;
 - [text-overflow](http://www.w3.org/TR/css3-ui/#propdef-text-overflow)
   - TR
@@ -1649,13 +1649,13 @@
   - Allowed prefixes: ms
   - Values: [clip | ellipsis | STRING]{1,2};
 ## [CSS Writing Modes 3](http://www.w3.org/TR/css-writing-modes-3/)
-- [direction](http://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
+- [direction](http://www.w3.org/TR/CSS21/visuren.html#propdef-direction)
   - TR
-      - [CSS Writing Modes 3 - direction](http://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
       - [CSS 2.1 - direction](http://www.w3.org/TR/CSS21/visuren.html#propdef-direction)
+      - [CSS Writing Modes 3 - direction](http://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
   - Drafts
-      - [CSS Writing Modes 3 - direction](https://drafts.csswg.org/css-writing-modes-3/#propdef-direction)
       - [CSS 2.1 - direction](https://drafts.csswg.org/css2/visuren.html#propdef-direction)
+      - [CSS Writing Modes 3 - direction](https://drafts.csswg.org/css-writing-modes-3/#propdef-direction)
   - Values: ltr | rtl;
 - [text-combine-upright](http://www.w3.org/TR/css-writing-modes-3/#propdef-text-combine-upright)
   - TR
@@ -1670,13 +1670,13 @@
       - [CSS Writing Modes 3 - text-orientation](https://drafts.csswg.org/css-writing-modes-3/#propdef-text-orientation)
   - Allowed prefixes: epub, webkit
   - Values: mixed | upright | sideways-right | sideways-left | sideways | use-glyph-orientation /* the following values are kept for backward-compatibility */ | vertical-right | rotate-right | rotate-left | rotate-normal | auto;
-- [unicode-bidi](http://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
+- [unicode-bidi](http://www.w3.org/TR/CSS21/visuren.html#propdef-unicode-bidi)
   - TR
-      - [CSS Writing Modes 3 - unicode-bidi](http://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
       - [CSS 2.1 - unicode-bidi](http://www.w3.org/TR/CSS21/visuren.html#propdef-unicode-bidi)
+      - [CSS Writing Modes 3 - unicode-bidi](http://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
   - Drafts
-      - [CSS Writing Modes 3 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-3/#propdef-unicode-bidi)
       - [CSS 2.1 - unicode-bidi](https://drafts.csswg.org/css2/visuren.html#propdef-unicode-bidi)
+      - [CSS Writing Modes 3 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-3/#propdef-unicode-bidi)
   - Values: normal | embed | bidi-override;
 - [writing-mode](http://www.w3.org/TR/css-writing-modes-3/#propdef-writing-mode)
   - TR
@@ -1686,53 +1686,53 @@
   - Allowed prefixes: epub, webkit
   - Values: horizontal-tb | vertical-rl;
 ## [CSS Speech 1](http://www.w3.org/TR/css3-speech/)
-- [cue-after](http://www.w3.org/TR/css3-speech/#cue-after)
+- [cue-after](http://www.w3.org/TR/CSS21/aural.html#propdef-cue-after)
   - TR
-      - [CSS Speech 1 - cue-after](http://www.w3.org/TR/css3-speech/#cue-after)
       - [CSS 2.1 - cue-after](http://www.w3.org/TR/CSS21/aural.html#propdef-cue-after)
+      - [CSS Speech 1 - cue-after](http://www.w3.org/TR/css3-speech/#cue-after)
   - Drafts
-      - [CSS Speech 1 - cue-after](https://drafts.csswg.org/css-speech-1/#cue-after)
       - [CSS 2.1 - cue-after](https://drafts.csswg.org/css2/aural.html#propdef-cue-after)
+      - [CSS Speech 1 - cue-after](https://drafts.csswg.org/css-speech-1/#cue-after)
   - Values: URI_OR_NONE;
-- [cue-before](http://www.w3.org/TR/css3-speech/#cue-before)
+- [cue-before](http://www.w3.org/TR/CSS21/aural.html#propdef-cue-before)
   - TR
-      - [CSS Speech 1 - cue-before](http://www.w3.org/TR/css3-speech/#cue-before)
       - [CSS 2.1 - cue-before](http://www.w3.org/TR/CSS21/aural.html#propdef-cue-before)
+      - [CSS Speech 1 - cue-before](http://www.w3.org/TR/css3-speech/#cue-before)
   - Drafts
-      - [CSS Speech 1 - cue-before](https://drafts.csswg.org/css-speech-1/#cue-before)
       - [CSS 2.1 - cue-before](https://drafts.csswg.org/css2/aural.html#propdef-cue-before)
+      - [CSS Speech 1 - cue-before](https://drafts.csswg.org/css-speech-1/#cue-before)
   - Values: URI_OR_NONE;
-- [pause](http://www.w3.org/TR/css3-speech/#pause)
+- [pause](http://www.w3.org/TR/CSS21/aural.html#propdef-pause)
   - TR
-      - [CSS Speech 1 - pause](http://www.w3.org/TR/css3-speech/#pause)
       - [CSS 2.1 - pause](http://www.w3.org/TR/CSS21/aural.html#propdef-pause)
+      - [CSS Speech 1 - pause](http://www.w3.org/TR/css3-speech/#pause)
   - Drafts
-      - [CSS Speech 1 - pause](https://drafts.csswg.org/css-speech-1/#pause)
       - [CSS 2.1 - pause](https://drafts.csswg.org/css2/aural.html#propdef-pause)
+      - [CSS Speech 1 - pause](https://drafts.csswg.org/css-speech-1/#pause)
   - Values: INSETS pause-before pause-after;
-- [pause-after](http://www.w3.org/TR/css3-speech/#pause-after)
+- [pause-after](http://www.w3.org/TR/CSS21/aural.html#propdef-pause-after)
   - TR
-      - [CSS Speech 1 - pause-after](http://www.w3.org/TR/css3-speech/#pause-after)
       - [CSS 2.1 - pause-after](http://www.w3.org/TR/CSS21/aural.html#propdef-pause-after)
+      - [CSS Speech 1 - pause-after](http://www.w3.org/TR/css3-speech/#pause-after)
   - Drafts
-      - [CSS Speech 1 - pause-after](https://drafts.csswg.org/css-speech-1/#pause-after)
       - [CSS 2.1 - pause-after](https://drafts.csswg.org/css2/aural.html#propdef-pause-after)
+      - [CSS Speech 1 - pause-after](https://drafts.csswg.org/css-speech-1/#pause-after)
   - Values: PAUSE;
-- [pause-before](http://www.w3.org/TR/css3-speech/#pause-before)
+- [pause-before](http://www.w3.org/TR/CSS21/aural.html#propdef-pause-before)
   - TR
-      - [CSS Speech 1 - pause-before](http://www.w3.org/TR/css3-speech/#pause-before)
       - [CSS 2.1 - pause-before](http://www.w3.org/TR/CSS21/aural.html#propdef-pause-before)
+      - [CSS Speech 1 - pause-before](http://www.w3.org/TR/css3-speech/#pause-before)
   - Drafts
-      - [CSS Speech 1 - pause-before](https://drafts.csswg.org/css-speech-1/#pause-before)
       - [CSS 2.1 - pause-before](https://drafts.csswg.org/css2/aural.html#propdef-pause-before)
+      - [CSS Speech 1 - pause-before](https://drafts.csswg.org/css-speech-1/#pause-before)
   - Values: PAUSE;
-- [voice-family](http://www.w3.org/TR/css3-speech/#voice-family)
+- [voice-family](http://www.w3.org/TR/CSS21/aural.html#propdef-voice-family)
   - TR
-      - [CSS Speech 1 - voice-family](http://www.w3.org/TR/css3-speech/#voice-family)
       - [CSS 2.1 - voice-family](http://www.w3.org/TR/CSS21/aural.html#propdef-voice-family)
+      - [CSS Speech 1 - voice-family](http://www.w3.org/TR/css3-speech/#voice-family)
   - Drafts
-      - [CSS Speech 1 - voice-family](https://drafts.csswg.org/css-speech-1/#voice-family)
       - [CSS 2.1 - voice-family](https://drafts.csswg.org/css2/aural.html#propdef-voice-family)
+      - [CSS Speech 1 - voice-family](https://drafts.csswg.org/css-speech-1/#voice-family)
   - Values: FAMILY_LIST;
 ## [CSS Flexbox 1](http://www.w3.org/TR/css-flexbox-1/)
 - [align-content](http://www.w3.org/TR/css-flexbox-1/#propdef-align-content)
@@ -1808,111 +1808,111 @@
       - [CSS Flexbox 1 - order](https://drafts.csswg.org/css-flexbox-1/#propdef-order)
   - Values: INT;
 ## [CSS Lists 3](http://www.w3.org/TR/css3-lists/)
-- [counter-increment](http://www.w3.org/TR/css3-lists/#propdef-counter-increment)
+- [counter-increment](http://www.w3.org/TR/CSS21/generate.html#propdef-counter-increment)
   - TR
-      - [CSS Lists 3 - counter-increment](http://www.w3.org/TR/css3-lists/#propdef-counter-increment)
       - [CSS 2.1 - counter-increment](http://www.w3.org/TR/CSS21/generate.html#propdef-counter-increment)
+      - [CSS Lists 3 - counter-increment](http://www.w3.org/TR/css3-lists/#propdef-counter-increment)
   - Drafts
-      - [CSS Lists 3 - counter-increment](https://drafts.csswg.org/css-lists-3/#propdef-counter-increment)
       - [CSS 2.1 - counter-increment](https://drafts.csswg.org/css2/generate.html#propdef-counter-increment)
+      - [CSS Lists 3 - counter-increment](https://drafts.csswg.org/css-lists-3/#propdef-counter-increment)
   - Values: COUNTER;
-- [counter-reset](http://www.w3.org/TR/css3-lists/#propdef-counter-reset)
+- [counter-reset](http://www.w3.org/TR/CSS21/generate.html#propdef-counter-reset)
   - TR
-      - [CSS Lists 3 - counter-reset](http://www.w3.org/TR/css3-lists/#propdef-counter-reset)
       - [CSS 2.1 - counter-reset](http://www.w3.org/TR/CSS21/generate.html#propdef-counter-reset)
+      - [CSS Lists 3 - counter-reset](http://www.w3.org/TR/css3-lists/#propdef-counter-reset)
   - Drafts
-      - [CSS Lists 3 - counter-reset](https://drafts.csswg.org/css-lists-3/#propdef-counter-reset)
       - [CSS 2.1 - counter-reset](https://drafts.csswg.org/css2/generate.html#propdef-counter-reset)
+      - [CSS Lists 3 - counter-reset](https://drafts.csswg.org/css-lists-3/#propdef-counter-reset)
   - Values: COUNTER;
-- [list-style](http://www.w3.org/TR/css3-lists/#propdef-list-style)
+- [list-style](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style)
   - TR
-      - [CSS Lists 3 - list-style](http://www.w3.org/TR/css3-lists/#propdef-list-style)
       - [CSS 2.1 - list-style](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style)
+      - [CSS Lists 3 - list-style](http://www.w3.org/TR/css3-lists/#propdef-list-style)
   - Drafts
-      - [CSS Lists 3 - list-style](https://drafts.csswg.org/css-lists-3/#propdef-list-style)
       - [CSS 2.1 - list-style](https://drafts.csswg.org/css2/generate.html#propdef-list-style)
+      - [CSS Lists 3 - list-style](https://drafts.csswg.org/css-lists-3/#propdef-list-style)
   - Values: list-style-type list-style-position list-style-image;
-- [list-style-image](http://www.w3.org/TR/css3-lists/#propdef-list-style-image)
+- [list-style-image](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-image)
   - TR
-      - [CSS Lists 3 - list-style-image](http://www.w3.org/TR/css3-lists/#propdef-list-style-image)
       - [CSS 2.1 - list-style-image](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-image)
+      - [CSS Lists 3 - list-style-image](http://www.w3.org/TR/css3-lists/#propdef-list-style-image)
   - Drafts
-      - [CSS Lists 3 - list-style-image](https://drafts.csswg.org/css-lists-3/#propdef-list-style-image)
       - [CSS 2.1 - list-style-image](https://drafts.csswg.org/css2/generate.html#propdef-list-style-image)
+      - [CSS Lists 3 - list-style-image](https://drafts.csswg.org/css-lists-3/#propdef-list-style-image)
   - Values: URI_OR_NONE;
-- [list-style-position](http://www.w3.org/TR/css3-lists/#propdef-list-style-position)
+- [list-style-position](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position)
   - TR
-      - [CSS Lists 3 - list-style-position](http://www.w3.org/TR/css3-lists/#propdef-list-style-position)
       - [CSS 2.1 - list-style-position](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position)
+      - [CSS Lists 3 - list-style-position](http://www.w3.org/TR/css3-lists/#propdef-list-style-position)
   - Drafts
-      - [CSS Lists 3 - list-style-position](https://drafts.csswg.org/css-lists-3/#propdef-list-style-position)
       - [CSS 2.1 - list-style-position](https://drafts.csswg.org/css2/generate.html#propdef-list-style-position)
+      - [CSS Lists 3 - list-style-position](https://drafts.csswg.org/css-lists-3/#propdef-list-style-position)
   - Values: inside | outside;
-- [list-style-type](http://www.w3.org/TR/css3-lists/#propdef-list-style-type)
+- [list-style-type](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-type)
   - TR
-      - [CSS Lists 3 - list-style-type](http://www.w3.org/TR/css3-lists/#propdef-list-style-type)
       - [CSS 2.1 - list-style-type](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-type)
+      - [CSS Lists 3 - list-style-type](http://www.w3.org/TR/css3-lists/#propdef-list-style-type)
   - Drafts
-      - [CSS Lists 3 - list-style-type](https://drafts.csswg.org/css-lists-3/#propdef-list-style-type)
       - [CSS 2.1 - list-style-type](https://drafts.csswg.org/css2/generate.html#propdef-list-style-type)
+      - [CSS Lists 3 - list-style-type](https://drafts.csswg.org/css-lists-3/#propdef-list-style-type)
   - Values: LIST_STYLE_TYPE;
 ## [CSS Masking 1](http://www.w3.org/TR/css-masking-1/)
-- [clip](http://www.w3.org/TR/css-masking-1/#propdef-clip)
+- [clip](http://www.w3.org/TR/CSS21/visufx.html#propdef-clip)
   - TR
-      - [CSS Masking 1 - clip](http://www.w3.org/TR/css-masking-1/#propdef-clip)
       - [CSS 2.1 - clip](http://www.w3.org/TR/CSS21/visufx.html#propdef-clip)
+      - [CSS Masking 1 - clip](http://www.w3.org/TR/css-masking-1/#propdef-clip)
   - Drafts
-      - [CSS Masking 1 - clip](https://drafts.fxtf.org/css-masking-1/#propdef-clip)
       - [CSS 2.1 - clip](https://drafts.csswg.org/css2/visufx.html#propdef-clip)
+      - [CSS Masking 1 - clip](https://drafts.fxtf.org/css-masking-1/#propdef-clip)
   - Values: rect(ALENGTH{4}) | rect(SPACE(ALENGTH{4})) | auto;
 ## [CSS Positioned Layout 3](http://www.w3.org/TR/css3-positioning/)
-- [bottom](http://www.w3.org/TR/css3-positioning/#propdef-bottom)
+- [bottom](http://www.w3.org/TR/CSS21/visuren.html#propdef-bottom)
   - TR
-      - [CSS Positioned Layout 3 - bottom](http://www.w3.org/TR/css3-positioning/#propdef-bottom)
       - [CSS 2.1 - bottom](http://www.w3.org/TR/CSS21/visuren.html#propdef-bottom)
+      - [CSS Positioned Layout 3 - bottom](http://www.w3.org/TR/css3-positioning/#propdef-bottom)
   - Drafts
-      - [CSS Positioned Layout 3 - bottom](https://drafts.csswg.org/css-position-3/#propdef-bottom)
       - [CSS 2.1 - bottom](https://drafts.csswg.org/css2/visuren.html#propdef-bottom)
+      - [CSS Positioned Layout 3 - bottom](https://drafts.csswg.org/css-position-3/#propdef-bottom)
   - Values: APLENGTH;
-- [left](http://www.w3.org/TR/css3-positioning/#propdef-left)
+- [left](http://www.w3.org/TR/CSS21/visuren.html#propdef-left)
   - TR
-      - [CSS Positioned Layout 3 - left](http://www.w3.org/TR/css3-positioning/#propdef-left)
       - [CSS 2.1 - left](http://www.w3.org/TR/CSS21/visuren.html#propdef-left)
+      - [CSS Positioned Layout 3 - left](http://www.w3.org/TR/css3-positioning/#propdef-left)
   - Drafts
-      - [CSS Positioned Layout 3 - left](https://drafts.csswg.org/css-position-3/#propdef-left)
       - [CSS 2.1 - left](https://drafts.csswg.org/css2/visuren.html#propdef-left)
+      - [CSS Positioned Layout 3 - left](https://drafts.csswg.org/css-position-3/#propdef-left)
   - Values: APLENGTH;
-- [position](http://www.w3.org/TR/css3-positioning/#propdef-position)
+- [position](http://www.w3.org/TR/CSS21/visuren.html#propdef-position)
   - TR
-      - [CSS Positioned Layout 3 - position](http://www.w3.org/TR/css3-positioning/#propdef-position)
       - [CSS 2.1 - position](http://www.w3.org/TR/CSS21/visuren.html#propdef-position)
+      - [CSS Positioned Layout 3 - position](http://www.w3.org/TR/css3-positioning/#propdef-position)
   - Drafts
-      - [CSS Positioned Layout 3 - position](https://drafts.csswg.org/css-position-3/#propdef-position)
       - [CSS 2.1 - position](https://drafts.csswg.org/css2/visuren.html#propdef-position)
+      - [CSS Positioned Layout 3 - position](https://drafts.csswg.org/css-position-3/#propdef-position)
   - Values: static | relative | absolute | fixed;
-- [right](http://www.w3.org/TR/css3-positioning/#propdef-right)
+- [right](http://www.w3.org/TR/CSS21/visuren.html#propdef-right)
   - TR
-      - [CSS Positioned Layout 3 - right](http://www.w3.org/TR/css3-positioning/#propdef-right)
       - [CSS 2.1 - right](http://www.w3.org/TR/CSS21/visuren.html#propdef-right)
+      - [CSS Positioned Layout 3 - right](http://www.w3.org/TR/css3-positioning/#propdef-right)
   - Drafts
-      - [CSS Positioned Layout 3 - right](https://drafts.csswg.org/css-position-3/#propdef-right)
       - [CSS 2.1 - right](https://drafts.csswg.org/css2/visuren.html#propdef-right)
+      - [CSS Positioned Layout 3 - right](https://drafts.csswg.org/css-position-3/#propdef-right)
   - Values: APLENGTH;
-- [top](http://www.w3.org/TR/css3-positioning/#propdef-top)
+- [top](http://www.w3.org/TR/CSS21/visuren.html#propdef-top)
   - TR
-      - [CSS Positioned Layout 3 - top](http://www.w3.org/TR/css3-positioning/#propdef-top)
       - [CSS 2.1 - top](http://www.w3.org/TR/CSS21/visuren.html#propdef-top)
+      - [CSS Positioned Layout 3 - top](http://www.w3.org/TR/css3-positioning/#propdef-top)
   - Drafts
-      - [CSS Positioned Layout 3 - top](https://drafts.csswg.org/css-position-3/#propdef-top)
       - [CSS 2.1 - top](https://drafts.csswg.org/css2/visuren.html#propdef-top)
+      - [CSS Positioned Layout 3 - top](https://drafts.csswg.org/css-position-3/#propdef-top)
   - Values: APLENGTH;
-- [z-index](http://www.w3.org/TR/css3-positioning/#propdef-z-index)
+- [z-index](http://www.w3.org/TR/CSS21/visuren.html#propdef-z-index)
   - TR
-      - [CSS Positioned Layout 3 - z-index](http://www.w3.org/TR/css3-positioning/#propdef-z-index)
       - [CSS 2.1 - z-index](http://www.w3.org/TR/CSS21/visuren.html#propdef-z-index)
+      - [CSS Positioned Layout 3 - z-index](http://www.w3.org/TR/css3-positioning/#propdef-z-index)
   - Drafts
-      - [CSS Positioned Layout 3 - z-index](https://drafts.csswg.org/css-position-3/#propdef-z-index)
       - [CSS 2.1 - z-index](https://drafts.csswg.org/css2/visuren.html#propdef-z-index)
+      - [CSS Positioned Layout 3 - z-index](https://drafts.csswg.org/css-position-3/#propdef-z-index)
   - Values: auto | INT;
 ## [CSS Fragmentation 3](http://www.w3.org/TR/css3-break/)
 - [box-decoration-break](http://www.w3.org/TR/css3-break/#box-decoration-break)
@@ -1922,48 +1922,48 @@
       - [CSS Fragmentation 3 - box-decoration-break](https://drafts.csswg.org/css-break-3/#propdef-box-decoration-break)
   - Allowed prefixes: webkit
   - Values: slice | clone;
-- [break-after](http://www.w3.org/TR/css3-break/#break-after)
+- [break-after](http://www.w3.org/TR/css3-multicol/#break-after)
   - TR
-      - [CSS Fragmentation 3 - break-after](http://www.w3.org/TR/css3-break/#break-after)
       - [CSS Multicol 1 - break-after](http://www.w3.org/TR/css3-multicol/#break-after)
+      - [CSS Fragmentation 3 - break-after](http://www.w3.org/TR/css3-break/#break-after)
       - [CSS Regions 1 - break-after](http://www.w3.org/TR/css3-regions/#propdef-break-after)
   - Drafts
       - [CSS Fragmentation 3 - break-after](https://drafts.csswg.org/css-break-3/#propdef-break-after)
       - [CSS Regions 1 - break-after](https://drafts.csswg.org/css-regions-1/#propdef-break-after)
   - Values: BREAK;
-- [break-before](http://www.w3.org/TR/css3-break/#break-before)
+- [break-before](http://www.w3.org/TR/css3-multicol/#break-before)
   - TR
-      - [CSS Fragmentation 3 - break-before](http://www.w3.org/TR/css3-break/#break-before)
       - [CSS Multicol 1 - break-before](http://www.w3.org/TR/css3-multicol/#break-before)
+      - [CSS Fragmentation 3 - break-before](http://www.w3.org/TR/css3-break/#break-before)
       - [CSS Regions 1 - break-before](http://www.w3.org/TR/css3-regions/#propdef-break-before)
   - Drafts
       - [CSS Fragmentation 3 - break-before](https://drafts.csswg.org/css-break-3/#propdef-break-before)
       - [CSS Regions 1 - break-before](https://drafts.csswg.org/css-regions-1/#propdef-break-before)
   - Values: BREAK;
-- [break-inside](http://www.w3.org/TR/css3-break/#break-inside)
+- [break-inside](http://www.w3.org/TR/css3-multicol/#break-inside)
   - TR
-      - [CSS Fragmentation 3 - break-inside](http://www.w3.org/TR/css3-break/#break-inside)
       - [CSS Multicol 1 - break-inside](http://www.w3.org/TR/css3-multicol/#break-inside)
+      - [CSS Fragmentation 3 - break-inside](http://www.w3.org/TR/css3-break/#break-inside)
       - [CSS Regions 1 - break-inside](http://www.w3.org/TR/css3-regions/#propdef-break-inside)
   - Drafts
       - [CSS Fragmentation 3 - break-inside](https://drafts.csswg.org/css-break-3/#propdef-break-inside)
       - [CSS Regions 1 - break-inside](https://drafts.csswg.org/css-regions-1/#propdef-break-inside)
   - Values: auto | avoid | avoid-page | avoid-column | avoid-region;
-- [orphans](http://www.w3.org/TR/css3-break/#orphans)
+- [orphans](http://www.w3.org/TR/CSS21/page.html#propdef-orphans)
   - TR
-      - [CSS Fragmentation 3 - orphans](http://www.w3.org/TR/css3-break/#orphans)
       - [CSS 2.1 - orphans](http://www.w3.org/TR/CSS21/page.html#propdef-orphans)
+      - [CSS Fragmentation 3 - orphans](http://www.w3.org/TR/css3-break/#orphans)
   - Drafts
-      - [CSS Fragmentation 3 - orphans](https://drafts.csswg.org/css-break-3/#propdef-orphans)
       - [CSS 2.1 - orphans](https://drafts.csswg.org/css2/page.html#propdef-orphans)
+      - [CSS Fragmentation 3 - orphans](https://drafts.csswg.org/css-break-3/#propdef-orphans)
   - Values: POS_INT;
-- [widows](http://www.w3.org/TR/css3-break/#widows)
+- [widows](http://www.w3.org/TR/CSS21/page.html#propdef-widows)
   - TR
-      - [CSS Fragmentation 3 - widows](http://www.w3.org/TR/css3-break/#widows)
       - [CSS 2.1 - widows](http://www.w3.org/TR/CSS21/page.html#propdef-widows)
+      - [CSS Fragmentation 3 - widows](http://www.w3.org/TR/css3-break/#widows)
   - Drafts
-      - [CSS Fragmentation 3 - widows](https://drafts.csswg.org/css-break-3/#propdef-widows)
       - [CSS 2.1 - widows](https://drafts.csswg.org/css2/page.html#propdef-widows)
+      - [CSS Fragmentation 3 - widows](https://drafts.csswg.org/css-break-3/#propdef-widows)
   - Values: POS_INT;
 ## [CSS Transforms 1](http://www.w3.org/TR/css-transforms-1/)
 - [backface-visibility](http://www.w3.org/TR/css-transforms-1/#propdef-backface-visibility)
@@ -1988,14 +1988,14 @@
   - Allowed prefixes: epub, ms
   - Values: [[[ top | bottom | left | right] PLENGTH?] | center | PLENGTH]{1,2}; /* relaxed */
 ## [CSS Ruby 1](http://www.w3.org/TR/css-ruby-1/)
-- [display](http://www.w3.org/TR/css-ruby-1/#propdef-display)
+- [display](http://www.w3.org/TR/CSS21/visuren.html#propdef-display)
   - TR
-      - [CSS Ruby 1 - display](http://www.w3.org/TR/css-ruby-1/#propdef-display)
       - [CSS 2.1 - display](http://www.w3.org/TR/CSS21/visuren.html#propdef-display)
+      - [CSS Ruby 1 - display](http://www.w3.org/TR/css-ruby-1/#propdef-display)
   - Drafts
       - [CSS Display 3 - display](https://drafts.csswg.org/css-display-3/#propdef-display)
-      - [CSS Ruby 1 - display](https://drafts.csswg.org/css-ruby-1/#propdef-display)
       - [CSS 2.1 - display](https://drafts.csswg.org/css2/visuren.html#propdef-display)
+      - [CSS Ruby 1 - display](https://drafts.csswg.org/css-ruby-1/#propdef-display)
   - Values: inline | block | list-item | inline-block | table | inline-table | table-row-group | table-header-group | table-footer-group | table-row | table-column-group | table-column | table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex | inline-flex;
 - [ruby-align](http://www.w3.org/TR/css-ruby-1/#propdef-ruby-align)
   - TR
@@ -2010,13 +2010,13 @@
       - [CSS Ruby 1 - ruby-position](https://drafts.csswg.org/css-ruby-1/#propdef-ruby-position)
   - Values: over | under | inter-character;
 ## [CSS Overflow 3](http://www.w3.org/TR/css-overflow-3/)
-- [overflow](http://www.w3.org/TR/css-overflow-3/#overflow)
+- [overflow](http://www.w3.org/TR/CSS21/visufx.html#propdef-overflow)
   - TR
-      - [CSS Overflow 3 - overflow](http://www.w3.org/TR/css-overflow-3/#overflow)
       - [CSS 2.1 - overflow](http://www.w3.org/TR/CSS21/visufx.html#propdef-overflow)
+      - [CSS Overflow 3 - overflow](http://www.w3.org/TR/css-overflow-3/#overflow)
   - Drafts
-      - [CSS Overflow 3 - overflow](https://drafts.csswg.org/css-overflow-3/#propdef-overflow)
       - [CSS 2.1 - overflow](https://drafts.csswg.org/css2/visufx.html#propdef-overflow)
+      - [CSS Overflow 3 - overflow](https://drafts.csswg.org/css-overflow-3/#propdef-overflow)
   - Values: visible | hidden | scroll | auto;
 ## [CSS Shapes 1](http://www.w3.org/TR/css-shapes-1/)
 - [shape-outside](http://www.w3.org/TR/css-shapes-1/#propdef-shape-outside)
@@ -2034,28 +2034,28 @@
   - Allowed prefixes: epubx
   - Values: SHAPE;
 ## [CSS Regions 1](http://www.w3.org/TR/css3-regions/)
-- [break-after](http://www.w3.org/TR/css3-break/#break-after)
+- [break-after](http://www.w3.org/TR/css3-multicol/#break-after)
   - TR
-      - [CSS Fragmentation 3 - break-after](http://www.w3.org/TR/css3-break/#break-after)
       - [CSS Multicol 1 - break-after](http://www.w3.org/TR/css3-multicol/#break-after)
+      - [CSS Fragmentation 3 - break-after](http://www.w3.org/TR/css3-break/#break-after)
       - [CSS Regions 1 - break-after](http://www.w3.org/TR/css3-regions/#propdef-break-after)
   - Drafts
       - [CSS Fragmentation 3 - break-after](https://drafts.csswg.org/css-break-3/#propdef-break-after)
       - [CSS Regions 1 - break-after](https://drafts.csswg.org/css-regions-1/#propdef-break-after)
   - Values: BREAK;
-- [break-before](http://www.w3.org/TR/css3-break/#break-before)
+- [break-before](http://www.w3.org/TR/css3-multicol/#break-before)
   - TR
-      - [CSS Fragmentation 3 - break-before](http://www.w3.org/TR/css3-break/#break-before)
       - [CSS Multicol 1 - break-before](http://www.w3.org/TR/css3-multicol/#break-before)
+      - [CSS Fragmentation 3 - break-before](http://www.w3.org/TR/css3-break/#break-before)
       - [CSS Regions 1 - break-before](http://www.w3.org/TR/css3-regions/#propdef-break-before)
   - Drafts
       - [CSS Fragmentation 3 - break-before](https://drafts.csswg.org/css-break-3/#propdef-break-before)
       - [CSS Regions 1 - break-before](https://drafts.csswg.org/css-regions-1/#propdef-break-before)
   - Values: BREAK;
-- [break-inside](http://www.w3.org/TR/css3-break/#break-inside)
+- [break-inside](http://www.w3.org/TR/css3-multicol/#break-inside)
   - TR
-      - [CSS Fragmentation 3 - break-inside](http://www.w3.org/TR/css3-break/#break-inside)
       - [CSS Multicol 1 - break-inside](http://www.w3.org/TR/css3-multicol/#break-inside)
+      - [CSS Fragmentation 3 - break-inside](http://www.w3.org/TR/css3-break/#break-inside)
       - [CSS Regions 1 - break-inside](http://www.w3.org/TR/css3-regions/#propdef-break-inside)
   - Drafts
       - [CSS Fragmentation 3 - break-inside](https://drafts.csswg.org/css-break-3/#propdef-break-inside)
@@ -2091,28 +2091,28 @@
   - Allowed prefixes: moz, ms
   - Values: auto | none | POS_PERCENTAGE;
 ## [CSS Inline Layout 3](http://www.w3.org/TR/css-inline-3/)
-- [vertical-align](http://www.w3.org/TR/css-inline-3/#propdef-vertical-align)
+- [vertical-align](http://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align)
   - TR
-      - [CSS Inline Layout 3 - vertical-align](http://www.w3.org/TR/css-inline-3/#propdef-vertical-align)
       - [CSS 2.1 - vertical-align](http://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align)
+      - [CSS Inline Layout 3 - vertical-align](http://www.w3.org/TR/css-inline-3/#propdef-vertical-align)
   - Drafts
-      - [CSS Inline Layout 3 - vertical-align](https://drafts.csswg.org/css-inline-3/#propdef-vertical-align)
       - [CSS 2.1 - vertical-align](https://drafts.csswg.org/css2/visudet.html#propdef-vertical-align)
+      - [CSS Inline Layout 3 - vertical-align](https://drafts.csswg.org/css-inline-3/#propdef-vertical-align)
   - Values: baseline | sub | super | top | text-top | middle | bottom | text-bottom | PLENGTH;
 ## [CSS Page Floats 3](https://drafts.csswg.org/css-page-floats-3/)
 - [clear](http://www.w3.org/TR/CSS21/visuren.html#propdef-clear)
   - TR
       - [CSS 2.1 - clear](http://www.w3.org/TR/CSS21/visuren.html#propdef-clear)
   - Drafts
-      - [CSS Page Floats 3 - clear](https://drafts.csswg.org/css-page-floats-3/#propdef-clear)
       - [CSS 2.1 - clear](https://drafts.csswg.org/css2/visuren.html#propdef-clear)
+      - [CSS Page Floats 3 - clear](https://drafts.csswg.org/css-page-floats-3/#propdef-clear)
   - Values: none | left | right | both;
 - [float](http://www.w3.org/TR/CSS21/visuren.html#propdef-float)
   - TR
       - [CSS 2.1 - float](http://www.w3.org/TR/CSS21/visuren.html#propdef-float)
   - Drafts
-      - [CSS Page Floats 3 - float](https://drafts.csswg.org/css-page-floats-3/#propdef-float)
       - [CSS 2.1 - float](https://drafts.csswg.org/css2/visuren.html#propdef-float)
+      - [CSS Page Floats 3 - float](https://drafts.csswg.org/css-page-floats-3/#propdef-float)
   - Values: block-start | block-end | inline-start | inline-end | snap-block | snap-inline | left | right | top | bottom | none | footnote;
 - [float-reference](#propdef-float-reference)
 
