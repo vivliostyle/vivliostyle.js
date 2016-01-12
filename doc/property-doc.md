@@ -486,20 +486,21 @@
 - [text-combine-upright](http://www.w3.org/TR/css-writing-modes-3/#propdef-text-combine-upright)
   - Depends on browser's capability: Yes
 - [text-combine-horizontal](http://www.w3.org/TR/2012/WD-css3-writing-modes-20121115/#text-combine-horizontal0)
-  - This old property is kept for compatibility.
+  - This deprecated property is kept for compatibility.
   - Allowed prefixes: epub, ms
   - Depends on browser's capability: Yes
 - [text-combine](http://www.w3.org/TR/2011/WD-css3-writing-modes-20110531/#text-combine0)
-  - This old property is kept for compatibility.
+  - This deprecated property is kept for compatibility.
   - Allowed prefixes: webkit
   - Depends on browser's capability: Yes
 - [text-orientation](http://www.w3.org/TR/css-writing-modes-3/#propdef-text-orientation)
   - Allowed prefixes: epub, webkit
   - Depends on browser's capability: Yes
+  - Note: supported values are [those defined in 20 March 2014 Candidate Recommendation](https://www.w3.org/TR/2014/CR-css-writing-modes-3-20140320/#propdef-text-orientation), not those in the latest spec.
 - [writing-mode](http://www.w3.org/TR/css-writing-modes-3/#propdef-writing-mode)
   - Allowed prefixes: epub, webkit
   - Depends on browser's capability: Yes
-- Note: supported values for [`text-orientation`](https://www.w3.org/TR/2014/CR-css-writing-modes-3-20140320/#propdef-text-orientation) and [`writing-mode`](https://www.w3.org/TR/2014/CR-css-writing-modes-3-20140320/#propdef-writing-mode) are those defined in [20 March 2014 Candidate Recommendation](https://www.w3.org/TR/2014/CR-css-writing-modes-3-20140320/).
+  - Note: supported values are [those defined in 20 March 2014 Candidate Recommendation](https://www.w3.org/TR/2014/CR-css-writing-modes-3-20140320/#propdef-writing-mode), not those in the latest spec.
 
 ## [CSS Speech 1](http://www.w3.org/TR/css3-speech/)
 - [cue-after](http://www.w3.org/TR/CSS21/aural.html#propdef-cue-after)
@@ -558,6 +559,9 @@
   - Depends on browser's capability: Yes
 - [align-self](http://www.w3.org/TR/css-flexbox-1/#propdef-align-self)
   - Depends on browser's capability: Yes
+- [display](https://www.w3.org/TR/css-flexbox-1/#flex-containers)
+  - Depends on browser's capability: Yes
+  - Supports [`flex` and `inline-flex` values](https://www.w3.org/TR/css-flexbox-1/#flex-containers)
 - [flex](http://www.w3.org/TR/css-flexbox-1/#propdef-flex)
   - Depends on browser's capability: Yes
 - [flex-basis](http://www.w3.org/TR/css-flexbox-1/#propdef-flex-basis)
