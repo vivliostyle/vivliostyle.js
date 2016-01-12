@@ -1,4 +1,9 @@
+# Features supported by Vivliostyle
+
 ## [CSS 2.1](http://www.w3.org/TR/CSS21/)
+
+### Properties
+
 - [background](http://www.w3.org/TR/CSS21/colors.html#propdef-background)
   - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background)
   - Depends on browser's capability: Yes
@@ -203,17 +208,26 @@
   - Depends on browser's capability: Yes
 
 ## [CSS Paged Media 3](https://drafts.csswg.org/css-page-3/)
+
+### Properties
+
 - [size](https://drafts.csswg.org/css-page-3/#descdef-page-size)
   - Depends on browser's capability: No
   - Supports `JIS-B5` and `JIS-B4` values in the current editor's draft.
 
 ## [CSS Color 3](http://www.w3.org/TR/css3-color/)
+
+### Properties
+
 - [color](http://www.w3.org/TR/css3-color/#color0)
   - Depends on browser's capability: Yes
 - [opacity](http://www.w3.org/TR/css3-color/#opacity)
   - Depends on browser's capability: Yes
 
 ## [CSS Backgrounds and Borders 3](http://www.w3.org/TR/css3-background/)
+
+### Properties
+
 - [background](http://www.w3.org/TR/css3-background/#background)
   - Depends on browser's capability: Yes
 - [background-attachment](http://www.w3.org/TR/css3-background/#background-attachment)
@@ -309,12 +323,18 @@
   - Depends on browser's capability: Yes
 
 ## [CSS Image Values and Replaced Content 3](http://www.w3.org/TR/css3-images/)
+
+### Properties
+
 - [object-fit](http://www.w3.org/TR/css3-images/#object-fit)
   - Depends on browser's capability: Yes
 - [object-position](http://www.w3.org/TR/css3-images/#object-position)
   - Depends on browser's capability: Yes
 
 ## [CSS Fonts 3](http://www.w3.org/TR/css-fonts-3/)
+
+### Properties
+
 - [font-family](http://www.w3.org/TR/css-fonts-3/#propdef-font-family)
   - Depends on browser's capability: Yes
 - [font-kerning](http://www.w3.org/TR/css-fonts-3/#propdef-font-kerning)
@@ -328,6 +348,9 @@
   - Depends on browser's capability: Yes
 
 ## [CSS Text 3](http://www.w3.org/TR/css-text-3/)
+
+### Properties
+
 - [hyphens](http://www.w3.org/TR/css-text-3/#hyphens)
   - Allowed prefixes: epub, moz, ms, webkit
   - Depends on browser's capability: Yes
@@ -361,6 +384,9 @@
   - Depends on browser's capability: Yes
 
 ## [CSS Text Decoration 3](http://www.w3.org/TR/css-text-decor-3/)
+
+### Properties
+
 - Note: While `text-decoration` property is a shorthand in CSS Text Decoration 3, Vivliostyle treats `text-decoration` for now as an independent property defined in CSS Level 2.1.
 - [text-decoration-color](http://www.w3.org/TR/css-text-decor-3/#text-decoration-color)
   - Allowed prefixes: webkit
@@ -393,6 +419,9 @@
   - Allowed prefixes: ms, webkit
 
 ## [CSS Multi-column Layout 1](http://www.w3.org/TR/css3-multicol/)
+
+### Properties
+
 - [break-after](http://www.w3.org/TR/css3-multicol/#break-after)
   - Depends on browser's capability: No
   - Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/129)
@@ -428,6 +457,9 @@
   - Depends on browser's capability: No
 
 ## [CSS Basic User Interface 3](http://www.w3.org/TR/css3-ui/)
+
+### Properties
+
 - [box-sizing](http://www.w3.org/TR/css3-ui/#propdef-box-sizing)
   - Depends on browser's capability: Yes
 - [outline](http://www.w3.org/TR/css3-ui/#propdef-outline)
@@ -443,6 +475,9 @@
   - Depends on browser's capability: Yes
 
 ## [CSS Writing Modes 3](http://www.w3.org/TR/css-writing-modes-3/)
+
+### Properties
+
 - [direction](http://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
   - Depends on browser's capability: Yes
 - [text-combine-upright](http://www.w3.org/TR/css-writing-modes-3/#propdef-text-combine-upright)
@@ -465,6 +500,9 @@
   - Note: supported values are [those defined in 20 March 2014 Candidate Recommendation](https://www.w3.org/TR/2014/CR-css-writing-modes-3-20140320/#propdef-writing-mode), not those in the latest spec.
 
 ## [CSS Flexible Box Layout 1](http://www.w3.org/TR/css-flexbox-1/)
+
+### Properties
+
 - [align-content](http://www.w3.org/TR/css-flexbox-1/#propdef-align-content)
   - Depends on browser's capability: Yes
 - [align-items](http://www.w3.org/TR/css-flexbox-1/#propdef-align-items)
@@ -494,6 +532,9 @@
   - Depends on browser's capability: Yes
 
 ## [CSS Fragmentation 3](http://www.w3.org/TR/css3-break/)
+
+### Properties
+
 - [break-after](http://www.w3.org/TR/css3-break/#break-after)
   - Depends on browser's capability: No
   - Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/129)
@@ -509,6 +550,9 @@
   - Depends on browser's capability: No
 
 ## [CSS Transforms 1](http://www.w3.org/TR/css-transforms-1/)
+
+### Properties
+
 - [backface-visibility](http://www.w3.org/TR/css-transforms-1/#propdef-backface-visibility)
   - Allowed prefixes: ms, webkit
   - Depends on browser's capability: Yes
@@ -520,6 +564,9 @@
   - Depends on browser's capability: Yes
 
 ## [CSS Ruby Layout 1](http://www.w3.org/TR/css-ruby-1/)
+
+### Properties
+
 - [ruby-align](http://www.w3.org/TR/css-ruby-1/#propdef-ruby-align)
   - Depends on browser's capability: Yes
 - [ruby-position](https://drafts.csswg.org/css-ruby-1/#propdef-ruby-position)
@@ -527,18 +574,26 @@
   - Supports syntax defined in the current editor's draft.
 
 ## [CSS Mobile Text Size Adjustment 1](https://drafts.csswg.org/css-size-adjust-1/)
+
+### Properties
+
 - [text-size-adjust](https://drafts.csswg.org/css-size-adjust-1/#text-size-adjust)
   - Allowed prefixes: moz, ms
   - Depends on browser's capability: Yes
 
 ## [Pointer Events](http://www.w3.org/TR/pointerevents/)
+
+### Properties
+
 - [touch-action](http://www.w3.org/TR/pointerevents/#the-touch-action-css-property)
   - Allowed prefixes: ms
   - Depends on browser's capability: Yes
 
 ## [EPUB Adaptive Layout](http://www.idpf.org/epub/pgt/)
 
-Note: This spec is not on a W3C standards track. Future version of Vivliostyle may drop support for these properties.
+Note: This spec is not on a W3C standards track. Future version of Vivliostyle may drop support for this spec.
+
+### Properties
 
 - [-epubx-conflicting-partitions](http://www.idpf.org/epub/pgt/#prop-conflicting-partitions)
   - Depends on browser's capability: No
