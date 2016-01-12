@@ -12,7 +12,7 @@
   - Drafts
       - [CSS 2.1 - background](https://drafts.csswg.org/css2/colors.html#propdef-background)
       - [CSS Backgrounds 3 - background](https://drafts.csswg.org/css-backgrounds-3/#background)
-  - Values: `COMMA background-image [background-position [ / background-size ]] background-repeat`
+  - Values: `COMMA background-image [background-position [ / background-size ]] background-repeat background-attachment [background-origin background-clip] background-color; /* background-color is a special case, see the code */`
 - [background-attachment](http://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment)
   - TR
       - [CSS 2.1 - background-attachment](http://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment)
@@ -894,7 +894,7 @@
   - Drafts
       - [CSS 2.1 - background](https://drafts.csswg.org/css2/colors.html#propdef-background)
       - [CSS Backgrounds 3 - background](https://drafts.csswg.org/css-backgrounds-3/#background)
-  - Values: `COMMA background-image [background-position [ / background-size ]] background-repeat`
+  - Values: `COMMA background-image [background-position [ / background-size ]] background-repeat background-attachment [background-origin background-clip] background-color; /* background-color is a special case, see the code */`
 - [background-attachment](http://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment)
   - TR
       - [CSS 2.1 - background-attachment](http://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment)

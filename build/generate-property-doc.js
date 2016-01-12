@@ -92,7 +92,7 @@ for (var key in rawData) {
 }
 
 var rawValidations = fs.readFileSync("../resources/validation.txt", "utf8");
-var propDefs = rawValidations.replace(/\r*\n +/g, " ").split("\n").filter(function(line) {
+var propDefs = rawValidations.replace(/\r*\n[ \t]+/g, " ").split("\n").filter(function(line) {
     return line.match(/^[[a-z][^=]*=/);
 }).map(function(line) {
     return line.trim();
