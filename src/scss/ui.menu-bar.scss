@@ -29,7 +29,8 @@ $icon-height: 36px;
 // --------------------------------------------------------------------------------
 
 @mixin on-loading() {
-	body[data-vivliostyle-viewer-status="loading"] &, body[data-vivliostyle-viewer-status="resizing"] & {
+	body[data-vivliostyle-viewer-status="loading"] &,
+	body[data-vivliostyle-viewer-status="resizing"] & {
 		@content;
 	}
 }
@@ -101,21 +102,22 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 		width: 100%;
 		height: $icon-height * 0.5;
 		text-align: center;
-		opacity: 0.4;
 		transition: linear .2s;
-		@media screen and (max-width: 600px) {
+		@media screen and (max-width: 640px) {
 			right: $icon-width + $icon-offset-x * 4;
 			width: 362px / (80px / ($icon-height * 0.5));
 			text-align: right;
 		}
 		@media screen and (max-width: 400px) {
-			opacity: 0;
+			animation: none !important;
+			opacity: 0 !important;
 		}
 	}
 	&:before {
 		content: "";
 		background: transparent no-repeat center center $vivliostyle-logo-type;
 		background-size: contain;
+		opacity: 1;
 		@include on-loading() {
 			opacity: 0;
 		}
@@ -128,7 +130,6 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 		font-weight: bold;
 		opacity: 0;
 		@include on-loading() {
-			background: transparent;
 			animation: $animation-GLOW;
 			opacity: 0.4;
 		}
@@ -256,8 +257,10 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 						-webkit-filter: grayscale(50%); filter: grayscale(50%);
 					}
 				}
-				@include on-loading() {
-					animation: $animation-FLIP;
+				@media screen and (max-width: 400px) {
+					@include on-loading() {
+						animation: $animation-FLIP;
+					}
 				}
 			}
 			&#vivliostyle-menu-item_misc-toggle.vivliostyle-menu-item_detail-opened {
