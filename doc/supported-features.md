@@ -1,5 +1,22 @@
 # Features supported by Vivliostyle
 
+## Values
+
+- [Supported CSS-wide keywords](http://www.w3.org/TR/css-values/#common-keywords): `inherit`
+  - Depends on browser's capability: No
+  - `initial` and `unset` are *not* supported.
+- [Supported length units](http://www.w3.org/TR/css-values/#lengths): `em`, `ex`, `ch`, `rem`, `cm`, `mm`, `q`, `in`, `pc`, `pt`, `px`.
+  - Depends on browser's capability: No
+  - Note: `rem` is not correctly interpreted when used within @page rules. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/109)
+- [Supported color values]
+  - Depends on browser's capability: Yes
+  - [Basic color keywords](http://www.w3.org/TR/css3-color/#html4)
+  - [RGB color values](http://www.w3.org/TR/css3-color/#rgb-color), [RGBA color values](http://www.w3.org/TR/css3-color/#rgba-color)
+  - [‘transparent’ color keyword](http://www.w3.org/TR/css3-color/#transparent)
+  - [HSL color values](http://www.w3.org/TR/css3-color/#hsl-color), [HSLA color values](http://www.w3.org/TR/css3-color/#hsla-color)
+  - [Extended color keywords](http://www.w3.org/TR/css3-color/#svg-color)
+  - [‘currentColor’ color keyword](http://www.w3.org/TR/css3-color/#currentcolor)
+
 ## Selectors
 
 ### [CSS 2](http://www.w3.org/TR/CSS2/)
