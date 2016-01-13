@@ -116,7 +116,9 @@
 
 <!-- MESSAGE DIALOG -->
 <div id="vivliostyle-message-dialog" data-bind="foreach: messageDialog.list, visible: messageDialog.visible" style="display:none">
-	<div data-bind="css: type, text: $parent.messageDialog.getDisplayMessage(content)"></div>
+	<div class="vivliostyle-message">
+		<p data-bind="css: type, text: $parent.messageDialog.getDisplayMessage(content)"></p>
+	</div>
 </div>
 
 </body>
