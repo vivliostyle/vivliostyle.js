@@ -29,7 +29,7 @@ $icon-height: 36px;
 // --------------------------------------------------------------------------------
 
 @mixin on-loading() {
-	html.LOADING & {
+	body[data-vivliostyle-viewer-status="loading"] &, body[data-vivliostyle-viewer-status="resizing"] & {
 		@content;
 	}
 }
