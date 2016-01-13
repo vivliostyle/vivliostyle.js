@@ -585,12 +585,7 @@ vivliostyle.page.PageRuleMasterInstance.prototype.setPageAreaDimension = functio
     style["padding-left"] = new adapt.css.Expr(dim.marginLeft);
     style["padding-right"] = new adapt.css.Expr(dim.marginRight);
     style["padding-top"] = new adapt.css.Expr(dim.marginTop);
-
-    // Rounding errors in vertical dimension calculations sometimes make the page size too large
-    // to fit within the actual page in printing (PDF) and cause extra blank pages.
-    // We subtract a small length from the padding-bottom value to avoid this problem.
-    var scope = dim.marginBottom.scope;
-    style["padding-bottom"] = new adapt.css.Expr(adapt.expr.sub(scope, dim.marginBottom, new adapt.expr.Const(scope, 0.75)));
+    style["padding-bottom"] = new adapt.css.Expr(dim.marginBottom);
 };
 
 /**
@@ -1019,6 +1014,15 @@ vivliostyle.page.PageRuleMasterInstance.prototype.distributeAutoMarginBoxSizes =
 };
 
 /**
+ * @override
+ */
+vivliostyle.page.PageRuleMasterInstance.prototype.prepareContainer = function(context, container, page) {
+    vivliostyle.page.PageRuleMasterInstance.superClass_.prepareContainer.call(this, context, container, page);
+    // Add an attribute to the element so that it can be refered from external style sheets.
+    container.element.setAttribute("data-vivliostyle-page-box", true);
+};
+
+/**
  * @param {!adapt.pm.PageBoxInstance} parentInstance
  * @param {!vivliostyle.page.PageRulePartition} pageRulePartition
  * @constructor
@@ -1286,7 +1290,9 @@ vivliostyle.page.PageMarginBoxPartitionInstance.prototype.positionAndSizeAlongFi
         var insideName = names.inside;
         var outsideName = names.outside;
         var extentName = names.extent;
-        var pageMargin = dim["margin" + outsideName.charAt(0).toUpperCase() + outsideName.substring(1)];
+        // Reduce page margin by 2px: workaround for Chrome printing problem.
+        // https://github.com/vivliostyle/vivliostyle.js/issues/97
+        var pageMargin = adapt.expr.sub(scope, dim["margin" + outsideName.charAt(0).toUpperCase() + outsideName.substring(1)], new adapt.expr.Const(scope, 2));
         var marginInside = adapt.pm.toExprZeroAuto(scope, style["margin-" + insideName], pageMargin);
         var marginOutside = adapt.pm.toExprZeroAuto(scope, style["margin-" + outsideName], pageMargin);
         var paddingInside = adapt.pm.toExprZero(scope, style["padding-" + insideName], pageMargin);
