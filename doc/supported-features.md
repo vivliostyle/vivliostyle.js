@@ -487,6 +487,7 @@
 - [word-wrap](http://www.w3.org/TR/css-text-3/#word-wrap)
   - Allowed prefixes: ms
   - Depends on browser's capability: Yes
+  - Note: While the spec states that `word-wrap` must be treated as if it were a shorthand of `overflow-wrap`, Vivliostyle treat them for now as different properties and might result in an incorrect cascading behavior when inconsistent values are specified for both of the properties.
 
 ### [CSS Text Decoration 3](http://www.w3.org/TR/css-text-decor-3/)
 
