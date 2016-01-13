@@ -65,8 +65,8 @@
 				left: .25em;
 				top: 0;
 			}
-			&.error { color: rgb(248,  32,   0); &:before { content: $fa-var-times-circle; } }
-			&.warn  { color: rgb(216, 128,   0); &:before { content: $fa-var-exclamation-circle; } }
+			&.error { color: rgb(216,  32,   0); &:before { content: $fa-var-times-circle; } }
+			&.warn  { color: rgb(192, 128,   0); &:before { content: $fa-var-exclamation-circle; } }
 			&.info  { color: rgb(  0,  96, 192); &:before { content: $fa-var-info-circle; } }
 			&.debug { color: rgb( 64,  64,  64); &:before { content: $fa-var-stop-circle; } }
 		}
