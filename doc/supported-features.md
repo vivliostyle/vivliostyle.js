@@ -1,8 +1,8 @@
 # Features supported by Vivliostyle
 
-## [CSS 2](http://www.w3.org/TR/CSS2/)
+## Selectors
 
-### Selectors
+### [CSS 2](http://www.w3.org/TR/CSS2/)
 
 - [Universal selector `*`](https://www.w3.org/TR/CSS2/selector.html#universal-selector)
   - Depends on browser's capability: No
@@ -40,14 +40,86 @@
 - [Link pseudo-class `E:visited`](https://www.w3.org/TR/CSS2/selector.html#link-pseudo-classes)
 - [Dynamic pseudo-classes `E:active`, `E:hover`, `E:focus`](https://www.w3.org/TR/CSS2/selector.html#dynamic-pseudo-classes)
 
-### At-rules
+### [Selectors 3](https://www.w3.org/TR/css3-selectors/)
+
+- [Type selectors with namespaces `ns|E`, `*|E`](https://www.w3.org/TR/css3-selectors/#typenmsp)
+  - Depends on browser's capability: No
+- [Universal selector with namespaces `ns|*`, `*|*`](https://www.w3.org/TR/css3-selectors/#univnmsp)
+  - Depends on browser's capability: No
+- [Attribute selectors with namespaces `[ns|att]`, `[|att]`, `[ns|att=val]`, `[|att=val]`, `[ns|att~=val]`, `[|att~=val]`, `[ns|att|=val]`, `[|att|=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
+  - Depends on browser's capability: No
+- [`:root` pseudo-class](https://www.w3.org/TR/css3-selectors/#root-pseudo)
+  - Depends on browser's capability: No
+- [`:nth-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
+  - Depends on browser's capability: No
+  - Note: only a single integer argument is accepted for now. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/87)
+- [`:first-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-child-pseudo)
+- [`::first-line` pseudo-element](https://www.w3.org/TR/css3-selectors/#first-line)
+  - Depends on browser's capability: No
+  - Note: there is a bug when used alone or with the universal selector(`*`). [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/133)
+- [`::first-letter` pseudo-element](https://www.w3.org/TR/css3-selectors/#first-letter)
+  - Depends on browser's capability: No
+  - Note: there is a bug when used alone, with the universal selector(`*`), or with non-ascii characters. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/34)
+- [`::before` and `::after` pseudo-elements](https://www.w3.org/TR/css3-selectors/#gen-content)
+  - Depends on browser's capability: No
+- [General sibling combinator `E ~ F`](https://www.w3.org/TR/css3-selectors/#general-sibling-combinators)
+  - Depends on browser's capability: No
+
+#### Not supported selectors
+
+- [Type selectors without namespaces `|E`](https://www.w3.org/TR/css3-selectors/#typenmsp)
+- [Universal selector without namespaces `|*`](https://www.w3.org/TR/css3-selectors/#univnmsp)
+- [Substring matching attribute selectors `[att^=val]`, `[att$=val]`, `[att*=val]`](https://www.w3.org/TR/css3-selectors/#attribute-substrings)
+- [Attribute selectors with universal namespace `[*|att]`, `[*|att=val]`, `[*|att~=val]`, `[*|att|=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
+- [Target pseudo-class `:target`](https://www.w3.org/TR/css3-selectors/#target-pseudo)
+- [The UI element states pseudo-classes `:enabled`, `:disabled`, `:checked`, `:indeterminate`](https://www.w3.org/TR/css3-selectors/#UIstates)
+- [`:nth-last-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-child-pseudo)
+- [`:nth-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-of-type-pseudo)
+- [`:nth-last-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-of-type-pseudo)
+- [`:last-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-child-pseudo)
+- [`:first-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-of-type-pseudo)
+- [`:last-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-of-type-pseudo)
+- [`:only-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#only-child-pseudo)
+- [`:only-of-type pseudo-class](https://www.w3.org/TR/css3-selectors/#only-of-type-pseudo)
+- [`:empty` pseudo-class](https://www.w3.org/TR/css3-selectors/#empty-pseudo)
+- [The negation pseudo-class `:not()`](https://www.w3.org/TR/css3-selectors/#negation)
+
+## At-rules
+
+### [CSS 2](http://www.w3.org/TR/CSS2/)
 
 - [@charset](http://www.w3.org/TR/CSS2/syndata.html#charset)
   - Depends on browser's capability: No
 - [@import](http://www.w3.org/TR/CSS2/cascade.html#at-import)
+  - [Also in CSS Cascading and Inheritance 3](http://www.w3.org/TR/css-cascade-3/#at-import)
   - Depends on browser's capability: No
 
-### Properties
+### [CSS Namespaces 3](http://www.w3.org/TR/css3-namespace/)
+
+- [@namespace](http://www.w3.org/TR/css3-namespace/#declaration)
+  - Depends on browser's capability: No
+
+### [CSS Conditional Rules 3](http://www.w3.org/TR/css3-conditional/)
+
+- [@media](http://www.w3.org/TR/css3-conditional/#atmedia-rule)
+  - Depends on browser's capability: No
+
+### [CSS Paged Media 3](https://drafts.csswg.org/css-page-3/)
+
+- [@page](https://drafts.csswg.org/css-page/#at-page-rule)
+  - Depends on browser's capability: No
+- [Page-margin boxes (@top-left-corner, @top-left, @top-center, @top-right, @top-right-corner, @left-top, @left-middle, @left-bottom, @right-top, @right-middle, @right-bottom, @bottom-left-corner, @bottom-left, @bottom-center, @bottom-right, @bottom-right-coner)](https://drafts.csswg.org/css-page/#margin-at-rules)
+  - Depends on browser's capability: No
+
+### [CSS Fonts 3](http://www.w3.org/TR/css-fonts-3/)
+
+- [@font-face](http://www.w3.org/TR/css-fonts-3/#font-face-rule)
+  - Depends on browser's capability: Yes
+  - Note: `font-stretch`, `unicode-range` and `font-feature-settings` descriptors are currently ignored.
+
+## Properties
+
+### [CSS 2](http://www.w3.org/TR/CSS2/)
 
 - [background](http://www.w3.org/TR/CSS2/colors.html#propdef-background)
   - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background)
@@ -252,100 +324,20 @@
 - [z-index](http://www.w3.org/TR/CSS2/visuren.html#propdef-z-index)
   - Depends on browser's capability: Yes
 
-## [CSS Namespaces 3](http://www.w3.org/TR/css3-namespace/)
-
-### At-rules
-
-- [@namespace](http://www.w3.org/TR/css3-namespace/#declaration)
-  - Depends on browser's capability: No
-
-## [Selectors 3](https://www.w3.org/TR/css3-selectors/)
-
-### Selectors
-
-- [Type selectors with namespaces `ns|E`, `*|E`](https://www.w3.org/TR/css3-selectors/#typenmsp)
-  - Depends on browser's capability: No
-- [Universal selector with namespaces `ns|*`, `*|*`](https://www.w3.org/TR/css3-selectors/#univnmsp)
-  - Depends on browser's capability: No
-- [Attribute selectors with namespaces `[ns|att]`, `[|att]`, `[ns|att=val]`, `[|att=val]`, `[ns|att~=val]`, `[|att~=val]`, `[ns|att|=val]`, `[|att|=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
-  - Depends on browser's capability: No
-- [`:root` pseudo-class](https://www.w3.org/TR/css3-selectors/#root-pseudo)
-  - Depends on browser's capability: No
-- [`:nth-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
-  - Depends on browser's capability: No
-  - Note: only a single integer argument is accepted for now. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/87)
-- [`:first-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-child-pseudo)
-- [`::first-line` pseudo-element](https://www.w3.org/TR/css3-selectors/#first-line)
-  - Depends on browser's capability: No
-  - Note: there is a bug when used alone or with the universal selector(`*`). [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/133)
-- [`::first-letter` pseudo-element](https://www.w3.org/TR/css3-selectors/#first-letter)
-  - Depends on browser's capability: No
-  - Note: there is a bug when used alone, with the universal selector(`*`), or with non-ascii characters. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/34)
-- [`::before` and `::after` pseudo-elements](https://www.w3.org/TR/css3-selectors/#gen-content)
-  - Depends on browser's capability: No
-- [General sibling combinator `E ~ F`](https://www.w3.org/TR/css3-selectors/#general-sibling-combinators)
-  - Depends on browser's capability: No
-
-#### Not supported selectors
-
-- [Type selectors without namespaces `|E`](https://www.w3.org/TR/css3-selectors/#typenmsp)
-- [Universal selector without namespaces `|*`](https://www.w3.org/TR/css3-selectors/#univnmsp)
-- [Substring matching attribute selectors `[att^=val]`, `[att$=val]`, `[att*=val]`](https://www.w3.org/TR/css3-selectors/#attribute-substrings)
-- [Attribute selectors with universal namespace `[*|att]`, `[*|att=val]`, `[*|att~=val]`, `[*|att|=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
-- [Target pseudo-class `:target`](https://www.w3.org/TR/css3-selectors/#target-pseudo)
-- [The UI element states pseudo-classes `:enabled`, `:disabled`, `:checked`, `:indeterminate`](https://www.w3.org/TR/css3-selectors/#UIstates)
-- [`:nth-last-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-child-pseudo)
-- [`:nth-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-of-type-pseudo)
-- [`:nth-last-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-of-type-pseudo)
-- [`:last-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-child-pseudo)
-- [`:first-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-of-type-pseudo)
-- [`:last-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-of-type-pseudo)
-- [`:only-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#only-child-pseudo)
-- [`:only-of-type pseudo-class](https://www.w3.org/TR/css3-selectors/#only-of-type-pseudo)
-- [`:empty` pseudo-class](https://www.w3.org/TR/css3-selectors/#empty-pseudo)
-- [The negation pseudo-class `:not()`](https://www.w3.org/TR/css3-selectors/#negation)
-
-## [CSS Cascading and Inheritance 3](http://www.w3.org/TR/css-cascade-3/)
-
-### At-rules
-
-- [@import](http://www.w3.org/TR/css-cascade-3/#at-import)
-  - Depends on browser's capability: No
-
-## [CSS Conditional Rules 3](http://www.w3.org/TR/css3-conditional/)
-
-### At-rules
-
-- [@media](http://www.w3.org/TR/css3-conditional/#atmedia-rule)
-  - Depends on browser's capability: No
-
-## [CSS Paged Media 3](https://drafts.csswg.org/css-page-3/)
-
-### At-rules
-
-- [@page](https://drafts.csswg.org/css-page/#at-page-rule)
-  - Depends on browser's capability: No
-- [Page-margin boxes (@top-left-corner, @top-left, @top-center, @top-right, @top-right-corner, @left-top, @left-middle, @left-bottom, @right-top, @right-middle, @right-bottom, @bottom-left-corner, @bottom-left, @bottom-center, @bottom-right, @bottom-right-coner)](https://drafts.csswg.org/css-page/#margin-at-rules)
-  - Depends on browser's capability: No
-
-### Properties
+### [CSS Paged Media 3](https://drafts.csswg.org/css-page-3/)
 
 - [size](https://drafts.csswg.org/css-page-3/#descdef-page-size)
   - Depends on browser's capability: No
   - Supports `JIS-B5` and `JIS-B4` values in the current editor's draft.
 
-## [CSS Color 3](http://www.w3.org/TR/css3-color/)
-
-### Properties
+### [CSS Color 3](http://www.w3.org/TR/css3-color/)
 
 - [color](http://www.w3.org/TR/css3-color/#color0)
   - Depends on browser's capability: Yes
 - [opacity](http://www.w3.org/TR/css3-color/#opacity)
   - Depends on browser's capability: Yes
 
-## [CSS Backgrounds and Borders 3](http://www.w3.org/TR/css3-background/)
-
-### Properties
+### [CSS Backgrounds and Borders 3](http://www.w3.org/TR/css3-background/)
 
 - [background](http://www.w3.org/TR/css3-background/#background)
   - Depends on browser's capability: Yes
@@ -441,24 +433,14 @@
   - Allowed prefixes: webkit
   - Depends on browser's capability: Yes
 
-## [CSS Image Values and Replaced Content 3](http://www.w3.org/TR/css3-images/)
-
-### Properties
+### [CSS Image Values and Replaced Content 3](http://www.w3.org/TR/css3-images/)
 
 - [object-fit](http://www.w3.org/TR/css3-images/#object-fit)
   - Depends on browser's capability: Yes
 - [object-position](http://www.w3.org/TR/css3-images/#object-position)
   - Depends on browser's capability: Yes
 
-## [CSS Fonts 3](http://www.w3.org/TR/css-fonts-3/)
-
-### At-rules
-
-- [@font-face](http://www.w3.org/TR/css-fonts-3/#font-face-rule)
-  - Depends on browser's capability: Yes
-  - Note: `font-stretch`, `unicode-range` and `font-feature-settings` descriptors are currently ignored.
-
-### Properties
+### [CSS Fonts 3](http://www.w3.org/TR/css-fonts-3/)
 
 - [font-family](http://www.w3.org/TR/css-fonts-3/#propdef-font-family)
   - Depends on browser's capability: Yes
@@ -472,9 +454,7 @@
 - [font-weight](http://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
   - Depends on browser's capability: Yes
 
-## [CSS Text 3](http://www.w3.org/TR/css-text-3/)
-
-### Properties
+### [CSS Text 3](http://www.w3.org/TR/css-text-3/)
 
 - [hyphens](http://www.w3.org/TR/css-text-3/#hyphens)
   - Allowed prefixes: epub, moz, ms, webkit
@@ -508,9 +488,7 @@
   - Allowed prefixes: ms
   - Depends on browser's capability: Yes
 
-## [CSS Text Decoration 3](http://www.w3.org/TR/css-text-decor-3/)
-
-### Properties
+### [CSS Text Decoration 3](http://www.w3.org/TR/css-text-decor-3/)
 
 - Note: While `text-decoration` property is a shorthand in CSS Text Decoration 3, Vivliostyle treats `text-decoration` for now as an independent property defined in CSS Level 2.1.
 - [text-decoration-color](http://www.w3.org/TR/css-text-decor-3/#text-decoration-color)
@@ -543,9 +521,7 @@
   - Depends on browser's capability: Yes
   - Allowed prefixes: ms, webkit
 
-## [CSS Multi-column Layout 1](http://www.w3.org/TR/css3-multicol/)
-
-### Properties
+### [CSS Multi-column Layout 1](http://www.w3.org/TR/css3-multicol/)
 
 - [break-after](http://www.w3.org/TR/css3-multicol/#break-after)
   - Depends on browser's capability: No
@@ -581,9 +557,7 @@
   - Allowed prefixes: moz, webkit
   - Depends on browser's capability: No
 
-## [CSS Basic User Interface 3](http://www.w3.org/TR/css3-ui/)
-
-### Properties
+### [CSS Basic User Interface 3](http://www.w3.org/TR/css3-ui/)
 
 - [box-sizing](http://www.w3.org/TR/css3-ui/#propdef-box-sizing)
   - Depends on browser's capability: Yes
@@ -599,9 +573,7 @@
   - Allowed prefixes: ms
   - Depends on browser's capability: Yes
 
-## [CSS Writing Modes 3](http://www.w3.org/TR/css-writing-modes-3/)
-
-### Properties
+### [CSS Writing Modes 3](http://www.w3.org/TR/css-writing-modes-3/)
 
 - [direction](http://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
   - Depends on browser's capability: Yes
@@ -624,9 +596,7 @@
   - Depends on browser's capability: Yes
   - Note: supported values are [those defined in 20 March 2014 Candidate Recommendation](https://www.w3.org/TR/2014/CR-css-writing-modes-3-20140320/#propdef-writing-mode), not those in the latest spec.
 
-## [CSS Flexible Box Layout 1](http://www.w3.org/TR/css-flexbox-1/)
-
-### Properties
+### [CSS Flexible Box Layout 1](http://www.w3.org/TR/css-flexbox-1/)
 
 - [align-content](http://www.w3.org/TR/css-flexbox-1/#propdef-align-content)
   - Depends on browser's capability: Yes
@@ -656,9 +626,7 @@
 - [order](http://www.w3.org/TR/css-flexbox-1/#propdef-order)
   - Depends on browser's capability: Yes
 
-## [CSS Fragmentation 3](http://www.w3.org/TR/css3-break/)
-
-### Properties
+### [CSS Fragmentation 3](http://www.w3.org/TR/css3-break/)
 
 - [break-after](http://www.w3.org/TR/css3-break/#break-after)
   - Depends on browser's capability: No
@@ -674,9 +642,7 @@
 - [widows](http://www.w3.org/TR/css3-break/#widows)
   - Depends on browser's capability: No
 
-## [CSS Transforms 1](http://www.w3.org/TR/css-transforms-1/)
-
-### Properties
+### [CSS Transforms 1](http://www.w3.org/TR/css-transforms-1/)
 
 - [backface-visibility](http://www.w3.org/TR/css-transforms-1/#propdef-backface-visibility)
   - Allowed prefixes: ms, webkit
@@ -688,9 +654,7 @@
   - Allowed prefixes: epub, ms
   - Depends on browser's capability: Yes
 
-## [CSS Ruby Layout 1](http://www.w3.org/TR/css-ruby-1/)
-
-### Properties
+### [CSS Ruby Layout 1](http://www.w3.org/TR/css-ruby-1/)
 
 - [ruby-align](http://www.w3.org/TR/css-ruby-1/#propdef-ruby-align)
   - Depends on browser's capability: Yes
@@ -698,17 +662,13 @@
   - Depends on browser's capability: Yes
   - Supports syntax defined in the current editor's draft.
 
-## [CSS Mobile Text Size Adjustment 1](https://drafts.csswg.org/css-size-adjust-1/)
-
-### Properties
+### [CSS Mobile Text Size Adjustment 1](https://drafts.csswg.org/css-size-adjust-1/)
 
 - [text-size-adjust](https://drafts.csswg.org/css-size-adjust-1/#text-size-adjust)
   - Allowed prefixes: moz, ms
   - Depends on browser's capability: Yes
 
-## [Pointer Events](http://www.w3.org/TR/pointerevents/)
-
-### Properties
+### [Pointer Events](http://www.w3.org/TR/pointerevents/)
 
 - [touch-action](http://www.w3.org/TR/pointerevents/#the-touch-action-css-property)
   - Allowed prefixes: ms
