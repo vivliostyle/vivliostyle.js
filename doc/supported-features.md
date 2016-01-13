@@ -2,6 +2,44 @@
 
 ## [CSS 2](http://www.w3.org/TR/CSS2/)
 
+### Selectors
+
+- [Universal selector `*`](https://www.w3.org/TR/CSS2/selector.html#universal-selector)
+  - Depends on browser's capability: No
+- [Type selectors `E`](https://www.w3.org/TR/CSS2/selector.html#type-selectors)
+  - Depends on browser's capability: No
+- [Descendant selectors `E F`](https://www.w3.org/TR/CSS2/selector.html#descendant-selectors)
+  - Depends on browser's capability: No
+- [Child selectors `E > F`](https://www.w3.org/TR/CSS2/selector.html#child-selectors)
+  - Depends on browser's capability: No
+- [Adjacent sibling selectors `E + F`](https://www.w3.org/TR/CSS2/selector.html#adjacent-selectors)
+  - Depends on browser's capability: No
+- [Attribute selectors `E[foo]`, `E[foo="bar"]`, `E[foo~="bar"]`, `E[foo|="bar"]`](https://www.w3.org/TR/CSS2/selector.html#attribute-selectors)
+  - Depends on browser's capability: No
+- [Class selectors `E.foo`](https://www.w3.org/TR/CSS2/selector.html#class-html)
+  - Depends on browser's capability: No
+- [ID selectors `E#foo`](https://www.w3.org/TR/CSS2/selector.html#id-selectors)
+  - Depends on browser's capability: No
+- [`:first-child` pseudo-class](https://www.w3.org/TR/CSS2/selector.html#first-child)
+  - Depends on browser's capability: No
+- [Link pseudo-class `E:link`](https://www.w3.org/TR/CSS2/selector.html#link-pseudo-classes)
+  - Depends on browser's capability: No
+- [Language pseudo-class `E:lang(c)`](https://www.w3.org/TR/CSS2/selector.html#lang)
+  - Depends on browser's capability: No
+- [`:first-line` pseudo-element](https://www.w3.org/TR/CSS2/selector.html#first-line-pseudo)
+  - Depends on browser's capability: No
+  - Note: there is a bug when used alone or with the universal selector(`*`). [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/133)
+- [`:first-letter` pseudo-element](https://www.w3.org/TR/CSS2/selector.html#first-letter)
+  - Depends on browser's capability: No
+  - Note: there is a bug when used alone, with the universal selector(`*`), or with non-ascii characters. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/34)
+- [`:before` and `:after` pseudo-elements](https://www.w3.org/TR/CSS2/selector.html#before-and-after)
+  - Depends on browser's capability: No
+
+#### Not supported selectors
+
+- [Link pseudo-class `E:visited`](https://www.w3.org/TR/CSS2/selector.html#link-pseudo-classes)
+- [Dynamic pseudo-classes `E:active`, `E:hover`, `E:focus`](https://www.w3.org/TR/CSS2/selector.html#dynamic-pseudo-classes)
+
 ### At-rules
 
 - [@charset](http://www.w3.org/TR/CSS2/syndata.html#charset)
@@ -220,6 +258,52 @@
 
 - [@namespace](http://www.w3.org/TR/css3-namespace/#declaration)
   - Depends on browser's capability: No
+
+## [Selectors 3](https://www.w3.org/TR/css3-selectors/)
+
+### Selectors
+
+- [Type selectors with namespaces `ns|E`, `*|E`](https://www.w3.org/TR/css3-selectors/#typenmsp)
+  - Depends on browser's capability: No
+- [Universal selector with namespaces `ns|*`, `*|*`](https://www.w3.org/TR/css3-selectors/#univnmsp)
+  - Depends on browser's capability: No
+- [Attribute selectors with namespaces `[ns|att]`, `[|att]`, `[ns|att=val]`, `[|att=val]`, `[ns|att~=val]`, `[|att~=val]`, `[ns|att|=val]`, `[|att|=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
+  - Depends on browser's capability: No
+- [`:root` pseudo-class](https://www.w3.org/TR/css3-selectors/#root-pseudo)
+  - Depends on browser's capability: No
+- [`:nth-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
+  - Depends on browser's capability: No
+  - Note: only a single integer argument is accepted for now. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/87)
+- [`:first-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-child-pseudo)
+- [`::first-line` pseudo-element](https://www.w3.org/TR/css3-selectors/#first-line)
+  - Depends on browser's capability: No
+  - Note: there is a bug when used alone or with the universal selector(`*`). [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/133)
+- [`::first-letter` pseudo-element](https://www.w3.org/TR/css3-selectors/#first-letter)
+  - Depends on browser's capability: No
+  - Note: there is a bug when used alone, with the universal selector(`*`), or with non-ascii characters. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/34)
+- [`::before` and `::after` pseudo-elements](https://www.w3.org/TR/css3-selectors/#gen-content)
+  - Depends on browser's capability: No
+- [General sibling combinator `E ~ F`](https://www.w3.org/TR/css3-selectors/#general-sibling-combinators)
+  - Depends on browser's capability: No
+
+#### Not supported selectors
+
+- [Type selectors without namespaces `|E`](https://www.w3.org/TR/css3-selectors/#typenmsp)
+- [Universal selector without namespaces `|*`](https://www.w3.org/TR/css3-selectors/#univnmsp)
+- [Substring matching attribute selectors `[att^=val]`, `[att$=val]`, `[att*=val]`](https://www.w3.org/TR/css3-selectors/#attribute-substrings)
+- [Attribute selectors with universal namespace `[*|att]`, `[*|att=val]`, `[*|att~=val]`, `[*|att|=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
+- [Target pseudo-class `:target`](https://www.w3.org/TR/css3-selectors/#target-pseudo)
+- [The UI element states pseudo-classes `:enabled`, `:disabled`, `:checked`, `:indeterminate`](https://www.w3.org/TR/css3-selectors/#UIstates)
+- [`:nth-last-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-child-pseudo)
+- [`:nth-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-of-type-pseudo)
+- [`:nth-last-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-of-type-pseudo)
+- [`:last-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-child-pseudo)
+- [`:first-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-of-type-pseudo)
+- [`:last-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-of-type-pseudo)
+- [`:only-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#only-child-pseudo)
+- [`:only-of-type pseudo-class](https://www.w3.org/TR/css3-selectors/#only-of-type-pseudo)
+- [`:empty` pseudo-class](https://www.w3.org/TR/css3-selectors/#empty-pseudo)
+- [The negation pseudo-class `:not()`](https://www.w3.org/TR/css3-selectors/#negation)
 
 ## [CSS Cascading and Inheritance 3](http://www.w3.org/TR/css-cascade-3/)
 
