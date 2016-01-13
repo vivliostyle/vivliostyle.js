@@ -16,15 +16,6 @@
 // --------------------------------------------------------------------------------
 
 
-// - Vars
-// --------------------------------------------------------------------------------
-
-$icon-offset-x: 2px;
-$icon-offset-y: 2px;
-$icon-width: 36px;
-$icon-height: 36px;
-
-
 // - Mix-Ins
 // --------------------------------------------------------------------------------
 
@@ -73,13 +64,13 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 	left: 0;
 	top: 0;
 	width: 100vw;
-	height: $icon-height;
+	height: $menu-icon-height;
 	font-family: $sans-serif;
 	font-size: 14px;
 	line-height: 1;
 	color: white;
 	background: black;
-	box-shadow: 0 2px 2px rgba(0,0,0,.4);
+	@include box-shadow($menu-box-shadow);
 	-webkit-font-smoothing: subpixel-antialiased;
 	-webkit-text-size-adjust: 100%;
 	* {
@@ -98,14 +89,14 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 		position: absolute;
 		z-index: 1;
 		right: 0;
-		top: $icon-height * 0.5 * 0.6;
+		top: $menu-icon-height * 0.5 * 0.6;
 		width: 100%;
-		height: $icon-height * 0.5;
+		height: $menu-icon-height * 0.5;
 		text-align: center;
 		transition: linear .2s;
 		@media screen and (max-width: 640px) {
-			right: $icon-width + $icon-offset-x * 4;
-			width: 362px / (80px / ($icon-height * 0.5));
+			right: $menu-icon-width + $menu-icon-offset-x * 4;
+			width: 362px / (80px / ($menu-icon-height * 0.5));
 			text-align: right;
 		}
 		@media screen and (max-width: 400px) {
@@ -125,7 +116,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 	&:after {
 		content: "Loading...";
 		font-family: sans-serif;
-		font-size: $icon-height * 0.38;
+		font-size: $menu-icon-height * 0.38;
 		line-height: 1.2;
 		font-weight: bold;
 		opacity: 0;
@@ -152,7 +143,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 			right: 0;
 			top: 1px;
 			width: 1px;
-			height: $icon-height - 2px;
+			height: $menu-icon-height - 2px;
 			background: rgb(64,64,64);
 		}
 		//&:first-child/*, &#vivliostyle-menu_misc*/ { padding-left: 0; &:before { display: none; } }
@@ -160,18 +151,18 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 		li.vivliostyle-menu-item {
 			display: table-cell;
 			position: relative;
-			width: $icon-width;
-			height: $icon-height;
+			width: $menu-icon-width;
+			height: $menu-icon-height;
 			>.vivliostyle-menu-icon-button, >.vivliostyle-menu-icon-button:before, >.vivliostyle-menu-icon-button:after {
 				@include box-sizing(border-box);
 				display: block;
 				position: absolute;
 			}
 			>.vivliostyle-menu-icon-button {
-				left: $icon-offset-x;
-				top: $icon-offset-y;
-				width: $icon-width - $icon-offset-x * 2;
-				height: $icon-height - $icon-offset-y * 2;
+				left: $menu-icon-offset-x;
+				top: $menu-icon-offset-y;
+				width: $menu-icon-width - $menu-icon-offset-x * 2;
+				height: $menu-icon-height - $menu-icon-offset-y * 2;
 				border-radius: 2px;
 				color: transparent;
 				cursor: pointer;
@@ -186,18 +177,18 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					top: 0;
 					width: 100%;
 					height: 100%;
-					line-height: $icon-height - $icon-offset-y * 2;
-					font-size: $icon-height * 0.45;
+					line-height: $menu-icon-height - $menu-icon-offset-y * 2;
+					font-size: $menu-icon-height * 0.45;
 					text-align: center;
 					@include font-icon("FontAwesome");
 				}
 				&:after {
 					width: 1em;
 					height: 1em;
-					line-height: $icon-height * 0.25;
+					line-height: $menu-icon-height * 0.25;
 					text-align: center;
 					font-family: Verdana;
-					font-size: $icon-height * 0.25;
+					font-size: $menu-icon-height * 0.25;
 					//font-weight: bold;
 				}
 				&.hover  { &:before, &:after { color: black; } background: rgba(255,255,255,0.75); }
@@ -229,19 +220,19 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 			&#vivliostyle-menu-item_move-next         >.vivliostyle-menu-icon-button:before { content: $fa-var-chevron-down; }
 			&#vivliostyle-menu-item_zoom-out          >.vivliostyle-menu-icon-button:before { content: $fa-var-search-minus; }
 		//	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:before { content: $fa-var-search; }
-			&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:before { content: $fa-var-arrows-alt/*$fa-var-search*/; top: .05em; /*font-size: $icon-height * 0.36;*/ }
+			&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:before { content: $fa-var-arrows-alt/*$fa-var-search*/; top: .05em; /*font-size: $menu-icon-height * 0.36;*/ }
 			&#vivliostyle-menu-item_zoom-in           >.vivliostyle-menu-icon-button:before { content: $fa-var-search-plus; }
 			&#vivliostyle-menu-item_text-size-smaller >.vivliostyle-menu-icon-button:before { content: $fa-var-font; }
 			&#vivliostyle-menu-item_text-size-default >.vivliostyle-menu-icon-button:before { content: $fa-var-font; }
 			&#vivliostyle-menu-item_text-size-larger  >.vivliostyle-menu-icon-button:before { content: $fa-var-font; }
-		//	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:after  { content: "="; left: $icon-width * 0.2625; top: $icon-height * 0.2; }
-		//	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:after  { content: ""; border: solid 1px; border-radius: 2px; width: 2.1em; height: 2.1em; left: $icon-width * 0.17; top: $icon-height * 0.18; }
+		//	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:after  { content: "="; left: $menu-icon-width * 0.2625; top: $menu-icon-height * 0.2; }
+		//	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:after  { content: ""; border: solid 1px; border-radius: 2px; width: 2.1em; height: 2.1em; left: $menu-icon-width * 0.17; top: $menu-icon-height * 0.18; }
 			&#vivliostyle-menu-item_text-size-smaller >.vivliostyle-menu-icon-button:after  { content: "-"; }
 			&#vivliostyle-menu-item_text-size-default >.vivliostyle-menu-icon-button:after  { content: "=" }
 			&#vivliostyle-menu-item_text-size-larger  >.vivliostyle-menu-icon-button:after  { content: "+"; }
 			&#vivliostyle-menu-item_text-size-smaller >.vivliostyle-menu-icon-button:after,
 			&#vivliostyle-menu-item_text-size-default >.vivliostyle-menu-icon-button:after,
-			&#vivliostyle-menu-item_text-size-larger  >.vivliostyle-menu-icon-button:after  {               right: $icon-width * 0.01; top: $icon-height * 0.15; }
+			&#vivliostyle-menu-item_text-size-larger  >.vivliostyle-menu-icon-button:after  {               right: $menu-icon-width * 0.01; top: $menu-icon-height * 0.15; }
 		//	&#vivliostyle-menu-item_misc-toggle       >.vivliostyle-menu-icon-button:before { content: $fa-var-bars; }
 		//	&#vivliostyle-menu-item_misc-toggle.vivliostyle-menu-item_detail-opened >.vivliostyle-menu-icon-button:before { content: $fa-var-times; }
 			&#vivliostyle-menu-item_misc-toggle {
@@ -283,15 +274,15 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 				display: none;
 				position: fixed;
 				right: 0;
-				top: $icon-height;
+				top: $menu-icon-height;
 				padding: 0 2px;
 				width: 100vw;
 				max-width: 320px;
-				height: calc(100% - #{$icon-height});
+				height: calc(100% - #{$menu-icon-height});
 				line-height: 1;
-				color: rgb(32,32,32); .vivliostyle-menu-disabled { color: rgb(160,160,160); }
-				background: rgba(248,248,248,0.9);
-				box-shadow: 0 2px 2px rgba(0,0,0,.4);
+				color: $menu-fg-color; .vivliostyle-menu-disabled { color: $menu-disabled-fg-color; }
+				background: $menu-bg-color;
+				@include box-shadow($menu-box-shadow);
 				input, select {
 					display: inline-block;
 				}
@@ -450,8 +441,8 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 
 @media screen {
 	#vivliostyle-viewer-viewport {
-		margin-top: $icon-height;
-		height: calc(100vh - #{$icon-height});
+		margin-top: $menu-icon-height;
+		height: calc(100vh - #{$menu-icon-height});
 		width: 100vw;
 		&[data-vivliostyle-viewer-status=complete] {
 			overflow: auto;
