@@ -1,217 +1,217 @@
 # Features supported by Vivliostyle
 
-## [CSS 2.1](http://www.w3.org/TR/CSS21/)
+## [CSS 2](http://www.w3.org/TR/CSS2/)
 
 ### At-rules
 
-- [@charset](http://www.w3.org/TR/CSS21/syndata.html#charset)
+- [@charset](http://www.w3.org/TR/CSS2/syndata.html#charset)
   - Depends on browser's capability: No
-- [@import](http://www.w3.org/TR/CSS21/cascade.html#at-import)
+- [@import](http://www.w3.org/TR/CSS2/cascade.html#at-import)
   - Depends on browser's capability: No
 
 ### Properties
 
-- [background](http://www.w3.org/TR/CSS21/colors.html#propdef-background)
+- [background](http://www.w3.org/TR/CSS2/colors.html#propdef-background)
   - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background)
   - Depends on browser's capability: Yes
-- [background-attachment](http://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment)
+- [background-attachment](http://www.w3.org/TR/CSS2/colors.html#propdef-background-attachment)
   - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background-attachment)
   - Depends on browser's capability: Yes
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [background-color](http://www.w3.org/TR/CSS21/colors.html#propdef-background-color)
+- [background-color](http://www.w3.org/TR/CSS2/colors.html#propdef-background-color)
   - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background-color)
   - Depends on browser's capability: Yes
-- [background-image](http://www.w3.org/TR/CSS21/colors.html#propdef-background-image)
+- [background-image](http://www.w3.org/TR/CSS2/colors.html#propdef-background-image)
   - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background-image)
   - Depends on browser's capability: Yes
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [background-position](http://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
+- [background-position](http://www.w3.org/TR/CSS2/colors.html#propdef-background-position)
   - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background-position)
   - Depends on browser's capability: Yes
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [background-repeat](http://www.w3.org/TR/CSS21/colors.html#propdef-background-repeat)
+- [background-repeat](http://www.w3.org/TR/CSS2/colors.html#propdef-background-repeat)
   - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background-repeat)
   - Depends on browser's capability: Yes
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [border](http://www.w3.org/TR/CSS21/box.html#propdef-border)
+- [border](http://www.w3.org/TR/CSS2/box.html#propdef-border)
   - Depends on browser's capability: Yes
-- [border-bottom](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom)
+- [border-bottom](http://www.w3.org/TR/CSS2/box.html#propdef-border-bottom)
   - Depends on browser's capability: Yes
-- [border-bottom-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-color)
+- [border-bottom-color](http://www.w3.org/TR/CSS2/box.html#propdef-border-bottom-color)
   - Depends on browser's capability: Yes
-- [border-bottom-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-style)
+- [border-bottom-style](http://www.w3.org/TR/CSS2/box.html#propdef-border-bottom-style)
   - Depends on browser's capability: Yes
-- [border-bottom-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-width)
+- [border-bottom-width](http://www.w3.org/TR/CSS2/box.html#propdef-border-bottom-width)
   - Depends on browser's capability: Yes
-- [border-collapse](http://www.w3.org/TR/CSS21/tables.html#propdef-border-collapse)
+- [border-collapse](http://www.w3.org/TR/CSS2/tables.html#propdef-border-collapse)
   - Depends on browser's capability: Yes
-- [border-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-color)
+- [border-color](http://www.w3.org/TR/CSS2/box.html#propdef-border-color)
   - Depends on browser's capability: Yes
-- [border-left](http://www.w3.org/TR/CSS21/box.html#propdef-border-left)
+- [border-left](http://www.w3.org/TR/CSS2/box.html#propdef-border-left)
   - Depends on browser's capability: Yes
-- [border-left-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-color)
+- [border-left-color](http://www.w3.org/TR/CSS2/box.html#propdef-border-left-color)
   - Depends on browser's capability: Yes
-- [border-left-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-style)
+- [border-left-style](http://www.w3.org/TR/CSS2/box.html#propdef-border-left-style)
   - Depends on browser's capability: Yes
-- [border-left-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-left-width)
+- [border-left-width](http://www.w3.org/TR/CSS2/box.html#propdef-border-left-width)
   - Depends on browser's capability: Yes
-- [border-right](http://www.w3.org/TR/CSS21/box.html#propdef-border-right)
+- [border-right](http://www.w3.org/TR/CSS2/box.html#propdef-border-right)
   - Depends on browser's capability: Yes
-- [border-right-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-color)
+- [border-right-color](http://www.w3.org/TR/CSS2/box.html#propdef-border-right-color)
   - Depends on browser's capability: Yes
-- [border-right-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-style)
+- [border-right-style](http://www.w3.org/TR/CSS2/box.html#propdef-border-right-style)
   - Depends on browser's capability: Yes
-- [border-right-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-right-width)
+- [border-right-width](http://www.w3.org/TR/CSS2/box.html#propdef-border-right-width)
   - Depends on browser's capability: Yes
-- [border-spacing](http://www.w3.org/TR/CSS21/tables.html#propdef-border-spacing)
+- [border-spacing](http://www.w3.org/TR/CSS2/tables.html#propdef-border-spacing)
   - Depends on browser's capability: Yes
-- [border-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-style)
+- [border-style](http://www.w3.org/TR/CSS2/box.html#propdef-border-style)
   - Depends on browser's capability: Yes
-- [border-top](http://www.w3.org/TR/CSS21/box.html#propdef-border-top)
+- [border-top](http://www.w3.org/TR/CSS2/box.html#propdef-border-top)
   - Depends on browser's capability: Yes
-- [border-top-color](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-color)
+- [border-top-color](http://www.w3.org/TR/CSS2/box.html#propdef-border-top-color)
   - Depends on browser's capability: Yes
-- [border-top-style](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-style)
+- [border-top-style](http://www.w3.org/TR/CSS2/box.html#propdef-border-top-style)
   - Depends on browser's capability: Yes
-- [border-top-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-top-width)
+- [border-top-width](http://www.w3.org/TR/CSS2/box.html#propdef-border-top-width)
   - Depends on browser's capability: Yes
-- [border-width](http://www.w3.org/TR/CSS21/box.html#propdef-border-width)
+- [border-width](http://www.w3.org/TR/CSS2/box.html#propdef-border-width)
   - Depends on browser's capability: Yes
-- [bottom](http://www.w3.org/TR/CSS21/visuren.html#propdef-bottom)
+- [bottom](http://www.w3.org/TR/CSS2/visuren.html#propdef-bottom)
   - Depends on browser's capability: Yes
-- [caption-side](http://www.w3.org/TR/CSS21/tables.html#propdef-caption-side)
+- [caption-side](http://www.w3.org/TR/CSS2/tables.html#propdef-caption-side)
   - Depends on browser's capability: Yes
-- [clear](http://www.w3.org/TR/CSS21/visuren.html#propdef-clear)
+- [clear](http://www.w3.org/TR/CSS2/visuren.html#propdef-clear)
   - Depends on browser's capability: No
-- [clip](http://www.w3.org/TR/CSS21/visufx.html#propdef-clip)
+- [clip](http://www.w3.org/TR/CSS2/visufx.html#propdef-clip)
   - Depends on browser's capability: Yes
-- [color](http://www.w3.org/TR/CSS21/colors.html#propdef-color)
+- [color](http://www.w3.org/TR/CSS2/colors.html#propdef-color)
   - Depends on browser's capability: Yes
-- [content](http://www.w3.org/TR/CSS21/generate.html#propdef-content)
+- [content](http://www.w3.org/TR/CSS2/generate.html#propdef-content)
   - Depends on browser's capability: No
-- [counter-increment](http://www.w3.org/TR/CSS21/generate.html#propdef-counter-increment)
+- [counter-increment](http://www.w3.org/TR/CSS2/generate.html#propdef-counter-increment)
   - Depends on browser's capability: No
-- [counter-reset](http://www.w3.org/TR/CSS21/generate.html#propdef-counter-reset)
+- [counter-reset](http://www.w3.org/TR/CSS2/generate.html#propdef-counter-reset)
   - Depends on browser's capability: No
-- [cursor](http://www.w3.org/TR/CSS21/ui.html#propdef-cursor)
+- [cursor](http://www.w3.org/TR/CSS2/ui.html#propdef-cursor)
   - Depends on browser's capability: Yes
-- [direction](http://www.w3.org/TR/CSS21/visuren.html#propdef-direction)
+- [direction](http://www.w3.org/TR/CSS2/visuren.html#propdef-direction)
   - Depends on browser's capability: Yes
-- [display](http://www.w3.org/TR/CSS21/visuren.html#propdef-display)
+- [display](http://www.w3.org/TR/CSS2/visuren.html#propdef-display)
   - Depends on browser's capability: Yes
   - Supports [`flex` and `inline-flex` values](https://www.w3.org/TR/css-flexbox-1/#flex-containers)
-- [empty-cells](http://www.w3.org/TR/CSS21/tables.html#propdef-empty-cells)
+- [empty-cells](http://www.w3.org/TR/CSS2/tables.html#propdef-empty-cells)
   - Depends on browser's capability: Yes
-- [float](http://www.w3.org/TR/CSS21/visuren.html#propdef-float)
+- [float](http://www.w3.org/TR/CSS2/visuren.html#propdef-float)
   - Depends on browser's capability: No
-- [font](http://www.w3.org/TR/CSS21/fonts.html#propdef-font)
+- [font](http://www.w3.org/TR/CSS2/fonts.html#propdef-font)
   - Depends on browser's capability: Yes
-- [font-family](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-family)
+- [font-family](http://www.w3.org/TR/CSS2/fonts.html#propdef-font-family)
   - Depends on browser's capability: Yes
-- [font-size](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-size)
+- [font-size](http://www.w3.org/TR/CSS2/fonts.html#propdef-font-size)
   - Depends on browser's capability: Yes
-- [font-style](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-style)
+- [font-style](http://www.w3.org/TR/CSS2/fonts.html#propdef-font-style)
   - Depends on browser's capability: Yes
-- [font-variant](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-variant)
+- [font-variant](http://www.w3.org/TR/CSS2/fonts.html#propdef-font-variant)
   - Depends on browser's capability: Yes
-- [font-weight](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-weight)
+- [font-weight](http://www.w3.org/TR/CSS2/fonts.html#propdef-font-weight)
   - Depends on browser's capability: Yes
-- [height](http://www.w3.org/TR/CSS21/visudet.html#propdef-height)
+- [height](http://www.w3.org/TR/CSS2/visudet.html#propdef-height)
   - Depends on browser's capability: Yes
-- [left](http://www.w3.org/TR/CSS21/visuren.html#propdef-left)
+- [left](http://www.w3.org/TR/CSS2/visuren.html#propdef-left)
   - Depends on browser's capability: Yes
-- [letter-spacing](http://www.w3.org/TR/CSS21/text.html#propdef-letter-spacing)
+- [letter-spacing](http://www.w3.org/TR/CSS2/text.html#propdef-letter-spacing)
   - Depends on browser's capability: Yes
-- [line-height](http://www.w3.org/TR/CSS21/visudet.html#propdef-line-height)
+- [line-height](http://www.w3.org/TR/CSS2/visudet.html#propdef-line-height)
   - Depends on browser's capability: Yes
-- [list-style](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style)
+- [list-style](http://www.w3.org/TR/CSS2/generate.html#propdef-list-style)
   - Depends on browser's capability: Yes
-- [list-style-image](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-image)
+- [list-style-image](http://www.w3.org/TR/CSS2/generate.html#propdef-list-style-image)
   - Depends on browser's capability: Yes
-- [list-style-position](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position)
+- [list-style-position](http://www.w3.org/TR/CSS2/generate.html#propdef-list-style-position)
   - Depends on browser's capability: Yes
-- [list-style-type](http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-type)
+- [list-style-type](http://www.w3.org/TR/CSS2/generate.html#propdef-list-style-type)
   - Depends on browser's capability: Yes
-- [margin](http://www.w3.org/TR/CSS21/box.html#propdef-margin)
+- [margin](http://www.w3.org/TR/CSS2/box.html#propdef-margin)
   - Depends on browser's capability: Yes
-- [margin-bottom](http://www.w3.org/TR/CSS21/box.html#propdef-margin-bottom)
+- [margin-bottom](http://www.w3.org/TR/CSS2/box.html#propdef-margin-bottom)
   - Depends on browser's capability: Yes
-- [margin-left](http://www.w3.org/TR/CSS21/box.html#propdef-margin-left)
+- [margin-left](http://www.w3.org/TR/CSS2/box.html#propdef-margin-left)
   - Depends on browser's capability: Yes
-- [margin-right](http://www.w3.org/TR/CSS21/box.html#propdef-margin-right)
+- [margin-right](http://www.w3.org/TR/CSS2/box.html#propdef-margin-right)
   - Depends on browser's capability: Yes
-- [margin-top](http://www.w3.org/TR/CSS21/box.html#propdef-margin-top)
+- [margin-top](http://www.w3.org/TR/CSS2/box.html#propdef-margin-top)
   - Depends on browser's capability: Yes
-- [max-height](http://www.w3.org/TR/CSS21/visudet.html#propdef-max-height)
+- [max-height](http://www.w3.org/TR/CSS2/visudet.html#propdef-max-height)
   - Depends on browser's capability: Yes
-- [max-width](http://www.w3.org/TR/CSS21/visudet.html#propdef-max-width)
+- [max-width](http://www.w3.org/TR/CSS2/visudet.html#propdef-max-width)
   - Depends on browser's capability: Yes
-- [min-height](http://www.w3.org/TR/CSS21/visudet.html#propdef-min-height)
+- [min-height](http://www.w3.org/TR/CSS2/visudet.html#propdef-min-height)
   - Depends on browser's capability: Yes
-- [min-width](http://www.w3.org/TR/CSS21/visudet.html#propdef-min-width)
+- [min-width](http://www.w3.org/TR/CSS2/visudet.html#propdef-min-width)
   - Depends on browser's capability: Yes
-- [orphans](http://www.w3.org/TR/CSS21/page.html#propdef-orphans)
+- [orphans](http://www.w3.org/TR/CSS2/page.html#propdef-orphans)
   - Depends on browser's capability: No
-- [outline](http://www.w3.org/TR/CSS21/ui.html#propdef-outline)
+- [outline](http://www.w3.org/TR/CSS2/ui.html#propdef-outline)
   - Depends on browser's capability: Yes
-- [outline-color](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-color)
+- [outline-color](http://www.w3.org/TR/CSS2/ui.html#propdef-outline-color)
   - Depends on browser's capability: Yes
-- [outline-style](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-style)
+- [outline-style](http://www.w3.org/TR/CSS2/ui.html#propdef-outline-style)
   - Depends on browser's capability: Yes
-- [outline-width](http://www.w3.org/TR/CSS21/ui.html#propdef-outline-width)
+- [outline-width](http://www.w3.org/TR/CSS2/ui.html#propdef-outline-width)
   - Depends on browser's capability: Yes
-- [overflow](http://www.w3.org/TR/CSS21/visufx.html#propdef-overflow)
+- [overflow](http://www.w3.org/TR/CSS2/visufx.html#propdef-overflow)
   - Depends on browser's capability: Yes
-- [padding](http://www.w3.org/TR/CSS21/box.html#propdef-padding)
+- [padding](http://www.w3.org/TR/CSS2/box.html#propdef-padding)
   - Depends on browser's capability: Yes
-- [padding-bottom](http://www.w3.org/TR/CSS21/box.html#propdef-padding-bottom)
+- [padding-bottom](http://www.w3.org/TR/CSS2/box.html#propdef-padding-bottom)
   - Depends on browser's capability: Yes
-- [padding-left](http://www.w3.org/TR/CSS21/box.html#propdef-padding-left)
+- [padding-left](http://www.w3.org/TR/CSS2/box.html#propdef-padding-left)
   - Depends on browser's capability: Yes
-- [padding-right](http://www.w3.org/TR/CSS21/box.html#propdef-padding-right)
+- [padding-right](http://www.w3.org/TR/CSS2/box.html#propdef-padding-right)
   - Depends on browser's capability: Yes
-- [padding-top](http://www.w3.org/TR/CSS21/box.html#propdef-padding-top)
+- [padding-top](http://www.w3.org/TR/CSS2/box.html#propdef-padding-top)
   - Depends on browser's capability: Yes
-- [page-break-after](http://www.w3.org/TR/CSS21/page.html#propdef-page-break-after)
+- [page-break-after](http://www.w3.org/TR/CSS2/page.html#propdef-page-break-after)
   - Depends on browser's capability: No
-- [page-break-before](http://www.w3.org/TR/CSS21/page.html#propdef-page-break-before)
+- [page-break-before](http://www.w3.org/TR/CSS2/page.html#propdef-page-break-before)
   - Depends on browser's capability: No
-- [page-break-inside](http://www.w3.org/TR/CSS21/page.html#propdef-page-break-inside)
+- [page-break-inside](http://www.w3.org/TR/CSS2/page.html#propdef-page-break-inside)
   - Depends on browser's capability: No
-- [position](http://www.w3.org/TR/CSS21/visuren.html#propdef-position)
+- [position](http://www.w3.org/TR/CSS2/visuren.html#propdef-position)
   - Depends on browser's capability: Yes
-- [quotes](http://www.w3.org/TR/CSS21/generate.html#propdef-quotes)
+- [quotes](http://www.w3.org/TR/CSS2/generate.html#propdef-quotes)
   - Depends on browser's capability: No
   - Note: not supported within `@page` rules. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/43)
-- [right](http://www.w3.org/TR/CSS21/visuren.html#propdef-right)
+- [right](http://www.w3.org/TR/CSS2/visuren.html#propdef-right)
   - Depends on browser's capability: Yes
-- [table-layout](http://www.w3.org/TR/CSS21/tables.html#propdef-table-layout)
+- [table-layout](http://www.w3.org/TR/CSS2/tables.html#propdef-table-layout)
   - Depends on browser's capability: Yes
-- [text-align](http://www.w3.org/TR/CSS21/text.html#propdef-text-align)
+- [text-align](http://www.w3.org/TR/CSS2/text.html#propdef-text-align)
   - Depends on browser's capability: Yes
-- [text-decoration](http://www.w3.org/TR/CSS21/text.html#propdef-text-decoration)
+- [text-decoration](http://www.w3.org/TR/CSS2/text.html#propdef-text-decoration)
   - Depends on browser's capability: Yes
-- [text-indent](http://www.w3.org/TR/CSS21/text.html#propdef-text-indent)
+- [text-indent](http://www.w3.org/TR/CSS2/text.html#propdef-text-indent)
   - Depends on browser's capability: Yes
-- [text-transform](http://www.w3.org/TR/CSS21/text.html#propdef-text-transform)
+- [text-transform](http://www.w3.org/TR/CSS2/text.html#propdef-text-transform)
   - Depends on browser's capability: Yes
-- [top](http://www.w3.org/TR/CSS21/visuren.html#propdef-top)
+- [top](http://www.w3.org/TR/CSS2/visuren.html#propdef-top)
   - Depends on browser's capability: Yes
-- [unicode-bidi](http://www.w3.org/TR/CSS21/visuren.html#propdef-unicode-bidi)
+- [unicode-bidi](http://www.w3.org/TR/CSS2/visuren.html#propdef-unicode-bidi)
   - Depends on browser's capability: Yes
-- [vertical-align](http://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align)
+- [vertical-align](http://www.w3.org/TR/CSS2/visudet.html#propdef-vertical-align)
   - Depends on browser's capability: Yes
-- [visibility](http://www.w3.org/TR/CSS21/visufx.html#propdef-visibility)
+- [visibility](http://www.w3.org/TR/CSS2/visufx.html#propdef-visibility)
   - Depends on browser's capability: Yes
-- [white-space](http://www.w3.org/TR/CSS21/text.html#propdef-white-space)
+- [white-space](http://www.w3.org/TR/CSS2/text.html#propdef-white-space)
   - Depends on browser's capability: Yes
-- [widows](http://www.w3.org/TR/CSS21/page.html#propdef-widows)
+- [widows](http://www.w3.org/TR/CSS2/page.html#propdef-widows)
   - Depends on browser's capability: No
-- [width](http://www.w3.org/TR/CSS21/visudet.html#propdef-width)
+- [width](http://www.w3.org/TR/CSS2/visudet.html#propdef-width)
   - Depends on browser's capability: Yes
-- [word-spacing](http://www.w3.org/TR/CSS21/text.html#propdef-word-spacing)
+- [word-spacing](http://www.w3.org/TR/CSS2/text.html#propdef-word-spacing)
   - Depends on browser's capability: Yes
-- [z-index](http://www.w3.org/TR/CSS21/visuren.html#propdef-z-index)
+- [z-index](http://www.w3.org/TR/CSS2/visuren.html#propdef-z-index)
   - Depends on browser's capability: Yes
 
 ## [CSS Namespaces 3](http://www.w3.org/TR/css3-namespace/)
