@@ -2,6 +2,13 @@
 
 ## [CSS 2.1](http://www.w3.org/TR/CSS21/)
 
+### At-rules
+
+- [@charset](http://www.w3.org/TR/CSS21/syndata.html#charset)
+  - Depends on browser's capability: No
+- [@import](http://www.w3.org/TR/CSS21/cascade.html#at-import)
+  - Depends on browser's capability: No
+
 ### Properties
 
 - [background](http://www.w3.org/TR/CSS21/colors.html#propdef-background)
@@ -207,7 +214,35 @@
 - [z-index](http://www.w3.org/TR/CSS21/visuren.html#propdef-z-index)
   - Depends on browser's capability: Yes
 
+## [CSS Namespaces 3](http://www.w3.org/TR/css3-namespace/)
+
+### At-rules
+
+- [@namespace](http://www.w3.org/TR/css3-namespace/#declaration)
+  - Depends on browser's capability: No
+
+## [CSS Cascading and Inheritance 3](http://www.w3.org/TR/css-cascade-3/)
+
+### At-rules
+
+- [@import](http://www.w3.org/TR/css-cascade-3/#at-import)
+  - Depends on browser's capability: No
+
+## [CSS Conditional Rules 3](http://www.w3.org/TR/css3-conditional/)
+
+### At-rules
+
+- [@media](http://www.w3.org/TR/css3-conditional/#atmedia-rule)
+  - Depends on browser's capability: No
+
 ## [CSS Paged Media 3](https://drafts.csswg.org/css-page-3/)
+
+### At-rules
+
+- [@page](https://drafts.csswg.org/css-page/#at-page-rule)
+  - Depends on browser's capability: No
+- [Page-margin boxes (@top-left-corner, @top-left, @top-center, @top-right, @top-right-corner, @left-top, @left-middle, @left-bottom, @right-top, @right-middle, @right-bottom, @bottom-left-corner, @bottom-left, @bottom-center, @bottom-right, @bottom-right-coner)](https://drafts.csswg.org/css-page/#margin-at-rules)
+  - Depends on browser's capability: No
 
 ### Properties
 
@@ -332,6 +367,12 @@
   - Depends on browser's capability: Yes
 
 ## [CSS Fonts 3](http://www.w3.org/TR/css-fonts-3/)
+
+### At-rules
+
+- [@font-face](http://www.w3.org/TR/css-fonts-3/#font-face-rule)
+  - Depends on browser's capability: Yes
+  - Note: `font-stretch`, `unicode-range` and `font-feature-settings` descriptors are currently ignored.
 
 ### Properties
 
@@ -592,6 +633,27 @@
 ## [EPUB Adaptive Layout](http://www.idpf.org/epub/pgt/)
 
 Note: This spec is not on a W3C standards track. Future version of Vivliostyle may drop support for this spec.
+
+### At-rules
+
+- [@-epubx-define](http://www.idpf.org/epub/pgt/#rule-define)
+  - Depends on browser's capability: No
+- [@-epubx-flow](http://www.idpf.org/epub/pgt/#rule-flow)
+  - Depends on browser's capability: No
+- [@-epubx-page-master](http://www.idpf.org/epub/pgt/#rule-page-master)
+  - Depends on browser's capability: No
+- [@-epubx-page-template](http://www.idpf.org/epub/pgt/#rule-page-template)
+  - Depends on browser's capability: No
+- [@-epubx-partition](http://www.idpf.org/epub/pgt/#rule-partition)
+  - Depends on browser's capability: No
+- [@-epubx-partition-group](http://www.idpf.org/epub/pgt/#rule-partition-group)
+  - Depends on browser's capability: No
+- [@-epubx-region](http://www.idpf.org/epub/pgt/#rule-region)
+  - Depends on browser's capability: No
+- [@-epubx-viewport](http://www.idpf.org/epub/pgt/#rule-viewport)
+  - Depends on browser's capability: No
+- [@-epubx-when](http://www.idpf.org/epub/pgt/#rule-when)
+  - Depends on browser's capability: No
 
 ### Properties
 
