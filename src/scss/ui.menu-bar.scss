@@ -40,11 +40,11 @@ $icon-height: 36px;
 // --------------------------------------------------------------------------------
 
 @keyframes GLOW {
-	  0% { opacity: 0.4; }
-	 25% { opacity: 0.2; }
-	 50% { opacity: 0.4; }
-	 75% { opacity: 0.6; }
-	100% { opacity: 0.4; }
+	  0% { opacity: 0.50; }
+	 25% { opacity: 0.25; }
+	 50% { opacity: 0.50; }
+	 75% { opacity: 0.75; }
+	100% { opacity: 0.50; }
 }
 $animation-GLOW: GLOW 1s linear 0s infinite normal;
 
@@ -131,7 +131,6 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 		opacity: 0;
 		@include on-loading() {
 			animation: $animation-GLOW;
-			opacity: 0.4;
 		}
 	}
 }
