@@ -16,7 +16,7 @@ goog.require('adapt.cssprop');
 adapt.cssstyler.SlipRange = function(endStuckFixed, endFixed, endSlipped) {
 	/** @type {number} */ this.endStuckFixed = endStuckFixed;
 	/** @type {number} */ this.endFixed = endFixed;
-	/** @type {number} */ this.endSlipped = endSlipped;	
+	/** @type {number} */ this.endSlipped = endSlipped;
 };
 
 /**
@@ -154,7 +154,7 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
     /** @const */ this.flowChunks = /** @type {Array.<adapt.vtree.FlowChunk>} */ ([]);
     /** @type {adapt.cssstyler.FlowListener} */ this.flowListener = null;
     /** @type {?string} */ this.flowToReach = null;
-    /** @const */ this.cascade = cascade.createInstance(context, pageCounterResolver, xmldoc.lang);
+    /** @const */ this.cascade = cascade.createInstance(context, pageCounterResolver, xmldoc);
     /** @const */ this.offsetMap = new adapt.cssstyler.SlipMap();
     /** @type {boolean} */ this.primary = true;
     /** @const */ this.primaryStack = /** @type {Array.<boolean>} */ ([]);
@@ -163,7 +163,7 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
     /** @type {boolean} */ this.rootLayoutAssigned = false;
     var rootOffset = xmldoc.getElementOffset(this.root);
     /** @type {number} */ this.lastOffset = rootOffset;
-    
+
     this.offsetMap.addStuckRange(rootOffset);
     var style = this.getAttrStyle(this.root);
     this.cascade.pushElement(this.root, style);
@@ -308,7 +308,7 @@ adapt.cssstyler.Styler.prototype.getAttrStyle = function(elem) {
                 this.xmldoc.url, styleAttrValue);
         }
     }
-	return /** @type {adapt.csscasc.ElementStyle} */ ({});	
+	return /** @type {adapt.csscasc.ElementStyle} */ ({});
 };
 
 /**
@@ -332,7 +332,7 @@ adapt.cssstyler.Styler.prototype.replayFlowElementsFromOffset = function(offset)
 		var rootStyle = this.getStyle(this.root, false);
 	    var flowName = adapt.csscasc.getProp(rootStyle, "flow-into");
 	    var flowNameStr = flowName ? flowName.evaluate(context, "flow-into").toString() : "body";
-	    this.encounteredFlowElement(flowNameStr, rootStyle, this.root, rootOffset);		
+	    this.encounteredFlowElement(flowNameStr, rootStyle, this.root, rootOffset);
 	}
 	var node = this.xmldoc.getNodeByOffset(offset);
 	var nodeOffset = this.xmldoc.getNodeOffset(node, 0, false);
@@ -499,7 +499,7 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
             var style = this.getAttrStyle(elem);
             this.primaryStack.push(this.primary);
             this.cascade.pushElement(elem, style);
-            if (!this.bodyReached && elem.localName == "body" && elem.parentNode == this.root) { 
+            if (!this.bodyReached && elem.localName == "body" && elem.parentNode == this.root) {
             	this.postprocessTopStyle(style, true);
             	this.bodyReached = true;
             }

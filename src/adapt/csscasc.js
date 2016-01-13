@@ -1871,8 +1871,8 @@ adapt.csscasc.Cascade.prototype.insertInTable = function(table, key, action) {
  * @param {adapt.csscasc.PageCounterResolver} pageCounterResolver
  * @return {adapt.csscasc.CascadeInstance}
  */
-adapt.csscasc.Cascade.prototype.createInstance = function(context, pageCounterResolver, lang) {
-    return new adapt.csscasc.CascadeInstance(this, context, pageCounterResolver, lang);
+adapt.csscasc.Cascade.prototype.createInstance = function(context, pageCounterResolver, doc) {
+    return new adapt.csscasc.CascadeInstance(this, context, pageCounterResolver, doc);
 };
 
 /**
@@ -1890,7 +1890,7 @@ adapt.csscasc.Cascade.prototype.nextOrder = function() {
  * @param {string} lang
  * @constructor
  */
-adapt.csscasc.CascadeInstance = function(cascade, context, pageCounterResolver, lang) {
+adapt.csscasc.CascadeInstance = function(cascade, context, pageCounterResolver, doc) {
 	/** @const */ this.code = cascade;
 	/** @const */ this.context = context;
 	/** @const */ this.pageCounterResolver = pageCounterResolver;
@@ -1915,11 +1915,16 @@ adapt.csscasc.CascadeInstance = function(cascade, context, pageCounterResolver, 
     	  new adapt.css.Str("\u2018"), new adapt.css.Str("\u2019")];
     /** @type {number} */ this.quoteDepth = 0;
     /** @type {string} */ this.lang = "";
+		if (doc) {
+		/** @type {adapt.xmldoc.XMLDocHolder} */ this.doc = doc;
+		console.log(['doc',doc])
+		}
 	/** @type {Array.<number>} */ this.siblingOrderStack = [0];
 	/** @type {number} */ this.currentSiblingOrder = 0;
     if (goog.DEBUG) {
     	/** @type {Array.<Element>} */ this.elementStack = [];
     }
+
 };
 
 /**
