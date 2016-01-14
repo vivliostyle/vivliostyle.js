@@ -319,20 +319,14 @@ adapt.layout.Column.prototype.hasNewlyAddedPageFloats = function() {
 };
 
 /**
- * Returns the element's client rect measured from edges of the page.
- * @param {Element} element
- * @returns {adapt.vtree.ClientRect}
+ * Receives a rect with absolute coordinates and returns one with coordinates relative to edges of the page.
+ * @param {adapt.geom.Rect} rect
+ * @returns {!adapt.geom.Rect}
  */
-adapt.layout.Column.prototype.getElementRelativeClientRect = function(element) {
-	var rect = this.clientLayout.getElementClientRect(element);
+adapt.layout.Column.prototype.getElementRelativeRect = function(rect) {
 	var offsetX = this.getLeftEdge() - this.box.x1;
 	var offsetY = this.getTopEdge() - this.box.y1;
-	return /** @type {adapt.vtree.ClientRect} */ ({
-		left: rect.left - offsetX,
-		top: rect.top - offsetY,
-		right: rect.right - offsetX,
-		bottom: rect.bottom - offsetY
-	});
+	return new adapt.geom.Rect(rect.x1 - offsetX, rect.y1 - offsetY, rect.x2 - offsetX, rect.y2 - offsetY);
 };
 
 /**
@@ -899,7 +893,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 		adapt.base.setCSSProperty(element, "top", "auto");
 	}
     self.buildDeepElementView(nodeContext).then(function(nodeContextAfter) {
-		var floatBBox = self.getElementRelativeClientRect(element);
+		var floatBBox = self.clientLayout.getElementClientRect(element);
 	    var margin = self.getComputedMargin(element);
 	    var floatBox = new adapt.geom.Rect(floatBBox.left - margin.left,
 	    		floatBBox.top - margin.top, floatBBox.right + margin.right,
@@ -921,7 +915,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 				nodeContextAfter.viewNode = dummy;
 				frame.finish(nodeContextAfter);
 			} else {
-				floatHolder.tryToAddFloat(nodeContext, element, floatBox, floatSide).then(function() {
+				floatHolder.tryToAddFloat(nodeContext, element, self.getElementRelativeRect(floatBox), floatSide).then(function() {
 					frame.finish(null);
 				});
 			}
@@ -929,8 +923,8 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 		}
 
 		floatSide = vivliostyle.pagefloat.resolveInlineFloatDirection(floatSide, self.vertical, direction);
-	    var x1 = self.vertical ? self.box.y1 : self.box.x1;
-	    var x2 = self.vertical ? self.box.y2 : self.box.x2;
+		var x1 = self.startEdge;
+		var x2 = self.endEdge;
 	    var parent = nodeContext.parent;
 	    while (parent && parent.inline) {
 	    	parent = parent.parent;
@@ -950,7 +944,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 		    	probe.style.height = "1px";
 	    	}
 	    	parent.viewNode.appendChild(probe);
-	        var parentBox = self.getElementRelativeClientRect(probe);
+	        var parentBox = self.clientLayout.getElementClientRect(probe);
 	    	x1 = Math.max(self.getStartEdge(parentBox), x1);
 	    	x2 = Math.min(self.getEndEdge(parentBox), x2);	    	
 	    	parent.viewNode.removeChild(probe);
@@ -961,7 +955,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    		x1 = Math.min(x1, x2 - floatBoxMeasure);
 	    }
 	    // box is rotated for vertical orientation
-	    var box = new adapt.geom.Rect(x1, self.getBoxDir() * self.box.y1, x2, self.getBoxDir() * self.box.y2);
+		var box = new adapt.geom.Rect(x1, self.getBoxDir() * self.beforeEdge, x2, self.getBoxDir() * self.afterEdge);
 	    var floatHorBox = floatBox;
 	    if (self.vertical) {
 	    	floatHorBox = adapt.geom.rotateBox(floatBox);
@@ -971,15 +965,20 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    	floatBox = adapt.geom.unrotateBox(floatHorBox);
 	    }
 	    adapt.base.setCSSProperty(element, "left",
-	    		(floatBox.x1 - self.box.x1 + self.paddingLeft) + "px");
+	    		(floatBox.x1 - self.getLeftEdge() + self.paddingLeft) + "px");
 	    adapt.base.setCSSProperty(element, "top",
-	    		(floatBox.y1 - self.box.y1 + self.paddingTop) + "px");
+	    		(floatBox.y1 - self.getTopEdge() + self.paddingTop) + "px");
 	    var floatBoxEdge = self.vertical ? floatBox.x1 : floatBox.y2;
 	    // TODO: subtract after margin when determining overflow.
 	    if (!self.isOverflown(floatBoxEdge) || self.breakPositions.length == 0) {
 	        // no overflow
 	    	self.killFloats();
 	    	box = self.vertical ? adapt.geom.rotateBox(self.box) : self.box;
+			if (self.vertical) {
+				floatHorBox = adapt.geom.rotateBox(self.getElementRelativeRect(adapt.geom.unrotateBox(floatHorBox)));
+			} else {
+				floatHorBox = self.getElementRelativeRect(floatHorBox);
+			}
 	        adapt.geom.addFloatToBands(box, self.bands, floatHorBox, null, floatSide);
 	        self.createFloats();
 	        if (floatSide == "left") {
