@@ -22,7 +22,7 @@ import ViewerOptions from "../models/viewer-options";
 import PageSize from "../models/page-size";
 import {Keys} from "../utils/key-util";
 
-function SettingsPanel(viewerOptions, documentOptions, viewer) {
+function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog) {
     this.viewerOptions_ = viewerOptions;
     this.documentOptions_ = documentOptions;
     this.viewer_ = viewer;
@@ -35,6 +35,10 @@ function SettingsPanel(viewerOptions, documentOptions, viewer) {
 
     ["close", "toggle", "apply", "reset"].forEach(function(methodName) {
         this[methodName] = this[methodName].bind(this);
+    }, this);
+
+    messageDialog.visible.subscribe(function(visible) {
+        if (visible) this.close();
     }, this);
 }
 

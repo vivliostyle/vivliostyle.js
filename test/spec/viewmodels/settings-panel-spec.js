@@ -17,6 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import ko from "knockout";
 import PageSize from "../../../src/js/models/page-size";
 import DocumentOptions from "../../../src/js/models/document-options";
 import ViewerOptions from "../../../src/js/models/viewer-options";
@@ -27,6 +28,7 @@ describe("SettingsPanel", function() {
     var viewerOptions;
     var viewer;
     var settingsPanel;
+    var messageDialog;
 
     beforeEach(function() {
         documentOptions = new DocumentOptions();
@@ -35,8 +37,9 @@ describe("SettingsPanel", function() {
         viewerOptions.spreadView(true);
         viewerOptions.fontSize(10);
         viewer = {loadDocument: function() {}};
+        messageDialog = {visible: ko.observable(false)};
 
-        settingsPanel = new SettingsPanel(viewerOptions, documentOptions, viewer);
+        settingsPanel = new SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog);
     });
 
     describe("constructor", function() {
@@ -59,6 +62,15 @@ describe("SettingsPanel", function() {
 
             expect(settingsPanel.opened()).toBe(false);
         });
+    });
+
+    it("closes when the error dialog is visible", function() {
+        settingsPanel.toggle();
+        expect(settingsPanel.opened()).toBe(true);
+
+        messageDialog.visible(true);
+
+        expect(settingsPanel.opened()).toBe(false);
     });
 
     describe("apply", function() {
