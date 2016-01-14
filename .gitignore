@@ -1,4 +1,5 @@
 node_modules
 
+doc/anchors.json
 lib/vivliostyle.min.js
 test/wpt/sauce-credentials.ini
