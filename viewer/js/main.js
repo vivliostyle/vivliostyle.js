@@ -6531,32 +6531,76 @@ _knockout2["default"].bindingHandlers.menuButton = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _modelsMessageQueue = require("../models/message-queue");
+
+var _modelsMessageQueue2 = _interopRequireDefault(_modelsMessageQueue);
+
+var LogLevel = {
+    DEBUG: "debug",
+    INFO: "info",
+    WARN: "warn",
+    ERROR: "error"
+};
+
 function Logger() {
-    this.console = window.console;
+    this.logLevel = LogLevel.ERROR;
 }
 
-Logger.prototype.log = function () {
-    if (this.console) {
-        if (typeof this.console.log === "function") {
-            this.console.log.apply(this.console, arguments);
-        }
+Logger.LogLevel = LogLevel;
+
+Logger.prototype.setLogLevel = function (logLevel) {
+    this.logLevel = logLevel;
+};
+
+Logger.prototype.debug = function (content) {
+    if (this.logLevel === LogLevel.DEBUG) {
+        _modelsMessageQueue2["default"].push({
+            type: "debug",
+            content: content
+        });
     }
 };
 
-Logger.prototype.error = function () {
-    if (this.console) {
-        if (typeof this.console.error === "function") {
-            this.console.error.apply(this.console, arguments);
-        } else {
-            this.log.apply(this, arguments);
-        }
+Logger.prototype.info = function (content) {
+    if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO) {
+        _modelsMessageQueue2["default"].push({
+            type: "info",
+            content: content
+        });
     }
 };
 
-exports["default"] = new Logger();
+Logger.prototype.warn = function (content) {
+    if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN) {
+        _modelsMessageQueue2["default"].push({
+            type: "warn",
+            content: content
+        });
+    }
+};
+
+Logger.prototype.error = function (content) {
+    if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN || this.logLevel === LogLevel.ERROR) {
+        _modelsMessageQueue2["default"].push({
+            type: "error",
+            content: content
+        });
+    }
+};
+
+var instance = new Logger();
+
+Logger.getLogger = function () {
+    return instance;
+};
+
+exports["default"] = Logger;
 module.exports = exports["default"];
 
-},{}],5:[function(require,module,exports){
+},{"../models/message-queue":7}],5:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -6595,7 +6639,7 @@ var _vivliostyleViewer2 = _interopRequireDefault(_vivliostyleViewer);
 _modelsVivliostyle2["default"].setInstance(_vivliostyle2["default"]);
 _vivliostyleViewer2["default"].start();
 
-},{"./models/vivliostyle":9,"./vivliostyle-viewer":18,"vivliostyle":2}],6:[function(require,module,exports){
+},{"./models/vivliostyle":10,"./vivliostyle-viewer":20,"vivliostyle":2}],6:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -6671,7 +6715,46 @@ DocumentOptions.prototype.toObject = function () {
 exports["default"] = DocumentOptions;
 module.exports = exports["default"];
 
-},{"../stores/url-parameters":10,"./page-size":7,"knockout":1}],7:[function(require,module,exports){
+},{"../stores/url-parameters":11,"./page-size":8,"knockout":1}],7:[function(require,module,exports){
+/*
+ * Copyright 2015 Vivliostyle Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+function MessageQueue() {
+  return _knockout2["default"].observableArray();
+}
+
+exports["default"] = new MessageQueue();
+module.exports = exports["default"];
+
+},{"knockout":1}],8:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -6785,7 +6868,7 @@ PageSize.prototype.toCSSDeclarationString = function () {
 exports["default"] = PageSize;
 module.exports = exports["default"];
 
-},{"knockout":1}],8:[function(require,module,exports){
+},{"knockout":1}],9:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -6874,7 +6957,7 @@ ViewerOptions.getDefaultValues = getDefaultValues;
 exports["default"] = ViewerOptions;
 module.exports = exports["default"];
 
-},{"../stores/url-parameters":10,"knockout":1}],9:[function(require,module,exports){
+},{"../stores/url-parameters":11,"knockout":1}],10:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -6914,7 +6997,7 @@ Vivliostyle.prototype.setInstance = function (vivliostyle) {
 exports["default"] = new Vivliostyle();
 module.exports = exports["default"];
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -6988,7 +7071,7 @@ URLParameterStore.prototype.setParameter = function (name, value) {
 exports["default"] = new URLParameterStore();
 module.exports = exports["default"];
 
-},{"../utils/string-util":13}],11:[function(require,module,exports){
+},{"../utils/string-util":14}],12:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7059,7 +7142,7 @@ exports["default"] = {
 };
 module.exports = exports["default"];
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7106,7 +7189,7 @@ var util = {
 exports["default"] = util;
 module.exports = exports["default"];
 
-},{"knockout":1}],13:[function(require,module,exports){
+},{"knockout":1}],14:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7141,7 +7224,61 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
+/*
+ * Copyright 2015 Vivliostyle Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+function MessageDialog(queue) {
+    this.list = queue;
+    this.visible = _knockout2["default"].pureComputed(function () {
+        return queue().length > 0;
+    });
+}
+
+MessageDialog.prototype.getDisplayMessage = function (errorInfo) {
+    var e = errorInfo.error;
+    var msg = e && (e.toString() || e.frameTrace || e.stack);
+    if (msg) {
+        msg = msg.split("\n", 1)[0];
+    }
+    if (!msg) {
+        msg = errorInfo.messages.join("\n");
+    }
+    return msg;
+};
+
+exports["default"] = MessageDialog;
+module.exports = exports["default"];
+
+},{"knockout":1}],16:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7353,7 +7490,7 @@ Navigation.prototype.handleKey = function (key) {
 exports["default"] = Navigation;
 module.exports = exports["default"];
 
-},{"../models/viewer-options":8,"../models/vivliostyle":9,"../utils/key-util":11,"knockout":1}],15:[function(require,module,exports){
+},{"../models/viewer-options":9,"../models/vivliostyle":10,"../utils/key-util":12,"knockout":1}],17:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7395,7 +7532,7 @@ var _modelsPageSize2 = _interopRequireDefault(_modelsPageSize);
 
 var _utilsKeyUtil = require("../utils/key-util");
 
-function SettingsPanel(viewerOptions, documentOptions, viewer) {
+function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog) {
     this.viewerOptions_ = viewerOptions;
     this.documentOptions_ = documentOptions;
     this.viewer_ = viewer;
@@ -7408,6 +7545,10 @@ function SettingsPanel(viewerOptions, documentOptions, viewer) {
 
     ["close", "toggle", "apply", "reset"].forEach(function (methodName) {
         this[methodName] = this[methodName].bind(this);
+    }, this);
+
+    messageDialog.visible.subscribe(function (visible) {
+        if (visible) this.close();
     }, this);
 }
 
@@ -7446,7 +7587,7 @@ SettingsPanel.prototype.handleKey = function (key) {
 exports["default"] = SettingsPanel;
 module.exports = exports["default"];
 
-},{"../models/page-size":7,"../models/viewer-options":8,"../utils/key-util":11,"knockout":1}],16:[function(require,module,exports){
+},{"../models/page-size":8,"../models/viewer-options":9,"../utils/key-util":12,"knockout":1}],18:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7490,6 +7631,10 @@ var _modelsViewerOptions = require("../models/viewer-options");
 
 var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
 
+var _modelsMessageQueue = require("../models/message-queue");
+
+var _modelsMessageQueue2 = _interopRequireDefault(_modelsMessageQueue);
+
 var _viewer = require("./viewer");
 
 var _viewer2 = _interopRequireDefault(_viewer);
@@ -7501,6 +7646,10 @@ var _navigation2 = _interopRequireDefault(_navigation);
 var _settingsPanel = require("./settings-panel");
 
 var _settingsPanel2 = _interopRequireDefault(_settingsPanel);
+
+var _messageDialog = require("./message-dialog");
+
+var _messageDialog2 = _interopRequireDefault(_messageDialog);
 
 var _utilsKeyUtil = require("../utils/key-util");
 
@@ -7517,7 +7666,8 @@ function ViewerApp() {
         viewportElement: document.getElementById("vivliostyle-viewer-viewport")
     };
     this.viewer = new _viewer2["default"](this.viewerSettings, this.viewerOptions);
-    this.settingsPanel = new _settingsPanel2["default"](this.viewerOptions, this.documentOptions, this.viewer);
+    this.messageDialog = new _messageDialog2["default"](_modelsMessageQueue2["default"]);
+    this.settingsPanel = new _settingsPanel2["default"](this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog);
     this.navigation = new _navigation2["default"](this.viewerOptions, this.viewer, this.settingsPanel);
 
     this.handleKey = (function (data, event) {
@@ -7552,7 +7702,7 @@ ViewerApp.prototype.setDefaultView = function () {
 exports["default"] = ViewerApp;
 module.exports = exports["default"];
 
-},{"../models/document-options":6,"../models/viewer-options":8,"../models/vivliostyle":9,"../utils/key-util":11,"./navigation":14,"./settings-panel":15,"./viewer":17,"knockout":1}],17:[function(require,module,exports){
+},{"../models/document-options":6,"../models/message-queue":7,"../models/viewer-options":9,"../models/vivliostyle":10,"../utils/key-util":12,"./message-dialog":15,"./navigation":16,"./settings-panel":17,"./viewer":19,"knockout":1}],19:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7617,8 +7767,18 @@ function Viewer(viewerSettings, viewerOptions) {
 }
 
 Viewer.prototype.setupViewerEventHandler = function () {
+    var logger = _loggingLogger2["default"].getLogger();
+    this.viewer_.addListener("debug", function (payload) {
+        logger.debug(payload.content);
+    });
+    this.viewer_.addListener("info", function (payload) {
+        logger.info(payload.content);
+    });
+    this.viewer_.addListener("warn", function (payload) {
+        logger.warn(payload.content);
+    });
     this.viewer_.addListener("error", function (payload) {
-        _loggingLogger2["default"].error(payload.content);
+        logger.error(payload.content);
     });
     this.viewer_.addListener("resizestart", (function () {
         var status = this.state.status();
@@ -7704,7 +7864,7 @@ Viewer.prototype.queryZoomFactor = function (type) {
 exports["default"] = Viewer;
 module.exports = exports["default"];
 
-},{"../logging/logger":4,"../models/vivliostyle":9,"../utils/observable-util":12,"knockout":1}],18:[function(require,module,exports){
+},{"../logging/logger":4,"../models/vivliostyle":10,"../utils/observable-util":13,"knockout":1}],20:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7755,4 +7915,4 @@ exports["default"] = {
 };
 module.exports = exports["default"];
 
-},{"./bindings/menuButton.js":3,"./viewmodels/viewer-app":16,"knockout":1}]},{},[5]);
+},{"./bindings/menuButton.js":3,"./viewmodels/viewer-app":18,"knockout":1}]},{},[5]);

@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="css/vivliostyle-viewer.css"/>
 <link rel="stylesheet" href="css/ui.arrows.css"/>
 <link rel="stylesheet" href="css/ui.menu-bar.css"/>
+<link rel="stylesheet" href="css/ui.message-dialog.css"/>
 <style id="vivliostyle-page-rules"></style>
 </head>
 <body data-vivliostyle-viewer-status="loading" data-bind="event: {keydown: handleKey}, attr: {'data-vivliostyle-viewer-status': viewer.state.status}">
@@ -109,5 +110,13 @@
 		</li>
 	</ul>
 </div>
+
+<!-- MESSAGE DIALOG -->
+<div id="vivliostyle-message-dialog" data-bind="foreach: messageDialog.list, css: {'vivliostyle-message-dialog-shown': messageDialog.visible}">
+	<div class="vivliostyle-message">
+		<p data-bind="css: type, text: $parent.messageDialog.getDisplayMessage(content)"></p>
+	</div>
+</div>
+
 </body>
 </html>
