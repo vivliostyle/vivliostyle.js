@@ -97,7 +97,7 @@
 - [`:first-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-of-type-pseudo)
 - [`:last-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-of-type-pseudo)
 - [`:only-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#only-child-pseudo)
-- [`:only-of-type pseudo-class](https://www.w3.org/TR/css3-selectors/#only-of-type-pseudo)
+- [`:only-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#only-of-type-pseudo)
 - [`:empty` pseudo-class](https://www.w3.org/TR/css3-selectors/#empty-pseudo)
 - [The negation pseudo-class `:not()`](https://www.w3.org/TR/css3-selectors/#negation)
 
@@ -133,6 +133,22 @@
 - [@font-face](http://www.w3.org/TR/css-fonts-3/#font-face-rule)
   - Depends on browser's capability: Yes
   - Note: `font-stretch`, `unicode-range` and `font-feature-settings` descriptors are currently ignored.
+
+## Media queries
+
+- Vivliostyle uses styles specified for [`print` media](http://www.w3.org/TR/CSS2/media.html#media-types) (as well as `all`).
+  - Depends on browser's capability: No
+- Supported media features
+  - [`(min-|max-)width`](http://www.w3.org/TR/css3-mediaqueries/#width)
+      - Depends on browser's capability: No
+  - [`(min-|max-)height`](http://www.w3.org/TR/css3-mediaqueries/#height)
+      - Depends on browser's capability: No
+  - [`(min-|max-)device-width`](http://www.w3.org/TR/css3-mediaqueries/#device-width)
+      - Depends on browser's capability: No
+  - [`(min-|max-)device-height`](http://www.w3.org/TR/css3-mediaqueries/#device-height)
+      - Depends on browser's capability: No
+  - [`(min-|max-)color`](http://www.w3.org/TR/css3-mediaqueries/#color)
+      - Depends on browser's capability: No
 
 ## Properties
 
