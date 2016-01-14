@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    H1 {
+      text-decoration: underline;
+    }
+    h1 {
+      border: 1px solid blue;
+    }
+    H1 {
+      color: red;
+    }
+    h1[ID='hamburg'] { background-color:purple;}
+    h1[id='HAMBURG'] { background-color:green;}
+    h1[hamburg='tokyo'] { opacity:0.4; }
+  </style>
+</head>
+<body>
+  <h1 id='hamburg' hamburg="TOKYO">This sentence should be written in red, underlined, have a purple background, 100% opacity and a 1px solid blue border.</h1>
+</body>
+</html>
