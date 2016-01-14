@@ -4,6 +4,9 @@
 {{/spec}}
 {{#properties}}
 - [{{{name}}}]({{#spec}}{{{spec.base_uri}}}{{{uri}}}{{/spec}})
+{{#prefixes}}
+    - Allowed prefixes: {{{prefixes}}}
+{{/prefixes}}
 {{#trData.length}}  - TR{{/trData.length}}
 {{#trData}}
       - [{{{spec.title}}} - {{{title}}}]({{{spec.base_uri}}}{{{uri}}})
@@ -12,9 +15,7 @@
 {{#draftData}}
       - [{{{spec.title}}} - {{{title}}}]({{{spec.draft_uri}}}{{{uri}}})
 {{/draftData}}
-{{#prefixes}}
-  - Allowed prefixes: {{{prefixes}}}
-{{/prefixes}}
   - Values: `{{{value}}}`
 {{/properties}}
+
 {{/properties}}
