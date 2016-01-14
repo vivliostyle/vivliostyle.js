@@ -65,6 +65,9 @@
   - Note that though the spec requires to honor multiple `break-before`/`break-after` values at a single break point, the current implementation choose one of them and discard the others. The fine-grained control of these break values will be a future task and tracked with a separate issue.
   - <https://github.com/vivliostyle/vivliostyle.js/issues/26>
   - <https://github.com/vivliostyle/vivliostyle.js/issues/103>
+- Element names and attribute names in selectors are now treated in a case-insensitive manner
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/95>
+  - Note that this behavior is incorrect for XML documents. This issue will be tracked at <https://github.com/vivliostyle/vivliostyle.js/issues/106>.
 
 ## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
 Beta release.
