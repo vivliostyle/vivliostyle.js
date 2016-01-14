@@ -1,0 +1,76 @@
+@charset "utf-8";
+
+@import "compass";
+
+@import "./lib/_mixins";
+@import "./lib/_vars";
+
+@import "../../node_modules/font-awesome/scss/_variables";
+@include at-font-face("FontAwesome", "../fonts/fontawesome-webfont", "#fontawesomeregular");
+
+
+
+// ================================================================================
+// + Message Dialog
+// --------------------------------------------------------------------------------
+
+
+#vivliostyle-message-dialog {
+	box-sizing: border-box;
+	overflow: auto;
+	overflow-x: hidden;
+	overflow-y: auto;
+	position: fixed;
+	z-index: 7777777;
+	top: -100%;
+	left: 0;
+	right: 0;
+	margin: auto;
+	padding: calc(0.375em + #{$menu-icon-height}) ($menu-icon-width * 0.5) 0.25em;
+	border-radius: 0 0 4px 4px;
+	max-width: 800px;
+	width: calc(100vw - (#{$menu-icon-width} * 0.5));
+	max-height: calc(100vh - (#{$menu-icon-height} * 0.25));
+	font-size: 14px;
+	background: white;
+	opacity: 0;
+	box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+	transition: 1s ease;
+	&.vivliostyle-message-dialog-shown {
+		top: 0;
+		opacity: 1;
+	}
+}
+
+
+// - Message Dialog > Message
+// --------------------------------------------------------------------------------
+
+
+#vivliostyle-message-dialog {
+	.vivliostyle-message {
+		padding: .75em 0;
+		border-top: solid 1px rgb(232,232,232); &:first-child { border-top: none 0; }
+		p {
+			position: relative;
+			margin: 0;
+			padding-left: 1.5em;
+			font-family: $sans-serif;
+			line-height: 1.25;
+			color: $menu-fg-color;
+			&:before {
+				@include font-icon("FontAwesome");
+				display: inline-block;
+				position: absolute;
+				left: .25em;
+				top: 0;
+			}
+			&.error { color: rgb(216,  32,   0); &:before { content: $fa-var-times-circle; } }
+			&.warn  { color: rgb(192, 128,   0); &:before { content: $fa-var-exclamation-circle; } }
+			&.info  { color: rgb(  0,  96, 192); &:before { content: $fa-var-info-circle; } }
+			&.debug { color: rgb( 64,  64,  64); &:before { content: $fa-var-stop-circle; } }
+		}
+	}
+}
+
+

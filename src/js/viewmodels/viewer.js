@@ -19,7 +19,7 @@
 
 import ko from "knockout";
 import obs from "../utils/observable-util";
-import logger from "../logging/logger";
+import Logger from "../logging/logger";
 import vivliostyle from "../models/vivliostyle";
 
 function Viewer(viewerSettings, viewerOptions) {
@@ -43,6 +43,16 @@ function Viewer(viewerSettings, viewerOptions) {
 }
 
 Viewer.prototype.setupViewerEventHandler = function() {
+    var logger = Logger.getLogger();
+    this.viewer_.addListener("debug", function(payload) {
+        logger.debug(payload.content);
+    });
+    this.viewer_.addListener("info", function(payload) {
+        logger.info(payload.content);
+    });
+    this.viewer_.addListener("warn", function(payload) {
+        logger.warn(payload.content);
+    });
     this.viewer_.addListener("error", function(payload) {
         logger.error(payload.content);
     });
