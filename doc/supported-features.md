@@ -1,8 +1,8 @@
 # Features supported by Vivliostyle
 
-The Vivliostyle uses a two-layer architecture, with some of its functionality implemented purely in javascript, and some being delegated all or in part to the browser engine on top of which Vivliostyle is running. In the following list <quote>Depends on browser's capability: No</quote> indicates that features implemented in Javascript that will work regardless of the browser engine. Other features' availability and behavior do vary based on what is supported by the underlying browser engine. Vivliostyle Formatter uses Chromium 47.0.2526.80's engine.
+The Vivliostyle uses a two-layer architecture, with some of its functionality implemented purely in javascript, and some being delegated all or in part to the browser engine on top of which Vivliostyle is running. In the following list <quote>*Depends on browser's capability: No*</quote> indicates that features implemented in Javascript that will work regardless of the browser engine. Other features' availability and behavior do vary based on what is supported by the underlying browser engine. Vivliostyle Formatter uses Chromium 47.0.2526.80's engine.
 
-Properties where <quote>Allowed prefixes</quote> is indicated may be used with any of the listed prefixes, or preferably without a prefix, regardless of the underlying browser engine. If Vivliostyle needs to invoke the browser engine, it will internally convert to the appropriate syntax.
+Properties where <quote>*Allowed prefixes*</quote> is indicated may be used with any of the listed prefixes, or preferably without a prefix, regardless of the underlying browser engine. If Vivliostyle needs to invoke the browser engine, it will internally convert to the appropriate syntax.
 
 ## Values
 
@@ -12,7 +12,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 - [Supported length units](http://www.w3.org/TR/css-values/#lengths): `em`, `ex`, `ch`, `rem`, `cm`, `mm`, `q`, `in`, `pc`, `pt`, `px`.
   - Depends on browser's capability: No
   - Note: `rem` is not correctly interpreted when used within @page rules. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/109)
-- [Supported color values]
+- Supported color values
   - Depends on browser's capability: Yes
   - [Basic color keywords](http://www.w3.org/TR/css3-color/#html4)
   - [RGB color values](http://www.w3.org/TR/css3-color/#rgb-color), [RGBA color values](http://www.w3.org/TR/css3-color/#rgba-color)
