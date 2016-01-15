@@ -1104,7 +1104,7 @@ adapt.vgen.ViewFactory.prototype.applyComputedStyles = function(target, computed
 				continue;
 			}
 		}
-		if (value.isNumeric() && value.unit === "rem") {
+		if (value.isNumeric() && (value.unit === "rem" || value.unit === "q")) {
 			// font-size for the root element is already converted to px
 			value = new adapt.css.Numeric(adapt.css.toNumber(value, this.context), "px");
 		}
