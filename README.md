@@ -15,11 +15,11 @@ Please send them to
 
 ## Using Vivliostyle.js
 
-### Using Vivliostyle.js Viewer
+### Using an all-in-one package
 
-Download a release package from <http://vivliostyle.com/en/sample/> and follow the instruction inside.
+Download an all-in-one package from <http://vivliostyle.com/en/sample/> and follow the instruction in it.
 
-See <https://github.com/vivliostyle/vivliostyle-js-viewer> for source code of the Viewer.
+See <https://github.com/vivliostyle/vivliostyle-ui> for source code of the UI.
 
 ### Integrating Vivliostyle.js into web sites
 
