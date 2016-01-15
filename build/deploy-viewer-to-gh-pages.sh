@@ -6,6 +6,10 @@ echo -e "Host github.com\n\tStrictHostKeyChecking no\nIdentityFile ~/.ssh/deploy
 echo -e "$GITHUB_DEPLOY_KEY" | base64 -d > ~/.ssh/deploy.key
 chmod 600 ~/.ssh/deploy.key
 
+# build documents
+gem install kramdown
+kramdown -i GFM --template doc/supported-features.erb doc/supported-features.md > doc/supported-features.html
+
 cd ../
 
 # fetch and build vivliostyle-ui
@@ -18,6 +22,7 @@ npm run build
 npm run test-sauce
 
 # make distribution package
+cp ../vivliostyle.js/doc/supported-features.{md,html} dist/docs/en/
 version=$(grep '^ *"version":' ../vivliostyle.js/package.json | sed -e 's/^.*"\([^"]*\)",$/\1/')
 scripts/make-dist-package.sh ${version}
 
@@ -33,6 +38,7 @@ git config user.name "kwkbtr (Travis CI)"
 
 # update gh-pages branch
 cp -R ../vivliostyle.js/samples/* samples/
+cp ../vivliostyle.js/doc/supported-features.{md,html} docs/
 cp -R ../vivliostyle-ui/build/* viewer/
 
 zip="../vivliostyle-ui/vivliostyle-js-latest.zip"
