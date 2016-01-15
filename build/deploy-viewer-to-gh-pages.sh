@@ -8,7 +8,7 @@ chmod 600 ~/.ssh/deploy.key
 
 # build documents
 gem install kramdown
-kramdown -i GFM --template doc/supported-features.erb doc/supported-features.md > doc/supported-features.html
+kramdown --no-auto-ids -i GFM --template doc/supported-features.erb doc/supported-features.md > doc/supported-features.html
 
 cd ../
 
