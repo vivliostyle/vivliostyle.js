@@ -1710,7 +1710,8 @@ adapt.cssvalid.ValidatorSet.prototype.initBuiltInValidators = function() {
 		        "in": adapt.css.empty,
 		        "px": adapt.css.empty,
 		        "pt": adapt.css.empty,
-		        "pc": adapt.css.empty
+		        "pc": adapt.css.empty,
+                "q": adapt.css.empty
 		    }));
     this.namedValidators["POS_ANGLE"] = this.primitive(new adapt.cssvalid.PrimitiveValidator(
     		adapt.cssvalid.ALLOW_POS_NUMERIC, adapt.cssvalid.NO_IDENTS, {

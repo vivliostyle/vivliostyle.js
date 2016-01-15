@@ -43,7 +43,7 @@ SCOLOR = HASHCOLOR | aliceblue: #F0F8FF | antiquewhite: #FAEBD7 | aqua: #00FFFF 
 	silver: #C0C0C0 | skyblue: #87CEEB | slateblue: #6A5ACD | slategray: #708090 | slategrey: #708090 | snow: #FFFAFA |
 	springgreen: #00FF7F | steelblue: #4682B4 | tan: #D2B48C | teal: #008080 | thistle: #D8BFD8 | tomato: #FF6347 |
 	turquoise: #40E0D0 | violet: #EE82EE | wheat: #F5DEB3 | white: #FFFFFF | whitesmoke: #F5F5F5 | yellow: #FFFF00 |
-	yellowgreen: #9ACD32 | transparent | currentColor;
+	yellowgreen: #9ACD32 | transparent | currentcolor;
 RGBCOLOR = rgb(INT{3}) | rgb(STRICT_PERCENTAGE{3});
 RGBACOLOR = rgba(NUM{4}) | rgba(STRICT_PERCENTAGE{3} NUM);
 HSLCOLOR = hsl(NUM PERCENTAGE{2});
@@ -55,7 +55,7 @@ background-attachment = COMMA( [scroll | fixed | local]+ );
 background-color = COLOR;
 background-image = COMMA( URI_OR_NONE+ );
 BG_POSITION_TERM = PLENGTH | left | center | right | top | bottom;
-background-position = COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */
+background-position = COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */
 background-repeat = COMMA( [repeat | repeat-x | repeat-y | no-repeat]+ );
 border-collapse = collapse | separate;
 BORDER_SIDE_COLOR = COLOR;
@@ -179,7 +179,7 @@ width = PAPLENGTH;
 word-spacing = normal | LENGTH; 
 z-index = auto | INT;
 
-[epub,moz,ms,webkit]hyphens = auto | none;
+[epub,moz,ms,webkit]hyphens = auto | manual | none;
 [adapt,webkit]margin-before = APLENGTH;
 [adapt,webkit]margin-after = APLENGTH;
 [adapt,webkit]margin-start = APLENGTH;
@@ -264,7 +264,7 @@ src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */
 
 /* CSS Images */
 object-fit = fill | contain | cover | none | scale-down;
-object-position = COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */
+object-position = COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */
 
 /* CSS Paged Media */
 PAGE_SIZE = a5 | a4 | a3 | b5 | b4 | jis-b5 | jis-b4 | letter | legal | ledger;
@@ -411,8 +411,8 @@ border-image = border-image-source border-image-slice [ / border-image-width [ /
      border-image-repeat;
 border-radius = INSETS_SLASH border-top-left-radius border-top-right-radius
      border-bottom-right-radius border-bottom-left-radius;
-columns = column-width column-count;
-column-rule = column-rule-width column-rule-style column-rule-color;
+[moz,webkit]columns = column-width column-count;
+[moz,webkit]column-rule = column-rule-width column-rule-style column-rule-color;
 flex-flow = flex-direction flex-wrap;
 oeb-column-number = column-count;
 outline = outline-width outline-style outline-color;

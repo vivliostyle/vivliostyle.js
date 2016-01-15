@@ -7,7 +7,7 @@ html|ol, html|p, html|ul, html|center, html|dir, html|hr, html|menu, html|pre,
 html|article, html|section, html|nav, html|aside, html|hgroup, html|footer, html|header,
 html|figure, html|figcaption, html|main {
      display: block;
-     unicode-bidi: embed;
+     unicode-bidi: normal;
 }
 html|li { 
     display: list-item;

@@ -2472,6 +2472,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
             this.pseudoelementSelector(name, params);
             return;
         default:
+			vivliostyle.logging.logger.warn("unknown pseudo-class selector: " + name);
             this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
             break;
     }
@@ -2542,7 +2543,7 @@ adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, na
             break;
         case adapt.csstok.TokenType.TILDE_EQ:
             this.chain.push(new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
-                new RegExp("(^|\s)" + adapt.base.escapeRegExp(value) + "($|\s)")));
+                new RegExp("(^|\\s)" + adapt.base.escapeRegExp(value) + "($|\\s)")));
             break;
         case adapt.csstok.TokenType.BAR_EQ:
             this.chain.push(new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
