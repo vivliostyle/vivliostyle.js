@@ -16,13 +16,13 @@
     <title>Features supported by Vivliostyle</title>
 </head>
 <body>
-<h1 id="features-supported-by-vivliostyle">Features supported by Vivliostyle</h1>
+<h1>Features supported by Vivliostyle</h1>
 
 <p>The Vivliostyle uses a two-layer architecture, with some of its functionality implemented purely in javascript, and some being delegated all or in part to the browser engine on top of which Vivliostyle is running. In the following list <quote>Depends on browser's capability: No</quote> indicates that features implemented in Javascript that will work regardless of the browser engine. Other features’ availability and behavior do vary based on what is supported by the underlying browser engine. Vivliostyle Formatter uses Chromium 47.0.2526.80’s engine.</p>
 
 <p>Properties where <quote>Allowed prefixes</quote> is indicated may be used with any of the listed prefixes, or preferably without a prefix, regardless of the underlying browser engine. If Vivliostyle needs to invoke the browser engine, it will internally convert to the appropriate syntax.</p>
 
-<h2 id="values">Values</h2>
+<h2>Values</h2>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css-values/#common-keywords">Supported CSS-wide keywords</a>: <code>inherit</code>
@@ -50,9 +50,9 @@
   </li>
 </ul>
 
-<h2 id="selectors">Selectors</h2>
+<h2>Selectors</h2>
 
-<h3 id="css-2httpwwww3orgtrcss2"><a href="http://www.w3.org/TR/CSS2/">CSS 2</a></h3>
+<h3><a href="http://www.w3.org/TR/CSS2/">CSS 2</a></h3>
 
 <ul>
   <li><a href="https://www.w3.org/TR/CSS2/selector.html#universal-selector">Universal selector <code>*</code></a>
@@ -129,14 +129,14 @@
   </li>
 </ul>
 
-<h4 id="not-supported-selectors">Not supported selectors</h4>
+<h4>Not supported selectors</h4>
 
 <ul>
   <li><a href="https://www.w3.org/TR/CSS2/selector.html#link-pseudo-classes">Link pseudo-class <code>E:visited</code></a></li>
   <li><a href="https://www.w3.org/TR/CSS2/selector.html#dynamic-pseudo-classes">Dynamic pseudo-classes <code>E:active</code>, <code>E:hover</code>, <code>E:focus</code></a></li>
 </ul>
 
-<h3 id="selectors-3httpswwww3orgtrcss3-selectors"><a href="https://www.w3.org/TR/css3-selectors/">Selectors 3</a></h3>
+<h3><a href="https://www.w3.org/TR/css3-selectors/">Selectors 3</a></h3>
 
 <ul>
   <li><a href="https://www.w3.org/TR/css3-selectors/#typenmsp">Type selectors with namespaces <code>ns|E</code>, <code>*|E</code></a>
@@ -190,7 +190,7 @@
   </li>
 </ul>
 
-<h4 id="not-supported-selectors-1">Not supported selectors</h4>
+<h4>Not supported selectors</h4>
 
 <ul>
   <li><a href="https://www.w3.org/TR/css3-selectors/#typenmsp">Type selectors without namespaces <code>|E</code></a></li>
@@ -211,9 +211,9 @@
   <li><a href="https://www.w3.org/TR/css3-selectors/#negation">The negation pseudo-class <code>:not()</code></a></li>
 </ul>
 
-<h2 id="at-rules">At-rules</h2>
+<h2>At-rules</h2>
 
-<h3 id="css-2httpwwww3orgtrcss2-1"><a href="http://www.w3.org/TR/CSS2/">CSS 2</a></h3>
+<h3><a href="http://www.w3.org/TR/CSS2/">CSS 2</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/CSS2/syndata.html#charset">@charset</a>
@@ -229,7 +229,7 @@
   </li>
 </ul>
 
-<h3 id="css-namespaces-3httpwwww3orgtrcss3-namespace"><a href="http://www.w3.org/TR/css3-namespace/">CSS Namespaces 3</a></h3>
+<h3><a href="http://www.w3.org/TR/css3-namespace/">CSS Namespaces 3</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css3-namespace/#declaration">@namespace</a>
@@ -239,7 +239,7 @@
   </li>
 </ul>
 
-<h3 id="css-conditional-rules-3httpwwww3orgtrcss3-conditional"><a href="http://www.w3.org/TR/css3-conditional/">CSS Conditional Rules 3</a></h3>
+<h3><a href="http://www.w3.org/TR/css3-conditional/">CSS Conditional Rules 3</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css3-conditional/#atmedia-rule">@media</a>
@@ -249,7 +249,7 @@
   </li>
 </ul>
 
-<h3 id="css-paged-media-3httpsdraftscsswgorgcss-page-3"><a href="https://drafts.csswg.org/css-page-3/">CSS Paged Media 3</a></h3>
+<h3><a href="https://drafts.csswg.org/css-page-3/">CSS Paged Media 3</a></h3>
 
 <ul>
   <li><a href="https://drafts.csswg.org/css-page/#at-page-rule">@page</a>
@@ -264,7 +264,7 @@
   </li>
 </ul>
 
-<h3 id="css-fonts-3httpwwww3orgtrcss-fonts-3"><a href="http://www.w3.org/TR/css-fonts-3/">CSS Fonts 3</a></h3>
+<h3><a href="http://www.w3.org/TR/css-fonts-3/">CSS Fonts 3</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css-fonts-3/#font-face-rule">@font-face</a>
@@ -275,7 +275,7 @@
   </li>
 </ul>
 
-<h2 id="media-queries">Media queries</h2>
+<h2>Media queries</h2>
 
 <ul>
   <li>Vivliostyle uses styles specified for <a href="http://www.w3.org/TR/CSS2/media.html#media-types"><code>print</code> media</a> (as well as <code>all</code>).
@@ -314,9 +314,9 @@
   </li>
 </ul>
 
-<h2 id="properties">Properties</h2>
+<h2>Properties</h2>
 
-<h3 id="css-2httpwwww3orgtrcss2-2"><a href="http://www.w3.org/TR/CSS2/">CSS 2</a></h3>
+<h3><a href="http://www.w3.org/TR/CSS2/">CSS 2</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/CSS2/colors.html#propdef-background">background</a>
@@ -808,7 +808,7 @@
   </li>
 </ul>
 
-<h3 id="css-paged-media-3httpsdraftscsswgorgcss-page-3-1"><a href="https://drafts.csswg.org/css-page-3/">CSS Paged Media 3</a></h3>
+<h3><a href="https://drafts.csswg.org/css-page-3/">CSS Paged Media 3</a></h3>
 
 <ul>
   <li><a href="https://drafts.csswg.org/css-page-3/#descdef-page-size">size</a>
@@ -819,7 +819,7 @@
   </li>
 </ul>
 
-<h3 id="css-color-3httpwwww3orgtrcss3-color"><a href="http://www.w3.org/TR/css3-color/">CSS Color 3</a></h3>
+<h3><a href="http://www.w3.org/TR/css3-color/">CSS Color 3</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css3-color/#color0">color</a>
@@ -834,7 +834,7 @@
   </li>
 </ul>
 
-<h3 id="css-backgrounds-and-borders-3httpwwww3orgtrcss3-background"><a href="http://www.w3.org/TR/css3-background/">CSS Backgrounds and Borders 3</a></h3>
+<h3><a href="http://www.w3.org/TR/css3-background/">CSS Backgrounds and Borders 3</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css3-background/#background">background</a>
@@ -1055,7 +1055,7 @@
   </li>
 </ul>
 
-<h3 id="css-image-values-and-replaced-content-3httpwwww3orgtrcss3-images"><a href="http://www.w3.org/TR/css3-images/">CSS Image Values and Replaced Content 3</a></h3>
+<h3><a href="http://www.w3.org/TR/css3-images/">CSS Image Values and Replaced Content 3</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css3-images/#object-fit">object-fit</a>
@@ -1070,7 +1070,7 @@
   </li>
 </ul>
 
-<h3 id="css-fonts-3httpwwww3orgtrcss-fonts-3-1"><a href="http://www.w3.org/TR/css-fonts-3/">CSS Fonts 3</a></h3>
+<h3><a href="http://www.w3.org/TR/css-fonts-3/">CSS Fonts 3</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css-fonts-3/#propdef-font-family">font-family</a>
@@ -1101,7 +1101,7 @@
   </li>
 </ul>
 
-<h3 id="css-text-3httpwwww3orgtrcss-text-3"><a href="http://www.w3.org/TR/css-text-3/">CSS Text 3</a></h3>
+<h3><a href="http://www.w3.org/TR/css-text-3/">CSS Text 3</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css-text-3/#hyphens">hyphens</a>
@@ -1168,7 +1168,7 @@
   </li>
 </ul>
 
-<h3 id="css-text-decoration-3httpwwww3orgtrcss-text-decor-3"><a href="http://www.w3.org/TR/css-text-decor-3/">CSS Text Decoration 3</a></h3>
+<h3><a href="http://www.w3.org/TR/css-text-decor-3/">CSS Text Decoration 3</a></h3>
 
 <ul>
   <li>Note: While <code>text-decoration</code> property is a shorthand in CSS Text Decoration 3, Vivliostyle treats <code>text-decoration</code> for now as an independent property defined in CSS Level 2.1.</li>
@@ -1233,7 +1233,7 @@
   </li>
 </ul>
 
-<h3 id="css-multi-column-layout-1httpwwww3orgtrcss3-multicol"><a href="http://www.w3.org/TR/css3-multicol/">CSS Multi-column Layout 1</a></h3>
+<h3><a href="http://www.w3.org/TR/css3-multicol/">CSS Multi-column Layout 1</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css3-multicol/#break-after">break-after</a>
@@ -1304,7 +1304,7 @@
   </li>
 </ul>
 
-<h3 id="css-basic-user-interface-3httpwwww3orgtrcss3-ui"><a href="http://www.w3.org/TR/css3-ui/">CSS Basic User Interface 3</a></h3>
+<h3><a href="http://www.w3.org/TR/css3-ui/">CSS Basic User Interface 3</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css3-ui/#propdef-box-sizing">box-sizing</a>
@@ -1340,7 +1340,7 @@
   </li>
 </ul>
 
-<h3 id="css-writing-modes-3httpwwww3orgtrcss-writing-modes-3"><a href="http://www.w3.org/TR/css-writing-modes-3/">CSS Writing Modes 3</a></h3>
+<h3><a href="http://www.w3.org/TR/css-writing-modes-3/">CSS Writing Modes 3</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css-writing-modes-3/#propdef-direction">direction</a>
@@ -1383,7 +1383,7 @@
   </li>
 </ul>
 
-<h3 id="css-flexible-box-layout-1httpwwww3orgtrcss-flexbox-1"><a href="http://www.w3.org/TR/css-flexbox-1/">CSS Flexible Box Layout 1</a></h3>
+<h3><a href="http://www.w3.org/TR/css-flexbox-1/">CSS Flexible Box Layout 1</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css-flexbox-1/#propdef-align-content">align-content</a>
@@ -1454,7 +1454,7 @@
   </li>
 </ul>
 
-<h3 id="css-fragmentation-3httpwwww3orgtrcss3-break"><a href="http://www.w3.org/TR/css3-break/">CSS Fragmentation 3</a></h3>
+<h3><a href="http://www.w3.org/TR/css3-break/">CSS Fragmentation 3</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css3-break/#break-after">break-after</a>
@@ -1487,7 +1487,7 @@
   </li>
 </ul>
 
-<h3 id="css-transforms-1httpwwww3orgtrcss-transforms-1"><a href="http://www.w3.org/TR/css-transforms-1/">CSS Transforms 1</a></h3>
+<h3><a href="http://www.w3.org/TR/css-transforms-1/">CSS Transforms 1</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css-transforms-1/#propdef-backface-visibility">backface-visibility</a>
@@ -1510,7 +1510,7 @@
   </li>
 </ul>
 
-<h3 id="css-ruby-layout-1httpwwww3orgtrcss-ruby-1"><a href="http://www.w3.org/TR/css-ruby-1/">CSS Ruby Layout 1</a></h3>
+<h3><a href="http://www.w3.org/TR/css-ruby-1/">CSS Ruby Layout 1</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/css-ruby-1/#propdef-ruby-align">ruby-align</a>
@@ -1526,7 +1526,7 @@
   </li>
 </ul>
 
-<h3 id="css-mobile-text-size-adjustment-1httpsdraftscsswgorgcss-size-adjust-1"><a href="https://drafts.csswg.org/css-size-adjust-1/">CSS Mobile Text Size Adjustment 1</a></h3>
+<h3><a href="https://drafts.csswg.org/css-size-adjust-1/">CSS Mobile Text Size Adjustment 1</a></h3>
 
 <ul>
   <li><a href="https://drafts.csswg.org/css-size-adjust-1/#text-size-adjust">text-size-adjust</a>
@@ -1537,7 +1537,7 @@
   </li>
 </ul>
 
-<h3 id="pointer-eventshttpwwww3orgtrpointerevents"><a href="http://www.w3.org/TR/pointerevents/">Pointer Events</a></h3>
+<h3><a href="http://www.w3.org/TR/pointerevents/">Pointer Events</a></h3>
 
 <ul>
   <li><a href="http://www.w3.org/TR/pointerevents/#the-touch-action-css-property">touch-action</a>
@@ -1548,11 +1548,11 @@
   </li>
 </ul>
 
-<h2 id="epub-adaptive-layouthttpwwwidpforgepubpgt"><a href="http://www.idpf.org/epub/pgt/">EPUB Adaptive Layout</a></h2>
+<h2><a href="http://www.idpf.org/epub/pgt/">EPUB Adaptive Layout</a></h2>
 
 <p>Note: This spec is not on a W3C standards track. Future version of Vivliostyle may drop support for this spec.</p>
 
-<h3 id="at-rules-1">At-rules</h3>
+<h3>At-rules</h3>
 
 <ul>
   <li><a href="http://www.idpf.org/epub/pgt/#rule-define">@-epubx-define</a>
@@ -1602,7 +1602,7 @@
   </li>
 </ul>
 
-<h3 id="properties-1">Properties</h3>
+<h3>Properties</h3>
 
 <ul>
   <li><a href="http://www.idpf.org/epub/pgt/#prop-conflicting-partitions">-epubx-conflicting-partitions</a>
