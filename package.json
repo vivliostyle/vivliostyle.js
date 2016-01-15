@@ -17,6 +17,8 @@
   },
   "license": "Apache-2.0",
   "files": [
+    "doc/supported-features.md",
+    "doc/supported-features.html",
     "lib",
     "resources",
     "samples"
