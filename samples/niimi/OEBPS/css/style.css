@@ -3,7 +3,10 @@ html {
   /* 組み方向 */
   -epub-writing-mode: vertical-rl;
   -ms-writing-mode: tb-rl;
-  writing-mode: vertical-rl; }
+  writing-mode: vertical-rl;
+
+  orphans: 1;
+  widows: 1; }
 
 * {
   margin: 0;
