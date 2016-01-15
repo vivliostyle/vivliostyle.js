@@ -1,7 +1,7 @@
 # Vivliostyle.js
 
 Vivliostyle.js is a web application displaying and typesetting HTML(XML)/CSS documents.
-This is a bundled package of [Vivliostyle Engine](https://github.com/vivliostyle/vivliostyle.js), [Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui) and other typesetting libraries.
+This is a bundled package of [Vivliostyle core engine](https://github.com/vivliostyle/vivliostyle.js), [Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui) and other typesetting libraries.
 
 - View samples online: <http://vivliostyle.com/en/sample/>
 - Download release version (beta): <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-viewer-0.2.0.zip>
@@ -41,14 +41,5 @@ Please send them to
 
 ## Source code
 
-- Vivliostyle Engine on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
+- Vivliostyle core engine on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
 - Vivliostyle UI on GitHub: <https://github.com/vivliostyle/vivliostyle-ui>
-
-## License
-
-Licensed under [GPL Version 3](http://www.gnu.org/licenses/gpl.html).
-
-This package includes following libraries:
-
-- [Font Awesome](http://fontawesome.io/) (Only includes font files, which are licensed under [SIL OFL 1.1](http://scripts.sil.org/OFL))
-- [MathJax](https://www.mathjax.org/) ([Apache License, Version 2.0](http://cdn.mathjax.org/mathjax/2.0-latest/LICENSE))

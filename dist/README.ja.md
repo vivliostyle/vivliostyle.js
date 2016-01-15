@@ -1,7 +1,7 @@
 # Vivliostyle.js
 
 Vivliostyle.jsは、HTML(XML)/CSS文書を組版・表示するWebアプリケーションです。
-このパッケージは[Vivliostyle Engine](https://github.com/vivliostyle/vivliostyle.js)、[Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui)およびその他の組版ライブラリーを組み合わせたものです。
+このパッケージは[Vivliostyle core engine](https://github.com/vivliostyle/vivliostyle.js)、[Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui)およびその他の組版ライブラリーを組み合わせたものです。
 
 - オンラインでサンプルを見る <http://vivliostyle.com/ja/sample/>
 - リリース版（ベータ）のダウンロード <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-viewer-0.2.0.zip>
@@ -40,14 +40,5 @@ Vivliostyle.jsは、HTML(XML)/CSS文書を組版・表示するWebアプリケ�
 
 ## ソースコード
 
-- Vivliostyle.js on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
+- Vivliostyle core engine on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
 - Vivliostyle UI on GitHub: <https://github.com/vivliostyle/vivliostyle-ui>
-
-## ライセンス
-
-ライセンスは[GPL Version 3](http://www.gnu.org/licenses/gpl.html)です。
-
-このパッケージは以下のライブラリーを同梱しています。
-
-- [Font Awesome](http://fontawesome.io/) （[SIL OFL 1.1](http://scripts.sil.org/OFL)でライセンスされているフォントファイルのみ同梱）
-- [MathJax](https://www.mathjax.org/) ([Apache License, Version 2.0](http://cdn.mathjax.org/mathjax/2.0-latest/LICENSE))
