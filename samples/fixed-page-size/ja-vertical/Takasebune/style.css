@@ -1,34 +1,30 @@
 @charset "UTF-8";
 
-html {
+/* 全ページ共通 */
+@page {
     /* ページサイズ */
-    --page-width: 148mm;
-    --page-height: 210mm;
-    /* 組み方向 */
-    -epub-writing-mode: vertical-rl;
-    -ms-writing-mode: tb-rl;
-    writing-mode: vertical-rl;
-    /* フォント */
-    font-family: "游明朝", "YuMincho", serif;
-    font-weight: normal;
-    /* フォントサイズ */
-    --font-size: 10pt;
-    /* 行送り */
-    --body-line-height: 18pt;
-    /* 行長（文字数） */
-    --line-length: 23;
-    /* 行数 */
-    --line-count: 18;
-    /* 段数 */
-    --column-count: 2;
-    /* 段間 */
-    --column-gap: 2em;
-    /* 基本版面の天からの距離 */
-    --page-margin-top: 17mm;
-    /* 基本版面の小口からの距離 */
-    --page-margin-outside: 20mm;
-    /* 行末揃え */
-    text-align: justify;
+    size: 148mm 210mm;
+    /* 版面幅 */
+    width: 324pt;
+    /* 版面高さ */
+    height: 480pt;
+    /* マージン */
+    margin-top: 17mm; /* 基本版面の天からの距離 */
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 左ページ */
+@page :left {
+    /* 左マージン（基本版面の小口からの距離） */
+    margin-left: 20mm;
+}
+
+/* 右ページ */
+@page :right {
+    /* 右マージン（基本版面の小口からの距離） */
+    margin-right: 20mm;
 }
 
 * {
@@ -36,6 +32,36 @@ html {
     padding: 0;
 }
 
+html {
+    /* 組み方向 */
+    -webkit-writing-mode: vertical-rl;
+    -ms-writing-mode: tb-rl;
+    writing-mode: vertical-rl;
+    /* フォント */
+    font-family: "游明朝", "YuMincho", serif;
+    font-weight: normal;
+    /* フォントサイズ */
+    font-size: 10pt;
+    /* 行送り */
+    line-height: 18pt;
+    /* 行末揃え */
+    text-align: justify;
+
+    orphans: 1;
+    widows: 1;
+}
+
+/* 印刷用のみ段組にする */
+@media print {
+    html {
+        /* 段数 */
+        column-count: 2;
+        /* 段間 */
+        column-gap: 2em;
+    }
+}
+
+/* 通常のブラウザ表示用 */
 @media screen {
     html {
         max-height: 40em;
@@ -44,114 +70,43 @@ html {
 }
 
 h1 {
-    /* 段抜き */
-    column-span: all;
-    /* 行取り */
-    --lines: 3;
     /* フォント */
     font-family: "游ゴシック", "YuGothic", sans-serif;
     font-weight: bold;
     /* フォントサイズ */
     font-size: 2em;
     /* 行送り */
-    --line-height: 1em;
+    line-height: 1em;
     /* 字下げ */
     text-indent: 0;
     /* 直後の改ページ・改段禁止 */
     break-after: avoid;
+    width: 37pt;
+    padding-right: 17pt;
 }
 
 h2.author {
-    /* 段抜き */
-    column-span: all;
-    /* 行取り */
-    --lines: 1;
     /* フォント */
     font-family: "游ゴシック", "YuGothic", sans-serif;
     font-weight: normal;
     /* フォントサイズ */
     font-size: 1em;
     /* 行送り */
-    --line-height: var(--body-line-height);
+    line-height: 18pt;
     /* 字下げ */
     text-indent: 0;
     /* 直後の改ページ・改段禁止 */
     break-after: avoid;
     /* 右揃え */
-    /*text-align: end;*/
     text-align: right;
+    width: 18pt;
+    padding-right: 0;
 }
 
 hr {
     border: none;
-    --line-width: 1pt;
-    /*border-block-start: var(--line-width) solid black;*/
     border-right: 1pt solid black;
-    /*inline-size: 6em;*/
     height: 6em;
-    /*margin: logical calc((var(--body-line-height) - var(--line-width)) / 2) auto;*/
     margin: auto 8.5pt;
 }
 
-html {
-    /*font-size: var(--font-size);*/
-    font-size: 10pt;
-    /*line-height: var(--body-line-height);*/
-    line-height: 18pt;
-}
-
-/* 印刷用のみ段組にする */
-@media print {
-    html {
-        /*column-count: var(--column-count);*/
-        column-count: 2;
-        /*column-gap: var(--column-gap);*/
-        column-gap: 2em;
-    }
-}
-
-@page {
-    /*size: var(--page-width) var(--page-height);*/
-    size: 148mm 210mm;
-    /*width: calc(var(--body-line-height) * var(--line-count));*/
-    width: 324pt;
-    /*height: var(--font-size) * var(--line-length) * var(--column-count) + var(--column-gap) * (var(--column-count) - 1);*/
-    height: 480pt;
-    /*margin-top: var(--page-margin-top);*/
-    margin-top: 17mm;
-    margin-bottom: auto;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-@page :left {
-    /*margin-left: var(--page-margin-outside);*/
-    margin-left: 20mm;
-}
-
-@page :right {
-    /*margin-right: var(--page-margin-outside);*/
-    margin-right: 20mm;
-}
-
-h1 {
-    /*box-sizing: border-box;*/
-    --block-size: calc(var(--body-line-height) * var(--lines));
-    /*block-size: var(--block-size);*/
-    /*width: 54pt;*/
-    width: 37pt;
-    /*line-height: var(--line-height);*/
-    line-height: 1em;
-    /*padding-block-start: calc((var(--block-size) - var(--line-height)) / 2);*/
-    padding-right: 17pt;
-}
-h2 {
-    /*box-sizing: border-box;*/
-    --block-size: calc(var(--body-line-height) * var(--lines));
-    /*block-size: var(--block-size);*/
-    width: 18pt;
-    /*line-height: var(--line-height);*/
-    line-height: 18pt;
-    /*padding-block-start: calc((var(--block-size) - var(--line-height)) / 2);*/
-    padding-right: 0pt;
-}

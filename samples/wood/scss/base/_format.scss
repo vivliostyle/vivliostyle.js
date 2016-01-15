@@ -2,6 +2,9 @@
 html {
     /* writing mode */
     writing-mode: horizontal-tb;
+
+    orphans: 2;
+    widows: 2;
 }
 
 * {
