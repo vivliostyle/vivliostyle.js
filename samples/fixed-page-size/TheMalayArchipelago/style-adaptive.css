@@ -1,3 +1,7 @@
+@page {
+    size: 7in 10in;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -7,7 +11,6 @@ html {
     font-family: Baskerville, Georgia, serif;
     font-weight: normal;
     font-size: 10pt;
-    line-height: 14pt; /* duplicate */
     text-align: justify;
     -moz-hyphens: auto;
     -ms-hyphens: auto;
@@ -25,11 +28,8 @@ html {
 h1 {
     font-weight: bold;
     font-size: 20pt;
-    line-height: 30pt; /* duplicate */
     text-indent: 0;
 
-    margin-top: 0; /* duplicate */
-    height: calc(14pt * 3); /* duplicate */
     break-after: avoid;
 }
 
@@ -40,11 +40,8 @@ h1 + figure {
 h2 {
     font-weight: bold;
     font-size: 12pt;
-    line-height: 14pt; /* duplicate */
     text-indent: 0;
 
-    margin-top: 14pt; /* duplicate */
-    height: calc(14pt * 2 - 14pt); /* duplicate */
     break-after: avoid;
 }
 
@@ -93,8 +90,8 @@ figcaption {
 @-epubx-page-template {
 
     @-epubx-define {
-        fixed-page-width: 5.8in;
-        fixed-page-height: 8.3in;
+        fixed-page-width: 7in;
+        fixed-page-height: 10in;
         page-margin-top: 0.5in;
         page-margin-side: 0.5in;
         body-line-height: 14pt;
@@ -136,16 +133,14 @@ figcaption {
         -epubx-flow-options: exclusive;
     }
 
-    /* auto configuration below */
-
     h1 {
-        height: -epubx-expr(h1-block-size);
+        min-height: -epubx-expr(h1-block-size);
         line-height: -epubx-expr(h1-line-height);
         margin-top: -epubx-expr(h1-margin-block-start);
     }
 
     h2 {
-        height: -epubx-expr(h2-block-size);
+        min-height: -epubx-expr(h2-block-size);
         line-height: -epubx-expr(h2-line-height);
         margin-top: -epubx-expr(h2-margin-block-start);
     }
