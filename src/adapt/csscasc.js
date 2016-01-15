@@ -2472,6 +2472,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
             this.pseudoelementSelector(name, params);
             return;
         default:
+			vivliostyle.logging.logger.warn("unknown pseudo-class selector: " + name);
             this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
             break;
     }
