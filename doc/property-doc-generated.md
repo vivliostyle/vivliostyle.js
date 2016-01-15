@@ -45,7 +45,7 @@
       - [CSS 2.1 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
       - [CSS Backgrounds 3 - background-position](https://drafts.csswg.org/css-backgrounds-3/#background-position)
       - [CSS Backgrounds 4 - background-position](https://drafts.csswg.org/css-backgrounds-4/#propdef-background-position)
-  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */`
+  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */`
 - [background-repeat](http://www.w3.org/TR/CSS21/colors.html#propdef-background-repeat)
   - TR
       - [CSS 2.1 - background-repeat](http://www.w3.org/TR/CSS21/colors.html#propdef-background-repeat)
@@ -945,7 +945,7 @@
       - [CSS 2.1 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
       - [CSS Backgrounds 3 - background-position](https://drafts.csswg.org/css-backgrounds-3/#background-position)
       - [CSS Backgrounds 4 - background-position](https://drafts.csswg.org/css-backgrounds-4/#propdef-background-position)
-  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */`
+  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */`
 - [background-repeat](http://www.w3.org/TR/CSS21/colors.html#propdef-background-repeat)
   - TR
       - [CSS 2.1 - background-repeat](http://www.w3.org/TR/CSS21/colors.html#propdef-background-repeat)
@@ -1205,7 +1205,7 @@
       - [CSS 2.1 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
       - [CSS Backgrounds 3 - background-position](https://drafts.csswg.org/css-backgrounds-3/#background-position)
       - [CSS Backgrounds 4 - background-position](https://drafts.csswg.org/css-backgrounds-4/#propdef-background-position)
-  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */`
+  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */`
 - [border-radius](http://www.w3.org/TR/css3-background/#border-radius)
   - TR
       - [CSS Backgrounds 3 - border-radius](http://www.w3.org/TR/css3-background/#border-radius)
@@ -1228,7 +1228,7 @@
       - [CSS Images 4 - object-position](http://www.w3.org/TR/css4-images/#object-position)
   - Drafts
       - [CSS Images 3 - object-position](https://drafts.csswg.org/css-images-3/#propdef-object-position)
-  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */`
+  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */`
 
 ## [CSS Images 4](http://www.w3.org/TR/css4-images/)
 - [object-fit](http://www.w3.org/TR/css3-images/#object-fit)
@@ -1244,7 +1244,7 @@
       - [CSS Images 4 - object-position](http://www.w3.org/TR/css4-images/#object-position)
   - Drafts
       - [CSS Images 3 - object-position](https://drafts.csswg.org/css-images-3/#propdef-object-position)
-  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,2})+ ); /* relaxed */`
+  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */`
 
 ## [CSS Fonts 3](http://www.w3.org/TR/css-fonts-3/)
 - [font](http://www.w3.org/TR/CSS21/fonts.html#propdef-font)
@@ -1310,7 +1310,7 @@
       - [CSS Text 3 - hyphens](http://www.w3.org/TR/css-text-3/#hyphens)
   - Drafts
       - [CSS Text 3 - hyphens](https://drafts.csswg.org/css-text-3/#propdef-hyphens)
-  - Values: `auto | none;`
+  - Values: `auto | manual | none;`
 - [letter-spacing](http://www.w3.org/TR/CSS21/text.html#propdef-letter-spacing)
   - TR
       - [CSS 2.1 - letter-spacing](http://www.w3.org/TR/CSS21/text.html#propdef-letter-spacing)
@@ -1550,6 +1550,7 @@
       - [CSS Multicol 1 - column-gap](https://drafts.csswg.org/css-multicol-1/#propdef-column-gap)
   - Values: `LENGTH | normal;`
 - [column-rule](http://www.w3.org/TR/css3-multicol/#column-rule0)
+    - Allowed prefixes: moz, webkit
   - TR
       - [CSS Multicol 1 - column-rule](http://www.w3.org/TR/css3-multicol/#column-rule0)
   - Drafts
@@ -1592,6 +1593,7 @@
       - [CSS Multicol 1 - column-width](https://drafts.csswg.org/css-multicol-1/#propdef-column-width)
   - Values: `LENGTH | auto;`
 - [columns](http://www.w3.org/TR/css3-multicol/#columns0)
+    - Allowed prefixes: moz, webkit
   - TR
       - [CSS Multicol 1 - columns](http://www.w3.org/TR/css3-multicol/#columns0)
   - Drafts
