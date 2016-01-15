@@ -70,6 +70,8 @@
   - Note that this behavior is incorrect for XML documents. This issue will be tracked at <https://github.com/vivliostyle/vivliostyle.js/issues/106>.
 - Fix incorrect positioning of floats and clearance
   - <https://github.com/vivliostyle/vivliostyle.js/pull/135>
+- Fix attribute selector `~=`
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/137>
 
 ## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
 Beta release.
