@@ -333,7 +333,7 @@
       - [CSS Display 3 - display](https://drafts.csswg.org/css-display-3/#propdef-display)
       - [CSS 2.1 - display](https://drafts.csswg.org/css2/visuren.html#propdef-display)
       - [CSS Ruby 1 - display](https://drafts.csswg.org/css-ruby-1/#propdef-display)
-  - Values: `inline | block | list-item | inline-block | table | inline-table | table-row-group | table-header-group | table-footer-group | table-row | table-column-group | table-column | table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex | inline-flex;`
+  - Values: `inline | block | list-item | inline-block | table | inline-table | table-row-group | table-header-group | table-footer-group | table-row | table-column-group | table-column | table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex | inline-flex | ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container;`
 - [elevation](http://www.w3.org/TR/CSS21/aural.html#propdef-elevation)
   - TR
       - [CSS 2.1 - elevation](http://www.w3.org/TR/CSS21/aural.html#propdef-elevation)
@@ -771,7 +771,7 @@
   - Drafts
       - [CSS 2.1 - unicode-bidi](https://drafts.csswg.org/css2/visuren.html#propdef-unicode-bidi)
       - [CSS Writing Modes 3 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-3/#propdef-unicode-bidi)
-  - Values: `normal | embed | bidi-override;`
+  - Values: `normal | embed | isolate | bidi-override | isolate-override | plaintext;`
 - [vertical-align](http://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align)
   - TR
       - [CSS 2.1 - vertical-align](http://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align)
@@ -1294,6 +1294,12 @@
       - [CSS 2.1 - font-variant](https://drafts.csswg.org/css2/fonts.html#propdef-font-variant)
       - [CSS Fonts 3 - font-variant](https://drafts.csswg.org/css-fonts-3/#propdef-font-variant)
   - Values: `normal | small-caps;`
+- [font-variant-east-asian](http://www.w3.org/TR/css-fonts-3/#propdef-font-variant-east-asian)
+  - TR
+      - [CSS Fonts 3 - font-variant-east-asian](http://www.w3.org/TR/css-fonts-3/#propdef-font-variant-east-asian)
+  - Drafts
+      - [CSS Fonts 3 - font-variant-east-asian](https://drafts.csswg.org/css-fonts-3/#propdef-font-variant-east-asian)
+  - Values: `normal | [[ jis78 | jis83 | jis90 | jis04 | simplified | traditional ] || [ full-width | proportional-width ] || ruby];`
 - [font-weight](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-weight)
   - TR
       - [CSS 2.1 - font-weight](http://www.w3.org/TR/CSS21/fonts.html#propdef-font-weight)
@@ -1694,7 +1700,7 @@
   - Drafts
       - [CSS 2.1 - unicode-bidi](https://drafts.csswg.org/css2/visuren.html#propdef-unicode-bidi)
       - [CSS Writing Modes 3 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-3/#propdef-unicode-bidi)
-  - Values: `normal | embed | bidi-override;`
+  - Values: `normal | embed | isolate | bidi-override | isolate-override | plaintext;`
 - [writing-mode](http://www.w3.org/TR/css-writing-modes-3/#propdef-writing-mode)
     - Allowed prefixes: epub, webkit
   - TR
@@ -2021,7 +2027,7 @@
       - [CSS Display 3 - display](https://drafts.csswg.org/css-display-3/#propdef-display)
       - [CSS 2.1 - display](https://drafts.csswg.org/css2/visuren.html#propdef-display)
       - [CSS Ruby 1 - display](https://drafts.csswg.org/css-ruby-1/#propdef-display)
-  - Values: `inline | block | list-item | inline-block | table | inline-table | table-row-group | table-header-group | table-footer-group | table-row | table-column-group | table-column | table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex | inline-flex;`
+  - Values: `inline | block | list-item | inline-block | table | inline-table | table-row-group | table-header-group | table-footer-group | table-row | table-column-group | table-column | table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex | inline-flex | ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container;`
 - [ruby-align](http://www.w3.org/TR/css-ruby-1/#propdef-ruby-align)
   - TR
       - [CSS Ruby 1 - ruby-align](http://www.w3.org/TR/css-ruby-1/#propdef-ruby-align)
