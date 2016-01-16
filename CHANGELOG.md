@@ -76,6 +76,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/137>
 - Fix support for `q` unit
   - <https://github.com/vivliostyle/vivliostyle.js/pull/137>
+- Avoid page break between ruby base and annotation
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/139>
 
 ## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
 Beta release.
