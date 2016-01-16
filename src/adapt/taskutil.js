@@ -4,6 +4,7 @@
  */
 goog.provide('adapt.taskutil');
 
+goog.require('vivliostyle.logging');
 goog.require('adapt.task');
 
 
@@ -23,7 +24,7 @@ adapt.taskutil.Fetcher = function(fetch, opt_name) {
 	/** @type {boolean} */ this.arrived = false;
 	/** @type {T} */ this.resource = null;
 	/** @type {adapt.task.Task} */ this.task = null;
-	/** @type {?Array.<function(*):void>} */ this.piggybacks = null;
+	/** @type {?Array.<function(*):void>} */ this.piggybacks = [];
 };
 
 /**
@@ -40,13 +41,13 @@ adapt.taskutil.Fetcher.prototype.start = function() {
 				self.arrived = true;
 				self.resource = resource;
 				self.task = null;
-				self.piggybacks = null;
+				self.piggybacks = [];
 				if (piggibacks) {
 					for (var i = 0; i < piggibacks.length; i++) {
 						try {
 							piggibacks[i](resource);
 						} catch (err) {
-							adapt.base.log("Error: " + err);
+							vivliostyle.logging.logger.error(err, "Error:");
 						}
 					}
 				}

@@ -1,9 +1,11 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Support utilities to extract information from various (parsed) CSS values.
  */
 goog.provide('adapt.cssprop');
 
+goog.require('vivliostyle.logging');
 goog.require('adapt.base');
 goog.require('adapt.css');
 goog.require('adapt.csstok');
@@ -51,7 +53,7 @@ adapt.cssprop.toSet = function(val) {
             val.visit(visitor);
             return visitor.propSet;
         } catch (err) {
-        	adapt.base.log("toSet: " + err);
+            vivliostyle.logging.logger.warn(err, "toSet:");
         }
     }
     return {};
@@ -90,7 +92,7 @@ adapt.cssprop.toInt = function(val, def) {
             val.visit(visitor);
             return visitor.value;
         } catch (err) {
-        	adapt.base.log("toInt: " + err);
+            vivliostyle.logging.logger.warn(err, "toInt: ");
         }
     }
     return def;
@@ -167,7 +169,7 @@ adapt.cssprop.ShapeVisitor.prototype.getShape = function(x, y, width, height, co
                     ref = Math.sqrt((width * width + height * height) / 2);
                 numbers.push(coord.num * ref / 100);
             } else {
-                numbers.push(coord.num * context.queryUnitSize(coord.unit));
+                numbers.push(coord.num * context.queryUnitSize(coord.unit, false));
             }
         }
         switch (this.name) {
@@ -217,7 +219,7 @@ adapt.cssprop.toShape = function(val, x, y, width, height, context) {
             val.visit(visitor);
             return visitor.getShape(x, y, width, height, context);
         } catch (err) {
-        	adapt.base.log("toShape: " + err);
+            vivliostyle.logging.logger.warn(err, "toShape:");
         }
     }
     return adapt.geom.shapeForRect(x, y, x + width, y + height);
@@ -271,89 +273,7 @@ adapt.cssprop.toCounters = function(val, reset) {
     try {
         val.visit(visitor);
     } catch (err) {
-    	adapt.base.log("toCounters: " + err);
+        vivliostyle.logging.logger.warn(err, "toCounters:");
     }
     return visitor.counters;
 };
-
-
-/**
- * @constructor
- * @extends {adapt.css.Visitor}
- */
-adapt.cssprop.FontSrcVisitor = function() {
-	adapt.css.Visitor.call(this);
-	/** @type {?string} */ this.url = null;
-	/** @type {boolean} */ this.knownFormat = false;
-};
-goog.inherits(adapt.cssprop.FontSrcVisitor, adapt.css.Visitor);
-
-/** @override */
-adapt.cssprop.FontSrcVisitor.prototype.visitURL = function(url) {
-	if (!this.url) {
-		this.url = url.url;
-	}
-	return url;
-};
-
-/**
- * Formats supported in EPUB.
- * @const
- */
-adapt.cssprop.supportedFontFormats = {
-	"opentype": true,
-	"truetype": true,
-	"woff": true,
-	"woff2": true
-};
-
-/** @override */
-adapt.cssprop.FontSrcVisitor.prototype.visitFunc = function(func) {
-	if (func.name.toLowerCase() == "format") {
-		for (var i = 0; i < func.values.length; i++) {
-			if (adapt.cssprop.supportedFontFormats[func.values[i].stringValue()]) {
-				this.knownFormat = true;
-				break;
-			}
-		}
-	}
-	return func;
-};
-
-/** @override */
-adapt.cssprop.FontSrcVisitor.prototype.visitSpaceList = function(list) {
-    if (list.values.length == 2) {
-    	// url(xxx) format(xxx) construct, check format
-    	this.knownFormat = false;
-    	list.values[1].visit(this);
-    	if (this.knownFormat) {
-        	list.values[0].visit(this);    		
-    	}
-    }
-    return list;
-};
-
-/** @override */
-adapt.cssprop.FontSrcVisitor.prototype.visitCommaList = function(list) {
-    this.visitValues(list.values);
-    return list;
-};
-
-/**
- * @param {adapt.css.Val} val
- * @return {?string}
- */
-adapt.cssprop.toFontSrcURL = function(val) {
-	if (!val) {
-		return null;
-	}
-    var visitor = new adapt.cssprop.FontSrcVisitor();
-    try {
-        val.visit(visitor);
-    } catch (err) {
-    	adapt.base.log("toFontSrcURL: " + err);
-    }
-    return visitor.url;
-};
-
-

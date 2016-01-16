@@ -14,8 +14,12 @@
         "closure/goog/asserts/asserts.js",
 
         "vivliostyle/namespace.js",
+        "vivliostyle/logging.js",
+        "vivliostyle/profile.js",
         "vivliostyle/constants.js",
         "vivliostyle/util.js",
+        "vivliostyle/plugin.js",
+        "vivliostyle/logical.js",
         "adapt/base.js",
         "adapt/sha1.js",
         "adapt/geom.js",
@@ -25,6 +29,7 @@
         "adapt/xmldoc.js",
         "adapt/expr.js",
         "adapt/css.js",
+        "vivliostyle/break.js",
         "adapt/csstok.js",
         "adapt/cssparse.js",
         "adapt/cssvalid.js",
@@ -35,6 +40,7 @@
         "adapt/cssstyler.js",
         "adapt/font.js",
         "adapt/pm.js",
+        "vivliostyle/pagefloat.js",
         "adapt/vgen.js",
         "adapt/layout.js",
         "vivliostyle/page.js",
@@ -42,7 +48,6 @@
         "adapt/cfi.js",
         "adapt/toc.js",
         "adapt/epub.js",
-        "adapt/devel.js",
         "adapt/viewer.js",
         "vivliostyle/viewer.js"
     ];

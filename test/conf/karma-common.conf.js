@@ -5,6 +5,7 @@ module.exports = function(config) {
     var testFiles = [
         "test/util/dom.js",
         "test/util/matchers.js",
+        "test/util/mock/vivliostyle/logging-mock.js",
         "test/spec/**/*.js"
     ];
     return {

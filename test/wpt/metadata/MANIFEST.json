@@ -90,8 +90,8 @@
         "url": "/css21/pagination/page-break-after-007.xht"
       },
       {
-        "path": "css21/pagination/page-break-after-009.xht",
-        "url": "/css21/pagination/page-break-after-009.xht"
+        "path": "css21/pagination/page-break-after-008.xht",
+        "url": "/css21/pagination/page-break-after-008.xht"
       },
       {
         "path": "css21/pagination/page-break-before-000.xht",
@@ -102,16 +102,16 @@
         "url": "/css21/pagination/page-break-before-006.xht"
       },
       {
+        "path": "css21/pagination/page-break-before-007.xht",
+        "url": "/css21/pagination/page-break-before-007.xht"
+      },
+      {
         "path": "css21/pagination/page-break-before-007-b.xht",
         "url": "/css21/pagination/page-break-before-007-b.xht"
       },
       {
         "path": "css21/pagination/page-break-before-008.xht",
         "url": "/css21/pagination/page-break-before-008.xht"
-      },
-      {
-        "path": "css21/pagination/page-break-before-010.xht",
-        "url": "/css21/pagination/page-break-before-010.xht"
       },
       {
         "path": "css21/pagination/page-break-before-011.xht",
@@ -128,10 +128,6 @@
       {
         "path": "css21/pagination/page-break-inside-003.xht",
         "url": "/css21/pagination/page-break-inside-003.xht"
-      },
-      {
-        "path": "css21/pagination/page-break-inside-004.xht",
-        "url": "/css21/pagination/page-break-inside-004.xht"
       },
       {
         "path": "css21/pagination/page-break-inside-005.xht",
@@ -226,13 +222,6 @@
         "url": "/css21/page-box/at-page-rule-002-b.xht"
       },
       {
-        "path": "css21/page-box/at-page-rule-002-c.xht",
-        "references": [
-          ["/css21/page-box/vivliostyle/at-page-rule-002-c-ref.html", "=="]
-        ],
-        "url": "/css21/page-box/at-page-rule-002-c.xht"
-      },
-      {
         "path": "css21/page-box/first-page-selectors-001.xht",
         "references": [
           ["/css21/page-box/vivliostyle/first-page-selectors-ltr-ref.html", "=="]
@@ -252,13 +241,6 @@
           ["/css21/page-box/vivliostyle/page-container-001-ref.html", "=="]
         ],
         "url": "/css21/page-box/page-container-001.xht"
-      },
-      {
-        "path": "css21/page-box/page-container-002.xht",
-        "references": [
-          ["css21/page-box/vivliostyle/page-container-002-ref.html", "=="]
-        ],
-        "url": "/css21/page-box/page-container-002.xht"
       },
       {
         "path": "css21/page-box/page-container-006.xht",
@@ -282,13 +264,6 @@
         "url": "/css21/page-box/page-container-009.xht"
       },
       {
-        "path": "css21/page-box/page-container-010.xht",
-        "references": [
-          ["css21/page-box/vivliostyle/page-container-010-ref.html", "=="]
-        ],
-        "url": "/css21/page-box/page-container-010.xht"
-      },
-      {
         "path": "css21/page-box/page-margin-000.xht",
         "references": [
           ["/css21/page-box/vivliostyle/page-margin-000-ref.html", "=="]
@@ -303,13 +278,6 @@
         "url": "/css21/page-box/page-margin-001.xht"
       },
       {
-        "path": "css21/page-box/page-margin-002.xht",
-        "references": [
-          ["/css21/page-box/vivliostyle/page-margin-002-ref.html", "=="]
-        ],
-        "url": "/css21/page-box/page-margin-002.xht"
-      },
-      {
         "path": "css21/page-box/page-selectors-004.xht",
         "references": [
           ["css21/page-box/vivliostyle/page-selectors-004-ref.html", "=="]
@@ -322,6 +290,34 @@
           ["css21/page-box/vivliostyle/page-selectors-006-ref.html", "=="]
         ],
         "url": "/css21/page-box/page-selectors-006.xht"
+      },
+      {
+        "path": "css21/pagination/orphans-001.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/orphans-001-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/orphans-001.xht"
+      },
+      {
+        "path": "css21/pagination/orphans-002.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/orphans-002-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/orphans-002.xht"
+      },
+      {
+        "path": "css21/pagination/orphans-003.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/orphans-002-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/orphans-003.xht"
+      },
+      {
+        "path": "css21/pagination/orphans-004b.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/orphans-004b-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/orphans-004b.xht"
       },
       {
         "path": "css21/pagination/page-break-after-001.xht",
@@ -352,11 +348,39 @@
         "url": "/css21/pagination/page-break-before-004.xht"
       },
       {
-        "path": "css-page-3/page-size-010.xht",
+        "path": "css21/pagination/widows-001.xht",
         "references": [
-          ["/css-page-3/vivliostyle/page-size-010-ref.html", "=="]
+          ["css21/pagination/vivliostyle/widows-001-ref.html", "=="]
         ],
-        "url": "/css-page-3/page-size-010.xht"
+        "url": "/css21/pagination/widows-001.xht"
+      },
+      {
+        "path": "css21/pagination/widows-002.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/widows-002-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/widows-002.xht"
+      },
+      {
+        "path": "css21/pagination/widows-003.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/widows-002-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/widows-003.xht"
+      },
+      {
+        "path": "css21/pagination/widows-004a.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/widows-002-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/widows-004a.xht"
+      },
+      {
+        "path": "css21/pagination/widows-004b.xht",
+        "references": [
+          ["css21/pagination/vivliostyle/widows-004b-ref.html", "=="]
+        ],
+        "url": "/css21/pagination/widows-004b.xht"
       },
       {
         "path": "css-page-3/page-background-000.xht",
@@ -366,6 +390,13 @@
           ]
         ],
         "url": "/css-page-3/page-background-000.xht"
+      },
+      {
+        "path": "css-page-3/page-size-010.xht",
+        "references": [
+          ["/css-page-3/vivliostyle/page-size-010-ref.html", "=="]
+        ],
+        "url": "/css-page-3/page-size-010.xht"
       },
       {
         "path": "css-page-3/page-borders-000.xht",

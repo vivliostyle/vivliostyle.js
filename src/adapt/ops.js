@@ -6,6 +6,7 @@
 goog.provide('adapt.ops');
 
 goog.require("vivliostyle.constants");
+goog.require("vivliostyle.logging");
 goog.require('adapt.task');
 goog.require('adapt.geom');
 goog.require('adapt.expr');
@@ -17,6 +18,7 @@ goog.require('adapt.csscasc');
 goog.require('adapt.cssstyler');
 goog.require('adapt.pm');
 goog.require('adapt.vtree');
+goog.require('vivliostyle.pagefloat');
 goog.require('adapt.layout');
 goog.require('adapt.vgen');
 goog.require('adapt.xmldoc');
@@ -59,7 +61,7 @@ adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
     });  
     this.pageScope.defineName("page-number", new adapt.expr.Native(this.pageScope, function() {    	
     	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
-    	return styleInstance.currentLayoutPosition.page;
+    	return styleInstance.pageNumberOffset + styleInstance.currentLayoutPosition.page;
     }, "page-number"));
 };
 
@@ -110,6 +112,7 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @param {adapt.font.Mapper} fontMapper
  * @param {adapt.vgen.CustomRenderer} customRenderer
  * @param {Object.<string,string>} fallbackMap
+ * @param {number} pageNumberOffset
  * @constructor
  * @extends {adapt.expr.Context}
  * @implements {adapt.cssstyler.FlowListener}
@@ -117,7 +120,7 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @implements {adapt.vgen.StylerProducer}
  */
 adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientLayout, 
-		fontMapper, customRenderer, fallbackMap) {
+		fontMapper, customRenderer, fallbackMap, pageNumberOffset) {
 	adapt.expr.Context.call(this, style.rootScope, viewport.width, viewport.height, viewport.fontSize);
 	/** @const */ this.style = style;
 	/** @const */ this.xmldoc = xmldoc;
@@ -134,12 +137,13 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @const */ this.faces = new adapt.font.DocumentFaces(this.style.fontDeobfuscator);
     /** @type {Object.<string,adapt.pm.PageBoxInstance>} */ this.pageBoxInstances = {};
     /** @type {vivliostyle.page.PageManager} */ this.pageManager = null;
-	/** @const @type {vivliostyle.page.PageCounterStore} */ this.pageCounterStore = new vivliostyle.page.PageCounterStore(style.pageScope);
+	/** @const @type {!vivliostyle.page.PageCounterStore} */ this.pageCounterStore = new vivliostyle.page.PageCounterStore(style.pageScope);
     /** @type {boolean} */ this.regionBreak = false;
     /** @type {!Object.<string,boolean>} */ this.pageBreaks = {};
     /** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = null;
     /** @const */ this.customRenderer = customRenderer;
     /** @const */ this.fallbackMap = fallbackMap;
+	/** @const @type {number} */ this.pageNumberOffset = pageNumberOffset;
     for (var flowName in style.flowProps) {
     	var flowStyle = style.flowProps[flowName];
     	var consume = adapt.csscasc.getProp(flowStyle, "flow-consume");
@@ -177,7 +181,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     this.pageManager = new vivliostyle.page.PageManager(cascadeInstance, this.style.pageScope, this.rootPageBoxInstance, self, docElementStyle);
     var srcFaces = /** @type {Array.<adapt.font.Face>} */ ([]);
     for (var i = 0; i < self.style.fontFaces.length; i++) {
-    	var fontFace = self.style.fontFaces[i++];
+    	var fontFace = self.style.fontFaces[i];
     	if (fontFace.condition && !fontFace.condition.evaluate(self))
     		continue;
     	var properties = adapt.font.prepareProperties(fontFace.properties, self);
@@ -196,7 +200,7 @@ adapt.ops.StyleInstance.prototype.getStylerForDoc = function(xmldoc) {
 	if (!styler) {
 		var style = this.style.store.getStyleForDoc(xmldoc);
 		// We need a separate content, so that variables can get potentially different values.
-		var context = new adapt.expr.Context(style.rootScope, this.pageWidth(), this.pageHeight(), this.fontSize);
+		var context = new adapt.expr.Context(style.rootScope, this.pageWidth(), this.pageHeight(), this.initialFontSize);
 		styler = new adapt.cssstyler.Styler(xmldoc, style.cascade, 
         		style.rootScope, context, this.primaryFlows, style.validatorSet, this.pageCounterStore);
 		this.stylerMap[xmldoc.url] = styler;
@@ -291,14 +295,14 @@ adapt.ops.StyleInstance.prototype.getPosition = function(layoutPosition) {
 };
 
 adapt.ops.StyleInstance.prototype.dumpLocation = function(position) {
-	adapt.base.log("Location - page " + this.currentLayoutPosition.page);
-	adapt.base.log("  currnt: " + position);
-	adapt.base.log("  lookup: " + this.lookupOffset);
+	vivliostyle.logging.logger.debug("Location - page", this.currentLayoutPosition.page);
+	vivliostyle.logging.logger.debug("  current:", position);
+	vivliostyle.logging.logger.debug("  lookup:", this.lookupOffset);
 	for (var flowName in this.currentLayoutPosition.flowPositions) {
 		var flowPosition = this.currentLayoutPosition.flowPositions[flowName];
 		for (var i = 0; i < flowPosition.positions.length; i++) {
 			var p = flowPosition.positions[i];
-			adapt.base.log("  Chunk " + flowName + ": " + p.flowChunk.startOffset);
+			vivliostyle.logging.logger.debug("  Chunk", flowName + ":", p.flowChunk.startOffset);
 		}
 	}
 };
@@ -333,7 +337,7 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function(cascadedPageStyle)
         var utilization = pageMaster.getProp(self, "utilization");
         if (utilization && utilization.isNum())
             coeff = (/** @type {adapt.css.Num} */ (utilization)).num;
-        var em = self.queryUnitSize("em");
+        var em = self.queryUnitSize("em", false);
         var pageArea = self.pageWidth() * self.pageHeight();
         var lookup = Math.ceil(coeff * pageArea / (em * em));
         // B. Determine element eligibility. Each element in a flow is considered eligible if
@@ -367,12 +371,12 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
     var flowPosition = this.currentLayoutPosition.flowPositions[flowName];
     if (!flowPosition)
         return adapt.task.newResult(true);
-    if (this.primaryFlows[flowName] && region.exclusions.length > 0) {
-        // In general, we force non-fitting content. Exception is only for primary flow regions
-    	// that have exclusions.
-    	region.forceNonfitting = false;
-	}
     region.init();
+    if (this.primaryFlows[flowName] && region.bands.length > 0) {
+        // In general, we force non-fitting content. Exception is only for primary flow regions
+        // that have exclusions.
+        region.forceNonfitting = false;
+    }
     var self = this;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("layoutColumn");
     var repeated = /** @type {Array.<adapt.vtree.FlowChunkPosition>} */ ([]);
@@ -395,7 +399,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 	        var pending = true;
 	        region.layout(selected.chunkPosition).then(function(newPosition) {
 		        // static: add back to the flow
-		        if (selected.flowChunk.repeated && (newPosition == null || flowChunk.exclusive))
+		        if (selected.flowChunk.repeated && (newPosition === null || flowChunk.exclusive))
 		            repeated.push(selected);
 		        if (flowChunk.exclusive) {
 		            // exclusive, only can have one, remove from the flow even if it did not fit
@@ -444,10 +448,11 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
  * @param {number} offsetX
  * @param {number} offsetY
  * @param {Array.<adapt.geom.Shape>} exclusions
+ * @param {!vivliostyle.pagefloat.FloatHolder} pageFloatHolder
  * @return {adapt.task.Result.<boolean>} holding true
  */
 adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
-		parentContainer, offsetX, offsetY, exclusions) {
+		parentContainer, offsetX, offsetY, exclusions, pageFloatHolder) {
 	var self = this;
     var enabled = boxInstance.getProp(self, "enabled");
     if (enabled && enabled !== adapt.css.ident._true) {
@@ -477,7 +482,9 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	    var contentVal = boxInstance.getProp(self, "content");
 		var removed = false;
 	    if (contentVal && adapt.vtree.nonTrivialContent(contentVal)) {
-			contentVal.visit(new adapt.vtree.ContentPropertyHandler(boxContainer, self));
+			var innerContainer = self.viewport.document.createElement("span");
+			contentVal.visit(new adapt.vtree.ContentPropertyHandler(innerContainer, self));
+			boxContainer.appendChild(innerContainer);
 			boxInstance.transferContentProps(self, layoutContainer, page);
 		} else if (boxInstance.suppressEmptyBoxGeneration) {
 			parentContainer.removeChild(boxContainer);
@@ -504,7 +511,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
         var layoutContext = new adapt.vgen.ViewFactory(flowNameStr, self,
                 self.viewport, self.styler, regionIds, self.xmldoc, self.faces,
                 self.style.footnoteProps, self, page, self.customRenderer,
-                self.fallbackMap);
+                self.fallbackMap, pageFloatHolder);
         var columnIndex = 0;
         var region = null;
         frame.loopWithFrame(function(loopFrame) {
@@ -562,13 +569,17 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	            	lr = adapt.task.newResult(true);
 	            }
 	            if (lr.isPending()) {
-		            lr.then(function() {
-		            	computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);
-		            	loopFrame.continueLoop();
-		            });
-		            return;
-	            } else {
-	            	computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);	            	
+					lr.then(function () {
+						if (pageFloatHolder.hasNewlyAddedFloats()) {
+							loopFrame.breakLoop();
+						} else {
+							computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);
+							loopFrame.continueLoop();
+						}
+					});
+					return;
+				} else if (!pageFloatHolder.hasNewlyAddedFloats()) {
+	            	computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);
 	            }
 	        }
 	        loopFrame.breakLoop();
@@ -595,7 +606,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	            		outerWidth, outerHeight, self);
 	            if (adapt.base.checkLShapeFloatBug(self.viewport.root)) {
 	            	// Simplistic bug workaround: add a copy of the shape translated up.
-		            exclusions.push(outerShape.withOffset(0, -1.25 * self.queryUnitSize("em")));
+		            exclusions.push(outerShape.withOffset(0, -1.25 * self.queryUnitSize("em", false)));
 	            }
 	            exclusions.push(outerShape);
         	}
@@ -609,7 +620,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	    	while (i >= 0) {
 	    		var child = boxInstance.children[i--];
 		        var r = self.layoutContainer(page, child, /** @type {HTMLElement} */ (boxContainer),
-		             offsetX, offsetY, exclusions);
+		             offsetX, offsetY, exclusions, pageFloatHolder);
 		        if (r.isPending()) {
 		        	return r;
 		        }
@@ -708,9 +719,30 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     }
 	self.pageCounterStore.updatePageCounters(cascadedPageStyle, self);
 
+	var writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
+	var direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
+	var pageFloatHolder = new vivliostyle.pagefloat.FloatHolder(page.getPageAreaElement.bind(page), writingMode, direction);
+	var currentLayoutPosition = cp.clone();
+	var exclusions = [];
+
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
     	= adapt.task.newFrame("layoutNextPage");
-    self.layoutContainer(page, pageMaster, page.container, 0, 0, []).then(function() {
+	frame.loopWithFrame(function(loopFrame) {
+		self.layoutContainer(page, pageMaster, page.container, 0, 0, exclusions.concat(), pageFloatHolder).then(function() {
+			if (pageFloatHolder.hasNewlyAddedFloats()) {
+				exclusions = exclusions.concat(pageFloatHolder.getShapesOfNewlyAddedFloats());
+				pageFloatHolder.clearNewlyAddedFloats();
+				cp = self.currentLayoutPosition = currentLayoutPosition.clone();
+				var c;
+				while (c = page.container.lastChild) {
+					page.container.removeChild(c);
+				}
+				loopFrame.continueLoop();
+			} else {
+				loopFrame.breakLoop();
+			}
+		});
+	}).then(function() {
 		pageMaster.adjustPageLayout(self, page, self.clientLayout);
         var isLeftPage = new adapt.expr.Named(pageMaster.pageBox.scope, "left-page");
         page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;
@@ -738,13 +770,13 @@ adapt.ops.StyleInstance.prototype.setPageSize = function(cascadedPageStyle) {
     if (width === adapt.css.fullWidth) {
         this.actualPageWidth = null;
     } else {
-        this.actualPageWidth = width.num * this.queryUnitSize(width.unit);
+        this.actualPageWidth = width.num * this.queryUnitSize(width.unit, false);
     }
     var height = pageSize.height;
     if (height === adapt.css.fullHeight) {
         this.actualPageHeight = null;
     } else {
-        this.actualPageHeight = height.num * this.queryUnitSize(height.unit);
+        this.actualPageHeight = height.num * this.queryUnitSize(height.unit, false);
     }
 };
 
@@ -940,7 +972,7 @@ goog.inherits(adapt.ops.StyleParserHandler, adapt.cssparse.DispatchParserHandler
  * @override
  */
 adapt.ops.StyleParserHandler.prototype.error = function(mnemonics, token) {
-    adapt.base.log("CSS parser: " + mnemonics);
+	vivliostyle.logging.logger.warn("CSS parser:", mnemonics);
 };
 
 /**
@@ -957,7 +989,7 @@ adapt.ops.StyleSource;
 /**
  * @param {adapt.net.Response} response
  * @param {adapt.xmldoc.XMLDocStore} store
- * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
+ * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
  */
 adapt.ops.parseOPSResource = function(response, store) {
 	return (/** @type {adapt.ops.OPSDocStore} */ (store)).parseOPSResource(response);
@@ -969,7 +1001,7 @@ adapt.ops.parseOPSResource = function(response, store) {
  * @extends {adapt.xmldoc.XMLDocStore}
  */
 adapt.ops.OPSDocStore = function(fontDeobfuscator) {
-	adapt.net.ResourceStore.call(this, adapt.ops.parseOPSResource, false);
+	adapt.net.ResourceStore.call(this, adapt.ops.parseOPSResource, adapt.net.XMLHttpRequestResponseType.DOCUMENT);
 	/** @type {?function(string):?function(Blob):adapt.task.Result.<Blob>} */ this.fontDeobfuscator = fontDeobfuscator;
 	/** @type {Object.<string,adapt.ops.Style>} */ this.styleByKey = {};
 	/** @type {Object.<string,adapt.taskutil.Fetcher.<adapt.ops.Style>>} */ this.styleFetcherByKey = {};
@@ -1024,14 +1056,18 @@ adapt.ops.OPSDocStore.prototype.addUserStyleSheet = function(stylesheet) {
 
 /**
  * @param {adapt.net.Response} response
- * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
+ * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
  */
 adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
-    /** @type {!adapt.task.Frame.<!adapt.xmldoc.XMLDocHolder>} */ var frame
+    /** @type {!adapt.task.Frame.<adapt.xmldoc.XMLDocHolder>} */ var frame
     	= adapt.task.newFrame("OPSDocStore.load");
 	var self = this;
 	var url = response.url;
 	adapt.xmldoc.parseXMLResource(response, self).then(function(xmldoc) {
+		if (!xmldoc) {
+			frame.finish(null);
+			return;
+		}
 		var triggers = [];
 		var triggerList = xmldoc.document.getElementsByTagNameNS(adapt.base.NS.epub, "trigger");
 		for (var i = 0; i < triggerList.length; i++) {
@@ -1126,7 +1162,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
 		            if (index < sources.length) {
 		                var source = sources[index++];
 		                sph.startStylesheet(source.flavor);
-		                if (source.text) {
+		                if (source.text !== null) {
 		                    return adapt.cssparse.parseStylesheetFromText(source.text, sph, source.url, source.classes, source.media);
 		                } else {
 		                    return adapt.cssparse.parseStylesheetFromURL(source.url, sph, source.classes, source.media);

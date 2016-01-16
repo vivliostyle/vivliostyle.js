@@ -3,9 +3,11 @@
 html|html, html|address, html|blockquote, html|body, html|dd, html|div,
 html|dl, html|dt, html|fieldset, html|form, html|frame, html|frameset,
 html|h1, html|h2, html|h3, html|h4, html|h5, html|h6, html|noframes,
-html|ol, html|p, html|ul, html|center, html|dir, html|hr, html|menu, html|pre {
+html|ol, html|p, html|ul, html|center, html|dir, html|hr, html|menu, html|pre,
+html|article, html|section, html|nav, html|aside, html|hgroup, html|footer, html|header,
+html|figure, html|figcaption, html|main {
      display: block;
-     unicode-bidi: embed;
+     unicode-bidi: normal;
 }
 html|li { 
     display: list-item;
@@ -156,6 +158,52 @@ html|q:after {
 
 html|audio, html|video {
     page-break-inside: avoid;
+}
+
+html|ruby {
+    display: ruby;
+}
+html|rp {
+    display: none;
+}
+html|rbc {
+    display: ruby-base-container;
+}
+html|rtc {
+    display: ruby-text-container;
+}
+html|rb {
+    display: ruby-base;
+    white-space: nowrap;
+}
+html|rt {
+    display: ruby-text;
+}
+html|ruby, html|rb, html|rt, html|rbc, html|rtc {
+    unicode-bidi: isolate;
+}
+
+html|rtc, html|rt {
+    font-variant-east-asian: ruby;
+    text-emphasis: none;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+html|rtc:lang(zh), html|rt:lang(zh) {
+    ruby-align: center;
+}
+
+html|rtc, html|rt {
+    font-size: 50%;
+}
+
+html|rtc:lang(zh-TW), html|rt:lang(zh-TW) {
+    font-size: 30%;
+}
+
+html|rtc > html|rt, html|rtc > html|rt:lang(zh-TW) {
+    font-size: 100%;
 }
 
 /*------------------ epub-specific ---------------------*/

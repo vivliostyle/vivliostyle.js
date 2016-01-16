@@ -1,31 +1,19 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Fills a region with styled content. This file does not communicate with
  * the styling system directly. Instead it goes through the layout interface that gives it one
  * view tree node at a time.
  */
+goog.require('goog.asserts');
+goog.require('vivliostyle.logging');
 goog.require('adapt.base');
 goog.require('adapt.geom');
 goog.require('adapt.task');
+goog.require('vivliostyle.break');
 goog.require('adapt.vtree');
 
 goog.provide('adapt.layout');
-
-/**
- * @param {?string} break1
- * @param {?string} break2
- * @return {?string}
- */
-adapt.layout.combineBreaks = function(break1, break2) {
-	if (!break1)
-		return break2;
-	if (!break2)
-		return break1;
-	// It is important to prioritize "avoid" to prevent breaking after a page/region break.
-	if (break1 == "avoid" || break2 == "avoid")
-		return "avoid";
-	return break1;
-};
 
 /** @const */
 adapt.layout.mediaTags = {
@@ -60,7 +48,7 @@ adapt.layout.fixBoxesForNode = function(clientLayout, boxes, node) {
 			}
 		}
 		if (k == fullBoxes.length) {
-			adapt.base.log("Could not fix character box");
+			vivliostyle.logging.logger.warn("Could not fix character box");
 			result.push(box);
 		}
 	}
@@ -200,7 +188,7 @@ adapt.layout.EdgeBreakPosition.prototype.findAcceptableBreak = function(column, 
  * @override
  */
 adapt.layout.EdgeBreakPosition.prototype.getMinBreakPenalty = function() {
-	return (this.breakOnEdge == "avoid" ? 1 : 0)
+	return (vivliostyle.break.isAvoidBreakValue(this.breakOnEdge) ? 1 : 0)
 		+ (this.overflows ? 3 : 0)
 		+ (this.position.parent ? this.position.parent.breakPenalty : 0);
 };
@@ -227,20 +215,20 @@ adapt.layout.validateCheckPoints = function(checkPoints) {
 		var cp0 = checkPoints[i-1];
 		var cp1 = checkPoints[i];
 		if (cp0 === cp1) {
-			adapt.base.log("validateCheckPoints: duplicate entry");
+			vivliostyle.logging.logger.warn("validateCheckPoints: duplicate entry");
 		} else if (cp0.boxOffset >= cp1.boxOffset) {
-			adapt.base.log("validateCheckPoints: incorrect boxOffset");
+			vivliostyle.logging.logger.warn("validateCheckPoints: incorrect boxOffset");
 		} else if (cp0.sourceNode == cp1.sourceNode) {
 			if (cp1.after) {
 				if (cp0.after) {
-					adapt.base.log("validateCheckPoints: duplicate after points");					
+					vivliostyle.logging.logger.warn("validateCheckPoints: duplicate after points");
 				}
 			} else {
 				if (cp0.after) {
-					adapt.base.log("validateCheckPoints: inconsistent after point");					
+					vivliostyle.logging.logger.warn("validateCheckPoints: inconsistent after point");
 				} else {
 					if (cp1.boxOffset - cp0.boxOffset != cp1.offsetInNode - cp0.offsetInNode) {
-						adapt.base.log("validateCheckPoints: boxOffset inconsistent with offsetInNode");					
+						vivliostyle.logging.logger.warn("validateCheckPoints: boxOffset inconsistent with offsetInNode");
 					}
 				}
 			}
@@ -324,20 +312,21 @@ adapt.layout.Column.prototype.getRightEdge = function() {
 };
 
 /**
- * Returns the element's client rect measured from edges of the page.
- * @param {Element} element
- * @returns {adapt.vtree.ClientRect}
+ * @returns {boolean}
  */
-adapt.layout.Column.prototype.getElementRelativeClientRect = function(element) {
-	var rect = this.clientLayout.getElementClientRect(element);
+adapt.layout.Column.prototype.hasNewlyAddedPageFloats = function() {
+	return this.layoutContext.getPageFloatHolder().hasNewlyAddedFloats();
+};
+
+/**
+ * Receives a rect with absolute coordinates and returns one with coordinates relative to edges of the page.
+ * @param {adapt.geom.Rect} rect
+ * @returns {!adapt.geom.Rect}
+ */
+adapt.layout.Column.prototype.getElementRelativeRect = function(rect) {
 	var offsetX = this.getLeftEdge() - this.box.x1;
 	var offsetY = this.getTopEdge() - this.box.y1;
-	return /** @type {adapt.vtree.ClientRect} */ ({
-		left: rect.left - offsetX,
-		top: rect.top - offsetY,
-		right: rect.right - offsetX,
-		bottom: rect.bottom - offsetY
-	});
+	return new adapt.geom.Rect(rect.x1 - offsetX, rect.y1 - offsetY, rect.x2 - offsetX, rect.y2 - offsetY);
 };
 
 /**
@@ -469,7 +458,7 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
 		        	// TODO: implement floats and footnotes properly
 		        	self.layoutFloatOrFootnote(position).then(function(positionParam) {
 			        	position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
-			        	if (!position || position.overflow) {
+			        	if (!position || position.overflow || self.hasNewlyAddedPageFloats()) {
 				        	bodyFrame.breakLoop();
 				            return;
 			        	}
@@ -875,32 +864,67 @@ adapt.layout.Column.prototype.layoutFootnote = function(nodeContext) {
 
 /**
  * Layout a single float element.
- * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {!adapt.vtree.NodeContext} nodeContext
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
 		= adapt.task.newFrame("layoutFloat");
-    var element = /** @type {Element} */ (nodeContext.viewNode);
-    var floatSide = /** @type {string} */ (nodeContext.floatSide);
-    adapt.base.setCSSProperty(element, "float", "none");
-    // special case in CSS: position:absolute with left/height: auto is
-    // placed where position:static would be
-    // TODO: review if it is good to rely on it
-    // TODO: position where a real float would have been positioned
-    adapt.base.setCSSProperty(element, "position", "absolute");
-    adapt.base.setCSSProperty(element, "left", "auto");
-    adapt.base.setCSSProperty(element, "right", "auto");
-    adapt.base.setCSSProperty(element, "top", "auto");
+    var element = /** @type {!Element} */ (nodeContext.viewNode);
+	var floatSide = /** @type {string} */ (nodeContext.floatSide);
+	var floatReference = /** @type {string} */ (nodeContext.floatReference);
+	var direction = nodeContext.parent ? nodeContext.parent.direction : "ltr";
+	var floatHolder = self.layoutContext.getPageFloatHolder();
+
+	var originalViewNodeParent = nodeContext.viewNode.parentNode;
+
+	if (floatReference === "page") {
+		floatHolder.prepareFloatElement(element, floatSide);
+	} else {
+		adapt.base.setCSSProperty(element, "float", "none");
+		// special case in CSS: position:absolute with left/height: auto is
+		// placed where position:static would be
+		// TODO: review if it is good to rely on it
+		// TODO: position where a real float would have been positioned
+		adapt.base.setCSSProperty(element, "position", "absolute");
+		adapt.base.setCSSProperty(element, "left", "auto");
+		adapt.base.setCSSProperty(element, "right", "auto");
+		adapt.base.setCSSProperty(element, "top", "auto");
+	}
     self.buildDeepElementView(nodeContext).then(function(nodeContextAfter) {
-		var floatBBox = self.getElementRelativeClientRect(element);
+		var floatBBox = self.clientLayout.getElementClientRect(element);
 	    var margin = self.getComputedMargin(element);
 	    var floatBox = new adapt.geom.Rect(floatBBox.left - margin.left,
 	    		floatBBox.top - margin.top, floatBBox.right + margin.right,
 	    		floatBBox.bottom + margin.bottom);
-	    var x1 = self.vertical ? self.box.y1 : self.box.x1;
-	    var x2 = self.vertical ? self.box.y2 : self.box.x2;
+
+		// page floats
+		if (floatReference === "page") {
+			goog.asserts.assert(self.layoutContext);
+			var pageFloat = floatHolder.getFloat(nodeContext, self.layoutContext);
+			if (pageFloat) {
+				// Replace nodeContextAfter.viewNode with a dummy span.
+				// Since the actual viewNode is moved and attached to a parent node
+				// which is different from that of subsequent content nodes,
+				// clearOverflownViewNodes method does not work correctly without this replacement.
+				var dummy = originalViewNodeParent.ownerDocument.createElement("span");
+				adapt.base.setCSSProperty(dummy, "width", "0");
+				adapt.base.setCSSProperty(dummy, "height", "0");
+				originalViewNodeParent.appendChild(dummy);
+				nodeContextAfter.viewNode = dummy;
+				frame.finish(nodeContextAfter);
+			} else {
+				floatHolder.tryToAddFloat(nodeContext, element, self.getElementRelativeRect(floatBox), floatSide).then(function() {
+					frame.finish(null);
+				});
+			}
+			return;
+		}
+
+		floatSide = vivliostyle.pagefloat.resolveInlineFloatDirection(floatSide, self.vertical, direction);
+		var x1 = self.startEdge;
+		var x2 = self.endEdge;
 	    var parent = nodeContext.parent;
 	    while (parent && parent.inline) {
 	    	parent = parent.parent;
@@ -920,7 +944,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 		    	probe.style.height = "1px";
 	    	}
 	    	parent.viewNode.appendChild(probe);
-	        var parentBox = self.getElementRelativeClientRect(probe);
+	        var parentBox = self.clientLayout.getElementClientRect(probe);
 	    	x1 = Math.max(self.getStartEdge(parentBox), x1);
 	    	x2 = Math.min(self.getEndEdge(parentBox), x2);	    	
 	    	parent.viewNode.removeChild(probe);
@@ -931,7 +955,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    		x1 = Math.min(x1, x2 - floatBoxMeasure);
 	    }
 	    // box is rotated for vertical orientation
-	    var box = new adapt.geom.Rect(x1, self.getBoxDir() * self.box.y1, x2, self.getBoxDir() * self.box.y2);
+		var box = new adapt.geom.Rect(x1, self.getBoxDir() * self.beforeEdge, x2, self.getBoxDir() * self.afterEdge);
 	    var floatHorBox = floatBox;
 	    if (self.vertical) {
 	    	floatHorBox = adapt.geom.rotateBox(floatBox);
@@ -941,15 +965,20 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    	floatBox = adapt.geom.unrotateBox(floatHorBox);
 	    }
 	    adapt.base.setCSSProperty(element, "left",
-	    		(floatBox.x1 - self.box.x1 + self.paddingLeft) + "px");
+	    		(floatBox.x1 - self.getLeftEdge() + self.paddingLeft) + "px");
 	    adapt.base.setCSSProperty(element, "top",
-	    		(floatBox.y1 - self.box.y1 + self.paddingTop) + "px");
+	    		(floatBox.y1 - self.getTopEdge() + self.paddingTop) + "px");
 	    var floatBoxEdge = self.vertical ? floatBox.x1 : floatBox.y2;
 	    // TODO: subtract after margin when determining overflow.
 	    if (!self.isOverflown(floatBoxEdge) || self.breakPositions.length == 0) {
 	        // no overflow
 	    	self.killFloats();
 	    	box = self.vertical ? adapt.geom.rotateBox(self.box) : self.box;
+			if (self.vertical) {
+				floatHorBox = adapt.geom.rotateBox(self.getElementRelativeRect(adapt.geom.unrotateBox(floatHorBox)));
+			} else {
+				floatHorBox = self.getElementRelativeRect(floatHorBox);
+			}
 	        adapt.geom.addFloatToBands(box, self.bands, floatHorBox, null, floatSide);
 	        self.createFloats();
 	        if (floatSide == "left") {
@@ -1051,7 +1080,11 @@ adapt.layout.Column.prototype.processLineStyling = function(nodeContext, resNode
 				lastCheckPoints = [];  // Wipe out line breaks inside pseudoelements
 				self.buildViewToNextBlockEdge(nodeContext, lastCheckPoints).then(function(resNodeContextParam) {
 					resNodeContext = resNodeContextParam;
-					loopFrame.continueLoop();
+					if (self.hasNewlyAddedPageFloats()) {
+						loopFrame.breakLoop();
+					} else {
+						loopFrame.continueLoop();
+					}
 				});
 			});
 		});
@@ -1113,6 +1146,11 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
 		= adapt.task.newFrame("layoutBreakableBlock");
     /** @type {Array.<adapt.vtree.NodeContext>} */ var checkPoints = [];
     self.buildViewToNextBlockEdge(nodeContext, checkPoints).then(function(resNodeContext) {
+		if (self.hasNewlyAddedPageFloats()) {
+			frame.finish(resNodeContext);
+			return;
+		}
+
 	    // at this point a single block was appended to the column
 	    // flowPosition is either null or 
 	    //  - if !after: contains view for the next block element
@@ -1419,8 +1457,8 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
 		while (block.parent && block.inline) {
 			block = block.parent;
 		}
-		widows = Math.max((block.inheritedProps["widows"] || 1) - 0, 1);
-		orphans = Math.max((block.inheritedProps["orphans"] || 1) - 0, 1);
+		widows = Math.max((block.inheritedProps["widows"] || 2) - 0, 1);
+		orphans = Math.max((block.inheritedProps["orphans"] || 2) - 0, 1);
 	}
 	// Select the first overflowing line break position
 	var linePositions = this.findLinePositions(checkPoints);
@@ -1491,7 +1529,7 @@ adapt.layout.Column.prototype.findAcceptableBreak = function(overflownNodeContex
 	} while(nextPenalty > penalty && !nodeContext)
 	var forceRemoveSelf = false;
 	if (!nodeContext) {
-		adapt.base.log("Could not find any page breaks?!!");
+		vivliostyle.logging.logger.warn("Could not find any page breaks?!!");
 		// Last resort
 		if (this.forceNonfitting) {
 			self.skipTailEdges(overflownNodeContext).then(function(nodeContext) {
@@ -1649,7 +1687,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
 		= adapt.task.newFrame("skipEdges");
-	var breakAtTheEdge = leadingEdge ? "avoid" : null;
+	var breakAtTheEdge = null;
 	var lastAfterNodeContext = null;
 	var trailingEdgeContexts = [];
 	frame.loopWithFrame(function(loopFrame) {
@@ -1703,7 +1741,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 					// Trailing edge
 					lastAfterNodeContext = nodeContext.copy();
 					trailingEdgeContexts.push(lastAfterNodeContext);
-					breakAtTheEdge = adapt.layout.combineBreaks(nodeContext.breakAfter, breakAtTheEdge);
+					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakAfter);
 					if (style && !(self.zeroIndent(style.paddingBottom) && self.zeroIndent(style.borderBottomWidth))) {
 						// Non-zero trailing inset.
 						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
@@ -1720,8 +1758,10 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 					}			
 				} else {
 					// Leading edge
-					breakAtTheEdge = adapt.layout.combineBreaks(nodeContext.breakBefore, breakAtTheEdge);
-					if (breakAtTheEdge && breakAtTheEdge != "avoid" && breakAtTheEdge != "auto") {
+					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
+					// leadingEdge=true means that we are at the beginning of the new column and hence must avoid a break
+					// (Otherwise leading to an infinite loop)
+					if (!leadingEdge && vivliostyle.break.isForcedBreakValue(breakAtTheEdge)) {
 						// explicit page break
 						loopFrame.breakLoop();
 						self.pageBreakType = breakAtTheEdge;
@@ -1826,11 +1866,11 @@ adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
 				var style = (/** @type {HTMLElement} */ (nodeContext.viewNode)).style;
 				if (nodeContext.after) {
 					// Trailing edge
-					breakAtTheEdge = adapt.layout.combineBreaks(nodeContext.breakAfter, breakAtTheEdge);
+					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakAfter);
 				} else {
 					// Leading edge
-					breakAtTheEdge = adapt.layout.combineBreaks(nodeContext.breakBefore, breakAtTheEdge);
-					if (breakAtTheEdge && breakAtTheEdge != "avoid" && breakAtTheEdge != "auto") {
+					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
+					if (vivliostyle.break.isForcedBreakValue(breakAtTheEdge)) {
 						// explicit page break
 						loopFrame.breakLoop();
 						self.pageBreakType = breakAtTheEdge;
@@ -2058,6 +2098,12 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
 			        self.layoutNext(nodeContext, leadingEdge).then(function(nodeContextParam) {
 			        	leadingEdge = false;
 						nodeContext = nodeContextParam;
+
+						if (self.hasNewlyAddedPageFloats()) {
+							loopFrame.breakLoop();
+							return;
+						}
+
 						if (self.pageBreakType) {
 							// explicit page break
 				            loopFrame.breakLoop(); // Loop end							
@@ -2099,7 +2145,9 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
 			    // TODO: look at footnotes and floats as well
 			    if (!nodeContext) {
 			    	frame.finish(null);
-			    } else {
+			    } else if (self.hasNewlyAddedPageFloats()) {
+					frame.finish(null);
+				} else {
 				    self.overflown = true;
 				    var result = new adapt.vtree.ChunkPosition(nodeContext.toNodePosition());
 				    // Transfer overflown footnotes
@@ -2129,8 +2177,13 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
  */
 adapt.layout.Column.prototype.redoLayout = function() {
 	var chunkPositions = this.chunkPositions;
-	while (this.element.lastChild != this.last) {
-		this.element.removeChild(this.element.lastChild);
+	var last = this.element.lastChild;
+	while (last != this.last) {
+		var prev = last.previousSibling;
+		if (!(this.element === last.parentNode && this.layoutContext.isPseudoelement(last))) {
+			this.element.removeChild(last);
+		}
+		last = prev;
 	}
 	this.killFloats();
 	this.init();

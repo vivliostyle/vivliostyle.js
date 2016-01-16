@@ -1,0 +1,183 @@
+@page {
+    size: 7in 10in;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-family: Baskerville, Georgia, serif;
+    font-weight: normal;
+    font-size: 10pt;
+    text-align: justify;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+
+@media screen {
+    html {
+        max-width: 500px;
+        margin: 30px auto;
+    }
+}
+
+h1 {
+    font-weight: bold;
+    font-size: 20pt;
+    text-indent: 0;
+
+    break-after: avoid;
+}
+
+h1 + figure {
+    margin-bottom: 8pt;
+}
+
+h2 {
+    font-weight: bold;
+    font-size: 12pt;
+    text-indent: 0;
+
+    break-after: avoid;
+}
+
+p + p {
+    text-indent: 1.5em;
+}
+
+figure {
+    text-align: center;
+}
+
+img {
+    max-width: 100%;
+    max-height: 4in;
+}
+
+figcaption {
+    font-size: 9pt;
+}
+
+.page-top-float {
+    margin-bottom: 8pt;
+}
+
+.footnote {
+    float: footnote;
+    font-size: 8pt;
+    counter-increment: footnote;
+    text-indent: 0;
+}
+
+.footnote::footnote-marker {
+    content: counter(footnote);
+    font-size: 8pt;
+    vertical-align: super;
+}
+
+.footnote::footnote-call {
+    content: counter(footnote);
+    font-size: 8pt;
+    vertical-align: super;
+    display: inline;
+    line-height: 1;
+}
+
+@-epubx-page-template {
+
+    @-epubx-define {
+        fixed-page-width: 7in;
+        fixed-page-height: 10in;
+        page-margin-top: 0.5in;
+        page-margin-side: 0.5in;
+        body-line-height: 14pt;
+        column-count: 2;
+        column-gap: 0.18in;
+
+        /* h1 */
+        h1-lines: 3;
+        h1-line-height: 30pt;
+        h1-margin-block-start: 0;
+        h1-block-size: -epubx-expr(body-line-height * h1-lines - h1-margin-block-start);
+
+        /* h2 */
+        h2-lines: 2;
+        h2-line-height: 14pt;
+        h2-margin-block-start: 14pt;
+        h2-block-size: -epubx-expr(body-line-height * h2-lines - h2-margin-block-start);
+    }
+
+    html {
+        line-height: -epubx-expr(body-line-height);
+        column-count: -epubx-expr(column-count);
+        column-gap: -epubx-expr(column-gap);
+        -epub-hyphens: auto;
+    }
+
+    h1 {
+        -epubx-flow-into: h1;
+    }
+
+    /* figure right after h1 spans all columns */
+    h1 + figure {
+        -epubx-flow-into: figure-after-h1;
+    }
+
+    /* floats to page top */
+    .page-top-float {
+        -epubx-flow-into: page-top-float;
+        -epubx-flow-options: exclusive;
+    }
+
+    h1 {
+        min-height: -epubx-expr(h1-block-size);
+        line-height: -epubx-expr(h1-line-height);
+        margin-top: -epubx-expr(h1-margin-block-start);
+    }
+
+    h2 {
+        min-height: -epubx-expr(h2-block-size);
+        line-height: -epubx-expr(h2-line-height);
+        margin-top: -epubx-expr(h2-margin-block-start);
+    }
+
+    @-epubx-page-master {
+        width: -epubx-expr(fixed-page-width);
+        height: -epubx-expr(fixed-page-height);
+
+        @-epubx-partition-group {
+            margin-top: -epubx-expr(page-margin-top);
+            margin-bottom: -epubx-expr(page-margin-top);
+            margin-left: -epubx-expr(page-margin-side);
+            margin-right: -epubx-expr(page-margin-side);
+            width: -epubx-expr(fixed-page-width - page-margin-side * 2);
+            height: -epubx-expr(fixed-page-height - page-margin-top * 2);
+
+            @-epubx-partition {
+                -epubx-flow-from: body;
+                column-count: -epubx-expr(column-count);
+                column-gap: -epubx-expr(column-gap);
+            }
+
+            @-epubx-partition {
+                -epubx-flow-from: figure-after-h1;
+                column-count: 1;
+            }
+
+            @-epubx-partition {
+                -epubx-flow-from: h1;
+                column-count: 1;
+            }
+
+            @-epubx-partition {
+                -epubx-flow-from: page-top-float;
+                column-count: 1;
+            }
+        }
+    }
+
+}

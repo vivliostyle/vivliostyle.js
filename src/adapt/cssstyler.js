@@ -256,6 +256,30 @@ adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBod
 			}
 		}
 	}
+    var fontSize = elemStyle["font-size"];
+    if (fontSize) {
+        var val = fontSize.evaluate(this.context);
+        var px = val.num;
+        switch (val.unit) {
+            case "em":
+            case "rem":
+                px *= this.context.initialFontSize;
+                break;
+            case "ex":
+            case "rex":
+                px *= this.context.initialFontSize * adapt.expr.defaultUnitSizes["ex"] / adapt.expr.defaultUnitSizes["em"];
+                break;
+            case "%":
+                px *= this.context.initialFontSize / 100;
+                break;
+            default:
+                var unitSize = adapt.expr.defaultUnitSizes[val.unit];
+                if (unitSize) {
+                    px *= unitSize;
+                }
+        }
+        this.context.rootFontSize = px;
+    }
 };
 
 /**

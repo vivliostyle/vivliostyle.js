@@ -1,71 +1,38 @@
 # Vivliostyle.js
 
 JavaScript library for web sites with rich paged viewing and EPUB support, shared with Vivliostyle Formatter & Browser.
-Vivliostyle.js is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout) (licensed under Apache License 2.0).
 
 ## Try Vivliostyle.js
 
-http://vivliostyle.github.io/vivliostyle.js/
+<http://vivliostyle.com/en/sample/>
 
 ## Bug reports & feature requests
 
 Please send them to
 
 - [GitHub Issues](https://github.com/vivliostyle/vivliostyle.js/issues)
-- Mailing list ([Japanese](https://groups.google.com/forum/?hl=ja#!forum/vivliostyle-ja))
+- Mailing list ([English](https://groups.google.com/forum/?hl=ja#!forum/vivliostyle), [Japanese](https://groups.google.com/forum/?hl=ja#!forum/vivliostyle-ja))
 
-## Using Vivliostyle.js viewer
+## Using Vivliostyle.js
 
-To run the viewer, you need to generate CSS files using [Compass](http://compass-style.org):
+### Using an all-in-one package
 
-```sh
-# Ensure Ruby and Node.js is installed in your system
-gem install compass
-npm install
-npm run build-css
+Download an all-in-one package from <http://vivliostyle.com/en/sample/> and follow the instruction in it.
+
+See <https://github.com/vivliostyle/vivliostyle-ui> for source code of the UI.
+
+### Integrating Vivliostyle.js into web sites
+
+Vivliostyle.js can be installed from [npm](https://www.npmjs.com/package/vivliostyle):
+
+```
+npm install vivliostyle
 ```
 
-Then you need a web server that can serve the following resources:
+Developer API documents are coming soon.
 
-- `src` directory (contains core JavaScript files and resources)
-- `viewer` directory (contains viewer resources like HTML/CSS/web fonts)
-- Content files you want to view in the viewer (see below)
+## License
 
-The viewer can display HTML files, as well as unpackaged EPUB and FB2 publications.
-Note that the viewer may not be able to display contents on servers different
-from one hosting the viewer files due to security restriction on cross-origin resources.
+Licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
-To display the content, a URL should be constructed in the following way:
-start by creating a URL that references vivliostyle-viewer.html.
-Then append '#' and one of the following parameters (x for HTML/FB2, b for EPUB's OPF file).
-
-- x=[path-to-html-or-fb2-content]
-- b=[path-to-opf-file]
-
-Path could either be absolute in the server context (starting with /)
-or relative to vivliostyle-viewer.html file.
-
-### MathML support
-
-Vivliostyle viewer can utilize MathJax to render MathML content in modern browsers.
-To use MathJax, ensure that the path to MathJax script is correct in
-vivliostyle-viewer.html.
-
-### Compiling JavaScript using Google Closure compiler
-
-[Google Closure compiler](https://developers.google.com/closure/compiler/)
-can be used to make the code faster and much more compact. Use of the
-Closure compiler for web apps is optional.
-
-Closure compiler can be installed via npm. To compile JavaScipt, run
-
-```sh
-npm install
-npm run build
-```
-
-Then the compiled JavaScript file appears at `lib/vivliostyle.min.js`.
-Modify vivliostyle-viewer.html to reference only vivliostyle-viewer.min.js
-(goog/base.js is not needed, but MathJax-related files can be kept if desired).
-You might need to modify `uaRoot` parameter in vivliostyle-viewer.html to
-point the location of user agent resources (user-agent-* and validation.txt files).
+Vivliostyle.js is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout).

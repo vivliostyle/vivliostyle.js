@@ -283,7 +283,7 @@ adapt.xmldoc.XMLDocHolder.prototype.getElement = function(url) {
 		return null;
 	}
 	var id = m[2];
-	var r = this.document.getElementById(id);
+	var r = this.document.getElementById(id) || this.document.getElementsByName(id)[0];
 	if (!r) {
 		if (!this.idMap) {
 			this.idMap = {};
@@ -295,12 +295,25 @@ adapt.xmldoc.XMLDocHolder.prototype.getElement = function(url) {
 };
 
 /**
- * @typedef {adapt.net.ResourceStore.<!adapt.xmldoc.XMLDocHolder>}
+ * @typedef {adapt.net.ResourceStore.<adapt.xmldoc.XMLDocHolder>}
  */
 adapt.xmldoc.XMLDocStore;
 
 /**
- * Parse a string with a DOMParser and returns the document.
+ * cf. https://w3c.github.io/DOM-Parsing/#the-domparser-interface
+ * @enum {string}
+ * @private
+ */
+adapt.xmldoc.DOMParserSupportedType = {
+	TEXT_HTML: "text/html",
+	TEXT_XML: "text/xml",
+	APPLICATION_XML: "application/xml",
+	APPLICATION_XHTML_XML: "application/xhtml_xml",
+	IMAGE_SVG_XML: "image/svg+xml"
+};
+
+/**
+ * Parses a string with a DOMParser and returns the document.
  * If a parse error occurs, return null.
  * @param {string} str
  * @param {string} type
@@ -333,26 +346,77 @@ adapt.xmldoc.parseAndReturnNullIfError = function(str, type, opt_parser) {
 };
 
 /**
+ * @private
+ * @param {adapt.net.Response} response
+ * @returns {?string} null if contentType cannot be inferred from HTTP header and file extension
+ */
+adapt.xmldoc.resolveContentType = function(response) {
+	var contentType = response.contentType;
+	if (contentType) {
+		var supportedKeys = Object.keys(adapt.xmldoc.DOMParserSupportedType);
+		for (var i = 0; i < supportedKeys.length; i++) {
+			if (adapt.xmldoc.DOMParserSupportedType[supportedKeys[i]] === contentType) {
+				return contentType;
+			}
+		}
+		if (contentType.match(/\+xml$/)) {
+			return adapt.xmldoc.DOMParserSupportedType.APPLICATION_XML;
+		}
+	}
+	var match = response.url.match(/\.([^./]+)$/);
+	if (match) {
+		var extension = match[1];
+		switch (extension) {
+			case "html":
+			case "htm":
+				return adapt.xmldoc.DOMParserSupportedType.TEXT_HTML;
+			case "xhtml":
+			case "xht":
+				return adapt.xmldoc.DOMParserSupportedType.APPLICATION_XHTML_XML;
+			case "svg":
+			case "svgz":
+				return adapt.xmldoc.DOMParserSupportedType.IMAGE_SVG_XML;
+			case "opf":
+			case "xml":
+				return adapt.xmldoc.DOMParserSupportedType.APPLICATION_XML;
+		}
+	}
+	return null;
+};
+
+/**
  * @param {adapt.net.Response} response
  * @param {adapt.xmldoc.XMLDocStore} store
- * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
+ * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
  */
 adapt.xmldoc.parseXMLResource = function(response, store) {
 	var doc = response.responseXML;
 	if (!doc) {
 		var parser = new DOMParser();
-		var text = response.responseText || "<not-found/>";
-		// If responseXML is absent, try to parse as text/xml
-		doc = adapt.xmldoc.parseAndReturnNullIfError(text, "text/xml", parser);
-		if (!doc) {
-			// If HTML parsing fails, try to parse as text/html
-			doc = adapt.xmldoc.parseAndReturnNullIfError(text, "text/html", parser);
+		var text = response.responseText;
+		if (text) {
+			var contentType = adapt.xmldoc.resolveContentType(response);
+			doc = adapt.xmldoc.parseAndReturnNullIfError(text, contentType || adapt.xmldoc.DOMParserSupportedType.APPLICATION_XML, parser);
+
+			// When contentType cannot be inferred from HTTP header and file extension,
+			// we use root element's tag name to infer the contentType.
+			// If it is html or svg, we re-parse the source with an appropriate contentType.
+			if (doc && !contentType) {
+				var root = doc.documentElement;
+				if (root.localName.toLowerCase() === "html" && !root.namespaceURI) {
+					doc = adapt.xmldoc.parseAndReturnNullIfError(text, adapt.xmldoc.DOMParserSupportedType.TEXT_HTML, parser);
+				} else if (root.localName.toLowerCase() === "svg" && doc.contentType !== adapt.xmldoc.DOMParserSupportedType.IMAGE_SVG_XML) {
+					doc = adapt.xmldoc.parseAndReturnNullIfError(text, adapt.xmldoc.DOMParserSupportedType.IMAGE_SVG_XML, parser);
+				}
+			}
+
 			if (!doc) {
-				parser.parseFromString("<error/>", "text/xml");
+				// Fallback to HTML parsing
+				doc = adapt.xmldoc.parseAndReturnNullIfError(text, adapt.xmldoc.DOMParserSupportedType.TEXT_HTML, parser);
 			}
 		}
 	}
-    var xmldoc = new adapt.xmldoc.XMLDocHolder(store, response.url, doc);
+    var xmldoc = doc ? new adapt.xmldoc.XMLDocHolder(store, response.url, doc) : null;
     return adapt.task.newResult(xmldoc);
 };
 
@@ -360,7 +424,7 @@ adapt.xmldoc.parseXMLResource = function(response, store) {
  * @return {adapt.xmldoc.XMLDocStore}
  */
 adapt.xmldoc.newXMLDocStore = function() {
-	return new adapt.net.ResourceStore(adapt.xmldoc.parseXMLResource, false);
+	return new adapt.net.ResourceStore(adapt.xmldoc.parseXMLResource, adapt.net.XMLHttpRequestResponseType.DOCUMENT);
 };
 
 /**

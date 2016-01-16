@@ -6,6 +6,8 @@
 goog.provide('adapt.epub');
 
 goog.require("vivliostyle.constants");
+goog.require("vivliostyle.logging");
+goog.require('adapt.net');
 goog.require('adapt.csscasc');
 goog.require('adapt.font');
 goog.require('adapt.ops');
@@ -29,7 +31,7 @@ adapt.epub.EPUBDocStore = function() {
 	/** @type {Object.<string,adapt.epub.OPFDoc>} */ this.opfByURL = {};
 	/** @type {Object.<string,adapt.epub.OPFDoc>} */ this.primaryOPFByEPubURL = {};
 	/** @type {Object.<string,function(Blob):adapt.task.Result.<Blob>>} */ this.deobfuscators = {};
-    /** @type {Object.<string,!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>>} */ this.documents = {};
+    /** @type {Object.<string,!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>>} */ this.documents = {};
 };
 goog.inherits(adapt.epub.EPUBDocStore, adapt.ops.OPSDocStore);
 
@@ -51,10 +53,12 @@ adapt.epub.EPUBDocStore.prototype.makeDeobfuscatorFactory = function() {
 
 /**
  * @param {string} url
- * @return {!adapt.task.Result.<!adapt.xmldoc.XMLDocHolder>}
+ * @param {boolean=} opt_required
+ * @param {string=} opt_message
+ * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
  */
-adapt.epub.EPUBDocStore.prototype.loadAsPlainXML = function(url) {
-	return this.plainXMLStore.load(url);	
+adapt.epub.EPUBDocStore.prototype.loadAsPlainXML = function(url, opt_required, opt_message) {
+	return this.plainXMLStore.load(url, opt_required, opt_message);
 };
 
 /**
@@ -90,22 +94,29 @@ adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ var frame
 		= adapt.task.newFrame("loadEPUBDoc");
+	if (url.substring(url.length - 1) !== "/") {
+		url = url + "/";
+	}
 	if (haveZipMetadata) {
 		self.startLoadingAsJSON(url + "?r=list");
 	}
 	self.startLoadingAsPlainXML(url + "META-INF/encryption.xml");
 	var containerURL = url + "META-INF/container.xml";
-	self.loadAsPlainXML(containerURL).then(function(containerXML){
-		var roots = containerXML.doc().child("container").child("rootfiles")
-			.child("rootfile").attribute("full-path");
-		for (var i = 0; i < roots.length; i++) {
-			var root = roots[i];
-			if (root) {
-				self.loadOPF(url, root, haveZipMetadata).thenFinish(frame);
-				return;
+	self.loadAsPlainXML(containerURL, true, "Failed to fetch EPUB container.xml from " + containerURL).then(function(containerXML){
+		if (!containerXML) {
+			vivliostyle.logging.logger.error("Received an empty response for EPUB container.xml " + containerURL + ". This may be caused by the server not allowing cross origin requests.");
+		} else {
+			var roots = containerXML.doc().child("container").child("rootfiles")
+				.child("rootfile").attribute("full-path");
+			for (var i = 0; i < roots.length; i++) {
+				var root = roots[i];
+				if (root) {
+					self.loadOPF(url, root, haveZipMetadata).thenFinish(frame);
+					return;
+				}
 			}
+			frame.finish(null);
 		}
-		frame.finish(null);
 	});
 	return frame.result();
 };
@@ -126,18 +137,22 @@ adapt.epub.EPUBDocStore.prototype.loadOPF = function(epubURL, root, haveZipMetad
 	/** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ var frame
 		= adapt.task.newFrame("loadOPF");
 	self.loadAsPlainXML(url).then(function(opfXML){
-		self.loadAsPlainXML(epubURL + "META-INF/encryption.xml").then(function(encXML) {
-			var zipMetadataResult = haveZipMetadata ? 
+		if (!opfXML) {
+			vivliostyle.logging.logger.error("Received an empty response for EPUB OPF " + url + ". This may be caused by the server not allowing cross origin requests.");
+		} else {
+			self.loadAsPlainXML(epubURL + "META-INF/encryption.xml").then(function (encXML) {
+				var zipMetadataResult = haveZipMetadata ?
 					self.loadAsJSON(epubURL + "?r=list") : adapt.task.newResult(null);
-			zipMetadataResult.then(function(zipMetadata) {
-				opf = new adapt.epub.OPFDoc(self, epubURL);
-				opf.initWithXMLDoc(opfXML, encXML, zipMetadata, epubURL + "?r=manifest").then(function() {
-					self.opfByURL[url] = opf;
-					self.primaryOPFByEPubURL[epubURL] = opf;
-					frame.finish(opf);			
+				zipMetadataResult.then(function (zipMetadata) {
+					opf = new adapt.epub.OPFDoc(self, epubURL);
+					opf.initWithXMLDoc(opfXML, encXML, zipMetadata, epubURL + "?r=manifest").then(function () {
+						self.opfByURL[url] = opf;
+						self.primaryOPFByEPubURL[epubURL] = opf;
+						frame.finish(opf);
+					});
 				});
 			});
-		});
+		}
 	});
 	return frame.result();
 };
@@ -150,7 +165,7 @@ adapt.epub.EPUBDocStore.prototype.addDocument = function(url, doc) {
     var frame = adapt.task.newFrame("EPUBDocStore.load");
     var docURL = adapt.base.stripFragment(url);
     var r = this.documents[docURL] = this.parseOPSResource(
-        {status: 200, url: docURL, responseText: null, responseXML: doc, responseBlob: null}
+        {status: 200, url: docURL, contentType: doc.contentType, responseText: null, responseXML: doc, responseBlob: null}
     );
     r.thenFinish(frame);
     return frame.result();
@@ -165,7 +180,16 @@ adapt.epub.EPUBDocStore.prototype.load = function(url) {
     if (r) {
         return r.isPending() ? r : adapt.task.newResult(r.get());
     } else {
-        return adapt.epub.EPUBDocStore.superClass_.load.call(this, docURL);
+		var frame = adapt.task.newFrame("EPUBDocStore.load");
+		r = adapt.epub.EPUBDocStore.superClass_.load.call(this, docURL, true, "Failed to fetch a source document from " + docURL);
+		r.then(function(xmldoc) {
+			if (!xmldoc) {
+				vivliostyle.logging.logger.error("Received an empty response for " + docURL + ". This may be caused by the server not allowing cross origin requests.");
+			} else {
+				frame.finish(xmldoc);
+			}
+		});
+		return frame.result();
     }
 };
 
@@ -488,13 +512,13 @@ adapt.epub.OPFDoc = function(store, epubURL) {
 	/** @type {?string} */ this.uid = null;
 	/** @type {Object.<string,string>} */ this.bindings = {};
 	/** @type {?string} */ this.lang = null;
-	/** @type {Object} */ this.toolData = null;  // see adapt.devel
 	/** @type {number} */ this.epageCount = 0;
 	/** @type {adapt.base.JSON} */ this.metadata = {};
 	/** @type {adapt.epub.OPFItem} */ this.ncxToc = null;
 	/** @type {adapt.epub.OPFItem} */ this.xhtmlToc = null;
 	/** @type {adapt.epub.OPFItem} */ this.cover = null;
 	/** @type {Object.<string,string>} */ this.fallbackMap = {};
+	/** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = null;
 	adapt.epub.checkMathJax();
 };
 
@@ -597,7 +621,11 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
 	if (tocAttr) {
 		this.ncxToc = this.itemMap[tocAttr];
 	}
-	var idpfObfURLs = encXML.doc().child("encryption").child("EncryptedData")
+	var pageProgressionAttr = pkg.child("spine").attribute("page-progression-direction")[0];
+	if (pageProgressionAttr) {
+		this.pageProgression = vivliostyle.constants.PageProgression.of(pageProgressionAttr);
+	}
+	var idpfObfURLs = !encXML ? [] : encXML.doc().child("encryption").child("EncryptedData")
 		.predicate(adapt.xmldoc.predicate.withChild("EncryptionMethod",
 				adapt.xmldoc.predicate.withAttribute("Algorithm",
 						"http://www.idpf.org/2008/embedding")))
@@ -661,7 +689,7 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
 		}
 	}
 	self.assignAutoPages();
-	return adapt.net.ajax(manifestURL, false, "POST", manifestText.toString(), "text/plain");
+	return adapt.net.ajax(manifestURL, adapt.net.XMLHttpRequestResponseType.DEFAULT, "POST", manifestText.toString(), "text/plain");
 };
 
 /**
@@ -776,7 +804,7 @@ adapt.epub.OPFDoc.prototype.resolveFragment = function(fragstr) {
     	 * @return {void}
     	 */					
 		function(frame, err) {
-			adapt.base.log("Error resolving fragment " + fragstr);
+			vivliostyle.logging.logger.warn(err, "Cannot resolve fragment:", fragstr);
 			frame.finish(null);
 		});
 };
@@ -824,7 +852,7 @@ adapt.epub.OPFDoc.prototype.resolveEPage = function(epage) {
     	 * @return {void}
     	 */					
 		function(frame, err) {
-			adapt.base.log("Error resolving epage: " + epage);
+			vivliostyle.logging.logger.warn(err, "Cannot resolve epage:", epage);
 			frame.finish(null);
 		});
 };
@@ -877,7 +905,6 @@ adapt.epub.OPFView = function(opf, viewport, fontMapper, pref) {
 	/** @type {number} */ this.offsetInItem = 0;
 	/** @const */ this.pref = adapt.expr.clonePreferences(pref);
 	/** @const */ this.clientLayout = new adapt.vgen.DefaultClientLayout(viewport.window);
-	/** @type {Object} */ this.tools = null;  // see adapt.devel
 };
 
 /**
@@ -911,8 +938,12 @@ adapt.epub.OPFView.prototype.getCurrentPage = function() {
  * @returns {?vivliostyle.constants.PageProgression}
  */
 adapt.epub.OPFView.prototype.getCurrentPageProgression = function() {
-    var viewItem = this.spineItems[this.spineIndex];
-    return viewItem ? viewItem.instance.pageProgression : null;
+	if (this.opf.pageProgression) {
+		return this.opf.pageProgression;
+	} else {
+		var viewItem = this.spineItems[this.spineIndex];
+		return viewItem ? viewItem.instance.pageProgression : null;
+	}
 };
 
 /**
@@ -997,6 +1028,7 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 			    }
 		    });
 		}).then(function() {
+			resultPage = resultPage || viewItem.pages[self.pageIndex];
 			if (resultPage) {
 			    frame.finish(resultPage);
 			    return;
@@ -1031,28 +1063,37 @@ adapt.epub.OPFView.prototype.renderPage = function() {
  * @returns {!adapt.task.Result.<adapt.vtree.Page>}
  */
 adapt.epub.OPFView.prototype.renderAllPages = function() {
+	return this.renderPagesUpto(this.opf.spine.length - 1, Number.POSITIVE_INFINITY);
+};
+
+/**
+ * Render pages from (spineIndex=0, pageIndex=0) to the specified (spineIndex, pageIndex).
+ * @param {number} spineIndex
+ * @param {number} pageIndex
+ * @returns {!adapt.task.Result.<adapt.vtree.Page>}
+ */
+adapt.epub.OPFView.prototype.renderPagesUpto = function(spineIndex, pageIndex) {
     var self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.Page>} */ var frame
         = adapt.task.newFrame("renderAllPages");
 
     // backup original values
-    var spineIndex = self.spineIndex;
-    var pageIndex = self.pageIndex;
+    var origSpineIndex = self.spineIndex;
+    var origPageIndex = self.pageIndex;
 
-    var spineLength = self.opf.spine.length;
     self.spineIndex = 0;
     frame.loopWithFrame(function(loopFrame) {
-        self.pageIndex = Number.POSITIVE_INFINITY;
+        self.pageIndex = self.spineIndex == spineIndex ? pageIndex : Number.POSITIVE_INFINITY;
         self.renderPage().then(function() {
-            if (++self.spineIndex >= spineLength) {
+            if (++self.spineIndex > spineIndex) {
                 loopFrame.breakLoop();
             } else {
                 loopFrame.continueLoop();
             }
         });
     }).then(function() {
-        self.spineIndex = spineIndex;
-        self.pageIndex = pageIndex;
+        self.spineIndex = origSpineIndex;
+        self.pageIndex = origPageIndex;
         self.renderPage().thenFinish(frame);
     });
     return frame.result();
@@ -1264,7 +1305,7 @@ adapt.epub.OPFView.prototype.navigateToFragment = function(fragment) {
  * @return {!adapt.task.Result.<adapt.vtree.Page>}
  */
 adapt.epub.OPFView.prototype.navigateTo = function(href) {
-	adapt.base.log("Navigate to " + href);
+	vivliostyle.logging.logger.debug("Navigate to", href);
 	var path = this.opf.getPathFromURL(adapt.base.stripFragment(href));
 	if (path == null) {
 		if (this.opf.opfXML && href.match(/^#epubcfi\(/)) {
@@ -1314,7 +1355,7 @@ adapt.epub.OPFView.prototype.navigateTo = function(href) {
 adapt.epub.OPFView.prototype.makePage = function(viewItem, pos) {
 	var viewport = viewItem.instance.viewport;
     var pageCont = /** @type {HTMLElement} */ (viewport.document.createElement("div"));
-    viewport.zoomBox.appendChild(pageCont);
+    viewport.contentContainer.appendChild(pageCont);
     pageCont.style.position = "relative";
     pageCont.style.visibility = "hidden";
     pageCont.style.left = "0px";
@@ -1523,8 +1564,16 @@ adapt.epub.OPFView.prototype.getPageViewItem = function() {
     		viewport = new adapt.vgen.Viewport(viewport.window, viewportSize.fontSize, viewport.root,
     				viewportSize.width, viewportSize.height);
     	}
+		var previousViewItem = self.spineItems[self.spineIndex - 1];
+		var pageNumberOffset = previousViewItem ?
+			previousViewItem.instance.pageNumberOffset + previousViewItem.pages.length : 0;
+
         var instance = new adapt.ops.StyleInstance(style, xmldoc, self.opf.lang,
-        		viewport, self.clientLayout, self.fontMapper, customRenderer, self.opf.fallbackMap);
+			viewport, self.clientLayout, self.fontMapper, customRenderer, self.opf.fallbackMap, pageNumberOffset);
+
+		if (previousViewItem) {
+			instance.pageCounterStore.copyFrom(previousViewItem.instance.pageCounterStore);
+		}
         instance.pref = self.pref;
         instance.init().then(function() {
 			viewItem = {item: item, xmldoc: xmldoc, instance: instance,
@@ -1557,7 +1606,7 @@ adapt.epub.OPFView.prototype.setPagePosition = function(pos) {
 		this.pageIndex = 0;
 		this.offsetInItem = 0;		
 	}
-	return this.renderPage();
+	return this.renderPagesUpto(this.spineIndex, this.pageIndex);
 };
 
 adapt.epub.OPFView.prototype.removeRenderedPages = function() {

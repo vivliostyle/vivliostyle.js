@@ -5,6 +5,7 @@
 goog.provide("vivliostyle.viewer");
 
 goog.require("vivliostyle.namespace");
+goog.require("vivliostyle.profile");
 goog.require("vivliostyle.constants");
 goog.require("vivliostyle.util");
 goog.require("adapt.base");
@@ -160,7 +161,7 @@ goog.scope(function() {
     };
 
     /**
-     * Load a HTML or an XML document.
+     * Load an HTML or XML document.
      * @param {string} url
      * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
@@ -169,7 +170,31 @@ goog.scope(function() {
         if (!url) {
             this.eventTarget.dispatchEvent({"type": "error", "content": "No URL specified"});
         }
+        this.loadDocumentOrEPUB(url, null, opt_documentOptions, opt_viewerOptions);
+    };
 
+    /**
+     * Load an EPUB document.
+     * @param {string} epubUrl
+     * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
+     * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
+     */
+    Viewer.prototype.loadEPUB = function(epubUrl, opt_documentOptions, opt_viewerOptions) {
+        if (!epubUrl) {
+            this.eventTarget.dispatchEvent({"type": "error", "content": "No URL specified"});
+        }
+        this.loadDocumentOrEPUB(null, epubUrl, opt_documentOptions, opt_viewerOptions);
+    };
+
+    /**
+     * Load an HTML or XML document, or an EPUB document.
+     * @private
+     * @param {?string} url
+     * @param {?string} epubUrl
+     * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
+     * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
+     */
+    Viewer.prototype.loadDocumentOrEPUB = function(url, epubUrl, opt_documentOptions, opt_viewerOptions) {
         var documentOptions = opt_documentOptions || {};
         var userStyleSheet;
         var uss = documentOptions["userStyleSheet"];
@@ -184,11 +209,11 @@ goog.scope(function() {
         }
 
         var command = Object.assign({
-            "a": "loadXML",
+            "a": url ? "loadXML" : "loadEPUB",
 
             "userAgentRootURL": this.settings["userAgentRootURL"],
 
-            "url": url,
+            "url": url || epubUrl,
             "document": documentOptions["documentObject"],
             "fragment": documentOptions["fragment"],
             "userStyleSheet": userStyleSheet
@@ -269,10 +294,13 @@ goog.scope(function() {
     goog.exportProperty(Viewer.prototype, "addListener", Viewer.prototype.addListener);
     goog.exportProperty(Viewer.prototype, "removeListener", Viewer.prototype.removeListener);
     goog.exportProperty(Viewer.prototype, "loadDocument", Viewer.prototype.loadDocument);
+    goog.exportProperty(Viewer.prototype, "loadEPUB", Viewer.prototype.loadEPUB);
     goog.exportProperty(Viewer.prototype, "getCurrentPageProgression", Viewer.prototype.getCurrentPageProgression);
     goog.exportProperty(Viewer.prototype, "navigateToPage", Viewer.prototype.navigateToPage);
     goog.exportProperty(Viewer.prototype, "navigateToInternalUrl", Viewer.prototype.navigateToInternalUrl);
     goog.exportProperty(Viewer.prototype, "queryZoomFactor", Viewer.prototype.queryZoomFactor);
     vivliostyle.namespace.exportSymbol("vivliostyle.viewer.ZoomType", ZoomType);
     goog.exportProperty(ZoomType, "FIT_INSIDE_VIEWPORT", ZoomType.FIT_INSIDE_VIEWPORT);
+
+    vivliostyle.profile.profiler.forceRegisterEndTiming("load_vivliostyle");
 });

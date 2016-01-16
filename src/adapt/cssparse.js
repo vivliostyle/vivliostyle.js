@@ -3,6 +3,7 @@
  * Copyright 2015 Vivliostyle Inc.
  * @fileoverview CSS Parser.
  */
+goog.require('vivliostyle.logging');
 goog.require('adapt.base');
 goog.require('adapt.expr');
 goog.require('adapt.css');
@@ -422,7 +423,7 @@ adapt.cssparse.DispatchParserHandler.prototype.error = function(mnemonics, token
  * @return {void}
  */
 adapt.cssparse.DispatchParserHandler.prototype.errorMsg = function(mnemonics, token) {
-	adapt.base.log(mnemonics);
+    vivliostyle.logging.logger.warn(mnemonics);
 };
 
 /**
@@ -1240,6 +1241,9 @@ adapt.cssparse.Parser.prototype.exprStackReduce = function(op, token) {
                 }
             }
             if (tok == adapt.csstok.TokenType.O_PAR) {
+                if (val.isMediaName()) {
+                    val = new adapt.expr.MediaTest(handler.getScope(), /** @type {!adapt.expr.MediaName} */(val), null);
+                }
                 op = adapt.csstok.TokenType.EOF;
                 continue;
             }
@@ -1383,14 +1387,14 @@ adapt.cssparse.Parser.prototype.readPseudoParams = function() {
 
 /**
  * @param {?string} classes
- * @param {?string} media
+ * @param {adapt.expr.Val} condition
  * @return {adapt.css.Expr}
  */
-adapt.cssparse.Parser.prototype.makeCondition = function(classes, media) {
+adapt.cssparse.Parser.prototype.makeCondition = function(classes, condition) {
 	var scope = this.handler.getScope();
 	if (!scope)
 		return null;
-	var condition = scope._true;
+	condition = condition || scope._true;
 	if (classes) {
 		var classList = classes.split(/\s+/);
 		for (var i = 0; i < classList.length; i++) {
@@ -1440,7 +1444,7 @@ adapt.cssparse.Parser.prototype.isInsidePropertyOnlyRule = function() {
  * @param {boolean} parsingStyleAttr
  * @return {boolean} 
  */
-adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsingStyleAttr) {
+adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsingStyleAttr, parsingMediaQuery) {
 	var handler = this.handler;
 	var tokenizer = this.tokenizer;
     var valStack = this.valStack;
@@ -1452,6 +1456,11 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
     /** @type {number} */ var num;
     /** @type {adapt.css.Val} */ var val;
     /** @type {Array.<number|string>} */ var params;
+
+    if (parsingMediaQuery) {
+        this.exprContext = adapt.cssparse.ExprContext.MEDIA;
+        this.valStack.push("{");
+    }
     
     for(; count > 0; --count) {
         token = tokenizer.token();
@@ -2009,6 +2018,8 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     	this.importCondition = /** @type {adapt.css.Expr} */ (valStack.pop());
                     	this.importReady = true;
                         this.actions = adapt.cssparse.actionsBase;
+                        tokenizer.consume();
+                        return false;
                     }
                 }
                 tokenizer.consume();
@@ -2314,6 +2325,13 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
             default:
             	if (parsingValue || parsingStyleAttr)
             		return true;
+                if (parsingMediaQuery) {
+                    if (this.exprStackReduce(adapt.csstok.TokenType.C_PAR, token)) {
+                        this.result = /** @type {adapt.css.Val} */ (valStack.pop());
+                        return true;
+                    }
+                    return false;
+                }
                 if (this.actions === adapt.cssparse.actionsPropVal && tokenizer.hasMark()) {
                     tokenizer.reset();
                     this.actions = adapt.cssparse.actionsSelectorStart;
@@ -2379,13 +2397,18 @@ adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL, classes, 
 	/** @type {adapt.task.Frame.<boolean>} */ var frame =
 		adapt.task.newFrame("parseStylesheet");
 	var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsBase, tokenizer, handler, baseURL);
-	var condition = parser.makeCondition(classes, media);
+
+    var condition = null;
+    if (media) {
+        condition = adapt.cssparse.parseMediaQuery(new adapt.csstok.Tokenizer(media, handler), handler, baseURL);
+    }
+    condition = parser.makeCondition(classes, condition && condition.toExpr());
 	if (condition) {
 		handler.startMediaRule(condition);
 		handler.startRuleBody();		
 	}
 	frame.loop(function() {
-		while (!parser.runParser(100, false, false)) {
+		while (!parser.runParser(100, false, false, false)) {
 			if (parser.importReady) {
 				var resolvedURL = adapt.base.resolveURL(/** @type {string} */ (parser.importURL), baseURL);
 				if (parser.importCondition) {
@@ -2462,7 +2485,7 @@ adapt.cssparse.parseStylesheetFromURL = function(url, handler, classes, media) {
     	 * @return {void}
     	 */
     	function(frame, err) {
-	    	adapt.task.report("Exception while parsing: " + url, err);
+            vivliostyle.logging.logger.error(err, "Exception while parsing:", url);
 	    	frame.finish(true);
 	    });
 };
@@ -2476,7 +2499,7 @@ adapt.cssparse.parseStylesheetFromURL = function(url, handler, classes, media) {
 adapt.cssparse.parseValue = function(scope, tokenizer, baseURL) {
 	var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsPropVal, tokenizer, 
     		new adapt.cssparse.ErrorHandler(scope), baseURL);
-	parser.runParser(Number.POSITIVE_INFINITY, true, false);
+	parser.runParser(Number.POSITIVE_INFINITY, true, false, false);
 	return parser.result;
 };
 
@@ -2489,7 +2512,19 @@ adapt.cssparse.parseValue = function(scope, tokenizer, baseURL) {
 adapt.cssparse.parseStyleAttribute = function(tokenizer, handler, baseURL) {
 	var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsStyleAttribute, tokenizer, 
     		handler, baseURL);
-	parser.runParser(Number.POSITIVE_INFINITY, false, true);
+	parser.runParser(Number.POSITIVE_INFINITY, false, true, false);
+};
+
+/**
+ * @param {adapt.csstok.Tokenizer} tokenizer
+ * @param {adapt.cssparse.ParserHandler} handler
+ * @param {string} baseURL
+ * @return {adapt.css.Expr}
+ */
+adapt.cssparse.parseMediaQuery = function(tokenizer, handler, baseURL) {
+    var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsExprVal, tokenizer, handler, baseURL);
+    parser.runParser(Number.POSITIVE_INFINITY, false, false, true);
+    return /** @type {adapt.css.Expr} */ (parser.result);
 };
 
 /**

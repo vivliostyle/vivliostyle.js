@@ -5,6 +5,8 @@
  */
 goog.provide('adapt.csscasc');
 
+goog.require('vivliostyle.logging');
+goog.require('vivliostyle.plugin');
 goog.require('adapt.expr');
 goog.require('adapt.css');
 goog.require('adapt.task');
@@ -83,7 +85,7 @@ adapt.csscasc.coupledPatterns = ["margin-%", "padding-%", "border-%-width", "bor
                                 "border-%-color", "%"];
 
 /**
- * @const 
+ * @const
  * @type {Object.<string,boolean>}
  */
 adapt.csscasc.geomNames = (function() {
@@ -432,7 +434,7 @@ adapt.csscasc.InheritanceVisitor = function(props, context) {
 	adapt.css.Visitor.call(this);
 	/** @const */ this.props = props;
 	/** @const */ this.context = context;
-	/** @type {string} */ this.propName = "";	
+	/** @type {string} */ this.propName = "";
 };
 goog.inherits(adapt.csscasc.InheritanceVisitor, adapt.css.FilterVisitor);
 
@@ -461,7 +463,7 @@ adapt.csscasc.InheritanceVisitor.prototype.getFontSize = function() {
  */
 adapt.csscasc.InheritanceVisitor.prototype.visitNumeric = function(numeric) {
 	if (numeric.unit == "em" || numeric.unit == "ex") {
-		var ratio = this.context.queryUnitSize(numeric.unit) / this.context.queryUnitSize("em");
+		var ratio = this.context.queryUnitSize(numeric.unit, false) / this.context.queryUnitSize("em", false);
 		return new adapt.css.Numeric(numeric.num * ratio * this.getFontSize(), "px");
 	} else if (numeric.unit == "%") {
         if (this.propName === "font-size") {
@@ -638,7 +640,7 @@ adapt.csscasc.ChainedAction.prototype.makePrimary = function(cascade) {
  */
 adapt.csscasc.CheckClassAction = function(className) {
 	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.className = className;	
+	/** @const */ this.className = className;
 };
 goog.inherits(adapt.csscasc.CheckClassAction, adapt.csscasc.ChainedAction);
 
@@ -675,7 +677,7 @@ adapt.csscasc.CheckClassAction.prototype.makePrimary = function(cascade) {
  */
 adapt.csscasc.CheckIdAction = function(id) {
 	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.id = id;	
+	/** @const */ this.id = id;
 };
 goog.inherits(adapt.csscasc.CheckIdAction, adapt.csscasc.ChainedAction);
 
@@ -712,7 +714,7 @@ adapt.csscasc.CheckIdAction.prototype.makePrimary = function(cascade) {
  */
 adapt.csscasc.CheckLocalNameAction = function(localName) {
 	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.localName = localName;	
+	/** @const */ this.localName = localName;
 };
 goog.inherits(adapt.csscasc.CheckLocalNameAction, adapt.csscasc.ChainedAction);
 
@@ -750,8 +752,8 @@ adapt.csscasc.CheckLocalNameAction.prototype.makePrimary = function(cascade) {
  */
 adapt.csscasc.CheckNSTagAction = function(ns, localName) {
 	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.ns = ns;	
-	/** @const */ this.localName = localName;	
+	/** @const */ this.ns = ns;
+	/** @const */ this.localName = localName;
 };
 goog.inherits(adapt.csscasc.CheckNSTagAction, adapt.csscasc.ChainedAction);
 
@@ -794,7 +796,7 @@ adapt.csscasc.CheckNSTagAction.prototype.makePrimary = function(cascade) {
  */
 adapt.csscasc.CheckTargetEpubTypeAction = function(epubTypePatt) {
 	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.epubTypePatt = epubTypePatt;	
+	/** @const */ this.epubTypePatt = epubTypePatt;
 };
 goog.inherits(adapt.csscasc.CheckTargetEpubTypeAction, adapt.csscasc.ChainedAction);
 
@@ -826,7 +828,7 @@ adapt.csscasc.CheckTargetEpubTypeAction.prototype.apply = function(cascadeInstan
  */
 adapt.csscasc.CheckNamespaceAction = function(ns) {
 	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.ns = ns;	
+	/** @const */ this.ns = ns;
 };
 goog.inherits(adapt.csscasc.CheckNamespaceAction, adapt.csscasc.ChainedAction);
 
@@ -847,8 +849,8 @@ adapt.csscasc.CheckNamespaceAction.prototype.apply = function(cascadeInstance) {
  */
 adapt.csscasc.CheckAttributePresentAction = function(ns, name) {
 	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.ns = ns;	
-	/** @const */ this.name = name;	
+	/** @const */ this.ns = ns;
+	/** @const */ this.name = name;
 };
 goog.inherits(adapt.csscasc.CheckAttributePresentAction, adapt.csscasc.ChainedAction);
 
@@ -856,7 +858,7 @@ goog.inherits(adapt.csscasc.CheckAttributePresentAction, adapt.csscasc.ChainedAc
  * @override
  */
 adapt.csscasc.CheckAttributePresentAction.prototype.apply = function(cascadeInstance) {
-    if (cascadeInstance.currentElement && 
+    if (cascadeInstance.currentElement &&
     		cascadeInstance.currentElement.hasAttributeNS(this.ns, this.name)) {
         this.chained.apply(cascadeInstance);
     }
@@ -872,9 +874,9 @@ adapt.csscasc.CheckAttributePresentAction.prototype.apply = function(cascadeInst
  */
 adapt.csscasc.CheckAttributeEqAction = function(ns, name, value) {
 	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.ns = ns;	
-	/** @const */ this.name = name;	
-	/** @const */ this.value = value;	
+	/** @const */ this.ns = ns;
+	/** @const */ this.name = name;
+	/** @const */ this.value = value;
 };
 goog.inherits(adapt.csscasc.CheckAttributeEqAction, adapt.csscasc.ChainedAction);
 
@@ -917,8 +919,8 @@ adapt.csscasc.CheckAttributeEqAction.prototype.makePrimary = function(cascade) {
  */
 adapt.csscasc.CheckNamespaceSupportedAction = function(ns, name) {
 	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.ns = ns;	
-	/** @const */ this.name = name;	
+	/** @const */ this.ns = ns;
+	/** @const */ this.name = name;
 };
 goog.inherits(adapt.csscasc.CheckNamespaceSupportedAction, adapt.csscasc.ChainedAction);
 
@@ -958,9 +960,9 @@ adapt.csscasc.CheckNamespaceSupportedAction.prototype.makePrimary = function(cas
  */
 adapt.csscasc.CheckAttributeRegExpAction = function(ns, name, regexp) {
 	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.ns = ns;	
-	/** @const */ this.name = name;	
-	/** @const */ this.regexp = regexp;	
+	/** @const */ this.ns = ns;
+	/** @const */ this.name = name;
+	/** @const */ this.regexp = regexp;
 };
 goog.inherits(adapt.csscasc.CheckAttributeRegExpAction, adapt.csscasc.ChainedAction);
 
@@ -982,7 +984,7 @@ adapt.csscasc.CheckAttributeRegExpAction.prototype.apply = function(cascadeInsta
  */
 adapt.csscasc.CheckLangAction = function(langRegExp) {
 	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.langRegExp = langRegExp;	
+	/** @const */ this.langRegExp = langRegExp;
 };
 goog.inherits(adapt.csscasc.CheckLangAction, adapt.csscasc.ChainedAction);
 
@@ -1044,13 +1046,39 @@ adapt.csscasc.IsRootAction.prototype.getPriority = function() {
 };
 
 /**
+ * @param {number} n
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.IsNthSiblingAction = function(n) {
+	adapt.csscasc.ChainedAction.call(this);
+	/** @const */ this.n = n;
+};
+goog.inherits(adapt.csscasc.IsNthSiblingAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthSiblingAction.prototype.apply = function(cascadeInstance) {
+	if (cascadeInstance.currentSiblingOrder === this.n)
+		this.chained.apply(cascadeInstance);
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthSiblingAction.prototype.getPriority = function() {
+	return 5;
+};
+
+/**
  * @param {string} condition
  * @constructor
  * @extends {adapt.csscasc.ChainedAction}
  */
 adapt.csscasc.CheckConditionAction = function(condition) {
 	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.condition = condition;	
+	/** @const */ this.condition = condition;
 };
 goog.inherits(adapt.csscasc.CheckConditionAction, adapt.csscasc.ChainedAction);
 
@@ -1130,7 +1158,7 @@ adapt.csscasc.DescendantConditionItem.prototype.push = function(cascade, depth) 
  */
 adapt.csscasc.DescendantConditionItem.prototype.pop = function(cascade, depth) {
 	if (depth == 0) {
-	    cascade.decrement(this.condition);		
+	    cascade.decrement(this.condition);
 		return true;
 	}
 	return false;
@@ -1157,7 +1185,7 @@ adapt.csscasc.ChildConditionItem.prototype.fresh = function() {
  */
 adapt.csscasc.ChildConditionItem.prototype.push = function(cascade, depth) {
 	if (depth == 0) {
-		cascade.increment(this.condition);		
+		cascade.increment(this.condition);
 	} else if (depth == 1) {
 	    cascade.decrement(this.condition);
 	}
@@ -1210,7 +1238,7 @@ adapt.csscasc.AdjacentSiblingConditionItem.prototype.push = function(cascade, de
  */
 adapt.csscasc.AdjacentSiblingConditionItem.prototype.pop = function(cascade, depth) {
 	if (this.fired) {
-	    cascade.decrement(this.condition);			
+	    cascade.decrement(this.condition);
 		return true;
 	}
 	if (depth == 0) {  // Leaving element that triggered this item.
@@ -1244,7 +1272,7 @@ adapt.csscasc.FollowingSiblingConditionItem.prototype.fresh = function() {
 adapt.csscasc.FollowingSiblingConditionItem.prototype.push = function(cascade, depth) {
     if (this.fired) {
 		if (depth == -1) {
-			cascade.increment(this.condition);		
+			cascade.increment(this.condition);
 		} else if (depth == 0) {
 		    cascade.decrement(this.condition);
 		}
@@ -1256,7 +1284,7 @@ adapt.csscasc.FollowingSiblingConditionItem.prototype.push = function(cascade, d
  * @override
  */
 adapt.csscasc.FollowingSiblingConditionItem.prototype.pop = function(cascade, depth) {
-	if (this.fired) {  
+	if (this.fired) {
 		if (depth == -1) {
 			cascade.decrement(this.condition);
 			return true;
@@ -1432,7 +1460,7 @@ adapt.csscasc.ContentPropVisitor.prototype.visitIdent = function(ident) {
             return result;
         case "close-quote":
             if (cascade.quoteDepth > 0)
-                cascade.quoteDepth--;                
+                cascade.quoteDepth--;
             return quotes[2 * Math.min(maxDepth, cascade.quoteDepth) + 1];
         case "no-open-quote":
             cascade.quoteDepth++;
@@ -1459,7 +1487,7 @@ adapt.csscasc.roman = function(num) {
 		if (digit == 9) {
 			result += digits[offset] + digits[offset+2];
 		} else if (digit == 4) {
-			result += digits[offset] + digits[offset+1];			
+			result += digits[offset] + digits[offset+1];
 		} else {
 			if (digit >= 5) {
 				result += digits[offset+1];
@@ -1478,7 +1506,7 @@ adapt.csscasc.roman = function(num) {
 
 /** @const */
 adapt.csscasc.additiveNumbering = {
-	"roman": [4999, 1000, 'M', 900, 'CM', 500, 'D', 400, 'CD', 100, 'C', 90, 'XC', 
+	"roman": [4999, 1000, 'M', 900, 'CM', 500, 'D', 400, 'CD', 100, 'C', 90, 'XC',
 	          50, 'L', 40, 'XL', 10, 'X', 9, 'IX', 5, 'V', 4, 'IV', 1, 'I'],
 	"armenian": [9999, 9000, '\u0584', 8000, '\u0583', 7000, '\u0582', 6000, '\u0581',
 	             5000, '\u0580', 4000, '\u057F', 3000, '\u057E', 2000, '\u057D',
@@ -1673,7 +1701,7 @@ adapt.csscasc.ContentPropVisitor.prototype.format = function(num, type) {
 	} else if (type == "cjk-ideographic" || type == "trad-chinese-informal") {
 		result = adapt.csscasc.chineseCounter(num, adapt.csscasc.chineseTradInformal);
 	} else {
-		result = num + "";		
+		result = num + "";
 	}
 	if (upper) {
 		return result.toUpperCase();
@@ -1763,15 +1791,15 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFunc = function(func) {
             }
             break;
     }
-    adapt.base.log("E_CSS_CONTENT_PROP: " + func.toString());
+	vivliostyle.logging.logger.warn("E_CSS_CONTENT_PROP:", func.toString());
     return new adapt.css.Str("");
 };
 
 
-/** 
+/**
  * Fitting order and specificity in the same number. Order is recorded in the
  * fractional part. Select value so that
- * 
+ *
  *   0x7FFFFFFF != 0x7FFFFFFF + ORDER_INCREMENT
  *
  * @const
@@ -1837,7 +1865,7 @@ adapt.csscasc.Cascade.prototype.insertInTable = function(table, key, action) {
         action = a.mergeWith(action);
     table[key] = action;
 };
-    
+
 /**
  * @param {adapt.expr.Context} context
  * @param {adapt.csscasc.PageCounterResolver} pageCounterResolver
@@ -1882,11 +1910,13 @@ adapt.csscasc.CascadeInstance = function(cascade, context, pageCounterResolver, 
     /** @type {boolean} */ this.isRoot = true;
     /** @type {Object.<string,Array.<number>>} */ this.counters = {};
     /** @type {Array.<Object.<string,boolean>>} */ this.counterScoping = [{}];
-    /** @type {Array.<adapt.css.Str>} */ this.quotes = 
+    /** @type {Array.<adapt.css.Str>} */ this.quotes =
     	[new adapt.css.Str("\u201C"), new adapt.css.Str("\u201D"),
     	  new adapt.css.Str("\u2018"), new adapt.css.Str("\u2019")];
     /** @type {number} */ this.quoteDepth = 0;
     /** @type {string} */ this.lang = "";
+	/** @type {Array.<number>} */ this.siblingOrderStack = [0];
+	/** @type {number} */ this.currentSiblingOrder = 0;
     if (goog.DEBUG) {
     	/** @type {Array.<Element>} */ this.elementStack = [];
     }
@@ -2017,12 +2047,12 @@ adapt.csscasc.CascadeInstance.prototype.pushCounters = function(props) {
 	        }
 	        var counterValues = this.counters[incrementCounterName];
 	        counterValues[counterValues.length - 1] += incrementMap[incrementCounterName];
-	    }	
+	    }
 	}
 	if (displayVal === adapt.css.ident.list_item) {
 		var listItemCounts = this.counters["ua-list-item"];
 		var listItemCount = listItemCounts[listItemCounts.length - 1];
-		props["ua-list-item-count"] = 
+		props["ua-list-item-count"] =
 			new adapt.csscasc.CascadeValue(new adapt.css.Num(listItemCount), 0);
 	}
 	this.counterScoping.push(null);
@@ -2042,7 +2072,7 @@ adapt.csscasc.CascadeInstance.prototype.popCounters = function() {
 	            } else {
 	            	arr.pop();
 	            }
-	        }			
+	        }
 		}
 	}
 };
@@ -2067,7 +2097,7 @@ adapt.csscasc.CascadeInstance.prototype.processPseudoelementProps = function(pse
  * @const
  */
 adapt.csscasc.pseudoNames = ["before", "transclusion-before",
-                  "footnote-call", "footnote-marker", "inner", "first-letter", "first-line", 
+                  "footnote-call", "footnote-marker", "inner", "first-letter", "first-line",
                              "" /* content */, "transclusion-after", "after"];
 
 /**
@@ -2103,7 +2133,7 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
     if (types) {
     	this.currentEpubTypes = types.split(/\s+/);
     } else {
-        this.currentEpubTypes = adapt.csscasc.EMPTY;    	
+        this.currentEpubTypes = adapt.csscasc.EMPTY;
     }
     if (this.currentLocalName == "style" && this.currentNamespace == adapt.base.NS.FB2) {
     	// special case
@@ -2119,9 +2149,13 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
         		new adapt.csscasc.RestoreLangItem(this.lang));
     	this.lang = lang.toLowerCase();
     }
+	var siblingOrderStack = this.siblingOrderStack;
+	this.currentSiblingOrder = ++siblingOrderStack[siblingOrderStack.length - 1];
+	siblingOrderStack.push([0]);
+
     this.applyActions();
     var quotesCasc = baseStyle["quotes"];
-    var itemToPushLast = null; 
+    var itemToPushLast = null;
     if (quotesCasc) {
     	var quotesVal = quotesCasc.evaluate(this.context);
     	if (quotesVal) {
@@ -2149,7 +2183,7 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
 	    			this.processPseudoelementProps(pseudoProps, element);
 	    		} else {
 	                this.stack[this.stack.length - 2].push(
-	                		new adapt.csscasc.AfterPseudoelementItem(pseudoProps, element));	    			
+	                		new adapt.csscasc.AfterPseudoelementItem(pseudoProps, element));
 	    		}
 	    	}
     	}
@@ -2169,12 +2203,12 @@ adapt.csscasc.CascadeInstance.prototype.applyActions = function() {
         this.applyAction(this.code.classes, this.currentClassNames[i]);
     }
     for (i = 0; i < this.currentEpubTypes.length; i++) {
-        this.applyAction(this.code.epubtypes, this.currentEpubTypes[i]);    	
+        this.applyAction(this.code.epubtypes, this.currentEpubTypes[i]);
     }
     this.applyAction(this.code.ids, this.currentId);
     this.applyAction(this.code.tags, this.currentLocalName);
     if (this.currentLocalName != "") {
-    	// Universal selector does not apply to page-master-related rules. 
+    	// Universal selector does not apply to page-master-related rules.
     	this.applyAction(this.code.tags, "*");
     }
     this.applyAction(this.code.nstags, this.currentNSTag);
@@ -2242,6 +2276,7 @@ adapt.csscasc.CascadeInstance.prototype.popElement = function(element) {
 			throw new Error("Invalid call to popElement");
 		}
 	}
+	this.siblingOrderStack.pop();
 	this.pop();
 	this.popCounters();
 };
@@ -2285,8 +2320,8 @@ adapt.csscasc.CascadeParserHandler = function(scope, owner, condition, parent, r
     /** @type {?string} */ this.pseudoelement = null;
     /** @type {boolean} */ this.footnoteContent = false;
 	/** @const */ this.condition = condition;
-    /** @const */ this.cascade = parent ? parent.cascade : 
-    	(adapt.csscasc.uaBaseCascade ? adapt.csscasc.uaBaseCascade.clone() : 
+    /** @const */ this.cascade = parent ? parent.cascade :
+    	(adapt.csscasc.uaBaseCascade ? adapt.csscasc.uaBaseCascade.clone() :
     		new adapt.csscasc.Cascade());
     /** @const */ this.regionId = regionId;
     /** @const */ this.validatorSet = validatorSet;
@@ -2311,7 +2346,7 @@ adapt.csscasc.CascadeParserHandler.prototype.processChain = function(action) {
     var chain = this.chain;
     if (chain.length > 0) {
         chain.sort(
-        	/** 
+        	/**
         	 * @param {adapt.csscasc.ChainedAction} a
         	 * @param {adapt.csscasc.ChainedAction} b
         	 * @return {number}
@@ -2352,9 +2387,9 @@ adapt.csscasc.CascadeParserHandler.prototype.tagSelector = function(ns, name) {
 	}
     this.specificity += 1;
     if (name && ns) {
-    	this.chain.push(new adapt.csscasc.CheckNSTagAction(ns, name));
+    	this.chain.push(new adapt.csscasc.CheckNSTagAction(ns, name.toLowerCase()));
     } else if (name) {
-    	this.chain.push(new adapt.csscasc.CheckLocalNameAction(name));
+    	this.chain.push(new adapt.csscasc.CheckLocalNameAction(name.toLowerCase()));
     } else {
         this.chain.push(new adapt.csscasc.CheckNamespaceAction(/** @type {string} */ (ns)));
     }
@@ -2365,8 +2400,8 @@ adapt.csscasc.CascadeParserHandler.prototype.tagSelector = function(ns, name) {
  */
 adapt.csscasc.CascadeParserHandler.prototype.classSelector = function(name) {
     if (this.pseudoelement) {
-    	adapt.base.log("::" + this.pseudoelement + " followed by ." + name);
-        this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails	    		
+		vivliostyle.logging.logger.warn("::" + this.pseudoelement, "followed by ." + name);
+        this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
     	return;
     }
     this.specificity += 0x100;
@@ -2378,8 +2413,8 @@ adapt.csscasc.CascadeParserHandler.prototype.classSelector = function(name) {
  */
 adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name, params) {
     if (this.pseudoelement) {
-    	adapt.base.log("::" + this.pseudoelement + " followed by :" + name);
-        this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails	    		
+		vivliostyle.logging.logger.warn("::" + this.pseudoelement, "followed by :" + name);
+        this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
     	return;
     }
     switch (name.toLowerCase()) {
@@ -2400,7 +2435,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
 	    		var patt = new RegExp("(^|\s)" + adapt.base.escapeRegExp(value) + "($|\s)");
 	    		this.chain.push(new adapt.csscasc.CheckTargetEpubTypeAction(patt));
 	    	} else {
-	            this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails	    		
+	            this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
 	    	}
             break;
         case "-adapt-footnote-content":
@@ -2420,9 +2455,16 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
 	    		this.chain.push(new adapt.csscasc.CheckLangAction(
 	    				new RegExp("^" + adapt.base.escapeRegExp(langValue.toLowerCase()) + "($|-)")));
 	    	} else {
-	            this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fais	    		
+	            this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fais
 	    	}
 	    	break;
+		case "nth-child":
+			if (params && params.length == 1 && typeof params[0] == "number") {
+				this.chain.push(new adapt.csscasc.IsNthSiblingAction(/** @type {number} */ (params[0])));
+			} else {
+				this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
+			}
+			break;
         case "before":
         case "after":
         case "first-line":
@@ -2430,6 +2472,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
             this.pseudoelementSelector(name, params);
             return;
         default:
+			vivliostyle.logging.logger.warn("unknown pseudo-class selector: " + name);
             this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
             break;
     }
@@ -2451,7 +2494,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
             if (!this.pseudoelement) {
                 this.pseudoelement = name;
             } else {
-	        	adapt.base.log("Double pseudoelement ::" + this.pseudoelement + "::" + name);
+				vivliostyle.logging.logger.warn("Double pseudoelement ::" + this.pseudoelement + "::" + name);
 	            this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
             }
             break;
@@ -2462,14 +2505,14 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
 	                if (!this.pseudoelement) {
 	                    this.pseudoelement = "first-" + n + "-lines";
 	                } else {
-	    	        	adapt.base.log("Double pseudoelement ::" + this.pseudoelement + "::" + name);
+	    	        	vivliostyle.logging.logger.warn("Double pseudoelement ::" + this.pseudoelement + "::" + name);
 	    	            this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
 	                }
 	    			break;
 	    		}
 	    	}
         default:
-        	adapt.base.log("Unrecognized pseudoelement: ::" + name);
+        	vivliostyle.logging.logger.warn("Unrecognized pseudoelement: ::" + name);
             this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
             break;
     }
@@ -2489,6 +2532,7 @@ adapt.csscasc.CascadeParserHandler.prototype.idSelector = function(id) {
  */
 adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, name, op, value) {
     this.specificity += 0x100;
+		name = name.toLowerCase();
     value = value || "";
     switch (op) {
         case adapt.csstok.TokenType.EOF:
@@ -2498,23 +2542,23 @@ adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, na
             this.chain.push(new adapt.csscasc.CheckAttributeEqAction(ns, name, value));
             break;
         case adapt.csstok.TokenType.TILDE_EQ:
-            this.chain.push(new adapt.csscasc.CheckAttributeRegExpAction(ns, name, 
-                new RegExp("(^|\s)" + adapt.base.escapeRegExp(value) + "($|\s)")));
+            this.chain.push(new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
+                new RegExp("(^|\\s)" + adapt.base.escapeRegExp(value) + "($|\\s)")));
             break;
         case adapt.csstok.TokenType.BAR_EQ:
-            this.chain.push(new adapt.csscasc.CheckAttributeRegExpAction(ns, name, 
+            this.chain.push(new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
                 new RegExp("^" + adapt.base.escapeRegExp(value) + "($|-)")));
             break;
         case adapt.csstok.TokenType.COL_COL:
         	if (value == "supported") {
-                this.chain.push(new adapt.csscasc.CheckNamespaceSupportedAction(ns, name));        		
+                this.chain.push(new adapt.csscasc.CheckNamespaceSupportedAction(ns, name));
         	} else {
-                adapt.base.log("Unsupported :: attr selector op: " + value);		
+				vivliostyle.logging.logger.warn("Unsupported :: attr selector op:", value);
         	}
         	break;
         case adapt.csstok.TokenType.STAR_EQ:
         default:
-            adapt.base.log("Unsupported attr selector: " + op);
+			vivliostyle.logging.logger.warn("Unsupported attr selector:", op);
     }
 };
 
@@ -2698,6 +2742,16 @@ adapt.csscasc.CascadeParserHandler.prototype.simpleProperty = function(name, val
 		this.simpleProperty("flow-into", value, important);
 		value = adapt.css.ident.block;
 	}
+
+	var hooks = vivliostyle.plugin.getHooksForName("SIMPLE_PROPERTY");
+	hooks.forEach(function(hook) {
+		var original = {"name": name, "value": value, "important": important};
+		var converted = hook(original);
+		name = converted["name"];
+		value = converted["value"];
+		important = converted["important"];
+	});
+
     var specificity = important ? this.getImportantSpecificity() : this.getBaseSpecificity();
     var cascval = this.condition
     		? new adapt.csscasc.ConditionalCascadeValue(value, specificity, this.condition)
@@ -2761,7 +2815,7 @@ goog.inherits(adapt.csscasc.PropSetParserHandler, adapt.cssparse.SlaveParserHand
  */
 adapt.csscasc.PropSetParserHandler.prototype.property = function(name, value, important) {
 	if (important)
-		adapt.base.log("E_IMPORTANT_NOT_ALLOWED");
+		vivliostyle.logging.logger.warn("E_IMPORTANT_NOT_ALLOWED");
 	else
 		this.validatorSet.validatePropertyAndHandleShorthand(name, value, important, this);
 };
@@ -2770,14 +2824,14 @@ adapt.csscasc.PropSetParserHandler.prototype.property = function(name, value, im
  * @override
  */
 adapt.csscasc.PropSetParserHandler.prototype.invalidPropertyValue = function(name, value) {
-	adapt.base.log("E_INVALID_PROPERTY_VALUE " + name + ": " + value.toString());
+	vivliostyle.logging.logger.warn("E_INVALID_PROPERTY_VALUE", name + ":", value.toString());
 };
 
 /**
  * @override
  */
 adapt.csscasc.PropSetParserHandler.prototype.unknownProperty = function(name, value) {
-	adapt.base.log("E_INVALID_PROPERTY " + name + ": " + value.toString());
+	vivliostyle.logging.logger.warn("E_INVALID_PROPERTY", name + ":", value.toString());
 };
 
 /**
@@ -2820,14 +2874,14 @@ adapt.csscasc.PropertyParserHandler.prototype.property = function(name, value, i
  * @override
  */
 adapt.csscasc.PropertyParserHandler.prototype.invalidPropertyValue = function(name, value) {
-	adapt.base.log("E_INVALID_PROPERTY_VALUE " + name + ": " + value.toString());
+	vivliostyle.logging.logger.warn("E_INVALID_PROPERTY_VALUE", name + ":", value.toString());
 };
 
 /**
  * @override
  */
 adapt.csscasc.PropertyParserHandler.prototype.unknownProperty = function(name, value) {
-	adapt.base.log("E_INVALID_PROPERTY " + name + ": " + value.toString());
+	vivliostyle.logging.logger.warn("E_INVALID_PROPERTY", name + ":", value.toString());
 };
 
 /**
@@ -2855,7 +2909,7 @@ adapt.csscasc.parseStyleAttribute = function(scope, validatorSet, baseURL, style
 	try {
 		adapt.cssparse.parseStyleAttribute(tokenizer, handler, baseURL);
 	} catch (err) {
-		adapt.base.log("Style attribute parse error: " + err);
+		vivliostyle.logging.logger.warn(err, "Style attribute parse error:");
 	}
 	return handler.elementStyle;
 };
@@ -2875,7 +2929,7 @@ adapt.csscasc.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(function() {
 	    adapt.csscasc.uaBaseCascade = handler.cascade;
 	    adapt.cssparse.parseStylesheetFromURL(url, handler, null, null).thenFinish(frame);
 	});
-    return frame.result();	
+    return frame.result();
 }, "uaStylesheetBaseFetcher");
 
 /**

@@ -10,7 +10,7 @@ goog.require('adapt.base');
 /**
  * @typedef {{fontFamily:string, lineHeight:number, margin:number, hyphenate:boolean,
  *   	columnWidth:number, horizontal:boolean, nightMode:boolean, spreadView:boolean,
- *      pageBorder:number}}
+ *      pageBorder:number, enabledMediaTypes:!Object.<string,boolean>}}
  */
 adapt.expr.Preferences;
 
@@ -19,7 +19,8 @@ adapt.expr.Preferences;
  */
 adapt.expr.defaultPreferences = function() {
 	return {fontFamily:"serif", lineHeight:1.25, margin:8, hyphenate:true, columnWidth:25,
-				horizontal:false, nightMode:false, spreadView:false, pageBorder:1};
+				horizontal:false, nightMode:false, spreadView:false, pageBorder:1,
+                enabledMediaTypes:{"print": true}};
 };
 
 /**
@@ -29,7 +30,8 @@ adapt.expr.defaultPreferences = function() {
 adapt.expr.clonePreferences = function(pref) {
 	return {fontFamily:pref.fontFamily, lineHeight:pref.lineHeight, margin:pref.margin,
 		hyphenate:pref.hyphenate, columnWidth:pref.columnWidth, horizontal:pref.horizontal,
-		nightMode:pref.nightMode, spreadView:pref.spreadView, pageBorder:pref.pageBorder};
+		nightMode:pref.nightMode, spreadView:pref.spreadView, pageBorder:pref.pageBorder,
+        enabledMediaTypes:Object.assign({}, pref.enabledMediaTypes)};
 };
 
 /**
@@ -258,7 +260,14 @@ adapt.expr.Context = function(rootScope, viewportWidth, viewportHeight, fontSize
         else
             return viewportHeight;
     };
-	/** @const */ this.fontSize = fontSize;
+    /** @const */ this.initialFontSize = fontSize;
+    /** @type {?number} */ this.rootFontSize = null;
+	this.fontSize = function() {
+        if (this.rootFontSize)
+            return this.rootFontSize;
+        else
+            return fontSize;
+    };
 	this.pref = adapt.expr.defaultPreferencesInstance;
 	/** @type {Object.<string,adapt.expr.ScopeContext>} */ this.scopes = {};
 };
@@ -290,17 +299,18 @@ adapt.expr.Context.prototype.clearScope = function(scope) {
 
 /**
  * @param {string} unit
+ * @param {boolean} isRoot
  * @return {number}
  */
-adapt.expr.Context.prototype.queryUnitSize = function(unit) {
+adapt.expr.Context.prototype.queryUnitSize = function(unit, isRoot) {
     if (unit == "vw")
         return this.pageWidth() / 100;
     if (unit == "vh")
         return this.pageHeight() / 100;
     if (unit == "em" || unit == "rem")
-        return this.fontSize;
+        return isRoot ? this.initialFontSize : this.fontSize();
     if (unit == "ex" || unit == "rex")
-        return adapt.expr.defaultUnitSizes["ex"] * this.fontSize / adapt.expr.defaultUnitSizes["em"];
+        return adapt.expr.defaultUnitSizes["ex"] * (isRoot ? this.initialFontSize : this.fontSize()) / adapt.expr.defaultUnitSizes["em"];
     return adapt.expr.defaultUnitSizes[unit];
 };
 
@@ -359,6 +369,16 @@ adapt.expr.Context.prototype.evalCall = function(scope, qualifiedName, params, n
 };
 
 /**
+ * @param {string} name
+ * @param {boolean} not
+ * @returns {boolean}
+ */
+adapt.expr.Context.prototype.evalMediaName = function(name, not) {
+    var enabled = (name === "all") || !!this.pref.enabledMediaTypes[name];
+    return not ? !enabled : enabled;
+};
+
+/**
  * @param {string} feature
  * @param {adapt.expr.Val} value
  * @return {boolean}
@@ -408,6 +428,8 @@ adapt.expr.Context.prototype.evalMediaTest = function(feature, value) {
             default:
                 return actual == req;
         }
+    } else if (actual != null && value == null) {
+        return actual !== 0;
     }
     return false;
 };
@@ -1229,7 +1251,7 @@ adapt.expr.Modulo.prototype.evalInfix = function(lhs, rhs) {
 adapt.expr.Numeric = function(scope, num, unit) {
     adapt.expr.Val.call(this, scope);
     /** @type {number} */ this.num = num;
-    /** @type {string} */ this.unit = unit;
+    /** @type {string} */ this.unit = unit.toLowerCase(); // units are case-insensitive in CSS
 };
 goog.inherits(adapt.expr.Numeric, adapt.expr.Val);
 
@@ -1245,7 +1267,7 @@ adapt.expr.Numeric.prototype.appendTo = function(buf, priority) {
  * @override
  */
 adapt.expr.Numeric.prototype.evaluateCore = function(context) {
-    return this.num * context.queryUnitSize(this.unit);
+    return this.num * context.queryUnitSize(this.unit, false);
 };
 
 
@@ -1313,7 +1335,14 @@ adapt.expr.MediaName.prototype.appendTo = function(buf, priority) {
  * @override
  */
 adapt.expr.MediaName.prototype.evaluateCore = function(context) {
-    return true;
+    return context.evalMediaName(this.name, this.not);
+};
+
+/**
+ * @override
+ */
+adapt.expr.MediaName.prototype.dependCore = function(other, context, dependencyCache) {
+    return other === this || this.value.dependOuter(other, context, dependencyCache);
 };
 
 /**

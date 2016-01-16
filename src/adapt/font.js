@@ -1,9 +1,11 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Deal with embedded fonts.
  */
 goog.provide('adapt.font');
 
+goog.require('vivliostyle.logging');
 goog.require('adapt.task');
 goog.require('adapt.taskutil');
 goog.require('adapt.net');
@@ -76,7 +78,7 @@ adapt.font.prepareProperties = function(properties, context) {
 adapt.font.Face = function(properties) {
 	/** @const */ this.properties = properties;
 	/** @const */ this.fontTraitKey = adapt.font.makeFontTraitKey(this.properties);
-	/** @const */ this.src = adapt.cssprop.toFontSrcURL(this.properties["src"]);
+	/** @const */ this.src = this.properties["src"] ? this.properties["src"].toString() : null;
 	/** @type {Array.<string>} */ this.blobURLs = [];
 	/** @type {Array.<Blob>} */ this.blobs = [];
 	var family = this.properties["font-family"];
@@ -115,11 +117,12 @@ adapt.font.Face.prototype.makeAtRule = function(src, fontBytes) {
 		sb.append(blobURL);
 		this.blobURLs.push(blobURL);
 		this.blobs.push(fontBytes);
+		sb.append('")');
 	} else {
-		sb.append('src: url("');
-		sb.append(adapt.base.escapeCSSStr(src));
+		sb.append('src: ');
+		sb.append(src);
 	}
-	sb.append('");\n}\n');
+	sb.append(';\n}\n');
 	return sb.toString();
 };
 
@@ -254,7 +257,7 @@ adapt.font.Mapper.prototype.initFont = function(srcFace, fontBytes, documentFace
 	var initWidth = rect.right - rect.left;
 	var initHeight = rect.bottom - rect.top;
 	style.textContent = viewFontFace.makeAtRule(src, fontBytes);
-	adapt.base.log("Starting to load font: " + src);
+	vivliostyle.logging.logger.info("Starting to load font:", src);
 	var loaded = false;
 	frame.loop(function() {
 		var rect = probe.getBoundingClientRect();
@@ -271,9 +274,9 @@ adapt.font.Mapper.prototype.initFont = function(srcFace, fontBytes, documentFace
 		return frame.sleep(10);
 	}).then(function() {
 		if (loaded) {
-			adapt.base.log("Loaded font: " + src);
+			vivliostyle.logging.logger.info("Loaded font:", src);
 		} else {
-			adapt.base.log("Failed to load font: " + src);
+			vivliostyle.logging.logger.warn("Failed to load font:", src);
 		}
 		self.body.removeChild(probe);
 		frame.finish(viewFontFace);
@@ -294,10 +297,10 @@ adapt.font.Mapper.prototype.loadFont = function(srcFace, documentFaces) {
 		fetcher.piggyback(function(viewFaceParam) {
 			var viewFace = /** @type {adapt.font.Face} */ (viewFaceParam);
 			if (!viewFace.traitsEqual(srcFace)) {
-				adapt.base.log("E_FONT_FACE_INCOMPATIBLE " + srcFace.src);
+				vivliostyle.logging.logger.warn("E_FONT_FACE_INCOMPATIBLE", srcFace.src);
 			} else {
 				documentFaces.registerFamily(srcFace, viewFace);
-				adapt.base.log("Found already-loaded font: " + src);
+				vivliostyle.logging.logger.warn("Found already-loaded font:", src);
 			}			
 		});
 	} else {
@@ -306,7 +309,7 @@ adapt.font.Mapper.prototype.loadFont = function(srcFace, documentFaces) {
 				adapt.task.newFrame("loadFont");
 			var deobfuscator = documentFaces.deobfuscator ? documentFaces.deobfuscator(src) : null;
 			if (deobfuscator) {
-				adapt.net.ajax(src, true).then(function(xhr) {
+				adapt.net.ajax(src, adapt.net.XMLHttpRequestResponseType.BLOB).then(function(xhr) {
 					if (!xhr.responseBlob) {
 						frame.finish(null);
 						return;
@@ -336,7 +339,7 @@ adapt.font.Mapper.prototype.findOrLoadFonts = function(srcFaces, documentFaces) 
 	for (var i = 0; i < srcFaces.length; i++) {
 		var srcFace = srcFaces[i];
 		if (!srcFace.src || !srcFace.family) {
-			adapt.base.log("E_FONT_FACE_INVALID");
+			vivliostyle.logging.logger.warn("E_FONT_FACE_INVALID");
 			continue;
 		}
 		fetchers.push(this.loadFont(srcFace, documentFaces));

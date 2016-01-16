@@ -536,7 +536,7 @@ adapt.css.getName = function(name) {
 adapt.css.Numeric = function(num, unit) {
     adapt.css.Val.call(this);
     /** @type {number} */ this.num = num;
-    /** @type {string} */ this.unit = unit;
+    /** @type {string} */ this.unit = unit.toLowerCase(); // units are case-insensitive in CSS
 };
 goog.inherits(adapt.css.Numeric, adapt.css.Val);
 
@@ -854,7 +854,7 @@ adapt.css.toNumber = function(val, context) {
 	if (val) {
 	    if (val.isNumeric()) {
 	        var numeric = /** @type {adapt.css.Numeric} */ (val);
-	        return context.queryUnitSize(numeric.unit) * numeric.num;
+	        return context.queryUnitSize(numeric.unit, false) * numeric.num;
 	    }
 	    if (val.isNum()) {
 	        return (/** @type {adapt.css.Num} */ (val)).num;
@@ -871,10 +871,14 @@ adapt.css.toNumber = function(val, context) {
 adapt.css.ident = {
 	absolute: adapt.css.getName("absolute"),
 	all: adapt.css.getName("all"),
+    always: adapt.css.getName("always"),
 	auto: adapt.css.getName("auto"),
 	avoid: adapt.css.getName("avoid"),
     block: adapt.css.getName("block"),
+    block_end: adapt.css.getName("block-end"),
+    block_start: adapt.css.getName("block-start"),
     both: adapt.css.getName("both"),
+    bottom: adapt.css.getName("bottom"),
     exclusive: adapt.css.getName("exclusive"),
     _false: adapt.css.getName("false"),
     footnote: adapt.css.getName("footnote"),
@@ -882,6 +886,8 @@ adapt.css.ident = {
     horizontal_tb: adapt.css.getName("horizontal-tb"),
     inherit: adapt.css.getName("inherit"),
     inline: adapt.css.getName("inline"),
+    inline_end: adapt.css.getName("inline-end"),
+    inline_start: adapt.css.getName("inline-start"),
     landscape: adapt.css.getName("landscape"),
     left: adapt.css.getName("left"),
     list_item: adapt.css.getName("list-item"),
@@ -890,6 +896,7 @@ adapt.css.ident = {
     normal: adapt.css.getName("normal"),
     oeb_page_foot: adapt.css.getName("oeb-page-foot"),
     oeb_page_head: adapt.css.getName("oeb-page-head"),
+    page: adapt.css.getName("page"),
     relative: adapt.css.getName("relative"),
     right: adapt.css.getName("right"),
     scale: adapt.css.getName("scale"),
@@ -897,6 +904,7 @@ adapt.css.ident = {
     rtl: adapt.css.getName("rtl"),
 	table: adapt.css.getName("table"),
 	table_row: adapt.css.getName("table-row"),
+    top: adapt.css.getName("top"),
 	transparent: adapt.css.getName("transparent"),
     vertical_lr: adapt.css.getName("vertical-lr"),
 	vertical_rl: adapt.css.getName("vertical-rl"),

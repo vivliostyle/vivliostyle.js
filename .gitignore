@@ -1,6 +1,8 @@
 .sass-cache
 node_modules
 
+doc/anchors.json
+doc/supported-features.html
 lib/vivliostyle.min.js
 test/wpt/sauce-credentials.ini
 viewer/res/css/*

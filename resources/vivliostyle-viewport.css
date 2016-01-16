@@ -3,17 +3,27 @@
  */
 
 @media print {
-    [data-vivliostyle-viewer-viewport] > div, [data-vivliostyle-viewer-viewport] > div > div {
+    [data-vivliostyle-viewer-viewport] > div, [data-vivliostyle-viewer-viewport] > div > div, [data-vivliostyle-viewer-viewport] > div > div > div {
         width: 100% !important;
         height: 100% !important;
     }
 
     [data-vivliostyle-viewer-viewport] > div > div {
-        display: block !important;
         -moz-transform: none !important;
         -ms-transform: none !important;
         -webkit-transform: none !important;
         transform: none !important;
+    }
+
+    /* Workaround for Chrome printing problem */
+    [data-vivliostyle-viewer-viewport] > div > div > div {
+        display: block !important;
+        page-break-after: always;
+    }
+    /* Workaround for Chrome printing problem */
+    [data-vivliostyle-page-box] {
+        padding-bottom: 0 !important;
+        overflow: visible !important;
     }
 }
 
@@ -33,53 +43,46 @@
 
     [data-vivliostyle-viewer-viewport] > div {
         margin: auto;
+        overflow: visible;
+        -webkit-flex: none;
+        flex: none;
+    }
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-viewer-status=complete] > div > div {
         display: -webkit-flex;
         display: flex;
-        -webkit-flex-shrink: 0;
-        flex-shrink: 0;
+        -webkit-flex: none;
+        flex: none;
         -webkit-justify-content: center;
         justify-content: center;
-        overflow: hidden;
-    }
-
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=ltr] > div {
-        -webkit-flex-direction: row;
-        flex-direction: row;
-    }
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=rtl] > div {
-        -webkit-flex-direction: row-reverse;
-        flex-direction: row-reverse;
-    }
-
-    [data-vivliostyle-viewer-viewport] > div > div {
-        margin: 0 auto;
-        -webkit-flex-shrink: 0;
-        flex-shrink: 0;
-        -moz-transform-origin: center top;
-        -ms-transform-origin: center top;
-        -webkit-transform-origin: center top;
-        transform-origin: center top;
-    }
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] > div > div[data-vivliostyle-page-side=left] {
-        margin-right: 1px;
-        -moz-transform-origin: right top;
-        -ms-transform-origin: right top;
-        -webkit-transform-origin: right top;
-        transform-origin: right top;
-    }
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] > div > div[data-vivliostyle-page-side=right] {
-        margin-left: 1px;
         -moz-transform-origin: left top;
         -ms-transform-origin: left top;
         -webkit-transform-origin: left top;
         transform-origin: left top;
     }
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] > div > div[data-vivliostyle-unpaired-page=true] {
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=ltr] > div > div {
+        -webkit-flex-direction: row;
+        flex-direction: row;
+    }
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=rtl] > div > div {
+        -webkit-flex-direction: row-reverse;
+        flex-direction: row-reverse;
+    }
+
+    [data-vivliostyle-viewer-viewport] > div > div > div {
+        margin: 0 auto;
+        -webkit-flex: none;
+        flex: none;
+    }
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] > div > div > div[data-vivliostyle-page-side=left] {
+        margin-right: 1px;
+    }
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] >div > div > div[data-vivliostyle-page-side=right] {
+        margin-left: 1px;
+    }
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] > div > div > div[data-vivliostyle-unpaired-page=true] {
         margin-left: auto;
         margin-right: auto;
-        -moz-transform-origin: center top;
-        -ms-transform-origin: center top;
-        -webkit-transform-origin: center top;
-        transform-origin: center top;
     }
 }

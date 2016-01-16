@@ -50,6 +50,8 @@ vivliostyle.page.pageSizes = {
     "a3": {width: new adapt.css.Numeric(297, "mm"), height: new adapt.css.Numeric(420, "mm")},
     "b5": {width: new adapt.css.Numeric(176, "mm"), height: new adapt.css.Numeric(250, "mm")},
     "b4": {width: new adapt.css.Numeric(250, "mm"), height: new adapt.css.Numeric(353, "mm")},
+    "jis-b5": {width: new adapt.css.Numeric(182, "mm"), height: new adapt.css.Numeric(257, "mm")},
+    "jis-b4": {width: new adapt.css.Numeric(257, "mm"), height: new adapt.css.Numeric(364, "mm")},
     "letter": {width: new adapt.css.Numeric(8.5, "in"), height: new adapt.css.Numeric(11, "in")},
     "legal": {width: new adapt.css.Numeric(8.5, "in"), height: new adapt.css.Numeric(14, "in")},
     "ledger": {width: new adapt.css.Numeric(11, "in"), height: new adapt.css.Numeric(17, "in")}
@@ -1012,6 +1014,15 @@ vivliostyle.page.PageRuleMasterInstance.prototype.distributeAutoMarginBoxSizes =
 };
 
 /**
+ * @override
+ */
+vivliostyle.page.PageRuleMasterInstance.prototype.prepareContainer = function(context, container, page) {
+    vivliostyle.page.PageRuleMasterInstance.superClass_.prepareContainer.call(this, context, container, page);
+    // Add an attribute to the element so that it can be refered from external style sheets.
+    container.element.setAttribute("data-vivliostyle-page-box", true);
+};
+
+/**
  * @param {!adapt.pm.PageBoxInstance} parentInstance
  * @param {!vivliostyle.page.PageRulePartition} pageRulePartition
  * @constructor
@@ -1153,6 +1164,14 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
 };
 
 /**
+ * @override
+ */
+vivliostyle.page.PageRulePartitionInstance.prototype.prepareContainer = function(context, container, page) {
+    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page);
+    page.pageAreaElement = /** @type {HTMLElement} */ (container.element);
+};
+
+/**
  * @param {!adapt.pm.PageBoxInstance} parentInstance
  * @param {!vivliostyle.page.PageMarginBoxPartition} pageMarginBoxPartition
  * @constructor
@@ -1271,7 +1290,9 @@ vivliostyle.page.PageMarginBoxPartitionInstance.prototype.positionAndSizeAlongFi
         var insideName = names.inside;
         var outsideName = names.outside;
         var extentName = names.extent;
-        var pageMargin = dim["margin" + outsideName.charAt(0).toUpperCase() + outsideName.substring(1)];
+        // Reduce page margin by 2px: workaround for Chrome printing problem.
+        // https://github.com/vivliostyle/vivliostyle.js/issues/97
+        var pageMargin = adapt.expr.sub(scope, dim["margin" + outsideName.charAt(0).toUpperCase() + outsideName.substring(1)], new adapt.expr.Const(scope, 2));
         var marginInside = adapt.pm.toExprZeroAuto(scope, style["margin-" + insideName], pageMargin);
         var marginOutside = adapt.pm.toExprZeroAuto(scope, style["margin-" + outsideName], pageMargin);
         var paddingInside = adapt.pm.toExprZero(scope, style["padding-" + insideName], pageMargin);
@@ -1796,10 +1817,6 @@ vivliostyle.page.mergeInPageRule = function(context, target, style, specificity,
                     targetMap[boxName] = targetBox;
                 }
                 adapt.csscasc.mergeIn(context, targetBox, marginBoxes[boxName], specificity, null, null);
-                if (targetBox["content"]) {
-                    targetBox["content"] = targetBox["content"].filterValue(
-                        new adapt.csscasc.ContentPropVisitor(cascadeInstance, null));
-                }
             }
         }
     }
@@ -1899,7 +1916,32 @@ vivliostyle.page.PageParserHandler.prototype.endRule = function() {
  */
 vivliostyle.page.PageParserHandler.prototype.property = function(name, value, important) {
     if (name === "size") {
-        this.pageSizeRules += "size: " + value.toString() + (important ? "!important" : "") + ";";
+        var landscape = value.isSpaceList() && value.values[1] === adapt.css.ident.landscape;
+        var valueStr = (landscape ? value.values[0] : value).toString().toLowerCase();
+        var presetValue = vivliostyle.page.pageSizes[valueStr];
+        if (presetValue) {
+            if (valueStr === "a5"
+                || valueStr === "a4"
+                || valueStr === "a3"
+                || valueStr === "b5"
+                || valueStr === "b4"
+                || valueStr === "letter"
+                || valueStr === "legal"
+                || valueStr === "ledger") {
+                if (landscape) {
+                    valueStr += " landscape";
+                }
+            } else {
+                var width = presetValue.width.stringValue();
+                var height = presetValue.height.stringValue();
+                if (landscape) {
+                    valueStr = height + " " + width;
+                } else {
+                    valueStr = width + " " + height;
+                }
+            }
+        }
+        this.pageSizeRules += "size: " + valueStr + (important ? " !important" : "") + ";";
     }
     adapt.csscasc.CascadeParserHandler.prototype.property.call(this, name, value, important);
 };
@@ -1990,8 +2032,18 @@ vivliostyle.page.PageMarginBoxParserHandler.prototype.simpleProperty = function(
  */
 vivliostyle.page.PageCounterStore = function(pageScope) {
     /** @const */ this.pageScope = pageScope;
-    /** @const @type {Object.<string,!Array.<number>>} */ this.counters = {};
+    /** @const @type {!Object.<string,!Array.<number>>} */ this.counters = {};
     this.counters["page"] = [0];
+};
+
+/**
+ * Copy (and override) counter states from another PageCounterstore.
+ * @param {!vivliostyle.page.PageCounterStore} pageCounterStore
+ */
+vivliostyle.page.PageCounterStore.prototype.copyFrom = function(pageCounterStore) {
+    Object.keys(pageCounterStore.counters).forEach(function(key) {
+        this.counters[key] = Array.from(pageCounterStore.counters[key]);
+    }, this);
 };
 
 /**
