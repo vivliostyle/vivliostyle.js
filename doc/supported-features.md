@@ -246,7 +246,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Depends on browser's capability: Yes
 - [display](http://www.w3.org/TR/CSS2/visuren.html#propdef-display)
   - Depends on browser's capability: Yes
-  - Supports [`flex` and `inline-flex` values](https://www.w3.org/TR/css-flexbox-1/#flex-containers)
+  - Supports [`flex`, `inline-flex`](https://www.w3.org/TR/css-flexbox-1/#flex-containers), [`ruby`, `ruby-base`, `ruby-text`, `ruby-base-container` and `ruby-text-container`](https://www.w3.org/TR/css-ruby-1/#propdef-display) values.
 - [empty-cells](http://www.w3.org/TR/CSS2/tables.html#propdef-empty-cells)
   - Depends on browser's capability: Yes
 - [float](http://www.w3.org/TR/CSS2/visuren.html#propdef-float)
@@ -346,6 +346,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Depends on browser's capability: Yes
 - [unicode-bidi](http://www.w3.org/TR/CSS2/visuren.html#propdef-unicode-bidi)
   - Depends on browser's capability: Yes
+  - Supports [new values (`isolate`, `isolate-override`, `plaintext`) in CSS Writing Modes 3](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
 - [vertical-align](http://www.w3.org/TR/CSS2/visudet.html#propdef-vertical-align)
   - Depends on browser's capability: Yes
 - [visibility](http://www.w3.org/TR/CSS2/visufx.html#propdef-visibility)
@@ -488,6 +489,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Depends on browser's capability: Yes
 - [font-style](http://www.w3.org/TR/css-fonts-3/#propdef-font-style)
   - Depends on browser's capability: Yes
+- [font-variant-east-asian](http://www.w3.org/TR/css-fonts-3/#propdef-font-variant-east-asian)
+  - Depends on browser's capability: Yes
 - [font-weight](http://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
   - Depends on browser's capability: Yes
 
@@ -629,6 +632,9 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Allowed prefixes: epub, webkit
   - Depends on browser's capability: Yes
   - Note: supported values are [those defined in 20 March 2014 Candidate Recommendation](https://www.w3.org/TR/2014/CR-css-writing-modes-3-20140320/#propdef-text-orientation), not those in the latest spec.
+- [unicode-bidi](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
+  - Depends on browser's capability: Yes
+  - Supports [new values (`isolate`, `isolate-override`, `plaintext`) in CSS Writing Modes 3](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
 - [writing-mode](http://www.w3.org/TR/css-writing-modes-3/#propdef-writing-mode)
   - Allowed prefixes: epub, webkit
   - Depends on browser's capability: Yes
@@ -644,7 +650,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Depends on browser's capability: Yes
 - [display](https://www.w3.org/TR/css-flexbox-1/#flex-containers)
   - Depends on browser's capability: Yes
-  - Supports [`flex` and `inline-flex` values](https://www.w3.org/TR/css-flexbox-1/#flex-containers)
+  - Supports [`flex`, `inline-flex`](https://www.w3.org/TR/css-flexbox-1/#flex-containers), [`ruby`, `ruby-base`, `ruby-text`, `ruby-base-container` and `ruby-text-container`](https://www.w3.org/TR/css-ruby-1/#propdef-display) values.
 - [flex](http://www.w3.org/TR/css-flexbox-1/#propdef-flex)
   - Depends on browser's capability: Yes
 - [flex-basis](http://www.w3.org/TR/css-flexbox-1/#propdef-flex-basis)
@@ -694,6 +700,9 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 ### [CSS Ruby Layout 1](http://www.w3.org/TR/css-ruby-1/)
 
+- [display](https://www.w3.org/TR/css-ruby-1/#propdef-display)
+  - Depends on browser's capability: Yes
+  - Supports [`flex`, `inline-flex`](https://www.w3.org/TR/css-flexbox-1/#flex-containers), [`ruby`, `ruby-base`, `ruby-text`, `ruby-base-container` and `ruby-text-container`](https://www.w3.org/TR/css-ruby-1/#propdef-display) values.
 - [ruby-align](http://www.w3.org/TR/css-ruby-1/#propdef-ruby-align)
   - Depends on browser's capability: Yes
 - [ruby-position](https://drafts.csswg.org/css-ruby-1/#propdef-ruby-position)
