@@ -34,3 +34,9 @@ html[data-vivliostyle-paginated] {
         }
     }
 }
+
+@media screen {
+    html[data-vivliostyle-paginated] {
+        background: #AAAAAA;
+    }
+}
