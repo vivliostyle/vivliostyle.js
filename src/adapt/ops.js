@@ -718,7 +718,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 	    self.currentLayoutPosition = null;
 	    cp.highestSeenOffset = self.styler.getReachedOffset();
         var triggers = self.style.store.getTriggersForDoc(self.xmldoc);
-	    page.finish(triggers);
+	    page.finish(triggers, self.clientLayout);
 	    if (self.noMorePrimaryFlows(cp)) {
 	    	cp = null;
 	    }

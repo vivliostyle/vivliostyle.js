@@ -1219,8 +1219,34 @@ adapt.vgen.Viewport = function(window, fontSize, opt_root, opt_width, opt_height
 	/** @const */ this.fontSize = fontSize;
 	/** @const */ this.document = window.document;
 	/** @type {HTMLElement} */ this.root = opt_root || this.document.body;
-	/** @type {number} */ this.width = opt_width || window.innerWidth;
-	/** @type {number} */ this.height = opt_height || window.innerHeight;
-    this.root.style["min-width"] = this.width + "px";
-    this.root.style["min-height"] = this.height + "px";
+	var zoomBox = this.root.firstElementChild;
+	if (!zoomBox) {
+		zoomBox = this.document.createElement("div");
+		this.root.appendChild(zoomBox);
+	}
+	/** @type {!HTMLElement} */ this.zoomBox = /** @type {!HTMLElement} */ (zoomBox);
+	var clientLayout = new adapt.vgen.DefaultClientLayout(window);
+	var computedStyle = clientLayout.getElementComputedStyle(this.root);
+	/** @type {number} */ this.width = opt_width || parseFloat(computedStyle["width"]) || window.innerWidth;
+	/** @type {number} */ this.height = opt_height || parseFloat(computedStyle["height"]) || window.innerHeight;
+};
+
+/**
+ * Size zoom box
+ * @param {number} width
+ * @param {number} height
+ */
+adapt.vgen.Viewport.prototype.sizeZoomBox = function(width, height) {
+	var zoomBox = this.zoomBox;
+	adapt.base.setCSSProperty(zoomBox, "width", width + "px");
+	adapt.base.setCSSProperty(zoomBox, "height", height + "px");
+};
+
+/**
+ * Reset zoom box's size
+ */
+adapt.vgen.Viewport.prototype.resetZoomBox = function() {
+	var zoomBox = this.zoomBox;
+	adapt.base.setCSSProperty(zoomBox, "width", "");
+	adapt.base.setCSSProperty(zoomBox, "height", "");
 };
