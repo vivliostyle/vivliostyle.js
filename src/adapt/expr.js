@@ -68,9 +68,7 @@ adapt.expr.PendingResult;
  */
 adapt.expr.letterbox = function(viewW, viewH, objW, objH) {
     var scale = Math.min((viewW - 0) / objW, (viewH - 0) / objH);
-    var x = (viewW - objW) / 2;
-    var y = (viewH - objH) / 2;
-    return "matrix(" + scale + ",0,0," + scale + "," + x + "," + y + ")";
+    return "matrix(" + scale + ",0,0," + scale + ",0,0)";
 };
 
 /**
