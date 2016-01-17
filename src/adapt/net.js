@@ -71,13 +71,18 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
             continuation.schedule(response);
         }
     };
-    if (opt_data) {
-        request.setRequestHeader("Content-Type",
-        		opt_contentType || "text/plain; charset=UTF-8");
-        request.send(opt_data);
-    }
-    else
-        request.send(null);
+	try {
+		if (opt_data) {
+			request.setRequestHeader("Content-Type",
+				opt_contentType || "text/plain; charset=UTF-8");
+			request.send(opt_data);
+		}
+		else
+			request.send(null);
+	} catch (e) {
+		vivliostyle.logging.logger.warn(e, "Error fetching " + url);
+		continuation.schedule(response);
+	}
     return frame.result();
 };
 

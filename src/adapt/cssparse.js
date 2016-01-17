@@ -2451,8 +2451,14 @@ adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL, classes, 
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.cssparse.parseStylesheetFromText = function(text, handler, baseURL, classes, media) {
-    var tok = new adapt.csstok.Tokenizer(text, handler);
-    return adapt.cssparse.parseStylesheet(tok, handler, baseURL, classes, media);
+    return adapt.task.handle("parseStylesheetFromText", function(frame) {
+        var tok = new adapt.csstok.Tokenizer(text, handler);
+        adapt.cssparse.parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
+    }, function(frame, err) {
+            vivliostyle.logging.logger.warn(err, "Failed to parse stylesheet text: " + text);
+            frame.finish(false);
+        }
+    );
 };
 
 /**
@@ -2475,7 +2481,13 @@ adapt.cssparse.parseStylesheetFromURL = function(url, handler, classes, media) {
 		            frame.finish(true);
 		        } else {
 		        	adapt.cssparse.parseStylesheetFromText(xhr.responseText,
-		        			handler, url, classes, media).thenFinish(frame);
+		        			handler, url, classes, media)
+                        .then(function(result) {
+                            if (!result) {
+                                vivliostyle.logging.logger.warn("Failed to parse stylesheet from " + url);
+                            }
+                            frame.finish(true);
+                        });
 		        }
 		    });
     	},
@@ -2485,7 +2497,7 @@ adapt.cssparse.parseStylesheetFromURL = function(url, handler, classes, media) {
     	 * @return {void}
     	 */
     	function(frame, err) {
-            vivliostyle.logging.logger.error(err, "Exception while parsing:", url);
+            vivliostyle.logging.logger.warn(err, "Exception while fetching and parsing:", url);
 	    	frame.finish(true);
 	    });
 };

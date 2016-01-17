@@ -78,6 +78,10 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/137>
 - Avoid page break between ruby base and annotation
   - <https://github.com/vivliostyle/vivliostyle.js/pull/139>
+- Do not block entire process when stylesheets cannot be fetched or parsed
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/141>
+- Fix problem that pages with viewport specified have incorrect horizontal offset on screen
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/142>
 
 ## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
 Beta release.

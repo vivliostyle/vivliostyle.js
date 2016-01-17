@@ -1163,7 +1163,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
 		                var source = sources[index++];
 		                sph.startStylesheet(source.flavor);
 		                if (source.text !== null) {
-		                    return adapt.cssparse.parseStylesheetFromText(source.text, sph, source.url, source.classes, source.media);
+							return adapt.cssparse.parseStylesheetFromText(source.text, sph, source.url, source.classes, source.media).thenReturn(true);
 		                } else {
 		                    return adapt.cssparse.parseStylesheetFromURL(source.url, sph, source.classes, source.media);
 		                }
