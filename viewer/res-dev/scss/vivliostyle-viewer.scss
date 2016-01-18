@@ -39,4 +39,8 @@ html[data-vivliostyle-paginated] {
     html[data-vivliostyle-paginated] {
         background: #AAAAAA;
     }
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-viewer-status=complete] {
+        overflow: auto;
+    }
 }
