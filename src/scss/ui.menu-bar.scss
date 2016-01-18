@@ -402,13 +402,13 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					left: 0;
 					bottom: 0;
 					border-top: solid 1px rgba(255,255,255,0.8);
-					padding: .75em 10px 0;
-					height: 3.7em;
+					padding: .75em 10px;
 					width: 100%;
 					text-align: center;
 					color: rgb(128,128,128);
 					background: rgba(255,255,255,.75);
 					font-size: 12px;
+					line-height: 1.2;
 					small {
 						font-size: 10px;
 						letter-spacing: -.05em;
@@ -424,6 +424,12 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 						}
 						small {
 							letter-spacing: 0;
+						}
+					}
+					>.version {
+						margin-top: 0.3em;
+						span {
+							white-space: nowrap;
 						}
 					}
 				}
