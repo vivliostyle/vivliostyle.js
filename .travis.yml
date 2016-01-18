@@ -5,6 +5,7 @@ node_js:
 before_install:
 - gem install compass
 script:
+- scripts/update-version.sh
 - npm run build
 - npm run test-sauce
 after_success:
