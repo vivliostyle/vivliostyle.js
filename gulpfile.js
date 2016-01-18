@@ -6,6 +6,7 @@ var browserSync = require('browser-sync').create();
 var changed = require("gulp-changed");
 var compass = require("gulp-compass");
 var ejs = require("gulp-ejs");
+var fs = require("fs");
 var gulp = require("gulp");
 var gutil = require("gulp-util");
 var KarmaServer = require("karma").Server;
@@ -37,6 +38,15 @@ var HTML_FILENAMES = {
     development: "vivliostyle-viewer-dev.html"
 };
 var SERVER_START_PATH = "/vivliostyle-ui/build/%viewer-html%#x=/vivliostyle.js/samples/gon/index.html";
+
+function getVersion(basePath) {
+    var version = JSON.parse(fs.readFileSync(basePath + "package.json", "utf8")).version;
+    return version.replace(/\.0$/, "");
+}
+var versions = {
+    core: getVersion("node_modules/vivliostyle/"),
+    ui: getVersion("")
+};
 
 // Utility functions
 function srcDir(type) {
@@ -110,7 +120,7 @@ copyTask("mathjax");
 // HTML build
 function buildHtml(development) {
     return gulp.src(srcPattern("html"))
-        .pipe(ejs({development: development}))
+        .pipe(ejs({development: development, versions: versions}))
         .pipe(plumber({
             errorHandler: notify.onError("Error: <%= error.message %>")
         }))
