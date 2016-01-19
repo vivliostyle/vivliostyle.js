@@ -12,13 +12,14 @@ cd ../
 gem install compass
 git clone --depth=1 --branch=master git@github.com:vivliostyle/vivliostyle-ui.git vivliostyle-ui
 cd vivliostyle-ui
-npm install ../vivliostyle.js
+scripts/update-version.sh
 npm install
+npm install ../vivliostyle.js
 npm run build
 npm run test-sauce
 
 # make distribution package
-version=$(grep '^ *"version":' ../vivliostyle.js/package.json | sed -e 's/^.*"\([^"]*\)",$/\1/')
+version=$(grep '^ *"version":' ../vivliostyle.js/package.json | sed -e 's/^.*"\([^"]*\)",$/\1/' | sed -e 's/\.0$//')
 scripts/make-dist-package.sh ${version}
 
 cd ../

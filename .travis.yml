@@ -5,8 +5,9 @@ before_install:
 - gem install compass
 - sudo pip install virtualenv
 script:
-- npm run build-css
+- build/update-version.sh
 - npm run build
+- npm run build-css
 - npm test
 - build/wpt-sauce.sh
 after_success:
