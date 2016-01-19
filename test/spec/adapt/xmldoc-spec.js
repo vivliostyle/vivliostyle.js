@@ -1,5 +1,35 @@
 describe("xmldoc", function() {
 
+    describe("XMLDocHolder", function() {
+        var url = "foobar";
+
+        describe("getElement", function() {
+            it("returns an element if there is one with the specified ID", function() {
+                var doc = new DOMParser().parseFromString("<foo><bar id='baz'></bar></foo>", "text/xml");
+                var holder = new adapt.xmldoc.XMLDocHolder(null, url, doc);
+
+                var e = holder.getElement("foobar#baz");
+                expect(e instanceof Element).toBe(true);
+            });
+
+            it("returns an element if there is one with the specified name", function() {
+                var doc = new DOMParser().parseFromString("<html><head></head><body><bar name='baz'></bar></body></html>", "text/html");
+                var holder = new adapt.xmldoc.XMLDocHolder(null, url, doc);
+
+                var e = holder.getElement("foobar#baz");
+                expect(e instanceof Element).toBe(true);
+            });
+
+            it("returns null if nothing found", function() {
+                var doc = new DOMParser().parseFromString("<foo><bar></bar></foo>", "text/xml");
+                var holder = new adapt.xmldoc.XMLDocHolder(null, url, doc);
+
+                var e = holder.getElement("foobar#baz");
+                expect(e).toBeFalsy();
+            });
+        });
+    });
+
     describe("parseAndReturnNullIfError", function() {
         it("uses a parser passed by an optional argument", function() {
             var parser = {parseFromString: function() {}};
