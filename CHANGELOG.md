@@ -1,6 +1,6 @@
 # Change Log
 
-## [2016.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.1) - 2016-01-19
+## [2016.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.1) - 2016-01-20
 
 ### Added
 - Support EPUB loading
