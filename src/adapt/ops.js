@@ -472,7 +472,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     parentContainer.insertBefore(boxContainer, parentContainer.firstChild);
     var layoutContainer = new adapt.vtree.Container(boxContainer);
     layoutContainer.vertical = boxInstance.vertical;
-    boxInstance.prepareContainer(self, layoutContainer, page);
+    boxInstance.prepareContainer(self, layoutContainer, page, self.faces);
     layoutContainer.originX = offsetX;
     layoutContainer.originY = offsetY;
     offsetX += layoutContainer.left + layoutContainer.marginLeft + layoutContainer.borderLeft;
@@ -485,13 +485,13 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 			var innerContainer = self.viewport.document.createElement("span");
 			contentVal.visit(new adapt.vtree.ContentPropertyHandler(innerContainer, self));
 			boxContainer.appendChild(innerContainer);
-			boxInstance.transferContentProps(self, layoutContainer, page);
+			boxInstance.transferContentProps(self, layoutContainer, page, self.faces);
 		} else if (boxInstance.suppressEmptyBoxGeneration) {
 			parentContainer.removeChild(boxContainer);
 			removed = true;
 		}
 		if (!removed) {
-			boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);
+			boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout, self.faces);
 		}
     	cont = adapt.task.newResult(true);
     } else if (!self.pageBreaks[flowName.toString()]) {
@@ -586,12 +586,12 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
         }).then(function() {
 	        layoutContainer.computedBlockSize = computedBlockSize;
 	        boxInstance.finishContainer(self, layoutContainer, page, region, 
-	        		columnCount, self.clientLayout);
+	        		columnCount, self.clientLayout, self.faces);
 	        innerFrame.finish(true);
         });
         cont = innerFrame.result();
     } else {
-        boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);	    		
+        boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout, self.faces);
     	cont = adapt.task.newResult(true);
     }
     cont.then(function() {
