@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Added
+- Support even/odd arguments for :nth-child selector
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/87>
+  - Spec: [Selectors Level 3 - :nth-child() pseudo-class](http://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
+
 ### Fixed
 - Lengths in 'rem' specified within page context are now interpreted correctly.
   - <https://github.com/vivliostyle/vivliostyle.js/issues/109>

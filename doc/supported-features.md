@@ -72,7 +72,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Supported in all browsers
 - [`:nth-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
   - Supported in all browsers
-  - Note: only a single integer argument is accepted for now. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/87)
+  - Note: only a single integer or "even"/"odd" arguments are accepted for now. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/163)
 - [`:first-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-child-pseudo)
 - [`::first-line` pseudo-element](https://www.w3.org/TR/css3-selectors/#first-line)
   - Supported in all browsers
