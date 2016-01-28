@@ -863,6 +863,16 @@ adapt.css.toNumber = function(val, context) {
 	return 0;
 };
 
+/**
+ * Convert numeric value to px
+ * @param {!adapt.css.Val} val
+ * @param {adapt.expr.Context} context
+ * @returns {!adapt.css.Numeric}
+ */
+adapt.css.convertNumericToPx = function(val, context) {
+    return new adapt.css.Numeric(adapt.css.toNumber(val, context), "px");
+};
+
 
 /**
  * @const
