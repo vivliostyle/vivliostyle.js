@@ -912,8 +912,12 @@ adapt.pm.PageBoxInstance.prototype.getActiveRegions = function(context) {
  */
 adapt.pm.PageBoxInstance.prototype.propagateProperty = function(context, container, name) {
     var val = this.getProp(context, name);
-    if (val)
+    if (val) {
+        if (val.isNumeric() && adapt.expr.needUnitConversion(val.unit)) {
+            val = adapt.css.convertNumericToPx(val, context);
+        }
         adapt.base.setCSSProperty(container.element, name, val.toString());
+    }
 };
 
 /**
