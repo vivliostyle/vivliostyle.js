@@ -7658,6 +7658,10 @@ var _utilsKeyUtil = require("../utils/key-util");
 
 var _utilsKeyUtil2 = _interopRequireDefault(_utilsKeyUtil);
 
+var _storesUrlParameters = require("../stores/url-parameters");
+
+var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
+
 function ViewerApp() {
     this.documentOptions = new _modelsDocumentOptions2["default"]();
     this.viewerOptions = new _modelsViewerOptions2["default"]();
@@ -7666,7 +7670,8 @@ function ViewerApp() {
     }
     this.viewerSettings = {
         userAgentRootURL: "resources/",
-        viewportElement: document.getElementById("vivliostyle-viewer-viewport")
+        viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
+        debug: _storesUrlParameters2["default"].getParameter("debug") === "true"
     };
     this.viewer = new _viewer2["default"](this.viewerSettings, this.viewerOptions);
     this.messageDialog = new _messageDialog2["default"](_modelsMessageQueue2["default"]);
@@ -7705,7 +7710,7 @@ ViewerApp.prototype.setDefaultView = function () {
 exports["default"] = ViewerApp;
 module.exports = exports["default"];
 
-},{"../models/document-options":6,"../models/message-queue":7,"../models/viewer-options":9,"../models/vivliostyle":10,"../utils/key-util":12,"./message-dialog":15,"./navigation":16,"./settings-panel":17,"./viewer":19,"knockout":1}],19:[function(require,module,exports){
+},{"../models/document-options":6,"../models/message-queue":7,"../models/viewer-options":9,"../models/vivliostyle":10,"../stores/url-parameters":11,"../utils/key-util":12,"./message-dialog":15,"./navigation":16,"./settings-panel":17,"./viewer":19,"knockout":1}],19:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
