@@ -1072,6 +1072,41 @@ adapt.csscasc.IsNthSiblingAction.prototype.getPriority = function() {
 };
 
 /**
+ * Judges whether the sibling's order is even/odd.
+ * @param {string} condition even or odd
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.IsEvenOddSiblingAction = function(condition) {
+	adapt.csscasc.ChainedAction.call(this);
+	/** @const */ this.condition = condition;
+};
+goog.inherits(adapt.csscasc.IsEvenOddSiblingAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsEvenOddSiblingAction.prototype.apply = function(cascadeInstance) {
+	var order = cascadeInstance.currentSiblingOrder;
+	if (this.condition === "even") {
+		if (order % 2 === 0) {
+			this.chained.apply(cascadeInstance);
+		}
+	} else if (this.condition === "odd") {
+		if (order % 2 === 1) {
+			this.chained.apply(cascadeInstance);
+		}
+	}
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsEvenOddSiblingAction.prototype.getPriority = function() {
+	return 5;
+};
+
+/**
  * @param {string} condition
  * @constructor
  * @extends {adapt.csscasc.ChainedAction}
@@ -2459,8 +2494,12 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
 	    	}
 	    	break;
 		case "nth-child":
-			if (params && params.length == 1 && typeof params[0] == "number") {
-				this.chain.push(new adapt.csscasc.IsNthSiblingAction(/** @type {number} */ (params[0])));
+			if (params && params.length == 1) {
+				if (typeof params[0] == "number") {
+					this.chain.push(new adapt.csscasc.IsNthSiblingAction(/** @type {number} */ (params[0])));
+				} else if (params[0] === "even" || params[0] === "odd") {
+					this.chain.push(new adapt.csscasc.IsEvenOddSiblingAction(/** @type {string} */ (params[0])));
+				}
 			} else {
 				this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
 			}
