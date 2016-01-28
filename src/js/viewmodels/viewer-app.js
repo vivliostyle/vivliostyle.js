@@ -27,6 +27,7 @@ import Navigation from "./navigation";
 import SettingsPanel from "./settings-panel";
 import MessageDialog from "./message-dialog";
 import keyUtil from "../utils/key-util";
+import urlParameters from "../stores/url-parameters";
 
 function ViewerApp() {
     this.documentOptions = new DocumentOptions();
@@ -36,7 +37,8 @@ function ViewerApp() {
     }
     this.viewerSettings = {
         userAgentRootURL: "resources/",
-        viewportElement: document.getElementById("vivliostyle-viewer-viewport")
+        viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
+        debug: urlParameters.getParameter("debug") === "true"
     };
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
     this.messageDialog = new MessageDialog(messageQueue);
