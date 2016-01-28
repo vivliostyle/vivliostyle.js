@@ -11,7 +11,6 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - `initial` and `unset` are *not* supported.
 - [Supported length units](http://www.w3.org/TR/css-values/#lengths): `em`, `ex`, `ch`, `rem`, `cm`, `mm`, `q`, `in`, `pc`, `pt`, `px`.
   - Supported in all browsers
-  - Note: `rem` is not correctly interpreted when used within @page rules. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/109)
 - Supported color values
   - Support depends on browser capabilities
   - [Basic color keywords](http://www.w3.org/TR/css3-color/#html4)
