@@ -1016,8 +1016,8 @@ vivliostyle.page.PageRuleMasterInstance.prototype.distributeAutoMarginBoxSizes =
 /**
  * @override
  */
-vivliostyle.page.PageRuleMasterInstance.prototype.prepareContainer = function(context, container, page) {
-    vivliostyle.page.PageRuleMasterInstance.superClass_.prepareContainer.call(this, context, container, page);
+vivliostyle.page.PageRuleMasterInstance.prototype.prepareContainer = function(context, container, page, docFaces) {
+    vivliostyle.page.PageRuleMasterInstance.superClass_.prepareContainer.call(this, context, container, page, docFaces);
     // Add an attribute to the element so that it can be refered from external style sheets.
     container.element.setAttribute("data-vivliostyle-page-box", true);
 };
@@ -1166,8 +1166,8 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
 /**
  * @override
  */
-vivliostyle.page.PageRulePartitionInstance.prototype.prepareContainer = function(context, container, page) {
-    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page);
+vivliostyle.page.PageRulePartitionInstance.prototype.prepareContainer = function(context, container, page, docFaces) {
+    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page, docFaces);
     page.pageAreaElement = /** @type {HTMLElement} */ (container.element);
 };
 
@@ -1191,9 +1191,9 @@ goog.inherits(vivliostyle.page.PageMarginBoxPartitionInstance, adapt.pm.Partitio
 /**
  * @override
  */
-vivliostyle.page.PageMarginBoxPartitionInstance.prototype.prepareContainer = function(context, container, page) {
+vivliostyle.page.PageMarginBoxPartitionInstance.prototype.prepareContainer = function(context, container, page, docFaces) {
     this.applyVerticalAlign(context, container.element);
-    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page);
+    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page, docFaces);
 };
 
 /**
@@ -1405,9 +1405,9 @@ vivliostyle.page.PageMarginBoxPartitionInstance.prototype.initVertical = functio
  * @override
  */
 vivliostyle.page.PageMarginBoxPartitionInstance.prototype.finishContainer = function(
-    context, container, page, column, columnCount, clientLayout) {
+    context, container, page, column, columnCount, clientLayout, docFaces) {
     adapt.pm.PartitionInstance.prototype.finishContainer.call(this,
-        context, container, page, column, columnCount, clientLayout);
+        context, container, page, column, columnCount, clientLayout, docFaces);
 
     // finishContainer is called only when the margin box is generated.
     // In this case, store the generated container for the margin box in the page object.
