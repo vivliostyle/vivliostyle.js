@@ -1357,7 +1357,9 @@ adapt.epub.OPFView.prototype.makePage = function(viewItem, pos) {
     var pageCont = /** @type {HTMLElement} */ (viewport.document.createElement("div"));
     viewport.contentContainer.appendChild(pageCont);
     pageCont.style.position = "relative";
-    pageCont.style.visibility = "hidden";
+	if (!vivliostyle.constants.isDebug) {
+		pageCont.style.visibility = "hidden";
+	}
     pageCont.style.left = "0px";
     pageCont.style.top = "0px";
     var page = new adapt.vtree.Page(pageCont);
