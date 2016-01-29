@@ -27,10 +27,10 @@ hr {
 	margin: 2em 25%;
 	width: 50%;
 }
-h1 { break-before: always; }
+h1 { break-before: page; }
 a[name] {
 	display: block;
-	break-before: always;
+	break-before: page;
 }
 h2 { break-after: avoid; }
 p { orphans: 2; widows: 2; }
@@ -53,7 +53,7 @@ p { orphans: 2; widows: 2; }
 	hr{
 		margin: 0;
 		visibility: hidden;
-		break-after: always;
+		break-after: page;
 	}
 }
 
