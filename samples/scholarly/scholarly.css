@@ -1,0 +1,496 @@
+/*
+  Mostly override colours, plus support the article styling.
+  The latter should be made into a separate CSS at some point, that can just be reused by whoever
+  likes it.
+*/
+
+@import url('./node_modules/normalize.css/normalize.css');
+@import url('./fonts/libre-baskerville-regular.css');
+@import url('./fonts/libre-baskerville-bold.css');
+@import url('./fonts/libre-baskerville-italic.css');
+
+@-epubx-page-template {
+ @-epubx-page-master first-page {
+   @-epubx-partition main {
+	   top: -epubx-expr(introduction.bottom-edge);
+	   column-width: 20em;
+	   column-gap: 2em;
+	   margin: 0 3em 3em;
+	   width: -epubx-expr(100% - main.margin-left - main.margin-right);
+	   -epubx-flow-from: body;
+   }
+   @-epubx-partition introduction {
+	   -epubx-required: true;
+	   top: 0;
+	   height: auto;
+	   margin-top: 3em;
+	   margin-bottom: 0;
+	   margin-left: -epubx-expr(3em + (main.column-count > 2 ? ( main.column-count = 3 ? (main.column-width + main.column-gap) / 2: main.column-width + main.column-gap) : 0 ));
+	   margin-right: -epubx-expr(introduction.margin-left);
+	   width: -epubx-expr(100% - introduction.margin-left - introduction.margin-right);
+	   -epubx-flow-from: intro;
+   }
+ }
+ @-epubx-page-master normal {
+   @-epubx-partition main {
+	   -epubx-required: true;
+	   top: 0;
+	   column-width: 20em;
+	   column-gap: 2em;
+	   margin: 3em;
+	   top: 0;
+	   -epubx-required: false;
+	   -epubx-flow-from: body;
+   }
+   @-epubx-partition figures-2 {
+	   -epubx-enabled: -epubx-expr( main.column-count >=4 );
+	   -epubx-flow-from: figs;
+	   height: auto;
+	   bottom: 0px;
+	   right: 0px;
+	   padding: 0px 3em;
+	   margin: 3em 3em 3em 0px;
+	   width: -epubx-expr( min( 100% - 6em , main.column-width * 2 + main.column-gap) - 6em );
+   }
+   @-epubx-partition figures {
+	   -epubx-flow-from: figs;
+	   margin: 3em 0px 3em 3em;
+	   padding-left: -epubx-expr( main.column-count >= 2 ? 1em : 0px );
+	   padding-right: -epubx-expr( figures.padding-left);
+	   height: auto;
+	   top: 0px;
+	   left: 0px;
+	   width: -epubx-expr( min( 100% - 6em , main.column-width * 2 + main.column-gap) - figures.padding-left - figures.padding-right );
+   }
+ }
+ figure {
+  -epubx-flow-into: figs;
+  -epubx-flow-options: exclusive;
+ }
+ @-epubx-flow figs {
+  -epubx-flow-consume: all;
+ }
+ article h1,
+ article h1 + section,
+ #abstract {
+  -epubx-flow-into: intro;
+ }
+ figure {
+  max-height: -epubx-expr(page-height - 6em);
+  break-inside: avoid;
+  break-after: avoid;
+ }
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: "Libre Baskerville", Times, serif;
+  background: #f7f7f7;
+  color: #434343;
+}
+header {
+  border-top: 8px solid #2196f3;
+  border-bottom: 2px solid #BDD5E9;
+  box-shadow: 2px 0 4px #BCBCBC;
+  margin-bottom: 64px;
+  background: #fff;
+}
+header p.title, header p.subtitle {
+  max-width: 900px;
+  padding: 0 10px;
+  font-variant: small-caps;
+  margin: 0 auto;
+}
+header p.title {
+  font-size: 32px;
+  margin-top: 16px;
+}
+header p.subtitle {
+  margin-bottom: 8px;
+}
+
+body > section, article {
+  margin: 0 auto 5em auto;
+  max-width: 900px;
+}
+section:target h2, section:target h3, article:target h1 {
+  color: #2196f3;
+}
+@media screen {
+  article {
+    /* the padding is 116px 116px 80px 116px, from which we remove the border */
+    padding: 88px 88px 72px 108px;
+    background: #fff;
+    border-top: 28px solid transparent;
+    border-right: 28px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 4px solid transparent;
+    border-image: url('card-bg.png') 28 28 8 4 repeat;
+  }
+}
+article {
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 24px;
+}
+p {
+  text-align: justify;
+  -moz-hyphens: auto;
+  hyphens: auto;
+  widows: 2;
+  orphans: 2;
+  margin-top:0;
+  margin-bottom: 1em;
+}
+h1, h2, h3 {
+  font-variant: small-caps;
+  text-align: center;
+  font-weight: 300;
+  break-after: avoid;
+  margin-bottom: 1em;
+}
+h1 {
+  padding-top:  16px;
+  padding-bottom: 16px;
+  letter-spacing: .75px;
+  font-size: 24px;
+  line-height: 32px;
+}
+h2 {
+  padding-top: 16px;
+  padding-bottom: 0;
+  letter-spacing: .75px;
+  font-size: 20px;
+}
+article *:first-child {
+  padding-top: 0;
+  margin-top: 0;
+}
+figure:first-child {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+h3 {
+  padding-top: 16px;
+  padding-bottom: 0;
+  letter-spacing:.5px;
+  font-size: 16px;
+}
+dfn {
+  text-decoration: underline;
+}
+a {
+  color: #2196f3;
+}
+a, :link, :visited {
+  text-decoration: none;
+  color: #2196f3;
+}
+a:active {
+  color: #64b5f6;
+}
+figure img {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+}
+
+pre, code, a[property="schema:citation"] {
+  -moz-hyphens: none;
+  hyphens: none;
+}
+code {
+  color: #FF8C00;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.3em;
+  padding: 0.2em;
+  background: #FDFDFD;
+  display: inline;
+}
+code.language-html {
+  color: inherit;
+}
+
+pre code {
+  color: inherit;
+  border: none;
+  padding: 0;
+  background: none;
+}
+
+footer {
+  font-size: 13px;
+  box-shadow: -1px 0px 2px #BCBCBC;
+  background: #BDD5E9;
+  /*border-top: 2px solid #F9EABD;*/
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+footer p {
+  max-width: 900px;
+  padding: 14px 10px;
+  margin: 0 auto;
+  text-align: center;
+}
+footer a:link, footer a:visited {
+  color: white;
+}
+footer img {
+  vertical-align: -4px;
+  background: white;
+  border-radius: 3px;
+  padding: 1px;
+  box-sizing: content-box;
+}
+
+section {
+  margin-bottom: 6em;
+}
+section[typeof='sa:ReferenceList'] dt {
+  float: left;
+  margin-right: 5px;
+}
+section[typeof='sa:ReferenceList'] dt::after {
+  content: ',';
+}
+section[typeof='sa:ReferenceList'] dd {
+  margin-bottom: 16px;
+}
+section[typeof='sa:ReferenceList'] cite::before {
+  content: '«';
+}
+section[typeof='sa:ReferenceList'] cite::after {
+  content: '»';
+}
+
+code {
+  overflow: visible;
+  white-space: pre-wrap;
+}
+pre {
+  border: solid 1px #DFDFDF;
+  border-left: solid #358CCB 10px;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin:0;
+}
+meta {
+  display:none;
+}
+figure {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: auto;
+}
+figure pre,
+figure table {
+  flex: auto;
+  overflow: auto;
+}
+figure figcaption {
+  flex: none;
+}
+
+table {
+  width: 100%;
+  font-family: sans-serif;
+  letter-spacing: .25px;
+  border-collapse: collapse;
+  box-sizing: border-box;
+  background: #fff;
+}
+table th {
+  padding: 8px 16px 8px 16px;
+  white-space: nowrap;
+  border-bottom: 0px;
+  border-top: 0px;
+  letter-spacing: .5px;
+  line-height: 15px;
+  text-align: left;
+}
+table td {
+  padding: 12px;
+  border-top: 1px solid lightgray;
+  border-bottom: 1px solid lightgray;
+  line-height: 18px;
+  vertical-align: baseline;
+  font-weight: 300;
+}
+caption {
+  font-family: "Libre Baskerville", Times, serif;
+  text-align: left;
+  padding: 16px;
+  margin-top: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  caption-side: bottom;
+  font-style: italic;
+  /* we're removing the border (28+4=32) + horizontal padding (88+108=196px) = 228px */
+  max-width: calc(100vw - 228px)
+}
+
+figure {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+figcaption {
+  text-align: left;
+  color: #9E9E9E;
+  margin: 24px 0px 0 0px;
+  padding: 0 0px 24px 0;
+  letter-spacing: .35px;
+  border-bottom: 1px solid #eee;
+  font-style: italic;
+  hyphens: auto;
+}
+figure[typeof="sa:Image"] {
+  border-top: 1px solid #eee;
+}
+
+
+/*
+  The first section is always the users
+*/
+article h1 + section {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+/* the authors' list */
+article h1 + section ol::before {
+  display: block;
+  float: left;
+  width: 150px;
+  font-variant: small-caps;
+  color: #9E9E9E;
+}
+article h1 + section ol:first-child::before {
+  content: 'Authors';
+}
+article h1 + section ol + ol::before {
+  content: 'Affiliations';
+}
+article h1 + section ol {
+  list-style-type: none;
+  counter-reset: affiliations;
+}
+article h1 + section ol + ol li::before {
+  counter-increment: affiliations;
+  content: counter(affiliations, lower-latin) '.';
+  font-size: 12px;
+  display: inline;
+}
+article h1 + section li {
+  display: inline;
+}
+article h1 + section li::after {
+  content: ',';
+}
+article h1 + section li + li::after {
+  content: normal;
+}
+article h1 + section ol + ol li::after {
+  content: normal;
+}
+article h1 + section a[property="sa:roleAffiliation"] {
+  font-size: 12px;
+  vertical-align: super;
+}
+
+/* have less vertical space in structured abstracts */
+section[typeof='sa:Abstract'] > section {
+  margin: 0;
+}
+section[typeof='sa:Abstract'] > section > h3 {
+  display: inline;
+  font-variant: small-caps;
+  float: left;
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0;
+  padding: 16px 8px 0 0;
+  color: #9E9E9E
+}
+
+aside[typeof="schema:WPSideBar"] {
+  margin: 1em 0;
+  font-style: italic;
+  background: #F0F6FA;
+}
+
+/* wide screen */
+@media screen and (min-width: 1900px) {
+  article {
+    max-width: 1200px;
+    font-size: 16px;
+    line-height: 30px;
+  }
+  header p.title, header p.subtitle, footer p {
+    max-width: 1200px;
+  }
+  footer {
+    font-size: 16px;
+  }
+}
+@media screen and (max-width: 979px) {
+  article {
+    width: 100%;
+    padding: 115px 116px 79px 116px;
+    border-top: 1px solid #E0E0E0;
+    border-bottom: 1px solid #E0E0E0;
+    border-left: none;
+    border-right: none;
+  }
+  caption {
+    /* we're removing the horizontal padding (116px*2 = 232px) */
+    max-width: calc(100vw - 232px)
+  }
+}
+@media screen and (max-width: 799px) {
+  article {
+    padding: 57px 58px 39px 58px;
+  }
+  caption {
+    /* we're removing the horizontal padding (58px*2 = 116px) */
+    max-width: calc(100vw - 116px)
+  }
+}
+@media screen and (max-width: 399px) {
+  article {
+    padding: 28px 29px 19px 29px;
+  }
+  caption {
+    /* we're removing the horizontal padding (29px*2 = 58px) */
+    max-width: calc(100vw - 58px)
+  }
+  footer {
+    font-size: 10px;
+  }
+  article > section:first-of-type ol::before {
+    float: none;
+    width: auto;
+    margin-left: 0;
+  }
+  article > section:first-of-type ol {
+    margin-left: 0;
+    padding: 0;
+  }
+  section[typeof="sa:Abstract"] {
+    margin-top: 30px;
+  }
+}
+@media print {
+  header {
+    display: none;
+  }
+  footer {
+    position: absolute;
+  }
+  article {
+    border:none;
+  }
+}

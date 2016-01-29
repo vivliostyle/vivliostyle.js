@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Scholarly HTML — Markedly Smart</title>
+    <link rel="stylesheet" href="scholarly.css">
+    <link rel="stylesheet" href="node_modules/prismjs/themes/prism-coy.css">
+    <script src="node_modules/prismjs/prism.js" defer></script>
+  </head>
+  <body prefix="schema: http://schema.org/ xsd: http://www.w3.org/2001/XMLSchema# sa: https://ns.science.ai/">
+    <header>
+      <p class="title">Scholarly HTML</p>
+      <p class="subtitle">Markedly Smart</p>
+    </header>
+    <article id="what" typeof="schema:ScholarlyArticle" resource="#">
+      <h1>What is Scholarly HTML?</h1>
+      <section>
+        <ol>
+          <li property="schema:author" typeof="sa:ContributorRole">
+            <a property="schema:author" href="http://berjon.com/" typeof="schema:Person">
+              <span property="schema:givenName">Robin</span>
+              <span property="schema:familyName">Berjon</span>
+            </a>
+            <a href="#scienceai" property="sa:roleAffiliation" resource="http://science.ai/">a</a>
+            <sup property="sa:roleContactPoint" typeof="schema:ContactPoint">
+              <a property="schema:email" href="mailto:robin@berjon.com" title="corresponding author">&#9993;</a>
+            </sup>
+          </li>
+          <li property="schema:contributor" typeof="sa:ContributorRole">
+            <a property="schema:contributor" href="https://github.com/sballesteros" typeof="schema:Person">
+              <span property="schema:givenName">Sebastien</span>
+              <span property="schema:familyName">Ballesteros</span>
+            </a>
+            <a href="#scienceai" property="sa:roleAffiliation" resource="http://science.ai/">a</a>
+          </li>
+        </ol>
+        <ol>
+          <li id="scienceai">
+            <a href="http://science.ai/" typeof="schema:Corporation">
+              <span property="schema:name">science.ai</span>
+            </a>
+          </li>
+        </ol>
+      </section>
+
+      <section typeof="sa:Abstract" id="abstract">
+        <h2>Abstract</h2>
+        <p>
+          Scholarly HTML is a domain-specific data format built entirely on open standards that
+          enables the interoperable exchange of scholarly articles in a manner that is compatible
+          with off-the-shelf browsers. This document describes how Scholarly HTML works and how it
+          is encoded as a document. It is, itself, written in Scholarly HTML.
+        </p>
+      </section>
+      <section typeof="sa:MaterialsAndMethods" id="motivation">
+        <h2>Motivation</h2>
+        <aside typeof="schema:WPSideBar">
+          <p>
+            <strong>New</strong>: you can now join the
+            <a href="https://www.w3.org/community/scholarlyhtml/">Scholarly HTML Community Group</a>
+            to help make this a standard.
+          </p>
+          <p>
+            This document is an early-stage release. While the underlying format is relatively
+            mature and actually implemented, details are still in flux and the format can still be
+            changed. The quality of this document is also being gradually improved. If you’re
+            interested in this project, come join
+            <a href="https://github.com/scienceai/scholarly.vernacular.io/">the party on GitHub</a>
+            or talk to either <a href="https://twitter.com/sciencedotai">@sciencedotai</a> or
+            <a href="https://twitter.com/robinberjon">@robinberjon</a> in Twitter.
+          </p>
+        </aside>
+        <p>
+          Scholarly articles are still primarily encoded as unstructured graphics formats in which
+          most of the information initially created by research, or even just in the text, is lost.
+          This was an acceptable, if deplorable, condition when viable alternatives did not seem
+          possible, but document technology has today reached a level of maturity and universality
+          that makes this situation no longer tenable. Information cannot be disseminated if it is
+          destroyed before even having left its creator’s laptop.
+        </p>
+        <p>
+          According to the New York Times, adding structured information to their recipes (instead
+          of exposing simply as plain text) improved their discoverability to the point of producing
+          an immediate rise of 52 percent in traffic (<a href="#ref-nyt"
+          property="schema:citation">NYT, 2014</a>). At this point in time, cupcake recipes are
+          reaping greater benefits from modern data format practices than the whole scientific
+          endeavour.
+        </p>
+        <p>
+          This is not solely a loss for the high principles of knowledge sharing in science, it also
+          has very immediate pragmatic consequences. Any tool, any service that tries to integrate
+          with scholarly publishing has to spend the brunt of its complexity (or budget) extracting
+          data the author would have willingly shared out of antiquated formats. This places
+          stringent limits on the improvement of the scholarly toolbox, on the discoverability of
+          scientific knowledge, and particularly on processes of meta-analysis.
+        </p>
+        <p>
+          To address these issues, we have followed an approach rooted in established best practices
+          for the reuse of open, standard formats. The «HTML Vernacular» body of practice provides
+          guidelines for the creation of domain-specific data formats that make use of HTML’s
+          inherent extensibility (<a href="#ref-vernacular" property="schema:citation">Science.AI,
+          2015b</a>). Using the vernacular foundation overlaid with «schema.org» metadata we have
+          produced a format for the interchange of scholarly articles built on open standards, ready
+          for all to use.
+        </p>
+        <p>
+          Our high-level goals were:
+        </p>
+        <ul>
+          <li>
+            Uncompromisingly enabling structured metadata, accessibility, and internationalisation.
+          </li>
+          <li>
+            Pragmatically working in Web browsers, even if it occasionally incurs some markup
+            overhead.
+          </li>
+          <li>
+            Powerfully customisable for inclusion in arbitrary Web sites, while remaining easy to
+            process and interoperable.
+          </li>
+          <li>
+            Entirely built on top of open, royalty-free standards.
+          </li>
+          <li>
+            Long-term viability as a data format.
+          </li>
+        </ul>
+        <p>
+          Additionally, in view of the specific problem we addressed, in the creation of this
+          vernacular we have favoured the reliability of interchange over ease of authoring; but
+          have nevertheless attempted to cater to the latter as much as possible. A decent
+          boilerplate template file can certainly make authoring relatively simple, but not as
+          radically simple as it can be. For such use cases, Scholarly HTML provides a great output
+          target and overview of the data model required to support scholarly publishing at the
+          document level.
+        </p>
+        <p>
+          An example of an authoring format that was designed to target Scholarly HTML as an
+          output is the <a href="http://scienceai.github.io/docx-standard-scientific-style">DOCX
+          Standard Scientific Style</a> which enables authors who are comfortable with Microsoft
+          Word to author documents that have a direct upgrade path to semantic, standard content.
+        </p>
+        <p>
+          Where semantic modelling is concerned, our approach is to stick as much as possible to
+          <a href="http://schema.org/">schema.org</a>. Beyond the obvious advantages there are in
+          reusing a vocabulary that is supported by all the major search engines and is actively
+          being developed towards enabling a shared understanding of many useful concepts, it also
+          provides a protection against «<em>ontological drift</em>» whereby a new vocabulary is
+          defined by a small group with insufficient input from a broader community of practice.
+          A language that solely a single participant understands is of limited value.
+        </p>
+        <p>
+          In a small, circumscribed number of cases we have had to depart from
+          <a href="http://schema.org">schema.org</a>, using the <code>https://ns.science.ai/</code>
+          (prefixed with <code>sa:</code>) vocabulary instead
+          (<a href="#ref-sa-ontology" property="schema:citation">Science.AI, 2015a</a>). Our goal is
+          to work with <a href="http://schema.org">schema.org</a> in order to extend their
+          vocabulary, and we will align our usage with the outcome of these discussions.
+        </p>
+      </section>
+      <section typeof="sa:Results" id="definition">
+        <h2>Definition</h2>
+        <p>
+          A <dfn id="scholarly-html">Scholarly HTML document</dfn> is a valid HTML document that
+          follows some additional rules to specialise its meaning and make it predictable to
+          processors wishing to produce or consume scholarly articles. These rules are outlined in
+          the following sections.
+        </p>
+        <p>
+          Please note that in its current state this specification is often informal in the manner
+          in which it describes its constraints. This is to facilitate review by people unfamiliar
+          with formal specification writing. As the format solidifies, it will be made more formal
+          progressively (but attempt to remain readable).
+        </p>
+        <section id="file-headers">
+          <h3>File &amp; Supporting Structure</h3>
+          <p>
+            The document must be encoded in UTF-8, and transmitted with a media type of
+            <code>text/html</code>. It must feature a <code>DOCTYPE</code> as its preamble.
+          </p>
+          <p>
+            The <code>html</code> root element must feature a valid <code>lang</code> attribute.
+          </p>
+          <p>
+            The <code>head</code> element of the document must contain a
+            <code class="language-html">&lt;meta charset="utf-8"></code> element (preferable as its
+            first child), a
+            <code class="language-html">&lt;meta name="viewport" content="width=device-width"></code>
+            element (and no other viewport <code>meta</code>), and a <code>title</code> element. All
+            the other content of the <code>head</code> is ignored.
+          </p>
+          <p>
+            The <code>body</code> element must have a <code>prefix</code> attribute, which must
+            declare the following mapping:
+          </p>
+
+          <figure typeof="schema:Table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Prefix</th>
+                  <th>URL</th>
+                </tr>
+              </thead>
+              <tr>
+                <td>schema</td>
+                <td>http://schema.org/</td>
+              </tr>
+              <tr>
+                <td>xsd</td>
+                <td>http://www.w3.org/2001/XMLSchema#</td>
+              </tr>
+              <tr>
+                <td>sa</td>
+                <td>https://ns.science.ai/</td>
+              </tr>
+              <caption>
+                The list of mappings that must be declared by the <code>body</code> element.
+              </caption>
+            </table>
+          </figure>
+
+          <p>
+            Having to declare prefixes is undoubtably an annoyance and it does hurt the human
+            authorability of the format (since hand-creating a document essentially requires a
+            boilerplate prefix declaration). This trade-off is made for several reasons. The most
+            important motivation is that having predictable prefixes means that the content can be
+            styled with CSS using reliable attribute selectors on the semantic information that
+            describes the document’s structure. The alternative would be to use URLs everywhere,
+            such that instead of <code>sa:Abstract</code> we would have
+            <code>https://ns.science.ai/Abstract</code>; but in practice that approach is more
+            painful since the content then becomes bloated with URLs that are longer than is
+            comfortable.
+          </p>
+          <p>
+            The RDFa content of the article must systematically make use of these prefixes when the
+            values match their URLs as prefixes. Authors may declare other prefix-URL mappings in
+            the <code>prefix</code> attribute of the <code>body</code> element (or
+            <code>prefix</code> attributes elsewhere), including other prefixes mapping to the same
+            URLs if needed, but inside of the article’s content these prefixes must be used for
+            these URLs.
+          </p>
+        </section>
+        <section id="article">
+          <h3>Article Structure</h3>
+          <p>
+            The article content is everything that is contained inside the first
+            <code>article</code> element in document order that has a
+            <code>typeof="schema:ScholarlyArticle"</code>. Everything part of the <code>body</code>
+            outside of that subtree is ignored. This enables publishers to surround the article
+            content with any amount of supporting markup, for instance for headers, footers,
+            or navigation, as well as to wrap the article inside arbitrary markup that may be
+            needed for stylistic reasons.
+          </p>
+          <p>
+            The <code>article</code> element should have
+            a <code>resource</code> attribute, usually with a value
+            of <code>#</code>. The reason for that is to grant it a
+            URL that can be targeted by other properties. The
+            <code>resource</code> attribute can take any value, but it
+            must then be matched by the
+            <code>about</code> attributes of the properties targeting
+            it. If <code>resource</code> is omitted, the only way in
+            which those properties can target it is by knowing the URL
+            from which the document was retrieved.
+          </p>
+          <p>
+            The first element child of the <code>article</code> element must be an <code>h1</code>
+            heading that serves as the primary title for the document. It may itself contain markup.
+            The white-space-normalised text value of the <code>h1</code> must appear as a substring
+            of the white-space-normalised text value of the <code>title</code> element. This ensures
+            semantic alignment between the two, while enabling publishers to add their name to the
+            <code>title</code> so as to identify themselves there alongside the content.
+          </p>
+          <p>
+            Any children of <code>article</code> that are not <code>section</code> elements are
+            ignored.
+          </p>
+          <p>
+            The first <code>section</code> child element of the <code>article</code> must be the
+            <a href="#authors">Authors and Affiliations</a> section. It has no <code>typeof</code>
+            and its specific rules are outlined in its own chapter below.
+          </p>
+          <p>
+            The <code>section</code> elements can be nested arbitrarily deep. Each
+            <code>section</code> element must have as its first element child an <code>hX</code>
+            heading element the numeric part of which must be the number of <code>section</code>
+            ancestor elements that heading elements has up to the <code>article</code> element, plus
+            one. If the numeric part is greater than 6, then <code>h6</code> must be used but an
+            <code>aria-level</code> attribute must be added that reflects the accurate depth.
+            (The <code>aria-level</code> attribute can be used at lower depths but is not required
+            there.)
+          </p>
+          <p>
+            Each <code>section</code> element may contain an arbitrary number of
+            <a href="#hunk-elements">hunk elements</a>, followed by an arbitrary number of
+            <code>section</code> elements being subsections. Note that
+            <a href="#hunk-elements">hunk elements</a> must imperatively appear <em>before</em> the
+            subsections.
+          </p>
+          <p>
+            Sections are expected to be typed using the <code>typeof</code> attribute. The following
+            <code>typeof</code> values are currently understood:
+          </p>
+          <ul>
+            <li><code>sa:Funding</code> (which has its <a href="#funding">specific structure</a>)</li>
+            <li><code>sa:Abstract</code></li>
+            <li><code>sa:MaterialsAndMethods</code></li>
+            <li><code>sa:Results</code></li>
+            <li><code>sa:Conclusion</code></li>
+            <li><code>sa:Acknowledgements</code></li>
+            <li><code>sa:ReferenceList</code></li>
+          </ul>
+          <p>
+            Hopefully these types are largely self-documenting, they are described further in the
+            Scholarly Article ontology
+            (<a href="#ref-sa-ontology" property="schema:citation">Science.AI, 2015a</a>).
+          </p>
+          <p>
+            The section typed <code>sa:ReferenceList</code> has special processing rules described
+            in the <a href="#references-section">References section</a>.
+          </p>
+        </section>
+        <section id="hunk-elements">
+          <h3>Hunk Elements</h3>
+          <p>
+            <dfn>Hunk elements</dfn> are the meaningful blocks from which sections are built. They
+            contain text and <a href="#inline-element">inline elements</a>. There are several
+            types of hunk elements.
+          </p>
+          <p>
+            The most common hunk element is <code>p</code>, which is used to capture paragraphs. It
+            requires no special processing.
+          </p>
+          <p>
+            The <code>blockquote</code>, <code>ul</code>, <code>ol</code>, and <code>dl</code>
+            elements can be used as they typically would and require no special treatment.
+          </p>
+          <p>
+            The <code>aside</code> hunk element is used to capture text boxes. If it contains an
+            <code>hX</code> heading element, that element must be its first element child and its
+            numeric part must reflect its depth, making use of <code>aria-level</code> according to
+            the same rules as apply for <code>section</code>. The other children of
+            <code>aside</code> must all be hunk elements.
+          </p>
+          <p>
+            The <code>figure</code> element is a general container for content units that are
+            embedded inside the main body of the text. It can come in several flavours that are
+            dictated by its <code>typeof</code> attribute.
+          </p>
+          <p>
+            If <code>figure</code> has <code>typeof="sa:Image"</code> then it is an image container.
+            It must contain an <code>img</code> child element and should contain a
+            <code>figcaption</code> labelling that image. An example of an image figure would be:
+          </p>
+          <figure typeof="sa:Image">
+            <img src="hop-less.png" width="880" height="655">
+            <figcaption>
+              Reconstruction of Sthenurus stirlingi, by Brian Regal; in
+              «<cite><a
+              href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0109888">Locomotion
+              in Extinct Giant Kangaroos: Were Sthenurines Hop-Less Monsters?</a></cite>», by
+              Christine M. Janis, Karalyn Buttrill, Borja Figueirido.
+            </figcaption>
+          </figure>
+          <p>
+            If <code>figure</code> has <code>typeof="sa:Table"</code> then it is a table container.
+            It must contain nothing other than a <code>table</code> element. If a caption is
+            available, it should be included using the <code>caption</code> child element of the
+            <code>table</code>, and not the <code>figcaption</code> child of the
+            <code>figure</code>.
+          </p>
+          <p>
+            If <code>figure</code> has <code>typeof="sa:Formula"</code> then it is a formula
+            container. It must contain a <code>math</code> element and optionally a
+            <code>figcaption</code> describing the formula. The <code>math</code> element must be
+            valid MathML 3. Additionally, given the dismal state of support for MathML in Web
+            browser the <code>math</code> element must contain an <code>annotation</code>
+            descendant with the TeX equivalent of the formula.
+          </p>
+          <p>
+            If <code>figure</code> has <code>typeof="schema:SoftwareSourceCode"</code>
+            then it is a code container. It must contain a <code>pre</code> element
+            and optionally a <code>figcaption</code>. The <code>pre</code> element must contain as
+            its only child a <code>code</code> element.
+          </p>
+          <p>
+            If you wish to specify the type of the language used in the code, the
+            <code>figure</code> needs to have a <code>schema:programmingLanguage</code> property
+            containing a type <code>schema:Language</code>, itself with a <code>schema:name</code>
+            containing the the lowercase name of one of the languages from the
+            <a
+            href="https://github.com/scienceai/list-of-programming-languages/blob/master/data/data.jsonld">list
+            of programming languages</a>. Canonically, this would look like the following source:
+          </p>
+          <figure typeof="schema:SoftwareSourceCode">
+            <meta property="schema:name" content="html">
+            <pre property="schema:programmingLanguage" typeof="schema:Language"><code class="language-html">
+&lt;figure typeof="schema:SoftwareSourceCode">
+  &lt;pre property="schema:programmingLanguage" typeof="schema:Language">
+    &lt;meta property="schema:name" content="python">
+    &lt;code>import foo&lt;/code>
+  &lt;/pre>
+  &lt;figcaption>
+    How to import foo.
+  &lt;/figcaption>
+&lt;/figure>
+            </code></pre>
+            <figcaption>
+              An example of HTML capturing some complex Python code
+            </figcaption>
+          </figure>
+        </section>
+        <section id="inline-elements">
+          <h3>Inline Elements</h3>
+          <p>
+            <dfn>Inline elements</dfn> essentially decorate, describe, and enrich text. Inside of
+            <a href="#hunk-elements">hunk elements</a>, of heading elements, and of captioning
+            elements (<code>caption</code> and <code>figcaption</code>) the following inline
+            elements can be used (and where applicable they can nest within one another):
+          </p>
+          <ul>
+            <li><code>a</code></li>
+            <li><code>abbr</code></li>
+            <li><code>bdi</code></li>
+            <li><code>bdo</code></li>
+            <li><code>cite</code></li>
+            <li><code>code</code></li>
+            <li><code>data</code></li>
+            <li><code>del</code></li>
+            <li><code>dfn</code></li>
+            <li><code>em</code></li>
+            <li><code>img</code> (for small, contextual images that should not be figures)</li>
+            <li><code>ins</code></li>
+            <li><code>kbd</code></li>
+            <li><code>mark</code></li>
+            <li><code>math</code> (for inline equations that should not be figures; they must also
+                contain a TeX annotation)</li>
+            <li><code>meter</code></li>
+            <li><code>q</code></li>
+            <li><code>ruby</code> (with embedded <code>rb</code>, <code>rt</code>, <code>rtc</code>,
+                and <code>rp</code>)</li>
+            <li><code>samp</code></li>
+            <li><code>span</code></li>
+            <li><code>strong</code></li>
+            <li><code>sub</code></li>
+            <li><code>sup</code></li>
+            <li><code>svg</code> (for small, contextual images that should not be figures)</li>
+            <li><code>time</code></li>
+            <li><code>var</code></li>
+            <li><code>wbr</code></li>
+          </ul>
+          <p>
+            If an <code>a</code> element is linking to a citation, then it must have
+            <code>property="schema:citation"</code>; if it is linking
+            to a figure or another creative work, it must
+            have <code>property="schema:hasPart"</code>
+            or <code>property="schema:isBasedOnUrl"</code>. These are
+            known as <dfn>flavoured links</dfn>, they can be used to
+            enhance the user experience by treating their behaviour
+            differently from regular links.
+          </p>
+        </section>
+        <section id="references-section">
+          <h3>The References Section</h3>
+          <p>
+            The references section is a special type of <code>section</code> element with
+            <code>typeof="sa:ReferenceList"</code>.
+          </p>
+          <p>
+            Apart from its heading element, it must contain nothing other than an <code>ol</code>
+            or a <code>dl</code> element.
+          </p>
+          <p>
+            If using a <code>dl</code> element, its content must be exclusively a strictly
+            alternating sequence of <code>dt</code> then <code>dd</code> elements, with the latter
+            being the citation-bearing element. The <code>dt</code> is used as a label in some
+            citation formats.
+          </p>
+          <p>
+            If using an <code>ol</code>, then its content is only <code>li</code> elements that are
+            the citation-bearing elements.
+          </p>
+          <p>
+            The citation-bearing element will have an <code>id</code> and be
+            <code>schema:Book</code> for books or
+            <code>typeof="schema:ScholarlyArticle"</code> (or its subclass
+            <code>schema:MedicalScholarlyArticle</code>, with probably more to come). Its
+            content follows the «flexcite» format (being defined as part of this document, see
+            <a href="https://github.com/scienceai/scholarly.vernacular.io/issues/4">#4</a>). The
+            references section of this document is an example.
+          </p>
+
+          <figure typeof="schema:SoftwareSourceCode">
+            <meta property="schema:name" content="html">
+            <pre property="schema:programmingLanguage" typeof="schema:Language"><code class="language-html">
+&lt;li id="ref-something" typeof="schema:ScholarlyArticle"
+       resource="http://dx.doi.org/10.1000/182">
+  &lt;span property="schema:author" typeof="schema:Person">
+    &lt;span property="schema:familyName">Jones&lt;/span>
+    &lt;span property="schema:givenName">K&lt;/span>&lt;span
+             property="schema:additionalName">E&lt;/span>
+  &lt;/span>,
+  &lt;span property="schema:author" typeof="schema:Person">
+    &lt;span property="schema:familyName">Patel&lt;/span>
+    &lt;span property="schema:givenName">N&lt;/span>
+  &lt;/span>.
+  &lt;cite property="schema:name">Global trends in emerging infectious diseases.&lt;/cite>
+  &lt;span property="schema:isPartOf" typeof="schema:PublicationVolume">
+    &lt;span property="schema:isPartOf" typeof="schema:Periodical">
+      &lt;span property="schema:name">Nature.&lt;/span>
+    &lt;/span>
+    &lt;time about="http://dx.doi.org/10.1000/182" property="schema:datePublished"
+             datetime="2008-01" datatype="xsd:gYearMonth">2008 Jan&lt;/time>;
+    &lt;span property="schema:volumeNumber">451&lt;/span>
+  &lt;/span>:&lt;span property="schema:pageStart">990&lt;/span>-&lt;span
+                      property="schema:pageEnd">4&lt;/span>
+&lt;/li>
+            </code></pre>
+            <figcaption>
+              A citation (not yet in Flexcite format).
+            </figcaption>
+          </figure>
+          <p>
+            At the semantics level, a citation is a <code>schema:ScholarlyArticle</code> (or subtype)
+            with an <code>id</code> to reference it internally in the document and a
+            <code>resource</code> that is a URL identifying it (its DOI for instance, preferable in
+            HTTP-retrievable form).
+          </p>
+          <p>
+            That <code>schema:ScholarlyArticle</code> has any number of <code>schema:author</code>
+            which are <code>schema:Person</code> (with the usual <code>schema:givenName</code>,
+            <code>schema:familyName</code>, etc.). A child <code>cite</code> element, with
+            <code>property="schema:name"</code> (and optionally a link child) provides the title
+            of the article.
+          </p>
+          <p>
+            The publisher is described using a nested <code>schema:isPartOf</code> structure of
+            <code>schema:PublicationIssue</code>, <code>schema:PublicationVolume</code>,
+            and <code>schema:Periodical</code> (with only those that are known being used). Both
+            <code>schema:volumeNumber</code> and <code>schema:issueNumber</code> may be used on the
+            volume and issue.
+          </p>
+          <p>
+            A <code>time</code> element with <code>property="schema:datePublished"</code> provides
+            the publication date, which is expressed in text in human-readable form and in the
+            <code>datetime</code> attribute in standard form. A <code>datatype</code> attribute
+            matching the date format must be provided.
+          </p>
+          <p>
+            Both <code>schema:pageStart</code> and <code>schema:pageEnd</code> may be provided.
+          </p>
+          <p>
+            Beyond the semantics, a more specific serialisation known a «Flexcite» is in the works
+            and will be added here soon. Its properties are simple: when unstyled it reads linearly
+            in a human-friendly manner (so as to be accessible), and it can be styled with CSS to be
+            turned into arbitrary citation style preferences.
+          </p>
+        </section>
+        <section id="authors">
+          <h3>The Authors &amp; Affiliations Section</h3>
+          <p>
+            Capturing authors, the affiliations and their relationship to the article is the most
+            intricate part of Scholarly HTML. Care was taken to avoid repetition and to keep the
+            markup density as reasonable as possible, but the data to content ratio remains
+            relatively high.
+          </p>
+          <p>
+            It is probably best to start from an example and then to explain it:
+          </p>
+
+          <figure typeof="schema:SoftwareSourceCode">
+            <meta property="schema:name" content="html">
+            <pre property="schema:programmingLanguage" typeof="schema:Language"><code class="language-html">
+&lt;!-- The author and contributor list --&gt;
+&lt;article resource="#"&gt;
+  …
+  &lt;section&gt;
+    &lt;ol&gt;
+      &lt;!-- The first author, Robin Berjon --&gt;
+      &lt;li property="schema:author" typeof="sa:ContributorRole"&gt;
+        &lt;a property="schema:author" href="http://berjon.com/" typeof="schema:Person"&gt;
+          &lt;span property="schema:givenName"&gt;Robin&lt;/span&gt;
+          &lt;span property="schema:familyName"&gt;Berjon&lt;/span&gt;
+        &lt;/a&gt;
+        &lt;a href="#scienceai" property="sa:roleAffiliation" resource="http://science.ai/"&gt;a&lt;/a&gt;
+        &lt;sup property="sa:roleContactPoint" typeof="schema:ContactPoint"&gt;
+          &lt;a property="schema:email" href="mailto:robin@berjon.com" title="corresponding author"&gt;&#9993;&lt;/a&gt;
+        &lt;/sup&gt;
+      &lt;/li&gt;
+      &lt;!-- A contributor, Sebastien Ballesteros --&gt;
+      &lt;li property="schema:contributor" typeof="sa:ContributorRole"&gt;
+        &lt;a property="schema:contributor" href="https://github.com/sballesteros" typeof="schema:Person"&gt;
+          &lt;span property="schema:givenName"&gt;Sebastien&lt;/span&gt;
+          &lt;span property="schema:familyName"&gt;Ballesteros&lt;/span&gt;
+        &lt;/a&gt;
+        &lt;a href="#scienceai" property="sa:roleAffiliation" resource="http://science.ai/"&gt;a&lt;/a&gt;
+      &lt;/li&gt;
+    &lt;/ol&gt;
+    &lt;!-- The affiliation list --&gt;
+    &lt;ol&gt;
+      &lt;li id="scienceai"&gt;
+        &lt;a href="http://science.ai/" typeof="schema:Corporation"&gt;
+          &lt;span property="schema:name"&gt;science.ai&lt;/span&gt;
+        &lt;/a&gt;
+      &lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/section&gt;
+  …
+&lt;/article&gt;
+            </code></pre>
+            <figcaption>
+              The authors and affiliations section for this document.
+            </figcaption>
+          </figure>
+          <p>
+            The markup is relatively convoluted, but the data model is rich:
+          </p>
+          <figure typeof="sa:Image">
+            <img src="affiliations.png" width="976" height="452">
+            <figcaption>
+              The data model that matches the code
+            </figcaption>
+          </figure>
+          <p>
+            This <code>section</code> has no <code>typeof</code> and
+            no heading element. It contains a first <code>ol</code>
+            which lists authors, and optionally a
+            second <code>ol</code> to list affiliations.
+          </p>
+          <p>
+            Each <code>li</code> in the authors <code>ol</code> has
+            <code>property="schema:author"</code> or <code>property="schema:contributor"</code> and a
+            <code>typeof="sa:ContributorRole"</code>.
+          </p>
+          <p>
+            A <code>sa:ContributorRole</code> type (following the
+            semantic of
+            schema.org <a href="http://schema.org/Role">Role</a>) is
+            used so that affiliations or contact informations (email
+            address, etc.) relevant to this specific scholarly article
+            (and this specific scholarly article only) can be
+            specified. This is important as authors may have different
+            affiliations and contact points at the time they are
+            publishing a scholarly article but may want to specify
+            only a subset of those. Readers not familiar with the
+            semantic of schema.org Role can consult
+            the <a href="http://blog.schema.org/2014/06/introducing-role.html">introductory
+            blog post</a>.
+          </p>
+          <p>
+            Inside of that <code>li</code>, arbitrary properties
+            of <code>schema:Person</code>, filling
+            the <code>schema:author</code> property of
+            the <code>sa:ContributorRole</code> can be specified, but
+            providing at least <code>schema:givenName</code> and
+            <code>schema:familyName</code>. It is recommended that
+            these properties are wrapped into an hyperlink
+            identifying the person with a URL to their home page,
+            their <a href="http://orcid.org/">ORCID</a>, or an email
+            address.
+          </p>
+          <p>
+            If there is an affiliations <code>ol</code> and a given
+            author is affiliated, there must be an <code>a</code>
+            element with its <code>href</code> pointing to that
+            affiliation, a <code>resource</code> matching the URL
+            identifying the affiliation,
+            and <code>property="schema:roleAffiliation"</code>. The
+            content of that <code>a</code> element must be a string
+            that matches the one that will be generated by CSS to
+            label the affiliation; Latin lowercase being
+            recommended. (This is a hack, but we can only do so much
+            within the limits of CSS — better <code>counter</code>
+            would be needed.)
+          </p>
+          <p>
+            If an author (or contributor) is a corresponding author, a
+            last <code>sup</code> element needs to be added to
+            its <code>li</code>
+            with <code>property="sa:roleContactPoint"</code>, <code>typeof="schema:ContactPoint"</code>
+            (or subclass). Inside the <code>sup</code> element, there
+            must be at least a link to the contributor email address
+            (<code>mailto:</code>). More contact information such as
+            properties of <code>schema:PostalAddress</code> may be
+            added using <code>meta</code> tags.
+          </p>
+          <p>
+            If there is an affiliations <code>ol</code>, each <code>li</code> in it must have an
+            <code>id</code> which the authors link to. In turn it contains an <code>a</code>
+            element linking to the affiliation with <code>typeof</code> set to either
+            <code>schema:Organization</code> or <a href="http://schema.org/Organization">one of its
+            subtypes</a>. Inside the <code>a</code> needs to sit a <code>span</code> (or any
+            acceptable element, really) with <code>property="schema:name"</code>, containing the
+            name.
+          </p>
+        </section>
+        <section id="funding">
+          <h3>The Funding Section</h3>
+          <p>
+            The funding information attached to an article involves a list of sponsors each of which
+            offers a list of funding sources. Again, an example probably makes the idea clearer:
+          </p>
+          <figure typeof="schema:SoftwareSourceCode">
+            <meta property="schema:name" content="html">
+            <pre property="schema:programmingLanguage" typeof="schema:Language"><code class="language-html">
+&lt;article resource="#"&gt;
+  &lt;!-- This work was sponsored by the Child Detection Agency (CDA) under the grant grantId --&gt;
+  &lt;section typeof="sa:Funding"&gt;
+    &lt;h2&gt;Funding&lt;/h2&gt;
+    &lt;p about="#" rel="schema:sponsor"&gt;
+      &lt;span typeof="sa:SponsorRole"&gt;
+        This work was sponsored by the
+        &lt;a
+         property="schema:sponsor"
+         href="http://pixar.wikia.com/wiki/CDA"
+         typeof="schema:Organization"
+        &gt;
+          &lt;span property="schema:name"&gt;Child Detection Agency&lt;/span&gt;
+          (&lt;span property="schema:alternateName"&gt;CDA&lt;/span&gt;)
+        &lt;/a&gt; under the grant
+        &lt;a
+         property="sa:roleOffer"
+         typeof="sa:FundingSource"
+         href="http://pixar.wikia.com/wiki/CDA#grantId"
+        &gt;
+          &lt;span property="schema:serialNumber"&gt;grantId&lt;/span&gt;
+        &lt;/a&gt;
+      &lt;/span&gt;
+    &lt;/p&gt;
+  &lt;/section&gt;
+&lt;/article&gt;
+            </code></pre>
+            <figcaption>
+              The markup for a complete funding section.
+            </figcaption>
+          </figure>
+          <p>
+            The section has <code>typeof="sa:Funding"</code> and an arbitrary heading title, like
+            other sections.
+          </p>
+          <p>
+            It contains a series of <a href="#hunk-elements">hunks</a> that are
+            <code>rel="schema:sponsor"</code> (there can also be other content, it is ignored for
+            our purposes). The example above uses a <code>p</code> and a narrative style for its
+            content, but you have freedom to use other encodings.
+          </p>
+          <p>
+            As for contributor affiliations, source of fundings are
+            expressed using a subclass of <code>schema:Role</code> (<code>sa:SponsorRole</code>).
+            The usage of schema.org <code>Role</code> type is needed
+            to describe the source of fundings specific to a scholarly
+            article as opposed to all the source of funding of an
+            organization (relevant or not to our scholarly article of
+            interest).
+          </p>
+          <p>
+            The funder will be <code>typeof="schema:Organization"</code> (or a subtype thereof), as the object of a
+            <code>schema:sponsor</code> property on the <code>sa:SponsorRole</code>. It
+            will be identified through its URL (as in the <code>a</code> above), and will typically
+            have <code>schema:name</code> and often <code>schema:alternateName</code>.
+          </p>
+          <p>
+            The specific source of funding is of type <code>sa:FundingSource</code>, as the object of a
+            <code>sa:roleOffer</code> property on the <code>sa:SponsorRole</code>. It
+            should have a URL identifying it and a <code>schema:serialNumber</code> that is its
+            labeled identity.
+          </p>
+        </section>
+        <section id="data-rich">
+          <h3>Data rich scholarly articles</h3>
+          <p>
+            Scholarly Articles are often part of a larger network of
+            creative works containing dataset, code, additional
+            figures, tables or media (audio, video). Even within a
+            scholarly article, some creative works can be encoded in
+            different ways (for instance, figures typically comes in
+            different resolutions). Scholarly HTML aims to formally
+            describe (and help archive) this larger context.
+          </p>
+          <p>
+            Further data about a scholarly graph can be exposed within
+            the article in RDFa or as
+            <a href="http://json-ld.org">JSON-LD</a> islands. When
+            JSON-LD is used, it is recommended not to duplicate the
+            data already serialized in RDFa. JSON-LD should be
+            reserved to expose data not directly present in the HTML
+            markup.
+          </p>
+          <figure>
+            <pre><code class="language-jsonld">
+{
+  "@context": "http://schema.org",
+  "@id": "http://example.com/graph",
+  "@graph": [
+    {
+      "@id": "http://example.com/article",
+      "@type": "ScholarlyArticle",
+      "isPartOf": "http://example.com/graph",
+      "isBasedOnUrl": ["http://example.com/code"],
+      "hasPart": {
+        "@id": "http://example.com/image",
+        "@type": "Image",
+        "encoding": [
+          {
+            "@id": "http://example.com/encodingsmall",
+            "@type": "ImageObject",
+            "contentUrl": "http://example.com/small"
+            "height": "400px",
+            "width": "400px",
+            "isBasedOnUrl": ["http://example.com/encodinglarge"]
+          },
+          {
+            "@id": "http://example.com/encodinglarge",
+            "@type": "ImageObject",
+            "contentUrl": "http://example.com/large",
+            "height": "1200px",
+            "width": "1200px"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "http://example.com/code",
+      "@type": "SoftwareSourceCode",
+      "codeRepository": "http://example.com/repository",
+      "isPartOf": "http://example.com/graph"
+    }
+  ]
+}
+            </code></pre>
+            <figcaption>
+              <p>
+                A scholarly graph, detailing the context of a
+                scholarly article in JSON-LD. Here, the scholarly
+                article contains a figure available in 2 sizes and is
+                based on software source code available in a code
+                repository. The <code>schemaIsBasedOnUrl</code>
+                property also indicates that the small image was
+                derived from the large one.
+              </p>
+              <aside typeof="schema:WPSideBar">
+                To maintain good compatibility with schema.org, each
+                creative work is marked as being part of the named
+                graph with <code>schema:isPartOf</code>.
+              </aside>
+            </figcaption>
+          </figure>
+          <p>
+            A scholarly graph provides a manifest for a scholarly
+            article listing all the creative works, their encodings
+            and the relationship between these objects (expressed
+            with <code>schema:hasPart</code>
+            and <code>schema:isBasedOnUrl</code>).
+          </p>
+
+          <figure typeof="schema:Table">
+            <table>
+              <caption>
+                Subclass of <code>schema:CreativeWork</code> commonly
+                associated with a Scholarly Article.
+              </caption>
+              <thead>
+                <tr>
+                  <td>Creative Work</td>
+                  <td>Property</td>
+                  <td>Encoding</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>schema:ScholarlyArticle</code></td>
+                  <td><code>schema:encoding</code></td>
+                  <td><code>sa:DocumentObject</code></td>
+                </tr>
+                <tr>
+                  <td><code>sa:Image</code></td>
+                  <td><code>schema:encoding</code></td>
+                  <td><code>schema:ImageObject</code></td>
+                </tr>
+                <tr>
+                  <td><code>sa:Audio</code></td>
+                  <td><code>schema:encoding</code></td>
+                  <td><code>schema:AudioObject</code></td>
+                </tr>
+                <tr>
+                  <td><code>sa:Video</code></td>
+                  <td><code>schema:encoding</code></td>
+                  <td><code>schema:VideoObject</code></td>
+                </tr>
+                <tr>
+                  <td><code>schema:Dataset</code></td>
+                  <td><code>schema:distribution</code></td>
+                  <td><code>schema:DataDownload</code></td>
+                </tr>
+                <tr>
+                  <td><code>schema:Table</code></td>
+                  <td><code>schema:encoding</code></td>
+                  <td><code>sa:TableObject</code></td>
+                </tr>
+                <tr>
+                  <td><code>schema:SoftwareSourceCode</code></td>
+                  <td><code>schema:encoding</code></td>
+                  <td><code>schema:MediaObject</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </figure>
+
+        </section>
+        <section id="context">
+          <h3>Semantic context of a scholarly article</h3>
+          <p>
+            Scholarly Articles (and their associated resources) are
+            frequently tagged to improve their discoverability. For
+            instance,
+            the <a href="https://en.wikipedia.org/wiki/United_States_National_Library_of_Medicine">National
+            Library of Medicine</a> uses
+            the <a href="https://en.wikipedia.org/wiki/Medical_Subject_Headings">Medical
+            Subject Headings</a> (MeSH) controlled vocabulary to index
+            journal articles in the life sciences. Scholarly HTML
+            leverages schema.org and the <code>schema:about</code>
+            property to efficiently expose this information to search
+            engines. When possible,
+            schema.org <a href="http://schema.org/MedicalEntity">MedicalEntity</a>
+            (and subclasses) should be used to describe biomedical
+            concepts.
+          </p>
+          <figure>
+            <pre><code class="language-jsonld">
+{
+  "@context": "http://schema.org",
+  "@id": "http://example.com/article",
+  "@type": "ScholarlyArticle",
+  "about": {
+    "@id": "http://id.nlm.nih.gov/mesh/D007251",
+    "@type": "InfectiousDisease",
+    "name": "Influenza, Human",
+    "description": "An acute viral infection in humans involving the respiratory tract. It is marked by inflammation of the NASAL MUCOSA; the PHARYNX; and conjunctiva, and by headache and severe, often generalized, myalgia.",
+    "code": {
+      "@type": "MedicalCode",
+      "codeValue": "D007251",
+      "codingSystem": "MeSH"
+    },
+    "mainEntityOfPage": {
+      "@id": "#Discussion",
+    }
+  }
+}
+            </pre></code>
+            <figcaption>
+              Leveraging the <code>schema:about</code> property to
+              expose concepts about a scholarly article. Note that
+              the <code>schema:mainEntityOfPage</code> property is
+              used to specify the part of the article where the
+              concept is relevant.
+            </figcaption>
+          </figure>
+        </section>
+        <section id="hypermedia">
+          <h3>Hypermedia controls</h3>
+          <p>
+            A Scholarly Article (or any resource part of a scholarly
+            graph) can be made actionable with the addition of
+            hypermedia controls provided
+            through <a href="http://schema.org/Action">schema.org
+            actions</a>. Readers not familiar with schema.org Actions
+            should refer to
+            the <a href="http://schema.org/docs/actions.html">actions
+            overview document</a> for a quick introduction.
+          </p>
+          <figure>
+            <pre><code class="language-jsonld">
+{
+  "@context": "http://schema.org",
+  "@id": "http://example.com/article",
+  "@type": "ScholarlyArticle",
+  "potentialAction": {
+    "@type": "ReviewAction",
+    "agent-input": {
+      "@type": "PropertyValueSpecification",
+      "valueRequired": true
+    },
+    "resultReview-input": {
+      "@type": "PropertyValueSpecification",
+      "valueRequired": true
+    },
+    "target": {
+      "@type": "EntryPoint",
+      "httpMethod": "PUT",
+      "urlTemplate": "http://example.com/review"
+    }
+  }
+}
+            </pre></code>
+            <figcaption>
+              Hypermedia controls indicating how to submit a review
+              about the scholarly article.
+            </figcaption>
+        </section>
+      </section>
+      <section typeof="sa:Acknowledgements" id="acknowledgements">
+        <h2>Acknowledgements</h2>
+        <p>
+          Scholarly HTML would like to thank <a href="http://scholarlyhtml.org/">Scholarly HTML</a>
+          (you read that right) for blazing the trail perhaps a few years too soon. Particularly,
+          the following people were particularly kind and helpful:
+          <a href="https://twitter.com/ptsefton">Peter Sefton</a>,
+          <a href="https://twitter.com/blahah404">Richard Smith-Unna</a>, and
+          <a href="https://twitter.com/petermurrayrust">Peter Murray-Rust</a>.
+        </p>
+        <p>
+          PLOS has a
+          <a href="http://blogs.plos.org/mfenner/2011/03/19/a-very-brief-history-of-scholarly-html/">short
+          history of Scholarly HTML</a> that is worth reading (and would be worth updating).
+        </p>
+        <p>
+          Dan Brickley was kind enough to drop by the office to chat about our usage of
+          <a href="http://schema.org">schema.org</a> even though he was tired and hungry. As always,
+          examples involving fish tanks are the most helpful. Tzviya Siegman and Dave Cramer have
+          shared ideas that we happily stole.
+        </p>
+        <p>
+          Patrick Johnston's input has been crucial, notably in modelling authoring. We can only
+          hope that getting those details exactly right have not caused him to lose too much sleep.
+        </p>
+        <p>
+          We also received very useful feedback and pointers from: Kjetil Kjernsmo (DAHUT!), Silvio
+          Peroni, Justin Johansson, Alf Eaton, Raniere Silvia, and Mike Smith.
+        </p>
+        <p>
+          If we somehow forgot you in this list and you are too gracious to complain, we love you
+          all the same.
+        </p>
+      </section>
+      <section typeof="sa:Conclusion" id="conclusion">
+        <h2>Conclusion</h2>
+        <p>
+          Scholarly HTML is currently a work in progress and is open to change. If you have
+          feedback, simply
+          <a href="https://github.com/scienceai/scholarly.vernacular.io/issues">open an issue</a> on
+          GitHub, or <a href="https://github.com/scienceai/scholarly.vernacular.io">make a pull
+          request</a>.
+        </p>
+        <p>
+          We believe that this vernacular establishes that it is possible to capture scholarly
+          information accurately, while retaining a clean HTML structure that does minimum violence
+          to the language’s spirit.
+        </p>
+        <p>
+          The science.ai platform currently supports (most of) Scholarly HTML, but our goal is not
+          to make this a proprietary standard — quite the opposite. We would like the scholarly
+          publishing as much as possible to align with common practices so that we can all focus on
+          problems more interesting than content conversion.
+        </p>
+      </section>
+      <section typeof="sa:ReferenceList" id="references">
+        <h2>References</h2>
+        <dl>
+          <dt>NYT, 2014</dt>
+          <dd id="ref-nyt" typeof="schema:ScholarlyArticle"
+              resource="http://www.scribd.com/doc/224608514/The-Full-New-York-Times-Innovation-Report">
+            <cite property="schema:name"><a
+              href="http://www.scribd.com/doc/224608514/The-Full-New-York-Times-Innovation-Report">The
+              Full New York Times Innovation Report</a></cite>,
+            by
+            <span property="schema:author" typeof="schema:Person">
+              <span property="schema:name">New York Times</span>
+            </span>;
+            <time property="schema:datePublished" datetime="2014-03" datatype="xsd:gYearMonth">2014 Mar</time>.
+          </dd>
+          <dt>Science.AI, 2015a</dt>
+          <dd id="ref-sa-ontology" typeof="schema:ScholarlyArticle"
+              resource="https://github.com/scienceai/scholarly-article/blob/master/scholarly-article.json">
+            <cite property="schema:name"><a
+              href="https://github.com/scienceai/scholarly-article/blob/master/scholarly-article.json">The
+              Scholarly Article ontology</a></cite>,
+            by
+            <span property="schema:author" typeof="schema:Person">
+              <span property="schema:name">Science.AI</span>
+            </span>;
+            <time property="schema:datePublished" datetime="2015-09" datatype="xsd:gYearMonth">2015 Sep</time>.
+          </dd>
+          <dt>Science.AI, 2015b</dt>
+          <dd id="ref-vernacular" typeof="schema:ScholarlyArticle" resource="http://vernacular.io/">
+            <cite property="schema:name"><a href="http://vernacular.io/">Vernacular — HTML Made Special</a></cite>,
+            by
+            <span property="schema:author" typeof="schema:Person">
+              <span property="schema:name">Science.AI</span>
+            </span>;
+            <time property="schema:datePublished" datetime="2015-10" datatype="xsd:gYearMonth">2015 Oct</time>.
+          </dd>
+        </dl>
+      </section>
+    </article>
+    <footer>
+      <p>
+        <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY</a>
+        <a href="https://twitter.com/sciencedotai">@sciencedotai</a>
+        •
+        <a href="https://github.com/scienceai/scholarly.vernacular.io">Contribute</a>
+        •
+        Brought to you by the
+        <a href="http://science.ai/"><img src="sciencedotai.svg" alt="science.ai logo" height="20px"></a>
+        League of JStice
+      </p>
+    </footer>
+  </body>
+</html>
