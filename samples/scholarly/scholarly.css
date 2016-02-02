@@ -13,7 +13,7 @@
  @-epubx-page-master first-page {
    @-epubx-partition main {
 	   top: -epubx-expr(introduction.bottom-edge);
-	   column-width: 20em;
+	   column-width: 25em;
 	   column-gap: 2em;
 	   margin: 0 3em 3em;
 	   width: -epubx-expr(100% - main.margin-left - main.margin-right);
@@ -35,7 +35,7 @@
    @-epubx-partition main {
 	   -epubx-required: true;
 	   top: 0;
-	   column-width: 20em;
+	   column-width: 25em;
 	   column-gap: 2em;
 	   margin: 3em;
 	   top: 0;
@@ -88,7 +88,7 @@
 body {
   font-family: "Libre Baskerville", Times, serif;
   background: #f7f7f7;
-  color: #434343;
+  color: #282828;
 }
 header {
   border-top: 8px solid #2196f3;
@@ -131,12 +131,12 @@ section:target h2, section:target h3, article:target h1 {
   }
 }
 article {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 300;
-  line-height: 24px;
+  line-height: 1.8;
 }
 p {
-  text-align: justify;
+/*  text-align: justify; */
   -moz-hyphens: auto;
   hyphens: auto;
   widows: 2;
@@ -146,8 +146,8 @@ p {
 }
 h1, h2, h3 {
   font-variant: small-caps;
-  text-align: center;
-  font-weight: 300;
+/*  text-align: center; */
+  font-weight: 700;
   break-after: avoid;
   margin-bottom: 1em;
 }
@@ -202,9 +202,10 @@ pre, code, a[property="schema:citation"] {
   hyphens: none;
 }
 code {
-  color: #FF8C00;
+  color: #ee2200;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 0.3em;
+  margin: 0 0.2em;
   padding: 0.2em;
   background: #FDFDFD;
   display: inline;
@@ -248,6 +249,12 @@ footer img {
 
 section {
   margin-bottom: 6em;
+}
+p + section {
+  margin-top: 2em;
+}
+ul + p {
+  margin-top: 1em;
 }
 section[typeof='sa:ReferenceList'] dt {
   float: left;
@@ -420,6 +427,10 @@ aside[typeof="schema:WPSideBar"] {
   margin: 1em 0;
   font-style: italic;
   background: #F0F6FA;
+  padding: 0.5em 1em;
+}
+aside p:last-child {
+  margin-bottom: 0;
 }
 
 /* wide screen */

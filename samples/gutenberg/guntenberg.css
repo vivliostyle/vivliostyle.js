@@ -1,26 +1,32 @@
 html {
-	max-width: 70ch;
+	max-width: 90ch;
 	margin: auto;
 }
-body { margin: 10%; }
+body {
+	margin: 10%;
+	font-family: Palatino, Georgia, serif;
+}
 h1,h2,h3,h4 {
-	text-align: center;
+/*	text-align: center; */
 	margin: 2em 0;
 }
 p {
-	text-indent: 1em;
+	text-indent: 1.5em;
 	margin-top: .25em; margin-bottom: .25em;
-	text-align: justify;
+/*	text-align: justify; */
 	hyphens: auto; -moz-hyphens: auto; -ms-hyphens: auto; -webkit-hyphens: auto;
+	line-height: 1.8;
 }
 pre {
+	font-family: Courier, "Courier New", monospace;
 	font-style: italic;
-	font-size: small;
+	font-size: 14px;
 	margin-left: 2em;
 	white-space:pre-wrap;
+	line-height: 1.5;
 }
 pre.legal {
-	font-size: xx-small;
+	font-size: 13px;
 	margin-top: 8em;
 }
 hr {
@@ -34,9 +40,13 @@ a[name] {
 }
 h2 { break-after: avoid; }
 p { orphans: 2; widows: 2; }
+th, td {
+	padding: 0.25em 0;
+}
 @page {
 	font-size: small;
-	font-style: italic;
+	font-family: Palatino, Georgia, serif;
+/*	font-style: italic; */
 }
 @page :right {
 	@bottom-right { content: counter(page); }
