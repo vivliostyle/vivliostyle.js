@@ -186,7 +186,7 @@ adapt.vtree.Page.prototype.registerElementWithId = function(element, id) {
  */
 adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
 	// use size of the container of the PageMasterInstance
-	var rect = clientLayout.getElementClientRect(this.container.firstElementChild);
+	var rect = clientLayout.getElementClientRect(this.container);
 	this.dimensions.width = rect.width;
 	this.dimensions.height = rect.height;
 

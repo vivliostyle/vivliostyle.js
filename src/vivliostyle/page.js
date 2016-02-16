@@ -34,7 +34,7 @@ vivliostyle.page.resolvePageProgression = function(style) {
 
 /**
  * Represent page size.
- *  @typedef {{width: !adapt.css.Numeric, height: !adapt.css.Numeric}}
+ *  @typedef {{width: !adapt.css.Numeric, height: !adapt.css.Numeric, bleed: !adapt.css.Numeric, bleedOffset: !adapt.css.Numeric}}
  */
 vivliostyle.page.PageSize;
 
@@ -58,23 +58,28 @@ vivliostyle.page.pageSizes = {
 };
 
 /**
- * @const
- * @type {!vivliostyle.page.PageSize}
+ * Default value for bleed offset (= [distance between an edge of the page and a corner crop mark: 3mm] + [line length of a corner crop mark: 10mm])
+ * @private
+ * @const {!adapt.css.Numeric}
  */
-vivliostyle.page.fitToViewportSize = {
-    width: adapt.css.fullWidth,
-    height: adapt.css.fullHeight
-};
+vivliostyle.page.defaultBleedOffset = new adapt.css.Numeric(13, "mm");
 
 /**
  * @param {!Object.<string, adapt.csscasc.CascadeValue>} style
  * @return {!vivliostyle.page.PageSize}
  */
 vivliostyle.page.resolvePageSize = function(style) {
+    // default value (fit to viewport, no bleed)
+    /** @type {!vivliostyle.page.PageSize} */ var pageSize = {
+        width: adapt.css.fullWidth,
+        height: adapt.css.fullHeight,
+        bleed: adapt.css.numericZero,
+        bleedOffset: adapt.css.numericZero
+    };
+
     /** @type {adapt.csscasc.CascadeValue} */ var size = style["size"];
     if (!size || size.value === adapt.css.ident.auto) {
-        // if size is auto, fit to the viewport
-        return vivliostyle.page.fitToViewportSize;
+        // if size is auto, fit to the viewport (use default value)
     } else {
         /** !type {!adapt.css.Val} */ var value = size.value;
         var val1, val2;
@@ -87,30 +92,49 @@ vivliostyle.page.resolvePageSize = function(style) {
         }
         if (val1.isNumeric()) {
             // <length>{1,2}
-            return {
-                width: val1,
-                height: val2 || val1
-            };
+            pageSize.width = val1;
+            pageSize.height = val2 || val1;
         } else {
             // <page-size> || [ portrait | landscape ]
             var s = vivliostyle.page.pageSizes[/** @type {adapt.css.Ident} */ (val1).name.toLowerCase()];
             if (!s) {
-                // portrait or landscape is specified alone. fallback to fit to the viewport
-                return vivliostyle.page.fitToViewportSize;
+                // portrait or landscape is specified alone. fallback to fit to the viewport (use default value)
             } else if (val2 && val2 === adapt.css.ident.landscape) {
                 // swap
-                return {
-                    width: s.height,
-                    height: s.width
-                };
+                pageSize.width = s.height;
+                pageSize.height = s.width;
             } else {
-                return {
-                    width: s.width,
-                    height: s.height
-                };
+                //return {
+                pageSize.width = s.width;
+                pageSize.height = s.height;
             }
         }
     }
+
+    var marks = style["marks"];
+    if (marks && marks.value !== adapt.css.ident.none) {
+        pageSize.bleedOffset = vivliostyle.page.defaultBleedOffset;
+    }
+    var bleed = style["bleed"];
+    if (!bleed || bleed.value === adapt.css.ident.auto) {
+        // "('auto' value) Computes to 6pt if marks has crop and to zero otherwise."
+        // https://drafts.csswg.org/css-page/#valdef-page-bleed-auto
+        if (marks) {
+            var hasCrop = false;
+            if (marks.value.isSpaceList()) {
+                hasCrop = marks.value.values.some(function(v) { return v === adapt.css.ident.crop});
+            } else {
+                hasCrop = marks.value === adapt.css.ident.crop;
+            }
+            if (hasCrop) {
+                pageSize.bleed = new adapt.css.Numeric(6, "pt");
+            }
+        }
+    } else if (bleed.value && bleed.value.isNumeric()) {
+        pageSize.bleed = /** @type {!adapt.css.Numeric} */ (bleed.value);
+    }
+
+    return pageSize;
 };
 
 /**

@@ -704,7 +704,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 
     // Resolve page size before page master selection.
     var cascadedPageStyle = self.pageManager.getCascadedPageStyle();
-    self.setPageSize(cascadedPageStyle);
+    self.setPageSizeAndBleed(cascadedPageStyle, page);
     var pageMaster = self.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
     	// end of primary content
@@ -760,24 +760,29 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 };
 
 /**
- * Set actual page width & height from style specified in page context.
+ * Set actual page width, height and bleed from style specified in page context.
  * @private
  * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle
+ * @param {adapt.vtree.Page} page
  */
-adapt.ops.StyleInstance.prototype.setPageSize = function(cascadedPageStyle) {
+adapt.ops.StyleInstance.prototype.setPageSizeAndBleed = function(cascadedPageStyle, page) {
     var pageSize = vivliostyle.page.resolvePageSize(cascadedPageStyle);
+	var bleed = pageSize.bleed.num * this.queryUnitSize(pageSize.bleed.unit, false);
+	var bleedOffset = pageSize.bleedOffset.num * this.queryUnitSize(pageSize.bleedOffset.unit, false);
+	var cropOffset = bleed + bleedOffset;
     var width = pageSize.width;
     if (width === adapt.css.fullWidth) {
-        this.actualPageWidth = null;
+        this.actualPageWidth = (this.pref.spreadView ? Math.floor(this.viewportWidth / 2) - this.pref.pageBorder : this.viewportWidth) - cropOffset * 2;
     } else {
         this.actualPageWidth = width.num * this.queryUnitSize(width.unit, false);
     }
     var height = pageSize.height;
     if (height === adapt.css.fullHeight) {
-        this.actualPageHeight = null;
+        this.actualPageHeight = this.viewportHeight - cropOffset * 2;
     } else {
         this.actualPageHeight = height.num * this.queryUnitSize(height.unit, false);
     }
+	page.container.style.padding = cropOffset + "px";
 };
 
 /**

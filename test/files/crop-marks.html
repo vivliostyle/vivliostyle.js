@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crop marks and bleed</title>
+    <style>
+        @page {
+/*            size: A4;*/
+            bleed: 5mm;
+            marks: crop cross;
+            margin: 0;
+        }
+        body {
+            margin: 0;
+            font-size: 200%;
+        }
+        div {
+/*            width: 210mm;
+            height: 297mm;*/
+            background: #CFC;
+        }
+    </style>
+</head>
+<body>
+<div>This green div has 210mm width and 297mm height.</div>
+</body>
+</html>
