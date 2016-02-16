@@ -3,12 +3,12 @@
  */
 
 @media print {
-    [data-vivliostyle-viewer-viewport] > div, [data-vivliostyle-viewer-viewport] > div > div, [data-vivliostyle-viewer-viewport] > div > div > div {
+    [data-vivliostyle-outer-zoom-box], [data-vivliostyle-spread-container], [data-vivliostyle-page-container] {
         width: 100% !important;
         height: 100% !important;
     }
 
-    [data-vivliostyle-viewer-viewport] > div > div {
+    [data-vivliostyle-spread-container] {
         -moz-transform: none !important;
         -ms-transform: none !important;
         -webkit-transform: none !important;
@@ -16,7 +16,7 @@
     }
 
     /* Workaround for Chrome printing problem */
-    [data-vivliostyle-viewer-viewport] > div > div > div {
+    [data-vivliostyle-page-container] {
         display: block !important;
         page-break-after: always;
     }
@@ -32,7 +32,7 @@
         background: #AAAAAA;
     }
 
-    [data-vivliostyle-viewer-viewport] > div > div > div {
+    [data-vivliostyle-page-container] {
         background: white;
     }
 
@@ -41,14 +41,14 @@
         display: flex;
     }
 
-    [data-vivliostyle-viewer-viewport] > div {
+    [data-vivliostyle-outer-zoom-box] {
         margin: auto;
         overflow: visible;
         -webkit-flex: none;
         flex: none;
     }
 
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-viewer-status=complete] > div > div {
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-viewer-status=complete] [data-vivliostyle-spread-container] {
         display: -webkit-flex;
         display: flex;
         -webkit-flex: none;
@@ -61,29 +61,29 @@
         transform-origin: left top;
     }
 
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=ltr] > div > div {
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=ltr] [data-vivliostyle-spread-container] {
         -webkit-flex-direction: row;
         flex-direction: row;
     }
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=rtl] > div > div {
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=rtl] [data-vivliostyle-spread-container] {
         -webkit-flex-direction: row-reverse;
         flex-direction: row-reverse;
     }
 
-    [data-vivliostyle-viewer-viewport] > div > div > div {
+    [data-vivliostyle-viewer-viewport] [data-vivliostyle-page-container] {
         margin: 0 auto;
         -webkit-flex: none;
         flex: none;
     }
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] > div > div > div[data-vivliostyle-page-side=left] {
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-page-side=left] {
         margin-right: 1px;
         transform-origin: right center;
     }
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] >div > div > div[data-vivliostyle-page-side=right] {
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-page-side=right] {
         margin-left: 1px;
         transform-origin: left center;
     }
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] > div > div > div[data-vivliostyle-unpaired-page=true] {
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-unpaired-page=true] {
         margin-left: auto;
         margin-right: auto;
         transform-origin: center center;

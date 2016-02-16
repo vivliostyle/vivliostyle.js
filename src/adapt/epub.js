@@ -1355,6 +1355,7 @@ adapt.epub.OPFView.prototype.navigateTo = function(href) {
 adapt.epub.OPFView.prototype.makePage = function(viewItem, pos) {
 	var viewport = viewItem.instance.viewport;
     var pageCont = /** @type {HTMLElement} */ (viewport.document.createElement("div"));
+	pageCont.setAttribute("data-vivliostyle-page-container", true);
     viewport.contentContainer.appendChild(pageCont);
     pageCont.style.position = "relative";
 	if (!vivliostyle.constants.isDebug) {
