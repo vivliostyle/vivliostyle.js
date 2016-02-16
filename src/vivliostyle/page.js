@@ -67,11 +67,11 @@ vivliostyle.page.fitToViewportSize = {
 };
 
 /**
- * @param {!Object.<string, adapt.css.Val>} style
+ * @param {!Object.<string, adapt.csscasc.CascadeValue>} style
  * @return {!vivliostyle.page.PageSize}
  */
 vivliostyle.page.resolvePageSize = function(style) {
-    /** @type {adapt.css.Val} */ var size = style["size"];
+    /** @type {adapt.csscasc.CascadeValue} */ var size = style["size"];
     if (!size || size.value === adapt.css.ident.auto) {
         // if size is auto, fit to the viewport
         return vivliostyle.page.fitToViewportSize;
