@@ -893,12 +893,14 @@ adapt.epub.OPFViewItem;
  * @param {adapt.vgen.Viewport} viewport
  * @param {adapt.font.Mapper} fontMapper
  * @param {adapt.expr.Preferences} pref
+ * @param {!function(!Object<string, !{width: number, height: number}>, number, number)} pageSheetSizeReporter
  * @implements {adapt.vgen.CustomRendererFactory}
  */
-adapt.epub.OPFView = function(opf, viewport, fontMapper, pref) {
+adapt.epub.OPFView = function(opf, viewport, fontMapper, pref, pageSheetSizeReporter) {
 	/** @const */ this.opf = opf;
 	/** @const */ this.viewport = viewport;
 	/** @const */ this.fontMapper = fontMapper;
+	/** @const */ this.pageSheetSizeReporter = pageSheetSizeReporter;
 	/** @type {Array.<adapt.epub.OPFViewItem>} */ this.spineItems = [];
 	/** @type {number} */ this.spineIndex = 0;
 	/** @type {number} */ this.pageIndex = 0;
@@ -999,8 +1001,10 @@ adapt.epub.OPFView.prototype.renderPage = function() {
                 page.container.style.visibility = "visible";
                 page.container.setAttribute("data-vivliostyle-page-side", /** @type {string} */ (page.side));
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
+				var pageIndex = pos ? pos.page - 1 : viewItem.layoutPositions.length - 1;
+				self.pageSheetSizeReporter(viewItem.instance.pageSheetSize, viewItem.item.spineIndex, pageIndex);
 			    if (pos) {
-                    viewItem.pages[pos.page - 1] = page;
+                    viewItem.pages[pageIndex] = page;
 			    	viewItem.layoutPositions.push(pos);
 			    	if (seekOffset >= 0) {
 			    		// Searching for offset, don't know the page number.
@@ -1012,17 +1016,17 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 			    			return;
 			    		}
 			    	}
-                    page.isFirstPage = viewItem.item.spineIndex == 0 && pos.page - 1 == 0;
+                    page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
 			    	loopFrame.continueLoop();
 			    } else {
                     viewItem.pages.push(page);
 			    	resultPage = page;
-			    	self.pageIndex = viewItem.layoutPositions.length - 1;
+			    	self.pageIndex = pageIndex;
 			    	if (seekOffset < 0) {
 			    		self.offsetInItem = page.offset;
 			    	}
 			    	viewItem.complete = true;
-					page.isFirstPage = viewItem.item.spineIndex == 0 && self.pageIndex == 0;
+					page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
 					page.isLastPage = viewItem.item.spineIndex == self.opf.spine.length - 1;
 					loopFrame.breakLoop();
 			    }
@@ -1043,15 +1047,17 @@ adapt.epub.OPFView.prototype.renderPage = function() {
                 page.container.style.visibility = "visible";
                 page.container.setAttribute("data-vivliostyle-page-side", /** @type {string} */ (page.side));
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
+				var pageIndex = pos ? pos.page - 1 : viewItem.layoutPositions.length - 1;
+				self.pageSheetSizeReporter(viewItem.instance.pageSheetSize, viewItem.item.spineIndex, pageIndex);
 			    if (pos) {
-                    viewItem.pages[pos.page - 1] = page;
+                    viewItem.pages[pageIndex] = page;
 			    	viewItem.layoutPositions[self.pageIndex + 1] = pos;
 			    } else {
                     viewItem.pages.push(page);
 			    	viewItem.complete = true;
 			    	page.isLastPage = viewItem.item.spineIndex == self.opf.spine.length - 1;
 			    }
-				page.isFirstPage = viewItem.item.spineIndex == 0 && self.pageIndex == 0;
+				page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
 			    frame.finish(page);
 		    });
 		});		    

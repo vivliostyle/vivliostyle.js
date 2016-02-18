@@ -2,16 +2,16 @@ describe("page", function() {
     var module = vivliostyle.page;
     var expected;
 
-    beforeEach(function() {
-        expected = {
-            width: adapt.css.fullWidth,
-            height: adapt.css.fullHeight,
-            bleed: adapt.css.numericZero,
-            bleedOffset: adapt.css.numericZero
-        };
-    });
-
     describe("resolvePageSize", function() {
+        beforeEach(function() {
+            expected = {
+                width: adapt.css.fullWidth,
+                height: adapt.css.fullHeight,
+                bleed: adapt.css.numericZero,
+                bleedOffset: adapt.css.numericZero
+            };
+        });
+
         it("has fullWidth and fullHeight when nothing specified", function() {
             var resolved = module.resolvePageSize({});
             expect(resolved).toEqual(expected);
@@ -141,4 +141,107 @@ describe("page", function() {
             expect(resolved).toEqual(expected);
         });
     });
+
+    describe("PageParserHandler", function() {
+        var pageProps, handler;
+
+        function createHandler() {
+            return new vivliostyle.page.PageParserHandler(null, new adapt.cssparse.DispatchParserHandler(), null, null, pageProps);
+        }
+
+        beforeEach(function() {
+            pageProps = {};
+            handler = createHandler();
+        });
+
+        it("'bleed' and 'marks' specified in @page rule without page selectors are effective", function() {
+            handler.startSelectorRule();
+            handler.startRuleBody();
+            handler.simpleProperty("size", new adapt.css.Numeric(100, "px"));
+            handler.simpleProperty("bleed", new adapt.css.Numeric(10, "px"));
+            handler.simpleProperty("marks", adapt.css.ident.crop);
+            handler.endRule();
+
+            expect(pageProps[""].size.value).toEqual(new adapt.css.Numeric(100, "px"));
+            expect(pageProps[""].bleed.value).toEqual(new adapt.css.Numeric(10, "px"));
+            expect(pageProps[""].marks.value).toBe(adapt.css.ident.crop);
+        });
+
+        it("'bleed' and 'marks' specified in @page rules with page selectors are ignored", function() {
+            handler.startSelectorRule();
+            handler.pseudoclassSelector("left", null);
+            handler.startRuleBody();
+            handler.simpleProperty("size", new adapt.css.Numeric(120, "px"));
+            handler.simpleProperty("bleed", new adapt.css.Numeric(20, "px"));
+            handler.simpleProperty("marks", adapt.css.ident.cross);
+            handler.endRule();
+
+            handler = createHandler();
+            handler.startSelectorRule();
+            handler.startRuleBody();
+            handler.simpleProperty("size", new adapt.css.Numeric(100, "px"));
+            handler.simpleProperty("bleed", new adapt.css.Numeric(10, "px"));
+            handler.simpleProperty("marks", adapt.css.ident.crop);
+            handler.endRule();
+
+            handler = createHandler();
+            handler.startSelectorRule();
+            handler.pseudoclassSelector("right", null);
+            handler.startRuleBody();
+            handler.simpleProperty("size", new adapt.css.Numeric(130, "px"));
+            handler.simpleProperty("bleed", new adapt.css.Numeric(30, "px"));
+            handler.simpleProperty("marks", adapt.css.ident.cross);
+            handler.endRule();
+
+            // multiple selectors separated by comma
+            handler = createHandler();
+            handler.startSelectorRule();
+            handler.pseudoclassSelector("first", null);
+            handler.nextSelector();
+            handler.tagSelector(null, "foo");
+            handler.startRuleBody();
+            handler.simpleProperty("size", new adapt.css.Numeric(140, "px"));
+            handler.simpleProperty("bleed", new adapt.css.Numeric(40, "px"));
+            handler.simpleProperty("marks", adapt.css.ident.cross);
+            handler.endRule();
+
+            // a selector with a name and multiple page pseudo classes
+            handler = createHandler();
+            handler.startSelectorRule();
+            handler.pseudoclassSelector("left", null);
+            handler.pseudoclassSelector("first", null);
+            handler.tagSelector(null, "bar");
+            handler.startRuleBody();
+            handler.simpleProperty("size", new adapt.css.Numeric(150, "px"));
+            handler.simpleProperty("bleed", new adapt.css.Numeric(50, "px"));
+            handler.simpleProperty("marks", adapt.css.ident.cross);
+            handler.endRule();
+
+            expect(pageProps[""].size.value).toEqual(new adapt.css.Numeric(100, "px"));
+            expect(pageProps[""].bleed.value).toEqual(new adapt.css.Numeric(10, "px"));
+            expect(pageProps[""].marks.value).toBe(adapt.css.ident.crop);
+
+            expect(pageProps[":left"].size.value).toEqual(new adapt.css.Numeric(120, "px"));
+            expect(pageProps[":left"].bleed.value).toEqual(new adapt.css.Numeric(10, "px"));
+            expect(pageProps[":left"].marks.value).toBe(adapt.css.ident.crop);
+
+            expect(pageProps[":right"].size.value).toEqual(new adapt.css.Numeric(130, "px"));
+            expect(pageProps[":right"].bleed.value).toEqual(new adapt.css.Numeric(10, "px"));
+            expect(pageProps[":right"].marks.value).toBe(adapt.css.ident.crop);
+
+            expect(pageProps[":first"].size.value).toEqual(new adapt.css.Numeric(140, "px"));
+            expect(pageProps[":first"].bleed.value).toEqual(new adapt.css.Numeric(10, "px"));
+            expect(pageProps[":first"].marks.value).toBe(adapt.css.ident.crop);
+
+            expect(pageProps["foo"].size.value).toEqual(new adapt.css.Numeric(140, "px"));
+            expect(pageProps["foo"].bleed.value).toEqual(new adapt.css.Numeric(10, "px"));
+            expect(pageProps["foo"].marks.value).toBe(adapt.css.ident.crop);
+
+            expect(pageProps["bar:first:left"].size.value).toEqual(new adapt.css.Numeric(150, "px"));
+            expect(pageProps["bar:first:left"].bleed.value).toEqual(new adapt.css.Numeric(10, "px"));
+            expect(pageProps["bar:first:left"].marks.value).toBe(adapt.css.ident.crop);
+        });
+
+    });
+
 });

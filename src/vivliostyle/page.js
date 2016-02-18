@@ -4,6 +4,7 @@
  */
 goog.provide("vivliostyle.page");
 
+goog.require("goog.asserts");
 goog.require("vivliostyle.constants");
 goog.require("adapt.expr");
 goog.require("adapt.css");
@@ -1847,17 +1848,23 @@ vivliostyle.page.mergeInPageRule = function(context, target, style, specificity,
 };
 
 /**
+ * ParserHandler for @page rules. It handles properties specified with page contexts.
+ * It also does basic cascading (which can be done without information other than the page rules themselves) and stores the result in `pageProps` object as a map from page selectors to sets of properties. This result is later used for adding @page rules to the real DOM, which are then used by the PDF renderer (Chromium) to determine page sizes.
  * @param {!adapt.expr.LexicalScope} scope
  * @param {!adapt.cssparse.DispatchParserHandler} owner
  * @param {!adapt.csscasc.CascadeParserHandler} parent
  * @param {adapt.cssvalid.ValidatorSet} validatorSet
+ * @param {!Object.<string,!adapt.csscasc.ElementStyle>} pageProps
  * @constructor
  * @extends {adapt.csscasc.CascadeParserHandler}
  * @implements {adapt.cssvalid.PropertyReceiver}
  */
-vivliostyle.page.PageParserHandler = function(scope, owner, parent, validatorSet) {
+vivliostyle.page.PageParserHandler = function(scope, owner, parent, validatorSet, pageProps) {
     adapt.csscasc.CascadeParserHandler.call(this, scope, owner, null, parent, null, validatorSet, false);
-    /** @type {string} */ this.pageSizeRules = "";
+    /** @private @const */ this.pageProps = pageProps;
+    /** @private @const {!Array<{selectors: ?Array<string>, specificity: number}>} */ this.currentPageSelectors = [];
+    /** @private @type {string} */ this.currentNamedPageSelector = "";
+    /** @private @type {!Array<string>} */ this.currentPseudoPageClassSelectors = [];
 };
 goog.inherits(vivliostyle.page.PageParserHandler, adapt.csscasc.CascadeParserHandler);
 
@@ -1865,7 +1872,6 @@ goog.inherits(vivliostyle.page.PageParserHandler, adapt.csscasc.CascadeParserHan
  * @override
  */
 vivliostyle.page.PageParserHandler.prototype.startPageRule = function() {
-    this.pageSizeRules += "@page ";
     this.startSelectorRule();
 };
 
@@ -1873,7 +1879,8 @@ vivliostyle.page.PageParserHandler.prototype.startPageRule = function() {
  * @override
  */
 vivliostyle.page.PageParserHandler.prototype.tagSelector = function(ns, name) {
-    this.pageSizeRules += name;
+    goog.asserts.assert(name);
+    this.currentNamedPageSelector = name;
     if (name) {
         this.chain.push(new vivliostyle.page.CheckPageTypeAction(name));
         this.specificity += 0x10000;
@@ -1887,7 +1894,7 @@ vivliostyle.page.PageParserHandler.prototype.pseudoclassSelector = function(name
     if (params) {
         this.reportAndSkip("E_INVALID_PAGE_SELECTOR :" + name + "(" + params.join("") + ")");
     }
-    this.pageSizeRules += ":" + name;
+    this.currentPseudoPageClassSelectors.push(":" + name);
     switch (name.toLowerCase()) {
         case "first":
             this.chain.push(new vivliostyle.page.IsFirstPageAction(this.scope));
@@ -1916,58 +1923,90 @@ vivliostyle.page.PageParserHandler.prototype.pseudoclassSelector = function(name
 };
 
 /**
+ * Save currently processed selector and reset variables.
+ * @private
+ */
+vivliostyle.page.PageParserHandler.prototype.finishSelector = function() {
+    var selectors;
+    if (!this.currentNamedPageSelector && !(this.currentPseudoPageClassSelectors.length)) {
+        selectors = null;
+    } else {
+        selectors = [this.currentNamedPageSelector].concat(this.currentPseudoPageClassSelectors.sort());
+    }
+    this.currentPageSelectors.push({selectors: selectors, specificity: this.specificity});
+    this.currentNamedPageSelector = "";
+    this.currentPseudoPageClassSelectors = [];
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageParserHandler.prototype.nextSelector = function() {
+    this.finishSelector();
+    adapt.csscasc.CascadeParserHandler.prototype.nextSelector.call(this);
+};
+
+/**
  * @override
  */
 vivliostyle.page.PageParserHandler.prototype.startRuleBody = function() {
-    this.pageSizeRules += "{";
+    this.finishSelector();
     adapt.csscasc.CascadeParserHandler.prototype.startRuleBody.call(this);
 };
 
 /**
  * @override
  */
-vivliostyle.page.PageParserHandler.prototype.endRule = function() {
-    this.pageSizeRules += "}";
+vivliostyle.page.PageParserHandler.prototype.simpleProperty = function(name, value, important) {
+    // we limit 'bleed' and 'marks' to be effective only when specified without page selectors
+    if ((name === "bleed" || name === "marks") && !this.currentPageSelectors.some(function(s) {
+            return s.selectors === null;
+        })) {
+        return;
+    }
 
-    // TODO This output to the style element should be done in an upper (view) layer
-    document.getElementById("vivliostyle-page-rules").textContent += this.pageSizeRules;
+    adapt.csscasc.CascadeParserHandler.prototype.simpleProperty.call(this, name, value, important);
 
-    adapt.csscasc.CascadeParserHandler.prototype.endRule.call(this);
-};
+    var cascVal = adapt.csscasc.getProp(this.elementStyle, name);
+    var pageProps = this.pageProps;
 
-/**
- * @override
- */
-vivliostyle.page.PageParserHandler.prototype.property = function(name, value, important) {
-    if (name === "size") {
-        var landscape = value.isSpaceList() && value.values[1] === adapt.css.ident.landscape;
-        var valueStr = (landscape ? value.values[0] : value).toString().toLowerCase();
-        var presetValue = vivliostyle.page.pageSizes[valueStr];
-        if (presetValue) {
-            if (valueStr === "a5"
-                || valueStr === "a4"
-                || valueStr === "a3"
-                || valueStr === "b5"
-                || valueStr === "b4"
-                || valueStr === "letter"
-                || valueStr === "legal"
-                || valueStr === "ledger") {
-                if (landscape) {
-                    valueStr += " landscape";
+    if (name === "bleed" || name === "marks") {
+        if (!pageProps[""]) {
+            pageProps[""] = /** @type {!adapt.csscasc.ElementStyle} */ ({});
+        }
+        // we can simply overwrite without considering specificity
+        // since 'bleed' and 'marks' always come from a page rule without page selectors.
+        Object.keys(pageProps).forEach(function(selector) {
+            adapt.csscasc.setProp(pageProps[selector], name, cascVal);
+        });
+    } else if (name === "size") {
+        var noPageSelectorProps = pageProps[""];
+        this.currentPageSelectors.forEach(function(s) {
+            // update specificity to reflect the specificity of the selector
+            var result = new adapt.csscasc.CascadeValue(cascVal.value, cascVal.priority + s.specificity);
+            var selector = s.selectors ? s.selectors.join("") : "";
+            var props = pageProps[selector];
+            if (!props) {
+                // since no properties for this selector have been stored before,
+                // we can simply set the 'size', 'bleed' and 'marks' properties.
+                props = pageProps[selector] = /** @type {!adapt.csscasc.ElementStyle} */ ({});
+                adapt.csscasc.setProp(props, name, result);
+                if (noPageSelectorProps) {
+                    ["bleed", "marks"].forEach(function (n) {
+                        if (noPageSelectorProps[n]) {
+                            adapt.csscasc.setProp(props, n, noPageSelectorProps[n]);
+                        }
+                    }, this);
                 }
             } else {
-                var width = presetValue.width.stringValue();
-                var height = presetValue.height.stringValue();
-                if (landscape) {
-                    valueStr = height + " " + width;
-                } else {
-                    valueStr = width + " " + height;
-                }
+                // consider specificity when setting 'size' property.
+                // we don't have to set 'bleed' and 'marks' since they should have been already updated.
+                var prevCascVal = adapt.csscasc.getProp(props, name);
+                result = prevCascVal ? adapt.csscasc.cascadeValues(null, result, prevCascVal) : result;
+                adapt.csscasc.setProp(props, name, result);
             }
-        }
-        this.pageSizeRules += "size: " + valueStr + (important ? " !important" : "") + ";";
+        }, this);
     }
-    adapt.csscasc.CascadeParserHandler.prototype.property.call(this, name, value, important);
 };
 
 /**
