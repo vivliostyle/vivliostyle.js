@@ -6,6 +6,7 @@ module.exports = function(config) {
         "test/util/dom.js",
         "test/util/matchers.js",
         "test/util/mock/vivliostyle/logging-mock.js",
+        "test/util/mock/vivliostyle/plugin-mock.js",
         "test/spec/**/*.js"
     ];
     return {
