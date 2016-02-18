@@ -1360,16 +1360,19 @@ adapt.epub.OPFView.prototype.navigateTo = function(href) {
  */
 adapt.epub.OPFView.prototype.makePage = function(viewItem, pos) {
 	var viewport = viewItem.instance.viewport;
+
     var pageCont = /** @type {HTMLElement} */ (viewport.document.createElement("div"));
 	pageCont.setAttribute("data-vivliostyle-page-container", true);
-    viewport.contentContainer.appendChild(pageCont);
-    pageCont.style.position = "relative";
 	if (!vivliostyle.constants.isDebug) {
 		pageCont.style.visibility = "hidden";
 	}
-    pageCont.style.left = "0px";
-    pageCont.style.top = "0px";
-    var page = new adapt.vtree.Page(pageCont);
+	viewport.contentContainer.appendChild(pageCont);
+
+	var bleedBox = /** @type {HTMLElement} */ (viewport.document.createElement("div"));
+	bleedBox.setAttribute("data-vivliostyle-bleed-box", true);
+	pageCont.appendChild(bleedBox);
+
+    var page = new adapt.vtree.Page(pageCont, bleedBox);
     page.spineIndex = viewItem.item.spineIndex;
     page.position = pos;
     page.offset = viewItem.instance.getPosition(pos);

@@ -165,7 +165,7 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
 	}
 	var self = this;
 	/** @type {!adapt.task.Frame.<adapt.vtree.Page>} */ var frame = adapt.task.newFrame("showTOC");
-	var page = new adapt.vtree.Page(elem);
+	var page = new adapt.vtree.Page(elem, elem);
 	this.page = page;
     this.store.load(this.url).then(function (xmldoc) {
     	var style = self.store.getStyleForDoc(xmldoc);

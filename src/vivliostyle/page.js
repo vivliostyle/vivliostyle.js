@@ -1315,9 +1315,7 @@ vivliostyle.page.PageMarginBoxPartitionInstance.prototype.positionAndSizeAlongFi
         var insideName = names.inside;
         var outsideName = names.outside;
         var extentName = names.extent;
-        // Reduce page margin by 2px: workaround for Chrome printing problem.
-        // https://github.com/vivliostyle/vivliostyle.js/issues/97
-        var pageMargin = adapt.expr.sub(scope, dim["margin" + outsideName.charAt(0).toUpperCase() + outsideName.substring(1)], new adapt.expr.Const(scope, 2));
+        var pageMargin = dim["margin" + outsideName.charAt(0).toUpperCase() + outsideName.substring(1)];
         var marginInside = adapt.pm.toExprZeroAuto(scope, style["margin-" + insideName], pageMargin);
         var marginOutside = adapt.pm.toExprZeroAuto(scope, style["margin-" + outsideName], pageMargin);
         var paddingInside = adapt.pm.toExprZero(scope, style["padding-" + insideName], pageMargin);

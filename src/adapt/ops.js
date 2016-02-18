@@ -711,7 +711,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
         self.styler.replayFlowElementsFromOffset(-1);
     }
     if (this.lang) {
-    	page.container.setAttribute("lang", this.lang);
+    	page.bleedBox.setAttribute("lang", this.lang);
     }
     cp = self.currentLayoutPosition;
     cp.page++;
@@ -743,14 +743,14 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
     	= adapt.task.newFrame("layoutNextPage");
 	frame.loopWithFrame(function(loopFrame) {
-		self.layoutContainer(page, pageMaster, page.container, 0, 0, exclusions.concat(), pageFloatHolder).then(function() {
+		self.layoutContainer(page, pageMaster, page.bleedBox, 0, 0, exclusions.concat(), pageFloatHolder).then(function() {
 			if (pageFloatHolder.hasNewlyAddedFloats()) {
 				exclusions = exclusions.concat(pageFloatHolder.getShapesOfNewlyAddedFloats());
 				pageFloatHolder.clearNewlyAddedFloats();
 				cp = self.currentLayoutPosition = currentLayoutPosition.clone();
 				var c;
-				while (c = page.container.lastChild) {
-					page.container.removeChild(c);
+				while (c = page.bleedBox.lastChild) {
+					page.bleedBox.removeChild(c);
 				}
 				loopFrame.continueLoop();
 			} else {
@@ -777,7 +777,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 /**
  * Resolve actual page width, height and bleed from style specified in page context.
  * @param cascadedPageStyle
- * @returns {!{pageWidth: number, pageHeight: number, cropOffset: number}}
+ * @returns {!{pageWidth: number, pageHeight: number, bleed: number, bleedOffset: number, cropOffset: number}}
  */
 adapt.ops.StyleInstance.prototype.resolvePageSizeAndBleed = function(cascadedPageStyle) {
 	var resolved = {};
@@ -797,6 +797,8 @@ adapt.ops.StyleInstance.prototype.resolvePageSizeAndBleed = function(cascadedPag
 	} else {
 		resolved.pageHeight = height.num * this.queryUnitSize(height.unit, false);
 	}
+	resolved.bleed = bleed;
+	resolved.bleedOffset = bleedOffset;
 	resolved.cropOffset = cropOffset;
 	return resolved;
 };
@@ -811,9 +813,13 @@ adapt.ops.StyleInstance.prototype.setPageSizeAndBleed = function(cascadedPageSty
 	var resolved = this.resolvePageSizeAndBleed(cascadedPageStyle);
 	this.actualPageWidth = resolved.pageWidth;
 	this.actualPageHeight = resolved.pageHeight;
-	page.container.style.padding = resolved.cropOffset + "px";
-	page.container.style.width = resolved.pageWidth + "px";
-	page.container.style.height = resolved.pageHeight + "px";
+	page.container.style.width = (resolved.pageWidth + resolved.cropOffset * 2) + "px";
+	page.container.style.height = (resolved.pageHeight + resolved.cropOffset * 2) + "px";
+	page.bleedBox.style.left = resolved.bleedOffset + "px";
+	page.bleedBox.style.right = resolved.bleedOffset + "px";
+	page.bleedBox.style.top = resolved.bleedOffset + "px";
+	page.bleedBox.style.bottom = resolved.bleedOffset + "px";
+	page.bleedBox.style.padding = resolved.bleed + "px";
 };
 
 /**

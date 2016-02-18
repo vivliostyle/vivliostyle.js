@@ -2,8 +2,21 @@
  * Copyright 2015 Vivliostyle Inc.
  */
 
+[data-vivliostyle-page-container] {
+    position: relative;
+    overflow: hidden;
+    max-height: 100%;
+}
+
+[data-vivliostyle-bleed-box] {
+    position: absolute;
+    overflow: hidden;
+    max-width: 100%;
+    max-height: 100%;
+}
+
 @media print {
-    [data-vivliostyle-outer-zoom-box], [data-vivliostyle-spread-container], [data-vivliostyle-page-container] {
+    [data-vivliostyle-outer-zoom-box], [data-vivliostyle-spread-container] {
         width: 100% !important;
         height: 100% !important;
     }
@@ -15,15 +28,9 @@
         transform: none !important;
     }
 
-    /* Workaround for Chrome printing problem */
     [data-vivliostyle-page-container] {
         display: block !important;
         page-break-after: always;
-    }
-    /* Workaround for Chrome printing problem */
-    [data-vivliostyle-page-box] {
-        padding-bottom: 0 !important;
-        overflow: visible !important;
     }
 }
 
