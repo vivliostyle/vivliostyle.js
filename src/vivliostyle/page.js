@@ -35,7 +35,7 @@ vivliostyle.page.resolvePageProgression = function(style) {
 
 /**
  * Represent page size.
- *  @typedef {{width: !adapt.css.Numeric, height: !adapt.css.Numeric, bleed: !adapt.css.Numeric, bleedOffset: !adapt.css.Numeric}}
+ *  @typedef {{width: !adapt.css.Numeric, height: !adapt.css.Numeric}}
  */
 vivliostyle.page.PageSize;
 
@@ -66,12 +66,18 @@ vivliostyle.page.pageSizes = {
 vivliostyle.page.defaultBleedOffset = new adapt.css.Numeric(13, "mm");
 
 /**
- * @param {!Object.<string, adapt.csscasc.CascadeValue>} style
- * @return {!vivliostyle.page.PageSize}
+ * Represent page size and bleed information.
+ *  @typedef {{width: !adapt.css.Numeric, height: !adapt.css.Numeric, bleed: !adapt.css.Numeric, bleedOffset: !adapt.css.Numeric}}
  */
-vivliostyle.page.resolvePageSize = function(style) {
+vivliostyle.page.PageSizeAndBleed;
+
+/**
+ * @param {!Object.<string, adapt.csscasc.CascadeValue>} style
+ * @return {!vivliostyle.page.PageSizeAndBleed}
+ */
+vivliostyle.page.resolvePageSizeAndBleed = function(style) {
     // default value (fit to viewport, no bleed)
-    /** @type {!vivliostyle.page.PageSize} */ var pageSize = {
+    /** @type {!vivliostyle.page.PageSizeAndBleed} */ var pageSizeAndBleed = {
         width: adapt.css.fullWidth,
         height: adapt.css.fullHeight,
         bleed: adapt.css.numericZero,
@@ -93,8 +99,8 @@ vivliostyle.page.resolvePageSize = function(style) {
         }
         if (val1.isNumeric()) {
             // <length>{1,2}
-            pageSize.width = val1;
-            pageSize.height = val2 || val1;
+            pageSizeAndBleed.width = val1;
+            pageSizeAndBleed.height = val2 || val1;
         } else {
             // <page-size> || [ portrait | landscape ]
             var s = vivliostyle.page.pageSizes[/** @type {adapt.css.Ident} */ (val1).name.toLowerCase()];
@@ -102,19 +108,19 @@ vivliostyle.page.resolvePageSize = function(style) {
                 // portrait or landscape is specified alone. fallback to fit to the viewport (use default value)
             } else if (val2 && val2 === adapt.css.ident.landscape) {
                 // swap
-                pageSize.width = s.height;
-                pageSize.height = s.width;
+                pageSizeAndBleed.width = s.height;
+                pageSizeAndBleed.height = s.width;
             } else {
                 //return {
-                pageSize.width = s.width;
-                pageSize.height = s.height;
+                pageSizeAndBleed.width = s.width;
+                pageSizeAndBleed.height = s.height;
             }
         }
     }
 
     var marks = style["marks"];
     if (marks && marks.value !== adapt.css.ident.none) {
-        pageSize.bleedOffset = vivliostyle.page.defaultBleedOffset;
+        pageSizeAndBleed.bleedOffset = vivliostyle.page.defaultBleedOffset;
     }
     var bleed = style["bleed"];
     if (!bleed || bleed.value === adapt.css.ident.auto) {
@@ -128,14 +134,48 @@ vivliostyle.page.resolvePageSize = function(style) {
                 hasCrop = marks.value === adapt.css.ident.crop;
             }
             if (hasCrop) {
-                pageSize.bleed = new adapt.css.Numeric(6, "pt");
+                pageSizeAndBleed.bleed = new adapt.css.Numeric(6, "pt");
             }
         }
     } else if (bleed.value && bleed.value.isNumeric()) {
-        pageSize.bleed = /** @type {!adapt.css.Numeric} */ (bleed.value);
+        pageSizeAndBleed.bleed = /** @type {!adapt.css.Numeric} */ (bleed.value);
     }
 
-    return pageSize;
+    return pageSizeAndBleed;
+};
+
+/**
+ * @typedef {{pageWidth: number, pageHeight: number, bleed: number, bleedOffset: number, cropOffset: number}}
+ */
+vivliostyle.page.EvaluatedPageSizeAndBleed;
+
+/**
+ * Evaluate actual page width, height and bleed from style specified in page context.
+ * @param {!vivliostyle.page.PageSizeAndBleed} pageSizeAndBleed
+ * @param {!adapt.expr.Context} context
+ * @returns {!vivliostyle.page.EvaluatedPageSizeAndBleed}
+ */
+vivliostyle.page.evaluatePageSizeAndBleed = function(pageSizeAndBleed, context) {
+    var evaluated = /** @type {!vivliostyle.page.EvaluatedPageSizeAndBleed} */ ({});
+    var bleed = pageSizeAndBleed.bleed.num * context.queryUnitSize(pageSizeAndBleed.bleed.unit, false);
+    var bleedOffset = pageSizeAndBleed.bleedOffset.num * context.queryUnitSize(pageSizeAndBleed.bleedOffset.unit, false);
+    var cropOffset = bleed + bleedOffset;
+    var width = pageSizeAndBleed.width;
+    if (width === adapt.css.fullWidth) {
+        evaluated.pageWidth = (context.pref.spreadView ? Math.floor(context.viewportWidth / 2) - context.pref.pageBorder : context.viewportWidth) - cropOffset * 2;
+    } else {
+        evaluated.pageWidth = width.num * context.queryUnitSize(width.unit, false);
+    }
+    var height = pageSizeAndBleed.height;
+    if (height === adapt.css.fullHeight) {
+        evaluated.pageHeight = context.viewportHeight - cropOffset * 2;
+    } else {
+        evaluated.pageHeight = height.num * context.queryUnitSize(height.unit, false);
+    }
+    evaluated.bleed = bleed;
+    evaluated.bleedOffset = bleedOffset;
+    evaluated.cropOffset = cropOffset;
+    return evaluated;
 };
 
 /**
@@ -377,7 +417,7 @@ vivliostyle.page.PageRuleMaster = function(scope, parent, style) {
     adapt.pm.PageMaster.call(this, scope, null, vivliostyle.page.pageRuleMasterPseudoName, [],
         parent, null, 0);
 
-    var pageSize = vivliostyle.page.resolvePageSize(style);
+    var pageSize = vivliostyle.page.resolvePageSizeAndBleed(style);
     var partition = new vivliostyle.page.PageRulePartition(this.scope, this, style, pageSize);
     /** @const @private */ this.bodyPartitionKey = partition.key;
 
@@ -1604,7 +1644,7 @@ vivliostyle.page.PageManager.prototype.generateCascadedPageMaster = function(sty
     var newPageMaster = pageMaster.clone({pseudoName: vivliostyle.page.pageRuleMasterPseudoName});
     var size = style["size"];
     if (size) {
-        var pageSize = vivliostyle.page.resolvePageSize(style);
+        var pageSize = vivliostyle.page.resolvePageSizeAndBleed(style);
         var priority = size.priority;
         newPageMaster.specified["width"] = adapt.csscasc.cascadeValues(
             this.context, newPageMaster.specified["width"],

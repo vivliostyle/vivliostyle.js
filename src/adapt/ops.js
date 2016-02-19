@@ -197,7 +197,8 @@ adapt.ops.StyleInstance.prototype.init = function() {
 	// Determine page sheet sizes corresponding to page selectors
 	var pageProps = self.style.pageProps;
 	Object.keys(pageProps).forEach(function(selector) {
-		var pageSizeAndBleed = this.resolvePageSizeAndBleed(pageProps[selector]);
+		var pageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(
+			vivliostyle.page.resolvePageSizeAndBleed(pageProps[selector]), this);
 		this.pageSheetSize[selector] = {
 			width: pageSizeAndBleed.pageWidth + pageSizeAndBleed.cropOffset * 2,
 			height: pageSizeAndBleed.pageHeight + pageSizeAndBleed.cropOffset * 2
@@ -719,7 +720,9 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 
     // Resolve page size before page master selection.
     var cascadedPageStyle = self.pageManager.getCascadedPageStyle();
-    self.setPageSizeAndBleed(cascadedPageStyle, page);
+	var evaluatedPageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(
+		vivliostyle.page.resolvePageSizeAndBleed(cascadedPageStyle), this);
+    self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
     var pageMaster = self.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
     	// end of primary content
@@ -775,51 +778,21 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 };
 
 /**
- * Resolve actual page width, height and bleed from style specified in page context.
- * @param cascadedPageStyle
- * @returns {!{pageWidth: number, pageHeight: number, bleed: number, bleedOffset: number, cropOffset: number}}
- */
-adapt.ops.StyleInstance.prototype.resolvePageSizeAndBleed = function(cascadedPageStyle) {
-	var resolved = {};
-	var pageSize = vivliostyle.page.resolvePageSize(cascadedPageStyle);
-	var bleed = pageSize.bleed.num * this.queryUnitSize(pageSize.bleed.unit, false);
-	var bleedOffset = pageSize.bleedOffset.num * this.queryUnitSize(pageSize.bleedOffset.unit, false);
-	var cropOffset = bleed + bleedOffset;
-	var width = pageSize.width;
-	if (width === adapt.css.fullWidth) {
-		resolved.pageWidth = (this.pref.spreadView ? Math.floor(this.viewportWidth / 2) - this.pref.pageBorder : this.viewportWidth) - cropOffset * 2;
-	} else {
-		resolved.pageWidth = width.num * this.queryUnitSize(width.unit, false);
-	}
-	var height = pageSize.height;
-	if (height === adapt.css.fullHeight) {
-		resolved.pageHeight = this.viewportHeight - cropOffset * 2;
-	} else {
-		resolved.pageHeight = height.num * this.queryUnitSize(height.unit, false);
-	}
-	resolved.bleed = bleed;
-	resolved.bleedOffset = bleedOffset;
-	resolved.cropOffset = cropOffset;
-	return resolved;
-};
-
-/**
  * Set actual page width, height and bleed from style specified in page context.
  * @private
- * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle
+ * @param {!vivliostyle.page.EvaluatedPageSizeAndBleed} evaluatedPageSizeAndBleed
  * @param {adapt.vtree.Page} page
  */
-adapt.ops.StyleInstance.prototype.setPageSizeAndBleed = function(cascadedPageStyle, page) {
-	var resolved = this.resolvePageSizeAndBleed(cascadedPageStyle);
-	this.actualPageWidth = resolved.pageWidth;
-	this.actualPageHeight = resolved.pageHeight;
-	page.container.style.width = (resolved.pageWidth + resolved.cropOffset * 2) + "px";
-	page.container.style.height = (resolved.pageHeight + resolved.cropOffset * 2) + "px";
-	page.bleedBox.style.left = resolved.bleedOffset + "px";
-	page.bleedBox.style.right = resolved.bleedOffset + "px";
-	page.bleedBox.style.top = resolved.bleedOffset + "px";
-	page.bleedBox.style.bottom = resolved.bleedOffset + "px";
-	page.bleedBox.style.padding = resolved.bleed + "px";
+adapt.ops.StyleInstance.prototype.setPageSizeAndBleed = function(evaluatedPageSizeAndBleed, page) {
+	this.actualPageWidth = evaluatedPageSizeAndBleed.pageWidth;
+	this.actualPageHeight = evaluatedPageSizeAndBleed.pageHeight;
+	page.container.style.width = (evaluatedPageSizeAndBleed.pageWidth + evaluatedPageSizeAndBleed.cropOffset * 2) + "px";
+	page.container.style.height = (evaluatedPageSizeAndBleed.pageHeight + evaluatedPageSizeAndBleed.cropOffset * 2) + "px";
+	page.bleedBox.style.left = evaluatedPageSizeAndBleed.bleedOffset + "px";
+	page.bleedBox.style.right = evaluatedPageSizeAndBleed.bleedOffset + "px";
+	page.bleedBox.style.top = evaluatedPageSizeAndBleed.bleedOffset + "px";
+	page.bleedBox.style.bottom = evaluatedPageSizeAndBleed.bleedOffset + "px";
+	page.bleedBox.style.padding = evaluatedPageSizeAndBleed.bleed + "px";
 };
 
 /**

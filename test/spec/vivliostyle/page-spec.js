@@ -2,7 +2,7 @@ describe("page", function() {
     var module = vivliostyle.page;
     var expected;
 
-    describe("resolvePageSize", function() {
+    describe("resolvePageSizeAndBleed", function() {
         beforeEach(function() {
             expected = {
                 width: adapt.css.fullWidth,
@@ -13,19 +13,19 @@ describe("page", function() {
         });
 
         it("has fullWidth and fullHeight when nothing specified", function() {
-            var resolved = module.resolvePageSize({});
+            var resolved = module.resolvePageSizeAndBleed({});
             expect(resolved).toEqual(expected);
         });
 
         it("has fullWidth and fullHeight when size=auto", function() {
-            var resolved = module.resolvePageSize({
+            var resolved = module.resolvePageSizeAndBleed({
                 size: new adapt.csscasc.CascadeValue(adapt.css.ident.auto, 0)
             });
             expect(resolved).toEqual(expected);
         });
 
         it("has the same width and height when only one length is specified in size property", function() {
-            var resolved = module.resolvePageSize({
+            var resolved = module.resolvePageSizeAndBleed({
                 size: new adapt.csscasc.CascadeValue(new adapt.css.Numeric(10, "cm"), 0)
             });
             expected.width = new adapt.css.Numeric(10, "cm");
@@ -34,7 +34,7 @@ describe("page", function() {
         });
 
         it("has the width and height specified in size property", function() {
-            var resolved = module.resolvePageSize({
+            var resolved = module.resolvePageSizeAndBleed({
                 size: new adapt.csscasc.CascadeValue(
                     new adapt.css.SpaceList([new adapt.css.Numeric(10, "cm"), new adapt.css.Numeric(12, "cm")]), 0)
             });
@@ -44,26 +44,26 @@ describe("page", function() {
         });
 
         it("has fullWidth and fullHeight when portrait of landscape is specified alone in size property", function() {
-            var resolved = module.resolvePageSize({
+            var resolved = module.resolvePageSizeAndBleed({
                 size: new adapt.csscasc.CascadeValue(adapt.css.getName("portrait"), 0)
             });
             expect(resolved).toEqual(expected);
 
-            resolved = module.resolvePageSize({
+            resolved = module.resolvePageSizeAndBleed({
                 size: new adapt.csscasc.CascadeValue(adapt.css.ident.landscape, 0)
             });
             expect(resolved).toEqual(expected);
         });
 
         it("has the width and height of the paper size specified in size property", function() {
-            var resolved = module.resolvePageSize({
+            var resolved = module.resolvePageSizeAndBleed({
                 size: new adapt.csscasc.CascadeValue(new adapt.css.getName("A5"), 0)
             });
             expected.width = new adapt.css.Numeric(148, "mm");
             expected.height = new adapt.css.Numeric(210, "mm");
             expect(resolved).toEqual(expected);
 
-            resolved = module.resolvePageSize({
+            resolved = module.resolvePageSizeAndBleed({
                 size: new adapt.csscasc.CascadeValue(
                     new adapt.css.SpaceList([new adapt.css.getName("A5"), new adapt.css.getName("portrait")]), 0)
             });
@@ -71,7 +71,7 @@ describe("page", function() {
             expected.height = new adapt.css.Numeric(210, "mm");
             expect(resolved).toEqual(expected);
 
-            resolved = module.resolvePageSize({
+            resolved = module.resolvePageSizeAndBleed({
                 size: new adapt.csscasc.CascadeValue(
                     new adapt.css.SpaceList([new adapt.css.getName("A5"), adapt.css.ident.landscape]), 0)
             });
@@ -81,25 +81,25 @@ describe("page", function() {
         });
 
         it("has the default bleed offset value when 'crop' and/or 'cross' value is specified in 'marks' property", function() {
-           var resolved = module.resolvePageSize({
+           var resolved = module.resolvePageSizeAndBleed({
                marks: new adapt.csscasc.CascadeValue(adapt.css.ident.none, 0)
            });
             expect(resolved).toEqual(expected);
 
             expected.bleedOffset = module.defaultBleedOffset;
 
-            resolved = module.resolvePageSize({
+            resolved = module.resolvePageSizeAndBleed({
                 bleed: new adapt.csscasc.CascadeValue(adapt.css.numericZero, 0), // if bleed=auto, it computes to 6pt (see below)
                 marks: new adapt.csscasc.CascadeValue(adapt.css.ident.crop, 0)
             });
             expect(resolved).toEqual(expected);
 
-            resolved = module.resolvePageSize({
+            resolved = module.resolvePageSizeAndBleed({
                 marks: new adapt.csscasc.CascadeValue(adapt.css.ident.cross, 0)
             });
             expect(resolved).toEqual(expected);
 
-            resolved = module.resolvePageSize({
+            resolved = module.resolvePageSizeAndBleed({
                 bleed: new adapt.csscasc.CascadeValue(adapt.css.numericZero, 0), // if bleed=auto, it computes to 6pt (see below)
                 marks: new adapt.csscasc.CascadeValue(
                     new adapt.css.SpaceList([adapt.css.ident.crop, adapt.css.ident.cross]), 0)
@@ -108,7 +108,7 @@ describe("page", function() {
         });
 
         it("has the bleed value specified in 'bleed' property when it is specified with a concrete length", function() {
-            var resolved = module.resolvePageSize({
+            var resolved = module.resolvePageSizeAndBleed({
                 bleed: new adapt.csscasc.CascadeValue(new adapt.css.Numeric(5, "mm"), 0)
             });
             expected.bleed = new adapt.css.Numeric(5, "mm");
@@ -119,12 +119,12 @@ describe("page", function() {
             expected.bleedOffset = module.defaultBleedOffset;
             expected.bleed = new adapt.css.Numeric(6, "pt");
 
-            var resolved = module.resolvePageSize({
+            var resolved = module.resolvePageSizeAndBleed({
                 marks: new adapt.csscasc.CascadeValue(adapt.css.ident.crop, 0)
             });
             expect(resolved).toEqual(expected);
 
-            resolved = module.resolvePageSize({
+            resolved = module.resolvePageSizeAndBleed({
                 bleed: new adapt.csscasc.CascadeValue(adapt.css.ident.auto, 0),
                 marks: new adapt.csscasc.CascadeValue(adapt.css.ident.crop, 0)
             });
@@ -132,7 +132,7 @@ describe("page", function() {
         });
 
         it("'auto' bleed value computes to zero if 'marks' does not has 'crop'", function() {
-            var resolved = module.resolvePageSize({
+            var resolved = module.resolvePageSizeAndBleed({
                 bleed: new adapt.csscasc.CascadeValue(adapt.css.ident.auto, 0),
                 marks: new adapt.csscasc.CascadeValue(adapt.css.ident.cross, 0)
             });
