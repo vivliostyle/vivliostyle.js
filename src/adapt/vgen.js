@@ -1313,11 +1313,13 @@ adapt.vgen.Viewport = function(window, fontSize, opt_root, opt_width, opt_height
 	var outerZoomBox = this.root.firstElementChild;
 	if (!outerZoomBox) {
 		outerZoomBox = this.document.createElement("div");
+		outerZoomBox.setAttribute("data-vivliostyle-outer-zoom-box", true);
 		this.root.appendChild(outerZoomBox);
 	}
 	var contentContainer = outerZoomBox.firstElementChild;
 	if (!contentContainer) {
 		contentContainer = this.document.createElement("div");
+		contentContainer.setAttribute("data-vivliostyle-spread-container", true);
 		outerZoomBox.appendChild(contentContainer);
 	}
 	/** @private @type {!HTMLElement} */ this.outerZoomBox = /** @type {!HTMLElement} */ (outerZoomBox);

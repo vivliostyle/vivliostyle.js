@@ -258,6 +258,8 @@ adapt.expr.ScopeContext;
  */
 adapt.expr.Context = function(rootScope, viewportWidth, viewportHeight, fontSize) {
 	/** @const */ this.rootScope = rootScope;
+    /** @const */ this.viewportWidth = viewportWidth;
+    /** @const */ this.viewportHeight = viewportHeight;
     /** @protected @type {?number} */ this.actualPageWidth = null;
     /** @const @type {function(this:adapt.expr.Context): number} */
     this.pageWidth = function() {

@@ -4,6 +4,7 @@
  */
 goog.provide("vivliostyle.page");
 
+goog.require("goog.asserts");
 goog.require("vivliostyle.constants");
 goog.require("adapt.expr");
 goog.require("adapt.css");
@@ -58,23 +59,55 @@ vivliostyle.page.pageSizes = {
 };
 
 /**
- * @const
- * @type {!vivliostyle.page.PageSize}
+ * Default value for line width of printer marks
+ * @private
+ * @const {!adapt.css.Numeric}
  */
-vivliostyle.page.fitToViewportSize = {
-    width: adapt.css.fullWidth,
-    height: adapt.css.fullHeight
-};
+vivliostyle.page.defaultPrinterMarkLineWidth = new adapt.css.Numeric(0.24, "pt");
 
 /**
- * @param {!Object.<string, adapt.css.Val>} style
- * @return {!vivliostyle.page.PageSize}
+ * Default value for distance between an edge of the page and printer marks
+ * @private
+ * @const {!adapt.css.Numeric}
  */
-vivliostyle.page.resolvePageSize = function(style) {
-    /** @type {adapt.css.Val} */ var size = style["size"];
+vivliostyle.page.defaultPrinterMarkOffset = new adapt.css.Numeric(3, "mm");
+
+/**
+ * Default value for line length of the (shorter) line of a crop mark and the shorter line of a cross mark
+ * @private
+ * @const {!adapt.css.Numeric}
+ */
+vivliostyle.page.defaultPrinterMarkLineLength = new adapt.css.Numeric(10, "mm");
+
+/**
+ * Default value for bleed offset (= defaultPrinterMarkOffset + defaultPrinterMarkLineLength)
+ * @private
+ * @const {!adapt.css.Numeric}
+ */
+vivliostyle.page.defaultBleedOffset = new adapt.css.Numeric(3 + 10, "mm");
+
+/**
+ * Represent page size and bleed information.
+ *  @typedef {{width: !adapt.css.Numeric, height: !adapt.css.Numeric, bleed: !adapt.css.Numeric, bleedOffset: !adapt.css.Numeric}}
+ */
+vivliostyle.page.PageSizeAndBleed;
+
+/**
+ * @param {!Object.<string, adapt.csscasc.CascadeValue>} style
+ * @return {!vivliostyle.page.PageSizeAndBleed}
+ */
+vivliostyle.page.resolvePageSizeAndBleed = function(style) {
+    // default value (fit to viewport, no bleed)
+    /** @type {!vivliostyle.page.PageSizeAndBleed} */ var pageSizeAndBleed = {
+        width: adapt.css.fullWidth,
+        height: adapt.css.fullHeight,
+        bleed: adapt.css.numericZero,
+        bleedOffset: adapt.css.numericZero
+    };
+
+    /** @type {adapt.csscasc.CascadeValue} */ var size = style["size"];
     if (!size || size.value === adapt.css.ident.auto) {
-        // if size is auto, fit to the viewport
-        return vivliostyle.page.fitToViewportSize;
+        // if size is auto, fit to the viewport (use default value)
     } else {
         /** !type {!adapt.css.Val} */ var value = size.value;
         var val1, val2;
@@ -87,29 +120,310 @@ vivliostyle.page.resolvePageSize = function(style) {
         }
         if (val1.isNumeric()) {
             // <length>{1,2}
-            return {
-                width: val1,
-                height: val2 || val1
-            };
+            pageSizeAndBleed.width = val1;
+            pageSizeAndBleed.height = val2 || val1;
         } else {
             // <page-size> || [ portrait | landscape ]
             var s = vivliostyle.page.pageSizes[/** @type {adapt.css.Ident} */ (val1).name.toLowerCase()];
             if (!s) {
-                // portrait or landscape is specified alone. fallback to fit to the viewport
-                return vivliostyle.page.fitToViewportSize;
+                // portrait or landscape is specified alone. fallback to fit to the viewport (use default value)
             } else if (val2 && val2 === adapt.css.ident.landscape) {
                 // swap
-                return {
-                    width: s.height,
-                    height: s.width
-                };
+                pageSizeAndBleed.width = s.height;
+                pageSizeAndBleed.height = s.width;
             } else {
-                return {
-                    width: s.width,
-                    height: s.height
-                };
+                //return {
+                pageSizeAndBleed.width = s.width;
+                pageSizeAndBleed.height = s.height;
             }
         }
+    }
+
+    var marks = style["marks"];
+    if (marks && marks.value !== adapt.css.ident.none) {
+        pageSizeAndBleed.bleedOffset = vivliostyle.page.defaultBleedOffset;
+    }
+    var bleed = style["bleed"];
+    if (!bleed || bleed.value === adapt.css.ident.auto) {
+        // "('auto' value) Computes to 6pt if marks has crop and to zero otherwise."
+        // https://drafts.csswg.org/css-page/#valdef-page-bleed-auto
+        if (marks) {
+            var hasCrop = false;
+            if (marks.value.isSpaceList()) {
+                hasCrop = marks.value.values.some(function(v) { return v === adapt.css.ident.crop});
+            } else {
+                hasCrop = marks.value === adapt.css.ident.crop;
+            }
+            if (hasCrop) {
+                pageSizeAndBleed.bleed = new adapt.css.Numeric(6, "pt");
+            }
+        }
+    } else if (bleed.value && bleed.value.isNumeric()) {
+        pageSizeAndBleed.bleed = /** @type {!adapt.css.Numeric} */ (bleed.value);
+    }
+
+    return pageSizeAndBleed;
+};
+
+/**
+ * @typedef {{pageWidth: number, pageHeight: number, bleed: number, bleedOffset: number, cropOffset: number}}
+ */
+vivliostyle.page.EvaluatedPageSizeAndBleed;
+
+/**
+ * Evaluate actual page width, height and bleed from style specified in page context.
+ * @param {!vivliostyle.page.PageSizeAndBleed} pageSizeAndBleed
+ * @param {!adapt.expr.Context} context
+ * @returns {!vivliostyle.page.EvaluatedPageSizeAndBleed}
+ */
+vivliostyle.page.evaluatePageSizeAndBleed = function(pageSizeAndBleed, context) {
+    var evaluated = /** @type {!vivliostyle.page.EvaluatedPageSizeAndBleed} */ ({});
+    var bleed = pageSizeAndBleed.bleed.num * context.queryUnitSize(pageSizeAndBleed.bleed.unit, false);
+    var bleedOffset = pageSizeAndBleed.bleedOffset.num * context.queryUnitSize(pageSizeAndBleed.bleedOffset.unit, false);
+    var cropOffset = bleed + bleedOffset;
+    var width = pageSizeAndBleed.width;
+    if (width === adapt.css.fullWidth) {
+        evaluated.pageWidth = (context.pref.spreadView ? Math.floor(context.viewportWidth / 2) - context.pref.pageBorder : context.viewportWidth) - cropOffset * 2;
+    } else {
+        evaluated.pageWidth = width.num * context.queryUnitSize(width.unit, false);
+    }
+    var height = pageSizeAndBleed.height;
+    if (height === adapt.css.fullHeight) {
+        evaluated.pageHeight = context.viewportHeight - cropOffset * 2;
+    } else {
+        evaluated.pageHeight = height.num * context.queryUnitSize(height.unit, false);
+    }
+    evaluated.bleed = bleed;
+    evaluated.bleedOffset = bleedOffset;
+    evaluated.cropOffset = cropOffset;
+    return evaluated;
+};
+
+/**
+ * Create an 'svg' element for a printer mark.
+ * @private
+ * @param {!Document} doc
+ * @param {number} width
+ * @param {number} height
+ * @returns {!Element}
+ */
+vivliostyle.page.createPrinterMarkSvg = function(doc, width, height) {
+    var mark = doc.createElementNS(adapt.base.NS.SVG, "svg");
+    mark.setAttribute("width", width);
+    mark.setAttribute("height", height);
+    mark.style.position = "absolute";
+    return mark;
+};
+
+/**
+ * Create an SVG element for a printer mark line.
+ * @private
+ * @param {!Document} doc
+ * @param {number} lineWidth
+ * @param {string=} elementType Specifies which type of element to create. Default value is "polyline".
+ * @returns {!Element}
+ */
+vivliostyle.page.createPrinterMarkElement = function(doc, lineWidth, elementType) {
+    elementType = elementType || "polyline";
+    var line = doc.createElementNS(adapt.base.NS.SVG, elementType);
+    line.setAttribute("stroke", "black");
+    line.setAttribute("stroke-width", lineWidth);
+    line.setAttribute("fill", "none");
+    return line;
+};
+
+/**
+ * Position of a corner mark
+ * @private
+ * @enum {string}
+ */
+vivliostyle.page.CornerMarkPosition = {
+    TOP_LEFT: "top left",
+    TOP_RIGHT: "top right",
+    BOTTOM_LEFT: "bottom left",
+    BOTTOM_RIGHT: "bottom right"
+};
+
+/**
+ * Create a corner mark.
+ * @private
+ * @param {!Document} doc
+ * @param {!vivliostyle.page.CornerMarkPosition} position
+ * @param {number} lineWidth
+ * @param {number} cropMarkLineLength
+ * @param {number} bleed
+ * @param {number} offset
+ * @return {!Element}
+ */
+vivliostyle.page.createCornerMark = function(doc, position, lineWidth, cropMarkLineLength, bleed, offset) {
+    var bleedMarkLineLength = cropMarkLineLength;
+    // bleed mark line should be longer than bleed + 2mm
+    if (bleedMarkLineLength <= bleed + 2 * adapt.expr.defaultUnitSizes["mm"]) {
+        bleedMarkLineLength = bleed + cropMarkLineLength / 2;
+    }
+    var maxLineLength = Math.max(cropMarkLineLength, bleedMarkLineLength);
+    var svgWidth = bleed + maxLineLength + lineWidth / 2;
+    var mark = vivliostyle.page.createPrinterMarkSvg(doc, svgWidth, svgWidth);
+
+    var points1 = [[0, bleed + cropMarkLineLength], [cropMarkLineLength, bleed + cropMarkLineLength], [cropMarkLineLength, bleed + cropMarkLineLength - bleedMarkLineLength]];
+    // reflect with respect to y=x
+    var points2 = points1.map(function(p) { return [p[1], p[0]]; });
+    if (position === vivliostyle.page.CornerMarkPosition.TOP_RIGHT || position === vivliostyle.page.CornerMarkPosition.BOTTOM_RIGHT) {
+        // reflect with respect to a vertical axis
+        points1 = points1.map(function(p) { return [bleed + maxLineLength - p[0], p[1]]; });
+        points2 = points2.map(function(p) { return [bleed + maxLineLength - p[0], p[1]]; });
+    }
+    if (position === vivliostyle.page.CornerMarkPosition.BOTTOM_LEFT || position === vivliostyle.page.CornerMarkPosition.BOTTOM_RIGHT) {
+        // reflect with respect to a vertical axis
+        points1 = points1.map(function(p) { return [p[0], bleed + maxLineLength - p[1]]; });
+        points2 = points2.map(function(p) { return [p[0], bleed + maxLineLength - p[1]]; });
+    }
+
+    var line1 = vivliostyle.page.createPrinterMarkElement(doc, lineWidth);
+    line1.setAttribute("points", points1.map(function(p) { return p.join(","); }).join(" "));
+    mark.appendChild(line1);
+
+    var line2 = vivliostyle.page.createPrinterMarkElement(doc, lineWidth);
+    line2.setAttribute("points", points2.map(function(p) { return p.join(","); }).join(" "));
+    mark.appendChild(line2);
+
+    position.split(" ").forEach(function(side) {
+        mark.style[side] = offset + "px";
+    });
+
+    return mark;
+};
+
+/**
+ * Position of a cross mark
+ * @private
+ * @enum {string}
+ */
+vivliostyle.page.CrossMarkPosition = {
+    TOP: "top",
+    BOTTOM: "bottom",
+    LEFT: "left",
+    RIGHT: "right"
+};
+
+/**
+ * Create a cross mark.
+ * @private
+ * @param {!Document} doc
+ * @param {!vivliostyle.page.CrossMarkPosition} position
+ * @param {number} lineWidth
+ * @param {number} lineLength
+ * @param {number} offset
+ * @returns {!Element}
+ */
+vivliostyle.page.createCrossMark = function(doc, position, lineWidth, lineLength, offset) {
+    var longLineLength = lineLength * 2;
+    var width, height;
+    if (position === vivliostyle.page.CrossMarkPosition.TOP || position === vivliostyle.page.CrossMarkPosition.BOTTOM) {
+        width = longLineLength;
+        height = lineLength;
+    } else {
+        width = lineLength;
+        height = longLineLength;
+    }
+    var mark = vivliostyle.page.createPrinterMarkSvg(doc, width, height);
+
+    var horizontalLine = vivliostyle.page.createPrinterMarkElement(doc, lineWidth);
+    horizontalLine.setAttribute("points", "0," + (height/2) + " " + width + "," + (height/2));
+    mark.appendChild(horizontalLine);
+
+    var verticalLine = vivliostyle.page.createPrinterMarkElement(doc, lineWidth);
+    verticalLine.setAttribute("points", (width/2) + ",0 " + (width/2) + "," + height);
+    mark.appendChild(verticalLine);
+
+    var circle = vivliostyle.page.createPrinterMarkElement(doc, lineWidth, "circle");
+    circle.setAttribute("cx", width / 2);
+    circle.setAttribute("cy", height / 2);
+    circle.setAttribute("r", lineLength / 4);
+    mark.appendChild(circle);
+
+    var opposite;
+    switch (position) {
+        case vivliostyle.page.CrossMarkPosition.TOP:
+            opposite = vivliostyle.page.CrossMarkPosition.BOTTOM;
+            break;
+        case vivliostyle.page.CrossMarkPosition.BOTTOM:
+            opposite = vivliostyle.page.CrossMarkPosition.TOP;
+            break;
+        case vivliostyle.page.CrossMarkPosition.LEFT:
+            opposite = vivliostyle.page.CrossMarkPosition.RIGHT;
+            break;
+        case vivliostyle.page.CrossMarkPosition.RIGHT:
+            opposite = vivliostyle.page.CrossMarkPosition.LEFT;
+            break;
+    }
+    Object.keys(vivliostyle.page.CrossMarkPosition).forEach(function(key) {
+        var side = vivliostyle.page.CrossMarkPosition[key];
+        if (side === position) {
+            mark.style[side] = offset + "px";
+        } else if (side !== opposite) {
+            mark.style[side] = "0";
+            mark.style["margin-" + side] = "auto";
+        }
+    });
+
+    return mark;
+};
+
+/**
+ * Add printer marks to the page.
+ * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle
+ * @param {!vivliostyle.page.EvaluatedPageSizeAndBleed} evaluatedPageSizeAndBleed
+ * @param {!adapt.vtree.Page} page
+ * @param {!adapt.expr.Context} context
+ */
+vivliostyle.page.addPrinterMarks = function(cascadedPageStyle, evaluatedPageSizeAndBleed, page, context) {
+    var crop = false, cross = false;
+    var marks = cascadedPageStyle["marks"];
+    if (marks) {
+        var value = marks.value;
+        if (value.isSpaceList()) {
+            value.values.forEach(function(v) {
+                if (v === adapt.css.ident.crop) {
+                    crop = true;
+                } else if (v === adapt.css.ident.cross) {
+                    cross = true;
+                }
+            })
+        } else if (value === adapt.css.ident.crop) {
+            crop = true;
+        } else if (value === adapt.css.ident.cross) {
+            cross = true;
+        }
+    }
+    if (!crop && !cross) {
+        return;
+    }
+
+    var container = page.container;
+    var doc = /** @type {!Document} */ (container.ownerDocument);
+    goog.asserts.assert(doc);
+    var bleed = evaluatedPageSizeAndBleed.bleed;
+    var lineWidth = adapt.css.toNumber(vivliostyle.page.defaultPrinterMarkLineWidth, context);
+    var printerMarkOffset = adapt.css.toNumber(vivliostyle.page.defaultPrinterMarkOffset, context);
+    var lineLength = adapt.css.toNumber(vivliostyle.page.defaultPrinterMarkLineLength, context);
+
+    // corner marks
+    if (crop) {
+        Object.keys(vivliostyle.page.CornerMarkPosition).forEach(function(key) {
+            var position = vivliostyle.page.CornerMarkPosition[key];
+            var mark = vivliostyle.page.createCornerMark(doc, position, lineWidth, lineLength, bleed, printerMarkOffset);
+            container.appendChild(mark);
+        });
+    }
+
+    // cross marks
+    if (cross) {
+        Object.keys(vivliostyle.page.CrossMarkPosition).forEach(function(key) {
+            var position = vivliostyle.page.CrossMarkPosition[key];
+            var mark = vivliostyle.page.createCrossMark(doc, position, lineWidth, lineLength, printerMarkOffset);
+            container.appendChild(mark);
+        });
     }
 };
 
@@ -352,7 +666,7 @@ vivliostyle.page.PageRuleMaster = function(scope, parent, style) {
     adapt.pm.PageMaster.call(this, scope, null, vivliostyle.page.pageRuleMasterPseudoName, [],
         parent, null, 0);
 
-    var pageSize = vivliostyle.page.resolvePageSize(style);
+    var pageSize = vivliostyle.page.resolvePageSizeAndBleed(style);
     var partition = new vivliostyle.page.PageRulePartition(this.scope, this, style, pageSize);
     /** @const @private */ this.bodyPartitionKey = partition.key;
 
@@ -1290,9 +1604,7 @@ vivliostyle.page.PageMarginBoxPartitionInstance.prototype.positionAndSizeAlongFi
         var insideName = names.inside;
         var outsideName = names.outside;
         var extentName = names.extent;
-        // Reduce page margin by 2px: workaround for Chrome printing problem.
-        // https://github.com/vivliostyle/vivliostyle.js/issues/97
-        var pageMargin = adapt.expr.sub(scope, dim["margin" + outsideName.charAt(0).toUpperCase() + outsideName.substring(1)], new adapt.expr.Const(scope, 2));
+        var pageMargin = dim["margin" + outsideName.charAt(0).toUpperCase() + outsideName.substring(1)];
         var marginInside = adapt.pm.toExprZeroAuto(scope, style["margin-" + insideName], pageMargin);
         var marginOutside = adapt.pm.toExprZeroAuto(scope, style["margin-" + outsideName], pageMargin);
         var paddingInside = adapt.pm.toExprZero(scope, style["padding-" + insideName], pageMargin);
@@ -1581,7 +1893,7 @@ vivliostyle.page.PageManager.prototype.generateCascadedPageMaster = function(sty
     var newPageMaster = pageMaster.clone({pseudoName: vivliostyle.page.pageRuleMasterPseudoName});
     var size = style["size"];
     if (size) {
-        var pageSize = vivliostyle.page.resolvePageSize(style);
+        var pageSize = vivliostyle.page.resolvePageSizeAndBleed(style);
         var priority = size.priority;
         newPageMaster.specified["width"] = adapt.csscasc.cascadeValues(
             this.context, newPageMaster.specified["width"],
@@ -1823,17 +2135,23 @@ vivliostyle.page.mergeInPageRule = function(context, target, style, specificity,
 };
 
 /**
+ * ParserHandler for @page rules. It handles properties specified with page contexts.
+ * It also does basic cascading (which can be done without information other than the page rules themselves) and stores the result in `pageProps` object as a map from page selectors to sets of properties. This result is later used for adding @page rules to the real DOM, which are then used by the PDF renderer (Chromium) to determine page sizes.
  * @param {!adapt.expr.LexicalScope} scope
  * @param {!adapt.cssparse.DispatchParserHandler} owner
  * @param {!adapt.csscasc.CascadeParserHandler} parent
  * @param {adapt.cssvalid.ValidatorSet} validatorSet
+ * @param {!Object.<string,!adapt.csscasc.ElementStyle>} pageProps
  * @constructor
  * @extends {adapt.csscasc.CascadeParserHandler}
  * @implements {adapt.cssvalid.PropertyReceiver}
  */
-vivliostyle.page.PageParserHandler = function(scope, owner, parent, validatorSet) {
+vivliostyle.page.PageParserHandler = function(scope, owner, parent, validatorSet, pageProps) {
     adapt.csscasc.CascadeParserHandler.call(this, scope, owner, null, parent, null, validatorSet, false);
-    /** @type {string} */ this.pageSizeRules = "";
+    /** @private @const */ this.pageProps = pageProps;
+    /** @private @const {!Array<{selectors: ?Array<string>, specificity: number}>} */ this.currentPageSelectors = [];
+    /** @private @type {string} */ this.currentNamedPageSelector = "";
+    /** @private @type {!Array<string>} */ this.currentPseudoPageClassSelectors = [];
 };
 goog.inherits(vivliostyle.page.PageParserHandler, adapt.csscasc.CascadeParserHandler);
 
@@ -1841,7 +2159,6 @@ goog.inherits(vivliostyle.page.PageParserHandler, adapt.csscasc.CascadeParserHan
  * @override
  */
 vivliostyle.page.PageParserHandler.prototype.startPageRule = function() {
-    this.pageSizeRules += "@page ";
     this.startSelectorRule();
 };
 
@@ -1849,7 +2166,8 @@ vivliostyle.page.PageParserHandler.prototype.startPageRule = function() {
  * @override
  */
 vivliostyle.page.PageParserHandler.prototype.tagSelector = function(ns, name) {
-    this.pageSizeRules += name;
+    goog.asserts.assert(name);
+    this.currentNamedPageSelector = name;
     if (name) {
         this.chain.push(new vivliostyle.page.CheckPageTypeAction(name));
         this.specificity += 0x10000;
@@ -1863,7 +2181,7 @@ vivliostyle.page.PageParserHandler.prototype.pseudoclassSelector = function(name
     if (params) {
         this.reportAndSkip("E_INVALID_PAGE_SELECTOR :" + name + "(" + params.join("") + ")");
     }
-    this.pageSizeRules += ":" + name;
+    this.currentPseudoPageClassSelectors.push(":" + name);
     switch (name.toLowerCase()) {
         case "first":
             this.chain.push(new vivliostyle.page.IsFirstPageAction(this.scope));
@@ -1892,58 +2210,90 @@ vivliostyle.page.PageParserHandler.prototype.pseudoclassSelector = function(name
 };
 
 /**
+ * Save currently processed selector and reset variables.
+ * @private
+ */
+vivliostyle.page.PageParserHandler.prototype.finishSelector = function() {
+    var selectors;
+    if (!this.currentNamedPageSelector && !(this.currentPseudoPageClassSelectors.length)) {
+        selectors = null;
+    } else {
+        selectors = [this.currentNamedPageSelector].concat(this.currentPseudoPageClassSelectors.sort());
+    }
+    this.currentPageSelectors.push({selectors: selectors, specificity: this.specificity});
+    this.currentNamedPageSelector = "";
+    this.currentPseudoPageClassSelectors = [];
+};
+
+/**
+ * @override
+ */
+vivliostyle.page.PageParserHandler.prototype.nextSelector = function() {
+    this.finishSelector();
+    adapt.csscasc.CascadeParserHandler.prototype.nextSelector.call(this);
+};
+
+/**
  * @override
  */
 vivliostyle.page.PageParserHandler.prototype.startRuleBody = function() {
-    this.pageSizeRules += "{";
+    this.finishSelector();
     adapt.csscasc.CascadeParserHandler.prototype.startRuleBody.call(this);
 };
 
 /**
  * @override
  */
-vivliostyle.page.PageParserHandler.prototype.endRule = function() {
-    this.pageSizeRules += "}";
+vivliostyle.page.PageParserHandler.prototype.simpleProperty = function(name, value, important) {
+    // we limit 'bleed' and 'marks' to be effective only when specified without page selectors
+    if ((name === "bleed" || name === "marks") && !this.currentPageSelectors.some(function(s) {
+            return s.selectors === null;
+        })) {
+        return;
+    }
 
-    // TODO This output to the style element should be done in an upper (view) layer
-    document.getElementById("vivliostyle-page-rules").textContent += this.pageSizeRules;
+    adapt.csscasc.CascadeParserHandler.prototype.simpleProperty.call(this, name, value, important);
 
-    adapt.csscasc.CascadeParserHandler.prototype.endRule.call(this);
-};
+    var cascVal = adapt.csscasc.getProp(this.elementStyle, name);
+    var pageProps = this.pageProps;
 
-/**
- * @override
- */
-vivliostyle.page.PageParserHandler.prototype.property = function(name, value, important) {
-    if (name === "size") {
-        var landscape = value.isSpaceList() && value.values[1] === adapt.css.ident.landscape;
-        var valueStr = (landscape ? value.values[0] : value).toString().toLowerCase();
-        var presetValue = vivliostyle.page.pageSizes[valueStr];
-        if (presetValue) {
-            if (valueStr === "a5"
-                || valueStr === "a4"
-                || valueStr === "a3"
-                || valueStr === "b5"
-                || valueStr === "b4"
-                || valueStr === "letter"
-                || valueStr === "legal"
-                || valueStr === "ledger") {
-                if (landscape) {
-                    valueStr += " landscape";
+    if (name === "bleed" || name === "marks") {
+        if (!pageProps[""]) {
+            pageProps[""] = /** @type {!adapt.csscasc.ElementStyle} */ ({});
+        }
+        // we can simply overwrite without considering specificity
+        // since 'bleed' and 'marks' always come from a page rule without page selectors.
+        Object.keys(pageProps).forEach(function(selector) {
+            adapt.csscasc.setProp(pageProps[selector], name, cascVal);
+        });
+    } else if (name === "size") {
+        var noPageSelectorProps = pageProps[""];
+        this.currentPageSelectors.forEach(function(s) {
+            // update specificity to reflect the specificity of the selector
+            var result = new adapt.csscasc.CascadeValue(cascVal.value, cascVal.priority + s.specificity);
+            var selector = s.selectors ? s.selectors.join("") : "";
+            var props = pageProps[selector];
+            if (!props) {
+                // since no properties for this selector have been stored before,
+                // we can simply set the 'size', 'bleed' and 'marks' properties.
+                props = pageProps[selector] = /** @type {!adapt.csscasc.ElementStyle} */ ({});
+                adapt.csscasc.setProp(props, name, result);
+                if (noPageSelectorProps) {
+                    ["bleed", "marks"].forEach(function (n) {
+                        if (noPageSelectorProps[n]) {
+                            adapt.csscasc.setProp(props, n, noPageSelectorProps[n]);
+                        }
+                    }, this);
                 }
             } else {
-                var width = presetValue.width.stringValue();
-                var height = presetValue.height.stringValue();
-                if (landscape) {
-                    valueStr = height + " " + width;
-                } else {
-                    valueStr = width + " " + height;
-                }
+                // consider specificity when setting 'size' property.
+                // we don't have to set 'bleed' and 'marks' since they should have been already updated.
+                var prevCascVal = adapt.csscasc.getProp(props, name);
+                result = prevCascVal ? adapt.csscasc.cascadeValues(null, result, prevCascVal) : result;
+                adapt.csscasc.setProp(props, name, result);
             }
-        }
-        this.pageSizeRules += "size: " + valueStr + (important ? " !important" : "") + ";";
+        }, this);
     }
-    adapt.csscasc.CascadeParserHandler.prototype.property.call(this, name, value, important);
 };
 
 /**

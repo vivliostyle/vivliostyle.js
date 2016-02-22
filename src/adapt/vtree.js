@@ -81,12 +81,14 @@ adapt.vtree.makeListener = function(refs, action) {
 
 /**
  * @param {!HTMLElement} container
+ * @param {!HTMLElement} bleedBox
  * @constructor
  * @extends {adapt.base.SimpleEventTarget}
  */
-adapt.vtree.Page = function(container) {
+adapt.vtree.Page = function(container, bleedBox) {
 	adapt.base.SimpleEventTarget.call(this);
 	/** @const */ this.container = container;
+	/** @const */ this.bleedBox = bleedBox;
 	/** @type {HTMLElement} */ this.pageAreaElement = null;
 	/** @type {Array.<adapt.vtree.DelayedItem>} */ this.delayedItems = [];
 	var self = this;
@@ -186,7 +188,7 @@ adapt.vtree.Page.prototype.registerElementWithId = function(element, id) {
  */
 adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
 	// use size of the container of the PageMasterInstance
-	var rect = clientLayout.getElementClientRect(this.container.firstElementChild);
+	var rect = clientLayout.getElementClientRect(this.container);
 	this.dimensions.width = rect.width;
 	this.dimensions.height = rect.height;
 

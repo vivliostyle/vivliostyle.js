@@ -40,10 +40,11 @@ adapt.ops.FontFace;
  * @param {adapt.csscasc.ElementStyle} footnoteProps
  * @param {Object.<string,adapt.csscasc.ElementStyle>} flowProps
  * @param {Array.<adapt.csscasc.ElementStyle>} viewportProps
+ * @param {!Object.<string,!adapt.csscasc.ElementStyle>} pageProps
  * @constructor
  */
 adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
-		fontFaces, footnoteProps, flowProps, viewportProps) {
+		fontFaces, footnoteProps, flowProps, viewportProps, pageProps) {
 	/** @const */ this.store = store;
 	/** @const */ this.rootScope = rootScope;
 	/** @const */ this.pageScope = pageScope;
@@ -54,6 +55,7 @@ adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
 	/** @const */ this.footnoteProps = footnoteProps;
 	/** @const */ this.flowProps = flowProps;
 	/** @const */ this.viewportProps = viewportProps;
+	/** @const */ this.pageProps = pageProps;
 	/** @const */ this.validatorSet = store.validatorSet;
     this.pageScope.defineBuiltIn("has-content", function(name) {
     	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
@@ -156,6 +158,8 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     		}
     	}
     }
+
+	/** @const {!Object<string, !{width: number, height: number}>} */ this.pageSheetSize = {};
 };
 goog.inherits(adapt.ops.StyleInstance, adapt.expr.Context);
 
@@ -189,6 +193,18 @@ adapt.ops.StyleInstance.prototype.init = function() {
     	srcFaces.push(srcFace);
     }
 	self.fontMapper.findOrLoadFonts(srcFaces, self.faces).thenFinish(frame);
+
+	// Determine page sheet sizes corresponding to page selectors
+	var pageProps = self.style.pageProps;
+	Object.keys(pageProps).forEach(function(selector) {
+		var pageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(
+			vivliostyle.page.resolvePageSizeAndBleed(pageProps[selector]), this);
+		this.pageSheetSize[selector] = {
+			width: pageSizeAndBleed.pageWidth + pageSizeAndBleed.cropOffset * 2,
+			height: pageSizeAndBleed.pageHeight + pageSizeAndBleed.cropOffset * 2
+		};
+	}, this);
+
 	return frame.result();
 };
 
@@ -681,7 +697,7 @@ adapt.ops.StyleInstance.prototype.noMorePrimaryFlows = function(cp) {
 };
 
 /**
- * @param {adapt.vtree.Page} page
+ * @param {!adapt.vtree.Page} page
  * @param {adapt.vtree.LayoutPosition|undefined} cp
  * @return {adapt.task.Result.<adapt.vtree.LayoutPosition>}
  */
@@ -696,7 +712,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
         self.styler.replayFlowElementsFromOffset(-1);
     }
     if (this.lang) {
-    	page.container.setAttribute("lang", this.lang);
+    	page.bleedBox.setAttribute("lang", this.lang);
     }
     cp = self.currentLayoutPosition;
     cp.page++;
@@ -704,7 +720,6 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 
     // Resolve page size before page master selection.
     var cascadedPageStyle = self.pageManager.getCascadedPageStyle();
-    self.setPageSize(cascadedPageStyle);
     var pageMaster = self.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
     	// end of primary content
@@ -719,6 +734,12 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     }
 	self.pageCounterStore.updatePageCounters(cascadedPageStyle, self);
 
+	// setup bleed area and crop marks
+	var evaluatedPageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(
+		vivliostyle.page.resolvePageSizeAndBleed(cascadedPageStyle), this);
+	self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
+	vivliostyle.page.addPrinterMarks(cascadedPageStyle, evaluatedPageSizeAndBleed, page, this);
+
 	var writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
 	var direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
 	var pageFloatHolder = new vivliostyle.pagefloat.FloatHolder(page.getPageAreaElement.bind(page), writingMode, direction);
@@ -728,14 +749,14 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
     	= adapt.task.newFrame("layoutNextPage");
 	frame.loopWithFrame(function(loopFrame) {
-		self.layoutContainer(page, pageMaster, page.container, 0, 0, exclusions.concat(), pageFloatHolder).then(function() {
+		self.layoutContainer(page, pageMaster, page.bleedBox, 0, 0, exclusions.concat(), pageFloatHolder).then(function() {
 			if (pageFloatHolder.hasNewlyAddedFloats()) {
 				exclusions = exclusions.concat(pageFloatHolder.getShapesOfNewlyAddedFloats());
 				pageFloatHolder.clearNewlyAddedFloats();
 				cp = self.currentLayoutPosition = currentLayoutPosition.clone();
 				var c;
-				while (c = page.container.lastChild) {
-					page.container.removeChild(c);
+				while (c = page.bleedBox.lastChild) {
+					page.bleedBox.removeChild(c);
 				}
 				loopFrame.continueLoop();
 			} else {
@@ -760,24 +781,21 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 };
 
 /**
- * Set actual page width & height from style specified in page context.
+ * Set actual page width, height and bleed from style specified in page context.
  * @private
- * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle
+ * @param {!vivliostyle.page.EvaluatedPageSizeAndBleed} evaluatedPageSizeAndBleed
+ * @param {adapt.vtree.Page} page
  */
-adapt.ops.StyleInstance.prototype.setPageSize = function(cascadedPageStyle) {
-    var pageSize = vivliostyle.page.resolvePageSize(cascadedPageStyle);
-    var width = pageSize.width;
-    if (width === adapt.css.fullWidth) {
-        this.actualPageWidth = null;
-    } else {
-        this.actualPageWidth = width.num * this.queryUnitSize(width.unit, false);
-    }
-    var height = pageSize.height;
-    if (height === adapt.css.fullHeight) {
-        this.actualPageHeight = null;
-    } else {
-        this.actualPageHeight = height.num * this.queryUnitSize(height.unit, false);
-    }
+adapt.ops.StyleInstance.prototype.setPageSizeAndBleed = function(evaluatedPageSizeAndBleed, page) {
+	this.actualPageWidth = evaluatedPageSizeAndBleed.pageWidth;
+	this.actualPageHeight = evaluatedPageSizeAndBleed.pageHeight;
+	page.container.style.width = (evaluatedPageSizeAndBleed.pageWidth + evaluatedPageSizeAndBleed.cropOffset * 2) + "px";
+	page.container.style.height = (evaluatedPageSizeAndBleed.pageHeight + evaluatedPageSizeAndBleed.cropOffset * 2) + "px";
+	page.bleedBox.style.left = evaluatedPageSizeAndBleed.bleedOffset + "px";
+	page.bleedBox.style.right = evaluatedPageSizeAndBleed.bleedOffset + "px";
+	page.bleedBox.style.top = evaluatedPageSizeAndBleed.bleedOffset + "px";
+	page.bleedBox.style.bottom = evaluatedPageSizeAndBleed.bleedOffset + "px";
+	page.bleedBox.style.padding = evaluatedPageSizeAndBleed.bleed + "px";
 };
 
 /**
@@ -898,7 +916,7 @@ adapt.ops.BaseParserHandler.prototype.startRegionRule = function() {
  */
 adapt.ops.BaseParserHandler.prototype.startPageRule = function() {
     var pageHandler = new vivliostyle.page.PageParserHandler(this.masterHandler.pageScope,
-        this.masterHandler, this, this.validatorSet);
+        this.masterHandler, this, this.validatorSet, this.masterHandler.pageProps);
     this.masterHandler.pushHandler(pageHandler);
     pageHandler.startPageRule();
 };
@@ -963,6 +981,7 @@ adapt.ops.StyleParserHandler = function(validatorSet) {
 	/** @const */ this.footnoteProps = /** @type {adapt.csscasc.ElementStyle} */ ({});
 	/** @const */ this.flowProps = /** @type {Object.<string,adapt.csscasc.ElementStyle>} */ ({});
 	/** @const */ this.viewportProps = /** @type {Array.<adapt.csscasc.ElementStyle>} */ ([]);
+	/** @const */ this.pageProps = /** @type {!Object.<string,!adapt.csscasc.ElementStyle>} */ ({});
 
     this.slave = this.cascadeParserHandler;
 };
@@ -1172,7 +1191,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
 		        }).then(function() {
 		        	var cascade = sph.cascadeParserHandler.finish();
 		        	style = new adapt.ops.Style(self, sph.rootScope, sph.pageScope, cascade, sph.rootBox,
-		        			sph.fontFaces, sph.footnoteProps, sph.flowProps, sph.viewportProps);
+		        			sph.fontFaces, sph.footnoteProps, sph.flowProps, sph.viewportProps, sph.pageProps);
 			    	self.styleByKey[key] = style;
 			    	delete self.styleFetcherByKey[key];
 		        	innerFrame.finish(style);

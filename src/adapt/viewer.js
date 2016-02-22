@@ -57,6 +57,8 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
     	self.kick();
     };
     /** @type {adapt.base.EventListener} */ this.hyperlinkListener = function(evt) {};
+    /** @const */ this.pageRuleStyleElement = document.getElementById("vivliostyle-page-rules");
+    /** @type {boolean} */ this.pageSheetSizeAlreadySet = false;
     /**
      * @type {Object.<string, adapt.viewer.Action>}
      */
@@ -440,6 +442,32 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
 
 /**
  * @private
+ * @param {!Object<string, !{width: number, height: number}>} pageSheetSize
+ * @param {number} spineIndex
+ * @param {number} pageIndex
+ */
+adapt.viewer.Viewer.prototype.setPageSizePageRules = function(pageSheetSize, spineIndex, pageIndex) {
+    if (!this.pageSheetSizeAlreadySet && this.pageRuleStyleElement && spineIndex === 0 && pageIndex === 0) {
+        var styleText = "";
+        Object.keys(pageSheetSize).forEach(function(selector) {
+            styleText += "@page " + selector + "{size:";
+            var size = pageSheetSize[selector];
+            styleText += size.width + "px " + size.height + "px;}";
+        });
+        this.pageRuleStyleElement.textContent = styleText;
+        this.pageSheetSizeAlreadySet = true;
+    }
+};
+
+adapt.viewer.Viewer.prototype.removePageSizePageRules = function() {
+    if (this.pageRuleStyleElement) {
+        this.pageRuleStyleElement.textContent = "";
+        this.pageSheetSizeAlreadySet = false;
+    }
+};
+
+/**
+ * @private
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.reset = function() {
@@ -447,9 +475,11 @@ adapt.viewer.Viewer.prototype.reset = function() {
 		this.opfView.hideTOC();
         this.opfView.removeRenderedPages();
 	}
+    this.removePageSizePageRules();
 	this.viewport = this.createViewport();
     this.viewport.resetZoom();
-    this.opfView = new adapt.epub.OPFView(this.opf, this.viewport, this.fontMapper, this.pref);
+    this.opfView = new adapt.epub.OPFView(this.opf, this.viewport, this.fontMapper, this.pref,
+        this.setPageSizePageRules.bind(this));
 };
 
 /**

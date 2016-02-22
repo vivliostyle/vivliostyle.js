@@ -1,6 +1,8 @@
 describe("csscasc", function() {
     describe("CascadeParserHandler", function() {
         describe("simpleProperty", function() {
+            vivliostyle.test.util.mock.plugin.setup();
+
             it("convert property declaration by calling functions registered to 'SIMPLE_PROPERTY' hook", function() {
                 function hook1(original) {
                     return {
