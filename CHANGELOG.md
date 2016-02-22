@@ -6,8 +6,8 @@
 - Support even/odd arguments for :nth-child selector
   - <https://github.com/vivliostyle/vivliostyle.js/issues/87>
   - Spec: [Selectors Level 3 - :nth-child() pseudo-class](http://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
-- Support Printer marks (`marks` property) and bleed area (`bleed` property)
-  - <https://github.com/vivliostyle/vivliostyle.js/issues/169>
+- Support printer marks (`marks` property) and bleed area (`bleed` property)
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/98>
   - Spec: [CSS Paged Media Module Level 3 - Crop and Registration Marks: the 'marks' property](https://drafts.csswg.org/css-page/#marks), [Bleed Area: the 'bleed' property](https://drafts.csswg.org/css-page/#bleed)
   - Only effective when specified within an `@page` rule without page selectors.
 
