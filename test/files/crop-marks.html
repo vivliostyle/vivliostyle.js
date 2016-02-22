@@ -8,7 +8,7 @@
             size: A4;
         }
         @page {
-            bleed: 5mm;
+            bleed: 2mm;
             marks: crop cross;
             margin: 0;
         }
@@ -18,11 +18,26 @@
         div {
             width: 210mm;
             height: 297mm;
+            margin-left: -10mm;
+            margin-right: -10mm;
+            margin-top: -10mm;
+            margin-bottom: -10mm;
+            padding-left: 10mm;
+            padding-top: 10mm;
+            padding-right: 10mm;
+            padding-bottom: 10mm;
+            page-break-after: always;
+        }
+        #page1 {
             background: #CFC;
+        }
+        #page2 {
+            background: #CCF;
         }
     </style>
 </head>
 <body>
-<div>This green div has 210mm width and 297mm height.</div>
+<div id="page1">This green div covers entire bleed area of page 1.</div>
+<div id="page2">This blue div covers entire bleed area of page 2.</div>
 </body>
 </html>

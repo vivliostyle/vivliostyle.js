@@ -59,11 +59,32 @@ vivliostyle.page.pageSizes = {
 };
 
 /**
- * Default value for bleed offset (= [distance between an edge of the page and a corner crop mark: 3mm] + [line length of a corner crop mark: 10mm])
+ * Default value for line width of printer marks
  * @private
  * @const {!adapt.css.Numeric}
  */
-vivliostyle.page.defaultBleedOffset = new adapt.css.Numeric(13, "mm");
+vivliostyle.page.defaultPrinterMarkLineWidth = new adapt.css.Numeric(0.24, "pt");
+
+/**
+ * Default value for distance between an edge of the page and printer marks
+ * @private
+ * @const {!adapt.css.Numeric}
+ */
+vivliostyle.page.defaultPrinterMarkOffset = new adapt.css.Numeric(3, "mm");
+
+/**
+ * Default value for line length of the (shorter) line of a crop mark and the shorter line of a cross mark
+ * @private
+ * @const {!adapt.css.Numeric}
+ */
+vivliostyle.page.defaultPrinterMarkLineLength = new adapt.css.Numeric(10, "mm");
+
+/**
+ * Default value for bleed offset (= defaultPrinterMarkOffset + defaultPrinterMarkLineLength)
+ * @private
+ * @const {!adapt.css.Numeric}
+ */
+vivliostyle.page.defaultBleedOffset = new adapt.css.Numeric(3 + 10, "mm");
 
 /**
  * Represent page size and bleed information.
@@ -176,6 +197,234 @@ vivliostyle.page.evaluatePageSizeAndBleed = function(pageSizeAndBleed, context) 
     evaluated.bleedOffset = bleedOffset;
     evaluated.cropOffset = cropOffset;
     return evaluated;
+};
+
+/**
+ * Create an 'svg' element for a printer mark.
+ * @private
+ * @param {!Document} doc
+ * @param {number} width
+ * @param {number} height
+ * @returns {!Element}
+ */
+vivliostyle.page.createPrinterMarkSvg = function(doc, width, height) {
+    var mark = doc.createElementNS(adapt.base.NS.SVG, "svg");
+    mark.setAttribute("width", width);
+    mark.setAttribute("height", height);
+    mark.style.position = "absolute";
+    return mark;
+};
+
+/**
+ * Create an SVG element for a printer mark line.
+ * @private
+ * @param {!Document} doc
+ * @param {number} lineWidth
+ * @param {string=} elementType Specifies which type of element to create. Default value is "polyline".
+ * @returns {!Element}
+ */
+vivliostyle.page.createPrinterMarkElement = function(doc, lineWidth, elementType) {
+    elementType = elementType || "polyline";
+    var line = doc.createElementNS(adapt.base.NS.SVG, elementType);
+    line.setAttribute("stroke", "black");
+    line.setAttribute("stroke-width", lineWidth);
+    line.setAttribute("fill", "none");
+    return line;
+};
+
+/**
+ * Position of a corner mark
+ * @private
+ * @enum {string}
+ */
+vivliostyle.page.CornerMarkPosition = {
+    TOP_LEFT: "top left",
+    TOP_RIGHT: "top right",
+    BOTTOM_LEFT: "bottom left",
+    BOTTOM_RIGHT: "bottom right"
+};
+
+/**
+ * Create a corner mark.
+ * @private
+ * @param {!Document} doc
+ * @param {!vivliostyle.page.CornerMarkPosition} position
+ * @param {number} lineWidth
+ * @param {number} cropMarkLineLength
+ * @param {number} bleed
+ * @param {number} offset
+ * @return {!Element}
+ */
+vivliostyle.page.createCornerMark = function(doc, position, lineWidth, cropMarkLineLength, bleed, offset) {
+    var bleedMarkLineLength = cropMarkLineLength;
+    // bleed mark line should be longer than bleed + 2mm
+    if (bleedMarkLineLength <= bleed + 2 * adapt.expr.defaultUnitSizes["mm"]) {
+        bleedMarkLineLength = bleed + cropMarkLineLength / 2;
+    }
+    var maxLineLength = Math.max(cropMarkLineLength, bleedMarkLineLength);
+    var svgWidth = bleed + maxLineLength + lineWidth / 2;
+    var mark = vivliostyle.page.createPrinterMarkSvg(doc, svgWidth, svgWidth);
+
+    var points1 = [[0, bleed + cropMarkLineLength], [cropMarkLineLength, bleed + cropMarkLineLength], [cropMarkLineLength, bleed + cropMarkLineLength - bleedMarkLineLength]];
+    // reflect with respect to y=x
+    var points2 = points1.map(function(p) { return [p[1], p[0]]; });
+    if (position === vivliostyle.page.CornerMarkPosition.TOP_RIGHT || position === vivliostyle.page.CornerMarkPosition.BOTTOM_RIGHT) {
+        // reflect with respect to a vertical axis
+        points1 = points1.map(function(p) { return [bleed + maxLineLength - p[0], p[1]]; });
+        points2 = points2.map(function(p) { return [bleed + maxLineLength - p[0], p[1]]; });
+    }
+    if (position === vivliostyle.page.CornerMarkPosition.BOTTOM_LEFT || position === vivliostyle.page.CornerMarkPosition.BOTTOM_RIGHT) {
+        // reflect with respect to a vertical axis
+        points1 = points1.map(function(p) { return [p[0], bleed + maxLineLength - p[1]]; });
+        points2 = points2.map(function(p) { return [p[0], bleed + maxLineLength - p[1]]; });
+    }
+
+    var line1 = vivliostyle.page.createPrinterMarkElement(doc, lineWidth);
+    line1.setAttribute("points", points1.map(function(p) { return p.join(","); }).join(" "));
+    mark.appendChild(line1);
+
+    var line2 = vivliostyle.page.createPrinterMarkElement(doc, lineWidth);
+    line2.setAttribute("points", points2.map(function(p) { return p.join(","); }).join(" "));
+    mark.appendChild(line2);
+
+    position.split(" ").forEach(function(side) {
+        mark.style[side] = offset + "px";
+    });
+
+    return mark;
+};
+
+/**
+ * Position of a cross mark
+ * @private
+ * @enum {string}
+ */
+vivliostyle.page.CrossMarkPosition = {
+    TOP: "top",
+    BOTTOM: "bottom",
+    LEFT: "left",
+    RIGHT: "right"
+};
+
+/**
+ * Create a cross mark.
+ * @private
+ * @param {!Document} doc
+ * @param {!vivliostyle.page.CrossMarkPosition} position
+ * @param {number} lineWidth
+ * @param {number} lineLength
+ * @param {number} offset
+ * @returns {!Element}
+ */
+vivliostyle.page.createCrossMark = function(doc, position, lineWidth, lineLength, offset) {
+    var longLineLength = lineLength * 2;
+    var width, height;
+    if (position === vivliostyle.page.CrossMarkPosition.TOP || position === vivliostyle.page.CrossMarkPosition.BOTTOM) {
+        width = longLineLength;
+        height = lineLength;
+    } else {
+        width = lineLength;
+        height = longLineLength;
+    }
+    var mark = vivliostyle.page.createPrinterMarkSvg(doc, width, height);
+
+    var horizontalLine = vivliostyle.page.createPrinterMarkElement(doc, lineWidth);
+    horizontalLine.setAttribute("points", "0," + (height/2) + " " + width + "," + (height/2));
+    mark.appendChild(horizontalLine);
+
+    var verticalLine = vivliostyle.page.createPrinterMarkElement(doc, lineWidth);
+    verticalLine.setAttribute("points", (width/2) + ",0 " + (width/2) + "," + height);
+    mark.appendChild(verticalLine);
+
+    var circle = vivliostyle.page.createPrinterMarkElement(doc, lineWidth, "circle");
+    circle.setAttribute("cx", width / 2);
+    circle.setAttribute("cy", height / 2);
+    circle.setAttribute("r", lineLength / 4);
+    mark.appendChild(circle);
+
+    var opposite;
+    switch (position) {
+        case vivliostyle.page.CrossMarkPosition.TOP:
+            opposite = vivliostyle.page.CrossMarkPosition.BOTTOM;
+            break;
+        case vivliostyle.page.CrossMarkPosition.BOTTOM:
+            opposite = vivliostyle.page.CrossMarkPosition.TOP;
+            break;
+        case vivliostyle.page.CrossMarkPosition.LEFT:
+            opposite = vivliostyle.page.CrossMarkPosition.RIGHT;
+            break;
+        case vivliostyle.page.CrossMarkPosition.RIGHT:
+            opposite = vivliostyle.page.CrossMarkPosition.LEFT;
+            break;
+    }
+    Object.keys(vivliostyle.page.CrossMarkPosition).forEach(function(key) {
+        var side = vivliostyle.page.CrossMarkPosition[key];
+        if (side === position) {
+            mark.style[side] = offset + "px";
+        } else if (side !== opposite) {
+            mark.style[side] = "0";
+            mark.style["margin-" + side] = "auto";
+        }
+    });
+
+    return mark;
+};
+
+/**
+ * Add printer marks to the page.
+ * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle
+ * @param {!vivliostyle.page.EvaluatedPageSizeAndBleed} evaluatedPageSizeAndBleed
+ * @param {!adapt.vtree.Page} page
+ * @param {!adapt.expr.Context} context
+ */
+vivliostyle.page.addPrinterMarks = function(cascadedPageStyle, evaluatedPageSizeAndBleed, page, context) {
+    var crop = false, cross = false;
+    var marks = cascadedPageStyle["marks"];
+    if (marks) {
+        var value = marks.value;
+        if (value.isSpaceList()) {
+            value.values.forEach(function(v) {
+                if (v === adapt.css.ident.crop) {
+                    crop = true;
+                } else if (v === adapt.css.ident.cross) {
+                    cross = true;
+                }
+            })
+        } else if (value === adapt.css.ident.crop) {
+            crop = true;
+        } else if (value === adapt.css.ident.cross) {
+            cross = true;
+        }
+    }
+    if (!crop && !cross) {
+        return;
+    }
+
+    var container = page.container;
+    var doc = /** @type {!Document} */ (container.ownerDocument);
+    goog.asserts.assert(doc);
+    var bleed = evaluatedPageSizeAndBleed.bleed;
+    var lineWidth = adapt.css.toNumber(vivliostyle.page.defaultPrinterMarkLineWidth, context);
+    var printerMarkOffset = adapt.css.toNumber(vivliostyle.page.defaultPrinterMarkOffset, context);
+    var lineLength = adapt.css.toNumber(vivliostyle.page.defaultPrinterMarkLineLength, context);
+
+    // corner marks
+    if (crop) {
+        Object.keys(vivliostyle.page.CornerMarkPosition).forEach(function(key) {
+            var position = vivliostyle.page.CornerMarkPosition[key];
+            var mark = vivliostyle.page.createCornerMark(doc, position, lineWidth, lineLength, bleed, printerMarkOffset);
+            container.appendChild(mark);
+        });
+    }
+
+    // cross marks
+    if (cross) {
+        Object.keys(vivliostyle.page.CrossMarkPosition).forEach(function(key) {
+            var position = vivliostyle.page.CrossMarkPosition[key];
+            var mark = vivliostyle.page.createCrossMark(doc, position, lineWidth, lineLength, printerMarkOffset);
+            container.appendChild(mark);
+        });
+    }
 };
 
 /**

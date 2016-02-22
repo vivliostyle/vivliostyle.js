@@ -1356,7 +1356,7 @@ adapt.epub.OPFView.prototype.navigateTo = function(href) {
 /**
  * @param {adapt.epub.OPFViewItem} viewItem
  * @param {adapt.vtree.LayoutPosition} pos
- * @return {adapt.vtree.Page}
+ * @return {!adapt.vtree.Page}
  */
 adapt.epub.OPFView.prototype.makePage = function(viewItem, pos) {
 	var viewport = viewItem.instance.viewport;

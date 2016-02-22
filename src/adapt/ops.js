@@ -697,7 +697,7 @@ adapt.ops.StyleInstance.prototype.noMorePrimaryFlows = function(cp) {
 };
 
 /**
- * @param {adapt.vtree.Page} page
+ * @param {!adapt.vtree.Page} page
  * @param {adapt.vtree.LayoutPosition|undefined} cp
  * @return {adapt.task.Result.<adapt.vtree.LayoutPosition>}
  */
@@ -720,9 +720,6 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 
     // Resolve page size before page master selection.
     var cascadedPageStyle = self.pageManager.getCascadedPageStyle();
-	var evaluatedPageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(
-		vivliostyle.page.resolvePageSizeAndBleed(cascadedPageStyle), this);
-    self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
     var pageMaster = self.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
     	// end of primary content
@@ -736,6 +733,12 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 		page.setAutoPageHeight(true);
     }
 	self.pageCounterStore.updatePageCounters(cascadedPageStyle, self);
+
+	// setup bleed area and crop marks
+	var evaluatedPageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(
+		vivliostyle.page.resolvePageSizeAndBleed(cascadedPageStyle), this);
+	self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
+	vivliostyle.page.addPrinterMarks(cascadedPageStyle, evaluatedPageSizeAndBleed, page, this);
 
 	var writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
 	var direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
