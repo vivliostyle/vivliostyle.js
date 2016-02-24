@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>second</title>
+    <style>
+        @page {
+            @top-center {
+                content: "Document 2, page " counter(page);
+            }
+        }
+        div {
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    This is the third page.
+    <a href="#fourth-page">link to the fourth page</a>
+</div>
+
+<div>
+    <a id="fourth-page"></a>
+    This is the fourth page.
+    <a href="first.html">link to the first page (first HTML)</a>
+    <a href="first.html#second-page">link to the second page (first HTML)</a>
+</div>
+
+</body>
+</html>
