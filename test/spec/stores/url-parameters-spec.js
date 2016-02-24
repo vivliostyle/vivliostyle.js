@@ -35,18 +35,18 @@ describe("URLParameterStore", function() {
     });
 
     describe("getParameter", function() {
-        it("returns a value corresponding to the key in the URL hash", function() {
-            urlParameters.location = {href: "http://example.com#aa=bb&cc=dd"};
+        it("returns an array containing values corresponding to the key in the URL hash", function() {
+            urlParameters.location = {href: "http://example.com#aa=bb&cc=dd&cc=ee"};
 
-            expect(urlParameters.getParameter("aa")).toBe("bb");
-            expect(urlParameters.getParameter("cc")).toBe("dd");
+            expect(urlParameters.getParameter("aa")).toEqual(["bb"]);
+            expect(urlParameters.getParameter("cc")).toEqual(["dd", "ee"]);
         });
 
         it("can retrieve a value for a unicode key", function() {
             var key = "あいうえお";
             urlParameters.location = {href: "http://example.com#aa=bb&" + key + "=dd"};
 
-            expect(urlParameters.getParameter(key)).toBe("dd");
+            expect(urlParameters.getParameter(key)).toEqual(["dd"]);
         });
     });
 

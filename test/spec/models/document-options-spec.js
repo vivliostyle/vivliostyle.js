@@ -36,18 +36,18 @@ describe("DocumentOptions", function() {
 
     describe("constructor", function() {
         it("retrieves parameters from URL", function() {
-            urlParameters.location = {href: "http://example.com#x=abc/def.html&f=ghi"};
+            urlParameters.location = {href: "http://example.com#x=abc/def.html&f=ghi&x=jkl/mno.html"};
             var options = new DocumentOptions();
 
             expect(options.epubUrl()).toBe("");
-            expect(options.url()).toBe("abc/def.html");
+            expect(options.url()).toEqual(["abc/def.html", "jkl/mno.html"]);
             expect(options.fragment()).toBe("ghi");
 
             urlParameters.location = {href: "http://example.com#b=abc/&f=ghi"};
             options = new DocumentOptions();
 
             expect(options.epubUrl()).toBe("abc/");
-            expect(options.url()).toBe("");
+            expect(options.url()).toBe(null);
             expect(options.fragment()).toBe("ghi");
         });
     });
