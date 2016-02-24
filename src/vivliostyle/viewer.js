@@ -164,8 +164,8 @@ goog.scope(function() {
     };
 
     /**
-     * Load an HTML or XML document.
-     * @param {string} url
+     * Load an HTML or XML document(s).
+     * @param {string|!Array<string>} url
      * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
      */
@@ -192,7 +192,7 @@ goog.scope(function() {
     /**
      * Load an HTML or XML document, or an EPUB document.
      * @private
-     * @param {?string} url
+     * @param {?(string|!Array<string>)} url
      * @param {?string} epubUrl
      * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions

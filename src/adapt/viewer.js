@@ -77,7 +77,7 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.init = function() {
-	/** @type {string} */ this.packageURL = "";
+	/** @type {!Array.<string>} */ this.packageURL = [];
 	/** @type {adapt.epub.OPFDoc} */ this.opf = null;
     /** @type {boolean} */ this.haveZipMetadata = false;
     /** @type {boolean} */ this.touchActive = false;
@@ -147,7 +147,7 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     }
 	store.init().then(function() {
 	    var epubURL = adapt.base.resolveURL(url, self.window.location.href);
-	    self.packageURL = epubURL;
+	    self.packageURL = [epubURL];
 	    store.loadEPUBDoc(epubURL, haveZipMetadata).then(function (opf) {
 	        self.opf = opf;
 	        self.opf.resolveFragment(fragment).then(function(position) {
@@ -173,7 +173,12 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
     vivliostyle.profile.profiler.registerStartTiming("loadXML");
     vivliostyle.profile.profiler.registerStartTiming("loadFirstPage");
     this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
-	var url = /** @type {string} */ (command["url"]);
+    /** @type {!Array<string>} */ var urls;
+    if (typeof command["url"] === "string") {
+        urls = [command["url"]];
+    } else {
+        urls = command["url"];
+    }
     var doc = /** @type {Document} */ (command["document"]);
 	var fragment = /** @type {?string} */ (command["fragment"]);
     var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
@@ -189,10 +194,12 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
         }
     }
 	store.init().then(function() {
-	    var xmlURL = adapt.base.resolveURL(url, self.window.location.href);
-	    self.packageURL = xmlURL;
+	    var xmlURLs = urls.map(function(url) {
+            return adapt.base.resolveURL(url, self.window.location.href);
+        });
+	    self.packageURL = xmlURLs;
 	    self.opf = new adapt.epub.OPFDoc(store, "");
-	    self.opf.initWithSingleChapter(xmlURL, doc).then(function() {
+	    self.opf.initWithChapters(xmlURLs, doc).then(function() {
             self.opf.resolveFragment(fragment).then(function(position) {
                 self.pagePosition = position;
                 self.resize().then(function() {
@@ -780,7 +787,9 @@ adapt.viewer.Viewer.prototype.initEmbed = function (cmd) {
         var scheduler = adapt.task.currentTask().getScheduler();
         viewer.hyperlinkListener = function(evt) {
     		var hrefEvent = /** @type {adapt.vtree.PageHyperlinkEvent} */ (evt);
-    		var internal = hrefEvent.href.substr(0, viewer.packageURL.length) == viewer.packageURL;
+            var internal = viewer.packageURL.some(function(url) {
+                return hrefEvent.href.substr(0, url.length) == url;
+            });
     		var msg = {"t":"hyperlink", "href":hrefEvent.href, "internal": internal};
     		scheduler.run(function() {
     			viewer.callback(msg);

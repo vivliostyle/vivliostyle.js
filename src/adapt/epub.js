@@ -8,6 +8,7 @@ goog.provide('adapt.epub');
 goog.require("vivliostyle.constants");
 goog.require("vivliostyle.logging");
 goog.require('adapt.net');
+goog.require('adapt.xmldoc');
 goog.require('adapt.csscasc');
 goog.require('adapt.font');
 goog.require('adapt.ops');
@@ -709,22 +710,35 @@ adapt.epub.OPFDoc.prototype.assignAutoPages = function() {
 
 /**
  * Creates a fake OPF "document" that contains a single OPS chapter.
- * @param url OPS (XHTML) document URL
+ * @param {!Array<string>} urls OPS (XHTML) document URL
  * @param {?Document} doc
  */
-adapt.epub.OPFDoc.prototype.initWithSingleChapter = function(url, doc) {
-	var item = new adapt.epub.OPFItem();
-	item.spineIndex = 0;
-	item.id = "item1";
-	item.src = url;
-	this.itemMap = {"item1": item};
+adapt.epub.OPFDoc.prototype.initWithChapters = function(urls, doc) {
+	this.itemMap = {};
 	this.itemMapByPath = {};
-	this.itemMapByPath[url] = item;
-	this.items = [item];
+	this.items = [];
 	this.spine = this.items;
+	// create a minimum fake OPF XML for navigation with EPUB CFI
+	var opfXML = this.opfXML = new adapt.xmldoc.XMLDocHolder(null, "", new DOMParser().parseFromString("<spine></spine>", "text/xml"));
+
+	urls.forEach(function(url, index) {
+		var item = new adapt.epub.OPFItem();
+		item.spineIndex = index;
+		item.id = "item" + (index+1);
+		item.src = url;
+
+		var itemref = opfXML.document.createElement("itemref");
+		itemref.setAttribute("idref", item.id);
+		opfXML.root.appendChild(itemref);
+		item.itemRefElement = itemref;
+
+		this.itemMap[item.id] = item;
+		this.itemMapByPath[url] = item;
+		this.items.push(item);
+	}, this);
 
     if (doc) {
-        return this.store.addDocument(url, doc);
+        return this.store.addDocument(urls[0], doc);
     } else {
         return adapt.task.newResult(null);
     }
@@ -1033,14 +1047,14 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 		    });
 		}).then(function() {
 			resultPage = resultPage || viewItem.pages[self.pageIndex];
-			if (resultPage) {
-			    frame.finish(resultPage);
-			    return;
-			}
 			var pos = viewItem.layoutPositions[self.pageIndex];
 	    	if (seekOffset < 0) {
 	    		self.offsetInItem = viewItem.instance.getPosition(pos);
 	    	}
+			if (resultPage) {
+				frame.finish(resultPage);
+				return;
+			}
 			var page = self.makePage(viewItem, pos);
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
                 page.container.style.display = "none";
