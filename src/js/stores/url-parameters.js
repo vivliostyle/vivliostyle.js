@@ -20,7 +20,7 @@
 import stringUtil from "../utils/string-util"
 
 function getRegExpForParameter(name) {
-    return new RegExp("[#&]" + stringUtil.escapeUnicodeString(name) + "=([^&]*)");
+    return new RegExp("[#&]" + stringUtil.escapeUnicodeString(name) + "=([^&]*)", "g");
 }
 
 function URLParameterStore() {
@@ -31,19 +31,19 @@ function URLParameterStore() {
 URLParameterStore.prototype.getParameter = function(name) {
     var url = this.location.href;
     var regexp = getRegExpForParameter(name);
-    var r = url.match(regexp);
-    if (r) {
-        return r[1];
-    } else {
-        return null;
+    var results = [];
+    var r;
+    while (r = regexp.exec(url)) {
+        results.push(r[1]);
     }
+    return results;
 };
 
 URLParameterStore.prototype.setParameter = function(name, value) {
     var url = this.location.href;
     var updated;
     var regexp = getRegExpForParameter(name);
-    var r = url.match(regexp);
+    var r = regexp.exec(url);
     if (r) {
         var l = r[1].length;
         var start = r.index + r[0].length - l;

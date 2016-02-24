@@ -22,8 +22,8 @@ import urlParameters from "../stores/url-parameters";
 
 function getViewerOptionsFromURL() {
     return {
-        profile: (urlParameters.getParameter("profile") === "true"),
-        spreadView: (urlParameters.getParameter("spread") === "true")
+        profile: (urlParameters.getParameter("profile")[0] === "true"),
+        spreadView: (urlParameters.getParameter("spread")[0] === "true")
     };
 }
 

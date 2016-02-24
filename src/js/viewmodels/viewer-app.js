@@ -38,7 +38,7 @@ function ViewerApp() {
     this.viewerSettings = {
         userAgentRootURL: "resources/",
         viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
-        debug: urlParameters.getParameter("debug") === "true"
+        debug: urlParameters.getParameter("debug")[0] === "true"
     };
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
     this.messageDialog = new MessageDialog(messageQueue);

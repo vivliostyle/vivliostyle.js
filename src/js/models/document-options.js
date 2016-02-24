@@ -22,17 +22,20 @@ import urlParameters from "../stores/url-parameters";
 import PageSize from "./page-size";
 
 function getDocumentOptionsFromURL() {
+    var epubUrl = urlParameters.getParameter("b");
+    var url = urlParameters.getParameter("x");
+    var fragment = urlParameters.getParameter("f");
     return {
-        epubUrl: urlParameters.getParameter("b"),
-        url: urlParameters.getParameter("x"),
-        fragment: urlParameters.getParameter("f")
+        epubUrl: epubUrl[0] || null,
+        url: url.length ? url : null,
+        fragment: fragment[0] || null
     };
 }
 
 function DocumentOptions() {
     var urlOptions = getDocumentOptionsFromURL();
     this.epubUrl = ko.observable(urlOptions.epubUrl || "");
-    this.url = ko.observable(urlOptions.url || "");
+    this.url = ko.observable(urlOptions.url || null);
     this.fragment = ko.observable(urlOptions.fragment || "");
     this.pageSize = new PageSize();
 
