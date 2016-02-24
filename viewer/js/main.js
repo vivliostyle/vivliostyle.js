@@ -6694,17 +6694,20 @@ var _pageSize = require("./page-size");
 var _pageSize2 = _interopRequireDefault(_pageSize);
 
 function getDocumentOptionsFromURL() {
+    var epubUrl = _storesUrlParameters2["default"].getParameter("b");
+    var url = _storesUrlParameters2["default"].getParameter("x");
+    var fragment = _storesUrlParameters2["default"].getParameter("f");
     return {
-        epubUrl: _storesUrlParameters2["default"].getParameter("b"),
-        url: _storesUrlParameters2["default"].getParameter("x"),
-        fragment: _storesUrlParameters2["default"].getParameter("f")
+        epubUrl: epubUrl[0] || null,
+        url: url.length ? url : null,
+        fragment: fragment[0] || null
     };
 }
 
 function DocumentOptions() {
     var urlOptions = getDocumentOptionsFromURL();
     this.epubUrl = _knockout2["default"].observable(urlOptions.epubUrl || "");
-    this.url = _knockout2["default"].observable(urlOptions.url || "");
+    this.url = _knockout2["default"].observable(urlOptions.url || null);
     this.fragment = _knockout2["default"].observable(urlOptions.fragment || "");
     this.pageSize = new _pageSize2["default"]();
 
@@ -6920,8 +6923,8 @@ var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
 
 function getViewerOptionsFromURL() {
     return {
-        profile: _storesUrlParameters2["default"].getParameter("profile") === "true",
-        spreadView: _storesUrlParameters2["default"].getParameter("spread") === "true"
+        profile: _storesUrlParameters2["default"].getParameter("profile")[0] === "true",
+        spreadView: _storesUrlParameters2["default"].getParameter("spread")[0] === "true"
     };
 }
 
@@ -7044,7 +7047,7 @@ var _utilsStringUtil = require("../utils/string-util");
 var _utilsStringUtil2 = _interopRequireDefault(_utilsStringUtil);
 
 function getRegExpForParameter(name) {
-    return new RegExp("[#&]" + _utilsStringUtil2["default"].escapeUnicodeString(name) + "=([^&]*)");
+    return new RegExp("[#&]" + _utilsStringUtil2["default"].escapeUnicodeString(name) + "=([^&]*)", "g");
 }
 
 function URLParameterStore() {
@@ -7055,19 +7058,19 @@ function URLParameterStore() {
 URLParameterStore.prototype.getParameter = function (name) {
     var url = this.location.href;
     var regexp = getRegExpForParameter(name);
-    var r = url.match(regexp);
-    if (r) {
-        return r[1];
-    } else {
-        return null;
+    var results = [];
+    var r;
+    while (r = regexp.exec(url)) {
+        results.push(r[1]);
     }
+    return results;
 };
 
 URLParameterStore.prototype.setParameter = function (name, value) {
     var url = this.location.href;
     var updated;
     var regexp = getRegExpForParameter(name);
-    var r = url.match(regexp);
+    var r = regexp.exec(url);
     if (r) {
         var l = r[1].length;
         var start = r.index + r[0].length - l;
@@ -7682,7 +7685,7 @@ function ViewerApp() {
     this.viewerSettings = {
         userAgentRootURL: "resources/",
         viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
-        debug: _storesUrlParameters2["default"].getParameter("debug") === "true"
+        debug: _storesUrlParameters2["default"].getParameter("debug")[0] === "true"
     };
     this.viewer = new _viewer2["default"](this.viewerSettings, this.viewerOptions);
     this.messageDialog = new _messageDialog2["default"](_modelsMessageQueue2["default"]);
