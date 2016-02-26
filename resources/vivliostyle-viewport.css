@@ -30,6 +30,7 @@
     [data-vivliostyle-page-container] {
         display: block !important;
         page-break-after: always;
+        height: 100% !important;
         max-height: 100%;
     }
 }
