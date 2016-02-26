@@ -395,14 +395,20 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
     }
     var self = this;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("layoutColumn");
-    var repeated = /** @type {Array.<adapt.vtree.FlowChunkPosition>} */ ([]);
+	// Record indices of repeated positions and removed positions
+    var repeatedIndices = /** @type {Array.<number>} */ ([]);
+	var removedIndices = /** @type {Array.<number>} */ ([]);
     frame.loopWithFrame(function(loopFrame) {
-	    while (flowPosition.positions.length > 0) {
+	    while (flowPosition.positions.length - removedIndices.length > 0) {
 	        var index = 0;
+			// Skip all removed positions
+			while (removedIndices.indexOf(index) >= 0)
+				index++;
 	        var selected = flowPosition.positions[index];
 	        if (selected.flowChunk.startOffset > self.lookupOffset)
 	            break;
 	        for (var k = 1; k < flowPosition.positions.length; k++) {
+				if (removedIndices.indexOf(k) >= 0) continue; // Skip removed positions
 	            var alt = flowPosition.positions[k];
 	            if (alt.flowChunk.startOffset > self.lookupOffset)
 	                break;
@@ -414,12 +420,12 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 	        var flowChunk = selected.flowChunk;
 	        var pending = true;
 	        region.layout(selected.chunkPosition).then(function(newPosition) {
-		        // static: add back to the flow
+		        // static: keep in the flow
 		        if (selected.flowChunk.repeated && (newPosition === null || flowChunk.exclusive))
-		            repeated.push(selected);
+		            repeatedIndices.push(index);
 		        if (flowChunk.exclusive) {
 		            // exclusive, only can have one, remove from the flow even if it did not fit
-		            flowPosition.positions.splice(index, 1);
+					removedIndices.push(index);
 		        	loopFrame.breakLoop();
 		        	return;
 		        } else {
@@ -430,7 +436,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 			        	return;
 		            }
 		            // go to the next element in the flow
-		            flowPosition.positions.splice(index, 1);
+					removedIndices.push(index);
 		        }
 		        if (pending) {
 		        	// Sync result
@@ -449,9 +455,10 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 	    }
 	    loopFrame.breakLoop();
     }).then(function() {
-	    // add all repeated back
-	    if (repeated.length > 0)
-	        flowPosition.positions = repeated.concat(flowPosition.positions);
+	    // Keep positions repeated or not removed
+		flowPosition.positions = flowPosition.positions.filter(function(pos, i) {
+			return repeatedIndices.indexOf(i) >= 0 || removedIndices.indexOf(i) < 0;
+		});
 	    frame.finish(true);
     });
     return frame.result();
