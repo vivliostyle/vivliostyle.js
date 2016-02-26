@@ -5,7 +5,6 @@
 [data-vivliostyle-page-container] {
     position: relative;
     overflow: hidden;
-    max-height: 100%;
 }
 
 [data-vivliostyle-bleed-box] {
@@ -31,6 +30,7 @@
     [data-vivliostyle-page-container] {
         display: block !important;
         page-break-after: always;
+        max-height: 100%;
     }
 }
 
