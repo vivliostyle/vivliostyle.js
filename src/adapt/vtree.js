@@ -17,8 +17,15 @@ goog.provide('adapt.vtree');
 /** @const */
 adapt.vtree.delayedProps = {
 	"transform": true,
-	"transform-origin": true,
-	"position": true  // only relative
+	"transform-origin": true
+};
+
+/** @const */
+adapt.vtree.delayedPropsIfRelativePositioned = {
+	"top": true,
+	"bottom": true,
+	"left": true,
+	"right": true
 };
 
 /**
