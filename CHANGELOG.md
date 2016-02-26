@@ -16,6 +16,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/109>
 - Web fonts are now applied correctly even when specified within page context.
   - <https://github.com/vivliostyle/vivliostyle.js/issues/58>
+- Fix incorrect pagination caused by absolutely positioned element.
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/158>
 
 ## [2016.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.1) - 2016-01-20
 
