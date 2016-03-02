@@ -1567,7 +1567,7 @@ adapt.layout.Column.prototype.isBreakable = function(flowPosition) {
 	case adapt.base.NS.SVG:
 		return false;
 	}
-	return true;
+	return !flowPosition.flexContainer;
 };
 
 /**
@@ -1721,8 +1721,8 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 						// clear
 						self.applyClearance(nodeContext);
 					}
-					if (nodeContext.floatSide) {
-						// float
+					if (nodeContext.floatSide || nodeContext.flexContainer) {
+						// float or flex container (unbreakable)
 						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
 							// overflow
 					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
