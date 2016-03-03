@@ -1804,8 +1804,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 				nodeContext = nextResult.get();
 			}
 		}
-		if (self.breakPositions.length != 0 &&
-				self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, false, breakAtTheEdge)) {
+		if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, false, breakAtTheEdge)) {
 			if (lastAfterNodeContext) {
 		    	nodeContext = lastAfterNodeContext.modify();
 		    	nodeContext.overflow = true;

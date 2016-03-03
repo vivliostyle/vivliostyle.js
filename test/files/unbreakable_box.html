@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>unbreakable box at the end of a flow</title>
+    <style>
+        @page {
+            size: 300px 300px;
+            margin: 0;
+        }
+        * {
+            margin: 0;
+        }
+        @-epubx-page-template {
+            @-epubx-page-master {
+                @-epubx-partition {
+                    -epubx-flow-from: top;
+                    top: 0;
+                }
+                @-epubx-partition {
+                    -epubx-flow-from: body;
+                    bottom: 0;
+                }
+            }
+        }
+        .top {
+            -epubx-flow-into: top;
+        }
+        svg {
+            display:block;
+            max-width:100%;
+            background:#DFD;
+        }
+    </style>
+</head>
+<body>
+<p>A green box should be visible above.</p>
+<p class="top">A green box should be visible below.</p>
+<svg class="top" width="400px" height="100px" version="1.1" xmlns="http://www.w3.org/2000/svg"></svg>
+</body>
+</html>
