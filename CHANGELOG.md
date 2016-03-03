@@ -18,6 +18,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/58>
 - Fix incorrect pagination caused by absolutely positioned element.
   - <https://github.com/vivliostyle/vivliostyle.js/issues/158>
+- Fix pagination problem with flex containers.
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/174>
 
 ## [2016.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.1) - 2016-01-20
 

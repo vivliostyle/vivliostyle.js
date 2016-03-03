@@ -526,6 +526,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
     	frame.finish(false);
     	return frame.result();
     }
+	self.nodeContext.flexContainer = (display === adapt.css.ident.flex);
     self.createShadows(element, self.nodeContext.parent == null, elementStyle, computedStyle, styler,
     		self.context, self.nodeContext.shadowContext).then(function(shadowParam) {
     	self.nodeContext.nodeShadow = shadowParam;    			

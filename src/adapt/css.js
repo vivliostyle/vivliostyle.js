@@ -893,6 +893,7 @@ adapt.css.ident = {
     cross: adapt.css.getName("cross"),
     exclusive: adapt.css.getName("exclusive"),
     _false: adapt.css.getName("false"),
+    flex: adapt.css.getName("flex"),
     footnote: adapt.css.getName("footnote"),
     hidden: adapt.css.getName("hidden"),
     horizontal_tb: adapt.css.getName("horizontal-tb"),
