@@ -2602,10 +2602,16 @@ adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, na
 };
 
 /**
+ * @private
+ * @type {number}
+ */
+adapt.csscasc.conditionCount = 0;
+
+/**
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.descendantSelector = function() {
-    var condition = "d" + (this.conditionCount++);
+    var condition = "d" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
     		new adapt.csscasc.DescendantConditionItem(condition)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -2615,7 +2621,7 @@ adapt.csscasc.CascadeParserHandler.prototype.descendantSelector = function() {
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.childSelector = function() {
-    var condition = "c" + (this.conditionCount++);
+    var condition = "c" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
     		new adapt.csscasc.ChildConditionItem(condition)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -2625,7 +2631,7 @@ adapt.csscasc.CascadeParserHandler.prototype.childSelector = function() {
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.adjacentSiblingSelector = function() {
-    var condition = "a" + (this.conditionCount++);
+    var condition = "a" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
     		new adapt.csscasc.AdjacentSiblingConditionItem(condition)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -2635,7 +2641,7 @@ adapt.csscasc.CascadeParserHandler.prototype.adjacentSiblingSelector = function(
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.followingSiblingSelector = function() {
-    var condition = "f" + (this.conditionCount++);
+    var condition = "f" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
     		new adapt.csscasc.FollowingSiblingConditionItem(condition)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
