@@ -1258,6 +1258,12 @@
       - [CSS 2.1 - font-family](https://drafts.csswg.org/css2/fonts.html#propdef-font-family)
       - [CSS Fonts 3 - font-family](https://drafts.csswg.org/css-fonts-3/#propdef-font-family)
   - Values: `FAMILY_LIST;`
+- [font-feature-settings](https://www.w3.org/TR/css-fonts-3/#propdef-font-feature-settings)
+  - TR
+      - [CSS Fonts 3 - font-feature-settings](https://www.w3.org/TR/css-fonts-3/#propdef-font-feature-settings)
+  - Drafts
+      - [CSS Fonts 3 - font-feature-settings](https://drafts.csswg.org/css-fonts-3/#propdef-font-feature-settings)
+  - Values: `normal | [STRING [ on | off ]?];`
 - [font-kerning](https://www.w3.org/TR/css-fonts-3/#propdef-font-kerning)
     - Allowed prefixes: webkit
   - TR

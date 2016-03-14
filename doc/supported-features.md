@@ -489,6 +489,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 - [font-family](https://www.w3.org/TR/css-fonts-3/#propdef-font-family)
   - Support depends on browser capabilities
+- [font-feature-settings](https://www.w3.org/TR/css-fonts-3/#propdef-font-feature-settings)
+  - Support depends on browser capabilities
 - [font-kerning](https://www.w3.org/TR/css-fonts-3/#propdef-font-kerning)
   - Allowed prefixes: webkit
   - Support depends on browser capabilities

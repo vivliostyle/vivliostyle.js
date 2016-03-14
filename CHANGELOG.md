@@ -13,7 +13,9 @@
 - Support outline-offset
   - <https://github.com/vivliostyle/vivliostyle.js/issues/181>
   - Spec: [CSS Basic User Interface Module Level 3 (CSS3 UI) - outline-offset property](https://drafts.csswg.org/css-ui-3/#outline-offset)
-   
+- Support font-feature-settings
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/151>
+  - Spec [CSS Fonts Module Level 3 - font-feature-settings descriptors](https://drafts.csswg.org/css-fonts-3/#propdef-font-feature-settings)
 
 ### Fixed
 - Lengths in 'rem' specified within page context are now interpreted correctly.
