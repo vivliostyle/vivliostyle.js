@@ -136,6 +136,7 @@ max-width = NPLENGTH;
 min-height = auto | PLENGTH;
 min-width = auto | PLENGTH;
 orphans = POS_INT;
+outline-offset = LENGTH;
 outline-color = COLOR | invert;
 outline-style = BORDER_SIDE_STYLE;
 outline-width = BORDER_SIDE_WIDTH;

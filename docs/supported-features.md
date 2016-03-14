@@ -302,6 +302,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Support depends on browser capabilities
 - [outline-color](https://www.w3.org/TR/CSS2/ui.html#propdef-outline-color)
   - Support depends on browser capabilities
+- [outline-offset](https://www.w3.org/TR/css3-ui/#propdef-outline-offset)
+  - Support depends on browser capabilities
 - [outline-style](https://www.w3.org/TR/CSS2/ui.html#propdef-outline-style)
   - Support depends on browser capabilities
 - [outline-width](https://www.w3.org/TR/CSS2/ui.html#propdef-outline-width)
