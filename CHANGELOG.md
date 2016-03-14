@@ -10,6 +10,10 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/98>
   - Spec: [CSS Paged Media Module Level 3 - Crop and Registration Marks: the 'marks' property](https://drafts.csswg.org/css-page/#marks), [Bleed Area: the 'bleed' property](https://drafts.csswg.org/css-page/#bleed)
   - Only effective when specified within an `@page` rule without page selectors.
+- Support outline-offset
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/181>
+  - Spec: [CSS Basic User Interface Module Level 3 (CSS3 UI) - outline-offset property](https://drafts.csswg.org/css-ui-3/#outline-offset)
+   
 
 ### Fixed
 - Lengths in 'rem' specified within page context are now interpreted correctly.
