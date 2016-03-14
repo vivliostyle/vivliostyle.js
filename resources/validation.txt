@@ -375,7 +375,6 @@ column-rule-color: currentColor;
 column-rule-style: none;
 column-rule-width: 3px;
 column-fill: auto;
-outline-offset: 0;
 outline-color: currentColor;
 outline-style: none;
 outline-width: 3px;
