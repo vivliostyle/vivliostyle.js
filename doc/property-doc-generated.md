@@ -322,8 +322,9 @@
       - [CSS 2.1 - direction](https://drafts.csswg.org/css2/visuren.html#propdef-direction)
       - [CSS Writing Modes 3 - direction](https://drafts.csswg.org/css-writing-modes-3/#propdef-direction)
   - Values: `ltr | rtl;`
-- [display](https://www.w3.org/TR/CSS21/visuren.html#propdef-display)
+- [display](https://www.w3.org/TR/css-display-3/#propdef-display)
   - TR
+      - [CSS Display 3 - display](https://www.w3.org/TR/css-display-3/#propdef-display)
       - [CSS 2.1 - display](https://www.w3.org/TR/CSS21/visuren.html#propdef-display)
       - [CSS Ruby 1 - display](https://www.w3.org/TR/css-ruby-1/#propdef-display)
   - Drafts
@@ -1641,6 +1642,12 @@
       - [CSS 2.1 - outline-color](https://drafts.csswg.org/css2/ui.html#propdef-outline-color)
       - [CSS User Interface 3 - outline-color](https://drafts.csswg.org/css-ui-3/#propdef-outline-color)
   - Values: `COLOR | invert;`
+- [outline-offset](https://www.w3.org/TR/css3-ui/#propdef-outline-offset)
+  - TR
+      - [CSS User Interface 3 - outline-offset](https://www.w3.org/TR/css3-ui/#propdef-outline-offset)
+  - Drafts
+      - [CSS User Interface 3 - outline-offset](https://drafts.csswg.org/css-ui-3/#propdef-outline-offset)
+  - Values: `LENGTH;`
 - [outline-style](https://www.w3.org/TR/CSS21/ui.html#propdef-outline-style)
   - TR
       - [CSS 2.1 - outline-style](https://www.w3.org/TR/CSS21/ui.html#propdef-outline-style)
@@ -2013,8 +2020,9 @@
   - Values: `[[[ top | bottom | left | right] PLENGTH?] | center | PLENGTH]{1,2}; /* relaxed */`
 
 ## [CSS Ruby 1](https://www.w3.org/TR/css-ruby-1/)
-- [display](https://www.w3.org/TR/CSS21/visuren.html#propdef-display)
+- [display](https://www.w3.org/TR/css-display-3/#propdef-display)
   - TR
+      - [CSS Display 3 - display](https://www.w3.org/TR/css-display-3/#propdef-display)
       - [CSS 2.1 - display](https://www.w3.org/TR/CSS21/visuren.html#propdef-display)
       - [CSS Ruby 1 - display](https://www.w3.org/TR/css-ruby-1/#propdef-display)
   - Drafts
@@ -2116,11 +2124,11 @@
   - Values: `auto | both | start | end | maximum | clear | around /* epub al */;`
 
 ## [CSS Size Adjustment 1](https://drafts.csswg.org/css-size-adjust-1/)
-- [text-size-adjust](#text-size-adjust)
+- [text-size-adjust](#propdef-text-size-adjust)
     - Allowed prefixes: moz, ms
 
   - Drafts
-      - [CSS Size Adjustment 1 - text-size-adjust](https://drafts.csswg.org/css-size-adjust-1/#text-size-adjust)
+      - [CSS Size Adjustment 1 - text-size-adjust](https://drafts.csswg.org/css-size-adjust-1/#propdef-text-size-adjust)
   - Values: `auto | none | POS_PERCENTAGE;`
 
 ## [CSS Inline Layout 3](https://www.w3.org/TR/css-inline-3/)
@@ -2317,6 +2325,16 @@
 
 
   - Values: `COMMA(IDENT+);`
+- [snap-height]()
+    - Allowed prefixes: epubx
+
+
+  - Values: `LENGTH | none;`
+- [snap-width]()
+    - Allowed prefixes: epubx
+
+
+  - Values: `LENGTH | none;`
 - [src]()
 
 
