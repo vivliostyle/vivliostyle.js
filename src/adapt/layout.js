@@ -1689,6 +1689,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 		= adapt.task.newFrame("skipEdges");
 	var breakAtTheEdge = null;
 	var lastAfterNodeContext = null;
+	var leadingEdgeContexts = [];
 	var trailingEdgeContexts = [];
 	frame.loopWithFrame(function(loopFrame) {
 		while (nodeContext) {
@@ -1755,14 +1756,18 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 						trailingEdgeContexts = [lastAfterNodeContext];
 						breakAtTheEdge = null;
 						lastAfterNodeContext = null;
+						leadingEdgeContexts = [];
 					}			
 				} else {
 					// Leading edge
+					leadingEdgeContexts.push(nodeContext.copy());
 					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
 					// leadingEdge=true means that we are at the beginning of the new column and hence must avoid a break
 					// (Otherwise leading to an infinite loop)
 					if (!leadingEdge && vivliostyle.break.isForcedBreakValue(breakAtTheEdge)) {
 						// explicit page break
+						self.removeNodesAfterForcedBreak(leadingEdgeContexts);
+						nodeContext = leadingEdgeContexts[0];
 						loopFrame.breakLoop();
 						self.pageBreakType = breakAtTheEdge;
 						return;			
@@ -1905,6 +1910,15 @@ adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
 		frame.finish(resultNodeContext);
 	});
 	return frame.result();
+};
+
+/**
+ * @private
+ * @param {!Array<!adapt.vtree.NodeContext>} leadingEdgeContexts
+ */
+adapt.layout.Column.prototype.removeNodesAfterForcedBreak = function(leadingEdgeContexts) {
+	var nodePosition = leadingEdgeContexts[0];
+	nodePosition.viewNode.parentNode.removeChild(nodePosition.viewNode);
 };
 
 /**
