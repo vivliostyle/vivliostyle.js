@@ -1687,6 +1687,8 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
 		= adapt.task.newFrame("skipEdges");
+	// If a forced break occurred at the end of the previous column, nodeContext.after should be false.
+	var atUnforcedBreak = leadingEdge && (nodeContext && nodeContext.after);
 	var breakAtTheEdge = null;
 	var lastAfterNodeContext = null;
 	var leadingEdgeContexts = [];
@@ -1785,6 +1787,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 					}
 					if (style && !(self.zeroIndent(style.paddingTop) && self.zeroIndent(style.borderTopWidth))) {
 						// Non-sero leading inset
+						atUnforcedBreak = false;
 						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
 							// overflow
 					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
@@ -1798,7 +1801,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 					}
 				}
 			} while(false);  // End of block of code to use break
-			var nextResult = self.layoutContext.nextInTree(nodeContext);
+			var nextResult = self.layoutContext.nextInTree(nodeContext, atUnforcedBreak);
 			if (nextResult.isPending()) {
 				nextResult.then(function(nodeContextParam) {
 					nodeContext = nodeContextParam;

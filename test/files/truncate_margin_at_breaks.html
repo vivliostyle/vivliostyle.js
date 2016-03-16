@@ -5,14 +5,14 @@
     <title>truncate margin at breaks</title>
     <style>
         @page {
-            size: 500px 300px;
+            size: 700px 300px;
             margin: 0;
         }
         html {
             height: 300px;
 
-            -moz-column-count: 3;
-            column-count: 3;
+            -moz-column-count: 5;
+            column-count: 5;
             -moz-column-fill: auto;
             column-fill: auto;
 
@@ -28,21 +28,36 @@
             background: #DDFFDD;
         }
         #p1 {
-            height: 290px;
-            margin-top: 0;
+            height: 270px;
+            margin-top: 20px;
             margin-bottom: 20px;
         }
         #p2 {
-            height: 200px;
+            height: 270px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+        #div2 {
+            margin-top: 20px;
+        }
+        #p3 {
+            margin-top: 19px;
+        }
+        #div3 {
+            padding-top: 1px;
+        }
+        #p4 {
+            break-before: column;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        #p5 {
+            break-before: column;
+            height: 270px;
             margin-top: 10px;
             margin-bottom: 20px;
         }
-        #p3 {
-            break-before: column;
-            height: 200px;
-            margin-top: 10px;
-        }
-        div {
+        #div5 {
             background: #CCC;
             min-height: 10px;
             padding-top: 10px;
@@ -50,8 +65,10 @@
     </style>
 </head>
 <body>
-<p id="p1">The top edge of this green block should align with the top edge of the page. There should be 10px margin between the bottom edge of this green block and the bottom edge of the page.</p>
-<p id="p2">The top edge of this green block should align with the top edge of the page.</p>
-<div><p id="p3">This first line should align with the second lines of the previous columns. The top edge of this green block should be 20px below the top edge of the page.</p></div>
+<p id="p1">The top edge of this green block should be 20px below the top edge of the page. There should be 10px margin between the bottom edge of this green block and the bottom edge of the page.</p>
+<div id="div2"><p id="p2">The top edge of this green block should align with the top edge of the page.</p></div>
+<div id="div3"><p id="p3">This first line should align with the first line of the first column. The top edge of this green block should be 20px below the top edge of the page.</p></div>
+<p id="p4">This first line should align with the first line of the first column. The top edge of this green block should be 20px below the top edge of the page.</p>
+<div id="div5"><p id="p5">This first line should align with the first lines of the first column. The top edge of this green block should be 20px below the top edge of the page. The space between them should be colored by gray.</p></div>
 </body>
 </html>

@@ -390,9 +390,10 @@ adapt.vtree.LayoutContext.prototype.clone = function() {};
  * the previous page.
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {boolean} firstTime
+ * @param {boolean=} atUnforcedBreak
  * @return {!adapt.task.Result.<boolean>} true if children should be processed as well
  */
-adapt.vtree.LayoutContext.prototype.setCurrent = function(nodeContext, firstTime) {};
+adapt.vtree.LayoutContext.prototype.setCurrent = function(nodeContext, firstTime, atUnforcedBreak) {};
 
 /**
  * Set the container element that holds view elements produced from the source.
@@ -404,9 +405,10 @@ adapt.vtree.LayoutContext.prototype.setViewRoot = function(container, isFootnote
 /**
  * Moves to the next view node, creating it and appending it to the view tree if needed.
  * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {boolean=} atUnforcedBreak
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>} that corresponds to the next view node
  */
-adapt.vtree.LayoutContext.prototype.nextInTree = function(nodeContext) {};
+adapt.vtree.LayoutContext.prototype.nextInTree = function(nodeContext, atUnforcedBreak) {};
 
 /**
  * Apply pseudo-element styles (if any).

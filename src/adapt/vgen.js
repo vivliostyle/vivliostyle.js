@@ -43,6 +43,24 @@ adapt.vgen.frontEdgeBlackListVert = {
     "border-right-color": "transparent"
 };
 
+/**
+ * @private
+ * @const
+ * @type {!Object.<string,string>}
+ */
+adapt.vgen.frontEdgeUnforcedBreakBlackListHor = {
+	"margin-top": "0px"
+};
+
+/**
+ * @private
+ * @const
+ * @type {!Object.<string,string>}
+ */
+adapt.vgen.frontEdgeUnforcedBreakBlackListVert = {
+	"margin-right": "0px"
+};
+
 
 /**
  * Function taking source element, parent view node and CSS properties and returning
@@ -491,10 +509,11 @@ adapt.vgen.ViewFactory.prototype.resolveURL = function(url) {
 
 /**
  * @param {boolean} firstTime
+ * @param {boolean} atUnforcedBreak
  * @private
  * @return {!adapt.task.Result.<boolean>} holding true if children should be processed
  */
-adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
+adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnforcedBreak) {
 	var self = this;
 	var needToProcessChildren = true;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame
@@ -843,12 +862,19 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 		    		self.nodeContext.inheritedProps["orphans"] = (/** @type {adapt.css.Int} */ (orphans)).num;
 		    	}
 		    }
-		    if (!firstTime && !self.nodeContext.inline) {
-		    	var blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeBlackListVert : adapt.vgen.frontEdgeBlackListHor;
-		        for (var propName in blackList) {
-		            adapt.base.setCSSProperty(result, propName, blackList[propName]);
-		        }
-		    }
+			if (!self.nodeContext.inline) {
+				var blackList = null;
+				if (!firstTime) {
+					blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeBlackListVert : adapt.vgen.frontEdgeBlackListHor;
+				} else if (atUnforcedBreak) {
+					blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeUnforcedBreakBlackListVert : adapt.vgen.frontEdgeUnforcedBreakBlackListHor;
+				}
+				if (blackList) {
+					for (var propName in blackList) {
+						adapt.base.setCSSProperty(result, propName, blackList[propName]);
+					}
+				}
+			}
 		    if (listItem) {
 		    	result.setAttribute("value", computedStyle["ua-list-item-count"].stringValue());
 		    }
@@ -869,16 +895,17 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 
 /**
  * @param {boolean} firstTime
+ * @param {boolean} atUnforcedBreak
  * @return {!adapt.task.Result.<boolean>} holding true if children should be processed
  */
-adapt.vgen.ViewFactory.prototype.createNodeView = function(firstTime) {
+adapt.vgen.ViewFactory.prototype.createNodeView = function(firstTime, atUnforcedBreak) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame
 		= adapt.task.newFrame("createNodeView");
 	var result;
 	var needToProcessChildren = true;
     if (self.sourceNode.nodeType == 1) {
-        result = self.createElementView(firstTime);
+        result = self.createElementView(firstTime, atUnforcedBreak);
     } else {
     	if (self.sourceNode.nodeType == 8) {
 	    	self.viewNode = null; // comment node
@@ -905,7 +932,7 @@ adapt.vgen.ViewFactory.prototype.createNodeView = function(firstTime) {
 /**
  * @override
  */
-adapt.vgen.ViewFactory.prototype.setCurrent = function(nodeContext, firstTime) {
+adapt.vgen.ViewFactory.prototype.setCurrent = function(nodeContext, firstTime, atUnforcedBreak) {
 	this.nodeContext = nodeContext;
     if (nodeContext) {
     	this.sourceNode = nodeContext.sourceNode;
@@ -916,7 +943,7 @@ adapt.vgen.ViewFactory.prototype.setCurrent = function(nodeContext, firstTime) {
     }
     this.viewNode = null;
     if (this.nodeContext) {
-    	return this.createNodeView(firstTime);
+    	return this.createNodeView(firstTime, !!atUnforcedBreak);
     }
     return adapt.task.newResult(true);
 };
@@ -1053,14 +1080,14 @@ adapt.vgen.ViewFactory.prototype.isTransclusion = function(element, elementStyle
 /**
  * @override
  */
-adapt.vgen.ViewFactory.prototype.nextInTree = function(nodeContext) {
+adapt.vgen.ViewFactory.prototype.nextInTree = function(nodeContext, atUnforcedBreak) {
 	nodeContext = this.nextPositionInTree(nodeContext);
 	if (!nodeContext || nodeContext.after) {
 		return adapt.task.newResult(nodeContext);
 	}
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
 		= adapt.task.newFrame("nextInTree");
-	this.setCurrent(nodeContext, true).then(function(processChildren) {
+	this.setCurrent(nodeContext, true, atUnforcedBreak).then(function(processChildren) {
 	    if (!nodeContext.viewNode || !processChildren) {
 	    	nodeContext = nodeContext.modify();
 	    	nodeContext.after = true; // skip
