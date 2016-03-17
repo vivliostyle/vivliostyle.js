@@ -26,6 +26,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/158>
 - Fix pagination problem with flex containers.
   - <https://github.com/vivliostyle/vivliostyle.js/issues/174>
+- box-shadow / text-shadow is now supported.
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/156>  
 
 ## [2016.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.1) - 2016-01-20
 
