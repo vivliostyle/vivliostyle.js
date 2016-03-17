@@ -26,6 +26,9 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/158>
 - Fix pagination problem with flex containers.
   - <https://github.com/vivliostyle/vivliostyle.js/issues/174>
+- Truncate margins at unforced page/column breaks
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/83>
+  - Spec: [CSS Fragmentation Module Level 3 - Adjoining Margins at Breaks](https://drafts.csswg.org/css-break/#break-margins)
 
 ## [2016.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.1) - 2016-01-20
 

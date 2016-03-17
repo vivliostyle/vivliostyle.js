@@ -31,9 +31,9 @@ h2 {
   /* 直後の改ページ・改段禁止 */
   break-after: avoid;
   // ボーダー・マージン合わせて3行取り
-  line-height: $base-line-height * 3 - 3.75pt - 23pt;
+  line-height: $base-line-height * 3 - 3.75pt - $base-line-height;
   border-right: 3.75pt solid #666;
-  margin-right: 23pt;
+  margin-right: $base-line-height;
 }
 
 p {
