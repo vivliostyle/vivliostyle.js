@@ -119,9 +119,9 @@ h2 {
   -webkit-column-break-after: avoid;
      page-break-after: avoid;
           break-after: avoid;
-  line-height: 27.25pt;
+  line-height: 32.25pt;
   border-right: 3.75pt solid #666;
-  margin-right: 23pt;
+  margin-right: 18pt;
 }
 
 p {
@@ -172,7 +172,7 @@ ul {
 }
 
 .linespace {
-  margin: 0 26pt 0 0;
+  margin: 0 44pt 0 0;
 }
 
 .linespace-right {
