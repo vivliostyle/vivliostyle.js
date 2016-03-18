@@ -1814,14 +1814,6 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 					if (style && !(self.zeroIndent(style.paddingTop) && self.zeroIndent(style.borderTopWidth))) {
 						// Non-zero leading inset
 						atUnforcedBreak = false;
-						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
-							// overflow
-					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
-					    	nodeContext.overflow = true;
-							loopFrame.breakLoop();
-							return;
-						}
-						lastAfterNodeContext = null;
 						trailingEdgeContexts = [];
 					}
 					onStartEdges = true; // we are now on starting edges.
