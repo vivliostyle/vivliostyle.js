@@ -73,8 +73,14 @@ describe("break", function() {
             expect(resolveEffectiveBreakValue("region", "avoid-page")).toBe("region");
         });
 
-        it("returns the second one if both are forced break values", function() {
-            expect(resolveEffectiveBreakValue("page", "column")).toBe("column");
+        it("honor both values when they are forced break values", function() {
+            expect(resolveEffectiveBreakValue("region", "column")).toBe("region");
+            expect(resolveEffectiveBreakValue("page", "region")).toBe("page");
+            expect(resolveEffectiveBreakValue("page", "column")).toBe("page");
+        });
+
+        it("returns the second one if both forced break values are conflicting each other", function() {
+            expect(resolveEffectiveBreakValue("left", "right")).toBe("right");
         });
 
         it("returns an avoid break value if the other is auto", function() {
