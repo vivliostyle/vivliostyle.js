@@ -1791,7 +1791,6 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 						}
 						// Margins don't collapse across non-zero borders and paddings.
 						trailingEdgeContexts = [lastAfterNodeContext];
-						breakAtTheEdge = null;
 						lastAfterNodeContext = null;
 					}
 				} else {
