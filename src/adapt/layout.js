@@ -1702,8 +1702,8 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 	}
 
 	function processForcedBreak() {
-		self.removeNodesAfterForcedBreak(leadingEdgeContexts);
-		nodeContext = leadingEdgeContexts[0];
+		nodeContext = leadingEdgeContexts[0] || nodeContext;
+		nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
 		self.pageBreakType = breakAtTheEdge;
 	}
 
@@ -1939,15 +1939,6 @@ adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
 		frame.finish(resultNodeContext);
 	});
 	return frame.result();
-};
-
-/**
- * @private
- * @param {!Array<!adapt.vtree.NodeContext>} leadingEdgeContexts
- */
-adapt.layout.Column.prototype.removeNodesAfterForcedBreak = function(leadingEdgeContexts) {
-	var nodePosition = leadingEdgeContexts[0];
-	nodePosition.viewNode.parentNode.removeChild(nodePosition.viewNode);
 };
 
 /**
