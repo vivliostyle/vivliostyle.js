@@ -686,13 +686,21 @@ adapt.cssvalid.ListValidator.prototype.validateList = function(arr, slice, start
             current = success ? current.success : current.failure; 
         } else {
         	if (index == 0 && !slice
-        			&& current.validator instanceof adapt.cssvalid.CommaListValidator 
-        			&& this instanceof adapt.cssvalid.SpaceListValidator) {
-        		// Special nesting case: validate the input space list as a whole.
-        		// Space lists cannot contain comma lists, so the only way for this
-        		// space list to match is to be the single-element space list.
+        			&& current.validator instanceof adapt.cssvalid.SpaceListValidator 
+        		&& this instanceof adapt.cssvalid.SpaceListValidator) {
+        	  // Special nesting case: validate the input space list as a whole.              
         		outval = (new adapt.css.SpaceList(arr)).visit(current.validator);
         		if (outval) {
+        			index = arr.length;
+        			current = current.success;
+        			continue;
+        		}
+            } else 	if (index == 0 && !slice
+        			&& current.validator instanceof adapt.cssvalid.CommaListValidator 
+        			&& this instanceof adapt.cssvalid.SpaceListValidator) {
+        	  // Special nesting case: validate the input comma list as a whole.
+        	  outval = (new adapt.css.CommaList(arr)).visit(current.validator);
+        	  if (outval) {
         			index = arr.length;
         			current = current.success;
         			continue;
@@ -868,6 +876,32 @@ adapt.cssvalid.SpaceListValidator.prototype.visitSpaceList = function(list) {
         return null;
     return new adapt.css.SpaceList(arr);
 };
+
+/**
+ * @override
+ */
+adapt.cssvalid.SpaceListValidator.prototype.visitCommaList = function(list) {
+  // Special Case : Issue #156
+  var node = this.first;
+  var hasCommaListValidator = false;
+  while (node) {
+    if (node.validator instanceof adapt.cssvalid.CommaListValidator) {
+      hasCommaListValidator = true;
+      break;
+    }
+    node = node.failure;
+  }
+  if (hasCommaListValidator) {
+    var arr = this.validateList(list.values, false, 0);
+    if (arr === list.values)
+      return list;
+    if (!arr)
+      return null;
+    return new adapt.css.CommaList(arr);
+  } 
+  return null;
+};
+
 
 /**
  * @override
