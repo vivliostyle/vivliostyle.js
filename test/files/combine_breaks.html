@@ -12,7 +12,7 @@
             }
         }
         html {
-            column-count: 2;
+            column-count: 3;
         }
         body {
             margin: 0;
@@ -47,6 +47,10 @@
         .top-padding {
             padding-top: 10px;
         }
+        .high-empty {
+            height: 261px;
+            background: #DFD;
+        }
         .bottom-padding {
             padding-bottom: 10px;
         }
@@ -60,9 +64,13 @@
 <div class="column-break-before"><div class="page-break-before float">This should be on the 5th page. This should not be covered by a green rectangle. The green rectangle is on the next (6th) page.</div></div>
 <div class="column-break-before"><div class="page-break-before empty"></div></div>
 <div class="column-break-before"><div class="page-break-before"><svg></svg> There should be a red square before this sentence. This should be on the 7th page.</div></div>
-<div class="page-break-before"><div class="top-padding">This should be on the 8th page.</div></div>
-<div class="page-break-after"><div class="column-break-after">This should be on the 8th page.</div></div>
-<div class="page-break-after bottom-padding">This should be on the 9th page.</div>
-This should be on the 10th page.
+<div class="page-break-before"><div class="top-padding">
+    This should be on the 8th page.
+    <div class="high-empty"></div>
+</div></div>
+<div class="top-padding"><div class="page-break-before">This should be on the 9th page.</div></div>
+<div class="page-break-after"><div class="column-break-after">This should be on the 9th page.</div></div>
+<div class="page-break-after bottom-padding">This should be on the 10th page.</div>
+This should be on the 11th page.
 </body>
 </html>
