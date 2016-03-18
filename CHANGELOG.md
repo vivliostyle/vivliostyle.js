@@ -30,7 +30,10 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/83>
   - Spec: [CSS Fragmentation Module Level 3 - Adjoining Margins at Breaks](https://drafts.csswg.org/css-break/#break-margins)
 - box-shadow / text-shadow is now supported.
-  - <https://github.com/vivliostyle/vivliostyle.js/issues/156>  
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/156>
+- Propagate and combine multiple break values at a single break point
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/129>
+  - Spec: [CSS Fragmentation Module Level 3 - Forced Breaks](https://drafts.csswg.org/css-break/#forced-breaks)
 
 ## [2016.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.1) - 2016-01-20
 
