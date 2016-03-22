@@ -1010,7 +1010,7 @@ adapt.cssvalid.ShorthandSyntaxProperty = function(validatorSet, name, nocomma) {
 	adapt.cssvalid.ShorthandSyntaxNode.call(this);
 	/** @const */ this.name = name;
     /** @type {adapt.cssvalid.PropertyValidator} */ this.validator = validatorSet.validators[this.name];
-    if (nocomma && this.validator instanceof adapt.cssvalid.CommaListValidator) {
+    if (nocomma && this.validator instanceof adapt.cssvalid.CommaListValidator) { // it will not work with background-image.
         this.validator = (/** @type {adapt.cssvalid.CommaListValidator} */ (this.validator)).first.validator;
     }
 };
