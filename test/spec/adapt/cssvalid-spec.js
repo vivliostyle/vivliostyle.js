@@ -1,6 +1,6 @@
 describe("cssvalid", function() {
   describe("ValidatorSet", function() {
-    it("sould parse simple validator and simple rule", function(done) {
+    it("should parse simple validator and simple rule", function(done) {
       var validatorSet = new adapt.cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo-or = bar | [ baz || biz ];");
@@ -18,7 +18,7 @@ describe("cssvalid", function() {
           });
       });
     });
-    it("sould parse validator and space rule", function(done) {
+    it("should parse validator and space rule", function(done) {
       var validatorSet = new adapt.cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo = SPACE(IDENT+);");
@@ -37,7 +37,7 @@ describe("cssvalid", function() {
       });
     });
 
-    it("sould parse validator and comma rule", function(done) {
+    it("should parse validator and comma rule", function(done) {
       var validatorSet = new adapt.cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo = COMMA( IDENT+ );");
@@ -56,7 +56,7 @@ describe("cssvalid", function() {
       });
     });
 
-    it("sould parse validator and complex comma rule", function(done) {
+    it("should parse validator and complex comma rule", function(done) {
       var validatorSet = new adapt.cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo-comma = none | COMMA( [ bar | baz ]+ );");
@@ -75,7 +75,7 @@ describe("cssvalid", function() {
       });
     });
 
-    it("sould parse validator and complex space rule", function(done) {
+    it("should parse validator and complex space rule", function(done) {
       var validatorSet = new adapt.cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("spacefoo = none | SPACE( [ bar | baz ]+ );");
@@ -93,6 +93,34 @@ describe("cssvalid", function() {
           });
       });
     });
-
+    it("should parse rule that contains function", function(done) {
+      var validatorSet = new adapt.cssvalid.ValidatorSet();
+      validatorSet.initBuiltInValidators();
+      var validation_txt = 
+          "THE_VALUE = SPACE(IDENT+);\n" +
+          "PRED_VALUE = [ fff | SPACE(bb bz)];" +
+          "THE_FUNCTION = the-function(PRED_VALUE? THE_VALUE+);\n" +
+          "AC_VALUES = STRING | THE_FUNCTION;" +
+          "accept-function = COMMA(AC_VALUES+);";
+      
+      validatorSet.parse(validation_txt);
+      var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+	    		                                           validatorSet, true);
+      var warnListener = jasmine.createSpy("warn listener");
+      vivliostyle.logging.logger.addListener(vivliostyle.logging.LogLevel.WARN, warnListener);
+      adapt.task.start(function() {
+        adapt.cssparse.parseStylesheetFromText(
+          ".test { accept-function: the-function(foo bar); }\n" +
+            ".test2 { accept-function: the-function(foo bar, bar baz); }\n" +
+            ".test3 { accept-function: the-function(fff, foo bar, bar baz); }\n" +
+            ".test4 { accept-function: the-function(bb bz, foo bar, bar baz); }"                      
+            , handler, null, null, null).then(
+            function(result) {
+              expect(result).toBe(true);
+              expect(warnListener).not.toHaveBeenCalled();
+              done();
+            });
+      });
+    });
   });
 });
