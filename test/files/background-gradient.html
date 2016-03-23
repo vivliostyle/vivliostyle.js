@@ -11,15 +11,20 @@
       .linear {
           background: linear-gradient(56deg, rgb(0, 255, 94) 20%, rgb(255, 255, 250) 77%);
       }
-      .radial {
-          background: radial-gradient(60% 55%, circle closest-corner, red, green 20%, yellow 70%, black);
+      .radial1 {
+          background: radial-gradient(circle closest-corner at 45% 55%, red, green 20%, yellow 70%, black);
+      }
+      .radial2 {
+          background: radial-gradient(ellipse closest-corner at 45% 55%, red, green 20%, yellow 70%, black);
       }
 </style>
 </head>
 <body>
   Linear gradient
   <div class="linear"></div>
-  Radial gradient
-  <div class="radial"></div>  
+  Radial gradient 1
+  <div class="radial1"></div>  
+  Radial gradient 2
+  <div class="radial2"></div>  
 </body>
 </html>
