@@ -1006,13 +1006,10 @@ adapt.cssvalid.ShorthandSyntaxNode.prototype.success = function(rval, shorthandV
  * @constructor
  * @extends {adapt.cssvalid.ShorthandSyntaxNode}
  */
-adapt.cssvalid.ShorthandSyntaxProperty = function(validatorSet, name, nocomma) {
+adapt.cssvalid.ShorthandSyntaxProperty = function(validatorSet, name) {
 	adapt.cssvalid.ShorthandSyntaxNode.call(this);
 	/** @const */ this.name = name;
     /** @type {adapt.cssvalid.PropertyValidator} */ this.validator = validatorSet.validators[this.name];
-    if (nocomma && this.validator instanceof adapt.cssvalid.CommaListValidator) { // it will not work with background-image.
-        this.validator = (/** @type {adapt.cssvalid.CommaListValidator} */ (this.validator)).first.validator;
-    }
 };
 goog.inherits(adapt.cssvalid.ShorthandSyntaxProperty, adapt.cssvalid.ShorthandSyntaxNode);
 
@@ -1128,7 +1125,7 @@ adapt.cssvalid.ShorthandValidator.prototype.setOwner = function(validatorSet) {
  * @return {adapt.cssvalid.ShorthandSyntaxNode}
  */
 adapt.cssvalid.ShorthandValidator.prototype.syntaxNodeForProperty = function(name) {
-    return new adapt.cssvalid.ShorthandSyntaxProperty(this.validatorSet, name, false);
+    return new adapt.cssvalid.ShorthandSyntaxProperty(this.validatorSet, name);
 };
 
 /**
@@ -1413,13 +1410,6 @@ adapt.cssvalid.CommaShorthandValidator = function() {
 goog.inherits(adapt.cssvalid.CommaShorthandValidator, adapt.cssvalid.SimpleShorthandValidator);
 
 /**
- * @override
- */
-adapt.cssvalid.CommaShorthandValidator.prototype.syntaxNodeForProperty = function(name) {
-    return new adapt.cssvalid.ShorthandSyntaxProperty(this.validatorSet, name, true);
-};
-
-/**
  * @param {Object.<string,Array.<adapt.css.Val>>} acc
  * @param {adapt.cssvalid.ValueMap} values
  */
@@ -1443,10 +1433,14 @@ adapt.cssvalid.CommaShorthandValidator.prototype.visitCommaList = function(list)
     /** @type {Object.<string,Array.<adapt.css.Val>>} */ var acc = {};
     for (var i = 0; i < list.values.length; i++) {
         this.values = {};
-        list.values[i].visit(this);
-        this.mergeIn(acc, this.values);
-        if (this.values["background-color"] && i != list.values.length - 1) {
+        if (list.values[i] instanceof adapt.css.CommaList) {
             this.error = true;
+        } else {
+            list.values[i].visit(this);
+            this.mergeIn(acc, this.values);
+            if (this.values["background-color"] && i != list.values.length - 1) {
+                this.error = true;
+            }
         }
         if (this.error)
             return null;
