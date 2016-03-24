@@ -41,5 +41,74 @@ describe("csscasc", function() {
                 expect(style["foo12"].priority).not.toBe(originalPriority);
             });
         });
+
+        describe("attributeSelector", function() {
+            var handler;
+
+            beforeEach(function() {
+                handler = new adapt.csscasc.CascadeParserHandler();
+                handler.startSelectorRule();
+            });
+
+            describe("Attribute presence selector", function() {
+                it("push CheckAttributePresentAction in the chain when the operator is EOF (no operator)", function() {
+                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.EOF, null);
+
+                    expect(handler.chain.length).toBe(1);
+                    var action = handler.chain[0];
+                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributePresentAction));
+                    expect(action.ns).toBe("ns");
+                    expect(action.name).toBe("foo");
+                });
+            });
+
+            it("push CheckAttributeEqAction in the chain when the operator is '='", function() {
+                handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.EQ, "bar");
+
+                expect(handler.chain.length).toBe(1);
+                var action = handler.chain[0];
+                expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeEqAction));
+                expect(action.ns).toBe("ns");
+                expect(action.name).toBe("foo");
+                expect(action.value).toBe("bar");
+            });
+
+            it("push CheckAttributeRegExpAction in the chain when the operator is '~='", function() {
+                handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.TILDE_EQ, "bar");
+
+                expect(handler.chain.length).toBe(1);
+                var action = handler.chain[0];
+                expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
+                expect(action.ns).toBe("ns");
+                expect(action.name).toBe("foo");
+                var regexp = action.regexp;
+                expect("bar".match(regexp)).toBeTruthy();
+                expect("a bar b".match(regexp)).toBeTruthy();
+                expect("abar b".match(regexp)).toBeFalsy();
+            });
+
+            it("push CheckAttributeRegExpAction in the chain when the operator is '|='", function() {
+                handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.BAR_EQ, "bar");
+
+                expect(handler.chain.length).toBe(1);
+                var action = handler.chain[0];
+                expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
+                expect(action.ns).toBe("ns");
+                expect(action.name).toBe("foo");
+                var regexp = action.regexp;
+                expect("bar".match(regexp)).toBeTruthy();
+                expect("bar-b".match(regexp)).toBeTruthy();
+                expect("barb".match(regexp)).toBeFalsy();
+            });
+
+            it("push always failing CheckConditionAction in the chain when an unsupported operator is passed", function() {
+                handler.attributeSelector("ns", "foo", null, "bar");
+
+                expect(handler.chain.length).toBe(1);
+                var action = handler.chain[0];
+                expect(action).toEqual(jasmine.any(adapt.csscasc.CheckConditionAction));
+                expect(action.condition).toBe("");
+            });
+        })
     });
 });

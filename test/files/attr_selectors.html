@@ -10,9 +10,14 @@
         [data-foo~="baz"] {
             color: green;
         }
+        [data-foo*="o b"] {
+            color: green;
+        }
     </style>
 </head>
 <body>
 <p data-foo="bar baz">This paragraph should be green. (using <code>~=</code> selector)</p>
+<p data-foo="foo bar">This paragraph should be green. (using <code>*=</code> selector)</p>
+This sentence should not be green.
 </body>
 </html>

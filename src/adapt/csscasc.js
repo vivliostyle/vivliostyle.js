@@ -2594,11 +2594,13 @@ adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, na
                 this.chain.push(new adapt.csscasc.CheckNamespaceSupportedAction(ns, name));
         	} else {
 				vivliostyle.logging.logger.warn("Unsupported :: attr selector op:", value);
+				this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
         	}
         	break;
         case adapt.csstok.TokenType.STAR_EQ:
         default:
 			vivliostyle.logging.logger.warn("Unsupported attr selector:", op);
+			this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
     }
 };
 
