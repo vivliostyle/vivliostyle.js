@@ -1002,7 +1002,6 @@ adapt.cssvalid.ShorthandSyntaxNode.prototype.success = function(rval, shorthandV
 /**
  * @param {adapt.cssvalid.ValidatorSet} validatorSet
  * @param {string} name
- * @param {boolean} nocomma
  * @constructor
  * @extends {adapt.cssvalid.ShorthandSyntaxNode}
  */
