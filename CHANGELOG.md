@@ -16,6 +16,9 @@
 - Support font-feature-settings
   - <https://github.com/vivliostyle/vivliostyle.js/issues/151>
   - Spec [CSS Fonts Module Level 3 - font-feature-settings descriptors](https://drafts.csswg.org/css-fonts-3/#propdef-font-feature-settings)
+- Support linear-gradient/radial-gradient
+  - <https://github.com/vivliostyle/vivliostyle-formatter-issues/issues/35>
+  - Spec [CSS Image Values and Replaced Content Module - Gradients](https://drafts.csswg.org/css-images-3/#gradients)
 
 ### Fixed
 - Lengths in 'rem' specified within page context are now interpreted correctly.
