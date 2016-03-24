@@ -5,7 +5,7 @@
     <title>combine breaks</title>
     <style>
         @page {
-            size: 500px 300px;
+            size: 900px 300px;
             margin: 20px;
             @bottom-center {
                 content: counter(page);
@@ -13,6 +13,8 @@
         }
         html {
             column-count: 3;
+            orphans: 1;
+            widows: 1;
         }
         body {
             margin: 0;
@@ -72,5 +74,17 @@
 <div class="page-break-after"><div class="column-break-after">This should be on the 9th page.</div></div>
 <div class="page-break-after bottom-padding">This should be on the 10th page.</div>
 This should be on the 11th page.
+<div class="page-break-after">This should be on the 11th page too.<svg style="height:300px"></svg></div>
+This should be on the 12th page.
+<div>This should be on the 12th page too.<svg style="height:300px"></svg></div>
+<div class="page-break-before">This should be on the 13th page.</div>
+<div>This should be on the 13th page too.<svg style="height:300px"></svg></div>
+<div class="coumn-break-before"><div class="page-break-before">This should be on the 14th page.</div></div>
+<div>This should be on the 14th page too.<svg style="height:300px"></svg></div>
+<div class="column-break-before"><div class="page-break-before float">This should be on the 15th page.</div></div>
+<div>This should be on the 15th page too.<svg style="height:300px"></svg></div>
+<div class="column-break-before"><div class="page-break-before empty"></div></div>
+<div>There should be a green rectangle above. This should be on the 16th page.<svg style="height:300px"></svg></div>
+<div class="page-break-before"><svg></svg> There should be a red square before this sentence. This should be on the 17th page.</div>
 </body>
 </html>
