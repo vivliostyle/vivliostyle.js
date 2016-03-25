@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>:not pseudo selector</title>
+<style>
+    .foo div {
+       width: 3cm;
+       height: 3cm;
+       border: 1px solid black;
+    }
+    .foo :not(.bar) {
+       background-color: red;
+    }
+</style>
+</head>
+<body>
+  <div class="foo">
+    White box below
+    <div class="bar">
+    </div>
+    Red box below
+    <div class="zzz">
+    </div>
+  </div>
+</body>
+</html>
