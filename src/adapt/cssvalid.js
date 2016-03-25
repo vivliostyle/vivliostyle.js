@@ -1044,7 +1044,7 @@ adapt.cssvalid.ShorthandSyntaxProperty.prototype.success = function(rval, shorth
  * @extends {adapt.cssvalid.ShorthandSyntaxProperty}
  */
 adapt.cssvalid.ShorthandSyntaxPropertyN = function(validatorSet, names) {
-	adapt.cssvalid.ShorthandSyntaxProperty.call(this, validatorSet, names[0], false);
+	adapt.cssvalid.ShorthandSyntaxProperty.call(this, validatorSet, names[0]);
 	/** @const */ this.names = names;
 };
 goog.inherits(adapt.cssvalid.ShorthandSyntaxPropertyN, adapt.cssvalid.ShorthandSyntaxProperty);
