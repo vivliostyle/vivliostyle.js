@@ -51,7 +51,7 @@ describe("csscasc", function() {
             });
 
             describe("Attribute presence selector", function() {
-                it("push CheckAttributePresentAction in the chain when the operator is EOF (no operator)", function() {
+                it("use CheckAttributePresentAction when the operator is EOF (no operator)", function() {
                     handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.EOF, null);
 
                     expect(handler.chain.length).toBe(1);
@@ -62,61 +62,105 @@ describe("csscasc", function() {
                 });
             });
 
-            it("push CheckAttributeEqAction in the chain when the operator is '='", function() {
-                handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.EQ, "bar");
+            describe("Attribute equality selector", function() {
+                it("use CheckAttributeEqAction when the operator is '='", function() {
+                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.EQ, "bar");
 
-                expect(handler.chain.length).toBe(1);
-                var action = handler.chain[0];
-                expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeEqAction));
-                expect(action.ns).toBe("ns");
-                expect(action.name).toBe("foo");
-                expect(action.value).toBe("bar");
+                    expect(handler.chain.length).toBe(1);
+                    var action = handler.chain[0];
+                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeEqAction));
+                    expect(action.ns).toBe("ns");
+                    expect(action.name).toBe("foo");
+                    expect(action.value).toBe("bar");
+                });
             });
 
-            it("push CheckAttributeRegExpAction in the chain when the operator is '~='", function() {
-                handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.TILDE_EQ, "bar");
+            describe("~= attribute selector", function() {
+                it("use CheckAttributeRegExpAction when the value is not empty and contains no whitespaces", function() {
+                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.TILDE_EQ, "bar");
 
-                expect(handler.chain.length).toBe(1);
-                var action = handler.chain[0];
-                expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
-                expect(action.ns).toBe("ns");
-                expect(action.name).toBe("foo");
-                var regexp = action.regexp;
-                expect("bar".match(regexp)).toBeTruthy();
-                expect("a bar b".match(regexp)).toBeTruthy();
-                expect("abar b".match(regexp)).toBeFalsy();
+                    expect(handler.chain.length).toBe(1);
+                    var action = handler.chain[0];
+                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
+                    expect(action.ns).toBe("ns");
+                    expect(action.name).toBe("foo");
+                    var regexp = action.regexp;
+                    expect("bar".match(regexp)).toBeTruthy();
+                    expect("a bar b".match(regexp)).toBeTruthy();
+                    expect("abar b".match(regexp)).toBeFalsy();
+                });
+
+                it("represents nothing when the value contains whitespaces", function() {
+                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.TILDE_EQ, "b c");
+
+                    expect(handler.chain.length).toBe(1);
+                    var action = handler.chain[0];
+                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckConditionAction));
+                    expect(action.condition).toBe("");
+                });
+
+                it("represents nothing when the value is an empty string", function() {
+                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.TILDE_EQ, "");
+
+                    expect(handler.chain.length).toBe(1);
+                    var action = handler.chain[0];
+                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckConditionAction));
+                    expect(action.condition).toBe("");
+                });
             });
 
-            it("push CheckAttributeRegExpAction in the chain when the operator is '|='", function() {
-                handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.BAR_EQ, "bar");
+            describe("|= attribute selector", function() {
+                it("use CheckAttributeRegExpAction when the value is a non-empty string", function() {
+                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.BAR_EQ, "bar");
 
-                expect(handler.chain.length).toBe(1);
-                var action = handler.chain[0];
-                expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
-                expect(action.ns).toBe("ns");
-                expect(action.name).toBe("foo");
-                var regexp = action.regexp;
-                expect("bar".match(regexp)).toBeTruthy();
-                expect("bar-b".match(regexp)).toBeTruthy();
-                expect("barb".match(regexp)).toBeFalsy();
+                    expect(handler.chain.length).toBe(1);
+                    var action = handler.chain[0];
+                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
+                    expect(action.ns).toBe("ns");
+                    expect(action.name).toBe("foo");
+                    var regexp = action.regexp;
+                    expect("bar".match(regexp)).toBeTruthy();
+                    expect("bar-b".match(regexp)).toBeTruthy();
+                    expect("barb".match(regexp)).toBeFalsy();
+                });
+
+                it("represents nothing when the value is an empty string", function() {
+                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.BAR_EQ, "");
+
+                    expect(handler.chain.length).toBe(1);
+                    var action = handler.chain[0];
+                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckConditionAction));
+                    expect(action.condition).toBe("");
+                });
             });
 
-            it("push CheckAttributeRegExpAction in the chain when the operator is '*='", function() {
-                handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.STAR_EQ, "bar");
+            describe("*= attribute selector", function() {
+                it("use CheckAttributeRegExpAction when the value is a non-empty string", function() {
+                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.STAR_EQ, "bar");
 
-                expect(handler.chain.length).toBe(1);
-                var action = handler.chain[0];
-                expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
-                expect(action.ns).toBe("ns");
-                expect(action.name).toBe("foo");
-                var regexp = action.regexp;
-                expect("bar".match(regexp)).toBeTruthy();
-                expect("a bar b".match(regexp)).toBeTruthy();
-                expect("abarb".match(regexp)).toBeTruthy();
-                expect("foo".match(regexp)).toBeFalsy();
+                    expect(handler.chain.length).toBe(1);
+                    var action = handler.chain[0];
+                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
+                    expect(action.ns).toBe("ns");
+                    expect(action.name).toBe("foo");
+                    var regexp = action.regexp;
+                    expect("bar".match(regexp)).toBeTruthy();
+                    expect("a bar b".match(regexp)).toBeTruthy();
+                    expect("abarb".match(regexp)).toBeTruthy();
+                    expect("foo".match(regexp)).toBeFalsy();
+                });
+
+                it("represents nothing when the value is an empty string", function() {
+                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.STAR_EQ, "");
+
+                    expect(handler.chain.length).toBe(1);
+                    var action = handler.chain[0];
+                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckConditionAction));
+                    expect(action.condition).toBe("");
+                });
             });
 
-            it("push always failing CheckConditionAction in the chain when an unsupported operator is passed", function() {
+            it("represents nothing when an unsupported operator is passed", function() {
                 handler.attributeSelector("ns", "foo", null, "bar");
 
                 expect(handler.chain.length).toBe(1);

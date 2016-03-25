@@ -2574,37 +2574,51 @@ adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, na
     this.specificity += 0x100;
 		name = name.toLowerCase();
     value = value || "";
+	var action;
     switch (op) {
         case adapt.csstok.TokenType.EOF:
-            this.chain.push(new adapt.csscasc.CheckAttributePresentAction(ns, name));
+            action = new adapt.csscasc.CheckAttributePresentAction(ns, name);
             break;
         case adapt.csstok.TokenType.EQ:
-            this.chain.push(new adapt.csscasc.CheckAttributeEqAction(ns, name, value));
+			action = new adapt.csscasc.CheckAttributeEqAction(ns, name, value);
             break;
         case adapt.csstok.TokenType.TILDE_EQ:
-            this.chain.push(new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
-                new RegExp("(^|\\s)" + adapt.base.escapeRegExp(value) + "($|\\s)")));
+			if (!value || value.match(/\s/)) {
+				action = new adapt.csscasc.CheckConditionAction(""); // always fails
+			} else {
+				action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
+					new RegExp("(^|\\s)" + adapt.base.escapeRegExp(value) + "($|\\s)"));
+			}
             break;
         case adapt.csstok.TokenType.BAR_EQ:
-            this.chain.push(new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
-                new RegExp("^" + adapt.base.escapeRegExp(value) + "($|-)")));
+			if (!value) {
+				action = new adapt.csscasc.CheckConditionAction(""); // always fails
+			} else {
+				action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
+					new RegExp("^" + adapt.base.escapeRegExp(value) + "($|-)"));
+			}
             break;
 		case adapt.csstok.TokenType.STAR_EQ:
-			this.chain.push(new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
-				new RegExp(adapt.base.escapeRegExp(value))));
+			if (!value) {
+				action = new adapt.csscasc.CheckConditionAction(""); // always fails
+			} else {
+				action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
+					new RegExp(adapt.base.escapeRegExp(value)));
+			}
 			break;
         case adapt.csstok.TokenType.COL_COL:
         	if (value == "supported") {
-                this.chain.push(new adapt.csscasc.CheckNamespaceSupportedAction(ns, name));
+				action = new adapt.csscasc.CheckNamespaceSupportedAction(ns, name);
         	} else {
 				vivliostyle.logging.logger.warn("Unsupported :: attr selector op:", value);
-				this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
+				action = new adapt.csscasc.CheckConditionAction(""); // always fails
         	}
         	break;
         default:
 			vivliostyle.logging.logger.warn("Unsupported attr selector:", op);
-			this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
+			action = new adapt.csscasc.CheckConditionAction(""); // always fails
     }
+	this.chain.push(action);
 };
 
 /**
