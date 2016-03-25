@@ -66,7 +66,9 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Supported in all browsers
 - [Universal selector with namespaces `ns|*`, `*|*`](https://www.w3.org/TR/css3-selectors/#univnmsp)
   - Supported in all browsers
-- [Attribute selectors with namespaces `[ns|att]`, `[|att]`, `[ns|att=val]`, `[|att=val]`, `[ns|att~=val]`, `[|att~=val]`, `[ns|att|=val]`, `[|att|=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
+- [Substring matching attribute selectors `[att^=val]`, `[att$=val]`, `[att*=val]`](https://www.w3.org/TR/css3-selectors/#attribute-substrings)
+  - Supported in all browsers
+- [Attribute selectors with namespaces `[ns|att]`, `[|att]`, `[ns|att=val]`, `[|att=val]`, `[ns|att~=val]`, `[|att~=val]`, `[ns|att|=val]`, `[|att|=val]`, `[ns|att^=val]`, `[|att^=val]`, `[ns|att$=val]`, `[|att$=val]`, `[ns|att*=val]`, `[|att*=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
   - Supported in all browsers
 - [`:root` pseudo-class](https://www.w3.org/TR/css3-selectors/#root-pseudo)
   - Supported in all browsers
@@ -89,7 +91,6 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 - [Type selectors without namespaces `|E`](https://www.w3.org/TR/css3-selectors/#typenmsp)
 - [Universal selector without namespaces `|*`](https://www.w3.org/TR/css3-selectors/#univnmsp)
-- [Substring matching attribute selectors `[att^=val]`, `[att$=val]`, `[att*=val]`](https://www.w3.org/TR/css3-selectors/#attribute-substrings)
 - [Attribute selectors with universal namespace `[*|att]`, `[*|att=val]`, `[*|att~=val]`, `[*|att|=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
 - [Target pseudo-class `:target`](https://www.w3.org/TR/css3-selectors/#target-pseudo)
 - [The UI element states pseudo-classes `:enabled`, `:disabled`, `:checked`, `:indeterminate`](https://www.w3.org/TR/css3-selectors/#UIstates)
