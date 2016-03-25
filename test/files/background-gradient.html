@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+      div {
+         width: 6cm;
+         height: 3cm;
+         border: 1px solid #004400;
+         margin: 1em;    
+      }
+      .linear {
+          background: linear-gradient(56deg, rgb(0, 255, 94) 20%, rgb(255, 255, 250) 77%);
+      }
+      .radial0 {
+          background: radial-gradient(at 20% 80%, red, green 20%, black);
+      }
+      .radial1 {
+          background: radial-gradient(circle closest-corner at 45% 55%, red, green 20%, yellow 70%, black);
+      }
+      .radial2 {
+          background: radial-gradient(ellipse closest-corner at 45% 55%, red, green 20%, yellow 70%, black);
+      }
+      .radial3 {
+          background: radial-gradient(circle 1.5cm at 45% 55%, red, green 20%, yellow 70%, black);
+      }
+      .radial4 {
+          background: radial-gradient(ellipse 80% 10% at 45% 55%, red, green 20%, yellow 70%, black);
+      }
+</style>
+</head>
+<body>
+  Linear gradient
+  <div class="linear"></div>
+  Radial gradient 0
+  <div class="radial0"></div>  
+  Radial gradient 1
+  <div class="radial1"></div>  
+  Radial gradient 2
+  <div class="radial2"></div>  
+  Radial gradient 3
+  <div class="radial3"></div>  
+  Radial gradient 4
+  <div class="radial4"></div>  
+</body>
+</html>
