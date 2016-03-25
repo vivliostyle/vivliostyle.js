@@ -2591,12 +2591,8 @@ adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, na
 			}
             break;
         case adapt.csstok.TokenType.BAR_EQ:
-			if (!value) {
-				action = new adapt.csscasc.CheckConditionAction(""); // always fails
-			} else {
-				action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
-					new RegExp("^" + adapt.base.escapeRegExp(value) + "($|-)"));
-			}
+			action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
+				new RegExp("^" + adapt.base.escapeRegExp(value) + "($|-)"));
             break;
 		case adapt.csstok.TokenType.HAT_EQ:
 			if (!value) {

@@ -125,13 +125,18 @@ describe("csscasc", function() {
                     expect("a-bar-b".match(regexp)).toBeFalsy();
                 });
 
-                it("represents nothing when the value is an empty string", function() {
+                it("also use CheckAttributeRegExpAction when the value is an empty string", function() {
                     handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.BAR_EQ, "");
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckConditionAction));
-                    expect(action.condition).toBe("");
+                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
+                    expect(action.ns).toBe("ns");
+                    expect(action.name).toBe("foo");
+                    var regexp = action.regexp;
+                    expect("-bar".match(regexp)).toBeTruthy();
+                    expect("-".match(regexp)).toBeTruthy();
+                    expect("bar-b".match(regexp)).toBeFalsy();
                 });
             });
 
