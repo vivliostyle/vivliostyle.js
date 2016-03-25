@@ -2589,6 +2589,10 @@ adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, na
             this.chain.push(new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
                 new RegExp("^" + adapt.base.escapeRegExp(value) + "($|-)")));
             break;
+		case adapt.csstok.TokenType.STAR_EQ:
+			this.chain.push(new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
+				new RegExp(adapt.base.escapeRegExp(value))));
+			break;
         case adapt.csstok.TokenType.COL_COL:
         	if (value == "supported") {
                 this.chain.push(new adapt.csscasc.CheckNamespaceSupportedAction(ns, name));
@@ -2597,7 +2601,6 @@ adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, na
 				this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
         	}
         	break;
-        case adapt.csstok.TokenType.STAR_EQ:
         default:
 			vivliostyle.logging.logger.warn("Unsupported attr selector:", op);
 			this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails

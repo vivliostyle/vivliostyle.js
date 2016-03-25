@@ -101,6 +101,21 @@ describe("csscasc", function() {
                 expect("barb".match(regexp)).toBeFalsy();
             });
 
+            it("push CheckAttributeRegExpAction in the chain when the operator is '*='", function() {
+                handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.STAR_EQ, "bar");
+
+                expect(handler.chain.length).toBe(1);
+                var action = handler.chain[0];
+                expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
+                expect(action.ns).toBe("ns");
+                expect(action.name).toBe("foo");
+                var regexp = action.regexp;
+                expect("bar".match(regexp)).toBeTruthy();
+                expect("a bar b".match(regexp)).toBeTruthy();
+                expect("abarb".match(regexp)).toBeTruthy();
+                expect("foo".match(regexp)).toBeFalsy();
+            });
+
             it("push always failing CheckConditionAction in the chain when an unsupported operator is passed", function() {
                 handler.attributeSelector("ns", "foo", null, "bar");
 
