@@ -22,6 +22,12 @@
         [data-foo|=""] {
             color: red;
         }
+        [data-foo^="baz"] {
+            color: green;
+        }
+        [data-foo^=""] {
+            color: red;
+        }
         [data-foo*="o b"] {
             color: green;
         }
@@ -34,6 +40,7 @@
 <p data-foo="bar baz">This paragraph should be green. (using <code>~=</code> selector)</p>
 <p data-foo="bar-baz">This paragraph should be green. (using <code>|=</code> selector)</p>
 <div data-foo="-baz">This paragraph should not be red.</div>
+<p data-foo="bazbar">This paragraph should be green. (using <code>^=</code> selector)</p>
 <p data-foo="foo bar">This paragraph should be green. (using <code>*=</code> selector)</p>
 This sentence should not be green.
 </body>
