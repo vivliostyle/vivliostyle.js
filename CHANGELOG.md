@@ -15,10 +15,13 @@
   - Spec: [CSS Basic User Interface Module Level 3 (CSS3 UI) - outline-offset property](https://drafts.csswg.org/css-ui-3/#outline-offset)
 - Support font-feature-settings
   - <https://github.com/vivliostyle/vivliostyle.js/issues/151>
-  - Spec [CSS Fonts Module Level 3 - font-feature-settings descriptors](https://drafts.csswg.org/css-fonts-3/#propdef-font-feature-settings)
+  - Spec: [CSS Fonts Module Level 3 - font-feature-settings descriptors](https://drafts.csswg.org/css-fonts-3/#propdef-font-feature-settings)
 - Support linear-gradient/radial-gradient
   - <https://github.com/vivliostyle/vivliostyle-formatter-issues/issues/35>
-  - Spec [CSS Image Values and Replaced Content Module - Gradients](https://drafts.csswg.org/css-images-3/#gradients)
+  - Spec: [CSS Image Values and Replaced Content Module - Gradients](https://drafts.csswg.org/css-images-3/#gradients)
+- Support substring matching attribute selectors `^=`, `$=` and `*=`
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/196>
+  - Spec: [Selectors Level 3 - Substring matching attribute selectors](https://www.w3.org/TR/css3-selectors/#attribute-substrings)
 
 ### Fixed
 - Lengths in 'rem' specified within page context are now interpreted correctly.
