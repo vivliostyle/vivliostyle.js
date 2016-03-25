@@ -1707,6 +1707,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     case adapt.csstok.TokenType.TILDE_EQ:
                     case adapt.csstok.TokenType.BAR_EQ:
                     case adapt.csstok.TokenType.HAT_EQ:
+                    case adapt.csstok.TokenType.DOLLAR_EQ:
                     case adapt.csstok.TokenType.STAR_EQ:
                     case adapt.csstok.TokenType.COL_COL:
                         num = token.type;
