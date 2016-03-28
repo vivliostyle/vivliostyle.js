@@ -1621,7 +1621,11 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     case adapt.csstok.TokenType.FUNC:
                         text = token.text;
                         tokenizer.consume();
-                        params = this.readPseudoParams();
+                        if (text == "not") {
+                          params = this.readPseudoParams();
+                        } else {
+                          params = this.readPseudoParams();
+                        }                  
                         token = tokenizer.token();
                         if (token.type == adapt.csstok.TokenType.C_PAR) {
                             handler.pseudoclassSelector(/** @type {string} */ (text), params);
