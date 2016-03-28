@@ -7,10 +7,16 @@
     .foo div {
        width: 3cm;
        height: 3cm;
-       border: 1px solid black;
+      border: 1px solid black;
+    }
+    .bar {
+       background-color: black;    
     }
     .foo :not(.bar) {
        background-color: red;
+    }
+    .foo [data-my-data="foobar"] {
+       background-color: yellow;
     }
 </style>
 </head>
@@ -21,6 +27,9 @@
     </div>
     Red box below
     <div class="zzz">
+    </div>
+    Yello box below
+    <div data-my-data="foobar">
     </div>
   </div>
 </body>
