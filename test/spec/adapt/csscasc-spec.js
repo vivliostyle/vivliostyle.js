@@ -108,6 +108,126 @@ describe("csscasc", function() {
         });
     });
 
+    describe("IsNthSiblingOfTypeAction", function() {
+        var element = {namespaceURI: "foo", localName: "bar"};
+        function dummyCascadeInstance(counts) {
+            var currentSiblingTypeCounts = {};
+            currentSiblingTypeCounts[element.namespaceURI] = counts;
+            return {
+                currentSiblingTypeCounts: currentSiblingTypeCounts,
+                currentNamespace: element.namespaceURI,
+                currentLocalName: element.localName
+            };
+        }
+
+        it("when a=0, matches if currentSiblingTypeCounts[namespace][locaName]=b", function() {
+            var action = new adapt.csscasc.IsNthSiblingOfTypeAction(0, 3);
+            var chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+
+            action.apply(dummyCascadeInstance({"bar": 1, "baz": 3}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 3, "baz": 3}));
+            expect(chained.apply).toHaveBeenCalled();
+        });
+
+        it("when a is non-zero, matches if non-negative n which satisfies currentSiblingOrder=an+b exists", function() {
+
+            var action = new adapt.csscasc.IsNthSiblingOfTypeAction(3, 0);
+            var chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+
+            action.apply(dummyCascadeInstance({"bar": 1, "baz": 3}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 2, "baz": 3}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 3, "baz": 1}));
+            expect(chained.apply).toHaveBeenCalled();
+
+            chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+
+            action.apply(dummyCascadeInstance({"bar": 4, "baz": 3}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 5, "baz": 3}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 6, "baz": 1}));
+            expect(chained.apply).toHaveBeenCalled();
+
+            action = new adapt.csscasc.IsNthSiblingOfTypeAction(2, 3);
+            chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+
+            action.apply(dummyCascadeInstance({"bar": 1, "baz": 3}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 2, "baz": 3}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 3, "baz": 1}));
+            expect(chained.apply).toHaveBeenCalled();
+
+            chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+
+            action.apply(dummyCascadeInstance({"bar": 4, "baz": 3}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 5, "baz": 1}));
+            expect(chained.apply).toHaveBeenCalled();
+
+            chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+
+            action.apply(dummyCascadeInstance({"bar": 6, "baz": 3}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 7, "baz": 3}));
+            expect(chained.apply).toHaveBeenCalled();
+
+            action = new adapt.csscasc.IsNthSiblingOfTypeAction(-3, 0);
+            chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+
+            action.apply(dummyCascadeInstance({"bar": 1, "baz": 3}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 2, "baz": 3}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 3, "baz": 3}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action = new adapt.csscasc.IsNthSiblingOfTypeAction(-2, 5);
+            chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+
+            action.apply(dummyCascadeInstance({"bar": 1, "baz": 2}));
+            expect(chained.apply).toHaveBeenCalled();
+
+            chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+
+            action.apply(dummyCascadeInstance({"bar": 2, "baz": 1}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 3, "baz": 2}));
+            expect(chained.apply).toHaveBeenCalled();
+
+            chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+
+            action.apply(dummyCascadeInstance({"bar": 4, "baz": 1}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 5, "baz": 2}));
+            expect(chained.apply).toHaveBeenCalled();
+
+            chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+
+            action.apply(dummyCascadeInstance({"bar": 6, "baz": 1}));
+            expect(chained.apply).not.toHaveBeenCalled();
+
+            action.apply(dummyCascadeInstance({"bar": 7, "baz": 1}));
+            expect(chained.apply).not.toHaveBeenCalled();
+        });
+    });
+
     describe("CascadeParserHandler", function() {
         describe("simpleProperty", function() {
             vivliostyle.test.util.mock.plugin.setup();

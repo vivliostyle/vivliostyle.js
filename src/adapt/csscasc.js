@@ -1047,15 +1047,28 @@ adapt.csscasc.IsRootAction.prototype.getPriority = function() {
 };
 
 /**
- * Checkes whether given order can be represented as an+b with a non-negative interger n
- * @private
  * @param {number} a
  * @param {number} b
+ * @private
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.IsNthAction = function(a, b) {
+	adapt.csscasc.ChainedAction.call(this);
+	/** @const */ this.a = a;
+	/** @const */ this.b = b;
+};
+goog.inherits(adapt.csscasc.IsNthAction, adapt.csscasc.ChainedAction);
+
+/**
+ * Checkes whether given order can be represented as an+b with a non-negative interger n
+ * @protected
  * @param {number} order
  * @returns {boolean}
  */
-adapt.csscasc.matchANPlusB = function(a, b, order) {
-	order -= b;
+adapt.csscasc.IsNthAction.prototype.matchANPlusB = function(order) {
+	var a = this.a;
+	order -= this.b;
 	if (a === 0) {
 		return order === 0;
 	} else {
@@ -1067,20 +1080,18 @@ adapt.csscasc.matchANPlusB = function(a, b, order) {
  * @param {number} a
  * @param {number} b
  * @constructor
- * @extends {adapt.csscasc.ChainedAction}
+ * @extends {adapt.csscasc.IsNthAction}
  */
 adapt.csscasc.IsNthSiblingAction = function(a, b) {
-	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.a = a;
-	/** @const */ this.b = b;
+	adapt.csscasc.IsNthAction.call(this, a, b);
 };
-goog.inherits(adapt.csscasc.IsNthSiblingAction, adapt.csscasc.ChainedAction);
+goog.inherits(adapt.csscasc.IsNthSiblingAction, adapt.csscasc.IsNthAction);
 
 /**
  * @override
  */
 adapt.csscasc.IsNthSiblingAction.prototype.apply = function(cascadeInstance) {
-	if (adapt.csscasc.matchANPlusB(this.a, this.b, cascadeInstance.currentSiblingOrder))
+	if (this.matchANPlusB(cascadeInstance.currentSiblingOrder))
 		this.chained.apply(cascadeInstance);
 };
 
@@ -1088,6 +1099,33 @@ adapt.csscasc.IsNthSiblingAction.prototype.apply = function(cascadeInstance) {
  * @override
  */
 adapt.csscasc.IsNthSiblingAction.prototype.getPriority = function() {
+	return 5;
+};
+
+/**
+ * @param {number} a
+ * @param {number} b
+ * @constructor
+ * @extends {adapt.csscasc.IsNthAction}
+ */
+adapt.csscasc.IsNthSiblingOfTypeAction = function(a, b) {
+	adapt.csscasc.IsNthAction.call(this, a, b);
+};
+goog.inherits(adapt.csscasc.IsNthSiblingOfTypeAction, adapt.csscasc.IsNthAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthSiblingOfTypeAction.prototype.apply = function(cascadeInstance) {
+	var order = cascadeInstance.currentSiblingTypeCounts[cascadeInstance.currentNamespace][cascadeInstance.currentLocalName];
+	if (this.matchANPlusB(order))
+		this.chained.apply(cascadeInstance);
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthSiblingOfTypeAction.prototype.getPriority = function() {
 	return 5;
 };
 
@@ -1937,6 +1975,8 @@ adapt.csscasc.CascadeInstance = function(cascade, context, pageCounterResolver, 
     /** @type {string} */ this.lang = "";
 	/** @type {Array.<number>} */ this.siblingOrderStack = [0];
 	/** @type {number} */ this.currentSiblingOrder = 0;
+	/** @const {!Array<!Object<string, !Object<string, number>>>} */ this.siblingTypeCountsStack = [{}];
+	/** @type {!Object<string, !Object<string, number>>} */ this.currentSiblingTypeCounts = this.siblingTypeCountsStack[0];
     if (goog.DEBUG) {
     	/** @type {Array.<Element>} */ this.elementStack = [];
     }
@@ -2169,9 +2209,19 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
         		new adapt.csscasc.RestoreLangItem(this.lang));
     	this.lang = lang.toLowerCase();
     }
+
 	var siblingOrderStack = this.siblingOrderStack;
 	this.currentSiblingOrder = ++siblingOrderStack[siblingOrderStack.length - 1];
 	siblingOrderStack.push([0]);
+
+	var siblingTypeCountsStack = this.siblingTypeCountsStack;
+	var currentSiblingTypeCounts = this.currentSiblingTypeCounts = siblingTypeCountsStack[siblingTypeCountsStack.length - 1];
+	var currentNamespaceTypeCounts = currentSiblingTypeCounts[this.currentNamespace];
+	if (!currentNamespaceTypeCounts) {
+		currentNamespaceTypeCounts = currentSiblingTypeCounts[this.currentNamespace] = {};
+	}
+	currentNamespaceTypeCounts[this.currentLocalName] = (currentNamespaceTypeCounts[this.currentLocalName] || 0) + 1;
+	siblingTypeCountsStack.push({});
 
     this.applyActions();
     var quotesCasc = baseStyle["quotes"];
@@ -2297,6 +2347,7 @@ adapt.csscasc.CascadeInstance.prototype.popElement = function(element) {
 		}
 	}
 	this.siblingOrderStack.pop();
+	this.siblingTypeCountsStack.pop();
 	this.pop();
 	this.popCounters();
 };
@@ -2429,6 +2480,15 @@ adapt.csscasc.CascadeParserHandler.prototype.classSelector = function(name) {
 };
 
 /**
+ * @private
+ * @const {!Object<string, function(new: adapt.csscasc.IsNthAction, number, number)>}
+ */
+adapt.csscasc.nthSelectorActionClasses = {
+	"nth-child": adapt.csscasc.IsNthSiblingAction,
+	"nth-of-type": adapt.csscasc.IsNthSiblingOfTypeAction
+};
+
+/**
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name, params) {
@@ -2479,13 +2539,15 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
 	    	}
 	    	break;
 		case "nth-child":
+		case "nth-of-type":
+			var ActionClass = adapt.csscasc.nthSelectorActionClasses[name.toLowerCase()];
 			if (params && params.length == 1) {
 				if (typeof params[0] == "number") {
-					this.chain.push(new adapt.csscasc.IsNthSiblingAction(0, /** @type {number} */ (params[0])));
+					this.chain.push(new ActionClass(0, /** @type {number} */ (params[0])));
 				} else if (params[0] === "even") {
-					this.chain.push(new adapt.csscasc.IsNthSiblingAction(2, 0));
+					this.chain.push(new ActionClass(2, 0));
 				} else if (params[0] === "odd") {
-					this.chain.push(new adapt.csscasc.IsNthSiblingAction(2, 1));
+					this.chain.push(new ActionClass(2, 1));
 				} else {
 					this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
 				}
