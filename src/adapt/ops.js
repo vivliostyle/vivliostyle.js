@@ -477,6 +477,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
 		parentContainer, offsetX, offsetY, exclusions, pageFloatHolder) {
 	var self = this;
+	boxInstance.reset();
     var enabled = boxInstance.getProp(self, "enabled");
     if (enabled && enabled !== adapt.css.ident._true) {
     	return adapt.task.newResult(true);

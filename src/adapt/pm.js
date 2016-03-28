@@ -420,6 +420,14 @@ adapt.pm.PageBoxInstance = function(parentInstance, pageBox) {
 };
 
 /**
+ * Reset information related to layout.
+ */
+adapt.pm.PageBoxInstance.prototype.reset = function() {
+    this.calculatedWidth = 0;
+    this.calculatedHeight = 0;
+};
+
+/**
  * @private
  * @param {string} name1
  * @param {string} name2
