@@ -1444,7 +1444,7 @@ adapt.cssparse.Parser.prototype.isInsidePropertyOnlyRule = function() {
  * @param {boolean} parsingStyleAttr
  * @return {boolean} 
  */
-adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsingStyleAttr, parsingMediaQuery) {
+adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsingStyleAttr, parsingMediaQuery, parsingFunctionParam) {
 	var handler = this.handler;
 	var tokenizer = this.tokenizer;
     var valStack = this.valStack;
@@ -1622,7 +1622,10 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         text = token.text;
                         tokenizer.consume();
                         if (text == "not") {
-                          params = this.readPseudoParams();
+                          this.actions = adapt.cssparse.actionsSelectorStart;
+                          this.runParser(Number.POSITIVE_INFINITY, false, false, false, true);
+                          this.actions = adapt.cssparse.actionsSelector;
+                          continue;
                         } else {
                           params = this.readPseudoParams();
                         }                  
@@ -2338,6 +2341,13 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     }
                     return false;
                 }
+                if (parsingFunctionParam) {
+                    if (token.type == adapt.csstok.TokenType.C_PAR) {
+                      tokenizer.consume();
+                      return true;
+                    }
+                    return false;
+                }
                 if (this.actions === adapt.cssparse.actionsPropVal && tokenizer.hasMark()) {
                     tokenizer.reset();
                     this.actions = adapt.cssparse.actionsSelectorStart;
@@ -2414,7 +2424,7 @@ adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL, classes, 
 		handler.startRuleBody();		
 	}
 	frame.loop(function() {
-		while (!parser.runParser(100, false, false, false)) {
+	    while (!parser.runParser(100, false, false, false, false)) {
 			if (parser.importReady) {
 				var resolvedURL = adapt.base.resolveURL(/** @type {string} */ (parser.importURL), baseURL);
 				if (parser.importCondition) {
@@ -2517,7 +2527,7 @@ adapt.cssparse.parseStylesheetFromURL = function(url, handler, classes, media) {
 adapt.cssparse.parseValue = function(scope, tokenizer, baseURL) {
 	var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsPropVal, tokenizer, 
     		new adapt.cssparse.ErrorHandler(scope), baseURL);
-	parser.runParser(Number.POSITIVE_INFINITY, true, false, false);
+    parser.runParser(Number.POSITIVE_INFINITY, true, false, false, false);
 	return parser.result;
 };
 
@@ -2530,7 +2540,7 @@ adapt.cssparse.parseValue = function(scope, tokenizer, baseURL) {
 adapt.cssparse.parseStyleAttribute = function(tokenizer, handler, baseURL) {
 	var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsStyleAttribute, tokenizer, 
     		handler, baseURL);
-	parser.runParser(Number.POSITIVE_INFINITY, false, true, false);
+    parser.runParser(Number.POSITIVE_INFINITY, false, true, false, false);
 };
 
 /**
@@ -2541,7 +2551,7 @@ adapt.cssparse.parseStyleAttribute = function(tokenizer, handler, baseURL) {
  */
 adapt.cssparse.parseMediaQuery = function(tokenizer, handler, baseURL) {
     var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsExprVal, tokenizer, handler, baseURL);
-    parser.runParser(Number.POSITIVE_INFINITY, false, false, true);
+    parser.runParser(Number.POSITIVE_INFINITY, false, false, true, false);
     return /** @type {adapt.css.Expr} */ (parser.result);
 };
 
