@@ -2638,16 +2638,8 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
 		case "nth-last-child":
 		case "nth-last-of-type":
 			var ActionClass = adapt.csscasc.nthSelectorActionClasses[name.toLowerCase()];
-			if (params && params.length == 1) {
-				if (typeof params[0] == "number") {
-					this.chain.push(new ActionClass(0, /** @type {number} */ (params[0])));
-				} else if (params[0] === "even") {
-					this.chain.push(new ActionClass(2, 0));
-				} else if (params[0] === "odd") {
-					this.chain.push(new ActionClass(2, 1));
-				} else {
-					this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
-				}
+			if (params && params.length == 2) {
+				this.chain.push(new ActionClass(/** @type {number} */ (params[0]), /** @type {number} */ (params[1])));
 			} else {
 				this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
 			}

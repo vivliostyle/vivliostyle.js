@@ -1386,6 +1386,108 @@ adapt.cssparse.Parser.prototype.readPseudoParams = function() {
 };
 
 /**
+ * Read `an+b` argument of pseudoclasses. Roughly based on the algorithm at https://drafts.csswg.org/css-syntax/#the-anb-type
+ * @private
+ * @return {?Array<number>}
+ */
+adapt.cssparse.Parser.prototype.readNthPseudoParams = function() {
+    var hasLeadingPlus = false;
+
+    var token = this.tokenizer.token();
+
+    if (token.type === adapt.csstok.TokenType.PLUS) {
+        // +
+        hasLeadingPlus = true;
+        this.tokenizer.consume();
+        token = this.tokenizer.token();
+    } else if (token.type === adapt.csstok.TokenType.IDENT && (token.text === "even" || token.text === "odd")) {
+        // even or odd
+        this.tokenizer.consume();
+        return [2, token.text === "odd" ? 1 : 0];
+    }
+
+    switch (token.type) {
+        case adapt.csstok.TokenType.NUMERIC:
+            if (hasLeadingPlus && token.num < 0) {
+                return null;
+            }
+            // FALLTHROUGH
+        case adapt.csstok.TokenType.IDENT:
+            if (hasLeadingPlus && token.text.charAt(0) === "-") {
+                return null;
+            }
+            if (token.text === "n" || token.text === "-n") {
+                if (hasLeadingPlus && token.precededBySpace) {
+                    return null;
+                }
+                var a = token.text === "-n" ? -1 : 1;
+                if (token.type === adapt.csstok.TokenType.NUMERIC) {
+                    a = token.num;
+                }
+                var b = 0;
+
+                this.tokenizer.consume();
+                token = this.tokenizer.token();
+                var hasSign = token.type === adapt.csstok.TokenType.PLUS || token.type === adapt.csstok.TokenType.MINUS;
+                if (hasSign) {
+                    this.tokenizer.consume();
+                    token = this.tokenizer.token();
+                }
+                if (token.type === adapt.csstok.TokenType.INT) {
+                    b = token.num;
+                    if (hasSign && b < 0) {
+                        return null;
+                    }
+                    this.tokenizer.consume();
+                } else if (hasSign) {
+                    return null;
+                }
+                return [a, b];
+            } else if (token.text === "n-" || token.text === "-n-") {
+                if (hasLeadingPlus && token.precededBySpace) {
+                    return null;
+                }
+                var a = token.text === "-n-" ? -1 : 1;
+                if (token.type === adapt.csstok.TokenType.NUMERIC) {
+                    a = token.num;
+                }
+                this.tokenizer.consume();
+                token = this.tokenizer.token();
+                if (token.type === adapt.csstok.TokenType.INT) {
+                    if (token.num < 0) {
+                        return null;
+                    } else {
+                        this.tokenizer.consume();
+                        return [a, token.num];
+                    }
+                }
+            } else {
+                var r = token.text.match(/^n(-[0-9]+)$/);
+                if (r) {
+                    if (hasLeadingPlus && token.precededBySpace) {
+                        return null;
+                    }
+                    this.tokenizer.consume();
+                    return [token.type === adapt.csstok.TokenType.NUMERIC ? token.num : 1, parseInt(r[1], 10)];
+                }
+                r = token.text.match(/^-n(-[0-9]+)$/);
+                if (r) {
+                    this.tokenizer.consume();
+                    return [-1, parseInt(r[1], 10)];
+                }
+            }
+            return null;
+        case adapt.csstok.TokenType.INT:
+            if (hasLeadingPlus && (token.precededBySpace || token.num < 0)) {
+                return null;
+            }
+            this.tokenizer.consume();
+            return [0, token.num];
+    }
+    return null;
+};
+
+/**
  * @param {?string} classes
  * @param {adapt.expr.Val} condition
  * @return {adapt.css.Expr}
@@ -1612,7 +1714,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
             case adapt.cssparse.Action.SELECTOR_PSEUDOCLASS:
                 tokenizer.consume();
                 token = tokenizer.token();
-                switch (token.type) {
+                pseudoclassType: switch (token.type) {
                     case adapt.csstok.TokenType.IDENT:
                         handler.pseudoclassSelector(token.text, null);
                         tokenizer.consume();
@@ -1621,7 +1723,30 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     case adapt.csstok.TokenType.FUNC:
                         text = token.text;
                         tokenizer.consume();
-                        params = this.readPseudoParams();
+                        switch (text) {
+                            case "lang":
+                            case "href-epub-type":
+                                token = tokenizer.token();
+                                if (token.type === adapt.csstok.TokenType.IDENT) {
+                                    params = [token.text];
+                                    tokenizer.consume();
+                                    break;
+                                } else {
+                                    break pseudoclassType;
+                                }
+                            case "nth-child":
+                            case "nth-of-type":
+                            case "nth-last-child":
+                            case "nth-last-of-type":
+                                params = this.readNthPseudoParams();
+                                if (!params) {
+                                    break pseudoclassType;
+                                } else {
+                                    break;
+                                }
+                            default: // TODO
+                                params = this.readPseudoParams();
+                        }
                         token = tokenizer.token();
                         if (token.type == adapt.csstok.TokenType.C_PAR) {
                             handler.pseudoclassSelector(/** @type {string} */ (text), params);
