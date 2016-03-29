@@ -2593,6 +2593,9 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
         case "first-child":
             this.chain.push(new adapt.csscasc.IsFirstAction());
             break;
+		case "last-child":
+			this.chain.push(new adapt.csscasc.IsNthLastSiblingAction(0, 1));
+			break;
         case "root":
             this.chain.push(new adapt.csscasc.IsRootAction());
             break;
