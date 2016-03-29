@@ -1130,6 +1130,75 @@ adapt.csscasc.IsNthSiblingOfTypeAction.prototype.getPriority = function() {
 };
 
 /**
+ * @param {number} a
+ * @param {number} b
+ * @constructor
+ * @extends {adapt.csscasc.IsNthAction}
+ */
+adapt.csscasc.IsNthLastSiblingAction = function(a, b) {
+	adapt.csscasc.IsNthAction.call(this, a, b);
+};
+goog.inherits(adapt.csscasc.IsNthLastSiblingAction, adapt.csscasc.IsNthAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthLastSiblingAction.prototype.apply = function(cascadeInstance) {
+	var order = cascadeInstance.currentFollowingSiblingOrder;
+	if (order === null) {
+		order = cascadeInstance.currentFollowingSiblingOrder = cascadeInstance.currentElement.parentNode.childElementCount - cascadeInstance.currentSiblingOrder + 1;
+	}
+	if (this.matchANPlusB(order))
+		this.chained.apply(cascadeInstance);
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthLastSiblingAction.prototype.getPriority = function() {
+	return 4;
+};
+
+/**
+ * @param {number} a
+ * @param {number} b
+ * @constructor
+ * @extends {adapt.csscasc.IsNthAction}
+ */
+adapt.csscasc.IsNthLastSiblingOfTypeAction = function(a, b) {
+	adapt.csscasc.IsNthAction.call(this, a, b);
+};
+goog.inherits(adapt.csscasc.IsNthLastSiblingOfTypeAction, adapt.csscasc.IsNthAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthLastSiblingOfTypeAction.prototype.apply = function(cascadeInstance) {
+	var counts = cascadeInstance.currentFollowingSiblingTypeCounts;
+	if (!counts[cascadeInstance.currentNamespace]) {
+		var elem = cascadeInstance.currentElement;
+		do {
+			var ns = elem.namespaceURI;
+			var localName = elem.localName;
+			var nsCounts = counts[ns];
+			if (!nsCounts) {
+				nsCounts = counts[ns] = {};
+			}
+			nsCounts[localName] = (nsCounts[localName] || 0) + 1;
+		} while (elem = elem.nextElementSibling)
+	}
+	if (this.matchANPlusB(counts[cascadeInstance.currentNamespace][cascadeInstance.currentLocalName]))
+		this.chained.apply(cascadeInstance);
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthLastSiblingOfTypeAction.prototype.getPriority = function() {
+	return 4;
+};
+
+/**
  * @param {string} condition
  * @constructor
  * @extends {adapt.csscasc.ChainedAction}
@@ -1977,6 +2046,10 @@ adapt.csscasc.CascadeInstance = function(cascade, context, pageCounterResolver, 
 	/** @type {number} */ this.currentSiblingOrder = 0;
 	/** @const {!Array<!Object<string, !Object<string, number>>>} */ this.siblingTypeCountsStack = [{}];
 	/** @type {!Object<string, !Object<string, number>>} */ this.currentSiblingTypeCounts = this.siblingTypeCountsStack[0];
+	/** @type {?number} */ this.currentFollowingSiblingOrder = null;
+	/** @type {Array.<?number>} */ this.followingSiblingOrderStack = [this.currentFollowingSiblingOrder];
+	/** @const {!Array<!Object<string, !Object<string, number>>>} */ this.followingSiblingTypeCountsStack = [{}];
+	/** @type {!Object<string, !Object<string, number>>} */ this.currentFollowingSiblingTypeCounts = this.siblingTypeCountsStack[0];
     if (goog.DEBUG) {
     	/** @type {Array.<Element>} */ this.elementStack = [];
     }
@@ -2212,7 +2285,7 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
 
 	var siblingOrderStack = this.siblingOrderStack;
 	this.currentSiblingOrder = ++siblingOrderStack[siblingOrderStack.length - 1];
-	siblingOrderStack.push([0]);
+	siblingOrderStack.push(0);
 
 	var siblingTypeCountsStack = this.siblingTypeCountsStack;
 	var currentSiblingTypeCounts = this.currentSiblingTypeCounts = siblingTypeCountsStack[siblingTypeCountsStack.length - 1];
@@ -2222,6 +2295,21 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
 	}
 	currentNamespaceTypeCounts[this.currentLocalName] = (currentNamespaceTypeCounts[this.currentLocalName] || 0) + 1;
 	siblingTypeCountsStack.push({});
+
+	var followingSiblingOrderStack = this.followingSiblingOrderStack;
+	if (followingSiblingOrderStack[followingSiblingOrderStack.length - 1] !== null) {
+		this.currentFollowingSiblingOrder = --followingSiblingOrderStack[followingSiblingOrderStack.length - 1];
+	} else {
+		this.currentFollowingSiblingOrder = null;
+	}
+	followingSiblingOrderStack.push(null);
+
+	var followingSiblingTypeCountsStack = this.followingSiblingTypeCountsStack;
+	var currentFollowingSiblingTypeCounts = this.currentFollowingSiblingTypeCounts = followingSiblingTypeCountsStack[followingSiblingTypeCountsStack.length - 1];
+	if (currentFollowingSiblingTypeCounts && currentFollowingSiblingTypeCounts[this.currentNamespace]) {
+		currentFollowingSiblingTypeCounts[this.currentNamespace][this.currentLocalName]--;
+	}
+	followingSiblingTypeCountsStack.push({});
 
     this.applyActions();
     var quotesCasc = baseStyle["quotes"];
@@ -2348,6 +2436,8 @@ adapt.csscasc.CascadeInstance.prototype.popElement = function(element) {
 	}
 	this.siblingOrderStack.pop();
 	this.siblingTypeCountsStack.pop();
+	this.followingSiblingOrderStack.pop();
+	this.followingSiblingTypeCountsStack.pop();
 	this.pop();
 	this.popCounters();
 };
@@ -2485,7 +2575,9 @@ adapt.csscasc.CascadeParserHandler.prototype.classSelector = function(name) {
  */
 adapt.csscasc.nthSelectorActionClasses = {
 	"nth-child": adapt.csscasc.IsNthSiblingAction,
-	"nth-of-type": adapt.csscasc.IsNthSiblingOfTypeAction
+	"nth-of-type": adapt.csscasc.IsNthSiblingOfTypeAction,
+	"nth-last-child": adapt.csscasc.IsNthLastSiblingAction,
+	"nth-last-of-type": adapt.csscasc.IsNthLastSiblingOfTypeAction
 };
 
 /**
@@ -2540,6 +2632,8 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
 	    	break;
 		case "nth-child":
 		case "nth-of-type":
+		case "nth-last-child":
+		case "nth-last-of-type":
 			var ActionClass = adapt.csscasc.nthSelectorActionClasses[name.toLowerCase()];
 			if (params && params.length == 1) {
 				if (typeof params[0] == "number") {
