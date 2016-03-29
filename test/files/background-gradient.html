@@ -16,7 +16,7 @@
          margin: 1em;    
       }
       .linear {
-          background: linear-gradient(56deg, rgb(0, 255, 94) 20%, rgb(255, 255, 250) 77%);
+          background: linear-gradient(56deg, rgb(0, 255, 94), rgb(255, 255, 250) 77%);
       }
       .radial0 {
           background: radial-gradient(at 20% 80%, red, green 20%, black);
@@ -39,6 +39,9 @@
       .rep-radial {
           background: repeating-radial-gradient(circle closest-side at 20px 30px, red, yellow, green 100%, yellow 150%, red 200%);
       }
+      .rep-radial2 {
+          background: repeating-radial-gradient(rgb(166,242,255),rgb(102,179,230) 90%)    
+      }
 </style>
 </head>
 <body>
@@ -58,5 +61,7 @@
   <div class="rep-linear"></div>    
   Repeating radial gradient
   <div class="rep-radial"></div>    
+  Radial gradient
+  <div class="rep-radial2"></div>    
 </body>
 </html>
