@@ -345,7 +345,7 @@ adapt.cssparse.ParserHandler.prototype.startNotRule = function() {
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.endNotRule = function() {
+adapt.cssparse.ParserHandler.prototype.endFuncRule = function() {
 };
 
 /**
@@ -646,6 +646,21 @@ adapt.cssparse.DispatchParserHandler.prototype.property = function(name, value, 
  */
 adapt.cssparse.DispatchParserHandler.prototype.endRule = function() {
     this.slave.endRule();
+};
+
+/**
+ * @override
+ */
+adapt.cssparse.DispatchParserHandler.prototype.startNotRule = function() {
+  this.slave.startNotRule();
+};
+
+
+/**
+ * @override
+ */
+adapt.cssparse.DispatchParserHandler.prototype.endFuncRule = function() {
+  this.slave.endFuncRule();
 };
 
 /**
@@ -2502,7 +2517,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 if (parsingFunctionParam) {
                     if (token.type == adapt.csstok.TokenType.C_PAR) {
                       tokenizer.consume();
-                      handler.endNotRule();
+                      handler.endFuncRule();
                       return true;
                     }
                     return false;

@@ -633,7 +633,6 @@ adapt.csscasc.ChainedAction.prototype.makePrimary = function(cascade) {
     return false; // cannot be made primary
 };
 
-
 /**
  * @param {string} className
  * @constructor
@@ -1259,6 +1258,50 @@ adapt.csscasc.CheckConditionAction.prototype.getPriority = function() {
     return 5;
 };
 
+/**
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.NegateHelperAction = function() {
+  this.applied = false;
+};
+goog.inherits(adapt.csscasc.NegateHelperAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.NegateHelperAction.prototype.apply = function(cascadeInstance) {
+  this.applied = true;
+};
+
+/**
+ * @param {adapt.csscasc.ChainedAction} original
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.NegateAction = function(original) {
+  adapt.csscasc.ChainedAction.call(this);
+  this.checkAppliedAction = new adapt.csscasc.NegateHelperAction();
+  original.chained = this.checkAppliedAction;
+  /** @const */ this.original = original;
+};
+goog.inherits(adapt.csscasc.NegateAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.NegateAction.prototype.apply = function(cascadeInstance) {
+  this.original.apply(cascaedInstance);
+  if (!this.checkAppliedAction.applied)
+    this.chained.apply(cascadeInstance);
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.NegateAction.prototype.makePrimary = function(cascade) {
+  return this.original.makePrimary(cascade);
+}
 
 /**
  * An object that is notified as elements are pushed and popped and typically
@@ -3038,17 +3081,18 @@ adapt.csscasc.CascadeParserHandler.prototype.finish = function() {
 /**
 * @override
 */
-adapt.csscasc.CascadeParserHandler.startNotRule = function() {
-  this.owner.pushHandler(new NotParameterParserHandler(this));
+adapt.csscasc.CascadeParserHandler.prototype.startNotRule = function() {
+  var notParserHandler = new adapt.csscasc.NotParameterParserHandler(this);
+  this.owner.pushHandler(notParserHandler);
 };
 
 /**
 * @type {adapt.csscasc.CascadeParserHandler} parent
 */
 adapt.csscasc.NotParameterParserHandler = function(parent) {
-  adapt.csscasc.CascadeParserHandler.call(parent.scope, parent.owner, parent.condition, parent, parent.regionId, parent.validatorSet, false);
+  adapt.csscasc.CascadeParserHandler.call(this, parent.scope, parent.owner, parent.condition, parent, parent.regionId, parent.validatorSet, false);
 };
-
+goog.inherits(adapt.csscasc.NotParameterParserHandler, adapt.csscasc.CascadeParserHandler);
 /**
 * @override
 */
@@ -3060,10 +3104,42 @@ adapt.csscasc.NotParameterParserHandler.startNotRule = function() {
 /**
 * @override
 */
-adapt.csscasc.NotParameterParserHandler.endNotRule = function() {
+adapt.csscasc.NotParameterParserHandler.endFuncRule = function() {
   this.finishChain();
   this.owner.popHandler();
 };
+
+/**
+ * @override
+ */
+/**
+ * @param {adapt.csscasc.CascadeAction} action
+ * @return {void}
+ */
+adapt.csscasc.NotParameterParserHandler.prototype.processChain = function(action) {
+  var chain = this.chain;
+  if (chain.length > 0) {
+    chain.sort(
+      /**
+       * @param {adapt.csscasc.ChainedAction} a
+       * @param {adapt.csscasc.ChainedAction} b
+       * @return {number}
+       */
+      function(a, b) {
+        return b.getPriority() - a.getPriority();
+      });
+    var chained = null;
+    for (var i = chain.length - 1 ; i >= 0 ; i--) {
+      chained = new adapt.csscasc.NegateAction(chain[i]);
+      chained.chained = action;
+      action = chained;
+    }
+    if (chained.makePrimary(this.cascade))
+      return;
+  }
+  this.insertNonPrimary(action);
+};
+
 
 /**
 * @override
