@@ -2047,8 +2047,15 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         continue;
                 	}
                 }
-                this.exprError("E_CSS_UNEXPECTED_PLUS", token);
-            	continue;
+                if (this.actions === adapt.cssparse.actionsPropVal && tokenizer.hasMark()) {
+                    tokenizer.reset();
+                    this.actions = adapt.cssparse.actionsSelectorStart;
+                    handler.startSelectorRule();
+                    continue;
+                } else {
+                    this.exprError("E_CSS_UNEXPECTED_PLUS", token);
+                    continue;
+                }
             case adapt.cssparse.Action.VAL_END:
                 tokenizer.consume();
                 // fall through
