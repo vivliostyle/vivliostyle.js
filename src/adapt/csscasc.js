@@ -1291,17 +1291,12 @@ goog.inherits(adapt.csscasc.NegateAction, adapt.csscasc.ChainedAction);
  * @override
  */
 adapt.csscasc.NegateAction.prototype.apply = function(cascadeInstance) {
-  this.original.apply(cascaedInstance);
-  if (!this.checkAppliedAction.applied)
+  this.original.apply(cascadeInstance);
+  if (!this.checkAppliedAction.applied) {
     this.chained.apply(cascadeInstance);
+  }
+  this.checkAppliedAction.applied = false;
 };
-
-/**
- * @override
- */
-adapt.csscasc.NegateAction.prototype.makePrimary = function(cascade) {
-  return this.original.makePrimary(cascade);
-}
 
 /**
  * @override
@@ -1348,13 +1343,6 @@ adapt.csscasc.NegateActionsSet.prototype.apply = function(cascadeInstance) {
   this.lastAction.chained = this.chained;
   this.firstAction.apply(cascadeInstance);
 };
-
-/**
- * @override
- */
-adapt.csscasc.NegateActionsSet.prototype.makePrimary = function(cascade) {
-  return this.firstAction.makePrimary(cascade);
-}
 
 /**
  * @override
