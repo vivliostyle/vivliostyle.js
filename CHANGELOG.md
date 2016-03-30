@@ -22,6 +22,14 @@
 - Support substring matching attribute selectors `^=`, `$=` and `*=`
   - <https://github.com/vivliostyle/vivliostyle.js/issues/196>
   - Spec: [Selectors Level 3 - Substring matching attribute selectors](https://www.w3.org/TR/css3-selectors/#attribute-substrings)
+- Support `an+b` arguments for `:nth-child()` pseudo-class selector
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/163>
+  - Spec: [Selectors Level 3 - :nth-child() pseudo-class](http://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
+- Support `:nth-last-child()`, `:nth-of-type()`, `:nth-last-of-type()`, `:last-child`, `:first-of-type`, `:last-of-type`, `:only-child` and `:only-of-type` pseudo-class selectors
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/86>
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/193>
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/194>
+  - Spec: [Selectors Level 3 - Structural pseudo-classes](https://www.w3.org/TR/css3-selectors/#structural-pseudos)
 
 ### Fixed
 - Lengths in 'rem' specified within page context are now interpreted correctly.
