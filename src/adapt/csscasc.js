@@ -3036,6 +3036,45 @@ adapt.csscasc.CascadeParserHandler.prototype.finish = function() {
 
 
 /**
+* @override
+*/
+adapt.csscasc.CascadeParserHandler.startNotRule = function() {
+  this.owner.pushHandler(new NotParameterParserHandler(this));
+};
+
+/**
+* @type {adapt.csscasc.CascadeParserHandler} parent
+*/
+adapt.csscasc.NotParameterParserHandler = function(parent) {
+  adapt.csscasc.CascadeParserHandler.call(parent.scope, parent.owner, parent.condition, parent, parent.regionId, parent.validatorSet, false);
+};
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.startNotRule = function() {
+  this.owner.popHandler();
+  this.reportAndSkip("E_CSS_UNEXPECTED_NOT");
+};
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.endNotRule = function() {
+  this.finishChain();
+  this.owner.popHandler();
+};
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.error = function(mnemonics, token) {
+  adapt.csscasc.CascadeParserHandler.prototype.error.call(mnemonics, token);
+};
+
+
+
+/**
  * @param {adapt.expr.LexicalScope} scope
  * @param {adapt.cssparse.DispatchParserHandler} owner
  * @constructor

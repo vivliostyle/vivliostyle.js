@@ -336,6 +336,19 @@ adapt.cssparse.ParserHandler.prototype.endRule = function() {
 };
 
 /**
+ * @return {void}
+ */
+adapt.cssparse.ParserHandler.prototype.startNotRule = function() {
+};
+
+
+/**
+ * @return {void}
+ */
+adapt.cssparse.ParserHandler.prototype.endNotRule = function() {
+};
+
+/**
  * @return {number}
  */
 adapt.cssparse.ParserHandler.prototype.getImportantSpecificity = function() {
@@ -1747,6 +1760,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         switch (text) {
                           case "not":
                                this.actions = adapt.cssparse.actionsSelectorStart;
+                               handler.startNotRule();
                                this.runParser(Number.POSITIVE_INFINITY, false, false, false, true);
                                this.actions = adapt.cssparse.actionsSelector;
                                break parserLoop;
@@ -2488,6 +2502,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 if (parsingFunctionParam) {
                     if (token.type == adapt.csstok.TokenType.C_PAR) {
                       tokenizer.consume();
+                      handler.endNotRule();
                       return true;
                     }
                     return false;
