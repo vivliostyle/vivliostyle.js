@@ -2590,12 +2590,6 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
     	return;
     }
     switch (name.toLowerCase()) {
-        case "first-child":
-            this.chain.push(new adapt.csscasc.IsFirstAction());
-            break;
-		case "last-child":
-			this.chain.push(new adapt.csscasc.IsNthLastSiblingAction(0, 1));
-			break;
         case "root":
             this.chain.push(new adapt.csscasc.IsRootAction());
             break;
@@ -2634,8 +2628,8 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
 	    	}
 	    	break;
 		case "nth-child":
-		case "nth-of-type":
 		case "nth-last-child":
+		case "nth-of-type":
 		case "nth-last-of-type":
 			var ActionClass = adapt.csscasc.nthSelectorActionClasses[name.toLowerCase()];
 			if (params && params.length == 2) {
@@ -2643,6 +2637,18 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
 			} else {
 				this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
 			}
+			break;
+		case "first-child":
+			this.chain.push(new adapt.csscasc.IsFirstAction());
+			break;
+		case "last-child":
+			this.chain.push(new adapt.csscasc.IsNthLastSiblingAction(0, 1));
+			break;
+		case "first-of-type":
+			this.chain.push(new adapt.csscasc.IsNthSiblingOfTypeAction(0, 1));
+			break;
+		case "last-of-type":
+			this.chain.push(new adapt.csscasc.IsNthLastSiblingOfTypeAction(0, 1));
 			break;
         case "before":
         case "after":

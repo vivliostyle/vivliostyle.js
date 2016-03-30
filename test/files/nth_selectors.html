@@ -238,6 +238,16 @@
         .a_-3_last_type span:nth-last-of-type(-3n-1) {
             color: red;
         }
+
+
+        .first-of-type span:first-of-type {
+            font-weight: bold;
+        }
+
+
+        .last-of-type span:last-of-type {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -358,6 +368,16 @@
 <div class="a_-3_last_type">
     (:nth-last-of-type(-3n+b)) 2 and 5 bold:
     <span>1</span> <div style="display: inline">other</div> <span>2</span> <span>3</span> <span>4</span> <span>5</span> <span>6</span>
+</div>
+
+<div class="first-of-type">
+    (:first-of-type) Only 1 should be bold:
+    <div style="display: inline">other</div> <span>1</span> <span>2</span>
+</div>
+
+<div class="last-of-type">
+    (:last-of-type) Only 2 should be bold:
+    <span>1</span> <span>2</span> <div style="display: inline">other</div>
 </div>
 </body>
 </html>
