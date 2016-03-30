@@ -3182,31 +3182,6 @@ adapt.csscasc.parseStyleAttribute = function(scope, validatorSet, baseURL, style
 	return handler.elementStyle;
 };
 
-
-/**
- * @type {adapt.taskutil.Fetcher.<boolean>}
- */
-adapt.csscasc.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(function() {
-	/** @type {!adapt.task.Frame.<boolean>} */ var frame =
-		adapt.task.newFrame("uaStylesheetBase");
-	adapt.cssvalid.loadValidatorSet().then(function(validatorSet) {
-	    var url = adapt.base.resolveURL("user-agent-base.css", adapt.base.resourceBaseURL);
-	    var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
-	    		validatorSet, true);
-	    handler.startStylesheet(adapt.cssparse.StylesheetFlavor.USER_AGENT);
-	    adapt.csscasc.uaBaseCascade = handler.cascade;
-	    adapt.cssparse.parseStylesheetFromURL(url, handler, null, null).thenFinish(frame);
-	});
-    return frame.result();
-}, "uaStylesheetBaseFetcher");
-
-/**
- * @return {!adapt.task.Result.<boolean>}
- */
-adapt.csscasc.loadUABase = function() {
-	return adapt.csscasc.uaStylesheetBaseFetcher.get();
-};
-
 /**
  * @param {Object.<string,adapt.csscasc.CascadeValue>} cascaded
  * @param {adapt.expr.Context} context
