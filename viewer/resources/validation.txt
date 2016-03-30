@@ -52,11 +52,13 @@ COLOR = SCOLOR | RGBCOLOR | RGBACOLOR | HSLCOLOR | HSLACOLOR;
 BG_POSITION_TERM = PLENGTH | left | center | right | top | bottom;
 SIDE_OR_CORNER =  [left | right] || [top | bottom];
 COLOR_STOP = SPACE(COLOR [PERCENTAGE | LENGTH]?);
-LINEAR_GRADIENT = linear-gradient([ANGLE | SPACE(to SIDE_OR_CORNER)]? COLOR_STOP+);
+LINEAR_GRADIENT = linear-gradient([ANGLE | SPACE(to SIDE_OR_CORNER)]? COLOR_STOP+) |
+                  repeating-linear-gradient([ANGLE | SPACE(to SIDE_OR_CORNER)]? COLOR_STOP+) |;
 GRADIENT_EXTENT = closest-corner | closest-side | farthest-corner | farthest-side;
 GRADIENT_POSITION = at BG_POSITION_TERM{1,4};
 GRADIENT_SHAPE = SPACE(circle LENGTH? GRADIENT_POSITION?) | SPACE(ellipse PLENGTH{2}? GRADIENT_POSITION?)| SPACE([circle | ellipse] GRADIENT_EXTENT? GRADIENT_POSITION?);
-RADIAL_GRADIENT = radial-gradient([GRADIENT_SHAPE | SPACE(GRADIENT_POSITION)] COLOR_STOP+);
+RADIAL_GRADIENT = radial-gradient([GRADIENT_SHAPE | SPACE(GRADIENT_POSITION)]? COLOR_STOP+) |
+                  repeating-radial-gradient([GRADIENT_SHAPE | SPACE(GRADIENT_POSITION)]? COLOR_STOP+);
 URI_OR_NONE = URI | none;
 IMAGE =  URI | LINEAR_GRADIENT | RADIAL_GRADIENT | none;
 azimuth = ANGLE | [[ left-side | far-left | left | center-left | center | center-right | right | far-right | right-side ] || behind ] | leftwards | rightwards;
