@@ -1304,6 +1304,66 @@ adapt.csscasc.NegateAction.prototype.makePrimary = function(cascade) {
 }
 
 /**
+ * @override
+ */
+adapt.csscasc.NegateAction.prototype.getPriority = function() {
+    return this.original.getPriority();
+};
+
+/**
+ * @param {Array.<adapt.csscasc.ChainedAction>} list
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.NegateActionsSet = function(list) {
+  adapt.csscasc.ChainedAction.call(this);
+  list.sort(
+    /**
+     * @param {adapt.csscasc.ChainedAction} a
+     * @param {adapt.csscasc.ChainedAction} b
+     * @return {number}
+     */
+    function(a, b) {
+      return b.getPriority() - a.getPriority();
+    });
+  list = list.map(function(action) {
+    return new adapt.csscasc.NegateAction(action);
+  });
+  var chained = null;
+  var action = null;
+  /** @type {adapt.csscasc.CascadeAction} */ this.lastAction = list[list.length - 1];
+  for (var i = list.length - 1 ; i >= 0 ; i--) {
+    chained = list[i];
+    chained.chained = action;
+    action = chained;
+  }
+  /** @type {adapt.csscasc.CascadeAction} */ this.firstAction = action;  
+};
+goog.inherits(adapt.csscasc.NegateActionsSet, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.NegateActionsSet.prototype.apply = function(cascadeInstance) {
+  this.lastAction.chained = this.chained;
+  this.firstAction.apply(cascadeInstance);
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.NegateActionsSet.prototype.makePrimary = function(cascade) {
+  return this.firstAction.makePrimary(cascade);
+}
+
+/**
+ * @override
+ */
+adapt.csscasc.NegateActionsSet.prototype.getPriority = function() {
+    return this.firstAction.getPriority();
+};
+
+/**
  * An object that is notified as elements are pushed and popped and typically
  * controls a "named condition" (which is a count associated with a name).
  * @interface
@@ -2565,6 +2625,8 @@ adapt.csscasc.CascadeParserHandler = function(scope, owner, condition, parent, r
     /** @const */ this.regionId = regionId;
     /** @const */ this.validatorSet = validatorSet;
     /** @type {adapt.csscasc.ParseState} */ this.state = adapt.csscasc.ParseState.TOP;
+    /** @type {Array.<Array.<adapt.csscasc.ChainedAction>>} */ this.chainStack = [];
+    /** @type {boolean} */ this.inNotParameter = false;
 };
 goog.inherits(adapt.csscasc.CascadeParserHandler, adapt.cssparse.SlaveParserHandler);
 
@@ -3082,74 +3144,30 @@ adapt.csscasc.CascadeParserHandler.prototype.finish = function() {
 * @override
 */
 adapt.csscasc.CascadeParserHandler.prototype.startNotRule = function() {
-  var notParserHandler = new adapt.csscasc.NotParameterParserHandler(this);
-  this.owner.pushHandler(notParserHandler);
-};
-
-/**
-* @type {adapt.csscasc.CascadeParserHandler} parent
-*/
-adapt.csscasc.NotParameterParserHandler = function(parent) {
-  adapt.csscasc.CascadeParserHandler.call(this, parent.scope, parent.owner, parent.condition, parent, parent.regionId, parent.validatorSet, false);
-};
-goog.inherits(adapt.csscasc.NotParameterParserHandler, adapt.csscasc.CascadeParserHandler);
-/**
-* @override
-*/
-adapt.csscasc.NotParameterParserHandler.startNotRule = function() {
-  this.owner.popHandler();
-  this.reportAndSkip("E_CSS_UNEXPECTED_NOT");
-};
-
-/**
-* @override
-*/
-adapt.csscasc.NotParameterParserHandler.endFuncRule = function() {
-  this.finishChain();
-  this.owner.popHandler();
-};
-
-/**
- * @override
- */
-/**
- * @param {adapt.csscasc.CascadeAction} action
- * @return {void}
- */
-adapt.csscasc.NotParameterParserHandler.prototype.processChain = function(action) {
-  var chain = this.chain;
-  if (chain.length > 0) {
-    chain.sort(
-      /**
-       * @param {adapt.csscasc.ChainedAction} a
-       * @param {adapt.csscasc.ChainedAction} b
-       * @return {number}
-       */
-      function(a, b) {
-        return b.getPriority() - a.getPriority();
-      });
-    var chained = null;
-    for (var i = chain.length - 1 ; i >= 0 ; i--) {
-      chained = new adapt.csscasc.NegateAction(chain[i]);
-      chained.chained = action;
-      action = chained;
+  if (this.inNotParameter) {
+    var popped = this.chainStack.pop();
+    if (popped) {
+      this.chain = popped;
     }
-    if (chained.makePrimary(this.cascade))
-      return;
+    this.reportAndSkip("E_CSS_UNEXPECTED_NOT");
+  } else {
+    this.chainStack.push(this.chain);
+    this.chain = [];
+    this.inNotParameter = true;
   }
-  this.insertNonPrimary(action);
 };
-
 
 /**
 * @override
 */
-adapt.csscasc.NotParameterParserHandler.error = function(mnemonics, token) {
-  adapt.csscasc.CascadeParserHandler.prototype.error.call(mnemonics, token);
+adapt.csscasc.CascadeParserHandler.prototype.endFuncRule = function() {
+  if (this.chain && this.chain.length > 0) {
+    var not_chain = this.chain;
+    this.chain = this.chainStack.pop();
+    this.chain.push(new adapt.csscasc.NegateActionsSet(not_chain));
+  }
+  this.inNotParameter = false;
 };
-
-
-
 /**
  * @param {adapt.expr.LexicalScope} scope
  * @param {adapt.cssparse.DispatchParserHandler} owner
