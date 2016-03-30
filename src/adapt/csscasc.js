@@ -1234,6 +1234,84 @@ adapt.csscasc.IsEmptyAction.prototype.getPriority = function() {
 };
 
 /**
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.IsEnabledAction = function() {
+	adapt.csscasc.ChainedAction.call(this);
+};
+goog.inherits(adapt.csscasc.IsEnabledAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsEnabledAction.prototype.apply = function(cascadeInstance) {
+	var elem = cascadeInstance.currentElement;
+	if (elem.disabled === false) {
+		this.chained.apply(cascadeInstance);
+	}
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsEnabledAction.prototype.getPriority = function() {
+	return 5;
+};
+
+/**
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.IsDisabledAction = function() {
+	adapt.csscasc.ChainedAction.call(this);
+};
+goog.inherits(adapt.csscasc.IsDisabledAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsDisabledAction.prototype.apply = function(cascadeInstance) {
+	var elem = cascadeInstance.currentElement;
+	if (elem.disabled === true) {
+		this.chained.apply(cascadeInstance);
+	}
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsDisabledAction.prototype.getPriority = function() {
+	return 5;
+};
+
+/**
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.IsCheckedAction = function() {
+	adapt.csscasc.ChainedAction.call(this);
+};
+goog.inherits(adapt.csscasc.IsCheckedAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsCheckedAction.prototype.apply = function(cascadeInstance) {
+	var elem = cascadeInstance.currentElement;
+	if (elem.selected === true || elem.checked === true) {
+		this.chained.apply(cascadeInstance);
+	}
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsCheckedAction.prototype.getPriority = function() {
+	return 5;
+};
+
+/**
  * @param {string} condition
  * @constructor
  * @extends {adapt.csscasc.ChainedAction}
@@ -2625,6 +2703,15 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
     	return;
     }
     switch (name.toLowerCase()) {
+		case "enabled":
+			this.chain.push(new adapt.csscasc.IsEnabledAction());
+			break;
+		case "disabled":
+			this.chain.push(new adapt.csscasc.IsDisabledAction());
+			break;
+		case "checked":
+			this.chain.push(new adapt.csscasc.IsCheckedAction());
+			break;
         case "root":
             this.chain.push(new adapt.csscasc.IsRootAction());
             break;

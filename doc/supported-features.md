@@ -70,6 +70,9 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Supported in all browsers
 - [Attribute selectors with namespaces `[ns|att]`, `[|att]`, `[ns|att=val]`, `[|att=val]`, `[ns|att~=val]`, `[|att~=val]`, `[ns|att|=val]`, `[|att|=val]`, `[ns|att^=val]`, `[|att^=val]`, `[ns|att$=val]`, `[|att$=val]`, `[ns|att*=val]`, `[|att*=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
   - Supported in all browsers
+- [The UI element states pseudo-classes `:enabled`, `:disabled`, `:checked`, `:indeterminate`](https://www.w3.org/TR/css3-selectors/#UIstates)
+  - Supported in all browsers
+  - Note that the current implementation can use only initial states of those UI elements. Even if the actual state of the element is toggled by user interaction, the style does not change.
 - [`:root` pseudo-class](https://www.w3.org/TR/css3-selectors/#root-pseudo)
   - Supported in all browsers
 - [`:nth-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
@@ -111,7 +114,6 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 - [Universal selector without namespaces `|*`](https://www.w3.org/TR/css3-selectors/#univnmsp)
 - [Attribute selectors with universal namespace `[*|att]`, `[*|att=val]`, `[*|att~=val]`, `[*|att|=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
 - [Target pseudo-class `:target`](https://www.w3.org/TR/css3-selectors/#target-pseudo)
-- [The UI element states pseudo-classes `:enabled`, `:disabled`, `:checked`, `:indeterminate`](https://www.w3.org/TR/css3-selectors/#UIstates)
 - [The negation pseudo-class `:not()`](https://www.w3.org/TR/css3-selectors/#negation)
 
 ## At-rules

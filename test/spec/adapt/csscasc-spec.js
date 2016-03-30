@@ -619,6 +619,88 @@ describe("csscasc", function() {
         });
     });
 
+    describe("IsEnabledAction", function() {
+        var action = new adapt.csscasc.IsEnabledAction();
+        var chained;
+
+        beforeEach(function() {
+            chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+        });
+
+        it("applies if the element's 'disabled' property is false (not undefined)", function() {
+            action.apply({currentElement: {disabled: false}});
+            expect(chained.apply).toHaveBeenCalled();
+        });
+
+        it("not applies if the element's 'disabled' property is true", function() {
+            action.apply({currentElement: {disabled: true}});
+            expect(chained.apply).not.toHaveBeenCalled();
+        });
+
+        it("applies if the element does not have 'disabled' property", function() {
+            action.apply({currentElement: {}});
+            expect(chained.apply).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("IsDisabledAction", function() {
+        var action = new adapt.csscasc.IsDisabledAction();
+        var chained;
+
+        beforeEach(function() {
+            chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+        });
+
+        it("applies if the element's 'disabled' property is true", function() {
+            action.apply({currentElement: {disabled: true}});
+            expect(chained.apply).toHaveBeenCalled();
+        });
+
+        it("not applies if the element's 'disabled' property is false (not undefined)", function() {
+            action.apply({currentElement: {disabled: false}});
+            expect(chained.apply).not.toHaveBeenCalled();
+        });
+
+        it("applies if the element does not have 'disabled' property", function() {
+            action.apply({currentElement: {}});
+            expect(chained.apply).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("IsCheckedAction", function() {
+        var action = new adapt.csscasc.IsCheckedAction();
+        var chained;
+
+        beforeEach(function() {
+            chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+        });
+
+        it("applies if the element's 'selected' property is true", function() {
+            action.apply({currentElement: {selected: true}});
+            expect(chained.apply).toHaveBeenCalled();
+        });
+
+        it("applies if the element's 'checked' property is true", function() {
+            action.apply({currentElement: {checked: true}});
+            expect(chained.apply).toHaveBeenCalled();
+        });
+
+        it("not applies if the element's 'selected' property is false (not undefined)", function() {
+            action.apply({currentElement: {selected: false}});
+            expect(chained.apply).not.toHaveBeenCalled();
+        });
+
+        it("not applies if the element's 'checked' property is false (not undefined)", function() {
+            action.apply({currentElement: {checked: false}});
+            expect(chained.apply).not.toHaveBeenCalled();
+        });
+
+        it("applies if the element does not have 'selected' nor 'checked' property", function() {
+            action.apply({currentElement: {}});
+            expect(chained.apply).not.toHaveBeenCalled();
+        });
+    });
+
     describe("CascadeParserHandler", function() {
         describe("simpleProperty", function() {
             vivliostyle.test.util.mock.plugin.setup();
