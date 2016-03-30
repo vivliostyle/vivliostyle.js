@@ -573,6 +573,52 @@ describe("csscasc", function() {
         });
     });
 
+    describe("IsEmptyAction", function() {
+        function dummyCascadeInstance(children) {
+            if (children) {
+                var node = children[0];
+                for (var i = 1; i < children.length; i++) {
+                    node = node.nextSibling = children[i];
+                }
+            }
+            return {currentElement: {firstChild: children ? children[0] : null}};
+        }
+
+        var action = new adapt.csscasc.IsEmptyAction();
+        var chained;
+
+        beforeEach(function() {
+            chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
+        });
+
+        it("applies if the element has no children", function() {
+            action.apply(dummyCascadeInstance(null));
+            expect(chained.apply).toHaveBeenCalled();
+        });
+
+        it("applies if the element has only comment nodes or empty text nodes (length=0) as its children", function() {
+            action.apply(dummyCascadeInstance([
+                {nodeType: Node.COMMENT_NODE, length: 10},
+                {nodeType: Node.TEXT_NODE, length: 0}
+            ]));
+            expect(chained.apply).toHaveBeenCalled();
+        });
+
+        it("not applies if the element has an element child", function() {
+            action.apply(dummyCascadeInstance([
+                {nodeType: Node.ELEMENT_NODE}
+            ]));
+            expect(chained.apply).not.toHaveBeenCalled();
+        });
+
+        it("not applies if the element has a non-empty text node as a child", function() {
+            action.apply(dummyCascadeInstance([
+                {nodeType: Node.TEXT_NODE, length: 1}
+            ]));
+            expect(chained.apply).not.toHaveBeenCalled();
+        });
+    });
+
     describe("CascadeParserHandler", function() {
         describe("simpleProperty", function() {
             vivliostyle.test.util.mock.plugin.setup();

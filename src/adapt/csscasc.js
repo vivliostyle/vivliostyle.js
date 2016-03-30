@@ -1199,6 +1199,41 @@ adapt.csscasc.IsNthLastSiblingOfTypeAction.prototype.getPriority = function() {
 };
 
 /**
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.IsEmptyAction = function() {
+	adapt.csscasc.ChainedAction.call(this);
+};
+goog.inherits(adapt.csscasc.IsEmptyAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsEmptyAction.prototype.apply = function(cascadeInstance) {
+	var node = cascadeInstance.currentElement.firstChild;
+	while (node) {
+		switch (node.nodeType) {
+			case Node.ELEMENT_NODE:
+				return;
+			case Node.TEXT_NODE:
+				if (/** @type {Text} */ (node).length > 0) {
+					return;
+				}
+		}
+		node = node.nextSibling;
+	}
+	this.chained.apply(cascadeInstance);
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsEmptyAction.prototype.getPriority = function() {
+	return 4;
+};
+
+/**
  * @param {string} condition
  * @constructor
  * @extends {adapt.csscasc.ChainedAction}
@@ -2657,6 +2692,9 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
 		case "only-of-type":
 			this.chain.push(new adapt.csscasc.IsNthSiblingOfTypeAction(0, 1));
 			this.chain.push(new adapt.csscasc.IsNthLastSiblingOfTypeAction(0, 1));
+			break;
+		case "empty":
+			this.chain.push(new adapt.csscasc.IsEmptyAction());
 			break;
         case "before":
         case "after":
