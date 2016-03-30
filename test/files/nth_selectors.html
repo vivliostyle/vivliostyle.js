@@ -248,6 +248,16 @@
         .last-of-type span:last-of-type {
             font-weight: bold;
         }
+
+
+        .only-child span:only-child {
+            font-weight: bold;
+        }
+
+
+        .only-of-type span:only-of-type {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -378,6 +388,24 @@
 <div class="last-of-type">
     (:last-of-type) Only 2 should be bold:
     <span>1</span> <span>2</span> <div style="display: inline">other</div>
+</div>
+
+<div class="only-child">
+    (:only-child) "bold" should be bold:
+    <span>bold</span>
+</div>
+<div class="only-child">
+    (:only-child) there should not be any bold element:
+    <div style="display: inline">other</div> <span>regular</span> <div style="display: inline">other</div>
+</div>
+
+<div class="only-of-type">
+    (:only-of-type) "bold" should be bold:
+    <div style="display: inline">other</div> <span>bold</span> <div style="display: inline">other</div>
+</div>
+<div class="only-of-type">
+    (:only-of-type) there should not be any bold element:
+    <div style="display: inline">other</div> <span>regular</span> <div style="display: inline">other</div> <span>regular</span>
 </div>
 </body>
 </html>

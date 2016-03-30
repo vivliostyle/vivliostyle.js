@@ -2650,6 +2650,14 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
 		case "last-of-type":
 			this.chain.push(new adapt.csscasc.IsNthLastSiblingOfTypeAction(0, 1));
 			break;
+		case "only-child":
+			this.chain.push(new adapt.csscasc.IsFirstAction());
+			this.chain.push(new adapt.csscasc.IsNthLastSiblingAction(0, 1));
+			break;
+		case "only-of-type":
+			this.chain.push(new adapt.csscasc.IsNthSiblingOfTypeAction(0, 1));
+			this.chain.push(new adapt.csscasc.IsNthLastSiblingOfTypeAction(0, 1));
+			break;
         case "before":
         case "after":
         case "first-line":
