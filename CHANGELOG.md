@@ -30,6 +30,9 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/193>
   - <https://github.com/vivliostyle/vivliostyle.js/issues/194>
   - Spec: [Selectors Level 3 - Structural pseudo-classes](https://www.w3.org/TR/css3-selectors/#structural-pseudos)
+- Support `:empty` pseudo-class selector
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/205>
+  - Spec: [Selectors Level 3 - :empty pseudo-class](https://www.w3.org/TR/css3-selectors/#empty-pseudo)
 
 ### Fixed
 - Lengths in 'rem' specified within page context are now interpreted correctly.
