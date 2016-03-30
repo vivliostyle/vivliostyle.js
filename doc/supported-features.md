@@ -74,8 +74,26 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Supported in all browsers
 - [`:nth-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
   - Supported in all browsers
-  - Note: only a single integer or "even"/"odd" arguments are accepted for now. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/163)
+- [`:nth-last-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-child-pseudo)
+  - Supported in all browsers
+- [`:nth-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-of-type-pseudo)
+  - Supported in all browsers
+- [`:nth-last-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-of-type-pseudo)
+  - Supported in all browsers
 - [`:first-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-child-pseudo)
+  - Supported in all browsers
+- [`:last-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-child-pseudo)
+  - Supported in all browsers
+- [`:first-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-of-type-pseudo)
+  - Supported in all browsers
+- [`:last-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-of-type-pseudo)
+  - Supported in all browsers
+- [`:only-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#only-child-pseudo)
+  - Supported in all browsers
+- [`:only-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#only-of-type-pseudo)
+  - Supported in all browsers
+- [`:empty` pseudo-class](https://www.w3.org/TR/css3-selectors/#empty-pseudo)
+  - Supported in all browsers
 - [`::first-line` pseudo-element](https://www.w3.org/TR/css3-selectors/#first-line)
   - Supported in all browsers
   - Note: there is a bug when used alone or with the universal selector(`*`). [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/133)
@@ -94,15 +112,6 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 - [Attribute selectors with universal namespace `[*|att]`, `[*|att=val]`, `[*|att~=val]`, `[*|att|=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
 - [Target pseudo-class `:target`](https://www.w3.org/TR/css3-selectors/#target-pseudo)
 - [The UI element states pseudo-classes `:enabled`, `:disabled`, `:checked`, `:indeterminate`](https://www.w3.org/TR/css3-selectors/#UIstates)
-- [`:nth-last-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-child-pseudo)
-- [`:nth-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-of-type-pseudo)
-- [`:nth-last-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-of-type-pseudo)
-- [`:last-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-child-pseudo)
-- [`:first-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-of-type-pseudo)
-- [`:last-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-of-type-pseudo)
-- [`:only-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#only-child-pseudo)
-- [`:only-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#only-of-type-pseudo)
-- [`:empty` pseudo-class](https://www.w3.org/TR/css3-selectors/#empty-pseudo)
 - [The negation pseudo-class `:not()`](https://www.w3.org/TR/css3-selectors/#negation)
 
 ## At-rules
