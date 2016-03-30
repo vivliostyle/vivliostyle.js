@@ -439,6 +439,14 @@ describe("cssparse", function() {
                 });
             });
 
+            describe("pseudo-class followed by +", function() {
+                it("should be parsed successfully", function(done) {
+                    parse(done, "div:empty + div {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("empty", null);
+                    });
+                })
+            });
         });
     });
 });
