@@ -1396,12 +1396,12 @@ adapt.cssparse.Parser.prototype.readNthPseudoParams = function() {
     var token = this.tokenizer.token();
 
     if (token.type === adapt.csstok.TokenType.PLUS) {
-        // +
+        // '+'
         hasLeadingPlus = true;
         this.tokenizer.consume();
         token = this.tokenizer.token();
     } else if (token.type === adapt.csstok.TokenType.IDENT && (token.text === "even" || token.text === "odd")) {
-        // even or odd
+        // 'even' or 'odd'
         this.tokenizer.consume();
         return [2, token.text === "odd" ? 1 : 0];
     }
@@ -1409,15 +1409,19 @@ adapt.cssparse.Parser.prototype.readNthPseudoParams = function() {
     switch (token.type) {
         case adapt.csstok.TokenType.NUMERIC:
             if (hasLeadingPlus && token.num < 0) {
+                // reject '+-an'
                 return null;
             }
             // FALLTHROUGH
         case adapt.csstok.TokenType.IDENT:
             if (hasLeadingPlus && token.text.charAt(0) === "-") {
+                // reject '+-n'
                 return null;
             }
             if (token.text === "n" || token.text === "-n") {
+                // 'an', 'an +b', 'an -b', 'n', 'n +b', 'n -b', '-n', '-n +b' '-n -b'
                 if (hasLeadingPlus && token.precededBySpace) {
+                    // reject '+ an'
                     return null;
                 }
                 var a = token.text === "-n" ? -1 : 1;
@@ -1428,23 +1432,36 @@ adapt.cssparse.Parser.prototype.readNthPseudoParams = function() {
 
                 this.tokenizer.consume();
                 token = this.tokenizer.token();
-                var hasSign = token.type === adapt.csstok.TokenType.PLUS || token.type === adapt.csstok.TokenType.MINUS;
+                var hasMinusSign = token.type === adapt.csstok.TokenType.MINUS;
+                var hasSign = token.type === adapt.csstok.TokenType.PLUS || hasMinusSign;
                 if (hasSign) {
+                    // 'an +b', 'an - b'
                     this.tokenizer.consume();
                     token = this.tokenizer.token();
                 }
                 if (token.type === adapt.csstok.TokenType.INT) {
                     b = token.num;
-                    if (hasSign && b < 0) {
-                        return null;
+                    if (1/b === 1/(-0)) {
+                        // negative zero: 'an -0'
+                        b = 0;
+                        if (hasSign) return null; // reject 'an + -0', 'an - -0'
+                    } else if (b < 0) {
+                        // negative: 'an -b'
+                        if (hasSign) return null; // reject 'an + -b', 'an - -b'
+                    } else if (b >= 0) {
+                        // positive or positive zero: 'an +b'
+                        if (!hasSign) return null;
                     }
                     this.tokenizer.consume();
                 } else if (hasSign) {
+                    // reject 'an + (non-integer)'
                     return null;
                 }
-                return [a, b];
+                return [a, hasMinusSign && b > 0 ? -b : b];
             } else if (token.text === "n-" || token.text === "-n-") {
+                // 'an- b', '-n- b'
                 if (hasLeadingPlus && token.precededBySpace) {
+                    // reject '+ an- b'
                     return null;
                 }
                 var a = token.text === "-n-" ? -1 : 1;
@@ -1454,7 +1471,8 @@ adapt.cssparse.Parser.prototype.readNthPseudoParams = function() {
                 this.tokenizer.consume();
                 token = this.tokenizer.token();
                 if (token.type === adapt.csstok.TokenType.INT) {
-                    if (token.num < 0) {
+                    if (token.num < 0 || 1/token.num === 1/(-0)) {
+                        // reject 'an- -b', 'an- -0'
                         return null;
                     } else {
                         this.tokenizer.consume();
@@ -1464,13 +1482,16 @@ adapt.cssparse.Parser.prototype.readNthPseudoParams = function() {
             } else {
                 var r = token.text.match(/^n(-[0-9]+)$/);
                 if (r) {
+                    // 'n-b', 'an-b'
                     if (hasLeadingPlus && token.precededBySpace) {
+                        // reject '+ an-b'
                         return null;
                     }
                     this.tokenizer.consume();
                     return [token.type === adapt.csstok.TokenType.NUMERIC ? token.num : 1, parseInt(r[1], 10)];
                 }
                 r = token.text.match(/^-n(-[0-9]+)$/);
+                // '-n-b'
                 if (r) {
                     this.tokenizer.consume();
                     return [-1, parseInt(r[1], 10)];

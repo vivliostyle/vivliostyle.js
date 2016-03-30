@@ -95,185 +95,234 @@ describe("cssparse", function() {
                     });
                 });
 
-                it("can take an 'n' argument", function(done) {
-                    parse(done, ":nth-child(n) {}", function() {
-                        expect(handler.error).not.toHaveBeenCalled();
-                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, 0]);
-                    });
-                });
-
-                it("error if there is whitespaces between an 'n' and a plus/minus sign", function(done) {
-                    parse(done, ":nth-child(+ n) {}", function() {
-                        expect(handler.error).toHaveBeenCalled();
-                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
-                    });
-                });
-
-                it("can take an 'n' argument with a plus sign", function(done) {
-                    parse(done, ":nth-child(+n) {}", function() {
-                        expect(handler.error).not.toHaveBeenCalled();
-                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, 0]);
-                    });
-                });
-
-                it("can take an 'an' argument", function(done) {
-                    parse(done, ":nth-child(2n) {}", function() {
-                        expect(handler.error).not.toHaveBeenCalled();
-                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [2, 0]);
-                    });
-                });
-
-                it("can take an 'an' argument with a plus sign", function(done) {
-                    parse(done, ":nth-child(+2n) {}", function() {
-                        expect(handler.error).not.toHaveBeenCalled();
-                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [2, 0]);
-                    });
-                });
-
-                it("error if there is whitespaces between an 'a' and a plus/minus sign", function(done) {
+                it("reject '+ an' argument", function(done) {
                     parse(done, ":nth-child(+ 2n) {}", function() {
                         expect(handler.error).toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
                     });
                 });
 
-                it("error if there is whitespaces between an 'a' and an 'n'", function(done) {
-                    parse(done, ":nth-child(+2 n) {}", function() {
+                it("can take 'n -0' argument", function(done) {
+                    parse(done, ":nth-child(n -0) {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, 0]);
+                    });
+                });
+
+                it("reject 'n + -0' argument", function(done) {
+                    parse(done, ":nth-child(n + -0) {}", function() {
                         expect(handler.error).toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
                     });
                 });
 
-                it("can take an 'an+b' argument", function(done) {
-                    parse(done, ":nth-child(2n+3) {}", function() {
-                        expect(handler.error).not.toHaveBeenCalled();
-                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [2, 3]);
-                    });
-                });
-
-                it("can take an 'an +b' argument", function(done) {
-                    parse(done, ":nth-child(2n +1) {}", function() {
-                        expect(handler.error).not.toHaveBeenCalled();
-                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [2, 1]);
-                    });
-                });
-
-                it("can take an 'an+ b' argument", function(done) {
-                    parse(done, ":nth-child(2n+ 1) {}", function() {
-                        expect(handler.error).not.toHaveBeenCalled();
-                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [2, 1]);
-                    });
-                });
-
-                it("can take an 'an + b' argument", function(done) {
-                    parse(done, ":nth-child(2n + 1) {}", function() {
-                        expect(handler.error).not.toHaveBeenCalled();
-                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [2, 1]);
-                    });
-                });
-
-                it("error an 'an+' argument", function(done) {
-                    parse(done, ":nth-child(2n+) {}", function() {
+                it("reject 'n - -0' argument", function(done) {
+                    parse(done, ":nth-child(n - -0) {}", function() {
                         expect(handler.error).toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
                     });
                 });
 
-                it("error an 'an +' argument", function(done) {
-                    parse(done, ":nth-child(2n +) {}", function() {
+                it("can take 'n -a' argument", function(done) {
+                    parse(done, ":nth-child(n -3) {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, -3]);
+                    });
+                });
+
+                it("reject 'n + -a' argument", function(done) {
+                    parse(done, ":nth-child(n + -3) {}", function() {
                         expect(handler.error).toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
                     });
                 });
 
-                it("can take an 'an' argument with a minus sign", function(done) {
+                it("reject 'n - -a' argument", function(done) {
+                    parse(done, ":nth-child(n - -3) {}", function() {
+                        expect(handler.error).toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
+                    });
+                });
+
+                it("can take 'n+a' argument", function(done) {
+                    parse(done, ":nth-child(n+3) {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, 3]);
+                    });
+                });
+
+                it("can take 'n +a' argument", function(done) {
+                    parse(done, ":nth-child(n +3) {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, 3]);
+                    });
+                });
+
+                it("can take 'n + a' argument", function(done) {
+                    parse(done, ":nth-child(n + 3) {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, 3]);
+                    });
+                });
+
+                it("can take 'n - a' argument", function(done) {
+                    parse(done, ":nth-child(n - 3) {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, -3]);
+                    });
+                });
+
+                it("can take 'n - 0' argument", function(done) {
+                    parse(done, ":nth-child(n - 0) {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, 0]);
+                    });
+                });
+
+                it("reject 'n b' argument", function(done) {
+                    parse(done, ":nth-child(n 2) {}", function() {
+                        expect(handler.error).toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
+                    });
+                });
+
+                it("reject 'n + +0' argument", function(done) {
+                    parse(done, ":nth-child(n + +0) {}", function() {
+                        expect(handler.error).toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
+                    });
+                });
+
+                it("reject 'n + +b' argument", function(done) {
+                    parse(done, ":nth-child(n + +3) {}", function() {
+                        expect(handler.error).toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
+                    });
+                });
+
+                it("can take 'n' argument", function(done) {
+                    parse(done, ":nth-child(n) {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, 0]);
+                    });
+                });
+
+                it("can take 'n' argument with a plus sign", function(done) {
+                    parse(done, ":nth-child(+n) {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, 0]);
+                    });
+                });
+
+                it("can take 'an' argument", function(done) {
+                    parse(done, ":nth-child(2n) {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [2, 0]);
+                    });
+                });
+
+                it("can take '-an' argument", function(done) {
                     parse(done, ":nth-child(-2n) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [-2, 0]);
                     });
                 });
 
-                it("can take an 'n' argument with a minus sign", function(done) {
+                it("can take 'an' argument with a plus sign", function(done) {
+                    parse(done, ":nth-child(+2n) {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [2, 0]);
+                    });
+                });
+
+                it("reject '+a n' argument", function(done) {
+                    parse(done, ":nth-child(+2 n) {}", function() {
+                        expect(handler.error).toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
+                    });
+                });
+
+                it("reject 'an+' argument", function(done) {
+                    parse(done, ":nth-child(2n+) {}", function() {
+                        expect(handler.error).toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
+                    });
+                });
+
+                it("reject 'an +' argument", function(done) {
+                    parse(done, ":nth-child(2n +) {}", function() {
+                        expect(handler.error).toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
+                    });
+                });
+
+                it("can take 'n' argument with a minus sign", function(done) {
                     parse(done, ":nth-child(-n) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [-1, 0]);
                     });
                 });
 
-                it("can take an '-n+b' argument", function(done) {
+                it("reject '- n' argument", function(done) {
+                    parse(done, ":nth-child(- n) {}", function() {
+                        expect(handler.error).toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
+                    });
+                });
+
+                it("can take '-n+b' argument", function(done) {
                     parse(done, ":nth-child(-n+3) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [-1, 3]);
                     });
                 });
 
-                it("can take an 'an -b' argument", function(done) {
+                it("can take 'an -b' argument", function(done) {
                     parse(done, ":nth-child(2n -1) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [2, -1]);
                     });
                 });
 
-                it("can take an 'an + b' argument", function(done) {
+                it("can take 'an + b' argument", function(done) {
                     parse(done, ":nth-child(2n + 3) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [2, 3]);
                     });
                 });
 
-                it("can take an 'an- b' argument", function(done) {
+                it("can take 'an- b' argument", function(done) {
                     parse(done, ":nth-child(2n- 1) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [2, 1]);
                     });
                 });
 
-                it("reject an '+ an- b' argument", function(done) {
+                it("reject '+ an- b' argument", function(done) {
                     parse(done, ":nth-child(+ 2n- 1) {}", function() {
                         expect(handler.error).toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
                     });
                 });
 
-                it("reject an 'an- -b' argument", function(done) {
+                it("reject 'an- -b' argument", function(done) {
                     parse(done, ":nth-child(2n- -1) {}", function() {
                         expect(handler.error).toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
                     });
                 });
 
-                it("can take an 'an - b' argument", function(done) {
-                    parse(done, ":nth-child(2n - 3) {}", function() {
-                        expect(handler.error).not.toHaveBeenCalled();
-                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [2, 3]);
-                    });
-                });
-
-                it("error an 'an-' argument", function(done) {
+                it("reject 'an-' argument", function(done) {
                     parse(done, ":nth-child(2n-) {}", function() {
                         expect(handler.error).toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
                     });
                 });
 
-                it("error an 'an -' argument", function(done) {
+                it("reject 'an -' argument", function(done) {
                     parse(done, ":nth-child(2n -) {}", function() {
                         expect(handler.error).toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
-                    });
-                });
-
-                it("can take an 'n-b' argument", function(done) {
-                    parse(done, ":nth-child(n-3) {}", function() {
-                        expect(handler.error).not.toHaveBeenCalled();
-                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, -3]);
-                    });
-                });
-
-                it("can take an '+n-b' argument", function(done) {
-                    parse(done, ":nth-child(+n-3) {}", function() {
-                        expect(handler.error).not.toHaveBeenCalled();
-                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, -3]);
                     });
                 });
 
@@ -284,59 +333,101 @@ describe("cssparse", function() {
                     });
                 });
 
-                it("can take an 'an-b' argument", function(done) {
+                it("reject 'n- +b' argument ", function(done) {
+                    parse(done, ":nth-child(n- +3) {}", function() {
+                        expect(handler.error).toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
+                    });
+                });
+
+                it("reject 'n- -b' argument ", function(done) {
+                    parse(done, ":nth-child(n- -3) {}", function() {
+                        expect(handler.error).toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
+                    });
+                });
+
+                it("reject 'n- -0' argument ", function(done) {
+                    parse(done, ":nth-child(n- -0) {}", function() {
+                        expect(handler.error).toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
+                    });
+                });
+
+                it("reject '+ an-b' argument ", function(done) {
+                    parse(done, ":nth-child(+ 2n-3) {}", function() {
+                        expect(handler.error).toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
+                    });
+                });
+
+                it("can take 'n-b' argument", function(done) {
+                    parse(done, ":nth-child(n-3) {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, -3]);
+                    });
+                });
+
+                it("can take '+n-b' argument", function(done) {
+                    parse(done, ":nth-child(+n-3) {}", function() {
+                        expect(handler.error).not.toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [1, -3]);
+                    });
+                });
+
+                it("can take 'an-b' argument", function(done) {
                     parse(done, ":nth-child(2n-3) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [2, -3]);
                     });
                 });
 
-                it("can take an '-n-b argument", function(done) {
+                it("can take '-n-b argument", function(done) {
                     parse(done, ":nth-child(-n-10) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [-1, -10]);
                     })
                 });
 
-                it("reject '+-n-b' argument ", function(done) {
-                    parse(done, ":nth-child(+-n-3) {}", function() {
-                        expect(handler.error).toHaveBeenCalled();
-                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
-                    });
-                });
-
-                it("error if an invalid identifier is passed", function(done) {
+                it("reject invalid identifier", function(done) {
                     parse(done, ":nth-child(foo) {}", function() {
                         expect(handler.error).toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
                     });
                 });
 
-                it("can take a single integer argument", function(done) {
+                it("can take 'b' argument", function(done) {
                     parse(done, ":nth-child(3) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [0, 3]);
                     });
                 });
 
-                it("can take a single integer argument with a plus sign", function(done) {
+                it("can take '+b' argument", function(done) {
                     parse(done, ":nth-child(+3) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [0, 3]);
                     });
                 });
 
-                it("error if there is whitespaces between a single integer and a plus/minus sign", function(done) {
+                it("reject '+ b' argument", function(done) {
                     parse(done, ":nth-child(+ 3) {}", function() {
                         expect(handler.error).toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
                     });
                 });
 
-                it("can take a single integer argument with a minus sign", function(done) {
+                it("can take '-b' argument", function(done) {
                     parse(done, ":nth-child(-3) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [0, -3]);
+                    });
+                });
+
+                it("reject '- b' argument", function(done) {
+                    parse(done, ":nth-child(- 3) {}", function() {
+                        expect(handler.error).toHaveBeenCalled();
+                        expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
                     });
                 });
 
