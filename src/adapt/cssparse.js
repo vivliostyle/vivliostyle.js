@@ -858,6 +858,12 @@ adapt.cssparse.actionsSelector = [];
  * @type {!Array.<adapt.cssparse.Action>}
  * @const
  */
+adapt.cssparse.actionsSelectorInFunc = [];
+
+/**
+ * @type {!Array.<adapt.cssparse.Action>}
+ * @const
+ */
 adapt.cssparse.actionsSelectorCont = [];
 
 /**
@@ -1011,6 +1017,14 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsSelector[adapt.csstok.TokenType.COLON] = adapt.cssparse.Action.SELECTOR_PSEUDOCLASS_1;
     actionsSelector[adapt.csstok.TokenType.COL_COL] = adapt.cssparse.Action.SELECTOR_PSEUDOELEM;
     actionsSelector[adapt.csstok.TokenType.COMMA] = adapt.cssparse.Action.SELECTOR_NEXT;
+    var actionsSelectorInFunc = adapt.cssparse.actionsSelectorInFunc;
+    actionsSelectorInFunc[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.SELECTOR_NAME_1;
+    actionsSelectorInFunc[adapt.csstok.TokenType.STAR] = adapt.cssparse.Action.SELECTOR_ANY_1;
+    actionsSelectorInFunc[adapt.csstok.TokenType.HASH] = adapt.cssparse.Action.SELECTOR_ID_1;
+    actionsSelectorInFunc[adapt.csstok.TokenType.CLASS] = adapt.cssparse.Action.SELECTOR_CLASS_1;
+    actionsSelectorInFunc[adapt.csstok.TokenType.O_BRK] = adapt.cssparse.Action.SELECTOR_ATTR_1;
+    actionsSelectorInFunc[adapt.csstok.TokenType.C_PAR] = adapt.cssparse.Action.DONE;
+    actionsSelectorInFunc[adapt.csstok.TokenType.COLON] = adapt.cssparse.Action.SELECTOR_PSEUDOCLASS_1;
     var actionsSelectorCont = adapt.cssparse.actionsSelectorCont;
     actionsSelectorCont[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.SELECTOR_NAME;
     actionsSelectorCont[adapt.csstok.TokenType.STAR] = adapt.cssparse.Action.SELECTOR_ANY;
@@ -1682,12 +1696,18 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         switch (token.type) {
                             case adapt.csstok.TokenType.IDENT:
                                 handler.tagSelector(ns, token.text);
-                                this.actions = adapt.cssparse.actionsSelector;
+                                if (parsingFunctionParam)
+                                  this.actions = adapt.cssparse.actionsSelectorInFunc;
+                                else
+                                  this.actions = adapt.cssparse.actionsSelector;
                                 tokenizer.consume();
                                 break;
                             case adapt.csstok.TokenType.STAR:
                                 handler.tagSelector(ns, null);
-                                this.actions = adapt.cssparse.actionsSelector;
+                                if (parsingFunctionParam)
+                                  this.actions = adapt.cssparse.actionsSelectorInFunc;
+                                else
+                                  this.actions = adapt.cssparse.actionsSelector;
                                 tokenizer.consume();
                                 break;
                             default:
@@ -1700,7 +1720,10 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     }
                 } else {
                     handler.tagSelector(this.defaultNamespaceURI, token.text);
-                    this.actions = adapt.cssparse.actionsSelector;
+                    if (parsingFunctionParam)
+                      this.actions = adapt.cssparse.actionsSelectorInFunc;
+                    else
+                      this.actions = adapt.cssparse.actionsSelector;
                     tokenizer.consume();
                 }
                 continue;
@@ -1720,12 +1743,18 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     switch (token.type) {
                         case adapt.csstok.TokenType.IDENT:
                             handler.tagSelector(null, token.text);
-                            this.actions = adapt.cssparse.actionsSelector;
+                            if (parsingFunctionParam)
+                              this.actions = adapt.cssparse.actionsSelectorInFunc;
+                            else
+                              this.actions = adapt.cssparse.actionsSelector;
                             tokenizer.consume();
                             break;
                         case adapt.csstok.TokenType.STAR:
                             handler.tagSelector(null, null);
-                            this.actions = adapt.cssparse.actionsSelector;
+                            if (parsingFunctionParam)
+                              this.actions = adapt.cssparse.actionsSelectorInFunc;
+                            else
+                              this.actions = adapt.cssparse.actionsSelector;
                             tokenizer.consume();
                             break;
                         default:
@@ -1734,7 +1763,10 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     }
                 } else {
                     handler.tagSelector(this.defaultNamespaceURI, null);
-                    this.actions = adapt.cssparse.actionsSelector;
+                    if (parsingFunctionParam)
+                       this.actions = adapt.cssparse.actionsSelectorInFunc;
+                    else
+                       this.actions = adapt.cssparse.actionsSelector;
                     tokenizer.consume();
                 }
                 continue;
@@ -1744,7 +1776,10 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 // fall through
             case adapt.cssparse.Action.SELECTOR_ID:
                 handler.idSelector(token.text);
-                this.actions = adapt.cssparse.actionsSelector;
+                if (parsingFunctionParam)
+                   this.actions = adapt.cssparse.actionsSelectorInFunc;
+                else
+                   this.actions = adapt.cssparse.actionsSelector;
                 tokenizer.consume();
                 continue;
             case adapt.cssparse.Action.SELECTOR_CLASS_1:
@@ -1753,7 +1788,10 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 // fall through
             case adapt.cssparse.Action.SELECTOR_CLASS:
                 handler.classSelector(token.text);
-                this.actions = adapt.cssparse.actionsSelector;
+                if (parsingFunctionParam)
+                   this.actions = adapt.cssparse.actionsSelectorInFunc;
+                else
+                   this.actions = adapt.cssparse.actionsSelector;
                 tokenizer.consume();
                 continue;
             case adapt.cssparse.Action.SELECTOR_PSEUDOCLASS_1:
@@ -1767,14 +1805,17 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     case adapt.csstok.TokenType.IDENT:
                         handler.pseudoclassSelector(token.text, null);
                         tokenizer.consume();
-                        this.actions = adapt.cssparse.actionsSelector;
+                        if (parsingFunctionParam)
+                           this.actions = adapt.cssparse.actionsSelectorInFunc;
+                        else
+                           this.actions = adapt.cssparse.actionsSelector;
                         continue;
                     case adapt.csstok.TokenType.FUNC:
                         text = token.text;
                         tokenizer.consume();
                         switch (text) {
                           case "not":
-                               this.actions = adapt.cssparse.actionsBase;
+                               this.actions = adapt.cssparse.actionsSelectorStart;
                                handler.startNotRule();
                                this.runParser(Number.POSITIVE_INFINITY, false, false, false, true);
                                this.actions = adapt.cssparse.actionsSelector;
@@ -1806,7 +1847,10 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         if (token.type == adapt.csstok.TokenType.C_PAR) {
                             handler.pseudoclassSelector(/** @type {string} */ (text), params);
                             tokenizer.consume();
-                            this.actions = adapt.cssparse.actionsSelector;
+                            if (parsingFunctionParam)
+                              this.actions = adapt.cssparse.actionsSelectorInFunc;
+                            else
+                              this.actions = adapt.cssparse.actionsSelector;
                             continue;
                         }
                         break;
@@ -1820,7 +1864,10 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 switch (token.type) {
                     case adapt.csstok.TokenType.IDENT:
                         handler.pseudoelementSelector(token.text, null);
-                        this.actions = adapt.cssparse.actionsSelector;
+                        if (parsingFunctionParam)
+                          this.actions = adapt.cssparse.actionsSelectorInFunc;
+                        else
+                          this.actions = adapt.cssparse.actionsSelector;
                         tokenizer.consume();
                         continue;
                     case adapt.csstok.TokenType.FUNC:
@@ -1830,7 +1877,10 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         token = tokenizer.token();
                         if (token.type == adapt.csstok.TokenType.C_PAR) {
                             handler.pseudoelementSelector(/** @type {string} */ (text), params);
-                            this.actions = adapt.cssparse.actionsSelector;
+                            if (parsingFunctionParam)
+                              this.actions = adapt.cssparse.actionsSelectorInFunc;
+                            else
+                              this.actions = adapt.cssparse.actionsSelector;
                             tokenizer.consume();
                             continue;
                         }
@@ -1897,7 +1947,10 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     case adapt.csstok.TokenType.C_BRK:
                         handler.attributeSelector(/** @type {string} */ (ns),
                         		/** @type {string} */ (text), adapt.csstok.TokenType.EOF, null);
-                        this.actions = adapt.cssparse.actionsSelector;
+                        if (parsingFunctionParam)
+                          this.actions = adapt.cssparse.actionsSelectorInFunc;
+                        else
+                          this.actions = adapt.cssparse.actionsSelector;
                         tokenizer.consume();
                         continue;
                     default:
@@ -1923,7 +1976,10 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     handler.error("E_CSS_ATTR", token);
                     continue;
                 }
-                this.actions = adapt.cssparse.actionsSelector;
+                if (parsingFunctionParam)
+                  this.actions = adapt.cssparse.actionsSelectorInFunc;
+                else
+                  this.actions = adapt.cssparse.actionsSelector;
                 tokenizer.consume();
                 continue;
             case adapt.cssparse.Action.SELECTOR_CHILD:
@@ -2510,6 +2566,10 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
 	            tokenizer.consume();
 	            continue;          
             case adapt.cssparse.Action.DONE:
+                if (parsingFunctionParam) {
+                      tokenizer.consume();
+                      handler.endFuncRule();
+                }
                 return true;
             default:
             	if (parsingValue || parsingStyleAttr)
@@ -2522,13 +2582,14 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     return false;
                 }
                 if (parsingFunctionParam) {
-                    if (token.type == adapt.csstok.TokenType.C_PAR) {
-                      tokenizer.consume();
-                      handler.endFuncRule();
-                      return true;
-                    }
-                    return false;
+                  if (token.type == adapt.csstok.TokenType.Invalid)
+                    handler.error(token.text, token);                    
+                  else
+                    handler.error("E_CSS_SYNTAX", token);
+                  handler.popHandler();
+                  return false;
                 }
+        
                 if (this.actions === adapt.cssparse.actionsPropVal && tokenizer.hasMark()) {
                     tokenizer.reset();
                     this.actions = adapt.cssparse.actionsSelectorStart;

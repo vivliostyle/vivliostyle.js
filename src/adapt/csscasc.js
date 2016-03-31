@@ -3219,6 +3219,7 @@ adapt.csscasc.CascadeParserHandler.prototype.finish = function() {
 */
 adapt.csscasc.CascadeParserHandler.prototype.startNotRule = function() {
   var notParserHandler = new adapt.csscasc.NotParameterParserHandler(this);
+  notParserHandler.startSelectorRule();
   this.owner.pushHandler(notParserHandler);
 };
 
