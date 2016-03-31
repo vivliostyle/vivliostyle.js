@@ -832,6 +832,21 @@ adapt.cssparse.SlaveParserHandler.prototype.startPartitionGroupRule = function(n
 /**
  * @override
  */
+adapt.cssparse.SlaveParserHandler.prototype.startFuncWithSelector = function(funcName) {
+    this.reportAndSkip("E_CSS_UNEXPECTED_SELECTOR_FUNC");
+};
+
+/**
+ * @override
+ */
+adapt.cssparse.SlaveParserHandler.prototype.endFuncWithSelector = function() {
+    this.reportAndSkip("E_CSS_UNEXPECTED_END_SELECTOR_FUNC");
+};
+
+
+/**
+ * @override
+ */
 adapt.cssparse.SlaveParserHandler.prototype.property = function(name, value, important) {
     this.error("E_CSS_UNEXPECTED_PROPERTY", this.getCurrentToken());
 };
