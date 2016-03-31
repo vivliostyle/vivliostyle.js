@@ -424,6 +424,34 @@ adapt.csscasc.mergeAll = function(context, styles) {
 	return target;
 };
 
+/**
+ * @protected
+ * @param {Array.<adapt.csscasc.ChainedAction>} chain
+ * @param {adapt.csscasc.CascadeAction} action
+ * @return {adapt.csscasc.CascadeAction} 
+*/
+adapt.csscasc.chainActions = function(chain, action) {
+    if (chain.length > 0) {
+        chain.sort(
+            /**
+             * @param {adapt.csscasc.ChainedAction} a
+             * @param {adapt.csscasc.ChainedAction} b
+             * @return {number}
+             */
+            function(a, b) {
+                return b.getPriority() - a.getPriority();
+            });
+        var chained = null;
+        for (var i = chain.length - 1 ; i >= 0 ; i--) {
+            chained = chain[i];
+            chained.chained = action;
+            action = chained;
+        }
+        return chained;
+    }
+    return action;
+}
+
 
 /**
  * @constructor
@@ -1363,64 +1391,14 @@ adapt.csscasc.CheckAppliedAction.prototype.clone = function() {
 }
 
 /**
- * @param {adapt.csscasc.ChainedAction} original
- * @constructor
- * @extends {adapt.csscasc.ChainedAction}
- */
-adapt.csscasc.NegateAction = function(original) {
-  adapt.csscasc.ChainedAction.call(this);
-  this.checkAppliedAction = new adapt.csscasc.CheckAppliedAction();
-  original.chained = this.checkAppliedAction;
-  /** @const */ this.original = original;
-};
-goog.inherits(adapt.csscasc.NegateAction, adapt.csscasc.ChainedAction);
-
-/**
- * @override
- */
-adapt.csscasc.NegateAction.prototype.apply = function(cascadeInstance) {
-  this.original.apply(cascadeInstance);
-  if (!this.checkAppliedAction.applied) {
-    this.chained.apply(cascadeInstance);
-  }
-  this.checkAppliedAction.applied = false;
-};
-
-/**
- * @override
- */
-adapt.csscasc.NegateAction.prototype.getPriority = function() {
-    return this.original.getPriority();
-};
-
-/**
  * @param {Array.<adapt.csscasc.ChainedAction>} list
  * @constructor
  * @extends {adapt.csscasc.ChainedAction}
  */
 adapt.csscasc.NegateActionsSet = function(list) {
-  adapt.csscasc.ChainedAction.call(this);
-  list.sort(
-    /**
-     * @param {adapt.csscasc.ChainedAction} a
-     * @param {adapt.csscasc.ChainedAction} b
-     * @return {number}
-     */
-    function(a, b) {
-      return b.getPriority() - a.getPriority();
-    });
-  list = list.map(function(action) {
-    return new adapt.csscasc.NegateAction(action);
-  });
-  var chained = null;
-  var action = null;
-  /** @type {adapt.csscasc.CascadeAction} */ this.lastAction = list[list.length - 1];
-  for (var i = list.length - 1 ; i >= 0 ; i--) {
-    chained = list[i];
-    chained.chained = action;
-    action = chained;
-  }
-  /** @type {adapt.csscasc.CascadeAction} */ this.firstAction = action;  
+    adapt.csscasc.ChainedAction.call(this);
+    this.checkAppliedAction = new adapt.csscasc.CheckAppliedAction();
+    this.firstAction = adapt.csscasc.chainActions(list, this.checkAppliedAction);
 };
 goog.inherits(adapt.csscasc.NegateActionsSet, adapt.csscasc.ChainedAction);
 
@@ -1428,8 +1406,10 @@ goog.inherits(adapt.csscasc.NegateActionsSet, adapt.csscasc.ChainedAction);
  * @override
  */
 adapt.csscasc.NegateActionsSet.prototype.apply = function(cascadeInstance) {
-  this.lastAction.chained = this.chained;
-  this.firstAction.apply(cascadeInstance);
+    this.firstAction.apply(cascadeInstance);
+    if (!this.checkAppliedAction.applied)
+        this.chained.apply(cascadeInstance);
+    this.checkAppliedAction.applied = false;
 };
 
 /**
@@ -2719,27 +2699,10 @@ adapt.csscasc.CascadeParserHandler.prototype.insertNonPrimary = function(action)
  * @return {void}
  */
 adapt.csscasc.CascadeParserHandler.prototype.processChain = function(action) {
-    var chain = this.chain;
-    if (chain.length > 0) {
-        chain.sort(
-        	/**
-        	 * @param {adapt.csscasc.ChainedAction} a
-        	 * @param {adapt.csscasc.ChainedAction} b
-        	 * @return {number}
-        	 */
-        	function(a, b) {
-        		return b.getPriority() - a.getPriority();
-        	});
-        var chained = null;
-        for (var i = chain.length - 1 ; i >= 0 ; i--) {
-            chained = chain[i];
-            chained.chained = action;
-            action = chained;
-        }
-        if (chained.makePrimary(this.cascade))
-            return;
-    }
-    this.insertNonPrimary(action);
+    var chained = adapt.csscasc.chainActions(this.chain, action);
+    if (chained !== action && chained.makePrimary(this.cascade))
+        return;
+    this.insertNonPrimary(chained);
 };
 
 /**

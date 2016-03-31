@@ -15,7 +15,7 @@
        background-color: black;    
        color: white;
     }
-    .foo div:not(.bar) {
+    .foo :not(div.bar) {
        background-color: red;
        color: blue;
     }
@@ -23,6 +23,7 @@
        background-color: yellow;
     }
     .foo :not(div) {
+       background-color: white;
        color: green;
     }
     li {
