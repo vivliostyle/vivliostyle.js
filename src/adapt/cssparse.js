@@ -1833,8 +1833,11 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                           case "not":
                                this.actions = adapt.cssparse.actionsSelectorStart;
                                handler.startFuncWithSelector("not");
-                               this.runParser(Number.POSITIVE_INFINITY, false, false, false, true);
-                               this.actions = adapt.cssparse.actionsSelector;
+                               if (this.runParser(Number.POSITIVE_INFINITY, false, false, false, true)) {
+                                   this.actions = adapt.cssparse.actionsSelector;
+                               } else {
+                                   this.actions = adapt.cssparse.actionsErrorSelector;
+                               }
                                break parserLoop;
                             case "lang":
                             case "href-epub-type":
@@ -2598,12 +2601,11 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     return false;
                 }
                 if (parsingFunctionParam) {
-                  if (token.type == adapt.csstok.TokenType.INVALID)
-                    handler.error(token.text, token);                    
-                  else
-                    handler.error("E_CSS_SYNTAX", token);
-                  handler.popHandler();
-                  return false;
+                    if (token.type == adapt.csstok.TokenType.INVALID)
+                      handler.error(token.text, token);                    
+                    else
+                      handler.error("E_CSS_SYNTAX", token);
+                    return false;
                 }
         
                 if (this.actions === adapt.cssparse.actionsPropVal && tokenizer.hasMark()) {

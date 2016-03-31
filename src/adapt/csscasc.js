@@ -3246,6 +3246,15 @@ adapt.csscasc.NotParameterParserHandler.prototype.endFuncWithSelector = function
 };
 
 /**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.error = function(mnemonics, token) {
+    adapt.csscasc.CascadeParserHandler.prototype.error.call(this, mnemonics, token);
+    this.owner.popHandler();
+};
+
+
+/**
  * @override
  */
 
