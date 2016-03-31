@@ -2692,7 +2692,6 @@ adapt.csscasc.CascadeParserHandler = function(scope, owner, condition, parent, r
     /** @const */ this.regionId = regionId;
     /** @const */ this.validatorSet = validatorSet;
     /** @type {adapt.csscasc.ParseState} */ this.state = adapt.csscasc.ParseState.TOP;
-    /** @type {Array.<Array.<adapt.csscasc.ChainedAction>>} */ this.chainStack = [];
 };
 goog.inherits(adapt.csscasc.CascadeParserHandler, adapt.cssparse.SlaveParserHandler);
 
@@ -3224,7 +3223,9 @@ adapt.csscasc.CascadeParserHandler.prototype.startNotRule = function() {
 };
 
 /**
-* @type {adapt.csscasc.CascadeParserHandler} parent
+ * @param {adapt.csscasc.CascadeParserHandler} parent
+ * @constructor
+ * @extends {adapt.csscasc.CascadeParserHandler}
 */
 adapt.csscasc.NotParameterParserHandler = function(parent) {
   adapt.csscasc.CascadeParserHandler.call(this, parent.scope, parent.owner, parent.condition, parent, parent.regionId, parent.validatorSet, false);
