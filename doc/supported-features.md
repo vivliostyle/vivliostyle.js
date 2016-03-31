@@ -97,6 +97,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Supported in all browsers
 - [`:empty` pseudo-class](https://www.w3.org/TR/css3-selectors/#empty-pseudo)
   - Supported in all browsers
+- [`:not()` pseudo-class](https://www.w3.org/TR/css3-selectors/#negation)
+  - Supported in all browsers
 - [`::first-line` pseudo-element](https://www.w3.org/TR/css3-selectors/#first-line)
   - Supported in all browsers
   - Note: there is a bug when used alone or with the universal selector(`*`). [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/133)
@@ -114,7 +116,6 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 - [Universal selector without namespaces `|*`](https://www.w3.org/TR/css3-selectors/#univnmsp)
 - [Attribute selectors with universal namespace `[*|att]`, `[*|att=val]`, `[*|att~=val]`, `[*|att|=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
 - [Target pseudo-class `:target`](https://www.w3.org/TR/css3-selectors/#target-pseudo)
-- [The negation pseudo-class `:not()`](https://www.w3.org/TR/css3-selectors/#negation)
 
 ## At-rules
 
