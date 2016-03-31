@@ -2583,7 +2583,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     return false;
                 }
                 if (parsingFunctionParam) {
-                  if (token.type == adapt.csstok.TokenType.Invalid)
+                  if (token.type == adapt.csstok.TokenType.INVALID)
                     handler.error(token.text, token);                    
                   else
                     handler.error("E_CSS_SYNTAX", token);
