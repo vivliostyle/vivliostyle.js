@@ -1338,12 +1338,13 @@ adapt.csscasc.CheckConditionAction.prototype.getPriority = function() {
 
 /**
  * @constructor
- * @extends {adapt.csscasc.ChainedAction}
+ * @extends {adapt.csscasc.CascadeAction}
  */
 adapt.csscasc.NegateHelperAction = function() {
+  adapt.csscasc.CascadeAction.call(this);  
   this.applied = false;
 };
-goog.inherits(adapt.csscasc.NegateHelperAction, adapt.csscasc.ChainedAction);
+goog.inherits(adapt.csscasc.NegateHelperAction, adapt.csscasc.CascadeAction);
 
 /**
  * @override
@@ -1351,6 +1352,15 @@ goog.inherits(adapt.csscasc.NegateHelperAction, adapt.csscasc.ChainedAction);
 adapt.csscasc.NegateHelperAction.prototype.apply = function(cascadeInstance) {
   this.applied = true;
 };
+
+/**
+ * @override
+ */
+adapt.csscasc.NegateHelperAction.prototype.clone = function() {
+  var cloned = new adapt.csscasc.NegateHelperAction();
+  cloned.applied = this.applied;
+  return cloned;
+}
 
 /**
  * @param {adapt.csscasc.ChainedAction} original
