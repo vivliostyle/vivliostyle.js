@@ -1774,7 +1774,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         tokenizer.consume();
                         switch (text) {
                           case "not":
-                               this.actions = adapt.cssparse.actionsSelectorStart;
+                               this.actions = adapt.cssparse.actionsBase;
                                handler.startNotRule();
                                this.runParser(Number.POSITIVE_INFINITY, false, false, false, true);
                                this.actions = adapt.cssparse.actionsSelector;

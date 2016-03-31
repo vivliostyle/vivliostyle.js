@@ -2685,6 +2685,7 @@ adapt.csscasc.CascadeParserHandler = function(scope, owner, condition, parent, r
     /** @type {?string} */ this.pseudoelement = null;
     /** @type {boolean} */ this.footnoteContent = false;
 	/** @const */ this.condition = condition;
+  /** @const */ this.parent = parent;
     /** @const */ this.cascade = parent ? parent.cascade :
     	(adapt.csscasc.uaBaseCascade ? adapt.csscasc.uaBaseCascade.clone() :
     		new adapt.csscasc.Cascade());
@@ -2692,7 +2693,6 @@ adapt.csscasc.CascadeParserHandler = function(scope, owner, condition, parent, r
     /** @const */ this.validatorSet = validatorSet;
     /** @type {adapt.csscasc.ParseState} */ this.state = adapt.csscasc.ParseState.TOP;
     /** @type {Array.<Array.<adapt.csscasc.ChainedAction>>} */ this.chainStack = [];
-    /** @type {boolean} */ this.inNotParameter = false;
 };
 goog.inherits(adapt.csscasc.CascadeParserHandler, adapt.cssparse.SlaveParserHandler);
 
@@ -3219,30 +3219,54 @@ adapt.csscasc.CascadeParserHandler.prototype.finish = function() {
 * @override
 */
 adapt.csscasc.CascadeParserHandler.prototype.startNotRule = function() {
-  if (this.inNotParameter) {
-    var popped = this.chainStack.pop();
-    if (popped) {
-      this.chain = popped;
-    }
-    this.reportAndSkip("E_CSS_UNEXPECTED_NOT");
-  } else {
-    this.chainStack.push(this.chain);
-    this.chain = [];
-    this.inNotParameter = true;
-  }
+  var notParserHandler = new adapt.csscasc.NotParameterParserHandler(this);
+  this.owner.pushHandler(notParserHandler);
+};
+
+/**
+* @type {adapt.csscasc.CascadeParserHandler} parent
+*/
+adapt.csscasc.NotParameterParserHandler = function(parent) {
+  adapt.csscasc.CascadeParserHandler.call(this, parent.scope, parent.owner, parent.condition, parent, parent.regionId, parent.validatorSet, false);
+};
+goog.inherits(adapt.csscasc.NotParameterParserHandler, adapt.csscasc.CascadeParserHandler);
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.startNotRule = function() {
+  this.reportAndSkip("E_CSS_UNEXPECTED_NOT");
 };
 
 /**
 * @override
 */
-adapt.csscasc.CascadeParserHandler.prototype.endFuncRule = function() {
-  if (this.chain && this.chain.length > 0) {
-    var not_chain = this.chain;
-    this.chain = this.chainStack.pop();
-    this.chain.push(new adapt.csscasc.NegateActionsSet(not_chain));
-  }
-  this.inNotParameter = false;
+adapt.csscasc.NotParameterParserHandler.prototype.startRuleBody = function() {
+  this.reportAndSkip("E_CSS_UNEXPECTED_RULE_BODY");
 };
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.nextSelector = function() {
+  this.reportAndSkip("E_CSS_UNEXPECTED_NEXT_SELECTOR");  
+}
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.endFuncRule = function() {
+  if (this.chain && this.chain.length > 0) {
+    this.parent.chain.push(new adapt.csscasc.NegateActionsSet(this.chain));
+  }
+  this.owner.popHandler();
+};
+
+/**
+ * @override
+ */
+
+
 /**
  * @param {adapt.expr.LexicalScope} scope
  * @param {adapt.cssparse.DispatchParserHandler} owner
