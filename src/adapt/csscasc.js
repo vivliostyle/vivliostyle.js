@@ -3190,10 +3190,17 @@ adapt.csscasc.CascadeParserHandler.prototype.finish = function() {
 /**
 * @override
 */
-adapt.csscasc.CascadeParserHandler.prototype.startNotRule = function() {
-  var notParserHandler = new adapt.csscasc.NotParameterParserHandler(this);
-  notParserHandler.startSelectorRule();
-  this.owner.pushHandler(notParserHandler);
+adapt.csscasc.CascadeParserHandler.prototype.startFuncWithSelector = function(funcName) {
+    switch (funcName) {
+    case "not":
+        var notParserHandler = new adapt.csscasc.NotParameterParserHandler(this);
+        notParserHandler.startSelectorRule();
+        this.owner.pushHandler(notParserHandler);
+        break;
+    default:
+        // TODO
+        break;
+    }
 };
 
 /**
@@ -3209,8 +3216,9 @@ goog.inherits(adapt.csscasc.NotParameterParserHandler, adapt.csscasc.CascadePars
 /**
 * @override
 */
-adapt.csscasc.NotParameterParserHandler.prototype.startNotRule = function() {
-  this.reportAndSkip("E_CSS_UNEXPECTED_NOT");
+adapt.csscasc.NotParameterParserHandler.prototype.startFuncWithSelector = function(funcName) {
+    if (funcName == "not")
+        this.reportAndSkip("E_CSS_UNEXPECTED_NOT");
 };
 
 /**
@@ -3230,7 +3238,7 @@ adapt.csscasc.NotParameterParserHandler.prototype.nextSelector = function() {
 /**
 * @override
 */
-adapt.csscasc.NotParameterParserHandler.prototype.endFuncRule = function() {
+adapt.csscasc.NotParameterParserHandler.prototype.endFuncWithSelector = function() {
   if (this.chain && this.chain.length > 0) {
     this.parent.chain.push(new adapt.csscasc.NegateActionsSet(this.chain));
   }

@@ -336,16 +336,17 @@ adapt.cssparse.ParserHandler.prototype.endRule = function() {
 };
 
 /**
+ * @param {string} funcName The name of the function taking a selector list as an argument
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startNotRule = function() {
+adapt.cssparse.ParserHandler.prototype.startFuncWithSelector = function(funcName) {
 };
 
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.endFuncRule = function() {
+adapt.cssparse.ParserHandler.prototype.endFuncWithSelector = function() {
 };
 
 /**
@@ -651,16 +652,16 @@ adapt.cssparse.DispatchParserHandler.prototype.endRule = function() {
 /**
  * @override
  */
-adapt.cssparse.DispatchParserHandler.prototype.startNotRule = function() {
-  this.slave.startNotRule();
+adapt.cssparse.DispatchParserHandler.prototype.startFuncWithSelector = function(funcName) {
+  this.slave.startFuncWithSelector(funcName);
 };
 
 
 /**
  * @override
  */
-adapt.cssparse.DispatchParserHandler.prototype.endFuncRule = function() {
-  this.slave.endFuncRule();
+adapt.cssparse.DispatchParserHandler.prototype.endFuncWithSelector = function() {
+  this.slave.endFuncWithSelector();
 };
 
 /**
@@ -1816,7 +1817,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         switch (text) {
                           case "not":
                                this.actions = adapt.cssparse.actionsSelectorStart;
-                               handler.startNotRule();
+                               handler.startFuncWithSelector("not");
                                this.runParser(Number.POSITIVE_INFINITY, false, false, false, true);
                                this.actions = adapt.cssparse.actionsSelector;
                                break parserLoop;
@@ -2568,7 +2569,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
             case adapt.cssparse.Action.DONE:
                 if (parsingFunctionParam) {
                       tokenizer.consume();
-                      handler.endFuncRule();
+                      handler.endFuncWithSelector();
                 }
                 return true;
             default:
