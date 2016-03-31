@@ -2675,7 +2675,6 @@ adapt.csscasc.CascadeParserHandler = function(scope, owner, condition, parent, r
     /** @type {?string} */ this.pseudoelement = null;
     /** @type {boolean} */ this.footnoteContent = false;
 	/** @const */ this.condition = condition;
-  /** @const */ this.parent = parent;
     /** @const */ this.cascade = parent ? parent.cascade :
     	(adapt.csscasc.uaBaseCascade ? adapt.csscasc.uaBaseCascade.clone() :
     		new adapt.csscasc.Cascade());
@@ -3209,7 +3208,8 @@ adapt.csscasc.CascadeParserHandler.prototype.startFuncWithSelector = function(fu
  * @extends {adapt.csscasc.CascadeParserHandler}
 */
 adapt.csscasc.NotParameterParserHandler = function(parent) {
-  adapt.csscasc.CascadeParserHandler.call(this, parent.scope, parent.owner, parent.condition, parent, parent.regionId, parent.validatorSet, false);
+    adapt.csscasc.CascadeParserHandler.call(this, parent.scope, parent.owner, parent.condition, parent, parent.regionId, parent.validatorSet, false);
+    /** @const */ this.parentChain = parent.chain;
 };
 goog.inherits(adapt.csscasc.NotParameterParserHandler, adapt.csscasc.CascadeParserHandler);
 
@@ -3240,7 +3240,7 @@ adapt.csscasc.NotParameterParserHandler.prototype.nextSelector = function() {
 */
 adapt.csscasc.NotParameterParserHandler.prototype.endFuncWithSelector = function() {
   if (this.chain && this.chain.length > 0) {
-    this.parent.chain.push(new adapt.csscasc.NegateActionsSet(this.chain));
+    this.parentChain.push(new adapt.csscasc.NegateActionsSet(this.chain));
   }
   this.owner.popHandler();
 };
