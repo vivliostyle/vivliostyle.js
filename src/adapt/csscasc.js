@@ -3209,6 +3209,7 @@ adapt.csscasc.CascadeParserHandler.prototype.startFuncWithSelector = function(fu
 */
 adapt.csscasc.NotParameterParserHandler = function(parent) {
     adapt.csscasc.CascadeParserHandler.call(this, parent.scope, parent.owner, parent.condition, parent, parent.regionId, parent.validatorSet, false);
+    /** @const */ this.parent = parent;
     /** @const */ this.parentChain = parent.chain;
 };
 goog.inherits(adapt.csscasc.NotParameterParserHandler, adapt.csscasc.CascadeParserHandler);
@@ -3239,10 +3240,11 @@ adapt.csscasc.NotParameterParserHandler.prototype.nextSelector = function() {
 * @override
 */
 adapt.csscasc.NotParameterParserHandler.prototype.endFuncWithSelector = function() {
-  if (this.chain && this.chain.length > 0) {
-    this.parentChain.push(new adapt.csscasc.NegateActionsSet(this.chain));
-  }
-  this.owner.popHandler();
+    if (this.chain && this.chain.length > 0) {
+        this.parentChain.push(new adapt.csscasc.NegateActionsSet(this.chain));
+    }
+    this.parent.specificity += this.specificity;
+    this.owner.popHandler();
 };
 
 /**
