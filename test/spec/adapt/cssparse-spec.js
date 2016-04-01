@@ -452,6 +452,7 @@ describe("cssparse", function() {
                     parse(done, ":not([attr='foobar']) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
+                        expect(handler.endFuncWithSelector).toHaveBeenCalled();                        
                     });
                 });
                 it("can take class selector", function(done) {
