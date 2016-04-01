@@ -38,6 +38,9 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/197>
   - Spec: [Selectors Level 3 - The UI element states pseudo-classes](https://www.w3.org/TR/css3-selectors/#UIstates)
   - Note that the current implementation can use only initial states of those UI elements. Even if the actual state of the element is toggled by user interaction, the style does not change.
+- Support `:not()` pseudo-class selector
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/195>
+  - Spec: [Selectors Level 3 - The negation pseudo class](https://www.w3.org/TR/css3-selectors/#negation)
 
 ### Fixed
 - Lengths in 'rem' specified within page context are now interpreted correctly.

@@ -424,6 +424,34 @@ adapt.csscasc.mergeAll = function(context, styles) {
 	return target;
 };
 
+/**
+ * @protected
+ * @param {Array.<adapt.csscasc.ChainedAction>} chain
+ * @param {adapt.csscasc.CascadeAction} action
+ * @return {adapt.csscasc.CascadeAction} 
+*/
+adapt.csscasc.chainActions = function(chain, action) {
+    if (chain.length > 0) {
+        chain.sort(
+            /**
+             * @param {adapt.csscasc.ChainedAction} a
+             * @param {adapt.csscasc.ChainedAction} b
+             * @return {number}
+             */
+            function(a, b) {
+                return b.getPriority() - a.getPriority();
+            });
+        var chained = null;
+        for (var i = chain.length - 1 ; i >= 0 ; i--) {
+            chained = chain[i];
+            chained.chained = action;
+            action = chained;
+        }
+        return chained;
+    }
+    return action;
+}
+
 
 /**
  * @constructor
@@ -632,7 +660,6 @@ adapt.csscasc.ChainedAction.prototype.getPriority = function() {
 adapt.csscasc.ChainedAction.prototype.makePrimary = function(cascade) {
     return false; // cannot be made primary
 };
-
 
 /**
  * @param {string} className
@@ -1337,6 +1364,60 @@ adapt.csscasc.CheckConditionAction.prototype.getPriority = function() {
     return 5;
 };
 
+/**
+ * @constructor
+ * @extends {adapt.csscasc.CascadeAction}
+ */
+adapt.csscasc.CheckAppliedAction = function() {
+  adapt.csscasc.CascadeAction.call(this);  
+  this.applied = false;
+};
+goog.inherits(adapt.csscasc.CheckAppliedAction, adapt.csscasc.CascadeAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.CheckAppliedAction.prototype.apply = function(cascadeInstance) {
+  this.applied = true;
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.CheckAppliedAction.prototype.clone = function() {
+  var cloned = new adapt.csscasc.CheckAppliedAction();
+  cloned.applied = this.applied;
+  return cloned;
+}
+
+/**
+ * @param {Array.<adapt.csscasc.ChainedAction>} list
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.NegateActionsSet = function(list) {
+    adapt.csscasc.ChainedAction.call(this);
+    this.checkAppliedAction = new adapt.csscasc.CheckAppliedAction();
+    this.firstAction = adapt.csscasc.chainActions(list, this.checkAppliedAction);
+};
+goog.inherits(adapt.csscasc.NegateActionsSet, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.NegateActionsSet.prototype.apply = function(cascadeInstance) {
+    this.firstAction.apply(cascadeInstance);
+    if (!this.checkAppliedAction.applied)
+        this.chained.apply(cascadeInstance);
+    this.checkAppliedAction.applied = false;
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.NegateActionsSet.prototype.getPriority = function() {
+    return this.firstAction.getPriority();
+};
 
 /**
  * An object that is notified as elements are pushed and popped and typically
@@ -2617,27 +2698,10 @@ adapt.csscasc.CascadeParserHandler.prototype.insertNonPrimary = function(action)
  * @return {void}
  */
 adapt.csscasc.CascadeParserHandler.prototype.processChain = function(action) {
-    var chain = this.chain;
-    if (chain.length > 0) {
-        chain.sort(
-        	/**
-        	 * @param {adapt.csscasc.ChainedAction} a
-        	 * @param {adapt.csscasc.ChainedAction} b
-        	 * @return {number}
-        	 */
-        	function(a, b) {
-        		return b.getPriority() - a.getPriority();
-        	});
-        var chained = null;
-        for (var i = chain.length - 1 ; i >= 0 ; i--) {
-            chained = chain[i];
-            chained.chained = action;
-            action = chained;
-        }
-        if (chained.makePrimary(this.cascade))
-            return;
-    }
-    this.insertNonPrimary(action);
+    var chained = adapt.csscasc.chainActions(this.chain, action);
+    if (chained !== action && chained.makePrimary(this.cascade))
+        return;
+    this.insertNonPrimary(chained);
 };
 
 /**
@@ -3123,6 +3187,79 @@ adapt.csscasc.CascadeParserHandler.prototype.finish = function() {
 
 
 /**
+* @override
+*/
+adapt.csscasc.CascadeParserHandler.prototype.startFuncWithSelector = function(funcName) {
+    switch (funcName) {
+    case "not":
+        var notParserHandler = new adapt.csscasc.NotParameterParserHandler(this);
+        notParserHandler.startSelectorRule();
+        this.owner.pushHandler(notParserHandler);
+        break;
+    default:
+        // TODO
+        break;
+    }
+};
+
+/**
+ * @param {adapt.csscasc.CascadeParserHandler} parent
+ * @constructor
+ * @extends {adapt.csscasc.CascadeParserHandler}
+*/
+adapt.csscasc.NotParameterParserHandler = function(parent) {
+    adapt.csscasc.CascadeParserHandler.call(this, parent.scope, parent.owner, parent.condition, parent, parent.regionId, parent.validatorSet, false);
+    /** @const */ this.parentChain = parent.chain;
+};
+goog.inherits(adapt.csscasc.NotParameterParserHandler, adapt.csscasc.CascadeParserHandler);
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.startFuncWithSelector = function(funcName) {
+    if (funcName == "not")
+        this.reportAndSkip("E_CSS_UNEXPECTED_NOT");
+};
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.startRuleBody = function() {
+  this.reportAndSkip("E_CSS_UNEXPECTED_RULE_BODY");
+};
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.nextSelector = function() {
+  this.reportAndSkip("E_CSS_UNEXPECTED_NEXT_SELECTOR");  
+}
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.endFuncWithSelector = function() {
+  if (this.chain && this.chain.length > 0) {
+    this.parentChain.push(new adapt.csscasc.NegateActionsSet(this.chain));
+  }
+  this.owner.popHandler();
+};
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.error = function(mnemonics, token) {
+    adapt.csscasc.CascadeParserHandler.prototype.error.call(this, mnemonics, token);
+    this.owner.popHandler();
+};
+
+
+/**
+ * @override
+ */
+
+
+/**
  * @param {adapt.expr.LexicalScope} scope
  * @param {adapt.cssparse.DispatchParserHandler} owner
  * @constructor
@@ -3267,31 +3404,6 @@ adapt.csscasc.parseStyleAttribute = function(scope, validatorSet, baseURL, style
 		vivliostyle.logging.logger.warn(err, "Style attribute parse error:");
 	}
 	return handler.elementStyle;
-};
-
-
-/**
- * @type {adapt.taskutil.Fetcher.<boolean>}
- */
-adapt.csscasc.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(function() {
-	/** @type {!adapt.task.Frame.<boolean>} */ var frame =
-		adapt.task.newFrame("uaStylesheetBase");
-	adapt.cssvalid.loadValidatorSet().then(function(validatorSet) {
-	    var url = adapt.base.resolveURL("user-agent-base.css", adapt.base.resourceBaseURL);
-	    var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
-	    		validatorSet, true);
-	    handler.startStylesheet(adapt.cssparse.StylesheetFlavor.USER_AGENT);
-	    adapt.csscasc.uaBaseCascade = handler.cascade;
-	    adapt.cssparse.parseStylesheetFromURL(url, handler, null, null).thenFinish(frame);
-	});
-    return frame.result();
-}, "uaStylesheetBaseFetcher");
-
-/**
- * @return {!adapt.task.Result.<boolean>}
- */
-adapt.csscasc.loadUABase = function() {
-	return adapt.csscasc.uaStylesheetBaseFetcher.get();
 };
 
 /**

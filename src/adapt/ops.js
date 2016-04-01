@@ -26,6 +26,32 @@ goog.require('adapt.font');
 goog.require('vivliostyle.page');
 
 /**
+ * @type {adapt.taskutil.Fetcher.<boolean>}
+ */
+adapt.ops.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(function() {
+	/** @type {!adapt.task.Frame.<boolean>} */ var frame =
+		adapt.task.newFrame("uaStylesheetBase");
+	adapt.cssvalid.loadValidatorSet().then(function(validatorSet) {
+	    var url = adapt.base.resolveURL("user-agent-base.css", adapt.base.resourceBaseURL);
+	    var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+	    		validatorSet, true);
+	    handler.startStylesheet(adapt.cssparse.StylesheetFlavor.USER_AGENT);
+	    adapt.csscasc.uaBaseCascade = handler.cascade;
+	    adapt.cssparse.parseStylesheetFromURL(url, handler, null, null).thenFinish(frame);
+	});
+    return frame.result();
+}, "uaStylesheetBaseFetcher");
+
+/**
+ * @return {!adapt.task.Result.<boolean>}
+ */
+adapt.ops.loadUABase = function() {
+	return adapt.ops.uaStylesheetBaseFetcher.get();
+};
+
+
+
+/**
  * @typedef {{properties:adapt.csscasc.ElementStyle,condition:adapt.expr.Val}}
  */
 adapt.ops.FontFace;
@@ -1048,7 +1074,7 @@ adapt.ops.OPSDocStore.prototype.init = function() {
 	var self = this;
     adapt.cssvalid.loadValidatorSet().then(function(validatorSet) {
     	self.validatorSet = validatorSet;
-    	adapt.csscasc.loadUABase().then(function() {
+    	adapt.ops.loadUABase().then(function() {
     		self.load(userAgentXML).then(function() {
     			frame.finish(true);
     		});

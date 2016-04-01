@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>:not pseudo selector</title>
+<style>
+    .foo div {
+       width: 3cm;
+       height: 3cm;
+       border: 1px solid black;
+       padding: 0.5em;
+       margin: 1em 0;
+    }
+    .bar {
+       background-color: black;    
+       color: white;
+    }
+    .foo :not(div.bar) {
+       background-color: red;
+       color: blue;
+    }
+    .foo div[data-my-data="foobar"] {
+       background-color: yellow;
+    }
+    .foo :not(div) {
+       background-color: white;
+       color: green;
+    }
+    li {
+      color: green;
+    }
+    li:not(:first-child) {
+       color: red;
+    }
+    #ul_test li:not([data-my-type="thin"]) {
+       font-weight: bold;
+    }
+</style>
+</head>
+<body>
+  <div class="foo">
+    <div class="bar">
+      Black (text is white)
+    </div>
+    <div class="zzz">
+      Red (text is blue)
+    </div>
+    <div data-my-data="foobar">
+      Yellow (text is blue)
+    </div>
+    <p>
+       This text should be green
+    </p>
+  </div>
+  <ul id="ul_test">
+    <li>Green Bold</li>
+    <li data-my-type='thin'>Red Normal Weight</li>
+    <li>Red Bold</li>
+  </ul>
+</body>
+</html>
