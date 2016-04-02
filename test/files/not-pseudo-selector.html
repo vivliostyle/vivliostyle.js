@@ -6,7 +6,7 @@
 <style>
     .foo div {
        width: 3cm;
-       height: 3cm;
+       height: 1.2cm;
        border: 1px solid black;
        padding: 0.5em;
        margin: 1em 0;
@@ -15,7 +15,7 @@
        background-color: black;    
        color: white;
     }
-    .foo :not(div.bar) {
+    .foo :not(.bar) {
        background-color: red;
        color: blue;
     }
@@ -35,6 +35,19 @@
     #ul_test li:not([data-my-type="thin"]) {
        font-weight: bold;
     }
+    .foo2 :not(.cls) {
+       background: green;
+    }
+    .foo2 :not(#id) {
+       color: red;
+    }
+    .foo2 div {
+       background: black;
+       color: white;
+       border: 1px solid black;
+       width: 3cm;
+       height: 1.2cm;
+    }
 </style>
 </head>
 <body>
@@ -49,8 +62,22 @@
       Yellow (text is blue)
     </div>
     <p>
-       This text should be green
+       This text should not be green; should be bule text with red background.
     </p>
+  </div>
+  <div class="foo2">
+    <div>
+      Green(red text)
+    </div>
+    <div class="cls">
+      Black(red text)
+    </div>
+    <div id="id">
+      Green(white text)
+    </div>
+    <div id="id" class="cls">
+      Black(white text)
+    </div>
   </div>
   <ul id="ul_test">
     <li>Green Bold</li>
