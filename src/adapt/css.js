@@ -863,6 +863,16 @@ adapt.css.toNumber = function(val, context) {
 	return 0;
 };
 
+/**
+ * Convert numeric value to px
+ * @param {!adapt.css.Val} val
+ * @param {adapt.expr.Context} context
+ * @returns {!adapt.css.Numeric}
+ */
+adapt.css.convertNumericToPx = function(val, context) {
+    return new adapt.css.Numeric(adapt.css.toNumber(val, context), "px");
+};
+
 
 /**
  * @const
@@ -879,8 +889,11 @@ adapt.css.ident = {
     block_start: adapt.css.getName("block-start"),
     both: adapt.css.getName("both"),
     bottom: adapt.css.getName("bottom"),
+    crop: adapt.css.getName("crop"),
+    cross: adapt.css.getName("cross"),
     exclusive: adapt.css.getName("exclusive"),
     _false: adapt.css.getName("false"),
+    flex: adapt.css.getName("flex"),
     footnote: adapt.css.getName("footnote"),
     hidden: adapt.css.getName("hidden"),
     horizontal_tb: adapt.css.getName("horizontal-tb"),

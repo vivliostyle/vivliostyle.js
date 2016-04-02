@@ -26,6 +26,32 @@ goog.require('adapt.font');
 goog.require('vivliostyle.page');
 
 /**
+ * @type {adapt.taskutil.Fetcher.<boolean>}
+ */
+adapt.ops.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(function() {
+	/** @type {!adapt.task.Frame.<boolean>} */ var frame =
+		adapt.task.newFrame("uaStylesheetBase");
+	adapt.cssvalid.loadValidatorSet().then(function(validatorSet) {
+	    var url = adapt.base.resolveURL("user-agent-base.css", adapt.base.resourceBaseURL);
+	    var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+	    		validatorSet, true);
+	    handler.startStylesheet(adapt.cssparse.StylesheetFlavor.USER_AGENT);
+	    adapt.csscasc.uaBaseCascade = handler.cascade;
+	    adapt.cssparse.parseStylesheetFromURL(url, handler, null, null).thenFinish(frame);
+	});
+    return frame.result();
+}, "uaStylesheetBaseFetcher");
+
+/**
+ * @return {!adapt.task.Result.<boolean>}
+ */
+adapt.ops.loadUABase = function() {
+	return adapt.ops.uaStylesheetBaseFetcher.get();
+};
+
+
+
+/**
  * @typedef {{properties:adapt.csscasc.ElementStyle,condition:adapt.expr.Val}}
  */
 adapt.ops.FontFace;
@@ -40,10 +66,11 @@ adapt.ops.FontFace;
  * @param {adapt.csscasc.ElementStyle} footnoteProps
  * @param {Object.<string,adapt.csscasc.ElementStyle>} flowProps
  * @param {Array.<adapt.csscasc.ElementStyle>} viewportProps
+ * @param {!Object.<string,!adapt.csscasc.ElementStyle>} pageProps
  * @constructor
  */
 adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
-		fontFaces, footnoteProps, flowProps, viewportProps) {
+		fontFaces, footnoteProps, flowProps, viewportProps, pageProps) {
 	/** @const */ this.store = store;
 	/** @const */ this.rootScope = rootScope;
 	/** @const */ this.pageScope = pageScope;
@@ -54,6 +81,7 @@ adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
 	/** @const */ this.footnoteProps = footnoteProps;
 	/** @const */ this.flowProps = flowProps;
 	/** @const */ this.viewportProps = viewportProps;
+	/** @const */ this.pageProps = pageProps;
 	/** @const */ this.validatorSet = store.validatorSet;
     this.pageScope.defineBuiltIn("has-content", function(name) {
     	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
@@ -156,6 +184,8 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     		}
     	}
     }
+
+	/** @const {!Object<string, !{width: number, height: number}>} */ this.pageSheetSize = {};
 };
 goog.inherits(adapt.ops.StyleInstance, adapt.expr.Context);
 
@@ -189,6 +219,18 @@ adapt.ops.StyleInstance.prototype.init = function() {
     	srcFaces.push(srcFace);
     }
 	self.fontMapper.findOrLoadFonts(srcFaces, self.faces).thenFinish(frame);
+
+	// Determine page sheet sizes corresponding to page selectors
+	var pageProps = self.style.pageProps;
+	Object.keys(pageProps).forEach(function(selector) {
+		var pageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(
+			vivliostyle.page.resolvePageSizeAndBleed(pageProps[selector]), this);
+		this.pageSheetSize[selector] = {
+			width: pageSizeAndBleed.pageWidth + pageSizeAndBleed.cropOffset * 2,
+			height: pageSizeAndBleed.pageHeight + pageSizeAndBleed.cropOffset * 2
+		};
+	}, this);
+
 	return frame.result();
 };
 
@@ -379,14 +421,20 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
     }
     var self = this;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("layoutColumn");
-    var repeated = /** @type {Array.<adapt.vtree.FlowChunkPosition>} */ ([]);
+	// Record indices of repeated positions and removed positions
+    var repeatedIndices = /** @type {Array.<number>} */ ([]);
+	var removedIndices = /** @type {Array.<number>} */ ([]);
     frame.loopWithFrame(function(loopFrame) {
-	    while (flowPosition.positions.length > 0) {
+	    while (flowPosition.positions.length - removedIndices.length > 0) {
 	        var index = 0;
+			// Skip all removed positions
+			while (removedIndices.indexOf(index) >= 0)
+				index++;
 	        var selected = flowPosition.positions[index];
 	        if (selected.flowChunk.startOffset > self.lookupOffset)
 	            break;
 	        for (var k = 1; k < flowPosition.positions.length; k++) {
+				if (removedIndices.indexOf(k) >= 0) continue; // Skip removed positions
 	            var alt = flowPosition.positions[k];
 	            if (alt.flowChunk.startOffset > self.lookupOffset)
 	                break;
@@ -398,12 +446,12 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 	        var flowChunk = selected.flowChunk;
 	        var pending = true;
 	        region.layout(selected.chunkPosition).then(function(newPosition) {
-		        // static: add back to the flow
+		        // static: keep in the flow
 		        if (selected.flowChunk.repeated && (newPosition === null || flowChunk.exclusive))
-		            repeated.push(selected);
+		            repeatedIndices.push(index);
 		        if (flowChunk.exclusive) {
 		            // exclusive, only can have one, remove from the flow even if it did not fit
-		            flowPosition.positions.splice(index, 1);
+					removedIndices.push(index);
 		        	loopFrame.breakLoop();
 		        	return;
 		        } else {
@@ -414,7 +462,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 			        	return;
 		            }
 		            // go to the next element in the flow
-		            flowPosition.positions.splice(index, 1);
+					removedIndices.push(index);
 		        }
 		        if (pending) {
 		        	// Sync result
@@ -433,9 +481,10 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 	    }
 	    loopFrame.breakLoop();
     }).then(function() {
-	    // add all repeated back
-	    if (repeated.length > 0)
-	        flowPosition.positions = repeated.concat(flowPosition.positions);
+	    // Keep positions repeated or not removed
+		flowPosition.positions = flowPosition.positions.filter(function(pos, i) {
+			return repeatedIndices.indexOf(i) >= 0 || removedIndices.indexOf(i) < 0;
+		});
 	    frame.finish(true);
     });
     return frame.result();
@@ -454,6 +503,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
 		parentContainer, offsetX, offsetY, exclusions, pageFloatHolder) {
 	var self = this;
+	boxInstance.reset();
     var enabled = boxInstance.getProp(self, "enabled");
     if (enabled && enabled !== adapt.css.ident._true) {
     	return adapt.task.newResult(true);
@@ -472,7 +522,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     parentContainer.insertBefore(boxContainer, parentContainer.firstChild);
     var layoutContainer = new adapt.vtree.Container(boxContainer);
     layoutContainer.vertical = boxInstance.vertical;
-    boxInstance.prepareContainer(self, layoutContainer, page);
+    boxInstance.prepareContainer(self, layoutContainer, page, self.faces);
     layoutContainer.originX = offsetX;
     layoutContainer.originY = offsetY;
     offsetX += layoutContainer.left + layoutContainer.marginLeft + layoutContainer.borderLeft;
@@ -485,13 +535,13 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 			var innerContainer = self.viewport.document.createElement("span");
 			contentVal.visit(new adapt.vtree.ContentPropertyHandler(innerContainer, self));
 			boxContainer.appendChild(innerContainer);
-			boxInstance.transferContentProps(self, layoutContainer, page);
+			boxInstance.transferContentProps(self, layoutContainer, page, self.faces);
 		} else if (boxInstance.suppressEmptyBoxGeneration) {
 			parentContainer.removeChild(boxContainer);
 			removed = true;
 		}
 		if (!removed) {
-			boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);
+			boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout, self.faces);
 		}
     	cont = adapt.task.newResult(true);
     } else if (!self.pageBreaks[flowName.toString()]) {
@@ -586,12 +636,12 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
         }).then(function() {
 	        layoutContainer.computedBlockSize = computedBlockSize;
 	        boxInstance.finishContainer(self, layoutContainer, page, region, 
-	        		columnCount, self.clientLayout);
+	        		columnCount, self.clientLayout, self.faces);
 	        innerFrame.finish(true);
         });
         cont = innerFrame.result();
     } else {
-        boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout);	    		
+        boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout, self.faces);
     	cont = adapt.task.newResult(true);
     }
     cont.then(function() {
@@ -681,7 +731,7 @@ adapt.ops.StyleInstance.prototype.noMorePrimaryFlows = function(cp) {
 };
 
 /**
- * @param {adapt.vtree.Page} page
+ * @param {!adapt.vtree.Page} page
  * @param {adapt.vtree.LayoutPosition|undefined} cp
  * @return {adapt.task.Result.<adapt.vtree.LayoutPosition>}
  */
@@ -696,7 +746,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
         self.styler.replayFlowElementsFromOffset(-1);
     }
     if (this.lang) {
-    	page.container.setAttribute("lang", this.lang);
+    	page.bleedBox.setAttribute("lang", this.lang);
     }
     cp = self.currentLayoutPosition;
     cp.page++;
@@ -704,7 +754,6 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 
     // Resolve page size before page master selection.
     var cascadedPageStyle = self.pageManager.getCascadedPageStyle();
-    self.setPageSize(cascadedPageStyle);
     var pageMaster = self.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
     	// end of primary content
@@ -719,6 +768,12 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     }
 	self.pageCounterStore.updatePageCounters(cascadedPageStyle, self);
 
+	// setup bleed area and crop marks
+	var evaluatedPageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(
+		vivliostyle.page.resolvePageSizeAndBleed(cascadedPageStyle), this);
+	self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
+	vivliostyle.page.addPrinterMarks(cascadedPageStyle, evaluatedPageSizeAndBleed, page, this);
+
 	var writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
 	var direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
 	var pageFloatHolder = new vivliostyle.pagefloat.FloatHolder(page.getPageAreaElement.bind(page), writingMode, direction);
@@ -728,14 +783,14 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
     	= adapt.task.newFrame("layoutNextPage");
 	frame.loopWithFrame(function(loopFrame) {
-		self.layoutContainer(page, pageMaster, page.container, 0, 0, exclusions.concat(), pageFloatHolder).then(function() {
+		self.layoutContainer(page, pageMaster, page.bleedBox, 0, 0, exclusions.concat(), pageFloatHolder).then(function() {
 			if (pageFloatHolder.hasNewlyAddedFloats()) {
 				exclusions = exclusions.concat(pageFloatHolder.getShapesOfNewlyAddedFloats());
 				pageFloatHolder.clearNewlyAddedFloats();
 				cp = self.currentLayoutPosition = currentLayoutPosition.clone();
 				var c;
-				while (c = page.container.lastChild) {
-					page.container.removeChild(c);
+				while (c = page.bleedBox.lastChild) {
+					page.bleedBox.removeChild(c);
 				}
 				loopFrame.continueLoop();
 			} else {
@@ -760,24 +815,21 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 };
 
 /**
- * Set actual page width & height from style specified in page context.
+ * Set actual page width, height and bleed from style specified in page context.
  * @private
- * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle
+ * @param {!vivliostyle.page.EvaluatedPageSizeAndBleed} evaluatedPageSizeAndBleed
+ * @param {adapt.vtree.Page} page
  */
-adapt.ops.StyleInstance.prototype.setPageSize = function(cascadedPageStyle) {
-    var pageSize = vivliostyle.page.resolvePageSize(cascadedPageStyle);
-    var width = pageSize.width;
-    if (width === adapt.css.fullWidth) {
-        this.actualPageWidth = null;
-    } else {
-        this.actualPageWidth = width.num * this.queryUnitSize(width.unit, false);
-    }
-    var height = pageSize.height;
-    if (height === adapt.css.fullHeight) {
-        this.actualPageHeight = null;
-    } else {
-        this.actualPageHeight = height.num * this.queryUnitSize(height.unit, false);
-    }
+adapt.ops.StyleInstance.prototype.setPageSizeAndBleed = function(evaluatedPageSizeAndBleed, page) {
+	this.actualPageWidth = evaluatedPageSizeAndBleed.pageWidth;
+	this.actualPageHeight = evaluatedPageSizeAndBleed.pageHeight;
+	page.container.style.width = (evaluatedPageSizeAndBleed.pageWidth + evaluatedPageSizeAndBleed.cropOffset * 2) + "px";
+	page.container.style.height = (evaluatedPageSizeAndBleed.pageHeight + evaluatedPageSizeAndBleed.cropOffset * 2) + "px";
+	page.bleedBox.style.left = evaluatedPageSizeAndBleed.bleedOffset + "px";
+	page.bleedBox.style.right = evaluatedPageSizeAndBleed.bleedOffset + "px";
+	page.bleedBox.style.top = evaluatedPageSizeAndBleed.bleedOffset + "px";
+	page.bleedBox.style.bottom = evaluatedPageSizeAndBleed.bleedOffset + "px";
+	page.bleedBox.style.padding = evaluatedPageSizeAndBleed.bleed + "px";
 };
 
 /**
@@ -898,7 +950,7 @@ adapt.ops.BaseParserHandler.prototype.startRegionRule = function() {
  */
 adapt.ops.BaseParserHandler.prototype.startPageRule = function() {
     var pageHandler = new vivliostyle.page.PageParserHandler(this.masterHandler.pageScope,
-        this.masterHandler, this, this.validatorSet);
+        this.masterHandler, this, this.validatorSet, this.masterHandler.pageProps);
     this.masterHandler.pushHandler(pageHandler);
     pageHandler.startPageRule();
 };
@@ -963,6 +1015,7 @@ adapt.ops.StyleParserHandler = function(validatorSet) {
 	/** @const */ this.footnoteProps = /** @type {adapt.csscasc.ElementStyle} */ ({});
 	/** @const */ this.flowProps = /** @type {Object.<string,adapt.csscasc.ElementStyle>} */ ({});
 	/** @const */ this.viewportProps = /** @type {Array.<adapt.csscasc.ElementStyle>} */ ([]);
+	/** @const */ this.pageProps = /** @type {!Object.<string,!adapt.csscasc.ElementStyle>} */ ({});
 
     this.slave = this.cascadeParserHandler;
 };
@@ -1021,7 +1074,7 @@ adapt.ops.OPSDocStore.prototype.init = function() {
 	var self = this;
     adapt.cssvalid.loadValidatorSet().then(function(validatorSet) {
     	self.validatorSet = validatorSet;
-    	adapt.csscasc.loadUABase().then(function() {
+    	adapt.ops.loadUABase().then(function() {
     		self.load(userAgentXML).then(function() {
     			frame.finish(true);
     		});
@@ -1172,7 +1225,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
 		        }).then(function() {
 		        	var cascade = sph.cascadeParserHandler.finish();
 		        	style = new adapt.ops.Style(self, sph.rootScope, sph.pageScope, cascade, sph.rootBox,
-		        			sph.fontFaces, sph.footnoteProps, sph.flowProps, sph.viewportProps);
+		        			sph.fontFaces, sph.footnoteProps, sph.flowProps, sph.viewportProps, sph.pageProps);
 			    	self.styleByKey[key] = style;
 			    	delete self.styleFetcherByKey[key];
 		        	innerFrame.finish(style);

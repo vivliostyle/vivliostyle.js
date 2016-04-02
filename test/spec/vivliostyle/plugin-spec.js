@@ -4,15 +4,9 @@ describe("plugin", function() {
     var fn1 = function() {}, fn2 = function() {};
     var hookName = vivliostyle.plugin.HOOKS["SIMPLE_PROPERTY"];
 
-    var originalHooks;
-    beforeAll(function() {
-        originalHooks = vivliostyle.plugin.hooks;
-    });
+    vivliostyle.test.util.mock.plugin.setup();
     beforeEach(function() {
         vivliostyle.plugin.hooks = {};
-    });
-    afterAll(function() {
-        vivliostyle.plugin.hooks = originalHooks;
     });
 
     describe("registerHook", function() {

@@ -94,16 +94,32 @@ goog.scope(function() {
             return second;
         } else if (!second) {
             return first;
-        } else if (vivliostyle.break.isForcedBreakValue(second)) {
-            return second;
-        } else if (vivliostyle.break.isForcedBreakValue(first)) {
-            return first;
-        } else if (vivliostyle.break.isAvoidBreakValue(second)) {
-            return second;
-        } else if (vivliostyle.break.isAvoidBreakValue(first)) {
-            return first;
         } else {
-            return second;
+            var firstIsForcedBreakValue = vivliostyle.break.isForcedBreakValue(first);
+            var secondIsForcedBreakValue = vivliostyle.break.isForcedBreakValue(second);
+            if (firstIsForcedBreakValue && secondIsForcedBreakValue) {
+                switch (second) {
+                    case "column":
+                        // "column" is the weakest value
+                        return first;
+                    case "region":
+                        // "region" is stronger than "column" but weaker than page values
+                        return first === "column" ? second : first;
+                    default:
+                        // page values are strongest
+                        return second;
+                }
+            } else if (secondIsForcedBreakValue) {
+                return second;
+            } else if (firstIsForcedBreakValue) {
+                return first;
+            } else if (vivliostyle.break.isAvoidBreakValue(second)) {
+                return second;
+            } else if (vivliostyle.break.isAvoidBreakValue(first)) {
+                return first;
+            } else {
+                return second;
+            }
         }
     };
 

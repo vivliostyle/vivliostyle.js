@@ -49,12 +49,22 @@ RGBACOLOR = rgba(NUM{4}) | rgba(STRICT_PERCENTAGE{3} NUM);
 HSLCOLOR = hsl(NUM PERCENTAGE{2});
 HSLACOLOR = hsl(NUM PERCENTAGE{2} NUM);
 COLOR = SCOLOR | RGBCOLOR | RGBACOLOR | HSLCOLOR | HSLACOLOR;
+BG_POSITION_TERM = PLENGTH | left | center | right | top | bottom;
+SIDE_OR_CORNER =  [left | right] || [top | bottom];
+COLOR_STOP = SPACE(COLOR [PERCENTAGE | LENGTH]?);
+LINEAR_GRADIENT = linear-gradient([ANGLE | SPACE(to SIDE_OR_CORNER)]? COLOR_STOP+) |
+                  repeating-linear-gradient([ANGLE | SPACE(to SIDE_OR_CORNER)]? COLOR_STOP+) |;
+GRADIENT_EXTENT = closest-corner | closest-side | farthest-corner | farthest-side;
+GRADIENT_POSITION = at BG_POSITION_TERM{1,4};
+GRADIENT_SHAPE = SPACE(circle LENGTH? GRADIENT_POSITION?) | SPACE(ellipse PLENGTH{2}? GRADIENT_POSITION?)| SPACE([circle | ellipse] GRADIENT_EXTENT? GRADIENT_POSITION?);
+RADIAL_GRADIENT = radial-gradient([GRADIENT_SHAPE | SPACE(GRADIENT_POSITION)]? COLOR_STOP+) |
+                  repeating-radial-gradient([GRADIENT_SHAPE | SPACE(GRADIENT_POSITION)]? COLOR_STOP+);
 URI_OR_NONE = URI | none;
+IMAGE =  URI | LINEAR_GRADIENT | RADIAL_GRADIENT | none;
 azimuth = ANGLE | [[ left-side | far-left | left | center-left | center | center-right | right | far-right | right-side ] || behind ] | leftwards | rightwards;
 background-attachment = COMMA( [scroll | fixed | local]+ );
 background-color = COLOR;
-background-image = COMMA( URI_OR_NONE+ );
-BG_POSITION_TERM = PLENGTH | left | center | right | top | bottom;
+background-image = COMMA( IMAGE+ );
 background-position = COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */
 background-repeat = COMMA( [repeat | repeat-x | repeat-y | no-repeat]+ );
 border-collapse = collapse | separate;
@@ -79,7 +89,7 @@ border-top-left-radius = BORDER_RADIUS;
 border-top-right-radius = BORDER_RADIUS;
 border-bottom-right-radius = BORDER_RADIUS;
 border-bottom-left-radius = BORDER_RADIUS;
-border-image-source = URI_OR_NONE;
+border-image-source = IMAGE;
 border-image-slice = [NUM | PERCENTAGE]{1,4} || fill; /* relaxed */
 border-image-width = [NUM | PLENGTH | auto]{1,4};
 border-image-outset = [NUM | LENGTH]{1,4};
@@ -123,7 +133,7 @@ height = PAPLENGTH;
 left = APLENGTH;
 letter-spacing = normal | LENGTH;
 line-height = normal | POS_NUM | PPLENGTH;
-list-style-image = URI_OR_NONE;
+list-style-image = IMAGE;
 list-style-position = inside | outside;
 list-style-type = LIST_STYLE_TYPE;
 margin-right = APLENGTH;
@@ -136,6 +146,7 @@ max-width = NPLENGTH;
 min-height = auto | PLENGTH;
 min-width = auto | PLENGTH;
 orphans = POS_INT;
+outline-offset = LENGTH;
 outline-color = COLOR | invert;
 outline-style = BORDER_SIDE_STYLE;
 outline-width = BORDER_SIDE_WIDTH;
@@ -262,6 +273,7 @@ src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */
 /* CSS Fonts */
 [webkit]font-kerning = auto | normal | none;
 font-variant-east-asian = normal | [[ jis78 | jis83 | jis90 | jis04 | simplified | traditional ] || [ full-width | proportional-width ] || ruby];
+font-feature-settings = COMMA( SPACE( STRING [ on | off | INT ]? )+ );
 
 /* CSS Images */
 object-fit = fill | contain | cover | none | scale-down;
@@ -269,6 +281,8 @@ object-position = COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */
 
 /* CSS Paged Media */
 PAGE_SIZE = a5 | a4 | a3 | b5 | b4 | jis-b5 | jis-b4 | letter | legal | ledger;
+bleed = auto | LENGTH;
+marks = none | [ crop || cross ];
 size = POS_LENGTH{1,2} | auto | [ PAGE_SIZE || [ portrait | landscape ] ];
 
 /* CSS Page Floats */

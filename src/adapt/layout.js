@@ -1567,7 +1567,7 @@ adapt.layout.Column.prototype.isBreakable = function(flowPosition) {
 	case adapt.base.NS.SVG:
 		return false;
 	}
-	return true;
+	return !flowPosition.flexContainer;
 };
 
 /**
@@ -1687,9 +1687,26 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
 		= adapt.task.newFrame("skipEdges");
+	// If a forced break occurred at the end of the previous column, nodeContext.after should be false.
+	var atUnforcedBreak = leadingEdge && (nodeContext && nodeContext.after);
 	var breakAtTheEdge = null;
 	var lastAfterNodeContext = null;
+	var leadingEdgeContexts = [];
 	var trailingEdgeContexts = [];
+	var onStartEdges = false;
+
+	function needForcedBreak() {
+		// leadingEdge=true means that we are at the beginning of the new column and hence must avoid a break
+		// (Otherwise leading to an infinite loop)
+		return !leadingEdge && vivliostyle.break.isForcedBreakValue(breakAtTheEdge);
+	}
+
+	function processForcedBreak() {
+		nodeContext = leadingEdgeContexts[0] || nodeContext;
+		nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+		self.pageBreakType = breakAtTheEdge;
+	}
+
 	frame.loopWithFrame(function(loopFrame) {
 		while (nodeContext) {
 			// A code block to be able to use break. Break moves to the next node position.
@@ -1704,8 +1721,10 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 						break;
 					}
 					if (!nodeContext.after) {
-						// Leading edge of non-empty block
-						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
+						// Leading edge of non-empty block -> finished going through all starting edges of the box
+						if (needForcedBreak()) {
+							processForcedBreak();
+						} else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
 							nodeContext = (lastAfterNodeContext || nodeContext).modify();
 					    	nodeContext.overflow = true;
 						} else {
@@ -1721,9 +1740,14 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 						// clear
 						self.applyClearance(nodeContext);
 					}
-					if (nodeContext.floatSide) {
-						// float
-						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
+					if (nodeContext.floatSide || nodeContext.flexContainer) {
+						// float or flex container (unbreakable)
+						leadingEdgeContexts.push(nodeContext.copy());
+						breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
+						// check if a forced break must occur before the block.
+						if (needForcedBreak()) {
+							processForcedBreak();
+						} else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
 							// overflow
 					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
 					    	nodeContext.overflow = true;
@@ -1739,6 +1763,21 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 				var style = (/** @type {HTMLElement} */ (nodeContext.viewNode)).style;
 				if (nodeContext.after) {
 					// Trailing edge
+					if (onStartEdges) {
+						// finished going through all starting edges of the box.
+						// check if a forced break must occur before the block.
+						if (needForcedBreak()) {
+							processForcedBreak();
+							loopFrame.breakLoop();
+							return;
+						}
+						// since a break did not occur, move to the next edge. this edge is no longer the leading edge.
+						leadingEdgeContexts = [];
+						leadingEdge = false;
+						atUnforcedBreak = false;
+						breakAtTheEdge = null;
+					}
+					onStartEdges = false; // we are now on end edges.
 					lastAfterNodeContext = nodeContext.copy();
 					trailingEdgeContexts.push(lastAfterNodeContext);
 					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakAfter);
@@ -1753,24 +1792,19 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 						}
 						// Margins don't collapse across non-zero borders and paddings.
 						trailingEdgeContexts = [lastAfterNodeContext];
-						breakAtTheEdge = null;
 						lastAfterNodeContext = null;
-					}			
+					}
 				} else {
 					// Leading edge
+					leadingEdgeContexts.push(nodeContext.copy());
 					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
-					// leadingEdge=true means that we are at the beginning of the new column and hence must avoid a break
-					// (Otherwise leading to an infinite loop)
-					if (!leadingEdge && vivliostyle.break.isForcedBreakValue(breakAtTheEdge)) {
-						// explicit page break
-						loopFrame.breakLoop();
-						self.pageBreakType = breakAtTheEdge;
-						return;			
-					}
 					var viewTag = nodeContext.viewNode.localName;
 					if (adapt.layout.mediaTags[viewTag]) {
 						// elements that have inherent content
-						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
+						// check if a forced break must occur before the block.
+						if (needForcedBreak()) {
+							processForcedBreak();
+						} else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
 							// overflow
 					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
 					    	nodeContext.overflow = true;
@@ -1779,21 +1813,14 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 						return;
 					}
 					if (style && !(self.zeroIndent(style.paddingTop) && self.zeroIndent(style.borderTopWidth))) {
-						// Non-sero leading inset
-						if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
-							// overflow
-					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
-					    	nodeContext.overflow = true;
-							loopFrame.breakLoop();
-							return;
-						}
-						breakAtTheEdge = null;
-						lastAfterNodeContext = null;
+						// Non-zero leading inset
+						atUnforcedBreak = false;
 						trailingEdgeContexts = [];
 					}
+					onStartEdges = true; // we are now on starting edges.
 				}
 			} while(false);  // End of block of code to use break
-			var nextResult = self.layoutContext.nextInTree(nodeContext);
+			var nextResult = self.layoutContext.nextInTree(nodeContext, atUnforcedBreak);
 			if (nextResult.isPending()) {
 				nextResult.then(function(nodeContextParam) {
 					nodeContext = nodeContextParam;
@@ -1804,8 +1831,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 				nodeContext = nextResult.get();
 			}
 		}
-		if (self.breakPositions.length != 0 &&
-				self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, false, breakAtTheEdge)) {
+		if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, false, breakAtTheEdge)) {
 			if (lastAfterNodeContext) {
 		    	nodeContext = lastAfterNodeContext.modify();
 		    	nodeContext.overflow = true;
@@ -1833,6 +1859,7 @@ adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
 		= adapt.task.newFrame("skipEdges");
 	var breakAtTheEdge = null;
+	var onStartEdges = false;
 	frame.loopWithFrame(function(loopFrame) {
 		while (nodeContext) {
 			// A code block to be able to use break. Break moves to the next node position.
@@ -1847,14 +1874,22 @@ adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
 						break;
 					}
 					if (!nodeContext.after) {
-						// Leading edge of non-empty block
+						// Leading edge of non-empty block -> finished going through all starting edges of the box
+						if (vivliostyle.break.isForcedBreakValue(breakAtTheEdge)) {
+							self.pageBreakType = breakAtTheEdge;
+						}
 						loopFrame.breakLoop();
 						return;
 					}
 				}
 				if (!nodeContext.after) {
-					if (nodeContext.floatSide) {
-						// float
+					if (nodeContext.floatSide || nodeContext.flexContainer) {
+						// float or flex container (unbreakable)
+						breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
+						// check if a forced break must occur before the block.
+						if (vivliostyle.break.isForcedBreakValue(breakAtTheEdge)) {
+							self.pageBreakType = breakAtTheEdge;
+						}
 						loopFrame.breakLoop();
 						return;
 					}
@@ -1866,28 +1901,39 @@ adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
 				var style = (/** @type {HTMLElement} */ (nodeContext.viewNode)).style;
 				if (nodeContext.after) {
 					// Trailing edge
+					if (onStartEdges) {
+						// finished going through all starting edges of the box.
+						// check if a forced break must occur before the block.
+						if (vivliostyle.break.isForcedBreakValue(breakAtTheEdge)) {
+							self.pageBreakType = breakAtTheEdge;
+							loopFrame.breakLoop();
+							return;
+						}
+						// since a break did not occur, move to the next edge.
+						breakAtTheEdge = null;
+					}
+					onStartEdges = false; // we are now on end edges.
 					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakAfter);
 				} else {
 					// Leading edge
 					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
-					if (vivliostyle.break.isForcedBreakValue(breakAtTheEdge)) {
-						// explicit page break
-						loopFrame.breakLoop();
-						self.pageBreakType = breakAtTheEdge;
-						return;			
-					}
 					var viewTag = nodeContext.viewNode.localName;
 					if (adapt.layout.mediaTags[viewTag]) {
 						// elements that have inherent content
+						// check if a forced break must occur before the block.
+						if (vivliostyle.break.isForcedBreakValue(breakAtTheEdge)) {
+							self.pageBreakType = breakAtTheEdge;
+						}
 						loopFrame.breakLoop();
 						return;
 					}
 					if (style && !(self.zeroIndent(style.paddingTop) && self.zeroIndent(style.borderTopWidth))) {
-						// Non-sero leading inset
+						// Non-zero leading inset
 						loopFrame.breakLoop();
 						return;
 					}
 				}
+				onStartEdges = true; // we are now on starting edges.
 			} while(false);  // End of block of code to use break
 			var nextResult = self.layoutContext.nextInTree(nodeContext);
 			if (nextResult.isPending()) {

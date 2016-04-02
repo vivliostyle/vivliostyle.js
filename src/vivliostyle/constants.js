@@ -8,6 +8,12 @@ goog.require("vivliostyle.namespace");
 
 goog.scope(function() {
     /**
+     * Debug flag.
+     * @type {boolean}
+     */
+    vivliostyle.constants.isDebug = false;
+
+    /**
      * Page progression direction.
      * @enum {string}
      */

@@ -28,7 +28,8 @@ adapt.csscasc.inheritedProps = {
     "font-kerning": true,
 	"font-size": true,
 	"font-family": true,
-	"font-style": true,
+    "font-feature-settings": true,
+    "font-style": true,
 	"font-variant": true,
 	"font-weight": true,
 	"letter-spacing": true,
@@ -423,6 +424,34 @@ adapt.csscasc.mergeAll = function(context, styles) {
 	return target;
 };
 
+/**
+ * @protected
+ * @param {Array.<adapt.csscasc.ChainedAction>} chain
+ * @param {adapt.csscasc.CascadeAction} action
+ * @return {adapt.csscasc.CascadeAction} 
+*/
+adapt.csscasc.chainActions = function(chain, action) {
+    if (chain.length > 0) {
+        chain.sort(
+            /**
+             * @param {adapt.csscasc.ChainedAction} a
+             * @param {adapt.csscasc.ChainedAction} b
+             * @return {number}
+             */
+            function(a, b) {
+                return b.getPriority() - a.getPriority();
+            });
+        var chained = null;
+        for (var i = chain.length - 1 ; i >= 0 ; i--) {
+            chained = chain[i];
+            chained.chained = action;
+            action = chained;
+        }
+        return chained;
+    }
+    return action;
+}
+
 
 /**
  * @constructor
@@ -631,7 +660,6 @@ adapt.csscasc.ChainedAction.prototype.getPriority = function() {
 adapt.csscasc.ChainedAction.prototype.makePrimary = function(cascade) {
     return false; // cannot be made primary
 };
-
 
 /**
  * @param {string} className
@@ -1046,21 +1074,51 @@ adapt.csscasc.IsRootAction.prototype.getPriority = function() {
 };
 
 /**
- * @param {number} n
+ * @param {number} a
+ * @param {number} b
+ * @private
  * @constructor
  * @extends {adapt.csscasc.ChainedAction}
  */
-adapt.csscasc.IsNthSiblingAction = function(n) {
+adapt.csscasc.IsNthAction = function(a, b) {
 	adapt.csscasc.ChainedAction.call(this);
-	/** @const */ this.n = n;
+	/** @const */ this.a = a;
+	/** @const */ this.b = b;
 };
-goog.inherits(adapt.csscasc.IsNthSiblingAction, adapt.csscasc.ChainedAction);
+goog.inherits(adapt.csscasc.IsNthAction, adapt.csscasc.ChainedAction);
+
+/**
+ * Checkes whether given order can be represented as an+b with a non-negative interger n
+ * @protected
+ * @param {number} order
+ * @returns {boolean}
+ */
+adapt.csscasc.IsNthAction.prototype.matchANPlusB = function(order) {
+	var a = this.a;
+	order -= this.b;
+	if (a === 0) {
+		return order === 0;
+	} else {
+		return (order % a === 0) && (order / a >= 0);
+	}
+};
+
+/**
+ * @param {number} a
+ * @param {number} b
+ * @constructor
+ * @extends {adapt.csscasc.IsNthAction}
+ */
+adapt.csscasc.IsNthSiblingAction = function(a, b) {
+	adapt.csscasc.IsNthAction.call(this, a, b);
+};
+goog.inherits(adapt.csscasc.IsNthSiblingAction, adapt.csscasc.IsNthAction);
 
 /**
  * @override
  */
 adapt.csscasc.IsNthSiblingAction.prototype.apply = function(cascadeInstance) {
-	if (cascadeInstance.currentSiblingOrder === this.n)
+	if (this.matchANPlusB(cascadeInstance.currentSiblingOrder))
 		this.chained.apply(cascadeInstance);
 };
 
@@ -1068,6 +1126,215 @@ adapt.csscasc.IsNthSiblingAction.prototype.apply = function(cascadeInstance) {
  * @override
  */
 adapt.csscasc.IsNthSiblingAction.prototype.getPriority = function() {
+	return 5;
+};
+
+/**
+ * @param {number} a
+ * @param {number} b
+ * @constructor
+ * @extends {adapt.csscasc.IsNthAction}
+ */
+adapt.csscasc.IsNthSiblingOfTypeAction = function(a, b) {
+	adapt.csscasc.IsNthAction.call(this, a, b);
+};
+goog.inherits(adapt.csscasc.IsNthSiblingOfTypeAction, adapt.csscasc.IsNthAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthSiblingOfTypeAction.prototype.apply = function(cascadeInstance) {
+	var order = cascadeInstance.currentSiblingTypeCounts[cascadeInstance.currentNamespace][cascadeInstance.currentLocalName];
+	if (this.matchANPlusB(order))
+		this.chained.apply(cascadeInstance);
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthSiblingOfTypeAction.prototype.getPriority = function() {
+	return 5;
+};
+
+/**
+ * @param {number} a
+ * @param {number} b
+ * @constructor
+ * @extends {adapt.csscasc.IsNthAction}
+ */
+adapt.csscasc.IsNthLastSiblingAction = function(a, b) {
+	adapt.csscasc.IsNthAction.call(this, a, b);
+};
+goog.inherits(adapt.csscasc.IsNthLastSiblingAction, adapt.csscasc.IsNthAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthLastSiblingAction.prototype.apply = function(cascadeInstance) {
+	var order = cascadeInstance.currentFollowingSiblingOrder;
+	if (order === null) {
+		order = cascadeInstance.currentFollowingSiblingOrder = cascadeInstance.currentElement.parentNode.childElementCount - cascadeInstance.currentSiblingOrder + 1;
+	}
+	if (this.matchANPlusB(order))
+		this.chained.apply(cascadeInstance);
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthLastSiblingAction.prototype.getPriority = function() {
+	return 4;
+};
+
+/**
+ * @param {number} a
+ * @param {number} b
+ * @constructor
+ * @extends {adapt.csscasc.IsNthAction}
+ */
+adapt.csscasc.IsNthLastSiblingOfTypeAction = function(a, b) {
+	adapt.csscasc.IsNthAction.call(this, a, b);
+};
+goog.inherits(adapt.csscasc.IsNthLastSiblingOfTypeAction, adapt.csscasc.IsNthAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthLastSiblingOfTypeAction.prototype.apply = function(cascadeInstance) {
+	var counts = cascadeInstance.currentFollowingSiblingTypeCounts;
+	if (!counts[cascadeInstance.currentNamespace]) {
+		var elem = cascadeInstance.currentElement;
+		do {
+			var ns = elem.namespaceURI;
+			var localName = elem.localName;
+			var nsCounts = counts[ns];
+			if (!nsCounts) {
+				nsCounts = counts[ns] = {};
+			}
+			nsCounts[localName] = (nsCounts[localName] || 0) + 1;
+		} while (elem = elem.nextElementSibling)
+	}
+	if (this.matchANPlusB(counts[cascadeInstance.currentNamespace][cascadeInstance.currentLocalName]))
+		this.chained.apply(cascadeInstance);
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsNthLastSiblingOfTypeAction.prototype.getPriority = function() {
+	return 4;
+};
+
+/**
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.IsEmptyAction = function() {
+	adapt.csscasc.ChainedAction.call(this);
+};
+goog.inherits(adapt.csscasc.IsEmptyAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsEmptyAction.prototype.apply = function(cascadeInstance) {
+	var node = cascadeInstance.currentElement.firstChild;
+	while (node) {
+		switch (node.nodeType) {
+			case Node.ELEMENT_NODE:
+				return;
+			case Node.TEXT_NODE:
+				if (/** @type {Text} */ (node).length > 0) {
+					return;
+				}
+		}
+		node = node.nextSibling;
+	}
+	this.chained.apply(cascadeInstance);
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsEmptyAction.prototype.getPriority = function() {
+	return 4;
+};
+
+/**
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.IsEnabledAction = function() {
+	adapt.csscasc.ChainedAction.call(this);
+};
+goog.inherits(adapt.csscasc.IsEnabledAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsEnabledAction.prototype.apply = function(cascadeInstance) {
+	var elem = cascadeInstance.currentElement;
+	if (elem.disabled === false) {
+		this.chained.apply(cascadeInstance);
+	}
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsEnabledAction.prototype.getPriority = function() {
+	return 5;
+};
+
+/**
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.IsDisabledAction = function() {
+	adapt.csscasc.ChainedAction.call(this);
+};
+goog.inherits(adapt.csscasc.IsDisabledAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsDisabledAction.prototype.apply = function(cascadeInstance) {
+	var elem = cascadeInstance.currentElement;
+	if (elem.disabled === true) {
+		this.chained.apply(cascadeInstance);
+	}
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsDisabledAction.prototype.getPriority = function() {
+	return 5;
+};
+
+/**
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.IsCheckedAction = function() {
+	adapt.csscasc.ChainedAction.call(this);
+};
+goog.inherits(adapt.csscasc.IsCheckedAction, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.IsCheckedAction.prototype.apply = function(cascadeInstance) {
+	var elem = cascadeInstance.currentElement;
+	if (elem.selected === true || elem.checked === true) {
+		this.chained.apply(cascadeInstance);
+	}
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.IsCheckedAction.prototype.getPriority = function() {
 	return 5;
 };
 
@@ -1097,6 +1364,60 @@ adapt.csscasc.CheckConditionAction.prototype.getPriority = function() {
     return 5;
 };
 
+/**
+ * @constructor
+ * @extends {adapt.csscasc.CascadeAction}
+ */
+adapt.csscasc.CheckAppliedAction = function() {
+  adapt.csscasc.CascadeAction.call(this);  
+  this.applied = false;
+};
+goog.inherits(adapt.csscasc.CheckAppliedAction, adapt.csscasc.CascadeAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.CheckAppliedAction.prototype.apply = function(cascadeInstance) {
+  this.applied = true;
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.CheckAppliedAction.prototype.clone = function() {
+  var cloned = new adapt.csscasc.CheckAppliedAction();
+  cloned.applied = this.applied;
+  return cloned;
+}
+
+/**
+ * @param {Array.<adapt.csscasc.ChainedAction>} list
+ * @constructor
+ * @extends {adapt.csscasc.ChainedAction}
+ */
+adapt.csscasc.NegateActionsSet = function(list) {
+    adapt.csscasc.ChainedAction.call(this);
+    this.checkAppliedAction = new adapt.csscasc.CheckAppliedAction();
+    this.firstAction = adapt.csscasc.chainActions(list, this.checkAppliedAction);
+};
+goog.inherits(adapt.csscasc.NegateActionsSet, adapt.csscasc.ChainedAction);
+
+/**
+ * @override
+ */
+adapt.csscasc.NegateActionsSet.prototype.apply = function(cascadeInstance) {
+    this.firstAction.apply(cascadeInstance);
+    if (!this.checkAppliedAction.applied)
+        this.chained.apply(cascadeInstance);
+    this.checkAppliedAction.applied = false;
+};
+
+/**
+ * @override
+ */
+adapt.csscasc.NegateActionsSet.prototype.getPriority = function() {
+    return this.firstAction.getPriority();
+};
 
 /**
  * An object that is notified as elements are pushed and popped and typically
@@ -1917,6 +2238,12 @@ adapt.csscasc.CascadeInstance = function(cascade, context, pageCounterResolver, 
     /** @type {string} */ this.lang = "";
 	/** @type {Array.<number>} */ this.siblingOrderStack = [0];
 	/** @type {number} */ this.currentSiblingOrder = 0;
+	/** @const {!Array<!Object<string, !Object<string, number>>>} */ this.siblingTypeCountsStack = [{}];
+	/** @type {!Object<string, !Object<string, number>>} */ this.currentSiblingTypeCounts = this.siblingTypeCountsStack[0];
+	/** @type {?number} */ this.currentFollowingSiblingOrder = null;
+	/** @type {Array.<?number>} */ this.followingSiblingOrderStack = [this.currentFollowingSiblingOrder];
+	/** @const {!Array<!Object<string, !Object<string, number>>>} */ this.followingSiblingTypeCountsStack = [{}];
+	/** @type {!Object<string, !Object<string, number>>} */ this.currentFollowingSiblingTypeCounts = this.siblingTypeCountsStack[0];
     if (goog.DEBUG) {
     	/** @type {Array.<Element>} */ this.elementStack = [];
     }
@@ -2149,9 +2476,34 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
         		new adapt.csscasc.RestoreLangItem(this.lang));
     	this.lang = lang.toLowerCase();
     }
+
 	var siblingOrderStack = this.siblingOrderStack;
 	this.currentSiblingOrder = ++siblingOrderStack[siblingOrderStack.length - 1];
-	siblingOrderStack.push([0]);
+	siblingOrderStack.push(0);
+
+	var siblingTypeCountsStack = this.siblingTypeCountsStack;
+	var currentSiblingTypeCounts = this.currentSiblingTypeCounts = siblingTypeCountsStack[siblingTypeCountsStack.length - 1];
+	var currentNamespaceTypeCounts = currentSiblingTypeCounts[this.currentNamespace];
+	if (!currentNamespaceTypeCounts) {
+		currentNamespaceTypeCounts = currentSiblingTypeCounts[this.currentNamespace] = {};
+	}
+	currentNamespaceTypeCounts[this.currentLocalName] = (currentNamespaceTypeCounts[this.currentLocalName] || 0) + 1;
+	siblingTypeCountsStack.push({});
+
+	var followingSiblingOrderStack = this.followingSiblingOrderStack;
+	if (followingSiblingOrderStack[followingSiblingOrderStack.length - 1] !== null) {
+		this.currentFollowingSiblingOrder = --followingSiblingOrderStack[followingSiblingOrderStack.length - 1];
+	} else {
+		this.currentFollowingSiblingOrder = null;
+	}
+	followingSiblingOrderStack.push(null);
+
+	var followingSiblingTypeCountsStack = this.followingSiblingTypeCountsStack;
+	var currentFollowingSiblingTypeCounts = this.currentFollowingSiblingTypeCounts = followingSiblingTypeCountsStack[followingSiblingTypeCountsStack.length - 1];
+	if (currentFollowingSiblingTypeCounts && currentFollowingSiblingTypeCounts[this.currentNamespace]) {
+		currentFollowingSiblingTypeCounts[this.currentNamespace][this.currentLocalName]--;
+	}
+	followingSiblingTypeCountsStack.push({});
 
     this.applyActions();
     var quotesCasc = baseStyle["quotes"];
@@ -2277,6 +2629,9 @@ adapt.csscasc.CascadeInstance.prototype.popElement = function(element) {
 		}
 	}
 	this.siblingOrderStack.pop();
+	this.siblingTypeCountsStack.pop();
+	this.followingSiblingOrderStack.pop();
+	this.followingSiblingTypeCountsStack.pop();
 	this.pop();
 	this.popCounters();
 };
@@ -2343,27 +2698,10 @@ adapt.csscasc.CascadeParserHandler.prototype.insertNonPrimary = function(action)
  * @return {void}
  */
 adapt.csscasc.CascadeParserHandler.prototype.processChain = function(action) {
-    var chain = this.chain;
-    if (chain.length > 0) {
-        chain.sort(
-        	/**
-        	 * @param {adapt.csscasc.ChainedAction} a
-        	 * @param {adapt.csscasc.ChainedAction} b
-        	 * @return {number}
-        	 */
-        	function(a, b) {
-        		return b.getPriority() - a.getPriority();
-        	});
-        var chained = null;
-        for (var i = chain.length - 1 ; i >= 0 ; i--) {
-            chained = chain[i];
-            chained.chained = action;
-            action = chained;
-        }
-        if (chained.makePrimary(this.cascade))
-            return;
-    }
-    this.insertNonPrimary(action);
+    var chained = adapt.csscasc.chainActions(this.chain, action);
+    if (chained !== action && chained.makePrimary(this.cascade))
+        return;
+    this.insertNonPrimary(chained);
 };
 
 /**
@@ -2409,6 +2747,17 @@ adapt.csscasc.CascadeParserHandler.prototype.classSelector = function(name) {
 };
 
 /**
+ * @private
+ * @const {!Object<string, function(new: adapt.csscasc.IsNthAction, number, number)>}
+ */
+adapt.csscasc.nthSelectorActionClasses = {
+	"nth-child": adapt.csscasc.IsNthSiblingAction,
+	"nth-of-type": adapt.csscasc.IsNthSiblingOfTypeAction,
+	"nth-last-child": adapt.csscasc.IsNthLastSiblingAction,
+	"nth-last-of-type": adapt.csscasc.IsNthLastSiblingOfTypeAction
+};
+
+/**
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name, params) {
@@ -2418,9 +2767,15 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
     	return;
     }
     switch (name.toLowerCase()) {
-        case "first-child":
-            this.chain.push(new adapt.csscasc.IsFirstAction());
-            break;
+		case "enabled":
+			this.chain.push(new adapt.csscasc.IsEnabledAction());
+			break;
+		case "disabled":
+			this.chain.push(new adapt.csscasc.IsDisabledAction());
+			break;
+		case "checked":
+			this.chain.push(new adapt.csscasc.IsCheckedAction());
+			break;
         case "root":
             this.chain.push(new adapt.csscasc.IsRootAction());
             break;
@@ -2459,11 +2814,38 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
 	    	}
 	    	break;
 		case "nth-child":
-			if (params && params.length == 1 && typeof params[0] == "number") {
-				this.chain.push(new adapt.csscasc.IsNthSiblingAction(/** @type {number} */ (params[0])));
+		case "nth-last-child":
+		case "nth-of-type":
+		case "nth-last-of-type":
+			var ActionClass = adapt.csscasc.nthSelectorActionClasses[name.toLowerCase()];
+			if (params && params.length == 2) {
+				this.chain.push(new ActionClass(/** @type {number} */ (params[0]), /** @type {number} */ (params[1])));
 			} else {
 				this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
 			}
+			break;
+		case "first-child":
+			this.chain.push(new adapt.csscasc.IsFirstAction());
+			break;
+		case "last-child":
+			this.chain.push(new adapt.csscasc.IsNthLastSiblingAction(0, 1));
+			break;
+		case "first-of-type":
+			this.chain.push(new adapt.csscasc.IsNthSiblingOfTypeAction(0, 1));
+			break;
+		case "last-of-type":
+			this.chain.push(new adapt.csscasc.IsNthLastSiblingOfTypeAction(0, 1));
+			break;
+		case "only-child":
+			this.chain.push(new adapt.csscasc.IsFirstAction());
+			this.chain.push(new adapt.csscasc.IsNthLastSiblingAction(0, 1));
+			break;
+		case "only-of-type":
+			this.chain.push(new adapt.csscasc.IsNthSiblingOfTypeAction(0, 1));
+			this.chain.push(new adapt.csscasc.IsNthLastSiblingOfTypeAction(0, 1));
+			break;
+		case "empty":
+			this.chain.push(new adapt.csscasc.IsEmptyAction());
 			break;
         case "before":
         case "after":
@@ -2534,39 +2916,76 @@ adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, na
     this.specificity += 0x100;
 		name = name.toLowerCase();
     value = value || "";
+	var action;
     switch (op) {
         case adapt.csstok.TokenType.EOF:
-            this.chain.push(new adapt.csscasc.CheckAttributePresentAction(ns, name));
+            action = new adapt.csscasc.CheckAttributePresentAction(ns, name);
             break;
         case adapt.csstok.TokenType.EQ:
-            this.chain.push(new adapt.csscasc.CheckAttributeEqAction(ns, name, value));
+			action = new adapt.csscasc.CheckAttributeEqAction(ns, name, value);
             break;
         case adapt.csstok.TokenType.TILDE_EQ:
-            this.chain.push(new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
-                new RegExp("(^|\\s)" + adapt.base.escapeRegExp(value) + "($|\\s)")));
+			if (!value || value.match(/\s/)) {
+				action = new adapt.csscasc.CheckConditionAction(""); // always fails
+			} else {
+				action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
+					new RegExp("(^|\\s)" + adapt.base.escapeRegExp(value) + "($|\\s)"));
+			}
             break;
         case adapt.csstok.TokenType.BAR_EQ:
-            this.chain.push(new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
-                new RegExp("^" + adapt.base.escapeRegExp(value) + "($|-)")));
+			action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
+				new RegExp("^" + adapt.base.escapeRegExp(value) + "($|-)"));
             break;
+		case adapt.csstok.TokenType.HAT_EQ:
+			if (!value) {
+				action = new adapt.csscasc.CheckConditionAction(""); // always fails
+			} else {
+				action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
+					new RegExp("^" + adapt.base.escapeRegExp(value)));
+			}
+			break;
+		case adapt.csstok.TokenType.DOLLAR_EQ:
+			if (!value) {
+				action = new adapt.csscasc.CheckConditionAction(""); // always fails
+			} else {
+				action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
+					new RegExp(adapt.base.escapeRegExp(value) + "$"));
+			}
+			break;
+		case adapt.csstok.TokenType.STAR_EQ:
+			if (!value) {
+				action = new adapt.csscasc.CheckConditionAction(""); // always fails
+			} else {
+				action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
+					new RegExp(adapt.base.escapeRegExp(value)));
+			}
+			break;
         case adapt.csstok.TokenType.COL_COL:
         	if (value == "supported") {
-                this.chain.push(new adapt.csscasc.CheckNamespaceSupportedAction(ns, name));
+				action = new adapt.csscasc.CheckNamespaceSupportedAction(ns, name);
         	} else {
 				vivliostyle.logging.logger.warn("Unsupported :: attr selector op:", value);
+				action = new adapt.csscasc.CheckConditionAction(""); // always fails
         	}
         	break;
-        case adapt.csstok.TokenType.STAR_EQ:
         default:
 			vivliostyle.logging.logger.warn("Unsupported attr selector:", op);
+			action = new adapt.csscasc.CheckConditionAction(""); // always fails
     }
+	this.chain.push(action);
 };
+
+/**
+ * @private
+ * @type {number}
+ */
+adapt.csscasc.conditionCount = 0;
 
 /**
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.descendantSelector = function() {
-    var condition = "d" + (this.conditionCount++);
+    var condition = "d" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
     		new adapt.csscasc.DescendantConditionItem(condition)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -2576,7 +2995,7 @@ adapt.csscasc.CascadeParserHandler.prototype.descendantSelector = function() {
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.childSelector = function() {
-    var condition = "c" + (this.conditionCount++);
+    var condition = "c" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
     		new adapt.csscasc.ChildConditionItem(condition)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -2586,7 +3005,7 @@ adapt.csscasc.CascadeParserHandler.prototype.childSelector = function() {
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.adjacentSiblingSelector = function() {
-    var condition = "a" + (this.conditionCount++);
+    var condition = "a" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
     		new adapt.csscasc.AdjacentSiblingConditionItem(condition)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -2596,7 +3015,7 @@ adapt.csscasc.CascadeParserHandler.prototype.adjacentSiblingSelector = function(
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.followingSiblingSelector = function() {
-    var condition = "f" + (this.conditionCount++);
+    var condition = "f" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
     		new adapt.csscasc.FollowingSiblingConditionItem(condition)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -2768,6 +3187,81 @@ adapt.csscasc.CascadeParserHandler.prototype.finish = function() {
 
 
 /**
+* @override
+*/
+adapt.csscasc.CascadeParserHandler.prototype.startFuncWithSelector = function(funcName) {
+    switch (funcName) {
+    case "not":
+        var notParserHandler = new adapt.csscasc.NotParameterParserHandler(this);
+        notParserHandler.startSelectorRule();
+        this.owner.pushHandler(notParserHandler);
+        break;
+    default:
+        // TODO
+        break;
+    }
+};
+
+/**
+ * @param {adapt.csscasc.CascadeParserHandler} parent
+ * @constructor
+ * @extends {adapt.csscasc.CascadeParserHandler}
+*/
+adapt.csscasc.NotParameterParserHandler = function(parent) {
+    adapt.csscasc.CascadeParserHandler.call(this, parent.scope, parent.owner, parent.condition, parent, parent.regionId, parent.validatorSet, false);
+    /** @const */ this.parent = parent;
+    /** @const */ this.parentChain = parent.chain;
+};
+goog.inherits(adapt.csscasc.NotParameterParserHandler, adapt.csscasc.CascadeParserHandler);
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.startFuncWithSelector = function(funcName) {
+    if (funcName == "not")
+        this.reportAndSkip("E_CSS_UNEXPECTED_NOT");
+};
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.startRuleBody = function() {
+  this.reportAndSkip("E_CSS_UNEXPECTED_RULE_BODY");
+};
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.nextSelector = function() {
+  this.reportAndSkip("E_CSS_UNEXPECTED_NEXT_SELECTOR");  
+}
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.endFuncWithSelector = function() {
+    if (this.chain && this.chain.length > 0) {
+        this.parentChain.push(new adapt.csscasc.NegateActionsSet(this.chain));
+    }
+    this.parent.specificity += this.specificity;
+    this.owner.popHandler();
+};
+
+/**
+* @override
+*/
+adapt.csscasc.NotParameterParserHandler.prototype.error = function(mnemonics, token) {
+    adapt.csscasc.CascadeParserHandler.prototype.error.call(this, mnemonics, token);
+    this.owner.popHandler();
+};
+
+
+/**
+ * @override
+ */
+
+
+/**
  * @param {adapt.expr.LexicalScope} scope
  * @param {adapt.cssparse.DispatchParserHandler} owner
  * @constructor
@@ -2912,31 +3406,6 @@ adapt.csscasc.parseStyleAttribute = function(scope, validatorSet, baseURL, style
 		vivliostyle.logging.logger.warn(err, "Style attribute parse error:");
 	}
 	return handler.elementStyle;
-};
-
-
-/**
- * @type {adapt.taskutil.Fetcher.<boolean>}
- */
-adapt.csscasc.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(function() {
-	/** @type {!adapt.task.Frame.<boolean>} */ var frame =
-		adapt.task.newFrame("uaStylesheetBase");
-	adapt.cssvalid.loadValidatorSet().then(function(validatorSet) {
-	    var url = adapt.base.resolveURL("user-agent-base.css", adapt.base.resourceBaseURL);
-	    var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
-	    		validatorSet, true);
-	    handler.startStylesheet(adapt.cssparse.StylesheetFlavor.USER_AGENT);
-	    adapt.csscasc.uaBaseCascade = handler.cascade;
-	    adapt.cssparse.parseStylesheetFromURL(url, handler, null, null).thenFinish(frame);
-	});
-    return frame.result();
-}, "uaStylesheetBaseFetcher");
-
-/**
- * @return {!adapt.task.Result.<boolean>}
- */
-adapt.csscasc.loadUABase = function() {
-	return adapt.csscasc.uaStylesheetBaseFetcher.get();
 };
 
 /**

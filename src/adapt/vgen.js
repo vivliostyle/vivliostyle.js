@@ -43,6 +43,24 @@ adapt.vgen.frontEdgeBlackListVert = {
     "border-right-color": "transparent"
 };
 
+/**
+ * @private
+ * @const
+ * @type {!Object.<string,string>}
+ */
+adapt.vgen.frontEdgeUnforcedBreakBlackListHor = {
+	"margin-top": "0px"
+};
+
+/**
+ * @private
+ * @const
+ * @type {!Object.<string,string>}
+ */
+adapt.vgen.frontEdgeUnforcedBreakBlackListVert = {
+	"margin-right": "0px"
+};
+
 
 /**
  * Function taking source element, parent view node and CSS properties and returning
@@ -491,10 +509,11 @@ adapt.vgen.ViewFactory.prototype.resolveURL = function(url) {
 
 /**
  * @param {boolean} firstTime
+ * @param {boolean} atUnforcedBreak
  * @private
  * @return {!adapt.task.Result.<boolean>} holding true if children should be processed
  */
-adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
+adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnforcedBreak) {
 	var self = this;
 	var needToProcessChildren = true;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame
@@ -526,6 +545,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
     	frame.finish(false);
     	return frame.result();
     }
+	self.nodeContext.flexContainer = (display === adapt.css.ident.flex);
     self.createShadows(element, self.nodeContext.parent == null, elementStyle, computedStyle, styler,
     		self.context, self.nodeContext.shadowContext).then(function(shadowParam) {
     	self.nodeContext.nodeShadow = shadowParam;    			
@@ -842,12 +862,19 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 		    		self.nodeContext.inheritedProps["orphans"] = (/** @type {adapt.css.Int} */ (orphans)).num;
 		    	}
 		    }
-		    if (!firstTime && !self.nodeContext.inline) {
-		    	var blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeBlackListVert : adapt.vgen.frontEdgeBlackListHor;
-		        for (var propName in blackList) {
-		            adapt.base.setCSSProperty(result, propName, blackList[propName]);
-		        }
-		    }
+			if (!self.nodeContext.inline) {
+				var blackList = null;
+				if (!firstTime) {
+					blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeBlackListVert : adapt.vgen.frontEdgeBlackListHor;
+				} else if (atUnforcedBreak) {
+					blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeUnforcedBreakBlackListVert : adapt.vgen.frontEdgeUnforcedBreakBlackListHor;
+				}
+				if (blackList) {
+					for (var propName in blackList) {
+						adapt.base.setCSSProperty(result, propName, blackList[propName]);
+					}
+				}
+			}
 		    if (listItem) {
 		    	result.setAttribute("value", computedStyle["ua-list-item-count"].stringValue());
 		    }
@@ -868,16 +895,17 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime) {
 
 /**
  * @param {boolean} firstTime
+ * @param {boolean} atUnforcedBreak
  * @return {!adapt.task.Result.<boolean>} holding true if children should be processed
  */
-adapt.vgen.ViewFactory.prototype.createNodeView = function(firstTime) {
+adapt.vgen.ViewFactory.prototype.createNodeView = function(firstTime, atUnforcedBreak) {
 	var self = this;
 	/** @type {!adapt.task.Frame.<boolean>} */ var frame
 		= adapt.task.newFrame("createNodeView");
 	var result;
 	var needToProcessChildren = true;
     if (self.sourceNode.nodeType == 1) {
-        result = self.createElementView(firstTime);
+        result = self.createElementView(firstTime, atUnforcedBreak);
     } else {
     	if (self.sourceNode.nodeType == 8) {
 	    	self.viewNode = null; // comment node
@@ -904,7 +932,7 @@ adapt.vgen.ViewFactory.prototype.createNodeView = function(firstTime) {
 /**
  * @override
  */
-adapt.vgen.ViewFactory.prototype.setCurrent = function(nodeContext, firstTime) {
+adapt.vgen.ViewFactory.prototype.setCurrent = function(nodeContext, firstTime, atUnforcedBreak) {
 	this.nodeContext = nodeContext;
     if (nodeContext) {
     	this.sourceNode = nodeContext.sourceNode;
@@ -915,7 +943,7 @@ adapt.vgen.ViewFactory.prototype.setCurrent = function(nodeContext, firstTime) {
     }
     this.viewNode = null;
     if (this.nodeContext) {
-    	return this.createNodeView(firstTime);
+    	return this.createNodeView(firstTime, !!atUnforcedBreak);
     }
     return adapt.task.newResult(true);
 };
@@ -1052,14 +1080,14 @@ adapt.vgen.ViewFactory.prototype.isTransclusion = function(element, elementStyle
 /**
  * @override
  */
-adapt.vgen.ViewFactory.prototype.nextInTree = function(nodeContext) {
+adapt.vgen.ViewFactory.prototype.nextInTree = function(nodeContext, atUnforcedBreak) {
 	nodeContext = this.nextPositionInTree(nodeContext);
 	if (!nodeContext || nodeContext.after) {
 		return adapt.task.newResult(nodeContext);
 	}
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
 		= adapt.task.newFrame("nextInTree");
-	this.setCurrent(nodeContext, true).then(function(processChildren) {
+	this.setCurrent(nodeContext, true, atUnforcedBreak).then(function(processChildren) {
 	    if (!nodeContext.viewNode || !processChildren) {
 	    	nodeContext = nodeContext.modify();
 	    	nodeContext.after = true; // skip
@@ -1094,19 +1122,19 @@ adapt.vgen.ViewFactory.prototype.applyComputedStyles = function(target, computed
 	if (bg) {
 		this.addImageFetchers(bg);
 	}
+	var isRelativePositioned = computedStyle["position"] === adapt.css.ident.relative;
 	for (var propName in computedStyle) {
 		var value = computedStyle[propName];
-		if (adapt.vtree.delayedProps[propName]) {
-			if (propName != "position" || value === adapt.css.ident.relative) {
-				// Set it after page layout is done.
-				this.page.delayedItems.push(
-						new adapt.vtree.DelayedItem(target, propName, value));
-				continue;
-			}
+		if (adapt.vtree.delayedProps[propName] ||
+			(isRelativePositioned && adapt.vtree.delayedPropsIfRelativePositioned[propName])) {
+			// Set it after page layout is done.
+			this.page.delayedItems.push(
+				new adapt.vtree.DelayedItem(target, propName, value));
+			continue;
 		}
-		if (value.isNumeric() && (value.unit === "rem" || value.unit === "q")) {
+		if (value.isNumeric() && adapt.expr.needUnitConversion(value.unit)) {
 			// font-size for the root element is already converted to px
-			value = new adapt.css.Numeric(adapt.css.toNumber(value, this.context), "px");
+			value = adapt.css.convertNumericToPx(value, this.context);
 		}
 	    adapt.base.setCSSProperty(target, propName, value.toString());
 	}	
@@ -1313,11 +1341,13 @@ adapt.vgen.Viewport = function(window, fontSize, opt_root, opt_width, opt_height
 	var outerZoomBox = this.root.firstElementChild;
 	if (!outerZoomBox) {
 		outerZoomBox = this.document.createElement("div");
+		outerZoomBox.setAttribute("data-vivliostyle-outer-zoom-box", true);
 		this.root.appendChild(outerZoomBox);
 	}
 	var contentContainer = outerZoomBox.firstElementChild;
 	if (!contentContainer) {
 		contentContainer = this.document.createElement("div");
+		contentContainer.setAttribute("data-vivliostyle-spread-container", true);
 		outerZoomBox.appendChild(contentContainer);
 	}
 	/** @private @type {!HTMLElement} */ this.outerZoomBox = /** @type {!HTMLElement} */ (outerZoomBox);

@@ -228,6 +228,22 @@ adapt.expr.defaultUnitSizes = {
 };
 
 /**
+ * Returns if a unit should be converted to px before applied to the raw DOM.
+ * @param {string} unit
+ * @returns {boolean}
+ */
+adapt.expr.needUnitConversion = function(unit) {
+    switch (unit) {
+        case "q":
+        case "rem":
+        case "rex":
+            return true;
+        default:
+            return false;
+    }
+};
+
+/**
  * @typedef {Object.<string,adapt.expr.Result>}
  */
 adapt.expr.ScopeContext;
@@ -242,6 +258,8 @@ adapt.expr.ScopeContext;
  */
 adapt.expr.Context = function(rootScope, viewportWidth, viewportHeight, fontSize) {
 	/** @const */ this.rootScope = rootScope;
+    /** @const */ this.viewportWidth = viewportWidth;
+    /** @const */ this.viewportHeight = viewportHeight;
     /** @protected @type {?number} */ this.actualPageWidth = null;
     /** @const @type {function(this:adapt.expr.Context): number} */
     this.pageWidth = function() {

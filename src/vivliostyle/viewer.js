@@ -19,11 +19,13 @@ goog.scope(function() {
      * - userAgentRootURL: URL of a directory from which viewer resource files (under resources/ directory in the source repository) are served.
      * - viewportElement: An element used as the viewport of the displayed contents.
      * - window: Window object. If omitted, current `window` is used.
+     * - debug: Debug flag.
      * @dict
      * @typedef {{
      *     userAgentRootURL: string,
      *     viewportElement: !HTMLElement,
-     *     window: (!Window|undefined)
+     *     window: (!Window|undefined),
+     *     debug: boolean
      * }}
      */
     vivliostyle.viewer.ViewerSettings;
@@ -105,6 +107,7 @@ goog.scope(function() {
      * @constructor
      */
     vivliostyle.viewer.Viewer = function(settings, opt_options) {
+        vivliostyle.constants.isDebug = settings.debug;
         /** @const @private */ this.settings = settings;
         /** @const @private */ this.adaptViewer = new adapt.viewer.Viewer(
             settings["window"] || window, settings["viewportElement"], "main", this.dispatcher.bind(this));
@@ -161,8 +164,8 @@ goog.scope(function() {
     };
 
     /**
-     * Load an HTML or XML document.
-     * @param {string} url
+     * Load an HTML or XML document(s).
+     * @param {string|!Array<string>} url
      * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
      */
@@ -189,7 +192,7 @@ goog.scope(function() {
     /**
      * Load an HTML or XML document, or an EPUB document.
      * @private
-     * @param {?string} url
+     * @param {?(string|!Array<string>)} url
      * @param {?string} epubUrl
      * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions

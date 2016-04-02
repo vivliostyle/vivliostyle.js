@@ -1,60 +1,59 @@
 # Features supported by Vivliostyle<%= $version %>
 
-The Vivliostyle uses a two-layer architecture, with some of its functionality implemented purely in javascript, and some being delegated all or in part to the browser engine on top of which Vivliostyle is running. In the following list <quote>Depends on browser's capability: No</quote> indicates that features implemented in Javascript that will work regardless of the browser engine. Other features' availability and behavior do vary based on what is supported by the underlying browser engine. Vivliostyle Formatter uses Chromium 47.0.2526.80's engine.
+The Vivliostyle uses a two-layer architecture, with some of its functionality implemented purely in javascript, and some being delegated all or in part to the browser engine on top of which Vivliostyle is running. In the following list <quote>Supported in all browsers</quote> indicates that features implemented in Javascript that will work regardless of the browser engine. Other features' availability and behavior do vary based on what is supported by the underlying browser engine. Vivliostyle Formatter uses Chromium 47.0.2526.80's engine.
 
 Properties where <quote>Allowed prefixes</quote> is indicated may be used with any of the listed prefixes, or preferably without a prefix, regardless of the underlying browser engine. If Vivliostyle needs to invoke the browser engine, it will internally convert to the appropriate syntax.
 
 ## Values
 
-- [Supported CSS-wide keywords](http://www.w3.org/TR/css-values/#common-keywords): `inherit`
-  - Depends on browser's capability: No
+- [Supported CSS-wide keywords](https://www.w3.org/TR/css-values/#common-keywords): `inherit`
+  - Supported in all browsers
   - `initial` and `unset` are *not* supported.
-- [Supported length units](http://www.w3.org/TR/css-values/#lengths): `em`, `ex`, `ch`, `rem`, `cm`, `mm`, `q`, `in`, `pc`, `pt`, `px`.
-  - Depends on browser's capability: No
-  - Note: `rem` is not correctly interpreted when used within @page rules. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/109)
+- [Supported length units](https://www.w3.org/TR/css-values/#lengths): `em`, `ex`, `ch`, `rem`, `cm`, `mm`, `q`, `in`, `pc`, `pt`, `px`.
+  - Supported in all browsers
 - Supported color values
-  - Depends on browser's capability: Yes
-  - [Basic color keywords](http://www.w3.org/TR/css3-color/#html4)
-  - [RGB color values](http://www.w3.org/TR/css3-color/#rgb-color), [RGBA color values](http://www.w3.org/TR/css3-color/#rgba-color)
-  - [‘transparent’ color keyword](http://www.w3.org/TR/css3-color/#transparent)
-  - [HSL color values](http://www.w3.org/TR/css3-color/#hsl-color), [HSLA color values](http://www.w3.org/TR/css3-color/#hsla-color)
-  - [Extended color keywords](http://www.w3.org/TR/css3-color/#svg-color)
-  - [‘currentColor’ color keyword](http://www.w3.org/TR/css3-color/#currentcolor)
+  - Support depends on browser capabilities
+  - [Basic color keywords](https://www.w3.org/TR/css3-color/#html4)
+  - [RGB color values](https://www.w3.org/TR/css3-color/#rgb-color), [RGBA color values](https://www.w3.org/TR/css3-color/#rgba-color)
+  - [‘transparent’ color keyword](https://www.w3.org/TR/css3-color/#transparent)
+  - [HSL color values](https://www.w3.org/TR/css3-color/#hsl-color), [HSLA color values](https://www.w3.org/TR/css3-color/#hsla-color)
+  - [Extended color keywords](https://www.w3.org/TR/css3-color/#svg-color)
+  - [‘currentColor’ color keyword](https://www.w3.org/TR/css3-color/#currentcolor)
 
 ## Selectors
 
-### [CSS 2](http://www.w3.org/TR/CSS2/)
+### [CSS 2](https://www.w3.org/TR/CSS2/)
 
 - [Universal selector `*`](https://www.w3.org/TR/CSS2/selector.html#universal-selector)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [Type selectors `E`](https://www.w3.org/TR/CSS2/selector.html#type-selectors)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [Descendant selectors `E F`](https://www.w3.org/TR/CSS2/selector.html#descendant-selectors)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [Child selectors `E > F`](https://www.w3.org/TR/CSS2/selector.html#child-selectors)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [Adjacent sibling selectors `E + F`](https://www.w3.org/TR/CSS2/selector.html#adjacent-selectors)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [Attribute selectors `E[foo]`, `E[foo="bar"]`, `E[foo~="bar"]`, `E[foo|="bar"]`](https://www.w3.org/TR/CSS2/selector.html#attribute-selectors)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [Class selectors `E.foo`](https://www.w3.org/TR/CSS2/selector.html#class-html)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [ID selectors `E#foo`](https://www.w3.org/TR/CSS2/selector.html#id-selectors)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [`:first-child` pseudo-class](https://www.w3.org/TR/CSS2/selector.html#first-child)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [Link pseudo-class `E:link`](https://www.w3.org/TR/CSS2/selector.html#link-pseudo-classes)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [Language pseudo-class `E:lang(c)`](https://www.w3.org/TR/CSS2/selector.html#lang)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [`:first-line` pseudo-element](https://www.w3.org/TR/CSS2/selector.html#first-line-pseudo)
-  - Depends on browser's capability: No
+  - Supported in all browsers
   - Note: there is a bug when used alone or with the universal selector(`*`). [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/133)
 - [`:first-letter` pseudo-element](https://www.w3.org/TR/CSS2/selector.html#first-letter)
-  - Depends on browser's capability: No
+  - Supported in all browsers
   - Note: there is a bug when used alone, with the universal selector(`*`), or with non-ascii characters. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/34)
 - [`:before` and `:after` pseudo-elements](https://www.w3.org/TR/CSS2/selector.html#before-and-after)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 
 #### Not supported selectors
 
@@ -64,662 +63,685 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 ### [Selectors 3](https://www.w3.org/TR/css3-selectors/)
 
 - [Type selectors with namespaces `ns|E`, `*|E`](https://www.w3.org/TR/css3-selectors/#typenmsp)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [Universal selector with namespaces `ns|*`, `*|*`](https://www.w3.org/TR/css3-selectors/#univnmsp)
-  - Depends on browser's capability: No
-- [Attribute selectors with namespaces `[ns|att]`, `[|att]`, `[ns|att=val]`, `[|att=val]`, `[ns|att~=val]`, `[|att~=val]`, `[ns|att|=val]`, `[|att|=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
-  - Depends on browser's capability: No
+  - Supported in all browsers
+- [Substring matching attribute selectors `[att^=val]`, `[att$=val]`, `[att*=val]`](https://www.w3.org/TR/css3-selectors/#attribute-substrings)
+  - Supported in all browsers
+- [Attribute selectors with namespaces `[ns|att]`, `[|att]`, `[ns|att=val]`, `[|att=val]`, `[ns|att~=val]`, `[|att~=val]`, `[ns|att|=val]`, `[|att|=val]`, `[ns|att^=val]`, `[|att^=val]`, `[ns|att$=val]`, `[|att$=val]`, `[ns|att*=val]`, `[|att*=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
+  - Supported in all browsers
+- [The UI element states pseudo-classes `:enabled`, `:disabled`, `:checked`, `:indeterminate`](https://www.w3.org/TR/css3-selectors/#UIstates)
+  - Supported in all browsers
+  - Note that the current implementation can use only initial states of those UI elements. Even if the actual state of the element is toggled by user interaction, the style does not change.
 - [`:root` pseudo-class](https://www.w3.org/TR/css3-selectors/#root-pseudo)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [`:nth-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
-  - Depends on browser's capability: No
-  - Note: only a single integer argument is accepted for now. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/87)
+  - Supported in all browsers
+- [`:nth-last-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-child-pseudo)
+  - Supported in all browsers
+- [`:nth-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-of-type-pseudo)
+  - Supported in all browsers
+- [`:nth-last-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-of-type-pseudo)
+  - Supported in all browsers
 - [`:first-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-child-pseudo)
+  - Supported in all browsers
+- [`:last-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-child-pseudo)
+  - Supported in all browsers
+- [`:first-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-of-type-pseudo)
+  - Supported in all browsers
+- [`:last-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-of-type-pseudo)
+  - Supported in all browsers
+- [`:only-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#only-child-pseudo)
+  - Supported in all browsers
+- [`:only-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#only-of-type-pseudo)
+  - Supported in all browsers
+- [`:empty` pseudo-class](https://www.w3.org/TR/css3-selectors/#empty-pseudo)
+  - Supported in all browsers
+- [`:not()` pseudo-class](https://www.w3.org/TR/css3-selectors/#negation)
+  - Supported in all browsers
 - [`::first-line` pseudo-element](https://www.w3.org/TR/css3-selectors/#first-line)
-  - Depends on browser's capability: No
+  - Supported in all browsers
   - Note: there is a bug when used alone or with the universal selector(`*`). [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/133)
 - [`::first-letter` pseudo-element](https://www.w3.org/TR/css3-selectors/#first-letter)
-  - Depends on browser's capability: No
+  - Supported in all browsers
   - Note: there is a bug when used alone, with the universal selector(`*`), or with non-ascii characters. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/34)
 - [`::before` and `::after` pseudo-elements](https://www.w3.org/TR/css3-selectors/#gen-content)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [General sibling combinator `E ~ F`](https://www.w3.org/TR/css3-selectors/#general-sibling-combinators)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 
 #### Not supported selectors
 
 - [Type selectors without namespaces `|E`](https://www.w3.org/TR/css3-selectors/#typenmsp)
 - [Universal selector without namespaces `|*`](https://www.w3.org/TR/css3-selectors/#univnmsp)
-- [Substring matching attribute selectors `[att^=val]`, `[att$=val]`, `[att*=val]`](https://www.w3.org/TR/css3-selectors/#attribute-substrings)
 - [Attribute selectors with universal namespace `[*|att]`, `[*|att=val]`, `[*|att~=val]`, `[*|att|=val]`](https://www.w3.org/TR/css3-selectors/#attrnmsp)
 - [Target pseudo-class `:target`](https://www.w3.org/TR/css3-selectors/#target-pseudo)
-- [The UI element states pseudo-classes `:enabled`, `:disabled`, `:checked`, `:indeterminate`](https://www.w3.org/TR/css3-selectors/#UIstates)
-- [`:nth-last-child()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-child-pseudo)
-- [`:nth-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-of-type-pseudo)
-- [`:nth-last-of-type()` pseudo-class](https://www.w3.org/TR/css3-selectors/#nth-last-of-type-pseudo)
-- [`:last-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-child-pseudo)
-- [`:first-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#first-of-type-pseudo)
-- [`:last-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#last-of-type-pseudo)
-- [`:only-child` pseudo-class](https://www.w3.org/TR/css3-selectors/#only-child-pseudo)
-- [`:only-of-type` pseudo-class](https://www.w3.org/TR/css3-selectors/#only-of-type-pseudo)
-- [`:empty` pseudo-class](https://www.w3.org/TR/css3-selectors/#empty-pseudo)
-- [The negation pseudo-class `:not()`](https://www.w3.org/TR/css3-selectors/#negation)
 
 ## At-rules
 
-### [CSS 2](http://www.w3.org/TR/CSS2/)
+### [CSS 2](https://www.w3.org/TR/CSS2/)
 
-- [@charset](http://www.w3.org/TR/CSS2/syndata.html#charset)
-  - Depends on browser's capability: No
-- [@import](http://www.w3.org/TR/CSS2/cascade.html#at-import)
-  - [Also in CSS Cascading and Inheritance 3](http://www.w3.org/TR/css-cascade-3/#at-import)
-  - Depends on browser's capability: No
+- [@charset](https://www.w3.org/TR/CSS2/syndata.html#charset)
+  - Supported in all browsers
+- [@import](https://www.w3.org/TR/CSS2/cascade.html#at-import)
+  - [Also in CSS Cascading and Inheritance 3](https://www.w3.org/TR/css-cascade-3/#at-import)
+  - Supported in all browsers
 
-### [CSS Namespaces 3](http://www.w3.org/TR/css3-namespace/)
+### [CSS Namespaces 3](https://www.w3.org/TR/css3-namespace/)
 
-- [@namespace](http://www.w3.org/TR/css3-namespace/#declaration)
-  - Depends on browser's capability: No
+- [@namespace](https://www.w3.org/TR/css3-namespace/#declaration)
+  - Supported in all browsers
 
-### [CSS Conditional Rules 3](http://www.w3.org/TR/css3-conditional/)
+### [CSS Conditional Rules 3](https://www.w3.org/TR/css3-conditional/)
 
-- [@media](http://www.w3.org/TR/css3-conditional/#atmedia-rule)
-  - Depends on browser's capability: No
+- [@media](https://www.w3.org/TR/css3-conditional/#atmedia-rule)
+  - Supported in all browsers
 
 ### [CSS Paged Media 3](https://drafts.csswg.org/css-page-3/)
 
 - [@page](https://drafts.csswg.org/css-page/#at-page-rule)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [Page-margin boxes (@top-left-corner, @top-left, @top-center, @top-right, @top-right-corner, @left-top, @left-middle, @left-bottom, @right-top, @right-middle, @right-bottom, @bottom-left-corner, @bottom-left, @bottom-center, @bottom-right, @bottom-right-coner)](https://drafts.csswg.org/css-page/#margin-at-rules)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 
-### [CSS Fonts 3](http://www.w3.org/TR/css-fonts-3/)
+### [CSS Fonts 3](https://www.w3.org/TR/css-fonts-3/)
 
-- [@font-face](http://www.w3.org/TR/css-fonts-3/#font-face-rule)
-  - Depends on browser's capability: Yes
+- [@font-face](https://www.w3.org/TR/css-fonts-3/#font-face-rule)
+  - Support depends on browser capabilities
   - Note: `font-stretch`, `unicode-range` and `font-feature-settings` descriptors are currently ignored.
 
 ## Media queries
 
-- Vivliostyle uses styles specified for [`print` media](http://www.w3.org/TR/CSS2/media.html#media-types) (as well as `all`).
-  - Depends on browser's capability: No
+- Vivliostyle uses styles specified for [`print` media](https://www.w3.org/TR/CSS2/media.html#media-types) (as well as `all`).
+  - Supported in all browsers
 - Supported media features
-  - [`(min-|max-)width`](http://www.w3.org/TR/css3-mediaqueries/#width)
-      - Depends on browser's capability: No
-  - [`(min-|max-)height`](http://www.w3.org/TR/css3-mediaqueries/#height)
-      - Depends on browser's capability: No
-  - [`(min-|max-)device-width`](http://www.w3.org/TR/css3-mediaqueries/#device-width)
-      - Depends on browser's capability: No
-  - [`(min-|max-)device-height`](http://www.w3.org/TR/css3-mediaqueries/#device-height)
-      - Depends on browser's capability: No
-  - [`(min-|max-)color`](http://www.w3.org/TR/css3-mediaqueries/#color)
-      - Depends on browser's capability: No
+  - [`(min-|max-)width`](https://www.w3.org/TR/css3-mediaqueries/#width)
+      - Supported in all browsers
+  - [`(min-|max-)height`](https://www.w3.org/TR/css3-mediaqueries/#height)
+      - Supported in all browsers
+  - [`(min-|max-)device-width`](https://www.w3.org/TR/css3-mediaqueries/#device-width)
+      - Supported in all browsers
+  - [`(min-|max-)device-height`](https://www.w3.org/TR/css3-mediaqueries/#device-height)
+      - Supported in all browsers
+  - [`(min-|max-)color`](https://www.w3.org/TR/css3-mediaqueries/#color)
+      - Supported in all browsers
 
 ## Properties
 
-### [CSS 2](http://www.w3.org/TR/CSS2/)
+### [CSS 2](https://www.w3.org/TR/CSS2/)
 
-- [background](http://www.w3.org/TR/CSS2/colors.html#propdef-background)
-  - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background)
-  - Depends on browser's capability: Yes
-- [background-attachment](http://www.w3.org/TR/CSS2/colors.html#propdef-background-attachment)
-  - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background-attachment)
-  - Depends on browser's capability: Yes
+- [background](https://www.w3.org/TR/CSS2/colors.html#propdef-background)
+  - Supports [CSS Backgrounds 3 syntax](https://www.w3.org/TR/css3-background/#background)
+  - Support depends on browser capabilities
+- [background-attachment](https://www.w3.org/TR/CSS2/colors.html#propdef-background-attachment)
+  - Supports [CSS Backgrounds 3 syntax](https://www.w3.org/TR/css3-background/#background-attachment)
+  - Support depends on browser capabilities
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [background-color](http://www.w3.org/TR/CSS2/colors.html#propdef-background-color)
-  - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background-color)
-  - Depends on browser's capability: Yes
-- [background-image](http://www.w3.org/TR/CSS2/colors.html#propdef-background-image)
-  - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background-image)
-  - Depends on browser's capability: Yes
+- [background-color](https://www.w3.org/TR/CSS2/colors.html#propdef-background-color)
+  - Supports [CSS Backgrounds 3 syntax](https://www.w3.org/TR/css3-background/#background-color)
+  - Support depends on browser capabilities
+- [background-image](https://www.w3.org/TR/CSS2/colors.html#propdef-background-image)
+  - Supports [CSS Backgrounds 3 syntax](https://www.w3.org/TR/css3-background/#background-image)
+  - Support depends on browser capabilities
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [background-position](http://www.w3.org/TR/CSS2/colors.html#propdef-background-position)
-  - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background-position)
-  - Depends on browser's capability: Yes
+- [background-position](https://www.w3.org/TR/CSS2/colors.html#propdef-background-position)
+  - Supports [CSS Backgrounds 3 syntax](https://www.w3.org/TR/css3-background/#background-position)
+  - Support depends on browser capabilities
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [background-repeat](http://www.w3.org/TR/CSS2/colors.html#propdef-background-repeat)
-  - Supports [CSS Backgrounds 3 syntax](http://www.w3.org/TR/css3-background/#background-repeat)
-  - Depends on browser's capability: Yes
+- [background-repeat](https://www.w3.org/TR/CSS2/colors.html#propdef-background-repeat)
+  - Supports [CSS Backgrounds 3 syntax](https://www.w3.org/TR/css3-background/#background-repeat)
+  - Support depends on browser capabilities
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [border](http://www.w3.org/TR/CSS2/box.html#propdef-border)
-  - Depends on browser's capability: Yes
-- [border-bottom](http://www.w3.org/TR/CSS2/box.html#propdef-border-bottom)
-  - Depends on browser's capability: Yes
-- [border-bottom-color](http://www.w3.org/TR/CSS2/box.html#propdef-border-bottom-color)
-  - Depends on browser's capability: Yes
-- [border-bottom-style](http://www.w3.org/TR/CSS2/box.html#propdef-border-bottom-style)
-  - Depends on browser's capability: Yes
-- [border-bottom-width](http://www.w3.org/TR/CSS2/box.html#propdef-border-bottom-width)
-  - Depends on browser's capability: Yes
-- [border-collapse](http://www.w3.org/TR/CSS2/tables.html#propdef-border-collapse)
-  - Depends on browser's capability: Yes
-- [border-color](http://www.w3.org/TR/CSS2/box.html#propdef-border-color)
-  - Depends on browser's capability: Yes
-- [border-left](http://www.w3.org/TR/CSS2/box.html#propdef-border-left)
-  - Depends on browser's capability: Yes
-- [border-left-color](http://www.w3.org/TR/CSS2/box.html#propdef-border-left-color)
-  - Depends on browser's capability: Yes
-- [border-left-style](http://www.w3.org/TR/CSS2/box.html#propdef-border-left-style)
-  - Depends on browser's capability: Yes
-- [border-left-width](http://www.w3.org/TR/CSS2/box.html#propdef-border-left-width)
-  - Depends on browser's capability: Yes
-- [border-right](http://www.w3.org/TR/CSS2/box.html#propdef-border-right)
-  - Depends on browser's capability: Yes
-- [border-right-color](http://www.w3.org/TR/CSS2/box.html#propdef-border-right-color)
-  - Depends on browser's capability: Yes
-- [border-right-style](http://www.w3.org/TR/CSS2/box.html#propdef-border-right-style)
-  - Depends on browser's capability: Yes
-- [border-right-width](http://www.w3.org/TR/CSS2/box.html#propdef-border-right-width)
-  - Depends on browser's capability: Yes
-- [border-spacing](http://www.w3.org/TR/CSS2/tables.html#propdef-border-spacing)
-  - Depends on browser's capability: Yes
-- [border-style](http://www.w3.org/TR/CSS2/box.html#propdef-border-style)
-  - Depends on browser's capability: Yes
-- [border-top](http://www.w3.org/TR/CSS2/box.html#propdef-border-top)
-  - Depends on browser's capability: Yes
-- [border-top-color](http://www.w3.org/TR/CSS2/box.html#propdef-border-top-color)
-  - Depends on browser's capability: Yes
-- [border-top-style](http://www.w3.org/TR/CSS2/box.html#propdef-border-top-style)
-  - Depends on browser's capability: Yes
-- [border-top-width](http://www.w3.org/TR/CSS2/box.html#propdef-border-top-width)
-  - Depends on browser's capability: Yes
-- [border-width](http://www.w3.org/TR/CSS2/box.html#propdef-border-width)
-  - Depends on browser's capability: Yes
-- [bottom](http://www.w3.org/TR/CSS2/visuren.html#propdef-bottom)
-  - Depends on browser's capability: Yes
-- [caption-side](http://www.w3.org/TR/CSS2/tables.html#propdef-caption-side)
-  - Depends on browser's capability: Yes
-- [clear](http://www.w3.org/TR/CSS2/visuren.html#propdef-clear)
-  - Depends on browser's capability: No
-- [clip](http://www.w3.org/TR/CSS2/visufx.html#propdef-clip)
-  - Depends on browser's capability: Yes
-- [color](http://www.w3.org/TR/CSS2/colors.html#propdef-color)
-  - Depends on browser's capability: Yes
-- [content](http://www.w3.org/TR/CSS2/generate.html#propdef-content)
-  - Depends on browser's capability: No
-- [counter-increment](http://www.w3.org/TR/CSS2/generate.html#propdef-counter-increment)
-  - Depends on browser's capability: No
-- [counter-reset](http://www.w3.org/TR/CSS2/generate.html#propdef-counter-reset)
-  - Depends on browser's capability: No
-- [cursor](http://www.w3.org/TR/CSS2/ui.html#propdef-cursor)
-  - Depends on browser's capability: Yes
-- [direction](http://www.w3.org/TR/CSS2/visuren.html#propdef-direction)
-  - Depends on browser's capability: Yes
-- [display](http://www.w3.org/TR/CSS2/visuren.html#propdef-display)
-  - Depends on browser's capability: Yes
+- [border](https://www.w3.org/TR/CSS2/box.html#propdef-border)
+  - Support depends on browser capabilities
+- [border-bottom](https://www.w3.org/TR/CSS2/box.html#propdef-border-bottom)
+  - Support depends on browser capabilities
+- [border-bottom-color](https://www.w3.org/TR/CSS2/box.html#propdef-border-bottom-color)
+  - Support depends on browser capabilities
+- [border-bottom-style](https://www.w3.org/TR/CSS2/box.html#propdef-border-bottom-style)
+  - Support depends on browser capabilities
+- [border-bottom-width](https://www.w3.org/TR/CSS2/box.html#propdef-border-bottom-width)
+  - Support depends on browser capabilities
+- [border-collapse](https://www.w3.org/TR/CSS2/tables.html#propdef-border-collapse)
+  - Support depends on browser capabilities
+- [border-color](https://www.w3.org/TR/CSS2/box.html#propdef-border-color)
+  - Support depends on browser capabilities
+- [border-left](https://www.w3.org/TR/CSS2/box.html#propdef-border-left)
+  - Support depends on browser capabilities
+- [border-left-color](https://www.w3.org/TR/CSS2/box.html#propdef-border-left-color)
+  - Support depends on browser capabilities
+- [border-left-style](https://www.w3.org/TR/CSS2/box.html#propdef-border-left-style)
+  - Support depends on browser capabilities
+- [border-left-width](https://www.w3.org/TR/CSS2/box.html#propdef-border-left-width)
+  - Support depends on browser capabilities
+- [border-right](https://www.w3.org/TR/CSS2/box.html#propdef-border-right)
+  - Support depends on browser capabilities
+- [border-right-color](https://www.w3.org/TR/CSS2/box.html#propdef-border-right-color)
+  - Support depends on browser capabilities
+- [border-right-style](https://www.w3.org/TR/CSS2/box.html#propdef-border-right-style)
+  - Support depends on browser capabilities
+- [border-right-width](https://www.w3.org/TR/CSS2/box.html#propdef-border-right-width)
+  - Support depends on browser capabilities
+- [border-spacing](https://www.w3.org/TR/CSS2/tables.html#propdef-border-spacing)
+  - Support depends on browser capabilities
+- [border-style](https://www.w3.org/TR/CSS2/box.html#propdef-border-style)
+  - Support depends on browser capabilities
+- [border-top](https://www.w3.org/TR/CSS2/box.html#propdef-border-top)
+  - Support depends on browser capabilities
+- [border-top-color](https://www.w3.org/TR/CSS2/box.html#propdef-border-top-color)
+  - Support depends on browser capabilities
+- [border-top-style](https://www.w3.org/TR/CSS2/box.html#propdef-border-top-style)
+  - Support depends on browser capabilities
+- [border-top-width](https://www.w3.org/TR/CSS2/box.html#propdef-border-top-width)
+  - Support depends on browser capabilities
+- [border-width](https://www.w3.org/TR/CSS2/box.html#propdef-border-width)
+  - Support depends on browser capabilities
+- [bottom](https://www.w3.org/TR/CSS2/visuren.html#propdef-bottom)
+  - Support depends on browser capabilities
+- [caption-side](https://www.w3.org/TR/CSS2/tables.html#propdef-caption-side)
+  - Support depends on browser capabilities
+- [clear](https://www.w3.org/TR/CSS2/visuren.html#propdef-clear)
+  - Supported in all browsers
+- [clip](https://www.w3.org/TR/CSS2/visufx.html#propdef-clip)
+  - Support depends on browser capabilities
+- [color](https://www.w3.org/TR/CSS2/colors.html#propdef-color)
+  - Support depends on browser capabilities
+- [content](https://www.w3.org/TR/CSS2/generate.html#propdef-content)
+  - Supported in all browsers
+- [counter-increment](https://www.w3.org/TR/CSS2/generate.html#propdef-counter-increment)
+  - Supported in all browsers
+- [counter-reset](https://www.w3.org/TR/CSS2/generate.html#propdef-counter-reset)
+  - Supported in all browsers
+- [cursor](https://www.w3.org/TR/CSS2/ui.html#propdef-cursor)
+  - Support depends on browser capabilities
+- [direction](https://www.w3.org/TR/CSS2/visuren.html#propdef-direction)
+  - Support depends on browser capabilities
+- [display](https://www.w3.org/TR/CSS2/visuren.html#propdef-display)
+  - Support depends on browser capabilities
   - Supports [`flex`, `inline-flex`](https://www.w3.org/TR/css-flexbox-1/#flex-containers), [`ruby`, `ruby-base`, `ruby-text`, `ruby-base-container` and `ruby-text-container`](https://www.w3.org/TR/css-ruby-1/#propdef-display) values.
-- [empty-cells](http://www.w3.org/TR/CSS2/tables.html#propdef-empty-cells)
-  - Depends on browser's capability: Yes
-- [float](http://www.w3.org/TR/CSS2/visuren.html#propdef-float)
-  - Depends on browser's capability: No
-- [font](http://www.w3.org/TR/CSS2/fonts.html#propdef-font)
-  - Depends on browser's capability: Yes
-- [font-family](http://www.w3.org/TR/CSS2/fonts.html#propdef-font-family)
-  - Depends on browser's capability: Yes
-- [font-size](http://www.w3.org/TR/CSS2/fonts.html#propdef-font-size)
-  - Depends on browser's capability: Yes
-- [font-style](http://www.w3.org/TR/CSS2/fonts.html#propdef-font-style)
-  - Depends on browser's capability: Yes
-- [font-variant](http://www.w3.org/TR/CSS2/fonts.html#propdef-font-variant)
-  - Depends on browser's capability: Yes
-- [font-weight](http://www.w3.org/TR/CSS2/fonts.html#propdef-font-weight)
-  - Depends on browser's capability: Yes
-- [height](http://www.w3.org/TR/CSS2/visudet.html#propdef-height)
-  - Depends on browser's capability: Yes
-- [left](http://www.w3.org/TR/CSS2/visuren.html#propdef-left)
-  - Depends on browser's capability: Yes
-- [letter-spacing](http://www.w3.org/TR/CSS2/text.html#propdef-letter-spacing)
-  - Depends on browser's capability: Yes
-- [line-height](http://www.w3.org/TR/CSS2/visudet.html#propdef-line-height)
-  - Depends on browser's capability: Yes
-- [list-style](http://www.w3.org/TR/CSS2/generate.html#propdef-list-style)
-  - Depends on browser's capability: Yes
-- [list-style-image](http://www.w3.org/TR/CSS2/generate.html#propdef-list-style-image)
-  - Depends on browser's capability: Yes
-- [list-style-position](http://www.w3.org/TR/CSS2/generate.html#propdef-list-style-position)
-  - Depends on browser's capability: Yes
-- [list-style-type](http://www.w3.org/TR/CSS2/generate.html#propdef-list-style-type)
-  - Depends on browser's capability: Yes
-- [margin](http://www.w3.org/TR/CSS2/box.html#propdef-margin)
-  - Depends on browser's capability: Yes
-- [margin-bottom](http://www.w3.org/TR/CSS2/box.html#propdef-margin-bottom)
-  - Depends on browser's capability: Yes
-- [margin-left](http://www.w3.org/TR/CSS2/box.html#propdef-margin-left)
-  - Depends on browser's capability: Yes
-- [margin-right](http://www.w3.org/TR/CSS2/box.html#propdef-margin-right)
-  - Depends on browser's capability: Yes
-- [margin-top](http://www.w3.org/TR/CSS2/box.html#propdef-margin-top)
-  - Depends on browser's capability: Yes
-- [max-height](http://www.w3.org/TR/CSS2/visudet.html#propdef-max-height)
-  - Depends on browser's capability: Yes
-- [max-width](http://www.w3.org/TR/CSS2/visudet.html#propdef-max-width)
-  - Depends on browser's capability: Yes
-- [min-height](http://www.w3.org/TR/CSS2/visudet.html#propdef-min-height)
-  - Depends on browser's capability: Yes
-- [min-width](http://www.w3.org/TR/CSS2/visudet.html#propdef-min-width)
-  - Depends on browser's capability: Yes
-- [orphans](http://www.w3.org/TR/CSS2/page.html#propdef-orphans)
-  - Depends on browser's capability: No
-- [outline](http://www.w3.org/TR/CSS2/ui.html#propdef-outline)
-  - Depends on browser's capability: Yes
-- [outline-color](http://www.w3.org/TR/CSS2/ui.html#propdef-outline-color)
-  - Depends on browser's capability: Yes
-- [outline-style](http://www.w3.org/TR/CSS2/ui.html#propdef-outline-style)
-  - Depends on browser's capability: Yes
-- [outline-width](http://www.w3.org/TR/CSS2/ui.html#propdef-outline-width)
-  - Depends on browser's capability: Yes
-- [overflow](http://www.w3.org/TR/CSS2/visufx.html#propdef-overflow)
-  - Depends on browser's capability: Yes
-- [padding](http://www.w3.org/TR/CSS2/box.html#propdef-padding)
-  - Depends on browser's capability: Yes
-- [padding-bottom](http://www.w3.org/TR/CSS2/box.html#propdef-padding-bottom)
-  - Depends on browser's capability: Yes
-- [padding-left](http://www.w3.org/TR/CSS2/box.html#propdef-padding-left)
-  - Depends on browser's capability: Yes
-- [padding-right](http://www.w3.org/TR/CSS2/box.html#propdef-padding-right)
-  - Depends on browser's capability: Yes
-- [padding-top](http://www.w3.org/TR/CSS2/box.html#propdef-padding-top)
-  - Depends on browser's capability: Yes
-- [page-break-after](http://www.w3.org/TR/CSS2/page.html#propdef-page-break-after)
-  - Depends on browser's capability: No
-- [page-break-before](http://www.w3.org/TR/CSS2/page.html#propdef-page-break-before)
-  - Depends on browser's capability: No
-- [page-break-inside](http://www.w3.org/TR/CSS2/page.html#propdef-page-break-inside)
-  - Depends on browser's capability: No
-- [position](http://www.w3.org/TR/CSS2/visuren.html#propdef-position)
-  - Depends on browser's capability: Yes
-- [quotes](http://www.w3.org/TR/CSS2/generate.html#propdef-quotes)
-  - Depends on browser's capability: No
+- [empty-cells](https://www.w3.org/TR/CSS2/tables.html#propdef-empty-cells)
+  - Support depends on browser capabilities
+- [float](https://www.w3.org/TR/CSS2/visuren.html#propdef-float)
+  - Supported in all browsers
+- [font](https://www.w3.org/TR/CSS2/fonts.html#propdef-font)
+  - Support depends on browser capabilities
+- [font-family](https://www.w3.org/TR/CSS2/fonts.html#propdef-font-family)
+  - Support depends on browser capabilities
+- [font-size](https://www.w3.org/TR/CSS2/fonts.html#propdef-font-size)
+  - Support depends on browser capabilities
+- [font-style](https://www.w3.org/TR/CSS2/fonts.html#propdef-font-style)
+  - Support depends on browser capabilities
+- [font-variant](https://www.w3.org/TR/CSS2/fonts.html#propdef-font-variant)
+  - Support depends on browser capabilities
+- [font-weight](https://www.w3.org/TR/CSS2/fonts.html#propdef-font-weight)
+  - Support depends on browser capabilities
+- [height](https://www.w3.org/TR/CSS2/visudet.html#propdef-height)
+  - Support depends on browser capabilities
+- [left](https://www.w3.org/TR/CSS2/visuren.html#propdef-left)
+  - Support depends on browser capabilities
+- [letter-spacing](https://www.w3.org/TR/CSS2/text.html#propdef-letter-spacing)
+  - Support depends on browser capabilities
+- [line-height](https://www.w3.org/TR/CSS2/visudet.html#propdef-line-height)
+  - Support depends on browser capabilities
+- [list-style](https://www.w3.org/TR/CSS2/generate.html#propdef-list-style)
+  - Support depends on browser capabilities
+- [list-style-image](https://www.w3.org/TR/CSS2/generate.html#propdef-list-style-image)
+  - Support depends on browser capabilities
+- [list-style-position](https://www.w3.org/TR/CSS2/generate.html#propdef-list-style-position)
+  - Support depends on browser capabilities
+- [list-style-type](https://www.w3.org/TR/CSS2/generate.html#propdef-list-style-type)
+  - Support depends on browser capabilities
+- [margin](https://www.w3.org/TR/CSS2/box.html#propdef-margin)
+  - Support depends on browser capabilities
+- [margin-bottom](https://www.w3.org/TR/CSS2/box.html#propdef-margin-bottom)
+  - Support depends on browser capabilities
+- [margin-left](https://www.w3.org/TR/CSS2/box.html#propdef-margin-left)
+  - Support depends on browser capabilities
+- [margin-right](https://www.w3.org/TR/CSS2/box.html#propdef-margin-right)
+  - Support depends on browser capabilities
+- [margin-top](https://www.w3.org/TR/CSS2/box.html#propdef-margin-top)
+  - Support depends on browser capabilities
+- [max-height](https://www.w3.org/TR/CSS2/visudet.html#propdef-max-height)
+  - Support depends on browser capabilities
+- [max-width](https://www.w3.org/TR/CSS2/visudet.html#propdef-max-width)
+  - Support depends on browser capabilities
+- [min-height](https://www.w3.org/TR/CSS2/visudet.html#propdef-min-height)
+  - Support depends on browser capabilities
+- [min-width](https://www.w3.org/TR/CSS2/visudet.html#propdef-min-width)
+  - Support depends on browser capabilities
+- [orphans](https://www.w3.org/TR/CSS2/page.html#propdef-orphans)
+  - Supported in all browsers
+- [outline](https://www.w3.org/TR/CSS2/ui.html#propdef-outline)
+  - Support depends on browser capabilities
+- [outline-color](https://www.w3.org/TR/CSS2/ui.html#propdef-outline-color)
+  - Support depends on browser capabilities
+- [outline-offset](https://www.w3.org/TR/css3-ui/#propdef-outline-offset)
+  - Support depends on browser capabilities
+- [outline-style](https://www.w3.org/TR/CSS2/ui.html#propdef-outline-style)
+  - Support depends on browser capabilities
+- [outline-width](https://www.w3.org/TR/CSS2/ui.html#propdef-outline-width)
+  - Support depends on browser capabilities
+- [overflow](https://www.w3.org/TR/CSS2/visufx.html#propdef-overflow)
+  - Support depends on browser capabilities
+- [padding](https://www.w3.org/TR/CSS2/box.html#propdef-padding)
+  - Support depends on browser capabilities
+- [padding-bottom](https://www.w3.org/TR/CSS2/box.html#propdef-padding-bottom)
+  - Support depends on browser capabilities
+- [padding-left](https://www.w3.org/TR/CSS2/box.html#propdef-padding-left)
+  - Support depends on browser capabilities
+- [padding-right](https://www.w3.org/TR/CSS2/box.html#propdef-padding-right)
+  - Support depends on browser capabilities
+- [padding-top](https://www.w3.org/TR/CSS2/box.html#propdef-padding-top)
+  - Support depends on browser capabilities
+- [page-break-after](https://www.w3.org/TR/CSS2/page.html#propdef-page-break-after)
+  - Supported in all browsers
+- [page-break-before](https://www.w3.org/TR/CSS2/page.html#propdef-page-break-before)
+  - Supported in all browsers
+- [page-break-inside](https://www.w3.org/TR/CSS2/page.html#propdef-page-break-inside)
+  - Supported in all browsers
+- [position](https://www.w3.org/TR/CSS2/visuren.html#propdef-position)
+  - Support depends on browser capabilities
+- [quotes](https://www.w3.org/TR/CSS2/generate.html#propdef-quotes)
+  - Supported in all browsers
   - Note: not supported within `@page` rules. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/43)
-- [right](http://www.w3.org/TR/CSS2/visuren.html#propdef-right)
-  - Depends on browser's capability: Yes
-- [table-layout](http://www.w3.org/TR/CSS2/tables.html#propdef-table-layout)
-  - Depends on browser's capability: Yes
-- [text-align](http://www.w3.org/TR/CSS2/text.html#propdef-text-align)
-  - Depends on browser's capability: Yes
-- [text-decoration](http://www.w3.org/TR/CSS2/text.html#propdef-text-decoration)
-  - Depends on browser's capability: Yes
-- [text-indent](http://www.w3.org/TR/CSS2/text.html#propdef-text-indent)
-  - Depends on browser's capability: Yes
-- [text-transform](http://www.w3.org/TR/CSS2/text.html#propdef-text-transform)
-  - Depends on browser's capability: Yes
-- [top](http://www.w3.org/TR/CSS2/visuren.html#propdef-top)
-  - Depends on browser's capability: Yes
-- [unicode-bidi](http://www.w3.org/TR/CSS2/visuren.html#propdef-unicode-bidi)
-  - Depends on browser's capability: Yes
+- [right](https://www.w3.org/TR/CSS2/visuren.html#propdef-right)
+  - Support depends on browser capabilities
+- [table-layout](https://www.w3.org/TR/CSS2/tables.html#propdef-table-layout)
+  - Support depends on browser capabilities
+- [text-align](https://www.w3.org/TR/CSS2/text.html#propdef-text-align)
+  - Support depends on browser capabilities
+- [text-decoration](https://www.w3.org/TR/CSS2/text.html#propdef-text-decoration)
+  - Support depends on browser capabilities
+- [text-indent](https://www.w3.org/TR/CSS2/text.html#propdef-text-indent)
+  - Support depends on browser capabilities
+- [text-transform](https://www.w3.org/TR/CSS2/text.html#propdef-text-transform)
+  - Support depends on browser capabilities
+- [top](https://www.w3.org/TR/CSS2/visuren.html#propdef-top)
+  - Support depends on browser capabilities
+- [unicode-bidi](https://www.w3.org/TR/CSS2/visuren.html#propdef-unicode-bidi)
+  - Support depends on browser capabilities
   - Supports [new values (`isolate`, `isolate-override`, `plaintext`) in CSS Writing Modes 3](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
-- [vertical-align](http://www.w3.org/TR/CSS2/visudet.html#propdef-vertical-align)
-  - Depends on browser's capability: Yes
-- [visibility](http://www.w3.org/TR/CSS2/visufx.html#propdef-visibility)
-  - Depends on browser's capability: Yes
-- [white-space](http://www.w3.org/TR/CSS2/text.html#propdef-white-space)
-  - Depends on browser's capability: Yes
-- [widows](http://www.w3.org/TR/CSS2/page.html#propdef-widows)
-  - Depends on browser's capability: No
-- [width](http://www.w3.org/TR/CSS2/visudet.html#propdef-width)
-  - Depends on browser's capability: Yes
-- [word-spacing](http://www.w3.org/TR/CSS2/text.html#propdef-word-spacing)
-  - Depends on browser's capability: Yes
-- [z-index](http://www.w3.org/TR/CSS2/visuren.html#propdef-z-index)
-  - Depends on browser's capability: Yes
+- [vertical-align](https://www.w3.org/TR/CSS2/visudet.html#propdef-vertical-align)
+  - Support depends on browser capabilities
+- [visibility](https://www.w3.org/TR/CSS2/visufx.html#propdef-visibility)
+  - Support depends on browser capabilities
+- [white-space](https://www.w3.org/TR/CSS2/text.html#propdef-white-space)
+  - Support depends on browser capabilities
+- [widows](https://www.w3.org/TR/CSS2/page.html#propdef-widows)
+  - Supported in all browsers
+- [width](https://www.w3.org/TR/CSS2/visudet.html#propdef-width)
+  - Support depends on browser capabilities
+- [word-spacing](https://www.w3.org/TR/CSS2/text.html#propdef-word-spacing)
+  - Support depends on browser capabilities
+- [z-index](https://www.w3.org/TR/CSS2/visuren.html#propdef-z-index)
+  - Support depends on browser capabilities
 
 ### [CSS Paged Media 3](https://drafts.csswg.org/css-page-3/)
 
+- [bleed](https://drafts.csswg.org/css-page/#bleed)
+  - Supported in all browsers
+  - Only effective when specified within an `@page` rule without page selectors
+- [marks](https://drafts.csswg.org/css-page/#marks)
+  - Supported in all browsers
+  - Only effective when specified within an `@page` rule without page selectors
 - [size](https://drafts.csswg.org/css-page-3/#descdef-page-size)
-  - Depends on browser's capability: No
+  - Supported in all browsers
   - Supports `JIS-B5` and `JIS-B4` values in the current editor's draft.
 
-### [CSS Color 3](http://www.w3.org/TR/css3-color/)
+### [CSS Color 3](https://www.w3.org/TR/css3-color/)
 
-- [color](http://www.w3.org/TR/css3-color/#color0)
-  - Depends on browser's capability: Yes
-- [opacity](http://www.w3.org/TR/css3-color/#opacity)
-  - Depends on browser's capability: Yes
+- [color](https://www.w3.org/TR/css3-color/#color0)
+  - Support depends on browser capabilities
+- [opacity](https://www.w3.org/TR/css3-color/#opacity)
+  - Support depends on browser capabilities
 
-### [CSS Backgrounds and Borders 3](http://www.w3.org/TR/css3-background/)
+### [CSS Backgrounds and Borders 3](https://www.w3.org/TR/css3-background/)
 
-- [background](http://www.w3.org/TR/css3-background/#background)
-  - Depends on browser's capability: Yes
-- [background-attachment](http://www.w3.org/TR/css3-background/#background-attachment)
-  - Depends on browser's capability: Yes
+- [background](https://www.w3.org/TR/css3-background/#background)
+  - Support depends on browser capabilities
+- [background-attachment](https://www.w3.org/TR/css3-background/#background-attachment)
+  - Support depends on browser capabilities
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [background-clip](http://www.w3.org/TR/css3-background/#background-clip)
+- [background-clip](https://www.w3.org/TR/css3-background/#background-clip)
   - Allowed prefixes: webkit
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [background-color](http://www.w3.org/TR/css3-background/#background-color)
-  - Depends on browser's capability: Yes
-- [background-image](http://www.w3.org/TR/css3-background/#background-image)
-  - Depends on browser's capability: Yes
+- [background-color](https://www.w3.org/TR/css3-background/#background-color)
+  - Support depends on browser capabilities
+- [background-image](https://www.w3.org/TR/css3-background/#background-image)
+  - Support depends on browser capabilities
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [background-origin](http://www.w3.org/TR/css3-background/#background-origin)
+- [background-origin](https://www.w3.org/TR/css3-background/#background-origin)
   - Allowed prefixes: webkit
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [background-position](http://www.w3.org/TR/css3-background/#background-position)
-  - Depends on browser's capability: Yes
+- [background-position](https://www.w3.org/TR/css3-background/#background-position)
+  - Support depends on browser capabilities
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [background-repeat](http://www.w3.org/TR/css3-background/#background-repeat)
-  - Depends on browser's capability: Yes
+- [background-repeat](https://www.w3.org/TR/css3-background/#background-repeat)
+  - Support depends on browser capabilities
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [background-size](http://www.w3.org/TR/css3-background/#background-size)
+- [background-size](https://www.w3.org/TR/css3-background/#background-size)
   - Allowed prefixes: webkit
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
   - Note: behavior when used within `@page` rules is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/22)
-- [border](http://www.w3.org/TR/css3-background/#border)
-  - Depends on browser's capability: Yes
-- [border-bottom](http://www.w3.org/TR/css3-background/#border-bottom)
-  - Depends on browser's capability: Yes
-- [border-bottom-color](http://www.w3.org/TR/css3-background/#border-bottom-color)
-  - Depends on browser's capability: Yes
-- [border-bottom-left-radius](http://www.w3.org/TR/css3-background/#border-bottom-left-radius)
-  - Depends on browser's capability: Yes
-- [border-bottom-right-radius](http://www.w3.org/TR/css3-background/#border-bottom-right-radius)
-  - Depends on browser's capability: Yes
-- [border-bottom-style](http://www.w3.org/TR/css3-background/#border-bottom-style)
-  - Depends on browser's capability: Yes
-- [border-bottom-width](http://www.w3.org/TR/css3-background/#border-bottom-width)
-  - Depends on browser's capability: Yes
-- [border-color](http://www.w3.org/TR/css3-background/#border-color)
-  - Depends on browser's capability: Yes
-- [border-image](http://www.w3.org/TR/css3-background/#border-image)
-  - Depends on browser's capability: Yes
-- [border-image-outset](http://www.w3.org/TR/css3-background/#border-image-outset)
-  - Depends on browser's capability: Yes
-- [border-image-repeat](http://www.w3.org/TR/css3-background/#border-image-repeat)
-  - Depends on browser's capability: Yes
-- [border-image-slice](http://www.w3.org/TR/css3-background/#border-image-slice)
-  - Depends on browser's capability: Yes
-- [border-image-source](http://www.w3.org/TR/css3-background/#border-image-source)
-  - Depends on browser's capability: Yes
-- [border-image-width](http://www.w3.org/TR/css3-background/#border-image-width)
-  - Depends on browser's capability: Yes
-- [border-left](http://www.w3.org/TR/css3-background/#border-left)
-  - Depends on browser's capability: Yes
-- [border-left-color](http://www.w3.org/TR/css3-background/#border-left-color)
-  - Depends on browser's capability: Yes
-- [border-left-style](http://www.w3.org/TR/css3-background/#border-left-style)
-  - Depends on browser's capability: Yes
-- [border-left-width](http://www.w3.org/TR/css3-background/#border-left-width)
-  - Depends on browser's capability: Yes
-- [border-radius](http://www.w3.org/TR/css3-background/#border-radius)
-  - Depends on browser's capability: Yes
-- [border-right](http://www.w3.org/TR/css3-background/#border-right)
-  - Depends on browser's capability: Yes
-- [border-right-color](http://www.w3.org/TR/css3-background/#border-right-color)
-  - Depends on browser's capability: Yes
-- [border-right-style](http://www.w3.org/TR/css3-background/#border-right-style)
-  - Depends on browser's capability: Yes
-- [border-right-width](http://www.w3.org/TR/css3-background/#border-right-width)
-  - Depends on browser's capability: Yes
-- [border-style](http://www.w3.org/TR/css3-background/#border-style)
-  - Depends on browser's capability: Yes
-- [border-top](http://www.w3.org/TR/css3-background/#border-top)
-  - Depends on browser's capability: Yes
-- [border-top-color](http://www.w3.org/TR/css3-background/#border-top-color)
-  - Depends on browser's capability: Yes
-- [border-top-left-radius](http://www.w3.org/TR/css3-background/#border-top-left-radius)
-  - Depends on browser's capability: Yes
-- [border-top-right-radius](http://www.w3.org/TR/css3-background/#border-top-right-radius)
-  - Depends on browser's capability: Yes
-- [border-top-style](http://www.w3.org/TR/css3-background/#border-top-style)
-  - Depends on browser's capability: Yes
-- [border-top-width](http://www.w3.org/TR/css3-background/#border-top-width)
-  - Depends on browser's capability: Yes
-- [border-width](http://www.w3.org/TR/css3-background/#border-width)
-  - Depends on browser's capability: Yes
-- [box-shadow](http://www.w3.org/TR/css3-background/#box-shadow)
+- [border](https://www.w3.org/TR/css3-background/#border)
+  - Support depends on browser capabilities
+- [border-bottom](https://www.w3.org/TR/css3-background/#border-bottom)
+  - Support depends on browser capabilities
+- [border-bottom-color](https://www.w3.org/TR/css3-background/#border-bottom-color)
+  - Support depends on browser capabilities
+- [border-bottom-left-radius](https://www.w3.org/TR/css3-background/#border-bottom-left-radius)
+  - Support depends on browser capabilities
+- [border-bottom-right-radius](https://www.w3.org/TR/css3-background/#border-bottom-right-radius)
+  - Support depends on browser capabilities
+- [border-bottom-style](https://www.w3.org/TR/css3-background/#border-bottom-style)
+  - Support depends on browser capabilities
+- [border-bottom-width](https://www.w3.org/TR/css3-background/#border-bottom-width)
+  - Support depends on browser capabilities
+- [border-color](https://www.w3.org/TR/css3-background/#border-color)
+  - Support depends on browser capabilities
+- [border-image](https://www.w3.org/TR/css3-background/#border-image)
+  - Support depends on browser capabilities
+- [border-image-outset](https://www.w3.org/TR/css3-background/#border-image-outset)
+  - Support depends on browser capabilities
+- [border-image-repeat](https://www.w3.org/TR/css3-background/#border-image-repeat)
+  - Support depends on browser capabilities
+- [border-image-slice](https://www.w3.org/TR/css3-background/#border-image-slice)
+  - Support depends on browser capabilities
+- [border-image-source](https://www.w3.org/TR/css3-background/#border-image-source)
+  - Support depends on browser capabilities
+- [border-image-width](https://www.w3.org/TR/css3-background/#border-image-width)
+  - Support depends on browser capabilities
+- [border-left](https://www.w3.org/TR/css3-background/#border-left)
+  - Support depends on browser capabilities
+- [border-left-color](https://www.w3.org/TR/css3-background/#border-left-color)
+  - Support depends on browser capabilities
+- [border-left-style](https://www.w3.org/TR/css3-background/#border-left-style)
+  - Support depends on browser capabilities
+- [border-left-width](https://www.w3.org/TR/css3-background/#border-left-width)
+  - Support depends on browser capabilities
+- [border-radius](https://www.w3.org/TR/css3-background/#border-radius)
+  - Support depends on browser capabilities
+- [border-right](https://www.w3.org/TR/css3-background/#border-right)
+  - Support depends on browser capabilities
+- [border-right-color](https://www.w3.org/TR/css3-background/#border-right-color)
+  - Support depends on browser capabilities
+- [border-right-style](https://www.w3.org/TR/css3-background/#border-right-style)
+  - Support depends on browser capabilities
+- [border-right-width](https://www.w3.org/TR/css3-background/#border-right-width)
+  - Support depends on browser capabilities
+- [border-style](https://www.w3.org/TR/css3-background/#border-style)
+  - Support depends on browser capabilities
+- [border-top](https://www.w3.org/TR/css3-background/#border-top)
+  - Support depends on browser capabilities
+- [border-top-color](https://www.w3.org/TR/css3-background/#border-top-color)
+  - Support depends on browser capabilities
+- [border-top-left-radius](https://www.w3.org/TR/css3-background/#border-top-left-radius)
+  - Support depends on browser capabilities
+- [border-top-right-radius](https://www.w3.org/TR/css3-background/#border-top-right-radius)
+  - Support depends on browser capabilities
+- [border-top-style](https://www.w3.org/TR/css3-background/#border-top-style)
+  - Support depends on browser capabilities
+- [border-top-width](https://www.w3.org/TR/css3-background/#border-top-width)
+  - Support depends on browser capabilities
+- [border-width](https://www.w3.org/TR/css3-background/#border-width)
+  - Support depends on browser capabilities
+- [box-shadow](https://www.w3.org/TR/css3-background/#box-shadow)
   - Allowed prefixes: webkit
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
 
-### [CSS Image Values and Replaced Content 3](http://www.w3.org/TR/css3-images/)
+### [CSS Image Values and Replaced Content 3](https://www.w3.org/TR/css3-images/)
 
-- [object-fit](http://www.w3.org/TR/css3-images/#object-fit)
-  - Depends on browser's capability: Yes
-- [object-position](http://www.w3.org/TR/css3-images/#object-position)
-  - Depends on browser's capability: Yes
+- [object-fit](https://www.w3.org/TR/css3-images/#object-fit)
+  - Support depends on browser capabilities
+- [object-position](https://www.w3.org/TR/css3-images/#object-position)
+  - Support depends on browser capabilities
 
-### [CSS Fonts 3](http://www.w3.org/TR/css-fonts-3/)
+### [CSS Fonts 3](https://www.w3.org/TR/css-fonts-3/)
 
-- [font-family](http://www.w3.org/TR/css-fonts-3/#propdef-font-family)
-  - Depends on browser's capability: Yes
-- [font-kerning](http://www.w3.org/TR/css-fonts-3/#propdef-font-kerning)
+- [font-family](https://www.w3.org/TR/css-fonts-3/#propdef-font-family)
+  - Support depends on browser capabilities
+- [font-feature-settings](https://www.w3.org/TR/css-fonts-3/#propdef-font-feature-settings)
+  - Support depends on browser capabilities
+- [font-kerning](https://www.w3.org/TR/css-fonts-3/#propdef-font-kerning)
   - Allowed prefixes: webkit
-  - Depends on browser's capability: Yes
-- [font-size](http://www.w3.org/TR/css-fonts-3/#propdef-font-size)
-  - Depends on browser's capability: Yes
-- [font-style](http://www.w3.org/TR/css-fonts-3/#propdef-font-style)
-  - Depends on browser's capability: Yes
-- [font-variant-east-asian](http://www.w3.org/TR/css-fonts-3/#propdef-font-variant-east-asian)
-  - Depends on browser's capability: Yes
-- [font-weight](http://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
+- [font-size](https://www.w3.org/TR/css-fonts-3/#propdef-font-size)
+  - Support depends on browser capabilities
+- [font-style](https://www.w3.org/TR/css-fonts-3/#propdef-font-style)
+  - Support depends on browser capabilities
+- [font-variant-east-asian](https://www.w3.org/TR/css-fonts-3/#propdef-font-variant-east-asian)
+  - Support depends on browser capabilities
+- [font-weight](https://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
+  - Support depends on browser capabilities
 
-### [CSS Text 3](http://www.w3.org/TR/css-text-3/)
+### [CSS Text 3](https://www.w3.org/TR/css-text-3/)
 
-- [hyphens](http://www.w3.org/TR/css-text-3/#hyphens)
+- [hyphens](https://www.w3.org/TR/css-text-3/#hyphens)
   - Allowed prefixes: epub, moz, ms, webkit
-  - Depends on browser's capability: Yes
-- [letter-spacing](http://www.w3.org/TR/css-text-3/#letter-spacing)
-  - Depends on browser's capability: Yes
-- [line-break](http://www.w3.org/TR/css-text-3/#line-break0)
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
+- [letter-spacing](https://www.w3.org/TR/css-text-3/#letter-spacing)
+  - Support depends on browser capabilities
+- [line-break](https://www.w3.org/TR/css-text-3/#line-break0)
+  - Support depends on browser capabilities
   - Allowed prefixes: ms, webkit
   - Values: `auto | loose | normal | strict;`
-- [overflow-wrap](http://www.w3.org/TR/css-text-3/#overflow-wrap)
-  - Depends on browser's capability: Yes
+- [overflow-wrap](https://www.w3.org/TR/css-text-3/#overflow-wrap)
+  - Support depends on browser capabilities
   - Note: While the spec states that `word-wrap` must be treated as if it were a shorthand of `overflow-wrap`, Vivliostyle treat them for now as different properties and might result in an incorrect cascading behavior when inconsistent values are specified for both of the properties.
-- [tab-size](http://www.w3.org/TR/css-text-3/#tab-size)
+- [tab-size](https://www.w3.org/TR/css-text-3/#tab-size)
   - Allowed prefixes: moz
-  - Depends on browser's capability: Yes
-- [text-align-last](http://www.w3.org/TR/css-text-3/#text-align-last)
+  - Support depends on browser capabilities
+- [text-align-last](https://www.w3.org/TR/css-text-3/#text-align-last)
   - Allowed prefixes: moz, ms
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
   - Note: While `text-align` property is a shorthand in CSS Text 3, Vivliostyle treats `text-align` for now as an independent property (defined in CSS 2.1) rather than a shorthand.
 - [text-justify](https://drafts.csswg.org/css-text-3/#propdef-text-justify)
   - Allowed prefixes: ms
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
   - Note: `inter-ideograph` value as well as values defined in the current editor's draft is supported since we use it in UA stylesheet to emulate text-justify: auto behavior defined in the spec on IE.
-- [white-space](http://www.w3.org/TR/css-text-3/#white-space)
-  - Depends on browser's capability: Yes
-- [word-break](http://www.w3.org/TR/css-text-3/#word-break)
+- [white-space](https://www.w3.org/TR/css-text-3/#white-space)
+  - Support depends on browser capabilities
+- [word-break](https://www.w3.org/TR/css-text-3/#word-break)
   - Allowed prefixes: ms
-  - Depends on browser's capability: Yes
-- [word-wrap](http://www.w3.org/TR/css-text-3/#word-wrap)
+  - Support depends on browser capabilities
+- [word-wrap](https://www.w3.org/TR/css-text-3/#word-wrap)
   - Allowed prefixes: ms
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
   - Note: While the spec states that `word-wrap` must be treated as if it were a shorthand of `overflow-wrap`, Vivliostyle treat them for now as different properties and might result in an incorrect cascading behavior when inconsistent values are specified for both of the properties.
 
-### [CSS Text Decoration 3](http://www.w3.org/TR/css-text-decor-3/)
+### [CSS Text Decoration 3](https://www.w3.org/TR/css-text-decor-3/)
 
 - Note: While `text-decoration` property is a shorthand in CSS Text Decoration 3, Vivliostyle treats `text-decoration` for now as an independent property defined in CSS Level 2.1.
-- [text-decoration-color](http://www.w3.org/TR/css-text-decor-3/#text-decoration-color)
+- [text-decoration-color](https://www.w3.org/TR/css-text-decor-3/#text-decoration-color)
   - Allowed prefixes: webkit
-  - Depends on browser's capability: Yes
-- [text-decoration-line](http://www.w3.org/TR/css-text-decor-3/#text-decoration-line)
+  - Support depends on browser capabilities
+- [text-decoration-line](https://www.w3.org/TR/css-text-decor-3/#text-decoration-line)
   - Allowed prefixes: webkit
-  - Depends on browser's capability: Yes
-- [text-decoration-skip](http://www.w3.org/TR/css-text-decor-3/#text-decoration-skip)
+  - Support depends on browser capabilities
+- [text-decoration-skip](https://www.w3.org/TR/css-text-decor-3/#text-decoration-skip)
   - Allowed prefixes: webkit
-  - Depends on browser's capability: Yes
-- [text-decoration-style](http://www.w3.org/TR/css-text-decor-3/#text-decoration-style)
+  - Support depends on browser capabilities
+- [text-decoration-style](https://www.w3.org/TR/css-text-decor-3/#text-decoration-style)
   - Allowed prefixes: webkit
-  - Depends on browser's capability: Yes
-- [text-emphasis](http://www.w3.org/TR/css-text-decor-3/#text-emphasis)
+  - Support depends on browser capabilities
+- [text-emphasis](https://www.w3.org/TR/css-text-decor-3/#text-emphasis)
   - Allowed prefixes: epub, webkit
-  - Depends on browser's capability: Yes
-- [text-emphasis-color](http://www.w3.org/TR/css-text-decor-3/#text-emphasis-color)
+  - Support depends on browser capabilities
+- [text-emphasis-color](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-color)
   - Allowed prefixes: epub, webkit
-  - Depends on browser's capability: Yes
-- [text-emphasis-position](http://www.w3.org/TR/css-text-decor-3/#text-emphasis-position)
+  - Support depends on browser capabilities
+- [text-emphasis-position](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-position)
   - Allowed prefixes: webkit
-  - Depends on browser's capability: Yes
-- [text-emphasis-style](http://www.w3.org/TR/css-text-decor-3/#text-emphasis-style)
+  - Support depends on browser capabilities
+- [text-emphasis-style](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-style)
   - Allowed prefixes: epub, webkit
-  - Depends on browser's capability: Yes
-- [text-shadow](http://www.w3.org/TR/css-text-decor-3/#text-shadow)
-  - Depends on browser's capability: Yes
-- [text-underline-position](http://www.w3.org/TR/css-text-decor-3/#text-underline-position)
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
+- [text-shadow](https://www.w3.org/TR/css-text-decor-3/#text-shadow)
+  - Support depends on browser capabilities
+- [text-underline-position](https://www.w3.org/TR/css-text-decor-3/#text-underline-position)
+  - Support depends on browser capabilities
   - Allowed prefixes: ms, webkit
 
-### [CSS Multi-column Layout 1](http://www.w3.org/TR/css3-multicol/)
+### [CSS Multi-column Layout 1](https://www.w3.org/TR/css3-multicol/)
 
-- [break-after](http://www.w3.org/TR/css3-multicol/#break-after)
-  - Depends on browser's capability: No
+- [break-after](https://www.w3.org/TR/css3-multicol/#break-after)
+  - Supported in all browsers
   - Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/129)
-- [break-before](http://www.w3.org/TR/css3-multicol/#break-before)
-  - Depends on browser's capability: No
+- [break-before](https://www.w3.org/TR/css3-multicol/#break-before)
+  - Supported in all browsers
   - Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/129)
-- [break-inside](http://www.w3.org/TR/css3-multicol/#break-inside)
-  - Depends on browser's capability: No
+- [break-inside](https://www.w3.org/TR/css3-multicol/#break-inside)
+  - Supported in all browsers
   - Note: All of `avoid-page`, `avoid-column` and `avoid-region` values are treated as if they were `avoid`. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/128)
-- [column-count](http://www.w3.org/TR/css3-multicol/#column-count)
+- [column-count](https://www.w3.org/TR/css3-multicol/#column-count)
   - Allowed prefixes: moz, webkit
-  - Depends on browser's capability: No
-- [column-gap](http://www.w3.org/TR/css3-multicol/#column-gap0)
+  - Supported in all browsers
+- [column-gap](https://www.w3.org/TR/css3-multicol/#column-gap0)
   - Allowed prefixes: moz, webkit
-  - Depends on browser's capability: No
-- [column-rule](http://www.w3.org/TR/css3-multicol/#column-rule0)
+  - Supported in all browsers
+- [column-rule](https://www.w3.org/TR/css3-multicol/#column-rule0)
   - Allowed prefixes: moz, webkit
-  - Depends on browser's capability: No
-- [column-rule-color](http://www.w3.org/TR/css3-multicol/#column-rule-color)
+  - Supported in all browsers
+- [column-rule-color](https://www.w3.org/TR/css3-multicol/#column-rule-color)
   - Allowed prefixes: moz, webkit
-  - Depends on browser's capability: No
-- [column-rule-style](http://www.w3.org/TR/css3-multicol/#column-rule-style)
+  - Supported in all browsers
+- [column-rule-style](https://www.w3.org/TR/css3-multicol/#column-rule-style)
   - Allowed prefixes: moz, webkit
-  - Depends on browser's capability: No
-- [column-rule-width](http://www.w3.org/TR/css3-multicol/#column-rule-width)
+  - Supported in all browsers
+- [column-rule-width](https://www.w3.org/TR/css3-multicol/#column-rule-width)
   - Allowed prefixes: moz, webkit
-  - Depends on browser's capability: No
-- [column-width](http://www.w3.org/TR/css3-multicol/#column-width)
+  - Supported in all browsers
+- [column-width](https://www.w3.org/TR/css3-multicol/#column-width)
   - Allowed prefixes: moz, webkit
-  - Depends on browser's capability: No
-- [columns](http://www.w3.org/TR/css3-multicol/#columns0)
+  - Supported in all browsers
+- [columns](https://www.w3.org/TR/css3-multicol/#columns0)
   - Allowed prefixes: moz, webkit
-  - Depends on browser's capability: No
+  - Supported in all browsers
 
-### [CSS Basic User Interface 3](http://www.w3.org/TR/css3-ui/)
+### [CSS Basic User Interface 3](https://www.w3.org/TR/css3-ui/)
 
-- [box-sizing](http://www.w3.org/TR/css3-ui/#propdef-box-sizing)
-  - Depends on browser's capability: Yes
-- [outline](http://www.w3.org/TR/css3-ui/#propdef-outline)
-  - Depends on browser's capability: Yes
-- [outline-color](http://www.w3.org/TR/css3-ui/#propdef-outline-color)
-  - Depends on browser's capability: Yes
-- [outline-style](http://www.w3.org/TR/css3-ui/#propdef-outline-style)
-  - Depends on browser's capability: Yes
-- [outline-width](http://www.w3.org/TR/css3-ui/#propdef-outline-width)
-  - Depends on browser's capability: Yes
-- [text-overflow](http://www.w3.org/TR/css3-ui/#propdef-text-overflow)
+- [box-sizing](https://www.w3.org/TR/css3-ui/#propdef-box-sizing)
+  - Support depends on browser capabilities
+- [outline](https://www.w3.org/TR/css3-ui/#propdef-outline)
+  - Support depends on browser capabilities
+- [outline-color](https://www.w3.org/TR/css3-ui/#propdef-outline-color)
+  - Support depends on browser capabilities
+- [outline-style](https://www.w3.org/TR/css3-ui/#propdef-outline-style)
+  - Support depends on browser capabilities
+- [outline-width](https://www.w3.org/TR/css3-ui/#propdef-outline-width)
+  - Support depends on browser capabilities
+- [text-overflow](https://www.w3.org/TR/css3-ui/#propdef-text-overflow)
   - Allowed prefixes: ms
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
 
-### [CSS Writing Modes 3](http://www.w3.org/TR/css-writing-modes-3/)
+### [CSS Writing Modes 3](https://www.w3.org/TR/css-writing-modes-3/)
 
-- [direction](http://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
-  - Depends on browser's capability: Yes
-- [text-combine-upright](http://www.w3.org/TR/css-writing-modes-3/#propdef-text-combine-upright)
-  - Depends on browser's capability: Yes
-- [text-combine-horizontal](http://www.w3.org/TR/2012/WD-css3-writing-modes-20121115/#text-combine-horizontal0)
+- [direction](https://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
+  - Support depends on browser capabilities
+- [text-combine-upright](https://www.w3.org/TR/css-writing-modes-3/#propdef-text-combine-upright)
+  - Support depends on browser capabilities
+- [text-combine-horizontal](https://www.w3.org/TR/2012/WD-css3-writing-modes-20121115/#text-combine-horizontal0)
   - This deprecated property is kept for compatibility.
   - Allowed prefixes: epub, ms
-  - Depends on browser's capability: Yes
-- [text-combine](http://www.w3.org/TR/2011/WD-css3-writing-modes-20110531/#text-combine0)
+  - Support depends on browser capabilities
+- [text-combine](https://www.w3.org/TR/2011/WD-css3-writing-modes-20110531/#text-combine0)
   - This deprecated property is kept for compatibility.
   - Allowed prefixes: webkit
-  - Depends on browser's capability: Yes
-- [text-orientation](http://www.w3.org/TR/css-writing-modes-3/#propdef-text-orientation)
+  - Support depends on browser capabilities
+- [text-orientation](https://www.w3.org/TR/css-writing-modes-3/#propdef-text-orientation)
   - Allowed prefixes: epub, webkit
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
   - Note: supported values are [those defined in 20 March 2014 Candidate Recommendation](https://www.w3.org/TR/2014/CR-css-writing-modes-3-20140320/#propdef-text-orientation), not those in the latest spec.
 - [unicode-bidi](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
   - Supports [new values (`isolate`, `isolate-override`, `plaintext`) in CSS Writing Modes 3](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
-- [writing-mode](http://www.w3.org/TR/css-writing-modes-3/#propdef-writing-mode)
+- [writing-mode](https://www.w3.org/TR/css-writing-modes-3/#propdef-writing-mode)
   - Allowed prefixes: epub, webkit
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
   - Note: supported values are [those defined in 20 March 2014 Candidate Recommendation](https://www.w3.org/TR/2014/CR-css-writing-modes-3-20140320/#propdef-writing-mode), not those in the latest spec.
 
-### [CSS Flexible Box Layout 1](http://www.w3.org/TR/css-flexbox-1/)
+### [CSS Flexible Box Layout 1](https://www.w3.org/TR/css-flexbox-1/)
 
-- [align-content](http://www.w3.org/TR/css-flexbox-1/#propdef-align-content)
-  - Depends on browser's capability: Yes
-- [align-items](http://www.w3.org/TR/css-flexbox-1/#propdef-align-items)
-  - Depends on browser's capability: Yes
-- [align-self](http://www.w3.org/TR/css-flexbox-1/#propdef-align-self)
-  - Depends on browser's capability: Yes
+- [align-content](https://www.w3.org/TR/css-flexbox-1/#propdef-align-content)
+  - Support depends on browser capabilities
+- [align-items](https://www.w3.org/TR/css-flexbox-1/#propdef-align-items)
+  - Support depends on browser capabilities
+- [align-self](https://www.w3.org/TR/css-flexbox-1/#propdef-align-self)
+  - Support depends on browser capabilities
 - [display](https://www.w3.org/TR/css-flexbox-1/#flex-containers)
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
   - Supports [`flex`, `inline-flex`](https://www.w3.org/TR/css-flexbox-1/#flex-containers), [`ruby`, `ruby-base`, `ruby-text`, `ruby-base-container` and `ruby-text-container`](https://www.w3.org/TR/css-ruby-1/#propdef-display) values.
-- [flex](http://www.w3.org/TR/css-flexbox-1/#propdef-flex)
-  - Depends on browser's capability: Yes
-- [flex-basis](http://www.w3.org/TR/css-flexbox-1/#propdef-flex-basis)
-  - Depends on browser's capability: Yes
-- [flex-direction](http://www.w3.org/TR/css-flexbox-1/#propdef-flex-direction)
-  - Depends on browser's capability: Yes
-- [flex-flow](http://www.w3.org/TR/css-flexbox-1/#propdef-flex-flow)
-  - Depends on browser's capability: Yes
-- [flex-grow](http://www.w3.org/TR/css-flexbox-1/#propdef-flex-grow)
-  - Depends on browser's capability: Yes
-- [flex-shrink](http://www.w3.org/TR/css-flexbox-1/#propdef-flex-shrink)
-  - Depends on browser's capability: Yes
-- [flex-wrap](http://www.w3.org/TR/css-flexbox-1/#propdef-flex-wrap)
-  - Depends on browser's capability: Yes
-- [justify-content](http://www.w3.org/TR/css-flexbox-1/#propdef-justify-content)
-  - Depends on browser's capability: Yes
-- [order](http://www.w3.org/TR/css-flexbox-1/#propdef-order)
-  - Depends on browser's capability: Yes
+- [flex](https://www.w3.org/TR/css-flexbox-1/#propdef-flex)
+  - Support depends on browser capabilities
+- [flex-basis](https://www.w3.org/TR/css-flexbox-1/#propdef-flex-basis)
+  - Support depends on browser capabilities
+- [flex-direction](https://www.w3.org/TR/css-flexbox-1/#propdef-flex-direction)
+  - Support depends on browser capabilities
+- [flex-flow](https://www.w3.org/TR/css-flexbox-1/#propdef-flex-flow)
+  - Support depends on browser capabilities
+- [flex-grow](https://www.w3.org/TR/css-flexbox-1/#propdef-flex-grow)
+  - Support depends on browser capabilities
+- [flex-shrink](https://www.w3.org/TR/css-flexbox-1/#propdef-flex-shrink)
+  - Support depends on browser capabilities
+- [flex-wrap](https://www.w3.org/TR/css-flexbox-1/#propdef-flex-wrap)
+  - Support depends on browser capabilities
+- [justify-content](https://www.w3.org/TR/css-flexbox-1/#propdef-justify-content)
+  - Support depends on browser capabilities
+- [order](https://www.w3.org/TR/css-flexbox-1/#propdef-order)
+  - Support depends on browser capabilities
 
-### [CSS Fragmentation 3](http://www.w3.org/TR/css3-break/)
+### [CSS Fragmentation 3](https://www.w3.org/TR/css3-break/)
 
-- [break-after](http://www.w3.org/TR/css3-break/#break-after)
-  - Depends on browser's capability: No
+- [break-after](https://www.w3.org/TR/css3-break/#propdef-break-after)
+  - Supported in all browsers
   - Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/129)
-- [break-before](http://www.w3.org/TR/css3-break/#break-before)
-  - Depends on browser's capability: No
+- [break-before](https://www.w3.org/TR/css3-break/#propdef-break-before)
+  - Supported in all browsers
   - Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/129)
-- [break-inside](http://www.w3.org/TR/css3-break/#break-inside)
-  - Depends on browser's capability: No
+- [break-inside](https://www.w3.org/TR/css3-multicol/#break-inside)
+  - Supported in all browsers
   - Note: All of `avoid-page`, `avoid-column` and `avoid-region` values are treated as if they were `avoid`. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/128)
-- [orphans](http://www.w3.org/TR/css3-break/#orphans)
-  - Depends on browser's capability: No
-- [widows](http://www.w3.org/TR/css3-break/#widows)
-  - Depends on browser's capability: No
+- [orphans](https://www.w3.org/TR/css3-break/#propdef-orphans)
+  - Supported in all browsers
+- [widows](https://www.w3.org/TR/css3-break/#propdef-widows)
+  - Supported in all browsers
 
-### [CSS Transforms 1](http://www.w3.org/TR/css-transforms-1/)
+### [CSS Transforms 1](https://www.w3.org/TR/css-transforms-1/)
 
-- [backface-visibility](http://www.w3.org/TR/css-transforms-1/#propdef-backface-visibility)
+- [backface-visibility](https://www.w3.org/TR/css-transforms-1/#propdef-backface-visibility)
   - Allowed prefixes: ms, webkit
-  - Depends on browser's capability: Yes
-- [transform](http://www.w3.org/TR/css-transforms-1/#propdef-transform)
+  - Support depends on browser capabilities
+- [transform](https://www.w3.org/TR/css-transforms-1/#propdef-transform)
   - Allowed prefixes: epub, ms
-  - Depends on browser's capability: Yes
-- [transform-origin](http://www.w3.org/TR/css-transforms-1/#propdef-transform-origin)
+  - Support depends on browser capabilities
+- [transform-origin](https://www.w3.org/TR/css-transforms-1/#propdef-transform-origin)
   - Allowed prefixes: epub, ms
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
 
-### [CSS Ruby Layout 1](http://www.w3.org/TR/css-ruby-1/)
+### [CSS Ruby Layout 1](https://www.w3.org/TR/css-ruby-1/)
 
 - [display](https://www.w3.org/TR/css-ruby-1/#propdef-display)
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
   - Supports [`flex`, `inline-flex`](https://www.w3.org/TR/css-flexbox-1/#flex-containers), [`ruby`, `ruby-base`, `ruby-text`, `ruby-base-container` and `ruby-text-container`](https://www.w3.org/TR/css-ruby-1/#propdef-display) values.
-- [ruby-align](http://www.w3.org/TR/css-ruby-1/#propdef-ruby-align)
-  - Depends on browser's capability: Yes
+- [ruby-align](https://www.w3.org/TR/css-ruby-1/#propdef-ruby-align)
+  - Support depends on browser capabilities
 - [ruby-position](https://drafts.csswg.org/css-ruby-1/#propdef-ruby-position)
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
   - Supports syntax defined in the current editor's draft.
 
 ### [CSS Mobile Text Size Adjustment 1](https://drafts.csswg.org/css-size-adjust-1/)
 
 - [text-size-adjust](https://drafts.csswg.org/css-size-adjust-1/#text-size-adjust)
   - Allowed prefixes: moz, ms
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
 
-### [Pointer Events](http://www.w3.org/TR/pointerevents/)
+### [Pointer Events](https://www.w3.org/TR/pointerevents/)
 
-- [touch-action](http://www.w3.org/TR/pointerevents/#the-touch-action-css-property)
+- [touch-action](https://www.w3.org/TR/pointerevents/#the-touch-action-css-property)
   - Allowed prefixes: ms
-  - Depends on browser's capability: Yes
+  - Support depends on browser capabilities
 
 ## [EPUB Adaptive Layout](http://www.idpf.org/epub/pgt/)
 
@@ -728,67 +750,67 @@ Note: This spec is not on a W3C standards track. Future version of Vivliostyle m
 ### At-rules
 
 - [@-epubx-define](http://www.idpf.org/epub/pgt/#rule-define)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [@-epubx-flow](http://www.idpf.org/epub/pgt/#rule-flow)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [@-epubx-page-master](http://www.idpf.org/epub/pgt/#rule-page-master)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [@-epubx-page-template](http://www.idpf.org/epub/pgt/#rule-page-template)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [@-epubx-partition](http://www.idpf.org/epub/pgt/#rule-partition)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [@-epubx-partition-group](http://www.idpf.org/epub/pgt/#rule-partition-group)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [@-epubx-region](http://www.idpf.org/epub/pgt/#rule-region)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [@-epubx-viewport](http://www.idpf.org/epub/pgt/#rule-viewport)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [@-epubx-when](http://www.idpf.org/epub/pgt/#rule-when)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 
 ### Properties
 
 - [-epubx-conflicting-partitions](http://www.idpf.org/epub/pgt/#prop-conflicting-partitions)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-enabled](http://www.idpf.org/epub/pgt/#prop-enabled)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-flow-consume](http://www.idpf.org/epub/pgt/#prop-flow-consume)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-flow-from](http://www.idpf.org/epub/pgt/#prop-flow-from)
-  - Depends on browser's capability: No
+  - Supported in all browsers
   - Only effective when specified to EPUB Adaptive Layout partitions.
 - [-epubx-flow-into](http://www.idpf.org/epub/pgt/#prop-flow-into)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-flow-linger](http://www.idpf.org/epub/pgt/#prop-flow-linger)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-flow-options](http://www.idpf.org/epub/pgt/#prop-flow-options)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-flow-priority](http://www.idpf.org/epub/pgt/#prop-flow-priority)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-min-page-height](http://www.idpf.org/epub/pgt/#prop-min-page-height)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-min-page-width](http://www.idpf.org/epub/pgt/#prop-min-page-width)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-required](http://www.idpf.org/epub/pgt/#prop-required)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-required-partitions](http://www.idpf.org/epub/pgt/#prop-required-partitions)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-shape-outside](http://www.idpf.org/epub/pgt/#prop-shape-outside)
-  - Depends on browser's capability: No
+  - Supported in all browsers
   - Only effective when specified to EPUB Adaptive Layout partitions.
-  - Note: only [old syntaxes from 3 May 2012 Working Draft](http://www.w3.org/TR/2012/WD-css3-exclusions-20120503/#supported-svg-shapes) are supported.
+  - Note: only [old syntaxes from 3 May 2012 Working Draft](https://www.w3.org/TR/2012/WD-css3-exclusions-20120503/#supported-svg-shapes) are supported.
 - [-epubx-shape-inside](http://www.idpf.org/epub/pgt/#prop-shape-inside)
-  - Depends on browser's capability: No
+  - Supported in all browsers
   - Only effective when specified to EPUB Adaptive Layout partitions.
-  - Note: only [old syntaxes from 3 May 2012 Working Draft](http://www.w3.org/TR/2012/WD-css3-exclusions-20120503/#supported-svg-shapes) are supported.
+  - Note: only [old syntaxes from 3 May 2012 Working Draft](https://www.w3.org/TR/2012/WD-css3-exclusions-20120503/#supported-svg-shapes) are supported.
 - [-epubx-snap-height](http://www.idpf.org/epub/pgt/#prop-snap-height)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-snap-width](http://www.idpf.org/epub/pgt/#prop-snap-width)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-text-zoom](http://www.idpf.org/epub/pgt/#prop-text-zoom)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-utilization](http://www.idpf.org/epub/pgt/#prop-utilization)
-  - Depends on browser's capability: No
+  - Supported in all browsers
 - [-epubx-wrap-flow](http://www.idpf.org/epub/pgt/#prop-wrap-flow)
-  - Depends on browser's capability: No
+  - Supported in all browsers
   - Only effective when specified to EPUB Adaptive Layout partitions.

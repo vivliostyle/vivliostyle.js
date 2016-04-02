@@ -17,8 +17,15 @@ goog.provide('adapt.vtree');
 /** @const */
 adapt.vtree.delayedProps = {
 	"transform": true,
-	"transform-origin": true,
-	"position": true  // only relative
+	"transform-origin": true
+};
+
+/** @const */
+adapt.vtree.delayedPropsIfRelativePositioned = {
+	"top": true,
+	"bottom": true,
+	"left": true,
+	"right": true
 };
 
 /**
@@ -81,12 +88,14 @@ adapt.vtree.makeListener = function(refs, action) {
 
 /**
  * @param {!HTMLElement} container
+ * @param {!HTMLElement} bleedBox
  * @constructor
  * @extends {adapt.base.SimpleEventTarget}
  */
-adapt.vtree.Page = function(container) {
+adapt.vtree.Page = function(container, bleedBox) {
 	adapt.base.SimpleEventTarget.call(this);
 	/** @const */ this.container = container;
+	/** @const */ this.bleedBox = bleedBox;
 	/** @type {HTMLElement} */ this.pageAreaElement = null;
 	/** @type {Array.<adapt.vtree.DelayedItem>} */ this.delayedItems = [];
 	var self = this;
@@ -186,7 +195,7 @@ adapt.vtree.Page.prototype.registerElementWithId = function(element, id) {
  */
 adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
 	// use size of the container of the PageMasterInstance
-	var rect = clientLayout.getElementClientRect(this.container.firstElementChild);
+	var rect = clientLayout.getElementClientRect(this.container);
 	this.dimensions.width = rect.width;
 	this.dimensions.height = rect.height;
 
@@ -381,9 +390,10 @@ adapt.vtree.LayoutContext.prototype.clone = function() {};
  * the previous page.
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {boolean} firstTime
+ * @param {boolean=} atUnforcedBreak
  * @return {!adapt.task.Result.<boolean>} true if children should be processed as well
  */
-adapt.vtree.LayoutContext.prototype.setCurrent = function(nodeContext, firstTime) {};
+adapt.vtree.LayoutContext.prototype.setCurrent = function(nodeContext, firstTime, atUnforcedBreak) {};
 
 /**
  * Set the container element that holds view elements produced from the source.
@@ -395,9 +405,10 @@ adapt.vtree.LayoutContext.prototype.setViewRoot = function(container, isFootnote
 /**
  * Moves to the next view node, creating it and appending it to the view tree if needed.
  * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {boolean=} atUnforcedBreak
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>} that corresponds to the next view node
  */
-adapt.vtree.LayoutContext.prototype.nextInTree = function(nodeContext) {};
+adapt.vtree.LayoutContext.prototype.nextInTree = function(nodeContext, atUnforcedBreak) {};
 
 /**
  * Apply pseudo-element styles (if any).
@@ -567,6 +578,7 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
 	/** @type {?string} */ this.floatReference = null;
     /** @type {?string} */ this.floatSide = null;
     /** @type {?string} */ this.clearSide = null;
+	/** @type {boolean} */ this.flexContainer = false;
     /** @type {adapt.vtree.Whitespace} */ this.whitespace = parent ? parent.whitespace : adapt.vtree.Whitespace.IGNORE;
     /** @type {boolean} */ this.floatContainer = parent ? parent.floatContainer : false;
     /** @type {?string} */ this.breakBefore = null;
@@ -589,6 +601,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.after = false;
     this.floatSide = null;
     this.clearSide = null;
+	this.flexContainer = false;
     this.breakBefore = null;
     this.breakAfter = null;	
     this.nodeShadow = null;
@@ -614,6 +627,7 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.floatSide = this.floatSide;
     np.clearSide = this.clearSide;
     np.floatContainer = this.floatContainer;
+	np.flexContainer = this.flexContainer;
     np.whitespace = this.whitespace;
     np.breakBefore = this.breakBefore;
     np.breakAfter = this.breakAfter;

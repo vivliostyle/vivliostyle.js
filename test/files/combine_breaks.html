@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>combine breaks</title>
+    <style>
+        @page {
+            size: 900px 300px;
+            margin: 20px;
+            @bottom-center {
+                content: counter(page);
+            }
+        }
+        html {
+            column-count: 3;
+            orphans: 1;
+            widows: 1;
+        }
+        body {
+            margin: 0;
+        }
+        .column-break-before {
+            break-before: column;
+        }
+        .column-break-after {
+            break-after: column;
+        }
+        .page-break-before {
+            break-before: page;
+        }
+        .page-break-after {
+            break-after: page;
+        }
+        .clear {
+            clear: both;
+        }
+        .float {
+            float: left;
+        }
+        .empty {
+            height: 100px;
+            background: #DFD;
+        }
+        svg {
+            width: 100px;
+            height: 100px;
+            background: #FDD;
+        }
+        .top-padding {
+            padding-top: 10px;
+        }
+        .high-empty {
+            height: 261px;
+            background: #DFD;
+        }
+        .bottom-padding {
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<div>This should be on the 1st page.</div>
+<div class="column-break-before"><div class="page-break-before">This should be on the 2nd page.</div></div>
+<div class="column-break-before"><div class="page-break-before"><div class="clear">This should be on the 3rd page.</div></div></div>
+<div class="column-break-before"><div class="page-break-before"><div class="float">This should be on the 4th page.</div></div></div>
+<div class="column-break-before"><div class="page-break-before float">This should be on the 5th page. This should not be covered by a green rectangle. The green rectangle is on the next (6th) page.</div></div>
+<div class="column-break-before"><div class="page-break-before empty"></div></div>
+<div class="column-break-before"><div class="page-break-before"><svg></svg> There should be a red square before this sentence. This should be on the 7th page.</div></div>
+<div class="page-break-before"><div class="top-padding">
+    This should be on the 8th page.
+    <div class="high-empty"></div>
+</div></div>
+<div class="top-padding"><div class="page-break-before">This should be on the 9th page.</div></div>
+<div class="page-break-after"><div class="column-break-after">This should be on the 9th page.</div></div>
+<div class="page-break-after bottom-padding">This should be on the 10th page.</div>
+This should be on the 11th page.
+<div class="page-break-after">This should be on the 11th page too.<svg style="height:300px"></svg></div>
+This should be on the 12th page.
+<div>This should be on the 12th page too.<svg style="height:300px"></svg></div>
+<div class="page-break-before">This should be on the 13th page.</div>
+<div>This should be on the 13th page too.<svg style="height:300px"></svg></div>
+<div class="coumn-break-before"><div class="page-break-before">This should be on the 14th page.</div></div>
+<div>This should be on the 14th page too.<svg style="height:300px"></svg></div>
+<div class="column-break-before"><div class="page-break-before float">This should be on the 15th page.</div></div>
+<div>This should be on the 15th page too.<svg style="height:300px"></svg></div>
+<div class="column-break-before"><div class="page-break-before empty"></div></div>
+<div>There should be a green rectangle above. This should be on the 16th page.<svg style="height:300px"></svg></div>
+<div class="page-break-before"><svg></svg> There should be a red square before this sentence. This should be on the 17th page.</div>
+</body>
+</html>

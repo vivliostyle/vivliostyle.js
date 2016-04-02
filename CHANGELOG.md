@@ -1,6 +1,66 @@
 # Change Log
 
-## [2016.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.1) - 2016-01-19
+## Unreleased
+
+### Added
+- Support even/odd arguments for :nth-child selector
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/87>
+  - Spec: [Selectors Level 3 - :nth-child() pseudo-class](http://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
+- Support printer marks (`marks` property) and bleed area (`bleed` property)
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/98>
+  - Spec: [CSS Paged Media Module Level 3 - Crop and Registration Marks: the 'marks' property](https://drafts.csswg.org/css-page/#marks), [Bleed Area: the 'bleed' property](https://drafts.csswg.org/css-page/#bleed)
+  - Only effective when specified within an `@page` rule without page selectors.
+- Support outline-offset
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/181>
+  - Spec: [CSS Basic User Interface Module Level 3 (CSS3 UI) - outline-offset property](https://drafts.csswg.org/css-ui-3/#outline-offset)
+- Support font-feature-settings
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/151>
+  - Spec: [CSS Fonts Module Level 3 - font-feature-settings descriptors](https://drafts.csswg.org/css-fonts-3/#propdef-font-feature-settings)
+- Support linear-gradient/radial-gradient
+  - <https://github.com/vivliostyle/vivliostyle-formatter-issues/issues/35>
+  - Spec: [CSS Image Values and Replaced Content Module - Gradients](https://drafts.csswg.org/css-images-3/#gradients)
+- Support substring matching attribute selectors `^=`, `$=` and `*=`
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/196>
+  - Spec: [Selectors Level 3 - Substring matching attribute selectors](https://www.w3.org/TR/css3-selectors/#attribute-substrings)
+- Support `an+b` arguments for `:nth-child()` pseudo-class selector
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/163>
+  - Spec: [Selectors Level 3 - :nth-child() pseudo-class](http://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
+- Support `:nth-last-child()`, `:nth-of-type()`, `:nth-last-of-type()`, `:last-child`, `:first-of-type`, `:last-of-type`, `:only-child` and `:only-of-type` pseudo-class selectors
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/86>
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/193>
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/194>
+  - Spec: [Selectors Level 3 - Structural pseudo-classes](https://www.w3.org/TR/css3-selectors/#structural-pseudos)
+- Support `:empty` pseudo-class selector
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/205>
+  - Spec: [Selectors Level 3 - :empty pseudo-class](https://www.w3.org/TR/css3-selectors/#empty-pseudo)
+- Support UI states selectors (`:checked`, `:enabled` and `:disabled`)
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/206>
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/197>
+  - Spec: [Selectors Level 3 - The UI element states pseudo-classes](https://www.w3.org/TR/css3-selectors/#UIstates)
+  - Note that the current implementation can use only initial states of those UI elements. Even if the actual state of the element is toggled by user interaction, the style does not change.
+- Support `:not()` pseudo-class selector
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/195>
+  - Spec: [Selectors Level 3 - The negation pseudo class](https://www.w3.org/TR/css3-selectors/#negation)
+
+### Fixed
+- Lengths in 'rem' specified within page context are now interpreted correctly.
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/109>
+- Web fonts are now applied correctly even when specified within page context.
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/58>
+- Fix incorrect pagination caused by absolutely positioned element.
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/158>
+- Fix pagination problem with flex containers.
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/174>
+- Truncate margins at unforced page/column breaks
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/83>
+  - Spec: [CSS Fragmentation Module Level 3 - Adjoining Margins at Breaks](https://drafts.csswg.org/css-break/#break-margins)
+- box-shadow / text-shadow is now supported.
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/156>
+- Propagate and combine multiple break values at a single break point
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/129>
+  - Spec: [CSS Fragmentation Module Level 3 - Forced Breaks](https://drafts.csswg.org/css-break/#forced-breaks)
+
+## [2016.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.1) - 2016-01-20
 
 ### Added
 - Support EPUB loading

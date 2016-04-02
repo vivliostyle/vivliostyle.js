@@ -686,13 +686,21 @@ adapt.cssvalid.ListValidator.prototype.validateList = function(arr, slice, start
             current = success ? current.success : current.failure; 
         } else {
         	if (index == 0 && !slice
-        			&& current.validator instanceof adapt.cssvalid.CommaListValidator 
-        			&& this instanceof adapt.cssvalid.SpaceListValidator) {
-        		// Special nesting case: validate the input space list as a whole.
-        		// Space lists cannot contain comma lists, so the only way for this
-        		// space list to match is to be the single-element space list.
+        			&& current.validator instanceof adapt.cssvalid.SpaceListValidator 
+        		&& this instanceof adapt.cssvalid.SpaceListValidator) {
+        	  // Special nesting case: validate the input space list as a whole.              
         		outval = (new adapt.css.SpaceList(arr)).visit(current.validator);
         		if (outval) {
+        			index = arr.length;
+        			current = current.success;
+        			continue;
+        		}
+            } else 	if (index == 0 && !slice
+        			&& current.validator instanceof adapt.cssvalid.CommaListValidator 
+        			&& this instanceof adapt.cssvalid.SpaceListValidator) {
+        	  // Special nesting case: validate the input comma list as a whole.
+        	  outval = (new adapt.css.CommaList(arr)).visit(current.validator);
+        	  if (outval) {
         			index = arr.length;
         			current = current.success;
         			continue;
@@ -872,6 +880,32 @@ adapt.cssvalid.SpaceListValidator.prototype.visitSpaceList = function(list) {
 /**
  * @override
  */
+adapt.cssvalid.SpaceListValidator.prototype.visitCommaList = function(list) {
+  // Special Case : Issue #156
+  var node = this.first;
+  var hasCommaListValidator = false;
+  while (node) {
+    if (node.validator instanceof adapt.cssvalid.CommaListValidator) {
+      hasCommaListValidator = true;
+      break;
+    }
+    node = node.failure;
+  }
+  if (hasCommaListValidator) {
+    var arr = this.validateList(list.values, false, 0);
+    if (arr === list.values)
+      return list;
+    if (!arr)
+      return null;
+    return new adapt.css.CommaList(arr);
+  } 
+  return null;
+};
+
+
+/**
+ * @override
+ */
 adapt.cssvalid.SpaceListValidator.prototype.validateForShorthand = function(values, index) {
     return this.validateList(values, true, index);
 };
@@ -968,17 +1002,13 @@ adapt.cssvalid.ShorthandSyntaxNode.prototype.success = function(rval, shorthandV
 /**
  * @param {adapt.cssvalid.ValidatorSet} validatorSet
  * @param {string} name
- * @param {boolean} nocomma
  * @constructor
  * @extends {adapt.cssvalid.ShorthandSyntaxNode}
  */
-adapt.cssvalid.ShorthandSyntaxProperty = function(validatorSet, name, nocomma) {
+adapt.cssvalid.ShorthandSyntaxProperty = function(validatorSet, name) {
 	adapt.cssvalid.ShorthandSyntaxNode.call(this);
 	/** @const */ this.name = name;
     /** @type {adapt.cssvalid.PropertyValidator} */ this.validator = validatorSet.validators[this.name];
-    if (nocomma && this.validator instanceof adapt.cssvalid.CommaListValidator) {
-        this.validator = (/** @type {adapt.cssvalid.CommaListValidator} */ (this.validator)).first.validator;
-    }
 };
 goog.inherits(adapt.cssvalid.ShorthandSyntaxProperty, adapt.cssvalid.ShorthandSyntaxNode);
 
@@ -1014,7 +1044,7 @@ adapt.cssvalid.ShorthandSyntaxProperty.prototype.success = function(rval, shorth
  * @extends {adapt.cssvalid.ShorthandSyntaxProperty}
  */
 adapt.cssvalid.ShorthandSyntaxPropertyN = function(validatorSet, names) {
-	adapt.cssvalid.ShorthandSyntaxProperty.call(this, validatorSet, names[0], false);
+	adapt.cssvalid.ShorthandSyntaxProperty.call(this, validatorSet, names[0]);
 	/** @const */ this.names = names;
 };
 goog.inherits(adapt.cssvalid.ShorthandSyntaxPropertyN, adapt.cssvalid.ShorthandSyntaxProperty);
@@ -1094,7 +1124,7 @@ adapt.cssvalid.ShorthandValidator.prototype.setOwner = function(validatorSet) {
  * @return {adapt.cssvalid.ShorthandSyntaxNode}
  */
 adapt.cssvalid.ShorthandValidator.prototype.syntaxNodeForProperty = function(name) {
-    return new adapt.cssvalid.ShorthandSyntaxProperty(this.validatorSet, name, false);
+    return new adapt.cssvalid.ShorthandSyntaxProperty(this.validatorSet, name);
 };
 
 /**
@@ -1379,13 +1409,6 @@ adapt.cssvalid.CommaShorthandValidator = function() {
 goog.inherits(adapt.cssvalid.CommaShorthandValidator, adapt.cssvalid.SimpleShorthandValidator);
 
 /**
- * @override
- */
-adapt.cssvalid.CommaShorthandValidator.prototype.syntaxNodeForProperty = function(name) {
-    return new adapt.cssvalid.ShorthandSyntaxProperty(this.validatorSet, name, true);
-};
-
-/**
  * @param {Object.<string,Array.<adapt.css.Val>>} acc
  * @param {adapt.cssvalid.ValueMap} values
  */
@@ -1409,10 +1432,14 @@ adapt.cssvalid.CommaShorthandValidator.prototype.visitCommaList = function(list)
     /** @type {Object.<string,Array.<adapt.css.Val>>} */ var acc = {};
     for (var i = 0; i < list.values.length; i++) {
         this.values = {};
-        list.values[i].visit(this);
-        this.mergeIn(acc, this.values);
-        if (this.values["background-color"] && i != list.values.length - 1) {
+        if (list.values[i] instanceof adapt.css.CommaList) {
             this.error = true;
+        } else {
+            list.values[i].visit(this);
+            this.mergeIn(acc, this.values);
+            if (this.values["background-color"] && i != list.values.length - 1) {
+                this.error = true;
+            }
         }
         if (this.error)
             return null;

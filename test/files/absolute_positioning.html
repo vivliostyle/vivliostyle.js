@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>absolute positioning</title>
+    <style>
+        @page {
+            size: 200px 200px;
+        }
+        @-epubx-page-template {
+            @-epubx-page-master {
+                @-epubx-partition {
+                    -epubx-flow-from: body;
+                    top: 0;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    padding: 10px;
+                }
+            }
+        }
+        * {
+            margin: 0;
+        }
+        #container {
+            width: 180px;
+            height: 180px;
+            background: #DDDDFF;
+            position: relative;
+        }
+        #absolute {
+            position: absolute;
+            width: 180px;
+            height: 40px;
+            background: #DDFFDD;
+            bottom: 0;
+            right: 0;
+            font-size: 10px;
+            line-height: 15px;
+        }
+    </style>
+</head>
+<body>
+<div id="container"><div id="absolute">2 lines should be visible<br>2nd line</div></div>
+</body>
+</html>

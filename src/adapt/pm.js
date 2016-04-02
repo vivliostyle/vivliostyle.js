@@ -160,7 +160,7 @@ adapt.pm.PageMaster = function(scope, name, pseudoName, classes, parent, conditi
     this.specified["height"] = new adapt.csscasc.CascadeValue(adapt.css.fullHeight, 0);
     this.specified["wrap-flow"] =  new adapt.csscasc.CascadeValue(adapt.css.ident.auto, 0);
     this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.relative, 0);
-    this.specified["overflow"] = new adapt.csscasc.CascadeValue(adapt.css.ident.hidden, 0);
+    this.specified["overflow"] = new adapt.csscasc.CascadeValue(adapt.css.ident.visible, 0);
     /** @type {Object.<string,string>} */ this.keyMap = {};
 };
 goog.inherits(adapt.pm.PageMaster, adapt.pm.PageBox);
@@ -417,6 +417,14 @@ adapt.pm.PageBoxInstance = function(parentInstance, pageBox) {
     if (parentInstance) {
     	parentInstance.children.push(this);
     }
+};
+
+/**
+ * Reset information related to layout.
+ */
+adapt.pm.PageBoxInstance.prototype.reset = function() {
+    this.calculatedWidth = 0;
+    this.calculatedHeight = 0;
 };
 
 /**
@@ -908,12 +916,20 @@ adapt.pm.PageBoxInstance.prototype.getActiveRegions = function(context) {
  * @param {adapt.expr.Context} context
  * @param {adapt.vtree.Container} container
  * @param {string} name
+ * @param {adapt.font.DocumentFaces} docFaces
  * @return {void}
  */
-adapt.pm.PageBoxInstance.prototype.propagateProperty = function(context, container, name) {
+adapt.pm.PageBoxInstance.prototype.propagateProperty = function(context, container, name, docFaces) {
     var val = this.getProp(context, name);
-    if (val)
+    if (val) {
+        if (val.isNumeric() && adapt.expr.needUnitConversion(val.unit)) {
+            val = adapt.css.convertNumericToPx(val, context);
+        }
+        if (name === "font-family") {
+            val = docFaces.filterFontFamily(val);
+        }
         adapt.base.setCSSProperty(container.element, name, val.toString());
+    }
 };
 
 /**
@@ -1185,9 +1201,10 @@ adapt.pm.delayedProperties = [
  * @param {adapt.expr.Context} context
  * @param {adapt.vtree.Container} container
  * @param {adapt.vtree.Page} page
+ * @param {adapt.font.DocumentFaces} docFaces
  * @return {void}
  */
-adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, container, page) {
+adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, container, page, docFaces) {
 	if (!this.parentInstance || this.vertical != this.parentInstance.vertical) {
 		adapt.base.setCSSProperty(container.element, "writing-mode", (this.vertical ? "vertical-rl" : "horizontal-tb"));
 	}
@@ -1209,7 +1226,7 @@ adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, containe
         this.assignStartEndPosition(context, container);
     }
     for (var i = 0; i < adapt.pm.passPreProperties.length; i++) {
-        this.propagateProperty(context, container, adapt.pm.passPreProperties[i]);    	
+        this.propagateProperty(context, container, adapt.pm.passPreProperties[i], docFaces);
     }
 };
 
@@ -1217,11 +1234,12 @@ adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, containe
  * @param {adapt.expr.Context} context
  * @param {adapt.vtree.Container} container
  * @param {adapt.vtree.Page} page
+ * @param {adapt.font.DocumentFaces} docFaces
  * @return {void}
  */
-adapt.pm.PageBoxInstance.prototype.transferContentProps = function(context, container, page) {
+adapt.pm.PageBoxInstance.prototype.transferContentProps = function(context, container, page, docFaces) {
     for (var i = 0; i < adapt.pm.passContentProperties.length; i++) {
-        this.propagateProperty(context, container, adapt.pm.passContentProperties[i]);    	
+        this.propagateProperty(context, container, adapt.pm.passContentProperties[i], docFaces);
     }
 };
 
@@ -1232,10 +1250,11 @@ adapt.pm.PageBoxInstance.prototype.transferContentProps = function(context, cont
  * @param {adapt.vtree.Container} column (null when content comes from the content property)
  * @param {number} columnCount
  * @param {adapt.vtree.ClientLayout} clientLayout
+ * @param {adapt.font.DocumentFaces} docFaces
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.finishContainer = function(
-		context, container, page, column, columnCount, clientLayout) {
+		context, container, page, column, columnCount, clientLayout, docFaces) {
 	if (this.vertical)
 	    this.calculatedWidth = container.computedBlockSize + container.snapOffsetX;
 	else
@@ -1300,7 +1319,7 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
     	}
     }
     for (var i = 0; i < adapt.pm.passPostProperties.length; i++) {
-        this.propagateProperty(context, container, adapt.pm.passPostProperties[i]);    	
+        this.propagateProperty(context, container, adapt.pm.passPostProperties[i], docFaces);
     }
     for (var i = 0; i < adapt.pm.delayedProperties.length; i++) {
         this.propagateDelayedProperty(context, container, adapt.pm.delayedProperties[i], page.delayedItems);    	
@@ -1519,9 +1538,9 @@ adapt.pm.PartitionInstance.prototype.boxSpecificEnabled = function(enabled) {
 /**
  * @override
  */
-adapt.pm.PartitionInstance.prototype.prepareContainer = function(context, container, delayedItems) {
+adapt.pm.PartitionInstance.prototype.prepareContainer = function(context, container, delayedItems, docFaces) {
 	adapt.base.setCSSProperty(container.element, "overflow", "hidden");  // default value
-	adapt.pm.PageBoxInstance.prototype.prepareContainer.call(this, context, container, delayedItems);
+	adapt.pm.PageBoxInstance.prototype.prepareContainer.call(this, context, container, delayedItems, docFaces);
 };
 
 
