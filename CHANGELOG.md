@@ -41,6 +41,11 @@
 - Support `:not()` pseudo-class selector
   - <https://github.com/vivliostyle/vivliostyle.js/issues/195>
   - Spec: [Selectors Level 3 - The negation pseudo class](https://www.w3.org/TR/css3-selectors/#negation)
+- Support TeX and AsciiMath mathematics
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/108>
+  - In a element with `data-math-typeset="true"` attribute, you can use TeX or AsciiMath mathematics.
+  - TeX mathematics are indicated by delimiters `$...$`, `\(...\)` or `$$...$$`.
+  - AsciiMath mathematics are indicated by delimiters `` `...` ``.
 
 ### Fixed
 - Lengths in 'rem' specified within page context are now interpreted correctly.
