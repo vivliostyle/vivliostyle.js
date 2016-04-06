@@ -1553,7 +1553,7 @@ adapt.epub.OPFView.prototype.makeCustomRenderer = function(xmldoc) {
 			return self.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
 		} else if (srcElem.namespaceURI == adapt.base.NS.SSE) {
             return self.makeSSEView(xmldoc, srcElem, viewParent, computedStyle);
-        } else if (srcElem.dataset.mathTypeset == "true") {
+        } else if (srcElem.dataset && srcElem.dataset.mathTypeset == "true") {
 			return self.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
         }
 		return adapt.task.newResult(/** @type {Element} */ (null));
