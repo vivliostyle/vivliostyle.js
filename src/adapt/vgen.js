@@ -1125,6 +1125,18 @@ adapt.vgen.ViewFactory.prototype.addImageFetchers = function(bg) {
 	}
 };
 
+/**
+ * @const
+ */
+adapt.vgen.propertiesNotPassedToDOM = {
+	"box-decoration-break": true,
+	"flow-into": true,
+	"flow-linger": true,
+	"flow-priority": true,
+	"flow-options": true,
+	"page": true,
+	"float-reference": true
+};
 
 /**
  * @param {Element} target
@@ -1137,6 +1149,9 @@ adapt.vgen.ViewFactory.prototype.applyComputedStyles = function(target, computed
 	}
 	var isRelativePositioned = computedStyle["position"] === adapt.css.ident.relative;
 	for (var propName in computedStyle) {
+		if (adapt.vgen.propertiesNotPassedToDOM[propName]) {
+			continue;
+		}
 		var value = computedStyle[propName];
 		if (adapt.vtree.delayedProps[propName] ||
 			(isRelativePositioned && adapt.vtree.delayedPropsIfRelativePositioned[propName])) {
