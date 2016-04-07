@@ -940,6 +940,21 @@ adapt.cssvalid.CommaListValidator.prototype.visitCommaList = function(list) {
     return new adapt.css.CommaList(arr);
 };
 
+/**
+ * @override
+ */
+adapt.cssvalid.CommaListValidator.prototype.validateForShorthand = function(values, index) {
+    var current = this.first;
+    var rval;
+    while (current !== this.failureTerminal) {
+        rval = current.validator.validateForShorthand(values, index);
+        if (rval)
+            return rval;
+        current = current.failure;
+    }
+    return null;
+};
+
 
 /**
  * @param {string} name
