@@ -748,7 +748,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 	    		custom = true;
 	    	}
 	    }
-        if (element.dataset && element.dataset.mathTypeset == "true")
+        if (element.dataset && element.dataset["mathTypeset"] == "true")
             custom = true;
 	    var elemResult;
 	    if (custom) {
