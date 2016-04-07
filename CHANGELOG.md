@@ -66,6 +66,8 @@
   - Spec: [CSS Fragmentation Module Level 3 - Forced Breaks](https://drafts.csswg.org/css-break/#forced-breaks)
 - Fix problematic handling of prefixed properties.
   - <https://github.com/vivliostyle/vivliostyle.js/issues/209>, <https://github.com/vivliostyle/vivliostyle.js/issues/210>
+- Fix `rem` calculation when `font-size` is specified to the `body` element.
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/217>
 
 ## [2016.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.1) - 2016-01-20
 
