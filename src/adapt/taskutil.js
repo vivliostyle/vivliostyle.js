@@ -1,5 +1,6 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Utilities asynchronous execution and cooperative multitasking.
  */
 goog.provide('adapt.taskutil');
