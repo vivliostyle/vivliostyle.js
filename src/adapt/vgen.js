@@ -277,6 +277,7 @@ adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, i
     if (!pseudoMap) {
     	return subShadow;
     }
+	var addedNames = [];
 	var root = adapt.vgen.pseudoelementDoc.createElementNS(adapt.base.NS.SHADOW, "root");
 	var att = root;
     for (var i = 0; i < adapt.vgen.pseudoNames.length; i++) {
@@ -295,6 +296,13 @@ adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, i
         			continue;
         		}
         	}
+			if (name === "before" || name === "after") {
+				var content = pseudoMap[name]["content"];
+				if (!content || content === adapt.css.ident.normal || content === adapt.css.ident.none) {
+					continue;
+				}
+			}
+			addedNames.push(name);
     		elem = adapt.vgen.pseudoelementDoc.createElementNS(adapt.base.NS.XHTML, "span");
 			adapt.vgen.setPseudoName(elem, name);
     	} else {
@@ -305,6 +313,9 @@ adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, i
     		att = elem;
     	}
     }
+	if (!addedNames.length) {
+		return subShadow;
+	}
     var shadowStyler = new adapt.vgen.PseudoelementStyler(element, cascStyle, styler, context);
     return new adapt.vtree.ShadowContext(element, root, null, parentShadow, 
     		subShadow, adapt.vtree.ShadowType.ROOTLESS, shadowStyler);
