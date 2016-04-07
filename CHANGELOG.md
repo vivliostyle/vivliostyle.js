@@ -44,7 +44,7 @@
 - Support TeX and AsciiMath mathematics
   - <https://github.com/vivliostyle/vivliostyle.js/issues/108>
   - In a element with `data-math-typeset="true"` attribute, you can use TeX or AsciiMath mathematics.
-  - TeX mathematics are indicated by delimiters `$...$`, `\(...\)` or `$$...$$`.
+  - TeX mathematics are indicated by delimiters `\(...\)` or `$$...$$`.
   - AsciiMath mathematics are indicated by delimiters `` `...` ``.
 
 ### Fixed
