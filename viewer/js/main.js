@@ -5888,7 +5888,7 @@ ko.exportSymbol('nativeTemplateEngine', ko.nativeTemplateEngine);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Vivliostyle core 2016.2.0-pre.20160407112835
+ * Vivliostyle core 2016.2.0-pre.20160407114641
  */
 (function(factory) {
     if (typeof define === "function" && define.amd) {
@@ -6197,7 +6197,7 @@ function Bk(a,b,c,d){c=c?Si:Ti;for(var e in a)if(a.hasOwnProperty(e)){var f=a[e]
 function Ik(a,b){var c=Qa(a.map.length,function(c){return b<=a.map[c].b}),c=a.map[c];return c.e-(c.b-b)}
 function Jk(a,b,c,d,e,f,g){this.ba=a;this.root=a.root;this.ea=c;this.f=d;this.h=f;this.d=this.root;this.u={};this.w={};this.D=[];this.l=this.k=null;this.A=new fk(b,d,g);this.e=new Dk;this.Ta=!0;this.F=[];this.$=e;this.N=this.H=!1;this.b=a=uh(a,this.root);Fk(this.e,a);b=Kk(this,this.root);ok(this.A,this.root,b);Lk(this,b,!1);this.j=!0;switch(this.root.namespaceURI){case "http://www.w3.org/1999/xhtml":case "http://www.gribuser.ru/xml/fictionbook/2.0":this.j=!1}this.F.push(!0);this.w={};this.w["e"+a]=
 b;this.b++;Mk(this,-1)}function Nk(a,b,c,d){return(b=b[d])&&b.evaluate(a.f)!==c[d]}function Ok(a,b,c){for(var d in c){var e=b[d];e?(a.u[d]=e,delete b[d]):(e=c[d])&&(a.u[d]=new T(e,33554432))}}var Pk=["column-count","column-width"];
-function Lk(a,b,c){c||["writing-mode","direction"].forEach(function(a){b[a]&&(this.u[a]=b[a])},a);if(!a.H){c=Nk(a,b,a.h.g,"background-color")?b["background-color"].evaluate(a.f):null;var d=Nk(a,b,a.h.g,"background-image")?b["background-image"].evaluate(a.f):null;if(c&&c!==Id||d&&d!==Id)Ok(a,b,a.h.g),a.H=!0}if(!a.N)for(c=0;c<Pk.length;c++)if(Nk(a,b,a.h.j,Pk[c])){Ok(a,b,a.h.j);a.N=!0;break}if(c=b["font-size"]){d=c.evaluate(a.f);c=d.B;switch(d.fa){case "em":case "rem":c*=a.f.h;break;case "ex":case "rex":c*=
+function Lk(a,b,c){c||["writing-mode","direction"].forEach(function(a){b[a]&&(this.u[a]=b[a])},a);if(!a.H){var d=Nk(a,b,a.h.g,"background-color")?b["background-color"].evaluate(a.f):null,e=Nk(a,b,a.h.g,"background-image")?b["background-image"].evaluate(a.f):null;if(d&&d!==Id||e&&e!==Id)Ok(a,b,a.h.g),a.H=!0}if(!a.N)for(d=0;d<Pk.length;d++)if(Nk(a,b,a.h.j,Pk[d])){Ok(a,b,a.h.j);a.N=!0;break}if(!c&&(c=b["font-size"])){d=c.evaluate(a.f);c=d.B;switch(d.fa){case "em":case "rem":c*=a.f.h;break;case "ex":case "rex":c*=
 a.f.h*lc.ex/lc.em;break;case "%":c*=a.f.h/100;break;default:(d=lc[d.fa])&&(c*=d)}a.f.$=c}}function Qk(a){for(var b=0;!a.j&&(b+=5E3,Rk(a,b,0)!=Number.POSITIVE_INFINITY););return a.u}function Kk(a,b){if(b.style instanceof CSSStyleDeclaration){var c=b.getAttribute("style");if(c){var d=a.ba.url,e=new yk(a.ea,a.h),c=new Tb(c,e);try{$f(new Rf(Hf,c,e,d),Number.POSITIVE_INFINITY,!1,!0,!1,!1)}catch(f){u.b(f,"Style attribute parse error:")}return e.b}}return{}}
 function Mk(a,b){if(!(b>=a.b)){var c=a.f,d=uh(a.ba,a.root);if(b<d){var e=a.g(a.root,!1),f=e["flow-into"],f=f?f.evaluate(c,"flow-into").toString():"body";Sk(a,f,e,a.root,d)}d=xh(a.ba,b);e=vh(a.ba,d,0,!1);if(!(e>=a.b))for(;;){if(1!=d.nodeType)e+=d.textContent.length;else{var g=d;if(e!=uh(a.ba,g))throw Error("Inconsistent offset");var h=a.g(g,!1);if(f=h["flow-into"])f=f.evaluate(c,"flow-into").toString(),Sk(a,f,h,g,e);e++}if(e>=a.b)break;f=d.firstChild;if(null==f)for(;!(f=d.nextSibling);)if(d=d.parentNode,
 d===a.root)return;d=f}}}function Tk(a,b){a.k=b;for(var c=0;c<a.D.length;c++)Wk(a.k,a.D[c])}
