@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## [2016.4](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.4) - 2016-04-08
 
 ### Added
 - Support printer marks (`marks` property) and bleed area (`bleed` property)
