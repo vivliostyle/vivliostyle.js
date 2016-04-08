@@ -1,5 +1,6 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Support for asynchronous execution and cooperative multitasking.
  */
 goog.require('vivliostyle.logging');

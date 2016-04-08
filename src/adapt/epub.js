@@ -1468,13 +1468,14 @@ adapt.epub.OPFView.prototype.makeObjectView = function(xmldoc, srcElem, viewPare
 	return adapt.task.newResult(/** @type {Element} */ (result));
 };
 
+
 /**
  * @param {adapt.xmldoc.XMLDocHolder} xmldoc
  * @param {Element} srcElem
  * @param {Element} viewParent
  * @return {!adapt.task.Result.<Element>}
  */
-adapt.epub.OPFView.prototype.makeMathMLView = function(xmldoc, srcElem, viewParent, computedStyle) {
+adapt.epub.OPFView.prototype.makeMathJaxView = function(xmldoc, srcElem, viewParent, computedStyle) {
 	// See if MathJax installed, use it if it is.
 	var hub = adapt.epub.getMathJaxHub();
 	if (hub) {
@@ -1549,9 +1550,11 @@ adapt.epub.OPFView.prototype.makeCustomRenderer = function(xmldoc) {
 		if (srcElem.localName == "object" && srcElem.namespaceURI == adapt.base.NS.XHTML) {
 			return self.makeObjectView(xmldoc, srcElem, viewParent, computedStyle);
 		} else if (srcElem.namespaceURI == adapt.base.NS.MATHML) {
-			return self.makeMathMLView(xmldoc, srcElem, viewParent, computedStyle);
+			return self.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
 		} else if (srcElem.namespaceURI == adapt.base.NS.SSE) {
             return self.makeSSEView(xmldoc, srcElem, viewParent, computedStyle);
+        } else if (srcElem.dataset && srcElem.dataset["mathTypeset"] == "true") {
+			return self.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
         }
 		return adapt.task.newResult(/** @type {Element} */ (null));
 	}

@@ -1,5 +1,6 @@
 /**
  * Copyright 2013 Google, Inc.
+ * Copyright 2016 Vivliostyle Inc.
  * @fileoverview Geometric utilities.
  */
 goog.provide('adapt.geom');

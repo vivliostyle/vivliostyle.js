@@ -258,79 +258,86 @@ adapt.base.PriorityQueue.prototype.remove = function() {
 };
 
 /**
+ * @private
+ * @param {string} prefix Prefix (containing leading and trailing hyphens)
  * @param {string} cssPropName CSS property name
  * @return {string} JavaScript property name
  */
-adapt.base.cssToJSProp = function(cssPropName) {
-	return cssPropName.replace(/-[a-z]/g, function(txt) {return txt.substr(1).toUpperCase();});
+adapt.base.cssToJSProp = function(prefix, cssPropName) {
+    if (prefix) {
+        cssPropName = "-" + cssPropName;
+        prefix = prefix.replace(/-/g, "");
+        if (prefix === "moz") {
+            prefix = "Moz";
+        }
+    }
+	return prefix + cssPropName.replace(/-[a-z]/g, function(txt) {return txt.substr(1).toUpperCase();});
 };
 
 /**
+ * @private
  * @const
  */
-adapt.base.knownPrefixes = ["-webkit-", "-moz-", "-ms-", "-o-", "-epub-", ""];
+adapt.base.knownPrefixes = ["", "-webkit-", "-moz-", "-ms-", "-o-", "-epub-"];
 
 /**
- * @return {Object.<string,string>}
+ * @private
+ * @const @type {Object<string, ?string>}
  */
-adapt.base.makePropNameMap = function(list) {
-	var map = {};
-	var probe = document.createElement("span");
-	var style = probe.style;
-	var lastPrefix = null;
-	try {
-		probe.style.setProperty("-ms-transform-origin", "0% 0%");
-		if (probe.style.getPropertyValue("-ms-transform-origin") == "0% 0%") {
-			for (var i = 0; i < list.length; i++) {
-				map[list[i]] = "-ms-" + list[i];
-			}
-			return map;
-		}
-	} catch (err) {
-	}
-	for (var i = 0; i < list.length; i++) {
-		var cssName = list[i];
-		var prefixedName = null;
-		var jsName = null;
-		if (lastPrefix) {
-			prefixedName = lastPrefix + cssName;
-			jsName = adapt.base.cssToJSProp(prefixedName);
-		}
-		if (!jsName || style[jsName] == null) {
-			for (var k = 0; k < adapt.base.knownPrefixes.length; k++) {
-				lastPrefix = adapt.base.knownPrefixes[k];
-				prefixedName = lastPrefix + cssName;
-				jsName = adapt.base.cssToJSProp(prefixedName);
-				if (style[jsName] != null) {
-					break;
-				}
-			}
-		}
-		if (style[jsName] != null) {
-			map[cssName] = prefixedName;
-		}
-	}
-	return map;
+adapt.base.propNameMap = {};
+
+/**
+ * @private
+ * @param {string} prefix
+ * @param {string} prop
+ * @returns {boolean}
+ */
+adapt.base.checkIfPropertySupported = function(prefix, prop) {
+    // Special case
+    if (prop === "writing-mode") {
+        var probe = document.createElement("span");
+        if (prefix === "-ms-") {
+            probe.style.setProperty(prefix + prop, "tb-rl");
+            return probe.style["writing-mode"] === "tb-rl";
+        } else {
+            probe.style.setProperty(prefix + prop, "vertical-rl");
+            return probe.style[prefix + prop] === "vertical-rl";
+        }
+    } else {
+        var style = document.documentElement.style;
+        return typeof style[adapt.base.cssToJSProp(prefix, prop)] === "string";
+    }
 };
 
 /**
- * @const
+ * @param {string} prop
+ * @returns {?string}
  */
-adapt.base.propNameMap = adapt.base.makePropNameMap([
-	"transform", "transform-origin", "hyphens", "writing-mode",
-    "text-orientation", "box-decoration-break",
-	"column-count", "column-width", "column-rule-color",
-	"column-rule-style", "column-rule-width",
-
-    "font-kerning", "text-size-adjust", "line-break", "tab-size",
-    "text-align-last", "text-justify", "word-break", "word-wrap",
-    "text-decoration-color", "text-decoration-line", "text-decoration-skip", "text-decoration-style",
-    "text-emphasis-color", "text-emphasis-position", "text-emphasis-style", "text-underline-position",
-    "backface-visibility", "text-overflow",
-    "text-combine", "text-combine-horizontal", "text-combine-upright", "text-orientation",
-    "touch-action"
-]);
-
+adapt.base.getPrefixedProperty = function(prop) {
+    var prefixed = adapt.base.propNameMap[prop];
+    if (prefixed || prefixed === null) { // null means the browser does not support the property
+        return prefixed;
+    }
+    if (prop === "writing-mode") {
+        // Special case: prefer '-ms-writing-mode' to 'writing-mode'
+        if (adapt.base.checkIfPropertySupported("-ms-", "writing-mode")) {
+            adapt.base.propNameMap[prop] = "-ms-writing-mode";
+            return "-ms-writing-mode";
+        }
+    }
+    for (var i = 0; i < adapt.base.knownPrefixes.length; i++) {
+        var prefix = adapt.base.knownPrefixes[i];
+        if (adapt.base.checkIfPropertySupported(prefix, prop)) {
+            prefixed = prefix + prop;
+            adapt.base.propNameMap[prop] = prefixed;
+            return prefixed;
+        }
+    }
+    // Not supported by the browser
+    vivliostyle.logging.logger.warn("Property not supported by the browser: ", prop);
+    adapt.base.propNameMap[prop] = null;
+    return null;
+};
 
 /**
  * @param {Element} elem
@@ -340,12 +347,25 @@ adapt.base.propNameMap = adapt.base.makePropNameMap([
  */
 adapt.base.setCSSProperty = function(elem, prop, value) {
     try {
-    	prop = adapt.base.propNameMap[prop] || prop;
-    	if (prop == "-ms-writing-mode" && value == "vertical-rl") {
-    		value = "tb-rl";
-     	}
+        var prefixed = adapt.base.getPrefixedProperty(prop);
+        if (!prefixed) {
+            return;
+        }
+        if (prefixed === "-ms-writing-mode") {
+            switch (value) {
+                case "horizontal-tb":
+                    value = "lr-tb";
+                    break;
+                case "vertical-rl":
+                    value = "tb-rl";
+                    break;
+                case "vertical-lr":
+                    value = "tb-lr";
+                    break;
+            }
+        }
         if (elem && elem.style) {
-            (/** @type {HTMLElement} */ (elem)).style.setProperty(prop, value);
+            (/** @type {HTMLElement} */ (elem)).style.setProperty(prefixed, value);
         }
     } catch (err) {
         vivliostyle.logging.logger.warn(err);
