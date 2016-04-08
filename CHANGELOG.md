@@ -3,9 +3,6 @@
 ## Unreleased
 
 ### Added
-- Support even/odd arguments for :nth-child selector
-  - <https://github.com/vivliostyle/vivliostyle.js/issues/87>
-  - Spec: [Selectors Level 3 - :nth-child() pseudo-class](http://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
 - Support printer marks (`marks` property) and bleed area (`bleed` property)
   - <https://github.com/vivliostyle/vivliostyle.js/issues/98>
   - Spec: [CSS Paged Media Module Level 3 - Crop and Registration Marks: the 'marks' property](https://drafts.csswg.org/css-page/#marks), [Bleed Area: the 'bleed' property](https://drafts.csswg.org/css-page/#bleed)
@@ -22,7 +19,8 @@
 - Support substring matching attribute selectors `^=`, `$=` and `*=`
   - <https://github.com/vivliostyle/vivliostyle.js/issues/196>
   - Spec: [Selectors Level 3 - Substring matching attribute selectors](https://www.w3.org/TR/css3-selectors/#attribute-substrings)
-- Support `an+b` arguments for `:nth-child()` pseudo-class selector
+- Support `even`, `odd` and `an+b` arguments for `:nth-child()` pseudo-class selector
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/87>
   - <https://github.com/vivliostyle/vivliostyle.js/issues/163>
   - Spec: [Selectors Level 3 - :nth-child() pseudo-class](http://www.w3.org/TR/css3-selectors/#nth-child-pseudo)
 - Support `:nth-last-child()`, `:nth-of-type()`, `:nth-last-of-type()`, `:last-child`, `:first-of-type`, `:last-of-type`, `:only-child` and `:only-of-type` pseudo-class selectors
@@ -48,25 +46,25 @@
   - AsciiMath mathematics are indicated by delimiters `` `...` ``.
 
 ### Fixed
-- Lengths in 'rem' specified within page context are now interpreted correctly.
+- Lengths in 'rem' specified within page context are now interpreted correctly
   - <https://github.com/vivliostyle/vivliostyle.js/issues/109>
-- Web fonts are now applied correctly even when specified within page context.
+- Web fonts are now applied correctly even when specified within page context
   - <https://github.com/vivliostyle/vivliostyle.js/issues/58>
-- Fix incorrect pagination caused by absolutely positioned element.
+- Fix incorrect pagination caused by absolutely positioned element
   - <https://github.com/vivliostyle/vivliostyle.js/issues/158>
-- Fix pagination problem with flex containers.
+- Fix pagination problem with flex containers
   - <https://github.com/vivliostyle/vivliostyle.js/issues/174>
 - Truncate margins at unforced page/column breaks
   - <https://github.com/vivliostyle/vivliostyle.js/issues/83>
   - Spec: [CSS Fragmentation Module Level 3 - Adjoining Margins at Breaks](https://drafts.csswg.org/css-break/#break-margins)
-- box-shadow / text-shadow is now supported.
+- box-shadow / text-shadow is now supported
   - <https://github.com/vivliostyle/vivliostyle.js/issues/156>
 - Propagate and combine multiple break values at a single break point
   - <https://github.com/vivliostyle/vivliostyle.js/issues/129>
   - Spec: [CSS Fragmentation Module Level 3 - Forced Breaks](https://drafts.csswg.org/css-break/#forced-breaks)
-- Fix problematic handling of prefixed properties.
+- Fix problematic handling of prefixed properties
   - <https://github.com/vivliostyle/vivliostyle.js/issues/209>, <https://github.com/vivliostyle/vivliostyle.js/issues/210>
-- Fix `rem` calculation when `font-size` is specified to the `body` element.
+- Fix `rem` calculation when `font-size` is specified to the `body` element
   - <https://github.com/vivliostyle/vivliostyle.js/pull/217>
 
 ## [2016.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.1) - 2016-01-20
