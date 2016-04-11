@@ -9,7 +9,7 @@
     
       div {
          width: 3cm;
-         height: 3cm;
+         height: 1cm;
          border: 4px solid #004400;
          margin: 1em;    
          background-color: #00FF00;
@@ -54,6 +54,10 @@
           -webkit-filter: sepia(90%);
           filter: sepia(90%);
       }
+      .multiple-filter {
+          -webkit-filter: grayscale(80%) drop-shadow(0.5em 0.5em #FF0000);
+          filter: grayscale(80%) drop-shadow(0.5em 0.5em #FF0000);
+      }
 </style>
 </head>
 <body>
@@ -77,5 +81,7 @@
   <div class="saturate"></div>
   Sepia
   <div class="sepia"></div>
+  Grayscale and dropshadow  
+  <div class="multiple-filter"></div>  
 </body>
 </html>
