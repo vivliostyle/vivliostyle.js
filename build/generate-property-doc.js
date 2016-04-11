@@ -46,6 +46,7 @@ var orderedSpecs = [
     "css-size-adjust-1",
     "css-inline-3",
     "css-page-floats-3",
+    "filters-1",
     "uncategorized"
 ];
 
@@ -67,7 +68,6 @@ for (var key in rawData) {
         uri: rawSpecData["base_uri"] || rawSpecData["draft_uri"]
     };
     specs[name] = spec;
-
     function parseAnchors(anchors, propertyMap) {
         anchors.forEach(function(anchor) {
             if (anchor["type"] === "property") {
