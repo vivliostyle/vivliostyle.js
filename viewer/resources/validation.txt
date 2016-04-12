@@ -231,6 +231,11 @@ SHADOW = SPACE(inset || LENGTH{2,4} || COLOR); /* relaxed */
 [webkit]box-shadow = none | COMMA( SHADOW+ );
 text-shadow = none |  COMMA( SHADOW+ );
 [webkit]box-decoration-break = slice | clone;
+FILTER_FUNCTION = blur(LENGTH) | brightness(NUM | PERCENTAGE) | contrast(NUM | PERCENTAGE) | drop-shadow(SPACE(LENGTH{2,3} COLOR?))
+                | grayscale(NUM | PERCENTAGE) | hue-rotate(ANGLE) | invert(NUM | PERCENTAGE) | opacity(NUM | PERCENTAGE) 
+                | saturate(NUM | PERCENTAGE) | sepia(NUM | PERCENTAGE);
+FILTER_FUNCTION_LIST = FILTER_FUNCTION+;
+[webkit]filter = none | FILTER_FUNCTION_LIST;
 
 opacity = NUM;
 

@@ -737,6 +737,11 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Allowed prefixes: moz, ms
   - Support depends on browser capabilities
 
+## [Filter Effects 1](https://www.w3.org/TR/filter-effects-1/)
+- [filter](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
+  - Allowed prefixes: webkit
+  - Support depends on browser capabilities
+
 ### [Pointer Events](https://www.w3.org/TR/pointerevents/)
 
 - [touch-action](https://www.w3.org/TR/pointerevents/#the-touch-action-css-property)
