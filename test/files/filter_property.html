@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    html {
+    column-count: 2;
+    column-gap: 2em;
+    }
+    
+      div {
+         width: 3cm;
+         height: 1cm;
+         border: 4px solid #004400;
+         margin: 1em;    
+         background-color: #00FF00;
+      }
+      .blur {
+          -webkit-filter: blur(0.5em);    
+          filter: blur(0.5em);    
+      }
+      .brightness-20 {
+          -webkit-filter: brightness(20%);
+          filter: brightness(20%);        
+      }
+      .contrast-20 {
+          -webkit-filter: contrast(20%);
+          filter: contrast(20%);        
+      }
+      .drop-shadow {
+          -webkit-filter: drop-shadow(0.5em 0.5em #FF0000);
+          filter: drop-shadow(0.5em 0.5em #FF0000);
+      }
+      .grayscale {
+          -webkit-filter: grayscale(80%);
+          filter: grayscale(80%);
+       }
+      .hue {
+          -webkit-filter: hue-rotate(180deg);
+          filter: hue-rotate(180deg);
+      }
+      .invert {
+          -webkit-filter: invert(100%);
+          filter: invert(100%);
+      }
+      .opaque {
+          -webkit-filter: opacity(10%);
+          filter: opacity(10%);
+      }
+      .saturate {
+          -webkit-filter: saturate(10%);
+          filter: saturate(10%);
+      }
+      .sepia {
+          -webkit-filter: sepia(90%);
+          filter: sepia(90%);
+      }
+      .multiple-filter {
+          -webkit-filter: grayscale(80%) drop-shadow(0.5em 0.5em #FF0000);
+          filter: grayscale(80%) drop-shadow(0.5em 0.5em #FF0000);
+      }
+</style>
+</head>
+<body>
+  Blur
+  <div class="blur"></div>
+  Brightness 20%
+  <div class="brightness-20"></div>
+  Contrast 20%
+  <div class="contrast-20"></div>
+  Red drop shadow
+  <div class="drop-shadow"></div>
+  Grayscale 80%
+  <div class="grayscale"></div>
+  Hue Rotate 180deg
+  <div class="hue"></div>
+  Invert
+  <div class="invert"></div>
+  Opacity 10%
+  <div class="opaque"></div>
+  Saturate
+  <div class="saturate"></div>
+  Sepia
+  <div class="sepia"></div>
+  Grayscale and dropshadow  
+  <div class="multiple-filter"></div>  
+</body>
+</html>

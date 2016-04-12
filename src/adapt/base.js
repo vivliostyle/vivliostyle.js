@@ -318,13 +318,24 @@ adapt.base.getPrefixedProperty = function(prop) {
     if (prefixed || prefixed === null) { // null means the browser does not support the property
         return prefixed;
     }
-    if (prop === "writing-mode") {
+    switch (prop) {
+    case "writing-mode":
         // Special case: prefer '-ms-writing-mode' to 'writing-mode'
         if (adapt.base.checkIfPropertySupported("-ms-", "writing-mode")) {
             adapt.base.propNameMap[prop] = "-ms-writing-mode";
             return "-ms-writing-mode";
         }
+        break;
+    case "filter":
+        // Special case: prefer '-webkit-filter' to 'filter'        
+        if (adapt.base.checkIfPropertySupported("-webkit-", "filter")) {
+            adapt.base.propNameMap[prop] = "-webkit-filter";
+            return "-webkit-filter";
+        }
+        break;
     }
+
+
     for (var i = 0; i < adapt.base.knownPrefixes.length; i++) {
         var prefix = adapt.base.knownPrefixes[i];
         if (adapt.base.checkIfPropertySupported(prefix, prop)) {
