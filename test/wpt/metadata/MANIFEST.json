@@ -212,175 +212,200 @@
         "references": [
           ["/css21/page-box/vivliostyle/at-page-rule-002-a-ref.html", "=="]
         ],
-        "url": "/css21/page-box/at-page-rule-002-a.xht"
+        "url": "/css21/page-box/at-page-rule-002-a.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/page-box/at-page-rule-002-b.xht",
         "references": [
           ["/css21/page-box/vivliostyle/at-page-rule-002-b-ref.html", "=="]
         ],
-        "url": "/css21/page-box/at-page-rule-002-b.xht"
+        "url": "/css21/page-box/at-page-rule-002-b.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/page-box/first-page-selectors-001.xht",
         "references": [
           ["/css21/page-box/vivliostyle/first-page-selectors-ltr-ref.html", "=="]
         ],
-        "url": "/css21/page-box/first-page-selectors-001.xht"
+        "url": "/css21/page-box/first-page-selectors-001.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/page-box/page-container-000.xht",
         "references": [
           ["/css21/page-box/vivliostyle/page-container-000-ref.html", "=="]
         ],
-        "url": "/css21/page-box/page-container-000.xht"
+        "url": "/css21/page-box/page-container-000.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/page-box/page-container-001.xht",
         "references": [
           ["/css21/page-box/vivliostyle/page-container-001-ref.html", "=="]
         ],
-        "url": "/css21/page-box/page-container-001.xht"
+        "url": "/css21/page-box/page-container-001.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/page-box/page-container-006.xht",
         "references": [
           ["css21/page-box/vivliostyle/page-container-006-ref.html", "=="]
         ],
-        "url": "/css21/page-box/page-container-006.xht"
+        "url": "/css21/page-box/page-container-006.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/page-box/page-container-008.xht",
         "references": [
           ["/css21/page-box/vivliostyle/page-container-008-ref.html", "=="]
         ],
-        "url": "/css21/page-box/page-container-008.xht"
+        "url": "/css21/page-box/page-container-008.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/page-box/page-container-009.xht",
         "references": [
           ["/css21/page-box/vivliostyle/page-container-008-ref.html", "=="]
         ],
-        "url": "/css21/page-box/page-container-009.xht"
+        "url": "/css21/page-box/page-container-009.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/page-box/page-margin-000.xht",
         "references": [
           ["/css21/page-box/vivliostyle/page-margin-000-ref.html", "=="]
         ],
-        "url": "/css21/page-box/page-margin-000.xht"
+        "url": "/css21/page-box/page-margin-000.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/page-box/page-margin-001.xht",
         "references": [
           ["/css21/page-box/vivliostyle/page-margin-001-ref.html", "=="]
         ],
-        "url": "/css21/page-box/page-margin-001.xht"
+        "url": "/css21/page-box/page-margin-001.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/page-box/page-selectors-004.xht",
         "references": [
           ["css21/page-box/vivliostyle/page-selectors-004-ref.html", "=="]
         ],
-        "url": "/css21/page-box/page-selectors-004.xht"
+        "url": "/css21/page-box/page-selectors-004.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/page-box/page-selectors-006.xht",
         "references": [
           ["css21/page-box/vivliostyle/page-selectors-006-ref.html", "=="]
         ],
-        "url": "/css21/page-box/page-selectors-006.xht"
+        "url": "/css21/page-box/page-selectors-006.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/pagination/orphans-001.xht",
         "references": [
           ["css21/pagination/vivliostyle/orphans-001-ref.html", "=="]
         ],
-        "url": "/css21/pagination/orphans-001.xht"
+        "url": "/css21/pagination/orphans-001.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/pagination/orphans-002.xht",
         "references": [
           ["css21/pagination/vivliostyle/orphans-002-ref.html", "=="]
         ],
-        "url": "/css21/pagination/orphans-002.xht"
+        "url": "/css21/pagination/orphans-002.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/pagination/orphans-003.xht",
         "references": [
           ["css21/pagination/vivliostyle/orphans-002-ref.html", "=="]
         ],
-        "url": "/css21/pagination/orphans-003.xht"
+        "url": "/css21/pagination/orphans-003.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/pagination/orphans-004b.xht",
         "references": [
           ["css21/pagination/vivliostyle/orphans-004b-ref.html", "=="]
         ],
-        "url": "/css21/pagination/orphans-004b.xht"
+        "url": "/css21/pagination/orphans-004b.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/pagination/page-break-after-001.xht",
         "references": [
           ["css21/pagination/vivliostyle/page-break-after-001-ref.html", "=="]
         ],
-        "url": "/css21/pagination/page-break-after-001.xht"
+        "url": "/css21/pagination/page-break-after-001.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/pagination/page-break-before-001.xht",
         "references": [
           ["css21/pagination/vivliostyle/page-break-after-001-ref.html", "=="]
         ],
-        "url": "/css21/pagination/page-break-before-001.xht"
+        "url": "/css21/pagination/page-break-before-001.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/pagination/page-break-before-002.xht",
         "references": [
           ["css21/pagination/vivliostyle/page-break-after-001-ref.html", "=="]
         ],
-        "url": "/css21/pagination/page-break-before-002.xht"
+        "url": "/css21/pagination/page-break-before-002.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/pagination/page-break-before-004.xht",
         "references": [
           ["css21/pagination/vivliostyle/page-break-before-004-ref.html", "=="]
         ],
-        "url": "/css21/pagination/page-break-before-004.xht"
+        "url": "/css21/pagination/page-break-before-004.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/pagination/widows-001.xht",
         "references": [
           ["css21/pagination/vivliostyle/widows-001-ref.html", "=="]
         ],
-        "url": "/css21/pagination/widows-001.xht"
+        "url": "/css21/pagination/widows-001.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/pagination/widows-002.xht",
         "references": [
           ["css21/pagination/vivliostyle/widows-002-ref.html", "=="]
         ],
-        "url": "/css21/pagination/widows-002.xht"
+        "url": "/css21/pagination/widows-002.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/pagination/widows-003.xht",
         "references": [
           ["css21/pagination/vivliostyle/widows-002-ref.html", "=="]
         ],
-        "url": "/css21/pagination/widows-003.xht"
+        "url": "/css21/pagination/widows-003.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/pagination/widows-004a.xht",
         "references": [
           ["css21/pagination/vivliostyle/widows-002-ref.html", "=="]
         ],
-        "url": "/css21/pagination/widows-004a.xht"
+        "url": "/css21/pagination/widows-004a.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css21/pagination/widows-004b.xht",
         "references": [
           ["css21/pagination/vivliostyle/widows-004b-ref.html", "=="]
         ],
-        "url": "/css21/pagination/widows-004b.xht"
+        "url": "/css21/pagination/widows-004b.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css-page-3/page-background-000.xht",
@@ -389,21 +414,24 @@
             "/css-page-3/vivliostyle/page-background-000-ref.html", "=="
           ]
         ],
-        "url": "/css-page-3/page-background-000.xht"
+        "url": "/css-page-3/page-background-000.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css-page-3/page-size-010.xht",
         "references": [
           ["/css-page-3/vivliostyle/page-size-010-ref.html", "=="]
         ],
-        "url": "/css-page-3/page-size-010.xht"
+        "url": "/css-page-3/page-size-010.xht",
+        "not_use_vivliostyle_for_reference": true
       },
       {
         "path": "css-page-3/page-borders-000.xht",
         "references": [
           ["/css-page-3/vivliostyle/page-borders-000-ref.html", "=="]
         ],
-        "url": "/css-page-3/page-borders-000.xht"
+        "url": "/css-page-3/page-borders-000.xht",
+        "not_use_vivliostyle_for_reference": true
       }
     ],
     "stub": [],
