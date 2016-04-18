@@ -1013,7 +1013,11 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
                 page.container.style.display = "none";
                 page.container.style.visibility = "visible";
+				page.container.style.position = "";
+				page.container.style.top = "";
+				page.container.style.left = "";
                 page.container.setAttribute("data-vivliostyle-page-side", /** @type {string} */ (page.side));
+				viewItem.instance.viewport.contentContainer.appendChild(page.container);
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 				var pageIndex = pos ? pos.page - 1 : viewItem.layoutPositions.length - 1;
 				self.pageSheetSizeReporter(viewItem.instance.pageSheetSize, viewItem.item.spineIndex, pageIndex);
@@ -1059,7 +1063,11 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
                 page.container.style.display = "none";
                 page.container.style.visibility = "visible";
+				page.container.style.position = "";
+				page.container.style.top = "";
+				page.container.style.left = "";
                 page.container.setAttribute("data-vivliostyle-page-side", /** @type {string} */ (page.side));
+				viewItem.instance.viewport.contentContainer.appendChild(page.container);
 		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 				var pageIndex = pos ? pos.page - 1 : viewItem.layoutPositions.length - 1;
 				self.pageSheetSizeReporter(viewItem.instance.pageSheetSize, viewItem.item.spineIndex, pageIndex);
@@ -1377,10 +1385,13 @@ adapt.epub.OPFView.prototype.makePage = function(viewItem, pos) {
 
     var pageCont = /** @type {HTMLElement} */ (viewport.document.createElement("div"));
 	pageCont.setAttribute("data-vivliostyle-page-container", true);
+	pageCont.style.position = "absolute";
+	pageCont.style.top = "0";
+	pageCont.style.left = "0";
 	if (!vivliostyle.constants.isDebug) {
 		pageCont.style.visibility = "hidden";
 	}
-	viewport.contentContainer.appendChild(pageCont);
+	viewport.root.appendChild(pageCont);
 
 	var bleedBox = /** @type {HTMLElement} */ (viewport.document.createElement("div"));
 	bleedBox.setAttribute("data-vivliostyle-bleed-box", true);
