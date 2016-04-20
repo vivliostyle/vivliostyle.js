@@ -602,6 +602,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.floatSide = null;
     this.clearSide = null;
 	this.flexContainer = false;
+	this.whitespace = this.parent ? this.parent.whitespace : adapt.vtree.Whitespace.IGNORE;
     this.breakBefore = null;
     this.breakAfter = null;	
     this.nodeShadow = null;
