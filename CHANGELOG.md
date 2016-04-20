@@ -7,6 +7,10 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/220>
   - Spec: [CSS Filter Effect Module Level 3 - filter property](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
 
+### Fixed
+- Fix a bug that `clear` is ignored when `white-space` property is used before the element
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/222>
+
 ## [2016.4](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.4) - 2016-04-08
 
 ### Added
