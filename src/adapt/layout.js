@@ -876,10 +876,8 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 		// TODO: review if it is good to rely on it
 		// TODO: position where a real float would have been positioned
 		adapt.base.setCSSProperty(element, "float", "none");
-		adapt.base.setCSSProperty(element, "display", "inline-block");        
-		adapt.base.setCSSProperty(element, "left", "auto");
-		adapt.base.setCSSProperty(element, "right", "auto");
-		adapt.base.setCSSProperty(element, "top", "auto");
+		adapt.base.setCSSProperty(element, "display", "inline-block");
+		adapt.base.setCSSProperty(element, "vertical-align", "top");                
 	}
     self.buildDeepElementView(nodeContext).then(function(nodeContextAfter) {
 		var floatBBox = self.clientLayout.getElementClientRect(element);
