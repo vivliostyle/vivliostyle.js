@@ -319,17 +319,6 @@ adapt.layout.Column.prototype.hasNewlyAddedPageFloats = function() {
 };
 
 /**
- * Receives a rect with absolute coordinates and returns one with coordinates relative to edges of the page.
- * @param {adapt.geom.Rect} rect
- * @returns {!adapt.geom.Rect}
- */
-adapt.layout.Column.prototype.getElementRelativeRect = function(rect) {
-	var offsetX = this.getLeftEdge() - this.box.x1;
-	var offsetY = this.getTopEdge() - this.box.y1;
-	return new adapt.geom.Rect(rect.x1 - offsetX, rect.y1 - offsetY, rect.x2 - offsetX, rect.y2 - offsetY);
-};
-
-/**
  * @param {number} edge
  * @return {boolean}
  */
@@ -882,11 +871,11 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	if (floatReference === "page") {
 		floatHolder.prepareFloatElement(element, floatSide);
 	} else {
-		adapt.base.setCSSProperty(element, "float", "none");
 		// special case in CSS: position:absolute with left/height: auto is
 		// placed where position:static would be
 		// TODO: review if it is good to rely on it
 		// TODO: position where a real float would have been positioned
+		adapt.base.setCSSProperty(element, "float", "none");
 		adapt.base.setCSSProperty(element, "display", "inline-block");        
 		adapt.base.setCSSProperty(element, "left", "auto");
 		adapt.base.setCSSProperty(element, "right", "auto");
@@ -915,7 +904,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 				nodeContextAfter.viewNode = dummy;
 				frame.finish(nodeContextAfter);
 			} else {
-				floatHolder.tryToAddFloat(nodeContext, element, self.getElementRelativeRect(floatBox), floatSide).then(function() {
+				floatHolder.tryToAddFloat(nodeContext, element, floatBox, floatSide).then(function() {
 					frame.finish(null);
 				});
 			}
@@ -975,11 +964,6 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	        // no overflow
 	    	self.killFloats();
 	    	box = self.vertical ? adapt.geom.rotateBox(self.box) : self.box;
-			if (self.vertical) {
-				floatHorBox = adapt.geom.rotateBox(self.getElementRelativeRect(adapt.geom.unrotateBox(floatHorBox)));
-			} else {
-				floatHorBox = self.getElementRelativeRect(floatHorBox);
-			}
 	        adapt.geom.addFloatToBands(box, self.bands, floatHorBox, null, floatSide);
 	        self.createFloats();
 	        if (floatSide == "left") {
