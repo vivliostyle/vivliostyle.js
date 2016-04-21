@@ -887,6 +887,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 		// placed where position:static would be
 		// TODO: review if it is good to rely on it
 		// TODO: position where a real float would have been positioned
+		adapt.base.setCSSProperty(element, "display", "inline-block");        
 		adapt.base.setCSSProperty(element, "position", "absolute");
 		adapt.base.setCSSProperty(element, "left", "auto");
 		adapt.base.setCSSProperty(element, "right", "auto");
