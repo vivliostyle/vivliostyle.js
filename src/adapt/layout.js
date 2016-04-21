@@ -956,6 +956,10 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    		(floatBox.x1 - self.getLeftEdge() + self.paddingLeft) + "px");
 	    adapt.base.setCSSProperty(element, "top",
 	    		(floatBox.y1 - self.getTopEdge() + self.paddingTop) + "px");
+        if (nodeContext.clearSpacer instanceof Node) {
+            nodeContext.viewNode.parentNode.removeChild(nodeContext.clearSpacer);
+            nodeContext.clearSpacer = null;
+        }
 	    var floatBoxEdge = self.vertical ? floatBox.x1 : floatBox.y2;
 	    // TODO: subtract after margin when determining overflow.
 	    if (!self.isOverflown(floatBoxEdge) || self.breakPositions.length == 0) {
@@ -1655,6 +1659,7 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
 			}
 			spacer.style.marginBottom = hAdj + "px";			
 		}
+        nodeContext.clearSpacer = spacer;            
 	}
 };
 

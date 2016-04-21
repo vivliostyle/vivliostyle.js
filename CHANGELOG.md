@@ -12,6 +12,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/222>
 - Fix Incorrect float positioning
   - <https://github.com/vivliostyle/vivliostyle.js/issues/192>
+- Fix Incorrect float clearance
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/223>
 
 ## [2016.4](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.4) - 2016-04-08
 
