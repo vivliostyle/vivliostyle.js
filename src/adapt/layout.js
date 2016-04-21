@@ -888,7 +888,6 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 		// TODO: review if it is good to rely on it
 		// TODO: position where a real float would have been positioned
 		adapt.base.setCSSProperty(element, "display", "inline-block");        
-		adapt.base.setCSSProperty(element, "position", "absolute");
 		adapt.base.setCSSProperty(element, "left", "auto");
 		adapt.base.setCSSProperty(element, "right", "auto");
 		adapt.base.setCSSProperty(element, "top", "auto");
@@ -965,6 +964,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    if (self.vertical) {
 	    	floatBox = adapt.geom.unrotateBox(floatHorBox);
 	    }
+		adapt.base.setCSSProperty(element, "position", "absolute");
 	    adapt.base.setCSSProperty(element, "left",
 	    		(floatBox.x1 - self.getLeftEdge() + self.paddingLeft) + "px");
 	    adapt.base.setCSSProperty(element, "top",
