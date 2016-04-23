@@ -266,6 +266,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout) {
 	/** @type {boolean} */ this.forceNonfitting = true;
 	/** @type {number} */ this.leftFloatEdge = 0;  // bottom of the bottommost left float
 	/** @type {number} */ this.rightFloatEdge = 0;  // bottom of the bottommost right float
+	/** @type {number} */ this.bottommostFloatTop = 0;  // Top of the bottommost float
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
 
@@ -947,6 +948,12 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    if (self.vertical) {
 	    	floatHorBox = adapt.geom.rotateBox(floatBox);
 	    }
+        var dir = self.getBoxDir();
+        if (floatHorBox.y1 < self.bottommostFloatTop * dir) {
+            var boxExtent = floatHorBox.y2 - floatHorBox.y1;
+            floatHorBox.y1 = self.bottommostFloatTop * dir;
+            floatHorBox.y2 = floatHorBox.y1 + boxExtent;
+        }
 	    adapt.geom.positionFloat(box, self.bands, floatHorBox, floatSide);
 	    if (self.vertical) {
 	    	floatBox = adapt.geom.unrotateBox(floatHorBox);
@@ -961,6 +968,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
             nodeContext.clearSpacer = null;
         }
 	    var floatBoxEdge = self.vertical ? floatBox.x1 : floatBox.y2;
+        var floatBoxTop = self.vertical? floatBox.x2 : floatBox.y1;
 	    // TODO: subtract after margin when determining overflow.
 	    if (!self.isOverflown(floatBoxEdge) || self.breakPositions.length == 0) {
 	        // no overflow
@@ -973,6 +981,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	        } else {
 	        	self.rightFloatEdge = floatBoxEdge;	        	
 	        }
+            self.bottommostFloatTop = floatBoxTop;
 	    	self.updateMaxReachedAfterEdge(floatBoxEdge);
 	        frame.finish(nodeContextAfter);
 	    } else {
@@ -2026,6 +2035,7 @@ adapt.layout.Column.prototype.initGeom = function() {
     this.afterEdge = columnBBox ? (this.vertical ? columnBBox.left : columnBBox.bottom) : 0;
     this.leftFloatEdge = this.beforeEdge;
     this.rightFloatEdge = this.beforeEdge;
+    this.bottommostFloatTop = this.beforeEdge;
     this.footnoteEdge = this.afterEdge;
     this.bands = adapt.geom.shapesToBands(this.box, [this.getInnerShape()],
     		this.exclusions, 8, this.snapHeight, this.vertical);
