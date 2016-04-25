@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<style>
+@-epubx-page-template {
+	section {
+		-epubx-flow-into: s;
+		page-break-before: always;
+		page-break-after: always;
+	}
+	@-epubx-page-master sect {
+		@-epubx-partition {
+			-epubx-flow-from: s;
+			-epubx-required: true;
+		}
+	}
+}
+
+/* Just to make things visible / understandable */
+body { border: solid gray; }
+body::after { content: "body"; }
+section {
+	border: solid pink;
+}
+</style>
+<body>
+	<section id="a">section 1</section>
+	<section id="b">section 2</section>
+</body>
