@@ -522,7 +522,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     parentContainer.insertBefore(boxContainer, parentContainer.firstChild);
     var layoutContainer = new adapt.vtree.Container(boxContainer);
     layoutContainer.vertical = boxInstance.vertical;
-    boxInstance.prepareContainer(self, layoutContainer, page, self.faces);
+    boxInstance.prepareContainer(self, layoutContainer, page, self.faces, self.clientLayout);
     layoutContainer.originX = offsetX;
     layoutContainer.originY = offsetY;
     offsetX += layoutContainer.left + layoutContainer.marginLeft + layoutContainer.borderLeft;

@@ -1330,8 +1330,8 @@ vivliostyle.page.PageRuleMasterInstance.prototype.distributeAutoMarginBoxSizes =
 /**
  * @override
  */
-vivliostyle.page.PageRuleMasterInstance.prototype.prepareContainer = function(context, container, page, docFaces) {
-    vivliostyle.page.PageRuleMasterInstance.superClass_.prepareContainer.call(this, context, container, page, docFaces);
+vivliostyle.page.PageRuleMasterInstance.prototype.prepareContainer = function(context, container, page, docFaces, clientLayout) {
+    vivliostyle.page.PageRuleMasterInstance.superClass_.prepareContainer.call(this, context, container, page, docFaces, clientLayout);
     // Add an attribute to the element so that it can be refered from external style sheets.
     container.element.setAttribute("data-vivliostyle-page-box", true);
 };
@@ -1480,8 +1480,8 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
 /**
  * @override
  */
-vivliostyle.page.PageRulePartitionInstance.prototype.prepareContainer = function(context, container, page, docFaces) {
-    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page, docFaces);
+vivliostyle.page.PageRulePartitionInstance.prototype.prepareContainer = function(context, container, page, docFaces, clientLayout) {
+    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page, docFaces, clientLayout);
     page.pageAreaElement = /** @type {HTMLElement} */ (container.element);
 };
 
@@ -1505,9 +1505,9 @@ goog.inherits(vivliostyle.page.PageMarginBoxPartitionInstance, adapt.pm.Partitio
 /**
  * @override
  */
-vivliostyle.page.PageMarginBoxPartitionInstance.prototype.prepareContainer = function(context, container, page, docFaces) {
+vivliostyle.page.PageMarginBoxPartitionInstance.prototype.prepareContainer = function(context, container, page, docFaces, clientLayout) {
     this.applyVerticalAlign(context, container.element);
-    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page, docFaces);
+    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page, docFaces, clientLayout);
 };
 
 /**
