@@ -345,32 +345,11 @@
         "url": "/css21/css1/c414-flt-fit-002.xht"
       },
       {
-        "path": "css21/css1/c414-flt-fit-004.xht",
-        "references": [
-          ["/css21/css1/c414-flt-fit-004-ref.xht", "=="]
-        ],
-        "url": "/css21/css1/c414-flt-fit-004.xht"
-      },
-      {
         "path": "css21/css1/c414-flt-fit-005.xht",
         "references": [
           ["/css21/css1/c414-flt-fit-005-ref.xht", "=="]
         ],
         "url": "/css21/css1/c414-flt-fit-005.xht"
-      },
-      {
-        "path": "css21/css1/c414-flt-fit-006.xht",
-        "references": [
-          ["/css21/css1/c414-flt-fit-006-ref.xht", "=="]
-        ],
-        "url": "/css21/css1/c414-flt-fit-006.xht"
-      },
-      {
-        "path": "css21/css1/c5525-fltmult-000.xht",
-        "references": [
-          ["/css21/css1/c5525-fltmult-000-ref.xht", "=="]
-        ],
-        "url": "/css21/css1/c5525-fltmult-000.xht"
       },
       {
         "path": "css21/css1/c5525-fltwidth-001.xht",
@@ -399,13 +378,6 @@
           ["/css21/floats-clear/float-006-ref.xht", "=="]
         ],
         "url": "/css21/floats-clear/float-006.xht"
-      },
-      {
-        "path": "css21/floats-clear/floats-001.xht",
-        "references": [
-          ["/css21/floats-clear/floats-001-ref.xht", "=="]
-        ],
-        "url": "/css21/floats-clear/floats-001.xht"
       },
       {
         "path": "css21/floats-clear/floats-002.xht",
@@ -555,13 +527,6 @@
         "url": "/css21/floats-clear/floats-043.xht"
       },
       {
-        "path": "css21/floats-clear/floats-101.xht",
-        "references": [
-          ["/css21/floats-clear/floats-101-ref.xht", "=="]
-        ],
-        "url": "/css21/floats-clear/floats-101.xht"
-      },
-      {
         "path": "css21/floats-clear/floats-114.xht",
         "references": [
           ["/css21/floats-clear/floats-114-ref.xht", "=="]
@@ -639,13 +604,6 @@
         "url": "/css21/floats-clear/floats-146.xht"
       },
       {
-        "path": "css21/floats-clear/floats-149.xht",
-        "references": [
-          ["/css21/floats-clear/floats-149-ref.xht", "=="]
-        ],
-        "url": "/css21/floats-clear/floats-149.xht"
-      },
-      {
         "path": "css21/floats-clear/floats-150.xht",
         "references": [
           ["/css21/floats-clear/floats-150-ref.xht", "=="]
@@ -695,151 +653,11 @@
         "url": "/css21/floats/floats-rule3-outside-left-001.xht"
       },
       {
-        "path": "css21/floats/floats-rule3-outside-left-002.xht",
-        "references": [
-          ["/css21/floats/floats-rule3-outside-left-002-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-rule3-outside-left-002.xht"
-      },
-      {
         "path": "css21/floats/floats-rule3-outside-right-001.xht",
         "references": [
           ["/css21/floats/floats-rule3-outside-right-001-ref.xht", "=="]
         ],
         "url": "/css21/floats/floats-rule3-outside-right-001.xht"
-      },
-      {
-        "path": "css21/floats/floats-rule3-outside-right-002.xht",
-        "references": [
-          ["/css21/floats/floats-rule3-outside-right-002-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-rule3-outside-right-002.xht"
-      },
-      {
-        "path": "css21/floats/floats-rule7-outside-left-001.xht",
-        "references": [
-          ["/css21/floats/floats-rule7-outside-left-001-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-rule7-outside-left-001.xht"
-      },
-      {
-        "path": "css21/floats/floats-rule7-outside-right-001.xht",
-        "references": [
-          ["/css21/floats/floats-rule7-outside-right-001-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-rule7-outside-right-001.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-001-left-overflow.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-001-left-overflow-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-001-left-overflow.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-001-left-table.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-001-left-table-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-001-left-table.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-001-right-overflow.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-001-right-overflow-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-001-right-overflow.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-001-right-table.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-001-right-table-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-001-right-table.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-002-left-overflow.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-002-left-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-002-left-overflow.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-002-left-table.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-002-left-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-002-left-table.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-002-right-overflow.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-002-right-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-002-right-overflow.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-002-right-table.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-002-right-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-002-right-table.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-003-left-overflow.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-003-left-overflow-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-003-left-overflow.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-003-left-table.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-003-left-table-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-003-left-table.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-003-right-overflow.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-003-right-overflow-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-003-right-overflow.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-003-right-table.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-003-right-table-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-003-right-table.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-004.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-004-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-004.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-005.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-005-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-005.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-007.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-007-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-007.xht"
-      },
-      {
-        "path": "css21/floats/floats-wrap-bfc-outside-001.xht",
-        "references": [
-          ["/css21/floats/floats-wrap-bfc-outside-001-ref.xht", "=="]
-        ],
-        "url": "/css21/floats/floats-wrap-bfc-outside-001.xht"
       },
       {
         "path": "css21/floats/floats-wrap-top-below-bfc-001l.xht",
