@@ -872,10 +872,6 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	if (floatReference === "page") {
 		floatHolder.prepareFloatElement(element, floatSide);
 	} else {
-		// special case in CSS: position:absolute with left/height: auto is
-		// placed where position:static would be
-		// TODO: review if it is good to rely on it
-		// TODO: position where a real float would have been positioned
 		adapt.base.setCSSProperty(element, "float", "none");
 		adapt.base.setCSSProperty(element, "display", "inline-block");
 		adapt.base.setCSSProperty(element, "vertical-align", "top");                
