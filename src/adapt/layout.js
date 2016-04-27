@@ -646,14 +646,45 @@ adapt.layout.Column.prototype.getComputedMargin = function(element) {
 };
 
 /**
- * Reads element's computed CSS insets (margins + border + padding).
+ * Reads element's computed CSS insets(margins + border + padding or margins : depends on box-sizing)
  * @param {Element} element
- * @param {adapt.layout.Column} container
  * @return {adapt.geom.Insets}
  */
-adapt.layout.Column.prototype.readComputedInsets = function(element, container) {
+adapt.layout.Column.prototype.getComputedInsets = function(element) {
     var style = this.clientLayout.getElementComputedStyle(element);
     var insets = new adapt.geom.Insets(0, 0, 0, 0);
+    if (style) {
+        if (style.boxSizing == "border-box")
+            return this.getComputedMargin(element);
+        
+        insets.left = 
+            this.parseComputedLength(style.marginLeft) +
+            this.parseComputedLength(style.borderLeftWidth) +
+            this.parseComputedLength(style.paddingLeft);
+        insets.top = 
+            this.parseComputedLength(style.marginTop) +
+            this.parseComputedLength(style.borderTopWidth) +
+            this.parseComputedLength(style.paddingTop);
+        insets.right = 
+            this.parseComputedLength(style.marginRight) +
+            this.parseComputedLength(style.borderRightWidth) +
+            this.parseComputedLength(style.paddingRight);
+        insets.bottom = 
+            this.parseComputedLength(style.marginBottom) +
+            this.parseComputedLength(style.borderBottomWidth) +
+            this.parseComputedLength(style.paddingBottom);
+    }
+    return insets;
+};
+
+
+/**
+ * Set element's computed CSS insets to Column Container
+ * @param {Element} element
+ * @param {adapt.layout.Column} container
+ */
+adapt.layout.Column.prototype.setComputedInsets = function(element, container) {
+    var style = this.clientLayout.getElementComputedStyle(element);
     if (style) {
         container.marginLeft = this.parseComputedLength(style.marginLeft);
         container.borderLeft = this.parseComputedLength(style.borderLeftWidth);
@@ -668,7 +699,6 @@ adapt.layout.Column.prototype.readComputedInsets = function(element, container) 
         container.borderBottom = this.parseComputedLength(style.borderBottomWidth);
         container.paddingBottom = this.parseComputedLength(style.paddingBottom);
     }
-    return insets;
 };
 
 /**
@@ -731,7 +761,7 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
     	}
     }
 	self.element.appendChild(footnoteArea.element);
-	self.readComputedInsets(footnoteArea.element, footnoteArea);
+	self.setComputedInsets(footnoteArea.element, footnoteArea);
 	var before = self.getBoxDir() * (boundingEdge - self.beforeEdge);
 	if (self.vertical) {
 		footnoteArea.height = self.box.y2 - self.box.y1
@@ -954,7 +984,11 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    if (self.vertical) {
 	    	floatBox = adapt.geom.unrotateBox(floatHorBox);
 	    }
+        var insets = self.getComputedInsets(element);
+        adapt.base.setCSSProperty(element, "width", floatBox.x2 - floatBox.x1 - insets.left - insets.right + "px");
+        adapt.base.setCSSProperty(element, "height", floatBox.y2 - floatBox.y1 - insets.top - insets.bottom + "px");        
 		adapt.base.setCSSProperty(element, "position", "absolute");
+		adapt.base.setCSSProperty(element, "display", "block");        
 	    adapt.base.setCSSProperty(element, "left",
 	    		(floatBox.x1 - self.getLeftEdge() + self.paddingLeft) + "px");
 	    adapt.base.setCSSProperty(element, "top",

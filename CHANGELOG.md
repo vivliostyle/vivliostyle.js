@@ -16,6 +16,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/223>
 - Fix incorrect text offset caused by float
   - <https://github.com/vivliostyle/vivliostyle.js/issues/226>
+- Fix improper rendering of floats with relative width/height
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/37>
 
 ## [2016.4](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.4) - 2016-04-08
 
