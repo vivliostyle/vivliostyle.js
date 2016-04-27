@@ -10,6 +10,14 @@
 ### Fixed
 - Fix a bug that `clear` is ignored when `white-space` property is used before the element
   - <https://github.com/vivliostyle/vivliostyle.js/pull/222>
+- Fix incorrect float positioning
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/192>
+- Fix incorrect float clearance
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/223>
+- Fix incorrect text offset caused by float
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/226>
+- Fix improper rendering of floats with relative width/height
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/37>
 
 ## [2016.4](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.4) - 2016-04-08
 

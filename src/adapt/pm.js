@@ -1202,9 +1202,10 @@ adapt.pm.delayedProperties = [
  * @param {adapt.vtree.Container} container
  * @param {adapt.vtree.Page} page
  * @param {adapt.font.DocumentFaces} docFaces
+ * @param {adapt.vtree.ClientLayout} clientLayout
  * @return {void}
  */
-adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, container, page, docFaces) {
+adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, container, page, docFaces, clientLayout) {
 	if (!this.parentInstance || this.vertical != this.parentInstance.vertical) {
 		adapt.base.setCSSProperty(container.element, "writing-mode", (this.vertical ? "vertical-rl" : "horizontal-tb"));
 	}
@@ -1225,6 +1226,11 @@ adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, containe
     } else {
         this.assignStartEndPosition(context, container);
     }
+    var containerBBox = clientLayout.getElementClientRect(container.element);
+    container.top = containerBBox.top - container.marginTop;
+    container.left = containerBBox.left - container.marginLeft;
+    container.width = containerBBox.right - containerBBox.left + container.marginTop + container.marginBottom;
+    container.height = containerBBox.bottom - containerBBox.top + container.marginLeft + container.marginRight;  
     for (var i = 0; i < adapt.pm.passPreProperties.length; i++) {
         this.propagateProperty(context, container, adapt.pm.passPreProperties[i], docFaces);
     }
@@ -1318,6 +1324,11 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
     		}
     	}
     }
+    var containerBBox = clientLayout.getElementClientRect(container.element);
+    container.top = containerBBox.top - container.marginTop;
+    container.left = containerBBox.left - container.marginLeft;
+    container.width = containerBBox.right - containerBBox.left + container.marginTop + container.marginBottom;
+    container.height = containerBBox.bottom - containerBBox.top + container.marginLeft + container.marginRight;  
     for (var i = 0; i < adapt.pm.passPostProperties.length; i++) {
         this.propagateProperty(context, container, adapt.pm.passPostProperties[i], docFaces);
     }
@@ -1538,9 +1549,9 @@ adapt.pm.PartitionInstance.prototype.boxSpecificEnabled = function(enabled) {
 /**
  * @override
  */
-adapt.pm.PartitionInstance.prototype.prepareContainer = function(context, container, delayedItems, docFaces) {
+adapt.pm.PartitionInstance.prototype.prepareContainer = function(context, container, delayedItems, docFaces, clientLayout) {
 	adapt.base.setCSSProperty(container.element, "overflow", "hidden");  // default value
-	adapt.pm.PageBoxInstance.prototype.prepareContainer.call(this, context, container, delayedItems, docFaces);
+	adapt.pm.PageBoxInstance.prototype.prepareContainer.call(this, context, container, delayedItems, docFaces, clientLayout);
 };
 
 

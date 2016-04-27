@@ -266,6 +266,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout) {
 	/** @type {boolean} */ this.forceNonfitting = true;
 	/** @type {number} */ this.leftFloatEdge = 0;  // bottom of the bottommost left float
 	/** @type {number} */ this.rightFloatEdge = 0;  // bottom of the bottommost right float
+	/** @type {number} */ this.bottommostFloatTop = 0;  // Top of the bottommost float
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
 
@@ -316,17 +317,6 @@ adapt.layout.Column.prototype.getRightEdge = function() {
  */
 adapt.layout.Column.prototype.hasNewlyAddedPageFloats = function() {
 	return this.layoutContext.getPageFloatHolder().hasNewlyAddedFloats();
-};
-
-/**
- * Receives a rect with absolute coordinates and returns one with coordinates relative to edges of the page.
- * @param {adapt.geom.Rect} rect
- * @returns {!adapt.geom.Rect}
- */
-adapt.layout.Column.prototype.getElementRelativeRect = function(rect) {
-	var offsetX = this.getLeftEdge() - this.box.x1;
-	var offsetY = this.getTopEdge() - this.box.y1;
-	return new adapt.geom.Rect(rect.x1 - offsetX, rect.y1 - offsetY, rect.x2 - offsetX, rect.y2 - offsetY);
 };
 
 /**
@@ -656,14 +646,45 @@ adapt.layout.Column.prototype.getComputedMargin = function(element) {
 };
 
 /**
- * Reads element's computed CSS insets (margins + border + padding).
+ * Reads element's computed CSS insets(margins + border + padding or margins : depends on box-sizing)
  * @param {Element} element
- * @param {adapt.layout.Column} container
  * @return {adapt.geom.Insets}
  */
-adapt.layout.Column.prototype.readComputedInsets = function(element, container) {
+adapt.layout.Column.prototype.getComputedInsets = function(element) {
     var style = this.clientLayout.getElementComputedStyle(element);
     var insets = new adapt.geom.Insets(0, 0, 0, 0);
+    if (style) {
+        if (style.boxSizing == "border-box")
+            return this.getComputedMargin(element);
+        
+        insets.left = 
+            this.parseComputedLength(style.marginLeft) +
+            this.parseComputedLength(style.borderLeftWidth) +
+            this.parseComputedLength(style.paddingLeft);
+        insets.top = 
+            this.parseComputedLength(style.marginTop) +
+            this.parseComputedLength(style.borderTopWidth) +
+            this.parseComputedLength(style.paddingTop);
+        insets.right = 
+            this.parseComputedLength(style.marginRight) +
+            this.parseComputedLength(style.borderRightWidth) +
+            this.parseComputedLength(style.paddingRight);
+        insets.bottom = 
+            this.parseComputedLength(style.marginBottom) +
+            this.parseComputedLength(style.borderBottomWidth) +
+            this.parseComputedLength(style.paddingBottom);
+    }
+    return insets;
+};
+
+
+/**
+ * Set element's computed CSS insets to Column Container
+ * @param {Element} element
+ * @param {adapt.layout.Column} container
+ */
+adapt.layout.Column.prototype.setComputedInsets = function(element, container) {
+    var style = this.clientLayout.getElementComputedStyle(element);
     if (style) {
         container.marginLeft = this.parseComputedLength(style.marginLeft);
         container.borderLeft = this.parseComputedLength(style.borderLeftWidth);
@@ -678,7 +699,6 @@ adapt.layout.Column.prototype.readComputedInsets = function(element, container) 
         container.borderBottom = this.parseComputedLength(style.borderBottomWidth);
         container.paddingBottom = this.parseComputedLength(style.paddingBottom);
     }
-    return insets;
 };
 
 /**
@@ -741,7 +761,7 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
     	}
     }
 	self.element.appendChild(footnoteArea.element);
-	self.readComputedInsets(footnoteArea.element, footnoteArea);
+	self.setComputedInsets(footnoteArea.element, footnoteArea);
 	var before = self.getBoxDir() * (boundingEdge - self.beforeEdge);
 	if (self.vertical) {
 		footnoteArea.height = self.box.y2 - self.box.y1
@@ -883,14 +903,8 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 		floatHolder.prepareFloatElement(element, floatSide);
 	} else {
 		adapt.base.setCSSProperty(element, "float", "none");
-		// special case in CSS: position:absolute with left/height: auto is
-		// placed where position:static would be
-		// TODO: review if it is good to rely on it
-		// TODO: position where a real float would have been positioned
-		adapt.base.setCSSProperty(element, "position", "absolute");
-		adapt.base.setCSSProperty(element, "left", "auto");
-		adapt.base.setCSSProperty(element, "right", "auto");
-		adapt.base.setCSSProperty(element, "top", "auto");
+		adapt.base.setCSSProperty(element, "display", "inline-block");
+		adapt.base.setCSSProperty(element, "vertical-align", "top");                
 	}
     self.buildDeepElementView(nodeContext).then(function(nodeContextAfter) {
 		var floatBBox = self.clientLayout.getElementClientRect(element);
@@ -915,7 +929,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 				nodeContextAfter.viewNode = dummy;
 				frame.finish(nodeContextAfter);
 			} else {
-				floatHolder.tryToAddFloat(nodeContext, element, self.getElementRelativeRect(floatBox), floatSide).then(function() {
+				floatHolder.tryToAddFloat(nodeContext, element, floatBox, floatSide).then(function() {
 					frame.finish(null);
 				});
 			}
@@ -960,25 +974,36 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    if (self.vertical) {
 	    	floatHorBox = adapt.geom.rotateBox(floatBox);
 	    }
+        var dir = self.getBoxDir();
+        if (floatHorBox.y1 < self.bottommostFloatTop * dir) {
+            var boxExtent = floatHorBox.y2 - floatHorBox.y1;
+            floatHorBox.y1 = self.bottommostFloatTop * dir;
+            floatHorBox.y2 = floatHorBox.y1 + boxExtent;
+        }
 	    adapt.geom.positionFloat(box, self.bands, floatHorBox, floatSide);
 	    if (self.vertical) {
 	    	floatBox = adapt.geom.unrotateBox(floatHorBox);
 	    }
+        var insets = self.getComputedInsets(element);
+        adapt.base.setCSSProperty(element, "width", floatBox.x2 - floatBox.x1 - insets.left - insets.right + "px");
+        adapt.base.setCSSProperty(element, "height", floatBox.y2 - floatBox.y1 - insets.top - insets.bottom + "px");        
+		adapt.base.setCSSProperty(element, "position", "absolute");
+		adapt.base.setCSSProperty(element, "display", "block");        
 	    adapt.base.setCSSProperty(element, "left",
 	    		(floatBox.x1 - self.getLeftEdge() + self.paddingLeft) + "px");
 	    adapt.base.setCSSProperty(element, "top",
 	    		(floatBox.y1 - self.getTopEdge() + self.paddingTop) + "px");
+        if (nodeContext.clearSpacer) {
+            nodeContext.clearSpacer.parentNode.removeChild(nodeContext.clearSpacer);
+            nodeContext.clearSpacer = null;
+        }
 	    var floatBoxEdge = self.vertical ? floatBox.x1 : floatBox.y2;
+        var floatBoxTop = self.vertical? floatBox.x2 : floatBox.y1;
 	    // TODO: subtract after margin when determining overflow.
 	    if (!self.isOverflown(floatBoxEdge) || self.breakPositions.length == 0) {
 	        // no overflow
 	    	self.killFloats();
 	    	box = self.vertical ? adapt.geom.rotateBox(self.box) : self.box;
-			if (self.vertical) {
-				floatHorBox = adapt.geom.rotateBox(self.getElementRelativeRect(adapt.geom.unrotateBox(floatHorBox)));
-			} else {
-				floatHorBox = self.getElementRelativeRect(floatHorBox);
-			}
 	        adapt.geom.addFloatToBands(box, self.bands, floatHorBox, null, floatSide);
 	        self.createFloats();
 	        if (floatSide == "left") {
@@ -986,6 +1011,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	        } else {
 	        	self.rightFloatEdge = floatBoxEdge;	        	
 	        }
+            self.bottommostFloatTop = floatBoxTop;
 	    	self.updateMaxReachedAfterEdge(floatBoxEdge);
 	        frame.finish(nodeContextAfter);
 	    } else {
@@ -1672,6 +1698,7 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
 			}
 			spacer.style.marginBottom = hAdj + "px";			
 		}
+        nodeContext.clearSpacer = spacer;            
 	}
 };
 
@@ -2038,6 +2065,7 @@ adapt.layout.Column.prototype.initGeom = function() {
     this.afterEdge = columnBBox ? (this.vertical ? columnBBox.left : columnBBox.bottom) : 0;
     this.leftFloatEdge = this.beforeEdge;
     this.rightFloatEdge = this.beforeEdge;
+    this.bottommostFloatTop = this.beforeEdge;
     this.footnoteEdge = this.afterEdge;
     this.bands = adapt.geom.shapesToBands(this.box, [this.getInnerShape()],
     		this.exclusions, 8, this.snapHeight, this.vertical);
