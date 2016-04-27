@@ -424,6 +424,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 	// Record indices of repeated positions and removed positions
     var repeatedIndices = /** @type {Array.<number>} */ ([]);
 	var removedIndices = /** @type {Array.<number>} */ ([]);
+	var leadingEdge = true;
     frame.loopWithFrame(function(loopFrame) {
 	    while (flowPosition.positions.length - removedIndices.length > 0) {
 	        var index = 0;
@@ -445,7 +446,8 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 	        }
 	        var flowChunk = selected.flowChunk;
 	        var pending = true;
-	        region.layout(selected.chunkPosition).then(function(newPosition) {
+	        region.layout(selected.chunkPosition, leadingEdge).then(function(newPosition) {
+		        leadingEdge = false;
 		        // static: keep in the flow
 		        if (selected.flowChunk.repeated && (newPosition === null || flowChunk.exclusive))
 		            repeatedIndices.push(index);
@@ -455,9 +457,15 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 		        	loopFrame.breakLoop();
 		        	return;
 		        } else {
-		            // not exclusive, did not fit completely
+		            // not exclusive
 		            if (newPosition) {
+		                // did not fit completely
 		                selected.chunkPosition = newPosition;
+			        	loopFrame.breakLoop();
+			        	return;
+		            } else if (region.pageBreakType) {
+			        	// forced break
+			        	removedIndices.push(index);
 			        	loopFrame.breakLoop();
 			        	return;
 		            }
