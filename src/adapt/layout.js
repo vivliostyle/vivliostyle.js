@@ -993,8 +993,8 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    		(floatBox.x1 - self.getLeftEdge() + self.paddingLeft) + "px");
 	    adapt.base.setCSSProperty(element, "top",
 	    		(floatBox.y1 - self.getTopEdge() + self.paddingTop) + "px");
-        if (nodeContext.clearSpacer instanceof Node) {
-            nodeContext.viewNode.parentNode.removeChild(nodeContext.clearSpacer);
+        if (nodeContext.clearSpacer) {
+            nodeContext.clearSpacer.parentNode.removeChild(nodeContext.clearSpacer);
             nodeContext.clearSpacer = null;
         }
 	    var floatBoxEdge = self.vertical ? floatBox.x1 : floatBox.y2;
