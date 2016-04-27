@@ -1229,8 +1229,8 @@ adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, containe
     var containerBBox = clientLayout.getElementClientRect(container.element);
     container.top = containerBBox.top - container.marginTop;
     container.left = containerBBox.left - container.marginLeft;
-    container.width = containerBBox.right - containerBBox.left + container.marginTop + container.marginBottom;
-    container.height = containerBBox.bottom - containerBBox.top + container.marginLeft + container.marginRight;  
+    container.width = containerBBox.right - containerBBox.left;
+    container.height = containerBBox.bottom - containerBBox.top;
     for (var i = 0; i < adapt.pm.passPreProperties.length; i++) {
         this.propagateProperty(context, container, adapt.pm.passPreProperties[i], docFaces);
     }
@@ -1327,8 +1327,8 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
     var containerBBox = clientLayout.getElementClientRect(container.element);
     container.top = containerBBox.top - container.marginTop;
     container.left = containerBBox.left - container.marginLeft;
-    container.width = containerBBox.right - containerBBox.left + container.marginTop + container.marginBottom;
-    container.height = containerBBox.bottom - containerBBox.top + container.marginLeft + container.marginRight;  
+    container.width = containerBBox.right - containerBBox.left;
+    container.height = containerBBox.bottom - containerBBox.top;
     for (var i = 0; i < adapt.pm.passPostProperties.length; i++) {
         this.propagateProperty(context, container, adapt.pm.passPostProperties[i], docFaces);
     }
