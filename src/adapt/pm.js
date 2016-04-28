@@ -1231,6 +1231,21 @@ adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, containe
     container.left = containerBBox.left - container.marginLeft;
     container.width = containerBBox.right - containerBBox.left;
     container.height = containerBBox.bottom - containerBBox.top;
+    var style = clientLayout.getElementComputedStyle(container.element);
+    if (style && style.boxSizing !== "border-box") {
+        container.width =
+            container.width - 
+            container.paddingLeft -
+            container.paddingRight -
+            container.borderLeft -
+            container.borderRight;
+        container.height =
+            container.height -
+            container.paddingTop -
+            container.paddingBottom -
+            container.borderTop -
+            container.borderBottom;
+    }
     for (var i = 0; i < adapt.pm.passPreProperties.length; i++) {
         this.propagateProperty(context, container, adapt.pm.passPreProperties[i], docFaces);
     }
@@ -1329,6 +1344,21 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
     container.left = containerBBox.left - container.marginLeft;
     container.width = containerBBox.right - containerBBox.left;
     container.height = containerBBox.bottom - containerBBox.top;
+    var style = clientLayout.getElementComputedStyle(container.element);
+    if (style && style.boxSizing !== "border-box") {
+        container.width =
+            container.width - 
+            container.paddingLeft -
+            container.paddingRight -
+            container.borderLeft -
+            container.borderRight;
+        container.height =
+            container.height -
+            container.paddingTop -
+            container.paddingBottom -
+            container.borderTop -
+            container.borderBottom;
+    }
     for (var i = 0; i < adapt.pm.passPostProperties.length; i++) {
         this.propagateProperty(context, container, adapt.pm.passPostProperties[i], docFaces);
     }
