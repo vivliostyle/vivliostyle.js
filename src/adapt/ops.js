@@ -23,6 +23,7 @@ goog.require('adapt.layout');
 goog.require('adapt.vgen');
 goog.require('adapt.xmldoc');
 goog.require('adapt.font');
+goog.require('vivliostyle.break');
 goog.require('vivliostyle.page');
 
 /**
@@ -84,10 +85,23 @@ adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
 	/** @const */ this.pageProps = pageProps;
 	/** @const */ this.validatorSet = store.validatorSet;
     this.pageScope.defineBuiltIn("has-content", function(name) {
-    	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
-    	return styleInstance.currentLayoutPosition.hasContent(/** @type {string} */ (name), styleInstance.lookupOffset);
-    });  
-    this.pageScope.defineName("page-number", new adapt.expr.Native(this.pageScope, function() {    	
+		var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
+		function matchPageSide(side) {
+			switch (side) {
+				case "left":
+				case "right":
+				case "recto":
+				case "verso":
+					return new adapt.expr.Named(pageScope, side + "-page").evaluate(styleInstance);
+				default:
+					return true;
+			}
+		}
+		var cp = styleInstance.currentLayoutPosition;
+		return matchPageSide(cp.startSideOfFlow(/** @type {string} */ (name))) &&
+			cp.hasContent(/** @type {string} */ (name), styleInstance.lookupOffset);
+    });
+    this.pageScope.defineName("page-number", new adapt.expr.Native(this.pageScope, function() {
     	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
     	return styleInstance.pageNumberOffset + styleInstance.currentLayoutPosition.page;
     }, "page-number"));
@@ -413,6 +427,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
     var flowPosition = this.currentLayoutPosition.flowPositions[flowName];
     if (!flowPosition)
         return adapt.task.newResult(true);
+    flowPosition.startSide = "any";
     region.init();
     if (this.primaryFlows[flowName] && region.bands.length > 0) {
         // In general, we force non-fitting content. Exception is only for primary flow regions
@@ -461,16 +476,18 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 		            if (newPosition) {
 		                // did not fit completely
 		                selected.chunkPosition = newPosition;
-			        	loopFrame.breakLoop();
-			        	return;
-		            } else if (region.pageBreakType) {
-			        	// forced break
-			        	removedIndices.push(index);
-			        	loopFrame.breakLoop();
-			        	return;
+		            } else {
+		                // go to the next element in the flow
+		                removedIndices.push(index);
 		            }
-		            // go to the next element in the flow
-					removedIndices.push(index);
+		            if (region.pageBreakType) {
+		                // forced break
+		                flowPosition.startSide = vivliostyle.break.breakValueToStartSideValue(region.pageBreakType);
+		            }
+		            if (newPosition || region.pageBreakType) {
+		                loopFrame.breakLoop();
+		                return;
+		            }
 		        }
 		        if (pending) {
 		        	// Sync result

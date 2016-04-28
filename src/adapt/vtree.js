@@ -765,6 +765,10 @@ adapt.vtree.FlowPosition = function() {
      * @type {Array.<adapt.vtree.FlowChunkPosition>}
      */
 	this.positions = [];
+	/**
+	 * @type {string}
+     */
+	this.startSide = "any";
 };
 
 /**
@@ -777,6 +781,7 @@ adapt.vtree.FlowPosition.prototype.clone = function() {
     for (var i = 0; i < arr.length; i++) {
         newarr[i] = arr[i].clone();
     }
+	newfp.startSide = this.startSide;
     return newfp;
 };
 
@@ -834,6 +839,17 @@ adapt.vtree.LayoutPosition.prototype.hasContent = function(name, offset) {
     if (!flowPos)
         return false;
     return flowPos.hasContent(offset);
+};
+
+/**
+ * @param {string} name
+ * @returns {string}
+ */
+adapt.vtree.LayoutPosition.prototype.startSideOfFlow = function(name) {
+	var flowPos = this.flowPositions[name];
+	if (!flowPos)
+		return "any";
+	return flowPos.startSide;
 };
 
 /**

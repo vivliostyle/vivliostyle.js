@@ -123,4 +123,20 @@ goog.scope(function() {
         }
     };
 
+    /**
+     * @param {string} breakValue
+     * @returns {string}
+     */
+    vivliostyle.break.breakValueToStartSideValue = function(breakValue) {
+        switch (breakValue) {
+            case "left":
+            case "right":
+            case "recto":
+            case "verso":
+                return breakValue;
+            default:
+                return "any";
+        }
+    }
+
 });
