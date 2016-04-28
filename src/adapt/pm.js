@@ -1198,6 +1198,31 @@ adapt.pm.delayedProperties = [
 ];
 
 /**
+ * @private
+ * @param {adapt.vtree.Container} container
+ * @return {void}
+ */
+adapt.pm.PageBoxInstance.prototype.setupContainerDimension = function(container, clientLayout) {
+    var containerBBox = clientLayout.getElementClientRect(container.element);
+    container.top = containerBBox.top - container.marginTop;
+    container.left = containerBBox.left - container.marginLeft;
+    container.width = 
+        containerBBox.right - 
+        containerBBox.left -
+        container.paddingLeft -
+        container.paddingRight -
+        container.borderLeft -
+        container.borderRight;
+    container.height =
+        containerBBox.bottom - 
+        containerBBox.top -
+        container.paddingTop -
+        container.paddingBottom -
+        container.borderTop -
+        container.borderBottom;
+}
+
+/**
  * @param {adapt.expr.Context} context
  * @param {adapt.vtree.Container} container
  * @param {adapt.vtree.Page} page
@@ -1226,29 +1251,10 @@ adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, containe
     } else {
         this.assignStartEndPosition(context, container);
     }
-    var containerBBox = clientLayout.getElementClientRect(container.element);
-    container.top = containerBBox.top - container.marginTop;
-    container.left = containerBBox.left - container.marginLeft;
-    container.width = containerBBox.right - containerBBox.left;
-    container.height = containerBBox.bottom - containerBBox.top;
-    var style = clientLayout.getElementComputedStyle(container.element);
-    if (style && style.boxSizing !== "border-box") {
-        container.width =
-            container.width - 
-            container.paddingLeft -
-            container.paddingRight -
-            container.borderLeft -
-            container.borderRight;
-        container.height =
-            container.height -
-            container.paddingTop -
-            container.paddingBottom -
-            container.borderTop -
-            container.borderBottom;
-    }
     for (var i = 0; i < adapt.pm.passPreProperties.length; i++) {
         this.propagateProperty(context, container, adapt.pm.passPreProperties[i], docFaces);
     }
+    this.setupContainerDimension(container, clientLayout);
 };
 
 /**
@@ -1339,32 +1345,13 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
     		}
     	}
     }
-    var containerBBox = clientLayout.getElementClientRect(container.element);
-    container.top = containerBBox.top - container.marginTop;
-    container.left = containerBBox.left - container.marginLeft;
-    container.width = containerBBox.right - containerBBox.left;
-    container.height = containerBBox.bottom - containerBBox.top;
-    var style = clientLayout.getElementComputedStyle(container.element);
-    if (style && style.boxSizing !== "border-box") {
-        container.width =
-            container.width - 
-            container.paddingLeft -
-            container.paddingRight -
-            container.borderLeft -
-            container.borderRight;
-        container.height =
-            container.height -
-            container.paddingTop -
-            container.paddingBottom -
-            container.borderTop -
-            container.borderBottom;
-    }
     for (var i = 0; i < adapt.pm.passPostProperties.length; i++) {
         this.propagateProperty(context, container, adapt.pm.passPostProperties[i], docFaces);
     }
     for (var i = 0; i < adapt.pm.delayedProperties.length; i++) {
         this.propagateDelayedProperty(context, container, adapt.pm.delayedProperties[i], page.delayedItems);    	
     }    
+    this.setupContainerDimension(container, clientLayout);
 };
 
 adapt.pm.userAgentPageMasterPseudo = "background-host";
