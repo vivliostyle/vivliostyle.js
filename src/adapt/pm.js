@@ -1206,21 +1206,18 @@ adapt.pm.PageBoxInstance.prototype.setupContainerDimension = function(container,
     var containerBBox = clientLayout.getElementClientRect(container.element);
     container.top = containerBBox.top - container.marginTop;
     container.left = containerBBox.left - container.marginLeft;
-    container.width = 
-        containerBBox.right - 
-        containerBBox.left -
-        container.paddingLeft -
-        container.paddingRight -
-        container.borderLeft -
-        container.borderRight;
-    container.height =
-        containerBBox.bottom - 
-        containerBBox.top -
-        container.paddingTop -
-        container.paddingBottom -
-        container.borderTop -
-        container.borderBottom;
-}
+    var probe = container.element.ownerDocument.createElement("div");
+    probe.style.position = "absolute";
+    probe.style.top = container.paddingTop + "px";
+    probe.style.bottom = container.paddingBottom + "px";
+    probe.style.left = container.paddingLeft + "px";
+    probe.style.right = container.paddingRight + "px";
+    container.element.appendChild(probe);
+    var contentArea = clientLayout.getElementClientRect(probe);
+    container.element.removeChild(probe);
+    container.width = contentArea.width;
+    container.height = contentArea.height;
+};
 
 /**
  * @param {adapt.expr.Context} context
