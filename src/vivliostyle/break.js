@@ -124,7 +124,7 @@ goog.scope(function() {
     };
 
     /**
-     * @param {string} breakValue
+     * @param {?string} breakValue
      * @returns {string}
      */
     vivliostyle.break.breakValueToStartSideValue = function(breakValue) {
@@ -137,6 +137,22 @@ goog.scope(function() {
             default:
                 return "any";
         }
-    }
+    };
+
+    /**
+     * @param {string} startSideValue
+     * @returns {?string}
+     */
+    vivliostyle.break.startSideValueToBreakValue = function(startSideValue) {
+        switch (startSideValue) {
+            case "left":
+            case "right":
+            case "rect":
+            case "verso":
+                return startSideValue;
+            default:
+                return null;
+        }
+    };
 
 });

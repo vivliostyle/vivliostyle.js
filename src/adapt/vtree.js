@@ -287,10 +287,11 @@ adapt.vtree.canIgnore = function(node, whitespace) {
  * @param {boolean} exclusive
  * @param {boolean} repeated
  * @param {boolean} last
+ * @param {?string} breakBefore
  * @constructor
  */
 adapt.vtree.FlowChunk = function(flowName, element, startOffset,
-        priority, linger, exclusive, repeated, last) {
+        priority, linger, exclusive, repeated, last, breakBefore) {
 	/** @type {string} */ this.flowName = flowName;
 	/** @type {!Element} */ this.element = element;
 	/** @type {number} */ this.startOffset = startOffset;
@@ -300,6 +301,7 @@ adapt.vtree.FlowChunk = function(flowName, element, startOffset,
 	/** @type {boolean} */ this.repeated = repeated;
 	/** @type {boolean} */ this.last = last;
 	/** @type {number} */ this.startPage = -1;
+	/** @type {?string} */ this.breakBefore = breakBefore;
 };
 
 /**
@@ -850,6 +852,18 @@ adapt.vtree.LayoutPosition.prototype.startSideOfFlow = function(name) {
 	if (!flowPos)
 		return "any";
 	return flowPos.startSide;
+};
+
+adapt.vtree.LayoutPosition.prototype.updateStartSide = function() {
+	for (var name in this.flowPositions) {
+		var flowPos = this.flowPositions[name];
+		if (flowPos && flowPos.positions.length > 0) {
+			var flowChunkBreakBefore = flowPos.positions[0].flowChunk.breakBefore;
+			var flowBreakAfter = vivliostyle.break.startSideValueToBreakValue(flowPos.startSide);
+			flowPos.startSide = vivliostyle.break.breakValueToStartSideValue(
+				vivliostyle.break.resolveEffectiveBreakValue(flowBreakAfter, flowChunkBreakBefore));
+		}
+	}
 };
 
 /**

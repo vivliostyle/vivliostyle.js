@@ -29,6 +29,7 @@
         "adapt/xmldoc.js",
         "adapt/expr.js",
         "adapt/css.js",
+        "vivliostyle/display.js",
         "vivliostyle/break.js",
         "adapt/csstok.js",
         "adapt/cssparse.js",

@@ -152,8 +152,10 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
     /** @const */ this.rootStyle = /** @type {!adapt.csscasc.ElementStyle} */ ({});
     /** @type {Object.<string,adapt.csscasc.ElementStyle>} */ this.styleMap = {};
     /** @const */ this.flowChunks = /** @type {Array.<adapt.vtree.FlowChunk>} */ ([]);
+    /** @type {adapt.vtree.FlowChunk} */ this.currentFlowChunk = null;
     /** @type {adapt.cssstyler.FlowListener} */ this.flowListener = null;
     /** @type {?string} */ this.flowToReach = null;
+    /** @type {boolean} */ this.atFlowStart = false;
     /** @const */ this.cascade = cascade.createInstance(context, pageCounterResolver, xmldoc.lang);
     /** @const */ this.offsetMap = new adapt.cssstyler.SlipMap();
     /** @type {boolean} */ this.primary = true;
@@ -163,6 +165,8 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
     /** @type {boolean} */ this.rootLayoutAssigned = false;
     var rootOffset = xmldoc.getElementOffset(this.root);
     /** @type {number} */ this.lastOffset = rootOffset;
+    /** @type {!Array<?adapt.css.Val>} */ this.displayStack = [];
+    /** @const */ this.breakBeforeValues = /** @type {!Object<number, ?string>} */ ({});
     
     this.offsetMap.addStuckRange(rootOffset);
     var style = this.getAttrStyle(this.root);
@@ -334,6 +338,8 @@ adapt.cssstyler.Styler.prototype.replayFlowElementsFromOffset = function(offset)
 		var rootStyle = this.getStyle(this.root, false);
 	    var flowName = adapt.csscasc.getProp(rootStyle, "flow-into");
 	    var flowNameStr = flowName ? flowName.evaluate(context, "flow-into").toString() : "body";
+        var display = adapt.csscasc.getProp(rootStyle, "display");
+        this.displayStack = [display && display.evaluate(context, "display")];
 	    this.encounteredFlowElement(flowNameStr, rootStyle, this.root, rootOffset);		
 	}
 	var node = this.xmldoc.getNodeByOffset(offset);
@@ -403,6 +409,31 @@ adapt.cssstyler.Styler.prototype.styleUntilFlowIsReached = function(flowName) {
 };
 
 /**
+ * Returns the effective value of 'break-before'.
+ * Returns null if 'break-before' is not specified or the generated box is not a block-level box.
+ * @param {!adapt.csscasc.ElementStyle} style
+ * @param {boolean} isRoot
+ * @returns {?string}
+ */
+adapt.cssstyler.Styler.prototype.getBreakBefore = function(style, isRoot) {
+    var breakBefore = null;
+    var displayCV = style["display"];
+    var display = displayCV ? displayCV.evaluate(this.context, "display") : adapt.css.ident.inline;
+    var positionCV = style["position"];
+    var position = positionCV && positionCV.evaluate(this.context, "position");
+    var floatCV = style["float"];
+    var float = floatCV && floatCV.evaluate(this.context, "float");
+    var isBlock = vivliostyle.display.isBlock(display, position, float, isRoot);
+    if (isBlock) {
+        var breakBeforeCV = style["break-before"];
+        if (breakBeforeCV) {
+            breakBefore = breakBeforeCV.evaluate(this.context, "break-before").toString();
+        }
+    }
+    return breakBefore;
+};
+
+/**
  * @private
  * @param {string} flowName
  * @param {adapt.csscasc.ElementStyle} style
@@ -432,9 +463,15 @@ adapt.cssstyler.Styler.prototype.encounteredFlowElement = function(flowName, sty
     if (priorityCV) {
         priority = adapt.cssprop.toInt(priorityCV.evaluate(this.context, "flow-priority"), 0);
     }
+    var breakBefore = this.breakBeforeValues[startOffset];
+    if (!breakBefore) {
+        breakBefore = this.breakBeforeValues[startOffset] = this.getBreakBefore(style, elem === this.root);
+    }
+    this.atFlowStart = true;
     var flowChunk = new adapt.vtree.FlowChunk(flowName, elem,
-    		startOffset, priority, linger, exclusive, repeated, last);
+    		startOffset, priority, linger, exclusive, repeated, last, breakBefore);
     this.flowChunks.push(flowChunk);
+    this.currentFlowChunk = flowChunk;
     if (this.flowToReach == flowName)
         this.flowToReach = null;
     if (this.flowListener)
@@ -468,6 +505,9 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
                 if (this.last.nodeType == 1) {
                     this.cascade.popElement(/** @type {Element} */ (this.last));
                     this.primary = this.primaryStack.pop();
+                    if (this.displayStack.pop() !== adapt.css.ident.none) {
+                        this.atFlowStart = false;
+                    }
                 }
                 next = this.last.nextSibling;
                 if (next)
@@ -505,18 +545,23 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
             	this.postprocessTopStyle(style, true);
             	this.bodyReached = true;
             }
+            var display = style["display"] && style["display"].evaluate(context, "display");
+            this.displayStack.push(display);
             var flowName = style["flow-into"];
             if (flowName) {
                 var flowNameStr = flowName.evaluate(context,"flow-into").toString();
                 this.encounteredFlowElement(flowNameStr, style, elem, this.lastOffset);
                 this.primary = !!this.primaryFlows[flowNameStr];
+            } else if (this.atFlowStart) {
+                var breakBefore = this.getBreakBefore(style, elem === this.root);
+                if (breakBefore) {
+                    this.breakBeforeValues[this.currentFlowChunk.startOffset] = this.currentFlowChunk.breakBefore =
+                        vivliostyle.break.resolveEffectiveBreakValue(this.currentFlowChunk.breakBefore, breakBefore);
+                }
             }
             if (this.primary) {
-                var display = style["display"];
-                if (display) {
-                    if (display.evaluate(context, "display") === adapt.css.ident.none) {
-                        this.primary = false;
-                    }
+                if (display === adapt.css.ident.none) {
+                    this.primary = false;
                 }
             }
             if (goog.DEBUG) {

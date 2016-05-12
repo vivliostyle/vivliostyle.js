@@ -1,27 +1,33 @@
 <!DOCTYPE html>
 <style>
 	@page {
+		margin: 0;
+		size: 200px 200px;
 		@bottom-center {
 			content: counter(page);
 		}
 	}
+	html {
+		widows: 1;
+		orphans: 1;
+	}
 	.break-before-page {
-		break-before: page;
+		page-break-before: always;
 	}
 	.break-after-page {
-		break-after: page;
+		page-break-after: always;
 	}
 	.break-before-right {
-		break-before: right;
+		page-break-before: right;
 	}
 	.break-after-right {
-		break-after: right;
+		page-break-after: right;
 	}
 	.break-before-left {
-		break-before: left;
+		page-break-before: left;
 	}
 	.break-after-left {
-		break-after: left;
+		page-break-after: left;
 	}
 	@-epubx-page-template {
 		section {
@@ -56,8 +62,11 @@
 	<section>This should be on the 2nd (left) page.</section>
 	<section class="break-before-page break-after-page">This should be on the 3nd (right) page. The next (4th, left) page should be empty.</section>
 	<section class="break-before-right break-after-right">This should be on the 5th (right) page. The next (6th, left) page should be empty.</section>
-	<section class="break-after-page break-after-page">This should be on the 7th (right) page.</section>
+	<section class="break-after-page">This should be on the 7th (right) page.</section>
 	<section class="break-after-page">This should be on the 8th (left) page. The next (9th, right) page should be empty.</section>
 	<section class="break-before-left break-after-left">This should be on the 10th (left) page. The next (11th, right) page should be empty.</section>
 	<section>This should be on the 12th (left) page.</section>
+	<section><span class="break-before-left">This should be on the 12th (left) page too. The next (13th, right) page should be empty.</span></section>
+	<section><div class="break-before-left">This should be on the 14th (left) page.</div> The next (15th, right) page should be empty. Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah</section>
+	<section><span style="display: none">This should not be displayed</span><div class="break-before-left">This should be on the 16th (left) page.</div></section>
 </body>

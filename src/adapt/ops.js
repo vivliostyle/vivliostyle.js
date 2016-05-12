@@ -400,6 +400,7 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function(cascadedPageStyle)
         // it is is not marked as fully consumed and it comes in the document before the lookup position.
         // Feed lookupOffset and flow availability into the context
         this.lookupOffset = this.styler.styleUntil(currentPosition, lookup);
+		cp.updateStartSide();
         this.initLingering();
         self.clearScope(this.style.pageScope);
         // C. Determine content availability. Flow has content available if it contains eligible elements.
