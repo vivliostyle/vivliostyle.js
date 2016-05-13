@@ -300,6 +300,16 @@ adapt.vtree.canIgnore = function(node, whitespace) {
 
 /**
  * @param {string} flowName
+ * @param {?string} parentFlowName
+ * @constructor
+ */
+adapt.vtree.Flow = function(flowName, parentFlowName) {
+	/** @const */ this.flowName = flowName;
+	/** @const */ this.parentFlowName = parentFlowName;
+};
+
+/**
+ * @param {string} flowName
  * @param {!Element} element
  * @param {number} startOffset
  * @param {number} priority
@@ -825,6 +835,10 @@ adapt.vtree.LayoutPosition = function() {
      * @type {number}
      */
 	this.page = 0;
+	/**
+	 * @type {!Object<string, adapt.vtree.Flow>}
+     */
+	this.flows = {};
 	/**
 	 * @type {Object.<string,adapt.vtree.FlowPosition>}
 	 */

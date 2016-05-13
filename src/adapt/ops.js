@@ -5,6 +5,7 @@
  */
 goog.provide('adapt.ops');
 
+goog.require("goog.asserts");
 goog.require("vivliostyle.constants");
 goog.require("vivliostyle.logging");
 goog.require('adapt.task');
@@ -270,9 +271,14 @@ adapt.ops.StyleInstance.prototype.lookupInstance = function(key) {
 /**
  * @override
  */
-adapt.ops.StyleInstance.prototype.encounteredFlowChunk = function(flowChunk) {
+adapt.ops.StyleInstance.prototype.encounteredFlowChunk = function(flowChunk, flow) {
     var cp = this.currentLayoutPosition;
     if (cp) {
+		if (!cp.flows[flowChunk.flowName]) {
+			cp.flows[flowChunk.flowName] = flow;
+		} else {
+			flow = cp.flows[flowChunk.flowName];
+		}
 	    var flowPosition = cp.flowPositions[flowChunk.flowName];
 	    if (!flowPosition) {
 	        flowPosition = new adapt.vtree.FlowPosition();
@@ -423,6 +429,7 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function(cascadedPageStyle)
         // it is is not marked as fully consumed and it comes in the document before the lookup position.
         // Feed lookupOffset and flow availability into the context
         this.lookupOffset = this.styler.styleUntil(currentPosition, lookup);
+		goog.asserts.assert(cp);
 		this.updateStartSide(cp);
         this.initLingering();
         self.clearScope(this.style.pageScope);

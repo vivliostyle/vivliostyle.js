@@ -114,9 +114,10 @@ adapt.cssstyler.FlowListener = function() {};
 
 /**
  * @param {adapt.vtree.FlowChunk} flowChunk
+ * @param {adapt.vtree.Flow} flow
  * @return void
  */
-adapt.cssstyler.FlowListener.prototype.encounteredFlowChunk = function(flowChunk) {};
+adapt.cssstyler.FlowListener.prototype.encounteredFlowChunk = function(flowChunk, flow) {};
 
 /**
  * @interface
@@ -152,8 +153,9 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
     /** @type {Node} */ this.last = this.root;
     /** @const */ this.rootStyle = /** @type {!adapt.csscasc.ElementStyle} */ ({});
     /** @type {Object.<string,adapt.csscasc.ElementStyle>} */ this.styleMap = {};
+    /** @const */ this.flows = /** @type {Object<string, !adapt.vtree.Flow>} */ ({});
     /** @const */ this.flowChunks = /** @type {Array.<adapt.vtree.FlowChunk>} */ ([]);
-    /** @type {adapt.vtree.FlowChunk} */ this.currentFlowChunk = null;
+    /** @type {!Array.<!adapt.vtree.FlowChunk>} */ this.flowChunkStack =  [];
     /** @type {adapt.cssstyler.FlowListener} */ this.flowListener = null;
     /** @type {?string} */ this.flowToReach = null;
     /** @type {boolean} */ this.atFlowStart = false;
@@ -341,7 +343,8 @@ adapt.cssstyler.Styler.prototype.replayFlowElementsFromOffset = function(offset)
 	    var flowNameStr = flowName ? flowName.evaluate(context, "flow-into").toString() : "body";
         var display = adapt.csscasc.getProp(rootStyle, "display");
         this.displayStack = [display && display.evaluate(context, "display")];
-	    this.encounteredFlowElement(flowNameStr, rootStyle, this.root, rootOffset);		
+        this.flowChunkStack = [];
+	    this.encounteredFlowElement(flowNameStr, rootStyle, this.root, rootOffset);
 	}
 	var node = this.xmldoc.getNodeByOffset(offset);
 	var nodeOffset = this.xmldoc.getNodeOffset(node, 0, false);
@@ -390,7 +393,7 @@ adapt.cssstyler.Styler.prototype.replayFlowElementsFromOffset = function(offset)
 adapt.cssstyler.Styler.prototype.resetFlowChunkStream = function(flowListener) {
     this.flowListener = flowListener;
     for (var i = 0; i < this.flowChunks.length; i++) {
-        this.flowListener.encounteredFlowChunk(this.flowChunks[i]);
+        this.flowListener.encounteredFlowChunk(this.flowChunks[i], this.flows[this.flowChunks[i].flowName]);
     }
 };
 
@@ -519,14 +522,20 @@ adapt.cssstyler.Styler.prototype.encounteredFlowElement = function(flowName, sty
         breakBefore = this.breakBeforeValues[startOffset] = vivliostyle.break.resolveEffectiveBreakValue(
             this.getBreakBefore(style, elem === this.root), beforePseudoBreakBefore);
     }
+    var flow = this.flows[flowName];
+    if (!flow) {
+        var parentFlowChunk = this.flowChunkStack[this.flowChunkStack.length - 1];
+        var parentFlowName = parentFlowChunk ? parentFlowChunk.flowName : null;
+        flow = this.flows[flowName] = new adapt.vtree.Flow(flowName, parentFlowName);
+    }
     var flowChunk = new adapt.vtree.FlowChunk(flowName, elem,
     		startOffset, priority, linger, exclusive, repeated, last, breakBefore);
     this.flowChunks.push(flowChunk);
-    this.currentFlowChunk = flowChunk;
+    this.flowChunkStack.push(flowChunk);
     if (this.flowToReach == flowName)
         this.flowToReach = null;
     if (this.flowListener)
-        this.flowListener.encounteredFlowChunk(flowChunk);
+        this.flowListener.encounteredFlowChunk(flowChunk, flow);
 };
 
 /**
@@ -560,9 +569,11 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
                     goog.asserts.assert(afterPseudoStyle);
                     var afterPseudoBreakBefore = this.processPseudoBreakBefore(afterPseudoStyle, "after");
                     if (this.atFlowStart && afterPseudoBreakBefore) {
-                        this.breakBeforeValues[this.currentFlowChunk.startOffset] = this.currentFlowChunk.breakBefore =
-                            vivliostyle.break.resolveEffectiveBreakValue(this.currentFlowChunk.breakBefore, afterPseudoBreakBefore);
+                        var currentFlowChunk = this.flowChunkStack[this.flowChunkStack.length - 1];
+                        this.breakBeforeValues[currentFlowChunk.startOffset] = currentFlowChunk.breakBefore =
+                            vivliostyle.break.resolveEffectiveBreakValue(currentFlowChunk.breakBefore, afterPseudoBreakBefore);
                     }
+                    this.flowChunkStack.pop();
                     if (this.displayStack.pop() !== adapt.css.ident.none) {
                         this.atFlowStart = false;
                     }
@@ -619,16 +630,20 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
                 var flowNameStr = flowName.evaluate(context,"flow-into").toString();
                 this.encounteredFlowElement(flowNameStr, style, elem, this.lastOffset);
                 this.primary = !!this.primaryFlows[flowNameStr];
-            } else if (this.atFlowStart) {
-                var beforePseudoBreakBefore = this.processPseudoBreakBefore(style, "before", function() {
-                    // if ::before pseudoelement generates a box, we are no longer at the start of the flow
-                    this.atFlowStart = false;
-                });
-                var breakBefore = vivliostyle.break.resolveEffectiveBreakValue(
-                    this.getBreakBefore(style, elem === this.root), beforePseudoBreakBefore);
-                if (breakBefore) {
-                    this.breakBeforeValues[this.currentFlowChunk.startOffset] = this.currentFlowChunk.breakBefore =
-                        vivliostyle.break.resolveEffectiveBreakValue(this.currentFlowChunk.breakBefore, breakBefore);
+            } else {
+                this.flowChunkStack.push(this.flowChunkStack[this.flowChunkStack.length - 1]);
+                if (this.atFlowStart) {
+                    var beforePseudoBreakBefore = this.processPseudoBreakBefore(style, "before", function() {
+                        // if ::before pseudoelement generates a box, we are no longer at the start of the flow
+                        this.atFlowStart = false;
+                    });
+                    var breakBefore = vivliostyle.break.resolveEffectiveBreakValue(
+                        this.getBreakBefore(style, elem === this.root), beforePseudoBreakBefore);
+                    if (breakBefore) {
+                        var currentFlowChunk = this.flowChunkStack[this.flowChunkStack.length - 1]
+                        this.breakBeforeValues[currentFlowChunk.startOffset] = currentFlowChunk.breakBefore =
+                            vivliostyle.break.resolveEffectiveBreakValue(currentFlowChunk.breakBefore, breakBefore);
+                    }
                 }
             }
             if (this.primary) {
