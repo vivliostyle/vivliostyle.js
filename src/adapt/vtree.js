@@ -874,18 +874,6 @@ adapt.vtree.LayoutPosition.prototype.startSideOfFlow = function(name) {
 	return flowPos.startSide;
 };
 
-adapt.vtree.LayoutPosition.prototype.updateStartSide = function() {
-	for (var name in this.flowPositions) {
-		var flowPos = this.flowPositions[name];
-		if (flowPos && flowPos.positions.length > 0) {
-			var flowChunkBreakBefore = flowPos.positions[0].flowChunk.breakBefore;
-			var flowBreakAfter = vivliostyle.break.startSideValueToBreakValue(flowPos.startSide);
-			flowPos.startSide = vivliostyle.break.breakValueToStartSideValue(
-				vivliostyle.break.resolveEffectiveBreakValue(flowBreakAfter, flowChunkBreakBefore));
-		}
-	}
-};
-
 /**
  * @param {Element} element
  * @constructor

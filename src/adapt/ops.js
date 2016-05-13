@@ -369,6 +369,24 @@ adapt.ops.StyleInstance.prototype.matchPageSide = function(side) {
 };
 
 /**
+ * @param {!adapt.vtree.LayoutPosition} layoutPosition
+ */
+adapt.ops.StyleInstance.prototype.updateStartSide = function(layoutPosition) {
+	for (var name in layoutPosition.flowPositions) {
+		var flowPos = layoutPosition.flowPositions[name];
+		if (flowPos && flowPos.positions.length > 0) {
+			var flowChunk = flowPos.positions[0].flowChunk;
+			if (this.getConsumedOffset(flowPos) === flowChunk.startOffset) {
+				var flowChunkBreakBefore = flowPos.positions[0].flowChunk.breakBefore;
+				var flowBreakAfter = vivliostyle.break.startSideValueToBreakValue(flowPos.startSide);
+				flowPos.startSide = vivliostyle.break.breakValueToStartSideValue(
+					vivliostyle.break.resolveEffectiveBreakValue(flowBreakAfter, flowChunkBreakBefore));
+			}
+		}
+	}
+};
+
+/**
  * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle Cascaded page style specified in page context
  * @return {adapt.pm.PageMasterInstance}
  */
@@ -405,7 +423,7 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function(cascadedPageStyle)
         // it is is not marked as fully consumed and it comes in the document before the lookup position.
         // Feed lookupOffset and flow availability into the context
         this.lookupOffset = this.styler.styleUntil(currentPosition, lookup);
-		cp.updateStartSide();
+		this.updateStartSide(cp);
         this.initLingering();
         self.clearScope(this.style.pageScope);
         // C. Determine content availability. Flow has content available if it contains eligible elements.
