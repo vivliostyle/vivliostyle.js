@@ -306,6 +306,7 @@ adapt.vtree.canIgnore = function(node, whitespace) {
 adapt.vtree.Flow = function(flowName, parentFlowName) {
 	/** @const */ this.flowName = flowName;
 	/** @const */ this.parentFlowName = parentFlowName;
+	/** @const */ this.forcedBreakOffsets = /** @type {Array<number>} */ ([]);
 };
 
 /**
@@ -859,6 +860,7 @@ adapt.vtree.LayoutPosition.prototype.clone = function() {
     newcp.highestSeenNode = this.highestSeenNode;
     newcp.highestSeenOffset = this.highestSeenOffset;
     newcp.lookupPositionOffset = this.lookupPositionOffset;
+	newcp.flows = this.flows;
     for (var name in this.flowPositions) {
         newcp.flowPositions[name] = this.flowPositions[name].clone();
     }
@@ -886,6 +888,20 @@ adapt.vtree.LayoutPosition.prototype.startSideOfFlow = function(name) {
 	if (!flowPos)
 		return "any";
 	return flowPos.startSide;
+};
+
+/**
+ * @param {string} name
+ * @returns {?adapt.vtree.FlowChunk}
+ */
+adapt.vtree.LayoutPosition.prototype.firstFlowChunkOfFlow = function(name) {
+	var flowPos = this.flowPositions[name];
+	if (!flowPos)
+		return null;
+	var flowChunkPosition = flowPos.positions[0];
+	if (!flowChunkPosition)
+		return null;
+	return flowChunkPosition.flowChunk;
 };
 
 /**

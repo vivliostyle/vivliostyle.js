@@ -422,14 +422,15 @@ adapt.cssstyler.Styler.prototype.isCurrentNodeDisplayed = function() {
 };
 
 /**
- * Returns the effective value of 'break-before'.
- * Returns null if 'break-before' is not specified or the generated box is not a block-level box.
+ * Returns the effective value of 'break-before/after'.
+ * Returns null if 'break-before/after' is not specified or the generated box is not a block-level box.
  * @param {!adapt.csscasc.ElementStyle} style
+ * @param {string} edge 'before' or 'after
  * @param {boolean} isRoot
  * @returns {?string}
  */
-adapt.cssstyler.Styler.prototype.getBreakBefore = function(style, isRoot) {
-    var breakBefore = null;
+adapt.cssstyler.Styler.prototype.getBreakValue = function(style, edge, isRoot) {
+    var breakValue = null;
     var displayCV = style["display"];
     var display = displayCV ? displayCV.evaluate(this.context, "display") : adapt.css.ident.inline;
     var positionCV = style["position"];
@@ -438,25 +439,26 @@ adapt.cssstyler.Styler.prototype.getBreakBefore = function(style, isRoot) {
     var float = floatCV && floatCV.evaluate(this.context, "float");
     var isBlock = vivliostyle.display.isBlock(display, position, float, isRoot);
     if (isBlock) {
-        var breakBeforeCV = style["break-before"];
+        var breakBeforeCV = style["break-" + edge];
         if (breakBeforeCV) {
-            breakBefore = breakBeforeCV.evaluate(this.context, "break-before").toString();
+            breakValue = breakBeforeCV.evaluate(this.context, "break-" + edge).toString();
         }
     }
-    return breakBefore;
+    return breakValue;
 };
 
 /**
- * Returns the effective value of 'break-before' for a specified pseudoelement.
- * Returns null if 'break-before' is not specified or the generated box of the pseudoelement is not a block-level box.
+ * Returns the effective value of 'break-before/after' for a specified pseudoelement.
+ * Returns null if 'break-before/after' is not specified or the generated box of the pseudoelement is not a block-level box.
  * When a callback function is passed, it is called only if the pseudoelement generates a box (i.e. the 'display' value is not none and the 'content' property has a value other than 'none' or 'normal').
  * @param {!adapt.csscasc.ElementStyle} style
  * @param {string} pseudoName
+ * @param {string} edge 'before' or 'after'
  * @param {function(this:adapt.cssstyler.Styler)=} callback
  * @returns {?string}
  */
-adapt.cssstyler.Styler.prototype.processPseudoBreakBefore = function(style, pseudoName, callback) {
-    var breakBefore = null;
+adapt.cssstyler.Styler.prototype.processPseudoBreakValue = function(style, pseudoName, edge, callback) {
+    var breakValue = null;
     if (this.isCurrentNodeDisplayed()) {
         var pseudoMap = style["_pseudos"];
         if (pseudoMap) {
@@ -469,7 +471,7 @@ adapt.cssstyler.Styler.prototype.processPseudoBreakBefore = function(style, pseu
                     if (contentCV) {
                         var content = contentCV.evaluate(this.context, "content");
                         if (adapt.vtree.nonTrivialContent(content)) {
-                            breakBefore = this.getBreakBefore(pseudoStyle, false);
+                            breakValue = this.getBreakValue(pseudoStyle, edge, false);
                             if (callback) {
                                 callback.call(this);
                             }
@@ -479,7 +481,7 @@ adapt.cssstyler.Styler.prototype.processPseudoBreakBefore = function(style, pseu
             }
         }
     }
-    return breakBefore;
+    return breakValue;
 };
 
 /**
@@ -531,6 +533,20 @@ adapt.cssstyler.Styler.prototype.encounteredFlowElement = function(flowName, sty
 };
 
 /**
+ * @param {?string} breakValue
+ */
+adapt.cssstyler.Styler.prototype.registerForcedBreakOffset = function(breakValue) {
+    if (vivliostyle.break.isForcedBreakValue(breakValue)) {
+        var currentFlowChunk = this.flowChunkStack[this.flowChunkStack.length - 1];
+        var forcedBreakOffsets = this.flows[currentFlowChunk.flowName].forcedBreakOffsets;
+        if (forcedBreakOffsets.length === 0 ||
+            forcedBreakOffsets[forcedBreakOffsets.length - 1] < this.lastOffset) {
+            forcedBreakOffsets.push(this.lastOffset);
+        }
+    }
+};
+
+/**
  * @param {number} startOffset current position in the document
  * @param {number} lookup lookup window size for the next page
  * @return {number} lookup offset in the document for the next page
@@ -559,12 +575,16 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
                     this.primary = this.primaryStack.pop();
                     var afterPseudoStyle = this.getStyle(/** @type {Element} */ (this.last), false);
                     goog.asserts.assert(afterPseudoStyle);
-                    var afterPseudoBreakBefore = this.processPseudoBreakBefore(afterPseudoStyle, "after");
+                    var afterPseudoBreakBefore = this.processPseudoBreakValue(afterPseudoStyle, "after", "before");
+                    this.registerForcedBreakOffset(afterPseudoBreakBefore);
                     if (this.atFlowStart && afterPseudoBreakBefore) {
                         var currentFlowChunk = this.flowChunkStack[this.flowChunkStack.length - 1];
                         this.breakBeforeValues[currentFlowChunk.startOffset] = currentFlowChunk.breakBefore =
                             vivliostyle.break.resolveEffectiveBreakValue(currentFlowChunk.breakBefore, afterPseudoBreakBefore);
                     }
+                    var breakAfter = this.processPseudoBreakValue(afterPseudoStyle, "after", "after");
+                    breakAfter = vivliostyle.break.resolveEffectiveBreakValue(breakAfter, this.getBreakValue(afterPseudoStyle, "after", this.last === this.root));
+                    this.registerForcedBreakOffset(breakAfter);
                     this.flowChunkStack.pop();
                     if (this.displayStack.pop() !== adapt.css.ident.none) {
                         this.atFlowStart = false;
@@ -626,17 +646,20 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
                 this.flowChunkStack.push(this.flowChunkStack[this.flowChunkStack.length - 1]);
             }
             var wasAtFlowStart = this.atFlowStart;
-            var beforePseudoBreakBefore = this.processPseudoBreakBefore(style, "before", function() {
+            var beforePseudoBreakBefore = this.processPseudoBreakValue(style, "before", "before", function() {
                 // if ::before pseudoelement generates a box, we are no longer at the start of the flow
                 this.atFlowStart = false;
             });
             var breakBefore = vivliostyle.break.resolveEffectiveBreakValue(
-                this.getBreakBefore(style, elem === this.root), beforePseudoBreakBefore);
+                this.getBreakValue(style, "before", elem === this.root), beforePseudoBreakBefore);
+            this.registerForcedBreakOffset(breakBefore);
             if (wasAtFlowStart && breakBefore) {
                 var currentFlowChunk = this.flowChunkStack[this.flowChunkStack.length - 1];
                 this.breakBeforeValues[currentFlowChunk.startOffset] = currentFlowChunk.breakBefore =
                     vivliostyle.break.resolveEffectiveBreakValue(currentFlowChunk.breakBefore, breakBefore);
             }
+            var beforePseudoBreakAfter = this.processPseudoBreakValue(style, "before", "after");
+            this.registerForcedBreakOffset(beforePseudoBreakAfter);
 
             if (this.primary) {
                 if (display === adapt.css.ident.none) {

@@ -86,10 +86,13 @@ adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
 	/** @const */ this.pageProps = pageProps;
 	/** @const */ this.validatorSet = store.validatorSet;
     this.pageScope.defineBuiltIn("has-content", function(name) {
+		name = /** @type {string} */ (name);
 		var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
 		var cp = styleInstance.currentLayoutPosition;
+		var flowChunk = cp.firstFlowChunkOfFlow(name);
 		return styleInstance.matchPageSide(cp.startSideOfFlow(/** @type {string} */ (name))) &&
-			cp.hasContent(/** @type {string} */ (name), styleInstance.lookupOffset);
+			cp.hasContent(/** @type {string} */ (name), styleInstance.lookupOffset) &&
+			!!flowChunk && !styleInstance.flowChunkIsAfterParentFlowForcedBreak(flowChunk);
     });
     this.pageScope.defineName("page-number", new adapt.expr.Native(this.pageScope, function() {
     	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
@@ -164,6 +167,7 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @type {adapt.cssstyler.Styler} */ this.styler = null;
     /** @type {Object.<string,adapt.cssstyler.Styler>} */ this.stylerMap = null;
     /** @type {adapt.vtree.LayoutPosition} */ this.currentLayoutPosition = null;
+	/** @type {adapt.vtree.LayoutPosition} */ this.layoutPositionAtPageStart = null;
     /** @type {number} */ this.lookupOffset = 0;
     /** @const */ this.fontMapper = fontMapper;
     /** @const */ this.faces = new adapt.font.DocumentFaces(this.style.fontDeobfuscator);
@@ -449,6 +453,38 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function(cascadedPageStyle)
 };
 
 /**
+ * @param {!adapt.vtree.FlowChunk} flowChunk
+ * @returns {boolean}
+ */
+adapt.ops.StyleInstance.prototype.flowChunkIsAfterParentFlowForcedBreak = function(flowChunk) {
+	var flows = this.layoutPositionAtPageStart.flows;
+	var parentFlowName = flows[flowChunk.flowName].parentFlowName;
+	if (parentFlowName) {
+		var startOffset = flowChunk.startOffset;
+		var forcedBreakOffsets = flows[parentFlowName].forcedBreakOffsets;
+		if (!forcedBreakOffsets.length || startOffset < forcedBreakOffsets[0]) {
+			return false;
+		}
+		var breakOffsetBeforeStartIndex = adapt.base.binarySearch(forcedBreakOffsets.length, function(i) {
+			return forcedBreakOffsets[i] > startOffset;
+		}) - 1;
+		var breakOffsetBeforeStart = forcedBreakOffsets[breakOffsetBeforeStartIndex];
+		var parentFlowPosition = this.layoutPositionAtPageStart.flowPositions[parentFlowName];
+		var parentStartOffset = this.getConsumedOffset(parentFlowPosition);
+		if (breakOffsetBeforeStart < parentStartOffset) {
+			return false;
+		}
+		if (parentStartOffset < breakOffsetBeforeStart) {
+			return true;
+		}
+		// Special case: parentStartOffset === breakOffsetBeforeStart
+		// In this case, the flowChunk can be used if the start side of the parent flow matches the current page side.
+		return !this.matchPageSide(parentFlowPosition.startSide);
+	}
+	return false;
+};
+
+/**
  * @param {adapt.layout.Column} region
  * @param {string} flowName
  * @param {Array.<string>} regionIds
@@ -491,6 +527,9 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 	            }
 	        }
 	        var flowChunk = selected.flowChunk;
+			if (self.flowChunkIsAfterParentFlowForcedBreak(flowChunk)) {
+				break;
+			}
 	        var pending = true;
 	        region.layout(selected.chunkPosition, leadingEdge).then(function(newPosition) {
 		        leadingEdge = false;
@@ -807,6 +846,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     cp = self.currentLayoutPosition;
     cp.page++;
     self.clearScope(self.style.pageScope);
+	self.layoutPositionAtPageStart = cp.clone();
 
     // Resolve page size before page master selection.
     var cascadedPageStyle = self.pageManager.getCascadedPageStyle();
@@ -833,7 +873,6 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 	var writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
 	var direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
 	var pageFloatHolder = new vivliostyle.pagefloat.FloatHolder(page.getPageAreaElement.bind(page), writingMode, direction);
-	var currentLayoutPosition = cp.clone();
 	var exclusions = [];
 
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
@@ -843,7 +882,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 			if (pageFloatHolder.hasNewlyAddedFloats()) {
 				exclusions = exclusions.concat(pageFloatHolder.getShapesOfNewlyAddedFloats());
 				pageFloatHolder.clearNewlyAddedFloats();
-				cp = self.currentLayoutPosition = currentLayoutPosition.clone();
+				cp = self.currentLayoutPosition = self.layoutPositionAtPageStart.clone();
 				var c;
 				while (c = page.bleedBox.lastChild) {
 					page.bleedBox.removeChild(c);
@@ -858,7 +897,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
         var isLeftPage = new adapt.expr.Named(pageMaster.pageBox.scope, "left-page");
         page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;
 	    self.processLinger();
-	    self.currentLayoutPosition = null;
+	    self.currentLayoutPosition = self.layoutPositionAtPageStart = null;
 	    cp.highestSeenOffset = self.styler.getReachedOffset();
         var triggers = self.style.store.getTriggersForDoc(self.xmldoc);
 	    page.finish(triggers, self.clientLayout);
