@@ -513,15 +513,7 @@ adapt.cssstyler.Styler.prototype.encounteredFlowElement = function(flowName, sty
     if (priorityCV) {
         priority = adapt.cssprop.toInt(priorityCV.evaluate(this.context, "flow-priority"), 0);
     }
-    var breakBefore = this.breakBeforeValues[startOffset];
-    if (!breakBefore) {
-        var beforePseudoBreakBefore = this.processPseudoBreakBefore(style, "before", function() {
-            // if ::before pseudoelement generates a box, we are no longer at the start of the flow
-            this.atFlowStart = false;
-        });
-        breakBefore = this.breakBeforeValues[startOffset] = vivliostyle.break.resolveEffectiveBreakValue(
-            this.getBreakBefore(style, elem === this.root), beforePseudoBreakBefore);
-    }
+    var breakBefore = this.breakBeforeValues[startOffset] || null;
     var flow = this.flows[flowName];
     if (!flow) {
         var parentFlowChunk = this.flowChunkStack[this.flowChunkStack.length - 1];
@@ -632,20 +624,20 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
                 this.primary = !!this.primaryFlows[flowNameStr];
             } else {
                 this.flowChunkStack.push(this.flowChunkStack[this.flowChunkStack.length - 1]);
-                if (this.atFlowStart) {
-                    var beforePseudoBreakBefore = this.processPseudoBreakBefore(style, "before", function() {
-                        // if ::before pseudoelement generates a box, we are no longer at the start of the flow
-                        this.atFlowStart = false;
-                    });
-                    var breakBefore = vivliostyle.break.resolveEffectiveBreakValue(
-                        this.getBreakBefore(style, elem === this.root), beforePseudoBreakBefore);
-                    if (breakBefore) {
-                        var currentFlowChunk = this.flowChunkStack[this.flowChunkStack.length - 1]
-                        this.breakBeforeValues[currentFlowChunk.startOffset] = currentFlowChunk.breakBefore =
-                            vivliostyle.break.resolveEffectiveBreakValue(currentFlowChunk.breakBefore, breakBefore);
-                    }
-                }
             }
+            var wasAtFlowStart = this.atFlowStart;
+            var beforePseudoBreakBefore = this.processPseudoBreakBefore(style, "before", function() {
+                // if ::before pseudoelement generates a box, we are no longer at the start of the flow
+                this.atFlowStart = false;
+            });
+            var breakBefore = vivliostyle.break.resolveEffectiveBreakValue(
+                this.getBreakBefore(style, elem === this.root), beforePseudoBreakBefore);
+            if (wasAtFlowStart && breakBefore) {
+                var currentFlowChunk = this.flowChunkStack[this.flowChunkStack.length - 1];
+                this.breakBeforeValues[currentFlowChunk.startOffset] = currentFlowChunk.breakBefore =
+                    vivliostyle.break.resolveEffectiveBreakValue(currentFlowChunk.breakBefore, breakBefore);
+            }
+
             if (this.primary) {
                 if (display === adapt.css.ident.none) {
                     this.primary = false;
