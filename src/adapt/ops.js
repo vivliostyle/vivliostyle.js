@@ -86,19 +86,8 @@ adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
 	/** @const */ this.validatorSet = store.validatorSet;
     this.pageScope.defineBuiltIn("has-content", function(name) {
 		var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
-		function matchPageSide(side) {
-			switch (side) {
-				case "left":
-				case "right":
-				case "recto":
-				case "verso":
-					return new adapt.expr.Named(pageScope, side + "-page").evaluate(styleInstance);
-				default:
-					return true;
-			}
-		}
 		var cp = styleInstance.currentLayoutPosition;
-		return matchPageSide(cp.startSideOfFlow(/** @type {string} */ (name))) &&
+		return styleInstance.matchPageSide(cp.startSideOfFlow(/** @type {string} */ (name))) &&
 			cp.hasContent(/** @type {string} */ (name), styleInstance.lookupOffset);
     });
     this.pageScope.defineName("page-number", new adapt.expr.Native(this.pageScope, function() {
@@ -364,6 +353,22 @@ adapt.ops.StyleInstance.prototype.dumpLocation = function(position) {
 };
 
 /**
+ * @param {string} side
+ * @returns {boolean}
+ */
+adapt.ops.StyleInstance.prototype.matchPageSide = function(side) {
+	switch (side) {
+		case "left":
+		case "right":
+		case "recto":
+		case "verso":
+			return /** @type {boolean} */ (new adapt.expr.Named(this.style.pageScope, side + "-page").evaluate(this));
+		default:
+			return true;
+	}
+};
+
+/**
  * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle Cascaded page style specified in page context
  * @return {adapt.pm.PageMasterInstance}
  */
@@ -426,7 +431,7 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function(cascadedPageStyle)
  */
 adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regionIds) {
     var flowPosition = this.currentLayoutPosition.flowPositions[flowName];
-    if (!flowPosition)
+    if (!flowPosition || !this.matchPageSide(flowPosition.startSide))
         return adapt.task.newResult(true);
     flowPosition.startSide = "any";
     region.init();

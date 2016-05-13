@@ -644,19 +644,10 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 	    }
 	    var whitespace = computedStyle["white-space"];
 	    if (whitespace) {
-	    	switch (whitespace.toString()) {
-	    	case "normal" :
-	    	case "nowrap" :
-	    		self.nodeContext.whitespace = adapt.vtree.Whitespace.IGNORE;
-	    		break;
-	    	case "pre-line" :
-	    		self.nodeContext.whitespace = adapt.vtree.Whitespace.NEWLINE;
-	    		break;    		
-	    	case "pre" :
-	    	case "pre-wrap" :
-	    		self.nodeContext.whitespace = adapt.vtree.Whitespace.PRESERVE;
-	    		break;
-	    	}
+			var whitespaceValue = adapt.vtree.whitespaceFromPropertyValue(whitespace.toString());
+			if (whitespaceValue !== null) {
+				self.nodeContext.whitespace = whitespaceValue;
+			}
 	    }
 	    // Create the view element
 	    var custom = false;

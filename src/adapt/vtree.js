@@ -259,6 +259,26 @@ adapt.vtree.Whitespace = {
 };
 
 /**
+ * Resolves adapt.vtree.Whitespace value from a value of 'white-space' property
+ * @param {string} whitespace The value of 'white-space' property
+ * @returns {?adapt.vtree.Whitespace}
+ */
+adapt.vtree.whitespaceFromPropertyValue = function(whitespace) {
+	switch (whitespace) {
+		case "normal" :
+		case "nowrap" :
+			return adapt.vtree.Whitespace.IGNORE;
+		case "pre-line" :
+			return adapt.vtree.Whitespace.NEWLINE;
+		case "pre" :
+		case "pre-wrap" :
+			return adapt.vtree.Whitespace.PRESERVE;
+		default:
+			return null;
+	}
+};
+
+/**
  * @param {Node} node
  * @param {adapt.vtree.Whitespace} whitespace
  * @return {boolean}
