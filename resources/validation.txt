@@ -103,9 +103,11 @@ LIST_STYLE_TYPE = disc | circle | square | decimal | decimal-leading-zero | lowe
     upper-roman | lower-greek | lower-latin | upper-latin | armenian | georgian | lower-alpha |
     upper-alpha | russian | upper-russian | lower-russian | cjk-ideographic | trad-chinese-informal |
     hebrew | none;
+TYPE_OR_UNIT_IN_ATTR = string | color | url | integer | number | length | angle | time | frequency;
+ATTR = attr(SPACE(IDENT TYPE_OR_UNIT_IN_ATTR?) [STRING | URI]?);
 CONTENT = normal | none | 
     [ STRING | URI | counter(IDENT LIST_STYLE_TYPE?) | 
-    counters(IDENT STRING LIST_STYLE_TYPE?) | attr(IDENT) |
+    counters(IDENT STRING LIST_STYLE_TYPE?) | ATTR |
     open-quote | close-quote | no-open-quote | no-close-quote ]+;
 content = CONTENT;
 COUNTER = [ IDENT INT? ]+ | none;
