@@ -479,7 +479,9 @@ adapt.ops.StyleInstance.prototype.flowChunkIsAfterParentFlowForcedBreak = functi
 		}
 		// Special case: parentStartOffset === breakOffsetBeforeStart
 		// In this case, the flowChunk can be used if the start side of the parent flow matches the current page side.
-		return !this.matchPageSide(parentFlowPosition.startSide);
+		// Since startSide may be updated since the page start, use currentLayoutPosition
+		var currentParentFlowPosition = this.currentLayoutPosition.flowPositions[parentFlowName];
+		return !this.matchPageSide(currentParentFlowPosition.startSide);
 	}
 	return false;
 };
