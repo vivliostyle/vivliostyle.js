@@ -1865,7 +1865,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 			} else {
 				// TODO: what to return here??
 			}
-		} else {
+		} else if (vivliostyle.break.isForcedBreakValue(breakAtTheEdge)) {
 			self.pageBreakType = breakAtTheEdge;
 		}
 		loopFrame.breakLoop();
