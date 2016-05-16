@@ -435,6 +435,8 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function(cascadedPageStyle)
         this.lookupOffset = this.styler.styleUntil(currentPosition, lookup);
 		goog.asserts.assert(cp);
 		this.updateStartSide(cp);
+		// update layoutPositionAtPageStart since startSide of FlowChunks may be updated
+		this.layoutPositionAtPageStart = cp.clone();
         this.initLingering();
         self.clearScope(this.style.pageScope);
         // C. Determine content availability. Flow has content available if it contains eligible elements.
@@ -479,9 +481,7 @@ adapt.ops.StyleInstance.prototype.flowChunkIsAfterParentFlowForcedBreak = functi
 		}
 		// Special case: parentStartOffset === breakOffsetBeforeStart
 		// In this case, the flowChunk can be used if the start side of the parent flow matches the current page side.
-		// Since startSide may be updated since the page start, use currentLayoutPosition
-		var currentParentFlowPosition = this.currentLayoutPosition.flowPositions[parentFlowName];
-		return !this.matchPageSide(currentParentFlowPosition.startSide);
+		return !this.matchPageSide(parentFlowPosition.startSide);
 	}
 	return false;
 };
