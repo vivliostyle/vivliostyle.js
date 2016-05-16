@@ -343,8 +343,10 @@ adapt.cssstyler.Styler.prototype.replayFlowElementsFromOffset = function(offset)
 	    var flowNameStr = flowName ? flowName.evaluate(context, "flow-into").toString() : "body";
         var display = adapt.csscasc.getProp(rootStyle, "display");
         this.displayStack = [display && display.evaluate(context, "display")];
-        this.flowChunkStack = [];
-	    this.encounteredFlowElement(flowNameStr, rootStyle, this.root, rootOffset);
+        var newFlowChunk = this.encounteredFlowElement(flowNameStr, rootStyle, this.root, rootOffset);
+        if (this.flowChunkStack.length === 0) {
+            this.flowChunkStack.push(newFlowChunk);
+        }
 	}
 	var node = this.xmldoc.getNodeByOffset(offset);
 	var nodeOffset = this.xmldoc.getNodeOffset(node, 0, false);
@@ -490,7 +492,7 @@ adapt.cssstyler.Styler.prototype.processPseudoBreakValue = function(style, pseud
  * @param {adapt.csscasc.ElementStyle} style
  * @param {!Element} elem
  * @param {number} startOffset
- * @return {void}
+ * @return {!adapt.vtree.FlowChunk}
  */
 adapt.cssstyler.Styler.prototype.encounteredFlowElement = function(flowName, style, elem, startOffset) {
     var priority = 0;
@@ -525,11 +527,11 @@ adapt.cssstyler.Styler.prototype.encounteredFlowElement = function(flowName, sty
     var flowChunk = new adapt.vtree.FlowChunk(flowName, elem,
     		startOffset, priority, linger, exclusive, repeated, last, breakBefore);
     this.flowChunks.push(flowChunk);
-    this.flowChunkStack.push(flowChunk);
     if (this.flowToReach == flowName)
         this.flowToReach = null;
     if (this.flowListener)
         this.flowListener.encounteredFlowChunk(flowChunk, flow);
+    return flowChunk;
 };
 
 /**
@@ -640,8 +642,9 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
             var flowName = style["flow-into"];
             if (flowName) {
                 var flowNameStr = flowName.evaluate(context,"flow-into").toString();
-                this.encounteredFlowElement(flowNameStr, style, elem, this.lastOffset);
+                var newFlowChunk = this.encounteredFlowElement(flowNameStr, style, elem, this.lastOffset);
                 this.primary = !!this.primaryFlows[flowNameStr];
+                this.flowChunkStack.push(newFlowChunk);
             } else {
                 this.flowChunkStack.push(this.flowChunkStack[this.flowChunkStack.length - 1]);
             }
