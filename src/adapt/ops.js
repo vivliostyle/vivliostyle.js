@@ -516,12 +516,14 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 			while (removedIndices.indexOf(index) >= 0)
 				index++;
 	        var selected = flowPosition.positions[index];
-	        if (selected.flowChunk.startOffset > self.lookupOffset)
+	        if (selected.flowChunk.startOffset > self.lookupOffset ||
+				self.flowChunkIsAfterParentFlowForcedBreak(selected.flowChunk))
 	            break;
-	        for (var k = 1; k < flowPosition.positions.length; k++) {
+	        for (var k = index + 1; k < flowPosition.positions.length; k++) {
 				if (removedIndices.indexOf(k) >= 0) continue; // Skip removed positions
 	            var alt = flowPosition.positions[k];
-	            if (alt.flowChunk.startOffset > self.lookupOffset)
+	            if (alt.flowChunk.startOffset > self.lookupOffset ||
+					self.flowChunkIsAfterParentFlowForcedBreak(alt.flowChunk))
 	                break;
 	            if (alt.flowChunk.isBetter(selected.flowChunk)) {
 	                selected = alt;
@@ -529,9 +531,6 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 	            }
 	        }
 	        var flowChunk = selected.flowChunk;
-			if (self.flowChunkIsAfterParentFlowForcedBreak(flowChunk)) {
-				break;
-			}
 	        var pending = true;
 	        region.layout(selected.chunkPosition, leadingEdge).then(function(newPosition) {
 		        leadingEdge = false;
