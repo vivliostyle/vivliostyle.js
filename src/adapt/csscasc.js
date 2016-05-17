@@ -1778,6 +1778,7 @@ adapt.csscasc.AttrValueFilterVisitor.prototype.createValueFromString = function(
             return new adapt.css.Str(str); // TODO should convert to absolute path
         return new adapt.css.Str("about:invalid");
         break;
+    case "string":
     default:
         if (str)
             return new adapt.css.Str(str);
@@ -1794,7 +1795,6 @@ adapt.csscasc.AttrValueFilterVisitor.prototype.visitFunc = function(func) {
     var type = "string";
     var attributeName = null;
     /** @type {adapt.css.Value} */ var defaultValue = null;
-    /** @type {adapt.css.Value} */ var r = null;
     
     if (func.values[0] instanceof adapt.css.SpaceList) {
         if (func.values[0].values.length >= 2) 
