@@ -6,6 +6,9 @@
 - Support `filter` property
   - <https://github.com/vivliostyle/vivliostyle.js/issues/220>
   - Spec: [CSS Filter Effect Module Level 3 - filter property](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
+- Support string and URL values in `attr()` function
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/234>
+  - Spec: [CSS Values and Units Module Level 3 - Attribute References: ‘attr()’](https://drafts.csswg.org/css-values/#attr-notation)
 
 ### Fixed
 - Fix a bug that `clear` is ignored when `white-space` property is used before the element

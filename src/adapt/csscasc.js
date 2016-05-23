@@ -1756,6 +1756,67 @@ adapt.csscasc.PageCounterResolver.prototype.getCountersVal = function(name, form
 
 /**
  * @constructor
+ * @param {Element} element
+ * @extends {adapt.css.FilterVisitor}
+ */
+adapt.csscasc.AttrValueFilterVisitor = function(element) {
+	adapt.css.FilterVisitor.call(this);
+	this.element = element;
+};
+goog.inherits(adapt.csscasc.AttrValueFilterVisitor, adapt.css.FilterVisitor);
+
+/**
+ * @private
+ * @param {?string} str
+ * @param {string} type
+ * @return {adapt.css.Val}
+*/
+adapt.csscasc.AttrValueFilterVisitor.prototype.createValueFromString = function(str, type) {
+    switch (type) {
+    case "url":
+        if (str)
+            return new adapt.css.URL(str); // TODO should convert to absolute path
+        return new adapt.css.URL("about:invalid");
+        break;
+    case "string":
+    default:
+        if (str)
+            return new adapt.css.Str(str);
+        return new adapt.css.Str("");
+        break;
+    }
+}
+/**
+ * @override
+ */
+adapt.csscasc.AttrValueFilterVisitor.prototype.visitFunc = function(func) {
+    if (func.name !== "attr")
+        return adapt.css.FilterVisitor.prototype.visitFunc.call(this, func);
+    var type = "string";
+    var attributeName = null;
+    /** @type {adapt.css.Val} */ var defaultValue = null;
+    
+    if (func.values[0] instanceof adapt.css.SpaceList) {
+        if (func.values[0].values.length >= 2) 
+            type = func.values[0].values[1].stringValue();
+        attributeName = func.values[0].values[0].stringValue();
+    } else {
+        attributeName = func.values[0].stringValue()        
+    }
+
+    if (func.values.length > 1) {
+        defaultValue = this.createValueFromString(func.values[1].stringValue(), type);
+    } else {
+        defaultValue = this.createValueFromString(null, type);        
+    }
+    if (this.element && this.element.hasAttribute(attributeName)) {
+        return this.createValueFromString(this.element.getAttribute(attributeName), type);
+    }
+    return defaultValue;
+};
+
+/**
+ * @constructor
  * @param {adapt.csscasc.CascadeInstance} cascade
  * @param {Element} element
  * @extends {adapt.css.FilterVisitor}
@@ -2096,11 +2157,6 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounters = function(values) 
  */
 adapt.csscasc.ContentPropVisitor.prototype.visitFunc = function(func) {
     switch (func.name) {
-        case "attr" :
-            if (func.values.length == 1) {
-                return new adapt.css.Str((this.element && this.element.getAttribute(func.values[0].stringValue())) || "");
-            }
-            break;
         case "counter" :
             if (func.values.length <= 2) {
             	return this.visitFuncCounter(func.values);
@@ -2506,6 +2562,7 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
 	followingSiblingTypeCountsStack.push({});
 
     this.applyActions();
+    this.applyAttrFilter(element);
     var quotesCasc = baseStyle["quotes"];
     var itemToPushLast = null;
     if (quotesCasc) {
@@ -2545,6 +2602,31 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
     }
 };
 
+
+/**
+* @private
+* @return {void}
+*/
+adapt.csscasc.CascadeInstance.prototype.applyAttrFilterInner = function(visitor, elementStyle) {
+    for (var propName in elementStyle) {
+        if (propName === "_pseudos")
+            continue;
+        elementStyle[propName] = elementStyle[propName].filterValue(visitor);
+    }
+}
+/**
+* @private
+* @return {void}
+*/
+adapt.csscasc.CascadeInstance.prototype.applyAttrFilter = function(element) {
+    var visitor = new adapt.csscasc.AttrValueFilterVisitor(element);
+    var currentStyle = this.currentStyle;
+    var pseudoMap = adapt.csscasc.getStyleMap(currentStyle, "_pseudos");        
+    for (var pseudoName in pseudoMap) {
+        this.applyAttrFilterInner(visitor, pseudoMap[pseudoName]);
+    }
+    this.applyAttrFilterInner(visitor, currentStyle);
+}
 /**
  * @private
  * @return {void}
