@@ -21,7 +21,7 @@
          content: attr(data-test-content url);
       }
       a::before {
-         content: "link to " attr(href url);
+         content: "link to " attr(href);
       }
       
 </style>
@@ -30,7 +30,7 @@
   <div class="simple" data-test-content="Text in a attribute"></div>
   <div class="with-string-type" data-test-content="Text in a attribute : with string type "></div>
   <div class="with-string-type-and-default"></div>
-  <div class="url" data-test-content="#foobar"></div>  
+  <div class="url" data-test-content="./vivliostyle-logo.png"></div>  
   <div><a href="http://vivliostyle.com"></a></div>
 </body>
 </html>

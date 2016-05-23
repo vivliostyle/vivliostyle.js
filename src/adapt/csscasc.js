@@ -1775,8 +1775,8 @@ adapt.csscasc.AttrValueFilterVisitor.prototype.createValueFromString = function(
     switch (type) {
     case "url":
         if (str)
-            return new adapt.css.Str(str); // TODO should convert to absolute path
-        return new adapt.css.Str("about:invalid");
+            return new adapt.css.URL(str); // TODO should convert to absolute path
+        return new adapt.css.URL("about:invalid");
         break;
     case "string":
     default:
