@@ -1767,7 +1767,7 @@ goog.inherits(adapt.csscasc.AttrValueFilterVisitor, adapt.css.FilterVisitor);
 
 /**
  * @private
- * @param {string} str
+ * @param {?string} str
  * @param {string} type
  * @return {adapt.css.Val}
 */
@@ -1794,7 +1794,7 @@ adapt.csscasc.AttrValueFilterVisitor.prototype.visitFunc = function(func) {
         return adapt.css.FilterVisitor.prototype.visitFunc.call(this, func);
     var type = "string";
     var attributeName = null;
-    /** @type {adapt.css.Value} */ var defaultValue = null;
+    /** @type {adapt.css.Val} */ var defaultValue = null;
     
     if (func.values[0] instanceof adapt.css.SpaceList) {
         if (func.values[0].values.length >= 2) 
