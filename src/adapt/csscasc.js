@@ -2609,11 +2609,10 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
 */
 adapt.csscasc.CascadeInstance.prototype.applyAttrFilterInner = function(visitor, elementStyle) {
     for (var propName in elementStyle) {
-        if (propName === "_pseudos")
-            continue;
-        elementStyle[propName] = elementStyle[propName].filterValue(visitor);
+        if (adapt.csscasc.isPropName(propName))
+            elementStyle[propName] = elementStyle[propName].filterValue(visitor);
     }
-}
+};
 /**
 * @private
 * @return {void}
