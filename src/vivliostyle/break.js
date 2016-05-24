@@ -147,7 +147,7 @@ goog.scope(function() {
         switch (startSideValue) {
             case "left":
             case "right":
-            case "rect":
+            case "recto":
             case "verso":
                 return startSideValue;
             default:

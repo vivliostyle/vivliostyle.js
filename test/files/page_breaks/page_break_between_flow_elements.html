@@ -29,6 +29,18 @@
 	.break-after-left {
 		page-break-after: left;
 	}
+	.break-before-recto {
+		page-break-before: recto;
+	}
+	.break-after-recto {
+		page-break-after: recto;
+	}
+	.break-before-verso {
+		page-break-before: verso;
+	}
+	.break-after-verso {
+		page-break-after: verso;
+	}
 	@-epubx-page-template {
 		section {
 			-epubx-flow-into: s;
@@ -69,4 +81,10 @@
 	<section><span class="break-before-left">This should be on the 12th (left) page too. The next (13th, right) page should be empty.</span></section>
 	<section><div class="break-before-left">This should be on the 14th (left) page.</div> The next (15th, right) page should be empty. Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah</section>
 	<section><span style="display: none">This should not be displayed</span><div class="break-before-left">This should be on the 16th (left) page.</div></section>
+    <section class="break-before-page">This should be on the 17th (right) page. The next (18th, left) page should be empty.</section>
+	<section class="break-before-recto break-after-recto">This should be on the 19th (right) page. The next (20th, left) page should be empty.</section>
+	<section>This should be on the 21st (right) page.</section>
+	<section class="break-before-page">This should be on the 22nd (left) page. The next (23rd, right) page should be empty.</section>
+	<section class="break-before-verso break-after-verso">This should be on the 24th (left) page. The next (25th, right) page should be empty.</section>
+	<section>This shoule be on the 26th (left) page.</section>
 </body>
