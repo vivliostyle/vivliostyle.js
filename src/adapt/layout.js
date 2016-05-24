@@ -1865,6 +1865,8 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 			} else {
 				// TODO: what to return here??
 			}
+		} else if (vivliostyle.break.isForcedBreakValue(breakAtTheEdge)) {
+			self.pageBreakType = breakAtTheEdge;
 		}
 		loopFrame.breakLoop();
 	}).then(function() {
@@ -2148,9 +2150,10 @@ adapt.layout.Column.prototype.layoutOverflownFootnotes = function(chunkPosition)
 
 /**
  * @param {adapt.vtree.ChunkPosition} chunkPosition starting position.
+ * @param {boolean} leadingEdge
  * @return {adapt.task.Result.<adapt.vtree.ChunkPosition>} holding end position.
  */
-adapt.layout.Column.prototype.layout = function(chunkPosition) {
+adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
 	this.chunkPositions.push(chunkPosition);  // So we can re-layout this column later
 	if (this.overflown) {
 		return adapt.task.newResult(chunkPosition);
@@ -2161,7 +2164,6 @@ adapt.layout.Column.prototype.layout = function(chunkPosition) {
 	    // ------ start the column -----------
 	    self.openAllViews(chunkPosition.primary).then(function(nodeContext) {
 	    	var initialNodeContext = nodeContext;
-	    	var leadingEdge = true;
 		    // ------ init backtracking list -----
 			self.breakPositions = [];
 		    // ------- fill the column -------------
@@ -2266,10 +2268,12 @@ adapt.layout.Column.prototype.redoLayout = function() {
 		= adapt.task.newFrame("redoLayout");
 	var i = 0;
 	var res = null;
+	var leadingEdge = true;
 	frame.loopWithFrame(function(loopFrame) {
 		if (i < chunkPositions.length) {
 			var chunkPosition = chunkPositions[i++];
-			self.layout(chunkPosition).then(function(pos) {
+			self.layout(chunkPosition, leadingEdge).then(function(pos) {
+				leadingEdge = false;
 				if (pos) {
 					res = pos;
 					loopFrame.breakLoop();

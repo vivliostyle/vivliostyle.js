@@ -5,6 +5,7 @@
  */
 goog.provide('adapt.ops');
 
+goog.require("goog.asserts");
 goog.require("vivliostyle.constants");
 goog.require("vivliostyle.logging");
 goog.require('adapt.task');
@@ -23,6 +24,7 @@ goog.require('adapt.layout');
 goog.require('adapt.vgen');
 goog.require('adapt.xmldoc');
 goog.require('adapt.font');
+goog.require('vivliostyle.break');
 goog.require('vivliostyle.page');
 
 /**
@@ -84,10 +86,15 @@ adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
 	/** @const */ this.pageProps = pageProps;
 	/** @const */ this.validatorSet = store.validatorSet;
     this.pageScope.defineBuiltIn("has-content", function(name) {
-    	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
-    	return styleInstance.currentLayoutPosition.hasContent(/** @type {string} */ (name), styleInstance.lookupOffset);
-    });  
-    this.pageScope.defineName("page-number", new adapt.expr.Native(this.pageScope, function() {    	
+		name = /** @type {string} */ (name);
+		var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
+		var cp = styleInstance.currentLayoutPosition;
+		var flowChunk = cp.firstFlowChunkOfFlow(name);
+		return styleInstance.matchPageSide(cp.startSideOfFlow(/** @type {string} */ (name))) &&
+			cp.hasContent(/** @type {string} */ (name), styleInstance.lookupOffset) &&
+			!!flowChunk && !styleInstance.flowChunkIsAfterParentFlowForcedBreak(flowChunk);
+    });
+    this.pageScope.defineName("page-number", new adapt.expr.Native(this.pageScope, function() {
     	var styleInstance = /** @type {adapt.ops.StyleInstance} */ (this);
     	return styleInstance.pageNumberOffset + styleInstance.currentLayoutPosition.page;
     }, "page-number"));
@@ -160,6 +167,7 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @type {adapt.cssstyler.Styler} */ this.styler = null;
     /** @type {Object.<string,adapt.cssstyler.Styler>} */ this.stylerMap = null;
     /** @type {adapt.vtree.LayoutPosition} */ this.currentLayoutPosition = null;
+	/** @type {adapt.vtree.LayoutPosition} */ this.layoutPositionAtPageStart = null;
     /** @type {number} */ this.lookupOffset = 0;
     /** @const */ this.fontMapper = fontMapper;
     /** @const */ this.faces = new adapt.font.DocumentFaces(this.style.fontDeobfuscator);
@@ -267,9 +275,14 @@ adapt.ops.StyleInstance.prototype.lookupInstance = function(key) {
 /**
  * @override
  */
-adapt.ops.StyleInstance.prototype.encounteredFlowChunk = function(flowChunk) {
+adapt.ops.StyleInstance.prototype.encounteredFlowChunk = function(flowChunk, flow) {
     var cp = this.currentLayoutPosition;
     if (cp) {
+		if (!cp.flows[flowChunk.flowName]) {
+			cp.flows[flowChunk.flowName] = flow;
+		} else {
+			flow = cp.flows[flowChunk.flowName];
+		}
 	    var flowPosition = cp.flowPositions[flowChunk.flowName];
 	    if (!flowPosition) {
 	        flowPosition = new adapt.vtree.FlowPosition();
@@ -350,6 +363,40 @@ adapt.ops.StyleInstance.prototype.dumpLocation = function(position) {
 };
 
 /**
+ * @param {string} side
+ * @returns {boolean}
+ */
+adapt.ops.StyleInstance.prototype.matchPageSide = function(side) {
+	switch (side) {
+		case "left":
+		case "right":
+		case "recto":
+		case "verso":
+			return /** @type {boolean} */ (new adapt.expr.Named(this.style.pageScope, side + "-page").evaluate(this));
+		default:
+			return true;
+	}
+};
+
+/**
+ * @param {!adapt.vtree.LayoutPosition} layoutPosition
+ */
+adapt.ops.StyleInstance.prototype.updateStartSide = function(layoutPosition) {
+	for (var name in layoutPosition.flowPositions) {
+		var flowPos = layoutPosition.flowPositions[name];
+		if (flowPos && flowPos.positions.length > 0) {
+			var flowChunk = flowPos.positions[0].flowChunk;
+			if (this.getConsumedOffset(flowPos) === flowChunk.startOffset) {
+				var flowChunkBreakBefore = flowPos.positions[0].flowChunk.breakBefore;
+				var flowBreakAfter = vivliostyle.break.startSideValueToBreakValue(flowPos.startSide);
+				flowPos.startSide = vivliostyle.break.breakValueToStartSideValue(
+					vivliostyle.break.resolveEffectiveBreakValue(flowBreakAfter, flowChunkBreakBefore));
+			}
+		}
+	}
+};
+
+/**
  * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle Cascaded page style specified in page context
  * @return {adapt.pm.PageMasterInstance}
  */
@@ -386,6 +433,10 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function(cascadedPageStyle)
         // it is is not marked as fully consumed and it comes in the document before the lookup position.
         // Feed lookupOffset and flow availability into the context
         this.lookupOffset = this.styler.styleUntil(currentPosition, lookup);
+		goog.asserts.assert(cp);
+		this.updateStartSide(cp);
+		// update layoutPositionAtPageStart since startSide of FlowChunks may be updated
+		this.layoutPositionAtPageStart = cp.clone();
         this.initLingering();
         self.clearScope(this.style.pageScope);
         // C. Determine content availability. Flow has content available if it contains eligible elements.
@@ -404,6 +455,38 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function(cascadedPageStyle)
 };
 
 /**
+ * @param {!adapt.vtree.FlowChunk} flowChunk
+ * @returns {boolean}
+ */
+adapt.ops.StyleInstance.prototype.flowChunkIsAfterParentFlowForcedBreak = function(flowChunk) {
+	var flows = this.layoutPositionAtPageStart.flows;
+	var parentFlowName = flows[flowChunk.flowName].parentFlowName;
+	if (parentFlowName) {
+		var startOffset = flowChunk.startOffset;
+		var forcedBreakOffsets = flows[parentFlowName].forcedBreakOffsets;
+		if (!forcedBreakOffsets.length || startOffset < forcedBreakOffsets[0]) {
+			return false;
+		}
+		var breakOffsetBeforeStartIndex = adapt.base.binarySearch(forcedBreakOffsets.length, function(i) {
+			return forcedBreakOffsets[i] > startOffset;
+		}) - 1;
+		var breakOffsetBeforeStart = forcedBreakOffsets[breakOffsetBeforeStartIndex];
+		var parentFlowPosition = this.layoutPositionAtPageStart.flowPositions[parentFlowName];
+		var parentStartOffset = this.getConsumedOffset(parentFlowPosition);
+		if (breakOffsetBeforeStart < parentStartOffset) {
+			return false;
+		}
+		if (parentStartOffset < breakOffsetBeforeStart) {
+			return true;
+		}
+		// Special case: parentStartOffset === breakOffsetBeforeStart
+		// In this case, the flowChunk can be used if the start side of the parent flow matches the current page side.
+		return !this.matchPageSide(parentFlowPosition.startSide);
+	}
+	return false;
+};
+
+/**
  * @param {adapt.layout.Column} region
  * @param {string} flowName
  * @param {Array.<string>} regionIds
@@ -411,8 +494,9 @@ adapt.ops.StyleInstance.prototype.selectPageMaster = function(cascadedPageStyle)
  */
 adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regionIds) {
     var flowPosition = this.currentLayoutPosition.flowPositions[flowName];
-    if (!flowPosition)
+    if (!flowPosition || !this.matchPageSide(flowPosition.startSide))
         return adapt.task.newResult(true);
+    flowPosition.startSide = "any";
     region.init();
     if (this.primaryFlows[flowName] && region.bands.length > 0) {
         // In general, we force non-fitting content. Exception is only for primary flow regions
@@ -424,6 +508,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 	// Record indices of repeated positions and removed positions
     var repeatedIndices = /** @type {Array.<number>} */ ([]);
 	var removedIndices = /** @type {Array.<number>} */ ([]);
+	var leadingEdge = true;
     frame.loopWithFrame(function(loopFrame) {
 	    while (flowPosition.positions.length - removedIndices.length > 0) {
 	        var index = 0;
@@ -431,12 +516,14 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 			while (removedIndices.indexOf(index) >= 0)
 				index++;
 	        var selected = flowPosition.positions[index];
-	        if (selected.flowChunk.startOffset > self.lookupOffset)
+	        if (selected.flowChunk.startOffset > self.lookupOffset ||
+				self.flowChunkIsAfterParentFlowForcedBreak(selected.flowChunk))
 	            break;
-	        for (var k = 1; k < flowPosition.positions.length; k++) {
+	        for (var k = index + 1; k < flowPosition.positions.length; k++) {
 				if (removedIndices.indexOf(k) >= 0) continue; // Skip removed positions
 	            var alt = flowPosition.positions[k];
-	            if (alt.flowChunk.startOffset > self.lookupOffset)
+	            if (alt.flowChunk.startOffset > self.lookupOffset ||
+					self.flowChunkIsAfterParentFlowForcedBreak(alt.flowChunk))
 	                break;
 	            if (alt.flowChunk.isBetter(selected.flowChunk)) {
 	                selected = alt;
@@ -445,7 +532,8 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 	        }
 	        var flowChunk = selected.flowChunk;
 	        var pending = true;
-	        region.layout(selected.chunkPosition).then(function(newPosition) {
+	        region.layout(selected.chunkPosition, leadingEdge).then(function(newPosition) {
+		        leadingEdge = false;
 		        // static: keep in the flow
 		        if (selected.flowChunk.repeated && (newPosition === null || flowChunk.exclusive))
 		            repeatedIndices.push(index);
@@ -455,14 +543,22 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
 		        	loopFrame.breakLoop();
 		        	return;
 		        } else {
-		            // not exclusive, did not fit completely
+		            // not exclusive
 		            if (newPosition) {
+		                // did not fit completely
 		                selected.chunkPosition = newPosition;
-			        	loopFrame.breakLoop();
-			        	return;
+		            } else {
+		                // go to the next element in the flow
+		                removedIndices.push(index);
 		            }
-		            // go to the next element in the flow
-					removedIndices.push(index);
+		            if (region.pageBreakType) {
+		                // forced break
+		                flowPosition.startSide = vivliostyle.break.breakValueToStartSideValue(region.pageBreakType);
+		            }
+		            if (newPosition || region.pageBreakType) {
+		                loopFrame.breakLoop();
+		                return;
+		            }
 		        }
 		        if (pending) {
 		        	// Sync result
@@ -751,6 +847,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     cp = self.currentLayoutPosition;
     cp.page++;
     self.clearScope(self.style.pageScope);
+	self.layoutPositionAtPageStart = cp.clone();
 
     // Resolve page size before page master selection.
     var cascadedPageStyle = self.pageManager.getCascadedPageStyle();
@@ -777,7 +874,6 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 	var writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
 	var direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
 	var pageFloatHolder = new vivliostyle.pagefloat.FloatHolder(page.getPageAreaElement.bind(page), writingMode, direction);
-	var currentLayoutPosition = cp.clone();
 	var exclusions = [];
 
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
@@ -787,7 +883,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 			if (pageFloatHolder.hasNewlyAddedFloats()) {
 				exclusions = exclusions.concat(pageFloatHolder.getShapesOfNewlyAddedFloats());
 				pageFloatHolder.clearNewlyAddedFloats();
-				cp = self.currentLayoutPosition = currentLayoutPosition.clone();
+				cp = self.currentLayoutPosition = self.layoutPositionAtPageStart.clone();
 				var c;
 				while (c = page.bleedBox.lastChild) {
 					page.bleedBox.removeChild(c);
@@ -802,7 +898,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
         var isLeftPage = new adapt.expr.Named(pageMaster.pageBox.scope, "left-page");
         page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;
 	    self.processLinger();
-	    self.currentLayoutPosition = null;
+	    self.currentLayoutPosition = self.layoutPositionAtPageStart = null;
 	    cp.highestSeenOffset = self.styler.getReachedOffset();
         var triggers = self.style.store.getTriggersForDoc(self.xmldoc);
 	    page.finish(triggers, self.clientLayout);

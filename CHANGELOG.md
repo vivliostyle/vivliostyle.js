@@ -9,6 +9,9 @@
 - Support string and URL values in `attr()` function
   - <https://github.com/vivliostyle/vivliostyle.js/pull/234>
   - Spec: [CSS Values and Units Module Level 3 - Attribute References: ‘attr()’](https://drafts.csswg.org/css-values/#attr-notation)
+- Support `left`/`right`/`recto`/`verso` values for `(page-)break-before`/`(page-)break-after`
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/25>
+  - Spec: [CSS Fragmentation - Page Break Values](http://dev.w3.org/csswg/css-break/#page-break-values)
 
 ### Fixed
 - Fix a bug that `clear` is ignored when `white-space` property is used before the element

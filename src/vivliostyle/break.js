@@ -123,4 +123,36 @@ goog.scope(function() {
         }
     };
 
+    /**
+     * @param {?string} breakValue
+     * @returns {string}
+     */
+    vivliostyle.break.breakValueToStartSideValue = function(breakValue) {
+        switch (breakValue) {
+            case "left":
+            case "right":
+            case "recto":
+            case "verso":
+                return breakValue;
+            default:
+                return "any";
+        }
+    };
+
+    /**
+     * @param {string} startSideValue
+     * @returns {?string}
+     */
+    vivliostyle.break.startSideValueToBreakValue = function(startSideValue) {
+        switch (startSideValue) {
+            case "left":
+            case "right":
+            case "recto":
+            case "verso":
+                return startSideValue;
+            default:
+                return null;
+        }
+    };
+
 });

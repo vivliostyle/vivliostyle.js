@@ -259,6 +259,26 @@ adapt.vtree.Whitespace = {
 };
 
 /**
+ * Resolves adapt.vtree.Whitespace value from a value of 'white-space' property
+ * @param {string} whitespace The value of 'white-space' property
+ * @returns {?adapt.vtree.Whitespace}
+ */
+adapt.vtree.whitespaceFromPropertyValue = function(whitespace) {
+	switch (whitespace) {
+		case "normal" :
+		case "nowrap" :
+			return adapt.vtree.Whitespace.IGNORE;
+		case "pre-line" :
+			return adapt.vtree.Whitespace.NEWLINE;
+		case "pre" :
+		case "pre-wrap" :
+			return adapt.vtree.Whitespace.PRESERVE;
+		default:
+			return null;
+	}
+};
+
+/**
  * @param {Node} node
  * @param {adapt.vtree.Whitespace} whitespace
  * @return {boolean}
@@ -280,6 +300,17 @@ adapt.vtree.canIgnore = function(node, whitespace) {
 
 /**
  * @param {string} flowName
+ * @param {?string} parentFlowName
+ * @constructor
+ */
+adapt.vtree.Flow = function(flowName, parentFlowName) {
+	/** @const */ this.flowName = flowName;
+	/** @const */ this.parentFlowName = parentFlowName;
+	/** @const */ this.forcedBreakOffsets = /** @type {Array<number>} */ ([]);
+};
+
+/**
+ * @param {string} flowName
  * @param {!Element} element
  * @param {number} startOffset
  * @param {number} priority
@@ -287,10 +318,11 @@ adapt.vtree.canIgnore = function(node, whitespace) {
  * @param {boolean} exclusive
  * @param {boolean} repeated
  * @param {boolean} last
+ * @param {?string} breakBefore
  * @constructor
  */
 adapt.vtree.FlowChunk = function(flowName, element, startOffset,
-        priority, linger, exclusive, repeated, last) {
+        priority, linger, exclusive, repeated, last, breakBefore) {
 	/** @type {string} */ this.flowName = flowName;
 	/** @type {!Element} */ this.element = element;
 	/** @type {number} */ this.startOffset = startOffset;
@@ -300,6 +332,7 @@ adapt.vtree.FlowChunk = function(flowName, element, startOffset,
 	/** @type {boolean} */ this.repeated = repeated;
 	/** @type {boolean} */ this.last = last;
 	/** @type {number} */ this.startPage = -1;
+	/** @type {?string} */ this.breakBefore = breakBefore;
 };
 
 /**
@@ -765,6 +798,10 @@ adapt.vtree.FlowPosition = function() {
      * @type {Array.<adapt.vtree.FlowChunkPosition>}
      */
 	this.positions = [];
+	/**
+	 * @type {string}
+     */
+	this.startSide = "any";
 };
 
 /**
@@ -777,6 +814,7 @@ adapt.vtree.FlowPosition.prototype.clone = function() {
     for (var i = 0; i < arr.length; i++) {
         newarr[i] = arr[i].clone();
     }
+	newfp.startSide = this.startSide;
     return newfp;
 };
 
@@ -799,6 +837,10 @@ adapt.vtree.LayoutPosition = function() {
      */
 	this.page = 0;
 	/**
+	 * @type {!Object<string, adapt.vtree.Flow>}
+     */
+	this.flows = {};
+	/**
 	 * @type {Object.<string,adapt.vtree.FlowPosition>}
 	 */
     this.flowPositions = {};
@@ -818,6 +860,7 @@ adapt.vtree.LayoutPosition.prototype.clone = function() {
     newcp.highestSeenNode = this.highestSeenNode;
     newcp.highestSeenOffset = this.highestSeenOffset;
     newcp.lookupPositionOffset = this.lookupPositionOffset;
+	newcp.flows = this.flows;
     for (var name in this.flowPositions) {
         newcp.flowPositions[name] = this.flowPositions[name].clone();
     }
@@ -834,6 +877,31 @@ adapt.vtree.LayoutPosition.prototype.hasContent = function(name, offset) {
     if (!flowPos)
         return false;
     return flowPos.hasContent(offset);
+};
+
+/**
+ * @param {string} name
+ * @returns {string}
+ */
+adapt.vtree.LayoutPosition.prototype.startSideOfFlow = function(name) {
+	var flowPos = this.flowPositions[name];
+	if (!flowPos)
+		return "any";
+	return flowPos.startSide;
+};
+
+/**
+ * @param {string} name
+ * @returns {?adapt.vtree.FlowChunk}
+ */
+adapt.vtree.LayoutPosition.prototype.firstFlowChunkOfFlow = function(name) {
+	var flowPos = this.flowPositions[name];
+	if (!flowPos)
+		return null;
+	var flowChunkPosition = flowPos.positions[0];
+	if (!flowChunkPosition)
+		return null;
+	return flowChunkPosition.flowChunk;
 };
 
 /**
