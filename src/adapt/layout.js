@@ -967,6 +967,13 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    		x2 = Math.max(x2, x1 + floatBoxMeasure);
 	    	else
 	    		x1 = Math.min(x1, x2 - floatBoxMeasure);
+
+			// Move the float below the block parent.
+			// Otherwise, if the float is attached to an inline box with 'position: relative',
+			// the absolute positioning of the float gets broken,
+			// since the inline parent can be pushed horizontally by exclusion floats
+			// after the layout of the float is done.
+			parent.viewNode.appendChild(nodeContext.viewNode);
 	    }
 	    // box is rotated for vertical orientation
 		var box = new adapt.geom.Rect(x1, self.getBoxDir() * self.beforeEdge, x2, self.getBoxDir() * self.afterEdge);
@@ -988,11 +995,42 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
         adapt.base.setCSSProperty(element, "width", floatBox.x2 - floatBox.x1 - insets.left - insets.right + "px");
         adapt.base.setCSSProperty(element, "height", floatBox.y2 - floatBox.y1 - insets.top - insets.bottom + "px");        
 		adapt.base.setCSSProperty(element, "position", "absolute");
-		adapt.base.setCSSProperty(element, "display", "block");        
-	    adapt.base.setCSSProperty(element, "left",
-	    		(floatBox.x1 - self.getLeftEdge() + self.paddingLeft) + "px");
+		adapt.base.setCSSProperty(element, "display", "block");
+
+		var offsets;
+		var containingBlockForAbsolute = null;
+		if (parent) {
+			if (parent.containingBlockForAbsolute) {
+				containingBlockForAbsolute = parent;
+			} else {
+				containingBlockForAbsolute = parent.getContainingBlockForAbsolute();
+			}
+		}
+		if (containingBlockForAbsolute) {
+			var probe = containingBlockForAbsolute.viewNode.ownerDocument.createElement("div");
+			probe.style.position = "absolute";
+			if (containingBlockForAbsolute.vertical) {
+				probe.style.right = "0";
+			} else {
+				probe.style.left = "0";
+			}
+			probe.style.top = "0";
+			containingBlockForAbsolute.viewNode.appendChild(probe);
+			offsets = self.clientLayout.getElementClientRect(probe);
+			containingBlockForAbsolute.viewNode.removeChild(probe);
+		} else {
+			offsets = {left: self.getLeftEdge(), right: self.getRightEdge(), top: self.getTopEdge()};
+		}
+
+		if (containingBlockForAbsolute ? containingBlockForAbsolute.vertical : self.vertical) {
+			adapt.base.setCSSProperty(element, "right",
+				(offsets.right - floatBox.x2 + self.paddingRight) + "px");
+		} else {
+			adapt.base.setCSSProperty(element, "left",
+				(floatBox.x1 - offsets.left + self.paddingLeft) + "px");
+		}
 	    adapt.base.setCSSProperty(element, "top",
-	    		(floatBox.y1 - self.getTopEdge() + self.paddingTop) + "px");
+	    		(floatBox.y1 - offsets.top + self.paddingTop) + "px");
         if (nodeContext.clearSpacer) {
             nodeContext.clearSpacer.parentNode.removeChild(nodeContext.clearSpacer);
             nodeContext.clearSpacer = null;

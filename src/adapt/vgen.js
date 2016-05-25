@@ -8,6 +8,7 @@ goog.provide('adapt.vgen');
 goog.require('adapt.task');
 goog.require('adapt.taskutil');
 goog.require('adapt.css');
+goog.require('vivliostyle.display');
 goog.require('adapt.csscasc');
 goog.require('adapt.cssstyler');
 goog.require('adapt.vtree');
@@ -430,6 +431,16 @@ adapt.vgen.ViewFactory.prototype.computeStyle = function(vertical, style, comput
         }
         return value;
     });
+	// Compute values of display, position and float
+	var position = /** @type {adapt.css.Ident} */ (computedStyle["position"]);
+	var float = /** @type {adapt.css.Ident} */ (computedStyle["float"]);
+	var displayValues = vivliostyle.display.getComputedDislayValue(
+		computedStyle["display"] || adapt.css.ident.inline, position, float, this.sourceNode === this.xmldoc.root);
+	["display", "position", "float"].forEach(function(name) {
+		if (displayValues[name]) {
+			computedStyle[name] = displayValues[name];
+		}
+	});
     return vertical;
 };
 
@@ -549,7 +560,6 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     	frame.finish(false);
     	return frame.result();
     }
-    // var position = computedStyle["position"]; // TODO: take it into account
     var display = computedStyle["display"];
     if (display === adapt.css.ident.none) {
         // no content
@@ -559,17 +569,16 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 	self.nodeContext.flexContainer = (display === adapt.css.ident.flex);
     self.createShadows(element, self.nodeContext.parent == null, elementStyle, computedStyle, styler,
     		self.context, self.nodeContext.shadowContext).then(function(shadowParam) {
-    	self.nodeContext.nodeShadow = shadowParam;    			
-	    var inFloatContainer = self.nodeContext.parent && self.nodeContext.parent.floatContainer;
+    	self.nodeContext.nodeShadow = shadowParam;
+		var position = computedStyle["position"];
 		var floatReference = computedStyle["float-reference"];
 	    var floatSide = computedStyle["float"];
 	    var clearSide = computedStyle["clear"];
-	    if (computedStyle["position"] === adapt.css.ident.absolute || 
-	    		computedStyle["position"] === adapt.css.ident.relative) {
-	    	self.nodeContext.floatContainer = true;
-	    	floatSide = null;
-	    }
-	    if (inFloatContainer) {
+		self.nodeContext.establishesBFC = vivliostyle.display.establishesBFC(display, position, floatSide, computedStyle["overflow"]);
+		self.nodeContext.containingBlockForAbsolute = vivliostyle.display.establishesCBForAbsolute(position);
+	    if (self.nodeContext.isInsideBFC()) {
+			// When the element is already inside a block formatting context (except one from the root),
+			// float and clear can be controlled by the browser and we don't need to care.
 	    	clearSide = null;
 	    	if (floatSide !== adapt.css.ident.footnote) {
 	    		floatSide = null;
@@ -597,7 +606,6 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			        computedStyle["display"] = adapt.css.ident.inline;
 		    	}
 		    }
-		    self.nodeContext.floatContainer = true;
 	    }
 	    if (clearSide) {
 	    	if (clearSide === adapt.css.ident.inherit) {
@@ -612,9 +620,6 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 		    		self.nodeContext.clearSide = clearSide.toString();
 		    	}
 		    }
-	    }
-	    if (computedStyle["overflow"] === adapt.css.ident.hidden) {
-		    self.nodeContext.floatContainer = true;
 	    }
 	    var listItem = display === adapt.css.ident.list_item && computedStyle["ua-list-item-count"];
 	    if (floating ||
