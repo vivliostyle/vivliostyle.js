@@ -568,8 +568,8 @@ adapt.layout.Column.prototype.killFloats = function() {
 adapt.layout.Column.prototype.createFloats = function() {
     var ref = this.element.firstChild;
     var bands = this.bands;
-    var x1 = this.vertical ? this.box.y1 : this.box.x1;
-    var x2 = this.vertical ? this.box.y2 : this.box.x2;
+    var x1 = this.vertical ? this.getTopEdge() : this.getLeftEdge();
+    var x2 = this.vertical ? this.getBottomEdge() : this.getRightEdge();
     for (var ri = 0 ; ri < bands.length ; ri++) {
         var band = bands[ri];
         var height = band.y2 - band.y1;
@@ -1041,7 +1041,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	    if (!self.isOverflown(floatBoxEdge) || self.breakPositions.length == 0) {
 	        // no overflow
 	    	self.killFloats();
-	    	box = self.vertical ? adapt.geom.rotateBox(self.box) : self.box;
+			box = new adapt.geom.Rect(self.getLeftEdge(), self.getTopEdge(), self.getRightEdge(), self.getBottomEdge());
 	        adapt.geom.addFloatToBands(box, self.bands, floatHorBox, null, floatSide);
 	        self.createFloats();
 	        if (floatSide == "left") {
