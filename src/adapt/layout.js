@@ -812,6 +812,15 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
     initResult.then(function() {
 		footnoteArea.layout(footnotePosition).then(function(footnoteOverflowParam) {
 			var footnoteOverflow = /** @type {adapt.vtree.ChunkPosition} */ (footnoteOverflowParam);
+			// If the footnote overflows, defer it to the next column entirely.
+			// TODO: Possibility of infinite loops?
+			if (footnoteOverflow) {
+				self.element.removeChild(footnoteArea.element);
+				self.processFullyOverflownFootnote(boxOffset, footnoteNodePosition);
+				self.footnoteArea = null;
+				frame.finish(true);
+				return;
+			}
 			if (self.vertical) {
 				self.footnoteEdge = self.afterEdge + (footnoteArea.computedBlockSize
 						+ footnoteArea.getInsetLeft() + footnoteArea.getInsetRight());
