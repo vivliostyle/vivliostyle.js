@@ -995,7 +995,8 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
         adapt.base.setCSSProperty(element, "width", floatBox.x2 - floatBox.x1 - insets.left - insets.right + "px");
         adapt.base.setCSSProperty(element, "height", floatBox.y2 - floatBox.y1 - insets.top - insets.bottom + "px");        
 		adapt.base.setCSSProperty(element, "position", "absolute");
-		adapt.base.setCSSProperty(element, "display", "block");
+		goog.asserts.assert(nodeContext.display);
+		adapt.base.setCSSProperty(element, "display", nodeContext.display);
 
 		var offsets;
 		var containingBlockForAbsolute = null;

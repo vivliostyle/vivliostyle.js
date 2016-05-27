@@ -629,6 +629,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 	    	self.nodeContext.breakPenalty += 10;
 	    }
 	    self.nodeContext.inline = !floating && !display || display === adapt.css.ident.inline;
+		self.nodeContext.display = display ? display.toString() : "inline";
 	    self.nodeContext.floatSide = floating ? floatSide.toString() : null;
 		self.nodeContext.floatReference = floatReference ? floatReference.toString() : null;
 	    if (!self.nodeContext.inline) {
