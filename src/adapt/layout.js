@@ -1042,6 +1042,9 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 	        // no overflow
 	    	self.killFloats();
 			box = new adapt.geom.Rect(self.getLeftEdge(), self.getTopEdge(), self.getRightEdge(), self.getBottomEdge());
+			if (self.vertical) {
+				box = adapt.geom.rotateBox(box);
+			}
 	        adapt.geom.addFloatToBands(box, self.bands, floatHorBox, null, floatSide);
 	        self.createFloats();
 	        if (floatSide == "left") {
