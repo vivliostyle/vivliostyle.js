@@ -24,6 +24,16 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/226>
 - Fix improper rendering of floats with relative width/height
   - <https://github.com/vivliostyle/vivliostyle.js/issues/37>
+- Fix positioning when a float is specified `position: relative` or a float is inside an positioned element
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/240>
+- Fix positioning when a float has a writing-mode value different from its container
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/192>
+- Fix issue with floats inside an element with an `overflow` value other than `visible`
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/224>
+- Fix issue that a `display` value was always set to `block` for a float, ignoring the original value
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/232>
+- Fix layout when a float is wider than its containing block
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/233>
 
 ## [2016.4](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.4) - 2016-04-08
 

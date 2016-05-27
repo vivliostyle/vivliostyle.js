@@ -373,13 +373,6 @@
         "url": "/css21/css1/c5526-flthw-000.xht"
       },
       {
-        "path": "css21/floats-clear/float-006.xht",
-        "references": [
-          ["/css21/floats-clear/float-006-ref.xht", "=="]
-        ],
-        "url": "/css21/floats-clear/float-006.xht"
-      },
-      {
         "path": "css21/floats-clear/floats-002.xht",
         "references": [
           ["/css21/floats-clear/floats-002-ref.xht", "=="]

@@ -608,12 +608,14 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {boolean} */ this.inline = true;
     /** @type {boolean} */ this.overflow = false;
     /** @type {number} */ this.breakPenalty = parent ? parent.breakPenalty : 0;
+	/** @type {?string} */ this.display = null;
 	/** @type {?string} */ this.floatReference = null;
     /** @type {?string} */ this.floatSide = null;
     /** @type {?string} */ this.clearSide = null;
 	/** @type {boolean} */ this.flexContainer = false;
     /** @type {adapt.vtree.Whitespace} */ this.whitespace = parent ? parent.whitespace : adapt.vtree.Whitespace.IGNORE;
-    /** @type {boolean} */ this.floatContainer = parent ? parent.floatContainer : false;
+    /** @type {boolean} */ this.establishesBFC = false;
+	/** @type {boolean} */ this.containingBlockForAbsolute = false;
     /** @type {?string} */ this.breakBefore = null;
     /** @type {?string} */ this.breakAfter = null;
     /** @type {Node} */ this.viewNode = null;
@@ -634,6 +636,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.clearSpacer = null;        
     this.offsetInNode = 0;
     this.after = false;
+	this.display = null;
     this.floatSide = null;
     this.clearSide = null;
 	this.flexContainer = false;
@@ -641,7 +644,8 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.breakBefore = null;
     this.breakAfter = null;	
     this.nodeShadow = null;
-    this.floatContainer = this.parent ? this.parent.floatContainer : false;
+    this.establishesBFC = false;
+	this.containingBlockForAbsolute = false;
     this.vertical = this.parent ? this.parent.vertical : false;
     this.nodeShadow = null;
 };
@@ -660,9 +664,11 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.shadowSibling = this.shadowSibling;
     np.inline = this.inline;
     np.breakPenalty = this.breakPenalty;
+	np.display = this.display;
     np.floatSide = this.floatSide;
     np.clearSide = this.clearSide;
-    np.floatContainer = this.floatContainer;
+    np.establishesBFC = this.establishesBFC;
+	np.containingBlockForAbsolute = this.containingBlockForAbsolute;
 	np.flexContainer = this.flexContainer;
     np.whitespace = this.whitespace;
     np.breakBefore = this.breakBefore;
@@ -740,6 +746,34 @@ adapt.vtree.NodeContext.prototype.toNodePosition = function() {
 		nc = nc.parent;
 	} while(nc);
 	return {steps:steps, offsetInNode: this.offsetInNode, after: this.after};
+};
+
+/**
+ * @returns {boolean}
+ */
+adapt.vtree.NodeContext.prototype.isInsideBFC = function() {
+	var parent = this.parent;
+	while (parent) {
+		if (parent.establishesBFC) {
+			return true;
+		}
+		parent = parent.parent;
+	}
+	return false;
+};
+
+/**
+ * @returns {adapt.vtree.NodeContext}
+ */
+adapt.vtree.NodeContext.prototype.getContainingBlockForAbsolute = function() {
+	var parent = this.parent;
+	while (parent) {
+		if (parent.containingBlockForAbsolute) {
+			return parent;
+		}
+		parent = parent.parent;
+	}
+	return null;
 };
 
 /**

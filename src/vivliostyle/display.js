@@ -47,6 +47,15 @@ goog.scope(function() {
     };
 
     /**
+     * Judge if the generated box is absolutely positioned.
+     * @param {adapt.css.Ident} position
+     * @returns {boolean}
+     */
+    vivliostyle.display.isAbsolutelyPositioned = function(position) {
+        return position === adapt.css.ident.absolute || position === adapt.css.ident.fixed;
+    };
+
+    /**
      * Get computed values of display, position and float.
      * cf. https://drafts.csswg.org/css-display/#transformations
      *     https://drafts.csswg.org/css2/visuren.html#dis-pos-flo
@@ -58,7 +67,7 @@ goog.scope(function() {
      */
     vivliostyle.display.getComputedDislayValue = function(display, position, float, isRoot) {
         if (display === adapt.css.ident.none) {
-        } else if (position === adapt.css.ident.absolute || position === adapt.css.ident.fixed) {
+        } else if (vivliostyle.display.isAbsolutelyPositioned(position)) {
             float = adapt.css.ident.none;
             display = vivliostyle.display.blockify(display);
         } else if ((float && float !== adapt.css.ident.none) || isRoot) {
@@ -82,5 +91,29 @@ goog.scope(function() {
     vivliostyle.display.isBlock = function(display, position, float, isRoot) {
         return vivliostyle.display.getComputedDislayValue(display, position, float, isRoot).display
             === adapt.css.ident.block;
+    };
+
+    /**
+     * Judges if the generated box establishes a new block formatting context.
+     * @param {adapt.css.Ident} display
+     * @param {adapt.css.Ident} position
+     * @param {adapt.css.Ident} float
+     * @param {adapt.css.Ident} overflow
+     * @returns {boolean}
+     */
+    vivliostyle.display.establishesBFC = function(display, position, float, overflow) {
+        return (!!float && float !== adapt.css.ident.none) ||
+            vivliostyle.display.isAbsolutelyPositioned(position) ||
+            (display === adapt.css.ident.inline_block || display === adapt.css.ident.table_cell || display === adapt.css.ident.table_caption) ||
+            ((display === adapt.css.ident.block || display === adapt.css.ident.list_item ) && !!overflow && overflow !== adapt.css.ident.visible);
+    };
+
+    /**
+     * Judges if the generated box establishes a containing block for descendant boxes with 'position: absolute'.
+     * @param {adapt.css.Ident} position
+     * @returns {boolean}
+     */
+    vivliostyle.display.establishesCBForAbsolute = function(position) {
+        return position === adapt.css.ident.relative || position === adapt.css.ident.absolute || position === adapt.css.ident.fixed;
     };
 });

@@ -209,6 +209,13 @@
         "url": "/css21/floats-clear/float-005.xht"
       },
       {
+        "path": "css21/floats-clear/float-006.xht",
+        "references": [
+          ["/css21/floats-clear/float-006-ref.xht", "=="]
+        ],
+        "url": "/css21/floats-clear/float-006.xht"
+      },
+      {
         "path": "css21/floats-clear/floats-006.xht",
         "references": [
           ["/css21/floats-clear/floats-006-ref.xht", "=="]
