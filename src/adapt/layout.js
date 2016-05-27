@@ -1925,7 +1925,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
-	var resultNodeContext = nodeContext;
+	var resultNodeContext = nodeContext.copy();
 	var self = this;
 	/** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
 		= adapt.task.newFrame("skipEdges");

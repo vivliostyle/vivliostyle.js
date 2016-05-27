@@ -34,6 +34,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/232>
 - Fix layout when a float is wider than its containing block
   - <https://github.com/vivliostyle/vivliostyle.js/issues/233>
+- Avoid error when an element with pseudoelements overflows its container
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/241>
 
 ## [2016.4](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.4) - 2016-04-08
 
