@@ -619,9 +619,9 @@ adapt.geom.addFloatToBands = function(box, bands, floatBox, floatBands, side) {
             if (floatBand.x1 != floatBand.x2) {
                 // non-empty floatBand
                 if (side == "left") {
-                    band.x1 = floatBand.x2;
+                    band.x1 = Math.min(floatBand.x2, box.x2);
                 } else {
-                    band.x2 = floatBand.x1;
+                    band.x2 = Math.max(floatBand.x1, box.x1);
                 }
             }
             if (band.y2 == floatBand.y2)
