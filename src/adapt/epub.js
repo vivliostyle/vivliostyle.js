@@ -1456,6 +1456,9 @@ adapt.epub.OPFView.prototype.makePage = function(viewItem, pos) {
     page.spineIndex = viewItem.item.spineIndex;
     page.position = pos;
     page.offset = viewItem.instance.getPosition(pos);
+	if (page.offset === 0) {
+		bleedBox.setAttribute("id", this.opf.documentURLTransformer.transformFragment("", viewItem.item.src));
+	}
     if (viewport !== this.viewport) {
     	var matrix = adapt.expr.letterbox(this.viewport.width, this.viewport.height,
     			viewport.width, viewport.height);
