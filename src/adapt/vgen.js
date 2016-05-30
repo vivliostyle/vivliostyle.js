@@ -799,10 +799,10 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			                continue; // don't propagate JavaScript code
 			            if (attributeName == "style")
 			                continue; // we do styling ourselves
-			            if (attributeName == "id") {
+			            if (attributeName == "id" || attributeName == "name") {
 			            	// Propagate transformed ids and collect them on the page.
 							attributeValue = self.documentURLTransformer.transformFragment(attributeValue, self.xmldoc.url);
-							result.setAttribute("id", attributeValue);
+							result.setAttribute(attributeName, attributeValue);
 			            	self.page.registerElementWithId(result, attributeValue);
 			            	continue;
 			            }
