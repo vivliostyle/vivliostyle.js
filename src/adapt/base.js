@@ -104,6 +104,30 @@ adapt.base.resolveURL = function(relURL, baseURL) {
     return url.replace(/\/(\.\/)+/g, '/');
 };
 
+/**
+ * @interface
+ */
+adapt.base.DocumentURLTransformer = function() {};
+
+/**
+ * @param {string} fragment
+ * @param {string} baseURL
+ * @returns {string}
+ */
+adapt.base.DocumentURLTransformer.prototype.transformFragment = function(fragment, baseURL) {};
+
+/**
+ * @param {string} url
+ * @param {string} baseURL
+ * @returns {string}
+ */
+adapt.base.DocumentURLTransformer.prototype.transformURL = function(url, baseURL) {};
+
+/**
+ * @param {string} encoded
+ * @returns {!Array<string>}
+ */
+adapt.base.DocumentURLTransformer.prototype.restoreURL = function(encoded) {};
 
 /**
  * Various namespaces.

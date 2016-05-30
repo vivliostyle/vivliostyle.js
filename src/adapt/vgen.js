@@ -217,12 +217,13 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
  * @param {adapt.vgen.CustomRenderer} customRenderer
  * @param {Object.<string,string>} fallbackMap
  * @param {!vivliostyle.pagefloat.FloatHolder} pageFloatHolder
+ * @param {!adapt.base.DocumentURLTransformer} documentURLTransformer
  * @constructor
  * @implements {adapt.vtree.LayoutContext}
  */
 adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds,
 		xmldoc, docFaces, footnoteStyle, stylerProducer, page, customRenderer, fallbackMap,
-		pageFloatHolder) {
+		pageFloatHolder, documentURLTransformer) {
 	// from constructor parameters
 	/** @const */ this.flowName = flowName;
 	/** @const */ this.context = context;
@@ -238,6 +239,7 @@ adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds
 	/** @const */ this.customRenderer = customRenderer;
 	/** @const */ this.fallbackMap = fallbackMap;
 	/** @const */ this.pageFloatHolder = pageFloatHolder;
+	/** @const */ this.documentURLTransformer = documentURLTransformer;
 	
     // provided by layout
 	/** @type {adapt.vtree.NodeContext} */ this.nodeContext = null;
@@ -258,7 +260,7 @@ adapt.vgen.ViewFactory.prototype.clone = function() {
 	return new adapt.vgen.ViewFactory(this.flowName, this.context, this.viewport,
 		this.styler, this.regionIds,
 		this.xmldoc, this.docFaces, this.footnoteStyle, this.stylerProducer,
-		this.page, this.customRenderer, this.fallbackMap, this.pageFloatHolder);
+		this.page, this.customRenderer, this.fallbackMap, this.pageFloatHolder, this.documentURLTransformer);
 };
 
 /**
@@ -798,13 +800,16 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			            if (attributeName == "style")
 			                continue; // we do styling ourselves
 			            if (attributeName == "id") {
-			            	// Don't propagate ids, but collect them on the page.
+			            	// Propagate transformed ids and collect them on the page.
+							attributeValue = self.documentURLTransformer.transformFragment(attributeValue, self.xmldoc.url);
+							result.setAttribute("id", attributeValue);
 			            	self.page.registerElementWithId(result, attributeValue);
 			            	continue;
 			            }
 			            // TODO: understand the element we are working with.
 			            if (attributeName == "src" || attributeName == "href" || attributeName == "poster") {
-			                attributeValue = self.resolveURL(attributeValue);
+			                attributeValue = self.documentURLTransformer.transformURL(
+								self.resolveURL(attributeValue), self.xmldoc.url);
 			            } else if (attributeName == "srcset") {
 							attributeValue = attributeValue.split(",").map(function(value) {
 								return self.resolveURL(value.trim());

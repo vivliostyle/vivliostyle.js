@@ -148,6 +148,7 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @param {adapt.vgen.CustomRenderer} customRenderer
  * @param {Object.<string,string>} fallbackMap
  * @param {number} pageNumberOffset
+ * @param {!adapt.base.DocumentURLTransformer} documentURLTransformer
  * @constructor
  * @extends {adapt.expr.Context}
  * @implements {adapt.cssstyler.FlowListener}
@@ -155,7 +156,7 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @implements {adapt.vgen.StylerProducer}
  */
 adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientLayout, 
-		fontMapper, customRenderer, fallbackMap, pageNumberOffset) {
+		fontMapper, customRenderer, fallbackMap, pageNumberOffset, documentURLTransformer) {
 	adapt.expr.Context.call(this, style.rootScope, viewport.width, viewport.height, viewport.fontSize);
 	/** @const */ this.style = style;
 	/** @const */ this.xmldoc = xmldoc;
@@ -180,6 +181,7 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @const */ this.customRenderer = customRenderer;
     /** @const */ this.fallbackMap = fallbackMap;
 	/** @const @type {number} */ this.pageNumberOffset = pageNumberOffset;
+	/** @const */ this.documentURLTransformer = documentURLTransformer;
     for (var flowName in style.flowProps) {
     	var flowStyle = style.flowProps[flowName];
     	var consume = adapt.csscasc.getProp(flowStyle, "flow-consume");
@@ -657,7 +659,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
         var layoutContext = new adapt.vgen.ViewFactory(flowNameStr, self,
                 self.viewport, self.styler, regionIds, self.xmldoc, self.faces,
                 self.style.footnoteProps, self, page, self.customRenderer,
-                self.fallbackMap, pageFloatHolder);
+                self.fallbackMap, pageFloatHolder, this.documentURLTransformer);
         var columnIndex = 0;
         var region = null;
         frame.loopWithFrame(function(loopFrame) {

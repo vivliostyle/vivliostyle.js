@@ -787,7 +787,7 @@ adapt.viewer.Viewer.prototype.initEmbed = function (cmd) {
         var scheduler = adapt.task.currentTask().getScheduler();
         viewer.hyperlinkListener = function(evt) {
     		var hrefEvent = /** @type {adapt.vtree.PageHyperlinkEvent} */ (evt);
-            var internal = viewer.packageURL.some(function(url) {
+            var internal = hrefEvent.href.charAt(0) === "#" || viewer.packageURL.some(function(url) {
                 return hrefEvent.href.substr(0, url.length) == url;
             });
     		var msg = {"t":"hyperlink", "href":hrefEvent.href, "internal": internal};
