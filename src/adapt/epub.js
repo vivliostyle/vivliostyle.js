@@ -520,7 +520,54 @@ adapt.epub.OPFDoc = function(store, epubURL) {
 	/** @type {adapt.epub.OPFItem} */ this.cover = null;
 	/** @type {Object.<string,string>} */ this.fallbackMap = {};
 	/** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = null;
+	/** @const */ this.documentURLTransformer = this.createDocumentURLTransformer();
 	adapt.epub.checkMathJax();
+};
+
+adapt.epub.OPFDoc.prototype.createDocumentURLTransformer = function() {
+	var self = this;
+
+	/**
+	 * @constructor
+	 * @implements {adapt.base.DocumentURLTransformer}
+     */
+	function OPFDocumentURLTransformer() {}
+	/**
+	 * @override
+     */
+	OPFDocumentURLTransformer.prototype.transformFragment = function(fragment, baseURL) {
+		var url = baseURL + (fragment ? "#" + fragment : "");
+		return encodeURIComponent(url);
+	};
+	/**
+	 * @override
+     */
+	OPFDocumentURLTransformer.prototype.transformURL = function(url, baseURL) {
+		var r = url.match(/^([^#]*)#?(.*)$/);
+		if (r) {
+			var path = r[1] || baseURL;
+			var fragment = r[2];
+			if (path) {
+				if (self.items.some(function(item) { return item.src === path; })) {
+					return "#" + this.transformFragment(fragment, path);
+				}
+			}
+		}
+		return url;
+	};
+	/**
+	 * @override
+	 */
+	OPFDocumentURLTransformer.prototype.restoreURL = function(encoded) {
+		if (encoded.charAt(0) === "#") {
+			encoded = encoded.substring(1);
+		}
+		var decoded = decodeURIComponent(encoded);
+		var r = decoded.match(/^([^#]*)#?(.*)$/);
+		return r ? [r[1], r[2]] : [];
+	};
+
+	return new OPFDocumentURLTransformer();
 };
 
 /**
@@ -1335,10 +1382,18 @@ adapt.epub.OPFView.prototype.navigateToFragment = function(fragment) {
 adapt.epub.OPFView.prototype.navigateTo = function(href) {
 	vivliostyle.logging.logger.debug("Navigate to", href);
 	var path = this.opf.getPathFromURL(adapt.base.stripFragment(href));
-	if (path == null) {
+	if (!path) {
 		if (this.opf.opfXML && href.match(/^#epubcfi\(/)) {
 			// CFI fragment is "relative" to OPF.
 			path = this.opf.getPathFromURL(this.opf.opfXML.url);
+		} else if (href.charAt(0) === "#") {
+			var restored = this.opf.documentURLTransformer.restoreURL(href);
+			if (this.opf.opfXML) {
+				path = this.opf.getPathFromURL(restored[0]);
+			} else {
+				path = restored[0];
+			}
+			href = path + (restored[1] ? "#" + restored[1] : "");
 		}
 		if (path == null) {
 			return adapt.task.newResult(/** @type {adapt.vtree.Page} */ (null));		
@@ -1609,7 +1664,8 @@ adapt.epub.OPFView.prototype.getPageViewItem = function() {
 			previousViewItem.instance.pageNumberOffset + previousViewItem.pages.length : 0;
 
         var instance = new adapt.ops.StyleInstance(style, xmldoc, self.opf.lang,
-			viewport, self.clientLayout, self.fontMapper, customRenderer, self.opf.fallbackMap, pageNumberOffset);
+			viewport, self.clientLayout, self.fontMapper, customRenderer, self.opf.fallbackMap, pageNumberOffset,
+			self.opf.documentURLTransformer);
 
 		if (previousViewItem) {
 			instance.pageCounterStore.copyFrom(previousViewItem.instance.pageCounterStore);
@@ -1699,7 +1755,7 @@ adapt.epub.OPFView.prototype.showTOC = function(autohide) {
 			= adapt.task.newFrame("showTOC");
 	if (!this.tocView) {
 		this.tocView = new adapt.toc.TOCView(opf.store, toc.src, opf.lang, 
-				this.clientLayout, this.fontMapper, this.pref, this, opf.fallbackMap);
+				this.clientLayout, this.fontMapper, this.pref, this, opf.fallbackMap, opf.documentURLTransformer);
 	}
 	var viewport = this.viewport;
 	var tocWidth = Math.min(350, Math.round(0.67 * viewport.width) - 16);
