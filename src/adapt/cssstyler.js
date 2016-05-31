@@ -425,11 +425,10 @@ adapt.cssstyler.BoxStack.prototype.nearestBlockStartOffset = function(box) {
  * @param {adapt.cssvalid.ValidatorSet} validatorSet
  * @param {!adapt.csscasc.CounterListener} counterListener
  * @param {!adapt.csscasc.CounterResolver} counterResolver
- * @param {!adapt.csscasc.PageCounterResolver} pageCounterResolver
  * @constructor
  * @implements {adapt.cssstyler.AbstractStyler}
  */
-adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows, validatorSet, counterListener, counterResolver, pageCounterResolver) {
+adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows, validatorSet, counterListener, counterResolver) {
 	/** @const */ this.xmldoc = xmldoc;
 	/** @const */ this.root = xmldoc.root;
 	/** @const */ this.cascadeHolder = cascade;
@@ -444,7 +443,7 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
     /** @type {adapt.cssstyler.FlowListener} */ this.flowListener = null;
     /** @type {?string} */ this.flowToReach = null;
     /** @type {?string} */ this.idToReach = null;
-    /** @const */ this.cascade = cascade.createInstance(context, counterListener, counterResolver, pageCounterResolver, xmldoc.lang);
+    /** @const */ this.cascade = cascade.createInstance(context, counterListener, counterResolver, xmldoc.lang);
     /** @const */ this.offsetMap = new adapt.cssstyler.SlipMap();
     /** @type {boolean} */ this.primary = true;
     /** @const */ this.primaryStack = /** @type {Array.<boolean>} */ ([]);

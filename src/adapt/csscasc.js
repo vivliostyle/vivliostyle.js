@@ -1749,6 +1749,22 @@ adapt.csscasc.CounterListener.prototype.countersOfId = function(id, counters) {}
 adapt.csscasc.CounterResolver = function() {};
 
 /**
+ * Returns an adapt.expr.Val, whose value is calculated at the layout time by retrieving the innermost page-based counter (null if it does not exist) by its name and formatting the value into a string.
+ * @param {string} name Name of the page-based counter to be retrieved
+ * @param {function(?number):string} format A function that formats the counter value into a string
+ * @returns {adapt.expr.Val}
+ */
+adapt.csscasc.CounterResolver.prototype.getPageCounterVal = function(name, format) {};
+
+/**
+ * Returns an adapt.expr.Val, whose value is calculated at the layout time by retrieving the page-based counters by its name and formatting the values into a string.
+ * @param {string} name Name of the page-based counters to be retrieved
+ * @param {function(!Array.<number>):string} format A function that formats the counter values (passed as an array ordered by the nesting depth with the outermost counter first and the innermost last) into a string
+ * @returns {adapt.expr.Val}
+ */
+adapt.csscasc.CounterResolver.prototype.getPageCountersVal = function(name, format) {};
+
+/**
  * @param {string} url
  * @param {string} name
  * @param {function(?number):string} format
@@ -1763,28 +1779,6 @@ adapt.csscasc.CounterResolver.prototype.getTargetCounterVal = function(url, name
  * @returns {!adapt.expr.Val}
  */
 adapt.csscasc.CounterResolver.prototype.getTargetCountersVal = function(url, name, format) {};
-
-/**
- * Interface representing an object which can resolve a page-based counter by its name.
- * @interface
- */
-adapt.csscasc.PageCounterResolver = function() {};
-
-/**
- * Returns an adapt.expr.Val, whose value is calculated at the layout time by retrieving the innermost page-based counter (null if it does not exist) by its name and formatting the value into a string.
- * @param {string} name Name of the page-based counter to be retrieved
- * @param {function(?number):string} format A function that formats the counter value into a string
- * @returns {adapt.expr.Val}
- */
-adapt.csscasc.PageCounterResolver.prototype.getCounterVal = function(name, format) {};
-
-/**
- * Returns an adapt.expr.Val, whose value is calculated at the layout time by retrieving the page-based counters by its name and formatting the values into a string.
- * @param {string} name Name of the page-based counters to be retrieved
- * @param {function(!Array.<number>):string} format A function that formats the counter values (passed as an array ordered by the nesting depth with the outermost counter first and the innermost last) into a string
- * @returns {adapt.expr.Val}
- */
-adapt.csscasc.PageCounterResolver.prototype.getCountersVal = function(name, format) {};
 
 /**
  * @constructor
@@ -2141,7 +2135,7 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounter = function(values) {
 		return new adapt.css.Str(this.format(numval, type));
 	} else {
 		var self = this;
-		var c = new adapt.css.Expr(this.cascade.pageCounterResolver.getCounterVal(counterName, function(numval) {
+		var c = new adapt.css.Expr(this.counterResolver.getPageCounterVal(counterName, function(numval) {
 			return self.format(numval || 0, type);
 		}));
 		return new adapt.css.SpaceList([c]);
@@ -2166,7 +2160,7 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounters = function(values) 
 	    }
 	}
 	var self = this;
-	var c = new adapt.css.Expr(this.cascade.pageCounterResolver.getCountersVal(counterName, function(numvals) {
+	var c = new adapt.css.Expr(this.counterResolver.getPageCountersVal(counterName, function(numvals) {
 		var parts = /** @type {Array.<string>} */ ([]);
 		if (numvals.length) {
 			for (var i = 0; i < numvals.length; i++) {
@@ -2343,11 +2337,10 @@ adapt.csscasc.Cascade.prototype.insertInTable = function(table, key, action) {
  * @param {adapt.expr.Context} context
  * @param {!adapt.csscasc.CounterListener} counterListener
  * @param {!adapt.csscasc.CounterResolver} counterResolver
- * @param {!adapt.csscasc.PageCounterResolver} pageCounterResolver
  * @return {adapt.csscasc.CascadeInstance}
  */
-adapt.csscasc.Cascade.prototype.createInstance = function(context, counterListener, counterResolver, pageCounterResolver, lang) {
-    return new adapt.csscasc.CascadeInstance(this, context, counterListener, counterResolver, pageCounterResolver, lang);
+adapt.csscasc.Cascade.prototype.createInstance = function(context, counterListener, counterResolver, lang) {
+    return new adapt.csscasc.CascadeInstance(this, context, counterListener, counterResolver, lang);
 };
 
 /**
@@ -2363,16 +2356,14 @@ adapt.csscasc.Cascade.prototype.nextOrder = function() {
  * @param {adapt.expr.Context} context
  * @param {!adapt.csscasc.CounterListener} counterListener
  * @param {!adapt.csscasc.CounterResolver} counterResolver
- * @param {!adapt.csscasc.PageCounterResolver} pageCounterResolver
  * @param {string} lang
  * @constructor
  */
-adapt.csscasc.CascadeInstance = function(cascade, context, counterListener, counterResolver, pageCounterResolver, lang) {
+adapt.csscasc.CascadeInstance = function(cascade, context, counterListener, counterResolver, lang) {
 	/** @const */ this.code = cascade;
 	/** @const */ this.context = context;
 	/** @const */ this.counterListener = counterListener;
 	/** @const */ this.counterResolver = counterResolver;
-	/** @const */ this.pageCounterResolver = pageCounterResolver;
 	/** @const */ this.stack = /** @type {Array.<Array.<adapt.csscasc.ConditionItem>>} */ ([[],[]]);
 	/** @const */ this.conditions = /** @type {Object.<string,number>} */ ({});
 	/** @type {Element} */ this.currentElement = null;

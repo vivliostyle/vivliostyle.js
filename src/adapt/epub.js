@@ -1672,9 +1672,6 @@ adapt.epub.OPFView.prototype.getPageViewItem = function() {
 			viewport, self.clientLayout, self.fontMapper, customRenderer, self.opf.fallbackMap, pageNumberOffset,
 			self.opf.documentURLTransformer, self.counterStore);
 
-		if (previousViewItem) {
-			instance.pageCounterStore.copyFrom(previousViewItem.instance.pageCounterStore);
-		}
         instance.pref = self.pref;
         instance.init().then(function() {
 			viewItem = {item: item, xmldoc: xmldoc, instance: instance,

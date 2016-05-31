@@ -177,7 +177,6 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @type {Object.<string,adapt.pm.PageBoxInstance>} */ this.pageBoxInstances = {};
     /** @type {vivliostyle.page.PageManager} */ this.pageManager = null;
 	/** @const */ this.counterStore = counterStore;
-	/** @const @type {!vivliostyle.page.PageCounterStore} */ this.pageCounterStore = new vivliostyle.page.PageCounterStore(style.pageScope);
     /** @type {boolean} */ this.regionBreak = false;
     /** @type {!Object.<string,boolean>} */ this.pageBreaks = {};
     /** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = null;
@@ -210,10 +209,9 @@ adapt.ops.StyleInstance.prototype.init = function() {
     /** @type {!adapt.task.Frame.<boolean>} */ var frame
     	= adapt.task.newFrame("StyleInstance.init");
 	var counterListener = self.counterStore.createCounterListener(self.xmldoc.url);
-	var counterResolver = self.counterStore.createCounterResolver(self.xmldoc.url, self.style.rootScope);
+	var counterResolver = self.counterStore.createCounterResolver(self.xmldoc.url, self.style.rootScope, self.style.pageScope);
     self.styler = new adapt.cssstyler.Styler(self.xmldoc, self.style.cascade,
-    		self.style.rootScope, self, this.primaryFlows, self.style.validatorSet, counterListener, counterResolver,
-		this.pageCounterStore);
+    		self.style.rootScope, self, this.primaryFlows, self.style.validatorSet, counterListener, counterResolver);
 	counterResolver.setStyler(self.styler);
     self.styler.resetFlowChunkStream(self);
     self.stylerMap = {};
@@ -222,7 +220,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     self.pageProgression = vivliostyle.page.resolvePageProgression(docElementStyle);
     var rootBox = this.style.rootBox;
     this.rootPageBoxInstance = new adapt.pm.RootPageBoxInstance(rootBox);
-    var cascadeInstance = this.style.cascade.createInstance(self, counterListener, counterResolver, this.pageCounterStore, this.lang);
+    var cascadeInstance = this.style.cascade.createInstance(self, counterListener, counterResolver, this.lang);
     this.rootPageBoxInstance.applyCascadeAndInit(cascadeInstance, docElementStyle);
     this.rootPageBoxInstance.resolveAutoSizing(self);
     this.pageManager = new vivliostyle.page.PageManager(cascadeInstance, this.style.pageScope, this.rootPageBoxInstance, self, docElementStyle);
@@ -261,9 +259,9 @@ adapt.ops.StyleInstance.prototype.getStylerForDoc = function(xmldoc) {
 		// We need a separate content, so that variables can get potentially different values.
 		var context = new adapt.expr.Context(style.rootScope, this.pageWidth(), this.pageHeight(), this.initialFontSize);
 		var counterListener = this.counterStore.createCounterListener(xmldoc.url);
-		var counterResolver = this.counterStore.createCounterResolver(xmldoc.url, style.rootScope);
+		var counterResolver = this.counterStore.createCounterResolver(xmldoc.url, style.rootScope, style.pageScope);
 		styler = new adapt.cssstyler.Styler(xmldoc, style.cascade,
-        		style.rootScope, context, this.primaryFlows, style.validatorSet, counterListener, counterResolver, this.pageCounterStore);
+        		style.rootScope, context, this.primaryFlows, style.validatorSet, counterListener, counterResolver);
 		this.stylerMap[xmldoc.url] = styler;
 	}
 	return styler;
@@ -874,7 +872,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     if (pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight) {
 		page.setAutoPageHeight(true);
     }
-	self.pageCounterStore.updatePageCounters(cascadedPageStyle, self);
+	self.counterStore.updatePageCounters(cascadedPageStyle, self);
 
 	// setup bleed area and crop marks
 	var evaluatedPageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(
