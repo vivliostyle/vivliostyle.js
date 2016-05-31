@@ -872,6 +872,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     if (pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight) {
 		page.setAutoPageHeight(true);
     }
+	self.counterStore.setCurrentPage(page);
 	self.counterStore.updatePageCounters(cascadedPageStyle, self);
 
 	// setup bleed area and crop marks
@@ -908,6 +909,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
         page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;
 	    self.processLinger();
 	    self.currentLayoutPosition = self.layoutPositionAtPageStart = null;
+		self.counterStore.finishPage();
 	    cp.highestSeenOffset = self.styler.getReachedOffset();
         var triggers = self.style.store.getTriggersForDoc(self.xmldoc);
 	    page.finish(triggers, self.clientLayout);

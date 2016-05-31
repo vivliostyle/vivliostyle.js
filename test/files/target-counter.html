@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <title>target-counter</title>
     <style>
+        @page {
+            counter-increment: foo;
+            @top-center {
+                content: "Page " counter(page);
+            }
+        }
+
+        .page-break-before {
+            page-break-before: always;
+        }
+
         .foo {
             counter-increment: foo;
         }
@@ -30,6 +41,12 @@
         }
         .ref-foofoo::after {
             content: target-counters("#foofoo-target", foo, "-", lower-roman);
+        }
+        .ref-foo-page::before {
+            content: target-counter(url(#foo-target), page);
+        }
+        .ref-foo-page::after {
+            content: target-counter("#foo-target", page, lower-roman);
         }
 
         .bar {
@@ -64,6 +81,7 @@
 <body>
 <p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
 <p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
+<p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
 <p class="foo">foo=</p>
 <p class="foo">foo=</p>
 <p class="foo" id="foo-target">(#foo-target) foo=</p>
@@ -71,8 +89,11 @@
 <p class="foo">foo=</p>
 <p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
 <p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
-<p>'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
+<p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
+
+<p class="page-break-before">'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
 <p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"> = </span></p>
+<p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
 <p class="bar">bar=</p>
 <p class="bar">bar=</p>
 <p class="bar" id="bar-target">(#bar-target) bar=</p>
@@ -80,5 +101,6 @@
 <p class="bar">bar=</p>
 <p>'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
 <p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"> = </span></p>
+<p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
 </body>
 </html>

@@ -13,16 +13,13 @@ goog.require("adapt.cssstyler");
 goog.scope(function() {
 
     /**
-     *
-     * @param {!adapt.base.DocumentURLTransformer} documentURLTransformer
-     * @param {!Object<string, !Object<string, !Array<number>>>} countersById
+     * @param {!vivliostyle.counters.CounterStore} counterStore
      * @param {string} baseURL
      * @constructor
      * @implements {adapt.csscasc.CounterListener}
      */
-    function CounterListener(documentURLTransformer, countersById, baseURL) {
-        /** @const */ this.documentURLTransformer = documentURLTransformer;
-        /** @const */ this.countersById = countersById;
+    function CounterListener(counterStore, baseURL) {
+        /** @const */ this.counterStore = counterStore;
         /** @const */ this.baseURL = baseURL;
     }
 
@@ -30,25 +27,20 @@ goog.scope(function() {
      * @override
      */
     CounterListener.prototype.countersOfId = function(id, counters) {
-        id = this.documentURLTransformer.transformFragment(id, this.baseURL);
-        this.countersById[id] = counters;
+        id = this.counterStore.documentURLTransformer.transformFragment(id, this.baseURL);
+        this.counterStore.countersById[id] = counters;
     };
 
     /**
-     *
-     * @param {!adapt.base.DocumentURLTransformer} documentURLTransformer
-     * @param {!Object<string, !Object<string, !Array<number>>>} countersById
-     * @param {!Object.<string, !Array<number>>} currentPageCounters
+     * @param {!vivliostyle.counters.CounterStore} counterStore
      * @param {string} baseURL
      * @param {adapt.expr.LexicalScope} rootScope
      * @param {adapt.expr.LexicalScope} pageScope
      * @constructor
      * @implements {adapt.csscasc.CounterResolver}
      */
-    function CounterResolver(documentURLTransformer, countersById, currentPageCounters, baseURL, rootScope, pageScope) {
-        /** @const */ this.documentURLTransformer = documentURLTransformer;
-        /** @const */ this.countersById = countersById;
-        /** @const */ this.currentPageCounters = currentPageCounters;
+    function CounterResolver(counterStore, baseURL, rootScope, pageScope) {
+        /** @const */ this.counterStore = counterStore;
         /** @const */ this.baseURL = baseURL;
         /** @const */ this.rootScope = rootScope;
         /** @const */ this.pageScope = pageScope;
@@ -79,7 +71,7 @@ goog.scope(function() {
      * @returns {string}
      */
     CounterResolver.prototype.getTransformedId = function(url) {
-        var transformedId = this.documentURLTransformer.transformURL(url, this.baseURL);
+        var transformedId = this.counterStore.documentURLTransformer.transformURL(url, this.baseURL);
         if (transformedId.charAt(0) === "#") {
             transformedId = transformedId.substring(1);
         }
@@ -92,7 +84,7 @@ goog.scope(function() {
     CounterResolver.prototype.getPageCounterVal = function(name, format) {
         var self = this;
         function getCounterNumber() {
-            var values = self.currentPageCounters[name];
+            var values = self.counterStore.currentPageCounters[name];
             return (values && values.length) ? values[values.length - 1] : null;
         }
         return new adapt.expr.Native(this.pageScope, function() {
@@ -106,11 +98,45 @@ goog.scope(function() {
     CounterResolver.prototype.getPageCountersVal = function(name, format) {
         var self = this;
         function getCounterNumbers() {
-            return self.currentPageCounters[name] || [];
+            return self.counterStore.currentPageCounters[name] || [];
         }
         return new adapt.expr.Native(this.pageScope, function() {
             return format(getCounterNumbers());
         }, "page-counters-" + name)
+    };
+
+    /**
+     * @private
+     * @param {?string} id
+     * @param {string} transformedId
+     * @param {string} name
+     * @returns {?Array<number>}
+     */
+    CounterResolver.prototype.getTargetCounters = function(id, transformedId, name) {
+        var targetCounters = this.counterStore.countersById[transformedId];
+        if (!targetCounters && id) {
+            this.styler.styleUntilIdIsReached(id);
+            targetCounters = this.counterStore.countersById[transformedId];
+        }
+        return (targetCounters && targetCounters[name]) || null;
+    };
+
+    /**
+     * @private
+     * @param {string} transformedId
+     * @param {string} name
+     * @returns {?Array<number>}
+     */
+    CounterResolver.prototype.getTargetPageCounters = function(transformedId, name) {
+        if (this.counterStore.currentPage.elementsById[transformedId]) {
+            return this.counterStore.currentPageCounters[name] || null;
+        } else {
+            var targetPageCounters = this.counterStore.pageCountersById[transformedId];
+            if (targetPageCounters) {
+                return targetPageCounters[name] || null;
+            }
+        }
+        return null;
     };
 
     /**
@@ -120,17 +146,17 @@ goog.scope(function() {
         var id = this.getFragment(url);
         var transformedId = this.getTransformedId(url);
         var self = this;
-        var scope = this.rootScope;
-        return new adapt.expr.Native(scope, function() {
-            var targetCounters = self.countersById[transformedId];
-            if (!targetCounters && id) {
-                self.styler.styleUntilIdIsReached(id);
-                targetCounters = self.countersById[transformedId];
+        return new adapt.expr.Native(this.rootScope, function() {
+            var arr = self.getTargetCounters(id, transformedId, name);
+            if (arr && arr.length) {
+                var numval = arr[arr.length - 1] || null;
+                return format(numval);
+            } else {
+                arr = self.getTargetPageCounters(transformedId, name);
+                var numval = (arr && arr.length && arr[arr.length - 1]) || null;
+                return format(numval);
             }
-            var arr = targetCounters && targetCounters[name];
-            var numval = (arr && arr.length && arr[arr.length - 1]) || null;
-            return format(numval);
-        }, "target-counter-" + name + "-of-#" + transformedId);
+        }, "target-counter-" + name + "-of-" + url);
     };
 
     /**
@@ -140,16 +166,11 @@ goog.scope(function() {
         var id = this.getFragment(url);
         var transformedId = this.getTransformedId(url);
         var self = this;
-        var scope = this.rootScope;
-        return new adapt.expr.Native(scope, function() {
-            var targetCounters = self.countersById[transformedId];
-            if (!targetCounters && id) {
-                self.styler.styleUntilIdIsReached(id);
-                targetCounters = self.countersById[transformedId];
-            }
-            var arr = targetCounters && targetCounters[name];
-            return format(arr || []);
-        }, "target-counters-" + name + "-of-#" + transformedId);
+        return new adapt.expr.Native(this.rootScope, function() {
+            var pageCounters = self.getTargetPageCounters(transformedId, name);
+            var elementCounters = self.getTargetCounters(id, transformedId, name);
+            return format((pageCounters ? pageCounters.concat(elementCounters) : elementCounters) || []);
+        }, "target-counters-" + name + "-of-" + url);
     };
 
     /**
@@ -159,29 +180,35 @@ goog.scope(function() {
     vivliostyle.counters.CounterStore = function(documentURLTransformer) {
         /** @const */ this.documentURLTransformer = documentURLTransformer;
         /** @const {!Object.<string, !Object<string, !Array.<number>>>} */ this.countersById = {};
+        /** @const {!Object.<string, !Object<string, !Array.<number>>>} */ this.pageCountersById = {};
         /** @const {!Object.<string, !Array<number>>} */ this.currentPageCounters = {};
         this.currentPageCounters["page"] = [0];
+        /** @type {adapt.vtree.Page} */ this.currentPage = null;
     };
 
     /**
-     *
      * @param {string} baseURL
      * @returns {!adapt.csscasc.CounterListener}
      */
     vivliostyle.counters.CounterStore.prototype.createCounterListener = function(baseURL) {
-        return new CounterListener(this.documentURLTransformer, this.countersById, baseURL);
+        return new CounterListener(this, baseURL);
     };
 
     /**
-     *
      * @param {string} baseURL
      * @param {adapt.expr.LexicalScope} rootScope
      * @param {adapt.expr.LexicalScope} pageScope
      * @returns {!adapt.csscasc.CounterResolver}
      */
     vivliostyle.counters.CounterStore.prototype.createCounterResolver = function(baseURL, rootScope, pageScope) {
-        return new CounterResolver(this.documentURLTransformer, this.countersById, this.currentPageCounters,
-            baseURL, rootScope, pageScope);
+        return new CounterResolver(this, baseURL, rootScope, pageScope);
+    };
+
+    /**
+     * @param {adapt.vtree.Page} page
+     */
+    vivliostyle.counters.CounterStore.prototype.setCurrentPage = function(page) {
+        this.currentPage = page;
     };
 
     /**
@@ -241,6 +268,20 @@ goog.scope(function() {
             var counterValues = this.currentPageCounters[incrementCounterName];
             counterValues[counterValues.length - 1] += incrementMap[incrementCounterName];
         }
+    };
+
+    vivliostyle.counters.CounterStore.prototype.finishPage = function() {
+        var ids = Object.keys(this.currentPage.elementsById);
+        if (ids.length > 0) {
+            /** @type {!Object<string, Array<number>>} */ var counters = {};
+            Object.keys(this.currentPageCounters).forEach(function(name) {
+                counters[name] = Array.from(this.currentPageCounters[name]);
+            }, this);
+            ids.forEach(function(id) {
+                this.pageCountersById[id] = counters;
+            }, this);
+        }
+        this.currentPage = null;
     };
 
 });

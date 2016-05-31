@@ -116,7 +116,7 @@ adapt.vtree.Page = function(container, bleedBox) {
 			self.dispatchEvent(evt);
 		}
 	};
-	/** @type {Object.<string,Array.<Element>>} */ this.elementsById = {};
+	/** @const {!Object.<string,Array.<Element>>} */ this.elementsById = {};
 	/** @const @type {{width: number, height: number}} */ this.dimensions = {width: 0, height: 0};
 	/** @type {boolean} */ this.isFirstPage = false;
 	/** @type {boolean} */ this.isLastPage = false;
