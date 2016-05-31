@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>target-counter</title>
+    <style>
+        .foo {
+            counter-increment: foo;
+        }
+        .foo::after {
+            content: counter(foo);
+        }
+        .foofoo:first-child {
+            counter-reset: foo;
+        }
+        .foofoo {
+            counter-increment: foo;
+        }
+        .foofoo::after {
+            content: counters(foo, "-");
+        }
+        .ref-foo::before {
+            content: target-counter(url(#foo-target), foo);
+        }
+        .ref-foo::after {
+            content: target-counter("#foo-target", foo, lower-roman);
+        }
+        .ref-foofoo::before {
+            content: target-counters(url("#foofoo-target"), foo, "-");
+        }
+        .ref-foofoo::after {
+            content: target-counters("#foofoo-target", foo, "-", lower-roman);
+        }
+    </style>
+</head>
+<body>
+<p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
+<p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
+<p class="foo">foo=</p>
+<p class="foo">foo=</p>
+<p class="foo" id="foo-target">(#foo-target) foo=</p>
+<p class="foo"><span class="foofoo">foos=</span>, <span class="foofoo" id="foofoo-target">foos=</span>, foo=</p>
+<p class="foo">foo=</p>
+<p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
+<p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
+</body>
+</html>

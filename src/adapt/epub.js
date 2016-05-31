@@ -11,6 +11,7 @@ goog.require('adapt.net');
 goog.require('adapt.xmldoc');
 goog.require('adapt.csscasc');
 goog.require('adapt.font');
+goog.require('vivliostyle.counters');
 goog.require('adapt.ops');
 goog.require('adapt.cfi');
 goog.require('adapt.sha1');
@@ -968,6 +969,7 @@ adapt.epub.OPFView = function(opf, viewport, fontMapper, pref, pageSheetSizeRepo
 	/** @type {number} */ this.offsetInItem = 0;
 	/** @const */ this.pref = adapt.expr.clonePreferences(pref);
 	/** @const */ this.clientLayout = new adapt.vgen.DefaultClientLayout(viewport.window);
+	/** @const */ this.counterStore = new vivliostyle.counters.CounterStore(opf.documentURLTransformer);
 };
 
 /**
@@ -1668,7 +1670,7 @@ adapt.epub.OPFView.prototype.getPageViewItem = function() {
 
         var instance = new adapt.ops.StyleInstance(style, xmldoc, self.opf.lang,
 			viewport, self.clientLayout, self.fontMapper, customRenderer, self.opf.fallbackMap, pageNumberOffset,
-			self.opf.documentURLTransformer);
+			self.opf.documentURLTransformer, self.counterStore);
 
 		if (previousViewItem) {
 			instance.pageCounterStore.copyFrom(previousViewItem.instance.pageCounterStore);
@@ -1758,7 +1760,8 @@ adapt.epub.OPFView.prototype.showTOC = function(autohide) {
 			= adapt.task.newFrame("showTOC");
 	if (!this.tocView) {
 		this.tocView = new adapt.toc.TOCView(opf.store, toc.src, opf.lang, 
-				this.clientLayout, this.fontMapper, this.pref, this, opf.fallbackMap, opf.documentURLTransformer);
+				this.clientLayout, this.fontMapper, this.pref, this, opf.fallbackMap, opf.documentURLTransformer,
+				this.counterStore);
 	}
 	var viewport = this.viewport;
 	var tocWidth = Math.min(350, Math.round(0.67 * viewport.width) - 16);

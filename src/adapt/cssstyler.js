@@ -423,11 +423,13 @@ adapt.cssstyler.BoxStack.prototype.nearestBlockStartOffset = function(box) {
  * @param {adapt.expr.Context} context
  * @param {Object.<string,boolean>} primaryFlows
  * @param {adapt.cssvalid.ValidatorSet} validatorSet
- * @param {adapt.csscasc.PageCounterResolver} pageCounterResolver
+ * @param {!adapt.csscasc.CounterListener} counterListener
+ * @param {!adapt.csscasc.CounterResolver} counterResolver
+ * @param {!adapt.csscasc.PageCounterResolver} pageCounterResolver
  * @constructor
  * @implements {adapt.cssstyler.AbstractStyler}
  */
-adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows, validatorSet, pageCounterResolver) {
+adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows, validatorSet, counterListener, counterResolver, pageCounterResolver) {
 	/** @const */ this.xmldoc = xmldoc;
 	/** @const */ this.root = xmldoc.root;
 	/** @const */ this.cascadeHolder = cascade;
@@ -441,7 +443,8 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
     /** @const */ this.flowChunks = /** @type {Array.<adapt.vtree.FlowChunk>} */ ([]);
     /** @type {adapt.cssstyler.FlowListener} */ this.flowListener = null;
     /** @type {?string} */ this.flowToReach = null;
-    /** @const */ this.cascade = cascade.createInstance(context, pageCounterResolver, xmldoc.lang);
+    /** @type {?string} */ this.idToReach = null;
+    /** @const */ this.cascade = cascade.createInstance(context, counterListener, counterResolver, pageCounterResolver, xmldoc.lang);
     /** @const */ this.offsetMap = new adapt.cssstyler.SlipMap();
     /** @type {boolean} */ this.primary = true;
     /** @const */ this.primaryStack = /** @type {Array.<boolean>} */ ([]);
@@ -696,6 +699,23 @@ adapt.cssstyler.Styler.prototype.styleUntilFlowIsReached = function(flowName) {
 };
 
 /**
+ * @param {string} id
+ */
+adapt.cssstyler.Styler.prototype.styleUntilIdIsReached = function(id) {
+    if (!id) return;
+    this.idToReach = id;
+    var offset = 0;
+    while (true) {
+        if (!this.idToReach)
+            break;
+        offset += 5000;
+        if (this.styleUntil(offset, 0) === Number.POSITIVE_INFINITY)
+            break;
+    }
+    this.idToReach = null;
+};
+
+/**
  * @private
  * @param {string} flowName
  * @param {adapt.csscasc.ElementStyle} style
@@ -829,6 +849,10 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
             var style = this.getAttrStyle(elem);
             this.primaryStack.push(this.primary);
             this.cascade.pushElement(elem, style);
+            var id = elem.getAttribute("id") || elem.getAttributeNS(adapt.base.NS.XML, "id");
+            if (id && id === this.idToReach) {
+                this.idToReach = null;
+            }
             if (!this.bodyReached && elem.localName == "body" && elem.parentNode == this.root) { 
             	this.postprocessTopStyle(style, true);
             	this.bodyReached = true;
