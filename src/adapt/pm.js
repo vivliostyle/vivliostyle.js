@@ -1198,28 +1198,6 @@ adapt.pm.delayedProperties = [
 ];
 
 /**
- * @private
- * @param {adapt.vtree.Container} container
- * @return {void}
- */
-adapt.pm.PageBoxInstance.prototype.setupContainerDimension = function(container, clientLayout) {
-    var containerBBox = clientLayout.getElementClientRect(container.element);
-    container.top = containerBBox.top - container.marginTop;
-    container.left = containerBBox.left - container.marginLeft;
-    var probe = container.element.ownerDocument.createElement("div");
-    probe.style.position = "absolute";
-    probe.style.top = container.paddingTop + "px";
-    probe.style.bottom = container.paddingBottom + "px";
-    probe.style.left = container.paddingLeft + "px";
-    probe.style.right = container.paddingRight + "px";
-    container.element.appendChild(probe);
-    var contentArea = clientLayout.getElementClientRect(probe);
-    container.element.removeChild(probe);
-    container.width = contentArea.width;
-    container.height = contentArea.height;
-};
-
-/**
  * @param {adapt.expr.Context} context
  * @param {adapt.vtree.Container} container
  * @param {adapt.vtree.Page} page
@@ -1251,7 +1229,6 @@ adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, containe
     for (var i = 0; i < adapt.pm.passPreProperties.length; i++) {
         this.propagateProperty(context, container, adapt.pm.passPreProperties[i], docFaces);
     }
-    this.setupContainerDimension(container, clientLayout);
 };
 
 /**
@@ -1348,7 +1325,6 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
     for (var i = 0; i < adapt.pm.delayedProperties.length; i++) {
         this.propagateDelayedProperty(context, container, adapt.pm.delayedProperties[i], page.delayedItems);    	
     }    
-    this.setupContainerDimension(container, clientLayout);
 };
 
 adapt.pm.userAgentPageMasterPseudo = "background-host";
