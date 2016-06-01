@@ -1025,6 +1025,40 @@ adapt.epub.OPFView.prototype.finishPageContainer = function(viewItem, page, page
 };
 
 /**
+ * @private
+ * @typedef {{
+ *      page: !adapt.vtree.Page,
+ *      position: adapt.vtree.LayoutPosition,
+ *      pageIndex: number
+ * }}
+ */
+adapt.epub.OPFView.RenderSinglePageResult;
+
+/**
+ * Render a single page.
+ * @private
+ * @param {!adapt.epub.OPFViewItem} viewItem
+ * @param {adapt.vtree.LayoutPosition} pos
+ * @returns {!adapt.task.Result<adapt.epub.OPFView.RenderSinglePageResult>}
+ */
+adapt.epub.OPFView.prototype.renderSinglePage = function(viewItem, pos) {
+	var frame = adapt.task.newFrame("renderSinglePage");
+	var page = this.makePage(viewItem, pos);
+	var self = this;
+	viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
+		pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
+		var pageIndex = pos ? pos.page - 1 : viewItem.layoutPositions.length - 1;
+		self.finishPageContainer(viewItem, page, pageIndex);
+		frame.finish({
+			page: page,
+			position: pos,
+			pageIndex: pageIndex
+		});
+	});
+	return frame.result();
+};
+
+/**
  * Renders the current page and normalizes current page position.
  * @return {!adapt.task.Result.<adapt.vtree.Page>}
  */
@@ -1071,35 +1105,34 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 				return;
 			}
 			var pos = viewItem.layoutPositions[viewItem.layoutPositions.length - 1];
-			var page = self.makePage(viewItem, pos);
-		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
-				pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
-				var pageIndex = pos ? pos.page - 1 : viewItem.layoutPositions.length - 1;
-				self.finishPageContainer(viewItem, page, pageIndex);
-			    if (pos) {
-			    	viewItem.layoutPositions.push(pos);
-			    	if (seekOffset >= 0) {
-			    		// Searching for offset, don't know the page number.
-			    		var offset = viewItem.instance.getPosition(pos);
-			    		if (offset > seekOffset) {
-					    	resultPage = page;
-					    	self.pageIndex = viewItem.layoutPositions.length - 2;
+			self.renderSinglePage(viewItem, pos).then(function(result) {
+				var page = result.page;
+				pos = result.position;
+				var pageIndex = result.pageIndex;
+				if (pos) {
+					viewItem.layoutPositions.push(pos);
+					if (seekOffset >= 0) {
+						// Searching for offset, don't know the page number.
+						var offset = viewItem.instance.getPosition(pos);
+						if (offset > seekOffset) {
+							resultPage = page;
+							self.pageIndex = viewItem.layoutPositions.length - 2;
 							loopFrame.breakLoop();
-			    			return;
-			    		}
-			    	}
-			    	loopFrame.continueLoop();
-			    } else {
-			    	resultPage = page;
-			    	self.pageIndex = pageIndex;
-			    	if (seekOffset < 0) {
-			    		self.offsetInItem = page.offset;
-			    	}
-			    	viewItem.complete = true;
+							return;
+						}
+					}
+					loopFrame.continueLoop();
+				} else {
+					resultPage = page;
+					self.pageIndex = pageIndex;
+					if (seekOffset < 0) {
+						self.offsetInItem = page.offset;
+					}
+					viewItem.complete = true;
 					page.isLastPage = viewItem.item.spineIndex == self.opf.spine.length - 1;
 					loopFrame.breakLoop();
-			    }
-		    });
+				}
+			});
 		}).then(function() {
 			resultPage = resultPage || viewItem.pages[self.pageIndex];
 			var pos = viewItem.layoutPositions[self.pageIndex];
@@ -1110,20 +1143,18 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 				frame.finish(resultPage);
 				return;
 			}
-			var page = self.makePage(viewItem, pos);
-		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
-				pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
-				var pageIndex = pos ? pos.page - 1 : viewItem.layoutPositions.length - 1;
-				self.finishPageContainer(viewItem, page, pageIndex);
-			    if (pos) {
-			    	viewItem.layoutPositions[self.pageIndex + 1] = pos;
-			    } else {
-			    	viewItem.complete = true;
-			    	page.isLastPage = viewItem.item.spineIndex == self.opf.spine.length - 1;
-			    }
-			    frame.finish(page);
-		    });
-		});		    
+			self.renderSinglePage(viewItem, pos).then(function(result) {
+				var page = result.page;
+				pos = result.position;
+				if (pos) {
+					viewItem.layoutPositions[self.pageIndex + 1] = pos;
+				} else {
+					viewItem.complete = true;
+					page.isLastPage = viewItem.item.spineIndex == self.opf.spine.length - 1;
+				}
+				frame.finish(page);
+			});
+		});
 	});
 	return frame.result();
 };
