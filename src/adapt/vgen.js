@@ -800,11 +800,13 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			            if (attributeName == "style")
 			                continue; // we do styling ourselves
 			            if (attributeName == "id" || attributeName == "name") {
-			            	// Propagate transformed ids and collect them on the page.
-							attributeValue = self.documentURLTransformer.transformFragment(attributeValue, self.xmldoc.url);
-							result.setAttribute(attributeName, attributeValue);
-			            	self.page.registerElementWithId(result, attributeValue);
-			            	continue;
+			            	// Propagate transformed ids and collect them on the page (only first time).
+							if (firstTime) {
+								attributeValue = self.documentURLTransformer.transformFragment(attributeValue, self.xmldoc.url);
+								result.setAttribute(attributeName, attributeValue);
+								self.page.registerElementWithId(result, attributeValue);
+								continue;
+							}
 			            }
 			            // TODO: understand the element we are working with.
 			            if (attributeName == "src" || attributeName == "href" || attributeName == "poster") {

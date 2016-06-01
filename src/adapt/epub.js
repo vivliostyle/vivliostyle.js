@@ -1018,7 +1018,12 @@ adapt.epub.OPFView.prototype.finishPageContainer = function(viewItem, page, page
 	page.container.style.top = "";
 	page.container.style.left = "";
 	page.container.setAttribute("data-vivliostyle-page-side", /** @type {string} */ (page.side));
-	viewItem.instance.viewport.contentContainer.appendChild(page.container);
+	var oldPage = viewItem.pages[pageIndex];
+	if (oldPage) {
+		viewItem.instance.viewport.contentContainer.replaceChild(page.container, oldPage.container);
+	} else {
+		viewItem.instance.viewport.contentContainer.appendChild(page.container);
+	}
 	this.pageSheetSizeReporter(viewItem.instance.pageSheetSize, viewItem.item.spineIndex, pageIndex);
 	page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
 	viewItem.pages[pageIndex] = page;
@@ -1035,25 +1040,72 @@ adapt.epub.OPFView.prototype.finishPageContainer = function(viewItem, page, page
 adapt.epub.OPFView.RenderSinglePageResult;
 
 /**
- * Render a single page.
+ * Render a single page. If the new page contains elements with ids that are referenced from other pages by 'target-counter()', those pages are rendered too (calling `renderSinglePage` recursively).
  * @private
  * @param {!adapt.epub.OPFViewItem} viewItem
  * @param {adapt.vtree.LayoutPosition} pos
- * @returns {!adapt.task.Result<adapt.epub.OPFView.RenderSinglePageResult>}
+ * @returns {!adapt.task.Result<!adapt.epub.OPFView.RenderSinglePageResult>}
  */
 adapt.epub.OPFView.prototype.renderSinglePage = function(viewItem, pos) {
-	var frame = adapt.task.newFrame("renderSinglePage");
+	/** @type {!adapt.task.Frame<!adapt.epub.OPFView.RenderSinglePageResult>} */ var frame
+		= adapt.task.newFrame("renderSinglePage");
 	var page = this.makePage(viewItem, pos);
 	var self = this;
 	viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
 		pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 		var pageIndex = pos ? pos.page - 1 : viewItem.layoutPositions.length - 1;
 		self.finishPageContainer(viewItem, page, pageIndex);
-		frame.finish({
-			page: page,
-			position: pos,
-			pageIndex: pageIndex
+
+		self.counterStore.finishPage(self.spineIndex, pageIndex);
+		var unresolvedRefs = self.counterStore.getUnresolvedRefsToPage(page);
+
+		// backup original values
+		var origSpineIndex = self.spineIndex;
+		var origPageIndex = self.pageIndex;
+		var origOffsetInItem = self.offsetInItem;
+
+		var index = 0;
+		frame.loopWithFrame(function(loopFrame) {
+			index++;
+			if (index > unresolvedRefs.length) {
+				loopFrame.breakLoop();
+				return;
+			}
+			var refs = unresolvedRefs[index - 1];
+			refs.refs = refs.refs.filter(function(ref) { return !ref.isResolved(); });
+			if (refs.refs.length === 0) {
+				loopFrame.continueLoop();
+				return;
+			}
+
+			self.spineIndex = refs.spineIndex;
+			self.pageIndex = refs.pageIndex;
+			self.getPageViewItem().then(function(viewItem) {
+				if (!viewItem) {
+					loopFrame.continueLoop();
+					return;
+				}
+				self.counterStore.pushPageCounters(refs.pageCounters);
+				self.counterStore.pushReferencesToSolve(refs.refs);
+				var pos = viewItem.layoutPositions[self.pageIndex];
+				self.renderSinglePage(viewItem, pos).then(function() {
+					self.counterStore.popPageCounters();
+					self.counterStore.popReferencesToSolve();
+					loopFrame.continueLoop();
+				});
+			});
+		}).then(function() {
+			// restore original values
+			self.spineIndex = origSpineIndex;
+			self.pageIndex = origPageIndex;
+			self.offsetInItem = origOffsetInItem;
+			frame.finish({
+				page: page,
+				position: pos,
+				pageIndex: pageIndex
+			});
 		});
+
 	});
 	return frame.result();
 };

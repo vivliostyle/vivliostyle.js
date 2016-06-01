@@ -1733,13 +1733,20 @@ adapt.csscasc.QuotesScopeItem.prototype.pop = function(cascade, depth) {
 };
 
 /**
+ * Represent a container for values of counters.
+ * Key=name of a counter, Value=values of a corresponding counter ordered from outermost to innermost
+ * @typedef {Object<string, !Array<number>>}
+ */
+adapt.csscasc.CounterValues;
+
+/**
  * @interface
  */
 adapt.csscasc.CounterListener = function() {};
 
 /**
  * @param {string} id
- * @param {!Object<string, !Array<number>>} counters
+ * @param {!adapt.csscasc.CounterValues} counters
  */
 adapt.csscasc.CounterListener.prototype.countersOfId = function(id, counters) {};
 

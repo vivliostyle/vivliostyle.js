@@ -5,7 +5,7 @@
     <title>target-counter</title>
     <style>
         @page {
-            counter-increment: foo;
+            counter-increment: foo bar;
             @top-center {
                 content: "Page " counter(page);
             }
@@ -76,6 +76,12 @@
         [data-ref-barbar]::after {
             content: target-counters(attr(data-ref-barbar), bar, "-", lower-roman);
         }
+        [data-ref-bar-page]::before {
+            content: target-counter(attr(data-ref-bar-page url), page);
+        }
+        [data-ref-bar-page]::after {
+            content: target-counter(attr(data-ref-bar-page), page, lower-roman);
+        }
     </style>
 </head>
 <body>
@@ -90,10 +96,11 @@
 <p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
 <p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
 <p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
+<p>#bar-target is on page <span data-ref-bar-page="#bar-target"> = </span></p>
 
 <p class="page-break-before">'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
 <p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"> = </span></p>
-<p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
+<p>#bar-target is on page <span data-ref-bar-page="#bar-target"> = </span></p>
 <p class="bar">bar=</p>
 <p class="bar">bar=</p>
 <p class="bar" id="bar-target">(#bar-target) bar=</p>
@@ -102,5 +109,6 @@
 <p>'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
 <p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"> = </span></p>
 <p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
+<p>#bar-target is on page <span data-ref-bar-page="#bar-target"> = </span></p>
 </body>
 </html>
