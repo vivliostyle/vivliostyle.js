@@ -1011,6 +1011,19 @@ adapt.epub.OPFView.prototype.getCurrentPageProgression = function() {
 	}
 };
 
+adapt.epub.OPFView.prototype.finishPageContainer = function(viewItem, page, pageIndex) {
+	page.container.style.display = "none";
+	page.container.style.visibility = "visible";
+	page.container.style.position = "";
+	page.container.style.top = "";
+	page.container.style.left = "";
+	page.container.setAttribute("data-vivliostyle-page-side", /** @type {string} */ (page.side));
+	viewItem.instance.viewport.contentContainer.appendChild(page.container);
+	this.pageSheetSizeReporter(viewItem.instance.pageSheetSize, viewItem.item.spineIndex, pageIndex);
+	page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
+	viewItem.pages[pageIndex] = page;
+};
+
 /**
  * Renders the current page and normalizes current page position.
  * @return {!adapt.task.Result.<adapt.vtree.Page>}
@@ -1060,18 +1073,10 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 			var pos = viewItem.layoutPositions[viewItem.layoutPositions.length - 1];
 			var page = self.makePage(viewItem, pos);
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
-                page.container.style.display = "none";
-                page.container.style.visibility = "visible";
-				page.container.style.position = "";
-				page.container.style.top = "";
-				page.container.style.left = "";
-                page.container.setAttribute("data-vivliostyle-page-side", /** @type {string} */ (page.side));
-				viewItem.instance.viewport.contentContainer.appendChild(page.container);
-		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
+				pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 				var pageIndex = pos ? pos.page - 1 : viewItem.layoutPositions.length - 1;
-				self.pageSheetSizeReporter(viewItem.instance.pageSheetSize, viewItem.item.spineIndex, pageIndex);
+				self.finishPageContainer(viewItem, page, pageIndex);
 			    if (pos) {
-                    viewItem.pages[pageIndex] = page;
 			    	viewItem.layoutPositions.push(pos);
 			    	if (seekOffset >= 0) {
 			    		// Searching for offset, don't know the page number.
@@ -1083,17 +1088,14 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 			    			return;
 			    		}
 			    	}
-                    page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
 			    	loopFrame.continueLoop();
 			    } else {
-                    viewItem.pages.push(page);
 			    	resultPage = page;
 			    	self.pageIndex = pageIndex;
 			    	if (seekOffset < 0) {
 			    		self.offsetInItem = page.offset;
 			    	}
 			    	viewItem.complete = true;
-					page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
 					page.isLastPage = viewItem.item.spineIndex == self.opf.spine.length - 1;
 					loopFrame.breakLoop();
 			    }
@@ -1110,25 +1112,15 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 			}
 			var page = self.makePage(viewItem, pos);
 		    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
-                page.container.style.display = "none";
-                page.container.style.visibility = "visible";
-				page.container.style.position = "";
-				page.container.style.top = "";
-				page.container.style.left = "";
-                page.container.setAttribute("data-vivliostyle-page-side", /** @type {string} */ (page.side));
-				viewItem.instance.viewport.contentContainer.appendChild(page.container);
-		    	pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
+				pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
 				var pageIndex = pos ? pos.page - 1 : viewItem.layoutPositions.length - 1;
-				self.pageSheetSizeReporter(viewItem.instance.pageSheetSize, viewItem.item.spineIndex, pageIndex);
+				self.finishPageContainer(viewItem, page, pageIndex);
 			    if (pos) {
-                    viewItem.pages[pageIndex] = page;
 			    	viewItem.layoutPositions[self.pageIndex + 1] = pos;
 			    } else {
-                    viewItem.pages.push(page);
 			    	viewItem.complete = true;
 			    	page.isLastPage = viewItem.item.spineIndex == self.opf.spine.length - 1;
 			    }
-				page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
 			    frame.finish(page);
 		    });
 		});		    
