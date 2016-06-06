@@ -1011,6 +1011,12 @@ adapt.epub.OPFView.prototype.getCurrentPageProgression = function() {
 	}
 };
 
+/**
+ * @private
+ * @param {adapt.epub.OPFViewItem} viewItem
+ * @param {adapt.vtree.Page} page
+ * @param {number} pageIndex
+ */
 adapt.epub.OPFView.prototype.finishPageContainer = function(viewItem, page, pageIndex) {
 	page.container.style.display = "none";
 	page.container.style.visibility = "visible";
@@ -1021,6 +1027,12 @@ adapt.epub.OPFView.prototype.finishPageContainer = function(viewItem, page, page
 	var oldPage = viewItem.pages[pageIndex];
 	if (oldPage) {
 		viewItem.instance.viewport.contentContainer.replaceChild(page.container, oldPage.container);
+		oldPage.dispatchEvent({
+			type: "replaced",
+			target: null,
+			currentTarget: null,
+			newPage: page
+		});
 	} else {
 		viewItem.instance.viewport.contentContainer.appendChild(page.container);
 	}
