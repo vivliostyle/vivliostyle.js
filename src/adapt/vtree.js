@@ -194,6 +194,22 @@ adapt.vtree.Page.prototype.registerElementWithId = function(element, id) {
  * @return {void}
  */
 adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
+	// Remove ID of elements which eventually did not fit in the page
+	// (Some nodes may have been removed after registration if they did not fit in the page)
+	Object.keys(this.elementsById).forEach(function(id) {
+		var elems = this.elementsById[id];
+		for (var i = 0; i < elems.length;) {
+			if (this.container.contains(elems[i])) {
+				i++;
+			} else {
+				elems.splice(i, 1);
+			}
+		}
+		if (elems.length === 0) {
+			delete this.elementsById[id];
+		}
+	}, this);
+
 	// use size of the container of the PageMasterInstance
 	var rect = clientLayout.getElementClientRect(this.container);
 	this.dimensions.width = rect.width;
