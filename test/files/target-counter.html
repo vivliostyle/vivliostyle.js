@@ -5,13 +5,31 @@
     <title>target-counter</title>
     <style>
         @page {
-            counter-increment: foo bar;
+            size: 460px;
+            margin: 50px;
+            counter-increment: foo bar baz;
             @top-center {
                 content: "Page " counter(page);
             }
+            @bottom-center {
+                content: "baz " counter(baz, upper-roman);
+            }
+        }
+        @page:first {
+            counter-reset: baz 995;
         }
 
-        .page-break-before {
+        * {
+            margin: 0;
+        }
+        html {
+            font-size: 16px;
+            line-height: 24px;
+            font-family: "Times New Roman", serif;
+            widows: 1;
+            orphans: 1;
+        }
+        section {
             page-break-before: always;
         }
 
@@ -82,37 +100,56 @@
         [data-ref-bar-page]::after {
             content: target-counter(attr(data-ref-bar-page), page, lower-roman);
         }
+
+        .baz1 {
+            margin-top: 330px;
+            text-indent: 60px;
+        }
+        .ref-baz1::before {
+            content: target-counter("#baz1-target", baz, upper-roman);
+        }
+        #baz1-target {
+            border-left: 1px solid blue;
+        }
     </style>
 </head>
 <body>
-<p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
-<p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
-<p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
-<p class="foo">foo=</p>
-<p class="foo">foo=</p>
-<p class="foo" id="foo-target">(#foo-target) foo=</p>
-<p class="foo"><span class="foofoo">foos=</span>, <span class="foofoo" id="foofoo-target">(#foofoo-target) foos=</span>, foo=</p>
-<p class="foo">foo=</p>
-<p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
-<p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
-<p>'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
-<p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"> = </span></p>
-<p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
-<p>#bar-target is on page <span data-ref-bar-page="#bar-target"> = </span></p>
+<section>
+    <p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
+    <p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
+    <p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
+    <p class="foo">foo=</p>
+    <p class="foo">foo=</p>
+    <p class="foo" id="foo-target">(#foo-target) foo=</p>
+    <p class="foo"><span class="foofoo">foos=</span>, <span class="foofoo" id="foofoo-target">(#foofoo-target) foos=</span>, foo=</p>
+    <p class="foo">foo=</p>
+    <p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
+    <p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
+    <p>'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
+    <p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"> = </span></p>
+    <p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
+    <p>#bar-target is on page <span data-ref-bar-page="#bar-target"> = </span></p>
+</section>
 
-<p class="page-break-before">'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
-<p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"> = </span></p>
-<p>#bar-target is on page <span data-ref-bar-page="#bar-target"> = </span></p>
-<p class="bar">bar=</p>
-<p class="bar">bar=</p>
-<p class="bar" id="bar-target">(#bar-target) bar=</p>
-<p class="bar"><span class="barbar">bars=</span>, <span class="barbar" id="barbar-target">(#barbar-target) bars=</span>, bar=</p>
-<p class="bar">bar=</p>
-<p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
-<p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
-<p>'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
-<p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"> = </span></p>
-<p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
-<p>#bar-target is on page <span data-ref-bar-page="#bar-target"> = </span></p>
+<section>
+    <p>'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
+    <p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"> = </span></p>
+    <p>#bar-target is on page <span data-ref-bar-page="#bar-target"> = </span></p>
+    <p class="bar">bar=</p>
+    <p class="bar">bar=</p>
+    <p class="bar" id="bar-target">(#bar-target) bar=</p>
+    <p class="bar"><span class="barbar">bars=</span>, <span class="barbar" id="barbar-target">(#barbar-target) bars=</span>, bar=</p>
+    <p class="bar">bar=</p>
+    <p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
+    <p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
+    <p>'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
+    <p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"> = </span></p>
+    <p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
+    <p>#bar-target is on page <span data-ref-bar-page="#bar-target"> = </span></p>
+</section>
+
+<section>
+    <p class="baz1">#baz1-target is on baz <span class="ref-baz1"></span> This sentence contains #baz1-target → <span id="baz1-target"></span> inside it. The previous sentence should be "This sentence contains #baz1-target → inside it." </p>
+</section>
 </body>
 </html>

@@ -1069,52 +1069,69 @@ adapt.epub.OPFView.prototype.renderSinglePage = function(viewItem, pos) {
 		self.finishPageContainer(viewItem, page, pageIndex);
 
 		self.counterStore.finishPage(self.spineIndex, pageIndex);
-		var unresolvedRefs = self.counterStore.getUnresolvedRefsToPage(page);
 
 		// backup original values
 		var origSpineIndex = self.spineIndex;
 		var origPageIndex = self.pageIndex;
 		var origOffsetInItem = self.offsetInItem;
 
-		var index = 0;
-		frame.loopWithFrame(function(loopFrame) {
-			index++;
-			if (index > unresolvedRefs.length) {
-				loopFrame.breakLoop();
-				return;
+		// If the position of the page break change, we should re-layout the next page too.
+		var cont = null;
+		if (pos) {
+			var prevPos = viewItem.layoutPositions[pos.page];
+			if (prevPos) {
+				if (!pos.isSamePosition(prevPos)) {
+					self.pageIndex = pos.page;
+					cont = self.renderSinglePage(viewItem, pos);
+				}
 			}
-			var refs = unresolvedRefs[index - 1];
-			refs.refs = refs.refs.filter(function(ref) { return !ref.isResolved(); });
-			if (refs.refs.length === 0) {
-				loopFrame.continueLoop();
-				return;
-			}
+		}
+		if (!cont) {
+			cont = adapt.task.newResult(true);
+		}
 
-			self.spineIndex = refs.spineIndex;
-			self.pageIndex = refs.pageIndex;
-			self.getPageViewItem().then(function(viewItem) {
-				if (!viewItem) {
+		cont.then(function() {
+			var unresolvedRefs = self.counterStore.getUnresolvedRefsToPage(page);
+			var index = 0;
+			frame.loopWithFrame(function(loopFrame) {
+				index++;
+				if (index > unresolvedRefs.length) {
+					loopFrame.breakLoop();
+					return;
+				}
+				var refs = unresolvedRefs[index - 1];
+				refs.refs = refs.refs.filter(function(ref) { return !ref.isResolved(); });
+				if (refs.refs.length === 0) {
 					loopFrame.continueLoop();
 					return;
 				}
-				self.counterStore.pushPageCounters(refs.pageCounters);
-				self.counterStore.pushReferencesToSolve(refs.refs);
-				var pos = viewItem.layoutPositions[self.pageIndex];
-				self.renderSinglePage(viewItem, pos).then(function() {
-					self.counterStore.popPageCounters();
-					self.counterStore.popReferencesToSolve();
-					loopFrame.continueLoop();
+
+				self.spineIndex = refs.spineIndex;
+				self.pageIndex = refs.pageIndex;
+				self.getPageViewItem().then(function(viewItem) {
+					if (!viewItem) {
+						loopFrame.continueLoop();
+						return;
+					}
+					self.counterStore.pushPageCounters(refs.pageCounters);
+					self.counterStore.pushReferencesToSolve(refs.refs);
+					var pos = viewItem.layoutPositions[self.pageIndex];
+					self.renderSinglePage(viewItem, pos).then(function() {
+						self.counterStore.popPageCounters();
+						self.counterStore.popReferencesToSolve();
+						loopFrame.continueLoop();
+					});
 				});
-			});
-		}).then(function() {
-			// restore original values
-			self.spineIndex = origSpineIndex;
-			self.pageIndex = origPageIndex;
-			self.offsetInItem = origOffsetInItem;
-			frame.finish({
-				page: page,
-				position: pos,
-				pageIndex: pageIndex
+			}).then(function() {
+				// restore original values
+				self.spineIndex = origSpineIndex;
+				self.pageIndex = origPageIndex;
+				self.offsetInItem = origOffsetInItem;
+				frame.finish({
+					page: page,
+					position: pos,
+					pageIndex: pageIndex
+				});
 			});
 		});
 
