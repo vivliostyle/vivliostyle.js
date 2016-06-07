@@ -228,12 +228,19 @@ goog.scope(function() {
         var id = this.getFragment(url);
         var transformedId = this.getTransformedId(url);
         var self = this;
-        return new adapt.expr.Native(this.rootScope, function() {
+        return new adapt.expr.Native(this.pageScope, function() {
             var pageCounters = self.getTargetPageCounters(transformedId);
-            var pageCountersOfName = (pageCounters && pageCounters[name]) || [];
-            var elementCounters = self.getTargetCounters(id, transformedId);
-            var elementCountersOfName = (elementCounters && elementCounters[name]) || [];
-            return format(pageCountersOfName.concat(elementCountersOfName));
+            if (!pageCounters) {
+                // The target element has not been laid out yet.
+                self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
+                return "??"; // TODO more reasonable placeholder?
+            } else {
+                self.counterStore.resolveReference(transformedId);
+                var pageCountersOfName = pageCounters[name] || [];
+                var elementCounters = self.getTargetCounters(id, transformedId);
+                var elementCountersOfName = elementCounters[name] || [];
+                return format(pageCountersOfName.concat(elementCountersOfName));
+            }
         }, "target-counters-" + name + "-of-" + url);
     };
 
