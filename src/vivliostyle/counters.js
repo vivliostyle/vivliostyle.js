@@ -248,7 +248,7 @@ goog.scope(function() {
             } else {
                 self.counterStore.resolveReference(transformedId);
                 var pageCountersOfName = pageCounters[name] || [];
-                var elementCounters = self.getTargetCounters(id, transformedId);
+                var elementCounters = self.getTargetCounters(id, transformedId, true);
                 var elementCountersOfName = elementCounters[name] || [];
                 return format(pageCountersOfName.concat(elementCountersOfName));
             }
