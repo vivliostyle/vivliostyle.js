@@ -4,22 +4,22 @@ module.exports = function(config) {
         sl_chrome: {
             base: "SauceLabs",
             browserName: "chrome",
-            platform: "Windows 8.1"
+            platform: "Windows 10"
         },
-        //sl_firefox: {
-        //    base: "SauceLabs",
-        //    browserName: "firefox",
-        //    platform: "Windows 8.1"
-        //},
+        sl_firefox: {
+           base: "SauceLabs",
+           browserName: "firefox",
+           platform: "Windows 10"
+        },
         sl_safari: {
             base: "SauceLabs",
             browserName: "safari",
-            platform: "OS X 10.10"
+            platform: "OS X 10.11"
         },
         sl_ie_11: {
             base: "SauceLabs",
             browserName: "internet explorer",
-            platform: "Windows 8.1"
+            platform: "Windows 10"
         }
     };
 
@@ -35,7 +35,8 @@ module.exports = function(config) {
         captureTimeout: 120000,
         customLaunchers: customLaunchers,
         browsers: Object.keys(customLaunchers),
-        singleRun: true
+        singleRun: true,
+        concurrency: 4
     };
     for (var key in commonConfig) {
         if (commonConfig.hasOwnProperty(key)) {
