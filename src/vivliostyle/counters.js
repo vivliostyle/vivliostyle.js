@@ -113,7 +113,8 @@ goog.scope(function() {
      * @returns {string}
      */
     CounterResolver.prototype.getTransformedId = function(url) {
-        var transformedId = this.counterStore.documentURLTransformer.transformURL(url, this.baseURL);
+        var transformedId = this.counterStore.documentURLTransformer.transformURL(
+            adapt.base.resolveURL(url, this.baseURL), this.baseURL);
         if (transformedId.charAt(0) === "#") {
             transformedId = transformedId.substring(1);
         }
@@ -211,8 +212,12 @@ goog.scope(function() {
                         return "??"; // TODO more reasonable placeholder?
                     }
                 }
+            } else {
+                // The style of target element has not been calculated yet.
+                // (The element is in another source document that is not parsed yet)
+                self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
+                return "??"; // TODO more reasonable placeholder?
             }
-            // TODO: handle the case where counters == null
         }, "target-counter-" + name + "-of-" + url);
     };
 
