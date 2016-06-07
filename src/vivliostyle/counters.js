@@ -154,11 +154,12 @@ goog.scope(function() {
      * @private
      * @param {?string} id Original ID value
      * @param {string} transformedId ID transformed by DocumentURLTransformer to handle a reference across multiple source documents
+     * @param {boolean} lookForElement If true, look ahead for an element with the ID in the current source document when such an element has not appeared yet. Do not set to true during Styler.styleUntil is being called, since in that case Styler.styleUntil can be called again and may lead to internal inconsistency.
      * @returns {?adapt.csscasc.CounterValues}
      */
-    CounterResolver.prototype.getTargetCounters = function(id, transformedId) {
+    CounterResolver.prototype.getTargetCounters = function(id, transformedId, lookForElement) {
         var targetCounters = this.counterStore.countersById[transformedId];
-        if (!targetCounters && id) {
+        if (!targetCounters && lookForElement && id) {
             this.styler.styleUntilIdIsReached(id);
             targetCounters = this.counterStore.countersById[transformedId];
         }
@@ -186,9 +187,19 @@ goog.scope(function() {
     CounterResolver.prototype.getTargetCounterVal = function(url, name, format) {
         var id = this.getFragment(url);
         var transformedId = this.getTransformedId(url);
+
+        // Since this method is executed during Styler.styleUntil is being called, set false to lookForElement argument.
+        var counters = this.getTargetCounters(id, transformedId, false);
+        if (counters && counters[name]) {
+            // Since an element-based counter is defined, any page-based counter is obscured even if it exists.
+            var countersOfName = counters[name];
+            return new adapt.expr.Const(this.rootScope, format(countersOfName[countersOfName.length - 1] || null));
+        }
+
         var self = this;
         return new adapt.expr.Native(this.pageScope, function() {
-            var counters = self.getTargetCounters(id, transformedId);
+            // Since This block is evaluated during layout, lookForElement argument can be set to true.
+            counters = self.getTargetCounters(id, transformedId, true);
             if (counters) {
                 if (counters[name]) {
                     // Since an element-based counter is defined, any page-based counter is obscured even if it exists.
