@@ -40,6 +40,23 @@ goog.scope(function() {
     };
 
     /**
+     * @param {vivliostyle.counters.TargetCounterReference} other
+     * @returns {boolean}
+     */
+    vivliostyle.counters.TargetCounterReference.prototype.equals = function(other) {
+        if (this === other) {
+            return true;
+        }
+        if (!other) {
+            return false;
+        }
+        return this.targetId === other.targetId &&
+                this.resolved === other.resolved &&
+                this.spineIndex === other.spineIndex &&
+                this.pageIndex === other.pageIndex;
+    };
+
+    /**
      * Returns if the reference is resolved or not.
      * @returns {boolean}
      */
@@ -438,7 +455,9 @@ goog.scope(function() {
                 if (!arr) {
                     arr = this.unresolvedReferences[ref.targetId] = [];
                 }
-                arr.push(ref);
+                if (arr.every(function(r) { return !ref.equals(r); })) {
+                    arr.push(ref);
+                }
             }
         }
 
