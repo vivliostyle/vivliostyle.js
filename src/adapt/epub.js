@@ -1079,6 +1079,7 @@ adapt.epub.OPFView.prototype.renderSinglePage = function(viewItem, pos) {
 		var cont = null;
 		if (pos) {
 			var prevPos = viewItem.layoutPositions[pos.page];
+			viewItem.layoutPositions[pos.page] = pos;
 			if (prevPos) {
 				if (!pos.isSamePosition(prevPos)) {
 					self.pageIndex = pos.page;
@@ -1191,7 +1192,6 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 				pos = result.position;
 				var pageIndex = result.pageIndex;
 				if (pos) {
-					viewItem.layoutPositions.push(pos);
 					if (seekOffset >= 0) {
 						// Searching for offset, don't know the page number.
 						var offset = viewItem.instance.getPosition(pos);
@@ -1227,9 +1227,7 @@ adapt.epub.OPFView.prototype.renderPage = function() {
 			self.renderSinglePage(viewItem, pos).then(function(result) {
 				var page = result.page;
 				pos = result.position;
-				if (pos) {
-					viewItem.layoutPositions[self.pageIndex + 1] = pos;
-				} else {
+				if (!pos) {
 					viewItem.complete = true;
 					page.isLastPage = viewItem.item.spineIndex == self.opf.spine.length - 1;
 				}
