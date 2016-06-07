@@ -568,8 +568,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     	frame.finish(false);
     	return frame.result();
     }
+	var isRoot = self.nodeContext.parent == null;
 	self.nodeContext.flexContainer = (display === adapt.css.ident.flex);
-    self.createShadows(element, self.nodeContext.parent == null, elementStyle, computedStyle, styler,
+    self.createShadows(element, isRoot, elementStyle, computedStyle, styler,
     		self.context, self.nodeContext.shadowContext).then(function(shadowParam) {
     	self.nodeContext.nodeShadow = shadowParam;
 		var position = computedStyle["position"];
@@ -844,6 +845,11 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                         }
 			        }
 			    }
+				// necessary for target-counter resolution
+				if (isRoot && firstTime) {
+					var rootId = self.documentURLTransformer.transformFragment("", self.xmldoc.url);
+					self.page.registerElementWithId(result, rootId);
+				}
 			    if (delayedSrc) {
 		        	var imageFetcher = adapt.taskutil.loadElement(result, delayedSrc);
 					var w = computedStyle["width"];

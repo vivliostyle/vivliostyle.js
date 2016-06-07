@@ -2632,6 +2632,7 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
         		new adapt.csscasc.RestoreLangItem(this.lang));
     	this.lang = lang.toLowerCase();
     }
+	var isRoot = this.isRoot;
 
 	var siblingOrderStack = this.siblingOrderStack;
 	this.currentSiblingOrder = ++siblingOrderStack[siblingOrderStack.length - 1];
@@ -2677,8 +2678,8 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
     	}
     }
     this.pushCounters(this.currentStyle);
-	var id = this.currentId || this.currentXmlId;
-	if (id) {
+	var id = this.currentId || this.currentXmlId || "";
+	if (isRoot || id) {
 		/** @type {!Object<string, Array<number>>} */ var counters = {};
 		Object.keys(this.counters).forEach(function(name) {
 			counters[name] = Array.from(this.counters[name]);
