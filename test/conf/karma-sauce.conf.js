@@ -35,7 +35,8 @@ module.exports = function(config) {
         captureTimeout: 120000,
         customLaunchers: customLaunchers,
         browsers: Object.keys(customLaunchers),
-        singleRun: true
+        singleRun: true,
+        concurrency: 4
     };
     for (var key in commonConfig) {
         if (commonConfig.hasOwnProperty(key)) {
