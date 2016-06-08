@@ -1733,10 +1733,27 @@ adapt.csscasc.QuotesScopeItem.prototype.pop = function(cascade, depth) {
 };
 
 /**
- * Interface representing an object which can resolve a page-based counter by its name.
+ * Represent a container for values of counters.
+ * Key=name of a counter, Value=values of a corresponding counter ordered from outermost to innermost
+ * @typedef {Object<string, !Array<number>>}
+ */
+adapt.csscasc.CounterValues;
+
+/**
  * @interface
  */
-adapt.csscasc.PageCounterResolver = function() {};
+adapt.csscasc.CounterListener = function() {};
+
+/**
+ * @param {string} id
+ * @param {!adapt.csscasc.CounterValues} counters
+ */
+adapt.csscasc.CounterListener.prototype.countersOfId = function(id, counters) {};
+
+/**
+ * @interface
+ */
+adapt.csscasc.CounterResolver = function() {};
 
 /**
  * Returns an adapt.expr.Val, whose value is calculated at the layout time by retrieving the innermost page-based counter (null if it does not exist) by its name and formatting the value into a string.
@@ -1744,7 +1761,7 @@ adapt.csscasc.PageCounterResolver = function() {};
  * @param {function(?number):string} format A function that formats the counter value into a string
  * @returns {adapt.expr.Val}
  */
-adapt.csscasc.PageCounterResolver.prototype.getCounterVal = function(name, format) {};
+adapt.csscasc.CounterResolver.prototype.getPageCounterVal = function(name, format) {};
 
 /**
  * Returns an adapt.expr.Val, whose value is calculated at the layout time by retrieving the page-based counters by its name and formatting the values into a string.
@@ -1752,7 +1769,23 @@ adapt.csscasc.PageCounterResolver.prototype.getCounterVal = function(name, forma
  * @param {function(!Array.<number>):string} format A function that formats the counter values (passed as an array ordered by the nesting depth with the outermost counter first and the innermost last) into a string
  * @returns {adapt.expr.Val}
  */
-adapt.csscasc.PageCounterResolver.prototype.getCountersVal = function(name, format) {};
+adapt.csscasc.CounterResolver.prototype.getPageCountersVal = function(name, format) {};
+
+/**
+ * @param {string} url
+ * @param {string} name
+ * @param {function(?number):string} format
+ * @returns {!adapt.expr.Val}
+ */
+adapt.csscasc.CounterResolver.prototype.getTargetCounterVal = function(url, name, format) {};
+
+/**
+ * @param {string} url
+ * @param {string} name
+ * @param {function(!Array<number>):string} format
+ * @returns {!adapt.expr.Val}
+ */
+adapt.csscasc.CounterResolver.prototype.getTargetCountersVal = function(url, name, format) {};
 
 /**
  * @constructor
@@ -1819,12 +1852,14 @@ adapt.csscasc.AttrValueFilterVisitor.prototype.visitFunc = function(func) {
  * @constructor
  * @param {adapt.csscasc.CascadeInstance} cascade
  * @param {Element} element
+ * @param {!adapt.csscasc.CounterResolver} counterResolver
  * @extends {adapt.css.FilterVisitor}
  */
-adapt.csscasc.ContentPropVisitor = function(cascade, element) {
+adapt.csscasc.ContentPropVisitor = function(cascade, element, counterResolver) {
 	adapt.css.FilterVisitor.call(this);
 	this.cascade = cascade;
 	this.element = element;
+	/** @const */ this.counterResolver = counterResolver;
 };
 goog.inherits(adapt.csscasc.ContentPropVisitor, adapt.css.FilterVisitor);
 
@@ -2107,7 +2142,7 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounter = function(values) {
 		return new adapt.css.Str(this.format(numval, type));
 	} else {
 		var self = this;
-		var c = new adapt.css.Expr(this.cascade.pageCounterResolver.getCounterVal(counterName, function(numval) {
+		var c = new adapt.css.Expr(this.counterResolver.getPageCounterVal(counterName, function(numval) {
 			return self.format(numval || 0, type);
 		}));
 		return new adapt.css.SpaceList([c]);
@@ -2132,7 +2167,7 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounters = function(values) 
 	    }
 	}
 	var self = this;
-	var c = new adapt.css.Expr(this.cascade.pageCounterResolver.getCountersVal(counterName, function(numvals) {
+	var c = new adapt.css.Expr(this.counterResolver.getPageCountersVal(counterName, function(numvals) {
 		var parts = /** @type {Array.<string>} */ ([]);
 		if (numvals.length) {
 			for (var i = 0; i < numvals.length; i++) {
@@ -2143,6 +2178,58 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounters = function(values) 
 		if (elementCounters.length) {
 			parts.push(elementCounters);
 		}
+		if (parts.length) {
+			return parts.join(separator);
+		} else {
+			return self.format(0, type);
+		}
+	}));
+	return new adapt.css.SpaceList([c]);
+};
+
+/**
+ * @param {Array.<adapt.css.Val>} values
+ * @return {adapt.css.Val}
+ */
+adapt.csscasc.ContentPropVisitor.prototype.visitFuncTargetCounter = function(values) {
+	var targetUrl = values[0];
+	var targetUrlStr;
+	if (targetUrl instanceof adapt.css.URL) {
+		targetUrlStr = targetUrl.url;
+	} else {
+		targetUrlStr = targetUrl.stringValue();
+	}
+	var counterName = values[1].toString();
+	var type = values.length > 2 ? values[2].stringValue() : "decimal";
+
+	var self = this;
+	var c = new adapt.css.Expr(this.counterResolver.getTargetCounterVal(targetUrlStr, counterName, function(numval) {
+		return self.format(numval || 0, type);
+	}));
+	return new adapt.css.SpaceList([c]);
+};
+
+/**
+ * @param {Array<adapt.css.Val>} values
+ * @returns {adapt.css.Val}
+ */
+adapt.csscasc.ContentPropVisitor.prototype.visitFuncTargetCounters = function(values) {
+	var targetUrl = values[0];
+	var targetUrlStr;
+	if (targetUrl instanceof adapt.css.URL) {
+		targetUrlStr = targetUrl.url;
+	} else {
+		targetUrlStr = targetUrl.stringValue();
+	}
+	var counterName = values[1].toString();
+	var separator = values[2].stringValue();
+	var type = values.length > 3 ? values[3].stringValue() : "decimal";
+
+	var self = this;
+	var c = new adapt.css.Expr(this.counterResolver.getTargetCountersVal(targetUrlStr, counterName, function(numvals) {
+		var parts = numvals.map(function(numval) {
+			return self.format(numval, type);
+		});
 		if (parts.length) {
 			return parts.join(separator);
 		} else {
@@ -2167,6 +2254,16 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFunc = function(func) {
             	return this.visitFuncCounters(func.values);
             }
             break;
+		case "target-counter":
+			if (func.values.length <= 3) {
+				return this.visitFuncTargetCounter(func.values);
+			}
+			break;
+		case "target-counters":
+			if (func.values.length <= 4) {
+				return this.visitFuncTargetCounters(func.values);
+			}
+			break;
     }
 	vivliostyle.logging.logger.warn("E_CSS_CONTENT_PROP:", func.toString());
     return new adapt.css.Str("");
@@ -2245,11 +2342,12 @@ adapt.csscasc.Cascade.prototype.insertInTable = function(table, key, action) {
 
 /**
  * @param {adapt.expr.Context} context
- * @param {adapt.csscasc.PageCounterResolver} pageCounterResolver
+ * @param {!adapt.csscasc.CounterListener} counterListener
+ * @param {!adapt.csscasc.CounterResolver} counterResolver
  * @return {adapt.csscasc.CascadeInstance}
  */
-adapt.csscasc.Cascade.prototype.createInstance = function(context, pageCounterResolver, lang) {
-    return new adapt.csscasc.CascadeInstance(this, context, pageCounterResolver, lang);
+adapt.csscasc.Cascade.prototype.createInstance = function(context, counterListener, counterResolver, lang) {
+    return new adapt.csscasc.CascadeInstance(this, context, counterListener, counterResolver, lang);
 };
 
 /**
@@ -2263,14 +2361,16 @@ adapt.csscasc.Cascade.prototype.nextOrder = function() {
 /**
  * @param {adapt.csscasc.Cascade} cascade
  * @param {adapt.expr.Context} context
- * @param {adapt.csscasc.PageCounterResolver} pageCounterResolver
+ * @param {!adapt.csscasc.CounterListener} counterListener
+ * @param {!adapt.csscasc.CounterResolver} counterResolver
  * @param {string} lang
  * @constructor
  */
-adapt.csscasc.CascadeInstance = function(cascade, context, pageCounterResolver, lang) {
+adapt.csscasc.CascadeInstance = function(cascade, context, counterListener, counterResolver, lang) {
 	/** @const */ this.code = cascade;
 	/** @const */ this.context = context;
-	/** @const */ this.pageCounterResolver = pageCounterResolver;
+	/** @const */ this.counterListener = counterListener;
+	/** @const */ this.counterResolver = counterResolver;
 	/** @const */ this.stack = /** @type {Array.<Array.<adapt.csscasc.ConditionItem>>} */ ([[],[]]);
 	/** @const */ this.conditions = /** @type {Object.<string,number>} */ ({});
 	/** @type {Element} */ this.currentElement = null;
@@ -2285,7 +2385,7 @@ adapt.csscasc.CascadeInstance = function(cascade, context, pageCounterResolver, 
     /** @type {?string} */ this.currentPageType = null;
     /** @type {boolean} */ this.isFirst = true;
     /** @type {boolean} */ this.isRoot = true;
-    /** @type {Object.<string,Array.<number>>} */ this.counters = {};
+    /** @type {!Object.<string,!Array.<number>>} */ this.counters = {};
     /** @type {Array.<Object.<string,boolean>>} */ this.counterScoping = [{}];
     /** @type {Array.<adapt.css.Str>} */ this.quotes =
     	[new adapt.css.Str("\u201C"), new adapt.css.Str("\u201D"),
@@ -2469,7 +2569,7 @@ adapt.csscasc.CascadeInstance.prototype.processPseudoelementProps = function(pse
     this.pushCounters(pseudoprops);
     if (pseudoprops["content"]) {
         pseudoprops["content"] = pseudoprops["content"].filterValue(
-        		new adapt.csscasc.ContentPropVisitor(this, element));
+        		new adapt.csscasc.ContentPropVisitor(this, element, this.counterResolver));
     }
     this.popCounters();
 };
@@ -2532,6 +2632,7 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
         		new adapt.csscasc.RestoreLangItem(this.lang));
     	this.lang = lang.toLowerCase();
     }
+	var isRoot = this.isRoot;
 
 	var siblingOrderStack = this.siblingOrderStack;
 	this.currentSiblingOrder = ++siblingOrderStack[siblingOrderStack.length - 1];
@@ -2577,6 +2678,14 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
     	}
     }
     this.pushCounters(this.currentStyle);
+	var id = this.currentId || this.currentXmlId || "";
+	if (isRoot || id) {
+		/** @type {!Object<string, Array<number>>} */ var counters = {};
+		Object.keys(this.counters).forEach(function(name) {
+			counters[name] = Array.from(this.counters[name]);
+		}, this);
+		this.counterListener.countersOfId(id, counters);
+	}
     var pseudos = adapt.csscasc.getStyleMap(this.currentStyle, "_pseudos");
     if (pseudos) {
     	var before = true;

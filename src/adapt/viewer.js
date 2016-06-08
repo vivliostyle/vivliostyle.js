@@ -56,6 +56,7 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
     	self.needResize = true;
     	self.kick();
     };
+    /** @const */ this.pageReplacedListener = this.pageReplacedListener.bind(this);
     /** @type {adapt.base.EventListener} */ this.hyperlinkListener = function(evt) {};
     /** @const */ this.pageRuleStyleElement = document.getElementById("vivliostyle-page-rules");
     /** @type {boolean} */ this.pageSheetSizeAlreadySet = false;
@@ -330,6 +331,18 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 };
 
 /**
+ * Refresh view when a currently displayed page is replaced (by re-layout caused by cross reference resolutions)
+ * @param {adapt.base.Event} evt
+ */
+adapt.viewer.Viewer.prototype.pageReplacedListener = function(evt) {
+    var currentPage = this.currentPage;
+    if (currentPage === evt.target) {
+        currentPage = evt.newPage;
+    }
+    this.showCurrent(currentPage);
+};
+
+/**
  * Hide current pages (this.currentPage, this.currentSpread)
  * @private
  */
@@ -348,6 +361,7 @@ adapt.viewer.Viewer.prototype.hidePages = function() {
         if (page) {
             adapt.base.setCSSProperty(page.container, "display", "none");
             page.removeEventListener("hyperlink", this.hyperlinkListener, false);
+            page.removeEventListener("replaced", this.pageReplacedListener, false);
         }
     }, this);
 };
@@ -358,6 +372,7 @@ adapt.viewer.Viewer.prototype.hidePages = function() {
  */
 adapt.viewer.Viewer.prototype.showSinglePage = function(page) {
     page.addEventListener("hyperlink", this.hyperlinkListener, false);
+    page.addEventListener("replaced", this.pageReplacedListener, false);
     adapt.base.setCSSProperty(page.container, "visibility", "visible");
     adapt.base.setCSSProperty(page.container, "display", "block");
 };

@@ -18,6 +18,7 @@ goog.require('adapt.cssvalid');
 goog.require('adapt.csscasc');
 goog.require('adapt.cssstyler');
 goog.require('adapt.pm');
+goog.require('vivliostyle.counters');
 goog.require('adapt.vtree');
 goog.require('vivliostyle.pagefloat');
 goog.require('adapt.layout');
@@ -149,6 +150,7 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @param {Object.<string,string>} fallbackMap
  * @param {number} pageNumberOffset
  * @param {!adapt.base.DocumentURLTransformer} documentURLTransformer
+ * @param {!vivliostyle.counters.CounterStore} counterStore
  * @constructor
  * @extends {adapt.expr.Context}
  * @implements {adapt.cssstyler.FlowListener}
@@ -156,7 +158,7 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @implements {adapt.vgen.StylerProducer}
  */
 adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientLayout, 
-		fontMapper, customRenderer, fallbackMap, pageNumberOffset, documentURLTransformer) {
+		fontMapper, customRenderer, fallbackMap, pageNumberOffset, documentURLTransformer, counterStore) {
 	adapt.expr.Context.call(this, style.rootScope, viewport.width, viewport.height, viewport.fontSize);
 	/** @const */ this.style = style;
 	/** @const */ this.xmldoc = xmldoc;
@@ -174,7 +176,7 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @const */ this.faces = new adapt.font.DocumentFaces(this.style.fontDeobfuscator);
     /** @type {Object.<string,adapt.pm.PageBoxInstance>} */ this.pageBoxInstances = {};
     /** @type {vivliostyle.page.PageManager} */ this.pageManager = null;
-	/** @const @type {!vivliostyle.page.PageCounterStore} */ this.pageCounterStore = new vivliostyle.page.PageCounterStore(style.pageScope);
+	/** @const */ this.counterStore = counterStore;
     /** @type {boolean} */ this.regionBreak = false;
     /** @type {!Object.<string,boolean>} */ this.pageBreaks = {};
     /** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = null;
@@ -206,8 +208,11 @@ adapt.ops.StyleInstance.prototype.init = function() {
     var self = this;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame
     	= adapt.task.newFrame("StyleInstance.init");
-    self.styler = new adapt.cssstyler.Styler(self.xmldoc, self.style.cascade, 
-    		self.style.rootScope, self, this.primaryFlows, self.style.validatorSet, this.pageCounterStore);
+	var counterListener = self.counterStore.createCounterListener(self.xmldoc.url);
+	var counterResolver = self.counterStore.createCounterResolver(self.xmldoc.url, self.style.rootScope, self.style.pageScope);
+    self.styler = new adapt.cssstyler.Styler(self.xmldoc, self.style.cascade,
+    		self.style.rootScope, self, this.primaryFlows, self.style.validatorSet, counterListener, counterResolver);
+	counterResolver.setStyler(self.styler);
     self.styler.resetFlowChunkStream(self);
     self.stylerMap = {};
     self.stylerMap[self.xmldoc.url] = self.styler;
@@ -215,7 +220,7 @@ adapt.ops.StyleInstance.prototype.init = function() {
     self.pageProgression = vivliostyle.page.resolvePageProgression(docElementStyle);
     var rootBox = this.style.rootBox;
     this.rootPageBoxInstance = new adapt.pm.RootPageBoxInstance(rootBox);
-    var cascadeInstance = this.style.cascade.createInstance(self, this.pageCounterStore, this.lang);
+    var cascadeInstance = this.style.cascade.createInstance(self, counterListener, counterResolver, this.lang);
     this.rootPageBoxInstance.applyCascadeAndInit(cascadeInstance, docElementStyle);
     this.rootPageBoxInstance.resolveAutoSizing(self);
     this.pageManager = new vivliostyle.page.PageManager(cascadeInstance, this.style.pageScope, this.rootPageBoxInstance, self, docElementStyle);
@@ -253,8 +258,10 @@ adapt.ops.StyleInstance.prototype.getStylerForDoc = function(xmldoc) {
 		var style = this.style.store.getStyleForDoc(xmldoc);
 		// We need a separate content, so that variables can get potentially different values.
 		var context = new adapt.expr.Context(style.rootScope, this.pageWidth(), this.pageHeight(), this.initialFontSize);
-		styler = new adapt.cssstyler.Styler(xmldoc, style.cascade, 
-        		style.rootScope, context, this.primaryFlows, style.validatorSet, this.pageCounterStore);
+		var counterListener = this.counterStore.createCounterListener(xmldoc.url);
+		var counterResolver = this.counterStore.createCounterResolver(xmldoc.url, style.rootScope, style.pageScope);
+		styler = new adapt.cssstyler.Styler(xmldoc, style.cascade,
+        		style.rootScope, context, this.primaryFlows, style.validatorSet, counterListener, counterResolver);
 		this.stylerMap[xmldoc.url] = styler;
 	}
 	return styler;
@@ -588,8 +595,13 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
     return frame.result();
 };
 
+adapt.ops.StyleInstance.prototype.createLayoutConstraint = function() {
+	var pageIndex = this.currentLayoutPosition.page - 1;
+	return this.counterStore.createLayoutConstraint(pageIndex);
+};
+
 /**
- * @param {adapt.vtree.Page} page
+ * @param {!adapt.vtree.Page} page
  * @param {adapt.pm.PageBoxInstance} boxInstance
  * @param {HTMLElement} parentContainer
  * @param {number} offsetX
@@ -660,6 +672,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
                 self.viewport, self.styler, regionIds, self.xmldoc, self.faces,
                 self.style.footnoteProps, self, page, self.customRenderer,
                 self.fallbackMap, pageFloatHolder, this.documentURLTransformer);
+		var layoutConstraint = this.createLayoutConstraint();
         var columnIndex = 0;
         var region = null;
         frame.loopWithFrame(function(loopFrame) {
@@ -669,7 +682,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	                var columnContainer = self.viewport.document.createElement("div");
 	                adapt.base.setCSSProperty(columnContainer, "position", "absolute");
 	                boxContainer.appendChild(columnContainer);
-	                region = new adapt.layout.Column(columnContainer, layoutContext, self.clientLayout);
+	                region = new adapt.layout.Column(columnContainer, layoutContext, self.clientLayout, layoutConstraint);
 	                region.vertical = layoutContainer.vertical;
 	                region.snapHeight = layoutContainer.snapHeight;
 	                region.snapWidth = layoutContainer.snapWidth;
@@ -689,7 +702,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	                region.originX = offsetX + layoutContainer.paddingLeft;
 	                region.originY = offsetY + layoutContainer.paddingTop;
 	            } else {
-	                region = new adapt.layout.Column(boxContainer, layoutContext, self.clientLayout);
+	                region = new adapt.layout.Column(boxContainer, layoutContext, self.clientLayout, layoutConstraint);
 	                region.copyFrom(layoutContainer);
 	                layoutContainer = region;
 	            }
@@ -865,7 +878,8 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     if (pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight) {
 		page.setAutoPageHeight(true);
     }
-	self.pageCounterStore.updatePageCounters(cascadedPageStyle, self);
+	self.counterStore.setCurrentPage(page);
+	self.counterStore.updatePageCounters(cascadedPageStyle, self);
 
 	// setup bleed area and crop marks
 	var evaluatedPageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(

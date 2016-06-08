@@ -12,6 +12,9 @@
 - Support `left`/`right`/`recto`/`verso` values for `(page-)break-before`/`(page-)break-after`
   - <https://github.com/vivliostyle/vivliostyle.js/issues/25>
   - Spec: [CSS Fragmentation - Page Break Values](http://dev.w3.org/csswg/css-break/#page-break-values)
+- Support cross references by `target-counter()`/`target-counters()`
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/248>
+  - Spec: [CSS Generated Content Module Level 3 - Cross references and the target-* functions](https://drafts.csswg.org/css-content/#cross-references)
 
 ### Fixed
 - Fix a bug that `clear` is ignored when `white-space` property is used before the element

@@ -45,6 +45,7 @@
         "adapt/vgen.js",
         "adapt/layout.js",
         "vivliostyle/page.js",
+        "vivliostyle/counters.js",
         "adapt/ops.js",
         "adapt/cfi.js",
         "adapt/toc.js",

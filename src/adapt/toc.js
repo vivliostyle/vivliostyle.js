@@ -9,6 +9,7 @@ goog.require('adapt.vgen');
 goog.require('adapt.ops');
 goog.require('adapt.font');
 goog.require('adapt.expr');
+goog.require('vivliostyle.counters');
 
 // closed: 25B8
 // open: 25BE
@@ -31,11 +32,12 @@ adapt.toc.bulletEmpty = "\u25B9";
  * @param {adapt.vgen.CustomRendererFactory} rendererFactory
  * @param {Object.<string,string>} fallbackMap
  * @param {!adapt.base.DocumentURLTransformer} documentURLTransformer
+ * @param {!vivliostyle.counters.CounterStore} counterStore
  * @constructor
  * @implements {adapt.vgen.CustomRendererFactory}
  */
 adapt.toc.TOCView = function(store, url, lang, clientLayout, fontMapper, pref,
-		rendererFactory, fallbackMap, documentURLTransformer) {
+		rendererFactory, fallbackMap, documentURLTransformer, counterStore) {
 	/** @const */ this.store = store;
 	/** @const */ this.url = url;
 	/** @const */ this.lang = lang;	
@@ -45,6 +47,7 @@ adapt.toc.TOCView = function(store, url, lang, clientLayout, fontMapper, pref,
 	/** @const */ this.rendererFactory = rendererFactory;
 	/** @const */ this.fallbackMap = fallbackMap;
 	/** @const */ this.documentURLTransformer = documentURLTransformer;
+	/** @const */ this.counterStore = counterStore;
 	/** @type {adapt.vtree.Page} */ this.page = null;
 	/** @type {adapt.ops.StyleInstance} */ this.instance = null;
 };
@@ -177,7 +180,7 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
     	var customRenderer = self.makeCustomRenderer(xmldoc);
         var instance = new adapt.ops.StyleInstance(style, xmldoc, self.lang,
         		viewport, self.clientLayout, self.fontMapper, customRenderer, self.fallbackMap, 0,
-        		self.documentURLTransformer);
+        		self.documentURLTransformer, self.counterStore);
         self.instance = instance;
         instance.pref = self.pref;
         instance.init().then(function() {

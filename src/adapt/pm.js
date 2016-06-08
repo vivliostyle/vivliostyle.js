@@ -1359,7 +1359,7 @@ adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit = function(cascade, docEl
 	cascade.pushRule(this.pageBox.classes, null, style);
     if (style["content"]) {
         style["content"] = style["content"].filterValue(
-            new adapt.csscasc.ContentPropVisitor(cascade, null));
+            new adapt.csscasc.ContentPropVisitor(cascade, null, cascade.counterResolver));
     }
 	this.init(cascade.context);
 	for (var i = 0; i < this.pageBox.children.length ; i++) {

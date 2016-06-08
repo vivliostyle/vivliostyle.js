@@ -116,7 +116,7 @@ adapt.vtree.Page = function(container, bleedBox) {
 			self.dispatchEvent(evt);
 		}
 	};
-	/** @type {Object.<string,Array.<Element>>} */ this.elementsById = {};
+	/** @const {!Object.<string,Array.<Element>>} */ this.elementsById = {};
 	/** @const @type {{width: number, height: number}} */ this.dimensions = {width: 0, height: 0};
 	/** @type {boolean} */ this.isFirstPage = false;
 	/** @type {boolean} */ this.isLastPage = false;
@@ -194,6 +194,22 @@ adapt.vtree.Page.prototype.registerElementWithId = function(element, id) {
  * @return {void}
  */
 adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
+	// Remove ID of elements which eventually did not fit in the page
+	// (Some nodes may have been removed after registration if they did not fit in the page)
+	Object.keys(this.elementsById).forEach(function(id) {
+		var elems = this.elementsById[id];
+		for (var i = 0; i < elems.length;) {
+			if (this.container.contains(elems[i])) {
+				i++;
+			} else {
+				elems.splice(i, 1);
+			}
+		}
+		if (elems.length === 0) {
+			delete this.elementsById[id];
+		}
+	}, this);
+
 	// use size of the container of the PageMasterInstance
 	var rect = clientLayout.getElementClientRect(this.container);
 	this.dimensions.width = rect.width;
@@ -495,6 +511,25 @@ adapt.vtree.LayoutContext.prototype.getPageFloatHolder = function() {};
 adapt.vtree.NodePositionStep;
 
 /**
+ * @param {adapt.vtree.NodePositionStep} nps1
+ * @param {adapt.vtree.NodePositionStep} nps2
+ * @returns {boolean}
+ */
+adapt.vtree.isSameNodePositionStep = function(nps1, nps2) {
+	if (nps1 === nps2) {
+		return true;
+	}
+	if (!nps1 || !nps2) {
+		return false;
+	}
+	return nps1.node === nps2.node &&
+			nps1.shadowType === nps2.shadowType &&
+			nps1.shadowContext === nps2.shadowContext &&
+			nps1.nodeShadow === nps2.nodeShadow &&
+			nps1.shadowSibling === nps2.shadowSibling;
+};
+
+/**
  * NodePosition represents a position in the document
  * @typedef {{
  * 		steps:Array.<adapt.vtree.NodePositionStep>,
@@ -503,6 +538,29 @@ adapt.vtree.NodePositionStep;
  * }}
  */
 adapt.vtree.NodePosition;
+
+/**
+ * @param {adapt.vtree.NodePosition} np1
+ * @param {adapt.vtree.NodePosition} np2
+ * @returns {boolean}
+ */
+adapt.vtree.isSameNodePosition = function(np1, np2) {
+	if (np1 === np2) {
+		return true;
+	}
+	if (!np1 || !np2) {
+		return false;
+	}
+	if (np1.offsetInNode !== np2.offsetInNode || np1.after !== np2.after || np1.steps.length !== np2.steps.length) {
+		return false;
+	}
+	for (var i = 0; i < np1.steps.length; i++) {
+		if (!adapt.vtree.isSameNodePositionStep(np1[i], np2[i])) {
+			return false;
+		}
+	}
+	return true;
+};
 
 /**
  * @param {Node} node
@@ -807,6 +865,47 @@ adapt.vtree.ChunkPosition.prototype.clone = function() {
 };
 
 /**
+ * @param {adapt.vtree.ChunkPosition} other
+ * @returns {boolean}
+ */
+adapt.vtree.ChunkPosition.prototype.isSamePosition = function(other) {
+	if (!other) {
+		return false;
+	}
+	if (this === other) {
+		return true;
+	}
+	if (!adapt.vtree.isSameNodePosition(this.primary, other.primary)) {
+		return false;
+	}
+	if (this.floats) {
+		if (!other.floats || this.floats.length !== other.floats.length) {
+			return false;
+		}
+		for (var i = 0; i < this.floats.length; i++) {
+			if (!adapt.vtree.isSameNodePosition(this.floats[i], other.floats[i])) {
+				return false;
+			}
+		}
+	} else if (other.floats) {
+		return false;
+	}
+	if (this.footnotes) {
+		if (!other.footnotes || this.footnotes.length !== other.footnotes.length) {
+			return false;
+		}
+		for (var i = 0; i < this.footnotes.length; i++) {
+			if (!adapt.vtree.isSameNodePosition(this.footnotes[i], other.footnotes[i])) {
+				return false;
+			}
+		}
+	} else if (other.footnotes) {
+		return false;
+	}
+	return true;
+};
+
+/**
  * @param {adapt.vtree.ChunkPosition} chunkPosition
  * @param {adapt.vtree.FlowChunk} flowChunk
  * @constructor
@@ -822,6 +921,14 @@ adapt.vtree.FlowChunkPosition = function(chunkPosition, flowChunk) {
 adapt.vtree.FlowChunkPosition.prototype.clone = function() {
     return new adapt.vtree.FlowChunkPosition(this.chunkPosition.clone(),
         this.flowChunk);
+};
+
+/**
+ * @param {adapt.vtree.FlowChunkPosition} other
+ * @returns {boolean}
+ */
+adapt.vtree.FlowChunkPosition.prototype.isSamePosition = function(other) {
+	return !!other && (this === other || this.chunkPosition.isSamePosition(other.chunkPosition));
 };
 
 /**
@@ -853,6 +960,25 @@ adapt.vtree.FlowPosition.prototype.clone = function() {
 };
 
 /**
+ * @param {adapt.vtree.FlowPosition} other
+ * @returns {boolean}
+ */
+adapt.vtree.FlowPosition.prototype.isSamePosition = function(other) {
+	if (this === other) {
+		return true;
+	}
+	if (!other || this.positions.length !== other.positions.length) {
+		return false;
+	}
+	for (var i = 0; i < this.positions.length; i++) {
+		if (!this.positions[i].isSamePosition(other.positions[i])) {
+			return false;
+		}
+	}
+	return true;
+};
+
+/**
  * @param {number} offset
  * @return {boolean}
  */
@@ -875,7 +1001,7 @@ adapt.vtree.LayoutPosition = function() {
      */
 	this.flows = {};
 	/**
-	 * @type {Object.<string,adapt.vtree.FlowPosition>}
+	 * @type {!Object.<string,adapt.vtree.FlowPosition>}
 	 */
     this.flowPositions = {};
     /**
@@ -899,6 +1025,31 @@ adapt.vtree.LayoutPosition.prototype.clone = function() {
         newcp.flowPositions[name] = this.flowPositions[name].clone();
     }
     return newcp;
+};
+
+/**
+ * @param {adapt.vtree.LayoutPosition} other
+ * @returns {boolean}
+ */
+adapt.vtree.LayoutPosition.prototype.isSamePosition = function(other) {
+	if (this === other) {
+		return true;
+	}
+	if (!other || this.page !== other.page || this.highestSeenOffset !== other.highestSeenOffset) {
+		return false;
+	}
+	var thisFlowNames = Object.keys(this.flowPositions);
+	var otherFlowNames = Object.keys(other.flowPositions);
+	if (thisFlowNames.length !== otherFlowNames.length) {
+		return false;
+	}
+	for (var i = 0; i < thisFlowNames.length; i++) {
+		var flowName = thisFlowNames[i];
+		if (!this.flowPositions[flowName].isSamePosition(other.flowPositions[flowName])) {
+			return false;
+		}
+	}
+	return true;
 };
 
 /**
