@@ -226,8 +226,8 @@ goog.scope(function() {
                     var pageCounters = self.getTargetPageCounters(transformedId);
                     if (pageCounters) {
                         // The target element has already been laid out.
+                        self.counterStore.resolveReference(transformedId);
                         if (pageCounters[name]) {
-                            self.counterStore.resolveReference(transformedId);
                             var pageCountersOfName = pageCounters[name];
                             return format(pageCountersOfName[pageCountersOfName.length - 1] || null)
                         } else {
