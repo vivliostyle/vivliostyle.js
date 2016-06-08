@@ -595,8 +595,13 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
     return frame.result();
 };
 
+adapt.ops.StyleInstance.prototype.createLayoutConstraint = function() {
+	var pageIndex = this.currentLayoutPosition.page - 1;
+	return this.counterStore.createLayoutConstraint(pageIndex);
+};
+
 /**
- * @param {adapt.vtree.Page} page
+ * @param {!adapt.vtree.Page} page
  * @param {adapt.pm.PageBoxInstance} boxInstance
  * @param {HTMLElement} parentContainer
  * @param {number} offsetX
@@ -667,6 +672,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
                 self.viewport, self.styler, regionIds, self.xmldoc, self.faces,
                 self.style.footnoteProps, self, page, self.customRenderer,
                 self.fallbackMap, pageFloatHolder, this.documentURLTransformer);
+		var layoutConstraint = this.createLayoutConstraint();
         var columnIndex = 0;
         var region = null;
         frame.loopWithFrame(function(loopFrame) {
@@ -676,7 +682,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	                var columnContainer = self.viewport.document.createElement("div");
 	                adapt.base.setCSSProperty(columnContainer, "position", "absolute");
 	                boxContainer.appendChild(columnContainer);
-	                region = new adapt.layout.Column(columnContainer, layoutContext, self.clientLayout);
+	                region = new adapt.layout.Column(columnContainer, layoutContext, self.clientLayout, layoutConstraint);
 	                region.vertical = layoutContainer.vertical;
 	                region.snapHeight = layoutContainer.snapHeight;
 	                region.snapWidth = layoutContainer.snapWidth;
@@ -696,7 +702,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	                region.originX = offsetX + layoutContainer.paddingLeft;
 	                region.originY = offsetY + layoutContainer.paddingTop;
 	            } else {
-	                region = new adapt.layout.Column(boxContainer, layoutContext, self.clientLayout);
+	                region = new adapt.layout.Column(boxContainer, layoutContext, self.clientLayout, layoutConstraint);
 	                region.copyFrom(layoutContainer);
 	                layoutContainer = region;
 	            }

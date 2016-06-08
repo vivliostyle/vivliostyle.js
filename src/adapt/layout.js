@@ -113,6 +113,19 @@ adapt.layout.calculateEdge = function(nodeContext, clientLayout,
 };
 
 /**
+ * Represents a constraint on layout
+ * @interface
+ */
+adapt.layout.LayoutConstraint = function() {};
+
+/**
+ * Returns if this constraint allows the node context to be laid out at the current position.
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @return {boolean}
+ */
+adapt.layout.LayoutConstraint.prototype.allowLayout = function(nodeContext) {};
+
+/**
  * Potential breaking position.
  * @interface
  */
@@ -240,14 +253,16 @@ adapt.layout.validateCheckPoints = function(checkPoints) {
  * @constructor
  * @param {Element} element
  * @param {adapt.vtree.LayoutContext} layoutContext
- * @param {adapt.vtree.ClientLayout} clientLayout 
+ * @param {adapt.vtree.ClientLayout} clientLayout
+ * @param {adapt.layout.LayoutConstraint} layoutConstraint
  * @extends {adapt.vtree.Container}
  */
-adapt.layout.Column = function(element, layoutContext, clientLayout) {
+adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConstraint) {
 	adapt.vtree.Container.call(this, element);
 	/** @type {Node} */ this.last = element.lastChild;
 	/** @type {adapt.vtree.LayoutContext} */ this.layoutContext = layoutContext;
 	/** @type {adapt.vtree.ClientLayout} */ this.clientLayout = clientLayout;
+	/** @const */ this.layoutConstraint = layoutConstraint;
 	/** @type {Document} */ this.viewDocument = element.ownerDocument;
     /** @type {boolean} */ this.isFootnote = false;
 	/** @type {number} */ this.startEdge = 0;
@@ -275,7 +290,7 @@ goog.inherits(adapt.layout.Column, adapt.vtree.Container);
  * @return {adapt.layout.Column}
  */
 adapt.layout.Column.prototype.clone = function() {
-	var copy = new adapt.layout.Column(this.element, this.layoutContext, this.clientLayout);
+	var copy = new adapt.layout.Column(this.element, this.layoutContext, this.clientLayout, this.layoutConstraint);
 	copy.copyFrom(this);
 	copy.last = this.last;
     copy.isFootnote = this.isFootnote;
@@ -444,6 +459,12 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
 		        	bodyFrame.breakLoop();
 		            return;
 		        }
+				if (!self.layoutConstraint.allowLayout(position)) {
+					position = position.modify();
+					position.overflow = true;
+					bodyFrame.breakLoop();
+					return;
+				}
 		        if (position.floatSide && !self.vertical) {
 		        	// TODO: implement floats and footnotes properly
 		        	self.layoutFloatOrFootnote(position).then(function(positionParam) {
@@ -502,7 +523,11 @@ adapt.layout.Column.prototype.buildDeepElementView = function(position) {
 	        self.layoutContext.nextInTree(position1).then(function(positionParam) {
 	        	position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
 		        if (!position || position.sourceNode == sourceNode) {
-	        		bodyFrame.breakLoop();
+					bodyFrame.breakLoop();
+				} else if (!self.layoutConstraint.allowLayout(position)) {
+					position = position.modify();
+					position.overflow = true;
+					bodyFrame.breakLoop();
 		        } else {
 		        	bodyFrame.continueLoop();
 		        }
@@ -748,7 +773,7 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
         adapt.base.setCSSProperty(footnoteContainer, "position", "absolute");
         var layoutContext = self.layoutContext.clone();
     	footnoteArea = new adapt.layout.Column(footnoteContainer,
-    			layoutContext, self.clientLayout);
+    			layoutContext, self.clientLayout, self.layoutConstraint);
     	self.footnoteArea = footnoteArea;
     	footnoteArea.vertical = self.layoutContext.applyFootnoteStyle(self.vertical, footnoteContainer);
     	footnoteArea.isFootnote = true;
@@ -1792,6 +1817,12 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 				if (!nodeContext.viewNode) {
 					// Non-displayable content, skip
 					break;
+				}
+				if (!self.layoutConstraint.allowLayout(nodeContext)) {
+					nodeContext = nodeContext.modify();
+					nodeContext.overflow = true;
+					loopFrame.breakLoop();
+					return;
 				}
 				if (nodeContext.inline && nodeContext.viewNode.nodeType != 1) {
 					if (adapt.vtree.canIgnore(nodeContext.viewNode, nodeContext.whitespace)) {

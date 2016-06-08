@@ -8,7 +8,9 @@ goog.provide("vivliostyle.counters");
 goog.require("adapt.base");
 goog.require("adapt.expr");
 goog.require("adapt.csscasc");
+goog.require("adapt.vtree");
 goog.require("adapt.cssstyler");
+goog.require("adapt.layout");
 
 goog.scope(function() {
 
@@ -69,6 +71,13 @@ goog.scope(function() {
      */
     vivliostyle.counters.TargetCounterReference.prototype.resolve = function() {
         this.resolved = true;
+    };
+
+    /**
+     * Marks that this reference is unresolved.
+     */
+    vivliostyle.counters.TargetCounterReference.prototype.unresolve = function() {
+        this.resolved = false;
     };
 
     /**
@@ -284,11 +293,13 @@ goog.scope(function() {
         this.currentPageCounters["page"] = [0];
         /** @type {!adapt.csscasc.CounterValues} */ this.previousPageCounters = {};
         /** @const {!Array<!adapt.csscasc.CounterValues>} */ this.currentPageCountersStack = [];
+        /** @const {!Object<string, !{spineIndex: number, pageIndex: number}>} */ this.pageIndicesById = {};
         /** @type {adapt.vtree.Page} */ this.currentPage = null;
         /** @const {!Array<!vivliostyle.counters.TargetCounterReference>} */ this.newReferencesOfCurrentPage = [];
         /** @type {!Array<!vivliostyle.counters.TargetCounterReference>} */ this.referencesToSolve = [];
         /** @type {!Array<!Array<!vivliostyle.counters.TargetCounterReference>>} */ this.referencesToSolveStack = [];
         /** @const {!Object<string, !Array<vivliostyle.counters.TargetCounterReference>>} */ this.unresolvedReferences = {};
+        /** @const {!Object<string, !Array<vivliostyle.counters.TargetCounterReference>>} */ this.resolvedReferences = {};
     };
 
     /**
@@ -401,6 +412,10 @@ goog.scope(function() {
      */
     vivliostyle.counters.CounterStore.prototype.resolveReference = function(id) {
         var unresolvedRefs = this.unresolvedReferences[id];
+        var resolvedRefs = this.resolvedReferences[id];
+        if (!resolvedRefs) {
+            resolvedRefs = this.resolvedReferences[id] = [];
+        }
         for (var i = 0; i < this.referencesToSolve.length;) {
             var ref = this.referencesToSolve[i];
             if (ref.targetId === id) {
@@ -412,6 +427,7 @@ goog.scope(function() {
                         unresolvedRefs.splice(j, 1);
                     }
                 }
+                resolvedRefs.push(ref);
             } else {
                 i++;
             }
@@ -441,6 +457,22 @@ goog.scope(function() {
             var currentPageCounters = cloneCounterValues(this.currentPageCounters);
             ids.forEach(function(id) {
                 this.pageCountersById[id] = currentPageCounters;
+                var oldPageIndex = this.pageIndicesById[id];
+                if (oldPageIndex && oldPageIndex.pageIndex < pageIndex) {
+                    var resolvedRefs = this.resolvedReferences[id];
+                    if (resolvedRefs) {
+                        var unresolvedRefs = this.unresolvedReferences[id];
+                        if (!unresolvedRefs) {
+                            unresolvedRefs = this.unresolvedReferences[id] = [];
+                        }
+                        var ref;
+                        while (ref = resolvedRefs.shift()) {
+                            ref.unresolve();
+                            unresolvedRefs.push(ref);
+                        }
+                    }
+                }
+                this.pageIndicesById[id] = {spineIndex: spineIndex, pageIndex: pageIndex};
             }, this);
         }
 
@@ -516,4 +548,44 @@ goog.scope(function() {
         this.referencesToSolve = this.referencesToSolveStack.pop();
     };
 
+    /**
+     * @param {!vivliostyle.counters.CounterStore} counterStore
+     * @param {number} pageIndex
+     * @constructor
+     * @implements {adapt.layout.LayoutConstraint}
+     */
+    function LayoutConstraint(counterStore, pageIndex) {
+        /** @const */ this.counterStore = counterStore;
+        /** @const */ this.pageIndex = pageIndex;
+    }
+
+    /**
+     * @override
+     */
+    LayoutConstraint.prototype.allowLayout = function(nodeContext) {
+        if (!nodeContext || nodeContext.after) {
+            return true;
+        }
+        var viewNode = nodeContext.viewNode;
+        if (!viewNode || viewNode.nodeType !== 1) {
+            return true;
+        }
+        var id = viewNode.getAttribute("id") || viewNode.getAttribute("name");
+        if (!id) {
+            return true;
+        }
+        var pageIndex = this.counterStore.pageIndicesById[id];
+        if (!pageIndex) {
+            return true;
+        }
+        return this.pageIndex >= pageIndex.pageIndex;
+    };
+
+    /**
+     * @param {number} pageIndex
+     * @returns {!adapt.layout.LayoutConstraint}
+     */
+    vivliostyle.counters.CounterStore.prototype.createLayoutConstraint = function(pageIndex) {
+        return new LayoutConstraint(this, pageIndex);
+    };
 });
