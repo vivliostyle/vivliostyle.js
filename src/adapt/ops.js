@@ -886,6 +886,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 		vivliostyle.page.resolvePageSizeAndBleed(cascadedPageStyle), this);
 	self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
 	vivliostyle.page.addPrinterMarks(cascadedPageStyle, evaluatedPageSizeAndBleed, page, this);
+	var bleedBoxPaddingEdge = evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
 
 	var writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
 	var direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
@@ -895,7 +896,7 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
     	= adapt.task.newFrame("layoutNextPage");
 	frame.loopWithFrame(function(loopFrame) {
-		self.layoutContainer(page, pageMaster, page.bleedBox, 0, 0, exclusions.concat(), pageFloatHolder).then(function() {
+		self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge, exclusions.concat(), pageFloatHolder).then(function() {
 			if (pageFloatHolder.hasNewlyAddedFloats()) {
 				exclusions = exclusions.concat(pageFloatHolder.getShapesOfNewlyAddedFloats());
 				pageFloatHolder.clearNewlyAddedFloats();
