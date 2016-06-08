@@ -7,16 +7,18 @@
         @page {
             size: 460px;
             margin: 50px;
-            counter-increment: foo bar baz bazz bazzz;
+            counter-increment: foo bar baz bazz bazzz qux;
             @top-center {
+                font-size: 10px;
                 content: "Page " counter(page);
             }
             @bottom-center {
-                content: "baz: " counter(baz, upper-roman) ", bazz: " counter(bazz, upper-roman) ", bazzz: " counter(bazzz, upper-roman);
+                font-size: 10px;
+                content: "baz: " counter(baz, upper-roman) ", bazz: " counter(bazz, upper-roman) ", bazzz: " counter(bazzz, upper-roman) ", qux: " counter(qux, upper-roman);
             }
         }
         @page:first {
-            counter-reset: baz 992 bazz 990 bazzz 988;
+            counter-reset: baz 992 bazz 990 bazzz 988 qux 984;
         }
 
         * {
@@ -139,6 +141,17 @@
         #bazzz-target {
             border-left: 1px solid blue;
         }
+
+        .qux {
+            margin-top: 330px;
+            text-indent: 120px;
+        }
+        .ref-qux::before {
+            content: target-counter(attr(data-href), qux, upper-roman);
+        }
+        #qux-target, #quxx-target {
+            border: 1px solid blue;
+        }
     </style>
 </head>
 <body>
@@ -196,6 +209,14 @@
 <section>
     <p class="bazzz">#bazzz-target is on bazzz <span class="ref-bazzz" data-href="#bazzz-target"></span> #bazzz-target ↓</p>
     <div class="bazzz-target-container"><span id="bazzz-target">This is #bazzz-target.</span></div>
+</section>
+
+<section>
+    <p class="qux">#quxx-target is on qux <span class="ref-qux" data-href="#quxx-target"></span> <span id="qux-target">#qux-target</span> Blah blah blah blah blah.</p>
+</section>
+
+<section>
+    <p>#qux-target is on qux <span class="ref-qux" data-href="#qux-target"></span>. <span id="quxx-target">quxx-target</span></p>
 </section>
 </body>
 </html>

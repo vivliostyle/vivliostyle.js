@@ -416,6 +416,7 @@ goog.scope(function() {
         if (!resolvedRefs) {
             resolvedRefs = this.resolvedReferences[id] = [];
         }
+        var pushed = false;
         for (var i = 0; i < this.referencesToSolve.length;) {
             var ref = this.referencesToSolve[i];
             if (ref.targetId === id) {
@@ -428,9 +429,13 @@ goog.scope(function() {
                     }
                 }
                 resolvedRefs.push(ref);
+                pushed = true;
             } else {
                 i++;
             }
+        }
+        if (!pushed) {
+            this.saveReferenceOfCurrentPage(id, true);
         }
     };
 
@@ -482,14 +487,20 @@ goog.scope(function() {
             ref.pageCounters = prevPageCounters;
             ref.spineIndex = spineIndex;
             ref.pageIndex = pageIndex;
-            if (!ref.isResolved()) {
-                var arr = this.unresolvedReferences[ref.targetId];
+            var arr;
+            if (ref.isResolved()) {
+                arr = this.resolvedReferences[ref.targetId];
+                if (!arr) {
+                    arr = this.resolvedReferences[ref.targetId] = [];
+                }
+            } else {
+                arr = this.unresolvedReferences[ref.targetId];
                 if (!arr) {
                     arr = this.unresolvedReferences[ref.targetId] = [];
                 }
-                if (arr.every(function(r) { return !ref.equals(r); })) {
-                    arr.push(ref);
-                }
+            }
+            if (arr.every(function(r) { return !ref.equals(r); })) {
+                arr.push(ref);
             }
         }
 
