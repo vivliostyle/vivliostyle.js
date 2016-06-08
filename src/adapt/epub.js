@@ -1080,7 +1080,7 @@ adapt.epub.OPFView.prototype.renderSinglePage = function(viewItem, pos) {
 		if (pos) {
 			var prevPos = viewItem.layoutPositions[pos.page];
 			viewItem.layoutPositions[pos.page] = pos;
-			if (prevPos) {
+			if (prevPos && viewItem.pages[pos.page]) {
 				if (!pos.isSamePosition(prevPos)) {
 					self.pageIndex = pos.page;
 					cont = self.renderSinglePage(viewItem, pos);
