@@ -108,6 +108,10 @@ ATTR = attr(SPACE(IDENT TYPE_OR_UNIT_IN_ATTR?) [ STRING | IDENT | COLOR | INT | 
 CONTENT = normal | none | 
     [ STRING | URI | counter(IDENT LIST_STYLE_TYPE?) | 
     counters(IDENT STRING LIST_STYLE_TYPE?) | ATTR |
+    target-counter([ STRING | URI ] IDENT LIST_STYLE_TYPE?) |
+    target-counter(ATTR IDENT LIST_STYLE_TYPE?) |
+    target-counters([ STRING | URI ] IDENT STRING LIST_STYLE_TYPE?) |
+    target-counters(ATTR IDENT STRING LIST_STYLE_TYPE?) |
     open-quote | close-quote | no-open-quote | no-close-quote ]+;
 content = CONTENT;
 COUNTER = [ IDENT INT? ]+ | none;
