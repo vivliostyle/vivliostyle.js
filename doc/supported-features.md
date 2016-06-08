@@ -19,6 +19,13 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - [HSL color values](https://www.w3.org/TR/css3-color/#hsl-color), [HSLA color values](https://www.w3.org/TR/css3-color/#hsla-color)
   - [Extended color keywords](https://www.w3.org/TR/css3-color/#svg-color)
   - [‘currentColor’ color keyword](https://www.w3.org/TR/css3-color/#currentcolor)
+- [Attribute references: `attr()`](https://www.w3.org/TR/css-values/#attr-notation)
+  - Supported in all browsers
+  - Only supported in values of `content` property.
+  - Only 'string' and 'url' types are supported.
+- [Cross references: `target-counter()` and `target-counters()`](https://drafts.csswg.org/css-content/#cross-references)
+  - Supported in all browsers
+  - Only supported in values of `content` property.
 
 ## Selectors
 
