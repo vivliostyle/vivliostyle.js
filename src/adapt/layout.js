@@ -1592,16 +1592,14 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
 
 	// In case of box-decoration-break: clone, width (or height in vertical writing mode) of cloned paddings and borders should be taken into account.
 	var clonedPaddingBorder = 0;
-	var isBlockVertical = block ? block.vertical : false;
-	while (block && block.vertical === isBlockVertical) {
+	while (block) {
 		if (!block.inline && block.inheritedProps["box-decoration-break"] === "clone") {
 			goog.asserts.assert(block.viewNode instanceof Element);
 			var paddingBorders = this.getComputedPaddingBorder(block.viewNode);
-			clonedPaddingBorder += isBlockVertical ? -paddingBorders.left : paddingBorders.bottom;
+			clonedPaddingBorder += block.vertical ? -paddingBorders.left : paddingBorders.bottom;
 		}
 		if (block.establishesBFC)
 			break;
-		isBlockVertical = block.vertical;
 		block = block.parent;
 	}
 
