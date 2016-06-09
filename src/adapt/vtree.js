@@ -835,6 +835,23 @@ adapt.vtree.NodeContext.prototype.getContainingBlockForAbsolute = function() {
 };
 
 /**
+ * Walk up NodeContext tree (starting from itself) and call the callback for each block,
+ * until a NodeContext which establishes a block formatting context is reached.
+ * @param {!function(!adapt.vtree.NodeContext)} callback
+ */
+adapt.vtree.NodeContext.prototype.walkBlocksUpToBFC = function(callback) {
+	var nodeContext = this;
+	while (nodeContext) {
+		if (!nodeContext.inline) {
+			callback(nodeContext);
+		}
+		if (nodeContext.establishesBFC)
+			break;
+		nodeContext = nodeContext.parent;
+	}
+};
+
+/**
  * @param {adapt.vtree.NodePosition} primary
  * @constructor
  */

@@ -1592,16 +1592,13 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
 
 	// In case of box-decoration-break: clone, width (or height in vertical writing mode) of cloned paddings and borders should be taken into account.
 	var clonedPaddingBorder = 0;
-	while (block) {
-		if (!block.inline && block.inheritedProps["box-decoration-break"] === "clone") {
+	block.walkBlocksUpToBFC(function(block) {
+		if (block.inheritedProps["box-decoration-break"] === "clone") {
 			goog.asserts.assert(block.viewNode instanceof Element);
-			var paddingBorders = this.getComputedPaddingBorder(block.viewNode);
+			var paddingBorders = self.getComputedPaddingBorder(block.viewNode);
 			clonedPaddingBorder += block.vertical ? -paddingBorders.left : paddingBorders.bottom;
 		}
-		if (block.establishesBFC)
-			break;
-		block = block.parent;
-	}
+	});
 
 	// Select the first overflowing line break position
 	var linePositions = this.findLinePositions(checkPoints);
