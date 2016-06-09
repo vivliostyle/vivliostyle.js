@@ -11,10 +11,10 @@
                 -epubx-page: 1;
                 @-epubx-partition {
                     -epubx-flow-from: body;
-                    column-count: 3;
+                    column-count: 4;
                     column-gap: 10px;
                     column-rule: 1px solid black;
-                    width: 620px;
+                    width: 820px;
                     height: 300px;
                     border: 2px solid blue;
                     margin: 30px;
@@ -25,12 +25,12 @@
                 -epubx-page: 2;
                 @-epubx-partition {
                     -epubx-flow-from: body;
-                    column-count: 3;
+                    column-count: 4;
                     column-gap: 10px;
                     column-rule: 1px solid black;
                     writing-mode: vertical-rl;
                     width: 300px;
-                    height: 620px;
+                    height: 820px;
                     border: 2px solid blue;
                     margin: 30px;
                     overflow: visible;
@@ -100,7 +100,12 @@
         box-decoration-break: clone<br>
         box-decoration-break: clone<br>
         box-decoration-break: clone<br>
-        box-decoration-break: clone<br>
+    </div>
+    <div class="slice">
+        (slice) not fragmented, should have bottom padding &amp; border
+    </div>
+    <div class="clone">
+        Another block not fragmented (box-decoration-break: clone)
     </div>
 </section>
 <section class="vertical">
@@ -119,7 +124,12 @@
         box-decoration-break: clone<br>
         box-decoration-break: clone<br>
         box-decoration-break: clone<br>
-        box-decoration-break: clone<br>
+    </div>
+    <div class="slice">
+        (slice) not fragmented, should have left padding &amp; border
+    </div>
+    <div class="clone">
+        Another block not fragmented (box-decoration-break: clone)
     </div>
 </section>
 </body>

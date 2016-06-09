@@ -1641,7 +1641,7 @@ adapt.layout.Column.prototype.finishBreak = function(nodeContext, forceRemoveSel
     this.clearOverflownViewNodes(nodeContext, removeSelf);
     if (endOfRegion) {
 		this.fixJustificationIfNeeded(nodeContext, true);
-		this.layoutContext.processFragmentedBlockEdge(nodeContext);
+		this.layoutContext.processFragmentedBlockEdge(removeSelf ? nodeContext : nodeContext.parent);
 	}
     return this.clearFootnotes(nodeContext.boxOffset);	
 };
