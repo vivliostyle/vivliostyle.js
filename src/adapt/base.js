@@ -774,7 +774,7 @@ adapt.base.SimpleEventTarget.prototype.removeEventListener = function(type, list
 	if (list) {
 		var index = list.indexOf(listener);
 		if (index >= 0) {
-			list.splice(index, 0);
+			list.splice(index, 1);
 		}
 	}
 };
