@@ -671,6 +671,31 @@ adapt.layout.Column.prototype.getComputedMargin = function(element) {
 };
 
 /**
+ * Reads element's computed padding + borders.
+ * @param {Element} element
+ * @returns {adapt.geom.Insets}
+ */
+adapt.layout.Column.prototype.getComputedPaddingBorder = function(element) {
+	var style = this.clientLayout.getElementComputedStyle(element);
+	var insets = new adapt.geom.Insets(0, 0, 0, 0);
+	if (style) {
+		insets.left =
+			this.parseComputedLength(style.borderLeftWidth) +
+			this.parseComputedLength(style.paddingLeft);
+		insets.top =
+			this.parseComputedLength(style.borderTopWidth) +
+			this.parseComputedLength(style.paddingTop);
+		insets.right =
+			this.parseComputedLength(style.borderRightWidth) +
+			this.parseComputedLength(style.paddingRight);
+		insets.bottom =
+			this.parseComputedLength(style.borderBottomWidth) +
+			this.parseComputedLength(style.paddingBottom);
+	}
+	return insets;
+};
+
+/**
  * Reads element's computed CSS insets(margins + border + padding or margins : depends on box-sizing)
  * @param {Element} element
  * @return {adapt.geom.Insets}
@@ -1547,6 +1572,12 @@ adapt.layout.Column.prototype.clearFootnotes = function(boxOffset) {
 adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
 	var self = this;
 	var checkPoints = bp.checkPoints;
+
+	var block = checkPoints[0];
+	while (block.parent && block.inline) {
+		block = block.parent;
+	}
+
 	var widows;
 	var orphans;
 	if (force) {
@@ -1555,16 +1586,28 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
 		orphans = 1;
 	} else {
 		// Get widows/orphans settings from the block element
-		var block = checkPoints[0];
-		while (block.parent && block.inline) {
-			block = block.parent;
-		}
 		widows = Math.max((block.inheritedProps["widows"] || 2) - 0, 1);
 		orphans = Math.max((block.inheritedProps["orphans"] || 2) - 0, 1);
 	}
+
+	// In case of box-decoration-break: clone, width (or height in vertical writing mode) of cloned paddings and borders should be taken into account.
+	var clonedPaddingBorder = 0;
+	var isBlockVertical = block ? block.vertical : false;
+	while (block && block.vertical === isBlockVertical) {
+		if (!block.inline && block.inheritedProps["box-decoration-break"] === "clone") {
+			goog.asserts.assert(block.viewNode instanceof Element);
+			var paddingBorders = this.getComputedPaddingBorder(block.viewNode);
+			clonedPaddingBorder += isBlockVertical ? -paddingBorders.left : paddingBorders.bottom;
+		}
+		if (block.establishesBFC)
+			break;
+		isBlockVertical = block.vertical;
+		block = block.parent;
+	}
+
 	// Select the first overflowing line break position
 	var linePositions = this.findLinePositions(checkPoints);
-	var edge = this.footnoteEdge;
+	var edge = this.footnoteEdge - clonedPaddingBorder;
 	var lineIndex = adapt.base.binarySearch(linePositions.length, function(i) {
 		return self.vertical ? linePositions[i] < edge : linePositions[i] > edge;
 	});

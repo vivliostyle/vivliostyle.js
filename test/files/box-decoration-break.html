@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>box-decoration-break</title>
+    <style>
+        @page {
+        }
+        @-epubx-page-template {
+            @-epubx-page-master {
+                -epubx-page: 1;
+                @-epubx-partition {
+                    -epubx-flow-from: body;
+                    column-count: 3;
+                    column-gap: 10px;
+                    column-rule: 1px solid black;
+                    width: 620px;
+                    height: 300px;
+                    border: 2px solid blue;
+                    margin: 30px;
+                    overflow: visible;
+                }
+            }
+            @-epubx-page-master {
+                -epubx-page: 2;
+                @-epubx-partition {
+                    -epubx-flow-from: body;
+                    column-count: 3;
+                    column-gap: 10px;
+                    column-rule: 1px solid black;
+                    writing-mode: vertical-rl;
+                    width: 300px;
+                    height: 620px;
+                    border: 2px solid blue;
+                    margin: 30px;
+                    overflow: visible;
+                }
+            }
+        }
+
+        * {
+            margin: 0;
+        }
+        html {
+            widows: 1;
+            orphans: 1;
+            line-height: 25px;
+        }
+        section {
+            page-break-after: always;
+        }
+        section.vertical {
+            writing-mode: vertical-rl;
+        }
+        div {
+            margin: 10px;
+            border: 3px solid green;
+            padding: 3px;
+        }
+        .horizontal div {
+            margin-bottom: 20px;
+            border-top: 4px solid brown;
+            border-bottom: 6px solid orange;
+            padding-top: 10px;
+            padding-bottom: 15px;
+            background: linear-gradient(56deg, rgb(0, 255, 94), rgb(255, 255, 250) 77%);
+            box-shadow: 3px 5px 1px gold;
+        }
+        .vertical div {
+            margin-left: 20px;
+            border-right: 4px solid brown;
+            border-left: 6px solid orange;
+            padding-right: 10px;
+            padding-left: 15px;
+            background: linear-gradient(124deg, rgb(0, 255, 94), rgb(255, 255, 250) 77%);
+            box-shadow: -3px 5px 1px gold;
+        }
+        .slice {
+            box-decoration-break: slice;
+        }
+        .clone {
+            box-decoration-break: clone;
+        }
+    </style>
+</head>
+<body>
+<section class="horizontal">
+    <div class="slice">
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+    </div>
+    <div class="clone">
+        box-decoration-break: clone<br>
+        box-decoration-break: clone<br>
+        box-decoration-break: clone<br>
+        box-decoration-break: clone<br>
+        box-decoration-break: clone<br>
+    </div>
+</section>
+<section class="vertical">
+    <div class="slice">
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+        box-decoration-break: slice<br>
+    </div>
+    <div class="clone">
+        box-decoration-break: clone<br>
+        box-decoration-break: clone<br>
+        box-decoration-break: clone<br>
+        box-decoration-break: clone<br>
+        box-decoration-break: clone<br>
+    </div>
+</section>
+</body>
+</html>

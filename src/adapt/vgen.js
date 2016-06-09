@@ -871,7 +871,8 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			self.applyComputedStyles(result, computedStyle);
 		    var widows = computedStyle["widows"];
 		    var orphans = computedStyle["orphans"];
-		    if (widows || orphans) {
+			var boxDecorationBreak = computedStyle["box-decoration-break"];
+		    if (widows || orphans || boxDecorationBreak) {
 		    	if (self.nodeContext.parent) {
 			    	self.nodeContext.inheritedProps = {};
 			    	for (var n in self.nodeContext.parent.inheritedProps) {
@@ -884,11 +885,19 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 		    	if (orphans instanceof adapt.css.Int) {
 		    		self.nodeContext.inheritedProps["orphans"] = (/** @type {adapt.css.Int} */ (orphans)).num;
 		    	}
+				if (boxDecorationBreak instanceof adapt.css.Ident) {
+					self.nodeContext.inheritedProps["box-decoration-break"] = (/** @type {adapt.css.Ident} */ (boxDecorationBreak)).name;
+				}
 		    }
 			if (!self.nodeContext.inline) {
 				var blackList = null;
 				if (!firstTime) {
-					blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeBlackListVert : adapt.vgen.frontEdgeBlackListHor;
+					if (boxDecorationBreak !== adapt.css.getName("clone")) {
+						blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeBlackListVert : adapt.vgen.frontEdgeBlackListHor;
+					} else {
+						// When box-decoration-break: clone, cloned margins are always truncated to zero.
+						blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeUnforcedBreakBlackListVert : adapt.vgen.frontEdgeUnforcedBreakBlackListHor;
+					}
 				} else if (atUnforcedBreak) {
 					blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeUnforcedBreakBlackListVert : adapt.vgen.frontEdgeUnforcedBreakBlackListHor;
 				}
