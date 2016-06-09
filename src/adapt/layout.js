@@ -1639,8 +1639,10 @@ adapt.layout.Column.prototype.findEdgeBreakPosition = function(bp) {
 adapt.layout.Column.prototype.finishBreak = function(nodeContext, forceRemoveSelf, endOfRegion) {
 	var removeSelf = forceRemoveSelf || (nodeContext.viewNode != null && nodeContext.viewNode.nodeType == 1 && !nodeContext.after);
     this.clearOverflownViewNodes(nodeContext, removeSelf);
-    if (endOfRegion)
-    	this.fixJustificationIfNeeded(nodeContext, true);
+    if (endOfRegion) {
+		this.fixJustificationIfNeeded(nodeContext, true);
+		this.layoutContext.processFragmentedBlockEdge(nodeContext);
+	}
     return this.clearFootnotes(nodeContext.boxOffset);	
 };
 

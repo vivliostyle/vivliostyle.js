@@ -487,6 +487,12 @@ adapt.vtree.LayoutContext.prototype.applyFootnoteStyle = function(vertical, elem
 adapt.vtree.LayoutContext.prototype.peelOff = function(nodeContext, nodeOffset) {};
 
 /**
+ * Process a block-end edge of a fragmented block.
+ * @param {adapt.vtree.NodeContext} nodeContext
+ */
+adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = function(nodeContext) {};
+
+/**
  * Returns if two NodePositions represents the same position in the document.
  * @param {!adapt.vtree.NodePosition} nodePosition1
  * @param {!adapt.vtree.NodePosition} nodePosition2

@@ -1303,6 +1303,26 @@ adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target)
 };
 
 /**
+ * @override
+ */
+adapt.vgen.ViewFactory.prototype.processFragmentedBlockEdge = function(nodeContext) {
+	nodeContext.walkBlocksUpToBFC(function(block) {
+		var boxDecorationBreak = block.inheritedProps["box-decoration-break"];
+		if (!boxDecorationBreak || boxDecorationBreak === "slice") {
+			var elem = block.viewNode;
+			goog.asserts.assert(elem instanceof Element);
+			if (block.vertical) {
+				adapt.base.setCSSProperty(elem, "padding-left", "0");
+				adapt.base.setCSSProperty(elem, "border-left", "none");
+			} else {
+				adapt.base.setCSSProperty(elem, "padding-bottom", "0");
+				adapt.base.setCSSProperty(elem, "border-bottom", "none");
+			}
+		}
+	});
+};
+
+/**
  * Returns if two NodePositionStep are equivalent.
  * @param {!adapt.vtree.NodePositionStep} step1
  * @param {!adapt.vtree.NodePositionStep} step2
