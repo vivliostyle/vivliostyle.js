@@ -27,7 +27,9 @@ adapt.vgen.frontEdgeBlackListHor = {
     "padding-top": "0px",
     "border-top-width": "0px",
     "border-top-style": "none",
-    "border-top-color": "transparent"
+    "border-top-color": "transparent",
+	"border-top-left-radius": "0px",
+	"border-top-right-radius": "0px"
 };
 
 /**
@@ -41,7 +43,9 @@ adapt.vgen.frontEdgeBlackListVert = {
     "padding-right": "0px",
     "border-right-width": "0px",
     "border-right-style": "none",
-    "border-right-color": "transparent"
+    "border-right-color": "transparent",
+	"border-top-right-radius": "0px",
+	"border-bottom-right-radius": "0px"
 };
 
 /**
@@ -1314,9 +1318,13 @@ adapt.vgen.ViewFactory.prototype.processFragmentedBlockEdge = function(nodeConte
 			if (block.vertical) {
 				adapt.base.setCSSProperty(elem, "padding-left", "0");
 				adapt.base.setCSSProperty(elem, "border-left", "none");
+				adapt.base.setCSSProperty(elem, "border-top-left-radius", "0");
+				adapt.base.setCSSProperty(elem, "border-bottom-left-radius", "0");
 			} else {
 				adapt.base.setCSSProperty(elem, "padding-bottom", "0");
 				adapt.base.setCSSProperty(elem, "border-bottom", "none");
+				adapt.base.setCSSProperty(elem, "border-bottom-left-radius", "0");
+				adapt.base.setCSSProperty(elem, "border-bottom-right-radius", "0");
 			}
 		}
 	});
