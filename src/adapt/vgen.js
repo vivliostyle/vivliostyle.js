@@ -27,7 +27,9 @@ adapt.vgen.frontEdgeBlackListHor = {
     "padding-top": "0px",
     "border-top-width": "0px",
     "border-top-style": "none",
-    "border-top-color": "transparent"
+    "border-top-color": "transparent",
+	"border-top-left-radius": "0px",
+	"border-top-right-radius": "0px"
 };
 
 /**
@@ -41,7 +43,9 @@ adapt.vgen.frontEdgeBlackListVert = {
     "padding-right": "0px",
     "border-right-width": "0px",
     "border-right-style": "none",
-    "border-right-color": "transparent"
+    "border-right-color": "transparent",
+	"border-top-right-radius": "0px",
+	"border-bottom-right-radius": "0px"
 };
 
 /**
@@ -577,7 +581,12 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 		var floatReference = computedStyle["float-reference"];
 	    var floatSide = computedStyle["float"];
 	    var clearSide = computedStyle["clear"];
-		self.nodeContext.establishesBFC = vivliostyle.display.establishesBFC(display, position, floatSide, computedStyle["overflow"]);
+		var writingMode = self.nodeContext.vertical ? adapt.css.ident.vertical_rl : adapt.css.ident.horizontal_tb;
+		var parentWritingMode = self.nodeContext.parent ?
+			(self.nodeContext.parent.vertical ? adapt.css.ident.vertical_rl : adapt.css.ident.horizontal_tb) :
+			writingMode;
+		self.nodeContext.establishesBFC = vivliostyle.display.establishesBFC(display, position, floatSide,
+			computedStyle["overflow"], writingMode, parentWritingMode);
 		self.nodeContext.containingBlockForAbsolute = vivliostyle.display.establishesCBForAbsolute(position);
 	    if (self.nodeContext.isInsideBFC()) {
 			// When the element is already inside a block formatting context (except one from the root),
@@ -871,7 +880,8 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			self.applyComputedStyles(result, computedStyle);
 		    var widows = computedStyle["widows"];
 		    var orphans = computedStyle["orphans"];
-		    if (widows || orphans) {
+			var boxDecorationBreak = computedStyle["box-decoration-break"];
+		    if (widows || orphans || boxDecorationBreak) {
 		    	if (self.nodeContext.parent) {
 			    	self.nodeContext.inheritedProps = {};
 			    	for (var n in self.nodeContext.parent.inheritedProps) {
@@ -884,11 +894,19 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 		    	if (orphans instanceof adapt.css.Int) {
 		    		self.nodeContext.inheritedProps["orphans"] = (/** @type {adapt.css.Int} */ (orphans)).num;
 		    	}
+				if (boxDecorationBreak instanceof adapt.css.Ident) {
+					self.nodeContext.inheritedProps["box-decoration-break"] = (/** @type {adapt.css.Ident} */ (boxDecorationBreak)).name;
+				}
 		    }
 			if (!self.nodeContext.inline) {
 				var blackList = null;
 				if (!firstTime) {
-					blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeBlackListVert : adapt.vgen.frontEdgeBlackListHor;
+					if (boxDecorationBreak !== adapt.css.getName("clone")) {
+						blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeBlackListVert : adapt.vgen.frontEdgeBlackListHor;
+					} else {
+						// When box-decoration-break: clone, cloned margins are always truncated to zero.
+						blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeUnforcedBreakBlackListVert : adapt.vgen.frontEdgeUnforcedBreakBlackListHor;
+					}
 				} else if (atUnforcedBreak) {
 					blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeUnforcedBreakBlackListVert : adapt.vgen.frontEdgeUnforcedBreakBlackListHor;
 				}
@@ -1286,6 +1304,30 @@ adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target)
 	delete computedStyle["content"];
 	this.applyComputedStyles(target, computedStyle);
 	return vertical;
+};
+
+/**
+ * @override
+ */
+adapt.vgen.ViewFactory.prototype.processFragmentedBlockEdge = function(nodeContext) {
+	nodeContext.walkBlocksUpToBFC(function(block) {
+		var boxDecorationBreak = block.inheritedProps["box-decoration-break"];
+		if (!boxDecorationBreak || boxDecorationBreak === "slice") {
+			var elem = block.viewNode;
+			goog.asserts.assert(elem instanceof Element);
+			if (block.vertical) {
+				adapt.base.setCSSProperty(elem, "padding-left", "0");
+				adapt.base.setCSSProperty(elem, "border-left", "none");
+				adapt.base.setCSSProperty(elem, "border-top-left-radius", "0");
+				adapt.base.setCSSProperty(elem, "border-bottom-left-radius", "0");
+			} else {
+				adapt.base.setCSSProperty(elem, "padding-bottom", "0");
+				adapt.base.setCSSProperty(elem, "border-bottom", "none");
+				adapt.base.setCSSProperty(elem, "border-bottom-left-radius", "0");
+				adapt.base.setCSSProperty(elem, "border-bottom-right-radius", "0");
+			}
+		}
+	});
 };
 
 /**

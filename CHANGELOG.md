@@ -15,6 +15,9 @@
 - Support cross references by `target-counter()`/`target-counters()`
   - <https://github.com/vivliostyle/vivliostyle.js/pull/248>
   - Spec: [CSS Generated Content Module Level 3 - Cross references and the target-* functions](https://drafts.csswg.org/css-content/#cross-references)
+- Support `box-decoration-break` property
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/250>
+  - Spec: [CSS Fragmentation Module Level 3 - Fragmented Borders and Backgrounds: the box-decoration-break property](https://drafts.csswg.org/css-break/#break-decoration)
 
 ### Fixed
 - Fix a bug that `clear` is ignored when `white-space` property is used before the element
@@ -39,6 +42,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/233>
 - Avoid error when an element with pseudoelements overflows its container
   - <https://github.com/vivliostyle/vivliostyle.js/pull/241>
+- Fix handling of padding and border of a block fragmented by a page/column break
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/250>
 
 ## [2016.4](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.4) - 2016-04-08
 

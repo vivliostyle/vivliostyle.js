@@ -99,13 +99,18 @@ goog.scope(function() {
      * @param {adapt.css.Ident} position
      * @param {adapt.css.Ident} float
      * @param {adapt.css.Ident} overflow
+     * @param {adapt.css.Ident=} writingMode
+     * @param {adapt.css.Ident=} parentWritingMode
      * @returns {boolean}
      */
-    vivliostyle.display.establishesBFC = function(display, position, float, overflow) {
+    vivliostyle.display.establishesBFC = function(display, position, float, overflow, writingMode, parentWritingMode) {
+        writingMode = writingMode || parentWritingMode || adapt.css.ident.horizontal_tb;
         return (!!float && float !== adapt.css.ident.none) ||
             vivliostyle.display.isAbsolutelyPositioned(position) ||
             (display === adapt.css.ident.inline_block || display === adapt.css.ident.table_cell || display === adapt.css.ident.table_caption) ||
-            ((display === adapt.css.ident.block || display === adapt.css.ident.list_item ) && !!overflow && overflow !== adapt.css.ident.visible);
+            ((display === adapt.css.ident.block || display === adapt.css.ident.list_item ) &&
+                (!!overflow && overflow !== adapt.css.ident.visible) ||
+                (!!parentWritingMode && writingMode !== parentWritingMode));
     };
 
     /**
