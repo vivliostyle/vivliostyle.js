@@ -854,11 +854,6 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                         }
 			        }
 			    }
-				// necessary for target-counter resolution
-				if (isRoot && firstTime) {
-					var rootId = self.documentURLTransformer.transformFragment("", self.xmldoc.url);
-					self.page.registerElementWithId(result, rootId);
-				}
 			    if (delayedSrc) {
 		        	var imageFetcher = adapt.taskutil.loadElement(result, delayedSrc);
 					var w = computedStyle["width"];
