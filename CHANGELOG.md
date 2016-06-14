@@ -19,6 +19,11 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/250>
   - Spec: [CSS Fragmentation Module Level 3 - Fragmented Borders and Backgrounds: the box-decoration-break property](https://drafts.csswg.org/css-break/#break-decoration)
 
+### Changed
+- `counter-reset` and `counter-increment` specified in a page master (`@-epubx-page-master`) are now effective to page-based counters
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/251>
+  - Note that these values, if specified, always override values specified in page contexts.
+
 ### Fixed
 - Fix a bug that `clear` is ignored when `white-space` property is used before the element
   - <https://github.com/vivliostyle/vivliostyle.js/pull/222>

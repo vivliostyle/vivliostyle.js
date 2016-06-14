@@ -1891,17 +1891,27 @@ vivliostyle.page.PageManager.prototype.generatePageRuleMaster = function(style) 
  */
 vivliostyle.page.PageManager.prototype.generateCascadedPageMaster = function(style, pageMaster) {
     var newPageMaster = pageMaster.clone({pseudoName: vivliostyle.page.pageRuleMasterPseudoName});
+    var pageMasterStyle = newPageMaster.specified;
+
     var size = style["size"];
     if (size) {
         var pageSize = vivliostyle.page.resolvePageSizeAndBleed(style);
         var priority = size.priority;
-        newPageMaster.specified["width"] = adapt.csscasc.cascadeValues(
-            this.context, newPageMaster.specified["width"],
+        pageMasterStyle["width"] = adapt.csscasc.cascadeValues(
+            this.context, pageMasterStyle["width"],
             new adapt.csscasc.CascadeValue(pageSize.width, priority));
-        newPageMaster.specified["height"] = adapt.csscasc.cascadeValues(
-            this.context, newPageMaster.specified["height"],
+        pageMasterStyle["height"] = adapt.csscasc.cascadeValues(
+            this.context, pageMasterStyle["height"],
             new adapt.csscasc.CascadeValue(pageSize.height, priority));
     }
+
+    // Transfer counter properties to the page style so that these specified in the page master are
+    // also effective. Note that these values (if specified) always override values in page contexts.
+    ["counter-reset", "counter-increment"].forEach(function(name) {
+        if (pageMasterStyle[name]) {
+            style[name] = pageMasterStyle[name];
+        }
+    });
 
     var pageMasterInstance = newPageMaster.createInstance(this.rootPageBoxInstance);
     // Do the same initialization as in adapt.ops.StyleInstance.prototype.init
