@@ -516,6 +516,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Support depends on browser capabilities
 - [font-size](https://www.w3.org/TR/css-fonts-3/#propdef-font-size)
   - Support depends on browser capabilities
+- [font-size-adjust](https://www.w3.org/TR/css-fonts-3/#propdef-font-size-adjust)
+  - Support depends on browser capabilities
 - [font-style](https://www.w3.org/TR/css-fonts-3/#propdef-font-style)
   - Support depends on browser capabilities
 - [font-variant-east-asian](https://www.w3.org/TR/css-fonts-3/#propdef-font-variant-east-asian)

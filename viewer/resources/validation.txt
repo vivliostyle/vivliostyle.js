@@ -282,6 +282,7 @@ src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */
 [adapt]behavior = IDENT;
 
 /* CSS Fonts */
+font-size-adjust = none | NNEG_NUM;
 [webkit]font-kerning = auto | normal | none;
 font-variant-east-asian = normal | [[ jis78 | jis83 | jis90 | jis04 | simplified | traditional ] || [ full-width | proportional-width ] || ruby];
 font-feature-settings = COMMA( SPACE( STRING [ on | off | INT ]? )+ );
