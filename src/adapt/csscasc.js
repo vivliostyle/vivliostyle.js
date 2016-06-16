@@ -2533,15 +2533,6 @@ adapt.csscasc.CascadeInstance.prototype.pushCounters = function(props) {
 	        this.defineCounter(resetCounterName, resetMap[resetCounterName]);
 	    }
 	}
-	if (incrementMap) {
-	    for (var incrementCounterName in incrementMap) {
-	        if (!this.counters[incrementCounterName]) {
-	            this.defineCounter(incrementCounterName, 0);
-	        }
-	        var counterValues = this.counters[incrementCounterName];
-	        counterValues[counterValues.length - 1] += incrementMap[incrementCounterName];
-	    }
-	}
 	if (setMap) {
 	    for (var setCounterName in setMap) {
 	        if (!this.counters[setCounterName]) {
@@ -2550,6 +2541,15 @@ adapt.csscasc.CascadeInstance.prototype.pushCounters = function(props) {
 	            var counterValues = this.counters[setCounterName];                
 	            counterValues[counterValues.length - 1] = setMap[setCounterName];
             }
+	    }
+	}
+	if (incrementMap) {
+	    for (var incrementCounterName in incrementMap) {
+	        if (!this.counters[incrementCounterName]) {
+	            this.defineCounter(incrementCounterName, 0);
+	        }
+	        var counterValues = this.counters[incrementCounterName];
+	        counterValues[counterValues.length - 1] += incrementMap[incrementCounterName];
 	    }
 	}
 	if (displayVal === adapt.css.ident.list_item) {
