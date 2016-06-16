@@ -107,7 +107,7 @@ goog.scope(function() {
         writingMode = writingMode || parentWritingMode || adapt.css.ident.horizontal_tb;
         return (!!float && float !== adapt.css.ident.none) ||
             vivliostyle.display.isAbsolutelyPositioned(position) ||
-            (display === adapt.css.ident.inline_block || display === adapt.css.ident.table_cell || display === adapt.css.ident.table_caption) ||
+            (display === adapt.css.ident.inline_block || display === adapt.css.ident.table_cell || display === adapt.css.ident.table_caption || display == adapt.css.ident.flex) ||
             ((display === adapt.css.ident.block || display === adapt.css.ident.list_item ) &&
                 (!!overflow && overflow !== adapt.css.ident.visible) ||
                 (!!parentWritingMode && writingMode !== parentWritingMode));
