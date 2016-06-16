@@ -18,6 +18,9 @@
 - Support `box-decoration-break` property
   - <https://github.com/vivliostyle/vivliostyle.js/pull/250>
   - Spec: [CSS Fragmentation Module Level 3 - Fragmented Borders and Backgrounds: the box-decoration-break property](https://drafts.csswg.org/css-break/#break-decoration)
+- Support `font-size-adjust` property
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/254>
+  - Spec: [CSS Fonts Module Level 3 - Relative sizing: the font-size-adjust property](https://www.w3.org/TR/css-fonts-3/#font-size-adjust-prop)
 
 ### Changed
 - `counter-reset` and `counter-increment` specified in a page master (`@-epubx-page-master`) are now effective to page-based counters

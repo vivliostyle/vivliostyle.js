@@ -27,6 +27,7 @@ adapt.csscasc.inheritedProps = {
 	"empty-cells": true,
     "font-kerning": true,
 	"font-size": true,
+	"font-size-adjust": true,
 	"font-family": true,
     "font-feature-settings": true,
     "font-style": true,
