@@ -21,6 +21,9 @@
 - Support `font-size-adjust` property
   - <https://github.com/vivliostyle/vivliostyle.js/pull/254>
   - Spec: [CSS Fonts Module Level 3 - Relative sizing: the font-size-adjust property](https://www.w3.org/TR/css-fonts-3/#font-size-adjust-prop)
+- Support `counter-set` property
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/255>
+  - Spec: [CSS Lists and Counters Module Level 3 - Automatic Numbering With Counters](https://drafts.csswg.org/css-lists-3/#propdef-counter-set) 
 
 ### Changed
 - `counter-reset` and `counter-increment` specified in a page master (`@-epubx-page-master`) are now effective to page-based counters
