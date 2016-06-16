@@ -49,6 +49,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/241>
 - Fix handling of padding and border of a block fragmented by a page/column break
   - <https://github.com/vivliostyle/vivliostyle.js/pull/250>
+- Fix layout of floats inside flex containers
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/253>
 
 ## [2016.4](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.4) - 2016-04-08
 
