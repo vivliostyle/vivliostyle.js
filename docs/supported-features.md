@@ -259,6 +259,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Supported in all browsers
 - [counter-reset](https://www.w3.org/TR/CSS2/generate.html#propdef-counter-reset)
   - Supported in all browsers
+- [counter-set](https://drafts.csswg.org/css-lists-3/#propdef-counter-set)
+  - Supported in all browsers
 - [cursor](https://www.w3.org/TR/CSS2/ui.html#propdef-cursor)
   - Support depends on browser capabilities
 - [direction](https://www.w3.org/TR/CSS2/visuren.html#propdef-direction)

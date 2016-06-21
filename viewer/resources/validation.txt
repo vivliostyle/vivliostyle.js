@@ -117,6 +117,7 @@ content = CONTENT;
 COUNTER = [ IDENT INT? ]+ | none;
 counter-increment = COUNTER;
 counter-reset = COUNTER;
+counter-set = COUNTER;
 cue-after = URI_OR_NONE;
 cue-before = URI_OR_NONE;
 cursor = COMMA(URI* [ auto | crosshair | default | pointer | move | e-resize | ne-resize | nw-resize |
