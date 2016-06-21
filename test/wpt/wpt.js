@@ -30,7 +30,7 @@
 
         var config = {
             "a": "loadXML",
-            "url": docURL,
+            "url": [{"url": docURL, "startPage": null, "skipPagesBefore": null}],
             "autoresize": false,
             "fragment": null,
             "renderAllPages": true,
