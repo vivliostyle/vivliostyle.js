@@ -2494,6 +2494,8 @@ adapt.csscasc.CascadeInstance.prototype.pushCounters = function(props) {
 	}
 	var resetMap = null;
 	var incrementMap = null;
+    var setMap = null;
+
 	var reset = props["counter-reset"];
 	if (reset) {
 		var resetVal = reset.evaluate(this.context);
@@ -2501,6 +2503,13 @@ adapt.csscasc.CascadeInstance.prototype.pushCounters = function(props) {
 			resetMap = adapt.cssprop.toCounters(resetVal, true);
 		}
 	}
+    var set = props["counter-set"];
+    if (set) {
+        var setVal = set.evaluate(this.context);
+        if (setVal) {
+            setMap = adapt.cssprop.toCounters(setVal, false);
+        }
+    }
 	var increment = props["counter-increment"];
 	if (increment) {
 		var incrementVal = increment.evaluate(this.context);
@@ -2522,6 +2531,16 @@ adapt.csscasc.CascadeInstance.prototype.pushCounters = function(props) {
 	if (resetMap) {
 	    for (var resetCounterName in resetMap) {
 	        this.defineCounter(resetCounterName, resetMap[resetCounterName]);
+	    }
+	}
+	if (setMap) {
+	    for (var setCounterName in setMap) {
+	        if (!this.counters[setCounterName]) {
+	            this.defineCounter(setCounterName, setMap[setCounterName]);
+	        } else {
+	            var counterValues = this.counters[setCounterName];                
+	            counterValues[counterValues.length - 1] = setMap[setCounterName];
+            }
 	    }
 	}
 	if (incrementMap) {
