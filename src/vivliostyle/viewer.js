@@ -101,6 +101,20 @@ goog.scope(function() {
     vivliostyle.viewer.DocumentOptions;
 
     /**
+     * Options for a single source document.
+     * - url: URL of the document.
+     * - startPage: If specified, the `page` page-based counter is set to the specified value on the first page of the document. It is equivalent to specifying `counter-reset: page [specified value - 1]` on that page.
+     * - skipPagesBefore: If specified, the `page` page-based counter is incremented by the specified value *before* updating page-based counters on the first page of the document. This option is ignored if `startPageNumber` option is also specified.
+     * @dict
+     * @typedef {(string|{
+     *     url: string,
+     *     startPage: (number|undefined),
+     *     skipPagesBefore: (number|undefined)
+     * })}
+     */
+    vivliostyle.viewer.SingleDocumentOptions;
+
+    /**
      * Vivliostyle Viewer class.
      * @param {!vivliostyle.viewer.ViewerSettings} settings
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_options
@@ -165,15 +179,15 @@ goog.scope(function() {
 
     /**
      * Load an HTML or XML document(s).
-     * @param {string|!Array<string>} url
+     * @param {!vivliostyle.viewer.SingleDocumentOptions|!Array<!vivliostyle.viewer.SingleDocumentOptions>} singleDocumentOptions
      * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
      */
-    Viewer.prototype.loadDocument = function(url, opt_documentOptions, opt_viewerOptions) {
-        if (!url) {
+    Viewer.prototype.loadDocument = function(singleDocumentOptions, opt_documentOptions, opt_viewerOptions) {
+        if (!singleDocumentOptions) {
             this.eventTarget.dispatchEvent({"type": "error", "content": "No URL specified"});
         }
-        this.loadDocumentOrEPUB(url, null, opt_documentOptions, opt_viewerOptions);
+        this.loadDocumentOrEPUB(singleDocumentOptions, null, opt_documentOptions, opt_viewerOptions);
     };
 
     /**
@@ -190,14 +204,52 @@ goog.scope(function() {
     };
 
     /**
+     * @param {(vivliostyle.viewer.SingleDocumentOptions|Array<!vivliostyle.viewer.SingleDocumentOptions>)} singleDocumentOptions
+     * @return {?Array<!adapt.viewer.SingleDocumentParam>}
+     */
+    function convertSingleDocumentOptions(singleDocumentOptions) {
+        /**
+         * @param {*} num
+         * @returns {?number}
+         */
+        function toNumberOrNull(num) {
+            return typeof num === "number" ? num : null;
+        }
+
+        function convert(opt) {
+            if (typeof opt === "string") {
+                return /** @type {adapt.viewer.SingleDocumentParam} */ ({
+                    url: opt,
+                    startPage: null,
+                    skipPagesBefore: null
+                });
+            } else {
+                return /** @type {adapt.viewer.SingleDocumentParam} */ ({
+                    url: opt["url"],
+                    startPage: toNumberOrNull(opt["startPage"]),
+                    skipPagesBefore: toNumberOrNull(opt["skipPagesBefore"])
+                });
+            }
+        }
+
+        if (Array.isArray(singleDocumentOptions)) {
+            return singleDocumentOptions.map(convert);
+        } else if (singleDocumentOptions) {
+            return [convert(singleDocumentOptions)];
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Load an HTML or XML document, or an EPUB document.
      * @private
-     * @param {?(string|!Array<string>)} url
+     * @param {?(!vivliostyle.viewer.SingleDocumentOptions|!Array<!vivliostyle.viewer.SingleDocumentOptions>)} singleDocumentOptions
      * @param {?string} epubUrl
      * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
      */
-    Viewer.prototype.loadDocumentOrEPUB = function(url, epubUrl, opt_documentOptions, opt_viewerOptions) {
+    Viewer.prototype.loadDocumentOrEPUB = function(singleDocumentOptions, epubUrl, opt_documentOptions, opt_viewerOptions) {
         var documentOptions = opt_documentOptions || {};
         var userStyleSheet;
         var uss = documentOptions["userStyleSheet"];
@@ -212,11 +264,11 @@ goog.scope(function() {
         }
 
         var command = Object.assign({
-            "a": url ? "loadXML" : "loadEPUB",
+            "a": singleDocumentOptions ? "loadXML" : "loadEPUB",
 
             "userAgentRootURL": this.settings["userAgentRootURL"],
 
-            "url": url || epubUrl,
+            "url": convertSingleDocumentOptions(singleDocumentOptions) || epubUrl,
             "document": documentOptions["documentObject"],
             "fragment": documentOptions["fragment"],
             "userStyleSheet": userStyleSheet

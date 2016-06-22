@@ -341,6 +341,19 @@ goog.scope(function() {
     };
 
     /**
+     * Forcefully set the `page` page-based counter to the specified value.
+     * @param {number} pageNumber
+     */
+    vivliostyle.counters.CounterStore.prototype.forceSetPageCounter = function(pageNumber) {
+        var counters = this.currentPageCounters["page"];
+        if (!counters || !counters.length) {
+            this.currentPageCounters["page"] = [pageNumber];
+        } else {
+            counters[counters.length - 1] = pageNumber;
+        }
+    };
+
+    /**
      * Update the page-based counters with 'counter-reset' and 'counter-increment' properties within the page context. Call before starting layout of the page.
      * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle
      * @param {!adapt.expr.Context} context

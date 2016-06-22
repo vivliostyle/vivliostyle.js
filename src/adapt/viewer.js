@@ -33,6 +33,15 @@ adapt.viewer.ViewportSize;
 adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE = "data-vivliostyle-viewer-status";
 
 /**
+ * @typedef {{
+ *     url: string,
+ *     startPage: ?number,
+ *     skipPagesBefore: ?number
+ * }}
+ */
+adapt.viewer.SingleDocumentParam;
+
+/**
  * @param {Window} window
  * @param {!HTMLElement} viewportElement
  * @param {string} instanceId
@@ -174,12 +183,7 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
     vivliostyle.profile.profiler.registerStartTiming("loadXML");
     vivliostyle.profile.profiler.registerStartTiming("loadFirstPage");
     this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
-    /** @type {!Array<string>} */ var urls;
-    if (typeof command["url"] === "string") {
-        urls = [command["url"]];
-    } else {
-        urls = command["url"];
-    }
+    /** @type {!Array<!adapt.viewer.SingleDocumentParam>} */ var params = command["url"];
     var doc = /** @type {Document} */ (command["document"]);
 	var fragment = /** @type {?string} */ (command["fragment"]);
     var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
@@ -195,12 +199,17 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
         }
     }
 	store.init().then(function() {
-	    var xmlURLs = urls.map(function(url) {
-            return adapt.base.resolveURL(url, self.window.location.href);
+        /** @type {!Array<!adapt.epub.OPFItemParam>} */ var resolvedParams = params.map(function(p, index) {
+            return {
+                url: adapt.base.resolveURL(p.url, self.window.location.href),
+                index: index,
+                startPage: p.startPage,
+                skipPagesBefore: p.skipPagesBefore
+            };
         });
-	    self.packageURL = xmlURLs;
+	    self.packageURL = resolvedParams.map(function(p) { return p.url; });
 	    self.opf = new adapt.epub.OPFDoc(store, "");
-	    self.opf.initWithChapters(xmlURLs, doc).then(function() {
+	    self.opf.initWithChapters(resolvedParams, doc).then(function() {
             self.opf.resolveFragment(fragment).then(function(position) {
                 self.pagePosition = position;
                 self.resize().then(function() {

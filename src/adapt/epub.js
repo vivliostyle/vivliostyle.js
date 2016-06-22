@@ -5,6 +5,7 @@
  */
 goog.provide('adapt.epub');
 
+goog.require("goog.asserts");
 goog.require("vivliostyle.constants");
 goog.require("vivliostyle.logging");
 goog.require('adapt.net');
@@ -196,6 +197,16 @@ adapt.epub.EPUBDocStore.prototype.load = function(url) {
 };
 
 /**
+ * @typedef {{
+ *     url: string,
+ *     index: number,
+ *     startPage: ?number,
+ *     skipPagesBefore: ?number
+ * }}
+ */
+adapt.epub.OPFItemParam;
+
+/**
  * @constructor
  */
 adapt.epub.OPFItem = function() {
@@ -208,6 +219,8 @@ adapt.epub.OPFItem = function() {
 	/** @type {?boolean} */ this.compressed = null;
 	/** @type {number} */ this.epage = 0;
 	/** @type {number} */ this.epageCount = 0;
+	/** @type {?number} */ this.startPage = null;
+	/** @type {?number} */ this.skipPagesBefore = null;
 	/** @type {Object.<string,boolean>} */ this.itemProperties = adapt.base.emptyObj;
 };
 
@@ -224,6 +237,17 @@ adapt.epub.OPFItem.prototype.initWithElement = function(itemElem, opfURL) {
 	if (propStr) {
 		this.itemProperties = adapt.base.arrayToSet(propStr.split(/\s+/));
 	}
+};
+
+/**
+ * @param {!adapt.epub.OPFItemParam} param
+ */
+adapt.epub.OPFItem.prototype.initWithParam = function(param) {
+	this.spineIndex = param.index;
+	this.id = "item" + (param.index+1);
+	this.src = param.url;
+	this.startPage = param.startPage;
+	this.skipPagesBefore = param.skipPagesBefore;
 };
 
 /**
@@ -757,11 +781,11 @@ adapt.epub.OPFDoc.prototype.assignAutoPages = function() {
 };
 
 /**
- * Creates a fake OPF "document" that contains a single OPS chapter.
- * @param {!Array<string>} urls OPS (XHTML) document URL
+ * Creates a fake OPF "document" that contains OPS chapters.
+ * @param {!Array<!adapt.epub.OPFItemParam>} params
  * @param {?Document} doc
  */
-adapt.epub.OPFDoc.prototype.initWithChapters = function(urls, doc) {
+adapt.epub.OPFDoc.prototype.initWithChapters = function(params, doc) {
 	this.itemMap = {};
 	this.itemMapByPath = {};
 	this.items = [];
@@ -769,11 +793,10 @@ adapt.epub.OPFDoc.prototype.initWithChapters = function(urls, doc) {
 	// create a minimum fake OPF XML for navigation with EPUB CFI
 	var opfXML = this.opfXML = new adapt.xmldoc.XMLDocHolder(null, "", new DOMParser().parseFromString("<spine></spine>", "text/xml"));
 
-	urls.forEach(function(url, index) {
+	params.forEach(function(param) {
 		var item = new adapt.epub.OPFItem();
-		item.spineIndex = index;
-		item.id = "item" + (index+1);
-		item.src = url;
+		item.initWithParam(param);
+		goog.asserts.assert(item.id);
 
 		var itemref = opfXML.document.createElement("itemref");
 		itemref.setAttribute("idref", item.id);
@@ -781,12 +804,12 @@ adapt.epub.OPFDoc.prototype.initWithChapters = function(urls, doc) {
 		item.itemRefElement = itemref;
 
 		this.itemMap[item.id] = item;
-		this.itemMapByPath[url] = item;
+		this.itemMapByPath[param.url] = item;
 		this.items.push(item);
 	}, this);
 
     if (doc) {
-        return this.store.addDocument(urls[0], doc);
+        return this.store.addDocument(params[0].url, doc);
     } else {
         return adapt.task.newResult(null);
     }
@@ -1769,8 +1792,16 @@ adapt.epub.OPFView.prototype.getPageViewItem = function() {
     				viewportSize.width, viewportSize.height);
     	}
 		var previousViewItem = self.spineItems[self.spineIndex - 1];
-		var pageNumberOffset = previousViewItem ?
-			previousViewItem.instance.pageNumberOffset + previousViewItem.pages.length : 0;
+		var pageNumberOffset;
+		if (item.startPage !== null) {
+			pageNumberOffset = item.startPage - 1;
+		} else {
+			pageNumberOffset = previousViewItem ? previousViewItem.instance.pageNumberOffset + previousViewItem.pages.length : 0;
+			if (item.skipPagesBefore !== null) {
+				pageNumberOffset += item.skipPagesBefore;
+			}
+		}
+		self.counterStore.forceSetPageCounter(pageNumberOffset);
 
         var instance = new adapt.ops.StyleInstance(style, xmldoc, self.opf.lang,
 			viewport, self.clientLayout, self.fontMapper, customRenderer, self.opf.fallbackMap, pageNumberOffset,
