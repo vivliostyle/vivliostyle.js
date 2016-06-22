@@ -536,6 +536,45 @@ adapt.vgen.ViewFactory.prototype.resolveURL = function(url) {
 };
 
 /**
+ *
+ * @param {!Object.<string,adapt.css.Val>} computedStyle
+ */
+adapt.vgen.ViewFactory.prototype.transferPolyfilledInheritedProps = function(computedStyle) {
+	var polyfilledInheritedProps = adapt.csscasc.polyfilledInheritedProps.filter(function(name) {
+		return computedStyle[name];
+	});
+	if (polyfilledInheritedProps.length) {
+		var props = this.nodeContext.inheritedProps;
+		if (this.nodeContext.parent) {
+			props = this.nodeContext.inheritedProps = {};
+			for (var n in this.nodeContext.parent.inheritedProps) {
+				props[n] = this.nodeContext.parent.inheritedProps[n];
+			}
+		}
+		polyfilledInheritedProps.forEach(function(name) {
+			var value = computedStyle[name];
+			if (value) {
+				if (value instanceof adapt.css.Int) {
+					props[name] = (/** @type {adapt.css.Int} */ (value)).num;
+				} else if (value instanceof adapt.css.Ident) {
+					props[name] = (/** @type {adapt.css.Ident} */ (value)).name;
+				} else if (value instanceof adapt.css.Numeric) {
+					var numericVal = (/** @type {adapt.css.Numeric} */ (value));
+					switch (numericVal.unit) {
+						case "dpi":
+						case "dpcm":
+						case "dppx":
+							props[name] = numericVal.num * adapt.expr.defaultUnitSizes[numericVal.unit];
+							break;
+					}
+				}
+				delete computedStyle[name];
+			}
+		});
+	}
+};
+
+/**
  * @param {boolean} firstTime
  * @param {boolean} atUnforcedBreak
  * @private
@@ -556,6 +595,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     	elementStyle = self.inheritFromSourceParent(elementStyle);
     }
     self.nodeContext.vertical = self.computeStyle(self.nodeContext.vertical, elementStyle, computedStyle);
+
+	this.transferPolyfilledInheritedProps(computedStyle);
+
 	if (computedStyle["direction"]) {
 		self.nodeContext.direction = computedStyle["direction"].toString();
 	}
@@ -795,6 +837,17 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 		    if (result.localName == "iframe" && result.namespaceURI == adapt.base.NS.XHTML) {
 		    	adapt.vgen.initIFrame(/** @type {HTMLIFrameElement} */ (result));   	
 		    }
+
+			var imageResolution = /** @type {(number|undefined)} */
+				(self.nodeContext.inheritedProps["image-resolution"]);
+			/** @const {!Array<!{image: !HTMLElement, element: !HTMLElement, fetcher: !adapt.taskutil.Fetcher<string>}>} */ var images = [];
+			var cssWidth = computedStyle["width"];
+			var cssHeight = computedStyle["height"];
+			var attrWidth = element.getAttribute("width");
+			var attrHeight = element.getAttribute("height");
+			var hasAutoWidth = (!cssWidth || cssWidth === adapt.css.ident.auto) && !attrWidth;
+			var hasAutoHeight = (!cssHeight || cssHeight === adapt.css.ident.auto) && !attrHeight;
+
 			if (element.namespaceURI != adapt.base.NS.FB2 || tag == "td") {
 			    var attributes = element.attributes;
 			    var attributeCount = attributes.length;
@@ -827,6 +880,13 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 								return self.resolveURL(value.trim());
 							}).join(",");
 						}
+						if (attributeName === "poster" && tag === "video" && ns === adapt.base.NS.XHTML &&
+							hasAutoWidth && hasAutoHeight) {
+							var image = new Image();
+							var fetcher = adapt.taskutil.loadElement(image, attributeValue);
+							fetchers.push(fetcher);
+							images.push({image: image, element: result, fetcher: fetcher});
+						}
 			        }
 			        else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
 			            continue; //namespace declaration (in Firefox)
@@ -839,9 +899,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			            if (attributePrefix)
 			                attributeName = attributePrefix + ":" + attributeName;
 			        }
-				    if (attributeName == "src" && !attributeNS && tag == "img" && ns == adapt.base.NS.XHTML) {
-				    	// HTML img element should start loading only once all attributes are assigned.
-				    	delayedSrc = attributeValue;
+				    if (attributeName == "src" && !attributeNS && (tag == "img" || tag == "input") && ns == adapt.base.NS.XHTML) {
+						// HTML img element should start loading only once all attributes are assigned.
+						delayedSrc = attributeValue;
 				    } else if (attributeName == "href" && tag == "image" && ns == adapt.base.NS.SVG && attributeNS == adapt.base.NS.XLINK) {
 			        	self.page.fetchers.push(adapt.taskutil.loadElement(result, attributeValue));
 			        } else {
@@ -855,13 +915,18 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			        }
 			    }
 			    if (delayedSrc) {
-		        	var imageFetcher = adapt.taskutil.loadElement(result, delayedSrc);
-					var w = computedStyle["width"];
-					var h = computedStyle["height"];
-		        	if (w && w !== adapt.css.ident.auto && h && h !== adapt.css.ident.auto) {
+					var image = tag === "input" ? new Image() : result;
+		        	var imageFetcher = adapt.taskutil.loadElement(image, delayedSrc);
+					if (image !== result) {
+						result.src = delayedSrc;
+					}
+		        	if (!hasAutoWidth && !hasAutoHeight) {
 		        		// No need to wait for the image, does not affect layout
 		        		self.page.fetchers.push(imageFetcher);
 		        	} else {
+						if (hasAutoWidth && hasAutoHeight && imageResolution) {
+							images.push({image: image, element: result, fetcher: imageFetcher});
+						}
 		    			fetchers.push(imageFetcher);
 		        	}
 			    }			    
@@ -873,30 +938,10 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     			fetchers.push(adapt.taskutil.loadElement(new Image(), listStyleURL));				
 			}
 			self.applyComputedStyles(result, computedStyle);
-		    var widows = computedStyle["widows"];
-		    var orphans = computedStyle["orphans"];
-			var boxDecorationBreak = computedStyle["box-decoration-break"];
-		    if (widows || orphans || boxDecorationBreak) {
-		    	if (self.nodeContext.parent) {
-			    	self.nodeContext.inheritedProps = {};
-			    	for (var n in self.nodeContext.parent.inheritedProps) {
-			    		self.nodeContext.inheritedProps[n] = self.nodeContext.parent.inheritedProps[n];
-			    	}
-		    	}
-		    	if (widows instanceof adapt.css.Int) {
-		    		self.nodeContext.inheritedProps["widows"] = (/** @type {adapt.css.Int} */ (widows)).num;
-		    	}
-		    	if (orphans instanceof adapt.css.Int) {
-		    		self.nodeContext.inheritedProps["orphans"] = (/** @type {adapt.css.Int} */ (orphans)).num;
-		    	}
-				if (boxDecorationBreak instanceof adapt.css.Ident) {
-					self.nodeContext.inheritedProps["box-decoration-break"] = (/** @type {adapt.css.Ident} */ (boxDecorationBreak)).name;
-				}
-		    }
 			if (!self.nodeContext.inline) {
 				var blackList = null;
 				if (!firstTime) {
-					if (boxDecorationBreak !== adapt.css.getName("clone")) {
+					if (self.nodeContext.inheritedProps["box-decoration-break"] !== "clone") {
 						blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeBlackListVert : adapt.vgen.frontEdgeBlackListHor;
 					} else {
 						// When box-decoration-break: clone, cloned margins are always truncated to zero.
@@ -917,6 +962,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 		    self.viewNode = result;
 		    if (fetchers.length) {
 		    	adapt.taskutil.waitForFetchers(fetchers).then(function() {
+					if (imageResolution > 0) {
+						self.modifyElemDimensionWithImageResolution(images, imageResolution);
+					}
 		    		frame.finish(needToProcessChildren);
 		    	});
 		    } else {
@@ -927,6 +975,25 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 	    });
     });
 	return frame.result();    
+};
+
+/**
+ * @param {!Array<!{image: !HTMLElement, element: !HTMLElement, fetcher: !adapt.taskutil.Fetcher<string>}>} images
+ * @param {number} imageResolution
+ */
+adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = function(images, imageResolution) {
+	images.forEach(function(param) {
+		if (param.fetcher.get().get() === "load") {
+			var img = param.image;
+			var w = img.width;
+			var h = img.height;
+			var elem = param.element;
+			if (w > 0 && h > 0) {
+				adapt.base.setCSSProperty(elem, "width", (w / imageResolution) + "px");
+				adapt.base.setCSSProperty(elem, "height", (h / imageResolution) + "px");
+			}
+		}
+	});
 };
 
 /**
