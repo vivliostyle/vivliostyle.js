@@ -23,7 +23,13 @@
   - Spec: [CSS Fonts Module Level 3 - Relative sizing: the font-size-adjust property](https://www.w3.org/TR/css-fonts-3/#font-size-adjust-prop)
 - Support `counter-set` property
   - <https://github.com/vivliostyle/vivliostyle.js/pull/255>
-  - Spec: [CSS Lists and Counters Module Level 3 - Automatic Numbering With Counters](https://drafts.csswg.org/css-lists-3/#propdef-counter-set) 
+  - Spec: [CSS Lists and Counters Module Level 3 - Automatic Numbering With Counters](https://drafts.csswg.org/css-lists-3/#propdef-counter-set)
+- Support `image-resolution` property
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/260>
+  - Spec: [CSS Image Values and Replaced Content Module Level 3 - Overriding Image Resolutions: the image-resolution property](https://drafts.csswg.org/css-images-3/#the-image-resolution)
+  - Only `<resolution>` value is supported.
+  - Only supported for content of `img`, `input[type=image]` and `video` (applied to poster images) elements and before/after pseudoelements. Other images such as background images, list images or border images are not supported.
+  - The property is applied to vector images such as SVG, as well as raster images. This behavior is different from what the spec specifies.
 
 ### Changed
 - `counter-reset` and `counter-increment` specified in a page master (`@-epubx-page-master`) are now effective to page-based counters
