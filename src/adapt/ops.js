@@ -638,9 +638,9 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     offsetX += layoutContainer.left + layoutContainer.marginLeft + layoutContainer.borderLeft;
     offsetY += layoutContainer.top + layoutContainer.marginTop + layoutContainer.borderTop;
     var cont;
+	var removed = false;
     if (!flowName || !flowName.isIdent()) {
 	    var contentVal = boxInstance.getProp(self, "content");
-		var removed = false;
 	    if (contentVal && adapt.vtree.nonTrivialContent(contentVal)) {
 			var innerContainer = self.viewport.document.createElement("span");
 			contentVal.visit(new adapt.vtree.ContentPropertyHandler(innerContainer, self));
@@ -757,7 +757,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     }
     cont.then(function() {
         if (!boxInstance.isAutoHeight || Math.floor(layoutContainer.computedBlockSize) > 0) {
-        	if (!dontExclude) {
+        	if (!removed && !dontExclude) {
 	            var outerX = layoutContainer.originX + layoutContainer.left;
 	            var outerY = layoutContainer.originY + layoutContainer.top;
 	            var outerWidth = layoutContainer.getInsetLeft() + layoutContainer.width + layoutContainer.getInsetRight();
@@ -765,10 +765,11 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	            var outerShapeProp = boxInstance.getProp(self, "shape-outside");
 	            var outerShape = adapt.cssprop.toShape(outerShapeProp, outerX, outerY,
 	            		outerWidth, outerHeight, self);
-	            if (adapt.base.checkLShapeFloatBug(self.viewport.root)) {
-	            	// Simplistic bug workaround: add a copy of the shape translated up.
-		            exclusions.push(outerShape.withOffset(0, -1.25 * self.queryUnitSize("em", false)));
-	            }
+	            // Though it seems that LShapeFloatBug still exists in Firefox, it apparently does not occur on exclusion floats. See the test file: test/files/column-break-bug.html
+	            // if (adapt.base.checkLShapeFloatBug(self.viewport.root)) {
+	            // 	// Simplistic bug workaround: add a copy of the shape translated up.
+		        //     exclusions.push(outerShape.withOffset(0, -1.25 * self.queryUnitSize("em", false)));
+	            // }
 	            exclusions.push(outerShape);
         	}
         } else if (boxInstance.children.length == 0) {

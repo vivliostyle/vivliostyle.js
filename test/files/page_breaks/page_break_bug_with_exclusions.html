@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Column break bug</title>
+    <style>
+        @-epubx-page-template {
+            .body {
+                -epubx-flow-from: body;
+                top: 10px;
+                left: 20px;
+                right: 20px;
+                bottom: 10px;
+                overflow: visible;
+            }
+            .exclusion {
+                content: "exclusion";
+                font-size: 8px;
+                line-height: 8px;
+                background: rgba(255, 0, 0, 0.2);
+            }
+            @-epubx-page-master {
+                -epubx-page: 1;
+                @-epubx-partition class(body) {}
+                @-epubx-partition class(exclusion) {
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    height: 11px;
+                }
+            }
+            @-epubx-page-master {
+                -epubx-page: 2;
+                @-epubx-partition class(body) {}
+                @-epubx-partition class(exclusion) {
+                    left: 0;
+                    right: 100px;
+                    top: 25px;
+                    height: 1px;
+                }
+            }
+        }
+        @page {
+            size: 200px;
+        }
+        * {
+            margin: 0;
+        }
+        body {
+            font-size: 20px;
+            line-height: 20px;
+        }
+        p {
+            background: rgba(0, 255, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+<p>
+    あいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえお
+</p>
+</body>
+</html>
