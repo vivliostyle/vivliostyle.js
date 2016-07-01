@@ -845,8 +845,8 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			var cssHeight = computedStyle["height"];
 			var attrWidth = element.getAttribute("width");
 			var attrHeight = element.getAttribute("height");
-			var hasAutoWidth = (!cssWidth || cssWidth === adapt.css.ident.auto) && !attrWidth;
-			var hasAutoHeight = (!cssHeight || cssHeight === adapt.css.ident.auto) && !attrHeight;
+			var hasAutoWidth = cssWidth === adapt.css.ident.auto || (!cssWidth && !attrWidth);
+			var hasAutoHeight = cssHeight === adapt.css.ident.auto || (!cssHeight && !attrHeight);
 
 			if (element.namespaceURI != adapt.base.NS.FB2 || tag == "td") {
 			    var attributes = element.attributes;
