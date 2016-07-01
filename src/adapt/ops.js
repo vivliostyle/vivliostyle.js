@@ -765,10 +765,11 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
 	            var outerShapeProp = boxInstance.getProp(self, "shape-outside");
 	            var outerShape = adapt.cssprop.toShape(outerShapeProp, outerX, outerY,
 	            		outerWidth, outerHeight, self);
-	            if (adapt.base.checkLShapeFloatBug(self.viewport.root)) {
-	            	// Simplistic bug workaround: add a copy of the shape translated up.
-		            exclusions.push(outerShape.withOffset(0, -1.25 * self.queryUnitSize("em", false)));
-	            }
+	            // Though it seems that LShapeFloatBug still exists in Firefox, it apparently does not occur on exclusion floats. See the test file: test/files/column-break-bug.html
+	            // if (adapt.base.checkLShapeFloatBug(self.viewport.root)) {
+	            // 	// Simplistic bug workaround: add a copy of the shape translated up.
+		        //     exclusions.push(outerShape.withOffset(0, -1.25 * self.queryUnitSize("em", false)));
+	            // }
 	            exclusions.push(outerShape);
         	}
         } else if (boxInstance.children.length == 0) {
