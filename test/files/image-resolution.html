@@ -12,11 +12,24 @@
             width: 2in;
             overflow: visible;
         }
+        p {
+            clear: both;
+        }
         canvas {
             background: #ccc;
         }
         video, canvas, img, input {
             max-width: 100%;
+        }
+        .auto-width {
+            width: auto;
+            height: 72px;
+            float: left;
+        }
+        .auto-height {
+            width: 144px;
+            height: auto;
+            float: left;
         }
         .bg {
             background-image: url("img/300x150.png");
@@ -87,6 +100,12 @@
 </p>
 <p>
     img (PNG) <img src="img/300x150.png" style="width:1.5in" alt="">
+</p>
+<p>
+    img (PNG) <img src="img/300x150.png" width="300" height="150" class="auto-width" alt="">
+</p>
+<p>
+    img (PNG) <img src="img/300x150.png" width="300" height="150" class="auto-height" alt="">
 </p>
 <p>
     img (SVG) <img src="img/300x150.svg" width="144" alt="">
