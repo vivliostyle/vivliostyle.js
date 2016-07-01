@@ -33,6 +33,7 @@ adapt.csscasc.inheritedProps = {
     "font-style": true,
 	"font-variant": true,
 	"font-weight": true,
+	"image-resolution": true,
 	"letter-spacing": true,
     "line-break": true,
 	"line-height": true,
@@ -74,6 +75,14 @@ adapt.csscasc.inheritedProps = {
     "word-wrap": true,
 	"writing-mode": true
 };
+
+/** @const */
+adapt.csscasc.polyfilledInheritedProps = [
+	"box-decoration-break", // TODO: box-decoration-block should not be inherited. https://github.com/vivliostyle/vivliostyle.js/issues/259
+	"image-resolution",
+	"orphans",
+	"widows"
+];
 
 /** @const */
 adapt.csscasc.supportedNamespaces = {

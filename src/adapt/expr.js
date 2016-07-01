@@ -224,7 +224,11 @@ adapt.expr.defaultUnitSizes = {
     "em": 16,
     "rem": 16,
     "ex": 8,
-    "rex": 8
+    "rex": 8,
+    // <resolution>
+    "dppx": 1,
+    "dpi": 1/96,
+    "dpcm": 2.54/96
 };
 
 /**
