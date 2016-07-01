@@ -502,6 +502,11 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 ### [CSS Image Values and Replaced Content 3](https://www.w3.org/TR/css3-images/)
 
+- [image-resolution](https://www.w3.org/TR/css3-images/#the-image-resolution)
+  - Supported in all browsers
+  - Only `<resolution>` value is supported.
+  - Only supported for content of `img`, `input[type=image]` and `video` (applied to poster images) elements and before/after pseudoelements. Other images such as background images, list images or border images are not supported.
+  - The property is applied to vector images such as SVG, as well as raster images. This behavior is different from what the spec specifies.
 - [object-fit](https://www.w3.org/TR/css3-images/#object-fit)
   - Support depends on browser capabilities
 - [object-position](https://www.w3.org/TR/css3-images/#object-position)

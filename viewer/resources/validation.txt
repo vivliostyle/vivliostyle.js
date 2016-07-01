@@ -289,6 +289,7 @@ font-variant-east-asian = normal | [[ jis78 | jis83 | jis90 | jis04 | simplified
 font-feature-settings = COMMA( SPACE( STRING [ on | off | INT ]? )+ );
 
 /* CSS Images */
+image-resolution = RESOLUTION;
 object-fit = fill | contain | cover | none | scale-down;
 object-position = COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */
 
