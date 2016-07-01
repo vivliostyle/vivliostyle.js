@@ -837,6 +837,10 @@ adapt.base.hasVerticalBBoxBug = null;
 
 /**
  * Check if there is a bug with the bounding boxes of vertical text characters.
+ * Though method used to be used check Chrome bug, it seems that the bug has been already fixed:
+ *   https://bugs.chromium.org/p/chromium/issues/detail?id=297808
+ * We now use this method to check Firefox bug:
+ *   https://bugzilla.mozilla.org/show_bug.cgi?id=1159309
  * @param {HTMLElement} body
  * @return {boolean}
  */
@@ -859,8 +863,8 @@ adapt.base.checkVerticalBBoxBug = function(body) {
 		var range = doc.createRange();
 		range.setStart(t, 0);
 		range.setEnd(t, 1);
-		var leftEdge = range.getBoundingClientRect().left;
-		adapt.base.hasVerticalBBoxBug = leftEdge < 50;
+		var box = range.getBoundingClientRect();
+		adapt.base.hasVerticalBBoxBug = (box.right - box.left < 10);
 		body.removeChild(container);
 	}
 	return adapt.base.hasVerticalBBoxBug;
