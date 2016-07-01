@@ -63,6 +63,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/250>
 - Fix layout of floats inside flex containers
   - <https://github.com/vivliostyle/vivliostyle.js/pull/253>
+- Fix page break bug in vertical text on Firefox (partially)
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/263>
 
 ## [2016.4](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.4) - 2016-04-08
 
