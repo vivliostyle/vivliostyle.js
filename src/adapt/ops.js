@@ -638,9 +638,9 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     offsetX += layoutContainer.left + layoutContainer.marginLeft + layoutContainer.borderLeft;
     offsetY += layoutContainer.top + layoutContainer.marginTop + layoutContainer.borderTop;
     var cont;
+	var removed = false;
     if (!flowName || !flowName.isIdent()) {
 	    var contentVal = boxInstance.getProp(self, "content");
-		var removed = false;
 	    if (contentVal && adapt.vtree.nonTrivialContent(contentVal)) {
 			var innerContainer = self.viewport.document.createElement("span");
 			contentVal.visit(new adapt.vtree.ContentPropertyHandler(innerContainer, self));
@@ -757,7 +757,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     }
     cont.then(function() {
         if (!boxInstance.isAutoHeight || Math.floor(layoutContainer.computedBlockSize) > 0) {
-        	if (!dontExclude) {
+        	if (!removed && !dontExclude) {
 	            var outerX = layoutContainer.originX + layoutContainer.left;
 	            var outerY = layoutContainer.originY + layoutContainer.top;
 	            var outerWidth = layoutContainer.getInsetLeft() + layoutContainer.width + layoutContainer.getInsetRight();
