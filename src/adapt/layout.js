@@ -24,13 +24,16 @@ adapt.layout.mediaTags = {
 };
 
 /**
- * Chrome bug workaround.
+ * Though method used to be used as a workaround for Chrome bug, it seems that the bug has been already fixed:
+ *   https://bugs.chromium.org/p/chromium/issues/detail?id=297808
+ * We now use this method as a workaround for Firefox bug:
+ *   https://bugzilla.mozilla.org/show_bug.cgi?id=1159309
  * @param {adapt.vtree.ClientLayout} clientLayout
  * @param {Node} node
  * @param {Array.<adapt.vtree.ClientRect>} boxes
  * @return {Array.<adapt.vtree.ClientRect>}
  */
-adapt.layout.fixBoxesForNode = function(clientLayout, boxes, node) {
+adapt.layout.fixBoxesForNode = function(clientLayout, boxes, node) {console.info("trying to fix");
 	var fullRange = node.ownerDocument.createRange();
 	fullRange.setStart(node, 0);
 	fullRange.setEnd(node, node.textContent.length);
@@ -42,8 +45,8 @@ adapt.layout.fixBoxesForNode = function(clientLayout, boxes, node) {
 		for (k = 0; k < fullBoxes.length; k++) {
 			var fullBox = fullBoxes[k];
 			if (box.top >= fullBox.top && box.bottom <= fullBox.bottom &&
-					Math.abs(box.right - fullBox.right) < 1) {
-				result.push({top:box.top, left:fullBox.left, bottom:fullBox.bottom, right: fullBox.right});
+					Math.abs(box.left - fullBox.left) < 1) {
+				result.push({top:box.top, left:fullBox.left, bottom:box.bottom, right: fullBox.right});
 				break;
 			}
 		}
