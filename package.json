@@ -1,6 +1,6 @@
 {
   "name": "vivliostyle",
-  "version": "2016.4.0",
+  "version": "2016.7.0",
   "description": "Library for web sites with rich paged viewing and EPUB support, shared with Vivliostyle Formatter & Browser",
   "scripts": {
   "build": "mkdirp lib && java -jar node_modules/google-closure-compiler/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --language_in ECMASCRIPT5 --warning_level VERBOSE --output_wrapper_file src/wrapper.js --externs src/externs.js --js_output_file lib/vivliostyle.min.js src/closure/goog/base.js src/closure/goog/*/*.js src/adapt/*.js src/vivliostyle/*.js",

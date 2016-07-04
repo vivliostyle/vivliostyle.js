@@ -1,6 +1,6 @@
 # Features supported by Vivliostyle<%= $version %>
 
-The Vivliostyle uses a two-layer architecture, with some of its functionality implemented purely in javascript, and some being delegated all or in part to the browser engine on top of which Vivliostyle is running. In the following list <quote>Supported in all browsers</quote> indicates that features implemented in Javascript that will work regardless of the browser engine. Other features' availability and behavior do vary based on what is supported by the underlying browser engine. Vivliostyle Formatter uses Chromium 49.0.2623.110's engine.
+The Vivliostyle uses a two-layer architecture, with some of its functionality implemented purely in javascript, and some being delegated all or in part to the browser engine on top of which Vivliostyle is running. In the following list <quote>Supported in all browsers</quote> indicates that features implemented in Javascript that will work regardless of the browser engine. Other features' availability and behavior do vary based on what is supported by the underlying browser engine. Vivliostyle Formatter uses Chromium 51.0.2704.84's engine.
 
 Properties where <quote>Allowed prefixes</quote> is indicated may be used with any of the listed prefixes, or preferably without a prefix, regardless of the underlying browser engine. If Vivliostyle needs to invoke the browser engine, it will internally convert to the appropriate syntax.
 
@@ -19,6 +19,13 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - [HSL color values](https://www.w3.org/TR/css3-color/#hsl-color), [HSLA color values](https://www.w3.org/TR/css3-color/#hsla-color)
   - [Extended color keywords](https://www.w3.org/TR/css3-color/#svg-color)
   - [‘currentColor’ color keyword](https://www.w3.org/TR/css3-color/#currentcolor)
+- [Attribute references: `attr()`](https://www.w3.org/TR/css-values/#attr-notation)
+  - Supported in all browsers
+  - Only supported in values of `content` property.
+  - Only 'string' and 'url' types are supported.
+- [Cross references: `target-counter()` and `target-counters()`](https://drafts.csswg.org/css-content/#cross-references)
+  - Supported in all browsers
+  - Only supported in values of `content` property.
 
 ## Selectors
 
@@ -251,6 +258,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 - [counter-increment](https://www.w3.org/TR/CSS2/generate.html#propdef-counter-increment)
   - Supported in all browsers
 - [counter-reset](https://www.w3.org/TR/CSS2/generate.html#propdef-counter-reset)
+  - Supported in all browsers
+- [counter-set](https://drafts.csswg.org/css-lists-3/#propdef-counter-set)
   - Supported in all browsers
 - [cursor](https://www.w3.org/TR/CSS2/ui.html#propdef-cursor)
   - Support depends on browser capabilities
@@ -493,6 +502,11 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 ### [CSS Image Values and Replaced Content 3](https://www.w3.org/TR/css3-images/)
 
+- [image-resolution](https://www.w3.org/TR/css3-images/#the-image-resolution)
+  - Supported in all browsers
+  - Only `<resolution>` value is supported.
+  - Only supported for content of `img`, `input[type=image]` and `video` (applied to poster images) elements and before/after pseudoelements. Other images such as background images, list images or border images are not supported.
+  - The property is applied to vector images such as SVG, as well as raster images. This behavior is different from what the spec specifies.
 - [object-fit](https://www.w3.org/TR/css3-images/#object-fit)
   - Support depends on browser capabilities
 - [object-position](https://www.w3.org/TR/css3-images/#object-position)
@@ -508,6 +522,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Allowed prefixes: webkit
   - Support depends on browser capabilities
 - [font-size](https://www.w3.org/TR/css-fonts-3/#propdef-font-size)
+  - Support depends on browser capabilities
+- [font-size-adjust](https://www.w3.org/TR/css-fonts-3/#propdef-font-size-adjust)
   - Support depends on browser capabilities
 - [font-style](https://www.w3.org/TR/css-fonts-3/#propdef-font-style)
   - Support depends on browser capabilities
@@ -696,10 +712,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 - [break-after](https://www.w3.org/TR/css3-break/#propdef-break-after)
   - Supported in all browsers
-  - Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/129)
 - [break-before](https://www.w3.org/TR/css3-break/#propdef-break-before)
   - Supported in all browsers
-  - Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/129)
 - [break-inside](https://www.w3.org/TR/css3-multicol/#break-inside)
   - Supported in all browsers
   - Note: All of `avoid-page`, `avoid-column` and `avoid-region` values are treated as if they were `avoid`. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/128)
@@ -707,6 +721,10 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Supported in all browsers
 - [widows](https://www.w3.org/TR/css3-break/#propdef-widows)
   - Supported in all browsers
+- [box-decoration-break](https://www.w3.org/TR/css3-break/#propdef-box-decoration-break)
+  - Allowed prefixes: webkit
+  - Supported in all browsers
+  - Note: Background, box-shadow and border images on inline-start/end borders are always rendered as if `box-decoration-break: clone` is specified.
 
 ### [CSS Transforms 1](https://www.w3.org/TR/css-transforms-1/)
 
@@ -735,6 +753,11 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 - [text-size-adjust](https://drafts.csswg.org/css-size-adjust-1/#text-size-adjust)
   - Allowed prefixes: moz, ms
+  - Support depends on browser capabilities
+
+## [Filter Effects 1](https://www.w3.org/TR/filter-effects-1/)
+- [filter](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
+  - Allowed prefixes: webkit
   - Support depends on browser capabilities
 
 ### [Pointer Events](https://www.w3.org/TR/pointerevents/)

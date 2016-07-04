@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<style>
+	@page {
+		margin: 0;
+		size: 200px 200px;
+		@bottom-center {
+			content: counter(page);
+		}
+	}
+	html {
+		widows: 1;
+		orphans: 1;
+	}
+	.break-before-page {
+		page-break-before: always;
+	}
+	.break-after-page {
+		page-break-after: always;
+	}
+	.break-before-right {
+		page-break-before: right;
+	}
+	.break-after-right {
+		page-break-after: right;
+	}
+	.break-before-left {
+		page-break-before: left;
+	}
+	.break-after-left {
+		page-break-after: left;
+	}
+	.break-before-recto {
+		page-break-before: recto;
+	}
+	.break-after-recto {
+		page-break-after: recto;
+	}
+	.break-before-verso {
+		page-break-before: verso;
+	}
+	.break-after-verso {
+		page-break-after: verso;
+	}
+	@-epubx-page-template {
+		section {
+			-epubx-flow-into: s;
+		}
+		@-epubx-flow s {
+			-epubx-flow-consume: all;
+		}
+		@-epubx-page-master sect {
+			@-epubx-partition {
+				height: 20px;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				content: counter(page);
+				text-align: center;
+			}
+			@-epubx-partition {
+				-epubx-flow-from: s;
+				-epubx-required: true;
+			}
+		}
+	}
+
+	/* Just to make things visible / understandable */
+	section {
+		border: solid pink;
+	}
+</style>
+<body>
+	<section class="break-after-page">This should be on the 1st (right) page.</section>
+	<section>This should be on the 2nd (left) page.</section>
+	<section class="break-before-page break-after-page">This should be on the 3nd (right) page. The next (4th, left) page should be empty.</section>
+	<section class="break-before-right break-after-right">This should be on the 5th (right) page. The next (6th, left) page should be empty.</section>
+	<section class="break-after-page">This should be on the 7th (right) page.</section>
+	<section class="break-after-page">This should be on the 8th (left) page. The next (9th, right) page should be empty.</section>
+	<section class="break-before-left break-after-left">This should be on the 10th (left) page. The next (11th, right) page should be empty.</section>
+	<section>This should be on the 12th (left) page.</section>
+	<section><span class="break-before-left">This should be on the 12th (left) page too. The next (13th, right) page should be empty.</span></section>
+	<section><div class="break-before-left">This should be on the 14th (left) page.</div> The next (15th, right) page should be empty. Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah</section>
+	<section><span style="display: none">This should not be displayed</span><div class="break-before-left">This should be on the 16th (left) page.</div></section>
+    <section class="break-before-page">This should be on the 17th (right) page. The next (18th, left) page should be empty.</section>
+	<section class="break-before-recto break-after-recto">This should be on the 19th (right) page. The next (20th, left) page should be empty.</section>
+	<section>This should be on the 21st (right) page.</section>
+	<section class="break-before-page">This should be on the 22nd (left) page. The next (23rd, right) page should be empty.</section>
+	<section class="break-before-verso break-after-verso">This should be on the 24th (left) page. The next (25th, right) page should be empty.</section>
+	<section>This shoule be on the 26th (left) page.</section>
+</body>

@@ -8,6 +8,7 @@ goog.provide('adapt.vgen');
 goog.require('adapt.task');
 goog.require('adapt.taskutil');
 goog.require('adapt.css');
+goog.require('vivliostyle.display');
 goog.require('adapt.csscasc');
 goog.require('adapt.cssstyler');
 goog.require('adapt.vtree');
@@ -26,7 +27,9 @@ adapt.vgen.frontEdgeBlackListHor = {
     "padding-top": "0px",
     "border-top-width": "0px",
     "border-top-style": "none",
-    "border-top-color": "transparent"
+    "border-top-color": "transparent",
+	"border-top-left-radius": "0px",
+	"border-top-right-radius": "0px"
 };
 
 /**
@@ -40,7 +43,9 @@ adapt.vgen.frontEdgeBlackListVert = {
     "padding-right": "0px",
     "border-right-width": "0px",
     "border-right-style": "none",
-    "border-right-color": "transparent"
+    "border-right-color": "transparent",
+	"border-top-right-radius": "0px",
+	"border-bottom-right-radius": "0px"
 };
 
 /**
@@ -216,12 +221,13 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
  * @param {adapt.vgen.CustomRenderer} customRenderer
  * @param {Object.<string,string>} fallbackMap
  * @param {!vivliostyle.pagefloat.FloatHolder} pageFloatHolder
+ * @param {!adapt.base.DocumentURLTransformer} documentURLTransformer
  * @constructor
  * @implements {adapt.vtree.LayoutContext}
  */
 adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds,
 		xmldoc, docFaces, footnoteStyle, stylerProducer, page, customRenderer, fallbackMap,
-		pageFloatHolder) {
+		pageFloatHolder, documentURLTransformer) {
 	// from constructor parameters
 	/** @const */ this.flowName = flowName;
 	/** @const */ this.context = context;
@@ -237,6 +243,7 @@ adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds
 	/** @const */ this.customRenderer = customRenderer;
 	/** @const */ this.fallbackMap = fallbackMap;
 	/** @const */ this.pageFloatHolder = pageFloatHolder;
+	/** @const */ this.documentURLTransformer = documentURLTransformer;
 	
     // provided by layout
 	/** @type {adapt.vtree.NodeContext} */ this.nodeContext = null;
@@ -257,7 +264,7 @@ adapt.vgen.ViewFactory.prototype.clone = function() {
 	return new adapt.vgen.ViewFactory(this.flowName, this.context, this.viewport,
 		this.styler, this.regionIds,
 		this.xmldoc, this.docFaces, this.footnoteStyle, this.stylerProducer,
-		this.page, this.customRenderer, this.fallbackMap, this.pageFloatHolder);
+		this.page, this.customRenderer, this.fallbackMap, this.pageFloatHolder, this.documentURLTransformer);
 };
 
 /**
@@ -430,6 +437,16 @@ adapt.vgen.ViewFactory.prototype.computeStyle = function(vertical, style, comput
         }
         return value;
     });
+	// Compute values of display, position and float
+	var position = /** @type {adapt.css.Ident} */ (computedStyle["position"]);
+	var float = /** @type {adapt.css.Ident} */ (computedStyle["float"]);
+	var displayValues = vivliostyle.display.getComputedDislayValue(
+		computedStyle["display"] || adapt.css.ident.inline, position, float, this.sourceNode === this.xmldoc.root);
+	["display", "position", "float"].forEach(function(name) {
+		if (displayValues[name]) {
+			computedStyle[name] = displayValues[name];
+		}
+	});
     return vertical;
 };
 
@@ -519,6 +536,45 @@ adapt.vgen.ViewFactory.prototype.resolveURL = function(url) {
 };
 
 /**
+ *
+ * @param {!Object.<string,adapt.css.Val>} computedStyle
+ */
+adapt.vgen.ViewFactory.prototype.transferPolyfilledInheritedProps = function(computedStyle) {
+	var polyfilledInheritedProps = adapt.csscasc.polyfilledInheritedProps.filter(function(name) {
+		return computedStyle[name];
+	});
+	if (polyfilledInheritedProps.length) {
+		var props = this.nodeContext.inheritedProps;
+		if (this.nodeContext.parent) {
+			props = this.nodeContext.inheritedProps = {};
+			for (var n in this.nodeContext.parent.inheritedProps) {
+				props[n] = this.nodeContext.parent.inheritedProps[n];
+			}
+		}
+		polyfilledInheritedProps.forEach(function(name) {
+			var value = computedStyle[name];
+			if (value) {
+				if (value instanceof adapt.css.Int) {
+					props[name] = (/** @type {adapt.css.Int} */ (value)).num;
+				} else if (value instanceof adapt.css.Ident) {
+					props[name] = (/** @type {adapt.css.Ident} */ (value)).name;
+				} else if (value instanceof adapt.css.Numeric) {
+					var numericVal = (/** @type {adapt.css.Numeric} */ (value));
+					switch (numericVal.unit) {
+						case "dpi":
+						case "dpcm":
+						case "dppx":
+							props[name] = numericVal.num * adapt.expr.defaultUnitSizes[numericVal.unit];
+							break;
+					}
+				}
+				delete computedStyle[name];
+			}
+		});
+	}
+};
+
+/**
  * @param {boolean} firstTime
  * @param {boolean} atUnforcedBreak
  * @private
@@ -539,6 +595,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     	elementStyle = self.inheritFromSourceParent(elementStyle);
     }
     self.nodeContext.vertical = self.computeStyle(self.nodeContext.vertical, elementStyle, computedStyle);
+
+	this.transferPolyfilledInheritedProps(computedStyle);
+
 	if (computedStyle["direction"]) {
 		self.nodeContext.direction = computedStyle["direction"].toString();
 	}
@@ -549,27 +608,31 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     	frame.finish(false);
     	return frame.result();
     }
-    // var position = computedStyle["position"]; // TODO: take it into account
     var display = computedStyle["display"];
     if (display === adapt.css.ident.none) {
         // no content
     	frame.finish(false);
     	return frame.result();
     }
+	var isRoot = self.nodeContext.parent == null;
 	self.nodeContext.flexContainer = (display === adapt.css.ident.flex);
-    self.createShadows(element, self.nodeContext.parent == null, elementStyle, computedStyle, styler,
+    self.createShadows(element, isRoot, elementStyle, computedStyle, styler,
     		self.context, self.nodeContext.shadowContext).then(function(shadowParam) {
-    	self.nodeContext.nodeShadow = shadowParam;    			
-	    var inFloatContainer = self.nodeContext.parent && self.nodeContext.parent.floatContainer;
+    	self.nodeContext.nodeShadow = shadowParam;
+		var position = computedStyle["position"];
 		var floatReference = computedStyle["float-reference"];
 	    var floatSide = computedStyle["float"];
 	    var clearSide = computedStyle["clear"];
-	    if (computedStyle["position"] === adapt.css.ident.absolute || 
-	    		computedStyle["position"] === adapt.css.ident.relative) {
-	    	self.nodeContext.floatContainer = true;
-	    	floatSide = null;
-	    }
-	    if (inFloatContainer) {
+		var writingMode = self.nodeContext.vertical ? adapt.css.ident.vertical_rl : adapt.css.ident.horizontal_tb;
+		var parentWritingMode = self.nodeContext.parent ?
+			(self.nodeContext.parent.vertical ? adapt.css.ident.vertical_rl : adapt.css.ident.horizontal_tb) :
+			writingMode;
+		self.nodeContext.establishesBFC = vivliostyle.display.establishesBFC(display, position, floatSide,
+			computedStyle["overflow"], writingMode, parentWritingMode);
+		self.nodeContext.containingBlockForAbsolute = vivliostyle.display.establishesCBForAbsolute(position);
+	    if (self.nodeContext.isInsideBFC()) {
+			// When the element is already inside a block formatting context (except one from the root),
+			// float and clear can be controlled by the browser and we don't need to care.
 	    	clearSide = null;
 	    	if (floatSide !== adapt.css.ident.footnote) {
 	    		floatSide = null;
@@ -597,7 +660,6 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			        computedStyle["display"] = adapt.css.ident.inline;
 		    	}
 		    }
-		    self.nodeContext.floatContainer = true;
 	    }
 	    if (clearSide) {
 	    	if (clearSide === adapt.css.ident.inherit) {
@@ -613,9 +675,6 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 		    	}
 		    }
 	    }
-	    if (computedStyle["overflow"] === adapt.css.ident.hidden) {
-		    self.nodeContext.floatContainer = true;
-	    }
 	    var listItem = display === adapt.css.ident.list_item && computedStyle["ua-list-item-count"];
 	    if (floating ||
 			(computedStyle["break-inside"] && computedStyle["break-inside"] !== adapt.css.ident.auto)) {
@@ -624,6 +683,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 	    	self.nodeContext.breakPenalty += 10;
 	    }
 	    self.nodeContext.inline = !floating && !display || display === adapt.css.ident.inline;
+		self.nodeContext.display = display ? display.toString() : "inline";
 	    self.nodeContext.floatSide = floating ? floatSide.toString() : null;
 		self.nodeContext.floatReference = floatReference ? floatReference.toString() : null;
 	    if (!self.nodeContext.inline) {
@@ -644,19 +704,10 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 	    }
 	    var whitespace = computedStyle["white-space"];
 	    if (whitespace) {
-	    	switch (whitespace.toString()) {
-	    	case "normal" :
-	    	case "nowrap" :
-	    		self.nodeContext.whitespace = adapt.vtree.Whitespace.IGNORE;
-	    		break;
-	    	case "pre-line" :
-	    		self.nodeContext.whitespace = adapt.vtree.Whitespace.NEWLINE;
-	    		break;    		
-	    	case "pre" :
-	    	case "pre-wrap" :
-	    		self.nodeContext.whitespace = adapt.vtree.Whitespace.PRESERVE;
-	    		break;
-	    	}
+			var whitespaceValue = adapt.vtree.whitespaceFromPropertyValue(whitespace.toString());
+			if (whitespaceValue !== null) {
+				self.nodeContext.whitespace = whitespaceValue;
+			}
 	    }
 	    // Create the view element
 	    var custom = false;
@@ -786,6 +837,17 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 		    if (result.localName == "iframe" && result.namespaceURI == adapt.base.NS.XHTML) {
 		    	adapt.vgen.initIFrame(/** @type {HTMLIFrameElement} */ (result));   	
 		    }
+
+			var imageResolution = /** @type {(number|undefined)} */
+				(self.nodeContext.inheritedProps["image-resolution"]);
+			/** @const {!Array<!{image: !HTMLElement, element: !HTMLElement, fetcher: !adapt.taskutil.Fetcher<string>}>} */ var images = [];
+			var cssWidth = computedStyle["width"];
+			var cssHeight = computedStyle["height"];
+			var attrWidth = element.getAttribute("width");
+			var attrHeight = element.getAttribute("height");
+			var hasAutoWidth = cssWidth === adapt.css.ident.auto || (!cssWidth && !attrWidth);
+			var hasAutoHeight = cssHeight === adapt.css.ident.auto || (!cssHeight && !attrHeight);
+
 			if (element.namespaceURI != adapt.base.NS.FB2 || tag == "td") {
 			    var attributes = element.attributes;
 			    var attributeCount = attributes.length;
@@ -800,18 +862,33 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			                continue; // don't propagate JavaScript code
 			            if (attributeName == "style")
 			                continue; // we do styling ourselves
-			            if (attributeName == "id") {
-			            	// Don't propagate ids, but collect them on the page.
-			            	self.page.registerElementWithId(result, attributeValue);
-			            	continue;
+			            if (attributeName == "id" || attributeName == "name") {
+			            	// Propagate transformed ids and collect them on the page (only first time).
+							if (firstTime) {
+								attributeValue = self.documentURLTransformer.transformFragment(attributeValue, self.xmldoc.url);
+								result.setAttribute(attributeName, attributeValue);
+								self.page.registerElementWithId(result, attributeValue);
+								continue;
+							}
 			            }
 			            // TODO: understand the element we are working with.
 			            if (attributeName == "src" || attributeName == "href" || attributeName == "poster") {
 			                attributeValue = self.resolveURL(attributeValue);
+			                if (attributeName === "href") {
+			                    attributeValue = self.documentURLTransformer.transformURL(
+			                        attributeValue, self.xmldoc.url);
+			                }
 			            } else if (attributeName == "srcset") {
 							attributeValue = attributeValue.split(",").map(function(value) {
 								return self.resolveURL(value.trim());
 							}).join(",");
+						}
+						if (attributeName === "poster" && tag === "video" && ns === adapt.base.NS.XHTML &&
+							hasAutoWidth && hasAutoHeight) {
+							var image = new Image();
+							var fetcher = adapt.taskutil.loadElement(image, attributeValue);
+							fetchers.push(fetcher);
+							images.push({image: image, element: result, fetcher: fetcher});
 						}
 			        }
 			        else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
@@ -825,9 +902,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			            if (attributePrefix)
 			                attributeName = attributePrefix + ":" + attributeName;
 			        }
-				    if (attributeName == "src" && !attributeNS && tag == "img" && ns == adapt.base.NS.XHTML) {
-				    	// HTML img element should start loading only once all attributes are assigned.
-				    	delayedSrc = attributeValue;
+				    if (attributeName == "src" && !attributeNS && (tag == "img" || tag == "input") && ns == adapt.base.NS.XHTML) {
+						// HTML img element should start loading only once all attributes are assigned.
+						delayedSrc = attributeValue;
 				    } else if (attributeName == "href" && tag == "image" && ns == adapt.base.NS.SVG && attributeNS == adapt.base.NS.XLINK) {
 			        	self.page.fetchers.push(adapt.taskutil.loadElement(result, attributeValue));
 			        } else {
@@ -841,13 +918,18 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			        }
 			    }
 			    if (delayedSrc) {
-		        	var imageFetcher = adapt.taskutil.loadElement(result, delayedSrc);
-					var w = computedStyle["width"];
-					var h = computedStyle["height"];
-		        	if (w && w !== adapt.css.ident.auto && h && h !== adapt.css.ident.auto) {
+					var image = tag === "input" ? new Image() : result;
+		        	var imageFetcher = adapt.taskutil.loadElement(image, delayedSrc);
+					if (image !== result) {
+						result.src = delayedSrc;
+					}
+		        	if (!hasAutoWidth && !hasAutoHeight) {
 		        		// No need to wait for the image, does not affect layout
 		        		self.page.fetchers.push(imageFetcher);
 		        	} else {
+						if (hasAutoWidth && hasAutoHeight && imageResolution) {
+							images.push({image: image, element: result, fetcher: imageFetcher});
+						}
 		    			fetchers.push(imageFetcher);
 		        	}
 			    }			    
@@ -859,26 +941,15 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     			fetchers.push(adapt.taskutil.loadElement(new Image(), listStyleURL));				
 			}
 			self.applyComputedStyles(result, computedStyle);
-		    var widows = computedStyle["widows"];
-		    var orphans = computedStyle["orphans"];
-		    if (widows || orphans) {
-		    	if (self.nodeContext.parent) {
-			    	self.nodeContext.inheritedProps = {};
-			    	for (var n in self.nodeContext.parent.inheritedProps) {
-			    		self.nodeContext.inheritedProps[n] = self.nodeContext.parent.inheritedProps[n];
-			    	}
-		    	}
-		    	if (widows instanceof adapt.css.Int) {
-		    		self.nodeContext.inheritedProps["widows"] = (/** @type {adapt.css.Int} */ (widows)).num;
-		    	}
-		    	if (orphans instanceof adapt.css.Int) {
-		    		self.nodeContext.inheritedProps["orphans"] = (/** @type {adapt.css.Int} */ (orphans)).num;
-		    	}
-		    }
 			if (!self.nodeContext.inline) {
 				var blackList = null;
 				if (!firstTime) {
-					blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeBlackListVert : adapt.vgen.frontEdgeBlackListHor;
+					if (self.nodeContext.inheritedProps["box-decoration-break"] !== "clone") {
+						blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeBlackListVert : adapt.vgen.frontEdgeBlackListHor;
+					} else {
+						// When box-decoration-break: clone, cloned margins are always truncated to zero.
+						blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeUnforcedBreakBlackListVert : adapt.vgen.frontEdgeUnforcedBreakBlackListHor;
+					}
 				} else if (atUnforcedBreak) {
 					blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeUnforcedBreakBlackListVert : adapt.vgen.frontEdgeUnforcedBreakBlackListHor;
 				}
@@ -894,6 +965,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 		    self.viewNode = result;
 		    if (fetchers.length) {
 		    	adapt.taskutil.waitForFetchers(fetchers).then(function() {
+					if (imageResolution > 0) {
+						self.modifyElemDimensionWithImageResolution(images, imageResolution);
+					}
 		    		frame.finish(needToProcessChildren);
 		    	});
 		    } else {
@@ -904,6 +978,25 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 	    });
     });
 	return frame.result();    
+};
+
+/**
+ * @param {!Array<!{image: !HTMLElement, element: !HTMLElement, fetcher: !adapt.taskutil.Fetcher<string>}>} images
+ * @param {number} imageResolution
+ */
+adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = function(images, imageResolution) {
+	images.forEach(function(param) {
+		if (param.fetcher.get().get() === "load") {
+			var img = param.image;
+			var w = img.width;
+			var h = img.height;
+			var elem = param.element;
+			if (w > 0 && h > 0) {
+				adapt.base.setCSSProperty(elem, "width", (w / imageResolution) + "px");
+				adapt.base.setCSSProperty(elem, "height", (h / imageResolution) + "px");
+			}
+		}
+	});
 };
 
 /**
@@ -1276,6 +1369,30 @@ adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target)
 	delete computedStyle["content"];
 	this.applyComputedStyles(target, computedStyle);
 	return vertical;
+};
+
+/**
+ * @override
+ */
+adapt.vgen.ViewFactory.prototype.processFragmentedBlockEdge = function(nodeContext) {
+	nodeContext.walkBlocksUpToBFC(function(block) {
+		var boxDecorationBreak = block.inheritedProps["box-decoration-break"];
+		if (!boxDecorationBreak || boxDecorationBreak === "slice") {
+			var elem = block.viewNode;
+			goog.asserts.assert(elem instanceof Element);
+			if (block.vertical) {
+				adapt.base.setCSSProperty(elem, "padding-left", "0");
+				adapt.base.setCSSProperty(elem, "border-left", "none");
+				adapt.base.setCSSProperty(elem, "border-top-left-radius", "0");
+				adapt.base.setCSSProperty(elem, "border-bottom-left-radius", "0");
+			} else {
+				adapt.base.setCSSProperty(elem, "padding-bottom", "0");
+				adapt.base.setCSSProperty(elem, "border-bottom", "none");
+				adapt.base.setCSSProperty(elem, "border-bottom-left-radius", "0");
+				adapt.base.setCSSProperty(elem, "border-bottom-right-radius", "0");
+			}
+		}
+	});
 };
 
 /**

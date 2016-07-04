@@ -1330,8 +1330,8 @@ vivliostyle.page.PageRuleMasterInstance.prototype.distributeAutoMarginBoxSizes =
 /**
  * @override
  */
-vivliostyle.page.PageRuleMasterInstance.prototype.prepareContainer = function(context, container, page, docFaces) {
-    vivliostyle.page.PageRuleMasterInstance.superClass_.prepareContainer.call(this, context, container, page, docFaces);
+vivliostyle.page.PageRuleMasterInstance.prototype.prepareContainer = function(context, container, page, docFaces, clientLayout) {
+    vivliostyle.page.PageRuleMasterInstance.superClass_.prepareContainer.call(this, context, container, page, docFaces, clientLayout);
     // Add an attribute to the element so that it can be refered from external style sheets.
     container.element.setAttribute("data-vivliostyle-page-box", true);
 };
@@ -1480,8 +1480,8 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
 /**
  * @override
  */
-vivliostyle.page.PageRulePartitionInstance.prototype.prepareContainer = function(context, container, page, docFaces) {
-    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page, docFaces);
+vivliostyle.page.PageRulePartitionInstance.prototype.prepareContainer = function(context, container, page, docFaces, clientLayout) {
+    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page, docFaces, clientLayout);
     page.pageAreaElement = /** @type {HTMLElement} */ (container.element);
 };
 
@@ -1505,9 +1505,9 @@ goog.inherits(vivliostyle.page.PageMarginBoxPartitionInstance, adapt.pm.Partitio
 /**
  * @override
  */
-vivliostyle.page.PageMarginBoxPartitionInstance.prototype.prepareContainer = function(context, container, page, docFaces) {
+vivliostyle.page.PageMarginBoxPartitionInstance.prototype.prepareContainer = function(context, container, page, docFaces, clientLayout) {
     this.applyVerticalAlign(context, container.element);
-    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page, docFaces);
+    adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page, docFaces, clientLayout);
 };
 
 /**
@@ -1891,17 +1891,27 @@ vivliostyle.page.PageManager.prototype.generatePageRuleMaster = function(style) 
  */
 vivliostyle.page.PageManager.prototype.generateCascadedPageMaster = function(style, pageMaster) {
     var newPageMaster = pageMaster.clone({pseudoName: vivliostyle.page.pageRuleMasterPseudoName});
+    var pageMasterStyle = newPageMaster.specified;
+
     var size = style["size"];
     if (size) {
         var pageSize = vivliostyle.page.resolvePageSizeAndBleed(style);
         var priority = size.priority;
-        newPageMaster.specified["width"] = adapt.csscasc.cascadeValues(
-            this.context, newPageMaster.specified["width"],
+        pageMasterStyle["width"] = adapt.csscasc.cascadeValues(
+            this.context, pageMasterStyle["width"],
             new adapt.csscasc.CascadeValue(pageSize.width, priority));
-        newPageMaster.specified["height"] = adapt.csscasc.cascadeValues(
-            this.context, newPageMaster.specified["height"],
+        pageMasterStyle["height"] = adapt.csscasc.cascadeValues(
+            this.context, pageMasterStyle["height"],
             new adapt.csscasc.CascadeValue(pageSize.height, priority));
     }
+
+    // Transfer counter properties to the page style so that these specified in the page master are
+    // also effective. Note that these values (if specified) always override values in page contexts.
+    ["counter-reset", "counter-increment"].forEach(function(name) {
+        if (pageMasterStyle[name]) {
+            style[name] = pageMasterStyle[name];
+        }
+    });
 
     var pageMasterInstance = newPageMaster.createInstance(this.rootPageBoxInstance);
     // Do the same initialization as in adapt.ops.StyleInstance.prototype.init
@@ -2371,113 +2381,4 @@ vivliostyle.page.PageMarginBoxParserHandler.prototype.simpleProperty = function(
     var specificity = important ? this.getImportantSpecificity() : this.getBaseSpecificity();
     var cascval = new adapt.csscasc.CascadeValue(value, specificity);
     adapt.csscasc.setProp(this.boxStyle, name, cascval);
-};
-
-
-/**
- * Object storing page-based counters.
- * @param {adapt.expr.LexicalScope} pageScope Scope in which a page-based counter's adapt.expr.Val is defined. Since the page-based counters are updated per page, the scope should be a page scope, which is cleared per page.
- * @constructor
- * @implements {adapt.csscasc.PageCounterResolver}
- */
-vivliostyle.page.PageCounterStore = function(pageScope) {
-    /** @const */ this.pageScope = pageScope;
-    /** @const @type {!Object.<string,!Array.<number>>} */ this.counters = {};
-    this.counters["page"] = [0];
-};
-
-/**
- * Copy (and override) counter states from another PageCounterstore.
- * @param {!vivliostyle.page.PageCounterStore} pageCounterStore
- */
-vivliostyle.page.PageCounterStore.prototype.copyFrom = function(pageCounterStore) {
-    Object.keys(pageCounterStore.counters).forEach(function(key) {
-        this.counters[key] = Array.from(pageCounterStore.counters[key]);
-    }, this);
-};
-
-/**
- * @override
- */
-vivliostyle.page.PageCounterStore.prototype.getCounterVal = function(name, format) {
-    var self = this;
-    function getCounterNumber() {
-        var values = self.counters[name];
-        return (values && values.length) ? values[values.length - 1] : null;
-    }
-    return new adapt.expr.Native(this.pageScope, function() {
-        return format(getCounterNumber());
-    }, "page-counter-" + name);
-};
-
-/**
- * @override
- */
-vivliostyle.page.PageCounterStore.prototype.getCountersVal = function(name, format) {
-    var self = this;
-    function getCounterNumbers() {
-        return self.counters[name] || [];
-    }
-    return new adapt.expr.Native(this.pageScope, function() {
-        return format(getCounterNumbers());
-    }, "page-counters-" + name)
-};
-
-/**
- * @private
- * @param {string} counterName
- * @param {number} value
- */
-vivliostyle.page.PageCounterStore.prototype.defineCounter = function(counterName, value) {
-    if (this.counters[counterName]) {
-        this.counters[counterName].push(value);
-    } else {
-        this.counters[counterName] = [value];
-    }
-};
-
-/**
- * Update the page-based counters with 'counter-reset' and 'counter-increment' properties within the page context. Call before starting layout of the page.
- * @param {!adapt.csscasc.ElementStyle} cascadedPageStyle
- * @param {!adapt.expr.Context} context
- */
-vivliostyle.page.PageCounterStore.prototype.updatePageCounters = function(cascadedPageStyle, context) {
-    var resetMap;
-    var reset = cascadedPageStyle["counter-reset"];
-    if (reset) {
-        var resetVal = reset.evaluate(context);
-        if (resetVal) {
-            resetMap = adapt.cssprop.toCounters(resetVal, true);
-        }
-    }
-    if (resetMap) {
-        for (var resetCounterName in resetMap) {
-            this.defineCounter(resetCounterName, resetMap[resetCounterName]);
-        }
-    }
-
-    var incrementMap;
-    var increment = cascadedPageStyle["counter-increment"];
-    if (increment) {
-        var incrementVal = increment.evaluate(context);
-        if (incrementVal) {
-            incrementMap = adapt.cssprop.toCounters(incrementVal, false);
-        }
-    }
-    // If 'counter-increment' for the builtin 'page' counter is absent, add it with value 1.
-    if (incrementMap) {
-        if (!("page" in incrementMap)) {
-            incrementMap["page"] = 1;
-        }
-    } else {
-        incrementMap = {};
-        incrementMap["page"] = 1;
-    }
-    for (var incrementCounterName in incrementMap) {
-        if (!this.counters[incrementCounterName]) {
-            this.defineCounter(incrementCounterName, 0);
-        }
-        var counterValues = this.counters[incrementCounterName];
-        counterValues[counterValues.length - 1] += incrementMap[incrementCounterName];
-    }
 };

@@ -116,7 +116,7 @@ adapt.vtree.Page = function(container, bleedBox) {
 			self.dispatchEvent(evt);
 		}
 	};
-	/** @type {Object.<string,Array.<Element>>} */ this.elementsById = {};
+	/** @const {!Object.<string,Array.<Element>>} */ this.elementsById = {};
 	/** @const @type {{width: number, height: number}} */ this.dimensions = {width: 0, height: 0};
 	/** @type {boolean} */ this.isFirstPage = false;
 	/** @type {boolean} */ this.isLastPage = false;
@@ -194,6 +194,22 @@ adapt.vtree.Page.prototype.registerElementWithId = function(element, id) {
  * @return {void}
  */
 adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
+	// Remove ID of elements which eventually did not fit in the page
+	// (Some nodes may have been removed after registration if they did not fit in the page)
+	Object.keys(this.elementsById).forEach(function(id) {
+		var elems = this.elementsById[id];
+		for (var i = 0; i < elems.length;) {
+			if (this.container.contains(elems[i])) {
+				i++;
+			} else {
+				elems.splice(i, 1);
+			}
+		}
+		if (elems.length === 0) {
+			delete this.elementsById[id];
+		}
+	}, this);
+
 	// use size of the container of the PageMasterInstance
 	var rect = clientLayout.getElementClientRect(this.container);
 	this.dimensions.width = rect.width;
@@ -259,6 +275,26 @@ adapt.vtree.Whitespace = {
 };
 
 /**
+ * Resolves adapt.vtree.Whitespace value from a value of 'white-space' property
+ * @param {string} whitespace The value of 'white-space' property
+ * @returns {?adapt.vtree.Whitespace}
+ */
+adapt.vtree.whitespaceFromPropertyValue = function(whitespace) {
+	switch (whitespace) {
+		case "normal" :
+		case "nowrap" :
+			return adapt.vtree.Whitespace.IGNORE;
+		case "pre-line" :
+			return adapt.vtree.Whitespace.NEWLINE;
+		case "pre" :
+		case "pre-wrap" :
+			return adapt.vtree.Whitespace.PRESERVE;
+		default:
+			return null;
+	}
+};
+
+/**
  * @param {Node} node
  * @param {adapt.vtree.Whitespace} whitespace
  * @return {boolean}
@@ -280,6 +316,17 @@ adapt.vtree.canIgnore = function(node, whitespace) {
 
 /**
  * @param {string} flowName
+ * @param {?string} parentFlowName
+ * @constructor
+ */
+adapt.vtree.Flow = function(flowName, parentFlowName) {
+	/** @const */ this.flowName = flowName;
+	/** @const */ this.parentFlowName = parentFlowName;
+	/** @const */ this.forcedBreakOffsets = /** @type {Array<number>} */ ([]);
+};
+
+/**
+ * @param {string} flowName
  * @param {!Element} element
  * @param {number} startOffset
  * @param {number} priority
@@ -287,10 +334,11 @@ adapt.vtree.canIgnore = function(node, whitespace) {
  * @param {boolean} exclusive
  * @param {boolean} repeated
  * @param {boolean} last
+ * @param {?string} breakBefore
  * @constructor
  */
 adapt.vtree.FlowChunk = function(flowName, element, startOffset,
-        priority, linger, exclusive, repeated, last) {
+        priority, linger, exclusive, repeated, last, breakBefore) {
 	/** @type {string} */ this.flowName = flowName;
 	/** @type {!Element} */ this.element = element;
 	/** @type {number} */ this.startOffset = startOffset;
@@ -300,6 +348,7 @@ adapt.vtree.FlowChunk = function(flowName, element, startOffset,
 	/** @type {boolean} */ this.repeated = repeated;
 	/** @type {boolean} */ this.last = last;
 	/** @type {number} */ this.startPage = -1;
+	/** @type {?string} */ this.breakBefore = breakBefore;
 };
 
 /**
@@ -438,6 +487,12 @@ adapt.vtree.LayoutContext.prototype.applyFootnoteStyle = function(vertical, elem
 adapt.vtree.LayoutContext.prototype.peelOff = function(nodeContext, nodeOffset) {};
 
 /**
+ * Process a block-end edge of a fragmented block.
+ * @param {adapt.vtree.NodeContext} nodeContext
+ */
+adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = function(nodeContext) {};
+
+/**
  * Returns if two NodePositions represents the same position in the document.
  * @param {!adapt.vtree.NodePosition} nodePosition1
  * @param {!adapt.vtree.NodePosition} nodePosition2
@@ -462,6 +517,25 @@ adapt.vtree.LayoutContext.prototype.getPageFloatHolder = function() {};
 adapt.vtree.NodePositionStep;
 
 /**
+ * @param {adapt.vtree.NodePositionStep} nps1
+ * @param {adapt.vtree.NodePositionStep} nps2
+ * @returns {boolean}
+ */
+adapt.vtree.isSameNodePositionStep = function(nps1, nps2) {
+	if (nps1 === nps2) {
+		return true;
+	}
+	if (!nps1 || !nps2) {
+		return false;
+	}
+	return nps1.node === nps2.node &&
+			nps1.shadowType === nps2.shadowType &&
+			nps1.shadowContext === nps2.shadowContext &&
+			nps1.nodeShadow === nps2.nodeShadow &&
+			nps1.shadowSibling === nps2.shadowSibling;
+};
+
+/**
  * NodePosition represents a position in the document
  * @typedef {{
  * 		steps:Array.<adapt.vtree.NodePositionStep>,
@@ -470,6 +544,29 @@ adapt.vtree.NodePositionStep;
  * }}
  */
 adapt.vtree.NodePosition;
+
+/**
+ * @param {adapt.vtree.NodePosition} np1
+ * @param {adapt.vtree.NodePosition} np2
+ * @returns {boolean}
+ */
+adapt.vtree.isSameNodePosition = function(np1, np2) {
+	if (np1 === np2) {
+		return true;
+	}
+	if (!np1 || !np2) {
+		return false;
+	}
+	if (np1.offsetInNode !== np2.offsetInNode || np1.after !== np2.after || np1.steps.length !== np2.steps.length) {
+		return false;
+	}
+	for (var i = 0; i < np1.steps.length; i++) {
+		if (!adapt.vtree.isSameNodePositionStep(np1[i], np2[i])) {
+			return false;
+		}
+	}
+	return true;
+};
 
 /**
  * @param {Node} node
@@ -575,15 +672,18 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {boolean} */ this.inline = true;
     /** @type {boolean} */ this.overflow = false;
     /** @type {number} */ this.breakPenalty = parent ? parent.breakPenalty : 0;
+	/** @type {?string} */ this.display = null;
 	/** @type {?string} */ this.floatReference = null;
     /** @type {?string} */ this.floatSide = null;
     /** @type {?string} */ this.clearSide = null;
 	/** @type {boolean} */ this.flexContainer = false;
     /** @type {adapt.vtree.Whitespace} */ this.whitespace = parent ? parent.whitespace : adapt.vtree.Whitespace.IGNORE;
-    /** @type {boolean} */ this.floatContainer = parent ? parent.floatContainer : false;
+    /** @type {boolean} */ this.establishesBFC = false;
+	/** @type {boolean} */ this.containingBlockForAbsolute = false;
     /** @type {?string} */ this.breakBefore = null;
     /** @type {?string} */ this.breakAfter = null;
     /** @type {Node} */ this.viewNode = null;
+    /** @type {Node} */ this.clearSpacer = null;    
     /** @type {Object.<string,number|string>} */ this.inheritedProps = parent ? parent.inheritedProps : {};
     /** @type {boolean} */ this.vertical = parent ? parent.vertical : false;
 	/** @type {string} */ this.direction = parent ? parent.direction : "ltr";
@@ -597,15 +697,19 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.inline = true;
     this.breakPenalty = this.parent ? this.parent.breakPenalty : 0;
     this.viewNode = null;
+    this.clearSpacer = null;        
     this.offsetInNode = 0;
     this.after = false;
+	this.display = null;
     this.floatSide = null;
     this.clearSide = null;
 	this.flexContainer = false;
+	this.whitespace = this.parent ? this.parent.whitespace : adapt.vtree.Whitespace.IGNORE;
     this.breakBefore = null;
     this.breakAfter = null;	
     this.nodeShadow = null;
-    this.floatContainer = this.parent ? this.parent.floatContainer : false;
+    this.establishesBFC = false;
+	this.containingBlockForAbsolute = false;
     this.vertical = this.parent ? this.parent.vertical : false;
     this.nodeShadow = null;
 };
@@ -624,14 +728,17 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.shadowSibling = this.shadowSibling;
     np.inline = this.inline;
     np.breakPenalty = this.breakPenalty;
+	np.display = this.display;
     np.floatSide = this.floatSide;
     np.clearSide = this.clearSide;
-    np.floatContainer = this.floatContainer;
+    np.establishesBFC = this.establishesBFC;
+	np.containingBlockForAbsolute = this.containingBlockForAbsolute;
 	np.flexContainer = this.flexContainer;
     np.whitespace = this.whitespace;
     np.breakBefore = this.breakBefore;
     np.breakAfter = this.breakAfter;
     np.viewNode = this.viewNode;
+    np.clearSpacer = this.clearSpacer;
     np.firstPseudo = this.firstPseudo;
     np.vertical = this.vertical;
     np.overflow = this.overflow;
@@ -706,6 +813,51 @@ adapt.vtree.NodeContext.prototype.toNodePosition = function() {
 };
 
 /**
+ * @returns {boolean}
+ */
+adapt.vtree.NodeContext.prototype.isInsideBFC = function() {
+	var parent = this.parent;
+	while (parent) {
+		if (parent.establishesBFC) {
+			return true;
+		}
+		parent = parent.parent;
+	}
+	return false;
+};
+
+/**
+ * @returns {adapt.vtree.NodeContext}
+ */
+adapt.vtree.NodeContext.prototype.getContainingBlockForAbsolute = function() {
+	var parent = this.parent;
+	while (parent) {
+		if (parent.containingBlockForAbsolute) {
+			return parent;
+		}
+		parent = parent.parent;
+	}
+	return null;
+};
+
+/**
+ * Walk up NodeContext tree (starting from itself) and call the callback for each block,
+ * until a NodeContext which establishes a block formatting context is reached.
+ * @param {!function(!adapt.vtree.NodeContext)} callback
+ */
+adapt.vtree.NodeContext.prototype.walkBlocksUpToBFC = function(callback) {
+	var nodeContext = this;
+	while (nodeContext) {
+		if (!nodeContext.inline) {
+			callback(nodeContext);
+		}
+		if (nodeContext.establishesBFC)
+			break;
+		nodeContext = nodeContext.parent;
+	}
+};
+
+/**
  * @param {adapt.vtree.NodePosition} primary
  * @constructor
  */
@@ -736,6 +888,47 @@ adapt.vtree.ChunkPosition.prototype.clone = function() {
 };
 
 /**
+ * @param {adapt.vtree.ChunkPosition} other
+ * @returns {boolean}
+ */
+adapt.vtree.ChunkPosition.prototype.isSamePosition = function(other) {
+	if (!other) {
+		return false;
+	}
+	if (this === other) {
+		return true;
+	}
+	if (!adapt.vtree.isSameNodePosition(this.primary, other.primary)) {
+		return false;
+	}
+	if (this.floats) {
+		if (!other.floats || this.floats.length !== other.floats.length) {
+			return false;
+		}
+		for (var i = 0; i < this.floats.length; i++) {
+			if (!adapt.vtree.isSameNodePosition(this.floats[i], other.floats[i])) {
+				return false;
+			}
+		}
+	} else if (other.floats) {
+		return false;
+	}
+	if (this.footnotes) {
+		if (!other.footnotes || this.footnotes.length !== other.footnotes.length) {
+			return false;
+		}
+		for (var i = 0; i < this.footnotes.length; i++) {
+			if (!adapt.vtree.isSameNodePosition(this.footnotes[i], other.footnotes[i])) {
+				return false;
+			}
+		}
+	} else if (other.footnotes) {
+		return false;
+	}
+	return true;
+};
+
+/**
  * @param {adapt.vtree.ChunkPosition} chunkPosition
  * @param {adapt.vtree.FlowChunk} flowChunk
  * @constructor
@@ -754,6 +947,14 @@ adapt.vtree.FlowChunkPosition.prototype.clone = function() {
 };
 
 /**
+ * @param {adapt.vtree.FlowChunkPosition} other
+ * @returns {boolean}
+ */
+adapt.vtree.FlowChunkPosition.prototype.isSamePosition = function(other) {
+	return !!other && (this === other || this.chunkPosition.isSamePosition(other.chunkPosition));
+};
+
+/**
  * @constructor
  */
 adapt.vtree.FlowPosition = function() {
@@ -761,6 +962,10 @@ adapt.vtree.FlowPosition = function() {
      * @type {Array.<adapt.vtree.FlowChunkPosition>}
      */
 	this.positions = [];
+	/**
+	 * @type {string}
+     */
+	this.startSide = "any";
 };
 
 /**
@@ -773,7 +978,27 @@ adapt.vtree.FlowPosition.prototype.clone = function() {
     for (var i = 0; i < arr.length; i++) {
         newarr[i] = arr[i].clone();
     }
+	newfp.startSide = this.startSide;
     return newfp;
+};
+
+/**
+ * @param {adapt.vtree.FlowPosition} other
+ * @returns {boolean}
+ */
+adapt.vtree.FlowPosition.prototype.isSamePosition = function(other) {
+	if (this === other) {
+		return true;
+	}
+	if (!other || this.positions.length !== other.positions.length) {
+		return false;
+	}
+	for (var i = 0; i < this.positions.length; i++) {
+		if (!this.positions[i].isSamePosition(other.positions[i])) {
+			return false;
+		}
+	}
+	return true;
 };
 
 /**
@@ -795,7 +1020,11 @@ adapt.vtree.LayoutPosition = function() {
      */
 	this.page = 0;
 	/**
-	 * @type {Object.<string,adapt.vtree.FlowPosition>}
+	 * @type {!Object<string, adapt.vtree.Flow>}
+     */
+	this.flows = {};
+	/**
+	 * @type {!Object.<string,adapt.vtree.FlowPosition>}
 	 */
     this.flowPositions = {};
     /**
@@ -814,10 +1043,36 @@ adapt.vtree.LayoutPosition.prototype.clone = function() {
     newcp.highestSeenNode = this.highestSeenNode;
     newcp.highestSeenOffset = this.highestSeenOffset;
     newcp.lookupPositionOffset = this.lookupPositionOffset;
+	newcp.flows = this.flows;
     for (var name in this.flowPositions) {
         newcp.flowPositions[name] = this.flowPositions[name].clone();
     }
     return newcp;
+};
+
+/**
+ * @param {adapt.vtree.LayoutPosition} other
+ * @returns {boolean}
+ */
+adapt.vtree.LayoutPosition.prototype.isSamePosition = function(other) {
+	if (this === other) {
+		return true;
+	}
+	if (!other || this.page !== other.page || this.highestSeenOffset !== other.highestSeenOffset) {
+		return false;
+	}
+	var thisFlowNames = Object.keys(this.flowPositions);
+	var otherFlowNames = Object.keys(other.flowPositions);
+	if (thisFlowNames.length !== otherFlowNames.length) {
+		return false;
+	}
+	for (var i = 0; i < thisFlowNames.length; i++) {
+		var flowName = thisFlowNames[i];
+		if (!this.flowPositions[flowName].isSamePosition(other.flowPositions[flowName])) {
+			return false;
+		}
+	}
+	return true;
 };
 
 /**
@@ -830,6 +1085,31 @@ adapt.vtree.LayoutPosition.prototype.hasContent = function(name, offset) {
     if (!flowPos)
         return false;
     return flowPos.hasContent(offset);
+};
+
+/**
+ * @param {string} name
+ * @returns {string}
+ */
+adapt.vtree.LayoutPosition.prototype.startSideOfFlow = function(name) {
+	var flowPos = this.flowPositions[name];
+	if (!flowPos)
+		return "any";
+	return flowPos.startSide;
+};
+
+/**
+ * @param {string} name
+ * @returns {?adapt.vtree.FlowChunk}
+ */
+adapt.vtree.LayoutPosition.prototype.firstFlowChunkOfFlow = function(name) {
+	var flowPos = this.flowPositions[name];
+	if (!flowPos)
+		return null;
+	var flowChunkPosition = flowPos.positions[0];
+	if (!flowChunkPosition)
+		return null;
+	return flowChunkPosition.flowChunk;
 };
 
 /**

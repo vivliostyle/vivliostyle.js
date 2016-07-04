@@ -10,24 +10,30 @@
                 content: "Document 1, page " counter(page);
             }
         }
-        div {
+        section {
             page-break-after: always;
+            counter-increment: section;
+        }
+        section::before {
+            display: block;
+            content: "Section " counter(section) ", page " counter(page);
+        }
+        a[href]::after {
+            content: "Section " target-counter(attr(href url), section) ", page " target-counter(attr(href url), page);
         }
     </style>
 </head>
 <body>
 
-<div>
-    This is the first page.
-    <a href="#second-page">link to the second page</a>
-</div>
+<section>
+    <a href="#second-page">link to </a>
+</section>
 
-<div>
+<section>
     <a id="second-page"></a>
-    This is the second page.
-    <a href="second.html">link to the third page (second HTML)</a>
-    <a href="second.html#fourth-page">link to the fourth page (second HTML)</a>
-</div>
+    <p><a href="second.html">link to (second HTML) </a></p>
+    <p><a href="second.html#fourth-page">link to (second HTML) </a></p>
+</section>
 
 </body>
 </html>

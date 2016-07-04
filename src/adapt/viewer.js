@@ -33,6 +33,15 @@ adapt.viewer.ViewportSize;
 adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE = "data-vivliostyle-viewer-status";
 
 /**
+ * @typedef {{
+ *     url: string,
+ *     startPage: ?number,
+ *     skipPagesBefore: ?number
+ * }}
+ */
+adapt.viewer.SingleDocumentParam;
+
+/**
  * @param {Window} window
  * @param {!HTMLElement} viewportElement
  * @param {string} instanceId
@@ -56,6 +65,7 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
     	self.needResize = true;
     	self.kick();
     };
+    /** @const */ this.pageReplacedListener = this.pageReplacedListener.bind(this);
     /** @type {adapt.base.EventListener} */ this.hyperlinkListener = function(evt) {};
     /** @const */ this.pageRuleStyleElement = document.getElementById("vivliostyle-page-rules");
     /** @type {boolean} */ this.pageSheetSizeAlreadySet = false;
@@ -174,12 +184,7 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
     vivliostyle.profile.profiler.registerStartTiming("loadXML");
     vivliostyle.profile.profiler.registerStartTiming("loadFirstPage");
     this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
-    /** @type {!Array<string>} */ var urls;
-    if (typeof command["url"] === "string") {
-        urls = [command["url"]];
-    } else {
-        urls = command["url"];
-    }
+    /** @type {!Array<!adapt.viewer.SingleDocumentParam>} */ var params = command["url"];
     var doc = /** @type {Document} */ (command["document"]);
 	var fragment = /** @type {?string} */ (command["fragment"]);
     var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
@@ -195,12 +200,17 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
         }
     }
 	store.init().then(function() {
-	    var xmlURLs = urls.map(function(url) {
-            return adapt.base.resolveURL(url, self.window.location.href);
+        /** @type {!Array<!adapt.epub.OPFItemParam>} */ var resolvedParams = params.map(function(p, index) {
+            return {
+                url: adapt.base.resolveURL(p.url, self.window.location.href),
+                index: index,
+                startPage: p.startPage,
+                skipPagesBefore: p.skipPagesBefore
+            };
         });
-	    self.packageURL = xmlURLs;
+	    self.packageURL = resolvedParams.map(function(p) { return p.url; });
 	    self.opf = new adapt.epub.OPFDoc(store, "");
-	    self.opf.initWithChapters(xmlURLs, doc).then(function() {
+	    self.opf.initWithChapters(resolvedParams, doc).then(function() {
             self.opf.resolveFragment(fragment).then(function(position) {
                 self.pagePosition = position;
                 self.resize().then(function() {
@@ -331,6 +341,18 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 };
 
 /**
+ * Refresh view when a currently displayed page is replaced (by re-layout caused by cross reference resolutions)
+ * @param {adapt.base.Event} evt
+ */
+adapt.viewer.Viewer.prototype.pageReplacedListener = function(evt) {
+    var currentPage = this.currentPage;
+    if (currentPage === evt.target) {
+        currentPage = evt.newPage;
+    }
+    this.showCurrent(currentPage);
+};
+
+/**
  * Hide current pages (this.currentPage, this.currentSpread)
  * @private
  */
@@ -349,6 +371,7 @@ adapt.viewer.Viewer.prototype.hidePages = function() {
         if (page) {
             adapt.base.setCSSProperty(page.container, "display", "none");
             page.removeEventListener("hyperlink", this.hyperlinkListener, false);
+            page.removeEventListener("replaced", this.pageReplacedListener, false);
         }
     }, this);
 };
@@ -359,6 +382,7 @@ adapt.viewer.Viewer.prototype.hidePages = function() {
  */
 adapt.viewer.Viewer.prototype.showSinglePage = function(page) {
     page.addEventListener("hyperlink", this.hyperlinkListener, false);
+    page.addEventListener("replaced", this.pageReplacedListener, false);
     adapt.base.setCSSProperty(page.container, "visibility", "visible");
     adapt.base.setCSSProperty(page.container, "display", "block");
 };
@@ -788,7 +812,7 @@ adapt.viewer.Viewer.prototype.initEmbed = function (cmd) {
         var scheduler = adapt.task.currentTask().getScheduler();
         viewer.hyperlinkListener = function(evt) {
     		var hrefEvent = /** @type {adapt.vtree.PageHyperlinkEvent} */ (evt);
-            var internal = viewer.packageURL.some(function(url) {
+            var internal = hrefEvent.href.charAt(0) === "#" || viewer.packageURL.some(function(url) {
                 return hrefEvent.href.substr(0, url.length) == url;
             });
     		var msg = {"t":"hyperlink", "href":hrefEvent.href, "internal": internal};

@@ -104,6 +104,30 @@ adapt.base.resolveURL = function(relURL, baseURL) {
     return url.replace(/\/(\.\/)+/g, '/');
 };
 
+/**
+ * @interface
+ */
+adapt.base.DocumentURLTransformer = function() {};
+
+/**
+ * @param {string} fragment
+ * @param {string} baseURL
+ * @returns {string}
+ */
+adapt.base.DocumentURLTransformer.prototype.transformFragment = function(fragment, baseURL) {};
+
+/**
+ * @param {string} url
+ * @param {string} baseURL
+ * @returns {string}
+ */
+adapt.base.DocumentURLTransformer.prototype.transformURL = function(url, baseURL) {};
+
+/**
+ * @param {string} encoded
+ * @returns {!Array<string>}
+ */
+adapt.base.DocumentURLTransformer.prototype.restoreURL = function(encoded) {};
 
 /**
  * Various namespaces.
@@ -318,13 +342,24 @@ adapt.base.getPrefixedProperty = function(prop) {
     if (prefixed || prefixed === null) { // null means the browser does not support the property
         return prefixed;
     }
-    if (prop === "writing-mode") {
+    switch (prop) {
+    case "writing-mode":
         // Special case: prefer '-ms-writing-mode' to 'writing-mode'
         if (adapt.base.checkIfPropertySupported("-ms-", "writing-mode")) {
             adapt.base.propNameMap[prop] = "-ms-writing-mode";
             return "-ms-writing-mode";
         }
+        break;
+    case "filter":
+        // Special case: prefer '-webkit-filter' to 'filter'        
+        if (adapt.base.checkIfPropertySupported("-webkit-", "filter")) {
+            adapt.base.propNameMap[prop] = "-webkit-filter";
+            return "-webkit-filter";
+        }
+        break;
     }
+
+
     for (var i = 0; i < adapt.base.knownPrefixes.length; i++) {
         var prefix = adapt.base.knownPrefixes[i];
         if (adapt.base.checkIfPropertySupported(prefix, prop)) {
@@ -739,7 +774,7 @@ adapt.base.SimpleEventTarget.prototype.removeEventListener = function(type, list
 	if (list) {
 		var index = list.indexOf(listener);
 		if (index >= 0) {
-			list.splice(index, 0);
+			list.splice(index, 1);
 		}
 	}
 };
@@ -802,6 +837,10 @@ adapt.base.hasVerticalBBoxBug = null;
 
 /**
  * Check if there is a bug with the bounding boxes of vertical text characters.
+ * Though method used to be used check Chrome bug, it seems that the bug has been already fixed:
+ *   https://bugs.chromium.org/p/chromium/issues/detail?id=297808
+ * We now use this method to check Firefox bug:
+ *   https://bugzilla.mozilla.org/show_bug.cgi?id=1159309
  * @param {HTMLElement} body
  * @return {boolean}
  */
@@ -824,8 +863,8 @@ adapt.base.checkVerticalBBoxBug = function(body) {
 		var range = doc.createRange();
 		range.setStart(t, 0);
 		range.setEnd(t, 1);
-		var leftEdge = range.getBoundingClientRect().left;
-		adapt.base.hasVerticalBBoxBug = leftEdge < 50;
+		var box = range.getBoundingClientRect();
+		adapt.base.hasVerticalBBoxBug = (box.right - box.left < 10);
 		body.removeChild(container);
 	}
 	return adapt.base.hasVerticalBBoxBug;

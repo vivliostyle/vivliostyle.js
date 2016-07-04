@@ -1202,9 +1202,10 @@ adapt.pm.delayedProperties = [
  * @param {adapt.vtree.Container} container
  * @param {adapt.vtree.Page} page
  * @param {adapt.font.DocumentFaces} docFaces
+ * @param {adapt.vtree.ClientLayout} clientLayout
  * @return {void}
  */
-adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, container, page, docFaces) {
+adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, container, page, docFaces, clientLayout) {
 	if (!this.parentInstance || this.vertical != this.parentInstance.vertical) {
 		adapt.base.setCSSProperty(container.element, "writing-mode", (this.vertical ? "vertical-rl" : "horizontal-tb"));
 	}
@@ -1358,7 +1359,7 @@ adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit = function(cascade, docEl
 	cascade.pushRule(this.pageBox.classes, null, style);
     if (style["content"]) {
         style["content"] = style["content"].filterValue(
-            new adapt.csscasc.ContentPropVisitor(cascade, null));
+            new adapt.csscasc.ContentPropVisitor(cascade, null, cascade.counterResolver));
     }
 	this.init(cascade.context);
 	for (var i = 0; i < this.pageBox.children.length ; i++) {
@@ -1538,9 +1539,9 @@ adapt.pm.PartitionInstance.prototype.boxSpecificEnabled = function(enabled) {
 /**
  * @override
  */
-adapt.pm.PartitionInstance.prototype.prepareContainer = function(context, container, delayedItems, docFaces) {
+adapt.pm.PartitionInstance.prototype.prepareContainer = function(context, container, delayedItems, docFaces, clientLayout) {
 	adapt.base.setCSSProperty(container.element, "overflow", "hidden");  // default value
-	adapt.pm.PageBoxInstance.prototype.prepareContainer.call(this, context, container, delayedItems, docFaces);
+	adapt.pm.PageBoxInstance.prototype.prepareContainer.call(this, context, container, delayedItems, docFaces, clientLayout);
 };
 
 

@@ -1,5 +1,73 @@
 # Change Log
 
+## Unreleased
+
+## [2016.7](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.7) - 2016-07-04
+
+### Added
+- Support `filter` property
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/220>
+  - Spec: [CSS Filter Effect Module Level 3 - filter property](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
+- Support string and URL values in `attr()` function
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/234>
+  - Spec: [CSS Values and Units Module Level 3 - Attribute References: ‘attr()’](https://drafts.csswg.org/css-values/#attr-notation)
+- Support `left`/`right`/`recto`/`verso` values for `(page-)break-before`/`(page-)break-after`
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/25>
+  - Spec: [CSS Fragmentation - Page Break Values](http://dev.w3.org/csswg/css-break/#page-break-values)
+- Support cross references by `target-counter()`/`target-counters()`
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/248>
+  - Spec: [CSS Generated Content Module Level 3 - Cross references and the target-* functions](https://drafts.csswg.org/css-content/#cross-references)
+- Support `box-decoration-break` property
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/250>
+  - Spec: [CSS Fragmentation Module Level 3 - Fragmented Borders and Backgrounds: the box-decoration-break property](https://drafts.csswg.org/css-break/#break-decoration)
+- Support `font-size-adjust` property
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/254>
+  - Spec: [CSS Fonts Module Level 3 - Relative sizing: the font-size-adjust property](https://www.w3.org/TR/css-fonts-3/#font-size-adjust-prop)
+- Support `counter-set` property
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/255>
+  - Spec: [CSS Lists and Counters Module Level 3 - Automatic Numbering With Counters](https://drafts.csswg.org/css-lists-3/#propdef-counter-set)
+- Support `image-resolution` property
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/260>
+  - Spec: [CSS Image Values and Replaced Content Module Level 3 - Overriding Image Resolutions: the image-resolution property](https://drafts.csswg.org/css-images-3/#the-image-resolution)
+  - Only `<resolution>` value is supported.
+  - Only supported for content of `img`, `input[type=image]` and `video` (applied to poster images) elements and before/after pseudoelements. Other images such as background images, list images or border images are not supported.
+  - The property is applied to vector images such as SVG, as well as raster images. This behavior is different from what the spec specifies.
+
+### Changed
+- `counter-reset` and `counter-increment` specified in a page master (`@-epubx-page-master`) are now effective to page-based counters
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/251>
+  - Note that these values, if specified, always override values specified in page contexts.
+
+### Fixed
+- Fix a bug that `clear` is ignored when `white-space` property is used before the element
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/222>
+- Fix incorrect float positioning
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/192>
+- Fix incorrect float clearance
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/223>
+- Fix incorrect text offset caused by float
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/226>
+- Fix improper rendering of floats with relative width/height
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/37>
+- Fix positioning when a float is specified `position: relative` or a float is inside an positioned element
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/240>
+- Fix positioning when a float has a writing-mode value different from its container
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/192>
+- Fix issue with floats inside an element with an `overflow` value other than `visible`
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/224>
+- Fix issue that a `display` value was always set to `block` for a float, ignoring the original value
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/232>
+- Fix layout when a float is wider than its containing block
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/233>
+- Avoid error when an element with pseudoelements overflows its container
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/241>
+- Fix handling of padding and border of a block fragmented by a page/column break
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/250>
+- Fix layout of floats inside flex containers
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/253>
+- Fix page break bug in vertical text on Firefox (partially)
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/263>
+
 ## [2016.4](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.4) - 2016-04-08
 
 ### Added

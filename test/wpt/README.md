@@ -26,7 +26,7 @@ git clone --depth=1 --branch=vivliostyle-master --recursive \
 
 # Copy Vivliostyle.js files
 mkdir csswg-test/vivliostyle.js
-cp -R (Vivliostyle.js repository)/{src,test} csswg-test/vivliostyle.js/
+cp -R (Vivliostyle.js repository)/{src,test,resources} csswg-test/vivliostyle.js/
 # Or, you can clone from GitHub directly
 # git clone --depth=1 --branch=master \
 #   https://github.com/vivliostyle/vivliostyle.js.git csswg-test/vivliostyle.js

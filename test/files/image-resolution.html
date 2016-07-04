@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>image-resolution</title>
+    <style>
+        html {
+            image-resolution: 300dpi;
+        }
+        body {
+            border: blue solid;
+            width: 2in;
+            overflow: visible;
+        }
+        p {
+            clear: both;
+        }
+        canvas {
+            background: #ccc;
+        }
+        video, canvas, img, input {
+            max-width: 100%;
+        }
+        .auto-width {
+            width: auto;
+            height: 72px;
+            float: left;
+        }
+        .auto-height {
+            width: 144px;
+            height: auto;
+            float: left;
+        }
+        .bg {
+            background-image: url("img/300x150.png");
+            background-repeat: no-repeat;
+            height: 150px;
+        }
+        .bg-size {
+            background-size: 1.5in 0.75in;
+        }
+        .list-image {
+            padding-left: 2in;
+            list-style-image: url("img/300x150.png");
+        }
+        .content::before {
+            content: url("img/300x150.png");
+        }
+        .content-size::before {
+            /* This is not applied to the inserted image. */
+            width: 1.5in;
+        }
+    </style>
+</head>
+<body>
+<p>This blue box is 2 inch wide. Gray replaced elements below should be 1 inch wide.</p>
+<p>
+    video (PNG poster) <video poster="img/300x150.png"></video>
+</p>
+<p>
+    video (SVG poster) <video poster="img/300x150.svg"></video>
+</p>
+<p>
+    canvas <canvas></canvas>
+</p>
+<p>
+    img (PNG) <img src="img/300x150.png" alt="">
+</p>
+<p>
+    img (SVG) <img src="img/300x150.svg" alt="">
+</p>
+<p>
+    input[type=image](PNG) <input type="image" src="img/300x150.png">
+</p>
+<p>
+    input[type=image](SVG) <input type="image" src="img/300x150.svg">
+</p>
+
+<p>Gray replaced elements below should be 1.5 inch wide.</p>
+<p>
+    video (PNG poster) <video width="144" poster="img/300x150.png"></video>
+</p>
+<p>
+    video (PNG poster) <video style="width:1.5in" poster="img/300x150.png"></video>
+</p>
+<p>
+    video (SVG poster) <video width="144" poster="img/300x150.svg"></video>
+</p>
+<p>
+    video (SVG poster) <video style="width:1.5in" poster="img/300x150.svg"></video>
+</p>
+<p>
+    canvas <canvas width="144"></canvas>
+</p>
+<p>
+    canvas <canvas style="width:1.5in"></canvas>
+</p>
+<p>
+    img (PNG) <img src="img/300x150.png" width="144" alt="">
+</p>
+<p>
+    img (PNG) <img src="img/300x150.png" style="width:1.5in" alt="">
+</p>
+<p>
+    img (PNG) <img src="img/300x150.png" width="300" height="150" class="auto-width" alt="">
+</p>
+<p>
+    img (PNG) <img src="img/300x150.png" width="300" height="150" class="auto-height" alt="">
+</p>
+<p>
+    img (SVG) <img src="img/300x150.svg" width="144" alt="">
+</p>
+<p>
+    img (SVG) <img src="img/300x150.svg" style="width:1.5in" alt="">
+</p>
+<p>
+    input[type=image](PNG) <input type="image" src="img/300x150.png" width="144">
+</p>
+<p>
+    input[type=image](PNG) <input type="image" src="img/300x150.png" style="width:1.5in">
+</p>
+<p>
+    input[type=image](SVG) <input type="image" src="img/300x150.svg" width="144">
+</p>
+<p>
+    input[type=image](SVG) <input type="image" src="img/300x150.svg" style="width:1.5in">
+</p>
+
+<p>nonexistent images should not be resized by image-resolution.</p>
+<p>
+    img (nonexistent) <img src="img/nonexistent.png" alt="">
+</p>
+<p>
+    input[type=image] (nonexistent) <input type="image" src="img/nonexistent.png">
+</p>
+
+<p>↓Background image should be 1 inch wide.</p>
+<p class="bg"></p>
+
+<p>↓Background image should be 1.5 inch wide.</p>
+<p class="bg bg-size"></p>
+
+<p>↓List image should be 1 inch wide.</p>
+<ul class="list-image">
+    <li></li>
+</ul>
+
+<p>↓Generated content should be 1 inch wide.</p>
+<p class="content"></p>
+<p class="content content-size"></p>
+</body>
+</html>

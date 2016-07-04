@@ -103,14 +103,21 @@ LIST_STYLE_TYPE = disc | circle | square | decimal | decimal-leading-zero | lowe
     upper-roman | lower-greek | lower-latin | upper-latin | armenian | georgian | lower-alpha |
     upper-alpha | russian | upper-russian | lower-russian | cjk-ideographic | trad-chinese-informal |
     hebrew | none;
+TYPE_OR_UNIT_IN_ATTR = string | color | url | integer | number | length | angle | time | frequency;
+ATTR = attr(SPACE(IDENT TYPE_OR_UNIT_IN_ATTR?) [ STRING | IDENT | COLOR | INT | NUM | PLENGTH | ANGLE | POS_TIME | FREQUENCY]?);
 CONTENT = normal | none | 
     [ STRING | URI | counter(IDENT LIST_STYLE_TYPE?) | 
-    counters(IDENT STRING LIST_STYLE_TYPE?) | attr(IDENT) |
+    counters(IDENT STRING LIST_STYLE_TYPE?) | ATTR |
+    target-counter([ STRING | URI ] IDENT LIST_STYLE_TYPE?) |
+    target-counter(ATTR IDENT LIST_STYLE_TYPE?) |
+    target-counters([ STRING | URI ] IDENT STRING LIST_STYLE_TYPE?) |
+    target-counters(ATTR IDENT STRING LIST_STYLE_TYPE?) |
     open-quote | close-quote | no-open-quote | no-close-quote ]+;
 content = CONTENT;
 COUNTER = [ IDENT INT? ]+ | none;
 counter-increment = COUNTER;
 counter-reset = COUNTER;
+counter-set = COUNTER;
 cue-after = URI_OR_NONE;
 cue-before = URI_OR_NONE;
 cursor = COMMA(URI* [ auto | crosshair | default | pointer | move | e-resize | ne-resize | nw-resize |
@@ -155,7 +162,7 @@ padding-right = PPLENGTH;
 padding-left = PPLENGTH;
 padding-top = PPLENGTH;
 padding-bottom = PPLENGTH;
-PAGE_BREAK = auto | always | avoid | left | right;
+PAGE_BREAK = auto | always | avoid | left | right | recto | verso;
 page-break-after = PAGE_BREAK;
 page-break-before = PAGE_BREAK;
 page-break-inside = avoid | auto;
@@ -231,6 +238,11 @@ SHADOW = SPACE(inset || LENGTH{2,4} || COLOR); /* relaxed */
 [webkit]box-shadow = none | COMMA( SHADOW+ );
 text-shadow = none |  COMMA( SHADOW+ );
 [webkit]box-decoration-break = slice | clone;
+FILTER_FUNCTION = blur(LENGTH) | brightness(NUM | PERCENTAGE) | contrast(NUM | PERCENTAGE) | drop-shadow(SPACE(LENGTH{2,3} COLOR?))
+                | grayscale(NUM | PERCENTAGE) | hue-rotate(ANGLE) | invert(NUM | PERCENTAGE) | opacity(NUM | PERCENTAGE) 
+                | saturate(NUM | PERCENTAGE) | sepia(NUM | PERCENTAGE);
+FILTER_FUNCTION_LIST = FILTER_FUNCTION+;
+[webkit]filter = none | FILTER_FUNCTION_LIST;
 
 opacity = NUM;
 
@@ -271,11 +283,13 @@ src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */
 [adapt]behavior = IDENT;
 
 /* CSS Fonts */
+font-size-adjust = none | NNEG_NUM;
 [webkit]font-kerning = auto | normal | none;
 font-variant-east-asian = normal | [[ jis78 | jis83 | jis90 | jis04 | simplified | traditional ] || [ full-width | proportional-width ] || ruby];
 font-feature-settings = COMMA( SPACE( STRING [ on | off | INT ]? )+ );
 
 /* CSS Images */
+image-resolution = RESOLUTION;
 object-fit = fill | contain | cover | none | scale-down;
 object-position = COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */
 

@@ -36,7 +36,7 @@
   - Drafts
       - [CSS 2.1 - background-image](https://drafts.csswg.org/css2/colors.html#propdef-background-image)
       - [CSS Backgrounds 3 - background-image](https://drafts.csswg.org/css-backgrounds-3/#background-image)
-  - Values: `COMMA( URI_OR_NONE+ );`
+  - Values: `COMMA( IMAGE+ );`
 - [background-position](https://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
   - TR
       - [CSS 2.1 - background-position](https://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
@@ -443,7 +443,7 @@
   - Drafts
       - [CSS 2.1 - list-style-image](https://drafts.csswg.org/css2/generate.html#propdef-list-style-image)
       - [CSS Lists 3 - list-style-image](https://drafts.csswg.org/css-lists-3/#propdef-list-style-image)
-  - Values: `URI_OR_NONE;`
+  - Values: `IMAGE;`
 - [list-style-position](https://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position)
   - TR
       - [CSS 2.1 - list-style-position](https://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position)
@@ -924,7 +924,7 @@
   - Drafts
       - [CSS 2.1 - background-image](https://drafts.csswg.org/css2/colors.html#propdef-background-image)
       - [CSS Backgrounds 3 - background-image](https://drafts.csswg.org/css-backgrounds-3/#background-image)
-  - Values: `COMMA( URI_OR_NONE+ );`
+  - Values: `COMMA( IMAGE+ );`
 - [background-origin](https://www.w3.org/TR/css3-background/#background-origin)
     - Allowed prefixes: webkit
   - TR
@@ -1045,7 +1045,7 @@
       - [CSS Backgrounds 3 - border-image-source](https://www.w3.org/TR/css3-background/#border-image-source)
   - Drafts
       - [CSS Backgrounds 3 - border-image-source](https://drafts.csswg.org/css-backgrounds-3/#border-image-source)
-  - Values: `URI_OR_NONE;`
+  - Values: `IMAGE;`
 - [border-image-width](https://www.w3.org/TR/css3-background/#border-image-width)
   - TR
       - [CSS Backgrounds 3 - border-image-width](https://www.w3.org/TR/css3-background/#border-image-width)
@@ -1263,7 +1263,7 @@
       - [CSS Fonts 3 - font-feature-settings](https://www.w3.org/TR/css-fonts-3/#propdef-font-feature-settings)
   - Drafts
       - [CSS Fonts 3 - font-feature-settings](https://drafts.csswg.org/css-fonts-3/#propdef-font-feature-settings)
-  - Values: `normal | [STRING [ on | off ]?];`
+  - Values: `COMMA( SPACE( STRING [ on | off | INT ]? )+ );`
 - [font-kerning](https://www.w3.org/TR/css-fonts-3/#propdef-font-kerning)
     - Allowed prefixes: webkit
   - TR
@@ -1872,7 +1872,7 @@
   - Drafts
       - [CSS 2.1 - list-style-image](https://drafts.csswg.org/css2/generate.html#propdef-list-style-image)
       - [CSS Lists 3 - list-style-image](https://drafts.csswg.org/css-lists-3/#propdef-list-style-image)
-  - Values: `URI_OR_NONE;`
+  - Values: `IMAGE;`
 - [list-style-position](https://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position)
   - TR
       - [CSS 2.1 - list-style-position](https://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position)
@@ -2167,6 +2167,15 @@
   - Drafts
       - [CSS Page Floats 3 - float-reference](https://drafts.csswg.org/css-page-floats-3/#propdef-float-reference)
   - Values: `inline | column | region | page;`
+
+## [Filter Effects 1](https://www.w3.org/TR/filter-effects-1/)
+- [filter](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
+    - Allowed prefixes: webkit
+  - TR
+      - [Filter Effects 1 - filter](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
+  - Drafts
+      - [Filter Effects 1 - filter](https://drafts.fxtf.org/filters-1/#propdef-filter)
+  - Values: `none | FILTER_FUNCTION_LIST;`
 
 ## [Uncategorized]()
 - [after]()
