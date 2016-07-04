@@ -873,8 +873,11 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 			            }
 			            // TODO: understand the element we are working with.
 			            if (attributeName == "src" || attributeName == "href" || attributeName == "poster") {
-			                attributeValue = self.documentURLTransformer.transformURL(
-								self.resolveURL(attributeValue), self.xmldoc.url);
+			                attributeValue = self.resolveURL(attributeValue);
+			                if (attributeName === "href") {
+			                    attributeValue = self.documentURLTransformer.transformURL(
+			                        attributeValue, self.xmldoc.url);
+			                }
 			            } else if (attributeName == "srcset") {
 							attributeValue = attributeValue.split(",").map(function(value) {
 								return self.resolveURL(value.trim());
