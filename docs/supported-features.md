@@ -259,6 +259,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Supported in all browsers
 - [counter-reset](https://www.w3.org/TR/CSS2/generate.html#propdef-counter-reset)
   - Supported in all browsers
+- [counter-set](https://drafts.csswg.org/css-lists-3/#propdef-counter-set)
+  - Supported in all browsers
 - [cursor](https://www.w3.org/TR/CSS2/ui.html#propdef-cursor)
   - Support depends on browser capabilities
 - [direction](https://www.w3.org/TR/CSS2/visuren.html#propdef-direction)
@@ -500,6 +502,11 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 ### [CSS Image Values and Replaced Content 3](https://www.w3.org/TR/css3-images/)
 
+- [image-resolution](https://www.w3.org/TR/css3-images/#the-image-resolution)
+  - Supported in all browsers
+  - Only `<resolution>` value is supported.
+  - Only supported for content of `img`, `input[type=image]` and `video` (applied to poster images) elements and before/after pseudoelements. Other images such as background images, list images or border images are not supported.
+  - The property is applied to vector images such as SVG, as well as raster images. This behavior is different from what the spec specifies.
 - [object-fit](https://www.w3.org/TR/css3-images/#object-fit)
   - Support depends on browser capabilities
 - [object-position](https://www.w3.org/TR/css3-images/#object-position)
@@ -515,6 +522,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Allowed prefixes: webkit
   - Support depends on browser capabilities
 - [font-size](https://www.w3.org/TR/css-fonts-3/#propdef-font-size)
+  - Support depends on browser capabilities
+- [font-size-adjust](https://www.w3.org/TR/css-fonts-3/#propdef-font-size-adjust)
   - Support depends on browser capabilities
 - [font-style](https://www.w3.org/TR/css-fonts-3/#propdef-font-style)
   - Support depends on browser capabilities
@@ -703,10 +712,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 - [break-after](https://www.w3.org/TR/css3-break/#propdef-break-after)
   - Supported in all browsers
-  - Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/129)
 - [break-before](https://www.w3.org/TR/css3-break/#propdef-break-before)
   - Supported in all browsers
-  - Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/129)
 - [break-inside](https://www.w3.org/TR/css3-multicol/#break-inside)
   - Supported in all browsers
   - Note: All of `avoid-page`, `avoid-column` and `avoid-region` values are treated as if they were `avoid`. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/128)
@@ -714,6 +721,10 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Supported in all browsers
 - [widows](https://www.w3.org/TR/css3-break/#propdef-widows)
   - Supported in all browsers
+- [box-decoration-break](https://www.w3.org/TR/css3-break/#propdef-box-decoration-break)
+  - Allowed prefixes: webkit
+  - Supported in all browsers
+  - Note: Background, box-shadow and border images on inline-start/end borders are always rendered as if `box-decoration-break: clone` is specified.
 
 ### [CSS Transforms 1](https://www.w3.org/TR/css-transforms-1/)
 

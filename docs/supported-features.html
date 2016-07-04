@@ -573,6 +573,11 @@
       <li>Supported in all browsers</li>
     </ul>
   </li>
+  <li><a href="https://drafts.csswg.org/css-lists-3/#propdef-counter-set">counter-set</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
   <li><a href="https://www.w3.org/TR/CSS2/ui.html#propdef-cursor">cursor</a>
     <ul>
       <li>Support depends on browser capabilities</li>
@@ -1140,6 +1145,14 @@
 <h3><a href="https://www.w3.org/TR/css3-images/">CSS Image Values and Replaced Content 3</a></h3>
 
 <ul>
+  <li><a href="https://www.w3.org/TR/css3-images/#the-image-resolution">image-resolution</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Only <code>&lt;resolution&gt;</code> value is supported.</li>
+      <li>Only supported for content of <code>img</code>, <code>input[type=image]</code> and <code>video</code> (applied to poster images) elements and before/after pseudoelements. Other images such as background images, list images or border images are not supported.</li>
+      <li>The property is applied to vector images such as SVG, as well as raster images. This behavior is different from what the spec specifies.</li>
+    </ul>
+  </li>
   <li><a href="https://www.w3.org/TR/css3-images/#object-fit">object-fit</a>
     <ul>
       <li>Support depends on browser capabilities</li>
@@ -1172,6 +1185,11 @@
     </ul>
   </li>
   <li><a href="https://www.w3.org/TR/css-fonts-3/#propdef-font-size">font-size</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-fonts-3/#propdef-font-size-adjust">font-size-adjust</a>
     <ul>
       <li>Support depends on browser capabilities</li>
     </ul>
@@ -1558,13 +1576,11 @@
   <li><a href="https://www.w3.org/TR/css3-break/#propdef-break-after">break-after</a>
     <ul>
       <li>Supported in all browsers</li>
-      <li>Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/129">[Issue]</a></li>
     </ul>
   </li>
   <li><a href="https://www.w3.org/TR/css3-break/#propdef-break-before">break-before</a>
     <ul>
       <li>Supported in all browsers</li>
-      <li>Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/129">[Issue]</a></li>
     </ul>
   </li>
   <li><a href="https://www.w3.org/TR/css3-multicol/#break-inside">break-inside</a>
@@ -1581,6 +1597,13 @@
   <li><a href="https://www.w3.org/TR/css3-break/#propdef-widows">widows</a>
     <ul>
       <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-break/#propdef-box-decoration-break">box-decoration-break</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Supported in all browsers</li>
+      <li>Note: Background, box-shadow and border images on inline-start/end borders are always rendered as if <code>box-decoration-break: clone</code> is specified.</li>
     </ul>
   </li>
 </ul>

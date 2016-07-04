@@ -1,0 +1,2106 @@
+@charset "UTF-8";
+/* COLOR INDEX */
+/*hsl(20, 40%, 90%);*/
+/* AH has trouble with real transparent */
+/* Fonts */
+/* Sizes */
+/* Original sizes
+$page_w: 8in;
+$page_h: 9.75in;
+$margin_top: .7in;
+$margin_bottom: 1in;
+$margin_outside: .5in;
+$margin_inside: .9in;
+$sidebar_gutter: .3in;
+$sidebar_width: 1.6in;
+*/
+/* Helper functions */
+/* Functions to create data URI SVGs */
+@import url("syntax.css");
+/* Common styles between page numbers and footer text */
+/* Page numbers */
+/* Text next to page numbers */
+@page {
+  /* defining overall trim size and page layout */
+  size: 182mm 233mm; }
+/* general blocks */
+strong {
+  font-weight: bold;
+  font-style: inherit; }
+
+em {
+  font-weight: inherit; }
+  em:lang(en) {
+    font-style: italic; }
+  em:lang(ja) {
+    font-style: normal; }
+
+head title {
+  display: none; }
+
+p {
+  /* general text styles */
+  margin: 0;
+  text-align: justify;
+  text-indent: 1em; }
+
+/* global styles */
+:root {
+  font: 100 8.5pt/1.6 "Source Han Sans", "ヒラギノ角ゴ ProN W3", HiraKakuProN-W3, "ヒラギノ角ゴ Pro W3", HiraKakuPro-W3, sans-serif;
+  color: rgb(0, 0, 0);
+  text-align: justify;
+  hyphens: manual;
+  orphans: 2;
+  widows: 2; }
+
+@media screen {
+  body {
+    margin: auto 2.55in; } }
+/* general inlines */
+a {
+  color: inherit;
+  font-weight: bold;
+  text-decoration: none; }
+  a[data-type="xref"] br {
+    display: none; }
+  a + span.print_url_in_parens, a + wbr + span.print_url_in_parens {
+    font-style: normal;
+    color: rgb(64, 64, 64); }
+    a + span.print_url_in_parens > .print_url, a + wbr + span.print_url_in_parens > .print_url {
+      font-style: italic; }
+  a.print_url:not(.print_url_in_parens a) {
+    font-style: normal; }
+  a.print_url, a + span.print_url_in_parens .print_url, a + wbr + span.print_url_in_parens .print_url {
+    font-family: Consolas, "Source Code Pro", "Source Han Sans", "ヒラギノ角ゴ ProN W3", HiraKakuProN-W3, "ヒラギノ角ゴ Pro W3", HiraKakuPro-W3, monospace;
+    word-wrap: break-word; }
+
+/* reset counters */
+/* counters add auto-numbering to elements in the book. 
+	 This reset initiates the counters, enabling them 
+	 to begin numbering correctly. */
+body[data-type="book"] {
+  counter-reset: PartNumber ChapterNumber AppendixNumber FigureNumber TableNumber ExampleNumber EquationNumber footnote Secret; }
+
+/* Dedication */
+section[data-type="dedication"]:not(.praise) {
+  padding-top: 3in; }
+  section[data-type="dedication"]:not(.praise) p {
+    font: italic 1.2rem/1.6 Baskerville, 'Libre Baskerville', serif;
+    font-feature-settings: "onum";
+    text-align: center;
+    white-space: pre-line;
+    text-indent: 0; }
+    section[data-type="dedication"]:not(.praise) p:lang(ja) {
+      font: 1.4rem/1.7 Baskerville, 'Libre Baskerville', 'Kaiti SC', 'ヒラギノ明朝 ProN W3', HiraMinProN-W3, 'ヒラギノ明朝 Pro W3', HiraMinPro-W3, '游明朝', 'YuMincho', 'Yu Mincho', 'ＭＳ Ｐ明朝', 'MS PMincho', 'Kochi Mincho', "Takao P明朝", "Takao PMincho", "TakaoPMincho", "Yu Gothic", "IPA P明朝", "IPAPMincho", serif; }
+      section[data-type="dedication"]:not(.praise) p:lang(ja) span:lang(en) {
+        font-size-adjust: 0.42;
+        font-style: italic; }
+
+/* Praise page */
+section[data-type="dedication"],
+section[data-type="copyright-page"] {
+  page-break-before: always;
+  page-break-after: always; }
+
+section[data-type="dedication"].praise blockquote {
+  border-left: none;
+  margin-bottom: 15pt; }
+  section[data-type="dedication"].praise blockquote p:first-child {
+    position: relative; }
+    @media not print {
+      section[data-type="dedication"].praise blockquote p:first-child {
+        /* on print there's enough room */
+        margin-left: 2ch; } }
+    section[data-type="dedication"].praise blockquote p:first-child::before {
+      content: '“';
+      color: #655;
+      font: bold 500%/0.5 Rokkitt, "Source Han Sans", serif;
+      position: absolute;
+      margin-left: -0.9ch; }
+    section[data-type="dedication"].praise blockquote p:first-child::after {
+      content: '”'; }
+  section[data-type="dedication"].praise blockquote p[data-type="attribution"] {
+    font: bold 125% Rokkitt, "Source Han Sans", serif;
+    color: #C00065; }
+    section[data-type="dedication"].praise blockquote p[data-type="attribution"] + p {
+      font-size: 80%;
+      text-align: right;
+      color: #920050; }
+
+/* Cover page */
+section[data-type="titlepage"]#jp-cover * {
+  display: none; }
+
+section[data-type="titlepage"]#jp-cover {
+  page-break-before: right;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  max-width: 5.6in;
+  margin: 0 auto; }
+
+section[data-type="titlepage"]#jp-cover::before {
+  content: " ";
+  white-space: pre;
+  line-height: 0;
+  background: url("../img/css_tobira_jp_top.png") no-repeat;
+  background-size: contain;
+  display: block;
+  width: 100%;
+  padding-top: 71.37%;
+  /* 1264 / 1771, to preserve aspect ratio */ }
+
+section[data-type="titlepage"]#jp-cover::after {
+  content: "";
+  background: url("../img/css_tobira_jp_bottom.png") no-repeat center;
+  background-size: contain;
+  display: block;
+  width: 20.7%;
+  /* 366 / 1771 */
+  padding-top: 7.75%;
+  /* 20.7% * 137 / 366, to preserve aspect ratio */
+  margin: auto auto 0;
+  border-top: 1rem solid white; }
+
+/* Copyright page */
+section[data-type="copyright-page"] h1 {
+  margin: 0;
+  font-weight: bold; }
+section[data-type="copyright-page"] header > h1 {
+  color: #C00065;
+  font-size: 150%; }
+section[data-type="copyright-page"] .author {
+  color: #920050; }
+section[data-type="copyright-page"] p {
+  text-indent: 0;
+  margin-bottom: 1em; }
+section[data-type="copyright-page"] p.copyright,
+section[data-type="copyright-page"] p.print {
+  margin-bottom: 0; }
+section[data-type="copyright-page"] ul.stafflist {
+  column-count: 2;
+  padding: 4pt 0;
+  margin: 1em auto 2em;
+  border: solid #58a;
+  border-width: 2.5pt 0; }
+  section[data-type="copyright-page"] ul.stafflist li {
+    margin-bottom: 0;
+    padding-bottom: 0; }
+  section[data-type="copyright-page"] ul.stafflist .staffrole {
+    color: #58a;
+    font-weight: bold; }
+section[data-type="copyright-page"] li::before {
+  content: none;
+  display: none; }
+section[data-type="copyright-page"] .history {
+  margin-bottom: 1em; }
+  section[data-type="copyright-page"] .history h1 {
+    color: #58a;
+    font-size: inherit;
+    font-family: inherit; }
+  section[data-type="copyright-page"] .history h1, section[data-type="copyright-page"] .history p {
+    display: inline; }
+  section[data-type="copyright-page"] .history ul {
+    margin-left: 2em; }
+  section[data-type="copyright-page"] .history time {
+    display: inline-block;
+    min-width: 8em;
+    font-weight: bold;
+    color: #58a; }
+  section[data-type="copyright-page"] .history .revisions {
+    margin-top: .5em; }
+section[data-type="copyright-page"] .legal {
+  font-size: 80%; }
+section[data-type="copyright-page"] div.copyright-bottom {
+  bottom: 0; }
+  @media print {
+    section[data-type="copyright-page"] div.copyright-bottom {
+      position: absolute; } }
+  section[data-type="copyright-page"] div.copyright-bottom p {
+    text-indent: 0;
+    margin-bottom: 0; }
+
+section[data-type="copyright-page"]:lang(ja) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%; }
+  section[data-type="copyright-page"]:lang(ja) .legal, section[data-type="copyright-page"]:lang(ja) .trademarks {
+    margin-top: auto;
+    break-before: page;
+    break-after: page;
+    font-size: 0.85rem; }
+    section[data-type="copyright-page"]:lang(ja) .legal p:lang(ja), section[data-type="copyright-page"]:lang(ja) .trademarks p:lang(ja) {
+      margin: 0.5em 0; }
+  section[data-type="copyright-page"]:lang(ja) .legal p:lang(ja) + p {
+    margin-top: 0;
+    padding-top: 0.5em;
+    border-top: 1px solid black; }
+
+/* Colophon */
+[data-type="colophon"] [data-type="sect1"] {
+  break-before: page;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column; }
+  @media print {
+    [data-type="colophon"] [data-type="sect1"] {
+      height: 100%; } }
+  [data-type="colophon"] [data-type="sect1"] header {
+    margin-top: auto; }
+
+/* Table of contents is a series of nested lists in a nav element */
+nav[data-type="toc"],
+section[data-type="index"].spec {
+  font-feature-settings: "tnum";
+  hyphens: none;
+  color: white;
+  font: 300 100%/1.2 Rokkitt, "Source Han Sans", serif; }
+  nav[data-type="toc"] > ol,
+  section[data-type="index"].spec > ol {
+    text-align: left; }
+    nav[data-type="toc"] > ol:lang(ja),
+    section[data-type="index"].spec > ol:lang(ja) {
+      font-family: "Source Han Sans", "ヒラギノ角ゴ ProN W3", HiraKakuProN-W3, "ヒラギノ角ゴ Pro W3", HiraKakuPro-W3; }
+    nav[data-type="toc"] > ol > li > ol > li,
+    section[data-type="index"].spec > ol > li > ol > li {
+      margin-top: 7pt; }
+  nav[data-type="toc"] a,
+  section[data-type="index"].spec a {
+    font-weight: inherit;
+    font-style: inherit; }
+  nav[data-type="toc"] ol, nav[data-type="toc"] li,
+  section[data-type="index"].spec ol,
+  section[data-type="index"].spec li {
+    margin-left: 0; }
+  nav[data-type="toc"] li,
+  section[data-type="index"].spec li {
+    /* no list marker on table of contents entries */ }
+    nav[data-type="toc"] li::before,
+    section[data-type="index"].spec li::before {
+      content: none;
+      display: none; }
+    nav[data-type="toc"] li[data-type="sect1"] li,
+    nav[data-type="toc"] li br,
+    section[data-type="index"].spec li[data-type="sect1"] li,
+    section[data-type="index"].spec li br {
+      display: none; }
+  nav[data-type="toc"] > ol,
+  section[data-type="index"].spec > ol {
+    margin-top: 0; }
+    nav[data-type="toc"] > ol > li:nth-child(2),
+    section[data-type="index"].spec > ol > li:nth-child(2) {
+      margin-top: 0; }
+
+nav[data-type="toc"] {
+  counter-reset: ChapterNumberTOC SecretTOC AppendixNumberTOC;
+  background: #655; }
+  nav[data-type="toc"] > h1, nav[data-type="toc"] .dup {
+    font-family: Rokkitt, "Source Han Sans", serif; }
+  nav[data-type="toc"][data-type="toc"] > h1 {
+    /* doubling of the [] selector for specificity */
+    color: #fb3;
+    font-size: 4rem;
+    line-height: 0.7; }
+  nav[data-type="toc"] > ol li[data-type="index"]:first-child {
+    display: none; }
+  nav[data-type="toc"] ol > li[data-type="index"]:last-of-type {
+    font-family: Rokkitt, "Source Han Sans", serif; }
+    nav[data-type="toc"] ol > li[data-type="index"]:last-of-type a {
+      font-size: 130%; }
+  nav[data-type="toc"] li[data-type="foreword"] a::after,
+  nav[data-type="toc"] li[data-type="preface"] a::after,
+  nav[data-type="toc"] li[data-type="chapter"] a::after,
+  nav[data-type="toc"] li[data-type="index"] a::after {
+    content: "123";
+    /*placeholder*/
+    content: target-counter(attr(href, url), page);
+    font-family: Rokkitt, "Source Han Sans", serif;
+    font-size: 125%;
+    line-height: 0; }
+  nav[data-type="toc"] li[data-type="foreword"],
+  nav[data-type="toc"] li[data-type="preface"],
+  nav[data-type="toc"] li[data-type="chapter"],
+  nav[data-type="toc"] li[data-type="index"]
+   {
+    margin-top: 14.4pt;
+    display: list-item; }
+    nav[data-type="toc"] li[data-type="foreword"] a:after,
+    nav[data-type="toc"] li[data-type="preface"] a:after,
+    nav[data-type="toc"] li[data-type="chapter"] a:after,
+    nav[data-type="toc"] li[data-type="index"]
+    a:after {
+      font-weight: bold;
+      color: #CBB0A6; }
+    nav[data-type="toc"] li[data-type="foreword"] > a:after,
+    nav[data-type="toc"] li[data-type="preface"] > a:after,
+    nav[data-type="toc"] li[data-type="chapter"] > a:after,
+    nav[data-type="toc"] li[data-type="index"]
+    > a:after {
+      color: white; }
+  nav[data-type="toc"] li[data-type="preface"], nav[data-type="toc"] li[data-type="foreword"] {
+    font-size: 1.35rem; }
+  nav[data-type="toc"] li[data-type="chapter"] {
+    font-size: 1.35rem; }
+    nav[data-type="toc"] li[data-type="chapter"] > a {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      break-after: avoid; }
+      nav[data-type="toc"] li[data-type="chapter"] > a:before {
+        content: "CHAPTER " counter(ChapterNumberTOC,decimal);
+        display: block;
+        counter-increment: ChapterNumberTOC;
+        font-weight: bold;
+        color: yellowgreen;
+        page-break-after: avoid; }
+      nav[data-type="toc"] li[data-type="chapter"] > a:lang(ja):before {
+        content: counter(ChapterNumberTOC,decimal) "章";
+        text-transform: full-width;
+        letter-spacing: 0.2em; }
+    nav[data-type="toc"] li[data-type="chapter"] ~ li[data-type="chapter"] li[data-type="sect1"] {
+      counter-increment: SecretTOC; }
+      nav[data-type="toc"] li[data-type="chapter"] ~ li[data-type="chapter"] li[data-type="sect1"] a:before {
+        position: static;
+        content: counter(SecretTOC);
+        display: inline-block;
+        min-width: 1em;
+        padding: .3em .1em 0 0;
+        margin-left: .2em;
+        border-radius: 1em 1em 0;
+        background: #C00065;
+        text-align: right;
+        color: white;
+        font: bold 100%/0.65 Rokkitt, "Source Han Sans", serif;
+        letter-spacing: -0.05em;
+        padding: .4em .15em 0 0em;
+        line-height: 0.7;
+        font-size: 120%;
+        min-width: 1.1em;
+        margin-right: .3em;
+        background: #fb3;
+        color: #655; }
+  nav[data-type="toc"] li[data-type="sect1"] {
+    font-size: 1rem; }
+
+nav[data-type="toc"] a:not(.spec-title a),
+section[data-type="index"].spec a:not(.spec-title a) {
+  display: inline-flex;
+  align-items: baseline; }
+  nav[data-type="toc"] a:not(.spec-title a)::after,
+  section[data-type="index"].spec a:not(.spec-title a)::after {
+    flex: auto;
+    text-align: right; }
+nav[data-type="toc"] li[data-type="sect1"],
+nav[data-type="toc"] li.secret,
+section[data-type="index"].spec li[data-type="sect1"],
+section[data-type="index"].spec li.secret {
+  display: flex; }
+  nav[data-type="toc"] li[data-type="sect1"] a,
+  nav[data-type="toc"] li.secret a,
+  section[data-type="index"].spec li[data-type="sect1"] a,
+  section[data-type="index"].spec li.secret a {
+    flex: auto; }
+
+nav[data-type="toc"] > ol > li > a {
+  width: 100%; }
+nav[data-type="toc"] [data-type="chapter"] > a {
+  flex-wrap: wrap; }
+  nav[data-type="toc"] [data-type="chapter"] > a::before {
+    width: 100%; }
+nav[data-type="toc"] li[data-type="sect1"] ol {
+  display: none; }
+
+/* Baseline styling for spec index; PLS UPDATE */
+section[data-type="index"].spec {
+  background: #58a; }
+  section[data-type="index"].spec li::before {
+    display: none; }
+  section[data-type="index"].spec > ol {
+    margin-top: 0; }
+    section[data-type="index"].spec > ol > li:first-child {
+      margin-top: 0; }
+      section[data-type="index"].spec > ol > li:first-child .spec-title {
+        margin-top: 0; }
+  section[data-type="index"].spec > h1 {
+    color: #000; }
+  section[data-type="index"].spec p {
+    text-indent: 0;
+    text-align: left;
+    page-break-inside: avoid;
+    break-inside: avoid; }
+  section[data-type="index"].spec div.spec-entry {
+    break-inside: avoid;
+    break-after: avoid;
+    break-before: auto; }
+  section[data-type="index"].spec ol {
+    break-inside: auto; }
+  section[data-type="index"].spec li {
+    break-inside: auto;
+    break-after: auto;
+    break-before: auto; }
+  section[data-type="index"].spec .spec-title {
+    margin-top: 1em;
+    font-weight: bold;
+    font-size: 1.50rem;
+    color: #fb3;
+    font-family: Rokkitt, "Source Han Sans", serif;
+    line-height: 1; }
+  section[data-type="index"].spec .spec-url {
+    color: #9CBACC;
+    font-style: italic;
+    font-weight: 600;
+    font-family: Consolas, "Source Code Pro", "Source Han Sans", "ヒラギノ角ゴ ProN W3", HiraKakuProN-W3, "ヒラギノ角ゴ Pro W3", HiraKakuPro-W3, monospace; }
+  section[data-type="index"].spec li.secret a:after {
+    content: "123";
+    /*placeholder*/
+    content: target-counter(attr(href, url), page);
+    color: #9CBACC;
+    font-weight: bold;
+    font-family: Rokkitt, "Source Han Sans", serif;
+    font-size: 125%;
+    line-height: 0; }
+  section[data-type="index"].spec .secret_number {
+    display: inline-block;
+    min-width: 1em;
+    padding: .3em .1em 0 0;
+    margin-left: .2em;
+    border-radius: 1em 1em 0;
+    background: #C00065;
+    text-align: right;
+    color: white;
+    font: bold 100%/0.65 Rokkitt, "Source Han Sans", serif;
+    letter-spacing: -0.05em;
+    padding: .4em .15em 0 0;
+    line-height: 0.7;
+    font-size: 120%;
+    min-width: 1.1em;
+    margin-right: .3em;
+    background: #000;
+    color: #58a; }
+
+/* End-of-book Index */
+section[data-type="index"]:not(.spec) > h1, section[data-type="index"]:not(.spec) .dup {
+  font-family: Rokkitt, "Source Han Sans", serif; }
+section[data-type="index"]:not(.spec)[data-type="index"]:not(.spec) > h1 {
+  font-size: 4em;
+  line-height: 0.7; }
+section[data-type="index"]:not(.spec) [data-type="indexdiv"]:first-of-type h3 {
+  margin-top: 0; }
+section[data-type="index"]:not(.spec) li {
+  white-space: pre-wrap; }
+section[data-type="index"]:not(.spec) [data-type="index-term"] {
+  white-space: nowrap; }
+
+/* preface, chapter, and appendix headings */
+/* shared styles for all chapter-level headings */
+section[data-type="preface"] > h1 {
+  margin-bottom: 0.9in;
+  margin-top: 0.5in;
+  text-align: right; }
+
+/* Main book section titles */
+section[data-type="chapter"] > h1 {
+  background: #655;
+  counter-increment: ChapterNumber; }
+
+section[data-type="chapter"] > h1,
+section[data-type="preface"] > h1 {
+  position: relative;
+  padding-right: 2in;
+  /* space for the number */
+  font-size: 4.3rem;
+  line-height: 1.15;
+  color: white;
+  text-align: right; }
+  section[data-type="chapter"] > h1:lang(ja),
+  section[data-type="preface"] > h1:lang(ja) {
+    font-weight: bold; }
+  section[data-type="chapter"] > h1:after,
+  section[data-type="preface"] > h1:after {
+    content: counter(ChapterNumber);
+    font-family: Rokkitt, "Source Han Sans", serif;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    color: yellowgreen;
+    font-size: 23rem;
+    line-height: .9;
+    height: .7em;
+    font-weight: bold; }
+
+@-epubx-page-template {
+  section[data-type="chapter"] > h1 {
+    position: absolute;
+    text-align: left;
+    top: 1.5em;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0;
+    margin: 0; }
+    section[data-type="chapter"] > h1::after {
+      position: absolute;
+      text-align: right;
+      right: 0;
+      bottom: 0; } }
+section[data-type="chapter"] > .dup::before {
+  content: counter(ChapterNumber) "章：";
+  text-transform: full-width; }
+
+/* section headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: Rokkitt, "Source Han Sans", serif;
+  line-height: 1.2;
+  hyphens: none;
+  text-align: left;
+  font-weight: 300;
+  page-break-after: avoid;
+  break-after: avoid; }
+  h1:lang(ja), h2:lang(ja), h3:lang(ja), h4:lang(ja), h5:lang(ja), h6:lang(ja) {
+    font-family: "Source Han Sans", "ヒラギノ角ゴ ProN W3", HiraKakuProN-W3, "ヒラギノ角ゴ Pro W3", HiraKakuPro-W3, Rokkitt, "Source Han Sans", serif; }
+
+.dup:lang(ja) {
+  font-family: "Source Han Sans", "ヒラギノ角ゴ ProN W3", HiraKakuProN-W3, "ヒラギノ角ゴ Pro W3", HiraKakuPro-W3; }
+
+h1, h2, h3 {
+  word-break: keep-all;
+  word-wrap: break-word;
+  overflow-wrap: break-word; }
+
+section[data-type="sect1"] > h1,
+nav[data-type="toc"] > h1,
+section[data-type="index"] > h1,
+section[data-type="preface"] > h1,
+section[data-type="dedication"] > h1 {
+  /* A-level headings */
+  position: relative;
+  padding-top: .35in;
+  margin-top: 0.8in;
+  margin-bottom: 0.8in;
+  overflow: visible;
+  color: #C00065;
+  font-weight: 700;
+  font-size: 3rem;
+  line-height: 1.2; }
+
+section[data-type="sect1"] {
+  page-break-after: always; }
+  section[data-type="sect1"] > h1 {
+    page-break-before: always;
+    white-space: pre-line; }
+  section[data-type="sect1"].secret > h1 {
+    page-break-before: left; }
+    section[data-type="sect1"].secret > h1:before {
+      content: counter(Secret);
+      counter-increment: Secret;
+      position: absolute;
+      right: 100%;
+      bottom: 0.2rem;
+      min-width: 1em;
+      padding: .3em .1em 0 0;
+      margin-left: .2em;
+      border-radius: 1em 1em 0;
+      background: #C00065;
+      text-align: right;
+      color: white;
+      font: bold 100%/0.65 Rokkitt, "Source Han Sans", serif;
+      letter-spacing: -0.05em;
+      font-size: 10rem;
+      margin-right: .2in; }
+  section[data-type="sect1"].secret > .dup::before {
+    content: "Secret #" counter(Secret) ": "; }
+  section[data-type="sect1"].secret > .dup:lang(ja)::before {
+    content: "シークレット" counter(Secret) "："; }
+  section[data-type="sect1"].secret.secrets1-9 > h1:before {
+    min-width: .9em; }
+  section[data-type="sect1"].secret:not(.secrets1-9) > h1:before {
+    min-width: 1.20em;
+    padding-top: .4em; }
+
+section[data-type="sect2"] {
+  margin-top: .5in; }
+  section[data-type="sect2"] > h2 {
+    /* B-level headings */
+    margin-bottom: .08in;
+    color: #C00065;
+    font-size: 160%;
+    font-weight: bold; }
+
+section[data-type="sect3"] {
+  margin-top: .3in; }
+  section[data-type="sect3"] > h3 {
+    /* C-level headings */
+    margin-bottom: .08in;
+    color: #655;
+    font-size: 140%;
+    font-weight: bold; }
+
+/* Dark blocks */
+.prereqs,
+.trivia,
+.full-page {
+  background: #655;
+  color: white;
+  font-weight: 300; }
+  .prereqs.full-page,
+  .trivia.full-page,
+  .full-page.full-page {
+    margin: 0; }
+  .prereqs > h1,
+  .trivia > h1,
+  .full-page > h1 {
+    color: yellowgreen;
+    font-size: 160%;
+    margin-top: 0;
+    margin-bottom: 5pt;
+    font-weight: 700; }
+  .prereqs code,
+  .prereqs span.print_url_in_parens,
+  .trivia code,
+  .trivia span.print_url_in_parens,
+  .full-page code,
+  .full-page span.print_url_in_parens {
+    color: rgb(247, 235, 237); }
+
+.prereqs {
+  padding: 1em;
+  border-radius: 5pt; }
+  .prereqs > h1 {
+    font-size: 1.8rem; }
+  .prereqs > p {
+    margin: 0; }
+  .prereqs a {
+    font-weight: inherit; }
+
+.specs {
+  padding: 1em 1em 1em 1em;
+  margin: 1.6em 0;
+  background: #58a;
+  border-radius: 5pt;
+  page-break-inside: avoid;
+  box-decoration-break: clone;
+  position: relative; }
+  .specs h1 {
+    position: absolute;
+    right: 0.83em;
+    /* 1em / 120%. We want 1em of the parent, so I need to adjust for the font size. */
+    width: 3.4em;
+    border-radius: 3em;
+    border-bottom-left-radius: 0;
+    padding: .5em .9em;
+    margin: 0;
+    color: #58a;
+    background: white;
+    font: bold 120%/1 Rokkitt, "Source Han Sans", serif;
+    text-transform: uppercase; }
+    .specs h1:lang(ja) {
+      font-family: "Source Han Sans", "ヒラギノ角ゴ ProN W3", HiraKakuProN-W3, "ヒラギノ角ゴ Pro W3", HiraKakuPro-W3, Rokkitt, "Source Han Sans", serif; }
+    .specs h1:lang(en)::first-line {
+      font-size: 66%; }
+  .specs h1:lang(ja) {
+    line-height: 1.5; }
+    .specs h1:lang(ja)::first-line {
+      font-size: 80%; }
+  .specs li::before {
+    color: currentColor; }
+  .specs li {
+    color: #9CBACC; }
+  .specs ul {
+    margin: 0 0 0 1em;
+    border-radius: 5pt;
+    list-style-position: inside; }
+  .specs a {
+    color: white; }
+  .specs span.print_url_in_parens {
+    display: block;
+    color: white; }
+
+.trivia {
+  padding: 2em 0 0;
+  font-size: 1rem;
+  margin-left: -3in;
+  margin-right: -3in;
+  padding-left: 3in;
+  padding-right: 3in; }
+  .trivia > h1 {
+    font-size: 2rem;
+    font-weight: 700; }
+  .trivia h1:before {
+    content: 'Trivia';
+    display: inline-block;
+    vertical-align: .36em;
+    border-radius: 2em;
+    border-bottom-right-radius: 0;
+    padding: .45em .5em .45em .6em;
+    margin: 0 .6em 0 -.7em;
+    color: #655;
+    background: yellowgreen;
+    font: bold 66%/0.9 Rokkitt, "Source Han Sans", serif;
+    text-transform: uppercase; }
+  .trivia.trivia:not(.future):lang(ja) > h1:before {
+    content: 'トリビア';
+    font-family: "Source Han Sans", "ヒラギノ角ゴ ProN W3", HiraKakuProN-W3, "ヒラギノ角ゴ Pro W3", HiraKakuPro-W3, Rokkitt, "Source Han Sans", serif;
+    font-size: 60%;
+    line-height: 1; }
+  .trivia.future.future > h1:before {
+    content: 'Future'; }
+
+/* prefaces */
+section[data-type="preface"] {
+  page-break-before: right;
+  /* forces the preface to start on a right hand page */
+  counter-reset: FigureNumber TableNumber ExampleNumber EquationNumber footnote;
+  /* setting auto-numbers for figures, tables, and footnotes to start at 1 */ }
+
+@-epubx-page-template {
+  body > [data-type="toc"] > .dup {
+    display: inline;
+    -epubx-flow-into: toc-footer-flow;
+    -epubx-flow-options: exclusive static last; }
+
+  body > [data-type="index"] > .dup {
+    display: inline;
+    -epubx-flow-into: index-footer-flow;
+    -epubx-flow-options: exclusive static last; }
+
+  body > [data-type="foreword"] > .dup,
+  body > [data-type="preface"] > .dup {
+    display: inline;
+    -epubx-flow-into: preface-footer-flow;
+    -epubx-flow-options: exclusive static last; }
+
+  body > [data-type="chapter"] > .dup {
+    display: inline;
+    -epubx-flow-into: chapter-footer-flow;
+    -epubx-flow-options: exclusive static last; }
+
+  [data-type="chapter"] section[data-type="sect1"] > .dup {
+    display: inline;
+    -epubx-flow-into: section-footer-flow;
+    -epubx-flow-options: exclusive static last; }
+
+  @-epubx-region .footer-text {
+    .dup.dup.dup.dup {
+      padding: .1em 0 0 0;
+      line-height: .4in;
+      text-transform: uppercase;
+      color: #A4958B; } }
+  @-epubx-region .footer-text {
+    #secrets-by-spec .dup.dup {
+      color: #9CBACC;
+      font-weight: bold; }
+
+    nav[data-type="toc"] .dup.dup {
+      font-weight: bold; } }
+  body > section[data-type="titlepage"]#jp-cover,
+  body > section[data-type="dedication"],
+  body > section[data-type="titlepage"],
+  body > section[data-type="copyright-page"] {
+    -epubx-flow-into: front-flow; }
+
+  @-epubx-flow front-flow {
+    -epubx-flow-consume: all; }
+  body > nav[data-type="toc"] {
+    -epubx-flow-into: toc-flow; }
+
+  @-epubx-flow toc-flow {
+    -epubx-flow-consume: all; }
+  body > nav[data-type="toc"] > h1 {
+    -epubx-flow-into: toc-title-flow; }
+
+  body > section[data-type="index"].spec {
+    -epubx-flow-into: spec-index-flow; }
+
+  @-epubx-flow spec-index-flow {
+    -epubx-flow-consume: all; }
+  body > section[data-type="index"].spec > h1 {
+    -epubx-flow-into: spec-index-title-flow; }
+
+  [data-type="preface"] .trivia {
+    -epubx-flow-into: preface-trivia-flow;
+    -epubx-flow-options: exclusive; }
+
+  [data-type="chapter"] .trivia {
+    -epubx-flow-into: trivia-flow;
+    -epubx-flow-options: exclusive; }
+
+  body > section[data-type="foreword"],
+  body > section[data-type="preface"] {
+    -epubx-flow-into: preface-flow; }
+
+  @-epubx-flow preface-flow {
+    -epubx-flow-consume: all; }
+  body > section[data-type="chapter"] > h1 {
+    -epubx-flow-into: chapter-title-flow; }
+
+  #blend-mode-patterns {
+    -epubx-flow-into: blend-mode-flow; }
+
+  @-epubx-flow blend-mode-flow {
+    -epubx-flow-consume: all; }
+  .full-page {
+    -epubx-flow-into: full-page-flow; }
+
+  @-epubx-flow full-page-flow {
+    -epubx-flow-consume: all; }
+  body > section[data-type="chapter"] {
+    -epubx-flow-into: chapter-flow; }
+
+  @-epubx-flow chapter-flow {
+    -epubx-flow-consume: all; }
+  section[data-type="chapter"] +
+  section[data-type="index"] {
+    -epubx-flow-into: index-flow; }
+
+  @-epubx-flow index-flow {
+    -epubx-flow-consume: all; }
+  section[data-type="chapter"] +
+  section[data-type="index"] > h1 {
+    -epubx-flow-into: index-title-flow; }
+
+  @-epubx-flow index-title-flow {
+    -epubx-flow-consume: all; }
+  [data-type="colophon"] {
+    -epubx-flow-into: colophon-flow; }
+
+  @-epubx-flow colophon-flow {
+    -epubx-flow-consume: all; }
+  [data-type="colophon"] > [data-type="sect1"] {
+    -epubx-flow-into: colophon-flow2; }
+
+  @-epubx-flow colophon-flow2 {
+    -epubx-flow-consume: all; }
+  @-epubx-page-master front {
+    @-epubx-partition class(page) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 1in : 1in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 1in : 1in );
+      -epubx-flow-from: front-flow;
+      -epubx-required: true; }
+    @-epubx-partition {
+      -epubx-flow-from: body; } }
+  @-epubx-page-master toc {
+    background: #655;
+    margin: -1in;
+    border: 1in transparent solid;
+    /*work around for the background of the page not being propagated the the bleed */
+    @-epubx-partition class(page) class(index) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 0.45in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 0.45in : 0.7in );
+      -epubx-flow-from: toc-flow;
+      -epubx-required: true;
+      top: -epubx-expr( title.height ); }
+    @-epubx-partition title {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 0.45in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 0.45in : 0.7in );
+      -epubx-flow-from: toc-title-flow;
+      margin-top: 0.7in;
+      left: 0;
+      right: 0; }
+    @-epubx-partition {
+      -epubx-enabled: -epubx-expr( page-number % 2 == 1 );
+      content: counter(page);
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      width: .4in;
+      border-radius: .2in;
+      border-bottom-right-radius: 0;
+      margin-bottom: .5in;
+      background: #CBB0A6;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-family: Rokkitt, "Source Han Sans", serif;
+      font-size: 1.2rem;
+      right: 0.45in;
+      color: #655; }
+    @-epubx-partition {
+      -epubx-enabled: -epubx-expr( page-number % 2 == 0 );
+      content: counter(page);
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      width: .4in;
+      border-radius: .2in;
+      border-bottom-left-radius: 0;
+      margin-bottom: .5in;
+      background: #CBB0A6;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-family: Rokkitt, "Source Han Sans", serif;
+      font-size: 1.2rem;
+      left: 0.45in;
+      color: #655; }
+    @-epubx-partition class(footer-text) {
+      -epubx-enabled: -epubx-expr( page-number % 2 == 0 );
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      margin-left: .5in;
+      left: 0.45in;
+      margin-bottom: .49in;
+      color: #A4958B;
+      text-transform: uppercase;
+      text-align: left;
+      -epubx-flow-from: toc-footer-flow; }
+    @-epubx-partition class(right) class(footer-text) {
+      -epubx-enabled: -epubx-expr( page-number % 2 == 1 );
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      margin-right: .5in;
+      right: 0.45in;
+      margin-bottom: .49in;
+      color: #A4958B;
+      text-transform: uppercase;
+      text-align: right;
+      -epubx-flow-from: toc-footer-flow; } }
+  @-epubx-page-master spec-index {
+    background: #58a;
+    margin: -1in;
+    border: 1in transparent solid;
+    /*work around for the background of the page not being propagated the the bleed */
+    @-epubx-partition class(page) class(index) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 0.45in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 0.45in : 0.7in );
+      -epubx-flow-from: spec-index-flow;
+      -epubx-required: true;
+      top: -epubx-expr( title.height ); }
+    @-epubx-partition title {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 0.45in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 0.45in : 0.7in );
+      -epubx-flow-from: spec-index-title-flow;
+      margin-top: 0.7in;
+      left: 0;
+      right: 0; }
+    @-epubx-partition {
+      -epubx-enabled: -epubx-expr( page-number % 2 == 1 );
+      content: counter(page);
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      width: .4in;
+      border-radius: .2in;
+      border-bottom-right-radius: 0;
+      margin-bottom: .5in;
+      background: #CBB0A6;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-family: Rokkitt, "Source Han Sans", serif;
+      font-size: 1.2rem;
+      right: 0.45in;
+      color: #58a;
+      background: #9CBACC; }
+    @-epubx-partition {
+      -epubx-enabled: -epubx-expr( page-number % 2 == 0 );
+      content: counter(page);
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      width: .4in;
+      border-radius: .2in;
+      border-bottom-left-radius: 0;
+      margin-bottom: .5in;
+      background: #CBB0A6;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-family: Rokkitt, "Source Han Sans", serif;
+      font-size: 1.2rem;
+      left: 0.45in;
+      color: #58a;
+      background: #9CBACC; }
+    @-epubx-partition class(footer-text) {
+      -epubx-enabled: -epubx-expr( page-number % 2 == 0 );
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      margin-left: .5in;
+      left: 0.45in;
+      margin-bottom: .49in;
+      color: #A4958B;
+      text-transform: uppercase;
+      text-align: left;
+      -epubx-flow-from: index-footer-flow; }
+    @-epubx-partition class(right) class(footer-text) {
+      -epubx-enabled: -epubx-expr( page-number % 2 == 1 );
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      margin-right: .5in;
+      right: 0.45in;
+      margin-bottom: .49in;
+      color: #A4958B;
+      text-transform: uppercase;
+      text-align: right;
+      -epubx-flow-from: index-footer-flow; } }
+  @-epubx-page-master preface-l {
+    -epubx-enabled: -epubx-expr( page-number % 2 == 0 );
+    -epubx-utilization: 0.2;
+    @-epubx-partition class(left) class(page) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 2.55in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 2.55in : 0.7in );
+      -epubx-flow-from: preface-flow;
+      -epubx-required: true;
+      bottom: -epubx-expr( trivia.height ? trivia.height + 1em : 0); }
+    @-epubx-partition trivia {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? -2.3in : -2.3in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? -2.3in : -2.3in );
+      -epubx-flow-from: preface-trivia-flow;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin-top: 1em;
+      margin-bottom: -1in;
+      padding-bottom: 2in;
+      padding-left: 3in;
+      padding-right: 3in;
+      background: #655;
+      overflow: visible; }
+    @-epubx-partition {
+      content: counter(page);
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      width: .4in;
+      border-radius: .2in;
+      border-bottom-left-radius: 0;
+      margin-bottom: .5in;
+      background: #CBB0A6;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-family: Rokkitt, "Source Han Sans", serif;
+      font-size: 1.2rem;
+      left: 0.45in; }
+    @-epubx-partition class(left) class(footer-text) {
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      margin-left: .5in;
+      left: 0.45in;
+      margin-bottom: .49in;
+      color: #A4958B;
+      text-transform: uppercase;
+      text-align: left;
+      -epubx-flow-from: preface-footer-flow; } }
+  @-epubx-page-master preface-r {
+    -epubx-enabled: -epubx-expr( page-number % 2 == 1 );
+    -epubx-utilization: 0.2;
+    @-epubx-partition class(right) class(page) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 2.55in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 2.55in : 0.7in );
+      -epubx-flow-from: preface-flow;
+      -epubx-required: true;
+      bottom: -epubx-expr( trivia.height ? trivia.height + 1em : 0); }
+    @-epubx-partition trivia {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? -2.3in : -2.3in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? -2.3in : -2.3in );
+      -epubx-flow-from: preface-trivia-flow;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin-top: 1em;
+      margin-bottom: -1in;
+      padding-bottom: 2in;
+      padding-left: 3in;
+      padding-right: 3in;
+      background: #655;
+      overflow: visible; }
+    @-epubx-partition {
+      content: counter(page);
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      width: .4in;
+      border-radius: .2in;
+      border-bottom-right-radius: 0;
+      margin-bottom: .5in;
+      background: #CBB0A6;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-family: Rokkitt, "Source Han Sans", serif;
+      font-size: 1.2rem;
+      right: 0.45in; }
+    @-epubx-partition class(right) class(footer-text) {
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      margin-right: .5in;
+      right: 0.45in;
+      margin-bottom: .49in;
+      color: #A4958B;
+      text-transform: uppercase;
+      text-align: right;
+      -epubx-flow-from: preface-footer-flow; } }
+  @-epubx-page-master blend-page-l {
+    -epubx-enabled: -epubx-expr( page-number % 2 == 0 );
+    background: rgb(204, 202, 200);
+    margin: -1in;
+    border: 1in transparent solid;
+    /*work around for the background of the page not being propagated the the bleed */
+    -epubx-utilization: 0.05;
+    @-epubx-partition class(left) class(page) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 2.55in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 2.55in : 0.7in );
+      -epubx-flow-from: blend-mode-flow;
+      -epubx-required: true; } }
+  @-epubx-page-master blend-page-r {
+    -epubx-enabled: -epubx-expr( page-number % 2 == 1 );
+    background: rgb(204, 202, 200);
+    margin: -1in;
+    border: 1in transparent solid;
+    /*work around for the background of the page not being propagated the the bleed */
+    -epubx-utilization: 0.05;
+    @-epubx-partition class(right) class(page) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 2.55in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 2.55in : 0.7in );
+      -epubx-flow-from: blend-mode-flow;
+      -epubx-required: true; } }
+  @-epubx-page-master full-page-l {
+    -epubx-enabled: -epubx-expr( page-number % 2 == 0 );
+    background: #655;
+    margin: -1in;
+    border: 1in transparent solid;
+    /*work around for the background of the page not being propagated the the bleed */
+    -epubx-utilization: 0.05;
+    @-epubx-partition class(left) class(page) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 2.55in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 2.55in : 0.7in );
+      -epubx-flow-from: full-page-flow;
+      -epubx-required: true; }
+    @-epubx-partition {
+      content: counter(page);
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      width: .4in;
+      border-radius: .2in;
+      border-bottom-left-radius: 0;
+      margin-bottom: .5in;
+      background: #CBB0A6;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-family: Rokkitt, "Source Han Sans", serif;
+      font-size: 1.2rem;
+      left: 0.45in; }
+    @-epubx-partition class(left) class(footer-text) {
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      margin-left: .5in;
+      left: 0.45in;
+      margin-bottom: .49in;
+      color: #A4958B;
+      text-transform: uppercase;
+      text-align: left;
+      -epubx-flow-from: chapter-footer-flow; } }
+  @-epubx-page-master full-page-r {
+    -epubx-enabled: -epubx-expr( page-number % 2 == 1 );
+    background: #655;
+    margin: -1in;
+    border: 1in transparent solid;
+    /*work around for the background of the page not being propagated the the bleed */
+    -epubx-utilization: 0.05;
+    @-epubx-partition class(right) class(page) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 2.55in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 2.55in : 0.7in );
+      -epubx-flow-from: full-page-flow;
+      -epubx-required: true; }
+    @-epubx-partition {
+      content: counter(page);
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      width: .4in;
+      border-radius: .2in;
+      border-bottom-right-radius: 0;
+      margin-bottom: .5in;
+      background: #CBB0A6;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-family: Rokkitt, "Source Han Sans", serif;
+      font-size: 1.2rem;
+      right: 0.45in; }
+    @-epubx-partition class(right) class(footer-text) {
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      margin-right: .5in;
+      right: 0.45in;
+      margin-bottom: .49in;
+      color: #A4958B;
+      text-transform: uppercase;
+      text-align: right;
+      -epubx-flow-from: section-footer-flow; } }
+  @-epubx-page-master chapter-title {
+    background: #655;
+    margin: -1in;
+    border: 1in transparent solid;
+    /*work around for the background of the page not being propagated the the bleed */
+    -epubx-utilization: 0.05;
+    @-epubx-partition class(page) {
+      margin-left: 1in;
+      margin-right: 1in;
+      -epubx-flow-from: chapter-title-flow;
+      -epubx-required: true; }
+    @-epubx-partition {
+      -epubx-flow-from: chapter-flow;
+      height: 0; } }
+  @-epubx-page-master chapters-l {
+    -epubx-enabled: -epubx-expr( page-number % 2 == 0 );
+    -epubx-utilization: 0.2;
+    @-epubx-partition class(left) class(page) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 2.55in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 2.55in : 0.7in );
+      -epubx-flow-from: chapter-flow;
+      -epubx-required: true;
+      bottom: -epubx-expr( trivia.height ? trivia.height + 1em : 0); }
+    @-epubx-partition trivia {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? -2.3in : -2.3in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? -2.3in : -2.3in );
+      -epubx-flow-from: trivia-flow;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin-top: 1em;
+      margin-bottom: -1in;
+      padding-bottom: 2in;
+      padding-left: 3in;
+      padding-right: 3in;
+      background: #655;
+      overflow: visible; }
+    @-epubx-partition {
+      content: counter(page);
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      width: .4in;
+      border-radius: .2in;
+      border-bottom-left-radius: 0;
+      margin-bottom: .5in;
+      background: #CBB0A6;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-family: Rokkitt, "Source Han Sans", serif;
+      font-size: 1.2rem;
+      left: 0.45in; }
+    @-epubx-partition class(left) class(footer-text) {
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      margin-left: .5in;
+      left: 0.45in;
+      margin-bottom: .49in;
+      color: #A4958B;
+      text-transform: uppercase;
+      text-align: left;
+      -epubx-flow-from: chapter-footer-flow; } }
+  @-epubx-page-master chapters-r {
+    -epubx-enabled: -epubx-expr( page-number % 2 == 1 );
+    -epubx-utilization: 0.2;
+    @-epubx-partition class(right) class(page) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 2.55in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 2.55in : 0.7in );
+      -epubx-flow-from: chapter-flow;
+      -epubx-required: true;
+      bottom: -epubx-expr( trivia.height ? trivia.height + 1em : 0); }
+    @-epubx-partition trivia {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? -2.3in : -2.3in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? -2.3in : -2.3in );
+      -epubx-flow-from: trivia-flow;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin-top: 1em;
+      margin-bottom: -1in;
+      padding-bottom: 2in;
+      padding-left: 3in;
+      padding-right: 3in;
+      background: #655;
+      overflow: visible; }
+    @-epubx-partition {
+      content: counter(page);
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      width: .4in;
+      border-radius: .2in;
+      border-bottom-right-radius: 0;
+      margin-bottom: .5in;
+      background: #CBB0A6;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-family: Rokkitt, "Source Han Sans", serif;
+      font-size: 1.2rem;
+      right: 0.45in; }
+    @-epubx-partition class(right) class(footer-text) {
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      margin-right: .5in;
+      right: 0.45in;
+      margin-bottom: .49in;
+      color: #A4958B;
+      text-transform: uppercase;
+      text-align: right;
+      -epubx-flow-from: section-footer-flow; } }
+  @-epubx-page-master index {
+    -epubx-utilization: 0.1;
+    @-epubx-partition class(page) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 0.45in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 0.45in : 0.7in );
+      -epubx-flow-from: index-flow;
+      -epubx-required: true;
+      column-count: 2;
+      column-gap: 20pt;
+      top: -epubx-expr( title.height ); }
+    @-epubx-partition title {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 0.45in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 0.45in : 0.7in );
+      -epubx-flow-from: index-title-flow;
+      margin-top: 0.7in;
+      left: 0;
+      right: 0; }
+    @-epubx-partition {
+      -epubx-enabled: -epubx-expr( page-number % 2 == 1 );
+      content: counter(page);
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      width: .4in;
+      border-radius: .2in;
+      border-bottom-right-radius: 0;
+      margin-bottom: .5in;
+      background: #CBB0A6;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-family: Rokkitt, "Source Han Sans", serif;
+      font-size: 1.2rem;
+      right: 0.45in; }
+    @-epubx-partition {
+      -epubx-enabled: -epubx-expr( page-number % 2 == 0 );
+      content: counter(page);
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      width: .4in;
+      border-radius: .2in;
+      border-bottom-left-radius: 0;
+      margin-bottom: .5in;
+      background: #CBB0A6;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-family: Rokkitt, "Source Han Sans", serif;
+      font-size: 1.2rem;
+      left: 0.45in; }
+    @-epubx-partition class(footer-text) {
+      -epubx-enabled: -epubx-expr( page-number % 2 == 0 );
+      -epubx-conflicting-partitions: title;
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      margin-left: .5in;
+      left: 0.45in;
+      margin-bottom: .49in;
+      color: #A4958B;
+      text-transform: uppercase;
+      text-align: left;
+      -epubx-flow-from: index-footer-flow; }
+    @-epubx-partition class(footer-text) class(right) {
+      -epubx-enabled: -epubx-expr( page-number % 2 == 1 );
+      -epubx-conflicting-partitions: title;
+      height: -epubx-expr(.4in - .1em);
+      padding-top: .1em;
+      font-size: 1rem;
+      line-height: .4in;
+      bottom: 0;
+      margin-right: .5in;
+      right: 0.45in;
+      margin-bottom: .49in;
+      color: #A4958B;
+      text-transform: uppercase;
+      text-align: right;
+      -epubx-flow-from: index-footer-flow; } }
+  @-epubx-page-master colophon {
+    -epubx-utilization: 0.1;
+    @-epubx-partition class(page) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 0.45in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 0.45in : 0.7in );
+      -epubx-flow-from: colophon-flow;
+      -epubx-required: true; } }
+  @-epubx-page-master colophon2 {
+    -epubx-utilization: 0.1;
+    @-epubx-partition class(page) {
+      margin-left: -epubx-expr( page-number % 2 == 0 ? 0.45in : 0.7in );
+      margin-right: -epubx-expr( page-number % 2 == 1 ? 0.45in : 0.7in );
+      -epubx-flow-from: colophon-flow2;
+      -epubx-required: true; } }
+  .page.index {
+    column-count: 2;
+    column-gap: 2.5em;
+    column-fill: auto; }
+
+  .page {
+    margin-top: 0.7in;
+    margin-bottom: 1in;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow: visible; } }
+/* page number resets to 1 on the first chapter */
+section[data-type="chapter"].pagenumrestart {
+  counter-reset: TableNumber FigureNumber ExampleNumber EquationNumber footnote; }
+
+section[data-type="chapter"] {
+  break-before: right;
+  counter-reset: TableNumber FigureNumber ExampleNumber EquationNumber footnote; }
+  section[data-type="chapter"] > h1 {
+    page-break-before: right;
+    /* forces new chapters to start on a right hand page */ }
+  section[data-type="chapter"]::before {
+    content: "";
+    display: block; }
+
+/* lists */
+ul,
+ol {
+  /* bulleted and numbered lists */
+  margin: 7pt 0 7pt;
+  padding-left: 0; }
+  ul li,
+  ol li {
+    margin-top: 3pt;
+    position: relative;
+    list-style: none; }
+    ul li::before,
+    ol li::before {
+      position: absolute;
+      z-index: 4;
+      color: yellowgreen;
+      left: -1.3em;
+      break-after: avoid; }
+  aside[data-type="note"] ul, aside[data-type="note"]
+  ol {
+    margin-left: 0; }
+
+ul > li::before {
+  content: "\25A0";
+  transform-origin: center;
+  transform: scale(0.75);
+  left: -1.4em; }
+  section[data-type="index"] ul > li::before {
+    content: none;
+    display: none;
+    transform: none; }
+
+ol {
+  counter-reset: ol_li; }
+
+ol > li {
+  counter-increment: ol_li; }
+
+ol > li::before {
+  content: counter(ol_li) ".";
+  font-family: Rokkitt, "Source Han Sans", serif;
+  font-weight: bold; }
+
+ol:lang(ja) > li::before {
+  font-family: "Source Han Sans", "ヒラギノ角ゴ ProN W3", HiraKakuProN-W3, "ヒラギノ角ゴ Pro W3", HiraKakuPro-W3; }
+
+dl {
+  /* definition lists */
+  margin-bottom: 7pt; }
+  dl dt {
+    /* definition list terms */
+    margin-top: 7pt; }
+  dl dd {
+    /* definition list descriptions */
+    text-indent: 0;
+    margin-left: 0.1667in; }
+
+/* figures */
+figure.block {
+  display: block;
+  margin: 20pt 0;
+  clear: both;
+  page-break-inside: avoid;
+  text-align: left; }
+
+figure.full-page {
+  width: 100%;
+  page-break-inside: avoid;
+  padding: 0; }
+  figure.full-page.full-page {
+    background: #655; }
+  figure.full-page img {
+    max-height: 187.28mm; }
+
+figure:not(.block) > div {
+  text-align: left; }
+figure:not(.block) img {
+  display: block;
+  width: 100%;
+  margin: 0 auto .5em; }
+figure:not(.block) figcaption {
+  margin-top: 1.2em; }
+
+figure figcaption {
+  display: block;
+  hyphens: none;
+  text-align: justify; }
+  figure figcaption:before {
+    counter-increment: FigureNumber;
+    content: "Figure " counter(ChapterNumber) "." counter(FigureNumber);
+    display: block;
+    margin-bottom: .3em;
+    font: bold 1.4em/1 Rokkitt, "Source Han Sans", serif;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: yellowgreen;
+    break-after: avoid;
+    /*workaround*/
+    text-align: left; }
+  figure figcaption:lang(ja)::before {
+    content: "図 " counter(ChapterNumber) "." counter(FigureNumber);
+    font-family: "Source Han Sans", "ヒラギノ角ゴ ProN W3", HiraKakuProN-W3, "ヒラギノ角ゴ Pro W3", HiraKakuPro-W3; }
+
+section[data-type="preface"] figcaption:before {
+  content: "Figure P-" counter(FigureNumber) ". "; }
+
+section[data-type="preface"] figcaption:lang(ja):before {
+  content: "図 P-" counter(FigureNumber) ". "; }
+
+img {
+  max-width: 100%; }
+
+dt img {
+  display: inline-block;
+  margin: 0; }
+
+figure div.border-box {
+  display: inline; }
+
+/* sidebars */
+aside p, aside dd {
+  /* sidebar text */
+  text-indent: 0;
+  margin-bottom: 6pt; }
+
+/* Sidebars */
+aside[data-type="note"],
+aside[data-type="warning"],
+aside[data-type="tip"],
+figure:not(.block),
+figure.block figcaption,
+.limited-support:before,
+aside[data-type="credits"]:before {
+  /* admonition containers */
+  position: relative;
+  z-index: 3;
+  clear: both;
+  float: right;
+  margin-right: -2.1in;
+  margin-left: 0;
+  margin-bottom: .1in;
+  margin-top: 0;
+  width: 1.6in;
+  padding: 0 0.25in 0.25in;
+  page-break-inside: avoid;
+  background: white;
+  /* adjust font-size to sidebar_width / 17 */
+  font-size: 79.7%;
+  text-align: justify; }
+@-epubx-page-template {
+  @-epubx-region .left {
+    aside[data-type="note"],
+    aside[data-type="warning"],
+    aside[data-type="tip"],
+    figure:not(.block),
+    figure.block figcaption,
+    .limited-support:before,
+    aside[data-type="credits"]:before {
+      float: left;
+      margin-right: 0;
+      margin-left: -2.1in; } } }
+  aside[data-type="note"] ol, aside[data-type="note"] ul,
+  aside[data-type="warning"] ol,
+  aside[data-type="warning"] ul,
+  aside[data-type="tip"] ol,
+  aside[data-type="tip"] ul,
+  figure:not(.block) ol,
+  figure:not(.block) ul,
+  figure.block figcaption ol,
+  figure.block figcaption ul,
+  .limited-support:before ol,
+  .limited-support:before ul,
+  aside[data-type="credits"]:before ol,
+  aside[data-type="credits"]:before ul {
+    margin-left: 0; }
+
+figure.block figcaption {
+  background: transparent; }
+
+aside[data-type="warning"]:before, aside[data-type="tip"]:before {
+  content: '!';
+  float: left;
+  border-radius: 2em;
+  border-bottom-right-radius: 0;
+  margin-right: .4em;
+  margin-left: -.7em;
+  color: white;
+  text-align: center;
+  font: bold 220%/1.1 Rokkitt, "Source Han Sans", serif; }
+aside[data-type="warning"]:before {
+  content: '!';
+  width: 1.3em;
+  background: #fb3;
+  padding: .1em 0 .1em .1em; }
+aside[data-type="tip"]:before {
+  content: 'Tip!';
+  text-transform: uppercase;
+  background: yellowgreen;
+  font-size: 150%;
+  padding: .43em .6em .43em .7em; }
+aside[data-type="play"], aside[data-type="test"] {
+  margin: 1.6em 0;
+  page-break-before: avoid;
+  page-break-inside: avoid; }
+  aside[data-type="play"]:before, aside[data-type="test"]:before {
+    content: '▶ Play!';
+    display: inline-block;
+    padding: .14em .4em .14em;
+    font-size: 120%;
+    border-radius: 0 .3em .3em 0;
+    margin-right: .5em;
+    background: #fb3;
+    color: white;
+    font-family: Rokkitt, "Source Han Sans", serif;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-left: -50em;
+    padding-left: 50em; }
+  aside[data-type="play"] a:not([data-type="xref"]), aside[data-type="test"] a:not([data-type="xref"]) {
+    font-family: Consolas, "Source Code Pro", "Source Han Sans", "ヒラギノ角ゴ ProN W3", HiraKakuProN-W3, "ヒラギノ角ゴ Pro W3", HiraKakuPro-W3, monospace; }
+    aside[data-type="play"] a:not([data-type="xref"]) .playio, aside[data-type="test"] a:not([data-type="xref"]) .playio {
+      color: rgb(64, 64, 64);
+      font-weight: normal; }
+  aside[data-type="play"] span.print_url_in_parens, aside[data-type="test"] span.print_url_in_parens {
+    display: none; }
+aside[data-type="test"]:before {
+  content: 'Test!';
+  background: #CBB0A6;
+  color: #655; }
+aside[data-type="test"] a:not([data-type="xref"]) .playio {
+  color: #CBB0A6; }
+
+.limited-support:before,
+aside[data-type="credits"]:before {
+  white-space: pre-line;
+  hyphens: none;
+  width: 0.8in;
+  padding-top: 0.8in;
+  padding-bottom: .2in;
+  background: url(../img/limited-support.svg) no-repeat;
+  background-position: 50% 0;
+  background-size: 0.8in auto;
+  color: #C00065;
+  text-align: center;
+  font: bold 125%/1 Rokkitt, "Source Han Sans", serif;
+  text-transform: uppercase; }
+
+.limited-support:before {
+  content: 'Limited\A support'; }
+
+aside[data-type="credits"] {
+  display: block;
+  margin-top: 1.6em;
+  page-break-inside: avoid;
+  clear: both; }
+  aside[data-type="credits"]:lang(en) {
+    font-style: italic; }
+  aside[data-type="credits"]:before {
+    content: 'Hat tip';
+    padding-top: .76in;
+    background-image: url(../img/hattip.svg); }
+
+/* code */
+pre, code {
+  /* monospace font for both code blocks and inline code */
+  font-family: Consolas, "Source Code Pro", "Source Han Sans", "ヒラギノ角ゴ ProN W3", HiraKakuProN-W3, "ヒラギノ角ゴ Pro W3", HiraKakuPro-W3, monospace;
+  text-align: left !important; }
+
+pre {
+  /* code blocks */
+  position: relative;
+  padding: 1em 0 1em .5em;
+  margin: 1em 0;
+  background: rgb(247, 235, 237);
+  margin: 3pt 0 3pt 0.146in;
+  white-space: pre;
+  tab-size: 4;
+  box-decoration-break: clone;
+  border-width: 9pt 0;
+  border-style: solid;
+  border-image: url("../img/rag.png") 90 0 90 0 repeat;
+  border-image-outset: 3pt 0;
+  /*extending the ragged edge off to the sides*/
+  margin-right: -50em;
+  padding-right: 50em;
+  margin-left: -49.854in;
+  /*0.146 - 50 */
+  padding-left: 50in; }
+  pre + pre {
+    margin-top: -3pt; }
+  pre.no-break {
+    /*workaround*/
+    border-image: none;
+    border-style: none;
+    margin-top: 12pt;
+    margin-bottom: 12pt; }
+  pre .ragged {
+    line-height: 0;
+    /*the elements unfortunately have content. Make it small. */
+    break-inside: avoid;
+    break-before: avoid;
+    break-after: avoid; }
+  pre :first-child {
+    break-before: auto; }
+  pre :last-child {
+    break-after: auto; }
+  pre .start {
+    margin-bottom: -1.6em; }
+  pre .end {
+    display: none; }
+  pre .start.cover, pre .end.cover {
+    display: block;
+    margin-bottom: 0;
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 9pt;
+    background: white; }
+  pre .start.cover {
+    top: -9pt; }
+  pre .end.cover {
+    bottom: -9pt; }
+  pre.long-lines {
+    clear: both;
+    white-space: pre; }
+  .trivia pre {
+    color: white;
+    background: #4C403D;
+    border: none;
+    border-image: none; }
+    .trivia pre code {
+      color: white; }
+    .trivia pre .ragged.cover {
+      display: none; }
+    .trivia pre:before {
+      right: .5em; }
+  pre code {
+    font-size: inherit;
+    white-space: pre; }
+  pre:before {
+    content: attr(data-code-language);
+    position: absolute;
+    right: .5em;
+    top: 0;
+    z-index: 3;
+    padding: 0 .4em;
+    background: #CBB0A6;
+    color: white;
+    text-transform: uppercase;
+    font-family: Rokkitt, "Source Han Sans", serif;
+    font-weight: bold;
+    border-radius: 0 0 .3em .3em;
+    break-after: avoid;
+    break-inside: avoid; }
+    @media print {
+      pre:before {
+        /* We only need this when doing the ragged edges*/
+        right: 50.5em;
+        /* 50 + 0.5 */ } }
+  pre[data-code-language^="css"]:before {
+    display: none; }
+  pre.svg:before {
+    content: "SVG"; }
+  pre .gs {
+    background: #E5E21C;
+    color: #302E0E;
+    font-weight: bold; }
+
+code {
+  font-size: 107%;
+  line-height: 0.93458;
+  /* line-height needs to stay the same */
+  white-space: normal; }
+
+/* Inline code */
+*:not(pre) > code {
+  color: #655;
+  font-weight: bold; }
+
+div[data-type="example"] h5 {
+  margin-bottom: 5pt;
+  text-align: left;
+  hyphens: none; }
+  div[data-type="example"] h5:lang(en) {
+    font-style: italic; }
+
+div[data-type="example"] h5:before {
+  content: "EXAMPLE " counter(ChapterNumber) "." counter(ExampleNumber) ". ";
+  counter-increment: ExampleNumber;
+  margin-bottom: 7.2pt;
+  margin-top: 0; }
+
+div[data-type="example"] h5:lang(ja):before {
+  content: "例 " counter(ChapterNumber) "." counter(ExampleNumber) ". "; }
+
+div[data-type="example"] pre {
+  margin-left: 0; }
+
+/* blockquote */
+p[data-type="attribution"] {
+  text-align: right;
+  margin-top: 6pt;
+  font-style: normal; }
+  p[data-type="attribution"]:before {
+    content: '—';
+    margin-right: 0.2em; }
+
+blockquote {
+  padding-left: .1in;
+  border-left: 0.05in solid yellowgreen;
+  margin: .1in 0;
+  page-break-inside: avoid; }
+  blockquote:lang(en) {
+    font-style: italic; }
+  blockquote p {
+    text-indent: 0; }
+  blockquote p[data-type="attribution"] {
+    font-size: 80%; }
+
+abbr[title]:after {
+  content: " (" attr(title) ")"; }
+
+/* math */
+@namespace mml "http://www.w3.org/1998/Math/MathML";
+p.math {
+  display: block;
+  text-align: center;
+  font-size: 110%;
+  text-indent: 0;
+  margin: 12pt 0; }
+  p.math .eq {
+    font-weight: bold;
+    color: yellowgreen; }
+  p.math .approx {
+    font-weight: bold;
+    color: #58a; }
+  p.math .implies {
+    font-weight: bold;
+    color: #C00065; }
+
+mml|math,
+mml|math *,
+math {
+  font: inherit;
+  font-family: "Source Han Sans", "ヒラギノ角ゴ ProN W3", HiraKakuProN-W3, "ヒラギノ角ゴ Pro W3", HiraKakuPro-W3, sans-serif; }
+
+/* Footnotes */
+@-adapt-footnote-area {
+  margin-top: 1em;
+  margin-bottom: 0; }
+@-adapt-footnote-area ::before {
+  display: block;
+  border-top-width: 0.3em;
+  border-top-style: solid;
+  border-top-color: yellowgreen;
+  width: 8em;
+  margin-bottom: 0.9em;
+  margin-left: 0;
+  margin-right: 0; }
+span[data-type="footnote"] {
+  float: footnote;
+  font-size: 80%;
+  font-weight: 100;
+  font-style: normal;
+  text-indent: 0; }
+  span[data-type="footnote"]:before {
+    content: '*';
+    position: absolute;
+    top: .4em;
+    right: 100%;
+    margin-right: .1em;
+    color: yellowgreen;
+    font: bold 200%/1 Rokkitt, "Source Han Sans", serif; }
+
+.pagebreak-before {
+  page-break-before: always; }
+
+.pagebreak-after {
+  page-break-after: always; }
+
+span.keep-together, code.keep-together {
+  white-space: nowrap; }
+
+span.todo {
+  background: yellow;
+  border: dotted red 5px;
+  padding: 5px;
+  border-radius: 5px;
+  color: darkred; }
+
+/* text-spacing: trim-adjacent trim-start emulation*/
+.ts-ta-l, .ts-ta-l-e:not(.pagenum), .open-zenkaku {
+  margin-left: -0.5em; }
+
+.ts-ta-r, .ts-ta-r-e {
+  margin-right: -0.5em; }
+
+a[data-type="xref"][href^="#section-"].ts-ta-l,
+a[data-type="xref"][href^="#secret-"].ts-ta-l {
+  margin-left: 0; }
+
+/* Emulate text-spacing:ideograph-alpha ideograph-numeric */
+section[data-type="foreword"] :not(.alphanum) > a.alphanum:not(.in_parens), section[data-type="foreword"] :not(.alphanum) > em.alphanum:not(.in_parens), section[data-type="foreword"] :not(.alphanum) > strong.alphanum:not(.in_parens), section[data-type="foreword"] :not(.alphanum) > span.alphanum:not(.in_parens):not(pre span), section[data-type="foreword"] :not(.alphanum) > code, section[data-type="foreword"] :not(.alphanum) > [data-type="tex"],
+section[data-type="colophon"] :not(.alphanum) > a.alphanum:not(.in_parens),
+section[data-type="colophon"] :not(.alphanum) > em.alphanum:not(.in_parens),
+section[data-type="colophon"] :not(.alphanum) > strong.alphanum:not(.in_parens),
+section[data-type="colophon"] :not(.alphanum) > span.alphanum:not(.in_parens):not(pre span),
+section[data-type="colophon"] :not(.alphanum) > code,
+section[data-type="colophon"] :not(.alphanum) > [data-type="tex"],
+section[data-type="dedication"] :not(.alphanum) > a.alphanum:not(.in_parens),
+section[data-type="dedication"] :not(.alphanum) > em.alphanum:not(.in_parens),
+section[data-type="dedication"] :not(.alphanum) > strong.alphanum:not(.in_parens),
+section[data-type="dedication"] :not(.alphanum) > span.alphanum:not(.in_parens):not(pre span),
+section[data-type="dedication"] :not(.alphanum) > code,
+section[data-type="dedication"] :not(.alphanum) > [data-type="tex"],
+section[data-type="preface"] :not(.alphanum) > a.alphanum:not(.in_parens),
+section[data-type="preface"] :not(.alphanum) > em.alphanum:not(.in_parens),
+section[data-type="preface"] :not(.alphanum) > strong.alphanum:not(.in_parens),
+section[data-type="preface"] :not(.alphanum) > span.alphanum:not(.in_parens):not(pre span),
+section[data-type="preface"] :not(.alphanum) > code,
+section[data-type="preface"] :not(.alphanum) > [data-type="tex"],
+section[data-type="chapter"] :not(.alphanum) > a.alphanum:not(.in_parens),
+section[data-type="chapter"] :not(.alphanum) > em.alphanum:not(.in_parens),
+section[data-type="chapter"] :not(.alphanum) > strong.alphanum:not(.in_parens),
+section[data-type="chapter"] :not(.alphanum) > span.alphanum:not(.in_parens):not(pre span),
+section[data-type="chapter"] :not(.alphanum) > code,
+section[data-type="chapter"] :not(.alphanum) > [data-type="tex"] {
+  margin-left: 0.125em;
+  margin-right: 0.125em; }
+section[data-type="foreword"] h1 > .alphanum.alphanum.alphanum:first-child,
+section[data-type="colophon"] h1 > .alphanum.alphanum.alphanum:first-child,
+section[data-type="dedication"] h1 > .alphanum.alphanum.alphanum:first-child,
+section[data-type="preface"] h1 > .alphanum.alphanum.alphanum:first-child,
+section[data-type="chapter"] h1 > .alphanum.alphanum.alphanum:first-child {
+  /* Only doing this for h1, as:
+   - this is where the extra space is most visible
+   - .alphanum:first-child just happens to never have a text node before it */
+  margin-left: 0; }
+
+/* Inline ruby improvement for Latin names */
+rb.alphanum + rb.alphanum + rtc rt + rt::before {
+  content: "・"; }
+
+/* Improve inline breaking*/
+.no-inline-break {
+  white-space: pre; }
+
+/* Give up justification */
+.giveup-justify.giveup-justify {
+  text-align: left; }
+
+/* Before giving up justify, slightly compress or expand spacing */
+.justify-compress {
+  letter-spacing: -0.02em; }
+
+.justify-space {
+  letter-spacing: 0.005em; }
+
+/* Full page ad*/
+.buy-ad rtc, .buy-ad rt {
+  display: inline;
+  font-size: 1em;
+  font-style: normal; }
+.buy-ad rtc::before {
+  content: "（"; }
+.buy-ad rtc::after {
+  content: "）"; }
+.buy-ad > .print_url_in_parens {
+  display: none; }
+.buy-ad > a {
+  display: block;
+  width: 90%;
+  margin: auto;
+  max-width: 5in; }
+  .buy-ad > a > img {
+    display: block; }
+
+/* Simple no-bullet list (used in Preface) */
+ul.no-bullet {
+  margin-left: 2em; }
+  ul.no-bullet li {
+    list-style: none; }
+    ul.no-bullet li::before {
+      content: none; }

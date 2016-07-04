@@ -1,0 +1,44 @@
+@charset "UTF-8";
+
+@font-face {
+	font-family: 'Source Han Sans';
+	src: url('fonts/SourceHanSansJP-Bold.ttf');
+	font-weight: 700;
+}
+
+@font-face {
+	font-family: 'Source Han Sans';
+	src: url('fonts/SourceHanSansJP-Normal.ttf');
+	font-weight: 300;
+}
+
+@font-face {
+	font-family: 'Libre Baskerville';
+	src: url('fonts/LibreBaskerville-Italic.ttf');
+	font-style: italic;
+}
+
+@font-face {
+	font-family: Rokkitt;
+	src: url("fonts/Rokkitt.ttf");
+}
+@font-face {
+	font-family: Rokkitt;
+	src: url("fonts/Rokkitt-Bold.ttf");
+	font-weight: 700;
+}
+@font-face {
+	font-family: 'Source Code Pro';
+	src: url('fonts/SourceCodePro-Bold.ttf');
+	font-weight: 700;
+}
+@font-face { 
+	font-family: 'Source Code Pro';
+	src: url('fonts/SourceCodePro-Regular.ttf');
+}
+@font-face {
+	font-family: 'Source Code Pro';
+	src: url('fonts/SourceCodePro-SemiboldIt.ttf');
+	font-weight: 600;
+	font-style: italic;
+}
