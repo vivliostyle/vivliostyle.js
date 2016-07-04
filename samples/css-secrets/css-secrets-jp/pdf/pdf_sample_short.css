@@ -1,0 +1,20 @@
+@import url('free_fonts.css');
+@import url('pdf.css');
+@import url('fig-adjust-basic.css');
+
+/* Set correct page trim size */
+@page { bleed: 0 }
+
+#chapter-sample > h1::after {
+	display: none !important;
+}
+@media print {
+	.buy-ad > a {
+		position: absolute;
+		bottom:0;
+	}
+}
+
+[data-type="colophon"] .replace {
+	display: none;
+}
