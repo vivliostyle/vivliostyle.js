@@ -4,14 +4,19 @@
 html {
 	max-width: 90ch;
 	margin: auto;
+	font-family: Georgia, serif;
 }
 body {
-	margin: 0;
-	font-family: 'FPL Neu', Palatino, Georgia, serif;
+	margin: 0 2em;
+}
+@media (max-width: 400) {
+	body {
+		margin: 0 1em;
+	}
 }
 @page {
 	font-size: small;
-	font-family: Palatino, Georgia, serif;
+	font-family: Georgia, serif;
 	margin: 4rem 10%;
 	@top-center {
 		color: gray;
@@ -49,7 +54,7 @@ nav ol {
 }
 nav li {
 	break-inside: avoid;
-	background: linear-gradient(to right, white , lightgrey) bottom 0.45em right / 100% 1px no-repeat;
+	background: linear-gradient(to right, white , lightgrey) bottom 0.40em right / 100% 1px no-repeat;
 }
 nav li::before {
 	counter-increment: chap;
@@ -63,15 +68,15 @@ nav li a {
 	width: 100%;
 	text-decoration: none;
 	color: currentColor;
-	justify-content: space-between;
+	break-inside: avoid;
 }
 nav li a::after {
-	flex: 0;
 	padding-left: 0.5ch;
 	text-align: right;
-	background: white border-box;
-	align-self: flex-end;
+	background: white;
+	margin-left: auto;
 	content: target-counter(attr(href, url), page);	
+	align-self: flex-end;
 }
 
 
@@ -135,11 +140,11 @@ p:first-of-type {
 }
 p:first-of-type::first-letter {
 	font-weight: bold;
-	font-size: 2em;
+	font-size: 1.8em;
 	line-height: 1;
 	padding-right: 1px
 }
-#the-end {
+main > section:last-child::after {
 	break-before: avoid;
 	break-inside: avoid;
 	margin: 2em 0;
@@ -147,14 +152,14 @@ p:first-of-type::first-letter {
 	font-size: 2em;
 	font-weight: bold;
 	font-variant: small-caps;
-}
-#the-end::after {
 	content: "\a\002722";
 	white-space: pre;
+	display: block;
 }
 
 pre {
 	font-family: 'Source Code Pro', monaco, monospace;
+	font-size-adjust: none;
 	font-weight: 500;
 	font-size: 0.75em;
 	margin-left: 2em;

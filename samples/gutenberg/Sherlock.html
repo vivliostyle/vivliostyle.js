@@ -1,24 +1,116 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html lang="en"><head>
-<title>The Project Gutenberg eBook of The Adventures of Sherlock Holmes, by Sir Arthur Conan Doyle</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="guntenberg.css">
-<style type="text/css">
-.toc { margin-left: 3%; text-align: left; }
-.bold { font-weight: bold; }
-center > h3:first-child {
-    break-before: page;
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>The Adventures of Sherlock Holmes, by Sir Arthur Conan Doyle</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link rel="stylesheet" href="guntenberg.css">
+		<style>
+@font-face {
+	font-family: 'Quattrocento';
+	src: url('fonts/Quattrocento-Regular.ttf');
+}
+@font-face {
+	font-family: 'Libre Baskerville';
+	src: url('fonts/LibreBaskerville-Regular.ttf');
+}
+@font-face {
+	font-family: 'Libre Baskerville';
+	src: url('fonts/LibreBaskerville-Bold.ttf');
+	font-weight: bold;
+}
+@font-face {
+	font-family: 'Libre Baskerville';
+	src: url('fonts/LibreBaskerville-Italic.ttf');
+	font-style: italic;
+}
+:root {
+	font-family: baskerville, 'Libre Baskerville', Georgia, serif;
+	font-size-adjust: 0.42;
+}
+@page {
+	font-size: small;
+	font-family: 'Quattrocento', baskerville, 'Libre Baskerville', Georgia, serif;
+	letter-spacing: 0.1em;
 }
 @page {
 	@top-center { content: "The Adventures of Sherlock Holmes"; }
 }
-</style>
-</head>
+header {
+	font-family: 'Quattrocento', baskerville, 'Libre Baskerville', Georgia, serif;
+	font-size-adjust: none;
+	font-size: 1.2em;
+	letter-spacing: 0.4em;
+	text-transform: uppercase;
+	text-align: center;
+	color: #333;
+}
+header > * {
+	font-weight: normal;
+	margin: 2em 0;
+	break-inside: avoid;
+}
+header h1 span{
+	display: inline-block;
+}
+header div {
+	font-size: 1.2em;
+}
+header .author {
+	font-size: 1.5em;
+}
+@media (max-width: 400px) {
+	header {
+		font-size: 1.1em;
+		letter-spacing: 0.2em;
+	}
+	header h1 {
+		font-size: 1.8em:
+	}
+	header > * {
+		margin: 1.5em 0;
+	}
+}
+@media (max-width: 350px) {
+	header {
+		font-size: 1em;
+		letter-spacing: 0.1em;
+	}
+	header > * {
+		margin: 1em 0;
+	}
+}
+h2, h3 {
+	font-family: 'Quattrocento', baskerville, 'Libre Baskerville', Georgia, serif;
+	letter-spacing: 0.05em;
+	font-size-adjust: none;
+	text-transform: uppercase;
+	text-align: center;
+	margin: 2em 0;
+	font-weight: normal;
+}
+h2 {
+	font-size: 1.2em;
+}
+h3 {
+	font-size: 1em;
+}
+.chap-num {
+	display: inline-block;
+	margin-right: 1ch;
+}
+p:first-of-type::first-letter {
+	font-weight: normal;
+}
+		</style>
+	</head>
 <body>
-<div class="book">
-<center>
-<h1>THE ADVENTURES OF<br>SHERLOCK HOLMES</h1><h3>BY</h3><h2>SIR ARTHUR CONAN DOYLE</h2>
-</center>
+<header>
+	<h1><span>The Adventures</span> of <span>Sherlock Holmes</span></h1>
+	<div>by</div>
+	<div class="author">Sir Arthur Conan Doyle</div>
+</header>
+
+<section class="copyright">
 <pre class="legal">
 This eBook is for the use of anyone anywhere at no cost and with
 almost no restrictions whatsoever.  You may copy it, give it away or
@@ -27,32 +119,31 @@ with this eBook or online at <a href="http://www.gutenberg.net">www.gutenberg.ne
 
 Produced by an anonymous Project Gutenberg volunteer and Jose Menendez
 </pre>
-<hr noshade="noshade" size="3">
-<center><h2>CONTENTS</h2></center>
-<div class="toc">
-<table class="bold" summary="Table of Contents" cellpadding="2" cellspacing="2">
-<colgroup><col align="right">
-<col align="left">
-</colgroup><tbody><tr><td>I.</td><td><a href="#1">A Scandal in Bohemia</a></td></tr>
-<tr><td>II.</td><td><a href="#2">The Red-Headed League</a></td></tr>
-<tr><td>III.</td><td><a href="#3">A Case of Identity</a></td></tr>
-<tr><td>IV.</td><td><a href="#4">The Boscombe Valley Mystery</a></td></tr>
-<tr><td>V.</td><td><a href="#5">The Five Orange Pips</a></td></tr>
-<tr><td>VI.</td><td><a href="#6">The Man with the Twisted Lip</a></td></tr>
-<tr><td>VII.</td><td><a href="#7">The Adventure of the Blue Carbuncle</a></td></tr>
-<tr><td>VIII.</td><td><a href="#8">The Adventure of the Speckled Band</a></td></tr>
-<tr><td>IX.</td><td><a href="#9">The Adventure of the Engineer’s Thumb</a></td></tr>
-<tr><td>X.</td><td><a href="#10">The Adventure of the Noble Bachelor</a></td></tr>
-<tr><td>XI.</td><td><a href="#11">The Adventure of the Beryl Coronet</a></td></tr>
-<tr><td>XII.</td><td><a href="#12">The Adventure of the Copper Beeches</a></td></tr>
-</tbody></table></div>
-<hr>
-<br>
-<center><h3><a id="1">ADVENTURE &nbsp;I.&nbsp; A SCANDAL IN BOHEMIA</a></h3>
-<br>
-I.</center>
-<p><br>
-<font size="+2">T</font>o Sherlock Holmes she is always <i>the</i> woman. I have seldom heard
+</section>
+<nav id="toc">
+<h2>Contents</h2>
+	<ol>
+		<li><a href="#1">A Scandal in Bohemia</a>
+		<li><a href="#2">The Red-Headed League</a>
+		<li><a href="#3">A Case of Identity</a>
+		<li><a href="#4">The Boscombe Valley Mystery</a>
+		<li><a href="#5">The Five Orange Pips</a>
+		<li><a href="#6">The Man with the Twisted Lip</a>
+		<li><a href="#7">The Adventure of the Blue Carbuncle</a>
+		<li><a href="#8">The Adventure of the Speckled Band</a>
+		<li><a href="#9">The Adventure of the Engineer’s Thumb</a>
+		<li><a href="#10">The Adventure of the Noble Bachelor</a>
+		<li><a href="#11">The Adventure of the Beryl Coronet</a>
+		<li><a href="#12">The Adventure of the Copper Beeches</a>
+	</ol>
+</nav>
+
+<main>
+<section>
+<h2><a id="1"><span class="chap-num">Adventure I</span> A Scandal in Bohemia</a></h2>
+<section>
+	<h3>I.</h3>
+<p>To Sherlock Holmes she is always <i>the</i> woman. I have seldom heard
 him mention her under any other name. In his eyes she eclipses
 and predominates the whole of her sex. It was not that he felt
 any emotion akin to love for Irene Adler. All emotions, and that
@@ -534,11 +625,11 @@ have some good news for you. And good-night, Watson,” he added,
 as the wheels of the royal brougham rolled down the street. “If
 you will be good enough to call to-morrow afternoon at three
 o’clock I should like to chat this little matter over with you.”
-<br><br>
-</p><center>
-II.
-</center><p><br>
-At three o’clock precisely I was at Baker Street, but Holmes had
+</p>
+</section>
+<section>
+	<h3>II.</h3>
+<p>At three o’clock precisely I was at Baker Street, but Holmes had
 not yet returned. The landlady informed me that he had left the
 house shortly after eight o’clock in the morning. I sat down
 beside the fire, however, with the intention of awaiting him,
@@ -1016,11 +1107,12 @@ hurried by.
 “I’ve heard that voice before,” said Holmes, staring down the
 dimly lit street. “Now, I wonder who the deuce that could have
 been.”
-<br><br>
-</p><center>
-III.
-</center><p><br>
-I slept at Baker Street that night, and we were engaged upon our
+
+</p>
+</section>
+<section>
+	<h3>III.</h3>
+<p>I slept at Baker Street that night, and we were engaged upon our
 toast and coffee in the morning when the King of Bohemia rushed
 into the room.
 </p><p>
@@ -1174,12 +1266,14 @@ beaten by a woman’s wit. He used to make merry over the
 cleverness of women, but I have not heard him do it of late. And
 when he speaks of Irene Adler, or when he refers to her
 photograph, it is always under the honourable title of <i>the</i> woman.
-<br>
-<br>
-</p><hr>
-<center><h3><a id="2">ADVENTURE &nbsp;II.&nbsp; THE RED-HEADED LEAGUE</a></h3></center>
-<p><br>
-<font size="+2">I</font> had called upon my friend, Mr. Sherlock Holmes, one day in the
+
+
+</p>
+</section>
+</section>
+<section>
+	<h2><a id="2"><span class="chap-num">Adventure II.</span> THE RED-HEADED LEAGUE</a></h2>
+<p>I had called upon my friend, Mr. Sherlock Holmes, one day in the
 autumn of last year and found him in deep conversation with a
 very stout, florid-faced, elderly gentleman with fiery red hair.
 With an apology for my intrusion, I was about to withdraw when
@@ -2283,12 +2377,13 @@ problems help me to do so.”
 He shrugged his shoulders. “Well, perhaps, after all, it is of
 some little use,” he remarked. “&nbsp;‘<i>L’homme c’est rien—l’oeuvre
 c’est tout</i>,’ as Gustave Flaubert wrote to George Sand.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="3">ADVENTURE &nbsp;III.&nbsp; A CASE OF IDENTITY</a></h3></center>
-<p><br>
-<font size="+2">“M</font>y dear fellow,” said Sherlock Holmes as we sat on either side
+
+
+</p>
+</section>
+<section>
+<h2><a id="3"><span class="chap-num">Adventure III.</span> A Case of Identity</a></h2>
+<p>“My dear fellow,” said Sherlock Holmes as we sat on either side
 of the fire in his lodgings at Baker Street, “life is infinitely
 stranger than anything which the mind of man could invent. We
 would not dare to conceive the things which are really mere
@@ -3086,12 +3181,13 @@ Persian saying, ‘There is danger for him who taketh the tiger
 cub, and danger also for whoso snatches a delusion from a woman.’
 There is as much sense in Hafiz as in Horace, and as much
 knowledge of the world.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="4">ADVENTURE IV. THE BOSCOMBE VALLEY MYSTERY</a></h3></center>
-<p><br>
-<font size="+2">W</font>e were seated at breakfast one morning, my wife and I, when the
+
+
+</p>
+</section>
+<section>
+<h2><a id="4"><span class="chap-num">Adventure IV.</span> The Boscombe Valley Mystery</a></h2>
+<p>We were seated at breakfast one morning, my wife and I, when the
 maid brought in a telegram. It was from Sherlock Holmes and ran
 in this way:
 </p><p>
@@ -4215,12 +4311,13 @@ months after our interview, but he is now dead; and there is
 every prospect that the son and daughter may come to live happily
 together in ignorance of the black cloud which rests upon their
 past.
-<br>
-<br>
-</p><hr>
-<center><h3><a id="5">ADVENTURE &nbsp;V.&nbsp; THE FIVE ORANGE PIPS</a></h3></center>
-<p><br>
-<font size="+2">W</font>hen I glance over my notes and records of the Sherlock Holmes
+
+
+</p>
+</section>
+<section>
+<h2><a id="5"><span class="chap-num">Adventure V.</span> The Five Orange Pips</a></h2>
+<p>When I glance over my notes and records of the Sherlock Holmes
 cases between the years ’82 and ’90, I am faced by so many which
 present strange and interesting features that it is no easy
 matter to know which to choose and which to leave. Some, however,
@@ -5110,12 +5207,13 @@ did at last hear that somewhere far out in the Atlantic a
 shattered stern-post of a boat was seen swinging in the trough
 of a wave, with the letters “L. S.” carved upon it, and that is
 all which we shall ever know of the fate of the <i>Lone Star</i>.
-<br>
-<br>
-</p><hr>
-<center><h3><a id="6">ADVENTURE &nbsp;VI.&nbsp; THE MAN WITH THE TWISTED LIP</a></h3></center>
-<p><br>
-<font size="+2">I</font>sa Whitney, brother of the late Elias Whitney, D.D., Principal
+
+
+</p>
+</section>
+<section>
+<h2><a id="6"><span class="chap-num">Adventure VI.</span> The Man With the Twisted Lip</a></h2>
+<p>Isa Whitney, brother of the late Elias Whitney, D.D., Principal
 of the Theological College of St. George’s, was much addicted to
 opium. The habit grew upon him, as I understand, from some
 foolish freak when he was at college; for having read De
@@ -6216,12 +6314,13 @@ results.”
 “I reached this one,” said my friend, “by sitting upon five
 pillows and consuming an ounce of shag. I think, Watson, that if
 we drive to Baker Street we shall just be in time for breakfast.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="7">VII.&nbsp; THE ADVENTURE OF THE BLUE CARBUNCLE</a></h3></center>
-<p><br>
-<font size="+2">I</font> had called upon my friend Sherlock Holmes upon the second
+
+
+</p>
+</section>
+<section>
+<h2><a id="7"><span class="chap-num">VII.</span> The Adventure of the Blue Carbuncle</a></h2>
+<p>I had called upon my friend Sherlock Holmes upon the second
 morning after Christmas, with the intention of wishing him the
 compliments of the season. He was lounging upon the sofa in a
 purple dressing-gown, a pipe-rack within his reach upon the
@@ -7195,12 +7294,13 @@ whimsical problem, and its solution is its own reward. If you
 will have the goodness to touch the bell, Doctor, we will begin
 another investigation, in which, also a bird will be the chief
 feature.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="8">VIII.&nbsp; THE ADVENTURE OF THE SPECKLED BAND</a></h3></center>
-<p><br>
-<font size="+2">O</font>n glancing over my notes of the seventy odd cases in which I
+
+
+</p>
+</section>
+<section>
+<h2><a id="8"><span class="chap-num">VIII.</span> The Adventure of the Speckled Band</a></h2>
+<p>On glancing over my notes of the seventy odd cases in which I
 have during the last eight years studied the methods of my friend
 Sherlock Holmes, I find many tragic, some comic, a large number
 merely strange, but none commonplace; for, working as he did
@@ -8403,12 +8503,13 @@ roused its snakish temper, so that it flew upon the first person
 it saw. In this way I am no doubt indirectly responsible for Dr.
 Grimesby Roylott’s death, and I cannot say that it is likely to
 weigh very heavily upon my conscience.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="9">IX.&nbsp; THE ADVENTURE OF THE ENGINEER’S THUMB</a></h3></center>
-<p><br>
-<font size="+2">O</font>f all the problems which have been submitted to my friend, Mr.
+
+
+</p>
+</section>
+<section>
+<h2><a id="9"><span class="chap-num">IX.</span> The Adventure of the Engineer’s Thumb</a></h2>
+<p>Of all the problems which have been submitted to my friend, Mr.
 Sherlock Holmes, for solution during the years of our intimacy,
 there were only two which I was the means of introducing to his
 notice—that of Mr. Hatherley’s thumb, and that of Colonel
@@ -9370,12 +9471,13 @@ have I gained?”
 value, you know; you have only to put it into words to gain the
 reputation of being excellent company for the remainder of your
 existence.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="10">X.&nbsp; THE ADVENTURE OF THE NOBLE BACHELOR</a></h3></center>
-<p><br>
-<font size="+2">T</font>he Lord St. Simon marriage, and its curious termination, have
+
+
+</p>
+</section>
+<section>
+<h2><a id="10"><span class="chap-num">X.</span> The Adventure of the Noble Bachelor</a></h2>
+<p>The Lord St. Simon marriage, and its curious termination, have
 long ceased to be a subject of interest in those exalted circles
 in which the unfortunate bridegroom moves. Fresh scandals have
 eclipsed it, and their more piquant details have drawn the
@@ -10396,12 +10498,13 @@ and thank our stars that we are never likely to find ourselves in
 the same position. Draw your chair up and hand me my violin, for
 the only problem we have still to solve is how to while away
 these bleak autumnal evenings.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="11">XI.&nbsp; THE ADVENTURE OF THE BERYL CORONET</a></h3></center>
-<p><br>
-<font size="+2">“H</font>olmes,” said I as I stood one morning in our bow-window looking
+
+
+</p>
+</section>
+<section>
+<h2><a id="11"><span class="chap-num">XI.</span> The Adventure of the Beryl Coronet</a></h2>
+<p>“Holmes,” said I as I stood one morning in our bow-window looking
 down the street, “here is a madman coming along. It seems rather
 sad that his relatives should allow him to come out alone.”
 </p><p>
@@ -11525,12 +11628,13 @@ very heart. Not even your skill can inform me where she is now.”
 wherever Sir George Burnwell is. It is equally certain, too, that
 whatever her sins are, they will soon receive a more than
 sufficient punishment.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="12">XII.&nbsp; THE ADVENTURE OF THE COPPER BEECHES</a></h3></center>
-<p><br>
-<font size="+2">“T</font>o the man who loves art for its own sake,” remarked Sherlock
+
+
+</p>
+</section>
+<section>
+<h2><a id="12"><span class="chap-num">XII.</span> The Adventure of the Copper Beeches</a></h2>
+<p>“To the man who loves art for its own sake,” remarked Sherlock
 Holmes, tossing aside the advertisement sheet of the <i>Daily
 Telegraph</i>, “it is frequently in its least important and lowliest
 manifestations that the keenest pleasure is to be derived. It is
@@ -12671,22 +12775,13 @@ Holmes, rather to my disappointment, manifested no further
 interest in her when once she had ceased to be the centre of one
 of his problems, and she is now the head of a private school at
 Walsall, where I believe that she has met with considerable success.
-</p><hr noshade="noshade" size="3">
-</div>
+</p>
+</section>
+</main>
+
+<footer role="contentinfo">
 <pre class="legal">
-End of the Project Gutenberg EBook of The Adventures of Sherlock Holmes, by 
-Arthur Conan Doyle
-
-*** END OF THIS PROJECT GUTENBERG EBOOK THE ADVENTURES OF SHERLOCK HOLMES ***
-
-***** This file should be named 1661-h.htm or 1661-h.zip *****
-This and all associated files of various formats will be found in:
-        http://www.gutenberg.org/1/6/6/1661/
-
 Produced by an anonymous Project Gutenberg volunteer and Jose Menendez
-
-Updated editions will replace the previous one--the old editions
-will be renamed.
 
 Creating the works from public domain print editions means that no
 one owns a United States copyright in these works, so the Foundation
@@ -13037,4 +13132,5 @@ including how to make donations to the Project Gutenberg Literary
 Archive Foundation, how to help produce our new eBooks, and how to
 subscribe to our email newsletter to hear about new eBooks.
 </pre>
+<footer>
 </body></html>
