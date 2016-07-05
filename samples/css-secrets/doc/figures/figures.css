@@ -286,14 +286,16 @@ code[data-color] {
   background-size: 100% 100%; }
 
 #svg-cutout-corners > div {
-  background: #58a url('data:image/svg+xml,<svg%20xmlns="http:%2F%2Fwww.w3.org%2F2000%2Fsvg"%20width="1.6in"%20height="1in"%20viewBox="0%200%20160%20100"><rect%20x="10"%20y="10"%20width="140"%20height="80"%20fill="white"%20%2F><polygon%20points="0,0%2010,0%200,10"%20fill="white"%20%2F><polygon%20points="0,90%200,100%2010,100"%20fill="white"%20%2F><polygon%20points="150,0%20160,0%20160,10"%20fill="white"%20%2F><polygon%20points="160,90%20160,100%20150,100"%20fill="white"%20%2F><%2Fsvg>') left -1px top -1px/102% 102% no-repeat; }
+  background: #58a url('data:image/svg+xml,<svg%20xmlns="http:%2F%2Fwww.w3.org%2F2000%2Fsvg"%20width="1.6in"%20height="1in"%20viewBox="0%200%20160%20100"><rect%20x="10"%20y="10"%20width="140"%20height="80"%20fill="white"%20%2F><polygon%20points="0,0%2010,0%200,10"%20fill="white"%20%2F><polygon%20points="0,90%200,100%2010,100"%20fill="white"%20%2F><polygon%20points="150,0%20160,0%20160,10"%20fill="white"%20%2F><polygon%20points="160,90%20160,100%20150,100"%20fill="white"%20%2F><%2Fsvg>');
+  background-position: left; }
 
 #svg-cutout-corners-background > div {
   color: white;
   background: #58a; }
 
 #svg-cutout-corners-brown > div {
-  background: #58a url('data:image/svg+xml,<svg%20xmlns="http:%2F%2Fwww.w3.org%2F2000%2Fsvg"%20width="1.6in"%20height="1in"%20viewBox="0%200%20160%20100"><rect%20x="10"%20y="10"%20width="140"%20height="80"%20fill="%23655"%20%2F><polygon%20points="0,0%2015,0%200,15"%20fill="%23655"%20%2F><polygon%20points="0,85%200,100%2015,100"%20fill="%23655"%20%2F><polygon%20points="145,0%20160,0%20160,15"%20fill="%23655"%20%2F><polygon%20points="160,85%20160,100%20145,100"%20fill="%23655"%20%2F><%2Fsvg>') left -1px top -1px/102% 102% no-repeat; }
+  background: #58a url('data:image/svg+xml,<svg%20xmlns="http:%2F%2Fwww.w3.org%2F2000%2Fsvg"%20width="1.6in"%20height="1in"%20viewBox="0%200%20160%20100"><rect%20x="10"%20y="10"%20width="140"%20height="80"%20fill="%23655"%20%2F><polygon%20points="0,0%2015,0%200,15"%20fill="%23655"%20%2F><polygon%20points="0,85%200,100%2015,100"%20fill="%23655"%20%2F><polygon%20points="145,0%20160,0%20160,15"%20fill="%23655"%20%2F><polygon%20points="160,85%20160,100%20145,100"%20fill="%23655"%20%2F><%2Fsvg>');
+  background-position: left; }
 
 #svg-cutout-radial > div {
   background: radial-gradient(rgb(166, 242, 255), #58a 90%) 1px 1px/auto 94px no-repeat; }

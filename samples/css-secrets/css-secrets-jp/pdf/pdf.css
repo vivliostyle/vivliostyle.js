@@ -785,7 +785,9 @@ section[data-type="preface"] {
       padding: .1em 0 0 0;
       line-height: .4in;
       text-transform: uppercase;
-      color: #A4958B; } }
+      color: #A4958B; }
+      [data-type="chapter"] .dup.dup.dup.dup {
+        text-transform: none; } }
   @-epubx-region .footer-text {
     #secrets-by-spec .dup.dup {
       color: #9CBACC;
