@@ -1,0 +1,372 @@
+@charset "UTF-8";
+html {
+  font-family: "Yu Gothic", "YuGothic", sans-serif;
+  font-weight: 500;
+  font-size: 100%;
+  line-height: 1.2;
+  widows: 1;
+  orphans: 1;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  break-inside: avoid;
+  break-after: avoid;
+}
+
+a:link, a:visited {
+  text-decoration: none;
+  color: inherit;
+}
+
+p.trimS {
+  text-indent: -0.5em;
+}
+
+span.trimS {
+  margin-left: -0.5em;
+}
+
+span.trimE {
+  margin-right: -0.5em;
+}
+
+.page-header {
+  display: flex;
+  width: 100%;
+  font-size: 0.5315rem;
+  font-weight: 400;
+  line-height: 1;
+  border-bottom: solid 0.0625rem;
+  padding-top: 0.11811rem;
+  padding-bottom: 0.11811rem;
+}
+.page-header .dt-published {
+  flex: 1;
+  margin-right: 1em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.page-header .newspaper-title {
+  margin-right: 1em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.page-header .issue-number {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.top-header h1 {
+  margin-top: 0.70866rem;
+}
+.top-header h1 .newspaper-logo {
+  float: left;
+  width: 8.26772rem;
+  margin-right: 0.70866rem;
+  margin-bottom: 0.70866rem;
+}
+
+.publisher {
+  margin-left: 8.97638rem;
+  white-space: nowrap;
+}
+.publisher .p-name {
+  display: table-cell;
+  vertical-align: middle;
+  font-family: "Yu Mincho", "YuMincho", serif;
+  font-weight: bold;
+  font-size: 0.94488rem;
+  line-height: 1.41732rem;
+  padding-right: 0.47244rem;
+  border-right: solid 0.0625rem;
+}
+.publisher .contact {
+  display: table-cell;
+  vertical-align: middle;
+  padding-left: 0.47244rem;
+}
+.publisher .contact .p-adr, .publisher .contact .p-tel {
+  font-family: "Yu Mincho", "YuMincho", serif;
+  font-weight: 500;
+  font-size: 0.59055rem;
+  line-height: 0.70866rem;
+}
+.publisher .p-note {
+  font-size: 0.47244rem;
+  font-weight: 400;
+  line-height: 1em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+#toc {
+  clear: both;
+  background: #E4E4E4;
+  font-size: 0.73819rem;
+  line-height: 1.06299rem;
+  column-width: 19.19291rem;
+  column-gap: 0.94488rem;
+  padding: 0.82677rem 0.59055rem 0.59055rem;
+  margin-top: 1.41732rem;
+  position: relative;
+}
+#toc h1 {
+  font-size: 1em;
+  line-height: inherit;
+}
+#toc h1 img {
+  height: 1.41732rem;
+  position: absolute;
+  top: -1em;
+}
+#toc ol {
+  margin: 0;
+  padding: 0;
+}
+#toc li {
+  list-style: none;
+}
+#toc li a {
+  display: flex;
+  width: 100%;
+}
+#toc li a[href] .ref-page {
+  display: none;
+}
+#toc li a[href]::after {
+  content: target-counter(attr(href, url), page);
+  flex: 1;
+  text-align: right;
+}
+#toc .toc-topnews {
+  display: inline-block;
+  background: black;
+  color: white;
+  font-family: "Arial Narrow", sans-serif;
+  font-size: 0.67913rem;
+  padding: 0.08858rem 0.17717rem;
+  line-height: 1;
+}
+#toc .toc-group {
+  background: #666666;
+  color: white;
+  font-size: 0.67913rem;
+  font-weight: 600;
+  padding: 0.08858rem 0.17717rem;
+}
+#toc .ref-page {
+  flex: 1;
+  text-align: right;
+}
+
+main {
+  font-size: 0.88583rem;
+  line-height: 1.29921rem;
+}
+
+article p {
+  text-indent: 1em;
+  text-align: justify;
+}
+article header p {
+  text-indent: 0;
+}
+article header h1 {
+  text-align: center;
+  font-size: 1.41732rem;
+  font-weight: bold;
+  line-height: 1.65354rem;
+  margin-bottom: 0.23622rem;
+}
+article header p.p-category {
+  text-align: center;
+  font-size: 0.76772rem;
+  font-weight: bold;
+  line-height: 1.41732rem;
+  margin-top: 0.94488rem;
+  break-inside: avoid;
+  break-after: avoid;
+}
+article header p.subtitle {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.88976rem;
+  line-height: 1.88976rem;
+}
+article header p.lead {
+  font-size: 0.94488rem;
+  font-weight: bold;
+  line-height: 1.1811rem;
+  margin-bottom: 0.59055rem;
+}
+article.topnews header h1 {
+  margin-left: 8.97638rem;
+  text-align: left;
+  font-family: "Yu Mincho", "YuMincho", serif;
+  font-size: 3.07087rem;
+  font-weight: bold;
+  line-height: 3.30709rem;
+  margin-top: 0.94488rem;
+}
+article.topnews header p.subtitle {
+  margin-left: 8.97638rem;
+  text-align: left;
+  font-weight: bold;
+  font-size: 1.88976rem;
+  line-height: 1.88976rem;
+}
+article.topnews header p.lead {
+  clear: left;
+  margin-top: 0.70866rem;
+  margin-right: 1.32874rem;
+}
+article h2 {
+  text-align: center;
+  font-size: 1.06299rem;
+  font-weight: bold;
+  line-height: 1.29921rem;
+  margin-top: 0.64961rem;
+  margin-bottom: 0.64961rem;
+}
+
+#fig01 {
+  margin: 0.23622rem 0 1.41732rem;
+}
+#fig01 img {
+  display: block;
+  margin: 0 auto;
+  width: 15.35433rem;
+  padding: 0.70866rem;
+  background: #E4E4E4;
+}
+#fig01 figcaption {
+  margin: 0 auto;
+  width: 15.35433rem;
+  padding: 0 0.70866rem 0.94488rem;
+  background: #E4E4E4;
+}
+
+#ad01 {
+  background: black;
+  color: white;
+  text-align: center;
+  height: 7.08661rem;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  margin: 0.47244rem 0;
+}
+
+@-epubx-page-template {
+  body {
+    margin: 0;
+  }
+
+  .top-header {
+    -epubx-flow-into: top-header;
+  }
+
+  .topnews header {
+    -epubx-flow-into: top-header;
+  }
+
+  .page-header {
+    -epubx-flow-into: page-header;
+    -epubx-flow-options: static;
+  }
+  .page-header .issue-number {
+    margin-right: 1.29921rem;
+  }
+
+  #toc {
+    -epubx-flow-into: toc;
+  }
+
+  #fig01 {
+    -epubx-flow-into: fig;
+  }
+
+  #ad01 {
+    -epubx-flow-into: ad;
+  }
+
+  @-epubx-page-master {
+    @-epubx-partition body {
+      -epubx-flow-from: body;
+      left: 3.54331rem;
+      right: 3.54331rem;
+      margin-bottom: 2.83465rem;
+      column-width: 19.48819rem;
+      column-gap: 1.32874rem;
+    }
+    @-epubx-partition fig {
+      -epubx-flow-from: fig;
+      -epubx-page: 2;
+      -epubx-enabled: -epubx-expr(body.column-count <= 2);
+      width: -epubx-expr(body.column-width);
+      left: 3.54331rem;
+      top: 3.54331rem;
+    }
+    @-epubx-partition fig {
+      -epubx-flow-from: fig;
+      -epubx-page: 1;
+      -epubx-enabled: -epubx-expr(body.column-count > 2);
+      width: -epubx-expr(body.column-width);
+      left: -epubx-expr(body.left + body.columns(2) + body.column-gap);
+      top: 3.07087rem;
+    }
+    @-epubx-partition ad {
+      -epubx-flow-from: ad;
+      -epubx-page: 3;
+      -epubx-enabled: -epubx-expr(body.column-count <= 2);
+      left: 3.54331rem;
+      right: 3.54331rem;
+      bottom: 2.83465rem;
+    }
+    @-epubx-partition ad {
+      -epubx-flow-from: ad;
+      -epubx-page: 2;
+      -epubx-enabled: -epubx-expr(body.column-count > 2);
+      width: -epubx-expr(body.columns(2));
+      left: 3.54331rem;
+      bottom: 2.83465rem;
+    }
+    @-epubx-partition toc {
+      -epubx-flow-from: toc;
+      -epubx-min-page-width: 47.24409rem;
+      -epubx-min-page-height: 47.24409rem;
+      left: 3.54331rem;
+      right: 3.54331rem;
+      bottom: 2.83465rem;
+    }
+    @-epubx-partition top-header {
+      -epubx-flow-from: top-header;
+      left: 3.54331rem;
+      width: -epubx-expr(body.columns(2) + body.column-gap);
+      margin-top: 3.66142rem;
+    }
+    @-epubx-partition page-number {
+      right: 3.54331rem;
+      top: 0;
+      height: 1.88976rem;
+      padding-top: 1.77165rem;
+      font-size: 0.5315rem;
+      font-weight: 400;
+      line-height: 1.4;
+      content: "［" counter(page) "］";
+      margin-right: -0.26575rem;
+    }
+    @-epubx-partition page-header {
+      -epubx-flow-from: page-header;
+      left: 3.54331rem;
+      right: 3.54331rem;
+      top: 0;
+      height: 1.88976rem;
+      padding-top: 1.77165rem;
+    }
+  }
+}

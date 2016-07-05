@@ -1,0 +1,438 @@
+@charset "UTF-8";
+
+// Colors
+$silver:  #E4E4E4;
+$gray:    #666666;
+
+// fonts
+$gothic: "Yu Gothic", "YuGothic", sans-serif;
+$mincho: "Yu Mincho", "YuMincho", serif;
+$sans-narrow: "Arial Narrow", sans-serif;
+
+$base-font-size: 12pt;
+
+@function to-rem($length) {
+  @return 1rem * ($length / $base-font-size);
+}
+
+// Q-unit
+$Q: 0.25mm;
+
+$body-font-size: 15*$Q;
+$body-line-height: 22*$Q;
+$body-column-width: 22*$body-font-size;
+$body-column-gap: 1.5*$body-font-size;
+
+$toc-font-size: 12.5*$Q;
+$toc-line-height: 18*$Q;
+$toc-column-width: 26*$toc-font-size;
+$toc-column-gap: 16*$Q;
+
+// 線幅
+$thin-line-width: 0.75pt;
+$medium-line-width: 1.5pt;
+
+// ページ各部サイズ（A4基準）
+// ページ上余白（ページ上端からページヘッダー下罫線までの距離）
+$page-margin-top: 13mm;
+// ページ上端からページヘッダー上端までの距離
+$page-top-to-header: 7.5mm;
+// ページ上罫線
+$page-top-border: $thin-line-width;
+// ページ下余白
+$page-margin-bottom: 12mm;
+// ページ左右余白
+$page-margin-side: 15mm;
+// ページ領域上パディング
+$page-area-top-padding: 2.5mm;
+
+// Styles
+
+html {
+  font-family: $gothic;
+  font-weight: 500;
+  font-size: 100%;
+  line-height: 1.2;
+  widows: 1;
+  orphans: 1;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  break-inside: avoid;
+  break-after: avoid;
+}
+
+a:link, a:visited {
+  text-decoration: none;
+  color: inherit;
+}
+
+// trim half-em space-start/end of fullwidth punctuation
+p.trimS {
+  text-indent: -0.5em;
+}
+span.trimS {
+  margin-left: -0.5em;
+}
+span.trimE {
+  margin-right: -0.5em;
+}
+
+.page-header {
+  display: flex;
+  width: 100%;
+  font-size: to-rem(9*$Q);
+  font-weight: 400;
+  line-height: 1;
+  border-bottom: solid to-rem($page-top-border);
+  padding-top: to-rem(2*$Q);
+  padding-bottom: to-rem(2*$Q);
+  .dt-published {
+    flex: 1;
+    margin-right: 1em;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .newspaper-title {
+    margin-right: 1em;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .issue-number {
+    white-space: nowrap;
+    overflow: hidden;
+  }
+}
+
+.top-header {
+  h1 {
+    margin-top: to-rem(3mm);
+    .newspaper-logo {
+      float: left;
+      width: to-rem(35mm);
+      margin-right: to-rem(3mm);
+      margin-bottom: to-rem(3mm);
+    }
+  }
+}
+
+.publisher {
+  margin-left: to-rem(38mm);  // workaround for float bug
+  white-space: nowrap;
+  .p-name {
+    display: table-cell;
+    vertical-align: middle;
+    font-family: $mincho;
+    font-weight: bold;
+    font-size: to-rem(16*$Q);
+    line-height: to-rem(24*$Q);
+    padding-right: to-rem(2mm);
+    border-right: solid to-rem($thin-line-width);
+  }
+
+  .contact {
+    display: table-cell;
+    vertical-align: middle;
+    padding-left: to-rem(2mm);
+    .p-adr, .p-tel {
+      font-family: $mincho;
+      font-weight: 500;;
+      font-size: to-rem(10*$Q);
+      line-height: to-rem(12*$Q);
+    }
+  }
+  .p-note {
+    font-size: to-rem(8*$Q);
+    font-weight: 400;
+    line-height: 1em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+}
+
+#toc {
+  clear: both;
+  background: $silver;
+  font-size: to-rem($toc-font-size);
+  line-height: to-rem($toc-line-height);
+  column-width: to-rem($toc-column-width);
+  column-gap: to-rem($toc-column-gap);
+  padding: to-rem(3.5mm) to-rem(2.5mm) to-rem(2.5mm);
+  margin-top: to-rem(6mm);
+  position: relative;
+  h1 {
+    font-size: 1em;
+    line-height: inherit;
+    img {
+      height: to-rem(24*$Q);
+      position: absolute;
+      top: -1em;
+    }
+  }
+  ol {
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    list-style: none;
+    a {
+      display: flex;
+      width: 100%;
+    }
+    a[href] .ref-page {
+      display: none;
+    }
+    a[href]::after {
+      content: target-counter( attr(href, url), page);
+      flex: 1;
+      text-align: right;
+    }
+  }
+  .toc-topnews {
+    display: inline-block;
+    background: black;
+    color: white;
+    font-family: $sans-narrow;
+    font-size: to-rem(11.5*$Q);
+    padding: to-rem(1.5*$Q) to-rem(3*$Q);
+    line-height: 1;
+  }
+  .toc-group {
+    background: $gray;
+    color: white;
+    font-size: to-rem(11.5*$Q);
+    font-weight: 600;
+    padding: to-rem(1.5*$Q) to-rem(3*$Q);
+  }
+  .ref-page {
+    flex: 1;
+    text-align: right;
+  }
+}
+
+main {
+  font-size: to-rem($body-font-size);
+  line-height: to-rem($body-line-height);
+}
+
+article {
+  p {
+    text-indent: 1em;
+    text-align: justify;
+  }
+  header {
+    p {
+      text-indent: 0;
+    }
+    h1 {
+      text-align: center;
+      font-size: to-rem(24*$Q);
+      font-weight: bold;
+      line-height: to-rem(28*$Q);
+      margin-bottom: to-rem(4*$Q);
+    }
+    p.p-category {
+      text-align: center;
+      font-size: to-rem(13*$Q);
+      font-weight: bold;
+      line-height: to-rem(24*$Q);
+      margin-top: to-rem(16*$Q);
+      break-inside: avoid;
+      break-after: avoid;
+    }
+    p.subtitle {
+      text-align: center;
+      font-weight: bold;
+      font-size: to-rem(32*$Q);
+      line-height: to-rem(32*$Q);
+    }
+    p.lead {
+      font-size: to-rem(16*$Q);
+      font-weight: bold;
+      line-height: to-rem(20*$Q);
+      margin-bottom: to-rem(10*$Q);
+    }
+  }
+  &.topnews header {
+    h1 {
+      margin-left: to-rem(38mm);
+      text-align: left;
+      font-family: $mincho;
+      font-size: to-rem(52*$Q);
+      font-weight: bold;
+      line-height: to-rem(56*$Q);
+      margin-top: to-rem(16*$Q);
+    }
+    p.subtitle {
+      margin-left: to-rem(38mm);
+      text-align: left;
+      font-weight: bold;
+      font-size: to-rem(32*$Q);
+      line-height: to-rem(32*$Q);
+    }
+    p.lead {
+      clear: left;
+      margin-top: to-rem(12*$Q);
+      margin-right: to-rem($body-column-gap);
+    }
+  }
+  h2 {
+    text-align: center;
+    font-size: to-rem(18*$Q);
+    font-weight: bold;
+    line-height: to-rem($body-line-height);
+    margin-top: to-rem($body-line-height / 2);
+    margin-bottom: to-rem($body-line-height / 2);
+  }
+}
+
+#fig01 {
+  margin: to-rem(1mm) 0 to-rem(6mm);
+  img {
+    display: block;
+    margin: 0 auto;;
+    width: to-rem(65mm);
+    padding: to-rem(3mm);
+    background: $silver;
+  }
+  figcaption {
+    margin: 0 auto;;
+    width: to-rem(65mm);
+    padding: 0 to-rem(3mm) to-rem(4mm);
+    background: $silver;
+  }
+}
+
+#ad01 {
+  background: black;
+  color: white;
+  text-align: center;
+  height: to-rem(30mm);
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  margin: to-rem(2mm) 0;
+}
+
+
+// Page Templates
+
+@-epubx-page-template {
+
+body {
+  margin: 0;
+}
+
+.top-header {
+  -epubx-flow-into: top-header;
+
+}
+.topnews {
+  header {
+    -epubx-flow-into: top-header;
+
+  }
+}
+.page-header {
+  -epubx-flow-into: page-header;
+  -epubx-flow-options: static;
+  .issue-number {
+    margin-right: to-rem(22*$Q);
+  }
+}
+
+#toc {
+  -epubx-flow-into: toc;
+}
+
+#fig01 {
+  -epubx-flow-into: fig;
+
+}
+#ad01 {
+  -epubx-flow-into: ad;
+}
+
+@-epubx-page-master {
+   @-epubx-partition body {
+     -epubx-flow-from: body;
+     left: to-rem($page-margin-side);
+     right: to-rem($page-margin-side);
+     margin-bottom: to-rem($page-margin-bottom);
+     column-width: to-rem($body-column-width);
+     column-gap: to-rem($body-column-gap);
+   }
+
+   @-epubx-partition fig {
+     -epubx-flow-from: fig;
+     -epubx-page: 2;
+     -epubx-enabled: unquote("-epubx-expr(body.column-count <= 2)");
+     width: unquote("-epubx-expr(body.column-width)");
+     left: to-rem($page-margin-side);
+     top: to-rem($page-margin-side);
+   }
+   @-epubx-partition fig {
+     -epubx-flow-from: fig;
+     -epubx-page: 1;
+     -epubx-enabled: unquote("-epubx-expr(body.column-count > 2)");
+     width: unquote("-epubx-expr(body.column-width)");
+     left: unquote("-epubx-expr(body.left + body.columns(2) + body.column-gap)");
+     top: to-rem($page-margin-top);
+   }
+   @-epubx-partition ad {
+     -epubx-flow-from: ad;
+     -epubx-page: 3;
+     -epubx-enabled: unquote("-epubx-expr(body.column-count <= 2)");
+     left: to-rem($page-margin-side);
+     right: to-rem($page-margin-side);
+     bottom: to-rem($page-margin-bottom);
+   }
+
+   @-epubx-partition ad {
+     -epubx-flow-from: ad;
+     -epubx-page: 2;
+     -epubx-enabled: unquote("-epubx-expr(body.column-count > 2)");
+     width: unquote("-epubx-expr(body.columns(2))");
+     left: to-rem($page-margin-side);
+     bottom: to-rem($page-margin-bottom);
+   }
+   @-epubx-partition toc {
+     -epubx-flow-from: toc;
+     -epubx-min-page-width: to-rem(200mm);
+     -epubx-min-page-height: to-rem(200mm);
+     left: to-rem($page-margin-side);
+     right: to-rem($page-margin-side);
+     bottom: to-rem($page-margin-bottom);
+   }
+   @-epubx-partition top-header {
+     -epubx-flow-from: top-header;
+     left: to-rem($page-margin-side);
+     width: unquote("-epubx-expr(body.columns(2) + body.column-gap)");
+     margin-top: to-rem($page-margin-top + $page-area-top-padding);
+   }
+   @-epubx-partition page-number {
+     right: to-rem($page-margin-side);
+     top: 0;
+     height: to-rem($page-margin-top - $page-top-to-header + $page-area-top-padding);
+     padding-top: to-rem($page-top-to-header);
+     font-size: to-rem(9*$Q);
+     font-weight: 400;
+     line-height: 1.4;
+     content: "［" counter(page) "］";
+     margin-right: to-rem(-4.5*$Q); // same as span.trimE
+   }
+   @-epubx-partition page-header {
+     -epubx-flow-from: page-header;
+     left: to-rem($page-margin-side);
+     right: to-rem($page-margin-side);
+     top: 0;
+     height: to-rem($page-margin-top - $page-top-to-header + $page-area-top-padding);
+     padding-top: to-rem($page-top-to-header);
+   }
+ }
+
+ }
