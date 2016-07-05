@@ -49,19 +49,23 @@ nav {
 nav ol {
 	list-style: none;
 	counter-reset: chap;
-	padding-left: 3em;
+	padding-left: 0em;
 	line-height: 1.45;
 }
 nav li {
 	break-inside: avoid;
-	background: linear-gradient(to right, white , lightgrey) bottom 0.40em right / 100% 1px no-repeat;
 }
-nav li::before {
-	counter-increment: chap;
-	content: counter(chap, upper-roman) ".";
-	float: left;
-	width: 3em;
-	margin-left: -3em;
+@media (min-width: 375px) {
+	nav li::before {
+		counter-increment: chap;
+		content: counter(chap, upper-roman) ".";
+		float: left;
+		width: 3em;
+		margin-left: -3em;
+	}
+	nav ol {
+		padding-left: 3em;
+	}
 }
 nav li a {
 	display: inline-flex;
@@ -69,16 +73,22 @@ nav li a {
 	text-decoration: none;
 	color: currentColor;
 	break-inside: avoid;
+	align-items: baseline;
+}
+nav li a::before {
+	margin-left: 1px;
+	margin-right: 1px;
+	border-bottom: solid 1px lightgray;
+	content: "";
+	order: 1;
+	flex: auto;
 }
 nav li a::after {
-	padding-left: 0.5ch;
 	text-align: right;
-	background: white;
-	margin-left: auto;
 	content: target-counter(attr(href, url), page);	
 	align-self: flex-end;
+	order: 2;
 }
-
 
 /** Legal Sections **/
 
