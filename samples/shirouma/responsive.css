@@ -4,22 +4,6 @@
 	size: auto;
 	font-size: 0.8rem;
 }
-@page :right {
-  @top-right {
-    margin-right: 0.5em;
-  }
-  @bottom-right {
-    margin-right: 0.5em;
-  }
-}
-@page :left {
-  @top-left {
-    margin-left: 0.5em;
-  }
-  @bottom-left {
-    margin-left: 0.5em;
-  }
-}
 
 html {
 	columns: 12em;
