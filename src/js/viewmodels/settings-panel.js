@@ -22,10 +22,14 @@ import ViewerOptions from "../models/viewer-options";
 import PageSize from "../models/page-size";
 import {Keys} from "../utils/key-util";
 
-function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog) {
+function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, settingsPanelOptions) {
     this.viewerOptions_ = viewerOptions;
     this.documentOptions_ = documentOptions;
     this.viewer_ = viewer;
+
+    this.isPageSizeChangeDisabled = !!settingsPanelOptions.disablePageSizeChange;
+    this.isOverrideDocumentStyleSheetDisabled = this.isPageSizeChangeDisabled;
+    this.isSpreadViewChangeDisabled = !!settingsPanelOptions.disableSpreadViewChange;
 
     this.opened = ko.observable(false);
     this.state = {

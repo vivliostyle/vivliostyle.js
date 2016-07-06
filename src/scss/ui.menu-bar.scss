@@ -363,7 +363,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 						.vivliostyle-menu-detail-group {
 							padding-left: 1.3em;
 						}
-						div.vivliostyle-menu-detail-group {
+						div.vivliostyle-menu-detail-group, fieldset.vivliostyle-menu-detail-group {
 							margin-top: .8em;/*
 							padding-left: 1.2em;
 							&:before {

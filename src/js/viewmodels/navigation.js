@@ -22,7 +22,7 @@ import vivliostyle from "../models/vivliostyle";
 import ViewerOptions from "../models/viewer-options";
 import {Keys} from "../utils/key-util";
 
-function Navigation(viewerOptions, viewer, settingsPanel) {
+function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
     this.viewerOptions_ = viewerOptions;
     this.viewer_ = viewer;
     this.settingsPanel_ = settingsPanel;
@@ -30,18 +30,36 @@ function Navigation(viewerOptions, viewer, settingsPanel) {
     this.isDisabled = ko.pureComputed(function() {
         return this.settingsPanel_.opened() || !this.viewer_.state.navigatable();
     }, this);
-    this.isNavigateToPreviousDisabled = this.isDisabled;
-    this.isNavigateToNextDisabled = this.isDisabled;
-    this.isNavigateToLeftDisabled = this.isDisabled;
-    this.isNavigateToRightDisabled = this.isDisabled;
-    this.isNavigateToFirstDisabled = this.isDisabled;
-    this.isNavigateToLastDisabled = this.isDisabled;
-    this.isZoomOutDisabled = this.isDisabled;
-    this.isZoomInDisabled = this.isDisabled;
-    this.isZoomDefaultDisabled = this.isDisabled;
-    this.isIncreaseFontSizeDisabled = this.isDisabled;
-    this.isDecreaseFontSizeDisabled = this.isDisabled;
-    this.isDefaultFontSizeDisabled = this.isDisabled;
+
+    var navigationDisabled = ko.pureComputed(function() {
+        return navigationOptions.disablePageNavigation || this.isDisabled();
+    }, this);
+
+    this.isNavigateToPreviousDisabled = navigationDisabled;
+    this.isNavigateToNextDisabled = navigationDisabled;
+    this.isNavigateToLeftDisabled = navigationDisabled;
+    this.isNavigateToRightDisabled = navigationDisabled;
+    this.isNavigateToFirstDisabled = navigationDisabled;
+    this.isNavigateToLastDisabled = navigationDisabled;
+    this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
+
+    var zoomDisabled = ko.pureComputed(function() {
+        return navigationOptions.disableZoom || this.isDisabled();
+    }, this);
+
+    this.isZoomOutDisabled = zoomDisabled;
+    this.isZoomInDisabled = zoomDisabled;
+    this.isZoomDefaultDisabled = zoomDisabled;
+    this.hideZoom = !!navigationOptions.disableZoom;
+
+    var fontSizeChangeDisabled = ko.pureComputed(function() {
+        return navigationOptions.disableFontSizeChange || this.isDisabled();
+    }, this);
+
+    this.isIncreaseFontSizeDisabled = fontSizeChangeDisabled;
+    this.isDecreaseFontSizeDisabled = fontSizeChangeDisabled;
+    this.isDefaultFontSizeDisabled = fontSizeChangeDisabled;
+    this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
 
     [
         "navigateToPrevious",

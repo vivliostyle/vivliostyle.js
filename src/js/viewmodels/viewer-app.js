@@ -42,8 +42,22 @@ function ViewerApp() {
     };
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
     this.messageDialog = new MessageDialog(messageQueue);
-    this.settingsPanel = new SettingsPanel(this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog);
-    this.navigation = new Navigation(this.viewerOptions, this.viewer, this.settingsPanel);
+
+    var settingsPanelOptions = {
+        disablePageSizeChange: false,
+        disableSpreadViewChange: true
+    };
+
+    this.settingsPanel = new SettingsPanel(this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog,
+        settingsPanelOptions);
+
+    var navigationOptions = {
+        disablePageNavigation: false,
+        disableZoom: false,
+        disableFontSizeChange: false
+    };
+
+    this.navigation = new Navigation(this.viewerOptions, this.viewer, this.settingsPanel, navigationOptions);
 
     this.handleKey = function(data, event) {
         var key = keyUtil.identifyKeyFromEvent(event);
