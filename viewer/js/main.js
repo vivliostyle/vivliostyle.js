@@ -7383,7 +7383,7 @@ var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
 
 var _utilsKeyUtil = require("../utils/key-util");
 
-function Navigation(viewerOptions, viewer, settingsPanel) {
+function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
     this.viewerOptions_ = viewerOptions;
     this.viewer_ = viewer;
     this.settingsPanel_ = settingsPanel;
@@ -7391,18 +7391,36 @@ function Navigation(viewerOptions, viewer, settingsPanel) {
     this.isDisabled = _knockout2["default"].pureComputed(function () {
         return this.settingsPanel_.opened() || !this.viewer_.state.navigatable();
     }, this);
-    this.isNavigateToPreviousDisabled = this.isDisabled;
-    this.isNavigateToNextDisabled = this.isDisabled;
-    this.isNavigateToLeftDisabled = this.isDisabled;
-    this.isNavigateToRightDisabled = this.isDisabled;
-    this.isNavigateToFirstDisabled = this.isDisabled;
-    this.isNavigateToLastDisabled = this.isDisabled;
-    this.isZoomOutDisabled = this.isDisabled;
-    this.isZoomInDisabled = this.isDisabled;
-    this.isZoomDefaultDisabled = this.isDisabled;
-    this.isIncreaseFontSizeDisabled = this.isDisabled;
-    this.isDecreaseFontSizeDisabled = this.isDisabled;
-    this.isDefaultFontSizeDisabled = this.isDisabled;
+
+    var navigationDisabled = _knockout2["default"].pureComputed(function () {
+        return navigationOptions.disablePageNavigation || this.isDisabled();
+    }, this);
+
+    this.isNavigateToPreviousDisabled = navigationDisabled;
+    this.isNavigateToNextDisabled = navigationDisabled;
+    this.isNavigateToLeftDisabled = navigationDisabled;
+    this.isNavigateToRightDisabled = navigationDisabled;
+    this.isNavigateToFirstDisabled = navigationDisabled;
+    this.isNavigateToLastDisabled = navigationDisabled;
+    this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
+
+    var zoomDisabled = _knockout2["default"].pureComputed(function () {
+        return navigationOptions.disableZoom || this.isDisabled();
+    }, this);
+
+    this.isZoomOutDisabled = zoomDisabled;
+    this.isZoomInDisabled = zoomDisabled;
+    this.isZoomDefaultDisabled = zoomDisabled;
+    this.hideZoom = !!navigationOptions.disableZoom;
+
+    var fontSizeChangeDisabled = _knockout2["default"].pureComputed(function () {
+        return navigationOptions.disableFontSizeChange || this.isDisabled();
+    }, this);
+
+    this.isIncreaseFontSizeDisabled = fontSizeChangeDisabled;
+    this.isDecreaseFontSizeDisabled = fontSizeChangeDisabled;
+    this.isDefaultFontSizeDisabled = fontSizeChangeDisabled;
+    this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
 
     ["navigateToPrevious", "navigateToNext", "navigateToLeft", "navigateToRight", "navigateToFirst", "navigateToLast", "zoomIn", "zoomOut", "zoomDefault", "increaseFontSize", "decreaseFontSize", "defaultFontSize", "handleKey"].forEach(function (methodName) {
         this[methodName] = this[methodName].bind(this);
@@ -7595,10 +7613,14 @@ var _modelsPageSize2 = _interopRequireDefault(_modelsPageSize);
 
 var _utilsKeyUtil = require("../utils/key-util");
 
-function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog) {
+function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, settingsPanelOptions) {
     this.viewerOptions_ = viewerOptions;
     this.documentOptions_ = documentOptions;
     this.viewer_ = viewer;
+
+    this.isPageSizeChangeDisabled = !!settingsPanelOptions.disablePageSizeChange;
+    this.isOverrideDocumentStyleSheetDisabled = this.isPageSizeChangeDisabled;
+    this.isSpreadViewChangeDisabled = !!settingsPanelOptions.disableSpreadViewChange;
 
     this.opened = _knockout2["default"].observable(false);
     this.state = {
@@ -7735,8 +7757,21 @@ function ViewerApp() {
     };
     this.viewer = new _viewer2["default"](this.viewerSettings, this.viewerOptions);
     this.messageDialog = new _messageDialog2["default"](_modelsMessageQueue2["default"]);
-    this.settingsPanel = new _settingsPanel2["default"](this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog);
-    this.navigation = new _navigation2["default"](this.viewerOptions, this.viewer, this.settingsPanel);
+
+    var settingsPanelOptions = {
+        disablePageSizeChange: false,
+        disableSpreadViewChange: true
+    };
+
+    this.settingsPanel = new _settingsPanel2["default"](this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog, settingsPanelOptions);
+
+    var navigationOptions = {
+        disablePageNavigation: false,
+        disableZoom: false,
+        disableFontSizeChange: false
+    };
+
+    this.navigation = new _navigation2["default"](this.viewerOptions, this.viewer, this.settingsPanel, navigationOptions);
 
     this.handleKey = (function (data, event) {
         var key = _utilsKeyUtil2["default"].identifyKeyFromEvent(event);
