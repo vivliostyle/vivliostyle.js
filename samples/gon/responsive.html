@@ -13,13 +13,57 @@
 	margin-left: 3.35rem;
 	margin-right: 3.35rem;
 }
+@page :right {
+	margin-left: 3.35rem;
+}
+@page :left {
+	margin-right: 3.35rem;
+}
 figure {
 	break-before: page;
 	break-after: page;
-	max-height: 95%;
-	max-width: 95%;
-	width: auto;
 }
+/* ugly workaround to deal with different bugs in each browsers and in vivliostyle,
+   meaning I cannot neatly use vh/vm or % or flexbox or a combination...
+
+   This should be replaced by a vertical flexbox on figure,
+   externally sized to 100vh / 100vw,
+ */
+@media print {
+figure {
+	position: absolute;
+	text-align: right;
+	width: 55rem;
+	height: 50rem;
+}
+
+@media (max-width: 60em) { figure { width: 48rem; } }
+@media (max-width: 55em) { figure { width: 43rem; } }
+@media (max-width: 50em) { figure { width: 38rem; } }
+@media (max-width: 45em) { figure { width: 33rem; } }
+@media (max-width: 40em) { figure { width: 28rem; } }
+@media (max-width: 35em) { figure { width: 23rem; } }
+@media (max-width: 30em) { figure { width: 18rem; } }
+@media (max-width: 25em) { figure { width: 13rem; } }
+@media (max-width: 20em) { figure { width: 8rem; } }
+@media (max-width: 15em) { figure { width: 3rem; } }
+
+@media (max-height: 60em) { figure { height: 45rem; } }
+@media (max-height: 55em) { figure { height: 40rem; } }
+@media (max-height: 50em) { figure { height: 35rem; } }
+@media (max-height: 45em) { figure { height: 30rem; } }
+@media (max-height: 40em) { figure { height: 25rem; } }
+@media (max-height: 35em) { figure { height: 20rem; } }
+@media (max-height: 30em) { figure { height: 15rem; } }
+@media (max-height: 25em) { figure { height: 10rem; } }
+@media (max-height: 20em) { figure { height: 5rem; } }
+
+figcaption {
+	text-align: right;
+}
+}
+/*end sily workaround*/
+
 figure img {
 	width: auto;
 	height: auto;
