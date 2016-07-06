@@ -49,10 +49,10 @@
 				<div class="vivliostyle-menu-detail-main">
 					<div class="vivliostyle-menu-detail-group">
 						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate" checked disabled /> <span>Paginate</span></label></div>
-						<div class="vivliostyle-menu-detail-group">
+						<div class="vivliostyle-menu-detail-group" data-bind="visible: !settingsPanel.isSpreadViewChangeDisabled">
 							<div><label><input type="checkbox" name="vivliostyle-misc_paginate_spread-view" data-bind="checked: settingsPanel.state.viewerOptions.spreadView, disable: settingsPanel.isSpreadViewChangeDisabled" /> <span>Spread View</span></label></div>
 						</div>
-						<fieldset class="vivliostyle-menu-detail-group" data-bind="disable: settingsPanel.isPageSizeChangeDisabled">
+						<fieldset class="vivliostyle-menu-detail-group" data-bind="disable: settingsPanel.isPageSizeChangeDisabled, visible: !settingsPanel.isPageSizeChangeDisabled">
 							<div class="vivliostyle-menu-detail-group-heading"><span>Page Size</span></div>
 							<ul class="vivliostyle-menu-detail-group">
 								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="auto" required data-bind="checked: settingsPanel.state.pageSize.mode" /> <span>Auto</span> <small>(Use entire window area)</small></label></li>
@@ -73,7 +73,7 @@
 							</ul>
 						</fieldset>
 					</div>
-					<div class="vivliostyle-menu-detail-group">
+					<div class="vivliostyle-menu-detail-group" data-bind="visible: !settingsPanel.isPageSizeChangeDisabled">
 						<div><label><input type="checkbox" name="vivliostyle-misc_paginate_override-document-stylesheets" data-bind="checked: settingsPanel.state.pageSize.isImportant, disable: settingsPanel.isOverrideDocumentStyleSheetDisabled" /> <span>Override Document StyleSheets</span></label></div>
 					</div>
 					<!--
