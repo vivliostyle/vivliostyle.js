@@ -27,8 +27,12 @@ describe("SettingsPanel", function() {
     var documentOptions;
     var viewerOptions;
     var viewer;
-    var settingsPanel;
     var messageDialog;
+
+    var defaultSettingsPanelOptions = {
+        disablePageSizeChange: false,
+        disableSpreadViewChange: false
+    };
 
     beforeEach(function() {
         documentOptions = new DocumentOptions();
@@ -38,12 +42,17 @@ describe("SettingsPanel", function() {
         viewerOptions.fontSize(10);
         viewer = {loadDocument: function() {}};
         messageDialog = {visible: ko.observable(false)};
-
-        settingsPanel = new SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog);
     });
+
+    function createSettingsPanel(options) {
+        return new SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog,
+            options || defaultSettingsPanelOptions);
+    }
 
     describe("constructor", function() {
         it("stores the options to 'state' property", function() {
+            var settingsPanel = createSettingsPanel();
+
             expect(settingsPanel.state.viewerOptions.spreadView()).toBe(true);
             expect(settingsPanel.state.viewerOptions.fontSize()).toBe(10);
             expect(settingsPanel.state.pageSize.customWidth()).toBe("100mm");
@@ -52,6 +61,8 @@ describe("SettingsPanel", function() {
 
     describe("toggle", function() {
         it("toggles 'opened' property", function() {
+            var settingsPanel = createSettingsPanel();
+
             expect(settingsPanel.opened()).toBe(false);
 
             settingsPanel.toggle();
@@ -65,7 +76,9 @@ describe("SettingsPanel", function() {
     });
 
     it("closes when the error dialog is visible", function() {
+        var settingsPanel = createSettingsPanel();
         settingsPanel.toggle();
+
         expect(settingsPanel.opened()).toBe(true);
 
         messageDialog.visible(true);
@@ -75,6 +88,7 @@ describe("SettingsPanel", function() {
 
     describe("apply", function() {
         it("writes parameters from this.state.viewerOptions to the original ViewerOptions if the page size is not changed", function() {
+            var settingsPanel = createSettingsPanel();
             settingsPanel.state.viewerOptions.spreadView(false);
             settingsPanel.state.viewerOptions.fontSize(20);
 
@@ -88,6 +102,7 @@ describe("SettingsPanel", function() {
         });
 
         it("writes parameters from this.state.pageSize to the original DocumentOptions and call viewer.loadDocument if the page size is changed", function() {
+            var settingsPanel = createSettingsPanel();
             settingsPanel.state.viewerOptions.spreadView(false);
             settingsPanel.state.viewerOptions.fontSize(20);
             settingsPanel.state.pageSize.mode(PageSize.Mode.PRESET);
@@ -101,11 +116,12 @@ describe("SettingsPanel", function() {
             expect(viewerOptions.fontSize()).toBe(10);
             expect(documentOptions.pageSize.mode()).toBe(PageSize.Mode.PRESET);
             expect(viewer.loadDocument).toHaveBeenCalledWith(documentOptions, settingsPanel.state.viewerOptions);
-        })
+        });
     });
 
     describe("reset", function() {
         it("writes parameters from the original ViewerOptions to this.state.viewerOptions", function() {
+            var settingsPanel = createSettingsPanel();
             settingsPanel.state.viewerOptions.spreadView(false);
             settingsPanel.state.viewerOptions.fontSize(20);
             settingsPanel.state.pageSize.mode(PageSize.Mode.PRESET);
@@ -115,6 +131,32 @@ describe("SettingsPanel", function() {
             expect(settingsPanel.state.viewerOptions.spreadView()).toBe(true);
             expect(settingsPanel.state.viewerOptions.fontSize()).toBe(10);
             expect(settingsPanel.state.pageSize.mode()).toBe(PageSize.Mode.AUTO);
+        });
+    });
+
+    describe("UI disabled flags", function() {
+        it("all flags are false by default", function() {
+            var settingsPanel = createSettingsPanel();
+
+            expect(settingsPanel.isPageSizeChangeDisabled).toBe(false);
+            expect(settingsPanel.isOverrideDocumentStyleSheetDisabled).toBe(false);
+            expect(settingsPanel.isSpreadViewChangeDisabled).toBe(false);
+        });
+
+        it("page size change and 'override document style sheet' are disabled by disablePageSizeChange=true in settingsPanelOptions", function() {
+            var settingsPanel = createSettingsPanel({disablePageSizeChange: true});
+
+            expect(settingsPanel.isPageSizeChangeDisabled).toBe(true);
+            expect(settingsPanel.isOverrideDocumentStyleSheetDisabled).toBe(true);
+            expect(settingsPanel.isSpreadViewChangeDisabled).toBe(false);
+        });
+
+        it("spread view change is disabled by disableSpreadViewChangeChange=true in settingsPanelOptions", function() {
+            var settingsPanel = createSettingsPanel({disableSpreadViewChange: true});
+
+            expect(settingsPanel.isPageSizeChangeDisabled).toBe(false);
+            expect(settingsPanel.isOverrideDocumentStyleSheetDisabled).toBe(false);
+            expect(settingsPanel.isSpreadViewChangeDisabled).toBe(true);
         });
     });
 });
