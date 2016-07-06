@@ -41,10 +41,28 @@ h2 {
 }
 .topimg img {
   width: auto;
-  max-width: 100%;
+  max-width: 100vw;
   height: auto;
   max-height: 100%;
 }
+/* Ugly workaround because vw doesn't work well */
+@media (max-width: 950px) { .topimg img { max-width: 800px; } }
+@media (max-width: 900px) { .topimg img { max-width: 750px; } }
+@media (max-width: 850px) { .topimg img { max-width: 700px; } }
+@media (max-width: 800px) { .topimg img { max-width: 650px; } }
+@media (max-width: 750px) { .topimg img { max-width: 600px; } }
+@media (max-width: 700px) { .topimg img { max-width: 550px; } }
+@media (max-width: 650px) { .topimg img { max-width: 500px; } }
+@media (max-width: 600px) { .topimg img { max-width: 450px; } }
+@media (max-width: 550px) { .topimg img { max-width: 400px; } }
+@media (max-width: 500px) { .topimg img { max-width: 350px; } }
+@media (max-width: 450px) { .topimg img { max-width: 300px; } }
+@media (max-width: 400px) { .topimg img { max-width: 250px; } }
+@media (max-width: 350px) { .topimg img { max-width: 200px; } }
+@media (max-width: 300px) { .topimg img { max-width: 150px; } }
+@media (max-width: 250px) { .topimg img { max-width: 100px; } }
+@media (max-width: 200px) { .topimg img { max-width: 50px; } }
+/* end woraround */
 .figure {
   width: 18em;
   margin-left: 1.8em;
