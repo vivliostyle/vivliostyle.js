@@ -178,4 +178,5 @@ pre {
 	margin-left: 2em;
 	white-space: pre-wrap;
 	line-height: 1.45;
+	hyphens: none;
 }
