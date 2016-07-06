@@ -45,7 +45,7 @@ function ViewerApp() {
 
     var settingsPanelOptions = {
         disablePageSizeChange: false,
-        disableSpreadViewChange: true
+        disableSpreadViewChange: false
     };
 
     this.settingsPanel = new SettingsPanel(this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog,
