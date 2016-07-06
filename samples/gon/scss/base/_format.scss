@@ -21,7 +21,6 @@ html {
 }
 
 @page {
-    size: 105mm 148mm;
     // 行送り * 行数
     width: $base-line-height * $lines;
     // フォントサイズ * 文字数
