@@ -1,24 +1,156 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html lang="en"><head>
-<title>The Project Gutenberg eBook of The Adventures of Sherlock Holmes, by Sir Arthur Conan Doyle</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="guntenberg.css">
-<style type="text/css">
-.toc { margin-left: 3%; text-align: left; }
-.bold { font-weight: bold; }
-center > h3:first-child {
-    break-before: page;
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>The Adventures of Sherlock Holmes, by Sir Arthur Conan Doyle</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link rel="stylesheet" href="guntenberg.css">
+		<style>
+@font-face {
+	font-family: 'Quattrocento';
+	src: url('fonts/Quattrocento-Regular.ttf');
+}
+@font-face {
+	font-family: 'Libre Baskerville';
+	src: url('fonts/LibreBaskerville-Regular.ttf');
+}
+@font-face {
+	font-family: 'Libre Baskerville';
+	src: url('fonts/LibreBaskerville-Bold.ttf');
+	font-weight: bold;
+}
+@font-face {
+	font-family: 'Libre Baskerville';
+	src: url('fonts/LibreBaskerville-Italic.ttf');
+	font-style: italic;
+}
+:root {
+	font-family: baskerville, 'Libre Baskerville', Georgia, serif;
+	font-size-adjust: 0.42;
+}
+@page {
+	font-size: small;
+	font-family: 'Quattrocento', baskerville, 'Libre Baskerville', Georgia, serif;
+	letter-spacing: 0.1em;
 }
 @page {
 	@top-center { content: "The Adventures of Sherlock Holmes"; }
 }
-</style>
-</head>
+header {
+	font-family: 'Quattrocento', baskerville, 'Libre Baskerville', Georgia, serif;
+	font-size-adjust: none;
+	font-size: 1.2em;
+	letter-spacing: 0.3em;
+	text-transform: uppercase;
+	text-align: center;
+	color: #333;
+	margin: -1rem;
+}
+header > * {
+	font-weight: normal;
+	margin: 1.7em 0;
+	break-inside: avoid;
+}
+header h1 span{
+	display: inline-block;
+}
+header div {
+	break-before: auto;
+	break-before: avoid;
+	font-size: 1.2em;
+}
+header .author {
+	font-size: 1.5em;
+}
+@media (max-width: 400px) {
+	header {
+		font-size: 1.1em;
+		letter-spacing: 0.2em;
+	}
+	header h1 {
+		font-size: 1.8em:
+	}
+	header > * {
+		margin: 1.5em 0;
+	}
+}
+@media (max-width: 350px) {
+	header {
+		font-size: 1em;
+		letter-spacing: 0.1em;
+	}
+	header > * {
+		margin: 1em 0;
+	}
+}
+h2, h3 {
+	font-family: 'Quattrocento', baskerville, 'Libre Baskerville', Georgia, serif;
+	letter-spacing: 0.05em;
+	font-size-adjust: none;
+	text-transform: uppercase;
+	text-align: center;
+	margin: 2em 0;
+	font-weight: normal;
+}
+h2 {
+	font-size: 1.2em;
+}
+h3 {
+	font-size: 1em;
+}
+.chap-num {
+	display: inline-block;
+	margin-right: 1ch;
+}
+p:first-of-type::first-letter {
+	font-weight: normal;
+}
+
+blockquote {
+	margin: 2em 1em 1em 2em;
+}
+.sign {
+	break-before: avoid;
+	margin: 1em 1em 2em auto;
+}
+.to {
+	break-after: avoid;
+	margin: 2em 1em -1em auto;
+}
+.sign, .to {
+	width: max-content;
+	text-align: center;
+	white-space: pre-wrap;
+	break-inside: avoid;
+	line-height: inherit;
+}
+blockquote p:first-of-type::first-letter {
+	font-size: 1em;
+	padding-right: 0;
+	font-weight: normal;
+}
+blockquote p:first-of-type:before {
+	content: "“";
+	font-weight: bold;
+	float: left;
+	font-size: 3em;
+	margin-left: -1.5ch;
+	line-height: 1;
+}
+@media (max-width: 27em) {
+	.adventure {
+		display: none;
+	}
+}
+		</style>
+	</head>
 <body>
-<div class="book">
-<center>
-<h1>THE ADVENTURES OF<br>SHERLOCK HOLMES</h1><h3>BY</h3><h2>SIR ARTHUR CONAN DOYLE</h2>
-</center>
+<header>
+	<h1><span>The Adventures</span> of <span>Sherlock Holmes</span></h1>
+	<div>by</div>
+	<div class="author">Sir Arthur Conan Doyle</div>
+</header>
+
+<section class="copyright">
 <pre class="legal">
 This eBook is for the use of anyone anywhere at no cost and with
 almost no restrictions whatsoever.  You may copy it, give it away or
@@ -27,32 +159,31 @@ with this eBook or online at <a href="http://www.gutenberg.net">www.gutenberg.ne
 
 Produced by an anonymous Project Gutenberg volunteer and Jose Menendez
 </pre>
-<hr noshade="noshade" size="3">
-<center><h2>CONTENTS</h2></center>
-<div class="toc">
-<table class="bold" summary="Table of Contents" cellpadding="2" cellspacing="2">
-<colgroup><col align="right">
-<col align="left">
-</colgroup><tbody><tr><td>I.</td><td><a href="#1">A Scandal in Bohemia</a></td></tr>
-<tr><td>II.</td><td><a href="#2">The Red-Headed League</a></td></tr>
-<tr><td>III.</td><td><a href="#3">A Case of Identity</a></td></tr>
-<tr><td>IV.</td><td><a href="#4">The Boscombe Valley Mystery</a></td></tr>
-<tr><td>V.</td><td><a href="#5">The Five Orange Pips</a></td></tr>
-<tr><td>VI.</td><td><a href="#6">The Man with the Twisted Lip</a></td></tr>
-<tr><td>VII.</td><td><a href="#7">The Adventure of the Blue Carbuncle</a></td></tr>
-<tr><td>VIII.</td><td><a href="#8">The Adventure of the Speckled Band</a></td></tr>
-<tr><td>IX.</td><td><a href="#9">The Adventure of the Engineer’s Thumb</a></td></tr>
-<tr><td>X.</td><td><a href="#10">The Adventure of the Noble Bachelor</a></td></tr>
-<tr><td>XI.</td><td><a href="#11">The Adventure of the Beryl Coronet</a></td></tr>
-<tr><td>XII.</td><td><a href="#12">The Adventure of the Copper Beeches</a></td></tr>
-</tbody></table></div>
-<hr>
-<br>
-<center><h3><a id="1">ADVENTURE &nbsp;I.&nbsp; A SCANDAL IN BOHEMIA</a></h3>
-<br>
-I.</center>
-<p><br>
-<font size="+2">T</font>o Sherlock Holmes she is always <i>the</i> woman. I have seldom heard
+</section>
+<nav id="toc">
+<h2>Contents</h2>
+	<ol>
+		<li><a href="#1">A Scandal in Bohemia</a>
+		<li><a href="#2">The Red-Headed League</a>
+		<li><a href="#3">A Case of Identity</a>
+		<li><a href="#4">The Boscombe Valley Mystery</a>
+		<li><a href="#5">The Five Orange Pips</a>
+		<li><a href="#6">The Man with the Twisted Lip</a>
+		<li><a href="#7"><span><span class="adventure">The Adventure of </span>The Blue Carbuncle</span></a>
+		<li><a href="#8"><span><span class="adventure">The Adventure of </span>The Speckled Band</span></a>
+		<li><a href="#9"><span><span class="adventure">The Adventure of  </span>The Engineer’s Thumb</span></a>
+		<li><a href="#10"><span><span class="adventure">The Adventure of </span>The Noble Bachelor</span></a>
+		<li><a href="#11"><span><span class="adventure">The Adventure of </span>The Beryl Coronet</span></a>
+		<li><a href="#12"><span><span class="adventure">The Adventure of </span>The Copper Beeches</span></a>
+	</ol>
+</nav>
+
+<main>
+<section>
+<h2><a id="1"><span class="chap-num">Adventure I</span> A Scandal in Bohemia</a></h2>
+<section>
+	<h3>I.</h3>
+<p>To Sherlock Holmes she is always <i>the</i> woman. I have seldom heard
 him mention her under any other name. In his eyes she eclipses
 and predominates the whole of her sex. It was not that he felt
 any emotion akin to love for Irene Adler. All emotions, and that
@@ -534,11 +665,11 @@ have some good news for you. And good-night, Watson,” he added,
 as the wheels of the royal brougham rolled down the street. “If
 you will be good enough to call to-morrow afternoon at three
 o’clock I should like to chat this little matter over with you.”
-<br><br>
-</p><center>
-II.
-</center><p><br>
-At three o’clock precisely I was at Baker Street, but Holmes had
+</p>
+</section>
+<section>
+	<h3>II.</h3>
+<p>At three o’clock precisely I was at Baker Street, but Holmes had
 not yet returned. The landlady informed me that he had left the
 house shortly after eight o’clock in the morning. I sat down
 beside the fire, however, with the intention of awaiting him,
@@ -1016,11 +1147,12 @@ hurried by.
 “I’ve heard that voice before,” said Holmes, staring down the
 dimly lit street. “Now, I wonder who the deuce that could have
 been.”
-<br><br>
-</p><center>
-III.
-</center><p><br>
-I slept at Baker Street that night, and we were engaged upon our
+
+</p>
+</section>
+<section>
+	<h3>III.</h3>
+<p>I slept at Baker Street that night, and we were engaged upon our
 toast and coffee in the morning when the King of Bohemia rushed
 into the room.
 </p><p>
@@ -1099,8 +1231,9 @@ herself in evening dress, the letter was superscribed to
 “Sherlock Holmes, Esq. To be left till called for.” My friend
 tore it open, and we all three read it together. It was dated at
 midnight of the preceding night and ran in this way:
-<br><br></p><p>
-“MY DEAR MR. SHERLOCK HOLMES,—You really did it very well. You
+</p>
+<blockquote><p>
+MY DEAR MR. SHERLOCK HOLMES,—You really did it very well. You
 took me in completely. Until after the alarm of fire, I had not a
 suspicion. But then, when I found how I had betrayed myself, I
 began to think. I had been warned against you months ago. I had
@@ -1114,10 +1247,11 @@ of the freedom which it gives. I sent John, the coachman, to
 watch you, ran upstairs, got into my walking clothes, as I call
 them, and came down just as you departed.
 </p><p>
-“Well, I followed you to your door, and so made sure that I was
+Well, I followed you to your door, and so made sure that I was
 really an object of interest to the celebrated Mr. Sherlock
 Holmes. Then I, rather imprudently, wished you good-night, and
-started for the Temple to see my husband.</p><p>“We both thought the
+started for the Temple to see my husband.</p>
+<p>We both thought the
 best resource was flight, when pursued by so formidable an
 antagonist; so you will find the nest empty when you call
 to-morrow. As to the photograph, your client may rest in peace. I
@@ -1127,10 +1261,10 @@ keep it only to safeguard myself, and to preserve a weapon which
 will always secure me from any steps which he might take in the
 future. I leave a photograph which he might care to possess; and
 I remain, dear Mr. Sherlock Holmes,
-</p><p align="right"><br>
-“Very truly yours, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br>
+</p></blockquote>
+<div class="sign">“Very truly yours,
 “IRENE NORTON, <i>née</i> ADLER.”
-<br><br></p><p>
+</div><p>
 “What a woman—oh, what a woman!” cried the King of Bohemia, when
 we had all three read this epistle. “Did I not tell you how quick
 and resolute she was? Would she not have made an admirable queen?
@@ -1174,12 +1308,14 @@ beaten by a woman’s wit. He used to make merry over the
 cleverness of women, but I have not heard him do it of late. And
 when he speaks of Irene Adler, or when he refers to her
 photograph, it is always under the honourable title of <i>the</i> woman.
-<br>
-<br>
-</p><hr>
-<center><h3><a id="2">ADVENTURE &nbsp;II.&nbsp; THE RED-HEADED LEAGUE</a></h3></center>
-<p><br>
-<font size="+2">I</font> had called upon my friend, Mr. Sherlock Holmes, one day in the
+
+
+</p>
+</section>
+</section>
+<section>
+	<h2><a id="2"><span class="chap-num">Adventure II.</span> THE RED-HEADED LEAGUE</a></h2>
+<p>I had called upon my friend, Mr. Sherlock Holmes, one day in the
 autumn of last year and found him in deep conversation with a
 very stout, florid-faced, elderly gentleman with fiery red hair.
 With an apology for my intrusion, I was about to withdraw when
@@ -1325,7 +1461,7 @@ I took the paper from him and read as follows:
 “TO THE RED-HEADED LEAGUE: On account of the bequest of the late
 Ezekiah Hopkins, of Lebanon, Pennsylvania, U. S. A., there is now
 another vacancy open which entitles a member of the League to a
-salary of <i>£</i>4 a week for purely nominal services. All
+salary of £4 a week for purely nominal services. All
 red-headed men who are sound in body and mind and above the age
 of twenty-one years, are eligible. Apply in person on Monday, at
 eleven o’clock, to Duncan Ross, at the offices of the League, 7
@@ -1556,7 +1692,7 @@ and that he would see to anything that turned up.
 </p><p>
 “&nbsp;‘That would suit me very well,’ said I. ‘And the pay?’
 </p><p>
-“&nbsp;‘Is <i>£</i>4 a week.’
+“&nbsp;‘Is £4 a week.’
 </p><p>
 “&nbsp;‘And the work?’
 </p><p>
@@ -1640,15 +1776,13 @@ panel with a tack. Here it is, and you can read for yourself.”
 </p><p>
 He held up a piece of white cardboard about the size of a sheet
 of note-paper. It read in this fashion:
-</p><center><br><br>
-THE RED-HEADED LEAGUE
-<br><br>
+</p>
+<center style="text-align: center; white-space: pre; line-height: 2.5em; break-inside: avoid;"
+>THE RED-HEADED LEAGUE
 IS
-<br><br>
 DISSOLVED.
-<br><br>
 October 9, 1890.</center>
-<br><br><p>
+<p>
 Sherlock Holmes and I surveyed this curt announcement and the
 rueful face behind it, until the comical side of the affair so
 completely overtopped every other consideration that we both
@@ -1713,7 +1847,7 @@ pound a week.”
 “As far as you are personally concerned,” remarked Holmes, “I do
 not see that you have any grievance against this extraordinary
 league. On the contrary, you are, as I understand, richer by some
-<i>£</i>30, to say nothing of the minute knowledge which you have
+£30, to say nothing of the minute knowledge which you have
 gained on every subject which comes under the letter A. You have
 lost nothing by them.”
 </p><p>
@@ -1990,7 +2124,7 @@ have not had my rubber.”
 “I think you will find,” said Sherlock Holmes, “that you will
 play for a higher stake to-night than you have ever done yet, and
 that the play will be more exciting. For you, Mr. Merryweather,
-the stake will be some <i>£</i>30,000; and for you, Jones, it will
+the stake will be some £30,000; and for you, Jones, it will
 be the man upon whom you wish to lay your hands.”
 </p><p>
 “John Clay, the murderer, thief, smasher, and forger. He’s a
@@ -2217,7 +2351,7 @@ this not over-bright pawnbroker out of the way for a number of
 hours every day. It was a curious way of managing it, but,
 really, it would be difficult to suggest a better. The method was
 no doubt suggested to Clay’s ingenious mind by the colour of his
-accomplice’s hair. The <i>£</i>4 a week was a lure which must draw
+accomplice’s hair. The £4 a week was a lure which must draw
 him, and what was it to them, who were playing for thousands?
 They put in the advertisement, one rogue has the temporary
 office, the other rogue incites the man to apply for it, and
@@ -2283,12 +2417,13 @@ problems help me to do so.”
 He shrugged his shoulders. “Well, perhaps, after all, it is of
 some little use,” he remarked. “&nbsp;‘<i>L’homme c’est rien—l’oeuvre
 c’est tout</i>,’ as Gustave Flaubert wrote to George Sand.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="3">ADVENTURE &nbsp;III.&nbsp; A CASE OF IDENTITY</a></h3></center>
-<p><br>
-<font size="+2">“M</font>y dear fellow,” said Sherlock Holmes as we sat on either side
+
+
+</p>
+</section>
+<section>
+<h2><a id="3"><span class="chap-num">Adventure III.</span> A Case of Identity</a></h2>
+<p>“My dear fellow,” said Sherlock Holmes as we sat on either side
 of the fire in his lodgings at Baker Street, “life is infinitely
 stranger than anything which the mind of man could invent. We
 would not dare to conceive the things which are really mere
@@ -2452,7 +2587,7 @@ was a plumber in the Tottenham Court Road, and he left a tidy
 business behind him, which mother carried on with Mr. Hardy, the
 foreman; but when Mr. Windibank came he made her sell the
 business, for he was very superior, being a traveller in wines.
-They got <i>£</i>4700 for the goodwill and interest, which wasn’t
+They got £4700 for the goodwill and interest, which wasn’t
 near as much as father could have got if he had been alive.”
 </p><p>
 I had expected to see Sherlock Holmes impatient under this
@@ -2471,7 +2606,7 @@ only touch the interest.”
 large a sum as a hundred a year, with what you earn into the
 bargain, you no doubt travel a little and indulge yourself in
 every way. I believe that a single lady can get on very nicely
-upon an income of about <i>£</i>60.”
+upon an income of about £60.”
 </p><p>
 “I could do with much less than that, Mr. Holmes, but you
 understand that as long as I live at home I don’t wish to be a
@@ -3086,12 +3221,13 @@ Persian saying, ‘There is danger for him who taketh the tiger
 cub, and danger also for whoso snatches a delusion from a woman.’
 There is as much sense in Hafiz as in Horace, and as much
 knowledge of the world.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="4">ADVENTURE IV. THE BOSCOMBE VALLEY MYSTERY</a></h3></center>
-<p><br>
-<font size="+2">W</font>e were seated at breakfast one morning, my wife and I, when the
+
+
+</p>
+</section>
+<section>
+<h2><a id="4"><span class="chap-num">Adventure IV.</span> The Boscombe Valley Mystery</a></h2>
+<p>We were seated at breakfast one morning, my wife and I, when the
 maid brought in a telegram. It was from Sherlock Holmes and ran
 in this way:
 </p><p>
@@ -4215,12 +4351,13 @@ months after our interview, but he is now dead; and there is
 every prospect that the son and daughter may come to live happily
 together in ignorance of the black cloud which rests upon their
 past.
-<br>
-<br>
-</p><hr>
-<center><h3><a id="5">ADVENTURE &nbsp;V.&nbsp; THE FIVE ORANGE PIPS</a></h3></center>
-<p><br>
-<font size="+2">W</font>hen I glance over my notes and records of the Sherlock Holmes
+
+
+</p>
+</section>
+<section>
+<h2><a id="5"><span class="chap-num">Adventure V.</span> The Five Orange Pips</a></h2>
+<p>When I glance over my notes and records of the Sherlock Holmes
 cases between the years ’82 and ’90, I am faced by so many which
 present strange and interesting features that it is no easy
 matter to know which to choose and which to leave. Some, however,
@@ -4492,7 +4629,7 @@ brought in a verdict of ‘suicide.’ But I, who knew how he winced
 from the very thought of death, had much ado to persuade myself
 that he had gone out of his way to meet it. The matter passed,
 however, and my father entered into possession of the estate, and
-of some <i>£</i>14,000, which lay to his credit at the bank.”
+of some £14,000, which lay to his credit at the bank.”
 </p><p>
 “One moment,” Holmes interposed, “your statement is, I foresee,
 one of the most remarkable to which I have ever listened. Let me
@@ -5110,12 +5247,13 @@ did at last hear that somewhere far out in the Atlantic a
 shattered stern-post of a boat was seen swinging in the trough
 of a wave, with the letters “L. S.” carved upon it, and that is
 all which we shall ever know of the fate of the <i>Lone Star</i>.
-<br>
-<br>
-</p><hr>
-<center><h3><a id="6">ADVENTURE &nbsp;VI.&nbsp; THE MAN WITH THE TWISTED LIP</a></h3></center>
-<p><br>
-<font size="+2">I</font>sa Whitney, brother of the late Elias Whitney, D.D., Principal
+
+
+</p>
+</section>
+<section>
+<h2><a id="6"><span class="chap-num">Adventure VI.</span> The Man With the Twisted Lip</a></h2>
+<p>Isa Whitney, brother of the late Elias Whitney, D.D., Principal
 of the Theological College of St. George’s, was much addicted to
 opium. The habit grew upon him, as I understand, from some
 foolish freak when he was at college; for having read De
@@ -5338,7 +5476,7 @@ nights.”
 </p><p>
 “What! You do not mean bodies?”
 </p><p>
-“Ay, bodies, Watson. We should be rich men if we had <i>£</i>1000
+“Ay, bodies, Watson. We should be rich men if we had £1000
 for every poor devil who has been done to death in that den. It
 is the vilest murder-trap on the whole riverside, and I fear that
 Neville St. Clair has entered it never to leave it more. But our
@@ -5420,8 +5558,8 @@ Street every night. Mr. St. Clair is now thirty-seven years of
 age, is a man of temperate habits, a good husband, a very
 affectionate father, and a man who is popular with all who know
 him. I may add that his whole debts at the present moment, as far
-as we have been able to ascertain, amount to <i>£</i>88 10<i>s</i>., while
-he has <i>£</i>220 standing to his credit in the Capital and
+as we have been able to ascertain, amount to £88 10s., while
+he has £220 standing to his credit in the Capital and
 Counties Bank. There is no reason, therefore, to think that money
 troubles have been weighing upon his mind.
 </p><p>
@@ -6120,18 +6258,18 @@ hair, and an appropriate dress, I took my station in the business
 part of the city, ostensibly as a match-seller but really as a
 beggar. For seven hours I plied my trade, and when I returned
 home in the evening I found to my surprise that I had received no
-less than 26<i>s</i>. 4<i>d</i>.
+less than 26s. 4d.
 </p><p>
 “I wrote my articles and thought little more of the matter until,
 some time later, I backed a bill for a friend and had a writ
-served upon me for <i>£</i>25. I was at my wit’s end where to get
+served upon me for £25. I was at my wit’s end where to get
 the money, but a sudden idea came to me. I begged a fortnight’s
 grace from the creditor, asked for a holiday from my employers,
 and spent the time in begging in the City under my disguise. In
 ten days I had the money and had paid the debt.
 </p><p>
 “Well, you can imagine how hard it was to settle down to arduous
-work at <i>£</i>2 a week when I knew that I could earn as much in
+work at £2 a week when I knew that I could earn as much in
 a day by smearing my face with a little paint, laying my cap on
 the ground, and sitting still. It was a long fight between my
 pride and the money, but the dollars won at last, and I threw up
@@ -6146,12 +6284,12 @@ my secret was safe in his possession.
 </p><p>
 “Well, very soon I found that I was saving considerable sums of
 money. I do not mean that any beggar in the streets of London
-could earn <i>£</i>700 a year—which is less than my average
+could earn £700 a year—which is less than my average
 takings—but I had exceptional advantages in my power of making
 up, and also in a facility of repartee, which improved by
 practice and made me quite a recognised character in the City.
 All day a stream of pennies, varied by silver, poured in upon me,
-and it was a very bad day in which I failed to take <i>£</i>2.
+and it was a very bad day in which I failed to take £2.
 </p><p>
 “As I grew richer I grew more ambitious, took a house in the
 country, and eventually married, without anyone having a
@@ -6216,12 +6354,13 @@ results.”
 “I reached this one,” said my friend, “by sitting upon five
 pillows and consuming an ounce of shag. I think, Watson, that if
 we drive to Baker Street we shall just be in time for breakfast.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="7">VII.&nbsp; THE ADVENTURE OF THE BLUE CARBUNCLE</a></h3></center>
-<p><br>
-<font size="+2">I</font> had called upon my friend Sherlock Holmes upon the second
+
+
+</p>
+</section>
+<section>
+<h2><a id="7"><span class="chap-num">VII.</span> The Adventure of the Blue Carbuncle</a></h2>
+<p>I had called upon my friend Sherlock Holmes upon the second
 morning after Christmas, with the intention of wishing him the
 compliments of the season. He was lounging upon the sofa in a
 purple dressing-gown, a pipe-rack within his reach upon the
@@ -6493,7 +6632,7 @@ it were putty.”
 “Precisely so. I ought to know its size and shape, seeing that I
 have read the advertisement about it in <i>The Times</i> every day
 lately. It is absolutely unique, and its value can only be
-conjectured, but the reward offered of <i>£</i>1000 is certainly
+conjectured, but the reward offered of £1000 is certainly
 not within a twentieth part of the market price.”
 </p><p>
 “A thousand pounds! Great Lord of mercy!” The commissionaire
@@ -6874,11 +7013,11 @@ Oakshott, 117, Brixton Road, egg and poultry supplier.’&nbsp;”
 </p><p>
 “Now, then, what’s the last entry?”
 </p><p>
-“&nbsp;‘December 22nd. Twenty-four geese at 7<i>s</i>. 6<i>d</i>.’&nbsp;”
+“&nbsp;‘December 22nd. Twenty-four geese at 7s. 6d.’&nbsp;”
 </p><p>
 “Quite so. There you are. And underneath?”
 </p><p>
-“&nbsp;‘Sold to Mr. Windigate of the Alpha, at 12<i>s</i>.’&nbsp;”
+“&nbsp;‘Sold to Mr. Windigate of the Alpha, at 12s.’&nbsp;”
 </p><p>
 “What have you to say now?”
 </p><p>
@@ -6890,7 +7029,7 @@ fashion which was peculiar to him.
 </p><p>
 “When you see a man with whiskers of that cut and the ‘Pink ’un’
 protruding out of his pocket, you can always draw him by a bet,”
-said he. “I daresay that if I had put <i>£</i>100 down in front of
+said he. “I daresay that if I had put £100 down in front of
 him, that man would not have given me such complete information
 as was drawn from him by the idea that he was doing me on a
 wager. Well, Watson, we are, I fancy, nearing the end of our
@@ -7195,12 +7334,13 @@ whimsical problem, and its solution is its own reward. If you
 will have the goodness to touch the bell, Doctor, we will begin
 another investigation, in which, also a bird will be the chief
 feature.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="8">VIII.&nbsp; THE ADVENTURE OF THE SPECKLED BAND</a></h3></center>
-<p><br>
-<font size="+2">O</font>n glancing over my notes of the seventy odd cases in which I
+
+
+</p>
+</section>
+<section>
+<h2><a id="8"><span class="chap-num">VIII.</span> The Adventure of the Speckled Band</a></h2>
+<p>On glancing over my notes of the seventy odd cases in which I
 have during the last eight years studied the methods of my friend
 Sherlock Holmes, I find many tragic, some comic, a large number
 merely strange, but none commonplace; for, working as he did
@@ -7367,7 +7507,7 @@ afterwards returned to England a morose and disappointed man.
 the young widow of Major-General Stoner, of the Bengal Artillery.
 My sister Julia and I were twins, and we were only two years old
 at the time of my mother’s re-marriage. She had a considerable
-sum of money—not less than <i>£</i>1000 a year—and this she
+sum of money—not less than £1000 a year—and this she
 bequeathed to Dr. Roylott entirely while we resided with him,
 with a provision that a certain annual sum should be allowed to
 each of us in the event of our marriage. Shortly after our return
@@ -7781,9 +7921,9 @@ over with notes and figures.
 determine its exact meaning I have been obliged to work out the
 present prices of the investments with which it is concerned. The
 total income, which at the time of the wife’s death was little
-short of <i>£</i>1100, is now, through the fall in agricultural
-prices, not more than <i>£</i>750. Each daughter can claim an
-income of <i>£</i>250, in case of marriage. It is evident,
+short of £1100, is now, through the fall in agricultural
+prices, not more than £750. Each daughter can claim an
+income of £250, in case of marriage. It is evident,
 therefore, that if both girls had married, this beauty would have
 had a mere pittance, while even one of them would cripple him to
 a very serious extent. My morning’s work has not been wasted,
@@ -8403,12 +8543,13 @@ roused its snakish temper, so that it flew upon the first person
 it saw. In this way I am no doubt indirectly responsible for Dr.
 Grimesby Roylott’s death, and I cannot say that it is likely to
 weigh very heavily upon my conscience.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="9">IX.&nbsp; THE ADVENTURE OF THE ENGINEER’S THUMB</a></h3></center>
-<p><br>
-<font size="+2">O</font>f all the problems which have been submitted to my friend, Mr.
+
+
+</p>
+</section>
+<section>
+<h2><a id="9"><span class="chap-num">IX.</span> The Adventure of the Engineer’s Thumb</a></h2>
+<p>Of all the problems which have been submitted to my friend, Mr.
 Sherlock Holmes, for solution during the years of our intimacy,
 there were only two which I was the means of introducing to his
 notice—that of Mr. Hatherley’s thumb, and that of Colonel
@@ -8624,7 +8765,7 @@ Street.
 business a dreary experience. To me it has been exceptionally so.
 During two years I have had three consultations and one small
 job, and that is absolutely all that my profession has brought
-me. My gross takings amount to <i>£</i>27 10<i>s</i>. Every day, from
+me. My gross takings amount to £27 10s. Every day, from
 nine in the morning until four in the afternoon, I waited in my
 little den, until at last my heart began to sink, and I came to
 believe that I should never have any practice at all.
@@ -9370,12 +9511,13 @@ have I gained?”
 value, you know; you have only to put it into words to gain the
 reputation of being excellent company for the remainder of your
 existence.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="10">X.&nbsp; THE ADVENTURE OF THE NOBLE BACHELOR</a></h3></center>
-<p><br>
-<font size="+2">T</font>he Lord St. Simon marriage, and its curious termination, have
+
+
+</p>
+</section>
+<section>
+<h2><a id="10"><span class="chap-num">X.</span> The Adventure of the Noble Bachelor</a></h2>
+<p>The Lord St. Simon marriage, and its curious termination, have
 long ceased to be a subject of interest in those exalted circles
 in which the unfortunate bridegroom moves. Fresh scandals have
 eclipsed it, and their more piquant details have drawn the
@@ -9444,8 +9586,9 @@ wedding?”
 St. Simon. I will read it to you, and in return you must turn
 over these papers and let me have whatever bears upon the matter.
 This is what he says:
-<br><br></p><p>
-“&nbsp;‘MY DEAR MR. SHERLOCK HOLMES:—Lord Backwater tells me that I
+</p>
+<blockquote><p>
+&nbsp;‘MY DEAR MR. SHERLOCK HOLMES:—Lord Backwater tells me that I
 may place implicit reliance upon your judgment and discretion. I
 have determined, therefore, to call upon you and to consult you
 in reference to the very painful event which has occurred in
@@ -9455,8 +9598,9 @@ objection to your co-operation, and that he even thinks that
 it might be of some assistance. I will call at four o’clock in
 the afternoon, and, should you have any other engagement at that
 time, I hope that you will postpone it, as this matter is of
-paramount importance. Yours faithfully,</p><p align="right"><br>“&nbsp;‘ST. SIMON.’
-<br><br></p><p>
+paramount importance. Yours faithfully,</p>
+</blockquote>
+<div class="sign">“&nbsp;‘ST. SIMON.’</div><p>
 “It is dated from Grosvenor Mansions, written with a quill pen,
 and the noble lord has had the misfortune to get a smear of ink
 upon the outer side of his right little finger,” remarked Holmes
@@ -10068,8 +10212,8 @@ over here.”
 bill, which interests me deeply.”
 </p><p>
 “There’s nothing in it. I looked at it before,” said Lestrade.
-“&nbsp;‘Oct. 4th, rooms 8<i>s</i>., breakfast 2<i>s</i>. 6<i>d</i>., cocktail 1<i>s</i>., lunch 2<i>s</i>.
-6<i>d</i>., glass sherry, 8<i>d</i>.’ I see nothing in that.”
+“&nbsp;‘Oct. 4th, rooms 8s., breakfast 2s. 6d., cocktail 1s., lunch 2s.
+6d., glass sherry, 8d.’ I see nothing in that.”
 </p><p>
 “Very likely not. It is most important, all the same. As to the
 note, it is important also, or at least the initials are, so I
@@ -10396,12 +10540,13 @@ and thank our stars that we are never likely to find ourselves in
 the same position. Draw your chair up and hand me my violin, for
 the only problem we have still to solve is how to while away
 these bleak autumnal evenings.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="11">XI.&nbsp; THE ADVENTURE OF THE BERYL CORONET</a></h3></center>
-<p><br>
-<font size="+2">“H</font>olmes,” said I as I stood one morning in our bow-window looking
+
+
+</p>
+</section>
+<section>
+<h2><a id="11"><span class="chap-num">XI.</span> The Adventure of the Beryl Coronet</a></h2>
+<p>“Holmes,” said I as I stood one morning in our bow-window looking
 down the street, “here is a madman coming along. It seems rather
 sad that his relatives should allow him to come out alone.”
 </p><p>
@@ -10526,7 +10671,7 @@ habit of advancing money.’
 “&nbsp;‘The firm does so when the security is good.’ I answered.
 </p><p>
 “&nbsp;‘It is absolutely essential to me,’ said he, ‘that I should have
-<i>£</i>50,000 at once. I could, of course, borrow so trifling a
+£50,000 at once. I could, of course, borrow so trifling a
 sum ten times over from my friends, but I much prefer to make it
 a matter of business and to carry out that business myself. In my
 position you can readily understand that it is unwise to place
@@ -10588,7 +10733,7 @@ I leave it with you, however, with every confidence, and I shall
 call for it in person on Monday morning.’
 </p><p>
 “Seeing that my client was anxious to leave, I said no more but,
-calling for my cashier, I ordered him to pay over fifty <i>£</i>1000
+calling for my cashier, I ordered him to pay over fifty £1000
 notes. When I was alone once more, however, with the
 precious case lying upon the table in front of me, I could not
 but think with some misgivings of the immense responsibility
@@ -10701,7 +10846,7 @@ what he said. He followed me to my room, however, that night with
 a very grave face.
 </p><p>
 “&nbsp;‘Look here, dad,’ said he with his eyes cast down, ‘can you let
-me have <i>£</i>200?’
+me have £200?’
 </p><p>
 “&nbsp;‘No, I cannot!’ I answered sharply. ‘I have been far too
 generous with you in money matters.’
@@ -10844,7 +10989,7 @@ going through all the police formalities, have hurried round to
 you to implore you to use your skill in unravelling the matter.
 The police have openly confessed that they can at present make
 nothing of it. You may go to any expense which you think
-necessary. I have already offered a reward of <i>£</i>1000. My
+necessary. I have already offered a reward of £1000. My
 God, what shall I do! I have lost my honour, my gems, and my son
 in one night. Oh, what shall I do!”
 </p><p>
@@ -11257,16 +11402,19 @@ her last night, in sorrow and not in anger, that if she had
 married my boy all might have been well with him. Perhaps it was
 thoughtless of me to say so. It is to that remark that she refers
 in this note:
-<br><br></p><p>
-“&nbsp;‘MY DEAREST UNCLE:—I feel that I have brought trouble upon you,
+</p>
+<blockquote><p>
+&nbsp;‘MY DEAREST UNCLE:—I feel that I have brought trouble upon you,
 and that if I had acted differently this terrible misfortune
 might never have occurred. I cannot, with this thought in my
 mind, ever again be happy under your roof, and I feel that I must
 leave you forever. Do not worry about my future, for that is
 provided for; and, above all, do not search for me, for it will
 be fruitless labour and an ill-service to me. In life or in
-death, I am ever your loving</p><p align="right"><br>“&nbsp;‘MARY.’
-<br><br></p><p>
+death, I am ever your loving</p>
+</blockquote>
+<div class="sign">“&nbsp;‘MARY.’</div>
+<p>
 “What could she mean by that note, Mr. Holmes? Do you think it
 points to suicide?”
 </p><p>
@@ -11277,14 +11425,14 @@ your troubles.”
 “Ha! You say so! You have heard something, Mr. Holmes; you have
 learned something! Where are the gems?”
 </p><p>
-“You would not think <i>£</i>1000 apiece an excessive sum for
+“You would not think £1000 apiece an excessive sum for
 them?”
 </p><p>
 “I would pay ten.”
 </p><p>
 “That would be unnecessary. Three thousand will cover the matter.
 And there is a little reward, I fancy. Have you your check-book?
-Here is a pen. Better make it out for <i>£</i>4000.”
+Here is a pen. Better make it out for £4000.”
 </p><p>
 With a dazed face the banker made out the required check. Holmes
 walked over to his desk, took out a little triangular piece of
@@ -11503,12 +11651,12 @@ particular that had occurred, he tried to bluster and took down a
 life-preserver from the wall. I knew my man, however, and I
 clapped a pistol to his head before he could strike. Then he
 became a little more reasonable. I told him that we would give
-him a price for the stones he held—<i>£</i>1000 apiece. That
+him a price for the stones he held—£1000 apiece. That
 brought out the first signs of grief that he had shown. ‘Why,
 dash it all!’ said he, ‘I’ve let them go at six hundred for the
 three!’ I soon managed to get the address of the receiver who had
 them, on promising him that there would be no prosecution. Off I
-set to him, and after much chaffering I got our stones at <i>£</i>1000
+set to him, and after much chaffering I got our stones at £1000
 apiece. Then I looked in upon your son, told him that all
 was right, and eventually got to my bed about two o’clock, after
 what I may call a really hard day’s work.”
@@ -11525,12 +11673,13 @@ very heart. Not even your skill can inform me where she is now.”
 wherever Sir George Burnwell is. It is equally certain, too, that
 whatever her sins are, they will soon receive a more than
 sufficient punishment.”
-<br>
-<br>
-</p><hr>
-<center><h3><a id="12">XII.&nbsp; THE ADVENTURE OF THE COPPER BEECHES</a></h3></center>
-<p><br>
-<font size="+2">“T</font>o the man who loves art for its own sake,” remarked Sherlock
+
+
+</p>
+</section>
+<section>
+<h2><a id="12"><span class="chap-num">XII.</span> The Adventure of the Copper Beeches</a></h2>
+<p>“To the man who loves art for its own sake,” remarked Sherlock
 Holmes, tossing aside the advertisement sheet of the <i>Daily
 Telegraph</i>, “it is frequently in its least important and lowliest
 manifestations that the keenest pleasure is to be derived. It is
@@ -11612,13 +11761,16 @@ to me.
 </p><p>
 It was dated from Montague Place upon the preceding evening, and
 ran thus:
-<br><br></p><p>
-“DEAR MR. HOLMES:—I am very anxious to consult you as to whether
+</p>
+<blockquote><p>
+DEAR MR. HOLMES:—I am very anxious to consult you as to whether
 I should or should not accept a situation which has been offered
 to me as governess. I shall call at half-past ten to-morrow if I
 do not inconvenience you. Yours faithfully,
-</p><p align="right"><br>“VIOLET HUNTER.”
-<br><br></p><p>
+</p>
+</blockquote>
+<div class="sign">“VIOLET HUNTER.”</div>
+<p>
 “Do you know the young lady?” I asked.
 </p><p>
 “Not I.”
@@ -11695,7 +11847,7 @@ him.
 </p><p>
 “&nbsp;‘And what salary do you ask?’
 </p><p>
-“&nbsp;‘I had <i>£</i>4 a month in my last place with Colonel Spence
+“&nbsp;‘I had £4 a month in my last place with Colonel Spence
 Munro.’
 </p><p>
 “&nbsp;‘Oh, tut, tut! sweating—rank sweating!’ he cried, throwing his
@@ -11713,7 +11865,7 @@ not fitted for the rearing of a child who may some day play a
 considerable part in the history of the country. But if you have
 why, then, how could any gentleman ask you to condescend to
 accept anything under the three figures? Your salary with me,
-madam, would commence at <i>£</i>100 a year.’
+madam, would commence at £100 a year.’
 </p><p>
 “You may imagine, Mr. Holmes, that to me, destitute as I was,
 such an offer seemed almost too good to be true. The gentleman,
@@ -11817,7 +11969,7 @@ table, I began to ask myself whether I had not done a very
 foolish thing. After all, if these people had strange fads and
 expected obedience on the most extraordinary matters, they were
 at least ready to pay for their eccentricity. Very few
-governesses in England are getting <i>£</i>100 a year. Besides,
+governesses in England are getting £100 a year. Besides,
 what use was my hair to me? Many people are improved by wearing
 it short and perhaps I should be among the number. Next day I was
 inclined to think that I had made a mistake, and by the day after
@@ -11825,13 +11977,13 @@ I was sure of it. I had almost overcome my pride so far as to go
 back to the agency and inquire whether the place was still open
 when I received this letter from the gentleman himself. I have it
 here and I will read it to you:
-</p><p align="right"><br>
-“&nbsp;‘The Copper Beeches, near Winchester.
-</p><p>“&nbsp;‘DEAR MISS HUNTER:—Miss Stoper has very kindly given me your
+</p>
+<div class="to">“&nbsp;‘The Copper Beeches, near Winchester.</div>
+<blockquote><p>&nbsp;‘DEAR MISS HUNTER:—Miss Stoper has very kindly given me your
 address, and I write from here to ask you whether you have
 reconsidered your decision. My wife is very anxious that you
 should come, for she has been much attracted by my description of
-you. We are willing to give <i>£</i>30 a quarter, or <i>£</i>120 a
+you. We are willing to give £30 a quarter, or £120 a
 year, so as to recompense you for any little inconvenience which
 our fads may cause you. They are not very exacting, after all. My
 wife is fond of a particular shade of electric blue and would
@@ -11847,8 +11999,10 @@ firm upon this point, and I only hope that the increased salary
 may recompense you for the loss. Your duties, as far as the child
 is concerned, are very light. Now do try to come, and I shall
 meet you with the dog-cart at Winchester. Let me know your train.
-Yours faithfully,</p><p align="right"><br>“&nbsp;‘JEPHRO RUCASTLE.’
-<br><br></p><p>
+Yours faithfully,</p>
+</blockquote>
+<div class="sign">“&nbsp;‘JEPHRO RUCASTLE.’</div>
+<p>
 “That is the letter which I have just received, Mr. Holmes, and
 my mind is made up that I will accept it. I thought, however,
 that before taking the final step I should like to submit the
@@ -11881,8 +12035,8 @@ nice household for a young lady.”
 “But the money, Mr. Holmes, the money!”
 </p><p>
 “Well, yes, of course the pay is good—too good. That is what
-makes me uneasy. Why should they give you <i>£</i>120 a year, when
-they could have their pick for <i>£</i>40? There must be some
+makes me uneasy. Why should they give you £120 a year, when
+they could have their pick for £40? There must be some
 strong reason behind.”
 </p><p>
 “I thought that if I told you the circumstances you would
@@ -11942,10 +12096,12 @@ and then, glancing at the message, threw it across to me.
 to his chemical studies.
 </p><p>
 The summons was a brief and urgent one.
-<br><br></p><p>
-“Please be at the Black Swan Hotel at Winchester at midday
-to-morrow,” it said. “Do come! I am at my wit’s end.</p><p align="right"><br>“HUNTER.”
-<br><br></p><p>
+</p>
+<blockquote><p>
+Please be at the Black Swan Hotel at Winchester at midday
+to-morrow,” it said. “Do come! I am at my wit’s end.</p></blockquote>
+<div class="sign">“HUNTER.”</div>
+<p>
 “Will you come with me?” asked Holmes, glancing up.
 </p><p>
 “I should wish to.”
@@ -12671,22 +12827,13 @@ Holmes, rather to my disappointment, manifested no further
 interest in her when once she had ceased to be the centre of one
 of his problems, and she is now the head of a private school at
 Walsall, where I believe that she has met with considerable success.
-</p><hr noshade="noshade" size="3">
-</div>
+</p>
+</section>
+</main>
+
+<footer role="contentinfo">
 <pre class="legal">
-End of the Project Gutenberg EBook of The Adventures of Sherlock Holmes, by 
-Arthur Conan Doyle
-
-*** END OF THIS PROJECT GUTENBERG EBOOK THE ADVENTURES OF SHERLOCK HOLMES ***
-
-***** This file should be named 1661-h.htm or 1661-h.zip *****
-This and all associated files of various formats will be found in:
-        http://www.gutenberg.org/1/6/6/1661/
-
 Produced by an anonymous Project Gutenberg volunteer and Jose Menendez
-
-Updated editions will replace the previous one--the old editions
-will be renamed.
 
 Creating the works from public domain print editions means that no
 one owns a United States copyright in these works, so the Foundation
@@ -13037,4 +13184,5 @@ including how to make donations to the Project Gutenberg Literary
 Archive Foundation, how to help produce our new eBooks, and how to
 subscribe to our email newsletter to hear about new eBooks.
 </pre>
+<footer>
 </body></html>

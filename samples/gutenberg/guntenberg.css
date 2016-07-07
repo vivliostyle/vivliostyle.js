@@ -1,52 +1,27 @@
+/** Fonts **/
+@import url(https://fonts.googleapis.com/css?family=Source+Code+Pro:500);
+/** Structure **/
 html {
 	max-width: 90ch;
 	margin: auto;
+	font-family: Georgia, serif;
 }
 body {
-	margin: 10%;
-	font-family: Palatino, Georgia, serif;
+	margin: 0 2em;
 }
-h1,h2,h3,h4 {
-/*	text-align: center; */
-	margin: 2em 0;
-}
-p {
-	text-indent: 1.5em;
-	margin-top: .25em; margin-bottom: .25em;
-/*	text-align: justify; */
-	hyphens: auto; -moz-hyphens: auto; -ms-hyphens: auto; -webkit-hyphens: auto;
-	line-height: 1.8;
-}
-pre {
-	font-family: Courier, "Courier New", monospace;
-	font-style: italic;
-	font-size: 14px;
-	margin-left: 2em;
-	white-space:pre-wrap;
-	line-height: 1.5;
-}
-pre.legal {
-	font-size: 13px;
-	margin-top: 8em;
-}
-hr {
-	margin: 2em 25%;
-	width: 50%;
-}
-h1 { break-before: page; }
-a[name] {
-	display: block;
-	break-before: page;
-}
-h2 { break-after: avoid; }
-p { orphans: 2; widows: 2; }
-th, td {
-	padding: 0.25em 0;
+@media (max-width: 400) {
+	body {
+		margin: 0 1em;
+	}
 }
 @page {
 	font-size: small;
-	font-family: Palatino, Georgia, serif;
-/*	font-style: italic; */
+	font-family: Georgia, serif;
+	margin: 4rem 10%;
+	@top-center {
+		color: gray;
+		font-variant: small-caps;
+	}
 }
 @page :right {
 	@bottom-right { content: counter(page); }
@@ -55,15 +30,155 @@ th, td {
 	@bottom-left { content: counter(page); }
 }
 @page :first {
-	@bottom-left { content:normal; }
-	@bottom-right { content:normal; }
-	@top-center { content:normal; }
+	@bottom-left { content: normal; }
+	@bottom-right { content: normal; }
+	@top-center { content: normal; }
 }
-@media print{
-	hr{
-		margin: 0;
-		visibility: hidden;
-		break-after: page;
-	}
+@page :blank {
+	@bottom-left { content: normal; }
+	@bottom-right { content: normal; }
+	@top-center { content: normal; }
 }
 
+/** Toc **/
+
+nav {
+	break-before: right;
+}
+
+nav ol {
+	list-style: none;
+	counter-reset: chap;
+	padding-left: 0em;
+	line-height: 1.45;
+}
+nav li {
+	break-inside: avoid;
+}
+@media (min-width: 375px) {
+	nav li::before {
+		counter-increment: chap;
+		content: counter(chap, upper-roman) ".";
+		float: left;
+		width: 3em;
+		margin-left: -3em;
+	}
+	nav ol {
+		padding-left: 3em;
+	}
+}
+nav li a {
+	display: inline-flex;
+	width: 100%;
+	text-decoration: none;
+	color: currentColor;
+	break-inside: avoid;
+	align-items: baseline;
+}
+/* Currently triggers a bug in cross references. Uncomment when fixed.
+nav li a::before {
+	margin-left: 1px;
+	margin-right: 1px;
+	border-bottom: solid 1px lightgray;
+	content: "";
+	order: 1;
+	flex: auto;
+}
+nav li a::after {
+	text-align: right;
+	content: target-counter(attr(href, url), page);	
+	align-self: flex-end;
+	order: 2;
+}
+*/
+
+/** Legal Sections **/
+
+.legal {
+	font-size: xx-small;
+	margin: 0 -1em;
+}
+
+.copyright {
+	break-before: right;
+	break-after: page;
+}
+.copyright .legal {
+	padding-top: 10rem;
+}
+
+body > footer {
+	break-before: left;
+}
+
+
+/** Titles **/
+
+h1, h2, h3, h4 {
+	margin: 2em 0;
+	hyphens: none;
+	break-after: avoid;
+}
+.author {
+	hyphens: none;
+}
+h1, h2 {
+	margin: 2em 0;
+}
+h3, h4 {
+	margin: 1em 0;
+}
+
+h2  {
+	break-before: right;
+}
+h3 {
+	break-before: page;
+}
+h2 + section h3 {
+	break-before: auto;
+}
+
+/** Body text **/
+
+p {
+	text-indent: 1.5em;
+	margin-top: 0em; margin-bottom: 0em;
+	hyphens: auto;
+	line-height: 1.45;
+	orphans: 2;
+	widows: 2;
+}
+
+p:first-of-type {
+	text-indent: 0;
+}
+p:first-of-type::first-letter {
+	font-weight: bold;
+	font-size: 1.8em;
+	line-height: 1;
+	padding-right: 1px
+}
+main > section:last-child::after {
+	break-before: avoid;
+	break-inside: avoid;
+	margin: 2em 0;
+	text-align: center;
+	font-size: 2em;
+	font-weight: bold;
+	font-variant: small-caps;
+	content: "\a\002722";
+	white-space: pre;
+	display: block;
+}
+
+pre {
+	font-family: 'Source Code Pro', monaco, monospace;
+	font-size-adjust: none;
+	font-weight: 500;
+	font-size: 0.75em;
+	margin-left: 2em;
+	white-space: pre-wrap;
+	line-height: 1.45;
+	hyphens: none;
+}
