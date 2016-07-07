@@ -4,7 +4,9 @@
 
 ### Fixed
 - Fix bug that pages occasionally disappear when resolving cross references
-  - <https://github.com/vivliostyle/vivliostyle.js/issues/268>
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/268>
+- Respect `target="_blank"` on links to external URLs
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/269>
 
 ## [2016.7](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.7) - 2016-07-04
 
