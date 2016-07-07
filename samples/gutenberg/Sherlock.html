@@ -53,12 +53,15 @@ header > * {
 header h1 span{
 	display: inline-block;
 }
+header h1 {
+	break-after: auto;
+}
 header div {
 	break-before: auto;
-	break-before: avoid;
 	font-size: 1.2em;
 }
 header .author {
+	break-before: avoid;
 	font-size: 1.5em;
 }
 @media (max-width: 400px) {
