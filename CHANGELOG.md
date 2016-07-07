@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+- Fix bug that pages occasionally disappear when resolving cross references
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/268>
+
 ## [2016.7](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.7) - 2016-07-04
 
 ### Added
