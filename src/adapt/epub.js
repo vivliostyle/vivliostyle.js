@@ -1048,6 +1048,8 @@ adapt.epub.OPFView.prototype.finishPageContainer = function(viewItem, page, page
 	page.container.style.left = "";
 	page.container.setAttribute("data-vivliostyle-page-side", /** @type {string} */ (page.side));
 	var oldPage = viewItem.pages[pageIndex];
+	page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
+	viewItem.pages[pageIndex] = page;
 	if (oldPage) {
 		viewItem.instance.viewport.contentContainer.replaceChild(page.container, oldPage.container);
 		oldPage.dispatchEvent({
@@ -1060,8 +1062,6 @@ adapt.epub.OPFView.prototype.finishPageContainer = function(viewItem, page, page
 		viewItem.instance.viewport.contentContainer.appendChild(page.container);
 	}
 	this.pageSheetSizeReporter(viewItem.instance.pageSheetSize, viewItem.item.spineIndex, pageIndex);
-	page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
-	viewItem.pages[pageIndex] = page;
 };
 
 /**

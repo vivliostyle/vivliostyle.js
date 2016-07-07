@@ -345,10 +345,15 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
  */
 adapt.viewer.Viewer.prototype.pageReplacedListener = function(evt) {
     var currentPage = this.currentPage;
-    if (currentPage === evt.target) {
-        currentPage = evt.newPage;
+    var spread = this.currentSpread;
+    var target = evt.target;
+    if (spread) {
+        if (spread.left === target || spread.right === target) {
+            this.showCurrent(evt.newPage);
+        }
+    } else if (currentPage === evt.target) {
+        this.showCurrent(evt.newPage);
     }
-    this.showCurrent(currentPage);
 };
 
 /**
