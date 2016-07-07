@@ -819,12 +819,15 @@ adapt.viewer.Viewer.prototype.initEmbed = function (cmd) {
             var internal = hrefEvent.href.charAt(0) === "#" || viewer.packageURL.some(function(url) {
                 return hrefEvent.href.substr(0, url.length) == url;
             });
-    		var msg = {"t":"hyperlink", "href":hrefEvent.href, "internal": internal};
-    		scheduler.run(function() {
-    			viewer.callback(msg);
-    			return adapt.task.newResult(true);
-    		});
-        };    	
+            if (internal) {
+                evt.preventDefault();
+                var msg = {"t":"hyperlink", "href":hrefEvent.href, "internal": internal};
+                scheduler.run(function() {
+                    viewer.callback(msg);
+                    return adapt.task.newResult(true);
+                });
+            }
+        };
 		frame.loopWithFrame(function(loopFrame) {
 			if (viewer.needResize) {
 				viewer.resize().then(function() {

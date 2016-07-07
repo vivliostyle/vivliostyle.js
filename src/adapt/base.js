@@ -709,7 +709,7 @@ adapt.base.mapSize = function(obj) {
 };
 
 /**
- * @typedef {{type:string, target, currentTarget}|Event}
+ * @typedef {{type:string, target, currentTarget, preventDefault}|Event}
  */
 adapt.base.Event;
 

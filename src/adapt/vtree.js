@@ -105,13 +105,13 @@ adapt.vtree.Page = function(container, bleedBox) {
 		var href = anchorElement.getAttribute("href") ||
 			anchorElement.getAttributeNS(adapt.base.NS.XLINK, "href");
 		if (href) {
-			e.preventDefault();
 			var evt = {
 				type: "hyperlink",
 				target: null,
 				currentTarget: null,
 				anchorElement: anchorElement,
-				href: href
+				href: href,
+				preventDefault: function() { e.preventDefault(); }
 			};
 			self.dispatchEvent(evt);
 		}
