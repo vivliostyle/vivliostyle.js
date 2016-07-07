@@ -48,6 +48,7 @@ function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, se
 
 SettingsPanel.prototype.close = function() {
     this.opened(false);
+    return true;
 };
 
 SettingsPanel.prototype.toggle = function() {
