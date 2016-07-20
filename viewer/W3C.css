@@ -1,0 +1,81 @@
+/* vivliotweaks*/
+.big-element-wrapper {
+	overflow: auto;
+}
+pre{
+	white-space: pre-wrap;
+}
+
+@-epubx-page-template {
+ @-epubx-page-master normal {
+   @-epubx-partition pagenum-right {
+	   -epubx-enabled: -epubx-expr(page-number % 2 == 1 && page-number > 1);
+	   -epubx-wrap-flow: auto;
+	   position: absolute;
+	   bottom: 0;
+	   right: 0;
+	   -epubx-flow-from: numbering;
+   }
+   @-epubx-partition pagenum-left {
+	   -epubx-enabled: -epubx-expr(page-number % 2 == 0);
+	   -epubx-wrap-flow: auto;
+	   position: absolute;
+	   bottom: 0;
+	   left: 0;
+	   -epubx-flow-from: numbering;
+   }
+   @-epubx-partition main {
+	   top: 0;
+	   column-width: 30em;
+	   column-gap: 2em;
+	   margin: 3em;
+	   -epubx-flow-from: body;
+   }
+   @-epubx-partition title {
+	   -epubx-flow-from: title;
+	   height: auto;
+	   top: 0px;
+	   left: 0px;
+	   width: 100%;
+   }
+ }
+ title {
+  -epubx-flow-into: title;
+  -epubx-flow-options: static;
+  display: block;
+  text-align: center;
+  font-style: italic;
+  font-size: small;
+  margin: 1em;
+ }
+}
+
+[title="Separator for header"] {
+	-epubx-flow-into: numbering;
+	-epubx-flow-options: static;
+	border-color: transparent;
+	margin: 1em;
+	font-style: italic;
+	font-size: small;
+}
+[title="Separator for header"]::before {
+	content: counter(page);
+}
+
+#contents, #references, #abstract, #index, #property-index, #issues-index, #intro {
+	break-before: column;
+}
+.toc + h2, main {
+	break-before: column;
+}
+
+pre, .example, .note {
+	break-inside: auto !important;
+	widows: 4;
+	orphans: 4;
+}
+.example::before, .note::before {
+	break-after: avoid;
+}
+
+/*end tweaks*/
