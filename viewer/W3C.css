@@ -50,14 +50,14 @@ ul.index li > ul {
 }
 
 /***** TOC & cross references *****/
-.toc a {
+.toc a[href] {
 	display: flex !important;
 	align-items: baseline;
 }
 .toc li:last-child, .toc li:first-child {
 	break-before: avoid;
 }
-.toc a::after {
+.toc a[href]::after {
 	content: target-counter( attr(href,url), page);
 	order: 2;
 	padding-left: 1ch;
@@ -65,7 +65,7 @@ ul.index li > ul {
 	text-align: right;
 	align-self: flex-end;
 }
-.toc a::before {
+.toc a[href]::before {
 	/* Simulate a leader */
 	content: "";
 	order: 1;
