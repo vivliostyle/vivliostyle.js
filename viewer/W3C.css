@@ -1,81 +1,187 @@
-/* vivliotweaks*/
-.big-element-wrapper {
+/* page decoration */
+@page :left {
+	@bottom-left-corner { content: counter(page); }
+}
+@page :right {
+	@bottom-right-corner { content: counter(page); }
+}
+@page :blank {
+	@bottom-left-corner { content: none; }
+	@bottom-right-corner { content: none; }
+}
+
+/***** Adjustments to look prettier *****/
+a.self-link {
+	border-bottom: none !important;
+}
+
+table.index {
+	word-break: keep-all;
+	hyphens: none !important;
+}
+
+/***** pagination tweaks *****/
+hr[title="Separator for header"] {
+	display: none;
+}
+
+.head dd, .head .copyright {
+	break-before: avoid;
+}
+
+.head {
+	break-after: right;
+}
+
+#toc {
+	break-before: left;
+	break-after: left;
+}
+
+#references, #index, #property-index, #issues-index {
+	break-before: page;
+}
+
+.toc li:last-of-type, .toc li:first-of-type {
+	break-before: avoid;
+}
+ul.index li > ul {
+	break-before: avoid;
+}
+
+/***** TOC & cross references *****/
+.toc a {
+	display: flex !important;
+	align-items: baseline;
+}
+.toc li:last-child, .toc li:first-child {
+	break-before: avoid;
+}
+.toc a::after {
+	content: target-counter( attr(href,url), page);
+	order: 2;
+	padding-left: 1ch;
+	margin-left: auto;
+	text-align: right;
+	align-self: flex-end;
+}
+.toc a::before {
+	/* Simulate a leader */
+	content: "";
+	order: 1;
+	flex: auto;
+	margin-left: 1ch;
+	border-bottom: solid 1px lightgrey;
+}
+
+/* Redo the indentation model of the TOC in a way that's compatible with flexbox */
+:not(li) > .toc { margin-left:  0rem; }
+.toc .secno {
+	float: none;
+	margin-left: 0;
+	display: inline-block;
+	width: 5rem;
+	flex: none;
+}
+.toc > li li li { margin-left: 0; }
+.toc > li li li .secno { margin-right: 2rem; }
+.toc > li li li li .secno { margin-right: 4rem; }
+.toc > li li li li li .secno { margin-right: 6rem; }
+@media (max-width: 40em) {
+	.toc .secno                  { width: 4rem; }
+	.toc > li li li .secno       { margin-right: 1rem; }
+	.toc > li li li li .secno    { margin-right: 2rem; }
+	.toc > li li li li li .secno { margin-right: 3rem; }
+}
+
+/***** Index & cross references *****/
+ul.index a[href^="#"]::after {
+	content: ", p.\00200a" target-counter( attr(href,url), page);
+	color: black;
+	border-bottom: solid 1px white;
+}
+
+/***** Dealing with large elements *****/
+img, svg {
+	max-width: 100%;
+}
+
+.example *, .note * {
+	/* scrollers inside scrollers are terrible */
+	overflow: visible !important;
+}
+
+.big-element-wrapper,
+.overlarge {
 	overflow: auto;
+	background: left / 4em 100% linear-gradient(to right, white, white 1em, rgba(255,255,255,0)) local,
+	            right / 4em 100% linear-gradient(to left, white, white 1em, rgba(255,255,255,0)) local,
+	            left / 1.2em 90% radial-gradient(at left, rgba(0,0,0,.25), transparent 70%) scroll,
+	            right / 1.2em 90% radial-gradient(at right, rgba(0,0,0,.25), transparent 70%) scroll
+	            white !important;
+	background-repeat:  no-repeat !important;
 }
-pre{
-	white-space: pre-wrap;
+.example {
+	background: left / 4em 100% linear-gradient(to right, #FCFAEE, #FCFAEE 1em, rgba(255,255,255,0)) local,
+	            right / 4em 100% linear-gradient(to left, #FCFAEE, #FCFAEE 1em, rgba(255,255,255,0)) local,
+	            left / 1.2em 90% radial-gradient(at left, rgba(0,0,0,.25), transparent 70%) scroll,
+	            right / 1.2em 90% radial-gradient(at right, rgba(0,0,0,.25), transparent 70%) scroll
+	            #FCFAEE !important;
+	background-repeat:  no-repeat !important;
 }
-
-@-epubx-page-template {
- @-epubx-page-master normal {
-   @-epubx-partition pagenum-right {
-	   -epubx-enabled: -epubx-expr(page-number % 2 == 1 && page-number > 1);
-	   -epubx-wrap-flow: auto;
-	   position: absolute;
-	   bottom: 0;
-	   right: 0;
-	   -epubx-flow-from: numbering;
-   }
-   @-epubx-partition pagenum-left {
-	   -epubx-enabled: -epubx-expr(page-number % 2 == 0);
-	   -epubx-wrap-flow: auto;
-	   position: absolute;
-	   bottom: 0;
-	   left: 0;
-	   -epubx-flow-from: numbering;
-   }
-   @-epubx-partition main {
-	   top: 0;
-	   column-width: 30em;
-	   column-gap: 2em;
-	   margin: 3em;
-	   -epubx-flow-from: body;
-   }
-   @-epubx-partition title {
-	   -epubx-flow-from: title;
-	   height: auto;
-	   top: 0px;
-	   left: 0px;
-	   width: 100%;
-   }
- }
- title {
-  -epubx-flow-into: title;
-  -epubx-flow-options: static;
-  display: block;
-  text-align: center;
-  font-style: italic;
-  font-size: small;
-  margin: 1em;
- }
+.note {
+	background: left / 4em 100% linear-gradient(to right, #E9FBE9, #E9FBE9 1em, rgba(255,255,255,0)) local,
+	            right / 4em 100% linear-gradient(to left, #E9FBE9, #E9FBE9 1em, rgba(255,255,255,0)) local,
+	            left / 1.2em 90% radial-gradient(at left, rgba(0,0,0,.25), transparent 70%) scroll,
+	            right / 1.2em 90% radial-gradient(at right, rgba(0,0,0,.25), transparent 70%) scroll
+	            #E9FBE9 !important;
+	background-repeat:  no-repeat !important;
 }
 
-[title="Separator for header"] {
-	-epubx-flow-into: numbering;
-	-epubx-flow-options: static;
-	border-color: transparent;
-	margin: 1em;
-	font-style: italic;
-	font-size: small;
-}
-[title="Separator for header"]::before {
-	content: counter(page);
-}
-
-#contents, #references, #abstract, #index, #property-index, #issues-index, #intro {
-	break-before: column;
-}
-.toc + h2, main {
-	break-before: column;
-}
-
-pre, .example, .note {
-	break-inside: auto !important;
-	widows: 4;
-	orphans: 4;
-}
-.example::before, .note::before {
-	break-after: avoid;
+@media (overflow-inline: none) {
+	/* On screen, dealing with a scrollbar is fine,
+	 * but when printing, we need something more drastic.
+	 * This media query isn't really the right one,
+	 * since we're not actually overflowing the viewport
+	 * but it is a good proxy for what we want:
+	 * are we in a mode where scrolling makes sense or not. */
+	pre {
+		overflow: visible;
+		white-space: pre-wrap;
+	}
+	.big-element-wrapper,
+	.overlarge,
+        .note,
+	.example {
+		overflow: visible;
+	}
+	table.index {
+		word-break: normal;
+		hyphens: manual;
+	}
 }
 
-/*end tweaks*/
+.big-element-wrapper > table {
+	/* limit preferred width of table */
+	max-width: 50em;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+@media (max-width: 40em) {
+	table.index tbody th {
+		writing-mode: sideways-lr;
+	}
+}
+
+/***** Bug fixes *****/
+a.self-link {
+	left: -epubx-expr(-1 * (3.5rem - 26px));
+	width: -epubx-expr(3.5rem - 26px);
+}
+li > a.self-link {
+	left: -epubx-expr(-1 * (3.5rem - 26px) - 2em);
+}
+body {
+	padding: 1.6em 1.5em 2em -epubx-expr(26px + 1.5em);
+}
