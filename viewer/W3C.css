@@ -112,10 +112,8 @@ img, svg {
 	max-width: 100%;
 	object-fit: contain;
 }
-
-.example *, .note * {
-	/* scrollers inside scrollers are terrible */
-	overflow: visible !important;
+table img {
+	max-width: none;
 }
 
 .big-element-wrapper,
