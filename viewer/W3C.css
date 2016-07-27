@@ -48,6 +48,7 @@ hr[title="Separator for header"] {
 ul.index li > ul {
 	break-before: avoid;
 }
+table caption { break-after: avoid; }
 
 /***** TOC & cross references *****/
 .toc a[href] {
