@@ -1861,12 +1861,6 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 					// Non-displayable content, skip
 					break;
 				}
-				if (!self.layoutConstraint.allowLayout(nodeContext)) {
-					nodeContext = nodeContext.modify();
-					nodeContext.overflow = true;
-					loopFrame.breakLoop();
-					return;
-				}
 				if (nodeContext.inline && nodeContext.viewNode.nodeType != 1) {
 					if (adapt.vtree.canIgnore(nodeContext.viewNode, nodeContext.whitespace)) {
 						// Ignorable text content, skip
@@ -1899,7 +1893,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 						// check if a forced break must occur before the block.
 						if (needForcedBreak()) {
 							processForcedBreak();
-						} else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
+						} else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge) || !self.layoutConstraint.allowLayout(nodeContext)) {
 							// overflow
 					    	nodeContext = (lastAfterNodeContext || nodeContext).modify();
 					    	nodeContext.overflow = true;
@@ -1950,6 +1944,13 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
 					// Leading edge
 					leadingEdgeContexts.push(nodeContext.copy());
 					breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
+					if (!self.layoutConstraint.allowLayout(nodeContext)) {
+						self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, false, breakAtTheEdge);
+						nodeContext = nodeContext.modify();
+						nodeContext.overflow = true;
+						loopFrame.breakLoop();
+						return;
+					}
 					var viewTag = nodeContext.viewNode.localName;
 					if (adapt.layout.mediaTags[viewTag]) {
 						// elements that have inherent content
