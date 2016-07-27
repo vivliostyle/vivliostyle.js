@@ -116,17 +116,34 @@ table img {
 	max-width: none;
 }
 
+pre.ascii-art,
+pre.output,
+div.figure pre, div.sidefigure pre, figure pre {
+	display: block !important;
+	width: max-content;
+	/* The next two lines wouldn't work if we were display: table */
+	max-width: 100%;
+	box-sizing: border-box;
+	overflow: auto;
+}
+
+html { background: white !important; }
+
+body,
+pre,
 .big-element-wrapper,
 .overlarge {
-	overflow: auto;
+	overflow: auto !important;
 	background: left / 4em 100% linear-gradient(to right, white, white 1em, rgba(255,255,255,0)) local,
 	            right / 4em 100% linear-gradient(to left, white, white 1em, rgba(255,255,255,0)) local,
 	            left / 1.2em 90% radial-gradient(at left, rgba(0,0,0,.25), transparent 70%) scroll,
 	            right / 1.2em 90% radial-gradient(at right, rgba(0,0,0,.25), transparent 70%) scroll
 	            white !important;
 	background-repeat:  no-repeat !important;
+	box-decoration-break: clone;
 }
-.example {
+.example, .example pre {
+	overflow: auto !important;
 	background: left / 4em 100% linear-gradient(to right, #FCFAEE, #FCFAEE 1em, rgba(255,255,255,0)) local,
 	            right / 4em 100% linear-gradient(to left, #FCFAEE, #FCFAEE 1em, rgba(255,255,255,0)) local,
 	            left / 1.2em 90% radial-gradient(at left, rgba(0,0,0,.25), transparent 70%) scroll,
@@ -134,7 +151,8 @@ table img {
 	            #FCFAEE !important;
 	background-repeat:  no-repeat !important;
 }
-.note {
+.note, .note pre {
+	overflow: auto !important;
 	background: left / 4em 100% linear-gradient(to right, #E9FBE9, #E9FBE9 1em, rgba(255,255,255,0)) local,
 	            right / 4em 100% linear-gradient(to left, #E9FBE9, #E9FBE9 1em, rgba(255,255,255,0)) local,
 	            left / 1.2em 90% radial-gradient(at left, rgba(0,0,0,.25), transparent 70%) scroll,
@@ -153,6 +171,14 @@ table img {
 	pre {
 		overflow: visible;
 		white-space: pre-wrap;
+		overflow-wrap: break-word !important;
+		word-wrap: break-word !important;
+	}
+	pre.ascii-art {
+		/* This is going to overflow and that's ugly,
+		   but ascii-art cannot be wrapped */
+		display: table !important;
+		white-space: pre !important;
 	}
 	.big-element-wrapper,
 	.overlarge,
@@ -166,7 +192,8 @@ table img {
 	}
 }
 
-.big-element-wrapper > table {
+.big-element-wrapper > table,
+.overlarge > table {
 	/* limit preferred width of table */
 	max-width: 50em;
 	margin-left: auto;
