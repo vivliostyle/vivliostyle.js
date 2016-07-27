@@ -19,6 +19,10 @@ table.index {
 	word-break: keep-all;
 	hyphens: none !important;
 }
+pre {
+	overflow-wrap: normal !important;
+	word-wrap: normal !important;
+}
 
 /***** pagination tweaks *****/
 hr[title="Separator for header"] {
