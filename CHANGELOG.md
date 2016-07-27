@@ -7,6 +7,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/268>
 - Respect `target="_blank"` on links to external URLs
   - <https://github.com/vivliostyle/vivliostyle.js/pull/269>
+- Fix incorrect page breaks with cross references
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/271>
 
 ## [2016.7](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.7) - 2016-07-04
 

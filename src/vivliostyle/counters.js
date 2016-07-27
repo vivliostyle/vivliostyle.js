@@ -598,6 +598,9 @@ goog.scope(function() {
         if (!id) {
             return true;
         }
+        if (!this.counterStore.resolvedReferences[id] && !this.counterStore.unresolvedReferences[id]) {
+            return true;
+        }
         var pageIndex = this.counterStore.pageIndicesById[id];
         if (!pageIndex) {
             return true;
