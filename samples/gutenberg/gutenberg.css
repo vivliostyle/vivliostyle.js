@@ -75,7 +75,6 @@ nav li a {
 	break-inside: avoid;
 	align-items: baseline;
 }
-/* Currently triggers a bug in cross references. Uncomment when fixed.
 nav li a::before {
 	margin-left: 1px;
 	margin-right: 1px;
@@ -88,9 +87,9 @@ nav li a::after {
 	text-align: right;
 	content: target-counter(attr(href, url), page);	
 	align-self: flex-end;
+	flex: none;
 	order: 2;
 }
-*/
 
 /** Legal Sections **/
 
