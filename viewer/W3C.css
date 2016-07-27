@@ -15,10 +15,18 @@ a.self-link {
 	border-bottom: none !important;
 }
 
-table.index {
+table {
+	overflow-wrap: normal !important;
+	word-wrap: normal !important;
+}
+table th {
+	hyphens: none !important;
+}
+table.index td {
 	word-break: keep-all;
 	hyphens: none !important;
 }
+
 pre {
 	overflow-wrap: normal !important;
 	word-wrap: normal !important;
@@ -34,7 +42,7 @@ hr[title="Separator for header"] {
 }
 
 .head {
-	break-after: right;
+	break-after: page;
 }
 
 #toc {
@@ -186,9 +194,16 @@ pre,
 	.example {
 		overflow: visible;
 	}
-	table.index {
+	table {
+		overflow-wrap: break-word; !important;
+		word-wrap: break-word; !important;
+	}
+	table th {
+		hyphens: manual !important;
+	}
+	table.index td {
 		word-break: normal;
-		hyphens: manual;
+		hyphens: manual !important;
 	}
 }
 
