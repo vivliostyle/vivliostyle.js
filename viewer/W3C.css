@@ -64,6 +64,7 @@ table caption { break-after: avoid; }
 }
 .toc a[href]::after {
 	content: target-counter( attr(href,url), page);
+	flex:none;
 	order: 2;
 	padding-left: 1ch;
 	margin-left: auto;
