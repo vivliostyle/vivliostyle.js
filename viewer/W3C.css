@@ -124,6 +124,32 @@ table img {
 	max-width: none;
 }
 
+figure, .figure {
+	display: flex;
+	flex-flow: column;
+	align-items: center;
+	/* not 100vh, to leave just a bit of room if the figure is in something that has a border */
+	max-height: 95vh;
+	max-height: calc(100vh - 6px); /* The thickest vertical border we have is 3px, and that's in case there's two of it */
+}
+figure > figcaption, .figure > .caption {
+	flex: none;
+	display: block;
+}
+figure > *, .figure > * {
+	flex: auto;
+	overflow: auto;
+}
+.figure > a,
+figure > a {
+	display: flex;
+	flex-flow: column;
+	align-items: center;
+	padding: 0 !important;
+	margin: 0 !important;
+	border-bottom: none !important;
+}
+
 pre.ascii-art,
 pre.output,
 div.figure pre, div.sidefigure pre, figure pre {
