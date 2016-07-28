@@ -101,11 +101,28 @@ ul.index li > ul {
 }
 table caption { break-after: avoid; }
 
+.note,
+.example,
+pre {
+	break-inside: auto !important;
+	widows: 3 !important;
+	orphans: 3 !important;
+}
+.note::before,
+.note a.self-link,
+.example::before,
+.example a.self-link,
+.example-title,
+.note-title {
+	break-inside: avoid;
+	break-after: avoid;
+}
+
 /* Web-IDL spec specific */
 .warning-title,
 .blockTitleDiv,
 .exampleHeader,
-.note-title {
+.noteHeader {
 	break-after: avoid;
 	break-inside: avoid;
 }
