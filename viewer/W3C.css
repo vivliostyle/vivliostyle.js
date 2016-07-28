@@ -32,6 +32,16 @@ pre {
 	word-wrap: normal !important;
 }
 
+.head hr {
+	height: 0 !important;
+	border: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	visibility: hidden !important;
+	background: transparent !important;
+	break-after: page;
+}
+
 /***** pagination tweaks *****/
 hr[title="Separator for header"] {
 	display: none;
