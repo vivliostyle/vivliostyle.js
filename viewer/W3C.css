@@ -82,6 +82,12 @@ hr[title="Separator for header"] {
 	break-before: left;
 	break-after: left;
 }
+/* CSS2 specific */
+.subtoc {
+	break-before: auto !important;
+	break-after: auto !important;
+}
+/* end CSS2 specific */
 
 #references, #index, #property-index, #issues-index {
 	break-before: page;
