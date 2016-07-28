@@ -86,6 +86,10 @@ table caption { break-after: avoid; }
 .toc a[href] {
 	display: flex !important;
 	align-items: baseline;
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
 }
 .toc li:last-child, .toc li:first-child {
 	break-before: avoid;
@@ -109,7 +113,7 @@ table caption { break-after: avoid; }
 }
 
 /* Redo the indentation model of the TOC in a way that's compatible with flexbox */
-:not(li) > .toc { margin-left:  0rem; }
+:not(li) > .toc { margin-left: 0 !important; padding-left: 0 !important;}
 .toc .secno {
 	float: none;
 	margin-left: 0;
