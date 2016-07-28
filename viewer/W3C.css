@@ -184,26 +184,64 @@ pre,
 	            right 1px center / 1.2em 90% radial-gradient(at right, rgba(0,0,0,.25), transparent 70%) scroll
 	            white !important;
 	background-repeat:  no-repeat !important;
-	box-decoration-break: clone;
 }
-.example, .example > pre {
+.example, .example pre:not(.example .note pre) {
 	overflow: auto !important;
-	background: left / 4em 100% linear-gradient(to right, #FCFAEE, #FCFAEE 1em, rgba(255,255,255,0)) local,
-	            right / 4em 100% linear-gradient(to left, #FCFAEE, #FCFAEE 1em, rgba(255,255,255,0)) local,
+	background: left / 4em 100% linear-gradient(to right, #FCFAEE, #FCFAEE 1em, rgba(252,250,238,0)) local,
+	            right / 4em 100% linear-gradient(to left, #FCFAEE, #FCFAEE 1em, rgba(252,250,238,0)) local,
 	            left 1px center / 1.2em 90% radial-gradient(at left, rgba(0,0,0,.25), transparent 70%) scroll,
 	            right 1px center / 1.2em 90% radial-gradient(at right, rgba(0,0,0,.25), transparent 70%) scroll
 	            #FCFAEE !important;
 	background-repeat:  no-repeat !important;
 }
-.note, .note > pre {
+.note, .note pre:not(.note .example pre) {
 	overflow: auto !important;
-	background: left / 4em 100% linear-gradient(to right, #E9FBE9, #E9FBE9 1em, rgba(255,255,255,0)) local,
-	            right / 4em 100% linear-gradient(to left, #E9FBE9, #E9FBE9 1em, rgba(255,255,255,0)) local,
+	background: left / 4em 100% linear-gradient(to right, #E9FBE9, #E9FBE9 1em, rgba(233,255,233,0)) local,
+	            right / 4em 100% linear-gradient(to left, #E9FBE9, #E9FBE9 1em, rgba(233,255,233,0)) local,
 	            left 1px center / 1.2em 90% radial-gradient(at left, rgba(0,0,0,.25), transparent 70%) scroll,
 	            right 1px center / 1.2em 90% radial-gradient(at right, rgba(0,0,0,.25), transparent 70%) scroll
 	            #E9FBE9 !important;
 	background-repeat:  no-repeat !important;
 }
+pre.def.def.def.def {
+	overflow: auto !important;
+	background: left / 4em 100% linear-gradient(to right, #DEF, #DEF 1em, rgba(221,238,255,0)) local,
+	            right / 4em 100% linear-gradient(to left, #DEF, #DEF 1em, rgba(221,238,255,0)) local,
+	            left 1px center / 1.2em 90% radial-gradient(at left, rgba(0,0,0,.25), transparent 70%) scroll,
+	            right 1px center / 1.2em 90% radial-gradient(at right, rgba(0,0,0,.25), transparent 70%) scroll
+	            #DEF !important;
+	background-repeat:  no-repeat !important;
+}
+pre.highlight.highlight.highlight.highlight {
+	overflow: auto !important;
+	background: left / 4em 100% linear-gradient(to right, hsl(24, 20%, 95%), hsl(24, 20%, 95%) 1em, rgba(244,241,239,0)) local,
+	            right / 4em 100% linear-gradient(to left, hsl(24, 20%, 95%), hsl(24, 20%, 95%) 1em, rgba(244,241,239,0)) local,
+	            left 1px center / 1.2em 90% radial-gradient(at left, rgba(0,0,0,.25), transparent 70%) scroll,
+	            right 1px center / 1.2em 90% radial-gradient(at right, rgba(0,0,0,.25), transparent 70%) scroll
+	            hsl(24, 20%, 95%) !important;
+	background-repeat:  no-repeat !important;
+}
+
+/* Web-IDL spec specific */
+.block > .blockContent > pre.code {
+	overflow: auto !important;
+	background: left / 4em 100% linear-gradient(to right, #f0f6ff, #f0f6ff 1em, rgba(240,246,255,0)) local,
+	            right / 4em 100% linear-gradient(to left, #f0f6ff, #f0f6ff 1em, rgba(240,246,255,0)) local,
+	            left 1px center / 1.2em 90% radial-gradient(at left, rgba(0,0,0,.25), transparent 70%) scroll,
+	            right 1px center / 1.2em 90% radial-gradient(at right, rgba(0,0,0,.25), transparent 70%) scroll
+	            transparent !important;
+	background-repeat:  no-repeat !important;
+}
+pre.syntax {
+	overflow: auto !important;
+	background: left / 4em 100% linear-gradient(to right, #ddffdd, #ddffdd 1em, rgba(221,255,221,0)) local,
+	            right / 4em 100% linear-gradient(to left, #ddffdd, #ddffdd 1em, rgba(221,255,221,0)) local,
+	            left 1px center / 1.2em 90% radial-gradient(at left, rgba(0,0,0,.25), transparent 70%) scroll,
+	            right 1px center / 1.2em 90% radial-gradient(at right, rgba(0,0,0,.25), transparent 70%) scroll
+	            #ddffdd !important;
+	background-repeat:  no-repeat !important;
+}
+/* end Web-IDL spec specific */
 
 @media (overflow-inline: none) {
 	/* On screen, dealing with a scrollbar is fine,
@@ -212,8 +250,9 @@ pre,
 	 * since we're not actually overflowing the viewport
 	 * but it is a good proxy for what we want:
 	 * are we in a mode where scrolling makes sense or not. */
-	pre {
-		overflow: visible;
+	pre, pre.def, .example > pre, .note > pre,
+	.block > .blockContent > pre.code, pre.syntax {
+		overflow: visible !important;
 		white-space: pre-wrap;
 		overflow-wrap: break-word !important;
 		word-wrap: break-word !important;
@@ -268,6 +307,3 @@ li > a.self-link {
 body {
 	padding: 1.6em 1.5em 2em -epubx-expr(26px + 1.5em);
 }
-
-* { box-decoration-break: slice; /* should not be inherited, reset */ }
-
