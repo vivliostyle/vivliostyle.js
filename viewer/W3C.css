@@ -62,6 +62,16 @@ ul.index li > ul {
 }
 table caption { break-after: avoid; }
 
+/* Web-IDL spec specific */
+.warning-title,
+.blockTitleDiv,
+.exampleHeader,
+.note-title {
+	break-after: avoid;
+	break-inside: avoid;
+}
+/* end Web-IDL spec specific */
+
 /***** TOC & cross references *****/
 .toc a[href] {
 	display: flex !important;
