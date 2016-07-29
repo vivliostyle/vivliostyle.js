@@ -9,16 +9,16 @@ if %errorlevel% == 0 (
     exit /b 0
 )
 
-call ruby --version
-if %errorlevel% == 0 (
-    ruby -run -e httpd . -p 8000
-    exit /b 0
-)
-
 call python --version
 if %errorlevel% == 0 (
     python -m http.server 8000
     python -m SimpleHTTPServer 8000
+    exit /b 0
+)
+
+call ruby --version
+if %errorlevel% == 0 (
+    ruby -run -e httpd . -p 8000
     exit /b 0
 )
 

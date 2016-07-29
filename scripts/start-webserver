@@ -5,13 +5,13 @@ if [ $(which npm) ]; then
         npm install http-server
     fi
     node node_modules/http-server/bin/http-server -p 8000 -o -c-1
-elif [ $(which ruby) ]; then
-    ruby -run -e httpd . -p 8000
 elif [ $(which python) ]; then
     python -m http.server 8000
     if [ $? -ne 0 ]; then
         python -m SimpleHTTPServer 8000
     fi
+elif [ $(which ruby) ]; then
+    ruby -run -e httpd . -p 8000
 else
     echo "Please install Node.js or Python or Ruby and rerun this script, or use your favorite HTTP server."
     exit 1
