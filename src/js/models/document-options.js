@@ -25,10 +25,12 @@ function getDocumentOptionsFromURL() {
     var epubUrl = urlParameters.getParameter("b");
     var url = urlParameters.getParameter("x");
     var fragment = urlParameters.getParameter("f");
+    var style = urlParameters.getParameter("style");
     return {
         epubUrl: epubUrl[0] || null,
         url: url.length ? url : null,
-        fragment: fragment[0] || null
+        fragment: fragment[0] || null,
+        userStyleSheet: style.length ? style : []
     };
 }
 
@@ -37,6 +39,7 @@ function DocumentOptions() {
     this.epubUrl = ko.observable(urlOptions.epubUrl || "");
     this.url = ko.observable(urlOptions.url || null);
     this.fragment = ko.observable(urlOptions.fragment || "");
+    this.userStyleSheet = ko.observable(urlOptions.userStyleSheet);
     this.pageSize = new PageSize();
 
     // write fragment back to URL when updated
@@ -47,13 +50,14 @@ function DocumentOptions() {
 }
 
 DocumentOptions.prototype.toObject = function() {
+    var uss = this.userStyleSheet().map(function(url) { return {url: url}; });
     // Do not include url
     // (url is a required argument to Viewer.loadDocument, separated from other options)
     return {
         fragment: this.fragment(),
-        userStyleSheet: [{
+        userStyleSheet: uss.concat([{
             text: "@page {" + this.pageSize.toCSSDeclarationString() + "}"
-        }]
+        }])
     };
 };
 

@@ -42,13 +42,15 @@ describe("DocumentOptions", function() {
             expect(options.epubUrl()).toBe("");
             expect(options.url()).toEqual(["abc/def.html", "jkl/mno.html"]);
             expect(options.fragment()).toBe("ghi");
+            expect(options.userStyleSheet()).toEqual([]);
 
-            urlParameters.location = {href: "http://example.com#b=abc/&f=ghi"};
+            urlParameters.location = {href: "http://example.com#b=abc/&f=ghi&style=style1&style=style2"};
             options = new DocumentOptions();
 
             expect(options.epubUrl()).toBe("abc/");
             expect(options.url()).toBe(null);
             expect(options.fragment()).toBe("ghi");
+            expect(options.userStyleSheet()).toEqual(["style1", "style2"]);
         });
     });
 
@@ -65,12 +67,14 @@ describe("DocumentOptions", function() {
             var options = new DocumentOptions();
             options.url("abc/def.html");
             options.fragment("ghi");
+            options.userStyleSheet(["style1", "style2"]);
 
             expect(options.toObject()).toEqual({
                 fragment: "ghi",
-                userStyleSheet: [{
-                    text: "@page {size: auto;}"
-                }]
+                userStyleSheet: [
+                    { url: "style1" },
+                    { url: "style2" },
+                    { text: "@page {size: auto;}" }]
             });
         });
     });
