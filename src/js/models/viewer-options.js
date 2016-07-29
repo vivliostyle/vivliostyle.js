@@ -50,6 +50,11 @@ function ViewerOptions(options) {
         this.profile(urlOptions.profile || defaultValues.profile);
         this.spreadView(urlOptions.spreadView || defaultValues.spreadView);
         this.zoom(defaultValues.zoom);
+
+        // write spread parameter back to URL when updated
+        this.spreadView.subscribe(function(spread) {
+            urlParameters.setParameter("spread", spread);
+        });
     }
 }
 
