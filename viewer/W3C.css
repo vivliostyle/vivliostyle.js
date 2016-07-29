@@ -95,10 +95,17 @@ dd, .head .copyright {
 	break-after: page;
 }
 
-#toc {
+h1#toc, h2#toc, h3#toc, h4#toc, h5#toc, h6#toc {
+	break-before: left;
+}
+section#toc, div#toc {
 	break-before: left;
 	break-after: left;
 }
+.toc:not(.toc .toc) {
+	break-after: left;
+}
+
 /* CSS2 specific */
 .subtoc {
 	break-before: auto !important;
@@ -130,20 +137,16 @@ pre {
 .example::before,
 .example a.self-link,
 .example-title,
-.note-title {
-	break-inside: avoid;
-	break-after: avoid;
-}
-
-/* Web-IDL spec specific */
+.note-title,
+pre::before,
 .warning-title,
 .blockTitleDiv,
 .exampleHeader,
-.noteHeader {
+.noteHeader,
+.note .prefix {
 	break-after: avoid;
 	break-inside: avoid;
 }
-/* end Web-IDL spec specific */
 
 /***** TOC & cross references *****/
 .toc a[href] {
