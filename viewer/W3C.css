@@ -27,6 +27,9 @@ body {
 }
 
 /***** page decoration *****/
+@page {
+	font-size: small;
+}
 @page :left {
 	@bottom-left-corner { content: counter(page); }
 }
@@ -36,6 +39,10 @@ body {
 @page :blank {
 	@bottom-left-corner { content: none; }
 	@bottom-right-corner { content: none; }
+	@bottom-center {
+		content: "page intentionally left blank";
+		font-style: italic;
+	}
 }
 
 /***** Adjustments to look prettier *****/
