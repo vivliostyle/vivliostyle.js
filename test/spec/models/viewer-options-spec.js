@@ -21,13 +21,16 @@ import ViewerOptions from "../../../src/js/models/viewer-options";
 import urlParameters from "../../../src/js/stores/url-parameters";
 
 describe("ViewerOptions", function() {
-    var location;
+    var history, location;
 
     beforeEach(function() {
+        history = urlParameters.history;
+        urlParameters.history = {};
         location = urlParameters.location;
     });
 
     afterEach(function() {
+        urlParameters.history = history;
         urlParameters.location = location;
     });
 
@@ -55,6 +58,28 @@ describe("ViewerOptions", function() {
             expect(options.fontSize()).toBe(20);
             expect(options.zoom()).toBe(1.2);
         });
+    });
+
+    it("write spread option back to URL when update if it is constructed with no argument", function() {
+        urlParameters.location = {href: "http://example.com#spread=true"};
+        var options = new ViewerOptions();
+        options.spreadView(false);
+
+        expect(urlParameters.location.href).toBe("http://example.com#spread=false");
+
+        options.spreadView(true);
+
+        expect(urlParameters.location.href).toBe("http://example.com#spread=true");
+
+        // not write back if it is constructed with another ViewerOptions
+        var other = new ViewerOptions();
+        other.spreadView(false);
+        other.fontSize(20);
+        other.zoom(1.2);
+        options = new ViewerOptions(other);
+        options.spreadView(true);
+
+        expect(urlParameters.location.href).toBe("http://example.com#spread=false");
     });
 
     describe("copyFrom", function() {
