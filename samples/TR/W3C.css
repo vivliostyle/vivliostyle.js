@@ -41,6 +41,7 @@ body {
 	@bottom-right-corner { content: none; }
 	@bottom-center {
 		content: "page intentionally left blank";
+		font-size: medium;
 		font-style: italic;
 	}
 }
