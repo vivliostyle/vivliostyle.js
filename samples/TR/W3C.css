@@ -98,7 +98,7 @@ dd, .head .copyright {
 h1#toc, h2#toc, h3#toc, h4#toc, h5#toc, h6#toc {
 	break-before: left;
 }
-section#toc, div#toc {
+section#toc, div#toc, nav#toc {
 	break-before: left;
 	break-after: left;
 }
