@@ -184,22 +184,25 @@ pre::before,
 
 /* Redo the indentation model of the TOC in a way that's compatible with flexbox */
 :not(li) > .toc { margin-left: 0 !important; padding-left: 0 !important;}
-.toc .secno {
+.toc a .secno {
 	float: none !important;
 	margin-left: 0 !important;
 	display: inline-block;
 	width: 5rem;
 	flex: none;
 }
+.toc .secno:not(a .secno) {
+	margin-left: 0 !important;
+}
 .toc > li li li { margin-left: 0; }
-.toc > li li li .secno { margin-right: 2rem; }
-.toc > li li li li .secno { margin-right: 4rem; }
-.toc > li li li li li .secno { margin-right: 6rem; }
+.toc > li li li a .secno { margin-right: 2rem; }
+.toc > li li li li a .secno { margin-right: 4rem; }
+.toc > li li li li li a .secno { margin-right: 6rem; }
 @media (max-width: 40em) {
-	.toc .secno                  { width: 4rem; }
-	.toc > li li li .secno       { margin-right: 1rem; }
-	.toc > li li li li .secno    { margin-right: 2rem; }
-	.toc > li li li li li .secno { margin-right: 3rem; }
+	.toc a .secno                  { width: 4rem; }
+	.toc > li li li a .secno       { margin-right: 1rem; }
+	.toc > li li li li a .secno    { margin-right: 2rem; }
+	.toc > li li li li li a .secno { margin-right: 3rem; }
 }
 
 /***** Index & cross references *****/
