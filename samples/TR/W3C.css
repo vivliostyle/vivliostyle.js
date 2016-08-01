@@ -72,8 +72,11 @@ hr:not(table hr) {
 	border: transparent solid 0 !important;
 	background: transparent;
 }
-hr+h1, hr+h2, hr+h3, hr+h4, hr+h5, hr+h6 {
+hr+h1, hr+h2, hr+h3, hr+h4, hr+h5, hr+h6, hr+section {
 	break-before: page;
+}
+#toc + hr {
+	display: none;
 }
 /* ancient spec specific */
 table hr { break-after: avoid; }
