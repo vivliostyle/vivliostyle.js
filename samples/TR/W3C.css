@@ -233,6 +233,7 @@ figure, .figure {
 figure > figcaption, .figure > .caption {
 	flex: none;
 	display: block;
+	overflow: visible;
 }
 figure > *, .figure > * {
 	flex: auto;
