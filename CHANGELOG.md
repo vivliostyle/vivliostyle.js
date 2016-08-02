@@ -9,6 +9,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/269>
 - Fix incorrect page breaks with cross references
   - <https://github.com/vivliostyle/vivliostyle.js/pull/271>
+- Fix image-resolution behavior when max/min-width/height is specified in length (not percentage)
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/275>
 
 ## [2016.7](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.7) - 2016-07-04
 

@@ -927,7 +927,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 		        		// No need to wait for the image, does not affect layout
 		        		self.page.fetchers.push(imageFetcher);
 		        	} else {
-						if (hasAutoWidth && hasAutoHeight && imageResolution) {
+						if (hasAutoWidth && hasAutoHeight && imageResolution && imageResolution !== 1) {
 							images.push({image: image, element: result, fetcher: imageFetcher});
 						}
 		    			fetchers.push(imageFetcher);
@@ -966,7 +966,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 		    if (fetchers.length) {
 		    	adapt.taskutil.waitForFetchers(fetchers).then(function() {
 					if (imageResolution > 0) {
-						self.modifyElemDimensionWithImageResolution(images, imageResolution);
+						self.modifyElemDimensionWithImageResolution(images, imageResolution, computedStyle, self.nodeContext.vertical);
 					}
 		    		frame.finish(needToProcessChildren);
 		    	});
@@ -983,17 +983,77 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 /**
  * @param {!Array<!{image: !HTMLElement, element: !HTMLElement, fetcher: !adapt.taskutil.Fetcher<string>}>} images
  * @param {number} imageResolution
+ * @param {!Object.<string,adapt.css.Val>} computedStyle
+ * @param {boolean} isVertical
  */
-adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = function(images, imageResolution) {
+adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = function(images, imageResolution, computedStyle, isVertical) {
+	var self = this;
 	images.forEach(function(param) {
 		if (param.fetcher.get().get() === "load") {
 			var img = param.image;
-			var w = img.width;
-			var h = img.height;
+			var scaledWidth = img.width / imageResolution;
+			var scaledHeight = img.height / imageResolution;
 			var elem = param.element;
-			if (w > 0 && h > 0) {
-				adapt.base.setCSSProperty(elem, "width", (w / imageResolution) + "px");
-				adapt.base.setCSSProperty(elem, "height", (h / imageResolution) + "px");
+			if (scaledWidth > 0 && scaledHeight > 0) {
+				if (imageResolution > 1) {
+					var maxWidth = computedStyle["max-width"] || adapt.css.ident.none;
+					var maxHeight = computedStyle["max-height"] || adapt.css.ident.none;
+					if (maxWidth === adapt.css.ident.none && maxHeight === adapt.css.ident.none) {
+						adapt.base.setCSSProperty(elem, "max-width", scaledWidth + "px");
+					} else if (maxWidth !== adapt.css.ident.none && maxHeight === adapt.css.ident.none) {
+						adapt.base.setCSSProperty(elem, "width", scaledWidth + "px");
+					} else if (maxWidth === adapt.css.ident.none && maxHeight !== adapt.css.ident.none) {
+						adapt.base.setCSSProperty(elem, "height", scaledHeight + "px");
+					} else {
+						// maxWidth != none && maxHeight != none
+						goog.asserts.assert(maxWidth.isNumeric());
+						goog.asserts.assert(maxHeight.isNumeric());
+						var numericMaxWidth = /** @type {adapt.css.Numeric} */ (maxWidth);
+						var numericMaxHeight = /** @type {adapt.css.Numeric} */ (maxHeight);
+						if (numericMaxWidth.unit !== "%") {
+							adapt.base.setCSSProperty(elem, "max-width",
+								Math.min(scaledWidth, adapt.css.toNumber(numericMaxWidth, self.context)) + "px");
+						} else if (numericMaxHeight.unit !== "%") {
+							adapt.base.setCSSProperty(elem, "max-height",
+								Math.min(scaledHeight, adapt.css.toNumber(numericMaxHeight, self.context)) + "px");
+						} else {
+							if (isVertical) {
+								adapt.base.setCSSProperty(elem, "height", scaledHeight + "px");
+							} else {
+								adapt.base.setCSSProperty(elem, "width", scaledWidth + "px");
+							}
+						}
+					}
+				} else if (imageResolution < 1) {
+					var minWidth = computedStyle["min-width"] || adapt.css.numericZero;
+					var minHeight = computedStyle["min-height"] || adapt.css.numericZero;
+					goog.asserts.assert(minWidth.isNumeric());
+					goog.asserts.assert(minWidth.isNumeric());
+					var numericMinWidth = /** @type {adapt.css.Numeric} */ (minWidth);
+					var numericMinHeight = /** @type {adapt.css.Numeric} */ (minHeight);
+					if (numericMinWidth.num === 0 && numericMinHeight.num === 0) {
+						adapt.base.setCSSProperty(elem, "min-width", scaledWidth + "px");
+					} else if (numericMinWidth.num !== 0 && numericMinHeight.num === 0) {
+						adapt.base.setCSSProperty(elem, "width", scaledWidth + "px");
+					} else if (numericMinWidth.num === 0 && numericMinHeight.num !== 0) {
+						adapt.base.setCSSProperty(elem, "height", scaledHeight + "px");
+					} else {
+						// minWidth != 0 && minHeight != 0
+						if (numericMinWidth.unit !== "%") {
+							adapt.base.setCSSProperty(elem, "min-width",
+								Math.max(scaledWidth, adapt.css.toNumber(numericMinWidth, self.context)) + "px");
+						} else if (numericMinHeight.unit !== "%") {
+							adapt.base.setCSSProperty(elem, "min-height",
+								Math.max(scaledHeight, adapt.css.toNumber(numericMinHeight, self.context)) + "px");
+						} else {
+							if (isVertical) {
+								adapt.base.setCSSProperty(elem, "height", scaledHeight + "px");
+							} else {
+								adapt.base.setCSSProperty(elem, "width", scaledWidth + "px");
+							}
+						}
+					}
+				}
 			}
 		}
 	});
