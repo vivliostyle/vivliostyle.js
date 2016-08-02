@@ -995,6 +995,20 @@ adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = functi
 			var scaledHeight = img.height / imageResolution;
 			var elem = param.element;
 			if (scaledWidth > 0 && scaledHeight > 0) {
+				if (computedStyle["box-sizing"] === adapt.css.ident.border_box) {
+					if (computedStyle["border-left-style"] !== adapt.css.ident.none) {
+						scaledWidth += adapt.css.toNumber(computedStyle["border-left-width"], self.context);
+					}
+					if (computedStyle["border-right-style"] !== adapt.css.ident.none) {
+						scaledWidth += adapt.css.toNumber(computedStyle["border-right-width"], self.context);
+					}
+					if (computedStyle["border-top-style"] !== adapt.css.ident.none) {
+						scaledHeight += adapt.css.toNumber(computedStyle["border-top-width"], self.context);
+					}
+					if (computedStyle["border-bottom-style"] !== adapt.css.ident.none) {
+						scaledHeight += adapt.css.toNumber(computedStyle["border-bottom-width"], self.context);
+					}
+				}
 				if (imageResolution > 1) {
 					var maxWidth = computedStyle["max-width"] || adapt.css.ident.none;
 					var maxHeight = computedStyle["max-height"] || adapt.css.ident.none;
