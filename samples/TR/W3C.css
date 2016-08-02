@@ -411,3 +411,16 @@ li > a.self-link {
 body {
 	padding: 1.6em 1.5em 2em -epubx-expr(26px + 1.5em);
 }
+
+
+/***** Spec specific tweaks *****/
+/* CSS3-UI */
+pre code.highlight {
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+}
+#awesome-table td * {
+	overflow: visible;
+	hyphens: none;
+}
+
