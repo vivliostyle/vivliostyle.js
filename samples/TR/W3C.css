@@ -356,6 +356,11 @@ pre.syntax {
 	background-repeat:  no-repeat !important;
 }
 /* end XInclude spec specific */
+/* Media Queries specific */
+blockquote pre {
+	background: none !important;
+}
+/* End Media Queries specific */
 
 @media (overflow-inline: none) {
 	/* On screen, dealing with a scrollbar is fine,
