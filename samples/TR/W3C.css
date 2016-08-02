@@ -86,6 +86,13 @@ hr+h1, hr+h2, hr+h3, hr+h4, hr+h5, hr+h6, hr+section {
 table hr { break-after: avoid; }
 /* end ancient spec specific */
 
+/* Web-IDL specific */
+.blockTitleDiv > .blockTitle {
+	position: static !important;
+}
+/* end Web-IDL specific */
+
+
 /***** pagination tweaks *****/
 hr[title="Separator for header"] {
 	display: none;
@@ -319,7 +326,7 @@ pre.highlight.highlight.highlight.highlight {
 }
 
 /* Web-IDL spec specific */
-.block > .blockContent > pre.code {
+.block.block > .blockContent > pre.code {
 	overflow: auto !important;
 	background: left / 4em 100% linear-gradient(to right, #f0f6ff, #f0f6ff 1em, rgba(240,246,255,0)) local,
 	            right / 4em 100% linear-gradient(to left, #f0f6ff, #f0f6ff 1em, rgba(240,246,255,0)) local,
