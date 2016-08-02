@@ -345,6 +345,17 @@ pre.syntax {
 	background-repeat:  no-repeat !important;
 }
 /* end Web-IDL spec specific */
+/* XInclude spec specific */
+.exampleInner > pre {
+	overflow: auto !important;
+	background: left / 4em 100% linear-gradient(to right, rgb(213,222,227), rgb(213,222,227), rgba(213,222,227,0)) local,
+	            right / 4em 100% linear-gradient(to left, rgb(213,222,227), rgb(213,222,227), rgba(213,222,227,0)) local,
+	            left 1px center / 1.2em 90% radial-gradient(at left, rgba(0,0,0,.25), transparent 70%) scroll,
+	            right 1px center / 1.2em 90% radial-gradient(at right, rgba(0,0,0,.25), transparent 70%) scroll
+	            transparent !important;
+	background-repeat:  no-repeat !important;
+}
+/* end XInclude spec specific */
 
 @media (overflow-inline: none) {
 	/* On screen, dealing with a scrollbar is fine,
