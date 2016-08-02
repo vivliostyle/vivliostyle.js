@@ -229,6 +229,14 @@ table img {
 	max-width: none;
 }
 
+td * {
+	/* not 100vh, to leave just a bit of room if the td has a border */
+	max-height: 95vh;
+	max-height: calc(100vh - 6px); /* The thickest vertical border we have is 3px, and that's in case there's two of it */
+	overflow: auto;
+	/* Should add overflow shadows as well */
+}
+
 figure, .figure {
 	display: flex;
 	flex-flow: column;
