@@ -345,8 +345,8 @@ pre.syntax {
 	background-repeat:  no-repeat !important;
 }
 /* end Web-IDL spec specific */
-/* XInclude spec specific */
-.exampleInner > pre {
+/* XInclude/XSL spec specific */
+.exampleInner.exampleInner.exampleInner.exampleInner > pre {
 	overflow: auto !important;
 	background: left / 4em 100% linear-gradient(to right, rgb(213,222,227), rgb(213,222,227), rgba(213,222,227,0)) local,
 	            right / 4em 100% linear-gradient(to left, rgb(213,222,227), rgb(213,222,227), rgba(213,222,227,0)) local,
@@ -355,7 +355,7 @@ pre.syntax {
 	            transparent !important;
 	background-repeat:  no-repeat !important;
 }
-/* end XInclude spec specific */
+/* end XInclude/XSL spec specific */
 /* Media Queries specific */
 blockquote pre {
 	background: none !important;
