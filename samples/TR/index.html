@@ -1,7 +1,51 @@
 <!doctype html>
+<html lang=en>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="//brick.a.ssl.fastly.net/Crimson:400,700,400i">
 <style>
-a {display: block;}
+body {
+	font-family: Crimson, serif;
+	font-variant-numeric: oldstyle-nums;
+	font-feature-settings: "onum";
+	-moz-columns: 45ch;
+	columns: 45ch;
+}
+
+header {
+	margin: 1em auto;
+	padding: 0 2em;
+}
+header::after {
+	display: block;
+	content: " \00273b";
+	text-align: center;
+	margin: 1em;
+	font-size: 1.5em;
+	break-before: avoid;
+}
+header h1 {
+	font-size: 1.2rem;
+	font-variant: small-caps;
+	letter-spacing: 0.1ch;
+}
+header p {
+	margin: 0;
+	text-indent: 2em;
+	line-height: 1.3em;
+	-webkit-hyphens: auto;
+	hyphens: auto;
+	text-align: justify;
+}
+header .warn {
+	font-size: 0.8em;
+	font-style: italic;
+	color: gray;
+	background: rgba(255,127,127,0.15);
+	padding: 1ch 1.5ch;
+	margin: 1ch 2em;
+}
+
+table a { display: block; }
 table {
 	border-collapse: collapse;
 	margin: auto;
@@ -17,10 +61,11 @@ table td:first-of-type {
 }
 .category {
 	font-weight: bold;
+	font-variant: small-caps;
+	letter-spacing: 0.1ch;
 	text-align: center;
-	border-top: 2px solid black;
+	border-top: 2px solid lightgrey;
 	border-bottom: 0.5px solid grey;
-	letter-spacing: 1px;
 	height: 2em;
 }
 tr:nth-of-type(2n) td {
@@ -32,193 +77,205 @@ tr td:first-of-type {
 td+td {
 	padding-left: 1ch;
 }
-body  {
-	-moz-columns: 45ch;
-	columns: 45ch;
-}
 </style>
+<header>
+	<h1>Vivliostyle TR demo</h1>
+	<p>This is a semi-random selection of W3C TR documents,
+	and a few editors drafts and IPDF specs as well.
+	Each document can be viewed via two links.
+	The first one (“Classic”) shows it in its usual form.
+	The second one (“Vivliostyle”) shows the same document
+	in a paginated yet responsive view
+	using <a href="http://vivliostyle.com/en/products/#secProducts-viv-js">Vivliostyle.js</a> and <a href="./W3C.css">a custom user stylesheet</a>
+	<p>The default setting is to show a single responsive page,
+	but by clicking on the <img width="16px" height="16px" alt="vivliostyle" src="data:image/png;base64,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"> icon,
+	you can set a predefined page size (for example A4),
+	or switch to a spread view, to see two pages side by side.
+
+	<p class=warn>This is a work in progress: the stylesheet needs more work to deal with all the variations of W3C documents, and Vivliostyle.js isn't free of bugs either. On top of that, there are a few more features we would like to include in Vivliostyle.js to improve this even further. Even then, this should be interesting.
+</header>
 <table>
 	<tr><th colspan=3 class=category>CSS-WG ED
 	<tr>
 		<td>css-align
-		<td><a href="https://drafts.csswg.org/css-align/">Raw HTML</a>
+		<td><a href="https://drafts.csswg.org/css-align/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=https://drafts.csswg.org/css-align/">Vivliostyle</a>
 	<tr>
 		<td>css-animations
-		<td><a href="https://drafts.csswg.org/css-animations/">Raw HTML</a>
+		<td><a href="https://drafts.csswg.org/css-animations/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=https://drafts.csswg.org/css-animations/">Vivliostyle</a>
 	<tr>
 		<td>css-page
-		<td><a href="https://drafts.csswg.org/css-page/">Raw HTML</a>
+		<td><a href="https://drafts.csswg.org/css-page/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=https://drafts.csswg.org/css-page/">Vivliostyle</a>
 	<tr>
 		<td>css-writing-modes
-		<td><a href="https://drafts.csswg.org/css-writing-modes-3/">Raw HTML</a>
+		<td><a href="https://drafts.csswg.org/css-writing-modes-3/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=https://drafts.csswg.org/css-writing-modes-3/">Vivliostyle</a>
 	<tr>
 		<td>css-text
-		<td><a href="https://drafts.csswg.org/css-text/">Raw HTML</a>
+		<td><a href="https://drafts.csswg.org/css-text/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=https://drafts.csswg.org/css-text/">Vivliostyle</a>
 	<tr>
 		<td>css-2015
-		<td><a href="https://drafts.csswg.org/css-2015/">Raw HTML</a>
+		<td><a href="https://drafts.csswg.org/css-2015/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=https://drafts.csswg.org/css-2015/">Vivliostyle</a>
 	<tr>
 		<td>css-inline
-		<td><a href="https://drafts.csswg.org/css-inline/">Raw HTML</a>
+		<td><a href="https://drafts.csswg.org/css-inline/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=https://drafts.csswg.org/css-inline/">Vivliostyle</a>
 </table>
 <table>
 	<tr><th colspan=3 class=category>TR 2016 designs
 	<tr>
 		<td>WebIDL
-		<td><a href="//www.w3.org/TR/2016/CR-WebIDL-1-20160308/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/CR-WebIDL-1-20160308/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/CR-WebIDL-1-20160308/">Vivliostyle</a>
 	<tr>
 		<td>css-flexbox-1
-		<td><a href="//www.w3.org/TR/2016/CR-css-flexbox-1-20160526/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/CR-css-flexbox-1-20160526/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/CR-css-flexbox-1-20160526/">Vivliostyle</a>
 	<tr>
 		<td>mediaqueries-4
-		<td><a href="//www.w3.org/TR/2016/WD-mediaqueries-4-20160706/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/WD-mediaqueries-4-20160706/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/WD-mediaqueries-4-20160706/">Vivliostyle</a>
 	<tr>
 		<td>ttml-profile-registry
-		<td><a href="//www.w3.org/TR/2016/NOTE-ttml-profile-registry-20160510/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/NOTE-ttml-profile-registry-20160510/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/NOTE-ttml-profile-registry-20160510/">Vivliostyle</a>
 	<tr>
 		<td>owl-time
-		<td><a href="//www.w3.org/TR/2016/WD-owl-time-20160712/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/WD-owl-time-20160712/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/WD-owl-time-20160712/">Vivliostyle</a>
 	<tr>
 		<td>resource-timing
-		<td><a href="//www.w3.org/TR/2016/CR-resource-timing-1-20160721/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/CR-resource-timing-1-20160721/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/CR-resource-timing-1-20160721/">Vivliostyle</a>
 	<tr>
 		<td>image-capture
-		<td><a href="//www.w3.org/TR/2016/WD-image-capture-20160722/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/WD-image-capture-20160722/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/WD-image-capture-20160722/">Vivliostyle</a>
 	<tr>
 		<td>ldn
-		<td><a href="//www.w3.org/TR/2016/WD-ldn-20160726/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/WD-ldn-20160726/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/WD-ldn-20160726/">Vivliostyle</a>
 	<tr>
 		<td>screen-orientation
-		<td><a href="//www.w3.org/TR/2016/WD-screen-orientation-20160721/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/WD-screen-orientation-20160721/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/WD-screen-orientation-20160721/">Vivliostyle</a>
 	<tr>
 		<td>xinclude
-		<td><a href="//www.w3.org/TR/2016/NOTE-xinclude-11-20160721/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/NOTE-xinclude-11-20160721/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/NOTE-xinclude-11-20160721/">Vivliostyle</a>
 	<tr>
 		<td>screen-capture
-		<td><a href="//www.w3.org/TR/2016/WD-screen-capture-20160714/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/WD-screen-capture-20160714/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/WD-screen-capture-20160714/">Vivliostyle</a>
 </table>
 <table>
 	<tr><th colspan=3 class=category>TR 2016 designs — Multipart spec
 	<tr>
 		<td>CSS2.2
-		<td><a href="//www.w3.org/TR/CSS22/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/CSS22/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/CSS22/&x=//www.w3.org/TR/CSS22/about.html&x=//www.w3.org/TR/CSS22/intro.html&x=//www.w3.org/TR/CSS22/conform.html&x=//www.w3.org/TR/CSS22/syndata.html&x=//www.w3.org/TR/CSS22/selector.html&x=//www.w3.org/TR/CSS22/cascade.html&x=//www.w3.org/TR/CSS22/media.html&x=//www.w3.org/TR/CSS22/box.html&x=//www.w3.org/TR/CSS22/visuren.html&x=//www.w3.org/TR/CSS22/visudet.html&x=//www.w3.org/TR/CSS22/visufx.html&x=//www.w3.org/TR/CSS22/generate.html&x=//www.w3.org/TR/CSS22/page.html&x=//www.w3.org/TR/CSS22/colors.html&x=//www.w3.org/TR/CSS22/fonts.html&x=//www.w3.org/TR/CSS22/text.html&x=//www.w3.org/TR/CSS22/tables.html&x=//www.w3.org/TR/CSS22/ui.html&x=//www.w3.org/TR/CSS22/aural.html&x=//www.w3.org/TR/CSS22/refs.html&x=//www.w3.org/TR/CSS22/changes.html&x=//www.w3.org/TR/CSS22/sample.html&x=//www.w3.org/TR/CSS22/zindex.html&x=//www.w3.org/TR/CSS22/propidx.html&x=//www.w3.org/TR/CSS22/grammar.html&x=//www.w3.org/TR/CSS22/indexlist.html">Vivliostyle</a>
 	<tr>
 		<td>HTML5
-		<td><a href="//www.w3.org/TR/2016/CR-html51-20160621/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/CR-html51-20160621/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/CR-html51-20160621/&x=//www.w3.org/TR/2016/CR-html51-20160621/introduction.html&x=//www.w3.org/TR/2016/CR-html51-20160621/infrastructure.html&x=//www.w3.org/TR/2016/CR-html51-20160621/dom.html&x=//www.w3.org/TR/2016/CR-html51-20160621/semantics.html&x=//www.w3.org/TR/2016/CR-html51-20160621/document-metadata.html&x=//www.w3.org/TR/2016/CR-html51-20160621/sections.html&x=//www.w3.org/TR/2016/CR-html51-20160621/grouping-content.html&x=//www.w3.org/TR/2016/CR-html51-20160621/textlevel-semantics.html&x=//www.w3.org/TR/2016/CR-html51-20160621/edits.html&x=//www.w3.org/TR/2016/CR-html51-20160621/semantics-embedded-content.html&x=//www.w3.org/TR/2016/CR-html51-20160621/links.html&x=//www.w3.org/TR/2016/CR-html51-20160621/tabular-data.html&x=//www.w3.org/TR/2016/CR-html51-20160621/sec-forms.html&x=//www.w3.org/TR/2016/CR-html51-20160621/interactive-elements.html&x=//www.w3.org/TR/2016/CR-html51-20160621/semantics-scripting.html&x=//www.w3.org/TR/2016/CR-html51-20160621/common-idioms-without-dedicated-elements.html&x=//www.w3.org/TR/2016/CR-html51-20160621/disabled-elements.html&x=//www.w3.org/TR/2016/CR-html51-20160621/matching-html-elements-using-selectors.html&x=//www.w3.org/TR/2016/CR-html51-20160621/editing.html&x=//www.w3.org/TR/2016/CR-html51-20160621/browsers.html&x=//www.w3.org/TR/2016/CR-html51-20160621/webappapis.html&x=//www.w3.org/TR/2016/CR-html51-20160621/syntax.html&x=//www.w3.org/TR/2016/CR-html51-20160621/xhtml.html&x=//www.w3.org/TR/2016/CR-html51-20160621/rendering.html&x=//www.w3.org/TR/2016/CR-html51-20160621/obsolete.html&x=//www.w3.org/TR/2016/CR-html51-20160621/iana.html&x=//www.w3.org/TR/2016/CR-html51-20160621/fullindex.html&x=//www.w3.org/TR/2016/CR-html51-20160621/property-index.html&x=//www.w3.org/TR/2016/CR-html51-20160621/idl-index.html&x=//www.w3.org/TR/2016/CR-html51-20160621/references.html&x=//www.w3.org/TR/2016/CR-html51-20160621/changes.html&x=//www.w3.org/TR/2016/CR-html51-20160621/acknowledgements.html">Vivliostyle</a>
 </table>
 <table>
 	<tr><th colspan=3 class=category>TR traditional designs
 	<tr>
 		<td>arabic-math
-		<td><a href="//www.w3.org/TR/2006/NOTE-arabic-math-20060131/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2006/NOTE-arabic-math-20060131/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2006/NOTE-arabic-math-20060131/">Vivliostyle</a>
 	<tr>
 		<td>charmod
-		<td><a href="//www.w3.org/TR/2005/REC-charmod-20050215/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2005/REC-charmod-20050215/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2005/REC-charmod-20050215/">Vivliostyle</a>
 	<tr>
 		<td>css-break-3
-		<td><a href="//www.w3.org/TR/2016/CR-css-break-3-20160114/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/CR-css-break-3-20160114/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/CR-css-break-3-20160114/">Vivliostyle</a>
 	<tr>
 		<td>css-text-3
-		<td><a href="//www.w3.org/TR/2013/WD-css-text-3-20131010/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2013/WD-css-text-3-20131010/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2013/WD-css-text-3-20131010/">Vivliostyle</a>
 	<tr>
 		<td>css-ui-3
-		<td><a href="//www.w3.org/TR/2015/CR-css-ui-3-20150707/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2015/CR-css-ui-3-20150707/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2015/CR-css-ui-3-20150707/">Vivliostyle</a>
 	<tr>
 		<td>css3-mediaqueries
-		<td><a href="//www.w3.org/TR/2012/REC-css3-mediaqueries-20120619/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2012/REC-css3-mediaqueries-20120619/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2012/REC-css3-mediaqueries-20120619/">Vivliostyle</a>
 	<tr>
 		<td>json-ld
-		<td><a href="//www.w3.org/TR/2014/REC-json-ld-20140116/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2014/REC-json-ld-20140116/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2014/REC-json-ld-20140116/">Vivliostyle</a>
 	<tr>
 		<td>pwp
-		<td><a href="//www.w3.org/TR/2015/WD-pwp-20151126/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2015/WD-pwp-20151126/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2015/WD-pwp-20151126/">Vivliostyle</a>
 	<tr>
 		<td>rdfa-core
-		<td><a href="//www.w3.org/TR/2015/REC-rdfa-core-20150317/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2015/REC-rdfa-core-20150317/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2015/REC-rdfa-core-20150317/">Vivliostyle</a>
 	<tr>
 		<td>role-attribute
-		<td><a href="//www.w3.org/TR/2013/REC-role-attribute-20130328/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2013/REC-role-attribute-20130328/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2013/REC-role-attribute-20130328/">Vivliostyle</a>
 	<tr>
 		<td>Selectors 4
-		<td><a href="//www.w3.org/TR/2013/WD-selectors4-20130502/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2013/WD-selectors4-20130502/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2013/WD-selectors4-20130502/">Vivliostyle</a>
 	<tr>
 		<td>svg-integration
-		<td><a href="//www.w3.org/TR/2014/WD-svg-integration-20140417/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2014/WD-svg-integration-20140417/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2014/WD-svg-integration-20140417/">Vivliostyle</a>
 	<tr>
 		<td>vehicle-data
-		<td><a href="//www.w3.org/TR/2016/WD-vehicle-data-20160119/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2016/WD-vehicle-data-20160119/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2016/WD-vehicle-data-20160119/">Vivliostyle</a>
 	<tr>
 		<td>xslt-3
-		<td><a href="//www.w3.org/TR/2015/CR-xslt-30-20151119/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2015/CR-xslt-30-20151119/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2015/CR-xslt-30-20151119/">Vivliostyle</a>
 </table>
 <table>
 	<tr><th colspan=3 class=category>TR traditional designs — Multipart spec
 	<tr>
 		<td>CSS2.1
-		<td><a href="//www.w3.org/TR/CSS21/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/CSS21/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/CSS21/&x=//www.w3.org/TR/CSS21/about.html&x=//www.w3.org/TR/CSS21/intro.html&x=//www.w3.org/TR/CSS21/conform.html&x=//www.w3.org/TR/CSS21/syndata.html&x=//www.w3.org/TR/CSS21/selector.html&x=//www.w3.org/TR/CSS21/cascade.html&x=//www.w3.org/TR/CSS21/media.html&x=//www.w3.org/TR/CSS21/box.html&x=//www.w3.org/TR/CSS21/visuren.html&x=//www.w3.org/TR/CSS21/visudet.html&x=//www.w3.org/TR/CSS21/visufx.html&x=//www.w3.org/TR/CSS21/generate.html&x=//www.w3.org/TR/CSS21/page.html&x=//www.w3.org/TR/CSS21/colors.html&x=//www.w3.org/TR/CSS21/fonts.html&x=//www.w3.org/TR/CSS21/text.html&x=//www.w3.org/TR/CSS21/tables.html&x=//www.w3.org/TR/CSS21/ui.html&x=//www.w3.org/TR/CSS21/aural.html&x=//www.w3.org/TR/CSS21/refs.html&x=//www.w3.org/TR/CSS21/changes.html&x=//www.w3.org/TR/CSS21/sample.html&x=//www.w3.org/TR/CSS21/zindex.html&x=//www.w3.org/TR/CSS21/propidx.html&x=//www.w3.org/TR/CSS21/grammar.html&x=//www.w3.org/TR/CSS21/indexlist.html">Vivliostyle</a>
 	<tr>
 		<td>HTML4
-		<td><a href="//www.w3.org/TR/html4/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/html4/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/html4/&x=//www.w3.org/TR/html4/about.html&x=//www.w3.org/TR/html4/intro/intro.html&x=//www.w3.org/TR/html4/intro/sgmltut.html&x=//www.w3.org/TR/html4/conform.html&x=//www.w3.org/TR/html4/charset.html&x=//www.w3.org/TR/html4/types.html&x=//www.w3.org/TR/html4/struct/global.html&x=//www.w3.org/TR/html4/struct/dirlang.html&x=//www.w3.org/TR/html4/struct/text.html&x=//www.w3.org/TR/html4/struct/lists.html&x=//www.w3.org/TR/html4/struct/tables.html&x=//www.w3.org/TR/html4/struct/links.html&x=//www.w3.org/TR/html4/struct/objects.html&x=//www.w3.org/TR/html4/present/styles.html&x=//www.w3.org/TR/html4/present/graphics.html&x=//www.w3.org/TR/html4/present/frames.html&x=//www.w3.org/TR/html4/interact/forms.html&x=//www.w3.org/TR/html4/interact/scripts.html&x=//www.w3.org/TR/html4/sgml/intro.html&x=//www.w3.org/TR/html4/sgml/sgmldecl.html&x=//www.w3.org/TR/html4/sgml/dtd.html&x=//www.w3.org/TR/html4/sgml/loosedtd.html&x=//www.w3.org/TR/html4/sgml/framesetdtd.html&x=//www.w3.org/TR/html4/sgml/entities.html&x=//www.w3.org/TR/html4/appendix/changes.html&x=//www.w3.org/TR/html4/appendix/notes.html&x=//www.w3.org/TR/html4/references.html&x=//www.w3.org/TR/html4/index/elements.html&x=//www.w3.org/TR/html4/index/attributes.html&x=//www.w3.org/TR/html4/index/list.html">Vivliostyle</a>
 	<tr>
 		<td>wai-aria
-		<td><a href="//www.w3.org/TR/2014/REC-wai-aria-20140320/">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/2014/REC-wai-aria-20140320/">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/2014/REC-wai-aria-20140320/&x=http://www.w3.org/TR/2014/REC-wai-aria-20140320/introduction&x=http://www.w3.org/TR/2014/REC-wai-aria-20140320/usage&x=http://www.w3.org/TR/2014/REC-wai-aria-20140320/normative&x=http://www.w3.org/TR/2014/REC-wai-aria-20140320/terms&x=http://www.w3.org/TR/2014/REC-wai-aria-20140320/roles&x=http://www.w3.org/TR/2014/REC-wai-aria-20140320/states_and_properties&x=http://www.w3.org/TR/2014/REC-wai-aria-20140320/host_languages&x=http://www.w3.org/TR/2014/REC-wai-aria-20140320/conformance&x=http://www.w3.org/TR/2014/REC-wai-aria-20140320/references&x=http://www.w3.org/TR/2014/REC-wai-aria-20140320/appendices">Vivliostyle</a>
 </table>
 <table>
 	<tr><th colspan=3 class=category>Ancient designs
 	<tr>
 		<td>CSS1 (first REC)
-		<td><a href="//www.w3.org/TR/REC-CSS1-961217">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/REC-CSS1-961217">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/REC-CSS1-961217">Vivliostyle</a>
 	<tr>
 		<td>HTML3.2
-		<td><a href="//www.w3.org/TR/REC-html32">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/REC-html32">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/REC-html32">Vivliostyle</a>
 	<tr>
 		<td>XML
-		<td><a href="//www.w3.org/TR/WD-xml-961114">Raw HTML</a>
+		<td><a href="//www.w3.org/TR/WD-xml-961114">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=//www.w3.org/TR/WD-xml-961114">Vivliostyle</a>
 </table>
 <table>
 	<tr><th colspan=3 class=category>IDPF
 	<tr>
 		<td>EPUB 3.1
-		<td><a href="/samples/TR/www.idpf.org/epub/31/spec/epub-spec-20160426.html">Raw HTML</a>
+		<td><a href="/samples/TR/www.idpf.org/epub/31/spec/epub-spec-20160426.html">Classic</a>
 		<td><a href="/viewer/vivliostyle-viewer.html#style=/samples/TR/W3C.css&x=/samples/TR/www.idpf.org/epub/31/spec/epub-spec-20160426.html&x=/samples/TR/www.idpf.org/epub/31/spec/epub-overview.html&x=/samples/TR/www.idpf.org/epub/31/spec/epub-packages.html&x=/samples/TR/www.idpf.org/epub/31/spec/epub-contentdocs.html&x=/samples/TR/www.idpf.org/epub/31/spec/epub-mediaoverlays.html&x=/samples/TR/www.idpf.org/epub/31/spec/epub-ocf.html&x=/samples/TR/www.idpf.org/epub/a11y/accessibility.html&x=/samples/TR/www.idpf.org/epub/altss-tags/altss-tags.html&x=/samples/TR/www.idpf.org/epub/31/spec/epub-changes.html">Vivliostyle</a> <!-- stop the multidocument changing as soon as we can do a[target^="http://www.idpf.org/epub/"] { link-target: blank -vivliostyle-viewer;} -->
 </table>
