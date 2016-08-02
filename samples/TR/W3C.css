@@ -172,60 +172,29 @@ pre::before,
 }
 
 /***** TOC & cross references *****/
-ol.toc a[href],
-ul.toc a[href] {
-	display: flex !important;
-	align-items: baseline;
-	padding-left: 0 !important;
-	padding-right: 0 !important;
-	margin-left: 0 !important;
-	margin-right: 0 !important;
+.toc li {
+	clear:both;
 }
-.toc li:last-child,
-.toc li:first-child {
-	break-before: avoid;
-}
-ol.toc a[href]::after,
-ul.toc a[href]::after {
-	content: target-counter( attr(href,url), page);
-	flex:none;
-	order: 2;
-	padding-left: 1ch;
-	margin-left: auto;
-	text-align: right;
-	align-self: flex-end;
-}
-ol.toc a[href]::before,
-ul.toc a[href]::before {
-	/* Simulate a leader */
+.toc::after {
 	content: "";
-	order: 1;
-	flex: auto;
-	margin-left: 1ch;
-	border-bottom: solid 1px lightgrey;
+	display: block;
+	clear: both;
 }
 
-/* Redo the indentation model of the TOC in a way that's compatible with flexbox */
-:not(li) > .toc { margin-left: 0 !important; padding-left: 0 !important;}
-.toc a .secno {
-	float: none !important;
-	margin-left: 0 !important;
-	display: inline-block;
-	width: 5rem;
-	flex: none;
+.toc li:nth-of-type(2n+1) {
+	background: rgba(230,230,230,0.5);
 }
-.toc .secno:not(a .secno) {
-	margin-left: 0 !important;
+
+.toc a {
+	margin-left:0 !important;
+	padding-left: 0 !important;
+	margin-right:0 !important;
+	padding-right: 0 !important;
 }
-.toc > li li li { margin-left: 0; }
-.toc > li li li a .secno { margin-right: 2rem; }
-.toc > li li li li a .secno { margin-right: 4rem; }
-.toc > li li li li li a .secno { margin-right: 6rem; }
-@media (max-width: 40em) {
-	.toc a .secno                  { width: 4rem; }
-	.toc > li li li a .secno       { margin-right: 1rem; }
-	.toc > li li li li a .secno    { margin-right: 2rem; }
-	.toc > li li li li li a .secno { margin-right: 3rem; }
+.toc a[href]::after {
+	content: target-counter( attr(href,url), page);
+	float: right;
+	padding-left: 1ch;
 }
 
 /***** Index & cross references *****/
