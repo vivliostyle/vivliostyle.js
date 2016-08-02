@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head><title>Alternate Style Tags</title><link rel="stylesheet" type="text/css" href="../css/epub-spec-2016.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.78.1"/><meta charset="utf-8"/><link rel="stylesheet" href="../css/epub-print.css" type="text/css" media="print"/></head><body><header><p><a href="http://www.idpf.org"><img src="../images/idpflogo_web_125.jpg" class="logo" alt="IDPF"/></a></p><h1 class="title">Alternate Style Tags</h1><p class="identity"><span class="releaseinfo">Editor's Draft</span> <span class="pubdate">26 April 2016</span></p><dl class="printhistory"><dt>This version</dt><dd><a href="http://www.idpf.org/epub/altss-tags/altss-tags-20160426.html">http://www.idpf.org/epub/altss-tags/altss-tags-20160426.html</a></dd><dt>Latest version</dt><dd><a href="http://www.idpf.org/epub/altss-tags/">http://www.idpf.org/epub/altss-tags/</a></dd><dt>Previous version</dt><dd><a href="http://www.idpf.org/epub/altss-tags/altss-tags-20140626.html">http://www.idpf.org/epub/altss-tags/altss-tags-20140626.html</a></dd><dt>Previous recommendation</dt><dd><a href="http://www.idpf.org/epub/altss-tags/altss-tags-20140626.html">http://www.idpf.org/epub/altss-tags/altss-tags-20140626.html</a></dd></dl><div class="history"><span class="history-title">Document history</span><ul><li><a href="https://github.com/IDPF/epub-revision/commits/master/src/spec/altss-tags.xml">Changes to this
+        document</a>
+    </li><li><a href="https://github.com/IDPF/epub-revision/issues?q=milestone%3A%22EPUB+3.1%22+is%3Aclosed">Issues addressed in this revision</a></li><li><a href="https://github.com/IDPF/epub-revision/issues">Report an issue</a></li><li><a href="./altss-tags-errata/">Errata</a></li></ul></div><div class="authorgroup"><p class="bridgehead">Editors</p><p class="editor">Elika J. Etemad, 
+          
+            Invited Expert
+          
+        </p></div><div class="legalnotice"><p>Copyright © 
+      2011
+      International Digital Publishing Forum™
+    </p><div xmlns:spec="http://www.idpf.org/2016/epub/spec" xml:lang="en" class="legalnotice">
+    <p>All rights reserved. This work is protected under Title 17 of the United States Code.
+        Reproduction and dissemination of this work with changes is prohibited except with the
+        written permission of the <a href="http://www.idpf.org">International Digital
+        Publishing Forum (IDPF)</a>.</p>
+    <p>EPUB is a registered trademark of the International Digital Publishing Forum.</p>
+</div></div></header><section id="sotd"><h2>Status of this Document</h2><p>This section describes the status of this document at the time of its publication. Other documents may supersede
+        this document.</p><p>This document is a draft produced by the EPUB Working Group under the <a class="ulink" href="http://www.idpf.org/charters/2015/epub/" target="_top">EPUB Working Group Charter</a> approved on 8 July
+        2015.</p><p>This document is not considered stable and may be updated, replaced or obsoleted at any time. Its publication as a
+        draft does not imply endorsement by IDPF membership or the IDPF Board. The document should only be cited as a work in
+        progress.</p><p>Feedback on this document can be provided to the EPUB Working Group's <a class="ulink" href="mailto:epub-working-group@googlegroups.com" target="_top">mailing list</a> or <a class="ulink" href="https://github.com/IDPF/epub-revision" target="_top">issue tracker</a>.</p><p>This document is governed by the <a class="ulink" href="http://idpf.org/about_us/corp_docs/policies_and_procedures" target="_top">IDPF
+            Policies and Procedures</a>.</p></section><nav xmlns:spec="http://www.idpf.org/2016/epub/spec" class="toc" id="toc"><h2 class="toc-title">Table of Contents</h2><ol class="toc"><li><span class="chapter"><a href="#intro">1. Introduction</a></span></li><li><span class="chapter"><a href="#conformance">2. Conformance</a></span></li><li><span class="chapter"><a href="#style-sets">3. Style Sets</a></span></li><li><span class="chapter"><a href="#style-tag">4. Tagging Style Sets</a></span></li><li><span class="appendix"><a href="#app-vertical-text-style-set-tags">A. Vertical Text Style Set Tags</a></span></li><li><span class="appendix"><a href="#app-night-version-style-set-tags">B. Night Vision Style Set Tags</a></span></li><li><span class="appendix"><a href="#app-acknowledgements">C. Acknowledgements</a></span></li><li><span class="bibliography"><a href="#references">References</a></span></li></ol></nav>
+
+  
+
+  
+
+  
+
+  <section class="chapter" id="intro"><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#intro"> </a> </span>1 Introduction</h1><p class="informative"> This section is informative</p>
+    
+
+    
+
+    <p>This module defines a pattern for tagging alternate style sheets using a microformat. It can be used to define
+      standardized classes that can be hooked into the browser UI. Sample use cases include horizontal-vertical layout
+      switches in Japanese Ebook readers; automatically selecting high-contrast styles; and other accessibility
+      concerns.</p>
+
+    <p><a class="biblioref" href="#refHTML4" title="HTML 4.01 Specification">HTML 4.0</a> defines the linking of external style sheets using the
+        <code class="markup">link</code> element. Although typically a style sheet is linked in unconditionally, HTML 4 also defines
+        <span class="emphasis"><em>alternate style sets</em></span>, which are named, mutually-exclusive sets of style sheets that the reader
+      can use to alter the display.</p>
+
+    <p>Until now, few HTML user agents have exposed alternate styles in a meaningful way. However, alternate styles are a
+      very simple way to allow the user to alter a document's presentation to his or her preferences and accessibility
+      needs.</p>
+
+    <p>This specification takes advantage of the <code class="markup">class</code> attribute of the HTML <code class="markup">link</code>
+      element (introduced in <a class="biblioref" href="#refHTML5" title="HTML5: A vocabulary and associated APIs for HTML and XHTML">[<abbr class="abbrev">HTML5</abbr>]</a>, but supported in many UAs for much longer) to define <span class="emphasis"><em>style
+        tags</em></span>: a markup pattern for tagging style sheets with standardized class names. These class names can be
+      used by a UA to offer special UI access to such tagged style sets.</p>
+
+    <p>The original impetus for this proposal was to offer standard controls for switching between horizontal and vertical
+      layouts in Japanese ebook readers; this use case is addressed in <a class="xref" href="#app-vertical-text-style-set-tags" title="Appendix A. Vertical Text Style Set Tags">Appendix A, <em>Vertical Text Style Set Tags</em></a>.</p>
+
+  </section>
+
+  <section class="chapter" id="conformance"><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#conformance"> </a> </span>2 Conformance</h1>
+    
+
+    <p>None of this specification applies if the UA has unilaterally turned author style sheets off. (This ability is
+      required by HTML and CSS.) In this case, of course, all style sheets are disabled.</p>
+
+    <p>The <a class="biblioref" href="#refCSSOM" title="CSSOM">[<abbr class="abbrev">CSSOM</abbr>]</a> has more low-level controls for controlling whether a given style sheet is enabled
+      or disabled; scripting the CSSOM may alter the behavior defined here.</p>
+
+    <div class="note" id="note-cssom"><h3 class="title">note</h3>
+      <p>Future versions of this specification will define error handling rules and interaction with <a class="biblioref" href="#refCSSOM" title="CSSOM">[<abbr class="abbrev">CSSOM</abbr>]</a>.
+        </p>
+    </div>
+
+    <p>The keywords <span class="rfc2119">MUST</span>, <span class="rfc2119">MUST NOT</span>, <span class="rfc2119">REQUIRED</span>, <span class="rfc2119">SHALL</span>, <span class="rfc2119">SHALL
+        NOT</span>, <span class="rfc2119">SHOULD</span>, <span class="rfc2119">SHOULD NOT</span>, <span class="rfc2119">RECOMMENDED</span>, <span class="rfc2119">MAY</span>, and <span class="rfc2119">OPTIONAL</span> in this document are to be interpreted as described in <a class="biblioref" href="#refRFC2119" title="Key words for use in RFCs to Indicate Requirement Levels (RFC 2119)">[<abbr class="abbrev">RFC2119</abbr>]</a>.</p>
+    <p>All sections of this specification are normative except where identified by the informative status label "This
+      section is informative". The application of informative status to sections and appendices applies to all child content
+      and subsections they may contain.</p>
+    <p>All examples in this specification are informative.</p>
+  </section>
+
+  <section class="chapter" id="style-sets"><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#style-sets"> </a> </span>3 Style Sets</h1><p class="informative"> This section is informative</p>
+    
+    <p><span class="emphasis"><em>This is an informative summary of HTML's declarative alternate style set mechanism, with a few slight
+        changes to terminology.</em></span></p>
+
+    <p>HTML 4 defines two types of style sheets in its linking mechanism: persistent style sheets and alternate style
+      sheets.</p>
+
+    <p>A <span class="emphasis"><em>persistent style sheet</em></span> is one that is always enabled, regardless of which alternate style
+      set is enabled. A persistent style sheet is indicated by omitting the <code class="markup">title</code> attribute from the
+        <code class="markup">link</code> or <code class="markup">style</code> element that imports it.</p>
+
+    <p>An <span class="emphasis"><em>alternate style sheet</em></span> is one that is part of an alternate set, and may be enabled or
+      disabled as part of that set. An alternate style sheet is indicated by setting a non-empty value for the
+        <code class="markup">title</code> attribute of the <code class="markup">link</code> or <code class="markup">style</code> that imports it. Except for
+      style sheets belonging to a <span class="emphasis"><em>preferred style set</em></span> (see below), alternate style sheets must have an
+        <span class="property">alternate</span> value in the <code class="markup">rel</code> attribue value addition to the <span class="property">stylesheet</span> value.</p>
+
+    <p>HTML allows the grouping of multiple alternate style sheets into a single, named <span class="emphasis"><em>alternate style
+        set</em></span>. All alternate style sheets with the same <code class="markup">title</code> value belong to the same style
+      set.</p>
+
+    <p>The author can indicate whether an alternate style set is <span class="emphasis"><em>preferred</em></span> by omitting the <span class="property">alternate</span> value from the <code class="markup">rel</code> attribute of each of its component alternate
+      style sheets. If no preferred style sets are defined, the default preferred style set is an unnamed set containing no
+      alternate style sheets.</p>
+
+    <p>By default, the first preferred style set is loaded. The author can override this behavior with the <span class="property">Default-Style</span> meta or HTTP header as defined in <a class="biblioref" href="#refHTML4" title="HTML 4.01 Specification">[<abbr class="abbrev">HTML401</abbr>]</a>.</p>
+
+  </section>
+
+  <section class="chapter" id="style-tag"><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#style-tag"> </a> </span>4 Tagging Style Sets</h1>
+    
+
+    <p> A style sheet can be tagged by adding the tag's name to the <code class="markup">class</code> attribute of the
+        <code class="markup">link</code> or <code class="markup">style</code> element that imports it. Tagging a style sheet with a
+        <span class="emphasis"><em>standard style tag</em></span> (one defined by a specification referencing this specification) indicates
+      that it <span class="emphasis"><em>implements</em></span> the functionality described by the style tag's definition. Both alternate style
+      sheets and persistent style sheets <span class="rfc2119">may</span> be tagged in this way.</p>
+
+    <p>A style set can be tagged by tagging any one of its component style sheets. Tagging a style set indicates that it
+        <span class="emphasis"><em>offers</em></span> the functionality described by the style tag's definition.</p>
+
+    <p>Authors using standard tags <span class="rfc2119">should</span> tag all alternate style sheets within a style
+      set with the same set of standard tags.</p>
+
+    <div class="note" id="note-disabling-tagged-style-sheets"><h3 class="title">note</h3>
+      <p> Future versions of this specification may allow UAs to selectively disable tagged style sheets within a style
+        set. Therefore all alternate style sheets that need to be enabled or disabled together must have the same set of
+        standard tags.</p>
+    </div>
+
+    
+
+    <p>If two style sheets within a style set are tagged with mutually exclusive tags, both tags are ignored.</p>
+
+    <p>A specification that defines style tags <span class="rfc2119">may</span> indicate that a particular tag is
+      assumed to be the default for untagged style sets. </p>
+  </section>
+
+  <section class="appendix" id="app-vertical-text-style-set-tags"><div class="titlepage"><div><div><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#app-vertical-text-style-set-tags"> </a> </span>Appendix A. Vertical Text Style Set Tags</h1></div></div></div>
+    
+
+    <p>The following style tags are defined by this appendix:</p>
+
+
+    <div class="variablelist"><dl class="variablelist"><dt class="varlistentry"><span class="term"><span class="property">horizontal</span></span></dt><dd>
+          <p>This style set provides a primarily horizontal presentation of text. This tag is mutually exclusive with
+              <span class="property">vertical</span>.</p>
+        </dd><dt class="varlistentry"><span class="term"><span class="property">vertical</span></span></dt><dd>
+          <p>This style set provides a primarily vertical presentation of text. This tag is mutually exclusive with
+              <span class="property">horizontal</span>.</p>
+        </dd></dl></div>
+
+
+
+    <p>The UA <span class="rfc2119">may</span> guess whether an untagged style set is <span class="property">horizontal</span> or <span class="property">vertical</span>, or <span class="rfc2119">may</span> instead
+      assign such a style set an indeterminate state.</p>
+
+    <h1 id="sec-vertical-ex">Examples</h1>
+
+    <p>The following examples use XHTML syntax; to use HTML syntax, simply drop the slash before the
+        <code class="literal">&gt;</code> in the tags.</p>
+
+
+    <div class="informalexample" id="ex.1">
+
+      <p>In the following example, the author provides a style sheet for a primarily horizontal-text presentation of the
+        document:</p>
+
+      <pre class="synopsis">
+   &lt;link rel="stylesheet" href="horizontal.css" class="horizontal"/&gt;</pre>
+      <p>The UA, knowing that only a horizontal version is provided, would have to synthesize a vertical style if one is
+        needed.</p>
+    </div>
+
+    <div class="informalexample" id="ex.2">
+      <p>In the following example, the author provides a style sheet for a primarily vertical-text presentation of the
+        document:</p>
+      <pre class="synopsis">
+   &lt;link rel="stylesheet" href="vertical.css" class="vertical"/&gt;</pre>
+      <p>The UA, knowing that only a vertical version is provided, would have to synthesize a horizontal style if one is
+        needed.</p>
+    </div>
+
+    <div class="informalexample" id="ex.3">
+      <p>In the following example, the author provides style sheets for both horizontal-text and vertical-text
+        presentations of the document:</p>
+      <pre class="synopsis">
+  &lt;link rel="stylesheet" href="horizontal.css" class="horizontal" title="横組"/&gt;
+  &lt;link rel="alternate stylesheet" href="vertical.css" class="vertical" title="縦組"/&gt;</pre>
+      <p>Since only the second style set is marked with the <span class="property">alternate</span> value of the
+          <span class="property">rel</span> attribute, the author has indicated a preference for the horizontal style set
+        which, in the absence of a user override, should be used by default.</p>
+    </div>
+
+
+    <div class="informalexample" id="ex.4">
+      <p>In the following example, the author provides style sheets for both horizontal-text and vertical-text
+        presentations of the document:</p>
+      <pre class="synopsis">
+  &lt;link rel="alternate stylesheet" href="horizontal.css" class="horizontal" title="横組"/&gt;
+  &lt;link rel="stylesheet" href="vertical.css" class="vertical" title="縦組"/&gt;</pre>
+      <p>Since only the first style set is marked with the <span class="property">alternate</span> value of the
+          <code class="markup">rel</code> attribute, the author has indicated a preference for the vertical style set which, in the
+        absence of a user override, should be used by default.</p>
+    </div>
+
+    <div class="informalexample" id="ex.5">
+      <p>In the following example, the author provides style sheets for both horizontal-text and vertical-text
+        presentations of the document:</p>
+      <pre class="synopsis">
+  &lt;link rel="stylesheet" href="horizontal.css" class="horizontal" title="横組"/&gt;
+  &lt;link rel="stylesheet" href="vertical.css" class="vertical" title="縦組"/&gt;</pre>
+      <p>Since neither is marked with the <span class="property">alternate</span> value of the <code class="markup">rel</code>
+        attribute, both are preferred presentations by the author. Since the horizontal presentation is provided first, in
+        the absence of a user preference to the contrary, it will be used by default.</p>
+    </div>
+  </section>
+
+  <section class="appendix" id="app-night-version-style-set-tags"><div class="titlepage"><div><div><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#app-night-version-style-set-tags"> </a> </span>Appendix B. Night Vision Style Set Tags</h1></div></div></div>
+    
+
+    <p>The following style tags are defined by this appendix:</p>
+
+    <div class="variablelist"><dl class="variablelist"><dt class="varlistentry"><span class="term"><span class="property">day</span></span></dt><dd>
+          <p>This style set provides a color scheme suited for daytime use (light background, dark text). This tag is
+            mutually exclusive with <span class="property">night</span>.</p>
+        </dd><dt class="varlistentry"><span class="term"><span class="property">night</span></span></dt><dd>
+          <p>This style set provides a color scheme suited for nighttime use (dark background, light text). This tag is
+            mutually exclusive with <span class="property">day</span>.</p>
+        </dd></dl></div>
+
+
+    <h1 id="sec-night-ex">Examples</h1>
+    <div class="informalexample" id="ex.b.1">
+      <p>In the following example, the author provides style sheets for both both day vision and night vision
+        presentations of the document. Both horizontal-text and vertical-text presentations are available, but the horizontal
+        presentation is preferred:</p>
+      <pre class="synopsis">
+  &lt;link rel="alternate stylesheet" href="vertical.css" class="vertical" title="Vertical Day"
+  &lt;link rel="alternate stylesheet" href="day.css"      class="day"      title="Vertical Day"/&gt;
+  &lt;link rel="alternate stylesheet" href="vertical.css" class="vertical" title="Vertical Night"/&gt;
+  &lt;link rel="alternate stylesheet" href="night.css"    class="night"    title="Vertical Night"/&gt;
+  &lt;link rel="stylesheet" href="horizontal.css" class="horizontal" title="Horizontal Day"/&gt;
+  &lt;link rel="stylesheet" href="day.css"        class="day"        title="Horizontal Day"/&gt;
+  &lt;link rel="stylesheet" href="horizontal.css" class="horizontal" title="Horizontal Night"/&gt;
+  &lt;link rel="stylesheet" href="night.css"      class="night"      title="Horizontal Night"/&gt;</pre>
+      <p>Of the preferred style sets, the day vision variant is listed first, and so in the absence of other preferences
+        will be loaded by default.</p>
+    </div>
+    <div class="informalexample" id="ex.b.2">
+      <p>The same effect can be created with fewer link tags by using @import statements:</p>
+      <pre class="synopsis">
+  &lt;link rel="alternate stylesheet" href="vertical-day.css"   class="vertical day"   title="Vertical Day"/&gt;
+  &lt;link rel="alternate stylesheet" href="vertical-night.css" class="vertical night" title="Vertical Night"/&gt;
+  &lt;link rel="stylesheet" href="horizontal-day.css"   class="horizontal day"   title="Horizontal Day"/&gt;
+  &lt;link rel="stylesheet" href="horizontal-night.css" class="horizontal night" title="Horizontal Night"/&gt;</pre>
+
+      <p>where vertical-day.css is</p>
+      <pre class="synopsis">
+  @import "vertical.css";
+  @import "day.css";</pre>
+      <p>and vertical-night.css is</p>
+      <pre class="synopsis">
+  @import "vertical.css";
+  @import "night.css";</pre>
+      <p>and horizontal-day.css is</p>
+      <pre class="synopsis">
+  @import "horizontal.css";
+  @import "day.css";</pre>
+      <p>and vertical-night.css is</p>
+      <pre class="synopsis">
+  @import "horizontal.css";
+  @import "night.css";</pre>
+    </div>
+  </section>
+
+  <section class="appendix" id="app-acknowledgements"><div class="titlepage"><div><div><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#app-acknowledgements"> </a> </span>Appendix C. Acknowledgements</h1></div></div></div>
+    
+
+    <p>This draft resulted from discussion in the <a class="ulink" href="http://www.w3.org/Style/CSS/Group" target="_top">W3C CSS Working
+        Group</a> and the <a class="ulink" href="../30/spec/overview/#sec-contributors-30" target="_top">IDPF EPUB Working Group</a> and
+      would not exist without the particular suggestion of <a class="ulink" href="http://annevankesteren.nl" target="_top">Anne van
+        Kesteren</a>.</p>
+
+  </section>
+
+  <section xmlns:spec="http://www.idpf.org/2016/epub/spec" xml:lang="en" class="bibliography" id="references"><div class="titlepage"><div><div><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#references"> </a> </span>References</h1></div></div></div>
+  
+  
+  
+<div class="bibliodiv" id="normative-refs">
+    <h3 class="title">Normative References</h3>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  <div class="biblioentry" id="refHTML4"><p>[<abbr class="abbrev">HTML401</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="http://www.w3.org/TR/html401/" target="_top">HTML 4.01 Specification</a>
+      </em>. </span>
+      <span class="author">Dave Raggett, et al. </span>
+      <span class="date">24 December 1999. </span>
+    </p></div><div class="biblioentry" id="refHTML5"><p>[<abbr class="abbrev">HTML5</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="http://www.w3.org/TR/html5/" target="_top">HTML5: A vocabulary and associated APIs for HTML and XHTML</a>
+      </em>. </span>
+    </p></div><div class="biblioentry" id="refRFC2119"><p>[<abbr class="abbrev">RFC2119</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="http://tools.ietf.org/html/rfc2119" target="_top">Key words for use in RFCs to Indicate Requirement Levels</a>
+        (RFC 2119) </em>. </span>
+      <span class="date">March 1997. </span>
+    </p></div></div><div class="bibliodiv" id="informative-refs">
+    <h3 class="title">Informative References</h3>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  <div class="biblioentry" id="refCSSOM"><p>[<abbr class="abbrev">CSSOM</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="http://dev.w3.org/csswg/cssom/" target="_top">CSSOM</a>
+      </em>. </span>
+      <span class="author">Anne van Kesteren. </span>
+    </p></div></div></section>
+
+</body></html>

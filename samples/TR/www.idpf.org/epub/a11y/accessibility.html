@@ -1,0 +1,1047 @@
+<?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head><title>EPUB Accessibility 1.0</title><link rel="stylesheet" type="text/css" href="../css/epub-spec-2016.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.78.1"/><meta name="description" content="EPUB Accessibility defines discovery and content accessibility requirements for EPUB Publications."/><meta charset="utf-8"/><link rel="stylesheet" href="../css/epub-print.css" type="text/css" media="print"/></head><body><header><p><a href="http://www.idpf.org"><img src="../images/idpflogo_web_125.jpg" class="logo" alt="IDPF"/></a></p><h1 class="title">EPUB Accessibility 1.0</h1><p class="subtitle">Conformance and Discovery Requirements for EPUB Publications</p><p class="identity"><span class="releaseinfo">Editor's Draft</span> <span class="pubdate">11 July 2016</span></p><dl class="printhistory"><dt>This version</dt><dd><a href="http://www.idpf.org/epub/a11y/accessibility-20160711.html">http://www.idpf.org/epub/a11y/accessibility-20160711.html</a></dd><dt>Latest version</dt><dd><a href="http://www.idpf.org/epub/latest/accessibility">http://www.idpf.org/epub/latest/accessibility</a></dd><dt>Previous version</dt><dd><a href="http://www.idpf.org/epub/a11y/accessibility-20160426.html">http://www.idpf.org/epub/a11y/accessibility-20160426.html</a></dd><dt>Previous recommendation</dt><dd>N/A</dd></dl><div class="history"><span class="history-title">Document history</span><ul><li><a href="https://github.com/IDPF/epub-revision/commits/master/src/spec/epub-a11y.xml">Changes to this
+                document</a></li><li><a href="https://github.com/IDPF/epub-revision/issues?q=milestone%3A%22EPUB+3.1%22+is%3Aclosed">Issues addressed in this revision</a></li><li><a href="https://github.com/IDPF/epub-revision/issues">Report an issue</a></li><li><a href="./errata/">Errata</a></li></ul></div><div class="authorgroup"><p class="bridgehead">Editors</p><p class="editor">Matt Garrish, 
+                    
+                        Invited Expert
+                    
+                </p><p class="editor">George Kersher, 
+                    
+                        DAISY Consortium
+                    
+                </p><p class="editor">Charles Lapierre, 
+                    
+                        Benetech
+                    
+                </p><p class="editor">Avneesh Singh, 
+                    
+                        DAISY Consortium
+                    
+                </p></div><div class="authorgroup"><p class="bridgehead">Authors</p><p class="editor">Romain Deltour, 
+                    
+                        DAISY Consortium
+                    
+                </p><p class="editor">Markus Gylling, 
+                    
+                        International Digital Publishing Forum (IDPF)
+                    
+                </p><p class="editor">Bernhard Heinser, 
+                    
+                        Access for All
+                    
+                </p><p class="editor">Jean Kaplansky, 
+                    
+                        Invited Expert
+                    
+                </p><p class="editor">Madeleine Rothberg, 
+                    
+                        Invited Expert
+                    
+                </p><p class="editor">Tzviya Siegman, 
+                    
+                        John Wiley &amp; Sons
+                    
+                </p><p class="editor">Jason White, 
+                    
+                        Invited Expert
+                    
+                </p></div><div class="legalnotice"><p>Copyright © 
+    2010-2016
+    International Digital Publishing Forum™
+</p><div xmlns:spec="http://www.idpf.org/2016/epub/spec" xml:lang="en" class="legalnotice">
+    <p>All rights reserved. This work is protected under Title 17 of the United States Code.
+        Reproduction and dissemination of this work with changes is prohibited except with the
+        written permission of the <a href="http://www.idpf.org">International Digital
+        Publishing Forum (IDPF)</a>.</p>
+    <p>EPUB is a registered trademark of the International Digital Publishing Forum.</p>
+</div></div></header><nav xmlns:spec="http://www.idpf.org/2016/epub/spec" class="toc" id="toc"><h2 class="toc-title">Table of Contents</h2><ol class="toc"><li><span class="chapter"><a href="#sec-overview">1. Overview</a></span><ol><li><span class="section"><a href="#sec-purpose-scope">1.1. Purpose and Scope</a></span></li><li><span class="section"><a href="#sec-success-techniques">1.2. Success Techniques</a></span></li><li><span class="section"><a href="#sec-application">1.3. Application to Older Specifications</a></span></li><li><span class="section"><a href="#sec-terminology">1.4. Terminology</a></span></li><li><span class="section"><a href="#sec-typography">1.5. Typographic Conventions</a></span></li><li><span class="section"><a href="#sec-conformance">1.6. Conformance Statements</a></span></li></ol></li><li><span class="chapter"><a href="#sec-epub-conformance">2. Conformance</a></span><ol><li><span class="section"><a href="#sec-conf-discovery">2.1. Discovery-Enabled EPUB Publications</a></span></li><li><span class="section"><a href="#sec-conf-epub">2.2. Accessible EPUB Publications</a></span></li><li><span class="section"><a href="#sec-conf-opt">2.3. Optimized EPUB Publications</a></span></li></ol></li><li><span class="chapter"><a href="#sec-discovery">3. Discovery</a></span><ol><li><span class="section"><a href="#sec-disc-intro">3.1. Introduction</a></span></li><li><span class="section"><a href="#sec-disc-package">3.2. Package Metadata</a></span></li><li><span class="section"><a href="#sec-disc-linked-rec">3.3. Linked Metadata Records</a></span></li></ol></li><li><span class="chapter"><a href="#sec-access-pub">4. Accessible Publications</a></span><ol><li><span class="section"><a href="#sec-access-pub-intro">4.1. Introduction</a></span></li><li><span class="section"><a href="#sec-acc-pub-wcag">4.2. WCAG Conformance</a></span><ol><li><span class="section"><a href="#sec-wcag-conf">4.2.1. WCAG Conformance Requirements</a></span></li><li><span class="section"><a href="#sec-wcag-eval">4.2.2. Evaluating WCAG Conformance</a></span><ol><li><span class="section"><a href="#sec-wcag-eval-page-pub">4.2.2.1. Page and Publication</a></span></li><li><span class="section"><a href="#sec-wcag-application">4.2.2.2. Applying the Conformance Criteria</a></span></li></ol></li></ol></li><li><span class="section"><a href="#sec-epub-req">4.3. EPUB Requirements</a></span><ol><li><span class="section"><a href="#sec-rel-wcag">4.3.1. Relationship to WCAG</a></span></li><li><span class="section"><a href="#sec-audio-playback">4.3.2. Structured Audio Playback</a></span><ol><li><span class="section"><a href="#sec-audio-playback-obj">4.3.2.1. Objective</a></span></li><li><span class="section"><a href="#sec-audio-playback-understand">4.3.2.2. Understanding this objective</a></span></li><li><span class="section"><a href="#sec-audio-playbac-conf">4.3.2.3. Meeting this objective</a></span></li></ol></li><li><span class="section"><a href="#sec-page-markers">4.3.3. Page Markers</a></span><ol><li><span class="section"><a href="#sec-page-markers-obj">4.3.3.1. Objective</a></span></li><li><span class="section"><a href="#sec-page-markers-understand">4.3.3.2. Understanding this objective</a></span></li><li><span class="section"><a href="#sec-page-markers-conf">4.3.3.3. Meeting this objective</a></span></li></ol></li></ol></li><li><span class="section"><a href="#sec-conf-reporting">4.4. Conformance Reporting</a></span></li></ol></li><li><span class="chapter"><a href="#sec-opt-pubs">5. Optimized Publications</a></span></li><li><span class="chapter"><a href="#sec-distribution">6. Distribution</a></span></li><li><span class="appendix"><a href="#app-auth-consump">A. Authoring and Consumption</a></span><ol><li><span class="section"><a href="#app-ac-intro">A.1. Introduction</a></span></li><li><span class="section"><a href="#app-ac-auth-conf">A.2. Authoring Tool Conformance</a></span></li><li><span class="section"><a href="#app-ac-rs-conf">A.3. Reading System Conformance</a></span></li></ol></li><li><span class="acknowledgements"><a href="#app-contributors">Acknowledgements and Contributors</a></span></li><li><span class="bibliography"><a href="#references">References</a></span></li></ol></nav>
+
+    
+    
+
+    
+
+    <section class="chapter" id="sec-overview"><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-overview"> </a> </span>1 Overview</h1>
+        
+
+        <section class="section" id="sec-purpose-scope"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-purpose-scope"> </a> </span>1.1 Purpose and Scope</h2><p class="informative"> This section is informative</p>
+            
+
+            <p>This specification, EPUB Accessibility, addresses two key needs in the EPUB® ecosystem:</p>
+
+            <div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+                    <p>evaluation and certification of accessible EPUB Publications;</p>
+                </li><li class="listitem">
+                    <p>discovery of the accessible qualities of EPUB Publications.</p>
+                </li></ol></div>
+
+            <p>Although it has always been possible to create <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB
+                    Publications</a> with a high degree of accessibility, this specification sets formal requirements to
+                meet to certify content as accessible. These requirements provide <a class="glossterm" href="#gloss-author" title="Author">Authors</a>
+                a clear set of guidelines to evaluate their content against, and allow certification of quality for
+                consumers.</p>
+
+            <p>The inclusion of accessibility metadata, on the other hand, facilitates informed decisions about the
+                usability of an EPUB Publication. Consumers can review the qualities of the content and decide whether an
+                EPUB Publication is appropriate for their needs, regardless of whether it meets the bar of being certified
+                broadly accessible.</p>
+
+            <p>This specification defines three categories of compliance for EPUB Publications:</p>
+
+            <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+                    <p>Discovery-only — this category of EPUB Publication meets the discovery metadata requirements of
+                        this specification, but does not meet the accessibility requirements. Conformance is defined in <a class="xref" href="#sec-conf-discovery" title="2.1 Discovery-Enabled EPUB Publications">Discovery-Enabled EPUB Publications</a>.</p>
+                </li><li class="listitem">
+                    <p>Accessible — this category of EPUB Publication meets all discovery, <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> and
+                        EPUB accessibility requirements. Conformance is defined in <a class="xref" href="#sec-conf-epub" title="2.2 Accessible EPUB Publications">Accessible EPUB Publications</a>.</p>
+                </li><li class="listitem">
+                    <p>Optimized — this category of EPUB Publication meets the discovery requirements for <a class="glossterm" href="#gloss-optimization" title="Optimization">Optimizations</a>. Conformance is defined in <a class="xref" href="#sec-conf-opt" title="2.3 Optimized EPUB Publications">Optimized EPUB Publications</a>.</p>
+                </li></ul></div>
+
+            <p>This specification does not target a single version of EPUB. It is designed to be applicable to EPUB
+                Publications that conform to any version or profile, including future versions of the standard.</p>
+
+            <p>Ideally, these guidelines will be instructive in evaluating any digital publication built on Open Web
+                technologies, although ensuring such application is outside the scope of this specification.</p>
+        </section>
+
+        <section class="section" id="sec-success-techniques"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-success-techniques"> </a> </span>1.2 Success Techniques</h2>
+            
+
+            <p>This specification takes an abstract approach to the accessibility requirements for <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publications</a>, similar to how <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> separates its accessibility guidelines from the techniques to achieve them. This approach allows the
+                guidelines to remain stable even as the format evolves.</p>
+
+            <p>To facilitate this approach, the companion <a class="biblioref" href="#refA11YTech" title="EPUB Accessibility">[<abbr class="abbrev">EPUB Accessibility Techniques</abbr>]</a> document outlines conformance
+                techniques. The techniques explain how to meet the requirements of this specification for different versions
+                of EPUB.</p>
+        </section>
+
+        <section class="section" id="sec-application"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-application"> </a> </span>1.3 Application to Older Specifications</h2><p class="informative"> This section is informative</p>
+            
+
+            <p>This specification is designed to be applicable to any <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a>, even if
+                the content conforms to an older specification that does not make reference to this one (i.e., specifications
+                prior to <a class="biblioref" href="#refEPUB31" title="EPUB 3.1">[<abbr class="abbrev">EPUB 3.1</abbr>]</a>).</p>
+
+            <p><a class="glossterm" href="#gloss-author" title="Author">Authors</a> of such EPUB Publications are encouraged to create content in
+                conformance with the accessibility requirements of this specification, even though it is not normatively
+                required.</p>
+        </section>
+
+        <section class="section" id="sec-terminology"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-terminology"> </a> </span>1.4 Terminology</h2>
+            
+
+            <div class="glosslist"><dl><dt class="glossentry" id="gloss-at"><span class="glossterm">Assistive Technology</span></dt><dd class="glossdef"><p>This specification adopts the meaning of an <a class="ulink" href="https://www.w3.org/TR/WCAG20/#atdef" target="_top">assistive technology</a> from <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a>.</p><p>Note that an assistive technology is not always a separate application from a Reading System.
+                            Reading Systems often integrate features of standalone assistive technologies, such as
+                            text-to-speech playback.</p></dd><dt class="glossentry" id="gloss-author"><span class="glossterm">Author</span></dt><dd class="glossdef"><p>The person(s) or organization responsible for the creation of an <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a>. The Author is not necessarily the creator of the
+                            content.</p></dd><dt class="glossentry" id="gloss-authoring-tool"><span class="glossterm">EPUB Authoring Tool</span></dt><dd class="glossdef"><p>This specification adapts the meaning of <a class="ulink" href="https://www.w3.org/TR/ATAG20/#def-Authoring-Tool" target="_top">authoring tool</a> from
+                                <a class="biblioref" href="#refATAG20" title="Authoring Tools Accessibility Guidelines (ATAG) 2.0">[<abbr class="abbrev">ATAG 2.0</abbr>]</a>. An EPUB Authoring Tool differs only in that it is has to be able
+                            to create or modify an EPUB Publication.</p></dd><dt class="glossentry" id="gloss-content-doc"><span class="glossterm">EPUB Content Document</span></dt><dd class="glossdef"><p>A document that conforms to one of the EPUB Content Document definitions.</p></dd><dt class="glossentry" id="gloss-epub-publication"><span class="glossterm">EPUB Publication</span></dt><dd class="glossdef"><p>A collection of one or more <a class="glossterm" href="#gloss-rendition" title="Rendition">Renditions</a> that represents a
+                            single intellectual or artistic work.</p></dd><dt class="glossentry" id="gloss-optimization"><span class="glossterm">Optimization</span></dt><dd class="glossdef"><p>An EPUB Publication whose content is enhanced to be accessible by Users with a specific need
+                            (e.g., dyslexia) or preferred reading modality (e.g., audio, tactile), so does not meet the
+                            broader accessibility requirements of <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a>. See <a class="xref" href="#sec-opt-pubs" title="5 Optimized Publications"><em>Optimized Publications</em></a>.</p></dd><dt class="glossentry" id="gloss-package-doc"><span class="glossterm">Package Document</span></dt><dd class="glossdef"><p>The Package Document describes one <a class="glossterm" href="#gloss-rendition" title="Rendition">Rendition</a> of an <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a>. It carries meta information, provides a manifest of
+                            resources and defines the default reading order.</p></dd><dt class="glossentry" id="gloss-reading-system"><span class="glossterm">Reading System</span></dt><dd class="glossdef"><p>A system that processes <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publications</a> for
+                            presentation to a <a class="glossterm" href="#gloss-user" title="User">User</a>.</p></dd><dt class="glossentry" id="gloss-rendition"><span class="glossterm">Rendition</span></dt><dd class="glossdef"><p>A logical document entity that represents one rendering of an <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a>.</p></dd><dt class="glossentry" id="gloss-user"><span class="glossterm">User</span></dt><dd class="glossdef"><p>An individual that consumes an <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a> using a <a class="glossterm" href="#gloss-reading-system" title="Reading System">Reading System</a>.</p></dd></dl></div>
+
+            <div class="note"><h3 class="title">note</h3>
+                <p>Some terms have more precise meanings for a given version of EPUB. Refer to the appropriate
+                    specification for more information.</p>
+            </div>
+        </section>
+
+        <section xml:lang="en" class="section" id="sec-typography"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-typography"> </a> </span>1.5 Typographic Conventions</h2>
+    
+
+    <p>The following typographic conventions are used in this specification:</p>
+    <div class="variablelist"><dl class="variablelist"><dt class="varlistentry"><span class="term"><code class="markup">markup</code></span></dt><dd>
+                <p>All markup (elements, attributes, properties), code (JavaScript, pseudo-code), machine-readable values
+                    (string, characters, media types) and file names are in red monospace font.</p>
+            </dd><dt class="varlistentry"><span class="term"><code class="code-link">markup link</code></span></dt><dd>
+                <p>Links to markup and code definitions are in underlined red monospace font.</p>
+            </dd><dt class="varlistentry"><span class="term"><code class="uri">http://www.idpf.org/</code></span></dt><dd>
+                <p>URIs are in navy blue monospace font.</p>
+            </dd><dt class="varlistentry"><span class="term"><span class="link">hyperlink</span></span></dt><dd>
+                <p>Hyperlinks are underlined and blue.</p>
+            </dd><dt class="varlistentry"><span class="term"><span class="link-ref">[reference]</span></span></dt><dd>
+                <p>Normative and informative references are enclosed in square brackets.</p>
+            </dd><dt class="varlistentry"><span class="term"><span class="terminology">Term</span></span></dt><dd>
+                <p>Terms defined in the <a class="xref" href="#sec-terminology" title="1.4 Terminology">Terminology</a> are in capital case.</p>
+            </dd><dt class="varlistentry"><span class="term"><span class="link-def">Term Link</span></span></dt><dd>
+                <p>Links to term definitions have a dotted blue underline.</p>
+            </dd></dl></div>
+    <div class="elem-synopsis"><dl class="elem-synopsis"><dt class="varlistentry"><span class="term"/></dt><dd>
+                <p>Normative element, attribute and property definitions are in blue boxes.</p>
+            </dd></dl></div>
+    <div class="informalexample">
+        <pre class="synopsis">Informative markup examples are in light gray boxes.</pre>
+    </div>
+    <div class="note"><h3 class="title">note</h3>
+        <p>Informative notes are in green boxes with a "Note" header.</p>
+    </div>
+    <div class="caution"><h3 class="title">caution</h3>
+        <p>Informative cautionary notes are in red boxes with a "Caution" header.</p>
+    </div>
+</section>
+
+        <section xml:lang="en" class="section" id="sec-conformance"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-conformance"> </a> </span>1.6 Conformance Statements</h2>
+    
+	<p>The keywords <span class="rfc2119">MUST</span>, <span class="rfc2119">MUST NOT</span>, 
+		<span class="rfc2119">REQUIRED</span>, <span class="rfc2119">SHALL</span>, <span class="rfc2119">SHALL NOT</span>,
+		<span class="rfc2119">SHOULD</span>, <span class="rfc2119">SHOULD NOT</span>, <span class="rfc2119">RECOMMENDED</span>,
+		<span class="rfc2119">MAY</span>, and <span class="rfc2119">OPTIONAL</span> in this document are to be interpreted as
+        described in <a class="biblioref" href="#refRFC2119" title="Key words for use in RFCs to Indicate Requirement Levels (RFC 2119)">[<abbr class="abbrev">RFC2119</abbr>]</a>.</p>
+    <p>All sections of this specification are normative except where identified by 
+        the informative status label "This section is informative". The application of informative 
+        status to sections and appendices applies to all child content and subsections 
+        they may contain.</p>
+    <p>All examples in this specification are informative.</p>
+</section>
+    </section>
+
+    <section class="chapter" id="sec-epub-conformance"><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-epub-conformance"> </a> </span>2 Conformance</h1>
+        
+
+        <section class="section" id="sec-conf-discovery"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-conf-discovery"> </a> </span>2.1 Discovery-Enabled EPUB Publications</h2>
+            
+
+            <p>The following requirements apply to a discovery-enabled <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a>:</p>
+
+            <div class="conformance-list"><ul class="conformance-list" style="list-style-type: disc; "><li class="listitem">
+                    <p id="confreq-disc-meta"><span class="link-marker"><a class="hidden-reveal" href="#confreq-disc-meta"> </a> </span>It <span class="rfc2119">must</span> include discovery metadata as
+                        defined in <a class="xref" href="#sec-discovery" title="3 Discovery"><em>Discovery</em></a>.</p>
+                </li><li class="listitem">
+                    <p id="confreq-disc-dist"><span class="link-marker"><a class="hidden-reveal" href="#confreq-disc-dist"> </a> </span><a class="glossterm" href="#gloss-author" title="Author">Authors</a>
+                        <span class="rfc2119">must</span> follow accessible distribution practices, as described in
+                            <a class="xref" href="#sec-distribution" title="6 Distribution"><em>Distribution</em></a>.</p>
+                </li></ul></div>
+        </section>
+
+        <section class="section" id="sec-conf-epub"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-conf-epub"> </a> </span>2.2 Accessible EPUB Publications</h2>
+            
+
+            <p>An <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a>
+                <span class="rfc2119">must</span> meet the following requirements to be accessible per this
+                specification: </p>
+
+            <div class="conformance-list"><ul class="conformance-list" style="list-style-type: disc; "><li class="listitem">
+                    <p id="confreq-epub-disc"><span class="link-marker"><a class="hidden-reveal" href="#confreq-epub-disc"> </a> </span>It <span class="rfc2119">must</span> meet the requirements for
+                            <a class="xref" href="#sec-conf-discovery" title="2.1 Discovery-Enabled EPUB Publications">Discovery-Enabled EPUB Publications</a>.</p>
+                </li><li class="listitem">
+                    <p id="confreq-epub-wcag"><span class="link-marker"><a class="hidden-reveal" href="#confreq-epub-wcag"> </a> </span>It <span class="rfc2119">must</span> meet the requirements for
+                            <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> conformance defined in <a class="xref" href="#sec-wcag-conf" title="4.2.1 WCAG Conformance Requirements">WCAG Conformance Requirements</a>.</p>
+                </li><li class="listitem">
+                    <p id="confreq-epub-epub"><span class="link-marker"><a class="hidden-reveal" href="#confreq-epub-epub"> </a> </span>It <span class="rfc2119">must</span> meet the additional
+                        requirements for EPUB Publications defined in <a class="xref" href="#sec-epub-req" title="4.3 EPUB Requirements">EPUB Requirements</a>.</p>
+                </li><li class="listitem">
+                    <p id="confreq-epub-report"><span class="link-marker"><a class="hidden-reveal" href="#confreq-epub-report"> </a> </span>It <span class="rfc2119">must</span> report its conformance as
+                        defined in <a class="xref" href="#sec-conf-reporting" title="4.4 Conformance Reporting">Conformance Reporting</a>.</p>
+                </li></ul></div>
+        </section>
+
+        <section class="section" id="sec-conf-opt"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-conf-opt"> </a> </span>2.3 Optimized EPUB Publications</h2>
+            
+
+            <p>An <a class="glossterm" href="#gloss-optimization" title="Optimization">optimized</a> <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a>
+                <span class="rfc2119">must</span> meet the following requirements:</p>
+
+            <div class="conformance-list"><ul class="conformance-list" style="list-style-type: disc; "><li class="listitem">
+                    <p id="confreq-opt-disc"><span class="link-marker"><a class="hidden-reveal" href="#confreq-opt-disc"> </a> </span>It <span class="rfc2119">must</span> meet the requirements for <a class="xref" href="#sec-conf-discovery" title="2.1 Discovery-Enabled EPUB Publications">Discovery-Enabled EPUB Publications</a>.</p>
+                </li><li class="listitem">
+                    <p id="confreq-opt-id"><span class="link-marker"><a class="hidden-reveal" href="#confreq-opt-id"> </a> </span>It <span class="rfc2119">must</span> be identified as an optimized as
+                        defined in <a class="xref" href="#sec-opt-pubs" title="5 Optimized Publications"><em>Optimized Publications</em></a>.</p>
+                </li></ul></div>
+        </section>
+    </section>
+
+    <section class="chapter" id="sec-discovery"><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-discovery"> </a> </span>3 Discovery</h1>
+        
+
+        <section class="section" id="sec-disc-intro"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-disc-intro"> </a> </span>3.1 Introduction</h2>
+            
+
+            <p>Unlike Web pages, <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publications</a> are designed to be
+                distributed through many channels for personal consumption – a model that has made EPUB a successful format
+                for ebooks and other types of digital publications. One downside to this model, however, is that specific
+                details about the accessibility of a publication typically do not travel with it.</p>
+
+            <p>An online bookstore aggregating content from publishers and authors, for example, does not know the
+                production quality that went into each submission, so can only relay to consumers what is present in the
+                metadata.</p>
+
+            <p>Ensuring that the accessible qualities of an EPUB Publication can be discovered by any interested party is
+                therefore a primary concern. <a class="glossterm" href="#gloss-user" title="User">Users</a> need to be able to gauge the suitability
+                of an EPUB Publication when they purchase, borrow or otherwise obtain it (e.g., will it be adequate for an
+                educational setting). That the content meets the accessibility requirements of this specification is often
+                not enough information; the specific affordances made to meet the requirements are equally important to know
+                when determining usability.</p>
+
+            <p>Similarly, content that does not meet the requirements of this specification, while not broadly accessible,
+                might still meet the needs of individual Users. Only through the inclusion of rich metadata can a User
+                decide if the content is suitable for them.</p>
+        </section>
+
+        <section class="section" id="sec-disc-package"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-disc-package"> </a> </span>3.2 Package Metadata</h2>
+            
+
+            <div class="issue"><h6 id="schema-org-properties">
+                        OPEN ISSUE
+                        1</h6>
+                <p>Three of the properties identified in this section are currently proposals to schema.org that are on
+                    track for inclusion. This proposal will be updated as their status becomes clear.</p>
+            </div>
+
+            <p>Every conformant <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a>
+                <span class="rfc2119">must</span> include the following <a class="biblioref" href="#refSCHEMA-ORG" title="schema.org">[<abbr class="abbrev">schema.org</abbr>]</a> accessibility
+                metadata:</p>
+
+            <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+                    <p><a class="ulink" href="https://github.com/daisy/epub-revision-a11y/wiki/ePub-3.1-Accessibility--Proposal-To-Schema.org#user-content-accessMode" target="_top">accessMode</a> [proposed] — the senses or faculties necessary to process or perceive the
+                        content (e.g., textual, visual, auditory, tactile).</p>
+                </li><li class="listitem">
+                    <p><a class="ulink" href="https://schema.org/accessibilityFeature" target="_top">accessibilityFeature</a> — features
+                        and adaptations that increase the overall accessibility of the content (e.g., alternative text,
+                        extended descriptions, captions).</p>
+                </li><li class="listitem">
+                    <p><a class="ulink" href="https://schema.org/accessibilityHazard" target="_top">accessibilityHazard</a> — any
+                        potential hazards that the content presents (e.g., flashing, motion simulation, sound).</p>
+                </li><li class="listitem">
+                    <p><a class="ulink" href="https://github.com/daisy/epub-revision-a11y/wiki/ePub-3.1-Accessibility--Proposal-To-Schema.org#user-content-accessibilitySummary" target="_top">accessibilitySummary</a> [proposed] — a human-readable summary of the overall accessibility,
+                        which includes a description of any known deficiencies (e.g., lack of extended descriptions, specific
+                        hazards).</p>
+                </li></ul></div>
+
+            <p>Inclusion of the following <a class="biblioref" href="#refSCHEMA-ORG" title="schema.org">[<abbr class="abbrev">schema.org</abbr>]</a> accessibility metadata is <span class="rfc2119">recommended</span>:</p>
+
+            <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+                    <p><a class="ulink" href="https://github.com/daisy/epub-revision-a11y/wiki/ePub-3.1-Accessibility--Proposal-To-Schema.org#user-content-accessModeSufficient" target="_top">accessModeSufficient</a> [proposed] — the access mode(s) sufficient to consume the content
+                        (e.g., a non-visual reader will be able to read a publication with extended descriptions even if the
+                        content's primary access mode is visual).</p>
+                </li></ul></div>
+
+            <p>Inclusion of the following <a class="biblioref" href="#refSCHEMA-ORG" title="schema.org">[<abbr class="abbrev">schema.org</abbr>]</a> metadata is <span class="rfc2119">optional</span>:</p>
+
+            <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+                    <p><a class="ulink" href="https://schema.org/accessibilityAPI" target="_top">accessibilityAPI</a> — indicates the
+                        resource is compatible with the specified accessibility API (e.g., ARIA).</p>
+                </li><li class="listitem">
+                    <p><a class="ulink" href="https://schema.org/accessibilityControl" target="_top">accessibilityControl</a> — identifies
+                        input methods that can be used to access the content (e.g., keyboard, mouse).</p>
+                </li></ul></div>
+
+            <div class="note"><h3 class="title">note</h3>
+                <p>See <span class="phrase"><a class="ulink" href="techniques/techniques.html#sec-discovery" target="_top">Discovery Metadata Techniques</a> <a class="biblioref" href="#refA11YTech" title="EPUB Accessibility">[<abbr class="abbrev">EPUB Accessibility Techniques</abbr>]</a></span> for more information on
+                    these properties and how to include them in different versions of EPUB.</p>
+                <p>See also <span class="phrase"><a class="ulink" href="techniques/techniques.html#sec-dist-002" target="_top">DIST-002: Include accessibility metadata in distribution records</a> <a class="biblioref" href="#refA11YTech" title="EPUB Accessibility">[<abbr class="abbrev">EPUB Accessibility Techniques</abbr>]</a></span> for more information
+                    on including accessibility metadata in other formats.</p>
+            </div>
+
+            <div class="note"><h3 class="title">note</h3>
+                <p>The above recommendations cover all <a class="biblioref" href="#refSCHEMA-ORG" title="schema.org">[<abbr class="abbrev">schema.org</abbr>]</a> accessibility properties at the
+                    time of publication. If new properties are added in the future, Authors are encouraged to include them,
+                    as applicable, until such time as this specification can be updated.</p>
+            </div>
+
+            <p>Inclusion of accessibility metadata from other vocabularies is <span class="rfc2119">optional</span>.</p>
+        </section>
+
+        <section class="section" id="sec-disc-linked-rec"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-disc-linked-rec"> </a> </span>3.3 Linked Metadata Records</h2>
+            
+
+            <p>Accessibility metadata can also be included in <a class="ulink" href="http://www.idpf.org/epub3/latest/packages#sec-link-elem" target="_top">linked records</a> <a class="biblioref" href="#refPackagesLatest" title="EPUB Packages 3">[<abbr class="abbrev">Packages 3</abbr>]</a>, but the inclusion of such metadata solely in a linked record does not
+                satisfy the discovery requirements of this specification.</p>
+
+            <p>As the precedence given to linked records varies depending on the version of EPUB, Authors need to take
+                care to ensure that accessibility metadata in the <a class="glossterm" href="#gloss-package-doc" title="Package Document">Package Document</a> and any linked records
+                do not contain contradictory statements, as it can affect the information a Reading System presents to the
+                User.</p>
+        </section>
+    </section>
+
+    <section class="chapter" id="sec-access-pub"><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-access-pub"> </a> </span>4 Accessible Publications</h1>
+        
+
+        <section class="section" id="sec-access-pub-intro"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-access-pub-intro"> </a> </span>4.1 Introduction</h2><p class="informative"> This section is informative</p>
+            
+
+            <p>EPUB is built on the Open Web Platform, with HTML, CSS, JavaScript and SVG the core technologies used for
+                content authoring. The use of these technologies means that <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB
+                    Publications</a> can be authored with a high degree of accessibility simply through the proper
+                application of established Web accessibility techniques.</p>
+
+            <p>The primary source for the production of accessible Web content is the W3C Web Content Accessibility
+                Guidelines (WCAG) 2.0 <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a>. This specification leverages the extensive work done in
+                    <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> to establish benchmarks for accessible content, and the same four high-level
+                content principles — Perceivable, Operable, Understandable and Robust — are central to creating accessible
+                EPUB Publications.</p>
+
+            <p>This section defines how to apply the conformance criteria defined in <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> and also
+                addresses qualities unique to EPUB Publications (e.g., page breaks).</p>
+
+            <p>EPUB Publications authored to comply with the requirements in this section will have a high degree of
+                accessibility for <a class="glossterm" href="#gloss-user" title="User">Users</a> with a wide variety of reading needs and
+                preferences.</p>
+        </section>
+
+        <section class="section" id="sec-acc-pub-wcag"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-acc-pub-wcag"> </a> </span>4.2 WCAG Conformance</h2>
+            
+
+            <section class="section" id="sec-wcag-conf"><h3 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-wcag-conf"> </a> </span>4.2.1 WCAG Conformance Requirements</h3>
+                
+
+                <p><a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publications</a>
+                    <span class="rfc2119">must</span> meet <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> <a class="ulink" href="https://www.w3.org/TR/WCAG20/#conformance-reqs" target="_top">Level A</a> to be conformant with this
+                    specification, but it is <span class="rfc2119">recommended</span> that they meet Level AA.</p>
+
+                <p>Note, however, that local and national laws can influence the level of conformance an EPUB Publication
+                    has to meet to be considered accessible, as <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> Level AA conformance is often
+                    cited as the benchmark for accessibility in legal frameworks and policies. In fact, any EPUB
+                    specification, and even vendor procurement requirements, can demand content that exceeds the minimum
+                    requirements of this specification.</p>
+
+                <p><a class="glossterm" href="#gloss-author" title="Author">Authors</a> need to ensure they understand the requirements their
+                    content has to meet to be considered accessible in any jurisdiction or distribution context, including
+                    seeking any necessary legal advice. Minimum conformance with this specification does not supersede such
+                    requirements, and does not offer protection from any legal liability that might arise.</p>
+            </section>
+
+            <section class="section" id="sec-wcag-eval"><h3 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-wcag-eval"> </a> </span>4.2.2 Evaluating WCAG Conformance</h3>
+                
+
+                <section class="section" id="sec-wcag-eval-page-pub"><h4 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-wcag-eval-page-pub"> </a> </span>4.2.2.1 Page and Publication</h4>
+                    
+
+                    <p>The <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> Principles and Guidelines focus on the evaluation of individual
+                            <a class="ulink" href="https://www.w3.org/TR/WCAG20/#webpagedef" target="_top">Web pages</a>, but an <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a> more closely resembles what <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> refers
+                        to as a <a class="ulink" href="https://www.w3.org/TR/WCAG20/#set-of-web-pagesdef" target="_top">set of Web pages</a>:
+                        "[a] collection of Web pages that share a common purpose".</p>
+
+                    <p>Consequently, when evaluating the accessibility of an EPUB Publication, individual pages — or <a class="glossterm" href="#gloss-content-doc" title="EPUB Content Document">Content Documents</a>, as they are known in EPUB nomenclature —
+                        cannot be reviewed in isolation. Rather, their overall accessibility as parts of a larger work also
+                        has to be evaluated.</p>
+
+                    <p>For example, it is not sufficient for individual Content Documents to have a logical reading order
+                        if the publication presents them in the wrong order. Likewise, including a title for every Content
+                        Document is complementary to providing a title for the publication: the overall accessibility is
+                        affected if either is missing.</p>
+
+                    <p>The guidelines for content to be <span class="emphasis"><em>perceivable</em></span>, <span class="emphasis"><em>operable</em></span>,
+                            <span class="emphasis"><em>understandable</em></span> and <span class="emphasis"><em>robust</em></span> <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> therefore <span class="rfc2119">must</span> be evaluated against the full EPUB
+                        Publication, not only to each Content Document within it.</p>
+
+                    <p>More information about applying these guidelines to EPUB Publications is available in the <a class="biblioref" href="#refA11YTech" title="EPUB Accessibility">[<abbr class="abbrev">EPUB Accessibility Techniques</abbr>]</a>.</p>
+                </section>
+
+                <section class="section" id="sec-wcag-application"><h4 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-wcag-application"> </a> </span>4.2.2.2 Applying the Conformance Criteria</h4>
+                    
+
+                    <p>When evaluating an <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a>, the <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> <a class="ulink" href="https://www.w3.org/TR/WCAG20/#conformance-reqs" target="_top">Conformance Criteria</a> are
+                        applied as follow:</p>
+
+                    <div class="conformance-list"><ul class="conformance-list" style="list-style-type: disc; "><li class="listitem">
+                            <p id="confreq-wcag-whole-epub"><span class="link-marker"><a class="hidden-reveal" href="#confreq-wcag-whole-epub"> </a> </span>When determining compliance with a Conformance Level, the
+                                EPUB Publication as a whole <span class="rfc2119">must</span> meet the conformance
+                                requirements of the level claimed.</p>
+                        </li><li class="listitem">
+                            <p id="confreq-wcag-fallbacks"><span class="link-marker"><a class="hidden-reveal" href="#confreq-wcag-fallbacks"> </a> </span><a class="glossterm" href="#gloss-author" title="Author">Authors</a>
+                                <span class="rfc2119">must not</span> use EPUB's fallback mechanisms to provide a <a class="ulink" href="https://www.w3.org/TR/WCAG20/#conforming-alternate-versiondef" target="_top">conforming
+                                    alternate version</a> <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a>, as there is no reliable way for
+                                    <a class="glossterm" href="#gloss-user" title="User">Users</a> to access such fallbacks. If fallbacks are used,
+                                both the primary content and its fallback(s) <span class="rfc2119">must</span> meet the
+                                requirements for the conformance level claimed. Examples of EPUB-specific fallback mechanisms
+                                include manifest fallbacks, bindings and content switching.</p>
+                        </li><li class="listitem">
+                            <p id="confreq-wcag-full-page"><span class="link-marker"><a class="hidden-reveal" href="#confreq-wcag-full-page"> </a> </span>When determining compliance with the "Full Pages"
+                                requirement (i.e., that parts of a page cannot be excluded when making a conformance claim),
+                                the entirety of each content document <span class="rfc2119">must</span> achieve the
+                                conformance level <span class="italic">and</span> every content document in the
+                                publication <span class="rfc2119">must</span> meet the stated conformance level.</p>
+                        </li></ul></div>
+                </section>
+            </section>
+        </section>
+
+        <section class="section" id="sec-epub-req"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-epub-req"> </a> </span>4.3 EPUB Requirements</h2>
+            
+
+            <section class="section" id="sec-rel-wcag"><h3 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-rel-wcag"> </a> </span>4.3.1 Relationship to WCAG</h3>
+                
+
+                <p>The requirements defined in this section are unique to <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB
+                        Publications</a>. As a result, an EPUB Publication can conform to <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> without conforming to this section, but an EPUB Publication that does not meet the requirements of
+                    this section is not conformant to this specification.</p>
+                <div class="note"><h3 class="title">note</h3>
+                    <p>The IDPF plans to work with W3C and the Web Accessibility Initiative to formalize these
+                        requirements for digital publications.</p>
+                </div>
+            </section>
+
+            <section class="section" id="sec-audio-playback"><h3 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-audio-playback"> </a> </span>4.3.2 Structured Audio Playback</h3>
+                
+
+                <section class="section" id="sec-audio-playback-obj"><h4 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-audio-playback-obj"> </a> </span>4.3.2.1 Objective</h4>
+                    
+                    <p>Enable navigation of the content through the inclusion of structure and semantics in <a class="biblioref" href="#refSMIL" title="SMIL Version 3.0">[<abbr class="abbrev">SMIL</abbr>]</a>-based playback.</p>
+                </section>
+
+                <section class="section" id="sec-audio-playback-understand"><h4 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-audio-playback-understand"> </a> </span>4.3.2.2 Understanding this objective</h4>
+                    
+
+                    <p>When an <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a> contains SMIL-based text and audio
+                        synchronization, the structure and semantics of the content have to be paralleled in the SMIL markup
+                        to provide the same ease of navigation for auditory readers.</p>
+
+                    <p>For example, if the SMIL markup contains only a single synchronization point for an entire table,
+                        the <a class="glossterm" href="#gloss-user" title="User">User</a> will have to listen to all the data in sequence with no ability to
+                        navigate the rows or cells. The addition of equivalent structure to mimic the rows and cells in the
+                        markup allows the User to efficiently navigate the content, escaping from cells, rows or the entire
+                        table as he or she desires.</p>
+
+                    <p>Similarly, including the semantics of the structures in the SMIL markup will allow a <a class="glossterm" href="#gloss-reading-system" title="Reading System">Reading System</a> to offer the User the ability to skip past undesired content.
+                        When reading through a section, a User might prefer to only hear the primary content and
+                        automatically skip all sidebars, figures and other supplementary content. Without this information in
+                        the SMIL markup, such an enhanced reading experience is not possible.</p>
+                </section>
+
+                <section class="section" id="sec-audio-playbac-conf"><h4 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-audio-playbac-conf"> </a> </span>4.3.2.3 Meeting this objective</h4>
+                    
+
+                    <p>If an <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a> provides synchronized text and audio playback
+                        functionality, it <span class="rfc2119">should</span> include the appropriate structure and
+                        semantics in the SMIL markup to skip and escape from content.</p>
+
+                    <p>See <span class="phrase"><a class="ulink" href="techniques/techniques.html#sec-epub-audio" target="_top">Structured Audio Playback</a> <a class="biblioref" href="#refA11YTech" title="EPUB Accessibility">[<abbr class="abbrev">EPUB Accessibility Techniques</abbr>]</a></span> for more information
+                        on structuring Media Overlays.</p>
+                </section>
+            </section>
+
+            <section class="section" id="sec-page-markers"><h3 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-page-markers"> </a> </span>4.3.3 Page Markers</h3>
+                
+
+                <section class="section" id="sec-page-markers-obj"><h4 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-page-markers-obj"> </a> </span>4.3.3.1 Objective</h4>
+                    
+
+                    <p>Provide navigation to static page break locations.</p>
+                </section>
+
+                <section class="section" id="sec-page-markers-understand"><h4 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-page-markers-understand"> </a> </span>4.3.3.2 Understanding this objective</h4>
+                    
+
+                    <p>Statically paginated content is still ubiquitous, as print continues to be the most consumed medium
+                        for books both among the general reading public and in educational settings. Print is not the only
+                        source of static pagination, either: static page boundaries are also present in fixed-layout digital
+                        publications.</p>
+
+                    <p>As a result, a non-visual reader in an environment where statically-paginated content is used is
+                        disadvantaged relative to his or her peers by not being able to easily locate the same locations in
+                        the publication (e.g., if a teacher instructs students to all turn to a specific page).</p>
+
+                    <p>The inclusion of page boundary locations helps bridge this disparity by ensuring that those using
+                        reflowable media are not disadvantaged by their choice.</p>
+
+                    <p>Providing page markers also helps aid navigation in reflowable publications that do not have a
+                        statically paginated equivalent. The default pagination of these publications by Reading Systems is
+                        not static, since it changes depending on the viewport size and <a class="glossterm" href="#gloss-user" title="User">User's</a> font settings. As a result, coordinating locations among Users of the same <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a> can be complicated without static references.</p>
+                </section>
+
+                <section class="section" id="sec-page-markers-conf"><h4 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-page-markers-conf"> </a> </span>4.3.3.3 Meeting this objective</h4>
+                    
+
+                    <p>If a reflowable <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a> represents a work that is also distributed
+                        in a statically paginated form, it <span class="rfc2119">should</span> include page break
+                        markers and a means of accessing them.</p>
+
+                    <p><a class="glossterm" href="#gloss-author" title="Author">Authors</a>
+                        <span class="rfc2119">may</span> include page break markers in reflowable EPUB Publications
+                        without statically paginated equivalents, but inclusion is not required to meet the requirements of
+                        this specification.</p>
+
+                    <p>See <span class="phrase"><a class="ulink" href="techniques/techniques.html#sec-epub-page-markers" target="_top">Page Markers</a> <a class="biblioref" href="#refA11YTech" title="EPUB Accessibility">[<abbr class="abbrev">EPUB Accessibility Techniques</abbr>]</a></span> for more
+                        information on the inclusion of page markers in EPUB Publications.</p>
+                </section>
+            </section>
+        </section>
+
+        <section class="section" id="sec-conf-reporting"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#sec-conf-reporting"> </a> </span>4.4 Conformance Reporting</h2>
+            
+
+            <p>To indicate that an <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a> conforms to the <a class="link" href="#sec-conf-epub" title="2.2 Accessible EPUB Publications">accessibility requirements</a> of this specification, it <span class="rfc2119">must</span> include a <code class="code">conformsTo</code> property <a class="biblioref" href="#refDCTERMS" title="DCMI Metadata Terms">[<abbr class="abbrev">DCTERMS</abbr>]</a> and an <a class="ulink" href="http://www.idpf.org/epub/vocab/package/a11y/#certifiedBy" target="_top"><code class="code">a11y:certifiedBy</code>
+                    property</a> <a class="biblioref" href="#refA11YVocab" title="EPUB Accessibility Vocabulary">[<abbr class="abbrev">Accessibility Vocab</abbr>]</a>.</p>
+
+            <p>The <code class="code">conformsTo</code> property <span class="rfc2119">must</span> specify the IRI of the dated
+                version of this specification the EPUB Publication conforms to and include one of the following fragment
+                identifiers to identify the <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> conformance level achieved:</p>
+
+            <div class="conformance-list"><ul class="conformance-list" style="list-style-type: disc; "><li class="listitem">
+                    <p id="wcag-a"><span class="link-marker"><a class="hidden-reveal" href="#wcag-a"> </a> </span><code class="code">wcag-a</code> — the EPUB Publication meets Level A conformance</p>
+                </li><li class="listitem">
+                    <p id="wcag-aa"><span class="link-marker"><a class="hidden-reveal" href="#wcag-aa"> </a> </span><code class="code">wcag-aa</code> — the EPUB Publication meets Level AA conformance</p>
+                </li><li class="listitem">
+                    <p id="wcag-aaa"><span class="link-marker"><a class="hidden-reveal" href="#wcag-aaa"> </a> </span><code class="code">wcag-aaa</code> — the EPUB Publication meets Level AAA conformance</p>
+                </li></ul></div>
+
+            <p>The <code class="code">a11y:certifiedBy</code> property specifies the name of the party that certified the content. The
+                certifier of the content could be the same entity that created the EPUB Publication, but can also be a third
+                party accessibility certifier.</p>
+
+            <div class="note"><h3 class="title">note</h3>
+                <p>As each metadata format is unique in what it can express, this specification does not mandate how
+                    conformance metadata is expressed outside of the Package Document.</p>
+            </div>
+
+            <div class="note"><h3 class="title">note</h3>
+                <p>This specification does not define a conformance level for EPUB Publications that only meet the <a class="link" href="#sec-discovery" title="3 Discovery">discovery metadata requirements</a>, as the usability of such content by
+                    any given User can only be determined from the accessibility metadata. <a class="link" href="#sec-opt-pubs" title="5 Optimized Publications">Reporting requirements for Optimized Publications</a> are defined in the next section.</p>
+            </div>
+
+            <div class="informalexample">
+                <p>The following example shows a complete conformance statement for an EPUB 3 Publication that meets the
+                    requirements of this specification to WCAG 2.0 Level A.</p>
+                <pre class="synopsis">&lt;package …&gt;&#xD;
+  &lt;metadata&gt;&#xD;
+    …&#xD;
+    &lt;link rel="dcterms:conformsTo" href="http://www.idpf.org/epub/a11y/accessibility-20160426.html#wcag-a"/&gt;&#xD;
+    &lt;meta property="a11y:certifiedBy"&gt;Acme Publishing Inc.&lt;/meta&gt;&#xD;
+    …&#xD;
+  &lt;/metadata&gt;&#xD;
+  …&#xD;
+&lt;/package&gt;</pre>
+            </div>
+
+            <div class="informalexample">
+                <p>The following example shows a similar conformance statement for an EPUB 2 Publication.</p>
+                <pre class="synopsis">&lt;package …&gt;&#xD;
+  &lt;metadata&gt;&#xD;
+    …&#xD;
+    &lt;meta name="dcterms:conformsTo" content="http://www.idpf.org/epub/a11y/accessibility-20160426.html#wcag-a"/&gt;&#xD;
+    &lt;meta name="a11y:certifiedBy" content="Acme Publishing Inc."/&gt;&#xD;
+    …&#xD;
+  &lt;/metadata&gt;&#xD;
+  …&#xD;
+&lt;/package&gt;</pre>
+            </div>
+        </section>
+    </section>
+
+    <section class="chapter" id="sec-opt-pubs"><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-opt-pubs"> </a> </span>5 Optimized Publications</h1>
+        
+
+        <p>Although <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> provides a general set of guidelines for making content broadly
+            accessible, conformant content is not always optimal for specific user groups. Conversely, content optimized for
+            a specific need or reading modality is often not conformant to <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> because it is not
+            designed for a broad audience. In these cases, failing to achieve a WCAG conformance level does not make the
+            publications any less accessible to their intended audience.</p>
+
+        <p>To account for this discrepancy, this specification places importance on the inclusion of discovery metadata.
+            An <a class="glossterm" href="#gloss-optimization" title="Optimization">optimized</a>
+            <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a> is discoverable to its intended audience through the inclusion of rich
+            metadata, even if it is not identified as broadly accessible per this specification.</p>
+
+        <p>In addition to the metadata requirements defined in <a class="xref" href="#sec-discovery" title="3 Discovery"><em>Discovery</em></a>, an optimized EPUB
+            Publication <span class="rfc2119">must</span> identify the standard or guidelines the content adheres to in
+            a <a class="biblioref" href="#refDCTERMS" title="DCMI Metadata Terms">[<abbr class="abbrev">DCTERMS</abbr>]</a> <code class="code">conformsTo</code> property. The value of this property <span class="rfc2119">must</span> be an IRI <a class="biblioref" href="#refRFC3987" title="Internationalized Resource Identifiers (IRIs) (RFC 3987)">[<abbr class="abbrev">RFC3987</abbr>]</a> that references the standard or
+            guidelines it follows.</p>
+
+        <p>The following example shows a conformance statement for an EPUB 3 Publication that conforms to the <a class="biblioref" href="#refDAISYAudio" title="Navigable audio-only EPUB 3 Guidelines">[<abbr class="abbrev">DAISY Audio</abbr>]</a> guidelines. </p>
+
+        <div class="informalexample">
+            <pre class="synopsis">&lt;package …&gt;&#xD;
+   &lt;metadata&gt;&#xD;
+      …&#xD;
+      &lt;link rel="dcterms:conformsTo" href="http://www.daisy.org/guidelines/epub/navigable-audio-only-epub3-guidelines"/&gt;&#xD;
+      …&#xD;
+   &lt;/metadata&gt;&#xD;
+   …&#xD;
+&lt;/package&gt;</pre>
+        </div>
+
+        <p>If the IRI is not sufficient for a User to understand conformance (e.g., the guidelines are not publicly
+            available), more information about how the content has been optimized <span class="rfc2119">should</span> be
+            provided in the <a class="link" href="#sec-disc-package" title="3.2 Package Metadata">accessibility summary</a>.</p>
+
+        <div class="note"><h3 class="title">note</h3>
+            <p>This specification does not define or recommend standards or guidelines for the production of optimized
+                content. An <a class="ulink" href="http://www.idpf.org/epub/registries/optimizations/" target="_top">informative registry of
+                    optimization standards</a> is maintained separately from this specification, but no endorsement of
+                them is implied.</p>
+        </div>
+    </section>
+
+    <section class="chapter" id="sec-distribution"><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#sec-distribution"> </a> </span>6 Distribution</h1>
+        
+
+        <p>The creation of an accessible <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publication</a> is not always enough to ensure that the
+            content will be usable when it reaches <a class="glossterm" href="#gloss-user" title="User">Users</a>. Depending on how <a class="glossterm" href="#gloss-author" title="Author">Authors</a> distribute their content, other factors will influence the overall
+            accessibility.</p>
+
+        <p>Some of these factors are outside the control of the Author, such as a third-party vendor's inaccessible
+            bookstore or an inaccessible Reading system, but others can be ameliorated through careful distribution
+            decisions.</p>
+
+        <p>For example, when distributing EPUB Publications, Authors can ensure that they do not impose digital rights
+            management restrictions on their content that impair access by <a class="glossterm" href="#gloss-at" title="Assistive Technology">Assistive
+                Technologies</a>. They can also include accessibility metadata in distribution records so that it is
+            available to vendors to use in bookstore search engines.</p>
+
+        <p>To ensure that EPUB Publications remain accessible to Users, Authors <span class="rfc2119">must</span> take all steps within their power to ensure that distribution of their content does not
+            negatively affect its discoverability or usability. See <span class="phrase"><a class="ulink" href="techniques/techniques.html#sec-distribution" target="_top">Distribution Techniques</a> <a class="biblioref" href="#refA11YTech" title="EPUB Accessibility">[<abbr class="abbrev">EPUB Accessibility Techniques</abbr>]</a></span> for more information.</p>
+    </section>
+
+    <section class="appendix" id="app-auth-consump"><div class="titlepage"><div><div><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#app-auth-consump"> </a> </span>Appendix A. Authoring and Consumption</h1></div></div></div>
+        
+
+        <section class="section" id="app-ac-intro"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#app-ac-intro"> </a> </span>A.1 Introduction</h2><p class="informative"> This section is informative</p>
+            
+
+            <p>Although this specification focuses on content requirements for accessible <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publications</a>, there are two additional considerations in
+                making EPUB Publications available to everyone: the ability for anyone to be able to create an EPUB
+                Publication and the ability for anyone to consume the content.</p>
+
+            <p>Although these needs are not the primary focus of this specification, this appendix provides conformance
+                requirements for the creation of accessible <a class="glossterm" href="#gloss-authoring-tool" title="EPUB Authoring Tool">Authoring Tools</a> and
+                    <a class="glossterm" href="#gloss-reading-system" title="Reading System">Reading Systems</a>. Developers who meet and exceed these
+                requirements will make their applications usable by a wide variety of <a class="glossterm" href="#gloss-user" title="User">Users</a>.</p>
+
+            <div class="note"><h3 class="title">note</h3>
+                <p>This appendix could be superseded by specifications dedicated to these concerns in the future.</p>
+            </div>
+        </section>
+
+        <section class="section" id="app-ac-auth-conf"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#app-ac-auth-conf"> </a> </span>A.2 Authoring Tool Conformance</h2>
+            
+
+            <p>A conformant <a class="glossterm" href="#gloss-authoring-tool" title="EPUB Authoring Tool">EPUB Authoring Tool</a>
+                <span class="rfc2119">must</span> meet the following requirements:</p>
+
+            <div class="conformance-list"><ul class="conformance-list" style="list-style-type: disc; "><li class="listitem">
+                    <p id="confreq-atag"><span class="link-marker"><a class="hidden-reveal" href="#confreq-atag"> </a> </span>It <span class="rfc2119">must</span> meet the requirements for <a class="biblioref" href="#refATAG20" title="Authoring Tools Accessibility Guidelines (ATAG) 2.0">[<abbr class="abbrev">ATAG 2.0</abbr>]</a> <a class="ulink" href="https://www.w3.org/TR/ATAG20/#intro_understand_levels_conformance" target="_top">Level A
+                            conformance</a>, with the following clarifications for Part B:</p>
+                    <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem">
+                            <p id="confreq-atag-epub"><span class="link-marker"><a class="hidden-reveal" href="#confreq-atag-epub"> </a> </span>It <span class="rfc2119">must</span> include support for
+                                the EPUB-specific requirements defined in <a class="xref" href="#sec-epub-req" title="4.3 EPUB Requirements">EPUB Requirements</a> where <a class="biblioref" href="#refATAG20" title="Authoring Tools Accessibility Guidelines (ATAG) 2.0">[<abbr class="abbrev">ATAG 2.0</abbr>]</a> references the generation of accessible web content (as applicable
+                                to the content it can generate).</p>
+                        </li><li class="listitem">
+                            <p id="confreq-atag-wcag"><span class="link-marker"><a class="hidden-reveal" href="#confreq-atag-wcag"> </a> </span>It <span class="rfc2119">must</span> support <a class="biblioref" href="#refWCAG20" title="Web Content Accessibility Guidelines (WCAG) 2.0">[<abbr class="abbrev">WCAG 2.0</abbr>]</a> accessibility requirements as they relate to <a class="glossterm" href="#gloss-epub-publication" title="EPUB Publication">EPUB Publications</a>, including support for adding
+                                discovery metadata as defined in <a class="xref" href="#sec-disc-package" title="3.2 Package Metadata">Package Metadata</a>. See <a class="xref" href="#sec-wcag-eval-page-pub" title="4.2.2.1 Page and Publication">Page and Publication</a> for more information.</p>
+                        </li></ul></div>
+                </li><li class="listitem">
+                    <p id="confreq-atag-level"><span class="link-marker"><a class="hidden-reveal" href="#confreq-atag-level"> </a> </span>It <span class="rfc2119">should</span> meet the requirements for
+                            <a class="biblioref" href="#refATAG20" title="Authoring Tools Accessibility Guidelines (ATAG) 2.0">[<abbr class="abbrev">ATAG 2.0</abbr>]</a> <a class="ulink" href="https://www.w3.org/TR/ATAG20/#intro_understand_levels_conformance" target="_top">Level AA
+                            conformance</a>, with the same clarifications defined in the preceding criteria.</p>
+                </li></ul></div>
+        </section>
+
+        <section class="section" id="app-ac-rs-conf"><h2 class="title" style="clear: both"><span class="link-marker"><a class="hidden-reveal" href="#app-ac-rs-conf"> </a> </span>A.3 Reading System Conformance</h2>
+            
+
+            <p>A conformant <a class="glossterm" href="#gloss-reading-system" title="Reading System">Reading System</a>
+                <span class="rfc2119">must</span> meet the following requirements:</p>
+
+            <div class="conformance-list"><ul class="conformance-list" style="list-style-type: disc; "><li class="listitem">
+                    <p id="confreq-rs-fundamental"><span class="link-marker"><a class="hidden-reveal" href="#confreq-rs-fundamental"> </a> </span>It <span class="rfc2119">must</span> pass all the <a class="biblioref" href="#refA11YTest" title="EPUB Accessibility Tests">[<abbr class="abbrev">A11Y Test Suite</abbr>]</a> <a class="ulink" href="http://epubtest.org/testsuite/" target="_top">Fundamental Accessible
+                            Reading System Tests</a>.</p>
+                </li><li class="listitem">
+                    <p id="confreq-rs-uaag"><span class="link-marker"><a class="hidden-reveal" href="#confreq-rs-uaag"> </a> </span>It <span class="rfc2119">should</span> meet the requirements for
+                            <a class="biblioref" href="#refUAAG20" title="User Agent Accessibility Guidelines 2.0">[<abbr class="abbrev">UAAG 2.0</abbr>]</a> <a class="ulink" href="https://www.w3.org/TR/UAAG20/#intro-conf-levels" target="_top">Level AA conformance</a>.</p>
+                </li></ul></div>
+        </section>
+    </section>
+
+    <section xmlns:spec="http://www.idpf.org/2016/epub/spec" xml:lang="en" class="acknowledgements" id="app-contributors"><div class="titlepage"><div><div><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#app-contributors"> </a> </span>Acknowledgements and Contributors</h1></div></div></div><p class="informative"> This section is informative</p>
+    
+
+    <p>EPUB has been developed by the International Digital Publishing Forum in a cooperative effort, bringing together
+        publishers, vendors, software developers, and experts in the relevant standards.</p>
+
+    <p>The EPUB Accessibility specification and techniques were prepared by the International Digital Publishing Forum’s
+        EPUB Maintenance Working Group, operating under a charter approved by the membership in July 2015, under the
+        leadership of:</p>
+
+    <ul xml:lang="en" class="personlist"><li class="person"><span class="name"><span class="surname">Gylling</span>, <span class="givenname">Markus</span></span> <span class="affiliation">(International Digital Publishing Forum (IDPF))</span>  <span class="wg-role">Chair</span></li><li class="person"><span class="name"><span class="surname">Siegman</span>, <span class="givenname">Tzviya</span></span> <span class="affiliation">(John Wiley &amp; Sons)</span>  <span class="wg-role">Chair</span></li><li class="person"><span class="name"><span class="surname">Conboy</span>, <span class="givenname">Garth</span></span> <span class="affiliation">(Google Inc.)</span>  <span class="wg-role">Vice-chair</span></li><li class="person"><span class="name"><span class="surname">Duga</span>, <span class="givenname">Brady</span></span> <span class="affiliation">(Google Inc.)</span>  <span class="wg-role">Vice-chair</span></li></ul>
+
+    <p>Work on these documents was undertaken by an accessibility subgroup led by:</p>
+
+    <ul xml:lang="en" class="personlist"><li class="person"><span class="name"><span class="surname">LaPierre</span>, <span class="givenname">Charles</span></span> <span class="affiliation">(
+                    Benetech
+                )</span> </li><li class="person"><span class="name"><span class="surname">Singh</span>, <span class="givenname">Avneesh</span></span> <span class="affiliation">(
+                    DAISY Consortium
+                )</span> </li></ul>
+
+    <p>Active members of the working group included:</p>
+
+    <h2 id="ack-idpf-members">IDPF Members</h2>
+
+    <ul xml:lang="en" class="personlist"><li class="person"><span class="name"><span class="surname">Albert</span>, <span class="givenname">Paolo</span></span> <span class="affiliation">(PubCoder)</span> </li><li class="person"><span class="name"><span class="surname">Baker</span>, <span class="givenname">Mike</span></span> <span class="affiliation">(Houghton Mifflin Harcourt)</span> </li><li class="person"><span class="name"><span class="surname">Balakrishnan</span>, <span class="givenname">Ramu</span></span> <span class="affiliation">(MPS Limited)</span> </li><li class="person"><span class="name"><span class="surname">Cho</span>, <span class="givenname">Yong-Sang</span></span> <span class="affiliation">(KERIS (Korea Education and Research Information Service))</span> </li><li class="person"><span class="name"><span class="surname">Comerford</span>, <span class="givenname">Rachel</span></span> <span class="affiliation">(Macmillan)</span> </li><li class="person"><span class="name"><span class="surname">Cramer</span>, <span class="givenname">Dave</span></span> <span class="affiliation">(Hachette Book Group)</span> </li><li class="person"><span class="name"><span class="surname">Creasy</span>, <span class="givenname">Keith</span></span> <span class="affiliation">(American Printing House for the Blind, Inc.)</span> </li><li class="person"><span class="name"><span class="surname">Deltour</span>, <span class="givenname">Romain</span></span> <span class="affiliation">(DAISY Consortium)</span> </li><li class="person"><span class="name"><span class="surname">Geffroy</span>, <span class="givenname">Jean-Marie</span></span> <span class="affiliation">(Mantano)</span> </li><li class="person"><span class="name"><span class="surname">Gusso</span>, <span class="givenname">Lina</span></span> <span class="affiliation">(Pearson)</span> </li><li class="person"><span class="name"><span class="surname">Gylling</span>, <span class="givenname">Markus</span></span> <span class="affiliation">(International Digital Publishing Forum (IDPF))</span> </li><li class="person"><span class="name"><span class="surname">Hanson</span>, <span class="givenname">Lauren</span></span> <span class="affiliation">(Kaplan Publishing)</span> </li><li class="person"><span class="name"><span class="surname">Harris</span>, <span class="givenname">Eric</span></span> <span class="affiliation">(Ingram Content Group)</span> </li><li class="person"><span class="name"><span class="surname">Heinser</span>, <span class="givenname">Bernhard</span></span> <span class="affiliation">(Access for All)</span> </li><li class="person"><span class="name"><span class="surname">Johnson</span>, <span class="givenname">Rick</span></span> <span class="affiliation">(Ingram Content Group)</span> </li><li class="person"><span class="name"><span class="surname">Kasdorf</span>, <span class="givenname">Bill</span></span> <span class="affiliation">(Apex CoVantage)</span> </li><li class="person"><span class="name"><span class="surname">Keating</span>, <span class="givenname">Patrick</span></span> <span class="affiliation">(Bluefire Productions)</span> </li><li class="person"><span class="name"><span class="surname">Kennedy</span>, <span class="givenname">Naomi</span></span> <span class="affiliation">(Penguin Random House)</span> </li><li class="person"><span class="name"><span class="surname">Kerscher</span>, <span class="givenname">George</span></span> <span class="affiliation">(DAISY Consortium)</span> </li><li class="person"><span class="name"><span class="surname">LaPierre</span>, <span class="givenname">Charles</span></span> <span class="affiliation">(Benetech)</span> </li><li class="person"><span class="name"><span class="surname">Leo</span>, <span class="givenname">Arthic</span></span> <span class="affiliation">(Amnet Systems)</span> </li><li class="person"><span class="name"><span class="surname">Mietkiewicz</span>, <span class="givenname">Elie</span></span> <span class="affiliation">(Gutenberg Technology)</span> </li><li class="person"><span class="name"><span class="surname">Murata</span>, <span class="givenname">Makoto</span></span> <span class="affiliation">(JEPA EPUB Study Group)</span> </li><li class="person"><span class="name"><span class="surname">Mussinelli</span>, <span class="givenname">Christina</span></span> <span class="affiliation">(Associazione Italiana Editori)</span> </li><li class="person"><span class="name"><span class="surname">Prabhu</span>, <span class="givenname">John</span></span> <span class="affiliation">(HOV Services)</span> </li><li class="person"><span class="name"><span class="surname">Siegman</span>, <span class="givenname">Tzviya</span></span> <span class="affiliation">(John Wiley &amp; Sons)</span> </li><li class="person"><span class="name"><span class="surname">Singh</span>, <span class="givenname">Avneesh</span></span> <span class="affiliation">(DAISY Consortium)</span> </li><li class="person"><span class="name"><span class="surname">Soiffer</span>, <span class="givenname">Neil</span></span> <span class="affiliation">(Design Science)</span> </li><li class="person"><span class="name"><span class="surname">Thurston</span>, <span class="givenname">Jonathan</span></span> <span class="affiliation">(Pearson)</span> </li><li class="person"><span class="name"><span class="surname">Webster</span>, <span class="givenname">Amaya</span></span> <span class="affiliation">(Benetech)</span> </li><li class="person"><span class="name"><span class="surname">Weck</span>, <span class="givenname">Daniel</span></span> <span class="affiliation">(DAISY Consortium)</span> </li></ul>
+
+    <h2 id="ack-experts-observers">Invited Experts/Observers</h2>
+
+    <ul xml:lang="en" class="personlist"><li class="person"><span class="name"><span class="surname">Andrews</span>, <span class="givenname">David</span></span></li><li class="person"><span class="name"><span class="surname">Bonelli</span>, <span class="givenname">Giuseppe</span></span></li><li class="person"><span class="name"><span class="surname">Garrish</span>, <span class="givenname">Matt</span></span></li><li class="person"><span class="name"><span class="surname">Kudou</span>, <span class="givenname">Tomoyuki</span></span></li><li class="person"><span class="name"><span class="surname">Leva</span>, <span class="givenname">Paolo</span></span></li><li class="person"><span class="name"><span class="surname">Marquès Solé</span>, <span class="givenname">Daniel</span></span></li><li class="person"><span class="name"><span class="surname">McGlone</span>, <span class="givenname">Jonathan</span></span></li><li class="person"><span class="name"><span class="surname">Morris</span>, <span class="givenname">Julie</span></span></li><li class="person"><span class="name"><span class="surname">Munchenburger</span>, <span class="givenname">Manfred</span></span></li><li class="person"><span class="name"><span class="surname">Rasmussen</span>, <span class="givenname">Lloyd</span></span></li><li class="person"><span class="name"><span class="surname">Reddy</span>, <span class="givenname">Ramesh</span></span></li><li class="person"><span class="name"><span class="surname">Rothberg</span>, <span class="givenname">Madeleine</span></span></li><li class="person"><span class="name"><span class="surname">Sheehan</span>, <span class="givenname">John</span></span></li><li class="person"><span class="name"><span class="surname">White</span>, <span class="givenname">Jason</span></span></li></ul>
+
+    <p>For more detailed acknowledgements and information about contributors to each version of EPUB, refer to <span class="phrase"><a class="ulink" href="../31/spec/epub-overview.html#acknowledgements" target="_top">Acknowledgements and Contributors</a> <a class="biblioref" href="#refEPUB3Overview" title="EPUB 3.1 Overview">[<abbr class="abbrev">EPUB3 Overview</abbr>]</a></span>. </p>
+</section>
+
+    <section xmlns:spec="http://www.idpf.org/2016/epub/spec" xml:lang="en" class="bibliography" id="references"><div class="titlepage"><div><div><h1 class="title"><span class="link-marker"><a class="hidden-reveal" href="#references"> </a> </span>References</h1></div></div></div>
+  
+  
+  
+<div class="bibliodiv" id="normative-refs">
+    <h3 class="title">Normative References</h3>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  <div class="biblioentry" id="refA11YTest"><p>[<abbr class="abbrev">A11Y Test Suite</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="https://github.com/daisy/epub-accessibility-tests" target="_top">EPUB Accessibility Tests</a>
+      </em>. </span>
+    </p></div><div class="biblioentry" id="refATAG20"><p>[<abbr class="abbrev">ATAG 2.0</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="https://www.w3.org/TR/ATAG20/" target="_top">Authoring Tools Accessibility Guidelines (ATAG) 2.0</a>
+      </em>. </span>
+      <span class="author">Jan Richards, et al. </span>
+    </p></div><div class="biblioentry" id="refA11YVocab"><p>[<abbr class="abbrev">Accessibility Vocab</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="http://www.idpf.org/epub/vocab/package/a11y" target="_top">EPUB Accessibility Vocabulary</a>
+      </em>. </span>
+    </p></div><div class="biblioentry" id="refDCTERMS"><p>[<abbr class="abbrev">DCTERMS</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="http://dublincore.org/documents/dcmi-terms/" target="_top">DCMI Metadata Terms</a>
+      </em>. </span>
+    </p></div><div class="biblioentry" id="refEPUB31"><p>[<abbr class="abbrev">EPUB 3.1</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="http://www.idpf.org/epub/31/spec/epub-spec.html" target="_top">EPUB 3.1</a>
+      </em>. </span>
+    </p></div><div class="biblioentry" id="refPackagesLatest"><p>[<abbr class="abbrev">Packages 3</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="http://www.idpf.org/epub/latest/packages" target="_top">EPUB Packages 3</a>
+      </em>. </span>
+    </p></div><div class="biblioentry" id="refRFC2119"><p>[<abbr class="abbrev">RFC2119</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="http://tools.ietf.org/html/rfc2119" target="_top">Key words for use in RFCs to Indicate Requirement Levels</a>
+        (RFC 2119) </em>. </span>
+      <span class="date">March 1997. </span>
+    </p></div><div class="biblioentry" id="refRFC3987"><p>[<abbr class="abbrev">RFC3987</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="http://tools.ietf.org/html/rfc3987" target="_top">Internationalized Resource Identifiers (IRIs)</a> (RFC 3987) </em>. </span>
+      <span class="author">M Duerst, et al. </span>
+      <span class="date">January 2005. </span>
+    </p></div><div class="biblioentry" id="refSMIL"><p>[<abbr class="abbrev">SMIL</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="https://www.w3.org/TR/2008/REC-SMIL3-20081201/" target="_top">SMIL Version 3.0</a>
+      </em>. </span>
+      <span class="author">D. Bulterman, et al. </span>
+      <span class="date">01 December 2008. </span>
+    </p></div><div class="biblioentry" id="refUAAG20"><p>[<abbr class="abbrev">UAAG 2.0</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="https://www.w3.org/TR/2015/NOTE-UAAG20-20151215/" target="_top">User Agent Accessibility Guidelines 2.0</a>
+      </em>. </span>
+      <span class="author">Ian Jacobs, et al. </span>
+      <span class="date">17 December 2002. </span>
+    </p></div><div class="biblioentry" id="refWCAG20"><p>[<abbr class="abbrev">WCAG 2.0</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="https://www.w3.org/TR/WCAG20/" target="_top">Web Content Accessibility Guidelines (WCAG) 2.0</a>
+      </em>. </span>
+      <span class="author">Ben Caldwell, et al. </span>
+    </p></div><div class="biblioentry" id="refSCHEMA-ORG"><p>[<abbr class="abbrev">schema.org</abbr>] 
+      
+      <span class="title"><em><a class="ulink" href="https://schema.org" target="_top">schema.org</a></em>. </span>
+    </p></div></div><div class="bibliodiv" id="informative-refs">
+    <h3 class="title">Informative References</h3>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  <div class="biblioentry" id="refDAISYAudio"><p>[<abbr class="abbrev">DAISY Audio</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="http://www.daisy.org/guidelines/epub/navigable-audio-only-epub3-guidelines" target="_top">Navigable audio-only
+          EPUB 3 Guidelines</a>
+      </em>. </span>
+    </p></div><div class="biblioentry" id="refA11YTech"><p>[<abbr class="abbrev">EPUB Accessibility Techniques</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="http://www.idpf.org/epub/latest/accessibility" target="_top">EPUB Accessibility</a>
+      </em>. </span>
+    </p></div><div class="biblioentry" id="refEPUB3Overview"><p>[<abbr class="abbrev">EPUB3 Overview</abbr>] 
+      
+      <span class="title"><em>
+        <a class="ulink" href="../31/spec/epub-overview.html" target="_top">EPUB 3.1 Overview</a>
+      </em>. </span>
+      <span class="author">Garth Conboy, et al. </span>
+    </p></div></div></section>
+</body></html>
