@@ -22,7 +22,7 @@ body {
 }
 
 
-.navbar {
+.navbar, .skip {
 	display: none;
 }
 
@@ -91,6 +91,16 @@ h1, h2, h3, h4, h5, h6 {
 	break-inside: avoid;
 	break-after: avoid;
 }
+h1 + .permalink,
+h2 + .permalink,
+h3 + .permalink,
+h4 + .permalink,
+h5 + .permalink,
+h6 + .permalink {
+	break-inside: avoid;
+	break-before: avoid;
+	break-after: avoid;
+}
 dd, .head .copyright {
 	break-before: avoid;
 }
@@ -111,6 +121,12 @@ section#toc, div#toc, nav#toc {
 }
 body > .toc > h2 {
 	break-before: left;
+}
+
+/* Aria specific */
+.slices_footer {
+	break-before: avoid;
+	break-inside: avoid;
 }
 
 /* CSS2 specific */
