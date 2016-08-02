@@ -67,6 +67,10 @@ pre {
 	overflow-wrap: normal !important;
 	word-wrap: normal !important;
 }
+h1, h2, h3, h4, h5, h6 {
+	hyphens: none;
+	text-wrap: balance;
+}
 
 hr:not(table hr) {
 	border: transparent solid 0 !important;
@@ -172,7 +176,10 @@ pre::before,
 }
 
 /***** TOC & cross references *****/
-.toc li {
+.toc li,
+.toc br,
+.toc p,
+p.toc {
 	clear:both;
 }
 .toc::after {
