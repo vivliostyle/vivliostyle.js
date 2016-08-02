@@ -31,6 +31,11 @@
             width: 1in;
             height: 1in;
         }
+        .border-box {
+            box-sizing: border-box;
+            border: 5px solid rgba(0, 255, 0, 0.2);
+            margin-left: -5px;
+        }
         .bg {
             background-image: url("img/200x200.png");
             background-repeat: no-repeat;
@@ -279,6 +284,31 @@
     </p>
     <p>
         input[type=image](SVG) <input class="res200" type="image" src="img/300x300.svg" style="width: 1in">
+    </p>
+
+    <!-- box-sizing: border-box -->
+    <p>
+        img (PNG) <img class="res200 border-box" src="img/200x200.png" alt="">
+    </p>
+    <p>
+        img (SVG) <img class="res200 border-box" src="img/200x200.svg" alt="">
+    </p>
+    <p>
+        video (PNG poster) <video class="res200 border-box" poster="img/200x200.png"></video>
+    </p>
+    <p>
+        video (SVG poster) <video class="res200 border-box" poster="img/200x200.svg"></video>
+    </p>
+    <!--
+    <p>
+        canvas <canvas class="res200 border-box"></canvas>
+    </p>
+    -->
+    <p>
+        input[type=image](PNG) <input class="res200 border-box" type="image" src="img/200x200.png">
+    </p>
+    <p>
+        input[type=image](SVG) <input class="res200 border-box" type="image" src="img/200x200.svg">
     </p>
 </div>
 

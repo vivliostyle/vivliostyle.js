@@ -11,6 +11,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/271>
 - Fix image-resolution behavior when max/min-width/height is specified in length (not percentage)
   - <https://github.com/vivliostyle/vivliostyle.js/pull/275>
+- Fix image-resolution to take box-sizing into account
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/276>
 
 ## [2016.7](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.7) - 2016-07-04
 
