@@ -212,10 +212,27 @@ p.toc {
 }
 
 /***** Index & cross references *****/
-ul.index a[href^="#"]::after {
+ul.index a[href^="#"]:not(.index-def):not(.index-inst)::after {
 	content: ", p.\00200a" target-counter( attr(href,url), page);
 	color: black;
 	border-bottom: solid 1px white;
+}
+a[href].index-def,
+a[href].index-inst {
+	visibility: hidden;
+	font-size: 1px;
+	letter-spacing: -1px;
+}
+
+a[href].index-def::before,
+a[href].index-inst::before {
+	font-size: 1rem;
+	letter-spacing: 0;
+	visibility: visible;
+	content: target-counter( attr(href,url), page);
+}
+a[href].index-def::before {
+	font-weight: bold;
 }
 
 /***** Dealing with large elements *****/
