@@ -2707,7 +2707,7 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
     	}
     }
     this.pushCounters(this.currentStyle);
-	var id = this.currentId || this.currentXmlId || "";
+	var id = this.currentId || this.currentXmlId || element.getAttribute("name") || "";
 	if (isRoot || id) {
 		/** @type {!Object<string, Array<number>>} */ var counters = {};
 		Object.keys(this.counters).forEach(function(name) {
