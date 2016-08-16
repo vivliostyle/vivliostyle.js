@@ -49,7 +49,7 @@ adapt.pm.PageBox = function(scope, name, pseudoName, classes, parent) {
  * @return {!adapt.pm.PageBoxInstance}
  */
 adapt.pm.PageBox.prototype.createInstance = function(parentInstance) {
-	throw new Error("E_UNEXPECTED_CALL");
+    throw new Error("E_UNEXPECTED_CALL");
 };
 
 /**
@@ -170,7 +170,7 @@ goog.inherits(adapt.pm.PageMaster, adapt.pm.PageBox);
  * @return {!adapt.pm.PageMasterInstance}
  */
 adapt.pm.PageMaster.prototype.createInstance = function(parentInstance) {
-	return new adapt.pm.PageMasterInstance(parentInstance, this);
+    return new adapt.pm.PageMasterInstance(parentInstance, this);
 };
 
 /**
@@ -208,7 +208,7 @@ adapt.pm.PartitionGroup = function(scope, name, pseudoName, classes, parent) {
     adapt.pm.PageBox.call(this, scope, name, pseudoName, classes, parent);
     this.pageMaster = parent.pageMaster;
     if (name) {
-    	this.pageMaster.keyMap[name] = this.key;
+        this.pageMaster.keyMap[name] = this.key;
     }
     this.specified["wrap-flow"] =  new adapt.csscasc.CascadeValue(adapt.css.ident.auto, 0);
 };
@@ -218,7 +218,7 @@ goog.inherits(adapt.pm.PartitionGroup, adapt.pm.PageBox);
  * @override
  */
 adapt.pm.PartitionGroup.prototype.createInstance = function(parentInstance) {
-	return new adapt.pm.PartitionGroupInstance(parentInstance, this);
+    return new adapt.pm.PartitionGroupInstance(parentInstance, this);
 };
 
 /**
@@ -247,7 +247,7 @@ adapt.pm.Partition = function(scope, name, pseudoName, classes, parent) {
     adapt.pm.PageBox.call(this, scope, name, pseudoName, classes, parent);
     this.pageMaster = parent.pageMaster;
     if (name) {
-    	this.pageMaster.keyMap[name] = this.key;
+        this.pageMaster.keyMap[name] = this.key;
     }
 };
 goog.inherits(adapt.pm.Partition, adapt.pm.PageBox);
@@ -256,7 +256,7 @@ goog.inherits(adapt.pm.Partition, adapt.pm.PageBox);
  * @override
  */
 adapt.pm.Partition.prototype.createInstance = function(parentInstance) {
-	return new adapt.pm.PartitionInstance(parentInstance, this);
+    return new adapt.pm.PartitionInstance(parentInstance, this);
 };
 
 /**
@@ -392,8 +392,8 @@ adapt.pm.InstanceHolder.prototype.lookupInstance = function(key) {};
  * @constructor
  */
 adapt.pm.PageBoxInstance = function(parentInstance, pageBox) {
-	/** @const */ this.parentInstance = parentInstance;
-	/** @const */ this.pageBox = pageBox;
+    /** @const */ this.parentInstance = parentInstance;
+    /** @const */ this.pageBox = pageBox;
     /**
      * cascaded styles, geometric ones converted to adapt.css.Expr
      * @protected @const
@@ -415,7 +415,7 @@ adapt.pm.PageBoxInstance = function(parentInstance, pageBox) {
     /** @type {boolean} */ this.vertical = false;
     /** @type {boolean} */ this.suppressEmptyBoxGeneration = false;
     if (parentInstance) {
-    	parentInstance.children.push(this);
+        parentInstance.children.push(this);
     }
 };
 
@@ -434,11 +434,11 @@ adapt.pm.PageBoxInstance.prototype.reset = function() {
  * @return {adapt.expr.Val}
  */
 adapt.pm.PageBoxInstance.prototype.addNamedValues = function(name1, name2) {
-	var v1 = this.resolveName(name1);
-	var v2 = this.resolveName(name2);
-	if (!v1 || !v2)
-		throw new Error("E_INTERNAL");
-	return adapt.expr.add(this.pageBox.scope, v1, v2);	
+    var v1 = this.resolveName(name1);
+    var v2 = this.resolveName(name2);
+    if (!v1 || !v2)
+        throw new Error("E_INTERNAL");
+    return adapt.expr.add(this.pageBox.scope, v1, v2);
 };
 
 /**
@@ -446,104 +446,104 @@ adapt.pm.PageBoxInstance.prototype.addNamedValues = function(name1, name2) {
  * @return {adapt.expr.Val}
  */
 adapt.pm.PageBoxInstance.prototype.resolveName = function(name) {
-	var expr = this.namedValues[name];
-	if (expr)
-		return expr;
-	var val = this.style[name];
-	if (val)
-		expr = val.toExpr(this.pageBox.scope, this.pageBox.scope.zero);
-	switch (name) {
-	case "margin-left-edge":
-		expr = this.resolveName("left");
-		break;
-	case "margin-top-edge":
-		expr = this.resolveName("top");
-		break;
-	case "margin-right-edge":
-		expr = this.addNamedValues("border-right-edge", "margin-right");
-		break;
-	case "margin-bottom-edge":
-		expr = this.addNamedValues("border-bottom-edge", "margin-bottom");
-		break;
-	case "border-left-edge":
-		expr = this.addNamedValues("margin-left-edge", "margin-left");
-		break;
-	case "border-top-edge":
-		expr = this.addNamedValues("margin-top-edge", "margin-top");
-		break;
-	case "border-right-edge":
-		expr = this.addNamedValues("padding-right-edge", "border-right-width");
-		break;
-	case "border-bottom-edge":
-		expr = this.addNamedValues("padding-bottom-edge", "border-bottom-width");
-		break;
-	case "padding-left-edge":
-		expr = this.addNamedValues("border-left-edge", "border-left-width");
-		break;
-	case "padding-top-edge":
-		expr = this.addNamedValues("border-top-edge", "border-top-width");
-		break;
-	case "padding-right-edge":
-		expr = this.addNamedValues("right-edge", "padding-right");
-		break;
-	case "padding-bottom-edge":
-		expr = this.addNamedValues("bottom-edge", "padding-bottom");
-		break;
-	case "left-edge":
-		expr = this.addNamedValues("padding-left-edge", "padding-left");
-		break;
-	case "top-edge":
-		expr = this.addNamedValues("padding-top-edge", "padding-top");
-		break;
-	case "right-edge":
-		expr = this.addNamedValues("left-edge", "width");
-		break;
-	case "bottom-edge":
-		expr = this.addNamedValues("top-edge", "height");
-		break;
-	}
-	if (!expr) {
-		var altName;
-		if (name == "extent") {
-			altName = this.vertical ? "width" : "height";
-		} else if (name == "measure") {
-			altName = this.vertical ? "height" : "width";
-		} else {
-			var map = this.vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
-			altName = name;
-			for (var key in map) {
-				altName = altName.replace(key, map[key]);
-			}
-		}
-		if (altName != name) {
-			expr = this.resolveName(altName);
-		}
-	}
-	if (expr)
-		this.namedValues[name] = expr;
-	return expr;
+    var expr = this.namedValues[name];
+    if (expr)
+        return expr;
+    var val = this.style[name];
+    if (val)
+        expr = val.toExpr(this.pageBox.scope, this.pageBox.scope.zero);
+    switch (name) {
+        case "margin-left-edge":
+            expr = this.resolveName("left");
+            break;
+        case "margin-top-edge":
+            expr = this.resolveName("top");
+            break;
+        case "margin-right-edge":
+            expr = this.addNamedValues("border-right-edge", "margin-right");
+            break;
+        case "margin-bottom-edge":
+            expr = this.addNamedValues("border-bottom-edge", "margin-bottom");
+            break;
+        case "border-left-edge":
+            expr = this.addNamedValues("margin-left-edge", "margin-left");
+            break;
+        case "border-top-edge":
+            expr = this.addNamedValues("margin-top-edge", "margin-top");
+            break;
+        case "border-right-edge":
+            expr = this.addNamedValues("padding-right-edge", "border-right-width");
+            break;
+        case "border-bottom-edge":
+            expr = this.addNamedValues("padding-bottom-edge", "border-bottom-width");
+            break;
+        case "padding-left-edge":
+            expr = this.addNamedValues("border-left-edge", "border-left-width");
+            break;
+        case "padding-top-edge":
+            expr = this.addNamedValues("border-top-edge", "border-top-width");
+            break;
+        case "padding-right-edge":
+            expr = this.addNamedValues("right-edge", "padding-right");
+            break;
+        case "padding-bottom-edge":
+            expr = this.addNamedValues("bottom-edge", "padding-bottom");
+            break;
+        case "left-edge":
+            expr = this.addNamedValues("padding-left-edge", "padding-left");
+            break;
+        case "top-edge":
+            expr = this.addNamedValues("padding-top-edge", "padding-top");
+            break;
+        case "right-edge":
+            expr = this.addNamedValues("left-edge", "width");
+            break;
+        case "bottom-edge":
+            expr = this.addNamedValues("top-edge", "height");
+            break;
+    }
+    if (!expr) {
+        var altName;
+        if (name == "extent") {
+            altName = this.vertical ? "width" : "height";
+        } else if (name == "measure") {
+            altName = this.vertical ? "height" : "width";
+        } else {
+            var map = this.vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
+            altName = name;
+            for (var key in map) {
+                altName = altName.replace(key, map[key]);
+            }
+        }
+        if (altName != name) {
+            expr = this.resolveName(altName);
+        }
+    }
+    if (expr)
+        this.namedValues[name] = expr;
+    return expr;
 };
 
 adapt.pm.PageBoxInstance.prototype.resolveFunc = function(name) {
-	var expr = this.namedFuncs[name];
-	if (expr)
-		return expr;
-	switch (name) {
-	case "columns":
-		// min(count,column-count) * (column-width + column-gap) - column-gap
-		var scope = this.pageBox.scope;
-		var count = new adapt.expr.Param(scope, 0);
-		var columnCount = this.resolveName("column-count");
-		var columnWidth = this.resolveName("column-width");
-		var columnGap = this.resolveName("column-gap");
-		expr = adapt.expr.sub(scope, adapt.expr.mul(scope,
-				new adapt.expr.Call(scope, "min", [count, columnCount]),
-				adapt.expr.add(scope, columnWidth, columnGap)), columnGap);	
-		break;
-	}
-	if (expr)
-		this.namedFuncs[name] = expr;
-	return expr;
+    var expr = this.namedFuncs[name];
+    if (expr)
+        return expr;
+    switch (name) {
+        case "columns":
+            // min(count,column-count) * (column-width + column-gap) - column-gap
+            var scope = this.pageBox.scope;
+            var count = new adapt.expr.Param(scope, 0);
+            var columnCount = this.resolveName("column-count");
+            var columnWidth = this.resolveName("column-width");
+            var columnGap = this.resolveName("column-gap");
+            expr = adapt.expr.sub(scope, adapt.expr.mul(scope,
+                new adapt.expr.Call(scope, "min", [count, columnCount]),
+                adapt.expr.add(scope, columnWidth, columnGap)), columnGap);
+            break;
+    }
+    if (expr)
+        this.namedFuncs[name] = expr;
+    return expr;
 };
 
 /**
@@ -561,13 +561,13 @@ adapt.pm.PageBoxInstance.prototype.initEnabled = function() {
     }
     var minPageWidth = adapt.pm.toExprAuto(scope, style["min-page-width"], scope.zero);
     if (minPageWidth) {
-    	enabled = adapt.expr.and(scope, enabled, 
-    			new adapt.expr.Ge(scope, new adapt.expr.Named(scope, "page-width"), minPageWidth));
+        enabled = adapt.expr.and(scope, enabled,
+            new adapt.expr.Ge(scope, new adapt.expr.Named(scope, "page-width"), minPageWidth));
     }
     var minPageHeight = adapt.pm.toExprAuto(scope, style["min-page-height"], scope.zero);
     if (minPageHeight) {
-    	enabled = adapt.expr.and(scope, enabled, 
-    			new adapt.expr.Ge(scope, new adapt.expr.Named(scope, "page-height"), minPageHeight));
+        enabled = adapt.expr.and(scope, enabled,
+            new adapt.expr.Ge(scope, new adapt.expr.Named(scope, "page-height"), minPageHeight));
     }
     enabled = this.boxSpecificEnabled(enabled);
     style["enabled"] = new adapt.css.Expr(enabled);
@@ -579,7 +579,7 @@ adapt.pm.PageBoxInstance.prototype.initEnabled = function() {
  * @return {adapt.expr.Val}
  */
 adapt.pm.PageBoxInstance.prototype.boxSpecificEnabled = function(enabled) {
-	return enabled;
+    return enabled;
 };
 
 /**
@@ -589,8 +589,8 @@ adapt.pm.PageBoxInstance.prototype.boxSpecificEnabled = function(enabled) {
 adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
     var scope = this.pageBox.scope;
     var style = this.style;
-    var parentWidth = this.parentInstance ? 
-    		this.parentInstance.style["width"].toExpr(scope, null) : null;
+    var parentWidth = this.parentInstance ?
+        this.parentInstance.style["width"].toExpr(scope, null) : null;
     var left = adapt.pm.toExprAuto(scope, style["left"], parentWidth);
     var marginLeft = adapt.pm.toExprAuto(scope, style["margin-left"], parentWidth);
     var borderLeftWidth = adapt.pm.toExprZeroBorder(scope, style["border-left-width"], style["border-left-style"], parentWidth);
@@ -605,7 +605,7 @@ adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
     var rightBP = adapt.expr.add(scope, borderLeftWidth, paddingRight);
     if (left && right && width) {
         var extra = adapt.expr.sub(scope, parentWidth, adapt.expr.add(scope, width,
-        		adapt.expr.add(scope, adapt.expr.add(scope, left, leftBP), rightBP)));
+            adapt.expr.add(scope, adapt.expr.add(scope, left, leftBP), rightBP)));
         if (!marginLeft) {
             extra = adapt.expr.sub(scope, extra, right);
             if (!marginRight) {
@@ -638,9 +638,9 @@ adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
             width = this.autoWidth;
             this.isAutoWidth = true;
         }
-        var remains = adapt.expr.sub(scope, parentWidth, 
-        		adapt.expr.add(scope, adapt.expr.add(scope, marginLeft, leftBP),
-        				adapt.expr.add(scope, marginRight, rightBP)));
+        var remains = adapt.expr.sub(scope, parentWidth,
+            adapt.expr.add(scope, adapt.expr.add(scope, marginLeft, leftBP),
+                adapt.expr.add(scope, marginRight, rightBP)));
         if (this.isAutoWidth) {
             if (!maxWidth) {
                 // TODO: handle the case when right/left depends on width
@@ -648,7 +648,7 @@ adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
             }
             // For multi-column layout, width is max-width.
             if (!this.vertical && (adapt.pm.toExprAuto(scope, style["column-width"], null) ||
-            		adapt.pm.toExprAuto(scope, style["column-count"], null))) {
+                adapt.pm.toExprAuto(scope, style["column-count"], null))) {
                 width = maxWidth;
                 this.isAutoWidth = false;
             }
@@ -662,8 +662,8 @@ adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
         }
     }
     // snap-width is inherited
-    var snapWidthVal = style["snap-width"] || 
-    	(this.parentInstance ? this.parentInstance.style["snap-width"] : null);
+    var snapWidthVal = style["snap-width"] ||
+        (this.parentInstance ? this.parentInstance.style["snap-width"] : null);
     var snapWidth = adapt.pm.toExprZero(scope, snapWidthVal, parentWidth);
     style["left"] = new adapt.css.Expr(left);
     style["margin-left"] = new adapt.css.Expr(marginLeft);
@@ -685,10 +685,10 @@ adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
 adapt.pm.PageBoxInstance.prototype.initVertical = function() {
     var scope = this.pageBox.scope;
     var style = this.style;
-    var parentWidth = this.parentInstance ? 
-    		this.parentInstance.style["width"].toExpr(scope, null) : null;
-    var parentHeight = this.parentInstance ? 
-    		this.parentInstance.style["height"].toExpr(scope, null) : null;
+    var parentWidth = this.parentInstance ?
+        this.parentInstance.style["width"].toExpr(scope, null) : null;
+    var parentHeight = this.parentInstance ?
+        this.parentInstance.style["height"].toExpr(scope, null) : null;
     var top = adapt.pm.toExprAuto(scope, style["top"], parentHeight);
     var marginTop = adapt.pm.toExprAuto(scope, style["margin-top"], parentWidth);
     var borderTopWidth = adapt.pm.toExprZeroBorder(scope, style["border-top-width"], style["border-top-style"], parentWidth);
@@ -702,9 +702,9 @@ adapt.pm.PageBoxInstance.prototype.initVertical = function() {
     var topBP = adapt.expr.add(scope, borderTopWidth, paddingTop);
     var bottomBP = adapt.expr.add(scope, borderBottomWidth, paddingBottom);
     if (top && bottom && height) {
-        var extra = adapt.expr.sub(scope, parentHeight, 
-        		adapt.expr.add(scope, height, adapt.expr.add(scope, 
-        				adapt.expr.add(scope, top, topBP), bottomBP)));
+        var extra = adapt.expr.sub(scope, parentHeight,
+            adapt.expr.add(scope, height, adapt.expr.add(scope,
+                adapt.expr.add(scope, top, topBP), bottomBP)));
         if (!marginTop) {
             extra = adapt.expr.sub(scope, extra, bottom);
             if (!marginBottom) {
@@ -715,8 +715,8 @@ adapt.pm.PageBoxInstance.prototype.initVertical = function() {
             }
         } else {
             if (!marginBottom) {
-                marginBottom = adapt.expr.sub(scope, extra, 
-                		adapt.expr.add(scope, bottom, marginTop));
+                marginBottom = adapt.expr.sub(scope, extra,
+                    adapt.expr.add(scope, bottom, marginTop));
             } else {
                 // overconstraint
                 bottom = adapt.expr.sub(scope, extra, marginTop);
@@ -738,17 +738,17 @@ adapt.pm.PageBoxInstance.prototype.initVertical = function() {
             height = this.autoHeight;
             this.isAutoHeight = true;
         }
-        var remains = adapt.expr.sub(scope, parentHeight, 
-        		adapt.expr.add(scope, adapt.expr.add(scope, marginTop, topBP), 
-        				adapt.expr.add(scope, marginBottom, bottomBP)));
+        var remains = adapt.expr.sub(scope, parentHeight,
+            adapt.expr.add(scope, adapt.expr.add(scope, marginTop, topBP),
+                adapt.expr.add(scope, marginBottom, bottomBP)));
         if (this.isAutoHeight) {
-        	if (!maxHeight) {
-	            // TODO: handle the case when top/bottom depends on height
-	            maxHeight = adapt.expr.sub(scope, remains, (top ? top : bottom));
-	        }
+            if (!maxHeight) {
+                // TODO: handle the case when top/bottom depends on height
+                maxHeight = adapt.expr.sub(scope, remains, (top ? top : bottom));
+            }
             // For multi-column layout in vertical writing, height is max-height.
             if (this.vertical && (adapt.pm.toExprAuto(scope, style["column-width"], null) ||
-            		adapt.pm.toExprAuto(scope, style["column-count"], null))) {
+                adapt.pm.toExprAuto(scope, style["column-count"], null))) {
                 height = maxHeight;
                 this.isAutoHeight = false;
             }
@@ -762,8 +762,8 @@ adapt.pm.PageBoxInstance.prototype.initVertical = function() {
         }
     }
     // snap-height is inherited
-    var snapHeightVal = style["snap-height"] || 
-    	(this.parentInstance ? this.parentInstance.style["snap-height"] : null);
+    var snapHeightVal = style["snap-height"] ||
+        (this.parentInstance ? this.parentInstance.style["snap-height"] : null);
     var snapHeight = adapt.pm.toExprZero(scope, snapHeightVal, parentWidth);
     style["top"] = new adapt.css.Expr(top);
     style["margin-top"] = new adapt.css.Expr(marginTop);
@@ -792,14 +792,14 @@ adapt.pm.PageBoxInstance.prototype.initColumns = function() {
     if (!columnGap)
         columnGap = new adapt.expr.Numeric(scope, 1, "em");
     if (columnWidth && !columnCount) {
-        columnCount = new adapt.expr.Call(scope, "floor", [adapt.expr.div(scope, 
-        		adapt.expr.add(scope, width, columnGap), adapt.expr.add(scope, columnWidth, columnGap))]);
+        columnCount = new adapt.expr.Call(scope, "floor", [adapt.expr.div(scope,
+            adapt.expr.add(scope, width, columnGap), adapt.expr.add(scope, columnWidth, columnGap))]);
         columnCount = new adapt.expr.Call(scope, "max", [scope.one, columnCount]);
     }
     if (!columnCount)
         columnCount = scope.one;
-    columnWidth = adapt.expr.sub(scope, adapt.expr.div(scope, 
-    		adapt.expr.add(scope, width, columnGap), columnCount), columnGap);
+    columnWidth = adapt.expr.sub(scope, adapt.expr.div(scope,
+        adapt.expr.add(scope, width, columnGap), columnCount), columnGap);
     style["column-width"] = new adapt.css.Expr(columnWidth);
     style["column-count"] = new adapt.css.Expr(columnCount);
     style["column-gap"] = new adapt.css.Expr(columnGap);
@@ -822,10 +822,10 @@ adapt.pm.PageBoxInstance.prototype.depends = function(propName, val, context) {
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.init = function(context) {
-	// If context does not implement InstanceHolder we would not be able to resolve
-	// "partition.property" names later.
-	var holder = /** @type {adapt.pm.InstanceHolder} */ (context);
-	holder.registerInstance(this.pageBox.key, this);
+    // If context does not implement InstanceHolder we would not be able to resolve
+    // "partition.property" names later.
+    var holder = /** @type {adapt.pm.InstanceHolder} */ (context);
+    holder.registerInstance(this.pageBox.key, this);
     var scope = this.pageBox.scope;
     var style = this.style;
     var self = this;
@@ -837,13 +837,13 @@ adapt.pm.PageBoxInstance.prototype.init = function(context) {
         return cascVal.value;
     });
     this.autoWidth = new adapt.expr.Native(scope,
-    		function() { 
-    			return self.calculatedWidth;
-    		}, "autoWidth");
-    this.autoHeight = new adapt.expr.Native(scope, 
-    		function() {
-    			return self.calculatedHeight;
-    		}, "autoHeight");
+        function() {
+            return self.calculatedWidth;
+        }, "autoWidth");
+    this.autoHeight = new adapt.expr.Native(scope,
+        function() {
+            return self.calculatedHeight;
+        }, "autoHeight");
     this.initHorizontal();
     this.initVertical();
     this.initColumns();
@@ -973,7 +973,7 @@ adapt.pm.PageBoxInstance.prototype.assignLeftPosition = function(context, contai
  */
 adapt.pm.PageBoxInstance.prototype.assignRightPosition = function(context, container) {
     var right = this.getPropAsNumber(context, "right");
-	var snapWidth = this.getPropAsNumber(context, "snap-height");
+    var snapWidth = this.getPropAsNumber(context, "snap-height");
     var marginRight = this.getPropAsNumber(context, "margin-right");
     var paddingRight = this.getPropAsNumber(context, "padding-right");
     var borderRightWidth = this.getPropAsNumber(context, "border-right-width");
@@ -983,13 +983,13 @@ adapt.pm.PageBoxInstance.prototype.assignRightPosition = function(context, conta
     container.marginRight = marginRight;
     container.borderRight = borderRightWidth;
     if (this.vertical && snapWidth > 0) {
-    	var xpos = right + container.getInsetRight();
-    	var r = xpos - Math.floor(xpos / snapWidth) * snapWidth;
-    	if (r > 0) {
-    		container.snapOffsetX = snapWidth - r;
-    		paddingRight += container.snapOffsetX;
-    	}
-    }    
+        var xpos = right + container.getInsetRight();
+        var r = xpos - Math.floor(xpos / snapWidth) * snapWidth;
+        if (r > 0) {
+            container.snapOffsetX = snapWidth - r;
+            paddingRight += container.snapOffsetX;
+        }
+    }
     container.paddingRight = paddingRight;
     container.snapWidth = snapWidth;
 };
@@ -1000,7 +1000,7 @@ adapt.pm.PageBoxInstance.prototype.assignRightPosition = function(context, conta
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.assignTopPosition = function(context, container) {
-	var snapHeight = this.getPropAsNumber(context, "snap-height");
+    var snapHeight = this.getPropAsNumber(context, "snap-height");
     var top = this.getPropAsNumber(context, "top");
     var marginTop = this.getPropAsNumber(context, "margin-top");
     var paddingTop = this.getPropAsNumber(context, "padding-top");
@@ -1010,14 +1010,14 @@ adapt.pm.PageBoxInstance.prototype.assignTopPosition = function(context, contain
     container.borderTop = borderTopWidth;
     container.snapHeight = snapHeight;
     if (!this.vertical && snapHeight > 0) {
-    	var ypos = top + container.getInsetTop();
-    	var r = ypos - Math.floor(ypos / snapHeight) * snapHeight;
-    	if (r > 0) {
-    		container.snapOffsetY = snapHeight - r;
-    		paddingTop += container.snapOffsetY;
-    	}
+        var ypos = top + container.getInsetTop();
+        var r = ypos - Math.floor(ypos / snapHeight) * snapHeight;
+        if (r > 0) {
+            container.snapOffsetY = snapHeight - r;
+            paddingTop += container.snapOffsetY;
+        }
     }
-	container.paddingTop = paddingTop;
+    container.paddingTop = paddingTop;
     adapt.base.setCSSProperty(container.element, "top", top + "px");
     adapt.base.setCSSProperty(container.element, "margin-top", marginTop + "px");
     adapt.base.setCSSProperty(container.element, "padding-top", paddingTop + "px");
@@ -1051,10 +1051,10 @@ adapt.pm.PageBoxInstance.prototype.assignBottomPosition = function(context, cont
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.assignBeforePosition = function(context, container) {
-	if (this.vertical)
-		this.assignRightPosition(context, container);
-	else
-		this.assignTopPosition(context, container);
+    if (this.vertical)
+        this.assignRightPosition(context, container);
+    else
+        this.assignTopPosition(context, container);
 };
 
 /**
@@ -1063,10 +1063,10 @@ adapt.pm.PageBoxInstance.prototype.assignBeforePosition = function(context, cont
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.assignAfterPosition = function(context, container) {
-	if (this.vertical)
-		this.assignLeftPosition(context, container);
-	else
-		this.assignBottomPosition(context, container);
+    if (this.vertical)
+        this.assignLeftPosition(context, container);
+    else
+        this.assignBottomPosition(context, container);
 };
 
 /**
@@ -1075,13 +1075,13 @@ adapt.pm.PageBoxInstance.prototype.assignAfterPosition = function(context, conta
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.assignStartEndPosition = function(context, container) {
-	if (this.vertical) {
-		this.assignTopPosition(context, container);
-		this.assignBottomPosition(context, container);
-	} else {
-		this.assignRightPosition(context, container);
-		this.assignLeftPosition(context, container);		
-	}
+    if (this.vertical) {
+        this.assignTopPosition(context, container);
+        this.assignBottomPosition(context, container);
+    } else {
+        this.assignRightPosition(context, container);
+        this.assignLeftPosition(context, container);
+    }
 };
 
 /**
@@ -1099,7 +1099,7 @@ adapt.pm.PageBoxInstance.prototype.sizeWithMaxHeight = function(context, contain
         height -= container.snapOffsetY;
         container.height = height;
         adapt.base.setCSSProperty(container.element, "height", height + "px");
-	}
+    }
 };
 
 /**
@@ -1111,14 +1111,14 @@ adapt.pm.PageBoxInstance.prototype.sizeWithMaxWidth = function(context, containe
     adapt.base.setCSSProperty(container.element, "border-left-width", "0px");
     var width = this.getPropAsNumber(context, "max-width");
     if (this.isRightDependentOnAutoWidth) {
-    	container.setHorizontalPosition(0, width);
+        container.setHorizontalPosition(0, width);
     } else {
         this.assignRightPosition(context, container);
         width -= container.snapOffsetX;
         container.width = width;
         var right = this.getPropAsNumber(context, "right");
-        adapt.base.setCSSProperty(container.element, "right", right + "px");    	
-        adapt.base.setCSSProperty(container.element, "width", width + "px");    	
+        adapt.base.setCSSProperty(container.element, "right", right + "px");
+        adapt.base.setCSSProperty(container.element, "width", width + "px");
     }
 };
 
@@ -1127,18 +1127,18 @@ adapt.pm.PageBoxInstance.prototype.sizeWithMaxWidth = function(context, containe
  * @const
  */
 adapt.pm.passPreProperties = [
-	"border-left-style",
-	"border-right-style",
-	"border-top-style",
-	"border-bottom-style",
-	"border-left-color",
-	"border-right-color",
-	"border-top-color",
-	"border-bottom-color",
+    "border-left-style",
+    "border-right-style",
+    "border-top-style",
+    "border-bottom-style",
+    "border-left-color",
+    "border-right-color",
+    "border-top-color",
+    "border-bottom-color",
     "outline-style",
     "outline-color",
     "outline-width",
-	"overflow",
+    "overflow",
     "visibility"
 ];
 
@@ -1147,25 +1147,25 @@ adapt.pm.passPreProperties = [
  * @const
  */
 adapt.pm.passPostProperties = [
-   	"border-top-left-radius",
-	"border-top-right-radius",
-	"border-bottom-right-radius",
-	"border-bottom-left-radius",
-	"border-image-source",
-	"border-image-slice",
-	"border-image-width",
-	"border-image-outset",
-	"border-image-repeat",
-	"background-attachment",
-	"background-color",
-	"background-image",
-	"background-repeat",
-	"background-position",
-	"background-clip",
-	"background-origin",
-	"background-size",
-	"opacity",
-	"z-index"
+    "border-top-left-radius",
+    "border-top-right-radius",
+    "border-bottom-right-radius",
+    "border-bottom-left-radius",
+    "border-image-source",
+    "border-image-slice",
+    "border-image-width",
+    "border-image-outset",
+    "border-image-repeat",
+    "background-attachment",
+    "background-color",
+    "background-image",
+    "background-repeat",
+    "background-position",
+    "background-clip",
+    "background-origin",
+    "background-size",
+    "opacity",
+    "z-index"
 ];
 
 /**
@@ -1193,8 +1193,8 @@ adapt.pm.passContentProperties = [
  * @const
  */
 adapt.pm.delayedProperties = [
-	"transform",
-	"transform-origin"
+    "transform",
+    "transform-origin"
 ];
 
 /**
@@ -1206,23 +1206,23 @@ adapt.pm.delayedProperties = [
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, container, page, docFaces, clientLayout) {
-	if (!this.parentInstance || this.vertical != this.parentInstance.vertical) {
-		adapt.base.setCSSProperty(container.element, "writing-mode", (this.vertical ? "vertical-rl" : "horizontal-tb"));
-	}
+    if (!this.parentInstance || this.vertical != this.parentInstance.vertical) {
+        adapt.base.setCSSProperty(container.element, "writing-mode", (this.vertical ? "vertical-rl" : "horizontal-tb"));
+    }
     if (this.vertical ? this.isAutoWidth : this.isAutoHeight) {
-    	if (this.vertical)
+        if (this.vertical)
             this.sizeWithMaxWidth(context, container);
-    	else
-    		this.sizeWithMaxHeight(context, container);
+        else
+            this.sizeWithMaxHeight(context, container);
     } else {
         this.assignBeforePosition(context, container);
         this.assignAfterPosition(context, container);
     }
     if (this.vertical ? this.isAutoHeight : this.isAutoWidth) {
-    	if (this.vertical)
+        if (this.vertical)
             this.sizeWithMaxHeight(context, container);
-    	else
-    		this.sizeWithMaxWidth(context, container);
+        else
+            this.sizeWithMaxWidth(context, container);
     } else {
         this.assignStartEndPosition(context, container);
     }
@@ -1255,39 +1255,39 @@ adapt.pm.PageBoxInstance.prototype.transferContentProps = function(context, cont
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.finishContainer = function(
-		context, container, page, column, columnCount, clientLayout, docFaces) {
-	if (this.vertical)
-	    this.calculatedWidth = container.computedBlockSize + container.snapOffsetX;
-	else
-		this.calculatedHeight = container.computedBlockSize + container.snapOffsetY;
+    context, container, page, column, columnCount, clientLayout, docFaces) {
+    if (this.vertical)
+        this.calculatedWidth = container.computedBlockSize + container.snapOffsetX;
+    else
+        this.calculatedHeight = container.computedBlockSize + container.snapOffsetY;
     var readHeight = (this.vertical || !column) && this.isAutoHeight;
     var readWidth = (!this.vertical || !column) && this.isAutoWidth;
     var bbox = null;
     if (readWidth || readHeight) {
-    	if (readWidth) {
-    		adapt.base.setCSSProperty(container.element, "width", "auto");
-    	}
-    	if (readHeight) {
-    		adapt.base.setCSSProperty(container.element, "height", "auto");
-    	}
-        bbox = clientLayout.getElementClientRect(column ? column.element : container.element);
         if (readWidth) {
-        	this.calculatedWidth = Math.ceil(bbox.right - bbox.left
-        		- container.paddingLeft - container.borderLeft
-        		- container.paddingRight - container.borderRight);
-        	if (this.vertical)
-        	    this.calculatedWidth += container.snapOffsetX;
+            adapt.base.setCSSProperty(container.element, "width", "auto");
         }
         if (readHeight) {
-        	this.calculatedHeight = bbox.bottom - bbox.top
-        		- container.paddingTop - container.borderTop
-        		- container.paddingBottom - container.borderBottom;
-        	if (!this.vertical)
-        		this.calculatedHeight += container.snapOffsetY;
+            adapt.base.setCSSProperty(container.element, "height", "auto");
+        }
+        bbox = clientLayout.getElementClientRect(column ? column.element : container.element);
+        if (readWidth) {
+            this.calculatedWidth = Math.ceil(bbox.right - bbox.left
+                - container.paddingLeft - container.borderLeft
+                - container.paddingRight - container.borderRight);
+            if (this.vertical)
+                this.calculatedWidth += container.snapOffsetX;
+        }
+        if (readHeight) {
+            this.calculatedHeight = bbox.bottom - bbox.top
+                - container.paddingTop - container.borderTop
+                - container.paddingBottom - container.borderBottom;
+            if (!this.vertical)
+                this.calculatedHeight += container.snapOffsetY;
         }
     }
     if (this.vertical ? this.isAutoHeight : this.isAutoWidth) {
-    	this.assignStartEndPosition(context, container);    	
+        this.assignStartEndPosition(context, container);
     }
     if (this.vertical ? this.isAutoWidth : this.isAutoHeight) {
         if (this.vertical ? this.isRightDependentOnAutoWidth : this.isTopDependentOnAutoHeight)
@@ -1295,36 +1295,36 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
         this.assignAfterPosition(context, container);
     }
     if (columnCount > 1) {
-    	var ruleWidth = this.getPropAsNumber(context, "column-rule-width");
-    	var ruleStyle = this.getProp(context, "column-rule-style");
-    	var ruleColor = this.getProp(context, "column-rule-color");
-    	if (ruleWidth > 0 && ruleStyle && ruleStyle != adapt.css.ident.none &&
-    			ruleColor != adapt.css.ident.transparent) {
-        	var columnGap = this.getPropAsNumber(context, "column-gap");
-        	var containerSize = this.vertical ? container.height : container.width;
-        	var border = this.vertical ? "border-top" : "border-left";
-    		for (var i = 1; i < columnCount; i++) {
-    			var pos = (containerSize + columnGap) * i / columnCount - columnGap/2
-    				+ container.paddingLeft - ruleWidth/2;
-    			var size = container.height + container.paddingTop + container.paddingBottom;
-    			var rule = container.element.ownerDocument.createElement("div");
-    			adapt.base.setCSSProperty(rule, "position", "absolute");
-    			adapt.base.setCSSProperty(rule, this.vertical ? "left" : "top", "0px");
-    			adapt.base.setCSSProperty(rule, this.vertical ? "top" : "left", pos + "px");
-    			adapt.base.setCSSProperty(rule, this.vertical ? "height" : "width", "0px");
-    			adapt.base.setCSSProperty(rule, this.vertical ? "width" : "height", size + "px");
-    			adapt.base.setCSSProperty(rule, border, 
-    					ruleWidth + "px " + ruleStyle.toString() + (ruleColor ? " " + ruleColor.toString() : ""));
-    			container.element.insertBefore(rule, container.element.firstChild);
-    		}
-    	}
+        var ruleWidth = this.getPropAsNumber(context, "column-rule-width");
+        var ruleStyle = this.getProp(context, "column-rule-style");
+        var ruleColor = this.getProp(context, "column-rule-color");
+        if (ruleWidth > 0 && ruleStyle && ruleStyle != adapt.css.ident.none &&
+            ruleColor != adapt.css.ident.transparent) {
+            var columnGap = this.getPropAsNumber(context, "column-gap");
+            var containerSize = this.vertical ? container.height : container.width;
+            var border = this.vertical ? "border-top" : "border-left";
+            for (var i = 1; i < columnCount; i++) {
+                var pos = (containerSize + columnGap) * i / columnCount - columnGap/2
+                    + container.paddingLeft - ruleWidth/2;
+                var size = container.height + container.paddingTop + container.paddingBottom;
+                var rule = container.element.ownerDocument.createElement("div");
+                adapt.base.setCSSProperty(rule, "position", "absolute");
+                adapt.base.setCSSProperty(rule, this.vertical ? "left" : "top", "0px");
+                adapt.base.setCSSProperty(rule, this.vertical ? "top" : "left", pos + "px");
+                adapt.base.setCSSProperty(rule, this.vertical ? "height" : "width", "0px");
+                adapt.base.setCSSProperty(rule, this.vertical ? "width" : "height", size + "px");
+                adapt.base.setCSSProperty(rule, border,
+                    ruleWidth + "px " + ruleStyle.toString() + (ruleColor ? " " + ruleColor.toString() : ""));
+                container.element.insertBefore(rule, container.element.firstChild);
+            }
+        }
     }
     for (var i = 0; i < adapt.pm.passPostProperties.length; i++) {
         this.propagateProperty(context, container, adapt.pm.passPostProperties[i], docFaces);
     }
     for (var i = 0; i < adapt.pm.delayedProperties.length; i++) {
-        this.propagateDelayedProperty(context, container, adapt.pm.delayedProperties[i], page.delayedItems);    	
-    }    
+        this.propagateDelayedProperty(context, container, adapt.pm.delayedProperties[i], page.delayedItems);
+    }
 };
 
 adapt.pm.userAgentPageMasterPseudo = "background-host";
@@ -1335,39 +1335,39 @@ adapt.pm.userAgentPageMasterPseudo = "background-host";
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit = function(cascade, docElementStyle) {
-	var style = this.cascaded;
-	var specified = this.pageBox.specified;
-	for (var name in specified) {
-		if (adapt.csscasc.isPropName(name)) {
-			adapt.csscasc.setProp(style, name, adapt.csscasc.getProp(specified, name));
-		}
-	}
-	if (this.pageBox.pseudoName == adapt.pm.userAgentPageMasterPseudo) {
-		for (var name in docElementStyle) {
-			if (name.match(/^background-/) || name == "writing-mode") {
-				style[name] = docElementStyle[name];
-			}
-		}
-	}
-	if (this.pageBox.pseudoName == "layout-host") {
-		for (var name in docElementStyle) {
-			if (!name.match(/^background-/) && name != "writing-mode") {
-				style[name] = docElementStyle[name];
-			}
-		}
-	}
-	cascade.pushRule(this.pageBox.classes, null, style);
+    var style = this.cascaded;
+    var specified = this.pageBox.specified;
+    for (var name in specified) {
+        if (adapt.csscasc.isPropName(name)) {
+            adapt.csscasc.setProp(style, name, adapt.csscasc.getProp(specified, name));
+        }
+    }
+    if (this.pageBox.pseudoName == adapt.pm.userAgentPageMasterPseudo) {
+        for (var name in docElementStyle) {
+            if (name.match(/^background-/) || name == "writing-mode") {
+                style[name] = docElementStyle[name];
+            }
+        }
+    }
+    if (this.pageBox.pseudoName == "layout-host") {
+        for (var name in docElementStyle) {
+            if (!name.match(/^background-/) && name != "writing-mode") {
+                style[name] = docElementStyle[name];
+            }
+        }
+    }
+    cascade.pushRule(this.pageBox.classes, null, style);
     if (style["content"]) {
         style["content"] = style["content"].filterValue(
             new adapt.csscasc.ContentPropVisitor(cascade, null, cascade.counterResolver));
     }
-	this.init(cascade.context);
-	for (var i = 0; i < this.pageBox.children.length ; i++) {
-		var child = this.pageBox.children[i];
-		var childInstance = child.createInstance(this);
-	    childInstance.applyCascadeAndInit(cascade, docElementStyle);
-	}
-	cascade.popRule();
+    this.init(cascade.context);
+    for (var i = 0; i < this.pageBox.children.length; i++) {
+        var child = this.pageBox.children[i];
+        var childInstance = child.createInstance(this);
+        childInstance.applyCascadeAndInit(cascade, docElementStyle);
+    }
+    cascade.popRule();
 };
 
 /**
@@ -1388,10 +1388,10 @@ adapt.pm.PageBoxInstance.prototype.resolveAutoSizing = function(context) {
             this.depends("border-top-width", this.autoHeight, context) ||
             this.depends("padding-top", this.autoHeight, context);
     }
-	for (var i = 0; i < this.children.length ; i++) {
-		var childInstance = this.children[i];
-	    childInstance.resolveAutoSizing(context);
-	}
+    for (var i = 0; i < this.children.length; i++) {
+        var childInstance = this.children[i];
+        childInstance.resolveAutoSizing(context);
+    }
 };
 
 
@@ -1401,7 +1401,7 @@ adapt.pm.PageBoxInstance.prototype.resolveAutoSizing = function(context) {
  * @extends {adapt.pm.PageBoxInstance}
  */
 adapt.pm.RootPageBoxInstance = function(pageBox) {
-	adapt.pm.PageBoxInstance.call(this, null, pageBox);
+    adapt.pm.PageBoxInstance.call(this, null, pageBox);
 };
 goog.inherits(adapt.pm.RootPageBoxInstance, adapt.pm.PageBoxInstance);
 
@@ -1409,19 +1409,19 @@ goog.inherits(adapt.pm.RootPageBoxInstance, adapt.pm.PageBoxInstance);
  * @override
  */
 adapt.pm.RootPageBoxInstance.prototype.applyCascadeAndInit = function(cascade, docElementStyle) {
-	adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit.call(this, cascade, docElementStyle);
-	// Sort page masters using order and specificity.
+    adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit.call(this, cascade, docElementStyle);
+    // Sort page masters using order and specificity.
     var pageMasters = this.children;
     (/** @type {Array.<adapt.pm.PageMasterInstance>} */ (pageMasters)).sort(
-    	/**
-    	 * @param {adapt.pm.PageMasterInstance} a
-    	 * @param {adapt.pm.PageMasterInstance} b
-    	 * @return {number}
-    	 */
-    	function (a, b) { 
-    		return b.pageBox.specificity - a.pageBox.specificity || a.pageBox.index - b.pageBox.index;
-    	}
-    );	
+        /**
+         * @param {adapt.pm.PageMasterInstance} a
+         * @param {adapt.pm.PageMasterInstance} b
+         * @return {number}
+         */
+        function(a, b) {
+            return b.pageBox.specificity - a.pageBox.specificity || a.pageBox.index - b.pageBox.index;
+        }
+    );
 };
 
 /**
@@ -1431,8 +1431,8 @@ adapt.pm.RootPageBoxInstance.prototype.applyCascadeAndInit = function(cascade, d
  * @extends {adapt.pm.PageBoxInstance}
  */
 adapt.pm.PageMasterInstance = function(parentInstance, pageBox) {
-	adapt.pm.PageBoxInstance.call(this, parentInstance, pageBox);
-	this.pageMasterInstance = this;
+    adapt.pm.PageBoxInstance.call(this, parentInstance, pageBox);
+    this.pageMasterInstance = this;
 };
 goog.inherits(adapt.pm.PageMasterInstance, adapt.pm.PageBoxInstance);
 
@@ -1440,7 +1440,7 @@ goog.inherits(adapt.pm.PageMasterInstance, adapt.pm.PageBoxInstance);
  * @override
  */
 adapt.pm.PageMasterInstance.prototype.boxSpecificEnabled = function(enabled) {
-	var pageMaster = this.pageBox.pageMaster;
+    var pageMaster = this.pageBox.pageMaster;
     if (pageMaster.condition) {
         enabled = adapt.expr.and(pageMaster.scope, enabled, pageMaster.condition);
     }
@@ -1464,8 +1464,8 @@ adapt.pm.PageMasterInstance.prototype.adjustPageLayout = function(context, page,
  * @extends {adapt.pm.PageBoxInstance}
  */
 adapt.pm.PartitionGroupInstance = function(parentInstance, pageBox) {
-	adapt.pm.PageBoxInstance.call(this, parentInstance, pageBox);
-	this.pageMasterInstance = parentInstance.pageMasterInstance;
+    adapt.pm.PageBoxInstance.call(this, parentInstance, pageBox);
+    this.pageMasterInstance = parentInstance.pageMasterInstance;
 };
 goog.inherits(adapt.pm.PartitionGroupInstance, adapt.pm.PageBoxInstance);
 
@@ -1477,8 +1477,8 @@ goog.inherits(adapt.pm.PartitionGroupInstance, adapt.pm.PageBoxInstance);
  * @extends {adapt.pm.PageBoxInstance}
  */
 adapt.pm.PartitionInstance = function(parentInstance, pageBox) {
-	adapt.pm.PageBoxInstance.call(this, parentInstance, pageBox);
-	this.pageMasterInstance = parentInstance.pageMasterInstance;
+    adapt.pm.PageBoxInstance.call(this, parentInstance, pageBox);
+    this.pageMasterInstance = parentInstance.pageMasterInstance;
 };
 goog.inherits(adapt.pm.PartitionInstance, adapt.pm.PageBoxInstance);
 
@@ -1489,26 +1489,26 @@ goog.inherits(adapt.pm.PartitionInstance, adapt.pm.PageBoxInstance);
  * @return {adapt.expr.Val}
  */
 adapt.pm.PartitionInstance.prototype.processPartitionList = function(enabled, listVal, conflicting) {
-	var list = null;
-	if (listVal instanceof adapt.css.Ident) {
-		list = [listVal];
-	}
-    if (listVal instanceof adapt.css.CommaList) {
-    	list = (/** @type {adapt.css.CommaList} */ (listVal)).values;
+    var list = null;
+    if (listVal instanceof adapt.css.Ident) {
+        list = [listVal];
     }
-	if (list) {
-    	var scope = this.pageBox.scope;
-    	for (var i = 0; i < list.length; i++) {
-    		if (list[i] instanceof adapt.css.Ident) {
-    			var qname = adapt.expr.makeQualifiedName(
-    					(/** @type {adapt.css.Ident} */ (list[i])).name, "enabled");
-    			var term = new adapt.expr.Named(scope, qname);
-    			if (conflicting) {
-    				term = new adapt.expr.Not(scope, term);
-    			}
-    			enabled = adapt.expr.and(scope, enabled, term);
-    		}
-    	}
+    if (listVal instanceof adapt.css.CommaList) {
+        list = (/** @type {adapt.css.CommaList} */ (listVal)).values;
+    }
+    if (list) {
+        var scope = this.pageBox.scope;
+        for (var i = 0; i < list.length; i++) {
+            if (list[i] instanceof adapt.css.Ident) {
+                var qname = adapt.expr.makeQualifiedName(
+                    (/** @type {adapt.css.Ident} */ (list[i])).name, "enabled");
+                var term = new adapt.expr.Named(scope, qname);
+                if (conflicting) {
+                    term = new adapt.expr.Not(scope, term);
+                }
+                enabled = adapt.expr.and(scope, enabled, term);
+            }
+        }
     }
     return enabled;
 };
@@ -1517,12 +1517,12 @@ adapt.pm.PartitionInstance.prototype.processPartitionList = function(enabled, li
  * @override
  */
 adapt.pm.PartitionInstance.prototype.boxSpecificEnabled = function(enabled) {
-	var scope = this.pageBox.scope;
-	var style = this.style;
-	var required = adapt.pm.toExprBool(scope, style["required"], scope._false) !== scope._false;
+    var scope = this.pageBox.scope;
+    var style = this.style;
+    var required = adapt.pm.toExprBool(scope, style["required"], scope._false) !== scope._false;
     if (required || this.isAutoHeight) {
         var flowName = adapt.pm.toExprIdent(scope, style["flow-from"], "body");
-    	var hasContent = new adapt.expr.Call(scope, "has-content", [flowName]);
+        var hasContent = new adapt.expr.Call(scope, "has-content", [flowName]);
         enabled = adapt.expr.and(scope, enabled, hasContent);
     }
     enabled = this.processPartitionList(enabled, style["required-partitions"], false);
@@ -1540,8 +1540,8 @@ adapt.pm.PartitionInstance.prototype.boxSpecificEnabled = function(enabled) {
  * @override
  */
 adapt.pm.PartitionInstance.prototype.prepareContainer = function(context, container, delayedItems, docFaces, clientLayout) {
-	adapt.base.setCSSProperty(container.element, "overflow", "hidden");  // default value
-	adapt.pm.PageBoxInstance.prototype.prepareContainer.call(this, context, container, delayedItems, docFaces, clientLayout);
+    adapt.base.setCSSProperty(container.element, "overflow", "hidden");  // default value
+    adapt.pm.PageBoxInstance.prototype.prepareContainer.call(this, context, container, delayedItems, docFaces, clientLayout);
 };
 
 
@@ -1557,9 +1557,9 @@ adapt.pm.PartitionInstance.prototype.prepareContainer = function(context, contai
  * @implements {adapt.cssvalid.PropertyReceiver}
  */
 adapt.pm.PageBoxParserHandler = function(scope, owner, target, validatorSet) {
-	adapt.cssparse.SlaveParserHandler.call(this, scope, owner, false);
-	/** @const */ this.target = target;
-	/** @const */ this.validatorSet = validatorSet;
+    adapt.cssparse.SlaveParserHandler.call(this, scope, owner, false);
+    /** @const */ this.target = target;
+    /** @const */ this.validatorSet = validatorSet;
 };
 goog.inherits(adapt.pm.PageBoxParserHandler, adapt.cssparse.SlaveParserHandler);
 
@@ -1588,8 +1588,8 @@ adapt.pm.PageBoxParserHandler.prototype.invalidPropertyValue = function(name, va
  * @override
  */
 adapt.pm.PageBoxParserHandler.prototype.simpleProperty = function(name, value, important) {
-    this.target.specified[name] = new adapt.csscasc.CascadeValue(value, 
-    		important ? adapt.cssparse.SPECIFICITY_STYLE:adapt.cssparse.SPECIFICITY_STYLE_IMPORTANT);
+    this.target.specified[name] = new adapt.csscasc.CascadeValue(value,
+        important ? adapt.cssparse.SPECIFICITY_STYLE:adapt.cssparse.SPECIFICITY_STYLE_IMPORTANT);
 };
 
 
@@ -1602,7 +1602,7 @@ adapt.pm.PageBoxParserHandler.prototype.simpleProperty = function(name, value, i
  * @extends {adapt.pm.PageBoxParserHandler}
  */
 adapt.pm.PartitionParserHandler = function(scope, owner, target, validatorSet) {
-	adapt.pm.PageBoxParserHandler.call(this, scope, owner, target, validatorSet);
+    adapt.pm.PageBoxParserHandler.call(this, scope, owner, target, validatorSet);
 };
 goog.inherits(adapt.pm.PartitionParserHandler, adapt.pm.PageBoxParserHandler);
 
@@ -1616,7 +1616,7 @@ goog.inherits(adapt.pm.PartitionParserHandler, adapt.pm.PageBoxParserHandler);
  * @extends {adapt.pm.PageBoxParserHandler}
  */
 adapt.pm.PartitionGroupParserHandler = function(scope, owner, target, validatorSet) {
-	adapt.pm.PageBoxParserHandler.call(this, scope, owner, target, validatorSet);
+    adapt.pm.PageBoxParserHandler.call(this, scope, owner, target, validatorSet);
     target.specified["width"] = new adapt.csscasc.CascadeValue(adapt.css.hundredPercent, 0);
     target.specified["height"] = new adapt.csscasc.CascadeValue(adapt.css.hundredPercent, 0);
 };
@@ -1628,7 +1628,7 @@ goog.inherits(adapt.pm.PartitionGroupParserHandler, adapt.pm.PageBoxParserHandle
 adapt.pm.PartitionGroupParserHandler.prototype.startPartitionRule = function(name, pseudoName, classes) {
     var partition = new adapt.pm.Partition(this.scope, name, pseudoName, classes, this.target);
     var handler = new adapt.pm.PartitionParserHandler(this.scope, this.owner,
-    		partition, this.validatorSet);
+        partition, this.validatorSet);
     this.owner.pushHandler(handler);
 };
 
@@ -1638,7 +1638,7 @@ adapt.pm.PartitionGroupParserHandler.prototype.startPartitionRule = function(nam
 adapt.pm.PartitionGroupParserHandler.prototype.startPartitionGroupRule = function(name, pseudoName, classes) {
     var partitionGroup = new adapt.pm.PartitionGroup(this.scope, name, pseudoName, classes, this.target);
     var handler = new adapt.pm.PartitionGroupParserHandler(this.scope, this.owner,
-    		partitionGroup, this.validatorSet);
+        partitionGroup, this.validatorSet);
     this.owner.pushHandler(handler);
 };
 
@@ -1652,7 +1652,7 @@ adapt.pm.PartitionGroupParserHandler.prototype.startPartitionGroupRule = functio
  * @extends {adapt.pm.PageBoxParserHandler}
  */
 adapt.pm.PageMasterParserHandler = function(scope, owner, target, validatorSet) {
-	adapt.pm.PageBoxParserHandler.call(this, scope, owner, target, validatorSet);
+    adapt.pm.PageBoxParserHandler.call(this, scope, owner, target, validatorSet);
 };
 goog.inherits(adapt.pm.PageMasterParserHandler, adapt.pm.PageBoxParserHandler);
 
@@ -1662,7 +1662,7 @@ goog.inherits(adapt.pm.PageMasterParserHandler, adapt.pm.PageBoxParserHandler);
 adapt.pm.PageMasterParserHandler.prototype.startPartitionRule = function(name, pseudoName, classes) {
     var partition = new adapt.pm.Partition(this.scope, name, pseudoName, classes, this.target);
     var handler = new adapt.pm.PartitionParserHandler(this.scope, this.owner,
-    		partition, this.validatorSet);
+        partition, this.validatorSet);
     this.owner.pushHandler(handler);
 };
 
@@ -1672,8 +1672,6 @@ adapt.pm.PageMasterParserHandler.prototype.startPartitionRule = function(name, p
 adapt.pm.PageMasterParserHandler.prototype.startPartitionGroupRule = function(name, pseudoName, classes) {
     var partitionGroup = new adapt.pm.PartitionGroup(this.scope, name, pseudoName, classes, this.target);
     var handler = new adapt.pm.PartitionGroupParserHandler(this.scope, this.owner,
-    		partitionGroup, this.validatorSet);
+        partitionGroup, this.validatorSet);
     this.owner.pushHandler(handler);
 };
-
-

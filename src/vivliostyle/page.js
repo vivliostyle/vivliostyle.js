@@ -150,7 +150,7 @@ vivliostyle.page.resolvePageSizeAndBleed = function(style) {
         if (marks) {
             var hasCrop = false;
             if (marks.value.isSpaceList()) {
-                hasCrop = marks.value.values.some(function(v) { return v === adapt.css.ident.crop});
+                hasCrop = marks.value.values.some(function(v) { return v === adapt.css.ident.crop;});
             } else {
                 hasCrop = marks.value === adapt.css.ident.crop;
             }
@@ -389,7 +389,7 @@ vivliostyle.page.addPrinterMarks = function(cascadedPageStyle, evaluatedPageSize
                 } else if (v === adapt.css.ident.cross) {
                     cross = true;
                 }
-            })
+            });
         } else if (value === adapt.css.ident.crop) {
             crop = true;
         } else if (value === adapt.css.ident.cross) {
@@ -1681,7 +1681,7 @@ vivliostyle.page.PageMarginBoxPartitionInstance.prototype.positionAndSizeAlongFi
         } else if (insideName === "top") {
             style["top"] = new adapt.css.Expr(adapt.expr.add(scope, dim.marginTop, dim.borderBoxHeight));
         }
-};
+    };
 
 /**
  * @override
@@ -2256,7 +2256,8 @@ vivliostyle.page.PageParserHandler.prototype.startRuleBody = function() {
  */
 vivliostyle.page.PageParserHandler.prototype.simpleProperty = function(name, value, important) {
     // we limit 'bleed' and 'marks' to be effective only when specified without page selectors
-    if ((name === "bleed" || name === "marks") && !this.currentPageSelectors.some(function(s) {
+    if ((name === "bleed" || name === "marks") &&
+        !this.currentPageSelectors.some(function(s) {
             return s.selectors === null;
         })) {
         return;
@@ -2289,7 +2290,7 @@ vivliostyle.page.PageParserHandler.prototype.simpleProperty = function(name, val
                 props = pageProps[selector] = /** @type {!adapt.csscasc.ElementStyle} */ ({});
                 adapt.csscasc.setProp(props, name, result);
                 if (noPageSelectorProps) {
-                    ["bleed", "marks"].forEach(function (n) {
+                    ["bleed", "marks"].forEach(function(n) {
                         if (noPageSelectorProps[n]) {
                             adapt.csscasc.setProp(props, n, noPageSelectorProps[n]);
                         }

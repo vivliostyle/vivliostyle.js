@@ -44,8 +44,8 @@ adapt.csstok.escapeParseSingle = function(str) {
  * @return {string}
  */
 adapt.csstok.escapeParse = function(str) {
-    return str.replace( /\\([0-9a-fA-F]{0,6}(\r\n|[ \n\r\t\f])?|[^0-9a-fA-F\n\r])/g,
-    		adapt.csstok.escapeParseSingle );
+    return str.replace(/\\([0-9a-fA-F]{0,6}(\r\n|[ \n\r\t\f])?|[^0-9a-fA-F\n\r])/g,
+        adapt.csstok.escapeParseSingle);
 };
 
 /**
@@ -208,12 +208,12 @@ adapt.csstok.Action = {
 adapt.csstok.makeActions = function(def, spec) {
     /** @type {Array.<number>} */ var a = Array(128);
     /** @type {number} */ var i;
-    for (i = 0 ; i < 128 ; i++) {
+    for (i = 0; i < 128; i++) {
         a[i] = def;
     }
-    a[NaN] = def == adapt.csstok.Action.END ? 
-    		adapt.csstok.Action.END : adapt.csstok.Action.INVALID;
-    for (i = 0 ; i < spec.length ; i += 2) {
+    a[NaN] = def == adapt.csstok.Action.END ?
+        adapt.csstok.Action.END : adapt.csstok.Action.INVALID;
+    for (i = 0; i < spec.length; i += 2) {
         a[spec[i]] = spec[i + 1];
     }
     return a;
@@ -398,31 +398,31 @@ adapt.csstok.actionsNumber[NaN] = adapt.csstok.Action.ENDNUM;
  * @type {Array.<adapt.csstok.Action>}
  * @const
  */
-adapt.csstok.actionsCheckEq = adapt.csstok.makeActions( adapt.csstok.Action.END, [61/*=*/, adapt.csstok.Action.EQTAIL]);
+adapt.csstok.actionsCheckEq = adapt.csstok.makeActions(adapt.csstok.Action.END, [61/*=*/, adapt.csstok.Action.EQTAIL]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
  * @const
  */
-adapt.csstok.actionsColon = adapt.csstok.makeActions( adapt.csstok.Action.END, [58/*:*/, adapt.csstok.Action.COL_COL]);
+adapt.csstok.actionsColon = adapt.csstok.makeActions(adapt.csstok.Action.END, [58/*:*/, adapt.csstok.Action.COL_COL]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
  * @const
  */
-adapt.csstok.actionsBar = adapt.csstok.makeActions( adapt.csstok.Action.END, [61/*=*/, adapt.csstok.Action.EQTAIL, 124 /*|*/, adapt.csstok.Action.BAR_BAR]);
+adapt.csstok.actionsBar = adapt.csstok.makeActions(adapt.csstok.Action.END, [61/*=*/, adapt.csstok.Action.EQTAIL, 124 /*|*/, adapt.csstok.Action.BAR_BAR]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
  * @const
  */
-adapt.csstok.actionsAmp = adapt.csstok.makeActions( adapt.csstok.Action.END, [38 /*&*/, adapt.csstok.Action.AMP_AMP]);
+adapt.csstok.actionsAmp = adapt.csstok.makeActions(adapt.csstok.Action.END, [38 /*&*/, adapt.csstok.Action.AMP_AMP]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
  * @const
  */
-adapt.csstok.actionsSlash = adapt.csstok.makeActions( adapt.csstok.Action.END, [42/* * */, adapt.csstok.Action.COMMENT]);
+adapt.csstok.actionsSlash = adapt.csstok.makeActions(adapt.csstok.Action.END, [42/* * */, adapt.csstok.Action.COMMENT]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
@@ -446,49 +446,49 @@ adapt.csstok.actionsMinusMinus = adapt.csstok.makeActions(adapt.csstok.Action.KI
  * @type {Array.<adapt.csstok.Action>}
  * @const
  */
-adapt.csstok.actionsLt = adapt.csstok.makeActions( adapt.csstok.Action.END, [61/*=*/, adapt.csstok.Action.EQTAIL, 33 /*!*/, adapt.csstok.Action.LT_BG]);
+adapt.csstok.actionsLt = adapt.csstok.makeActions(adapt.csstok.Action.END, [61/*=*/, adapt.csstok.Action.EQTAIL, 33 /*!*/, adapt.csstok.Action.LT_BG]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
  * @const
  */
-adapt.csstok.actionsLtBang = adapt.csstok.makeActions( adapt.csstok.Action.KILL1, [45 /*-*/, adapt.csstok.Action.LT_BG_M]);
+adapt.csstok.actionsLtBang = adapt.csstok.makeActions(adapt.csstok.Action.KILL1, [45 /*-*/, adapt.csstok.Action.LT_BG_M]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
  * @const
  */
-adapt.csstok.actionsLtBangMinus = adapt.csstok.makeActions( adapt.csstok.Action.KILL2, [45 /*-*/, adapt.csstok.Action.ENDNOTK]);
+adapt.csstok.actionsLtBangMinus = adapt.csstok.makeActions(adapt.csstok.Action.KILL2, [45 /*-*/, adapt.csstok.Action.ENDNOTK]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
  * @const
  */
-adapt.csstok.actionsIdentEscChr = adapt.csstok.makeActions( adapt.csstok.Action.IDESCH, [9/*tab*/, adapt.csstok.Action.INVALID, 10/*LF*/, adapt.csstok.Action.INVALID, 13/*CR*/, adapt.csstok.Action.INVALID, 32/*sp*/, adapt.csstok.Action.INVALID] );
+adapt.csstok.actionsIdentEscChr = adapt.csstok.makeActions(adapt.csstok.Action.IDESCH, [9/*tab*/, adapt.csstok.Action.INVALID, 10/*LF*/, adapt.csstok.Action.INVALID, 13/*CR*/, adapt.csstok.Action.INVALID, 32/*sp*/, adapt.csstok.Action.INVALID]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
  * @const
  */
-adapt.csstok.actionsStr1 = adapt.csstok.makeActions( adapt.csstok.Action.CONT, [39/*'*/, adapt.csstok.Action.ENDSTR, 10/*LF*/, adapt.csstok.Action.INVALID, 13/*CR*/, adapt.csstok.Action.INVALID, 92/*\*/, adapt.csstok.Action.STR1ESC]);
+adapt.csstok.actionsStr1 = adapt.csstok.makeActions(adapt.csstok.Action.CONT, [39/*'*/, adapt.csstok.Action.ENDSTR, 10/*LF*/, adapt.csstok.Action.INVALID, 13/*CR*/, adapt.csstok.Action.INVALID, 92/*\*/, adapt.csstok.Action.STR1ESC]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
  * @const
  */
-adapt.csstok.actionsStr2 = adapt.csstok.makeActions( adapt.csstok.Action.CONT, [34/*"*/, adapt.csstok.Action.ENDSTR, 10/*LF*/, adapt.csstok.Action.INVALID, 13/*CR*/, adapt.csstok.Action.INVALID, 92/*\*/, adapt.csstok.Action.STR2ESC]);
+adapt.csstok.actionsStr2 = adapt.csstok.makeActions(adapt.csstok.Action.CONT, [34/*"*/, adapt.csstok.Action.ENDSTR, 10/*LF*/, adapt.csstok.Action.INVALID, 13/*CR*/, adapt.csstok.Action.INVALID, 92/*\*/, adapt.csstok.Action.STR2ESC]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
  * @const
  */
-adapt.csstok.actionsStr1Esc = adapt.csstok.makeActions( adapt.csstok.Action.CONT, [39/*'*/, adapt.csstok.Action.ENDESTR, 10/*LF*/, adapt.csstok.Action.CHKPOSN, 13/*CR*/, adapt.csstok.Action.CHKPOSN, 92/*\*/, adapt.csstok.Action.STR1ESC]);
+adapt.csstok.actionsStr1Esc = adapt.csstok.makeActions(adapt.csstok.Action.CONT, [39/*'*/, adapt.csstok.Action.ENDESTR, 10/*LF*/, adapt.csstok.Action.CHKPOSN, 13/*CR*/, adapt.csstok.Action.CHKPOSN, 92/*\*/, adapt.csstok.Action.STR1ESC]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
  * @const
  */
-adapt.csstok.actionsStr2Esc = adapt.csstok.makeActions( adapt.csstok.Action.CONT, [34/*"*/, adapt.csstok.Action.ENDESTR, 10/*LF*/, adapt.csstok.Action.CHKPOSN, 13/*CR*/, adapt.csstok.Action.CHKPOSN, 92/*\*/, adapt.csstok.Action.STR2ESC]);
+adapt.csstok.actionsStr2Esc = adapt.csstok.makeActions(adapt.csstok.Action.CONT, [34/*"*/, adapt.csstok.Action.ENDESTR, 10/*LF*/, adapt.csstok.Action.CHKPOSN, 13/*CR*/, adapt.csstok.Action.CHKPOSN, 92/*\*/, adapt.csstok.Action.STR2ESC]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
@@ -501,8 +501,8 @@ adapt.csstok.actionsURL = adapt.csstok.makeActions(adapt.csstok.Action.URL, [9/*
  * @const
  */
 adapt.csstok.actionsURLInside = adapt.csstok.makeActions(adapt.csstok.Action.CONT, [41/*)*/, adapt.csstok.Action.ENDURL, 9/*TAB*/, adapt.csstok.Action.CHKSP, 10/*LF*/, adapt.csstok.Action.CHKSP, 13/*CR*/, adapt.csstok.Action.CHKSP, 32/*sp*/, adapt.csstok.Action.CHKSP, 92/*\*/, adapt.csstok.Action.URLESC,
-                                                                                    40/*(*/, adapt.csstok.Action.INVALID, 91/*[*/, adapt.csstok.Action.INVALID,  93/*]*/, adapt.csstok.Action.INVALID, 123/*{*/, adapt.csstok.Action.INVALID, 125/*}*/, adapt.csstok.Action.INVALID,
-                                                                                    NaN, adapt.csstok.Action.ENDURL]);
+    40/*(*/, adapt.csstok.Action.INVALID, 91/*[*/, adapt.csstok.Action.INVALID,  93/*]*/, adapt.csstok.Action.INVALID, 123/*{*/, adapt.csstok.Action.INVALID, 125/*}*/, adapt.csstok.Action.INVALID,
+    NaN, adapt.csstok.Action.ENDURL]);
 
 /**
  * @type {Array.<adapt.csstok.Action>}
@@ -533,15 +533,15 @@ adapt.csstok.INITIAL_INDEX_MASK = 0xF;
  * @param {adapt.csstok.TokenizerHandler} handler
  */
 adapt.csstok.Tokenizer = function(input, handler) {
-	/** @const */ this.handler = handler;
+    /** @const */ this.handler = handler;
     /** @type {number} */ this.indexMask = adapt.csstok.INITIAL_INDEX_MASK;
-	/** @type {string} */ this.input = input;
+    /** @type {string} */ this.input = input;
     /** @type {Array.<adapt.csstok.Token>} */ this.buffer = Array(this.indexMask + 1);
     /** @type {number} */ this.head = -1; // saved, occupied if >= 0
     /** @type {number} */ this.tail = 0; // available, ready to write
     /** @type {number} */ this.curr = 0; // ready to read
     /** @type {number} */ this.position = 0;
-    for (var i = 0 ; i <= this.indexMask ; i++)
+    for (var i = 0; i <= this.indexMask; i++)
         this.buffer[i] = new adapt.csstok.Token();
 };
 
@@ -633,9 +633,9 @@ adapt.csstok.Tokenizer.prototype.reallocate = function() {
  * @private
  */
 adapt.csstok.Tokenizer.prototype.error = function(position, token, mnemonics) {
-	if (this.handler) {
-		this.handler.error(mnemonics, token);
-	}
+    if (this.handler) {
+        this.handler.error(mnemonics, token);
+    }
 };
 
 /**
@@ -674,12 +674,12 @@ adapt.csstok.Tokenizer.prototype.fillBuffer = function() {
         var charCode = input.charCodeAt(position);
         switch (actions[charCode] || actions[65/*A*/]) {
             case adapt.csstok.Action.INVALID:
-        		tokenType = adapt.csstok.TokenType.INVALID;
-        		if (isNaN(charCode)) {
-        			tokenText = "E_CSS_UNEXPECTED_EOF";        			
-        		} else {
-        			tokenText = "E_CSS_UNEXPECTED_CHAR";
-        		}
+                tokenType = adapt.csstok.TokenType.INVALID;
+                if (isNaN(charCode)) {
+                    tokenText = "E_CSS_UNEXPECTED_EOF";
+                } else {
+                    tokenText = "E_CSS_UNEXPECTED_CHAR";
+                }
                 actions = adapt.csstok.actionsNormal;
                 position++;
                 break;
@@ -713,7 +713,7 @@ adapt.csstok.Tokenizer.prototype.fillBuffer = function() {
                 continue;
             case adapt.csstok.Action.HASH:
                 tokenPosition = ++position; // after hash
-	            tokenType = adapt.csstok.TokenType.HASH;
+                tokenType = adapt.csstok.TokenType.HASH;
                 actions = adapt.csstok.actionsIdent;
                 continue;
             case adapt.csstok.Action.DOLLAR:
@@ -1027,8 +1027,8 @@ adapt.csstok.Tokenizer.prototype.fillBuffer = function() {
                         continue;
                     }
                 }
-                // end of url
-                // fall through
+            // end of url
+            // fall through
             case adapt.csstok.Action.TERMURL:
                 tokenType = adapt.csstok.TokenType.URL;
                 tokenText = adapt.csstok.escapeParse(input.substring(tokenPosition, position));
@@ -1046,8 +1046,8 @@ adapt.csstok.Tokenizer.prototype.fillBuffer = function() {
                     }
                 }
                 // invalid token
-        		tokenType = adapt.csstok.TokenType.INVALID;
-        		tokenText = "E_CSS_UNEXPECTED_NEWLINE";
+                tokenType = adapt.csstok.TokenType.INVALID;
+                tokenText = "E_CSS_UNEXPECTED_NEWLINE";
                 actions = adapt.csstok.actionsNormal;
                 break;
             case adapt.csstok.Action.CHKPOSS:
@@ -1075,9 +1075,9 @@ adapt.csstok.Tokenizer.prototype.fillBuffer = function() {
             default:
                 // EOF
                 if (actions !== adapt.csstok.actionsNormal) {
-            		tokenType = adapt.csstok.TokenType.INVALID;
-            		tokenText = "E_CSS_UNEXPECTED_STATE";
-            		break;
+                    tokenType = adapt.csstok.TokenType.INVALID;
+                    tokenText = "E_CSS_UNEXPECTED_STATE";
+                    break;
                 }
                 tokenPosition = position;
                 tokenType = adapt.csstok.TokenType.EOF;

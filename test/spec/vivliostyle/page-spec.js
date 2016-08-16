@@ -81,9 +81,9 @@ describe("page", function() {
         });
 
         it("has the default bleed offset value when 'crop' and/or 'cross' value is specified in 'marks' property", function() {
-           var resolved = module.resolvePageSizeAndBleed({
-               marks: new adapt.csscasc.CascadeValue(adapt.css.ident.none, 0)
-           });
+            var resolved = module.resolvePageSizeAndBleed({
+                marks: new adapt.csscasc.CascadeValue(adapt.css.ident.none, 0)
+            });
             expect(resolved).toEqual(expected);
 
             expected.bleedOffset = module.defaultBleedOffset;

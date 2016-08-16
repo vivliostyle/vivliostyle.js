@@ -182,5 +182,5 @@ goog.scope(function() {
             }
         }
         return value;
-    }
+    };
 });

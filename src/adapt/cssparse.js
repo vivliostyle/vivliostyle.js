@@ -65,9 +65,9 @@ adapt.cssparse.SPECIFICITY_USER_IMPORTANT = 0x6000000; // User stylesheet !impor
  * @enum {string}
  */
 adapt.cssparse.StylesheetFlavor = {
-	USER_AGENT: "UA",
-	USER: "User",
-	AUTHOR: "Author"
+    USER_AGENT: "UA",
+    USER: "User",
+    AUTHOR: "Author"
 };
 
 
@@ -84,7 +84,7 @@ adapt.cssparse.colorFromHash = function(text) {
         return new adapt.css.Color(num);
     if (text.length == 3) {
         num = (num & 0xF) | ((num & 0xF) << 4) | ((num & 0xF0) << 4) | ((num & 0xF0) << 8) |
-                ((num & 0xF00) << 8) | ((num & 0xF00) << 12);
+            ((num & 0xF00) << 8) | ((num & 0xF00) << 12);
         return new adapt.css.Color(num);
     }
     throw new Error("E_CSS_COLOR");
@@ -96,7 +96,7 @@ adapt.cssparse.colorFromHash = function(text) {
  * @implements {adapt.csstok.TokenizerHandler}
  */
 adapt.cssparse.ParserHandler = function(scope) {
-	/** @type {adapt.expr.LexicalScope} */ this.scope = scope;
+    /** @type {adapt.expr.LexicalScope} */ this.scope = scope;
     /** @type {adapt.cssparse.StylesheetFlavor} */ this.flavor = adapt.cssparse.StylesheetFlavor.AUTHOR;
 };
 
@@ -127,7 +127,7 @@ adapt.cssparse.ParserHandler.prototype.error = function(mnemonics, token) {
  * @return {void}
  */
 adapt.cssparse.ParserHandler.prototype.startStylesheet = function(flavor) {
-	this.flavor = flavor;
+    this.flavor = flavor;
 };
 
 /**
@@ -354,12 +354,12 @@ adapt.cssparse.ParserHandler.prototype.endFuncWithSelector = function() {
  */
 adapt.cssparse.ParserHandler.prototype.getImportantSpecificity = function() {
     switch (this.flavor) {
-    case adapt.cssparse.StylesheetFlavor.USER_AGENT:
-        return adapt.cssparse.SPECIFICITY_USER_AGENT;
-    case adapt.cssparse.StylesheetFlavor.USER:
-        return adapt.cssparse.SPECIFICITY_USER_IMPORTANT;
-    default:
-        return adapt.cssparse.SPECIFICITY_AUTHOR_IMPORTANT;
+        case adapt.cssparse.StylesheetFlavor.USER_AGENT:
+            return adapt.cssparse.SPECIFICITY_USER_AGENT;
+        case adapt.cssparse.StylesheetFlavor.USER:
+            return adapt.cssparse.SPECIFICITY_USER_IMPORTANT;
+        default:
+            return adapt.cssparse.SPECIFICITY_AUTHOR_IMPORTANT;
     }
 };
 
@@ -368,12 +368,12 @@ adapt.cssparse.ParserHandler.prototype.getImportantSpecificity = function() {
  */
 adapt.cssparse.ParserHandler.prototype.getBaseSpecificity = function() {
     switch (this.flavor) {
-    case adapt.cssparse.StylesheetFlavor.USER_AGENT:
-        return adapt.cssparse.SPECIFICITY_USER_AGENT;
-    case adapt.cssparse.StylesheetFlavor.USER:
-        return adapt.cssparse.SPECIFICITY_USER;
-    default:
-        return adapt.cssparse.SPECIFICITY_AUTHOR;
+        case adapt.cssparse.StylesheetFlavor.USER_AGENT:
+            return adapt.cssparse.SPECIFICITY_USER_AGENT;
+        case adapt.cssparse.StylesheetFlavor.USER:
+            return adapt.cssparse.SPECIFICITY_USER;
+        default:
+            return adapt.cssparse.SPECIFICITY_AUTHOR;
     }
 };
 
@@ -383,7 +383,7 @@ adapt.cssparse.ParserHandler.prototype.getBaseSpecificity = function() {
  * @extends {adapt.cssparse.ParserHandler}
  */
 adapt.cssparse.DispatchParserHandler = function() {
-	adapt.cssparse.ParserHandler.call(this, null);
+    adapt.cssparse.ParserHandler.call(this, null);
     /** @type {Array.<adapt.cssparse.ParserHandler>} */ this.stack = [];
     /** @type {adapt.csstok.Tokenizer} */ this.tokenizer = null;
     /** @type {adapt.cssparse.ParserHandler} */ this.slave = null;
@@ -427,7 +427,7 @@ adapt.cssparse.DispatchParserHandler.prototype.getScope = function() {
  * @override
  */
 adapt.cssparse.DispatchParserHandler.prototype.error = function(mnemonics, token) {
-	this.slave.error(mnemonics, token);
+    this.slave.error(mnemonics, token);
 };
 
 /**
@@ -444,11 +444,11 @@ adapt.cssparse.DispatchParserHandler.prototype.errorMsg = function(mnemonics, to
  * @override
  */
 adapt.cssparse.DispatchParserHandler.prototype.startStylesheet = function(flavor) {
-	adapt.cssparse.ParserHandler.prototype.startStylesheet.call(this, flavor);
+    adapt.cssparse.ParserHandler.prototype.startStylesheet.call(this, flavor);
     if (this.stack.length > 0) {
-    	// This can occur as a result of an error
-    	this.slave = this.stack[0];
-    	this.stack = [];
+        // This can occur as a result of an error
+        this.slave = this.stack[0];
+        this.stack = [];
     }
     this.slave.startStylesheet(flavor);
 };
@@ -653,7 +653,7 @@ adapt.cssparse.DispatchParserHandler.prototype.endRule = function() {
  * @override
  */
 adapt.cssparse.DispatchParserHandler.prototype.startFuncWithSelector = function(funcName) {
-  this.slave.startFuncWithSelector(funcName);
+    this.slave.startFuncWithSelector(funcName);
 };
 
 
@@ -661,7 +661,7 @@ adapt.cssparse.DispatchParserHandler.prototype.startFuncWithSelector = function(
  * @override
  */
 adapt.cssparse.DispatchParserHandler.prototype.endFuncWithSelector = function() {
-  this.slave.endFuncWithSelector();
+    this.slave.endFuncWithSelector();
 };
 
 /**
@@ -671,8 +671,8 @@ adapt.cssparse.DispatchParserHandler.prototype.endFuncWithSelector = function() 
  * @extends {adapt.cssparse.ParserHandler}
  */
 adapt.cssparse.SkippingParserHandler = function(scope, owner, topLevel) {
-	adapt.cssparse.ParserHandler.call(this, scope);
-	/** @const */ this.topLevel = topLevel;
+    adapt.cssparse.ParserHandler.call(this, scope);
+    /** @const */ this.topLevel = topLevel;
     /** @type {number} */ this.depth = 0;
     /** @type {adapt.cssparse.DispatchParserHandler} */ this.owner = owner;
 };
@@ -717,7 +717,7 @@ adapt.cssparse.SkippingParserHandler.prototype.endRule = function() {
  * @extends {adapt.cssparse.SkippingParserHandler}
  */
 adapt.cssparse.SlaveParserHandler = function(scope, owner, topLevel) {
-	adapt.cssparse.SkippingParserHandler.call(this, scope, owner, topLevel);
+    adapt.cssparse.SkippingParserHandler.call(this, scope, owner, topLevel);
 };
 goog.inherits(adapt.cssparse.SlaveParserHandler, adapt.cssparse.SkippingParserHandler);
 
@@ -989,7 +989,7 @@ adapt.cssparse.Action = {
     ERROR_SEMICOL: 53,
     VAL_PLUS: 54,
     SELECTOR_PSEUDOCLASS_1: 55,
-    SELECTOR_FOLLOWING_SIBLING: 56,    
+    SELECTOR_FOLLOWING_SIBLING: 56,
     DONE: 200
 };
 
@@ -1000,7 +1000,7 @@ adapt.cssparse.Action = {
 adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
 
 (function() {
-	var actionsBase = adapt.cssparse.actionsBase;
+    var actionsBase = adapt.cssparse.actionsBase;
     actionsBase[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.IDENT;
     actionsBase[adapt.csstok.TokenType.STAR] = adapt.cssparse.Action.SELECTOR_START;
     actionsBase[adapt.csstok.TokenType.HASH] = adapt.cssparse.Action.SELECTOR_START;
@@ -1010,7 +1010,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsBase[adapt.csstok.TokenType.AT] = adapt.cssparse.Action.AT;
     actionsBase[adapt.csstok.TokenType.C_BRC] = adapt.cssparse.Action.RULE_END;
     actionsBase[adapt.csstok.TokenType.EOF] = adapt.cssparse.Action.DONE;
-	var actionsStyleAttribute = adapt.cssparse.actionsStyleAttribute;
+    var actionsStyleAttribute = adapt.cssparse.actionsStyleAttribute;
     actionsStyleAttribute[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.PROP;
     actionsStyleAttribute[adapt.csstok.TokenType.EOF] = adapt.cssparse.Action.DONE;
     var actionsSelectorStart = adapt.cssparse.actionsSelectorStart;
@@ -1167,10 +1167,10 @@ adapt.cssparse.ExprContext = {
  * @constructor
  */
 adapt.cssparse.Parser = function(actions, tokenizer, handler, baseURL) {
-	/** @type {!Array.<adapt.cssparse.Action>} */ this.actions = actions;
-	/** @type {adapt.csstok.Tokenizer} */ this.tokenizer = tokenizer;
-	/** @const */ this.handler = handler;
-	/** @type {string} baseURL */ this.baseURL = baseURL;
+    /** @type {!Array.<adapt.cssparse.Action>} */ this.actions = actions;
+    /** @type {adapt.csstok.Tokenizer} */ this.tokenizer = tokenizer;
+    /** @const */ this.handler = handler;
+    /** @type {string} baseURL */ this.baseURL = baseURL;
     /** @type {Array.<*>} */ this.valStack = [];
     /** @type {Object.<string,string>} */ this.namespacePrefixToURI = {};
     /** @type {?string} */ this.defaultNamespaceURI = null;
@@ -1210,8 +1210,8 @@ adapt.cssparse.Parser.prototype.extractVals = function(sep, index) {
  * @param {adapt.csstok.Token} token
  * @return {adapt.css.Val}
  */
-adapt.cssparse.Parser.prototype.valStackReduce = function (sep, token) {
-	var valStack = this.valStack;
+adapt.cssparse.Parser.prototype.valStackReduce = function(sep, token) {
+    var valStack = this.valStack;
     var index = valStack.length;
     var v;
     do {
@@ -1255,24 +1255,24 @@ adapt.cssparse.Parser.prototype.valStackReduce = function (sep, token) {
  * @param {adapt.csstok.Token} token
  */
 adapt.cssparse.Parser.prototype.exprError = function(mnemonics, token) {
-	this.actions = this.propName ? adapt.cssparse.actionsErrorDecl : adapt.cssparse.actionsError;
+    this.actions = this.propName ? adapt.cssparse.actionsErrorDecl : adapt.cssparse.actionsError;
     this.handler.error(mnemonics, token);
 };
 
 /**
  * @param {number} op
  * @param {adapt.csstok.Token} token
- * @return {boolean} 
+ * @return {boolean}
  */
 adapt.cssparse.Parser.prototype.exprStackReduce = function(op, token) {
-	var valStack = this.valStack;
-	var handler = this.handler;
+    var valStack = this.valStack;
+    var handler = this.handler;
     var val = /** @type {adapt.expr.Val} */ (valStack.pop());
     /** @type {adapt.expr.Val} */ var val2;
     while (true) {
         var tok = valStack.pop();
         if (op == adapt.csstok.TokenType.C_PAR) {
-        	/** @type {Array.<adapt.expr.Val>} */ var args = [val];
+            /** @type {Array.<adapt.expr.Val>} */ var args = [val];
             while (tok == adapt.csstok.TokenType.COMMA) {
                 args.unshift(valStack.pop());
                 tok = valStack.pop();
@@ -1292,8 +1292,8 @@ adapt.cssparse.Parser.prototype.exprStackReduce = function(op, token) {
                     // call
                     var name2 = /** @type {string} */ (valStack.pop());
                     var name1 = /** @type {?string} */ (valStack.pop());
-                    val = new adapt.expr.Call(handler.getScope(), 
-                    		adapt.expr.makeQualifiedName(name1, name2), args);
+                    val = new adapt.expr.Call(handler.getScope(),
+                        adapt.expr.makeQualifiedName(name1, name2), args);
                     op = adapt.csstok.TokenType.EOF;
                     continue;
                 }
@@ -1378,12 +1378,12 @@ adapt.cssparse.Parser.prototype.exprStackReduce = function(op, token) {
                         switch (valStack[valStack.length - 1]) {
                             case adapt.csstok.TokenType.QMARK:
                                 valStack.pop();
-                                val = new adapt.expr.Cond(handler.getScope(), 
+                                val = new adapt.expr.Cond(handler.getScope(),
                                     /** @type {adapt.expr.Val} */ (valStack.pop()), val2, val);
                                 break;
                             case adapt.csstok.TokenType.O_PAR:
                                 if (val2.isMediaName()) {
-                                    val = new adapt.expr.MediaTest(handler.getScope(), 
+                                    val = new adapt.expr.MediaTest(handler.getScope(),
                                         /** @type {adapt.expr.MediaName} */ (val2), val);
                                 } else {
                                     this.exprError("E_CSS_MEDIA_TEST", token);
@@ -1401,7 +1401,7 @@ adapt.cssparse.Parser.prototype.exprStackReduce = function(op, token) {
                         this.exprError("E_CSS_EXPR_COND", token);
                         return false;
                     }
-                    // fall through
+                // fall through
                 case adapt.csstok.TokenType.O_PAR:
                     // don't reduce
                     valStack.push(val2);
@@ -1422,25 +1422,25 @@ adapt.cssparse.Parser.prototype.exprStackReduce = function(op, token) {
  * @return {Array.<number|string>}
  */
 adapt.cssparse.Parser.prototype.readPseudoParams = function() {
-	var arr = [];
-	while (true) {
-		var token = this.tokenizer.token();
-		switch (token.type) {
-		case adapt.csstok.TokenType.IDENT:
-			arr.push(token.text);
-			break;
-		case adapt.csstok.TokenType.PLUS:
-			arr.push("+");
-			break;
-		case adapt.csstok.TokenType.NUM:
-		case adapt.csstok.TokenType.INT:
-			arr.push(token.num);
-			break;
-		default:
-			return arr;
-		}
-		this.tokenizer.consume();
-	}
+    var arr = [];
+    while (true) {
+        var token = this.tokenizer.token();
+        switch (token.type) {
+            case adapt.csstok.TokenType.IDENT:
+                arr.push(token.text);
+                break;
+            case adapt.csstok.TokenType.PLUS:
+                arr.push("+");
+                break;
+            case adapt.csstok.TokenType.NUM:
+            case adapt.csstok.TokenType.INT:
+                arr.push(token.num);
+                break;
+            default:
+                return arr;
+        }
+        this.tokenizer.consume();
+    }
 };
 
 /**
@@ -1470,7 +1470,7 @@ adapt.cssparse.Parser.prototype.readNthPseudoParams = function() {
                 // reject '+-an'
                 return null;
             }
-            // FALLTHROUGH
+        // FALLTHROUGH
         case adapt.csstok.TokenType.IDENT:
             if (hasLeadingPlus && token.text.charAt(0) === "-") {
                 // reject '+-n'
@@ -1572,64 +1572,64 @@ adapt.cssparse.Parser.prototype.readNthPseudoParams = function() {
  * @return {adapt.css.Expr}
  */
 adapt.cssparse.Parser.prototype.makeCondition = function(classes, condition) {
-	var scope = this.handler.getScope();
-	if (!scope)
-		return null;
-	condition = condition || scope._true;
-	if (classes) {
-		var classList = classes.split(/\s+/);
-		for (var i = 0; i < classList.length; i++) {
-			var className = classList[i];
-			switch(className) {
-			case "vertical":
-				condition = adapt.expr.and(scope, condition, new adapt.expr.Not(scope, new adapt.expr.Named(scope, "pref-horizontal")));
-				break;
-			case "horizontal":
-				condition = adapt.expr.and(scope, condition, new adapt.expr.Named(scope, "pref-horizontal"));
-				break;
-			case "day":
-				condition = adapt.expr.and(scope, condition, new adapt.expr.Not(scope, new adapt.expr.Named(scope, "pref-night-mode")));
-				break;
-			case "night":
-				condition = adapt.expr.and(scope, condition, new adapt.expr.Named(scope, "pref-night-mode"));
-				break;
-			default:
-				condition = scope._false;
-			}
-		}
-	}
-	if (condition === scope._true) {
-		return null;
-	}
-	return new adapt.css.Expr(condition);
+    var scope = this.handler.getScope();
+    if (!scope)
+        return null;
+    condition = condition || scope._true;
+    if (classes) {
+        var classList = classes.split(/\s+/);
+        for (var i = 0; i < classList.length; i++) {
+            var className = classList[i];
+            switch (className) {
+                case "vertical":
+                    condition = adapt.expr.and(scope, condition, new adapt.expr.Not(scope, new adapt.expr.Named(scope, "pref-horizontal")));
+                    break;
+                case "horizontal":
+                    condition = adapt.expr.and(scope, condition, new adapt.expr.Named(scope, "pref-horizontal"));
+                    break;
+                case "day":
+                    condition = adapt.expr.and(scope, condition, new adapt.expr.Not(scope, new adapt.expr.Named(scope, "pref-night-mode")));
+                    break;
+                case "night":
+                    condition = adapt.expr.and(scope, condition, new adapt.expr.Named(scope, "pref-night-mode"));
+                    break;
+                default:
+                    condition = scope._false;
+            }
+        }
+    }
+    if (condition === scope._true) {
+        return null;
+    }
+    return new adapt.css.Expr(condition);
 };
 
 /**
  * @returns {boolean}
  */
 adapt.cssparse.Parser.prototype.isInsidePropertyOnlyRule = function() {
-	switch (this.ruleStack[this.ruleStack.length-1]) {
-	case "[selector]":
-	case "font-face":
-	case "-epubx-flow":
-	case "-epubx-viewport":
-	case "-epubx-define":
-	case "-adapt-footnote-area":
-		return true;
-	}
-	return false;
+    switch (this.ruleStack[this.ruleStack.length-1]) {
+        case "[selector]":
+        case "font-face":
+        case "-epubx-flow":
+        case "-epubx-viewport":
+        case "-epubx-define":
+        case "-adapt-footnote-area":
+            return true;
+    }
+    return false;
 };
 
 /**
  * @param {number} count
  * @param {boolean} parsingStyleAttr
- * @return {boolean} 
+ * @return {boolean}
  */
 adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsingStyleAttr, parsingMediaQuery, parsingFunctionParam) {
-	var handler = this.handler;
-	var tokenizer = this.tokenizer;
+    var handler = this.handler;
+    var tokenizer = this.tokenizer;
     var valStack = this.valStack;
-    
+
     /** @type {adapt.csstok.Token} */ var token;
     /** @type {adapt.csstok.Token} */ var token1;
     /** @type {?string} */ var ns;
@@ -1642,64 +1642,64 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
         this.exprContext = adapt.cssparse.ExprContext.MEDIA;
         this.valStack.push("{");
     }
-    
-    parserLoop: for(; count > 0; --count) {
+
+    parserLoop: for (; count > 0; --count) {
         token = tokenizer.token();
         switch (this.actions[token.type]) {
-	        case adapt.cssparse.Action.IDENT:
-	            // figure out if this is a property assignment or selector
-	            if (tokenizer.nthToken(1).type != adapt.csstok.TokenType.COLON) {
-	                // cannot be property assignment
-	            	if (this.isInsidePropertyOnlyRule()) {
-                		handler.error("E_CSS_COLON_EXPECTED", tokenizer.nthToken(1));
-                    	this.actions = adapt.cssparse.actionsErrorDecl;	            		
-	            	} else {
-	            		this.actions = adapt.cssparse.actionsSelectorStart;
-	            		handler.startSelectorRule();
-	            	}
-	                continue;
-	            }
-	            token1 = tokenizer.nthToken(2);
-	            if (token1.precededBySpace || (token1.type != adapt.csstok.TokenType.IDENT &&
-	                    token1.type != adapt.csstok.TokenType.FUNC)) {
-	                        // cannot be a selector
-	            } else {
-	                // can be either a selector or a property assignment
-	                tokenizer.mark();
-	            }
-	            this.propName = token.text;
-	            this.propImportant = false;
-	            tokenizer.consume();
-	            tokenizer.consume();
-	            this.actions = adapt.cssparse.actionsPropVal;
-	            valStack.splice(0, valStack.length);
-	            continue;
-	        case adapt.cssparse.Action.PROP:
-	            // figure out if this is a property assignment or selector
-	            if (tokenizer.nthToken(1).type != adapt.csstok.TokenType.COLON) {
-	                // cannot be property assignment
+            case adapt.cssparse.Action.IDENT:
+                // figure out if this is a property assignment or selector
+                if (tokenizer.nthToken(1).type != adapt.csstok.TokenType.COLON) {
+                    // cannot be property assignment
+                    if (this.isInsidePropertyOnlyRule()) {
+                        handler.error("E_CSS_COLON_EXPECTED", tokenizer.nthToken(1));
+                        this.actions = adapt.cssparse.actionsErrorDecl;
+                    } else {
+                        this.actions = adapt.cssparse.actionsSelectorStart;
+                        handler.startSelectorRule();
+                    }
+                    continue;
+                }
+                token1 = tokenizer.nthToken(2);
+                if (token1.precededBySpace || (token1.type != adapt.csstok.TokenType.IDENT &&
+                    token1.type != adapt.csstok.TokenType.FUNC)) {
+                    // cannot be a selector
+                } else {
+                    // can be either a selector or a property assignment
+                    tokenizer.mark();
+                }
+                this.propName = token.text;
+                this.propImportant = false;
+                tokenizer.consume();
+                tokenizer.consume();
+                this.actions = adapt.cssparse.actionsPropVal;
+                valStack.splice(0, valStack.length);
+                continue;
+            case adapt.cssparse.Action.PROP:
+                // figure out if this is a property assignment or selector
+                if (tokenizer.nthToken(1).type != adapt.csstok.TokenType.COLON) {
+                    // cannot be property assignment
                     this.actions = adapt.cssparse.actionsErrorDecl;
                     handler.error("E_CSS_COLON_EXPECTED", tokenizer.nthToken(1));
-	                continue;
-	            }
-	            this.propName = token.text;
-	            this.propImportant = false;
-	            tokenizer.consume();
-	            tokenizer.consume();
-	            this.actions = adapt.cssparse.actionsPropVal;
-	            valStack.splice(0, valStack.length);
-	            continue;
+                    continue;
+                }
+                this.propName = token.text;
+                this.propImportant = false;
+                tokenizer.consume();
+                tokenizer.consume();
+                this.actions = adapt.cssparse.actionsPropVal;
+                valStack.splice(0, valStack.length);
+                continue;
             case adapt.cssparse.Action.SELECTOR_START:
                 // don't consume, process again
                 this.actions = adapt.cssparse.actionsSelectorStart;
                 handler.startSelectorRule();
                 continue;
             case adapt.cssparse.Action.SELECTOR_NAME_1:
-            	if (!token.precededBySpace) {
+                if (!token.precededBySpace) {
                     this.actions = adapt.cssparse.actionsErrorSelector;
                     handler.error("E_CSS_SPACE_EXPECTED", token);
                     continue;
-            	}
+                }
                 handler.descendantSelector();
             // fall through
             case adapt.cssparse.Action.SELECTOR_NAME:
@@ -1713,17 +1713,17 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                             case adapt.csstok.TokenType.IDENT:
                                 handler.tagSelector(ns, token.text);
                                 if (parsingFunctionParam)
-                                  this.actions = adapt.cssparse.actionsSelectorInFunc;
+                                    this.actions = adapt.cssparse.actionsSelectorInFunc;
                                 else
-                                  this.actions = adapt.cssparse.actionsSelector;
+                                    this.actions = adapt.cssparse.actionsSelector;
                                 tokenizer.consume();
                                 break;
                             case adapt.csstok.TokenType.STAR:
                                 handler.tagSelector(ns, null);
                                 if (parsingFunctionParam)
-                                  this.actions = adapt.cssparse.actionsSelectorInFunc;
+                                    this.actions = adapt.cssparse.actionsSelectorInFunc;
                                 else
-                                  this.actions = adapt.cssparse.actionsSelector;
+                                    this.actions = adapt.cssparse.actionsSelector;
                                 tokenizer.consume();
                                 break;
                             default:
@@ -1737,18 +1737,18 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 } else {
                     handler.tagSelector(this.defaultNamespaceURI, token.text);
                     if (parsingFunctionParam)
-                      this.actions = adapt.cssparse.actionsSelectorInFunc;
+                        this.actions = adapt.cssparse.actionsSelectorInFunc;
                     else
-                      this.actions = adapt.cssparse.actionsSelector;
+                        this.actions = adapt.cssparse.actionsSelector;
                     tokenizer.consume();
                 }
                 continue;
             case adapt.cssparse.Action.SELECTOR_ANY_1:
-            	if (!token.precededBySpace) {
+                if (!token.precededBySpace) {
                     this.actions = adapt.cssparse.actionsErrorSelector;
                     handler.error("E_CSS_SPACE_EXPECTED", token);
                     continue;
-            	}
+                }
                 handler.descendantSelector();
             // fall through
             case adapt.cssparse.Action.SELECTOR_ANY:
@@ -1760,17 +1760,17 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         case adapt.csstok.TokenType.IDENT:
                             handler.tagSelector(null, token.text);
                             if (parsingFunctionParam)
-                              this.actions = adapt.cssparse.actionsSelectorInFunc;
+                                this.actions = adapt.cssparse.actionsSelectorInFunc;
                             else
-                              this.actions = adapt.cssparse.actionsSelector;
+                                this.actions = adapt.cssparse.actionsSelector;
                             tokenizer.consume();
                             break;
                         case adapt.csstok.TokenType.STAR:
                             handler.tagSelector(null, null);
                             if (parsingFunctionParam)
-                              this.actions = adapt.cssparse.actionsSelectorInFunc;
+                                this.actions = adapt.cssparse.actionsSelectorInFunc;
                             else
-                              this.actions = adapt.cssparse.actionsSelector;
+                                this.actions = adapt.cssparse.actionsSelector;
                             tokenizer.consume();
                             break;
                         default:
@@ -1780,40 +1780,40 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 } else {
                     handler.tagSelector(this.defaultNamespaceURI, null);
                     if (parsingFunctionParam)
-                       this.actions = adapt.cssparse.actionsSelectorInFunc;
+                        this.actions = adapt.cssparse.actionsSelectorInFunc;
                     else
-                       this.actions = adapt.cssparse.actionsSelector;
+                        this.actions = adapt.cssparse.actionsSelector;
                     tokenizer.consume();
                 }
                 continue;
             case adapt.cssparse.Action.SELECTOR_ID_1:
                 if (token.precededBySpace)
                     handler.descendantSelector();
-                // fall through
+            // fall through
             case adapt.cssparse.Action.SELECTOR_ID:
                 handler.idSelector(token.text);
                 if (parsingFunctionParam)
-                   this.actions = adapt.cssparse.actionsSelectorInFunc;
+                    this.actions = adapt.cssparse.actionsSelectorInFunc;
                 else
-                   this.actions = adapt.cssparse.actionsSelector;
+                    this.actions = adapt.cssparse.actionsSelector;
                 tokenizer.consume();
                 continue;
             case adapt.cssparse.Action.SELECTOR_CLASS_1:
                 if (token.precededBySpace)
                     handler.descendantSelector();
-                // fall through
+            // fall through
             case adapt.cssparse.Action.SELECTOR_CLASS:
                 handler.classSelector(token.text);
                 if (parsingFunctionParam)
-                   this.actions = adapt.cssparse.actionsSelectorInFunc;
+                    this.actions = adapt.cssparse.actionsSelectorInFunc;
                 else
-                   this.actions = adapt.cssparse.actionsSelector;
+                    this.actions = adapt.cssparse.actionsSelector;
                 tokenizer.consume();
                 continue;
             case adapt.cssparse.Action.SELECTOR_PSEUDOCLASS_1:
                 if (token.precededBySpace)
                     handler.descendantSelector();
-                // fall through
+            // fall through
             case adapt.cssparse.Action.SELECTOR_PSEUDOCLASS:
                 tokenizer.consume();
                 token = tokenizer.token();
@@ -1822,23 +1822,23 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         handler.pseudoclassSelector(token.text, null);
                         tokenizer.consume();
                         if (parsingFunctionParam)
-                           this.actions = adapt.cssparse.actionsSelectorInFunc;
+                            this.actions = adapt.cssparse.actionsSelectorInFunc;
                         else
-                           this.actions = adapt.cssparse.actionsSelector;
+                            this.actions = adapt.cssparse.actionsSelector;
                         continue;
                     case adapt.csstok.TokenType.FUNC:
                         text = token.text;
                         tokenizer.consume();
                         switch (text) {
-                          case "not":
-                               this.actions = adapt.cssparse.actionsSelectorStart;
-                               handler.startFuncWithSelector("not");
-                               if (this.runParser(Number.POSITIVE_INFINITY, false, false, false, true)) {
-                                   this.actions = adapt.cssparse.actionsSelector;
-                               } else {
-                                   this.actions = adapt.cssparse.actionsErrorSelector;
-                               }
-                               break parserLoop;
+                            case "not":
+                                this.actions = adapt.cssparse.actionsSelectorStart;
+                                handler.startFuncWithSelector("not");
+                                if (this.runParser(Number.POSITIVE_INFINITY, false, false, false, true)) {
+                                    this.actions = adapt.cssparse.actionsSelector;
+                                } else {
+                                    this.actions = adapt.cssparse.actionsErrorSelector;
+                                }
+                                break parserLoop;
                             case "lang":
                             case "href-epub-type":
                                 token = tokenizer.token();
@@ -1867,9 +1867,9 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                             handler.pseudoclassSelector(/** @type {string} */ (text), params);
                             tokenizer.consume();
                             if (parsingFunctionParam)
-                              this.actions = adapt.cssparse.actionsSelectorInFunc;
+                                this.actions = adapt.cssparse.actionsSelectorInFunc;
                             else
-                              this.actions = adapt.cssparse.actionsSelector;
+                                this.actions = adapt.cssparse.actionsSelector;
                             continue;
                         }
                         break;
@@ -1884,9 +1884,9 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     case adapt.csstok.TokenType.IDENT:
                         handler.pseudoelementSelector(token.text, null);
                         if (parsingFunctionParam)
-                          this.actions = adapt.cssparse.actionsSelectorInFunc;
+                            this.actions = adapt.cssparse.actionsSelectorInFunc;
                         else
-                          this.actions = adapt.cssparse.actionsSelector;
+                            this.actions = adapt.cssparse.actionsSelector;
                         tokenizer.consume();
                         continue;
                     case adapt.csstok.TokenType.FUNC:
@@ -1897,9 +1897,9 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         if (token.type == adapt.csstok.TokenType.C_PAR) {
                             handler.pseudoelementSelector(/** @type {string} */ (text), params);
                             if (parsingFunctionParam)
-                              this.actions = adapt.cssparse.actionsSelectorInFunc;
+                                this.actions = adapt.cssparse.actionsSelectorInFunc;
                             else
-                              this.actions = adapt.cssparse.actionsSelector;
+                                this.actions = adapt.cssparse.actionsSelector;
                             tokenizer.consume();
                             continue;
                         }
@@ -1965,11 +1965,11 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         break;
                     case adapt.csstok.TokenType.C_BRK:
                         handler.attributeSelector(/** @type {string} */ (ns),
-                        		/** @type {string} */ (text), adapt.csstok.TokenType.EOF, null);
+                            /** @type {string} */ (text), adapt.csstok.TokenType.EOF, null);
                         if (parsingFunctionParam)
-                          this.actions = adapt.cssparse.actionsSelectorInFunc;
+                            this.actions = adapt.cssparse.actionsSelectorInFunc;
                         else
-                          this.actions = adapt.cssparse.actionsSelector;
+                            this.actions = adapt.cssparse.actionsSelector;
                         tokenizer.consume();
                         continue;
                     default:
@@ -1981,7 +1981,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     case adapt.csstok.TokenType.IDENT:
                     case adapt.csstok.TokenType.STR:
                         handler.attributeSelector(/** @type {string} */ (ns),
-                        		/** @type {string} */ (text), num, token.text);
+                            /** @type {string} */ (text), num, token.text);
                         tokenizer.consume();
                         token = tokenizer.token();
                         break;
@@ -1996,9 +1996,9 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     continue;
                 }
                 if (parsingFunctionParam)
-                  this.actions = adapt.cssparse.actionsSelectorInFunc;
+                    this.actions = adapt.cssparse.actionsSelectorInFunc;
                 else
-                  this.actions = adapt.cssparse.actionsSelector;
+                    this.actions = adapt.cssparse.actionsSelector;
                 tokenizer.consume();
                 continue;
             case adapt.cssparse.Action.SELECTOR_CHILD:
@@ -2017,15 +2017,15 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 tokenizer.consume();
                 continue;
             case adapt.cssparse.Action.SELECTOR_BODY:
-            	if (this.regionRule) {
-                	this.ruleStack.push("-epubx-region");            		
-                	this.regionRule = false;
+                if (this.regionRule) {
+                    this.ruleStack.push("-epubx-region");
+                    this.regionRule = false;
                 } else if (this.pageRule) {
                     this.ruleStack.push("page");
                     this.pageRule = false;
-            	} else {
-            		this.ruleStack.push("[selector]");
-            	}
+                } else {
+                    this.ruleStack.push("[selector]");
+                }
                 handler.startRuleBody();
                 this.actions = adapt.cssparse.actionsBase;
                 tokenizer.consume();
@@ -2099,28 +2099,28 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 tokenizer.consume();
                 token = tokenizer.token();
                 token1 = tokenizer.nthToken(1);
-                if (token.type == adapt.csstok.TokenType.IDENT && 
-                	token.text.toLowerCase() == "important" && 
-                	(token1.type == adapt.csstok.TokenType.SEMICOL || 
-                			token1.type == adapt.csstok.TokenType.EOF ||
-                			token1.type == adapt.csstok.TokenType.C_BRC)) {
+                if (token.type == adapt.csstok.TokenType.IDENT &&
+                    token.text.toLowerCase() == "important" &&
+                    (token1.type == adapt.csstok.TokenType.SEMICOL ||
+                    token1.type == adapt.csstok.TokenType.EOF ||
+                    token1.type == adapt.csstok.TokenType.C_BRC)) {
                     tokenizer.consume();
-                	this.propImportant = true;
-                	continue;
+                    this.propImportant = true;
+                    continue;
                 }
                 this.exprError("E_CSS_SYNTAX", token);
                 continue;
             case adapt.cssparse.Action.VAL_PLUS:
                 token1 = tokenizer.nthToken(1);
                 switch (token1.type) {
-                case adapt.csstok.TokenType.NUM:
-                case adapt.csstok.TokenType.NUMERIC:
-                case adapt.csstok.TokenType.INT:
-                	if (!token1.precededBySpace) {
-                		// Plus before number, ignore
-                        tokenizer.consume();
-                        continue;
-                	}
+                    case adapt.csstok.TokenType.NUM:
+                    case adapt.csstok.TokenType.NUMERIC:
+                    case adapt.csstok.TokenType.INT:
+                        if (!token1.precededBySpace) {
+                            // Plus before number, ignore
+                            tokenizer.consume();
+                            continue;
+                        }
                 }
                 if (this.actions === adapt.cssparse.actionsPropVal && tokenizer.hasMark()) {
                     tokenizer.reset();
@@ -2133,30 +2133,30 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 }
             case adapt.cssparse.Action.VAL_END:
                 tokenizer.consume();
-                // fall through
+            // fall through
             case adapt.cssparse.Action.VAL_BRC:
                 tokenizer.unmark();
                 val = this.valStackReduce(";", token);
                 if (val && this.propName) {
                     handler.property(/** @type {string} */ (this.propName), val, this.propImportant);
                 }
-                this.actions = parsingStyleAttr ? 
-                    	adapt.cssparse.actionsStyleAttribute : adapt.cssparse.actionsBase;
+                this.actions = parsingStyleAttr ?
+                    adapt.cssparse.actionsStyleAttribute : adapt.cssparse.actionsBase;
                 continue;
-             case adapt.cssparse.Action.VAL_FINISH:
+            case adapt.cssparse.Action.VAL_FINISH:
                 tokenizer.consume();
                 tokenizer.unmark();
                 val = this.valStackReduce(";", token);
                 if (parsingValue) {
-                	this.result = val;
-                	return true;
+                    this.result = val;
+                    return true;
                 }
                 if (this.propName && val) {
-                	handler.property(/** @type {string} */ (this.propName), val, this.propImportant);
+                    handler.property(/** @type {string} */ (this.propName), val, this.propImportant);
                 }
                 if (parsingStyleAttr) {
-                	return true;
-                }	
+                    return true;
+                }
                 this.exprError("E_CSS_SYNTAX", token);
                 continue;
             case adapt.cssparse.Action.EXPR_IDENT:
@@ -2173,7 +2173,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     tokenizer.consume();
                 } else {
                     if (this.exprContext == adapt.cssparse.ExprContext.MEDIA
-                    		|| this.exprContext == adapt.cssparse.ExprContext.IMPORT) {
+                        || this.exprContext == adapt.cssparse.ExprContext.IMPORT) {
                         if (token.text.toLowerCase() == "not") {
                             tokenizer.consume();
                             valStack.push(new adapt.expr.MediaName(handler.getScope(), true, token1.text));
@@ -2267,7 +2267,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                             handler.startWhenRule(/** @type {adapt.css.Expr} */ (valStack.pop()));
                         else
                             handler.startMediaRule(/** @type {adapt.css.Expr} */ (valStack.pop()));
-                    	this.ruleStack.push("media");
+                        this.ruleStack.push("media");
                         handler.startRuleBody();
                         this.actions = adapt.cssparse.actionsBase;
                     }
@@ -2277,10 +2277,10 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
             case adapt.cssparse.Action.EXPR_SEMICOL:
                 if (this.exprStackReduce(adapt.csstok.TokenType.C_PAR, token)) {
                     if (this.propName || this.exprContext != adapt.cssparse.ExprContext.IMPORT) {
-                    	this.exprError("E_CSS_UNEXPECTED_SEMICOL", token);
+                        this.exprError("E_CSS_UNEXPECTED_SEMICOL", token);
                     } else {
-                    	this.importCondition = /** @type {adapt.css.Expr} */ (valStack.pop());
-                    	this.importReady = true;
+                        this.importCondition = /** @type {adapt.css.Expr} */ (valStack.pop());
+                        this.importReady = true;
                         this.actions = adapt.cssparse.actionsBase;
                         tokenizer.consume();
                         return false;
@@ -2297,83 +2297,83 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 tokenizer.consume();
                 handler.endRule();
                 if (this.ruleStack.length) {
-                	this.ruleStack.pop();
+                    this.ruleStack.pop();
                 }
                 continue;
             case adapt.cssparse.Action.AT:
                 text = token.text.toLowerCase();
                 switch (text) {
-            		case "import":
-                		tokenizer.consume();
-                		token = tokenizer.token();
-                		if (token.type == adapt.csstok.TokenType.STR ||
-                				token.type == adapt.csstok.TokenType.URL) {
-                			this.importURL = token.text;
-                    		tokenizer.consume();
-                    		token = tokenizer.token();
-                    		if (token.type == adapt.csstok.TokenType.SEMICOL || token.type == adapt.csstok.TokenType.EOF) {
-                    			this.importReady = true;
-                        		tokenizer.consume();
-                    			return false;
-                    		} else {
+                    case "import":
+                        tokenizer.consume();
+                        token = tokenizer.token();
+                        if (token.type == adapt.csstok.TokenType.STR ||
+                            token.type == adapt.csstok.TokenType.URL) {
+                            this.importURL = token.text;
+                            tokenizer.consume();
+                            token = tokenizer.token();
+                            if (token.type == adapt.csstok.TokenType.SEMICOL || token.type == adapt.csstok.TokenType.EOF) {
+                                this.importReady = true;
+                                tokenizer.consume();
+                                return false;
+                            } else {
                                 this.propName = null; // signals @ rule
                                 this.exprContext = adapt.cssparse.ExprContext.IMPORT;
                                 this.actions = adapt.cssparse.actionsExprVal;
                                 valStack.push("{");
                                 continue;
-                    		}
-                		}
+                            }
+                        }
                         handler.error("E_CSS_IMPORT_SYNTAX", token);
                         this.actions = adapt.cssparse.actionsError;
                         continue;
-            		case "namespace":
-                		tokenizer.consume();
-                		token = tokenizer.token();
-                		switch (token.type) {
-                			case adapt.csstok.TokenType.IDENT:
-                				text = token.text;  // Prefix
-                        		tokenizer.consume();
-                        		token = tokenizer.token();
-                				if ((token.type == adapt.csstok.TokenType.STR || 
-                						token.type == adapt.csstok.TokenType.URL) &&
-                						tokenizer.nthToken(1).type == adapt.csstok.TokenType.SEMICOL) {
-                					this.namespacePrefixToURI[text] = token.text;
-                            		tokenizer.consume();
-                            		tokenizer.consume();
-                            		continue;
-                				}
-                				break;
-                			case adapt.csstok.TokenType.STR:
-                			case adapt.csstok.TokenType.URL:
-                				if (tokenizer.nthToken(1).type == adapt.csstok.TokenType.SEMICOL) {
-	                				this.defaultNamespaceURI = token.text;
-	                        		tokenizer.consume();
-	                        		tokenizer.consume();
-	                        		continue;
-                				}
-                				break;
-                		}
+                    case "namespace":
+                        tokenizer.consume();
+                        token = tokenizer.token();
+                        switch (token.type) {
+                            case adapt.csstok.TokenType.IDENT:
+                                text = token.text;  // Prefix
+                                tokenizer.consume();
+                                token = tokenizer.token();
+                                if ((token.type == adapt.csstok.TokenType.STR ||
+                                    token.type == adapt.csstok.TokenType.URL) &&
+                                    tokenizer.nthToken(1).type == adapt.csstok.TokenType.SEMICOL) {
+                                    this.namespacePrefixToURI[text] = token.text;
+                                    tokenizer.consume();
+                                    tokenizer.consume();
+                                    continue;
+                                }
+                                break;
+                            case adapt.csstok.TokenType.STR:
+                            case adapt.csstok.TokenType.URL:
+                                if (tokenizer.nthToken(1).type == adapt.csstok.TokenType.SEMICOL) {
+                                    this.defaultNamespaceURI = token.text;
+                                    tokenizer.consume();
+                                    tokenizer.consume();
+                                    continue;
+                                }
+                                break;
+                        }
                         handler.error("E_CSS_NAMESPACE_SYNTAX", token);
                         this.actions = adapt.cssparse.actionsError;
                         continue;
-            		case "charset":
-            			// Useless in EPUB (only UTF-8 or UTF-16 is allowed anyway and
-            			// we are at the mercy of the browser charset handling anyway).
-                		tokenizer.consume();
-                		token = tokenizer.token();
-                		if (token.type == adapt.csstok.TokenType.STR && 
-                				tokenizer.nthToken(1).type == adapt.csstok.TokenType.SEMICOL) {
-            				text = token.text.toLowerCase();
-            				if (text != "utf-8" && text != "utf-16") {
-                                handler.error("E_CSS_UNEXPECTED_CHARSET " + text, token);            					
-            				}
-            				tokenizer.consume();
-            				tokenizer.consume();
-            				continue;
-                		}
+                    case "charset":
+                        // Useless in EPUB (only UTF-8 or UTF-16 is allowed anyway and
+                        // we are at the mercy of the browser charset handling anyway).
+                        tokenizer.consume();
+                        token = tokenizer.token();
+                        if (token.type == adapt.csstok.TokenType.STR &&
+                            tokenizer.nthToken(1).type == adapt.csstok.TokenType.SEMICOL) {
+                            text = token.text.toLowerCase();
+                            if (text != "utf-8" && text != "utf-16") {
+                                handler.error("E_CSS_UNEXPECTED_CHARSET " + text, token);
+                            }
+                            tokenizer.consume();
+                            tokenizer.consume();
+                            continue;
+                        }
                         handler.error("E_CSS_CHARSET_SYNTAX", token);
                         this.actions = adapt.cssparse.actionsError;
-                        continue;                		
+                        continue;
                     case "font-face":
                     case "-epubx-page-template":
                     case "-epubx-define":
@@ -2395,37 +2395,37 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                                     handler.startViewportRule();
                                     break;
                             }
-                        	this.ruleStack.push(text);
+                            this.ruleStack.push(text);
                             handler.startRuleBody();
                             continue;
                         }
                         break;
                     case "-adapt-footnote-area":
                         tokenizer.consume();
-                		token = tokenizer.token();
-                		switch (token.type) {
-                			case adapt.csstok.TokenType.O_BRC:
+                        token = tokenizer.token();
+                        switch (token.type) {
+                            case adapt.csstok.TokenType.O_BRC:
                                 tokenizer.consume();
-		                    	handler.startFootnoteRule(null);
-		                    	this.ruleStack.push(text);		                    	
-		                    	handler.startRuleBody();
-		                    	continue;
-                			case adapt.csstok.TokenType.COL_COL:
+                                handler.startFootnoteRule(null);
+                                this.ruleStack.push(text);
+                                handler.startRuleBody();
+                                continue;
+                            case adapt.csstok.TokenType.COL_COL:
                                 tokenizer.consume();
-                        		token = tokenizer.token();
-                        		if (token.type == adapt.csstok.TokenType.IDENT &&
-                        				tokenizer.nthToken(1).type == adapt.csstok.TokenType.O_BRC) {
-                        			text = token.text;
+                                token = tokenizer.token();
+                                if (token.type == adapt.csstok.TokenType.IDENT &&
+                                    tokenizer.nthToken(1).type == adapt.csstok.TokenType.O_BRC) {
+                                    text = token.text;
                                     tokenizer.consume();
                                     tokenizer.consume();
-    		                    	handler.startFootnoteRule(text);
-    		                    	this.ruleStack.push("-adapt-footnote-area");		                    	
-    		                    	handler.startRuleBody();
-    		                    	continue;                        			
-                        		}
-                				break;
-                		}
-                    	break;
+                                    handler.startFootnoteRule(text);
+                                    this.ruleStack.push("-adapt-footnote-area");
+                                    handler.startRuleBody();
+                                    continue;
+                                }
+                                break;
+                        }
+                        break;
                     case "-epubx-region":
                         tokenizer.consume();
                         handler.startRegionRule();
@@ -2479,13 +2479,13 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         valStack.push("{");
                         continue;
                     case "-epubx-flow":
-                        if (tokenizer.nthToken(1).type == adapt.csstok.TokenType.IDENT && 
+                        if (tokenizer.nthToken(1).type == adapt.csstok.TokenType.IDENT &&
                             tokenizer.nthToken(2).type == adapt.csstok.TokenType.O_BRC) {
                             handler.startFlowRule(tokenizer.nthToken(1).text);
                             tokenizer.consume();
                             tokenizer.consume();
                             tokenizer.consume();
-                        	this.ruleStack.push(text);
+                            this.ruleStack.push(text);
                             handler.startRuleBody();
                             continue;
                         }
@@ -2504,15 +2504,15 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                             token = tokenizer.token();
                         }
                         if (token.type == adapt.csstok.TokenType.COLON &&
-                        		tokenizer.nthToken(1).type == adapt.csstok.TokenType.IDENT) {
-                        	rulePseudoName = tokenizer.nthToken(1).text;
+                            tokenizer.nthToken(1).type == adapt.csstok.TokenType.IDENT) {
+                            rulePseudoName = tokenizer.nthToken(1).text;
                             tokenizer.consume();
                             tokenizer.consume();
                             token = tokenizer.token();
                         }
                         while (token.type == adapt.csstok.TokenType.FUNC && token.text.toLowerCase() == "class" &&
-                                tokenizer.nthToken(1).type == adapt.csstok.TokenType.IDENT &&
-                                tokenizer.nthToken(2).type == adapt.csstok.TokenType.C_PAR) {
+                        tokenizer.nthToken(1).type == adapt.csstok.TokenType.IDENT &&
+                        tokenizer.nthToken(2).type == adapt.csstok.TokenType.C_PAR) {
                             classes.push(tokenizer.nthToken(1).text);
                             tokenizer.consume();
                             tokenizer.consume();
@@ -2532,17 +2532,17 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                                     handler.startPartitionGroupRule(ruleName, rulePseudoName, classes);
                                     break;
                             }
-                        	this.ruleStack.push(text);
+                            this.ruleStack.push(text);
                             handler.startRuleBody();
                             continue;
                         }
                         break;
-					case "":
-						// No text after @
+                    case "":
+                        // No text after @
                         handler.error("E_CSS_UNEXPECTED_AT" + text, token);
                         // Error recovery using selector rules.
                         this.actions = adapt.cssparse.actionsErrorSelector;
-						continue;
+                        continue;
                     default:
                         handler.error("E_CSS_AT_UNKNOWN " + text, token);
                         this.actions = adapt.cssparse.actionsError;
@@ -2552,47 +2552,47 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 this.actions = adapt.cssparse.actionsError;
                 continue;
             case adapt.cssparse.Action.ERROR_PUSH:  // Open bracket while skipping error syntax
-            	if (parsingValue || parsingStyleAttr)
-            		return true;
-            	this.errorBrackets.push(token.type + 1);  // Expected closing bracket
+                if (parsingValue || parsingStyleAttr)
+                    return true;
+                this.errorBrackets.push(token.type + 1);  // Expected closing bracket
                 tokenizer.consume();
                 continue;
             case adapt.cssparse.Action.ERROR_POP_DECL:  // Close bracket while skipping error syntax in declaration
-            	if (parsingValue || parsingStyleAttr)
-            		return true;
-            	if (this.errorBrackets.length == 0) {
+                if (parsingValue || parsingStyleAttr)
+                    return true;
+                if (this.errorBrackets.length == 0) {
                     this.actions = adapt.cssparse.actionsBase;
                     // Don't consume closing brace
                     continue;
-            	}
-            	// fall through
-            case adapt.cssparse.Action.ERROR_POP:  // Close bracket while skipping error syntax            
+                }
+            // fall through
+            case adapt.cssparse.Action.ERROR_POP:  // Close bracket while skipping error syntax
                 if (this.errorBrackets.length > 0 &&
-                		this.errorBrackets[this.errorBrackets.length-1] == token.type) {
-	                this.errorBrackets.pop();
+                    this.errorBrackets[this.errorBrackets.length-1] == token.type) {
+                    this.errorBrackets.pop();
                 }
-            	if (this.errorBrackets.length == 0 && token.type == adapt.csstok.TokenType.C_BRC) {
+                if (this.errorBrackets.length == 0 && token.type == adapt.csstok.TokenType.C_BRC) {
                     this.actions = adapt.cssparse.actionsBase;
-            	}
-                tokenizer.consume();
-            	continue;
-            case adapt.cssparse.Action.ERROR_SEMICOL:
-            	if (parsingValue || parsingStyleAttr)
-            		return true;
-                if (this.errorBrackets.length == 0) {
-                    this.actions = adapt.cssparse.actionsBase;                	
                 }
-	            tokenizer.consume();
-	            continue;          
+                tokenizer.consume();
+                continue;
+            case adapt.cssparse.Action.ERROR_SEMICOL:
+                if (parsingValue || parsingStyleAttr)
+                    return true;
+                if (this.errorBrackets.length == 0) {
+                    this.actions = adapt.cssparse.actionsBase;
+                }
+                tokenizer.consume();
+                continue;
             case adapt.cssparse.Action.DONE:
                 if (parsingFunctionParam) {
-                      tokenizer.consume();
-                      handler.endFuncWithSelector();
+                    tokenizer.consume();
+                    handler.endFuncWithSelector();
                 }
                 return true;
             default:
-            	if (parsingValue || parsingStyleAttr)
-            		return true;
+                if (parsingValue || parsingStyleAttr)
+                    return true;
                 if (parsingMediaQuery) {
                     if (this.exprStackReduce(adapt.csstok.TokenType.C_PAR, token)) {
                         this.result = /** @type {adapt.css.Val} */ (valStack.pop());
@@ -2602,12 +2602,12 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 }
                 if (parsingFunctionParam) {
                     if (token.type == adapt.csstok.TokenType.INVALID)
-                      handler.error(token.text, token);                    
+                        handler.error(token.text, token);
                     else
-                      handler.error("E_CSS_SYNTAX", token);
+                        handler.error("E_CSS_SYNTAX", token);
                     return false;
                 }
-        
+
                 if (this.actions === adapt.cssparse.actionsPropVal && tokenizer.hasMark()) {
                     tokenizer.reset();
                     this.actions = adapt.cssparse.actionsSelectorStart;
@@ -2615,17 +2615,17 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     continue;
                 }
                 if (this.actions !== adapt.cssparse.actionsError &&
-                		this.actions !== adapt.cssparse.actionsErrorSelector && 
-                		this.actions !== adapt.cssparse.actionsErrorDecl) {
-                	if (token.type == adapt.csstok.TokenType.INVALID)
-                		handler.error(token.text, token);
-                	else
-                		handler.error("E_CSS_SYNTAX", token);
-                	if (this.isInsidePropertyOnlyRule()) {
-                		this.actions = adapt.cssparse.actionsErrorDecl;
-                	} else {
-                    	this.actions = adapt.cssparse.actionsErrorSelector;
-                	}
+                    this.actions !== adapt.cssparse.actionsErrorSelector &&
+                    this.actions !== adapt.cssparse.actionsErrorDecl) {
+                    if (token.type == adapt.csstok.TokenType.INVALID)
+                        handler.error(token.text, token);
+                    else
+                        handler.error("E_CSS_SYNTAX", token);
+                    if (this.isInsidePropertyOnlyRule()) {
+                        this.actions = adapt.cssparse.actionsErrorDecl;
+                    } else {
+                        this.actions = adapt.cssparse.actionsErrorSelector;
+                    }
                     continue;  // Let error-recovery to re-process the offending token
                 }
                 tokenizer.consume();
@@ -2642,8 +2642,8 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
  * @extends {adapt.cssparse.ParserHandler}
  */
 adapt.cssparse.ErrorHandler = function(scope) {
-	adapt.cssparse.ParserHandler.call(this, null);
-	/** @const */ this.scope = scope;
+    adapt.cssparse.ParserHandler.call(this, null);
+    /** @const */ this.scope = scope;
 };
 goog.inherits(adapt.cssparse.ErrorHandler, adapt.cssparse.ParserHandler);
 
@@ -2670,52 +2670,52 @@ adapt.cssparse.ErrorHandler.prototype.getScope = function() {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL, classes, media) {
-	/** @type {adapt.task.Frame.<boolean>} */ var frame =
-		adapt.task.newFrame("parseStylesheet");
-	var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsBase, tokenizer, handler, baseURL);
+    /** @type {adapt.task.Frame.<boolean>} */ var frame =
+        adapt.task.newFrame("parseStylesheet");
+    var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsBase, tokenizer, handler, baseURL);
 
     var condition = null;
     if (media) {
         condition = adapt.cssparse.parseMediaQuery(new adapt.csstok.Tokenizer(media, handler), handler, baseURL);
     }
     condition = parser.makeCondition(classes, condition && condition.toExpr());
-	if (condition) {
-		handler.startMediaRule(condition);
-		handler.startRuleBody();		
-	}
-	frame.loop(function() {
-	    while (!parser.runParser(100, false, false, false, false)) {
-			if (parser.importReady) {
-				var resolvedURL = adapt.base.resolveURL(/** @type {string} */ (parser.importURL), baseURL);
-				if (parser.importCondition) {
-					handler.startMediaRule(parser.importCondition);
-					handler.startRuleBody();
-				}
-				/** @type {adapt.task.Frame.<boolean>} */ var innerFrame =
-					adapt.task.newFrame("parseStylesheet.import");
-				adapt.cssparse.parseStylesheetFromURL(resolvedURL, handler, null, null).then(function() {
-					if (parser.importCondition) {
-						handler.endRule();
-					}					
-					parser.importReady = false;
-					parser.importURL = null;
-					parser.importCondition = null;
-					innerFrame.finish(true);
-				});
-				return innerFrame.result();
-			}
-			var r = frame.timeSlice();
-			if (r.isPending)
-				return r;
-		}
-		return adapt.task.newResult(false);
-	}).then(function() {
-		if (condition) {
-			handler.endRule();
-		}					
-		frame.finish(true);
-	});
-	return frame.result();
+    if (condition) {
+        handler.startMediaRule(condition);
+        handler.startRuleBody();
+    }
+    frame.loop(function() {
+        while (!parser.runParser(100, false, false, false, false)) {
+            if (parser.importReady) {
+                var resolvedURL = adapt.base.resolveURL(/** @type {string} */ (parser.importURL), baseURL);
+                if (parser.importCondition) {
+                    handler.startMediaRule(parser.importCondition);
+                    handler.startRuleBody();
+                }
+                /** @type {adapt.task.Frame.<boolean>} */ var innerFrame =
+                    adapt.task.newFrame("parseStylesheet.import");
+                adapt.cssparse.parseStylesheetFromURL(resolvedURL, handler, null, null).then(function() {
+                    if (parser.importCondition) {
+                        handler.endRule();
+                    }
+                    parser.importReady = false;
+                    parser.importURL = null;
+                    parser.importCondition = null;
+                    innerFrame.finish(true);
+                });
+                return innerFrame.result();
+            }
+            var r = frame.timeSlice();
+            if (r.isPending)
+                return r;
+        }
+        return adapt.task.newResult(false);
+    }).then(function() {
+        if (condition) {
+            handler.endRule();
+        }
+        frame.finish(true);
+    });
+    return frame.result();
 };
 
 /**
@@ -2731,10 +2731,9 @@ adapt.cssparse.parseStylesheetFromText = function(text, handler, baseURL, classe
         var tok = new adapt.csstok.Tokenizer(text, handler);
         adapt.cssparse.parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
     }, function(frame, err) {
-            vivliostyle.logging.logger.warn(err, "Failed to parse stylesheet text: " + text);
-            frame.finish(false);
-        }
-    );
+        vivliostyle.logging.logger.warn(err, "Failed to parse stylesheet text: " + text);
+        frame.finish(false);
+    });
 };
 
 /**
@@ -2745,37 +2744,37 @@ adapt.cssparse.parseStylesheetFromText = function(text, handler, baseURL, classe
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.cssparse.parseStylesheetFromURL = function(url, handler, classes, media) {
-    return adapt.task.handle("parseStylesheetFromURL", 
-    	/**
-    	 * @param {!adapt.task.Frame.<boolean>} frame
-    	 * @return {void}
-    	 */
-    	function(frame) {
-		    adapt.net.ajax(url).then(function (xhrParam) {
-		    	var xhr = /** @type {XMLHttpRequest} */ (xhrParam);
-		        if (!xhr.responseText) {
-		            frame.finish(true);
-		        } else {
-		        	adapt.cssparse.parseStylesheetFromText(xhr.responseText,
-		        			handler, url, classes, media)
+    return adapt.task.handle("parseStylesheetFromURL",
+        /**
+         * @param {!adapt.task.Frame.<boolean>} frame
+         * @return {void}
+         */
+        function(frame) {
+            adapt.net.ajax(url).then(function(xhrParam) {
+                var xhr = /** @type {XMLHttpRequest} */ (xhrParam);
+                if (!xhr.responseText) {
+                    frame.finish(true);
+                } else {
+                    adapt.cssparse.parseStylesheetFromText(xhr.responseText,
+                        handler, url, classes, media)
                         .then(function(result) {
                             if (!result) {
                                 vivliostyle.logging.logger.warn("Failed to parse stylesheet from " + url);
                             }
                             frame.finish(true);
                         });
-		        }
-		    });
-    	},
-    	/**
-    	 * @param {!adapt.task.Frame.<boolean>} frame
-    	 * @param {Error} err
-    	 * @return {void}
-    	 */
-    	function(frame, err) {
+                }
+            });
+        },
+        /**
+         * @param {!adapt.task.Frame.<boolean>} frame
+         * @param {Error} err
+         * @return {void}
+         */
+        function(frame, err) {
             vivliostyle.logging.logger.warn(err, "Exception while fetching and parsing:", url);
-	    	frame.finish(true);
-	    });
+            frame.finish(true);
+        });
 };
 
 /**
@@ -2785,10 +2784,10 @@ adapt.cssparse.parseStylesheetFromURL = function(url, handler, classes, media) {
  * @return {adapt.css.Val}
  */
 adapt.cssparse.parseValue = function(scope, tokenizer, baseURL) {
-	var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsPropVal, tokenizer, 
-    		new adapt.cssparse.ErrorHandler(scope), baseURL);
+    var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsPropVal, tokenizer,
+        new adapt.cssparse.ErrorHandler(scope), baseURL);
     parser.runParser(Number.POSITIVE_INFINITY, true, false, false, false);
-	return parser.result;
+    return parser.result;
 };
 
 /**
@@ -2798,8 +2797,8 @@ adapt.cssparse.parseValue = function(scope, tokenizer, baseURL) {
  * @return {void}
  */
 adapt.cssparse.parseStyleAttribute = function(tokenizer, handler, baseURL) {
-	var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsStyleAttribute, tokenizer, 
-    		handler, baseURL);
+    var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsStyleAttribute, tokenizer,
+        handler, baseURL);
     parser.runParser(Number.POSITIVE_INFINITY, false, true, false, false);
 };
 

@@ -1,6 +1,7 @@
 /**
  * Copyright 2015 Vivliostyle Inc.
  */
+/*eslint-env node */
 (function() {
     "use strict";
 
