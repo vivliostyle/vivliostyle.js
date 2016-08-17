@@ -120,7 +120,7 @@ adapt.task.newFrame = function(name) {
     if (!adapt.task.privateCurrentTask)
         throw new Error('E_TASK_NO_CONTEXT');
     if (!adapt.task.privateCurrentTask.name)
-    	adapt.task.privateCurrentTask.name = name;
+        adapt.task.privateCurrentTask.name = name;
     var task = adapt.task.privateCurrentTask;
     var frame = new adapt.task.Frame(task, task.top, name);
     task.top = frame;
@@ -164,13 +164,13 @@ adapt.task.newResult = function(opt_value) {
  * @return {!adapt.task.Result.<T>}
  */
 adapt.task.handle = function(name, code, onErr) {
-	var frame = adapt.task.newFrame(name);
-	frame.handler = onErr;
+    var frame = adapt.task.newFrame(name);
+    frame.handler = onErr;
     try {
-    	code(frame);
+        code(frame);
     } catch (err) {
-    	// synchronous exception
-    	frame.task.raise(err, frame);
+        // synchronous exception
+        frame.task.raise(err, frame);
     }
     return frame.result();
 };
@@ -181,10 +181,10 @@ adapt.task.handle = function(name, code, onErr) {
  * @return {adapt.task.Task}
  */
 adapt.task.start = function(func, opt_name) {
-	var scheduler = adapt.task.privateCurrentTask
-		? adapt.task.privateCurrentTask.getScheduler() 
-		: adapt.task.primaryScheduler || adapt.task.newScheduler();
-	return scheduler.run(func, opt_name);
+    var scheduler = adapt.task.privateCurrentTask
+        ? adapt.task.privateCurrentTask.getScheduler()
+        : adapt.task.primaryScheduler || adapt.task.newScheduler();
+    return scheduler.run(func, opt_name);
 };
 
 /**
@@ -245,7 +245,7 @@ adapt.task.Scheduler = function(timer) {
     /** @type {boolean} */ this.inTimeSlice = false;
     /** @type {number} */ this.order = 0;
     if (!adapt.task.primaryScheduler) {
-    	adapt.task.primaryScheduler = this;
+        adapt.task.primaryScheduler = this;
     }
 };
 
@@ -254,7 +254,7 @@ adapt.task.Scheduler = function(timer) {
  * @param {number} slice length in milliseconds.
  */
 adapt.task.Scheduler.prototype.setSlice = function(slice) {
-	this.slice = slice;
+    this.slice = slice;
 };
 
 /**
@@ -262,7 +262,7 @@ adapt.task.Scheduler.prototype.setSlice = function(slice) {
  * @param {number} timeout in milliseconds.
  */
 adapt.task.Scheduler.prototype.setTimeout = function(timeout) {
-	this.timeout = timeout;
+    this.timeout = timeout;
 };
 
 /**
@@ -308,7 +308,7 @@ adapt.task.Scheduler.prototype.arm = function() {
  * @return {void}
  */
 adapt.task.Scheduler.prototype.schedule = function(
-        continuation, opt_delay) {
+    continuation, opt_delay) {
     var c = /** @type {adapt.task.Continuation} */ (continuation);
     var now = this.timer.currentTime();
     c.order = this.order++;
@@ -409,7 +409,7 @@ adapt.task.Continuation = function(task) {
  */
 adapt.task.Continuation.prototype.compare = function(otherComp) {
     // earlier wins
-	var other = /** @type {adapt.task.Continuation} */ (otherComp);
+    var other = /** @type {adapt.task.Continuation} */ (otherComp);
     return other.scheduledTime - this.scheduledTime || other.order - this.order;
 };
 
@@ -428,7 +428,7 @@ adapt.task.Continuation.prototype.getTask = function() {
  * @param {number=} opt_delay optional delay in milliseconds.
  */
 adapt.task.Continuation.prototype.schedule = function(result, opt_delay) {
-	this.result = result;
+    this.result = result;
     this.task.scheduler.schedule(this, opt_delay);
 };
 
@@ -474,7 +474,7 @@ adapt.task.Task = function(scheduler, name) {
  * @return {string} task name.
  */
 adapt.task.Task.prototype.getName = function() {
-	return this.name;
+    return this.name;
 };
 
 /**
@@ -540,20 +540,20 @@ adapt.task.Task.prototype.join = function() {
  * parent link) and sync (regular JavaScript stack).
  */
 adapt.task.Task.prototype.unwind = function() {
-	// We have a sequence of frames on the stack.
-	while(this.top && !this.top.handler) {
-		this.top = this.top.parent;
-	}
-	if (this.top) {
-		// found a handler
-		var err = this.exception;
-		this.exception = null;
-		this.top.handler(this.top, err);
-	} else {
+    // We have a sequence of frames on the stack.
+    while (this.top && !this.top.handler) {
+        this.top = this.top.parent;
+    }
+    if (this.top) {
+        // found a handler
+        var err = this.exception;
+        this.exception = null;
+        this.top.handler(this.top, err);
+    } else {
         if (this.exception) {
             vivliostyle.logging.logger.error(this.exception, 'Unhandled exception in task', this.name);
         }
-	}
+    }
 };
 
 /**
@@ -567,11 +567,11 @@ adapt.task.Task.prototype.raise = function(err, opt_frame) {
     if (opt_frame) {
         var f = this.top;
         while (f && f != opt_frame) {
-        	f = f.parent;
+            f = f.parent;
         }
         if (f == opt_frame) {
-        	this.top = f;
-        }    	
+            this.top = f;
+        }
     }
     this.exception = err;
     this.unwind();
@@ -581,16 +581,16 @@ adapt.task.Task.prototype.raise = function(err, opt_frame) {
  * Fill the stack trace in the exception
  * @param {Error} err exception
  */
-adapt.task.Task.prototype.fillStack = function(err) {	
-	var out = err['frameTrace'];
+adapt.task.Task.prototype.fillStack = function(err) {
+    var out = err['frameTrace'];
     if (!out) {
-    	out = err["stack"] ? err["stack"] + "\n\t---- async ---\n" : "";
-	    for (var f = this.top; f; f = f.parent) {
-	        out += '\t';
-	        out += f.getName();
-	        out += '\n';
-	    }
-	    err['frameTrace'] = out;
+        out = err["stack"] ? err["stack"] + "\n\t---- async ---\n" : "";
+        for (var f = this.top; f; f = f.parent) {
+            out += '\t';
+            out += f.getName();
+            out += '\n';
+        }
+        err['frameTrace'] = out;
     }
 };
 
@@ -631,7 +631,7 @@ adapt.task.SyncResultImpl.prototype.thenReturn = function(result) {
  * @override
  */
 adapt.task.SyncResultImpl.prototype.thenFinish = function(frame) {
-	frame.finish(this.value);
+    frame.finish(this.value);
 };
 
 /**
@@ -693,10 +693,10 @@ adapt.task.ResultImpl.prototype.thenAsync = function(callback) {
 adapt.task.ResultImpl.prototype.thenReturn = function(result) {
     if (this.isPending()) {
         return this.thenAsync(function() {
-        	return new adapt.task.SyncResultImpl(result);
+            return new adapt.task.SyncResultImpl(result);
         });
     } else {
-    	return new adapt.task.SyncResultImpl(result);
+        return new adapt.task.SyncResultImpl(result);
     }
 };
 
@@ -706,11 +706,11 @@ adapt.task.ResultImpl.prototype.thenReturn = function(result) {
 adapt.task.ResultImpl.prototype.thenFinish = function(frame) {
     if (this.isPending()) {
         this.then(function(res) {
-        	frame.finish(res);
+            frame.finish(res);
         });
     } else {
-    	frame.finish(this.frame.res);
-    }	
+        frame.finish(this.frame.res);
+    }
 };
 
 /**
@@ -725,7 +725,7 @@ adapt.task.ResultImpl.prototype.isPending = function() {
  */
 adapt.task.ResultImpl.prototype.get = function() {
     if (this.isPending())
-    	throw new Error("Result is pending");
+        throw new Error("Result is pending");
     return this.frame.res;
 };
 
@@ -781,13 +781,13 @@ adapt.task.Frame.prototype.finish = function(res) {
     var frame = this.parent;
     adapt.task.privateCurrentTask.top = frame;
     if (this.callback) {
-	    try {
-	        this.callback(res);
-	    } catch (err) {
-	        this.task.raise(err, frame);
-	    }
-	    // callback was called
-	    this.state = adapt.task.FrameState.DEAD;
+        try {
+            this.callback(res);
+        } catch (err) {
+            this.task.raise(err, frame);
+        }
+        // callback was called
+        this.state = adapt.task.FrameState.DEAD;
     }
 };
 
@@ -828,8 +828,8 @@ adapt.task.Frame.prototype.then = function(callback) {
             }
             break;
         case adapt.task.FrameState.FINISHED:
-        	var task = this.task;
-        	var frame = this.parent;
+            var task = this.task;
+            var frame = this.parent;
             try {
                 callback(this.res);
                 this.state = adapt.task.FrameState.DEAD;
@@ -894,7 +894,7 @@ adapt.task.Frame.prototype.loop = function(func) {
             }
             frame.finish(true);
         } catch (err) {
-        	frame.task.raise(err, frame);
+            frame.task.raise(err, frame);
         }
     };
     step(true);
@@ -909,18 +909,18 @@ adapt.task.Frame.prototype.loop = function(func) {
 adapt.task.Frame.prototype.loopWithFrame = function(func) {
     var task = adapt.task.privateCurrentTask;
     if (!task) {
-    	throw new Error("E_TASK_NO_CONTEXT");
+        throw new Error("E_TASK_NO_CONTEXT");
     }
     return this.loop(function() {
-    	var result;
-    	do {
-		    var frame = new adapt.task.LoopBodyFrame(/** @type {!adapt.task.Task} */ (task), task.top);
-		    task.top = frame;
-		    frame.state = adapt.task.FrameState.ACTIVE;
-		    func(frame);
-		    result = frame.result();
-    	} while(!result.isPending() && result.get());
-    	return result;
+        var result;
+        do {
+            var frame = new adapt.task.LoopBodyFrame(/** @type {!adapt.task.Task} */ (task), task.top);
+            task.top = frame;
+            frame.state = adapt.task.FrameState.ACTIVE;
+            func(frame);
+            result = frame.result();
+        } while (!result.isPending() && result.get());
+        return result;
     });
 };
 
@@ -933,7 +933,7 @@ adapt.task.Frame.prototype.suspend = function(opt_waitTarget) {
     if (this.task.continuation)
         throw new Error('E_TASK_ALREADY_SUSPENDED');
     /** @type {adapt.task.Continuation.<T>} */ var continuation =
-    	new adapt.task.Continuation(this.task);
+        new adapt.task.Continuation(this.task);
     this.task.continuation = continuation;
     adapt.task.privateCurrentTask = null;
     this.task.waitTarget = opt_waitTarget || null;
@@ -947,7 +947,7 @@ adapt.task.Frame.prototype.suspend = function(opt_waitTarget) {
  * @extends {adapt.task.Frame.<boolean>}
  */
 adapt.task.LoopBodyFrame = function(task, parent) {
-	adapt.task.Frame.call(this, task, parent, "loop");
+    adapt.task.Frame.call(this, task, parent, "loop");
 };
 goog.inherits(adapt.task.LoopBodyFrame, adapt.task.Frame);
 
@@ -955,14 +955,14 @@ goog.inherits(adapt.task.LoopBodyFrame, adapt.task.Frame);
  * @return {void}
  */
 adapt.task.LoopBodyFrame.prototype.continueLoop = function() {
-	this.finish(true);
+    this.finish(true);
 };
 
 /**
  * @return {void}
  */
 adapt.task.LoopBodyFrame.prototype.breakLoop = function() {
-	this.finish(false);
+    this.finish(false);
 };
 
 /**
@@ -1005,9 +1005,9 @@ adapt.task.EventSource = function() {
 adapt.task.EventSource.prototype.attach = function(target, type, opt_preventDefault) {
     var self = this;
     var listener = /** @param {adapt.base.Event} event */ function(event) {
-    	if (opt_preventDefault) {
-    		event.preventDefault();
-    	}
+        if (opt_preventDefault) {
+            event.preventDefault();
+        }
         if (self.tail.event) {
             self.tail.next = new adapt.task.EventItem(event);
             self.tail = self.tail.next;
@@ -1030,27 +1030,27 @@ adapt.task.EventSource.prototype.attach = function(target, type, opt_preventDefa
  * @return {void}
  */
 adapt.task.EventSource.prototype.detach = function(target, type) {
-	var i = 0;
-	var item = null;
-	while (i < this.listeners.length) {
-		item = this.listeners[i];
-		if (item.type == type && item.target === target) {
-			this.listeners.splice(i, 1);
-		    item.target.removeEventListener(item.type, item.listener, false);
-		    return;
-		}
-		i++;
-	}
+    var i = 0;
+    var item = null;
+    while (i < this.listeners.length) {
+        item = this.listeners[i];
+        if (item.type == type && item.target === target) {
+            this.listeners.splice(i, 1);
+            item.target.removeEventListener(item.type, item.listener, false);
+            return;
+        }
+        i++;
+    }
     throw new Error('E_TASK_EVENT_SOURCE_NOT_ATTACHED');
 };
 
 /**
  * Read next dispatched event, blocking the current task if needed.
- * @return {!adapt.task.Result.<adapt.base.Event>} 
+ * @return {!adapt.task.Result.<adapt.base.Event>}
  */
 adapt.task.EventSource.prototype.nextEvent = function() {
     /** @type {!adapt.task.Frame.<adapt.base.Event>} */ var frame =
-    	adapt.task.newFrame('EventSource.nextEvent');
+        adapt.task.newFrame('EventSource.nextEvent');
     var self = this;
     var readEvent = function() {
         if (self.head.event) {
@@ -1063,7 +1063,7 @@ adapt.task.EventSource.prototype.nextEvent = function() {
         } else if (self.continuation) {
             throw new Error('E_TASK_EVENT_SOURCE_OTHER_TASK_WAITING');
         } else {
-        	/** @type {!adapt.task.Frame.<boolean>} */ var frameInternal =
+            /** @type {!adapt.task.Frame.<boolean>} */ var frameInternal =
                 adapt.task.newFrame('EventSource.nextEventInternal');
             self.continuation = frameInternal.suspend(self);
             frameInternal.result().then(readEvent);

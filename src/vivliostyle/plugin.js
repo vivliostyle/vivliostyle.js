@@ -49,7 +49,7 @@ goog.scope(function() {
      */
     vivliostyle.plugin.registerHook = function(name, fn) {
         if (!HOOKS[name]) {
-            vivliostyle.logging.logger.warn(new Error("Skipping unknown plugin hook '" + name + "'."))
+            vivliostyle.logging.logger.warn(new Error("Skipping unknown plugin hook '" + name + "'."));
         } else {
             var hooksForName = vivliostyle.plugin.hooks[name];
             if (!hooksForName) {
@@ -67,7 +67,7 @@ goog.scope(function() {
      */
     vivliostyle.plugin.removeHook = function(name, fn) {
         if (!HOOKS[name]) {
-            vivliostyle.logging.logger.warn(new Error("Ignoring unknown plugin hook '" + name + "'."))
+            vivliostyle.logging.logger.warn(new Error("Ignoring unknown plugin hook '" + name + "'."));
         } else {
             var hooksForName = vivliostyle.plugin.hooks[name];
             if (hooksForName) {

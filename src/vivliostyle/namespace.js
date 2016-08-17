@@ -2,6 +2,7 @@
  * Copyright 2015 Vivliostyle Inc.
  * @fileoverview Setup namespace for Vivliostyle.
  */
+/*globals enclosingObject */
 goog.provide("vivliostyle.namespace");
 
 /**

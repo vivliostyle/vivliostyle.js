@@ -50,7 +50,7 @@
         main(config);
     }
 
-    if(window["__loaded"])
+    if (window["__loaded"])
         startViewer();
     else
         window.onload = startViewer;

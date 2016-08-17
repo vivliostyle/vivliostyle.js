@@ -7,7 +7,7 @@ describe("cssparse", function() {
                 spyOn(handler, "error");
                 spyOn(handler, "pseudoclassSelector");
                 spyOn(handler, "startFuncWithSelector");
-                spyOn(handler, "endFuncWithSelector");                                
+                spyOn(handler, "endFuncWithSelector");
             });
 
             function parse(done, text, fn) {
@@ -388,7 +388,7 @@ describe("cssparse", function() {
                     parse(done, ":nth-child(-n-10) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).toHaveBeenCalledWith("nth-child", [-1, -10]);
-                    })
+                    });
                 });
 
                 it("reject invalid identifier", function(done) {
@@ -445,14 +445,14 @@ describe("cssparse", function() {
                     parse(done, ":not(h1) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
-                        expect(handler.endFuncWithSelector).toHaveBeenCalled();                        
+                        expect(handler.endFuncWithSelector).toHaveBeenCalled();
                     });
                 });
                 it("can take attribute selector", function(done) {
                     parse(done, ":not([attr='foobar']) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
-                        expect(handler.endFuncWithSelector).toHaveBeenCalled();                        
+                        expect(handler.endFuncWithSelector).toHaveBeenCalled();
                     });
                 });
                 it("can take class selector", function(done) {
@@ -466,14 +466,14 @@ describe("cssparse", function() {
                     parse(done, ":not(#content) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
-                        expect(handler.endFuncWithSelector).toHaveBeenCalled();                        
+                        expect(handler.endFuncWithSelector).toHaveBeenCalled();
                     });
                 });
                 it("can take pseudo-class selector", function(done) {
                     parse(done, ":not(:lang(ja)) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
-                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("lang", ["ja"]);                        
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("lang", ["ja"]);
                         expect(handler.endFuncWithSelector).toHaveBeenCalled();
                     });
                 });
@@ -481,29 +481,29 @@ describe("cssparse", function() {
                     parse(done, ":not(div:lang(ja)) {}", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
-                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("lang", ["ja"]);                        
+                        expect(handler.pseudoclassSelector).toHaveBeenCalledWith("lang", ["ja"]);
                         expect(handler.endFuncWithSelector).toHaveBeenCalled();
                     });
                 });
                 it("error if selector is invalid", function(done) {
                     parse(done, ":not(.) {}", function() {
-                        expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");                        
+                        expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
                         expect(handler.error).toHaveBeenCalled();
-                        expect(handler.endFuncWithSelector).not.toHaveBeenCalled();                        
+                        expect(handler.endFuncWithSelector).not.toHaveBeenCalled();
                     });
                 });
                 it("error if multiple selectors", function(done) {
                     parse(done, ":not(div, .foo) {}", function() {
-                        expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");                        
+                        expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
                         expect(handler.error).toHaveBeenCalled();
-                        expect(handler.endFuncWithSelector).not.toHaveBeenCalled();                        
+                        expect(handler.endFuncWithSelector).not.toHaveBeenCalled();
                     });
                 });
                 it("error if adjacent selector is specified", function(done) {
                     parse(done, ":not(div + .foo) {}", function() {
-                        expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");                        
+                        expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
                         expect(handler.error).toHaveBeenCalled();
-                        expect(handler.endFuncWithSelector).not.toHaveBeenCalled();                        
+                        expect(handler.endFuncWithSelector).not.toHaveBeenCalled();
                     });
                 });
             });
@@ -513,7 +513,7 @@ describe("cssparse", function() {
                         expect(handler.error).not.toHaveBeenCalled();
                         expect(handler.pseudoclassSelector).toHaveBeenCalledWith("empty", null);
                     });
-                })
+                });
             });
         });
     });

@@ -1,5 +1,5 @@
 describe("sizing", function() {
-   "use strict";
+    "use strict";
 
     var domUtil = vivliostyle.test.util.dom;
     var sizing = vivliostyle.sizing;

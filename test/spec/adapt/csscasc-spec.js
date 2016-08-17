@@ -928,6 +928,6 @@ describe("csscasc", function() {
                 expect(action).toEqual(jasmine.any(adapt.csscasc.CheckConditionAction));
                 expect(action.condition).toBe("");
             });
-        })
+        });
     });
 });

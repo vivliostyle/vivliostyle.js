@@ -18,9 +18,9 @@ adapt.expr.Preferences;
  * @return {adapt.expr.Preferences}
  */
 adapt.expr.defaultPreferences = function() {
-	return {fontFamily:"serif", lineHeight:1.25, margin:8, hyphenate:true, columnWidth:25,
-				horizontal:false, nightMode:false, spreadView:false, pageBorder:1,
-                enabledMediaTypes:{"print": true}};
+    return {fontFamily:"serif", lineHeight:1.25, margin:8, hyphenate:true, columnWidth:25,
+        horizontal:false, nightMode:false, spreadView:false, pageBorder:1,
+        enabledMediaTypes:{"print": true}};
 };
 
 /**
@@ -28,9 +28,9 @@ adapt.expr.defaultPreferences = function() {
  * @return {adapt.expr.Preferences}
  */
 adapt.expr.clonePreferences = function(pref) {
-	return {fontFamily:pref.fontFamily, lineHeight:pref.lineHeight, margin:pref.margin,
-		hyphenate:pref.hyphenate, columnWidth:pref.columnWidth, horizontal:pref.horizontal,
-		nightMode:pref.nightMode, spreadView:pref.spreadView, pageBorder:pref.pageBorder,
+    return {fontFamily:pref.fontFamily, lineHeight:pref.lineHeight, margin:pref.margin,
+        hyphenate:pref.hyphenate, columnWidth:pref.columnWidth, horizontal:pref.horizontal,
+        nightMode:pref.nightMode, spreadView:pref.spreadView, pageBorder:pref.pageBorder,
         enabledMediaTypes:Object.assign({}, pref.enabledMediaTypes)};
 };
 
@@ -45,7 +45,7 @@ adapt.expr.defaultPreferencesInstance = adapt.expr.defaultPreferences();
  * @enum {!Object}
  */
 adapt.expr.Special = {
-	PENDING: {}
+    PENDING: {}
 };
 
 /**
@@ -94,8 +94,8 @@ adapt.expr.cssIdent = function(name) {
  */
 adapt.expr.makeQualifiedName = function(objName, memberName) {
     if (objName) {
-        return adapt.base.escapeCSSIdent(objName) + "." + 
-        	adapt.base.escapeCSSIdent(memberName);
+        return adapt.base.escapeCSSIdent(objName) + "." +
+            adapt.base.escapeCSSIdent(memberName);
     }
     return adapt.base.escapeCSSIdent(memberName);
 };
@@ -113,7 +113,7 @@ adapt.expr.nextKeyIndex = 0;
  * @constructor
  */
 adapt.expr.LexicalScope = function(parent, resolver) {
-	this.parent = parent;
+    this.parent = parent;
     /** @type {string} */ this.scopeKey = "S" + (adapt.expr.nextKeyIndex++);
     /** @type {Array.<adapt.expr.LexicalScope>} */ this.children = [];
     /** @type {adapt.expr.Const} */ this.zero = new adapt.expr.Const(this, 0);
@@ -128,7 +128,7 @@ adapt.expr.LexicalScope = function(parent, resolver) {
     this.builtIns = {};
     /** @const */ this.resolver = resolver;
     if (!parent) {
-    	// root scope
+        // root scope
         var builtIns = this.builtIns;
         builtIns["floor"] = Math.floor;
         builtIns["ceil"] = Math.ceil;
@@ -139,7 +139,7 @@ adapt.expr.LexicalScope = function(parent, resolver) {
         builtIns["letterbox"] = adapt.expr.letterbox;
         builtIns["css-string"] = adapt.expr.cssString;
         builtIns["css-name"] = adapt.expr.cssIdent;
-        builtIns["typeof"] = function(x) { return typeof(x); };
+        builtIns["typeof"] = function(x) { return typeof x; };
         this.defineBuiltInName("page-width", function() { return this.pageWidth(); });
         this.defineBuiltInName("page-height", function() { return this.pageHeight(); });
         this.defineBuiltInName("pref-font-family", function() { return this.pref.fontFamily; });
@@ -149,7 +149,7 @@ adapt.expr.LexicalScope = function(parent, resolver) {
         this.defineBuiltInName("pref-line-height", function() { return this.pref.lineHeight; });
         this.defineBuiltInName("pref-column-width", function() { return this.pref.columnWidth * this.fontSize; });
         this.defineBuiltInName("pref-horizontal", function() {
-        	return this.pref.horizontal;
+            return this.pref.horizontal;
         });
         this.defineBuiltInName("pref-spread-view", function() { return this.pref.spreadView; });
     }
@@ -160,7 +160,7 @@ adapt.expr.LexicalScope = function(parent, resolver) {
  * @param {function(this:adapt.expr.Context):adapt.expr.Result} fn
  */
 adapt.expr.LexicalScope.prototype.defineBuiltInName = function(name, fn) {
-	this.values[name] = new adapt.expr.Native(this, fn, name);
+    this.values[name] = new adapt.expr.Native(this, fn, name);
 };
 
 /**
@@ -261,7 +261,7 @@ adapt.expr.ScopeContext;
  * @constructor
  */
 adapt.expr.Context = function(rootScope, viewportWidth, viewportHeight, fontSize) {
-	/** @const */ this.rootScope = rootScope;
+    /** @const */ this.rootScope = rootScope;
     /** @const */ this.viewportWidth = viewportWidth;
     /** @const */ this.viewportHeight = viewportHeight;
     /** @protected @type {?number} */ this.actualPageWidth = null;
@@ -282,14 +282,14 @@ adapt.expr.Context = function(rootScope, viewportWidth, viewportHeight, fontSize
     };
     /** @const */ this.initialFontSize = fontSize;
     /** @type {?number} */ this.rootFontSize = null;
-	this.fontSize = function() {
+    this.fontSize = function() {
         if (this.rootFontSize)
             return this.rootFontSize;
         else
             return fontSize;
     };
-	this.pref = adapt.expr.defaultPreferencesInstance;
-	/** @type {Object.<string,adapt.expr.ScopeContext>} */ this.scopes = {};
+    this.pref = adapt.expr.defaultPreferencesInstance;
+    /** @type {Object.<string,adapt.expr.ScopeContext>} */ this.scopes = {};
 };
 
 /**
@@ -347,9 +347,9 @@ adapt.expr.Context.prototype.evalName = function(scope, qualifiedName) {
         if (val)
             return val;
         if (scope.resolver) {
-        	val = scope.resolver.call(this, qualifiedName, false);
-        	if (val)
-        		return val;
+            val = scope.resolver.call(this, qualifiedName, false);
+            if (val)
+                return val;
         }
         scope = scope.parent;
     } while (scope);
@@ -369,14 +369,14 @@ adapt.expr.Context.prototype.evalCall = function(scope, qualifiedName, params, n
         if (body)
             return body; // will be expanded by callee
         if (scope.resolver) {
-        	body = scope.resolver.call(this, qualifiedName, true);
-        	if (body)
-        		return body;
-        }        
+            body = scope.resolver.call(this, qualifiedName, true);
+            if (body)
+                return body;
+        }
         var fn = scope.builtIns[qualifiedName];
         if (fn) {
-        	if (noBuiltInEval)
-        		return scope.zero;
+            if (noBuiltInEval)
+                return scope.zero;
             var args = Array(params.length);
             for (var i = 0; i < params.length; i++) {
                 args[i] = params[i].evaluate(this);
@@ -486,7 +486,7 @@ adapt.expr.DependencyCache;
  * @constructor
  */
 adapt.expr.Val = function(scope) {
-	this.scope = scope;
+    this.scope = scope;
     this.key = "_" + adapt.expr.nextKeyIndex++;
 };
 
@@ -596,8 +596,8 @@ adapt.expr.Val.prototype.isMediaName = function() {
  * @extends {adapt.expr.Val}
  */
 adapt.expr.Prefix = function(scope, val) {
-	adapt.expr.Val.call(this, scope);
-	/** @type {adapt.expr.Val} */ this.val = val;
+    adapt.expr.Val.call(this, scope);
+    /** @type {adapt.expr.Val} */ this.val = val;
 };
 goog.inherits(adapt.expr.Prefix, adapt.expr.Val);
 
@@ -606,7 +606,7 @@ goog.inherits(adapt.expr.Prefix, adapt.expr.Val);
  * @return {string}
  */
 adapt.expr.Prefix.prototype.getOp = function() {
-    throw new Error("F_ABSTRACT");        
+    throw new Error("F_ABSTRACT");
 };
 
 /**
@@ -614,7 +614,7 @@ adapt.expr.Prefix.prototype.getOp = function() {
  * @return {adapt.expr.Result}
  */
 adapt.expr.Prefix.prototype.evalPrefix = function(val) {
-	throw new Error("F_ABSTRACT");        
+    throw new Error("F_ABSTRACT");
 };
 
 /**
@@ -649,7 +649,7 @@ adapt.expr.Prefix.prototype.appendTo = function(buf, priority) {
  */
 adapt.expr.Prefix.prototype.expand = function(context, params) {
     var val = this.val.expand(context, params);
-    if( val === this.val )
+    if (val === this.val)
         return this;
     var r = new this.constructor(this.scope, val);
     return r;
@@ -681,7 +681,7 @@ adapt.expr.Infix.prototype.getPriority = function() {
  * @return {string}
  */
 adapt.expr.Infix.prototype.getOp = function() {
-    throw new Error("F_ABSTRACT");        
+    throw new Error("F_ABSTRACT");
 };
 
 /**
@@ -690,7 +690,7 @@ adapt.expr.Infix.prototype.getOp = function() {
  * @return {adapt.expr.Result}
  */
 adapt.expr.Infix.prototype.evalInfix = function(lhs, rhs) {
-    throw new Error("F_ABSTRACT");        
+    throw new Error("F_ABSTRACT");
 };
 
 /**
@@ -707,7 +707,7 @@ adapt.expr.Infix.prototype.evaluateCore = function(context) {
  */
 adapt.expr.Infix.prototype.dependCore = function(other, context, dependencyCache) {
     return other === this || this.lhs.dependOuter(other, context, dependencyCache) ||
-         this.rhs.dependOuter(other, context, dependencyCache);
+        this.rhs.dependOuter(other, context, dependencyCache);
 };
 
 /**
@@ -730,7 +730,7 @@ adapt.expr.Infix.prototype.appendTo = function(buf, priority) {
 adapt.expr.Infix.prototype.expand = function(context, params) {
     var lhs = this.lhs.expand(context, params);
     var rhs = this.rhs.expand(context, params);
-    if( lhs === this.lhs && rhs === this.rhs )
+    if (lhs === this.lhs && rhs === this.rhs)
         return this;
     var r = new this.constructor(this.scope, lhs, rhs);
     return r;
@@ -745,7 +745,7 @@ adapt.expr.Infix.prototype.expand = function(context, params) {
  * @param {adapt.expr.Val} rhs
  */
 adapt.expr.Logical = function(scope, lhs, rhs) {
-	adapt.expr.Infix.call(this, scope, lhs, rhs);
+    adapt.expr.Infix.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Logical, adapt.expr.Infix);
 
@@ -765,7 +765,7 @@ adapt.expr.Logical.prototype.getPriority = function() {
  * @param {adapt.expr.Val} rhs
  */
 adapt.expr.Comparison = function(scope, lhs, rhs) {
-	adapt.expr.Infix.call(this, scope, lhs, rhs);
+    adapt.expr.Infix.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Comparison, adapt.expr.Infix);
 
@@ -785,7 +785,7 @@ adapt.expr.Comparison.prototype.getPriority = function() {
  * @param {adapt.expr.Val} rhs
  */
 adapt.expr.Additive = function(scope, lhs, rhs) {
-	adapt.expr.Infix.call(this, scope, lhs, rhs);
+    adapt.expr.Infix.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Additive, adapt.expr.Infix);
 
@@ -805,7 +805,7 @@ adapt.expr.Additive.prototype.getPriority = function() {
  * @param {adapt.expr.Val} rhs
  */
 adapt.expr.Multiplicative = function(scope, lhs, rhs) {
-	adapt.expr.Infix.call(this, scope, lhs, rhs);
+    adapt.expr.Infix.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Multiplicative, adapt.expr.Infix);
 
@@ -824,7 +824,7 @@ adapt.expr.Multiplicative.prototype.getPriority = function() {
  * @extends {adapt.expr.Prefix}
  */
 adapt.expr.Not = function(scope, val) {
-	adapt.expr.Prefix.call(this, scope, val);
+    adapt.expr.Prefix.call(this, scope, val);
 };
 goog.inherits(adapt.expr.Not, adapt.expr.Prefix);
 
@@ -850,7 +850,7 @@ adapt.expr.Not.prototype.evalPrefix = function(val) {
  * @extends {adapt.expr.Prefix}
  */
 adapt.expr.Negate = function(scope, val) {
-	adapt.expr.Prefix.call(this, scope, val);
+    adapt.expr.Prefix.call(this, scope, val);
 };
 goog.inherits(adapt.expr.Negate, adapt.expr.Prefix);
 
@@ -877,7 +877,7 @@ adapt.expr.Negate.prototype.evalPrefix = function(val) {
  * @extends {adapt.expr.Logical}
  */
 adapt.expr.And = function(scope, lhs, rhs) {
-	adapt.expr.Logical.call(this, scope, lhs, rhs);
+    adapt.expr.Logical.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.And, adapt.expr.Logical);
 
@@ -894,7 +894,7 @@ adapt.expr.And.prototype.getOp = function() {
 adapt.expr.And.prototype.evaluateCore = function(context) {
     return this.lhs.evaluate(context) && this.rhs.evaluate(context);
 };
-    
+
 
 /**
  * @constructor
@@ -904,7 +904,7 @@ adapt.expr.And.prototype.evaluateCore = function(context) {
  * @extends {adapt.expr.And}
  */
 adapt.expr.AndMedia = function(scope, lhs, rhs) {
-	adapt.expr.And.call(this, scope, lhs, rhs);
+    adapt.expr.And.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.AndMedia, adapt.expr.And);
 
@@ -924,7 +924,7 @@ adapt.expr.AndMedia.prototype.getOp = function() {
  * @extends {adapt.expr.Logical}
  */
 adapt.expr.Or = function(scope, lhs, rhs) {
-	adapt.expr.Logical.call(this, scope, lhs, rhs);
+    adapt.expr.Logical.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Or, adapt.expr.Logical);
 
@@ -951,7 +951,7 @@ adapt.expr.Or.prototype.evaluateCore = function(context) {
  * @extends {adapt.expr.Or}
  */
 adapt.expr.OrMedia = function(scope, lhs, rhs) {
-	adapt.expr.Or.call(this, scope, lhs, rhs);
+    adapt.expr.Or.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.OrMedia, adapt.expr.Or);
 
@@ -971,7 +971,7 @@ adapt.expr.OrMedia.prototype.getOp = function() {
  * @extends {adapt.expr.Comparison}
  */
 adapt.expr.Lt = function(scope, lhs, rhs) {
-	adapt.expr.Comparison.call(this, scope, lhs, rhs);
+    adapt.expr.Comparison.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Lt, adapt.expr.Comparison);
 
@@ -998,7 +998,7 @@ adapt.expr.Lt.prototype.evalInfix = function(lhs, rhs) {
  * @extends {adapt.expr.Comparison}
  */
 adapt.expr.Le = function(scope, lhs, rhs) {
-	adapt.expr.Comparison.call(this, scope, lhs, rhs);
+    adapt.expr.Comparison.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Le, adapt.expr.Comparison);
 
@@ -1025,7 +1025,7 @@ adapt.expr.Le.prototype.evalInfix = function(lhs, rhs) {
  * @extends {adapt.expr.Comparison}
  */
 adapt.expr.Gt = function(scope, lhs, rhs) {
-	adapt.expr.Comparison.call(this, scope, lhs, rhs);
+    adapt.expr.Comparison.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Gt, adapt.expr.Comparison);
 
@@ -1052,7 +1052,7 @@ adapt.expr.Gt.prototype.evalInfix = function(lhs, rhs) {
  * @extends {adapt.expr.Comparison}
  */
 adapt.expr.Ge = function(scope, lhs, rhs) {
-	adapt.expr.Comparison.call(this, scope, lhs, rhs);
+    adapt.expr.Comparison.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Ge, adapt.expr.Comparison);
 
@@ -1079,7 +1079,7 @@ adapt.expr.Ge.prototype.evalInfix = function(lhs, rhs) {
  * @extends {adapt.expr.Comparison}
  */
 adapt.expr.Eq = function(scope, lhs, rhs) {
-	adapt.expr.Comparison.call(this, scope, lhs, rhs);
+    adapt.expr.Comparison.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Eq, adapt.expr.Comparison);
 
@@ -1106,7 +1106,7 @@ adapt.expr.Eq.prototype.evalInfix = function(lhs, rhs) {
  * @extends {adapt.expr.Comparison}
  */
 adapt.expr.Ne = function(scope, lhs, rhs) {
-	adapt.expr.Comparison.call(this, scope, lhs, rhs);
+    adapt.expr.Comparison.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Ne, adapt.expr.Comparison);
 
@@ -1133,7 +1133,7 @@ adapt.expr.Ne.prototype.evalInfix = function(lhs, rhs) {
  * @extends {adapt.expr.Additive}
  */
 adapt.expr.Add = function(scope, lhs, rhs) {
-	adapt.expr.Additive.call(this, scope, lhs, rhs);
+    adapt.expr.Additive.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Add, adapt.expr.Additive);
 
@@ -1160,7 +1160,7 @@ adapt.expr.Add.prototype.evalInfix = function(lhs, rhs) {
  * @extends {adapt.expr.Additive}
  */
 adapt.expr.Subtract = function(scope, lhs, rhs) {
-	adapt.expr.Additive.call(this, scope, lhs, rhs);
+    adapt.expr.Additive.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Subtract, adapt.expr.Additive);
 
@@ -1187,7 +1187,7 @@ adapt.expr.Subtract.prototype.evalInfix = function(lhs, rhs) {
  * @extends {adapt.expr.Multiplicative}
  */
 adapt.expr.Multiply = function(scope, lhs, rhs) {
-	adapt.expr.Multiplicative.call(this, scope, lhs, rhs);
+    adapt.expr.Multiplicative.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Multiply, adapt.expr.Multiplicative);
 
@@ -1214,7 +1214,7 @@ adapt.expr.Multiply.prototype.evalInfix = function(lhs, rhs) {
  * @extends {adapt.expr.Multiplicative}
  */
 adapt.expr.Divide = function(scope, lhs, rhs) {
-	adapt.expr.Multiplicative.call(this, scope, lhs, rhs);
+    adapt.expr.Multiplicative.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Divide, adapt.expr.Multiplicative);
 
@@ -1241,7 +1241,7 @@ adapt.expr.Divide.prototype.evalInfix = function(lhs, rhs) {
  * @extends {adapt.expr.Multiplicative}
  */
 adapt.expr.Modulo = function(scope, lhs, rhs) {
-	adapt.expr.Multiplicative.call(this, scope, lhs, rhs);
+    adapt.expr.Multiplicative.call(this, scope, lhs, rhs);
 };
 goog.inherits(adapt.expr.Modulo, adapt.expr.Multiplicative);
 
@@ -1295,7 +1295,7 @@ adapt.expr.Numeric.prototype.evaluateCore = function(context) {
  * Named value.
  * @constructor
  * @param {adapt.expr.LexicalScope} scope
- * @param {string} qualifiedName CSS-escaped name sequence separated by dots. 
+ * @param {string} qualifiedName CSS-escaped name sequence separated by dots.
  * @extends {adapt.expr.Val}
  */
 adapt.expr.Named = function(scope, qualifiedName) {
@@ -1310,7 +1310,7 @@ goog.inherits(adapt.expr.Named, adapt.expr.Val);
 adapt.expr.Named.prototype.appendTo = function(buf, priority) {
     buf.append(this.qualifiedName);
 };
-    
+
 /**
  * @override
  */
@@ -1322,7 +1322,7 @@ adapt.expr.Named.prototype.evaluateCore = function(context) {
  * @override
  */
 adapt.expr.Named.prototype.dependCore = function(other, context, dependencyCache) {
-    return other === this || 
+    return other === this ||
         context.evalName(this.scope, this.qualifiedName).dependOuter(other, context, dependencyCache);
 };
 
@@ -1336,7 +1336,7 @@ adapt.expr.Named.prototype.dependCore = function(other, context, dependencyCache
  * @extends {adapt.expr.Val}
  */
 adapt.expr.MediaName = function(scope, not, name) {
-	adapt.expr.Val.call(this, scope);
+    adapt.expr.Val.call(this, scope);
     /** @type {boolean} */ this.not = not;
     /** @type {string} */ this.name = name;
 };
@@ -1350,7 +1350,7 @@ adapt.expr.MediaName.prototype.appendTo = function(buf, priority) {
         buf.append('not ');
     buf.append(adapt.base.escapeCSSIdent(this.name));
 };
-    
+
 /**
  * @override
  */
@@ -1414,8 +1414,8 @@ adapt.expr.Native.prototype.evaluateCore = function(context) {
  */
 adapt.expr.appendValArray = function(buf, arr) {
     buf.append("(");
-    for (var i = 0 ; i < arr.length ; i++) {
-        if (i) 
+    for (var i = 0; i < arr.length; i++) {
+        if (i)
             buf.append(",");
         arr[i].appendTo(buf, 0);
     }
@@ -1433,13 +1433,13 @@ adapt.expr.expandValArray = function(context, arr, params) {
     for (var i = 0; i < arr.length; i++) {
         var p = arr[i].expand(context, params);
         if (arr !== expanded) {
-        	expanded[i] = p;
+            expanded[i] = p;
         } else if (p !== arr[i]) {
-        	expanded = Array(arr.length);
-        	for (var j = 0; j < i; j++) {
-        		expanded[j] = arr[j];
-        	}
-        	expanded[i] = p;
+            expanded = Array(arr.length);
+            for (var j = 0; j < i; j++) {
+                expanded[j] = arr[j];
+            }
+            expanded[i] = p;
         }
     }
     return expanded;
@@ -1523,10 +1523,10 @@ adapt.expr.Call.prototype.expand = function(context, params) {
  * @extends {adapt.expr.Val}
  */
 adapt.expr.Cond = function(scope, cond, ifTrue, ifFalse) {
-	adapt.expr.Val.call(this, scope);
-	/** @type {adapt.expr.Val} */ this.cond = cond;
-	/** @type {adapt.expr.Val} */ this.ifTrue = ifTrue;
-	/** @type {adapt.expr.Val} */ this.ifFalse = ifFalse;
+    adapt.expr.Val.call(this, scope);
+    /** @type {adapt.expr.Val} */ this.cond = cond;
+    /** @type {adapt.expr.Val} */ this.ifTrue = ifTrue;
+    /** @type {adapt.expr.Val} */ this.ifFalse = ifFalse;
 };
 goog.inherits(adapt.expr.Cond, adapt.expr.Val);
 
@@ -1534,14 +1534,14 @@ goog.inherits(adapt.expr.Cond, adapt.expr.Val);
  * @override
  */
 adapt.expr.Cond.prototype.appendTo = function(buf, priority) {
-    if( priority > 0 )
+    if (priority > 0)
         buf.append("(");
     this.cond.appendTo(buf, 0);
     buf.append("?");
     this.ifTrue.appendTo(buf, 0);
     buf.append(":");
     this.ifFalse.appendTo(buf, 0);
-    if( priority > 0 )
+    if (priority > 0)
         buf.append(")");
 };
 
@@ -1584,7 +1584,7 @@ adapt.expr.Cond.prototype.expand = function(context, params) {
  * @extends {adapt.expr.Val}
  */
 adapt.expr.Const = function(scope, val) {
-	adapt.expr.Val.call(this, scope);
+    adapt.expr.Val.call(this, scope);
     this.val = val;
 };
 goog.inherits(adapt.expr.Const, adapt.expr.Val);
@@ -1594,17 +1594,17 @@ goog.inherits(adapt.expr.Const, adapt.expr.Val);
  */
 adapt.expr.Const.prototype.appendTo = function(buf, priority) {
     switch (typeof this.val) {
-    case "number":
-    case "boolean":
-        buf.append(this.val.toString());
-        break;
-    case "string":
-        buf.append('"');
-        buf.append(adapt.base.escapeCSSStr(this.val));
-        buf.append('"');
-        break;
-    default:
-        throw new Error("F_UNEXPECTED_STATE");
+        case "number":
+        case "boolean":
+            buf.append(this.val.toString());
+            break;
+        case "string":
+            buf.append('"');
+            buf.append(adapt.base.escapeCSSStr(this.val));
+            buf.append('"');
+            break;
+        default:
+            throw new Error("F_UNEXPECTED_STATE");
     }
 };
 
@@ -1624,7 +1624,7 @@ adapt.expr.Const.prototype.evaluateCore = function(context) {
  * @extends {adapt.expr.Val}
  */
 adapt.expr.MediaTest = function(scope, name, value) {
-	adapt.expr.Val.call(this, scope);
+    adapt.expr.Val.call(this, scope);
     this.name = name;
     this.value = value;
 };
@@ -1673,7 +1673,7 @@ adapt.expr.MediaTest.prototype.expand = function(context, params) {
  * @extends {adapt.expr.Val}
  */
 adapt.expr.Param = function(scope, index) {
-	adapt.expr.Val.call(this, scope);
+    adapt.expr.Val.call(this, scope);
     this.index = index;
 };
 goog.inherits(adapt.expr.Param, adapt.expr.Val);

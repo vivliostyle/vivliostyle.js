@@ -1,3 +1,5 @@
+/*eslint-env node */
+/*eslint global-require: "off" */
 module.exports = function(config) {
     var commonConfig = (require("./karma-common.conf"))(config);
 

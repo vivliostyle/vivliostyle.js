@@ -15,9 +15,9 @@ goog.require('adapt.cssprop');
  * @constructor
  */
 adapt.cssstyler.SlipRange = function(endStuckFixed, endFixed, endSlipped) {
-	/** @type {number} */ this.endStuckFixed = endStuckFixed;
-	/** @type {number} */ this.endFixed = endFixed;
-	/** @type {number} */ this.endSlipped = endSlipped;	
+    /** @type {number} */ this.endStuckFixed = endStuckFixed;
+    /** @type {number} */ this.endFixed = endFixed;
+    /** @type {number} */ this.endSlipped = endSlipped;
 };
 
 /**
@@ -85,7 +85,7 @@ adapt.cssstyler.SlipMap.prototype.addSlippedRange = function(endFixed) {
  * @return {number}
  */
 adapt.cssstyler.SlipMap.prototype.slippedByFixed = function(fixed) {
-	var self = this;
+    var self = this;
     var index = adapt.base.binarySearch(this.map.length, function(index) {
         return fixed <= self.map[index].endFixed;
     });
@@ -99,7 +99,7 @@ adapt.cssstyler.SlipMap.prototype.slippedByFixed = function(fixed) {
  * @return {number}
  */
 adapt.cssstyler.SlipMap.prototype.fixedBySlipped = function(slipped) {
-	var self = this;
+    var self = this;
     var index = adapt.base.binarySearch(this.map.length, function(index) {
         return slipped <= self.map[index].endSlipped;
     });
@@ -429,12 +429,12 @@ adapt.cssstyler.BoxStack.prototype.nearestBlockStartOffset = function(box) {
  * @implements {adapt.cssstyler.AbstractStyler}
  */
 adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows, validatorSet, counterListener, counterResolver) {
-	/** @const */ this.xmldoc = xmldoc;
-	/** @const */ this.root = xmldoc.root;
-	/** @const */ this.cascadeHolder = cascade;
-	/** @const */ this.scope = scope;
-	/** @const */ this.context = context;
-	/** @const */ this.validatorSet = validatorSet;
+    /** @const */ this.xmldoc = xmldoc;
+    /** @const */ this.root = xmldoc.root;
+    /** @const */ this.cascadeHolder = cascade;
+    /** @const */ this.scope = scope;
+    /** @const */ this.context = context;
+    /** @const */ this.validatorSet = validatorSet;
     /** @type {Node} */ this.last = this.root;
     /** @const */ this.rootStyle = /** @type {!adapt.csscasc.ElementStyle} */ ({});
     /** @type {Object.<string,adapt.csscasc.ElementStyle>} */ this.styleMap = {};
@@ -454,17 +454,17 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
     /** @type {number} */ this.lastOffset = rootOffset;
     /** @const */ this.breakBeforeValues = /** @type {!Object<number, ?string>} */ ({});
     /** @const */ this.boxStack = new adapt.cssstyler.BoxStack(context);
-    
+
     this.offsetMap.addStuckRange(rootOffset);
     var style = this.getAttrStyle(this.root);
     this.cascade.pushElement(this.root, style);
     this.postprocessTopStyle(style, false);
     /** @type {boolean} */ this.bodyReached = true;
     switch (this.root.namespaceURI) {
-    case adapt.base.NS.XHTML:
-    case adapt.base.NS.FB2:
-    	this.bodyReached = false;
-    	break;
+        case adapt.base.NS.XHTML:
+        case adapt.base.NS.FB2:
+            this.bodyReached = false;
+            break;
     }
     this.primaryStack.push(true);
     this.styleMap = {};
@@ -480,8 +480,8 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
  * @return {boolean}
  **/
 adapt.cssstyler.Styler.prototype.hasProp = function(style, map, name) {
-	var cascVal = style[name];
-	return cascVal && cascVal.evaluate(this.context) !== map[name];
+    var cascVal = style[name];
+    return cascVal && cascVal.evaluate(this.context) !== map[name];
 };
 
 /**
@@ -490,18 +490,18 @@ adapt.cssstyler.Styler.prototype.hasProp = function(style, map, name) {
  * @return {void}
  **/
 adapt.cssstyler.Styler.prototype.transferPropsToRoot = function(srcStyle, map) {
-	for (var pname in map) {
-		var cascval = srcStyle[pname];
-		if (cascval) {
-			this.rootStyle[pname] = cascval;
-			delete srcStyle[pname];
-		} else {
-			var val = map[pname];
-			if (val) {
-				this.rootStyle[pname] = new adapt.csscasc.CascadeValue(val, adapt.cssparse.SPECIFICITY_AUTHOR);
-			}
-		}
-	}
+    for (var pname in map) {
+        var cascval = srcStyle[pname];
+        if (cascval) {
+            this.rootStyle[pname] = cascval;
+            delete srcStyle[pname];
+        } else {
+            var val = map[pname];
+            if (val) {
+                this.rootStyle[pname] = new adapt.csscasc.CascadeValue(val, adapt.cssparse.SPECIFICITY_AUTHOR);
+            }
+        }
+    }
 };
 
 /**
@@ -518,35 +518,35 @@ adapt.cssstyler.columnProps = ["column-count", "column-width"];
  */
 adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBody) {
     if (!isBody) {
-        ["writing-mode", "direction"].forEach(function (propName) {
+        ["writing-mode", "direction"].forEach(function(propName) {
             if (elemStyle[propName]) {
                 // Copy it over, but keep it at the root element as well.
                 this.rootStyle[propName] = elemStyle[propName];
             }
         }, this);
     }
-	if (!this.rootBackgroundAssigned) {
+    if (!this.rootBackgroundAssigned) {
         var backgroundColor = /** @type {adapt.css.Val} */
             (this.hasProp(elemStyle, this.validatorSet.backgroundProps, "background-color") ?
                 elemStyle["background-color"].evaluate(this.context) : null);
         var backgroundImage = /** @type {adapt.css.Val} */
             (this.hasProp(elemStyle, this.validatorSet.backgroundProps, "background-image") ?
                 elemStyle["background-image"].evaluate(this.context) : null);
-		if ((backgroundColor && backgroundColor !== adapt.css.ident.inherit) ||
+        if ((backgroundColor && backgroundColor !== adapt.css.ident.inherit) ||
             (backgroundImage && backgroundImage !== adapt.css.ident.inherit)) {
-			this.transferPropsToRoot(elemStyle, this.validatorSet.backgroundProps);
-			this.rootBackgroundAssigned = true;
-		}
-	}
-	if (!this.rootLayoutAssigned) {
-		for (var i = 0; i < adapt.cssstyler.columnProps.length; i++) {
-			if (this.hasProp(elemStyle, this.validatorSet.layoutProps, adapt.cssstyler.columnProps[i])) {
-				this.transferPropsToRoot(elemStyle, this.validatorSet.layoutProps);
-				this.rootLayoutAssigned = true;
-				break;
-			}
-		}
-	}
+            this.transferPropsToRoot(elemStyle, this.validatorSet.backgroundProps);
+            this.rootBackgroundAssigned = true;
+        }
+    }
+    if (!this.rootLayoutAssigned) {
+        for (var i = 0; i < adapt.cssstyler.columnProps.length; i++) {
+            if (this.hasProp(elemStyle, this.validatorSet.layoutProps, adapt.cssstyler.columnProps[i])) {
+                this.transferPropsToRoot(elemStyle, this.validatorSet.layoutProps);
+                this.rootLayoutAssigned = true;
+                break;
+            }
+        }
+    }
     if (!isBody) {
         var fontSize = elemStyle["font-size"];
         if (fontSize) {
@@ -601,14 +601,14 @@ adapt.cssstyler.Styler.prototype.getAttrStyle = function(elem) {
                 this.xmldoc.url, styleAttrValue);
         }
     }
-	return /** @type {adapt.csscasc.ElementStyle} */ ({});	
+    return /** @type {adapt.csscasc.ElementStyle} */ ({});
 };
 
 /**
  * @return {number} currently reached offset
  */
 adapt.cssstyler.Styler.prototype.getReachedOffset = function() {
-	return this.lastOffset;
+    return this.lastOffset;
 };
 
 /**
@@ -618,43 +618,43 @@ adapt.cssstyler.Styler.prototype.getReachedOffset = function() {
  */
 adapt.cssstyler.Styler.prototype.replayFlowElementsFromOffset = function(offset) {
     if (offset >= this.lastOffset)
-    	return;
+        return;
     var context = this.context;
     var rootOffset = this.xmldoc.getElementOffset(this.root);
-	if (offset < rootOffset) {
-		var rootStyle = this.getStyle(this.root, false);
+    if (offset < rootOffset) {
+        var rootStyle = this.getStyle(this.root, false);
         goog.asserts.assert(rootStyle);
-	    var flowName = adapt.csscasc.getProp(rootStyle, "flow-into");
-	    var flowNameStr = flowName ? flowName.evaluate(context, "flow-into").toString() : "body";
+        var flowName = adapt.csscasc.getProp(rootStyle, "flow-into");
+        var flowNameStr = flowName ? flowName.evaluate(context, "flow-into").toString() : "body";
         var newFlowChunk = this.encounteredFlowElement(flowNameStr, rootStyle, this.root, rootOffset);
         if (this.boxStack.empty()) {
             this.boxStack.push(rootStyle, rootOffset, true, newFlowChunk);
         }
-	}
-	var node = this.xmldoc.getNodeByOffset(offset);
-	var nodeOffset = this.xmldoc.getNodeOffset(node, 0, false);
+    }
+    var node = this.xmldoc.getNodeByOffset(offset);
+    var nodeOffset = this.xmldoc.getNodeOffset(node, 0, false);
     if (nodeOffset >= this.lastOffset)
-    	return;
+        return;
     while (true) {
         if (node.nodeType != 1) {
             nodeOffset += node.textContent.length;
         } else {
             var elem = /** @type {!Element} */ (node);
-        	if (goog.DEBUG) {
-        		if (nodeOffset != this.xmldoc.getElementOffset(elem)) {
-        			throw new Error("Inconsistent offset");
-        		}
-        	}
+            if (goog.DEBUG) {
+                if (nodeOffset != this.xmldoc.getElementOffset(elem)) {
+                    throw new Error("Inconsistent offset");
+                }
+            }
             var style = this.getStyle(elem, false);
             var flowName = style["flow-into"];
             if (flowName) {
-                var flowNameStr = flowName.evaluate(context,"flow-into").toString();
+                var flowNameStr = flowName.evaluate(context, "flow-into").toString();
                 this.encounteredFlowElement(flowNameStr, style, elem, nodeOffset);
             }
             nodeOffset++;
         }
         if (nodeOffset >= this.lastOffset)
-        	break;
+            break;
         var next = node.firstChild;
         if (next == null) {
             while (true) {
@@ -738,7 +738,7 @@ adapt.cssstyler.Styler.prototype.encounteredFlowElement = function(flowName, sty
     var lingerCV = style["flow-linger"];
     if (lingerCV) {
         linger = adapt.cssprop.toInt(lingerCV.evaluate(this.context, "flow-linger"),
-        		Number.POSITIVE_INFINITY);
+            Number.POSITIVE_INFINITY);
     }
     var priorityCV = style["flow-priority"];
     if (priorityCV) {
@@ -751,7 +751,7 @@ adapt.cssstyler.Styler.prototype.encounteredFlowElement = function(flowName, sty
         flow = this.flows[flowName] = new adapt.vtree.Flow(flowName, parentFlowName);
     }
     var flowChunk = new adapt.vtree.FlowChunk(flowName, elem,
-    		startOffset, priority, linger, exclusive, repeated, last, breakBefore);
+        startOffset, priority, linger, exclusive, repeated, last, breakBefore);
     this.flowChunks.push(flowChunk);
     if (this.flowToReach == flowName)
         this.flowToReach = null;
@@ -822,14 +822,14 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
                 if (this.last === this.root) {
                     this.last = null;
                     if (startOffset < this.lastOffset) {
-	                    if (targetSlippedOffset < 0) {
-	                        slippedOffset = this.offsetMap.slippedByFixed(startOffset);
-	                        targetSlippedOffset = slippedOffset + lookup;
-	                    }
-	                    if (targetSlippedOffset <= this.offsetMap.getMaxSlipped()) {
-	                        // got to the desired point
-	                        return this.offsetMap.fixedBySlipped(targetSlippedOffset);
-	                    }
+                        if (targetSlippedOffset < 0) {
+                            slippedOffset = this.offsetMap.slippedByFixed(startOffset);
+                            targetSlippedOffset = slippedOffset + lookup;
+                        }
+                        if (targetSlippedOffset <= this.offsetMap.getMaxSlipped()) {
+                            // got to the desired point
+                            return this.offsetMap.fixedBySlipped(targetSlippedOffset);
+                        }
                     }
                     return Number.POSITIVE_INFINITY;
                 }
@@ -852,14 +852,14 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
             if (id && id === this.idToReach) {
                 this.idToReach = null;
             }
-            if (!this.bodyReached && elem.localName == "body" && elem.parentNode == this.root) { 
-            	this.postprocessTopStyle(style, true);
-            	this.bodyReached = true;
+            if (!this.bodyReached && elem.localName == "body" && elem.parentNode == this.root) {
+                this.postprocessTopStyle(style, true);
+                this.bodyReached = true;
             }
             var box;
             var flowName = style["flow-into"];
             if (flowName) {
-                var flowNameStr = flowName.evaluate(context,"flow-into").toString();
+                var flowNameStr = flowName.evaluate(context, "flow-into").toString();
                 var newFlowChunk = this.encounteredFlowElement(flowNameStr, style, elem, this.lastOffset);
                 this.primary = !!this.primaryFlows[flowNameStr];
                 box = this.boxStack.push(style, this.lastOffset, elem === this.root, newFlowChunk);
@@ -881,9 +881,9 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
                 }
             }
             if (goog.DEBUG) {
-	            var offset = this.xmldoc.getElementOffset(/** @type {Element} */ (this.last));
-	            if (offset != this.lastOffset)
-	                throw new Error("Inconsistent offset");
+                var offset = this.xmldoc.getElementOffset(/** @type {Element} */ (this.last));
+                if (offset != this.lastOffset)
+                    throw new Error("Inconsistent offset");
             }
             this.styleMap["e"+this.lastOffset] = style;
             this.lastOffset++;
@@ -912,7 +912,7 @@ adapt.cssstyler.Styler.prototype.getStyle = function(element, deep) {
     var offset = this.xmldoc.getElementOffset(element);
     var key = "e" + offset;
     if (deep) {
-    	offset = this.xmldoc.getNodeOffset(element, 0, true);
+        offset = this.xmldoc.getNodeOffset(element, 0, true);
     }
     if (this.lastOffset <= offset) {
         this.styleUntil(offset, 0);
