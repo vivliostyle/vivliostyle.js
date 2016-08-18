@@ -442,9 +442,7 @@ adapt.viewer.Viewer.prototype.showSpread = function(spread) {
 adapt.viewer.Viewer.prototype.reportPosition = function() {
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("reportPosition");
     var self = this;
-    if (!self.pagePosition) {
-        self.pagePosition = self.opfView.getPagePosition();
-    }
+    goog.asserts.assert(self.pagePosition);
     self.opf.getCFI(this.pagePosition.spineIndex, this.pagePosition.offsetInItem).then(function(cfi) {
         var page = self.currentPage;
         var r = self.waitForLoading && page.fetchers.length > 0
@@ -539,7 +537,7 @@ adapt.viewer.Viewer.prototype.showCurrent = function(page) {
     this.needRefresh = false;
     var self = this;
     if (this.pref.spreadView) {
-        return this.opfView.getCurrentSpread().thenAsync(function(spread) {
+        return this.opfView.getSpread(this.pagePosition).thenAsync(function(spread) {
             self.showSpread(spread);
             self.setSpreadZoom(spread);
             self.currentPage = page;
@@ -636,15 +634,20 @@ adapt.viewer.Viewer.prototype.resize = function() {
     }
     self.callback({"t": "resizestart"});
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("resize");
-    if (self.opfView && !self.pagePosition) {
-        self.pagePosition = self.opfView.getPagePosition();
-    }
     self.reset();
+
+    if (self.pagePosition) {
+        // When resizing, do not use the current page index, for a page index corresponding to
+        // the current position in the document (offsetInItem) can change due to different layout
+        // caused by different viewport size.
+        self.pagePosition.pageIndex = -1;
+    }
 
     // With renderAllPages option specified, the rendering is performed after the initial page display,
     // otherwise users are forced to wait the rendering finish in front of a blank page.
-    self.opfView.setPagePosition(self.pagePosition).then(function(page) {
-        self.showCurrent(page).then(function() {
+    self.opfView.renderPagesUpto(self.pagePosition).then(function(result) {
+        self.pagePosition = result.position;
+        self.showCurrent(result.page).then(function() {
             self.reportPosition().then(function(p) {
                 vivliostyle.profile.profiler.registerEndTiming("loadFirstPage");
                 var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
@@ -686,7 +689,7 @@ adapt.viewer.Viewer.prototype.sendLocationNotification = function(page, cfi) {
  * @returns {?vivliostyle.constants.PageProgression}
  */
 adapt.viewer.Viewer.prototype.getCurrentPageProgression = function() {
-    return this.opfView ? this.opfView.getCurrentPageProgression() : null;
+    return this.opfView ? this.opfView.getCurrentPageProgression(this.pagePosition) : null;
 };
 
 /**
@@ -713,6 +716,12 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
             default:
                 return adapt.task.newResult(true);
         }
+        if (method) {
+            var m = method;
+            method = function() {
+                return m.call(self.opfView, self.pagePosition);
+            };
+        }
     } else if (typeof command["epage"] == "number") {
         var epage = /** @type {number} */ (command["epage"]);
         method = function() {
@@ -721,16 +730,16 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
     } else if (typeof command["url"] == "string") {
         var url = /** @type {string} */ (command["url"]);
         method = function() {
-            return self.opfView.navigateTo(url);
+            return self.opfView.navigateTo(url, self.pagePosition);
         };
     } else {
         return adapt.task.newResult(true);
     }
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("nextPage");
-    method.call(self.opfView).then(/** @param {adapt.vtree.Page} page */ function(page) {
-        if (page) {
-            self.pagePosition = null;
-            self.showCurrent(page).then(function() {
+    method.call(self.opfView).then(/** @param {adapt.epub.PageAndPosition} result */ function(result) {
+        if (result) {
+            self.pagePosition = result.position;
+            self.showCurrent(result.page).then(function() {
                 self.reportPosition().thenFinish(frame);
             });
         } else {
