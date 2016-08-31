@@ -6,6 +6,7 @@
 goog.provide('adapt.viewer');
 
 goog.require('goog.asserts');
+goog.require('vivliostyle.constants');
 goog.require('vivliostyle.logging');
 goog.require('adapt.task');
 goog.require('adapt.vgen');
@@ -87,6 +88,7 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.init = function() {
+    /** @type {!vivliostyle.constants.ReadyState} */ this.readyState = vivliostyle.constants.ReadyState.LOADING;
     /** @type {!Array.<string>} */ this.packageURL = [];
     /** @type {adapt.epub.OPFDoc} */ this.opf = null;
     /** @type {boolean} */ this.haveZipMetadata = false;
@@ -133,13 +135,25 @@ adapt.viewer.Viewer.prototype.callback = function(message) {
 };
 
 /**
+ * Set readyState and notify to listeners
+ * @param {!vivliostyle.constants.ReadyState} readyState
+ */
+adapt.viewer.Viewer.prototype.setReadyState = function(readyState) {
+    if (this.readyState !== readyState) {
+        this.readyState = readyState;
+        this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, readyState);
+        this.callback({"t": "readystatechange"});
+    }
+};
+
+/**
  * @param {adapt.base.JSON} command
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     vivliostyle.profile.profiler.registerStartTiming("loadEPUB");
     vivliostyle.profile.profiler.registerStartTiming("loadFirstPage");
-    this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
+    this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     var url = /** @type {string} */ (command["url"]);
     var fragment = /** @type {?string} */ (command["fragment"]);
     var haveZipMetadata = !!command["zipmeta"];
@@ -169,7 +183,6 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
                 self.opf.resolveFragment(fragment).then(function(position) {
                     self.pagePosition = position;
                     self.resize().then(function() {
-                        self.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "complete");
                         vivliostyle.profile.profiler.registerEndTiming("loadEPUB");
                         self.callback({"t":"loaded", "metadata": self.opf.getMetadata()});
                         frame.finish(true);
@@ -188,7 +201,7 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
 adapt.viewer.Viewer.prototype.loadXML = function(command) {
     vivliostyle.profile.profiler.registerStartTiming("loadXML");
     vivliostyle.profile.profiler.registerStartTiming("loadFirstPage");
-    this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
+    this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     /** @type {!Array<!adapt.viewer.SingleDocumentParam>} */ var params = command["url"];
     var doc = /** @type {Document} */ (command["document"]);
     var fragment = /** @type {?string} */ (command["fragment"]);
@@ -225,7 +238,6 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
                 self.opf.resolveFragment(fragment).then(function(position) {
                     self.pagePosition = position;
                     self.resize().then(function() {
-                        self.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "complete");
                         vivliostyle.profile.profiler.registerEndTiming("loadXML");
                         self.callback({"t":"loaded"});
                         frame.finish(true);
@@ -629,10 +641,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
         return adapt.task.newResult(true);
     }
     var self = this;
-    if (this.viewportElement.getAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE) === "complete") {
-        this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "resizing");
-    }
-    self.callback({"t": "resizestart"});
+    this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("resize");
     self.reset();
 
@@ -649,11 +658,11 @@ adapt.viewer.Viewer.prototype.resize = function() {
         self.pagePosition = result.position;
         self.showCurrent(result.page).then(function() {
             self.reportPosition().then(function(p) {
+                self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
                 vivliostyle.profile.profiler.registerEndTiming("loadFirstPage");
                 var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
                 r.then(function() {
-                    self.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "complete");
-                    self.callback({"t": "resizeend"});
+                    self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
                     frame.finish(p);
                 });
             });
@@ -699,6 +708,9 @@ adapt.viewer.Viewer.prototype.getCurrentPageProgression = function() {
 adapt.viewer.Viewer.prototype.moveTo = function(command) {
     var method;
     var self = this;
+    if (this.readyState !== vivliostyle.constants.ReadyState.COMPLETE) {
+        this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
+    }
     if (typeof command["where"] == "string") {
         switch (command["where"]) {
             case "next":
@@ -740,7 +752,12 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
         if (result) {
             self.pagePosition = result.position;
             self.showCurrent(result.page).then(function() {
-                self.reportPosition().thenFinish(frame);
+                self.reportPosition().then(function(res) {
+                    if (self.readyState === vivliostyle.constants.ReadyState.LOADING) {
+                        self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
+                    }
+                    frame.finish(res);
+                });
             });
         } else {
             frame.finish(true);

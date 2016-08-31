@@ -55,4 +55,19 @@ goog.scope(function() {
     vivliostyle.namespace.exportSymbol("vivliostyle.constants.PageSide", PageSide);
     goog.exportProperty(PageSide, "LEFT", PageSide.LEFT);
     goog.exportProperty(PageSide, "RIGHT", PageSide.RIGHT);
+
+    /**
+     * Viewer ready state.
+     * @enum {string}
+     */
+    vivliostyle.constants.ReadyState = {
+        LOADING: "loading",
+        INTERACTIVE: "interactive",
+        COMPLETE: "complete"
+    };
+    var ReadyState = vivliostyle.constants.ReadyState;
+    vivliostyle.namespace.exportSymbol("vivliostyle.constants.ReadyState", ReadyState);
+    goog.exportProperty(ReadyState, "LOADING", ReadyState.LOADING);
+    goog.exportProperty(ReadyState, "INTERACTIVE", ReadyState.INTERACTIVE);
+    goog.exportProperty(ReadyState, "COMPLETE", ReadyState.COMPLETE);
 });

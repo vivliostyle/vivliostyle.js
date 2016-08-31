@@ -133,6 +133,12 @@ goog.scope(function() {
             this.setOptions(opt_options);
         }
         /** @const @private */ this.eventTarget = new adapt.base.SimpleEventTarget();
+
+        Object.defineProperty(this, "readyState", {
+            get: function() {
+                return this.adaptViewer.readyState;
+            }
+        });
     };
     /** @const */ var Viewer = vivliostyle.viewer.Viewer;
 
