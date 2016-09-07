@@ -182,9 +182,16 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
                 self.opf = opf;
                 self.opf.resolveFragment(fragment).then(function(position) {
                     self.pagePosition = position;
-                    self.resize().then(function() {
-                        vivliostyle.profile.profiler.registerEndTiming("loadEPUB");
-                        self.callback({"t":"loaded", "metadata": self.opf.getMetadata()});
+                    self.resize().then(function(task) {
+                        function loaded() {
+                            vivliostyle.profile.profiler.registerEndTiming("loadEPUB");
+                            self.callback({"t":"loaded", "metadata": self.opf.getMetadata()});
+                        }
+                        if (task) {
+                            task.whenDone(loaded);
+                        } else {
+                            loaded();
+                        }
                         frame.finish(true);
                     });
                 });
@@ -237,9 +244,16 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
             self.opf.initWithChapters(resolvedParams, doc).then(function() {
                 self.opf.resolveFragment(fragment).then(function(position) {
                     self.pagePosition = position;
-                    self.resize().then(function() {
-                        vivliostyle.profile.profiler.registerEndTiming("loadXML");
-                        self.callback({"t":"loaded"});
+                    self.resize().then(function(task) {
+                        function loaded() {
+                            vivliostyle.profile.profiler.registerEndTiming("loadXML");
+                            self.callback({"t":"loaded"});
+                        }
+                        if (task) {
+                            task.whenDone(loaded);
+                        } else {
+                            loaded();
+                        }
                         frame.finish(true);
                     });
                 });
@@ -633,16 +647,16 @@ adapt.viewer.Viewer.prototype.queryZoomFactor = function(type) {
 };
 
 /**
- * @return {!adapt.task.Result.<boolean>}
+ * @return {!adapt.task.Result.<?adapt.task.Task>}
  */
 adapt.viewer.Viewer.prototype.resize = function() {
     this.needResize = false;
     if (this.sizeIsGood()) {
-        return adapt.task.newResult(true);
+        return adapt.task.newResult(/** @type {?adapt.task.Task} */ (null));
     }
     var self = this;
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
-    adapt.task.currentTask().getScheduler().run(function() {
+    var task = adapt.task.currentTask().getScheduler().run(function() {
         /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("resize");
         self.reset();
 
@@ -671,7 +685,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
         });
         return frame.result();
     });
-    return adapt.task.newResult(true);
+    return adapt.task.newResult(task);
 };
 
 /**
