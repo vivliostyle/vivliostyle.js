@@ -70,6 +70,7 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
     /** @type {adapt.base.EventListener} */ this.hyperlinkListener = function(evt) {};
     /** @const */ this.pageRuleStyleElement = document.getElementById("vivliostyle-page-rules");
     /** @type {boolean} */ this.pageSheetSizeAlreadySet = false;
+    /** @type {?adapt.task.Task} */ this.renderTask = null;
     /**
      * @type {Object.<string, adapt.viewer.Action>}
      */
@@ -151,8 +152,7 @@ adapt.viewer.Viewer.prototype.setReadyState = function(readyState) {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
-    vivliostyle.profile.profiler.registerStartTiming("loadEPUB");
-    vivliostyle.profile.profiler.registerStartTiming("loadFirstPage");
+    vivliostyle.profile.profiler.registerStartTiming("beforeRender");
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     var url = /** @type {string} */ (command["url"]);
     var fragment = /** @type {?string} */ (command["fragment"]);
@@ -182,16 +182,8 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
                 self.opf = opf;
                 self.opf.resolveFragment(fragment).then(function(position) {
                     self.pagePosition = position;
-                    self.resize().then(function(task) {
-                        function loaded() {
-                            vivliostyle.profile.profiler.registerEndTiming("loadEPUB");
-                            self.callback({"t":"loaded", "metadata": self.opf.getMetadata()});
-                        }
-                        if (task) {
-                            task.whenDone(loaded);
-                        } else {
-                            loaded();
-                        }
+                    vivliostyle.profile.profiler.registerEndTiming("beforeRender");
+                    self.resize().then(function() {
                         frame.finish(true);
                     });
                 });
@@ -206,8 +198,7 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.loadXML = function(command) {
-    vivliostyle.profile.profiler.registerStartTiming("loadXML");
-    vivliostyle.profile.profiler.registerStartTiming("loadFirstPage");
+    vivliostyle.profile.profiler.registerStartTiming("beforeRender");
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     /** @type {!Array<!adapt.viewer.SingleDocumentParam>} */ var params = command["url"];
     var doc = /** @type {Document} */ (command["document"]);
@@ -244,16 +235,8 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
             self.opf.initWithChapters(resolvedParams, doc).then(function() {
                 self.opf.resolveFragment(fragment).then(function(position) {
                     self.pagePosition = position;
-                    self.resize().then(function(task) {
-                        function loaded() {
-                            vivliostyle.profile.profiler.registerEndTiming("loadXML");
-                            self.callback({"t":"loaded"});
-                        }
-                        if (task) {
-                            task.whenDone(loaded);
-                        } else {
-                            loaded();
-                        }
+                    vivliostyle.profile.profiler.registerEndTiming("beforeRender");
+                    self.resize().then(function() {
                         frame.finish(true);
                     });
                 });
@@ -647,45 +630,74 @@ adapt.viewer.Viewer.prototype.queryZoomFactor = function(type) {
 };
 
 /**
- * @return {!adapt.task.Result.<?adapt.task.Task>}
+ * Error representing that the rendering has been canceled.
+ * @private
+ * @constructor
+ * @extends {Error}
+ */
+adapt.viewer.Viewer.RenderingCanceledError = function() {
+    this.name = "RenderingCanceledError";
+    this.message = "Page rendering has been canceled";
+    this.stack = (new Error()).stack;
+};
+goog.inherits(adapt.viewer.Viewer.RenderingCanceledError, Error);
+
+/**
+ * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.resize = function() {
     this.needResize = false;
     if (this.sizeIsGood()) {
-        return adapt.task.newResult(/** @type {?adapt.task.Task} */ (null));
+        return adapt.task.newResult(true);
     }
     var self = this;
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     var task = adapt.task.currentTask().getScheduler().run(function() {
-        /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("resize");
-        self.reset();
+        return adapt.task.handle("resize", function(frame) {
+            if (self.renderTask) {
+                self.renderTask.interrupt(new adapt.viewer.Viewer.RenderingCanceledError());
+            }
+            self.renderTask = task;
+            vivliostyle.profile.profiler.registerStartTiming("render (resize)");
+            self.reset();
 
-        if (self.pagePosition) {
-            // When resizing, do not use the current page index, for a page index corresponding to
-            // the current position in the document (offsetInItem) can change due to different layout
-            // caused by different viewport size.
-            self.pagePosition.pageIndex = -1;
-        }
+            if (self.pagePosition) {
+                // When resizing, do not use the current page index, for a page index corresponding to
+                // the current position in the document (offsetInItem) can change due to different layout
+                // caused by different viewport size.
+                self.pagePosition.pageIndex = -1;
+            }
 
-        // With renderAllPages option specified, the rendering is performed after the initial page display,
-        // otherwise users are forced to wait the rendering finish in front of a blank page.
-        self.opfView.renderPagesUpto(self.pagePosition).then(function(result) {
-            self.pagePosition = result.position;
-            self.showCurrent(result.page).then(function() {
-                self.reportPosition().then(function(p) {
-                    self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
-                    vivliostyle.profile.profiler.registerEndTiming("loadFirstPage");
-                    var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
-                    r.then(function() {
-                        self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
-                        frame.finish(p);
+            // With renderAllPages option specified, the rendering is performed after the initial page display,
+            // otherwise users are forced to wait the rendering finish in front of a blank page.
+            self.opfView.renderPagesUpto(self.pagePosition).then(function(result) {
+                self.pagePosition = result.position;
+                self.showCurrent(result.page).then(function() {
+                    self.reportPosition().then(function(p) {
+                        self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
+                        var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
+                        r.then(function() {
+                            if (self.renderTask === task) {
+                                self.renderTask = null;
+                            }
+                            vivliostyle.profile.profiler.registerEndTiming("render (resize)");
+                            self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
+                            self.callback({"t":"loaded"});
+                            frame.finish(p);
+                        });
                     });
                 });
             });
+        }, function(frame, err) {
+            if (err instanceof adapt.viewer.Viewer.RenderingCanceledError) {
+                vivliostyle.profile.profiler.registerEndTiming("render (resize)");
+                vivliostyle.logging.logger.debug(err.message);
+            } else {
+                throw err;
+            }
         });
-        return frame.result();
     });
-    return adapt.task.newResult(task);
+    return adapt.task.newResult(true);
 };
 
 /**

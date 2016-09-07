@@ -336,7 +336,9 @@ adapt.task.Scheduler.prototype.doTimeSlice = function() {
             if (continuation.scheduledTime > now)
                 break; // too early
             this.queue.remove();
-            continuation.resumeInternal();
+            if (!continuation.canceled) {
+                continuation.resumeInternal();
+            }
             now = this.timer.currentTime();
             if (now >= this.sliceOverTime)
                 break;
@@ -400,6 +402,7 @@ adapt.task.Continuation = function(task) {
     /** @type {number} */ this.scheduledTime = 0;
     /** @type {number} */ this.order = 0;
     /** @type {*} */ this.result = null;
+    /** @type {boolean} */ this.canceled = false;
 };
 
 /**
@@ -450,6 +453,13 @@ adapt.task.Continuation.prototype.resumeInternal = function() {
     return false;
 };
 
+/**
+ * Cancel continuation
+ */
+adapt.task.Continuation.prototype.cancel = function() {
+    this.canceled = true;
+};
+
 
 /**
  * An asynchronous, time-sliced task.
@@ -485,6 +495,7 @@ adapt.task.Task.prototype.interrupt = function(err) {
     this.raise(err || new Error('E_TASK_INTERRUPT'));
     if (this !== adapt.task.privateCurrentTask && this.continuation) {
         // blocked on something
+        this.continuation.cancel();
         var continuation = new adapt.task.Continuation(this);
         this.waitTarget = 'interrupt';
         this.continuation = continuation;
