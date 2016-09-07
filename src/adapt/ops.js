@@ -331,15 +331,16 @@ adapt.ops.StyleInstance.prototype.getConsumedOffset = function(flowPosition) {
 
 /**
  * @param {adapt.vtree.LayoutPosition|undefined} layoutPosition
+ * @param {boolean=} noLookAhead Do not look ahead elements that are not styled yet
  * @return {number} document offset of the given layoutPosition
  */
-adapt.ops.StyleInstance.prototype.getPosition = function(layoutPosition) {
+adapt.ops.StyleInstance.prototype.getPosition = function(layoutPosition, noLookAhead) {
     if (!layoutPosition)
         return 0;
     var currentPosition = Number.POSITIVE_INFINITY;
     for (var flowName in this.primaryFlows) {
         var flowPosition = layoutPosition.flowPositions[flowName];
-        if ((!flowPosition || flowPosition.positions.length == 0) && this.currentLayoutPosition) {
+        if (!noLookAhead && (!flowPosition || flowPosition.positions.length == 0) && this.currentLayoutPosition) {
             this.styler.styleUntilFlowIsReached(flowName);
             flowPosition = this.currentLayoutPosition.flowPositions[flowName];
             if (layoutPosition != this.currentLayoutPosition) {

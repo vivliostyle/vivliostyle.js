@@ -642,33 +642,36 @@ adapt.viewer.Viewer.prototype.resize = function() {
     }
     var self = this;
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("resize");
-    self.reset();
+    adapt.task.currentTask().getScheduler().run(function() {
+        /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("resize");
+        self.reset();
 
-    if (self.pagePosition) {
-        // When resizing, do not use the current page index, for a page index corresponding to
-        // the current position in the document (offsetInItem) can change due to different layout
-        // caused by different viewport size.
-        self.pagePosition.pageIndex = -1;
-    }
+        if (self.pagePosition) {
+            // When resizing, do not use the current page index, for a page index corresponding to
+            // the current position in the document (offsetInItem) can change due to different layout
+            // caused by different viewport size.
+            self.pagePosition.pageIndex = -1;
+        }
 
-    // With renderAllPages option specified, the rendering is performed after the initial page display,
-    // otherwise users are forced to wait the rendering finish in front of a blank page.
-    self.opfView.renderPagesUpto(self.pagePosition).then(function(result) {
-        self.pagePosition = result.position;
-        self.showCurrent(result.page).then(function() {
-            self.reportPosition().then(function(p) {
-                self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
-                vivliostyle.profile.profiler.registerEndTiming("loadFirstPage");
-                var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
-                r.then(function() {
-                    self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
-                    frame.finish(p);
+        // With renderAllPages option specified, the rendering is performed after the initial page display,
+        // otherwise users are forced to wait the rendering finish in front of a blank page.
+        self.opfView.renderPagesUpto(self.pagePosition).then(function(result) {
+            self.pagePosition = result.position;
+            self.showCurrent(result.page).then(function() {
+                self.reportPosition().then(function(p) {
+                    self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
+                    vivliostyle.profile.profiler.registerEndTiming("loadFirstPage");
+                    var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
+                    r.then(function() {
+                        self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
+                        frame.finish(p);
+                    });
                 });
             });
         });
+        return frame.result();
     });
-    return frame.result();
+    return adapt.task.newResult(true);
 };
 
 /**
@@ -747,21 +750,25 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
     } else {
         return adapt.task.newResult(true);
     }
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("nextPage");
+    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("moveTo");
     method.call(self.opfView).then(/** @param {adapt.epub.PageAndPosition} result */ function(result) {
+        var cont;
         if (result) {
             self.pagePosition = result.position;
+            /** @type {!adapt.task.Frame<boolean>} */ var innerFrame = adapt.task.newFrame("moveTo.showCurrent");
+            cont = innerFrame.result();
             self.showCurrent(result.page).then(function() {
-                self.reportPosition().then(function(res) {
-                    if (self.readyState === vivliostyle.constants.ReadyState.LOADING) {
-                        self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
-                    }
-                    frame.finish(res);
-                });
+                self.reportPosition().thenFinish(innerFrame);
             });
         } else {
-            frame.finish(true);
+            cont = adapt.task.newResult(true);
         }
+        cont.then(function(res) {
+            if (self.readyState === vivliostyle.constants.ReadyState.LOADING) {
+                self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
+            }
+            frame.finish(res);
+        });
     });
     return frame.result();
 };

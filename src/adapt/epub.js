@@ -1156,6 +1156,85 @@ adapt.epub.OPFView.prototype.renderSinglePage = function(viewItem, pos) {
 };
 
 /**
+ * @private
+ * @param {!adapt.epub.Position} position
+ * @param {!adapt.epub.OPFViewItem} viewItem
+ * @returns {?adapt.epub.Position}
+ */
+adapt.epub.OPFView.prototype.normalizeSeekPosition = function(position, viewItem) {
+    var pageIndex = position.pageIndex;
+    var seekOffset = -1;
+    if (pageIndex < 0) {
+        seekOffset = position.offsetInItem;
+        // page with offset higher than seekOffset
+        var seekOffsetPageIndex = adapt.base.binarySearch(viewItem.layoutPositions.length,
+            function(pageIndex) {
+                // 'noLookAhead' argument of getPosition must be true, since otherwise
+                // StyleInstance.currentLayoutPosition is modified unintentionally.
+                var offset = viewItem.instance.getPosition(viewItem.layoutPositions[pageIndex], true);
+                return offset > seekOffset;
+            });
+        if (seekOffsetPageIndex === viewItem.layoutPositions.length) {
+            if (viewItem.complete) {
+                pageIndex = viewItem.layoutPositions.length - 1;
+            } else {
+                // need to search through pages that are not yet produced
+                pageIndex = Number.POSITIVE_INFINITY;
+            }
+        } else {
+            // page that contains seekOffset
+            pageIndex = seekOffsetPageIndex - 1;
+        }
+    }
+    return /** @type {!adapt.epub.Position} */ ({
+        spineIndex: position.spineIndex,
+        pageIndex: pageIndex,
+        offsetInItem: seekOffset
+    });
+};
+
+/**
+ * Find a page corresponding to a specified position among already laid out pages.
+ * @private
+ * @param {!adapt.epub.Position} position
+ * @returns {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
+ */
+adapt.epub.OPFView.prototype.findPage = function(position) {
+    var self = this;
+    /** @type {!adapt.task.Frame.<?adapt.epub.PageAndPosition>} */ var frame
+        = adapt.task.newFrame("findPage");
+    self.getPageViewItem(position.spineIndex).then(function(viewItem) {
+        if (!viewItem) {
+            frame.finish(null);
+            return;
+        }
+        var resultPage = null;
+        var pageIndex;
+        frame.loopWithFrame(function(loopFrame) {
+            var normalizedPosition = self.normalizeSeekPosition(position, viewItem);
+            pageIndex = normalizedPosition.pageIndex;
+            resultPage = viewItem.pages[pageIndex];
+            if (resultPage) {
+                loopFrame.breakLoop();
+            } else if (viewItem.complete) {
+                pageIndex = viewItem.layoutPositions.length - 1;
+                resultPage = viewItem.pages[pageIndex];
+                loopFrame.breakLoop();
+            } else {
+                // Wait for the layout task and retry
+                frame.sleep(100).then(function() {
+                    loopFrame.continueLoop();
+                });
+            }
+        }).then(function() {
+            goog.asserts.assert(resultPage);
+            frame.finish(adapt.epub.makePageAndPosition(resultPage, pageIndex));
+        });
+    });
+    return frame.result();
+};
+
+/**
  * Renders a page at the specified position.
  * @param {!adapt.epub.Position} position
  * @return {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
@@ -1169,24 +1248,9 @@ adapt.epub.OPFView.prototype.renderPage = function(position) {
             frame.finish(null);
             return;
         }
-        var pageIndex = position.pageIndex;
-        var seekOffset = -1;
-        if (pageIndex < 0) {
-            seekOffset = position.offsetInItem;
-            // page with offset higher than seekOffset
-            var seekOffsetPageIndex = adapt.base.binarySearch(viewItem.layoutPositions.length,
-                function(pageIndex) {
-                    var offset = viewItem.instance.getPosition(viewItem.layoutPositions[pageIndex]);
-                    return offset > seekOffset;
-                });
-            if (seekOffsetPageIndex === viewItem.layoutPositions.length) {
-                // need to search through pages that are not yet produced
-                pageIndex = Number.POSITIVE_INFINITY;
-            } else {
-                // page that contains seekOffset
-                pageIndex = seekOffsetPageIndex - 1;
-            }
-        }
+        var normalizedPosition = self.normalizeSeekPosition(position, viewItem);
+        var pageIndex = normalizedPosition.pageIndex;
+        var seekOffset = normalizedPosition.offsetInItem;
         var resultPage = viewItem.pages[pageIndex];
         if (resultPage) {
             frame.finish(adapt.epub.makePageAndPosition(resultPage, pageIndex));
@@ -1303,7 +1367,7 @@ adapt.epub.OPFView.prototype.renderPagesUpto = function(position) {
  * @return {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
  */
 adapt.epub.OPFView.prototype.firstPage = function() {
-    return this.renderPagesUpto({
+    return this.findPage({
         spineIndex: 0,
         pageIndex: 0,
         offsetInItem: -1
@@ -1315,7 +1379,7 @@ adapt.epub.OPFView.prototype.firstPage = function() {
  * @return {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
  */
 adapt.epub.OPFView.prototype.lastPage = function() {
-    return this.renderPagesUpto({
+    return this.findPage({
         spineIndex: this.opf.spine.length - 1,
         pageIndex: Number.POSITIVE_INFINITY,
         offsetInItem: -1
@@ -1348,7 +1412,7 @@ adapt.epub.OPFView.prototype.nextPage = function(position) {
         } else {
             pageIndex++;
         }
-        self.renderPagesUpto({
+        self.findPage({
             spineIndex: spineIndex,
             pageIndex: pageIndex,
             offsetInItem: -1
@@ -1374,7 +1438,7 @@ adapt.epub.OPFView.prototype.previousPage = function(position) {
     } else {
         pageIndex--;
     }
-    return this.renderPagesUpto({
+    return this.findPage({
         spineIndex: spineIndex,
         pageIndex: pageIndex,
         offsetInItem: -1
@@ -1489,7 +1553,7 @@ adapt.epub.OPFView.prototype.navigateToEPage = function(epage) {
     var self = this;
     this.opf.resolveEPage(epage).then(function(position) {
         if (position) {
-            self.renderPage(position).thenFinish(frame);
+            self.findPage(position).thenFinish(frame);
         } else {
             frame.finish(null);
         }
@@ -1508,7 +1572,7 @@ adapt.epub.OPFView.prototype.navigateToFragment = function(fragment) {
     var self = this;
     self.opf.resolveFragment(fragment).then(function(position) {
         if (position) {
-            self.renderPage(position).thenFinish(frame);
+            self.findPage(position).thenFinish(frame);
         } else {
             frame.finish(null);
         }
@@ -1560,14 +1624,14 @@ adapt.epub.OPFView.prototype.navigateTo = function(href, position) {
     self.getPageViewItem(item.spineIndex).then(function(viewItem) {
         var target = viewItem.xmldoc.getElement(href);
         if (target) {
-            self.renderPagesUpto({
+            self.findPage({
                 spineIndex: item.spineIndex,
                 pageIndex: -1,
                 offsetInItem: viewItem.xmldoc.getElementOffset(target)
             }).thenFinish(frame);
         } else if (position.spineIndex !== item.spineIndex) {
             // no fragment, different spine item
-            self.renderPagesUpto({
+            self.findPage({
                 spineIndex: item.spineIndex,
                 pageIndex: 0,
                 offsetInItem: -1
