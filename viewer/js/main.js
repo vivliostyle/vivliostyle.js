@@ -6747,11 +6747,13 @@ function getDocumentOptionsFromURL() {
     var url = _storesUrlParameters2["default"].getParameter("x");
     var fragment = _storesUrlParameters2["default"].getParameter("f");
     var style = _storesUrlParameters2["default"].getParameter("style");
+    var userStyle = _storesUrlParameters2["default"].getParameter("userStyle");
     return {
         epubUrl: epubUrl[0] || null,
         url: url.length ? url : null,
         fragment: fragment[0] || null,
-        userStyleSheet: style.length ? style : []
+        authorStyleSheet: style.length ? style : [],
+        userStyleSheet: userStyle.length ? userStyle : []
     };
 }
 
@@ -6760,6 +6762,7 @@ function DocumentOptions() {
     this.epubUrl = _knockout2["default"].observable(urlOptions.epubUrl || "");
     this.url = _knockout2["default"].observable(urlOptions.url || null);
     this.fragment = _knockout2["default"].observable(urlOptions.fragment || "");
+    this.authorStyleSheet = _knockout2["default"].observable(urlOptions.authorStyleSheet);
     this.userStyleSheet = _knockout2["default"].observable(urlOptions.userStyleSheet);
     this.pageSize = new _pageSize2["default"]();
 
@@ -6771,16 +6774,20 @@ function DocumentOptions() {
 }
 
 DocumentOptions.prototype.toObject = function () {
-    var uss = this.userStyleSheet().map(function (url) {
-        return { url: url };
-    });
+    function convertStyleSheetArray(arr) {
+        return arr.map(function (url) {
+            return { url: url };
+        });
+    }
+    var uss = convertStyleSheetArray(this.userStyleSheet());
     // Do not include url
     // (url is a required argument to Viewer.loadDocument, separated from other options)
     return {
         fragment: this.fragment(),
-        userStyleSheet: uss.concat([{
+        authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
+        userStyleSheet: [{
             text: "@page {" + this.pageSize.toCSSDeclarationString() + "}"
-        }])
+        }].concat(uss)
     };
 };
 
