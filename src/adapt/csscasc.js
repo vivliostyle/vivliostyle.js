@@ -504,6 +504,9 @@ adapt.csscasc.InheritanceVisitor.prototype.visitNumeric = function(numeric) {
     if (numeric.unit == "em" || numeric.unit == "ex") {
         var ratio = this.context.queryUnitSize(numeric.unit, false) / this.context.queryUnitSize("em", false);
         return new adapt.css.Numeric(numeric.num * ratio * this.getFontSize(), "px");
+    } else if (numeric.unit == "rem" || numeric.unit == "rex") {
+        var ratio = this.context.queryUnitSize(numeric.unit, false) / this.context.queryUnitSize("rem", false);
+        return new adapt.css.Numeric(numeric.num * ratio * this.context.fontSize(), "px");
     } else if (numeric.unit == "%") {
         if (this.propName === "font-size") {
             return new adapt.css.Numeric(numeric.num / 100 * this.getFontSize(), "px");
