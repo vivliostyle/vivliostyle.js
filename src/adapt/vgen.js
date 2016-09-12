@@ -496,7 +496,10 @@ adapt.vgen.ViewFactory.prototype.inheritFromSourceParent = function(elementStyle
         for (var k = 0; k < propList.length; k++) {
             var name = propList[k];
             inheritanceVisitor.setPropName(name);
-            props[name] = adapt.csscasc.getProp(style, name).filterValue(inheritanceVisitor);
+            var value = adapt.csscasc.getProp(style, name);
+            if (value.value !== adapt.css.ident.inherit) {
+                props[name] = value.filterValue(inheritanceVisitor);
+            }
         }
     }
     for (var sname in elementStyle) {
