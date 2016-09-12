@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>TEST</title>
+    <style>
+html {
+  font-size: 10pt;
+}
+.container {
+  position: relative;
+  border: solid silver;
+  width: 40em;
+}
+.relpos-em {
+  background: lime;
+  position: relative;
+  left: 20em;
+  width: 20em;
+}
+.relpos-rem {
+  background: orange;
+  position: relative;
+  left: 20rem;
+  width: 20rem;
+}
+.abspos-em {
+  background: lime;
+  position: absolute;
+  left: 20em;
+  width: 20em;
+}
+.abspos-rem {
+  background: orange;
+  position: absolute;
+  left: 20rem;
+  width: 20rem;
+}
+.hspace {
+  height: 5em;
+}
+    </style>
+  </head>
+  <body>
+    <h2>root font-size: 10pt;</h2>
+    <div class="container">
+      <div class="test relpos-em">
+        position: relative;
+        left: 20em;
+        width: 20em;
+      </div>
+      <div class="test relpos-rem">
+        position: relative;
+        left: 20rem;
+        width: 20rem;
+      </div>
+      <hr>
+      <div class="test abspos-em">
+        position: absolute;
+        left: 20em;
+        width: 20em;
+      </div>
+      <div class="hspace"></div>
+      <div class="test abspos-rem">
+        position: absolute;
+        left: 20rem;
+        width: 20rem;
+      </div>
+      <div class="hspace"></div>
+    </div>
+  </body>
+</html>
