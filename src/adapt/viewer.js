@@ -143,6 +143,7 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     var url = /** @type {string} */ (command["url"]);
     var fragment = /** @type {?string} */ (command["fragment"]);
     var haveZipMetadata = !!command["zipmeta"];
+    var authorStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["authorStyleSheet"]);
     var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
     // force relayout
     this.viewport = null;
@@ -150,6 +151,11 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     var self = this;
     self.configure(command).then(function() {
         var store = new adapt.epub.EPUBDocStore();
+        if (authorStyleSheet) {
+            for (var i = 0; i < authorStyleSheet.length; i++) {
+                store.addAuthorStyleSheet(authorStyleSheet[i]);
+            }
+        }
         if (userStyleSheet) {
             for (var i = 0; i < userStyleSheet.length; i++) {
                 store.addUserStyleSheet(userStyleSheet[i]);
@@ -186,6 +192,7 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
     /** @type {!Array<!adapt.viewer.SingleDocumentParam>} */ var params = command["url"];
     var doc = /** @type {Document} */ (command["document"]);
     var fragment = /** @type {?string} */ (command["fragment"]);
+    var authorStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["authorStyleSheet"]);
     var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
     // force relayout
     this.viewport = null;
@@ -193,6 +200,11 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
     var self = this;
     self.configure(command).then(function() {
         var store = new adapt.epub.EPUBDocStore();
+        if (authorStyleSheet) {
+            for (var i = 0; i < authorStyleSheet.length; i++) {
+                store.addAuthorStyleSheet(authorStyleSheet[i]);
+            }
+        }
         if (userStyleSheet) {
             for (var i = 0; i < userStyleSheet.length; i++) {
                 store.addUserStyleSheet(userStyleSheet[i]);
