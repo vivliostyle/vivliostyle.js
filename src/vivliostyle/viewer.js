@@ -90,11 +90,13 @@ goog.scope(function() {
      * Options for the displayed document.
      * - documentObject: Document object for the document. If provided, it is used directly without parsing the source again.
      * - fragment: Fragmentation identifier (EPUB CFI) of the location in the document which is to be displayed.
+     * - styleSheet: An array of author style sheets to be injected after all author style sheets referenced from the document. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
      * - userStyleSheet: An array of user style sheets to be injected. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
      * @dict
      * @typedef {{
      *     documentObject: (!Document|undefined),
      *     fragment: (string|undefined),
+     *     styleSheet: (!Array<{url: (string|undefined), text: (string|undefined)}>|undefined),
      *     userStyleSheet: (!Array<{url: (string|undefined), text: (string|undefined)}>|undefined)
      * }}
      */
@@ -251,13 +253,19 @@ goog.scope(function() {
      */
     Viewer.prototype.loadDocumentOrEPUB = function(singleDocumentOptions, epubUrl, opt_documentOptions, opt_viewerOptions) {
         var documentOptions = opt_documentOptions || {};
-        var userStyleSheet;
-        var uss = documentOptions["userStyleSheet"];
-        if (uss) {
-            userStyleSheet = uss.map(function(s) {
-                return { url: s.url || null, text: s.text || null};
-            });
+
+        function convertStyleSheetArray(arr) {
+            if (arr) {
+                return arr.map(function(s) {
+                    return { url: s.url || null, text: s.text || null };
+                });
+            } else {
+                return undefined;
+            }
         }
+
+        var authorStyleSheet = convertStyleSheetArray(documentOptions["authorStyleSheet"]);
+        var userStyleSheet = convertStyleSheetArray(documentOptions["userStyleSheet"]);
 
         if (opt_viewerOptions) {
             Object.assign(this.options, opt_viewerOptions);
@@ -271,6 +279,7 @@ goog.scope(function() {
             "url": convertSingleDocumentOptions(singleDocumentOptions) || epubUrl,
             "document": documentOptions["documentObject"],
             "fragment": documentOptions["fragment"],
+            "authorStyleSheet": authorStyleSheet,
             "userStyleSheet": userStyleSheet
         }, convertViewerOptions(this.options));
         this.adaptViewer.initEmbed(command);

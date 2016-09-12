@@ -1176,7 +1176,7 @@ adapt.ops.OPSDocStore = function(fontDeobfuscator) {
     /** @type {Object.<string,adapt.ops.Style>} */ this.styleByDocURL = {};
     /** @type {Object.<string,Array.<adapt.vtree.Trigger>>} */ this.triggersByDocURL = {};
     /** @type {adapt.cssvalid.ValidatorSet} */ this.validatorSet = null;
-    /** @private @const @type {Array.<adapt.ops.StyleSource>} */ this.userStyleSheets = [];
+    /** @private @const @type {Array.<adapt.ops.StyleSource>} */ this.styleSheets = [];
 };
 goog.inherits(adapt.ops.OPSDocStore, adapt.net.ResourceStore);
 
@@ -1217,8 +1217,16 @@ adapt.ops.OPSDocStore.prototype.getTriggersForDoc = function(xmldoc) {
 /**
  * @param {{url: ?string, text: ?string}} stylesheet
  */
+adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
+    this.styleSheets.push({url: stylesheet.url, text: stylesheet.text,
+        flavor: adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
+};
+
+/**
+ * @param {{url: ?string, text: ?string}} stylesheet
+ */
 adapt.ops.OPSDocStore.prototype.addUserStyleSheet = function(stylesheet) {
-    this.userStyleSheets.push({url: stylesheet.url, text: stylesheet.text,
+    this.styleSheets.push({url: stylesheet.url, text: stylesheet.text,
         flavor: adapt.cssparse.StylesheetFlavor.USER, classes: null, media: null});
 };
 
@@ -1253,9 +1261,6 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
         var userAgentURL = adapt.base.resolveURL("user-agent-page.css", adapt.base.resourceBaseURL);
         sources.push({url: userAgentURL, text:null,
             flavor:adapt.cssparse.StylesheetFlavor.USER_AGENT, classes: null, media: null});
-        for (var i = 0; i < self.userStyleSheets.length; i++) {
-            sources.push(self.userStyleSheets[i]);
-        }
         var head = xmldoc.head;
         if (head) {
             for (var c = head.firstChild; c; c = c.nextSibling) {
@@ -1303,6 +1308,9 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
                     }
                 }
             }
+        }
+        for (var i = 0; i < self.styleSheets.length; i++) {
+            sources.push(self.styleSheets[i]);
         }
         var key = "";
         for (var i = 0; i < sources.length; i++) {

@@ -675,6 +675,9 @@ adapt.cssparse.SkippingParserHandler = function(scope, owner, topLevel) {
     /** @const */ this.topLevel = topLevel;
     /** @type {number} */ this.depth = 0;
     /** @type {adapt.cssparse.DispatchParserHandler} */ this.owner = owner;
+    if (owner) {
+        this.flavor = owner.flavor;
+    }
 };
 goog.inherits(adapt.cssparse.SkippingParserHandler, adapt.cssparse.ParserHandler);
 

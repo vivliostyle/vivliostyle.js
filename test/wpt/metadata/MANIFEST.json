@@ -429,13 +429,6 @@
         "url": "/css21/floats-clear/floats-015.xht"
       },
       {
-        "path": "css21/floats-clear/floats-019.xht",
-        "references": [
-          ["/css21/floats-clear/floats-019-ref.xht", "=="]
-        ],
-        "url": "/css21/floats-clear/floats-019.xht"
-      },
-      {
         "path": "css21/floats-clear/floats-022.xht",
         "references": [
           ["/css21/floats-clear/floats-022-ref.xht", "=="]
