@@ -24,6 +24,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/283>
 - Avoid error when `rem` unit is used
   - <https://github.com/vivliostyle/vivliostyle.js/pull/283>
+- Fix rem unit inside `position: relative` elements
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/242>
 
 ## [2016.7](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.7) - 2016-07-04
 

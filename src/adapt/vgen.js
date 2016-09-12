@@ -1322,16 +1322,16 @@ adapt.vgen.ViewFactory.prototype.applyComputedStyles = function(target, computed
             continue;
         }
         var value = computedStyle[propName];
+        if (value.isNumeric() && adapt.expr.needUnitConversion(value.unit)) {
+            // font-size for the root element is already converted to px
+            value = adapt.css.convertNumericToPx(value, this.context);
+        }
         if (adapt.vtree.delayedProps[propName] ||
             (isRelativePositioned && adapt.vtree.delayedPropsIfRelativePositioned[propName])) {
             // Set it after page layout is done.
             this.page.delayedItems.push(
                 new adapt.vtree.DelayedItem(target, propName, value));
             continue;
-        }
-        if (value.isNumeric() && adapt.expr.needUnitConversion(value.unit)) {
-            // font-size for the root element is already converted to px
-            value = adapt.css.convertNumericToPx(value, this.context);
         }
         adapt.base.setCSSProperty(target, propName, value.toString());
     }
