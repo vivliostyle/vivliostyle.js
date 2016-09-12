@@ -20,6 +20,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/276>
 - Fix cross reference bug with name attribute
   - <https://github.com/vivliostyle/vivliostyle.js/issues/278>
+- Avoid error when `inherit` value is used
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/283>
 
 ## [2016.7](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.7) - 2016-07-04
 
