@@ -72,9 +72,10 @@ describe("DocumentOptions", function() {
             expect(options.toObject()).toEqual({
                 fragment: "ghi",
                 userStyleSheet: [
+                    { text: "@page {size: auto;}" },
                     { url: "style1" },
-                    { url: "style2" },
-                    { text: "@page {size: auto;}" }]
+                    { url: "style2" }
+                ]
             });
         });
     });

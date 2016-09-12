@@ -55,9 +55,9 @@ DocumentOptions.prototype.toObject = function() {
     // (url is a required argument to Viewer.loadDocument, separated from other options)
     return {
         fragment: this.fragment(),
-        userStyleSheet: uss.concat([{
+        userStyleSheet: [{
             text: "@page {" + this.pageSize.toCSSDeclarationString() + "}"
-        }])
+        }].concat(uss)
     };
 };
 
