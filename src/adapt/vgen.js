@@ -1451,24 +1451,26 @@ adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target)
  * @override
  */
 adapt.vgen.ViewFactory.prototype.processFragmentedBlockEdge = function(nodeContext) {
-    nodeContext.walkBlocksUpToBFC(function(block) {
-        var boxDecorationBreak = block.inheritedProps["box-decoration-break"];
-        if (!boxDecorationBreak || boxDecorationBreak === "slice") {
-            var elem = block.viewNode;
-            goog.asserts.assert(elem instanceof Element);
-            if (block.vertical) {
-                adapt.base.setCSSProperty(elem, "padding-left", "0");
-                adapt.base.setCSSProperty(elem, "border-left", "none");
-                adapt.base.setCSSProperty(elem, "border-top-left-radius", "0");
-                adapt.base.setCSSProperty(elem, "border-bottom-left-radius", "0");
-            } else {
-                adapt.base.setCSSProperty(elem, "padding-bottom", "0");
-                adapt.base.setCSSProperty(elem, "border-bottom", "none");
-                adapt.base.setCSSProperty(elem, "border-bottom-left-radius", "0");
-                adapt.base.setCSSProperty(elem, "border-bottom-right-radius", "0");
+    if (nodeContext) {
+        nodeContext.walkBlocksUpToBFC(function(block) {
+            var boxDecorationBreak = block.inheritedProps["box-decoration-break"];
+            if (!boxDecorationBreak || boxDecorationBreak === "slice") {
+                var elem = block.viewNode;
+                goog.asserts.assert(elem instanceof Element);
+                if (block.vertical) {
+                    adapt.base.setCSSProperty(elem, "padding-left", "0");
+                    adapt.base.setCSSProperty(elem, "border-left", "none");
+                    adapt.base.setCSSProperty(elem, "border-top-left-radius", "0");
+                    adapt.base.setCSSProperty(elem, "border-bottom-left-radius", "0");
+                } else {
+                    adapt.base.setCSSProperty(elem, "padding-bottom", "0");
+                    adapt.base.setCSSProperty(elem, "border-bottom", "none");
+                    adapt.base.setCSSProperty(elem, "border-bottom-left-radius", "0");
+                    adapt.base.setCSSProperty(elem, "border-bottom-right-radius", "0");
+                }
             }
-        }
-    });
+        });
+    }
 };
 
 /**
