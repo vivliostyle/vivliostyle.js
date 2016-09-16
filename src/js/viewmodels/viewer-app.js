@@ -79,7 +79,7 @@ ViewerApp.prototype.setDefaultView = function() {
         var finished = false;
         var oldStatus = status;
         status = newStatus;
-        if (oldStatus === "loading" && newStatus === "complete") {
+        if (oldStatus === "loading" && newStatus !== "loading") {
             // After document loaded, zoom to the default size
             finished = this.navigation.zoomDefault(true);
         } else if (newStatus === "loading") {
