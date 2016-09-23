@@ -31,12 +31,14 @@ function Viewer(viewerSettings, viewerOptions) {
         pageProgression: obs.readonlyObservable(vivliostyle.constants.LTR)
     };
     this.state = {
-        status: state_.status.getter,
+        status: state_.status.getter.extend({
+            rateLimit: { timeout: 100, method: "notifyWhenChangesStop" }
+        }),
         navigatable: ko.pureComputed(function() {
             return state_.status.value() !== vivliostyle.constants.ReadyState.LOADING;
         }),
         pageProgression: state_.pageProgression.getter
-    };
+    }; 
 
     this.setupViewerEventHandler();
     this.setupViewerOptionSubscriptions();
