@@ -53,6 +53,7 @@ $animation-ROTATE: ROTATE 1.5s linear infinite normal;
 
 #vivliostyle-loading-overlay {
 	opacity: 0;
+	visibility: hidden;
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -62,10 +63,12 @@ $animation-ROTATE: ROTATE 1.5s linear infinite normal;
 	background-color: rgba(black, 0.2);
 	@include on-loading() {
 		opacity: 1;
+		visibility: visible;
 		@include transition(.1s liner);
 	}
 	@include on-laying-out() {
 		opacity: 0;
+		visibility: hidden;
 		@include transition(.25s ease-out);
 	}
 	.vivliostyle-loading-spinner {
