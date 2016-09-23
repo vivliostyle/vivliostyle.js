@@ -123,3 +123,23 @@
 	speak: none;
 }
 
+// - Viewer Status
+// --------------------------------------------------------------------------------
+
+@mixin on-loading() {
+	body[data-vivliostyle-viewer-status="loading"] & {
+		@content;
+	}
+}
+
+@mixin on-laying-out() {
+	body[data-vivliostyle-viewer-status="interactive"] & {
+		@content;
+	}
+}
+
+@mixin on-complete() {
+	body[data-vivliostyle-viewer-status="complete"] & {
+		@content;
+	}
+}
