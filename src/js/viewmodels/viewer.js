@@ -38,7 +38,7 @@ function Viewer(viewerSettings, viewerOptions) {
             return state_.status.value() !== vivliostyle.constants.ReadyState.LOADING;
         }),
         pageProgression: state_.pageProgression.getter
-    }; 
+    };
 
     this.setupViewerEventHandler();
     this.setupViewerOptionSubscriptions();
