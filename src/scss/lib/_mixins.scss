@@ -132,7 +132,7 @@
 	}
 }
 
-@mixin on-laying-out() {
+@mixin on-interactive() {
 	body[data-vivliostyle-viewer-status="interactive"] & {
 		@content;
 	}

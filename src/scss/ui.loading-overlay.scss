@@ -71,7 +71,7 @@ $animation-ROTATE: ROTATE 1.5s linear infinite normal;
 			@include spinner($spinner-width);
 		}
 	}
-	@include on-laying-out() {
+	@include on-interactive() {
 		opacity: 0;
 		visibility: hidden;
 		@include transition(.25s ease-out);
