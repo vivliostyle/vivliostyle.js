@@ -80,7 +80,5 @@ $animation-ROTATE: ROTATE 1.5s linear infinite normal;
 		position: absolute;
 		top: calc(50% - #{$spinner-width} / 2);
 		left: calc(50% - #{$spinner-width} / 2);
-		-webkit-transform: translateY(-50%) translateX(-50%);
-		transform: translateY(-50%) translateX(-50%);
 	}
 }
