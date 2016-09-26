@@ -15,18 +15,6 @@
 // + Setting
 // --------------------------------------------------------------------------------
 
-
-// - Mix-Ins
-// --------------------------------------------------------------------------------
-
-@mixin on-loading() {
-	body[data-vivliostyle-viewer-status="loading"] &,
-	body[data-vivliostyle-viewer-status="resizing"] & {
-		@content;
-	}
-}
-
-
 // - Animation
 // --------------------------------------------------------------------------------
 
@@ -109,20 +97,6 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 		background: transparent no-repeat center center $vivliostyle-logo-type;
 		background-size: contain;
 		opacity: 1;
-		@include on-loading() {
-			opacity: 0;
-		}
-	}
-	&:after {
-		content: "Loading...";
-		font-family: sans-serif;
-		font-size: $menu-icon-height * 0.38;
-		line-height: 1.2;
-		font-weight: bold;
-		opacity: 0;
-		@include on-loading() {
-			animation: $animation-GLOW;
-		}
 	}
 }
 
@@ -245,11 +219,6 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					&:hover {
 						opacity: 0.75;
 						-webkit-filter: grayscale(50%); filter: grayscale(50%);
-					}
-				}
-				@media screen and (max-width: 400px) {
-					@include on-loading() {
-						animation: $animation-FLIP;
 					}
 				}
 			}
