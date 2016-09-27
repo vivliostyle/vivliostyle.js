@@ -1197,9 +1197,10 @@ adapt.epub.OPFView.prototype.normalizeSeekPosition = function(position, viewItem
  * Find a page corresponding to a specified position among already laid out pages.
  * @private
  * @param {!adapt.epub.Position} position
+ * @param {boolean=} sync If true, find the page synchronously (not waiting another rendering task)
  * @returns {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
  */
-adapt.epub.OPFView.prototype.findPage = function(position) {
+adapt.epub.OPFView.prototype.findPage = function(position, sync) {
     var self = this;
     /** @type {!adapt.task.Frame.<?adapt.epub.PageAndPosition>} */ var frame
         = adapt.task.newFrame("findPage");
@@ -1220,6 +1221,13 @@ adapt.epub.OPFView.prototype.findPage = function(position) {
                 pageIndex = viewItem.layoutPositions.length - 1;
                 resultPage = viewItem.pages[pageIndex];
                 loopFrame.breakLoop();
+            } else if (sync) {
+                self.renderPage(normalizedPosition).then(function(result) {
+                    if (result) {
+                        resultPage = result.page;
+                    }
+                    loopFrame.breakLoop();
+                });
             } else {
                 // Wait for the layout task and retry
                 frame.sleep(100).then(function() {
@@ -1389,9 +1397,10 @@ adapt.epub.OPFView.prototype.lastPage = function() {
 /**
  * Move to the next page position and render page.
  * @param {!adapt.epub.Position} position
+ * @param {boolean} sync If true, get the page synchronously (not waiting another rendering task)
  * @return {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
  */
-adapt.epub.OPFView.prototype.nextPage = function(position) {
+adapt.epub.OPFView.prototype.nextPage = function(position, sync) {
     var self = this;
     var spineIndex = position.spineIndex;
     var pageIndex = position.pageIndex;
@@ -1416,7 +1425,7 @@ adapt.epub.OPFView.prototype.nextPage = function(position) {
             spineIndex: spineIndex,
             pageIndex: pageIndex,
             offsetInItem: -1
-        }).thenFinish(frame);
+        }, sync).thenFinish(frame);
     });
     return frame.result();
 };
@@ -1460,9 +1469,10 @@ adapt.epub.OPFView.prototype.isRectoPage = function(page, position) {
 /**
  * Get a spread containing the currently displayed page.
  * @param {!adapt.epub.Position} position
+ * @param {boolean} sync If true, get the spread synchronously (not waiting another rendering task)
  * @return {!adapt.task.Result.<!adapt.vtree.Spread>}
  */
-adapt.epub.OPFView.prototype.getSpread = function(position) {
+adapt.epub.OPFView.prototype.getSpread = function(position, sync) {
     /** @type {!adapt.task.Frame.<adapt.vtree.Spread>} */ var frame
         = adapt.task.newFrame("getCurrentSpread");
 
@@ -1476,7 +1486,7 @@ adapt.epub.OPFView.prototype.getSpread = function(position) {
     if (this.isRectoPage(page, position)) {
         other = this.previousPage(position);
     } else {
-        other = this.nextPage(position);
+        other = this.nextPage(position, sync);
     }
     other.then(function(otherPageAndPosition) {
         var otherPage = otherPageAndPosition && otherPageAndPosition.page;
@@ -1493,15 +1503,16 @@ adapt.epub.OPFView.prototype.getSpread = function(position) {
 /**
  * Move to the next spread and render pages.
  * @param {!adapt.epub.Position} position
+ * @param {boolean=} sync If true, get the spread synchronously (not waiting another rendering task)
  * @returns {!adapt.task.Result.<?adapt.epub.PageAndPosition>} The 'verso' page of the next spread.
  */
-adapt.epub.OPFView.prototype.nextSpread = function(position) {
+adapt.epub.OPFView.prototype.nextSpread = function(position, sync) {
     var page = this.getPage(position);
     if (!page) {
         return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
     }
     var isRecto = this.isRectoPage(page, position);
-    var next = this.nextPage(position);
+    var next = this.nextPage(position, !!sync);
     if (isRecto) {
         return next;
     } else {

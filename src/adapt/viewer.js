@@ -546,7 +546,10 @@ adapt.viewer.Viewer.prototype.showCurrent = function(page) {
     this.needRefresh = false;
     var self = this;
     if (this.pref.spreadView) {
-        return this.opfView.getSpread(this.pagePosition).thenAsync(function(spread) {
+        // If the rendering task is not running, we should get the spread synchronously
+        // (not waiting the non-existent renderint task)
+        var sync = !this.renderTask;
+        return this.opfView.getSpread(this.pagePosition, sync).thenAsync(function(spread) {
             self.showSpread(spread);
             self.setSpreadZoom(spread);
             self.currentPage = page;
@@ -657,7 +660,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
             if (self.renderTask) {
                 self.renderTask.interrupt(new adapt.viewer.Viewer.RenderingCanceledError());
             }
-            self.renderTask = task;
+            self.renderTask = null;
             vivliostyle.profile.profiler.registerStartTiming("render (resize)");
             self.reset();
 
@@ -675,6 +678,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
                 self.showCurrent(result.page).then(function() {
                     self.reportPosition().then(function(p) {
                         self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
+                        self.renderTask = task;
                         var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
                         r.then(function() {
                             if (self.renderTask === task) {
