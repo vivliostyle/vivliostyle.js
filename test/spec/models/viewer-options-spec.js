@@ -18,6 +18,7 @@
  */
 
 import ViewerOptions from "../../../src/js/models/viewer-options";
+import ZoomOptions from "../../../src/js/models/zoom-options";
 import urlParameters from "../../../src/js/stores/url-parameters";
 
 describe("ViewerOptions", function() {
@@ -51,12 +52,13 @@ describe("ViewerOptions", function() {
             var other = new ViewerOptions();
             other.spreadView(false);
             other.fontSize(20);
-            other.zoom(1.2);
+            other.zoom(ZoomOptions.createFromZoomFactor(1.2));
             var options = new ViewerOptions(other);
 
             expect(options.spreadView()).toBe(false);
             expect(options.fontSize()).toBe(20);
-            expect(options.zoom()).toBe(1.2);
+            expect(options.zoom().zoom).toBe(1.2);
+            expect(options.zoom().fitToScreen).toBe(false);
         });
     });
 
@@ -75,7 +77,7 @@ describe("ViewerOptions", function() {
         var other = new ViewerOptions();
         other.spreadView(false);
         other.fontSize(20);
-        other.zoom(1.2);
+        other.zoom(ZoomOptions.createFromZoomFactor(1.2));
         options = new ViewerOptions(other);
         options.spreadView(true);
 
@@ -87,16 +89,17 @@ describe("ViewerOptions", function() {
             var options = new ViewerOptions();
             options.spreadView(true);
             options.fontSize(10);
-            options.zoom(1.4);
+            options.zoom(ZoomOptions.createFromZoomFactor(1.4));
             var other = new ViewerOptions();
             other.spreadView(false);
             other.fontSize(20);
-            other.zoom(1.2);
+            other.zoom(ZoomOptions.createFromZoomFactor(1.2));
             options.copyFrom(other);
 
             expect(options.spreadView()).toBe(false);
             expect(options.fontSize()).toBe(20);
-            expect(options.zoom()).toBe(1.2);
+            expect(options.zoom().zoom).toBe(1.2);
+            expect(options.zoom().fitToScreen).toBe(false);
         });
     });
 
@@ -105,12 +108,13 @@ describe("ViewerOptions", function() {
             var options = new ViewerOptions();
             options.spreadView(true);
             options.fontSize(20);
-            options.zoom(1.2);
+            options.zoom(ZoomOptions.createFromZoomFactor(1.2));
 
             expect(options.toObject()).toEqual({
                 fontSize: 20,
                 spreadView: true,
-                zoom: 1.2
+                zoom: 1.2,
+                fitToScreen: false
             });
         });
     });

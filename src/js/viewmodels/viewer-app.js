@@ -20,6 +20,7 @@
 import ko from "knockout";
 import vivliostyle from "../models/vivliostyle";
 import DocumentOptions from "../models/document-options";
+import ZoomOptions from "../models/zoom-options";
 import ViewerOptions from "../models/viewer-options";
 import messageQueue from "../models/message-queue";
 import Viewer from "./viewer";

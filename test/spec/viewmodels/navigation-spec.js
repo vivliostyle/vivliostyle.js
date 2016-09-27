@@ -20,6 +20,7 @@
 import ko from "knockout";
 import vivliostyle from "../../../src/js/models/vivliostyle";
 import ViewerOptions from "../../../src/js/models/viewer-options";
+import ZoomOptions from "../../../src/js/models/zoom-options";
 import Navigation from "../../../src/js/viewmodels/navigation";
 import vivliostyleMock from "../../mock/models/vivliostyle";
 
@@ -291,78 +292,147 @@ describe("Navigation", function() {
     });
 
     describe("zoomIn", function() {
+        beforeEach(function() {
+            spyOn(viewer, "queryZoomFactor").and.returnValue(1);
+        });
         it("increases zoom factor stored in ViewerOptions model and returns true", function () {
             var navigation = createNavigation();
             setDisabled(false);
-            var zoom = viewerOptions.zoom();
+            var zoom = viewerOptions.zoom().zoom;
             var ret = navigation.zoomIn();
 
-            expect(viewerOptions.zoom()).toBe(zoom * 1.25);
+            expect(viewer.queryZoomFactor).toHaveBeenCalledWith("fit inside viewport");
+            expect(viewerOptions.zoom().zoom).toBe(zoom * 1.25);
+            expect(viewerOptions.zoom().fitToScreen).toBe(false);
             expect(ret).toBe(true);
 
             ret = navigation.zoomIn();
 
-            expect(viewerOptions.zoom()).toBe(zoom * 1.25 * 1.25);
+            expect(viewer.queryZoomFactor).toHaveBeenCalledWith("fit inside viewport");
+            expect(viewerOptions.zoom().zoom).toBe(zoom * 1.25 * 1.25);
+            expect(viewerOptions.zoom().fitToScreen).toBe(false);
             expect(ret).toBe(true);
         });
 
         it("do nothing and returns false when navigation is disabled", function() {
             var navigation = createNavigation();
             setDisabled(true);
-            var zoom = viewerOptions.zoom();
+            var zoom = viewerOptions.zoom().zoom;
             var ret = navigation.zoomIn();
 
-            expect(viewerOptions.zoom()).toBe(zoom);
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
+            expect(viewerOptions.zoom().zoom).toBe(zoom);
+            expect(viewerOptions.zoom().fitToScreen).toBe(true);
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
             navigation = createNavigation({disableZoom: true});
             setDisabled(false);
-            zoom = viewerOptions.zoom();
+            zoom = viewerOptions.zoom().zoom;
             ret = navigation.zoomIn();
 
-            expect(viewerOptions.zoom()).toBe(zoom);
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
+            expect(viewerOptions.zoom().zoom).toBe(zoom);
+            expect(viewerOptions.zoom().fitToScreen).toBe(true);
             expect(ret).toBe(false);
         });
     });
 
     describe("zoomOut", function() {
+        beforeEach(function() {
+            spyOn(viewer, "queryZoomFactor").and.returnValue(1);
+        });
         it("decreases zoom factor stored in ViewerOptions model and returns true", function() {
             var navigation = createNavigation();
             setDisabled(false);
-            var zoom = viewerOptions.zoom();
+            var zoom = viewerOptions.zoom().zoom;
             var ret = navigation.zoomOut();
 
-            expect(viewerOptions.zoom()).toBe(zoom * 0.8);
+            expect(viewer.queryZoomFactor).toHaveBeenCalledWith("fit inside viewport");
+            expect(viewerOptions.zoom().zoom).toBe(zoom * 0.8);
+            expect(viewerOptions.zoom().fitToScreen).toBe(false);
             expect(ret).toBe(true);
 
             ret = navigation.zoomOut();
 
-            expect(viewerOptions.zoom()).toBe(zoom * 0.8 * 0.8);
+            expect(viewer.queryZoomFactor).toHaveBeenCalledWith("fit inside viewport");
+            expect(viewerOptions.zoom().zoom).toBe(zoom * 0.8 * 0.8);
+            expect(viewerOptions.zoom().fitToScreen).toBe(false);
             expect(ret).toBe(true);
         });
 
         it("do nothing and returns false when navigation is disabled", function() {
             var navigation = createNavigation();
             setDisabled(true);
-            var zoom = viewerOptions.zoom();
+            var zoom = viewerOptions.zoom().zoom;
             var ret = navigation.zoomOut();
 
-            expect(viewerOptions.zoom()).toBe(zoom);
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
+            expect(viewerOptions.zoom().zoom).toBe(zoom);
+            expect(viewerOptions.zoom().fitToScreen).toBe(true);
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
             navigation = createNavigation({disableZoom: true});
             setDisabled(false);
-            zoom = viewerOptions.zoom();
+            zoom = viewerOptions.zoom().zoom;
             ret = navigation.zoomOut();
 
-            expect(viewerOptions.zoom()).toBe(zoom);
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
+            expect(viewerOptions.zoom().zoom).toBe(zoom);
+            expect(viewerOptions.zoom().fitToScreen).toBe(true);
             expect(ret).toBe(false);
         });
     });
 
-    describe("zoomDefault", function() {
+    describe("zoomToActualSize", function() {
+        beforeEach(function() {
+            spyOn(viewer, "queryZoomFactor").and.returnValue(2);
+        });
+        it("set zoom factor stored in ViewerOptions model to 1 and returns true", function() {
+            var navigation = createNavigation();
+            setDisabled(false);
+            var zoom = viewerOptions.zoom().zoom;
+            var ret = navigation.zoomToActualSize();
+
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
+            expect(viewerOptions.zoom().zoom).toBe(1);
+            expect(viewerOptions.zoom().fitToScreen).toBe(false);
+            expect(ret).toBe(true);
+
+            ret = navigation.zoomToActualSize();
+
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
+            expect(viewerOptions.zoom().zoom).toBe(1);
+            expect(viewerOptions.zoom().fitToScreen).toBe(false);
+            expect(ret).toBe(true);
+        });
+
+        it("do nothing and returns false when navigation is disabled", function() {
+            var navigation = createNavigation();
+            setDisabled(true);
+            var zoom = viewerOptions.zoom().zoom;
+            var ret = navigation.zoomToActualSize();
+
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
+            expect(viewerOptions.zoom().zoom).toBe(zoom);
+            expect(viewerOptions.zoom().fitToScreen).toBe(true);
+            expect(ret).toBe(false);
+
+            // disabled by navigationOptions
+            navigation = createNavigation({disableZoom: true});
+            setDisabled(false);
+            zoom = viewerOptions.zoom().zoom;
+            ret = navigation.zoomOut();
+
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
+            expect(viewerOptions.zoom().zoom).toBe(zoom);
+            expect(viewerOptions.zoom().fitToScreen).toBe(true);
+            expect(ret).toBe(false);
+        });
+    });
+
+    describe("toggleFitToScreen", function() {
         beforeEach(function() {
             spyOn(viewer, "queryZoomFactor").and.returnValue(1.2);
         });
@@ -370,51 +440,42 @@ describe("Navigation", function() {
         it("query zoom factor for 'fit inside viewport' to the viewer and set returned zoom factor in ViewerOptions model and returns true", function() {
             var navigation = createNavigation();
             setDisabled(false);
-            viewerOptions.zoom(1);
-            var ret = navigation.zoomDefault();
+            viewerOptions.zoom(ZoomOptions.createFromZoomFactor(2));
+            var ret = navigation.toggleFitToScreen();
 
-            expect(viewer.queryZoomFactor).toHaveBeenCalledWith("fit inside viewport");
-            expect(viewerOptions.zoom()).toBe(1.2);
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
+            expect(viewerOptions.zoom().zoom).toBe(1);
+            expect(viewerOptions.zoom().fitToScreen).toBe(true);
+            expect(ret).toBe(true);
+
+            ret = navigation.toggleFitToScreen();
+
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
+            expect(viewerOptions.zoom().zoom).toBe(1);
+            expect(viewerOptions.zoom().fitToScreen).toBe(false);
             expect(ret).toBe(true);
         });
 
         it("do nothing and returns false when navigation is disabled", function() {
             var navigation = createNavigation();
             setDisabled(true);
-            viewerOptions.zoom(1);
-            var ret = navigation.zoomDefault();
+            viewerOptions.zoom(ZoomOptions.createFromZoomFactor(2));
+            var ret = navigation.toggleFitToScreen();
 
             expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
-            expect(viewerOptions.zoom()).toBe(1);
+            expect(viewerOptions.zoom().zoom).toBe(2);
+            expect(viewerOptions.zoom().fitToScreen).toBe(false);
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
             navigation = createNavigation({disableZoom: true});
             setDisabled(false);
-            ret = navigation.zoomDefault();
+            ret = navigation.toggleFitToScreen();
 
             expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
-            expect(viewerOptions.zoom()).toBe(1);
+            expect(viewerOptions.zoom().zoom).toBe(2);
+            expect(viewerOptions.zoom().fitToScreen).toBe(false);
             expect(ret).toBe(false);
-        });
-
-        it("if force=true is specified, do the zoom even if navigation is disabled", function() {
-            var navigation = createNavigation();
-            setDisabled(true);
-            viewerOptions.zoom(1);
-
-            // if the argument not equals to 'true' (compared using ===), do nothing
-            var ret = navigation.zoomDefault({});
-
-            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
-            expect(viewerOptions.zoom()).toBe(1);
-            expect(ret).toBe(false);
-
-            ret = navigation.zoomDefault(true);
-
-            expect(viewer.queryZoomFactor).toHaveBeenCalledWith(vivliostyle.viewer.ZoomType.FIT_INSIDE_VIEWPORT);
-            expect(viewerOptions.zoom()).toBe(1.2);
-            expect(ret).toBe(true);
         });
     });
 

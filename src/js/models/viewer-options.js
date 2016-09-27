@@ -19,6 +19,7 @@
 
 import ko from "knockout";
 import urlParameters from "../stores/url-parameters";
+import ZoomOptions from "./zoom-options";
 
 function getViewerOptionsFromURL() {
     return {
@@ -32,7 +33,7 @@ function getDefaultValues() {
         fontSize: 16,
         profile: false,
         spreadView: false,
-        zoom: 1
+        zoom: ZoomOptions.createDefaultOptions()
     };
 }
 
@@ -69,7 +70,8 @@ ViewerOptions.prototype.toObject = function() {
     return {
         fontSize: this.fontSize(),
         spreadView: this.spreadView(),
-        zoom: this.zoom()
+        zoom: this.zoom().zoom,
+        fitToScreen: this.zoom().fitToScreen
     }
 };
 

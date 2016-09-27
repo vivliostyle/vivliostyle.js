@@ -18,7 +18,6 @@
  */
 
 import ko from "knockout";
-import vivliostyle from "../models/vivliostyle";
 import ViewerOptions from "../models/viewer-options";
 import {Keys} from "../utils/key-util";
 
@@ -49,7 +48,8 @@ function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
 
     this.isZoomOutDisabled = zoomDisabled;
     this.isZoomInDisabled = zoomDisabled;
-    this.isZoomDefaultDisabled = zoomDisabled;
+    this.isZoomToActualSizeDisabled = zoomDisabled;
+    this.isToggleFitToScreenDisabled = zoomDisabled;
     this.hideZoom = !!navigationOptions.disableZoom;
 
     var fontSizeChangeDisabled = ko.pureComputed(function() {
@@ -70,7 +70,8 @@ function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
         "navigateToLast",
         "zoomIn",
         "zoomOut",
-        "zoomDefault",
+        "zoomToActualSize",
+        "toggleFitToScreen",
         "increaseFontSize",
         "decreaseFontSize",
         "defaultFontSize",
@@ -137,7 +138,7 @@ Navigation.prototype.navigateToLast = function() {
 Navigation.prototype.zoomIn = function() {
     if (!this.isZoomInDisabled()) {
         var zoom = this.viewerOptions_.zoom();
-        this.viewerOptions_.zoom(zoom * 1.25);
+        this.viewerOptions_.zoom(zoom.zoomIn(this.viewer_));
         return true;
     } else {
         return false;
@@ -147,17 +148,27 @@ Navigation.prototype.zoomIn = function() {
 Navigation.prototype.zoomOut = function() {
     if (!this.isZoomOutDisabled()) {
         var zoom = this.viewerOptions_.zoom();
-        this.viewerOptions_.zoom(zoom * 0.8);
+        this.viewerOptions_.zoom(zoom.zoomOut(this.viewer_));
         return true;
     } else {
         return false;
     }
 };
 
-Navigation.prototype.zoomDefault = function(force) {
-    if (force === true || !this.isZoomDefaultDisabled()) {
-        var zoom = this.viewer_.queryZoomFactor(vivliostyle.viewer.ZoomType.FIT_INSIDE_VIEWPORT);
-        this.viewerOptions_.zoom(zoom);
+Navigation.prototype.zoomToActualSize = function() {
+    if (!this.isZoomToActualSizeDisabled()) {
+        var zoom = this.viewerOptions_.zoom();
+        this.viewerOptions_.zoom(zoom.zoomToActualSize());
+        return true;
+    } else {
+        return false;
+    }
+};
+
+Navigation.prototype.toggleFitToScreen = function() {
+    if (!this.isToggleFitToScreenDisabled()) {
+        var zoom = this.viewerOptions_.zoom();
+        this.viewerOptions_.zoom(zoom.toggleFitToScreen());
         return true;
     } else {
         return false;
