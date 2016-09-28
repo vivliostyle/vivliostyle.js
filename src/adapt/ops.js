@@ -1216,6 +1216,29 @@ adapt.ops.OPSDocStore.prototype.getTriggersForDoc = function(xmldoc) {
 };
 
 /**
+ * Set author stylesheets and user stylesheets. Existing style sheets are removed.
+ * @param {?Array.<{url: ?string, text: ?string}>} authorStyleSheets
+ * @param {?Array.<{url: ?string, text: ?string}>} userStyleSheets
+ */
+adapt.ops.OPSDocStore.prototype.setStyleSheets = function(authorStyleSheets, userStyleSheets) {
+    this.clearStyleSheets();
+    if (authorStyleSheets) {
+        authorStyleSheets.forEach(this.addAuthorStyleSheet, this);
+    }
+    if (userStyleSheets) {
+        userStyleSheets.forEach(this.addUserStyleSheet, this);
+    }
+};
+
+/**
+ * @private
+ */
+adapt.ops.OPSDocStore.prototype.clearStyleSheets = function() {
+    this.styleSheets.splice(0);
+};
+
+/**
+ * @private
  * @param {{url: ?string, text: ?string}} stylesheet
  */
 adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
@@ -1224,6 +1247,7 @@ adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
 };
 
 /**
+ * @private
  * @param {{url: ?string, text: ?string}} stylesheet
  */
 adapt.ops.OPSDocStore.prototype.addUserStyleSheet = function(stylesheet) {

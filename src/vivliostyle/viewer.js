@@ -124,6 +124,7 @@ goog.scope(function() {
      */
     vivliostyle.viewer.Viewer = function(settings, opt_options) {
         vivliostyle.constants.isDebug = settings.debug;
+        /** @private @type {boolean} */ this.initialized = false;
         /** @const @private */ this.settings = settings;
         /** @const @private */ this.adaptViewer = new adapt.viewer.Viewer(
             settings["window"] || window, settings["viewportElement"], "main", this.dispatcher.bind(this));
@@ -288,7 +289,13 @@ goog.scope(function() {
             "authorStyleSheet": authorStyleSheet,
             "userStyleSheet": userStyleSheet
         }, convertViewerOptions(this.options));
-        this.adaptViewer.initEmbed(command);
+
+        if (this.initialized) {
+            this.adaptViewer.sendCommand(command);
+        } else {
+            this.initialized = true;
+            this.adaptViewer.initEmbed(command);
+        }
     };
 
     /**

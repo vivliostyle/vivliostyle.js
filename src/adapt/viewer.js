@@ -165,27 +165,13 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     var self = this;
     self.configure(command).then(function() {
         var store = new adapt.epub.EPUBDocStore();
-        if (authorStyleSheet) {
-            for (var i = 0; i < authorStyleSheet.length; i++) {
-                store.addAuthorStyleSheet(authorStyleSheet[i]);
-            }
-        }
-        if (userStyleSheet) {
-            for (var i = 0; i < userStyleSheet.length; i++) {
-                store.addUserStyleSheet(userStyleSheet[i]);
-            }
-        }
         store.init().then(function() {
             var epubURL = adapt.base.resolveURL(url, self.window.location.href);
             self.packageURL = [epubURL];
             store.loadEPUBDoc(epubURL, haveZipMetadata).then(function(opf) {
                 self.opf = opf;
-                self.opf.resolveFragment(fragment).then(function(position) {
-                    self.pagePosition = position;
-                    vivliostyle.profile.profiler.registerEndTiming("beforeRender");
-                    self.resize().then(function() {
-                        frame.finish(true);
-                    });
+                self.setStyleSheetsAndRender(authorStyleSheet, userStyleSheet, fragment).then(function() {
+                    frame.finish(true);
                 });
             });
         });
@@ -211,16 +197,6 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
     var self = this;
     self.configure(command).then(function() {
         var store = new adapt.epub.EPUBDocStore();
-        if (authorStyleSheet) {
-            for (var i = 0; i < authorStyleSheet.length; i++) {
-                store.addAuthorStyleSheet(authorStyleSheet[i]);
-            }
-        }
-        if (userStyleSheet) {
-            for (var i = 0; i < userStyleSheet.length; i++) {
-                store.addUserStyleSheet(userStyleSheet[i]);
-            }
-        }
         store.init().then(function() {
             /** @type {!Array<!adapt.epub.OPFItemParam>} */ var resolvedParams = params.map(function(p, index) {
                 return {
@@ -233,17 +209,41 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
             self.packageURL = resolvedParams.map(function(p) { return p.url; });
             self.opf = new adapt.epub.OPFDoc(store, "");
             self.opf.initWithChapters(resolvedParams, doc).then(function() {
-                self.opf.resolveFragment(fragment).then(function(position) {
-                    self.pagePosition = position;
-                    vivliostyle.profile.profiler.registerEndTiming("beforeRender");
-                    self.resize().then(function() {
-                        frame.finish(true);
-                    });
+                self.setStyleSheetsAndRender(authorStyleSheet, userStyleSheet, fragment).then(function() {
+                    frame.finish(true);
                 });
             });
         });
     });
     return frame.result();
+};
+
+/**
+ * @private
+ * @param {Array.<{url: ?string, text: ?string}>} authorStyleSheet
+ * @param {Array.<{url: ?string, text: ?string}>} userStyleSheet
+ * @param {?string=} fragment
+ * @returns {!adapt.task.Result.<boolean>}
+ */
+adapt.viewer.Viewer.prototype.setStyleSheetsAndRender = function(authorStyleSheet, userStyleSheet, fragment) {
+    this.cancelRenderingTask();
+    this.opf.store.setStyleSheets(authorStyleSheet, userStyleSheet);
+    var self = this;
+
+    var cont;
+    if (fragment) {
+        cont = this.opf.resolveFragment(fragment).thenAsync(function(position) {
+            self.pagePosition = position;
+            return adapt.task.newResult(true);
+        });
+    } else {
+        cont = adapt.task.newResult(true);
+    }
+
+    return cont.thenAsync(function() {
+        vivliostyle.profile.profiler.registerEndTiming("beforeRender");
+        return self.resize();
+    });
 };
 
 /**
@@ -644,19 +644,27 @@ adapt.viewer.Viewer.RenderingCanceledError = function() {
 goog.inherits(adapt.viewer.Viewer.RenderingCanceledError, Error);
 
 /**
+ * @private
+ */
+adapt.viewer.Viewer.prototype.cancelRenderingTask = function() {
+    if (this.renderTask) {
+        this.renderTask.interrupt(new adapt.viewer.Viewer.RenderingCanceledError());
+    }
+    this.renderTask = null;
+};
+
+/**
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.resize = function() {
     this.needResize = false;
+    this.needRefresh = false;
     if (this.sizeIsGood()) {
         return adapt.task.newResult(true);
     }
     var self = this;
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
-    if (self.renderTask) {
-        self.renderTask.interrupt(new adapt.viewer.Viewer.RenderingCanceledError());
-    }
-    self.renderTask = null;
+    this.cancelRenderingTask();
     var task = adapt.task.currentTask().getScheduler().run(function() {
         return adapt.task.handle("resize", function(frame) {
             self.renderTask = task;
