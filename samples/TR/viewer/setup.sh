@@ -3,10 +3,10 @@
 # When specifying commit, branch should be specified too.
 core_tag=
 core_branch=background_layout-r#152
-core_commit=09e721b487c008d8818cbfeba4e1aa1139e136d7
+core_commit=faaaf952f2d0616656cfe712fd46668eaf025ddc
 ui_tag=
 ui_branch=background_layout-r#152
-ui_commit=5a932ef95552b548ebab63566b37c2d989dec3b2
+ui_commit=a61f071ee4edb3778bea730d3b156ea0e43c8969
 
 core_repo=git://github.com/vivliostyle/vivliostyle.js.git
 ui_repo=git://github.com/vivliostyle/vivliostyle-ui.git
@@ -22,7 +22,10 @@ if [ "${core_tag}" != "" ]; then
     git fetch --tags
     git checkout ${core_tag}
 else
-    git fetch origin ${core_branch}:remotes/origin/${core_branch}
+    if [ "${core_branch}" != "master" ]; then
+        git remote set-branches origin master "${core_branch}"
+    fi
+    git fetch
     if [ "${core_branch}" != "master" ]; then
         git checkout -B ${core_branch} origin/${core_branch}
     fi
@@ -53,7 +56,10 @@ if [ "${ui_tag}" != "" ]; then
     git fetch --tags
     git checkout ${ui_tag}
 else
-    git fetch origin ${ui_branch}:remotes/origin/${ui_branch}
+    if [ "${ui_branch}" != "master" ]; then
+        git remote set-branches origin master "${ui_branch}"
+    fi
+    git fetch
     if [ "${ui_branch}" != "master" ]; then
         git checkout -B ${ui_branch} origin/${ui_branch}
     fi
