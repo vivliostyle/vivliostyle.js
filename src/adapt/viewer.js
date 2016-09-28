@@ -540,15 +540,13 @@ adapt.viewer.Viewer.prototype.reset = function() {
  * Show current page or spread depending on the setting (this.pref.spreadView).
  * @private
  * @param {!adapt.vtree.Page} page
+ * @param {boolean=} sync If true, get the necessary page synchronously (not waiting another rendering task)
  * @returns {!adapt.task.Result}
  */
-adapt.viewer.Viewer.prototype.showCurrent = function(page) {
+adapt.viewer.Viewer.prototype.showCurrent = function(page, sync) {
     this.needRefresh = false;
     var self = this;
     if (this.pref.spreadView) {
-        // If the rendering task is not running, we should get the spread synchronously
-        // (not waiting the non-existent renderint task)
-        var sync = !this.renderTask;
         return this.opfView.getSpread(this.pagePosition, sync).thenAsync(function(spread) {
             self.showSpread(spread);
             self.setSpreadZoom(spread);
@@ -655,12 +653,13 @@ adapt.viewer.Viewer.prototype.resize = function() {
     }
     var self = this;
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
+    if (self.renderTask) {
+        self.renderTask.interrupt(new adapt.viewer.Viewer.RenderingCanceledError());
+    }
+    self.renderTask = null;
     var task = adapt.task.currentTask().getScheduler().run(function() {
         return adapt.task.handle("resize", function(frame) {
-            if (self.renderTask) {
-                self.renderTask.interrupt(new adapt.viewer.Viewer.RenderingCanceledError());
-            }
-            self.renderTask = null;
+            self.renderTask = task;
             vivliostyle.profile.profiler.registerStartTiming("render (resize)");
             self.reset();
 
@@ -675,10 +674,9 @@ adapt.viewer.Viewer.prototype.resize = function() {
             // otherwise users are forced to wait the rendering finish in front of a blank page.
             self.opfView.renderPagesUpto(self.pagePosition).then(function(result) {
                 self.pagePosition = result.position;
-                self.showCurrent(result.page).then(function() {
+                self.showCurrent(result.page, true).then(function() {
                     self.reportPosition().then(function(p) {
                         self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
-                        self.renderTask = task;
                         var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
                         r.then(function() {
                             if (self.renderTask === task) {

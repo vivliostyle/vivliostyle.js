@@ -1519,7 +1519,7 @@ adapt.epub.OPFView.prototype.nextSpread = function(position, sync) {
         var self = this;
         return next.thenAsync(function(result) {
             if (result) {
-                return self.nextPage(result.position);
+                return self.nextPage(result.position, !!sync);
             } else {
                 return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
             }
