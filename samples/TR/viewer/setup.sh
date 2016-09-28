@@ -3,7 +3,7 @@
 # When specifying commit, branch should be specified too.
 core_tag=
 core_branch=background_layout-r#152
-core_commit=faaaf952f2d0616656cfe712fd46668eaf025ddc
+core_commit=63cd0166a4d2087023a7dc5080fe7f3e31e65da0
 ui_tag=
 ui_branch=background_layout-r#152
 ui_commit=a61f071ee4edb3778bea730d3b156ea0e43c8969
