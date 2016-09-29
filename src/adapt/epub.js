@@ -1009,7 +1009,7 @@ adapt.epub.OPFView = function(opf, viewport, fontMapper, pref, pageSheetSizeRepo
     /** @const */ this.pageSheetSizeReporter = pageSheetSizeReporter;
     /** @type {Array.<adapt.epub.OPFViewItem>} */ this.spineItems = [];
     /** @const */ this.pref = adapt.expr.clonePreferences(pref);
-    /** @const */ this.clientLayout = new adapt.vgen.DefaultClientLayout(viewport.window);
+    /** @const */ this.clientLayout = new adapt.vgen.DefaultClientLayout(viewport);
     /** @const */ this.counterStore = new vivliostyle.counters.CounterStore(opf.documentURLTransformer);
 };
 
@@ -1670,7 +1670,7 @@ adapt.epub.OPFView.prototype.makePage = function(viewItem, pos) {
     if (!vivliostyle.constants.isDebug) {
         pageCont.style.visibility = "hidden";
     }
-    viewport.root.appendChild(pageCont);
+    viewport.layoutBox.appendChild(pageCont);
 
     var bleedBox = /** @type {HTMLElement} */ (viewport.document.createElement("div"));
     bleedBox.setAttribute("data-vivliostyle-bleed-box", true);

@@ -47,6 +47,14 @@
     [data-vivliostyle-viewer-viewport] {
         display: -webkit-flex;
         display: flex;
+        overflow: auto;
+        position: relative;
+    }
+
+    [data-vivliostyle-layout-box] {
+        position: absolute;
+        left: 0;
+        top: 0;
     }
 
     [data-vivliostyle-outer-zoom-box] {
