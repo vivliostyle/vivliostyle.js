@@ -38,7 +38,7 @@ goog.scope(function() {
      * - renderAllPages: Render all pages at the document load time. default: true
      * - spreadView: Display two pages in a single spread at a time. default: false
      * - zoom: Zoom factor with which pages are displayed. default: 1
-     * - fitToScreen: Auto adjust zoom factor to fit the screen. default: true
+     * - fitToScreen: Auto adjust zoom factor to fit the screen. default: false
      * @dict
      * @typedef {{
      *     autoResize: (boolean|undefined),
@@ -63,7 +63,7 @@ goog.scope(function() {
             "renderAllPages": true,
             "spreadView": false,
             "zoom": 1,
-            "fitToScreen": true
+            "fitToScreen": false
         };
     }
 
