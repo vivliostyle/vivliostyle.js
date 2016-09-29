@@ -3,10 +3,10 @@
 # When specifying commit, branch should be specified too.
 core_tag=
 core_branch=background_layout-r#152
-core_commit=63cd0166a4d2087023a7dc5080fe7f3e31e65da0
+core_commit=db6f10249d7015a0d87d41a5f7ff5d8030db894c
 ui_tag=
 ui_branch=background_layout-r#152
-ui_commit=a61f071ee4edb3778bea730d3b156ea0e43c8969
+ui_commit=5f5f12fe05a3c2ac0b62a613fc5059884216b414
 
 core_repo=git://github.com/vivliostyle/vivliostyle.js.git
 ui_repo=git://github.com/vivliostyle/vivliostyle-ui.git
