@@ -54,6 +54,9 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
     /** @const */ this.window = window;
     /** @const */ this.viewportElement = viewportElement;
     viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
+    if (vivliostyle.constants.isDebug) {
+        viewportElement.setAttribute("data-vivliostyle-debug", true);
+    }
     viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
     /** @const */ this.instanceId = instanceId;
     /** @const */ this.callbackFn = callbackFn;

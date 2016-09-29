@@ -55,6 +55,10 @@
         position: absolute;
         left: 0;
         top: 0;
+        z-index: -1;
+    }
+    [data-vivliostyle-debug] [data-vivliostyle-layout-box] {
+        z-index: auto;
     }
 
     [data-vivliostyle-outer-zoom-box] {
