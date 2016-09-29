@@ -104,6 +104,7 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {?adapt.epub.Position} */ this.pagePosition = null;
     /** @type {number} */ this.fontSize = 16;
     /** @type {number} */ this.zoom = 1;
+    /** @type {boolean} */ this.fitToScreen = false;
     /** @type {boolean} */ this.waitForLoading = false;
     /** @type {boolean} */ this.renderAllPages = true;
     /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();
@@ -357,6 +358,10 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
         this.zoom = command["zoom"];
         this.needRefresh = true;
     }
+    if (typeof command["fitToScreen"] == "boolean" && command["fitToScreen"] !== this.fitToScreen) {
+        this.fitToScreen = command["fitToScreen"];
+        this.needRefresh = true;
+    }
     return adapt.task.newResult(true);
 };
 
@@ -490,8 +495,17 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
         return false;
     }
     var viewport = this.createViewport();
-    return (viewport.width == this.viewport.width && viewport.height == this.viewport.height) ||
-        (this.opfView && !this.opfView.hasAutoSizedPages());
+
+    if (viewport.width == this.viewport.width && viewport.height == this.viewport.height) {
+        return true;
+    }
+    if (this.opfView && !this.opfView.hasAutoSizedPages()) {
+        this.viewport.width = viewport.width;
+        this.viewport.height = viewport.height;
+        this.needRefresh = true;
+        return true;
+    }
+    return false;
 };
 
 /**
@@ -565,7 +579,8 @@ adapt.viewer.Viewer.prototype.showCurrent = function(page, sync) {
  * @param {!adapt.vtree.Page} page
  */
 adapt.viewer.Viewer.prototype.setPageZoom = function(page) {
-    this.viewport.zoom(page.dimensions.width, page.dimensions.height, this.zoom);
+    var zoom = this.getAdjustedZoomFactor(page.dimensions);
+    this.viewport.zoom(page.dimensions.width, page.dimensions.height, zoom);
 };
 
 /**
@@ -573,7 +588,17 @@ adapt.viewer.Viewer.prototype.setPageZoom = function(page) {
  */
 adapt.viewer.Viewer.prototype.setSpreadZoom = function(spread) {
     var dim = this.getSpreadDimensions(spread);
-    this.viewport.zoom(dim.width, dim.height, this.zoom);
+    this.viewport.zoom(dim.width, dim.height, this.getAdjustedZoomFactor(dim));
+};
+
+/**
+* @param {!{width: number, height: number}} pageDimension
+* @returns {number} adjusted zoom factor
+ */
+adapt.viewer.Viewer.prototype.getAdjustedZoomFactor = function(pageDimension) {
+    return this.fitToScreen
+        ? this.calculateZoomFactorToFitInsideViewPort(pageDimension)
+        : this.zoom;
 };
 
 /**
@@ -622,12 +647,20 @@ adapt.viewer.Viewer.prototype.queryZoomFactor = function(type) {
             } else {
                 pageDim = this.currentPage.dimensions;
             }
-            var widthZoom = this.viewport.width / pageDim.width;
-            var heightZoom = this.viewport.height / pageDim.height;
-            return Math.min(widthZoom, heightZoom);
+            return this.calculateZoomFactorToFitInsideViewPort(pageDim);
         default:
             throw new Error("unknown zoom type: " + type);
     }
+};
+
+/**
+ * @param {!{width: number, height: number}} pageDimension
+ * @returns {number} zoom factor to fit inside viewport
+ */
+adapt.viewer.Viewer.prototype.calculateZoomFactorToFitInsideViewPort = function(pageDimension) {
+    var widthZoom = this.viewport.width / pageDimension.width;
+    var heightZoom = this.viewport.height / pageDimension.height;
+    return Math.min(widthZoom, heightZoom);
 };
 
 /**

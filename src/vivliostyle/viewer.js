@@ -38,6 +38,7 @@ goog.scope(function() {
      * - renderAllPages: Render all pages at the document load time. default: true
      * - spreadView: Display two pages in a single spread at a time. default: false
      * - zoom: Zoom factor with which pages are displayed. default: 1
+     * - fitToScreen: Auto adjust zoom factor to fit the screen. default: false
      * @dict
      * @typedef {{
      *     autoResize: (boolean|undefined),
@@ -45,7 +46,8 @@ goog.scope(function() {
      *     pageBorderWidth: (number|undefined),
      *     renderAllPages: (boolean|undefined),
      *     spreadView: (boolean|undefined),
-     *     zoom: (number|undefined)
+     *     zoom: (number|undefined),
+     *     fitToScreen: (boolean|undefined)
      * }}
      */
     vivliostyle.viewer.ViewerOptions;
@@ -60,7 +62,8 @@ goog.scope(function() {
             "pageBorderWidth": 1,
             "renderAllPages": true,
             "spreadView": false,
-            "zoom": 1
+            "zoom": 1,
+            "fitToScreen": false
         };
     }
 
