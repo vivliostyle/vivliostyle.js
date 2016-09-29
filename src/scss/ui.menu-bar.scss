@@ -196,7 +196,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 		//	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:before { content: $fa-var-search; }
 			&#vivliostyle-menu-item_zoom-fit-to-screen    >.vivliostyle-menu-icon-button:before { content: $fa-var-arrows-alt/*$fa-var-search*/; top: .05em; /*font-size: $menu-icon-height * 0.36;*/ }
 			&#vivliostyle-menu-item_zoom-in               >.vivliostyle-menu-icon-button:before { content: $fa-var-search-plus; }
-      &#vivliostyle-menu-item_zoom-to-actual-size   >.vivliostyle-menu-icon-button:before { content: $fa-var-search; }
+			&#vivliostyle-menu-item_zoom-to-actual-size   >.vivliostyle-menu-icon-button:before { content: $fa-var-search; }
 			&#vivliostyle-menu-item_text-size-smaller     >.vivliostyle-menu-icon-button:before { content: $fa-var-font; }
 			&#vivliostyle-menu-item_text-size-default     >.vivliostyle-menu-icon-button:before { content: $fa-var-font; }
 			&#vivliostyle-menu-item_text-size-larger      >.vivliostyle-menu-icon-button:before { content: $fa-var-font; }
