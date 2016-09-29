@@ -306,9 +306,10 @@ describe("Navigation", function() {
             expect(viewerOptions.zoom().fitToScreen).toBe(false);
             expect(ret).toBe(true);
 
+            viewer.queryZoomFactor.calls.reset();
             ret = navigation.zoomIn();
 
-            expect(viewer.queryZoomFactor).toHaveBeenCalledWith("fit inside viewport");
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
             expect(viewerOptions.zoom().zoom).toBe(zoom * 1.25 * 1.25);
             expect(viewerOptions.zoom().fitToScreen).toBe(false);
             expect(ret).toBe(true);
@@ -353,9 +354,10 @@ describe("Navigation", function() {
             expect(viewerOptions.zoom().fitToScreen).toBe(false);
             expect(ret).toBe(true);
 
+            viewer.queryZoomFactor.calls.reset();
             ret = navigation.zoomOut();
 
-            expect(viewer.queryZoomFactor).toHaveBeenCalledWith("fit inside viewport");
+            expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
             expect(viewerOptions.zoom().zoom).toBe(zoom * 0.8 * 0.8);
             expect(viewerOptions.zoom().fitToScreen).toBe(false);
             expect(ret).toBe(true);
@@ -448,6 +450,7 @@ describe("Navigation", function() {
             expect(viewerOptions.zoom().fitToScreen).toBe(true);
             expect(ret).toBe(true);
 
+            viewer.queryZoomFactor.calls.reset();
             ret = navigation.toggleFitToScreen();
 
             expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
