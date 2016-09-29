@@ -78,7 +78,7 @@ $animation-ROTATE: ROTATE 1.5s linear infinite normal;
 	}
 	.vivliostyle-loading-spinner {
 		position: absolute;
-		top: calc(50% - #{$spinner-width} / 2);
-		left: calc(50% - #{$spinner-width} / 2);
+		top:  calc(50% - #{$spinner-width + $spinner-width * 0.2 } / 2);
+		left: calc(50% - #{$spinner-width + $spinner-width * 0.2 } / 2);
 	}
 }
