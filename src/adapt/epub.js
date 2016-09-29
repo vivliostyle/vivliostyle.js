@@ -1921,14 +1921,10 @@ adapt.epub.OPFView.prototype.removeRenderedPages = function() {
     for (var i = 0; i < items.length; i++) {
         var item = items[i];
         if (item) {
-            var pages = item.pages;
-            var page;
-            while (page = pages.shift()) {
-                var container = page.container;
-                container.parentNode.removeChild(container);
-            }
+            item.pages.splice(0);
         }
     }
+    this.viewport.clear();
 };
 
 /**

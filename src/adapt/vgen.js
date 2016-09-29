@@ -1603,3 +1603,13 @@ adapt.vgen.Viewport.prototype.zoom = function(width, height, scale) {
     adapt.base.setCSSProperty(this.contentContainer, "height", height + "px");
     adapt.base.setCSSProperty(this.contentContainer, "transform", "scale(" + scale + ")");
 };
+
+/**
+ * Remove all pages inside the viewport.
+ */
+adapt.vgen.Viewport.prototype.clear = function() {
+    var root = this.root;
+    while (root.lastChild) {
+        root.removeChild(root.lastChild);
+    }
+};
