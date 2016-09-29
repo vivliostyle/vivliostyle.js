@@ -430,8 +430,5 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 		margin-top: $menu-icon-height;
 		height: calc(100vh - #{$menu-icon-height});
 		width: 100vw;
-		&[data-vivliostyle-viewer-status=complete] {
-			overflow: auto;
-		}
 	}
 }
