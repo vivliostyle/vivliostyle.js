@@ -69,24 +69,7 @@ function ViewerApp() {
         return ret;
     }.bind(this);
 
-    this.setDefaultView();
-
     this.viewer.loadDocument(this.documentOptions);
 }
-
-ViewerApp.prototype.setDefaultView = function() {
-    var status = this.viewer.state.status();
-    this.viewer.state.status.subscribe(function(newStatus) {
-        var finished = false;
-        var oldStatus = status;
-        status = newStatus;
-        if (oldStatus === "loading" && newStatus !== "loading") {
-            // After document loaded, zoom to the default size
-            finished = this.navigation.zoomDefault(true);
-        } else if (newStatus === "loading") {
-            finished = false;
-        }
-    }, this);
-};
 
 export default ViewerApp;
