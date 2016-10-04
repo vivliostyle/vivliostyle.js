@@ -7,6 +7,13 @@
 - Additional author style sheets can be injected with 'styleSheet' property of `vivliostyle.viewer.DocumentOptions`.
   - <https://github.com/vivliostyle/vivliostyle.js/pull/282>
 
+### Changed
+
+- Introduce background layout and change event model
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/292>
+- Improve zoom behavior
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/292>
+
 ### Fixed
 - Fix bug that pages occasionally disappear when resolving cross references
   - <https://github.com/vivliostyle/vivliostyle.js/pull/268>

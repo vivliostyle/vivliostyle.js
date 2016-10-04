@@ -1518,19 +1518,43 @@ adapt.vgen.ViewFactory.prototype.isPseudoelement = function(elem) {
 };
 
 /**
- * @param {Window} window
+ * @param {adapt.vgen.Viewport} viewport
  * @constructor
  * @implements {adapt.vtree.ClientLayout}
  */
-adapt.vgen.DefaultClientLayout = function(window) {
-    /** @const */ this.window = window;
+adapt.vgen.DefaultClientLayout = function(viewport) {
+    /** @const */ this.layoutBox = viewport.layoutBox;
+    /** @const */ this.window = viewport.window;
+};
+
+/**
+ * @private
+ * @param {adapt.vtree.ClientRect} rect
+ * @param {adapt.vtree.ClientRect} originRect
+ * @returns {adapt.vtree.ClientRect}
+ */
+adapt.vgen.DefaultClientLayout.prototype.subtractOffsets = function(rect, originRect) {
+    var viewportLeft = originRect.left;
+    var viewportTop = originRect.top;
+    return /** @type {adapt.vtree.ClientRect} */ ({
+        left: rect.left - viewportLeft,
+        top: rect.top - viewportTop,
+        right: rect.right - viewportLeft,
+        bottom: rect.bottom - viewportTop,
+        width: rect.width,
+        height: rect.height
+    });
 };
 
 /**
  * @override
  */
 adapt.vgen.DefaultClientLayout.prototype.getRangeClientRects = function(range) {
-    return range["getClientRects"]();
+    var rects = range["getClientRects"]();
+    var layoutBoxRect = this.layoutBox.getBoundingClientRect();
+    return Array.from(rects).map(function(rect) {
+        return this.subtractOffsets(rect, layoutBoxRect);
+    }, this);
 };
 
 /**
@@ -1538,7 +1562,9 @@ adapt.vgen.DefaultClientLayout.prototype.getRangeClientRects = function(range) {
  */
 adapt.vgen.DefaultClientLayout.prototype.getElementClientRect = function(element) {
     var htmlElement = /** @type {HTMLElement} */ (element);
-    return /** @type {adapt.vtree.ClientRect} */ (htmlElement.getBoundingClientRect());
+    var rect = /** @type {adapt.vtree.ClientRect} */ (htmlElement.getBoundingClientRect());
+    var layoutBoxRect = this.layoutBox.getBoundingClientRect();
+    return this.subtractOffsets(rect, layoutBoxRect);
 };
 
 /**
@@ -1573,9 +1599,16 @@ adapt.vgen.Viewport = function(window, fontSize, opt_root, opt_width, opt_height
         contentContainer.setAttribute("data-vivliostyle-spread-container", true);
         outerZoomBox.appendChild(contentContainer);
     }
+    var layoutBox = outerZoomBox.nextElementSibling;
+    if (!layoutBox) {
+        layoutBox = this.document.createElement("div");
+        layoutBox.setAttribute("data-vivliostyle-layout-box", true);
+        this.root.appendChild(layoutBox);
+    }
     /** @private @type {!HTMLElement} */ this.outerZoomBox = /** @type {!HTMLElement} */ (outerZoomBox);
     /** @type {!HTMLElement} */ this.contentContainer = /** @type {!HTMLElement} */ (contentContainer);
-    var clientLayout = new adapt.vgen.DefaultClientLayout(window);
+    /** @const */ this.layoutBox = /** @type {!HTMLElement} */ (layoutBox);
+    var clientLayout = new adapt.vgen.DefaultClientLayout(this);
     var computedStyle = clientLayout.getElementComputedStyle(this.root);
     /** @type {number} */ this.width = opt_width || parseFloat(computedStyle["width"]) || window.innerWidth;
     /** @type {number} */ this.height = opt_height || parseFloat(computedStyle["height"]) || window.innerHeight;
@@ -1604,4 +1637,14 @@ adapt.vgen.Viewport.prototype.zoom = function(width, height, scale) {
     adapt.base.setCSSProperty(this.contentContainer, "width", width + "px");
     adapt.base.setCSSProperty(this.contentContainer, "height", height + "px");
     adapt.base.setCSSProperty(this.contentContainer, "transform", "scale(" + scale + ")");
+};
+
+/**
+ * Remove all pages inside the viewport.
+ */
+adapt.vgen.Viewport.prototype.clear = function() {
+    var root = this.root;
+    while (root.lastChild) {
+        root.removeChild(root.lastChild);
+    }
 };

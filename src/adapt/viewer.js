@@ -6,6 +6,7 @@
 goog.provide('adapt.viewer');
 
 goog.require('goog.asserts');
+goog.require('vivliostyle.constants');
 goog.require('vivliostyle.logging');
 goog.require('adapt.task');
 goog.require('adapt.vgen');
@@ -53,6 +54,9 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
     /** @const */ this.window = window;
     /** @const */ this.viewportElement = viewportElement;
     viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
+    if (vivliostyle.constants.isDebug) {
+        viewportElement.setAttribute("data-vivliostyle-debug", true);
+    }
     viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
     /** @const */ this.instanceId = instanceId;
     /** @const */ this.callbackFn = callbackFn;
@@ -69,6 +73,7 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
     /** @type {adapt.base.EventListener} */ this.hyperlinkListener = function(evt) {};
     /** @const */ this.pageRuleStyleElement = document.getElementById("vivliostyle-page-rules");
     /** @type {boolean} */ this.pageSheetSizeAlreadySet = false;
+    /** @type {?adapt.task.Task} */ this.renderTask = null;
     /**
      * @type {Object.<string, adapt.viewer.Action>}
      */
@@ -87,6 +92,7 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.init = function() {
+    /** @type {!vivliostyle.constants.ReadyState} */ this.readyState = vivliostyle.constants.ReadyState.LOADING;
     /** @type {!Array.<string>} */ this.packageURL = [];
     /** @type {adapt.epub.OPFDoc} */ this.opf = null;
     /** @type {boolean} */ this.haveZipMetadata = false;
@@ -101,6 +107,7 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {?adapt.epub.Position} */ this.pagePosition = null;
     /** @type {number} */ this.fontSize = 16;
     /** @type {number} */ this.zoom = 1;
+    /** @type {boolean} */ this.fitToScreen = false;
     /** @type {boolean} */ this.waitForLoading = false;
     /** @type {boolean} */ this.renderAllPages = true;
     /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();
@@ -133,13 +140,24 @@ adapt.viewer.Viewer.prototype.callback = function(message) {
 };
 
 /**
+ * Set readyState and notify to listeners
+ * @param {!vivliostyle.constants.ReadyState} readyState
+ */
+adapt.viewer.Viewer.prototype.setReadyState = function(readyState) {
+    if (this.readyState !== readyState) {
+        this.readyState = readyState;
+        this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, readyState);
+        this.callback({"t": "readystatechange"});
+    }
+};
+
+/**
  * @param {adapt.base.JSON} command
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
-    vivliostyle.profile.profiler.registerStartTiming("loadEPUB");
-    vivliostyle.profile.profiler.registerStartTiming("loadFirstPage");
-    this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
+    vivliostyle.profile.profiler.registerStartTiming("beforeRender");
+    this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     var url = /** @type {string} */ (command["url"]);
     var fragment = /** @type {?string} */ (command["fragment"]);
     var haveZipMetadata = !!command["zipmeta"];
@@ -151,29 +169,13 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     var self = this;
     self.configure(command).then(function() {
         var store = new adapt.epub.EPUBDocStore();
-        if (authorStyleSheet) {
-            for (var i = 0; i < authorStyleSheet.length; i++) {
-                store.addAuthorStyleSheet(authorStyleSheet[i]);
-            }
-        }
-        if (userStyleSheet) {
-            for (var i = 0; i < userStyleSheet.length; i++) {
-                store.addUserStyleSheet(userStyleSheet[i]);
-            }
-        }
         store.init().then(function() {
             var epubURL = adapt.base.resolveURL(url, self.window.location.href);
             self.packageURL = [epubURL];
             store.loadEPUBDoc(epubURL, haveZipMetadata).then(function(opf) {
                 self.opf = opf;
-                self.opf.resolveFragment(fragment).then(function(position) {
-                    self.pagePosition = position;
-                    self.resize().then(function() {
-                        self.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "complete");
-                        vivliostyle.profile.profiler.registerEndTiming("loadEPUB");
-                        self.callback({"t":"loaded", "metadata": self.opf.getMetadata()});
-                        frame.finish(true);
-                    });
+                self.setStyleSheetsAndRender(authorStyleSheet, userStyleSheet, fragment).then(function() {
+                    frame.finish(true);
                 });
             });
         });
@@ -186,9 +188,8 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.loadXML = function(command) {
-    vivliostyle.profile.profiler.registerStartTiming("loadXML");
-    vivliostyle.profile.profiler.registerStartTiming("loadFirstPage");
-    this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
+    vivliostyle.profile.profiler.registerStartTiming("beforeRender");
+    this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     /** @type {!Array<!adapt.viewer.SingleDocumentParam>} */ var params = command["url"];
     var doc = /** @type {Document} */ (command["document"]);
     var fragment = /** @type {?string} */ (command["fragment"]);
@@ -200,16 +201,6 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
     var self = this;
     self.configure(command).then(function() {
         var store = new adapt.epub.EPUBDocStore();
-        if (authorStyleSheet) {
-            for (var i = 0; i < authorStyleSheet.length; i++) {
-                store.addAuthorStyleSheet(authorStyleSheet[i]);
-            }
-        }
-        if (userStyleSheet) {
-            for (var i = 0; i < userStyleSheet.length; i++) {
-                store.addUserStyleSheet(userStyleSheet[i]);
-            }
-        }
         store.init().then(function() {
             /** @type {!Array<!adapt.epub.OPFItemParam>} */ var resolvedParams = params.map(function(p, index) {
                 return {
@@ -222,19 +213,41 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
             self.packageURL = resolvedParams.map(function(p) { return p.url; });
             self.opf = new adapt.epub.OPFDoc(store, "");
             self.opf.initWithChapters(resolvedParams, doc).then(function() {
-                self.opf.resolveFragment(fragment).then(function(position) {
-                    self.pagePosition = position;
-                    self.resize().then(function() {
-                        self.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "complete");
-                        vivliostyle.profile.profiler.registerEndTiming("loadXML");
-                        self.callback({"t":"loaded"});
-                        frame.finish(true);
-                    });
+                self.setStyleSheetsAndRender(authorStyleSheet, userStyleSheet, fragment).then(function() {
+                    frame.finish(true);
                 });
             });
         });
     });
     return frame.result();
+};
+
+/**
+ * @private
+ * @param {Array.<{url: ?string, text: ?string}>} authorStyleSheet
+ * @param {Array.<{url: ?string, text: ?string}>} userStyleSheet
+ * @param {?string=} fragment
+ * @returns {!adapt.task.Result.<boolean>}
+ */
+adapt.viewer.Viewer.prototype.setStyleSheetsAndRender = function(authorStyleSheet, userStyleSheet, fragment) {
+    this.cancelRenderingTask();
+    this.opf.store.setStyleSheets(authorStyleSheet, userStyleSheet);
+    var self = this;
+
+    var cont;
+    if (fragment) {
+        cont = this.opf.resolveFragment(fragment).thenAsync(function(position) {
+            self.pagePosition = position;
+            return adapt.task.newResult(true);
+        });
+    } else {
+        cont = adapt.task.newResult(true);
+    }
+
+    return cont.thenAsync(function() {
+        vivliostyle.profile.profiler.registerEndTiming("beforeRender");
+        return self.resize();
+    });
 };
 
 /**
@@ -348,6 +361,10 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
         this.zoom = command["zoom"];
         this.needRefresh = true;
     }
+    if (typeof command["fitToScreen"] == "boolean" && command["fitToScreen"] !== this.fitToScreen) {
+        this.fitToScreen = command["fitToScreen"];
+        this.needRefresh = true;
+    }
     return adapt.task.newResult(true);
 };
 
@@ -442,9 +459,7 @@ adapt.viewer.Viewer.prototype.showSpread = function(spread) {
 adapt.viewer.Viewer.prototype.reportPosition = function() {
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("reportPosition");
     var self = this;
-    if (!self.pagePosition) {
-        self.pagePosition = self.opfView.getPagePosition();
-    }
+    goog.asserts.assert(self.pagePosition);
     self.opf.getCFI(this.pagePosition.spineIndex, this.pagePosition.offsetInItem).then(function(cfi) {
         var page = self.currentPage;
         var r = self.waitForLoading && page.fetchers.length > 0
@@ -483,8 +498,17 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
         return false;
     }
     var viewport = this.createViewport();
-    return (viewport.width == this.viewport.width && viewport.height == this.viewport.height) ||
-        (this.opfView && !this.opfView.hasAutoSizedPages());
+
+    if (viewport.width == this.viewport.width && viewport.height == this.viewport.height) {
+        return true;
+    }
+    if (this.opfView && this.opfView.hasPages() && !this.opfView.hasAutoSizedPages()) {
+        this.viewport.width = viewport.width;
+        this.viewport.height = viewport.height;
+        this.needRefresh = true;
+        return true;
+    }
+    return false;
 };
 
 /**
@@ -533,13 +557,14 @@ adapt.viewer.Viewer.prototype.reset = function() {
  * Show current page or spread depending on the setting (this.pref.spreadView).
  * @private
  * @param {!adapt.vtree.Page} page
+ * @param {boolean=} sync If true, get the necessary page synchronously (not waiting another rendering task)
  * @returns {!adapt.task.Result}
  */
-adapt.viewer.Viewer.prototype.showCurrent = function(page) {
+adapt.viewer.Viewer.prototype.showCurrent = function(page, sync) {
     this.needRefresh = false;
     var self = this;
     if (this.pref.spreadView) {
-        return this.opfView.getCurrentSpread().thenAsync(function(spread) {
+        return this.opfView.getSpread(this.pagePosition, sync).thenAsync(function(spread) {
             self.showSpread(spread);
             self.setSpreadZoom(spread);
             self.currentPage = page;
@@ -557,7 +582,8 @@ adapt.viewer.Viewer.prototype.showCurrent = function(page) {
  * @param {!adapt.vtree.Page} page
  */
 adapt.viewer.Viewer.prototype.setPageZoom = function(page) {
-    this.viewport.zoom(page.dimensions.width, page.dimensions.height, this.zoom);
+    var zoom = this.getAdjustedZoomFactor(page.dimensions);
+    this.viewport.zoom(page.dimensions.width, page.dimensions.height, zoom);
 };
 
 /**
@@ -565,7 +591,17 @@ adapt.viewer.Viewer.prototype.setPageZoom = function(page) {
  */
 adapt.viewer.Viewer.prototype.setSpreadZoom = function(spread) {
     var dim = this.getSpreadDimensions(spread);
-    this.viewport.zoom(dim.width, dim.height, this.zoom);
+    this.viewport.zoom(dim.width, dim.height, this.getAdjustedZoomFactor(dim));
+};
+
+/**
+* @param {!{width: number, height: number}} pageDimension
+* @returns {number} adjusted zoom factor
+ */
+adapt.viewer.Viewer.prototype.getAdjustedZoomFactor = function(pageDimension) {
+    return this.fitToScreen
+        ? this.calculateZoomFactorToFitInsideViewPort(pageDimension)
+        : this.zoom;
 };
 
 /**
@@ -614,12 +650,43 @@ adapt.viewer.Viewer.prototype.queryZoomFactor = function(type) {
             } else {
                 pageDim = this.currentPage.dimensions;
             }
-            var widthZoom = this.viewport.width / pageDim.width;
-            var heightZoom = this.viewport.height / pageDim.height;
-            return Math.min(widthZoom, heightZoom);
+            return this.calculateZoomFactorToFitInsideViewPort(pageDim);
         default:
             throw new Error("unknown zoom type: " + type);
     }
+};
+
+/**
+ * @param {!{width: number, height: number}} pageDimension
+ * @returns {number} zoom factor to fit inside viewport
+ */
+adapt.viewer.Viewer.prototype.calculateZoomFactorToFitInsideViewPort = function(pageDimension) {
+    var widthZoom = this.viewport.width / pageDimension.width;
+    var heightZoom = this.viewport.height / pageDimension.height;
+    return Math.min(widthZoom, heightZoom);
+};
+
+/**
+ * Error representing that the rendering has been canceled.
+ * @private
+ * @constructor
+ * @extends {Error}
+ */
+adapt.viewer.Viewer.RenderingCanceledError = function() {
+    this.name = "RenderingCanceledError";
+    this.message = "Page rendering has been canceled";
+    this.stack = (new Error()).stack;
+};
+goog.inherits(adapt.viewer.Viewer.RenderingCanceledError, Error);
+
+/**
+ * @private
+ */
+adapt.viewer.Viewer.prototype.cancelRenderingTask = function() {
+    if (this.renderTask) {
+        this.renderTask.interrupt(new adapt.viewer.Viewer.RenderingCanceledError());
+    }
+    this.renderTask = null;
 };
 
 /**
@@ -627,36 +694,56 @@ adapt.viewer.Viewer.prototype.queryZoomFactor = function(type) {
  */
 adapt.viewer.Viewer.prototype.resize = function() {
     this.needResize = false;
+    this.needRefresh = false;
     if (this.sizeIsGood()) {
         return adapt.task.newResult(true);
     }
     var self = this;
-    if (this.viewportElement.getAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE) === "complete") {
-        this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "resizing");
-    }
-    self.callback({"t": "resizestart"});
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("resize");
-    if (self.opfView && !self.pagePosition) {
-        self.pagePosition = self.opfView.getPagePosition();
-    }
-    self.reset();
+    this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
+    this.cancelRenderingTask();
+    var task = adapt.task.currentTask().getScheduler().run(function() {
+        return adapt.task.handle("resize", function(frame) {
+            self.renderTask = task;
+            vivliostyle.profile.profiler.registerStartTiming("render (resize)");
+            self.reset();
 
-    // With renderAllPages option specified, the rendering is performed after the initial page display,
-    // otherwise users are forced to wait the rendering finish in front of a blank page.
-    self.opfView.setPagePosition(self.pagePosition).then(function(page) {
-        self.showCurrent(page).then(function() {
-            self.reportPosition().then(function(p) {
-                vivliostyle.profile.profiler.registerEndTiming("loadFirstPage");
-                var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
-                r.then(function() {
-                    self.viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "complete");
-                    self.callback({"t": "resizeend"});
-                    frame.finish(p);
+            if (self.pagePosition) {
+                // When resizing, do not use the current page index, for a page index corresponding to
+                // the current position in the document (offsetInItem) can change due to different layout
+                // caused by different viewport size.
+                self.pagePosition.pageIndex = -1;
+            }
+
+            // With renderAllPages option specified, the rendering is performed after the initial page display,
+            // otherwise users are forced to wait the rendering finish in front of a blank page.
+            self.opfView.renderPagesUpto(self.pagePosition).then(function(result) {
+                self.pagePosition = result.position;
+                self.showCurrent(result.page, true).then(function() {
+                    self.reportPosition().then(function(p) {
+                        self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
+                        var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
+                        r.then(function() {
+                            if (self.renderTask === task) {
+                                self.renderTask = null;
+                            }
+                            vivliostyle.profile.profiler.registerEndTiming("render (resize)");
+                            self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
+                            self.callback({"t":"loaded"});
+                            frame.finish(p);
+                        });
+                    });
                 });
             });
+        }, function(frame, err) {
+            if (err instanceof adapt.viewer.Viewer.RenderingCanceledError) {
+                vivliostyle.profile.profiler.registerEndTiming("render (resize)");
+                vivliostyle.logging.logger.debug(err.message);
+            } else {
+                throw err;
+            }
         });
     });
-    return frame.result();
+    return adapt.task.newResult(true);
 };
 
 /**
@@ -686,7 +773,7 @@ adapt.viewer.Viewer.prototype.sendLocationNotification = function(page, cfi) {
  * @returns {?vivliostyle.constants.PageProgression}
  */
 adapt.viewer.Viewer.prototype.getCurrentPageProgression = function() {
-    return this.opfView ? this.opfView.getCurrentPageProgression() : null;
+    return this.opfView ? this.opfView.getCurrentPageProgression(this.pagePosition) : null;
 };
 
 /**
@@ -696,6 +783,9 @@ adapt.viewer.Viewer.prototype.getCurrentPageProgression = function() {
 adapt.viewer.Viewer.prototype.moveTo = function(command) {
     var method;
     var self = this;
+    if (this.readyState !== vivliostyle.constants.ReadyState.COMPLETE) {
+        this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
+    }
     if (typeof command["where"] == "string") {
         switch (command["where"]) {
             case "next":
@@ -713,6 +803,12 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
             default:
                 return adapt.task.newResult(true);
         }
+        if (method) {
+            var m = method;
+            method = function() {
+                return m.call(self.opfView, self.pagePosition);
+            };
+        }
     } else if (typeof command["epage"] == "number") {
         var epage = /** @type {number} */ (command["epage"]);
         method = function() {
@@ -721,21 +817,30 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
     } else if (typeof command["url"] == "string") {
         var url = /** @type {string} */ (command["url"]);
         method = function() {
-            return self.opfView.navigateTo(url);
+            return self.opfView.navigateTo(url, self.pagePosition);
         };
     } else {
         return adapt.task.newResult(true);
     }
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("nextPage");
-    method.call(self.opfView).then(/** @param {adapt.vtree.Page} page */ function(page) {
-        if (page) {
-            self.pagePosition = null;
-            self.showCurrent(page).then(function() {
-                self.reportPosition().thenFinish(frame);
+    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("moveTo");
+    method.call(self.opfView).then(/** @param {adapt.epub.PageAndPosition} result */ function(result) {
+        var cont;
+        if (result) {
+            self.pagePosition = result.position;
+            /** @type {!adapt.task.Frame<boolean>} */ var innerFrame = adapt.task.newFrame("moveTo.showCurrent");
+            cont = innerFrame.result();
+            self.showCurrent(result.page).then(function() {
+                self.reportPosition().thenFinish(innerFrame);
             });
         } else {
-            frame.finish(true);
+            cont = adapt.task.newResult(true);
         }
+        cont.then(function(res) {
+            if (self.readyState === vivliostyle.constants.ReadyState.LOADING) {
+                self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
+            }
+            frame.finish(res);
+        });
     });
     return frame.result();
 };

@@ -249,7 +249,7 @@ describe("sizing", function() {
             it("is the narrowest inline size it could take if none of the soft wrap opportunities were taken", function() {
                 var size = sizing.getSize(clientLayout, element, [Size.MAX_CONTENT_INLINE_SIZE]);
 
-                expect(size[Size.MAX_CONTENT_INLINE_SIZE]).toBe(maxContentInlineSize);
+                expect(size[Size.MAX_CONTENT_INLINE_SIZE]).toBeCloseTo(maxContentInlineSize, 1);
             });
 
             it("is the narrowest inline size it could take if none of the soft wrap opportunities were taken (in vertical writing mode)", function() {
@@ -257,7 +257,7 @@ describe("sizing", function() {
 
                 var size = sizing.getSize(clientLayout, element, [Size.MAX_CONTENT_INLINE_SIZE]);
 
-                expect(size[Size.MAX_CONTENT_INLINE_SIZE]).toBe(maxContentInlineSize);
+                expect(size[Size.MAX_CONTENT_INLINE_SIZE]).toBeCloseTo(maxContentInlineSize, 1);
             });
 
             it("the original properties and DOM structure are restored after measurement", function() {
@@ -429,7 +429,7 @@ describe("sizing", function() {
 
                 var size = sizing.getSize(clientLayout, element, [Size.FIT_CONTENT_INLINE_SIZE]);
 
-                expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBe(maxContentInlineSize);
+                expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBeCloseTo(maxContentInlineSize, 1);
             });
 
             it("the original properties and DOM structure are restored after measurement", function() {
@@ -468,7 +468,7 @@ describe("sizing", function() {
 
                 var size = sizing.getSize(clientLayout, element, [Size.FIT_CONTENT_INLINE_SIZE]);
 
-                expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBe(maxContentInlineSize);
+                expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBeCloseTo(maxContentInlineSize, 1);
             });
 
             it("the original properties and DOM structure are restored after measurement", function() {

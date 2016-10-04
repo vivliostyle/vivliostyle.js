@@ -38,6 +38,7 @@ goog.scope(function() {
      * - renderAllPages: Render all pages at the document load time. default: true
      * - spreadView: Display two pages in a single spread at a time. default: false
      * - zoom: Zoom factor with which pages are displayed. default: 1
+     * - fitToScreen: Auto adjust zoom factor to fit the screen. default: false
      * @dict
      * @typedef {{
      *     autoResize: (boolean|undefined),
@@ -45,7 +46,8 @@ goog.scope(function() {
      *     pageBorderWidth: (number|undefined),
      *     renderAllPages: (boolean|undefined),
      *     spreadView: (boolean|undefined),
-     *     zoom: (number|undefined)
+     *     zoom: (number|undefined),
+     *     fitToScreen: (boolean|undefined)
      * }}
      */
     vivliostyle.viewer.ViewerOptions;
@@ -60,7 +62,8 @@ goog.scope(function() {
             "pageBorderWidth": 1,
             "renderAllPages": true,
             "spreadView": false,
-            "zoom": 1
+            "zoom": 1,
+            "fitToScreen": false
         };
     }
 
@@ -124,6 +127,7 @@ goog.scope(function() {
      */
     vivliostyle.viewer.Viewer = function(settings, opt_options) {
         vivliostyle.constants.isDebug = settings.debug;
+        /** @private @type {boolean} */ this.initialized = false;
         /** @const @private */ this.settings = settings;
         /** @const @private */ this.adaptViewer = new adapt.viewer.Viewer(
             settings["window"] || window, settings["viewportElement"], "main", this.dispatcher.bind(this));
@@ -133,6 +137,12 @@ goog.scope(function() {
             this.setOptions(opt_options);
         }
         /** @const @private */ this.eventTarget = new adapt.base.SimpleEventTarget();
+
+        Object.defineProperty(this, "readyState", {
+            get: function() {
+                return this.adaptViewer.readyState;
+            }
+        });
     };
     /** @const */ var Viewer = vivliostyle.viewer.Viewer;
 
@@ -282,7 +292,13 @@ goog.scope(function() {
             "authorStyleSheet": authorStyleSheet,
             "userStyleSheet": userStyleSheet
         }, convertViewerOptions(this.options));
-        this.adaptViewer.initEmbed(command);
+
+        if (this.initialized) {
+            this.adaptViewer.sendCommand(command);
+        } else {
+            this.initialized = true;
+            this.adaptViewer.initEmbed(command);
+        }
     };
 
     /**

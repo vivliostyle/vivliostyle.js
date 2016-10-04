@@ -331,15 +331,16 @@ adapt.ops.StyleInstance.prototype.getConsumedOffset = function(flowPosition) {
 
 /**
  * @param {adapt.vtree.LayoutPosition|undefined} layoutPosition
+ * @param {boolean=} noLookAhead Do not look ahead elements that are not styled yet
  * @return {number} document offset of the given layoutPosition
  */
-adapt.ops.StyleInstance.prototype.getPosition = function(layoutPosition) {
+adapt.ops.StyleInstance.prototype.getPosition = function(layoutPosition, noLookAhead) {
     if (!layoutPosition)
         return 0;
     var currentPosition = Number.POSITIVE_INFINITY;
     for (var flowName in this.primaryFlows) {
         var flowPosition = layoutPosition.flowPositions[flowName];
-        if ((!flowPosition || flowPosition.positions.length == 0) && this.currentLayoutPosition) {
+        if (!noLookAhead && (!flowPosition || flowPosition.positions.length == 0) && this.currentLayoutPosition) {
             this.styler.styleUntilFlowIsReached(flowName);
             flowPosition = this.currentLayoutPosition.flowPositions[flowName];
             if (layoutPosition != this.currentLayoutPosition) {
@@ -874,12 +875,8 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
         return adapt.task.newResult(/** @type {adapt.vtree.LayoutPosition}*/ (null));
     }
 
-    if (pageMaster.pageBox.specified["width"].value === adapt.css.fullWidth) {
-        page.setAutoPageWidth(true);
-    }
-    if (pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight) {
-        page.setAutoPageHeight(true);
-    }
+    page.setAutoPageWidth(pageMaster.pageBox.specified["width"].value === adapt.css.fullWidth);
+    page.setAutoPageHeight(pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight);
     self.counterStore.setCurrentPage(page);
     self.counterStore.updatePageCounters(cascadedPageStyle, self);
 
@@ -1215,6 +1212,29 @@ adapt.ops.OPSDocStore.prototype.getTriggersForDoc = function(xmldoc) {
 };
 
 /**
+ * Set author stylesheets and user stylesheets. Existing style sheets are removed.
+ * @param {?Array.<{url: ?string, text: ?string}>} authorStyleSheets
+ * @param {?Array.<{url: ?string, text: ?string}>} userStyleSheets
+ */
+adapt.ops.OPSDocStore.prototype.setStyleSheets = function(authorStyleSheets, userStyleSheets) {
+    this.clearStyleSheets();
+    if (authorStyleSheets) {
+        authorStyleSheets.forEach(this.addAuthorStyleSheet, this);
+    }
+    if (userStyleSheets) {
+        userStyleSheets.forEach(this.addUserStyleSheet, this);
+    }
+};
+
+/**
+ * @private
+ */
+adapt.ops.OPSDocStore.prototype.clearStyleSheets = function() {
+    this.styleSheets.splice(0);
+};
+
+/**
+ * @private
  * @param {{url: ?string, text: ?string}} stylesheet
  */
 adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
@@ -1223,6 +1243,7 @@ adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
 };
 
 /**
+ * @private
  * @param {{url: ?string, text: ?string}} stylesheet
  */
 adapt.ops.OPSDocStore.prototype.addUserStyleSheet = function(stylesheet) {
