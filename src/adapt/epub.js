@@ -987,7 +987,7 @@ adapt.epub.makePageAndPosition = function(page, pageIndex) {
  * 		xmldoc: adapt.xmldoc.XMLDocHolder,
  * 		instance: adapt.ops.StyleInstance,
  * 		layoutPositions: Array.<adapt.vtree.LayoutPosition>,
- * 		pages: Array.<adapt.vtree.Page>,
+ * 		pages: !Array.<adapt.vtree.Page>,
  * 		complete: boolean
  * }}
  */
@@ -1946,6 +1946,15 @@ adapt.epub.OPFView.prototype.hasAutoSizedPages = function() {
         }
     }
     return false;
+};
+
+/**
+ * @returns {boolean}
+ */
+adapt.epub.OPFView.prototype.hasPages = function() {
+    return this.spineItems.some(function(item) {
+        return item && item.pages.length > 0;
+    });
 };
 
 /**

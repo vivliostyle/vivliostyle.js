@@ -875,12 +875,8 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
         return adapt.task.newResult(/** @type {adapt.vtree.LayoutPosition}*/ (null));
     }
 
-    if (pageMaster.pageBox.specified["width"].value === adapt.css.fullWidth) {
-        page.setAutoPageWidth(true);
-    }
-    if (pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight) {
-        page.setAutoPageHeight(true);
-    }
+    page.setAutoPageWidth(pageMaster.pageBox.specified["width"].value === adapt.css.fullWidth);
+    page.setAutoPageHeight(pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight);
     self.counterStore.setCurrentPage(page);
     self.counterStore.updatePageCounters(cascadedPageStyle, self);
 

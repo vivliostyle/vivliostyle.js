@@ -502,7 +502,7 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
     if (viewport.width == this.viewport.width && viewport.height == this.viewport.height) {
         return true;
     }
-    if (this.opfView && !this.opfView.hasAutoSizedPages()) {
+    if (this.opfView && this.opfView.hasPages() && !this.opfView.hasAutoSizedPages()) {
         this.viewport.width = viewport.width;
         this.viewport.height = viewport.height;
         this.needRefresh = true;
