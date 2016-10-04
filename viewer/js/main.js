@@ -6708,7 +6708,7 @@ var _vivliostyleViewer2 = _interopRequireDefault(_vivliostyleViewer);
 _modelsVivliostyle2["default"].setInstance(_vivliostyle2["default"]);
 _vivliostyleViewer2["default"].start();
 
-},{"./models/vivliostyle":10,"./vivliostyle-viewer":20,"vivliostyle":2}],6:[function(require,module,exports){
+},{"./models/vivliostyle":10,"./vivliostyle-viewer":21,"vivliostyle":2}],6:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -6800,7 +6800,7 @@ DocumentOptions.prototype.toObject = function () {
 exports["default"] = DocumentOptions;
 module.exports = exports["default"];
 
-},{"../stores/url-parameters":11,"./page-size":8,"knockout":1}],7:[function(require,module,exports){
+},{"../stores/url-parameters":12,"./page-size":8,"knockout":1}],7:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -6989,6 +6989,10 @@ var _storesUrlParameters = require("../stores/url-parameters");
 
 var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
 
+var _zoomOptions = require("./zoom-options");
+
+var _zoomOptions2 = _interopRequireDefault(_zoomOptions);
+
 function getViewerOptionsFromURL() {
     return {
         profile: _storesUrlParameters2["default"].getParameter("profile")[0] === "true",
@@ -7001,7 +7005,7 @@ function getDefaultValues() {
         fontSize: 16,
         profile: false,
         spreadView: false,
-        zoom: 1
+        zoom: _zoomOptions2["default"].createDefaultOptions()
     };
 }
 
@@ -7038,7 +7042,8 @@ ViewerOptions.prototype.toObject = function () {
     return {
         fontSize: this.fontSize(),
         spreadView: this.spreadView(),
-        zoom: this.zoom()
+        zoom: this.zoom().zoom,
+        fitToScreen: this.zoom().fitToScreen
     };
 };
 
@@ -7047,7 +7052,7 @@ ViewerOptions.getDefaultValues = getDefaultValues;
 exports["default"] = ViewerOptions;
 module.exports = exports["default"];
 
-},{"../stores/url-parameters":11,"knockout":1}],10:[function(require,module,exports){
+},{"../stores/url-parameters":12,"./zoom-options":11,"knockout":1}],10:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7088,6 +7093,144 @@ exports["default"] = new Vivliostyle();
 module.exports = exports["default"];
 
 },{}],11:[function(require,module,exports){
+/*
+ * Copyright 2016 Vivliostyle Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _modelsVivliostyle = require("../models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var ZoomOptions = (function () {
+    function ZoomOptions(zoom) {
+        _classCallCheck(this, ZoomOptions);
+
+        this.zoom = zoom;
+    }
+
+    _createClass(ZoomOptions, [{
+        key: "zoomIn",
+        value: function zoomIn(viewer) {
+            return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 1.25);
+        }
+    }, {
+        key: "zoomOut",
+        value: function zoomOut(viewer) {
+            return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 0.8);
+        }
+    }, {
+        key: "zoomToActualSize",
+        value: function zoomToActualSize() {
+            return new FixedZoomFactor(1);
+        }
+    }], [{
+        key: "createDefaultOptions",
+        value: function createDefaultOptions() {
+            return new FitToScreen();
+        }
+    }, {
+        key: "createFromZoomFactor",
+        value: function createFromZoomFactor(zoom) {
+            return new FixedZoomFactor(zoom);
+        }
+    }]);
+
+    return ZoomOptions;
+})();
+
+var FitToScreen = (function (_ZoomOptions) {
+    _inherits(FitToScreen, _ZoomOptions);
+
+    function FitToScreen() {
+        _classCallCheck(this, FitToScreen);
+
+        _get(Object.getPrototypeOf(FitToScreen.prototype), "constructor", this).call(this, 1);
+    }
+
+    _createClass(FitToScreen, [{
+        key: "toggleFitToScreen",
+        value: function toggleFitToScreen() {
+            return new FixedZoomFactor(1);
+        }
+    }, {
+        key: "getCurrentZoomFactor",
+        value: function getCurrentZoomFactor(viewer) {
+            return viewer.queryZoomFactor(_modelsVivliostyle2["default"].viewer.ZoomType.FIT_INSIDE_VIEWPORT);
+        }
+    }, {
+        key: "fitToScreen",
+        get: function get() {
+            return true;
+        }
+    }]);
+
+    return FitToScreen;
+})(ZoomOptions);
+
+var FixedZoomFactor = (function (_ZoomOptions2) {
+    _inherits(FixedZoomFactor, _ZoomOptions2);
+
+    function FixedZoomFactor() {
+        _classCallCheck(this, FixedZoomFactor);
+
+        _get(Object.getPrototypeOf(FixedZoomFactor.prototype), "constructor", this).apply(this, arguments);
+    }
+
+    _createClass(FixedZoomFactor, [{
+        key: "toggleFitToScreen",
+        value: function toggleFitToScreen() {
+            return new FitToScreen();
+        }
+    }, {
+        key: "getCurrentZoomFactor",
+        value: function getCurrentZoomFactor(viewer) {
+            return this.zoom;
+        }
+    }, {
+        key: "fitToScreen",
+        get: function get() {
+            return false;
+        }
+    }]);
+
+    return FixedZoomFactor;
+})(ZoomOptions);
+
+exports["default"] = ZoomOptions;
+module.exports = exports["default"];
+
+},{"../models/vivliostyle":10}],12:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7161,7 +7304,7 @@ URLParameterStore.prototype.setParameter = function (name, value) {
 exports["default"] = new URLParameterStore();
 module.exports = exports["default"];
 
-},{"../utils/string-util":14}],12:[function(require,module,exports){
+},{"../utils/string-util":15}],13:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7232,7 +7375,7 @@ exports["default"] = {
 };
 module.exports = exports["default"];
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7279,7 +7422,7 @@ var util = {
 exports["default"] = util;
 module.exports = exports["default"];
 
-},{"knockout":1}],14:[function(require,module,exports){
+},{"knockout":1}],15:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7314,7 +7457,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7368,7 +7511,7 @@ MessageDialog.prototype.getDisplayMessage = function (errorInfo) {
 exports["default"] = MessageDialog;
 module.exports = exports["default"];
 
-},{"knockout":1}],16:[function(require,module,exports){
+},{"knockout":1}],17:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7399,10 +7542,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 var _knockout = require("knockout");
 
 var _knockout2 = _interopRequireDefault(_knockout);
-
-var _modelsVivliostyle = require("../models/vivliostyle");
-
-var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
 
 var _modelsViewerOptions = require("../models/viewer-options");
 
@@ -7437,8 +7576,13 @@ function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
 
     this.isZoomOutDisabled = zoomDisabled;
     this.isZoomInDisabled = zoomDisabled;
-    this.isZoomDefaultDisabled = zoomDisabled;
+    this.isZoomToActualSizeDisabled = zoomDisabled;
+    this.isToggleFitToScreenDisabled = zoomDisabled;
     this.hideZoom = !!navigationOptions.disableZoom;
+
+    this.fitToScreen = _knockout2["default"].pureComputed(function () {
+        return viewerOptions.zoom().fitToScreen;
+    }, this);
 
     var fontSizeChangeDisabled = _knockout2["default"].pureComputed(function () {
         return navigationOptions.disableFontSizeChange || this.isDisabled();
@@ -7449,7 +7593,7 @@ function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
     this.isDefaultFontSizeDisabled = fontSizeChangeDisabled;
     this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
 
-    ["navigateToPrevious", "navigateToNext", "navigateToLeft", "navigateToRight", "navigateToFirst", "navigateToLast", "zoomIn", "zoomOut", "zoomDefault", "increaseFontSize", "decreaseFontSize", "defaultFontSize", "handleKey"].forEach(function (methodName) {
+    ["navigateToPrevious", "navigateToNext", "navigateToLeft", "navigateToRight", "navigateToFirst", "navigateToLast", "zoomIn", "zoomOut", "zoomToActualSize", "toggleFitToScreen", "increaseFontSize", "decreaseFontSize", "defaultFontSize", "handleKey"].forEach(function (methodName) {
         this[methodName] = this[methodName].bind(this);
     }, this);
 }
@@ -7511,7 +7655,7 @@ Navigation.prototype.navigateToLast = function () {
 Navigation.prototype.zoomIn = function () {
     if (!this.isZoomInDisabled()) {
         var zoom = this.viewerOptions_.zoom();
-        this.viewerOptions_.zoom(zoom * 1.25);
+        this.viewerOptions_.zoom(zoom.zoomIn(this.viewer_));
         return true;
     } else {
         return false;
@@ -7521,17 +7665,27 @@ Navigation.prototype.zoomIn = function () {
 Navigation.prototype.zoomOut = function () {
     if (!this.isZoomOutDisabled()) {
         var zoom = this.viewerOptions_.zoom();
-        this.viewerOptions_.zoom(zoom * 0.8);
+        this.viewerOptions_.zoom(zoom.zoomOut(this.viewer_));
         return true;
     } else {
         return false;
     }
 };
 
-Navigation.prototype.zoomDefault = function (force) {
-    if (force === true || !this.isZoomDefaultDisabled()) {
-        var zoom = this.viewer_.queryZoomFactor(_modelsVivliostyle2["default"].viewer.ZoomType.FIT_INSIDE_VIEWPORT);
-        this.viewerOptions_.zoom(zoom);
+Navigation.prototype.zoomToActualSize = function () {
+    if (!this.isZoomToActualSizeDisabled()) {
+        var zoom = this.viewerOptions_.zoom();
+        this.viewerOptions_.zoom(zoom.zoomToActualSize());
+        return true;
+    } else {
+        return false;
+    }
+};
+
+Navigation.prototype.toggleFitToScreen = function () {
+    if (!this.isToggleFitToScreenDisabled()) {
+        var zoom = this.viewerOptions_.zoom();
+        this.viewerOptions_.zoom(zoom.toggleFitToScreen());
         return true;
     } else {
         return false;
@@ -7598,7 +7752,7 @@ Navigation.prototype.handleKey = function (key) {
 exports["default"] = Navigation;
 module.exports = exports["default"];
 
-},{"../models/viewer-options":9,"../models/vivliostyle":10,"../utils/key-util":12,"knockout":1}],17:[function(require,module,exports){
+},{"../models/viewer-options":9,"../utils/key-util":13,"knockout":1}],18:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7700,7 +7854,7 @@ SettingsPanel.prototype.handleKey = function (key) {
 exports["default"] = SettingsPanel;
 module.exports = exports["default"];
 
-},{"../models/page-size":8,"../models/viewer-options":9,"../utils/key-util":12,"knockout":1}],18:[function(require,module,exports){
+},{"../models/page-size":8,"../models/viewer-options":9,"../utils/key-util":13,"knockout":1}],19:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7740,6 +7894,10 @@ var _modelsDocumentOptions = require("../models/document-options");
 
 var _modelsDocumentOptions2 = _interopRequireDefault(_modelsDocumentOptions);
 
+var _modelsZoomOptions = require("../models/zoom-options");
+
+var _modelsZoomOptions2 = _interopRequireDefault(_modelsZoomOptions);
+
 var _modelsViewerOptions = require("../models/viewer-options");
 
 var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
@@ -7778,10 +7936,11 @@ function ViewerApp() {
     if (this.viewerOptions.profile()) {
         _modelsVivliostyle2["default"].profile.profiler.enable();
     }
+    this.isDebug = _storesUrlParameters2["default"].getParameter("debug")[0] === "true";
     this.viewerSettings = {
         userAgentRootURL: "resources/",
         viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
-        debug: _storesUrlParameters2["default"].getParameter("debug")[0] === "true"
+        debug: this.isDebug
     };
     this.viewer = new _viewer2["default"](this.viewerSettings, this.viewerOptions);
     this.messageDialog = new _messageDialog2["default"](_modelsMessageQueue2["default"]);
@@ -7810,30 +7969,13 @@ function ViewerApp() {
         return ret;
     }).bind(this);
 
-    this.setDefaultView();
-
     this.viewer.loadDocument(this.documentOptions);
 }
-
-ViewerApp.prototype.setDefaultView = function () {
-    var status = this.viewer.state.status();
-    this.viewer.state.status.subscribe(function (newStatus) {
-        var finished = false;
-        var oldStatus = status;
-        status = newStatus;
-        if (oldStatus === "loading" && newStatus === "complete") {
-            // After document loaded, zoom to the default size
-            finished = this.navigation.zoomDefault(true);
-        } else if (newStatus === "loading") {
-            finished = false;
-        }
-    }, this);
-};
 
 exports["default"] = ViewerApp;
 module.exports = exports["default"];
 
-},{"../models/document-options":6,"../models/message-queue":7,"../models/viewer-options":9,"../models/vivliostyle":10,"../stores/url-parameters":11,"../utils/key-util":12,"./message-dialog":15,"./navigation":16,"./settings-panel":17,"./viewer":19,"knockout":1}],19:[function(require,module,exports){
+},{"../models/document-options":6,"../models/message-queue":7,"../models/viewer-options":9,"../models/vivliostyle":10,"../models/zoom-options":11,"../stores/url-parameters":12,"../utils/key-util":13,"./message-dialog":16,"./navigation":17,"./settings-panel":18,"./viewer":20,"knockout":1}],20:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7882,13 +8024,15 @@ function Viewer(viewerSettings, viewerOptions) {
     this.documentOptions_ = null;
     this.viewer_ = new _modelsVivliostyle2["default"].viewer.Viewer(viewerSettings, viewerOptions.toObject());
     var state_ = this.state_ = {
-        status: _utilsObservableUtil2["default"].readonlyObservable("loading"),
+        status: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.ReadyState.LOADING),
         pageProgression: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.LTR)
     };
     this.state = {
-        status: state_.status.getter,
+        status: state_.status.getter.extend({
+            rateLimit: { timeout: 100, method: "notifyWhenChangesStop" }
+        }),
         navigatable: _knockout2["default"].pureComputed(function () {
-            return state_.status.value() === "complete";
+            return state_.status.value() !== _modelsVivliostyle2["default"].constants.ReadyState.LOADING;
         }),
         pageProgression: state_.pageProgression.getter
     };
@@ -7911,18 +8055,14 @@ Viewer.prototype.setupViewerEventHandler = function () {
     this.viewer_.addListener("error", function (payload) {
         logger.error(payload.content);
     });
-    this.viewer_.addListener("resizestart", (function () {
-        var status = this.state.status();
-        if (status === "complete") {
-            this.state_.status.value("resizing");
+    this.viewer_.addListener("readystatechange", (function () {
+        var readyState = this.viewer_.readyState;
+        if (readyState === _modelsVivliostyle2["default"].constants.ReadyState.INTERACTIVE || _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
+            this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
         }
-    }).bind(this));
-    this.viewer_.addListener("resizeend", (function () {
-        this.state_.status.value("complete");
+        this.state_.status.value(readyState);
     }).bind(this));
     this.viewer_.addListener("loaded", (function () {
-        this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
-        this.state_.status.value("complete");
         if (this.viewerOptions_.profile()) {
             _modelsVivliostyle2["default"].profile.profiler.printTimings();
         }
@@ -7945,9 +8085,7 @@ Viewer.prototype.setupViewerEventHandler = function () {
 Viewer.prototype.setupViewerOptionSubscriptions = function () {
     _knockout2["default"].computed(function () {
         var viewerOptions = this.viewerOptions_.toObject();
-        if (this.state.status.peek() === "complete") {
-            this.viewer_.setOptions(viewerOptions);
-        }
+        this.viewer_.setOptions(viewerOptions);
     }, this).extend({ rateLimit: 0 });
 };
 
@@ -7995,7 +8133,7 @@ Viewer.prototype.queryZoomFactor = function (type) {
 exports["default"] = Viewer;
 module.exports = exports["default"];
 
-},{"../logging/logger":4,"../models/vivliostyle":10,"../utils/observable-util":13,"knockout":1}],20:[function(require,module,exports){
+},{"../logging/logger":4,"../models/vivliostyle":10,"../utils/observable-util":14,"knockout":1}],21:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -8046,4 +8184,4 @@ exports["default"] = {
 };
 module.exports = exports["default"];
 
-},{"./bindings/menuButton.js":3,"./viewmodels/viewer-app":18,"knockout":1}]},{},[5]);
+},{"./bindings/menuButton.js":3,"./viewmodels/viewer-app":19,"knockout":1}]},{},[5]);
