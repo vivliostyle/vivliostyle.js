@@ -36,10 +36,11 @@ function ViewerApp() {
     if (this.viewerOptions.profile()) {
         vivliostyle.profile.profiler.enable();
     }
+    this.isDebug = urlParameters.getParameter("debug")[0] === "true";
     this.viewerSettings = {
         userAgentRootURL: "resources/",
         viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
-        debug: urlParameters.getParameter("debug")[0] === "true"
+        debug: this.isDebug
     };
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
     this.messageDialog = new MessageDialog(messageQueue);

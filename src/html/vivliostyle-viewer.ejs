@@ -26,7 +26,7 @@
 <div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression, 'data-vivliostyle-spread-view': viewerOptions.spreadView}, click: settingsPanel.close"></div>
 <span id="vivliostyle-page-navigation-left" title="navigate to left" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToLeftDisabled()}"></span>
 <span id="vivliostyle-page-navigation-right" title="navigate to right" data-bind="click: navigation.navigateToRight, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToRightDisabled()}"></span>
-<div id="vivliostyle-loading-overlay">
+<div id="vivliostyle-loading-overlay" data-bind="visible: !isDebug">
 	<div class="vivliostyle-loading-spinner"></div>
 </div>
 
