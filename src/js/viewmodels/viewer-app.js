@@ -20,6 +20,7 @@
 import ko from "knockout";
 import vivliostyle from "../models/vivliostyle";
 import DocumentOptions from "../models/document-options";
+import ZoomOptions from "../models/zoom-options";
 import ViewerOptions from "../models/viewer-options";
 import messageQueue from "../models/message-queue";
 import Viewer from "./viewer";
@@ -35,10 +36,11 @@ function ViewerApp() {
     if (this.viewerOptions.profile()) {
         vivliostyle.profile.profiler.enable();
     }
+    this.isDebug = urlParameters.getParameter("debug")[0] === "true";
     this.viewerSettings = {
         userAgentRootURL: "resources/",
         viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
-        debug: urlParameters.getParameter("debug")[0] === "true"
+        debug: this.isDebug
     };
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
     this.messageDialog = new MessageDialog(messageQueue);
@@ -68,24 +70,7 @@ function ViewerApp() {
         return ret;
     }.bind(this);
 
-    this.setDefaultView();
-
     this.viewer.loadDocument(this.documentOptions);
 }
-
-ViewerApp.prototype.setDefaultView = function() {
-    var status = this.viewer.state.status();
-    this.viewer.state.status.subscribe(function(newStatus) {
-        var finished = false;
-        var oldStatus = status;
-        status = newStatus;
-        if (oldStatus === "loading" && newStatus === "complete") {
-            // After document loaded, zoom to the default size
-            finished = this.navigation.zoomDefault(true);
-        } else if (newStatus === "loading") {
-            finished = false;
-        }
-    }, this);
-};
 
 export default ViewerApp;

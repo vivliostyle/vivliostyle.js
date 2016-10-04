@@ -27,13 +27,15 @@ function Viewer(viewerSettings, viewerOptions) {
     this.documentOptions_ = null;
     this.viewer_ = new vivliostyle.viewer.Viewer(viewerSettings, viewerOptions.toObject());
     var state_ = this.state_= {
-        status: obs.readonlyObservable("loading"),
+        status: obs.readonlyObservable(vivliostyle.constants.ReadyState.LOADING),
         pageProgression: obs.readonlyObservable(vivliostyle.constants.LTR)
     };
     this.state = {
-        status: state_.status.getter,
+        status: state_.status.getter.extend({
+            rateLimit: { timeout: 100, method: "notifyWhenChangesStop" }
+        }),
         navigatable: ko.pureComputed(function() {
-            return state_.status.value() === "complete";
+            return state_.status.value() !== vivliostyle.constants.ReadyState.LOADING;
         }),
         pageProgression: state_.pageProgression.getter
     };
@@ -56,18 +58,14 @@ Viewer.prototype.setupViewerEventHandler = function() {
     this.viewer_.addListener("error", function(payload) {
         logger.error(payload.content);
     });
-    this.viewer_.addListener("resizestart", function() {
-        var status = this.state.status();
-        if (status === "complete") {
-            this.state_.status.value("resizing");
+    this.viewer_.addListener("readystatechange", function() {
+        var readyState = this.viewer_.readyState;
+        if (readyState === vivliostyle.constants.ReadyState.INTERACTIVE || vivliostyle.constants.ReadyState.COMPLETE) {
+            this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
         }
-    }.bind(this));
-    this.viewer_.addListener("resizeend", function() {
-        this.state_.status.value("complete");
+        this.state_.status.value(readyState);
     }.bind(this));
     this.viewer_.addListener("loaded", function() {
-        this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
-        this.state_.status.value("complete");
         if (this.viewerOptions_.profile()) {
             vivliostyle.profile.profiler.printTimings();
         }
@@ -90,9 +88,7 @@ Viewer.prototype.setupViewerEventHandler = function() {
 Viewer.prototype.setupViewerOptionSubscriptions = function() {
     ko.computed(function() {
         var viewerOptions = this.viewerOptions_.toObject();
-        if (this.state.status.peek() === "complete") {
-            this.viewer_.setOptions(viewerOptions);
-        }
+        this.viewer_.setOptions(viewerOptions);
     }, this).extend({rateLimit: 0});
 };
 
