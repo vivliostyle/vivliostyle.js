@@ -59,10 +59,13 @@ Viewer.prototype.setupViewerEventHandler = function() {
         logger.error(payload.content);
     });
     this.viewer_.addListener("readystatechange", function() {
-        this.state_.status.value(this.viewer_.readyState);
+        var readyState = this.viewer_.readyState;
+        if (readyState === vivliostyle.constants.ReadyState.INTERACTIVE || vivliostyle.constants.ReadyState.COMPLETE) {
+            this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
+        }
+        this.state_.status.value(readyState);
     }.bind(this));
     this.viewer_.addListener("loaded", function() {
-        this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
         if (this.viewerOptions_.profile()) {
             vivliostyle.profile.profiler.printTimings();
         }
