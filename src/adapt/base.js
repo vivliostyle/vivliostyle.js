@@ -357,6 +357,13 @@ adapt.base.getPrefixedProperty = function(prop) {
                 return "-webkit-filter";
             }
             break;
+        case "clip-path":
+            // Special case: prefer '-webkit-clip-path' to 'clip-path'
+            if (adapt.base.checkIfPropertySupported("-webkit-", "clip-path")) {
+                adapt.base.propNameMap[prop] = "-webkit-clip-path";
+                return "-webkit-clip-path";
+            }
+            break;
     }
 
 
