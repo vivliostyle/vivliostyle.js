@@ -1914,7 +1914,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
                         vals.push(builtIn.clone());
                     } else {
                         var idents = {};
-                        idents[token.text] = adapt.css.getName(token.text);
+                        idents[token.text.toLowerCase()] = adapt.css.getName(token.text);
                         vals.push(this.primitive(new adapt.cssvalid.PrimitiveValidator(0, idents, adapt.cssvalid.NO_IDENTS)));
                     }
                     expectval = false;

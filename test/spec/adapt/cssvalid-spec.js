@@ -18,6 +18,31 @@ describe("cssvalid", function() {
                     });
             });
         });
+        it("should parse simple validator that compare values case-insensitively.", function(done) {
+            var validatorSet = new adapt.cssvalid.ValidatorSet();
+            validatorSet.initBuiltInValidators();
+            validatorSet.parse("foo = bAr | Baz | bIZ ;");
+            var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+                validatorSet, true);
+            var warnListener = jasmine.createSpy("warn listener");
+            vivliostyle.logging.logger.addListener(vivliostyle.logging.LogLevel.WARN, warnListener);
+            adapt.task.start(function() {
+                adapt.cssparse.parseStylesheetFromText(
+                    ".test { foo: bar; }\n" +
+                    ".test2 { foo: BAR; }" +
+                    ".test3 { foo: Bar; }" +
+                    ".test4 { foo: bAr; }" +
+                    ".test5 { foo: baR; }" +
+                    ".test6 { foo: BAZ; }" +
+                    ".test6 { foo: biz; }" +
+                    "", handler, null, null, null).then(
+                    function(result) {
+                        expect(result).toBe(true);
+                        expect(warnListener).not.toHaveBeenCalled();
+                        done();
+                    });
+            });
+        });
         it("should parse validator and space rule", function(done) {
             var validatorSet = new adapt.cssvalid.ValidatorSet();
             validatorSet.initBuiltInValidators();
