@@ -129,8 +129,15 @@ adapt.taskutil.loadElement = function(elem, src) {
     var fetcher = new adapt.taskutil.Fetcher(function() {
         /** @type {!adapt.task.Frame.<string>} */ var frame = adapt.task.newFrame("loadImage");
         var continuation = frame.suspend(elem);
+        var done = false;
         /** @param {Event} evt */
         var handler = function(evt) {
+            if (done) {
+                return;
+            } else {
+                done = true;
+            }
+
             if (elem.localName == "img") {
                 // IE puts these bogus attributes, even if they were not present
                 if (!width) {
