@@ -366,8 +366,6 @@ align-content = flex-start | flex-end | center | space-between | space-around | 
 OPACITY_VALUE = NUM | PERCENTAGE;
 DASH_ARRAY = COMMA( SPACE( [ LENGTH | PERCENTAGE | NUM ]+ )+ );
 PAINT = none | child | child(INT) | COLOR | SPACE( URI [none | COLOR]? ) | context-fill | context-stroke;
-alignment-baseline = auto | baseline | before-edge | text-before-edge | middle | central | after-edge | text-after-edge | ideographic | alphabetic | hanging | mathematical;
-baseline-shift = baseline | sub | super | PERCENTAGE | LENGTH;
 color-interpolation = auto | sRGB | linearRGB;
 color-rendering = auto | optimizeSpeed | optimizeQuality;
 fill = PAINT;
@@ -417,7 +415,9 @@ mask-mode = alpha | luminance | match-source;
 [webkit]mask-composite = COMMA( [ add | subtract | intersect | exclude ]+ );
 
 /* css-inline-3 */
-dominant-baseline = auto | use-script | no-change | reset-size | ideographic | alphabetic | hanging | mathematical | central | middle | text-after-edge | text-before-edge;
+alignment-baseline = auto | before-edge | after-edge | baseline | text-bottom | alphabetic | ideographic | middle | central | mathematical | text-top | bottom | center | top;
+baseline-shift = baseline | sub | super | PERCENTAGE | LENGTH;
+dominant-baseline = reset-size | no-change | use-script | auto | text-bottom | alphabetic | ideographic | middle | central | mathematical | hanging | text-top;
 
 /* filters */
 flood-color = COLOR;
