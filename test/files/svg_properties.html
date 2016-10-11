@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+      svg {
+        width:  500px;
+        height: 500px;
+        background: rgba(200,200,200,0.5);
+      }
+      .graphic_1 {
+      }
+      .graphic_2 {
+      }
+      text {
+        fill: #333;
+        alignment-baseline: auto;
+        cursor: text;
+      }
+      .text1 {
+        dominant-baseline: auto;
+        alignment-baseline: middle;
+        baseline-shift: 1px;
+        direction: ltr;
+        font: bold italic large Palatino, serif;
+        font-stretch: narrower;
+      }
+      .text2 {
+        dominant-baseline: central;
+        alignment-baseline: central;
+        baseline-shift: baseline;
+        direction: rtl;
+        font-family: san-serif;
+        font-size-adjust: 1.2;
+        font-stretch: wider;
+        font-style: italic;
+        font-variant:  small-caps;
+        font-weight: bold;
+        glyph-orientation-vertical: 90deg;
+      }
+      rect {
+        fill: rgb(200,100,100);
+        cursor: pointer;
+        flood-color: blue;
+        flood-opacity: 0.2;
+      }
+      .rect1 {
+        clip-path: inset(0px 0px 0px 0px round 10px 10px / 10px 10px );
+        -webkit-clip-path: inset(0px 0px 0px 0px round 10px 10px / 10px 10px );
+        color-interpolation: sRGB;
+        color-rendering: auto;
+        fill-opacity: 90%;
+        fill-rule: evenodd;
+      }
+      .rect2 {
+        clip-path: circle(50px at center);
+        -webkit-clip-path: circle(50px at center);
+        color-interpolation: linearRGB;
+        color-rendering: optimizeSpeed;
+        fill-opacity: 0.5;
+        fill-rule: nonzero;
+      }
+      .rect3 {
+        clip-path: ellipse(20px 50px at 50px 50px);
+        -webkit-clip-path: ellipse(20px 50px at 50px 50px);
+        color-interpolation: auto;
+        color-rendering: optimizeQuality;
+      }
+      .rect4 {
+        -webkit-clip-path: polygon(evenodd, 50px 0px, 20px 100px, 100px 40px, 0px 40px, 80px 100px);
+        clip-path: polygon(evenodd, 50px 0px, 20px 100px, 100px 40px, 0px 40px, 80px 100px);
+      }
+      .rect11 {
+        -webkit-filter: blur(0.5em);
+        filter: blur(0.5em);
+      }
+      .rect12 {
+        -webkit-filter: brightness(20%);
+        filter: brightness(20%);
+      }
+      .rect13 {
+        -webkit-filter: drop-shadow(0.5em 0.5em #FF0000);
+        filter: drop-shadow(0.5em 0.5em #FF0000);
+      }
+      .rect14 {
+        -webkit-filter: sepia(90%);
+        filter: sepia(90%);
+      }
+      .image1 {
+        image-rendering: optimizeSpeed;
+      }
+      .image2 {
+        image-rendering: optimizeQuality;
+      }
+    </style>
+</head>
+<body>
+  <svg class="graphic_1" version="1.1" xmlns="http://www.w3.org/2000/svg">
+
+    <line x1="10" y1="40" x2="233" y2="40" stroke="red" stroke-dasharray="2"/>
+    <line x1="10" y1="80" x2="233" y2="80" stroke="red" stroke-dasharray="2"/>
+
+    <text class="text1" x="20" y="40" text-anchor="start">日本語abc</text>
+    <text class="text2" x="220" y="80" text-anchor="start">日本語abc</text>
+
+    <rect class="rect1" x="10" y="110" width="100" height="100"></rect>
+    <rect class="rect2" x="120" y="110" width="100" height="100"></rect>
+    <rect class="rect3" x="230" y="110" width="100" height="100"></rect>
+    <rect class="rect4" x="340" y="110" width="100" height="100"></rect>
+
+    <rect class="rect11" x="10" y="220" width="100" height="100"></rect>
+    <rect class="rect12" x="120" y="220" width="100" height="100"></rect>
+    <rect class="rect13" x="230" y="220" width="100" height="100"></rect>
+    <rect class="rect14" x="340" y="220" width="100" height="100"></rect>
+    
+    <image class="image1" xlink:href="./img/50x50.png" x="10" y="330" height="50px" width="50px"/>
+    <image class="image2" xlink:href="./img/50x50.png" x="70" y="330" height="50px" width="50px"/>
+  </svg>
+  <svg class="graphic_2" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  </svg>
+  <svg class="graphic_2" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  </svg>
+  <svg class="graphic_2" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  </svg>
+  <svg class="graphic_2" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  </svg>
+</body>
+</html>
