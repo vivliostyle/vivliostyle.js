@@ -399,7 +399,7 @@ FILL_RULE = nonzero | evenodd;
 SHAPE_BOX = BOX | margin-box;
 GEOMETRY_BOX = SHAPE_BOX | fill-box | stroke-box | view-box;
 BASIC_SHAPE =
-    inset( SPACE( PLENGTH{1,4} [ round PLENGTH{1,4} [ \/ PLENGTH{1,4} ]? ]? ) )
+    inset( SPACE( PLENGTH{1,4} [ round PLENGTH{1,4} [ SLASH PLENGTH{1,4} ]? ]? ) )
   | circle(  SPACE( [SHAPE_RADIUS]?    [at BG_POSITION_TERM{1,4}]? ) )
   | ellipse( SPACE( SHAPE_RADIUS{2}? [at BG_POSITION_TERM{1,4}]? ) )
   | polygon( FILL_RULE? COMMA( SPACE( PLENGTH{2} )+ )+ );

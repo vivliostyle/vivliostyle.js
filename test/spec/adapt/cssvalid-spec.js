@@ -147,5 +147,24 @@ describe("cssvalid", function() {
                     });
             });
         });
+        it("should parse rule that contains slash", function(done) {
+            var validatorSet = new adapt.cssvalid.ValidatorSet();
+            validatorSet.initBuiltInValidators();
+            validatorSet.parse("foo = bar( SPACE( POS_NUM [ SLASH POS_NUM ]? ) );");
+            var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+                validatorSet, true);
+            var warnListener = jasmine.createSpy("warn listener");
+            vivliostyle.logging.logger.addListener(vivliostyle.logging.LogLevel.WARN, warnListener);
+            adapt.task.start(function() {
+                adapt.cssparse.parseStylesheetFromText(
+                    ".test { foo: bar( 10 / 10 ) ; }\n" +
+                    ".test2 { foo: bar( 10 ) ; }", handler, null, null, null).then(
+                    function(result) {
+                        expect(result).toBe(true);
+                        expect(warnListener).not.toHaveBeenCalled();
+                        done();
+                    });
+            });
+        });
     });
 });
