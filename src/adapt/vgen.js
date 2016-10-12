@@ -900,7 +900,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                         if (attributeName == "href")
                             attributeValue = self.resolveURL(attributeValue);
                     }
-                    if ( ns == adapt.base.NS.SVG && /^[A-Z\-]+$/.test(attributeName) ) {
+                    if (ns == adapt.base.NS.SVG && (/^[A-Z\-]+$/).test(attributeName)) {
+                        // Workaround for Edge bug
+                        // See https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/5579311/
                         attributeName = attributeName.toLowerCase();
                     }
                     if (self.isSVGUrlAttribute(attributeName)) {
