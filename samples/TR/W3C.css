@@ -12,13 +12,13 @@ body {
 	padding: 0 !important;
 }
 @page:left {
-	margin: 10% 10% 10% 14%!important;
+	margin: 10% 10% 10% 10% !important;
 }
 @page:right {
-	margin: 10% 14% 10% 10%!important;
+	margin: 10% 10% 10% 10% !important;
 }
 @page:first {
-	margin: 10% 10% 10% 14%!important;
+	margin: 10% 10% 10% 10% !important;
 }
 
 
@@ -445,6 +445,11 @@ body {
 }
 
 
+/***** font-family *****/
+body {
+	font-family: "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif;
+}
+
 /***** Spec specific tweaks *****/
 /* CSS3-UI */
 pre code.highlight {
@@ -455,4 +460,3 @@ pre code.highlight {
 	overflow: visible;
 	hyphens: none;
 }
-
