@@ -900,6 +900,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                         if (attributeName == "href")
                             attributeValue = self.resolveURL(attributeValue);
                     }
+                    if ( ns == adapt.base.NS.SVG && /^[A-Z\-]+$/.test(attributeName) ) {
+                        attributeName = attributeName.toLowerCase();
+                    }
                     if (self.isSVGUrlAttribute(attributeName)) {
                         attributeValue = vivliostyle.urls.transformURIs(
                             attributeValue, self.xmldoc.url, self.documentURLTransformer);
@@ -1003,7 +1006,7 @@ adapt.vgen.ViewFactory.SVG_URL_ATTRIBUTES = [
  * @return {boolean} isSVGUrlAttribute
  */
 adapt.vgen.ViewFactory.prototype.isSVGUrlAttribute = function(attributeName) {
-    return adapt.vgen.ViewFactory.SVG_URL_ATTRIBUTES.indexOf(attributeName) != -1;
+    return adapt.vgen.ViewFactory.SVG_URL_ATTRIBUTES.indexOf(attributeName.toLowerCase()) != -1;
 };
 
 /**
