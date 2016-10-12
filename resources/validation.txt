@@ -18,6 +18,8 @@ ALENGTH = LENGTH | auto;
 APLENGTH = PLENGTH | auto;
 PAPLENGTH = PPLENGTH | auto;
 ANGLE = POS_ANGLE | ZERO | NEGATIVE;
+LENGTH_OR_NUM = LENGTH | NUM;
+ANGLE_OR_NUM = ANGLE | NUM;
 SCOLOR = HASHCOLOR | aliceblue: #F0F8FF | antiquewhite: #FAEBD7 | aqua: #00FFFF | aquamarine: #7FFFD4 | azure: #F0FFFF |
     beige: #F5F5DC | bisque: #FFE4C4 | black: #000000 | blanchedalmond: #FFEBCD | blue: #0000FF | blueviolet: #8A2BE2 | brown: #A52A2A |
     burlywood: #DEB887 | cadetblue: #5F9EA0 | chartreuse: #7FFF00 | chocolate: #D2691E | coral: #FF7F50 | cornflowerblue: #6495ED |
@@ -132,13 +134,13 @@ empty-cells = show | hide;
 FAMILY = SPACE(IDENT+) | STRING;
 FAMILY_LIST = COMMA( FAMILY+ );
 font-family = FAMILY_LIST;
-font-size = xx-small | x-small | small | medium | large | x-large | xx-large | larger | smaller | PPLENGTH;
+font-size = xx-small | x-small | small | medium | large | x-large | xx-large | larger | smaller | PPLENGTH | POS_NUM;
 font-style = normal | italic | oblique;
 font-variant = normal | small-caps;
 font-weight = normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
-height = PAPLENGTH;
+height = PAPLENGTH | POS_NUM ;
 left = APLENGTH;
-letter-spacing = normal | LENGTH;
+letter-spacing = normal | LENGTH_OR_NUM;
 line-height = normal | POS_NUM | PPLENGTH;
 list-style-image = IMAGE;
 list-style-position = inside | outside;
@@ -193,8 +195,8 @@ voice-family = FAMILY_LIST;
 volume = NUM | PERCENTAGE | silent | x-soft | soft | medium | loud | x-loud;
 white-space = normal | pre | nowrap | pre-wrap | pre-line;
 widows = POS_INT;
-width = PAPLENGTH;
-word-spacing = normal | LENGTH;
+width = PAPLENGTH | POS_NUM ;
+word-spacing = normal | LENGTH_OR_NUM;
 z-index = auto | INT;
 
 [epub,moz,ms,webkit]hyphens = auto | manual | none;
@@ -383,12 +385,12 @@ stop-color = COLOR;
 stop-opacity = OPACITY_VALUE;
 stroke = PAINT;
 stroke-dasharray = none | DASH_ARRAY;
-stroke-dashoffset = PERCENTAGE | LENGTH;
+stroke-dashoffset = PERCENTAGE | LENGTH_OR_NUM;
 stroke-linecap = butt | round | square;
 stroke-linejoin = miter | round | bevel;
 stroke-miterlimit = NUM;
 stroke-opacity = OPACITY_VALUE;
-stroke-width = PERCENTAGE | LENGTH;
+stroke-width = PERCENTAGE | LENGTH_OR_NUM;
 text-anchor = start | middle | end;
 text-rendering = auto | optimizeSpeed | optimizeLegibility | geometricPrecision;
 vector-effect = none | SPACE( [ non-scaling-stroke | non-scaling-size | non-rotation | fixed-position ]+ [ viewport | screen ]? );
@@ -411,7 +413,7 @@ clip-rule = nonzero | evenodd;
 
 /* css-inline-3 */
 alignment-baseline = auto | before-edge | after-edge | baseline | text-bottom | alphabetic | ideographic | middle | central | mathematical | text-top | bottom | center | top;
-baseline-shift = baseline | sub | super | PERCENTAGE | LENGTH;
+baseline-shift = baseline | sub | super | PERCENTAGE | LENGTH_OR_NUM;
 dominant-baseline = reset-size | no-change | use-script | auto | text-bottom | alphabetic | ideographic | middle | central | mathematical | hanging | text-top;
 
 /* filters */
