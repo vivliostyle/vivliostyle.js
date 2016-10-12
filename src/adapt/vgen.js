@@ -997,7 +997,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
  */
 adapt.vgen.ViewFactory.SVG_URL_ATTRIBUTES = [
     "color-profile", "clip-path", "cursor", "filter",
-    "maker", "marker-start", "marker-end", "marker-mid",
+    "marker", "marker-start", "marker-end", "marker-mid",
     "fill", "stroke", "mask"
 ];
 
