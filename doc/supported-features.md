@@ -814,38 +814,17 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 - [vector-effect](https://www.w3.org/TR/SVG2/coords.html#VectorEffectProperty)
   - Support depends on browser capabilities
 
+### [Scalable Vector Graphics (SVG) 1.1](https://www.w3.org/TR/SVG11/)
+
+  - [mask](https://www.w3.org/TR/SVG11/masking.html#MaskProperty)
+    - Support depends on browser capabilities
+
 ### [CSS Masking 1](https://drafts.fxtf.org/css-masking-1/)
 
 - [clip-path](https://drafts.fxtf.org/css-masking-1/#the-clip-path)
   - Allowed prefixes: webkit
   - Support depends on browser capabilities
 - [clip-rule](https://drafts.fxtf.org/css-masking-1/#the-clip-rule)
-  - Support depends on browser capabilities
-- [mask](https://drafts.fxtf.org/css-masking-1/#propdef-mask)
-  - Allowed prefixes: webkit
-  - Support depends on browser capabilities
-- [mask-image](https://drafts.fxtf.org/css-masking-1/#the-mask-image)
-  - Allowed prefixes: webkit
-  - Support depends on browser capabilities
-- [mask-mode](https://drafts.fxtf.org/css-masking-1/#the-mask-mode)
-  - Support depends on browser capabilities
-- [mask-origin](https://drafts.fxtf.org/css-masking-1/#the-mask-origin)
-  - Allowed prefixes: webkit
-  - Support depends on browser capabilities
-- [mask-clip](https://drafts.fxtf.org/css-masking-1/#the-mask-clip)
-  - Allowed prefixes: webkit
-  - Support depends on browser capabilities
-- [mask-position](https://drafts.fxtf.org/css-masking-1/#the-mask-position)
-  - Allowed prefixes: webkit
-  - Support depends on browser capabilities
-- [mask-size](https://drafts.fxtf.org/css-masking-1/#the-mask-size)
-  - Allowed prefixes: webkit
-  - Support depends on browser capabilities
-- [mask-repeat](https://drafts.fxtf.org/css-masking-1/#the-mask-repeat)
-  - Allowed prefixes: webkit
-  - Support depends on browser capabilities
-- [mask-composite](https://drafts.fxtf.org/css-masking-1/#the-mask-composite)
-  - Allowed prefixes: webkit
   - Support depends on browser capabilities
 
 ### [CSS Inline Layout 3](https://www.w3.org/TR/css-inline-3/)

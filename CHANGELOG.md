@@ -34,18 +34,11 @@
   - [text-anchor](https://www.w3.org/TR/SVG2/text.html#TextAnchorProperty)
   - [text-rendering](https://www.w3.org/TR/SVG2/painting.html#TextRenderingProperty)
   - [vector-effect](https://www.w3.org/TR/SVG2/coords.html#VectorEffectProperty)
+- Support [Scalable Vector Graphics (SVG) 1.1](https://www.w3.org/TR/SVG11/) properties.
+  - [mask](https://www.w3.org/TR/SVG11/masking.html#MaskProperty)
 - Support [CSS Masking 1](https://drafts.fxtf.org/css-masking-1/) properties.
   - [clip-path](https://drafts.fxtf.org/css-masking-1/#the-clip-path)
   - [clip-rule](https://drafts.fxtf.org/css-masking-1/#the-clip-rule)
-  - [mask](https://drafts.fxtf.org/css-masking-1/#propdef-mask)
-  - [mask-image](https://drafts.fxtf.org/css-masking-1/#the-mask-image)
-  - [mask-mode](https://drafts.fxtf.org/css-masking-1/#the-mask-mode)
-  - [mask-origin](https://drafts.fxtf.org/css-masking-1/#the-mask-origin)
-  - [mask-clip](https://drafts.fxtf.org/css-masking-1/#the-mask-clip)
-  - [mask-position](https://drafts.fxtf.org/css-masking-1/#the-mask-position)
-  - [mask-size](https://drafts.fxtf.org/css-masking-1/#the-mask-size)
-  - [mask-repeat](https://drafts.fxtf.org/css-masking-1/#the-mask-repeat)
-  - [mask-composite](https://drafts.fxtf.org/css-masking-1/#the-mask-composite)
 - Support [CSS Inline Layout 3](https://www.w3.org/TR/css-inline-3/) properties.
   - [alignment-baseline](https://www.w3.org/TR/css-inline-3/#propdef-alignment-baseline)
   - [baseline-shift](https://www.w3.org/TR/css-inline-3/#propdef-baseline-shift)

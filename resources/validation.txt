@@ -393,6 +393,9 @@ text-anchor = start | middle | end;
 text-rendering = auto | optimizeSpeed | optimizeLegibility | geometricPrecision;
 vector-effect = none | SPACE( [ non-scaling-stroke | non-scaling-size | non-rotation | fixed-position ]+ [ viewport | screen ]? );
 
+/* SVG 1.1 */
+mask = none | URI;
+
 /* css-masking-1 */
 SHAPE_RADIUS = PLENGTH | closest-side | farthest-side;
 FILL_RULE = nonzero | evenodd;
@@ -405,14 +408,6 @@ BASIC_SHAPE =
   | polygon( FILL_RULE? COMMA( SPACE( PLENGTH{2} )+ )+ );
 [webkit]clip-path = none | URI | [ BASIC_SHAPE || GEOMETRY_BOX ];
 clip-rule = nonzero | evenodd;
-[webkit]mask-image = COMMA( [ none | IMAGE ]+ );
-mask-mode = alpha | luminance | match-source;
-[webkit]mask-origin = COMMA( GEOMETRY_BOX+ );
-[webkit]mask-clip = COMMA( [ GEOMETRY_BOX | no-clip ]+ );
-[webkit]mask-position = COMMA( SPACE(BG_POSITION_TERM{1,4})+ );
-[webkit]mask-size = COMMA( SPACE( [PLENGTH | auto ]{1,2} | cover | contain)+ );
-[webkit]mask-repeat = COMMA( [ repeat | repeat-x | repeat-y | no-repeat ]+ );
-[webkit]mask-composite = COMMA( [ add | subtract | intersect | exclude ]+ );
 
 /* css-inline-3 */
 alignment-baseline = auto | before-edge | after-edge | baseline | text-bottom | alphabetic | ideographic | middle | central | mathematical | text-top | bottom | center | top;
@@ -490,14 +485,7 @@ text-emphasis-style: none;
 marker-start: none;
 marker-mid: none;
 marker-end: none;
-mask-image: none;
-mask-mode: match-source;
-mask-position: center;
-mask-size: auto;
-mask-repeat: no-repeat;
-mask-origin: border-box;
-mask-clip: border-box;
-mask-composite: add;
+
 
 SHORTHANDS
 
@@ -527,5 +515,3 @@ pause = INSETS pause-before pause-after;
 font = FONT font-style font-variant font-weight /* font-size line-height font-family are special-cased */;
 [epub,webkit]text-emphasis = text-emphasis-style text-emphasis-color;
 marker = INSETS marker-start marker-mid marker-end;
-[webkit]mask = COMMA mask-image mask-mode [ mask-position  [ / mask-size ] ]
-   mask-repeat [ mask-origin mask-clip ] mask-composite;
