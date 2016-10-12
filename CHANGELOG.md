@@ -83,6 +83,9 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/283>
 - Fix rem unit inside `position: relative` elements
   - <https://github.com/vivliostyle/vivliostyle.js/issues/242>
+- Fix internally generated IDs on elements to conform to the XML specification
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/295>
+  - Characters which can be used in an ID in an XML document is specified at <https://www.w3.org/TR/xml/#NT-NameStartChar>.
 
 ## [2016.7](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.7) - 2016-07-04
 
