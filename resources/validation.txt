@@ -396,6 +396,9 @@ text-rendering = auto | optimizeSpeed | optimizeLegibility | geometricPrecision;
 vector-effect = none | SPACE( [ non-scaling-stroke | non-scaling-size | non-rotation | fixed-position ]+ [ viewport | screen ]? );
 
 /* SVG 1.1 */
+alignment-baseline = auto | baseline | before-edge | text-before-edge | middle | central | after-edge | text-after-edge | ideographic | alphabetic | hanging | mathematical;
+baseline-shift = baseline | sub | super | PERCENTAGE | LENGTH_OR_NUM;
+dominant-baseline = auto | use-script | no-change | reset-size | ideographic | alphabetic | hanging | mathematical | central | middle | text-after-edge | text-before-edge;
 mask = none | URI;
 
 /* css-masking-1 */
@@ -410,11 +413,6 @@ BASIC_SHAPE =
   | polygon( FILL_RULE? COMMA( SPACE( PLENGTH{2} )+ )+ );
 [webkit]clip-path = none | URI | [ BASIC_SHAPE || GEOMETRY_BOX ];
 clip-rule = nonzero | evenodd;
-
-/* css-inline-3 */
-alignment-baseline = auto | before-edge | after-edge | baseline | text-bottom | alphabetic | ideographic | middle | central | mathematical | text-top | bottom | center | top;
-baseline-shift = baseline | sub | super | PERCENTAGE | LENGTH_OR_NUM;
-dominant-baseline = reset-size | no-change | use-script | auto | text-bottom | alphabetic | ideographic | middle | central | mathematical | hanging | text-top;
 
 /* filters */
 flood-color = COLOR;

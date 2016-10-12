@@ -816,6 +816,12 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 ### [Scalable Vector Graphics (SVG) 1.1](https://www.w3.org/TR/SVG11/)
 
+  - [alignment-baseline](https://www.w3.org/TR/SVG11/text.html#AlignmentBaselineProperty)
+    - Support depends on browser capabilities
+  - [baseline-shift](https://www.w3.org/TR/SVG11/text.html#BaselineShiftProperty)
+    - Support depends on browser capabilities
+  - [dominant-baseline](https://www.w3.org/TR/SVG11/text.html#DominantBaselineProperty)
+    - Support depends on browser capabilities
   - [mask](https://www.w3.org/TR/SVG11/masking.html#MaskProperty)
     - Support depends on browser capabilities
 
@@ -825,15 +831,6 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Allowed prefixes: webkit
   - Support depends on browser capabilities
 - [clip-rule](https://drafts.fxtf.org/css-masking-1/#the-clip-rule)
-  - Support depends on browser capabilities
-
-### [CSS Inline Layout 3](https://www.w3.org/TR/css-inline-3/)
-
-- [alignment-baseline](https://www.w3.org/TR/css-inline-3/#propdef-alignment-baseline)
-  - Support depends on browser capabilities
-- [baseline-shift](https://www.w3.org/TR/css-inline-3/#propdef-baseline-shift)
-  - Support depends on browser capabilities
-- [dominant-baseline](https://www.w3.org/TR/css-inline-3/#propdef-dominant-baseline)
   - Support depends on browser capabilities
 
 ## [Filter Effects 1](https://www.w3.org/TR/filter-effects-1/)

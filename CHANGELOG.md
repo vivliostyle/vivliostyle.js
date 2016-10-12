@@ -8,7 +8,7 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/282>
 - Support [Scalable Vector Graphics (SVG) 2](https://www.w3.org/TR/SVG2/) properties.
   - [color-interpolation](https://www.w3.org/TR/SVG2/painting.html#ColorInterpolationProperty)
-  - [color-rendering](https://www.w3.org/TR/SVG2/painting.html#ColorInterpolationProperty)
+  - [color-rendering](https://www.w3.org/TR/SVG2/painting.html#ColorRenderingProperty)
   - [fill](https://www.w3.org/TR/SVG2/painting.html#FillProperty)
   - [fill-opacity](https://www.w3.org/TR/SVG2/painting.html#FillOpacityProperty)
   - [fill-rule](https://www.w3.org/TR/SVG2/painting.html#FillRuleProperty)
@@ -35,16 +35,15 @@
   - [text-rendering](https://www.w3.org/TR/SVG2/painting.html#TextRenderingProperty)
   - [vector-effect](https://www.w3.org/TR/SVG2/coords.html#VectorEffectProperty)
 - Support [Scalable Vector Graphics (SVG) 1.1](https://www.w3.org/TR/SVG11/) properties.
+  - [alignment-baseline](https://www.w3.org/TR/SVG11/text.html#AlignmentBaselineProperty)
+  - [baseline-shift](https://www.w3.org/TR/SVG11/text.html#BaselineShiftProperty)
+  - [dominant-baseline](https://www.w3.org/TR/SVG11/text.html#DominantBaselineProperty)
   - [mask](https://www.w3.org/TR/SVG11/masking.html#MaskProperty)
 - Support [CSS Masking 1](https://drafts.fxtf.org/css-masking-1/) properties.
   - [clip-path](https://drafts.fxtf.org/css-masking-1/#the-clip-path)
   - [clip-rule](https://drafts.fxtf.org/css-masking-1/#the-clip-rule)
-- Support [CSS Inline Layout 3](https://www.w3.org/TR/css-inline-3/) properties.
-  - [alignment-baseline](https://www.w3.org/TR/css-inline-3/#propdef-alignment-baseline)
-  - [baseline-shift](https://www.w3.org/TR/css-inline-3/#propdef-baseline-shift)
-  - [dominant-baseline](https://www.w3.org/TR/css-inline-3/#propdef-dominant-baseline)
 - Support [Filter Effects 1](https://www.w3.org/TR/filter-effects-1/) properties.
-  - [flood-color](https://www.w3.org/TR/filter-effects-1/#FloodColorPropesrty)
+  - [flood-color](https://www.w3.org/TR/filter-effects-1/#propdef-flood-color)
   - [flood-opacity](https://www.w3.org/TR/filter-effects-1/#propdef-flood-opacity)
   - [lighting-color](https://www.w3.org/TR/filter-effects-1/#propdef-lighting-color)
 - Support `font-stretch` property
