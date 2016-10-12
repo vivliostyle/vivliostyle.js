@@ -507,10 +507,24 @@ adapt.base.isLetter = function(ch) {
 
 /**
  * @param {string} str
+ * @param {string=} prefix
  * @return {string}
  */
-adapt.base.escapeRegexpChar = function(str) {
-    return '\\u' + (0x10000|str.charCodeAt(0)).toString(16).substr(1);
+adapt.base.escapeCharToHex = function(str, prefix) {
+    prefix = typeof prefix === "string" ? prefix : '\\u';
+    return prefix + (0x10000|str.charCodeAt(0)).toString(16).substr(1);
+};
+
+/**
+ * @param {string} str
+ * @param {string=} prefix
+ * @return {string}
+ */
+adapt.base.escapeNameStrToHex = function(str, prefix) {
+    function escapeChar(s) {
+        return adapt.base.escapeCharToHex(s, prefix);
+    }
+    return str.replace(/[^-a-zA-Z0-9_]/g, escapeChar);
 };
 
 /**
@@ -518,7 +532,35 @@ adapt.base.escapeRegexpChar = function(str) {
  * @return {string}
  */
 adapt.base.escapeRegExp = function(str) {
-    return str.replace(/[^-a-zA-Z0-9_]/g, adapt.base.escapeRegexpChar);
+    return adapt.base.escapeNameStrToHex(str);
+};
+
+/**
+ * @param {string} str
+ * @param {string=} prefix
+ * @return {string}
+ */
+adapt.base.unescapeCharFromHex = function(str, prefix) {
+    prefix = typeof prefix === "string" ? prefix : '\\u';
+    if (str.indexOf(prefix) === 0) {
+        return String.fromCharCode(parseInt(str.substring(prefix.length), 16));
+    } else {
+        return str;
+    }
+};
+
+/**
+ * @param {string} str
+ * @param {string=} prefix
+ * @return {string}
+ */
+adapt.base.unescapeStrFromHex = function(str, prefix) {
+    prefix = typeof prefix === "string" ? prefix : '\\u';
+    function unescapeChar(s) {
+        return adapt.base.unescapeCharFromHex(s, prefix);
+    }
+    var regexp = new RegExp(adapt.base.escapeRegExp(prefix) + "[0-9a-fA-F]{4}", "g");
+    return str.replace(regexp, unescapeChar);
 };
 
 /**
