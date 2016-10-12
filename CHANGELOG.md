@@ -6,6 +6,48 @@
 
 - Additional author style sheets can be injected with 'styleSheet' property of `vivliostyle.viewer.DocumentOptions`.
   - <https://github.com/vivliostyle/vivliostyle.js/pull/282>
+- Support [Scalable Vector Graphics (SVG) 2](https://www.w3.org/TR/SVG2/) properties.
+  - [color-interpolation](https://www.w3.org/TR/SVG2/painting.html#ColorInterpolationProperty)
+  - [color-rendering](https://www.w3.org/TR/SVG2/painting.html#ColorRenderingProperty)
+  - [fill](https://www.w3.org/TR/SVG2/painting.html#FillProperty)
+  - [fill-opacity](https://www.w3.org/TR/SVG2/painting.html#FillOpacityProperty)
+  - [fill-rule](https://www.w3.org/TR/SVG2/painting.html#FillRuleProperty)
+  - [glyph-orientation-vertical](https://www.w3.org/TR/SVG2/text.html#GlyphOrientationVerticalProperty)
+  - [image-rendering](https://www.w3.org/TR/SVG2/painting.html#ImageRenderingProperty)
+  - [marker](https://www.w3.org/TR/SVG2/painting.html#MarkerProperty)
+  - [marker-start](https://www.w3.org/TR/SVG2/painting.html#MarkerStartProperty)
+  - [marker-mid](https://www.w3.org/TR/SVG2/painting.html#MarkerMidProperty)
+  - [marker-end](https://www.w3.org/TR/SVG2/painting.html#MarkerEndProperty)
+  - [pointer-events](https://www.w3.org/TR/SVG2/interact.html#PointerEventsProperty)
+  - [paint-order](https://www.w3.org/TR/SVG2/painting.html#PaintOrderProperty)
+  - [shape-rendering](https://www.w3.org/TR/SVG2/painting.html#ShapeRenderingProperty)
+  - [stop-color](https://www.w3.org/TR/SVG2/pservers.html#StopColorProperty)
+  - [stop-opacity](https://www.w3.org/TR/SVG2/pservers.html#StopOpacityProperty)
+  - [stroke](https://www.w3.org/TR/SVG2/painting.html#StrokeProperty)
+  - [stroke-dasharray](https://www.w3.org/TR/SVG2/painting.html#StrokeDasharrayProperty)
+  - [stroke-dashoffset](https://www.w3.org/TR/SVG2/painting.html#StrokeDashoffsetProperty)
+  - [stroke-linecap](https://www.w3.org/TR/SVG2/painting.html#StrokeLinecapProperty)
+  - [stroke-linejoin](https://www.w3.org/TR/SVG2/painting.html#StrokeLinejoinProperty)
+  - [stroke-miterlimit](https://www.w3.org/TR/SVG2/painting.html#StrokeMiterlimitProperty)
+  - [stroke-opacity](https://www.w3.org/TR/SVG2/painting.html#StrokeOpacityProperty)
+  - [stroke-width](https://www.w3.org/TR/SVG2/painting.html#StrokeWidthProperty)
+  - [text-anchor](https://www.w3.org/TR/SVG2/text.html#TextAnchorProperty)
+  - [text-rendering](https://www.w3.org/TR/SVG2/painting.html#TextRenderingProperty)
+  - [vector-effect](https://www.w3.org/TR/SVG2/coords.html#VectorEffectProperty)
+- Support [Scalable Vector Graphics (SVG) 1.1](https://www.w3.org/TR/SVG11/) properties.
+  - [alignment-baseline](https://www.w3.org/TR/SVG11/text.html#AlignmentBaselineProperty)
+  - [baseline-shift](https://www.w3.org/TR/SVG11/text.html#BaselineShiftProperty)
+  - [dominant-baseline](https://www.w3.org/TR/SVG11/text.html#DominantBaselineProperty)
+  - [mask](https://www.w3.org/TR/SVG11/masking.html#MaskProperty)
+- Support [CSS Masking 1](https://drafts.fxtf.org/css-masking-1/) properties.
+  - [clip-path](https://drafts.fxtf.org/css-masking-1/#the-clip-path)
+  - [clip-rule](https://drafts.fxtf.org/css-masking-1/#the-clip-rule)
+- Support [Filter Effects 1](https://www.w3.org/TR/filter-effects-1/) properties.
+  - [flood-color](https://www.w3.org/TR/filter-effects-1/#propdef-flood-color)
+  - [flood-opacity](https://www.w3.org/TR/filter-effects-1/#propdef-flood-opacity)
+  - [lighting-color](https://www.w3.org/TR/filter-effects-1/#propdef-lighting-color)
+- Support `font-stretch` property
+  - Spec: [CSS Fonts Module Level 3 - font-stretch property](https://www.w3.org/TR/css-fonts-3/#propdef-font-stretch)
 
 ### Changed
 
@@ -33,6 +75,9 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/283>
 - Fix rem unit inside `position: relative` elements
   - <https://github.com/vivliostyle/vivliostyle.js/issues/242>
+- Fix internally generated IDs on elements to conform to the XML specification
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/295>
+  - Characters which can be used in an ID in an XML document is specified at <https://www.w3.org/TR/xml/#NT-NameStartChar>.
 
 ## [2016.7](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.7) - 2016-07-04
 
@@ -254,7 +299,7 @@
 Beta release.
 
 ### Added
-- [core] Support page background and document canvas background color 
+- [core] Support page background and document canvas background color
   - <https://github.com/vivliostyle/vivliostyle.js/pull/33>
   - Note: only simple background color is supported.
 - [core, viewer] Layout is automatically updated when the window size is changed

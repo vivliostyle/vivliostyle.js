@@ -1,0 +1,5 @@
+<svg width="32px" height="32px" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+    <title>cursor.svgの内容（外部ファイルとして定義）</title>
+    <path d="M10,10L90,90M90,50V90H50z" fill="none" stroke="black" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M10,10L90,90M90,50V90H50z" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

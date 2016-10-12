@@ -277,3 +277,21 @@ adapt.cssprop.toCounters = function(val, reset) {
     }
     return visitor.counters;
 };
+
+
+/**
+ * @constructor
+ * @extends {adapt.css.FilterVisitor}
+ */
+adapt.cssprop.UrlTransformVisitor = function(baseUrl, transformer) {
+    adapt.css.FilterVisitor.call(this);
+    this.baseUrl = baseUrl;
+    this.transformer = transformer;
+};
+goog.inherits(adapt.cssprop.UrlTransformVisitor, adapt.css.FilterVisitor);
+
+/** @override */
+adapt.cssprop.UrlTransformVisitor.prototype.visitURL = function(url) {
+    return new adapt.css.URL(
+        this.transformer.transformURL(url.url, this.baseUrl));
+};

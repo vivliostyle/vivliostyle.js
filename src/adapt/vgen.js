@@ -15,6 +15,7 @@ goog.require('adapt.vtree');
 goog.require('adapt.xmldoc');
 goog.require('adapt.font');
 goog.require('vivliostyle.pagefloat');
+goog.require('vivliostyle.urls');
 
 /**
  * @private
@@ -899,6 +900,15 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                         if (attributeName == "href")
                             attributeValue = self.resolveURL(attributeValue);
                     }
+                    if (ns == adapt.base.NS.SVG && (/^[A-Z\-]+$/).test(attributeName)) {
+                        // Workaround for Edge bug
+                        // See https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/5579311/
+                        attributeName = attributeName.toLowerCase();
+                    }
+                    if (self.isSVGUrlAttribute(attributeName)) {
+                        attributeValue = vivliostyle.urls.transformURIs(
+                            attributeValue, self.xmldoc.url, self.documentURLTransformer);
+                    }
                     if (attributeNS) {
                         var attributePrefix = adapt.vgen.namespacePrefixMap[attributeNS];
                         if (attributePrefix)
@@ -980,6 +990,25 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         });
     });
     return frame.result();
+};
+
+/**
+ * @private
+ * @const
+ * @type {Array.<string>}
+ */
+adapt.vgen.ViewFactory.SVG_URL_ATTRIBUTES = [
+    "color-profile", "clip-path", "cursor", "filter",
+    "marker", "marker-start", "marker-end", "marker-mid",
+    "fill", "stroke", "mask"
+];
+
+/**
+ * @param {string} attributeName
+ * @return {boolean} isSVGUrlAttribute
+ */
+adapt.vgen.ViewFactory.prototype.isSVGUrlAttribute = function(attributeName) {
+    return adapt.vgen.ViewFactory.SVG_URL_ATTRIBUTES.indexOf(attributeName.toLowerCase()) != -1;
 };
 
 /**
@@ -1322,6 +1351,8 @@ adapt.vgen.ViewFactory.prototype.applyComputedStyles = function(target, computed
             continue;
         }
         var value = computedStyle[propName];
+        value = value.visit(new adapt.cssprop.UrlTransformVisitor(
+            this.xmldoc.url, this.documentURLTransformer));
         if (value.isNumeric() && adapt.expr.needUnitConversion(value.unit)) {
             // font-size for the root element is already converted to px
             value = adapt.css.convertNumericToPx(value, this.context);

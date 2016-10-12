@@ -18,6 +18,8 @@ ALENGTH = LENGTH | auto;
 APLENGTH = PLENGTH | auto;
 PAPLENGTH = PPLENGTH | auto;
 ANGLE = POS_ANGLE | ZERO | NEGATIVE;
+LENGTH_OR_NUM = LENGTH | NUM;
+ANGLE_OR_NUM = ANGLE | NUM;
 SCOLOR = HASHCOLOR | aliceblue: #F0F8FF | antiquewhite: #FAEBD7 | aqua: #00FFFF | aquamarine: #7FFFD4 | azure: #F0FFFF |
     beige: #F5F5DC | bisque: #FFE4C4 | black: #000000 | blanchedalmond: #FFEBCD | blue: #0000FF | blueviolet: #8A2BE2 | brown: #A52A2A |
     burlywood: #DEB887 | cadetblue: #5F9EA0 | chartreuse: #7FFF00 | chocolate: #D2691E | coral: #FF7F50 | cornflowerblue: #6495ED |
@@ -105,8 +107,8 @@ LIST_STYLE_TYPE = disc | circle | square | decimal | decimal-leading-zero | lowe
     hebrew | none;
 TYPE_OR_UNIT_IN_ATTR = string | color | url | integer | number | length | angle | time | frequency;
 ATTR = attr(SPACE(IDENT TYPE_OR_UNIT_IN_ATTR?) [ STRING | IDENT | COLOR | INT | NUM | PLENGTH | ANGLE | POS_TIME | FREQUENCY]?);
-CONTENT = normal | none | 
-    [ STRING | URI | counter(IDENT LIST_STYLE_TYPE?) | 
+CONTENT = normal | none |
+    [ STRING | URI | counter(IDENT LIST_STYLE_TYPE?) |
     counters(IDENT STRING LIST_STYLE_TYPE?) | ATTR |
     target-counter([ STRING | URI ] IDENT LIST_STYLE_TYPE?) |
     target-counter(ATTR IDENT LIST_STYLE_TYPE?) |
@@ -126,19 +128,19 @@ direction = ltr | rtl;
 display = inline | block | list-item | inline-block | table | inline-table | table-row-group |
     table-header-group | table-footer-group | table-row | table-column-group | table-column |
     table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex | inline-flex |
-    ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container;
+    ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container | run-in | compact | marker;
 elevation = ANGLE | below | level | above | higher | lower;
 empty-cells = show | hide;
 FAMILY = SPACE(IDENT+) | STRING;
 FAMILY_LIST = COMMA( FAMILY+ );
 font-family = FAMILY_LIST;
-font-size = xx-small | x-small | small | medium | large | x-large | xx-large | larger | smaller | PPLENGTH;
+font-size = xx-small | x-small | small | medium | large | x-large | xx-large | larger | smaller | PPLENGTH | POS_NUM;
 font-style = normal | italic | oblique;
 font-variant = normal | small-caps;
 font-weight = normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
-height = PAPLENGTH;
+height = PAPLENGTH | POS_NUM ;
 left = APLENGTH;
-letter-spacing = normal | LENGTH;
+letter-spacing = normal | LENGTH_OR_NUM;
 line-height = normal | POS_NUM | PPLENGTH;
 list-style-image = IMAGE;
 list-style-position = inside | outside;
@@ -193,8 +195,8 @@ voice-family = FAMILY_LIST;
 volume = NUM | PERCENTAGE | silent | x-soft | soft | medium | loud | x-loud;
 white-space = normal | pre | nowrap | pre-wrap | pre-line;
 widows = POS_INT;
-width = PAPLENGTH;
-word-spacing = normal | LENGTH; 
+width = PAPLENGTH | POS_NUM ;
+word-spacing = normal | LENGTH_OR_NUM;
 z-index = auto | INT;
 
 [epub,moz,ms,webkit]hyphens = auto | manual | none;
@@ -219,7 +221,7 @@ z-index = auto | INT;
 [adapt]border-start-width = BORDER_SIDE_WIDTH;
 [adapt]border-end-width = BORDER_SIDE_WIDTH;
 
-SHAPE = auto | rectangle( PLENGTH{4} ) |  ellipse( PLENGTH{4} ) |  circle( PLENGTH{3} ) | 
+SHAPE = auto | rectangle( PLENGTH{4} ) |  ellipse( PLENGTH{4} ) |  circle( PLENGTH{3} ) |
     polygon( SPACE(PLENGTH+)+ );
 [epubx]shape-inside = SHAPE;
 [epubx,webkit]shape-outside = SHAPE;
@@ -239,7 +241,7 @@ SHADOW = SPACE(inset || LENGTH{2,4} || COLOR); /* relaxed */
 text-shadow = none |  COMMA( SHADOW+ );
 [webkit]box-decoration-break = slice | clone;
 FILTER_FUNCTION = blur(LENGTH) | brightness(NUM | PERCENTAGE) | contrast(NUM | PERCENTAGE) | drop-shadow(SPACE(LENGTH{2,3} COLOR?))
-                | grayscale(NUM | PERCENTAGE) | hue-rotate(ANGLE) | invert(NUM | PERCENTAGE) | opacity(NUM | PERCENTAGE) 
+                | grayscale(NUM | PERCENTAGE) | hue-rotate(ANGLE) | invert(NUM | PERCENTAGE) | opacity(NUM | PERCENTAGE)
                 | saturate(NUM | PERCENTAGE) | sepia(NUM | PERCENTAGE);
 FILTER_FUNCTION_LIST = FILTER_FUNCTION+;
 [webkit]filter = none | FILTER_FUNCTION_LIST;
@@ -287,6 +289,7 @@ font-size-adjust = none | NNEG_NUM;
 [webkit]font-kerning = auto | normal | none;
 font-variant-east-asian = normal | [[ jis78 | jis83 | jis90 | jis04 | simplified | traditional ] || [ full-width | proportional-width ] || ruby];
 font-feature-settings = COMMA( SPACE( STRING [ on | off | INT ]? )+ );
+font-stretch = normal | wider | narrower | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded;
 
 /* CSS Images */
 image-resolution = RESOLUTION;
@@ -342,7 +345,7 @@ box-sizing = content-box | padding-box | border-box;
 text-combine-upright = none | all | [ digits POS_INT? ]; /* relaxed */
 [epub,webkit]text-orientation = mixed | upright | sideways-right | sideways-left | sideways | use-glyph-orientation /* the following values are kept for backward-compatibility */ | vertical-right | rotate-right | rotate-left | rotate-normal | auto;
 unicode-bidi = normal | embed | isolate | bidi-override | isolate-override | plaintext;
-[epub,webkit]writing-mode = horizontal-tb | vertical-rl;
+[epub,webkit]writing-mode = horizontal-tb | vertical-rl | lr-tb | rl-tb | tb-rl | lr | rl | tb;
 
 /* CSS Flex box */
 FLEX_BASIS = content | PAPLENGTH;
@@ -360,6 +363,61 @@ align-content = flex-start | flex-end | center | space-between | space-around | 
 
 /* Pointer Events */
 [ms]touch-action = auto | none | [ pan-x || pan-y ] | manipulation;
+
+/* SVG 2 */
+OPACITY_VALUE = NUM | PERCENTAGE;
+DASH_ARRAY = COMMA( SPACE( [ LENGTH | PERCENTAGE | NUM ]+ )+ );
+PAINT = none | child | child(INT) | COLOR | SPACE( URI [none | COLOR]? ) | context-fill | context-stroke;
+color-interpolation = auto | sRGB | linearRGB;
+color-rendering = auto | optimizeSpeed | optimizeQuality;
+fill = PAINT;
+fill-opacity = OPACITY_VALUE;
+fill-rule = nonzero | evenodd;
+glyph-orientation-vertical = auto | NUM | ANGLE;
+image-rendering = auto | optimizeSpeed | optimizeQuality | crisp-edges | pixelated;
+marker-start = none | URI;
+marker-mid = none | URI;
+marker-end = none | URI;
+pointer-events = bounding-box | visiblePainted | visibleFill | visibleStroke | visible | painted | fill | stroke | all | none;
+paint-order = normal | [ fill || stroke || markers ];
+shape-rendering = auto | optimizeSpeed | crispEdges | geometricPrecision;
+stop-color = COLOR;
+stop-opacity = OPACITY_VALUE;
+stroke = PAINT;
+stroke-dasharray = none | DASH_ARRAY;
+stroke-dashoffset = PERCENTAGE | LENGTH_OR_NUM;
+stroke-linecap = butt | round | square;
+stroke-linejoin = miter | round | bevel;
+stroke-miterlimit = NUM;
+stroke-opacity = OPACITY_VALUE;
+stroke-width = PERCENTAGE | LENGTH_OR_NUM;
+text-anchor = start | middle | end;
+text-rendering = auto | optimizeSpeed | optimizeLegibility | geometricPrecision;
+vector-effect = none | SPACE( [ non-scaling-stroke | non-scaling-size | non-rotation | fixed-position ]+ [ viewport | screen ]? );
+
+/* SVG 1.1 */
+alignment-baseline = auto | baseline | before-edge | text-before-edge | middle | central | after-edge | text-after-edge | ideographic | alphabetic | hanging | mathematical;
+baseline-shift = baseline | sub | super | PERCENTAGE | LENGTH_OR_NUM;
+dominant-baseline = auto | use-script | no-change | reset-size | ideographic | alphabetic | hanging | mathematical | central | middle | text-after-edge | text-before-edge;
+mask = none | URI;
+
+/* css-masking-1 */
+SHAPE_RADIUS = PLENGTH | closest-side | farthest-side;
+FILL_RULE = nonzero | evenodd;
+SHAPE_BOX = BOX | margin-box;
+GEOMETRY_BOX = SHAPE_BOX | fill-box | stroke-box | view-box;
+BASIC_SHAPE =
+    inset( SPACE( PLENGTH{1,4} [ round PLENGTH{1,4} [ SLASH PLENGTH{1,4} ]? ]? ) )
+  | circle(  SPACE( [SHAPE_RADIUS]?    [at BG_POSITION_TERM{1,4}]? ) )
+  | ellipse( SPACE( SHAPE_RADIUS{2}? [at BG_POSITION_TERM{1,4}]? ) )
+  | polygon( FILL_RULE? COMMA( SPACE( PLENGTH{2} )+ )+ );
+[webkit]clip-path = none | URI | [ BASIC_SHAPE || GEOMETRY_BOX ];
+clip-rule = nonzero | evenodd;
+
+/* filters */
+flood-color = COLOR;
+flood-opacity = OPACITY_VALUE;
+lighting-color = COLOR;
 
 
 DEFAULTS
@@ -424,6 +482,10 @@ padding-right: auto;
 padding-top: auto;
 text-emphasis-color: currentColor;
 text-emphasis-style: none;
+marker-start: none;
+marker-mid: none;
+marker-end: none;
+
 
 SHORTHANDS
 
@@ -452,3 +514,4 @@ padding = INSETS padding-top padding-right padding-bottom padding-left;
 pause = INSETS pause-before pause-after;
 font = FONT font-style font-variant font-weight /* font-size line-height font-family are special-cased */;
 [epub,webkit]text-emphasis = text-emphasis-style text-emphasis-color;
+marker = INSETS marker-start marker-mid marker-end;

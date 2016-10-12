@@ -1784,6 +1784,8 @@ adapt.cssvalid.ValidatorSet.prototype.initBuiltInValidators = function() {
         adapt.cssvalid.ALLOW_IDENT, adapt.cssvalid.NO_IDENTS, adapt.cssvalid.NO_IDENTS));
     this.namedValidators["STRING"] = this.primitive(new adapt.cssvalid.PrimitiveValidator(
         adapt.cssvalid.ALLOW_STR, adapt.cssvalid.NO_IDENTS, adapt.cssvalid.NO_IDENTS));
+    this.namedValidators["SLASH"] = this.primitive(new adapt.cssvalid.PrimitiveValidator(
+        adapt.cssvalid.ALLOW_SLASH, adapt.cssvalid.NO_IDENTS, adapt.cssvalid.NO_IDENTS));
 
     var stdfont = {
         "font-family": adapt.css.getName("sans-serif")
@@ -1914,7 +1916,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
                         vals.push(builtIn.clone());
                     } else {
                         var idents = {};
-                        idents[token.text] = adapt.css.getName(token.text);
+                        idents[token.text.toLowerCase()] = adapt.css.getName(token.text);
                         vals.push(this.primitive(new adapt.cssvalid.PrimitiveValidator(0, idents, adapt.cssvalid.NO_IDENTS)));
                     }
                     expectval = false;

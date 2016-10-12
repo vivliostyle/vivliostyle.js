@@ -521,6 +521,9 @@ adapt.epub.supportedMediaTypes = {
     "audio/mp3": true
 };
 
+/** @private @const */
+adapt.epub.transformedIdPrefix = "viv-id-";
+
 /**
  * @constructor
  * @param {adapt.epub.EPUBDocStore} store
@@ -562,7 +565,7 @@ adapt.epub.OPFDoc.prototype.createDocumentURLTransformer = function() {
      */
     OPFDocumentURLTransformer.prototype.transformFragment = function(fragment, baseURL) {
         var url = baseURL + (fragment ? "#" + fragment : "");
-        return encodeURIComponent(url);
+        return adapt.epub.transformedIdPrefix + adapt.base.escapeNameStrToHex(url, ":");
     };
     /**
      * @override
@@ -587,7 +590,10 @@ adapt.epub.OPFDoc.prototype.createDocumentURLTransformer = function() {
         if (encoded.charAt(0) === "#") {
             encoded = encoded.substring(1);
         }
-        var decoded = decodeURIComponent(encoded);
+        if (encoded.indexOf(adapt.epub.transformedIdPrefix) === 0) {
+            encoded = encoded.substring(adapt.epub.transformedIdPrefix.length);
+        }
+        var decoded = adapt.base.unescapeStrFromHex(encoded, ":");
         var r = decoded.match(/^([^#]*)#?(.*)$/);
         return r ? [r[1], r[2]] : [];
     };

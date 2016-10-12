@@ -531,6 +531,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Support depends on browser capabilities
 - [font-weight](https://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
   - Support depends on browser capabilities
+- [font-stretch](https://www.w3.org/TR/css-fonts-3/#propdef-font-stretch)
+  - Support depends on browser capabilities
 
 ### [CSS Text 3](https://www.w3.org/TR/css-text-3/)
 
@@ -755,9 +757,91 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Allowed prefixes: moz, ms
   - Support depends on browser capabilities
 
+### [Scalable Vector Graphics (SVG) 2](https://www.w3.org/TR/SVG2/)
+
+- [color-interpolation](https://www.w3.org/TR/SVG2/painting.html#ColorInterpolationProperty)
+  - Support depends on browser capabilities
+- [color-rendering](https://www.w3.org/TR/SVG2/painting.html#ColorRenderingProperty)
+  - Support depends on browser capabilities
+- [fill](https://www.w3.org/TR/SVG2/painting.html#FillProperty)
+  - Support depends on browser capabilities
+- [fill-opacity](https://www.w3.org/TR/SVG2/painting.html#FillOpacityProperty)
+  - Support depends on browser capabilities
+- [fill-rule](https://www.w3.org/TR/SVG2/painting.html#FillRuleProperty)
+  - Support depends on browser capabilities
+- [glyph-orientation-vertical](https://www.w3.org/TR/SVG2/text.html#GlyphOrientationVerticalProperty)
+  - Support depends on browser capabilities
+- [image-rendering](https://www.w3.org/TR/SVG2/painting.html#ImageRenderingProperty)
+  - Support depends on browser capabilities
+- [marker](https://www.w3.org/TR/SVG2/painting.html#MarkerProperty)
+  - Support depends on browser capabilities
+- [marker-start](https://www.w3.org/TR/SVG2/painting.html#MarkerStartProperty)
+  - Support depends on browser capabilities
+- [marker-mid](https://www.w3.org/TR/SVG2/painting.html#MarkerMidProperty)
+  - Support depends on browser capabilities
+- [marker-end](https://www.w3.org/TR/SVG2/painting.html#MarkerEndProperty)
+  - Support depends on browser capabilities
+- [pointer-events](https://www.w3.org/TR/SVG2/interact.html#PointerEventsProperty)
+  - Support depends on browser capabilities
+- [paint-order](https://www.w3.org/TR/SVG2/painting.html#PaintOrderProperty)
+  - Support depends on browser capabilities
+- [shape-rendering](https://www.w3.org/TR/SVG2/painting.html#ShapeRenderingProperty)
+  - Support depends on browser capabilities
+- [stop-color](https://www.w3.org/TR/SVG2/pservers.html#StopColorProperty)
+  - Support depends on browser capabilities
+- [stop-opacity](https://www.w3.org/TR/SVG2/pservers.html#StopOpacityProperty)
+  - Support depends on browser capabilities
+- [stroke](https://www.w3.org/TR/SVG2/painting.html#StrokeProperty)
+  - Support depends on browser capabilities
+- [stroke-dasharray](https://www.w3.org/TR/SVG2/painting.html#StrokeDasharrayProperty)
+  - Support depends on browser capabilities
+- [stroke-dashoffset](https://www.w3.org/TR/SVG2/painting.html#StrokeDashoffsetProperty)
+  - Support depends on browser capabilities
+- [stroke-linecap](https://www.w3.org/TR/SVG2/painting.html#StrokeLinecapProperty)
+  - Support depends on browser capabilities
+- [stroke-linejoin](https://www.w3.org/TR/SVG2/painting.html#StrokeLinejoinProperty)
+  - Support depends on browser capabilities
+- [stroke-miterlimit](https://www.w3.org/TR/SVG2/painting.html#StrokeMiterlimitProperty)
+  - Support depends on browser capabilities
+- [stroke-opacity](https://www.w3.org/TR/SVG2/painting.html#StrokeOpacityProperty)
+  - Support depends on browser capabilities
+- [stroke-width](https://www.w3.org/TR/SVG2/painting.html#StrokeWidthProperty)
+  - Support depends on browser capabilities
+- [text-anchor](https://www.w3.org/TR/SVG2/text.html#TextAnchorProperty)
+  - Support depends on browser capabilities
+- [text-rendering](https://www.w3.org/TR/SVG2/painting.html#TextRenderingProperty)
+  - Support depends on browser capabilities
+- [vector-effect](https://www.w3.org/TR/SVG2/coords.html#VectorEffectProperty)
+  - Support depends on browser capabilities
+
+### [Scalable Vector Graphics (SVG) 1.1](https://www.w3.org/TR/SVG11/)
+
+  - [alignment-baseline](https://www.w3.org/TR/SVG11/text.html#AlignmentBaselineProperty)
+    - Support depends on browser capabilities
+  - [baseline-shift](https://www.w3.org/TR/SVG11/text.html#BaselineShiftProperty)
+    - Support depends on browser capabilities
+  - [dominant-baseline](https://www.w3.org/TR/SVG11/text.html#DominantBaselineProperty)
+    - Support depends on browser capabilities
+  - [mask](https://www.w3.org/TR/SVG11/masking.html#MaskProperty)
+    - Support depends on browser capabilities
+
+### [CSS Masking 1](https://drafts.fxtf.org/css-masking-1/)
+
+- [clip-path](https://drafts.fxtf.org/css-masking-1/#the-clip-path)
+  - Allowed prefixes: webkit
+  - Support depends on browser capabilities
+- [clip-rule](https://drafts.fxtf.org/css-masking-1/#the-clip-rule)
+  - Support depends on browser capabilities
+
 ## [Filter Effects 1](https://www.w3.org/TR/filter-effects-1/)
 - [filter](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
   - Allowed prefixes: webkit
+  - Support depends on browser capabilities
+- [flood-color](https://www.w3.org/TR/filter-effects-1/#FloodColorProperty)
+  - Support depends on browser capabilities
+- [flood-opacity](https://www.w3.org/TR/filter-effects-1/#propdef-flood-opacity)
+  - Support depends on browser capabilities
+- [lighting-color](https://www.w3.org/TR/filter-effects-1/#propdef-lighting-color)
   - Support depends on browser capabilities
 
 ### [Pointer Events](https://www.w3.org/TR/pointerevents/)

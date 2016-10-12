@@ -8,9 +8,7 @@ var ignoreSpecs = {
     "css-2d-transforms-1": true,
     "css-align-3": true,
     "css-box-3": true,
-    "css-round-display-1": true,
-    "svg": true,
-    "svg2": true
+    "css-round-display-1": true
 };
 
 var orderedSpecs = [
@@ -47,6 +45,8 @@ var orderedSpecs = [
     "css-inline-3",
     "css-page-floats-3",
     "filters-1",
+    "svg",
+    "svg2",
     "uncategorized"
 ];
 

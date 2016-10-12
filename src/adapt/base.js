@@ -306,7 +306,7 @@ adapt.base.knownPrefixes = ["", "-webkit-", "-moz-", "-ms-", "-o-", "-epub-"];
 
 /**
  * @private
- * @const @type {Object<string, ?string>}
+ * @const @type {Object<string, ?Array.<string>>}
  */
 adapt.base.propNameMap = {};
 
@@ -335,9 +335,9 @@ adapt.base.checkIfPropertySupported = function(prefix, prop) {
 
 /**
  * @param {string} prop
- * @returns {?string}
+ * @returns {?Array.<string>}
  */
-adapt.base.getPrefixedProperty = function(prop) {
+adapt.base.getPrefixedPropertyNames = function(prop) {
     var prefixed = adapt.base.propNameMap[prop];
     if (prefixed || prefixed === null) { // null means the browser does not support the property
         return prefixed;
@@ -346,15 +346,21 @@ adapt.base.getPrefixedProperty = function(prop) {
         case "writing-mode":
             // Special case: prefer '-ms-writing-mode' to 'writing-mode'
             if (adapt.base.checkIfPropertySupported("-ms-", "writing-mode")) {
-                adapt.base.propNameMap[prop] = "-ms-writing-mode";
-                return "-ms-writing-mode";
+                adapt.base.propNameMap[prop] = ["-ms-writing-mode"];
+                return ["-ms-writing-mode"];
             }
             break;
         case "filter":
             // Special case: prefer '-webkit-filter' to 'filter'
             if (adapt.base.checkIfPropertySupported("-webkit-", "filter")) {
-                adapt.base.propNameMap[prop] = "-webkit-filter";
-                return "-webkit-filter";
+                adapt.base.propNameMap[prop] = ["-webkit-filter"];
+                return ["-webkit-filter"];
+            }
+            break;
+        case "clip-path":
+            // Special case for chrome.
+            if (adapt.base.checkIfPropertySupported("-webkit-", "clip-path")) {
+                return adapt.base.propNameMap[prop] = ["-webkit-clip-path", "clip-path"];
             }
             break;
     }
@@ -364,8 +370,8 @@ adapt.base.getPrefixedProperty = function(prop) {
         var prefix = adapt.base.knownPrefixes[i];
         if (adapt.base.checkIfPropertySupported(prefix, prop)) {
             prefixed = prefix + prop;
-            adapt.base.propNameMap[prop] = prefixed;
-            return prefixed;
+            adapt.base.propNameMap[prop] = [prefixed];
+            return [prefixed];
         }
     }
     // Not supported by the browser
@@ -382,26 +388,28 @@ adapt.base.getPrefixedProperty = function(prop) {
  */
 adapt.base.setCSSProperty = function(elem, prop, value) {
     try {
-        var prefixed = adapt.base.getPrefixedProperty(prop);
-        if (!prefixed) {
+        var prefixedPropertyNames = adapt.base.getPrefixedPropertyNames(prop);
+        if (!prefixedPropertyNames) {
             return;
         }
-        if (prefixed === "-ms-writing-mode") {
-            switch (value) {
-                case "horizontal-tb":
-                    value = "lr-tb";
-                    break;
-                case "vertical-rl":
-                    value = "tb-rl";
-                    break;
-                case "vertical-lr":
-                    value = "tb-lr";
-                    break;
+        prefixedPropertyNames.forEach(function(prefixed) {
+            if (prefixed === "-ms-writing-mode") {
+                switch (value) {
+                    case "horizontal-tb":
+                        value = "lr-tb";
+                        break;
+                    case "vertical-rl":
+                        value = "tb-rl";
+                        break;
+                    case "vertical-lr":
+                        value = "tb-lr";
+                        break;
+                }
             }
-        }
-        if (elem && elem.style) {
-            (/** @type {HTMLElement} */ (elem)).style.setProperty(prefixed, value);
-        }
+            if (elem && elem.style) {
+                (/** @type {HTMLElement} */ (elem)).style.setProperty(prefixed, value);
+            }
+        });
     } catch (err) {
         vivliostyle.logging.logger.warn(err);
     }
@@ -415,8 +423,9 @@ adapt.base.setCSSProperty = function(elem, prop, value) {
  */
 adapt.base.getCSSProperty = function(elem, prop, opt_value) {
     try {
+        var propertyNames = adapt.base.propNameMap[prop];
         return (/** @type {HTMLElement} */ (elem)).style.getPropertyValue(
-            adapt.base.propNameMap[prop] || prop);
+             propertyNames ? propertyNames[0] : prop);
     } catch (err) {
     }
     return opt_value || "";
@@ -498,10 +507,24 @@ adapt.base.isLetter = function(ch) {
 
 /**
  * @param {string} str
+ * @param {string=} prefix
  * @return {string}
  */
-adapt.base.escapeRegexpChar = function(str) {
-    return '\\u' + (0x10000|str.charCodeAt(0)).toString(16).substr(1);
+adapt.base.escapeCharToHex = function(str, prefix) {
+    prefix = typeof prefix === "string" ? prefix : '\\u';
+    return prefix + (0x10000|str.charCodeAt(0)).toString(16).substr(1);
+};
+
+/**
+ * @param {string} str
+ * @param {string=} prefix
+ * @return {string}
+ */
+adapt.base.escapeNameStrToHex = function(str, prefix) {
+    function escapeChar(s) {
+        return adapt.base.escapeCharToHex(s, prefix);
+    }
+    return str.replace(/[^-a-zA-Z0-9_]/g, escapeChar);
 };
 
 /**
@@ -509,7 +532,35 @@ adapt.base.escapeRegexpChar = function(str) {
  * @return {string}
  */
 adapt.base.escapeRegExp = function(str) {
-    return str.replace(/[^-a-zA-Z0-9_]/g, adapt.base.escapeRegexpChar);
+    return adapt.base.escapeNameStrToHex(str);
+};
+
+/**
+ * @param {string} str
+ * @param {string=} prefix
+ * @return {string}
+ */
+adapt.base.unescapeCharFromHex = function(str, prefix) {
+    prefix = typeof prefix === "string" ? prefix : '\\u';
+    if (str.indexOf(prefix) === 0) {
+        return String.fromCharCode(parseInt(str.substring(prefix.length), 16));
+    } else {
+        return str;
+    }
+};
+
+/**
+ * @param {string} str
+ * @param {string=} prefix
+ * @return {string}
+ */
+adapt.base.unescapeStrFromHex = function(str, prefix) {
+    prefix = typeof prefix === "string" ? prefix : '\\u';
+    function unescapeChar(s) {
+        return adapt.base.unescapeCharFromHex(s, prefix);
+    }
+    var regexp = new RegExp(adapt.base.escapeRegExp(prefix) + "[0-9a-fA-F]{4}", "g");
+    return str.replace(regexp, unescapeChar);
 };
 
 /**
