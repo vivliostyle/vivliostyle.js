@@ -306,7 +306,7 @@ adapt.base.knownPrefixes = ["", "-webkit-", "-moz-", "-ms-", "-o-", "-epub-"];
 
 /**
  * @private
- * @const @type {Object<string, ?string>}
+ * @const @type {Object<string, ?Array.<string>>}
  */
 adapt.base.propNameMap = {};
 
@@ -335,9 +335,9 @@ adapt.base.checkIfPropertySupported = function(prefix, prop) {
 
 /**
  * @param {string} prop
- * @returns {?string}
+ * @returns {?Array.<string>}
  */
-adapt.base.getPrefixedProperty = function(prop) {
+adapt.base.getPrefixedPropertyNames = function(prop) {
     var prefixed = adapt.base.propNameMap[prop];
     if (prefixed || prefixed === null) { // null means the browser does not support the property
         return prefixed;
@@ -346,22 +346,21 @@ adapt.base.getPrefixedProperty = function(prop) {
         case "writing-mode":
             // Special case: prefer '-ms-writing-mode' to 'writing-mode'
             if (adapt.base.checkIfPropertySupported("-ms-", "writing-mode")) {
-                adapt.base.propNameMap[prop] = "-ms-writing-mode";
-                return "-ms-writing-mode";
+                adapt.base.propNameMap[prop] = ["-ms-writing-mode"];
+                return ["-ms-writing-mode"];
             }
             break;
         case "filter":
             // Special case: prefer '-webkit-filter' to 'filter'
             if (adapt.base.checkIfPropertySupported("-webkit-", "filter")) {
-                adapt.base.propNameMap[prop] = "-webkit-filter";
-                return "-webkit-filter";
+                adapt.base.propNameMap[prop] = ["-webkit-filter"];
+                return ["-webkit-filter"];
             }
             break;
         case "clip-path":
-            // Special case: prefer '-webkit-clip-path' to 'clip-path'
+            // Special case for chrome.
             if (adapt.base.checkIfPropertySupported("-webkit-", "clip-path")) {
-                adapt.base.propNameMap[prop] = "-webkit-clip-path";
-                return "-webkit-clip-path";
+                return adapt.base.propNameMap[prop] = ["-webkit-clip-path", "clip-path"];
             }
             break;
     }
@@ -371,8 +370,8 @@ adapt.base.getPrefixedProperty = function(prop) {
         var prefix = adapt.base.knownPrefixes[i];
         if (adapt.base.checkIfPropertySupported(prefix, prop)) {
             prefixed = prefix + prop;
-            adapt.base.propNameMap[prop] = prefixed;
-            return prefixed;
+            adapt.base.propNameMap[prop] = [prefixed];
+            return [prefixed];
         }
     }
     // Not supported by the browser
@@ -389,26 +388,28 @@ adapt.base.getPrefixedProperty = function(prop) {
  */
 adapt.base.setCSSProperty = function(elem, prop, value) {
     try {
-        var prefixed = adapt.base.getPrefixedProperty(prop);
-        if (!prefixed) {
+        var prefixedPropertyNames = adapt.base.getPrefixedPropertyNames(prop);
+        if (!prefixedPropertyNames) {
             return;
         }
-        if (prefixed === "-ms-writing-mode") {
-            switch (value) {
-                case "horizontal-tb":
-                    value = "lr-tb";
-                    break;
-                case "vertical-rl":
-                    value = "tb-rl";
-                    break;
-                case "vertical-lr":
-                    value = "tb-lr";
-                    break;
+        prefixedPropertyNames.forEach(function(prefixed) {
+            if (prefixed === "-ms-writing-mode") {
+                switch (value) {
+                    case "horizontal-tb":
+                        value = "lr-tb";
+                        break;
+                    case "vertical-rl":
+                        value = "tb-rl";
+                        break;
+                    case "vertical-lr":
+                        value = "tb-lr";
+                        break;
+                }
             }
-        }
-        if (elem && elem.style) {
-            (/** @type {HTMLElement} */ (elem)).style.setProperty(prefixed, value);
-        }
+            if (elem && elem.style) {
+                (/** @type {HTMLElement} */ (elem)).style.setProperty(prefixed, value);
+            }
+        });
     } catch (err) {
         vivliostyle.logging.logger.warn(err);
     }
@@ -422,8 +423,9 @@ adapt.base.setCSSProperty = function(elem, prop, value) {
  */
 adapt.base.getCSSProperty = function(elem, prop, opt_value) {
     try {
+        var propertyNames = adapt.base.propNameMap[prop];
         return (/** @type {HTMLElement} */ (elem)).style.getPropertyValue(
-            adapt.base.propNameMap[prop] || prop);
+             propertyNames ? propertyNames[0] : prop);
     } catch (err) {
     }
     return opt_value || "";
