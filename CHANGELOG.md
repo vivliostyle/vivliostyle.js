@@ -55,6 +55,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/292>
 - Improve zoom behavior
   - <https://github.com/vivliostyle/vivliostyle.js/pull/292>
+- Add very simple 'auto spread' page view mode
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/300>
 
 ### Fixed
 - Fix bug that pages occasionally disappear when resolving cross references
