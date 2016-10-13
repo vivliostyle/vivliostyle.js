@@ -6713,7 +6713,7 @@ var _vivliostyleViewer2 = _interopRequireDefault(_vivliostyleViewer);
 _modelsVivliostyle2["default"].setInstance(_vivliostyle2["default"]);
 _vivliostyleViewer2["default"].start();
 
-},{"./models/vivliostyle":10,"./vivliostyle-viewer":21,"vivliostyle":2}],6:[function(require,module,exports){
+},{"./models/vivliostyle":11,"./vivliostyle-viewer":22,"vivliostyle":2}],6:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -6805,7 +6805,7 @@ DocumentOptions.prototype.toObject = function () {
 exports["default"] = DocumentOptions;
 module.exports = exports["default"];
 
-},{"../stores/url-parameters":12,"./page-size":8,"knockout":1}],7:[function(require,module,exports){
+},{"../stores/url-parameters":13,"./page-size":8,"knockout":1}],7:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -6960,6 +6960,115 @@ module.exports = exports["default"];
 
 },{"knockout":1}],9:[function(require,module,exports){
 /*
+ * Copyright 2016 Vivliostyle Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _modelsVivliostyle = require("../models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var PageViewModeInstance = (function () {
+    function PageViewModeInstance() {
+        _classCallCheck(this, PageViewModeInstance);
+    }
+
+    _createClass(PageViewModeInstance, [{
+        key: "toSpreadViewString",
+        value: function toSpreadViewString() {
+            switch (this) {
+                case PageViewMode.SPREAD:
+                    return "true";
+                case PageViewMode.SINGLE_PAGE:
+                    return "false";
+                case PageViewMode.AUTO_SPREAD:
+                    return "auto";
+                default:
+                    throw new Error("Invalid PageViewMode");
+            }
+        }
+    }, {
+        key: "toString",
+        value: function toString() {
+            switch (this) {
+                case PageViewMode.SPREAD:
+                    return _modelsVivliostyle2["default"].viewer.PageViewMode.SPREAD;
+                case PageViewMode.SINGLE_PAGE:
+                    return _modelsVivliostyle2["default"].viewer.PageViewMode.SINGLE_PAGE;
+                case PageViewMode.AUTO_SPREAD:
+                    return _modelsVivliostyle2["default"].viewer.PageViewMode.AUTO_SPREAD;
+                default:
+                    throw new Error("Invalid PageViewMode");
+            }
+        }
+    }]);
+
+    return PageViewModeInstance;
+})();
+
+var PageViewMode = {
+    AUTO_SPREAD: new PageViewModeInstance(),
+    SINGLE_PAGE: new PageViewModeInstance(),
+    SPREAD: new PageViewModeInstance(),
+    defaultMode: function defaultMode() {
+        return this.AUTO_SPREAD;
+    },
+    fromSpreadViewString: function fromSpreadViewString(str) {
+        switch (str) {
+            case "true":
+                return this.SPREAD;
+            case "false":
+                return this.SINGLE_PAGE;
+            case "auto":
+            default:
+                return this.AUTO_SPREAD;
+        }
+    },
+    of: function of(name) {
+        switch (name) {
+            case _modelsVivliostyle2["default"].viewer.PageViewMode.SPREAD:
+                return this.SPREAD;
+            case _modelsVivliostyle2["default"].viewer.PageViewMode.SINGLE_PAGE:
+                return this.SINGLE_PAGE;
+            case _modelsVivliostyle2["default"].viewer.PageViewMode.AUTO_SPREAD:
+                return this.AUTO_SPREAD;
+            default:
+                throw new Error("Invalid PageViewMode name: " + name);
+        }
+    }
+};
+
+exports["default"] = PageViewMode;
+module.exports = exports["default"];
+
+},{"../models/vivliostyle":11}],10:[function(require,module,exports){
+/*
  * Copyright 2015 Vivliostyle Inc.
  *
  * This file is part of Vivliostyle UI.
@@ -6994,6 +7103,10 @@ var _storesUrlParameters = require("../stores/url-parameters");
 
 var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
 
+var _pageViewMode = require("./page-view-mode");
+
+var _pageViewMode2 = _interopRequireDefault(_pageViewMode);
+
 var _zoomOptions = require("./zoom-options");
 
 var _zoomOptions2 = _interopRequireDefault(_zoomOptions);
@@ -7001,7 +7114,7 @@ var _zoomOptions2 = _interopRequireDefault(_zoomOptions);
 function getViewerOptionsFromURL() {
     return {
         profile: _storesUrlParameters2["default"].getParameter("profile")[0] === "true",
-        spreadView: _storesUrlParameters2["default"].getParameter("spread")[0] === "true"
+        pageViewMode: _pageViewMode2["default"].fromSpreadViewString(_storesUrlParameters2["default"].getParameter("spread")[0])
     };
 }
 
@@ -7009,7 +7122,7 @@ function getDefaultValues() {
     return {
         fontSize: 16,
         profile: false,
-        spreadView: false,
+        pageViewMode: _pageViewMode2["default"].defaultMode(),
         zoom: _zoomOptions2["default"].createDefaultOptions()
     };
 }
@@ -7017,7 +7130,7 @@ function getDefaultValues() {
 function ViewerOptions(options) {
     this.fontSize = _knockout2["default"].observable();
     this.profile = _knockout2["default"].observable();
-    this.spreadView = _knockout2["default"].observable();
+    this.pageViewMode = _knockout2["default"].observable();
     this.zoom = _knockout2["default"].observable();
     if (options) {
         this.copyFrom(options);
@@ -7026,12 +7139,12 @@ function ViewerOptions(options) {
         var urlOptions = getViewerOptionsFromURL();
         this.fontSize(defaultValues.fontSize);
         this.profile(urlOptions.profile || defaultValues.profile);
-        this.spreadView(urlOptions.spreadView || defaultValues.spreadView);
+        this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
         this.zoom(defaultValues.zoom);
 
         // write spread parameter back to URL when updated
-        this.spreadView.subscribe(function (spread) {
-            _storesUrlParameters2["default"].setParameter("spread", spread);
+        this.pageViewMode.subscribe(function (pageViewMode) {
+            _storesUrlParameters2["default"].setParameter("spread", pageViewMode.toSpreadViewString());
         });
     }
 }
@@ -7039,14 +7152,14 @@ function ViewerOptions(options) {
 ViewerOptions.prototype.copyFrom = function (other) {
     this.fontSize(other.fontSize());
     this.profile(other.profile());
-    this.spreadView(other.spreadView());
+    this.pageViewMode(other.pageViewMode());
     this.zoom(other.zoom());
 };
 
 ViewerOptions.prototype.toObject = function () {
     return {
         fontSize: this.fontSize(),
-        spreadView: this.spreadView(),
+        pageViewMode: this.pageViewMode().toString(),
         zoom: this.zoom().zoom,
         fitToScreen: this.zoom().fitToScreen
     };
@@ -7057,7 +7170,7 @@ ViewerOptions.getDefaultValues = getDefaultValues;
 exports["default"] = ViewerOptions;
 module.exports = exports["default"];
 
-},{"../stores/url-parameters":12,"./zoom-options":11,"knockout":1}],10:[function(require,module,exports){
+},{"../stores/url-parameters":13,"./page-view-mode":9,"./zoom-options":12,"knockout":1}],11:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7097,7 +7210,7 @@ Vivliostyle.prototype.setInstance = function (vivliostyle) {
 exports["default"] = new Vivliostyle();
 module.exports = exports["default"];
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /*
  * Copyright 2016 Vivliostyle Inc.
  *
@@ -7235,7 +7348,7 @@ var FixedZoomFactor = (function (_ZoomOptions2) {
 exports["default"] = ZoomOptions;
 module.exports = exports["default"];
 
-},{"../models/vivliostyle":10}],12:[function(require,module,exports){
+},{"../models/vivliostyle":11}],13:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7309,7 +7422,7 @@ URLParameterStore.prototype.setParameter = function (name, value) {
 exports["default"] = new URLParameterStore();
 module.exports = exports["default"];
 
-},{"../utils/string-util":15}],13:[function(require,module,exports){
+},{"../utils/string-util":16}],14:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7380,7 +7493,7 @@ exports["default"] = {
 };
 module.exports = exports["default"];
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7427,7 +7540,7 @@ var util = {
 exports["default"] = util;
 module.exports = exports["default"];
 
-},{"knockout":1}],15:[function(require,module,exports){
+},{"knockout":1}],16:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7462,7 +7575,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7516,7 +7629,7 @@ MessageDialog.prototype.getDisplayMessage = function (errorInfo) {
 exports["default"] = MessageDialog;
 module.exports = exports["default"];
 
-},{"knockout":1}],17:[function(require,module,exports){
+},{"knockout":1}],18:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7757,7 +7870,7 @@ Navigation.prototype.handleKey = function (key) {
 exports["default"] = Navigation;
 module.exports = exports["default"];
 
-},{"../models/viewer-options":9,"../utils/key-util":13,"knockout":1}],18:[function(require,module,exports){
+},{"../models/viewer-options":10,"../utils/key-util":14,"knockout":1}],19:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7797,21 +7910,35 @@ var _modelsPageSize = require("../models/page-size");
 
 var _modelsPageSize2 = _interopRequireDefault(_modelsPageSize);
 
+var _modelsPageViewMode = require("../models/page-view-mode");
+
+var _modelsPageViewMode2 = _interopRequireDefault(_modelsPageViewMode);
+
 var _utilsKeyUtil = require("../utils/key-util");
 
 function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, settingsPanelOptions) {
+    var _this = this;
+
     this.viewerOptions_ = viewerOptions;
     this.documentOptions_ = documentOptions;
     this.viewer_ = viewer;
 
     this.isPageSizeChangeDisabled = !!settingsPanelOptions.disablePageSizeChange;
     this.isOverrideDocumentStyleSheetDisabled = this.isPageSizeChangeDisabled;
-    this.isSpreadViewChangeDisabled = !!settingsPanelOptions.disableSpreadViewChange;
+    this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
 
     this.opened = _knockout2["default"].observable(false);
     this.state = {
         viewerOptions: new _modelsViewerOptions2["default"](viewerOptions),
-        pageSize: new _modelsPageSize2["default"](documentOptions.pageSize)
+        pageSize: new _modelsPageSize2["default"](documentOptions.pageSize),
+        pageViewMode: _knockout2["default"].pureComputed({
+            read: function read() {
+                return _this.state.viewerOptions.pageViewMode().toString();
+            },
+            write: function write(value) {
+                _this.state.viewerOptions.pageViewMode(_modelsPageViewMode2["default"].of(value));
+            }
+        })
     };
 
     ["close", "toggle", "apply", "reset"].forEach(function (methodName) {
@@ -7859,7 +7986,7 @@ SettingsPanel.prototype.handleKey = function (key) {
 exports["default"] = SettingsPanel;
 module.exports = exports["default"];
 
-},{"../models/page-size":8,"../models/viewer-options":9,"../utils/key-util":13,"knockout":1}],19:[function(require,module,exports){
+},{"../models/page-size":8,"../models/page-view-mode":9,"../models/viewer-options":10,"../utils/key-util":14,"knockout":1}],20:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -7952,7 +8079,7 @@ function ViewerApp() {
 
     var settingsPanelOptions = {
         disablePageSizeChange: false,
-        disableSpreadViewChange: false
+        disablePageViewModeChange: false
     };
 
     this.settingsPanel = new _settingsPanel2["default"](this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog, settingsPanelOptions);
@@ -7980,7 +8107,7 @@ function ViewerApp() {
 exports["default"] = ViewerApp;
 module.exports = exports["default"];
 
-},{"../models/document-options":6,"../models/message-queue":7,"../models/viewer-options":9,"../models/vivliostyle":10,"../models/zoom-options":11,"../stores/url-parameters":12,"../utils/key-util":13,"./message-dialog":16,"./navigation":17,"./settings-panel":18,"./viewer":20,"knockout":1}],20:[function(require,module,exports){
+},{"../models/document-options":6,"../models/message-queue":7,"../models/viewer-options":10,"../models/vivliostyle":11,"../models/zoom-options":12,"../stores/url-parameters":13,"../utils/key-util":14,"./message-dialog":17,"./navigation":18,"./settings-panel":19,"./viewer":21,"knockout":1}],21:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -8138,7 +8265,7 @@ Viewer.prototype.queryZoomFactor = function (type) {
 exports["default"] = Viewer;
 module.exports = exports["default"];
 
-},{"../logging/logger":4,"../models/vivliostyle":10,"../utils/observable-util":14,"knockout":1}],21:[function(require,module,exports){
+},{"../logging/logger":4,"../models/vivliostyle":11,"../utils/observable-util":15,"knockout":1}],22:[function(require,module,exports){
 /*
  * Copyright 2015 Vivliostyle Inc.
  *
@@ -8189,4 +8316,4 @@ exports["default"] = {
 };
 module.exports = exports["default"];
 
-},{"./bindings/menuButton.js":3,"./viewmodels/viewer-app":19,"knockout":1}]},{},[5]);
+},{"./bindings/menuButton.js":3,"./viewmodels/viewer-app":20,"knockout":1}]},{},[5]);
