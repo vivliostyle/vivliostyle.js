@@ -33,6 +33,18 @@ adapt.viewer.ViewportSize;
 /** @const */
 adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE = "data-vivliostyle-viewer-status";
 
+/** @const */
+adapt.viewer.VIEWPORT_SPREAD_VIEW_ATTRIBUTE = "data-vivliostyle-spread-view";
+
+/**
+ * @enum {string}
+ */
+adapt.viewer.PageViewMode = {
+    SINGLE_PAGE: "singlePage",
+    SPREAD: "spread",
+    AUTO_SPREAD: "autoSpread"
+};
+
 /**
  * @typedef {{
  *     url: string,
@@ -108,6 +120,7 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {number} */ this.fontSize = 16;
     /** @type {number} */ this.zoom = 1;
     /** @type {boolean} */ this.fitToScreen = false;
+    /** @type {!adapt.viewer.PageViewMode} */ this.pageViewMode = adapt.viewer.PageViewMode.AUTO_SPREAD;
     /** @type {boolean} */ this.waitForLoading = false;
     /** @type {boolean} */ this.renderAllPages = true;
     /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();
@@ -345,10 +358,8 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
     if (typeof command["userAgentRootURL"] == "string") {
         adapt.base.resourceBaseURL = command["userAgentRootURL"];
     }
-    if (typeof command["spreadView"] == "boolean" && command["spreadView"] !== this.pref.spreadView) {
-        // Force relayout
-        this.viewport = null;
-        this.pref.spreadView = command["spreadView"];
+    if (typeof command["pageViewMode"] == "string" && command["pageViewMode"] !== this.pageViewMode) {
+        this.pageViewMode = command["pageViewMode"];
         this.needResize = true;
     }
     if (typeof command["pageBorder"] == "number" && command["pageBorder"] !== this.pref.pageBorder) {
@@ -473,7 +484,7 @@ adapt.viewer.Viewer.prototype.reportPosition = function() {
 
 /**
  * @private
- * @return {adapt.vgen.Viewport}
+ * @return {!adapt.vgen.Viewport}
  */
 adapt.viewer.Viewer.prototype.createViewport = function() {
     var viewportElement = this.viewportElement;
@@ -491,15 +502,47 @@ adapt.viewer.Viewer.prototype.createViewport = function() {
 
 /**
  * @private
+ * @param {!adapt.vgen.Viewport} viewport
+ * @returns {boolean}
+ */
+adapt.viewer.Viewer.prototype.resolveSpreadView = function(viewport) {
+    switch (this.pageViewMode) {
+        case adapt.viewer.PageViewMode.SINGLE_PAGE:
+            return false;
+        case adapt.viewer.PageViewMode.SPREAD:
+            return true;
+        case adapt.viewer.PageViewMode.AUTO_SPREAD:
+        default:
+            // wide enough for a pair of pages of A/B paper sizes, but not too narrow
+            return viewport.width / viewport.height >= 1.45 && viewport.width > 800;
+    }
+};
+
+/**
+ * @private
+ * @param {boolean} spreadView
+ */
+adapt.viewer.Viewer.prototype.updateSpreadView = function(spreadView) {
+    this.pref.spreadView = spreadView;
+    this.viewportElement.setAttribute(adapt.viewer.VIEWPORT_SPREAD_VIEW_ATTRIBUTE, spreadView);
+};
+
+/**
+ * @private
  * @return {boolean}
  */
 adapt.viewer.Viewer.prototype.sizeIsGood = function() {
+    var viewport = this.createViewport();
+
+    var spreadView = this.resolveSpreadView(viewport);
+    var spreadViewChanged = this.pref.spreadView !== spreadView;
+    this.updateSpreadView(spreadView);
+
     if (this.viewportSize || !this.viewport || this.viewport.fontSize != this.fontSize) {
         return false;
     }
-    var viewport = this.createViewport();
 
-    if (viewport.width == this.viewport.width && viewport.height == this.viewport.height) {
+    if (!spreadViewChanged && viewport.width == this.viewport.width && viewport.height == this.viewport.height) {
         return true;
     }
     if (this.opfView && this.opfView.hasPages() && !this.opfView.hasAutoSizedPages()) {

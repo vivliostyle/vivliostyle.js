@@ -34,9 +34,9 @@ goog.scope(function() {
      * Viewer options that can be set after the Viewer object is constructed.
      * - autoResize: Run layout again when the window is resized. default: true
      * - fontSize: Default font size (px). default: 16
-     * - pageBorderWidth: Width of a border between two pages in a single spread (px). Effective only when spreadView option is true. default: 1
+     * - pageBorderWidth: Width of a border between two pages in a single spread (px). Effective only in spread view mode. default: 1
      * - renderAllPages: Render all pages at the document load time. default: true
-     * - spreadView: Display two pages in a single spread at a time. default: false
+     * - pageViewMode: Page view mode (singlePage / spread / autoSpread). default: singlePage
      * - zoom: Zoom factor with which pages are displayed. default: 1
      * - fitToScreen: Auto adjust zoom factor to fit the screen. default: false
      * @dict
@@ -45,7 +45,7 @@ goog.scope(function() {
      *     fontSize: (number|undefined),
      *     pageBorderWidth: (number|undefined),
      *     renderAllPages: (boolean|undefined),
-     *     spreadView: (boolean|undefined),
+     *     pageViewMode: (!vivliostyle.viewer.PageViewMode|undefined),
      *     zoom: (number|undefined),
      *     fitToScreen: (boolean|undefined)
      * }}
@@ -61,7 +61,7 @@ goog.scope(function() {
             "fontSize": 16,
             "pageBorderWidth": 1,
             "renderAllPages": true,
-            "spreadView": false,
+            "pageViewMode": PageViewMode.AUTO_SPREAD,
             "zoom": 1,
             "fitToScreen": false
         };
@@ -369,6 +369,12 @@ goog.scope(function() {
         return this.adaptViewer.queryZoomFactor(type);
     };
 
+    /**
+     * @enum {string}
+     */
+    vivliostyle.viewer.PageViewMode = adapt.viewer.PageViewMode;
+    /** @const */ var PageViewMode = vivliostyle.viewer.PageViewMode;
+
     vivliostyle.namespace.exportSymbol("vivliostyle.viewer.Viewer", Viewer);
     goog.exportProperty(Viewer.prototype, "setOptions", Viewer.prototype.setOptions);
     goog.exportProperty(Viewer.prototype, "addListener", Viewer.prototype.addListener);
@@ -381,6 +387,10 @@ goog.scope(function() {
     goog.exportProperty(Viewer.prototype, "queryZoomFactor", Viewer.prototype.queryZoomFactor);
     vivliostyle.namespace.exportSymbol("vivliostyle.viewer.ZoomType", ZoomType);
     goog.exportProperty(ZoomType, "FIT_INSIDE_VIEWPORT", ZoomType.FIT_INSIDE_VIEWPORT);
+    vivliostyle.namespace.exportSymbol("vivliostyle.viewer.PageViewMode", PageViewMode);
+    goog.exportProperty(PageViewMode, "SINGLE_PAGE", PageViewMode.SINGLE_PAGE);
+    goog.exportProperty(PageViewMode, "SPREAD", PageViewMode.SPREAD);
+    goog.exportProperty(PageViewMode, "AUTO_SPREAD", PageViewMode.AUTO_SPREAD);
 
     vivliostyle.profile.profiler.forceRegisterEndTiming("load_vivliostyle");
 });
