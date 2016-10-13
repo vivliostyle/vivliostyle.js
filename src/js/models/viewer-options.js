@@ -19,12 +19,13 @@
 
 import ko from "knockout";
 import urlParameters from "../stores/url-parameters";
+import PageViewMode from "./page-view-mode";
 import ZoomOptions from "./zoom-options";
 
 function getViewerOptionsFromURL() {
     return {
         profile: (urlParameters.getParameter("profile")[0] === "true"),
-        spreadView: (urlParameters.getParameter("spread")[0] === "true")
+        pageViewMode: PageViewMode.fromSpreadViewString(urlParameters.getParameter("spread")[0])
     };
 }
 
@@ -32,7 +33,7 @@ function getDefaultValues() {
     return {
         fontSize: 16,
         profile: false,
-        spreadView: false,
+        pageViewMode: PageViewMode.defaultMode(),
         zoom: ZoomOptions.createDefaultOptions()
     };
 }
@@ -40,7 +41,7 @@ function getDefaultValues() {
 function ViewerOptions(options) {
     this.fontSize = ko.observable();
     this.profile = ko.observable();
-    this.spreadView = ko.observable();
+    this.pageViewMode = ko.observable();
     this.zoom = ko.observable();
     if (options) {
         this.copyFrom(options);
@@ -49,12 +50,12 @@ function ViewerOptions(options) {
         var urlOptions = getViewerOptionsFromURL();
         this.fontSize(defaultValues.fontSize);
         this.profile(urlOptions.profile || defaultValues.profile);
-        this.spreadView(urlOptions.spreadView || defaultValues.spreadView);
+        this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
         this.zoom(defaultValues.zoom);
 
         // write spread parameter back to URL when updated
-        this.spreadView.subscribe(function(spread) {
-            urlParameters.setParameter("spread", spread);
+        this.pageViewMode.subscribe(function(pageViewMode) {
+            urlParameters.setParameter("spread", pageViewMode.toSpreadViewString());
         });
     }
 }
@@ -62,14 +63,14 @@ function ViewerOptions(options) {
 ViewerOptions.prototype.copyFrom = function(other) {
     this.fontSize(other.fontSize());
     this.profile(other.profile());
-    this.spreadView(other.spreadView());
+    this.pageViewMode(other.pageViewMode());
     this.zoom(other.zoom());
 };
 
 ViewerOptions.prototype.toObject = function() {
     return {
         fontSize: this.fontSize(),
-        spreadView: this.spreadView(),
+        pageViewMode: this.pageViewMode().toString(),
         zoom: this.zoom().zoom,
         fitToScreen: this.zoom().fitToScreen
     }
