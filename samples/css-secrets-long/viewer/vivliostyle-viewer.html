@@ -20,7 +20,7 @@
 <style id="vivliostyle-page-rules"></style>
 </head>
 <body data-vivliostyle-viewer-status="loading" data-bind="event: {keydown: handleKey}, attr: {'data-vivliostyle-viewer-status': viewer.state.status}">
-<div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression, 'data-vivliostyle-spread-view': viewerOptions.spreadView}, click: settingsPanel.close"></div>
+<div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, click: settingsPanel.close"></div>
 <span id="vivliostyle-page-navigation-left" title="navigate to left" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToLeftDisabled()}"></span>
 <span id="vivliostyle-page-navigation-right" title="navigate to right" data-bind="click: navigation.navigateToRight, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToRightDisabled()}"></span>
 <div id="vivliostyle-loading-overlay" data-bind="visible: !isDebug">
@@ -51,9 +51,14 @@
 				<div class="vivliostyle-menu-detail-main">
 					<div class="vivliostyle-menu-detail-group">
 						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate" checked disabled /> <span>Paginate</span></label></div>
-						<div class="vivliostyle-menu-detail-group" data-bind="visible: !settingsPanel.isSpreadViewChangeDisabled">
-							<div><label><input type="checkbox" name="vivliostyle-misc_paginate_spread-view" data-bind="checked: settingsPanel.state.viewerOptions.spreadView, disable: settingsPanel.isSpreadViewChangeDisabled" /> <span>Spread View</span></label></div>
-						</div>
+						<fieldset class="vivliostyle-menu-detail-group" data-bind="disable: settingsPanel.isPageViewModeChangeDisabled, visible: !settingsPanel.isPageViewModeChangeDisabled">
+							<div class="vivliostyle-menu-detail-group-heading"><span>Page View Mode</span></div>
+							<ul class="vivliostyle-menu-detail-group">
+								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-view-mode" value="autoSpread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Auto</span></label></li>
+								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-view-mode" value="singlePage" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Single page</span></label></li>
+								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-view-mode" value="spread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Spread</span></label></li>
+							</ul>
+						</fieldset>
 						<fieldset class="vivliostyle-menu-detail-group" data-bind="disable: settingsPanel.isPageSizeChangeDisabled, visible: !settingsPanel.isPageSizeChangeDisabled">
 							<div class="vivliostyle-menu-detail-group-heading"><span>Page Size</span></div>
 							<ul class="vivliostyle-menu-detail-group">
@@ -110,7 +115,7 @@
 				</div>
 				<div class="vivliostyle-menu-detail-aside">
 					<div><small>Powered by</small> <a href="http://vivliostyle.com"><strong>Vivliostyle.js</strong></a> </div>
-					<div class="version"><small>(<span>Core: 2016.7.1-pre.8f392d06870d726a02b7c2b44898d45dbc5ba473,</span> <span>UI: 2016.7.1-pre.b83a3e16bd1cc79763ea63ad45bed9a45f46f5f2</span>)</small></div>
+					<div class="version"><small>(<span>Core: 2016.7.1-pre.8fa981337efc045c24419a456cdba9cd5cafeb19,</span> <span>UI: 2016.7.1-pre.ad950d1905ccb6e62646a0268c76a20db8995237</span>)</small></div>
 				</div>
 			</div>
 		</li>
