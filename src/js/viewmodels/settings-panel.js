@@ -20,6 +20,7 @@
 import ko from "knockout";
 import ViewerOptions from "../models/viewer-options";
 import PageSize from "../models/page-size";
+import PageViewMode from "../models/page-view-mode";
 import {Keys} from "../utils/key-util";
 
 function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, settingsPanelOptions) {
@@ -29,12 +30,20 @@ function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, se
 
     this.isPageSizeChangeDisabled = !!settingsPanelOptions.disablePageSizeChange;
     this.isOverrideDocumentStyleSheetDisabled = this.isPageSizeChangeDisabled;
-    this.isSpreadViewChangeDisabled = !!settingsPanelOptions.disableSpreadViewChange;
+    this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
 
     this.opened = ko.observable(false);
     this.state = {
         viewerOptions: new ViewerOptions(viewerOptions),
-        pageSize: new PageSize(documentOptions.pageSize)
+        pageSize: new PageSize(documentOptions.pageSize),
+        pageViewMode: ko.pureComputed({
+            read: () => {
+                return this.state.viewerOptions.pageViewMode().toString();
+            },
+            write: value => {
+                this.state.viewerOptions.pageViewMode(PageViewMode.of(value));
+            }
+        })
     };
 
     ["close", "toggle", "apply", "reset"].forEach(function(methodName) {

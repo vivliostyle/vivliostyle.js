@@ -17,12 +17,17 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import vivliostyle from "../../../src/js/models/vivliostyle";
+import PageViewMode from "../../../src/js/models/page-view-mode";
 import ViewerOptions from "../../../src/js/models/viewer-options";
 import ZoomOptions from "../../../src/js/models/zoom-options";
 import urlParameters from "../../../src/js/stores/url-parameters";
+import vivliostyleMock from "../../mock/models/vivliostyle";
 
 describe("ViewerOptions", function() {
     var history, location;
+
+    vivliostyleMock();
 
     beforeEach(function() {
         history = urlParameters.history;
@@ -40,22 +45,27 @@ describe("ViewerOptions", function() {
             urlParameters.location = {href: "http://example.com#spread=true"};
             var options = new ViewerOptions();
 
-            expect(options.spreadView()).toBe(true);
+            expect(options.pageViewMode()).toEqual(PageViewMode.SPREAD);
 
             urlParameters.location = {href: "http://example.com#spread=false"};
             options = new ViewerOptions();
 
-            expect(options.spreadView()).toBe(false);
+            expect(options.pageViewMode()).toBe(PageViewMode.SINGLE_PAGE);
+
+            urlParameters.location = {href: "http://example.com#spread=auto"};
+            options = new ViewerOptions();
+
+            expect(options.pageViewMode()).toBe(PageViewMode.AUTO_SPREAD);
         });
 
         it("copies parameters from the argument", function() {
             var other = new ViewerOptions();
-            other.spreadView(false);
+            other.pageViewMode(PageViewMode.SINGLE_PAGE);
             other.fontSize(20);
             other.zoom(ZoomOptions.createFromZoomFactor(1.2));
             var options = new ViewerOptions(other);
 
-            expect(options.spreadView()).toBe(false);
+            expect(options.pageViewMode()).toBe(PageViewMode.SINGLE_PAGE);
             expect(options.fontSize()).toBe(20);
             expect(options.zoom().zoom).toBe(1.2);
             expect(options.zoom().fitToScreen).toBe(false);
@@ -65,21 +75,25 @@ describe("ViewerOptions", function() {
     it("write spread option back to URL when update if it is constructed with no argument", function() {
         urlParameters.location = {href: "http://example.com#spread=true"};
         var options = new ViewerOptions();
-        options.spreadView(false);
+        options.pageViewMode(PageViewMode.SINGLE_PAGE);
 
         expect(urlParameters.location.href).toBe("http://example.com#spread=false");
 
-        options.spreadView(true);
+        options.pageViewMode(PageViewMode.SPREAD);
 
         expect(urlParameters.location.href).toBe("http://example.com#spread=true");
 
+        options.pageViewMode(PageViewMode.AUTO_SPREAD);
+
+        expect(urlParameters.location.href).toBe("http://example.com#spread=auto");
+
         // not write back if it is constructed with another ViewerOptions
         var other = new ViewerOptions();
-        other.spreadView(false);
+        other.pageViewMode(PageViewMode.SINGLE_PAGE);
         other.fontSize(20);
         other.zoom(ZoomOptions.createFromZoomFactor(1.2));
         options = new ViewerOptions(other);
-        options.spreadView(true);
+        options.pageViewMode(PageViewMode.SPREAD);
 
         expect(urlParameters.location.href).toBe("http://example.com#spread=false");
     });
@@ -87,16 +101,16 @@ describe("ViewerOptions", function() {
     describe("copyFrom", function() {
         it("copies parameters from the argument to itself", function() {
             var options = new ViewerOptions();
-            options.spreadView(true);
+            options.pageViewMode(PageViewMode.SPREAD);
             options.fontSize(10);
             options.zoom(ZoomOptions.createFromZoomFactor(1.4));
             var other = new ViewerOptions();
-            other.spreadView(false);
+            other.pageViewMode(PageViewMode.SINGLE_PAGE);
             other.fontSize(20);
             other.zoom(ZoomOptions.createFromZoomFactor(1.2));
             options.copyFrom(other);
 
-            expect(options.spreadView()).toBe(false);
+            expect(options.pageViewMode()).toBe(PageViewMode.SINGLE_PAGE);
             expect(options.fontSize()).toBe(20);
             expect(options.zoom().zoom).toBe(1.2);
             expect(options.zoom().fitToScreen).toBe(false);
@@ -106,13 +120,13 @@ describe("ViewerOptions", function() {
     describe("toObject", function() {
         it("converts parameters to an object", function() {
             var options = new ViewerOptions();
-            options.spreadView(true);
+            options.pageViewMode(PageViewMode.SPREAD);
             options.fontSize(20);
             options.zoom(ZoomOptions.createFromZoomFactor(1.2));
 
             expect(options.toObject()).toEqual({
                 fontSize: 20,
-                spreadView: true,
+                pageViewMode: vivliostyle.viewer.PageViewMode.SPREAD,
                 zoom: 1.2,
                 fitToScreen: false
             });

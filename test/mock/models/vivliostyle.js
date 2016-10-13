@@ -23,6 +23,11 @@ export default function() {
     beforeAll(function() {
         vivliostyle.setInstance({
             viewer: {
+                PageViewMode: {
+                    SINGLE_PAGE: "singlePage",
+                    SPREAD: "spread",
+                    AUTO_SPREAD: "autoSpread"
+                },
                 ZoomType: {
                     FIT_INSIDE_VIEWPORT: "fit inside viewport"
                 }
