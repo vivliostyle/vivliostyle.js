@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    @page {
+      size: 700px 500px;
+      margin: 50px;
+    }
+    html {
+      writing-mode: horizontal-tb;
+    }
+    div.page {
+      margin: 10px;
+    }
+    div.box {
+      margin: 10px 0px;
+      background-color: #FF9988;
+      text-align: center;
+    }
+    .px1  { width: 300px; }
+    .px2  { width: 200px; }
+    .vw   { width: 50vw; }
+    .vh   { width: 50vh; }
+    .vi   { width: 50vi; }
+    .vb   { width: 50vb; }
+    .vmax { width: 50vmax; }
+    .vmin { width: 50vmin; }
+</style>
+</head>
+<body>
+  <div class="page page1">
+    page = size:700px 500px; margin:50px;
+    <div class="box px1">width: 300px</div>
+    <div class="box px2">width: 200px</div>
+    <div class="box vw">'50vw' should be eq '300px'</div>
+    <div class="box vh">'50vh' should be eq '200px'</div>
+    <div class="box vi">'50vi' should be eq '300px'</div>
+    <div class="box vb">'50vb' should be eq '200px'</div>
+    <div class="box vmax">'50vmax' should be eq '300px'</div>
+    <div class="box vmin">'50vmin' should be eq '200px'</div>
+  </div>
+</body>
+</html>
