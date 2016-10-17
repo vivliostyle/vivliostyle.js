@@ -166,5 +166,51 @@ describe("cssvalid", function() {
                     });
             });
         });
+        it("should parse font shorthand rule", function(done) {
+            var validatorSet = new adapt.cssvalid.ValidatorSet();
+            validatorSet.initBuiltInValidators();
+            validatorSet.parse(
+                "PPLENGTH = POS_LENGTH | ZERO | POS_PERCENTAGE;" +
+                "FAMILY = SPACE(IDENT+) | STRING;" +
+                "FAMILY_LIST = COMMA( FAMILY+ );" +
+                "font-family = FAMILY_LIST;" +
+                "font-size = xx-small | x-small | small | medium | large | x-large | xx-large | larger | smaller | PPLENGTH | POS_NUM;" +
+                "font-style = normal | italic | oblique;" +
+                "font-variant = normal | small-caps;" +
+                "font-weight = normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;" +
+                "font-stretch = normal | wider | narrower | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded;" +
+                "line-height = normal | POS_NUM | PPLENGTH;" +
+                "\n\n" +
+                "DEFAULTS\n\n" +
+                "font-family: serif;" +
+                "font-style: normal;" +
+                "font-size: medium;" +
+                "font-variant: normal;" +
+                "line-height: normal;" +
+                "font-weight: normal;" +
+                "\n\n" +
+                "SHORTHANDS\n\n" +
+                "font = FONT font-style font-variant font-weight font-stretch ;");
+            var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+                validatorSet, true);
+            var warnListener = jasmine.createSpy("warn listener");
+            vivliostyle.logging.logger.addListener(vivliostyle.logging.LogLevel.WARN, warnListener);
+            adapt.task.start(function() {
+                adapt.cssparse.parseStylesheetFromText(
+                    ".test  { font: 80% sans-serif ; }\n" +
+                    ".test2 { font: 12px/14px \"Times\" ; }\n" +
+                    ".test3 { font: oblique small-caps bold 12px/14px \"Times\" ; }\n" +
+                    ".test4 { font: small-caps oblique 12px \"Times\" ; }\n" +
+                    ".test5 { font: oblique small-caps bold ultra-condensed 12px/14px \"Times\" ; }\n" +
+                    ".test6 { font: small-caps wider oblique 12px \"Times\" ; }\n" +
+                    ".test7 { font: status-bar ; }",
+                    handler, null, null, null).then(
+                    function(result) {
+                        expect(result).toBe(true);
+                        expect(warnListener).not.toHaveBeenCalled();
+                        done();
+                    });
+            });
+        });
     });
 });
