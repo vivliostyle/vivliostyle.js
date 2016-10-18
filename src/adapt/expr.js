@@ -241,6 +241,12 @@ adapt.expr.needUnitConversion = function(unit) {
         case "q":
         case "rem":
         case "rex":
+        case "vw":
+        case "vh":
+        case "vi":
+        case "vb":
+        case "vmax":
+        case "vmin":
             return true;
         default:
             return false;
@@ -324,9 +330,17 @@ adapt.expr.Context.prototype.clearScope = function(scope) {
  */
 adapt.expr.Context.prototype.queryUnitSize = function(unit, isRoot) {
     if (unit == "vw")
-        return this.pageWidth() / 100;
+        return this.pageAreaSize.width / 100;
     if (unit == "vh")
-        return this.pageHeight() / 100;
+        return this.pageAreaSize.hight / 100;
+    if (unit == "vi")
+        return this.pageAreaSize.width / 100; // TODO
+    if (unit == "vb")
+        return this.pageAreaSize.hight / 100; // TODO
+    if (unit == "vmax")
+        return Math.max(this.pageAreaSize.width, this.pageAreaSize.hight) / 100;
+    if (unit == "vmin")
+        return Math.min(this.pageAreaSize.width, this.pageAreaSize.hight) / 100;
     if (unit == "em" || unit == "rem")
         return isRoot ? this.initialFontSize : this.fontSize();
     if (unit == "ex" || unit == "rex")
