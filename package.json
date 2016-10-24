@@ -28,7 +28,7 @@
   "homepage": "https://github.com/vivliostyle/vivliostyle.js",
   "devDependencies": {
     "eslint": "^3.3.1",
-    "google-closure-compiler": "^20150315.0.2",
+    "google-closure-compiler": "^20160911.0.0",
     "jasmine-core": "^2.3.4",
     "karma": "^0.13.7",
     "karma-cli": "^0.1.0",
