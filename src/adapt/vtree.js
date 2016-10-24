@@ -210,16 +210,16 @@ adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
         }
     }, this);
 
-    // use size of the container of the PageMasterInstance
-    var rect = clientLayout.getElementClientRect(this.container);
-    this.dimensions.width = rect.width;
-    this.dimensions.height = rect.height;
-
     var list = this.delayedItems;
     for (var i = 0; i < list.length; i++) {
         var item = list[i];
         adapt.base.setCSSProperty(item.target, item.name, item.value.toString());
     }
+
+    // use size of the container of the PageMasterInstance
+    var rect = clientLayout.getElementClientRect(this.container);
+    this.dimensions.width = rect.width;
+    this.dimensions.height = rect.height;
 
     for (var i = 0; i < triggers.length; i++) {
         var trigger = triggers[i];
