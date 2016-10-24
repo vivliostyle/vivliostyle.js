@@ -94,6 +94,7 @@
         margin: 0 auto;
         -webkit-flex: none;
         flex: none;
+        transform-origin: left top;
     }
     [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-page-side=left] {
         margin-right: 1px;
