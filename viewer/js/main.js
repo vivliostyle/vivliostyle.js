@@ -5888,7 +5888,7 @@ ko.exportSymbol('nativeTemplateEngine', ko.nativeTemplateEngine);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Vivliostyle core 2016.7.1-pre.20161017034146
+ * Vivliostyle core 2016.7.1-pre.20161024055317
  */
 (function(factory) {
     if (typeof define === "function" && define.amd) {
@@ -6122,7 +6122,7 @@ function Rh(a){return Ph(a,function(a,c){for(var d=a.firstChild;d;d=d.nextSiblin
 function Xh(a,b){var c=Wh[b];return c?function(){for(var b=0;b<a.length;b++)try{c(a[b])}catch(e){}}:null}
 function Yh(a,b){this.f={};this.L=a;this.e=b;this.D=null;this.h=[];var c=this;this.G=function(a){var b=a.currentTarget,f=b.getAttribute("href")||b.getAttributeNS("http://www.w3.org/1999/xlink","href");f&&ab(c,{type:"hyperlink",target:null,currentTarget:null,Me:b,href:f,preventDefault:function(){a.preventDefault()}})};this.b={};this.d={width:0,height:0};this.k=this.w=!1;this.l=this.u=!0;this.H=0;this.position=null;this.offset=-1;this.j=null;this.g=[];this.A={top:{},bottom:{},left:{},right:{}}}
 t(Yh,$a);function Zh(a,b){(a.u=b)?a.L.setAttribute("data-vivliostyle-auto-page-width",!0):a.L.removeAttribute("data-vivliostyle-auto-page-width")}function $h(a,b){(a.l=b)?a.L.setAttribute("data-vivliostyle-auto-page-height",!0):a.L.removeAttribute("data-vivliostyle-auto-page-height")}function ai(a,b,c){var d=a.b[c];d?d.push(b):a.b[c]=[b]}
-function bi(a,b,c){Object.keys(a.b).forEach(function(a){for(var b=this.b[a],c=0;c<b.length;)this.L.contains(b[c])?c++:b.splice(c,1);0===b.length&&delete this.b[a]},a);c=ci(c,a.L);a.d.width=c.width;a.d.height=c.height;var d=a.h;for(c=0;c<d.length;c++){var e=d[c];v(e.target,e.name,e.value.toString())}for(c=0;c<b.length;c++){var d=b[c],f=a.b[d.fc],e=a.b[d.je];if(f&&e&&(f=Xh(f,d.action)))for(var g=0;g<e.length;g++)e[g].addEventListener(d.event,f,!1)}}
+function bi(a,b,c){Object.keys(a.b).forEach(function(a){for(var b=this.b[a],c=0;c<b.length;)this.L.contains(b[c])?c++:b.splice(c,1);0===b.length&&delete this.b[a]},a);for(var d=a.h,e=0;e<d.length;e++){var f=d[e];v(f.target,f.name,f.value.toString())}e=ci(c,a.L);a.d.width=e.width;a.d.height=e.height;for(e=0;e<b.length;e++)if(c=b[e],f=a.b[c.fc],d=a.b[c.je],f&&d&&(f=Xh(f,c.action)))for(var g=0;g<d.length;g++)d[g].addEventListener(c.event,f,!1)}
 Yh.prototype.zoom=function(a){v(this.L,"transform","scale("+a+")")};Yh.prototype.F=function(){return this.D||this.L};function di(a){switch(a){case "normal":case "nowrap":return 0;case "pre-line":return 1;case "pre":case "pre-wrap":return 2;default:return null}}function ei(a,b){if(1==a.nodeType)return!1;var c=a.textContent;switch(b){case 0:return!!c.match(/^\s*$/);case 1:return!!c.match(/^[ \t\f]*$/);case 2:return 0==c.length}throw Error("Unexpected whitespace: "+b);}
 function fi(a){this.d=a;this.b=[]}function gi(a,b,c,d,e,f,g,h,l){this.b=a;this.element=b;this.d=c;this.Ha=d;this.h=e;this.f=f;this.me=g;this.g=h;this.Wa=-1;this.e=l}function hi(a,b){return a.f?!b.f||a.Ha>b.Ha?!0:a.g:!1}function ii(a,b){return a.top-b.top}function ji(a,b){return b.right-a.right}
 function ki(a,b){if(a===b)return!0;if(!a||!b||a.ea!==b.ea||a.I!==b.I||a.ha.length!==b.ha.length)return!1;for(var c=0;c<a.ha.length;c++){var d=a[c],e=b[c];if(!(d===e||d&&e&&d.ga===e.ga&&d.Ia===e.Ia&&d.fa===e.fa&&d.ra===e.ra&&d.pa===e.pa))return!1}return!0}function li(a,b,c,d,e,f,g){this.ba=a;this.gd=d;this.Fd=null;this.root=b;this.X=c;this.type=f;e&&(e.Fd=this);this.b=g}function mi(a,b){this.ke=a;this.count=b}
