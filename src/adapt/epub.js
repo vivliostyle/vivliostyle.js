@@ -1014,6 +1014,7 @@ adapt.epub.OPFView = function(opf, viewport, fontMapper, pref, pageSheetSizeRepo
     /** @const */ this.fontMapper = fontMapper;
     /** @const */ this.pageSheetSizeReporter = pageSheetSizeReporter;
     /** @type {Array.<adapt.epub.OPFViewItem>} */ this.spineItems = [];
+    /** @const {Array.<Array.<adapt.task.Continuation>>} */ this.spineItemLoadingContinuations = [];
     /** @const */ this.pref = adapt.expr.clonePreferences(pref);
     /** @const */ this.clientLayout = new adapt.vgen.DefaultClientLayout(viewport);
     /** @const */ this.counterStore = new vivliostyle.counters.CounterStore(opf.documentURLTransformer);
@@ -1875,10 +1876,21 @@ adapt.epub.OPFView.prototype.getPageViewItem = function(spineIndex) {
     if (viewItem) {
         return adapt.task.newResult(viewItem);
     }
-    var item = self.opf.spine[spineIndex];
-    var store = self.opf.store;
     /** @type {!adapt.task.Frame.<adapt.epub.OPFViewItem>} */ var frame
         = adapt.task.newFrame("getPageViewItem");
+
+    // If loading for the item has already been started, suspend and wait for the result.
+    var loadingContinuations = this.spineItemLoadingContinuations[spineIndex];
+    if (loadingContinuations) {
+        var cont = frame.suspend();
+        loadingContinuations.push(cont);
+        return frame.result();
+    } else {
+        loadingContinuations = this.spineItemLoadingContinuations[spineIndex] = [];
+    }
+
+    var item = self.opf.spine[spineIndex];
+    var store = self.opf.store;
     store.load(item.src).then(function(xmldoc) {
         if (item.epageCount == 0 && self.opf.spine.length == 1) {
             // Single-chapter doc without epages (e.g. FB2).
@@ -1917,6 +1929,9 @@ adapt.epub.OPFView.prototype.getPageViewItem = function(spineIndex) {
                 layoutPositions: [null], pages: [], complete: false};
             self.spineItems[spineIndex] = viewItem;
             frame.finish(viewItem);
+            loadingContinuations.forEach(function(c) {
+                c.schedule(viewItem);
+            });
         });
     });
     return frame.result();
