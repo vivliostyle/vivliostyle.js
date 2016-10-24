@@ -1239,7 +1239,7 @@ adapt.ops.OPSDocStore.prototype.clearStyleSheets = function() {
 
 /**
  * @private
- * @param {{url: ?string, text: ?string}} stylesheet
+ * @param {adapt.ops.StyleSource} stylesheet
  */
 adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
     this.styleSheets.push({url: stylesheet.url, text: stylesheet.text,
@@ -1248,7 +1248,7 @@ adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
 
 /**
  * @private
- * @param {{url: ?string, text: ?string}} stylesheet
+ * @param {adapt.ops.StyleSource} stylesheet
  */
 adapt.ops.OPSDocStore.prototype.addUserStyleSheet = function(stylesheet) {
     this.styleSheets.push({url: stylesheet.url, text: stylesheet.text,
@@ -1310,7 +1310,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
                         }
                     } else if (localName == "meta" && child.getAttribute("name") == "viewport") {
                         sources.push({url:url, text: adapt.ops.processViewportMeta(child),
-                            flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, condition: null, media: null});
+                            flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
                     }
                 } else if (ns == adapt.base.NS.FB2) {
                     if (localName == "stylesheet" && child.getAttribute("type") == "text/css") {
@@ -1390,4 +1390,3 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
     });
     return frame.result();
 };
-
