@@ -1199,7 +1199,7 @@ adapt.cssparse.Parser.prototype.extractVals = function(sep, index) {
     /** @type {Array.<adapt.css.Val>} */ var arr = [];
     var valStack = this.valStack;
     while (true) {
-        arr.push( /** @type {adapt.css.Val} */ (valStack[index++]));
+        arr.push(/** @type {adapt.css.Val} */(valStack[index++]));
         if (index == valStack.length)
             break;
         if (valStack[index++] != sep)
