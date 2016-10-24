@@ -1199,7 +1199,7 @@ adapt.cssparse.Parser.prototype.extractVals = function(sep, index) {
     /** @type {Array.<adapt.css.Val>} */ var arr = [];
     var valStack = this.valStack;
     while (true) {
-        arr.push(valStack[index++]);
+        arr.push( /** @type {adapt.css.Val} */ (valStack[index++]));
         if (index == valStack.length)
             break;
         if (valStack[index++] != sep)
@@ -1327,7 +1327,7 @@ adapt.cssparse.Parser.prototype.exprStackReduce = function(op, token) {
             }
         } else {
             // infix
-            if (adapt.cssparse.priority[op] > adapt.cssparse.priority[tok]) {
+            if (adapt.cssparse.priority[op] > adapt.cssparse.priority[ /** @type {number} */ (tok) ]) {
                 valStack.push(tok);
                 break;
             }

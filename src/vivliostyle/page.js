@@ -1,6 +1,6 @@
 /**
  * Copyright 2015 Vivliostyle Inc.
- * @fileoverview @page rule (CSS Paged Media) support
+ * @fileoverview \@page rule (CSS Paged Media) support
  */
 goog.provide("vivliostyle.page");
 

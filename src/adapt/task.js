@@ -521,7 +521,7 @@ adapt.task.Task.prototype.isRunning = function() {
  * Register a callback to be called when the task is done. Callback is not
  * executed in any task context. Multiple callbacks can be registered and
  * they will be called in the registration order.
- * @param {function(*):void} callback
+ * @param {function():void} callback
  * @return {void}
  */
 adapt.task.Task.prototype.whenDone = function(callback) {

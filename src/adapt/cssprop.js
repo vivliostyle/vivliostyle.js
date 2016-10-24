@@ -177,7 +177,7 @@ adapt.cssprop.ShapeVisitor.prototype.getShape = function(x, y, width, height, co
                 if (numbers.length % 2 == 0) {
                     /** @type {Array.<adapt.geom.Point>} */ var points = [];
                     for (var k = 0; k < numbers.length; k += 2) {
-                        points.push({ x: x + numbers[k], y: y + numbers[k + 1] });
+                        points.push(new adapt.geom.Point( x + numbers[k], y + numbers[k + 1] ));
                     }
                     return new adapt.geom.Shape(points);
                 }
