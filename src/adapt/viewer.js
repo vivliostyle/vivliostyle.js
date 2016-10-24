@@ -387,12 +387,11 @@ adapt.viewer.Viewer.prototype.pageReplacedListener = function(evt) {
     var currentPage = this.currentPage;
     var spread = this.currentSpread;
     var target = evt.target;
-    if (spread) {
-        if (spread.left === target || spread.right === target) {
-            this.showCurrent(evt.newPage);
-        }
-    } else if (currentPage === evt.target) {
-        this.showCurrent(evt.newPage);
+    if (currentPage === evt.target ||
+        (spread && (spread.left === target || spread.right === target))) {
+        this.currentPage = evt.newPage;
+        this.needRefresh = true;
+        this.kick();
     }
 };
 
