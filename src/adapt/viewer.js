@@ -183,12 +183,12 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     var self = this;
     self.configure(command).then(function() {
         var store = new adapt.epub.EPUBDocStore();
-        store.init().then(function() {
+        store.init(authorStyleSheet, userStyleSheet).then(function() {
             var epubURL = adapt.base.resolveURL(url, self.window.location.href);
             self.packageURL = [epubURL];
             store.loadEPUBDoc(epubURL, haveZipMetadata).then(function(opf) {
                 self.opf = opf;
-                self.setStyleSheetsAndRender(authorStyleSheet, userStyleSheet, fragment).then(function() {
+                self.render(fragment).then(function() {
                     frame.finish(true);
                 });
             });
@@ -215,7 +215,7 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
     var self = this;
     self.configure(command).then(function() {
         var store = new adapt.epub.EPUBDocStore();
-        store.init().then(function() {
+        store.init(authorStyleSheet, userStyleSheet).then(function() {
             /** @type {!Array<!adapt.epub.OPFItemParam>} */ var resolvedParams = params.map(function(p, index) {
                 return {
                     url: adapt.base.resolveURL(p.url, self.window.location.href),
@@ -227,7 +227,7 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
             self.packageURL = resolvedParams.map(function(p) { return p.url; });
             self.opf = new adapt.epub.OPFDoc(store, "");
             self.opf.initWithChapters(resolvedParams, doc).then(function() {
-                self.setStyleSheetsAndRender(authorStyleSheet, userStyleSheet, fragment).then(function() {
+                self.render(fragment).then(function() {
                     frame.finish(true);
                 });
             });
@@ -238,16 +238,12 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
 
 /**
  * @private
- * @param {Array.<{url: ?string, text: ?string}>} authorStyleSheet
- * @param {Array.<{url: ?string, text: ?string}>} userStyleSheet
  * @param {?string=} fragment
  * @returns {!adapt.task.Result.<boolean>}
  */
-adapt.viewer.Viewer.prototype.setStyleSheetsAndRender = function(authorStyleSheet, userStyleSheet, fragment) {
+adapt.viewer.Viewer.prototype.render = function(fragment) {
     this.cancelRenderingTask();
-    this.opf.store.setStyleSheets(authorStyleSheet, userStyleSheet);
     var self = this;
-
     var cont;
     if (fragment) {
         cont = this.opf.resolveFragment(fragment).thenAsync(function(position) {
