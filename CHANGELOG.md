@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [2016.10](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.10) - 2016-10-25
+
 ### Added
 
 - Additional author style sheets can be injected with 'styleSheet' property of `vivliostyle.viewer.DocumentOptions`.
