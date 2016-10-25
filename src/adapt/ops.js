@@ -1178,9 +1178,12 @@ adapt.ops.OPSDocStore = function(fontDeobfuscator) {
 goog.inherits(adapt.ops.OPSDocStore, adapt.net.ResourceStore);
 
 /**
+ * @param {?Array.<{url: ?string, text: ?string}>} authorStyleSheets
+ * @param {?Array.<{url: ?string, text: ?string}>} userStyleSheets
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.ops.OPSDocStore.prototype.init = function() {
+adapt.ops.OPSDocStore.prototype.init = function(authorStyleSheets, userStyleSheets) {
+    this.setStyleSheets(authorStyleSheets, userStyleSheets);
     var userAgentXML = adapt.base.resolveURL("user-agent.xml", adapt.base.resourceBaseURL);
     var frame = adapt.task.newFrame("OPSDocStore.init");
     var self = this;
@@ -1213,6 +1216,7 @@ adapt.ops.OPSDocStore.prototype.getTriggersForDoc = function(xmldoc) {
 
 /**
  * Set author stylesheets and user stylesheets. Existing style sheets are removed.
+ * @private
  * @param {?Array.<{url: ?string, text: ?string}>} authorStyleSheets
  * @param {?Array.<{url: ?string, text: ?string}>} userStyleSheets
  */
