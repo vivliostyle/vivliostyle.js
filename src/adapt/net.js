@@ -12,12 +12,12 @@ goog.require('adapt.task');
  * @enum {string}
  */
 adapt.net.XMLHttpRequestResponseType = {
-	DEFAULT: "",
-	ARRAYBUFFER: "arraybuffer",
-	BLOB: "blob",
-	DOCUMENT: "document",
-	JSON: "json",
-	TEXT: "text"
+    DEFAULT: "",
+    ARRAYBUFFER: "arraybuffer",
+    BLOB: "blob",
+    DOCUMENT: "document",
+    JSON: "json",
+    TEXT: "text"
 };
 
 /** @typedef {{status:number, url:string, contentType:?string, responseText:?string, responseXML:Document, responseBlob:Blob}} */
@@ -28,61 +28,61 @@ adapt.net.Response;
  * @param {adapt.net.XMLHttpRequestResponseType=} opt_type
  * @param {string=} opt_method
  * @param {string=} opt_data
- * @param {string=} opt_contentType 
+ * @param {string=} opt_contentType
  * @return {!adapt.task.Result.<adapt.net.Response>}
  */
 adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) {
     /** @type {!adapt.task.Frame.<adapt.net.Response>} */ var frame =
-    	adapt.task.newFrame("ajax");
+        adapt.task.newFrame("ajax");
     var request = new XMLHttpRequest();
     var continuation = frame.suspend(request);
     /** @type {adapt.net.Response} */ var response =
-    	{status: 0, url: url, contentType: null, responseText: null, responseXML: null, responseBlob: null};
+    {status: 0, url: url, contentType: null, responseText: null, responseXML: null, responseBlob: null};
     request.open(opt_method || "GET", url, true);
     if (opt_type) {
-    	request.responseType = opt_type;
+        request.responseType = opt_type;
     }
     request.onreadystatechange = function() {
         if (request.readyState === 4) {
-        	response.status = request.status;
-        	if (response.status == 200 || response.status == 0) {
-	        	if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.DOCUMENT) && request.responseXML) {
-	        		response.responseXML = request.responseXML;
-					response.contentType = request.responseXML.contentType;
-	        	} else {
-	        		var text = request.response;
-	        		if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.TEXT) && typeof text == "string") {
-	        			response.responseText = text;
-	        		} else if (!text) {
-						vivliostyle.logging.logger.warn("Unexpected empty success response for", url);
-        			} else {
-        				if (typeof text == "string") {
-        					response.responseBlob = adapt.net.makeBlob([text]);
-        				} else {
-        					response.responseBlob = /** @type {Blob} */ (text);
-        				}
-        			}
-					var contentTypeHeader = request.getResponseHeader("Content-Type");
-					if (contentTypeHeader) {
-						response.contentType = contentTypeHeader.replace(/(.*);.*$/, "$1");
-					}
-	        	}
-        	}
+            response.status = request.status;
+            if (response.status == 200 || response.status == 0) {
+                if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.DOCUMENT) && request.responseXML) {
+                    response.responseXML = request.responseXML;
+                    response.contentType = request.responseXML.contentType;
+                } else {
+                    var text = request.response;
+                    if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.TEXT) && typeof text == "string") {
+                        response.responseText = text;
+                    } else if (!text) {
+                        vivliostyle.logging.logger.warn("Unexpected empty success response for", url);
+                    } else {
+                        if (typeof text == "string") {
+                            response.responseBlob = adapt.net.makeBlob([text]);
+                        } else {
+                            response.responseBlob = /** @type {Blob} */ (text);
+                        }
+                    }
+                    var contentTypeHeader = request.getResponseHeader("Content-Type");
+                    if (contentTypeHeader) {
+                        response.contentType = contentTypeHeader.replace(/(.*);.*$/, "$1");
+                    }
+                }
+            }
             continuation.schedule(response);
         }
     };
-	try {
-		if (opt_data) {
-			request.setRequestHeader("Content-Type",
-				opt_contentType || "text/plain; charset=UTF-8");
-			request.send(opt_data);
-		}
-		else
-			request.send(null);
-	} catch (e) {
-		vivliostyle.logging.logger.warn(e, "Error fetching " + url);
-		continuation.schedule(response);
-	}
+    try {
+        if (opt_data) {
+            request.setRequestHeader("Content-Type",
+                opt_contentType || "text/plain; charset=UTF-8");
+            request.send(opt_data);
+        }
+        else
+            request.send(null);
+    } catch (e) {
+        vivliostyle.logging.logger.warn(e, "Error fetching " + url);
+        continuation.schedule(response);
+    }
     return frame.result();
 };
 
@@ -92,39 +92,39 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
  * @return Blob
  */
 adapt.net.makeBlob = function(parts, opt_type) {
-	var type = opt_type || "application/octet-stream";
-	var builderCtr = window["WebKitBlobBuilder"] || window["MSBlobBuilder"]; // deprecated
-	if (builderCtr) {
-		var builder = new builderCtr();
-		for (var i = 0; i < parts.length; i++) {
-			builder.append(parts[i]);
-		}
-		return builder.getBlob(type);
-	}
-	return new Blob(parts, {type: type});
+    var type = opt_type || "application/octet-stream";
+    var builderCtr = window["WebKitBlobBuilder"] || window["MSBlobBuilder"]; // deprecated
+    if (builderCtr) {
+        var builder = new builderCtr();
+        for (var i = 0; i < parts.length; i++) {
+            builder.append(parts[i]);
+        }
+        return builder.getBlob(type);
+    }
+    return new Blob(parts, {type: type});
 };
 
 /**
  * @param {!Blob} blob
- * @return adapt.task.Result.<ArrayBuffer> 
+ * @return adapt.task.Result.<ArrayBuffer>
  */
 adapt.net.readBlob = function(blob) {
     /** @type {!adapt.task.Frame.<ArrayBuffer>} */ var frame =
-    	adapt.task.newFrame("readBlob");
-	var fileReader = new FileReader();
+        adapt.task.newFrame("readBlob");
+    var fileReader = new FileReader();
     var continuation = frame.suspend(fileReader);
-	fileReader.addEventListener("load", function() {
-		continuation.schedule(/** @type {ArrayBuffer} */ (fileReader.result));
-	}, false);
-	fileReader.readAsArrayBuffer(blob);
-	return frame.result();
+    fileReader.addEventListener("load", function() {
+        continuation.schedule(/** @type {ArrayBuffer} */ (fileReader.result));
+    }, false);
+    fileReader.readAsArrayBuffer(blob);
+    return frame.result();
 };
 
 /**
  * @param {string} url
  */
 adapt.net.revokeObjectURL = function(url) {
-	(window["URL"] || window["webkitURL"]).revokeObjectURL(url);	
+    (window["URL"] || window["webkitURL"]).revokeObjectURL(url);
 };
 
 /**
@@ -132,7 +132,7 @@ adapt.net.revokeObjectURL = function(url) {
  * @return {string} url
  */
 adapt.net.createObjectURL = function(blob) {
-	return (window["URL"] || window["webkitURL"]).createObjectURL(blob);
+    return (window["URL"] || window["webkitURL"]).createObjectURL(blob);
 };
 
 /**
@@ -142,10 +142,10 @@ adapt.net.createObjectURL = function(blob) {
  * @param {adapt.net.XMLHttpRequestResponseType} type
  */
 adapt.net.ResourceStore = function(parser, type) {
-	/** @const */ this.parser = parser;
-	/** @const */ this.type = type;
-	/** @type {Object.<string,Resource>} */ this.resources = {};
-	/** @type {Object.<string,adapt.taskutil.Fetcher.<Resource>>} */ this.fetchers = {};
+    /** @const */ this.parser = parser;
+    /** @const */ this.type = type;
+    /** @type {Object.<string,Resource>} */ this.resources = {};
+    /** @type {Object.<string,adapt.taskutil.Fetcher.<Resource>>} */ this.fetchers = {};
 };
 
 /**
@@ -155,12 +155,12 @@ adapt.net.ResourceStore = function(parser, type) {
  * @return {!adapt.task.Result.<Resource>} resource for the given URL
  */
 adapt.net.ResourceStore.prototype.load = function(url, opt_required, opt_message) {
-	url = adapt.base.stripFragment(url);
-	var resource = this.resources[url];
-	if (typeof resource != "undefined") {
-		return adapt.task.newResult(resource);
-	}
-	return this.fetch(url, opt_required, opt_message).get();
+    url = adapt.base.stripFragment(url);
+    var resource = this.resources[url];
+    if (typeof resource != "undefined") {
+        return adapt.task.newResult(resource);
+    }
+    return this.fetch(url, opt_required, opt_message).get();
 };
 
 /**
@@ -171,19 +171,19 @@ adapt.net.ResourceStore.prototype.load = function(url, opt_required, opt_message
  * @return {!adapt.task.Result.<Resource>}
  */
 adapt.net.ResourceStore.prototype.fetchInner = function(url, opt_required, opt_message) {
-	var self = this;
-	/** @type {adapt.task.Frame.<Resource>} */ var frame = adapt.task.newFrame("fetch");
-	adapt.net.ajax(url, self.type).then(function(response) {
-		if (opt_required && response.status >= 400) {
-			throw new Error(opt_message || ("Failed to fetch required resource: " + url));
-		}
-    	self.parser(response, self).then(function(resource) {
+    var self = this;
+    /** @type {adapt.task.Frame.<Resource>} */ var frame = adapt.task.newFrame("fetch");
+    adapt.net.ajax(url, self.type).then(function(response) {
+        if (opt_required && response.status >= 400) {
+            throw new Error(opt_message || ("Failed to fetch required resource: " + url));
+        }
+        self.parser(response, self).then(function(resource) {
             delete self.fetchers[url];
             self.resources[url] = resource;
             frame.finish(resource);
-    	});
-	});
-	return frame.result();
+        });
+    });
+    return frame.result();
 };
 
 /**
@@ -193,21 +193,21 @@ adapt.net.ResourceStore.prototype.fetchInner = function(url, opt_required, opt_m
  * @return {adapt.taskutil.Fetcher.<Resource>} fetcher for the resource for the given URL
  */
 adapt.net.ResourceStore.prototype.fetch = function(url, opt_required, opt_message) {
-	url = adapt.base.stripFragment(url);
-	var resource = this.resources[url];
-	if (resource) {
-		return null;
-	}
-	var fetcher = this.fetchers[url];
-	if (!fetcher) {
-		var self = this;
-		fetcher = new adapt.taskutil.Fetcher(function() {
-			return self.fetchInner(url, opt_required, opt_message);
-		}, "Fetch " + url);
-		self.fetchers[url] = fetcher;
-		fetcher.start();
-	}
-	return fetcher;
+    url = adapt.base.stripFragment(url);
+    var resource = this.resources[url];
+    if (resource) {
+        return null;
+    }
+    var fetcher = this.fetchers[url];
+    if (!fetcher) {
+        var self = this;
+        fetcher = new adapt.taskutil.Fetcher(function() {
+            return self.fetchInner(url, opt_required, opt_message);
+        }, "Fetch " + url);
+        self.fetchers[url] = fetcher;
+        fetcher.start();
+    }
+    return fetcher;
 };
 
 /**
@@ -215,7 +215,7 @@ adapt.net.ResourceStore.prototype.fetch = function(url, opt_required, opt_messag
  * @return {adapt.xmldoc.XMLDocHolder}
  */
 adapt.net.ResourceStore.prototype.get = function(url) {
-	return this.resources[adapt.base.stripFragment(url)];
+    return this.resources[adapt.base.stripFragment(url)];
 };
 
 /**
@@ -229,13 +229,13 @@ adapt.net.JSONStore;
  * @return {!adapt.task.Result.<adapt.base.JSON>}
  */
 adapt.net.parseJSONResource = function(response, store) {
-	var text = response.responseText;
-	return adapt.task.newResult(text ? adapt.base.stringToJSON(text) : null);
+    var text = response.responseText;
+    return adapt.task.newResult(text ? adapt.base.stringToJSON(text) : null);
 };
 
 /**
  * return {adapt.net.JSONStore}
  */
 adapt.net.newJSONStore = function() {
-	return new adapt.net.ResourceStore(adapt.net.parseJSONResource, adapt.net.XMLHttpRequestResponseType.TEXT);
+    return new adapt.net.ResourceStore(adapt.net.parseJSONResource, adapt.net.XMLHttpRequestResponseType.TEXT);
 };

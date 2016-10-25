@@ -30,6 +30,8 @@ EOS
 # setup environment
 virtualenv .
 source bin/activate
+pip install --upgrade setuptools
+pip install --upgrade pip
 pip install -e wptrunner
 pip install -r wptrunner/requirements_sauce.txt
 

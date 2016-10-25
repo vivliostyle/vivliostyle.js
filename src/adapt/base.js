@@ -17,7 +17,7 @@ adapt.base.JSON;
  * @return {string}
  */
 adapt.base.jsonToString = function(json) {
-	return JSON.stringify(json);
+    return JSON.stringify(json);
 };
 
 /**
@@ -25,7 +25,7 @@ adapt.base.jsonToString = function(json) {
  * @return {adapt.base.JSON}
  */
 adapt.base.stringToJSON = function(str) {
-	return JSON.parse(str);
+    return JSON.parse(str);
 };
 
 /**
@@ -35,7 +35,7 @@ adapt.base.stringToJSON = function(str) {
 adapt.base.stripFragment = function(url) {
     var r = url.match(/^([^#]*)/);
     if (r)
-        return r[1];	
+        return r[1];
     return url;
 };
 
@@ -46,7 +46,7 @@ adapt.base.stripFragment = function(url) {
 adapt.base.stripFragmentAndQuery = function(url) {
     var r = url.match(/^([^#?]*)/);
     if (r)
-        return r[1];	
+        return r[1];
     return url;
 };
 
@@ -63,9 +63,9 @@ adapt.base.resourceBaseURL = window.location.href;
  */
 adapt.base.resolveURL = function(relURL, baseURL) {
     if (!baseURL || relURL.match(/^\w{2,}:/)) {
-    	if (relURL.toLowerCase().match("^javascript:")) {
-    		return "#";
-    	}
+        if (relURL.toLowerCase().match("^javascript:")) {
+            return "#";
+        }
         return relURL;
     }
     if (baseURL.match(/^\w{2,}:\/\/[^\/]+$/))
@@ -74,7 +74,7 @@ adapt.base.resolveURL = function(relURL, baseURL) {
     if (relURL.match(/^\/\//)) {
         r = baseURL.match(/^(\w{2,}:)\/\//);
         if (r)
-        return r[1] + relURL;
+            return r[1] + relURL;
         return relURL;
     }
     if (relURL.match(/^\//)) {
@@ -134,17 +134,17 @@ adapt.base.DocumentURLTransformer.prototype.restoreURL = function(encoded) {};
  * @enum {string}
  */
 adapt.base.NS = {
-	FB2: "http://www.gribuser.ru/xml/fictionbook/2.0",
-	epub: "http://www.idpf.org/2007/ops",
-	EV: "http://www.w3.org/2001/xml-events",
-	MATHML: "http://www.w3.org/1998/Math/MathML",
-	XML: "http://www.w3.org/XML/1998/namespace",
-	XHTML: "http://www.w3.org/1999/xhtml",
-	XLINK: "http://www.w3.org/1999/xlink",
-	SHADOW: "http://www.pyroxy.com/ns/shadow",
-	SVG: "http://www.w3.org/2000/svg",
-	DC: "http://purl.org/dc/elements/1.1/",
-	NCX: "http://www.daisy.org/z3986/2005/ncx/",
+    FB2: "http://www.gribuser.ru/xml/fictionbook/2.0",
+    epub: "http://www.idpf.org/2007/ops",
+    EV: "http://www.w3.org/2001/xml-events",
+    MATHML: "http://www.w3.org/1998/Math/MathML",
+    XML: "http://www.w3.org/XML/1998/namespace",
+    XHTML: "http://www.w3.org/1999/xhtml",
+    XLINK: "http://www.w3.org/1999/xlink",
+    SHADOW: "http://www.pyroxy.com/ns/shadow",
+    SVG: "http://www.w3.org/2000/svg",
+    DC: "http://purl.org/dc/elements/1.1/",
+    NCX: "http://www.daisy.org/z3986/2005/ncx/",
     SSE: "http://example.com/sse" // temporary dummy namespace
 };
 
@@ -173,14 +173,14 @@ adapt.base.setURLParam = function(url, name, value) {
     var rg = new RegExp('#(.*&)?' + adapt.base.escapeRegExp(name) + '=([^#&]*)');
     var r = url.match(rg);
     if (r) {
-    	var length = r[2].length;
-    	var index = r.index + r[0].length - length;
-    	return url.substr(0, index) + value + url.substr(index + length);
+        var length = r[2].length;
+        var index = r.index + r[0].length - length;
+        return url.substr(0, index) + value + url.substr(index + length);
     }
     if (!url.match(/#/)) {
-    	return url + "#" + name + "=" + value;
+        return url + "#" + name + "=" + value;
     } else {
-    	return url + "&" + name + "=" + value;
+        return url + "&" + name + "=" + value;
     }
 };
 
@@ -189,9 +189,9 @@ adapt.base.setURLParam = function(url, name, value) {
  * @return ?string
  */
 adapt.base.asString = function(v) {
-	if (v == null)
-		return v;
-	return v.toString();
+    if (v == null)
+        return v;
+    return v.toString();
 };
 
 /**
@@ -211,14 +211,14 @@ adapt.base.Comparable.prototype.compare = function(other) {};
  * @constructor
  */
 adapt.base.PriorityQueue = function() {
-	/** @type {Array.<adapt.base.Comparable>} */ this.queue = [null];
+    /** @type {Array.<adapt.base.Comparable>} */ this.queue = [null];
 };
 
 /**
  * @return {number}
  */
 adapt.base.PriorityQueue.prototype.length = function() {
-	return this.queue.length - 1;
+    return this.queue.length - 1;
 };
 
 /**
@@ -244,7 +244,7 @@ adapt.base.PriorityQueue.prototype.add = function(item) {
  * @return {adapt.base.Comparable} highest priority Comparable.
  */
 adapt.base.PriorityQueue.prototype.peek = function() {
-	return this.queue[1];
+    return this.queue[1];
 };
 
 
@@ -258,25 +258,25 @@ adapt.base.PriorityQueue.prototype.remove = function() {
     var size = this.queue.length;
     if (size > 1) {
         var index = 1;
-        while( true ) {
+        while (true) {
             var childIndex = index*2;
-            if( childIndex >= size )
+            if (childIndex >= size)
                 break;
-            if( this.queue[childIndex].compare(curr) > 0 ) {
-                if( childIndex+1 < size && 
+            if (this.queue[childIndex].compare(curr) > 0) {
+                if (childIndex+1 < size &&
                     this.queue[childIndex+1].compare(
-                        /** @type {!adapt.base.Comparable} */ (this.queue[childIndex])) > 0 ) {
+                        /** @type {!adapt.base.Comparable} */ (this.queue[childIndex])) > 0) {
                     childIndex++;
                 }
-            } else if( childIndex+1 < size && this.queue[childIndex+1].compare(curr) > 0 ) {
-              childIndex++;
+            } else if (childIndex+1 < size && this.queue[childIndex+1].compare(curr) > 0) {
+                childIndex++;
             } else {
-              break;
+                break;
             }
             this.queue[index] = this.queue[childIndex];
             index = childIndex;
-       }
-       this.queue[index] = curr;
+        }
+        this.queue[index] = curr;
     }
     return result;
 };
@@ -295,7 +295,7 @@ adapt.base.cssToJSProp = function(prefix, cssPropName) {
             prefix = "Moz";
         }
     }
-	return prefix + cssPropName.replace(/-[a-z]/g, function(txt) {return txt.substr(1).toUpperCase();});
+    return prefix + cssPropName.replace(/-[a-z]/g, function(txt) {return txt.substr(1).toUpperCase();});
 };
 
 /**
@@ -306,7 +306,7 @@ adapt.base.knownPrefixes = ["", "-webkit-", "-moz-", "-ms-", "-o-", "-epub-"];
 
 /**
  * @private
- * @const @type {Object<string, ?string>}
+ * @const @type {Object<string, ?Array.<string>>}
  */
 adapt.base.propNameMap = {};
 
@@ -335,28 +335,34 @@ adapt.base.checkIfPropertySupported = function(prefix, prop) {
 
 /**
  * @param {string} prop
- * @returns {?string}
+ * @returns {?Array.<string>}
  */
-adapt.base.getPrefixedProperty = function(prop) {
+adapt.base.getPrefixedPropertyNames = function(prop) {
     var prefixed = adapt.base.propNameMap[prop];
     if (prefixed || prefixed === null) { // null means the browser does not support the property
         return prefixed;
     }
     switch (prop) {
-    case "writing-mode":
-        // Special case: prefer '-ms-writing-mode' to 'writing-mode'
-        if (adapt.base.checkIfPropertySupported("-ms-", "writing-mode")) {
-            adapt.base.propNameMap[prop] = "-ms-writing-mode";
-            return "-ms-writing-mode";
-        }
-        break;
-    case "filter":
-        // Special case: prefer '-webkit-filter' to 'filter'        
-        if (adapt.base.checkIfPropertySupported("-webkit-", "filter")) {
-            adapt.base.propNameMap[prop] = "-webkit-filter";
-            return "-webkit-filter";
-        }
-        break;
+        case "writing-mode":
+            // Special case: prefer '-ms-writing-mode' to 'writing-mode'
+            if (adapt.base.checkIfPropertySupported("-ms-", "writing-mode")) {
+                adapt.base.propNameMap[prop] = ["-ms-writing-mode"];
+                return ["-ms-writing-mode"];
+            }
+            break;
+        case "filter":
+            // Special case: prefer '-webkit-filter' to 'filter'
+            if (adapt.base.checkIfPropertySupported("-webkit-", "filter")) {
+                adapt.base.propNameMap[prop] = ["-webkit-filter"];
+                return ["-webkit-filter"];
+            }
+            break;
+        case "clip-path":
+            // Special case for chrome.
+            if (adapt.base.checkIfPropertySupported("-webkit-", "clip-path")) {
+                return adapt.base.propNameMap[prop] = ["-webkit-clip-path", "clip-path"];
+            }
+            break;
     }
 
 
@@ -364,8 +370,8 @@ adapt.base.getPrefixedProperty = function(prop) {
         var prefix = adapt.base.knownPrefixes[i];
         if (adapt.base.checkIfPropertySupported(prefix, prop)) {
             prefixed = prefix + prop;
-            adapt.base.propNameMap[prop] = prefixed;
-            return prefixed;
+            adapt.base.propNameMap[prop] = [prefixed];
+            return [prefixed];
         }
     }
     // Not supported by the browser
@@ -382,26 +388,28 @@ adapt.base.getPrefixedProperty = function(prop) {
  */
 adapt.base.setCSSProperty = function(elem, prop, value) {
     try {
-        var prefixed = adapt.base.getPrefixedProperty(prop);
-        if (!prefixed) {
+        var prefixedPropertyNames = adapt.base.getPrefixedPropertyNames(prop);
+        if (!prefixedPropertyNames) {
             return;
         }
-        if (prefixed === "-ms-writing-mode") {
-            switch (value) {
-                case "horizontal-tb":
-                    value = "lr-tb";
-                    break;
-                case "vertical-rl":
-                    value = "tb-rl";
-                    break;
-                case "vertical-lr":
-                    value = "tb-lr";
-                    break;
+        prefixedPropertyNames.forEach(function(prefixed) {
+            if (prefixed === "-ms-writing-mode") {
+                switch (value) {
+                    case "horizontal-tb":
+                        value = "lr-tb";
+                        break;
+                    case "vertical-rl":
+                        value = "tb-rl";
+                        break;
+                    case "vertical-lr":
+                        value = "tb-lr";
+                        break;
+                }
             }
-        }
-        if (elem && elem.style) {
-            (/** @type {HTMLElement} */ (elem)).style.setProperty(prefixed, value);
-        }
+            if (elem && elem.style) {
+                (/** @type {HTMLElement} */ (elem)).style.setProperty(prefixed, value);
+            }
+        });
     } catch (err) {
         vivliostyle.logging.logger.warn(err);
     }
@@ -415,8 +423,9 @@ adapt.base.setCSSProperty = function(elem, prop, value) {
  */
 adapt.base.getCSSProperty = function(elem, prop, opt_value) {
     try {
+        var propertyNames = adapt.base.propNameMap[prop];
         return (/** @type {HTMLElement} */ (elem)).style.getPropertyValue(
-        		adapt.base.propNameMap[prop] || prop);
+             propertyNames ? propertyNames[0] : prop);
     } catch (err) {
     }
     return opt_value || "";
@@ -434,8 +443,8 @@ adapt.base.StringBuffer = function() {
  * @return {!adapt.base.StringBuffer}
  */
 adapt.base.StringBuffer.prototype.append = function(str) {
-	this.list.push(str);
-	return this;
+    this.list.push(str);
+    return this;
 };
 
 /**
@@ -493,15 +502,29 @@ adapt.base.lightURLEncode = function(str) {
  * @return {boolean}
  */
 adapt.base.isLetter = function(ch) {
-	return !!ch.match(/^[a-zA-Z\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]$/);
+    return !!ch.match(/^[a-zA-Z\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]$/);
 };
 
 /**
  * @param {string} str
+ * @param {string=} prefix
  * @return {string}
  */
-adapt.base.escapeRegexpChar = function(str) {
-    return '\\u' + (0x10000|str.charCodeAt(0)).toString(16).substr(1);
+adapt.base.escapeCharToHex = function(str, prefix) {
+    prefix = typeof prefix === "string" ? prefix : '\\u';
+    return prefix + (0x10000|str.charCodeAt(0)).toString(16).substr(1);
+};
+
+/**
+ * @param {string} str
+ * @param {string=} prefix
+ * @return {string}
+ */
+adapt.base.escapeNameStrToHex = function(str, prefix) {
+    function escapeChar(s) {
+        return adapt.base.escapeCharToHex(s, prefix);
+    }
+    return str.replace(/[^-a-zA-Z0-9_]/g, escapeChar);
 };
 
 /**
@@ -509,7 +532,35 @@ adapt.base.escapeRegexpChar = function(str) {
  * @return {string}
  */
 adapt.base.escapeRegExp = function(str) {
-    return str.replace(/[^-a-zA-Z0-9_]/g, adapt.base.escapeRegexpChar);
+    return adapt.base.escapeNameStrToHex(str);
+};
+
+/**
+ * @param {string} str
+ * @param {string=} prefix
+ * @return {string}
+ */
+adapt.base.unescapeCharFromHex = function(str, prefix) {
+    prefix = typeof prefix === "string" ? prefix : '\\u';
+    if (str.indexOf(prefix) === 0) {
+        return String.fromCharCode(parseInt(str.substring(prefix.length), 16));
+    } else {
+        return str;
+    }
+};
+
+/**
+ * @param {string} str
+ * @param {string=} prefix
+ * @return {string}
+ */
+adapt.base.unescapeStrFromHex = function(str, prefix) {
+    prefix = typeof prefix === "string" ? prefix : '\\u';
+    function unescapeChar(s) {
+        return adapt.base.unescapeCharFromHex(s, prefix);
+    }
+    var regexp = new RegExp(adapt.base.escapeRegExp(prefix) + "[0-9a-fA-F]{4}", "g");
+    return str.replace(regexp, unescapeChar);
 };
 
 /**
@@ -518,11 +569,11 @@ adapt.base.escapeRegExp = function(str) {
  */
 adapt.base.assert = function(cond) {
     if (!cond) {
-    	throw "Assert failed";
+        throw "Assert failed";
     }
 };
 
-/** 
+/**
  * Function good is defined for ints from 0 to high-1. It is such that for
  * each i between 1 and high-1 !good(i-1) || good(i) is true. In other words,
  * it goes like false ... false true ... true.
@@ -536,11 +587,11 @@ adapt.base.binarySearch = function(high, good) {
     var l = 0;
     var h = high;
     while (true) {
-    	if (goog.DEBUG) {
-    		adapt.base.assert(l <= h);
-    		adapt.base.assert(l == 0 || !good(l - 1));
-    		adapt.base.assert(h == high || good(h));
-    	}
+        if (goog.DEBUG) {
+            adapt.base.assert(l <= h);
+            adapt.base.assert(l == 0 || !good(l - 1));
+            adapt.base.assert(h == high || good(h));
+        }
         if (l == h)
             return l;
         var m = (l + h) >> 1;
@@ -558,7 +609,7 @@ adapt.base.binarySearch = function(high, good) {
  * @return {number}
  */
 adapt.base.numberCompare = function(a, b) {
-	return a - b;
+    return a - b;
 };
 
 /** @const */
@@ -570,33 +621,33 @@ adapt.base.base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01
  * @return {void}
  */
 adapt.base.appendBase64 = function(sb, data) {
-	var length = data.length;
+    var length = data.length;
     var length3 = Math.floor(length / 3) * 3;
-    for( var i = 0 ; i < length3 ; i += 3) {
-    	var c1 = data.charCodeAt(i) & 0xFF;
-    	var c2 = data.charCodeAt(i+1) & 0xFF;
-    	var c3 = data.charCodeAt(i+2) & 0xFF;
-    	sb.append(adapt.base.base64Chars.charAt(c1 >> 2));
-    	sb.append(adapt.base.base64Chars.charAt(((c1 << 4) | (c2 >> 4)) & 0x3F));
-    	sb.append(adapt.base.base64Chars.charAt(((c2 << 2) | (c3 >> 6)) & 0x3F));
-    	sb.append(adapt.base.base64Chars.charAt(c3 & 0x3F));
+    for (var i = 0; i < length3; i += 3) {
+        var c1 = data.charCodeAt(i) & 0xFF;
+        var c2 = data.charCodeAt(i+1) & 0xFF;
+        var c3 = data.charCodeAt(i+2) & 0xFF;
+        sb.append(adapt.base.base64Chars.charAt(c1 >> 2));
+        sb.append(adapt.base.base64Chars.charAt(((c1 << 4) | (c2 >> 4)) & 0x3F));
+        sb.append(adapt.base.base64Chars.charAt(((c2 << 2) | (c3 >> 6)) & 0x3F));
+        sb.append(adapt.base.base64Chars.charAt(c3 & 0x3F));
     }
     switch (length - length3) {
-    case 1:
-    	var p1 = data.charCodeAt(length3) & 0xFF;
-    	sb.append(adapt.base.base64Chars.charAt(p1 >> 2));
-    	sb.append(adapt.base.base64Chars.charAt((p1 << 4) & 0x3F));
-    	sb.append("==");
-    	break;
-    case 2:
-    	var q1 = data.charCodeAt(length3) & 0xFF;
-    	var q2 = data.charCodeAt(length3+1) & 0xFF;
-    	sb.append(adapt.base.base64Chars.charAt(q1 >> 2));
-    	sb.append(adapt.base.base64Chars.charAt(((q1 << 4) | (q2 >> 4)) & 0x3F));
-    	sb.append(adapt.base.base64Chars.charAt((q2 << 2) & 0x3F));
-    	sb.append("=");
-    	break;
-    };
+        case 1:
+            var p1 = data.charCodeAt(length3) & 0xFF;
+            sb.append(adapt.base.base64Chars.charAt(p1 >> 2));
+            sb.append(adapt.base.base64Chars.charAt((p1 << 4) & 0x3F));
+            sb.append("==");
+            break;
+        case 2:
+            var q1 = data.charCodeAt(length3) & 0xFF;
+            var q2 = data.charCodeAt(length3+1) & 0xFF;
+            sb.append(adapt.base.base64Chars.charAt(q1 >> 2));
+            sb.append(adapt.base.base64Chars.charAt(((q1 << 4) | (q2 >> 4)) & 0x3F));
+            sb.append(adapt.base.base64Chars.charAt((q2 << 2) & 0x3F));
+            sb.append("=");
+            break;
+    }
 };
 
 /**
@@ -615,15 +666,15 @@ adapt.base.identity = function(param) {return param;};
  * @return {Object.<string,T>}
  */
 adapt.base.indexArray = function(arr, key) {
-	var map = {};
-	for (var i = 0; i < arr.length; i++) {
-		var v = arr[i];
-		var k = key(v);
-		if (k && !map[k]) {
-			map[k] = v;
-		}
-	}
-	return map;
+    var map = {};
+    for (var i = 0; i < arr.length; i++) {
+        var v = arr[i];
+        var k = key(v);
+        if (k && !map[k]) {
+            map[k] = v;
+        }
+    }
+    return map;
 };
 
 /** @const */
@@ -635,11 +686,11 @@ adapt.base.emptyObj = {};
  * @return {Object.<string,boolean>}
  */
 adapt.base.arrayToSet = function(arr) {
-	var set = {};
-	for (var i = 0; i < arr.length; i++) {
-		set[arr[i]] = true;
-	}
-	return set;
+    var set = {};
+    for (var i = 0; i < arr.length; i++) {
+        set[arr[i]] = true;
+    }
+    return set;
 };
 
 /**
@@ -651,19 +702,19 @@ adapt.base.arrayToSet = function(arr) {
  * @return {Object.<string,Array.<T>>}
  */
 adapt.base.multiIndexArray = function(arr, key) {
-	var map = {};
-	for (var i = 0; i < arr.length; i++) {
-		var v = arr[i];
-		var k = key(v);
-		if (k) {
-			if (map[k]) {
-				map[k].push(v);
-			} else {
-				map[k] = [v];
-			}
-		}
-	}
-	return map;
+    var map = {};
+    for (var i = 0; i < arr.length; i++) {
+        var v = arr[i];
+        var k = key(v);
+        if (k) {
+            if (map[k]) {
+                map[k].push(v);
+            } else {
+                map[k] = [v];
+            }
+        }
+    }
+    return map;
 };
 
 /**
@@ -674,11 +725,11 @@ adapt.base.multiIndexArray = function(arr, key) {
  * @return {Array.<R>}
  */
 adapt.base.map = function(arr, fn) {
-	var res = Array(arr.length);
-	for (var i = 0; i < arr.length; i++) {
-		res[i] = fn(arr[i], i);
-	}
-	return res;
+    var res = Array(arr.length);
+    for (var i = 0; i < arr.length; i++) {
+        res[i] = fn(arr[i], i);
+    }
+    return res;
 };
 
 /**
@@ -689,11 +740,11 @@ adapt.base.map = function(arr, fn) {
  * @return {Object.<string, R>}
  */
 adapt.base.mapObj = function(obj, fn) {
-	var res = {};
-	for (var n in obj) {
-		res[n] = fn(obj[n], n);
-	}
-	return res;
+    var res = {};
+    for (var n in obj) {
+        res[n] = fn(obj[n], n);
+    }
+    return res;
 };
 
 /**
@@ -701,15 +752,15 @@ adapt.base.mapObj = function(obj, fn) {
  * @return {number}
  */
 adapt.base.mapSize = function(obj) {
-	var n = 0;
-	for (var key in obj) {
-		n++;
-	}
-	return n;
+    var n = 0;
+    for (var key in obj) {
+        n++;
+    }
+    return n;
 };
 
 /**
- * @typedef {{type:string, target, currentTarget}|Event}
+ * @typedef {{type:string, target, currentTarget, preventDefault}|Event}
  */
 adapt.base.Event;
 
@@ -720,11 +771,11 @@ adapt.base.EventListener;
 
 /**
  * Extemely simple-minded EventTarget implementation. Consider using
- * goog.events.EventTarget if you are using Closure library. 
+ * goog.events.EventTarget if you are using Closure library.
  * @constructor
  */
 adapt.base.SimpleEventTarget = function() {
-	/** @type {Object.<string,Array.<adapt.base.EventListener>>} */ this.listeners = {};
+    /** @type {Object.<string,Array.<adapt.base.EventListener>>} */ this.listeners = {};
 };
 
 /**
@@ -732,14 +783,14 @@ adapt.base.SimpleEventTarget = function() {
  * @return {void}
  */
 adapt.base.SimpleEventTarget.prototype.dispatchEvent = function(evt) {
-	var list = this.listeners[evt.type];
-	if (list) {
-		evt.target = this;
-		evt.currentTarget = this;
-		for (var i = 0; i < list.length; i++) {
-			list[i](evt);
-		}
-	}
+    var list = this.listeners[evt.type];
+    if (list) {
+        evt.target = this;
+        evt.currentTarget = this;
+        for (var i = 0; i < list.length; i++) {
+            list[i](evt);
+        }
+    }
 };
 
 /**
@@ -749,15 +800,15 @@ adapt.base.SimpleEventTarget.prototype.dispatchEvent = function(evt) {
  * @return {void}
  */
 adapt.base.SimpleEventTarget.prototype.addEventListener = function(type, listener, capture) {
-	if (capture) {
-		return;
-	}
-	var list = this.listeners[type];
-	if (list) {
-		list.push(listener);
-	} else {
-		this.listeners[type] = [listener];
-	}
+    if (capture) {
+        return;
+    }
+    var list = this.listeners[type];
+    if (list) {
+        list.push(listener);
+    } else {
+        this.listeners[type] = [listener];
+    }
 };
 
 /**
@@ -767,16 +818,16 @@ adapt.base.SimpleEventTarget.prototype.addEventListener = function(type, listene
  * @return {void}
  */
 adapt.base.SimpleEventTarget.prototype.removeEventListener = function(type, listener, capture) {
-	if (capture) {
-		return;
-	}
-	var list = this.listeners[type];
-	if (list) {
-		var index = list.indexOf(listener);
-		if (index >= 0) {
-			list.splice(index, 1);
-		}
-	}
+    if (capture) {
+        return;
+    }
+    var list = this.listeners[type];
+    if (list) {
+        var index = list.indexOf(listener);
+        if (index >= 0) {
+            list.splice(index, 1);
+        }
+    }
 };
 
 /**
@@ -795,39 +846,39 @@ adapt.base.hasLShapeFloatBug = null;
  * @return {boolean}
  */
 adapt.base.checkLShapeFloatBug = function(body) {
-	if (adapt.base.hasLShapeFloatBug == null) {
-		var doc = body.ownerDocument;
-		var container = /** @type {HTMLElement} */ (doc.createElement("div"));
-		container.style.position = "absolute";
-		container.style.top = "0px";
-		container.style.left = "0px";
-		container.style.width = "100px";
-		container.style.height = "100px";
-		container.style.overflow = "hidden";
-		container.style.lineHeight = "16px";
-		container.style.fontSize = "16px";
-		body.appendChild(container);
-		var f1 = /** @type {HTMLElement} */ (doc.createElement("div"));
-		f1.style.width = "0px";
-		f1.style.height = "14px";
-		f1.style.cssFloat = "left";
-		container.appendChild(f1);
-		var f2 = /** @type {HTMLElement} */ (doc.createElement("div"));
-		f2.style.width = "50px";
-		f2.style.height = "50px";
-		f2.style.cssFloat = "left";
-		f2.style.clear = "left";
-		container.appendChild(f2);
-		var t = doc.createTextNode("a a a a a a a a a a a a a a a a");
-		container.appendChild(t);
-		var range = doc.createRange();
-		range.setStart(t, 0);
-		range.setEnd(t, 1);
-		var leftEdge = range.getBoundingClientRect().left;
-		adapt.base.hasLShapeFloatBug = leftEdge < 40;
-		body.removeChild(container);
-	}
-	return adapt.base.hasLShapeFloatBug;
+    if (adapt.base.hasLShapeFloatBug == null) {
+        var doc = body.ownerDocument;
+        var container = /** @type {HTMLElement} */ (doc.createElement("div"));
+        container.style.position = "absolute";
+        container.style.top = "0px";
+        container.style.left = "0px";
+        container.style.width = "100px";
+        container.style.height = "100px";
+        container.style.overflow = "hidden";
+        container.style.lineHeight = "16px";
+        container.style.fontSize = "16px";
+        body.appendChild(container);
+        var f1 = /** @type {HTMLElement} */ (doc.createElement("div"));
+        f1.style.width = "0px";
+        f1.style.height = "14px";
+        f1.style.cssFloat = "left";
+        container.appendChild(f1);
+        var f2 = /** @type {HTMLElement} */ (doc.createElement("div"));
+        f2.style.width = "50px";
+        f2.style.height = "50px";
+        f2.style.cssFloat = "left";
+        f2.style.clear = "left";
+        container.appendChild(f2);
+        var t = doc.createTextNode("a a a a a a a a a a a a a a a a");
+        container.appendChild(t);
+        var range = doc.createRange();
+        range.setStart(t, 0);
+        range.setEnd(t, 1);
+        var leftEdge = range.getBoundingClientRect().left;
+        adapt.base.hasLShapeFloatBug = leftEdge < 40;
+        body.removeChild(container);
+    }
+    return adapt.base.hasLShapeFloatBug;
 };
 
 /**
@@ -845,27 +896,27 @@ adapt.base.hasVerticalBBoxBug = null;
  * @return {boolean}
  */
 adapt.base.checkVerticalBBoxBug = function(body) {
-	if (adapt.base.hasVerticalBBoxBug == null) {
-		var doc = body.ownerDocument;
-		var container = /** @type {HTMLElement} */ (doc.createElement("div"));
-		container.style.position = "absolute";
-		container.style.top = "0px";
-		container.style.left = "0px";
-		container.style.width = "100px";
-		container.style.height = "100px";
-		container.style.overflow = "hidden";
-		container.style.lineHeight = "16px";
-		container.style.fontSize = "16px";
-		adapt.base.setCSSProperty(container, "writing-mode", "vertical-rl");
-		body.appendChild(container);
-		var t = doc.createTextNode("a a a a a a a a a a a a a a a a");
-		container.appendChild(t);
-		var range = doc.createRange();
-		range.setStart(t, 0);
-		range.setEnd(t, 1);
-		var box = range.getBoundingClientRect();
-		adapt.base.hasVerticalBBoxBug = (box.right - box.left < 10);
-		body.removeChild(container);
-	}
-	return adapt.base.hasVerticalBBoxBug;
+    if (adapt.base.hasVerticalBBoxBug == null) {
+        var doc = body.ownerDocument;
+        var container = /** @type {HTMLElement} */ (doc.createElement("div"));
+        container.style.position = "absolute";
+        container.style.top = "0px";
+        container.style.left = "0px";
+        container.style.width = "100px";
+        container.style.height = "100px";
+        container.style.overflow = "hidden";
+        container.style.lineHeight = "16px";
+        container.style.fontSize = "16px";
+        adapt.base.setCSSProperty(container, "writing-mode", "vertical-rl");
+        body.appendChild(container);
+        var t = doc.createTextNode("a a a a a a a a a a a a a a a a");
+        container.appendChild(t);
+        var range = doc.createRange();
+        range.setStart(t, 0);
+        range.setEnd(t, 1);
+        var box = range.getBoundingClientRect();
+        adapt.base.hasVerticalBBoxBug = (box.right - box.left < 10);
+        body.removeChild(container);
+    }
+    return adapt.base.hasVerticalBBoxBug;
 };

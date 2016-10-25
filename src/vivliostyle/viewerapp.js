@@ -22,7 +22,7 @@ goog.require('adapt.viewer');
  * @param {adapt.base.JSON} cmd
  */
 vivliostyle.viewerapp.sendCommand = function(cmd) {
-	window["adapt_command"](cmd);
+    window["adapt_command"](cmd);
 };
 
 vivliostyle.viewerapp.navigateToLeftPage = function() {
@@ -75,16 +75,16 @@ vivliostyle.viewerapp.keydown = function(evt) {
         vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
         evt.preventDefault();
         /*
-    } else if (key === "n" || keyIdentifier === "U+004E") {
-        // N - night toggle
-        self.pref.nightMode = !self.pref.nightMode;
-        self.viewport = null;
-        self.resize().thenFinish(frame);
-    } else if (key === "v" || keyIdentifier === "U+0056") {
-        self.pref.horizontal = !self.pref.horizontal;
-        self.viewport = null;
-        self.resize().thenFinish(frame);
-        */
+         } else if (key === "n" || keyIdentifier === "U+004E") {
+         // N - night toggle
+         self.pref.nightMode = !self.pref.nightMode;
+         self.viewport = null;
+         self.resize().thenFinish(frame);
+         } else if (key === "v" || keyIdentifier === "U+0056") {
+         self.pref.horizontal = !self.pref.horizontal;
+         self.viewport = null;
+         self.resize().thenFinish(frame);
+         */
     } else if (key === "t" || keyIdentifier === "U+0054") {
         vivliostyle.viewerapp.sendCommand({"a": "toc", "v": "toggle", "autohide": true});
         evt.preventDefault();
@@ -106,103 +106,103 @@ vivliostyle.viewerapp.keydown = function(evt) {
  * @return {void}
  */
 vivliostyle.viewerapp.touch = function(evt) {
-	if (evt.type == "touchmove") {
-		evt.preventDefault();
-	}
-	if (evt.touches.length == 1) {
-		var x = evt.touches[0].pageX;
-		var y = evt.touches[0].pageY;
-		if (evt.type == "touchstart") {
-			vivliostyle.viewerapp.touchActive = true;
-			vivliostyle.viewerapp.touchX = x;
-			vivliostyle.viewerapp.touchY = y;
-		} else if (vivliostyle.viewerapp.touchActive) {
-			var dx = x - vivliostyle.viewerapp.touchX;
-			var dy = y - vivliostyle.viewerapp.touchY;
-			if (evt.type == "touchend") {
-				vivliostyle.viewerapp.touchActive = false;
-			}
-			if (Math.abs(dy) < 0.5 * Math.abs(dx) && Math.abs(dx) > 15) {
-				vivliostyle.viewerapp.touchActive = false;
-				if (dx > 0) {
-			    	vivliostyle.viewerapp.sendCommand({
+    if (evt.type == "touchmove") {
+        evt.preventDefault();
+    }
+    if (evt.touches.length == 1) {
+        var x = evt.touches[0].pageX;
+        var y = evt.touches[0].pageY;
+        if (evt.type == "touchstart") {
+            vivliostyle.viewerapp.touchActive = true;
+            vivliostyle.viewerapp.touchX = x;
+            vivliostyle.viewerapp.touchY = y;
+        } else if (vivliostyle.viewerapp.touchActive) {
+            var dx = x - vivliostyle.viewerapp.touchX;
+            var dy = y - vivliostyle.viewerapp.touchY;
+            if (evt.type == "touchend") {
+                vivliostyle.viewerapp.touchActive = false;
+            }
+            if (Math.abs(dy) < 0.5 * Math.abs(dx) && Math.abs(dx) > 15) {
+                vivliostyle.viewerapp.touchActive = false;
+                if (dx > 0) {
+                    vivliostyle.viewerapp.sendCommand({
                         "a": "moveTo",
                         "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "previous" : "next"
                     });
-				} else {
-			    	vivliostyle.viewerapp.sendCommand({
+                } else {
+                    vivliostyle.viewerapp.sendCommand({
                         "a": "moveTo",
                         "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "next" : "previous"
                     });
-				}
-			}
-		}
-	} else if (evt.touches.length == 2) {
-		var px = evt.touches[0].pageX - evt.touches[1].pageX;
-		var py = evt.touches[0].pageY - evt.touches[1].pageY;
-		var pinchDist = Math.sqrt(px*px + py*py);
-		if (evt.type == "touchstart") {
-			vivliostyle.viewerapp.zoomActive = true;
-			vivliostyle.viewerapp.zoomDist = pinchDist;
-		} else if (vivliostyle.viewerapp.zoomActive) {
-			if (evt.type == "touchend") {
-				vivliostyle.viewerapp.zoomActive = false;
-			}
-			var scale = pinchDist / vivliostyle.viewerapp.zoomDist;
-			if (scale > 1.5) {
-		    	vivliostyle.viewerapp.fontSize *= 1.2;
-		    	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
-			} else if (scale < 1/1.5) {
-		    	vivliostyle.viewerapp.fontSize *= 1.2;
-		    	vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
-			}
-		}
-	}
+                }
+            }
+        }
+    } else if (evt.touches.length == 2) {
+        var px = evt.touches[0].pageX - evt.touches[1].pageX;
+        var py = evt.touches[0].pageY - evt.touches[1].pageY;
+        var pinchDist = Math.sqrt(px*px + py*py);
+        if (evt.type == "touchstart") {
+            vivliostyle.viewerapp.zoomActive = true;
+            vivliostyle.viewerapp.zoomDist = pinchDist;
+        } else if (vivliostyle.viewerapp.zoomActive) {
+            if (evt.type == "touchend") {
+                vivliostyle.viewerapp.zoomActive = false;
+            }
+            var scale = pinchDist / vivliostyle.viewerapp.zoomDist;
+            if (scale > 1.5) {
+                vivliostyle.viewerapp.fontSize *= 1.2;
+                vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
+            } else if (scale < 1/1.5) {
+                vivliostyle.viewerapp.fontSize *= 1.2;
+                vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
+            }
+        }
+    }
 };
 
 vivliostyle.viewerapp.callback = function(msg) {
-	switch (msg["t"]) {
-	case "loaded" :
-        var viewer = msg["viewer"];
-        var pageProgression = vivliostyle.viewerapp.currentPageProgression
-            = viewer.getCurrentPageProgression();
-        viewer.viewportElement.setAttribute("data-vivliostyle-page-progression", pageProgression);
-        viewer.viewportElement.setAttribute("data-vivliostyle-spread-view", viewer.pref.spreadView);
+    switch (msg["t"]) {
+        case "loaded" :
+            var viewer = msg["viewer"];
+            var pageProgression = vivliostyle.viewerapp.currentPageProgression
+                = viewer.getCurrentPageProgression();
+            viewer.viewportElement.setAttribute("data-vivliostyle-page-progression", pageProgression);
+            viewer.viewportElement.setAttribute("data-vivliostyle-spread-view", viewer.pref.spreadView);
 
-        window.addEventListener("keydown", /** @type {Function} */ (vivliostyle.viewerapp.keydown), false);
+            window.addEventListener("keydown", /** @type {Function} */ (vivliostyle.viewerapp.keydown), false);
 //        window.addEventListener("touchstart", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
 //        window.addEventListener("touchmove", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
 //        window.addEventListener("touchend", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
 
-        document.body.setAttribute("data-vivliostyle-viewer-status", "complete");
+            document.body.setAttribute("data-vivliostyle-viewer-status", "complete");
 
-        var leftButton = document.getElementById("vivliostyle-page-navigation-left");
-        leftButton.addEventListener("click", /** @type {Function} */ (vivliostyle.viewerapp.navigateToLeftPage), false);
-        var rightButton = document.getElementById("vivliostyle-page-navigation-right");
-        rightButton.addEventListener("click", /** @type {Function} */ (vivliostyle.viewerapp.navigateToRightPage), false);
-        [leftButton, rightButton].forEach(function(button) {
-            button.setAttribute("data-vivliostyle-ui-state", "attention");
-            window.setTimeout(function() {
-                button.removeAttribute("data-vivliostyle-ui-state");
-            }, 1000);
-        });
+            var leftButton = document.getElementById("vivliostyle-page-navigation-left");
+            leftButton.addEventListener("click", /** @type {Function} */ (vivliostyle.viewerapp.navigateToLeftPage), false);
+            var rightButton = document.getElementById("vivliostyle-page-navigation-right");
+            rightButton.addEventListener("click", /** @type {Function} */ (vivliostyle.viewerapp.navigateToRightPage), false);
+            [leftButton, rightButton].forEach(function(button) {
+                button.setAttribute("data-vivliostyle-ui-state", "attention");
+                window.setTimeout(function() {
+                    button.removeAttribute("data-vivliostyle-ui-state");
+                }, 1000);
+            });
 
-		break;
-	case "error" :
-        // adapt.base.log("Error: " + msg["content"]);
-		break;
-	case "nav" :
-		var cfi = msg["cfi"];
-		if (cfi) {
-			location.replace(adapt.base.setURLParam(location.href,
-				"f", adapt.base.lightURLEncode(cfi || "")));
-		}
-		break;
-	case "hyperlink" :
-		if (msg["internal"]) {
-	    	vivliostyle.viewerapp.sendCommand({"a": "moveTo", "url": msg["href"]});			
-		}
-	}
+            break;
+        case "error" :
+            // adapt.base.log("Error: " + msg["content"]);
+            break;
+        case "nav" :
+            var cfi = msg["cfi"];
+            if (cfi) {
+                location.replace(adapt.base.setURLParam(location.href,
+                    "f", adapt.base.lightURLEncode(cfi || "")));
+            }
+            break;
+        case "hyperlink" :
+            if (msg["internal"]) {
+                vivliostyle.viewerapp.sendCommand({"a": "moveTo", "url": msg["href"]});
+            }
+    }
 };
 
 /**

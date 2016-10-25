@@ -64,8 +64,8 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
         return clientLayout.getElementComputedStyle(element).getPropertyValue(name);
     }
 
-    var writingModeProperty = adapt.base.getPrefixedProperty("writing-mode");
-    var writingModeValue = (writingModeProperty ? getComputedValue(writingModeProperty) : null) ||
+    var writingModeProperty = adapt.base.getPrefixedPropertyNames("writing-mode");
+    var writingModeValue = (writingModeProperty ? getComputedValue(writingModeProperty[0]) : null) ||
         getComputedValue("writing-mode");
     var isVertical = writingModeValue === "vertical-rl" || writingModeValue === "tb-rl" ||
                      writingModeValue === "vertical-lr" || writingModeValue === "tb-lr";

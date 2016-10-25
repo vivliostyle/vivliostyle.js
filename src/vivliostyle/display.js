@@ -67,6 +67,7 @@ goog.scope(function() {
      */
     vivliostyle.display.getComputedDislayValue = function(display, position, float, isRoot) {
         if (display === adapt.css.ident.none) {
+            // no need to convert values when 'display' is 'none'
         } else if (vivliostyle.display.isAbsolutelyPositioned(position)) {
             float = adapt.css.ident.none;
             display = vivliostyle.display.blockify(display);
@@ -108,7 +109,7 @@ goog.scope(function() {
         return (!!float && float !== adapt.css.ident.none) ||
             vivliostyle.display.isAbsolutelyPositioned(position) ||
             (display === adapt.css.ident.inline_block || display === adapt.css.ident.table_cell || display === adapt.css.ident.table_caption || display == adapt.css.ident.flex) ||
-            ((display === adapt.css.ident.block || display === adapt.css.ident.list_item ) &&
+            ((display === adapt.css.ident.block || display === adapt.css.ident.list_item) &&
                 (!!overflow && overflow !== adapt.css.ident.visible) ||
                 (!!parentWritingMode && writingMode !== parentWritingMode));
     };

@@ -35,6 +35,10 @@
             page-break-before: always;
         }
 
+        .ref-page::after {
+            content: target-counter(attr(data-href, url), page);
+        }
+
         .foo {
             counter-increment: foo;
         }
@@ -152,6 +156,10 @@
         #qux-target, #quxx-target {
             border: 1px solid blue;
         }
+
+        #no-reffed-id, #xxx2-target {
+            margin-top: 400px;
+        }
     </style>
 </head>
 <body>
@@ -217,6 +225,19 @@
 
 <section>
     <p>#qux-target is on qux <span class="ref-qux" data-href="#qux-target"></span>. <span id="quxx-target">quxx-target</span></p>
+</section>
+
+<section>
+    <p>#xxx1-target is on page <span class="ref-page" data-href="#xxx1-target"></span>. ← This reference should be "page 17".</p>
+    <p id="no-reffed-id">no-reffed-id</p>
+    <p>#no-reffed-id is on this page (page 17). <span id="xxx1-target">xxx1-target</span></p>
+</section>
+
+<section>
+    <p>#xxx2-target is on page <span class="ref-page" data-href="#xxx2-target"></span>. ← This reference should be "page 19".</p>
+    <p>#xxx3-target is on page <span class="ref-page" data-href="#xxx3-target"></span>. ← This reference should be "page 19".</p>
+    <p id="xxx2-target">xxx2-target</p>
+    <p>#xxx2-target is on this page (page 19). <span id="xxx3-target">xxx3-target</span></p>
 </section>
 </body>
 </html>

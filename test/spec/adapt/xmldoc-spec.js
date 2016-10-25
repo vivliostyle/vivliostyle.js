@@ -101,7 +101,7 @@ describe("xmldoc", function() {
                 expect(doc.documentElement.localName).toBe("svg");
                 doneSvg = true;
                 complete();
-            })
+            });
         });
 
         it("can parse application/*+xml source as an XML", function(done) {
@@ -112,7 +112,7 @@ describe("xmldoc", function() {
                 var doc = docHolder.document;
                 expect(doc.documentElement.localName).toBe("foo");
                 done();
-            })
+            });
         });
 
         it("can infer contentType from file extension", function(done) {

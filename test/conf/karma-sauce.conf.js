@@ -1,3 +1,5 @@
+/*eslint-env node */
+/*eslint global-require: "off", no-process-env: "off" */
 module.exports = function(config) {
     var commonConfig = (require("./karma-common.conf"))(config);
     var customLaunchers = {
@@ -7,9 +9,9 @@ module.exports = function(config) {
             platform: "Windows 10"
         },
         sl_firefox: {
-           base: "SauceLabs",
-           browserName: "firefox",
-           platform: "Windows 10"
+            base: "SauceLabs",
+            browserName: "firefox",
+            platform: "Windows 10"
         },
         sl_safari: {
             base: "SauceLabs",

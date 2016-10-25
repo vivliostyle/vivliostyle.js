@@ -1,6 +1,7 @@
 /**
  * Copyright 2015 Vivliostyle Inc.
  */
+/*eslint-env node */
 (function() {
     "use strict";
 
@@ -18,6 +19,7 @@
         "vivliostyle/profile.js",
         "vivliostyle/constants.js",
         "vivliostyle/util.js",
+        "vivliostyle/urls.js",
         "vivliostyle/plugin.js",
         "vivliostyle/logical.js",
         "adapt/base.js",

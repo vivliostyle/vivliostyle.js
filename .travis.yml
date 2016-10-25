@@ -6,6 +6,7 @@ before_install:
 - sudo pip install virtualenv
 script:
 - build/update-version.sh
+- npm run lint
 - npm run build
 - npm run build-css
 - npm test

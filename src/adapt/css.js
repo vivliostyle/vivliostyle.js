@@ -28,7 +28,7 @@ adapt.css.Visitor = function() {
  * @return void
  */
 adapt.css.Visitor.prototype.visitValues = function(values) {
-    for (var i = 0 ; i < values.length ; i++) {
+    for (var i = 0; i < values.length; i++) {
         values[i].visit(this);
     }
 };
@@ -46,7 +46,7 @@ adapt.css.Visitor.prototype.visitEmpty = function(empty) {
  * @return {adapt.css.Val}
  */
 adapt.css.Visitor.prototype.visitSlash = function(slash) {
-	throw new Error("E_CSS_SLASH_NOT_ALLOWED");
+    throw new Error("E_CSS_SLASH_NOT_ALLOWED");
 };
 
 /**
@@ -142,7 +142,7 @@ adapt.css.Visitor.prototype.visitExpr = function(expr) {
  * @extends {adapt.css.Visitor}
  */
 adapt.css.FilterVisitor = function() {
-	adapt.css.Visitor.call(this);
+    adapt.css.Visitor.call(this);
 };
 goog.inherits(adapt.css.FilterVisitor, adapt.css.Visitor);
 
@@ -152,14 +152,14 @@ goog.inherits(adapt.css.FilterVisitor, adapt.css.Visitor);
  */
 adapt.css.FilterVisitor.prototype.visitValues = function(values) {
     /** @type {Array.<adapt.css.Val>} */ var arr = null;
-    for (var i = 0 ; i < values.length ; i++) {
+    for (var i = 0; i < values.length; i++) {
         var before = values[i];
         var after = before.visit(this);
         if (arr) {
             arr[i] = after;
         } else if (before !== after) {
             arr = new Array(values.length);
-            for (var k = 0 ; k < i ; k++) {
+            for (var k = 0; k < i; k++) {
                 arr[k] = values[k];
             }
             arr[i] = after;
@@ -450,13 +450,13 @@ adapt.css.Str.prototype.toExpr = function(scope, ref) {
  * @override
  */
 adapt.css.Str.prototype.appendTo = function(buf, toString) {
-	if (toString) {
-	    buf.append('"');
-	    buf.append(adapt.base.escapeCSSStr(this.str));
-	    buf.append('"');
-	} else {
-	    buf.append(this.str);		
-	}
+    if (toString) {
+        buf.append('"');
+        buf.append(adapt.base.escapeCSSStr(this.str));
+        buf.append('"');
+    } else {
+        buf.append(this.str);
+    }
 };
 
 /**
@@ -487,16 +487,16 @@ goog.inherits(adapt.css.Ident, adapt.css.Val);
 adapt.css.Ident.prototype.toExpr = function(scope, ref) {
     return new adapt.expr.Const(scope, this.name);
 };
-    
+
 /**
  * @override
  */
 adapt.css.Ident.prototype.appendTo = function(buf, toString) {
-	if (toString) {
-		buf.append(adapt.base.escapeCSSIdent(this.name));
-	} else {
-		buf.append(this.name);
-	}
+    if (toString) {
+        buf.append(adapt.base.escapeCSSIdent(this.name));
+    } else {
+        buf.append(this.name);
+    }
 };
 
 /**
@@ -521,7 +521,7 @@ adapt.css.Ident.prototype.isIdent = function() {
 adapt.css.getName = function(name) {
     var r = adapt.css.nameTable[name];
     if (!r) {
-    	r = new adapt.css.Ident(name);
+        r = new adapt.css.Ident(name);
     }
     return r;
 };
@@ -707,7 +707,7 @@ adapt.css.URL.prototype.visit = function(visitor) {
 adapt.css.appendList = function(buf, values, separator, toString) {
     var length = values.length;
     values[0].appendTo(buf, toString);
-    for (var i = 1 ; i < length ; i++) {
+    for (var i = 1; i < length; i++) {
         buf.append(separator);
         values[i].appendTo(buf, toString);
     }
@@ -762,7 +762,7 @@ goog.inherits(adapt.css.CommaList, adapt.css.Val);
  * @override
  */
 adapt.css.CommaList.prototype.appendTo = function(buf, toString) {
-	adapt.css.appendList(buf, this.values, ",", toString);
+    adapt.css.appendList(buf, this.values, ",", toString);
 };
 
 /**
@@ -848,19 +848,19 @@ adapt.css.Expr.prototype.isExpr = function() {
 /**
  * @param {adapt.css.Val} val
  * @param {adapt.expr.Context} context
- * @return {number} 
+ * @return {number}
  */
 adapt.css.toNumber = function(val, context) {
-	if (val) {
-	    if (val.isNumeric()) {
-	        var numeric = /** @type {adapt.css.Numeric} */ (val);
-	        return context.queryUnitSize(numeric.unit, false) * numeric.num;
-	    }
-	    if (val.isNum()) {
-	        return (/** @type {adapt.css.Num} */ (val)).num;
-	    }
-	}
-	return 0;
+    if (val) {
+        if (val.isNumeric()) {
+            var numeric = /** @type {adapt.css.Numeric} */ (val);
+            return context.queryUnitSize(numeric.unit, false) * numeric.num;
+        }
+        if (val.isNum()) {
+            return (/** @type {adapt.css.Num} */ (val)).num;
+        }
+    }
+    return 0;
 };
 
 /**
@@ -879,16 +879,17 @@ adapt.css.convertNumericToPx = function(val, context) {
  * @type {Object.<string,adapt.css.Ident>}
  */
 adapt.css.ident = {
-	absolute: adapt.css.getName("absolute"),
-	all: adapt.css.getName("all"),
+    absolute: adapt.css.getName("absolute"),
+    all: adapt.css.getName("all"),
     always: adapt.css.getName("always"),
-	auto: adapt.css.getName("auto"),
-	avoid: adapt.css.getName("avoid"),
+    auto: adapt.css.getName("auto"),
+    avoid: adapt.css.getName("avoid"),
     block: adapt.css.getName("block"),
     block_end: adapt.css.getName("block-end"),
     block_start: adapt.css.getName("block-start"),
     both: adapt.css.getName("both"),
     bottom: adapt.css.getName("bottom"),
+    border_box: adapt.css.getName("border-box"),
     crop: adapt.css.getName("crop"),
     cross: adapt.css.getName("cross"),
     exclusive: adapt.css.getName("exclusive"),
@@ -917,14 +918,14 @@ adapt.css.ident = {
     scale: adapt.css.getName("scale"),
     _static: adapt.css.getName("static"),
     rtl: adapt.css.getName("rtl"),
-	table: adapt.css.getName("table"),
+    table: adapt.css.getName("table"),
     table_caption: adapt.css.getName("table-caption"),
     table_cell: adapt.css.getName("table-cell"),
-	table_row: adapt.css.getName("table-row"),
+    table_row: adapt.css.getName("table-row"),
     top: adapt.css.getName("top"),
-	transparent: adapt.css.getName("transparent"),
+    transparent: adapt.css.getName("transparent"),
     vertical_lr: adapt.css.getName("vertical-lr"),
-	vertical_rl: adapt.css.getName("vertical-rl"),
+    vertical_rl: adapt.css.getName("vertical-rl"),
     visible: adapt.css.getName("visible"),
     _true: adapt.css.getName("true")
 };
@@ -954,8 +955,8 @@ adapt.css.fullHeight = new adapt.css.Numeric(100, "vh");
 adapt.css.numericZero = new adapt.css.Numeric(0, "px");
 
 adapt.css.processingOrder = {
-	"font-size": 1,
-	"color": 2
+    "font-size": 1,
+    "color": 2
 };
 
 /**
@@ -965,8 +966,8 @@ adapt.css.processingOrder = {
  * @return {number}
  */
 adapt.css.processingOrderFn = function(name1, name2) {
-	var n1 = adapt.css.processingOrder[name1] || Number.MAX_VALUE;
-	var n2 = adapt.css.processingOrder[name2] || Number.MAX_VALUE;
-	return n1 - n2;
+    var n1 = adapt.css.processingOrder[name1] || Number.MAX_VALUE;
+    var n2 = adapt.css.processingOrder[name2] || Number.MAX_VALUE;
+    return n1 - n2;
 };
 

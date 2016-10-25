@@ -21,8 +21,8 @@ goog.require('adapt.geom');
  * @extends {adapt.css.Visitor}
  */
 adapt.cssprop.SetVisitor = function() {
-	adapt.css.Visitor.call(this);
-	/** @type {Object.<string,boolean>} */ this.propSet = {};
+    adapt.css.Visitor.call(this);
+    /** @type {Object.<string,boolean>} */ this.propSet = {};
 };
 goog.inherits(adapt.cssprop.SetVisitor, adapt.css.Visitor);
 
@@ -66,8 +66,8 @@ adapt.cssprop.toSet = function(val) {
  * @extends {adapt.css.Visitor}
  */
 adapt.cssprop.IntVisitor = function(value) {
-	adapt.css.Visitor.call(this);
-	/** @type {number} */ this.value = value;
+    adapt.css.Visitor.call(this);
+    /** @type {number} */ this.value = value;
 };
 goog.inherits(adapt.cssprop.IntVisitor, adapt.css.Visitor);
 
@@ -104,10 +104,10 @@ adapt.cssprop.toInt = function(val, def) {
  * @extends {adapt.css.Visitor}
  */
 adapt.cssprop.ShapeVisitor = function() {
-	adapt.css.Visitor.call(this);
-	/** @type {boolean} */ this.collect = false;
-	/** @type {Array.<adapt.css.Numeric>} */ this.coords = [];
-	/** @type {?string} */ this.name = null;
+    adapt.css.Visitor.call(this);
+    /** @type {boolean} */ this.collect = false;
+    /** @type {Array.<adapt.css.Numeric>} */ this.coords = [];
+    /** @type {?string} */ this.name = null;
 };
 goog.inherits(adapt.cssprop.ShapeVisitor, adapt.css.Visitor);
 
@@ -231,10 +231,10 @@ adapt.cssprop.toShape = function(val, x, y, width, height, context) {
  * @extends {adapt.css.Visitor}
  */
 adapt.cssprop.CountersVisitor = function(reset) {
-	adapt.css.Visitor.call(this);
-	/** @const */ this.reset = reset;
-	/** @type {Object.<string,number>} */ this.counters = {};
-	/** @type {?string} */ this.name = null;
+    adapt.css.Visitor.call(this);
+    /** @const */ this.reset = reset;
+    /** @type {Object.<string,number>} */ this.counters = {};
+    /** @type {?string} */ this.name = null;
 };
 goog.inherits(adapt.cssprop.CountersVisitor, adapt.css.Visitor);
 
@@ -242,18 +242,18 @@ goog.inherits(adapt.cssprop.CountersVisitor, adapt.css.Visitor);
 adapt.cssprop.CountersVisitor.prototype.visitIdent = function(ident) {
     this.name = ident.toString();
     if (this.reset) {
-    	this.counters[this.name] = 0;
+        this.counters[this.name] = 0;
     } else {
-    	this.counters[this.name] = (this.counters[this.name] || 0) + 1;    	
+        this.counters[this.name] = (this.counters[this.name] || 0) + 1;
     }
     return ident;
 };
 
 /** @override */
 adapt.cssprop.CountersVisitor.prototype.visitInt = function(num) {
-	if (this.name) {
-		this.counters[this.name] += num.num - (this.reset ? 0 : 1);
-	}
+    if (this.name) {
+        this.counters[this.name] += num.num - (this.reset ? 0 : 1);
+    }
     return num;
 };
 
@@ -276,4 +276,22 @@ adapt.cssprop.toCounters = function(val, reset) {
         vivliostyle.logging.logger.warn(err, "toCounters:");
     }
     return visitor.counters;
+};
+
+
+/**
+ * @constructor
+ * @extends {adapt.css.FilterVisitor}
+ */
+adapt.cssprop.UrlTransformVisitor = function(baseUrl, transformer) {
+    adapt.css.FilterVisitor.call(this);
+    this.baseUrl = baseUrl;
+    this.transformer = transformer;
+};
+goog.inherits(adapt.cssprop.UrlTransformVisitor, adapt.css.FilterVisitor);
+
+/** @override */
+adapt.cssprop.UrlTransformVisitor.prototype.visitURL = function(url) {
+    return new adapt.css.URL(
+        this.transformer.transformURL(url.url, this.baseUrl));
 };

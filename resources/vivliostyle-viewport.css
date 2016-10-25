@@ -47,6 +47,18 @@
     [data-vivliostyle-viewer-viewport] {
         display: -webkit-flex;
         display: flex;
+        overflow: auto;
+        position: relative;
+    }
+
+    [data-vivliostyle-layout-box] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: -1;
+    }
+    [data-vivliostyle-debug] [data-vivliostyle-layout-box] {
+        z-index: auto;
     }
 
     [data-vivliostyle-outer-zoom-box] {
@@ -56,7 +68,7 @@
         flex: none;
     }
 
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-viewer-status=complete] [data-vivliostyle-spread-container] {
+    [data-vivliostyle-viewer-viewport] [data-vivliostyle-spread-container] {
         display: -webkit-flex;
         display: flex;
         -webkit-flex: none;
@@ -82,6 +94,7 @@
         margin: 0 auto;
         -webkit-flex: none;
         flex: none;
+        transform-origin: center top;
     }
     [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-page-side=left] {
         margin-right: 1px;

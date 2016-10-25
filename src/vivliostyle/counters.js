@@ -171,7 +171,7 @@ goog.scope(function() {
         }
         return new adapt.expr.Native(this.pageScope, function() {
             return format(getCounterNumbers());
-        }, "page-counters-" + name)
+        }, "page-counters-" + name);
     };
 
     /**
@@ -238,7 +238,7 @@ goog.scope(function() {
                         self.counterStore.resolveReference(transformedId);
                         if (pageCounters[name]) {
                             var pageCountersOfName = pageCounters[name];
-                            return format(pageCountersOfName[pageCountersOfName.length - 1] || null)
+                            return format(pageCountersOfName[pageCountersOfName.length - 1] || null);
                         } else {
                             // No corresponding counter with the name.
                             return format(0);
@@ -596,6 +596,9 @@ goog.scope(function() {
         }
         var id = viewNode.getAttribute("id") || viewNode.getAttribute("name");
         if (!id) {
+            return true;
+        }
+        if (!this.counterStore.resolvedReferences[id] && !this.counterStore.unresolvedReferences[id]) {
             return true;
         }
         var pageIndex = this.counterStore.pageIndicesById[id];
