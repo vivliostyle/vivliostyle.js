@@ -162,8 +162,11 @@ vivliostyle.viewerapp.touch = function(evt) {
 
 vivliostyle.viewerapp.callback = function(msg) {
     switch (msg["t"]) {
-        case "loaded" :
+        case "readystatechange" :
             var viewer = msg["viewer"];
+            if (viewer.readyState !== "interactive") {
+                break;
+            }
             var pageProgression = vivliostyle.viewerapp.currentPageProgression
                 = viewer.getCurrentPageProgression();
             viewer.viewportElement.setAttribute("data-vivliostyle-page-progression", pageProgression);
@@ -304,7 +307,7 @@ vivliostyle.viewerapp.main = function(arg) {
         "userAgentRootURL": uaRoot,
         "document": doc,
         "userStyleSheet": userStyleSheet,
-        "spreadView": spreadView,
+        "pageViewMode": spreadView ? adapt.viewer.PageViewMode.SPREAD : adapt.viewer.PageViewMode.SINGLE_PAGE,
         "pageBorder": 1
     };
     setViewportSize(width, height, size, orientation, config);
