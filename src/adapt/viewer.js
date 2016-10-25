@@ -397,27 +397,47 @@ adapt.viewer.Viewer.prototype.pageReplacedListener = function(evt) {
 };
 
 /**
- * Hide current pages (this.currentPage, this.currentSpread)
+ * Iterate through currently displayed pages and do something
  * @private
+ * @param {!function(!adapt.vtree.Page)} fn
  */
-adapt.viewer.Viewer.prototype.hidePages = function() {
+adapt.viewer.Viewer.prototype.forCurrentPages = function(fn) {
     var pages = [];
     if (this.currentPage) {
         pages.push(this.currentPage);
-        this.currentPage = null;
     }
     if (this.currentSpread) {
         pages.push(this.currentSpread.left);
         pages.push(this.currentSpread.right);
-        this.currentSpread = null;
     }
     pages.forEach(function(page) {
         if (page) {
-            adapt.base.setCSSProperty(page.container, "display", "none");
-            page.removeEventListener("hyperlink", this.hyperlinkListener, false);
-            page.removeEventListener("replaced", this.pageReplacedListener, false);
+            fn(page);
         }
-    }, this);
+    });
+};
+
+/**
+ * @private
+ */
+adapt.viewer.Viewer.prototype.removePageListeners = function() {
+    this.forCurrentPages(function(page) {
+        page.removeEventListener("hyperlink", this.hyperlinkListener, false);
+        page.removeEventListener("replaced", this.pageReplacedListener, false);
+    }.bind(this));
+};
+
+/**
+ * Hide current pages (this.currentPage, this.currentSpread)
+ * @private
+ */
+adapt.viewer.Viewer.prototype.hidePages = function() {
+    this.removePageListeners();
+    this.forCurrentPages(function(page) {
+        adapt.base.setCSSProperty(page.container, "display", "none");
+    });
+    this.currentPage = null;
+    this.currentSpread = null;
 };
 
 /**
@@ -605,6 +625,7 @@ adapt.viewer.Viewer.prototype.reset = function() {
  */
 adapt.viewer.Viewer.prototype.showCurrent = function(page, sync) {
     this.needRefresh = false;
+    this.removePageListeners();
     var self = this;
     if (this.pref.spreadView) {
         return this.opfView.getSpread(this.pagePosition, sync).thenAsync(function(spread) {
