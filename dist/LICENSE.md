@@ -1,6 +1,6 @@
 # License
 
-Vivliostyle.js is licensed under [GPL Version 3](licenses/GPL.txt).
+Vivliostyle Viewer is licensed under [GPL Version 3](licenses/GPL.txt).
 
 This package contains following components:
 

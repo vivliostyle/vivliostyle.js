@@ -1,6 +1,6 @@
-# Vivliostyle.js
+# Vivliostyle Viewer
 
-Vivliostyle.jsは、HTML(XML)/CSS文書を組版・表示するWebアプリケーションです。
+Vivliostyle Viewerは、HTML(XML)/CSS文書を組版・表示するWebアプリケーションです。
 このパッケージは[Vivliostyle core engine](https://github.com/vivliostyle/vivliostyle.js)、[Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui)およびその他の組版ライブラリーを組み合わせたものです。
 
 - オンラインでサンプルを見る <http://vivliostyle.com/ja/sample/>
