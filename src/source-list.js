@@ -64,6 +64,9 @@
     }
 
     if (typeof module === "object" && module.exports) {
-        module.exports = list;
+        module.exports = {
+            list: list,
+            commonJsModuleList: commonJsModuleList
+        };
     }
 })();
