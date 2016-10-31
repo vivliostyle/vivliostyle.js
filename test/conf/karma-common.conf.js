@@ -16,13 +16,15 @@ var testFiles = [
 module.exports = function(config) {
     return {
         basePath: "../..",
-        frameworks: ["jasmine", 'commonjs'],
+        frameworks: ["jasmine"],
         files: sourceFiles.concat(testFiles).concat(commonJsSourceFiles),
-        preprocessors: {
-        },
-        commonjsPreprocessor: {
-            modulesRoot: './'
-        },
+        // frameworks: ["jasmine", 'commonjs'],
+        // preprocessors: {
+        //     "node_modules/dummy/*.js": ['commonjs']
+        // },
+        // commonjsPreprocessor: {
+        //     modulesRoot: './'
+        // },
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO
