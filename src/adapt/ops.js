@@ -1217,8 +1217,8 @@ adapt.ops.OPSDocStore.prototype.getTriggersForDoc = function(xmldoc) {
 /**
  * Set author stylesheets and user stylesheets. Existing style sheets are removed.
  * @private
- * @param {?Array.<{url: ?string, text: ?string}>} authorStyleSheets
- * @param {?Array.<{url: ?string, text: ?string}>} userStyleSheets
+ * @param {?Array.<adapt.ops.StyleSource>} authorStyleSheets
+ * @param {?Array.<adapt.ops.StyleSource>} userStyleSheets
  */
 adapt.ops.OPSDocStore.prototype.setStyleSheets = function(authorStyleSheets, userStyleSheets) {
     this.clearStyleSheets();

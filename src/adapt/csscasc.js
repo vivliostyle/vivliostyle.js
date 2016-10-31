@@ -2426,9 +2426,10 @@ adapt.csscasc.CascadeInstance = function(cascade, context, counterListener, coun
     /** @type {boolean} */ this.isRoot = true;
     /** @type {!Object.<string,!Array.<number>>} */ this.counters = {};
     /** @type {Array.<Object.<string,boolean>>} */ this.counterScoping = [{}];
-    /** @type {Array.<adapt.css.Str>} */ this.quotes =
-        [new adapt.css.Str("\u201C"), new adapt.css.Str("\u201D"),
-            new adapt.css.Str("\u2018"), new adapt.css.Str("\u2019")];
+    /** @type {Array.<adapt.css.Str>} */ this.quotes = [
+        new adapt.css.Str("\u201C"), new adapt.css.Str("\u201D"),
+        new adapt.css.Str("\u2018"), new adapt.css.Str("\u2019")
+    ];
     /** @type {number} */ this.quoteDepth = 0;
     /** @type {string} */ this.lang = "";
     /** @type {Array.<number>} */ this.siblingOrderStack = [0];
