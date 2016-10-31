@@ -1,7 +1,9 @@
 /*eslint-env node */
-var sourceFiles = require("../../src/source-list").map(function(src) {
+var sourceList = require("../../src/source-list");
+var sourceFiles = sourceList.list.map(function(src) {
     return "src/" + src;
 });
+var commonJsSourceFiles = sourceList.commonJsModuleList;
 
 var testFiles = [
     "test/util/dom.js",
@@ -15,7 +17,14 @@ module.exports = function(config) {
     return {
         basePath: "../..",
         frameworks: ["jasmine"],
-        files: sourceFiles.concat(testFiles),
+        files: sourceFiles.concat(testFiles).concat(commonJsSourceFiles),
+        // frameworks: ["jasmine", 'commonjs'],
+        // preprocessors: {
+        //     "node_modules/dummy/*.js": ['commonjs']
+        // },
+        // commonjsPreprocessor: {
+        //     modulesRoot: './'
+        // },
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO

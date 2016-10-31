@@ -843,7 +843,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 
             var imageResolution = /** @type {(number|undefined)} */
                 (self.nodeContext.inheritedProps["image-resolution"]);
-            /** @const {!Array<!{image: !HTMLElement, element: !HTMLElement, fetcher: !adapt.taskutil.Fetcher<string>}>} */ var images = [];
+            /** @const {!Array<!{image: !Element, element: !Element, fetcher: !adapt.taskutil.Fetcher<string>}>} */ var images = [];
             var cssWidth = computedStyle["width"];
             var cssHeight = computedStyle["height"];
             var attrWidth = element.getAttribute("width");

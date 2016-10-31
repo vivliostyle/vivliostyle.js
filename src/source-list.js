@@ -56,11 +56,17 @@
         "vivliostyle/viewer.js"
     ];
 
+    var commonJsModuleList = [
+    ];
+
     if (typeof window === "object" && typeof window.vivliostyleCallback === "function") {
-        window.vivliostyleCallback(list);
+        window.vivliostyleCallback(list, commonJsModuleList);
     }
 
     if (typeof module === "object" && module.exports) {
-        module.exports = list;
+        module.exports = {
+            list: list,
+            commonJsModuleList: commonJsModuleList
+        };
     }
 })();
