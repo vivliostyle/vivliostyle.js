@@ -35,7 +35,7 @@ goog.provide("vivliostyle.util");
          */
         Object.assign = function(target, source) {
             if (!source) return target;
-            Object.keys(/** @type !Object */ (source)).forEach(function(key) {
+            Object.keys(source).forEach(function(key) {
                 target[key] = source[key];
             });
             return target;
