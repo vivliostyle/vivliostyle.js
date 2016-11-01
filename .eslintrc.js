@@ -1,7 +1,8 @@
 module.exports = {
     "env": {
         "browser": true,
-        "jasmine": true
+        "jasmine": true,
+        "commonjs": true
     },
     "globals": {
         "adapt": false,
