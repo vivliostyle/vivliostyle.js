@@ -1,0 +1,295 @@
+/**
+ * Copyright 2016 Vivliostyle Inc.
+ * @fileoverview Utilities related to layout.
+ */
+goog.provide("vivliostyle.layoututil");
+
+goog.require("adapt.task");
+goog.require("adapt.vtree");
+goog.require("vivliostyle.break");
+goog.require("adapt.layout");
+
+goog.scope(function() {
+    /**
+     * @typedef {{nodeContext: adapt.vtree.NodeContext, atUnforcedBreak: boolean, break: boolean}}
+     */
+    vivliostyle.layoututil.LayoutIteratorState;
+
+    /**
+     * @constructor
+     */
+    vivliostyle.layoututil.LayoutIteratorStrategy = function() {};
+    /** @const */ var LayoutIteratorStrategy = vivliostyle.layoututil.LayoutIteratorStrategy;
+
+    /**
+     * @param {!adapt.vtree.NodeContext} initialNodeContext
+     * @return {!vivliostyle.layoututil.LayoutIteratorState}
+     */
+    LayoutIteratorStrategy.prototype.initialState = function(initialNodeContext) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    LayoutIteratorStrategy.prototype.startNonDisplayableNode = function(state) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    LayoutIteratorStrategy.prototype.afterNonDisplayableNode = function(state) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    LayoutIteratorStrategy.prototype.startIgnoredTextNode = function(state) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    LayoutIteratorStrategy.prototype.afterIgnoredTextNode = function(state) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    LayoutIteratorStrategy.prototype.startNonElementNode = function(state) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    LayoutIteratorStrategy.prototype.afterNonElementNode = function(state) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    LayoutIteratorStrategy.prototype.startInlineElementNode = function(state) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    LayoutIteratorStrategy.prototype.afterInlineElementNode = function(state) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    LayoutIteratorStrategy.prototype.startNonInlineElementNode = function(state) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    LayoutIteratorStrategy.prototype.afterNonInlineElementNode = function(state) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    LayoutIteratorStrategy.prototype.finish = function(state) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorStrategy} strategy
+     * @param {!adapt.vtree.LayoutContext} layoutContext
+     * @constructor
+     */
+    vivliostyle.layoututil.LayoutIterator = function(strategy, layoutContext) {
+        /** @private @const */ this.strategy = strategy;
+        /** @private @const */ this.layoutContext = layoutContext;
+    };
+    /** @const */ var LayoutIterator = vivliostyle.layoututil.LayoutIterator;
+
+    /**
+     * @param {!adapt.vtree.NodeContext} initialNodeContext
+     * @return {!adapt.task.Result<adapt.vtree.NodeContext>}
+     */
+    LayoutIterator.prototype.iterate = function(initialNodeContext) {
+        /** @const */ var strategy = this.strategy;
+        /** @const */ var state = strategy.initialState(initialNodeContext);
+        /** @const {!adapt.task.Frame<adapt.vtree.NodeContext>} */ var frame = adapt.task.newFrame("LayoutIterator");
+        frame.loopWithFrame(function(loopFrame) {
+            while (state.nodeContext) {
+                if (!state.nodeContext.viewNode) {
+                    if (state.nodeContext.after) {
+                        strategy.afterNonDisplayableNode(state);
+                    } else {
+                        strategy.startNonDisplayableNode(state);
+                    }
+                } else if (state.nodeContext.viewNode.nodeType !== 1) {
+                    if (adapt.vtree.canIgnore(state.nodeContext.viewNode, state.nodeContext.whitespace)) {
+                        if (state.nodeContext.after) {
+                            strategy.afterIgnoredTextNode(state);
+                        } else {
+                            strategy.startIgnoredTextNode(state);
+                        }
+                    } else {
+                        if (state.nodeContext.after) {
+                            strategy.afterNonElementNode(state);
+                        } else {
+                            strategy.startNonElementNode(state);
+                        }
+                    }
+                } else {
+                    if (state.nodeContext.inline) {
+                        if (state.nodeContext.after) {
+                            strategy.afterInlineElementNode(state);
+                        } else {
+                            strategy.startInlineElementNode(state);
+                        }
+                    } else {
+                        if (state.nodeContext.after) {
+                            strategy.afterNonInlineElementNode(state);
+                        } else {
+                            strategy.startNonInlineElementNode(state);
+                        }
+                    }
+                }
+                if (state.break) {
+                    loopFrame.breakLoop();
+                    return;
+                }
+                var nextResult = this.layoutContext.nextInTree(state.nodeContext, state.atUnforcedBreak);
+                if (nextResult.isPending()) {
+                    nextResult.then(function(nextNodeContext) {
+                        state.nodeContext = nextNodeContext;
+                        loopFrame.continueLoop();
+                    });
+                    return;
+                } else {
+                    state.nodeContext = nextResult.get();
+                }
+            }
+            strategy.finish(state);
+            loopFrame.breakLoop();
+        }.bind(this)).then(function() {
+            frame.finish(state.nodeContext);
+        });
+        return frame.result();
+    };
+
+    /**
+     * @param {boolean} leadingEdge
+     * @constructor
+     * @extends {vivliostyle.layoututil.LayoutIteratorStrategy}
+     */
+    vivliostyle.layoututil.EdgeSkipper = function(leadingEdge) {
+        /** @protected @const */ this.leadingEdge = leadingEdge;
+    };
+    /** @const */ var EdgeSkipper = vivliostyle.layoututil.EdgeSkipper;
+    goog.inherits(EdgeSkipper, LayoutIteratorStrategy);
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    EdgeSkipper.prototype.startNonInlineBox = function(state) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    EdgeSkipper.prototype.endEmptyNonInlineBox = function(state) {};
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    EdgeSkipper.prototype.endNonInlineBox = function(state) {};
+
+    /**
+     * @param {!adapt.vtree.NodeContext} initialNodeContext
+     * @return {!vivliostyle.layoututil.LayoutIteratorState}
+     */
+    EdgeSkipper.prototype.initialState = function(initialNodeContext) {
+        return {
+            nodeContext: initialNodeContext,
+            atUnforcedBreak: !!this.leadingEdge && initialNodeContext.after,
+            break: false,
+            leadingEdge: this.leadingEdge,
+            breakAtTheEdge: null,
+            onStartEdges: false,
+            leadingEdgeContexts: [],
+            lastAfterNodeContext: null
+        };
+    };
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @param {!adapt.layout.Column} column
+     * @return {boolean} Returns true if a forced break occurs.
+     */
+    EdgeSkipper.prototype.processForcedBreak = function(state, column) {
+        var needForcedBreak = !state.leadingEdge && vivliostyle.break.isForcedBreakValue(state.breakAtTheEdge);
+        if (needForcedBreak) {
+            var nodeContext = state.nodeContext = state.leadingEdgeContexts[0] || state.nodeContext;
+            nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+            column.pageBreakType = state.breakAtTheEdge;
+        }
+        return needForcedBreak;
+    };
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @param {!adapt.layout.Column} column
+     * @return {boolean} Returns true if the node overflows the column.
+     */
+    EdgeSkipper.prototype.saveEdgeAndProcessOverflow = function(state, column) {
+        var overflow = column.saveEdgeAndCheckForOverflow(state.lastAfterNodeContext, null, true, state.breakAtTheEdge);
+        if (overflow) {
+            state.nodeContext = (state.lastAfterNodeContext || state.nodeContext).modify();
+            state.nodeContext.overflow = true;
+        }
+        return overflow;
+    };
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @param {!adapt.layout.LayoutConstraint} layoutConstraint
+     * @param {!adapt.layout.Column} column
+     * @returns {boolean} Returns true if the layout constraint is violated.
+     */
+    EdgeSkipper.prototype.processLayoutConstraint = function(state, layoutConstraint, column) {
+        var nodeContext = state.nodeContext;
+        var violateConstraint = !layoutConstraint.allowLayout(nodeContext);
+        if (violateConstraint) {
+            column.saveEdgeAndCheckForOverflow(state.lastAfterNodeContext, null, false, state.breakAtTheEdge);
+            nodeContext = state.nodeContext = nodeContext.modify();
+            nodeContext.overflow = true;
+        }
+        return violateConstraint;
+    };
+
+    /**
+     * @override
+     */
+    EdgeSkipper.prototype.startNonElementNode = function(state) {
+        state.onStartEdges = false;
+    };
+
+    /**
+     * @override
+     */
+    EdgeSkipper.prototype.startNonInlineElementNode = function(state) {
+        state.leadingEdgeContexts.push(state.nodeContext.copy());
+        state.breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(state.breakAtTheEdge, state.nodeContext.breakBefore);
+        state.onStartEdges = true;
+        this.startNonInlineBox(state);
+    };
+
+    /**
+     * @override
+     */
+    EdgeSkipper.prototype.afterNonInlineElementNode = function(state) {
+        if (state.onStartEdges) {
+            this.endEmptyNonInlineBox(state);
+            if (state.break) {
+                return;
+            }
+            state.leadingEdgeContexts = [];
+            state.leadingEdge = false;
+            state.atUnforcedBreak = false;
+            state.breakAtTheEdge = null;
+        } else {
+            this.endNonInlineBox(state);
+            if (state.break) {
+                return;
+            }
+        }
+        state.onStartEdges = false;
+        state.lastAfterNodeContext = state.nodeContext.copy();
+        state.breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(state.breakAtTheEdge, state.nodeContext.breakAfter);
+    };
+
+});
+

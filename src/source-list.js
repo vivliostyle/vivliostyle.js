@@ -46,6 +46,8 @@
         "vivliostyle/pagefloat.js",
         "adapt/vgen.js",
         "adapt/layout.js",
+        "vivliostyle/layoututil.js",
+        "vivliostyle/table.js",
         "vivliostyle/page.js",
         "vivliostyle/counters.js",
         "adapt/ops.js",

@@ -116,6 +116,43 @@ adapt.layout.calculateEdge = function(nodeContext, clientLayout,
 };
 
 /**
+ * Processor doing some special layout (e.g. table layout)
+ * @interface
+ */
+adapt.layout.LayoutProcessor = function() {};
+
+/**
+ * Do actual layout in the column starting from given NodeContext.
+ * @param {!adapt.vtree.NodeContext} nodeContext
+ * @param {!adapt.layout.Column} column
+ * @return {!adapt.task.Result<adapt.vtree.NodeContext>}
+ */
+adapt.layout.LayoutProcessor.prototype.layout = function(nodeContext, column) {};
+
+/**
+ * Resolver finding an appropriate LayoutProcessor given a formatting context
+ * @constructor
+ */
+adapt.layout.LayoutProcessorResolver = function() {};
+
+/**
+ * Find LayoutProcessor corresponding to given formatting context.
+ * @param {!adapt.vtree.FormattingContext} formattingContext
+ * @return {!adapt.layout.LayoutProcessor}
+ */
+adapt.layout.LayoutProcessorResolver.prototype.find = function(formattingContext) {
+    /** @type {!Array<!vivliostyle.plugin.ResolveLayoutProcessorHook>} */ var hooks =
+        vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR);
+    for (var i = 0; i < hooks.length; i++) {
+        var processor = hooks[i](formattingContext);
+        if (processor) {
+            return processor;
+        }
+    }
+    throw new Error("No processor found for a formatting context: " + formattingContext.getName());
+};
+
+/**
  * Represents a constraint on layout
  * @interface
  */
@@ -255,7 +292,7 @@ adapt.layout.validateCheckPoints = function(checkPoints) {
 /**
  * @constructor
  * @param {Element} element
- * @param {adapt.vtree.LayoutContext} layoutContext
+ * @param {!adapt.vtree.LayoutContext} layoutContext
  * @param {adapt.vtree.ClientLayout} clientLayout
  * @param {adapt.layout.LayoutConstraint} layoutConstraint
  * @extends {adapt.vtree.Container}
@@ -263,7 +300,7 @@ adapt.layout.validateCheckPoints = function(checkPoints) {
 adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConstraint) {
     adapt.vtree.Container.call(this, element);
     /** @type {Node} */ this.last = element.lastChild;
-    /** @type {adapt.vtree.LayoutContext} */ this.layoutContext = layoutContext;
+    /** @type {!adapt.vtree.LayoutContext} */ this.layoutContext = layoutContext;
     /** @type {adapt.vtree.ClientLayout} */ this.clientLayout = clientLayout;
     /** @const */ this.layoutConstraint = layoutConstraint;
     /** @type {Document} */ this.viewDocument = element.ownerDocument;
@@ -375,6 +412,7 @@ adapt.layout.Column.prototype.makeNodeContext = function(step, parent) {
         nodeContext.nodeShadow = step.nodeShadow;
     nodeContext.shadowSibling = step.shadowSibling ?
         this.makeNodeContext(step.shadowSibling, parent.copy()) : null;
+    nodeContext.formattingContext = step.formattingContext;
     return nodeContext;
 };
 
@@ -1830,6 +1868,10 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
+    if (nodeContext.formattingContext) {
+        return adapt.task.newResult(nodeContext);
+    }
+
     var self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
         = adapt.task.newFrame("skipEdges");
@@ -1886,8 +1928,8 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                         // clear
                         self.applyClearance(nodeContext);
                     }
-                    if (nodeContext.floatSide || nodeContext.flexContainer) {
-                        // float or flex container (unbreakable)
+                    if (nodeContext.formattingContext || nodeContext.floatSide || nodeContext.flexContainer) {
+                        // new formatting context, or float or flex container (unbreakable)
                         leadingEdgeContexts.push(nodeContext.copy());
                         breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
                         // check if a forced break must occur before the block.
@@ -2138,6 +2180,10 @@ adapt.layout.Column.prototype.layoutNext = function(nodeContext, leadingEdge) {
         } else if (nodeContext.floatSide) {
             // TODO: implement floats and footnotes properly for vertical writing
             self.layoutFloatOrFootnote(nodeContext).thenFinish(frame);
+        } else if (nodeContext.formattingContext) {
+            var formattingContext = nodeContext.formattingContext;
+            var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(formattingContext);
+            layoutProcessor.layout(nodeContext, self).thenFinish(frame);
         } else if (self.isBreakable(nodeContext)) {
             self.layoutBreakableBlock(nodeContext).thenFinish(frame);
         } else {

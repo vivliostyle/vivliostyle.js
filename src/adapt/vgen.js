@@ -579,6 +579,21 @@ adapt.vgen.ViewFactory.prototype.transferPolyfilledInheritedProps = function(com
 };
 
 /**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ */
+adapt.vgen.ViewFactory.prototype.resolveFormattingContext = function(nodeContext) {
+    /** @type {!Array<!vivliostyle.plugin.ResolveFormattingContextHook>} */ var hooks =
+        vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT);
+    for (var i = 0; i < hooks.length; i++) {
+        var formattingContext = hooks[i](nodeContext);
+        if (formattingContext) {
+            nodeContext.formattingContext = formattingContext;
+            return;
+        }
+    }
+};
+
+/**
  * @param {boolean} firstTime
  * @param {boolean} atUnforcedBreak
  * @private
@@ -712,6 +727,8 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                 self.nodeContext.whitespace = whitespaceValue;
             }
         }
+        // Resolve formatting context
+        self.resolveFormattingContext(self.nodeContext);
         // Create the view element
         var custom = false;
         var inner = null;

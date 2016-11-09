@@ -27,10 +27,34 @@ goog.scope(function() {
          * Note that a shorthand declaration is not directly passed to this hook.
          * After the shorthand declaration is interpreted and broken into non-shorthand declarations, the hook is called for each of the non-shorthand declarations.
          */
-        "SIMPLE_PROPERTY": "SIMPLE_PROPERTY"
+        "SIMPLE_PROPERTY": "SIMPLE_PROPERTY",
+        /**
+         * Called when resolving a formatting context.
+         *
+         * The hook is called with a NodeContext object.
+         * Functions called by this hook are expected to return a formatting context for the NodeContext.
+         */
+        "RESOLVE_FORMATTING_CONTEXT": "RESOLVE_FORMATTING_CONTEXT",
+        /**
+         * Called when resolving a layout processor (adapt.layout.LayoutProcessor) for a formatting context.
+         *
+         * The hook is called with a formatting context (adapt.vtree.FormattingContext).
+         * Functions called by this hook are expected to return a layout processor corresponding to the formatting context.
+         */
+        "RESOLVE_LAYOUT_PROCESSOR": "RESOLVE_LAYOUT_PROCESSOR"
     };
 
     /** @const */ var HOOKS = vivliostyle.plugin.HOOKS;
+
+    /**
+     * @typedef {function(adapt.vtree.NodeContext):adapt.vtree.FormattingContext}
+     */
+    vivliostyle.plugin.ResolveFormattingContextHook;
+
+    /**
+     * @typedef {function(!adapt.vtree.FormattingContext):adapt.layout.LayoutProcessor}
+     */
+    vivliostyle.plugin.ResolveLayoutProcessorHook;
 
     /**
      * @private
