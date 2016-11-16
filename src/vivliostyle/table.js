@@ -279,7 +279,7 @@ goog.scope(function() {
         this.layoutEntireTable(nodeContext, column).then(function(nodeContextAfter) {
             var tableElement = nodeContextAfter.viewNode;
             var tableBBox = column.clientLayout.getElementClientRect(tableElement);
-            if (!column.isOverflown(nodeContextAfter.parent.vertical ? tableBBox.left : tableBBox.bottom)) {
+            if (!column.isOverflown(column.vertical ? tableBBox.left : tableBBox.bottom)) {
                 frame.finish(nodeContextAfter);
                 return;
             }
