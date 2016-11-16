@@ -31,7 +31,7 @@ goog.scope(function() {
         /**
          * Called when resolving a formatting context.
          *
-         * The hook is called with a NodeContext object.
+         * The hook is called with a NodeContext object and a boolean flag representing whether this node is encountered for the first time or not.
          * Functions called by this hook are expected to return a formatting context for the NodeContext.
          */
         "RESOLVE_FORMATTING_CONTEXT": "RESOLVE_FORMATTING_CONTEXT",
@@ -47,7 +47,7 @@ goog.scope(function() {
     /** @const */ var HOOKS = vivliostyle.plugin.HOOKS;
 
     /**
-     * @typedef {function(adapt.vtree.NodeContext):adapt.vtree.FormattingContext}
+     * @typedef {function(adapt.vtree.NodeContext, boolean):adapt.vtree.FormattingContext}
      */
     vivliostyle.plugin.ResolveFormattingContextHook;
 

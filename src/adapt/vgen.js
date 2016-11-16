@@ -580,12 +580,13 @@ adapt.vgen.ViewFactory.prototype.transferPolyfilledInheritedProps = function(com
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {boolean} firstTime
  */
-adapt.vgen.ViewFactory.prototype.resolveFormattingContext = function(nodeContext) {
+adapt.vgen.ViewFactory.prototype.resolveFormattingContext = function(nodeContext, firstTime) {
     /** @type {!Array<!vivliostyle.plugin.ResolveFormattingContextHook>} */ var hooks =
         vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT);
     for (var i = 0; i < hooks.length; i++) {
-        var formattingContext = hooks[i](nodeContext);
+        var formattingContext = hooks[i](nodeContext, firstTime);
         if (formattingContext) {
             nodeContext.formattingContext = formattingContext;
             return;
@@ -728,7 +729,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             }
         }
         // Resolve formatting context
-        self.resolveFormattingContext(self.nodeContext);
+        self.resolveFormattingContext(self.nodeContext, firstTime);
         // Create the view element
         var custom = false;
         var inner = null;

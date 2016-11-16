@@ -385,7 +385,9 @@ goog.scope(function() {
     /**
      * @type {vivliostyle.plugin.ResolveFormattingContextHook}
      */
-    function resolveFormattingContextHook(nodeContext) {
+    function resolveFormattingContextHook(nodeContext, firstTime) {
+        if (!firstTime)
+            return null;
         var parentIsTable = !!nodeContext.parent &&
             nodeContext.parent.formattingContext instanceof TableFormattingContext;
         var display = nodeContext.display;
