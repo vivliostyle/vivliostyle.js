@@ -1173,6 +1173,8 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
  * @return {void}
  */
 adapt.layout.Column.prototype.fixJustificationIfNeeded = function(nodeContext, endOfRegion) {
+    if (nodeContext.after && !nodeContext.inline)
+        return;
     var node = nodeContext.viewNode;
     var textAlign = "";
     for (; node && endOfRegion && !textAlign; node = node.parentNode) {
