@@ -172,7 +172,7 @@ goog.scope(function() {
      * @returns {!DocumentFragment} A DocumentFragment containing the normalized colgroup elements.
      */
     TableLayoutProcessor.prototype.normalizeColGroups = function(tableElement, column) {
-        /** @const */ var fragment = new DocumentFragment();
+        /** @const */ var fragment = tableElement.ownerDocument.createDocumentFragment();
 
         // Count columns
         var columnCount = Math.max.apply(null,
