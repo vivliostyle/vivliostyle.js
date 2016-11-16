@@ -25,60 +25,77 @@ goog.scope(function() {
      * @param {!adapt.vtree.NodeContext} initialNodeContext
      * @return {!vivliostyle.layoututil.LayoutIteratorState}
      */
-    LayoutIteratorStrategy.prototype.initialState = function(initialNodeContext) {};
+    LayoutIteratorStrategy.prototype.initialState = function(initialNodeContext) {
+        return {
+            nodeContext: initialNodeContext,
+            atUnforcedBreak: false,
+            break: false
+        };
+    };
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     LayoutIteratorStrategy.prototype.startNonDisplayableNode = function(state) {};
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     LayoutIteratorStrategy.prototype.afterNonDisplayableNode = function(state) {};
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     LayoutIteratorStrategy.prototype.startIgnoredTextNode = function(state) {};
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     LayoutIteratorStrategy.prototype.afterIgnoredTextNode = function(state) {};
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     LayoutIteratorStrategy.prototype.startNonElementNode = function(state) {};
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     LayoutIteratorStrategy.prototype.afterNonElementNode = function(state) {};
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     LayoutIteratorStrategy.prototype.startInlineElementNode = function(state) {};
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     LayoutIteratorStrategy.prototype.afterInlineElementNode = function(state) {};
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     LayoutIteratorStrategy.prototype.startNonInlineElementNode = function(state) {};
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     LayoutIteratorStrategy.prototype.afterNonInlineElementNode = function(state) {};
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     LayoutIteratorStrategy.prototype.finish = function(state) {};
 
@@ -102,52 +119,62 @@ goog.scope(function() {
         /** @const */ var state = strategy.initialState(initialNodeContext);
         /** @const {!adapt.task.Frame<adapt.vtree.NodeContext>} */ var frame = adapt.task.newFrame("LayoutIterator");
         frame.loopWithFrame(function(loopFrame) {
+            var r;
             while (state.nodeContext) {
                 if (!state.nodeContext.viewNode) {
                     if (state.nodeContext.after) {
-                        strategy.afterNonDisplayableNode(state);
+                        r = strategy.afterNonDisplayableNode(state);
                     } else {
-                        strategy.startNonDisplayableNode(state);
+                        r = strategy.startNonDisplayableNode(state);
                     }
                 } else if (state.nodeContext.viewNode.nodeType !== 1) {
                     if (adapt.vtree.canIgnore(state.nodeContext.viewNode, state.nodeContext.whitespace)) {
                         if (state.nodeContext.after) {
-                            strategy.afterIgnoredTextNode(state);
+                            r = strategy.afterIgnoredTextNode(state);
                         } else {
-                            strategy.startIgnoredTextNode(state);
+                            r = strategy.startIgnoredTextNode(state);
                         }
                     } else {
                         if (state.nodeContext.after) {
-                            strategy.afterNonElementNode(state);
+                            r = strategy.afterNonElementNode(state);
                         } else {
-                            strategy.startNonElementNode(state);
+                            r = strategy.startNonElementNode(state);
                         }
                     }
                 } else {
                     if (state.nodeContext.inline) {
                         if (state.nodeContext.after) {
-                            strategy.afterInlineElementNode(state);
+                            r = strategy.afterInlineElementNode(state);
                         } else {
-                            strategy.startInlineElementNode(state);
+                            r = strategy.startInlineElementNode(state);
                         }
                     } else {
                         if (state.nodeContext.after) {
-                            strategy.afterNonInlineElementNode(state);
+                            r = strategy.afterNonInlineElementNode(state);
                         } else {
-                            strategy.startNonInlineElementNode(state);
+                            r = strategy.startNonInlineElementNode(state);
                         }
                     }
                 }
-                if (state.break) {
-                    loopFrame.breakLoop();
-                    return;
-                }
-                var nextResult = this.layoutContext.nextInTree(state.nodeContext, state.atUnforcedBreak);
+                var cont = (r && r.isPending()) ? r : adapt.task.newResult(true);
+                var nextResult = cont.thenAsync(function() {
+                    if (state.break) {
+                        return adapt.task.newResult(null);
+                    }
+                    return this.layoutContext.nextInTree(state.nodeContext, state.atUnforcedBreak);
+                }.bind(this));
                 if (nextResult.isPending()) {
                     nextResult.then(function(nextNodeContext) {
-                        state.nodeContext = nextNodeContext;
-                        loopFrame.continueLoop();
+                        if (state.break) {
+                            loopFrame.breakLoop();
+                        } else {
+                            state.nodeContext = nextNodeContext;
+                            loopFrame.continueLoop();
+                        }
                     });
+                    return;
+                } else if (state.break) {
+                    loopFrame.breakLoop();
                     return;
                 } else {
                     state.nodeContext = nextResult.get();

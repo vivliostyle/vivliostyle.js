@@ -72,17 +72,34 @@
             border: 2px black solid;
             border-spacing: 2px;
         }
+        figure {
+            margin: 0;
+            border: 2px black solid;
+            border-collapse: separate;
+            border-spacing: 2px;
+            display: table;
+        }
+        figcaption {
+            display: table-caption;
+            caption-side: bottom;
+        }
         caption {
             caption-side: bottom;
         }
         .border-collapse {
             border-collapse: collapse;
         }
-        th, td {
+        th, td, .th, .td {
             border: 1px gray solid;
         }
-        th > div, td > div {
+        th > div, td > div, .th > div, .td > div {
             background: #DDD;
+        }
+        .tr {
+            display: table-row;
+        }
+        .th, .td {
+            display: table-cell;
         }
         .highlight {
             background: #FFDDDD;
@@ -1013,15 +1030,63 @@
         </tbody>
     </table>
 </section>
-<!--
-<div style="display:table; border: blue solid">
-    <div style="display:table-row">
-        <div colspan="2" style="display:table-cell">aaa</div><div style="display:table-cell">b</div>
-    </div>
-    <div style="display:table-row">
-        <div style="display:table-cell; height: 300px">c</div><div style="display:table-cell">ddd</div><div style="display:table-cell">e</div>
-    </div>
-</div>
--->
+
+<section>
+    <figure>
+        <figcaption>(18) Non-table elements with table display values</figcaption>
+        <div class="tr">
+            <div class="td">
+                <div style="width: 50px; height: 48px;">
+                    min-content width = 50px.
+                </div>
+            </div>
+            <div class="td">
+                <div style="width: 60px; height: 48px;">
+                    min-content width = 60px.
+                </div>
+            </div>
+            <div class="td">
+                <div style="width: 80px; height: 36px;">
+                    min-content width = 80px.
+                </div>
+            </div>
+        </div>
+        <div class="tr">
+            <div class="td">
+                <div style="width: 100px; height: 36px;">
+                    minimum content width = 100px.
+                </div>
+            </div>
+            <div class="td">
+                <div style="width: 50px; height: 126px;">
+                    minimum content width = 50px.
+                </div>
+            </div>
+            <div class="td">
+                <div style="width: 70px; height: 48px;">
+                    minimum content width = 70px.
+                </div>
+            </div>
+        </div>
+        <div class="tr">
+            <div class="td">
+                <div style="width: 50px; height: 48px;">
+                    min-content width = 50px.
+                </div>
+            </div>
+            <div class="td">
+                <div style="width: 60px; height: 48px;">
+                    min-content width = 60px.
+                </div>
+            </div>
+            <div class="td">
+                <div style="width: 80px; height: 36px;">
+                    min-content width = 80px.
+                </div>
+            </div>
+        </div>
+    </figure>
+</section>
+
 </body>
 </html>

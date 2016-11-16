@@ -15,6 +15,30 @@ goog.require("vivliostyle.layoututil");
 
 goog.scope(function() {
     /**
+     * @constructor
+     */
+    vivliostyle.table.TableRow = function() {
+        /** @const {!Array<vivliostyle.table.TableCell>} */ this.cells = [];
+    };
+    /** @const */ var TableRow = vivliostyle.table.TableRow;
+
+    /**
+     * @param {!vivliostyle.table.TableCell} cell
+     */
+    TableRow.prototype.addCell = function(cell) {
+        this.cells.push(cell);
+    };
+
+    /**
+     * @param {!Element} element
+     * @constructor
+     */
+    vivliostyle.table.TableCell = function(element) {
+        /** @const {number} */ this.colSpan = element.colSpan || 1;
+    };
+    /** @const */ var TableCell = vivliostyle.table.TableCell;
+
+    /**
      * @param {!Element} tableSourceNode Source node of the table
      * @constructor
      * @implements {adapt.vtree.FormattingContext}
@@ -22,8 +46,10 @@ goog.scope(function() {
     vivliostyle.table.TableFormattingContext = function(tableSourceNode) {
         /** @const */ this.tableSourceNode = tableSourceNode;
         /** @type {boolean} */ this.doneInitialLayout = false;
-        /** @type {HTMLElement} */ this.caption = null;
+        /** @type {Element} */ this.caption = null;
         /** @type {DocumentFragment} */ this.colGroups = null;
+        /** @const {!Array<vivliostyle.table.TableRow>} */ this.rows = [];
+        /** @type {Element} */ this.lastRowViewNode = null;
     };
     /** @const */ var TableFormattingContext = vivliostyle.table.TableFormattingContext;
 
@@ -56,6 +82,65 @@ goog.scope(function() {
         goog.asserts.assert(formattingContext instanceof TableFormattingContext);
         return /** @type {!vivliostyle.table.TableFormattingContext} */ (formattingContext);
     }
+
+    /**
+     * @param {!vivliostyle.table.TableFormattingContext} formattingContext
+     * @param {!adapt.layout.Column} column
+     * @constructor
+     * @extends {vivliostyle.layoututil.LayoutIteratorStrategy}
+     */
+    vivliostyle.table.EntireTableLayoutStrategy = function(formattingContext, column) {
+        /** @const */ this.formattingContext = formattingContext;
+        /** @const */ this.column = column;
+        /** @type {vivliostyle.table.TableRow} */ this.row = null;
+    };
+    /** @const */ var EntireTableLayoutStrategy = vivliostyle.table.EntireTableLayoutStrategy;
+    goog.inherits(EntireTableLayoutStrategy, vivliostyle.layoututil.LayoutIteratorStrategy);
+
+    /**
+     * @override
+     */
+    EntireTableLayoutStrategy.prototype.startNonInlineElementNode = function(state) {
+        /** @const */ var formattingContext = this.formattingContext;
+        /** @const */ var nodeContext = state.nodeContext;
+        /** @const */ var display = nodeContext.display;
+        switch (display) {
+            case "table-caption":
+                if (!formattingContext.caption) {
+                    formattingContext.caption = /** @type {Element} */ (nodeContext.viewNode);
+                }
+                break;
+            case "table-row":
+                this.row = new TableRow();
+                break;
+            case "table-cell":
+                return this.column.buildDeepElementView(nodeContext).thenAsync(function(cellNodeContext) {
+                    var cell = new TableCell(cellNodeContext.viewNode);
+                    this.row.addCell(cell);
+                    return adapt.task.newResult(true);
+                }.bind(this));
+        }
+        return adapt.task.newResult(true);
+    };
+
+    /**
+     * @override
+     */
+    EntireTableLayoutStrategy.prototype.afterNonInlineElementNode = function(state) {
+        /** @const */ var formattingContext = this.formattingContext;
+        /** @const */ var nodeContext = state.nodeContext;
+        /** @const */ var display = nodeContext.display;
+        if (nodeContext.sourceNode === formattingContext.tableSourceNode) {
+            state.break = true;
+        } else {
+            switch (display) {
+                case "table-row":
+                    formattingContext.rows.push(this.row);
+                    formattingContext.lastRowViewNode = /** @type {Element} */ (nodeContext.viewNode);
+                    break;
+            }
+        }
+    };
 
     /**
      * @param {!Element} tableSourceNode Source node of the table
@@ -143,73 +228,74 @@ goog.scope(function() {
      * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
      */
     TableLayoutProcessor.prototype.layoutEntireTable = function(nodeContext, column) {
-        var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
-        /** @const {!adapt.task.Frame<adapt.vtree.NodeContext>} */ var frame =
-            adapt.task.newFrame("layoutEntireTable");
-        frame.loopWithFrame(function(bodyFrame) {
-            if (!formattingContext.caption && nodeContext.display === "table-caption") {
-                formattingContext.caption = /** @type {HTMLElement} */ (nodeContext.viewNode);
-            }
-            column.layoutContext.nextInTree(nodeContext).then(function(positionParam) {
-                nodeContext = positionParam;
-                if (!nodeContext || nodeContext.sourceNode === formattingContext.tableSourceNode) {
-                    bodyFrame.breakLoop();
-                } else {
-                    bodyFrame.continueLoop();
-                }
-            });
-        }).then(function() {
-            frame.finish(nodeContext);
-        });
-        return frame.result();
+        /** @const */ var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
+        /** @const */ var strategy = new EntireTableLayoutStrategy(formattingContext, column);
+        /** @const */ var iterator = new vivliostyle.layoututil.LayoutIterator(strategy, column.layoutContext);
+        return iterator.iterate(nodeContext);
     };
 
     /**
-     * Measure width of columns and normalize colgroup and col elements so that each column has
-     * a corresponding col element with the width specified.
-     * @param {!Element} tableElement
-     * @param {!adapt.layout.Column} column
-     * @returns {!DocumentFragment} A DocumentFragment containing the normalized colgroup elements.
+     * @private
+     * @param {!vivliostyle.table.TableFormattingContext} formattingContext
+     * @returns {number}
      */
-    TableLayoutProcessor.prototype.normalizeColGroups = function(tableElement, column) {
-        /** @const */ var fragment = tableElement.ownerDocument.createDocumentFragment();
-
-        // Count columns
-        var columnCount = Math.max.apply(null,
-            Array.from(tableElement.rows).map(function(row) {
-                return Array.from(row.cells).reduce(function(sum, c) {
+    TableLayoutProcessor.prototype.getColumnCount = function(formattingContext) {
+        return Math.max.apply(null,
+            formattingContext.rows.map(function(row) {
+                return row.cells.reduce(function(sum, c) {
                     return sum + c.colSpan;
                 }, 0);
             })
         );
-        if (!(columnCount > 0)) {
-            return fragment;
-        }
+    };
 
-        // Measure column widths
-        var firstSection = tableElement.tHead || tableElement.tBodies[0] || tableElement.tFoot;
-        goog.asserts.assert(firstSection);
-        var dummyRow = firstSection.insertRow(-1);
-        var dummyCells = [];
+    /**
+     * @private
+     * @param {!Element} lastRow
+     * @param {number} columnCount
+     * @param {adapt.vtree.ClientLayout} clientLayout
+     * @returns {!Array<number>}
+     */
+    TableLayoutProcessor.prototype.getColumnWidths = function(lastRow, columnCount, clientLayout) {
+        /** @const */ var doc = lastRow.ownerDocument;
+        /** @const */ var dummyRow = doc.createElement("tr");
+        /** @const */ var dummyCells = [];
         for (var i = 0; i < columnCount; i++) {
-            var cell = dummyRow.insertCell();
+            var cell = doc.createElement("td");
+            dummyRow.appendChild(cell);
             dummyCells.push(cell);
         }
-        var colWidths = dummyCells.map(function(cell) {
-            return column.clientLayout.getElementClientRect(cell)["width"];
+        lastRow.parentNode.insertBefore(dummyRow, lastRow.nextSibling);
+        /** @const */ var colWidths = dummyCells.map(function(cell) {
+            return clientLayout.getElementClientRect(cell)["width"];
         });
-        firstSection.deleteRow(-1);
+        lastRow.parentNode.removeChild(dummyRow);
+        return colWidths;
+    };
 
+    /**
+     * @private
+     * @param {!Element} tableElement
+     * @returns {!Array<!Element>}
+     */
+    TableLayoutProcessor.prototype.getColGroupElements = function(tableElement) {
         var colGroups = [];
-        var cols = [];
-
-        // Normalize colgroup and col elements
         var child = tableElement.firstElementChild;
         do {
             if (child.localName === "colgroup") {
                 colGroups.push(child);
             }
         } while (child = child.nextElementSibling);
+        return colGroups;
+    };
+
+    /**
+     * @private
+     * @param {!Array<!Element>} colGroups
+     * @returns {!Array<!Element>}
+     */
+    TableLayoutProcessor.prototype.normalizeAndGetColElements = function(colGroups) {
+        var cols = [];
         colGroups.forEach(function(colGroup) {
             // Replace colgroup[span=n] with colgroup with n col elements
             var span = colGroup.span;
@@ -236,19 +322,19 @@ goog.scope(function() {
                 cols.push(col);
             }
         });
-        // Add missing col elements for remaining columns
+        return cols;
+    };
+
+    /**
+     * @private
+     * @param {!Array<!Element>} cols
+     * @param {!Array<!Element>} colGroups
+     * @param {number} columnCount
+     * @param {!Element} tableElement
+     */
+    TableLayoutProcessor.prototype.addMissingColElements = function(cols, colGroups, columnCount, tableElement) {
         if (cols.length < columnCount) {
             var colGroup = tableElement.ownerDocument.createElement("colgroup");
-            var lastColGroup = colGroups[colGroups.length - 1];
-            if (lastColGroup) {
-                if (lastColGroup.nextSibling) {
-                    lastColGroup.parentNode.insertBefore(colGroup, lastColGroup.nextSibling);
-                } else {
-                    lastColGroup.parentNode.appendChild(colGroup);
-                }
-            } else {
-                firstSection.parentNode.insertBefore(colGroup, firstSection);
-            }
             colGroups.push(colGroup);
             for (var i = cols.length; i < columnCount; i++) {
                 var col = tableElement.ownerDocument.createElement("col");
@@ -256,6 +342,37 @@ goog.scope(function() {
                 cols.push(col);
             }
         }
+    };
+    /**
+     * Measure width of columns and normalize colgroup and col elements so that each column has
+     * a corresponding col element with the width specified.
+     * @param {!Element} tableElement
+     * @param {!vivliostyle.table.TableFormattingContext} formattingContext
+     * @param {!adapt.layout.Column} column
+     * @returns {!DocumentFragment} A DocumentFragment containing the normalized colgroup elements.
+     */
+    TableLayoutProcessor.prototype.normalizeColGroups = function(tableElement, formattingContext, column) {
+        /** @const */ var lastRow = formattingContext.lastRowViewNode;
+        goog.asserts.assert(lastRow);
+        formattingContext.lastRowViewNode = null;
+        /** @const */ var doc = lastRow.ownerDocument;
+        /** @const */ var fragment = doc.createDocumentFragment();
+
+        // Count columns
+        /** @const */ var columnCount = this.getColumnCount(formattingContext);
+        if (!(columnCount > 0)) {
+            return fragment;
+        }
+
+        // Measure column widths
+        /** @const */ var colWidths = this.getColumnWidths(lastRow, columnCount, column.clientLayout);
+
+        // Normalize colgroup and col elements
+        /** @const */ var colGroups = this.getColGroupElements(tableElement);
+        /** @const */ var cols = this.normalizeAndGetColElements(colGroups);
+
+        // Add missing col elements for remaining columns
+        this.addMissingColElements(cols, colGroups, columnCount, tableElement);
 
         // Assign width to col elements
         cols.forEach(function(col, i) {
@@ -280,10 +397,12 @@ goog.scope(function() {
             var tableElement = nodeContextAfter.viewNode;
             var tableBBox = column.clientLayout.getElementClientRect(tableElement);
             if (!column.isOverflown(column.vertical ? tableBBox.left : tableBBox.bottom)) {
+                nodeContextAfter = nodeContextAfter.modify();
+                nodeContextAfter.formattingContext = null;
                 frame.finish(nodeContextAfter);
                 return;
             }
-            formattingContext.colGroups = this.normalizeColGroups(tableElement, column);
+            formattingContext.colGroups = this.normalizeColGroups(tableElement, formattingContext, column);
             frame.finish(null);
         }.bind(this));
         return frame.result();
@@ -311,17 +430,10 @@ goog.scope(function() {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
         var rootViewNode = formattingContext.getRootViewNode(nodeContext);
         var firstChild = rootViewNode.firstChild;
-        function prepend(node) {
-            if (firstChild) {
-                rootViewNode.insertBefore(node, firstChild);
-            } else {
-                rootViewNode.appendChild(node);
-            }
-        }
         if (formattingContext.caption) {
-            prepend(formattingContext.caption);
+            rootViewNode.insertBefore(formattingContext.caption, firstChild);
         }
-        prepend(formattingContext.colGroups.cloneNode(true));
+        rootViewNode.insertBefore(formattingContext.colGroups.cloneNode(true), firstChild);
 
         var frame = adapt.task.newFrame("TableFormattingContext.doLayout");
         /** @type {adapt.vtree.NodeContext} */ var position = nodeContext;
@@ -388,11 +500,8 @@ goog.scope(function() {
     function resolveFormattingContextHook(nodeContext, firstTime) {
         if (!firstTime)
             return null;
-        var parentIsTable = !!nodeContext.parent &&
-            nodeContext.parent.formattingContext instanceof TableFormattingContext;
         var display = nodeContext.display;
-        if (display === "table" ||
-            (!parentIsTable && (display === "table-row" || display === "table-header-group" || display === "table-footer-group" || display === "table-row-group"))) {
+        if (display === "table") {
             return new TableFormattingContext(/** @type {!Element} */ (nodeContext.sourceNode));
         }
         return null;
