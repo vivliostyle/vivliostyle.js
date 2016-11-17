@@ -685,7 +685,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         } else if (display === adapt.css.ident.table_row) {
             self.nodeContext.breakPenalty += 10;
         }
-        self.nodeContext.inline = !floating && !display || display === adapt.css.ident.inline;
+        self.nodeContext.inline = !floating && !display || vivliostyle.display.isInlineLevel(display) || vivliostyle.display.isRubyInternalDisplay(display);
         self.nodeContext.display = display ? display.toString() : "inline";
         self.nodeContext.floatSide = floating ? floatSide.toString() : null;
         self.nodeContext.floatReference = floatReference ? floatReference.toString() : null;
