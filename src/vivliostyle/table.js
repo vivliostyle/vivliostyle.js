@@ -46,6 +46,7 @@ goog.scope(function() {
     vivliostyle.table.TableFormattingContext = function(tableSourceNode) {
         /** @const */ this.tableSourceNode = tableSourceNode;
         /** @type {boolean} */ this.doneInitialLayout = false;
+        /** @type {boolean} */ this.vertical = false;
         /** @type {Element} */ this.caption = null;
         /** @type {DocumentFragment} */ this.colGroups = null;
         /** @const {!Array<vivliostyle.table.TableRow>} */ this.rows = [];
@@ -62,12 +63,12 @@ goog.scope(function() {
 
     /**
      * @param {adapt.vtree.NodeContext} position
-     * @returns {Node}
+     * @returns {Element}
      */
     TableFormattingContext.prototype.getRootViewNode = function(position) {
         do {
             if (position.sourceNode === this.tableSourceNode) {
-                return position.viewNode;
+                return /** @type {Element} */ (position.viewNode);
             }
         } while (position = position.parent);
         return null;
@@ -115,7 +116,9 @@ goog.scope(function() {
                 break;
             case "table-cell":
                 return this.column.buildDeepElementView(nodeContext).thenAsync(function(cellNodeContext) {
-                    var cell = new TableCell(cellNodeContext.viewNode);
+                    state.nodeContext = cellNodeContext;
+                    var elem = cellNodeContext.viewNode;
+                    var cell = new TableCell(elem);
                     this.row.addCell(cell);
                     return adapt.task.newResult(true);
                 }.bind(this));
@@ -149,19 +152,19 @@ goog.scope(function() {
      * @constructor
      * @extends {vivliostyle.layoututil.EdgeSkipper}
      */
-    vivliostyle.table.TableEdgeSkipper = function(tableSourceNode, column, leadingEdge) {
+    vivliostyle.table.RowByRowTableLayoutStrategy = function(tableSourceNode, column, leadingEdge) {
         vivliostyle.layoututil.EdgeSkipper.call(this, leadingEdge);
         /** @private @const */ this.tableSourceNode = tableSourceNode;
         /** @private @const */ this.column = column;
     };
-    /** @const */ var TableEdgeSkipper = vivliostyle.table.TableEdgeSkipper;
-    goog.inherits(TableEdgeSkipper, vivliostyle.layoututil.EdgeSkipper);
+    /** @const */ var RowByRowTableLayoutStrategy = vivliostyle.table.RowByRowTableLayoutStrategy;
+    goog.inherits(RowByRowTableLayoutStrategy, vivliostyle.layoututil.EdgeSkipper);
 
     /**
      * @private
      * @const {Object<string, boolean>}
      */
-    TableEdgeSkipper.ignoreList = {
+    RowByRowTableLayoutStrategy.ignoreList = {
         "table-caption": true,
         "table-column-group": true,
         "table-column": true
@@ -170,33 +173,42 @@ goog.scope(function() {
     /**
      * @override
      */
-    TableEdgeSkipper.prototype.startNonInlineBox = function(state) {
+    RowByRowTableLayoutStrategy.prototype.startNonInlineBox = function(state) {
         /** @const */ var nodeContext = state.nodeContext;
         /** @const */ var display = nodeContext.display;
         goog.asserts.assert(display);
         /** @const */ var layoutConstraint = this.column.layoutConstraint;
         if (layoutConstraint && this.processLayoutConstraint(state, layoutConstraint, this.column)) {
             state.break = true;
-            return;
+            return adapt.task.newResult(true);
         }
         if (display === "table-row") {
             if (!this.processForcedBreak(state, this.column)) {
-                this.saveEdgeAndProcessOverflow(state, this.column);
+                if (this.saveEdgeAndProcessOverflow(state, this.column)) {
+                    state.break = true;
+                    return adapt.task.newResult(true);
+                }
             }
-            state.break = true;
-        } else if (!TableEdgeSkipper.ignoreList[display]) {
+            return this.column.buildDeepElementView(nodeContext).thenAsync(function(nodeContextAfter) {
+                state.nodeContext = nodeContextAfter;
+                state.onStartEdges = false;
+                var r = this.afterNonInlineElementNode(state);
+                return r || adapt.task.newResult(true);
+            }.bind(this));
+        } else if (!RowByRowTableLayoutStrategy.ignoreList[display]) {
             state.leadingEdgeContexts.push(state.nodeContext.copy());
             state.breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(state.breakAtTheEdge, state.nodeContext.breakBefore);
         }
+        return adapt.task.newResult(true);
     };
 
     /**
      * @override
      */
-    TableEdgeSkipper.prototype.afterNonInlineElementNode = function(state) {
+    RowByRowTableLayoutStrategy.prototype.afterNonInlineElementNode = function(state) {
         var nodeContext = state.nodeContext;
         /** @const */ var display = nodeContext.display;
-        if (display && TableEdgeSkipper.ignoreList[display]) {
+        if (display && RowByRowTableLayoutStrategy.ignoreList[display]) {
             nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
         } else if (nodeContext.sourceNode === this.tableSourceNode) {
             nodeContext = state.nodeContext = nodeContext.modify();
@@ -210,7 +222,7 @@ goog.scope(function() {
     /**
      * @override
      */
-    TableEdgeSkipper.prototype.endEmptyNonInlineBox = function(state) {
+    RowByRowTableLayoutStrategy.prototype.endEmptyNonInlineBox = function(state) {
         state.break = this.processForcedBreak(state, this.column);
     };
 
@@ -253,10 +265,11 @@ goog.scope(function() {
      * @private
      * @param {!Element} lastRow
      * @param {number} columnCount
+     * @param {boolean} vertical
      * @param {adapt.vtree.ClientLayout} clientLayout
      * @returns {!Array<number>}
      */
-    TableLayoutProcessor.prototype.getColumnWidths = function(lastRow, columnCount, clientLayout) {
+    TableLayoutProcessor.prototype.getColumnWidths = function(lastRow, columnCount, vertical, clientLayout) {
         /** @const */ var doc = lastRow.ownerDocument;
         /** @const */ var dummyRow = doc.createElement("tr");
         /** @const */ var dummyCells = [];
@@ -267,7 +280,8 @@ goog.scope(function() {
         }
         lastRow.parentNode.insertBefore(dummyRow, lastRow.nextSibling);
         /** @const */ var colWidths = dummyCells.map(function(cell) {
-            return clientLayout.getElementClientRect(cell)["width"];
+            var rect = clientLayout.getElementClientRect(cell);
+            return vertical ? rect["height"] : rect["width"];
         });
         lastRow.parentNode.removeChild(dummyRow);
         return colWidths;
@@ -352,6 +366,7 @@ goog.scope(function() {
      * @returns {!DocumentFragment} A DocumentFragment containing the normalized colgroup elements.
      */
     TableLayoutProcessor.prototype.normalizeColGroups = function(tableElement, formattingContext, column) {
+        /** @const */ var vertical = formattingContext.vertical;
         /** @const */ var lastRow = formattingContext.lastRowViewNode;
         goog.asserts.assert(lastRow);
         formattingContext.lastRowViewNode = null;
@@ -365,7 +380,7 @@ goog.scope(function() {
         }
 
         // Measure column widths
-        /** @const */ var colWidths = this.getColumnWidths(lastRow, columnCount, column.clientLayout);
+        /** @const */ var colWidths = this.getColumnWidths(lastRow, columnCount, vertical, column.clientLayout);
 
         // Normalize colgroup and col elements
         /** @const */ var colGroups = this.getColGroupElements(tableElement);
@@ -376,7 +391,7 @@ goog.scope(function() {
 
         // Assign width to col elements
         cols.forEach(function(col, i) {
-            adapt.base.setCSSProperty(col, "width", colWidths[i] + "px");
+            adapt.base.setCSSProperty(col, vertical ? "height" : "width", colWidths[i] + "px");
         });
 
         colGroups.forEach(function(colGroup) {
@@ -392,6 +407,7 @@ goog.scope(function() {
      */
     TableLayoutProcessor.prototype.doInitialLayout = function(nodeContext, column) {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
+        formattingContext.vertical = nodeContext.vertical;
         var frame = adapt.task.newFrame("layoutTableFirst");
         this.layoutEntireTable(nodeContext, column).then(function(nodeContextAfter) {
             var tableElement = nodeContextAfter.viewNode;
@@ -414,9 +430,9 @@ goog.scope(function() {
      * @param {boolean} leadingEdge
      * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
      */
-    TableLayoutProcessor.prototype.skipToTableRow = function(nodeContext, column, leadingEdge) {
+    TableLayoutProcessor.prototype.layoutTableRowByRow = function(nodeContext, column, leadingEdge) {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
-        var skipper = new TableEdgeSkipper(formattingContext.tableSourceNode, column, leadingEdge);
+        var skipper = new RowByRowTableLayoutStrategy(formattingContext.tableSourceNode, column, leadingEdge);
         var iterator = new vivliostyle.layoututil.LayoutIterator(skipper, column.layoutContext);
         return iterator.iterate(nodeContext);
     };
@@ -436,27 +452,8 @@ goog.scope(function() {
         rootViewNode.insertBefore(formattingContext.colGroups.cloneNode(true), firstChild);
 
         var frame = adapt.task.newFrame("TableFormattingContext.doLayout");
-        /** @type {adapt.vtree.NodeContext} */ var position = nodeContext;
-        var leadingEdge = true;
-        frame.loopWithFrame(function(loopFrame) {
-            if (!position) {
-                loopFrame.breakLoop();
-                return;
-            }
-            this.skipToTableRow(position, column, leadingEdge).then(function(p) {
-                position = p;
-                if (!position || position.overflow ||
-                    (position.after && position.sourceNode === formattingContext.tableSourceNode)) {
-                    loopFrame.breakLoop();
-                } else {
-                    column.buildDeepElementView(position).then(function(positionAfter) {
-                        position = positionAfter;
-                        loopFrame.continueLoop();
-                    });
-                }
-            });
-        }.bind(this)).then(function() {
-            frame.finish(position);
+        this.layoutTableRowByRow(nodeContext, column, true).then(function(positionAfter) {
+            frame.finish(positionAfter);
         });
         return frame.result();
     };

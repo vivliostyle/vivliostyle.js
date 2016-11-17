@@ -201,16 +201,19 @@ goog.scope(function() {
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     EdgeSkipper.prototype.startNonInlineBox = function(state) {};
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     EdgeSkipper.prototype.endEmptyNonInlineBox = function(state) {};
 
     /**
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @return {undefined|adapt.task.Result<boolean>}
      */
     EdgeSkipper.prototype.endNonInlineBox = function(state) {};
 
@@ -291,31 +294,39 @@ goog.scope(function() {
         state.leadingEdgeContexts.push(state.nodeContext.copy());
         state.breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(state.breakAtTheEdge, state.nodeContext.breakBefore);
         state.onStartEdges = true;
-        this.startNonInlineBox(state);
+        return this.startNonInlineBox(state);
     };
 
     /**
      * @override
      */
     EdgeSkipper.prototype.afterNonInlineElementNode = function(state) {
+        var r;
+        var cont;
         if (state.onStartEdges) {
-            this.endEmptyNonInlineBox(state);
-            if (state.break) {
-                return;
-            }
-            state.leadingEdgeContexts = [];
-            state.leadingEdge = false;
-            state.atUnforcedBreak = false;
-            state.breakAtTheEdge = null;
+            r = this.endEmptyNonInlineBox(state);
+            cont = (r && r.isPending()) ? r : adapt.task.newResult(true);
+            cont = cont.thenAsync(function() {
+                if (!state.break) {
+                    state.leadingEdgeContexts = [];
+                    state.leadingEdge = false;
+                    state.atUnforcedBreak = false;
+                    state.breakAtTheEdge = null;
+                }
+                return adapt.task.newResult(true);
+            });
         } else {
-            this.endNonInlineBox(state);
-            if (state.break) {
-                return;
-            }
+            r = this.endNonInlineBox(state);
+            cont = (r && r.isPending()) ? r : adapt.task.newResult(true);
         }
-        state.onStartEdges = false;
-        state.lastAfterNodeContext = state.nodeContext.copy();
-        state.breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(state.breakAtTheEdge, state.nodeContext.breakAfter);
+        return cont.thenAsync(function() {
+            if (!state.break) {
+                state.onStartEdges = false;
+                state.lastAfterNodeContext = state.nodeContext.copy();
+                state.breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(state.breakAtTheEdge, state.nodeContext.breakAfter);
+            }
+            return adapt.task.newResult(true);
+        });
     };
 
 });
