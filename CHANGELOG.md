@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixed
+
+- Fix incorrect page breaking at boundaries of inline-block boxes
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/309>
+
 ## [2016.10](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.10) - 2016-10-25
 
 ### Added
