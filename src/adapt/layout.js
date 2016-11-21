@@ -130,6 +130,14 @@ adapt.layout.LayoutProcessor = function() {};
 adapt.layout.LayoutProcessor.prototype.layout = function(nodeContext, column) {};
 
 /**
+ * @param {adapt.vtree.NodeContext} overflownNodeContext
+ * @param {adapt.vtree.NodeContext} initialNodeContext
+ * @param {!adapt.layout.Column} column
+ * @return {!adapt.task.Result<adapt.vtree.NodeContext>}
+ */
+adapt.layout.LayoutProcessor.prototype.findAndProcessAcceptableBreak = function(overflownNodeContext, initialNodeContext, column) {};
+
+/**
  * Resolver finding an appropriate LayoutProcessor given a formatting context
  * @constructor
  */
@@ -1694,6 +1702,32 @@ adapt.layout.Column.prototype.finishBreak = function(nodeContext, forceRemoveSel
  * @param {adapt.vtree.NodeContext} initialNodeContext
  * @return {adapt.task.Result.<adapt.vtree.NodeContext>}
  */
+adapt.layout.Column.prototype.findAndProcessAcceptableBreak = function(overflownNodeContext, initialNodeContext) {
+    /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
+        adapt.task.newFrame("findAndProcessAcceptableBreak");
+    var cont;
+    if (overflownNodeContext.formattingContext) {
+        var formattingContext = overflownNodeContext.formattingContext;
+        var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(formattingContext);
+        cont = layoutProcessor.findAndProcessAcceptableBreak(overflownNodeContext, initialNodeContext, this);
+    } else {
+        cont = adapt.task.newResult(null);
+    }
+    cont.then(function(breakPosition) {
+        if (breakPosition) {
+            frame.finish(breakPosition);
+        } else {
+            this.findAcceptableBreak(overflownNodeContext, initialNodeContext).thenFinish(frame);
+        }
+    }.bind(this));
+    return frame.result();
+};
+
+/**
+ * @param {adapt.vtree.NodeContext} overflownNodeContext
+ * @param {adapt.vtree.NodeContext} initialNodeContext
+ * @return {adapt.task.Result.<adapt.vtree.NodeContext>}
+ */
 adapt.layout.Column.prototype.findAcceptableBreak = function(overflownNodeContext, initialNodeContext) {
     /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
         adapt.task.newFrame("findAcceptableBreak");
@@ -2359,7 +2393,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
                             loopFrame.breakLoop(); // Loop end
                         } else if (nodeContext && nodeContext.overflow) {
                             // overflow (implicit page break): back up and find a page break
-                            self.findAcceptableBreak(nodeContext, initialNodeContext).then(function(nodeContextParam) {
+                            self.findAndProcessAcceptableBreak(nodeContext, initialNodeContext).then(function(nodeContextParam) {
                                 nodeContext = nodeContextParam;
                                 loopFrame.breakLoop(); // Loop end
                             });

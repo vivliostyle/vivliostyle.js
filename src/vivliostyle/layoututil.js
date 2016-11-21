@@ -329,5 +329,46 @@ goog.scope(function() {
         });
     };
 
+    /**
+     * Represents a "pseudo"-column nested inside a real column.
+     * This class is created to handle parallel fragmented flows (e.g. table columns in a single table row).
+     * A pseudo-column behaves in the same way as the original column, sharing its properties.
+     * Property changes on the pseudo-column are not propagated to the original column.
+     * The LayoutContext of the original column is also cloned and used by the pseudo-column,
+     * not to propagate state changes of the LayoutContext caused by the pseudo-column.
+     * @param {!adapt.layout.Column} column The original (parent) column
+     * @param {Element} viewRoot Root element for the pseudo-column, i.e., the root of the fragmented flow.
+     * @constructor
+     */
+    vivliostyle.layoututil.PseudoColumn = function(column, viewRoot) {
+        /** @private @const */ this.column = /** @type {!adapt.layout.Column} */ (Object.create(column));
+        this.column.element = viewRoot;
+        this.column.layoutContext = column.layoutContext.clone();
+        this.column.findAndProcessAcceptableBreak = this.findAndProcessAcceptableBreak.bind(this);
+    };
+    /** @const */ var PseudoColumn = vivliostyle.layoututil.PseudoColumn;
+
+    /**
+     * @param {adapt.vtree.ChunkPosition} chunkPosition starting position.
+     * @param {boolean} leadingEdge
+     * @return {adapt.task.Result.<adapt.vtree.ChunkPosition>} holding end position.
+     */
+    PseudoColumn.prototype.layout = function(chunkPosition, leadingEdge) {
+        return this.column.layout(chunkPosition, leadingEdge);
+    };
+
+    /**
+     * @param {adapt.vtree.NodeContext} overflownNodeContext
+     * @param {adapt.vtree.NodeContext} initialNodeContext
+     * @return {adapt.task.Result.<adapt.vtree.NodeContext>}
+     */
+    PseudoColumn.prototype.findAndProcessAcceptableBreak = function(overflownNodeContext, initialNodeContext) {
+        if (overflownNodeContext.sourceNode === initialNodeContext.sourceNode) {
+            return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (null));
+        } else {
+            return adapt.layout.Column.prototype.findAndProcessAcceptableBreak.call(this.column,
+                overflownNodeContext, initialNodeContext);
+        }
+    };
 });
 
