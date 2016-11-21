@@ -695,6 +695,7 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {?string} */ this.floatReference = null;
     /** @type {?string} */ this.floatSide = null;
     /** @type {?string} */ this.clearSide = null;
+    /** @type {string} */ this.captionSide = "top";
     /** @type {boolean} */ this.flexContainer = false;
     /** @type {adapt.vtree.Whitespace} */ this.whitespace = parent ? parent.whitespace : adapt.vtree.Whitespace.IGNORE;
     /** @type {boolean} */ this.establishesBFC = false;

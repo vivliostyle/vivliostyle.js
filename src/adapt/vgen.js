@@ -715,6 +715,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                 self.nodeContext.breakBefore = breakBefore.toString();
             }
         }
+        self.nodeContext.captionSide = computedStyle["caption-side"] && computedStyle["caption-side"].toString() || "top";
         var firstPseudo = computedStyle["x-first-pseudo"];
         if (firstPseudo) {
             var outerPseudo = self.nodeContext.parent ? self.nodeContext.parent.firstPseudo : null;

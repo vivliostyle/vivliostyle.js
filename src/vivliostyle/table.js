@@ -111,7 +111,8 @@ goog.scope(function() {
         /** @type {boolean} */ this.vertical = false;
         /** @private @type {number} */ this.currentRowIndex = 0;
         /** @type {number} */ this.tableWidth = 0;
-        /** @type {Element} */ this.caption = null;
+        /** @const {!Array<Element>} */ this.captions = [];
+        /** @const {!Array<string>} */ this.captionSide = [];
         /** @type {DocumentFragment} */ this.colGroups = null;
         /** @const {!Array<vivliostyle.table.TableRow>} */ this.rows = [];
         /** @type {Element} */ this.lastRowViewNode = null;
@@ -205,9 +206,8 @@ goog.scope(function() {
         /** @const */ var display = nodeContext.display;
         switch (display) {
             case "table-caption":
-                if (!formattingContext.caption) {
-                    formattingContext.caption = /** @type {Element} */ (nodeContext.viewNode);
-                }
+                formattingContext.captions.push(/** @type {Element} */ (nodeContext.viewNode));
+                formattingContext.captionSide.push(nodeContext.captionSide);
                 break;
             case "table-row":
                 this.currentRowCellElements = [];
@@ -661,9 +661,15 @@ goog.scope(function() {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
         var rootViewNode = formattingContext.getRootViewNode(nodeContext);
         var firstChild = rootViewNode.firstChild;
-        if (formattingContext.caption) {
-            rootViewNode.insertBefore(formattingContext.caption, firstChild);
-        }
+        formattingContext.captions.forEach(function(caption, i) {
+            if (caption) {
+                rootViewNode.insertBefore(caption, firstChild);
+                if (formattingContext.captionSide[i] === "top") {
+                    formattingContext.captions[i] = null;
+                }
+            }
+        });
+
         rootViewNode.insertBefore(formattingContext.colGroups.cloneNode(true), firstChild);
 
         var frame = adapt.task.newFrame("TableFormattingContext.doLayout");
