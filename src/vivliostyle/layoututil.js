@@ -344,7 +344,10 @@ goog.scope(function() {
         /** @private @const */ this.column = /** @type {!adapt.layout.Column} */ (Object.create(column));
         this.column.element = viewRoot;
         this.column.layoutContext = column.layoutContext.clone();
+        this.column.openAllViews = this.openAllViews.bind(this);
         this.column.findAndProcessAcceptableBreak = this.findAndProcessAcceptableBreak.bind(this);
+
+        /** @type {adapt.vtree.NodeContext} */ this.firstOpenedPosition = null;
     };
     /** @const */ var PseudoColumn = vivliostyle.layoututil.PseudoColumn;
 
@@ -355,6 +358,19 @@ goog.scope(function() {
      */
     PseudoColumn.prototype.layout = function(chunkPosition, leadingEdge) {
         return this.column.layout(chunkPosition, leadingEdge);
+    };
+
+    /**
+     * @param {adapt.vtree.NodePosition} position
+     * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
+     */
+    PseudoColumn.prototype.openAllViews = function(position) {
+        return adapt.layout.Column.prototype.openAllViews.call(this.column, position).thenAsync(function(nodeContext) {
+            if (!this.firstOpenedPosition) {
+                this.firstOpenedPosition = nodeContext;
+            }
+            return adapt.task.newResult(nodeContext);
+        }.bind(this));
     };
 
     /**

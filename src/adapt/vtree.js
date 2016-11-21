@@ -517,6 +517,13 @@ adapt.vtree.FormattingContext = function() {};
 adapt.vtree.FormattingContext.prototype.getName = function() {};
 
 /**
+ * @param {!adapt.vtree.NodeContext} nodeContext
+ * @param {boolean} firstTime
+ * @return {boolean}
+ */
+adapt.vtree.FormattingContext.prototype.isFirstTime = function(nodeContext, firstTime) {};
+
+/**
  * @typedef {{
  * 		node:Node,
  *      shadowType:adapt.vtree.ShadowType,

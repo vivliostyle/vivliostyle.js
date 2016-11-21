@@ -730,6 +730,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         }
         // Resolve formatting context
         self.resolveFormattingContext(self.nodeContext, firstTime);
+        if (self.nodeContext.formattingContext) {
+            firstTime = self.nodeContext.formattingContext.isFirstTime(self.nodeContext, firstTime);
+        }
         // Create the view element
         var custom = false;
         var inner = null;
