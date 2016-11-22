@@ -19,9 +19,6 @@ goog.scope(function() {
      */
     vivliostyle.table.TableRow = function() {
         /** @const {!Array<vivliostyle.table.TableCell>} */ this.cells = [];
-        /** @private @type {!Array<adapt.vtree.ChunkPosition>} */ this.cellBreakPositions = [];
-        /** @private @type {!Array<adapt.vtree.ChunkPosition>} */ this.previousCellBreakPositions = [];
-        /** @type {!Array<adapt.vtree.NodeContext>} */ this.cellNodeContexts = [];
     };
     /** @const */ var TableRow = vivliostyle.table.TableRow;
 
@@ -33,47 +30,55 @@ goog.scope(function() {
     };
 
     /**
+     * @param {number} index
      * @param {adapt.vtree.ChunkPosition} cellBreakPosition
      * @param {adapt.vtree.NodeContext} cellNodeContext
      */
-    TableRow.prototype.addCellPosition = function(cellBreakPosition, cellNodeContext) {
-        this.cellBreakPositions.push(cellBreakPosition);
-        this.cellNodeContexts.push(cellNodeContext);
+    TableRow.prototype.addCellPosition = function(index, cellBreakPosition, cellNodeContext) {
+        var cell = this.cells[index];
+        goog.asserts.assert(cell);
+        cell.setBreakChunkPosition(cellBreakPosition);
+        cell.setCellNodeContext(cellNodeContext);
     };
 
     TableRow.prototype.resetCellBreakPositions = function() {
-        this.previousCellBreakPositions = this.cellBreakPositions;
-        this.cellBreakPositions = [];
+        this.cells.forEach(function(cell) {
+            cell.resetBreakChunkPosition();
+        });
     };
 
     /**
      * @returns {!Array<adapt.vtree.ChunkPosition>}
      */
     TableRow.prototype.getPreviousCellBreakPositions = function() {
-        return this.previousCellBreakPositions.slice();
+        return this.cells.map(function(cell) {
+            return cell.previousBreakChunkPosition;
+        });
     };
 
     /**
      * @returns {!Array<adapt.vtree.NodeContext>}
      */
     TableRow.prototype.resetCellNodeContexts = function() {
-        var cellNodeContexts = this.cellNodeContexts;
-        this.cellNodeContexts = [];
-        return cellNodeContexts;
+        return this.cells.map(function(cell) {
+            var nodeContext = cell.cellNodeContext;
+            cell.setCellNodeContext(null);
+            return nodeContext;
+        });
     };
 
     /**
      * @returns {boolean}
      */
     TableRow.prototype.isFragmented = function() {
-        return this.cellBreakPositions.some(function(position) { return !!position; });
+        return this.cells.some(function(cell) { return !!cell.breakChunkPosition; });
     };
 
     /**
      * @returns {boolean}
      */
     TableRow.prototype.wasPreviouslyFragmented = function() {
-        return this.previousCellBreakPositions.some(function(position) { return !!position; });
+        return this.cells.some(function(cell) { return !!cell.previousBreakChunkPosition; });
     };
 
     /**
@@ -89,7 +94,11 @@ goog.scope(function() {
      */
     vivliostyle.table.TableCell = function(element) {
         /** @const {number} */ this.colSpan = element.colSpan || 1;
+        /** @const {number} */ this.rowSpan = element.rowSpan || 1;
         /** @type {number} */ this.height = 0;
+        /** @type {adapt.vtree.ChunkPosition} */ this.breakChunkPosition = null;
+        /** @type {adapt.vtree.ChunkPosition} */ this.previousBreakChunkPosition = null;
+        /** @type {adapt.vtree.NodeContext} */ this.cellNodeContext = null;
     };
     /** @const */ var TableCell = vivliostyle.table.TableCell;
 
@@ -98,6 +107,29 @@ goog.scope(function() {
      */
     TableCell.prototype.setHeight = function(height) {
         this.height = height;
+    };
+
+    /**
+     * @param {adapt.vtree.ChunkPosition} breakChunkPosition
+     */
+    TableCell.prototype.setBreakChunkPosition = function(breakChunkPosition) {
+        this.breakChunkPosition = breakChunkPosition;
+    };
+
+    /**
+     * @return {adapt.vtree.ChunkPosition}
+     */
+    TableCell.prototype.resetBreakChunkPosition = function() {
+        this.previousBreakChunkPosition = this.breakChunkPosition;
+        this.breakChunkPosition = null;
+        return this.previousBreakChunkPosition;
+    };
+
+    /**
+     * @param {adapt.vtree.NodeContext} cellNodeContext
+     */
+    TableCell.prototype.setCellNodeContext = function(cellNodeContext) {
+        this.cellNodeContext = cellNodeContext;
     };
 
     /**
@@ -265,6 +297,7 @@ goog.scope(function() {
         /** @private @const */ this.formattingContext = formattingContext;
         /** @private @const */ this.column = column;
         /** @private @type {!Array<adapt.vtree.ChunkPosition>} */ this.cellPositions = [];
+        /** @private @type {number} */ this.cellIndex = 0;
     };
     /** @const */ var RowByRowTableLayoutStrategy = vivliostyle.table.RowByRowTableLayoutStrategy;
     goog.inherits(RowByRowTableLayoutStrategy, vivliostyle.layoututil.EdgeSkipper);
@@ -358,9 +391,9 @@ goog.scope(function() {
 
         var pseudoColumn = new vivliostyle.layoututil.PseudoColumn(this.column, parentNode);
         return pseudoColumn.layout(cellChunkPosition, true).thenAsync(function(cellBreakPosition) {
-            row.addCellPosition(cellBreakPosition, pseudoColumn.firstOpenedPosition);
+            row.addCellPosition(this.cellIndex++, cellBreakPosition, pseudoColumn.firstOpenedPosition);
             return adapt.task.newResult(true);
-        });
+        }.bind(this));
     };
 
     /**
@@ -408,6 +441,7 @@ goog.scope(function() {
                 state.break = true;
             } else {
                 formattingContext.nextRow();
+                this.cellIndex = 0;
             }
         }
         return adapt.task.newResult(true);
