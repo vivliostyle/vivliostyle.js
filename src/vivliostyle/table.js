@@ -71,14 +71,18 @@ goog.scope(function() {
      * @returns {boolean}
      */
     TableRow.prototype.isFragmented = function() {
-        return this.cells.some(function(cell) { return !!cell.breakChunkPosition; });
+        return this.cells.some(function(cell) {
+            return !!cell.breakChunkPosition && cell.rowSpan === 1;
+        });
     };
 
     /**
      * @returns {boolean}
      */
     TableRow.prototype.wasPreviouslyFragmented = function() {
-        return this.cells.some(function(cell) { return !!cell.previousBreakChunkPosition; });
+        return this.cells.some(function(cell) {
+            return !!cell.previousBreakChunkPosition && cell.rowSpan === 1;
+        });
     };
 
     /**
@@ -89,12 +93,13 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!Element} element
+     * @param {!Element} viewElement
      * @constructor
      */
-    vivliostyle.table.TableCell = function(element) {
-        /** @const {number} */ this.colSpan = element.colSpan || 1;
-        /** @const {number} */ this.rowSpan = element.rowSpan || 1;
+    vivliostyle.table.TableCell = function(viewElement) {
+        /** {Element} */ this.viewElement = viewElement;
+        /** @const {number} */ this.colSpan = viewElement.colSpan || 1;
+        /** @const {number} */ this.rowSpan = viewElement.rowSpan || 1;
         /** @type {number} */ this.height = 0;
         /** @type {adapt.vtree.ChunkPosition} */ this.breakChunkPosition = null;
         /** @type {adapt.vtree.ChunkPosition} */ this.previousBreakChunkPosition = null;
@@ -224,7 +229,6 @@ goog.scope(function() {
         /** @const */ this.formattingContext = formattingContext;
         /** @const */ this.column = column;
         /** @type {vivliostyle.table.TableRow} */ this.row = null;
-        /** @type {!Array<!Element>} */ this.currentRowCellElements = [];
     };
     /** @const */ var EntireTableLayoutStrategy = vivliostyle.table.EntireTableLayoutStrategy;
     goog.inherits(EntireTableLayoutStrategy, vivliostyle.layoututil.LayoutIteratorStrategy);
@@ -242,7 +246,6 @@ goog.scope(function() {
                 formattingContext.captionSide.push(nodeContext.captionSide);
                 break;
             case "table-row":
-                this.currentRowCellElements = [];
                 this.row = new TableRow();
                 break;
             case "table-cell":
@@ -250,7 +253,6 @@ goog.scope(function() {
                     state.nodeContext = cellNodeContext;
                     var elem = cellNodeContext.viewNode;
                     var cell = new TableCell(elem);
-                    this.currentRowCellElements.push(elem);
                     this.row.addCell(cell);
                     return adapt.task.newResult(true);
                 }.bind(this));
@@ -273,11 +275,6 @@ goog.scope(function() {
         } else {
             switch (display) {
                 case "table-row":
-                    this.row.cells.forEach(function(cell, i) {
-                        var elem = this.currentRowCellElements[i];
-                        var rect = clientLayout.getElementClientRect(elem);
-                        cell.setHeight(formattingContext.vertical ? rect["width"] : rect["height"]);
-                    }, this);
                     formattingContext.rows.push(this.row);
                     formattingContext.lastRowViewNode = /** @type {Element} */ (nodeContext.viewNode);
                     break;
@@ -497,6 +494,22 @@ goog.scope(function() {
     /**
      * @private
      * @param {!vivliostyle.table.TableFormattingContext} formattingContext
+     * @param {!adapt.layout.Column} column
+     */
+    TableLayoutProcessor.prototype.measureCellSizes = function(formattingContext, column) {
+        var clientLayout = column.clientLayout;
+        formattingContext.rows.forEach(function(row) {
+            row.cells.forEach(function(cell) {
+                var rect = clientLayout.getElementClientRect(cell.viewElement);
+                cell.viewElement = null;
+                cell.setHeight(formattingContext.vertical ? rect["width"] : rect["height"]);
+            });
+        });
+    };
+
+    /**
+     * @private
+     * @param {!vivliostyle.table.TableFormattingContext} formattingContext
      * @returns {number}
      */
     TableLayoutProcessor.prototype.getColumnCount = function(formattingContext) {
@@ -667,6 +680,7 @@ goog.scope(function() {
                 frame.finish(nodeContextAfter);
                 return;
             }
+            this.measureCellSizes(formattingContext, column);
             formattingContext.colGroups = this.normalizeColGroups(tableElement, formattingContext, column);
             frame.finish(null);
         }.bind(this));
