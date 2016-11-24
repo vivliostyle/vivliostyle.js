@@ -460,7 +460,7 @@ adapt.layout.Column.prototype.removeFollowingSiblings = function(parentNode, vie
 /**
  * @param {adapt.vtree.NodePositionStep} step
  * @param {adapt.vtree.NodeContext} parent
- * @return {adapt.vtree.NodeContext}
+ * @return {!adapt.vtree.NodeContext}
  * @private
  */
 adapt.layout.Column.prototype.makeNodeContext = function(step, parent) {
@@ -2420,7 +2420,7 @@ adapt.layout.Column.prototype.layoutOverflownFootnotes = function(chunkPosition)
 /**
  * @param {adapt.vtree.ChunkPosition} chunkPosition starting position.
  * @param {boolean} leadingEdge
- * @return {adapt.task.Result.<adapt.vtree.ChunkPosition>} holding end position.
+ * @return {!adapt.task.Result.<adapt.vtree.ChunkPosition>} holding end position.
  */
 adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
     this.chunkPositions.push(chunkPosition);  // So we can re-layout this column later

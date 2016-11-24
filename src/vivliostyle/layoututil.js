@@ -351,7 +351,7 @@ goog.scope(function() {
     /**
      * @param {adapt.vtree.ChunkPosition} chunkPosition starting position.
      * @param {boolean} leadingEdge
-     * @return {adapt.task.Result.<adapt.vtree.ChunkPosition>} holding end position.
+     * @return {!adapt.task.Result.<adapt.vtree.ChunkPosition>} holding end position.
      */
     PseudoColumn.prototype.layout = function(chunkPosition, leadingEdge) {
         return this.column.layout(chunkPosition, leadingEdge);
