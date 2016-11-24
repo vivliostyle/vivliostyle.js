@@ -778,7 +778,7 @@ adapt.vtree.NodeContext.prototype.modify = function() {
 };
 
 /**
- * @return {adapt.vtree.NodeContext}
+ * @return {!adapt.vtree.NodeContext}
  */
 adapt.vtree.NodeContext.prototype.copy = function() {
     var np = this;

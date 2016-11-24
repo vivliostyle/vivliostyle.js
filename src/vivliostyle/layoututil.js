@@ -344,10 +344,7 @@ goog.scope(function() {
         /** @private @const */ this.column = /** @type {!adapt.layout.Column} */ (Object.create(column));
         this.column.element = viewRoot;
         this.column.layoutContext = column.layoutContext.clone();
-        this.column.openAllViews = this.openAllViews.bind(this);
-        this.column.findAndProcessAcceptableBreak = this.findAndProcessAcceptableBreak.bind(this);
-
-        /** @type {adapt.vtree.NodeContext} */ this.firstOpenedPosition = null;
+        this.column.stopAtOverflow = false;
     };
     /** @const */ var PseudoColumn = vivliostyle.layoututil.PseudoColumn;
 
@@ -361,30 +358,20 @@ goog.scope(function() {
     };
 
     /**
-     * @param {adapt.vtree.NodePosition} position
-     * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
+     * @returns {!adapt.layout.BreakPositionAndNodeContext}
      */
-    PseudoColumn.prototype.openAllViews = function(position) {
-        return adapt.layout.Column.prototype.openAllViews.call(this.column, position).thenAsync(function(nodeContext) {
-            if (!this.firstOpenedPosition) {
-                this.firstOpenedPosition = nodeContext;
-            }
-            return adapt.task.newResult(nodeContext);
-        }.bind(this));
+    PseudoColumn.prototype.findAcceptableBreakPosition = function() {
+        return this.column.findAcceptableBreakPosition();
     };
 
     /**
-     * @param {adapt.vtree.NodeContext} overflownNodeContext
-     * @param {adapt.vtree.NodeContext} initialNodeContext
-     * @return {adapt.task.Result.<adapt.vtree.NodeContext>}
+     * @param {adapt.vtree.NodeContext} nodeContext
+     * @param {boolean} forceRemoveSelf
+     * @param {boolean} endOfRegion
+     * @return {!adapt.task.Result.<boolean>} holing true
      */
-    PseudoColumn.prototype.findAndProcessAcceptableBreak = function(overflownNodeContext, initialNodeContext) {
-        if (overflownNodeContext.sourceNode === initialNodeContext.sourceNode) {
-            return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (null));
-        } else {
-            return adapt.layout.Column.prototype.findAndProcessAcceptableBreak.call(this.column,
-                overflownNodeContext, initialNodeContext);
-        }
+    PseudoColumn.prototype.finishBreak = function(nodeContext, forceRemoveSelf, endOfRegion) {
+        return this.column.finishBreak(nodeContext, forceRemoveSelf, endOfRegion);
     };
 });
 

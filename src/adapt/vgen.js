@@ -403,7 +403,16 @@ adapt.vgen.ViewFactory.prototype.createShadows = function(element, isRoot, cascS
         }
         if (cont1 == null)
             cont1 = adapt.task.newResult(shadow);
+        var cont2 = null;
         cont1.then(function(shadow) {
+            if (computedStyle["display"] === adapt.css.ident.table_cell) {
+                var url = adapt.base.resolveURL("user-agent.xml#table-cell", adapt.base.resourceBaseURL);
+                cont2 = self.createRefShadow(url, adapt.vtree.ShadowType.ROOTLESS, element, shadowContext, shadow);
+            } else {
+                cont2 = adapt.task.newResult(shadow);
+            }
+        });
+        cont2.then(function(shadow) {
             shadow = self.createPseudoelementShadow(element, isRoot, cascStyle, computedStyle,
                 styler, context, shadowContext, shadow);
             frame.finish(shadow);
@@ -698,8 +707,6 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         if (floating ||
             (computedStyle["break-inside"] && computedStyle["break-inside"] !== adapt.css.ident.auto)) {
             self.nodeContext.breakPenalty++;
-        } else if (display === adapt.css.ident.table_row) {
-            self.nodeContext.breakPenalty += 10;
         }
         self.nodeContext.inline = !floating && !display || display === adapt.css.ident.inline;
         self.nodeContext.display = display ? display.toString() : "inline";
