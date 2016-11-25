@@ -458,23 +458,6 @@ adapt.layout.Column.prototype.removeFollowingSiblings = function(parentNode, vie
 };
 
 /**
- * @param {adapt.vtree.NodePositionStep} step
- * @param {adapt.vtree.NodeContext} parent
- * @return {!adapt.vtree.NodeContext}
- * @private
- */
-adapt.layout.Column.prototype.makeNodeContext = function(step, parent) {
-    var nodeContext = new adapt.vtree.NodeContext(step.node, parent, 0);
-    nodeContext.shadowType = step.shadowType;
-    nodeContext.shadowContext = step.shadowContext,
-        nodeContext.nodeShadow = step.nodeShadow;
-    nodeContext.shadowSibling = step.shadowSibling ?
-        this.makeNodeContext(step.shadowSibling, parent.copy()) : null;
-    nodeContext.formattingContext = step.formattingContext;
-    return nodeContext;
-};
-
-/**
  * @param {adapt.vtree.NodePosition} position
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
@@ -490,7 +473,7 @@ adapt.layout.Column.prototype.openAllViews = function(position) {
         while (stepIndex >= 0) {
             var prevContext = nodeContext;
             var step = steps[stepIndex];
-            nodeContext = self.makeNodeContext(step, prevContext);
+            nodeContext = adapt.vtree.makeNodeContextFromNodePositionStep(step, prevContext);
             if (stepIndex == 0) {
                 nodeContext.offsetInNode = position.offsetInNode;
                 nodeContext.after = position.after;

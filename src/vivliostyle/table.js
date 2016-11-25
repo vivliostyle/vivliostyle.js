@@ -616,7 +616,8 @@ goog.scope(function() {
             var cellBreakPosition = cellBreakPositions.shift();
             var cell = cellBreakPosition.cell;
             var cellNodePosition = cellBreakPosition.cellNodePosition;
-            var cellNodeContext = column.makeNodeContext(cellNodePosition.steps[0], parentNodeContext);
+            var cellNodeContext = adapt.vtree.makeNodeContextFromNodePositionStep(
+                cellNodePosition.steps[0], parentNodeContext);
             cellNodeContext.offsetInNode = cellNodePosition.offsetInNode;
             cellNodeContext.after = cellNodePosition.after;
             column.layoutContext.setCurrent(cellNodeContext, false).then(function() {

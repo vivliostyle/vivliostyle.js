@@ -618,6 +618,22 @@ adapt.vtree.newNodePositionFromNodeContext = function(nodeContext) {
 };
 
 /**
+ * @param {adapt.vtree.NodePositionStep} step
+ * @param {adapt.vtree.NodeContext} parent
+ * @return {!adapt.vtree.NodeContext}
+ */
+adapt.vtree.makeNodeContextFromNodePositionStep = function(step, parent) {
+    var nodeContext = new adapt.vtree.NodeContext(step.node, parent, 0);
+    nodeContext.shadowType = step.shadowType;
+    nodeContext.shadowContext = step.shadowContext;
+    nodeContext.nodeShadow = step.nodeShadow;
+    nodeContext.shadowSibling = step.shadowSibling ?
+        adapt.vtree.makeNodeContextFromNodePositionStep(step.shadowSibling, parent.copy()) : null;
+    nodeContext.formattingContext = step.formattingContext;
+    return nodeContext;
+};
+
+/**
  * @enum {number}
  */
 adapt.vtree.ShadowType = {
