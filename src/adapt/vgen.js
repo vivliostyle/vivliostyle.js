@@ -724,6 +724,18 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             }
         }
         self.nodeContext.captionSide = computedStyle["caption-side"] && computedStyle["caption-side"].toString() || "top";
+        var borderCollapse = computedStyle["border-collapse"];
+        if (!borderCollapse || borderCollapse === adapt.css.getName("collapse")) {
+            var borderSpacing = computedStyle["border-spacing"];
+            if (borderSpacing) {
+                if (borderSpacing.isSpaceList()) {
+                    borderSpacing = borderSpacing.values[0];
+                }
+                if (borderSpacing.isNumeric()) {
+                    self.nodeContext.inlineBorderSpacing = adapt.css.toNumber(borderSpacing, self.context);
+                }
+            }
+        }
         var firstPseudo = computedStyle["x-first-pseudo"];
         if (firstPseudo) {
             var outerPseudo = self.nodeContext.parent ? self.nodeContext.parent.firstPseudo : null;

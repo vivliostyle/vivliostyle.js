@@ -258,6 +258,8 @@ goog.scope(function() {
         /** @type {number} */ this.tableWidth = 0;
         /** @const {!Array<vivliostyle.table.TableCaptionView>} */ this.captions = [];
         /** @type {DocumentFragment} */ this.colGroups = null;
+        /** @type {Array<number>} */ this.colWidths = null;
+        /** @type {number} */ this.inlineBorderSpacing = 0;
         /** @const {!Array<!vivliostyle.table.TableRow>} */ this.rows = [];
         /** @const {!Array<!Array<!vivliostyle.table.TableSlot>>} */ this.slots = [];
         /** @type {!Array<!Array<!vivliostyle.table.TableCellFragment>>} */ this.cellFragments = [];
@@ -488,6 +490,9 @@ goog.scope(function() {
         /** @const */ var nodeContext = state.nodeContext;
         /** @const */ var display = nodeContext.display;
         switch (display) {
+            case "table":
+                formattingContext.inlineBorderSpacing = nodeContext.inlineBorderSpacing;
+                break;
             case "table-caption":
                 var captionView = new TableCaptionView(/** @type {!Element} */ (nodeContext.viewNode),
                     nodeContext.captionSide);
@@ -564,6 +569,21 @@ goog.scope(function() {
 
     /**
      * @param {!vivliostyle.table.TableCell} cell
+     * @returns {number}
+     */
+    TableLayoutStrategy.prototype.getColSpanningCellWidth = function(cell) {
+        var colWidths = this.formattingContext.colWidths;
+        goog.asserts.assert(colWidths);
+        var width = 0;
+        for (var i = 0; i < cell.colSpan; i++) {
+            width += colWidths[cell.anchorSlot.columnIndex + i];
+        }
+        width += this.formattingContext.inlineBorderSpacing * (cell.colSpan - 1);
+        return width;
+    };
+
+    /**
+     * @param {!vivliostyle.table.TableCell} cell
      * @param {!adapt.vtree.NodeContext} cellNodeContext
      * @param {!adapt.vtree.ChunkPosition} startChunkPosition
      * @returns {!adapt.task.Result<adapt.vtree.ChunkPosition>}
@@ -571,7 +591,14 @@ goog.scope(function() {
     TableLayoutStrategy.prototype.layoutCell = function(cell, cellNodeContext, startChunkPosition) {
         var rowIndex = cell.rowIndex;
         var columnIndex = cell.columnIndex;
-        var cellViewNode = cellNodeContext.viewNode;
+        var colSpan = cell.colSpan;
+        var cellViewNode = /** @type {Element} */ (cellNodeContext.viewNode);
+
+        if (colSpan > 1) {
+            adapt.base.setCSSProperty(cellViewNode, "box-sizing", "border-box");
+            adapt.base.setCSSProperty(cellViewNode, this.formattingContext.vertical ? "height" : "width",
+                this.getColSpanningCellWidth(cell) + "px");
+        }
 
         var pseudoColumnContainer = cellViewNode.ownerDocument.createElement("div");
         cellViewNode.appendChild(pseudoColumnContainer);
@@ -957,7 +984,8 @@ goog.scope(function() {
         }
 
         // Measure column widths
-        /** @const */ var colWidths = this.getColumnWidths(lastRow, columnCount, vertical, column.clientLayout);
+        /** @const */ var colWidths = formattingContext.colWidths =
+            this.getColumnWidths(lastRow, columnCount, vertical, column.clientLayout);
 
         // Normalize colgroup and col elements
         /** @const */ var colGroups = this.getColGroupElements(tableElement);
