@@ -99,7 +99,7 @@
 
 <section>
     <table>
-        <caption>(1) Fragment between rows</caption>
+        <caption>(1) Fragment between rows; rowspan in 1st and 2nd columns</caption>
         <colgroup span="2" class="highlight"></colgroup>
         <tr>
             <td rowspan="3">
@@ -182,14 +182,14 @@
 
 <section>
     <table>
-        <caption>(3)</caption>
+        <caption>(2) Fragment between rows; rowspan in 2nd column</caption>
         <colgroup span="2" class="highlight"></colgroup>
         <tr>
             <td rowspan="2">
                 (1) This cell<br>
                 (2) contains <b>4</b><br>
                 (3) lines<br>
-                (4) rowspan=3
+                (4) rowspan=2
             </td>
             <td>
                 (1) This cell<br>
@@ -238,12 +238,29 @@
                 (3) lines
             </td>
         </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>3</b><br>
+                (3) lines
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>3</b><br>
+                (3) lines
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>3</b><br>
+                (3) lines
+            </td>
+        </tr>
     </table>
 </section>
 
 <section>
     <table>
-        <caption>(4)</caption>
+        <caption>(3) Fragment between rows; rowspan in 1st and 3rd columns</caption>
         <colgroup span="2" class="highlight"></colgroup>
         <tr>
             <td>
@@ -298,6 +315,107 @@
             </td>
         </tr>
         <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>3</b><br>
+                (3) lines
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>3</b><br>
+                (3) lines
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>3</b><br>
+                (3) lines
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>3</b><br>
+                (3) lines
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section>
+    <table>
+        <caption>(1) Fragment inside a row; rowspan in 1st and 2nd columns</caption>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+            <td rowspan="3">
+                (1) This cell<br>
+                (2) contains <b>15</b><br>
+                (3) lines<br>
+                (4) rowspan=3<br>
+                (5) rowspan=3<br>
+                (6) rowspan=3<br>
+                (7) rowspan=3<br>
+                (8) rowspan=3<br>
+                (9) rowspan=3<br>
+                (10) rowspan=3<br>
+                (11) rowspan=3<br>
+                (12) rowspan=3<br>
+                (13) rowspan=3<br>
+                (14) rowspan=3<br>
+                (15) rowspan=3
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>3</b><br>
+                (3) lines
+            </td>
+        </tr>
+        <tr>
+            <td rowspan="2">
+                (1) This cell<br>
+                (2) contains <b>8</b><br>
+                (3) lines<br>
+                (4) rowspan=2<br>
+                (5) rowspan=2<br>
+                (6) rowspan=2<br>
+                (7) rowspan=2<br>
+                (8) rowspan=2
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>8</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell<br>
+                (8) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>3</b><br>
+                (3) lines
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>3</b><br>
+                (3) lines
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>3</b><br>
+                (3) lines
+            </td>
             <td>
                 (1) This cell<br>
                 (2) contains <b>3</b><br>

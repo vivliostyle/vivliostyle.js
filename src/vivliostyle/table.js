@@ -254,6 +254,7 @@ goog.scope(function() {
         /** @const */ this.tableSourceNode = tableSourceNode;
         /** @type {boolean} */ this.doneInitialLayout = false;
         /** @type {boolean} */ this.vertical = false;
+        /** @type {number} */ this.columnCount = -1;
         /** @type {number} */ this.tableWidth = 0;
         /** @const {!Array<vivliostyle.table.TableCaptionView>} */ this.captions = [];
         /** @type {DocumentFragment} */ this.colGroups = null;
@@ -431,11 +432,14 @@ goog.scope(function() {
      * @returns {number}
      */
     TableFormattingContext.prototype.getColumnCount = function() {
-        return Math.max.apply(null, this.rows.map(function(row) {
-            return row.cells.reduce(function(sum, c) {
-                return sum + c.colSpan;
-            }, 0);
-        }));
+        if (this.columnCount < 0) {
+            this.columnCount = Math.max.apply(null, this.rows.map(function(row) {
+                return row.cells.reduce(function(sum, c) {
+                    return sum + c.colSpan;
+                }, 0);
+            }));
+        }
+        return this.columnCount;
     };
 
     /**
@@ -621,7 +625,7 @@ goog.scope(function() {
     TableLayoutStrategy.prototype.layoutRowSpanningCellsFromPreviousFragment = function(state) {
         var formattingContext = this.formattingContext;
         var rowSpanningCellBreakPositions = this.extractRowSpanningCellBreakPositions();
-        var rowCount = rowSpanningCellBreakPositions.length;
+        var rowCount = rowSpanningCellBreakPositions.reduce(function(s) { return s + 1; }, 0);
         if (rowCount === 0) {
             return adapt.task.newResult(true);
         }
@@ -633,9 +637,9 @@ goog.scope(function() {
         var frame = adapt.task.newFrame("layoutRowSpanningCellsFromPreviousFragment");
         var cont = adapt.task.newResult(true);
         var spanningCellRowIndex = 0;
-        rowSpanningCellBreakPositions.forEach(function(rowCellBreakPositions, rowIndex) {
+        var occupiedSlotIndices = [];
+        rowSpanningCellBreakPositions.forEach(function(rowCellBreakPositions) {
             cont = cont.thenAsync(function() {
-                var cells = formattingContext.getCellsFallingOnRow(rowIndex);
                 // Is it always correct to assume steps[1] to be the row?
                 var rowNodeContext = adapt.vtree.makeNodeContextFromNodePositionStep(
                     rowCellBreakPositions[0].cellNodePosition.steps[1], currentRow.parent);
@@ -645,7 +649,7 @@ goog.scope(function() {
 
                     function addDummyCellUntil(upperColumnIndex) {
                         while (columnIndex < upperColumnIndex) {
-                            if (cells.some(function(c) { return c.columnIndex === columnIndex; })) {
+                            if (!(occupiedSlotIndices.indexOf(columnIndex) >= 0)) {
                                 var dummy = rowNodeContext.viewNode.ownerDocument.createElement("td");
                                 adapt.base.setCSSProperty(dummy, "padding", "0");
                                 rowNodeContext.viewNode.appendChild(dummy);
@@ -657,7 +661,7 @@ goog.scope(function() {
                     rowCellBreakPositions.forEach(function(cellBreakPosition) {
                         cont1 = cont1.thenAsync(function() {
                             var cell = cellBreakPosition.cell;
-                            addDummyCellUntil(cell.columnIndex);
+                            addDummyCellUntil(cell.anchorSlot.columnIndex);
                             var cellNodePosition = cellBreakPosition.cellNodePosition;
                             var cellNodeContext = adapt.vtree.makeNodeContextFromNodePositionStep(
                                 cellNodePosition.steps[0], rowNodeContext);
@@ -665,6 +669,9 @@ goog.scope(function() {
                             cellNodeContext.after = cellNodePosition.after;
                             return layoutContext.setCurrent(cellNodeContext, false).thenAsync(function() {
                                 var breakChunkPosition = cellBreakPosition.breakChunkPosition;
+                                for (var i = 0; i < cell.colSpan; i++) {
+                                    occupiedSlotIndices.push(columnIndex + i);
+                                }
                                 columnIndex += cell.colSpan;
                                 return this.layoutCell(cell, cellNodeContext, breakChunkPosition).thenAsync(function() {
                                     cellNodeContext.viewNode.rowSpan = cell.rowIndex + cell.rowSpan -
@@ -675,8 +682,7 @@ goog.scope(function() {
                         }.bind(this));
                     }, this);
                     return cont1.thenAsync(function() {
-                        var totalColumnCount = formattingContext.getColumnCount();
-                        addDummyCellUntil(totalColumnCount);
+                        addDummyCellUntil(formattingContext.getColumnCount());
                         spanningCellRowIndex++;
                         return adapt.task.newResult(true);
                     });
