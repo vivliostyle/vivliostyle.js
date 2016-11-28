@@ -655,8 +655,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         var parentWritingMode = self.nodeContext.parent ?
             (self.nodeContext.parent.vertical ? adapt.css.ident.vertical_rl : adapt.css.ident.horizontal_tb) :
             writingMode;
+        var isFlowRoot = vivliostyle.display.isFlowRoot(element);
         self.nodeContext.establishesBFC = vivliostyle.display.establishesBFC(display, position, floatSide,
-            computedStyle["overflow"], writingMode, parentWritingMode);
+            computedStyle["overflow"], writingMode, parentWritingMode, isFlowRoot);
         self.nodeContext.containingBlockForAbsolute = vivliostyle.display.establishesCBForAbsolute(position);
         if (self.nodeContext.isInsideBFC()) {
             // When the element is already inside a block formatting context (except one from the root),

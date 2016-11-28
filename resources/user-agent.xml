@@ -17,7 +17,7 @@
 
 <s:template id="footnote"><s:content/><s:include class="footnote-content"/></s:template>
 
-<s:template id="table-cell"><div class="table-cell-container"><s:content/></div></s:template>
+<s:template id="table-cell"><div data-vivliostyle-flow-root="true" class="table-cell-container"><s:content/></div></s:template>
 
 </body>
 </html>
