@@ -558,6 +558,10 @@ goog.scope(function() {
         "table-column": true
     };
 
+    TableLayoutStrategy.prototype.resetColumn = function() {
+        this.column.stopAtOverflow = this.originalStopAtOverflow;
+    };
+
     /**
      * @param {!vivliostyle.table.TableCell} cell
      * @param {!adapt.vtree.NodeContext} cellNodeContext
@@ -703,15 +707,23 @@ goog.scope(function() {
      */
     TableLayoutStrategy.prototype.startTableRow = function(state) {
         var nodeContext = state.nodeContext;
+        var formattingContext = this.formattingContext;
         if (this.currentRowIndex < 0) {
             goog.asserts.assert(nodeContext.sourceNode);
-            this.currentRowIndex = this.formattingContext.findRowIndexBySourceNode(nodeContext.sourceNode);
+            this.currentRowIndex = formattingContext.findRowIndexBySourceNode(nodeContext.sourceNode);
         } else {
             this.currentRowIndex++;
         }
         this.currentColumnIndex = 0;
         return this.layoutRowSpanningCellsFromPreviousFragment(state).thenAsync(function() {
-            this.column.saveEdgeAndCheckForOverflow(state.lastAfterNodeContext, null, true, state.breakAtTheEdge);
+            var overflown = this.column.saveEdgeAndCheckForOverflow(state.lastAfterNodeContext, null, true,
+                state.breakAtTheEdge);
+            if (overflown &&
+                formattingContext.getRowSpanningCellsOverflowingTheRow(this.currentRowIndex - 1).length === 0) {
+                this.resetColumn();
+                nodeContext.overflow = true;
+                state.break = true;
+            }
             return adapt.task.newResult(true);
         }.bind(this));
     };
@@ -797,7 +809,7 @@ goog.scope(function() {
         } else if (nodeContext.sourceNode === this.formattingContext.tableSourceNode) {
             nodeContext = state.nodeContext = nodeContext.modify();
             nodeContext.formattingContext = null;
-            this.column.stopAtOverflow = this.originalStopAtOverflow;
+            this.resetColumn();
             state.break = true;
         } else {
             return EdgeSkipper.prototype.afterNonInlineElementNode.call(this, state);
