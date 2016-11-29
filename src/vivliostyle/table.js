@@ -601,6 +601,7 @@ goog.scope(function() {
         var columnIndex = cell.columnIndex;
         var colSpan = cell.colSpan;
         var cellViewNode = /** @type {Element} */ (cellNodeContext.viewNode);
+        var verticalAlign = cellNodeContext.verticalAlign;
 
         if (colSpan > 1) {
             adapt.base.setCSSProperty(cellViewNode, "box-sizing", "border-box");
@@ -619,7 +620,12 @@ goog.scope(function() {
             cellFragment.empty = true;
         }
 
-        return cellFragment.pseudoColumn.layout(startChunkPosition, true);
+        return cellFragment.pseudoColumn.layout(startChunkPosition, true).thenAsync(function() {
+            if (verticalAlign !== "top") {
+                adapt.base.setCSSProperty(cellViewNode, "vertical-align", "top");
+            }
+            return adapt.task.newResult(true);
+        });
     };
 
     /**
@@ -1161,12 +1167,17 @@ goog.scope(function() {
                             cell: cell
                         })
                     );
+                    var cellViewNode = /** @type {Element} */ (cellNodeContext.viewNode);
                     cellFragment.column.layoutContext.processFragmentedBlockEdge(cellFragment.cellNodeContext);
                     if (rowIndex < cell.rowIndex + cell.rowSpan - 1) {
-                        cellNodeContext.viewNode.rowSpan = rowIndex - cell.rowIndex + 1;
+                        cellViewNode.rowSpan = rowIndex - cell.rowIndex + 1;
                     }
                     if (!cellFragment.empty) {
                         cellFragment.pseudoColumn.finishBreak(breakNodeContext, false, true).then(function() {
+                            var verticalAlign = cellNodeContext.verticalAlign;
+                            if (verticalAlign !== "top") {
+                                adapt.base.setCSSProperty(cellViewNode, "vertical-align", verticalAlign);
+                            }
                             loopFrame.continueLoop();
                         });
                     } else {
