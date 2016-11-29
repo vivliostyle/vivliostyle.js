@@ -100,8 +100,16 @@ goog.scope(function() {
         /** @const */ this.column = column;
         /** @const */ this.cellNodeContext = cellNodeContext;
         /** @const */ this.pseudoColumn = new PseudoColumn(column, pseudoColumnContainer);
+        /** @type {boolean} */ this.empty = false;
     };
     /** @const */ var TableCellFragment = vivliostyle.table.TableCellFragment;
+
+    /**
+     * @returns {!adapt.layout.BreakPositionAndNodeContext}
+     */
+    TableCellFragment.prototype.findAcceptableBreakPosition = function() {
+        return this.pseudoColumn.findAcceptableBreakPosition(true);
+    };
 
     /**
      * @param {!Element} viewNode
@@ -168,7 +176,7 @@ goog.scope(function() {
             var cellFragments = formattingContext.getRowSpanningCellsOverflowingTheRow(rowIndex).map(
                 formattingContext.getCellFragmentOfCell, formattingContext);
             this.acceptableCellBreakPositions = cellFragments.map(function(cellFragment) {
-                return cellFragment.pseudoColumn.findAcceptableBreakPosition();
+                return cellFragment.findAcceptableBreakPosition();
             });
         }
         return this.acceptableCellBreakPositions;
@@ -230,7 +238,7 @@ goog.scope(function() {
             var cellFragments = formattingContext.getCellsFallingOnRow(this.rowIndex).map(
                 formattingContext.getCellFragmentOfCell, formattingContext);
             this.acceptableCellBreakPositions = cellFragments.map(function(cellFragment) {
-                return cellFragment.pseudoColumn.findAcceptableBreakPosition();
+                return cellFragment.findAcceptableBreakPosition();
             });
         }
         return this.acceptableCellBreakPositions;
@@ -605,6 +613,11 @@ goog.scope(function() {
 
         var cellFragment = new TableCellFragment(this.column, pseudoColumnContainer, cellNodeContext);
         this.formattingContext.addCellFragment(rowIndex, columnIndex, cellFragment);
+
+        if (startChunkPosition.primary.steps.length === 1 && startChunkPosition.primary.after) {
+            // Contents of the cell have ended in the previous fragment
+            cellFragment.empty = true;
+        }
 
         return cellFragment.pseudoColumn.layout(startChunkPosition, true);
     };
@@ -1136,7 +1149,7 @@ goog.scope(function() {
                     }
                     var cell = cells[i++];
                     var cellFragment = formattingContext.getCellFragmentOfCell(cell);
-                    var breakNodeContext = cellFragment.pseudoColumn.findAcceptableBreakPosition().nodeContext;
+                    var breakNodeContext = cellFragment.findAcceptableBreakPosition().nodeContext;
                     goog.asserts.assert(breakNodeContext);
                     var cellNodeContext = cellFragment.cellNodeContext;
                     var cellNodePosition = cellNodeContext.toNodePosition();
@@ -1152,9 +1165,13 @@ goog.scope(function() {
                     if (rowIndex < cell.rowIndex + cell.rowSpan - 1) {
                         cellNodeContext.viewNode.rowSpan = rowIndex - cell.rowIndex + 1;
                     }
-                    cellFragment.pseudoColumn.finishBreak(breakNodeContext, false, true).then(function() {
+                    if (!cellFragment.empty) {
+                        cellFragment.pseudoColumn.finishBreak(breakNodeContext, false, true).then(function() {
+                            loopFrame.continueLoop();
+                        });
+                    } else {
                         loopFrame.continueLoop();
-                    });
+                    }
                 }).then(function() {
                     formattingContext.finishFragment();
                     column.clearOverflownViewNodes(nodeContext, false);

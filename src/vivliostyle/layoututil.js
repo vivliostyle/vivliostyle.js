@@ -341,10 +341,19 @@ goog.scope(function() {
      * @constructor
      */
     vivliostyle.layoututil.PseudoColumn = function(column, viewRoot) {
+        /** @const {!Array<!adapt.vtree.NodeContext>} */ this.startNodeContexts = [];
         /** @private @const */ this.column = /** @type {!adapt.layout.Column} */ (Object.create(column));
         this.column.element = viewRoot;
         this.column.layoutContext = column.layoutContext.clone();
         this.column.stopAtOverflow = false;
+
+        var pseudoColumn = this;
+        this.column.openAllViews = function(position) {
+            return adapt.layout.Column.prototype.openAllViews.call(this, position).thenAsync(function(result) {
+                pseudoColumn.startNodeContexts.push(result.copy());
+                return adapt.task.newResult(result);
+            });
+        };
     };
     /** @const */ var PseudoColumn = vivliostyle.layoututil.PseudoColumn;
 
@@ -358,10 +367,25 @@ goog.scope(function() {
     };
 
     /**
+     * @param {boolean} allowBreakAtStartPosition
      * @returns {!adapt.layout.BreakPositionAndNodeContext}
      */
-    PseudoColumn.prototype.findAcceptableBreakPosition = function() {
-        return this.column.findAcceptableBreakPosition();
+    PseudoColumn.prototype.findAcceptableBreakPosition = function(allowBreakAtStartPosition) {
+        var p = this.column.findAcceptableBreakPosition();
+        if (allowBreakAtStartPosition) {
+            var penalty = p.breakPosition ? p.breakPosition.getMinBreakPenalty() : Number.MAX_VALUE;
+            var startNodeContext = this.startNodeContexts[0];
+            var bp = new adapt.layout.EdgeBreakPosition(startNodeContext.copy(), null,
+                startNodeContext.overflow, 0);
+            var nodeContext = bp.findAcceptableBreak(this.column, penalty);
+            if (nodeContext && bp.getMinBreakPenalty() < penalty) {
+                return {
+                    breakPosition: bp,
+                    nodeContext: nodeContext
+                };
+            }
+        }
+        return p;
     };
 
     /**
