@@ -658,8 +658,8 @@ goog.scope(function() {
                 var arr = rowSpanningCellBreakPositions[rowIndex];
                 if (!arr) {
                     arr = rowSpanningCellBreakPositions[rowIndex] = [];
-                    arr.push(p);
                 }
+                arr.push(p);
                 cellBreakPositions.splice(i, 1);
             } else {
                 i++;
