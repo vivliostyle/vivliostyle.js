@@ -23,12 +23,14 @@ html|tr {
 }
 html|thead {
     display: table-header-group;
+    page-break-after: avoid;
 }
 html|tbody {
     display: table-row-group;
 }
 html|tfoot {
     display: table-footer-group;
+    page-break-before: avoid;
 }
 html|col {
     display: table-column;
