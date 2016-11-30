@@ -726,7 +726,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         self.nodeContext.verticalAlign = computedStyle["vertical-align"] && computedStyle["vertical-align"].toString() || "baseline";
         self.nodeContext.captionSide = computedStyle["caption-side"] && computedStyle["caption-side"].toString() || "top";
         var borderCollapse = computedStyle["border-collapse"];
-        if (!borderCollapse || borderCollapse === adapt.css.getName("collapse")) {
+        if (!borderCollapse || borderCollapse === adapt.css.getName("separate")) {
             var borderSpacing = computedStyle["border-spacing"];
             if (borderSpacing) {
                 if (borderSpacing.isSpaceList()) {
