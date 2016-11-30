@@ -621,7 +621,7 @@ goog.scope(function() {
         }
 
         return cellFragment.pseudoColumn.layout(startChunkPosition, true).thenAsync(function() {
-            if (verticalAlign !== "top") {
+            if (verticalAlign !== "baseline" && verticalAlign !== "top") {
                 adapt.base.setCSSProperty(cellViewNode, "vertical-align", "top");
             }
             return adapt.task.newResult(true);
@@ -1175,7 +1175,7 @@ goog.scope(function() {
                     if (!cellFragment.empty) {
                         cellFragment.pseudoColumn.finishBreak(breakNodeContext, false, true).then(function() {
                             var verticalAlign = cellNodeContext.verticalAlign;
-                            if (verticalAlign !== "top") {
+                            if (verticalAlign !== "baseline" && verticalAlign !== "top") {
                                 adapt.base.setCSSProperty(cellViewNode, "vertical-align", verticalAlign);
                             }
                             loopFrame.continueLoop();

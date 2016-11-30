@@ -126,6 +126,13 @@ html|table {
 html|thead, html|tbody, html|tfoot {
     vertical-align: middle;
 }
+/* for XHTML tables without tbody */
+html|table > html|tr {
+    vertical-align: middle;
+}
+html|td, html|th {
+    vertical-align: inherit;
+}
 html|s, html|strike, html|del {
     text-decoration: line-through;
 }
