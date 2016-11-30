@@ -920,3 +920,41 @@ adapt.base.checkVerticalBBoxBug = function(body) {
     }
     return adapt.base.hasVerticalBBoxBug;
 };
+
+/**
+ * @type {boolean|null}
+ */
+adapt.base.hasInlineBlockJustificationBug = null;
+
+/**
+ * @param {HTMLElement} body
+ * @returns {boolean}
+ */
+adapt.base.checkInlineBlockJustificationBug = function(body) {
+    if (adapt.base.hasInlineBlockJustificationBug === null) {
+        var doc = body.ownerDocument;
+        var container = /** @type {HTMLElement} */ (doc.createElement("div"));
+        container.style.position = "absolute";
+        container.style.top = "0px";
+        container.style.left = "0px";
+        container.style.width = "30px";
+        container.style.height = "100px";
+        container.style.lineHeight = "16px";
+        container.style.fontSize = "16px";
+        container.style.textAlign = "justify";
+        body.appendChild(container);
+        var t = doc.createTextNode("a | ");
+        container.appendChild(t);
+        var inlineBlock = doc.createElement("span");
+        inlineBlock.style.display = "inline-block";
+        inlineBlock.style.width = "30px";
+        container.appendChild(inlineBlock);
+        var range = doc.createRange();
+        range.setStart(t, 0);
+        range.setEnd(t, 3);
+        var box = range.getBoundingClientRect();
+        adapt.base.hasInlineBlockJustificationBug = box.right < 27;
+        body.removeChild(container);
+    }
+    return adapt.base.hasInlineBlockJustificationBug;
+};
