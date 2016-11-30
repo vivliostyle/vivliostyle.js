@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Justification</title>
+    <style>
+        @page {
+            size: 200px;
+            margin: 10px;
+        }
+        :root {
+            text-align: justify;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 18px;
+        }
+        body {
+            outline: blue dashed 1px;
+            width: 18.5ch;
+        }
+        p::first-line {
+            color: blue;
+        }
+        p {
+            margin: 0;
+        }
+        .hyphens {
+            hyphens: auto;
+        }
+        .no-hyphens {
+            hyphens: none;
+        }
+    </style>
+</head>
+<body>
+<p class="hyphens">
+Justify justify and justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify &amp; justify justify justify justify justify justify justify.
+</p>
+<p class="no-hyphens">
+    Justify justify and justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify &amp; justify justify justify justify justify justify justify.
+</p>
+</body>
+</html>

@@ -8,6 +8,17 @@ goog.require("adapt.css");
 
 goog.scope(function() {
 
+    /** @private @const */
+    vivliostyle.display.FLOW_ROOT_ATTR = "data-vivliostyle-flow-root";
+
+    /**
+     * @param {!Element} element
+     * @returns {boolean}
+     */
+    vivliostyle.display.isFlowRoot = function(element) {
+        return element.getAttribute(vivliostyle.display.FLOW_ROOT_ATTR) === "true";
+    };
+
     /**
      * 'Blockify' a display value.
      * cf. https://drafts.csswg.org/css-display/#transformations
@@ -137,11 +148,12 @@ goog.scope(function() {
      * @param {adapt.css.Ident} overflow
      * @param {adapt.css.Ident=} writingMode
      * @param {adapt.css.Ident=} parentWritingMode
+     * @param {boolean=} isFlowRoot
      * @returns {boolean}
      */
-    vivliostyle.display.establishesBFC = function(display, position, float, overflow, writingMode, parentWritingMode) {
+    vivliostyle.display.establishesBFC = function(display, position, float, overflow, writingMode, parentWritingMode, isFlowRoot) {
         writingMode = writingMode || parentWritingMode || adapt.css.ident.horizontal_tb;
-        return (!!float && float !== adapt.css.ident.none) ||
+        return !!isFlowRoot || (!!float && float !== adapt.css.ident.none) ||
             vivliostyle.display.isAbsolutelyPositioned(position) ||
             (display === adapt.css.ident.inline_block || display === adapt.css.ident.table_cell || display === adapt.css.ident.table_caption || display == adapt.css.ident.flex) ||
             ((display === adapt.css.ident.block || display === adapt.css.ident.list_item) &&

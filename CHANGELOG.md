@@ -6,6 +6,15 @@
 
 - Fix incorrect page breaking at boundaries of inline-block boxes
   - <https://github.com/vivliostyle/vivliostyle.js/pull/309>
+- Improve page/column breaking inside tables
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/311>
+  - Following issues are resolved:
+      - Table cell with rowspan disappears after page break
+          - https://github.com/vivliostyle/vivliostyle.js/issues/85
+      - Table (column) width should not change over page breaks
+          - https://github.com/vivliostyle/vivliostyle.js/issues/157
+      - Table breaks occur between the colgroup and the first row
+          - https://github.com/vivliostyle/vivliostyle.js/issues/279
 
 ## [2016.10](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.10) - 2016-10-25
 

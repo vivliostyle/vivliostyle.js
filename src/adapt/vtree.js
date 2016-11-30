@@ -429,7 +429,7 @@ adapt.vtree.LayoutContext = function() {};
 /**
  * Creates a functionally equivalent, but uninitialized layout context,
  * suitable for building a separate column.
- * @return {adapt.vtree.LayoutContext}
+ * @return {!adapt.vtree.LayoutContext}
  */
 adapt.vtree.LayoutContext.prototype.clone = function() {};
 
@@ -506,12 +506,31 @@ adapt.vtree.LayoutContext.prototype.isSameNodePosition = function(nodePosition1,
 adapt.vtree.LayoutContext.prototype.getPageFloatHolder = function() {};
 
 /**
+ * Formatting context.
+ * @interface
+ */
+adapt.vtree.FormattingContext = function() {};
+
+/**
+ * @return {string}
+ */
+adapt.vtree.FormattingContext.prototype.getName = function() {};
+
+/**
+ * @param {!adapt.vtree.NodeContext} nodeContext
+ * @param {boolean} firstTime
+ * @return {boolean}
+ */
+adapt.vtree.FormattingContext.prototype.isFirstTime = function(nodeContext, firstTime) {};
+
+/**
  * @typedef {{
  * 		node:Node,
  *      shadowType:adapt.vtree.ShadowType,
  *      shadowContext:adapt.vtree.ShadowContext,
  *      nodeShadow:adapt.vtree.ShadowContext,
- *      shadowSibling:adapt.vtree.NodePositionStep
+ *      shadowSibling:adapt.vtree.NodePositionStep,
+ *      formattingContext:adapt.vtree.FormattingContext
  * }}
  */
 adapt.vtree.NodePositionStep;
@@ -599,6 +618,22 @@ adapt.vtree.newNodePositionFromNodeContext = function(nodeContext) {
 };
 
 /**
+ * @param {adapt.vtree.NodePositionStep} step
+ * @param {adapt.vtree.NodeContext} parent
+ * @return {!adapt.vtree.NodeContext}
+ */
+adapt.vtree.makeNodeContextFromNodePositionStep = function(step, parent) {
+    var nodeContext = new adapt.vtree.NodeContext(step.node, parent, 0);
+    nodeContext.shadowType = step.shadowType;
+    nodeContext.shadowContext = step.shadowContext;
+    nodeContext.nodeShadow = step.nodeShadow;
+    nodeContext.shadowSibling = step.shadowSibling ?
+        adapt.vtree.makeNodeContextFromNodePositionStep(step.shadowSibling, parent.copy()) : null;
+    nodeContext.formattingContext = step.formattingContext;
+    return nodeContext;
+};
+
+/**
  * @enum {number}
  */
 adapt.vtree.ShadowType = {
@@ -676,6 +711,9 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {?string} */ this.floatReference = null;
     /** @type {?string} */ this.floatSide = null;
     /** @type {?string} */ this.clearSide = null;
+    /** @type {string} */ this.verticalAlign = "baseline";
+    /** @type {string} */ this.captionSide = "top";
+    /** @type {number} */ this.inlineBorderSpacing = 0;
     /** @type {boolean} */ this.flexContainer = false;
     /** @type {adapt.vtree.Whitespace} */ this.whitespace = parent ? parent.whitespace : adapt.vtree.Whitespace.IGNORE;
     /** @type {boolean} */ this.establishesBFC = false;
@@ -688,6 +726,7 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {boolean} */ this.vertical = parent ? parent.vertical : false;
     /** @type {string} */ this.direction = parent ? parent.direction : "ltr";
     /** @type {adapt.vtree.FirstPseudo} */ this.firstPseudo = parent ? parent.firstPseudo : null;
+    /** @type {adapt.vtree.FormattingContext} */ this.formattingContext = parent ? parent.formattingContext : null;
 };
 
 /**
@@ -703,6 +742,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.display = null;
     this.floatSide = null;
     this.clearSide = null;
+    this.verticalAlign = "baseline";
     this.flexContainer = false;
     this.whitespace = this.parent ? this.parent.whitespace : adapt.vtree.Whitespace.IGNORE;
     this.breakBefore = null;
@@ -712,6 +752,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.containingBlockForAbsolute = false;
     this.vertical = this.parent ? this.parent.vertical : false;
     this.nodeShadow = null;
+    this.formattingContext = this.parent ? this.parent.formattingContext : null;
 };
 
 /**
@@ -731,6 +772,9 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.display = this.display;
     np.floatSide = this.floatSide;
     np.clearSide = this.clearSide;
+    np.verticalAlign = this.verticalAlign;
+    np.captionSide = this.captionSide;
+    np.inlineBorderSpacing = this.inlineBorderSpacing;
     np.establishesBFC = this.establishesBFC;
     np.containingBlockForAbsolute = this.containingBlockForAbsolute;
     np.flexContainer = this.flexContainer;
@@ -742,6 +786,7 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.firstPseudo = this.firstPseudo;
     np.vertical = this.vertical;
     np.overflow = this.overflow;
+    np.formattingContext = this.formattingContext;
     return np;
 };
 
@@ -755,7 +800,7 @@ adapt.vtree.NodeContext.prototype.modify = function() {
 };
 
 /**
- * @return {adapt.vtree.NodeContext}
+ * @return {!adapt.vtree.NodeContext}
  */
 adapt.vtree.NodeContext.prototype.copy = function() {
     var np = this;
@@ -792,7 +837,8 @@ adapt.vtree.NodeContext.prototype.toNodePositionStep = function() {
         shadowType: this.shadowType,
         shadowContext: this.shadowContext,
         nodeShadow: this.nodeShadow,
-        shadowSibling: this.shadowSibling ? this.shadowSibling.toNodePositionStep() : null
+        shadowSibling: this.shadowSibling ? this.shadowSibling.toNodePositionStep() : null,
+        formattingContext: this.formattingContext
     };
 };
 
