@@ -106,6 +106,41 @@ goog.scope(function() {
     };
 
     /**
+     * @param {!adapt.css.Ident} display
+     * @returns {boolean}
+     */
+    vivliostyle.display.isInlineLevel = function(display) {
+        switch (display.toString()) {
+            case "inline":
+            case "inline-block":
+            case "inline-list-item":
+            case "inline-flex":
+            case "inline-grid":
+            case "ruby":
+            case "inline-table":
+                return true;
+            default:
+                return false;
+        }
+    };
+
+    /**
+     * @param {!adapt.css.Ident} display
+     * @returns {boolean}
+     */
+    vivliostyle.display.isRubyInternalDisplay = function(display) {
+        switch (display.toString()) {
+            case "ruby-base":
+            case "ruby-text":
+            case "ruby-base-container":
+            case "ruby-text-container":
+                return true;
+            default:
+                return false;
+        }
+    };
+
+    /**
      * Judges if the generated box establishes a new block formatting context.
      * @param {adapt.css.Ident} display
      * @param {adapt.css.Ident} position

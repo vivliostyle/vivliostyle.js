@@ -709,7 +709,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             (computedStyle["break-inside"] && computedStyle["break-inside"] !== adapt.css.ident.auto)) {
             self.nodeContext.breakPenalty++;
         }
-        self.nodeContext.inline = !floating && !display || display === adapt.css.ident.inline;
+        self.nodeContext.inline = !floating && !display || vivliostyle.display.isInlineLevel(display) || vivliostyle.display.isRubyInternalDisplay(display);
         self.nodeContext.display = display ? display.toString() : "inline";
         self.nodeContext.floatSide = floating ? floatSide.toString() : null;
         self.nodeContext.floatReference = floatReference ? floatReference.toString() : null;

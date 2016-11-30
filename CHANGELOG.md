@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Fixed
+
+- Fix incorrect page breaking at boundaries of inline-block boxes
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/309>
 - Improve page/column breaking inside tables
   - <https://github.com/vivliostyle/vivliostyle.js/pull/311>
   - Following issues are resolved:
