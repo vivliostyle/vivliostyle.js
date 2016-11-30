@@ -22,7 +22,7 @@ goog.scope(function() {
 
     /**
      * @param {number} rowIndex
-     * @param {!Node} sourceNode
+     * @param {Node} sourceNode
      * @constructor
      */
     vivliostyle.table.TableRow = function(rowIndex, sourceNode) {
@@ -345,6 +345,10 @@ goog.scope(function() {
      */
     TableFormattingContext.prototype.addCell = function(rowIndex, cell) {
         var row = this.rows[rowIndex];
+        if (!row) {
+            this.addRow(rowIndex, new TableRow(rowIndex, null));
+            row = this.rows[rowIndex];
+        }
         goog.asserts.assert(row);
         row.addCell(cell);
         var rowUpper = rowIndex + cell.rowSpan;
@@ -484,8 +488,9 @@ goog.scope(function() {
     vivliostyle.table.EntireTableLayoutStrategy = function(formattingContext, column) {
         /** @const */ this.formattingContext = formattingContext;
         /** @const */ this.column = column;
-        this.rowIndex = 0;
-        this.columnIndex = 0;
+        /** @type {number} */ this.rowIndex = -1;
+        /** @type {number} */ this.columnIndex = 0;
+        /** @type {boolean} */ this.inRow = false;
     };
     /** @const */ var EntireTableLayoutStrategy = vivliostyle.table.EntireTableLayoutStrategy;
     goog.inherits(EntireTableLayoutStrategy, LayoutIteratorStrategy);
@@ -507,6 +512,8 @@ goog.scope(function() {
                 formattingContext.captions.push(captionView);
                 break;
             case "table-row":
+                this.inRow = true;
+                this.rowIndex++;
                 goog.asserts.assert(nodeContext.sourceNode);
                 this.columnIndex = 0;
                 formattingContext.addRow(this.rowIndex, new TableRow(this.rowIndex, nodeContext.sourceNode));
@@ -531,9 +538,14 @@ goog.scope(function() {
             switch (display) {
                 case "table-row":
                     formattingContext.lastRowViewNode = /** @type {!Element} */ (nodeContext.viewNode);
-                    this.rowIndex++;
+                    this.inRow = false;
                     break;
                 case "table-cell":
+                    if (!this.inRow) {
+                        this.rowIndex++;
+                        this.columnIndex = 0;
+                        this.inRow = true;
+                    }
                     var elem = /** @type {!Element} */ (nodeContext.viewNode);
                     formattingContext.addCell(this.rowIndex, new TableCell(this.rowIndex, this.columnIndex, elem));
                     this.columnIndex++;
@@ -552,6 +564,7 @@ goog.scope(function() {
         EdgeSkipper.call(this, true);
         /** @const */ this.formattingContext = formattingContext;
         /** @const */ this.column = column;
+        /** @type {boolean} */ this.inRow = false;
 
         /** @type {number} */ this.currentRowIndex = -1;
         /** @type {number} */ this.currentColumnIndex = 0;
@@ -761,6 +774,7 @@ goog.scope(function() {
             this.currentRowIndex++;
         }
         this.currentColumnIndex = 0;
+        this.inRow = true;
         return this.layoutRowSpanningCellsFromPreviousFragment(state).thenAsync(function() {
             var overflown = this.column.saveEdgeAndCheckForOverflow(state.lastAfterNodeContext, null, true,
                 state.breakAtTheEdge);
@@ -780,6 +794,15 @@ goog.scope(function() {
      */
     TableLayoutStrategy.prototype.startTableCell = function(state) {
         var nodeContext = state.nodeContext;
+        if (!this.inRow) {
+            if (this.currentRowIndex < 0) {
+                this.currentRowIndex = 0;
+            } else {
+                this.currentRowIndex++;
+            }
+            this.currentColumnIndex = 0;
+            this.inRow = true;
+        }
         var cell = this.formattingContext.getRowByIndex(this.currentRowIndex).cells[this.currentColumnIndex];
 
         var afterNodeContext = nodeContext.copy().modify();
@@ -835,6 +858,7 @@ goog.scope(function() {
         var nodeContext = state.nodeContext;
         var display = nodeContext.display;
         if (display === "table-row") {
+            this.inRow = false;
             var beforeNodeContext = nodeContext.copy().modify();
             beforeNodeContext.after = false;
             var bp = new InsideTableRowBreakPosition(this.currentRowIndex, beforeNodeContext, this.formattingContext);
@@ -990,6 +1014,7 @@ goog.scope(function() {
     TableLayoutProcessor.prototype.normalizeColGroups = function(formattingContext, tableElement, column) {
         /** @const */ var vertical = formattingContext.vertical;
         /** @const */ var lastRow = formattingContext.lastRowViewNode;
+        if (!lastRow) return;
         goog.asserts.assert(lastRow);
         formattingContext.lastRowViewNode = null;
         /** @const */ var doc = lastRow.ownerDocument;
@@ -1072,7 +1097,9 @@ goog.scope(function() {
      * @param {?Node} firstChild
      */
     TableLayoutProcessor.prototype.addColGroups = function(formattingContext, rootViewNode, firstChild) {
-        rootViewNode.insertBefore(formattingContext.colGroups.cloneNode(true), firstChild);
+        if (formattingContext.colGroups) {
+            rootViewNode.insertBefore(formattingContext.colGroups.cloneNode(true), firstChild);
+        }
     };
 
     /**
