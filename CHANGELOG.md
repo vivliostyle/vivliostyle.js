@@ -15,6 +15,8 @@
           - https://github.com/vivliostyle/vivliostyle.js/issues/157
       - Table breaks occur between the colgroup and the first row
           - https://github.com/vivliostyle/vivliostyle.js/issues/279
+- Fix incorrect treatment of percentage value for line-height property
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/312>
 
 ## [2016.10](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.10) - 2016-10-25
 

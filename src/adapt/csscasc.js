@@ -536,6 +536,8 @@ adapt.csscasc.InheritanceVisitor.prototype.visitNumeric = function(numeric) {
     } else if (numeric.unit == "%") {
         if (this.propName === "font-size") {
             return new adapt.css.Numeric(numeric.num / 100 * this.getFontSize(), "px");
+        } else if (this.propName === "line-height") {
+            return numeric;
         }
         var unit = this.propName.match(/height|^(top|bottom)$/) ? "vh" : "vw";
         return new adapt.css.Numeric(numeric.num, unit);
