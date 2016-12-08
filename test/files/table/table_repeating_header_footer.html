@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Repeating Table header,footer</title>
+    <style>
+        @page {
+            size: 820px;
+        }
+        @-epubx-page-template {
+            .partition {
+                width: 398px;
+                height: 198px;
+                border: rgba(0, 0, 255, 0.2) solid 1px;
+                -epubx-flow-from: body;
+            }
+            .left {
+                left: 10px;
+            }
+            .right {
+                right: 10px;
+            }
+
+            @-epubx-page-master {
+                @-epubx-partition {
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 10px;
+                    font-size: 10px;
+                    line-height: 10px;
+                    text-align: center;
+                    content: counter(page);
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 610px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 410px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 210px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 10px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 610px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 410px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 210px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 10px;
+                }
+            }
+        }
+        :root {
+            font-size: 10px;
+            line-height: 12px;
+            widows: 1;
+            orphans: 1;
+        }
+        body {
+            margin: 0 10px;
+        }
+        section {
+            break-after: column;
+        }
+        table {
+            border: 2px black solid;
+            border-spacing: 2px;
+        }
+        caption {
+            caption-side: bottom;
+        }
+        tr, .tr {
+            border: 1px blue solid;
+        }
+        th, td, .th, .td {
+            border: 1px gray solid;
+            line-height: 16px;
+        }
+        td {
+            height: 30px;
+        }
+        thead {
+            background-color: #FFAAAA;
+        }
+        tfoot {
+            background-color: #AAAAFF;
+        }
+
+        .tr {
+            display: table-row;
+        }
+        .th, .td {
+            display: table-cell;
+        }
+        figure {
+            margin: 0;
+            border: 2px black solid;
+            border-collapse: separate;
+            border-spacing: 2px;
+            display: table;
+        }
+        figcaption {
+            display: table-caption;
+            caption-side: bottom;
+        }
+
+    </style>
+</head>
+<body>
+
+<section>
+    <table>
+        <caption>(1) Break Between Table Row</caption>
+        <thead>
+            <tr>
+                <td>header-cell-1</td>
+                <td>header-cell-2</td>
+                <td>header-cell-3</td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td>footer-cell-1</td>
+                <td>footer-cell-2</td>
+                <td>footer-cell-3</td>
+            </tr>
+        </tfoot>
+        <tbody>
+            <tr>
+                <td>row1-cell-1</td>
+                <td>row1-cell-2</td>
+                <td>row1-cell-3</td>
+            </tr>
+            <tr>
+                <td>row2-cell-1</td>
+                <td>row2-cell-2</td>
+                <td>row2-cell-3</td>
+            </tr>
+            <tr>
+                <td>row3-cell-1</td>
+                <td>row3-cell-2</td>
+                <td>row3-cell-3</td>
+            </tr>
+            <tr>
+                <td>row4-cell-1</td>
+                <td>row4-cell-2</td>
+                <td>row4-cell-3</td>
+            </tr>
+            <tr>
+                <td>row5-cell-1</td>
+                <td>row5-cell-2</td>
+                <td>row5-cell-3</td>
+            </tr>
+            <tr>
+                <td>row6-cell-1</td>
+                <td>row6-cell-2</td>
+                <td>row6-cell-3</td>
+            </tr>
+            <tr>
+                <td>row7-cell-1</td>
+                <td>row7-cell-2</td>
+                <td>row7-cell-3</td>
+            </tr>
+            <tr>
+                <td>row8-cell-1</td>
+                <td>row8-cell-2</td>
+                <td>row8-cell-3</td>
+            </tr>
+            <tr>
+                <td>row9-cell-1</td>
+                <td>row9-cell-2</td>
+                <td>row9-cell-3</td>
+            </tr>
+            <tr>
+                <td>row10-cell-1</td>
+                <td>row10-cell-2</td>
+                <td>row10-cell-3</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <table>
+        <caption>(2) No Breaking</caption>
+        <thead>
+            <tr>
+                <td>header-cell-1</td>
+                <td>header-cell-2</td>
+                <td>header-cell-3</td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td>footer-cell-1</td>
+                <td>footer-cell-2</td>
+                <td>footer-cell-3</td>
+            </tr>
+        </tfoot>
+        <tbody>
+            <tr>
+                <td>row1-cell-1</td>
+                <td>row1-cell-2</td>
+                <td>row1-cell-3</td>
+            </tr>
+            <tr>
+                <td>row2-cell-1</td>
+                <td>row2-cell-2</td>
+                <td>row2-cell-3</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <table>
+        <caption>(3) Break at the inside row</caption>
+        <thead>
+            <tr>
+                <td>header-cell-1</td>
+                <td>header-cell-2</td>
+                <td>header-cell-3</td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td>footer-cell-1</td>
+                <td>footer-cell-2</td>
+                <td>footer-cell-3</td>
+            </tr>
+        </tfoot>
+        <tbody>
+          <tr>
+              <td>
+                  <div style="width: 60px; height: 48px;">
+                      min-content width = 60px.
+                  </div>
+              </td>
+              <td>
+                  <div style="width: 60px; height: 48px;">
+                      min-content width = 60px.
+                  </div>
+              </td>
+              <td>
+                  <div style="width: 80px; height: 36px;">
+                      min-content width = 80px.
+                  </div>
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  <div style="width: 100px; height: 36px;">
+                      minimum content width = 100px.
+                  </div>
+                  <div style="width: 60px; height: 48px;">
+                      min-content width = 60px.
+                  </div>
+              </td>
+              <td>
+                  <div style="width: 50px; height: 115px;">
+                      minimum content width = 50px.
+                  </div>
+                  <div style="width: 60px; height: 48px;">
+                      min-content width = 60px.
+                  </div>
+              </td>
+              <td>
+                  <div style="width: 70px; height: 48px;">
+                      minimum content width = 70px.
+                  </div>
+                  <div style="width: 80px; height: 36px;">
+                      min-content width = 80px.
+                  </div>
+              </td>
+          </tr>
+        </tbody>
+    </table>
+</section>
+
+</body>
+</html>

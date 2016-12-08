@@ -376,7 +376,7 @@ goog.scope(function() {
             var penalty = p.breakPosition ? p.breakPosition.getMinBreakPenalty() : Number.MAX_VALUE;
             var startNodeContext = this.startNodeContexts[0];
             var bp = new adapt.layout.EdgeBreakPosition(startNodeContext.copy(), null,
-                startNodeContext.overflow, 0);
+                startNodeContext.overflow, 0, null);
             var nodeContext = bp.findAcceptableBreak(this.column, penalty);
             if (nodeContext && bp.getMinBreakPenalty() < penalty) {
                 return {
@@ -397,5 +397,132 @@ goog.scope(function() {
     PseudoColumn.prototype.finishBreak = function(nodeContext, forceRemoveSelf, endOfRegion) {
         return this.column.finishBreak(nodeContext, forceRemoveSelf, endOfRegion);
     };
-});
 
+
+    /**
+     * @constructor
+     */
+    vivliostyle.layoututil.RepetitiveElements = function(vertical) {
+        /** @private @const */ this.vertical = vertical;
+        /** @private @type {Element} */ this.headerElement = null;
+        /** @private @type {Element} */ this.footerElement = null;
+        /** @private @type {!Array.<!Element>} */ this.headerViewNodes = [];
+        /** @private @type {!Array.<!Element>} */ this.footerViewNodes = [];
+        /** @private @type {number} */ this.headerHeight = 0;
+        /** @private @type {number} */ this.footerHeight = 0;
+        /** @private @type {boolean} */ this.isSkipHeader = false;
+        /** @private @type {boolean} */ this.isSkipFooter = false;
+        /** @private @type {null|number} */this.previousPenalty = null;
+    };
+    /** @const */ var RepetitiveElements = vivliostyle.layoututil.RepetitiveElements;
+
+    /**
+     * @param {Element} element
+     */
+    RepetitiveElements.prototype.setHeaderElement = function(element) {
+        if (this.headerElement) return; // use first one.
+        this.headerElement = element;
+    };
+    /**
+     * @param {Element} element
+     */
+    RepetitiveElements.prototype.setFooterElement = function(element) {
+        if (this.footerElement) return; // use first one.
+        this.footerElement = element;
+    };
+
+    /**
+     * @param {!adapt.vtree.ClientLayout} clientLayout
+     */
+    RepetitiveElements.prototype.updateHeight = function(clientLayout) {
+        if (this.headerElement) {
+            this.headerHeight = this.getElementHeight(this.headerElement, clientLayout);
+        }
+        if (this.footerElement) {
+            this.footerHeight = this.getElementHeight(this.footerElement, clientLayout);
+        }
+    };
+
+    /**
+     * @private
+     * @param {!Element} element
+     * @param {!adapt.vtree.ClientLayout} clientLayout
+     */
+    RepetitiveElements.prototype.getElementHeight = function(element, clientLayout) {
+        var rect = clientLayout.getElementClientRect(element);
+        return this.vertical ? rect["width"] : rect["height"];
+    };
+
+    RepetitiveElements.prototype.prepareLayoutFragment = function() {
+        this.previousPenalty  = null;
+        this.isSkipHeader = this.isSkipFooter = false;
+        this.headerViewNodes = [];
+        this.footerViewNodes = [];
+    };
+    /**
+     * @param {!Element} rootViewNode
+     * @param {?Node} firstChild
+     */
+    RepetitiveElements.prototype.appendHeaderToFragment = function(rootViewNode, firstChild) {
+        if (!this.headerElement) return;
+        var headerViewNode = this.headerElement.cloneNode(true);
+        this.headerViewNodes.push(headerViewNode);
+        rootViewNode.insertBefore(headerViewNode, firstChild);
+    };
+    /**
+     * @param {!Element} rootViewNode
+     * @param {?Node} firstChild
+     */
+    RepetitiveElements.prototype.appendFooterToFragment = function(rootViewNode, firstChild) {
+        if (!this.footerElement) return;
+        var footerViewNode = this.footerElement.cloneNode(true);
+        this.footerViewNodes.push(footerViewNode);
+        rootViewNode.insertBefore(footerViewNode, firstChild);
+    };
+
+    /**
+     * @return {number}
+     */
+    RepetitiveElements.prototype.getPenalty = function() {
+        return (this.isSkipHeader ? 1 : 0) + (this.isSkipFooter ? 1 : 0);
+    };
+    /**
+     * @return {number}
+     */
+    RepetitiveElements.prototype.calculateElementHeight = function() {
+        return (this.isSkipFooter ? 0 : this.footerHeight)
+             - (this.isSkipHeader ? this.headerHeight : 0);
+    };
+    /**
+     * @param {number} penalty
+     */
+    RepetitiveElements.prototype.updateState = function(penalty) {
+        var changeState = this.previousPenalty != null
+            && this.previousPenalty < penalty;
+        this.previousPenalty = penalty;
+        if (!changeState) return;
+
+        if (!this.isSkipFooter) {
+            this.isSkipFooter = true;
+        } else if (!this.isSkipHeader) {
+            this.isSkipHeader = true;
+        }
+    };
+
+    RepetitiveElements.prototype.removeHeaderFromFragment = function() {
+        this.headerViewNodes.forEach(function(viewNode) {
+            viewNode.parentNode.removeChild(viewNode);
+        });
+        this.headerViewNodes = [];
+    };
+    RepetitiveElements.prototype.removeFooterFromFragment = function() {
+        this.footerViewNodes.forEach(function(viewNode) {
+            viewNode.parentNode.removeChild(viewNode);
+        });
+        this.footerViewNodes = [];
+    };
+    RepetitiveElements.prototype.removeSkippedNodesFromFragment = function() {
+        if (this.isSkipHeader) this.removeHeaderFromFragment();
+        if (this.isSkipFooter) this.removeFooterFromFragment();
+    };
+});

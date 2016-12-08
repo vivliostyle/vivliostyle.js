@@ -204,6 +204,26 @@ adapt.layout.BreakPosition.prototype.findAcceptableBreak = function(column, pena
 adapt.layout.BreakPosition.prototype.getMinBreakPenalty = function() {};
 
 /**
+ * @abstract
+ * @constructor
+ * @param {vivliostyle.layoututil.RepetitiveElements} repetitiveElements
+ * @implements {adapt.layout.BreakPosition}
+ */
+adapt.layout.AbstractBreakPosition = function(repetitiveElements) {
+    /** @const */ this.repetitiveElements = repetitiveElements;
+};
+
+/**
+ * @abstract
+ */
+adapt.layout.AbstractBreakPosition.prototype.findAcceptableBreak = function(column, penalty) {};
+
+/**
+ * @abstract
+ */
+adapt.layout.AbstractBreakPosition.prototype.getMinBreakPenalty = function() {};
+
+/**
  * @typedef {{breakPosition: adapt.layout.BreakPosition, nodeContext: adapt.vtree.NodeContext}}
  */
 adapt.layout.BreakPositionAndNodeContext;
@@ -214,20 +234,25 @@ adapt.layout.BreakPositionAndNodeContext;
  * @param {Array.<adapt.vtree.NodeContext>} checkPoints array of breaking points for
  *    breakable block
  * @param {number} penalty
- * @implements {adapt.layout.BreakPosition}
+ * @param {vivliostyle.layoututil.RepetitiveElements} repetitiveElements
+ * @extends {adapt.layout.AbstractBreakPosition}
  */
-adapt.layout.BoxBreakPosition = function(checkPoints, penalty) {
+adapt.layout.BoxBreakPosition = function(checkPoints, penalty, repetitiveElements) {
+    adapt.layout.AbstractBreakPosition.call(this, repetitiveElements);
     /** @const */ this.checkPoints = checkPoints;
     /** @const */ this.penalty = penalty;
     /** @private @type {boolean} */ this.alreadyEvaluated = false;
     /** @type {adapt.vtree.NodeContext} */ this.breakNodeContext = null;
 };
+goog.inherits(adapt.layout.BoxBreakPosition, adapt.layout.AbstractBreakPosition);
 
 /**
  * @override
  */
 adapt.layout.BoxBreakPosition.prototype.findAcceptableBreak = function(column, penalty) {
-    if (penalty < this.penalty)
+    if (this.repetitiveElements) this.repetitiveElements.updateState(penalty);
+
+    if (penalty < this.getMinBreakPenalty())
         return null;
     if (!this.alreadyEvaluated) {
         this.breakNodeContext = column.findBoxBreakPosition(this, penalty > 0);
@@ -240,7 +265,7 @@ adapt.layout.BoxBreakPosition.prototype.findAcceptableBreak = function(column, p
  * @override
  */
 adapt.layout.BoxBreakPosition.prototype.getMinBreakPenalty = function() {
-    return this.penalty;
+    return this.penalty + (this.repetitiveElements ? this.repetitiveElements.getPenalty() : 0);
 };
 
 /**
@@ -250,25 +275,30 @@ adapt.layout.BoxBreakPosition.prototype.getMinBreakPenalty = function() {
  * @param {?string} breakOnEdge
  * @param {boolean} overflows
  * @param {number} computedBlockSize
- * @implements {adapt.layout.BreakPosition}
+ * @param {vivliostyle.layoututil.RepetitiveElements} repetitiveElements
+ * @extends {adapt.layout.AbstractBreakPosition}
  */
-adapt.layout.EdgeBreakPosition = function(position, breakOnEdge, overflows, computedBlockSize) {
+adapt.layout.EdgeBreakPosition = function(position, breakOnEdge, overflows,
+    computedBlockSize, repetitiveElements) {
+    adapt.layout.AbstractBreakPosition.call(this, repetitiveElements);
     /** @const */ this.position = position;
     /** @const */ this.breakOnEdge = breakOnEdge;
     /** @type {boolean} */ this.overflows = overflows;
     /** @const */ this.computedBlockSize = computedBlockSize;
     /** @private @type {boolean} */ this.isEdgeUpdated = false;
+    /** @private @type {number} */ this.edge = 0;
 };
+goog.inherits(adapt.layout.EdgeBreakPosition, adapt.layout.AbstractBreakPosition);
 
 /**
  * @override
  */
 adapt.layout.EdgeBreakPosition.prototype.findAcceptableBreak = function(column, penalty) {
-    if (!this.isEdgeUpdated) {
-        this.updateEdge(column);
-    }
-    if (penalty < this.getMinBreakPenalty())
+    if (this.repetitiveElements) this.repetitiveElements.updateState(penalty);
+    this.updateOverflows(column);
+    if (penalty < this.getMinBreakPenalty()) {
         return null;
+    }
     return column.findEdgeBreakPosition(this);
 };
 
@@ -281,7 +311,8 @@ adapt.layout.EdgeBreakPosition.prototype.getMinBreakPenalty = function() {
     }
     return (vivliostyle.break.isAvoidBreakValue(this.breakOnEdge) ? 1 : 0)
         + (this.overflows ? 3 : 0)
-        + (this.position.parent ? this.position.parent.breakPenalty : 0);
+        + (this.position.parent ? this.position.parent.breakPenalty : 0)
+        + (this.repetitiveElements ? this.repetitiveElements.getPenalty() : 0);
 };
 
 /**
@@ -289,9 +320,21 @@ adapt.layout.EdgeBreakPosition.prototype.getMinBreakPenalty = function() {
  * @param {!adapt.layout.Column} column
  */
 adapt.layout.EdgeBreakPosition.prototype.updateEdge = function(column) {
-    var edge = adapt.layout.calculateEdge(this.position, column.clientLayout, 0, column.vertical);
-    this.overflows = this.position.overflow = column.isOverflown(edge);
+    this.edge = adapt.layout.calculateEdge(this.position, column.clientLayout, 0, column.vertical);
     this.isEdgeUpdated = true;
+};
+
+/**
+ * @private
+ * @param {!adapt.layout.Column} column
+ */
+adapt.layout.EdgeBreakPosition.prototype.updateOverflows = function(column) {
+    if (!this.isEdgeUpdated) {
+        this.updateEdge(column);
+    }
+    var edge = this.edge;
+    if (this.repetitiveElements) edge = edge + this.repetitiveElements.calculateElementHeight();
+    this.overflows = this.position.overflow = column.isOverflown(edge);
 };
 
 
@@ -1808,6 +1851,7 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
     // Select the first overflowing line break position
     var linePositions = this.findLinePositions(checkPoints);
     var edge = this.footnoteEdge - clonedPaddingBorder;
+    if (bp.repetitiveElements) edge = edge - bp.repetitiveElements.calculateElementHeight();
     var lineIndex = adapt.base.binarySearch(linePositions.length, function(i) {
         return self.vertical ? linePositions[i] < edge : linePositions[i] > edge;
     });
@@ -2464,7 +2508,7 @@ adapt.layout.Column.prototype.saveEdgeBreakPosition = function(position, breakAt
         bp = layoutProcessor.createEdgeBreakPosition(copy, breakAtEdge, overflows, this.computedBlockSize);
     }
     if (!bp) {
-        bp = new adapt.layout.EdgeBreakPosition(copy, breakAtEdge, overflows, this.computedBlockSize);
+        bp = new adapt.layout.EdgeBreakPosition(copy, breakAtEdge, overflows, this.computedBlockSize, null);
     }
     this.breakPositions.push(bp);
 };
@@ -2475,7 +2519,7 @@ adapt.layout.Column.prototype.saveEdgeBreakPosition = function(position, breakAt
  */
 adapt.layout.Column.prototype.saveBoxBreakPosition = function(checkPoints) {
     var penalty = checkPoints[0].breakPenalty;
-    var bp = new adapt.layout.BoxBreakPosition(checkPoints, penalty);
+    var bp = new adapt.layout.BoxBreakPosition(checkPoints, penalty, null);
     this.breakPositions.push(bp);
 };
 
