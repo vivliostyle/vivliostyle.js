@@ -419,6 +419,12 @@ flood-color = COLOR;
 flood-opacity = OPACITY_VALUE;
 lighting-color = COLOR;
 
+/* compositing-1 */
+BLEND_MODE = normal | multiply | screen | overlay | darken | lighten | color-dodge | color-burn | hard-light | soft-light | difference | exclusion | hue | saturation | color | luminosity;
+mix-blend-mode = BLEND_MODE;
+isolation = auto | isolate;
+background-blend-mode = COMMA( BLEND_MODE+ );
+
 
 DEFAULTS
 

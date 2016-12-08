@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+
+- Add support for Compositing and Blending Level 1
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/148>
+  - Spec: [Compositing and Blending Level 1](https://drafts.fxtf.org/compositing-1/)
+
 ### Fixed
 
 - Fix incorrect page breaking at boundaries of inline-block boxes
