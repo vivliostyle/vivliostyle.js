@@ -757,6 +757,15 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Allowed prefixes: moz, ms
   - Support depends on browser capabilities
 
+## [Compositing and Blending 1](https://www.w3.org/TR/compositing-1/)
+
+- [background-blend-mode](https://www.w3.org/TR/compositing-1/#propdef-background-blend-mode)
+  - Support depends on browser capabilities
+- [isolation](https://www.w3.org/TR/compositing-1/#propdef-isolation)
+  - Support depends on browser capabilities
+- [mix-blend-mode](https://www.w3.org/TR/compositing-1/#propdef-mix-blend-mode)
+  - Support depends on browser capabilities
+
 ### [Scalable Vector Graphics (SVG) 2](https://www.w3.org/TR/SVG2/)
 
 - [color-interpolation](https://www.w3.org/TR/SVG2/painting.html#ColorInterpolationProperty)
