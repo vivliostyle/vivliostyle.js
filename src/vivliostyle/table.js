@@ -261,11 +261,13 @@ goog.scope(function() {
     vivliostyle.table.BrokenTableCellPosition;
 
     /**
+     * @param {adapt.vtree.FormattingContext} parent
      * @param {!Element} tableSourceNode Source node of the table
      * @constructor
      * @implements {adapt.vtree.FormattingContext}
      */
-    vivliostyle.table.TableFormattingContext = function(tableSourceNode) {
+    vivliostyle.table.TableFormattingContext = function(parent, tableSourceNode) {
+        /** @private @const */ this.parent = parent;
         /** @const */ this.tableSourceNode = tableSourceNode;
         /** @type {boolean} */ this.doneInitialLayout = false;
         /** @type {boolean} */ this.vertical = false;
@@ -308,6 +310,13 @@ goog.scope(function() {
             default:
                 return firstTime;
         }
+    };
+
+    /**
+     * @override
+     */
+    TableFormattingContext.prototype.getParent = function() {
+        return this.parent;
     };
 
     TableFormattingContext.prototype.finishFragment = function() {
@@ -914,7 +923,7 @@ goog.scope(function() {
             nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
         } else if (nodeContext.sourceNode === this.formattingContext.tableSourceNode) {
             nodeContext = state.nodeContext = nodeContext.modify();
-            nodeContext.formattingContext = null;
+            nodeContext.formattingContext = this.formattingContext.getParent();
             this.resetColumn();
             state.break = true;
         } else {
@@ -1100,7 +1109,7 @@ goog.scope(function() {
             var tableBBox = column.clientLayout.getElementClientRect(tableElement);
             if (!column.isOverflown(column.vertical ? tableBBox.left : tableBBox.bottom)) {
                 nodeContextAfter = nodeContextAfter.modify();
-                nodeContextAfter.formattingContext = null;
+                nodeContextAfter.formattingContext = formattingContext.getParent();
                 frame.finish(nodeContextAfter);
                 return;
             }
@@ -1279,12 +1288,13 @@ goog.scope(function() {
     /**
      * @type {vivliostyle.plugin.ResolveFormattingContextHook}
      */
-    function resolveFormattingContextHook(nodeContext, firstTime) {
+    function resolveFormattingContextHook(nodeContext, firstTime, display, position, floatSide, isRoot) {
         if (!firstTime)
             return null;
-        var display = nodeContext.display;
-        if (display === "table") {
-            return new TableFormattingContext(/** @type {!Element} */ (nodeContext.sourceNode));
+        if (display === adapt.css.ident.table) {
+            var parent = nodeContext.parent;
+            return new TableFormattingContext(parent ? parent.formattingContext : null,
+                /** @type {!Element} */ (nodeContext.sourceNode));
         }
         return null;
     }
