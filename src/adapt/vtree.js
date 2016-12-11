@@ -524,6 +524,11 @@ adapt.vtree.FormattingContext.prototype.getName = function() {};
 adapt.vtree.FormattingContext.prototype.isFirstTime = function(nodeContext, firstTime) {};
 
 /**
+ * @return {adapt.vtree.FormattingContext}
+ */
+adapt.vtree.FormattingContext.prototype.getParent = function() {};
+
+/**
  * @typedef {{
  * 		node:Node,
  *      shadowType:adapt.vtree.ShadowType,

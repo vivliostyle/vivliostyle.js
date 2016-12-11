@@ -80,7 +80,13 @@ goog.scope(function() {
         /**
          * Called when resolving a formatting context.
          *
-         * The hook is called with a NodeContext object and a boolean flag representing whether this node is encountered for the first time or not.
+         * The hook is called with the following parameters:
+         *   nodeContext: a NodeContext object
+         *   firstTime: a boolean flag representing whether this node is encountered for the first time or not
+         *   display: an adapt.css.Ident value representing 'display' value of the node
+         *   position: an adapt.css.Ident value representing 'position' value of the node
+         *   float: an adapt.css.Ident value representing 'float' value of the node
+         *   isRoot: a boolean flag representing whether this node is a root (of a flow) or not
          * Functions called by this hook are expected to return a formatting context for the NodeContext.
          */
         "RESOLVE_FORMATTING_CONTEXT": "RESOLVE_FORMATTING_CONTEXT",
@@ -128,7 +134,7 @@ goog.scope(function() {
      */
     vivliostyle.plugin.ResolveTextNodeBreakerHook;
     /**
-     * @typedef {function(adapt.vtree.NodeContext, boolean):adapt.vtree.FormattingContext}
+     * @typedef {function(adapt.vtree.NodeContext, boolean, adapt.css.Ident, adapt.css.Ident, adapt.css.Ident, boolean):adapt.vtree.FormattingContext}
      */
     vivliostyle.plugin.ResolveFormattingContextHook;
 

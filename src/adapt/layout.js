@@ -381,6 +381,36 @@ adapt.layout.validateCheckPoints = function(checkPoints) {
 };
 
 /**
+ * @param {adapt.vtree.FormattingContext} parent
+ * @constructor
+ * @implements {adapt.vtree.FormattingContext}
+ */
+adapt.layout.BlockFormattingContext = function(parent) {
+    /** @private @const */ this.parent = parent;
+};
+
+/**
+ * @override
+ */
+adapt.layout.BlockFormattingContext.prototype.getName = function() {
+    return "Block formatting context (adapt.layout.BlockFormattingContext)";
+};
+
+/**
+ * @override
+ */
+adapt.layout.BlockFormattingContext.prototype.isFirstTime = function(nodeContext, firstTime) {
+    return firstTime;
+};
+
+/**
+ * @override
+ */
+adapt.layout.BlockFormattingContext.prototype.getParent = function() {
+    return this.parent;
+};
+
+/**
  * @constructor
  * @param {Element} element
  * @param {!adapt.vtree.LayoutContext} layoutContext
@@ -1886,19 +1916,13 @@ adapt.layout.Column.prototype.findEdgeBreakPosition = function(bp) {
  * @return {!adapt.task.Result.<boolean>} holing true
  */
 adapt.layout.Column.prototype.finishBreak = function(nodeContext, forceRemoveSelf, endOfRegion) {
-    if (nodeContext.formattingContext) {
-        var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(nodeContext.formattingContext);
-        var result = layoutProcessor.finishBreak(this, nodeContext, forceRemoveSelf, endOfRegion);
-        if (result)
-            return result;
+    goog.asserts.assert(nodeContext.formattingContext);
+    var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(nodeContext.formattingContext);
+    var result = layoutProcessor.finishBreak(this, nodeContext, forceRemoveSelf, endOfRegion);
+    if (!result) {
+        result = adapt.layout.blockLayoutProcessor.finishBreak(this, nodeContext, forceRemoveSelf, endOfRegion);
     }
-    var removeSelf = forceRemoveSelf || (nodeContext.viewNode != null && nodeContext.viewNode.nodeType == 1 && !nodeContext.after);
-    this.clearOverflownViewNodes(nodeContext, removeSelf);
-    if (endOfRegion) {
-        this.fixJustificationIfNeeded(nodeContext, true);
-        this.layoutContext.processFragmentedBlockEdge(removeSelf ? nodeContext : nodeContext.parent);
-    }
-    return this.clearFootnotes(nodeContext.boxOffset);
+    return result;
 };
 
 /**
@@ -2087,6 +2111,14 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
 };
 
 /**
+ * @param {adapt.vtree.FormattingContext} formattingContext
+ * @returns {boolean}
+ */
+adapt.layout.Column.prototype.isBFC = function(formattingContext) {
+    return formattingContext instanceof adapt.layout.BlockFormattingContext;
+};
+
+/**
  * Skips positions until either the start of unbreakable block or inline content.
  * Also sets breakBefore on the result combining break-before and break-after
  * properties from all elements that meet at the edge.
@@ -2095,7 +2127,7 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
-    if (nodeContext.formattingContext) {
+    if (!this.isBFC(nodeContext.formattingContext)) {
         return adapt.task.newResult(nodeContext);
     }
 
@@ -2155,7 +2187,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                         // clear
                         self.applyClearance(nodeContext);
                     }
-                    if (nodeContext.formattingContext || nodeContext.floatSide || nodeContext.flexContainer) {
+                    if (!self.isBFC(nodeContext.formattingContext) || nodeContext.floatSide || nodeContext.flexContainer) {
                         // new formatting context, or float or flex container (unbreakable)
                         leadingEdgeContexts.push(nodeContext.copy());
                         breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
@@ -2384,7 +2416,7 @@ adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
- * @return {adapt.task.Result.<adapt.vtree.NodeContext>}
+ * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.layoutFloatOrFootnote = function(nodeContext) {
     if (nodeContext.floatSide == "footnote") {
@@ -2408,17 +2440,11 @@ adapt.layout.Column.prototype.layoutNext = function(nodeContext, leadingEdge) {
         if (!nodeContext || self.pageBreakType || self.stopByOverflow(nodeContext)) {
             // finished all content, explicit page break or overflow (automatic page break)
             frame.finish(nodeContext);
-        } else if (nodeContext.floatSide) {
-            // TODO: implement floats and footnotes properly for vertical writing
-            self.layoutFloatOrFootnote(nodeContext).thenFinish(frame);
-        } else if (nodeContext.formattingContext) {
+        } else {
+            goog.asserts.assert(nodeContext.formattingContext);
             var formattingContext = nodeContext.formattingContext;
             var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(formattingContext);
             layoutProcessor.layout(nodeContext, self).thenFinish(frame);
-        } else if (self.isBreakable(nodeContext)) {
-            self.layoutBreakableBlock(nodeContext).thenFinish(frame);
-        } else {
-            self.layoutUnbreakable(nodeContext).thenFinish(frame);
         }
     });
     return frame.result();
@@ -2501,15 +2527,10 @@ adapt.layout.Column.prototype.init = function() {
  * @return {void}
  */
 adapt.layout.Column.prototype.saveEdgeBreakPosition = function(position, breakAtEdge, overflows) {
+    goog.asserts.assert(position.formattingContext);
     var copy = position.copy();
-    var bp;
-    if (position.formattingContext) {
-        var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(position.formattingContext);
-        bp = layoutProcessor.createEdgeBreakPosition(copy, breakAtEdge, overflows, this.computedBlockSize);
-    }
-    if (!bp) {
-        bp = new adapt.layout.EdgeBreakPosition(copy, breakAtEdge, overflows, this.computedBlockSize, null);
-    }
+    var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(position.formattingContext);
+    var bp = layoutProcessor.createEdgeBreakPosition(copy, breakAtEdge, overflows, this.computedBlockSize);
     this.breakPositions.push(bp);
 };
 
@@ -2700,3 +2721,73 @@ adapt.layout.Column.prototype.redoLayout = function() {
     });
     return frame.result();
 };
+
+/**
+ * @constructor
+ * @implements {adapt.layout.LayoutProcessor}
+ */
+adapt.layout.BlockLayoutProcessor = function() {};
+
+/**
+ * @override
+ */
+adapt.layout.BlockLayoutProcessor.prototype.layout = function(nodeContext, column) {
+    if (nodeContext.floatSide) {
+        // TODO: implement floats and footnotes properly for vertical writing
+        return column.layoutFloatOrFootnote(nodeContext);
+    } else if (column.isBreakable(nodeContext)) {
+        return column.layoutBreakableBlock(nodeContext);
+    } else {
+        return column.layoutUnbreakable(nodeContext);
+    }
+};
+
+/**
+ * @override
+ */
+adapt.layout.BlockLayoutProcessor.prototype.createEdgeBreakPosition = function(
+    position, breakOnEdge, overflows, columnBlockSize) {
+    return new adapt.layout.EdgeBreakPosition(position.copy(), breakOnEdge, overflows, columnBlockSize, null);
+};
+
+/**
+ * @param {!adapt.layout.Column} column
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {boolean} forceRemoveSelf
+ * @param {boolean} endOfRegion
+ * @return {!adapt.task.Result.<boolean>} holing true
+ * @override
+ */
+adapt.layout.BlockLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {
+    var removeSelf = forceRemoveSelf || (nodeContext.viewNode != null && nodeContext.viewNode.nodeType == 1 && !nodeContext.after);
+    column.clearOverflownViewNodes(nodeContext, removeSelf);
+    if (endOfRegion) {
+        column.fixJustificationIfNeeded(nodeContext, true);
+        column.layoutContext.processFragmentedBlockEdge(removeSelf ? nodeContext : nodeContext.parent);
+    }
+    return column.clearFootnotes(nodeContext.boxOffset);
+};
+
+/**
+ * @const
+ */
+adapt.layout.blockLayoutProcessor = new adapt.layout.BlockLayoutProcessor();
+
+vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
+    function(nodeContext, firstTime, display, position, floatSide, isRoot) {
+        if (nodeContext.establishesBFC ||
+            (!nodeContext.formattingContext && vivliostyle.display.isBlock(display, position, floatSide, isRoot))) {
+            var parent = nodeContext.parent;
+            return new adapt.layout.BlockFormattingContext(parent ? parent.formattingContext : null);
+        } else {
+            return null;
+        }
+    }
+);
+
+vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, function(formattingContext) {
+    if (formattingContext instanceof adapt.layout.BlockFormattingContext) {
+        return adapt.layout.blockLayoutProcessor;
+    }
+    return null;
+});
