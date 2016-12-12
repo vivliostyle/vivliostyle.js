@@ -1974,6 +1974,10 @@ adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext
         return false;
     }
     var edge = adapt.layout.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
+    if (nodeContext.formattingContext) {
+        var repetitiveElements = nodeContext.formattingContext.getRepetitiveElements();
+        if (repetitiveElements) edge = edge + repetitiveElements.calculateElementHeight();
+    }
     var overflown = this.isOverflown(edge);
     if (trailingEdgeContexts) {
         edge += this.getTrailingMarginEdgeAdjustment(trailingEdgeContexts);
