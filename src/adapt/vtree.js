@@ -529,6 +529,11 @@ adapt.vtree.FormattingContext.prototype.isFirstTime = function(nodeContext, firs
 adapt.vtree.FormattingContext.prototype.getParent = function() {};
 
 /**
+ * @return {vivliostyle.layoututil.RepetitiveElements}
+ */
+adapt.vtree.FormattingContext.prototype.getRepetitiveElements = function() {};
+
+/**
  * @typedef {{
  * 		node:Node,
  *      shadowType:adapt.vtree.ShadowType,

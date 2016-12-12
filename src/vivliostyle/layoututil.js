@@ -340,7 +340,7 @@ goog.scope(function() {
      * @param {Element} viewRoot Root element for the pseudo-column, i.e., the root of the fragmented flow.
      * @constructor
      */
-    vivliostyle.layoututil.PseudoColumn = function(column, viewRoot) {
+    vivliostyle.layoututil.PseudoColumn = function(column, viewRoot, parentNodeContext) {
         /** @const {!Array<!adapt.vtree.NodeContext>} */ this.startNodeContexts = [];
         /** @private @const */ this.column = /** @type {!adapt.layout.Column} */ (Object.create(column));
         this.column.element = viewRoot;
@@ -350,7 +350,9 @@ goog.scope(function() {
         var pseudoColumn = this;
         this.column.openAllViews = function(position) {
             return adapt.layout.Column.prototype.openAllViews.call(this, position).thenAsync(function(result) {
-                pseudoColumn.startNodeContexts.push(result.copy());
+                var startNodeContext = result.copy();
+                startNodeContext.formattingContext.parent = parentNodeContext.formattingContext;
+                pseudoColumn.startNodeContexts.push(startNodeContext);
                 return adapt.task.newResult(result);
             });
         };
@@ -376,7 +378,7 @@ goog.scope(function() {
             var penalty = p.breakPosition ? p.breakPosition.getMinBreakPenalty() : Number.MAX_VALUE;
             var startNodeContext = this.startNodeContexts[0];
             var bp = new adapt.layout.EdgeBreakPosition(startNodeContext.copy(), null,
-                startNodeContext.overflow, 0, null);
+                startNodeContext.overflow, 0);
             var nodeContext = bp.findAcceptableBreak(this.column, penalty);
             if (nodeContext && bp.getMinBreakPenalty() < penalty) {
                 return {
@@ -458,6 +460,7 @@ goog.scope(function() {
         this.isSkipHeader = this.isSkipFooter = false;
         this.headerViewNodes = [];
         this.footerViewNodes = [];
+        this.enableStatusUpdate = true;
     };
     /**
      * @param {!Element} rootViewNode
@@ -497,6 +500,7 @@ goog.scope(function() {
      * @param {number} penalty
      */
     RepetitiveElements.prototype.updateState = function(penalty) {
+        if (!this.enableStatusUpdate) return;
         var changeState = this.previousPenalty != null
             && this.previousPenalty < penalty;
         this.previousPenalty = penalty;
@@ -508,6 +512,14 @@ goog.scope(function() {
             this.isSkipHeader = true;
         }
     };
+
+    RepetitiveElements.prototype.preventStatusUpdate = function() {
+        this.enableStatusUpdate = false;
+    };
+    RepetitiveElements.prototype.allowStatusUpdate = function() {
+        this.enableStatusUpdate = true;
+    };
+
 
     RepetitiveElements.prototype.removeHeaderFromFragment = function() {
         this.headerViewNodes.forEach(function(viewNode) {
