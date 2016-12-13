@@ -26,7 +26,8 @@ var DIRS = {
     js: {src: "js"},
     css: {src: "scss", dest: "css", srcPattern: "*.scss"},
     resources: {src: "../node_modules/vivliostyle/resources", dest: "resources"},
-    mathjax: {src: "../node_modules/mathjax", dest: "mathjax"}
+    mathjax: {src: "../node_modules/mathjax", dest: "mathjax"},
+    plugin_resources: {src: "../node_modules/vivliostyle/plugins/*/resources", dest: "plugins"}
 };
 var JS_ENTRIES = {
     production: "main.js",
@@ -116,6 +117,7 @@ function copyTask(type) {
 copyTask("fonts");
 copyTask("resources");
 copyTask("mathjax");
+copyTask("plugin_resources");
 
 // HTML build
 function buildHtml(development) {
@@ -161,6 +163,7 @@ gulp.task("build", [
     "build:fonts",
     "build:resources",
 //    "build:mathjax",
+    "build:plugin_resources",
     "build:css"
 ]);
 gulp.task("build-dev", [
@@ -168,6 +171,7 @@ gulp.task("build-dev", [
     "build:html-dev",
     "build:fonts",
     "build:resources",
+    "build:plugin_resources",
     "build:css-dev"
 ]);
 
@@ -180,6 +184,7 @@ gulp.task("watch", ["start-watching", "build"], function() {
     gulp.watch(srcPattern("html"), ["build:html"]);
     gulp.watch(srcPattern("fonts"), ["build:fonts"]);
     gulp.watch(srcPattern("resources"), ["build:resources"]);
+    gulp.watch(srcPattern("plugin_resources"), ["build:plugin_resources"]);
     gulp.watch(srcPattern("css"), ["build:css"]);
 });
 gulp.task("watch-dev", ["start-watching", "build-dev"], function() {
@@ -187,6 +192,7 @@ gulp.task("watch-dev", ["start-watching", "build-dev"], function() {
     gulp.watch(srcPattern("html"), ["build:html-dev"]);
     gulp.watch(srcPattern("fonts"), ["build:fonts"]);
     gulp.watch(srcPattern("resources"), ["build:resources"]);
+    gulp.watch(srcPattern("plugin_resources"), ["build:plugin_resources"]);
     gulp.watch(srcPattern("css"), ["build:css-dev"]);
 });
 
