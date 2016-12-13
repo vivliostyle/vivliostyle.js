@@ -204,6 +204,11 @@ adapt.layout.BreakPosition.prototype.findAcceptableBreak = function(column, pena
 adapt.layout.BreakPosition.prototype.getMinBreakPenalty = function() {};
 
 /**
+ * @return {number} next penalty for this break position
+ */
+adapt.layout.BreakPosition.prototype.getNextMinBreakPenalty = function() {};
+
+/**
  * @return {vivliostyle.layoututil.RepetitiveElements}
  */
 adapt.layout.BreakPosition.prototype.getRepetitiveElements = function() {};
@@ -224,6 +229,15 @@ adapt.layout.AbstractBreakPosition.prototype.findAcceptableBreak = function(colu
  * @abstract
  */
 adapt.layout.AbstractBreakPosition.prototype.getMinBreakPenalty = function() {};
+
+/**
+ * @override
+ */
+adapt.layout.AbstractBreakPosition.prototype.getNextMinBreakPenalty = function() {
+    var repetitiveElements =  this.getRepetitiveElements();
+    return this.getMinBreakPenalty()
+        + (repetitiveElements ? repetitiveElements.getNextPenaltyIncreasement() : 0);
+};
 
 /**
  * @abstract
@@ -1986,7 +2000,7 @@ adapt.layout.Column.prototype.findAcceptableBreakPosition = function() {
         for (var i = this.breakPositions.length - 1; i >= 0 && !nodeContext; --i) {
             bp = this.breakPositions[i];
             nodeContext = bp.findAcceptableBreak(this, penalty);
-            var minPenalty = bp.getMinBreakPenalty();
+            var minPenalty = bp.getNextMinBreakPenalty();
             if (minPenalty > penalty) {
                 nextPenalty = Math.min(nextPenalty, minPenalty);
             }

@@ -329,5 +329,45 @@
     </table>
 </section>
 
+
+<section>
+    <table>
+
+        <caption>(5) skip header/footer when there doesn't leave enough space to insert at least one content row</caption>
+        <thead>
+            <tr>
+              <td>header-cell-1</td>
+            </tr>
+        </thead>
+        <tbody>
+          <tr>
+              <td>
+                  aaa
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  <div style="height:140px;">height=140px</div>
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  <div style="height:200px;">height=200px</div>
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  bbb
+              </td>
+          </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td>footer-cell-1</td>
+            </tr>
+        </tfoot>
+    </table>
+</section>
+
 </body>
 </html>

@@ -131,10 +131,11 @@ goog.scope(function() {
      * @extends {adapt.layout.EdgeBreakPosition}
      */
     vivliostyle.table.BetweenTableRowBreakPosition = function(position,
-        breakOnEdge, overflows, columnBlockSize) {
+        breakOnEdge, overflows, columnBlockSize, isFirstRow) {
         EdgeBreakPosition.call(this, position, breakOnEdge, overflows, columnBlockSize);
         /** @private @const */ this.formattingContext = position.formattingContext;
         /** Array<!adapt.layout.BreakPositionAndNodeContext> */ this.acceptableCellBreakPositions = null;
+        /** @private @const */ this.isFirstRow = isFirstRow;
     };
     /** @const */ var BetweenTableRowBreakPosition = vivliostyle.table.BetweenTableRowBreakPosition;
     goog.inherits(BetweenTableRowBreakPosition, EdgeBreakPosition);
@@ -164,6 +165,7 @@ goog.scope(function() {
         this.getAcceptableCellBreakPositions().forEach(function(bp) {
             penalty += bp.breakPosition.getMinBreakPenalty();
         });
+        if (this.isFirstRow) penalty += 3;
         return penalty;
     };
 
@@ -209,8 +211,9 @@ goog.scope(function() {
         if (repetitiveElements) repetitiveElements.updateState(penalty);
         if (penalty < this.getMinBreakPenalty())
             return null;
-        var allCellsBreakable = this.getAcceptableCellBreakPositions().every(function(bp) {
-            return !!bp.nodeContext;
+        var cellFragments = this.getCellFragments();
+        var allCellsBreakable = this.getAcceptableCellBreakPositions().every(function(bp, index) {
+            return !!bp.nodeContext && !cellFragments[index].pseudoColumn.isStartNodeContext(bp.nodeContext);
         });
         if (allCellsBreakable) {
             return this.beforeNodeContext;
@@ -242,9 +245,7 @@ goog.scope(function() {
         if (!this.acceptableCellBreakPositions) {
             var repetitiveElements =  this.getRepetitiveElements();
             if (repetitiveElements) repetitiveElements.preventStatusUpdate();
-            var formattingContext = this.formattingContext;
-            var cellFragments = formattingContext.getCellsFallingOnRow(this.rowIndex).map(
-                formattingContext.getCellFragmentOfCell, formattingContext);
+            var cellFragments = this.getCellFragments();
             this.acceptableCellBreakPositions = cellFragments.map(function(cellFragment) {
                 return cellFragment.findAcceptableBreakPosition();
             });
@@ -258,6 +259,15 @@ goog.scope(function() {
      */
     InsideTableRowBreakPosition.prototype.getRepetitiveElements = function() {
         return this.retrieveRepetitiveElements(this.beforeNodeContext);
+    };
+
+
+    /**
+     * @private
+     */
+    InsideTableRowBreakPosition.prototype.getCellFragments = function() {
+        return this.formattingContext.getCellsFallingOnRow(this.rowIndex).map(
+                this.formattingContext.getCellFragmentOfCell, this.formattingContext);
     };
 
     /**
@@ -819,6 +829,7 @@ goog.scope(function() {
         } else {
             this.currentRowIndex++;
         }
+        formattingContext.rowIndexInFragement++;
         this.currentColumnIndex = 0;
         this.inRow = true;
         return this.layoutRowSpanningCellsFromPreviousFragment(state).thenAsync(function() {
@@ -1180,6 +1191,7 @@ goog.scope(function() {
         repetitiveElements.prepareLayoutFragment();
         repetitiveElements.appendHeaderToFragment(rootViewNode, firstChild);
         repetitiveElements.appendFooterToFragment(rootViewNode, firstChild);
+        formattingContext.rowIndexInFragement = 0;
 
         var strategy = new TableLayoutStrategy(formattingContext, column);
         var iterator = new LayoutIterator(strategy, column.layoutContext);
@@ -1221,9 +1233,9 @@ goog.scope(function() {
      */
     TableLayoutProcessor.prototype.createEdgeBreakPosition = function(position,
         breakOnEdge, overflows, columnBlockSize) {
-        var repetitiveElements = getTableFormattingContext(position.formattingContext).repetitiveElements;
+        var rowIndexInFragement = getTableFormattingContext(position.formattingContext).rowIndexInFragement;
         return new BetweenTableRowBreakPosition(position,
-            breakOnEdge, overflows, columnBlockSize);
+            breakOnEdge, overflows, columnBlockSize, rowIndexInFragement === 1);
     };
 
     /**
@@ -1231,7 +1243,8 @@ goog.scope(function() {
      */
     TableLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
-        formattingContext.repetitiveElements.removeSkippedNodesFromFragment();
+        var repetitiveElements = formattingContext.repetitiveElements;
+        repetitiveElements.removeSkippedNodesFromFragment();
 
         if (nodeContext.display === "table-row") {
             goog.asserts.assert(nodeContext.sourceNode);
@@ -1254,7 +1267,13 @@ goog.scope(function() {
                     }
                     var cell = cells[i++];
                     var cellFragment = formattingContext.getCellFragmentOfCell(cell);
-                    var breakNodeContext = cellFragment.findAcceptableBreakPosition().nodeContext;
+                    var breakNodeContext;
+                    try {
+                        if (repetitiveElements) repetitiveElements.preventStatusUpdate();
+                        breakNodeContext = cellFragment.findAcceptableBreakPosition().nodeContext;
+                    } finally {
+                        if (repetitiveElements) repetitiveElements.allowStatusUpdate();
+                    }
                     goog.asserts.assert(breakNodeContext);
                     var cellNodeContext = cellFragment.cellNodeContext;
                     var cellNodePosition = cellNodeContext.toNodePosition();
