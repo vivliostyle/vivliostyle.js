@@ -400,6 +400,17 @@ goog.scope(function() {
         return this.column.finishBreak(nodeContext, forceRemoveSelf, endOfRegion);
     };
 
+    /**
+     * @param {adapt.vtree.NodeContext} nodeContext
+     * @return {boolean}
+     */
+    PseudoColumn.prototype.isStartNodeContext = function(nodeContext) {
+        var startNodeContext = this.startNodeContexts[0];
+        return startNodeContext.viewNode === nodeContext.viewNode
+            && startNodeContext.after === nodeContext.after
+            && startNodeContext.offsetInNode === nodeContext.offsetInNode;
+    };
+
 
     /**
      * @constructor
@@ -487,8 +498,18 @@ goog.scope(function() {
      * @return {number}
      */
     RepetitiveElements.prototype.getPenalty = function() {
-        return (this.isSkipHeader ? 1 : 0) + (this.isSkipFooter ? 1 : 0);
+        return (this.isSkipHeader ? 1 : 0)
+             + (this.isSkipFooter ? 1 : 0);
     };
+
+    /**
+     * @return {number}
+     */
+    RepetitiveElements.prototype.getNextPenaltyIncreasement = function() {
+        if (this.enableStatusUpdate) return 0;
+        return (!this.isSkipFooter || !this.isSkipFooter) ? 1 : 0;
+    };
+
     /**
      * @return {number}
      */
