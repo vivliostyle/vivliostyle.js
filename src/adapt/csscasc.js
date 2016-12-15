@@ -41,6 +41,10 @@ adapt.csscasc.inheritedProps = {
     "font-variant": true,
     "font-weight": true,
     "glyph-orientation-vertical": true,
+    "hyphens": true,
+    "hyphenate-character": true,
+    "hyphenate-limit-chars": true,
+    "hyphenate-limit-last": true,
     "image-rendering": true,
     "image-resolution": true,
     "letter-spacing": true,
@@ -109,6 +113,17 @@ adapt.csscasc.polyfilledInheritedProps = [
     "orphans",
     "widows"
 ];
+
+/**
+ * @return {Array.<string>}
+ */
+adapt.csscasc.getPolyfilledInheritedProps = function() {
+    /** @type {!Array.<vivliostyle.plugin.PolyfilledInheritedPropsHook>} */ var hooks =
+        vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.POLYFILLED_INHERITED_PROPS);
+    return hooks.reduce(function(props, f) {
+        return props.concat(f());
+    }, [].concat(adapt.csscasc.polyfilledInheritedProps));
+};
 
 /** @const */
 adapt.csscasc.supportedNamespaces = {
@@ -2684,10 +2699,7 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
         var className = element.getAttribute("name") || "";
         this.currentClassNames = [className];
     }
-    var lang = element.getAttributeNS(adapt.base.NS.XML, "lang");
-    if (!lang && this.currentNamespace == adapt.base.NS.XHTML) {
-        lang = element.getAttribute("lang");
-    }
+    var lang = adapt.base.getLangAttribute(element);
     if (lang) {
         this.stack[this.stack.length - 1].push(
             new adapt.csscasc.RestoreLangItem(this.lang));

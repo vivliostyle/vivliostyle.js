@@ -51,6 +51,11 @@ adapt.base.stripFragmentAndQuery = function(url) {
 };
 
 /**
+ * Base URL relative to which URLs of resources are resolved.
+ */
+adapt.base.baseURL = window.location.href;
+
+/**
  * Base URL relative to which URLs of resources such as validation.txt and
  * user-agent.css are resolved.
  */
@@ -429,6 +434,18 @@ adapt.base.getCSSProperty = function(elem, prop, opt_value) {
     } catch (err) {
     }
     return opt_value || "";
+};
+
+/**
+ * @param {Element} element
+ * @return {string}
+ */
+adapt.base.getLangAttribute = function(element) {
+    var lang = element.getAttributeNS(adapt.base.NS.XML, "lang");
+    if (!lang && element.namespaceURI == adapt.base.NS.XHTML) {
+        lang = element.getAttribute("lang");
+    }
+    return lang;
 };
 
 /**

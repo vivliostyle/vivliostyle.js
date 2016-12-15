@@ -569,6 +569,11 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Support depends on browser capabilities
   - Note: While the spec states that `word-wrap` must be treated as if it were a shorthand of `overflow-wrap`, Vivliostyle treat them for now as different properties and might result in an incorrect cascading behavior when inconsistent values are specified for both of the properties.
 
+### [CSS Text 4](https://drafts.csswg.org/css-text-4/)
+
+- [hyphenate-character](https://drafts.csswg.org/css-text-4/#propdef-hyphenate-character)
+  - Allowed prefixes: webkit
+  - Support depends on browser capabilities
 ### [CSS Text Decoration 3](https://www.w3.org/TR/css-text-decor-3/)
 
 - Note: While `text-decoration` property is a shorthand in CSS Text Decoration 3, Vivliostyle treats `text-decoration` for now as an independent property defined in CSS Level 2.1.

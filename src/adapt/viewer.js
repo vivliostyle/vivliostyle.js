@@ -351,8 +351,14 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
     if (typeof command["renderAllPages"] == "boolean") {
         this.renderAllPages = command["renderAllPages"];
     }
+    // for backward compatibility
     if (typeof command["userAgentRootURL"] == "string") {
+        adapt.base.baseURL = command["userAgentRootURL"].replace(/resources\/?$/, "");
         adapt.base.resourceBaseURL = command["userAgentRootURL"];
+    }
+    if (typeof command["rootURL"] == "string") {
+        adapt.base.baseURL = command["rootURL"];
+        adapt.base.resourceBaseURL = adapt.base.baseURL + "resources/";
     }
     if (typeof command["pageViewMode"] == "string" && command["pageViewMode"] !== this.pageViewMode) {
         this.pageViewMode = command["pageViewMode"];
@@ -372,7 +378,23 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
         this.fitToScreen = command["fitToScreen"];
         this.needRefresh = true;
     }
+
+    this.configurePlugins(command);
+
     return adapt.task.newResult(true);
+};
+
+/**
+ * @param {adapt.base.JSON} command
+ */
+adapt.viewer.Viewer.prototype.configurePlugins = function(command) {
+    /** @type {!Array.<vivliostyle.plugin.ConfigurationHook>} */ var hooks =
+        vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.CONFIGURATION);
+    hooks.forEach(function(hook) {
+        var result = hook(command);
+        this.needResize  = result.needResize  || this.needResize;
+        this.needRefresh = result.needRefresh || this.needRefresh;
+    }.bind(this));
 };
 
 /**

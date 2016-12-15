@@ -200,6 +200,7 @@ word-spacing = normal | LENGTH_OR_NUM;
 z-index = auto | INT;
 
 [epub,moz,ms,webkit]hyphens = auto | manual | none;
+[webkit]hyphenate-character = auto | STRING;
 [adapt,webkit]margin-before = APLENGTH;
 [adapt,webkit]margin-after = APLENGTH;
 [adapt,webkit]margin-start = APLENGTH;

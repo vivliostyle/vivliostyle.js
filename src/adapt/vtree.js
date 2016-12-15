@@ -559,7 +559,8 @@ adapt.vtree.isSameNodePositionStep = function(nps1, nps2) {
  * @typedef {{
  * 		steps:Array.<adapt.vtree.NodePositionStep>,
  * 		offsetInNode:number,
- *  	after:boolean
+ *  	after:boolean,
+ *  	preprocessedTextContent:?Array.<vivliostyle.diff.Change>
  * }}
  */
 adapt.vtree.NodePosition;
@@ -599,7 +600,7 @@ adapt.vtree.newNodePositionFromNode = function(node) {
         nodeShadow: null,
         shadowSibling: null
     };
-    return {steps:[step], offsetInNode:0, after:false};
+    return {steps:[step], offsetInNode:0, after:false, preprocessedTextContent:null};
 };
 
 /**
@@ -614,7 +615,7 @@ adapt.vtree.newNodePositionFromNodeContext = function(nodeContext) {
         nodeShadow: null,
         shadowSibling: null
     };
-    return {steps:[step], offsetInNode:0, after:false};
+    return {steps:[step], offsetInNode:0, after:false, preprocessedTextContent:nodeContext.preprocessedTextContent};
 };
 
 /**
@@ -716,16 +717,20 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {number} */ this.inlineBorderSpacing = 0;
     /** @type {boolean} */ this.flexContainer = false;
     /** @type {adapt.vtree.Whitespace} */ this.whitespace = parent ? parent.whitespace : adapt.vtree.Whitespace.IGNORE;
+    /** @type {?string} */ this.hyphenateCharacter = parent ? parent.hyphenateCharacter : null;
+    /** @type {boolean} */ this.breakWord = parent ? parent.breakWord : false;
     /** @type {boolean} */ this.establishesBFC = false;
     /** @type {boolean} */ this.containingBlockForAbsolute = false;
     /** @type {?string} */ this.breakBefore = null;
     /** @type {?string} */ this.breakAfter = null;
     /** @type {Node} */ this.viewNode = null;
     /** @type {Node} */ this.clearSpacer = null;
-    /** @type {Object.<string,number|string>} */ this.inheritedProps = parent ? parent.inheritedProps : {};
+    /** @type {Object.<string,number|string|adapt.css.Val>} */ this.inheritedProps = parent ? parent.inheritedProps : {};
     /** @type {boolean} */ this.vertical = parent ? parent.vertical : false;
     /** @type {string} */ this.direction = parent ? parent.direction : "ltr";
     /** @type {adapt.vtree.FirstPseudo} */ this.firstPseudo = parent ? parent.firstPseudo : null;
+    /** @type {?string} */ this.lang = null;
+    /** @type {?Array.<vivliostyle.diff.Change>} */ this.preprocessedTextContent = null;
     /** @type {adapt.vtree.FormattingContext} */ this.formattingContext = parent ? parent.formattingContext : null;
 };
 
@@ -745,6 +750,8 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.verticalAlign = "baseline";
     this.flexContainer = false;
     this.whitespace = this.parent ? this.parent.whitespace : adapt.vtree.Whitespace.IGNORE;
+    this.hyphenateCharacter = this.parent ? this.parent.hyphenateCharacter : null;
+    this.breakWord = this.parent ? this.parent.breakWord : false;
     this.breakBefore = null;
     this.breakAfter = null;
     this.nodeShadow = null;
@@ -752,6 +759,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.containingBlockForAbsolute = false;
     this.vertical = this.parent ? this.parent.vertical : false;
     this.nodeShadow = null;
+    this.preprocessedTextContent = null;
     this.formattingContext = this.parent ? this.parent.formattingContext : null;
 };
 
@@ -779,6 +787,8 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.containingBlockForAbsolute = this.containingBlockForAbsolute;
     np.flexContainer = this.flexContainer;
     np.whitespace = this.whitespace;
+    np.hyphenateCharacter = this.hyphenateCharacter;
+    np.breakWord = this.breakWord;
     np.breakBefore = this.breakBefore;
     np.breakAfter = this.breakAfter;
     np.viewNode = this.viewNode;
@@ -786,6 +796,7 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.firstPseudo = this.firstPseudo;
     np.vertical = this.vertical;
     np.overflow = this.overflow;
+    np.preprocessedTextContent = this.preprocessedTextContent;
     np.formattingContext = this.formattingContext;
     return np;
 };
@@ -855,7 +866,16 @@ adapt.vtree.NodeContext.prototype.toNodePosition = function() {
         }
         nc = nc.parent;
     } while (nc);
-    return {steps:steps, offsetInNode: this.offsetInNode, after: this.after};
+
+    var actualOffsetInNode = this.preprocessedTextContent
+        ? vivliostyle.diff.resolveOriginalIndex(this.preprocessedTextContent, this.offsetInNode)
+        : this.offsetInNode;
+    return {
+        steps:steps,
+        offsetInNode: actualOffsetInNode,
+        after: this.after,
+        preprocessedTextContent: this.preprocessedTextContent
+    };
 };
 
 /**

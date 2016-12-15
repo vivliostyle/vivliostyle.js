@@ -475,8 +475,9 @@ adapt.layout.Column.prototype.openAllViews = function(position) {
             var step = steps[stepIndex];
             nodeContext = adapt.vtree.makeNodeContextFromNodePositionStep(step, prevContext);
             if (stepIndex == 0) {
-                nodeContext.offsetInNode = position.offsetInNode;
+                nodeContext.offsetInNode = self.calculateOffsetInNodeForNodeContext(position);
                 nodeContext.after = position.after;
+                nodeContext.preprocessedTextContent = position.preprocessedTextContent;
                 if (nodeContext.after) {
                     break;
                 }
@@ -491,6 +492,16 @@ adapt.layout.Column.prototype.openAllViews = function(position) {
         frame.finish(nodeContext);
     });
     return frame.result();
+};
+
+/**
+ * @param {adapt.vtree.NodePosition} position
+ * @return {number}
+ */
+adapt.layout.Column.prototype.calculateOffsetInNodeForNodeContext = function(position) {
+    return position.preprocessedTextContent
+        ? vivliostyle.diff.resolveNewIndex(position.preprocessedTextContent, position.offsetInNode)
+        : position.offsetInNode;
 };
 
 adapt.layout.firstCharPattern =
@@ -1301,7 +1312,11 @@ adapt.layout.Column.prototype.processLineStyling = function(nodeContext, resNode
             loopFrame.breakLoop();
             return;
         }
-        var lineBreak = self.findAcceptableBreakInside(lastCheckPoints, linePositions[count-1]);
+        var lineBreak = self.findAcceptableBreakInside(lastCheckPoints, linePositions[count-1], true);
+        if (lineBreak == null) {
+            loopFrame.breakLoop();
+            return;
+        }
         self.finishBreak(lineBreak, false, false).then(function() {
             totalLineCount += count;
             self.layoutContext.peelOff(lineBreak, 0).then(function(resNodeContextParam) {
@@ -1425,9 +1440,10 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
 /**
  * @param {Array.<adapt.vtree.NodeContext>} checkPoints
  * @param {number} edgePosition
+ * @param {boolean} force
  * @return {adapt.vtree.NodeContext}
  */
-adapt.layout.Column.prototype.findAcceptableBreakInside = function(checkPoints, edgePosition) {
+adapt.layout.Column.prototype.findAcceptableBreakInside = function(checkPoints, edgePosition, force) {
     if (goog.DEBUG) {
         adapt.layout.validateCheckPoints(checkPoints);
     }
@@ -1438,7 +1454,6 @@ adapt.layout.Column.prototype.findAcceptableBreakInside = function(checkPoints, 
     var highCP = checkPoints.length - 1;
     var high = checkPoints[highCP].boxOffset;
     var mid;
-    var viewIndex;
     while (low < high) {
         mid = low + Math.ceil((high - low) / 2);
         // find the node which contains mid index
@@ -1468,34 +1483,120 @@ adapt.layout.Column.prototype.findAcceptableBreakInside = function(checkPoints, 
     var viewNode = nodeContext.viewNode;
     if (viewNode.nodeType != 1) {
         var textNode = /** @type {Text} */ (viewNode);
-        if (nodeContext.after) {
-            nodeContext.offsetInNode = textNode.length;
+        var textNodeBreaker = this.resolveTextNodeBreaker(nodeContext);
+        return textNodeBreaker.breakTextNode(textNode, nodeContext,
+            low, checkPoints, low1, force);
+    } else {
+        return nodeContext;
+    }
+};
+
+/**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @return {!adapt.layout.TextNodeBreaker}
+ */
+adapt.layout.Column.prototype.resolveTextNodeBreaker = function(nodeContext) {
+    /** @type {!Array.<vivliostyle.plugin.ResolveTextNodeBreakerHook>} */ var hooks =
+        vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER);
+    return hooks.reduce(function(prev, hook) {
+        return hook(nodeContext) || prev;
+    }, adapt.layout.TextNodeBreaker.instance);
+};
+
+/**
+* breaking point resolver for Text Node.
+* @constructor
+ */
+adapt.layout.TextNodeBreaker = function() {};
+
+/**
+ * @param {Text} textNode
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {number} low
+ * @param {Array.<adapt.vtree.NodeContext>} checkPoints
+ * @param {number} checkpointIndex
+ * @param {boolean} force
+ * @return {adapt.vtree.NodeContext}
+ */
+adapt.layout.TextNodeBreaker.prototype.breakTextNode = function(textNode,
+    nodeContext, low, checkPoints, checkpointIndex, force) {
+    if (nodeContext.after) {
+        nodeContext.offsetInNode = textNode.length;
+    } else {
+        // Character with index low is the last one that fits.
+        var viewIndex = low - nodeContext.boxOffset;
+        var text = textNode.data;
+        if (text.charCodeAt(viewIndex) == 0xAD) {
+            viewIndex = this.breakAfterSoftHyphen(textNode, text, viewIndex, nodeContext);
         } else {
-            // Character with index low is the last one that fits.
-            viewIndex = low - nodeContext.boxOffset;
-            var text = textNode.data;
-            if (text.charCodeAt(viewIndex) == 0xAD) {
-                // convert trailing soft hyphen to a real hyphen
-                textNode.replaceData(viewIndex, text.length - viewIndex, "-");
-                viewIndex++;
-            } else {
-                // keep the trailing character (it may be a space or not)
-                var ch0 = text.charAt(viewIndex);
-                viewIndex++;
-                var ch1 = text.charAt(viewIndex);
-                // If automatic hyphen was inserted here, add a real hyphen.
-                textNode.replaceData(viewIndex, text.length - viewIndex,
-                    adapt.base.isLetter(ch0) && adapt.base.isLetter(ch1) ? "-" : "");
-            }
-            if (viewIndex > 0) {
-                nodeContext = nodeContext.modify();
-                nodeContext.offsetInNode += viewIndex;
-                nodeContext.breakBefore = null;
-            }
+            viewIndex = this.breakAfterOtherCharacter(textNode, text, viewIndex, nodeContext);
+        }
+        if (viewIndex > 0) {
+            nodeContext = this.updateNodeContext(nodeContext, viewIndex, textNode);
         }
     }
     return nodeContext;
 };
+
+/**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @return {string}
+ */
+adapt.layout.TextNodeBreaker.prototype.resolveHyphenateCharacter = function(nodeContext) {
+    return nodeContext.hyphenateCharacter
+        || (nodeContext.parent && nodeContext.parent.hyphenateCharacter)
+        || "-";
+};
+
+/**
+ * @param {Text} textNode
+ * @param {string} text
+ * @param {number} viewIndex
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @return {number}
+ */
+adapt.layout.TextNodeBreaker.prototype.breakAfterSoftHyphen = function(
+    textNode, text, viewIndex, nodeContext) {
+    // convert trailing soft hyphen to a real hyphen
+    textNode.replaceData(viewIndex, text.length - viewIndex,
+        !nodeContext.breakWord ? this.resolveHyphenateCharacter(nodeContext) : "");
+    return viewIndex+1;
+};
+/**
+ * @param {Text} textNode
+ * @param {string} text
+ * @param {number} viewIndex
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @return {number}
+ */
+adapt.layout.TextNodeBreaker.prototype.breakAfterOtherCharacter = function(
+    textNode, text, viewIndex, nodeContext) {
+    // keep the trailing character (it may be a space or not)
+    var ch0 = text.charAt(viewIndex);
+    viewIndex++;
+    var ch1 = text.charAt(viewIndex);
+
+    // If automatic hyphen was inserted here, add a real hyphen.
+    textNode.replaceData(viewIndex, text.length - viewIndex,
+        !nodeContext.breakWord && adapt.base.isLetter(ch0) && adapt.base.isLetter(ch1)
+            ? this.resolveHyphenateCharacter(nodeContext) : "");
+    return viewIndex;
+};
+
+/**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {number} viewIndex
+ * @param {Text} textNode
+ * @return {adapt.vtree.NodeContext}
+ */
+adapt.layout.TextNodeBreaker.prototype.updateNodeContext = function(nodeContext, viewIndex, textNode) {
+    nodeContext = nodeContext.modify();
+    nodeContext.offsetInNode += viewIndex;
+    nodeContext.breakBefore = null;
+    return nodeContext;
+};
+
+adapt.layout.TextNodeBreaker.instance = new adapt.layout.TextNodeBreaker();
 
 /**
  * @param {Element} e
@@ -1717,7 +1818,7 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
         return null;
     }
     edge = linePositions[lineIndex-1];
-    var nodeContext = this.findAcceptableBreakInside(bp.checkPoints, edge);
+    var nodeContext = this.findAcceptableBreakInside(bp.checkPoints, edge, force);
     if (nodeContext) {
         this.computedBlockSize = this.getBoxDir() * (edge - this.beforeEdge);
     }
@@ -2555,4 +2656,3 @@ adapt.layout.Column.prototype.redoLayout = function() {
     });
     return frame.result();
 };
-

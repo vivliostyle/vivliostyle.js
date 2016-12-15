@@ -23,10 +23,10 @@
     }
 
     // An emulation of nodejs require (only for internal modules).
-    window.module = {};
+    var m = window.module = {};
     window.require = function(name) {
-        if (window.module[name]) {
-            return window.module[name];
+        if (m[name]) {
+            return m[name];
         }
         throw new Error("module '" + name + "' not found!");
     };
