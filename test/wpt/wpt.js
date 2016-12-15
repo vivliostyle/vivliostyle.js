@@ -35,7 +35,7 @@
             "fragment": null,
             "renderAllPages": true,
             "userAgentRootURL": uaRoot,
-            "spreadView": false
+            "pageViewMode": "singlePage"
         };
 
         var viewer = new adapt.viewer.Viewer(window, arg["viewportElement"], "main", callback);
