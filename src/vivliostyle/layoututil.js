@@ -426,6 +426,9 @@ goog.scope(function() {
         /** @private @type {boolean} */ this.isSkipHeader = false;
         /** @private @type {boolean} */ this.isSkipFooter = false;
         /** @private @type {null|number} */this.previousPenalty = null;
+        /** @private @type {boolean} */ this.enableStatusUpdate = true;
+        /** @private @type {boolean} */ this.enableSkippingFooter = true;
+        /** @private @type {boolean} */ this.enableSkippingHeader = true;
     };
     /** @const */ var RepetitiveElements = vivliostyle.layoututil.RepetitiveElements;
 
@@ -472,6 +475,8 @@ goog.scope(function() {
         this.headerViewNodes = [];
         this.footerViewNodes = [];
         this.enableStatusUpdate = true;
+        this.enableSkippingFooter = true;
+        this.enableSkippingHeader = true;
     };
     /**
      * @param {!Element} rootViewNode
@@ -506,8 +511,13 @@ goog.scope(function() {
      * @return {number}
      */
     RepetitiveElements.prototype.getNextPenaltyIncreasement = function() {
-        if (this.enableStatusUpdate) return 0;
-        return (!this.isSkipFooter || !this.isSkipFooter) ? 1 : 0;
+        if (!this.enableStatusUpdate) return 0;
+        if ( (!this.isSkipFooter && this.enableSkippingFooter)
+          || (!this.isSkipHeader && this.enableSkippingHeader)) {
+            return 1;
+        } else {
+            return 0;
+        }
     };
 
     /**
@@ -527,10 +537,12 @@ goog.scope(function() {
         this.previousPenalty = penalty;
         if (!changeState) return;
 
-        if (!this.isSkipFooter) {
+        if (!this.isSkipFooter && this.enableSkippingFooter) {
             this.isSkipFooter = true;
-        } else if (!this.isSkipHeader) {
+            this.removeFooterFromFragment();
+        } else if (!this.isSkipHeader && this.enableSkippingHeader) {
             this.isSkipHeader = true;
+            this.removeHeaderFromFragment();
         }
     };
 
@@ -541,7 +553,12 @@ goog.scope(function() {
         this.enableStatusUpdate = true;
     };
 
-
+    RepetitiveElements.prototype.preventSkippingHeader = function() {
+        this.enableSkippingHeader = false;
+    };
+    RepetitiveElements.prototype.preventSkippingFooter = function() {
+        this.enableSkippingFooter = false;
+    };
     RepetitiveElements.prototype.removeHeaderFromFragment = function() {
         this.headerViewNodes.forEach(function(viewNode) {
             viewNode.parentNode.removeChild(viewNode);
@@ -553,9 +570,5 @@ goog.scope(function() {
             viewNode.parentNode.removeChild(viewNode);
         });
         this.footerViewNodes = [];
-    };
-    RepetitiveElements.prototype.removeSkippedNodesFromFragment = function() {
-        if (this.isSkipHeader) this.removeHeaderFromFragment();
-        if (this.isSkipFooter) this.removeFooterFromFragment();
     };
 });
