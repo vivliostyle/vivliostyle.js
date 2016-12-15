@@ -1362,7 +1362,7 @@ goog.scope(function() {
 
         var cellElementRect = column.clientLayout.getElementClientRect(cellElement);
         if (vertical) {
-            var width = (column.footnoteEdge - repetitiveElements.calculateElementHeight() - cellElementRect.left);
+            var width = (cellElementRect.right - column.footnoteEdge - repetitiveElements.calculateElementHeight());
             adapt.base.setCSSProperty(cellContentElement, "width", width + "px");
         } else {
             var height = (column.footnoteEdge - repetitiveElements.calculateElementHeight() - cellElementRect.top);

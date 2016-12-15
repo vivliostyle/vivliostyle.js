@@ -380,7 +380,7 @@ adapt.layout.EdgeBreakPosition.prototype.updateOverflows = function(column) {
     }
     var edge = this.edge;
     var repetitiveElements =  this.getRepetitiveElements();
-    if (repetitiveElements) edge = edge + repetitiveElements.calculateElementHeight();
+    if (repetitiveElements) edge += (column.vertical ? -1 : 1) *  repetitiveElements.calculateElementHeight();
     this.overflows = this.position.overflow = column.isOverflown(edge);
 };
 
@@ -1942,7 +1942,7 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
     var linePositions = this.findLinePositions(checkPoints);
     var edge = this.footnoteEdge - clonedPaddingBorder;
     var repetitiveElements = bp.getRepetitiveElements();
-    if (repetitiveElements) edge = edge - repetitiveElements.calculateElementHeight();
+    if (repetitiveElements) edge -= (this.vertical ? -1 : 1) * repetitiveElements.calculateElementHeight();
     var lineIndex = adapt.base.binarySearch(linePositions.length, function(i) {
         return self.vertical ? linePositions[i] < edge : linePositions[i] > edge;
     });
@@ -2091,7 +2091,7 @@ adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext
     var edge = adapt.layout.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
     if (nodeContext.formattingContext) {
         var repetitiveElements = nodeContext.formattingContext.getRepetitiveElements();
-        if (repetitiveElements) edge = edge + repetitiveElements.calculateElementHeight();
+        if (repetitiveElements) edge += (this.vertical ? -1 : 1) * repetitiveElements.calculateElementHeight();
     }
     var overflown = this.isOverflown(edge);
     if (trailingEdgeContexts) {
