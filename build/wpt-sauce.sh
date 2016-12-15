@@ -16,6 +16,8 @@ git clone --depth=1 --branch=vivliostyle-master --recursive https://github.com/v
 # copy Vivliostyle.js files
 mkdir csswg-test/vivliostyle.js
 cp -R ../vivliostyle/vivliostyle.js/{src,resources,test} csswg-test/vivliostyle.js/
+mkdir csswg-test/vivliostyle.js/node_modules
+cp -R ../vivliostyle/vivliostyle.js/node_modules/fast-diff csswg-test/vivliostyle.js/node_modules/
 
 # setup Sauce Labs credentials
 cat << EOS > csswg-test/vivliostyle.js/test/wpt/sauce-credentials.ini
