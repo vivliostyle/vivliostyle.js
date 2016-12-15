@@ -28,6 +28,55 @@ goog.scope(function() {
          * After the shorthand declaration is interpreted and broken into non-shorthand declarations, the hook is called for each of the non-shorthand declarations.
          */
         "SIMPLE_PROPERTY": "SIMPLE_PROPERTY",
+
+        /**
+         * Called before creating a text node for modifying a text content.
+         *
+         * The hook is called with an object with the following properties:
+         *   {adapt.vtree.NodeContext} nodeContext
+         *   {string} sourceTextContent
+         *
+         * Functions called by this hook are expected to return a adapt.task.Result.<string>.
+         * The text content is then replaced by the returned value.
+         */
+        "PREPROCESS_TEXT_CONTENT": "PREPROCESS_TEXT_CONTENT",
+
+        /**
+         * Called before creating a element for modifying a element style.
+         *
+         * The hook is called with an object with the following properties:
+         *   {adapt.vtree.NodeContext} nodeContext
+         *   {!Object} style
+         */
+        "PREPROCESS_ELEMENT_STYLE": "PREPROCESS_ELEMENT_STYLE",
+
+        /**
+         * Called before geting adapt.csscasc.polyfilledInheritedProps.
+         *
+         * The hook return a array of polyfilled inherited property name.
+         */
+        "POLYFILLED_INHERITED_PROPS": "POLYFILLED_INHERITED_PROPS",
+
+        /**
+         * Called when a Viewer is configured.
+         *
+         * The hook is called with an object with the following properties:
+         *  {adapt.base.JSON} command
+         */
+        "CONFIGURATION": "CONFIGURATION",
+
+        /**
+         * Called when resolving a text node breaker
+         * which detects an acceptable breakpoint and break text node at this point.
+         *
+         * The hook is called with an object with the following properties:
+         *  {adapt.vtree.NodeContext} nodeContext
+         *
+         * Functions called by this hook are expected to
+         * return an instnce of {adapt.layout.TextNodeBreaker} or null.
+         */
+        "RESOLVE_TEXT_NODE_BREAKER": "RESOLVE_TEXT_NODE_BREAKER",
+
         /**
          * Called when resolving a formatting context.
          *
@@ -46,6 +95,38 @@ goog.scope(function() {
 
     /** @const */ var HOOKS = vivliostyle.plugin.HOOKS;
 
+    /**
+     * @typedef {function(
+     *   adapt.vtree.NodeContext,
+     *   string
+     * ):adapt.task.Result.<string>}
+     */
+    vivliostyle.plugin.PreProcessTextContentHook;
+
+    /**
+     * @typedef {function(
+     *   adapt.vtree.NodeContext,
+     *   !Object
+     * ):undefined}
+     */
+    vivliostyle.plugin.PreProcessElementStyleHook;
+
+    /**
+     * @typedef {function():!Array.<string>}
+     */
+    vivliostyle.plugin.PolyfilledInheritedPropsHook;
+
+    /**
+     * @typedef {function(
+     *   adapt.base.JSON
+     * ):{needResize:(?boolean|undefined), needRefresh:(?boolean|undefined)}}
+     */
+    vivliostyle.plugin.ConfigurationHook;
+
+    /**
+     * @typedef {function(adapt.vtree.NodeContext):adapt.layout.TextNodeBreaker}
+     */
+    vivliostyle.plugin.ResolveTextNodeBreakerHook;
     /**
      * @typedef {function(adapt.vtree.NodeContext, boolean):adapt.vtree.FormattingContext}
      */

@@ -1811,6 +1811,18 @@
   - Values: `normal | break-word;`
 
 ## [CSS Text 4](https://drafts.csswg.org/css-text-4/)
+- [hyphenate-character](#propdef-hyphenate-character)
+    - Allowed prefixes: webkit
+
+  - Drafts
+      - [CSS Text 4 - hyphenate-character](https://drafts.csswg.org/css-text-4/#propdef-hyphenate-character)
+  - Values: `auto | STRING;`
+- [hyphenate-limit-chars](#propdef-hyphenate-limit-chars)
+    - Allowed prefixes: ms
+
+  - Drafts
+      - [CSS Text 4 - hyphenate-limit-chars](https://drafts.csswg.org/css-text-4/#propdef-hyphenate-limit-chars)
+  - Values: `[ auto | INT ]{1,3};`
 - [white-space](https://www.w3.org/TR/CSS22/text.html#propdef-white-space)
   - TR
       - [CSS 2.2 - white-space](https://www.w3.org/TR/CSS22/text.html#propdef-white-space)

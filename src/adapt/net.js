@@ -219,6 +219,13 @@ adapt.net.ResourceStore.prototype.get = function(url) {
 };
 
 /**
+ * @param {string} url
+ */
+adapt.net.ResourceStore.prototype.delete = function(url) {
+    delete this.resources[adapt.base.stripFragment(url)];
+};
+
+/**
  * @typedef adapt.net.ResourceStore.<adapt.base.JSON>
  */
 adapt.net.JSONStore;
