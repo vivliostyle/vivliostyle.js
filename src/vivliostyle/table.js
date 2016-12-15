@@ -176,10 +176,14 @@ goog.scope(function() {
     BetweenTableRowBreakPosition.prototype.getAcceptableCellBreakPositions = function() {
         if (!this.acceptableCellBreakPositions) {
             var formattingContext = this.formattingContext;
-            var cellFragments = this.getCellFragments();
-            this.acceptableCellBreakPositions = cellFragments.map(function(cellFragment) {
-                return cellFragment.findAcceptableBreakPosition();
-            });
+            var repetitiveElements = formattingContext.repetitiveElements;
+            var f = function() {
+                var cellFragments = this.getCellFragments();
+                this.acceptableCellBreakPositions = cellFragments.map(function(cellFragment) {
+                    return cellFragment.findAcceptableBreakPosition();
+                });
+            }.bind(this);
+            repetitiveElements ? repetitiveElements.preventStatusUpdate(f) : f();
         }
         return this.acceptableCellBreakPositions;
     };
@@ -260,12 +264,13 @@ goog.scope(function() {
     InsideTableRowBreakPosition.prototype.getAcceptableCellBreakPositions = function() {
         if (!this.acceptableCellBreakPositions) {
             var repetitiveElements =  this.getRepetitiveElements();
-            if (repetitiveElements) repetitiveElements.preventStatusUpdate();
-            var cellFragments = this.getCellFragments();
-            this.acceptableCellBreakPositions = cellFragments.map(function(cellFragment) {
+            var f = function() {
+                var cellFragments = this.getCellFragments();
+                this.acceptableCellBreakPositions = cellFragments.map(function(cellFragment) {
                 return cellFragment.findAcceptableBreakPosition();
-            });
-            if (repetitiveElements) repetitiveElements.allowStatusUpdate();
+                });
+            }.bind(this);
+            repetitiveElements ? repetitiveElements.preventStatusUpdate(f) : f();
         }
         return this.acceptableCellBreakPositions;
     };
@@ -1300,12 +1305,10 @@ goog.scope(function() {
                     var cell = cells[i++];
                     var cellFragment = formattingContext.getCellFragmentOfCell(cell);
                     var breakNodeContext;
-                    try {
-                        if (repetitiveElements) repetitiveElements.preventStatusUpdate();
+                    var f = function() {
                         breakNodeContext = cellFragment.findAcceptableBreakPosition().nodeContext;
-                    } finally {
-                        if (repetitiveElements) repetitiveElements.allowStatusUpdate();
-                    }
+                    };
+                    repetitiveElements ? repetitiveElements.preventStatusUpdate(f) : f();
                     goog.asserts.assert(breakNodeContext);
                     var cellNodeContext = cellFragment.cellNodeContext;
                     var cellNodePosition = cellNodeContext.toNodePosition();

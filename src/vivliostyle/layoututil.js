@@ -546,11 +546,13 @@ goog.scope(function() {
         }
     };
 
-    RepetitiveElements.prototype.preventStatusUpdate = function() {
-        this.enableStatusUpdate = false;
-    };
-    RepetitiveElements.prototype.allowStatusUpdate = function() {
-        this.enableStatusUpdate = true;
+    RepetitiveElements.prototype.preventStatusUpdate = function(callback) {
+        try {
+            this.enableStatusUpdate = false;
+            return callback();
+        } finally {
+            this.enableStatusUpdate = true;
+        }
     };
 
     RepetitiveElements.prototype.preventSkippingHeader = function() {
