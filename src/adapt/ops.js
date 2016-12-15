@@ -644,8 +644,12 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     if (!flowName || !flowName.isIdent()) {
         var contentVal = boxInstance.getProp(self, "content");
         if (contentVal && adapt.vtree.nonTrivialContent(contentVal)) {
-            var innerContainer = self.viewport.document.createElement("span");
-            contentVal.visit(new adapt.vtree.ContentPropertyHandler(innerContainer, self));
+            var innerContainerTag = "span";
+            if (contentVal.url) {
+                innerContainerTag = "img";
+            }
+            var innerContainer = self.viewport.document.createElement(innerContainerTag);
+            contentVal.visit(new adapt.vtree.ContentPropertyHandler(innerContainer, self, contentVal));
             boxContainer.appendChild(innerContainer);
             boxInstance.transferContentProps(self, layoutContainer, page, self.faces);
         } else if (boxInstance.suppressEmptyBoxGeneration) {
