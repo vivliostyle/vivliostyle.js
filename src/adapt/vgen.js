@@ -770,6 +770,12 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                 tag = "audio";
             else if (tag == "object")
                 custom = !!self.customRenderer;
+            if (element.getAttribute(adapt.vgen.PSEUDO_ATTR)) {
+                if (elementStyle["content"] && elementStyle["content"]["value"] && 
+                    elementStyle["content"]["value"]["url"]) {
+                    tag = "img";
+                }
+            }
         } else if (ns == adapt.base.NS.epub) {
             tag = "span";
             ns = adapt.base.NS.XHTML;
