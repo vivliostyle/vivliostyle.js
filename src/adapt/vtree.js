@@ -1397,7 +1397,9 @@ adapt.vtree.ContentPropertyHandler.prototype.visitStr = function(str) {
 
 /** @override */
 adapt.vtree.ContentPropertyHandler.prototype.visitURL = function(url) {
-    this.elem.setAttribute("src", url.url);
+    var img = this.elem.ownerDocument.createElementNS(adapt.base.NS.XHTML, "img");
+    img.setAttribute("src", url.url);
+    this.elem.appendChild(img);    
     return null;
 };
 

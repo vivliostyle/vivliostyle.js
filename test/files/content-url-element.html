@@ -9,13 +9,21 @@
          margin: 1em;    
       }
       .url-before::before {
-        content: url('./vivliostyle-logo.png');
+         content: url('./vivliostyle-logo.png');
          width: 3cm;
          height: 3cm;
+      }
+      .multiple-urls::before {
+        content: url('./vivliostyle-logo.png') url('./vivliostyle-logo.png');
+      }
+      .url-and-string::before {
+        content: url('./vivliostyle-logo.png') "vivliostyle logo";
       }
 </style>
 </head>
 <body>
   <div class="url-before"></div>
+  <div class="multiple-urls"></div>  
+  <div class="url-and-string"></div>  
 </body>
 </html>

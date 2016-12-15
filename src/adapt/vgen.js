@@ -771,9 +771,11 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             else if (tag == "object")
                 custom = !!self.customRenderer;
             if (element.getAttribute(adapt.vgen.PSEUDO_ATTR)) {
-                if (elementStyle["content"] && elementStyle["content"]["value"] && 
-                    elementStyle["content"]["value"]["url"]) {
+                if (elementStyle["content"] && elementStyle["content"].value && 
+                    elementStyle["content"].value.url && element["childNodes"].length === 1) {
                     tag = "img";
+                    element.setAttribute("src", elementStyle["content"].value.url);
+                    element.removeChild(element.childNodes[0]);
                 }
             }
         } else if (ns == adapt.base.NS.epub) {
