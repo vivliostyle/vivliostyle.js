@@ -512,8 +512,8 @@ goog.scope(function() {
      */
     RepetitiveElements.prototype.getNextPenaltyIncreasement = function() {
         if (!this.enableStatusUpdate) return 0;
-        if ( (!this.isSkipFooter && this.enableSkippingFooter)
-          || (!this.isSkipHeader && this.enableSkippingHeader)) {
+        if ((!this.isSkipFooter && this.enableSkippingFooter)
+        || (!this.isSkipHeader && this.enableSkippingHeader)) {
             return 1;
         } else {
             return 0;
@@ -546,10 +546,15 @@ goog.scope(function() {
         }
     };
 
-    RepetitiveElements.prototype.preventStatusUpdate = function(callback) {
+    /**
+     * @template T
+     * @param {function():T} func
+     * @return {T}
+     */
+    RepetitiveElements.prototype.preventStatusUpdate = function(func) {
         try {
             this.enableStatusUpdate = false;
-            return callback();
+            return func();
         } finally {
             this.enableStatusUpdate = true;
         }
