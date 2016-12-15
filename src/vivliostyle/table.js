@@ -179,11 +179,12 @@ goog.scope(function() {
             var repetitiveElements = formattingContext.repetitiveElements;
             var f = function() {
                 var cellFragments = this.getCellFragments();
-                this.acceptableCellBreakPositions = cellFragments.map(function(cellFragment) {
+                return cellFragments.map(function(cellFragment) {
                     return cellFragment.findAcceptableBreakPosition();
                 });
             }.bind(this);
-            repetitiveElements ? repetitiveElements.preventStatusUpdate(f) : f();
+            this.acceptableCellBreakPositions =
+              repetitiveElements ? repetitiveElements.preventStatusUpdate(f) : f();
         }
         return this.acceptableCellBreakPositions;
     };
@@ -266,11 +267,12 @@ goog.scope(function() {
             var repetitiveElements =  this.getRepetitiveElements();
             var f = function() {
                 var cellFragments = this.getCellFragments();
-                this.acceptableCellBreakPositions = cellFragments.map(function(cellFragment) {
-                return cellFragment.findAcceptableBreakPosition();
+                return cellFragments.map(function(cellFragment) {
+                    return cellFragment.findAcceptableBreakPosition();
                 });
             }.bind(this);
-            repetitiveElements ? repetitiveElements.preventStatusUpdate(f) : f();
+            this.acceptableCellBreakPositions =
+              repetitiveElements ? repetitiveElements.preventStatusUpdate(f) : f();
         }
         return this.acceptableCellBreakPositions;
     };
@@ -616,7 +618,7 @@ goog.scope(function() {
             switch (display) {
                 case "table-header-group":
                 case "table-footer-group":
-                    this.inHeaderOrFooter = false
+                    this.inHeaderOrFooter = false;
                     break;
                 case "table-row":
                     if (!this.inHeaderOrFooter) {
