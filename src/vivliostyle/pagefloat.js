@@ -229,9 +229,9 @@ goog.scope(function() {
      * @param {!adapt.vtree.LayoutContext} layoutContext
      * @returns {?vivliostyle.pagefloat.PageFloat}
      */
-    FloatHolder.prototype.getFloat = function(nodeContext, layoutContext) {
+    FloatHolder.prototype.getFloat = function(nodeContext, floatReference, layoutContext) {
         var nodePosition = nodeContext.toNodePosition();
-        var floats = this.floats[nodeContext.floatReference];
+        var floats = this.floats[floatReference];
         for (var i = 0; i < floats.length; i++) {
             var pageFloat = floats[i];
             if (layoutContext.isSameNodePosition(nodePosition, pageFloat.nodeContext.toNodePosition())) {

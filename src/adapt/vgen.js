@@ -736,6 +736,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         self.nodeContext.display = display ? display.toString() : "inline";
         self.nodeContext.floatSide = floating ? floatSide.toString() : null;
         self.nodeContext.floatReference = floatReference || vivliostyle.pagefloat.FloatReference.INLINE;
+        self.nodeContext.columnSpan = computedStyle["column-span"] || adapt.css.ident.none;
         if (!self.nodeContext.inline) {
             var breakAfter = computedStyle["break-after"];
             if (breakAfter) {
@@ -1470,7 +1471,8 @@ adapt.vgen.propertiesNotPassedToDOM = {
     "flow-priority": true,
     "flow-options": true,
     "page": true,
-    "float-reference": true
+    "float-reference": true,
+    "column-span": true
 };
 
 /**

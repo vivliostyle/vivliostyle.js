@@ -1066,8 +1066,23 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
         adapt.base.setCSSProperty(element, "vertical-align", "top");
     }
     self.buildDeepElementView(nodeContext).then(function(nodeContextAfter) {
-        var floatBBox = self.clientLayout.getElementClientRect(element);
         var margin = self.getComputedMargin(element);
+
+        if (floatReference === vivliostyle.pagefloat.FloatReference.COLUMN) {
+            switch (nodeContextAfter.columnSpan) {
+                case adapt.css.ident.auto:
+                    var minInlineSize = vivliostyle.sizing.getSize(self.clientLayout, element,
+                        [vivliostyle.sizing.Size.MIN_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.MIN_CONTENT_INLINE_SIZE];
+                    var inlineMargin = self.vertical ? margin.top + margin.bottom : margin.left + margin.right;
+                    if (minInlineSize + inlineMargin <= self.width) break;
+                    // FALLTHROUGH
+                case adapt.css.ident.all:
+                    floatReference = vivliostyle.pagefloat.FloatReference.REGION;
+                    floatHolder.prepareFloatElement(element, floatSide, floatReference);
+            }
+        }
+
+        var floatBBox = self.clientLayout.getElementClientRect(element);
         var floatBox = new adapt.geom.Rect(floatBBox.left - margin.left,
             floatBBox.top - margin.top, floatBBox.right + margin.right,
             floatBBox.bottom + margin.bottom);
@@ -1075,7 +1090,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
         // page floats
         if (isPageFloat) {
             goog.asserts.assert(self.layoutContext);
-            var pageFloat = floatHolder.getFloat(nodeContext, self.layoutContext);
+            var pageFloat = floatHolder.getFloat(nodeContext, floatReference, self.layoutContext);
             if (pageFloat) {
                 // Replace nodeContextAfter.viewNode with a dummy span.
                 // Since the actual viewNode is moved and attached to a parent node

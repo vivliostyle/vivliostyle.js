@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Page page floats</title>
+  <style>
+    @page {
+      size: 620px;
+      margin: 10px;
+    }
+    :root {
+      column-count: 2;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      line-height: 20px;
+      widows: 1;
+      orphans: 1;
+    }
+    body {
+      margin: 8px;
+    }
+    p {
+      background: lightgray;
+      border: blue dashed;
+    }
+    .float {
+      float-reference: column;
+      background: lightblue;
+    }
+    .top {
+      float: top;
+      float: column-top;
+      -ah-float: top multicol;
+    }
+    .bottom {
+      float: bottom;
+      float: column-bottom;
+      -ah-float: bottom multicol;
+    }
+    .span-all {
+      column-span: all;
+    }
+    .span-auto {
+      column-span: all;
+      column-span: auto;
+    }
+    .spacer {
+      background: pink;
+      width: 400px;
+    }
+  </style>
+</head>
+<body>
+<p>(1) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<p>(2) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<p>(3) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<div class="float bottom span-all">
+  (a) Background of page floats is lightblue. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float.
+  <div class="spacer">spacer</div>
+</div>
+<p>(4) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<div class="float top span-auto">
+  (b) Background of page floats is lightblue. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float.
+  <div class="spacer">spacer</div>
+</div>
+<p>(5) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<p>(6) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<div class="float top span-all">
+  (c) Background of page floats is lightblue. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float.
+</div>
+<p>(7) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<p>(8) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<p>(9) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<p>(10) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<p>(11) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<div class="float bottom span-auto">
+  (d) Background of page floats is lightblue. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float.
+</div>
+<p>(12) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+</body>
+</html>
