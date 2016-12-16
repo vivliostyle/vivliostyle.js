@@ -652,7 +652,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
             contentVal.visit(new adapt.vtree.ContentPropertyHandler(innerContainer, self, contentVal));
             boxContainer.appendChild(innerContainer);
             if (innerContainerTag == "img")
-                boxInstance.transferSinglUriContentProps(self, innerContainer, page, self.faces);                
+                boxInstance.transferSinglUriContentProps(self, innerContainer, page, self.faces);
             boxInstance.transferContentProps(self, layoutContainer, page, self.faces);
         } else if (boxInstance.suppressEmptyBoxGeneration) {
             parentContainer.removeChild(boxContainer);

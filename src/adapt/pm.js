@@ -1205,8 +1205,8 @@ adapt.pm.passContentProperties = [
  */
 adapt.pm.passSingleUriContentProperties = [
     "width",
-    "height",
-]
+    "height"
+];
 
 /**
  * @const
@@ -1274,7 +1274,7 @@ adapt.pm.PageBoxInstance.prototype.transferSinglUriContentProps = function(conte
     for (var i = 0; i < adapt.pm.passSingleUriContentProperties.length; i++) {
         this.propagatePropertyToElement(context, element, adapt.pm.passSingleUriContentProperties[i], docFaces);
     }
-}
+};
 
 
 /**
