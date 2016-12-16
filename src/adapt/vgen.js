@@ -191,7 +191,7 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
         if (content) {
             var contentVal = content.evaluate(this.context);
             if (adapt.vtree.nonTrivialContent(contentVal))
-                contentVal.visit(new adapt.vtree.ContentPropertyHandler(element, this.context));
+                contentVal.visit(new adapt.vtree.ContentPropertyHandler(element, this.context, contentVal));
         }
     }
     if (pseudoName.match(/^first-/) && !style["x-first-pseudo"]) {
@@ -792,6 +792,12 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                 tag = "audio";
             else if (tag == "object")
                 custom = !!self.customRenderer;
+            if (element.getAttribute(adapt.vgen.PSEUDO_ATTR)) {
+                if (elementStyle["content"] && elementStyle["content"].value &&
+                    elementStyle["content"].value.url) {
+                    tag = "img";
+                }
+            }
         } else if (ns == adapt.base.NS.epub) {
             tag = "span";
             ns = adapt.base.NS.XHTML;
@@ -1517,7 +1523,7 @@ adapt.vgen.ViewFactory.prototype.applyPseudoelementStyle = function(nodeContext,
     nodeContext.vertical = this.computeStyle(nodeContext.vertical, elementStyle, computedStyle);
     var content = computedStyle["content"];
     if (adapt.vtree.nonTrivialContent(content)) {
-        content.visit(new adapt.vtree.ContentPropertyHandler(target, this.context));
+        content.visit(new adapt.vtree.ContentPropertyHandler(target, this.context, content));
         delete computedStyle["content"];
     }
     this.applyComputedStyles(target, computedStyle);

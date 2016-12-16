@@ -920,6 +920,17 @@ adapt.pm.PageBoxInstance.prototype.getActiveRegions = function(context) {
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.propagateProperty = function(context, container, name, docFaces) {
+    this.propagatePropertyToElement(context, container.element, name, docFaces);
+};
+
+/**
+ * @param {adapt.expr.Context} context
+ * @param {Element} element
+ * @param {string} name
+ * @param {adapt.font.DocumentFaces} docFaces
+ * @return {void}
+ */
+adapt.pm.PageBoxInstance.prototype.propagatePropertyToElement = function(context, element, name, docFaces) {
     var val = this.getProp(context, name);
     if (val) {
         if (val.isNumeric() && adapt.expr.needUnitConversion(val.unit)) {
@@ -928,7 +939,7 @@ adapt.pm.PageBoxInstance.prototype.propagateProperty = function(context, contain
         if (name === "font-family") {
             val = docFaces.filterFontFamily(val);
         }
-        adapt.base.setCSSProperty(container.element, name, val.toString());
+        adapt.base.setCSSProperty(element, name, val.toString());
     }
 };
 
@@ -1192,6 +1203,14 @@ adapt.pm.passContentProperties = [
 /**
  * @const
  */
+adapt.pm.passSingleUriContentProperties = [
+    "width",
+    "height"
+];
+
+/**
+ * @const
+ */
 adapt.pm.delayedProperties = [
     "transform",
     "transform-origin"
@@ -1243,6 +1262,19 @@ adapt.pm.PageBoxInstance.prototype.transferContentProps = function(context, cont
         this.propagateProperty(context, container, adapt.pm.passContentProperties[i], docFaces);
     }
 };
+
+/**
+ * @param {adapt.expr.Context} context
+ * @param {Element} element
+ * @param {adapt.font.DocumentFaces} docFaces
+ * @return {void}
+ */
+adapt.pm.PageBoxInstance.prototype.transferSinglUriContentProps = function(context, element, docFaces) {
+    for (var i = 0; i < adapt.pm.passSingleUriContentProperties.length; i++) {
+        this.propagatePropertyToElement(context, element, adapt.pm.passSingleUriContentProperties[i], docFaces);
+    }
+};
+
 
 /**
  * @param {adapt.expr.Context} context

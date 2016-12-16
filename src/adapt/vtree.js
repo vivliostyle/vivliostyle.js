@@ -1392,12 +1392,14 @@ adapt.vtree.Container.prototype.getInnerShape = function() {
  * @constructor
  * @param {Element} elem
  * @param {adapt.expr.Context} context
+ * @param {adapt.css.Val} rootContentValue
  * @extends {adapt.css.Visitor}
  */
-adapt.vtree.ContentPropertyHandler = function(elem, context) {
+adapt.vtree.ContentPropertyHandler = function(elem, context, rootContentValue) {
     adapt.css.Visitor.call(this);
     /** @const */ this.elem = elem;
     /** @const */ this.context = context;
+    /** @const */ this.rootContentValue = rootContentValue;
 };
 goog.inherits(adapt.vtree.ContentPropertyHandler, adapt.css.Visitor);
 
@@ -1417,9 +1419,13 @@ adapt.vtree.ContentPropertyHandler.prototype.visitStr = function(str) {
 
 /** @override */
 adapt.vtree.ContentPropertyHandler.prototype.visitURL = function(url) {
-    var img = this.elem.ownerDocument.createElementNS(adapt.base.NS.XHTML, "img");
-    img.setAttribute("src", url.url);
-    this.elem.appendChild(img);
+    if (this.rootContentValue.url) {
+        this.elem.setAttribute("src", url.url);
+    } else {
+        var img = this.elem.ownerDocument.createElementNS(adapt.base.NS.XHTML, "img");
+        img.setAttribute("src", url.url);
+        this.elem.appendChild(img);
+    }
     return null;
 };
 
