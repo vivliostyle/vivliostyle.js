@@ -1379,7 +1379,7 @@ adapt.vtree.ContentPropertyHandler = function(elem, context, rootContentValue) {
     adapt.css.Visitor.call(this);
     /** @const */ this.elem = elem;
     /** @const */ this.context = context;
-    /** @const */ this.rootContentValue = rootContentValue;    
+    /** @const */ this.rootContentValue = rootContentValue;
 };
 goog.inherits(adapt.vtree.ContentPropertyHandler, adapt.css.Visitor);
 
@@ -1404,7 +1404,7 @@ adapt.vtree.ContentPropertyHandler.prototype.visitURL = function(url) {
     } else {
         var img = this.elem.ownerDocument.createElementNS(adapt.base.NS.XHTML, "img");
         img.setAttribute("src", url.url);
-        this.elem.appendChild(img);    
+        this.elem.appendChild(img);
     }
     return null;
 };

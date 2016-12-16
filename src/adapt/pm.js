@@ -1265,8 +1265,7 @@ adapt.pm.PageBoxInstance.prototype.transferContentProps = function(context, cont
 
 /**
  * @param {adapt.expr.Context} context
- * @param {adapt.vtree.Container} container
- * @param {adapt.vtree.Page} page
+ * @param {Element} element
  * @param {adapt.font.DocumentFaces} docFaces
  * @return {void}
  */

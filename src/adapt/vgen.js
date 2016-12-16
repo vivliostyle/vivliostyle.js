@@ -771,7 +771,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             else if (tag == "object")
                 custom = !!self.customRenderer;
             if (element.getAttribute(adapt.vgen.PSEUDO_ATTR)) {
-                if (elementStyle["content"] && elementStyle["content"].value && 
+                if (elementStyle["content"] && elementStyle["content"].value &&
                     elementStyle["content"].value.url) {
                     tag = "img";
                 }
