@@ -639,6 +639,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     layoutContainer.originY = offsetY;
     offsetX += layoutContainer.left + layoutContainer.marginLeft + layoutContainer.borderLeft;
     offsetY += layoutContainer.top + layoutContainer.marginTop + layoutContainer.borderTop;
+    pageFloatHolder.setCurrentRegion(layoutContainer);
     var cont;
     var removed = false;
     if (!flowName || !flowName.isIdent()) {
@@ -714,6 +715,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
                 if (region.width >= 0) {
                     // region.element.style.outline = "1px dotted green";
                     /** @type {!adapt.task.Frame.<boolean>} */ var innerFrame = adapt.task.newFrame("inner");
+                    pageFloatHolder.setCurrentColumn(region);
                     self.layoutColumn(region, flowNameStr, regionIds).then(function() {
                         if (region.pageBreakType) {
                             if (region.pageBreakType != "column") {
@@ -889,7 +891,8 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 
     var writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
     var direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
-    var pageFloatHolder = new vivliostyle.pagefloat.FloatHolder(page.getPageAreaElement.bind(page), writingMode, direction);
+    var pageFloatHolder = new vivliostyle.pagefloat.FloatHolder(writingMode, direction);
+    pageFloatHolder.setCurrentPage(page);
     var exclusions = [];
 
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame

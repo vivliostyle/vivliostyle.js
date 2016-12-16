@@ -1051,14 +1051,15 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
         = adapt.task.newFrame("layoutFloat");
     var element = /** @type {!Element} */ (nodeContext.viewNode);
     var floatSide = /** @type {string} */ (nodeContext.floatSide);
-    var floatReference = /** @type {string} */ (nodeContext.floatReference);
+    var floatReference = nodeContext.floatReference;
     var direction = nodeContext.parent ? nodeContext.parent.direction : "ltr";
     var floatHolder = self.layoutContext.getPageFloatHolder();
+    var isPageFloat = vivliostyle.pagefloat.isPageFloat(floatReference);
 
     var originalViewNodeParent = nodeContext.viewNode.parentNode;
 
-    if (floatReference === "page") {
-        floatHolder.prepareFloatElement(element, floatSide);
+    if (isPageFloat) {
+        floatHolder.prepareFloatElement(element, floatSide, floatReference);
     } else {
         adapt.base.setCSSProperty(element, "float", "none");
         adapt.base.setCSSProperty(element, "display", "inline-block");
@@ -1072,7 +1073,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
             floatBBox.bottom + margin.bottom);
 
         // page floats
-        if (floatReference === "page") {
+        if (isPageFloat) {
             goog.asserts.assert(self.layoutContext);
             var pageFloat = floatHolder.getFloat(nodeContext, self.layoutContext);
             if (pageFloat) {
@@ -1087,7 +1088,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
                 nodeContextAfter.viewNode = dummy;
                 frame.finish(nodeContextAfter);
             } else {
-                floatHolder.tryToAddFloat(nodeContext, element, floatBox, floatSide).then(function() {
+                floatHolder.tryToAddFloat(nodeContext, element, floatBox, floatSide, floatReference).then(function() {
                     frame.finish(null);
                 });
             }
@@ -2388,7 +2389,7 @@ adapt.layout.Column.prototype.layoutNext = function(nodeContext, leadingEdge) {
 adapt.layout.Column.prototype.clearOverflownViewNodes = function(nodePosition, removeSelf) {
     do {
         var parent = nodePosition.viewNode.parentNode;
-        if (!parent)
+        if (!parent || parent === this.element)
             return;
         this.removeFollowingSiblings(parent, nodePosition.viewNode);
         if (removeSelf) {
