@@ -2098,7 +2098,8 @@ adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext
         return false;
     }
     var edge = adapt.layout.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
-    var fc = nodeContext.after ? nodeContext.formattingContext.getParent() : nodeContext.formattingContext;
+    var fc = nodeContext.after ?
+        (nodeContext.parent && nodeContext.parent.formattingContext) : nodeContext.formattingContext;
     if (fc) {
         var repetitiveElements = fc.getRepetitiveElements();
         if (repetitiveElements) edge += (this.vertical ? -1 : 1) * repetitiveElements.calculateElementHeight();
