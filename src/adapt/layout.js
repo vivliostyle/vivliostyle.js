@@ -2202,7 +2202,8 @@ adapt.layout.Column.prototype.isBFC = function(formattingContext) {
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
-    var fc = nodeContext.after ? nodeContext.formattingContext.getParent() : nodeContext.formattingContext;
+    var fc = nodeContext.after ?
+        (nodeContext.parent && nodeContext.parent.formattingContext) : nodeContext.formattingContext;
     if (fc && !this.isBFC(fc)) {
         return adapt.task.newResult(nodeContext);
     }
