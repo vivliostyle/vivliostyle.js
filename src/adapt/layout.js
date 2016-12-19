@@ -1988,8 +1988,9 @@ adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext
         return false;
     }
     var edge = adapt.layout.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
-    if (nodeContext.formattingContext) {
-        var repetitiveElements = nodeContext.formattingContext.getRepetitiveElements();
+    var fc = nodeContext.after ? nodeContext.formattingContext.getParent() : nodeContext.formattingContext;
+    if (fc) {
+        var repetitiveElements = fc.getRepetitiveElements();
         if (repetitiveElements) edge += (this.vertical ? -1 : 1) * repetitiveElements.calculateElementHeight();
     }
     var overflown = this.isOverflown(edge);
@@ -2091,7 +2092,8 @@ adapt.layout.Column.prototype.isBFC = function(formattingContext) {
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
-    if (!nodeContext.after && !this.isBFC(nodeContext.formattingContext)) {
+    var fc = nodeContext.after ? nodeContext.formattingContext.getParent() : nodeContext.formattingContext;
+    if (fc && !this.isBFC(fc)) {
         return adapt.task.newResult(nodeContext);
     }
 
