@@ -989,8 +989,6 @@ goog.scope(function() {
         if (display && TableLayoutStrategy.ignoreList[display]) {
             nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
         } else if (nodeContext.sourceNode === this.formattingContext.tableSourceNode) {
-            nodeContext = state.nodeContext = nodeContext.modify();
-            nodeContext.formattingContext = this.formattingContext.getParent();
             this.resetColumn();
             state.break = true;
         } else {
@@ -1175,8 +1173,6 @@ goog.scope(function() {
             var tableElement = nodeContextAfter.viewNode;
             var tableBBox = column.clientLayout.getElementClientRect(tableElement);
             if (!column.isOverflown(column.vertical ? tableBBox.left : tableBBox.bottom)) {
-                nodeContextAfter = nodeContextAfter.modify();
-                nodeContextAfter.formattingContext = formattingContext.getParent();
                 frame.finish(nodeContextAfter);
                 return;
             }
