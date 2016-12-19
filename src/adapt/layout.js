@@ -344,6 +344,11 @@ adapt.layout.EdgeBreakPosition.prototype.findAcceptableBreak = function(column, 
     if (penalty < this.getMinBreakPenalty()) {
         return null;
     }
+    if (repetitiveElements
+        && repetitiveElements.getNextPenaltyIncreasement() > 0
+        && this.overflows) {
+        return null;
+    }
     return column.findEdgeBreakPosition(this);
 };
 
