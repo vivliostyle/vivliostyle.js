@@ -346,12 +346,12 @@ goog.scope(function() {
         this.column.element = viewRoot;
         this.column.layoutContext = column.layoutContext.clone();
         this.column.stopAtOverflow = false;
+        this.column.flowRootFormattingContext = parentNodeContext.formattingContext;
 
         var pseudoColumn = this;
         this.column.openAllViews = function(position) {
             return adapt.layout.Column.prototype.openAllViews.call(this, position).thenAsync(function(result) {
                 var startNodeContext = result.copy();
-                startNodeContext.formattingContext.parent = parentNodeContext.formattingContext;
                 pseudoColumn.startNodeContexts.push(startNodeContext);
                 return adapt.task.newResult(result);
             });

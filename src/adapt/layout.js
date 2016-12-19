@@ -485,6 +485,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @type {adapt.vtree.ClientLayout} */ this.clientLayout = clientLayout;
     /** @const */ this.layoutConstraint = layoutConstraint;
     /** @type {Document} */ this.viewDocument = element.ownerDocument;
+    /** @type {adapt.vtree.FormattingContext} */ this.flowRootFormattingContext = null;
     /** @type {boolean} */ this.isFootnote = false;
     /** @type {number} */ this.startEdge = 0;
     /** @type {number} */ this.endEdge = 0;
@@ -607,6 +608,9 @@ adapt.layout.Column.prototype.openAllViews = function(position) {
             var prevContext = nodeContext;
             var step = steps[stepIndex];
             nodeContext = adapt.vtree.makeNodeContextFromNodePositionStep(step, prevContext);
+            if (stepIndex === steps.length - 1 && !nodeContext.formattingContext) {
+                nodeContext.formattingContext = self.flowRootFormattingContext;
+            }
             if (stepIndex == 0) {
                 nodeContext.offsetInNode = position.offsetInNode;
                 nodeContext.after = position.after;
@@ -2741,9 +2745,13 @@ adapt.layout.blockLayoutProcessor = new adapt.layout.BlockLayoutProcessor();
 
 vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
     function(nodeContext, firstTime, display, position, floatSide, isRoot) {
-        if (nodeContext.establishesBFC ||
+        var parent = nodeContext.parent;
+        if (!parent && nodeContext.formattingContext) {
+            return null;
+        } else if (parent && nodeContext.formattingContext !== parent.formattingContext) {
+            return null;
+        } else if (nodeContext.establishesBFC ||
             (!nodeContext.formattingContext && vivliostyle.display.isBlock(display, position, floatSide, isRoot))) {
-            var parent = nodeContext.parent;
             return new adapt.layout.BlockFormattingContext(parent ? parent.formattingContext : null);
         } else {
             return null;

@@ -323,6 +323,7 @@ adapt.vtree.Flow = function(flowName, parentFlowName) {
     /** @const */ this.flowName = flowName;
     /** @const */ this.parentFlowName = parentFlowName;
     /** @const */ this.forcedBreakOffsets = /** @type {Array<number>} */ ([]);
+    /** @type {?adapt.vtree.FormattingContext} */ this.formattingContext = null;
 };
 
 /**
