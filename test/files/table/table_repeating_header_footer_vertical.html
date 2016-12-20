@@ -89,13 +89,18 @@
         td {
             width: 30px;
         }
-        thead {
+        thead, .thead {
             background-color: #FFAAAA;
         }
-        tfoot {
+        tfoot, .tfoot {
             background-color: #AAAAFF;
         }
-
+        .thead {
+            display: table-header-group;
+        }
+        .tfoot {
+            display: table-footer-group;
+        }
         .tr {
             display: table-row;
         }
@@ -117,7 +122,6 @@
     </style>
 </head>
 <body>
-
 <section>
     <table>
         <caption>(1) Break Between Table Row</caption>
@@ -496,10 +500,82 @@
     </table>
 </section>
 
+
+<section>
+    <figure>
+        <figcaption>(8) Non-table elements with table display values</figcaption>
+        <div class="tr">
+            <div class="td">
+                <div style="height: 60px; width: 48px;">
+                    min-content width = 60px.
+                </div>
+            </div>
+            <div class="td">
+                <div style="height: 60px; width: 48px;">
+                    min-content width = 60px.
+                </div>
+            </div>
+            <div class="td">
+                <div style="height: 80px; width: 36px;">
+                    min-content width = 80px.
+                </div>
+            </div>
+        </div>
+        <div class="tr">
+            <div class="td">
+                <div style="height: 100px; width: 36px;">
+                    minimum content width = 100px.
+                </div>
+            </div>
+            <div class="td">
+                <div style="height: 50px; width: 127px;">
+                    minimum content width = 50px.
+                </div>
+            </div>
+            <div class="td">
+                <div style="height: 70px; width: 48px;">
+                    minimum content width = 70px.
+                </div>
+            </div>
+        </div>
+        <div class="tr">
+            <div class="td">
+                <div style="height: 60px; width: 48px;">
+                    min-content width = 60px.
+                </div>
+            </div>
+            <div class="td">
+                <div style="height: 60px; width: 48px;">
+                    min-content width = 60px.
+                </div>
+            </div>
+            <div class="td">
+                <div style="height: 80px; width: 36px;">
+                    min-content width = 80px.
+                </div>
+            </div>
+        </div>
+        <div class="thead">
+            <div class="tr">
+                <div class="td">header-cell-1</div>
+                <div class="td">header-cell-2</div>
+                <div class="td">header-cell-3</div>
+            </div>
+        </div>
+        <div class="tfoot">
+            <div class="tr">
+                <div class="td">footer-cell-1</div>
+                <div class="td">footer-cell-2</div>
+                <div class="td">footer-cell-3</div>
+            </tr>
+        </div>
+    </figure>
+</section>
+
 <section>
     <table>
 
-        <caption>(8) skip header/footer when there doesn't leave enough space to insert at least one content row</caption>
+        <caption>(9) skip header/footer when there doesn't leave enough space to insert at least one content row</caption>
         <thead>
             <tr>
               <td>header-cell-1</td>
@@ -552,7 +628,7 @@
 
 <section>
     <table>
-        <caption>(9) tall header</caption>
+        <caption>(10) tall header</caption>
         <thead>
             <tr>
               <td><div style="width:200px;">width=200px</div></td>
@@ -585,7 +661,7 @@
 
 <section>
     <table>
-        <caption>(10) tall footer</caption>
+        <caption>(11) tall footer</caption>
         <tfoot>
             <tr>
                 <td><div style="width:200px;">width=200px</div></td>
@@ -618,7 +694,7 @@
 
 <section>
     <table>
-        <caption>(11) tall header and footer</caption>
+        <caption>(12) tall header and footer</caption>
         <tfoot>
             <tr>
                 <td><div style="width:200px;">width=200px</div></td>
