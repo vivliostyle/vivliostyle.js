@@ -2097,6 +2097,9 @@ adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext
     if (!nodeContext) {
         return false;
     }
+    if (this.isOrphan(nodeContext.viewNode)) {
+        return false;
+    }
     var edge = adapt.layout.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
     var fc = nodeContext.after ?
         (nodeContext.parent && nodeContext.parent.formattingContext) : nodeContext.formattingContext;
@@ -2194,6 +2197,17 @@ adapt.layout.Column.prototype.isBFC = function(formattingContext) {
     return formattingContext instanceof adapt.layout.BlockFormattingContext;
 };
 
+/**
+ * @param {Node} node
+ * @return {boolean}
+ */
+adapt.layout.Column.prototype.isOrphan = function(node) {
+    while( node ) {
+        if (node.parentNode === node.ownerDocument) return false;
+        node = node.parentNode;
+    }
+    return true;
+}
 /**
  * Skips positions until either the start of unbreakable block or inline content.
  * Also sets breakBefore on the result combining break-before and break-after
