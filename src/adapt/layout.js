@@ -2202,12 +2202,13 @@ adapt.layout.Column.prototype.isBFC = function(formattingContext) {
  * @return {boolean}
  */
 adapt.layout.Column.prototype.isOrphan = function(node) {
-    while( node ) {
+    while (node) {
         if (node.parentNode === node.ownerDocument) return false;
         node = node.parentNode;
     }
     return true;
-}
+};
+
 /**
  * Skips positions until either the start of unbreakable block or inline content.
  * Also sets breakBefore on the result combining break-before and break-after
