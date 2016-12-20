@@ -2130,7 +2130,6 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
         nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
         self.pageBreakType = breakAtTheEdge;
     }
-
     frame.loopWithFrame(function(loopFrame) {
         while (nodeContext) {
             // A code block to be able to use break. Break moves to the next node position.
@@ -2149,7 +2148,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                         if (needForcedBreak()) {
                             processForcedBreak();
                         } else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
-                            nodeContext = (lastAfterNodeContext || nodeContext).modify();
+                            nodeContext = (self.stopAtOverflow ? (lastAfterNodeContext || nodeContext) : nodeContext).modify();
                             nodeContext.overflow = true;
                         } else {
                             nodeContext = nodeContext.modify();
@@ -2173,7 +2172,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                             processForcedBreak();
                         } else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge) || !self.layoutConstraint.allowLayout(nodeContext)) {
                             // overflow
-                            nodeContext = (lastAfterNodeContext || nodeContext).modify();
+                            nodeContext = (self.stopAtOverflow ? (lastAfterNodeContext || nodeContext) : nodeContext).modify();
                             nodeContext.overflow = true;
                         }
                         loopFrame.breakLoop();
@@ -2209,7 +2208,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                         // Non-zero trailing inset.
                         if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
                             // overflow
-                            nodeContext = (lastAfterNodeContext || nodeContext).modify();
+                            nodeContext = (self.stopAtOverflow ? (lastAfterNodeContext || nodeContext) : nodeContext).modify();
                             nodeContext.overflow = true;
                             if (self.stopAtOverflow) {
                                 loopFrame.breakLoop();
@@ -2241,7 +2240,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                             processForcedBreak();
                         } else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
                             // overflow
-                            nodeContext = (lastAfterNodeContext || nodeContext).modify();
+                            nodeContext = (self.stopAtOverflow ? (lastAfterNodeContext || nodeContext) : nodeContext).modify();
                             nodeContext.overflow = true;
                         }
                         loopFrame.breakLoop();
@@ -2267,7 +2266,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
             }
         }
         if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, true, breakAtTheEdge)) {
-            if (lastAfterNodeContext) {
+            if (lastAfterNodeContext && self.stopAtOverflow) {
                 nodeContext = lastAfterNodeContext.modify();
                 nodeContext.overflow = true;
             } else {
