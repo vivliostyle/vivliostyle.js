@@ -233,8 +233,11 @@ goog.scope(function() {
         if (penalty < this.getMinBreakPenalty())
             return null;
         var cellFragments = this.getCellFragments();
-        var allCellsBreakable = this.getAcceptableCellBreakPositions().every(function(bp, index) {
-            return !!bp.nodeContext && !cellFragments[index].pseudoColumn.isStartNodeContext(bp.nodeContext);
+        var acceptableCellBreakPositions = this.getAcceptableCellBreakPositions();
+        var allCellsBreakable = acceptableCellBreakPositions.every(function(bp) {
+            return !!bp.nodeContext;
+        }) && acceptableCellBreakPositions.some(function(bp, index) {
+            return !cellFragments[index].pseudoColumn.isStartNodeContext(bp.nodeContext);
         });
         if (allCellsBreakable) {
             return this.beforeNodeContext;
