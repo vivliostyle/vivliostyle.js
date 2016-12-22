@@ -523,7 +523,7 @@ goog.scope(function() {
     /**
      * @return {number}
      */
-    RepetitiveElements.prototype.calculateElementHeight = function() {
+    RepetitiveElements.prototype.calculateOffset = function() {
         return (this.isSkipFooter ? 0 : this.footerHeight)
              - (this.isSkipHeader ? this.headerHeight : 0);
     };
