@@ -1368,10 +1368,10 @@ goog.scope(function() {
         var cellElementRect = column.clientLayout.getElementClientRect(cellElement);
         if (vertical) {
             var width = (cellElementRect.right - column.footnoteEdge - repetitiveElements.calculateElementHeight());
-            adapt.base.setCSSProperty(cellContentElement, "width", width + "px");
+            adapt.base.setCSSProperty(cellContentElement, "max-width", width + "px");
         } else {
             var height = (column.footnoteEdge - repetitiveElements.calculateElementHeight() - cellElementRect.top);
-            adapt.base.setCSSProperty(cellContentElement, "height", height + "px");
+            adapt.base.setCSSProperty(cellContentElement, "max-height", height + "px");
         }
         adapt.base.setCSSProperty(cellContentElement, "overflow", "hidden");
     }
