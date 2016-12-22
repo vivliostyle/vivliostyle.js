@@ -1912,6 +1912,25 @@ adapt.layout.Column.prototype.clearFootnotes = function(boxOffset) {
 };
 
 /**
+ * @param {!adapt.vtree.NodeContext} nodeContext
+ * @returns {number}
+ */
+adapt.layout.Column.prototype.calculateClonedPaddingBorder = function(nodeContext) {
+    var clonedPaddingBorder = 0;
+    nodeContext.walkUpBlocks(function(block) {
+        if (block.inheritedProps["box-decoration-break"] === "clone") {
+            goog.asserts.assert(block.viewNode instanceof Element);
+            var paddingBorders = this.getComputedPaddingBorder(block.viewNode);
+            clonedPaddingBorder += block.vertical ? -paddingBorders.left : paddingBorders.bottom;
+            if (block.display === "table") {
+                clonedPaddingBorder += block.blockBorderSpacing;
+            }
+        }
+    }.bind(this));
+    return clonedPaddingBorder;
+};
+
+/**
  * @param {adapt.layout.BoxBreakPosition} bp
  * @param {boolean} force
  * @return {adapt.vtree.NodeContext}
@@ -1938,14 +1957,7 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
     }
 
     // In case of box-decoration-break: clone, width (or height in vertical writing mode) of cloned paddings and borders should be taken into account.
-    var clonedPaddingBorder = 0;
-    block.walkBlocksUpToBFC(function(block) {
-        if (block.inheritedProps["box-decoration-break"] === "clone") {
-            goog.asserts.assert(block.viewNode instanceof Element);
-            var paddingBorders = self.getComputedPaddingBorder(block.viewNode);
-            clonedPaddingBorder += block.vertical ? -paddingBorders.left : paddingBorders.bottom;
-        }
-    });
+    var clonedPaddingBorder = self.calculateClonedPaddingBorder(block);
 
     // Select the first overflowing line break position
     var linePositions = this.findLinePositions(checkPoints);

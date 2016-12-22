@@ -748,12 +748,19 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         var borderCollapse = computedStyle["border-collapse"];
         if (!borderCollapse || borderCollapse === adapt.css.getName("separate")) {
             var borderSpacing = computedStyle["border-spacing"];
+            var inlineBorderSpacing, blockBorderSpacing;
             if (borderSpacing) {
                 if (borderSpacing.isSpaceList()) {
-                    borderSpacing = borderSpacing.values[0];
+                    inlineBorderSpacing = borderSpacing.values[0];
+                    blockBorderSpacing = borderSpacing.values[1];
+                } else {
+                    inlineBorderSpacing = blockBorderSpacing = borderSpacing;
                 }
-                if (borderSpacing.isNumeric()) {
-                    self.nodeContext.inlineBorderSpacing = adapt.css.toNumber(borderSpacing, self.context);
+                if (inlineBorderSpacing.isNumeric()) {
+                    self.nodeContext.inlineBorderSpacing = adapt.css.toNumber(inlineBorderSpacing, self.context);
+                }
+                if (blockBorderSpacing.isNumeric()) {
+                    self.nodeContext.blockBorderSpacing = adapt.css.toNumber(blockBorderSpacing, self.context);
                 }
             }
         }
@@ -1623,7 +1630,7 @@ adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target)
  */
 adapt.vgen.ViewFactory.prototype.processFragmentedBlockEdge = function(nodeContext) {
     if (nodeContext) {
-        nodeContext.walkBlocksUpToBFC(function(block) {
+        nodeContext.walkUpBlocks(function(block) {
             var boxDecorationBreak = block.inheritedProps["box-decoration-break"];
             if (!boxDecorationBreak || boxDecorationBreak === "slice") {
                 var elem = block.viewNode;

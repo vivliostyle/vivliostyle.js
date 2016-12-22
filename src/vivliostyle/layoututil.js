@@ -338,6 +338,7 @@ goog.scope(function() {
      * not to propagate state changes of the LayoutContext caused by the pseudo-column.
      * @param {!adapt.layout.Column} column The original (parent) column
      * @param {Element} viewRoot Root element for the pseudo-column, i.e., the root of the fragmented flow.
+     * @param {!adapt.vtree.NodeContext} parentNodeContext A NodeContext generating this PseudoColumn
      * @constructor
      */
     vivliostyle.layoututil.PseudoColumn = function(column, viewRoot, parentNodeContext) {
@@ -347,6 +348,9 @@ goog.scope(function() {
         this.column.layoutContext = column.layoutContext.clone();
         this.column.stopAtOverflow = false;
         this.column.flowRootFormattingContext = parentNodeContext.formattingContext;
+
+        var parentClonedPaddingBorder = this.column.calculateClonedPaddingBorder(parentNodeContext);
+        this.column.footnoteEdge = this.column.footnoteEdge - parentClonedPaddingBorder;
 
         var pseudoColumn = this;
         this.column.openAllViews = function(position) {
