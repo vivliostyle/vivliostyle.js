@@ -1353,7 +1353,8 @@ goog.scope(function() {
     };
 
     /**
-     * @override
+     * @param {!vivliostyle.table.TableCellFragment} cellFragment
+     * @param {!vivliostyle.table.TableFormattingContext}
      */
     function adjustCellHeight(cellFragment, formattingContext) {
         var repetitiveElements = formattingContext.getRepetitiveElements();
