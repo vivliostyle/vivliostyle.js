@@ -779,8 +779,8 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         self.nodeContext.breakWord = (wordBreak === adapt.css.ident.break_all) || (overflowWrap === adapt.css.ident.break_word);
         // Resolve formatting context
         self.resolveFormattingContext(self.nodeContext, firstTime, display, position, floatSide, isRoot);
-        if (self.nodeContext.formattingContext) {
-            firstTime = self.nodeContext.formattingContext.isFirstTime(self.nodeContext, firstTime);
+        if (self.nodeContext.parent && self.nodeContext.parent.formattingContext) {
+            firstTime = self.nodeContext.parent.formattingContext.isFirstTime(self.nodeContext, firstTime);
         }
         // Create the view element
         var custom = false;
