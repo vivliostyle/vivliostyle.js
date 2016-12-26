@@ -20,7 +20,6 @@ goog.require('adapt.cssstyler');
 goog.require('adapt.pm');
 goog.require('vivliostyle.counters');
 goog.require('adapt.vtree');
-goog.require('vivliostyle.pagefloat');
 goog.require('adapt.layout');
 goog.require('adapt.vgen');
 goog.require('adapt.xmldoc');
@@ -622,11 +621,10 @@ adapt.ops.StyleInstance.prototype.createLayoutConstraint = function() {
  * @param {number} offsetX
  * @param {number} offsetY
  * @param {Array.<adapt.geom.Shape>} exclusions
- * @param {!vivliostyle.pagefloat.FloatHolder} pageFloatHolder
  * @return {adapt.task.Result.<boolean>} holding true
  */
 adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
-                                                             parentContainer, offsetX, offsetY, exclusions, pageFloatHolder) {
+                                                             parentContainer, offsetX, offsetY, exclusions) {
     var self = this;
     boxInstance.reset();
     var enabled = boxInstance.getProp(self, "enabled");
@@ -692,7 +690,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
         var layoutContext = new adapt.vgen.ViewFactory(flowNameStr, self,
             self.viewport, self.styler, regionIds, self.xmldoc, self.faces,
             self.style.footnoteProps, self, page, self.customRenderer,
-            self.fallbackMap, pageFloatHolder, this.documentURLTransformer);
+            self.fallbackMap, this.documentURLTransformer);
         var layoutConstraint = this.createLayoutConstraint();
         var columnIndex = 0;
         var region = null;
@@ -752,15 +750,11 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
                 }
                 if (lr.isPending()) {
                     lr.then(function() {
-                        if (pageFloatHolder.hasNewlyAddedFloats()) {
-                            loopFrame.breakLoop();
-                        } else {
-                            computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);
-                            loopFrame.continueLoop();
-                        }
+                        computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);
+                        loopFrame.continueLoop();
                     });
                     return;
-                } else if (!pageFloatHolder.hasNewlyAddedFloats()) {
+                } else {
                     computedBlockSize = Math.max(computedBlockSize, region.computedBlockSize);
                 }
             }
@@ -803,7 +797,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
             while (i >= 0) {
                 var child = boxInstance.children[i--];
                 var r = self.layoutContainer(page, child, /** @type {HTMLElement} */ (boxContainer),
-                    offsetX, offsetY, exclusions, pageFloatHolder);
+                    offsetX, offsetY, exclusions);
                 if (r.isPending()) {
                     return r;
                 }
@@ -908,25 +902,13 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 
     var writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
     var direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
-    var pageFloatHolder = new vivliostyle.pagefloat.FloatHolder(page.getPageAreaElement.bind(page), writingMode, direction);
     var exclusions = [];
 
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
         = adapt.task.newFrame("layoutNextPage");
     frame.loopWithFrame(function(loopFrame) {
-        self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge, exclusions.concat(), pageFloatHolder).then(function() {
-            if (pageFloatHolder.hasNewlyAddedFloats()) {
-                exclusions = exclusions.concat(pageFloatHolder.getShapesOfNewlyAddedFloats());
-                pageFloatHolder.clearNewlyAddedFloats();
-                cp = self.currentLayoutPosition = self.layoutPositionAtPageStart.clone();
-                var c;
-                while (c = page.bleedBox.lastChild) {
-                    page.bleedBox.removeChild(c);
-                }
-                loopFrame.continueLoop();
-            } else {
-                loopFrame.breakLoop();
-            }
+        self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge, exclusions.concat()).then(function() {
+            loopFrame.breakLoop();
         });
     }).then(function() {
         pageMaster.adjustPageLayout(self, page, self.clientLayout);

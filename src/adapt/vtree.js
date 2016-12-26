@@ -502,11 +502,6 @@ adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = function(nodeCo
 adapt.vtree.LayoutContext.prototype.isSameNodePosition = function(nodePosition1, nodePosition2) {};
 
 /**
- * @return {!vivliostyle.pagefloat.FloatHolder}
- */
-adapt.vtree.LayoutContext.prototype.getPageFloatHolder = function() {};
-
-/**
  * Formatting context.
  * @interface
  */
@@ -720,7 +715,6 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {boolean} */ this.overflow = false;
     /** @type {number} */ this.breakPenalty = parent ? parent.breakPenalty : 0;
     /** @type {?string} */ this.display = null;
-    /** @type {?string} */ this.floatReference = null;
     /** @type {?string} */ this.floatSide = null;
     /** @type {?string} */ this.clearSide = null;
     /** @type {string} */ this.verticalAlign = "baseline";

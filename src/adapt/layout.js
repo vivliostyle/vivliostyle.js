@@ -530,13 +530,6 @@ adapt.layout.Column.prototype.getRightEdge = function() {
 };
 
 /**
- * @returns {boolean}
- */
-adapt.layout.Column.prototype.hasNewlyAddedPageFloats = function() {
-    return this.layoutContext.getPageFloatHolder().hasNewlyAddedFloats();
-};
-
-/**
  * @private
  * @param {adapt.vtree.NodeContext} nodeContext
  * @returns {boolean}
@@ -680,7 +673,7 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
                     // TODO: implement floats and footnotes properly
                     self.layoutFloatOrFootnote(position).then(function(positionParam) {
                         position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
-                        if (!position || self.stopByOverflow(position) || self.hasNewlyAddedPageFloats()) {
+                        if (!position || self.stopByOverflow(position)) {
                             bodyFrame.breakLoop();
                             return;
                         }
@@ -1167,19 +1160,11 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
         = adapt.task.newFrame("layoutFloat");
     var element = /** @type {!Element} */ (nodeContext.viewNode);
     var floatSide = /** @type {string} */ (nodeContext.floatSide);
-    var floatReference = /** @type {string} */ (nodeContext.floatReference);
     var direction = nodeContext.parent ? nodeContext.parent.direction : "ltr";
-    var floatHolder = self.layoutContext.getPageFloatHolder();
 
-    var originalViewNodeParent = nodeContext.viewNode.parentNode;
-
-    if (floatReference === "page") {
-        floatHolder.prepareFloatElement(element, floatSide);
-    } else {
-        adapt.base.setCSSProperty(element, "float", "none");
-        adapt.base.setCSSProperty(element, "display", "inline-block");
-        adapt.base.setCSSProperty(element, "vertical-align", "top");
-    }
+    adapt.base.setCSSProperty(element, "float", "none");
+    adapt.base.setCSSProperty(element, "display", "inline-block");
+    adapt.base.setCSSProperty(element, "vertical-align", "top");
     self.buildDeepElementView(nodeContext).then(function(nodeContextAfter) {
         var floatBBox = self.clientLayout.getElementClientRect(element);
         var margin = self.getComputedMargin(element);
@@ -1187,30 +1172,6 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
             floatBBox.top - margin.top, floatBBox.right + margin.right,
             floatBBox.bottom + margin.bottom);
 
-        // page floats
-        if (floatReference === "page") {
-            goog.asserts.assert(self.layoutContext);
-            var pageFloat = floatHolder.getFloat(nodeContext, self.layoutContext);
-            if (pageFloat) {
-                // Replace nodeContextAfter.viewNode with a dummy span.
-                // Since the actual viewNode is moved and attached to a parent node
-                // which is different from that of subsequent content nodes,
-                // clearOverflownViewNodes method does not work correctly without this replacement.
-                var dummy = originalViewNodeParent.ownerDocument.createElement("span");
-                adapt.base.setCSSProperty(dummy, "width", "0");
-                adapt.base.setCSSProperty(dummy, "height", "0");
-                originalViewNodeParent.appendChild(dummy);
-                nodeContextAfter.viewNode = dummy;
-                frame.finish(nodeContextAfter);
-            } else {
-                floatHolder.tryToAddFloat(nodeContext, element, floatBox, floatSide).then(function() {
-                    frame.finish(null);
-                });
-            }
-            return;
-        }
-
-        floatSide = vivliostyle.pagefloat.resolveInlineFloatDirection(floatSide, self.vertical, direction);
         var x1 = self.startEdge;
         var x2 = self.endEdge;
         var parent = nodeContext.parent;
@@ -1442,11 +1403,7 @@ adapt.layout.Column.prototype.processLineStyling = function(nodeContext, resNode
                 lastCheckPoints = [];  // Wipe out line breaks inside pseudoelements
                 self.buildViewToNextBlockEdge(nodeContext, lastCheckPoints).then(function(resNodeContextParam) {
                     resNodeContext = resNodeContextParam;
-                    if (self.hasNewlyAddedPageFloats()) {
-                        loopFrame.breakLoop();
-                    } else {
-                        loopFrame.continueLoop();
-                    }
+                    loopFrame.continueLoop();
                 });
             });
         });
@@ -1508,11 +1465,6 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
         = adapt.task.newFrame("layoutBreakableBlock");
     /** @type {Array.<adapt.vtree.NodeContext>} */ var checkPoints = [];
     self.buildViewToNextBlockEdge(nodeContext, checkPoints).then(function(resNodeContext) {
-        if (self.hasNewlyAddedPageFloats()) {
-            frame.finish(resNodeContext);
-            return;
-        }
-
         // at this point a single block was appended to the column
         // flowPosition is either null or
         //  - if !after: contains view for the next block element
@@ -2685,11 +2637,6 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
                         leadingEdge = false;
                         nodeContext = nodeContextParam;
 
-                        if (self.hasNewlyAddedPageFloats()) {
-                            loopFrame.breakLoop();
-                            return;
-                        }
-
                         if (self.pageBreakType) {
                             // explicit page break
                             loopFrame.breakLoop(); // Loop end
@@ -2730,8 +2677,6 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
                 }
                 // TODO: look at footnotes and floats as well
                 if (!nodeContext) {
-                    frame.finish(null);
-                } else if (self.hasNewlyAddedPageFloats()) {
                     frame.finish(null);
                 } else {
                     self.overflown = true;
