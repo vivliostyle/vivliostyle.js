@@ -1,7 +1,7 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
- * @fileoverview Fills a region with styled content. This file does not communicate with
+ * @fileoverview Fills a column with styled content. This file does not communicate with
  * the styling system directly. Instead it goes through the layout interface that gives it one
  * view tree node at a time.
  */
@@ -144,10 +144,10 @@ adapt.layout.LayoutProcessor.prototype.createEdgeBreakPosition = function(
  * @param {!adapt.layout.Column} column
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {boolean} forceRemoveSelf
- * @param {boolean} endOfRegion
+ * @param {boolean} endOfColumn
  * @return {?adapt.task.Result.<boolean>} holing true
  */
-adapt.layout.LayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {};
+adapt.layout.LayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfColumn) {};
 
 /**
  * Resolver finding an appropriate LayoutProcessor given a formatting context
@@ -795,7 +795,7 @@ adapt.layout.Column.prototype.killFloats = function() {
 };
 
 /**
- * Create exclusion floats for a region.
+ * Create exclusion floats for a column.
  * @return {void}
  */
 adapt.layout.Column.prototype.createFloats = function() {
@@ -1304,22 +1304,22 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
  * Fix justification of the last line of text broken across pages (if
  * needed).
  * @param {adapt.vtree.NodeContext} nodeContext
- * @param {boolean} endOfRegion
+ * @param {boolean} endOfColumn
  * @return {void}
  */
-adapt.layout.Column.prototype.fixJustificationIfNeeded = function(nodeContext, endOfRegion) {
+adapt.layout.Column.prototype.fixJustificationIfNeeded = function(nodeContext, endOfColumn) {
     if (nodeContext.after && !nodeContext.inline)
         return;
     var node = nodeContext.viewNode;
     var textAlign = "";
-    for (; node && endOfRegion && !textAlign; node = node.parentNode) {
+    for (; node && endOfColumn && !textAlign; node = node.parentNode) {
         if (node.nodeType != 1)
             continue;
         textAlign = (/** @type {HTMLElement} */ (node)).style.textAlign;
-        if (!endOfRegion)
+        if (!endOfColumn)
             break;
     }
-    if (endOfRegion && textAlign != "justify")
+    if (endOfColumn && textAlign != "justify")
         return;
     node = nodeContext.viewNode;
     var doc = node.ownerDocument;
@@ -1341,14 +1341,14 @@ adapt.layout.Column.prototype.fixJustificationIfNeeded = function(nodeContext, e
     }
     span.textContent = " #";
     span.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
-    var insertionPoint = endOfRegion && (nodeContext.after || node.nodeType != 1) ? node.nextSibling : node;
+    var insertionPoint = endOfColumn && (nodeContext.after || node.nodeType != 1) ? node.nextSibling : node;
     var parent = node.parentNode;
     if (!parent) {
         // Possible if nothing was added to the column
         return;
     }
     parent.insertBefore(span, insertionPoint);
-    if (!endOfRegion) {
+    if (!endOfColumn) {
         var br = /** @type {HTMLElement} */ (doc.createElement("div"));
         parent.insertBefore(br, insertionPoint);
         // TODO: see if it can be reduced
@@ -1920,15 +1920,15 @@ adapt.layout.Column.prototype.findEdgeBreakPosition = function(bp) {
  * Finalize a line break.
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {boolean} forceRemoveSelf
- * @param {boolean} endOfRegion
+ * @param {boolean} endOfColumn
  * @return {!adapt.task.Result.<boolean>} holing true
  */
-adapt.layout.Column.prototype.finishBreak = function(nodeContext, forceRemoveSelf, endOfRegion) {
+adapt.layout.Column.prototype.finishBreak = function(nodeContext, forceRemoveSelf, endOfColumn) {
     goog.asserts.assert(nodeContext.formattingContext);
     var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(nodeContext.formattingContext);
-    var result = layoutProcessor.finishBreak(this, nodeContext, forceRemoveSelf, endOfRegion);
+    var result = layoutProcessor.finishBreak(this, nodeContext, forceRemoveSelf, endOfColumn);
     if (!result) {
-        result = adapt.layout.blockLayoutProcessor.finishBreak(this, nodeContext, forceRemoveSelf, endOfRegion);
+        result = adapt.layout.blockLayoutProcessor.finishBreak(this, nodeContext, forceRemoveSelf, endOfColumn);
     }
     return result;
 };
@@ -2777,14 +2777,14 @@ adapt.layout.BlockLayoutProcessor.prototype.createEdgeBreakPosition = function(
  * @param {!adapt.layout.Column} column
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {boolean} forceRemoveSelf
- * @param {boolean} endOfRegion
+ * @param {boolean} endOfColumn
  * @return {!adapt.task.Result.<boolean>} holing true
  * @override
  */
-adapt.layout.BlockLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {
+adapt.layout.BlockLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfColumn) {
     var removeSelf = forceRemoveSelf || (nodeContext.viewNode != null && nodeContext.viewNode.nodeType == 1 && !nodeContext.after);
     column.clearOverflownViewNodes(nodeContext, removeSelf);
-    if (endOfRegion) {
+    if (endOfColumn) {
         column.fixJustificationIfNeeded(nodeContext, true);
         column.layoutContext.processFragmentedBlockEdge(removeSelf ? nodeContext : nodeContext.parent);
     }
