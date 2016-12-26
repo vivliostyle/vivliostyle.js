@@ -639,6 +639,15 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         elementStyle = inheritedValues.elementStyle;
         self.nodeContext.lang = inheritedValues.lang;
     }
+    var floatReference = elementStyle["float-reference"] &&
+        vivliostyle.pagefloat.FloatReference.of(elementStyle["float-reference"].value.toString());
+    if (self.nodeContext.parent && floatReference && vivliostyle.pagefloat.isPageFloat(floatReference)) {
+        // Since a page float will be detached from a view node of its parent,
+        // inherited properties need to be inherited from its source parent.
+        var inheritedValues = self.inheritFromSourceParent(elementStyle);
+        elementStyle = inheritedValues.elementStyle;
+        self.nodeContext.lang = inheritedValues.lang;
+    }
     self.nodeContext.vertical = self.computeStyle(self.nodeContext.vertical, elementStyle, computedStyle);
 
     this.transferPolyfilledInheritedProps(computedStyle);
@@ -728,6 +737,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         self.nodeContext.inline = !floating && !display || vivliostyle.display.isInlineLevel(display) || vivliostyle.display.isRubyInternalDisplay(display);
         self.nodeContext.display = display ? display.toString() : "inline";
         self.nodeContext.floatSide = floating ? floatSide.toString() : null;
+        self.nodeContext.floatReference = floatReference || vivliostyle.pagefloat.FloatReference.INLINE;
         if (!self.nodeContext.inline) {
             var breakAfter = computedStyle["break-after"];
             if (breakAfter) {

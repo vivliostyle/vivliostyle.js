@@ -13,6 +13,37 @@ goog.require("adapt.vtree");
 goog.require("vivliostyle.logical");
 
 goog.scope(function() {
+
+    /**
+     * @enum {string}
+     */
+    vivliostyle.pagefloat.FloatReference = {
+        INLINE: "inline",
+        COLUMN: "column",
+        REGION: "region",
+        PAGE: "page"
+    };
+    /** @const */ var FloatReference = vivliostyle.pagefloat.FloatReference;
+
+    /**
+     * @param {string} str
+     * @returns {!vivliostyle.pagefloat.FloatReference}
+     */
+    FloatReference.of = function(str) {
+        switch (str) {
+            case "inline":
+                return FloatReference.INLINE;
+            case "column":
+                return FloatReference.COLUMN;
+            case "region":
+                return FloatReference.REGION;
+            case "page":
+                return FloatReference.PAGE;
+            default:
+                throw new Error("Unknown float-reference: " + str);
+        }
+    };
+
     /**
      * Interpret a float value with the writing-mode and direction assuming the float-reference is inline and returns "left" or "right".
      * @param {string} floatSide
