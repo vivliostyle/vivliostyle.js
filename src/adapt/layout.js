@@ -12,6 +12,7 @@ goog.require('adapt.geom');
 goog.require('adapt.task');
 goog.require('vivliostyle.break');
 goog.require('adapt.vtree');
+goog.require('vivliostyle.pagefloat');
 
 goog.provide('adapt.layout');
 
@@ -455,15 +456,17 @@ adapt.layout.BlockFormattingContext.prototype.getRepetitiveElements = function()
  * @param {!adapt.vtree.LayoutContext} layoutContext
  * @param {adapt.vtree.ClientLayout} clientLayout
  * @param {adapt.layout.LayoutConstraint} layoutConstraint
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} regionPageFloatLayoutContext
  * @extends {adapt.vtree.Container}
  */
-adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConstraint) {
+adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConstraint, regionPageFloatLayoutContext) {
     adapt.vtree.Container.call(this, element);
     /** @type {Node} */ this.last = element.lastChild;
     /** @type {!adapt.vtree.LayoutContext} */ this.layoutContext = layoutContext;
     /** @type {adapt.vtree.ClientLayout} */ this.clientLayout = clientLayout;
     /** @const */ this.layoutConstraint = layoutConstraint;
     /** @type {Document} */ this.viewDocument = element.ownerDocument;
+    this.pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(regionPageFloatLayoutContext);
     /** @type {adapt.vtree.FormattingContext} */ this.flowRootFormattingContext = null;
     /** @type {boolean} */ this.isFootnote = false;
     /** @type {number} */ this.startEdge = 0;
@@ -486,20 +489,6 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @type {boolean} */ this.stopAtOverflow = true;
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
-
-/**
- * Saves the state of this column. init() is required for the new column before doing layout.
- * @return {adapt.layout.Column}
- */
-adapt.layout.Column.prototype.clone = function() {
-    var copy = new adapt.layout.Column(this.element, this.layoutContext, this.clientLayout, this.layoutConstraint);
-    copy.copyFrom(this);
-    copy.last = this.last;
-    copy.isFootnote = this.isFootnote;
-    copy.footnoteArea = (this.footnoteArea ? this.footnoteArea.clone() : null);
-    copy.chunkPositions = this.chunkPositions.concat();  // Make a copy
-    return copy;
-};
 
 /**
  * @returns {number}
@@ -1005,8 +994,9 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
         var footnoteContainer = self.element.ownerDocument.createElement("div");
         adapt.base.setCSSProperty(footnoteContainer, "position", "absolute");
         var layoutContext = self.layoutContext.clone();
+        goog.asserts.assert(self.pageFloatLayoutContext.parent);
         footnoteArea = new adapt.layout.Column(footnoteContainer,
-            layoutContext, self.clientLayout, self.layoutConstraint);
+            layoutContext, self.clientLayout, self.layoutConstraint, self.pageFloatLayoutContext.parent);
         self.footnoteArea = footnoteArea;
         footnoteArea.vertical = self.layoutContext.applyFootnoteStyle(self.vertical, footnoteContainer);
         footnoteArea.isFootnote = true;
@@ -1160,7 +1150,6 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
         = adapt.task.newFrame("layoutFloat");
     var element = /** @type {!Element} */ (nodeContext.viewNode);
     var floatSide = /** @type {string} */ (nodeContext.floatSide);
-    var direction = nodeContext.parent ? nodeContext.parent.direction : "ltr";
 
     adapt.base.setCSSProperty(element, "float", "none");
     adapt.base.setCSSProperty(element, "display", "inline-block");

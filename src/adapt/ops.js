@@ -20,6 +20,7 @@ goog.require('adapt.cssstyler');
 goog.require('adapt.pm');
 goog.require('vivliostyle.counters');
 goog.require('adapt.vtree');
+goog.require('vivliostyle.pagefloat');
 goog.require('adapt.layout');
 goog.require('adapt.vgen');
 goog.require('adapt.xmldoc');
@@ -176,6 +177,7 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @type {Object.<string,adapt.pm.PageBoxInstance>} */ this.pageBoxInstances = {};
     /** @type {vivliostyle.page.PageManager} */ this.pageManager = null;
     /** @const */ this.counterStore = counterStore;
+    /** @private @const */ this.rootPageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(null);
     /** @type {!Object.<string,boolean>} */ this.pageBreaks = {};
     /** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = null;
     /** @const */ this.customRenderer = customRenderer;
@@ -613,16 +615,36 @@ adapt.ops.StyleInstance.prototype.createLayoutConstraint = function() {
 };
 
 /**
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} parent
+ * @param {!adapt.pm.PageBoxInstance} boxInstance
+ * @returns {!vivliostyle.pagefloat.PageFloatLayoutContext}
+ */
+adapt.ops.StyleInstance.prototype.getRegionPageFloatLayoutContext = function(parent, boxInstance) {
+    if (boxInstance instanceof vivliostyle.page.PageRulePartitionInstance ||
+        (boxInstance instanceof adapt.pm.PageMasterInstance &&
+        !(boxInstance instanceof vivliostyle.page.PageRuleMasterInstance))) {
+        parent = new vivliostyle.pagefloat.PageFloatLayoutContext(parent);
+    }
+    if (boxInstance instanceof adapt.pm.PartitionInstance) {
+        return new vivliostyle.pagefloat.PageFloatLayoutContext(parent);
+    } else {
+        return parent;
+    }
+};
+
+/**
  * @param {!adapt.vtree.Page} page
  * @param {adapt.pm.PageBoxInstance} boxInstance
  * @param {HTMLElement} parentContainer
  * @param {number} offsetX
  * @param {number} offsetY
  * @param {Array.<adapt.geom.Shape>} exclusions
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} parentPageFloatLayoutContext
  * @return {adapt.task.Result.<boolean>} holding true
  */
-adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
-                                                             parentContainer, offsetX, offsetY, exclusions) {
+adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, parentContainer,
+                                                             offsetX, offsetY, exclusions,
+                                                             parentPageFloatLayoutContext) {
     var self = this;
     boxInstance.reset();
     var enabled = boxInstance.getProp(self, "enabled");
@@ -648,6 +670,8 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
     layoutContainer.originY = offsetY;
     offsetX += layoutContainer.left + layoutContainer.marginLeft + layoutContainer.borderLeft;
     offsetY += layoutContainer.top + layoutContainer.marginTop + layoutContainer.borderTop;
+    var regionPageFloatLayoutContext =
+        self.getRegionPageFloatLayoutContext(self.rootPageFloatLayoutContext, boxInstance);
     var cont;
     var removed = false;
     if (!flowName || !flowName.isIdent()) {
@@ -699,7 +723,8 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
                     var columnContainer = self.viewport.document.createElement("div");
                     adapt.base.setCSSProperty(columnContainer, "position", "absolute");
                     boxContainer.appendChild(columnContainer);
-                    column = new adapt.layout.Column(columnContainer, layoutContext, self.clientLayout, layoutConstraint);
+                    column = new adapt.layout.Column(columnContainer, layoutContext, self.clientLayout,
+                        layoutConstraint, regionPageFloatLayoutContext);
                     column.vertical = layoutContainer.vertical;
                     column.snapHeight = layoutContainer.snapHeight;
                     column.snapWidth = layoutContainer.snapWidth;
@@ -719,7 +744,8 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
                     column.originX = offsetX + layoutContainer.paddingLeft;
                     column.originY = offsetY + layoutContainer.paddingTop;
                 } else {
-                    column = new adapt.layout.Column(boxContainer, layoutContext, self.clientLayout, layoutConstraint);
+                    column = new adapt.layout.Column(boxContainer, layoutContext, self.clientLayout,
+                        layoutConstraint, regionPageFloatLayoutContext);
                     column.copyFrom(layoutContainer);
                     layoutContainer = column;
                 }
@@ -795,7 +821,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance,
             while (i >= 0) {
                 var child = boxInstance.children[i--];
                 var r = self.layoutContainer(page, child, /** @type {HTMLElement} */ (boxContainer),
-                    offsetX, offsetY, exclusions);
+                    offsetX, offsetY, exclusions, regionPageFloatLayoutContext);
                 if (r.isPending()) {
                     return r;
                 }
@@ -898,16 +924,16 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     vivliostyle.page.addPrinterMarks(cascadedPageStyle, evaluatedPageSizeAndBleed, page, this);
     var bleedBoxPaddingEdge = evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
 
-    var writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
-    var direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
     var exclusions = [];
+    var pagefloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(self.rootPageFloatLayoutContext);
 
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
         = adapt.task.newFrame("layoutNextPage");
     frame.loopWithFrame(function(loopFrame) {
-        self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge, exclusions.concat()).then(function() {
-            loopFrame.breakLoop();
-        });
+        self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge,
+            exclusions.concat(), pagefloatLayoutContext).then(function() {
+                loopFrame.breakLoop();
+            });
     }).then(function() {
         pageMaster.adjustPageLayout(self, page, self.clientLayout);
         var isLeftPage = new adapt.expr.Named(pageMaster.pageBox.scope, "left-page");
