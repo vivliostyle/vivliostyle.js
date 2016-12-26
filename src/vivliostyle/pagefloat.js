@@ -45,6 +45,23 @@ goog.scope(function() {
     };
 
     /**
+     * @param {!vivliostyle.pagefloat.FloatReference} floatReference
+     * @returns {boolean}
+     */
+    vivliostyle.pagefloat.isPageFloat = function(floatReference) {
+        switch (floatReference) {
+            case FloatReference.INLINE:
+                return false;
+            case FloatReference.COLUMN:
+            case FloatReference.REGION:
+            case FloatReference.PAGE:
+                return true;
+            default:
+                throw new Error("Unknown float-reference: " + floatReference);
+        }
+    };
+
+    /**
      * Interpret a float value with the writing-mode and direction assuming the float-reference is inline and returns "left" or "right".
      * @param {string} floatSide
      * @param {boolean} vertical
@@ -76,5 +93,73 @@ goog.scope(function() {
             floatSide = "left";
         }
         return floatSide;
+    };
+
+    /**
+     * @param {!Node} sourceNode
+     * @constructor
+     */
+    vivliostyle.pagefloat.PageFloat = function(sourceNode) {
+        /** @const */ this.sourceNode = sourceNode;
+    };
+    /** @const */ var PageFloat = vivliostyle.pagefloat.PageFloat;
+
+    /**
+     * @private
+     * @constructor
+     */
+    vivliostyle.pagefloat.PageFloatStore = function() {
+        /** @private @const {!Array<!vivliostyle.pagefloat.PageFloat>} */ this.floats = [];
+    };
+    /** @const */ var PageFloatStore = vivliostyle.pagefloat.PageFloatStore;
+
+    /**
+     * @param {!vivliostyle.pagefloat.PageFloat} float
+     */
+    PageFloatStore.prototype.addPageFloat = function(float) {
+        var index = this.floats.findIndex(function(f) {
+            return f.sourceNode === float.sourceNode;
+        });
+        if (index >= 0) {
+            throw new Error("A page float with the same source node is already registered");
+        } else {
+            this.floats.push(float);
+        }
+    };
+
+    /**
+     * @param {!Node} sourceNode
+     * @returns {?vivliostyle.pagefloat.PageFloat}
+     */
+    PageFloatStore.prototype.findPageFloatBySourceNode = function(sourceNode) {
+        var index = this.floats.findIndex(function(f) {
+            return f.sourceNode === sourceNode;
+        });
+        return index >= 0 ? this.floats[index] : null;
+    };
+
+    /**
+     * @param {vivliostyle.pagefloat.PageFloatLayoutContext} parent
+     * @constructor
+     */
+    vivliostyle.pagefloat.PageFloatLayoutContext = function(parent) {
+        /** @const */ this.parent = parent;
+        /** @private @const */ this.floatStore = parent ? parent.floatStore : new PageFloatStore();
+    };
+    /** @const */ var PageFloatLayoutContext = vivliostyle.pagefloat.PageFloatLayoutContext;
+
+    /**
+     * @param {!vivliostyle.pagefloat.PageFloat} float
+     */
+    PageFloatLayoutContext.prototype.addPageFloat = function(float) {
+        this.floatStore.addPageFloat(float);
+    };
+
+    /**
+     * @param {!Node} sourceNode
+     * @returns {?vivliostyle.pagefloat.PageFloat}
+     */
+    PageFloatLayoutContext.prototype.findPageFloatBySourceNode = function(sourceNode) {
+        return this.floatStore.findPageFloatBySourceNode(sourceNode);
     };
 });

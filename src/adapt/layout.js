@@ -1145,6 +1145,10 @@ adapt.layout.Column.prototype.layoutFootnote = function(nodeContext) {
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
+    if (vivliostyle.pagefloat.isPageFloat(nodeContext.floatReference)) {
+        return this.layoutPageFloat(nodeContext);
+    }
+
     var self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
         = adapt.task.newFrame("layoutFloat");
@@ -1287,6 +1291,22 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
         }
     });
     return frame.result();
+};
+
+/**
+ * @param {!adapt.vtree.NodeContext} nodeContext
+ * @return {!adapt.task.Result<adapt.vtree.NodeContext>}
+ */
+adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
+    var sourceNode = nodeContext.sourceNode;
+    goog.asserts.assert(sourceNode);
+    var float = this.pageFloatLayoutContext.findPageFloatBySourceNode(sourceNode);
+    if (!float) {
+        float = new vivliostyle.pagefloat.PageFloat(sourceNode);
+        this.pageFloatLayoutContext.addPageFloat(float);
+    }
+    // TODO
+    return this.buildDeepElementView(nodeContext);
 };
 
 /**
