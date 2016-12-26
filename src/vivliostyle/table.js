@@ -1366,11 +1366,12 @@ goog.scope(function() {
         var cellElement = cellFragment.cellNodeContext.viewNode;
 
         var cellElementRect = column.clientLayout.getElementClientRect(cellElement);
+        var padding = column.getComputedPaddingBorder(cellElement);
         if (vertical) {
-            var width = (cellElementRect.right - column.footnoteEdge - repetitiveElements.calculateOffset());
+            var width = (cellElementRect.right - column.footnoteEdge - repetitiveElements.calculateOffset() - padding.right);
             adapt.base.setCSSProperty(cellContentElement, "max-width", width + "px");
         } else {
-            var height = (column.footnoteEdge - repetitiveElements.calculateOffset() - cellElementRect.top);
+            var height = (column.footnoteEdge - repetitiveElements.calculateOffset() - cellElementRect.top - padding.top);
             adapt.base.setCSSProperty(cellContentElement, "max-height", height + "px");
         }
         adapt.base.setCSSProperty(cellContentElement, "overflow", "hidden");
