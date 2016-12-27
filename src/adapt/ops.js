@@ -615,6 +615,73 @@ adapt.ops.StyleInstance.prototype.createLayoutConstraint = function() {
 };
 
 /**
+ * @private
+ * @param {adapt.pm.PageBoxInstance} boxInstance
+ * @param {number} offsetX
+ * @param {number} offsetY
+ * @param {Array.<adapt.geom.Shape>} exclusions
+ * @param {!adapt.vtree.Container} layoutContainer
+ * @param {number} currentColumnIndex
+ * @param {string} flowNameStr
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} regionPageFloatLayoutContext
+ * @param {number} columnCount
+ * @param {number} columnGap
+ * @param {number} columnWidth
+ * @param {adapt.geom.Shape} innerShape
+ * @param {!adapt.vtree.LayoutContext} layoutContext
+ * @param {!adapt.layout.LayoutConstraint} layoutConstraint
+ * @returns {!adapt.task.Result.<!adapt.layout.Column>}
+ */
+adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, offsetX, offsetY, exclusions,
+                                                                   layoutContainer, currentColumnIndex,
+                                                                   flowNameStr, regionPageFloatLayoutContext,
+                                                                   columnCount, columnGap, columnWidth,
+                                                                   innerShape, layoutContext, layoutConstraint) {
+    var dontApplyExclusions = boxInstance.vertical
+        ? boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth
+        : boxInstance.isAutoHeight && boxInstance.isTopDependentOnAutoHeight;
+    var boxContainer = layoutContainer.element;
+    var column;
+    if (columnCount > 1) {
+        var columnContainer = this.viewport.document.createElement("div");
+        adapt.base.setCSSProperty(columnContainer, "position", "absolute");
+        boxContainer.appendChild(columnContainer);
+        column = new adapt.layout.Column(columnContainer, layoutContext, this.clientLayout,
+            layoutConstraint, regionPageFloatLayoutContext);
+        column.vertical = layoutContainer.vertical;
+        column.snapHeight = layoutContainer.snapHeight;
+        column.snapWidth = layoutContainer.snapWidth;
+        if (layoutContainer.vertical) {
+            adapt.base.setCSSProperty(columnContainer, "margin-left", layoutContainer.paddingLeft + "px");
+            adapt.base.setCSSProperty(columnContainer, "margin-right", layoutContainer.paddingRight + "px");
+            var columnY = currentColumnIndex * (columnWidth + columnGap) + layoutContainer.paddingTop;
+            column.setHorizontalPosition(0, layoutContainer.width);
+            column.setVerticalPosition(columnY, columnWidth);
+        } else {
+            adapt.base.setCSSProperty(columnContainer, "margin-top", layoutContainer.paddingTop + "px");
+            adapt.base.setCSSProperty(columnContainer, "margin-bottom", layoutContainer.paddingBottom + "px");
+            var columnX = currentColumnIndex * (columnWidth + columnGap) + layoutContainer.paddingLeft;
+            column.setVerticalPosition(0, layoutContainer.height);
+            column.setHorizontalPosition(columnX, columnWidth);
+        }
+        column.originX = offsetX + layoutContainer.paddingLeft;
+        column.originY = offsetY + layoutContainer.paddingTop;
+    } else {
+        column = new adapt.layout.Column(boxContainer, layoutContext, this.clientLayout,
+            layoutConstraint, regionPageFloatLayoutContext);
+        column.copyFrom(layoutContainer);
+    }
+    column.exclusions = dontApplyExclusions ? [] : exclusions;
+    column.innerShape = innerShape;
+    if (column.width >= 0) {
+        // column.element.style.outline = "1px dotted green";
+        return this.layoutColumn(column, flowNameStr).thenReturn(column);
+    } else {
+        return adapt.task.newResult(column);
+    }
+};
+
+/**
  * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} parent
  * @param {!adapt.pm.PageBoxInstance} boxInstance
  * @returns {!vivliostyle.pagefloat.PageFloatLayoutContext}
@@ -655,9 +722,6 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
         = adapt.task.newFrame("layoutContainer");
     var wrapFlow = boxInstance.getProp(self, "wrap-flow");
     var dontExclude = wrapFlow === adapt.css.ident.auto;
-    var dontApplyExclusions = boxInstance.vertical
-        ? boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth
-        : boxInstance.isAutoHeight && boxInstance.isTopDependentOnAutoHeight;
     var flowName = boxInstance.getProp(self, "flow-from");
     var boxContainer = self.viewport.document.createElement("div");
     var position = boxInstance.getProp(self, "position");
@@ -719,43 +783,13 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
         frame.loopWithFrame(function(loopFrame) {
             while (columnIndex < columnCount) {
                 var currentColumnIndex = columnIndex++;
-                if (columnCount > 1) {
-                    var columnContainer = self.viewport.document.createElement("div");
-                    adapt.base.setCSSProperty(columnContainer, "position", "absolute");
-                    boxContainer.appendChild(columnContainer);
-                    column = new adapt.layout.Column(columnContainer, layoutContext, self.clientLayout,
-                        layoutConstraint, regionPageFloatLayoutContext);
-                    column.vertical = layoutContainer.vertical;
-                    column.snapHeight = layoutContainer.snapHeight;
-                    column.snapWidth = layoutContainer.snapWidth;
-                    if (layoutContainer.vertical) {
-                        adapt.base.setCSSProperty(columnContainer, "margin-left", layoutContainer.paddingLeft + "px");
-                        adapt.base.setCSSProperty(columnContainer, "margin-right", layoutContainer.paddingRight + "px");
-                        var columnY = currentColumnIndex * (columnWidth + columnGap) + layoutContainer.paddingTop;
-                        column.setHorizontalPosition(0, layoutContainer.width);
-                        column.setVerticalPosition(columnY, columnWidth);
-                    } else {
-                        adapt.base.setCSSProperty(columnContainer, "margin-top", layoutContainer.paddingTop + "px");
-                        adapt.base.setCSSProperty(columnContainer, "margin-bottom", layoutContainer.paddingBottom + "px");
-                        var columnX = currentColumnIndex * (columnWidth + columnGap) + layoutContainer.paddingLeft;
-                        column.setVerticalPosition(0, layoutContainer.height);
-                        column.setHorizontalPosition(columnX, columnWidth);
-                    }
-                    column.originX = offsetX + layoutContainer.paddingLeft;
-                    column.originY = offsetY + layoutContainer.paddingTop;
-                } else {
-                    column = new adapt.layout.Column(boxContainer, layoutContext, self.clientLayout,
-                        layoutConstraint, regionPageFloatLayoutContext);
-                    column.copyFrom(layoutContainer);
-                    layoutContainer = column;
-                }
-                column.exclusions = dontApplyExclusions ? [] : exclusions;
-                column.innerShape = innerShape;
-                var lr;
-                if (column.width >= 0) {
-                    // column.element.style.outline = "1px dotted green";
-                    /** @type {!adapt.task.Frame.<boolean>} */ var innerFrame = adapt.task.newFrame("inner");
-                    self.layoutColumn(column, flowNameStr).then(function() {
+                var lr = self.createAndLayoutColumn(boxInstance, offsetX, offsetY, exclusions, layoutContainer,
+                    currentColumnIndex, flowNameStr, regionPageFloatLayoutContext, columnCount, columnGap,
+                    columnWidth, innerShape, layoutContext, layoutConstraint).thenAsync(function(c) {
+                        column = c;
+                        if (column.element === boxContainer) {
+                            layoutContainer = column;
+                        }
                         if (column.pageBreakType) {
                             if (column.pageBreakType != "column") {
                                 // skip remaining columns
@@ -766,12 +800,8 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
                                 }
                             }
                         }
-                        innerFrame.finish(true);
+                        return adapt.task.newResult(true);
                     });
-                    lr = innerFrame.result();
-                } else {
-                    lr = adapt.task.newResult(true);
-                }
                 if (lr.isPending()) {
                     lr.then(function() {
                         computedBlockSize = Math.max(computedBlockSize, column.computedBlockSize);
