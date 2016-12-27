@@ -98,11 +98,13 @@ goog.scope(function() {
     /**
      * @param {!Node} sourceNode
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
+     * @param {string} floatSide
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloat = function(sourceNode, floatReference) {
+    vivliostyle.pagefloat.PageFloat = function(sourceNode, floatReference, floatSide) {
         /** @const */ this.sourceNode = sourceNode;
         /** @const */ this.floatReference = floatReference;
+        /** @const */ this.floatSide = floatSide;
         /** @private @type {?vivliostyle.pagefloat.PageFloat.ID} */ this.id = null;
     };
     /** @const */ var PageFloat = vivliostyle.pagefloat.PageFloat;
@@ -178,23 +180,37 @@ goog.scope(function() {
 
     /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
+     * @param {!adapt.vtree.Container} area
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloatFragment = function(float) {
+    vivliostyle.pagefloat.PageFloatFragment = function(float, area) {
         /** @const */ this.pageFloatId = float.getId();
+        /** @const */ this.outerShape = area.getOuterShape(null, null);
     };
     /** @const */ var PageFloatFragment = vivliostyle.pagefloat.PageFloatFragment;
+
+    /**
+     * @returns {adapt.geom.Shape}
+     */
+    PageFloatFragment.prototype.getOuterShape = function() {
+        return this.outerShape;
+    };
 
     /**
      * @param {vivliostyle.pagefloat.PageFloatLayoutContext} parent
      * @param {?vivliostyle.pagefloat.FloatReference} floatReference
      * @param {adapt.vtree.Container} container
+     * @param {?adapt.css.Val} writingMode
+     * @param {?adapt.css.Val} direction
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloatLayoutContext = function(parent, floatReference, container) {
+    vivliostyle.pagefloat.PageFloatLayoutContext = function(parent, floatReference, container, writingMode,
+                                                            direction) {
         /** @const */ this.parent = parent;
         /** @private @const */ this.floatReference = floatReference;
         /** @private */ this.container = container;
+        /** @const */ this.writingMode = writingMode || (parent && parent.writingMode);
+        /** @const */ this.direction = direction || (parent && parent.direction);
         /** @private @const */ this.floatStore = parent ? parent.floatStore : new PageFloatStore();
         /** @private @const {!Array<vivliostyle.pagefloat.PageFloat.ID>} */ this.forbiddenFloats = [];
         /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatFragment>} */ this.floatFragments = [];
@@ -202,10 +218,25 @@ goog.scope(function() {
     /** @const */ var PageFloatLayoutContext = vivliostyle.pagefloat.PageFloatLayoutContext;
 
     /**
+     * @param {!vivliostyle.pagefloat.FloatReference} floatReference
+     * @returns {!vivliostyle.pagefloat.PageFloatLayoutContext}
+     */
+    PageFloatLayoutContext.prototype.getParent = function(floatReference) {
+        if (!this.parent) {
+            throw new Error("No PageFloatLayoutContext for " + floatReference);
+        }
+        return this.parent;
+    };
+
+    /**
+     * @param {vivliostyle.pagefloat.FloatReference=} floatReference
      * @returns {adapt.vtree.Container}
      */
-    PageFloatLayoutContext.prototype.getContainer = function() {
-        return this.container;
+    PageFloatLayoutContext.prototype.getContainer = function(floatReference) {
+        if (!floatReference || floatReference === this.floatReference) {
+            return this.container;
+        }
+        return this.getParent(floatReference).getContainer(floatReference);
     };
 
     /**
@@ -220,6 +251,17 @@ goog.scope(function() {
      */
     PageFloatLayoutContext.prototype.addPageFloat = function(float) {
         this.floatStore.addPageFloat(float);
+    };
+
+    /**
+     * @param {!vivliostyle.pagefloat.FloatReference} floatReference
+     * @returns {!vivliostyle.pagefloat.PageFloatLayoutContext}
+     */
+    PageFloatLayoutContext.prototype.getPageFloatLayoutContext = function(floatReference) {
+        if (floatReference === this.floatReference) {
+            return this;
+        }
+        return this.getParent(floatReference).getPageFloatLayoutContext(floatReference);
     };
 
     /**
@@ -240,10 +282,9 @@ goog.scope(function() {
             if (this.forbiddenFloats.indexOf(id) < 0) {
                 this.forbiddenFloats.push(id);
             }
-        } else if (!this.parent) {
-            throw new Error("No PageFloatLayoutContext for " + floatReference);
         } else {
-            this.parent.forbid(float);
+            var parent = this.getParent(floatReference);
+            parent.forbid(float);
         }
     };
 
@@ -256,10 +297,9 @@ goog.scope(function() {
         var floatReference = float.floatReference;
         if (floatReference === this.floatReference) {
             return this.forbiddenFloats.indexOf(id) >= 0;
-        } else if (!this.parent) {
-            throw new Error("No PageFloatLayoutContext for " + floatReference);
         } else {
-            return this.parent.isForbidden(float);
+            var parent = this.getParent(floatReference);
+            return parent.isForbidden(float);
         }
     };
 
@@ -272,11 +312,8 @@ goog.scope(function() {
         goog.asserts.assert(float);
         var floatReference = float.floatReference;
         if (floatReference !== this.floatReference) {
-            if (!this.parent) {
-                throw new Error("No PageFloatLayoutContext for " + floatReference);
-            } else {
-                this.parent.addPageFloatFragment(floatFragment);
-            }
+            var parent = this.getParent(floatReference);
+            parent.addPageFloatFragment(floatFragment);
         } else if (this.floatFragments.indexOf(floatFragment) < 0) {
             this.floatFragments.push(floatFragment);
         }
@@ -289,11 +326,8 @@ goog.scope(function() {
      */
     PageFloatLayoutContext.prototype.findPageFloatFragment = function(float) {
         if (float.floatReference !== this.floatReference) {
-            if (!this.parent) {
-                throw new Error("No PageFloatLayoutContext for " + float.floatReference);
-            } else {
-                return this.parent.findPageFloatFragment(float);
-            }
+            var parent = this.getParent(float.floatReference);
+            return parent.findPageFloatFragment(float);
         }
         var id = float.getId();
         var index = this.floatFragments.findIndex(function(f) {
@@ -312,6 +346,53 @@ goog.scope(function() {
     PageFloatLayoutContext.prototype.invalidate = function() {
         if (this.container) {
             this.container.invalidate();
+        }
+    };
+
+    /**
+     * @param {!adapt.vtree.Container} area
+     * @param {!vivliostyle.pagefloat.PageFloat} float
+     */
+    PageFloatLayoutContext.prototype.setFloatAreaDimensions = function(area, float) {
+        if (float.floatReference !== this.floatReference) {
+            var parent = this.getParent(float.floatReference);
+            parent.setFloatAreaDimensions(area, float);
+            return;
+        }
+
+        var writingMode = this.writingMode.toString();
+        var direction = this.direction.toString();
+        var logicalFloatSide = vivliostyle.logical.toLogical(float.floatSide, writingMode, direction);
+        var blockStart = area.vertical ? (area.left + area.width) : area.top;
+        var blockEnd = area.vertical ? area.left : area.top + area.height;
+        switch (logicalFloatSide) {
+            case "inline-start":
+            case "inline-end":
+                // TODO Calculate and set correct block-dimension position
+                area.setBlockPosition(blockStart, area.computedBlockSize);
+                break;
+            case "block-start":
+                area.setBlockPosition(blockStart, area.computedBlockSize);
+                break;
+            case "block-end":
+                area.setBlockPosition(blockEnd - area.computedBlockSize * area.getBoxDir(), area.computedBlockSize);
+                break;
+            default:
+                throw new Error("unknown float direction: " + float.floatSide);
+        }
+    };
+
+    /**
+     * @returns {!Array<adapt.geom.Shape>}
+     */
+    PageFloatLayoutContext.prototype.getFloatFragmentExclusions = function() {
+        var result = this.floatFragments.map(function(fragment) {
+            return fragment.getOuterShape();
+        });
+        if (this.parent) {
+            return this.parent.getFloatFragmentExclusions().concat(result);
+        } else {
+            return result;
         }
     };
 });

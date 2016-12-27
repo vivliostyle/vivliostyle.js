@@ -1393,6 +1393,32 @@ adapt.vtree.Container.prototype.setHorizontalPosition = function(left, width) {
 };
 
 /**
+ * @param {number} start
+ * @param {number} extent
+ * @return {void}
+ */
+adapt.vtree.Container.prototype.setBlockPosition = function(start, extent) {
+    if (this.vertical) {
+        this.setHorizontalPosition(start + extent * this.getBoxDir(), extent);
+    } else {
+        this.setVerticalPosition(start, extent);
+    }
+};
+
+/**
+ * @param {number} start
+ * @param {number} extent
+ * @return {void}
+ */
+adapt.vtree.Container.prototype.setInlinePosition = function(start, extent) {
+    if (this.vertical) {
+        this.setVerticalPosition(start, extent);
+    } else {
+        this.setHorizontalPosition(start, extent);
+    }
+};
+
+/**
  * @returns {boolean}
  */
 adapt.vtree.Container.prototype.isInvalidated = function() {
@@ -1422,6 +1448,20 @@ adapt.vtree.Container.prototype.getInnerShape = function() {
         return this.innerShape.withOffset(offsetX, offsetY);
     return adapt.geom.shapeForRect(offsetX, offsetY,
         offsetX + this.width, offsetY + this.height);
+};
+
+/**
+ * @param {adapt.css.Val} outerShapeProp
+ * @param {adapt.expr.Context} context
+ * @returns {adapt.geom.Shape}
+ */
+adapt.vtree.Container.prototype.getOuterShape = function(outerShapeProp, context) {
+    var outerX = this.originX + this.left;
+    var outerY = this.originY + this.top;
+    var outerWidth = this.getInsetLeft() + this.width + this.getInsetRight();
+    var outerHeight = this.getInsetTop() + this.height + this.getInsetBottom();
+    return adapt.cssprop.toShape(outerShapeProp, outerX, outerY,
+        outerWidth, outerHeight, context);
 };
 
 

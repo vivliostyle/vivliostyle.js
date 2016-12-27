@@ -178,7 +178,7 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @type {vivliostyle.page.PageManager} */ this.pageManager = null;
     /** @const */ this.counterStore = counterStore;
     /** @private @const */ this.rootPageFloatLayoutContext =
-        new vivliostyle.pagefloat.PageFloatLayoutContext(null, null, null);
+        new vivliostyle.pagefloat.PageFloatLayoutContext(null, null, null, null, null);
     /** @type {!Object.<string,boolean>} */ this.pageBreaks = {};
     /** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = null;
     /** @const */ this.customRenderer = customRenderer;
@@ -650,7 +650,7 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
         : boxInstance.isAutoHeight && boxInstance.isTopDependentOnAutoHeight;
     var boxContainer = layoutContainer.element;
     var columnPageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
-        regionPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.COLUMN, null);
+        regionPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.COLUMN, null, null, null);
     var positionAtColumnStart = self.currentLayoutPosition.clone();
     /** @type {!adapt.task.Frame<!adapt.layout.Column>} */ var frame = adapt.task.newFrame("createAndLayoutColumn");
     var column;
@@ -684,7 +684,8 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
                 layoutConstraint, columnPageFloatLayoutContext);
             column.copyFrom(layoutContainer);
         }
-        column.exclusions = dontApplyExclusions ? [] : exclusions;
+        var pageFloatExclusions = columnPageFloatLayoutContext.getFloatFragmentExclusions();
+        column.exclusions = dontApplyExclusions ? pageFloatExclusions : exclusions.concat(pageFloatExclusions);
         column.innerShape = innerShape;
         columnPageFloatLayoutContext.setContainer(column);
         if (column.width >= 0) {
@@ -723,8 +724,10 @@ adapt.ops.StyleInstance.prototype.getRegionPageFloatLayoutContext = function(
         pagePageFloatLayoutContext.setContainer(layoutContainer);
     }
     if (boxInstance instanceof adapt.pm.PartitionInstance) {
+        var writingMode = boxInstance.getProp(this, "writing-mode") || null;
+        var direction = boxInstance.getProp(this, "direction") || null;
         return new vivliostyle.pagefloat.PageFloatLayoutContext(pagePageFloatLayoutContext,
-            vivliostyle.pagefloat.FloatReference.REGION, layoutContainer);
+            vivliostyle.pagefloat.FloatReference.REGION, layoutContainer, writingMode, direction);
     } else {
         return pagePageFloatLayoutContext;
     }
@@ -872,13 +875,8 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
         }
         if (!boxInstance.isAutoHeight || Math.floor(layoutContainer.computedBlockSize) > 0) {
             if (!removed && !dontExclude) {
-                var outerX = layoutContainer.originX + layoutContainer.left;
-                var outerY = layoutContainer.originY + layoutContainer.top;
-                var outerWidth = layoutContainer.getInsetLeft() + layoutContainer.width + layoutContainer.getInsetRight();
-                var outerHeight = layoutContainer.getInsetTop() + layoutContainer.height + layoutContainer.getInsetBottom();
                 var outerShapeProp = boxInstance.getProp(self, "shape-outside");
-                var outerShape = adapt.cssprop.toShape(outerShapeProp, outerX, outerY,
-                    outerWidth, outerHeight, self);
+                var outerShape = layoutContainer.getOuterShape(outerShapeProp, self);
                 // Though it seems that LShapeFloatBug still exists in Firefox, it apparently does not occur on exclusion floats. See the test file: test/files/column-break-bug.html
                 // if (adapt.base.checkLShapeFloatBug(self.viewport.root)) {
                 // 	// Simplistic bug workaround: add a copy of the shape translated up.
@@ -1004,8 +1002,10 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     var bleedBoxPaddingEdge = evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
 
     var exclusions = [];
+    var writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
+    var direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
     var pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
-        self.rootPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.PAGE, null);
+        self.rootPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.PAGE, null, writingMode, direction);
 
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
         = adapt.task.newFrame("layoutNextPage");

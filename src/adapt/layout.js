@@ -469,6 +469,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @const */ this.pageFloatLayoutContext = pageFloatLayoutContext;
     pageFloatLayoutContext.setContainer(this);
     /** @type {adapt.vtree.FormattingContext} */ this.flowRootFormattingContext = null;
+    /** @type {boolean} */ this.isFloat = false;
     /** @type {boolean} */ this.isFootnote = false;
     /** @type {number} */ this.startEdge = 0;
     /** @type {number} */ this.endEdge = 0;
@@ -517,6 +518,14 @@ adapt.layout.Column.prototype.getLeftEdge = function() {
  */
 adapt.layout.Column.prototype.getRightEdge = function() {
     return this.vertical ? this.beforeEdge : this.endEdge;
+};
+
+/**
+ * @param {!adapt.vtree.NodeContext} nodeContext
+ * @returns {boolean}
+ */
+adapt.layout.Column.prototype.isFloatNodeContext = function(nodeContext) {
+    return !!nodeContext.floatSide && (!this.isFloat || !!nodeContext.parent);
 };
 
 /**
@@ -659,7 +668,7 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
                         return;
                     }
                 }
-                if (position.floatSide && !self.vertical) {
+                if (self.isFloatNodeContext(position) && !self.vertical) {
                     // TODO: implement floats and footnotes properly
                     self.layoutFloatOrFootnote(position).then(function(positionParam) {
                         position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
@@ -1295,6 +1304,78 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 };
 
 /**
+ * @param {!adapt.layout.Column} area
+ * @param {?vivliostyle.pagefloat.PageFloat} float
+ */
+adapt.layout.Column.prototype.setupFloatArea = function(area, float) {
+    var floatLayoutContext = this.pageFloatLayoutContext;
+    var floatContainer = floatLayoutContext.getContainer(float.floatReference);
+    var element = area.element;
+    floatContainer.element.parentNode.appendChild(element);
+    area.copyFrom(floatContainer);
+    area.element = element;
+    area.isFloat = true;
+    var columnMargin = this.getComputedMargin(floatContainer.element);
+    adapt.base.setCSSProperty(element, "margin-top", columnMargin.top + "px");
+    adapt.base.setCSSProperty(element, "margin-bottom", columnMargin.bottom + "px");
+    adapt.base.setCSSProperty(element, "margin-left", columnMargin.left + "px");
+    adapt.base.setCSSProperty(element, "margin-right", columnMargin.right + "px");
+    area.width = floatContainer.borderLeft + floatContainer.paddingLeft + floatContainer.width +
+        floatContainer.paddingRight + floatContainer.borderRight;
+    area.height = floatContainer.borderTop + floatContainer.paddingTop + floatContainer.height +
+        floatContainer.paddingBottom + floatContainer.borderBottom;
+    area.borderLeft = area.borderRight = area.borderTop = area.borderBottom = 0;
+    area.paddingLeft = area.paddingRight = area.paddingTop = area.paddingBottom = 0;
+    area.setHorizontalPosition(area.left, area.width);
+    area.setVerticalPosition(area.top, area.height);
+    var exclusions = area.exclusions = (floatContainer.exclusions || []).concat();
+};
+
+/**
+ * @param {?vivliostyle.pagefloat.PageFloat} float
+ * @returns {!adapt.layout.Column}
+ */
+adapt.layout.Column.prototype.createPageFloatArea = function(float) {
+    var floatAreaElement = this.element.ownerDocument.createElement("div");
+    adapt.base.setCSSProperty(floatAreaElement, "position", "absolute");
+    var parentPageFloatLayoutContext = this.pageFloatLayoutContext.getPageFloatLayoutContext(float.floatReference);
+    var pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(parentPageFloatLayoutContext,
+        vivliostyle.pagefloat.FloatReference.COLUMN, null, null, null);
+    var floatArea = new adapt.layout.Column(floatAreaElement, this.layoutContext.clone(), this.clientLayout, this.layoutConstraint, pageFloatLayoutContext);
+    pageFloatLayoutContext.setContainer(floatArea);
+    this.setupFloatArea(floatArea, float);
+    floatArea.init();
+    return floatArea;
+};
+
+/**
+ * @param {!adapt.vtree.NodePosition} nodePosition
+ * @param {!vivliostyle.pagefloat.PageFloat} float
+ * @returns {!adapt.task.Result.<!adapt.layout.Column>}
+ */
+adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, float) {
+    var context = this.pageFloatLayoutContext;
+    var floatArea = this.createPageFloatArea(float);
+    var floatChunkPosition = new adapt.vtree.ChunkPosition(nodePosition);
+
+    /** @const {!adapt.task.Frame<!adapt.layout.Column>} */ var frame = adapt.task.newFrame("layoutPageFloatInner");
+    floatArea.layout(floatChunkPosition, true).then(function(newPosition) {
+        context.setFloatAreaDimensions(floatArea, float);
+        var redoResult;
+        if (floatArea.exclusions.length > 0) {
+            redoResult = floatArea.redoLayout();
+        } else {
+            redoResult = adapt.task.newResult(newPosition);
+        }
+        redoResult.then(function(floatChunkPositionAfter) {
+            context.setFloatAreaDimensions(floatArea, float);
+            frame.finish(floatArea);
+        });
+    });
+    return frame.result();
+};
+
+/**
  * @param {!adapt.vtree.NodeContext} nodeContext
  * @return {!adapt.task.Result<adapt.vtree.NodeContext>}
  */
@@ -1302,20 +1383,30 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
     var floatReference = nodeContext.floatReference;
     var sourceNode = nodeContext.sourceNode;
     goog.asserts.assert(sourceNode);
+    var floatSide = nodeContext.floatSide;
+    goog.asserts.assert(floatSide);
     var float = this.pageFloatLayoutContext.findPageFloatBySourceNode(sourceNode);
     if (!float) {
-        float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference);
+        float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference, floatSide);
         this.pageFloatLayoutContext.addPageFloat(float);
     }
     var pageFloatFragment = this.pageFloatLayoutContext.findPageFloatFragment(float);
     if (pageFloatFragment || this.pageFloatLayoutContext.isForbidden(float)) {
         // TODO
-        return this.buildDeepElementView(nodeContext);
+        nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+        var after = nodeContext.modify();
+        after.after = true;
+        return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (after));
     } else {
-        pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(float);
-        this.pageFloatLayoutContext.addPageFloatFragment(pageFloatFragment);
-        //TODO
-        return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (null));
+        var nodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
+        var self = this;
+        goog.asserts.assert(float);
+        return this.layoutPageFloatInner(nodePosition, float).thenAsync(function(floatArea) {
+            goog.asserts.assert(float);
+            pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(float, floatArea);
+            self.pageFloatLayoutContext.addPageFloatFragment(pageFloatFragment);
+            return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (null));
+        });
     }
 };
 
@@ -2236,7 +2327,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                         // clear
                         self.applyClearance(nodeContext);
                     }
-                    if (!self.isBFC(nodeContext.formattingContext) || nodeContext.floatSide || nodeContext.flexContainer) {
+                    if (!self.isBFC(nodeContext.formattingContext) || self.isFloatNodeContext(nodeContext) || nodeContext.flexContainer) {
                         // new formatting context, or float or flex container (unbreakable)
                         leadingEdgeContexts.push(nodeContext.copy());
                         breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
@@ -2392,7 +2483,7 @@ adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
                     }
                 }
                 if (!nodeContext.after) {
-                    if (nodeContext.floatSide || nodeContext.flexContainer) {
+                    if (self.isFloatNodeContext(nodeContext) || nodeContext.flexContainer) {
                         // float or flex container (unbreakable)
                         breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
                         // check if a forced break must occur before the block.
@@ -2780,7 +2871,7 @@ adapt.layout.BlockLayoutProcessor = function() {};
  * @override
  */
 adapt.layout.BlockLayoutProcessor.prototype.layout = function(nodeContext, column) {
-    if (nodeContext.floatSide) {
+    if (column.isFloatNodeContext(nodeContext)) {
         // TODO: implement floats and footnotes properly for vertical writing
         return column.layoutFloatOrFootnote(nodeContext);
     } else if (column.isBreakable(nodeContext)) {
