@@ -204,11 +204,6 @@ adapt.layout.BreakPosition.prototype.findAcceptableBreak = function(column, pena
 adapt.layout.BreakPosition.prototype.getMinBreakPenalty = function() {};
 
 /**
- * @return {number} next penalty for this break position
- */
-adapt.layout.BreakPosition.prototype.getNextMinBreakPenalty = function() {};
-
-/**
  * @return {vivliostyle.layoututil.RepetitiveElements}
  */
 adapt.layout.BreakPosition.prototype.getRepetitiveElements = function() {};
@@ -230,14 +225,6 @@ adapt.layout.AbstractBreakPosition.prototype.findAcceptableBreak = function(colu
  */
 adapt.layout.AbstractBreakPosition.prototype.getMinBreakPenalty = function() {};
 
-/**
- * @override
- */
-adapt.layout.AbstractBreakPosition.prototype.getNextMinBreakPenalty = function() {
-    var repetitiveElements =  this.getRepetitiveElements();
-    return this.getMinBreakPenalty()
-        + (repetitiveElements ? repetitiveElements.getNextPenaltyIncreasement() : 0);
-};
 
 /**
  * @abstract
@@ -286,9 +273,6 @@ goog.inherits(adapt.layout.BoxBreakPosition, adapt.layout.AbstractBreakPosition)
  * @override
  */
 adapt.layout.BoxBreakPosition.prototype.findAcceptableBreak = function(column, penalty) {
-    var repetitiveElements = this.getRepetitiveElements();
-    if (repetitiveElements) repetitiveElements.updateState(penalty);
-
     if (penalty < this.getMinBreakPenalty())
         return null;
     if (!this.alreadyEvaluated) {
@@ -302,8 +286,7 @@ adapt.layout.BoxBreakPosition.prototype.findAcceptableBreak = function(column, p
  * @override
  */
 adapt.layout.BoxBreakPosition.prototype.getMinBreakPenalty = function() {
-    var repetitiveElements =  this.getRepetitiveElements();
-    return this.penalty + (repetitiveElements ? repetitiveElements.getPenalty() : 0);
+    return this.penalty;
 };
 
 /**
@@ -338,15 +321,8 @@ goog.inherits(adapt.layout.EdgeBreakPosition, adapt.layout.AbstractBreakPosition
  * @override
  */
 adapt.layout.EdgeBreakPosition.prototype.findAcceptableBreak = function(column, penalty) {
-    var repetitiveElements =  this.getRepetitiveElements();
-    if (repetitiveElements) repetitiveElements.updateState(penalty);
     this.updateOverflows(column);
     if (penalty < this.getMinBreakPenalty()) {
-        return null;
-    }
-    if (repetitiveElements
-        && repetitiveElements.getNextPenaltyIncreasement() > 0
-        && this.overflows) {
         return null;
     }
     return column.findEdgeBreakPosition(this);
@@ -359,11 +335,9 @@ adapt.layout.EdgeBreakPosition.prototype.getMinBreakPenalty = function() {
     if (!this.isEdgeUpdated) {
         throw new Error("EdgeBreakPosition.prototype.updateEdge not called");
     }
-    var repetitiveElements =  this.getRepetitiveElements();
     return (vivliostyle.break.isAvoidBreakValue(this.breakOnEdge) ? 1 : 0)
         + (this.overflows ? 3 : 0)
-        + (this.position.parent ? this.position.parent.breakPenalty : 0)
-        + (repetitiveElements ? repetitiveElements.getPenalty() : 0);
+        + (this.position.parent ? this.position.parent.breakPenalty : 0);
 };
 
 /**
@@ -2021,7 +1995,7 @@ adapt.layout.Column.prototype.findAcceptableBreakPosition = function() {
         for (var i = this.breakPositions.length - 1; i >= 0 && !nodeContext; --i) {
             bp = this.breakPositions[i];
             nodeContext = bp.findAcceptableBreak(this, penalty);
-            var minPenalty = bp.getNextMinBreakPenalty();
+            var minPenalty = bp.getMinBreakPenalty();
             if (minPenalty > penalty) {
                 nextPenalty = Math.min(nextPenalty, minPenalty);
             }

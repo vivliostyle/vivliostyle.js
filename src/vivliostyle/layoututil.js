@@ -415,6 +415,12 @@ goog.scope(function() {
             && startNodeContext.offsetInNode === nodeContext.offsetInNode;
     };
 
+    /**
+     * @return {Element}
+     */
+    PseudoColumn.prototype.getColumnElement = function() {
+        return this.column.element;
+    };
 
     /**
      * @constructor
@@ -427,12 +433,10 @@ goog.scope(function() {
         /** @private @type {!Array.<!Element>} */ this.footerViewNodes = [];
         /** @private @type {number} */ this.headerHeight = 0;
         /** @private @type {number} */ this.footerHeight = 0;
-        /** @private @type {boolean} */ this.isSkipHeader = false;
-        /** @private @type {boolean} */ this.isSkipFooter = false;
-        /** @private @type {null|number} */this.previousPenalty = null;
-        /** @private @type {boolean} */ this.enableStatusUpdate = true;
-        /** @private @type {boolean} */ this.enableSkippingFooter = true;
-        /** @private @type {boolean} */ this.enableSkippingHeader = true;
+        /** @type {boolean} */ this.isSkipHeader = false;
+        /** @type {boolean} */ this.isSkipFooter = false;
+        /** @type {boolean} */ this.enableSkippingFooter = true;
+        /** @type {boolean} */ this.enableSkippingHeader = true;
     };
     /** @const */ var RepetitiveElements = vivliostyle.layoututil.RepetitiveElements;
 
@@ -474,11 +478,9 @@ goog.scope(function() {
     };
 
     RepetitiveElements.prototype.prepareLayoutFragment = function() {
-        this.previousPenalty  = null;
         this.isSkipHeader = this.isSkipFooter = false;
         this.headerViewNodes = [];
         this.footerViewNodes = [];
-        this.enableStatusUpdate = true;
         this.enableSkippingFooter = true;
         this.enableSkippingHeader = true;
     };
@@ -487,7 +489,7 @@ goog.scope(function() {
      * @param {?Node} firstChild
      */
     RepetitiveElements.prototype.appendHeaderToFragment = function(rootViewNode, firstChild) {
-        if (!this.headerElement) return;
+        if (!this.headerElement || this.isSkipHeader) return;
         var headerViewNode = this.headerElement.cloneNode(true);
         this.headerViewNodes.push(headerViewNode);
         rootViewNode.insertBefore(headerViewNode, firstChild);
@@ -497,31 +499,10 @@ goog.scope(function() {
      * @param {?Node} firstChild
      */
     RepetitiveElements.prototype.appendFooterToFragment = function(rootViewNode, firstChild) {
-        if (!this.footerElement) return;
+        if (!this.footerElement || this.isSkipFooter) return;
         var footerViewNode = this.footerElement.cloneNode(true);
         this.footerViewNodes.push(footerViewNode);
         rootViewNode.insertBefore(footerViewNode, firstChild);
-    };
-
-    /**
-     * @return {number}
-     */
-    RepetitiveElements.prototype.getPenalty = function() {
-        return (this.isSkipHeader ? 1 : 0)
-             + (this.isSkipFooter ? 1 : 0);
-    };
-
-    /**
-     * @return {number}
-     */
-    RepetitiveElements.prototype.getNextPenaltyIncreasement = function() {
-        if (!this.enableStatusUpdate) return 0;
-        if ((!this.isSkipFooter && this.enableSkippingFooter)
-        || (!this.isSkipHeader && this.enableSkippingHeader)) {
-            return 1;
-        } else {
-            return 0;
-        }
     };
 
     /**
@@ -531,43 +512,33 @@ goog.scope(function() {
         return (this.isSkipFooter ? 0 : this.footerHeight)
              - (this.isSkipHeader ? this.headerHeight : 0);
     };
-    /**
-     * @param {number} penalty
-     */
-    RepetitiveElements.prototype.updateState = function(penalty) {
-        if (!this.enableStatusUpdate) return;
-        var changeState = this.previousPenalty != null
-            && this.previousPenalty < penalty;
-        this.previousPenalty = penalty;
-        if (!changeState) return;
 
-        if (!this.isSkipFooter && this.enableSkippingFooter) {
-            this.isSkipFooter = true;
-            this.removeFooterFromFragment();
-        } else if (!this.isSkipHeader && this.enableSkippingHeader) {
-            this.isSkipHeader = true;
-            this.removeHeaderFromFragment();
+    /**
+     * @return {boolean}
+     */
+    RepetitiveElements.prototype.isEnableToUpdateState = function() {
+        if ((!this.isSkipFooter && this.enableSkippingFooter)
+          || (!this.isSkipHeader && this.enableSkippingHeader)) {
+            return true;
+        } else {
+            return false;
         }
     };
 
-    /**
-     * @template T
-     * @param {function():T} func
-     * @return {T}
-     */
-    RepetitiveElements.prototype.preventStatusUpdate = function(func) {
-        try {
-            this.enableStatusUpdate = false;
-            return func();
-        } finally {
-            this.enableStatusUpdate = true;
+    RepetitiveElements.prototype.updateState = function() {
+        if (!this.isSkipFooter && this.enableSkippingFooter) {
+            this.isSkipFooter = true;
+        } else if (!this.isSkipHeader && this.enableSkippingHeader) {
+            this.isSkipHeader = true;
         }
     };
 
     RepetitiveElements.prototype.preventSkippingHeader = function() {
+        this.isSkipHeader = false;
         this.enableSkippingHeader = false;
     };
     RepetitiveElements.prototype.preventSkippingFooter = function() {
+        this.isSkipFooter = false;
         this.enableSkippingFooter = false;
     };
     RepetitiveElements.prototype.removeHeaderFromFragment = function() {

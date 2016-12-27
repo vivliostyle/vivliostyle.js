@@ -131,11 +131,10 @@ goog.scope(function() {
      * @extends {adapt.layout.EdgeBreakPosition}
      */
     vivliostyle.table.BetweenTableRowBreakPosition = function(position,
-        breakOnEdge, overflows, columnBlockSize, isFirstRow) {
+        breakOnEdge, overflows, columnBlockSize) {
         EdgeBreakPosition.call(this, position, breakOnEdge, overflows, columnBlockSize);
         /** @private @const */ this.formattingContext = position.formattingContext;
         /** Array<!adapt.layout.BreakPositionAndNodeContext> */ this.acceptableCellBreakPositions = null;
-        /** @private @const */ this.isFirstRow = isFirstRow;
         /** @private @type {number|null} */ this.rowIndex = null;
     };
     /** @const */ var BetweenTableRowBreakPosition = vivliostyle.table.BetweenTableRowBreakPosition;
@@ -166,7 +165,6 @@ goog.scope(function() {
         this.getAcceptableCellBreakPositions().forEach(function(bp) {
             penalty += bp.breakPosition.getMinBreakPenalty();
         });
-        if (this.isFirstRow) penalty += 3;
         return penalty;
     };
 
@@ -176,15 +174,10 @@ goog.scope(function() {
     BetweenTableRowBreakPosition.prototype.getAcceptableCellBreakPositions = function() {
         if (!this.acceptableCellBreakPositions) {
             var formattingContext = this.formattingContext;
-            var repetitiveElements = formattingContext.repetitiveElements;
-            var f = function() {
-                var cellFragments = this.getCellFragments();
-                return cellFragments.map(function(cellFragment) {
-                    return cellFragment.findAcceptableBreakPosition();
-                });
-            }.bind(this);
-            this.acceptableCellBreakPositions =
-              repetitiveElements ? repetitiveElements.preventStatusUpdate(f) : f();
+            var cellFragments = this.getCellFragments();
+            this.acceptableCellBreakPositions = cellFragments.map(function(cellFragment) {
+                return cellFragment.findAcceptableBreakPosition();
+            });
         }
         return this.acceptableCellBreakPositions;
     };
@@ -228,8 +221,6 @@ goog.scope(function() {
      * @override
      */
     InsideTableRowBreakPosition.prototype.findAcceptableBreak = function(column, penalty) {
-        var repetitiveElements =  this.getRepetitiveElements();
-        if (repetitiveElements) repetitiveElements.updateState(penalty);
         if (penalty < this.getMinBreakPenalty())
             return null;
         var cellFragments = this.getCellFragments();
@@ -267,15 +258,10 @@ goog.scope(function() {
      */
     InsideTableRowBreakPosition.prototype.getAcceptableCellBreakPositions = function() {
         if (!this.acceptableCellBreakPositions) {
-            var repetitiveElements =  this.getRepetitiveElements();
-            var f = function() {
-                var cellFragments = this.getCellFragments();
-                return cellFragments.map(function(cellFragment) {
-                    return cellFragment.findAcceptableBreakPosition();
-                });
-            }.bind(this);
-            this.acceptableCellBreakPositions =
-              repetitiveElements ? repetitiveElements.preventStatusUpdate(f) : f();
+            var cellFragments = this.getCellFragments();
+            this.acceptableCellBreakPositions = cellFragments.map(function(cellFragment) {
+                return cellFragment.findAcceptableBreakPosition();
+            });
         }
         return this.acceptableCellBreakPositions;
     };
@@ -867,7 +853,6 @@ goog.scope(function() {
         } else {
             this.currentRowIndex++;
         }
-        formattingContext.rowIndexInFragement++;
         this.currentColumnIndex = 0;
         this.inRow = true;
         return this.layoutRowSpanningCellsFromPreviousFragment(state).thenAsync(function() {
@@ -968,11 +953,6 @@ goog.scope(function() {
                     beforeNodeContext, this.formattingContext);
                 this.column.breakPositions.push(bp);
             }
-            if (this.currentRowIndex === 0) {
-                this.formattingContext.repetitiveElements.preventSkippingHeader();
-            } else if (this.currentRowIndex == this.formattingContext.rows.length-1 && !nodeContext.overflow) {
-                this.formattingContext.repetitiveElements.preventSkippingFooter();
-            }
         }
         return adapt.task.newResult(true);
     };
@@ -1054,11 +1034,12 @@ goog.scope(function() {
     TableLayoutProcessor.prototype.getColGroupElements = function(tableElement) {
         var colGroups = [];
         var child = tableElement.firstElementChild;
-        do {
+        while (child) {
             if (child.localName === "colgroup") {
                 colGroups.push(child);
             }
-        } while (child = child.nextElementSibling);
+            child = child.nextElementSibling;
+        }
         return colGroups;
     };
 
@@ -1216,6 +1197,21 @@ goog.scope(function() {
     };
 
     /**
+     * @param {!vivliostyle.table.TableFormattingContext} formattingContext
+     * @param {Element} rootViewNode
+     */
+    TableLayoutProcessor.prototype.removeColGroups = function(formattingContext, rootViewNode) {
+        if (formattingContext.colGroups && rootViewNode) {
+            var colGroups = this.getColGroupElements(rootViewNode);
+            if (colGroups) {
+                colGroups.forEach(function(colGroup) {
+                    rootViewNode.removeChild(colGroup);
+                });
+            }
+        }
+    };
+
+    /**
      * @param {!adapt.vtree.NodeContext} nodeContext
      * @param {!adapt.layout.Column} column
      * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
@@ -1227,10 +1223,8 @@ goog.scope(function() {
         var firstChild = rootViewNode.firstChild;
         this.addCaptions(formattingContext, rootViewNode, firstChild);
         this.addColGroups(formattingContext, rootViewNode, firstChild);
-        repetitiveElements.prepareLayoutFragment();
         repetitiveElements.appendHeaderToFragment(rootViewNode, firstChild);
         repetitiveElements.appendFooterToFragment(rootViewNode, firstChild);
-        formattingContext.rowIndexInFragement = 0;
 
         var strategy = new TableLayoutStrategy(formattingContext, column);
         var iterator = new LayoutIterator(strategy, column.layoutContext);
@@ -1245,25 +1239,29 @@ goog.scope(function() {
     TableLayoutProcessor.prototype.layout = function(nodeContext, column) {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
         var frame = adapt.task.newFrame("TableLayoutProcessor.layout");
-        if (!formattingContext.doneInitialLayout) {
-            var initialPosition = nodeContext.copy();
-            this.doInitialLayout(nodeContext, column).then(function(positionAfter) {
-                formattingContext.doneInitialLayout = true;
-                if (positionAfter) {
-                    // not overflowing
-                    frame.finish(positionAfter);
-                } else {
-                    var tableViewNode = initialPosition.viewNode;
-                    var child;
-                    while (child = tableViewNode.lastChild) {
-                        tableViewNode.removeChild(child);
-                    }
-                    this.doLayout(initialPosition, column).thenFinish(frame);
+        var mode = LayoutMode.resolve(nodeContext, formattingContext);
+        var initialPosition = nodeContext.copy();
+        var initialCellBreakPositions = [].concat(formattingContext.cellBreakPositions);
+        var initialBreakPositions = [].concat(column.breakPositions);
+        mode.doLayout(this, nodeContext, column).then(function(positionAfter) {
+            var accepted = mode.accept(positionAfter, formattingContext, column);
+            mode.postLayout(positionAfter, formattingContext, accepted);
+            if (accepted) {
+                frame.finish(positionAfter);
+            } else {
+                var viewNode = initialPosition.viewNode || initialPosition.parent.viewNode;
+                var child;
+                while (child = viewNode.lastChild) {
+                    viewNode.removeChild(child);
                 }
-            }.bind(this));
-        } else {
-            this.doLayout(nodeContext, column).thenFinish(frame);
-        }
+                var rootViewNode = formattingContext.getRootViewNode(nodeContext);
+                this.removeColGroups(formattingContext, rootViewNode);
+                column.breakPositions = initialBreakPositions;
+                formattingContext.finishFragment();
+                formattingContext.cellBreakPositions = initialCellBreakPositions;
+                this.layout(nodeContext, column).thenFinish(frame);
+            }
+        }.bind(this));
         return frame.result();
     };
 
@@ -1272,9 +1270,7 @@ goog.scope(function() {
      */
     TableLayoutProcessor.prototype.createEdgeBreakPosition = function(position,
         breakOnEdge, overflows, columnBlockSize) {
-        var rowIndexInFragement = getTableFormattingContext(position.formattingContext).rowIndexInFragement;
-        return new BetweenTableRowBreakPosition(position,
-            breakOnEdge, overflows, columnBlockSize, rowIndexInFragement === 1);
+        return new BetweenTableRowBreakPosition(position, breakOnEdge, overflows, columnBlockSize);
     };
 
     /**
@@ -1283,6 +1279,11 @@ goog.scope(function() {
     TableLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
         var repetitiveElements = formattingContext.repetitiveElements;
+
+        if (!repetitiveElements.enableSkippingFooter
+            && !isTableAfterContext(nodeContext, formattingContext)) {
+            repetitiveElements.removeFooterFromFragment();
+        }
 
         if (nodeContext.display === "table-row") {
             goog.asserts.assert(nodeContext.sourceNode);
@@ -1305,11 +1306,7 @@ goog.scope(function() {
                     }
                     var cell = cells[i++];
                     var cellFragment = formattingContext.getCellFragmentOfCell(cell);
-                    var breakNodeContext;
-                    var f = function() {
-                        breakNodeContext = cellFragment.findAcceptableBreakPosition().nodeContext;
-                    };
-                    repetitiveElements ? repetitiveElements.preventStatusUpdate(f) : f();
+                    var breakNodeContext = cellFragment.findAcceptableBreakPosition().nodeContext;
                     goog.asserts.assert(breakNodeContext);
                     var cellNodeContext = cellFragment.cellNodeContext;
                     var cellNodePosition = cellNodeContext.toNodePosition();
@@ -1339,6 +1336,7 @@ goog.scope(function() {
                         loopFrame.continueLoop();
                     }
                 }).then(function() {
+                    if (repetitiveElements) repetitiveElements.prepareLayoutFragment();
                     formattingContext.finishFragment();
                     column.clearOverflownViewNodes(nodeContext, false);
                     column.layoutContext.processFragmentedBlockEdge(nodeContext);
@@ -1347,23 +1345,23 @@ goog.scope(function() {
                 return frame.result();
             }
         }
-
+        if (repetitiveElements) repetitiveElements.prepareLayoutFragment();
         formattingContext.finishFragment();
         return null;
     };
 
     /**
      * @param {!vivliostyle.table.TableCellFragment} cellFragment
-     * @param {!vivliostyle.table.TableFormattingContext}
+     * @param {!vivliostyle.table.TableFormattingContext} formattingContext
      */
     function adjustCellHeight(cellFragment, formattingContext) {
         var repetitiveElements = formattingContext.getRepetitiveElements();
         if (!repetitiveElements) return;
 
         var vertical = formattingContext.vertical;
-        var column = cellFragment.pseudoColumn.column;
-        var cellContentElement = column.element;
-        var cellElement = cellFragment.cellNodeContext.viewNode;
+        var column = cellFragment.column;
+        var cellContentElement = cellFragment.pseudoColumn.getColumnElement();
+        var cellElement = /** @type {Element} */ (cellFragment.cellNodeContext.viewNode);
 
         var cellElementRect = column.clientLayout.getElementClientRect(cellElement);
         var padding = column.getComputedPaddingBorder(cellElement);
@@ -1376,6 +1374,137 @@ goog.scope(function() {
         }
         adapt.base.setCSSProperty(cellContentElement, "overflow", "hidden");
     }
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!vivliostyle.table.TableFormattingContext} formattingContext
+     * @return {boolean}
+     */
+    function isTableAfterContext(nodeContext, formattingContext) {
+        return nodeContext.sourceNode === formattingContext.tableSourceNode
+            && nodeContext.after;
+    };
+
+    /**
+     * @interface
+     */
+    vivliostyle.table.LayoutMode = function() {};
+    /** @const */ var LayoutMode = vivliostyle.table.LayoutMode;
+
+    /**
+     * @param {!vivliostyle.table.TableLayoutProcessor} processor
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!adapt.layout.Column} column
+     * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
+     */
+    LayoutMode.prototype.doLayout = function(processor, nodeContext, column) {};
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!vivliostyle.table.TableFormattingContext} formattingContext
+     * @param {!adapt.layout.Column} column
+     * @return {boolean}
+     */
+    LayoutMode.prototype.accept = function(nodeContext, formattingContext, column) {};
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!vivliostyle.table.TableFormattingContext} formattingContext
+     * @param {boolean} accepted
+     */
+    LayoutMode.prototype.postLayout = function(nodeContext, formattingContext, accepted) {};
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!vivliostyle.table.TableFormattingContext} formattingContext
+     * @return {vivliostyle.table.LayoutMode}
+     */
+    LayoutMode.resolve = function(nodeContext, formattingContext) {
+        if (!formattingContext.doneInitialLayout) {
+            return new LayoutEntireTable();
+        } else {
+            var repetitiveElements = formattingContext.getRepetitiveElements();
+            if (nodeContext.sourceNode === formattingContext.tableSourceNode && !nodeContext.after) {
+                if (repetitiveElements) repetitiveElements.preventSkippingHeader();
+            }
+            return new LayoutFragmentedTable();
+        }
+    };
+
+    /**
+     * @constructor
+     * @implements {vivliostyle.table.LayoutMode}
+     */
+    vivliostyle.table.LayoutEntireTable = function() {};
+    /** @const */ var LayoutEntireTable = vivliostyle.table.LayoutEntireTable;
+
+    /**
+     * @override
+     */
+    LayoutEntireTable.prototype.doLayout = function(processor, nodeContext, column) {
+        return processor.doInitialLayout(nodeContext, column);
+    };
+
+    /**
+     * @override
+     */
+    LayoutEntireTable.prototype.accept = function(nodeContext, formattingContext) {
+        return !!nodeContext;
+    };
+
+    /**
+     * @override
+     */
+    LayoutEntireTable.prototype.postLayout = function(nodeContext, formattingContext, accepted) {
+        formattingContext.doneInitialLayout = true;
+    };
+
+
+    /**
+     * @constructor
+     * @implements {vivliostyle.table.LayoutMode}
+     */
+    vivliostyle.table.LayoutFragmentedTable = function() {};
+    /** @const */ var LayoutFragmentedTable = vivliostyle.table.LayoutFragmentedTable;
+
+    /**
+     * @override
+     */
+    LayoutFragmentedTable.prototype.doLayout = function(processor, nodeContext, column) {
+        return processor.doLayout(nodeContext, column);
+    };
+
+    /**
+     * @override
+     */
+    LayoutFragmentedTable.prototype.accept = function(nodeContext, formattingContext, column) {
+        var repetitiveElements = formattingContext.getRepetitiveElements();
+        if (!repetitiveElements) return true;
+
+        var breakPosition = column.findAcceptableBreakPosition();
+
+        if (isTableAfterContext(nodeContext, formattingContext)
+            && repetitiveElements.isSkipFooter) {
+            repetitiveElements.preventSkippingFooter();
+            return false;
+        }
+
+        if (!repetitiveElements.isEnableToUpdateState()) return true;
+        return !!(breakPosition.nodeContext) && !breakPosition.nodeContext.overflow;
+    };
+
+    /**
+     * @override
+     */
+    LayoutFragmentedTable.prototype.postLayout = function(nodeContext, formattingContext, accepted) {
+        var repetitiveElements = formattingContext.getRepetitiveElements();
+        if (!repetitiveElements) return;
+        if (!accepted) {
+            repetitiveElements.removeHeaderFromFragment();
+            repetitiveElements.removeFooterFromFragment();
+            repetitiveElements.updateState();
+        }
+    };
 
     /**
      * @const
