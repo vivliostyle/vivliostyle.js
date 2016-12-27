@@ -177,7 +177,8 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @type {Object.<string,adapt.pm.PageBoxInstance>} */ this.pageBoxInstances = {};
     /** @type {vivliostyle.page.PageManager} */ this.pageManager = null;
     /** @const */ this.counterStore = counterStore;
-    /** @private @const */ this.rootPageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(null);
+    /** @private @const */ this.rootPageFloatLayoutContext =
+        new vivliostyle.pagefloat.PageFloatLayoutContext(null, null, null);
     /** @type {!Object.<string,boolean>} */ this.pageBreaks = {};
     /** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = null;
     /** @const */ this.customRenderer = customRenderer;
@@ -556,6 +557,10 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
             var flowChunk = selected.flowChunk;
             var pending = true;
             column.layout(selected.chunkPosition, leadingEdge).then(function(newPosition) {
+                if (column.isInvalidated()) {
+                    loopFrame.breakLoop();
+                    return;
+                }
                 leadingEdge = false;
                 // static: keep in the flow
                 if (selected.flowChunk.repeated && (newPosition === null || flowChunk.exclusive))
@@ -600,10 +605,12 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
         }
         loopFrame.breakLoop();
     }).then(function() {
-        // Keep positions repeated or not removed
-        flowPosition.positions = flowPosition.positions.filter(function(pos, i) {
-            return repeatedIndices.indexOf(i) >= 0 || removedIndices.indexOf(i) < 0;
-        });
+        if (!column.isInvalidated()) {
+            // Keep positions repeated or not removed
+            flowPosition.positions = flowPosition.positions.filter(function(pos, i) {
+                return repeatedIndices.indexOf(i) >= 0 || removedIndices.indexOf(i) < 0;
+            });
+        }
         frame.finish(true);
     });
     return frame.result();
@@ -637,65 +644,89 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
                                                                    flowNameStr, regionPageFloatLayoutContext,
                                                                    columnCount, columnGap, columnWidth,
                                                                    innerShape, layoutContext, layoutConstraint) {
+    var self = this;
     var dontApplyExclusions = boxInstance.vertical
         ? boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth
         : boxInstance.isAutoHeight && boxInstance.isTopDependentOnAutoHeight;
     var boxContainer = layoutContainer.element;
+    var columnPageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
+        regionPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.COLUMN, null);
+    var positionAtColumnStart = self.currentLayoutPosition.clone();
+    /** @type {!adapt.task.Frame<!adapt.layout.Column>} */ var frame = adapt.task.newFrame("createAndLayoutColumn");
     var column;
-    if (columnCount > 1) {
-        var columnContainer = this.viewport.document.createElement("div");
-        adapt.base.setCSSProperty(columnContainer, "position", "absolute");
-        boxContainer.appendChild(columnContainer);
-        column = new adapt.layout.Column(columnContainer, layoutContext, this.clientLayout,
-            layoutConstraint, regionPageFloatLayoutContext);
-        column.vertical = layoutContainer.vertical;
-        column.snapHeight = layoutContainer.snapHeight;
-        column.snapWidth = layoutContainer.snapWidth;
-        if (layoutContainer.vertical) {
-            adapt.base.setCSSProperty(columnContainer, "margin-left", layoutContainer.paddingLeft + "px");
-            adapt.base.setCSSProperty(columnContainer, "margin-right", layoutContainer.paddingRight + "px");
-            var columnY = currentColumnIndex * (columnWidth + columnGap) + layoutContainer.paddingTop;
-            column.setHorizontalPosition(0, layoutContainer.width);
-            column.setVerticalPosition(columnY, columnWidth);
+    frame.loopWithFrame(function(loopFrame) {
+        if (columnCount > 1) {
+            var columnContainer = self.viewport.document.createElement("div");
+            adapt.base.setCSSProperty(columnContainer, "position", "absolute");
+            boxContainer.appendChild(columnContainer);
+            column = new adapt.layout.Column(columnContainer, layoutContext, self.clientLayout,
+                layoutConstraint, columnPageFloatLayoutContext);
+            column.vertical = layoutContainer.vertical;
+            column.snapHeight = layoutContainer.snapHeight;
+            column.snapWidth = layoutContainer.snapWidth;
+            if (layoutContainer.vertical) {
+                adapt.base.setCSSProperty(columnContainer, "margin-left", layoutContainer.paddingLeft + "px");
+                adapt.base.setCSSProperty(columnContainer, "margin-right", layoutContainer.paddingRight + "px");
+                var columnY = currentColumnIndex * (columnWidth + columnGap) + layoutContainer.paddingTop;
+                column.setHorizontalPosition(0, layoutContainer.width);
+                column.setVerticalPosition(columnY, columnWidth);
+            } else {
+                adapt.base.setCSSProperty(columnContainer, "margin-top", layoutContainer.paddingTop + "px");
+                adapt.base.setCSSProperty(columnContainer, "margin-bottom", layoutContainer.paddingBottom + "px");
+                var columnX = currentColumnIndex * (columnWidth + columnGap) + layoutContainer.paddingLeft;
+                column.setVerticalPosition(0, layoutContainer.height);
+                column.setHorizontalPosition(columnX, columnWidth);
+            }
+            column.originX = offsetX + layoutContainer.paddingLeft;
+            column.originY = offsetY + layoutContainer.paddingTop;
         } else {
-            adapt.base.setCSSProperty(columnContainer, "margin-top", layoutContainer.paddingTop + "px");
-            adapt.base.setCSSProperty(columnContainer, "margin-bottom", layoutContainer.paddingBottom + "px");
-            var columnX = currentColumnIndex * (columnWidth + columnGap) + layoutContainer.paddingLeft;
-            column.setVerticalPosition(0, layoutContainer.height);
-            column.setHorizontalPosition(columnX, columnWidth);
+            column = new adapt.layout.Column(boxContainer, layoutContext, self.clientLayout,
+                layoutConstraint, columnPageFloatLayoutContext);
+            column.copyFrom(layoutContainer);
         }
-        column.originX = offsetX + layoutContainer.paddingLeft;
-        column.originY = offsetY + layoutContainer.paddingTop;
-    } else {
-        column = new adapt.layout.Column(boxContainer, layoutContext, this.clientLayout,
-            layoutConstraint, regionPageFloatLayoutContext);
-        column.copyFrom(layoutContainer);
-    }
-    column.exclusions = dontApplyExclusions ? [] : exclusions;
-    column.innerShape = innerShape;
-    if (column.width >= 0) {
-        // column.element.style.outline = "1px dotted green";
-        return this.layoutColumn(column, flowNameStr).thenReturn(column);
-    } else {
-        return adapt.task.newResult(column);
-    }
+        column.exclusions = dontApplyExclusions ? [] : exclusions;
+        column.innerShape = innerShape;
+        columnPageFloatLayoutContext.setContainer(column);
+        if (column.width >= 0) {
+            // column.element.style.outline = "1px dotted green";
+            self.layoutColumn(column, flowNameStr).then(function() {
+                if (column.isInvalidated() && !layoutContainer.isInvalidated()) {
+                    self.currentLayoutPosition = positionAtColumnStart.clone();
+                    if (column.element !== boxContainer) {
+                        boxContainer.removeChild(column.element);
+                    }
+                    loopFrame.continueLoop();
+                } else {
+                    loopFrame.breakLoop();
+                }
+            });
+        } else {
+            loopFrame.breakLoop();
+        }
+    }).then(function() {
+        frame.finish(column);
+    });
+    return frame.result();
 };
 
 /**
- * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} parent
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} pagePageFloatLayoutContext
  * @param {!adapt.pm.PageBoxInstance} boxInstance
+ * @param {!adapt.vtree.Container} layoutContainer
  * @returns {!vivliostyle.pagefloat.PageFloatLayoutContext}
  */
-adapt.ops.StyleInstance.prototype.getRegionPageFloatLayoutContext = function(parent, boxInstance) {
+adapt.ops.StyleInstance.prototype.getRegionPageFloatLayoutContext = function(
+    pagePageFloatLayoutContext, boxInstance, layoutContainer) {
     if (boxInstance instanceof vivliostyle.page.PageRulePartitionInstance ||
         (boxInstance instanceof adapt.pm.PageMasterInstance &&
         !(boxInstance instanceof vivliostyle.page.PageRuleMasterInstance))) {
-        parent = new vivliostyle.pagefloat.PageFloatLayoutContext(parent);
+        pagePageFloatLayoutContext.setContainer(layoutContainer);
     }
     if (boxInstance instanceof adapt.pm.PartitionInstance) {
-        return new vivliostyle.pagefloat.PageFloatLayoutContext(parent);
+        return new vivliostyle.pagefloat.PageFloatLayoutContext(pagePageFloatLayoutContext,
+            vivliostyle.pagefloat.FloatReference.REGION, layoutContainer);
     } else {
-        return parent;
+        return pagePageFloatLayoutContext;
     }
 };
 
@@ -706,12 +737,12 @@ adapt.ops.StyleInstance.prototype.getRegionPageFloatLayoutContext = function(par
  * @param {number} offsetX
  * @param {number} offsetY
  * @param {Array.<adapt.geom.Shape>} exclusions
- * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} parentPageFloatLayoutContext
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} pagePageFloatLayoutContext
  * @return {adapt.task.Result.<boolean>} holding true
  */
 adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, parentContainer,
                                                              offsetX, offsetY, exclusions,
-                                                             parentPageFloatLayoutContext) {
+                                                             pagePageFloatLayoutContext) {
     var self = this;
     boxInstance.reset();
     var enabled = boxInstance.getProp(self, "enabled");
@@ -735,7 +766,9 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
     offsetX += layoutContainer.left + layoutContainer.marginLeft + layoutContainer.borderLeft;
     offsetY += layoutContainer.top + layoutContainer.marginTop + layoutContainer.borderTop;
     var regionPageFloatLayoutContext =
-        self.getRegionPageFloatLayoutContext(self.rootPageFloatLayoutContext, boxInstance);
+        self.getRegionPageFloatLayoutContext(pagePageFloatLayoutContext, boxInstance, layoutContainer);
+    var pageContainer = pagePageFloatLayoutContext.getContainer();
+    var positionAtContainerStart = self.currentLayoutPosition.clone();
     var cont;
     var removed = false;
     if (!flowName || !flowName.isIdent()) {
@@ -781,50 +814,62 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
         var columnIndex = 0;
         var column = null;
         frame.loopWithFrame(function(loopFrame) {
-            while (columnIndex < columnCount) {
-                var currentColumnIndex = columnIndex++;
-                var lr = self.createAndLayoutColumn(boxInstance, offsetX, offsetY, exclusions, layoutContainer,
-                    currentColumnIndex, flowNameStr, regionPageFloatLayoutContext, columnCount, columnGap,
-                    columnWidth, innerShape, layoutContext, layoutConstraint).thenAsync(function(c) {
-                        column = c;
-                        if (column.element === boxContainer) {
-                            layoutContainer = column;
+            self.createAndLayoutColumn(boxInstance, offsetX, offsetY, exclusions, layoutContainer,
+                columnIndex++, flowNameStr, regionPageFloatLayoutContext, columnCount, columnGap,
+                columnWidth, innerShape, layoutContext, layoutConstraint).then(function(c) {
+                    if (layoutContainer.isInvalidated()) {
+                        goog.asserts.assert(pageContainer);
+                        if (layoutContainer === pageContainer || !pageContainer.isInvalidated()) {
+                            columnIndex = 0;
+                            self.currentLayoutPosition = positionAtContainerStart.clone();
+                            layoutContainer.validate();
+                            loopFrame.continueLoop();
+                        } else {
+                            loopFrame.breakLoop();
                         }
-                        if (column.pageBreakType) {
-                            if (column.pageBreakType != "column") {
-                                // skip remaining columns
-                                columnIndex = columnCount;
-                                if (column.pageBreakType != "region") {
-                                    // skip remaining regions
-                                    self.pageBreaks[flowNameStr] = true;
-                                }
+                        return;
+                    }
+                    column = c;
+                    if (column.pageBreakType) {
+                        if (column.pageBreakType != "column") {
+                            // skip remaining columns
+                            columnIndex = columnCount;
+                            if (column.pageBreakType != "region") {
+                                // skip remaining regions
+                                self.pageBreaks[flowNameStr] = true;
                             }
                         }
-                        return adapt.task.newResult(true);
-                    });
-                if (lr.isPending()) {
-                    lr.then(function() {
-                        computedBlockSize = Math.max(computedBlockSize, column.computedBlockSize);
-                        loopFrame.continueLoop();
-                    });
-                    return;
-                } else {
+                    }
                     computedBlockSize = Math.max(computedBlockSize, column.computedBlockSize);
-                }
-            }
-            loopFrame.breakLoop();
+                    if (columnIndex < columnCount) {
+                        loopFrame.continueLoop();
+                    } else {
+                        loopFrame.breakLoop();
+                    }
+                });
         }).then(function() {
-            layoutContainer.computedBlockSize = computedBlockSize;
-            boxInstance.finishContainer(self, layoutContainer, page, column,
-                columnCount, self.clientLayout, self.faces);
+            if (pageContainer && !pageContainer.isInvalidated()) {
+                if (column.element === boxContainer) {
+                    layoutContainer = column;
+                }
+                layoutContainer.computedBlockSize = computedBlockSize;
+                boxInstance.finishContainer(self, layoutContainer, page, column,
+                    columnCount, self.clientLayout, self.faces);
+            }
             innerFrame.finish(true);
         });
         cont = innerFrame.result();
     } else {
-        boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout, self.faces);
+        if (pageContainer && !pageContainer.isInvalidated()) {
+            boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout, self.faces);
+        }
         cont = adapt.task.newResult(true);
     }
     cont.then(function() {
+        if (pageContainer && pageContainer.isInvalidated()) {
+            frame.finish(true);
+            return;
+        }
         if (!boxInstance.isAutoHeight || Math.floor(layoutContainer.computedBlockSize) > 0) {
             if (!removed && !dontExclude) {
                 var outerX = layoutContainer.originX + layoutContainer.left;
@@ -853,7 +898,11 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
                 var r = self.layoutContainer(page, child, /** @type {HTMLElement} */ (boxContainer),
                     offsetX, offsetY, exclusions, regionPageFloatLayoutContext);
                 if (r.isPending()) {
-                    return r;
+                    return r.thenAsync(function() {
+                        return adapt.task.newResult(pageContainer ? !pageContainer.isInvalidated() : true);
+                    });
+                } else if (pageContainer && pageContainer.isInvalidated()) {
+                    break;
                 }
             }
             return adapt.task.newResult(false);
@@ -955,20 +1004,31 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     var bleedBoxPaddingEdge = evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
 
     var exclusions = [];
-    var pagefloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(self.rootPageFloatLayoutContext);
+    var pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
+        self.rootPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.PAGE, null);
 
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
         = adapt.task.newFrame("layoutNextPage");
     frame.loopWithFrame(function(loopFrame) {
         self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge,
-            exclusions.concat(), pagefloatLayoutContext).then(function() {
-                loopFrame.breakLoop();
+            exclusions.concat(), pageFloatLayoutContext).then(function() {
+                var pageContainer = pageFloatLayoutContext.getContainer();
+                goog.asserts.assert(pageContainer);
+                if (pageContainer.isInvalidated()) {
+                    self.currentLayoutPosition = self.layoutPositionAtPageStart.clone();
+                    page.clearBleedBox();
+                    pageContainer.validate();
+                    loopFrame.continueLoop();
+                } else {
+                    loopFrame.breakLoop();
+                }
             });
     }).then(function() {
         pageMaster.adjustPageLayout(self, page, self.clientLayout);
         var isLeftPage = new adapt.expr.Named(pageMaster.pageBox.scope, "left-page");
         page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;
         self.processLinger();
+        cp = self.currentLayoutPosition;
         self.currentLayoutPosition = self.layoutPositionAtPageStart = null;
         cp.highestSeenOffset = self.styler.getReachedOffset();
         var triggers = self.style.store.getTriggersForDoc(self.xmldoc);

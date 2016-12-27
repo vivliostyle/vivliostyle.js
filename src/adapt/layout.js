@@ -456,17 +456,18 @@ adapt.layout.BlockFormattingContext.prototype.getRepetitiveElements = function()
  * @param {!adapt.vtree.LayoutContext} layoutContext
  * @param {adapt.vtree.ClientLayout} clientLayout
  * @param {adapt.layout.LayoutConstraint} layoutConstraint
- * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} regionPageFloatLayoutContext
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} pageFloatLayoutContext
  * @extends {adapt.vtree.Container}
  */
-adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConstraint, regionPageFloatLayoutContext) {
+adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConstraint, pageFloatLayoutContext) {
     adapt.vtree.Container.call(this, element);
     /** @type {Node} */ this.last = element.lastChild;
     /** @type {!adapt.vtree.LayoutContext} */ this.layoutContext = layoutContext;
     /** @type {adapt.vtree.ClientLayout} */ this.clientLayout = clientLayout;
     /** @const */ this.layoutConstraint = layoutConstraint;
     /** @type {Document} */ this.viewDocument = element.ownerDocument;
-    this.pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(regionPageFloatLayoutContext);
+    /** @const */ this.pageFloatLayoutContext = pageFloatLayoutContext;
+    pageFloatLayoutContext.setContainer(this);
     /** @type {adapt.vtree.FormattingContext} */ this.flowRootFormattingContext = null;
     /** @type {boolean} */ this.isFootnote = false;
     /** @type {number} */ this.startEdge = 0;
@@ -1298,15 +1299,24 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
  * @return {!adapt.task.Result<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
+    var floatReference = nodeContext.floatReference;
     var sourceNode = nodeContext.sourceNode;
     goog.asserts.assert(sourceNode);
     var float = this.pageFloatLayoutContext.findPageFloatBySourceNode(sourceNode);
     if (!float) {
-        float = new vivliostyle.pagefloat.PageFloat(sourceNode);
+        float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference);
         this.pageFloatLayoutContext.addPageFloat(float);
     }
-    // TODO
-    return this.buildDeepElementView(nodeContext);
+    var pageFloatFragment = this.pageFloatLayoutContext.findPageFloatFragment(float);
+    if (pageFloatFragment || this.pageFloatLayoutContext.isForbidden(float)) {
+        // TODO
+        return this.buildDeepElementView(nodeContext);
+    } else {
+        pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(float);
+        this.pageFloatLayoutContext.addPageFloatFragment(pageFloatFragment);
+        //TODO
+        return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (null));
+    }
 };
 
 /**
@@ -2646,7 +2656,9 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
                         leadingEdge = false;
                         nodeContext = nodeContextParam;
 
-                        if (self.pageBreakType) {
+                        if (self.isInvalidated()) {
+                            loopFrame.breakLoop();
+                        } else if (self.pageBreakType) {
                             // explicit page break
                             loopFrame.breakLoop(); // Loop end
                         } else if (nodeContext && self.stopByOverflow(nodeContext)) {
@@ -2674,6 +2686,10 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
                 }
                 loopFrame.breakLoop();
             }).then(function() {
+                if (self.isInvalidated()) {
+                    frame.finish(null);
+                    return;
+                }
                 var footnoteArea = self.footnoteArea;
                 if (footnoteArea) {
                     self.element.appendChild(footnoteArea.element);

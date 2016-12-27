@@ -97,12 +97,30 @@ goog.scope(function() {
 
     /**
      * @param {!Node} sourceNode
+     * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloat = function(sourceNode) {
+    vivliostyle.pagefloat.PageFloat = function(sourceNode, floatReference) {
         /** @const */ this.sourceNode = sourceNode;
+        /** @const */ this.floatReference = floatReference;
+        /** @private @type {?vivliostyle.pagefloat.PageFloat.ID} */ this.id = null;
     };
     /** @const */ var PageFloat = vivliostyle.pagefloat.PageFloat;
+
+    /**
+     * @typedef {string}
+     */
+    PageFloat.ID;
+
+    /**
+     * @returns {vivliostyle.pagefloat.PageFloat.ID}
+     */
+    PageFloat.prototype.getId = function() {
+        if (!this.id) {
+            throw new Error("The page float is not yet added");
+        }
+        return this.id;
+    };
 
     /**
      * @private
@@ -110,8 +128,17 @@ goog.scope(function() {
      */
     vivliostyle.pagefloat.PageFloatStore = function() {
         /** @private @const {!Array<!vivliostyle.pagefloat.PageFloat>} */ this.floats = [];
+        /** @private @type {number} */ this.nextPageFloatIndex = 0;
     };
     /** @const */ var PageFloatStore = vivliostyle.pagefloat.PageFloatStore;
+
+    /**
+     * @private
+     * @returns {vivliostyle.pagefloat.PageFloat.ID}
+     */
+    PageFloatStore.prototype.createPageFloatId = function() {
+        return "pf" + (this.nextPageFloatIndex++);
+    };
 
     /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
@@ -123,6 +150,7 @@ goog.scope(function() {
         if (index >= 0) {
             throw new Error("A page float with the same source node is already registered");
         } else {
+            float.id = this.createPageFloatId();
             this.floats.push(float);
         }
     };
@@ -139,14 +167,53 @@ goog.scope(function() {
     };
 
     /**
-     * @param {vivliostyle.pagefloat.PageFloatLayoutContext} parent
+     * @param {vivliostyle.pagefloat.PageFloat.ID} id
+     */
+    PageFloatStore.prototype.findPageFloatById = function(id) {
+        var index = this.floats.findIndex(function(f) {
+            return f.id === id;
+        });
+        return index >= 0 ? this.floats[index] : null;
+    };
+
+    /**
+     * @param {!vivliostyle.pagefloat.PageFloat} float
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloatLayoutContext = function(parent) {
+    vivliostyle.pagefloat.PageFloatFragment = function(float) {
+        /** @const */ this.pageFloatId = float.getId();
+    };
+    /** @const */ var PageFloatFragment = vivliostyle.pagefloat.PageFloatFragment;
+
+    /**
+     * @param {vivliostyle.pagefloat.PageFloatLayoutContext} parent
+     * @param {?vivliostyle.pagefloat.FloatReference} floatReference
+     * @param {adapt.vtree.Container} container
+     * @constructor
+     */
+    vivliostyle.pagefloat.PageFloatLayoutContext = function(parent, floatReference, container) {
         /** @const */ this.parent = parent;
+        /** @private @const */ this.floatReference = floatReference;
+        /** @private */ this.container = container;
         /** @private @const */ this.floatStore = parent ? parent.floatStore : new PageFloatStore();
+        /** @private @const {!Array<vivliostyle.pagefloat.PageFloat.ID>} */ this.forbiddenFloats = [];
+        /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatFragment>} */ this.floatFragments = [];
     };
     /** @const */ var PageFloatLayoutContext = vivliostyle.pagefloat.PageFloatLayoutContext;
+
+    /**
+     * @returns {adapt.vtree.Container}
+     */
+    PageFloatLayoutContext.prototype.getContainer = function() {
+        return this.container;
+    };
+
+    /**
+     * @param {!adapt.vtree.Container} container
+     */
+    PageFloatLayoutContext.prototype.setContainer = function(container) {
+        this.container = container;
+    };
 
     /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
@@ -161,5 +228,90 @@ goog.scope(function() {
      */
     PageFloatLayoutContext.prototype.findPageFloatBySourceNode = function(sourceNode) {
         return this.floatStore.findPageFloatBySourceNode(sourceNode);
+    };
+
+    /**
+     * @param {!vivliostyle.pagefloat.PageFloat} float
+     */
+    PageFloatLayoutContext.prototype.forbid = function(float) {
+        var id = float.getId();
+        var floatReference = float.floatReference;
+        if (floatReference === this.floatReference) {
+            if (this.forbiddenFloats.indexOf(id) < 0) {
+                this.forbiddenFloats.push(id);
+            }
+        } else if (!this.parent) {
+            throw new Error("No PageFloatLayoutContext for " + floatReference);
+        } else {
+            this.parent.forbid(float);
+        }
+    };
+
+    /**
+     * @param {!vivliostyle.pagefloat.PageFloat} float
+     * @returns {boolean}
+     */
+    PageFloatLayoutContext.prototype.isForbidden = function(float) {
+        var id = float.getId();
+        var floatReference = float.floatReference;
+        if (floatReference === this.floatReference) {
+            return this.forbiddenFloats.indexOf(id) >= 0;
+        } else if (!this.parent) {
+            throw new Error("No PageFloatLayoutContext for " + floatReference);
+        } else {
+            return this.parent.isForbidden(float);
+        }
+    };
+
+    /**
+     * @param {!vivliostyle.pagefloat.PageFloatFragment} floatFragment
+     */
+    PageFloatLayoutContext.prototype.addPageFloatFragment = function(floatFragment) {
+        var id = floatFragment.pageFloatId;
+        var float = this.floatStore.findPageFloatById(id);
+        goog.asserts.assert(float);
+        var floatReference = float.floatReference;
+        if (floatReference !== this.floatReference) {
+            if (!this.parent) {
+                throw new Error("No PageFloatLayoutContext for " + floatReference);
+            } else {
+                this.parent.addPageFloatFragment(floatFragment);
+            }
+        } else if (this.floatFragments.indexOf(floatFragment) < 0) {
+            this.floatFragments.push(floatFragment);
+        }
+        this.invalidate();
+    };
+
+    /**
+     * @param {!vivliostyle.pagefloat.PageFloat} float
+     * @returns {?vivliostyle.pagefloat.PageFloatFragment}
+     */
+    PageFloatLayoutContext.prototype.findPageFloatFragment = function(float) {
+        if (float.floatReference !== this.floatReference) {
+            if (!this.parent) {
+                throw new Error("No PageFloatLayoutContext for " + float.floatReference);
+            } else {
+                return this.parent.findPageFloatFragment(float);
+            }
+        }
+        var id = float.getId();
+        var index = this.floatFragments.findIndex(function(f) {
+            return f.pageFloatId === id;
+        });
+        if (index >= 0) {
+            return this.floatFragments[index];
+        } else {
+            return null;
+        }
+    };
+
+    /**
+     * @private
+     */
+    PageFloatLayoutContext.prototype.invalidate = function() {
+        if (this.container) {
+            this.container.invalidate();
+        }
     };
 });
