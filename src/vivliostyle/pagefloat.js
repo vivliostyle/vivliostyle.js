@@ -365,11 +365,18 @@ goog.scope(function() {
         var logicalFloatSide = vivliostyle.logical.toLogical(float.floatSide, writingMode, direction);
         var blockStart = area.vertical ? (area.left + area.width) : area.top;
         var blockEnd = area.vertical ? area.left : area.top + area.height;
+        var inlineStart = area.vertical ? area.top : area.left;
+        var inlineEnd = area.vertical ? area.top + area.height : area.left + area.width;
+        var fitContentInlineSize = vivliostyle.sizing.getSize(area.clientLayout, area.element,
+            [vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE];
         switch (logicalFloatSide) {
             case "inline-start":
-            case "inline-end":
-                // TODO Calculate and set correct block-dimension position
                 area.setBlockPosition(blockStart, area.computedBlockSize);
+                area.setInlinePosition(inlineStart, fitContentInlineSize);
+                break;
+            case "inline-end":
+                area.setBlockPosition(blockStart, area.computedBlockSize);
+                area.setInlinePosition(inlineEnd - fitContentInlineSize, fitContentInlineSize);
                 break;
             case "block-start":
                 area.setBlockPosition(blockStart, area.computedBlockSize);

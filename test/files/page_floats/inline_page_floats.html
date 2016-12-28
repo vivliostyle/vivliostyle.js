@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Inline page floats</title>
+  <style>
+    @page {
+      size: 400px;
+    }
+    :root {
+      column-count: 2;
+    }
+    .float {
+      background: rgba(255, 0, 0, 0.3);
+      padding: 5px;
+      border: blue solid 3px;
+      margin: 3px;
+    }
+    .column-float {
+      float-reference: column;
+    }
+    .page-float {
+      float-reference: page;
+    }
+    .inline-start {
+      float: inline-start;
+    }
+    .inline-end {
+      float: inline-end;
+    }
+  </style>
+</head>
+<body>
+Inline size of inline page floats should be fit-content (shrink-to-fit) inline size.
+<div class="float column-float inline-start">column</div>
+<div class="float page-float inline-end">page</div>
+</body>
+</html>
