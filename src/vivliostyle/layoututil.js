@@ -517,8 +517,8 @@ goog.scope(function() {
      * @return {boolean}
      */
     RepetitiveElements.prototype.isEnableToUpdateState = function() {
-        if ((!this.isSkipFooter && this.enableSkippingFooter)
-          || (!this.isSkipHeader && this.enableSkippingHeader)) {
+        if ((!this.isSkipFooter && this.enableSkippingFooter && this.footerElement)
+          || (!this.isSkipHeader && this.enableSkippingHeader && this.headerElement)) {
             return true;
         } else {
             return false;
@@ -526,9 +526,9 @@ goog.scope(function() {
     };
 
     RepetitiveElements.prototype.updateState = function() {
-        if (!this.isSkipFooter && this.enableSkippingFooter) {
+        if (!this.isSkipFooter && this.enableSkippingFooter && this.footerElement) {
             this.isSkipFooter = true;
-        } else if (!this.isSkipHeader && this.enableSkippingHeader) {
+        } else if (!this.isSkipHeader && this.enableSkippingHeader && this.headerElement) {
             this.isSkipHeader = true;
         }
     };
