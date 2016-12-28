@@ -1377,9 +1377,27 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, floa
 
 /**
  * @param {!adapt.vtree.NodeContext} nodeContext
+ * @returns {!adapt.vtree.NodeContext}
+ */
+adapt.layout.Column.prototype.setFloatAnchorViewNode = function(nodeContext) {
+    var parent = nodeContext.viewNode.parentNode;
+    var dummy = parent.ownerDocument.createElement("span");
+    adapt.base.setCSSProperty(dummy, "width", "0");
+    adapt.base.setCSSProperty(dummy, "height", "0");
+    parent.appendChild(dummy);
+    parent.removeChild(nodeContext.viewNode);
+    var nodeContextAfter = nodeContext.modify();
+    nodeContextAfter.after = true;
+    nodeContextAfter.viewNode = dummy;
+    return nodeContextAfter;
+};
+
+/**
+ * @param {!adapt.vtree.NodeContext} nodeContext
  * @return {!adapt.task.Result<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
+    var self = this;
     var floatReference = nodeContext.floatReference;
     var sourceNode = nodeContext.sourceNode;
     goog.asserts.assert(sourceNode);
@@ -1391,23 +1409,23 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
         this.pageFloatLayoutContext.addPageFloat(float);
     }
     var pageFloatFragment = this.pageFloatLayoutContext.findPageFloatFragment(float);
+    var cont;
     if (pageFloatFragment || this.pageFloatLayoutContext.isForbidden(float)) {
-        // TODO
-        nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
-        var after = nodeContext.modify();
-        after.after = true;
-        return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (after));
+        cont = adapt.task.newResult(true);
     } else {
         var nodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
-        var self = this;
         goog.asserts.assert(float);
-        return this.layoutPageFloatInner(nodePosition, float).thenAsync(function(floatArea) {
+        cont = this.layoutPageFloatInner(nodePosition, float).thenAsync(function(floatArea) {
             goog.asserts.assert(float);
             pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(float, floatArea);
             self.pageFloatLayoutContext.addPageFloatFragment(pageFloatFragment);
-            return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (null));
+            return adapt.task.newResult(true);
         });
     }
+    return cont.thenAsync(function() {
+        var nodeContextAfter = self.setFloatAnchorViewNode(nodeContext);
+        return adapt.task.newResult(nodeContextAfter);
+    });
 };
 
 /**
