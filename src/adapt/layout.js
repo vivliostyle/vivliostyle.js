@@ -413,43 +413,6 @@ adapt.layout.validateCheckPoints = function(checkPoints) {
 };
 
 /**
- * @param {adapt.vtree.FormattingContext} parent
- * @constructor
- * @implements {adapt.vtree.FormattingContext}
- */
-adapt.layout.BlockFormattingContext = function(parent) {
-    /** @private @const */ this.parent = parent;
-};
-
-/**
- * @override
- */
-adapt.layout.BlockFormattingContext.prototype.getName = function() {
-    return "Block formatting context (adapt.layout.BlockFormattingContext)";
-};
-
-/**
- * @override
- */
-adapt.layout.BlockFormattingContext.prototype.isFirstTime = function(nodeContext, firstTime) {
-    return firstTime;
-};
-
-/**
- * @override
- */
-adapt.layout.BlockFormattingContext.prototype.getParent = function() {
-    return this.parent;
-};
-
-/**
- * @override
- */
-adapt.layout.BlockFormattingContext.prototype.getRepetitiveElements = function() {
-    return null;
-};
-
-/**
  * @constructor
  * @param {Element} element
  * @param {!adapt.vtree.LayoutContext} layoutContext
@@ -1976,7 +1939,7 @@ adapt.layout.Column.prototype.finishBreak = function(nodeContext, forceRemoveSel
     var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(nodeContext.formattingContext);
     var result = layoutProcessor.finishBreak(this, nodeContext, forceRemoveSelf, endOfRegion);
     if (!result) {
-        result = adapt.layout.blockLayoutProcessor.finishBreak(this, nodeContext, forceRemoveSelf, endOfRegion);
+        result = vivliostyle.bfc.blockLayoutProcessor.finishBreak(this, nodeContext, forceRemoveSelf, endOfRegion);
     }
     return result;
 };
@@ -2180,7 +2143,7 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
  * @returns {boolean}
  */
 adapt.layout.Column.prototype.isBFC = function(formattingContext) {
-    return formattingContext instanceof adapt.layout.BlockFormattingContext;
+    return formattingContext instanceof vivliostyle.bfc.BlockFormattingContext;
 };
 
 /**
@@ -2206,7 +2169,7 @@ adapt.layout.Column.prototype.isOrphan = function(node) {
 adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
     var fc = nodeContext.after ?
         (nodeContext.parent && nodeContext.parent.formattingContext) : nodeContext.formattingContext;
-    if (fc && !this.isBFC(fc)) {
+    if (fc && !this.isBFC(fc) ) {
         return adapt.task.newResult(nodeContext);
     }
 
@@ -2799,77 +2762,3 @@ adapt.layout.Column.prototype.redoLayout = function() {
     });
     return frame.result();
 };
-
-/**
- * @constructor
- * @implements {adapt.layout.LayoutProcessor}
- */
-adapt.layout.BlockLayoutProcessor = function() {};
-
-/**
- * @override
- */
-adapt.layout.BlockLayoutProcessor.prototype.layout = function(nodeContext, column) {
-    if (nodeContext.floatSide) {
-        // TODO: implement floats and footnotes properly for vertical writing
-        return column.layoutFloatOrFootnote(nodeContext);
-    } else if (column.isBreakable(nodeContext)) {
-        return column.layoutBreakableBlock(nodeContext);
-    } else {
-        return column.layoutUnbreakable(nodeContext);
-    }
-};
-
-/**
- * @override
- */
-adapt.layout.BlockLayoutProcessor.prototype.createEdgeBreakPosition = function(
-    position, breakOnEdge, overflows, columnBlockSize) {
-    return new adapt.layout.EdgeBreakPosition(position.copy(), breakOnEdge, overflows, columnBlockSize);
-};
-
-/**
- * @param {!adapt.layout.Column} column
- * @param {adapt.vtree.NodeContext} nodeContext
- * @param {boolean} forceRemoveSelf
- * @param {boolean} endOfRegion
- * @return {!adapt.task.Result.<boolean>} holing true
- * @override
- */
-adapt.layout.BlockLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {
-    var removeSelf = forceRemoveSelf || (nodeContext.viewNode != null && nodeContext.viewNode.nodeType == 1 && !nodeContext.after);
-    column.clearOverflownViewNodes(nodeContext, removeSelf);
-    if (endOfRegion) {
-        column.fixJustificationIfNeeded(nodeContext, true);
-        column.layoutContext.processFragmentedBlockEdge(removeSelf ? nodeContext : nodeContext.parent);
-    }
-    return column.clearFootnotes(nodeContext.boxOffset);
-};
-
-/**
- * @const
- */
-adapt.layout.blockLayoutProcessor = new adapt.layout.BlockLayoutProcessor();
-
-vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
-    function(nodeContext, firstTime, display, position, floatSide, isRoot) {
-        var parent = nodeContext.parent;
-        if (!parent && nodeContext.formattingContext) {
-            return null;
-        } else if (parent && nodeContext.formattingContext !== parent.formattingContext) {
-            return null;
-        } else if (nodeContext.establishesBFC ||
-            (!nodeContext.formattingContext && vivliostyle.display.isBlock(display, position, floatSide, isRoot))) {
-            return new adapt.layout.BlockFormattingContext(parent ? parent.formattingContext : null);
-        } else {
-            return null;
-        }
-    }
-);
-
-vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, function(formattingContext) {
-    if (formattingContext instanceof adapt.layout.BlockFormattingContext) {
-        return adapt.layout.blockLayoutProcessor;
-    }
-    return null;
-});

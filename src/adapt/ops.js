@@ -504,7 +504,7 @@ adapt.ops.StyleInstance.prototype.flowChunkIsAfterParentFlowForcedBreak = functi
 adapt.ops.StyleInstance.prototype.setFormattingContextToColumn = function(column, flowName) {
     var flow = this.currentLayoutPosition.flows[flowName];
     if (!flow.formattingContext) {
-        flow.formattingContext = new adapt.layout.BlockFormattingContext(null);
+        flow.formattingContext = new vivliostyle.bfc.BlockFormattingContext(null);
     }
     column.flowRootFormattingContext = flow.formattingContext;
 };
