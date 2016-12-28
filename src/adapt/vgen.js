@@ -789,6 +789,8 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         if (self.nodeContext.parent && self.nodeContext.parent.formattingContext) {
             firstTime = self.nodeContext.parent.formattingContext.isFirstTime(self.nodeContext, firstTime);
         }
+        self.processRepeateOnBreak(computedStyle);
+
         // Create the view element
         var custom = false;
         var inner = null;
@@ -1201,6 +1203,31 @@ adapt.vgen.ViewFactory.prototype.preprocessElementStyle = function(computedStyle
     hooks.forEach(function(hook) {
         hook(self.nodeContext, computedStyle);
     });
+};
+
+/**
+ * @private
+ * @param {!Object.<string,adapt.css.Val>} computedStyle
+ */
+adapt.vgen.ViewFactory.prototype.processRepeateOnBreak = function(computedStyle) {
+    var repeatOnBreak = computedStyle["repeat-on-break"];
+    if (repeatOnBreak !== adapt.css.ident.none
+      && this.nodeContext.parent
+      && this.nodeContext.parent.formattingContext) {
+        if ( repeatOnBreak === adapt.css.ident.auto) {
+            if ( this.nodeContext.display === "table-header-group") {
+                repeatOnBreak = adapt.css.ident.header;
+            } else if ( this.nodeContext.display === "table-header-group") {
+                repeatOnBreak = adapt.css.ident.footer;
+            } else {
+                repeatOnBreak = adapt.css.ident.none;
+            }
+        }
+        if (repeatOnBreak && repeatOnBreak !== adapt.css.ident.none) {
+            this.nodeContext.parent.formattingContext.initializeRepetitiveElements(this.nodeContext.vertical);
+            this.nodeContext.repeatOnBreak = repeatOnBreak.toString();
+        }
+    }
 };
 
 /**

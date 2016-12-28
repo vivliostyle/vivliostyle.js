@@ -529,10 +529,6 @@ adapt.vtree.FormattingContext.prototype.isFirstTime = function(nodeContext, firs
  */
 adapt.vtree.FormattingContext.prototype.getParent = function() {};
 
-/**
- * @return {vivliostyle.layoututil.RepetitiveElements}
- */
-adapt.vtree.FormattingContext.prototype.getRepetitiveElements = function() {};
 
 /**
  * @typedef {{
@@ -744,6 +740,7 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {?string} */ this.lang = null;
     /** @type {?Array.<vivliostyle.diff.Change>} */ this.preprocessedTextContent = null;
     /** @type {adapt.vtree.FormattingContext} */ this.formattingContext = parent ? parent.formattingContext : null;
+    /** @type {?string} */ this.repeatOnBreak = null;
 };
 
 /**
@@ -773,6 +770,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.nodeShadow = null;
     this.preprocessedTextContent = null;
     this.formattingContext = this.parent ? this.parent.formattingContext : null;
+    this.repeatOnBreak = null;
 };
 
 /**
@@ -811,6 +809,7 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.overflow = this.overflow;
     np.preprocessedTextContent = this.preprocessedTextContent;
     np.formattingContext = this.formattingContext;
+    np.repeatOnBreak = this.repeatOnBreak;
     return np;
 };
 
