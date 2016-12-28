@@ -48,6 +48,8 @@
         "adapt/vgen.js",
         "adapt/layout.js",
         "vivliostyle/layoututil.js",
+        "vivliostyle/repetitiveelements.js",
+        "vivliostyle/bfc.js",
         "vivliostyle/table.js",
         "vivliostyle/page.js",
         "vivliostyle/counters.js",
