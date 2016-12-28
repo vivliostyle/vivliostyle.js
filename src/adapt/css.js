@@ -900,6 +900,8 @@ adapt.css.ident = {
     fixed: adapt.css.getName("fixed"),
     flex: adapt.css.getName("flex"),
     footnote: adapt.css.getName("footnote"),
+    footer: adapt.css.getName("footer"),
+    header: adapt.css.getName("header"),
     hidden: adapt.css.getName("hidden"),
     horizontal_tb: adapt.css.getName("horizontal-tb"),
     inherit: adapt.css.getName("inherit"),
