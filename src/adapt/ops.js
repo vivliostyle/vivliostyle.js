@@ -606,6 +606,9 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
         loopFrame.breakLoop();
     }).then(function() {
         if (!column.isInvalidated()) {
+            column.pageFloatLayoutContext.finish();
+        }
+        if (!column.isInvalidated()) {
             // Keep positions repeated or not removed
             flowPosition.positions = flowPosition.positions.filter(function(pos, i) {
                 return repeatedIndices.indexOf(i) >= 0 || removedIndices.indexOf(i) < 0;
@@ -820,6 +823,9 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
             self.createAndLayoutColumn(boxInstance, offsetX, offsetY, exclusions, layoutContainer,
                 columnIndex++, flowNameStr, regionPageFloatLayoutContext, columnCount, columnGap,
                 columnWidth, innerShape, layoutContext, layoutConstraint).then(function(c) {
+                    if (columnIndex === columnCount) {
+                        regionPageFloatLayoutContext.finish();
+                    }
                     if (layoutContainer.isInvalidated()) {
                         goog.asserts.assert(pageContainer);
                         if (layoutContainer === pageContainer || !pageContainer.isInvalidated()) {
@@ -1012,11 +1018,12 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     frame.loopWithFrame(function(loopFrame) {
         self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge,
             exclusions.concat(), pageFloatLayoutContext).then(function() {
+                pageFloatLayoutContext.finish();
                 var pageContainer = pageFloatLayoutContext.getContainer();
                 goog.asserts.assert(pageContainer);
                 if (pageContainer.isInvalidated()) {
                     self.currentLayoutPosition = self.layoutPositionAtPageStart.clone();
-                    page.clearBleedBox();
+                    pageFloatLayoutContext.removeAllPageFloatFragment();
                     pageContainer.validate();
                     loopFrame.continueLoop();
                 } else {

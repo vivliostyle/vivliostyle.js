@@ -1398,34 +1398,32 @@ adapt.layout.Column.prototype.setFloatAnchorViewNode = function(nodeContext) {
  */
 adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
     var self = this;
+    var context = this.pageFloatLayoutContext;
     var floatReference = nodeContext.floatReference;
     var sourceNode = nodeContext.sourceNode;
     goog.asserts.assert(sourceNode);
     var floatSide = nodeContext.floatSide;
     goog.asserts.assert(floatSide);
-    var float = this.pageFloatLayoutContext.findPageFloatBySourceNode(sourceNode);
+    var float = context.findPageFloatBySourceNode(sourceNode);
     if (!float) {
         float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference, floatSide);
-        this.pageFloatLayoutContext.addPageFloat(float);
+        context.addPageFloat(float);
     }
-    var pageFloatFragment = this.pageFloatLayoutContext.findPageFloatFragment(float);
-    var cont;
-    if (pageFloatFragment || this.pageFloatLayoutContext.isForbidden(float)) {
-        cont = adapt.task.newResult(true);
+    var nodeContextAfter = self.setFloatAnchorViewNode(nodeContext);
+    var pageFloatFragment = context.findPageFloatFragment(float);
+    if (pageFloatFragment || context.isForbidden(float)) {
+        context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
+        return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
     } else {
         var nodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
         goog.asserts.assert(float);
-        cont = this.layoutPageFloatInner(nodePosition, float).thenAsync(function(floatArea) {
+        return this.layoutPageFloatInner(nodePosition, float).thenAsync(function(floatArea) {
             goog.asserts.assert(float);
             pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(float, floatArea);
-            self.pageFloatLayoutContext.addPageFloatFragment(pageFloatFragment);
-            return adapt.task.newResult(true);
+            context.addPageFloatFragment(pageFloatFragment);
+            return adapt.task.newResult(null);
         });
     }
-    return cont.thenAsync(function() {
-        var nodeContextAfter = self.setFloatAnchorViewNode(nodeContext);
-        return adapt.task.newResult(nodeContextAfter);
-    });
 };
 
 /**

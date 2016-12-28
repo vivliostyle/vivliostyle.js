@@ -277,14 +277,192 @@ describe("pagefloat", function() {
             });
         });
 
-        describe("#invalidate", function() {
-            it("invalidate the container", function() {
-                var container = { invalidate: jasmine.createSpy("invalidate") };
-                var context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, container, null, null);
+        describe("#removePageFloatFragment", function() {
+            var container, context, float, area, fragment;
+            beforeEach(function() {
+                container = {
+                    invalidate: jasmine.createSpy("invalidate")
+                };
+                context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, container, null, null);
+                float = new PageFloat({}, FloatReference.PAGE, "block-start");
+                context.addPageFloat(float);
+                area = {
+                    element: {
+                        parentNode: {
+                            removeChild: jasmine.createSpy("removeChild")
+                        }
+                    }
+                };
+                fragment = new PageFloatFragment(float, area);
+                context.addPageFloatFragment(fragment);
+                container.invalidate.calls.reset();
+            });
 
+            it("removes the specified PageFloatFragment", function() {
+                expect(context.findPageFloatFragment(float)).toBe(fragment);
+
+                context.removePageFloatFragment(fragment);
+
+                expect(context.findPageFloatFragment(float)).toBe(null);
+            });
+
+            it("detaches the view node of the fragment", function() {
+                context.removePageFloatFragment(fragment);
+
+                expect(area.element.parentNode.removeChild).toHaveBeenCalledWith(area.element);
+            });
+
+            it("invalidates the page float container", function() {
+                context.removePageFloatFragment(fragment);
+
+                expect(container.invalidate).toHaveBeenCalled();
+            });
+        });
+
+        describe("#registerPageFloatAnchor", function() {
+            var pageContext, regionContext, columnContext, float, anchorViewNode;
+            beforeEach(function() {
+                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null);
+                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null);
+                anchorViewNode = {};
+            });
+
+            it("stores the anchor view node", function() {
+                float = new PageFloat({}, FloatReference.COLUMN, "block-start");
+                columnContext.addPageFloat(float);
+                columnContext.registerPageFloatAnchor(float, anchorViewNode);
+
+                expect(columnContext.floatAnchors[float.getId()]).toBe(anchorViewNode);
+            });
+
+            it("stores the anchor view node to the corresponding context", function() {
+                float = new PageFloat({}, FloatReference.REGION, "block-start");
+                columnContext.addPageFloat(float);
+                columnContext.registerPageFloatAnchor(float, anchorViewNode);
+
+                expect(columnContext.floatAnchors[float.getId()]).toBeUndefined();
+                expect(regionContext.floatAnchors[float.getId()]).toBe(anchorViewNode);
+
+                float = new PageFloat({}, FloatReference.PAGE, "block-start");
+                columnContext.addPageFloat(float);
+                columnContext.registerPageFloatAnchor(float, anchorViewNode);
+
+                expect(columnContext.floatAnchors[float.getId()]).toBeUndefined();
+                expect(regionContext.floatAnchors[float.getId()]).toBeUndefined();
+                expect(pageContext.floatAnchors[float.getId()]).toBe(anchorViewNode);
+            });
+        });
+
+        describe("#isAnchorAlreadyAppeared", function() {
+            var container, context, float, id, anchorViewNode;
+            beforeEach(function() {
+                container = {
+                    element: {
+                        contains: jasmine.createSpy("contains")
+                    }
+                };
+                context = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, container, null, null);
+                float = new PageFloat({}, FloatReference.COLUMN, "block-start");
+                context.addPageFloat(float);
+                id = float.getId();
+                anchorViewNode = {};
+            });
+
+            it("returns false if the anchor view node is not registered", function() {
+                expect(context.isAnchorAlreadyAppeared(id)).toBe(false);
+            });
+
+            it("returns false if the anchor view node if registered but not contained in the container", function() {
+                container.element.contains.and.returnValue(false);
+                context.registerPageFloatAnchor(float, anchorViewNode);
+
+                expect(context.isAnchorAlreadyAppeared(id)).toBe(false);
+                expect(container.element.contains).toHaveBeenCalledWith(anchorViewNode);
+            });
+
+            it("returns true if the anchor view node if registered and contained in the container", function() {
+                container.element.contains.and.returnValue(true);
+                context.registerPageFloatAnchor(float, anchorViewNode);
+
+                expect(context.isAnchorAlreadyAppeared(id)).toBe(true);
+                expect(container.element.contains).toHaveBeenCalledWith(anchorViewNode);
+            });
+        });
+
+        describe("#finish", function() {
+            var context, float1, fragment1, float2, fragment2;
+            beforeEach(function() {
+                context = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, null);
+                spyOn(context, "isAnchorAlreadyAppeared");
+                spyOn(context, "removePageFloatFragment");
+                float1 = new PageFloat({}, FloatReference.COLUMN, "block-start");
+                context.addPageFloat(float1);
+                fragment1 = new PageFloatFragment(float1, {});
+                context.addPageFloatFragment(fragment1);
+                float2 = new PageFloat({}, FloatReference.COLUMN, "block-start");
+                context.addPageFloat(float2);
+                fragment2 = new PageFloatFragment(float2, {});
+                context.addPageFloatFragment(fragment2);
+            });
+
+            it("do nothing if all anchor view nodes of the float fragments have already appeared", function() {
+                expect(context.findPageFloatFragment(float1)).toBe(fragment1);
+                expect(context.findPageFloatFragment(float2)).toBe(fragment2);
+
+                context.isAnchorAlreadyAppeared.and.returnValue(true);
+                context.finish();
+
+                expect(context.removePageFloatFragment).not.toHaveBeenCalled();
+            });
+
+            it("Removes and forbids the last fragment whose anchor have not appeared", function() {
+                context.isAnchorAlreadyAppeared.and.returnValue(false);
+                context.finish();
+
+                expect(context.removePageFloatFragment).toHaveBeenCalledWith(fragment2);
+                expect(context.removePageFloatFragment).not.toHaveBeenCalledWith(fragment1);
+                expect(context.isForbidden(float2)).toBe(true);
+                expect(context.isForbidden(float1)).not.toBe(true);
+            });
+
+            it("Removes the last fragment whose anchor have not appeared", function() {
+                context.isAnchorAlreadyAppeared.and.callFake(function(f) {
+                    return f === fragment2.pageFloatId;
+                });
+                context.finish();
+
+                expect(context.removePageFloatFragment).toHaveBeenCalledWith(fragment1);
+                expect(context.removePageFloatFragment).not.toHaveBeenCalledWith(fragment2);
+                expect(context.isForbidden(float1)).toBe(true);
+                expect(context.isForbidden(float2)).not.toBe(true);
+            });
+        });
+
+        describe("#invalidate", function() {
+            var container, context;
+            beforeEach(function() {
+                container = { invalidate: jasmine.createSpy("invalidate") };
+                context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, container, null, null);
+            });
+
+            it("invalidate the container", function() {
                 context.invalidate();
 
                 expect(container.invalidate).toHaveBeenCalled();
+            });
+
+            it("removes all registered anchor view nodes", function() {
+                var float = new PageFloat({}, FloatReference.PAGE, "block-start");
+                context.addPageFloat(float);
+                var anchorViewNode = {};
+                context.registerPageFloatAnchor(float, anchorViewNode);
+
+                expect(context.floatAnchors[float.getId()]).toBe(anchorViewNode);
+
+                context.invalidate();
+
+                expect(Object.keys(context.floatAnchors).length).toBe(0);
             });
         });
 

@@ -252,13 +252,6 @@ adapt.vtree.Page.prototype.getPageAreaElement = function() {
     return this.pageAreaElement || this.container;
 };
 
-adapt.vtree.Page.prototype.clearBleedBox = function() {
-    var c;
-    while (c = this.bleedBox.lastChild) {
-        this.bleedBox.removeChild(c);
-    }
-};
-
 /**
  * @typedef {{left: adapt.vtree.Page, right: adapt.vtree.Page}}
  */

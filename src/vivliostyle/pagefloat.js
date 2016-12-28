@@ -185,7 +185,7 @@ goog.scope(function() {
      */
     vivliostyle.pagefloat.PageFloatFragment = function(float, area) {
         /** @const */ this.pageFloatId = float.getId();
-        /** @const */ this.outerShape = area.getOuterShape(null, null);
+        /** @const */ this.area = area;
     };
     /** @const */ var PageFloatFragment = vivliostyle.pagefloat.PageFloatFragment;
 
@@ -193,7 +193,7 @@ goog.scope(function() {
      * @returns {adapt.geom.Shape}
      */
     PageFloatFragment.prototype.getOuterShape = function() {
-        return this.outerShape;
+        return this.area.getOuterShape(null, null);
     };
 
     /**
@@ -214,10 +214,12 @@ goog.scope(function() {
         /** @private @const */ this.floatStore = parent ? parent.floatStore : new PageFloatStore();
         /** @private @const {!Array<vivliostyle.pagefloat.PageFloat.ID>} */ this.forbiddenFloats = [];
         /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatFragment>} */ this.floatFragments = [];
+        /** @private @const {!Object<vivliostyle.pagefloat.PageFloat.ID, Node>} */ this.floatAnchors = {};
     };
     /** @const */ var PageFloatLayoutContext = vivliostyle.pagefloat.PageFloatLayoutContext;
 
     /**
+     * @private
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @returns {!vivliostyle.pagefloat.PageFloatLayoutContext}
      */
@@ -273,6 +275,7 @@ goog.scope(function() {
     };
 
     /**
+     * @private
      * @param {!vivliostyle.pagefloat.PageFloat} float
      */
     PageFloatLayoutContext.prototype.forbid = function(float) {
@@ -321,6 +324,28 @@ goog.scope(function() {
     };
 
     /**
+     * @private
+     * @param {!vivliostyle.pagefloat.PageFloatFragment} floatFragment
+     */
+    PageFloatLayoutContext.prototype.removePageFloatFragment = function(floatFragment) {
+        var index = this.floatFragments.indexOf(floatFragment);
+        if (index >= 0) {
+            var fragment = (this.floatFragments.splice(index, 1))[0];
+            var element = fragment.area && fragment.area.element;
+            if (element && element.parentNode) {
+                element.parentNode.removeChild(element);
+            }
+            this.container.invalidate();
+        }
+    };
+
+    PageFloatLayoutContext.prototype.removeAllPageFloatFragment = function() {
+        for (var i = this.floatFragments.length - 1; i >= 0; i--) {
+            this.removePageFloatFragment(this.floatFragments[i]);
+        }
+    };
+
+    /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
      * @returns {?vivliostyle.pagefloat.PageFloatFragment}
      */
@@ -341,9 +366,50 @@ goog.scope(function() {
     };
 
     /**
+     * @param {!vivliostyle.pagefloat.PageFloat} float
+     * @param {Node} anchorViewNode
+     */
+    PageFloatLayoutContext.prototype.registerPageFloatAnchor = function(float, anchorViewNode) {
+        if (float.floatReference === this.floatReference) {
+            this.floatAnchors[float.getId()] = anchorViewNode;
+        } else {
+            var parent = this.getParent(float.floatReference);
+            parent.registerPageFloatAnchor(float, anchorViewNode);
+        }
+    };
+
+    /**
+     * @private
+     * @param {vivliostyle.pagefloat.PageFloat.ID} floatId
+     */
+    PageFloatLayoutContext.prototype.isAnchorAlreadyAppeared = function(floatId) {
+        var anchorViewNode = this.floatAnchors[floatId];
+        if (!anchorViewNode) return false;
+        if (this.container && this.container.element) {
+            return this.container.element.contains(anchorViewNode);
+        }
+        return false;
+    };
+
+    PageFloatLayoutContext.prototype.finish = function() {
+        for (var i = this.floatFragments.length - 1; i >= 0; i--) {
+            var fragment = this.floatFragments[i];
+            if (!this.isAnchorAlreadyAppeared(fragment.pageFloatId)) {
+                this.removePageFloatFragment(fragment);
+                var float = this.floatStore.findPageFloatById(fragment.pageFloatId);
+                this.forbid(float);
+                return;
+            }
+        }
+    };
+
+    /**
      * @private
      */
     PageFloatLayoutContext.prototype.invalidate = function() {
+        Object.keys(this.floatAnchors).forEach(function(k) {
+            delete this.floatAnchors[k];
+        }, this);
         if (this.container) {
             this.container.invalidate();
         }
