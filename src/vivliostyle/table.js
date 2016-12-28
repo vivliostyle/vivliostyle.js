@@ -1249,13 +1249,7 @@ goog.scope(function() {
             if (accepted) {
                 frame.finish(positionAfter);
             } else {
-                var viewNode = initialPosition.viewNode || initialPosition.parent.viewNode;
-                var child;
-                while (child = viewNode.lastChild) {
-                    viewNode.removeChild(child);
-                }
-                var rootViewNode = formattingContext.getRootViewNode(nodeContext);
-                this.removeColGroups(formattingContext, rootViewNode);
+                this.clearNodes(formattingContext, initialPosition);
                 column.breakPositions = initialBreakPositions;
                 formattingContext.finishFragment();
                 formattingContext.cellBreakPositions = initialCellBreakPositions;
@@ -1263,6 +1257,24 @@ goog.scope(function() {
             }
         }.bind(this));
         return frame.result();
+    };
+
+    /**
+     * @param {!vivliostyle.table.TableFormattingContext} formattingContext
+     * @param {!adapt.vtree.NodeContext} initialPosition
+     */
+    TableLayoutProcessor.prototype.clearNodes = function(formattingContext, initialPosition) {
+        var viewNode = initialPosition.viewNode || initialPosition.parent.viewNode;
+        var child;
+        while (child = viewNode.lastChild) {
+            viewNode.removeChild(child);
+        }
+        var sibling;
+        while (sibling = viewNode.nextSibling) {
+            sibling.parentNode.removeChild(sibling);
+        }
+        var rootViewNode = formattingContext.getRootViewNode(initialPosition);
+        this.removeColGroups(formattingContext, rootViewNode);
     };
 
     /**
