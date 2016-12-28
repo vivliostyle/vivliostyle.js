@@ -1340,7 +1340,7 @@ adapt.layout.Column.prototype.createPageFloatArea = function(float) {
     adapt.base.setCSSProperty(floatAreaElement, "position", "absolute");
     var parentPageFloatLayoutContext = this.pageFloatLayoutContext.getPageFloatLayoutContext(float.floatReference);
     var pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(parentPageFloatLayoutContext,
-        vivliostyle.pagefloat.FloatReference.COLUMN, null, null, null);
+        vivliostyle.pagefloat.FloatReference.COLUMN, null, this.pageFloatLayoutContext.flowName, null, null);
     var floatArea = new adapt.layout.Column(floatAreaElement, this.layoutContext.clone(), this.clientLayout, this.layoutConstraint, pageFloatLayoutContext);
     pageFloatLayoutContext.setContainer(floatArea);
     this.setupFloatArea(floatArea, float);
@@ -1409,13 +1409,18 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
         float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference, floatSide);
         context.addPageFloat(float);
     }
+
+    var nodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
     var nodeContextAfter = self.setFloatAnchorViewNode(nodeContext);
     var pageFloatFragment = context.findPageFloatFragment(float);
-    if (pageFloatFragment || context.isForbidden(float)) {
+    if (pageFloatFragment) {
+        context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
+        return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
+    } else if (context.isForbidden(float)) {
+        context.deferPageFloat(float, nodePosition);
         context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
         return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
     } else {
-        var nodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
         goog.asserts.assert(float);
         return this.layoutPageFloatInner(nodePosition, float).thenAsync(function(floatArea) {
             goog.asserts.assert(float);

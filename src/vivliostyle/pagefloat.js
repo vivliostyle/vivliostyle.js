@@ -197,24 +197,47 @@ goog.scope(function() {
     };
 
     /**
+     * @param {!vivliostyle.pagefloat.PageFloat} float
+     * @param {!adapt.vtree.NodePosition} nodePosition
+     * @param {string} flowName
+     * @constructor
+     */
+    vivliostyle.pagefloat.PageFloatContinuation = function(float, nodePosition, flowName) {
+        /** @const */ this.float = float;
+        /** @const */ this.nodePosition = nodePosition;
+        /** @const */ this.flowName = flowName;
+    };
+    /** @const */ var PageFloatContinuation = vivliostyle.pagefloat.PageFloatContinuation;
+
+    /**
      * @param {vivliostyle.pagefloat.PageFloatLayoutContext} parent
      * @param {?vivliostyle.pagefloat.FloatReference} floatReference
      * @param {adapt.vtree.Container} container
+     * @param {?string} flowName
      * @param {?adapt.css.Val} writingMode
      * @param {?adapt.css.Val} direction
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloatLayoutContext = function(parent, floatReference, container, writingMode,
-                                                            direction) {
+    vivliostyle.pagefloat.PageFloatLayoutContext = function(parent, floatReference, container, flowName,
+                                                            writingMode, direction) {
         /** @const */ this.parent = parent;
+        if (parent) {
+            parent.children.push(this);
+        }
+        /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatLayoutContext>} */ this.children = [];
         /** @private @const */ this.floatReference = floatReference;
         /** @private */ this.container = container;
+        /** @const */ this.flowName = flowName;
         /** @const */ this.writingMode = writingMode || (parent && parent.writingMode);
         /** @const */ this.direction = direction || (parent && parent.direction);
         /** @private @const */ this.floatStore = parent ? parent.floatStore : new PageFloatStore();
         /** @private @const {!Array<vivliostyle.pagefloat.PageFloat.ID>} */ this.forbiddenFloats = [];
         /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatFragment>} */ this.floatFragments = [];
         /** @private @const {!Object<vivliostyle.pagefloat.PageFloat.ID, Node>} */ this.floatAnchors = {};
+        /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} */ this.floatsDeferredToNext = [];
+        var previousSibling = this.getPreviousSibling();
+        /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} */
+        this.floatsDeferredFromPrevious = previousSibling ? [].concat(previousSibling.floatsDeferredToNext) : [];
     };
     /** @const */ var PageFloatLayoutContext = vivliostyle.pagefloat.PageFloatLayoutContext;
 
@@ -228,6 +251,47 @@ goog.scope(function() {
             throw new Error("No PageFloatLayoutContext for " + floatReference);
         }
         return this.parent;
+    };
+
+    /**
+     * @private
+     * @param {?vivliostyle.pagefloat.PageFloatLayoutContext} child
+     * @param {?vivliostyle.pagefloat.FloatReference} floatReference
+     * @returns {?vivliostyle.pagefloat.PageFloatLayoutContext}
+     */
+    PageFloatLayoutContext.prototype.getPreviousSiblingOf = function(child, floatReference) {
+        var index = this.children.indexOf(/** @type {!vivliostyle.pagefloat.PageFloatLayoutContext} */ (child));
+        if (index < 0) {
+            index = this.children.length;
+        }
+        for (var i = index - 1; i >= 0; i--) {
+            var result = this.children[i];
+            if (result.floatReference === floatReference) {
+                return result;
+            } else {
+                result = result.getPreviousSiblingOf(null, floatReference);
+                if (result) {
+                    return result;
+                }
+            }
+        }
+        if (this.parent) {
+            return this.parent.getPreviousSiblingOf(this, floatReference);
+        } else {
+            return null;
+        }
+    };
+
+    /**
+     * @private
+     * @returns {?vivliostyle.pagefloat.PageFloatLayoutContext}
+     */
+    PageFloatLayoutContext.prototype.getPreviousSibling = function() {
+        if (this.parent) {
+            return this.parent.getPreviousSiblingOf(this, this.floatReference);
+        } else {
+            return null;
+        }
     };
 
     /**
@@ -383,12 +447,48 @@ goog.scope(function() {
      * @param {vivliostyle.pagefloat.PageFloat.ID} floatId
      */
     PageFloatLayoutContext.prototype.isAnchorAlreadyAppeared = function(floatId) {
+        var deferredFloats = this.getDeferredPageFloatContinuations();
+        if (deferredFloats.some(function(cont) { return cont.float.getId() === floatId; })) {
+            return true;
+        }
         var anchorViewNode = this.floatAnchors[floatId];
         if (!anchorViewNode) return false;
         if (this.container && this.container.element) {
             return this.container.element.contains(anchorViewNode);
         }
         return false;
+    };
+
+    /**
+     * @param {!vivliostyle.pagefloat.PageFloat} float
+     * @param {!adapt.vtree.NodePosition} nodePosition
+     * @param {?string=} flowName
+     */
+    PageFloatLayoutContext.prototype.deferPageFloat = function(float, nodePosition, flowName) {
+        flowName = flowName || this.flowName;
+        goog.asserts.assert(flowName);
+        if (float.floatReference === this.floatReference) {
+            this.floatsDeferredToNext.push(new PageFloatContinuation(float, nodePosition, flowName));
+        } else {
+            var parent = this.getParent(float.floatReference);
+            parent.deferPageFloat(float, nodePosition, flowName);
+        }
+    };
+
+    /**
+     * @param {?string=} flowName
+     * @returns {!Array<!vivliostyle.pagefloat.PageFloatContinuation>}
+     */
+    PageFloatLayoutContext.prototype.getDeferredPageFloatContinuations = function(flowName) {
+        flowName = flowName || this.flowName;
+        var result = this.floatsDeferredFromPrevious.filter(function(cont) {
+            return !flowName || cont.flowName === flowName;
+        });
+        if (this.parent) {
+            return this.parent.getDeferredPageFloatContinuations(flowName).concat(result);
+        } else {
+            return result;
+        }
     };
 
     PageFloatLayoutContext.prototype.finish = function() {
@@ -407,6 +507,7 @@ goog.scope(function() {
      * @private
      */
     PageFloatLayoutContext.prototype.invalidate = function() {
+        this.children.splice(0);
         Object.keys(this.floatAnchors).forEach(function(k) {
             delete this.floatAnchors[k];
         }, this);
