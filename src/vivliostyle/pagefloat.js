@@ -487,6 +487,22 @@ goog.scope(function() {
         }
     };
 
+    /**
+     * @param {?string=} flowName
+     * @returns {!Array<!vivliostyle.pagefloat.PageFloatContinuation>}
+     */
+    PageFloatLayoutContext.prototype.getPageFloatContinuationsDeferredToNext = function(flowName) {
+        flowName = flowName || this.flowName;
+        var result = this.floatsDeferredToNext.filter(function(cont) {
+            return !flowName || cont.flowName === flowName;
+        });
+        if (this.parent) {
+            return this.parent.getPageFloatContinuationsDeferredToNext(flowName).concat(result);
+        } else {
+            return result;
+        }
+    };
+
     PageFloatLayoutContext.prototype.finish = function() {
         for (var i = this.floatFragments.length - 1; i >= 0; i--) {
             var fragment = this.floatFragments[i];
@@ -497,6 +513,14 @@ goog.scope(function() {
                 return;
             }
         }
+        this.floatsDeferredFromPrevious.forEach(function(continuation) {
+            if (this.floatsDeferredToNext.indexOf(continuation) >= 0)
+                return;
+            var pageFloatId = continuation.float.getId();
+            if (this.floatFragments.some(function(f) { return f.pageFloatId === pageFloatId; }))
+                return;
+            this.floatsDeferredToNext.push(continuation);
+        }, this);
     };
 
     /**

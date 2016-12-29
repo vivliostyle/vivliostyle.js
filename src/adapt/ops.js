@@ -543,6 +543,25 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
 };
 
 /**
+ * @param {!adapt.layout.Column} column
+ * @returns {?adapt.vtree.ChunkPosition}
+ */
+adapt.ops.StyleInstance.prototype.getLastAfterPositionIfDeferredFloatsExists = function(column) {
+    var pageFloatLayoutContext = column.pageFloatLayoutContext;
+    var deferredFloats = pageFloatLayoutContext.getPageFloatContinuationsDeferredToNext();
+    if (deferredFloats.length > 0) {
+        if (column.lastAfterPosition) {
+            return new adapt.vtree.ChunkPosition(column.lastAfterPosition);
+        } else {
+            goog.asserts.assert("column.lastAfterPosition === null");
+            return null;
+        }
+    } else {
+        return null;
+    }
+};
+
+/**
  * @param {adapt.layout.Column} column
  * @param {string} flowName
  * @return {adapt.task.Result.<boolean>} holding true
@@ -615,6 +634,13 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
                         } else {
                             // go to the next element in the flow
                             removedIndices.push(index);
+                            // If there are page floats deferred to the next fragmentainer,
+                            // continue layout in the next fragmentainer from dummy position (last after position)
+                            var lastAfterPosition = self.getLastAfterPositionIfDeferredFloatsExists(column);
+                            if (lastAfterPosition) {
+                                selected.chunkPosition = lastAfterPosition;
+                                repeatedIndices.push(index);
+                            }
                         }
                         if (column.pageBreakType) {
                             // forced break

@@ -489,6 +489,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @type {number} */ this.rightFloatEdge = 0;  // bottom of the bottommost right float
     /** @type {number} */ this.bottommostFloatTop = 0;  // Top of the bottommost float
     /** @type {boolean} */ this.stopAtOverflow = true;
+    /** @type {?adapt.vtree.NodePosition} */ this.lastAfterPosition = null;
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
 
@@ -2450,6 +2451,9 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                 nodeContext = nextResult.get();
             }
         }
+        if (lastAfterNodeContext) {
+            self.lastAfterPosition = lastAfterNodeContext.toNodePosition();
+        }
         if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, true, breakAtTheEdge)) {
             if (lastAfterNodeContext && self.stopAtOverflow) {
                 nodeContext = lastAfterNodeContext.modify();
@@ -2676,6 +2680,7 @@ adapt.layout.Column.prototype.init = function() {
     this.computedBlockSize = 0;
     this.overflown = false;
     this.pageBreakType = null;
+    this.lastAfterPosition = null;
 };
 
 /**

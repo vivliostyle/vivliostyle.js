@@ -499,8 +499,38 @@ describe("pagefloat", function() {
             });
         });
 
+        describe("getPageFloatContinuationsDeferredToNext", function() {
+            var pageContext, regionContext, columnContext, cont1, cont2, cont3, cont4, cont5, cont6;
+            beforeEach(function() {
+                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
+                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, "foo", null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, "foo", null, null);
+                cont1 = new PageFloatContinuation({}, {}, "foo");
+                pageContext.floatsDeferredToNext.push(cont1);
+                cont2 = new PageFloatContinuation({}, {}, "bar");
+                pageContext.floatsDeferredToNext.push(cont2);
+                cont3 = new PageFloatContinuation({}, {}, "foo");
+                regionContext.floatsDeferredToNext.push(cont3);
+                cont4 = new PageFloatContinuation({}, {}, "bar");
+                regionContext.floatsDeferredToNext.push(cont4);
+                cont5 = new PageFloatContinuation({}, {}, "foo");
+                columnContext.floatsDeferredToNext.push(cont5);
+                cont6 = new PageFloatContinuation({}, {}, "bar");
+                columnContext.floatsDeferredToNext.push(cont6);
+            });
+
+            it("returns all PageFloatContinuations deferred to the next fragmentainer with the corresonding flow name in order of page, region and column", function() {
+                expect(columnContext.getPageFloatContinuationsDeferredToNext()).toEqual([cont1, cont3, cont5]);
+                expect(columnContext.getPageFloatContinuationsDeferredToNext("bar")).toEqual([cont2, cont4, cont6]);
+            });
+
+            it("returns all PageFLoatContinuations deferred to the next fragmentainer in order of page, region and column when the context does not have a flow name and no flow name is specified as an argument", function() {
+                expect(pageContext.getPageFloatContinuationsDeferredToNext()).toEqual([cont1, cont2]);
+            });
+        });
+
         describe("#finish", function() {
-            var context, float1, fragment1, float2, fragment2;
+            var context, float1, cont1, fragment1, float2, fragment2, float3, cont3, float4, cont4;
             beforeEach(function() {
                 context = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, null, null);
                 spyOn(context, "isAnchorAlreadyAppeared");
@@ -509,13 +539,22 @@ describe("pagefloat", function() {
                 context.addPageFloat(float1);
                 fragment1 = new PageFloatFragment(float1, {});
                 context.addPageFloatFragment(fragment1);
+                cont1 = new PageFloatContinuation(float1, {}, "foo");
                 float2 = new PageFloat({}, FloatReference.COLUMN, "block-start");
                 context.addPageFloat(float2);
                 fragment2 = new PageFloatFragment(float2, {});
                 context.addPageFloatFragment(fragment2);
+                float3 = new PageFloat({}, FloatReference.COLUMN, "block-start");
+                cont3 = new PageFloatContinuation(float3, {}, "bar");
+                context.addPageFloat(float3);
+                float4 = new PageFloat({}, FloatReference.COLUMN, "block-start");
+                context.addPageFloat(float4);
+                cont4 = new PageFloatContinuation(float4, {}, "baz");
+                context.floatsDeferredFromPrevious = [cont1, cont3, cont4];
+                context.floatsDeferredToNext = [cont3];
             });
 
-            it("do nothing if all anchor view nodes of the float fragments have already appeared", function() {
+            it("Transfer floats deferred from previous fragmentainers and not laid out yet if all anchor view nodes of the float fragments have already appeared", function() {
                 expect(context.findPageFloatFragment(float1)).toBe(fragment1);
                 expect(context.findPageFloatFragment(float2)).toBe(fragment2);
 
@@ -523,6 +562,7 @@ describe("pagefloat", function() {
                 context.finish();
 
                 expect(context.removePageFloatFragment).not.toHaveBeenCalled();
+                expect(context.floatsDeferredToNext).toEqual([cont3, cont4]);
             });
 
             it("Removes and forbids the last fragment whose anchor have not appeared", function() {
@@ -533,6 +573,7 @@ describe("pagefloat", function() {
                 expect(context.removePageFloatFragment).not.toHaveBeenCalledWith(fragment1);
                 expect(context.isForbidden(float2)).toBe(true);
                 expect(context.isForbidden(float1)).not.toBe(true);
+                expect(context.floatsDeferredToNext).toEqual([cont3]);
             });
 
             it("Removes the last fragment whose anchor have not appeared", function() {
@@ -545,6 +586,7 @@ describe("pagefloat", function() {
                 expect(context.removePageFloatFragment).not.toHaveBeenCalledWith(fragment2);
                 expect(context.isForbidden(float1)).toBe(true);
                 expect(context.isForbidden(float2)).not.toBe(true);
+                expect(context.floatsDeferredToNext).toEqual([cont3]);
             });
         });
 
