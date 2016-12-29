@@ -498,6 +498,18 @@ adapt.ops.StyleInstance.prototype.flowChunkIsAfterParentFlowForcedBreak = functi
 };
 
 /**
+ * @param {adapt.layout.Column} column
+ * @param {string} flowName
+ */
+adapt.ops.StyleInstance.prototype.setFormattingContextToColumn = function(column, flowName) {
+    var flow = this.currentLayoutPosition.flows[flowName];
+    if (!flow.formattingContext) {
+        flow.formattingContext = new adapt.layout.BlockFormattingContext(null);
+    }
+    column.flowRootFormattingContext = flow.formattingContext;
+};
+
+/**
  * @param {adapt.layout.Column} region
  * @param {string} flowName
  * @param {Array.<string>} regionIds
@@ -508,6 +520,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(region, flowName, regi
     if (!flowPosition || !this.matchPageSide(flowPosition.startSide))
         return adapt.task.newResult(true);
     flowPosition.startSide = "any";
+    this.setFormattingContextToColumn(region, flowName);
     region.init();
     if (this.primaryFlows[flowName] && region.bands.length > 0) {
         // In general, we force non-fitting content. Exception is only for primary flow regions

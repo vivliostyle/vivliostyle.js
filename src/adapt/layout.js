@@ -204,6 +204,50 @@ adapt.layout.BreakPosition.prototype.findAcceptableBreak = function(column, pena
 adapt.layout.BreakPosition.prototype.getMinBreakPenalty = function() {};
 
 /**
+ * @return {vivliostyle.layoututil.RepetitiveElements}
+ */
+adapt.layout.BreakPosition.prototype.getRepetitiveElements = function() {};
+
+/**
+ * @abstract
+ * @constructor
+ * @implements {adapt.layout.BreakPosition}
+ */
+adapt.layout.AbstractBreakPosition = function() {};
+
+/**
+ * @abstract
+ */
+adapt.layout.AbstractBreakPosition.prototype.findAcceptableBreak = function(column, penalty) {};
+
+/**
+ * @abstract
+ */
+adapt.layout.AbstractBreakPosition.prototype.getMinBreakPenalty = function() {};
+
+
+/**
+ * @abstract
+ */
+adapt.layout.AbstractBreakPosition.prototype.getRepetitiveElements = function() {};
+
+/**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @return {vivliostyle.layoututil.RepetitiveElements}
+ */
+adapt.layout.AbstractBreakPosition.prototype.retrieveRepetitiveElements = function(nodeContext) {
+    if (!nodeContext) return null;
+    var formattingContext = nodeContext.formattingContext;
+    while (formattingContext) {
+        var repetitiveElements = formattingContext.getRepetitiveElements();
+        if (repetitiveElements) return repetitiveElements;
+        formattingContext = formattingContext.getParent();
+    }
+    return null;
+};
+
+
+/**
  * @typedef {{breakPosition: adapt.layout.BreakPosition, nodeContext: adapt.vtree.NodeContext}}
  */
 adapt.layout.BreakPositionAndNodeContext;
@@ -214,20 +258,22 @@ adapt.layout.BreakPositionAndNodeContext;
  * @param {Array.<adapt.vtree.NodeContext>} checkPoints array of breaking points for
  *    breakable block
  * @param {number} penalty
- * @implements {adapt.layout.BreakPosition}
+ * @extends {adapt.layout.AbstractBreakPosition}
  */
 adapt.layout.BoxBreakPosition = function(checkPoints, penalty) {
+    adapt.layout.AbstractBreakPosition.call(this);
     /** @const */ this.checkPoints = checkPoints;
     /** @const */ this.penalty = penalty;
     /** @private @type {boolean} */ this.alreadyEvaluated = false;
     /** @type {adapt.vtree.NodeContext} */ this.breakNodeContext = null;
 };
+goog.inherits(adapt.layout.BoxBreakPosition, adapt.layout.AbstractBreakPosition);
 
 /**
  * @override
  */
 adapt.layout.BoxBreakPosition.prototype.findAcceptableBreak = function(column, penalty) {
-    if (penalty < this.penalty)
+    if (penalty < this.getMinBreakPenalty())
         return null;
     if (!this.alreadyEvaluated) {
         this.breakNodeContext = column.findBoxBreakPosition(this, penalty > 0);
@@ -244,31 +290,41 @@ adapt.layout.BoxBreakPosition.prototype.getMinBreakPenalty = function() {
 };
 
 /**
+ * @override
+ */
+adapt.layout.BoxBreakPosition.prototype.getRepetitiveElements = function() {
+    return this.retrieveRepetitiveElements(this.checkPoints[0]);
+};
+
+/**
  * Potential edge breaking position.
  * @constructor
  * @param {adapt.vtree.NodeContext} position
  * @param {?string} breakOnEdge
  * @param {boolean} overflows
  * @param {number} computedBlockSize
- * @implements {adapt.layout.BreakPosition}
+ * @extends {adapt.layout.AbstractBreakPosition}
  */
-adapt.layout.EdgeBreakPosition = function(position, breakOnEdge, overflows, computedBlockSize) {
+adapt.layout.EdgeBreakPosition = function(position, breakOnEdge, overflows,
+    computedBlockSize) {
+    adapt.layout.AbstractBreakPosition.call(this);
     /** @const */ this.position = position;
     /** @const */ this.breakOnEdge = breakOnEdge;
     /** @type {boolean} */ this.overflows = overflows;
     /** @const */ this.computedBlockSize = computedBlockSize;
     /** @private @type {boolean} */ this.isEdgeUpdated = false;
+    /** @private @type {number} */ this.edge = 0;
 };
+goog.inherits(adapt.layout.EdgeBreakPosition, adapt.layout.AbstractBreakPosition);
 
 /**
  * @override
  */
 adapt.layout.EdgeBreakPosition.prototype.findAcceptableBreak = function(column, penalty) {
-    if (!this.isEdgeUpdated) {
-        this.updateEdge(column);
-    }
-    if (penalty < this.getMinBreakPenalty())
+    this.updateOverflows(column);
+    if (penalty < this.getMinBreakPenalty()) {
         return null;
+    }
     return column.findEdgeBreakPosition(this);
 };
 
@@ -289,11 +345,30 @@ adapt.layout.EdgeBreakPosition.prototype.getMinBreakPenalty = function() {
  * @param {!adapt.layout.Column} column
  */
 adapt.layout.EdgeBreakPosition.prototype.updateEdge = function(column) {
-    var edge = adapt.layout.calculateEdge(this.position, column.clientLayout, 0, column.vertical);
-    this.overflows = this.position.overflow = column.isOverflown(edge);
+    this.edge = adapt.layout.calculateEdge(this.position, column.clientLayout, 0, column.vertical);
     this.isEdgeUpdated = true;
 };
 
+/**
+ * @private
+ * @param {!adapt.layout.Column} column
+ */
+adapt.layout.EdgeBreakPosition.prototype.updateOverflows = function(column) {
+    if (!this.isEdgeUpdated) {
+        this.updateEdge(column);
+    }
+    var edge = this.edge;
+    var repetitiveElements =  this.getRepetitiveElements();
+    if (repetitiveElements) edge += (column.vertical ? -1 : 1) *  repetitiveElements.calculateOffset();
+    this.overflows = this.position.overflow = column.isOverflown(edge);
+};
+
+/**
+ * @override
+ */
+adapt.layout.EdgeBreakPosition.prototype.getRepetitiveElements = function() {
+    return this.retrieveRepetitiveElements(this.position);
+};
 
 /**
  * Record describing added footnote
@@ -338,6 +413,43 @@ adapt.layout.validateCheckPoints = function(checkPoints) {
 };
 
 /**
+ * @param {adapt.vtree.FormattingContext} parent
+ * @constructor
+ * @implements {adapt.vtree.FormattingContext}
+ */
+adapt.layout.BlockFormattingContext = function(parent) {
+    /** @private @const */ this.parent = parent;
+};
+
+/**
+ * @override
+ */
+adapt.layout.BlockFormattingContext.prototype.getName = function() {
+    return "Block formatting context (adapt.layout.BlockFormattingContext)";
+};
+
+/**
+ * @override
+ */
+adapt.layout.BlockFormattingContext.prototype.isFirstTime = function(nodeContext, firstTime) {
+    return firstTime;
+};
+
+/**
+ * @override
+ */
+adapt.layout.BlockFormattingContext.prototype.getParent = function() {
+    return this.parent;
+};
+
+/**
+ * @override
+ */
+adapt.layout.BlockFormattingContext.prototype.getRepetitiveElements = function() {
+    return null;
+};
+
+/**
  * @constructor
  * @param {Element} element
  * @param {!adapt.vtree.LayoutContext} layoutContext
@@ -352,6 +464,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @type {adapt.vtree.ClientLayout} */ this.clientLayout = clientLayout;
     /** @const */ this.layoutConstraint = layoutConstraint;
     /** @type {Document} */ this.viewDocument = element.ownerDocument;
+    /** @type {adapt.vtree.FormattingContext} */ this.flowRootFormattingContext = null;
     /** @type {boolean} */ this.isFootnote = false;
     /** @type {number} */ this.startEdge = 0;
     /** @type {number} */ this.endEdge = 0;
@@ -474,6 +587,9 @@ adapt.layout.Column.prototype.openAllViews = function(position) {
             var prevContext = nodeContext;
             var step = steps[stepIndex];
             nodeContext = adapt.vtree.makeNodeContextFromNodePositionStep(step, prevContext);
+            if (stepIndex === steps.length - 1 && !nodeContext.formattingContext) {
+                nodeContext.formattingContext = self.flowRootFormattingContext;
+            }
             if (stepIndex == 0) {
                 nodeContext.offsetInNode = self.calculateOffsetInNodeForNodeContext(position);
                 nodeContext.after = position.after;
@@ -1770,6 +1886,25 @@ adapt.layout.Column.prototype.clearFootnotes = function(boxOffset) {
 };
 
 /**
+ * @param {!adapt.vtree.NodeContext} nodeContext
+ * @returns {number}
+ */
+adapt.layout.Column.prototype.calculateClonedPaddingBorder = function(nodeContext) {
+    var clonedPaddingBorder = 0;
+    nodeContext.walkUpBlocks(function(block) {
+        if (block.inheritedProps["box-decoration-break"] === "clone") {
+            goog.asserts.assert(block.viewNode instanceof Element);
+            var paddingBorders = this.getComputedPaddingBorder(block.viewNode);
+            clonedPaddingBorder += block.vertical ? -paddingBorders.left : paddingBorders.bottom;
+            if (block.display === "table") {
+                clonedPaddingBorder += block.blockBorderSpacing;
+            }
+        }
+    }.bind(this));
+    return clonedPaddingBorder;
+};
+
+/**
  * @param {adapt.layout.BoxBreakPosition} bp
  * @param {boolean} force
  * @return {adapt.vtree.NodeContext}
@@ -1796,18 +1931,13 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
     }
 
     // In case of box-decoration-break: clone, width (or height in vertical writing mode) of cloned paddings and borders should be taken into account.
-    var clonedPaddingBorder = 0;
-    block.walkBlocksUpToBFC(function(block) {
-        if (block.inheritedProps["box-decoration-break"] === "clone") {
-            goog.asserts.assert(block.viewNode instanceof Element);
-            var paddingBorders = self.getComputedPaddingBorder(block.viewNode);
-            clonedPaddingBorder += block.vertical ? -paddingBorders.left : paddingBorders.bottom;
-        }
-    });
+    var clonedPaddingBorder = self.calculateClonedPaddingBorder(block);
 
     // Select the first overflowing line break position
     var linePositions = this.findLinePositions(checkPoints);
     var edge = this.footnoteEdge - clonedPaddingBorder;
+    var repetitiveElements = bp.getRepetitiveElements();
+    if (repetitiveElements) edge -= (this.vertical ? -1 : 1) * repetitiveElements.calculateOffset();
     var lineIndex = adapt.base.binarySearch(linePositions.length, function(i) {
         return self.vertical ? linePositions[i] < edge : linePositions[i] > edge;
     });
@@ -1842,19 +1972,13 @@ adapt.layout.Column.prototype.findEdgeBreakPosition = function(bp) {
  * @return {!adapt.task.Result.<boolean>} holing true
  */
 adapt.layout.Column.prototype.finishBreak = function(nodeContext, forceRemoveSelf, endOfRegion) {
-    if (nodeContext.formattingContext) {
-        var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(nodeContext.formattingContext);
-        var result = layoutProcessor.finishBreak(this, nodeContext, forceRemoveSelf, endOfRegion);
-        if (result)
-            return result;
+    goog.asserts.assert(nodeContext.formattingContext);
+    var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(nodeContext.formattingContext);
+    var result = layoutProcessor.finishBreak(this, nodeContext, forceRemoveSelf, endOfRegion);
+    if (!result) {
+        result = adapt.layout.blockLayoutProcessor.finishBreak(this, nodeContext, forceRemoveSelf, endOfRegion);
     }
-    var removeSelf = forceRemoveSelf || (nodeContext.viewNode != null && nodeContext.viewNode.nodeType == 1 && !nodeContext.after);
-    this.clearOverflownViewNodes(nodeContext, removeSelf);
-    if (endOfRegion) {
-        this.fixJustificationIfNeeded(nodeContext, true);
-        this.layoutContext.processFragmentedBlockEdge(removeSelf ? nodeContext : nodeContext.parent);
-    }
-    return this.clearFootnotes(nodeContext.boxOffset);
+    return result;
 };
 
 /**
@@ -1959,7 +2083,16 @@ adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext
     if (!nodeContext) {
         return false;
     }
+    if (this.isOrphan(nodeContext.viewNode)) {
+        return false;
+    }
     var edge = adapt.layout.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
+    var fc = nodeContext.after ?
+        (nodeContext.parent && nodeContext.parent.formattingContext) : nodeContext.formattingContext;
+    if (fc) {
+        var repetitiveElements = fc.getRepetitiveElements();
+        if (repetitiveElements) edge += (this.vertical ? -1 : 1) * repetitiveElements.calculateOffset();
+    }
     var overflown = this.isOverflown(edge);
     if (trailingEdgeContexts) {
         edge += this.getTrailingMarginEdgeAdjustment(trailingEdgeContexts);
@@ -2043,6 +2176,26 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
 };
 
 /**
+ * @param {adapt.vtree.FormattingContext} formattingContext
+ * @returns {boolean}
+ */
+adapt.layout.Column.prototype.isBFC = function(formattingContext) {
+    return formattingContext instanceof adapt.layout.BlockFormattingContext;
+};
+
+/**
+ * @param {Node} node
+ * @return {boolean}
+ */
+adapt.layout.Column.prototype.isOrphan = function(node) {
+    while (node) {
+        if (node.parentNode === node.ownerDocument) return false;
+        node = node.parentNode;
+    }
+    return true;
+};
+
+/**
  * Skips positions until either the start of unbreakable block or inline content.
  * Also sets breakBefore on the result combining break-before and break-after
  * properties from all elements that meet at the edge.
@@ -2051,7 +2204,9 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
-    if (nodeContext.formattingContext) {
+    var fc = nodeContext.after ?
+        (nodeContext.parent && nodeContext.parent.formattingContext) : nodeContext.formattingContext;
+    if (fc && !this.isBFC(fc)) {
         return adapt.task.newResult(nodeContext);
     }
 
@@ -2077,7 +2232,6 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
         nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
         self.pageBreakType = breakAtTheEdge;
     }
-
     frame.loopWithFrame(function(loopFrame) {
         while (nodeContext) {
             // A code block to be able to use break. Break moves to the next node position.
@@ -2096,7 +2250,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                         if (needForcedBreak()) {
                             processForcedBreak();
                         } else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
-                            nodeContext = (lastAfterNodeContext || nodeContext).modify();
+                            nodeContext = (self.stopAtOverflow ? (lastAfterNodeContext || nodeContext) : nodeContext).modify();
                             nodeContext.overflow = true;
                         } else {
                             nodeContext = nodeContext.modify();
@@ -2111,7 +2265,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                         // clear
                         self.applyClearance(nodeContext);
                     }
-                    if (nodeContext.formattingContext || nodeContext.floatSide || nodeContext.flexContainer) {
+                    if (!self.isBFC(nodeContext.formattingContext) || nodeContext.floatSide || nodeContext.flexContainer) {
                         // new formatting context, or float or flex container (unbreakable)
                         leadingEdgeContexts.push(nodeContext.copy());
                         breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
@@ -2120,7 +2274,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                             processForcedBreak();
                         } else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge) || !self.layoutConstraint.allowLayout(nodeContext)) {
                             // overflow
-                            nodeContext = (lastAfterNodeContext || nodeContext).modify();
+                            nodeContext = (self.stopAtOverflow ? (lastAfterNodeContext || nodeContext) : nodeContext).modify();
                             nodeContext.overflow = true;
                         }
                         loopFrame.breakLoop();
@@ -2156,7 +2310,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                         // Non-zero trailing inset.
                         if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
                             // overflow
-                            nodeContext = (lastAfterNodeContext || nodeContext).modify();
+                            nodeContext = (self.stopAtOverflow ? (lastAfterNodeContext || nodeContext) : nodeContext).modify();
                             nodeContext.overflow = true;
                             if (self.stopAtOverflow) {
                                 loopFrame.breakLoop();
@@ -2188,7 +2342,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                             processForcedBreak();
                         } else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
                             // overflow
-                            nodeContext = (lastAfterNodeContext || nodeContext).modify();
+                            nodeContext = (self.stopAtOverflow ? (lastAfterNodeContext || nodeContext) : nodeContext).modify();
                             nodeContext.overflow = true;
                         }
                         loopFrame.breakLoop();
@@ -2214,7 +2368,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
             }
         }
         if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, true, breakAtTheEdge)) {
-            if (lastAfterNodeContext) {
+            if (lastAfterNodeContext && self.stopAtOverflow) {
                 nodeContext = lastAfterNodeContext.modify();
                 nodeContext.overflow = true;
             } else {
@@ -2340,7 +2494,7 @@ adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
- * @return {adapt.task.Result.<adapt.vtree.NodeContext>}
+ * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.layoutFloatOrFootnote = function(nodeContext) {
     if (nodeContext.floatSide == "footnote") {
@@ -2364,17 +2518,11 @@ adapt.layout.Column.prototype.layoutNext = function(nodeContext, leadingEdge) {
         if (!nodeContext || self.pageBreakType || self.stopByOverflow(nodeContext)) {
             // finished all content, explicit page break or overflow (automatic page break)
             frame.finish(nodeContext);
-        } else if (nodeContext.floatSide) {
-            // TODO: implement floats and footnotes properly for vertical writing
-            self.layoutFloatOrFootnote(nodeContext).thenFinish(frame);
-        } else if (nodeContext.formattingContext) {
+        } else {
+            goog.asserts.assert(nodeContext.formattingContext);
             var formattingContext = nodeContext.formattingContext;
             var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(formattingContext);
             layoutProcessor.layout(nodeContext, self).thenFinish(frame);
-        } else if (self.isBreakable(nodeContext)) {
-            self.layoutBreakableBlock(nodeContext).thenFinish(frame);
-        } else {
-            self.layoutUnbreakable(nodeContext).thenFinish(frame);
         }
     });
     return frame.result();
@@ -2457,15 +2605,10 @@ adapt.layout.Column.prototype.init = function() {
  * @return {void}
  */
 adapt.layout.Column.prototype.saveEdgeBreakPosition = function(position, breakAtEdge, overflows) {
+    goog.asserts.assert(position.formattingContext);
     var copy = position.copy();
-    var bp;
-    if (position.formattingContext) {
-        var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(position.formattingContext);
-        bp = layoutProcessor.createEdgeBreakPosition(copy, breakAtEdge, overflows, this.computedBlockSize);
-    }
-    if (!bp) {
-        bp = new adapt.layout.EdgeBreakPosition(copy, breakAtEdge, overflows, this.computedBlockSize);
-    }
+    var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(position.formattingContext);
+    var bp = layoutProcessor.createEdgeBreakPosition(copy, breakAtEdge, overflows, this.computedBlockSize);
     this.breakPositions.push(bp);
 };
 
@@ -2656,3 +2799,77 @@ adapt.layout.Column.prototype.redoLayout = function() {
     });
     return frame.result();
 };
+
+/**
+ * @constructor
+ * @implements {adapt.layout.LayoutProcessor}
+ */
+adapt.layout.BlockLayoutProcessor = function() {};
+
+/**
+ * @override
+ */
+adapt.layout.BlockLayoutProcessor.prototype.layout = function(nodeContext, column) {
+    if (nodeContext.floatSide) {
+        // TODO: implement floats and footnotes properly for vertical writing
+        return column.layoutFloatOrFootnote(nodeContext);
+    } else if (column.isBreakable(nodeContext)) {
+        return column.layoutBreakableBlock(nodeContext);
+    } else {
+        return column.layoutUnbreakable(nodeContext);
+    }
+};
+
+/**
+ * @override
+ */
+adapt.layout.BlockLayoutProcessor.prototype.createEdgeBreakPosition = function(
+    position, breakOnEdge, overflows, columnBlockSize) {
+    return new adapt.layout.EdgeBreakPosition(position.copy(), breakOnEdge, overflows, columnBlockSize);
+};
+
+/**
+ * @param {!adapt.layout.Column} column
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {boolean} forceRemoveSelf
+ * @param {boolean} endOfRegion
+ * @return {!adapt.task.Result.<boolean>} holing true
+ * @override
+ */
+adapt.layout.BlockLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {
+    var removeSelf = forceRemoveSelf || (nodeContext.viewNode != null && nodeContext.viewNode.nodeType == 1 && !nodeContext.after);
+    column.clearOverflownViewNodes(nodeContext, removeSelf);
+    if (endOfRegion) {
+        column.fixJustificationIfNeeded(nodeContext, true);
+        column.layoutContext.processFragmentedBlockEdge(removeSelf ? nodeContext : nodeContext.parent);
+    }
+    return column.clearFootnotes(nodeContext.boxOffset);
+};
+
+/**
+ * @const
+ */
+adapt.layout.blockLayoutProcessor = new adapt.layout.BlockLayoutProcessor();
+
+vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
+    function(nodeContext, firstTime, display, position, floatSide, isRoot) {
+        var parent = nodeContext.parent;
+        if (!parent && nodeContext.formattingContext) {
+            return null;
+        } else if (parent && nodeContext.formattingContext !== parent.formattingContext) {
+            return null;
+        } else if (nodeContext.establishesBFC ||
+            (!nodeContext.formattingContext && vivliostyle.display.isBlock(display, position, floatSide, isRoot))) {
+            return new adapt.layout.BlockFormattingContext(parent ? parent.formattingContext : null);
+        } else {
+            return null;
+        }
+    }
+);
+
+vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, function(formattingContext) {
+    if (formattingContext instanceof adapt.layout.BlockFormattingContext) {
+        return adapt.layout.blockLayoutProcessor;
+    }
+    return null;
+});

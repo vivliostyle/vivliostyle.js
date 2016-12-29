@@ -602,12 +602,17 @@ adapt.vgen.ViewFactory.prototype.transferPolyfilledInheritedProps = function(com
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {boolean} firstTime
+ * @param {adapt.css.Ident} display
+ * @param {adapt.css.Ident} position
+ * @param {adapt.css.Ident} float
+ * @param {boolean} isRoot
  */
-adapt.vgen.ViewFactory.prototype.resolveFormattingContext = function(nodeContext, firstTime) {
+adapt.vgen.ViewFactory.prototype.resolveFormattingContext = function(nodeContext, firstTime, display,
+                                                                     position, float, isRoot) {
     /** @type {!Array<!vivliostyle.plugin.ResolveFormattingContextHook>} */ var hooks =
         vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT);
     for (var i = 0; i < hooks.length; i++) {
-        var formattingContext = hooks[i](nodeContext, firstTime);
+        var formattingContext = hooks[i](nodeContext, firstTime, display, position, float, isRoot);
         if (formattingContext) {
             nodeContext.formattingContext = formattingContext;
             return;
@@ -743,12 +748,19 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         var borderCollapse = computedStyle["border-collapse"];
         if (!borderCollapse || borderCollapse === adapt.css.getName("separate")) {
             var borderSpacing = computedStyle["border-spacing"];
+            var inlineBorderSpacing, blockBorderSpacing;
             if (borderSpacing) {
                 if (borderSpacing.isSpaceList()) {
-                    borderSpacing = borderSpacing.values[0];
+                    inlineBorderSpacing = borderSpacing.values[0];
+                    blockBorderSpacing = borderSpacing.values[1];
+                } else {
+                    inlineBorderSpacing = blockBorderSpacing = borderSpacing;
                 }
-                if (borderSpacing.isNumeric()) {
-                    self.nodeContext.inlineBorderSpacing = adapt.css.toNumber(borderSpacing, self.context);
+                if (inlineBorderSpacing.isNumeric()) {
+                    self.nodeContext.inlineBorderSpacing = adapt.css.toNumber(inlineBorderSpacing, self.context);
+                }
+                if (blockBorderSpacing.isNumeric()) {
+                    self.nodeContext.blockBorderSpacing = adapt.css.toNumber(blockBorderSpacing, self.context);
                 }
             }
         }
@@ -773,9 +785,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         var overflowWrap = computedStyle["overflow-wrap"] || ["word-wrap"];
         self.nodeContext.breakWord = (wordBreak === adapt.css.ident.break_all) || (overflowWrap === adapt.css.ident.break_word);
         // Resolve formatting context
-        self.resolveFormattingContext(self.nodeContext, firstTime);
-        if (self.nodeContext.formattingContext) {
-            firstTime = self.nodeContext.formattingContext.isFirstTime(self.nodeContext, firstTime);
+        self.resolveFormattingContext(self.nodeContext, firstTime, display, position, floatSide, isRoot);
+        if (self.nodeContext.parent && self.nodeContext.parent.formattingContext) {
+            firstTime = self.nodeContext.parent.formattingContext.isFirstTime(self.nodeContext, firstTime);
         }
         // Create the view element
         var custom = false;
@@ -1618,7 +1630,7 @@ adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target)
  */
 adapt.vgen.ViewFactory.prototype.processFragmentedBlockEdge = function(nodeContext) {
     if (nodeContext) {
-        nodeContext.walkBlocksUpToBFC(function(block) {
+        nodeContext.walkUpBlocks(function(block) {
             var boxDecorationBreak = block.inheritedProps["box-decoration-break"];
             if (!boxDecorationBreak || boxDecorationBreak === "slice") {
                 var elem = block.viewNode;

@@ -323,6 +323,7 @@ adapt.vtree.Flow = function(flowName, parentFlowName) {
     /** @const */ this.flowName = flowName;
     /** @const */ this.parentFlowName = parentFlowName;
     /** @const */ this.forcedBreakOffsets = /** @type {Array<number>} */ ([]);
+    /** @type {?adapt.vtree.FormattingContext} */ this.formattingContext = null;
 };
 
 /**
@@ -524,6 +525,16 @@ adapt.vtree.FormattingContext.prototype.getName = function() {};
 adapt.vtree.FormattingContext.prototype.isFirstTime = function(nodeContext, firstTime) {};
 
 /**
+ * @return {adapt.vtree.FormattingContext}
+ */
+adapt.vtree.FormattingContext.prototype.getParent = function() {};
+
+/**
+ * @return {vivliostyle.layoututil.RepetitiveElements}
+ */
+adapt.vtree.FormattingContext.prototype.getRepetitiveElements = function() {};
+
+/**
  * @typedef {{
  * 		node:Node,
  *      shadowType:adapt.vtree.ShadowType,
@@ -715,6 +726,7 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {string} */ this.verticalAlign = "baseline";
     /** @type {string} */ this.captionSide = "top";
     /** @type {number} */ this.inlineBorderSpacing = 0;
+    /** @type {number} */ this.blockBorderSpacing = 0;
     /** @type {boolean} */ this.flexContainer = false;
     /** @type {adapt.vtree.Whitespace} */ this.whitespace = parent ? parent.whitespace : adapt.vtree.Whitespace.IGNORE;
     /** @type {?string} */ this.hyphenateCharacter = parent ? parent.hyphenateCharacter : null;
@@ -783,6 +795,7 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.verticalAlign = this.verticalAlign;
     np.captionSide = this.captionSide;
     np.inlineBorderSpacing = this.inlineBorderSpacing;
+    np.blockBorderSpacing = this.blockBorderSpacing;
     np.establishesBFC = this.establishesBFC;
     np.containingBlockForAbsolute = this.containingBlockForAbsolute;
     np.flexContainer = this.flexContainer;
@@ -907,18 +920,15 @@ adapt.vtree.NodeContext.prototype.getContainingBlockForAbsolute = function() {
 };
 
 /**
- * Walk up NodeContext tree (starting from itself) and call the callback for each block,
- * until a NodeContext which establishes a block formatting context is reached.
+ * Walk up NodeContext tree (starting from itself) and call the callback for each block.
  * @param {!function(!adapt.vtree.NodeContext)} callback
  */
-adapt.vtree.NodeContext.prototype.walkBlocksUpToBFC = function(callback) {
+adapt.vtree.NodeContext.prototype.walkUpBlocks = function(callback) {
     var nodeContext = this;
     while (nodeContext) {
         if (!nodeContext.inline) {
             callback(nodeContext);
         }
-        if (nodeContext.establishesBFC)
-            break;
         nodeContext = nodeContext.parent;
     }
 };
