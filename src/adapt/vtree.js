@@ -1218,7 +1218,6 @@ adapt.vtree.Container = function(element) {
     /** @type {number} */ this.snapOffsetX = 0;
     /** @type {number} */ this.snapOffsetY = 0;
     /** @type {boolean} */ this.vertical = false;  // vertical writing
-    /** @private @type {boolean} */ this.invalidated = false;
 };
 
 adapt.vtree.Container.prototype.getInsetTop = function() {
@@ -1358,7 +1357,6 @@ adapt.vtree.Container.prototype.copyFrom = function(other) {
     this.snapWidth = other.snapWidth;
     this.snapHeight = other.snapHeight;
     this.vertical = other.vertical;
-    this.invalidated = other.invalidated;
 };
 
 /**
@@ -1411,24 +1409,12 @@ adapt.vtree.Container.prototype.setInlinePosition = function(start, extent) {
     }
 };
 
-/**
- * @returns {boolean}
- */
-adapt.vtree.Container.prototype.isInvalidated = function() {
-    return this.invalidated;
-};
-
-adapt.vtree.Container.prototype.invalidate = function() {
-    this.invalidated = true;
+adapt.vtree.Container.prototype.clear = function() {
     var parent = this.element;
     var c;
     while (c = parent.lastChild) {
         parent.removeChild(c);
     }
-};
-
-adapt.vtree.Container.prototype.validate = function() {
-    this.invalidated = false;
 };
 
 /**

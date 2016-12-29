@@ -275,11 +275,7 @@ goog.scope(function() {
                 }
             }
         }
-        if (this.parent) {
-            return this.parent.getPreviousSiblingOf(this, floatReference);
-        } else {
-            return null;
-        }
+        return null;
     };
 
     /**
@@ -287,11 +283,16 @@ goog.scope(function() {
      * @returns {?vivliostyle.pagefloat.PageFloatLayoutContext}
      */
     PageFloatLayoutContext.prototype.getPreviousSibling = function() {
-        if (this.parent) {
-            return this.parent.getPreviousSiblingOf(this, this.floatReference);
-        } else {
-            return null;
+        var child = this;
+        var parent = this.parent;
+        var result;
+        while (parent) {
+            result = parent.getPreviousSiblingOf(child, this.floatReference);
+            if (result) return result;
+            child = parent;
+            parent = parent.parent;
         }
+        return null;
     };
 
     /**
@@ -310,6 +311,7 @@ goog.scope(function() {
      */
     PageFloatLayoutContext.prototype.setContainer = function(container) {
         this.container = container;
+        this.reattachFloatFragments();
     };
 
     /**
@@ -399,13 +401,7 @@ goog.scope(function() {
             if (element && element.parentNode) {
                 element.parentNode.removeChild(element);
             }
-            this.container.invalidate();
-        }
-    };
-
-    PageFloatLayoutContext.prototype.removeAllPageFloatFragment = function() {
-        for (var i = this.floatFragments.length - 1; i >= 0; i--) {
-            this.removePageFloatFragment(this.floatFragments[i]);
+            this.invalidate();
         }
     };
 
@@ -512,8 +508,18 @@ goog.scope(function() {
             delete this.floatAnchors[k];
         }, this);
         if (this.container) {
-            this.container.invalidate();
+            this.container.clear();
         }
+        this.invalidated = true;
+    };
+
+    PageFloatLayoutContext.prototype.isInvalidated = function() {
+        return this.invalidated ||
+            (!!this.parent && this.parent.isInvalidated());
+    };
+
+    PageFloatLayoutContext.prototype.validate = function() {
+        this.invalidated = false;
     };
 
     /**
@@ -567,6 +573,18 @@ goog.scope(function() {
             return this.parent.getFloatFragmentExclusions().concat(result);
         } else {
             return result;
+        }
+    };
+
+    /**
+     * @private
+     */
+    PageFloatLayoutContext.prototype.reattachFloatFragments = function() {
+        var parent = this.container.element && this.container.element.parentNode;
+        if (parent) {
+            this.floatFragments.forEach(function(fragment) {
+                parent.appendChild(fragment.area.element);
+            });
         }
     };
 });

@@ -562,7 +562,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
     var self = this;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("layoutColumn");
     this.layoutDeferredPageFloats(column).then(function() {
-        if (column.isInvalidated()) {
+        if (column.pageFloatLayoutContext.isInvalidated()) {
             frame.finish(true);
             return;
         }
@@ -594,7 +594,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
                 var flowChunk = selected.flowChunk;
                 var pending = true;
                 column.layout(selected.chunkPosition, leadingEdge).then(function(newPosition) {
-                    if (column.isInvalidated()) {
+                    if (column.pageFloatLayoutContext.isInvalidated()) {
                         loopFrame.breakLoop();
                         return;
                     }
@@ -642,10 +642,10 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
             }
             loopFrame.breakLoop();
         }).then(function() {
-            if (!column.isInvalidated()) {
+            if (!column.pageFloatLayoutContext.isInvalidated()) {
                 column.pageFloatLayoutContext.finish();
             }
-            if (!column.isInvalidated()) {
+            if (!column.pageFloatLayoutContext.isInvalidated()) {
                 // Keep positions repeated or not removed
                 flowPosition.positions = flowPosition.positions.filter(function(pos, i) {
                     return repeatedIndices.indexOf(i) >= 0 || removedIndices.indexOf(i) < 0;
@@ -732,7 +732,8 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
         if (column.width >= 0) {
             // column.element.style.outline = "1px dotted green";
             self.layoutColumn(column, flowNameStr).then(function() {
-                if (column.isInvalidated() && !layoutContainer.isInvalidated()) {
+                if (column.pageFloatLayoutContext.isInvalidated() && !regionPageFloatLayoutContext.isInvalidated()) {
+                    column.pageFloatLayoutContext.validate();
                     self.currentLayoutPosition = positionAtColumnStart.clone();
                     if (column.element !== boxContainer) {
                         boxContainer.removeChild(column.element);
@@ -755,25 +756,30 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
  * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} pagePageFloatLayoutContext
  * @param {!adapt.pm.PageBoxInstance} boxInstance
  * @param {!adapt.vtree.Container} layoutContainer
- * @param {?adapt.css.Val} flowName
- * @returns {!vivliostyle.pagefloat.PageFloatLayoutContext}
  */
-adapt.ops.StyleInstance.prototype.getRegionPageFloatLayoutContext = function(
-    pagePageFloatLayoutContext, boxInstance, layoutContainer, flowName) {
+adapt.ops.StyleInstance.prototype.setPagePageFloatLayoutContextContainer = function(
+    pagePageFloatLayoutContext, boxInstance, layoutContainer) {
     if (boxInstance instanceof vivliostyle.page.PageRulePartitionInstance ||
         (boxInstance instanceof adapt.pm.PageMasterInstance &&
         !(boxInstance instanceof vivliostyle.page.PageRuleMasterInstance))) {
         pagePageFloatLayoutContext.setContainer(layoutContainer);
     }
-    if (boxInstance instanceof adapt.pm.PartitionInstance) {
-        var flowNameStr = (flowName && flowName.isIdent()) ? flowName.toString() : null;
-        var writingMode = boxInstance.getProp(this, "writing-mode") || null;
-        var direction = boxInstance.getProp(this, "direction") || null;
-        return new vivliostyle.pagefloat.PageFloatLayoutContext(pagePageFloatLayoutContext,
-            vivliostyle.pagefloat.FloatReference.REGION, layoutContainer, flowNameStr, writingMode, direction);
-    } else {
-        return pagePageFloatLayoutContext;
-    }
+};
+
+/**
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} pagePageFloatLayoutContext
+ * @param {!adapt.pm.PageBoxInstance} boxInstance
+ * @param {!adapt.vtree.Container} layoutContainer
+ * @param {string} flowName
+ * @returns {!vivliostyle.pagefloat.PageFloatLayoutContext}
+ */
+adapt.ops.StyleInstance.prototype.getRegionPageFloatLayoutContext = function(
+    pagePageFloatLayoutContext, boxInstance, layoutContainer, flowName) {
+    goog.asserts.assert(boxInstance instanceof adapt.pm.PartitionInstance);
+    var writingMode = boxInstance.getProp(this, "writing-mode") || null;
+    var direction = boxInstance.getProp(this, "direction") || null;
+    return new vivliostyle.pagefloat.PageFloatLayoutContext(pagePageFloatLayoutContext,
+        vivliostyle.pagefloat.FloatReference.REGION, layoutContainer, flowName, writingMode, direction);
 };
 
 /**
@@ -811,8 +817,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
     layoutContainer.originY = offsetY;
     offsetX += layoutContainer.left + layoutContainer.marginLeft + layoutContainer.borderLeft;
     offsetY += layoutContainer.top + layoutContainer.marginTop + layoutContainer.borderTop;
-    var regionPageFloatLayoutContext =
-        self.getRegionPageFloatLayoutContext(pagePageFloatLayoutContext, boxInstance, layoutContainer, flowName);
+    this.setPagePageFloatLayoutContextContainer(pagePageFloatLayoutContext, boxInstance, layoutContainer);
     var pageContainer = pagePageFloatLayoutContext.getContainer();
     var positionAtContainerStart = self.currentLayoutPosition.clone();
     var cont;
@@ -841,6 +846,8 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
     } else if (!self.pageBreaks[flowName.toString()]) {
         /** @type {!adapt.task.Frame.<boolean>} */ var innerFrame = adapt.task.newFrame("layoutContainer.inner");
         var flowNameStr = flowName.toString();
+        var regionPageFloatLayoutContext =
+            self.getRegionPageFloatLayoutContext(pagePageFloatLayoutContext, boxInstance, layoutContainer, flowNameStr);
         // for now only a single column in vertical case
         var columnCount = boxInstance.getPropAsNumber(self, "column-count");
         var columnGap = boxInstance.getPropAsNumber(self, "column-gap");
@@ -863,19 +870,18 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
             self.createAndLayoutColumn(boxInstance, offsetX, offsetY, exclusions, layoutContainer,
                 columnIndex++, flowNameStr, regionPageFloatLayoutContext, columnCount, columnGap,
                 columnWidth, innerShape, layoutContext, layoutConstraint).then(function(c) {
-                    if (columnIndex === columnCount) {
+                    if (pagePageFloatLayoutContext.isInvalidated()) {
+                        loopFrame.breakLoop();
+                        return;
+                    }
+                    if (columnIndex === columnCount && !regionPageFloatLayoutContext.isInvalidated()) {
                         regionPageFloatLayoutContext.finish();
                     }
-                    if (layoutContainer.isInvalidated()) {
-                        goog.asserts.assert(pageContainer);
-                        if (layoutContainer === pageContainer || !pageContainer.isInvalidated()) {
-                            columnIndex = 0;
-                            self.currentLayoutPosition = positionAtContainerStart.clone();
-                            layoutContainer.validate();
-                            loopFrame.continueLoop();
-                        } else {
-                            loopFrame.breakLoop();
-                        }
+                    if (regionPageFloatLayoutContext.isInvalidated()) {
+                        columnIndex = 0;
+                        self.currentLayoutPosition = positionAtContainerStart.clone();
+                        regionPageFloatLayoutContext.validate();
+                        loopFrame.continueLoop();
                         return;
                     }
                     column = c;
@@ -897,7 +903,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
                     }
                 });
         }).then(function() {
-            if (pageContainer && !pageContainer.isInvalidated()) {
+            if (!pagePageFloatLayoutContext.isInvalidated()) {
                 if (column.element === boxContainer) {
                     layoutContainer = column;
                 }
@@ -909,13 +915,13 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
         });
         cont = innerFrame.result();
     } else {
-        if (pageContainer && !pageContainer.isInvalidated()) {
+        if (!pagePageFloatLayoutContext.isInvalidated()) {
             boxInstance.finishContainer(self, layoutContainer, page, null, 1, self.clientLayout, self.faces);
         }
         cont = adapt.task.newResult(true);
     }
     cont.then(function() {
-        if (pageContainer && pageContainer.isInvalidated()) {
+        if (pagePageFloatLayoutContext.isInvalidated()) {
             frame.finish(true);
             return;
         }
@@ -940,12 +946,12 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
             while (i >= 0) {
                 var child = boxInstance.children[i--];
                 var r = self.layoutContainer(page, child, /** @type {HTMLElement} */ (boxContainer),
-                    offsetX, offsetY, exclusions, regionPageFloatLayoutContext);
+                    offsetX, offsetY, exclusions, pagePageFloatLayoutContext);
                 if (r.isPending()) {
                     return r.thenAsync(function() {
-                        return adapt.task.newResult(pageContainer ? !pageContainer.isInvalidated() : true);
+                        return adapt.task.newResult(!pagePageFloatLayoutContext.isInvalidated());
                     });
-                } else if (pageContainer && pageContainer.isInvalidated()) {
+                } else if (pagePageFloatLayoutContext.isInvalidated()) {
                     break;
                 }
             }
@@ -1057,13 +1063,12 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     frame.loopWithFrame(function(loopFrame) {
         self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge,
             [], pageFloatLayoutContext).then(function() {
-                pageFloatLayoutContext.finish();
-                var pageContainer = pageFloatLayoutContext.getContainer();
-                goog.asserts.assert(pageContainer);
-                if (pageContainer.isInvalidated()) {
+                if (!pageFloatLayoutContext.isInvalidated()) {
+                    pageFloatLayoutContext.finish();
+                }
+                if (pageFloatLayoutContext.isInvalidated()) {
                     self.currentLayoutPosition = self.layoutPositionAtPageStart.clone();
-                    pageFloatLayoutContext.removeAllPageFloatFragment();
-                    pageContainer.validate();
+                    pageFloatLayoutContext.validate();
                     loopFrame.continueLoop();
                 } else {
                     loopFrame.breakLoop();

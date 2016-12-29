@@ -326,10 +326,8 @@ describe("pagefloat", function() {
         describe("#removePageFloatFragment", function() {
             var container, context, float, area, fragment;
             beforeEach(function() {
-                container = {
-                    invalidate: jasmine.createSpy("invalidate")
-                };
                 context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, container, null, null, null);
+                spyOn(context, "invalidate");
                 float = new PageFloat({}, FloatReference.PAGE, "block-start");
                 context.addPageFloat(float);
                 area = {
@@ -341,7 +339,7 @@ describe("pagefloat", function() {
                 };
                 fragment = new PageFloatFragment(float, area);
                 context.addPageFloatFragment(fragment);
-                container.invalidate.calls.reset();
+                context.invalidate.calls.reset();
             });
 
             it("removes the specified PageFloatFragment", function() {
@@ -358,10 +356,10 @@ describe("pagefloat", function() {
                 expect(area.element.parentNode.removeChild).toHaveBeenCalledWith(area.element);
             });
 
-            it("invalidates the page float container", function() {
+            it("invalidates the context", function() {
                 context.removePageFloatFragment(fragment);
 
-                expect(container.invalidate).toHaveBeenCalled();
+                expect(context.invalidate).toHaveBeenCalled();
             });
         });
 
@@ -553,14 +551,17 @@ describe("pagefloat", function() {
         describe("#invalidate", function() {
             var container, context;
             beforeEach(function() {
-                container = { invalidate: jasmine.createSpy("invalidate") };
+                container = { clear: jasmine.createSpy("clear") };
                 context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, container, null, null, null);
             });
 
             it("invalidate the container", function() {
+                expect(context.isInvalidated()).toBe(false);
+
                 context.invalidate();
 
-                expect(container.invalidate).toHaveBeenCalled();
+                expect(container.clear).toHaveBeenCalled();
+                expect(context.isInvalidated()).toBe(true);
             });
 
             it("removes all registered anchor view nodes", function() {
@@ -584,6 +585,48 @@ describe("pagefloat", function() {
                 context.invalidate();
 
                 expect(context.children).toEqual([]);
+            });
+        });
+
+        describe("#isInvalidated", function() {
+            function container() {
+                return { clear: jasmine.createSpy("clear") };
+            }
+
+            it("returns true if one of its ancestors is invalidated", function() {
+                var pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, container(), null, null, null);
+                var regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, container(), null, null, null);
+                var columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, container(), null, null, null);
+
+                expect(columnContext.isInvalidated()).toBe(false);
+                expect(regionContext.isInvalidated()).toBe(false);
+                expect(pageContext.isInvalidated()).toBe(false);
+
+                columnContext.invalidate();
+
+                expect(columnContext.isInvalidated()).toBe(true);
+                expect(regionContext.isInvalidated()).toBe(false);
+                expect(pageContext.isInvalidated()).toBe(false);
+
+                columnContext.validate();
+
+                expect(columnContext.isInvalidated()).toBe(false);
+
+                regionContext.invalidate();
+
+                expect(columnContext.isInvalidated()).toBe(true);
+                expect(regionContext.isInvalidated()).toBe(true);
+                expect(pageContext.isInvalidated()).toBe(false);
+
+                regionContext.validate();
+
+                expect(regionContext.isInvalidated()).toBe(false);
+
+                pageContext.invalidate();
+
+                expect(columnContext.isInvalidated()).toBe(true);
+                expect(regionContext.isInvalidated()).toBe(true);
+                expect(pageContext.isInvalidated()).toBe(true);
             });
         });
 

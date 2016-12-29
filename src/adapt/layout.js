@@ -2768,7 +2768,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
                         leadingEdge = false;
                         nodeContext = nodeContextParam;
 
-                        if (self.isInvalidated()) {
+                        if (self.pageFloatLayoutContext.isInvalidated()) {
                             loopFrame.breakLoop();
                         } else if (self.pageBreakType) {
                             // explicit page break
@@ -2798,7 +2798,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
                 }
                 loopFrame.breakLoop();
             }).then(function() {
-                if (self.isInvalidated()) {
+                if (self.pageFloatLayoutContext.isInvalidated()) {
                     frame.finish(null);
                     return;
                 }
