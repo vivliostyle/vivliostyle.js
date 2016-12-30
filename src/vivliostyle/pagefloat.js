@@ -230,6 +230,7 @@ goog.scope(function() {
         /** @const */ this.flowName = flowName;
         /** @const */ this.writingMode = writingMode || (parent && parent.writingMode);
         /** @const */ this.direction = direction || (parent && parent.direction);
+        /** @private @type {boolean} */ this.invalidated = false;
         /** @private @const */ this.floatStore = parent ? parent.floatStore : new PageFloatStore();
         /** @private @const {!Array<vivliostyle.pagefloat.PageFloat.ID>} */ this.forbiddenFloats = [];
         /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatFragment>} */ this.floatFragments = [];
@@ -465,9 +466,9 @@ goog.scope(function() {
         goog.asserts.assert(flowName);
         if (float.floatReference === this.floatReference) {
             var continuation = new PageFloatContinuation(float, nodePosition, flowName);
-            var index = this.floatsDeferredToNext.findIndex(function(c) { return c.float === float; })
+            var index = this.floatsDeferredToNext.findIndex(function(c) { return c.float === float; });
             if (index >= 0) {
-                this.floatsDeferredToNext.splice(index, 1, continuation)
+                this.floatsDeferredToNext.splice(index, 1, continuation);
             } else {
                 this.floatsDeferredToNext.push(continuation);
             }
@@ -535,9 +536,6 @@ goog.scope(function() {
         }, this);
     };
 
-    /**
-     * @private
-     */
     PageFloatLayoutContext.prototype.invalidate = function() {
         this.children.splice(0);
         Object.keys(this.floatAnchors).forEach(function(k) {

@@ -518,6 +518,7 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
     var pageFloatLayoutContext = column.pageFloatLayoutContext;
     var deferredFloats = pageFloatLayoutContext.getDeferredPageFloatContinuations();
     var frame = adapt.task.newFrame("layoutDeferredPageFloats");
+    var invalidated = false;
     var i = 0;
     frame.loopWithFrame(function(loopFrame) {
         if (i === deferredFloats.length) {
@@ -534,9 +535,19 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
         column.layoutPageFloatInner(continuation.nodePosition, float).then(function(floatArea) {
             pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(float, floatArea);
             pageFloatLayoutContext.addPageFloatFragment(pageFloatFragment);
+            var parentInvalidated = pageFloatLayoutContext.parent.isInvalidated();
+            if (parentInvalidated) {
+                loopFrame.breakLoop();
+                return;
+            } else if (pageFloatLayoutContext.isInvalidated() && !parentInvalidated) {
+                invalidated = true;
+                pageFloatLayoutContext.validate();
+            }
             loopFrame.continueLoop();
         });
     }).then(function() {
+        if (invalidated)
+            pageFloatLayoutContext.invalidate();
         frame.finish(true);
     });
     return frame.result();
