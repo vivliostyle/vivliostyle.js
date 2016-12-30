@@ -464,7 +464,13 @@ goog.scope(function() {
         flowName = flowName || this.flowName;
         goog.asserts.assert(flowName);
         if (float.floatReference === this.floatReference) {
-            this.floatsDeferredToNext.push(new PageFloatContinuation(float, nodePosition, flowName));
+            var continuation = new PageFloatContinuation(float, nodePosition, flowName);
+            var index = this.floatsDeferredToNext.findIndex(function(c) { return c.float === float; })
+            if (index >= 0) {
+                this.floatsDeferredToNext.splice(index, 1, continuation)
+            } else {
+                this.floatsDeferredToNext.push(continuation);
+            }
         } else {
             var parent = this.getParent(float.floatReference);
             parent.deferPageFloat(float, nodePosition, flowName);
@@ -511,6 +517,12 @@ goog.scope(function() {
                 var float = this.floatStore.findPageFloatById(fragment.pageFloatId);
                 this.forbid(float);
                 return;
+            }
+        }
+        for (var i = this.floatsDeferredToNext.length - 1; i >= 0; i--) {
+            var continuation = this.floatsDeferredToNext[i];
+            if (!this.isAnchorAlreadyAppeared(continuation.float.getId())) {
+                this.floatsDeferredToNext.splice(i, 1);
             }
         }
         this.floatsDeferredFromPrevious.forEach(function(continuation) {

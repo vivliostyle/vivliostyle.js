@@ -458,6 +458,24 @@ describe("pagefloat", function() {
                 expect(columnContext.floatsDeferredToNext[0].flowName).toBe("foo");
             });
 
+            it("replaces an existing deferred PageFloatContinuation with new one if there exists a deferred continuation of the same float", function() {
+                float = new PageFloat({}, FloatReference.COLUMN, "block-start");
+                columnContext.addPageFloat(float);
+                var position1 = {};
+                columnContext.deferPageFloat(float, position1);
+
+                expect(columnContext.floatsDeferredToNext.length).toBe(1);
+                expect(columnContext.floatsDeferredToNext[0].flowName).toBe("foo");
+                expect(columnContext.floatsDeferredToNext[0].nodePosition).toBe(position1);
+
+                var position2 = {};
+                columnContext.deferPageFloat(float, position2);
+
+                expect(columnContext.floatsDeferredToNext.length).toBe(1);
+                expect(columnContext.floatsDeferredToNext[0].flowName).toBe("foo");
+                expect(columnContext.floatsDeferredToNext[0].nodePosition).toBe(position2);
+            });
+
             it("stores a PageFloatContinuation in the corresponding context as a deferred float", function() {
                 float = new PageFloat({}, FloatReference.REGION, "block-start");
                 columnContext.addPageFloat(float);
@@ -554,17 +572,6 @@ describe("pagefloat", function() {
                 context.floatsDeferredToNext = [cont3];
             });
 
-            it("Transfer floats deferred from previous fragmentainers and not laid out yet if all anchor view nodes of the float fragments have already appeared", function() {
-                expect(context.findPageFloatFragment(float1)).toBe(fragment1);
-                expect(context.findPageFloatFragment(float2)).toBe(fragment2);
-
-                context.isAnchorAlreadyAppeared.and.returnValue(true);
-                context.finish();
-
-                expect(context.removePageFloatFragment).not.toHaveBeenCalled();
-                expect(context.floatsDeferredToNext).toEqual([cont3, cont4]);
-            });
-
             it("Removes and forbids the last fragment whose anchor have not appeared", function() {
                 context.isAnchorAlreadyAppeared.and.returnValue(false);
                 context.finish();
@@ -587,6 +594,31 @@ describe("pagefloat", function() {
                 expect(context.isForbidden(float1)).toBe(true);
                 expect(context.isForbidden(float2)).not.toBe(true);
                 expect(context.floatsDeferredToNext).toEqual([cont3]);
+            });
+
+            it("Removes floats deferred to next fragmentainers if their anchors have not appeared", function() {
+                var float5 = new PageFloat({}, FloatReference.COLUMN, "block-start");
+                context.addPageFloat(float5);
+                var cont5 = new PageFloatContinuation(float5, {}, "aaa");
+                context.floatsDeferredToNext = [cont3, cont5];
+                context.isAnchorAlreadyAppeared.and.callFake(function(id) {
+                    return id === float1.getId() || id === float2.getId();
+                });
+                context.finish();
+
+                expect(context.removePageFloatFragment).not.toHaveBeenCalled();
+                expect(context.floatsDeferredToNext).toEqual([cont3, cont4]);
+            });
+
+            it("Transfer floats deferred from previous fragmentainers and not laid out yet if all anchor view nodes of the float fragments have already appeared", function() {
+                expect(context.findPageFloatFragment(float1)).toBe(fragment1);
+                expect(context.findPageFloatFragment(float2)).toBe(fragment2);
+
+                context.isAnchorAlreadyAppeared.and.returnValue(true);
+                context.finish();
+
+                expect(context.removePageFloatFragment).not.toHaveBeenCalled();
+                expect(context.floatsDeferredToNext).toEqual([cont3, cont4]);
             });
         });
 
