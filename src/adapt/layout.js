@@ -1370,6 +1370,9 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, floa
         }
         redoResult.then(function(floatChunkPositionAfter) {
             context.setFloatAreaDimensions(floatArea, float);
+            if (newPosition && newPosition.isSamePosition(floatChunkPositionAfter)) {
+                context.deferPageFloat(float, floatChunkPositionAfter.primary);
+            }
             frame.finish(floatArea);
         });
     });
