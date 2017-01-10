@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Repeating element</title>
+    <style>
+        @page {
+            size: 820px;
+        }
+        @-epubx-page-template {
+            .partition {
+                width: 398px;
+                height: 198px;
+                border: rgba(0, 0, 255, 0.2) solid 1px;
+                -epubx-flow-from: body;
+            }
+            .left {
+                left: 10px;
+            }
+            .right {
+                right: 10px;
+            }
+
+            @-epubx-page-master {
+                @-epubx-partition {
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 10px;
+                    font-size: 10px;
+                    line-height: 10px;
+                    text-align: center;
+                    content: counter(page);
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 610px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 410px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 210px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 10px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 610px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 410px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 210px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 10px;
+                }
+            }
+        }
+        :root {
+            font-size: 10px;
+            line-height: 12px;
+            widows: 1;
+            orphans: 1;
+        }
+        body {
+            margin: 0 10px;
+        }
+        section {
+            break-after: column;
+        }
+        .header {
+            repeat-on-break: header;
+            background-color: #FF9999;
+        }
+        .footer {
+            repeat-on-break: footer;
+            background-color: #9999FF;
+        }
+
+        .auto {
+            repeat-on-break: auto;
+        }
+        .thead {
+            display: table-header-group;
+        }
+        .tfoot {
+            display: table-footer-group;
+        }
+
+        .box {
+            height: 30px;
+            border: 1px solid #999;
+            margin: 2px;
+            padding: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<section>
+    <div>
+        <div class="box header">this is header</div>
+        <div class="box footer">this is footer</div>
+        <div class="box">1</div>
+        <div class="box">2</div>
+        <div class="box">3</div>
+        <div class="box">4</div>
+        <div class="box">5</div>
+        <div class="box">6</div>
+        <div class="box">7</div>
+        <div class="box">8</div>
+        <div class="box">9</div>
+        <div class="box">10</div>
+        <div class="box">11</div>
+    </div>
+</section>
+
+</body>
+</html>
