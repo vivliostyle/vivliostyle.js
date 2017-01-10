@@ -307,7 +307,7 @@ goog.scope(function() {
      * @extends {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext}
      */
     vivliostyle.table.TableFormattingContext = function(parent, tableSourceNode) {
-        vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext.call(this,tableSourceNode);
+        vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext.call(this, tableSourceNode);
         /** @private @const */ this.parent = parent;
         /** @const */ this.tableSourceNode = tableSourceNode;
         /** @type {boolean} */ this.vertical = false;
@@ -1402,7 +1402,7 @@ goog.scope(function() {
         /** @private @const */ this.processor = processor;
         /** @private @const */ this.formattingContext = formattingContext;
         /** @private @type {!Array<!vivliostyle.table.BrokenTableCellPosition>}*/ this.initialCellBreakPositions = [];
-     };
+    };
     /** @const */ var LayoutRetryer = vivliostyle.table.LayoutRetryer;
     goog.inherits(LayoutRetryer, vivliostyle.repetitiveelements.AbstractLayoutRetryer);
 
