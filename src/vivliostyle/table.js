@@ -1290,6 +1290,14 @@ goog.scope(function() {
     /**
      * @override
      */
+    TableLayoutProcessor.prototype.afterNonInlineElementNode = function(nodeContext) {
+        return false;
+    };
+
+
+    /**
+     * @override
+     */
     TableLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
         var repetitiveElements = formattingContext.repetitiveElements;

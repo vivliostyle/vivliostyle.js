@@ -141,6 +141,14 @@ adapt.layout.LayoutProcessor.prototype.createEdgeBreakPosition = function(
     position, breakOnEdge, overflows, columnBlockSize) {};
 
 /**
+ * process nodecontex of the after non inline element.
+ * @param {!adapt.vtree.NodeContext} nodeContext
+ * @return {boolean} return true if you skip the subsequent
+ */
+adapt.layout.LayoutProcessor.prototype.afterNonInlineElementNode = function(
+    nodeContext) {};
+
+/**
  * @param {!adapt.layout.Column} column
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {boolean} forceRemoveSelf
@@ -2232,6 +2240,8 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
     }
     frame.loopWithFrame(function(loopFrame) {
         while (nodeContext) {
+            var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(nodeContext.formattingContext);
+
             // A code block to be able to use break. Break moves to the next node position.
             do {
                 if (!nodeContext.viewNode) {
@@ -2285,6 +2295,9 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                 }
                 var style = (/** @type {HTMLElement} */ (nodeContext.viewNode)).style;
                 if (nodeContext.after) {
+                    if (layoutProcessor) {
+                        if (layoutProcessor.afterNonInlineElementNode(nodeContext)) break;
+                    }
                     // Trailing edge
                     if (onStartEdges) {
                         // finished going through all starting edges of the box.
@@ -2825,6 +2838,14 @@ adapt.layout.BlockLayoutProcessor.prototype.createEdgeBreakPosition = function(
     position, breakOnEdge, overflows, columnBlockSize) {
     return new adapt.layout.EdgeBreakPosition(position.copy(), breakOnEdge, overflows, columnBlockSize);
 };
+
+/**
+ * @override
+ */
+adapt.layout.BlockLayoutProcessor.prototype.afterNonInlineElementNode = function(nodeContext) {
+    return false;
+};
+
 
 /**
  * @param {!adapt.layout.Column} column
