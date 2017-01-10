@@ -248,7 +248,7 @@ adapt.layout.AbstractBreakPosition.prototype.retrieveRepetitiveElements = functi
     var formattingContext = nodeContext.formattingContext;
     while (formattingContext) {
         if (formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext) {
-            var repetitiveElementsOwnerFormattingContext = /**  @type {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} */ (formattingContext)
+            var repetitiveElementsOwnerFormattingContext = /**  @type {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} */ (formattingContext);
             var repetitiveElements = repetitiveElementsOwnerFormattingContext.getRepetitiveElements();
             if (repetitiveElements) return repetitiveElements;
         }

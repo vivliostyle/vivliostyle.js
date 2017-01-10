@@ -1239,10 +1239,10 @@ adapt.vgen.ViewFactory.prototype.findAndProcessRepeatingElements = function(elem
 adapt.vgen.ViewFactory.prototype.processRepeateOnBreak = function(computedStyle) {
     var repeatOnBreak = computedStyle["repeat-on-break"];
     if (repeatOnBreak !== adapt.css.ident.none) {
-        if ( repeatOnBreak === adapt.css.ident.auto) {
-            if ( this.nodeContext.display === "table-header-group") {
+        if (repeatOnBreak === adapt.css.ident.auto) {
+            if (this.nodeContext.display === "table-header-group") {
                 repeatOnBreak = adapt.css.ident.header;
-            } else if ( this.nodeContext.display === "table-header-group") {
+            } else if (this.nodeContext.display === "table-header-group") {
                 repeatOnBreak = adapt.css.ident.footer;
             } else {
                 repeatOnBreak = adapt.css.ident.none;
@@ -1250,10 +1250,9 @@ adapt.vgen.ViewFactory.prototype.processRepeateOnBreak = function(computedStyle)
         }
         if (repeatOnBreak && repeatOnBreak !== adapt.css.ident.none) {
             return repeatOnBreak.toString();
-        } else {
-            return null;
         }
     }
+    return null;
 };
 
 

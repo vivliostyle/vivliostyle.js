@@ -101,7 +101,7 @@ goog.scope(function() {
      * @return {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext}
      */
     RepetitiveElementsOwnerFormattingContext.prototype.findRootContext = function(nodeContext) {
-        for ( ; nodeContext; nodeContext = nodeContext.parent ) {
+        for (; nodeContext; nodeContext = nodeContext.parent) {
             var formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext);
             if (formattingContext && !formattingContext.isInherited(nodeContext)
                 && formattingContext.isRoot) {
@@ -532,7 +532,7 @@ goog.scope(function() {
         vivliostyle.repetitiveelements.AbstractLayoutRetryer.call(this, formattingContext);
         /** @private @const */ this.processor = processor;
         /** @private @const */ this.formattingContext = formattingContext;
-     };
+    };
     /** @const */ var RepetitiveElementsOwnerLayoutRetryer = vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutRetryer;
     goog.inherits(RepetitiveElementsOwnerLayoutRetryer, vivliostyle.repetitiveelements.AbstractLayoutRetryer);
 
@@ -622,7 +622,7 @@ goog.scope(function() {
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.layout = function(nodeContext, column) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
-        if ( !formattingContext.findRootContext(nodeContext) ) {
+        if (!formattingContext.findRootContext(nodeContext)) {
             return new RepetitiveElementsOwnerLayoutRetryer(formattingContext, this).layout(nodeContext, column);
         } else {
             return adapt.layout.BlockLayoutProcessor.prototype.layout.call(this, nodeContext, column);
@@ -652,14 +652,14 @@ goog.scope(function() {
      * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.doInitialLayout = function(nodeContext, column) {
-       var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
-       var repetitiveElements = formattingContext.getRepetitiveElements();
-       var frame = adapt.task.newFrame("BlockLayoutProcessor.doInitialLayout");
-       this.layoutEntireBlock(nodeContext, column).then(function(nodeContextAfter) {
-           if (repetitiveElements) repetitiveElements.updateHeight(column.clientLayout);
-           frame.finish(null);
-       });
-       return frame.result();
+        var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
+        var repetitiveElements = formattingContext.getRepetitiveElements();
+        var frame = adapt.task.newFrame("BlockLayoutProcessor.doInitialLayout");
+        this.layoutEntireBlock(nodeContext, column).then(function(nodeContextAfter) {
+            if (repetitiveElements) repetitiveElements.updateHeight(column.clientLayout);
+            frame.finish(null);
+        });
+        return frame.result();
     };
 
     /**
@@ -708,10 +708,10 @@ goog.scope(function() {
                 }
             }
             loopFrame.breakLoop();
-        }).then(function(){
+        }).then(function() {
             formattingContext.isRoot = false;
             frame.finish(nodeContext);
-        })
+        });
         return frame.result();
     };
 
@@ -727,15 +727,15 @@ goog.scope(function() {
         /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
             adapt.task.newFrame("RepetitiveElementsOwnerLayoutProcessor.finishBreak");
         adapt.layout.BlockLayoutProcessor.prototype.finishBreak.call(
-            this, column, nodeContext, forceRemoveSelf, endOfRegion).then(function(result){
-            for (; nodeContext; nodeContext = nodeContext.parent) {
-                var formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext);
-                if (formattingContext && !formattingContext.isInherited(nodeContext)) {
-                    this.appendFooter(formattingContext, nodeContext);
+            this, column, nodeContext, forceRemoveSelf, endOfRegion).then(function(result) {
+                for (; nodeContext; nodeContext = nodeContext.parent) {
+                    var formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext);
+                    if (formattingContext && !formattingContext.isInherited(nodeContext)) {
+                        this.appendFooter(formattingContext, nodeContext);
+                    }
                 }
-            }
-            frame.finish(result);
-        }.bind(this));
+                frame.finish(result);
+            }.bind(this));
         return frame.result();
     };
 
