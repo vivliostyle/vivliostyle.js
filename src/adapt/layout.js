@@ -239,8 +239,11 @@ adapt.layout.AbstractBreakPosition.prototype.retrieveRepetitiveElements = functi
     if (!nodeContext) return null;
     var formattingContext = nodeContext.formattingContext;
     while (formattingContext) {
-        var repetitiveElements = formattingContext.getRepetitiveElements();
-        if (repetitiveElements) return repetitiveElements;
+        if (formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext) {
+            var repetitiveElementsOwnerFormattingContext = /**  @type {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} */ (formattingContext)
+            var repetitiveElements = repetitiveElementsOwnerFormattingContext.getRepetitiveElements();
+            if (repetitiveElements) return repetitiveElements;
+        }
         formattingContext = formattingContext.getParent();
     }
     return null;
@@ -440,13 +443,6 @@ adapt.layout.BlockFormattingContext.prototype.isFirstTime = function(nodeContext
  */
 adapt.layout.BlockFormattingContext.prototype.getParent = function() {
     return this.parent;
-};
-
-/**
- * @override
- */
-adapt.layout.BlockFormattingContext.prototype.getRepetitiveElements = function() {
-    return null;
 };
 
 /**
@@ -2089,8 +2085,8 @@ adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext
     var edge = adapt.layout.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
     var fc = nodeContext.after ?
         (nodeContext.parent && nodeContext.parent.formattingContext) : nodeContext.formattingContext;
-    if (fc) {
-        var repetitiveElements = fc.getRepetitiveElements();
+    if (fc && fc instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext) {
+        var repetitiveElements = /** @type {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} */ (fc).getRepetitiveElements();
         if (repetitiveElements) edge += (this.vertical ? -1 : 1) * repetitiveElements.calculateOffset();
     }
     var overflown = this.isOverflown(edge);
@@ -2179,8 +2175,10 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
  * @param {adapt.vtree.FormattingContext} formattingContext
  * @returns {boolean}
  */
-adapt.layout.Column.prototype.isBFC = function(formattingContext) {
-    return formattingContext instanceof adapt.layout.BlockFormattingContext;
+adapt.layout.Column.prototype.isBFC = function(formattingContext, nodeContext) {
+    if (formattingContext instanceof adapt.layout.BlockFormattingContext) return true;
+    return formattingContext.rootSourceNode !== nodeContext.sourceNode
+        || formattingContext.processChildren;
 };
 
 /**
@@ -2206,7 +2204,7 @@ adapt.layout.Column.prototype.isOrphan = function(node) {
 adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
     var fc = nodeContext.after ?
         (nodeContext.parent && nodeContext.parent.formattingContext) : nodeContext.formattingContext;
-    if (fc && !this.isBFC(fc)) {
+    if (fc && !this.isBFC(fc, nodeContext)) {
         return adapt.task.newResult(nodeContext);
     }
 
@@ -2265,7 +2263,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                         // clear
                         self.applyClearance(nodeContext);
                     }
-                    if (!self.isBFC(nodeContext.formattingContext) || nodeContext.floatSide || nodeContext.flexContainer) {
+                    if (!self.isBFC(nodeContext.formattingContext, nodeContext) || nodeContext.floatSide || nodeContext.flexContainer) {
                         // new formatting context, or float or flex container (unbreakable)
                         leadingEdgeContexts.push(nodeContext.copy());
                         breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);

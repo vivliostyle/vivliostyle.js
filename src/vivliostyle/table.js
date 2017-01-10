@@ -304,10 +304,10 @@ goog.scope(function() {
      * @param {!Element} tableSourceNode Source node of the table
      * @constructor
      * @implements {adapt.vtree.FormattingContext}
-     * @extends {vivliostyle.repetitiveelements.RepetitiveElementsPossessable}
+     * @extends {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext}
      */
     vivliostyle.table.TableFormattingContext = function(parent, tableSourceNode) {
-        vivliostyle.repetitiveelements.RepetitiveElementsPossessable.call(this,tableSourceNode)
+        vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext.call(this,tableSourceNode);
         /** @private @const */ this.parent = parent;
         /** @const */ this.tableSourceNode = tableSourceNode;
         /** @type {boolean} */ this.vertical = false;
@@ -325,7 +325,7 @@ goog.scope(function() {
         /** @type {vivliostyle.layoututil.RepetitiveElements} */ this.repetitiveElements = null;
     };
     /** @const */ var TableFormattingContext = vivliostyle.table.TableFormattingContext;
-    goog.inherits(TableFormattingContext, vivliostyle.repetitiveelements.RepetitiveElementsPossessable);
+    goog.inherits(TableFormattingContext, vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext);
 
     /**
      * @override
@@ -512,10 +512,6 @@ goog.scope(function() {
                 cell.setHeight(this.vertical ? rect["width"] : rect["height"]);
             }, this);
         }, this);
-    };
-
-    TableFormattingContext.prototype.initializeRepetitiveElements = function() {
-        this.repetitiveElements = new vivliostyle.repetitiveelements.RepetitiveElements(this.vertical);
     };
 
     /**
@@ -1197,7 +1193,7 @@ goog.scope(function() {
     TableLayoutProcessor.prototype.doInitialLayout = function(nodeContext, column) {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
         formattingContext.vertical = nodeContext.vertical;
-        formattingContext.initializeRepetitiveElements();
+        formattingContext.initializeRepetitiveElements(nodeContext.vertical);
         var frame = adapt.task.newFrame("TableLayoutProcessor.doInitialLayout");
         this.layoutEntireTable(nodeContext, column).then(function(nodeContextAfter) {
             var tableElement = nodeContextAfter.viewNode;
@@ -1299,7 +1295,7 @@ goog.scope(function() {
         var repetitiveElements = formattingContext.repetitiveElements;
 
         if (!repetitiveElements.enableSkippingFooter
-            && !formattingContext.isAfterContextOfRootelement(nodeContext)) {
+            && !formattingContext.isAfterContextOfRootElement(nodeContext)) {
             repetitiveElements.removeFooterFromFragment();
         }
 
@@ -1400,7 +1396,7 @@ goog.scope(function() {
         /** @private @type {!Array<!vivliostyle.table.BrokenTableCellPosition>}*/ this.initialCellBreakPositions = [];
      };
     /** @const */ var LayoutRetryer = vivliostyle.table.LayoutRetryer;
-    goog.inherits(LayoutRetryer, vivliostyle.repetitiveelements.LayoutRetryer);
+    goog.inherits(LayoutRetryer, vivliostyle.repetitiveelements.AbstractLayoutRetryer);
 
     /**
      * @override
@@ -1424,14 +1420,6 @@ goog.scope(function() {
         vivliostyle.repetitiveelements.LayoutRetryer.prototype.clearNodes.call(this, initialPosition);
         var rootViewNode = this.formattingContext.getRootViewNode(initialPosition);
         this.processor.removeColGroups(this.formattingContext, rootViewNode);
-    };
-
-    /**
-     * @override
-     */
-    LayoutRetryer.prototype.prepareLayout = function(nodeContext, column) {
-        var repetitiveElements = this.formattingContext.getRepetitiveElements();
-        if (repetitiveElements) repetitiveElements.prepareLayoutFragment();
     };
 
     /**
@@ -1477,7 +1465,7 @@ goog.scope(function() {
      * @constructor
      * @param {!vivliostyle.table.TableFormattingContext} formattingContext
      * @param {!vivliostyle.table.TableLayoutProcessor} processor
-     * @extends {vivliostyle.repetitiveelements.LayoutEntireTable}
+     * @extends {vivliostyle.repetitiveelements.LayoutFragmentedBlock}
      */
     vivliostyle.table.LayoutFragmentedTable = function(formattingContext, processor) {
         vivliostyle.repetitiveelements.LayoutFragmentedBlock.call(this, formattingContext);
