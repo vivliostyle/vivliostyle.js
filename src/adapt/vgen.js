@@ -1210,13 +1210,15 @@ adapt.vgen.ViewFactory.prototype.preprocessElementStyle = function(computedStyle
 
 /**
  * @private
- * @param {!Object.<string,adapt.css.Val>} computedStyle
+ * @param {Element} element
+ * @param {adapt.cssstyler.AbstractStyler} styler
  */
 adapt.vgen.ViewFactory.prototype.findAndProcessRepeatingElements = function(element, styler) {
-    var child = element.firstChild;
     for (var child = element.firstChild; child; child = child.nextSibling) {
         if (child.nodeType !== 1) continue;
-        var computedStyle = styler.getStyle(child, false);
+        var computedStyle = {};
+        var elementStyle = styler.getStyle(/** @type {Element}*/ (child), false);
+        this.computeStyle(this.nodeContext.vertical, elementStyle, computedStyle);
         var processRepeateOnBreak = this.processRepeateOnBreak(computedStyle);
         if (!processRepeateOnBreak) continue;
         if (this.nodeContext.formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext) {
@@ -1226,7 +1228,7 @@ adapt.vgen.ViewFactory.prototype.findAndProcessRepeatingElements = function(elem
         var parentFormattingContext = parent && parent.formattingcontext;
         this.nodeContext.formattingContext =
             new vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext(
-                parentFormattingContext, this.nodeContext.sourceNode);
+                parentFormattingContext, /** @type {!Element}*/ (this.nodeContext.sourceNode));
         this.nodeContext.formattingContext.initializeRepetitiveElements(this.nodeContext.vertical);
         return;
     }
