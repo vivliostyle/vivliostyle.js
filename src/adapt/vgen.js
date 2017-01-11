@@ -789,8 +789,8 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         if (self.nodeContext.parent && self.nodeContext.parent.formattingContext) {
             firstTime = self.nodeContext.parent.formattingContext.isFirstTime(self.nodeContext, firstTime);
         }
-        self.nodeContext.repeatOnBreak = self.processRepeateOnBreak(computedStyle);
         if (!self.nodeContext.inline) {
+            self.nodeContext.repeatOnBreak = self.processRepeateOnBreak(computedStyle);
             self.findAndProcessRepeatingElements(element, styler);
         }
 
@@ -1221,11 +1221,14 @@ adapt.vgen.ViewFactory.prototype.findAndProcessRepeatingElements = function(elem
         this.computeStyle(this.nodeContext.vertical, elementStyle, computedStyle);
         var processRepeateOnBreak = this.processRepeateOnBreak(computedStyle);
         if (!processRepeateOnBreak) continue;
-        if (this.nodeContext.formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext) {
-            continue;
+
+        if (this.nodeContext.formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext
+            && !this.nodeContext.formattingContext.isInherited(this.nodeContext)) {
+            return;
         }
+
         var parent = this.nodeContext.parent;
-        var parentFormattingContext = parent && parent.formattingcontext;
+        var parentFormattingContext = parent && parent.formattingContext;
         this.nodeContext.formattingContext =
             new vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext(
                 parentFormattingContext, /** @type {!Element}*/ (this.nodeContext.sourceNode));
