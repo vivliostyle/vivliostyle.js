@@ -2185,8 +2185,11 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
  */
 adapt.layout.Column.prototype.isBFC = function(formattingContext, nodeContext) {
     if (formattingContext instanceof adapt.layout.BlockFormattingContext) return true;
-    return formattingContext.rootSourceNode !== nodeContext.sourceNode
-        || formattingContext.processChildren;
+    if (formattingContext instanceof vivliostyle.table.TableFormattingContext) return false;
+    if (formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext) {
+        return formattingContext.isInherited(nodeContext) || formattingContext.isRoot;
+    }
+    return false;
 };
 
 /**

@@ -624,6 +624,7 @@ goog.scope(function() {
     RepetitiveElementsOwnerLayoutProcessor.prototype.layout = function(nodeContext, column) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
         if (!formattingContext.findRootContext(nodeContext)) {
+        //if (!formattingContext.isInherited(nodeContext)) {
             return new RepetitiveElementsOwnerLayoutRetryer(formattingContext, this).layout(nodeContext, column);
         } else {
             return adapt.layout.BlockLayoutProcessor.prototype.layout.call(this, nodeContext, column);
@@ -639,7 +640,7 @@ goog.scope(function() {
             nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
             return true;
         } else if (formattingContext && !formattingContext.isInherited(nodeContext)) {
-            this.appendFooter(formattingContext, nodeContext);
+            appendFooter(formattingContext, nodeContext);
             return false;
         } else {
             return false;
@@ -725,21 +726,29 @@ goog.scope(function() {
             adapt.task.newFrame("RepetitiveElementsOwnerLayoutProcessor.finishBreak");
         adapt.layout.BlockLayoutProcessor.prototype.finishBreak.call(
             this, column, nodeContext, forceRemoveSelf, endOfRegion).then(function(result) {
-                for (var nc = nodeContext; nc; nc = nc.parent) {
-                    var formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nc);
-                    if (formattingContext && !formattingContext.isInherited(nc)) {
-                        this.appendFooter(formattingContext, nc);
-                    }
-                }
+                appendFootersToAncestors(nodeContext);
                 frame.finish(result);
             }.bind(this));
         return frame.result();
     };
 
     /**
-     * @private
+     * @param {adapt.vtree.NodeContext} nodeContext
      */
-    RepetitiveElementsOwnerLayoutProcessor.prototype.appendFooter = function(formattingContext, nodeContext) {
+    function appendFootersToAncestors(nodeContext) {
+        for (var nc = nodeContext; nc; nc = nc.parent) {
+            var formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nc);
+            if (formattingContext && !formattingContext.isInherited(nc)) {
+                appendFooter(formattingContext, nc);
+            }
+        }
+    };
+
+    /**
+     * @param {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext}
+     * @param {adapt.vtree.NodeContext} nodeContext
+     */
+    function appendFooter(formattingContext, nodeContext) {
         var repetitiveElements = formattingContext.getRepetitiveElements();
         if (repetitiveElements) {
             if (!repetitiveElements.isSkipFooter) {
@@ -748,7 +757,8 @@ goog.scope(function() {
             }
         }
     };
-
+    vivliostyle.repetitiveelements.appendFootersToAncestors = appendFootersToAncestors;
+    vivliostyle.repetitiveelements.appendFooter = appendFooter;
 
     /**
      * @param {adapt.vtree.NodeContext} nodeContext
@@ -777,7 +787,8 @@ goog.scope(function() {
     var layoutProcessor = new RepetitiveElementsOwnerLayoutProcessor();
 
     vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, function(formattingContext) {
-        if (formattingContext instanceof RepetitiveElementsOwnerFormattingContext) {
+        if (formattingContext instanceof RepetitiveElementsOwnerFormattingContext
+         && !formattingContext instanceof vivliostyle.table.TableFormattingContext) {
             return layoutProcessor;
         }
         return null;
