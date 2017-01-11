@@ -539,6 +539,61 @@ goog.scope(function() {
     }
 
     /**
+     * @private
+     * @param {?string} display
+     * @returns {boolean}
+     */
+    function isTableRowGrouping(display) {
+        return display === "table-row-group" ||
+                display === "table-header-group" ||
+                display === "table-footer-group";
+    }
+
+    /**
+     * @private
+     * @param {?string} display
+     * @returns {boolean}
+     */
+    function isTableRoot(display) {
+        return display === "table" || display === "inline-table";
+    }
+
+    /**
+     * @private
+     * @param {?string} display
+     * @returns {boolean}
+     */
+    function isValidParentOfTableRow(display) {
+        return isTableRowGrouping(display) || isTableRoot(display);
+    }
+
+    /**
+     * @private
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     * @param {!vivliostyle.table.TableFormattingContext} formattingContext
+     * @param {!adapt.layout.Column} column
+     * @returns {?adapt.task.Result<boolean>}
+     */
+    function skipNestedTable(state, formattingContext, column) {
+        var nodeContext = state.nodeContext;
+        var display = nodeContext.display;
+        var parentDisplay = nodeContext.parent ? nodeContext.parent.display : null;
+        var isNestedTable =
+            (display === "table-row" && !isValidParentOfTableRow(parentDisplay)) ||
+            (display === "table-cell" && parentDisplay !== "table-row" && !isValidParentOfTableRow(parentDisplay)) ||
+            (nodeContext.formattingContext instanceof TableFormattingContext &&
+                nodeContext.formattingContext !== formattingContext);
+        if (isNestedTable) {
+            return column.buildDeepElementView(nodeContext).thenAsync(function(nodeContextAfter) {
+                state.nodeContext = nodeContextAfter;
+                return adapt.task.newResult(true);
+            });
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * @param {!vivliostyle.table.TableFormattingContext} formattingContext
      * @param {!adapt.layout.Column} column
      * @constructor
@@ -559,6 +614,9 @@ goog.scope(function() {
      */
     EntireTableLayoutStrategy.prototype.startNonInlineElementNode = function(state) {
         /** @const */ var formattingContext = this.formattingContext;
+        var r = skipNestedTable(state, formattingContext, this.column);
+        if (r) return r;
+
         /** @const */ var nodeContext = state.nodeContext;
         /** @const */ var display = nodeContext.display;
         switch (display) {
@@ -920,6 +978,9 @@ goog.scope(function() {
      * @return {!adapt.task.Result<boolean>}
      */
     TableLayoutStrategy.prototype.startNonInlineBox = function(state) {
+        var r = skipNestedTable(state, getTableFormattingContext(this.formattingContext), this.column);
+        if (r) return r;
+
         var nodeContext = state.nodeContext;
         var display = nodeContext.display;
         if (display === "table-header-group") {
