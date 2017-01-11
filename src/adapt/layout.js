@@ -212,7 +212,7 @@ adapt.layout.BreakPosition.prototype.findAcceptableBreak = function(column, pena
 adapt.layout.BreakPosition.prototype.getMinBreakPenalty = function() {};
 
 /**
- * @return {vivliostyle.layoututil.RepetitiveElements}
+ * @return {vivliostyle.repetitiveelements.RepetitiveElements}
  */
 adapt.layout.BreakPosition.prototype.getRepetitiveElements = function() {};
 
@@ -241,7 +241,7 @@ adapt.layout.AbstractBreakPosition.prototype.getRepetitiveElements = function() 
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
- * @return {vivliostyle.layoututil.RepetitiveElements}
+ * @return {vivliostyle.repetitiveelements.RepetitiveElements}
  */
 adapt.layout.AbstractBreakPosition.prototype.retrieveRepetitiveElements = function(nodeContext) {
     if (!nodeContext) return null;
@@ -2240,6 +2240,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
     }
     frame.loopWithFrame(function(loopFrame) {
         while (nodeContext) {
+            goog.asserts.assert(nodeContext.formattingContext);
             var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(nodeContext.formattingContext);
 
             // A code block to be able to use break. Break moves to the next node position.
