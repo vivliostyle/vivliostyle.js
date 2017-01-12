@@ -12,6 +12,7 @@ goog.require('adapt.geom');
 goog.require('adapt.task');
 goog.require('vivliostyle.break');
 goog.require('adapt.vtree');
+goog.require("vivliostyle.layoututil");
 
 goog.provide('adapt.layout');
 
@@ -2198,7 +2199,7 @@ adapt.layout.Column.prototype.isBFC = function(formattingContext, nodeContext) {
     if (formattingContext instanceof adapt.layout.BlockFormattingContext) return true;
     if (formattingContext instanceof vivliostyle.table.TableFormattingContext) return false;
     if (formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext) {
-        return formattingContext.isInherited(nodeContext) || formattingContext.isRoot;
+        return formattingContext.isInherited(nodeContext);
     }
     return false;
 };
@@ -2699,51 +2700,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
     self.layoutOverflownFootnotes(chunkPosition).then(function() {
         // ------ start the column -----------
         self.openAllViews(chunkPosition.primary).then(function(nodeContext) {
-            var initialNodeContext = nodeContext;
-            // ------ init backtracking list -----
-            self.breakPositions = [];
-            // ------- fill the column -------------
-            frame.loopWithFrame(function(loopFrame) {
-                while (nodeContext) {
-                    // fill a single block
-                    var pending = true;
-                    self.layoutNext(nodeContext, leadingEdge).then(function(nodeContextParam) {
-                        leadingEdge = false;
-                        nodeContext = nodeContextParam;
-
-                        if (self.hasNewlyAddedPageFloats()) {
-                            loopFrame.breakLoop();
-                            return;
-                        }
-
-                        if (self.pageBreakType) {
-                            // explicit page break
-                            loopFrame.breakLoop(); // Loop end
-                        } else if (nodeContext && self.stopByOverflow(nodeContext)) {
-                            // overflow (implicit page break): back up and find a page break
-                            self.findAcceptableBreak(nodeContext, initialNodeContext).then(function(nodeContextParam) {
-                                nodeContext = nodeContextParam;
-                                loopFrame.breakLoop(); // Loop end
-                            });
-                        } else {
-                            if (pending) {
-                                // Sync case
-                                pending = false;
-                            } else {
-                                // Async case
-                                loopFrame.continueLoop();
-                            }
-                        }
-                    });
-                    if (pending) {
-                        // Async case and loop end
-                        pending = false;
-                        return;
-                    }
-                    // Sync case
-                }
-                loopFrame.breakLoop();
-            }).then(function() {
+            new adapt.layout.LayoutRetryer(leadingEdge).layout(nodeContext, self).then(function(positionAfter) {
                 var footnoteArea = self.footnoteArea;
                 if (footnoteArea) {
                     self.element.appendChild(footnoteArea.element);
@@ -2755,13 +2712,13 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
                     }
                 }
                 // TODO: look at footnotes and floats as well
-                if (!nodeContext) {
+                if (!positionAfter) {
                     frame.finish(null);
                 } else if (self.hasNewlyAddedPageFloats()) {
                     frame.finish(null);
                 } else {
                     self.overflown = true;
-                    var result = new adapt.vtree.ChunkPosition(nodeContext.toNodePosition());
+                    var result = new adapt.vtree.ChunkPosition(positionAfter.toNodePosition());
                     // Transfer overflown footnotes
                     if (self.footnoteItems) {
                         var overflowFootnotes = [];
@@ -2777,6 +2734,64 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
                 }
             });
         });
+    });
+    return frame.result();
+};
+
+/**
+ * @param {adapt.vtree.ChunkPosition} chunkPosition starting position.
+ * @param {boolean} leadingEdge
+ * @return {!adapt.task.Result.<adapt.vtree.ChunkPosition>} holding end position.
+ */
+adapt.layout.Column.prototype.doLayout = function(nodeContext, leadingEdge) {
+    var self = this;
+    /** @type {!adapt.task.Frame.<adapt.vtree.ChunkPosition>} */ var frame = adapt.task.newFrame("doLayout");
+    var initialNodeContext = nodeContext;
+    // ------ init backtracking list -----
+    self.breakPositions = [];
+    // ------- fill the column -------------
+    frame.loopWithFrame(function(loopFrame) {
+        while (nodeContext) {
+            // fill a single block
+            var pending = true;
+            self.layoutNext(nodeContext, leadingEdge).then(function(nodeContextParam) {
+                leadingEdge = false;
+                nodeContext = nodeContextParam;
+
+                if (self.hasNewlyAddedPageFloats()) {
+                    loopFrame.breakLoop();
+                    return;
+                }
+
+                if (self.pageBreakType) {
+                    // explicit page break
+                    loopFrame.breakLoop(); // Loop end
+                } else if (nodeContext && self.stopByOverflow(nodeContext)) {
+                    // overflow (implicit page break): back up and find a page break
+                    self.findAcceptableBreak(nodeContext, initialNodeContext).then(function(nodeContextParam) {
+                        nodeContext = nodeContextParam;
+                        loopFrame.breakLoop(); // Loop end
+                    });
+                } else {
+                    if (pending) {
+                        // Sync case
+                        pending = false;
+                    } else {
+                        // Async case
+                        loopFrame.continueLoop();
+                    }
+                }
+            });
+            if (pending) {
+                // Async case and loop end
+                pending = false;
+                return;
+            }
+            // Sync case
+        }
+        loopFrame.breakLoop();
+    }).then(function() {
+        frame.finish(nodeContext);
     });
     return frame.result();
 };
@@ -2825,6 +2840,97 @@ adapt.layout.Column.prototype.redoLayout = function() {
     });
     return frame.result();
 };
+
+/**
+ * @constructor
+ * @param {boolean} leadingEdge
+ * @extends {vivliostyle.layoututil.AbstractLayoutRetryer}
+ */
+adapt.layout.LayoutRetryer = function(leadingEdge) {
+    vivliostyle.layoututil.AbstractLayoutRetryer.call(this);
+    /** @const */ this.leadingEdge = leadingEdge;
+};
+goog.inherits(adapt.layout.LayoutRetryer, vivliostyle.layoututil.AbstractLayoutRetryer);
+
+/**
+ * @override
+ */
+adapt.layout.LayoutRetryer.prototype.resolveLayoutMode = function(nodeContext) {
+    return new adapt.layout.DefaultLayoutMode(this.leadingEdge);
+};
+
+/**
+ * @override
+ */
+adapt.layout.LayoutRetryer.prototype.prepareLayout = function(nodeContext, column) {
+    vivliostyle.repetitiveelements.eachAncestorRepetitiveElementsOwnerFormattingContext(nodeContext, function(formattingContext){
+        var repetitiveElements = formattingContext.getRepetitiveElements();
+        if (repetitiveElements) repetitiveElements.prepareLayoutFragment();
+    });
+};
+
+/**
+ * @constructor
+ * @param {boolean} leadingEdge
+ * @implements {vivliostyle.layoututil.LayoutMode}
+ */
+adapt.layout.DefaultLayoutMode = function(leadingEdge) {
+  /** @const */ this.leadingEdge = leadingEdge;
+};
+
+/**
+ * @override
+ */
+adapt.layout.DefaultLayoutMode.prototype.doLayout = function(nodeContext, column) {
+    vivliostyle.repetitiveelements.appendHeaderToAncestors(nodeContext);
+    /** @type {!adapt.task.Frame.<boolean>} */ var frame =
+        adapt.task.newFrame("adapt.layout.DefaultLayoutMode.doLayout ");
+    column.doLayout(nodeContext, this.leadingEdge).then(function(result) {
+        vivliostyle.repetitiveelements.appendFooterToAncestors(nodeContext);
+        frame.finish(result);
+    }.bind(this));
+    return frame.result();
+};
+
+/**
+ * @override
+ */
+adapt.layout.DefaultLayoutMode.prototype.accept = function(nodeContext, column) {
+    return true; /// TODO
+    // var repetitiveElements = this.formattingContext.getRepetitiveElements();
+    // if (!repetitiveElements) return true;
+    //
+    // var breakPosition = column.findAcceptableBreakPosition();
+    //
+    // if (this.formattingContext.isAfterContextOfRootElement(nodeContext)
+    //     && repetitiveElements.isSkipFooter) {
+    //     repetitiveElements.preventSkippingFooter();
+    //     return false;
+    // }
+    //
+    // if (!repetitiveElements.isEnableToUpdateState()) return true;
+    // return !!(breakPosition.nodeContext) && !breakPosition.nodeContext.overflow;
+};
+
+/**
+ * @override
+ */
+adapt.layout.DefaultLayoutMode.prototype.postLayout = function(positionAfter, initialPosition, column, accepted) {
+    vivliostyle.repetitiveelements.eachAncestorRepetitiveElementsOwnerFormattingContext(initialPosition, function(formattingContext){
+        var repetitiveElements = formattingContext.getRepetitiveElements();
+        if (!repetitiveElements) return;
+        if (!accepted) {
+            repetitiveElements.removeHeaderFromFragment();
+            repetitiveElements.removeFooterFromFragment();
+        }
+    });
+    // var repetitiveElements = this.formattingContext.getRepetitiveElements();
+    // if (!repetitiveElements) return;
+    // if (!accepted) {
+    //     repetitiveElements.updateState(); // TODO
+    // }
+};
+
 
 /**
  * @constructor
