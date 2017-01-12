@@ -7,7 +7,6 @@ goog.provide("vivliostyle.layoututil");
 goog.require("adapt.task");
 goog.require("adapt.vtree");
 goog.require("vivliostyle.break");
-goog.require("adapt.layout");
 
 goog.scope(function() {
     /**
@@ -421,4 +420,126 @@ goog.scope(function() {
     PseudoColumn.prototype.getColumnElement = function() {
         return this.column.element;
     };
+
+
+    /**
+     * @abstract
+     * @constructor
+     */
+    vivliostyle.layoututil.AbstractLayoutRetryer = function() {
+        /** @type {Array.<adapt.layout.BreakPosition>} */this.initialBreakPositions = null;
+    };
+    /** @const */ var AbstractLayoutRetryer = vivliostyle.layoututil.AbstractLayoutRetryer;
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!adapt.layout.Column} column
+     * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
+     */
+    AbstractLayoutRetryer.prototype.layout = function(nodeContext, column) {
+        this.prepareLayout(nodeContext, column);
+        return this.tryLayout(nodeContext, column);
+    };
+    /**
+     * @private
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!adapt.layout.Column} column
+     * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
+     */
+    AbstractLayoutRetryer.prototype.tryLayout = function(nodeContext, column) {
+        var frame = adapt.task.newFrame("vivliostyle.layoututil.AbstractLayoutRetryer.tryLayout");
+
+        this.saveState(nodeContext, column);
+
+        var mode = this.resolveLayoutMode(nodeContext);
+        mode.doLayout(nodeContext, column).then(function(positionAfter) {
+            var accepted = mode.accept(positionAfter, column);
+            mode.postLayout(positionAfter, this.initialPosition, column, accepted);
+            if (accepted) {
+                frame.finish(positionAfter);
+            } else {
+                goog.asserts.assert(this.initialPosition);
+                this.clearNodes(this.initialPosition);
+                this.restoreState(nodeContext, column);
+                this.tryLayout(this.initialPosition, column).thenFinish(frame);
+            }
+        }.bind(this));
+        return frame.result();
+    };
+
+    /**
+     * @abstract
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @return {vivliostyle.layoututil.LayoutMode}
+     */
+    AbstractLayoutRetryer.prototype.resolveLayoutMode = function(nodeContext) {};
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!adapt.layout.Column} column
+     */
+    AbstractLayoutRetryer.prototype.prepareLayout = function(nodeContext, column) {};
+
+    /**
+     * @param {!adapt.vtree.NodeContext} initialPosition
+     */
+    AbstractLayoutRetryer.prototype.clearNodes = function(initialPosition) {
+        var viewNode = initialPosition.viewNode || initialPosition.parent.viewNode;
+        var child;
+        while (child = viewNode.lastChild) {
+            viewNode.removeChild(child);
+        }
+        var sibling;
+        while (sibling = viewNode.nextSibling) {
+            sibling.parentNode.removeChild(sibling);
+        }
+    };
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!adapt.layout.Column} column
+     */
+    AbstractLayoutRetryer.prototype.saveState = function(nodeContext, column) {
+        this.initialPosition = nodeContext.copy();
+        this.initialBreakPositions = [].concat(column.breakPositions);
+    };
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!adapt.layout.Column} column
+     */
+    AbstractLayoutRetryer.prototype.restoreState = function(nodeContext, column) {
+        column.breakPositions = this.initialBreakPositions;
+    };
+
+
+    /**
+     * @interface
+     */
+    vivliostyle.layoututil.LayoutMode = function() {};
+    /** @const */ var LayoutMode = vivliostyle.layoututil.LayoutMode;
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!adapt.layout.Column} column
+     * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
+     */
+    LayoutMode.prototype.doLayout = function(nodeContext, column) {};
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!adapt.layout.Column} column
+     * @return {boolean}
+     */
+    LayoutMode.prototype.accept = function(nodeContext, column) {};
+
+    /**
+     * @param {!adapt.vtree.NodeContext} positionAfter
+     * @param {!adapt.vtree.NodeContext} initialPosition
+     * @param {!adapt.layout.Column} column
+     * @param {boolean} accepted
+     */
+    LayoutMode.prototype.postLayout = function(positionAfter, initialPosition, column, accepted) {};
+
+
 });

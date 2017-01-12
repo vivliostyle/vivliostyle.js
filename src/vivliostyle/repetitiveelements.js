@@ -97,21 +97,6 @@ goog.scope(function() {
     };
 
     /**
-     * @param {adapt.vtree.NodeContext} nodeContext
-     * @return {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext}
-     */
-    RepetitiveElementsOwnerFormattingContext.prototype.findRootContext = function(nodeContext) {
-        for (var nc = nodeContext.parent; nc; nc = nc.parent) {
-            var formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nc);
-            if (formattingContext && !formattingContext.isInherited(nc)
-                && formattingContext.isRoot) {
-                return formattingContext;
-            }
-        }
-        return null;
-    };
-
-    /**
      * @constructor
      */
     vivliostyle.repetitiveelements.RepetitiveElements = function(vertical) {
@@ -252,142 +237,9 @@ goog.scope(function() {
     };
 
     /**
-     * @abstract
-     * @param {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext
-     * @constructor
-     */
-    vivliostyle.repetitiveelements.AbstractLayoutRetryer = function(formattingContext) {
-        /** @const */ this.formattingContext = formattingContext;
-        /** @type {Array.<adapt.layout.BreakPosition>} */this.initialBreakPositions = null;
-    };
-    /** @const */ var AbstractLayoutRetryer = vivliostyle.repetitiveelements.AbstractLayoutRetryer;
-
-    /**
-     * @param {!adapt.vtree.NodeContext} nodeContext
-     * @param {!adapt.layout.Column} column
-     * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
-     */
-    AbstractLayoutRetryer.prototype.layout = function(nodeContext, column) {
-        this.prepareLayout(nodeContext, column);
-        return this.tryLayout(nodeContext, column);
-    };
-    /**
-     * @private
-     * @param {!adapt.vtree.NodeContext} nodeContext
-     * @param {!adapt.layout.Column} column
-     * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
-     */
-    AbstractLayoutRetryer.prototype.tryLayout = function(nodeContext, column) {
-        var frame = adapt.task.newFrame("vivliostyle.repetitiveelements.layout");
-
-        this.saveState(nodeContext, column);
-
-        var mode = this.resolveLayoutMode(nodeContext);
-        mode.doLayout(nodeContext, column).then(function(positionAfter) {
-            var accepted = mode.accept(positionAfter, column);
-            mode.postLayout(positionAfter, this.initialPosition, column, accepted);
-            if (accepted) {
-                frame.finish(positionAfter);
-            } else {
-                goog.asserts.assert(this.initialPosition);
-                this.clearNodes(this.initialPosition);
-                this.restoreState(nodeContext, column);
-                this.tryLayout(this.initialPosition, column).thenFinish(frame);
-            }
-        }.bind(this));
-        return frame.result();
-    };
-
-    /**
-     * @abstract
-     * @param {!adapt.vtree.NodeContext} nodeContext
-     * @return {vivliostyle.repetitiveelements.LayoutMode}
-     */
-    AbstractLayoutRetryer.prototype.resolveLayoutMode = function(nodeContext) {};
-
-    /**
-     * @param {!adapt.vtree.NodeContext} nodeContext
-     * @param {!adapt.layout.Column} column
-     */
-    AbstractLayoutRetryer.prototype.prepareLayout = function(nodeContext, column) {
-        if (!this.formattingContext.isInherited(nodeContext)) {
-            var repetitiveElements = this.formattingContext.getRepetitiveElements();
-            if (repetitiveElements) repetitiveElements.prepareLayoutFragment();
-        }
-        if (!this.formattingContext.findRootContext(nodeContext)) {
-            eachAncestorRepetitiveElementsOwnerFormattingContext(nodeContext, function(formattingContext){
-                var repetitiveElements = formattingContext.getRepetitiveElements();
-                if (repetitiveElements) repetitiveElements.prepareLayoutFragment();
-            });
-        }
-    };
-
-    /**
-     * @param {!adapt.vtree.NodeContext} initialPosition
-     */
-    AbstractLayoutRetryer.prototype.clearNodes = function(initialPosition) {
-        var viewNode = initialPosition.viewNode || initialPosition.parent.viewNode;
-        var child;
-        while (child = viewNode.lastChild) {
-            viewNode.removeChild(child);
-        }
-        var sibling;
-        while (sibling = viewNode.nextSibling) {
-            sibling.parentNode.removeChild(sibling);
-        }
-    };
-
-    /**
-     * @param {!adapt.vtree.NodeContext} nodeContext
-     * @param {!adapt.layout.Column} column
-     */
-    AbstractLayoutRetryer.prototype.saveState = function(nodeContext, column) {
-        this.initialPosition = nodeContext.copy();
-        this.initialBreakPositions = [].concat(column.breakPositions);
-    };
-
-    /**
-     * @param {!adapt.vtree.NodeContext} nodeContext
-     * @param {!adapt.layout.Column} column
-     */
-    AbstractLayoutRetryer.prototype.restoreState = function(nodeContext, column) {
-        column.breakPositions = this.initialBreakPositions;
-    };
-
-
-    /**
-     * @interface
-     */
-    vivliostyle.repetitiveelements.LayoutMode = function() {};
-    /** @const */ var LayoutMode = vivliostyle.repetitiveelements.LayoutMode;
-
-    /**
-     * @param {!adapt.vtree.NodeContext} nodeContext
-     * @param {!adapt.layout.Column} column
-     * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
-     */
-    LayoutMode.prototype.doLayout = function(nodeContext, column) {};
-
-    /**
-     * @param {!adapt.vtree.NodeContext} nodeContext
-     * @param {!adapt.layout.Column} column
-     * @return {boolean}
-     */
-    LayoutMode.prototype.accept = function(nodeContext, column) {};
-
-    /**
-     * @param {!adapt.vtree.NodeContext} positionAfter
-     * @param {!adapt.vtree.NodeContext} initialPosition
-     * @param {!adapt.layout.Column} column
-     * @param {boolean} accepted
-     */
-    LayoutMode.prototype.postLayout = function(positionAfter, initialPosition, column, accepted) {};
-
-
-    /**
      * @constructor
      * @param {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext
-     * @implements {vivliostyle.repetitiveelements.LayoutMode}
+     * @implements {vivliostyle.layoututil.LayoutMode}
      */
     vivliostyle.repetitiveelements.LayoutEntireBlock = function(formattingContext) {
         this.formattingContext = formattingContext;
@@ -421,7 +273,7 @@ goog.scope(function() {
     /**
      * @constructor
      * @param {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext
-     * @implements {vivliostyle.repetitiveelements.LayoutMode}
+     * @implements {vivliostyle.layoututil.LayoutMode}
      */
     vivliostyle.repetitiveelements.LayoutFragmentedBlock = function(formattingContext) {
         this.formattingContext = formattingContext;
@@ -437,39 +289,26 @@ goog.scope(function() {
      * @override
      */
     LayoutFragmentedBlock.prototype.accept = function(nodeContext, column) {
-        var repetitiveElements = this.formattingContext.getRepetitiveElements();
-        if (!repetitiveElements) return true;
-
-        var breakPosition = column.findAcceptableBreakPosition();
-
-        if (this.formattingContext.isAfterContextOfRootElement(nodeContext)
-            && repetitiveElements.isSkipFooter) {
-            repetitiveElements.preventSkippingFooter();
-            return false;
-        }
-
-        if (!repetitiveElements.isEnableToUpdateState()) return true;
-        return !!(breakPosition.nodeContext) && !breakPosition.nodeContext.overflow;
+        return true;
+        // var repetitiveElements = this.formattingContext.getRepetitiveElements();
+        // if (!repetitiveElements) return true;
+        //
+        // var breakPosition = column.findAcceptableBreakPosition();
+        //
+        // if (this.formattingContext.isAfterContextOfRootElement(nodeContext)
+        //     && repetitiveElements.isSkipFooter) {
+        //     repetitiveElements.preventSkippingFooter();
+        //     return false;
+        // }
+        //
+        // if (!repetitiveElements.isEnableToUpdateState()) return true;
+        // return !!(breakPosition.nodeContext) && !breakPosition.nodeContext.overflow;
     };
 
     /**
      * @override
      */
-    LayoutFragmentedBlock.prototype.postLayout = function(positionAfter, initialPosition, column, accepted) {
-        eachAncestorRepetitiveElementsOwnerFormattingContext(initialPosition, function(formattingContext){
-            var repetitiveElements = formattingContext.getRepetitiveElements();
-            if (!repetitiveElements) return;
-            if (!accepted) {
-                repetitiveElements.removeHeaderFromFragment();
-                repetitiveElements.removeFooterFromFragment();
-            }
-        });
-        var repetitiveElements = this.formattingContext.getRepetitiveElements();
-        if (!repetitiveElements) return;
-        if (!accepted) {
-            repetitiveElements.updateState();
-        }
-    };
+    LayoutFragmentedBlock.prototype.postLayout = function(positionAfter, initialPosition, column, accepted) {};
 
     /**
      * @param {!adapt.vtree.NodeContext} nodeContext
@@ -477,9 +316,6 @@ goog.scope(function() {
     LayoutFragmentedBlock.prototype.appendHeaders = function(nodeContext) {
         if (!this.formattingContext.isInherited(nodeContext)) {
             appendHeader(this.formattingContext, nodeContext);
-        }
-        if (!this.formattingContext.findRootContext(nodeContext)) {
-            appendHeadersToAncestors(nodeContext);
         }
     };
 
@@ -536,14 +372,15 @@ goog.scope(function() {
      * @constructor
      * @param {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext
      * @param {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutProcessor} processor
-     * @extends {vivliostyle.repetitiveelements.AbstractLayoutRetryer}
+     * @extends {vivliostyle.layoututil.AbstractLayoutRetryer}
      */
     vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutRetryer = function(formattingContext, processor) {
-        vivliostyle.repetitiveelements.AbstractLayoutRetryer.call(this, formattingContext);
+        vivliostyle.layoututil.AbstractLayoutRetryer.call(this);
+        /** @const */ this.formattingContext = formattingContext;
         /** @private @const */ this.processor = processor;
     };
     /** @const */ var RepetitiveElementsOwnerLayoutRetryer = vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutRetryer;
-    goog.inherits(RepetitiveElementsOwnerLayoutRetryer, vivliostyle.repetitiveelements.AbstractLayoutRetryer);
+    goog.inherits(RepetitiveElementsOwnerLayoutRetryer, vivliostyle.layoututil.AbstractLayoutRetryer);
 
     /**
      * @override
@@ -559,6 +396,14 @@ goog.scope(function() {
             }
             return new LayoutFragmentedOwnerBlock(this.formattingContext, this.processor);
         }
+    };
+
+    /**
+     * @override
+     */
+    RepetitiveElementsOwnerLayoutRetryer.prototype.prepareLayout = function(nodeContext, column) {
+        var repetitiveElements = this.formattingContext.getRepetitiveElements();
+        if (repetitiveElements) repetitiveElements.prepareLayoutFragment();
     };
 
     /**
@@ -618,7 +463,7 @@ goog.scope(function() {
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.layout = function(nodeContext, column) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
-        if (!formattingContext.isInherited(nodeContext) || !formattingContext.findRootContext(nodeContext)) {
+        if (!formattingContext.isInherited(nodeContext)) {
             return new RepetitiveElementsOwnerLayoutRetryer(formattingContext, this).layout(nodeContext, column);
         } else {
             return adapt.layout.BlockLayoutProcessor.prototype.layout.call(this, nodeContext, column);
@@ -680,58 +525,8 @@ goog.scope(function() {
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.doLayout = function(nodeContext, column) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
-        if (!formattingContext.findRootContext(nodeContext)) {
-            return this.layoutRoot(nodeContext, column);
-        } else {
-            return adapt.layout.BlockLayoutProcessor.prototype.layout.call(this, nodeContext, column);
-        }
+        return adapt.layout.BlockLayoutProcessor.prototype.layout.call(this, nodeContext, column);
     }
-
-    /**
-     * @private
-     * @param {adapt.vtree.NodeContext} nodeContext
-     * @param {!adapt.layout.Column} column
-     * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
-     */
-    RepetitiveElementsOwnerLayoutProcessor.prototype.layoutRoot = function(nodeContext, column) {
-        var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
-        formattingContext.isRoot = true;
-
-        /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
-            adapt.task.newFrame("RepetitiveElementsOwnerLayoutProcessor.doLayout");
-        frame.loopWithFrame(function(loopFrame) {
-            while (nodeContext) {
-                var pending = true;
-                column.layoutNext(nodeContext, false).then(function(nodeContextParam) {
-                    nodeContext = nodeContextParam;
-                    if (column.hasNewlyAddedPageFloats()) {
-                        loopFrame.breakLoop();
-                        return;
-                    }
-                    if (column.pageBreakType) {
-                        loopFrame.breakLoop();
-                    } else if (nodeContext && column.stopByOverflow(nodeContext)) {
-                        loopFrame.breakLoop();
-                    } else {
-                        if (pending) {
-                            pending = false;
-                        } else {
-                            loopFrame.continueLoop();
-                        }
-                    }
-                });
-                if (pending) {
-                    pending = false;
-                    return;
-                }
-            }
-            loopFrame.breakLoop();
-        }).then(function() {
-            formattingContext.isRoot = false;
-            frame.finish(nodeContext);
-        });
-        return frame.result();
-    };
 
     /**
      * @override
@@ -743,12 +538,7 @@ goog.scope(function() {
             adapt.task.newFrame("RepetitiveElementsOwnerLayoutProcessor.finishBreak");
         adapt.layout.BlockLayoutProcessor.prototype.finishBreak.call(
             this, column, nodeContext, forceRemoveSelf, endOfRegion).then(function(result) {
-                if (!formattingContext.isInherited(nodeContext)) {
-                    appendFooter(formattingContext, nodeContext);
-                }
-                if (!formattingContext.findRootContext(nodeContext)) {
-                    appendFootersToAncestors(nodeContext);
-                }
+                appendFooter(formattingContext, nodeContext);
                 frame.finish(result);
             }.bind(this));
         return frame.result();
@@ -769,7 +559,7 @@ goog.scope(function() {
     /**
      * @param {!adapt.vtree.NodeContext} nodeContext
      */
-    function appendHeadersToAncestors(nodeContext) {
+    function appendHeaderToAncestors(nodeContext) {
         eachAncestorRepetitiveElementsOwnerFormattingContext(nodeContext.parent, function(formattingContext) {
             appendHeader(formattingContext, nodeContext);
         });
@@ -783,6 +573,9 @@ goog.scope(function() {
         var repetitiveElements = formattingContext.getRepetitiveElements();
         if (repetitiveElements) {
             var rootViewNode = formattingContext.getRootViewNode(nodeContext);
+            if (!rootViewNode) {
+                return;
+            }
             var firstChild = rootViewNode.firstChild;
             repetitiveElements.appendHeaderToFragment(rootViewNode, firstChild);
         }
@@ -791,7 +584,7 @@ goog.scope(function() {
     /**
      * @param {adapt.vtree.NodeContext} nodeContext
      */
-    function appendFootersToAncestors(nodeContext) {
+    function appendFooterToAncestors(nodeContext) {
         eachAncestorRepetitiveElementsOwnerFormattingContext(nodeContext.parent, function(formattingContext) {
             appendFooter(formattingContext, nodeContext);
         });
@@ -806,15 +599,18 @@ goog.scope(function() {
         if (repetitiveElements) {
             if (!repetitiveElements.isSkipFooter) {
                 var rootViewNode = formattingContext.getRootViewNode(nodeContext);
+                if (!rootViewNode) {
+                    return;
+                }
                 repetitiveElements.appendFooterToFragment(rootViewNode, null);
             }
         }
     };
     vivliostyle.repetitiveelements.eachAncestorRepetitiveElementsOwnerFormattingContext
         = eachAncestorRepetitiveElementsOwnerFormattingContext;
-    vivliostyle.repetitiveelements.appendHeadersToAncestors = appendHeadersToAncestors;
+    vivliostyle.repetitiveelements.appendHeaderToAncestors = appendHeaderToAncestors;
     vivliostyle.repetitiveelements.appendHeader = appendHeader;
-    vivliostyle.repetitiveelements.appendFootersToAncestors = appendFootersToAncestors;
+    vivliostyle.repetitiveelements.appendFooterToAncestors = appendFooterToAncestors;
     vivliostyle.repetitiveelements.appendFooter = appendFooter;
 
     /**
