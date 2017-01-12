@@ -531,6 +531,17 @@ adapt.vtree.FormattingContext.prototype.getParent = function() {};
 
 
 /**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {function(adapt.vtree.FormattingContext)} callback
+ */
+adapt.vtree.eachAncestorFormattingContext = function(nodeContext, callback) {
+    if (!nodeContext) return;
+    for (var fc = nodeContext.formattingContext; fc; fc = fc.getParent()) {
+        callback(fc);
+    }
+};
+
+/**
  * @typedef {{
  * 		node:Node,
  *      shadowType:adapt.vtree.ShadowType,
