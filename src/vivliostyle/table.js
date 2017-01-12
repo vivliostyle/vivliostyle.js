@@ -1496,7 +1496,7 @@ goog.scope(function() {
      * @override
      */
     LayoutFragmentedTable.prototype.doLayout = function(nodeContext, column) {
-        LayoutFragmentedBlock.prototype.addHeadersToAncestors.call(this, nodeContext);
+        LayoutFragmentedBlock.prototype.appendHeaders.call(this, nodeContext);
         return this.processor.doLayout(nodeContext, column);
     };
 
