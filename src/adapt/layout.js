@@ -1359,8 +1359,9 @@ adapt.layout.Column.prototype.createPageFloatArea = function(float) {
     var floatAreaElement = this.element.ownerDocument.createElement("div");
     adapt.base.setCSSProperty(floatAreaElement, "position", "absolute");
     var parentPageFloatLayoutContext = this.pageFloatLayoutContext.getPageFloatLayoutContext(float.floatReference);
-    var pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(parentPageFloatLayoutContext,
-        vivliostyle.pagefloat.FloatReference.COLUMN, null, this.pageFloatLayoutContext.flowName, null, null);
+    var pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
+        parentPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.COLUMN, null,
+        this.pageFloatLayoutContext.flowName, float.sourceNode, null, null);
     var floatArea = new adapt.layout.Column(floatAreaElement, this.layoutContext.clone(), this.clientLayout, this.layoutConstraint, pageFloatLayoutContext);
     pageFloatLayoutContext.setContainer(floatArea);
     if (this.setupFloatArea(floatArea, float)) {

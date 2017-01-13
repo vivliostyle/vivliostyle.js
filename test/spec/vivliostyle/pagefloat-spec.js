@@ -75,29 +75,32 @@ describe("pagefloat", function() {
     describe("PageFloatLayoutContext", function() {
         var rootContext;
         beforeEach(function() {
-            rootContext = new PageFloatLayoutContext(null, null, null, null, null, null);
+            rootContext = new PageFloatLayoutContext(null, null, null, null, null, null, null);
         });
 
         describe("constructor", function() {
             it("uses writing-mode and direction values of the parent if they are not specified", function() {
                 var context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
-                    adapt.css.ident.vertical_rl, adapt.css.ident.rtl);
+                    null, adapt.css.ident.vertical_rl, adapt.css.ident.rtl);
 
                 expect(context.writingMode).toBe(adapt.css.ident.vertical_rl);
                 expect(context.direction).toBe(adapt.css.ident.rtl);
 
-                context = new PageFloatLayoutContext(context, FloatReference.REGION, null, null, null, null);
+                context = new PageFloatLayoutContext(context, FloatReference.REGION, null, null, null,
+                    null, null);
 
                 expect(context.writingMode).toBe(adapt.css.ident.vertical_rl);
                 expect(context.direction).toBe(adapt.css.ident.rtl);
             });
 
             it("registers itself to the parent as a child", function() {
-                var pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
+                var pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null,
+                    null, null, null, null);
 
                 expect(rootContext.children).toEqual([pageContext]);
 
-                var regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, null, null, null);
+                var regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION,
+                    null, null, null, null, null);
 
                 expect(pageContext.children).toEqual([regionContext]);
             });
@@ -105,43 +108,66 @@ describe("pagefloat", function() {
 
         describe("#getPreviousSibling", function() {
             it("returns null if the parent has no children preceding the child", function() {
-                var context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
+                var context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
 
                 expect(context.getPreviousSibling()).toBe(null);
             });
 
             it("returns the previous sibling if it has the same floatReference", function() {
-                var context1 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                var context2 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                var context3 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
+                var context1 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
+                var context2 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
+                var context3 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
 
                 expect(context3.getPreviousSibling()).toBe(context2);
                 expect(context2.getPreviousSibling()).toBe(context1);
                 expect(context1.getPreviousSibling()).toBe(null);
             });
 
-            it("returns the last child with the same floatReference of the previous sibling if it has a different floatReference", function() {
-                var context1 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                var context2 = new PageFloatLayoutContext(context1, FloatReference.REGION, null, null, null, null);
-                var context3 = new PageFloatLayoutContext(context2, FloatReference.COLUMN, null, null, null, null);
-                var context4 = new PageFloatLayoutContext(context1, FloatReference.REGION, null, null, null, null);
-                var context5 = new PageFloatLayoutContext(context4, FloatReference.COLUMN, null, null, null, null);
-                var context6 = new PageFloatLayoutContext(context4, FloatReference.COLUMN, null, null, null, null);
-                var context7 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                var context8 = new PageFloatLayoutContext(context7, FloatReference.REGION, null, null, null, null);
-                var context9 = new PageFloatLayoutContext(context8, FloatReference.COLUMN, null, null, null, null);
+            it("returns the last context with the same floatReference, the same flow and the same generating element", function() {
+                var context1 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
+                var context2 = new PageFloatLayoutContext(context1, FloatReference.REGION, null, "body",
+                    null, null, null);
+                var context3 = new PageFloatLayoutContext(context2, FloatReference.COLUMN, null, "body",
+                    null, null, null);
+                var context4 = new PageFloatLayoutContext(context1, FloatReference.REGION, null, "flow",
+                    null, null, null);
+                var context5 = new PageFloatLayoutContext(context4, FloatReference.COLUMN, null, "flow",
+                    null, null, null);
+                var context6 = new PageFloatLayoutContext(context4, FloatReference.COLUMN, null, "flow",
+                    {}, null, null); // generating element exists
+                var context7 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
+                var context8 = new PageFloatLayoutContext(context7, FloatReference.REGION, null, "body",
+                    null, null, null);
+                var context9 = new PageFloatLayoutContext(context8, FloatReference.COLUMN, null, "body",
+                    null, null, null);
+                var context10 = new PageFloatLayoutContext(context7, FloatReference.REGION, null,
+                    "flow", null, null, null);
+                var context11 = new PageFloatLayoutContext(context10, FloatReference.COLUMN, null,
+                    "flow", null, null, null);
 
-                expect(context9.getPreviousSibling()).toBe(context6);
-                expect(context8.getPreviousSibling()).toBe(context4);
+                expect(context4.getPreviousSibling()).toBe(null);
+                expect(context5.getPreviousSibling()).toBe(null);
+                expect(context6.getPreviousSibling()).toBe(null);
                 expect(context7.getPreviousSibling()).toBe(context1);
-                expect(context5.getPreviousSibling()).toBe(context3);
+                expect(context8.getPreviousSibling()).toBe(context2);
+                expect(context9.getPreviousSibling()).toBe(context3);
+                expect(context10.getPreviousSibling()).toBe(context4);
+                expect(context11.getPreviousSibling()).toBe(context5);
             });
         });
 
         describe("#findPageFloatBySourceNode", function() {
             it("returns a page float registered by PageFloatLayoutContext with the same root PageFloatLayoutContext", function() {
-                var context1 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                var context2 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
+                var context1 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
+                var context2 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
                 var sourceNode1 = {};
                 var float1 = new PageFloat(sourceNode1, FloatReference.PAGE, "block-start");
                 context1.addPageFloat(float1);
@@ -158,7 +184,8 @@ describe("pagefloat", function() {
 
         describe("#forbid, #isForbidden", function() {
             it("returns if the page float is forbidden in the context by #forbid method", function() {
-                var context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
+                var context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
                 var float = new PageFloat({}, FloatReference.PAGE, "block-start");
                 context.addPageFloat(float);
 
@@ -170,9 +197,12 @@ describe("pagefloat", function() {
             });
 
             it("returns true if the page float is forbidden by one of ancestors of the context", function() {
-                var pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                var regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, null, null, null);
-                var columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
+                var pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null,
+                    null, null, null, null);
+                var regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION,
+                    null, null, null, null, null);
+                var columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN,
+                    null, null, null, null, null);
 
                 var float = new PageFloat({}, FloatReference.COLUMN, "block-start");
                 columnContext.addPageFloat(float);
@@ -181,7 +211,8 @@ describe("pagefloat", function() {
                 expect(columnContext.isForbidden(float)).toBe(true);
                 expect(function() { regionContext.isForbidden(float); }).toThrow();
 
-                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
+                    null, null, null, null);
 
                 expect(columnContext.isForbidden(float)).toBe(false);
 
@@ -193,12 +224,15 @@ describe("pagefloat", function() {
                 expect(regionContext.isForbidden(float)).toBe(true);
                 expect(function() { pageContext.isForbidden(float); }).toThrow();
 
-                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
+                    null, null, null, null);
 
                 expect(columnContext.isForbidden(float)).toBe(true);
 
-                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, null, null, null);
-                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
+                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null,
+                    null, null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
+                    null, null, null, null);
 
                 expect(columnContext.isForbidden(float)).toBe(false);
                 expect(regionContext.isForbidden(float)).toBe(false);
@@ -212,19 +246,25 @@ describe("pagefloat", function() {
                 expect(regionContext.isForbidden(float)).toBe(true);
                 expect(pageContext.isForbidden(float)).toBe(true);
 
-                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
+                    null, null, null, null);
 
                 expect(columnContext.isForbidden(float)).toBe(true);
 
-                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, null, null, null);
-                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
+                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null,
+                    null, null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
+                    null, null, null, null);
 
                 expect(columnContext.isForbidden(float)).toBe(true);
                 expect(regionContext.isForbidden(float)).toBe(true);
 
-                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, null, null, null);
-                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
+                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
+                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null,
+                    null, null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
+                    null, null, null, null);
 
                 expect(columnContext.isForbidden(float)).toBe(false);
                 expect(regionContext.isForbidden(float)).toBe(false);
@@ -235,9 +275,12 @@ describe("pagefloat", function() {
         describe("#addPageFloatFragment, #findPageFloatFragment", function() {
             var pageContext, regionContext, columnContext, area;
             function reset() {
-                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, null, null, null);
-                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
+                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
+                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null,
+                    null, null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
+                    null, null, null, null);
                 [pageContext, regionContext, columnContext].forEach(function(context) {
                     spyOn(context, "invalidate");
                     spyOn(context, "addPageFloatFragment").and.callThrough();
@@ -249,7 +292,8 @@ describe("pagefloat", function() {
             });
 
             it("A PageFloatFragment added by #addPageFloatFragment can be retrieved by #findPageFloatFragment", function() {
-                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
+                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
                 var float = new PageFloat({}, FloatReference.PAGE, "block-start");
                 pageContext.addPageFloat(float);
                 var fragment = new PageFloatFragment(float, area);
@@ -266,7 +310,8 @@ describe("pagefloat", function() {
                 columnContext.addPageFloat(float);
                 var fragment = new PageFloatFragment(float, area);
                 columnContext.addPageFloatFragment(fragment);
-                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
+                    null, null, null, null);
 
                 expect(columnContext.findPageFloatFragment(float)).toBe(fragment);
                 expect(regionContext.findPageFloatFragment(float)).toBe(fragment);
@@ -276,8 +321,10 @@ describe("pagefloat", function() {
                 columnContext.addPageFloat(float);
                 fragment = new PageFloatFragment(float, area);
                 columnContext.addPageFloatFragment(fragment);
-                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, null, null, null);
-                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
+                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null,
+                    null, null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
+                    null, null, null, null);
 
                 expect(columnContext.findPageFloatFragment(float)).toBe(fragment);
                 expect(regionContext.findPageFloatFragment(float)).toBe(fragment);
@@ -321,7 +368,8 @@ describe("pagefloat", function() {
         describe("#removePageFloatFragment", function() {
             var container, context, float, area, fragment;
             beforeEach(function() {
-                context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, container, null, null, null);
+                context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, container, null,
+                    null, null, null);
                 spyOn(context, "invalidate");
                 float = new PageFloat({}, FloatReference.PAGE, "block-start");
                 context.addPageFloat(float);
@@ -361,9 +409,12 @@ describe("pagefloat", function() {
         describe("#registerPageFloatAnchor", function() {
             var pageContext, regionContext, columnContext, float, anchorViewNode;
             beforeEach(function() {
-                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, null, null, null);
-                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
+                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
+                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null,
+                    null, null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
+                    null, null, null, null);
                 anchorViewNode = {};
             });
 
@@ -401,7 +452,8 @@ describe("pagefloat", function() {
                         contains: jasmine.createSpy("contains")
                     }
                 };
-                context = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, container, "foo", null, null);
+                context = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, container,
+                    "foo", null, null, null);
                 float = new PageFloat({}, FloatReference.COLUMN, "block-start");
                 context.addPageFloat(float);
                 id = float.getId();
@@ -439,9 +491,12 @@ describe("pagefloat", function() {
         describe("#deferPageFloat", function() {
             var pageContext, regionContext, columnContext, float;
             beforeEach(function() {
-                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, "foo", null, null);
-                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, "foo", null, null);
+                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null, null);
+                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null,
+                    "foo", null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
+                    "foo", null, null, null);
             });
 
             it("stores a PageFloatContinuation as a deferred float", function() {
@@ -483,22 +538,37 @@ describe("pagefloat", function() {
         });
 
         describe("getDeferredPageFloatContinuations", function() {
+            function addPageFloat(floatReference, context) {
+                var float = new PageFloat({}, floatReference, "block-start", {});
+                context.addPageFloat(float);
+                return float;
+            }
+
             var pageContext, regionContext, columnContext, cont1, cont2, cont3, cont4, cont5, cont6;
             beforeEach(function() {
-                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, "foo", null, null);
-                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, "foo", null, null);
-                cont1 = new PageFloatContinuation({}, {}, "foo");
+                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null);
+                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null,
+                    "foo", null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
+                    "foo", null, null, null);
+                var float1 = addPageFloat(FloatReference.PAGE, pageContext);
+                cont1 = new PageFloatContinuation(float1, {}, "foo");
                 pageContext.floatsDeferredFromPrevious.push(cont1);
-                cont2 = new PageFloatContinuation({}, {}, "bar");
+                var float2 = addPageFloat(FloatReference.PAGE, pageContext);
+                cont2 = new PageFloatContinuation(float2, {}, "bar");
                 pageContext.floatsDeferredFromPrevious.push(cont2);
-                cont3 = new PageFloatContinuation({}, {}, "foo");
+                var float3 = addPageFloat(FloatReference.REGION, regionContext);
+                cont3 = new PageFloatContinuation(float3, {}, "foo");
                 regionContext.floatsDeferredFromPrevious.push(cont3);
-                cont4 = new PageFloatContinuation({}, {}, "bar");
+                var float4 = addPageFloat(FloatReference.REGION, regionContext);
+                cont4 = new PageFloatContinuation(float4, {}, "bar");
                 regionContext.floatsDeferredFromPrevious.push(cont4);
-                cont5 = new PageFloatContinuation({}, {}, "foo");
+                var float5 = addPageFloat(FloatReference.COLUMN, columnContext);
+                cont5 = new PageFloatContinuation(float5, {}, "foo");
                 columnContext.floatsDeferredFromPrevious.push(cont5);
-                cont6 = new PageFloatContinuation({}, {}, "bar");
+                var float6 = addPageFloat(FloatReference.COLUMN, columnContext);
+                cont6 = new PageFloatContinuation(float6, {}, "bar");
                 columnContext.floatsDeferredFromPrevious.push(cont6);
             });
 
@@ -515,9 +585,12 @@ describe("pagefloat", function() {
         describe("getPageFloatContinuationsDeferredToNext", function() {
             var pageContext, regionContext, columnContext, cont1, cont2, cont3, cont4, cont5, cont6;
             beforeEach(function() {
-                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, "foo", null, null);
-                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, "foo", null, null);
+                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
+                    null, null);
+                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null,
+                    "foo", null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
+                    "foo", null, null, null);
                 cont1 = new PageFloatContinuation({}, {}, "foo");
                 pageContext.floatsDeferredToNext.push(cont1);
                 cont2 = new PageFloatContinuation({}, {}, "bar");
@@ -545,7 +618,8 @@ describe("pagefloat", function() {
         describe("#finish", function() {
             var context, float1, cont1, fragment1, float2, fragment2, float3, cont3, float4, cont4;
             beforeEach(function() {
-                context = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, null, null);
+                context = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null,
+                    null, null, null);
                 spyOn(context, "isAnchorAlreadyAppeared");
                 spyOn(context, "removePageFloatFragment");
                 float1 = new PageFloat({}, FloatReference.COLUMN, "block-start");
@@ -621,7 +695,8 @@ describe("pagefloat", function() {
             var container, context;
             beforeEach(function() {
                 container = { clear: jasmine.createSpy("clear") };
-                context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, container, null, null, null);
+                context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, container, null,
+                    null, null, null);
             });
 
             it("invalidate the container", function() {
@@ -647,7 +722,8 @@ describe("pagefloat", function() {
             });
 
             it("clears children", function() {
-                var child = new PageFloatLayoutContext(context, FloatReference.REGION, null, null, null, null);
+                var child = new PageFloatLayoutContext(context, FloatReference.REGION, null, null,
+                    null, null, null);
 
                 expect(context.children).toEqual([child]);
 
@@ -663,9 +739,12 @@ describe("pagefloat", function() {
             }
 
             it("returns true if one of its ancestors is invalidated", function() {
-                var pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, container(), null, null, null);
-                var regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, container(), null, null, null);
-                var columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, container(), null, null, null);
+                var pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE,
+                    container(), null, null, null, null);
+                var regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION,
+                    container(), null, null, null, null);
+                var columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN,
+                    container(), null, null, null, null);
 
                 expect(columnContext.isInvalidated()).toBe(false);
                 expect(regionContext.isInvalidated()).toBe(false);
@@ -723,7 +802,8 @@ describe("pagefloat", function() {
             });
 
             it("set position in block direction on the area for block-start float", function() {
-                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.horizontal_tb, adapt.css.ident.ltr);
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN,
+                    null, null, null, adapt.css.ident.horizontal_tb, adapt.css.ident.ltr);
                 columnContext.setContainer(container);
                 var float = new PageFloat({}, FloatReference.COLUMN, "block-start");
                 columnContext.setFloatAreaDimensions(area, float);
@@ -734,7 +814,8 @@ describe("pagefloat", function() {
 
             it("set position in block direction on the vertical area for block-start float", function() {
                 area.vertical = true;
-                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.vertical_rl, adapt.css.ident.ltr);
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN,
+                    null, null, null, adapt.css.ident.vertical_rl, adapt.css.ident.ltr);
                 columnContext.setContainer(container);
                 var float = new PageFloat({}, FloatReference.COLUMN, "block-start");
                 columnContext.setFloatAreaDimensions(area, float);
@@ -744,7 +825,8 @@ describe("pagefloat", function() {
             });
 
             it("set position in block direction on the area for block-end float", function() {
-                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.horizontal_tb, adapt.css.ident.ltr);
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN,
+                    null, null, null, adapt.css.ident.horizontal_tb, adapt.css.ident.ltr);
                 columnContext.setContainer(container);
                 var float = new PageFloat({}, FloatReference.COLUMN, "block-end");
                 columnContext.setFloatAreaDimensions(area, float);
@@ -755,7 +837,8 @@ describe("pagefloat", function() {
 
             it("set position in block direction on the vertical area for block-end float", function() {
                 area.vertical = true;
-                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.vertical_rl, adapt.css.ident.ltr);
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN,
+                    null, null, null, adapt.css.ident.vertical_rl, adapt.css.ident.ltr);
                 columnContext.setContainer(container);
                 var float = new PageFloat({}, FloatReference.COLUMN, "block-end");
                 columnContext.setFloatAreaDimensions(area, float);
@@ -765,7 +848,8 @@ describe("pagefloat", function() {
             });
 
             it("set position in block and inline directions on the area for inline-start float", function() {
-                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.horizontal_tb, adapt.css.ident.ltr);
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN,
+                    null, null, null, adapt.css.ident.horizontal_tb, adapt.css.ident.ltr);
                 columnContext.setContainer(container);
                 var float = new PageFloat({}, FloatReference.COLUMN, "inline-start");
                 columnContext.setFloatAreaDimensions(area, float);
@@ -778,7 +862,8 @@ describe("pagefloat", function() {
 
             it("set position in block and inline directions on the vertical area for inline-start float", function() {
                 area.vertical = true;
-                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.vertical_rl, adapt.css.ident.ltr);
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN,
+                    null, null, null, adapt.css.ident.vertical_rl, adapt.css.ident.ltr);
                 columnContext.setContainer(container);
                 var float = new PageFloat({}, FloatReference.COLUMN, "inline-start");
                 columnContext.setFloatAreaDimensions(area, float);
@@ -790,7 +875,8 @@ describe("pagefloat", function() {
             });
 
             it("set position in block and inline directions on the area for inline-end float", function() {
-                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.horizontal_tb, adapt.css.ident.ltr);
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN,
+                    null, null, null, adapt.css.ident.horizontal_tb, adapt.css.ident.ltr);
                 columnContext.setContainer(container);
                 var float = new PageFloat({}, FloatReference.COLUMN, "inline-start");
                 columnContext.setFloatAreaDimensions(area, float);
@@ -803,7 +889,8 @@ describe("pagefloat", function() {
 
             it("set position in block and inline directions on the vertical area for inline-end float", function() {
                 area.vertical = true;
-                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.vertical_rl, adapt.css.ident.ltr);
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN,
+                    null, null, null, adapt.css.ident.vertical_rl, adapt.css.ident.ltr);
                 columnContext.setContainer(container);
                 var float = new PageFloat({}, FloatReference.COLUMN, "inline-end");
                 columnContext.setFloatAreaDimensions(area, float);
@@ -817,7 +904,8 @@ describe("pagefloat", function() {
 
         describe("#getFloatFragmentExclusions", function() {
             it("returns an array of exclusions of PageFloatFragments", function() {
-                var context = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, null, null);
+                var context = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null,
+                    null, null, null, null);
 
                 var float1 = new PageFloat({}, FloatReference.COLUMN, "block-start");
                 context.addPageFloat(float1);
@@ -837,8 +925,10 @@ describe("pagefloat", function() {
             });
 
             it("returns an array of exclusions of PageFloatFragments, including those registered in the parent context", function() {
-                var regionContext = new PageFloatLayoutContext(rootContext, FloatReference.REGION, null, null, null, null);
-                var columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
+                var regionContext = new PageFloatLayoutContext(rootContext, FloatReference.REGION,
+                    null, null, null, null, null);
+                var columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN,
+                    null, null, null, null, null);
 
                 var float1 = new PageFloat({}, FloatReference.REGION, "block-start");
                 regionContext.addPageFloat(float1);
