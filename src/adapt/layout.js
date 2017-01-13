@@ -646,13 +646,14 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
     /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
         = adapt.task.newFrame("buildViewToNextBlockEdge");
     frame.loopWithFrame(function(bodyFrame) {
-        if (position.viewNode)
+        if (position.viewNode && !adapt.layout.isSpecialNodeContext(position))
             checkPoints.push(position.copy());
         self.maybePeelOff(position, 0).then(function(position1Param) {
             var position1 = /** @type {adapt.vtree.NodeContext} */ (position1Param);
             if (position1 !== position) {
                 position = position1;
-                checkPoints.push(position.copy());
+                if (!adapt.layout.isSpecialNodeContext(position))
+                    checkPoints.push(position.copy());
             }
             self.layoutContext.nextInTree(position).then(function(positionParam) {
                 position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
@@ -1414,8 +1415,7 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, floa
 adapt.layout.Column.prototype.setFloatAnchorViewNode = function(nodeContext) {
     var parent = nodeContext.viewNode.parentNode;
     var dummy = parent.ownerDocument.createElement("span");
-    adapt.base.setCSSProperty(dummy, "width", "0");
-    adapt.base.setCSSProperty(dummy, "height", "0");
+    dummy.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
     parent.appendChild(dummy);
     parent.removeChild(nodeContext.viewNode);
     var nodeContextAfter = nodeContext.modify();
@@ -1840,6 +1840,20 @@ adapt.layout.TextNodeBreaker.instance = new adapt.layout.TextNodeBreaker();
  */
 adapt.layout.isSpecial = function(e) {
     return !!e.getAttribute(adapt.vtree.SPECIAL_ATTR);
+};
+
+/**
+ * @private
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @returns {boolean}
+ */
+adapt.layout.isSpecialNodeContext = function(nodeContext) {
+    if (!nodeContext) return false;
+    var viewNode = nodeContext.viewNode;
+    if (viewNode && viewNode.nodeType === 1)
+        return adapt.layout.isSpecial(/** @type {Element} */ (viewNode));
+    else
+        return false;
 };
 
 /**
