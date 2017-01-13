@@ -108,7 +108,14 @@ goog.scope(function() {
      * @returns {!adapt.layout.BreakPositionAndNodeContext}
      */
     TableCellFragment.prototype.findAcceptableBreakPosition = function() {
-        return this.pseudoColumn.findAcceptableBreakPosition(true);
+        var element = /** @type {Element} */ (this.cellNodeContext.viewNode);
+        var verticalAlign = this.cellNodeContext.verticalAlign;
+        if (verticalAlign === "middle" || verticalAlign === "bottom") {
+            adapt.base.setCSSProperty(element, "vertical-align", "top");
+        }
+        var bp = this.pseudoColumn.findAcceptableBreakPosition(true);
+        adapt.base.setCSSProperty(element, "vertical-align", verticalAlign);
+        return bp;
     };
 
     /**
@@ -744,7 +751,7 @@ goog.scope(function() {
      * @param {!vivliostyle.table.TableCell} cell
      * @param {!adapt.vtree.NodeContext} cellNodeContext
      * @param {!adapt.vtree.ChunkPosition} startChunkPosition
-     * @returns {!adapt.task.Result<adapt.vtree.ChunkPosition>}
+     * @returns {!adapt.task.Result<boolean>}
      */
     TableLayoutStrategy.prototype.layoutCell = function(cell, cellNodeContext, startChunkPosition) {
         var rowIndex = cell.rowIndex;
@@ -770,12 +777,7 @@ goog.scope(function() {
             cellFragment.empty = true;
         }
 
-        return cellFragment.pseudoColumn.layout(startChunkPosition, true).thenAsync(function() {
-            if (verticalAlign !== "baseline" && verticalAlign !== "top") {
-                adapt.base.setCSSProperty(cellViewNode, "vertical-align", "top");
-            }
-            return adapt.task.newResult(true);
-        });
+        return cellFragment.pseudoColumn.layout(startChunkPosition, true).thenReturn(true);
     };
 
     /**
@@ -1398,10 +1400,6 @@ goog.scope(function() {
                     }
                     if (!cellFragment.empty) {
                         cellFragment.pseudoColumn.finishBreak(breakNodeContext, false, true).then(function() {
-                            var verticalAlign = cellNodeContext.verticalAlign;
-                            if (verticalAlign !== "baseline" && verticalAlign !== "top") {
-                                adapt.base.setCSSProperty(cellViewNode, "vertical-align", verticalAlign);
-                            }
                             adjustCellHeight(cellFragment, formattingContext);
                             loopFrame.continueLoop();
                         });
