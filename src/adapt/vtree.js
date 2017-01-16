@@ -1435,12 +1435,20 @@ adapt.vtree.Container.prototype.getInnerShape = function() {
  * @returns {adapt.geom.Shape}
  */
 adapt.vtree.Container.prototype.getOuterShape = function(outerShapeProp, context) {
+    var rect = this.getOuterRect();
+    return adapt.cssprop.toShape(outerShapeProp, rect.x1, rect.y1,
+        rect.x2 - rect.x1, rect.y2 - rect.y1, context);
+};
+
+/**
+ * @returns {!adapt.geom.Rect}
+ */
+adapt.vtree.Container.prototype.getOuterRect = function() {
     var outerX = this.originX + this.left;
     var outerY = this.originY + this.top;
     var outerWidth = this.getInsetLeft() + this.width + this.getInsetRight();
     var outerHeight = this.getInsetTop() + this.height + this.getInsetBottom();
-    return adapt.cssprop.toShape(outerShapeProp, outerX, outerY,
-        outerWidth, outerHeight, context);
+    return new adapt.geom.Rect(outerX, outerY, outerX + outerWidth, outerY + outerHeight);
 };
 
 

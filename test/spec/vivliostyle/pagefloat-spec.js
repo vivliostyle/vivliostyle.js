@@ -233,28 +233,35 @@ describe("pagefloat", function() {
         });
 
         describe("#addPageFloatFragment, #findPageFloatFragment", function() {
-            var area;
+            var pageContext, regionContext, columnContext, area;
+            function reset() {
+                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
+                regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, null, null, null);
+                columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
+                [pageContext, regionContext, columnContext].forEach(function(context) {
+                    spyOn(context, "invalidate");
+                    spyOn(context, "addPageFloatFragment").and.callThrough();
+                });
+            }
             beforeEach(function() {
                 area = { getOuterShape: jasmine.createSpy("getOuterShape") };
+                reset();
             });
 
             it("A PageFloatFragment added by #addPageFloatFragment can be retrieved by #findPageFloatFragment", function() {
-                var context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
+                pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
                 var float = new PageFloat({}, FloatReference.PAGE, "block-start");
-                context.addPageFloat(float);
+                pageContext.addPageFloat(float);
                 var fragment = new PageFloatFragment(float, area);
 
-                expect(context.findPageFloatFragment(float)).toBe(null);
+                expect(pageContext.findPageFloatFragment(float)).toBe(null);
 
-                context.addPageFloatFragment(fragment);
+                pageContext.addPageFloatFragment(fragment);
 
-                expect(context.findPageFloatFragment(float)).toBe(fragment);
+                expect(pageContext.findPageFloatFragment(float)).toBe(fragment);
             });
 
             it("A PageFloatFragment stored in one of the ancestors can be retrieved by #findPageFloatFragment", function() {
-                var pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                var regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, null, null, null);
-                var columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
                 var float = new PageFloat({}, FloatReference.REGION, "block-start");
                 columnContext.addPageFloat(float);
                 var fragment = new PageFloatFragment(float, area);
@@ -278,18 +285,6 @@ describe("pagefloat", function() {
             });
 
             it("When a PageFloatFragment is added by #addPageFloatFragment, the corresponding PageFloatLayoutContext is invalidated", function() {
-                var pageContext, regionContext, columnContext;
-                function reset() {
-                    pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null, null, null);
-                    regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null, null, null, null);
-                    columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null, null, null, null);
-                    [pageContext, regionContext, columnContext].forEach(function(context) {
-                        spyOn(context, "invalidate");
-                        spyOn(context, "addPageFloatFragment").and.callThrough();
-                    });
-                }
-
-                reset();
                 var float = new PageFloat({}, FloatReference.COLUMN, "block-start");
                 columnContext.addPageFloat(float);
                 var fragment = new PageFloatFragment(float, area);
@@ -701,6 +696,122 @@ describe("pagefloat", function() {
                 expect(columnContext.isInvalidated()).toBe(true);
                 expect(regionContext.isInvalidated()).toBe(true);
                 expect(pageContext.isInvalidated()).toBe(true);
+            });
+        });
+
+        describe("#setFloatAreaDimensions", function() {
+            var Size = vivliostyle.sizing.Size;
+            var fitContentInlineSize, container, area;
+            beforeEach(function() {
+                fitContentInlineSize = 100;
+                var sizeObj = {};
+                sizeObj[Size.FIT_CONTENT_INLINE_SIZE] = fitContentInlineSize;
+                spyOn(vivliostyle.sizing, "getSize").and.returnValue(sizeObj);
+                container = {
+                    top: 2,
+                    left: 3,
+                    width: 111,
+                    height: 222
+                };
+                area = {
+                    vertical: false,
+                    computedBlockSize: 77,
+                    getBoxDir: function() { return this.vertical ? -1 : 1; },
+                    setBlockPosition: jasmine.createSpy("setBlockPosition"),
+                    setInlinePosition: jasmine.createSpy("setInlinePosition")
+                };
+            });
+
+            it("set position in block direction on the area for block-start float", function() {
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.horizontal_tb, adapt.css.ident.ltr);
+                columnContext.setContainer(container);
+                var float = new PageFloat({}, FloatReference.COLUMN, "block-start");
+                columnContext.setFloatAreaDimensions(area, float);
+
+                expect(area.setBlockPosition).toHaveBeenCalledWith(
+                    container.top, area.computedBlockSize);
+            });
+
+            it("set position in block direction on the vertical area for block-start float", function() {
+                area.vertical = true;
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.vertical_rl, adapt.css.ident.ltr);
+                columnContext.setContainer(container);
+                var float = new PageFloat({}, FloatReference.COLUMN, "block-start");
+                columnContext.setFloatAreaDimensions(area, float);
+
+                expect(area.setBlockPosition).toHaveBeenCalledWith(
+                    container.left + container.width, area.computedBlockSize);
+            });
+
+            it("set position in block direction on the area for block-end float", function() {
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.horizontal_tb, adapt.css.ident.ltr);
+                columnContext.setContainer(container);
+                var float = new PageFloat({}, FloatReference.COLUMN, "block-end");
+                columnContext.setFloatAreaDimensions(area, float);
+
+                expect(area.setBlockPosition).toHaveBeenCalledWith(
+                    container.top + container.height - area.computedBlockSize, area.computedBlockSize);
+            });
+
+            it("set position in block direction on the vertical area for block-end float", function() {
+                area.vertical = true;
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.vertical_rl, adapt.css.ident.ltr);
+                columnContext.setContainer(container);
+                var float = new PageFloat({}, FloatReference.COLUMN, "block-end");
+                columnContext.setFloatAreaDimensions(area, float);
+
+                expect(area.setBlockPosition).toHaveBeenCalledWith(
+                    container.left + area.computedBlockSize, area.computedBlockSize);
+            });
+
+            it("set position in block and inline directions on the area for inline-start float", function() {
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.horizontal_tb, adapt.css.ident.ltr);
+                columnContext.setContainer(container);
+                var float = new PageFloat({}, FloatReference.COLUMN, "inline-start");
+                columnContext.setFloatAreaDimensions(area, float);
+
+                expect(area.setBlockPosition).toHaveBeenCalledWith(
+                    container.top, area.computedBlockSize);
+                expect(area.setInlinePosition).toHaveBeenCalledWith(
+                    container.left, fitContentInlineSize);
+            });
+
+            it("set position in block and inline directions on the vertical area for inline-start float", function() {
+                area.vertical = true;
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.vertical_rl, adapt.css.ident.ltr);
+                columnContext.setContainer(container);
+                var float = new PageFloat({}, FloatReference.COLUMN, "inline-start");
+                columnContext.setFloatAreaDimensions(area, float);
+
+                expect(area.setBlockPosition).toHaveBeenCalledWith(
+                    container.left + container.width, area.computedBlockSize);
+                expect(area.setInlinePosition).toHaveBeenCalledWith(
+                    container.top, fitContentInlineSize);
+            });
+
+            it("set position in block and inline directions on the area for inline-end float", function() {
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.horizontal_tb, adapt.css.ident.ltr);
+                columnContext.setContainer(container);
+                var float = new PageFloat({}, FloatReference.COLUMN, "inline-start");
+                columnContext.setFloatAreaDimensions(area, float);
+
+                expect(area.setBlockPosition).toHaveBeenCalledWith(
+                    container.top, area.computedBlockSize);
+                expect(area.setInlinePosition).toHaveBeenCalledWith(
+                    container.left, fitContentInlineSize);
+            });
+
+            it("set position in block and inline directions on the vertical area for inline-end float", function() {
+                area.vertical = true;
+                var columnContext = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null, null, adapt.css.ident.vertical_rl, adapt.css.ident.ltr);
+                columnContext.setContainer(container);
+                var float = new PageFloat({}, FloatReference.COLUMN, "inline-end");
+                columnContext.setFloatAreaDimensions(area, float);
+
+                expect(area.setBlockPosition).toHaveBeenCalledWith(
+                    container.left + area.computedBlockSize, area.computedBlockSize);
+                expect(area.setInlinePosition).toHaveBeenCalledWith(
+                    container.top + container.height - fitContentInlineSize, fitContentInlineSize);
             });
         });
 

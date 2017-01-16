@@ -99,12 +99,14 @@ goog.scope(function() {
      * @param {!Node} sourceNode
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @param {string} floatSide
+     * @param {!adapt.geom.Insets} margin
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloat = function(sourceNode, floatReference, floatSide) {
+    vivliostyle.pagefloat.PageFloat = function(sourceNode, floatReference, floatSide, margin) {
         /** @const */ this.sourceNode = sourceNode;
         /** @const */ this.floatReference = floatReference;
         /** @const */ this.floatSide = floatSide;
+        /** @const */ this.margin = margin;
         /** @private @type {?vivliostyle.pagefloat.PageFloat.ID} */ this.id = null;
     };
     /** @const */ var PageFloat = vivliostyle.pagefloat.PageFloat;
@@ -197,6 +199,13 @@ goog.scope(function() {
     };
 
     /**
+     * @returns {!adapt.geom.Rect}
+     */
+    PageFloatFragment.prototype.getOuterRect = function() {
+        return this.area.getOuterRect();
+    };
+
+    /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
      * @param {!adapt.vtree.NodePosition} nodePosition
      * @param {string} flowName
@@ -228,8 +237,10 @@ goog.scope(function() {
         /** @private @const */ this.floatReference = floatReference;
         /** @private */ this.container = container;
         /** @const */ this.flowName = flowName;
-        /** @const */ this.writingMode = writingMode || (parent && parent.writingMode);
-        /** @const */ this.direction = direction || (parent && parent.direction);
+        /** @const {!adapt.css.Val} */ this.writingMode =
+            writingMode || (parent && parent.writingMode) || adapt.css.ident.horizontal_tb;
+        /** @const {!adapt.css.Val} */ this.direction =
+            direction || (parent && parent.direction) || adapt.css.ident.ltr;
         /** @private @type {boolean} */ this.invalidated = false;
         /** @private @const */ this.floatStore = parent ? parent.floatStore : new PageFloatStore();
         /** @private @const {!Array<vivliostyle.pagefloat.PageFloat.ID>} */ this.forbiddenFloats = [];
@@ -239,6 +250,10 @@ goog.scope(function() {
         var previousSibling = this.getPreviousSibling();
         /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} */
         this.floatsDeferredFromPrevious = previousSibling ? [].concat(previousSibling.floatsDeferredToNext) : [];
+        /** @private @type {?number} */ this.blockStartLimit = null;
+        /** @private @type {?number} */ this.blockEndLimit = null;
+        /** @private @type {?number} */ this.inlineStartLimit = null;
+        /** @private @type {?number} */ this.inlineEndLimit = null;
     };
     /** @const */ var PageFloatLayoutContext = vivliostyle.pagefloat.PageFloatLayoutContext;
 
@@ -386,6 +401,7 @@ goog.scope(function() {
             parent.addPageFloatFragment(floatFragment);
         } else if (this.floatFragments.indexOf(floatFragment) < 0) {
             this.floatFragments.push(floatFragment);
+            this.updateLimitValues();
         }
         this.invalidate();
     };
@@ -402,6 +418,7 @@ goog.scope(function() {
             if (element && element.parentNode) {
                 element.parentNode.removeChild(element);
             }
+            this.updateLimitValues();
             this.invalidate();
         }
     };
@@ -423,6 +440,19 @@ goog.scope(function() {
             return this.floatFragments[index];
         } else {
             return null;
+        }
+    };
+
+    /**
+     * @returns {boolean}
+     */
+    PageFloatLayoutContext.prototype.hasFloatFragments = function() {
+        if (this.floatFragments.length > 0) {
+            return true;
+        } else if (this.parent) {
+            return this.parent.hasFloatFragments();
+        } else {
+            return false;
         }
     };
 
@@ -557,43 +587,225 @@ goog.scope(function() {
     };
 
     /**
+     * @private
+     * @param {string} side
+     * @returns {number}
+     */
+    PageFloatLayoutContext.prototype.getLimitValue = function(side) {
+        goog.asserts.assert(this.container);
+        var writingMode = this.writingMode.toString();
+        var direction = this.direction.toString();
+        var logicalSide = vivliostyle.logical.toLogical(side, writingMode, direction);
+        var physicalSide = vivliostyle.logical.toPhysical(side, writingMode, direction);
+        var limit = function() {
+            switch (logicalSide) {
+                case "block-start":
+                    return this.blockStartLimit;
+                case "block-end":
+                    return this.blockEndLimit;
+                case "inline-start":
+                    return this.inlineStartLimit;
+                case "inline-end":
+                    return this.inlineEndLimit;
+                default:
+                    throw new Error("Unknown logical side: " + logicalSide);
+            }
+        }.call(this);
+        if (limit === null) {
+            limit = (function(container) {
+                var rect = container.getOuterRect();
+                switch (physicalSide) {
+                    case "top":
+                        return rect.y1;
+                    case "bottom":
+                        return rect.y2;
+                    case "left":
+                        return rect.x1;
+                    case "right":
+                        return rect.x2;
+                    default:
+                        throw new Error("Unknown physical side: " + physicalSide);
+                }
+            })(this.container);
+        }
+        goog.asserts.assert(limit !== null && limit >= 0);
+        if (this.parent && this.parent.container) {
+            var parentLimit = this.parent.getLimitValue(physicalSide);
+            switch (physicalSide) {
+                case "top":
+                    return Math.max(limit, parentLimit);
+                case "left":
+                    return Math.max(limit, parentLimit);
+                case "bottom":
+                    return Math.min(limit, parentLimit);
+                case "right":
+                    return Math.min(limit, parentLimit);
+                default:
+                    goog.asserts.assert("Should be unreachable");
+            }
+        }
+        return limit;
+    };
+
+    /**
+     * @private
+     */
+    PageFloatLayoutContext.prototype.updateLimitValues = function() {
+        if (!this.container) return;
+        var self = this;
+        var limits = {
+            top: this.container.top,
+            left: this.container.left,
+            bottom: this.container.top + this.container.height,
+            right: this.container.left + this.container.width
+        };
+        var offsetX = this.container.originX;
+        var offsetY = this.container.originY;
+
+        var fragments = this.floatFragments;
+        if (fragments.length > 0) {
+            var writingMode = this.writingMode.toString();
+            var direction = this.direction.toString();
+            limits = fragments.reduce(function(l, f) {
+                var float = self.floatStore.findPageFloatById(f.pageFloatId);
+                var logicalFloatSide = vivliostyle.logical.toLogical(float.floatSide,
+                    writingMode, direction);
+                var area = f.area;
+                var top = l.top, left = l.left, bottom = l.bottom, right = l.right;
+                switch (logicalFloatSide) {
+                    case "inline-start":
+                        if (area.vertical) {
+                            top = Math.max(top, area.top + area.height);
+                        } else {
+                            left = Math.max(left, area.left + area.width);
+                        }
+                        // FALLTHROUGH
+                    case "block-start":
+                        if (area.vertical) {
+                            right = Math.min(right, area.left);
+                        } else {
+                            top = Math.max(top, area.top + area.height);
+                        }
+                        break;
+                    case "inline-end":
+                        if (area.vertical) {
+                            bottom = Math.min(bottom, area.top);
+                        } else {
+                            right = Math.min(right, area.left + area.width);
+                        }
+                        // FALLTHROUGH
+                    case "block-end":
+                        if (area.vertical) {
+                            left = Math.max(left, area.left + area.width);
+                        } else {
+                            bottom = Math.min(bottom, area.top);
+                        }
+                        break;
+                    default:
+                        throw new Error("Unknown logical float side: " + logicalFloatSide);
+                }
+                return { top: top, left: left, bottom: bottom, right: right };
+            }, limits);
+        }
+        if (this.container.vertical) {
+            this.blockStartLimit = limits.right + offsetX;
+            this.blockEndLimit = limits.left + offsetX;
+            this.inlineStartLimit = limits.top + offsetY;
+            this.inlineEndLimit = limits.bottom + offsetY;
+        } else {
+            this.blockStartLimit = limits.top + offsetY;
+            this.blockEndLimit = limits.bottom + offsetY;
+            this.inlineStartLimit = limits.left + offsetX;
+            this.inlineEndLimit = limits.right + offsetX;
+        }
+    };
+
+    /**
      * @param {!adapt.vtree.Container} area
      * @param {!vivliostyle.pagefloat.PageFloat} float
+     * @param {boolean}  init
+     * @return {boolean} Indicates if the float area fits inside the container or not
      */
-    PageFloatLayoutContext.prototype.setFloatAreaDimensions = function(area, float) {
+    PageFloatLayoutContext.prototype.setFloatAreaDimensions = function(area, float, init) {
         if (float.floatReference !== this.floatReference) {
             var parent = this.getParent(float.floatReference);
-            parent.setFloatAreaDimensions(area, float);
-            return;
+            return parent.setFloatAreaDimensions(area, float, init);
         }
 
         var writingMode = this.writingMode.toString();
         var direction = this.direction.toString();
         var logicalFloatSide = vivliostyle.logical.toLogical(float.floatSide, writingMode, direction);
-        var blockStart = area.vertical ? (area.left + area.width) : area.top;
-        var blockEnd = area.vertical ? area.left : area.top + area.height;
-        var inlineStart = area.vertical ? area.top : area.left;
-        var inlineEnd = area.vertical ? area.top + area.height : area.left + area.width;
-        var fitContentInlineSize = vivliostyle.sizing.getSize(area.clientLayout, area.element,
-            [vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE];
+        var blockStart = this.getLimitValue("block-start");
+        var blockEnd = this.getLimitValue("block-end");
+        var inlineStart = this.getLimitValue("inline-start");
+        var inlineEnd = this.getLimitValue("inline-end");
+
+        var blockOffset = area.vertical ? area.originX : area.originY;
+        var inlineOffset = area.vertical ? area.originY : area.originX;
+        blockStart -= blockOffset;
+        blockEnd -= blockOffset;
+        inlineStart -= inlineOffset;
+        inlineEnd -= inlineOffset;
+        blockStart = Math.max(blockStart, area.top);
+        blockEnd = Math.min(blockEnd, area.top + area.height);
+
+        var blockSize, inlineSize;
+        if (init) {
+            var startExclusionSize = 0;
+            for (var i = 0; i < area.bands.length; i++) {
+                var band = area.bands[i];
+                if (Math.abs(band.x2 - band.x1 - (area.vertical ? area.height : area.width)) < 0.01) {
+                    break;
+                } else {
+                    startExclusionSize += band.y2 - band.y1;
+                }
+            }
+            var nonExclusionSize = 0;
+            for (; i < area.bands.length; i++) {
+                var band = area.bands[i];
+                if (Math.abs(band.x2 - band.x1 - (area.vertical ? area.height : area.width)) > 0.01) {
+                    break;
+                } else {
+                    nonExclusionSize += band.y2 - band.y1;
+                }
+            }
+            blockStart = Math.max(blockStart, area.top + startExclusionSize);
+            if (i < area.bands.length) {
+                blockEnd = Math.min(blockEnd, area.top + startExclusionSize + nonExclusionSize);
+            }
+            blockSize = (blockEnd - blockStart) * area.getBoxDir();
+            inlineSize = inlineEnd - inlineStart;
+            if (blockSize <= 0)
+                return false;
+        } else {
+            blockSize = area.computedBlockSize;
+            var availableBlockSize = (blockEnd - blockStart) * area.getBoxDir();
+            if (availableBlockSize < blockSize)
+                return false;
+            blockSize = Math.min(blockSize + (area.vertical ? float.margin.right : float.margin.top),
+                availableBlockSize);
+            inlineSize = vivliostyle.sizing.getSize(area.clientLayout, area.element,
+                [vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE];
+        }
+
         switch (logicalFloatSide) {
             case "inline-start":
-                area.setBlockPosition(blockStart, area.computedBlockSize);
-                area.setInlinePosition(inlineStart, fitContentInlineSize);
+                area.setInlinePosition(inlineStart, inlineSize);
+                // FALLTHROUGH
+            case "block-start":
+                area.setBlockPosition(blockStart, blockSize);
                 break;
             case "inline-end":
-                area.setBlockPosition(blockStart, area.computedBlockSize);
-                area.setInlinePosition(inlineEnd - fitContentInlineSize, fitContentInlineSize);
-                break;
-            case "block-start":
-                area.setBlockPosition(blockStart, area.computedBlockSize);
-                break;
+                area.setInlinePosition(inlineEnd - inlineSize, inlineSize);
+                // FALLTHROUGH
             case "block-end":
-                area.setBlockPosition(blockEnd - area.computedBlockSize * area.getBoxDir(), area.computedBlockSize);
+                area.setBlockPosition(blockEnd - blockSize * area.getBoxDir(), blockSize);
                 break;
             default:
                 throw new Error("unknown float direction: " + float.floatSide);
         }
+
+        return true;
     };
 
     /**

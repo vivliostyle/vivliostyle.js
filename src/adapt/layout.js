@@ -870,7 +870,7 @@ adapt.layout.Column.prototype.parseComputedLength = function(val) {
 /**
  * Reads element's computed CSS margin.
  * @param {Element} element
- * @return {adapt.geom.Insets}
+ * @return {!adapt.geom.Insets}
  */
 adapt.layout.Column.prototype.getComputedMargin = function(element) {
     var style = this.clientLayout.getElementComputedStyle(element);
@@ -1335,12 +1335,24 @@ adapt.layout.Column.prototype.setupFloatArea = function(area, float) {
     area.paddingLeft = area.paddingRight = area.paddingTop = area.paddingBottom = 0;
     area.setHorizontalPosition(area.left, area.width);
     area.setVerticalPosition(area.top, area.height);
-    var exclusions = area.exclusions = (floatContainer.exclusions || []).concat();
+    area.exclusions = (floatContainer.exclusions || []).concat();
+    area.forceNonfitting = !floatLayoutContext.hasFloatFragments();
+    // Calculate bands from the exclusions before setting float area dimensions
+    area.init();
+    var fitWithinContainer = floatLayoutContext.setFloatAreaDimensions(area, float, true);
+    if (fitWithinContainer) {
+        // New dimensions have been set, remove exclusion floats and re-init
+        area.killFloats();
+        area.init();
+    } else {
+        floatContainer.element.parentNode.removeChild(element);
+    }
+    return fitWithinContainer;
 };
 
 /**
  * @param {?vivliostyle.pagefloat.PageFloat} float
- * @returns {!adapt.layout.Column}
+ * @returns {?adapt.layout.Column}
  */
 adapt.layout.Column.prototype.createPageFloatArea = function(float) {
     var floatAreaElement = this.element.ownerDocument.createElement("div");
@@ -1350,37 +1362,47 @@ adapt.layout.Column.prototype.createPageFloatArea = function(float) {
         vivliostyle.pagefloat.FloatReference.COLUMN, null, this.pageFloatLayoutContext.flowName, null, null);
     var floatArea = new adapt.layout.Column(floatAreaElement, this.layoutContext.clone(), this.clientLayout, this.layoutConstraint, pageFloatLayoutContext);
     pageFloatLayoutContext.setContainer(floatArea);
-    this.setupFloatArea(floatArea, float);
-    floatArea.init();
-    return floatArea;
+    if (this.setupFloatArea(floatArea, float)) {
+        return floatArea;
+    } else {
+        return null;
+    }
 };
 
 /**
  * @param {!adapt.vtree.NodePosition} nodePosition
  * @param {!vivliostyle.pagefloat.PageFloat} float
- * @returns {!adapt.task.Result.<!adapt.layout.Column>}
+ * @returns {!adapt.task.Result.<?adapt.layout.Column>}
  */
 adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, float) {
     var context = this.pageFloatLayoutContext;
     var floatArea = this.createPageFloatArea(float);
+    if (!floatArea) {
+        context.deferPageFloat(float, nodePosition);
+        return adapt.task.newResult(/** @type {adapt.layout.Column} */ (null));
+    }
     var floatChunkPosition = new adapt.vtree.ChunkPosition(nodePosition);
 
-    /** @const {!adapt.task.Frame<!adapt.layout.Column>} */ var frame = adapt.task.newFrame("layoutPageFloatInner");
+    /** @const {!adapt.task.Frame<?adapt.layout.Column>} */ var frame = adapt.task.newFrame("layoutPageFloatInner");
     floatArea.layout(floatChunkPosition, true).then(function(newPosition) {
-        context.setFloatAreaDimensions(floatArea, float);
-        var redoResult;
-        if (floatArea.exclusions.length > 0) {
-            redoResult = floatArea.redoLayout();
+        if (newPosition && context.hasFloatFragments()) {
+            context.deferPageFloat(float, nodePosition);
+            floatArea.element.parentNode.removeChild(floatArea.element);
+            frame.finish(null);
         } else {
-            redoResult = adapt.task.newResult(newPosition);
-        }
-        redoResult.then(function(floatChunkPositionAfter) {
-            context.setFloatAreaDimensions(floatArea, float);
-            if (newPosition && newPosition.isSamePosition(floatChunkPositionAfter)) {
-                context.deferPageFloat(float, floatChunkPositionAfter.primary);
+            goog.asserts.assert(floatArea);
+            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, float, false);
+            if (!fitWithinContainer) {
+                context.deferPageFloat(float, nodePosition);
+                floatArea.element.parentNode.removeChild(floatArea.element);
+                frame.finish(null);
+            } else {
+                if (newPosition) {
+                    context.deferPageFloat(float, newPosition.primary);
+                }
+                frame.finish(floatArea);
             }
-            frame.finish(floatArea);
-        });
+        }
     });
     return frame.result();
 };
@@ -1416,7 +1438,8 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
     goog.asserts.assert(floatSide);
     var float = context.findPageFloatBySourceNode(sourceNode);
     if (!float) {
-        float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference, floatSide);
+        var margin = this.getComputedMargin(/** @type {Element} */ (nodeContext.viewNode));
+        float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference, floatSide, margin);
         context.addPageFloat(float);
     }
 
@@ -1431,12 +1454,16 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
         context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
         return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
     } else {
-        goog.asserts.assert(float);
         return this.layoutPageFloatInner(nodePosition, float).thenAsync(function(floatArea) {
             goog.asserts.assert(float);
-            pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(float, floatArea);
-            context.addPageFloatFragment(pageFloatFragment);
-            return adapt.task.newResult(null);
+            if (!floatArea) {
+                context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
+                return adapt.task.newResult(nodeContextAfter);
+            } else {
+                pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(float, floatArea);
+                context.addPageFloatFragment(pageFloatFragment);
+                return adapt.task.newResult(null);
+            }
         });
     }
 };
