@@ -684,9 +684,6 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
             loopFrame.breakLoop();
         }).then(function() {
             if (!column.pageFloatLayoutContext.isInvalidated()) {
-                column.pageFloatLayoutContext.finish();
-            }
-            if (!column.pageFloatLayoutContext.isInvalidated()) {
                 // Keep positions repeated or not removed
                 flowPosition.positions = flowPosition.positions.filter(function(pos, i) {
                     return repeatedIndices.indexOf(i) >= 0 || removedIndices.indexOf(i) < 0;
@@ -773,6 +770,9 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
         if (column.width >= 0) {
             // column.element.style.outline = "1px dotted green";
             self.layoutColumn(column, flowNameStr).then(function() {
+                if (!columnPageFloatLayoutContext.isInvalidated()) {
+                    columnPageFloatLayoutContext.finish();
+                }
                 if (column.pageFloatLayoutContext.isInvalidated() && !regionPageFloatLayoutContext.isInvalidated()) {
                     column.pageFloatLayoutContext.validate();
                     self.currentLayoutPosition = positionAtColumnStart.clone();
@@ -785,6 +785,7 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
                 }
             });
         } else {
+            columnPageFloatLayoutContext.finish();
             loopFrame.breakLoop();
         }
     }).then(function() {
@@ -859,7 +860,6 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
     offsetX += layoutContainer.left + layoutContainer.marginLeft + layoutContainer.borderLeft;
     offsetY += layoutContainer.top + layoutContainer.marginTop + layoutContainer.borderTop;
     this.setPagePageFloatLayoutContextContainer(pagePageFloatLayoutContext, boxInstance, layoutContainer);
-    var pageContainer = pagePageFloatLayoutContext.getContainer();
     var positionAtContainerStart = self.currentLayoutPosition.clone();
     var cont;
     var removed = false;
