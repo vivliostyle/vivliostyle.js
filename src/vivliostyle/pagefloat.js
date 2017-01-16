@@ -833,4 +833,19 @@ goog.scope(function() {
             });
         }
     };
+
+    /**
+     * @returns {number}
+     */
+    PageFloatLayoutContext.prototype.getMaxReachedAfterEdge = function() {
+        var isVertical = this.getContainer().vertical;
+        return this.floatFragments.reduce(function(edge, fragment) {
+            var rect = fragment.getOuterRect();
+            if (isVertical) {
+                return Math.min(edge, rect.x1);
+            } else {
+                return Math.max(edge, rect.y2);
+            }
+        }, isVertical ? Infinity : 0);
+    };
 });

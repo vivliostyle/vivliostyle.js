@@ -688,6 +688,8 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
                 flowPosition.positions = flowPosition.positions.filter(function(pos, i) {
                     return repeatedIndices.indexOf(i) >= 0 || removedIndices.indexOf(i) < 0;
                 });
+                var edge = column.pageFloatLayoutContext.getMaxReachedAfterEdge();
+                column.updateMaxReachedAfterEdge(edge);
             }
             frame.finish(true);
         });
