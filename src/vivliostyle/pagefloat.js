@@ -556,10 +556,11 @@ goog.scope(function() {
             return !flowName || cont.flowName === flowName;
         });
         if (this.parent) {
-            return this.parent.getDeferredPageFloatContinuations(flowName).concat(result);
-        } else {
-            return result;
+            result = this.parent.getDeferredPageFloatContinuations(flowName).concat(result);
         }
+        return result.sort(function(c1, c2) {
+            return c1.float.getOrder() - c2.float.getOrder();
+        });
     };
 
     /**
