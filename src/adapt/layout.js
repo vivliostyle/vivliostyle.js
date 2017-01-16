@@ -759,9 +759,15 @@ adapt.layout.Column.prototype.createFloat = function(ref, side, width,
                                                      height) {
     var div = this.viewDocument.createElement("div");
     if (this.vertical) {
+        if (height >= this.height) {
+            height -= 0.1;
+        }
         adapt.base.setCSSProperty(div, "height", width + "px");
         adapt.base.setCSSProperty(div, "width", height + "px");
     } else {
+        if (width >= this.width) {
+            width -= 0.1;
+        }
         adapt.base.setCSSProperty(div, "width", width + "px");
         adapt.base.setCSSProperty(div, "height", height + "px");
     }
