@@ -694,7 +694,10 @@ describe("pagefloat", function() {
         describe("#invalidate", function() {
             var container, context;
             beforeEach(function() {
-                container = { clear: jasmine.createSpy("clear") };
+                container = {
+                    clear: jasmine.createSpy("clear"),
+                    element: {}
+                };
                 context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, container, null,
                     null, null, null);
             });
@@ -724,11 +727,20 @@ describe("pagefloat", function() {
             it("clears children", function() {
                 var child = new PageFloatLayoutContext(context, FloatReference.REGION, null, null,
                     null, null, null);
+                child.container = {
+                    clear: jasmine.createSpy("clear"),
+                    element: container.element
+                };
+                var fragment = {
+                    area: { element: { parentNode: { removeChild: jasmine.createSpy("removeChild") }}}
+                };
+                child.floatFragments.push(fragment);
 
                 expect(context.children).toEqual([child]);
 
                 context.invalidate();
 
+                expect(fragment.area.element.parentNode.removeChild).toHaveBeenCalledWith(fragment.area.element);
                 expect(context.children).toEqual([]);
             });
         });

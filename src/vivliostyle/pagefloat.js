@@ -626,13 +626,25 @@ goog.scope(function() {
     };
 
     PageFloatLayoutContext.prototype.invalidate = function() {
+        if (this.container) {
+            this.children.forEach(function(child) {
+                // Since the same container element is shared by a region page float layout context and
+                // a column page float layout context in a single column region,
+                // view elements of float fragments of the child (column) context need to be removed here.
+                if (child.container && child.container.element === this.container.element) {
+                    child.floatFragments.forEach(function(fragment) {
+                        var elem = fragment.area.element;
+                        if (elem && elem.parentNode)
+                            elem.parentNode.removeChild(elem);
+                    });
+                }
+            }, this);
+            this.container.clear();
+        }
         this.children.splice(0);
         Object.keys(this.floatAnchors).forEach(function(k) {
             delete this.floatAnchors[k];
         }, this);
-        if (this.container) {
-            this.container.clear();
-        }
         this.invalidated = true;
     };
 
