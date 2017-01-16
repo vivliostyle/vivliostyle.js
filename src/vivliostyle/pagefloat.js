@@ -532,6 +532,19 @@ goog.scope(function() {
     /**
      * @returns {boolean}
      */
+    PageFloatLayoutContext.prototype.hasFloatsDeferredToNext = function() {
+        if (this.floatsDeferredToNext.length > 0) {
+            return true;
+        } else if (this.parent) {
+            return this.parent.hasFloatsDeferredToNext();
+        } else {
+            return false;
+        }
+    };
+
+    /**
+     * @returns {boolean}
+     */
     PageFloatLayoutContext.prototype.hasPrecedingFloatsDeferredToNext = function(float) {
         var order = float.getOrder();
         var hasPrecedingFloatsDeferredToNext = this.floatsDeferredToNext.some(function(c) {

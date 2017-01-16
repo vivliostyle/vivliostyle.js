@@ -521,7 +521,7 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
     var invalidated = false;
     var i = 0;
     frame.loopWithFrame(function(loopFrame) {
-        if (i === deferredFloats.length) {
+        if (i === deferredFloats.length || pageFloatLayoutContext.hasFloatsDeferredToNext()) {
             loopFrame.breakLoop();
             return;
         }
