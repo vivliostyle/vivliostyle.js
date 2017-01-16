@@ -107,6 +107,7 @@ goog.scope(function() {
         /** @const */ this.floatReference = floatReference;
         /** @const */ this.floatSide = floatSide;
         /** @const */ this.margin = margin;
+        /** @private @type {?number} */ this.order = null;
         /** @private @type {?vivliostyle.pagefloat.PageFloat.ID} */ this.id = null;
     };
     /** @const */ var PageFloat = vivliostyle.pagefloat.PageFloat;
@@ -115,6 +116,16 @@ goog.scope(function() {
      * @typedef {string}
      */
     PageFloat.ID;
+
+    /**
+     * @returns {number}
+     */
+    PageFloat.prototype.getOrder = function() {
+        if (this.order === null) {
+            throw new Error("The page float is not yet added");
+        }
+        return this.order;
+    };
 
     /**
      * @returns {vivliostyle.pagefloat.PageFloat.ID}
@@ -138,10 +149,19 @@ goog.scope(function() {
 
     /**
      * @private
+     * @returns {number}
+     */
+    PageFloatStore.prototype.nextOrder = function() {
+        return this.nextPageFloatIndex++;
+    };
+
+    /**
+     * @private
+     * @param {number} order
      * @returns {vivliostyle.pagefloat.PageFloat.ID}
      */
-    PageFloatStore.prototype.createPageFloatId = function() {
-        return "pf" + (this.nextPageFloatIndex++);
+    PageFloatStore.prototype.createPageFloatId = function(order) {
+        return "pf" + order;
     };
 
     /**
@@ -154,7 +174,8 @@ goog.scope(function() {
         if (index >= 0) {
             throw new Error("A page float with the same source node is already registered");
         } else {
-            float.id = this.createPageFloatId();
+            var order = float.order = this.nextOrder();
+            float.id = this.createPageFloatId(order);
             this.floats.push(float);
         }
     };
@@ -505,6 +526,23 @@ goog.scope(function() {
         } else {
             var parent = this.getParent(float.floatReference);
             parent.deferPageFloat(float, nodePosition, flowName);
+        }
+    };
+
+    /**
+     * @returns {boolean}
+     */
+    PageFloatLayoutContext.prototype.hasPrecedingFloatsDeferredToNext = function(float) {
+        var order = float.getOrder();
+        var hasPrecedingFloatsDeferredToNext = this.floatsDeferredToNext.some(function(c) {
+            return c.float.getOrder() < order;
+        });
+        if (hasPrecedingFloatsDeferredToNext) {
+            return true;
+        } else if (this.parent) {
+            return this.parent.hasPrecedingFloatsDeferredToNext(float);
+        } else {
+            return false;
         }
     };
 

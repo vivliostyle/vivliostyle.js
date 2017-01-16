@@ -1449,7 +1449,7 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
     if (pageFloatFragment) {
         context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
         return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
-    } else if (context.isForbidden(float)) {
+    } else if (context.isForbidden(float) || context.hasPrecedingFloatsDeferredToNext(float)) {
         context.deferPageFloat(float, nodePosition);
         context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
         return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
