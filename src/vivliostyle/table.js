@@ -1378,7 +1378,7 @@ goog.scope(function() {
             this, column, nodeContext, forceRemoveSelf, endOfRegion).then(function(result) {
                 vivliostyle.repetitiveelements.appendFooterToAncestors(nodeContext);
                 frame.finish(result);
-            }.bind(this));
+            });
         return frame.result();
     };
 
@@ -1541,7 +1541,7 @@ goog.scope(function() {
     TableRowLayoutConstraint.prototype.nextCandidate = function(nodeContext) {
         var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
         var repetitiveElements = this.getRepetitiveElements();
-        if (!repetitiveElements) return;
+        if (!repetitiveElements) return false;
         if (formattingContext.isAfterContextOfRootElement(nodeContext)
             && repetitiveElements.isSkipFooter) {
             repetitiveElements.preventSkippingFooter();
