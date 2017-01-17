@@ -688,7 +688,8 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             // When the element is already inside a block formatting context (except one from the root),
             // float and clear can be controlled by the browser and we don't need to care.
             clearSide = null;
-            if (floatSide !== adapt.css.ident.footnote) {
+            if (floatSide !== adapt.css.ident.footnote &&
+                !(floatReference && vivliostyle.pagefloat.isPageFloat(floatReference))) {
                 floatSide = null;
             }
         }
