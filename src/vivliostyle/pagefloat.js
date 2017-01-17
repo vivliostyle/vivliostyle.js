@@ -853,7 +853,7 @@ goog.scope(function() {
             var availableBlockSize = (blockEnd - blockStart) * area.getBoxDir();
             if (availableBlockSize < blockSize)
                 return false;
-            blockSize = Math.min(blockSize + (area.vertical ? float.margin.right : float.margin.top),
+            blockSize = Math.min(blockSize + (area.vertical ? float.margin.left : float.margin.bottom),
                 availableBlockSize);
             inlineSize = vivliostyle.sizing.getSize(area.clientLayout, area.element,
                 [vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE];
