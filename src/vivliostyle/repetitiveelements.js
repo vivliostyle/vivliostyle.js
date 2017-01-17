@@ -110,7 +110,7 @@ goog.scope(function() {
      */
     RepetitiveElementsOwnerFormattingContext.prototype.initializeRepetitiveElements = function(vertical) {
         if (this.repetitiveElements) return;
-        var found = repetitiveElementsCache.some(function(entry){
+        var found = repetitiveElementsCache.some(function(entry) {
             if (entry.root === this.rootSourceNode) {
                 this.repetitiveElements = entry.elements;
                 return true;
@@ -463,7 +463,7 @@ goog.scope(function() {
     /** @override */
     RepetitiveElementsOwnerLayoutConstraint.prototype.nextCandidate = function(nodeContext) {
         var repetitiveElements = this.getRepetitiveElements();
-        if (!repetitiveElements) return;
+        if (!repetitiveElements) return false;
         if (repetitiveElements.isEnableToUpdateState()) {
             repetitiveElements.updateState();
             return true;
@@ -495,7 +495,7 @@ goog.scope(function() {
      */
     RepetitiveElementsOwnerLayoutConstraint.prototype.isContentExist = function() {
         for (var child = this.nodeContext.viewNode.firstChild; child; child = child.nextSibling) {
-            if (child.nodeType === 1 ) {
+            if (child.nodeType === 1) {
                 return true;
             } else {
                 if (!this.repetitiveElements.isHeaderViewNode(child)
@@ -658,7 +658,7 @@ goog.scope(function() {
     RepetitiveElementsOwnerLayoutProcessor.prototype.doLayout = function(nodeContext, column) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
         return adapt.layout.BlockLayoutProcessor.prototype.layout.call(this, nodeContext, column);
-    }
+    };
 
     /**
      * @override
@@ -672,7 +672,7 @@ goog.scope(function() {
             this, column, nodeContext, forceRemoveSelf, endOfRegion).then(function(result) {
                 appendFooter(formattingContext, nodeContext);
                 frame.finish(result);
-            }.bind(this));
+            });
         return frame.result();
     };
 
@@ -681,7 +681,7 @@ goog.scope(function() {
      * @param {function(vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext)} callback
      */
     function eachAncestorRepetitiveElementsOwnerFormattingContext(nodeContext, callback) {
-        adapt.vtree.eachAncestorFormattingContext(nodeContext, function(formattingContext){
+        adapt.vtree.eachAncestorFormattingContext(nodeContext, function(formattingContext) {
             if (formattingContext && formattingContext instanceof RepetitiveElementsOwnerFormattingContext) {
                 callback(/** @type {RepetitiveElementsOwnerFormattingContext} */ (formattingContext));
             }

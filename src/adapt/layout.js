@@ -211,12 +211,12 @@ adapt.layout.FragmentLayoutConstraint.prototype.allowLayout = function(nodeConte
  * @param {adapt.vtree.NodeContext} nodeContext
  * @return {boolean}
  */
-adapt.layout.FragmentLayoutConstraint.prototype.nextCandidate = function(nodeContext) {}
+adapt.layout.FragmentLayoutConstraint.prototype.nextCandidate = function(nodeContext) {};
 
 /**
  * @param {boolean} allowed
  */
-adapt.layout.FragmentLayoutConstraint.prototype.prepareLayout = function(allowed) {}
+adapt.layout.FragmentLayoutConstraint.prototype.prepareLayout = function(allowed) {};
 
 
 /**
@@ -282,7 +282,7 @@ adapt.layout.AbstractBreakPosition.prototype.calculateOffsetOfRepetitiveElements
  * @return {number}
  */
 function calculateOffsetOfRepetitiveElements(repetitiveElements) {
-    return repetitiveElements.reduce(function(val, repetitiveElement){
+    return repetitiveElements.reduce(function(val, repetitiveElement) {
         return val + repetitiveElement.calculateOffset();
     }, 0);
 };
@@ -292,9 +292,9 @@ function calculateOffsetOfRepetitiveElements(repetitiveElements) {
  * @return {Array.<vivliostyle.repetitiveelements.RepetitiveElements>}
  */
 function retrieveAncestorRepetitiveElements(nodeContext) {
-    var result = []
+    var result = [];
     if (!nodeContext) return result;
-    vivliostyle.repetitiveelements.eachAncestorRepetitiveElementsOwnerFormattingContext(nodeContext, function(formattingContext){
+    vivliostyle.repetitiveelements.eachAncestorRepetitiveElementsOwnerFormattingContext(nodeContext, function(formattingContext) {
         var repetitiveElements = formattingContext.getRepetitiveElements();
         if (repetitiveElements) result.push(repetitiveElements);
     });
@@ -2909,7 +2909,7 @@ adapt.layout.LayoutRetryer.prototype.prepareLayout = function(nodeContext, colum
  * @implements {vivliostyle.layoututil.LayoutMode}
  */
 adapt.layout.DefaultLayoutMode = function(leadingEdge) {
-  /** @const */ this.leadingEdge = leadingEdge;
+    /** @const */ this.leadingEdge = leadingEdge;
 };
 
 /**
@@ -2922,7 +2922,7 @@ adapt.layout.DefaultLayoutMode.prototype.doLayout = function(nodeContext, column
     column.doLayout(nodeContext, this.leadingEdge).then(function(result) {
         vivliostyle.repetitiveelements.appendFooterToAncestors(nodeContext);
         frame.finish(result);
-    }.bind(this));
+    });
     return frame.result();
 };
 
@@ -2931,7 +2931,7 @@ adapt.layout.DefaultLayoutMode.prototype.doLayout = function(nodeContext, column
  */
 adapt.layout.DefaultLayoutMode.prototype.accept = function(nodeContext, column) {
     if (column.fragmentLayoutConstraints.length <= 0) return true;
-    return column.fragmentLayoutConstraints.every(function(constraint){
+    return column.fragmentLayoutConstraints.every(function(constraint) {
         return constraint.allowLayout(nodeContext);
     });
 };
@@ -2940,10 +2940,10 @@ adapt.layout.DefaultLayoutMode.prototype.accept = function(nodeContext, column) 
  * @override
  */
 adapt.layout.DefaultLayoutMode.prototype.postLayout = function(positionAfter, initialPosition, column, accepted) {
-    column.fragmentLayoutConstraints.some(function(constraint){
+    column.fragmentLayoutConstraints.some(function(constraint) {
         return constraint.nextCandidate(positionAfter);
     });
-    column.fragmentLayoutConstraints.forEach(function(constraint){
+    column.fragmentLayoutConstraints.forEach(function(constraint) {
         constraint.postLayout(accepted);
     });
 };
