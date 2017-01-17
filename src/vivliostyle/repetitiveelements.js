@@ -158,7 +158,7 @@ goog.scope(function() {
     /** @const */ var RepetitiveElements = vivliostyle.repetitiveelements.RepetitiveElements;
 
     /**
-     * @param {Element} element
+     * @param {!Element} element
      */
     RepetitiveElements.prototype.setHeaderElement = function(element) {
         if (this.headerElement) return; // use first one.
@@ -166,7 +166,7 @@ goog.scope(function() {
         this.headerViewNodes.push(element);
     };
     /**
-     * @param {Element} element
+     * @param {!Element} element
      */
     RepetitiveElements.prototype.setFooterElement = function(element) {
         if (this.footerElement) return; // use first one.
@@ -453,7 +453,7 @@ goog.scope(function() {
 
         if (!repetitiveElements.isEnableToUpdateState()) return true;
 
-        if ((nodeContext && nodeContext.overflow) || !this.isContentExist()) {
+        if ((nodeContext && nodeContext.overflow) || !this.isContentExist(repetitiveElements)) {
             return false;
         } else {
             return true;
@@ -491,15 +491,16 @@ goog.scope(function() {
 
     /**
      * @private
+     * @param {!vivliostyle.repetitiveelements.RepetitiveElements} repetitiveElements
      * @return {boolean}
      */
-    RepetitiveElementsOwnerLayoutConstraint.prototype.isContentExist = function() {
+    RepetitiveElementsOwnerLayoutConstraint.prototype.isContentExist = function(repetitiveElements) {
         for (var child = this.nodeContext.viewNode.firstChild; child; child = child.nextSibling) {
             if (child.nodeType === 1) {
                 return true;
             } else {
-                if (!this.repetitiveElements.isHeaderViewNode(child)
-                  && !this.repetitiveElements.isFooterViewNode(child)) {
+                if (!repetitiveElements.isHeaderViewNode(child)
+                  && !repetitiveElements.isFooterViewNode(child)) {
                     return true;
                 }
             }
@@ -670,7 +671,7 @@ goog.scope(function() {
             adapt.task.newFrame("RepetitiveElementsOwnerLayoutProcessor.finishBreak");
         adapt.layout.BlockLayoutProcessor.prototype.finishBreak.call(
             this, column, nodeContext, forceRemoveSelf, endOfRegion).then(function(result) {
-                appendFooter(formattingContext, nodeContext);
+                if (nodeContext) appendFooter(formattingContext, nodeContext);
                 frame.finish(result);
             });
         return frame.result();
@@ -689,8 +690,8 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!adapt.vtree.NodeContext} nodeContext
-     * @param {!function(adapt.vtree.NodeContext,vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContex)} column
+     * @param {adapt.vtree.NodeContext} nodeContext
+     * @param {!function(!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext, !adapt.vtree.NodeContext)} callback
      */
     function eachAncestorNodeContext(nodeContext, callback) {
         for (var nc = nodeContext; nc; nc = nc.parent) {
@@ -705,7 +706,7 @@ goog.scope(function() {
 
 
     /**
-     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {adapt.vtree.NodeContext} nodeContext
      * @param {!adapt.layout.Column} column
      */
     function appendHeaderToAncestors(nodeContext, column) {
@@ -717,8 +718,8 @@ goog.scope(function() {
     };
 
     /**
-     * @param {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext}
-     * @param {adapt.vtree.NodeContext} nodeContext
+     * @param {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext
+     * @param {!adapt.vtree.NodeContext} nodeContext
      */
     function appendHeader(formattingContext, nodeContext) {
         var repetitiveElements = formattingContext.getRepetitiveElements();
@@ -742,8 +743,8 @@ goog.scope(function() {
     };
 
     /**
-     * @param {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext}
-     * @param {adapt.vtree.NodeContext} nodeContext
+     * @param {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext
+     * @param {!adapt.vtree.NodeContext} nodeContext
      */
     function appendFooter(formattingContext, nodeContext) {
         var repetitiveElements = formattingContext.getRepetitiveElements();
