@@ -24,6 +24,7 @@ goog.scope(function() {
     /** @const */ var LayoutEntireBlock = vivliostyle.repetitiveelements.LayoutEntireBlock;
     /** @const */ var LayoutFragmentedBlock = vivliostyle.repetitiveelements.LayoutFragmentedBlock;
     /** @const */ var RepetitiveElementsOwnerFormattingContext = vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext;
+    /** @const */ var RepetitiveElementsOwnerLayoutConstraint = vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutConstraint;
 
     /**
      * @param {number} rowIndex
@@ -224,7 +225,7 @@ goog.scope(function() {
         /** @const */ this.rowIndex = rowIndex;
         /** @const */ this.beforeNodeContext = beforeNodeContext;
         /** @const */ this.formattingContext = formattingContext;
-        /** Array<!adapt.layout.BreakPositionAndNodeContext> */ this.acceptableCellBreakPositions = null;
+        /** @type {Array<!adapt.layout.BreakPositionAndNodeContext} */ this.acceptableCellBreakPositions = null;
     };
     /** @const */ var InsideTableRowBreakPosition = vivliostyle.table.InsideTableRowBreakPosition;
     goog.inherits(InsideTableRowBreakPosition, adapt.layout.AbstractBreakPosition);
@@ -515,6 +516,16 @@ goog.scope(function() {
                 cell.setHeight(this.vertical ? rect["width"] : rect["height"]);
             }, this);
         }, this);
+    };
+
+    /** @override */
+    TableFormattingContext.prototype.saveState = function() {
+        return [].concat(this.cellBreakPositions);
+    };
+
+    /** @override */
+    TableFormattingContext.prototype.restoreState = function(state) {
+        this.cellBreakPositions =  /** @type {!Array<!vivliostyle.table.BrokenTableCellPosition>}*/ (state);
     };
 
     /**
@@ -1303,7 +1314,6 @@ goog.scope(function() {
      */
     TableLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
-        var repetitiveElements = formattingContext.repetitiveElements;
 
         if (nodeContext.display === "table-row") {
             goog.asserts.assert(nodeContext.sourceNode);
@@ -1407,7 +1417,6 @@ goog.scope(function() {
         RepetitiveElementsOwnerLayoutRetryer.call(this, formattingContext);
         /** @private @const */ this.processor = processor;
         /** @private @const */ this.tableFormattingContext = formattingContext;
-        /** @private @type {!Array<!vivliostyle.table.BrokenTableCellPosition>}*/ this.initialCellBreakPositions = [];
     };
     /** @const */ var LayoutRetryer = vivliostyle.table.LayoutRetryer;
     goog.inherits(LayoutRetryer, RepetitiveElementsOwnerLayoutRetryer);
@@ -1439,18 +1448,9 @@ goog.scope(function() {
     /**
      * @override
      */
-    LayoutRetryer.prototype.saveState = function(nodeContext, column) {
-        RepetitiveElementsOwnerLayoutRetryer.prototype.saveState.call(this, nodeContext, column);
-        this.initialCellBreakPositions = [].concat(this.formattingContext.cellBreakPositions);
-    };
-
-    /**
-     * @override
-     */
     LayoutRetryer.prototype.restoreState = function(nodeContext, column) {
         RepetitiveElementsOwnerLayoutRetryer.prototype.restoreState.call(this, nodeContext, column);
         this.formattingContext.finishFragment();
-        this.formattingContext.cellBreakPositions = this.initialCellBreakPositions;
     };
 
     /**
@@ -1471,6 +1471,8 @@ goog.scope(function() {
      */
     LayoutEntireTable.prototype.doLayout = function(nodeContext, column) {
         LayoutEntireBlock.prototype.doLayout.call(this, nodeContext, column);
+        column.fragmentLayoutConstraints.unshift(
+            new TableRowLayoutConstraint(nodeContext));
         return this.processor.doInitialLayout(nodeContext, column);
     };
 
@@ -1493,9 +1495,60 @@ goog.scope(function() {
      */
     LayoutFragmentedTable.prototype.doLayout = function(nodeContext, column) {
         LayoutFragmentedBlock.prototype.appendHeaders.call(this, nodeContext);
+        column.fragmentLayoutConstraints.unshift(
+            new TableRowLayoutConstraint(nodeContext));
         return this.processor.doLayout(nodeContext, column);
     };
 
+
+    /**
+     * @constructor
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @extends {vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutConstraint}
+     */
+    vivliostyle.table.TableRowLayoutConstraint = function(nodeContext) {
+        RepetitiveElementsOwnerLayoutConstraint.call(this, nodeContext);
+    };
+    /** @const */ var TableRowLayoutConstraint = vivliostyle.table.TableRowLayoutConstraint;
+    goog.inherits(TableRowLayoutConstraint, RepetitiveElementsOwnerLayoutConstraint);
+
+    /**
+     * @override
+     */
+    TableRowLayoutConstraint.prototype.allowLayout = function(nodeContext) {
+        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
+        var repetitiveElements = this.getRepetitiveElements();
+        if (!repetitiveElements) return true;
+
+        if (adapt.layout.isOrphan(this.nodeContext.viewNode)) return true;
+
+
+        if (formattingContext.isAfterContextOfRootElement(nodeContext)) {
+            repetitiveElements.preventSkippingFooter();
+            vivliostyle.repetitiveelements.appendFooter(formattingContext, this.nodeContext);
+        }
+
+        if (!repetitiveElements.isEnableToUpdateState()) return true;
+
+        if (nodeContext && nodeContext.overflow) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+    /** @override */
+    TableRowLayoutConstraint.prototype.nextCandidate = function(nodeContext) {
+        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
+        var repetitiveElements = this.getRepetitiveElements();
+        if (!repetitiveElements) return;
+        if (formattingContext.isAfterContextOfRootElement(nodeContext)
+            && repetitiveElements.isSkipFooter) {
+            repetitiveElements.preventSkippingFooter();
+            return true;
+        }
+        return RepetitiveElementsOwnerLayoutConstraint.prototype.nextCandidate.call(this);
+    };
 
     /**
      * @const

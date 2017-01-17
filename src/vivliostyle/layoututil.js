@@ -347,6 +347,7 @@ goog.scope(function() {
         this.column.layoutContext = column.layoutContext.clone();
         this.column.stopAtOverflow = false;
         this.column.flowRootFormattingContext = parentNodeContext.formattingContext;
+        this.column.pseudColumn = true;
 
         var parentClonedPaddingBorder = this.column.calculateClonedPaddingBorder(parentNodeContext);
         this.column.footnoteEdge = this.column.footnoteEdge - parentClonedPaddingBorder;
@@ -428,6 +429,7 @@ goog.scope(function() {
      */
     vivliostyle.layoututil.AbstractLayoutRetryer = function() {
         /** @type {Array.<adapt.layout.BreakPosition>} */this.initialBreakPositions = null;
+        /** @type {*} */ this.initialStateOfFormattingContext = null;
     };
     /** @const */ var AbstractLayoutRetryer = vivliostyle.layoututil.AbstractLayoutRetryer;
 
@@ -502,6 +504,12 @@ goog.scope(function() {
     AbstractLayoutRetryer.prototype.saveState = function(nodeContext, column) {
         this.initialPosition = nodeContext.copy();
         this.initialBreakPositions = [].concat(column.breakPositions);
+        this.initialFragmentLayoutConstraints =
+            [].concat(column.fragmentLayoutConstraints);
+        if (nodeContext.formattingContext) {
+            this.initialStateOfFormattingContext =
+                nodeContext.formattingContext.saveState();
+        }
     };
 
     /**
@@ -510,6 +518,11 @@ goog.scope(function() {
      */
     AbstractLayoutRetryer.prototype.restoreState = function(nodeContext, column) {
         column.breakPositions = this.initialBreakPositions;
+        column.fragmentLayoutConstraints = this.initialFragmentLayoutConstraints;
+        if (nodeContext.formattingContext) {
+            nodeContext.formattingContext.restoreState(
+                this.initialStateOfFormattingContext);
+        }
     };
 
 

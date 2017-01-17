@@ -194,6 +194,31 @@ adapt.layout.LayoutConstraint = function() {};
  */
 adapt.layout.LayoutConstraint.prototype.allowLayout = function(nodeContext) {};
 
+
+/**
+ * Represents constraints on laying out fragments
+ * @interface
+ */
+adapt.layout.FragmentLayoutConstraint = function() {};
+
+/**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @return {boolean}
+ */
+adapt.layout.FragmentLayoutConstraint.prototype.allowLayout = function(nodeContext) {};
+
+/**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @return {boolean}
+ */
+adapt.layout.FragmentLayoutConstraint.prototype.nextCandidate = function(nodeContext) {}
+
+/**
+ * @param {boolean} allowed
+ */
+adapt.layout.FragmentLayoutConstraint.prototype.prepareLayout = function(allowed) {}
+
+
 /**
  * Potential breaking position.
  * @interface
@@ -471,6 +496,13 @@ adapt.layout.BlockFormattingContext.prototype.getParent = function() {
     return this.parent;
 };
 
+/** @override */
+adapt.layout.BlockFormattingContext.prototype.saveState = function() {};
+
+/** @override */
+adapt.layout.BlockFormattingContext.prototype.restoreState = function(state) {};
+
+
 /**
  * @constructor
  * @param {Element} element
@@ -506,6 +538,8 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @type {number} */ this.rightFloatEdge = 0;  // bottom of the bottommost right float
     /** @type {number} */ this.bottommostFloatTop = 0;  // Top of the bottommost float
     /** @type {boolean} */ this.stopAtOverflow = true;
+    /** @type {!Array.<adapt.layout.FragmentLayoutConstraint>} */ this.fragmentLayoutConstraints = [];
+    /** @type {boolean} */ this.pseudColumn = false;
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
 
@@ -2104,7 +2138,7 @@ adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext
     if (!nodeContext) {
         return false;
     }
-    if (this.isOrphan(nodeContext.viewNode)) {
+    if (adapt.layout.isOrphan(nodeContext.viewNode)) {
         return false;
     }
     var edge = adapt.layout.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
@@ -2204,17 +2238,6 @@ adapt.layout.Column.prototype.isBFC = function(formattingContext, nodeContext) {
     return false;
 };
 
-/**
- * @param {Node} node
- * @return {boolean}
- */
-adapt.layout.Column.prototype.isOrphan = function(node) {
-    while (node) {
-        if (node.parentNode === node.ownerDocument) return false;
-        node = node.parentNode;
-    }
-    return true;
-};
 
 /**
  * Skips positions until either the start of unbreakable block or inline content.
@@ -2841,6 +2864,19 @@ adapt.layout.Column.prototype.redoLayout = function() {
     return frame.result();
 };
 
+
+/**
+ * @param {Node} node
+ * @return {boolean}
+ */
+adapt.layout.isOrphan = function(node) {
+    while (node) {
+        if (node.parentNode === node.ownerDocument) return false;
+        node = node.parentNode;
+    }
+    return true;
+};
+
 /**
  * @constructor
  * @param {boolean} leadingEdge
@@ -2863,10 +2899,8 @@ adapt.layout.LayoutRetryer.prototype.resolveLayoutMode = function(nodeContext) {
  * @override
  */
 adapt.layout.LayoutRetryer.prototype.prepareLayout = function(nodeContext, column) {
-    vivliostyle.repetitiveelements.eachAncestorRepetitiveElementsOwnerFormattingContext(nodeContext, function(formattingContext){
-        var repetitiveElements = formattingContext.getRepetitiveElements();
-        if (repetitiveElements) repetitiveElements.prepareLayoutFragment();
-    });
+    column.fragmentLayoutConstraints = [];
+    if (!column.pseudColumn) vivliostyle.repetitiveelements.clearCache();
 };
 
 /**
@@ -2882,9 +2916,9 @@ adapt.layout.DefaultLayoutMode = function(leadingEdge) {
  * @override
  */
 adapt.layout.DefaultLayoutMode.prototype.doLayout = function(nodeContext, column) {
-    vivliostyle.repetitiveelements.appendHeaderToAncestors(nodeContext);
+    vivliostyle.repetitiveelements.appendHeaderToAncestors(nodeContext, column);
     /** @type {!adapt.task.Frame.<boolean>} */ var frame =
-        adapt.task.newFrame("adapt.layout.DefaultLayoutMode.doLayout ");
+        adapt.task.newFrame("adapt.layout.DefaultLayoutMode.doLayout");
     column.doLayout(nodeContext, this.leadingEdge).then(function(result) {
         vivliostyle.repetitiveelements.appendFooterToAncestors(nodeContext);
         frame.finish(result);
@@ -2896,39 +2930,22 @@ adapt.layout.DefaultLayoutMode.prototype.doLayout = function(nodeContext, column
  * @override
  */
 adapt.layout.DefaultLayoutMode.prototype.accept = function(nodeContext, column) {
-    return true; /// TODO
-    // var repetitiveElements = this.formattingContext.getRepetitiveElements();
-    // if (!repetitiveElements) return true;
-    //
-    // var breakPosition = column.findAcceptableBreakPosition();
-    //
-    // if (this.formattingContext.isAfterContextOfRootElement(nodeContext)
-    //     && repetitiveElements.isSkipFooter) {
-    //     repetitiveElements.preventSkippingFooter();
-    //     return false;
-    // }
-    //
-    // if (!repetitiveElements.isEnableToUpdateState()) return true;
-    // return !!(breakPosition.nodeContext) && !breakPosition.nodeContext.overflow;
+    if (column.fragmentLayoutConstraints.length <= 0) return true;
+    return column.fragmentLayoutConstraints.every(function(constraint){
+        return constraint.allowLayout(nodeContext);
+    });
 };
 
 /**
  * @override
  */
 adapt.layout.DefaultLayoutMode.prototype.postLayout = function(positionAfter, initialPosition, column, accepted) {
-    vivliostyle.repetitiveelements.eachAncestorRepetitiveElementsOwnerFormattingContext(initialPosition, function(formattingContext){
-        var repetitiveElements = formattingContext.getRepetitiveElements();
-        if (!repetitiveElements) return;
-        if (!accepted) {
-            repetitiveElements.removeHeaderFromFragment();
-            repetitiveElements.removeFooterFromFragment();
-        }
+    column.fragmentLayoutConstraints.some(function(constraint){
+        return constraint.nextCandidate(positionAfter);
     });
-    // var repetitiveElements = this.formattingContext.getRepetitiveElements();
-    // if (!repetitiveElements) return;
-    // if (!accepted) {
-    //     repetitiveElements.updateState(); // TODO
-    // }
+    column.fragmentLayoutConstraints.forEach(function(constraint){
+        constraint.postLayout(accepted);
+    });
 };
 
 
