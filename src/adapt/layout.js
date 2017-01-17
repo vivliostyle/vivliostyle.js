@@ -203,9 +203,10 @@ adapt.layout.FragmentLayoutConstraint = function() {};
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {adapt.layout.Column} column
  * @return {boolean}
  */
-adapt.layout.FragmentLayoutConstraint.prototype.allowLayout = function(nodeContext) {};
+adapt.layout.FragmentLayoutConstraint.prototype.allowLayout = function(nodeContext, column) {};
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
@@ -216,7 +217,7 @@ adapt.layout.FragmentLayoutConstraint.prototype.nextCandidate = function(nodeCon
 /**
  * @param {boolean} allowed
  */
-adapt.layout.FragmentLayoutConstraint.prototype.prepareLayout = function(allowed) {};
+adapt.layout.FragmentLayoutConstraint.prototype.postLayout = function(allowed) {};
 
 
 /**
@@ -300,7 +301,7 @@ function retrieveAncestorRepetitiveElements(nodeContext) {
     });
     return result;
 };
-
+adapt.layout.retrieveAncestorRepetitiveElements = retrieveAncestorRepetitiveElements;
 
 /**
  * @typedef {{breakPosition: adapt.layout.BreakPosition, nodeContext: adapt.vtree.NodeContext}}
@@ -628,11 +629,11 @@ adapt.layout.Column.prototype.removeFollowingSiblings = function(parentNode, vie
 
 /**
  * @param {adapt.vtree.NodePosition} position
- * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
+ * @return {!adapt.task.Result.<!adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.openAllViews = function(position) {
     var self = this;
-    /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
+    /** @type {!adapt.task.Frame.<!adapt.vtree.NodeContext>} */ var frame =
         adapt.task.newFrame("openAllViews");
     var steps = position.steps;
     self.layoutContext.setViewRoot(self.element, self.isFootnote);
@@ -661,6 +662,7 @@ adapt.layout.Column.prototype.openAllViews = function(position) {
         }
         return adapt.task.newResult(false);
     }).then(function() {
+        goog.asserts.assert(nodeContext);
         frame.finish(nodeContext);
     });
     return frame.result();
@@ -2762,13 +2764,13 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
 };
 
 /**
- * @param {adapt.vtree.ChunkPosition} chunkPosition starting position.
+ * @param {adapt.vtree.NodeContext} nodeContext starting position.
  * @param {boolean} leadingEdge
- * @return {!adapt.task.Result.<adapt.vtree.ChunkPosition>} holding end position.
+ * @return {!adapt.task.Result.<adapt.vtree.NodeContext>} holding end position.
  */
 adapt.layout.Column.prototype.doLayout = function(nodeContext, leadingEdge) {
     var self = this;
-    /** @type {!adapt.task.Frame.<adapt.vtree.ChunkPosition>} */ var frame = adapt.task.newFrame("doLayout");
+    /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame = adapt.task.newFrame("doLayout");
     var initialNodeContext = nodeContext;
     // ------ init backtracking list -----
     self.breakPositions = [];
@@ -2917,7 +2919,7 @@ adapt.layout.DefaultLayoutMode = function(leadingEdge) {
  */
 adapt.layout.DefaultLayoutMode.prototype.doLayout = function(nodeContext, column) {
     vivliostyle.repetitiveelements.appendHeaderToAncestors(nodeContext, column);
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame =
+    /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
         adapt.task.newFrame("adapt.layout.DefaultLayoutMode.doLayout");
     column.doLayout(nodeContext, this.leadingEdge).then(function(result) {
         vivliostyle.repetitiveelements.appendFooterToAncestors(nodeContext);
@@ -2932,7 +2934,7 @@ adapt.layout.DefaultLayoutMode.prototype.doLayout = function(nodeContext, column
 adapt.layout.DefaultLayoutMode.prototype.accept = function(nodeContext, column) {
     if (column.fragmentLayoutConstraints.length <= 0) return true;
     return column.fragmentLayoutConstraints.every(function(constraint) {
-        return constraint.allowLayout(nodeContext);
+        return constraint.allowLayout(nodeContext, column);
     });
 };
 
