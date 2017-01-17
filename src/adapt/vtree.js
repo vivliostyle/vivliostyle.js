@@ -529,6 +529,16 @@ adapt.vtree.FormattingContext.prototype.isFirstTime = function(nodeContext, firs
  */
 adapt.vtree.FormattingContext.prototype.getParent = function() {};
 
+/**
+ * @return {*}
+ */
+adapt.vtree.FormattingContext.prototype.saveState = function() {};
+
+/**
+ * @param {*} state
+ */
+adapt.vtree.FormattingContext.prototype.restoreState = function(state) {};
+
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
