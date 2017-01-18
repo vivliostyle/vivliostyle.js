@@ -2806,8 +2806,11 @@ adapt.layout.Column.prototype.layoutOverflownFootnotes = function(chunkPosition)
  */
 adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
     this.chunkPositions.push(chunkPosition);  // So we can re-layout this column later
+    if (chunkPosition.primary.after) {
+        this.lastAfterPosition = chunkPosition.primary;
+    }
     if (this.stopAtOverflow && this.overflown) {
-        return adapt.task.newResult(chunkPosition);
+        return adapt.task.newResult(/** @type {adapt.vtree.ChunkPosition} */ (chunkPosition));
     }
     var self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.ChunkPosition>} */ var frame = adapt.task.newFrame("layout");
