@@ -750,7 +750,7 @@ goog.scope(function() {
                         } else {
                             left = Math.max(left, area.left + area.width);
                         }
-                        // FALLTHROUGH
+                        break;
                     case "block-start":
                         if (area.vertical) {
                             right = Math.min(right, area.left);
@@ -762,9 +762,9 @@ goog.scope(function() {
                         if (area.vertical) {
                             bottom = Math.min(bottom, area.top);
                         } else {
-                            right = Math.min(right, area.left + area.width);
+                            right = Math.min(right, area.left);
                         }
-                        // FALLTHROUGH
+                        break;
                     case "block-end":
                         if (area.vertical) {
                             left = Math.max(left, area.left + area.width);
@@ -792,7 +792,7 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!adapt.vtree.Container} area
+     * @param {!adapt.layout.PageFloatArea} area
      * @param {!vivliostyle.pagefloat.PageFloat} float
      * @param {boolean}  init
      * @return {boolean} Indicates if the float area fits inside the container or not
@@ -822,31 +822,75 @@ goog.scope(function() {
 
         var blockSize, inlineSize;
         if (init) {
-            var startExclusionSize = 0;
-            for (var i = 0; i < area.bands.length; i++) {
-                var band = area.bands[i];
-                if (Math.abs(band.x2 - band.x1 - (area.vertical ? area.height : area.width)) < 0.01) {
+            var bands = area.bands;
+            switch (logicalFloatSide) {
+                case "block-start":
+                case "inline-start":
+                    var startExclusionSize = 0;
+                    for (var i = 0; i < bands.length; i++) {
+                        var band = area.bands[i];
+                        if (band.y2 - blockOffset > blockStart &&
+                            band.x1 - inlineOffset <= inlineStart &&
+                            band.x2 - inlineOffset >= inlineEnd) {
+                            break;
+                        } else {
+                            startExclusionSize += band.y2 - band.y1;
+                        }
+                    }
+                    var nonExclusionSize = 0;
+                    for (; i < bands.length; i++) {
+                        var band = area.bands[i];
+                        if (band.y1 - blockOffset >= blockEnd ||
+                            band.x1 - inlineOffset > inlineStart ||
+                            band.x2 - inlineOffset < inlineEnd) {
+                            break;
+                        } else {
+                            nonExclusionSize += band.y2 - band.y1;
+                        }
+                    }
+                    blockStart = Math.max(blockStart, area.top + startExclusionSize);
+                    if (i < bands.length) {
+                        blockEnd = Math.min(blockEnd, area.top + startExclusionSize + nonExclusionSize);
+                    }
                     break;
-                } else {
-                    startExclusionSize += band.y2 - band.y1;
-                }
-            }
-            var nonExclusionSize = 0;
-            for (; i < area.bands.length; i++) {
-                var band = area.bands[i];
-                if (Math.abs(band.x2 - band.x1 - (area.vertical ? area.height : area.width)) > 0.01) {
+                case "block-end":
+                case "inline-end":
+                    var bandEndPosition = bands.length ?
+                        bands[bands.length - 1].y2 - blockOffset : 0;
+                    var endExclusionSize = 0;
+                    var i = bands.length - 1;
+                    if (bandEndPosition >= blockEnd) {
+                        for (; i >= 0; i--) {
+                            var band = area.bands[i];
+                            if (band.y1 - blockOffset < blockEnd &&
+                                band.x1 - inlineOffset <= inlineStart &&
+                                band.x2 - inlineOffset >= inlineEnd) {
+                                break;
+                            } else {
+                                endExclusionSize += band.y2 - band.y1;
+                            }
+                        }
+                    }
+                    var nonExclusionSize = 0;
+                    for (; i >= 0; i--) {
+                        var band = area.bands[i];
+                        if (band.y2 - blockOffset <= blockStart ||
+                            band.x1 - inlineOffset > inlineStart ||
+                            band.x2 - inlineOffset < inlineEnd) {
+                            break;
+                        } else {
+                            nonExclusionSize += band.y2 - band.y1;
+                        }
+                    }
+                    blockStart = Math.max(blockStart, bandEndPosition - endExclusionSize - nonExclusionSize);
+                    if (endExclusionSize > 0) {
+                        blockEnd = Math.min(blockEnd, bandEndPosition - endExclusionSize);
+                    }
                     break;
-                } else {
-                    nonExclusionSize += band.y2 - band.y1;
-                }
-            }
-            blockStart = Math.max(blockStart, area.top + startExclusionSize);
-            if (i < area.bands.length) {
-                blockEnd = Math.min(blockEnd, area.top + startExclusionSize + nonExclusionSize);
             }
             blockSize = (blockEnd - blockStart) * area.getBoxDir();
             inlineSize = inlineEnd - inlineStart;
-            if (blockSize <= 0)
+            if (blockSize <= 0 || inlineSize <= 0)
                 return false;
         } else {
             blockSize = area.computedBlockSize;
@@ -855,21 +899,26 @@ goog.scope(function() {
                 return false;
             blockSize = Math.min(blockSize + (area.vertical ? float.margin.left : float.margin.bottom),
                 availableBlockSize);
-            inlineSize = vivliostyle.sizing.getSize(area.clientLayout, area.element,
-                [vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE];
+            if (logicalFloatSide === "inline-start" || logicalFloatSide === "inline-end") {
+                inlineSize = vivliostyle.sizing.getSize(area.clientLayout, area.element,
+                    [vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE];
+            } else {
+                var rect = area.clientLayout.getElementClientRect(area.rootViewNode);
+                inlineSize = rect[area.vertical ? "height" : "width"] +
+                    (area.vertical ? float.margin.top : float.margin.left) +
+                    (area.vertical ? float.margin.bottom : float.margin.right);
+            }
         }
 
         switch (logicalFloatSide) {
             case "inline-start":
-                area.setInlinePosition(inlineStart, inlineSize);
-                // FALLTHROUGH
             case "block-start":
+                area.setInlinePosition(inlineStart, inlineSize);
                 area.setBlockPosition(blockStart, blockSize);
                 break;
             case "inline-end":
-                area.setInlinePosition(inlineEnd - inlineSize, inlineSize);
-                // FALLTHROUGH
             case "block-end":
+                area.setInlinePosition(inlineEnd - inlineSize, inlineSize);
                 area.setBlockPosition(blockEnd - blockSize * area.getBoxDir(), blockSize);
                 break;
             default:

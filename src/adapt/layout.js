@@ -1312,7 +1312,7 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 };
 
 /**
- * @param {!adapt.layout.Column} area
+ * @param {!adapt.layout.PageFloatArea} area
  * @param {?vivliostyle.pagefloat.PageFloat} float
  */
 adapt.layout.Column.prototype.setupFloatArea = function(area, float) {
@@ -1353,7 +1353,7 @@ adapt.layout.Column.prototype.setupFloatArea = function(area, float) {
 
 /**
  * @param {?vivliostyle.pagefloat.PageFloat} float
- * @returns {?adapt.layout.Column}
+ * @returns {?adapt.layout.PageFloatArea}
  */
 adapt.layout.Column.prototype.createPageFloatArea = function(float) {
     var floatAreaElement = this.element.ownerDocument.createElement("div");
@@ -1362,7 +1362,9 @@ adapt.layout.Column.prototype.createPageFloatArea = function(float) {
     var pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
         parentPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.COLUMN, null,
         this.pageFloatLayoutContext.flowName, float.sourceNode, null, null);
-    var floatArea = new adapt.layout.Column(floatAreaElement, this.layoutContext.clone(), this.clientLayout, this.layoutConstraint, pageFloatLayoutContext);
+    var parentContainer = parentPageFloatLayoutContext.getContainer();
+    var floatArea = new adapt.layout.PageFloatArea(float, floatAreaElement, this.layoutContext.clone(),
+        this.clientLayout, this.layoutConstraint, pageFloatLayoutContext, parentContainer);
     pageFloatLayoutContext.setContainer(floatArea);
     if (this.setupFloatArea(floatArea, float)) {
         return floatArea;
@@ -3011,3 +3013,92 @@ vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSO
     }
     return null;
 });
+
+/**
+ * @constructor
+ * @param {!vivliostyle.pagefloat.PageFloat} float
+ * @param {Element} element
+ * @param {!adapt.vtree.LayoutContext} layoutContext
+ * @param {adapt.vtree.ClientLayout} clientLayout
+ * @param {adapt.layout.LayoutConstraint} layoutConstraint
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} pageFloatLayoutContext
+ * @param {adapt.vtree.Container} parentContainer
+ * @extends {adapt.layout.Column}
+ */
+adapt.layout.PageFloatArea = function(float, element, layoutContext, clientLayout, layoutConstraint,
+                                      pageFloatLayoutContext, parentContainer) {
+    adapt.layout.Column.call(this, element, layoutContext, clientLayout, layoutConstraint,
+        pageFloatLayoutContext);
+    /** @const */ this.float = float;
+    /** @const */ this.parentContainer = parentContainer;
+    /** @type {?Element} */ this.rootViewNode = null;
+};
+goog.inherits(adapt.layout.PageFloatArea, adapt.layout.Column);
+
+/**
+ * @override
+ */
+adapt.layout.PageFloatArea.prototype.openAllViews = function(position) {
+    return adapt.layout.Column.prototype.openAllViews.call(this, position).thenAsync(function(nodeContext) {
+        if (nodeContext)
+            this.fixFloatSizeAndPosition(nodeContext);
+        return adapt.task.newResult(nodeContext);
+    }.bind(this));
+};
+
+/**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ */
+adapt.layout.PageFloatArea.prototype.fixFloatSizeAndPosition = function(nodeContext) {
+    while (nodeContext.parent) {
+        nodeContext = nodeContext.parent;
+    }
+    goog.asserts.assert(this.rootViewNode === null);
+    goog.asserts.assert(nodeContext.viewNode.nodeType === 1);
+    var rootViewNode = this.rootViewNode = /** @type {Element} */ (nodeContext.viewNode);
+    var containingBlockRect = this.parentContainer.getInnerRect();
+    var parentWidth = containingBlockRect.x2 - containingBlockRect.x1;
+    var parentHeight = containingBlockRect.y2 - containingBlockRect.y1;
+
+    /**
+     * @param {!Array<string>} props
+     * @param {number} refValue
+     */
+    function convertPercentageToPx(props, refValue) {
+        props.forEach(function(propName) {
+            var valueString = adapt.base.getCSSProperty(rootViewNode, propName);
+            if (valueString && valueString.charAt(valueString.length - 1) === "%") {
+                var percentageValue = parseFloat(valueString);
+                var value = refValue * percentageValue / 100;
+                adapt.base.setCSSProperty(rootViewNode, propName, value + "px");
+            }
+        });
+    }
+
+    convertPercentageToPx(["width", "max-width", "min-width"], parentWidth);
+    convertPercentageToPx(["height", "max-height", "min-height"], parentHeight);
+    convertPercentageToPx([
+        "margin-top", "margin-right", "margin-bottom", "margin-left",
+        "padding-top", "padding-right", "padding-bottom", "padding-left"
+    ], this.vertical ? parentHeight : parentWidth);
+    ["margin-top", "margin-right", "margin-bottom", "margin-left"].forEach(function(propName) {
+        var value = adapt.base.getCSSProperty(rootViewNode, propName);
+        if (value === "auto")
+            adapt.base.setCSSProperty(rootViewNode, propName, "0");
+    });
+
+    var floatSide = this.float.floatSide;
+    if (this.parentContainer.vertical) {
+        if (floatSide === "block-end" || floatSide === "left") {
+            var height = adapt.base.getCSSProperty(rootViewNode, "height");
+            if (height !== "" && height !== "auto")
+                adapt.base.setCSSProperty(rootViewNode, "margin-top", "auto");
+        }
+    } else {
+        if (floatSide === "block-end" || floatSide === "bottom") {
+            var width = adapt.base.getCSSProperty(rootViewNode, "width");
+            if (width !== "" && width !== "auto")
+                adapt.base.setCSSProperty(rootViewNode, "margin-left", "auto");
+        }
+    }
+};

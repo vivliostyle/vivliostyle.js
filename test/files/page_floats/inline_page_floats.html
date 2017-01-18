@@ -5,7 +5,7 @@
   <title>Inline page floats</title>
   <style>
     @page {
-      size: 400px;
+      size: 800px;
     }
     :root {
       column-count: 2;
@@ -15,6 +15,7 @@
       padding: 5px;
       border: blue solid 3px;
       margin: 3px;
+      height: 90%;
     }
     .column-float {
       float-reference: column;
@@ -32,7 +33,13 @@
 </head>
 <body>
 Inline size of inline page floats should be fit-content (shrink-to-fit) inline size.
-<div class="float column-float inline-start">column</div>
-<div class="float page-float inline-end">page</div>
+<div class="float column-float inline-start">col<br>start<br>1</div>
+<div class="float page-float inline-start">page<br>start<br>2</div>
+<div class="float column-float inline-end">col<br>end<br>3</div>
+<div class="float page-float inline-end">page<br>end<br>4</div>
+<div class="float column-float inline-end">col<br>end<br>5</div>
+<div class="float column-float inline-start">col<br>start<br>6</div>
+<div class="float column-float inline-end">col<br>end<br>7</div>
+<div class="float page-float inline-start">page<br>start<br>8</div>
 </body>
 </html>

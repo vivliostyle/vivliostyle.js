@@ -1421,12 +1421,19 @@ adapt.vtree.Container.prototype.clear = function() {
  * @return {adapt.geom.Shape}
  */
 adapt.vtree.Container.prototype.getInnerShape = function() {
+    var rect = this.getInnerRect();
+    if (this.innerShape)
+        return this.innerShape.withOffset(rect.x1, rect.y1);
+    return adapt.geom.shapeForRect(rect.x1, rect.y1, rect.x2, rect.y2);
+};
+
+/**
+ * @returns {!adapt.geom.Rect}
+ */
+adapt.vtree.Container.prototype.getInnerRect = function() {
     var offsetX = this.originX + this.left + this.getInsetLeft();
     var offsetY = this.originY + this.top + this.getInsetTop();
-    if (this.innerShape)
-        return this.innerShape.withOffset(offsetX, offsetY);
-    return adapt.geom.shapeForRect(offsetX, offsetY,
-        offsetX + this.width, offsetY + this.height);
+    return new adapt.geom.Rect(offsetX, offsetY, offsetX + this.width, offsetY + this.height);
 };
 
 /**

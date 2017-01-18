@@ -73,9 +73,18 @@
       float: column-bottom;
       -ah-float: bottom column;
     }
+    .left {
+      float: left;
+    }
+    .right {
+      float: right;
+    }
   </style>
 </head>
 <body>
+<div class="float left">
+  left<br>inline
+</div>
 <p>(1) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
 <div class="float bottom">
   (a) Background of page floats is lightblue. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float.
@@ -87,7 +96,10 @@
   (b') Background of page floats is lightblue. This is a top float.
 </div>
 <p>(2) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
-<p>(3) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<p>(3) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns.</p>
+<div class="float right">
+  right<br>inline
+</div>
 <div class="float bottom">
   (c) Background of page floats is lightblue. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float.
 </div>
