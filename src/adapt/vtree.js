@@ -1437,6 +1437,17 @@ adapt.vtree.Container.prototype.getInnerRect = function() {
 };
 
 /**
+ * @returns {!adapt.geom.Rect}
+ */
+adapt.vtree.Container.prototype.getPaddingRect = function() {
+    var paddingX = this.originX + this.left + this.marginLeft + this.borderLeft;
+    var paddingY = this.originY + this.top + this.marginTop + this.borderTop;
+    var paddingWidth = this.paddingLeft + this.width + this.paddingRight;
+    var paddingHeight = this.paddingTop + this.height + this.paddingBottom;
+    return new adapt.geom.Rect(paddingX, paddingY, paddingX + paddingWidth, paddingY + paddingHeight);
+};
+
+/**
  * @param {adapt.css.Val} outerShapeProp
  * @param {adapt.expr.Context} context
  * @returns {adapt.geom.Shape}

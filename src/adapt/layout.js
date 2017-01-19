@@ -1318,26 +1318,23 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 adapt.layout.Column.prototype.setupFloatArea = function(area, float) {
     var floatLayoutContext = this.pageFloatLayoutContext;
     var floatContainer = floatLayoutContext.getContainer(float.floatReference);
+    var containingBlockRect = floatContainer.getPaddingRect();
     var element = area.element;
     floatContainer.element.parentNode.appendChild(element);
     area.copyFrom(floatContainer);
+
     area.element = element;
     area.isFloat = true;
-    var columnMargin = this.getComputedMargin(floatContainer.element);
-    adapt.base.setCSSProperty(element, "margin-top", columnMargin.top + "px");
-    adapt.base.setCSSProperty(element, "margin-bottom", columnMargin.bottom + "px");
-    adapt.base.setCSSProperty(element, "margin-left", columnMargin.left + "px");
-    adapt.base.setCSSProperty(element, "margin-right", columnMargin.right + "px");
-    area.width = floatContainer.borderLeft + floatContainer.paddingLeft + floatContainer.width +
-        floatContainer.paddingRight + floatContainer.borderRight;
-    area.height = floatContainer.borderTop + floatContainer.paddingTop + floatContainer.height +
-        floatContainer.paddingBottom + floatContainer.borderBottom;
+    area.width = containingBlockRect.x2 - containingBlockRect.x1;
+    area.height = containingBlockRect.y2 - containingBlockRect.y1;
+    area.marginLeft = area.marginRight = area.marginTop = area.marginBottom = 0;
     area.borderLeft = area.borderRight = area.borderTop = area.borderBottom = 0;
     area.paddingLeft = area.paddingRight = area.paddingTop = area.paddingBottom = 0;
-    area.setHorizontalPosition(area.left, area.width);
-    area.setVerticalPosition(area.top, area.height);
+    area.setHorizontalPosition(containingBlockRect.x1 - floatContainer.originX, area.width);
+    area.setVerticalPosition(containingBlockRect.y1 - floatContainer.originY, area.height);
     area.exclusions = (floatContainer.exclusions || []).concat();
     area.forceNonfitting = !floatLayoutContext.hasFloatFragments();
+
     // Calculate bands from the exclusions before setting float area dimensions
     area.init();
     var fitWithinContainer = floatLayoutContext.setFloatAreaDimensions(area, float, true);
@@ -3059,7 +3056,7 @@ adapt.layout.PageFloatArea.prototype.fixFloatSizeAndPosition = function(nodeCont
     goog.asserts.assert(this.rootViewNode === null);
     goog.asserts.assert(nodeContext.viewNode.nodeType === 1);
     var rootViewNode = this.rootViewNode = /** @type {Element} */ (nodeContext.viewNode);
-    var containingBlockRect = this.parentContainer.getInnerRect();
+    var containingBlockRect = this.parentContainer.getPaddingRect();
     var parentWidth = containingBlockRect.x2 - containingBlockRect.x1;
     var parentHeight = containingBlockRect.y2 - containingBlockRect.y1;
 

@@ -684,7 +684,7 @@ goog.scope(function() {
         }.call(this);
         if (limit === null) {
             limit = (function(container) {
-                var rect = container.getOuterRect();
+                var rect = container.getPaddingRect();
                 switch (physicalSide) {
                     case "top":
                         return rect.y1;
@@ -724,14 +724,15 @@ goog.scope(function() {
     PageFloatLayoutContext.prototype.updateLimitValues = function() {
         if (!this.container) return;
         var self = this;
-        var limits = {
-            top: this.container.top,
-            left: this.container.left,
-            bottom: this.container.top + this.container.height,
-            right: this.container.left + this.container.width
-        };
         var offsetX = this.container.originX;
         var offsetY = this.container.originY;
+        var paddingRect = this.container.getPaddingRect();
+        var limits = {
+            top: paddingRect.y1 - offsetY,
+            left: paddingRect.x1 - offsetX,
+            bottom: paddingRect.y2 - offsetY,
+            right: paddingRect.x2 - offsetX
+        };
 
         var fragments = this.floatFragments;
         if (fragments.length > 0) {
