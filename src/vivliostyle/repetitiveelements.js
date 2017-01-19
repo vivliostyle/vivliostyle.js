@@ -466,7 +466,7 @@ goog.scope(function() {
 
         if (!repetitiveElements.isEnableToUpdateState()) return true;
 
-        if (column.failPageBreaks || (nodeContext && nodeContext.overflow)) {
+        if (column.paginationFailed || (nodeContext && nodeContext.overflow)) {
             return false;
         } else {
             return true;
