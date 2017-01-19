@@ -2901,6 +2901,9 @@ adapt.layout.isOrphan = function(node) {
 adapt.layout.LayoutRetryer = function(leadingEdge) {
     vivliostyle.layoututil.AbstractLayoutRetryer.call(this);
     /** @const */ this.leadingEdge = leadingEdge;
+    /** @private @type {?string} */ this.initialPageBreakType = null;
+    /** @private @type {number} */ this.initialComputedBlockSize = 0;
+    /** @private @type {boolean} */ this.initialOverflown = false;
 };
 goog.inherits(adapt.layout.LayoutRetryer, vivliostyle.layoututil.AbstractLayoutRetryer);
 
@@ -2917,6 +2920,27 @@ adapt.layout.LayoutRetryer.prototype.resolveLayoutMode = function(nodeContext) {
 adapt.layout.LayoutRetryer.prototype.prepareLayout = function(nodeContext, column) {
     column.fragmentLayoutConstraints = [];
     if (!column.pseudColumn) vivliostyle.repetitiveelements.clearCache();
+};
+
+/**
+ * @override
+ */
+adapt.layout.LayoutRetryer.prototype.saveState = function(nodeContext, column) {
+    vivliostyle.layoututil.AbstractLayoutRetryer.prototype.saveState.call(this, nodeContext, column);
+    this.initialPageBreakType = column.pageBreakType;
+    this.initialComputedBlockSize = column.computedBlockSize;
+    this.initialOverflown = column.overflown;
+};
+
+/**
+ * @override
+ */
+adapt.layout.LayoutRetryer.prototype.restoreState = function(nodeContext, column) {
+    vivliostyle.layoututil.AbstractLayoutRetryer.prototype.restoreState.call(this, nodeContext, column);
+    column.failPageBreaks = false;
+    column.pageBreakType = this.initialPageBreakType;
+    column.computedBlockSize = this.initialComputedBlockSize;
+    column.overflown = this.initialOverflown;
 };
 
 /**
@@ -2962,10 +2986,7 @@ adapt.layout.DefaultLayoutMode.prototype.postLayout = function(positionAfter, in
     column.fragmentLayoutConstraints.forEach(function(constraint) {
         constraint.postLayout(accepted);
     });
-    column.failPageBreaks = false;
-    column.pageBreakType = null;
 };
-
 
 /**
  * @constructor
