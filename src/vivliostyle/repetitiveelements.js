@@ -154,6 +154,7 @@ goog.scope(function() {
         /** @type {boolean} */ this.isSkipFooter = false;
         /** @type {boolean} */ this.enableSkippingFooter = true;
         /** @type {boolean} */ this.enableSkippingHeader = true;
+        /** @type {boolean} */ this.doneInitialLayout = false;
     };
     /** @const */ var RepetitiveElements = vivliostyle.repetitiveelements.RepetitiveElements;
 
@@ -281,6 +282,15 @@ goog.scope(function() {
         this.footerViewNodes = [];
     };
 
+    RepetitiveElements.prototype.clearOrphans = function() {
+        this.headerViewNodes = this.headerViewNodes.filter(function(node) {
+            return !adapt.layout.isOrphan(node);
+        });
+        this.footerViewNodes = this.footerViewNodes.filter(function(node) {
+            return !adapt.layout.isOrphan(node);
+        });
+    };
+
     /**
      * @param {Node} node
      * @return {boolean}
@@ -330,7 +340,10 @@ goog.scope(function() {
         var repetitiveElements = this.formattingContext.getRepetitiveElements();
         if (repetitiveElements) {
             goog.asserts.assert(column.clientLayout);
-            repetitiveElements.updateHeight(column.clientLayout);
+            if (!repetitiveElements.doneInitialLayout) {
+                repetitiveElements.updateHeight(column.clientLayout);
+                repetitiveElements.doneInitialLayout = true;
+            }
         }
         this.formattingContext.doneInitialLayout = true;
         if (!accepted) {
@@ -453,7 +466,7 @@ goog.scope(function() {
 
         if (!repetitiveElements.isEnableToUpdateState()) return true;
 
-        if ((nodeContext && nodeContext.overflow) || !this.isContentExist(repetitiveElements)) {
+        if (column.failPageBreaks || (nodeContext && nodeContext.overflow)) {
             return false;
         } else {
             return true;
@@ -487,25 +500,6 @@ goog.scope(function() {
     RepetitiveElementsOwnerLayoutConstraint.prototype.getRepetitiveElements = function() {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(this.nodeContext.formattingContext);
         return formattingContext.getRepetitiveElements();
-    };
-
-    /**
-     * @private
-     * @param {!vivliostyle.repetitiveelements.RepetitiveElements} repetitiveElements
-     * @return {boolean}
-     */
-    RepetitiveElementsOwnerLayoutConstraint.prototype.isContentExist = function(repetitiveElements) {
-        for (var child = this.nodeContext.viewNode.firstChild; child; child = child.nextSibling) {
-            if (child.nodeType === 1) {
-                return true;
-            } else {
-                if (!repetitiveElements.isHeaderViewNode(child)
-                  && !repetitiveElements.isFooterViewNode(child)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     };
 
 
@@ -606,12 +600,20 @@ goog.scope(function() {
     /**
      * @override
      */
-    RepetitiveElementsOwnerLayoutProcessor.prototype.afterNonInlineElementNode = function(nodeContext) {
+    RepetitiveElementsOwnerLayoutProcessor.prototype.startNonInlineElementNode = function(nodeContext) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext);
         if (nodeContext.repeatOnBreak === "header" || nodeContext.repeatOnBreak === "footer") {
             if (nodeContext.viewNode.parentNode) nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode); //TODO
-            return true;
-        } else if (formattingContext && !formattingContext.isInherited(nodeContext)) {
+        }
+        return false;
+    };
+
+    /**
+     * @override
+     */
+    RepetitiveElementsOwnerLayoutProcessor.prototype.afterNonInlineElementNode = function(nodeContext) {
+        var formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext);
+        if (formattingContext && !formattingContext.isInherited(nodeContext)) {
             appendFooter(formattingContext, nodeContext);
             return false;
         } else {
@@ -629,11 +631,7 @@ goog.scope(function() {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
         var repetitiveElements = formattingContext.getRepetitiveElements();
         var frame = adapt.task.newFrame("BlockLayoutProcessor.doInitialLayout");
-        this.layoutEntireBlock(nodeContext, column).then(function(nodeContextAfter) {
-            goog.asserts.assert(column.clientLayout);
-            if (repetitiveElements) repetitiveElements.updateHeight(column.clientLayout);
-            frame.finish(null);
-        });
+        this.layoutEntireBlock(nodeContext, column).thenFinish(frame);
         return frame.result();
     };
 
@@ -666,11 +664,13 @@ goog.scope(function() {
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
+        var repetitiveElements = formattingContext.getRepetitiveElements();
 
         /** @type {!adapt.task.Frame.<boolean>} */ var frame =
             adapt.task.newFrame("RepetitiveElementsOwnerLayoutProcessor.finishBreak");
         adapt.layout.BlockLayoutProcessor.prototype.finishBreak.call(
             this, column, nodeContext, forceRemoveSelf, endOfRegion).then(function(result) {
+                if (repetitiveElements) repetitiveElements.clearOrphans();
                 if (nodeContext) appendFooter(formattingContext, nodeContext);
                 frame.finish(result);
             });
@@ -710,7 +710,8 @@ goog.scope(function() {
      * @param {!adapt.layout.Column} column
      */
     function appendHeaderToAncestors(nodeContext, column) {
-        eachAncestorNodeContext(nodeContext, function(formattingContext, nc) {
+        if (!nodeContext) return;
+        eachAncestorNodeContext(nodeContext.after ? nodeContext.parent : nodeContext, function(formattingContext, nc) {
             appendHeader(formattingContext, nc);
             column.fragmentLayoutConstraints.push(
               new RepetitiveElementsOwnerLayoutConstraint(nc));
@@ -737,7 +738,8 @@ goog.scope(function() {
      * @param {adapt.vtree.NodeContext} nodeContext
      */
     function appendFooterToAncestors(nodeContext) {
-        eachAncestorNodeContext(nodeContext, function(formattingContext, nc) {
+        if (!nodeContext) return;
+        eachAncestorNodeContext(nodeContext.after ? nodeContext.parent : nodeContext, function(formattingContext, nc) {
             appendFooter(formattingContext, nc);
         });
     };

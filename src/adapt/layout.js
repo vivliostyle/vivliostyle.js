@@ -146,6 +146,14 @@ adapt.layout.LayoutProcessor.prototype.createEdgeBreakPosition = function(
  * @param {!adapt.vtree.NodeContext} nodeContext
  * @return {boolean} return true if you skip the subsequent
  */
+adapt.layout.LayoutProcessor.prototype.startNonInlineElementNode = function(
+    nodeContext) {};
+
+/**
+ * process nodecontex of the after non inline element.
+ * @param {!adapt.vtree.NodeContext} nodeContext
+ * @return {boolean} return true if you skip the subsequent
+ */
 adapt.layout.LayoutProcessor.prototype.afterNonInlineElementNode = function(
     nodeContext) {};
 
@@ -541,6 +549,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @type {boolean} */ this.stopAtOverflow = true;
     /** @type {!Array.<adapt.layout.FragmentLayoutConstraint>} */ this.fragmentLayoutConstraints = [];
     /** @type {boolean} */ this.pseudColumn = false;
+    /** @type {boolean} */ this.failPageBreaks = false;
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
 
@@ -1584,6 +1593,7 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
         // TODO: should this be done after first-line calculation?
         var edge = self.calculateEdge(resNodeContext, checkPoints, checkPointIndex,
             checkPoints[checkPointIndex].boxOffset);
+        edge += (this.vertical ? -1 : 1) * calculateOffsetOfRepetitiveElements(retrieveAncestorRepetitiveElements(resNodeContext));
         var overflown = self.isOverflown(edge);
         if (resNodeContext == null) {
             edge += self.getTrailingMarginEdgeAdjustment(checkPoints);
@@ -2077,6 +2087,7 @@ adapt.layout.Column.prototype.findAcceptableBreak = function(overflownNodeContex
     var forceRemoveSelf = false;
     if (!nodeContext) {
         vivliostyle.logging.logger.warn("Could not find any page breaks?!!");
+        this.failPageBreaks = true;
         // Last resort
         if (this.forceNonfitting) {
             self.skipTailEdges(overflownNodeContext).then(function(nodeContext) {
@@ -2310,6 +2321,9 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                     }
                 }
                 if (!nodeContext.after) {
+                    if (layoutProcessor) {
+                        if (layoutProcessor.startNonInlineElementNode(nodeContext)) break;
+                    }
                     if (nodeContext.clearSide) {
                         // clear
                         self.applyClearance(nodeContext);
@@ -2948,6 +2962,8 @@ adapt.layout.DefaultLayoutMode.prototype.postLayout = function(positionAfter, in
     column.fragmentLayoutConstraints.forEach(function(constraint) {
         constraint.postLayout(accepted);
     });
+    column.failPageBreaks = false;
+    column.pageBreakType = null;
 };
 
 
@@ -2978,7 +2994,12 @@ adapt.layout.BlockLayoutProcessor.prototype.createEdgeBreakPosition = function(
     position, breakOnEdge, overflows, columnBlockSize) {
     return new adapt.layout.EdgeBreakPosition(position.copy(), breakOnEdge, overflows, columnBlockSize);
 };
-
+/**
+ * @override
+ */
+adapt.layout.BlockLayoutProcessor.prototype.startNonInlineElementNode = function(nodeContext) {
+    return false;
+};
 /**
  * @override
  */
