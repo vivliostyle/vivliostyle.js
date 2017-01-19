@@ -296,7 +296,7 @@ describe("pagefloat", function() {
                     null, null, null);
                 var float = new PageFloat({}, FloatReference.PAGE, "block-start");
                 pageContext.addPageFloat(float);
-                var fragment = new PageFloatFragment(float, area);
+                var fragment = new PageFloatFragment(float, {}, area);
 
                 expect(pageContext.findPageFloatFragment(float)).toBe(null);
 
@@ -308,7 +308,7 @@ describe("pagefloat", function() {
             it("A PageFloatFragment stored in one of the ancestors can be retrieved by #findPageFloatFragment", function() {
                 var float = new PageFloat({}, FloatReference.REGION, "block-start");
                 columnContext.addPageFloat(float);
-                var fragment = new PageFloatFragment(float, area);
+                var fragment = new PageFloatFragment(float, {}, area);
                 columnContext.addPageFloatFragment(fragment);
                 columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
                     null, null, null, null);
@@ -319,7 +319,7 @@ describe("pagefloat", function() {
 
                 float = new PageFloat({}, FloatReference.PAGE, "block-start");
                 columnContext.addPageFloat(float);
-                fragment = new PageFloatFragment(float, area);
+                fragment = new PageFloatFragment(float, {}, area);
                 columnContext.addPageFloatFragment(fragment);
                 regionContext = new PageFloatLayoutContext(pageContext, FloatReference.REGION, null,
                     null, null, null, null);
@@ -334,7 +334,7 @@ describe("pagefloat", function() {
             it("When a PageFloatFragment is added by #addPageFloatFragment, the corresponding PageFloatLayoutContext is invalidated", function() {
                 var float = new PageFloat({}, FloatReference.COLUMN, "block-start");
                 columnContext.addPageFloat(float);
-                var fragment = new PageFloatFragment(float, area);
+                var fragment = new PageFloatFragment(float, {}, area);
                 columnContext.addPageFloatFragment(fragment);
 
                 expect(columnContext.invalidate).toHaveBeenCalled();
@@ -343,11 +343,11 @@ describe("pagefloat", function() {
                 reset();
                 float = new PageFloat({}, FloatReference.REGION, "block-start");
                 columnContext.addPageFloat(float);
-                fragment = new PageFloatFragment(float, area);
+                fragment = new PageFloatFragment(float, {}, area);
                 columnContext.addPageFloatFragment(fragment);
 
                 expect(columnContext.invalidate).toHaveBeenCalled();
-                expect(regionContext.addPageFloatFragment).toHaveBeenCalledWith(fragment);
+                expect(regionContext.addPageFloatFragment).toHaveBeenCalledWith(fragment, undefined);
                 expect(regionContext.invalidate).toHaveBeenCalled();
                 expect(pageContext.addPageFloatFragment).not.toHaveBeenCalledWith(fragment);
 
@@ -358,9 +358,9 @@ describe("pagefloat", function() {
                 columnContext.addPageFloatFragment(fragment);
 
                 expect(columnContext.invalidate).toHaveBeenCalled();
-                expect(regionContext.addPageFloatFragment).toHaveBeenCalledWith(fragment);
+                expect(regionContext.addPageFloatFragment).toHaveBeenCalledWith(fragment, undefined);
                 expect(regionContext.invalidate).toHaveBeenCalled();
-                expect(pageContext.addPageFloatFragment).toHaveBeenCalledWith(fragment);
+                expect(pageContext.addPageFloatFragment).toHaveBeenCalledWith(fragment, undefined);
                 expect(pageContext.invalidate).toHaveBeenCalled();
             });
         });
@@ -380,7 +380,7 @@ describe("pagefloat", function() {
                         }
                     }
                 };
-                fragment = new PageFloatFragment(float, area);
+                fragment = new PageFloatFragment(float, {}, area);
                 context.addPageFloatFragment(fragment);
                 context.invalidate.calls.reset();
             });
@@ -624,12 +624,12 @@ describe("pagefloat", function() {
                 spyOn(context, "removePageFloatFragment");
                 float1 = new PageFloat({}, FloatReference.COLUMN, "block-start");
                 context.addPageFloat(float1);
-                fragment1 = new PageFloatFragment(float1, {});
+                fragment1 = new PageFloatFragment(float1, {}, {});
                 context.addPageFloatFragment(fragment1);
                 cont1 = new PageFloatContinuation(float1, {}, "foo");
                 float2 = new PageFloat({}, FloatReference.COLUMN, "block-start");
                 context.addPageFloat(float2);
-                fragment2 = new PageFloatFragment(float2, {});
+                fragment2 = new PageFloatFragment(float2, {}, {});
                 context.addPageFloatFragment(fragment2);
                 float3 = new PageFloat({}, FloatReference.COLUMN, "block-start");
                 cont3 = new PageFloatContinuation(float3, {}, "bar");
@@ -799,14 +799,14 @@ describe("pagefloat", function() {
                 context.addPageFloat(float1);
                 var shape1 = { foo: "shape1" };
                 var area1 = { getOuterShape: jasmine.createSpy("getOuterShape").and.returnValue(shape1) };
-                var fragment1 = new PageFloatFragment(float1, area1);
+                var fragment1 = new PageFloatFragment(float1, {}, area1);
                 context.addPageFloatFragment(fragment1);
 
                 var float2 = new PageFloat({}, FloatReference.COLUMN, "block-start");
                 context.addPageFloat(float2);
                 var shape2 = { foo: "shape2" };
                 var area2 = { getOuterShape: jasmine.createSpy("getOuterShape").and.returnValue(shape2) };
-                var fragment2 = new PageFloatFragment(float2, area2);
+                var fragment2 = new PageFloatFragment(float2, {}, area2);
                 context.addPageFloatFragment(fragment2);
 
                 expect(context.getFloatFragmentExclusions()).toEqual([shape1, shape2]);
@@ -822,14 +822,14 @@ describe("pagefloat", function() {
                 regionContext.addPageFloat(float1);
                 var shape1 = { foo: "shape1" };
                 var area1 = { getOuterShape: jasmine.createSpy("getOuterShape").and.returnValue(shape1) };
-                var fragment1 = new PageFloatFragment(float1, area1);
+                var fragment1 = new PageFloatFragment(float1, {}, area1);
                 regionContext.addPageFloatFragment(fragment1);
 
                 var float2 = new PageFloat({}, FloatReference.COLUMN, "block-start");
                 columnContext.addPageFloat(float2);
                 var shape2 = { foo: "shape2" };
                 var area2 = { getOuterShape: jasmine.createSpy("getOuterShape").and.returnValue(shape2) };
-                var fragment2 = new PageFloatFragment(float2, area2);
+                var fragment2 = new PageFloatFragment(float2, {}, area2);
                 columnContext.addPageFloatFragment(fragment2);
 
                 expect(columnContext.getFloatFragmentExclusions()).toEqual([shape1, shape2]);

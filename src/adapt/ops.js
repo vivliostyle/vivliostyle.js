@@ -537,8 +537,6 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
                 loopFrame.continueLoop();
                 return;
             }
-            pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(float, floatArea);
-            pageFloatLayoutContext.addPageFloatFragment(pageFloatFragment);
             var parentInvalidated = pageFloatLayoutContext.parent.isInvalidated();
             if (parentInvalidated) {
                 loopFrame.breakLoop();
