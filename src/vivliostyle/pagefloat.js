@@ -99,14 +99,12 @@ goog.scope(function() {
      * @param {!Node} sourceNode
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @param {string} floatSide
-     * @param {!adapt.geom.Insets} margin
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloat = function(sourceNode, floatReference, floatSide, margin) {
+    vivliostyle.pagefloat.PageFloat = function(sourceNode, floatReference, floatSide) {
         /** @const */ this.sourceNode = sourceNode;
         /** @const */ this.floatReference = floatReference;
         /** @const */ this.floatSide = floatSide;
-        /** @const */ this.margin = margin;
         /** @private @type {?number} */ this.order = null;
         /** @private @type {?vivliostyle.pagefloat.PageFloat.ID} */ this.id = null;
     };
@@ -877,7 +875,7 @@ goog.scope(function() {
     /**
      * @param {!adapt.layout.PageFloatArea} area
      * @param {!vivliostyle.pagefloat.PageFloat} float
-     * @param {boolean}  init
+     * @param {boolean} init
      * @return {boolean} Indicates if the float area fits inside the container or not
      */
     PageFloatLayoutContext.prototype.setFloatAreaDimensions = function(area, float, init) {
@@ -978,7 +976,8 @@ goog.scope(function() {
             var availableBlockSize = (blockEnd - blockStart) * area.getBoxDir();
             if (availableBlockSize < blockSize)
                 return false;
-            blockSize = Math.min(blockSize + (area.vertical ? float.margin.left : float.margin.bottom),
+            var margin = area.getComputedMargin(area.rootViewNode);
+            blockSize = Math.min(blockSize + (area.vertical ? margin.left : margin.bottom),
                 availableBlockSize);
             if (logicalFloatSide === "inline-start" || logicalFloatSide === "inline-end") {
                 inlineSize = vivliostyle.sizing.getSize(area.clientLayout, area.element,
@@ -986,8 +985,8 @@ goog.scope(function() {
             } else {
                 var rect = area.clientLayout.getElementClientRect(area.rootViewNode);
                 inlineSize = rect[area.vertical ? "height" : "width"] +
-                    (area.vertical ? float.margin.top : float.margin.left) +
-                    (area.vertical ? float.margin.bottom : float.margin.right);
+                    (area.vertical ? margin.top : margin.left) +
+                    (area.vertical ? margin.bottom : margin.right);
             }
         }
 

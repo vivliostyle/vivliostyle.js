@@ -1531,8 +1531,7 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
     goog.asserts.assert(floatSide);
     var float = context.findPageFloatBySourceNode(sourceNode);
     if (!float) {
-        var margin = this.getComputedMargin(/** @type {Element} */ (nodeContext.viewNode));
-        float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference, floatSide, margin);
+        float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference, floatSide);
         context.addPageFloat(float);
     }
 
