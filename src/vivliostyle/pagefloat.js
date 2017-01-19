@@ -273,10 +273,6 @@ goog.scope(function() {
         var previousSibling = this.getPreviousSibling();
         /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} */
         this.floatsDeferredFromPrevious = previousSibling ? [].concat(previousSibling.floatsDeferredToNext) : [];
-        /** @private @type {?number} */ this.blockStartLimit = null;
-        /** @private @type {?number} */ this.blockEndLimit = null;
-        /** @private @type {?number} */ this.inlineStartLimit = null;
-        /** @private @type {?number} */ this.inlineEndLimit = null;
     };
     /** @const */ var PageFloatLayoutContext = vivliostyle.pagefloat.PageFloatLayoutContext;
 
@@ -429,7 +425,6 @@ goog.scope(function() {
             parent.addPageFloatFragment(floatFragment);
         } else if (this.floatFragments.indexOf(floatFragment) < 0) {
             this.floatFragments.push(floatFragment);
-            this.updateLimitValues();
         }
         this.invalidate();
     };
@@ -446,7 +441,6 @@ goog.scope(function() {
             if (element && element.parentNode) {
                 element.parentNode.removeChild(element);
             }
-            this.updateLimitValues();
             this.invalidate();
         }
     };
@@ -660,46 +654,36 @@ goog.scope(function() {
     /**
      * @private
      * @param {string} side
+     * @returns {string}
+     */
+    PageFloatLayoutContext.prototype.toLogical = function(side) {
+        var writingMode = this.writingMode.toString();
+        var direction = this.direction.toString();
+        return vivliostyle.logical.toLogical(side, writingMode, direction);
+    };
+
+    /**
+     * @private
+     * @param {string} side
+     * @returns {string}
+     */
+    PageFloatLayoutContext.prototype.toPhysical = function(side) {
+        var writingMode = this.writingMode.toString();
+        var direction = this.direction.toString();
+        return vivliostyle.logical.toPhysical(side, writingMode, direction);
+    };
+
+    /**
+     * @private
+     * @param {string} side
      * @returns {number}
      */
     PageFloatLayoutContext.prototype.getLimitValue = function(side) {
         goog.asserts.assert(this.container);
-        var writingMode = this.writingMode.toString();
-        var direction = this.direction.toString();
-        var logicalSide = vivliostyle.logical.toLogical(side, writingMode, direction);
-        var physicalSide = vivliostyle.logical.toPhysical(side, writingMode, direction);
-        var limit = function() {
-            switch (logicalSide) {
-                case "block-start":
-                    return this.blockStartLimit;
-                case "block-end":
-                    return this.blockEndLimit;
-                case "inline-start":
-                    return this.inlineStartLimit;
-                case "inline-end":
-                    return this.inlineEndLimit;
-                default:
-                    throw new Error("Unknown logical side: " + logicalSide);
-            }
-        }.call(this);
-        if (limit === null) {
-            limit = (function(container) {
-                var rect = container.getPaddingRect();
-                switch (physicalSide) {
-                    case "top":
-                        return rect.y1;
-                    case "bottom":
-                        return rect.y2;
-                    case "left":
-                        return rect.x1;
-                    case "right":
-                        return rect.x2;
-                    default:
-                        throw new Error("Unknown physical side: " + physicalSide);
-                }
-            })(this.container);
-        }
-        goog.asserts.assert(limit !== null && limit >= 0);
+        var logicalSide = this.toLogical(side);
+        var physicalSide = this.toPhysical(side);
+        var limit = this.getLimitValueInner(logicalSide);
+        goog.asserts.assert(limit >= 0);
         if (this.parent && this.parent.container) {
             var parentLimit = this.parent.getLimitValue(physicalSide);
             switch (physicalSide) {
@@ -712,7 +696,7 @@ goog.scope(function() {
                 case "right":
                     return Math.min(limit, parentLimit);
                 default:
-                    goog.asserts.assert("Should be unreachable");
+                    goog.asserts.fail("Should be unreachable");
             }
         }
         return limit;
@@ -720,9 +704,10 @@ goog.scope(function() {
 
     /**
      * @private
+     * @return {number}
      */
-    PageFloatLayoutContext.prototype.updateLimitValues = function() {
-        if (!this.container) return;
+    PageFloatLayoutContext.prototype.getLimitValueInner = function(logicalSide) {
+        goog.asserts.assert(this.container);
         var self = this;
         var offsetX = this.container.originX;
         var offsetY = this.container.originY;
@@ -740,8 +725,7 @@ goog.scope(function() {
             var direction = this.direction.toString();
             limits = fragments.reduce(function(l, f) {
                 var float = self.floatStore.findPageFloatById(f.pageFloatId);
-                var logicalFloatSide = vivliostyle.logical.toLogical(float.floatSide,
-                    writingMode, direction);
+                var logicalFloatSide = this.toLogical(float.floatSide);
                 var area = f.area;
                 var top = l.top, left = l.left, bottom = l.bottom, right = l.right;
                 switch (logicalFloatSide) {
@@ -777,18 +761,25 @@ goog.scope(function() {
                         throw new Error("Unknown logical float side: " + logicalFloatSide);
                 }
                 return { top: top, left: left, bottom: bottom, right: right };
-            }, limits);
+            }.bind(this), limits);
         }
-        if (this.container.vertical) {
-            this.blockStartLimit = limits.right + offsetX;
-            this.blockEndLimit = limits.left + offsetX;
-            this.inlineStartLimit = limits.top + offsetY;
-            this.inlineEndLimit = limits.bottom + offsetY;
-        } else {
-            this.blockStartLimit = limits.top + offsetY;
-            this.blockEndLimit = limits.bottom + offsetY;
-            this.inlineStartLimit = limits.left + offsetX;
-            this.inlineEndLimit = limits.right + offsetX;
+
+        limits.left += offsetX;
+        limits.right += offsetX;
+        limits.top += offsetY;
+        limits.bottom += offsetY;
+
+        switch (logicalSide) {
+            case "block-start":
+                return this.container.vertical ? limits.right : limits.top;
+            case "block-end":
+                return this.container.vertical ? limits.left : limits.bottom;
+            case "inline-start":
+                return this.container.vertical ? limits.top : limits.left;
+            case "inline-end":
+                return this.container.vertical ? limits.bottom : limits.right;
+            default:
+                throw new Error("Unknown logical side: " + logicalSide);
         }
     };
 
@@ -804,9 +795,7 @@ goog.scope(function() {
             return parent.setFloatAreaDimensions(area, float, init);
         }
 
-        var writingMode = this.writingMode.toString();
-        var direction = this.direction.toString();
-        var logicalFloatSide = vivliostyle.logical.toLogical(float.floatSide, writingMode, direction);
+        var logicalFloatSide = this.toLogical(float.floatSide);
         var blockStart = this.getLimitValue("block-start");
         var blockEnd = this.getLimitValue("block-end");
         var inlineStart = this.getLimitValue("inline-start");
