@@ -549,7 +549,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @type {boolean} */ this.stopAtOverflow = true;
     /** @type {!Array.<adapt.layout.FragmentLayoutConstraint>} */ this.fragmentLayoutConstraints = [];
     /** @type {boolean} */ this.pseudColumn = false;
-    /** @type {boolean} */ this.failPageBreaks = false;
+    /** @type {boolean} */ this.paginationFailed = false;
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
 
@@ -2087,7 +2087,7 @@ adapt.layout.Column.prototype.findAcceptableBreak = function(overflownNodeContex
     var forceRemoveSelf = false;
     if (!nodeContext) {
         vivliostyle.logging.logger.warn("Could not find any page breaks?!!");
-        this.failPageBreaks = true;
+        this.paginationFailed = true;
         // Last resort
         if (this.forceNonfitting) {
             self.skipTailEdges(overflownNodeContext).then(function(nodeContext) {
@@ -2937,7 +2937,7 @@ adapt.layout.LayoutRetryer.prototype.saveState = function(nodeContext, column) {
  */
 adapt.layout.LayoutRetryer.prototype.restoreState = function(nodeContext, column) {
     vivliostyle.layoututil.AbstractLayoutRetryer.prototype.restoreState.call(this, nodeContext, column);
-    column.failPageBreaks = false;
+    column.paginationFailed = false;
     column.pageBreakType = this.initialPageBreakType;
     column.computedBlockSize = this.initialComputedBlockSize;
     column.overflown = this.initialOverflown;
