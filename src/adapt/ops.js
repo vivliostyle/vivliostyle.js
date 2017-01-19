@@ -747,20 +747,16 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
             column.snapHeight = layoutContainer.snapHeight;
             column.snapWidth = layoutContainer.snapWidth;
             if (layoutContainer.vertical) {
-                adapt.base.setCSSProperty(columnContainer, "margin-left", layoutContainer.paddingLeft + "px");
-                adapt.base.setCSSProperty(columnContainer, "margin-right", layoutContainer.paddingRight + "px");
                 var columnY = currentColumnIndex * (columnWidth + columnGap) + layoutContainer.paddingTop;
-                column.setHorizontalPosition(0, layoutContainer.width);
+                column.setHorizontalPosition(layoutContainer.paddingLeft, layoutContainer.width);
                 column.setVerticalPosition(columnY, columnWidth);
             } else {
-                adapt.base.setCSSProperty(columnContainer, "margin-top", layoutContainer.paddingTop + "px");
-                adapt.base.setCSSProperty(columnContainer, "margin-bottom", layoutContainer.paddingBottom + "px");
                 var columnX = currentColumnIndex * (columnWidth + columnGap) + layoutContainer.paddingLeft;
-                column.setVerticalPosition(0, layoutContainer.height);
+                column.setVerticalPosition(layoutContainer.paddingTop, layoutContainer.height);
                 column.setHorizontalPosition(columnX, columnWidth);
             }
-            column.originX = offsetX + layoutContainer.paddingLeft;
-            column.originY = offsetY + layoutContainer.paddingTop;
+            column.originX = offsetX;
+            column.originY = offsetY;
         } else {
             column = new adapt.layout.Column(boxContainer, layoutContext, self.clientLayout,
                 layoutConstraint, columnPageFloatLayoutContext);
