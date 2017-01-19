@@ -1304,6 +1304,12 @@ goog.scope(function() {
     /**
      * @override
      */
+    TableLayoutProcessor.prototype.startNonInlineElementNode = function(nodeContext) {
+        return false;
+    };
+    /**
+     * @override
+     */
     TableLayoutProcessor.prototype.afterNonInlineElementNode = function(nodeContext) {
         return false;
     };
