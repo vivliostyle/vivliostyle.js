@@ -526,6 +526,84 @@ adapt.geom.findBand = function(bands, y) {
 };
 
 /**
+ * Find the uppermost rectangle contained in the specified rect which occupies full width of the rect without overlapping with any band in the specified bands.
+ * @param {Array<adapt.geom.Band>} bands
+ * @param {!adapt.geom.Rect} rect
+ * @returns {?adapt.geom.Rect} Returns null if such rectangle does not exist.
+ */
+adapt.geom.findUppermostFullyOpenRect = function(bands, rect) {
+    if (!bands.length)
+        return rect;
+    var topEdge = rect.y1;
+    var band;
+    for (var i = 0; i < bands.length; i++) {
+        band = bands[i];
+        if (band.y2 > rect.y1 && band.x1 - 0.1 <= rect.x1 && band.x2 + 0.1 >= rect.x2) {
+            break;
+        } else {
+            topEdge = Math.max(topEdge, band.y2);
+        }
+    }
+    var bottomEdge = topEdge;
+    for (; i < bands.length; i++) {
+        band = bands[i];
+        if (band.y1 >= rect.y2 || band.x1 - 0.1 > rect.x1 || band.x2 + 0.1 < rect.x2) {
+            break;
+        } else {
+            bottomEdge = band.y2;
+        }
+    }
+    if (i === bands.length) {
+        bottomEdge = rect.y2;
+    } else {
+        bottomEdge = Math.min(bottomEdge, rect.y2);
+    }
+
+    if (bottomEdge <= topEdge) {
+        return null;
+    } else {
+        return new adapt.geom.Rect(rect.x1, topEdge, rect.x2, bottomEdge);
+    }
+};
+
+/**
+ * Find the bottommost rectangle contained in the specified rect which occupies full width of the rect without overlapping with any band in the specified bands.
+ * @param {Array<adapt.geom.Band>} bands
+ * @param {!adapt.geom.Rect} rect
+ * @returns {?adapt.geom.Rect} Returns null if such rectangle does not exist.
+ */
+adapt.geom.findBottommostFullyOpenRect = function(bands, rect) {
+    if (!bands.length)
+        return rect;
+    var bottomEdge = rect.y2;
+    var band;
+    for (var i = bands.length - 1; i >= 0; i--) {
+        band = bands[i];
+        if (band.y1 < rect.y2 && band.x1 - 0.1 <= rect.x1 && band.x2 + 0.1 >= rect.x2) {
+            break;
+        } else {
+            bottomEdge = Math.min(bottomEdge, band.y1);
+        }
+    }
+    var topEdge = bottomEdge;
+    for (; i >= 0; i--) {
+        band = bands[i];
+        if (band.y2 <= rect.y1 || band.x1 - 0.1 > rect.x1 || band.x2 + 0.1 < rect.x2) {
+            break;
+        } else {
+            topEdge = band.y1;
+        }
+    }
+    topEdge = Math.max(topEdge, rect.y1);
+
+    if (bottomEdge <= topEdge) {
+        return null;
+    } else {
+        return new adapt.geom.Rect(rect.x1, topEdge, rect.x2, bottomEdge);
+    }
+};
+
+/**
  * @param {adapt.geom.Rect} box
  * @param {Array.<adapt.geom.Band>} bands
  * @param {adapt.geom.Rect} floatBox

@@ -1012,9 +1012,13 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
         var footnoteContainer = self.element.ownerDocument.createElement("div");
         adapt.base.setCSSProperty(footnoteContainer, "position", "absolute");
         var layoutContext = self.layoutContext.clone();
-        goog.asserts.assert(self.pageFloatLayoutContext.parent);
-        footnoteArea = new adapt.layout.Column(footnoteContainer,
-            layoutContext, self.clientLayout, self.layoutConstraint, self.pageFloatLayoutContext.parent);
+        var footnotePageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
+            self.pageFloatLayoutContext.parent, vivliostyle.pagefloat.FloatReference.COLUMN,
+            null, self.pageFloatLayoutContext.flowName, footnoteNodePosition.steps[0].node,
+            null, null);
+        footnoteArea = new adapt.layout.Column(footnoteContainer, layoutContext, self.clientLayout,
+            self.layoutConstraint, footnotePageFloatLayoutContext);
+        footnotePageFloatLayoutContext.setContainer(footnoteArea);
         self.footnoteArea = footnoteArea;
         footnoteArea.vertical = self.layoutContext.applyFootnoteStyle(self.vertical, footnoteContainer);
         footnoteArea.isFootnote = true;
@@ -1039,7 +1043,10 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
     var blockDirInsets = self.vertical ?
     footnoteArea.getInsetLeft() - footnoteArea.getInsetRight() :
     footnoteArea.getInsetTop() + footnoteArea.getInsetBottom();
-    var extent = self.getBoxDir() * (self.afterEdge - boundingEdge) - blockDirInsets;
+    var bottommostFullyOpenRect = adapt.geom.findBottommostFullyOpenRect(self.bands,
+        new adapt.geom.Rect(self.startEdge, self.beforeEdge, self.endEdge, self.afterEdge));
+    var afterEdge = bottommostFullyOpenRect ? bottommostFullyOpenRect.y2 : self.afterEdge;
+    var extent = self.getBoxDir() * (afterEdge - boundingEdge) - blockDirInsets;
     if (firstFootnoteInColumn && extent < 18) {
         self.element.removeChild(footnoteArea.element);
         self.footnoteArea = null;
@@ -1088,11 +1095,11 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
                 return;
             }
             if (self.vertical) {
-                self.footnoteEdge = self.afterEdge + (footnoteArea.computedBlockSize
+                self.footnoteEdge = afterEdge + (footnoteArea.computedBlockSize
                     + footnoteArea.getInsetLeft() + footnoteArea.getInsetRight());
                 footnoteArea.setHorizontalPosition(0, footnoteArea.computedBlockSize);
             } else {
-                self.footnoteEdge = self.afterEdge - (footnoteArea.computedBlockSize
+                self.footnoteEdge = afterEdge - (footnoteArea.computedBlockSize
                     + footnoteArea.getInsetTop() + footnoteArea.getInsetBottom());
                 var footnoteTop = self.footnoteEdge - self.beforeEdge;
                 footnoteArea.setVerticalPosition(footnoteTop, footnoteArea.computedBlockSize);
