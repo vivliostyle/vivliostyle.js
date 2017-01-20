@@ -435,6 +435,11 @@ goog.scope(function() {
             parent.addPageFloatFragment(floatFragment, dontInvalidate);
         } else if (this.floatFragments.indexOf(floatFragment) < 0) {
             this.floatFragments.push(floatFragment);
+            this.floatFragments.sort(function(fr1, fr2) {
+                var f1 = this.getFloatOfFragment(fr1);
+                var f2 = this.getFloatOfFragment(fr2);
+                return f1.getOrder() - f2.getOrder();
+            }.bind(this));
         }
         if (!dontInvalidate)
             this.invalidate();
@@ -620,6 +625,9 @@ goog.scope(function() {
                 this.removePageFloatFragment(fragment);
                 var float = this.getFloatOfFragment(fragment);
                 this.forbid(float);
+                // If the removed float is a block-end/inline-end float,
+                // we should re-layout preceding floats with the same float direction.
+                this.removeEndFloatFragments(float);
                 return;
             }
         }
@@ -696,6 +704,25 @@ goog.scope(function() {
     /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
      */
+    PageFloatLayoutContext.prototype.removeEndFloatFragments = function(float) {
+        var logicalFloatSide = this.toLogical(float.floatSide);
+        if (logicalFloatSide === "block-end" || logicalFloatSide === "inline-end") {
+            var i = 0;
+            while (i < this.floatFragments.length) {
+                var fragment = this.floatFragments[i];
+                var logicalFloatSide2 = this.toLogical(this.getFloatOfFragment(fragment).floatSide);
+                if (logicalFloatSide2 === logicalFloatSide) {
+                    this.removePageFloatFragment(fragment);
+                } else {
+                    i++;
+                }
+            }
+        }
+    };
+
+    /**
+     * @param {!vivliostyle.pagefloat.PageFloat} float
+     */
     PageFloatLayoutContext.prototype.stashEndFloats = function(float) {
         if (float.floatReference !== this.floatReference) {
             this.getParent(float.floatReference).stashEndFloats(float);
@@ -728,7 +755,7 @@ goog.scope(function() {
         }
 
         this.stashedFloatFragments.forEach(function(stashed) {
-            this.floatFragments.push(stashed);
+            this.addPageFloatFragment(stashed, true);
         }, this);
         this.stashedFloatFragments.splice(0);
     };
