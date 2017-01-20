@@ -551,6 +551,14 @@ adapt.layout.Column.prototype.isOverflown = function(edge) {
 };
 
 /**
+ * @returns {Array.<adapt.geom.Shape>}
+ */
+adapt.layout.Column.prototype.getExclusions = function() {
+    var pageFloatExclusions = this.pageFloatLayoutContext.getFloatFragmentExclusions();
+    return this.exclusions.concat(pageFloatExclusions);
+};
+
+/**
  * @param {Node} parentNode
  * @param {Node} viewNode
  * @return {void}
@@ -1013,7 +1021,7 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
         adapt.base.setCSSProperty(footnoteContainer, "position", "absolute");
         var layoutContext = self.layoutContext.clone();
         var footnotePageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
-            self.pageFloatLayoutContext.parent, vivliostyle.pagefloat.FloatReference.COLUMN,
+            self.pageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.COLUMN,
             null, self.pageFloatLayoutContext.flowName, footnoteNodePosition.steps[0].node,
             null, null);
         footnoteArea = new adapt.layout.Column(footnoteContainer, layoutContext, self.clientLayout,
@@ -1074,7 +1082,7 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
     if (firstFootnoteInColumn) {
         footnoteArea.init();
         initResult = adapt.task.newResult(true);
-    } else if (footnoteArea.exclusions.length == 0) {
+    } else if (footnoteArea.getExclusions().length == 0) {
         // No need to redo, just reset the geometry
         footnoteArea.initGeom();
         initResult = adapt.task.newResult(true);
@@ -1105,7 +1113,7 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
                 footnoteArea.setVerticalPosition(footnoteTop, footnoteArea.computedBlockSize);
             }
             var redoResult;
-            if (!self.vertical && footnoteArea.exclusions.length > 0) {
+            if (!self.vertical && footnoteArea.getExclusions().length > 0) {
                 redoResult = footnoteArea.redoLayout();
             } else {
                 redoResult = adapt.task.newResult(footnoteOverflow);
@@ -2811,7 +2819,7 @@ adapt.layout.Column.prototype.initGeom = function() {
     this.bottommostFloatTop = this.beforeEdge;
     this.footnoteEdge = this.afterEdge;
     this.bands = adapt.geom.shapesToBands(this.box, [this.getInnerShape()],
-        this.exclusions, 8, this.snapHeight, this.vertical);
+        this.getExclusions(), 8, this.snapHeight, this.vertical);
     this.createFloats();
     this.footnoteItems = null;
 };
@@ -3185,7 +3193,16 @@ adapt.layout.PageFloatArea.prototype.fixFloatSizeAndPosition = function(nodeCont
     });
 
     var floatSide = this.float.floatSide;
-    if (this.parentContainer.vertical) {
+    var isVertical = this.parentContainer.vertical;
+
+    // For shrink-to-fit inline-size
+    if (floatSide === "inline-start" || floatSide === (isVertical ? "top" : "left")) {
+        adapt.base.setCSSProperty(rootViewNode, "float", "left");
+    } else if (floatSide === "inline-end" || floatSide === (isVertical ? "bottom" : "right")) {
+        adapt.base.setCSSProperty(rootViewNode, "float", "right");
+    }
+
+    if (isVertical) {
         if (floatSide === "block-end" || floatSide === "left") {
             var height = adapt.base.getCSSProperty(rootViewNode, "height");
             if (height !== "" && height !== "auto")

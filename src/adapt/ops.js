@@ -760,8 +760,7 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
                 layoutConstraint, columnPageFloatLayoutContext);
             column.copyFrom(layoutContainer);
         }
-        var pageFloatExclusions = columnPageFloatLayoutContext.getFloatFragmentExclusions();
-        column.exclusions = dontApplyExclusions ? pageFloatExclusions : exclusions.concat(pageFloatExclusions);
+        column.exclusions = dontApplyExclusions ? [] : exclusions.concat();
         column.innerShape = innerShape;
         columnPageFloatLayoutContext.setContainer(column);
         if (column.width >= 0) {
@@ -852,6 +851,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
     parentContainer.insertBefore(boxContainer, parentContainer.firstChild);
     var layoutContainer = new adapt.vtree.Container(boxContainer);
     layoutContainer.vertical = boxInstance.vertical;
+    layoutContainer.exclusions = exclusions;
     boxInstance.prepareContainer(self, layoutContainer, page, self.faces, self.clientLayout);
     layoutContainer.originX = offsetX;
     layoutContainer.originY = offsetY;

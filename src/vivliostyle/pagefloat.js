@@ -903,8 +903,8 @@ goog.scope(function() {
                     var uppermostFullyOpenRect = adapt.geom.findUppermostFullyOpenRect(area.bands,
                         new adapt.geom.Rect(inlineStart, blockStart, inlineEnd, blockEnd));
                     if (uppermostFullyOpenRect) {
-                        blockStart = Math.max(blockStart, uppermostFullyOpenRect.y1 + area.top);
-                        blockEnd = Math.min(blockEnd, uppermostFullyOpenRect.y2 + area.top);
+                        blockStart = Math.max(blockStart, uppermostFullyOpenRect.y1);
+                        blockEnd = Math.min(blockEnd, uppermostFullyOpenRect.y2);
                     } else {
                         return false;
                     }
@@ -914,8 +914,8 @@ goog.scope(function() {
                     var bottommostFullyOpenRect = adapt.geom.findBottommostFullyOpenRect(area.bands,
                         new adapt.geom.Rect(inlineStart, blockStart, inlineEnd, blockEnd));
                     if (bottommostFullyOpenRect) {
-                        blockStart = Math.max(blockStart, bottommostFullyOpenRect.y1 + area.top);
-                        blockEnd = Math.min(blockEnd, bottommostFullyOpenRect.y2 + area.top);
+                        blockStart = Math.max(blockStart, bottommostFullyOpenRect.y1);
+                        blockEnd = Math.min(blockEnd, bottommostFullyOpenRect.y2);
                     } else {
                         return false;
                     }

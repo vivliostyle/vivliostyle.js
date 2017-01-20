@@ -579,13 +579,15 @@ adapt.geom.findBottommostFullyOpenRect = function(bands, rect) {
     var band;
     for (var i = bands.length - 1; i >= 0; i--) {
         band = bands[i];
-        if (band.y1 < rect.y2 && band.x1 - 0.1 <= rect.x1 && band.x2 + 0.1 >= rect.x2) {
+        if (i === bands.length - 1 && band.y2 < rect.y2) {
+            break;
+        } else if (band.y1 < rect.y2 && band.x1 - 0.1 <= rect.x1 && band.x2 + 0.1 >= rect.x2) {
             break;
         } else {
             bottomEdge = Math.min(bottomEdge, band.y1);
         }
     }
-    var topEdge = bottomEdge;
+    var topEdge = Math.min(bottomEdge, band.y2);
     for (; i >= 0; i--) {
         band = bands[i];
         if (band.y2 <= rect.y1 || band.x1 - 0.1 > rect.x1 || band.x2 + 0.1 < rect.x2) {
