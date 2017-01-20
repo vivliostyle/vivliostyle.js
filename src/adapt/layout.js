@@ -1543,7 +1543,10 @@ adapt.layout.Column.prototype.resolveFloatReferenceFromColumnSpan = function(
     var self = this;
     var frame = /** @type {!adapt.task.Frame<vivliostyle.pagefloat.FloatReference>} */
         (adapt.task.newFrame("resolveFloatReferenceFromColumnSpan"));
-    if (floatReference === vivliostyle.pagefloat.FloatReference.COLUMN) {
+    var columnContext = this.pageFloatLayoutContext;
+    var regionContext = columnContext.getPageFloatLayoutContext(vivliostyle.pagefloat.FloatReference.REGION);
+    var isRegionWider = columnContext.getContainer().width < regionContext.getContainer().width;
+    if (isRegionWider && floatReference === vivliostyle.pagefloat.FloatReference.COLUMN) {
         if (columnSpan === adapt.css.ident.auto) {
             this.buildDeepElementView(nodeContext.copy()).then(function(position) {
                 var element = /** @type {Element} */ (position.viewNode);
