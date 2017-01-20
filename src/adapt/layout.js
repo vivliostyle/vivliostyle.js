@@ -3195,13 +3195,6 @@ adapt.layout.PageFloatArea.prototype.fixFloatSizeAndPosition = function(nodeCont
     var floatSide = this.float.floatSide;
     var isVertical = this.parentContainer.vertical;
 
-    // For shrink-to-fit inline-size
-    if (floatSide === "inline-start" || floatSide === (isVertical ? "top" : "left")) {
-        adapt.base.setCSSProperty(rootViewNode, "float", "left");
-    } else if (floatSide === "inline-end" || floatSide === (isVertical ? "bottom" : "right")) {
-        adapt.base.setCSSProperty(rootViewNode, "float", "right");
-    }
-
     if (isVertical) {
         if (floatSide === "block-end" || floatSide === "left") {
             var height = adapt.base.getCSSProperty(rootViewNode, "height");
