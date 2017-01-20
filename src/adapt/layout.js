@@ -1013,6 +1013,10 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
             return adapt.task.newResult(true);
         }
     }
+    var columnRect = new adapt.geom.Rect(self.startEdge, self.beforeEdge, self.endEdge, self.afterEdge);
+    var uppermostFullyOpenRect = adapt.geom.findUppermostFullyOpenRect(self.bands, columnRect);
+    if (uppermostFullyOpenRect)
+        boundingEdge = Math.max(boundingEdge, uppermostFullyOpenRect.y1 * self.getBoxDir());
     boundingEdge += self.getBoxDir() * 40; // Leave some space
     var footnoteArea = self.footnoteArea;
     var firstFootnoteInColumn = !footnoteArea;
@@ -1051,8 +1055,7 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
     var blockDirInsets = self.vertical ?
     footnoteArea.getInsetLeft() - footnoteArea.getInsetRight() :
     footnoteArea.getInsetTop() + footnoteArea.getInsetBottom();
-    var bottommostFullyOpenRect = adapt.geom.findBottommostFullyOpenRect(self.bands,
-        new adapt.geom.Rect(self.startEdge, self.beforeEdge, self.endEdge, self.afterEdge));
+    var bottommostFullyOpenRect = adapt.geom.findBottommostFullyOpenRect(self.bands, columnRect);
     var afterEdge = bottommostFullyOpenRect ? bottommostFullyOpenRect.y2 : self.afterEdge;
     var extent = self.getBoxDir() * (afterEdge - boundingEdge) - blockDirInsets;
     if (firstFootnoteInColumn && extent < 18) {
