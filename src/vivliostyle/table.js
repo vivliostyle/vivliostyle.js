@@ -1370,7 +1370,6 @@ goog.scope(function() {
                 }).then(function() {
                     column.clearOverflownViewNodes(nodeContext, false);
                     column.layoutContext.processFragmentedBlockEdge(nodeContext);
-                    vivliostyle.repetitiveelements.appendFooterToAncestors(nodeContext);
                     formattingContext.finishFragment();
                     frame.finish(true);
                 });
@@ -1378,14 +1377,8 @@ goog.scope(function() {
             }
         }
         formattingContext.finishFragment();
-        /** @type {!adapt.task.Frame.<boolean>} */ var frame =
-            adapt.task.newFrame("finishBreak");
-        adapt.layout.blockLayoutProcessor.finishBreak(
-            column, nodeContext, forceRemoveSelf, endOfRegion).then(function(result) {
-                vivliostyle.repetitiveelements.appendFooterToAncestors(nodeContext);
-                frame.finish(result);
-            });
-        return frame.result();
+        return adapt.layout.blockLayoutProcessor.finishBreak(
+            column, nodeContext, forceRemoveSelf, endOfRegion)
     };
 
     /**
@@ -1500,7 +1493,7 @@ goog.scope(function() {
      * @override
      */
     LayoutFragmentedTable.prototype.doLayout = function(nodeContext, column) {
-        LayoutFragmentedBlock.prototype.appendHeaders.call(this, nodeContext);
+        vivliostyle.repetitiveelements.appendHeader(this.formattingContext, nodeContext);
         column.fragmentLayoutConstraints.unshift(
             new TableRowLayoutConstraint(nodeContext));
         return this.processor.doLayout(nodeContext, column);
@@ -1529,9 +1522,10 @@ goog.scope(function() {
         if (adapt.layout.isOrphan(this.nodeContext.viewNode)) return true;
 
 
-        if (formattingContext.isAfterContextOfRootElement(nodeContext)) {
+        if (formattingContext.isAfterContextOfRootElement(nodeContext)
+            && repetitiveElements.isSkipFooter) {
             repetitiveElements.preventSkippingFooter();
-            vivliostyle.repetitiveelements.appendFooter(formattingContext, this.nodeContext);
+            return false;
         }
 
         if (!repetitiveElements.isEnableToUpdateState()) return true;
