@@ -269,8 +269,13 @@ goog.scope(function() {
         this.enableSkippingHeader = false;
     };
     RepetitiveElements.prototype.preventSkippingFooter = function() {
+        this.originalFooterSkippingState = this.isSkipFooter;
         this.isSkipFooter = false;
         this.enableSkippingFooter = false;
+    };
+    RepetitiveElements.prototype.allowSkippingFooter = function() {
+        this.isSkipFooter = this.originalFooterSkippingState;
+        this.enableSkippingFooter = true;
     };
     RepetitiveElements.prototype.removeHeaderFromFragment = function() {
         this.headerViewNodes.forEach(function(viewNode) {
@@ -463,14 +468,6 @@ goog.scope(function() {
         if (!repetitiveElements) return true;
 
         if (adapt.layout.isOrphan(this.nodeContext.viewNode)) return true;
-
-        if (formattingContext.isAfterContextOfRootElement(nodeContext)
-            && repetitiveElements.enableSkippingFooter
-            && repetitiveElements.isSkipFooter) {
-            repetitiveElements.preventSkippingFooter();
-            return false;
-        }
-
         if (!repetitiveElements.isEnableToUpdateState()) return true;
 
         if (column.paginationFailed || (nodeContext && nodeContext.overflow)) {
@@ -621,6 +618,11 @@ goog.scope(function() {
      * @override
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.afterNonInlineElementNode = function(nodeContext) {
+        var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
+        if (!formattingContext.isInherited(nodeContext) && nodeContext.after) {
+            var repetitiveElements = formattingContext.getRepetitiveElements();
+            if (repetitiveElements) repetitiveElements.preventSkippingFooter();
+        }
         return false;
     };
 
@@ -666,6 +668,15 @@ goog.scope(function() {
      * @override
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {
+        var formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext);
+        var repetitiveElements = formattingContext && formattingContext.getRepetitiveElements();
+
+        if (repetitiveElements
+            && !formattingContext.isAfterContextOfRootElement(nodeContext)
+            && !repetitiveElements.enableSkippingFooter) {
+            repetitiveElements.allowSkippingFooter();
+        }
+
         return adapt.layout.BlockLayoutProcessor.prototype.finishBreak.call(
             this, column, nodeContext, forceRemoveSelf, endOfRegion);
     };

@@ -199,5 +199,36 @@
         </div>
     </section>
 
+    <section>
+        <h1>(4) drop in order from the footer of the child element</h1>
+        <div class="parent">
+            <div class="box header" style="height:50px">this is header of parent</div>
+            <div class="box footer" style="height:50px">this is footer of parent</div>
+
+            <div class="child c1">
+                <div class="box header" style="height:40px">this is header of child1</div>
+                <div class="box footer">this is footer of child1</div>
+                <div class="box c11">child1 content 1 / drop parent footer</div>
+            </div>
+
+            <div class="child c2">
+                <div class="box header" style="height:40px">this is header of child2</div>
+                <div class="box footer" >this is footer of child2</div>
+                <div class="box c21">child2 content 1 / drop child footer and parent footer</div>
+                <div class="box c22">child2 content 2 / drop child header</div>
+            </div>
+
+            <div class="child c3">
+                <div class="box header" style="height:50px">this is header of child3</div>
+                <div class="box footer" style="height:50px">this is footer of child3</div>
+                <div class="box c31" style="height:190px">child3 content 1 / drop child header, and parent header, footer.</div>
+                <div class="box c32" style="height: 50px">child3 content 2 / drop child header and footer</div>
+                <div class="box c33" style="height:100px">child3 content 3 / drop child header and footer, and parent footer</div>
+                <div class="box c34" style="height:190px">child3 content 4 / drop child header and footer, and parent header, footer</div>
+                <div class="box c35" style="height:160px">child3 content 5 / drop child header, and parent header, footer.</div>
+            </div>
+        </div>
+    </section>
+
 </body>
 </html>
