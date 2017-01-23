@@ -64,9 +64,12 @@ goog.scope(function() {
      * @return {boolean}
      */
     RepetitiveElementsOwnerFormattingContext.prototype.isAfterContextOfRootElement = function(nodeContext) {
-        if (nodeContext && !this.isInherited(nodeContext) && nodeContext.after) return true;
+        if (nodeContext
+            && nodeContext.formattingContext === this
+            && nodeContext.sourceNode === this.rootSourceNode
+            && nodeContext.after) return true;
         for (; nodeContext; nodeContext = nodeContext.parent) {
-            if (this.isInherited(nodeContext)) {
+            if (nodeContext.formattingContext === this) {
                 return false;
             }
         }
@@ -383,7 +386,7 @@ goog.scope(function() {
      * @param {!adapt.vtree.NodeContext} nodeContext
      */
     LayoutFragmentedBlock.prototype.appendHeaders = function(nodeContext) {
-        if (!this.formattingContext.isInherited(nodeContext)) {
+        if (!this.formattingContext.isInherited(nodeContext) && !nodeContext.after) {
             appendHeader(this.formattingContext, nodeContext);
         }
     };
@@ -434,8 +437,10 @@ goog.scope(function() {
      */
     LayoutFragmentedOwnerBlock.prototype.doLayout = function(nodeContext, column) {
         LayoutFragmentedBlock.prototype.appendHeaders.call(this, nodeContext);
-        column.fragmentLayoutConstraints.unshift(
-          new RepetitiveElementsOwnerLayoutConstraint(nodeContext));
+        if (!this.formattingContext.isInherited(nodeContext) && !nodeContext.after) {
+            column.fragmentLayoutConstraints.unshift(
+                new RepetitiveElementsOwnerLayoutConstraint(nodeContext));
+        }
         return this.processor.doLayout(nodeContext, column);
     };
 
@@ -460,6 +465,7 @@ goog.scope(function() {
         if (adapt.layout.isOrphan(this.nodeContext.viewNode)) return true;
 
         if (formattingContext.isAfterContextOfRootElement(nodeContext)
+            && repetitiveElements.enableSkippingFooter
             && repetitiveElements.isSkipFooter) {
             repetitiveElements.preventSkippingFooter();
             return false;
