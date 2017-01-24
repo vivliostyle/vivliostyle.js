@@ -347,7 +347,7 @@ goog.scope(function() {
         this.column.layoutContext = column.layoutContext.clone();
         this.column.stopAtOverflow = false;
         this.column.flowRootFormattingContext = parentNodeContext.formattingContext;
-        this.column.pseudColumn = true;
+        this.column.parent = column;
 
         var parentClonedPaddingBorder = this.column.calculateClonedPaddingBorder(parentNodeContext);
         this.column.footnoteEdge = this.column.footnoteEdge - parentClonedPaddingBorder;
