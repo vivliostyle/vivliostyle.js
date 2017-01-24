@@ -1022,6 +1022,9 @@ goog.scope(function() {
         if (display && TableLayoutStrategy.ignoreList[display]) {
             nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
         } else if (nodeContext.sourceNode === this.formattingContext.tableSourceNode) {
+            var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
+            var repetitiveElements = formattingContext.getRepetitiveElements();
+            if (repetitiveElements) repetitiveElements.preventSkippingFooter();
             this.resetColumn();
             state.break = true;
         } else {
@@ -1510,45 +1513,6 @@ goog.scope(function() {
     };
     /** @const */ var TableRowLayoutConstraint = vivliostyle.table.TableRowLayoutConstraint;
     goog.inherits(TableRowLayoutConstraint, RepetitiveElementsOwnerLayoutConstraint);
-
-    /**
-     * @override
-     */
-    TableRowLayoutConstraint.prototype.allowLayout = function(nodeContext) {
-        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
-        var repetitiveElements = this.getRepetitiveElements();
-        if (!repetitiveElements) return true;
-
-        if (adapt.layout.isOrphan(this.nodeContext.viewNode)) return true;
-
-
-        if (formattingContext.isAfterContextOfRootElement(nodeContext)
-            && repetitiveElements.isSkipFooter) {
-            repetitiveElements.preventSkippingFooter();
-            return false;
-        }
-
-        if (!repetitiveElements.isEnableToUpdateState()) return true;
-
-        if (nodeContext && nodeContext.overflow) {
-            return false;
-        } else {
-            return true;
-        }
-    };
-
-    /** @override */
-    TableRowLayoutConstraint.prototype.nextCandidate = function(nodeContext) {
-        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
-        var repetitiveElements = this.getRepetitiveElements();
-        if (!repetitiveElements) return false;
-        if (formattingContext.isAfterContextOfRootElement(nodeContext)
-            && repetitiveElements.isSkipFooter) {
-            repetitiveElements.preventSkippingFooter();
-            return true;
-        }
-        return RepetitiveElementsOwnerLayoutConstraint.prototype.nextCandidate.call(this, nodeContext);
-    };
 
     /**
      * @const
