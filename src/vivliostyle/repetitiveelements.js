@@ -240,8 +240,7 @@ goog.scope(function() {
      * @return {number}
      */
     RepetitiveElements.prototype.calculateOffset = function() {
-        return (this.isSkipFooter ? 0 : this.footerHeight)
-             - (this.isSkipHeader ? this.headerHeight : 0);
+        return (this.isSkipFooter ? 0 : this.footerHeight);
     };
 
     /**
