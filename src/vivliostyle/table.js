@@ -25,6 +25,7 @@ goog.scope(function() {
     /** @const */ var LayoutFragmentedBlock = vivliostyle.repetitiveelements.LayoutFragmentedBlock;
     /** @const */ var RepetitiveElementsOwnerFormattingContext = vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext;
     /** @const */ var RepetitiveElementsOwnerLayoutConstraint = vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutConstraint;
+    /** @const */ var RepetitiveElementsOwnerLayoutProcessor = vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutProcessor;
 
     /**
      * @param {number} rowIndex
@@ -1378,7 +1379,13 @@ goog.scope(function() {
         }
         formattingContext.finishFragment();
         return adapt.layout.blockLayoutProcessor.finishBreak(
-            column, nodeContext, forceRemoveSelf, endOfRegion)
+            column, nodeContext, forceRemoveSelf, endOfRegion);
+    };
+
+    /** @override */
+    TableLayoutProcessor.prototype.clearOverflownViewNodes = function(column, parentNodeContext, nodeContext, removeSelf) {
+        vivliostyle.repetitiveelements.clearOverflownViewNodes(
+            column, parentNodeContext, nodeContext, removeSelf);
     };
 
     /**
