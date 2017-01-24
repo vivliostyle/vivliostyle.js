@@ -261,11 +261,6 @@ adapt.layout.BreakPosition.prototype.findAcceptableBreak = function(column, pena
 adapt.layout.BreakPosition.prototype.getMinBreakPenalty = function() {};
 
 /**
- * @return {Array.<vivliostyle.repetitiveelements.RepetitiveElements>}
- */
-adapt.layout.BreakPosition.prototype.getRepetitiveElements = function() {};
-
-/**
  * @param {!adapt.layout.Column} column
  * @return {number}
  */
@@ -287,12 +282,6 @@ adapt.layout.AbstractBreakPosition.prototype.findAcceptableBreak = function(colu
  * @abstract
  */
 adapt.layout.AbstractBreakPosition.prototype.getMinBreakPenalty = function() {};
-
-
-/**
- * @abstract
- */
-adapt.layout.AbstractBreakPosition.prototype.getRepetitiveElements = function() {};
 
 /**
  * @return {number}
