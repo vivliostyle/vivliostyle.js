@@ -536,7 +536,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @type {number} */ this.bottommostFloatTop = 0;  // Top of the bottommost float
     /** @type {boolean} */ this.stopAtOverflow = true;
     /** @type {!Array.<adapt.layout.FragmentLayoutConstraint>} */ this.fragmentLayoutConstraints = [];
-    /** @type {boolean} */ this.pseudColumn = false;
+    /** @type {adapt.layout.Column} */ this.parent = null;
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
 
@@ -2921,7 +2921,7 @@ adapt.layout.LayoutRetryer.prototype.resolveLayoutMode = function(nodeContext) {
  */
 adapt.layout.LayoutRetryer.prototype.prepareLayout = function(nodeContext, column) {
     column.fragmentLayoutConstraints = [];
-    if (!column.pseudColumn) vivliostyle.repetitiveelements.clearCache();
+    if (!column.parent) vivliostyle.repetitiveelements.clearCache();
 };
 
 /**

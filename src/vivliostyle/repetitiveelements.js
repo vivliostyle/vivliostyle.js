@@ -779,16 +779,21 @@ goog.scope(function() {
     vivliostyle.repetitiveelements.appendHeader = appendHeader;
     vivliostyle.repetitiveelements.appendFooter = appendFooter;
 
+    /**
+     * @param {!adapt.layout.Column} column
+     * @return {Array.<!vivliostyle.repetitiveelements.RepetitiveElements>}
+     */
     vivliostyle.repetitiveelements.collectRepetitiveElements = function(column) {
-        return column.fragmentLayoutConstraints.map(function(constraint) {
-            if (constraint instanceof RepetitiveElementsOwnerLayoutConstraint) {
-                return constraint.getRepetitiveElements();
-            } else {
-                return null;
-            }
-        }).filter(function(repetitiveElement) {
-            return repetitiveElement;
-        });
+        /** @type {Array.<!vivliostyle.repetitiveelements.RepetitiveElements>} */ var repetitiveElements = [];
+        for (var current = column; current; current = current.parent) {
+            current.fragmentLayoutConstraints.forEach(function(constraint) {
+                if (constraint instanceof RepetitiveElementsOwnerLayoutConstraint) {
+                    var repetitiveElement = constraint.getRepetitiveElements();
+                    repetitiveElements.push(repetitiveElement);
+                }
+            });
+        }
+        return repetitiveElements;
     };
 
     /**
