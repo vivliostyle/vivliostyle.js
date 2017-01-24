@@ -273,13 +273,6 @@ goog.scope(function() {
         return this.acceptableCellBreakPositions;
     };
 
-    /**
-     * @override
-     */
-    InsideTableRowBreakPosition.prototype.getRepetitiveElements = function() {
-        return adapt.layout.retrieveAncestorRepetitiveElements(this.beforeNodeContext);
-    };
-
 
     /**
      * @private
