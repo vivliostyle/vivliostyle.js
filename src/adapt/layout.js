@@ -1536,6 +1536,49 @@ adapt.layout.Column.prototype.setFloatAnchorViewNode = function(nodeContext) {
 };
 
 /**
+ * @param {vivliostyle.pagefloat.FloatReference} floatReference
+ * @param {adapt.css.Val} columnSpan
+ * @param {!adapt.vtree.NodeContext} nodeContext
+ * @returns {!adapt.task.Result<vivliostyle.pagefloat.FloatReference>}
+ */
+adapt.layout.Column.prototype.resolveFloatReferenceFromColumnSpan = function(
+    floatReference, columnSpan, nodeContext) {
+    var self = this;
+    var frame = /** @type {!adapt.task.Frame<vivliostyle.pagefloat.FloatReference>} */
+        (adapt.task.newFrame("resolveFloatReferenceFromColumnSpan"));
+    var columnContext = this.pageFloatLayoutContext;
+    var regionContext = columnContext.getPageFloatLayoutContext(vivliostyle.pagefloat.FloatReference.REGION);
+    var isRegionWider = columnContext.getContainer().width < regionContext.getContainer().width;
+    if (isRegionWider && floatReference === vivliostyle.pagefloat.FloatReference.COLUMN) {
+        if (columnSpan === adapt.css.ident.auto) {
+            this.buildDeepElementView(nodeContext.copy()).then(function(position) {
+                var element = /** @type {Element} */ (position.viewNode);
+                var inlineSize = vivliostyle.sizing.getSize(self.clientLayout, element,
+                    [vivliostyle.sizing.Size.MIN_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.MIN_CONTENT_INLINE_SIZE];
+                var margin = self.getComputedMargin(element);
+                if (self.vertical) {
+                    inlineSize += margin.top + margin.bottom;
+                } else {
+                    inlineSize += margin.left + margin.right;
+                }
+                if (inlineSize > self.width) {
+                    frame.finish(vivliostyle.pagefloat.FloatReference.REGION);
+                } else {
+                    frame.finish(floatReference);
+                }
+            });
+        } else if (columnSpan === adapt.css.ident.all) {
+            frame.finish(vivliostyle.pagefloat.FloatReference.REGION);
+        } else {
+            frame.finish(floatReference);
+        }
+    } else {
+        frame.finish(floatReference);
+    }
+    return frame.result();
+};
+
+/**
  * @param {!adapt.vtree.NodeContext} nodeContext
  * @return {!adapt.task.Result<adapt.vtree.NodeContext>}
  */
@@ -1543,37 +1586,47 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
     var self = this;
     var context = this.pageFloatLayoutContext;
     var floatReference = nodeContext.floatReference;
-    var sourceNode = nodeContext.sourceNode;
-    goog.asserts.assert(sourceNode);
-    var floatSide = nodeContext.floatSide;
-    goog.asserts.assert(floatSide);
+    goog.asserts.assert(nodeContext.sourceNode);
+    /** @const {!Node} */ var sourceNode = nodeContext.sourceNode;
+    goog.asserts.assert(nodeContext.floatSide);
+    /** @const {string} */ var floatSide = nodeContext.floatSide;
+
+    /** @type {adapt.task.Result<!vivliostyle.pagefloat.PageFloat>} */ var cont;
     var float = context.findPageFloatBySourceNode(sourceNode);
     if (!float) {
-        float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference, floatSide);
-        context.addPageFloat(float);
+        cont = this.resolveFloatReferenceFromColumnSpan(floatReference, nodeContext.columnSpan, nodeContext).thenAsync(function(ref) {
+            floatReference = ref;
+            float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference, floatSide);
+            context.addPageFloat(float);
+            return adapt.task.newResult(float);
+        });
+    } else {
+        cont = adapt.task.newResult(float);
     }
 
-    var nodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
-    var nodeContextAfter = self.setFloatAnchorViewNode(nodeContext);
-    var pageFloatFragment = context.findPageFloatFragment(float);
-    if (pageFloatFragment) {
-        context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
-        return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
-    } else if (context.isForbidden(float) || context.hasPrecedingFloatsDeferredToNext(float)) {
-        context.deferPageFloat(float, nodePosition);
-        context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
-        return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
-    } else {
-        return this.layoutPageFloatInner(nodePosition, float).thenAsync(function(floatArea) {
-            goog.asserts.assert(float);
-            if (!floatArea) {
-                context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
-                return adapt.task.newResult(nodeContextAfter);
-            } else {
-                return adapt.task.newResult(null);
-            }
-        });
-    }
+    return cont.thenAsync(function(float) {
+        var nodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
+        var nodeContextAfter = self.setFloatAnchorViewNode(nodeContext);
+        var pageFloatFragment = context.findPageFloatFragment(float);
+        if (pageFloatFragment) {
+            context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
+            return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
+        } else if (context.isForbidden(float) || context.hasPrecedingFloatsDeferredToNext(float)) {
+            context.deferPageFloat(float, nodePosition);
+            context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
+            return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
+        } else {
+            return self.layoutPageFloatInner(nodePosition, float).thenAsync(function(floatArea) {
+                goog.asserts.assert(float);
+                if (!floatArea) {
+                    context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
+                    return adapt.task.newResult(nodeContextAfter);
+                } else {
+                    return adapt.task.newResult(null);
+                }
+            });
+        }
+    });
 };
 
 /**

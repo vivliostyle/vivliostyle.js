@@ -739,6 +739,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         self.nodeContext.display = display ? display.toString() : "inline";
         self.nodeContext.floatSide = floating ? floatSide.toString() : null;
         self.nodeContext.floatReference = floatReference || vivliostyle.pagefloat.FloatReference.INLINE;
+        self.nodeContext.columnSpan = computedStyle["column-span"];
         if (!self.nodeContext.inline) {
             var breakAfter = computedStyle["break-after"];
             if (breakAfter) {
