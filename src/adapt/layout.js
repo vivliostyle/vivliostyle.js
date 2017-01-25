@@ -2565,7 +2565,7 @@ adapt.layout.Column.prototype.layoutNext = function(nodeContext, leadingEdge) {
             frame.finish(nodeContext);
         } else {
             goog.asserts.assert(nodeContext.formattingContext);
-            var formattingContext = nodeContext.formattingContext;
+            var formattingContext = (nodeContext.after ? nodeContext.parent : nodeContext).formattingContext;
             var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(formattingContext);
             layoutProcessor.layout(nodeContext, self).thenFinish(frame);
         }
