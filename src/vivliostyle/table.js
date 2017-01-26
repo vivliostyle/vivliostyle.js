@@ -1422,8 +1422,6 @@ goog.scope(function() {
      */
     LayoutEntireTable.prototype.doLayout = function(nodeContext, column) {
         LayoutEntireBlock.prototype.doLayout.call(this, nodeContext, column);
-        column.fragmentLayoutConstraints.unshift(
-            new TableRowLayoutConstraint(nodeContext));
         return this.processor.doInitialLayout(nodeContext, column);
     };
 
