@@ -300,6 +300,7 @@ function calculateOffsetOfRepetitiveElements(repetitiveElements) {
         return val + repetitiveElement.calculateOffset();
     }, 0);
 };
+adapt.layout.calculateOffsetOfRepetitiveElements = calculateOffsetOfRepetitiveElements;
 
 /**
  * @typedef {{breakPosition: adapt.layout.BreakPosition, nodeContext: adapt.vtree.NodeContext}}
@@ -2718,7 +2719,6 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
             var retryer = new adapt.layout.LayoutRetryer(leadingEdge);
             retryer.layout(nodeContext, self).then(function(nodeContextParam) {
                 self.doFinishBreak(nodeContextParam, retryer.context.overflownNodeContext, nodeContext).then(function(positionAfter) {
-
                     self.fragmentLayoutConstraints.forEach(function(constraint) {
                         constraint.finishBreak(positionAfter);
                     });
