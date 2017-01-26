@@ -2225,9 +2225,7 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
 adapt.layout.Column.prototype.isBFC = function(formattingContext, nodeContext) {
     if (formattingContext instanceof adapt.layout.BlockFormattingContext) return true;
     if (formattingContext instanceof vivliostyle.table.TableFormattingContext) return false;
-    if (formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext) {
-        return formattingContext.isInherited(nodeContext);
-    }
+    if (formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext) return true;
     return false;
 };
 
@@ -2308,7 +2306,9 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                         // clear
                         self.applyClearance(nodeContext);
                     }
-                    if (!self.isBFC(nodeContext.formattingContext, nodeContext) || nodeContext.floatSide || nodeContext.flexContainer) {
+                    if (!self.isBFC(nodeContext.formattingContext, nodeContext)
+                        || nodeContext.formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext
+                        || nodeContext.floatSide || nodeContext.flexContainer) {
                         // new formatting context, or float or flex container (unbreakable)
                         leadingEdgeContexts.push(nodeContext.copy());
                         breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
