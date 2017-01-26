@@ -2719,9 +2719,8 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
             var retryer = new adapt.layout.LayoutRetryer(leadingEdge);
             retryer.layout(nodeContext, self).then(function(nodeContextParam) {
                 self.doFinishBreak(nodeContextParam, retryer.context.overflownNodeContext, nodeContext).then(function(positionAfter) {
-                    self.fragmentLayoutConstraints.forEach(function(constraint) {
-                        constraint.finishBreak(positionAfter);
-                    });
+
+                    if (!self.parent) self.resetConstraints(positionAfter);
 
                     var footnoteArea = self.footnoteArea;
                     if (footnoteArea) {
@@ -2759,6 +2758,12 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
         });
     });
     return frame.result();
+};
+
+adapt.layout.Column.prototype.resetConstraints = function(nodeContext) {
+    this.fragmentLayoutConstraints.forEach(function(constraint) {
+        constraint.finishBreak(nodeContext);
+    });
 };
 
 /**

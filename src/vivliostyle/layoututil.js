@@ -405,6 +405,13 @@ goog.scope(function() {
     };
 
     /**
+     * @param {adapt.vtree.NodeContext} positionAfter
+     */
+    PseudoColumn.prototype.resetConstraints = function(positionAfter) {
+        this.column.resetConstraints(positionAfter);
+    };
+
+    /**
      * @param {adapt.vtree.NodeContext} nodeContext
      * @return {boolean}
      */

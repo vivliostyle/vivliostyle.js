@@ -1367,6 +1367,7 @@ goog.scope(function() {
                     if (!cellFragment.empty) {
                         cellFragment.pseudoColumn.finishBreak(breakNodeContext, false, true).then(function() {
                             adjustCellHeight(cellFragment, formattingContext);
+                            cellFragment.pseudoColumn.resetConstraints(breakNodeContext);
                             loopFrame.continueLoop();
                         });
                     } else {
