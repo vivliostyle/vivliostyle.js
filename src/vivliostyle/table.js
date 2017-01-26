@@ -1146,7 +1146,10 @@ goog.scope(function() {
         this.layoutEntireTable(nodeContext, column).then(function(nodeContextAfter) {
             var tableElement = nodeContextAfter.viewNode;
             var tableBBox = column.clientLayout.getElementClientRect(tableElement);
-            if (!column.isOverflown(column.vertical ? tableBBox.left : tableBBox.bottom)) {
+            var edge = column.vertical ? tableBBox.left : tableBBox.bottom;
+            edge += (column.vertical ? -1 : 1) * adapt.layout.calculateOffsetOfRepetitiveElements(
+              vivliostyle.repetitiveelements.collectRepetitiveElements(column));
+            if (!column.isOverflown(edge)) {
                 frame.finish(nodeContextAfter);
                 return;
             }
