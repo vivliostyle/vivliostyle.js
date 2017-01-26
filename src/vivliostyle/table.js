@@ -1308,6 +1308,7 @@ goog.scope(function() {
                                 adapt.base.setCSSProperty(cellViewNode, "vertical-align", verticalAlign);
                             }
                             adjustCellHeight(cellFragment, formattingContext);
+                            cellFragment.pseudoColumn.resetConstraints(breakNodeContext);
                             loopFrame.continueLoop();
                         });
                     } else {
