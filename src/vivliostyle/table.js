@@ -1025,6 +1025,11 @@ goog.scope(function() {
             var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
             var repetitiveElements = formattingContext.getRepetitiveElements();
             if (repetitiveElements) repetitiveElements.preventSkippingFooter();
+            var style = (/** @type {HTMLElement} */ (nodeContext.viewNode)).style;
+            if (style && !(this.column.zeroIndent(style.paddingBottom) && this.column.zeroIndent(style.borderBottomWidth))) {
+                nodeContext.overflow = this.column.saveEdgeAndCheckForOverflow(
+                    state.lastAfterNodeContext, null, false, state.breakAtTheEdge);
+            }
             this.resetColumn();
             state.break = true;
         } else {
