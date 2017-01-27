@@ -957,7 +957,7 @@ goog.scope(function() {
             var availableBlockSize = (blockEnd - blockStart) * area.getBoxDir();
             if (availableBlockSize < blockSize)
                 return false;
-            var margin = area.getComputedMargin(area.rootViewNode);
+            var margin = area.floatMargin;
             blockSize = Math.min(blockSize + (area.vertical ? margin.left : margin.bottom),
                 availableBlockSize);
             if (logicalFloatSide === "inline-start" || logicalFloatSide === "inline-end") {

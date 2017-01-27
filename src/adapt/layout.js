@@ -3193,6 +3193,7 @@ adapt.layout.PageFloatArea = function(float, element, layoutContext, clientLayou
     /** @const */ this.float = float;
     /** @const */ this.parentContainer = parentContainer;
     /** @type {?Element} */ this.rootViewNode = null;
+    /** @type {?adapt.geom.Insets} */ this.floatMargin = null;
 };
 goog.inherits(adapt.layout.PageFloatArea, adapt.layout.Column);
 
@@ -3247,6 +3248,8 @@ adapt.layout.PageFloatArea.prototype.fixFloatSizeAndPosition = function(nodeCont
         if (value === "auto")
             adapt.base.setCSSProperty(rootViewNode, propName, "0");
     });
+
+    this.floatMargin = this.getComputedMargin(rootViewNode);
 
     var floatSide = this.float.floatSide;
     var isVertical = this.parentContainer.vertical;
