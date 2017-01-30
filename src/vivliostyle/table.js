@@ -1462,6 +1462,95 @@ goog.scope(function() {
     /** @const */ var TableRowLayoutConstraint = vivliostyle.table.TableRowLayoutConstraint;
     goog.inherits(TableRowLayoutConstraint, RepetitiveElementsOwnerLayoutConstraint);
 
+    /** @override */
+    TableRowLayoutConstraint.prototype.allowLayout = function(nodeContext, overflownNodeContext, column) {
+        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
+
+        var repetitiveElements = this.getRepetitiveElements();
+        if (!repetitiveElements) return true;
+
+        this.updateFooterSkippingState(nodeContext);
+
+        if (adapt.layout.isOrphan(this.nodeContext.viewNode)) return true;
+        if (!repetitiveElements.isEnableToUpdateState()) return true;
+
+        if ((overflownNodeContext && !nodeContext)
+          || (nodeContext && nodeContext.overflow )
+          || this.isOverflowCell(nodeContext, formattingContext) ) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+
+    /** @override */
+    TableRowLayoutConstraint.prototype.nextCandidate = function(nodeContext) {
+        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
+
+        var cellFragmentConstraints = this.collectCellFragmentLayoutConstraints(nodeContext, formattingContext);
+        if (cellFragmentConstraints.some(function(constraints){
+            return constraints.some(function(constraint){
+                return constraint.nextCandidate(nodeContext);
+            });
+        })) {
+            return true;
+        }
+        return RepetitiveElementsOwnerLayoutConstraint.prototype.nextCandidate.call(this, nodeContext);
+    };
+
+    /** @override */
+    TableRowLayoutConstraint.prototype.postLayout = function(allowed, nodeContext) {
+        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
+        if (nodeContext) {
+            var cellFragmentConstraints = this.collectCellFragmentLayoutConstraints(nodeContext, formattingContext);
+            cellFragmentConstraints.forEach(function(constraints){
+                return constraints.forEach(function(constraint){
+                    return constraint.postLayout(allowed);
+                });
+            });
+        }
+        RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout.call(this, allowed);
+    };
+
+    TableRowLayoutConstraint.prototype.collectCellFragmentLayoutConstraints = function(nodeContext, formattingContext) {
+        return this.getCells(nodeContext, formattingContext).map(function(cell) {
+            var cellFragment = formattingContext.getCellFragmentOfCell(cell);
+            return cellFragment.pseudoColumn.column.fragmentLayoutConstraints;
+        });
+    };
+
+    TableRowLayoutConstraint.prototype.getCells = function(nodeContext, formattingContext) {
+        if (!nodeContext || nodeContext.display !== "table-row") return [];
+
+        goog.asserts.assert(nodeContext.sourceNode);
+        var rowIndex = formattingContext.findRowIndexBySourceNode(nodeContext.sourceNode);
+        return formattingContext.getCellsFallingOnRow(rowIndex);
+    };
+
+    TableRowLayoutConstraint.prototype.isOverflowCell = function(nodeContext, formattingContext) {
+        return this.getCells(nodeContext, formattingContext).some(function(cell) {
+            var cellFragment = formattingContext.getCellFragmentOfCell(cell);
+            var breakNodeContext = cellFragment.pseudoColumn.findAcceptableBreakPosition(false).nodeContext;
+            return breakNodeContext && breakNodeContext.overflow;
+        });
+    };
+
+    /** @override */
+    TableRowLayoutConstraint.prototype.updateFooterSkippingState = function(nodeContext) {
+        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
+        this.getCells(nodeContext, formattingContext).forEach(function(cell) {
+            var cellFragment = formattingContext.getCellFragmentOfCell(cell);
+            cellFragment.pseudoColumn.column.fragmentLayoutConstraints.forEach(function(constraint){
+                var repetitiveElements = constraint.getRepetitiveElements();
+                if (repetitiveElements && nodeContext.after && !nodeContext.overflow) repetitiveElements.preventSkippingFooter();
+                constraint.getRepetitiveElements().removeFooterFromFragment();
+            });
+        });
+        RepetitiveElementsOwnerLayoutConstraint.prototype
+            .updateFooterSkippingState.call(this, nodeContext);
+    };
+
     /**
      * @const
      */

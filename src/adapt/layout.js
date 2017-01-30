@@ -233,8 +233,9 @@ adapt.layout.FragmentLayoutConstraint.prototype.nextCandidate = function(nodeCon
 
 /**
  * @param {boolean} allowed
+ * @param {adapt.vtree.NodeContext} nodeContext
  */
-adapt.layout.FragmentLayoutConstraint.prototype.postLayout = function(allowed) {};
+adapt.layout.FragmentLayoutConstraint.prototype.postLayout = function(allowed, nodeContext) {};
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
@@ -2331,7 +2332,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                 var style = (/** @type {HTMLElement} */ (nodeContext.viewNode)).style;
                 if (nodeContext.after) {
                     if (layoutProcessor) {
-                        if (layoutProcessor.afterNonInlineElementNode(nodeContext)) break;
+                        if (layoutProcessor.afterNonInlineElementNode(nodeContext, self.stopAtOverflow)) break;
                     }
                     // Trailing edge
                     if (onStartEdges) {
@@ -2986,7 +2987,7 @@ adapt.layout.DefaultLayoutMode.prototype.postLayout = function(positionAfter, in
         });
     }
     column.fragmentLayoutConstraints.forEach(function(constraint) {
-        constraint.postLayout(accepted);
+        constraint.postLayout(accepted, positionAfter);
     });
 };
 

@@ -466,7 +466,7 @@ goog.scope(function() {
         var repetitiveElements = this.getRepetitiveElements();
         if (!repetitiveElements) return true;
 
-        this.updateFooterSkippingState(nodeContext, formattingContext, repetitiveElements);
+        this.updateFooterSkippingState(nodeContext);
 
         if (adapt.layout.isOrphan(this.nodeContext.viewNode)) return true;
         if (!repetitiveElements.isEnableToUpdateState()) return true;
@@ -491,7 +491,7 @@ goog.scope(function() {
     };
 
     /** @override */
-    RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout = function(allowed) {
+    RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout = function(allowed, nodeContext) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(this.nodeContext.formattingContext);
         var repetitiveElements = this.getRepetitiveElements();
         if (!repetitiveElements) return;
@@ -517,10 +517,10 @@ goog.scope(function() {
 
     /**
      * @param {adapt.vtree.NodeContext} nodeContext
-     * @param {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext
-     * @param {vivliostyle.repetitiveelements.RepetitiveElements} repetitiveElements
      */
-    RepetitiveElementsOwnerLayoutConstraint.prototype.updateFooterSkippingState = function(nodeContext, formattingContext, repetitiveElements) {
+    RepetitiveElementsOwnerLayoutConstraint.prototype.updateFooterSkippingState = function(nodeContext) {
+        var formattingContext = getRepetitiveElementsOwnerFormattingContext(this.nodeContext.formattingContext);
+        var repetitiveElements = this.getRepetitiveElements();
         if (repetitiveElements
             && !formattingContext.isAfterContextOfRootElement(nodeContext)
             && !repetitiveElements.enableSkippingFooter) {
@@ -636,9 +636,9 @@ goog.scope(function() {
     /**
      * @override
      */
-    RepetitiveElementsOwnerLayoutProcessor.prototype.afterNonInlineElementNode = function(nodeContext) {
+    RepetitiveElementsOwnerLayoutProcessor.prototype.afterNonInlineElementNode = function(nodeContext, stopAtOverflow) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
-        if (!formattingContext.isInherited(nodeContext) && nodeContext.after) {
+        if (!formattingContext.isInherited(nodeContext) && nodeContext.after && stopAtOverflow) {
             var repetitiveElements = formattingContext.getRepetitiveElements();
             if (repetitiveElements) repetitiveElements.preventSkippingFooter();
         }
@@ -840,6 +840,7 @@ goog.scope(function() {
         goog.asserts.assert(formattingContext instanceof RepetitiveElementsOwnerFormattingContext);
         return /** @type {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} */ (formattingContext);
     }
+    vivliostyle.repetitiveelements.getRepetitiveElementsOwnerFormattingContext = getRepetitiveElementsOwnerFormattingContext;
 
     /**
      * @const
