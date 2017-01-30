@@ -207,7 +207,7 @@
     </section>
 
     <section>
-        <h1>(1) Nested div -> table / dropping header,footer</h1>
+        <h1>(2) Nested div -> table / dropping header,footer</h1>
 
         <div>
             <div class="box header">this is header of parent</div>
@@ -299,5 +299,48 @@
             </tbody>
         </table>
     </section>
+
+
+    <section>
+        <h1>(4) Nested table -> div / dropping header,footer</h1>
+
+        <table class="table1">
+            <thead>
+                <tr>
+                    <td>header 1</td>
+                    <td>header 2</td>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <td>footer 1</td>
+                    <td>footer 2</td>
+                </tr>
+            </tfoot>
+            <tbody>
+                <tr>
+                  <td>
+                    <div class="child2">
+                        <div class="box header">this is header of child</div>
+                        <div class="box footer">this is footer of child</div>
+                        <div style='height:100px'>drop child footer, and parent header, footer</div>
+                        <div style='height:100px'>drop child footer</div>
+                        <div style='height:120px'>drop child header, footer</div>
+                        <div style='height:170px'>drop child header, footer and parent footer</div>
+                        <div style='height:190px'>drop child header, footer and parent header, footer</div>
+                        <div style='height:150px'>drop child header, and parent header, footer</div>
+                    </div>
+                  </td>
+                  <td>
+                  </td>
+                </tr>
+                <tr>
+                    <td>cell 2-1</td>
+                    <td>cell 2-2</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
 </body>
 </html>
