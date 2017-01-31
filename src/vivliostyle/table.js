@@ -1529,7 +1529,6 @@ goog.scope(function() {
         if (!repetitiveElements) return true;
 
         this.updateFooterSkippingState(nodeContext);
-
         if (adapt.layout.isOrphan(this.nodeContext.viewNode)) return true;
         if (!repetitiveElements.isEnableToUpdateState()) return true;
 
