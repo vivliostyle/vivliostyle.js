@@ -1534,8 +1534,8 @@ goog.scope(function() {
         if (!repetitiveElements.isEnableToUpdateState()) return true;
 
         if ((overflownNodeContext && !nodeContext)
-          || (nodeContext && nodeContext.overflow )
-          || this.isOverflowCell(nodeContext, formattingContext) ) {
+          || (nodeContext && nodeContext.overflow)
+          || this.isOverflowCell(nodeContext, formattingContext)) {
             return false;
         } else {
             return true;
@@ -1548,8 +1548,8 @@ goog.scope(function() {
         var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
 
         var cellFragmentConstraints = this.collectCellFragmentLayoutConstraints(nodeContext, formattingContext);
-        if (cellFragmentConstraints.some(function(constraints){
-            return constraints.some(function(constraint){
+        if (cellFragmentConstraints.some(function(constraints) {
+            return constraints.some(function(constraint) {
                 return constraint.nextCandidate(nodeContext);
             });
         })) {
@@ -1563,8 +1563,8 @@ goog.scope(function() {
         var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
         if (nodeContext) {
             var cellFragmentConstraints = this.collectCellFragmentLayoutConstraints(nodeContext, formattingContext);
-            cellFragmentConstraints.forEach(function(constraints){
-                return constraints.forEach(function(constraint){
+            cellFragmentConstraints.forEach(function(constraints) {
+                return constraints.forEach(function(constraint) {
                     return constraint.postLayout(allowed);
                 });
             });
@@ -1600,7 +1600,7 @@ goog.scope(function() {
         var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
         this.getCells(nodeContext, formattingContext).forEach(function(cell) {
             var cellFragment = formattingContext.getCellFragmentOfCell(cell);
-            cellFragment.pseudoColumn.column.fragmentLayoutConstraints.forEach(function(constraint){
+            cellFragment.pseudoColumn.column.fragmentLayoutConstraints.forEach(function(constraint) {
                 var repetitiveElements = constraint.getRepetitiveElements();
                 if (repetitiveElements && nodeContext.after && !nodeContext.overflow) repetitiveElements.preventSkippingFooter();
                 constraint.getRepetitiveElements().removeFooterFromFragment();
