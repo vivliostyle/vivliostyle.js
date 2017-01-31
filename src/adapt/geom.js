@@ -313,8 +313,8 @@ adapt.geom.rotatePoint = function(point) {
 
 /**
  * Vertical box to pseudo-horizontal coords.
- * @param {adapt.geom.Rect} box
- * @return {adapt.geom.Rect}
+ * @param {!adapt.geom.Rect} box
+ * @return {!adapt.geom.Rect}
  */
 adapt.geom.rotateBox = function(box) {
     return new adapt.geom.Rect(box.y1, -box.x2, box.y2, -box.x1);
@@ -338,7 +338,7 @@ adapt.geom.rotateShape = function(shape) {
 };
 
 /**
- * @param {adapt.geom.Rect} box
+ * @param {!adapt.geom.Rect} box
  * @param {Array.<adapt.geom.Shape>} include
  * @param {Array.<adapt.geom.Shape>} exclude
  * @param {number} granularity

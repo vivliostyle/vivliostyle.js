@@ -837,8 +837,6 @@ goog.scope(function() {
 
         var fragments = this.floatFragments;
         if (fragments.length > 0) {
-            var writingMode = this.writingMode.toString();
-            var direction = this.direction.toString();
             limits = fragments.reduce(function(l, f) {
                 var float = self.getFloatOfFragment(f);
                 var logicalFloatSide = this.toLogical(float.floatSide);
@@ -919,19 +917,33 @@ goog.scope(function() {
 
         var blockOffset = area.vertical ? area.originX : area.originY;
         var inlineOffset = area.vertical ? area.originY : area.originX;
-        blockStart = Math.max(blockStart, area.top + blockOffset);
-        blockEnd = Math.min(blockEnd, area.top + area.height + blockOffset);
+        blockStart = area.vertical ?
+            Math.min(blockStart, area.left + area.width + blockOffset) :
+            Math.max(blockStart, area.top + blockOffset);
+        blockEnd = area.vertical ?
+            Math.max(blockEnd, area.left + blockOffset) :
+            Math.min(blockEnd, area.top + area.height + blockOffset);
 
         var blockSize, inlineSize;
         if (init) {
+            var rect = area.vertical ?
+                adapt.geom.rotateBox(new adapt.geom.Rect(blockEnd, inlineStart, blockStart, inlineEnd)) :
+                new adapt.geom.Rect(inlineStart, blockStart, inlineEnd, blockEnd);
             switch (logicalFloatSide) {
                 case "block-start":
                 case "inline-start":
                     var uppermostFullyOpenRect = adapt.geom.findUppermostFullyOpenRect(area.bands,
-                        new adapt.geom.Rect(inlineStart, blockStart, inlineEnd, blockEnd));
+                        rect);
                     if (uppermostFullyOpenRect) {
-                        blockStart = Math.max(blockStart, uppermostFullyOpenRect.y1);
-                        blockEnd = Math.min(blockEnd, uppermostFullyOpenRect.y2);
+                        if (area.vertical) {
+                            uppermostFullyOpenRect = adapt.geom.unrotateBox(uppermostFullyOpenRect);
+                        }
+                        blockStart = area.vertical ?
+                            Math.min(blockStart, uppermostFullyOpenRect.x2) :
+                            Math.max(blockStart, uppermostFullyOpenRect.y1);
+                        blockEnd = area.vertical ?
+                            Math.max(blockEnd, uppermostFullyOpenRect.x1) :
+                            Math.min(blockEnd, uppermostFullyOpenRect.y2);
                     } else {
                         return false;
                     }
@@ -939,10 +951,17 @@ goog.scope(function() {
                 case "block-end":
                 case "inline-end":
                     var bottommostFullyOpenRect = adapt.geom.findBottommostFullyOpenRect(area.bands,
-                        new adapt.geom.Rect(inlineStart, blockStart, inlineEnd, blockEnd));
+                        rect);
                     if (bottommostFullyOpenRect) {
-                        blockStart = Math.max(blockStart, bottommostFullyOpenRect.y1);
-                        blockEnd = Math.min(blockEnd, bottommostFullyOpenRect.y2);
+                        if (area.vertical) {
+                            bottommostFullyOpenRect = adapt.geom.unrotateBox(bottommostFullyOpenRect);
+                        }
+                        blockStart = area.vertical ?
+                            Math.min(blockStart, bottommostFullyOpenRect.x2) :
+                            Math.max(blockStart, bottommostFullyOpenRect.y1);
+                        blockEnd = area.vertical ?
+                            Math.max(blockEnd, bottommostFullyOpenRect.x1) :
+                            Math.min(blockEnd, bottommostFullyOpenRect.y2);
                     } else {
                         return false;
                     }
@@ -964,8 +983,8 @@ goog.scope(function() {
                 inlineSize = vivliostyle.sizing.getSize(area.clientLayout, area.element,
                     [vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE];
             } else {
-                var rect = area.clientLayout.getElementClientRect(area.rootViewNode);
-                inlineSize = rect[area.vertical ? "height" : "width"] +
+                var floatBBox = area.clientLayout.getElementClientRect(area.rootViewNode);
+                inlineSize = floatBBox[area.vertical ? "height" : "width"] +
                     (area.vertical ? margin.top : margin.left) +
                     (area.vertical ? margin.bottom : margin.right);
             }

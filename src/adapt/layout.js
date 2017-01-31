@@ -1352,6 +1352,7 @@ adapt.layout.Column.prototype.setupFloatArea = function(area, float) {
     area.setVerticalPosition(containingBlockRect.y1 - floatContainer.originY, area.height);
     area.exclusions = (floatContainer.exclusions || []).concat();
     area.forceNonfitting = !floatLayoutContext.hasFloatFragments();
+    area.innerShape = null;
 
     // Calculate bands from the exclusions before setting float area dimensions
     area.init();
