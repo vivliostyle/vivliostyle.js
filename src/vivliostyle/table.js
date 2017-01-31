@@ -1504,8 +1504,10 @@ goog.scope(function() {
      */
     LayoutFragmentedTable.prototype.doLayout = function(nodeContext, column) {
         vivliostyle.repetitiveelements.appendHeader(this.formattingContext, nodeContext);
-        column.fragmentLayoutConstraints.unshift(
-            new TableRowLayoutConstraint(nodeContext));
+        var constraint = new TableRowLayoutConstraint(nodeContext);
+        if (!column.fragmentLayoutConstraints.some(function(c) { return constraint.equalsTo(c); })) {
+            column.fragmentLayoutConstraints.unshift(constraint);
+        }
         return this.processor.doLayout(nodeContext, column);
     };
 
@@ -1617,6 +1619,13 @@ goog.scope(function() {
         RepetitiveElementsOwnerLayoutConstraint.prototype
             .updateFooterSkippingState.call(this, nodeContext);
     };
+
+    /** @override */
+    TableRowLayoutConstraint.prototype.equalsTo = function(constraint) {
+        if ( !constraint instanceof TableRowLayoutConstraint ) return false;
+        return getTableFormattingContext(this.nodeContext.formattingContext)
+           === getTableFormattingContext(constraint.nodeContext.formattingContext);
+    }
 
     /**
      * @const

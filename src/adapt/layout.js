@@ -243,6 +243,11 @@ adapt.layout.FragmentLayoutConstraint.prototype.postLayout = function(allowed, n
  */
 adapt.layout.FragmentLayoutConstraint.prototype.finishBreak = function(nodeContext) {};
 
+/**
+ * @param {adapt.layout.FragmentLayoutConstraint} constraint
+ * @return {boolean}
+ */
+adapt.layout.FragmentLayoutConstraint.prototype.equalsTo = function(constraint) {};
 
 /**
  * Potential breaking position.
