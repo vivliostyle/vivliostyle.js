@@ -152,10 +152,11 @@ adapt.layout.LayoutProcessor.prototype.startNonInlineElementNode = function(
 /**
  * process nodecontex of the after non inline element.
  * @param {!adapt.vtree.NodeContext} nodeContext
+ * @param {boolean} stopAtOverflow
  * @return {boolean} return true if you skip the subsequent
  */
 adapt.layout.LayoutProcessor.prototype.afterNonInlineElementNode = function(
-    nodeContext) {};
+    nodeContext, stopAtOverflow) {};
 
 /**
  * @param {!adapt.layout.Column} column
@@ -2566,8 +2567,8 @@ adapt.layout.Column.prototype.layoutNext = function(nodeContext, leadingEdge) {
             // finished all content, explicit page break or overflow (automatic page break)
             frame.finish(nodeContext);
         } else {
-            goog.asserts.assert(nodeContext.formattingContext);
             var formattingContext = (nodeContext.after ? nodeContext.parent : nodeContext).formattingContext;
+            goog.asserts.assert(formattingContext);
             var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(formattingContext);
             layoutProcessor.layout(nodeContext, self).thenFinish(frame);
         }

@@ -1569,7 +1569,7 @@ goog.scope(function() {
                 });
             });
         }
-        RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout.call(this, allowed);
+        RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout.call(this, allowed, nodeContext);
     };
 
     TableRowLayoutConstraint.prototype.collectCellFragmentLayoutConstraints = function(nodeContext, formattingContext) {
@@ -1600,7 +1600,7 @@ goog.scope(function() {
         var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
         this.getCells(nodeContext, formattingContext).forEach(function(cell) {
             var cellFragment = formattingContext.getCellFragmentOfCell(cell);
-            cellFragment.pseudoColumn.column.fragmentLayoutConstraints.forEach(function(constraint) {
+            cellFragment.pseudoColumn.getFragmentLayoutConstraints().forEach(function(constraint) {
                 var repetitiveElements = constraint.getRepetitiveElements();
                 if (repetitiveElements && nodeContext.after && !nodeContext.overflow) repetitiveElements.preventSkippingFooter();
                 constraint.getRepetitiveElements().removeFooterFromFragment();
