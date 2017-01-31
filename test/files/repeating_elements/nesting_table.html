@@ -124,6 +124,7 @@
         th, td, .th, .td {
             border: 1px gray solid;
             line-height: 16px;
+            vertical-align: top;
         }
         td {
         }
@@ -136,6 +137,7 @@
     </style>
 </head>
 <body>
+
 
     <section>
         <h1>(1) Nested div -> table</h1>
@@ -205,6 +207,8 @@
             </table>
         </div>
     </section>
+
+    <section>Empty</section>
 
     <section>
         <h1>(2) Nested div -> table / dropping header,footer</h1>
@@ -323,7 +327,7 @@
                     <div class="child2">
                         <div class="box header">this is header of child</div>
                         <div class="box footer">this is footer of child</div>
-                        <div style='height:100px'>drop child footer, and parent header, footer</div>
+                        <div style='height:120px'>drop child footer, and parent footer</div>
                         <div style='height:100px'>drop child footer</div>
                         <div style='height:120px'>drop child header, footer</div>
                         <div style='height:170px'>drop child header, footer and parent footer</div>
@@ -341,6 +345,8 @@
             </tbody>
         </table>
     </section>
+
+
 
 </body>
 </html>

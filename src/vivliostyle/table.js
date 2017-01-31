@@ -1588,10 +1588,19 @@ goog.scope(function() {
     };
 
     TableRowLayoutConstraint.prototype.isOverflowCell = function(nodeContext, formattingContext) {
-        return this.getCells(nodeContext, formattingContext).some(function(cell) {
+        var acceptableCellBreakPositions = this.getCells(nodeContext, formattingContext).map(function(cell) {
             var cellFragment = formattingContext.getCellFragmentOfCell(cell);
-            var breakNodeContext = cellFragment.pseudoColumn.findAcceptableBreakPosition(false).nodeContext;
-            return breakNodeContext && breakNodeContext.overflow;
+            var bp = cellFragment.findAcceptableBreakPosition();
+            var breakAtBeginningOfCell = cellFragment.pseudoColumn.isStartNodeContext(bp.nodeContext);
+            return {
+                nodeContext: bp.nodeContext,
+                breakAtBeginningOfCell: breakAtBeginningOfCell
+            };
+        });
+        return acceptableCellBreakPositions.some(function(bp) {
+            return !bp.nodeContext || bp.nodeContext.overflow;
+        }) || acceptableCellBreakPositions.every(function(bp, index) {
+            return bp.breakAtBeginningOfCell;
         });
     };
 
