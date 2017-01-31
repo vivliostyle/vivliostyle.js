@@ -1531,6 +1531,7 @@ goog.scope(function() {
         if (!repetitiveElements) return true;
 
         this.updateFooterSkippingState(nodeContext);
+        if (column.parent) return true;
         if (adapt.layout.isOrphan(this.nodeContext.viewNode)) return true;
         if (!repetitiveElements.isEnableToUpdateState()) return true;
 
@@ -1622,7 +1623,7 @@ goog.scope(function() {
 
     /** @override */
     TableRowLayoutConstraint.prototype.equalsTo = function(constraint) {
-        if ( !constraint instanceof TableRowLayoutConstraint ) return false;
+        if ( !(constraint instanceof TableRowLayoutConstraint) ) return false;
         return getTableFormattingContext(this.nodeContext.formattingContext)
            === getTableFormattingContext(constraint.nodeContext.formattingContext);
     }

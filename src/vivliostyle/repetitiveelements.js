@@ -530,7 +530,7 @@ goog.scope(function() {
 
     /** @override */
     RepetitiveElementsOwnerLayoutConstraint.prototype.equalsTo = function(constraint) {
-        if ( !constraint instanceof RepetitiveElementsOwnerLayoutConstraint ) return false;
+        if ( !(constraint instanceof RepetitiveElementsOwnerLayoutConstraint) ) return false;
         return getRepetitiveElementsOwnerFormattingContext(this.nodeContext.formattingContext)
            === getRepetitiveElementsOwnerFormattingContext(constraint.nodeContext.formattingContext);
     }
