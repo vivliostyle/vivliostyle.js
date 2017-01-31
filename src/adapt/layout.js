@@ -2583,8 +2583,8 @@ adapt.layout.Column.prototype.layoutNext = function(nodeContext, leadingEdge) {
  */
 adapt.layout.Column.prototype.clearOverflownViewNodes = function(nodeContext, removeSelf) {
     if (!nodeContext) return;
-    for (var parent = nodeContext.parent; parent; nodeContext = parent, parent = parent.parent) {
-        var formattingContext = nodeContext.parent.formattingContext;
+    for (var parent = nodeContext.parent; nodeContext; nodeContext = parent, parent = parent ? parent.parent : null) {
+        var formattingContext = (parent || nodeContext).formattingContext;
         goog.asserts.assert(formattingContext);
         var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(formattingContext);
         layoutProcessor.clearOverflownViewNodes(this, parent, nodeContext, removeSelf);
@@ -3036,12 +3036,13 @@ adapt.layout.BlockLayoutProcessor.prototype.afterNonInlineElementNode = function
  * @override
  */
 adapt.layout.BlockLayoutProcessor.prototype.clearOverflownViewNodes = function(column, parentNodeContext, nodeContext, removeSelf) {
-    if (!parentNodeContext.viewNode) return;
     if (!nodeContext.viewNode) return;
+    if (!nodeContext.viewNode.parentNode) return;
+    var parentNode = nodeContext.viewNode.parentNode;
 
-    column.removeFollowingSiblings(parentNodeContext.viewNode, nodeContext.viewNode);
+    column.removeFollowingSiblings(parentNode, nodeContext.viewNode);
     if (removeSelf) {
-        parentNodeContext.viewNode.removeChild(nodeContext.viewNode);
+        parentNode.removeChild(nodeContext.viewNode);
     }
 };
 
