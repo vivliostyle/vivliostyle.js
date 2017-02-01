@@ -1043,6 +1043,10 @@ adapt.vtree.FlowPosition = function() {
      * @type {string}
      */
     this.startSide = "any";
+    /**
+     * @type {?string}
+     */
+    this.breakAfter = null;
 };
 
 /**
@@ -1056,6 +1060,7 @@ adapt.vtree.FlowPosition.prototype.clone = function() {
         newarr[i] = arr[i].clone();
     }
     newfp.startSide = this.startSide;
+    newfp.breakAfter = this.breakAfter;
     return newfp;
 };
 

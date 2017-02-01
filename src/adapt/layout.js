@@ -2497,9 +2497,10 @@ adapt.layout.Column.prototype.isOrphan = function(node) {
  * properties from all elements that meet at the edge.
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {boolean} leadingEdge
+ * @param {?string} forcedBreakValue
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
-adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
+adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, forcedBreakValue) {
     var fc = nodeContext.after ?
         (nodeContext.parent && nodeContext.parent.formattingContext) : nodeContext.formattingContext;
     if (fc && !this.isBFC(fc)) {
@@ -2510,8 +2511,8 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
     /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
         = adapt.task.newFrame("skipEdges");
     // If a forced break occurred at the end of the previous column, nodeContext.after should be false.
-    var atUnforcedBreak = leadingEdge && (nodeContext && nodeContext.after);
-    var breakAtTheEdge = null;
+    var atUnforcedBreak = !forcedBreakValue && leadingEdge && (nodeContext && nodeContext.after);
+    var breakAtTheEdge = forcedBreakValue;
     var lastAfterNodeContext = null;
     var leadingEdgeContexts = [];
     var trailingEdgeContexts = [];
@@ -2520,7 +2521,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
     function needForcedBreak() {
         // leadingEdge=true means that we are at the beginning of the new column and hence must avoid a break
         // (Otherwise leading to an infinite loop)
-        return !leadingEdge && vivliostyle.break.isForcedBreakValue(breakAtTheEdge);
+        return !!forcedBreakValue || (!leadingEdge && vivliostyle.break.isForcedBreakValue(breakAtTheEdge));
     }
 
     function processForcedBreak() {
@@ -2663,9 +2664,6 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                 nodeContext = nextResult.get();
             }
         }
-        if (lastAfterNodeContext) {
-            self.lastAfterPosition = lastAfterNodeContext.toNodePosition();
-        }
         if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, true, breakAtTheEdge)) {
             if (lastAfterNodeContext && self.stopAtOverflow) {
                 nodeContext = lastAfterNodeContext.modify();
@@ -2678,6 +2676,9 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
         }
         loopFrame.breakLoop();
     }).then(function() {
+        if (lastAfterNodeContext) {
+            self.lastAfterPosition = lastAfterNodeContext.toNodePosition();
+        }
         frame.finish(nodeContext);
     });
     return frame.result();
@@ -2806,13 +2807,14 @@ adapt.layout.Column.prototype.layoutFloatOrFootnote = function(nodeContext) {
  * Layout next portion of the source.
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {boolean} leadingEdge
+ * @param {?string} forcedBreakValue
  * @return {adapt.task.Result.<adapt.vtree.NodeContext>}
  */
-adapt.layout.Column.prototype.layoutNext = function(nodeContext, leadingEdge) {
+adapt.layout.Column.prototype.layoutNext = function(nodeContext, leadingEdge, forcedBreakValue) {
     var self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
         = adapt.task.newFrame("layoutNext");
-    this.skipEdges(nodeContext, leadingEdge).then(function(nodeContextParam) {
+    this.skipEdges(nodeContext, leadingEdge, forcedBreakValue).then(function(nodeContextParam) {
         nodeContext = /** @type {adapt.vtree.NodeContext} */ (nodeContextParam);
         if (!nodeContext || self.pageBreakType || self.stopByOverflow(nodeContext)) {
             // finished all content, explicit page break or overflow (automatic page break)
@@ -2961,9 +2963,10 @@ adapt.layout.Column.prototype.layoutOverflownFootnotes = function(chunkPosition)
 /**
  * @param {adapt.vtree.ChunkPosition} chunkPosition starting position.
  * @param {boolean} leadingEdge
+ * @param {?string=} breakAfter
  * @return {!adapt.task.Result.<adapt.vtree.ChunkPosition>} holding end position.
  */
-adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
+adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, breakAfter) {
     this.chunkPositions.push(chunkPosition);  // So we can re-layout this column later
     if (chunkPosition.primary.after) {
         this.lastAfterPosition = chunkPosition.primary;
@@ -2984,7 +2987,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
                 while (nodeContext) {
                     // fill a single block
                     var pending = true;
-                    self.layoutNext(nodeContext, leadingEdge).then(function(nodeContextParam) {
+                    self.layoutNext(nodeContext, leadingEdge, breakAfter || null).then(function(nodeContextParam) {
                         leadingEdge = false;
                         nodeContext = nodeContextParam;
 

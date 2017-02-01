@@ -557,14 +557,23 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
 
 /**
  * @param {!adapt.layout.Column} column
+ * @param {?adapt.vtree.ChunkPosition} newPosition
  * @returns {?adapt.vtree.ChunkPosition}
  */
-adapt.ops.StyleInstance.prototype.getLastAfterPositionIfDeferredFloatsExists = function(column) {
+adapt.ops.StyleInstance.prototype.getLastAfterPositionIfDeferredFloatsExists = function(column, newPosition) {
     var pageFloatLayoutContext = column.pageFloatLayoutContext;
     var deferredFloats = pageFloatLayoutContext.getPageFloatContinuationsDeferredToNext();
     if (deferredFloats.length > 0) {
         if (column.lastAfterPosition) {
-            return new adapt.vtree.ChunkPosition(column.lastAfterPosition);
+            var result;
+            if (newPosition) {
+                // Need overflown footnotes owned by newPosition
+                result = newPosition.clone();
+                result.primary = column.lastAfterPosition;
+            } else {
+                result = new adapt.vtree.ChunkPosition(column.lastAfterPosition);
+            }
+            return result;
         } else {
             goog.asserts.assert("column.lastAfterPosition === null");
             return null;
@@ -580,7 +589,7 @@ adapt.ops.StyleInstance.prototype.getLastAfterPositionIfDeferredFloatsExists = f
  * @return {adapt.task.Result.<boolean>} holding true
  */
 adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
-    var flowPosition = this.currentLayoutPosition.flowPositions[flowName];
+    /** @const */ var flowPosition = this.currentLayoutPosition.flowPositions[flowName];
     if (!flowPosition || !this.matchPageSide(flowPosition.startSide))
         return adapt.task.newResult(true);
     flowPosition.startSide = "any";
@@ -625,7 +634,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
                 }
                 var flowChunk = selected.flowChunk;
                 var pending = true;
-                column.layout(selected.chunkPosition, leadingEdge).then(function(newPosition) {
+                column.layout(selected.chunkPosition, leadingEdge, flowPosition.breakAfter).then(function(newPosition) {
                     if (column.pageFloatLayoutContext.isInvalidated()) {
                         loopFrame.breakLoop();
                         return;
@@ -641,25 +650,27 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
                         return;
                     } else {
                         // not exclusive
-                        if (newPosition) {
-                            // did not fit completely
-                            selected.chunkPosition = newPosition;
+                        var endOfColumn = !!newPosition || !!column.pageBreakType;
+                        var lastAfterPosition = self.getLastAfterPositionIfDeferredFloatsExists(column, newPosition);
+                        if (column.pageBreakType && lastAfterPosition) {
+                            selected.chunkPosition = lastAfterPosition;
+                            // TODO propagate pageBreakType
+                            flowPosition.breakAfter = column.pageBreakType;
+                            column.pageBreakType = null;
                         } else {
                             // go to the next element in the flow
                             removedIndices.push(index);
-                            // If there are page floats deferred to the next fragmentainer,
-                            // continue layout in the next fragmentainer from dummy position (last after position)
-                            var lastAfterPosition = self.getLastAfterPositionIfDeferredFloatsExists(column);
-                            if (lastAfterPosition) {
-                                selected.chunkPosition = lastAfterPosition;
+                            if (newPosition || lastAfterPosition) {
+                                // did not fit completely
+                                selected.chunkPosition = newPosition || lastAfterPosition;
                                 repeatedIndices.push(index);
                             }
+                            if (column.pageBreakType) {
+                                // forced break
+                                flowPosition.startSide = vivliostyle.break.breakValueToStartSideValue(column.pageBreakType);
+                            }
                         }
-                        if (column.pageBreakType) {
-                            // forced break
-                            flowPosition.startSide = vivliostyle.break.breakValueToStartSideValue(column.pageBreakType);
-                        }
-                        if (newPosition || column.pageBreakType) {
+                        if (endOfColumn) {
                             loopFrame.breakLoop();
                             return;
                         }
@@ -686,6 +697,8 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
                 flowPosition.positions = flowPosition.positions.filter(function(pos, i) {
                     return repeatedIndices.indexOf(i) >= 0 || removedIndices.indexOf(i) < 0;
                 });
+                if (flowPosition.breakAfter === "column")
+                    flowPosition.breakAfter = null;
                 var edge = column.pageFloatLayoutContext.getMaxReachedAfterEdge();
                 column.updateMaxReachedAfterEdge(edge);
             }
@@ -949,6 +962,9 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
                 layoutContainer.computedBlockSize = computedBlockSize;
                 boxInstance.finishContainer(self, layoutContainer, page, column,
                     columnCount, self.clientLayout, self.faces);
+                var flowPosition = self.currentLayoutPosition.flowPositions[flowNameStr];
+                if (flowPosition.breakAfter === "region")
+                    flowPosition.breakAfter = null;
             }
             innerFrame.finish(true);
         });
@@ -1120,6 +1136,13 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
         page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;
         self.processLinger();
         cp = self.currentLayoutPosition;
+        Object.keys(cp.flowPositions).forEach(function(flowName) {
+            var flowPosition = cp.flowPositions[flowName];
+            var breakAfter = flowPosition.breakAfter;
+            if (breakAfter && (breakAfter === "page" || !self.matchPageSide(breakAfter))) {
+                flowPosition.breakAfter = null;
+            }
+        });
         self.currentLayoutPosition = self.layoutPositionAtPageStart = null;
         cp.highestSeenOffset = self.styler.getReachedOffset();
         var triggers = self.style.store.getTriggersForDoc(self.xmldoc);
