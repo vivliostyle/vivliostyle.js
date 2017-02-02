@@ -963,7 +963,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
                 boxInstance.finishContainer(self, layoutContainer, page, column,
                     columnCount, self.clientLayout, self.faces);
                 var flowPosition = self.currentLayoutPosition.flowPositions[flowNameStr];
-                if (flowPosition.breakAfter === "region")
+                if (flowPosition && flowPosition.breakAfter === "region")
                     flowPosition.breakAfter = null;
             }
             innerFrame.finish(true);
