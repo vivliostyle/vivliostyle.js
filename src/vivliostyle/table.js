@@ -1625,10 +1625,10 @@ goog.scope(function() {
 
     /** @override */
     TableRowLayoutConstraint.prototype.equalsTo = function(constraint) {
-        if ( !(constraint instanceof TableRowLayoutConstraint) ) return false;
+        if (!(constraint instanceof TableRowLayoutConstraint)) return false;
         return getTableFormattingContext(this.nodeContext.formattingContext)
            === getTableFormattingContext(constraint.nodeContext.formattingContext);
-    }
+    };
 
     /**
      * @const
