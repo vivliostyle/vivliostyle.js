@@ -397,11 +397,11 @@ goog.scope(function() {
     /**
      * @param {adapt.vtree.NodeContext} nodeContext
      * @param {boolean} forceRemoveSelf
-     * @param {boolean} endOfRegion
+     * @param {boolean} endOfColumn
      * @return {!adapt.task.Result.<boolean>} holing true
      */
-    PseudoColumn.prototype.finishBreak = function(nodeContext, forceRemoveSelf, endOfRegion) {
-        return this.column.finishBreak(nodeContext, forceRemoveSelf, endOfRegion);
+    PseudoColumn.prototype.finishBreak = function(nodeContext, forceRemoveSelf, endOfColumn) {
+        return this.column.finishBreak(nodeContext, forceRemoveSelf, endOfColumn);
     };
 
     /**

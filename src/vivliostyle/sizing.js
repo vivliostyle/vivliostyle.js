@@ -42,7 +42,11 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
         display: element.style.display,
         position: element.style.position,
         width: /** @type {string} */ (element.style.width),
-        height: /** @type {string} */ (element.style.height)
+        maxWidth: /** @type {string} */ (element.style.maxWidth),
+        minWidth: /** @type {string} */ (element.style.minWidth),
+        height: /** @type {string} */ (element.style.height),
+        maxHeight: /** @type {string} */ (element.style.maxHeight),
+        minHeight: /** @type {string} */ (element.style.minHeight)
     };
     var doc = element.ownerDocument;
     var parent = element.parentNode;
@@ -54,7 +58,11 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
     container.appendChild(element);
 
     adapt.base.setCSSProperty(element, "width", "auto");
+    adapt.base.setCSSProperty(element, "max-width", "none");
+    adapt.base.setCSSProperty(element, "min-width", "0");
     adapt.base.setCSSProperty(element, "height", "auto");
+    adapt.base.setCSSProperty(element, "max-height", "none");
+    adapt.base.setCSSProperty(element, "min-height", "0");
 
     /**
      * @param {string} name
@@ -183,7 +191,11 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
     });
 
     adapt.base.setCSSProperty(element, "width", original.width);
+    adapt.base.setCSSProperty(element, "max-width", original.maxWidth);
+    adapt.base.setCSSProperty(element, "min-width", original.minWidth);
     adapt.base.setCSSProperty(element, "height", original.height);
+    adapt.base.setCSSProperty(element, "max-height", original.maxHeight);
+    adapt.base.setCSSProperty(element, "min-height", original.minHeight);
 
     parent.insertBefore(element, container);
     parent.removeChild(container);

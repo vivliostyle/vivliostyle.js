@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple kind of page floats</title>
+  <style>
+    @page {
+      size: 620px;
+      margin: 10px;
+    }
+    :root {
+      column-count: 2;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      line-height: 20px;
+      widows: 1;
+      orphans: 1;
+    }
+    body {
+      margin: 8px;
+    }
+    p {
+      background: rgba(100, 100, 100, 0.2);
+      border: blue dashed;
+    }
+    .float {
+      background: rgba(100, 100, 255, 0.2);
+    }
+    .page-float {
+      float-reference: page;
+    }
+    .region-float {
+      float-reference: region;
+    }
+    .column-float {
+      float-reference: column;
+    }
+    .top {
+      float: block-start;
+    }
+    .bottom {
+      float: block-end;
+    }
+  </style>
+</head>
+<body>
+<p>(1) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<div class="float column-float bottom">
+  (a) Background of page floats is lightblue. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float.
+</div>
+<div class="float region-float top">
+  (b) Background of page floats is lightblue. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float. This is a top float.
+</div>
+<p>(2) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<p>(3) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<p>(4) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<p>(5) Background of p elements is lightgray. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns. This is normal text inside two columns.</p>
+<p>(6) Background of p elements is lightgray. This is normal text inside two columns.</p>
+<div class="float page-float bottom">
+  (c) Background of page floats is lightblue. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float. This is a bottom float.
+</div>
+</body>
+</html>

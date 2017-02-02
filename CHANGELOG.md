@@ -9,6 +9,10 @@
   - Spec: [Compositing and Blending Level 1](https://drafts.fxtf.org/compositing-1/)
 - pseudo element or page margin box with `content:url()` behave as a replaced element
   - Spec: [Inserting and replacing content with the content property](https://drafts.csswg.org/css-content/#content-property)
+- Experimental support of CSS Page Floats and `column-span`
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/324>
+  - Spec: [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
+  - Spec: [CSS Multi-column Layout Module Level 2 - `column-span`](https://drafts.csswg.org/css-multicol-2/#column-span)
 
 ### Fixed
 

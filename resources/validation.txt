@@ -259,7 +259,7 @@ BREAK = auto | avoid | avoid-page | page | left | right | recto | verso | avoid-
 break-before = BREAK;
 break-after = BREAK;
 break-inside = auto | avoid | avoid-page | avoid-column | avoid-region;
-[webkit]column-span = none | all;
+[webkit]column-span = none | auto | all;
 [moz]column-fill = auto | balance;
 
 src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */

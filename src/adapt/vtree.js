@@ -502,11 +502,6 @@ adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = function(nodeCo
 adapt.vtree.LayoutContext.prototype.isSameNodePosition = function(nodePosition1, nodePosition2) {};
 
 /**
- * @return {!vivliostyle.pagefloat.FloatHolder}
- */
-adapt.vtree.LayoutContext.prototype.getPageFloatHolder = function() {};
-
-/**
  * Formatting context.
  * @interface
  */
@@ -720,9 +715,11 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {boolean} */ this.overflow = false;
     /** @type {number} */ this.breakPenalty = parent ? parent.breakPenalty : 0;
     /** @type {?string} */ this.display = null;
-    /** @type {?string} */ this.floatReference = null;
+    /** @type {!vivliostyle.pagefloat.FloatReference} */ this.floatReference =
+        vivliostyle.pagefloat.FloatReference.INLINE;
     /** @type {?string} */ this.floatSide = null;
     /** @type {?string} */ this.clearSide = null;
+    /** @type {?adapt.css.Val} */ this.columnSpan = null;
     /** @type {string} */ this.verticalAlign = "baseline";
     /** @type {string} */ this.captionSide = "top";
     /** @type {number} */ this.inlineBorderSpacing = 0;
@@ -757,8 +754,10 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.offsetInNode = 0;
     this.after = false;
     this.display = null;
+    this.floatReference = vivliostyle.pagefloat.FloatReference.INLINE;
     this.floatSide = null;
     this.clearSide = null;
+    this.columnSpan = null;
     this.verticalAlign = "baseline";
     this.flexContainer = false;
     this.whitespace = this.parent ? this.parent.whitespace : adapt.vtree.Whitespace.IGNORE;
@@ -790,8 +789,10 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.inline = this.inline;
     np.breakPenalty = this.breakPenalty;
     np.display = this.display;
+    np.floatReference = this.floatReference;
     np.floatSide = this.floatSide;
     np.clearSide = this.clearSide;
+    np.columnSpan = this.columnSpan;
     np.verticalAlign = this.verticalAlign;
     np.captionSide = this.captionSide;
     np.inlineBorderSpacing = this.inlineBorderSpacing;
@@ -1042,6 +1043,10 @@ adapt.vtree.FlowPosition = function() {
      * @type {string}
      */
     this.startSide = "any";
+    /**
+     * @type {?string}
+     */
+    this.breakAfter = null;
 };
 
 /**
@@ -1055,6 +1060,7 @@ adapt.vtree.FlowPosition.prototype.clone = function() {
         newarr[i] = arr[i].clone();
     }
     newfp.startSide = this.startSide;
+    newfp.breakAfter = this.breakAfter;
     return newfp;
 };
 
@@ -1386,15 +1392,89 @@ adapt.vtree.Container.prototype.setHorizontalPosition = function(left, width) {
 };
 
 /**
+ * @param {number} start
+ * @param {number} extent
+ * @return {void}
+ */
+adapt.vtree.Container.prototype.setBlockPosition = function(start, extent) {
+    if (this.vertical) {
+        this.setHorizontalPosition(start + extent * this.getBoxDir(), extent);
+    } else {
+        this.setVerticalPosition(start, extent);
+    }
+};
+
+/**
+ * @param {number} start
+ * @param {number} extent
+ * @return {void}
+ */
+adapt.vtree.Container.prototype.setInlinePosition = function(start, extent) {
+    if (this.vertical) {
+        this.setVerticalPosition(start, extent);
+    } else {
+        this.setHorizontalPosition(start, extent);
+    }
+};
+
+adapt.vtree.Container.prototype.clear = function() {
+    var parent = this.element;
+    var c;
+    while (c = parent.lastChild) {
+        parent.removeChild(c);
+    }
+};
+
+/**
  * @return {adapt.geom.Shape}
  */
 adapt.vtree.Container.prototype.getInnerShape = function() {
+    var rect = this.getInnerRect();
+    if (this.innerShape)
+        return this.innerShape.withOffset(rect.x1, rect.y1);
+    return adapt.geom.shapeForRect(rect.x1, rect.y1, rect.x2, rect.y2);
+};
+
+/**
+ * @returns {!adapt.geom.Rect}
+ */
+adapt.vtree.Container.prototype.getInnerRect = function() {
     var offsetX = this.originX + this.left + this.getInsetLeft();
     var offsetY = this.originY + this.top + this.getInsetTop();
-    if (this.innerShape)
-        return this.innerShape.withOffset(offsetX, offsetY);
-    return adapt.geom.shapeForRect(offsetX, offsetY,
-        offsetX + this.width, offsetY + this.height);
+    return new adapt.geom.Rect(offsetX, offsetY, offsetX + this.width, offsetY + this.height);
+};
+
+/**
+ * @returns {!adapt.geom.Rect}
+ */
+adapt.vtree.Container.prototype.getPaddingRect = function() {
+    var paddingX = this.originX + this.left + this.marginLeft + this.borderLeft;
+    var paddingY = this.originY + this.top + this.marginTop + this.borderTop;
+    var paddingWidth = this.paddingLeft + this.width + this.paddingRight;
+    var paddingHeight = this.paddingTop + this.height + this.paddingBottom;
+    return new adapt.geom.Rect(paddingX, paddingY, paddingX + paddingWidth, paddingY + paddingHeight);
+};
+
+/**
+ * @param {adapt.css.Val} outerShapeProp
+ * @param {adapt.expr.Context} context
+ * @returns {adapt.geom.Shape}
+ */
+adapt.vtree.Container.prototype.getOuterShape = function(outerShapeProp, context) {
+    var rect = this.getOuterRect();
+    return adapt.cssprop.toShape(outerShapeProp, rect.x1, rect.y1,
+        rect.x2 - rect.x1, rect.y2 - rect.y1, context);
+};
+
+/**
+ * @returns {!adapt.geom.Rect}
+ */
+adapt.vtree.Container.prototype.getOuterRect = function() {
+    var outerX = this.originX + this.left;
+    var outerY = this.originY + this.top;
+    var outerWidth = this.getInsetLeft() + this.width + this.getInsetRight();
+    var outerHeight = this.getInsetTop() + this.height + this.getInsetBottom();
+    return new adapt.geom.Rect(outerX, outerY, outerX + outerWidth, outerY + outerHeight);
 };
 
 

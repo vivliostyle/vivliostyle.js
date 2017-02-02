@@ -153,6 +153,9 @@ ul {
 
 .figure {
   width: 320px;
+  float-reference: column;
+  float: left;
+  margin-left: 8pt;
 }
 .figure img {
   width: auto;
@@ -172,7 +175,7 @@ ul {
 }
 
 .linespace {
-  margin: 0 44pt 0 0;
+  margin-right: 44pt;
 }
 
 .linespace-right {

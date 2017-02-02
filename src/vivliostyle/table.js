@@ -1351,7 +1351,7 @@ goog.scope(function() {
     /**
      * @override
      */
-    TableLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {
+    TableLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfColumn) {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
         var repetitiveElements = formattingContext.repetitiveElements;
 
