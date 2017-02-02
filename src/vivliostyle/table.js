@@ -1251,7 +1251,7 @@ goog.scope(function() {
      * @param {?Node} firstChild
      */
     TableLayoutProcessor.prototype.addColGroups = function(formattingContext, rootViewNode, firstChild) {
-        if (formattingContext.colGroups) {
+        if (formattingContext.colGroups && this.getColGroupElements(rootViewNode).length === 0) {
             rootViewNode.insertBefore(formattingContext.colGroups.cloneNode(true), firstChild);
         }
     };
