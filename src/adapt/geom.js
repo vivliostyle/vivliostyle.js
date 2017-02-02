@@ -386,7 +386,7 @@ adapt.geom.shapesToBands = function(box, include, exclude,
         // calculate the height of the band to work with
         var y2 = box.y2;  // band bottom
         // min possible y2
-        var y2min = adapt.geom.ceil(Math.ceil(y + granularity), snapHeight);
+        var y2min = Math.min(adapt.geom.ceil(Math.ceil(y + granularity), snapHeight), box.y2);
         for (k = 0; k < activeSegments.length && y2 > y2min; k++) {
             segment = activeSegments[k];
             if (segment.low.x == segment.high.x) {
