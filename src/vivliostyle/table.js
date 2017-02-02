@@ -1024,13 +1024,13 @@ goog.scope(function() {
         } else if (nodeContext.sourceNode === this.formattingContext.tableSourceNode) {
             var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
             var repetitiveElements = formattingContext.getRepetitiveElements();
-            if (repetitiveElements) repetitiveElements.preventSkippingFooter();
             var style = (/** @type {HTMLElement} */ (nodeContext.viewNode)).style;
             if (style && !(this.column.zeroIndent(style.paddingBottom) && this.column.zeroIndent(style.borderBottomWidth))) {
                 nodeContext.overflow = this.column.saveEdgeAndCheckForOverflow(
                     state.lastAfterNodeContext, null, false, state.breakAtTheEdge);
             }
             this.resetColumn();
+            if (repetitiveElements && this.column.stopAtOverflow) repetitiveElements.preventSkippingFooter();
             state.break = true;
         } else {
             return EdgeSkipper.prototype.afterNonInlineElementNode.call(this, state);
@@ -1530,8 +1530,8 @@ goog.scope(function() {
         var repetitiveElements = this.getRepetitiveElements();
         if (!repetitiveElements) return true;
 
-        this.updateFooterSkippingState(nodeContext);
         if (column.parent) return true;
+        this.updateFooterSkippingState(nodeContext);
         if (adapt.layout.isOrphan(this.nodeContext.viewNode)) return true;
         if (!repetitiveElements.isEnableToUpdateState()) return true;
 
@@ -1613,7 +1613,9 @@ goog.scope(function() {
             var cellFragment = formattingContext.getCellFragmentOfCell(cell);
             cellFragment.pseudoColumn.getFragmentLayoutConstraints().forEach(function(constraint) {
                 var repetitiveElements = constraint.getRepetitiveElements();
-                if (repetitiveElements && nodeContext.after && !nodeContext.overflow) repetitiveElements.preventSkippingFooter();
+                if (repetitiveElements && nodeContext.after && !nodeContext.overflow) {
+                    repetitiveElements.preventSkippingFooter();
+                }
                 constraint.getRepetitiveElements().removeFooterFromFragment();
             });
         });
