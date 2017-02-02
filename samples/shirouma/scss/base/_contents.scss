@@ -12,6 +12,9 @@
 
 .figure {
   width: 320px;
+  float-reference: column;
+  float: left;
+  margin-left: 8pt;
   img {
     width: auto;
     height: 100%;
@@ -31,7 +34,7 @@
 }
 
 .linespace {
-  margin: 0 44pt 0 0;
+  margin-right: 44pt;
 }
 
 .linespace-right {
