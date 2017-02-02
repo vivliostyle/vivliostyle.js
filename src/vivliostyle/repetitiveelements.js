@@ -819,6 +819,7 @@ goog.scope(function() {
             repetitiveElements = formattingContext.getRepetitiveElements();
         }
         var parentNode = nodeContext.viewNode.parentNode;
+        if (!parentNode) return;
         for (var lastChild = parentNode.lastChild; lastChild && lastChild != nodeContext.viewNode;) {
             var target = lastChild;
             lastChild = lastChild.previousSibling;

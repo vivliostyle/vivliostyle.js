@@ -9,16 +9,17 @@
         }
         @-epubx-page-template {
             .partition {
-                width: 398px;
-                height: 198px;
+                width: 198px;
+                height: 398px;
                 border: rgba(0, 0, 255, 0.2) solid 1px;
                 -epubx-flow-from: body;
+                writing-mode: vertical-rl;
             }
             .left {
-                left: 10px;
+                top: 10px;
             }
             .right {
-                right: 10px;
+                bottom: 10px;
             }
 
             @-epubx-page-master {
@@ -33,36 +34,37 @@
                     content: counter(page);
                 }
                 @-epubx-partition class(partition) class(right) {
-                    top: 610px;
+                    right: 610px;
                 }
                 @-epubx-partition class(partition) class(right) {
-                    top: 410px;
+                    right: 410px;
                 }
                 @-epubx-partition class(partition) class(right) {
-                    top: 210px;
+                    right: 210px;
                 }
                 @-epubx-partition class(partition) class(right) {
-                    top: 10px;
+                    right: 10px;
                 }
                 @-epubx-partition class(partition) class(left) {
-                    top: 610px;
+                    right: 610px;
                 }
                 @-epubx-partition class(partition) class(left) {
-                    top: 410px;
+                    right: 410px;
                 }
                 @-epubx-partition class(partition) class(left) {
-                    top: 210px;
+                    right: 210px;
                 }
                 @-epubx-partition class(partition) class(left) {
-                    top: 10px;
+                    right: 10px;
                 }
             }
         }
         :root {
-            font-size: 10px;
+            writing-mode: vertical-rl;
             line-height: 12px;
             widows: 1;
             orphans: 1;
+            font-size: 10px;
         }
         body {
             margin: 0 10px;
@@ -95,7 +97,7 @@
         }
 
         .box {
-            height: 30px;
+            width: 30px;
             border: 1px solid #999;
             margin: 2px;
             padding: 2px;
@@ -108,7 +110,7 @@
         }
         .child .box {
             background-color: #FFF;
-            height: 20px;
+            width: 20px;
         }
 
         table {
@@ -229,22 +231,22 @@
                 </tfoot>
                 <tbody>
                     <tr>
-                        <td><div style='height:190px'>drop child footer, and parent header, footer</div></td>
+                        <td><div style='width:190px'>drop child footer, and parent header, footer</div></td>
                     </tr>
                     <tr>
-                        <td><div style='height:80px'>drop child footer</div></td>
+                        <td><div style='width:80px'>drop child footer</div></td>
                     </tr>
                     <tr>
-                        <td><div style='height:100px'>drop child header, footer</div></td>
+                        <td><div style='width:100px'>drop child header, footer</div></td>
                     </tr>
                     <tr>
-                        <td><div style='height:130px'>drop child header, footer and parent footer</div></td>
+                        <td><div style='width:130px'>drop child header, footer and parent footer</div></td>
                     </tr>
                     <tr>
-                        <td><div style='height:190px'>drop child header, footer and parent header, footer</div></td>
+                        <td><div style='width:190px'>drop child header, footer and parent header, footer</div></td>
                     </tr>
                     <tr>
-                        <td><div style='height:150px'>drop child header, and parent header, footer</div></td>
+                        <td><div style='width:150px'>drop child header, and parent header, footer</div></td>
                     </tr>
                 </tbody>
             </table>
@@ -312,7 +314,7 @@
             <thead>
                 <tr>
                     <td>header 1</td>
-                    <td style="width:80px;">header 2</td>
+                    <td style="height:80px;">header 2</td>
                 </tr>
             </thead>
             <tfoot>
@@ -327,12 +329,12 @@
                     <div class="child2">
                         <div class="box header">this is header of child</div>
                         <div class="box footer">this is footer of child</div>
-                        <div style='height:120px'>drop child footer, and parent footer</div>
-                        <div style='height:100px'>drop child footer</div>
-                        <div style='height:120px'>drop child header, footer</div>
-                        <div style='height:170px'>drop child header, footer and parent footer</div>
-                        <div style='height:190px'>drop child header, footer and parent header, footer</div>
-                        <div style='height:150px'>drop child header, and parent header, footer</div>
+                        <div style='width:120px'>drop child footer, and parent footer</div>
+                        <div style='width:100px'>drop child footer</div>
+                        <div style='width:120px'>drop child header, footer</div>
+                        <div style='width:170px'>drop child header, footer and parent footer</div>
+                        <div style='width:190px'>drop child header, footer and parent header, footer</div>
+                        <div style='width:150px'>drop child header, and parent header, footer</div>
                     </div>
                   </td>
                   <td>
@@ -476,7 +478,7 @@
             <thead>
                 <tr>
                     <td>header 1</td>
-                    <td style="width:80px;">header 2</td>
+                    <td style="height:80px;">header 2</td>
                 </tr>
             </thead>
             <tfoot>
@@ -501,22 +503,22 @@
                         </tfoot>
                         <tbody>
                             <tr>
-                                <td><div style='height:130px'>drop child footer, and parent header, footer</div></td>
+                                <td><div style='width:130px'>drop child footer, and parent header, footer</div></td>
                             </tr>
                             <tr>
-                                <td><div style='height:120px'>drop child footer</div></td>
+                                <td><div style='width:120px'>drop child footer</div></td>
                             </tr>
                             <tr>
-                                <td><div style='height:140px'>drop child header, footer</div></td>
+                                <td><div style='width:140px'>drop child header, footer</div></td>
                             </tr>
                             <tr>
-                                <td><div style='height:155px'>drop child header, footer and parent footer</div></td>
+                                <td><div style='width:155px'>drop child header, footer and parent footer</div></td>
                             </tr>
                             <tr>
-                                <td><div style='height:190px'>drop child header, footer and parent header, footer</div></td>
+                                <td><div style='width:190px'>drop child header, footer and parent header, footer</div></td>
                             </tr>
                             <tr>
-                                <td><div style='height:155px'>drop child header, and parent header, footer</div></td>
+                                <td><div style='width:155px'>drop child header, and parent header, footer</div></td>
                             </tr>
                         </tbody>
                     </table>

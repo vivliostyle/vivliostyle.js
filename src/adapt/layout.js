@@ -1577,9 +1577,9 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
         // TODO: should this be done after first-line calculation?
         var edge = self.calculateEdge(resNodeContext, checkPoints, checkPointIndex,
             checkPoints[checkPointIndex].boxOffset);
-        edge += (this.vertical ? -1 : 1) * calculateOffsetOfRepetitiveElements(
+        edge += (self.vertical ? -1 : 1) * calculateOffsetOfRepetitiveElements(
             vivliostyle.repetitiveelements.collectRepetitiveElements(self));
-        var overflown = self.isOverflown(edge);
+        var overflown = self.isOverflown(edge) && !adapt.layout.isOrphan(resNodeContext.viewNode);
         if (resNodeContext == null) {
             edge += self.getTrailingMarginEdgeAdjustment(checkPoints);
         }
