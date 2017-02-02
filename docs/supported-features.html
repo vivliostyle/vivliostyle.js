@@ -602,6 +602,7 @@
   <li><a href="https://www.w3.org/TR/CSS2/visuren.html#propdef-float">float</a>
     <ul>
       <li>Supported in all browsers</li>
+      <li>Supports <a href="https://drafts.csswg.org/css-page-floats/#propdef-float"><code>block-start</code>, <code>block-end</code>, <code>inline-start</code>, <code>inline-end</code>, <code>left</code>, <code>right</code>, <code>top</code>, <code>bottom</code> and <code>none</code></a> values.</li>
     </ul>
   </li>
   <li><a href="https://www.w3.org/TR/CSS2/fonts.html#propdef-font">font</a>
@@ -1425,6 +1426,25 @@
       <li>Supported in all browsers</li>
     </ul>
   </li>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#column-span0">column-span</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Supported in all browsers</li>
+      <li>Note: Currently <code>column-span</code> is effective only when specified on a page float.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2><a href="https://drafts.csswg.org/css-multicol-2/">CSS Multi-column Layout 2</a></h2>
+
+<ul>
+  <li><a href="https://drafts.csswg.org/css-multicol-2/#propdef-column-span">column-span</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Supported in all browsers</li>
+      <li>Note: Currently <code>column-span</code> is effective only when specified on a page float. When <code>auto</code> value is specified, either a single column or all columns are spanned depending on the min-content inline size of the page float.</li>
+    </ul>
+  </li>
 </ul>
 
 <h3><a href="https://www.w3.org/TR/css3-ui/">CSS Basic User Interface 3</a></h3>
@@ -1874,6 +1894,21 @@
   <li><a href="https://drafts.fxtf.org/css-masking-1/#the-clip-rule">clip-rule</a>
     <ul>
       <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h2><a href="https://drafts.csswg.org/css-page-floats-3/">CSS Page Floats 3</a></h2>
+<ul>
+  <li><a href="https://drafts.csswg.org/css-page-floats-3/#propdef-float">float</a>
+    <ul>
+      <li>Supports <a href="https://drafts.csswg.org/css-page-floats/#propdef-float"><code>block-start</code>, <code>block-end</code>, <code>inline-start</code>, <code>inline-end</code>, <code>left</code>, <code>right</code>, <code>top</code>, <code>bottom</code> and <code>none</code></a> values.</li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.csswg.org/css-page-floats-3/#propdef-float-reference">float-reference</a>
+    <ul>
+      <li>Supported in all browsers</li>
     </ul>
   </li>
 </ul>

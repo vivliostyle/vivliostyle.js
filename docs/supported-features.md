@@ -272,6 +272,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Support depends on browser capabilities
 - [float](https://www.w3.org/TR/CSS2/visuren.html#propdef-float)
   - Supported in all browsers
+  - Supports [`block-start`, `block-end`, `inline-start`, `inline-end`, `left`, `right`, `top`, `bottom` and `none`](https://drafts.csswg.org/css-page-floats/#propdef-float) values.
 - [font](https://www.w3.org/TR/CSS2/fonts.html#propdef-font)
   - Support depends on browser capabilities
 - [font-family](https://www.w3.org/TR/CSS2/fonts.html#propdef-font-family)
@@ -642,6 +643,17 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 - [columns](https://www.w3.org/TR/css3-multicol/#columns0)
   - Allowed prefixes: moz, webkit
   - Supported in all browsers
+- [column-span](https://www.w3.org/TR/css3-multicol/#column-span0)
+  - Allowed prefixes: webkit
+  - Supported in all browsers
+  - Note: Currently `column-span` is effective only when specified on a page float.
+
+## [CSS Multi-column Layout 2](https://drafts.csswg.org/css-multicol-2/)
+
+- [column-span](https://drafts.csswg.org/css-multicol-2/#propdef-column-span)
+  - Allowed prefixes: webkit
+  - Supported in all browsers
+  - Note: Currently `column-span` is effective only when specified on a page float. When `auto` value is specified, either a single column or all columns are spanned depending on the min-content inline size of the page float.
 
 ### [CSS Basic User Interface 3](https://www.w3.org/TR/css3-ui/)
 
@@ -846,6 +858,13 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Support depends on browser capabilities
 - [clip-rule](https://drafts.fxtf.org/css-masking-1/#the-clip-rule)
   - Support depends on browser capabilities
+
+## [CSS Page Floats 3](https://drafts.csswg.org/css-page-floats-3/)
+- [float](https://drafts.csswg.org/css-page-floats-3/#propdef-float)
+  - Supports [`block-start`, `block-end`, `inline-start`, `inline-end`, `left`, `right`, `top`, `bottom` and `none`](https://drafts.csswg.org/css-page-floats/#propdef-float) values.
+  - Supported in all browsers
+- [float-reference](https://drafts.csswg.org/css-page-floats-3/#propdef-float-reference)
+  - Supported in all browsers
 
 ## [Filter Effects 1](https://www.w3.org/TR/filter-effects-1/)
 - [filter](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
