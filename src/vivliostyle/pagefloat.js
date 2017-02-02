@@ -240,6 +240,17 @@ goog.scope(function() {
     /** @const */ var PageFloatContinuation = vivliostyle.pagefloat.PageFloatContinuation;
 
     /**
+     * @param {?vivliostyle.pagefloat.PageFloatContinuation} other
+     * @returns {boolean}
+     */
+    PageFloatContinuation.prototype.equals = function(other) {
+        if (!other) return false;
+        if (this === other) return true;
+        return this.float === other.float &&
+                adapt.vtree.isSameNodePosition(this.nodePosition, other.nodePosition);
+    };
+
+    /**
      * @param {vivliostyle.pagefloat.PageFloatLayoutContext} parent
      * @param {?vivliostyle.pagefloat.FloatReference} floatReference
      * @param {adapt.vtree.Container} container
@@ -638,7 +649,7 @@ goog.scope(function() {
             }
         }
         this.floatsDeferredFromPrevious.forEach(function(continuation) {
-            if (this.floatsDeferredToNext.indexOf(continuation) >= 0)
+            if (this.floatsDeferredToNext.findIndex(function(c) { return continuation.equals(c); }) >= 0)
                 return;
             var pageFloatId = continuation.float.getId();
             if (this.floatFragments.some(function(f) { return f.pageFloatId === pageFloatId; }))
