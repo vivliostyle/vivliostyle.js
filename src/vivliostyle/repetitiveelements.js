@@ -214,6 +214,7 @@ goog.scope(function() {
     RepetitiveElements.prototype.appendHeaderToFragment = function(rootViewNode, firstChild) {
         if (!this.headerElement || this.isSkipHeader || this.headerViewNodes.length > 0) return;
         var headerViewNode = this.headerElement.cloneNode(true);
+        headerViewNode.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
         this.headerViewNodes.push(headerViewNode);
         if (firstChild) {
             rootViewNode.insertBefore(headerViewNode, firstChild);
@@ -228,6 +229,7 @@ goog.scope(function() {
     RepetitiveElements.prototype.appendFooterToFragment = function(rootViewNode, firstChild) {
         if (!this.footerElement || this.isSkipFooter  || this.footerViewNodes.length > 0) return;
         var footerViewNode = this.footerElement.cloneNode(true);
+        footerViewNode.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
         this.footerViewNodes.push(footerViewNode);
         if (firstChild) {
             rootViewNode.insertBefore(footerViewNode, firstChild);
