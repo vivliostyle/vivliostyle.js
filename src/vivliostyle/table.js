@@ -1571,6 +1571,10 @@ goog.scope(function() {
                 });
             });
         }
+        if (!allowed) {
+            var rootViewNode = formattingContext.getRootViewNode(this.nodeContext);
+            new vivliostyle.table.TableLayoutProcessor().removeColGroups(formattingContext, rootViewNode);
+        }
         RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout.call(this, allowed, nodeContext);
     };
 
