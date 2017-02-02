@@ -901,12 +901,13 @@ goog.scope(function() {
      * @param {!adapt.layout.PageFloatArea} area
      * @param {!vivliostyle.pagefloat.PageFloat} float
      * @param {boolean} init
+     * @param {boolean} force
      * @return {boolean} Indicates if the float area fits inside the container or not
      */
-    PageFloatLayoutContext.prototype.setFloatAreaDimensions = function(area, float, init) {
+    PageFloatLayoutContext.prototype.setFloatAreaDimensions = function(area, float, init, force) {
         if (float.floatReference !== this.floatReference) {
             var parent = this.getParent(float.floatReference);
-            return parent.setFloatAreaDimensions(area, float, init);
+            return parent.setFloatAreaDimensions(area, float, init, force);
         }
 
         var logicalFloatSide = this.toLogical(float.floatSide);
@@ -944,7 +945,7 @@ goog.scope(function() {
                         blockEnd = area.vertical ?
                             Math.max(blockEnd, uppermostFullyOpenRect.x1) :
                             Math.min(blockEnd, uppermostFullyOpenRect.y2);
-                    } else {
+                    } else if (!force) {
                         return false;
                     }
                     break;
@@ -962,19 +963,19 @@ goog.scope(function() {
                         blockEnd = area.vertical ?
                             Math.max(blockEnd, bottommostFullyOpenRect.x1) :
                             Math.min(blockEnd, bottommostFullyOpenRect.y2);
-                    } else {
+                    } else if (!force) {
                         return false;
                     }
                     break;
             }
             blockSize = (blockEnd - blockStart) * area.getBoxDir();
             inlineSize = inlineEnd - inlineStart;
-            if (blockSize <= 0 || inlineSize <= 0)
+            if (!force && (blockSize <= 0 || inlineSize <= 0))
                 return false;
         } else {
             blockSize = area.computedBlockSize;
             var availableBlockSize = (blockEnd - blockStart) * area.getBoxDir();
-            if (availableBlockSize < blockSize)
+            if (!force && availableBlockSize < blockSize)
                 return false;
             var margin = area.floatMargin;
             blockSize = Math.min(blockSize + (area.vertical ? margin.left : margin.bottom),
@@ -988,6 +989,9 @@ goog.scope(function() {
                     (area.vertical ? margin.top : margin.left) +
                     (area.vertical ? margin.bottom : margin.right);
             }
+            var availableInlineSize = inlineEnd - inlineStart;
+            if (!force && availableInlineSize < inlineSize)
+                return false;
         }
 
         blockStart -= blockOffset;

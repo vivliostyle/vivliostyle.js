@@ -1356,7 +1356,8 @@ adapt.layout.Column.prototype.setupFloatArea = function(area, float) {
 
     // Calculate bands from the exclusions before setting float area dimensions
     area.init();
-    var fitWithinContainer = floatLayoutContext.setFloatAreaDimensions(area, float, true);
+    var fitWithinContainer = floatLayoutContext.setFloatAreaDimensions(area, float, true,
+        !floatLayoutContext.hasFloatFragments());
     if (fitWithinContainer) {
         // New dimensions have been set, remove exclusion floats and re-init
         area.killFloats();
@@ -1415,7 +1416,8 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, floa
             frame.finish(null);
         } else {
             goog.asserts.assert(floatArea);
-            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, float, false);
+            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, float, false,
+                !context.hasFloatFragments());
             if (!fitWithinContainer) {
                 context.restoreStashedFragments(float.floatReference);
                 context.deferPageFloat(float, nodePosition);
@@ -1484,7 +1486,7 @@ adapt.layout.Column.prototype.layoutStashedPageFloats = function(floatReference)
                 return;
             }
             goog.asserts.assert(floatArea);
-            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, float, false);
+            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, float, false, false);
             if (!fitWithinContainer) {
                 failed = true;
                 loopFrame.breakLoop();
