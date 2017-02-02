@@ -169,7 +169,7 @@ adapt.layout.LayoutProcessor.prototype.finishBreak = function(column, nodeContex
 
 /**
  * @param {!adapt.layout.Column} column
- * @param {!adapt.vtree.NodeContext} parentNodeContext
+ * @param {adapt.vtree.NodeContext} parentNodeContext
  * @param {!adapt.vtree.NodeContext} nodeContext
  * @param {boolean} removeSelf
  */

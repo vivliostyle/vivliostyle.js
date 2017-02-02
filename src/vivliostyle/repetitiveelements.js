@@ -805,17 +805,18 @@ goog.scope(function() {
 
     /**
      * @param {!adapt.layout.Column} column
-     * @param {!adapt.vtree.NodeContext} parentNodeContext
+     * @param {adapt.vtree.NodeContext} parentNodeContext
      * @param {!adapt.vtree.NodeContext} nodeContext
      * @param {boolean} removeSelf
      */
     vivliostyle.repetitiveelements.clearOverflownViewNodes = function(column, parentNodeContext, nodeContext, removeSelf) {
-        if (!parentNodeContext.viewNode) return;
         if (!nodeContext.viewNode) return;
-        var formattingContext = getRepetitiveElementsOwnerFormattingContext(parentNodeContext.formattingContext);
-        var repetitiveElements = formattingContext.getRepetitiveElements();
-
-        var parentNode = parentNodeContext.viewNode;
+        var repetitiveElements = null;
+        if (parentNodeContext) {
+            var formattingContext = getRepetitiveElementsOwnerFormattingContext(parentNodeContext.formattingContext);
+            repetitiveElements = formattingContext.getRepetitiveElements();
+        }
+        var parentNode = nodeContext.viewNode.parentNode;
         for (var lastChild = parentNode.lastChild; lastChild && lastChild != nodeContext.viewNode;) {
             var target = lastChild;
             lastChild = lastChild.previousSibling;
