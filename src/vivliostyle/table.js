@@ -613,6 +613,7 @@ goog.scope(function() {
 
         /** @const */ var nodeContext = state.nodeContext;
         /** @const */ var display = nodeContext.display;
+        var repetitiveElements = formattingContext.getRepetitiveElements();
         switch (display) {
             case "table":
                 formattingContext.inlineBorderSpacing = nodeContext.inlineBorderSpacing;
@@ -623,12 +624,20 @@ goog.scope(function() {
                 formattingContext.captions.push(captionView);
                 break;
             case "table-header-group":
-                this.inHeaderOrFooter = true;
-                formattingContext.repetitiveElements.setHeaderElement(/** @type {!Element} */ (nodeContext.viewNode));
+                if (!repetitiveElements.isHeaderRegisterd()) {
+                    this.inHeaderOrFooter = true;
+                    repetitiveElements.setHeaderElement(
+                      /** @type {!Element} */ (nodeContext.viewNode),
+                      /** @type {!Element} */ (nodeContext.sourceNode));
+                }
                 break;
             case "table-footer-group":
-                this.inHeaderOrFooter = true;
-                formattingContext.repetitiveElements.setFooterElement(/** @type {!Element} */ (nodeContext.viewNode));
+                if (!repetitiveElements.isFooterRegisterd()) {
+                    this.inHeaderOrFooter = true;
+                    repetitiveElements.setFooterElement(
+                      /** @type {!Element} */ (nodeContext.viewNode),
+                      /** @type {!Element} */ (nodeContext.sourceNode));
+                }
                 break;
             case "table-row":
                 if (!this.inHeaderOrFooter) {
@@ -659,7 +668,7 @@ goog.scope(function() {
             switch (display) {
                 case "table-header-group":
                 case "table-footer-group":
-                    this.inHeaderOrFooter = false;
+                    if (this.inHeaderOrFooter) this.inHeaderOrFooter = false;
                     break;
                 case "table-row":
                     if (!this.inHeaderOrFooter) {
@@ -710,9 +719,7 @@ goog.scope(function() {
     TableLayoutStrategy.ignoreList = {
         "table-caption": true,
         "table-column-group": true,
-        "table-column": true,
-        "table-header-group": true,
-        "table-footer-group": true
+        "table-column": true
     };
 
     TableLayoutStrategy.prototype.resetColumn = function() {
@@ -971,11 +978,16 @@ goog.scope(function() {
         if (r) return r;
 
         var nodeContext = state.nodeContext;
+        var repetitiveElements = this.formattingContext.getRepetitiveElements();
         var display = nodeContext.display;
-        if (display === "table-header-group") {
+        if (display === "table-header-group"
+          && repetitiveElements
+          && repetitiveElements.isHeaderSourceNode(nodeContext.sourceNode)) {
             this.inHeader = true;
             return adapt.task.newResult(true);
-        } else if (display === "table-footer-group") {
+        } else if (display === "table-footer-group"
+          && repetitiveElements
+          && repetitiveElements.isFooterSourceNode(nodeContext.sourceNode)) {
             this.inFooter = true;
             return adapt.task.newResult(true);
         } else if (display === "table-row") {
@@ -1013,17 +1025,26 @@ goog.scope(function() {
      */
     TableLayoutStrategy.prototype.afterNonInlineElementNode = function(state) {
         var nodeContext = state.nodeContext;
+        var repetitiveElements = this.formattingContext.getRepetitiveElements();
         var display = nodeContext.display;
         if (display === "table-header-group") {
-            this.inHeader = false;
+            if (repetitiveElements && repetitiveElements.isHeaderSourceNode(nodeContext.sourceNode)) {
+                this.inHeader = false;
+                nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+            } else {
+                adapt.base.setCSSProperty(/** @type {!Element} */ (nodeContext.viewNode), "display", "table-row-group");
+            }
         } else if (display === "table-footer-group") {
-            this.inFooter = false;
+            if (repetitiveElements && repetitiveElements.isFooterSourceNode(nodeContext.sourceNode)) {
+                this.inFooter = false;
+                nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+            } else {
+                adapt.base.setCSSProperty(/** @type {!Element} */ (nodeContext.viewNode), "display", "table-row-group");
+            }
         }
         if (display && TableLayoutStrategy.ignoreList[display]) {
             nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
         } else if (nodeContext.sourceNode === this.formattingContext.tableSourceNode) {
-            var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
-            var repetitiveElements = formattingContext.getRepetitiveElements();
             var style = (/** @type {HTMLElement} */ (nodeContext.viewNode)).style;
             if (style && !(this.column.zeroIndent(style.paddingBottom) && this.column.zeroIndent(style.borderBottomWidth))) {
                 nodeContext.overflow = this.column.saveEdgeAndCheckForOverflow(
@@ -1536,8 +1557,7 @@ goog.scope(function() {
         if (!repetitiveElements.isEnableToUpdateState()) return true;
 
         if ((overflownNodeContext && !nodeContext)
-          || (nodeContext && nodeContext.overflow)
-          || this.isOverflowCell(nodeContext, formattingContext)) {
+          || (nodeContext && nodeContext.overflow)) {
             return false;
         } else {
             return true;
@@ -1591,23 +1611,6 @@ goog.scope(function() {
         goog.asserts.assert(nodeContext.sourceNode);
         var rowIndex = formattingContext.findRowIndexBySourceNode(nodeContext.sourceNode);
         return formattingContext.getCellsFallingOnRow(rowIndex);
-    };
-
-    TableRowLayoutConstraint.prototype.isOverflowCell = function(nodeContext, formattingContext) {
-        var acceptableCellBreakPositions = this.getCells(nodeContext, formattingContext).map(function(cell) {
-            var cellFragment = formattingContext.getCellFragmentOfCell(cell);
-            var bp = cellFragment.findAcceptableBreakPosition();
-            var breakAtBeginningOfCell = cellFragment.pseudoColumn.isStartNodeContext(bp.nodeContext);
-            return {
-                nodeContext: bp.nodeContext,
-                breakAtBeginningOfCell: breakAtBeginningOfCell
-            };
-        });
-        return acceptableCellBreakPositions.some(function(bp) {
-            return !bp.nodeContext || bp.nodeContext.overflow;
-        }) || acceptableCellBreakPositions.every(function(bp, index) {
-            return bp.breakAtBeginningOfCell;
-        });
     };
 
     /** @override */

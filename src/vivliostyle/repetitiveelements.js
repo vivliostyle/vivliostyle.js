@@ -147,8 +147,10 @@ goog.scope(function() {
      */
     vivliostyle.repetitiveelements.RepetitiveElements = function(vertical) {
         /** @private @const */ this.vertical = vertical;
-        /** @private @type {Element} */ this.headerElement = null;
-        /** @private @type {Element} */ this.footerElement = null;
+        /** @private @type {Element} */ this.headerSourceNode = null;
+        /** @private @type {Element} */ this.footerSourceNode = null;
+        /** @private @type {Element} */ this.headerViewNode = null;
+        /** @private @type {Element} */ this.footerViewNode = null;
         /** @private @type {!Array.<!Element>} */ this.headerViewNodes = [];
         /** @private @type {!Array.<!Element>} */ this.footerViewNodes = [];
         /** @private @type {number} */ this.headerHeight = 0;
@@ -162,31 +164,35 @@ goog.scope(function() {
     /** @const */ var RepetitiveElements = vivliostyle.repetitiveelements.RepetitiveElements;
 
     /**
-     * @param {!Element} element
+     * @param {!Element} viewNode
+     * @param {!Element} sourceNode
      */
-    RepetitiveElements.prototype.setHeaderElement = function(element) {
-        if (this.headerElement) return; // use first one.
-        this.headerElement = element;
-        this.headerViewNodes.push(element);
+    RepetitiveElements.prototype.setHeaderElement = function(viewNode, sourceNode) {
+        if (this.headerViewNode) return; // use first one.
+        this.headerViewNode = viewNode;
+        this.headerSourceNode = sourceNode;
+        this.headerViewNodes.push(viewNode);
     };
     /**
-     * @param {!Element} element
+     * @param {!Element} viewNode
+     * @param {!Element} sourceNode
      */
-    RepetitiveElements.prototype.setFooterElement = function(element) {
-        if (this.footerElement) return; // use first one.
-        this.footerElement = element;
-        this.footerViewNodes.push(element);
+    RepetitiveElements.prototype.setFooterElement = function(viewNode, sourceNode) {
+        if (this.footerViewNode) return; // use first one.
+        this.footerViewNode = viewNode;
+        this.footerSourceNode = sourceNode;
+        this.footerViewNodes.push(viewNode);
     };
 
     /**
      * @param {!adapt.vtree.ClientLayout} clientLayout
      */
     RepetitiveElements.prototype.updateHeight = function(clientLayout) {
-        if (this.headerElement) {
-            this.headerHeight = this.getElementHeight(this.headerElement, clientLayout);
+        if (this.headerViewNode) {
+            this.headerHeight = this.getElementHeight(this.headerViewNode, clientLayout);
         }
-        if (this.footerElement) {
-            this.footerHeight = this.getElementHeight(this.footerElement, clientLayout);
+        if (this.footerViewNode) {
+            this.footerHeight = this.getElementHeight(this.footerViewNode, clientLayout);
         }
     };
 
@@ -212,8 +218,8 @@ goog.scope(function() {
      * @param {?Node} firstChild
      */
     RepetitiveElements.prototype.appendHeaderToFragment = function(rootViewNode, firstChild) {
-        if (!this.headerElement || this.isSkipHeader || this.headerViewNodes.length > 0) return;
-        var headerViewNode = this.headerElement.cloneNode(true);
+        if (!this.headerViewNode || this.isSkipHeader || this.headerViewNodes.length > 0) return;
+        var headerViewNode = this.headerViewNode.cloneNode(true);
         headerViewNode.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
         this.headerViewNodes.push(headerViewNode);
         if (firstChild) {
@@ -227,8 +233,8 @@ goog.scope(function() {
      * @param {?Node} firstChild
      */
     RepetitiveElements.prototype.appendFooterToFragment = function(rootViewNode, firstChild) {
-        if (!this.footerElement || this.isSkipFooter  || this.footerViewNodes.length > 0) return;
-        var footerViewNode = this.footerElement.cloneNode(true);
+        if (!this.footerViewNode || this.isSkipFooter  || this.footerViewNodes.length > 0) return;
+        var footerViewNode = this.footerViewNode.cloneNode(true);
         footerViewNode.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
         this.footerViewNodes.push(footerViewNode);
         if (firstChild) {
@@ -249,8 +255,8 @@ goog.scope(function() {
      * @return {boolean}
      */
     RepetitiveElements.prototype.isEnableToUpdateState = function() {
-        if ((!this.isSkipFooter && this.enableSkippingFooter && this.footerElement)
-          || (!this.isSkipHeader && this.enableSkippingHeader && this.headerElement)) {
+        if ((!this.isSkipFooter && this.enableSkippingFooter && this.footerViewNode)
+          || (!this.isSkipHeader && this.enableSkippingHeader && this.headerViewNode)) {
             return true;
         } else {
             return false;
@@ -258,9 +264,9 @@ goog.scope(function() {
     };
 
     RepetitiveElements.prototype.updateState = function() {
-        if (!this.isSkipFooter && this.enableSkippingFooter && this.footerElement) {
+        if (!this.isSkipFooter && this.enableSkippingFooter && this.footerViewNode) {
             this.isSkipFooter = true;
-        } else if (!this.isSkipHeader && this.enableSkippingHeader && this.headerElement) {
+        } else if (!this.isSkipHeader && this.enableSkippingHeader && this.headerViewNode) {
             this.isSkipHeader = true;
         }
     };
@@ -318,6 +324,32 @@ goog.scope(function() {
         return this.footerViewNodes.some(function(viewNode) {
             return viewNode === node;
         });
+    };
+    /**
+     * @return {boolean}
+     */
+    RepetitiveElements.prototype.isHeaderRegisterd = function() {
+        return !!this.headerViewNode;
+    };
+    /**
+     * @return {boolean}
+     */
+    RepetitiveElements.prototype.isFooterRegisterd = function() {
+        return !!this.footerViewNode;
+    };
+    /**
+     * @param {Node} node
+     * @return {boolean}
+     */
+    RepetitiveElements.prototype.isHeaderSourceNode = function(node) {
+        return this.headerSourceNode === node;
+    };
+    /**
+     * @param {Node} node
+     * @return {boolean}
+     */
+    RepetitiveElements.prototype.isFooterSourceNode = function(node) {
+        return this.footerSourceNode === node;
     };
 
     /**
@@ -588,10 +620,14 @@ goog.scope(function() {
         /** @const */ var nodeContext = state.nodeContext;
         switch (nodeContext.repeatOnBreak) {
             case "header":
-                formattingContext.repetitiveElements.setHeaderElement(/** @type {!Element} */ (nodeContext.viewNode));
+                formattingContext.repetitiveElements.setHeaderElement(
+                  /** @type {!Element} */ (nodeContext.viewNode),
+                  /** @type {!Element} */ (nodeContext.sourceNode));
                 break;
             case "footer":
-                formattingContext.repetitiveElements.setFooterElement(/** @type {!Element} */ (nodeContext.viewNode));
+                formattingContext.repetitiveElements.setFooterElement(
+                  /** @type {!Element} */ (nodeContext.viewNode),
+                  /** @type {!Element} */ (nodeContext.sourceNode));
                 break;
         }
         return adapt.task.newResult(true);
@@ -636,8 +672,12 @@ goog.scope(function() {
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.startNonInlineElementNode = function(nodeContext) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext);
-        if (nodeContext.repeatOnBreak === "header" || nodeContext.repeatOnBreak === "footer") {
-            if (nodeContext.viewNode.parentNode) nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+        var repetitiveElements = formattingContext.getRepetitiveElements();
+        if (!repetitiveElements) return false;
+
+        if (repetitiveElements.isHeaderSourceNode(nodeContext.sourceNode)
+           || repetitiveElements.isFooterSourceNode(nodeContext.sourceNode)) {
+            nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
         }
         return false;
     };
