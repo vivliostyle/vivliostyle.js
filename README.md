@@ -11,4 +11,4 @@ Please send them to
 
 ## License
 
-Licensed under [GPL Version 3](http://www.gnu.org/licenses/gpl.html).
+Licensed under [AGPL Version 3](http://www.gnu.org/licenses/agpl.html).
