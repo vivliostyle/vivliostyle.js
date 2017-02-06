@@ -1245,9 +1245,9 @@ adapt.vgen.ViewFactory.prototype.processRepeatOnBreak = function(computedStyle) 
     var repeatOnBreak = computedStyle["repeat-on-break"];
     if (repeatOnBreak !== adapt.css.ident.none) {
         if (repeatOnBreak === adapt.css.ident.auto) {
-            if (this.nodeContext.display === "table-header-group") {
+            if (computedStyle["display"] === adapt.css.ident.table_header_group) {
                 repeatOnBreak = adapt.css.ident.header;
-            } else if (this.nodeContext.display === "table-header-group") {
+            } else if (computedStyle["display"] === adapt.css.ident.table_footer_group) {
                 repeatOnBreak = adapt.css.ident.footer;
             } else {
                 repeatOnBreak = adapt.css.ident.none;

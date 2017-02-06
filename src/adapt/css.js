@@ -928,6 +928,8 @@ adapt.css.ident = {
     table: adapt.css.getName("table"),
     table_caption: adapt.css.getName("table-caption"),
     table_cell: adapt.css.getName("table-cell"),
+    table_footer_group: adapt.css.getName("table-footer-group"),
+    table_header_group: adapt.css.getName("table-header-group"),
     table_row: adapt.css.getName("table-row"),
     top: adapt.css.getName("top"),
     transparent: adapt.css.getName("transparent"),
