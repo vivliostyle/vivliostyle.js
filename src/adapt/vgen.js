@@ -790,7 +790,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             firstTime = self.nodeContext.parent.formattingContext.isFirstTime(self.nodeContext, firstTime);
         }
         if (!self.nodeContext.inline) {
-            self.nodeContext.repeatOnBreak = self.processRepeateOnBreak(computedStyle);
+            self.nodeContext.repeatOnBreak = self.processRepeatOnBreak(computedStyle);
             self.findAndProcessRepeatingElements(element, styler);
         }
 
@@ -1219,8 +1219,8 @@ adapt.vgen.ViewFactory.prototype.findAndProcessRepeatingElements = function(elem
         var computedStyle = {};
         var elementStyle = styler.getStyle(/** @type {Element}*/ (child), false);
         this.computeStyle(this.nodeContext.vertical, elementStyle, computedStyle);
-        var processRepeateOnBreak = this.processRepeateOnBreak(computedStyle);
-        if (!processRepeateOnBreak) continue;
+        var processRepeatOnBreak = this.processRepeatOnBreak(computedStyle);
+        if (!processRepeatOnBreak) continue;
 
         if (this.nodeContext.formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext
             && !this.nodeContext.formattingContext.isInherited(this.nodeContext)) {
@@ -1241,7 +1241,7 @@ adapt.vgen.ViewFactory.prototype.findAndProcessRepeatingElements = function(elem
  * @private
  * @param {!Object.<string,adapt.css.Val>} computedStyle
  */
-adapt.vgen.ViewFactory.prototype.processRepeateOnBreak = function(computedStyle) {
+adapt.vgen.ViewFactory.prototype.processRepeatOnBreak = function(computedStyle) {
     var repeatOnBreak = computedStyle["repeat-on-break"];
     if (repeatOnBreak !== adapt.css.ident.none) {
         if (repeatOnBreak === adapt.css.ident.auto) {
