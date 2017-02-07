@@ -627,6 +627,17 @@ goog.scope(function() {
     };
 
     /**
+     * @override
+     */
+    EntireBlockLayoutStrategy.prototype.afterNonInlineElementNode = function(state) {
+        /** @const */ var formattingContext = this.formattingContext;
+        /** @const */ var nodeContext = state.nodeContext;
+        if (nodeContext.sourceNode === formattingContext.rootSourceNode) {
+            state.break = true;
+        }
+    };
+
+    /**
      * @param {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext
      * @param {!adapt.layout.Column} column
      * @constructor
