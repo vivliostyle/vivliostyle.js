@@ -66,7 +66,9 @@ $button-offset: 0;
 #vivliostyle-page-navigation-down {
 	left: 0;
 	right: 0;
-	width: 100%;
+	margin-left: auto;
+	margin-right: auto;
+	width: 50%;
 	height: ($button-size + $button-offset * 2) * 1.0;
 }
 #vivliostyle-page-navigation-up {
@@ -90,8 +92,10 @@ $button-offset: 0;
 #vivliostyle-page-navigation-right {
 	top: 0;
 	bottom: 0;
+	margin-top: auto;
+	margin-bottom: auto;
 	width: ($button-size + $button-offset * 2) * 1.0;
-	height: 100%;
+	height: 50%;
 }
 #vivliostyle-page-navigation-left {
 	left: 0;
