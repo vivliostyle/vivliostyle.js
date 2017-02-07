@@ -15,6 +15,8 @@ goog.scope(function() {
     /** @const */ var LayoutIterator = vivliostyle.layoututil.LayoutIterator;
     /** @const */ var EdgeSkipper = vivliostyle.layoututil.EdgeSkipper;
     /** @const */ var EdgeBreakPosition = adapt.layout.EdgeBreakPosition;
+    /** @const */ var AbstractLayoutRetryer = vivliostyle.layoututil.AbstractLayoutRetryer;
+    /** @const */ var BlockLayoutProcessor = adapt.layout.BlockLayoutProcessor;
 
     /**
      * @param {adapt.vtree.FormattingContext} parent
@@ -440,7 +442,7 @@ goog.scope(function() {
         /** @const */ this.processor = processor;
     };
     /** @const */ var LayoutEntireOwnerBlock = vivliostyle.repetitiveelements.LayoutEntireOwnerBlock;
-    goog.inherits(LayoutEntireOwnerBlock, vivliostyle.repetitiveelements.LayoutEntireBlock);
+    goog.inherits(LayoutEntireOwnerBlock, LayoutEntireBlock);
 
     /**
      * @override
@@ -468,7 +470,7 @@ goog.scope(function() {
         /** @const */ this.processor = processor;
     };
     /** @const */ var LayoutFragmentedOwnerBlock = vivliostyle.repetitiveelements.LayoutFragmentedOwnerBlock;
-    goog.inherits(LayoutFragmentedOwnerBlock, vivliostyle.repetitiveelements.LayoutFragmentedBlock);
+    goog.inherits(LayoutFragmentedOwnerBlock, LayoutFragmentedBlock);
 
     /**
      * @override
@@ -581,7 +583,7 @@ goog.scope(function() {
         /** @private @const */ this.processor = processor;
     };
     /** @const */ var RepetitiveElementsOwnerLayoutRetryer = vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutRetryer;
-    goog.inherits(RepetitiveElementsOwnerLayoutRetryer, vivliostyle.layoututil.AbstractLayoutRetryer);
+    goog.inherits(RepetitiveElementsOwnerLayoutRetryer, AbstractLayoutRetryer);
 
     /**
      * @override
@@ -644,7 +646,7 @@ goog.scope(function() {
         /** @const */ this.column = column;
     };
     /** @const */ var FragmentedBlockLayoutStrategy = vivliostyle.repetitiveelements.FragmentedBlockLayoutStrategy;
-    goog.inherits(FragmentedBlockLayoutStrategy, vivliostyle.layoututil.EdgeSkipper);
+    goog.inherits(FragmentedBlockLayoutStrategy, EdgeSkipper);
 
     /**
      * @constructor
@@ -653,7 +655,7 @@ goog.scope(function() {
      */
     vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutProcessor = function() {};
     /** @const */ var RepetitiveElementsOwnerLayoutProcessor = vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutProcessor;
-    goog.inherits(RepetitiveElementsOwnerLayoutProcessor, adapt.layout.BlockLayoutProcessor);
+    goog.inherits(RepetitiveElementsOwnerLayoutProcessor, BlockLayoutProcessor);
 
     /**
      * @override
