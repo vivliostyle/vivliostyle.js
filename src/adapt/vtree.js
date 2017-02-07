@@ -953,6 +953,18 @@ adapt.vtree.NodeContext.prototype.walkUpBlocks = function(callback) {
     }
 };
 
+
+/**
+ * @param {adapt.vtree.FormattingContext} formattingContext
+ * @returns {boolean}
+ */
+adapt.vtree.NodeContext.prototype.belongsTo = function(formattingContext) {
+    return this.formattingContext === formattingContext
+        && !!this.parent
+        && this.parent.formattingContext === formattingContext;
+};
+
+
 /**
  * @param {adapt.vtree.NodePosition} primary
  * @constructor

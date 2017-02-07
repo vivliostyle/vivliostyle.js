@@ -1223,7 +1223,7 @@ adapt.vgen.ViewFactory.prototype.findAndProcessRepeatingElements = function(elem
         if (!processRepeatOnBreak) continue;
 
         if (this.nodeContext.formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext
-            && !this.nodeContext.formattingContext.isInherited(this.nodeContext)) {
+            && !this.nodeContext.belongsTo(this.nodeContext.formattingContext)) {
             return;
         }
 

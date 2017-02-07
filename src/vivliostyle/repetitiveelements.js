@@ -93,22 +93,13 @@ goog.scope(function() {
      */
     RepetitiveElementsOwnerFormattingContext.prototype.getRootNodeContext = function(nodeContext) {
         do {
-            if (!this.isInherited(nodeContext)) {
+            if (!nodeContext.belongsTo(this)) {
                 return nodeContext;
             }
         } while (nodeContext = nodeContext.parent);
         return null;
     };
 
-    /**
-     * @param {adapt.vtree.NodeContext} nodeContext
-     * @returns {boolean}
-     */
-    RepetitiveElementsOwnerFormattingContext.prototype.isInherited = function(nodeContext) {
-        return !!(nodeContext
-          && nodeContext.formattingContext === this
-          && nodeContext.sourceNode !== this.rootSourceNode);
-    };
 
     /**
      * @param {boolean} vertical
@@ -426,7 +417,7 @@ goog.scope(function() {
      * @param {!adapt.vtree.NodeContext} nodeContext
      */
     LayoutFragmentedBlock.prototype.appendHeaders = function(nodeContext) {
-        if (!this.formattingContext.isInherited(nodeContext) && !nodeContext.after) {
+        if (!nodeContext.belongsTo(this.formattingContext) && !nodeContext.after) {
             appendHeader(this.formattingContext, nodeContext);
         }
     };
@@ -477,7 +468,7 @@ goog.scope(function() {
      */
     LayoutFragmentedOwnerBlock.prototype.doLayout = function(nodeContext, column) {
         LayoutFragmentedBlock.prototype.appendHeaders.call(this, nodeContext);
-        if (!this.formattingContext.isInherited(nodeContext) && !nodeContext.after) {
+        if (!nodeContext.belongsTo(this.formattingContext) && !nodeContext.after) {
             column.fragmentLayoutConstraints.unshift(
                 new RepetitiveElementsOwnerLayoutConstraint(nodeContext));
         }
@@ -589,12 +580,12 @@ goog.scope(function() {
      * @override
      */
     RepetitiveElementsOwnerLayoutRetryer.prototype.resolveLayoutMode = function(nodeContext) {
-        if (!this.formattingContext.isInherited(nodeContext)
+        if (!nodeContext.belongsTo(this.formattingContext)
           && !this.formattingContext.doneInitialLayout) {
             return new LayoutEntireOwnerBlock(this.formattingContext, this.processor);
         } else {
             var repetitiveElements = this.formattingContext.getRepetitiveElements();
-            if (!this.formattingContext.isInherited(nodeContext) && !nodeContext.after) {
+            if (!nodeContext.belongsTo(this.formattingContext) && !nodeContext.after) {
                 if (repetitiveElements) repetitiveElements.preventSkippingHeader();
             }
             return new LayoutFragmentedOwnerBlock(this.formattingContext, this.processor);
@@ -662,7 +653,7 @@ goog.scope(function() {
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.layout = function(nodeContext, column) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
-        if (!formattingContext.isInherited(nodeContext)) {
+        if (!nodeContext.belongsTo(formattingContext)) {
             return new RepetitiveElementsOwnerLayoutRetryer(formattingContext, this).layout(nodeContext, column);
         } else {
             return adapt.layout.BlockLayoutProcessor.prototype.layout.call(this, nodeContext, column);
@@ -689,7 +680,7 @@ goog.scope(function() {
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.afterNonInlineElementNode = function(nodeContext, stopAtOverflow) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
-        if (!formattingContext.isInherited(nodeContext) && nodeContext.after && stopAtOverflow) {
+        if (!nodeContext.belongsTo(formattingContext) && nodeContext.after && stopAtOverflow) {
             var repetitiveElements = formattingContext.getRepetitiveElements();
             if (repetitiveElements) repetitiveElements.preventSkippingFooter();
         }
@@ -771,7 +762,7 @@ goog.scope(function() {
             var formattingContext = nc.formattingContext;
             if (formattingContext
               && formattingContext instanceof RepetitiveElementsOwnerFormattingContext
-              && !formattingContext.isInherited(nc)) {
+              && !nc.belongsTo(formattingContext)) {
                 callback(formattingContext, nc);
             }
         }
