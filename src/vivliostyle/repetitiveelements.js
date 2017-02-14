@@ -240,8 +240,35 @@ goog.scope(function() {
     /**
      * @return {number}
      */
-    RepetitiveElements.prototype.calculateOffset = function() {
-        return (this.isSkipFooter ? 0 : this.footerHeight);
+    RepetitiveElements.prototype.calculateOffset = function(nodeContext) {
+        if (!this.isSkipFooter
+          || (nodeContext && this.isAfterTheLastContent(nodeContext))) {
+            return this.footerHeight;
+        }
+        return 0;
+    };
+
+    RepetitiveElements.prototype.isAfterTheLastContent = function(nodeContext) {
+        var parentsOfLastContent = [];
+        for (var n=this.lastContentSourceNode; n; n=n.parentNode) {
+            if (nodeContext.sourceNode === n) {
+                return nodeContext.after;
+            } else {
+                parentsOfLastContent.push(n);
+            }
+        }
+        for (var currentParent=nodeContext.sourceNode; currentParent; currentParent=currentParent.parentNode) {
+            if (parentsOfLastContent.indexOf(currentParent) >= 0) {
+                return false;
+            } else {
+                for (var current=currentParent; current; current=current.previousElementSibling) {
+                    if (parentsOfLastContent.indexOf(current) >= 0) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return nodeContext.after;
     };
 
     /**
@@ -269,13 +296,8 @@ goog.scope(function() {
         this.enableSkippingHeader = false;
     };
     RepetitiveElements.prototype.preventSkippingFooter = function() {
-        this.originalFooterSkippingState = this.isSkipFooter;
         this.isSkipFooter = false;
         this.enableSkippingFooter = false;
-    };
-    RepetitiveElements.prototype.allowSkippingFooter = function() {
-        this.isSkipFooter = this.originalFooterSkippingState;
-        this.enableSkippingFooter = true;
     };
     RepetitiveElements.prototype.removeHeaderFromFragment = function() {
         this.headerViewNodes.forEach(function(viewNode) {
@@ -288,15 +310,6 @@ goog.scope(function() {
             if (viewNode.parentNode) viewNode.parentNode.removeChild(viewNode);
         });
         this.footerViewNodes = [];
-    };
-
-    RepetitiveElements.prototype.clearOrphans = function() {
-        this.headerViewNodes = this.headerViewNodes.filter(function(node) {
-            return !adapt.layout.isOrphan(node);
-        });
-        this.footerViewNodes = this.footerViewNodes.filter(function(node) {
-            return !adapt.layout.isOrphan(node);
-        });
     };
 
     /**
@@ -493,8 +506,6 @@ goog.scope(function() {
         var repetitiveElements = this.getRepetitiveElements();
         if (!repetitiveElements) return true;
 
-        this.updateFooterSkippingState(nodeContext);
-
         if (adapt.layout.isOrphan(this.nodeContext.viewNode)) return true;
         if (!repetitiveElements.isEnableToUpdateState()) return true;
 
@@ -518,11 +529,16 @@ goog.scope(function() {
     };
 
     /** @override */
-    RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout = function(allowed, nodeContext) {
+    RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout = function(allowed, nodeContext, column) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(this.nodeContext.formattingContext);
         var repetitiveElements = this.getRepetitiveElements();
         if (!repetitiveElements) return;
         if (allowed) {
+            if (column.stopAtOverflow) {
+                if (nodeContext == null || repetitiveElements.isAfterTheLastContent(nodeContext)) {
+                    repetitiveElements.preventSkippingFooter();
+                }
+            }
             vivliostyle.repetitiveelements.appendFooter(formattingContext, this.nodeContext);
         } else {
             repetitiveElements.removeHeaderFromFragment();
@@ -542,18 +558,6 @@ goog.scope(function() {
         return formattingContext.getRepetitiveElements();
     };
 
-    /**
-     * @param {adapt.vtree.NodeContext} nodeContext
-     */
-    RepetitiveElementsOwnerLayoutConstraint.prototype.updateFooterSkippingState = function(nodeContext) {
-        var formattingContext = getRepetitiveElementsOwnerFormattingContext(this.nodeContext.formattingContext);
-        var repetitiveElements = this.getRepetitiveElements();
-        if (repetitiveElements
-            && !formattingContext.isAfterContextOfRootElement(nodeContext)
-            && !repetitiveElements.enableSkippingFooter) {
-            repetitiveElements.allowSkippingFooter();
-        }
-    };
 
     /** @override */
     RepetitiveElementsOwnerLayoutConstraint.prototype.equalsTo = function(constraint) {
@@ -596,14 +600,14 @@ goog.scope(function() {
      * @param {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext
      * @param {!adapt.layout.Column} column
      * @constructor
-     * @extends {vivliostyle.layoututil.LayoutIteratorStrategy}
+     * @extends {vivliostyle.layoututil.EdgeSkipper}
      */
     vivliostyle.repetitiveelements.EntireBlockLayoutStrategy = function(formattingContext, column) {
         /** @const */ this.formattingContext = formattingContext;
         /** @const */ this.column = column;
     };
     /** @const */ var EntireBlockLayoutStrategy = vivliostyle.repetitiveelements.EntireBlockLayoutStrategy;
-    goog.inherits(EntireBlockLayoutStrategy, LayoutIteratorStrategy);
+    goog.inherits(EntireBlockLayoutStrategy, EdgeSkipper);
 
     /**
      * @override
@@ -611,19 +615,30 @@ goog.scope(function() {
     EntireBlockLayoutStrategy.prototype.startNonInlineElementNode = function(state) {
         /** @const */ var formattingContext = this.formattingContext;
         /** @const */ var nodeContext = state.nodeContext;
+        /** @const */ var repetitiveElements = formattingContext.getRepetitiveElements();
         switch (nodeContext.repeatOnBreak) {
             case "header":
-                formattingContext.repetitiveElements.setHeaderElement(
-                  /** @type {!Element} */ (nodeContext.viewNode),
-                  /** @type {!Element} */ (nodeContext.sourceNode));
+                if (!repetitiveElements.isHeaderRegisterd()) {
+                    repetitiveElements.setHeaderElement(
+                        /** @type {!Element} */ (nodeContext.viewNode),
+                        /** @type {!Element} */ (nodeContext.sourceNode));
+                    return adapt.task.newResult(true);
+                } else {
+                    nodeContext.repeatOnBreak = "none";
+                }
                 break;
             case "footer":
-                formattingContext.repetitiveElements.setFooterElement(
-                  /** @type {!Element} */ (nodeContext.viewNode),
-                  /** @type {!Element} */ (nodeContext.sourceNode));
+                if (!repetitiveElements.isFooterRegisterd()) {
+                    repetitiveElements.setFooterElement(
+                      /** @type {!Element} */ (nodeContext.viewNode),
+                      /** @type {!Element} */ (nodeContext.sourceNode));
+                    return adapt.task.newResult(true);
+                } else {
+                    nodeContext.repeatOnBreak = "none";
+                }
                 break;
         }
-        return adapt.task.newResult(true);
+        return EdgeSkipper.prototype.startNonInlineElementNode.call(this, state);
     };
 
     /**
@@ -633,7 +648,15 @@ goog.scope(function() {
         /** @const */ var formattingContext = this.formattingContext;
         /** @const */ var nodeContext = state.nodeContext;
         if (nodeContext.sourceNode === formattingContext.rootSourceNode) {
+            formattingContext.getRepetitiveElements().lastContentSourceNode =
+                state.lastAfterNodeContext && state.lastAfterNodeContext.sourceNode;
             state.break = true;
+        }
+        if (nodeContext.repeatOnBreak === 'header'
+            || nodeContext.repeatOnBreak === 'footer') {
+            return adapt.task.newResult(true);
+        } else {
+            return EdgeSkipper.prototype.afterNonInlineElementNode.call(this, state);
         }
     };
 
@@ -662,12 +685,14 @@ goog.scope(function() {
     /**
      * @override
      */
-    RepetitiveElementsOwnerLayoutProcessor.prototype.layout = function(nodeContext, column) {
+    RepetitiveElementsOwnerLayoutProcessor.prototype.layout = function(nodeContext, column, leadingEdge) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
+        if (leadingEdge) vivliostyle.repetitiveelements.appendHeaderToAncestors(nodeContext.parent, column);
+
         if (!nodeContext.belongsTo(formattingContext)) {
             return new RepetitiveElementsOwnerLayoutRetryer(formattingContext, this).layout(nodeContext, column);
         } else {
-            return adapt.layout.BlockLayoutProcessor.prototype.layout.call(this, nodeContext, column);
+            return adapt.layout.BlockLayoutProcessor.prototype.layout.call(this, nodeContext, column, leadingEdge);
         }
     };
 
@@ -685,19 +710,6 @@ goog.scope(function() {
         }
         return false;
     };
-
-    /**
-     * @override
-     */
-    RepetitiveElementsOwnerLayoutProcessor.prototype.afterNonInlineElementNode = function(nodeContext, stopAtOverflow) {
-        var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
-        if (!nodeContext.belongsTo(formattingContext) && nodeContext.after && stopAtOverflow) {
-            var repetitiveElements = formattingContext.getRepetitiveElements();
-            if (repetitiveElements) repetitiveElements.preventSkippingFooter();
-        }
-        return false;
-    };
-
 
     /**
      * @param {!adapt.vtree.NodeContext} nodeContext
@@ -733,7 +745,7 @@ goog.scope(function() {
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.doLayout = function(nodeContext, column) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
-        return adapt.layout.BlockLayoutProcessor.prototype.layout.call(this, nodeContext, column);
+        return adapt.layout.BlockLayoutProcessor.prototype.layout.call(this, nodeContext, column, false);
     };
 
     /**

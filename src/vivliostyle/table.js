@@ -213,6 +213,23 @@ goog.scope(function() {
                 this.formattingContext.getCellFragmentOfCell, this.formattingContext);
     };
 
+    /** @override */
+    BetweenTableRowBreakPosition.prototype.calculateOffsetOfRepetitiveElements = function(column) {
+        var nodeContext = this.getNodeContext();
+        if (nodeContext && nodeContext.display == "table-row") {
+            var maxOffsetOfTableCell = 0;
+            this.formattingContext.getCellsFallingOnRow(this.getRowIndex()).forEach(function(cell) {
+                var cellFragment = this.formattingContext.getCellFragmentOfCell(cell);
+                var repetitiveElements = vivliostyle.repetitiveelements.collectRepetitiveElements(cellFragment.pseudoColumn.column);
+                var offset = adapt.layout.calculateOffsetOfRepetitiveElements(nodeContext, repetitiveElements);
+                maxOffsetOfTableCell = Math.max(maxOffsetOfTableCell, offset);
+            }.bind(this));
+            return maxOffsetOfTableCell;
+        } else {
+            return EdgeBreakPosition.prototype.calculateOffsetOfRepetitiveElements.call(this, column);
+        }
+    };
+
     /**
      * @param {number} rowIndex
      * @param {!adapt.vtree.NodeContext} beforeNodeContext
@@ -591,7 +608,7 @@ goog.scope(function() {
      * @param {!vivliostyle.table.TableFormattingContext} formattingContext
      * @param {!adapt.layout.Column} column
      * @constructor
-     * @extends {vivliostyle.layoututil.LayoutIteratorStrategy}
+     * @extends {vivliostyle.layoututil.EdgeSkipper}
      */
     vivliostyle.table.EntireTableLayoutStrategy = function(formattingContext, column) {
         /** @const */ this.formattingContext = formattingContext;
@@ -601,7 +618,7 @@ goog.scope(function() {
         /** @type {boolean} */ this.inRow = false;
     };
     /** @const */ var EntireTableLayoutStrategy = vivliostyle.table.EntireTableLayoutStrategy;
-    goog.inherits(EntireTableLayoutStrategy, LayoutIteratorStrategy);
+    goog.inherits(EntireTableLayoutStrategy, EdgeSkipper);
 
     /**
      * @override
@@ -630,7 +647,7 @@ goog.scope(function() {
                       /** @type {!Element} */ (nodeContext.viewNode),
                       /** @type {!Element} */ (nodeContext.sourceNode));
                 }
-                break;
+                return adapt.task.newResult(true);
             case "table-footer-group":
                 if (!repetitiveElements.isFooterRegisterd()) {
                     this.inHeaderOrFooter = true;
@@ -638,7 +655,7 @@ goog.scope(function() {
                       /** @type {!Element} */ (nodeContext.viewNode),
                       /** @type {!Element} */ (nodeContext.sourceNode));
                 }
-                break;
+                return adapt.task.newResult(true);
             case "table-row":
                 if (!this.inHeaderOrFooter) {
                     this.inRow = true;
@@ -649,7 +666,7 @@ goog.scope(function() {
                 }
                 break;
         }
-        return adapt.task.newResult(true);
+        return EdgeSkipper.prototype.startNonInlineElementNode.call(this, state);
     };
 
     /**
@@ -663,12 +680,17 @@ goog.scope(function() {
         if (nodeContext.sourceNode === formattingContext.tableSourceNode) {
             var computedStyle = clientLayout.getElementComputedStyle(formattingContext.getRootViewNode(nodeContext));
             formattingContext.tableWidth = parseFloat(computedStyle[formattingContext.vertical ? "height" : "width"]);
+            formattingContext.getRepetitiveElements().lastContentSourceNode =
+                state.lastAfterNodeContext && state.lastAfterNodeContext.sourceNode;
             state.break = true;
         } else {
             switch (display) {
                 case "table-header-group":
                 case "table-footer-group":
-                    if (this.inHeaderOrFooter) this.inHeaderOrFooter = false;
+                    if (this.inHeaderOrFooter) {
+                        this.inHeaderOrFooter = false;
+                        return adapt.task.newResult(true);
+                    }
                     break;
                 case "table-row":
                     if (!this.inHeaderOrFooter) {
@@ -690,6 +712,7 @@ goog.scope(function() {
                     break;
             }
         }
+        return EdgeSkipper.prototype.afterNonInlineElementNode.call(this, state);
     };
 
     /**
@@ -1051,7 +1074,6 @@ goog.scope(function() {
                     state.lastAfterNodeContext, null, false, state.breakAtTheEdge);
             }
             this.resetColumn();
-            if (repetitiveElements && this.column.stopAtOverflow) repetitiveElements.preventSkippingFooter();
             state.break = true;
         } else {
             return EdgeSkipper.prototype.afterNonInlineElementNode.call(this, state);
@@ -1237,7 +1259,7 @@ goog.scope(function() {
             var tableBBox = column.clientLayout.getElementClientRect(tableElement);
             var edge = column.vertical ? tableBBox.left : tableBBox.bottom;
             edge += (column.vertical ? -1 : 1) * adapt.layout.calculateOffsetOfRepetitiveElements(
-              vivliostyle.repetitiveelements.collectRepetitiveElements(column));
+                nodeContext, vivliostyle.repetitiveelements.collectRepetitiveElements(column));
             if (!column.isOverflown(edge)) {
                 frame.finish(nodeContextAfter);
                 return;
@@ -1314,8 +1336,10 @@ goog.scope(function() {
     /**
      * @override
      */
-    TableLayoutProcessor.prototype.layout = function(nodeContext, column) {
+    TableLayoutProcessor.prototype.layout = function(nodeContext, column, leadingEdge) {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
+        if (leadingEdge) vivliostyle.repetitiveelements.appendHeaderToAncestors(nodeContext.parent, column);
+
         return new LayoutRetryer(formattingContext, this).layout(nodeContext, column);
     };
 
@@ -1387,7 +1411,7 @@ goog.scope(function() {
                     }
                     if (!cellFragment.empty) {
                         cellFragment.pseudoColumn.finishBreak(breakNodeContext, false, true).then(function() {
-                            adjustCellHeight(cellFragment, formattingContext);
+                            adjustCellHeight(cellFragment, formattingContext, breakNodeContext);
                             cellFragment.pseudoColumn.resetConstraints(breakNodeContext);
                             loopFrame.continueLoop();
                         });
@@ -1417,8 +1441,9 @@ goog.scope(function() {
     /**
      * @param {!vivliostyle.table.TableCellFragment} cellFragment
      * @param {!vivliostyle.table.TableFormattingContext} formattingContext
+     * @param {adapt.vtree.NodeContext} breakNodeContext
      */
-    function adjustCellHeight(cellFragment, formattingContext) {
+    function adjustCellHeight(cellFragment, formattingContext, breakNodeContext) {
         var repetitiveElements = formattingContext.getRepetitiveElements();
         if (!repetitiveElements) return;
 
@@ -1430,10 +1455,10 @@ goog.scope(function() {
         var cellElementRect = column.clientLayout.getElementClientRect(cellElement);
         var padding = column.getComputedPaddingBorder(cellElement);
         if (vertical) {
-            var width = (cellElementRect.right - column.footnoteEdge - repetitiveElements.calculateOffset() - padding.right);
+            var width = (cellElementRect.right - column.footnoteEdge - repetitiveElements.calculateOffset(breakNodeContext) - padding.right);
             adapt.base.setCSSProperty(cellContentElement, "max-width", width + "px");
         } else {
-            var height = (column.footnoteEdge - repetitiveElements.calculateOffset() - cellElementRect.top - padding.top);
+            var height = (column.footnoteEdge - repetitiveElements.calculateOffset(breakNodeContext) - cellElementRect.top - padding.top);
             adapt.base.setCSSProperty(cellContentElement, "max-height", height + "px");
         }
         adapt.base.setCSSProperty(cellContentElement, "overflow", "hidden");
@@ -1552,7 +1577,6 @@ goog.scope(function() {
         if (!repetitiveElements) return true;
 
         if (column.parent) return true;
-        this.updateFooterSkippingState(nodeContext);
         if (adapt.layout.isOrphan(this.nodeContext.viewNode)) return true;
         if (!repetitiveElements.isEnableToUpdateState()) return true;
 
@@ -1581,13 +1605,12 @@ goog.scope(function() {
     };
 
     /** @override */
-    TableRowLayoutConstraint.prototype.postLayout = function(allowed, nodeContext) {
+    TableRowLayoutConstraint.prototype.postLayout = function(allowed, nodeContext, column) {
         var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
-        if (nodeContext) {
-            var cellFragmentConstraints = this.collectCellFragmentLayoutConstraints(nodeContext, formattingContext);
-            cellFragmentConstraints.forEach(function(constraints) {
-                return constraints.forEach(function(constraint) {
-                    return constraint.postLayout(allowed);
+        if (nodeContext && nodeContext.display == "table-row") {
+            this.collectCellFragmentLayoutConstraints(nodeContext, formattingContext).forEach(function(constraints) {
+                constraints.forEach(function(constraint) {
+                    constraint.postLayout(allowed, nodeContext, column);
                 });
             });
         }
@@ -1595,7 +1618,7 @@ goog.scope(function() {
             var rootViewNode = formattingContext.getRootViewNode(this.nodeContext);
             new vivliostyle.table.TableLayoutProcessor().removeColGroups(formattingContext, rootViewNode);
         }
-        RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout.call(this, allowed, nodeContext);
+        RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout.call(this, allowed, nodeContext, column);
     };
 
     TableRowLayoutConstraint.prototype.collectCellFragmentLayoutConstraints = function(nodeContext, formattingContext) {
@@ -1611,23 +1634,6 @@ goog.scope(function() {
         goog.asserts.assert(nodeContext.sourceNode);
         var rowIndex = formattingContext.findRowIndexBySourceNode(nodeContext.sourceNode);
         return formattingContext.getCellsFallingOnRow(rowIndex);
-    };
-
-    /** @override */
-    TableRowLayoutConstraint.prototype.updateFooterSkippingState = function(nodeContext) {
-        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
-        this.getCells(nodeContext, formattingContext).forEach(function(cell) {
-            var cellFragment = formattingContext.getCellFragmentOfCell(cell);
-            cellFragment.pseudoColumn.getFragmentLayoutConstraints().forEach(function(constraint) {
-                var repetitiveElements = constraint.getRepetitiveElements();
-                if (repetitiveElements && nodeContext.after && !nodeContext.overflow) {
-                    repetitiveElements.preventSkippingFooter();
-                }
-                constraint.getRepetitiveElements().removeFooterFromFragment();
-            });
-        });
-        RepetitiveElementsOwnerLayoutConstraint.prototype
-            .updateFooterSkippingState.call(this, nodeContext);
     };
 
     /** @override */
