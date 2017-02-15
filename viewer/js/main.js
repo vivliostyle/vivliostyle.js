@@ -5911,7 +5911,7 @@ ko.exportSymbol('nativeTemplateEngine', ko.nativeTemplateEngine);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Vivliostyle core 2016.10.1-pre.20170202150155
+ * Vivliostyle core 2016.10.1-pre.20170215131143
  */
 (function(factory) {
     if (typeof define === "function" && define.amd) {
