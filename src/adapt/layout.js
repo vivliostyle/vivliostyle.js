@@ -1030,6 +1030,7 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
             null, null);
         footnoteArea = new adapt.layout.Column(footnoteContainer, layoutContext, self.clientLayout,
             self.layoutConstraint, footnotePageFloatLayoutContext);
+        footnoteArea.forceNonfitting = false;
         footnotePageFloatLayoutContext.setContainer(footnoteArea);
         self.footnoteArea = footnoteArea;
         footnoteArea.vertical = self.layoutContext.applyFootnoteStyle(self.vertical, footnoteContainer);
@@ -2308,9 +2309,10 @@ adapt.layout.Column.prototype.findAcceptableBreakPosition = function() {
 /**
  * @param {adapt.vtree.NodeContext} overflownNodeContext
  * @param {adapt.vtree.NodeContext} initialNodeContext
+ * @param {number} initialComputedBlockSize
  * @return {adapt.task.Result.<adapt.vtree.NodeContext>}
  */
-adapt.layout.Column.prototype.findAcceptableBreak = function(overflownNodeContext, initialNodeContext) {
+adapt.layout.Column.prototype.findAcceptableBreak = function(overflownNodeContext, initialNodeContext, initialComputedBlockSize) {
     /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
         adapt.task.newFrame("findAcceptableBreak");
     var self = this;
@@ -2335,6 +2337,7 @@ adapt.layout.Column.prototype.findAcceptableBreak = function(overflownNodeContex
         } else {
             nodeContext = initialNodeContext;
             forceRemoveSelf = true;
+            self.computedBlockSize = initialComputedBlockSize;
         }
     }
     this.finishBreak(nodeContext, forceRemoveSelf, true).then(function() {
@@ -2982,6 +2985,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, brea
         // ------ start the column -----------
         self.openAllViews(chunkPosition.primary).then(function(nodeContext) {
             var initialNodeContext = nodeContext;
+            var initialComputedBlockSize = self.computedBlockSize;
             // ------ init backtracking list -----
             self.breakPositions = [];
             // ------- fill the column -------------
@@ -3000,7 +3004,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, brea
                             loopFrame.breakLoop(); // Loop end
                         } else if (nodeContext && self.stopByOverflow(nodeContext)) {
                             // overflow (implicit page break): back up and find a page break
-                            self.findAcceptableBreak(nodeContext, initialNodeContext).then(function(nodeContextParam) {
+                            self.findAcceptableBreak(nodeContext, initialNodeContext, initialComputedBlockSize).then(function(nodeContextParam) {
                                 nodeContext = nodeContextParam;
                                 loopFrame.breakLoop(); // Loop end
                             });

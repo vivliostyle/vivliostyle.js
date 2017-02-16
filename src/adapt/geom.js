@@ -478,26 +478,25 @@ adapt.geom.shapesToBands = function(box, include, exclude,
             }
         }
     }
-    adapt.geom.normalize(box, result, false);
+    adapt.geom.normalize(box, result);
     return result;
 };
 
 /**
  * @param {adapt.geom.Rect} box
  * @param {Array.<adapt.geom.Band>} bands
- * @param {boolean} keepNonExcludingAtBottom
  * @return {void}
  */
-adapt.geom.normalize = function(box, bands, keepNonExcludingAtBottom) {
+adapt.geom.normalize = function(box, bands) {
     var k = bands.length - 1;
     // Merge bands with the same x1, x2 and remove unneeded bands at the end.
     // Create fictious last band to merge unneeded bands at the end
-    var currBand = new adapt.geom.Band(box.y2, box.y2,
-        (keepNonExcludingAtBottom ? NaN: box.x1), box.x2);
+    var currBand = new adapt.geom.Band(box.y2, box.y2, box.x1, box.x2);
     while (k >= 0) {
         var prevBand = currBand; // result[k+1]
         currBand = bands[k];
-        if (currBand.x1 == prevBand.x1 && currBand.x2 == prevBand.x2) {
+        if ((currBand.y2 - currBand.y1 < 1) || // Remove bands with height less than 1px
+            currBand.x1 == prevBand.x1 && currBand.x2 == prevBand.x2) {
             prevBand.y1 = currBand.y1; // merge
             bands.splice(k, 1);
             currBand = prevBand;
@@ -708,5 +707,5 @@ adapt.geom.addFloatToBands = function(box, bands, floatBox, floatBands, side) {
                 break;
         }
     }
-    adapt.geom.normalize(box, bands, false);
+    adapt.geom.normalize(box, bands);
 };
