@@ -62,23 +62,6 @@ goog.scope(function() {
     };
 
     /**
-     * @param {adapt.vtree.NodeContext} nodeContext
-     * @return {boolean}
-     */
-    RepetitiveElementsOwnerFormattingContext.prototype.isAfterContextOfRootElement = function(nodeContext) {
-        if (nodeContext
-            && nodeContext.formattingContext === this
-            && nodeContext.sourceNode === this.rootSourceNode
-            && nodeContext.after) return true;
-        for (; nodeContext; nodeContext = nodeContext.parent) {
-            if (nodeContext.formattingContext === this) {
-                return false;
-            }
-        }
-        return true;
-    };
-
-    /**
      * @param {adapt.vtree.NodeContext} position
      * @returns {Element}
      */
