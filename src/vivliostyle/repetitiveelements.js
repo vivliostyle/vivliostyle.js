@@ -127,8 +127,8 @@ goog.scope(function() {
         /** @private @type {Element} */ this.footerSourceNode = null;
         /** @private @type {Element} */ this.headerViewNode = null;
         /** @private @type {Element} */ this.footerViewNode = null;
-        /** @private @type {!Array.<!Element>} */ this.headerViewNodes = [];
-        /** @private @type {!Array.<!Element>} */ this.footerViewNodes = [];
+        /** @private @type {!Array.<!Element>} */ this.insertedHeaders = [];
+        /** @private @type {!Array.<!Element>} */ this.insertedFooters = [];
         /** @private @type {number} */ this.headerHeight = 0;
         /** @private @type {number} */ this.footerHeight = 0;
         /** @type {boolean} */ this.isSkipHeader = false;
@@ -147,7 +147,7 @@ goog.scope(function() {
         if (this.headerViewNode) return; // use first one.
         this.headerViewNode = viewNode;
         this.headerSourceNode = sourceNode;
-        this.headerViewNodes.push(viewNode);
+        this.insertedHeaders.push(viewNode);
     };
     /**
      * @param {!Element} viewNode
@@ -157,7 +157,7 @@ goog.scope(function() {
         if (this.footerViewNode) return; // use first one.
         this.footerViewNode = viewNode;
         this.footerSourceNode = sourceNode;
-        this.footerViewNodes.push(viewNode);
+        this.insertedFooters.push(viewNode);
     };
 
     /**
@@ -184,8 +184,8 @@ goog.scope(function() {
 
     RepetitiveElements.prototype.prepareLayoutFragment = function() {
         this.isSkipHeader = this.isSkipFooter = false;
-        this.headerViewNodes = [];
-        this.footerViewNodes = [];
+        this.insertedHeaders = [];
+        this.insertedFooters = [];
         this.enableSkippingFooter = true;
         this.enableSkippingHeader = true;
     };
@@ -194,10 +194,10 @@ goog.scope(function() {
      * @param {?Node} firstChild
      */
     RepetitiveElements.prototype.appendHeaderToFragment = function(rootViewNode, firstChild) {
-        if (!this.headerViewNode || this.isSkipHeader || this.headerViewNodes.length > 0) return;
+        if (!this.headerViewNode || this.isSkipHeader || this.insertedHeaders.length > 0) return;
         var headerViewNode = this.headerViewNode.cloneNode(true);
         headerViewNode.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
-        this.headerViewNodes.push(headerViewNode);
+        this.insertedHeaders.push(headerViewNode);
         if (firstChild) {
             rootViewNode.insertBefore(headerViewNode, firstChild);
         } else {
@@ -209,10 +209,10 @@ goog.scope(function() {
      * @param {?Node} firstChild
      */
     RepetitiveElements.prototype.appendFooterToFragment = function(rootViewNode, firstChild) {
-        if (!this.footerViewNode || this.isSkipFooter  || this.footerViewNodes.length > 0) return;
+        if (!this.footerViewNode || this.isSkipFooter  || this.insertedFooters.length > 0) return;
         var footerViewNode = this.footerViewNode.cloneNode(true);
         footerViewNode.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
-        this.footerViewNodes.push(footerViewNode);
+        this.insertedFooters.push(footerViewNode);
         if (firstChild) {
             rootViewNode.insertBefore(footerViewNode, firstChild);
         } else {
@@ -283,16 +283,16 @@ goog.scope(function() {
         this.enableSkippingFooter = false;
     };
     RepetitiveElements.prototype.removeHeaderFromFragment = function() {
-        this.headerViewNodes.forEach(function(viewNode) {
+        this.insertedHeaders.forEach(function(viewNode) {
             if (viewNode.parentNode) viewNode.parentNode.removeChild(viewNode);
         });
-        this.headerViewNodes = [];
+        this.insertedHeaders = [];
     };
     RepetitiveElements.prototype.removeFooterFromFragment = function() {
-        this.footerViewNodes.forEach(function(viewNode) {
+        this.insertedFooters.forEach(function(viewNode) {
             if (viewNode.parentNode) viewNode.parentNode.removeChild(viewNode);
         });
-        this.footerViewNodes = [];
+        this.insertedFooters = [];
     };
 
     /**
@@ -300,7 +300,7 @@ goog.scope(function() {
      * @return {boolean}
      */
     RepetitiveElements.prototype.isHeaderViewNode = function(node) {
-        return this.headerViewNodes.some(function(viewNode) {
+        return this.insertedHeaders.some(function(viewNode) {
             return viewNode === node;
         });
     };
@@ -310,7 +310,7 @@ goog.scope(function() {
      * @return {boolean}
      */
     RepetitiveElements.prototype.isFooterViewNode = function(node) {
-        return this.footerViewNodes.some(function(viewNode) {
+        return this.insertedFooters.some(function(viewNode) {
             return viewNode === node;
         });
     };
