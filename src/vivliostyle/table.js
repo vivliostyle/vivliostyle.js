@@ -1549,10 +1549,13 @@ goog.scope(function() {
      * @override
      */
     LayoutFragmentedTable.prototype.doLayout = function(nodeContext, column) {
-        vivliostyle.repetitiveelements.appendHeader(this.formattingContext, nodeContext);
-        var constraint = new TableRowLayoutConstraint(nodeContext);
-        if (!column.fragmentLayoutConstraints.some(function(c) { return constraint.equalsTo(c); })) {
-            column.fragmentLayoutConstraints.unshift(constraint);
+        var repetitiveElements = this.formattingContext.getRepetitiveElements();
+        if (repetitiveElements && !repetitiveElements.isAfterTheLastContent(nodeContext)) {
+            vivliostyle.repetitiveelements.appendHeader(this.formattingContext, nodeContext);
+            var constraint = new TableRowLayoutConstraint(nodeContext);
+            if (!column.fragmentLayoutConstraints.some(function(c) { return constraint.equalsTo(c); })) {
+                column.fragmentLayoutConstraints.unshift(constraint);
+            }
         }
         return this.processor.doLayout(nodeContext, column);
     };
