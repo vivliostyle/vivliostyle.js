@@ -31,6 +31,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/312>
 - Support repeating table header/footer across pages
   - <https://github.com/vivliostyle/vivliostyle.js/pull/319>
+- Fix incorrect widows behavior with footnote call close to the end of the page
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/328>
 
 ## [2016.10](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.10) - 2016-10-25
 
