@@ -14,6 +14,11 @@
   - Spec: [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
   - Spec: [CSS Multi-column Layout Module Level 2 - `column-span`](https://drafts.csswg.org/css-multicol-2/#column-span)
 
+### Changed
+
+- Change license to AGPL 3.0
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/329>
+
 ### Fixed
 
 - Fix incorrect page breaking at boundaries of inline-block boxes
