@@ -1592,7 +1592,7 @@ goog.scope(function() {
         var repetitiveElements = this.getRepetitiveElements();
         if (!repetitiveElements) return true;
 
-        if (column.parent) return true;
+        if (column.pseudoParent) return true;
         if (adapt.layout.isOrphan(this.nodeContext.viewNode)) return true;
         if (!repetitiveElements.isEnableToUpdateState()) return true;
 

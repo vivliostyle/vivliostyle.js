@@ -547,7 +547,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @type {number} */ this.bottommostFloatTop = 0;  // Top of the bottommost float
     /** @type {boolean} */ this.stopAtOverflow = true;
     /** @type {!Array.<adapt.layout.FragmentLayoutConstraint>} */ this.fragmentLayoutConstraints = [];
-    /** @type {adapt.layout.Column} */ this.parent = null;
+    /** @type {adapt.layout.Column} */ this.pseudoParent = null;
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
 
@@ -2741,7 +2741,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
             retryer.layout(nodeContext, self).then(function(nodeContextParam) {
                 self.doFinishBreak(nodeContextParam, retryer.context.overflownNodeContext, nodeContext).then(function(positionAfter) {
 
-                    if (!self.parent) self.resetConstraints(positionAfter);
+                    if (!self.pseudoParent) self.resetConstraints(positionAfter);
 
                     var footnoteArea = self.footnoteArea;
                     if (footnoteArea) {
@@ -2935,7 +2935,7 @@ adapt.layout.LayoutRetryer.prototype.resolveLayoutMode = function(nodeContext) {
  */
 adapt.layout.LayoutRetryer.prototype.prepareLayout = function(nodeContext, column) {
     column.fragmentLayoutConstraints = [];
-    if (!column.parent) vivliostyle.repetitiveelements.clearCache();
+    if (!column.pseudoParent) vivliostyle.repetitiveelements.clearCache();
 };
 
 /**

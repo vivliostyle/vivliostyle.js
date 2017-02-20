@@ -833,7 +833,7 @@ goog.scope(function() {
      */
     vivliostyle.repetitiveelements.collectRepetitiveElements = function(column) {
         /** @type {Array.<!vivliostyle.repetitiveelements.RepetitiveElements>} */ var repetitiveElements = [];
-        for (var current = column; current; current = current.parent) {
+        for (var current = column; current; current = current.pseudoParent) {
             current.fragmentLayoutConstraints.forEach(function(constraint) {
                 if (constraint instanceof RepetitiveElementsOwnerLayoutConstraint) {
                     var repetitiveElement = constraint.getRepetitiveElements();
