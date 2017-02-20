@@ -2413,6 +2413,8 @@ adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext
         edge += this.getTrailingMarginEdgeAdjustment(trailingEdgeContexts);
     }
     this.updateMaxReachedAfterEdge(edge);
+    // Always save if this.stopAtOverflow is false
+    saveEvenOverflown = this.stopAtOverflow ? saveEvenOverflown : true;
     if (saveEvenOverflown || !overflown) {
         this.saveEdgeBreakPosition(nodeContext, breakAtTheEdge, overflown);
     }
@@ -2642,7 +2644,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, for
                     leadingEdgeContexts.push(nodeContext.copy());
                     breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
                     if (!self.layoutConstraint.allowLayout(nodeContext)) {
-                        self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge);
+                        self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, false, breakAtTheEdge);
                         nodeContext = nodeContext.modify();
                         nodeContext.overflow = true;
                         if (self.stopAtOverflow) {
@@ -2683,7 +2685,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, for
                 nodeContext = nextResult.get();
             }
         }
-        if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, true, breakAtTheEdge)) {
+        if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, false, breakAtTheEdge)) {
             if (lastAfterNodeContext && self.stopAtOverflow) {
                 nodeContext = lastAfterNodeContext.modify();
                 nodeContext.overflow = true;
