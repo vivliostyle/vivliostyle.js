@@ -5,8 +5,8 @@ Vivliostyle Viewer is licensed under [AGPL Version 3](licenses/agpl-3.0.txt).
 This package contains following components:
 
 - [Vivliostyle core engine](https://github.com/vivliostyle/vivliostyle.js)
-  - Licensed under [Apache License, Version 2.0](licenses/Apache.txt).
-  - Vivliostyle core engine is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout), which is also licensed under [Apache License, Version 2.0](licenses/Apache.txt).
+  - Licensed under [AGPL Version 3](licenses/agpl-3.0.txt).
+  - Vivliostyle core engine is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout), which is licensed under [Apache License, Version 2.0](licenses/Apache.txt).
 - [Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui)
   - Licensed under [AGPL Version 3](licenses/agpl-3.0.txt).
 - [Knockout](http://knockoutjs.com/)
