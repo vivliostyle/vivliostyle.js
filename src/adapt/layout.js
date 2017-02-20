@@ -601,7 +601,6 @@ adapt.layout.Column.prototype.hasNewlyAddedPageFloats = function() {
 };
 
 /**
- * @private
  * @param {adapt.vtree.NodeContext} nodeContext
  * @returns {boolean}
  */

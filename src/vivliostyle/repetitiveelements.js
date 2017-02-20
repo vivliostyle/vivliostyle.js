@@ -728,7 +728,51 @@ goog.scope(function() {
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.doLayout = function(nodeContext, column) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
-        return adapt.layout.BlockLayoutProcessor.prototype.layout.call(this, nodeContext, column, false);
+
+        /**
+         * @type {!adapt.task.Frame.<adapt.vtree.NodeContext>}
+         */
+        var frame = adapt.task.newFrame("doLayout");
+        column.layoutContext.nextInTree(nodeContext, false).then(function(resNodeContext) {
+            var nextNodeContext = resNodeContext;
+            frame.loopWithFrame(function(loopFrame) {
+                while (nextNodeContext) {
+                    var pending = true;
+                    column.layoutNext(nextNodeContext, false).then(function(nodeContextParam) {
+                        nextNodeContext = nodeContextParam;
+                        if (column.hasNewlyAddedPageFloats()) {
+                            loopFrame.breakLoop();
+                            return;
+                        }
+                        if (column.pageBreakType) {
+                            loopFrame.breakLoop(); // Loop end
+                        } else if (nextNodeContext && column.stopByOverflow(nextNodeContext)) {
+                            loopFrame.breakLoop(); // Loop end
+                        } else if (nextNodeContext && nextNodeContext.after && nextNodeContext.sourceNode == formattingContext.rootSourceNode) {
+                            loopFrame.breakLoop(); // Loop end
+                        } else {
+                            if (pending) {
+                                // Sync case
+                                pending = false;
+                            } else {
+                                // Async case
+                                loopFrame.continueLoop();
+                            }
+                        }
+                    });
+                    if (pending) {
+                        // Async case and loop end
+                        pending = false;
+                        return;
+                    }
+                    // Sync case
+                }
+                loopFrame.breakLoop();
+            }).then(function() {
+                frame.finish(nextNodeContext);
+            });
+        });
+        return frame.result();
     };
 
     /**
