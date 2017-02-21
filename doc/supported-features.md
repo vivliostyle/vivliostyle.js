@@ -575,6 +575,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 - [hyphenate-character](https://drafts.csswg.org/css-text-4/#propdef-hyphenate-character)
   - Allowed prefixes: webkit
   - Support depends on browser capabilities
+
 ### [CSS Text Decoration 3](https://www.w3.org/TR/css-text-decor-3/)
 
 - Note: While `text-decoration` property is a shorthand in CSS Text Decoration 3, Vivliostyle treats `text-decoration` for now as an independent property defined in CSS Level 2.1.
