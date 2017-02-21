@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview View tree generator.
  */
 goog.provide('adapt.vgen');
@@ -14,7 +28,6 @@ goog.require('adapt.cssstyler');
 goog.require('adapt.vtree');
 goog.require('adapt.xmldoc');
 goog.require('adapt.font');
-goog.require('vivliostyle.pagefloat');
 goog.require('vivliostyle.urls');
 
 /**
@@ -191,7 +204,7 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
         if (content) {
             var contentVal = content.evaluate(this.context);
             if (adapt.vtree.nonTrivialContent(contentVal))
-                contentVal.visit(new adapt.vtree.ContentPropertyHandler(element, this.context));
+                contentVal.visit(new adapt.vtree.ContentPropertyHandler(element, this.context, contentVal));
         }
     }
     if (pseudoName.match(/^first-/) && !style["x-first-pseudo"]) {
@@ -221,14 +234,13 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
  * @param {adapt.vtree.Page} page
  * @param {adapt.vgen.CustomRenderer} customRenderer
  * @param {Object.<string,string>} fallbackMap
- * @param {!vivliostyle.pagefloat.FloatHolder} pageFloatHolder
  * @param {!adapt.base.DocumentURLTransformer} documentURLTransformer
  * @constructor
  * @implements {adapt.vtree.LayoutContext}
  */
 adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds,
                                   xmldoc, docFaces, footnoteStyle, stylerProducer, page, customRenderer, fallbackMap,
-                                  pageFloatHolder, documentURLTransformer) {
+                                  documentURLTransformer) {
     // from constructor parameters
     /** @const */ this.flowName = flowName;
     /** @const */ this.context = context;
@@ -243,7 +255,6 @@ adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds
     /** @const */ this.page = page;
     /** @const */ this.customRenderer = customRenderer;
     /** @const */ this.fallbackMap = fallbackMap;
-    /** @const */ this.pageFloatHolder = pageFloatHolder;
     /** @const */ this.documentURLTransformer = documentURLTransformer;
 
     // provided by layout
@@ -265,7 +276,7 @@ adapt.vgen.ViewFactory.prototype.clone = function() {
     return new adapt.vgen.ViewFactory(this.flowName, this.context, this.viewport,
         this.styler, this.regionIds,
         this.xmldoc, this.docFaces, this.footnoteStyle, this.stylerProducer,
-        this.page, this.customRenderer, this.fallbackMap, this.pageFloatHolder, this.documentURLTransformer);
+        this.page, this.customRenderer, this.fallbackMap, this.documentURLTransformer);
 };
 
 /**
@@ -403,7 +414,16 @@ adapt.vgen.ViewFactory.prototype.createShadows = function(element, isRoot, cascS
         }
         if (cont1 == null)
             cont1 = adapt.task.newResult(shadow);
+        var cont2 = null;
         cont1.then(function(shadow) {
+            if (computedStyle["display"] === adapt.css.ident.table_cell) {
+                var url = adapt.base.resolveURL("user-agent.xml#table-cell", adapt.base.resourceBaseURL);
+                cont2 = self.createRefShadow(url, adapt.vtree.ShadowType.ROOTLESS, element, shadowContext, shadow);
+            } else {
+                cont2 = adapt.task.newResult(shadow);
+            }
+        });
+        cont2.then(function(shadow) {
             shadow = self.createPseudoelementShadow(element, isRoot, cascStyle, computedStyle,
                 styler, context, shadowContext, shadow);
             frame.finish(shadow);
@@ -454,11 +474,12 @@ adapt.vgen.ViewFactory.prototype.computeStyle = function(vertical, style, comput
 /**
  * @private
  * @param {adapt.csscasc.ElementStyle} elementStyle
- * @return {adapt.csscasc.ElementStyle}
+ * @return {{lang:?string, elementStyle:adapt.csscasc.ElementStyle}}
  */
 adapt.vgen.ViewFactory.prototype.inheritFromSourceParent = function(elementStyle) {
     var node = this.nodeContext.sourceNode;
     var styles = [];
+    var lang = null;
     // TODO: this is hacky. We need to recover the path through the shadow trees, but we do not
     // have the full shadow tree structure at this point. This code handles coming out of the
     // shadow trees, but does not go back in (through shadow:content element).
@@ -471,6 +492,7 @@ adapt.vgen.ViewFactory.prototype.inheritFromSourceParent = function(elementStyle
                 /** @type {adapt.cssstyler.AbstractStyler} */ (shadowContext.styler) : this.styler;
             var nodeStyle = styler.getStyle(/** @type {Element} */ (node), false);
             styles.push(nodeStyle);
+            lang = lang || adapt.base.getLangAttribute(/** @type {Element} */ (node));
         }
         if (shadowRoot) {
             node = shadowContext.owner;
@@ -508,7 +530,7 @@ adapt.vgen.ViewFactory.prototype.inheritFromSourceParent = function(elementStyle
             props[sname] = elementStyle[sname];
         }
     }
-    return props;
+    return {lang:lang, elementStyle:props};
 };
 
 adapt.vgen.fb2Remap = {
@@ -540,11 +562,19 @@ adapt.vgen.ViewFactory.prototype.resolveURL = function(url) {
 };
 
 /**
+ */
+adapt.vgen.ViewFactory.prototype.inheritLangAttribute = function() {
+    this.nodeContext.lang = adapt.base.getLangAttribute(/** @type {Element} */ (this.nodeContext.sourceNode))
+        || (this.nodeContext.parent && this.nodeContext.parent.lang)
+        || this.nodeContext.lang;
+};
+
+/**
  *
  * @param {!Object.<string,adapt.css.Val>} computedStyle
  */
 adapt.vgen.ViewFactory.prototype.transferPolyfilledInheritedProps = function(computedStyle) {
-    var polyfilledInheritedProps = adapt.csscasc.polyfilledInheritedProps.filter(function(name) {
+    var polyfilledInheritedProps = adapt.csscasc.getPolyfilledInheritedProps().filter(function(name) {
         return computedStyle[name];
     });
     if (polyfilledInheritedProps.length) {
@@ -571,10 +601,33 @@ adapt.vgen.ViewFactory.prototype.transferPolyfilledInheritedProps = function(com
                             props[name] = numericVal.num * adapt.expr.defaultUnitSizes[numericVal.unit];
                             break;
                     }
+                } else {
+                    props[name] = value;
                 }
                 delete computedStyle[name];
             }
         });
+    }
+};
+
+/**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {boolean} firstTime
+ * @param {adapt.css.Ident} display
+ * @param {adapt.css.Ident} position
+ * @param {adapt.css.Ident} float
+ * @param {boolean} isRoot
+ */
+adapt.vgen.ViewFactory.prototype.resolveFormattingContext = function(nodeContext, firstTime, display,
+                                                                     position, float, isRoot) {
+    /** @type {!Array<!vivliostyle.plugin.ResolveFormattingContextHook>} */ var hooks =
+        vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT);
+    for (var i = 0; i < hooks.length; i++) {
+        var formattingContext = hooks[i](nodeContext, firstTime, display, position, float, isRoot);
+        if (formattingContext) {
+            nodeContext.formattingContext = formattingContext;
+            return;
+        }
     }
 };
 
@@ -596,11 +649,23 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     var elementStyle = styler.getStyle(element, false);
     var computedStyle = {};
     if (!self.nodeContext.parent) {
-        elementStyle = self.inheritFromSourceParent(elementStyle);
+        var inheritedValues = self.inheritFromSourceParent(elementStyle);
+        elementStyle = inheritedValues.elementStyle;
+        self.nodeContext.lang = inheritedValues.lang;
+    }
+    var floatReference = elementStyle["float-reference"] &&
+        vivliostyle.pagefloat.FloatReference.of(elementStyle["float-reference"].value.toString());
+    if (self.nodeContext.parent && floatReference && vivliostyle.pagefloat.isPageFloat(floatReference)) {
+        // Since a page float will be detached from a view node of its parent,
+        // inherited properties need to be inherited from its source parent.
+        var inheritedValues = self.inheritFromSourceParent(elementStyle);
+        elementStyle = inheritedValues.elementStyle;
+        self.nodeContext.lang = inheritedValues.lang;
     }
     self.nodeContext.vertical = self.computeStyle(self.nodeContext.vertical, elementStyle, computedStyle);
 
     this.transferPolyfilledInheritedProps(computedStyle);
+    this.inheritLangAttribute();
 
     if (computedStyle["direction"]) {
         self.nodeContext.direction = computedStyle["direction"].toString();
@@ -623,21 +688,22 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     self.createShadows(element, isRoot, elementStyle, computedStyle, styler, self.context, self.nodeContext.shadowContext).then(function(shadowParam) {
         self.nodeContext.nodeShadow = shadowParam;
         var position = computedStyle["position"];
-        var floatReference = computedStyle["float-reference"];
         var floatSide = computedStyle["float"];
         var clearSide = computedStyle["clear"];
         var writingMode = self.nodeContext.vertical ? adapt.css.ident.vertical_rl : adapt.css.ident.horizontal_tb;
         var parentWritingMode = self.nodeContext.parent ?
             (self.nodeContext.parent.vertical ? adapt.css.ident.vertical_rl : adapt.css.ident.horizontal_tb) :
             writingMode;
+        var isFlowRoot = vivliostyle.display.isFlowRoot(element);
         self.nodeContext.establishesBFC = vivliostyle.display.establishesBFC(display, position, floatSide,
-            computedStyle["overflow"], writingMode, parentWritingMode);
+            computedStyle["overflow"], writingMode, parentWritingMode, isFlowRoot);
         self.nodeContext.containingBlockForAbsolute = vivliostyle.display.establishesCBForAbsolute(position);
         if (self.nodeContext.isInsideBFC()) {
             // When the element is already inside a block formatting context (except one from the root),
             // float and clear can be controlled by the browser and we don't need to care.
             clearSide = null;
-            if (floatSide !== adapt.css.ident.footnote) {
+            if (floatSide !== adapt.css.ident.footnote &&
+                !(floatReference && vivliostyle.pagefloat.isPageFloat(floatReference))) {
                 floatSide = null;
             }
         }
@@ -682,13 +748,12 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         if (floating ||
             (computedStyle["break-inside"] && computedStyle["break-inside"] !== adapt.css.ident.auto)) {
             self.nodeContext.breakPenalty++;
-        } else if (display === adapt.css.ident.table_row) {
-            self.nodeContext.breakPenalty += 10;
         }
-        self.nodeContext.inline = !floating && !display || display === adapt.css.ident.inline;
+        self.nodeContext.inline = !floating && !display || vivliostyle.display.isInlineLevel(display) || vivliostyle.display.isRubyInternalDisplay(display);
         self.nodeContext.display = display ? display.toString() : "inline";
         self.nodeContext.floatSide = floating ? floatSide.toString() : null;
-        self.nodeContext.floatReference = floatReference ? floatReference.toString() : null;
+        self.nodeContext.floatReference = floatReference || vivliostyle.pagefloat.FloatReference.INLINE;
+        self.nodeContext.columnSpan = computedStyle["column-span"];
         if (!self.nodeContext.inline) {
             var breakAfter = computedStyle["break-after"];
             if (breakAfter) {
@@ -697,6 +762,27 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             var breakBefore = computedStyle["break-before"];
             if (breakBefore) {
                 self.nodeContext.breakBefore = breakBefore.toString();
+            }
+        }
+        self.nodeContext.verticalAlign = computedStyle["vertical-align"] && computedStyle["vertical-align"].toString() || "baseline";
+        self.nodeContext.captionSide = computedStyle["caption-side"] && computedStyle["caption-side"].toString() || "top";
+        var borderCollapse = computedStyle["border-collapse"];
+        if (!borderCollapse || borderCollapse === adapt.css.getName("separate")) {
+            var borderSpacing = computedStyle["border-spacing"];
+            var inlineBorderSpacing, blockBorderSpacing;
+            if (borderSpacing) {
+                if (borderSpacing.isSpaceList()) {
+                    inlineBorderSpacing = borderSpacing.values[0];
+                    blockBorderSpacing = borderSpacing.values[1];
+                } else {
+                    inlineBorderSpacing = blockBorderSpacing = borderSpacing;
+                }
+                if (inlineBorderSpacing.isNumeric()) {
+                    self.nodeContext.inlineBorderSpacing = adapt.css.toNumber(inlineBorderSpacing, self.context);
+                }
+                if (blockBorderSpacing.isNumeric()) {
+                    self.nodeContext.blockBorderSpacing = adapt.css.toNumber(blockBorderSpacing, self.context);
+                }
             }
         }
         var firstPseudo = computedStyle["x-first-pseudo"];
@@ -711,6 +797,18 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             if (whitespaceValue !== null) {
                 self.nodeContext.whitespace = whitespaceValue;
             }
+        }
+        var hyphenateCharacter = computedStyle["hyphenate-character"];
+        if (hyphenateCharacter && hyphenateCharacter !== adapt.css.ident.auto) {
+            self.nodeContext.hyphenateCharacter = hyphenateCharacter.str;
+        }
+        var wordBreak = computedStyle["word-break"];
+        var overflowWrap = computedStyle["overflow-wrap"] || ["word-wrap"];
+        self.nodeContext.breakWord = (wordBreak === adapt.css.ident.break_all) || (overflowWrap === adapt.css.ident.break_word);
+        // Resolve formatting context
+        self.resolveFormattingContext(self.nodeContext, firstTime, display, position, floatSide, isRoot);
+        if (self.nodeContext.parent && self.nodeContext.parent.formattingContext) {
+            firstTime = self.nodeContext.parent.formattingContext.isFirstTime(self.nodeContext, firstTime);
         }
         // Create the view element
         var custom = false;
@@ -727,6 +825,12 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                 tag = "audio";
             else if (tag == "object")
                 custom = !!self.customRenderer;
+            if (element.getAttribute(adapt.vgen.PSEUDO_ATTR)) {
+                if (elementStyle["content"] && elementStyle["content"].value &&
+                    elementStyle["content"].value.url) {
+                    tag = "img";
+                }
+            }
         } else if (ns == adapt.base.NS.epub) {
             tag = "span";
             ns = adapt.base.NS.XHTML;
@@ -843,7 +947,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 
             var imageResolution = /** @type {(number|undefined)} */
                 (self.nodeContext.inheritedProps["image-resolution"]);
-            /** @const {!Array<!{image: !HTMLElement, element: !HTMLElement, fetcher: !adapt.taskutil.Fetcher<string>}>} */ var images = [];
+            /** @const {!Array<!{image: !Element, element: !Element, fetcher: !adapt.taskutil.Fetcher<string>}>} */ var images = [];
             var cssWidth = computedStyle["width"];
             var cssHeight = computedStyle["height"];
             var attrWidth = element.getAttribute("width");
@@ -952,6 +1056,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                 var listStyleURL = (/** @type {adapt.css.URL} */ (listStyleImage)).url;
                 fetchers.push(adapt.taskutil.loadElement(new Image(), listStyleURL));
             }
+
+            self.preprocessElementStyle(computedStyle);
+
             self.applyComputedStyles(result, computedStyle);
             if (!self.nodeContext.inline) {
                 var blackList = null;
@@ -1105,6 +1212,67 @@ adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = functi
 };
 
 /**
+ * @private
+ * @param {!Object.<string,adapt.css.Val>} computedStyle
+ */
+adapt.vgen.ViewFactory.prototype.preprocessElementStyle = function(computedStyle) {
+    var self = this;
+    /** @type {!Array.<vivliostyle.plugin.PreProcessElementStyleHook>} */ var hooks =
+        vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.PREPROCESS_ELEMENT_STYLE);
+    hooks.forEach(function(hook) {
+        hook(self.nodeContext, computedStyle);
+    });
+};
+
+/**
+ * @private
+ * @return {!adapt.task.Result.<boolean>}
+ */
+adapt.vgen.ViewFactory.prototype.createTextNodeView = function() {
+    var self = this;
+    /** @type {!adapt.task.Frame.<boolean>} */ var frame
+        = adapt.task.newFrame("createTextNodeView");
+    this.preprocessTextContent().then(function() {
+        var offsetInNode = self.offsetInNode || 0;
+        var textContent = vivliostyle.diff.restoreNewText(
+            self.nodeContext.preprocessedTextContent).substr(offsetInNode);
+        self.viewNode = document.createTextNode(textContent);
+        frame.finish(true);
+    });
+    return frame.result();
+};
+
+/**
+ * @private
+ * @return {!adapt.task.Result.<boolean>}
+ */
+adapt.vgen.ViewFactory.prototype.preprocessTextContent = function() {
+    if (this.nodeContext.preprocessedTextContent != null) {
+        return adapt.task.newResult(true);
+    }
+    var self = this;
+    var originl;
+    var textContent = originl = self.sourceNode.textContent;
+    /** @type {!adapt.task.Frame.<boolean>} */ var frame
+        = adapt.task.newFrame("preprocessTextContent");
+    /** @type {!Array.<vivliostyle.plugin.PreProcessTextContentHook>} */ var hooks =
+        vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.PREPROCESS_TEXT_CONTENT);
+    var index = 0;
+    frame.loop(function() {
+        if (index >= hooks.length) return adapt.task.newResult(false);
+        return hooks[index++](self.nodeContext, textContent).thenAsync(function(processedText) {
+            textContent = processedText;
+            return adapt.task.newResult(true);
+        });
+    }).then(function() {
+        self.nodeContext.preprocessedTextContent =
+            vivliostyle.diff.diffChars(originl, textContent);
+        frame.finish(true);
+    });
+    return frame.result();
+};
+
+/**
  * @param {boolean} firstTime
  * @param {boolean} atUnforcedBreak
  * @return {!adapt.task.Result.<boolean>} holding true if children should be processed
@@ -1120,11 +1288,10 @@ adapt.vgen.ViewFactory.prototype.createNodeView = function(firstTime, atUnforced
     } else {
         if (self.sourceNode.nodeType == 8) {
             self.viewNode = null; // comment node
+            result = adapt.task.newResult(true);
         } else {
-            var offsetInNode = self.offsetInNode || 0;
-            self.viewNode = document.createTextNode(self.sourceNode.textContent.substr(offsetInNode));
+            result = self.createTextNodeView();
         }
-        result = adapt.task.newResult(true);
     }
     result.then(function(processChildren) {
         needToProcessChildren = processChildren;
@@ -1263,7 +1430,8 @@ adapt.vgen.ViewFactory.prototype.nextPositionInTree = function(pos) {
         }
         // no children - was there text content?
         if (pos.sourceNode.nodeType != 1) {
-            boxOffset += pos.sourceNode.textContent.length - 1 - pos.offsetInNode;
+            var content = vivliostyle.diff.restoreNewText(pos.preprocessedTextContent);
+            boxOffset += content.length - 1 - pos.offsetInNode;
         }
         pos = pos.modify();
         pos.boxOffset = boxOffset;
@@ -1388,7 +1556,7 @@ adapt.vgen.ViewFactory.prototype.applyPseudoelementStyle = function(nodeContext,
     nodeContext.vertical = this.computeStyle(nodeContext.vertical, elementStyle, computedStyle);
     var content = computedStyle["content"];
     if (adapt.vtree.nonTrivialContent(content)) {
-        content.visit(new adapt.vtree.ContentPropertyHandler(target, this.context));
+        content.visit(new adapt.vtree.ContentPropertyHandler(target, this.context, content));
         delete computedStyle["content"];
     }
     this.applyComputedStyles(target, computedStyle);
@@ -1483,7 +1651,7 @@ adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target)
  */
 adapt.vgen.ViewFactory.prototype.processFragmentedBlockEdge = function(nodeContext) {
     if (nodeContext) {
-        nodeContext.walkBlocksUpToBFC(function(block) {
+        nodeContext.walkUpBlocks(function(block) {
             var boxDecorationBreak = block.inheritedProps["box-decoration-break"];
             if (!boxDecorationBreak || boxDecorationBreak === "slice") {
                 var elem = block.viewNode;
@@ -1535,13 +1703,6 @@ adapt.vgen.ViewFactory.prototype.isSameNodePosition = function(nodePosition1, no
             var step2 = nodePosition2.steps[i];
             return this.isSameNodePositionStep(step1, step2);
         }.bind(this));
-};
-
-/**
- * @override
- */
-adapt.vgen.ViewFactory.prototype.getPageFloatHolder = function() {
-    return this.pageFloatHolder;
 };
 
 adapt.vgen.ViewFactory.prototype.isPseudoelement = function(elem) {

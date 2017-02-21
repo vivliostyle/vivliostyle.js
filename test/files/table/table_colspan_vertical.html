@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Table colspan</title>
+    <style>
+        @page {
+            size: 820px;
+        }
+        @-epubx-page-template {
+            .partition {
+                width: 198px;
+                height: 398px;
+                border: rgba(0, 0, 255, 0.2) solid 1px;
+                -epubx-flow-from: body;
+                writing-mode: vertical-rl;
+            }
+            .left {
+                top: 10px;
+            }
+            .right {
+                bottom: 10px;
+            }
+
+            @-epubx-page-master {
+                @-epubx-partition {
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 10px;
+                    font-size: 10px;
+                    line-height: 10px;
+                    text-align: center;
+                    content: counter(page);
+                }
+                @-epubx-partition class(partition) class(right) {
+                    right: 610px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    right: 410px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    right: 210px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    right: 10px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    right: 610px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    right: 410px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    right: 210px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    right: 10px;
+                }
+            }
+        }
+        :root {
+            writing-mode: vertical-rl;
+            font-size: 10px;
+            line-height: 12px;
+            widows: 1;
+            orphans: 1;
+        }
+        body {
+            margin: 10px 0;
+        }
+        section {
+            break-after: column;
+        }
+        table {
+            border: 2px black solid;
+            border-spacing: 2px;
+        }
+        caption {
+            caption-side: bottom;
+        }
+        .border-collapse {
+            border-collapse: collapse;
+        }
+        tr {
+            border: 1px blue solid;
+        }
+        th, td {
+            border: 1px gray solid;
+            line-height: 16px;
+        }
+        th > div, td > div {
+            background: #DDD;
+        }
+        .highlight {
+            background: #FFDDDD;
+        }
+    </style>
+</head>
+<body>
+
+<section>
+    <table>
+        <caption>(1) Fragment inside a row; colspan in 1st and 2nd columns</caption>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section>
+    <table>
+        <caption>(2) Fragment inside a row; colspan in 2nd and 3rd columns</caption>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td colspan="2">
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section>
+    <table class="border-collapse">
+        <caption>(3) Fragment inside a row; colspan in 1st and 2nd columns; border-collapse: collapse</caption>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section>
+    <table class="border-collapse">
+        <caption>(4) Fragment inside a row; colspan in 2nd and 3rd columns; border-collapse: collapse</caption>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td colspan="2">
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section>
+    <table>
+        <caption>(5) Fragment between rows, inside a row-spanning column; colspan in 1st and 2nd columns</caption>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" rowspan="2">
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section>
+    <table>
+        <caption>(6) Fragment between rows, inside a row-spanning column; colspan in 2nd and 3rd columns</caption>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+            <td colspan="2" rowspan="2">
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section>
+    <table class="border-collapse">
+        <caption>(7) Fragment between rows, inside a row-spanning column; colspan in 1st and 2nd columns; border-collapse: collapse</caption>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" rowspan="2">
+                (1) This cell<br>
+                (2) contains <b>8</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2<br>
+                (8) colspan=2
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section>
+    <table class="border-collapse">
+        <caption>(8) Fragment between rows, inside a row-spanning column; colspan in 2nd and 3rd columns; border-collapse: collapse</caption>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+            <td colspan="2" rowspan="2">
+                (1) This cell<br>
+                (2) contains <b>8</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2<br>
+                (8) colspan=2
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section>
+    <table>
+        <caption>(9) Fragment inside a row, inside a row-spanning column; colspan in 1st and 2nd columns (also row-spanning), and in 3rd and 4th columns</caption>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" rowspan="2">
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2
+            </td>
+            <td colspan="2">
+                (1) This cell<br>
+                (2) contains <b>9</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2<br>
+                (8) colspan=2<br>
+                (9) colspan=2<br>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section>
+    <table>
+        <caption>(10) Fragment inside a row, inside a row-spanning column; colspan in 1st and 2nd columns, and in 3rd and 4th columns (also row-spanning)</caption>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell<br>
+                (6) normal cell<br>
+                (7) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                (1) This cell<br>
+                (2) contains <b>9</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2<br>
+                (8) colspan=2<br>
+                (9) colspan=2<br>
+            </td>
+            <td colspan="2" rowspan="2">
+                (1) This cell<br>
+                (2) contains <b>7</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section>
+    <table class="border-collapse">
+        <caption>(11) Fragment between rows, inside a row-spanning column; colspan in 1st and 2nd columns (also row-spanning), and in 3rd and 4th columns; border-collapse: collapse</caption>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" rowspan="2">
+                (1) This cell<br>
+                (2) contains <b>8</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2<br>
+                (8) colspan=2
+            </td>
+            <td colspan="2">
+                (1) This cell<br>
+                (2) contains <b>8</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2<br>
+                (8) colspan=2
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section>
+    <table class="border-collapse">
+        <caption>(11) Fragment between rows, inside a row-spanning column; colspan in 1st and 2nd columns, and in 3rd and 4th columns (also row-spanning); border-collapse: collapse</caption>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>5</b><br>
+                (3) lines<br>
+                (4) normal cell<br>
+                (5) normal cell
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                (1) This cell<br>
+                (2) contains <b>8</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2<br>
+                (8) colspan=2
+            </td>
+            <td colspan="2" rowspan="2">
+                (1) This cell<br>
+                (2) contains <b>8</b><br>
+                (3) lines<br>
+                (4) colspan=2<br>
+                (5) colspan=2<br>
+                (6) colspan=2<br>
+                (7) colspan=2<br>
+                (8) colspan=2
+            </td>
+        </tr>
+        <tr>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+            <td>
+                (1) This cell<br>
+                (2) contains <b>4</b><br>
+                (3) lines<br>
+                (4) normal cell
+            </td>
+        </tr>
+    </table>
+</section>
+
+</body>
+</html>

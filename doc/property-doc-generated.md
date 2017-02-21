@@ -4,6 +4,7 @@
       - [CSS 2.2 - azimuth](https://www.w3.org/TR/CSS22/aural.html#propdef-azimuth)
       - [CSS 2.1 - azimuth](https://www.w3.org/TR/CSS21/aural.html#propdef-azimuth)
   - Drafts
+      - [CSS 2.2 - azimuth](https://drafts.csswg.org/css2/aural.html#propdef-azimuth)
       - [CSS 2.1 - azimuth](https://drafts.csswg.org/css21/aural.html#propdef-azimuth)
   - Values: `ANGLE | [[ left-side | far-left | left | center-left | center | center-right | right | far-right | right-side ] || behind ] | leftwards | rightwards;`
 - [background](https://www.w3.org/TR/CSS22/colors.html#propdef-background)
@@ -12,6 +13,7 @@
       - [CSS 2.1 - background](https://www.w3.org/TR/CSS21/colors.html#propdef-background)
       - [CSS Backgrounds 3 - background](https://www.w3.org/TR/css3-background/#background)
   - Drafts
+      - [CSS 2.2 - background](https://drafts.csswg.org/css2/colors.html#propdef-background)
       - [CSS 2.1 - background](https://drafts.csswg.org/css21/colors.html#propdef-background)
       - [CSS Backgrounds 3 - background](https://drafts.csswg.org/css-backgrounds-3/#background)
   - Values: `COMMA background-image [background-position [ / background-size ]] background-repeat background-attachment [background-origin background-clip] background-color; /* background-color is a special case, see the code */`
@@ -21,6 +23,7 @@
       - [CSS 2.1 - background-attachment](https://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment)
       - [CSS Backgrounds 3 - background-attachment](https://www.w3.org/TR/css3-background/#background-attachment)
   - Drafts
+      - [CSS 2.2 - background-attachment](https://drafts.csswg.org/css2/colors.html#propdef-background-attachment)
       - [CSS 2.1 - background-attachment](https://drafts.csswg.org/css21/colors.html#propdef-background-attachment)
       - [CSS Backgrounds 3 - background-attachment](https://drafts.csswg.org/css-backgrounds-3/#background-attachment)
   - Values: `COMMA( [scroll | fixed | local]+ );`
@@ -30,6 +33,7 @@
       - [CSS 2.1 - background-color](https://www.w3.org/TR/CSS21/colors.html#propdef-background-color)
       - [CSS Backgrounds 3 - background-color](https://www.w3.org/TR/css3-background/#background-color)
   - Drafts
+      - [CSS 2.2 - background-color](https://drafts.csswg.org/css2/colors.html#propdef-background-color)
       - [CSS 2.1 - background-color](https://drafts.csswg.org/css21/colors.html#propdef-background-color)
       - [CSS Backgrounds 3 - background-color](https://drafts.csswg.org/css-backgrounds-3/#background-color)
   - Values: `COLOR;`
@@ -39,6 +43,7 @@
       - [CSS 2.1 - background-image](https://www.w3.org/TR/CSS21/colors.html#propdef-background-image)
       - [CSS Backgrounds 3 - background-image](https://www.w3.org/TR/css3-background/#background-image)
   - Drafts
+      - [CSS 2.2 - background-image](https://drafts.csswg.org/css2/colors.html#propdef-background-image)
       - [CSS 2.1 - background-image](https://drafts.csswg.org/css21/colors.html#propdef-background-image)
       - [CSS Backgrounds 3 - background-image](https://drafts.csswg.org/css-backgrounds-3/#background-image)
   - Values: `COMMA( IMAGE+ );`
@@ -48,6 +53,7 @@
       - [CSS 2.1 - background-position](https://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
       - [CSS Backgrounds 3 - background-position](https://www.w3.org/TR/css3-background/#background-position)
   - Drafts
+      - [CSS 2.2 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
       - [CSS 2.1 - background-position](https://drafts.csswg.org/css21/colors.html#propdef-background-position)
       - [CSS Backgrounds 3 - background-position](https://drafts.csswg.org/css-backgrounds-3/#background-position)
       - [CSS Backgrounds 4 - background-position](https://drafts.csswg.org/css-backgrounds-4/#propdef-background-position)
@@ -58,6 +64,7 @@
       - [CSS 2.1 - background-repeat](https://www.w3.org/TR/CSS21/colors.html#propdef-background-repeat)
       - [CSS Backgrounds 3 - background-repeat](https://www.w3.org/TR/css3-background/#background-repeat)
   - Drafts
+      - [CSS 2.2 - background-repeat](https://drafts.csswg.org/css2/colors.html#propdef-background-repeat)
       - [CSS 2.1 - background-repeat](https://drafts.csswg.org/css21/colors.html#propdef-background-repeat)
       - [CSS Backgrounds 3 - background-repeat](https://drafts.csswg.org/css-backgrounds-3/#background-repeat)
   - Values: `COMMA( [repeat | repeat-x | repeat-y | no-repeat]+ );`
@@ -67,6 +74,7 @@
       - [CSS 2.1 - border](https://www.w3.org/TR/CSS21/box.html#propdef-border)
       - [CSS Backgrounds 3 - border](https://www.w3.org/TR/css3-background/#border)
   - Drafts
+      - [CSS 2.2 - border](https://drafts.csswg.org/css2/box.html#propdef-border)
       - [CSS 2.1 - border](https://drafts.csswg.org/css21/box.html#propdef-border)
       - [CSS Backgrounds 3 - border](https://drafts.csswg.org/css-backgrounds-3/#border)
   - Values: `border-width border-style border-color;`
@@ -76,6 +84,7 @@
       - [CSS 2.1 - border-bottom](https://www.w3.org/TR/CSS21/box.html#propdef-border-bottom)
       - [CSS Backgrounds 3 - border-bottom](https://www.w3.org/TR/css3-background/#border-bottom)
   - Drafts
+      - [CSS 2.2 - border-bottom](https://drafts.csswg.org/css2/box.html#propdef-border-bottom)
       - [CSS 2.1 - border-bottom](https://drafts.csswg.org/css21/box.html#propdef-border-bottom)
       - [CSS Backgrounds 3 - border-bottom](https://drafts.csswg.org/css-backgrounds-3/#border-bottom)
   - Values: `border-bottom-width border-bottom-style border-bottom-color;`
@@ -85,6 +94,7 @@
       - [CSS 2.1 - border-bottom-color](https://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-color)
       - [CSS Backgrounds 3 - border-bottom-color](https://www.w3.org/TR/css3-background/#border-bottom-color)
   - Drafts
+      - [CSS 2.2 - border-bottom-color](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-color)
       - [CSS 2.1 - border-bottom-color](https://drafts.csswg.org/css21/box.html#propdef-border-bottom-color)
       - [CSS Backgrounds 3 - border-bottom-color](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-color)
   - Values: `BORDER_SIDE_COLOR;`
@@ -94,6 +104,7 @@
       - [CSS 2.1 - border-bottom-style](https://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-style)
       - [CSS Backgrounds 3 - border-bottom-style](https://www.w3.org/TR/css3-background/#border-bottom-style)
   - Drafts
+      - [CSS 2.2 - border-bottom-style](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-style)
       - [CSS 2.1 - border-bottom-style](https://drafts.csswg.org/css21/box.html#propdef-border-bottom-style)
       - [CSS Backgrounds 3 - border-bottom-style](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-style)
   - Values: `BORDER_SIDE_STYLE;`
@@ -103,6 +114,7 @@
       - [CSS 2.1 - border-bottom-width](https://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-width)
       - [CSS Backgrounds 3 - border-bottom-width](https://www.w3.org/TR/css3-background/#border-bottom-width)
   - Drafts
+      - [CSS 2.2 - border-bottom-width](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-width)
       - [CSS 2.1 - border-bottom-width](https://drafts.csswg.org/css21/box.html#propdef-border-bottom-width)
       - [CSS Backgrounds 3 - border-bottom-width](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-width)
   - Values: `BORDER_SIDE_WIDTH;`
@@ -112,6 +124,7 @@
       - [CSS 2.1 - border-collapse](https://www.w3.org/TR/CSS21/tables.html#propdef-border-collapse)
   - Drafts
       - [CSS Tables 3 - border-collapse](https://drafts.csswg.org/css-tables-3/#propdef-border-collapse)
+      - [CSS 2.2 - border-collapse](https://drafts.csswg.org/css2/tables.html#propdef-border-collapse)
       - [CSS 2.1 - border-collapse](https://drafts.csswg.org/css21/tables.html#propdef-border-collapse)
   - Values: `collapse | separate;`
 - [border-color](https://www.w3.org/TR/CSS22/box.html#propdef-border-color)
@@ -120,6 +133,7 @@
       - [CSS 2.1 - border-color](https://www.w3.org/TR/CSS21/box.html#propdef-border-color)
       - [CSS Backgrounds 3 - border-color](https://www.w3.org/TR/css3-background/#border-color)
   - Drafts
+      - [CSS 2.2 - border-color](https://drafts.csswg.org/css2/box.html#propdef-border-color)
       - [CSS 2.1 - border-color](https://drafts.csswg.org/css21/box.html#propdef-border-color)
       - [CSS Backgrounds 3 - border-color](https://drafts.csswg.org/css-backgrounds-3/#border-color)
   - Values: `INSETS border-top-color border-right-color border-bottom-color border-left-color;`
@@ -129,6 +143,7 @@
       - [CSS 2.1 - border-left](https://www.w3.org/TR/CSS21/box.html#propdef-border-left)
       - [CSS Backgrounds 3 - border-left](https://www.w3.org/TR/css3-background/#border-left)
   - Drafts
+      - [CSS 2.2 - border-left](https://drafts.csswg.org/css2/box.html#propdef-border-left)
       - [CSS 2.1 - border-left](https://drafts.csswg.org/css21/box.html#propdef-border-left)
       - [CSS Backgrounds 3 - border-left](https://drafts.csswg.org/css-backgrounds-3/#border-left)
   - Values: `border-left-width border-left-style border-left-color;`
@@ -138,6 +153,7 @@
       - [CSS 2.1 - border-left-color](https://www.w3.org/TR/CSS21/box.html#propdef-border-left-color)
       - [CSS Backgrounds 3 - border-left-color](https://www.w3.org/TR/css3-background/#border-left-color)
   - Drafts
+      - [CSS 2.2 - border-left-color](https://drafts.csswg.org/css2/box.html#propdef-border-left-color)
       - [CSS 2.1 - border-left-color](https://drafts.csswg.org/css21/box.html#propdef-border-left-color)
       - [CSS Backgrounds 3 - border-left-color](https://drafts.csswg.org/css-backgrounds-3/#border-left-color)
   - Values: `BORDER_SIDE_COLOR;`
@@ -147,6 +163,7 @@
       - [CSS 2.1 - border-left-style](https://www.w3.org/TR/CSS21/box.html#propdef-border-left-style)
       - [CSS Backgrounds 3 - border-left-style](https://www.w3.org/TR/css3-background/#border-left-style)
   - Drafts
+      - [CSS 2.2 - border-left-style](https://drafts.csswg.org/css2/box.html#propdef-border-left-style)
       - [CSS 2.1 - border-left-style](https://drafts.csswg.org/css21/box.html#propdef-border-left-style)
       - [CSS Backgrounds 3 - border-left-style](https://drafts.csswg.org/css-backgrounds-3/#border-left-style)
   - Values: `BORDER_SIDE_STYLE;`
@@ -156,6 +173,7 @@
       - [CSS 2.1 - border-left-width](https://www.w3.org/TR/CSS21/box.html#propdef-border-left-width)
       - [CSS Backgrounds 3 - border-left-width](https://www.w3.org/TR/css3-background/#border-left-width)
   - Drafts
+      - [CSS 2.2 - border-left-width](https://drafts.csswg.org/css2/box.html#propdef-border-left-width)
       - [CSS 2.1 - border-left-width](https://drafts.csswg.org/css21/box.html#propdef-border-left-width)
       - [CSS Backgrounds 3 - border-left-width](https://drafts.csswg.org/css-backgrounds-3/#border-left-width)
   - Values: `BORDER_SIDE_WIDTH;`
@@ -165,6 +183,7 @@
       - [CSS 2.1 - border-right](https://www.w3.org/TR/CSS21/box.html#propdef-border-right)
       - [CSS Backgrounds 3 - border-right](https://www.w3.org/TR/css3-background/#border-right)
   - Drafts
+      - [CSS 2.2 - border-right](https://drafts.csswg.org/css2/box.html#propdef-border-right)
       - [CSS 2.1 - border-right](https://drafts.csswg.org/css21/box.html#propdef-border-right)
       - [CSS Backgrounds 3 - border-right](https://drafts.csswg.org/css-backgrounds-3/#border-right)
   - Values: `border-right-width border-right-style border-right-color;`
@@ -174,6 +193,7 @@
       - [CSS 2.1 - border-right-color](https://www.w3.org/TR/CSS21/box.html#propdef-border-right-color)
       - [CSS Backgrounds 3 - border-right-color](https://www.w3.org/TR/css3-background/#border-right-color)
   - Drafts
+      - [CSS 2.2 - border-right-color](https://drafts.csswg.org/css2/box.html#propdef-border-right-color)
       - [CSS 2.1 - border-right-color](https://drafts.csswg.org/css21/box.html#propdef-border-right-color)
       - [CSS Backgrounds 3 - border-right-color](https://drafts.csswg.org/css-backgrounds-3/#border-right-color)
   - Values: `BORDER_SIDE_COLOR;`
@@ -183,6 +203,7 @@
       - [CSS 2.1 - border-right-style](https://www.w3.org/TR/CSS21/box.html#propdef-border-right-style)
       - [CSS Backgrounds 3 - border-right-style](https://www.w3.org/TR/css3-background/#border-right-style)
   - Drafts
+      - [CSS 2.2 - border-right-style](https://drafts.csswg.org/css2/box.html#propdef-border-right-style)
       - [CSS 2.1 - border-right-style](https://drafts.csswg.org/css21/box.html#propdef-border-right-style)
       - [CSS Backgrounds 3 - border-right-style](https://drafts.csswg.org/css-backgrounds-3/#border-right-style)
   - Values: `BORDER_SIDE_STYLE;`
@@ -192,6 +213,7 @@
       - [CSS 2.1 - border-right-width](https://www.w3.org/TR/CSS21/box.html#propdef-border-right-width)
       - [CSS Backgrounds 3 - border-right-width](https://www.w3.org/TR/css3-background/#border-right-width)
   - Drafts
+      - [CSS 2.2 - border-right-width](https://drafts.csswg.org/css2/box.html#propdef-border-right-width)
       - [CSS 2.1 - border-right-width](https://drafts.csswg.org/css21/box.html#propdef-border-right-width)
       - [CSS Backgrounds 3 - border-right-width](https://drafts.csswg.org/css-backgrounds-3/#border-right-width)
   - Values: `BORDER_SIDE_WIDTH;`
@@ -201,6 +223,7 @@
       - [CSS 2.1 - border-spacing](https://www.w3.org/TR/CSS21/tables.html#propdef-border-spacing)
   - Drafts
       - [CSS Tables 3 - border-spacing](https://drafts.csswg.org/css-tables-3/#propdef-border-spacing)
+      - [CSS 2.2 - border-spacing](https://drafts.csswg.org/css2/tables.html#propdef-border-spacing)
       - [CSS 2.1 - border-spacing](https://drafts.csswg.org/css21/tables.html#propdef-border-spacing)
   - Values: `LENGTH LENGTH?;`
 - [border-style](https://www.w3.org/TR/CSS22/box.html#propdef-border-style)
@@ -209,6 +232,7 @@
       - [CSS 2.1 - border-style](https://www.w3.org/TR/CSS21/box.html#propdef-border-style)
       - [CSS Backgrounds 3 - border-style](https://www.w3.org/TR/css3-background/#border-style)
   - Drafts
+      - [CSS 2.2 - border-style](https://drafts.csswg.org/css2/box.html#propdef-border-style)
       - [CSS 2.1 - border-style](https://drafts.csswg.org/css21/box.html#propdef-border-style)
       - [CSS Backgrounds 3 - border-style](https://drafts.csswg.org/css-backgrounds-3/#border-style)
   - Values: `INSETS border-top-style border-right-style border-bottom-style border-left-style;`
@@ -218,6 +242,7 @@
       - [CSS 2.1 - border-top](https://www.w3.org/TR/CSS21/box.html#propdef-border-top)
       - [CSS Backgrounds 3 - border-top](https://www.w3.org/TR/css3-background/#border-top)
   - Drafts
+      - [CSS 2.2 - border-top](https://drafts.csswg.org/css2/box.html#propdef-border-top)
       - [CSS 2.1 - border-top](https://drafts.csswg.org/css21/box.html#propdef-border-top)
       - [CSS Backgrounds 3 - border-top](https://drafts.csswg.org/css-backgrounds-3/#border-top)
   - Values: `border-top-width border-top-style border-top-color;`
@@ -227,6 +252,7 @@
       - [CSS 2.1 - border-top-color](https://www.w3.org/TR/CSS21/box.html#propdef-border-top-color)
       - [CSS Backgrounds 3 - border-top-color](https://www.w3.org/TR/css3-background/#border-top-color)
   - Drafts
+      - [CSS 2.2 - border-top-color](https://drafts.csswg.org/css2/box.html#propdef-border-top-color)
       - [CSS 2.1 - border-top-color](https://drafts.csswg.org/css21/box.html#propdef-border-top-color)
       - [CSS Backgrounds 3 - border-top-color](https://drafts.csswg.org/css-backgrounds-3/#border-top-color)
   - Values: `BORDER_SIDE_COLOR;`
@@ -236,6 +262,7 @@
       - [CSS 2.1 - border-top-style](https://www.w3.org/TR/CSS21/box.html#propdef-border-top-style)
       - [CSS Backgrounds 3 - border-top-style](https://www.w3.org/TR/css3-background/#border-top-style)
   - Drafts
+      - [CSS 2.2 - border-top-style](https://drafts.csswg.org/css2/box.html#propdef-border-top-style)
       - [CSS 2.1 - border-top-style](https://drafts.csswg.org/css21/box.html#propdef-border-top-style)
       - [CSS Backgrounds 3 - border-top-style](https://drafts.csswg.org/css-backgrounds-3/#border-top-style)
   - Values: `BORDER_SIDE_STYLE;`
@@ -245,6 +272,7 @@
       - [CSS 2.1 - border-top-width](https://www.w3.org/TR/CSS21/box.html#propdef-border-top-width)
       - [CSS Backgrounds 3 - border-top-width](https://www.w3.org/TR/css3-background/#border-top-width)
   - Drafts
+      - [CSS 2.2 - border-top-width](https://drafts.csswg.org/css2/box.html#propdef-border-top-width)
       - [CSS 2.1 - border-top-width](https://drafts.csswg.org/css21/box.html#propdef-border-top-width)
       - [CSS Backgrounds 3 - border-top-width](https://drafts.csswg.org/css-backgrounds-3/#border-top-width)
   - Values: `BORDER_SIDE_WIDTH;`
@@ -254,6 +282,7 @@
       - [CSS 2.1 - border-width](https://www.w3.org/TR/CSS21/box.html#propdef-border-width)
       - [CSS Backgrounds 3 - border-width](https://www.w3.org/TR/css3-background/#border-width)
   - Drafts
+      - [CSS 2.2 - border-width](https://drafts.csswg.org/css2/box.html#propdef-border-width)
       - [CSS 2.1 - border-width](https://drafts.csswg.org/css21/box.html#propdef-border-width)
       - [CSS Backgrounds 3 - border-width](https://drafts.csswg.org/css-backgrounds-3/#border-width)
   - Values: `INSETS border-top-width border-right-width border-bottom-width border-left-width;`
@@ -263,6 +292,7 @@
       - [CSS 2.1 - bottom](https://www.w3.org/TR/CSS21/visuren.html#propdef-bottom)
       - [CSS Positioned Layout 3 - bottom](https://www.w3.org/TR/css3-positioning/#propdef-bottom)
   - Drafts
+      - [CSS 2.2 - bottom](https://drafts.csswg.org/css2/visuren.html#propdef-bottom)
       - [CSS 2.1 - bottom](https://drafts.csswg.org/css21/visuren.html#propdef-bottom)
       - [CSS Positioned Layout 3 - bottom](https://drafts.csswg.org/css-position-3/#propdef-bottom)
   - Values: `APLENGTH;`
@@ -272,6 +302,7 @@
       - [CSS 2.1 - caption-side](https://www.w3.org/TR/CSS21/tables.html#propdef-caption-side)
   - Drafts
       - [CSS Tables 3 - caption-side](https://drafts.csswg.org/css-tables-3/#propdef-caption-side)
+      - [CSS 2.2 - caption-side](https://drafts.csswg.org/css2/tables.html#propdef-caption-side)
       - [CSS 2.1 - caption-side](https://drafts.csswg.org/css21/tables.html#propdef-caption-side)
   - Values: `top | bottom;`
 - [clear](https://www.w3.org/TR/CSS22/visuren.html#propdef-clear)
@@ -279,6 +310,7 @@
       - [CSS 2.2 - clear](https://www.w3.org/TR/CSS22/visuren.html#propdef-clear)
       - [CSS 2.1 - clear](https://www.w3.org/TR/CSS21/visuren.html#propdef-clear)
   - Drafts
+      - [CSS 2.2 - clear](https://drafts.csswg.org/css2/visuren.html#propdef-clear)
       - [CSS 2.1 - clear](https://drafts.csswg.org/css21/visuren.html#propdef-clear)
       - [CSS Page Floats 3 - clear](https://drafts.csswg.org/css-page-floats-3/#propdef-clear)
   - Values: `none | left | right | both;`
@@ -289,6 +321,7 @@
       - [CSS Masking 1 - clip](https://www.w3.org/TR/css-masking-1/#propdef-clip)
       - [SVG 1.1 - clip](https://www.w3.org/TR/SVG/masking.html#ClipProperty)
   - Drafts
+      - [CSS 2.2 - clip](https://drafts.csswg.org/css2/visufx.html#propdef-clip)
       - [CSS 2.1 - clip](https://drafts.csswg.org/css21/visufx.html#propdef-clip)
       - [CSS Masking 1 - clip](https://drafts.fxtf.org/css-masking-1/#propdef-clip)
   - Values: `rect(ALENGTH{4}) | rect(SPACE(ALENGTH{4})) | auto;`
@@ -299,6 +332,7 @@
       - [CSS Color 3 - color](https://www.w3.org/TR/css3-color/#color0)
       - [CSS Color 4 - color](https://www.w3.org/TR/css-color-4/#propdef-color)
   - Drafts
+      - [CSS 2.2 - color](https://drafts.csswg.org/css2/colors.html#propdef-color)
       - [CSS 2.1 - color](https://drafts.csswg.org/css21/colors.html#propdef-color)
       - [CSS Color 3 - color](https://drafts.csswg.org/css-color-3/#color0)
       - [CSS Color 4 - color](https://drafts.csswg.org/css-color-4/#propdef-color)
@@ -310,6 +344,7 @@
       - [CSS 2.1 - content](https://www.w3.org/TR/CSS21/generate.html#propdef-content)
   - Drafts
       - [CSS Generated Content 3 - content](https://drafts.csswg.org/css-content-3/#propdef-content)
+      - [CSS 2.2 - content](https://drafts.csswg.org/css2/generate.html#propdef-content)
       - [CSS 2.1 - content](https://drafts.csswg.org/css21/generate.html#propdef-content)
   - Values: `CONTENT;`
 - [counter-increment](https://www.w3.org/TR/CSS22/generate.html#propdef-counter-increment)
@@ -318,6 +353,7 @@
       - [CSS 2.1 - counter-increment](https://www.w3.org/TR/CSS21/generate.html#propdef-counter-increment)
       - [CSS Lists 3 - counter-increment](https://www.w3.org/TR/css-lists-3/#propdef-counter-increment)
   - Drafts
+      - [CSS 2.2 - counter-increment](https://drafts.csswg.org/css2/generate.html#propdef-counter-increment)
       - [CSS 2.1 - counter-increment](https://drafts.csswg.org/css21/generate.html#propdef-counter-increment)
       - [CSS Lists 3 - counter-increment](https://drafts.csswg.org/css-lists-3/#propdef-counter-increment)
   - Values: `COUNTER;`
@@ -327,6 +363,7 @@
       - [CSS 2.1 - counter-reset](https://www.w3.org/TR/CSS21/generate.html#propdef-counter-reset)
       - [CSS Lists 3 - counter-reset](https://www.w3.org/TR/css-lists-3/#propdef-counter-reset)
   - Drafts
+      - [CSS 2.2 - counter-reset](https://drafts.csswg.org/css2/generate.html#propdef-counter-reset)
       - [CSS 2.1 - counter-reset](https://drafts.csswg.org/css21/generate.html#propdef-counter-reset)
       - [CSS Lists 3 - counter-reset](https://drafts.csswg.org/css-lists-3/#propdef-counter-reset)
   - Values: `COUNTER;`
@@ -336,6 +373,7 @@
       - [CSS 2.1 - cue-after](https://www.w3.org/TR/CSS21/aural.html#propdef-cue-after)
       - [CSS Speech 1 - cue-after](https://www.w3.org/TR/css3-speech/#cue-after)
   - Drafts
+      - [CSS 2.2 - cue-after](https://drafts.csswg.org/css2/aural.html#propdef-cue-after)
       - [CSS 2.1 - cue-after](https://drafts.csswg.org/css21/aural.html#propdef-cue-after)
       - [CSS Speech 1 - cue-after](https://drafts.csswg.org/css-speech-1/#cue-after)
   - Values: `URI_OR_NONE;`
@@ -345,6 +383,7 @@
       - [CSS 2.1 - cue-before](https://www.w3.org/TR/CSS21/aural.html#propdef-cue-before)
       - [CSS Speech 1 - cue-before](https://www.w3.org/TR/css3-speech/#cue-before)
   - Drafts
+      - [CSS 2.2 - cue-before](https://drafts.csswg.org/css2/aural.html#propdef-cue-before)
       - [CSS 2.1 - cue-before](https://drafts.csswg.org/css21/aural.html#propdef-cue-before)
       - [CSS Speech 1 - cue-before](https://drafts.csswg.org/css-speech-1/#cue-before)
   - Values: `URI_OR_NONE;`
@@ -354,6 +393,7 @@
       - [CSS 2.1 - cursor](https://www.w3.org/TR/CSS21/ui.html#propdef-cursor)
       - [CSS User Interface 3 - cursor](https://www.w3.org/TR/css3-ui/#propdef-cursor)
   - Drafts
+      - [CSS 2.2 - cursor](https://drafts.csswg.org/css2/ui.html#propdef-cursor)
       - [CSS 2.1 - cursor](https://drafts.csswg.org/css21/ui.html#propdef-cursor)
       - [CSS User Interface 3 - cursor](https://drafts.csswg.org/css-ui-3/#propdef-cursor)
   - Values: `COMMA(URI* [ auto | crosshair | default | pointer | move | e-resize | ne-resize | nw-resize | n-resize | se-resize | sw-resize | s-resize | w-resize | text | wait | help | progress ]);`
@@ -364,6 +404,7 @@
       - [CSS Writing Modes 3 - direction](https://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
       - [SVG 1.1 - direction](https://www.w3.org/TR/SVG/text.html#DirectionProperty)
   - Drafts
+      - [CSS 2.2 - direction](https://drafts.csswg.org/css2/visuren.html#propdef-direction)
       - [CSS 2.1 - direction](https://drafts.csswg.org/css21/visuren.html#propdef-direction)
       - [CSS Writing Modes 3 - direction](https://drafts.csswg.org/css-writing-modes-3/#propdef-direction)
   - Values: `ltr | rtl;`
@@ -376,6 +417,7 @@
       - [SVG 1.1 - display](https://www.w3.org/TR/SVG/painting.html#DisplayProperty)
   - Drafts
       - [CSS Display 3 - display](https://drafts.csswg.org/css-display-3/#propdef-display)
+      - [CSS 2.2 - display](https://drafts.csswg.org/css2/visuren.html#propdef-display)
       - [CSS 2.1 - display](https://drafts.csswg.org/css21/visuren.html#propdef-display)
   - Values: `inline | block | list-item | inline-block | table | inline-table | table-row-group | table-header-group | table-footer-group | table-row | table-column-group | table-column | table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex | inline-flex | ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container | run-in | compact | marker;`
 - [elevation](https://www.w3.org/TR/CSS22/aural.html#propdef-elevation)
@@ -383,6 +425,7 @@
       - [CSS 2.2 - elevation](https://www.w3.org/TR/CSS22/aural.html#propdef-elevation)
       - [CSS 2.1 - elevation](https://www.w3.org/TR/CSS21/aural.html#propdef-elevation)
   - Drafts
+      - [CSS 2.2 - elevation](https://drafts.csswg.org/css2/aural.html#propdef-elevation)
       - [CSS 2.1 - elevation](https://drafts.csswg.org/css21/aural.html#propdef-elevation)
   - Values: `ANGLE | below | level | above | higher | lower;`
 - [empty-cells](https://www.w3.org/TR/CSS22/tables.html#propdef-empty-cells)
@@ -391,6 +434,7 @@
       - [CSS 2.1 - empty-cells](https://www.w3.org/TR/CSS21/tables.html#propdef-empty-cells)
   - Drafts
       - [CSS Tables 3 - empty-cells](https://drafts.csswg.org/css-tables-3/#propdef-empty-cells)
+      - [CSS 2.2 - empty-cells](https://drafts.csswg.org/css2/tables.html#propdef-empty-cells)
       - [CSS 2.1 - empty-cells](https://drafts.csswg.org/css21/tables.html#propdef-empty-cells)
   - Values: `show | hide;`
 - [float](https://www.w3.org/TR/CSS22/visuren.html#propdef-float)
@@ -398,6 +442,7 @@
       - [CSS 2.2 - float](https://www.w3.org/TR/CSS22/visuren.html#propdef-float)
       - [CSS 2.1 - float](https://www.w3.org/TR/CSS21/visuren.html#propdef-float)
   - Drafts
+      - [CSS 2.2 - float](https://drafts.csswg.org/css2/visuren.html#propdef-float)
       - [CSS 2.1 - float](https://drafts.csswg.org/css21/visuren.html#propdef-float)
       - [CSS Page Floats 3 - float](https://drafts.csswg.org/css-page-floats-3/#propdef-float)
   - Values: `block-start | block-end | inline-start | inline-end | snap-block | snap-inline | left | right | top | bottom | none | footnote;`
@@ -408,9 +453,10 @@
       - [CSS Fonts 3 - font](https://www.w3.org/TR/css-fonts-3/#propdef-font)
       - [SVG 1.1 - font](https://www.w3.org/TR/SVG/text.html#FontProperty)
   - Drafts
+      - [CSS 2.2 - font](https://drafts.csswg.org/css2/fonts.html#propdef-font)
       - [CSS 2.1 - font](https://drafts.csswg.org/css21/fonts.html#propdef-font)
       - [CSS Fonts 3 - font](https://drafts.csswg.org/css-fonts-3/#propdef-font)
-  - Values: `FONT font-style font-variant font-weight /* font-size line-height font-family are special-cased */;`
+  - Values: `FONT font-style font-variant font-weight font-stretch /* font-size line-height font-family are special-cased */;`
 - [font-family](https://www.w3.org/TR/CSS22/fonts.html#propdef-font-family)
   - TR
       - [CSS 2.2 - font-family](https://www.w3.org/TR/CSS22/fonts.html#propdef-font-family)
@@ -418,6 +464,7 @@
       - [CSS Fonts 3 - font-family](https://www.w3.org/TR/css-fonts-3/#propdef-font-family)
       - [SVG 1.1 - font-family](https://www.w3.org/TR/SVG/text.html#FontFamilyProperty)
   - Drafts
+      - [CSS 2.2 - font-family](https://drafts.csswg.org/css2/fonts.html#propdef-font-family)
       - [CSS 2.1 - font-family](https://drafts.csswg.org/css21/fonts.html#propdef-font-family)
       - [CSS Fonts 3 - font-family](https://drafts.csswg.org/css-fonts-3/#propdef-font-family)
   - Values: `FAMILY_LIST;`
@@ -428,6 +475,8 @@
       - [CSS Fonts 3 - font-size](https://www.w3.org/TR/css-fonts-3/#propdef-font-size)
       - [SVG 1.1 - font-size](https://www.w3.org/TR/SVG/text.html#FontSizeProperty)
   - Drafts
+      - [CSS Fonts 4 - font-size](https://drafts.csswg.org/css-fonts-4/#propdef-font-size)
+      - [CSS 2.2 - font-size](https://drafts.csswg.org/css2/fonts.html#propdef-font-size)
       - [CSS 2.1 - font-size](https://drafts.csswg.org/css21/fonts.html#propdef-font-size)
       - [CSS Fonts 3 - font-size](https://drafts.csswg.org/css-fonts-3/#propdef-font-size)
   - Values: `xx-small | x-small | small | medium | large | x-large | xx-large | larger | smaller | PPLENGTH | POS_NUM;`
@@ -439,6 +488,7 @@
       - [SVG 1.1 - font-style](https://www.w3.org/TR/SVG/text.html#FontStyleProperty)
   - Drafts
       - [CSS Fonts 4 - font-style](https://drafts.csswg.org/css-fonts-4/#propdef-font-style)
+      - [CSS 2.2 - font-style](https://drafts.csswg.org/css2/fonts.html#propdef-font-style)
       - [CSS 2.1 - font-style](https://drafts.csswg.org/css21/fonts.html#propdef-font-style)
       - [CSS Fonts 3 - font-style](https://drafts.csswg.org/css-fonts-3/#propdef-font-style)
   - Values: `normal | italic | oblique;`
@@ -449,6 +499,7 @@
       - [CSS Fonts 3 - font-variant](https://www.w3.org/TR/css-fonts-3/#propdef-font-variant)
       - [SVG 1.1 - font-variant](https://www.w3.org/TR/SVG/text.html#FontVariantProperty)
   - Drafts
+      - [CSS 2.2 - font-variant](https://drafts.csswg.org/css2/fonts.html#propdef-font-variant)
       - [CSS 2.1 - font-variant](https://drafts.csswg.org/css21/fonts.html#propdef-font-variant)
       - [CSS Fonts 3 - font-variant](https://drafts.csswg.org/css-fonts-3/#propdef-font-variant)
   - Values: `normal | small-caps;`
@@ -460,6 +511,7 @@
       - [SVG 1.1 - font-weight](https://www.w3.org/TR/SVG/text.html#FontWeightProperty)
   - Drafts
       - [CSS Fonts 4 - font-weight](https://drafts.csswg.org/css-fonts-4/#propdef-font-weight)
+      - [CSS 2.2 - font-weight](https://drafts.csswg.org/css2/fonts.html#propdef-font-weight)
       - [CSS 2.1 - font-weight](https://drafts.csswg.org/css21/fonts.html#propdef-font-weight)
       - [CSS Fonts 3 - font-weight](https://drafts.csswg.org/css-fonts-3/#propdef-font-weight)
   - Values: `normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;`
@@ -468,6 +520,7 @@
       - [CSS 2.2 - height](https://www.w3.org/TR/CSS22/visudet.html#propdef-height)
       - [CSS 2.1 - height](https://www.w3.org/TR/CSS21/visudet.html#propdef-height)
   - Drafts
+      - [CSS 2.2 - height](https://drafts.csswg.org/css2/visudet.html#propdef-height)
       - [CSS 2.1 - height](https://drafts.csswg.org/css21/visudet.html#propdef-height)
   - Values: `PAPLENGTH | POS_NUM ;`
 - [left](https://www.w3.org/TR/CSS22/visuren.html#propdef-left)
@@ -476,6 +529,7 @@
       - [CSS 2.1 - left](https://www.w3.org/TR/CSS21/visuren.html#propdef-left)
       - [CSS Positioned Layout 3 - left](https://www.w3.org/TR/css3-positioning/#propdef-left)
   - Drafts
+      - [CSS 2.2 - left](https://drafts.csswg.org/css2/visuren.html#propdef-left)
       - [CSS 2.1 - left](https://drafts.csswg.org/css21/visuren.html#propdef-left)
       - [CSS Positioned Layout 3 - left](https://drafts.csswg.org/css-position-3/#propdef-left)
   - Values: `APLENGTH;`
@@ -486,6 +540,7 @@
       - [CSS Text 3 - letter-spacing](https://www.w3.org/TR/css-text-3/#letter-spacing)
       - [SVG 1.1 - letter-spacing](https://www.w3.org/TR/SVG/text.html#LetterSpacingProperty)
   - Drafts
+      - [CSS 2.2 - letter-spacing](https://drafts.csswg.org/css2/text.html#propdef-letter-spacing)
       - [CSS 2.1 - letter-spacing](https://drafts.csswg.org/css21/text.html#propdef-letter-spacing)
       - [CSS Text 3 - letter-spacing](https://drafts.csswg.org/css-text-3/#propdef-letter-spacing)
   - Values: `normal | LENGTH_OR_NUM;`
@@ -494,6 +549,7 @@
       - [CSS 2.2 - line-height](https://www.w3.org/TR/CSS22/visudet.html#propdef-line-height)
       - [CSS 2.1 - line-height](https://www.w3.org/TR/CSS21/visudet.html#propdef-line-height)
   - Drafts
+      - [CSS 2.2 - line-height](https://drafts.csswg.org/css2/visudet.html#propdef-line-height)
       - [CSS 2.1 - line-height](https://drafts.csswg.org/css21/visudet.html#propdef-line-height)
   - Values: `normal | POS_NUM | PPLENGTH;`
 - [list-style](https://www.w3.org/TR/CSS22/generate.html#propdef-list-style)
@@ -502,6 +558,7 @@
       - [CSS 2.1 - list-style](https://www.w3.org/TR/CSS21/generate.html#propdef-list-style)
       - [CSS Lists 3 - list-style](https://www.w3.org/TR/css-lists-3/#propdef-list-style)
   - Drafts
+      - [CSS 2.2 - list-style](https://drafts.csswg.org/css2/generate.html#propdef-list-style)
       - [CSS 2.1 - list-style](https://drafts.csswg.org/css21/generate.html#propdef-list-style)
       - [CSS Lists 3 - list-style](https://drafts.csswg.org/css-lists-3/#propdef-list-style)
   - Values: `list-style-type list-style-position list-style-image;`
@@ -511,6 +568,7 @@
       - [CSS 2.1 - list-style-image](https://www.w3.org/TR/CSS21/generate.html#propdef-list-style-image)
       - [CSS Lists 3 - list-style-image](https://www.w3.org/TR/css-lists-3/#propdef-list-style-image)
   - Drafts
+      - [CSS 2.2 - list-style-image](https://drafts.csswg.org/css2/generate.html#propdef-list-style-image)
       - [CSS 2.1 - list-style-image](https://drafts.csswg.org/css21/generate.html#propdef-list-style-image)
       - [CSS Lists 3 - list-style-image](https://drafts.csswg.org/css-lists-3/#propdef-list-style-image)
   - Values: `IMAGE;`
@@ -520,6 +578,7 @@
       - [CSS 2.1 - list-style-position](https://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position)
       - [CSS Lists 3 - list-style-position](https://www.w3.org/TR/css-lists-3/#propdef-list-style-position)
   - Drafts
+      - [CSS 2.2 - list-style-position](https://drafts.csswg.org/css2/generate.html#propdef-list-style-position)
       - [CSS 2.1 - list-style-position](https://drafts.csswg.org/css21/generate.html#propdef-list-style-position)
       - [CSS Lists 3 - list-style-position](https://drafts.csswg.org/css-lists-3/#propdef-list-style-position)
   - Values: `inside | outside;`
@@ -529,6 +588,7 @@
       - [CSS 2.1 - list-style-type](https://www.w3.org/TR/CSS21/generate.html#propdef-list-style-type)
       - [CSS Lists 3 - list-style-type](https://www.w3.org/TR/css-lists-3/#propdef-list-style-type)
   - Drafts
+      - [CSS 2.2 - list-style-type](https://drafts.csswg.org/css2/generate.html#propdef-list-style-type)
       - [CSS 2.1 - list-style-type](https://drafts.csswg.org/css21/generate.html#propdef-list-style-type)
       - [CSS Lists 3 - list-style-type](https://drafts.csswg.org/css-lists-3/#propdef-list-style-type)
   - Values: `LIST_STYLE_TYPE;`
@@ -537,6 +597,7 @@
       - [CSS 2.2 - margin](https://www.w3.org/TR/CSS22/box.html#propdef-margin)
       - [CSS 2.1 - margin](https://www.w3.org/TR/CSS21/box.html#propdef-margin)
   - Drafts
+      - [CSS 2.2 - margin](https://drafts.csswg.org/css2/box.html#propdef-margin)
       - [CSS 2.1 - margin](https://drafts.csswg.org/css21/box.html#propdef-margin)
   - Values: `INSETS margin-top margin-right margin-bottom margin-left;`
 - [margin-bottom](https://www.w3.org/TR/CSS22/box.html#propdef-margin-bottom)
@@ -544,6 +605,7 @@
       - [CSS 2.2 - margin-bottom](https://www.w3.org/TR/CSS22/box.html#propdef-margin-bottom)
       - [CSS 2.1 - margin-bottom](https://www.w3.org/TR/CSS21/box.html#propdef-margin-bottom)
   - Drafts
+      - [CSS 2.2 - margin-bottom](https://drafts.csswg.org/css2/box.html#propdef-margin-bottom)
       - [CSS 2.1 - margin-bottom](https://drafts.csswg.org/css21/box.html#propdef-margin-bottom)
   - Values: `APLENGTH;`
 - [margin-left](https://www.w3.org/TR/CSS22/box.html#propdef-margin-left)
@@ -551,6 +613,7 @@
       - [CSS 2.2 - margin-left](https://www.w3.org/TR/CSS22/box.html#propdef-margin-left)
       - [CSS 2.1 - margin-left](https://www.w3.org/TR/CSS21/box.html#propdef-margin-left)
   - Drafts
+      - [CSS 2.2 - margin-left](https://drafts.csswg.org/css2/box.html#propdef-margin-left)
       - [CSS 2.1 - margin-left](https://drafts.csswg.org/css21/box.html#propdef-margin-left)
   - Values: `APLENGTH;`
 - [margin-right](https://www.w3.org/TR/CSS22/box.html#propdef-margin-right)
@@ -558,6 +621,7 @@
       - [CSS 2.2 - margin-right](https://www.w3.org/TR/CSS22/box.html#propdef-margin-right)
       - [CSS 2.1 - margin-right](https://www.w3.org/TR/CSS21/box.html#propdef-margin-right)
   - Drafts
+      - [CSS 2.2 - margin-right](https://drafts.csswg.org/css2/box.html#propdef-margin-right)
       - [CSS 2.1 - margin-right](https://drafts.csswg.org/css21/box.html#propdef-margin-right)
   - Values: `APLENGTH;`
 - [margin-top](https://www.w3.org/TR/CSS22/box.html#propdef-margin-top)
@@ -565,6 +629,7 @@
       - [CSS 2.2 - margin-top](https://www.w3.org/TR/CSS22/box.html#propdef-margin-top)
       - [CSS 2.1 - margin-top](https://www.w3.org/TR/CSS21/box.html#propdef-margin-top)
   - Drafts
+      - [CSS 2.2 - margin-top](https://drafts.csswg.org/css2/box.html#propdef-margin-top)
       - [CSS 2.1 - margin-top](https://drafts.csswg.org/css21/box.html#propdef-margin-top)
   - Values: `APLENGTH;`
 - [max-height](https://www.w3.org/TR/CSS22/visudet.html#propdef-max-height)
@@ -572,6 +637,7 @@
       - [CSS 2.2 - max-height](https://www.w3.org/TR/CSS22/visudet.html#propdef-max-height)
       - [CSS 2.1 - max-height](https://www.w3.org/TR/CSS21/visudet.html#propdef-max-height)
   - Drafts
+      - [CSS 2.2 - max-height](https://drafts.csswg.org/css2/visudet.html#propdef-max-height)
       - [CSS 2.1 - max-height](https://drafts.csswg.org/css21/visudet.html#propdef-max-height)
   - Values: `NPLENGTH;`
 - [max-width](https://www.w3.org/TR/CSS22/visudet.html#propdef-max-width)
@@ -579,6 +645,7 @@
       - [CSS 2.2 - max-width](https://www.w3.org/TR/CSS22/visudet.html#propdef-max-width)
       - [CSS 2.1 - max-width](https://www.w3.org/TR/CSS21/visudet.html#propdef-max-width)
   - Drafts
+      - [CSS 2.2 - max-width](https://drafts.csswg.org/css2/visudet.html#propdef-max-width)
       - [CSS 2.1 - max-width](https://drafts.csswg.org/css21/visudet.html#propdef-max-width)
   - Values: `NPLENGTH;`
 - [min-height](https://www.w3.org/TR/CSS22/visudet.html#propdef-min-height)
@@ -586,6 +653,7 @@
       - [CSS 2.2 - min-height](https://www.w3.org/TR/CSS22/visudet.html#propdef-min-height)
       - [CSS 2.1 - min-height](https://www.w3.org/TR/CSS21/visudet.html#propdef-min-height)
   - Drafts
+      - [CSS 2.2 - min-height](https://drafts.csswg.org/css2/visudet.html#propdef-min-height)
       - [CSS 2.1 - min-height](https://drafts.csswg.org/css21/visudet.html#propdef-min-height)
   - Values: `auto | PLENGTH;`
 - [min-width](https://www.w3.org/TR/CSS22/visudet.html#propdef-min-width)
@@ -593,6 +661,7 @@
       - [CSS 2.2 - min-width](https://www.w3.org/TR/CSS22/visudet.html#propdef-min-width)
       - [CSS 2.1 - min-width](https://www.w3.org/TR/CSS21/visudet.html#propdef-min-width)
   - Drafts
+      - [CSS 2.2 - min-width](https://drafts.csswg.org/css2/visudet.html#propdef-min-width)
       - [CSS 2.1 - min-width](https://drafts.csswg.org/css21/visudet.html#propdef-min-width)
   - Values: `auto | PLENGTH;`
 - [orphans](https://www.w3.org/TR/CSS22/page.html#propdef-orphans)
@@ -601,6 +670,7 @@
       - [CSS 2.1 - orphans](https://www.w3.org/TR/CSS21/page.html#propdef-orphans)
       - [CSS Fragmentation 3 - orphans](https://www.w3.org/TR/css3-break/#propdef-orphans)
   - Drafts
+      - [CSS 2.2 - orphans](https://drafts.csswg.org/css2/page.html#propdef-orphans)
       - [CSS 2.1 - orphans](https://drafts.csswg.org/css21/page.html#propdef-orphans)
       - [CSS Fragmentation 3 - orphans](https://drafts.csswg.org/css-break-3/#propdef-orphans)
   - Values: `POS_INT;`
@@ -610,6 +680,7 @@
       - [CSS 2.1 - outline](https://www.w3.org/TR/CSS21/ui.html#propdef-outline)
       - [CSS User Interface 3 - outline](https://www.w3.org/TR/css3-ui/#propdef-outline)
   - Drafts
+      - [CSS 2.2 - outline](https://drafts.csswg.org/css2/ui.html#propdef-outline)
       - [CSS 2.1 - outline](https://drafts.csswg.org/css21/ui.html#propdef-outline)
       - [CSS User Interface 3 - outline](https://drafts.csswg.org/css-ui-3/#propdef-outline)
   - Values: `outline-width outline-style outline-color;`
@@ -619,6 +690,7 @@
       - [CSS 2.1 - outline-color](https://www.w3.org/TR/CSS21/ui.html#propdef-outline-color)
       - [CSS User Interface 3 - outline-color](https://www.w3.org/TR/css3-ui/#propdef-outline-color)
   - Drafts
+      - [CSS 2.2 - outline-color](https://drafts.csswg.org/css2/ui.html#propdef-outline-color)
       - [CSS 2.1 - outline-color](https://drafts.csswg.org/css21/ui.html#propdef-outline-color)
       - [CSS User Interface 3 - outline-color](https://drafts.csswg.org/css-ui-3/#propdef-outline-color)
   - Values: `COLOR | invert;`
@@ -628,6 +700,7 @@
       - [CSS 2.1 - outline-style](https://www.w3.org/TR/CSS21/ui.html#propdef-outline-style)
       - [CSS User Interface 3 - outline-style](https://www.w3.org/TR/css3-ui/#propdef-outline-style)
   - Drafts
+      - [CSS 2.2 - outline-style](https://drafts.csswg.org/css2/ui.html#propdef-outline-style)
       - [CSS 2.1 - outline-style](https://drafts.csswg.org/css21/ui.html#propdef-outline-style)
       - [CSS User Interface 3 - outline-style](https://drafts.csswg.org/css-ui-3/#propdef-outline-style)
   - Values: `BORDER_SIDE_STYLE;`
@@ -637,6 +710,7 @@
       - [CSS 2.1 - outline-width](https://www.w3.org/TR/CSS21/ui.html#propdef-outline-width)
       - [CSS User Interface 3 - outline-width](https://www.w3.org/TR/css3-ui/#propdef-outline-width)
   - Drafts
+      - [CSS 2.2 - outline-width](https://drafts.csswg.org/css2/ui.html#propdef-outline-width)
       - [CSS 2.1 - outline-width](https://drafts.csswg.org/css21/ui.html#propdef-outline-width)
       - [CSS User Interface 3 - outline-width](https://drafts.csswg.org/css-ui-3/#propdef-outline-width)
   - Values: `BORDER_SIDE_WIDTH;`
@@ -648,6 +722,7 @@
       - [SVG 1.1 - overflow](https://www.w3.org/TR/SVG/masking.html#OverflowProperty)
   - Drafts
       - [CSS Overflow 4 - overflow](https://drafts.csswg.org/css-overflow-4/#propdef-overflow)
+      - [CSS 2.2 - overflow](https://drafts.csswg.org/css2/visufx.html#propdef-overflow)
       - [CSS 2.1 - overflow](https://drafts.csswg.org/css21/visufx.html#propdef-overflow)
       - [CSS Overflow 3 - overflow](https://drafts.csswg.org/css-overflow-3/#propdef-overflow)
   - Values: `visible | hidden | scroll | auto;`
@@ -656,6 +731,7 @@
       - [CSS 2.2 - padding](https://www.w3.org/TR/CSS22/box.html#propdef-padding)
       - [CSS 2.1 - padding](https://www.w3.org/TR/CSS21/box.html#propdef-padding)
   - Drafts
+      - [CSS 2.2 - padding](https://drafts.csswg.org/css2/box.html#propdef-padding)
       - [CSS 2.1 - padding](https://drafts.csswg.org/css21/box.html#propdef-padding)
   - Values: `INSETS padding-top padding-right padding-bottom padding-left;`
 - [padding-bottom](https://www.w3.org/TR/CSS22/box.html#propdef-padding-bottom)
@@ -663,6 +739,7 @@
       - [CSS 2.2 - padding-bottom](https://www.w3.org/TR/CSS22/box.html#propdef-padding-bottom)
       - [CSS 2.1 - padding-bottom](https://www.w3.org/TR/CSS21/box.html#propdef-padding-bottom)
   - Drafts
+      - [CSS 2.2 - padding-bottom](https://drafts.csswg.org/css2/box.html#propdef-padding-bottom)
       - [CSS 2.1 - padding-bottom](https://drafts.csswg.org/css21/box.html#propdef-padding-bottom)
   - Values: `PPLENGTH;`
 - [padding-left](https://www.w3.org/TR/CSS22/box.html#propdef-padding-left)
@@ -670,6 +747,7 @@
       - [CSS 2.2 - padding-left](https://www.w3.org/TR/CSS22/box.html#propdef-padding-left)
       - [CSS 2.1 - padding-left](https://www.w3.org/TR/CSS21/box.html#propdef-padding-left)
   - Drafts
+      - [CSS 2.2 - padding-left](https://drafts.csswg.org/css2/box.html#propdef-padding-left)
       - [CSS 2.1 - padding-left](https://drafts.csswg.org/css21/box.html#propdef-padding-left)
   - Values: `PPLENGTH;`
 - [padding-right](https://www.w3.org/TR/CSS22/box.html#propdef-padding-right)
@@ -677,6 +755,7 @@
       - [CSS 2.2 - padding-right](https://www.w3.org/TR/CSS22/box.html#propdef-padding-right)
       - [CSS 2.1 - padding-right](https://www.w3.org/TR/CSS21/box.html#propdef-padding-right)
   - Drafts
+      - [CSS 2.2 - padding-right](https://drafts.csswg.org/css2/box.html#propdef-padding-right)
       - [CSS 2.1 - padding-right](https://drafts.csswg.org/css21/box.html#propdef-padding-right)
   - Values: `PPLENGTH;`
 - [padding-top](https://www.w3.org/TR/CSS22/box.html#propdef-padding-top)
@@ -684,6 +763,7 @@
       - [CSS 2.2 - padding-top](https://www.w3.org/TR/CSS22/box.html#propdef-padding-top)
       - [CSS 2.1 - padding-top](https://www.w3.org/TR/CSS21/box.html#propdef-padding-top)
   - Drafts
+      - [CSS 2.2 - padding-top](https://drafts.csswg.org/css2/box.html#propdef-padding-top)
       - [CSS 2.1 - padding-top](https://drafts.csswg.org/css21/box.html#propdef-padding-top)
   - Values: `PPLENGTH;`
 - [page-break-after](https://www.w3.org/TR/CSS22/page.html#propdef-page-break-after)
@@ -691,6 +771,7 @@
       - [CSS 2.2 - page-break-after](https://www.w3.org/TR/CSS22/page.html#propdef-page-break-after)
       - [CSS 2.1 - page-break-after](https://www.w3.org/TR/CSS21/page.html#propdef-page-break-after)
   - Drafts
+      - [CSS 2.2 - page-break-after](https://drafts.csswg.org/css2/page.html#propdef-page-break-after)
       - [CSS 2.1 - page-break-after](https://drafts.csswg.org/css21/page.html#propdef-page-break-after)
   - Values: `PAGE_BREAK;`
 - [page-break-before](https://www.w3.org/TR/CSS22/page.html#propdef-page-break-before)
@@ -698,6 +779,7 @@
       - [CSS 2.2 - page-break-before](https://www.w3.org/TR/CSS22/page.html#propdef-page-break-before)
       - [CSS 2.1 - page-break-before](https://www.w3.org/TR/CSS21/page.html#propdef-page-break-before)
   - Drafts
+      - [CSS 2.2 - page-break-before](https://drafts.csswg.org/css2/page.html#propdef-page-break-before)
       - [CSS 2.1 - page-break-before](https://drafts.csswg.org/css21/page.html#propdef-page-break-before)
   - Values: `PAGE_BREAK;`
 - [page-break-inside](https://www.w3.org/TR/CSS22/page.html#propdef-page-break-inside)
@@ -705,6 +787,7 @@
       - [CSS 2.2 - page-break-inside](https://www.w3.org/TR/CSS22/page.html#propdef-page-break-inside)
       - [CSS 2.1 - page-break-inside](https://www.w3.org/TR/CSS21/page.html#propdef-page-break-inside)
   - Drafts
+      - [CSS 2.2 - page-break-inside](https://drafts.csswg.org/css2/page.html#propdef-page-break-inside)
       - [CSS 2.1 - page-break-inside](https://drafts.csswg.org/css21/page.html#propdef-page-break-inside)
   - Values: `avoid | auto;`
 - [pause](https://www.w3.org/TR/CSS22/aural.html#propdef-pause)
@@ -713,6 +796,7 @@
       - [CSS 2.1 - pause](https://www.w3.org/TR/CSS21/aural.html#propdef-pause)
       - [CSS Speech 1 - pause](https://www.w3.org/TR/css3-speech/#pause)
   - Drafts
+      - [CSS 2.2 - pause](https://drafts.csswg.org/css2/aural.html#propdef-pause)
       - [CSS 2.1 - pause](https://drafts.csswg.org/css21/aural.html#propdef-pause)
       - [CSS Speech 1 - pause](https://drafts.csswg.org/css-speech-1/#pause)
   - Values: `INSETS pause-before pause-after;`
@@ -722,6 +806,7 @@
       - [CSS 2.1 - pause-after](https://www.w3.org/TR/CSS21/aural.html#propdef-pause-after)
       - [CSS Speech 1 - pause-after](https://www.w3.org/TR/css3-speech/#pause-after)
   - Drafts
+      - [CSS 2.2 - pause-after](https://drafts.csswg.org/css2/aural.html#propdef-pause-after)
       - [CSS 2.1 - pause-after](https://drafts.csswg.org/css21/aural.html#propdef-pause-after)
       - [CSS Speech 1 - pause-after](https://drafts.csswg.org/css-speech-1/#pause-after)
   - Values: `PAUSE;`
@@ -731,6 +816,7 @@
       - [CSS 2.1 - pause-before](https://www.w3.org/TR/CSS21/aural.html#propdef-pause-before)
       - [CSS Speech 1 - pause-before](https://www.w3.org/TR/css3-speech/#pause-before)
   - Drafts
+      - [CSS 2.2 - pause-before](https://drafts.csswg.org/css2/aural.html#propdef-pause-before)
       - [CSS 2.1 - pause-before](https://drafts.csswg.org/css21/aural.html#propdef-pause-before)
       - [CSS Speech 1 - pause-before](https://drafts.csswg.org/css-speech-1/#pause-before)
   - Values: `PAUSE;`
@@ -739,6 +825,7 @@
       - [CSS 2.2 - pitch](https://www.w3.org/TR/CSS22/aural.html#propdef-pitch)
       - [CSS 2.1 - pitch](https://www.w3.org/TR/CSS21/aural.html#propdef-pitch)
   - Drafts
+      - [CSS 2.2 - pitch](https://drafts.csswg.org/css2/aural.html#propdef-pitch)
       - [CSS 2.1 - pitch](https://drafts.csswg.org/css21/aural.html#propdef-pitch)
   - Values: `FREQUENCY | x-low | low | medium | high | x-high;`
 - [pitch-range](https://www.w3.org/TR/CSS22/aural.html#propdef-pitch-range)
@@ -746,6 +833,7 @@
       - [CSS 2.2 - pitch-range](https://www.w3.org/TR/CSS22/aural.html#propdef-pitch-range)
       - [CSS 2.1 - pitch-range](https://www.w3.org/TR/CSS21/aural.html#propdef-pitch-range)
   - Drafts
+      - [CSS 2.2 - pitch-range](https://drafts.csswg.org/css2/aural.html#propdef-pitch-range)
       - [CSS 2.1 - pitch-range](https://drafts.csswg.org/css21/aural.html#propdef-pitch-range)
   - Values: `NUM;`
 - [play-during](https://www.w3.org/TR/CSS22/aural.html#propdef-play-during)
@@ -753,6 +841,7 @@
       - [CSS 2.2 - play-during](https://www.w3.org/TR/CSS22/aural.html#propdef-play-during)
       - [CSS 2.1 - play-during](https://www.w3.org/TR/CSS21/aural.html#propdef-play-during)
   - Drafts
+      - [CSS 2.2 - play-during](https://drafts.csswg.org/css2/aural.html#propdef-play-during)
       - [CSS 2.1 - play-during](https://drafts.csswg.org/css21/aural.html#propdef-play-during)
   - Values: `[URI [ mix || repeat ]?] | auto | none;`
 - [position](https://www.w3.org/TR/CSS22/visuren.html#propdef-position)
@@ -761,6 +850,7 @@
       - [CSS 2.1 - position](https://www.w3.org/TR/CSS21/visuren.html#propdef-position)
       - [CSS Positioned Layout 3 - position](https://www.w3.org/TR/css3-positioning/#propdef-position)
   - Drafts
+      - [CSS 2.2 - position](https://drafts.csswg.org/css2/visuren.html#propdef-position)
       - [CSS 2.1 - position](https://drafts.csswg.org/css21/visuren.html#propdef-position)
       - [CSS Positioned Layout 3 - position](https://drafts.csswg.org/css-position-3/#propdef-position)
   - Values: `static | relative | absolute | fixed;`
@@ -771,6 +861,7 @@
       - [CSS 2.1 - quotes](https://www.w3.org/TR/CSS21/generate.html#propdef-quotes)
   - Drafts
       - [CSS Generated Content 3 - quotes](https://drafts.csswg.org/css-content-3/#propdef-quotes)
+      - [CSS 2.2 - quotes](https://drafts.csswg.org/css2/generate.html#propdef-quotes)
       - [CSS 2.1 - quotes](https://drafts.csswg.org/css21/generate.html#propdef-quotes)
   - Values: `[STRING STRING]+ | none;`
 - [richness](https://www.w3.org/TR/CSS22/aural.html#propdef-richness)
@@ -778,6 +869,7 @@
       - [CSS 2.2 - richness](https://www.w3.org/TR/CSS22/aural.html#propdef-richness)
       - [CSS 2.1 - richness](https://www.w3.org/TR/CSS21/aural.html#propdef-richness)
   - Drafts
+      - [CSS 2.2 - richness](https://drafts.csswg.org/css2/aural.html#propdef-richness)
       - [CSS 2.1 - richness](https://drafts.csswg.org/css21/aural.html#propdef-richness)
   - Values: `NUM;`
 - [right](https://www.w3.org/TR/CSS22/visuren.html#propdef-right)
@@ -786,6 +878,7 @@
       - [CSS 2.1 - right](https://www.w3.org/TR/CSS21/visuren.html#propdef-right)
       - [CSS Positioned Layout 3 - right](https://www.w3.org/TR/css3-positioning/#propdef-right)
   - Drafts
+      - [CSS 2.2 - right](https://drafts.csswg.org/css2/visuren.html#propdef-right)
       - [CSS 2.1 - right](https://drafts.csswg.org/css21/visuren.html#propdef-right)
       - [CSS Positioned Layout 3 - right](https://drafts.csswg.org/css-position-3/#propdef-right)
   - Values: `APLENGTH;`
@@ -794,6 +887,7 @@
       - [CSS 2.2 - speak-header](https://www.w3.org/TR/CSS22/aural.html#propdef-speak-header)
       - [CSS 2.1 - speak-header](https://www.w3.org/TR/CSS21/aural.html#propdef-speak-header)
   - Drafts
+      - [CSS 2.2 - speak-header](https://drafts.csswg.org/css2/aural.html#propdef-speak-header)
       - [CSS 2.1 - speak-header](https://drafts.csswg.org/css21/aural.html#propdef-speak-header)
   - Values: `once | always;`
 - [speak-numeral](https://www.w3.org/TR/CSS22/aural.html#propdef-speak-numeral)
@@ -801,6 +895,7 @@
       - [CSS 2.2 - speak-numeral](https://www.w3.org/TR/CSS22/aural.html#propdef-speak-numeral)
       - [CSS 2.1 - speak-numeral](https://www.w3.org/TR/CSS21/aural.html#propdef-speak-numeral)
   - Drafts
+      - [CSS 2.2 - speak-numeral](https://drafts.csswg.org/css2/aural.html#propdef-speak-numeral)
       - [CSS 2.1 - speak-numeral](https://drafts.csswg.org/css21/aural.html#propdef-speak-numeral)
   - Values: `digits | continuous;`
 - [speak-punctuation](https://www.w3.org/TR/CSS22/aural.html#propdef-speak-punctuation)
@@ -808,6 +903,7 @@
       - [CSS 2.2 - speak-punctuation](https://www.w3.org/TR/CSS22/aural.html#propdef-speak-punctuation)
       - [CSS 2.1 - speak-punctuation](https://www.w3.org/TR/CSS21/aural.html#propdef-speak-punctuation)
   - Drafts
+      - [CSS 2.2 - speak-punctuation](https://drafts.csswg.org/css2/aural.html#propdef-speak-punctuation)
       - [CSS 2.1 - speak-punctuation](https://drafts.csswg.org/css21/aural.html#propdef-speak-punctuation)
   - Values: `code | none;`
 - [speech-rate](https://www.w3.org/TR/CSS22/aural.html#propdef-speech-rate)
@@ -815,6 +911,7 @@
       - [CSS 2.2 - speech-rate](https://www.w3.org/TR/CSS22/aural.html#propdef-speech-rate)
       - [CSS 2.1 - speech-rate](https://www.w3.org/TR/CSS21/aural.html#propdef-speech-rate)
   - Drafts
+      - [CSS 2.2 - speech-rate](https://drafts.csswg.org/css2/aural.html#propdef-speech-rate)
       - [CSS 2.1 - speech-rate](https://drafts.csswg.org/css21/aural.html#propdef-speech-rate)
   - Values: `NUM | x-slow | slow | medium | fast | x-fast | faster | slower;`
 - [stress](https://www.w3.org/TR/CSS22/aural.html#propdef-stress)
@@ -822,6 +919,7 @@
       - [CSS 2.2 - stress](https://www.w3.org/TR/CSS22/aural.html#propdef-stress)
       - [CSS 2.1 - stress](https://www.w3.org/TR/CSS21/aural.html#propdef-stress)
   - Drafts
+      - [CSS 2.2 - stress](https://drafts.csswg.org/css2/aural.html#propdef-stress)
       - [CSS 2.1 - stress](https://drafts.csswg.org/css21/aural.html#propdef-stress)
   - Values: `NUM;`
 - [table-layout](https://www.w3.org/TR/CSS22/tables.html#propdef-table-layout)
@@ -830,6 +928,7 @@
       - [CSS 2.1 - table-layout](https://www.w3.org/TR/CSS21/tables.html#propdef-table-layout)
   - Drafts
       - [CSS Tables 3 - table-layout](https://drafts.csswg.org/css-tables-3/#propdef-table-layout)
+      - [CSS 2.2 - table-layout](https://drafts.csswg.org/css2/tables.html#propdef-table-layout)
       - [CSS 2.1 - table-layout](https://drafts.csswg.org/css21/tables.html#propdef-table-layout)
   - Values: `auto | fixed;`
 - [text-align](https://www.w3.org/TR/CSS22/text.html#propdef-text-align)
@@ -838,6 +937,7 @@
       - [CSS 2.1 - text-align](https://www.w3.org/TR/CSS21/text.html#propdef-text-align)
       - [CSS Text 3 - text-align](https://www.w3.org/TR/css-text-3/#text-align)
   - Drafts
+      - [CSS 2.2 - text-align](https://drafts.csswg.org/css2/text.html#propdef-text-align)
       - [CSS 2.1 - text-align](https://drafts.csswg.org/css21/text.html#propdef-text-align)
       - [CSS Text 3 - text-align](https://drafts.csswg.org/css-text-3/#propdef-text-align)
   - Values: `left | right | center | justify;`
@@ -848,6 +948,7 @@
       - [CSS Text Decoration 3 - text-decoration](https://www.w3.org/TR/css-text-decor-3/#text-decoration)
       - [SVG 1.1 - text-decoration](https://www.w3.org/TR/SVG/text.html#TextDecorationProperty)
   - Drafts
+      - [CSS 2.2 - text-decoration](https://drafts.csswg.org/css2/text.html#propdef-text-decoration)
       - [CSS 2.1 - text-decoration](https://drafts.csswg.org/css21/text.html#propdef-text-decoration)
       - [CSS Text Decoration 3 - text-decoration](https://drafts.csswg.org/css-text-decor-3/#propdef-text-decoration)
   - Values: `none | [ underline || overline || line-through || blink ];`
@@ -857,6 +958,7 @@
       - [CSS 2.1 - text-indent](https://www.w3.org/TR/CSS21/text.html#propdef-text-indent)
       - [CSS Text 3 - text-indent](https://www.w3.org/TR/css-text-3/#text-indent)
   - Drafts
+      - [CSS 2.2 - text-indent](https://drafts.csswg.org/css2/text.html#propdef-text-indent)
       - [CSS 2.1 - text-indent](https://drafts.csswg.org/css21/text.html#propdef-text-indent)
       - [CSS Text 3 - text-indent](https://drafts.csswg.org/css-text-3/#propdef-text-indent)
   - Values: `PLENGTH;`
@@ -866,6 +968,7 @@
       - [CSS 2.1 - text-transform](https://www.w3.org/TR/CSS21/text.html#propdef-text-transform)
       - [CSS Text 3 - text-transform](https://www.w3.org/TR/css-text-3/#text-transform)
   - Drafts
+      - [CSS 2.2 - text-transform](https://drafts.csswg.org/css2/text.html#propdef-text-transform)
       - [CSS 2.1 - text-transform](https://drafts.csswg.org/css21/text.html#propdef-text-transform)
       - [CSS Text 3 - text-transform](https://drafts.csswg.org/css-text-3/#propdef-text-transform)
   - Values: `capitalize | uppercase | lowercase | none;`
@@ -875,6 +978,7 @@
       - [CSS 2.1 - top](https://www.w3.org/TR/CSS21/visuren.html#propdef-top)
       - [CSS Positioned Layout 3 - top](https://www.w3.org/TR/css3-positioning/#propdef-top)
   - Drafts
+      - [CSS 2.2 - top](https://drafts.csswg.org/css2/visuren.html#propdef-top)
       - [CSS 2.1 - top](https://drafts.csswg.org/css21/visuren.html#propdef-top)
       - [CSS Positioned Layout 3 - top](https://drafts.csswg.org/css-position-3/#propdef-top)
   - Values: `APLENGTH;`
@@ -885,6 +989,7 @@
       - [CSS Writing Modes 3 - unicode-bidi](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
       - [SVG 1.1 - unicode-bidi](https://www.w3.org/TR/SVG/text.html#UnicodeBidiProperty)
   - Drafts
+      - [CSS 2.2 - unicode-bidi](https://drafts.csswg.org/css2/visuren.html#propdef-unicode-bidi)
       - [CSS 2.1 - unicode-bidi](https://drafts.csswg.org/css21/visuren.html#propdef-unicode-bidi)
       - [CSS Writing Modes 3 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-3/#propdef-unicode-bidi)
   - Values: `normal | embed | isolate | bidi-override | isolate-override | plaintext;`
@@ -894,6 +999,7 @@
       - [CSS 2.1 - vertical-align](https://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align)
       - [CSS Inline Layout 3 - vertical-align](https://www.w3.org/TR/css-inline-3/#propdef-vertical-align)
   - Drafts
+      - [CSS 2.2 - vertical-align](https://drafts.csswg.org/css2/visudet.html#propdef-vertical-align)
       - [CSS 2.1 - vertical-align](https://drafts.csswg.org/css21/visudet.html#propdef-vertical-align)
       - [CSS Inline Layout 3 - vertical-align](https://drafts.csswg.org/css-inline-3/#propdef-vertical-align)
   - Values: `baseline | sub | super | top | text-top | middle | bottom | text-bottom | PLENGTH;`
@@ -903,6 +1009,7 @@
       - [CSS 2.1 - visibility](https://www.w3.org/TR/CSS21/visufx.html#propdef-visibility)
       - [SVG 1.1 - visibility](https://www.w3.org/TR/SVG/painting.html#VisibilityProperty)
   - Drafts
+      - [CSS 2.2 - visibility](https://drafts.csswg.org/css2/visufx.html#propdef-visibility)
       - [CSS 2.1 - visibility](https://drafts.csswg.org/css21/visufx.html#propdef-visibility)
   - Values: `visible | hidden | collapse;`
 - [voice-family](https://www.w3.org/TR/CSS22/aural.html#propdef-voice-family)
@@ -911,6 +1018,7 @@
       - [CSS 2.1 - voice-family](https://www.w3.org/TR/CSS21/aural.html#propdef-voice-family)
       - [CSS Speech 1 - voice-family](https://www.w3.org/TR/css3-speech/#voice-family)
   - Drafts
+      - [CSS 2.2 - voice-family](https://drafts.csswg.org/css2/aural.html#propdef-voice-family)
       - [CSS 2.1 - voice-family](https://drafts.csswg.org/css21/aural.html#propdef-voice-family)
       - [CSS Speech 1 - voice-family](https://drafts.csswg.org/css-speech-1/#voice-family)
   - Values: `FAMILY_LIST;`
@@ -919,6 +1027,7 @@
       - [CSS 2.2 - volume](https://www.w3.org/TR/CSS22/aural.html#propdef-volume)
       - [CSS 2.1 - volume](https://www.w3.org/TR/CSS21/aural.html#propdef-volume)
   - Drafts
+      - [CSS 2.2 - volume](https://drafts.csswg.org/css2/aural.html#propdef-volume)
       - [CSS 2.1 - volume](https://drafts.csswg.org/css21/aural.html#propdef-volume)
   - Values: `NUM | PERCENTAGE | silent | x-soft | soft | medium | loud | x-loud;`
 - [white-space](https://www.w3.org/TR/CSS22/text.html#propdef-white-space)
@@ -928,6 +1037,7 @@
       - [CSS Text 3 - white-space](https://www.w3.org/TR/css-text-3/#white-space)
       - [SVG 2 - white-space](https://www.w3.org/TR/svg2/text.html#WhiteSpaceProperty)
   - Drafts
+      - [CSS 2.2 - white-space](https://drafts.csswg.org/css2/text.html#propdef-white-space)
       - [CSS 2.1 - white-space](https://drafts.csswg.org/css21/text.html#propdef-white-space)
       - [CSS Text 3 - white-space](https://drafts.csswg.org/css-text-3/#propdef-white-space)
       - [CSS Text 4 - white-space](https://drafts.csswg.org/css-text-4/#propdef-white-space)
@@ -939,6 +1049,7 @@
       - [CSS 2.1 - widows](https://www.w3.org/TR/CSS21/page.html#propdef-widows)
       - [CSS Fragmentation 3 - widows](https://www.w3.org/TR/css3-break/#propdef-widows)
   - Drafts
+      - [CSS 2.2 - widows](https://drafts.csswg.org/css2/page.html#propdef-widows)
       - [CSS 2.1 - widows](https://drafts.csswg.org/css21/page.html#propdef-widows)
       - [CSS Fragmentation 3 - widows](https://drafts.csswg.org/css-break-3/#propdef-widows)
   - Values: `POS_INT;`
@@ -947,6 +1058,7 @@
       - [CSS 2.2 - width](https://www.w3.org/TR/CSS22/visudet.html#propdef-width)
       - [CSS 2.1 - width](https://www.w3.org/TR/CSS21/visudet.html#propdef-width)
   - Drafts
+      - [CSS 2.2 - width](https://drafts.csswg.org/css2/visudet.html#propdef-width)
       - [CSS 2.1 - width](https://drafts.csswg.org/css21/visudet.html#propdef-width)
   - Values: `PAPLENGTH | POS_NUM ;`
 - [word-spacing](https://www.w3.org/TR/CSS22/text.html#propdef-word-spacing)
@@ -956,6 +1068,7 @@
       - [CSS Text 3 - word-spacing](https://www.w3.org/TR/css-text-3/#word-spacing)
       - [SVG 1.1 - word-spacing](https://www.w3.org/TR/SVG/text.html#WordSpacingProperty)
   - Drafts
+      - [CSS 2.2 - word-spacing](https://drafts.csswg.org/css2/text.html#propdef-word-spacing)
       - [CSS 2.1 - word-spacing](https://drafts.csswg.org/css21/text.html#propdef-word-spacing)
       - [CSS Text 3 - word-spacing](https://drafts.csswg.org/css-text-3/#propdef-word-spacing)
   - Values: `normal | LENGTH_OR_NUM;`
@@ -965,6 +1078,7 @@
       - [CSS 2.1 - z-index](https://www.w3.org/TR/CSS21/visuren.html#propdef-z-index)
       - [CSS Positioned Layout 3 - z-index](https://www.w3.org/TR/css3-positioning/#propdef-z-index)
   - Drafts
+      - [CSS 2.2 - z-index](https://drafts.csswg.org/css2/visuren.html#propdef-z-index)
       - [CSS 2.1 - z-index](https://drafts.csswg.org/css21/visuren.html#propdef-z-index)
       - [CSS Positioned Layout 3 - z-index](https://drafts.csswg.org/css-position-3/#propdef-z-index)
   - Values: `auto | INT;`
@@ -991,6 +1105,7 @@
       - [CSS Color 3 - color](https://www.w3.org/TR/css3-color/#color0)
       - [CSS Color 4 - color](https://www.w3.org/TR/css-color-4/#propdef-color)
   - Drafts
+      - [CSS 2.2 - color](https://drafts.csswg.org/css2/colors.html#propdef-color)
       - [CSS 2.1 - color](https://drafts.csswg.org/css21/colors.html#propdef-color)
       - [CSS Color 3 - color](https://drafts.csswg.org/css-color-3/#color0)
       - [CSS Color 4 - color](https://drafts.csswg.org/css-color-4/#propdef-color)
@@ -1013,6 +1128,7 @@
       - [CSS Color 3 - color](https://www.w3.org/TR/css3-color/#color0)
       - [CSS Color 4 - color](https://www.w3.org/TR/css-color-4/#propdef-color)
   - Drafts
+      - [CSS 2.2 - color](https://drafts.csswg.org/css2/colors.html#propdef-color)
       - [CSS 2.1 - color](https://drafts.csswg.org/css21/colors.html#propdef-color)
       - [CSS Color 3 - color](https://drafts.csswg.org/css-color-3/#color0)
       - [CSS Color 4 - color](https://drafts.csswg.org/css-color-4/#propdef-color)
@@ -1034,6 +1150,7 @@
       - [CSS 2.1 - background](https://www.w3.org/TR/CSS21/colors.html#propdef-background)
       - [CSS Backgrounds 3 - background](https://www.w3.org/TR/css3-background/#background)
   - Drafts
+      - [CSS 2.2 - background](https://drafts.csswg.org/css2/colors.html#propdef-background)
       - [CSS 2.1 - background](https://drafts.csswg.org/css21/colors.html#propdef-background)
       - [CSS Backgrounds 3 - background](https://drafts.csswg.org/css-backgrounds-3/#background)
   - Values: `COMMA background-image [background-position [ / background-size ]] background-repeat background-attachment [background-origin background-clip] background-color; /* background-color is a special case, see the code */`
@@ -1043,6 +1160,7 @@
       - [CSS 2.1 - background-attachment](https://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment)
       - [CSS Backgrounds 3 - background-attachment](https://www.w3.org/TR/css3-background/#background-attachment)
   - Drafts
+      - [CSS 2.2 - background-attachment](https://drafts.csswg.org/css2/colors.html#propdef-background-attachment)
       - [CSS 2.1 - background-attachment](https://drafts.csswg.org/css21/colors.html#propdef-background-attachment)
       - [CSS Backgrounds 3 - background-attachment](https://drafts.csswg.org/css-backgrounds-3/#background-attachment)
   - Values: `COMMA( [scroll | fixed | local]+ );`
@@ -1059,6 +1177,7 @@
       - [CSS 2.1 - background-color](https://www.w3.org/TR/CSS21/colors.html#propdef-background-color)
       - [CSS Backgrounds 3 - background-color](https://www.w3.org/TR/css3-background/#background-color)
   - Drafts
+      - [CSS 2.2 - background-color](https://drafts.csswg.org/css2/colors.html#propdef-background-color)
       - [CSS 2.1 - background-color](https://drafts.csswg.org/css21/colors.html#propdef-background-color)
       - [CSS Backgrounds 3 - background-color](https://drafts.csswg.org/css-backgrounds-3/#background-color)
   - Values: `COLOR;`
@@ -1068,6 +1187,7 @@
       - [CSS 2.1 - background-image](https://www.w3.org/TR/CSS21/colors.html#propdef-background-image)
       - [CSS Backgrounds 3 - background-image](https://www.w3.org/TR/css3-background/#background-image)
   - Drafts
+      - [CSS 2.2 - background-image](https://drafts.csswg.org/css2/colors.html#propdef-background-image)
       - [CSS 2.1 - background-image](https://drafts.csswg.org/css21/colors.html#propdef-background-image)
       - [CSS Backgrounds 3 - background-image](https://drafts.csswg.org/css-backgrounds-3/#background-image)
   - Values: `COMMA( IMAGE+ );`
@@ -1084,6 +1204,7 @@
       - [CSS 2.1 - background-position](https://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
       - [CSS Backgrounds 3 - background-position](https://www.w3.org/TR/css3-background/#background-position)
   - Drafts
+      - [CSS 2.2 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
       - [CSS 2.1 - background-position](https://drafts.csswg.org/css21/colors.html#propdef-background-position)
       - [CSS Backgrounds 3 - background-position](https://drafts.csswg.org/css-backgrounds-3/#background-position)
       - [CSS Backgrounds 4 - background-position](https://drafts.csswg.org/css-backgrounds-4/#propdef-background-position)
@@ -1094,6 +1215,7 @@
       - [CSS 2.1 - background-repeat](https://www.w3.org/TR/CSS21/colors.html#propdef-background-repeat)
       - [CSS Backgrounds 3 - background-repeat](https://www.w3.org/TR/css3-background/#background-repeat)
   - Drafts
+      - [CSS 2.2 - background-repeat](https://drafts.csswg.org/css2/colors.html#propdef-background-repeat)
       - [CSS 2.1 - background-repeat](https://drafts.csswg.org/css21/colors.html#propdef-background-repeat)
       - [CSS Backgrounds 3 - background-repeat](https://drafts.csswg.org/css-backgrounds-3/#background-repeat)
   - Values: `COMMA( [repeat | repeat-x | repeat-y | no-repeat]+ );`
@@ -1110,6 +1232,7 @@
       - [CSS 2.1 - border](https://www.w3.org/TR/CSS21/box.html#propdef-border)
       - [CSS Backgrounds 3 - border](https://www.w3.org/TR/css3-background/#border)
   - Drafts
+      - [CSS 2.2 - border](https://drafts.csswg.org/css2/box.html#propdef-border)
       - [CSS 2.1 - border](https://drafts.csswg.org/css21/box.html#propdef-border)
       - [CSS Backgrounds 3 - border](https://drafts.csswg.org/css-backgrounds-3/#border)
   - Values: `border-width border-style border-color;`
@@ -1119,6 +1242,7 @@
       - [CSS 2.1 - border-bottom](https://www.w3.org/TR/CSS21/box.html#propdef-border-bottom)
       - [CSS Backgrounds 3 - border-bottom](https://www.w3.org/TR/css3-background/#border-bottom)
   - Drafts
+      - [CSS 2.2 - border-bottom](https://drafts.csswg.org/css2/box.html#propdef-border-bottom)
       - [CSS 2.1 - border-bottom](https://drafts.csswg.org/css21/box.html#propdef-border-bottom)
       - [CSS Backgrounds 3 - border-bottom](https://drafts.csswg.org/css-backgrounds-3/#border-bottom)
   - Values: `border-bottom-width border-bottom-style border-bottom-color;`
@@ -1128,6 +1252,7 @@
       - [CSS 2.1 - border-bottom-color](https://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-color)
       - [CSS Backgrounds 3 - border-bottom-color](https://www.w3.org/TR/css3-background/#border-bottom-color)
   - Drafts
+      - [CSS 2.2 - border-bottom-color](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-color)
       - [CSS 2.1 - border-bottom-color](https://drafts.csswg.org/css21/box.html#propdef-border-bottom-color)
       - [CSS Backgrounds 3 - border-bottom-color](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-color)
   - Values: `BORDER_SIDE_COLOR;`
@@ -1149,6 +1274,7 @@
       - [CSS 2.1 - border-bottom-style](https://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-style)
       - [CSS Backgrounds 3 - border-bottom-style](https://www.w3.org/TR/css3-background/#border-bottom-style)
   - Drafts
+      - [CSS 2.2 - border-bottom-style](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-style)
       - [CSS 2.1 - border-bottom-style](https://drafts.csswg.org/css21/box.html#propdef-border-bottom-style)
       - [CSS Backgrounds 3 - border-bottom-style](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-style)
   - Values: `BORDER_SIDE_STYLE;`
@@ -1158,6 +1284,7 @@
       - [CSS 2.1 - border-bottom-width](https://www.w3.org/TR/CSS21/box.html#propdef-border-bottom-width)
       - [CSS Backgrounds 3 - border-bottom-width](https://www.w3.org/TR/css3-background/#border-bottom-width)
   - Drafts
+      - [CSS 2.2 - border-bottom-width](https://drafts.csswg.org/css2/box.html#propdef-border-bottom-width)
       - [CSS 2.1 - border-bottom-width](https://drafts.csswg.org/css21/box.html#propdef-border-bottom-width)
       - [CSS Backgrounds 3 - border-bottom-width](https://drafts.csswg.org/css-backgrounds-3/#border-bottom-width)
   - Values: `BORDER_SIDE_WIDTH;`
@@ -1167,6 +1294,7 @@
       - [CSS 2.1 - border-color](https://www.w3.org/TR/CSS21/box.html#propdef-border-color)
       - [CSS Backgrounds 3 - border-color](https://www.w3.org/TR/css3-background/#border-color)
   - Drafts
+      - [CSS 2.2 - border-color](https://drafts.csswg.org/css2/box.html#propdef-border-color)
       - [CSS 2.1 - border-color](https://drafts.csswg.org/css21/box.html#propdef-border-color)
       - [CSS Backgrounds 3 - border-color](https://drafts.csswg.org/css-backgrounds-3/#border-color)
   - Values: `INSETS border-top-color border-right-color border-bottom-color border-left-color;`
@@ -1212,6 +1340,7 @@
       - [CSS 2.1 - border-left](https://www.w3.org/TR/CSS21/box.html#propdef-border-left)
       - [CSS Backgrounds 3 - border-left](https://www.w3.org/TR/css3-background/#border-left)
   - Drafts
+      - [CSS 2.2 - border-left](https://drafts.csswg.org/css2/box.html#propdef-border-left)
       - [CSS 2.1 - border-left](https://drafts.csswg.org/css21/box.html#propdef-border-left)
       - [CSS Backgrounds 3 - border-left](https://drafts.csswg.org/css-backgrounds-3/#border-left)
   - Values: `border-left-width border-left-style border-left-color;`
@@ -1221,6 +1350,7 @@
       - [CSS 2.1 - border-left-color](https://www.w3.org/TR/CSS21/box.html#propdef-border-left-color)
       - [CSS Backgrounds 3 - border-left-color](https://www.w3.org/TR/css3-background/#border-left-color)
   - Drafts
+      - [CSS 2.2 - border-left-color](https://drafts.csswg.org/css2/box.html#propdef-border-left-color)
       - [CSS 2.1 - border-left-color](https://drafts.csswg.org/css21/box.html#propdef-border-left-color)
       - [CSS Backgrounds 3 - border-left-color](https://drafts.csswg.org/css-backgrounds-3/#border-left-color)
   - Values: `BORDER_SIDE_COLOR;`
@@ -1230,6 +1360,7 @@
       - [CSS 2.1 - border-left-style](https://www.w3.org/TR/CSS21/box.html#propdef-border-left-style)
       - [CSS Backgrounds 3 - border-left-style](https://www.w3.org/TR/css3-background/#border-left-style)
   - Drafts
+      - [CSS 2.2 - border-left-style](https://drafts.csswg.org/css2/box.html#propdef-border-left-style)
       - [CSS 2.1 - border-left-style](https://drafts.csswg.org/css21/box.html#propdef-border-left-style)
       - [CSS Backgrounds 3 - border-left-style](https://drafts.csswg.org/css-backgrounds-3/#border-left-style)
   - Values: `BORDER_SIDE_STYLE;`
@@ -1239,6 +1370,7 @@
       - [CSS 2.1 - border-left-width](https://www.w3.org/TR/CSS21/box.html#propdef-border-left-width)
       - [CSS Backgrounds 3 - border-left-width](https://www.w3.org/TR/css3-background/#border-left-width)
   - Drafts
+      - [CSS 2.2 - border-left-width](https://drafts.csswg.org/css2/box.html#propdef-border-left-width)
       - [CSS 2.1 - border-left-width](https://drafts.csswg.org/css21/box.html#propdef-border-left-width)
       - [CSS Backgrounds 3 - border-left-width](https://drafts.csswg.org/css-backgrounds-3/#border-left-width)
   - Values: `BORDER_SIDE_WIDTH;`
@@ -1255,6 +1387,7 @@
       - [CSS 2.1 - border-right](https://www.w3.org/TR/CSS21/box.html#propdef-border-right)
       - [CSS Backgrounds 3 - border-right](https://www.w3.org/TR/css3-background/#border-right)
   - Drafts
+      - [CSS 2.2 - border-right](https://drafts.csswg.org/css2/box.html#propdef-border-right)
       - [CSS 2.1 - border-right](https://drafts.csswg.org/css21/box.html#propdef-border-right)
       - [CSS Backgrounds 3 - border-right](https://drafts.csswg.org/css-backgrounds-3/#border-right)
   - Values: `border-right-width border-right-style border-right-color;`
@@ -1264,6 +1397,7 @@
       - [CSS 2.1 - border-right-color](https://www.w3.org/TR/CSS21/box.html#propdef-border-right-color)
       - [CSS Backgrounds 3 - border-right-color](https://www.w3.org/TR/css3-background/#border-right-color)
   - Drafts
+      - [CSS 2.2 - border-right-color](https://drafts.csswg.org/css2/box.html#propdef-border-right-color)
       - [CSS 2.1 - border-right-color](https://drafts.csswg.org/css21/box.html#propdef-border-right-color)
       - [CSS Backgrounds 3 - border-right-color](https://drafts.csswg.org/css-backgrounds-3/#border-right-color)
   - Values: `BORDER_SIDE_COLOR;`
@@ -1273,6 +1407,7 @@
       - [CSS 2.1 - border-right-style](https://www.w3.org/TR/CSS21/box.html#propdef-border-right-style)
       - [CSS Backgrounds 3 - border-right-style](https://www.w3.org/TR/css3-background/#border-right-style)
   - Drafts
+      - [CSS 2.2 - border-right-style](https://drafts.csswg.org/css2/box.html#propdef-border-right-style)
       - [CSS 2.1 - border-right-style](https://drafts.csswg.org/css21/box.html#propdef-border-right-style)
       - [CSS Backgrounds 3 - border-right-style](https://drafts.csswg.org/css-backgrounds-3/#border-right-style)
   - Values: `BORDER_SIDE_STYLE;`
@@ -1282,6 +1417,7 @@
       - [CSS 2.1 - border-right-width](https://www.w3.org/TR/CSS21/box.html#propdef-border-right-width)
       - [CSS Backgrounds 3 - border-right-width](https://www.w3.org/TR/css3-background/#border-right-width)
   - Drafts
+      - [CSS 2.2 - border-right-width](https://drafts.csswg.org/css2/box.html#propdef-border-right-width)
       - [CSS 2.1 - border-right-width](https://drafts.csswg.org/css21/box.html#propdef-border-right-width)
       - [CSS Backgrounds 3 - border-right-width](https://drafts.csswg.org/css-backgrounds-3/#border-right-width)
   - Values: `BORDER_SIDE_WIDTH;`
@@ -1291,6 +1427,7 @@
       - [CSS 2.1 - border-style](https://www.w3.org/TR/CSS21/box.html#propdef-border-style)
       - [CSS Backgrounds 3 - border-style](https://www.w3.org/TR/css3-background/#border-style)
   - Drafts
+      - [CSS 2.2 - border-style](https://drafts.csswg.org/css2/box.html#propdef-border-style)
       - [CSS 2.1 - border-style](https://drafts.csswg.org/css21/box.html#propdef-border-style)
       - [CSS Backgrounds 3 - border-style](https://drafts.csswg.org/css-backgrounds-3/#border-style)
   - Values: `INSETS border-top-style border-right-style border-bottom-style border-left-style;`
@@ -1300,6 +1437,7 @@
       - [CSS 2.1 - border-top](https://www.w3.org/TR/CSS21/box.html#propdef-border-top)
       - [CSS Backgrounds 3 - border-top](https://www.w3.org/TR/css3-background/#border-top)
   - Drafts
+      - [CSS 2.2 - border-top](https://drafts.csswg.org/css2/box.html#propdef-border-top)
       - [CSS 2.1 - border-top](https://drafts.csswg.org/css21/box.html#propdef-border-top)
       - [CSS Backgrounds 3 - border-top](https://drafts.csswg.org/css-backgrounds-3/#border-top)
   - Values: `border-top-width border-top-style border-top-color;`
@@ -1309,6 +1447,7 @@
       - [CSS 2.1 - border-top-color](https://www.w3.org/TR/CSS21/box.html#propdef-border-top-color)
       - [CSS Backgrounds 3 - border-top-color](https://www.w3.org/TR/css3-background/#border-top-color)
   - Drafts
+      - [CSS 2.2 - border-top-color](https://drafts.csswg.org/css2/box.html#propdef-border-top-color)
       - [CSS 2.1 - border-top-color](https://drafts.csswg.org/css21/box.html#propdef-border-top-color)
       - [CSS Backgrounds 3 - border-top-color](https://drafts.csswg.org/css-backgrounds-3/#border-top-color)
   - Values: `BORDER_SIDE_COLOR;`
@@ -1330,6 +1469,7 @@
       - [CSS 2.1 - border-top-style](https://www.w3.org/TR/CSS21/box.html#propdef-border-top-style)
       - [CSS Backgrounds 3 - border-top-style](https://www.w3.org/TR/css3-background/#border-top-style)
   - Drafts
+      - [CSS 2.2 - border-top-style](https://drafts.csswg.org/css2/box.html#propdef-border-top-style)
       - [CSS 2.1 - border-top-style](https://drafts.csswg.org/css21/box.html#propdef-border-top-style)
       - [CSS Backgrounds 3 - border-top-style](https://drafts.csswg.org/css-backgrounds-3/#border-top-style)
   - Values: `BORDER_SIDE_STYLE;`
@@ -1339,6 +1479,7 @@
       - [CSS 2.1 - border-top-width](https://www.w3.org/TR/CSS21/box.html#propdef-border-top-width)
       - [CSS Backgrounds 3 - border-top-width](https://www.w3.org/TR/css3-background/#border-top-width)
   - Drafts
+      - [CSS 2.2 - border-top-width](https://drafts.csswg.org/css2/box.html#propdef-border-top-width)
       - [CSS 2.1 - border-top-width](https://drafts.csswg.org/css21/box.html#propdef-border-top-width)
       - [CSS Backgrounds 3 - border-top-width](https://drafts.csswg.org/css-backgrounds-3/#border-top-width)
   - Values: `BORDER_SIDE_WIDTH;`
@@ -1348,6 +1489,7 @@
       - [CSS 2.1 - border-width](https://www.w3.org/TR/CSS21/box.html#propdef-border-width)
       - [CSS Backgrounds 3 - border-width](https://www.w3.org/TR/css3-background/#border-width)
   - Drafts
+      - [CSS 2.2 - border-width](https://drafts.csswg.org/css2/box.html#propdef-border-width)
       - [CSS 2.1 - border-width](https://drafts.csswg.org/css21/box.html#propdef-border-width)
       - [CSS Backgrounds 3 - border-width](https://drafts.csswg.org/css-backgrounds-3/#border-width)
   - Values: `INSETS border-top-width border-right-width border-bottom-width border-left-width;`
@@ -1366,6 +1508,7 @@
       - [CSS 2.1 - background-position](https://www.w3.org/TR/CSS21/colors.html#propdef-background-position)
       - [CSS Backgrounds 3 - background-position](https://www.w3.org/TR/css3-background/#background-position)
   - Drafts
+      - [CSS 2.2 - background-position](https://drafts.csswg.org/css2/colors.html#propdef-background-position)
       - [CSS 2.1 - background-position](https://drafts.csswg.org/css21/colors.html#propdef-background-position)
       - [CSS Backgrounds 3 - background-position](https://drafts.csswg.org/css-backgrounds-3/#background-position)
       - [CSS Backgrounds 4 - background-position](https://drafts.csswg.org/css-backgrounds-4/#propdef-background-position)
@@ -1448,9 +1591,10 @@
       - [CSS Fonts 3 - font](https://www.w3.org/TR/css-fonts-3/#propdef-font)
       - [SVG 1.1 - font](https://www.w3.org/TR/SVG/text.html#FontProperty)
   - Drafts
+      - [CSS 2.2 - font](https://drafts.csswg.org/css2/fonts.html#propdef-font)
       - [CSS 2.1 - font](https://drafts.csswg.org/css21/fonts.html#propdef-font)
       - [CSS Fonts 3 - font](https://drafts.csswg.org/css-fonts-3/#propdef-font)
-  - Values: `FONT font-style font-variant font-weight /* font-size line-height font-family are special-cased */;`
+  - Values: `FONT font-style font-variant font-weight font-stretch /* font-size line-height font-family are special-cased */;`
 - [font-family](https://www.w3.org/TR/CSS22/fonts.html#propdef-font-family)
   - TR
       - [CSS 2.2 - font-family](https://www.w3.org/TR/CSS22/fonts.html#propdef-font-family)
@@ -1458,6 +1602,7 @@
       - [CSS Fonts 3 - font-family](https://www.w3.org/TR/css-fonts-3/#propdef-font-family)
       - [SVG 1.1 - font-family](https://www.w3.org/TR/SVG/text.html#FontFamilyProperty)
   - Drafts
+      - [CSS 2.2 - font-family](https://drafts.csswg.org/css2/fonts.html#propdef-font-family)
       - [CSS 2.1 - font-family](https://drafts.csswg.org/css21/fonts.html#propdef-font-family)
       - [CSS Fonts 3 - font-family](https://drafts.csswg.org/css-fonts-3/#propdef-font-family)
   - Values: `FAMILY_LIST;`
@@ -1481,6 +1626,8 @@
       - [CSS Fonts 3 - font-size](https://www.w3.org/TR/css-fonts-3/#propdef-font-size)
       - [SVG 1.1 - font-size](https://www.w3.org/TR/SVG/text.html#FontSizeProperty)
   - Drafts
+      - [CSS Fonts 4 - font-size](https://drafts.csswg.org/css-fonts-4/#propdef-font-size)
+      - [CSS 2.2 - font-size](https://drafts.csswg.org/css2/fonts.html#propdef-font-size)
       - [CSS 2.1 - font-size](https://drafts.csswg.org/css21/fonts.html#propdef-font-size)
       - [CSS Fonts 3 - font-size](https://drafts.csswg.org/css-fonts-3/#propdef-font-size)
   - Values: `xx-small | x-small | small | medium | large | x-large | xx-large | larger | smaller | PPLENGTH | POS_NUM;`
@@ -1507,6 +1654,7 @@
       - [SVG 1.1 - font-style](https://www.w3.org/TR/SVG/text.html#FontStyleProperty)
   - Drafts
       - [CSS Fonts 4 - font-style](https://drafts.csswg.org/css-fonts-4/#propdef-font-style)
+      - [CSS 2.2 - font-style](https://drafts.csswg.org/css2/fonts.html#propdef-font-style)
       - [CSS 2.1 - font-style](https://drafts.csswg.org/css21/fonts.html#propdef-font-style)
       - [CSS Fonts 3 - font-style](https://drafts.csswg.org/css-fonts-3/#propdef-font-style)
   - Values: `normal | italic | oblique;`
@@ -1517,6 +1665,7 @@
       - [CSS Fonts 3 - font-variant](https://www.w3.org/TR/css-fonts-3/#propdef-font-variant)
       - [SVG 1.1 - font-variant](https://www.w3.org/TR/SVG/text.html#FontVariantProperty)
   - Drafts
+      - [CSS 2.2 - font-variant](https://drafts.csswg.org/css2/fonts.html#propdef-font-variant)
       - [CSS 2.1 - font-variant](https://drafts.csswg.org/css21/fonts.html#propdef-font-variant)
       - [CSS Fonts 3 - font-variant](https://drafts.csswg.org/css-fonts-3/#propdef-font-variant)
   - Values: `normal | small-caps;`
@@ -1534,6 +1683,7 @@
       - [SVG 1.1 - font-weight](https://www.w3.org/TR/SVG/text.html#FontWeightProperty)
   - Drafts
       - [CSS Fonts 4 - font-weight](https://drafts.csswg.org/css-fonts-4/#propdef-font-weight)
+      - [CSS 2.2 - font-weight](https://drafts.csswg.org/css2/fonts.html#propdef-font-weight)
       - [CSS 2.1 - font-weight](https://drafts.csswg.org/css21/fonts.html#propdef-font-weight)
       - [CSS Fonts 3 - font-weight](https://drafts.csswg.org/css-fonts-3/#propdef-font-weight)
   - Values: `normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;`
@@ -1553,6 +1703,7 @@
       - [CSS Text 3 - letter-spacing](https://www.w3.org/TR/css-text-3/#letter-spacing)
       - [SVG 1.1 - letter-spacing](https://www.w3.org/TR/SVG/text.html#LetterSpacingProperty)
   - Drafts
+      - [CSS 2.2 - letter-spacing](https://drafts.csswg.org/css2/text.html#propdef-letter-spacing)
       - [CSS 2.1 - letter-spacing](https://drafts.csswg.org/css21/text.html#propdef-letter-spacing)
       - [CSS Text 3 - letter-spacing](https://drafts.csswg.org/css-text-3/#propdef-letter-spacing)
   - Values: `normal | LENGTH_OR_NUM;`
@@ -1582,6 +1733,7 @@
       - [CSS 2.1 - text-align](https://www.w3.org/TR/CSS21/text.html#propdef-text-align)
       - [CSS Text 3 - text-align](https://www.w3.org/TR/css-text-3/#text-align)
   - Drafts
+      - [CSS 2.2 - text-align](https://drafts.csswg.org/css2/text.html#propdef-text-align)
       - [CSS 2.1 - text-align](https://drafts.csswg.org/css21/text.html#propdef-text-align)
       - [CSS Text 3 - text-align](https://drafts.csswg.org/css-text-3/#propdef-text-align)
   - Values: `left | right | center | justify;`
@@ -1598,6 +1750,7 @@
       - [CSS 2.1 - text-indent](https://www.w3.org/TR/CSS21/text.html#propdef-text-indent)
       - [CSS Text 3 - text-indent](https://www.w3.org/TR/css-text-3/#text-indent)
   - Drafts
+      - [CSS 2.2 - text-indent](https://drafts.csswg.org/css2/text.html#propdef-text-indent)
       - [CSS 2.1 - text-indent](https://drafts.csswg.org/css21/text.html#propdef-text-indent)
       - [CSS Text 3 - text-indent](https://drafts.csswg.org/css-text-3/#propdef-text-indent)
   - Values: `PLENGTH;`
@@ -1614,6 +1767,7 @@
       - [CSS 2.1 - text-transform](https://www.w3.org/TR/CSS21/text.html#propdef-text-transform)
       - [CSS Text 3 - text-transform](https://www.w3.org/TR/css-text-3/#text-transform)
   - Drafts
+      - [CSS 2.2 - text-transform](https://drafts.csswg.org/css2/text.html#propdef-text-transform)
       - [CSS 2.1 - text-transform](https://drafts.csswg.org/css21/text.html#propdef-text-transform)
       - [CSS Text 3 - text-transform](https://drafts.csswg.org/css-text-3/#propdef-text-transform)
   - Values: `capitalize | uppercase | lowercase | none;`
@@ -1624,6 +1778,7 @@
       - [CSS Text 3 - white-space](https://www.w3.org/TR/css-text-3/#white-space)
       - [SVG 2 - white-space](https://www.w3.org/TR/svg2/text.html#WhiteSpaceProperty)
   - Drafts
+      - [CSS 2.2 - white-space](https://drafts.csswg.org/css2/text.html#propdef-white-space)
       - [CSS 2.1 - white-space](https://drafts.csswg.org/css21/text.html#propdef-white-space)
       - [CSS Text 3 - white-space](https://drafts.csswg.org/css-text-3/#propdef-white-space)
       - [CSS Text 4 - white-space](https://drafts.csswg.org/css-text-4/#propdef-white-space)
@@ -1643,6 +1798,7 @@
       - [CSS Text 3 - word-spacing](https://www.w3.org/TR/css-text-3/#word-spacing)
       - [SVG 1.1 - word-spacing](https://www.w3.org/TR/SVG/text.html#WordSpacingProperty)
   - Drafts
+      - [CSS 2.2 - word-spacing](https://drafts.csswg.org/css2/text.html#propdef-word-spacing)
       - [CSS 2.1 - word-spacing](https://drafts.csswg.org/css21/text.html#propdef-word-spacing)
       - [CSS Text 3 - word-spacing](https://drafts.csswg.org/css-text-3/#propdef-word-spacing)
   - Values: `normal | LENGTH_OR_NUM;`
@@ -1655,6 +1811,18 @@
   - Values: `normal | break-word;`
 
 ## [CSS Text 4](https://drafts.csswg.org/css-text-4/)
+- [hyphenate-character](#propdef-hyphenate-character)
+    - Allowed prefixes: webkit
+
+  - Drafts
+      - [CSS Text 4 - hyphenate-character](https://drafts.csswg.org/css-text-4/#propdef-hyphenate-character)
+  - Values: `auto | STRING;`
+- [hyphenate-limit-chars](#propdef-hyphenate-limit-chars)
+    - Allowed prefixes: ms
+
+  - Drafts
+      - [CSS Text 4 - hyphenate-limit-chars](https://drafts.csswg.org/css-text-4/#propdef-hyphenate-limit-chars)
+  - Values: `[ auto | INT ]{1,3};`
 - [white-space](https://www.w3.org/TR/CSS22/text.html#propdef-white-space)
   - TR
       - [CSS 2.2 - white-space](https://www.w3.org/TR/CSS22/text.html#propdef-white-space)
@@ -1662,6 +1830,7 @@
       - [CSS Text 3 - white-space](https://www.w3.org/TR/css-text-3/#white-space)
       - [SVG 2 - white-space](https://www.w3.org/TR/svg2/text.html#WhiteSpaceProperty)
   - Drafts
+      - [CSS 2.2 - white-space](https://drafts.csswg.org/css2/text.html#propdef-white-space)
       - [CSS 2.1 - white-space](https://drafts.csswg.org/css21/text.html#propdef-white-space)
       - [CSS Text 3 - white-space](https://drafts.csswg.org/css-text-3/#propdef-white-space)
       - [CSS Text 4 - white-space](https://drafts.csswg.org/css-text-4/#propdef-white-space)
@@ -1676,6 +1845,7 @@
       - [CSS Text Decoration 3 - text-decoration](https://www.w3.org/TR/css-text-decor-3/#text-decoration)
       - [SVG 1.1 - text-decoration](https://www.w3.org/TR/SVG/text.html#TextDecorationProperty)
   - Drafts
+      - [CSS 2.2 - text-decoration](https://drafts.csswg.org/css2/text.html#propdef-text-decoration)
       - [CSS 2.1 - text-decoration](https://drafts.csswg.org/css21/text.html#propdef-text-decoration)
       - [CSS Text Decoration 3 - text-decoration](https://drafts.csswg.org/css-text-decor-3/#propdef-text-decoration)
   - Values: `none | [ underline || overline || line-through || blink ];`
@@ -1873,6 +2043,7 @@
       - [CSS 2.1 - cursor](https://www.w3.org/TR/CSS21/ui.html#propdef-cursor)
       - [CSS User Interface 3 - cursor](https://www.w3.org/TR/css3-ui/#propdef-cursor)
   - Drafts
+      - [CSS 2.2 - cursor](https://drafts.csswg.org/css2/ui.html#propdef-cursor)
       - [CSS 2.1 - cursor](https://drafts.csswg.org/css21/ui.html#propdef-cursor)
       - [CSS User Interface 3 - cursor](https://drafts.csswg.org/css-ui-3/#propdef-cursor)
   - Values: `COMMA(URI* [ auto | crosshair | default | pointer | move | e-resize | ne-resize | nw-resize | n-resize | se-resize | sw-resize | s-resize | w-resize | text | wait | help | progress ]);`
@@ -1882,6 +2053,7 @@
       - [CSS 2.1 - outline](https://www.w3.org/TR/CSS21/ui.html#propdef-outline)
       - [CSS User Interface 3 - outline](https://www.w3.org/TR/css3-ui/#propdef-outline)
   - Drafts
+      - [CSS 2.2 - outline](https://drafts.csswg.org/css2/ui.html#propdef-outline)
       - [CSS 2.1 - outline](https://drafts.csswg.org/css21/ui.html#propdef-outline)
       - [CSS User Interface 3 - outline](https://drafts.csswg.org/css-ui-3/#propdef-outline)
   - Values: `outline-width outline-style outline-color;`
@@ -1891,6 +2063,7 @@
       - [CSS 2.1 - outline-color](https://www.w3.org/TR/CSS21/ui.html#propdef-outline-color)
       - [CSS User Interface 3 - outline-color](https://www.w3.org/TR/css3-ui/#propdef-outline-color)
   - Drafts
+      - [CSS 2.2 - outline-color](https://drafts.csswg.org/css2/ui.html#propdef-outline-color)
       - [CSS 2.1 - outline-color](https://drafts.csswg.org/css21/ui.html#propdef-outline-color)
       - [CSS User Interface 3 - outline-color](https://drafts.csswg.org/css-ui-3/#propdef-outline-color)
   - Values: `COLOR | invert;`
@@ -1906,6 +2079,7 @@
       - [CSS 2.1 - outline-style](https://www.w3.org/TR/CSS21/ui.html#propdef-outline-style)
       - [CSS User Interface 3 - outline-style](https://www.w3.org/TR/css3-ui/#propdef-outline-style)
   - Drafts
+      - [CSS 2.2 - outline-style](https://drafts.csswg.org/css2/ui.html#propdef-outline-style)
       - [CSS 2.1 - outline-style](https://drafts.csswg.org/css21/ui.html#propdef-outline-style)
       - [CSS User Interface 3 - outline-style](https://drafts.csswg.org/css-ui-3/#propdef-outline-style)
   - Values: `BORDER_SIDE_STYLE;`
@@ -1915,6 +2089,7 @@
       - [CSS 2.1 - outline-width](https://www.w3.org/TR/CSS21/ui.html#propdef-outline-width)
       - [CSS User Interface 3 - outline-width](https://www.w3.org/TR/css3-ui/#propdef-outline-width)
   - Drafts
+      - [CSS 2.2 - outline-width](https://drafts.csswg.org/css2/ui.html#propdef-outline-width)
       - [CSS 2.1 - outline-width](https://drafts.csswg.org/css21/ui.html#propdef-outline-width)
       - [CSS User Interface 3 - outline-width](https://drafts.csswg.org/css-ui-3/#propdef-outline-width)
   - Values: `BORDER_SIDE_WIDTH;`
@@ -1934,6 +2109,7 @@
       - [CSS Writing Modes 3 - direction](https://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
       - [SVG 1.1 - direction](https://www.w3.org/TR/SVG/text.html#DirectionProperty)
   - Drafts
+      - [CSS 2.2 - direction](https://drafts.csswg.org/css2/visuren.html#propdef-direction)
       - [CSS 2.1 - direction](https://drafts.csswg.org/css21/visuren.html#propdef-direction)
       - [CSS Writing Modes 3 - direction](https://drafts.csswg.org/css-writing-modes-3/#propdef-direction)
   - Values: `ltr | rtl;`
@@ -1964,6 +2140,7 @@
       - [CSS Writing Modes 3 - unicode-bidi](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
       - [SVG 1.1 - unicode-bidi](https://www.w3.org/TR/SVG/text.html#UnicodeBidiProperty)
   - Drafts
+      - [CSS 2.2 - unicode-bidi](https://drafts.csswg.org/css2/visuren.html#propdef-unicode-bidi)
       - [CSS 2.1 - unicode-bidi](https://drafts.csswg.org/css21/visuren.html#propdef-unicode-bidi)
       - [CSS Writing Modes 3 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-3/#propdef-unicode-bidi)
   - Values: `normal | embed | isolate | bidi-override | isolate-override | plaintext;`
@@ -1983,6 +2160,7 @@
       - [CSS 2.1 - cue-after](https://www.w3.org/TR/CSS21/aural.html#propdef-cue-after)
       - [CSS Speech 1 - cue-after](https://www.w3.org/TR/css3-speech/#cue-after)
   - Drafts
+      - [CSS 2.2 - cue-after](https://drafts.csswg.org/css2/aural.html#propdef-cue-after)
       - [CSS 2.1 - cue-after](https://drafts.csswg.org/css21/aural.html#propdef-cue-after)
       - [CSS Speech 1 - cue-after](https://drafts.csswg.org/css-speech-1/#cue-after)
   - Values: `URI_OR_NONE;`
@@ -1992,6 +2170,7 @@
       - [CSS 2.1 - cue-before](https://www.w3.org/TR/CSS21/aural.html#propdef-cue-before)
       - [CSS Speech 1 - cue-before](https://www.w3.org/TR/css3-speech/#cue-before)
   - Drafts
+      - [CSS 2.2 - cue-before](https://drafts.csswg.org/css2/aural.html#propdef-cue-before)
       - [CSS 2.1 - cue-before](https://drafts.csswg.org/css21/aural.html#propdef-cue-before)
       - [CSS Speech 1 - cue-before](https://drafts.csswg.org/css-speech-1/#cue-before)
   - Values: `URI_OR_NONE;`
@@ -2001,6 +2180,7 @@
       - [CSS 2.1 - pause](https://www.w3.org/TR/CSS21/aural.html#propdef-pause)
       - [CSS Speech 1 - pause](https://www.w3.org/TR/css3-speech/#pause)
   - Drafts
+      - [CSS 2.2 - pause](https://drafts.csswg.org/css2/aural.html#propdef-pause)
       - [CSS 2.1 - pause](https://drafts.csswg.org/css21/aural.html#propdef-pause)
       - [CSS Speech 1 - pause](https://drafts.csswg.org/css-speech-1/#pause)
   - Values: `INSETS pause-before pause-after;`
@@ -2010,6 +2190,7 @@
       - [CSS 2.1 - pause-after](https://www.w3.org/TR/CSS21/aural.html#propdef-pause-after)
       - [CSS Speech 1 - pause-after](https://www.w3.org/TR/css3-speech/#pause-after)
   - Drafts
+      - [CSS 2.2 - pause-after](https://drafts.csswg.org/css2/aural.html#propdef-pause-after)
       - [CSS 2.1 - pause-after](https://drafts.csswg.org/css21/aural.html#propdef-pause-after)
       - [CSS Speech 1 - pause-after](https://drafts.csswg.org/css-speech-1/#pause-after)
   - Values: `PAUSE;`
@@ -2019,6 +2200,7 @@
       - [CSS 2.1 - pause-before](https://www.w3.org/TR/CSS21/aural.html#propdef-pause-before)
       - [CSS Speech 1 - pause-before](https://www.w3.org/TR/css3-speech/#pause-before)
   - Drafts
+      - [CSS 2.2 - pause-before](https://drafts.csswg.org/css2/aural.html#propdef-pause-before)
       - [CSS 2.1 - pause-before](https://drafts.csswg.org/css21/aural.html#propdef-pause-before)
       - [CSS Speech 1 - pause-before](https://drafts.csswg.org/css-speech-1/#pause-before)
   - Values: `PAUSE;`
@@ -2028,6 +2210,7 @@
       - [CSS 2.1 - voice-family](https://www.w3.org/TR/CSS21/aural.html#propdef-voice-family)
       - [CSS Speech 1 - voice-family](https://www.w3.org/TR/css3-speech/#voice-family)
   - Drafts
+      - [CSS 2.2 - voice-family](https://drafts.csswg.org/css2/aural.html#propdef-voice-family)
       - [CSS 2.1 - voice-family](https://drafts.csswg.org/css21/aural.html#propdef-voice-family)
       - [CSS Speech 1 - voice-family](https://drafts.csswg.org/css-speech-1/#voice-family)
   - Values: `FAMILY_LIST;`
@@ -2113,6 +2296,7 @@
       - [CSS 2.1 - counter-increment](https://www.w3.org/TR/CSS21/generate.html#propdef-counter-increment)
       - [CSS Lists 3 - counter-increment](https://www.w3.org/TR/css-lists-3/#propdef-counter-increment)
   - Drafts
+      - [CSS 2.2 - counter-increment](https://drafts.csswg.org/css2/generate.html#propdef-counter-increment)
       - [CSS 2.1 - counter-increment](https://drafts.csswg.org/css21/generate.html#propdef-counter-increment)
       - [CSS Lists 3 - counter-increment](https://drafts.csswg.org/css-lists-3/#propdef-counter-increment)
   - Values: `COUNTER;`
@@ -2122,6 +2306,7 @@
       - [CSS 2.1 - counter-reset](https://www.w3.org/TR/CSS21/generate.html#propdef-counter-reset)
       - [CSS Lists 3 - counter-reset](https://www.w3.org/TR/css-lists-3/#propdef-counter-reset)
   - Drafts
+      - [CSS 2.2 - counter-reset](https://drafts.csswg.org/css2/generate.html#propdef-counter-reset)
       - [CSS 2.1 - counter-reset](https://drafts.csswg.org/css21/generate.html#propdef-counter-reset)
       - [CSS Lists 3 - counter-reset](https://drafts.csswg.org/css-lists-3/#propdef-counter-reset)
   - Values: `COUNTER;`
@@ -2137,6 +2322,7 @@
       - [CSS 2.1 - list-style](https://www.w3.org/TR/CSS21/generate.html#propdef-list-style)
       - [CSS Lists 3 - list-style](https://www.w3.org/TR/css-lists-3/#propdef-list-style)
   - Drafts
+      - [CSS 2.2 - list-style](https://drafts.csswg.org/css2/generate.html#propdef-list-style)
       - [CSS 2.1 - list-style](https://drafts.csswg.org/css21/generate.html#propdef-list-style)
       - [CSS Lists 3 - list-style](https://drafts.csswg.org/css-lists-3/#propdef-list-style)
   - Values: `list-style-type list-style-position list-style-image;`
@@ -2146,6 +2332,7 @@
       - [CSS 2.1 - list-style-image](https://www.w3.org/TR/CSS21/generate.html#propdef-list-style-image)
       - [CSS Lists 3 - list-style-image](https://www.w3.org/TR/css-lists-3/#propdef-list-style-image)
   - Drafts
+      - [CSS 2.2 - list-style-image](https://drafts.csswg.org/css2/generate.html#propdef-list-style-image)
       - [CSS 2.1 - list-style-image](https://drafts.csswg.org/css21/generate.html#propdef-list-style-image)
       - [CSS Lists 3 - list-style-image](https://drafts.csswg.org/css-lists-3/#propdef-list-style-image)
   - Values: `IMAGE;`
@@ -2155,6 +2342,7 @@
       - [CSS 2.1 - list-style-position](https://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position)
       - [CSS Lists 3 - list-style-position](https://www.w3.org/TR/css-lists-3/#propdef-list-style-position)
   - Drafts
+      - [CSS 2.2 - list-style-position](https://drafts.csswg.org/css2/generate.html#propdef-list-style-position)
       - [CSS 2.1 - list-style-position](https://drafts.csswg.org/css21/generate.html#propdef-list-style-position)
       - [CSS Lists 3 - list-style-position](https://drafts.csswg.org/css-lists-3/#propdef-list-style-position)
   - Values: `inside | outside;`
@@ -2164,6 +2352,7 @@
       - [CSS 2.1 - list-style-type](https://www.w3.org/TR/CSS21/generate.html#propdef-list-style-type)
       - [CSS Lists 3 - list-style-type](https://www.w3.org/TR/css-lists-3/#propdef-list-style-type)
   - Drafts
+      - [CSS 2.2 - list-style-type](https://drafts.csswg.org/css2/generate.html#propdef-list-style-type)
       - [CSS 2.1 - list-style-type](https://drafts.csswg.org/css21/generate.html#propdef-list-style-type)
       - [CSS Lists 3 - list-style-type](https://drafts.csswg.org/css-lists-3/#propdef-list-style-type)
   - Values: `LIST_STYLE_TYPE;`
@@ -2176,6 +2365,7 @@
       - [CSS Masking 1 - clip](https://www.w3.org/TR/css-masking-1/#propdef-clip)
       - [SVG 1.1 - clip](https://www.w3.org/TR/SVG/masking.html#ClipProperty)
   - Drafts
+      - [CSS 2.2 - clip](https://drafts.csswg.org/css2/visufx.html#propdef-clip)
       - [CSS 2.1 - clip](https://drafts.csswg.org/css21/visufx.html#propdef-clip)
       - [CSS Masking 1 - clip](https://drafts.fxtf.org/css-masking-1/#propdef-clip)
   - Values: `rect(ALENGTH{4}) | rect(SPACE(ALENGTH{4})) | auto;`
@@ -2209,6 +2399,7 @@
       - [CSS 2.1 - bottom](https://www.w3.org/TR/CSS21/visuren.html#propdef-bottom)
       - [CSS Positioned Layout 3 - bottom](https://www.w3.org/TR/css3-positioning/#propdef-bottom)
   - Drafts
+      - [CSS 2.2 - bottom](https://drafts.csswg.org/css2/visuren.html#propdef-bottom)
       - [CSS 2.1 - bottom](https://drafts.csswg.org/css21/visuren.html#propdef-bottom)
       - [CSS Positioned Layout 3 - bottom](https://drafts.csswg.org/css-position-3/#propdef-bottom)
   - Values: `APLENGTH;`
@@ -2218,6 +2409,7 @@
       - [CSS 2.1 - left](https://www.w3.org/TR/CSS21/visuren.html#propdef-left)
       - [CSS Positioned Layout 3 - left](https://www.w3.org/TR/css3-positioning/#propdef-left)
   - Drafts
+      - [CSS 2.2 - left](https://drafts.csswg.org/css2/visuren.html#propdef-left)
       - [CSS 2.1 - left](https://drafts.csswg.org/css21/visuren.html#propdef-left)
       - [CSS Positioned Layout 3 - left](https://drafts.csswg.org/css-position-3/#propdef-left)
   - Values: `APLENGTH;`
@@ -2227,6 +2419,7 @@
       - [CSS 2.1 - position](https://www.w3.org/TR/CSS21/visuren.html#propdef-position)
       - [CSS Positioned Layout 3 - position](https://www.w3.org/TR/css3-positioning/#propdef-position)
   - Drafts
+      - [CSS 2.2 - position](https://drafts.csswg.org/css2/visuren.html#propdef-position)
       - [CSS 2.1 - position](https://drafts.csswg.org/css21/visuren.html#propdef-position)
       - [CSS Positioned Layout 3 - position](https://drafts.csswg.org/css-position-3/#propdef-position)
   - Values: `static | relative | absolute | fixed;`
@@ -2236,6 +2429,7 @@
       - [CSS 2.1 - right](https://www.w3.org/TR/CSS21/visuren.html#propdef-right)
       - [CSS Positioned Layout 3 - right](https://www.w3.org/TR/css3-positioning/#propdef-right)
   - Drafts
+      - [CSS 2.2 - right](https://drafts.csswg.org/css2/visuren.html#propdef-right)
       - [CSS 2.1 - right](https://drafts.csswg.org/css21/visuren.html#propdef-right)
       - [CSS Positioned Layout 3 - right](https://drafts.csswg.org/css-position-3/#propdef-right)
   - Values: `APLENGTH;`
@@ -2245,6 +2439,7 @@
       - [CSS 2.1 - top](https://www.w3.org/TR/CSS21/visuren.html#propdef-top)
       - [CSS Positioned Layout 3 - top](https://www.w3.org/TR/css3-positioning/#propdef-top)
   - Drafts
+      - [CSS 2.2 - top](https://drafts.csswg.org/css2/visuren.html#propdef-top)
       - [CSS 2.1 - top](https://drafts.csswg.org/css21/visuren.html#propdef-top)
       - [CSS Positioned Layout 3 - top](https://drafts.csswg.org/css-position-3/#propdef-top)
   - Values: `APLENGTH;`
@@ -2254,6 +2449,7 @@
       - [CSS 2.1 - z-index](https://www.w3.org/TR/CSS21/visuren.html#propdef-z-index)
       - [CSS Positioned Layout 3 - z-index](https://www.w3.org/TR/css3-positioning/#propdef-z-index)
   - Drafts
+      - [CSS 2.2 - z-index](https://drafts.csswg.org/css2/visuren.html#propdef-z-index)
       - [CSS 2.1 - z-index](https://drafts.csswg.org/css21/visuren.html#propdef-z-index)
       - [CSS Positioned Layout 3 - z-index](https://drafts.csswg.org/css-position-3/#propdef-z-index)
   - Values: `auto | INT;`
@@ -2299,6 +2495,7 @@
       - [CSS 2.1 - orphans](https://www.w3.org/TR/CSS21/page.html#propdef-orphans)
       - [CSS Fragmentation 3 - orphans](https://www.w3.org/TR/css3-break/#propdef-orphans)
   - Drafts
+      - [CSS 2.2 - orphans](https://drafts.csswg.org/css2/page.html#propdef-orphans)
       - [CSS 2.1 - orphans](https://drafts.csswg.org/css21/page.html#propdef-orphans)
       - [CSS Fragmentation 3 - orphans](https://drafts.csswg.org/css-break-3/#propdef-orphans)
   - Values: `POS_INT;`
@@ -2308,6 +2505,7 @@
       - [CSS 2.1 - widows](https://www.w3.org/TR/CSS21/page.html#propdef-widows)
       - [CSS Fragmentation 3 - widows](https://www.w3.org/TR/css3-break/#propdef-widows)
   - Drafts
+      - [CSS 2.2 - widows](https://drafts.csswg.org/css2/page.html#propdef-widows)
       - [CSS 2.1 - widows](https://drafts.csswg.org/css21/page.html#propdef-widows)
       - [CSS Fragmentation 3 - widows](https://drafts.csswg.org/css-break-3/#propdef-widows)
   - Values: `POS_INT;`
@@ -2345,6 +2543,7 @@
       - [SVG 1.1 - display](https://www.w3.org/TR/SVG/painting.html#DisplayProperty)
   - Drafts
       - [CSS Display 3 - display](https://drafts.csswg.org/css-display-3/#propdef-display)
+      - [CSS 2.2 - display](https://drafts.csswg.org/css2/visuren.html#propdef-display)
       - [CSS 2.1 - display](https://drafts.csswg.org/css21/visuren.html#propdef-display)
   - Values: `inline | block | list-item | inline-block | table | inline-table | table-row-group | table-header-group | table-footer-group | table-row | table-column-group | table-column | table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex | inline-flex | ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container | run-in | compact | marker;`
 - [ruby-align](https://www.w3.org/TR/css-ruby-1/#propdef-ruby-align)
@@ -2369,6 +2568,7 @@
       - [SVG 1.1 - overflow](https://www.w3.org/TR/SVG/masking.html#OverflowProperty)
   - Drafts
       - [CSS Overflow 4 - overflow](https://drafts.csswg.org/css-overflow-4/#propdef-overflow)
+      - [CSS 2.2 - overflow](https://drafts.csswg.org/css2/visufx.html#propdef-overflow)
       - [CSS 2.1 - overflow](https://drafts.csswg.org/css21/visufx.html#propdef-overflow)
       - [CSS Overflow 3 - overflow](https://drafts.csswg.org/css-overflow-3/#propdef-overflow)
   - Values: `visible | hidden | scroll | auto;`
@@ -2459,7 +2659,7 @@
       - [SVG 1.1 - alignment-baseline](https://www.w3.org/TR/SVG/text.html#AlignmentBaselineProperty)
   - Drafts
       - [CSS Inline Layout 3 - alignment-baseline](https://drafts.csswg.org/css-inline-3/#propdef-alignment-baseline)
-  - Values: `auto | before-edge | after-edge | baseline | text-bottom | alphabetic | ideographic | middle | central | mathematical | text-top | bottom | center | top;`
+  - Values: `auto | baseline | before-edge | text-before-edge | middle | central | after-edge | text-after-edge | ideographic | alphabetic | hanging | mathematical;`
 - [baseline-shift](https://www.w3.org/TR/css-inline-3/#propdef-baseline-shift)
   - TR
       - [CSS Inline Layout 3 - baseline-shift](https://www.w3.org/TR/css-inline-3/#propdef-baseline-shift)
@@ -2473,13 +2673,14 @@
       - [SVG 1.1 - dominant-baseline](https://www.w3.org/TR/SVG/text.html#DominantBaselineProperty)
   - Drafts
       - [CSS Inline Layout 3 - dominant-baseline](https://drafts.csswg.org/css-inline-3/#propdef-dominant-baseline)
-  - Values: `reset-size | no-change | use-script | auto | text-bottom | alphabetic | ideographic | middle | central | mathematical | hanging | text-top;`
+  - Values: `auto | use-script | no-change | reset-size | ideographic | alphabetic | hanging | mathematical | central | middle | text-after-edge | text-before-edge;`
 - [vertical-align](https://www.w3.org/TR/CSS22/visudet.html#propdef-vertical-align)
   - TR
       - [CSS 2.2 - vertical-align](https://www.w3.org/TR/CSS22/visudet.html#propdef-vertical-align)
       - [CSS 2.1 - vertical-align](https://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align)
       - [CSS Inline Layout 3 - vertical-align](https://www.w3.org/TR/css-inline-3/#propdef-vertical-align)
   - Drafts
+      - [CSS 2.2 - vertical-align](https://drafts.csswg.org/css2/visudet.html#propdef-vertical-align)
       - [CSS 2.1 - vertical-align](https://drafts.csswg.org/css21/visudet.html#propdef-vertical-align)
       - [CSS Inline Layout 3 - vertical-align](https://drafts.csswg.org/css-inline-3/#propdef-vertical-align)
   - Values: `baseline | sub | super | top | text-top | middle | bottom | text-bottom | PLENGTH;`
@@ -2490,6 +2691,7 @@
       - [CSS 2.2 - clear](https://www.w3.org/TR/CSS22/visuren.html#propdef-clear)
       - [CSS 2.1 - clear](https://www.w3.org/TR/CSS21/visuren.html#propdef-clear)
   - Drafts
+      - [CSS 2.2 - clear](https://drafts.csswg.org/css2/visuren.html#propdef-clear)
       - [CSS 2.1 - clear](https://drafts.csswg.org/css21/visuren.html#propdef-clear)
       - [CSS Page Floats 3 - clear](https://drafts.csswg.org/css-page-floats-3/#propdef-clear)
   - Values: `none | left | right | both;`
@@ -2498,6 +2700,7 @@
       - [CSS 2.2 - float](https://www.w3.org/TR/CSS22/visuren.html#propdef-float)
       - [CSS 2.1 - float](https://www.w3.org/TR/CSS21/visuren.html#propdef-float)
   - Drafts
+      - [CSS 2.2 - float](https://drafts.csswg.org/css2/visuren.html#propdef-float)
       - [CSS 2.1 - float](https://drafts.csswg.org/css21/visuren.html#propdef-float)
       - [CSS Page Floats 3 - float](https://drafts.csswg.org/css-page-floats-3/#propdef-float)
   - Values: `block-start | block-end | inline-start | inline-end | snap-block | snap-inline | left | right | top | bottom | none | footnote;`
@@ -2536,6 +2739,29 @@
       - [Filter Effects 1 - lighting-color](https://drafts.fxtf.org/filters-1/#propdef-lighting-color)
   - Values: `COLOR;`
 
+## [Compositing 1](https://www.w3.org/TR/compositing-1/)
+- [background-blend-mode](https://www.w3.org/TR/compositing-1/#propdef-background-blend-mode)
+  - TR
+      - [Compositing 1 - background-blend-mode](https://www.w3.org/TR/compositing-1/#propdef-background-blend-mode)
+  - Drafts
+      - [Compositing 2 - background-blend-mode](https://drafts.fxtf.org/compositing-2/#propdef-background-blend-mode)
+      - [Compositing 1 - background-blend-mode](https://drafts.fxtf.org/compositing-1/#propdef-background-blend-mode)
+  - Values: `COMMA( BLEND_MODE+ );`
+- [isolation](https://www.w3.org/TR/compositing-1/#propdef-isolation)
+  - TR
+      - [Compositing 1 - isolation](https://www.w3.org/TR/compositing-1/#propdef-isolation)
+  - Drafts
+      - [Compositing 2 - isolation](https://drafts.fxtf.org/compositing-2/#propdef-isolation)
+      - [Compositing 1 - isolation](https://drafts.fxtf.org/compositing-1/#propdef-isolation)
+  - Values: `auto | isolate;`
+- [mix-blend-mode](https://www.w3.org/TR/compositing-1/#propdef-mix-blend-mode)
+  - TR
+      - [Compositing 1 - mix-blend-mode](https://www.w3.org/TR/compositing-1/#propdef-mix-blend-mode)
+  - Drafts
+      - [Compositing 2 - mix-blend-mode](https://drafts.fxtf.org/compositing-2/#propdef-mix-blend-mode)
+      - [Compositing 1 - mix-blend-mode](https://drafts.fxtf.org/compositing-1/#propdef-mix-blend-mode)
+  - Values: `BLEND_MODE;`
+
 ## [SVG 1.1](https://www.w3.org/TR/SVG/)
 - [alignment-baseline](https://www.w3.org/TR/css-inline-3/#propdef-alignment-baseline)
   - TR
@@ -2543,7 +2769,7 @@
       - [SVG 1.1 - alignment-baseline](https://www.w3.org/TR/SVG/text.html#AlignmentBaselineProperty)
   - Drafts
       - [CSS Inline Layout 3 - alignment-baseline](https://drafts.csswg.org/css-inline-3/#propdef-alignment-baseline)
-  - Values: `auto | before-edge | after-edge | baseline | text-bottom | alphabetic | ideographic | middle | central | mathematical | text-top | bottom | center | top;`
+  - Values: `auto | baseline | before-edge | text-before-edge | middle | central | after-edge | text-after-edge | ideographic | alphabetic | hanging | mathematical;`
 - [baseline-shift](https://www.w3.org/TR/css-inline-3/#propdef-baseline-shift)
   - TR
       - [CSS Inline Layout 3 - baseline-shift](https://www.w3.org/TR/css-inline-3/#propdef-baseline-shift)
@@ -2558,6 +2784,7 @@
       - [CSS Masking 1 - clip](https://www.w3.org/TR/css-masking-1/#propdef-clip)
       - [SVG 1.1 - clip](https://www.w3.org/TR/SVG/masking.html#ClipProperty)
   - Drafts
+      - [CSS 2.2 - clip](https://drafts.csswg.org/css2/visufx.html#propdef-clip)
       - [CSS 2.1 - clip](https://drafts.csswg.org/css21/visufx.html#propdef-clip)
       - [CSS Masking 1 - clip](https://drafts.fxtf.org/css-masking-1/#propdef-clip)
   - Values: `rect(ALENGTH{4}) | rect(SPACE(ALENGTH{4})) | auto;`
@@ -2590,6 +2817,7 @@
       - [CSS Writing Modes 3 - direction](https://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
       - [SVG 1.1 - direction](https://www.w3.org/TR/SVG/text.html#DirectionProperty)
   - Drafts
+      - [CSS 2.2 - direction](https://drafts.csswg.org/css2/visuren.html#propdef-direction)
       - [CSS 2.1 - direction](https://drafts.csswg.org/css21/visuren.html#propdef-direction)
       - [CSS Writing Modes 3 - direction](https://drafts.csswg.org/css-writing-modes-3/#propdef-direction)
   - Values: `ltr | rtl;`
@@ -2602,6 +2830,7 @@
       - [SVG 1.1 - display](https://www.w3.org/TR/SVG/painting.html#DisplayProperty)
   - Drafts
       - [CSS Display 3 - display](https://drafts.csswg.org/css-display-3/#propdef-display)
+      - [CSS 2.2 - display](https://drafts.csswg.org/css2/visuren.html#propdef-display)
       - [CSS 2.1 - display](https://drafts.csswg.org/css21/visuren.html#propdef-display)
   - Values: `inline | block | list-item | inline-block | table | inline-table | table-row-group | table-header-group | table-footer-group | table-row | table-column-group | table-column | table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex | inline-flex | ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container | run-in | compact | marker;`
 - [dominant-baseline](https://www.w3.org/TR/css-inline-3/#propdef-dominant-baseline)
@@ -2610,7 +2839,7 @@
       - [SVG 1.1 - dominant-baseline](https://www.w3.org/TR/SVG/text.html#DominantBaselineProperty)
   - Drafts
       - [CSS Inline Layout 3 - dominant-baseline](https://drafts.csswg.org/css-inline-3/#propdef-dominant-baseline)
-  - Values: `reset-size | no-change | use-script | auto | text-bottom | alphabetic | ideographic | middle | central | mathematical | hanging | text-top;`
+  - Values: `auto | use-script | no-change | reset-size | ideographic | alphabetic | hanging | mathematical | central | middle | text-after-edge | text-before-edge;`
 - [fill](https://www.w3.org/TR/SVG/painting.html#FillProperty)
   - TR
       - [SVG 1.1 - fill](https://www.w3.org/TR/SVG/painting.html#FillProperty)
@@ -2658,9 +2887,10 @@
       - [CSS Fonts 3 - font](https://www.w3.org/TR/css-fonts-3/#propdef-font)
       - [SVG 1.1 - font](https://www.w3.org/TR/SVG/text.html#FontProperty)
   - Drafts
+      - [CSS 2.2 - font](https://drafts.csswg.org/css2/fonts.html#propdef-font)
       - [CSS 2.1 - font](https://drafts.csswg.org/css21/fonts.html#propdef-font)
       - [CSS Fonts 3 - font](https://drafts.csswg.org/css-fonts-3/#propdef-font)
-  - Values: `FONT font-style font-variant font-weight /* font-size line-height font-family are special-cased */;`
+  - Values: `FONT font-style font-variant font-weight font-stretch /* font-size line-height font-family are special-cased */;`
 - [font-family](https://www.w3.org/TR/CSS22/fonts.html#propdef-font-family)
   - TR
       - [CSS 2.2 - font-family](https://www.w3.org/TR/CSS22/fonts.html#propdef-font-family)
@@ -2668,6 +2898,7 @@
       - [CSS Fonts 3 - font-family](https://www.w3.org/TR/css-fonts-3/#propdef-font-family)
       - [SVG 1.1 - font-family](https://www.w3.org/TR/SVG/text.html#FontFamilyProperty)
   - Drafts
+      - [CSS 2.2 - font-family](https://drafts.csswg.org/css2/fonts.html#propdef-font-family)
       - [CSS 2.1 - font-family](https://drafts.csswg.org/css21/fonts.html#propdef-font-family)
       - [CSS Fonts 3 - font-family](https://drafts.csswg.org/css-fonts-3/#propdef-font-family)
   - Values: `FAMILY_LIST;`
@@ -2678,6 +2909,8 @@
       - [CSS Fonts 3 - font-size](https://www.w3.org/TR/css-fonts-3/#propdef-font-size)
       - [SVG 1.1 - font-size](https://www.w3.org/TR/SVG/text.html#FontSizeProperty)
   - Drafts
+      - [CSS Fonts 4 - font-size](https://drafts.csswg.org/css-fonts-4/#propdef-font-size)
+      - [CSS 2.2 - font-size](https://drafts.csswg.org/css2/fonts.html#propdef-font-size)
       - [CSS 2.1 - font-size](https://drafts.csswg.org/css21/fonts.html#propdef-font-size)
       - [CSS Fonts 3 - font-size](https://drafts.csswg.org/css-fonts-3/#propdef-font-size)
   - Values: `xx-small | x-small | small | medium | large | x-large | xx-large | larger | smaller | PPLENGTH | POS_NUM;`
@@ -2704,6 +2937,7 @@
       - [SVG 1.1 - font-style](https://www.w3.org/TR/SVG/text.html#FontStyleProperty)
   - Drafts
       - [CSS Fonts 4 - font-style](https://drafts.csswg.org/css-fonts-4/#propdef-font-style)
+      - [CSS 2.2 - font-style](https://drafts.csswg.org/css2/fonts.html#propdef-font-style)
       - [CSS 2.1 - font-style](https://drafts.csswg.org/css21/fonts.html#propdef-font-style)
       - [CSS Fonts 3 - font-style](https://drafts.csswg.org/css-fonts-3/#propdef-font-style)
   - Values: `normal | italic | oblique;`
@@ -2714,6 +2948,7 @@
       - [CSS Fonts 3 - font-variant](https://www.w3.org/TR/css-fonts-3/#propdef-font-variant)
       - [SVG 1.1 - font-variant](https://www.w3.org/TR/SVG/text.html#FontVariantProperty)
   - Drafts
+      - [CSS 2.2 - font-variant](https://drafts.csswg.org/css2/fonts.html#propdef-font-variant)
       - [CSS 2.1 - font-variant](https://drafts.csswg.org/css21/fonts.html#propdef-font-variant)
       - [CSS Fonts 3 - font-variant](https://drafts.csswg.org/css-fonts-3/#propdef-font-variant)
   - Values: `normal | small-caps;`
@@ -2725,6 +2960,7 @@
       - [SVG 1.1 - font-weight](https://www.w3.org/TR/SVG/text.html#FontWeightProperty)
   - Drafts
       - [CSS Fonts 4 - font-weight](https://drafts.csswg.org/css-fonts-4/#propdef-font-weight)
+      - [CSS 2.2 - font-weight](https://drafts.csswg.org/css2/fonts.html#propdef-font-weight)
       - [CSS 2.1 - font-weight](https://drafts.csswg.org/css21/fonts.html#propdef-font-weight)
       - [CSS Fonts 3 - font-weight](https://drafts.csswg.org/css-fonts-3/#propdef-font-weight)
   - Values: `normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;`
@@ -2742,6 +2978,7 @@
       - [CSS Text 3 - letter-spacing](https://www.w3.org/TR/css-text-3/#letter-spacing)
       - [SVG 1.1 - letter-spacing](https://www.w3.org/TR/SVG/text.html#LetterSpacingProperty)
   - Drafts
+      - [CSS 2.2 - letter-spacing](https://drafts.csswg.org/css2/text.html#propdef-letter-spacing)
       - [CSS 2.1 - letter-spacing](https://drafts.csswg.org/css21/text.html#propdef-letter-spacing)
       - [CSS Text 3 - letter-spacing](https://drafts.csswg.org/css-text-3/#propdef-letter-spacing)
   - Values: `normal | LENGTH_OR_NUM;`
@@ -2790,6 +3027,7 @@
       - [SVG 1.1 - overflow](https://www.w3.org/TR/SVG/masking.html#OverflowProperty)
   - Drafts
       - [CSS Overflow 4 - overflow](https://drafts.csswg.org/css-overflow-4/#propdef-overflow)
+      - [CSS 2.2 - overflow](https://drafts.csswg.org/css2/visufx.html#propdef-overflow)
       - [CSS 2.1 - overflow](https://drafts.csswg.org/css21/visufx.html#propdef-overflow)
       - [CSS Overflow 3 - overflow](https://drafts.csswg.org/css-overflow-3/#propdef-overflow)
   - Values: `visible | hidden | scroll | auto;`
@@ -2893,6 +3131,7 @@
       - [CSS Text Decoration 3 - text-decoration](https://www.w3.org/TR/css-text-decor-3/#text-decoration)
       - [SVG 1.1 - text-decoration](https://www.w3.org/TR/SVG/text.html#TextDecorationProperty)
   - Drafts
+      - [CSS 2.2 - text-decoration](https://drafts.csswg.org/css2/text.html#propdef-text-decoration)
       - [CSS 2.1 - text-decoration](https://drafts.csswg.org/css21/text.html#propdef-text-decoration)
       - [CSS Text Decoration 3 - text-decoration](https://drafts.csswg.org/css-text-decor-3/#propdef-text-decoration)
   - Values: `none | [ underline || overline || line-through || blink ];`
@@ -2903,6 +3142,7 @@
       - [CSS Writing Modes 3 - unicode-bidi](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
       - [SVG 1.1 - unicode-bidi](https://www.w3.org/TR/SVG/text.html#UnicodeBidiProperty)
   - Drafts
+      - [CSS 2.2 - unicode-bidi](https://drafts.csswg.org/css2/visuren.html#propdef-unicode-bidi)
       - [CSS 2.1 - unicode-bidi](https://drafts.csswg.org/css21/visuren.html#propdef-unicode-bidi)
       - [CSS Writing Modes 3 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-3/#propdef-unicode-bidi)
   - Values: `normal | embed | isolate | bidi-override | isolate-override | plaintext;`
@@ -2912,6 +3152,7 @@
       - [CSS 2.1 - visibility](https://www.w3.org/TR/CSS21/visufx.html#propdef-visibility)
       - [SVG 1.1 - visibility](https://www.w3.org/TR/SVG/painting.html#VisibilityProperty)
   - Drafts
+      - [CSS 2.2 - visibility](https://drafts.csswg.org/css2/visufx.html#propdef-visibility)
       - [CSS 2.1 - visibility](https://drafts.csswg.org/css21/visufx.html#propdef-visibility)
   - Values: `visible | hidden | collapse;`
 - [word-spacing](https://www.w3.org/TR/CSS22/text.html#propdef-word-spacing)
@@ -2921,6 +3162,7 @@
       - [CSS Text 3 - word-spacing](https://www.w3.org/TR/css-text-3/#word-spacing)
       - [SVG 1.1 - word-spacing](https://www.w3.org/TR/SVG/text.html#WordSpacingProperty)
   - Drafts
+      - [CSS 2.2 - word-spacing](https://drafts.csswg.org/css2/text.html#propdef-word-spacing)
       - [CSS 2.1 - word-spacing](https://drafts.csswg.org/css21/text.html#propdef-word-spacing)
       - [CSS Text 3 - word-spacing](https://drafts.csswg.org/css-text-3/#propdef-word-spacing)
   - Values: `normal | LENGTH_OR_NUM;`
@@ -3146,6 +3388,7 @@
       - [CSS Text 3 - white-space](https://www.w3.org/TR/css-text-3/#white-space)
       - [SVG 2 - white-space](https://www.w3.org/TR/svg2/text.html#WhiteSpaceProperty)
   - Drafts
+      - [CSS 2.2 - white-space](https://drafts.csswg.org/css2/text.html#propdef-white-space)
       - [CSS 2.1 - white-space](https://drafts.csswg.org/css21/text.html#propdef-white-space)
       - [CSS Text 3 - white-space](https://drafts.csswg.org/css-text-3/#propdef-white-space)
       - [CSS Text 4 - white-space](https://drafts.csswg.org/css-text-4/#propdef-white-space)

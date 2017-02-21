@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview CSS Values and utilities to handle them.
  */
 goog.provide('adapt.css');
@@ -890,8 +904,11 @@ adapt.css.ident = {
     both: adapt.css.getName("both"),
     bottom: adapt.css.getName("bottom"),
     border_box: adapt.css.getName("border-box"),
+    break_all: adapt.css.getName("break-all"),
+    break_word: adapt.css.getName("break-word"),
     crop: adapt.css.getName("crop"),
     cross: adapt.css.getName("cross"),
+    column: adapt.css.getName("column"),
     exclusive: adapt.css.getName("exclusive"),
     _false: adapt.css.getName("false"),
     fixed: adapt.css.getName("fixed"),
@@ -908,6 +925,7 @@ adapt.css.ident = {
     left: adapt.css.getName("left"),
     list_item: adapt.css.getName("list-item"),
     ltr: adapt.css.getName("ltr"),
+    manual: adapt.css.getName("manual"),
     none: adapt.css.getName("none"),
     normal: adapt.css.getName("normal"),
     oeb_page_foot: adapt.css.getName("oeb-page-foot"),
@@ -916,6 +934,7 @@ adapt.css.ident = {
     relative: adapt.css.getName("relative"),
     right: adapt.css.getName("right"),
     scale: adapt.css.getName("scale"),
+    spread: adapt.css.getName("spread"),
     _static: adapt.css.getName("static"),
     rtl: adapt.css.getName("rtl"),
     table: adapt.css.getName("table"),
@@ -970,4 +989,3 @@ adapt.css.processingOrderFn = function(name1, name2) {
     var n2 = adapt.css.processingOrder[name2] || Number.MAX_VALUE;
     return n1 - n2;
 };
-

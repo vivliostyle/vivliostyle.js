@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview Support utilities to extract information from various (parsed) CSS values.
  */
 goog.provide('adapt.cssprop');
@@ -177,7 +191,7 @@ adapt.cssprop.ShapeVisitor.prototype.getShape = function(x, y, width, height, co
                 if (numbers.length % 2 == 0) {
                     /** @type {Array.<adapt.geom.Point>} */ var points = [];
                     for (var k = 0; k < numbers.length; k += 2) {
-                        points.push({ x: x + numbers[k], y: y + numbers[k + 1] });
+                        points.push(new adapt.geom.Point(x + numbers[k], y + numbers[k + 1]));
                     }
                     return new adapt.geom.Shape(points);
                 }

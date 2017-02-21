@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview Basic view tree data structures and support utilities.
  */
 goog.require('vivliostyle.constants');
@@ -323,6 +337,7 @@ adapt.vtree.Flow = function(flowName, parentFlowName) {
     /** @const */ this.flowName = flowName;
     /** @const */ this.parentFlowName = parentFlowName;
     /** @const */ this.forcedBreakOffsets = /** @type {Array<number>} */ ([]);
+    /** @type {?adapt.vtree.FormattingContext} */ this.formattingContext = null;
 };
 
 /**
@@ -429,7 +444,7 @@ adapt.vtree.LayoutContext = function() {};
 /**
  * Creates a functionally equivalent, but uninitialized layout context,
  * suitable for building a separate column.
- * @return {adapt.vtree.LayoutContext}
+ * @return {!adapt.vtree.LayoutContext}
  */
 adapt.vtree.LayoutContext.prototype.clone = function() {};
 
@@ -501,9 +516,32 @@ adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = function(nodeCo
 adapt.vtree.LayoutContext.prototype.isSameNodePosition = function(nodePosition1, nodePosition2) {};
 
 /**
- * @return {!vivliostyle.pagefloat.FloatHolder}
+ * Formatting context.
+ * @interface
  */
-adapt.vtree.LayoutContext.prototype.getPageFloatHolder = function() {};
+adapt.vtree.FormattingContext = function() {};
+
+/**
+ * @return {string}
+ */
+adapt.vtree.FormattingContext.prototype.getName = function() {};
+
+/**
+ * @param {!adapt.vtree.NodeContext} nodeContext
+ * @param {boolean} firstTime
+ * @return {boolean}
+ */
+adapt.vtree.FormattingContext.prototype.isFirstTime = function(nodeContext, firstTime) {};
+
+/**
+ * @return {adapt.vtree.FormattingContext}
+ */
+adapt.vtree.FormattingContext.prototype.getParent = function() {};
+
+/**
+ * @return {vivliostyle.layoututil.RepetitiveElements}
+ */
+adapt.vtree.FormattingContext.prototype.getRepetitiveElements = function() {};
 
 /**
  * @typedef {{
@@ -511,7 +549,8 @@ adapt.vtree.LayoutContext.prototype.getPageFloatHolder = function() {};
  *      shadowType:adapt.vtree.ShadowType,
  *      shadowContext:adapt.vtree.ShadowContext,
  *      nodeShadow:adapt.vtree.ShadowContext,
- *      shadowSibling:adapt.vtree.NodePositionStep
+ *      shadowSibling:adapt.vtree.NodePositionStep,
+ *      formattingContext:adapt.vtree.FormattingContext
  * }}
  */
 adapt.vtree.NodePositionStep;
@@ -540,7 +579,8 @@ adapt.vtree.isSameNodePositionStep = function(nps1, nps2) {
  * @typedef {{
  * 		steps:Array.<adapt.vtree.NodePositionStep>,
  * 		offsetInNode:number,
- *  	after:boolean
+ *  	after:boolean,
+ *  	preprocessedTextContent:?Array.<vivliostyle.diff.Change>
  * }}
  */
 adapt.vtree.NodePosition;
@@ -580,7 +620,7 @@ adapt.vtree.newNodePositionFromNode = function(node) {
         nodeShadow: null,
         shadowSibling: null
     };
-    return {steps:[step], offsetInNode:0, after:false};
+    return {steps:[step], offsetInNode:0, after:false, preprocessedTextContent:null};
 };
 
 /**
@@ -595,7 +635,23 @@ adapt.vtree.newNodePositionFromNodeContext = function(nodeContext) {
         nodeShadow: null,
         shadowSibling: null
     };
-    return {steps:[step], offsetInNode:0, after:false};
+    return {steps:[step], offsetInNode:0, after:false, preprocessedTextContent:nodeContext.preprocessedTextContent};
+};
+
+/**
+ * @param {adapt.vtree.NodePositionStep} step
+ * @param {adapt.vtree.NodeContext} parent
+ * @return {!adapt.vtree.NodeContext}
+ */
+adapt.vtree.makeNodeContextFromNodePositionStep = function(step, parent) {
+    var nodeContext = new adapt.vtree.NodeContext(step.node, parent, 0);
+    nodeContext.shadowType = step.shadowType;
+    nodeContext.shadowContext = step.shadowContext;
+    nodeContext.nodeShadow = step.nodeShadow;
+    nodeContext.shadowSibling = step.shadowSibling ?
+        adapt.vtree.makeNodeContextFromNodePositionStep(step.shadowSibling, parent.copy()) : null;
+    nodeContext.formattingContext = step.formattingContext;
+    return nodeContext;
 };
 
 /**
@@ -673,21 +729,32 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {boolean} */ this.overflow = false;
     /** @type {number} */ this.breakPenalty = parent ? parent.breakPenalty : 0;
     /** @type {?string} */ this.display = null;
-    /** @type {?string} */ this.floatReference = null;
+    /** @type {!vivliostyle.pagefloat.FloatReference} */ this.floatReference =
+        vivliostyle.pagefloat.FloatReference.INLINE;
     /** @type {?string} */ this.floatSide = null;
     /** @type {?string} */ this.clearSide = null;
+    /** @type {?adapt.css.Val} */ this.columnSpan = null;
+    /** @type {string} */ this.verticalAlign = "baseline";
+    /** @type {string} */ this.captionSide = "top";
+    /** @type {number} */ this.inlineBorderSpacing = 0;
+    /** @type {number} */ this.blockBorderSpacing = 0;
     /** @type {boolean} */ this.flexContainer = false;
     /** @type {adapt.vtree.Whitespace} */ this.whitespace = parent ? parent.whitespace : adapt.vtree.Whitespace.IGNORE;
+    /** @type {?string} */ this.hyphenateCharacter = parent ? parent.hyphenateCharacter : null;
+    /** @type {boolean} */ this.breakWord = parent ? parent.breakWord : false;
     /** @type {boolean} */ this.establishesBFC = false;
     /** @type {boolean} */ this.containingBlockForAbsolute = false;
     /** @type {?string} */ this.breakBefore = null;
     /** @type {?string} */ this.breakAfter = null;
     /** @type {Node} */ this.viewNode = null;
     /** @type {Node} */ this.clearSpacer = null;
-    /** @type {Object.<string,number|string>} */ this.inheritedProps = parent ? parent.inheritedProps : {};
+    /** @type {Object.<string,number|string|adapt.css.Val>} */ this.inheritedProps = parent ? parent.inheritedProps : {};
     /** @type {boolean} */ this.vertical = parent ? parent.vertical : false;
     /** @type {string} */ this.direction = parent ? parent.direction : "ltr";
     /** @type {adapt.vtree.FirstPseudo} */ this.firstPseudo = parent ? parent.firstPseudo : null;
+    /** @type {?string} */ this.lang = null;
+    /** @type {?Array.<vivliostyle.diff.Change>} */ this.preprocessedTextContent = null;
+    /** @type {adapt.vtree.FormattingContext} */ this.formattingContext = parent ? parent.formattingContext : null;
 };
 
 /**
@@ -701,10 +768,15 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.offsetInNode = 0;
     this.after = false;
     this.display = null;
+    this.floatReference = vivliostyle.pagefloat.FloatReference.INLINE;
     this.floatSide = null;
     this.clearSide = null;
+    this.columnSpan = null;
+    this.verticalAlign = "baseline";
     this.flexContainer = false;
     this.whitespace = this.parent ? this.parent.whitespace : adapt.vtree.Whitespace.IGNORE;
+    this.hyphenateCharacter = this.parent ? this.parent.hyphenateCharacter : null;
+    this.breakWord = this.parent ? this.parent.breakWord : false;
     this.breakBefore = null;
     this.breakAfter = null;
     this.nodeShadow = null;
@@ -712,6 +784,8 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.containingBlockForAbsolute = false;
     this.vertical = this.parent ? this.parent.vertical : false;
     this.nodeShadow = null;
+    this.preprocessedTextContent = null;
+    this.formattingContext = this.parent ? this.parent.formattingContext : null;
 };
 
 /**
@@ -729,12 +803,20 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.inline = this.inline;
     np.breakPenalty = this.breakPenalty;
     np.display = this.display;
+    np.floatReference = this.floatReference;
     np.floatSide = this.floatSide;
     np.clearSide = this.clearSide;
+    np.columnSpan = this.columnSpan;
+    np.verticalAlign = this.verticalAlign;
+    np.captionSide = this.captionSide;
+    np.inlineBorderSpacing = this.inlineBorderSpacing;
+    np.blockBorderSpacing = this.blockBorderSpacing;
     np.establishesBFC = this.establishesBFC;
     np.containingBlockForAbsolute = this.containingBlockForAbsolute;
     np.flexContainer = this.flexContainer;
     np.whitespace = this.whitespace;
+    np.hyphenateCharacter = this.hyphenateCharacter;
+    np.breakWord = this.breakWord;
     np.breakBefore = this.breakBefore;
     np.breakAfter = this.breakAfter;
     np.viewNode = this.viewNode;
@@ -742,6 +824,8 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.firstPseudo = this.firstPseudo;
     np.vertical = this.vertical;
     np.overflow = this.overflow;
+    np.preprocessedTextContent = this.preprocessedTextContent;
+    np.formattingContext = this.formattingContext;
     return np;
 };
 
@@ -755,7 +839,7 @@ adapt.vtree.NodeContext.prototype.modify = function() {
 };
 
 /**
- * @return {adapt.vtree.NodeContext}
+ * @return {!adapt.vtree.NodeContext}
  */
 adapt.vtree.NodeContext.prototype.copy = function() {
     var np = this;
@@ -792,7 +876,8 @@ adapt.vtree.NodeContext.prototype.toNodePositionStep = function() {
         shadowType: this.shadowType,
         shadowContext: this.shadowContext,
         nodeShadow: this.nodeShadow,
-        shadowSibling: this.shadowSibling ? this.shadowSibling.toNodePositionStep() : null
+        shadowSibling: this.shadowSibling ? this.shadowSibling.toNodePositionStep() : null,
+        formattingContext: this.formattingContext
     };
 };
 
@@ -809,7 +894,16 @@ adapt.vtree.NodeContext.prototype.toNodePosition = function() {
         }
         nc = nc.parent;
     } while (nc);
-    return {steps:steps, offsetInNode: this.offsetInNode, after: this.after};
+
+    var actualOffsetInNode = this.preprocessedTextContent
+        ? vivliostyle.diff.resolveOriginalIndex(this.preprocessedTextContent, this.offsetInNode)
+        : this.offsetInNode;
+    return {
+        steps:steps,
+        offsetInNode: actualOffsetInNode,
+        after: this.after,
+        preprocessedTextContent: this.preprocessedTextContent
+    };
 };
 
 /**
@@ -841,18 +935,15 @@ adapt.vtree.NodeContext.prototype.getContainingBlockForAbsolute = function() {
 };
 
 /**
- * Walk up NodeContext tree (starting from itself) and call the callback for each block,
- * until a NodeContext which establishes a block formatting context is reached.
+ * Walk up NodeContext tree (starting from itself) and call the callback for each block.
  * @param {!function(!adapt.vtree.NodeContext)} callback
  */
-adapt.vtree.NodeContext.prototype.walkBlocksUpToBFC = function(callback) {
+adapt.vtree.NodeContext.prototype.walkUpBlocks = function(callback) {
     var nodeContext = this;
     while (nodeContext) {
         if (!nodeContext.inline) {
             callback(nodeContext);
         }
-        if (nodeContext.establishesBFC)
-            break;
         nodeContext = nodeContext.parent;
     }
 };
@@ -966,6 +1057,10 @@ adapt.vtree.FlowPosition = function() {
      * @type {string}
      */
     this.startSide = "any";
+    /**
+     * @type {?string}
+     */
+    this.breakAfter = null;
 };
 
 /**
@@ -979,6 +1074,7 @@ adapt.vtree.FlowPosition.prototype.clone = function() {
         newarr[i] = arr[i].clone();
     }
     newfp.startSide = this.startSide;
+    newfp.breakAfter = this.breakAfter;
     return newfp;
 };
 
@@ -1310,15 +1406,89 @@ adapt.vtree.Container.prototype.setHorizontalPosition = function(left, width) {
 };
 
 /**
+ * @param {number} start
+ * @param {number} extent
+ * @return {void}
+ */
+adapt.vtree.Container.prototype.setBlockPosition = function(start, extent) {
+    if (this.vertical) {
+        this.setHorizontalPosition(start + extent * this.getBoxDir(), extent);
+    } else {
+        this.setVerticalPosition(start, extent);
+    }
+};
+
+/**
+ * @param {number} start
+ * @param {number} extent
+ * @return {void}
+ */
+adapt.vtree.Container.prototype.setInlinePosition = function(start, extent) {
+    if (this.vertical) {
+        this.setVerticalPosition(start, extent);
+    } else {
+        this.setHorizontalPosition(start, extent);
+    }
+};
+
+adapt.vtree.Container.prototype.clear = function() {
+    var parent = this.element;
+    var c;
+    while (c = parent.lastChild) {
+        parent.removeChild(c);
+    }
+};
+
+/**
  * @return {adapt.geom.Shape}
  */
 adapt.vtree.Container.prototype.getInnerShape = function() {
+    var rect = this.getInnerRect();
+    if (this.innerShape)
+        return this.innerShape.withOffset(rect.x1, rect.y1);
+    return adapt.geom.shapeForRect(rect.x1, rect.y1, rect.x2, rect.y2);
+};
+
+/**
+ * @returns {!adapt.geom.Rect}
+ */
+adapt.vtree.Container.prototype.getInnerRect = function() {
     var offsetX = this.originX + this.left + this.getInsetLeft();
     var offsetY = this.originY + this.top + this.getInsetTop();
-    if (this.innerShape)
-        return this.innerShape.withOffset(offsetX, offsetY);
-    return adapt.geom.shapeForRect(offsetX, offsetY,
-        offsetX + this.width, offsetY + this.height);
+    return new adapt.geom.Rect(offsetX, offsetY, offsetX + this.width, offsetY + this.height);
+};
+
+/**
+ * @returns {!adapt.geom.Rect}
+ */
+adapt.vtree.Container.prototype.getPaddingRect = function() {
+    var paddingX = this.originX + this.left + this.marginLeft + this.borderLeft;
+    var paddingY = this.originY + this.top + this.marginTop + this.borderTop;
+    var paddingWidth = this.paddingLeft + this.width + this.paddingRight;
+    var paddingHeight = this.paddingTop + this.height + this.paddingBottom;
+    return new adapt.geom.Rect(paddingX, paddingY, paddingX + paddingWidth, paddingY + paddingHeight);
+};
+
+/**
+ * @param {adapt.css.Val} outerShapeProp
+ * @param {adapt.expr.Context} context
+ * @returns {adapt.geom.Shape}
+ */
+adapt.vtree.Container.prototype.getOuterShape = function(outerShapeProp, context) {
+    var rect = this.getOuterRect();
+    return adapt.cssprop.toShape(outerShapeProp, rect.x1, rect.y1,
+        rect.x2 - rect.x1, rect.y2 - rect.y1, context);
+};
+
+/**
+ * @returns {!adapt.geom.Rect}
+ */
+adapt.vtree.Container.prototype.getOuterRect = function() {
+    var outerX = this.originX + this.left;
+    var outerY = this.originY + this.top;
+    var outerWidth = this.getInsetLeft() + this.width + this.getInsetRight();
+    var outerHeight = this.getInsetTop() + this.height + this.getInsetBottom();
+    return new adapt.geom.Rect(outerX, outerY, outerX + outerWidth, outerY + outerHeight);
 };
 
 
@@ -1326,12 +1496,14 @@ adapt.vtree.Container.prototype.getInnerShape = function() {
  * @constructor
  * @param {Element} elem
  * @param {adapt.expr.Context} context
+ * @param {adapt.css.Val} rootContentValue
  * @extends {adapt.css.Visitor}
  */
-adapt.vtree.ContentPropertyHandler = function(elem, context) {
+adapt.vtree.ContentPropertyHandler = function(elem, context, rootContentValue) {
     adapt.css.Visitor.call(this);
     /** @const */ this.elem = elem;
     /** @const */ this.context = context;
+    /** @const */ this.rootContentValue = rootContentValue;
 };
 goog.inherits(adapt.vtree.ContentPropertyHandler, adapt.css.Visitor);
 
@@ -1351,9 +1523,13 @@ adapt.vtree.ContentPropertyHandler.prototype.visitStr = function(str) {
 
 /** @override */
 adapt.vtree.ContentPropertyHandler.prototype.visitURL = function(url) {
-    var img = this.elem.ownerDocument.createElementNS(adapt.base.NS.XHTML, "img");
-    img.setAttribute("src", url.url);
-    this.elem.appendChild(img);
+    if (this.rootContentValue.url) {
+        this.elem.setAttribute("src", url.url);
+    } else {
+        var img = this.elem.ownerDocument.createElementNS(adapt.base.NS.XHTML, "img");
+        img.setAttribute("src", url.url);
+        this.elem.appendChild(img);
+    }
     return null;
 };
 

@@ -1,5 +1,19 @@
 /**
  * Copyright 2016 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview CSS Display Module
  */
 goog.provide("vivliostyle.display");
@@ -7,6 +21,17 @@ goog.provide("vivliostyle.display");
 goog.require("adapt.css");
 
 goog.scope(function() {
+
+    /** @private @const */
+    vivliostyle.display.FLOW_ROOT_ATTR = "data-vivliostyle-flow-root";
+
+    /**
+     * @param {!Element} element
+     * @returns {boolean}
+     */
+    vivliostyle.display.isFlowRoot = function(element) {
+        return element.getAttribute(vivliostyle.display.FLOW_ROOT_ATTR) === "true";
+    };
 
     /**
      * 'Blockify' a display value.
@@ -95,6 +120,41 @@ goog.scope(function() {
     };
 
     /**
+     * @param {!adapt.css.Ident} display
+     * @returns {boolean}
+     */
+    vivliostyle.display.isInlineLevel = function(display) {
+        switch (display.toString()) {
+            case "inline":
+            case "inline-block":
+            case "inline-list-item":
+            case "inline-flex":
+            case "inline-grid":
+            case "ruby":
+            case "inline-table":
+                return true;
+            default:
+                return false;
+        }
+    };
+
+    /**
+     * @param {!adapt.css.Ident} display
+     * @returns {boolean}
+     */
+    vivliostyle.display.isRubyInternalDisplay = function(display) {
+        switch (display.toString()) {
+            case "ruby-base":
+            case "ruby-text":
+            case "ruby-base-container":
+            case "ruby-text-container":
+                return true;
+            default:
+                return false;
+        }
+    };
+
+    /**
      * Judges if the generated box establishes a new block formatting context.
      * @param {adapt.css.Ident} display
      * @param {adapt.css.Ident} position
@@ -102,11 +162,12 @@ goog.scope(function() {
      * @param {adapt.css.Ident} overflow
      * @param {adapt.css.Ident=} writingMode
      * @param {adapt.css.Ident=} parentWritingMode
+     * @param {boolean=} isFlowRoot
      * @returns {boolean}
      */
-    vivliostyle.display.establishesBFC = function(display, position, float, overflow, writingMode, parentWritingMode) {
+    vivliostyle.display.establishesBFC = function(display, position, float, overflow, writingMode, parentWritingMode, isFlowRoot) {
         writingMode = writingMode || parentWritingMode || adapt.css.ident.horizontal_tb;
-        return (!!float && float !== adapt.css.ident.none) ||
+        return !!isFlowRoot || (!!float && float !== adapt.css.ident.none) ||
             vivliostyle.display.isAbsolutelyPositioned(position) ||
             (display === adapt.css.ident.inline_block || display === adapt.css.ident.table_cell || display === adapt.css.ident.table_caption || display == adapt.css.ident.flex) ||
             ((display === adapt.css.ident.block || display === adapt.css.ident.list_item) &&

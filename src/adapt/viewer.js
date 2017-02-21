@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview Sample EPUB rendering application.
  */
 goog.provide('adapt.viewer');
@@ -120,7 +134,7 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {number} */ this.fontSize = 16;
     /** @type {number} */ this.zoom = 1;
     /** @type {boolean} */ this.fitToScreen = false;
-    /** @type {!adapt.viewer.PageViewMode} */ this.pageViewMode = adapt.viewer.PageViewMode.AUTO_SPREAD;
+    /** @type {!adapt.viewer.PageViewMode} */ this.pageViewMode = adapt.viewer.PageViewMode.SINGLE_PAGE;
     /** @type {boolean} */ this.waitForLoading = false;
     /** @type {boolean} */ this.renderAllPages = true;
     /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();
@@ -352,8 +366,14 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
     if (typeof command["renderAllPages"] == "boolean") {
         this.renderAllPages = command["renderAllPages"];
     }
+    // for backward compatibility
     if (typeof command["userAgentRootURL"] == "string") {
+        adapt.base.baseURL = command["userAgentRootURL"].replace(/resources\/?$/, "");
         adapt.base.resourceBaseURL = command["userAgentRootURL"];
+    }
+    if (typeof command["rootURL"] == "string") {
+        adapt.base.baseURL = command["rootURL"];
+        adapt.base.resourceBaseURL = adapt.base.baseURL + "resources/";
     }
     if (typeof command["pageViewMode"] == "string" && command["pageViewMode"] !== this.pageViewMode) {
         this.pageViewMode = command["pageViewMode"];
@@ -373,7 +393,23 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
         this.fitToScreen = command["fitToScreen"];
         this.needRefresh = true;
     }
+
+    this.configurePlugins(command);
+
     return adapt.task.newResult(true);
+};
+
+/**
+ * @param {adapt.base.JSON} command
+ */
+adapt.viewer.Viewer.prototype.configurePlugins = function(command) {
+    /** @type {!Array.<vivliostyle.plugin.ConfigurationHook>} */ var hooks =
+        vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.CONFIGURATION);
+    hooks.forEach(function(hook) {
+        var result = hook(command);
+        this.needResize  = result.needResize  || this.needResize;
+        this.needRefresh = result.needRefresh || this.needRefresh;
+    }.bind(this));
 };
 
 /**

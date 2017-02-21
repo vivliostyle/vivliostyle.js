@@ -1,6 +1,6 @@
 # Features supported by Vivliostyle<%= $version %>
 
-The Vivliostyle uses a two-layer architecture, with some of its functionality implemented purely in javascript, and some being delegated all or in part to the browser engine on top of which Vivliostyle is running. In the following list <quote>Supported in all browsers</quote> indicates that features implemented in Javascript that will work regardless of the browser engine. Other features' availability and behavior do vary based on what is supported by the underlying browser engine. Vivliostyle Formatter uses Chromium 54.0.2840.59's engine.
+The Vivliostyle uses a two-layer architecture, with some of its functionality implemented purely in javascript, and some being delegated all or in part to the browser engine on top of which Vivliostyle is running. In the following list <quote>Supported in all browsers</quote> indicates that features implemented in Javascript that will work regardless of the browser engine. Other features' availability and behavior do vary based on what is supported by the underlying browser engine. Vivliostyle Formatter uses Chromium 56.0.2924.76's engine.
 
 Properties where <quote>Allowed prefixes</quote> is indicated may be used with any of the listed prefixes, or preferably without a prefix, regardless of the underlying browser engine. If Vivliostyle needs to invoke the browser engine, it will internally convert to the appropriate syntax.
 
@@ -272,6 +272,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Support depends on browser capabilities
 - [float](https://www.w3.org/TR/CSS2/visuren.html#propdef-float)
   - Supported in all browsers
+  - Supports [`block-start`, `block-end`, `inline-start`, `inline-end`, `left`, `right`, `top`, `bottom` and `none`](https://drafts.csswg.org/css-page-floats/#propdef-float) values.
 - [font](https://www.w3.org/TR/CSS2/fonts.html#propdef-font)
   - Support depends on browser capabilities
 - [font-family](https://www.w3.org/TR/CSS2/fonts.html#propdef-font-family)
@@ -569,6 +570,11 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Support depends on browser capabilities
   - Note: While the spec states that `word-wrap` must be treated as if it were a shorthand of `overflow-wrap`, Vivliostyle treat them for now as different properties and might result in an incorrect cascading behavior when inconsistent values are specified for both of the properties.
 
+### [CSS Text 4](https://drafts.csswg.org/css-text-4/)
+
+- [hyphenate-character](https://drafts.csswg.org/css-text-4/#propdef-hyphenate-character)
+  - Allowed prefixes: webkit
+  - Support depends on browser capabilities
 ### [CSS Text Decoration 3](https://www.w3.org/TR/css-text-decor-3/)
 
 - Note: While `text-decoration` property is a shorthand in CSS Text Decoration 3, Vivliostyle treats `text-decoration` for now as an independent property defined in CSS Level 2.1.
@@ -637,6 +643,17 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 - [columns](https://www.w3.org/TR/css3-multicol/#columns0)
   - Allowed prefixes: moz, webkit
   - Supported in all browsers
+- [column-span](https://www.w3.org/TR/css3-multicol/#column-span0)
+  - Allowed prefixes: webkit
+  - Supported in all browsers
+  - Note: Currently `column-span` is effective only when specified on a page float.
+
+## [CSS Multi-column Layout 2](https://drafts.csswg.org/css-multicol-2/)
+
+- [column-span](https://drafts.csswg.org/css-multicol-2/#propdef-column-span)
+  - Allowed prefixes: webkit
+  - Supported in all browsers
+  - Note: Currently `column-span` is effective only when specified on a page float. When `auto` value is specified, either a single column or all columns are spanned depending on the min-content inline size of the page float.
 
 ### [CSS Basic User Interface 3](https://www.w3.org/TR/css3-ui/)
 
@@ -757,6 +774,15 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Allowed prefixes: moz, ms
   - Support depends on browser capabilities
 
+## [Compositing and Blending 1](https://www.w3.org/TR/compositing-1/)
+
+- [background-blend-mode](https://www.w3.org/TR/compositing-1/#propdef-background-blend-mode)
+  - Support depends on browser capabilities
+- [isolation](https://www.w3.org/TR/compositing-1/#propdef-isolation)
+  - Support depends on browser capabilities
+- [mix-blend-mode](https://www.w3.org/TR/compositing-1/#propdef-mix-blend-mode)
+  - Support depends on browser capabilities
+
 ### [Scalable Vector Graphics (SVG) 2](https://www.w3.org/TR/SVG2/)
 
 - [color-interpolation](https://www.w3.org/TR/SVG2/painting.html#ColorInterpolationProperty)
@@ -832,6 +858,13 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Support depends on browser capabilities
 - [clip-rule](https://drafts.fxtf.org/css-masking-1/#the-clip-rule)
   - Support depends on browser capabilities
+
+## [CSS Page Floats 3](https://drafts.csswg.org/css-page-floats-3/)
+- [float](https://drafts.csswg.org/css-page-floats-3/#propdef-float)
+  - Supports [`block-start`, `block-end`, `inline-start`, `inline-end`, `left`, `right`, `top`, `bottom` and `none`](https://drafts.csswg.org/css-page-floats/#propdef-float) values.
+  - Supported in all browsers
+- [float-reference](https://drafts.csswg.org/css-page-floats-3/#propdef-float-reference)
+  - Supported in all browsers
 
 ## [Filter Effects 1](https://www.w3.org/TR/filter-effects-1/)
 - [filter](https://www.w3.org/TR/filter-effects-1/#propdef-filter)

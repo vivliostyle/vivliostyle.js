@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview CSS Cascade.
  */
 goog.provide('adapt.csscasc');
@@ -41,6 +55,10 @@ adapt.csscasc.inheritedProps = {
     "font-variant": true,
     "font-weight": true,
     "glyph-orientation-vertical": true,
+    "hyphens": true,
+    "hyphenate-character": true,
+    "hyphenate-limit-chars": true,
+    "hyphenate-limit-last": true,
     "image-rendering": true,
     "image-resolution": true,
     "letter-spacing": true,
@@ -109,6 +127,17 @@ adapt.csscasc.polyfilledInheritedProps = [
     "orphans",
     "widows"
 ];
+
+/**
+ * @return {Array.<string>}
+ */
+adapt.csscasc.getPolyfilledInheritedProps = function() {
+    /** @type {!Array.<vivliostyle.plugin.PolyfilledInheritedPropsHook>} */ var hooks =
+        vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.POLYFILLED_INHERITED_PROPS);
+    return hooks.reduce(function(props, f) {
+        return props.concat(f());
+    }, [].concat(adapt.csscasc.polyfilledInheritedProps));
+};
 
 /** @const */
 adapt.csscasc.supportedNamespaces = {
@@ -536,6 +565,8 @@ adapt.csscasc.InheritanceVisitor.prototype.visitNumeric = function(numeric) {
     } else if (numeric.unit == "%") {
         if (this.propName === "font-size") {
             return new adapt.css.Numeric(numeric.num / 100 * this.getFontSize(), "px");
+        } else if (this.propName === "line-height") {
+            return numeric;
         }
         var unit = this.propName.match(/height|^(top|bottom)$/) ? "vh" : "vw";
         return new adapt.css.Numeric(numeric.num, unit);
@@ -2426,9 +2457,10 @@ adapt.csscasc.CascadeInstance = function(cascade, context, counterListener, coun
     /** @type {boolean} */ this.isRoot = true;
     /** @type {!Object.<string,!Array.<number>>} */ this.counters = {};
     /** @type {Array.<Object.<string,boolean>>} */ this.counterScoping = [{}];
-    /** @type {Array.<adapt.css.Str>} */ this.quotes =
-        [new adapt.css.Str("\u201C"), new adapt.css.Str("\u201D"),
-            new adapt.css.Str("\u2018"), new adapt.css.Str("\u2019")];
+    /** @type {Array.<adapt.css.Str>} */ this.quotes = [
+        new adapt.css.Str("\u201C"), new adapt.css.Str("\u201D"),
+        new adapt.css.Str("\u2018"), new adapt.css.Str("\u2019")
+    ];
     /** @type {number} */ this.quoteDepth = 0;
     /** @type {string} */ this.lang = "";
     /** @type {Array.<number>} */ this.siblingOrderStack = [0];
@@ -2681,10 +2713,7 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
         var className = element.getAttribute("name") || "";
         this.currentClassNames = [className];
     }
-    var lang = element.getAttributeNS(adapt.base.NS.XML, "lang");
-    if (!lang && this.currentNamespace == adapt.base.NS.XHTML) {
-        lang = element.getAttribute("lang");
-    }
+    var lang = adapt.base.getLangAttribute(element);
     if (lang) {
         this.stack[this.stack.length - 1].push(
             new adapt.csscasc.RestoreLangItem(this.lang));

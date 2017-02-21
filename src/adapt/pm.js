@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview Deal with page masters, partition groups, and partitions.
  */
 goog.provide('adapt.pm');
@@ -920,6 +934,17 @@ adapt.pm.PageBoxInstance.prototype.getActiveRegions = function(context) {
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.propagateProperty = function(context, container, name, docFaces) {
+    this.propagatePropertyToElement(context, container.element, name, docFaces);
+};
+
+/**
+ * @param {adapt.expr.Context} context
+ * @param {Element} element
+ * @param {string} name
+ * @param {adapt.font.DocumentFaces} docFaces
+ * @return {void}
+ */
+adapt.pm.PageBoxInstance.prototype.propagatePropertyToElement = function(context, element, name, docFaces) {
     var val = this.getProp(context, name);
     if (val) {
         if (val.isNumeric() && adapt.expr.needUnitConversion(val.unit)) {
@@ -928,7 +953,7 @@ adapt.pm.PageBoxInstance.prototype.propagateProperty = function(context, contain
         if (name === "font-family") {
             val = docFaces.filterFontFamily(val);
         }
-        adapt.base.setCSSProperty(container.element, name, val.toString());
+        adapt.base.setCSSProperty(element, name, val.toString());
     }
 };
 
@@ -1192,6 +1217,14 @@ adapt.pm.passContentProperties = [
 /**
  * @const
  */
+adapt.pm.passSingleUriContentProperties = [
+    "width",
+    "height"
+];
+
+/**
+ * @const
+ */
 adapt.pm.delayedProperties = [
     "transform",
     "transform-origin"
@@ -1243,6 +1276,19 @@ adapt.pm.PageBoxInstance.prototype.transferContentProps = function(context, cont
         this.propagateProperty(context, container, adapt.pm.passContentProperties[i], docFaces);
     }
 };
+
+/**
+ * @param {adapt.expr.Context} context
+ * @param {Element} element
+ * @param {adapt.font.DocumentFaces} docFaces
+ * @return {void}
+ */
+adapt.pm.PageBoxInstance.prototype.transferSinglUriContentProps = function(context, element, docFaces) {
+    for (var i = 0; i < adapt.pm.passSingleUriContentProperties.length; i++) {
+        this.propagatePropertyToElement(context, element, adapt.pm.passSingleUriContentProperties[i], docFaces);
+    }
+};
+
 
 /**
  * @param {adapt.expr.Context} context

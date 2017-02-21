@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Forced break and page floats</title>
+  <style>
+    @page {
+      size: 920px;
+    }
+    @-epubx-page-template {
+      .region {
+        -epubx-flow-from: body;
+        width: 890px;
+        height: 280px;
+        left: 10px;
+        border: rgba(255, 0, 0, 0.3) solid;
+        padding: 5px;
+        column-count: 3;
+        column-gap: 10px;
+        column-rule: 1px solid black;
+      }
+      @-epubx-page-master {
+        @-epubx-partition class(region) {
+          bottom: 15px;
+        }
+        @-epubx-partition class(region) {
+          top: 310px;
+        }
+        @-epubx-partition class(region) {
+          top: 10px;
+        }
+        @-epubx-partition {
+          left: 0;
+          right: 0;
+          bottom: 1px;
+          height: 12px;
+          text-align: center;
+          font-size: 12px;
+          line-height: 1;
+          content: counter(page);
+        }
+      }
+    }
+    :root {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      line-height: 20px;
+      widows: 1;
+      orphans: 1;
+    }
+    body {
+      margin: 8px;
+    }
+    .column-float, .region-float, .page-float {
+      float: block-start;
+      background: rgba(100, 100, 255, 0.2);
+    }
+    .column-float {
+      float-reference: column;
+      height: 180px;
+    }
+    .region-float {
+      float-reference: region;
+      height: 180px;
+    }
+    .page-float {
+      float-reference: page;
+      height: 500px;
+    }
+    .column-break {
+      break-after: column;
+    }
+    .region-break {
+      break-after: region;
+    }
+    .page-break {
+      break-after: page;
+    }
+    .left-break {
+      break-after: left;
+    }
+    .right-break {
+      break-after: right;
+    }
+    .footnote {
+      float: footnote;
+    }
+  </style>
+</head>
+<body>
+<section class="column-break">
+  <div class="column-float">(float1-1) column float</div>
+  <div class="column-float">(float1-2) column float</div>
+  (sec1-1) break-after: column, column floats
+  <span class="footnote">(footnote1) top center col on page 1</span>
+</section>
+<section class="region-break">
+  (sec1-2) top center col on page 1
+</section>
+
+<section class="region-break">
+  <div class="column-float">(float2-1) column float</div>
+  <div class="column-float">(float2-2) column float</div>
+  (sec2-1) break-after: region, column floats
+  <span class="footnote">(footnote2) middle center col on page 1</span>
+</section>
+<section class="page-break">
+  (sec2-2) bottom left col on page 1
+</section>
+
+<section class="region-break">
+  <div class="column-float">(float3-1) column float</div>
+  <div class="column-float">(float3-2) column float</div>
+  <div class="column-float">(float3-3) column float</div>
+  <div class="column-float">(float3-4) column float</div>
+  (sec3-1) break-after: region, column floats
+  <span class="footnote">(footnote3) top center col on page 2</span>
+</section>
+<section class="region-break">
+  (sec3-2) middle left col on page 2
+</section>
+
+<section class="page-break">
+  <div class="column-float">(float4-1) column float</div>
+  <div class="column-float">(float4-2) column float</div>
+  <div class="column-float">(float4-3) column float</div>
+  <div class="column-float">(float4-4) column float</div>
+  (sec4-1) break-after: page, column floats
+  <span class="footnote">(footnote4) bottom center col on page 2</span>
+</section>
+<section class="region-break">
+  (sec4-2) top left col on page 3
+</section>
+
+<section class="page-break">
+  <div class="column-float">(float5-1) column float</div>
+  <div class="column-float">(float5-2) column float</div>
+  (sec5-1) break-after: page, column floats
+  <span class="footnote">(footnote5) middle center col on page 3</span>
+</section>
+<section class="region-break">
+  (sec5-2) top left col on page 4
+</section>
+
+<section class="left-break">
+  <div class="column-float">(float6-1) column float</div>
+  <div class="column-float">(float6-2) column float</div>
+  (sec6-1) break-after: left, column floats
+  <span class="footnote">(footnote6) middle center col on page 4</span>
+</section>
+<section class="page-break">
+  (sec6-2) top left col on page 6
+</section>
+
+<section class="right-break">
+  <div class="column-float">(float7-1) column float</div>
+  <div class="column-float">(float7-2) column float</div>
+  (sec7-1) break-after: right, column floats
+  <span class="footnote">(footnote7) top center col on page 7</span>
+</section>
+<section class="region-break">
+  (sec7-2) top left col on page 9
+</section>
+
+<section class="column-break">
+  <div class="region-float">(float8-1) region float</div>
+  <div class="region-float">(float8-2) region float</div>
+  (sec8-1) break-after: column, region floats
+  <span class="footnote">(footnote8) middle center col on page 9</span>
+</section>
+<section class="page-break">
+  (sec8-2) middle center col on page 9
+</section>
+
+<section class="region-break">
+  <div class="region-float">(float9-1) region float</div>
+  <div class="region-float">(float9-2) region float</div>
+  (sec9-1) break-after: region, region floats
+  <span class="footnote">(footnote9) top center col on page 10</span>
+</section>
+<section class="column-break">
+  (sec9-2) middle left col on page 10
+</section>
+<section class="region-break">
+  (sec9-3) middle center col on page 10
+</section>
+
+<section class="page-break">
+  <div class="region-float">(float10-1) region float</div>
+  <div class="region-float">(float10-2) region float</div>
+  (sec10-1) break-after: page, region floats
+  <span class="footnote">(footnote10) bottom center col on p10</span>
+</section>
+<section class="page-break">
+  (sec10-2) top left col on page 11
+</section>
+
+<section class="page-break">
+  <div class="region-float">(float11-1) region float</div>
+  <div class="region-float">(float11-2) region float</div>
+  (sec11-1) break-after: page, region floats
+  <span class="footnote">(footnote11) top center col on p12</span>
+</section>
+<section class="region-break">
+  (sec11-2) top left col on page 13
+</section>
+
+<section class="right-break">
+  <div class="region-float">(float12-1) region float</div>
+  <div class="region-float">(float12-2) region float</div>
+  (sec12-1) break-after: right, region floats
+  <span class="footnote">(footnote12) middle center col on p13</span>
+</section>
+<section class="page-break">
+  (sec11-2) top left col on page 15
+</section>
+
+<section class="left-break">
+  <div class="region-float">(float13-1) region float</div>
+  <div class="region-float">(float13-2) region float</div>
+  (sec13-1) break-after: left, region floats
+  <span class="footnote">(footnote13) middle center col on p16</span>
+</section>
+<section class="page-break">
+  (sec11-2) top left col on page 18
+</section>
+
+<section class="column-break">
+  <div class="page-float">(float14-1) page float</div>
+  <div class="page-float">(float14-2) page float</div>
+  (sec14-1) break-after: column, page floats
+  <span class="footnote">(footnote14) middle center col on p19</span>
+</section>
+<section class="region-break">
+  (sec14-2) middle center col on p19
+</section>
+<section class="page-break">
+  (sec14-3) bottom left col on p19
+</section>
+<section>
+  (sec14-4) middle left col on p20
+</section>
+</body>
+</html>

@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview Common utilities.
  */
 goog.provide('adapt.base');
@@ -49,6 +63,11 @@ adapt.base.stripFragmentAndQuery = function(url) {
         return r[1];
     return url;
 };
+
+/**
+ * Base URL relative to which URLs of resources are resolved.
+ */
+adapt.base.baseURL = window.location.href;
 
 /**
  * Base URL relative to which URLs of resources such as validation.txt and
@@ -429,6 +448,18 @@ adapt.base.getCSSProperty = function(elem, prop, opt_value) {
     } catch (err) {
     }
     return opt_value || "";
+};
+
+/**
+ * @param {Element} element
+ * @return {string}
+ */
+adapt.base.getLangAttribute = function(element) {
+    var lang = element.getAttributeNS(adapt.base.NS.XML, "lang");
+    if (!lang && element.namespaceURI == adapt.base.NS.XHTML) {
+        lang = element.getAttribute("lang");
+    }
+    return lang;
 };
 
 /**
@@ -919,4 +950,42 @@ adapt.base.checkVerticalBBoxBug = function(body) {
         body.removeChild(container);
     }
     return adapt.base.hasVerticalBBoxBug;
+};
+
+/**
+ * @type {boolean|null}
+ */
+adapt.base.hasInlineBlockJustificationBug = null;
+
+/**
+ * @param {HTMLElement} body
+ * @returns {boolean}
+ */
+adapt.base.checkInlineBlockJustificationBug = function(body) {
+    if (adapt.base.hasInlineBlockJustificationBug === null) {
+        var doc = body.ownerDocument;
+        var container = /** @type {HTMLElement} */ (doc.createElement("div"));
+        container.style.position = "absolute";
+        container.style.top = "0px";
+        container.style.left = "0px";
+        container.style.width = "30px";
+        container.style.height = "100px";
+        container.style.lineHeight = "16px";
+        container.style.fontSize = "16px";
+        container.style.textAlign = "justify";
+        body.appendChild(container);
+        var t = doc.createTextNode("a | ");
+        container.appendChild(t);
+        var inlineBlock = doc.createElement("span");
+        inlineBlock.style.display = "inline-block";
+        inlineBlock.style.width = "30px";
+        container.appendChild(inlineBlock);
+        var range = doc.createRange();
+        range.setStart(t, 0);
+        range.setEnd(t, 3);
+        var box = range.getBoundingClientRect();
+        adapt.base.hasInlineBlockJustificationBug = box.right < 27;
+        body.removeChild(container);
+    }
+    return adapt.base.hasInlineBlockJustificationBug;
 };

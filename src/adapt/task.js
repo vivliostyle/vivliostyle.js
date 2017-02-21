@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview Support for asynchronous execution and cooperative multitasking.
  */
 goog.require('vivliostyle.logging');
@@ -521,7 +535,7 @@ adapt.task.Task.prototype.isRunning = function() {
  * Register a callback to be called when the task is done. Callback is not
  * executed in any task context. Multiple callbacks can be registered and
  * they will be called in the registration order.
- * @param {function(*):void} callback
+ * @param {function():void} callback
  * @return {void}
  */
 adapt.task.Task.prototype.whenDone = function(callback) {

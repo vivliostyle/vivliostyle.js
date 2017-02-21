@@ -1,5 +1,19 @@
 /**
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
 /*eslint-env node */
 (function() {
@@ -19,6 +33,7 @@
         "vivliostyle/profile.js",
         "vivliostyle/constants.js",
         "vivliostyle/util.js",
+        "vivliostyle/diff.js",
         "vivliostyle/urls.js",
         "vivliostyle/plugin.js",
         "vivliostyle/logical.js",
@@ -46,6 +61,8 @@
         "vivliostyle/pagefloat.js",
         "adapt/vgen.js",
         "adapt/layout.js",
+        "vivliostyle/layoututil.js",
+        "vivliostyle/table.js",
         "vivliostyle/page.js",
         "vivliostyle/counters.js",
         "adapt/ops.js",
@@ -56,11 +73,18 @@
         "vivliostyle/viewer.js"
     ];
 
+    var commonJsModuleList = [
+        "node_modules/fast-diff/diff.js"
+    ];
+
     if (typeof window === "object" && typeof window.vivliostyleCallback === "function") {
-        window.vivliostyleCallback(list);
+        window.vivliostyleCallback(list, commonJsModuleList);
     }
 
     if (typeof module === "object" && module.exports) {
-        module.exports = list;
+        module.exports = {
+            list: list,
+            commonJsModuleList: commonJsModuleList
+        };
     }
 })();

@@ -2,6 +2,45 @@
 
 ## Unreleased
 
+## [2017.2](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.2) - 2017-2-22
+
+### Added
+
+- Add support for Compositing and Blending Level 1
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/148>
+  - Spec: [Compositing and Blending Level 1](https://drafts.fxtf.org/compositing-1/)
+- pseudo element or page margin box with `content:url()` behave as a replaced element
+  - Spec: [Inserting and replacing content with the content property](https://drafts.csswg.org/css-content/#content-property)
+- Experimental support of CSS Page Floats and `column-span`
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/324>
+  - Spec: [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
+  - Spec: [CSS Multi-column Layout Module Level 2 - `column-span`](https://drafts.csswg.org/css-multicol-2/#column-span)
+
+### Changed
+
+- Change license to AGPL 3.0
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/329>
+
+### Fixed
+
+- Fix incorrect page breaking at boundaries of inline-block boxes
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/309>
+- Improve page/column breaking inside tables
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/311>
+  - Following issues are resolved:
+      - Table cell with rowspan disappears after page break
+          - https://github.com/vivliostyle/vivliostyle.js/issues/85
+      - Table (column) width should not change over page breaks
+          - https://github.com/vivliostyle/vivliostyle.js/issues/157
+      - Table breaks occur between the colgroup and the first row
+          - https://github.com/vivliostyle/vivliostyle.js/issues/279
+- Fix incorrect treatment of percentage value for line-height property
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/312>
+- Support repeating table header/footer across pages
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/319>
+- Fix incorrect widows behavior with footnote call close to the end of the page
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/328>
+
 ## [2016.10](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.10) - 2016-10-25
 
 ### Added

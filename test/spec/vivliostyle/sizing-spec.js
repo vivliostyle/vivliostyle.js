@@ -1,3 +1,19 @@
+/**
+ * Copyright 2017 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ */
 describe("sizing", function() {
     "use strict";
 
@@ -27,7 +43,11 @@ describe("sizing", function() {
         containingBlockDisplay: "block",
         containingBlockPosition: "relative",
         elementWidth: 1,
+        elementMaxWidth: 3,
+        elementMinWidth: 2,
         elementHeight: 1,
+        elementMaxHeight: 3,
+        elementMinHeight: 2,
         elementDisplay: "block",
         elementPosition: "static",
         marginLeft: 5,
@@ -52,7 +72,11 @@ describe("sizing", function() {
         cStyle.position = initialProperties.containingBlockPosition;
         var eStyle = element.style;
         eStyle.width = initialProperties.elementWidth + "px";
+        eStyle.maxWidth = initialProperties.elementMaxWidth + "px";
+        eStyle.minWidth = initialProperties.elementMinWidth + "px";
         eStyle.height = initialProperties.elementHeight + "px";
+        eStyle.maxHeight = initialProperties.elementMaxHeight + "px";
+        eStyle.minHeight = initialProperties.elementMinHeight + "px";
         eStyle.display = initialProperties.elementDisplay;
         eStyle.position = initialProperties.elementPosition;
         eStyle.marginLeft = initialProperties.marginLeft + "px";
@@ -78,7 +102,11 @@ describe("sizing", function() {
         expect(cStyle.position).toBe(initialProperties.containingBlockPosition);
         var eStyle = element.style;
         expect(eStyle.width).toBe(initialProperties.elementWidth + "px");
+        expect(eStyle.maxWidth).toBe(initialProperties.elementMaxWidth + "px");
+        expect(eStyle.minWidth).toBe(initialProperties.elementMinWidth + "px");
         expect(eStyle.height).toBe(initialProperties.elementHeight + "px");
+        expect(eStyle.maxHeight).toBe(initialProperties.elementMaxHeight + "px");
+        expect(eStyle.minHeight).toBe(initialProperties.elementMinHeight + "px");
         expect(eStyle.display).toBe(initialProperties.elementDisplay);
         expect(eStyle.position).toBe(initialProperties.elementPosition);
         expect(eStyle.marginLeft).toBe(initialProperties.marginLeft + "px");
