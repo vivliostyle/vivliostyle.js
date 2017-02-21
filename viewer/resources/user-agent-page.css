@@ -6,6 +6,7 @@ html|body, fb2|body {
 }
 
 @-adapt-footnote-area {
+	display: block;
 	-adapt-margin-before: 0.5em;
 	-adapt-margin-after: 0.5em;
 }
