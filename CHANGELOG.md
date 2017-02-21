@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [2017.2](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.2) - 2017-2-22
+
 ### Added
 
 - Add support for Compositing and Blending Level 1
