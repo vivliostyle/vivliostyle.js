@@ -1120,6 +1120,8 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
                 frame.finish(true);
                 return;
             }
+            // Cancel a computation error
+            footnoteArea.computedBlockSize += 0.01;
             if (self.vertical) {
                 self.footnoteEdge = afterEdge + (footnoteArea.computedBlockSize
                     + footnoteArea.getInsetLeft() + footnoteArea.getInsetRight());
