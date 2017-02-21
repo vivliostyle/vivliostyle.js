@@ -1495,10 +1495,10 @@ goog.scope(function() {
      * @override
      */
     LayoutRetryer.prototype.resolveLayoutMode = function(nodeContext) {
-        if (!this.tableFormattingContext.doneInitialLayout) {
+        var repetitiveElements = this.tableFormattingContext.getRepetitiveElements();
+        if (!repetitiveElements || !repetitiveElements.doneInitialLayout) {
             return new LayoutEntireTable(this.tableFormattingContext, this.processor);
         } else {
-            var repetitiveElements = this.tableFormattingContext.getRepetitiveElements();
             if (nodeContext.sourceNode === this.tableFormattingContext.tableSourceNode && !nodeContext.after) {
                 if (repetitiveElements) repetitiveElements.preventSkippingHeader();
             }

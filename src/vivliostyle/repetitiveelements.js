@@ -27,7 +27,6 @@ goog.scope(function() {
     vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext = function(parent, rootSourceNode) {
         /** @const */ this.parent = parent;
         /** @const */ this.rootSourceNode = rootSourceNode;
-        /** @type {boolean} */ this.doneInitialLayout = false;
         /** @type {boolean} */ this.isRoot = false;
         /** @type {vivliostyle.repetitiveelements.RepetitiveElements} */ this.repetitiveElements = null;
     };
@@ -375,7 +374,6 @@ goog.scope(function() {
                 repetitiveElements.doneInitialLayout = true;
             }
         }
-        this.formattingContext.doneInitialLayout = true;
         if (!accepted) {
             repetitiveElements.removeHeaderFromFragment();
             repetitiveElements.removeFooterFromFragment();
@@ -567,11 +565,11 @@ goog.scope(function() {
      * @override
      */
     RepetitiveElementsOwnerLayoutRetryer.prototype.resolveLayoutMode = function(nodeContext) {
+        var repetitiveElements = this.formattingContext.getRepetitiveElements();
         if (!nodeContext.belongsTo(this.formattingContext)
-          && !this.formattingContext.doneInitialLayout) {
+          && !repetitiveElements.doneInitialLayout) {
             return new LayoutEntireOwnerBlock(this.formattingContext, this.processor);
         } else {
-            var repetitiveElements = this.formattingContext.getRepetitiveElements();
             if (!nodeContext.belongsTo(this.formattingContext) && !nodeContext.after) {
                 if (repetitiveElements) repetitiveElements.preventSkippingHeader();
             }
@@ -599,27 +597,29 @@ goog.scope(function() {
         /** @const */ var formattingContext = this.formattingContext;
         /** @const */ var nodeContext = state.nodeContext;
         /** @const */ var repetitiveElements = formattingContext.getRepetitiveElements();
-        switch (nodeContext.repeatOnBreak) {
-            case "header":
-                if (!repetitiveElements.isHeaderRegisterd()) {
-                    repetitiveElements.setHeaderElement(
-                        /** @type {!Element} */ (nodeContext.viewNode),
-                        /** @type {!Element} */ (nodeContext.sourceNode));
-                    return adapt.task.newResult(true);
-                } else {
-                    nodeContext.repeatOnBreak = "none";
-                }
-                break;
-            case "footer":
-                if (!repetitiveElements.isFooterRegisterd()) {
-                    repetitiveElements.setFooterElement(
-                      /** @type {!Element} */ (nodeContext.viewNode),
-                      /** @type {!Element} */ (nodeContext.sourceNode));
-                    return adapt.task.newResult(true);
-                } else {
-                    nodeContext.repeatOnBreak = "none";
-                }
-                break;
+        if (nodeContext.parent && formattingContext.rootSourceNode === nodeContext.parent.sourceNode) {
+            switch (nodeContext.repeatOnBreak) {
+                case "header":
+                    if (!repetitiveElements.isHeaderRegisterd()) {
+                        repetitiveElements.setHeaderElement(
+                            /** @type {!Element} */ (nodeContext.viewNode),
+                            /** @type {!Element} */ (nodeContext.sourceNode));
+                        return adapt.task.newResult(true);
+                    } else {
+                        nodeContext.repeatOnBreak = "none";
+                    }
+                    break;
+                case "footer":
+                    if (!repetitiveElements.isFooterRegisterd()) {
+                        repetitiveElements.setFooterElement(
+                          /** @type {!Element} */ (nodeContext.viewNode),
+                          /** @type {!Element} */ (nodeContext.sourceNode));
+                        return adapt.task.newResult(true);
+                    } else {
+                        nodeContext.repeatOnBreak = "none";
+                    }
+                    break;
+            }
         }
         return EdgeSkipper.prototype.startNonInlineElementNode.call(this, state);
     };
