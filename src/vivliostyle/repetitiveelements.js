@@ -141,8 +141,7 @@ goog.scope(function() {
         /** @type {Element} */ this.firstContentSourceNode = null;
         /** @type {Element} */ this.lastContentSourceNode = null;
         /** @private @const {!Array.<{nodeContext:adapt.vtree.NodeContext,result:boolean}>} */ this.affectedNodeCache = [];
-        /** @private @const {!Array.<{nodeContext:adapt.vtree.NodeContext,result:boolean}>} */ this.afterFooterNodeCache = [];
-        // /** @private @const {!Array.<{nodeContext:adapt.vtree.NodeContext,result:boolean}>} */ this.afterHeaderNodeCache = [];
+        /** @private @const {!Array.<{nodeContext:adapt.vtree.NodeContext,result:boolean}>} */ this.afterLastContentNodeCache = [];
     };
     /** @const */ var RepetitiveElements = vivliostyle.repetitiveelements.RepetitiveElements;
 
@@ -235,11 +234,10 @@ goog.scope(function() {
         if (nodeContext && !this.affectTo(nodeContext)) return offset;
 
         if (!this.isSkipFooter
-          || (nodeContext && this.isAfterFooter(nodeContext))) {
+          || (nodeContext && this.isAfterLastContent(nodeContext))) {
             offset += this.footerHeight;
         }
         if (!this.isSkipHeader) {
-            // && (!nodeContext || this.isAfterHeader(nodeContext))) {
             offset += this.headerHeight;
         }
         return offset;
@@ -252,10 +250,10 @@ goog.scope(function() {
         var offset = 0;
         if (nodeContext && !this.affectTo(nodeContext)) return offset;
 
-        if (nodeContext && this.isAfterFooter(nodeContext)) {
+        if (nodeContext && this.isAfterLastContent(nodeContext)) {
             offset += this.footerHeight;
         }
-        if (!this.enableSkippingHeader /*&& (!nodeContext || this.isAfterHeader(nodeContext))*/) {
+        if (!this.enableSkippingHeader) {
             offset += this.headerHeight;
         }
         return offset;
@@ -265,21 +263,11 @@ goog.scope(function() {
      * @param {!adapt.vtree.NodeContext} nodeContext
      * @return {boolean}
      */
-    RepetitiveElements.prototype.isAfterFooter = function(nodeContext) {
-        return this.findResultFromCache(nodeContext, this.afterFooterNodeCache, function(nc) {
+    RepetitiveElements.prototype.isAfterLastContent = function(nodeContext) {
+        return this.findResultFromCache(nodeContext, this.afterLastContentNodeCache, function(nc) {
             return this.isAfterNodeContextOf(this.lastContentSourceNode, nodeContext, false)
         }.bind(this));
     };
-
-    // /**
-    //  * @param {!adapt.vtree.NodeContext} nodeContext
-    //  * @return {boolean}
-    //  */
-    // RepetitiveElements.prototype.isAfterHeader = function(nodeContext) {
-    //     return this.findResultFromCache(nodeContext, this.afterHeaderNodeCache, function(nc) {
-    //         return this.isAfterNodeContextOf(this.firstContentSourceNode, nodeContext, true)
-    //     }.bind(this));
-    // };
 
     /**
      * @param {!adapt.vtree.NodeContext} nodeContext
@@ -615,7 +603,7 @@ goog.scope(function() {
         if (!repetitiveElements) return;
         if (allowed) {
             if (column.stopAtOverflow) {
-                if (nodeContext == null || repetitiveElements.isAfterFooter(nodeContext)) {
+                if (nodeContext == null || repetitiveElements.isAfterLastContent(nodeContext)) {
                     repetitiveElements.preventSkippingFooter();
                 }
             }

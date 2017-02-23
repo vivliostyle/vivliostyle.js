@@ -1563,7 +1563,7 @@ goog.scope(function() {
      */
     LayoutFragmentedTable.prototype.doLayout = function(nodeContext, column) {
         var repetitiveElements = this.formattingContext.getRepetitiveElements();
-        if (repetitiveElements && !repetitiveElements.isAfterFooter(nodeContext)) {
+        if (repetitiveElements && !repetitiveElements.isAfterLastContent(nodeContext)) {
             vivliostyle.repetitiveelements.appendHeader(this.formattingContext, nodeContext);
             var constraint = new TableRowLayoutConstraint(nodeContext);
             if (!column.fragmentLayoutConstraints.some(function(c) { return constraint.equalsTo(c); })) {
