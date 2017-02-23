@@ -1271,7 +1271,7 @@ goog.scope(function() {
             var tableBBox = column.clientLayout.getElementClientRect(tableElement);
             var edge = column.vertical ? tableBBox.left : tableBBox.bottom;
             edge += (column.vertical ? -1 : 1) * adapt.layout.calculateOffsetOfRepetitiveElements(
-                nodeContext, vivliostyle.repetitiveelements.collectRepetitiveElements(column));
+                nodeContext, vivliostyle.repetitiveelements.collectRepetitiveElements(column)).current;
             if (!column.isOverflown(edge)) {
                 frame.finish(nodeContextAfter);
                 return;
@@ -1563,7 +1563,7 @@ goog.scope(function() {
      */
     LayoutFragmentedTable.prototype.doLayout = function(nodeContext, column) {
         var repetitiveElements = this.formattingContext.getRepetitiveElements();
-        if (repetitiveElements && !repetitiveElements.isAfterTheLastContent(nodeContext)) {
+        if (repetitiveElements && !repetitiveElements.isAfterFooter(nodeContext)) {
             vivliostyle.repetitiveelements.appendHeader(this.formattingContext, nodeContext);
             var constraint = new TableRowLayoutConstraint(nodeContext);
             if (!column.fragmentLayoutConstraints.some(function(c) { return constraint.equalsTo(c); })) {
