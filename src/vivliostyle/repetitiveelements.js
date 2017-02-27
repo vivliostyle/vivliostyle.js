@@ -119,8 +119,8 @@ goog.scope(function() {
 
     /**
      * @constructor
-     * @param {Element}
-     * @param {boolean}
+     * @param {boolean} vertical
+     * @param {Element} ownerSourceNode
      */
     vivliostyle.repetitiveelements.RepetitiveElements = function(vertical, ownerSourceNode) {
         /** @private @const */ this.vertical = vertical;
@@ -287,7 +287,7 @@ goog.scope(function() {
      */
     RepetitiveElements.prototype.findResultFromCache = function(nodeContext, cache, calculator) {
         var cacheEntry = cache.filter(function(cache) {
-            return cache.nodeContext.sourcNode === nodeContext.sourceNode
+            return cache.nodeContext.sourceNode === nodeContext.sourceNode
                 && cache.nodeContext.after === nodeContext.after;
         });
         if (cacheEntry.length > 0) {
@@ -709,7 +709,7 @@ goog.scope(function() {
                     break;
             }
             if (!repetitiveElements.firstContentSourceNode) {
-                repetitiveElements.firstContentSourceNode = nodeContext.sourceNode;
+                repetitiveElements.firstContentSourceNode = /** @type {!Element} */ (nodeContext.sourceNode);
             }
         }
         return EdgeSkipper.prototype.startNonInlineElementNode.call(this, state);

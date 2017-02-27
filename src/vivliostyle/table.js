@@ -223,15 +223,16 @@ goog.scope(function() {
         } else {
             cells = this.formattingContext.getCellsOfLastRow();
         }
-        var maxOffsetOfTableCell = 0;
+        var maxOffsetsOfTableCell = { current:0, minimum: 0};
         cells.forEach(function(cell) {
             var cellFragment = this.formattingContext.getCellFragmentOfCell(cell);
             if (!cellFragment) return;
             var repetitiveElements = vivliostyle.repetitiveelements.collectRepetitiveElements(cellFragment.pseudoColumn.column);
-            var offset = adapt.layout.calculateOffsetOfRepetitiveElements(nodeContext, repetitiveElements);
-            maxOffsetOfTableCell = Math.max(maxOffsetOfTableCell, offset);
+            var offsets = adapt.layout.calculateOffsetOfRepetitiveElements(nodeContext, repetitiveElements);
+            maxOffsetsOfTableCell.current = Math.max(maxOffsetsOfTableCell.current, offsets.current);
+            maxOffsetsOfTableCell.minimum = Math.max(maxOffsetsOfTableCell.minimum, offsets.minimum);
         }.bind(this));
-        return maxOffsetOfTableCell;
+        return maxOffsetsOfTableCell;
     };
 
     /**
