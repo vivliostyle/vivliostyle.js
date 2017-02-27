@@ -696,7 +696,7 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
                     // TODO: implement floats and footnotes properly
                     self.layoutFloatOrFootnote(position).then(function(positionParam) {
                         position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
-                        if (!position || self.stopByOverflow(position)) {
+                        if (!position) {
                             bodyFrame.breakLoop();
                             return;
                         }
@@ -1175,6 +1175,7 @@ adapt.layout.Column.prototype.layoutFootnote = function(nodeContext) {
     self.layoutContext.applyPseudoelementStyle(nodeContext, "footnote-call", element);
     if (!element.textContent) {
         element.parentNode.removeChild(element);
+        nodeContext.viewNode = null;
     }
     var footnoteNodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
     var boxOffset = nodeContext.boxOffset;
