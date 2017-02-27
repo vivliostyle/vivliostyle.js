@@ -319,7 +319,7 @@ function calculateOffsetOfRepetitiveElements(nodeContext, repetitiveElements) {
         minimum: repetitiveElements.reduce(function(val, repetitiveElement) {
             return val + repetitiveElement.calculateMinimumOffset(nodeContext);
         }, 0)
-    }
+    };
 };
 adapt.layout.calculateOffsetOfRepetitiveElements = calculateOffsetOfRepetitiveElements;
 

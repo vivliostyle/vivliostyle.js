@@ -265,7 +265,7 @@ goog.scope(function() {
      */
     RepetitiveElements.prototype.isAfterLastContent = function(nodeContext) {
         return this.findResultFromCache(nodeContext, this.afterLastContentNodeCache, function(nc) {
-            return this.isAfterNodeContextOf(this.lastContentSourceNode, nodeContext, false)
+            return this.isAfterNodeContextOf(this.lastContentSourceNode, nodeContext, false);
         }.bind(this));
     };
 
@@ -275,7 +275,7 @@ goog.scope(function() {
      */
     RepetitiveElements.prototype.affectTo = function(nodeContext) {
         return this.findResultFromCache(nodeContext, this.affectedNodeCache, function(nc) {
-            return this.isAfterNodeContextOf(this.ownerSourceNode, nodeContext, true)
+            return this.isAfterNodeContextOf(this.ownerSourceNode, nodeContext, true);
         }.bind(this));
     };
 
@@ -286,14 +286,14 @@ goog.scope(function() {
      * @return {boolean}
      */
     RepetitiveElements.prototype.findResultFromCache = function(nodeContext, cache, calculator) {
-        var cacheEntry = cache.filter(function(cache){
+        var cacheEntry = cache.filter(function(cache) {
             return cache.nodeContext.sourcNode === nodeContext.sourceNode
                 && cache.nodeContext.after === nodeContext.after;
         });
         if (cacheEntry.length > 0) {
-            return cacheEntry[0].result
+            return cacheEntry[0].result;
         } else {
-            var result = calculator(nodeContext)
+            var result = calculator(nodeContext);
             cache.push({
                 nodeContext: nodeContext, result: result
             });
@@ -963,7 +963,7 @@ goog.scope(function() {
      */
     function isFirstContnetOfRepetitiveElementsOwner(nodeContext) {
         if (!nodeContext || !nodeContext.parent) return false;
-        var formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext.parent)
+        var formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext.parent);
         if (!formattingContext) return false;
         var repetitiveElements = formattingContext.getRepetitiveElements();
         if (!repetitiveElements) return false;
