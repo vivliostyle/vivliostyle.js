@@ -55,6 +55,7 @@
     [data-vivliostyle-page-container] {
         display: block !important;
         page-break-after: always;
+        max-width: 100%;
         height: 100% !important;
         max-height: 100%;
     }
