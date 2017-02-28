@@ -308,15 +308,15 @@ adapt.layout.AbstractBreakPosition.prototype.getNodeContext = function() {
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
- * @param {Array.<vivliostyle.repetitiveelements.RepetitiveElements>} repetitiveElements
+ * @param {Array.<vivliostyle.repetitiveelements.ElementsOffset>} elementsOffsets
  * @return {{current:number, minimum:number}}
  */
-function calculateOffsetOfRepetitiveElements(nodeContext, repetitiveElements) {
+function calculateOffsetOfRepetitiveElements(nodeContext, elementsOffsets) {
     return {
-        current: repetitiveElements.reduce(function(val, repetitiveElement) {
+        current: elementsOffsets.reduce(function(val, repetitiveElement) {
             return val + repetitiveElement.calculateOffset(nodeContext);
         }, 0),
-        minimum: repetitiveElements.reduce(function(val, repetitiveElement) {
+        minimum: elementsOffsets.reduce(function(val, repetitiveElement) {
             return val + repetitiveElement.calculateMinimumOffset(nodeContext);
         }, 0)
     };

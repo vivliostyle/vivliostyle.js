@@ -436,6 +436,13 @@ goog.scope(function() {
         return this.column.element;
     };
 
+    /**
+     * @return {!adapt.layout.Column}
+     */
+    PseudoColumn.prototype.getColumn = function() {
+        return this.column;
+    };
+
 
     /**
      * @abstract
