@@ -5912,7 +5912,7 @@ ko.exportSymbol('nativeTemplateEngine', ko.nativeTemplateEngine);
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Vivliostyle core 2017.2.1-pre.20170227053808
+ * Vivliostyle core 2017.2.1-pre.20170228130329
  */
 (function(factory) {
     if (typeof define === "function" && define.amd) {
