@@ -244,7 +244,7 @@ goog.scope(function() {
         }) && acceptableCellBreakPositions.some(function(bp, index) {
             return !cellFragments[index].pseudoColumn.isStartNodeContext(bp.nodeContext);
         });
-        this.beforeNodeContext.overflow =  acceptableCellBreakPositions.some( function(bp){
+        this.beforeNodeContext.overflow = acceptableCellBreakPositions.some(function(bp) {
             return bp.nodeContext && bp.nodeContext.overflow;
         });
         if (allCellsBreakable) {
@@ -530,9 +530,9 @@ goog.scope(function() {
     TableFormattingContext.prototype.findCellPositionFromColumn = function(column) {
         if (!column) return null;
         var tableCell = null;
-        for ( var row=0; row < this.cellFragments.length; row++) {
+        for (var row=0; row < this.cellFragments.length; row++) {
             if (!this.cellFragments[row]) continue;
-            for ( var col=0; col < this.cellFragments[row].length; col++) {
+            for (var col=0; col < this.cellFragments[row].length; col++) {
                 if (!this.cellFragments[row][col]) continue;
                 if (column === this.cellFragments[row][col].pseudoColumn.getColumn()) {
                     tableCell = this.rows[row][col];
@@ -557,8 +557,8 @@ goog.scope(function() {
      */
     TableFormattingContext.prototype.collectRepetitiveElementsOfUpperCells = function(position) {
         var collected = [];
-        return this.rows.reduce( function( repetitiveElements, row, index ){
-            if (index >= position.rowIndex) return;
+        return this.rows.reduce(function(repetitiveElements, row, index) {
+            if (index >= position.rowIndex) return repetitiveElements;
             var cellFragment = this.getCellFragmentOfCell(row[position.columnIndex]);
             if (!cellFragment || collected.indexOf(cellFragment) >= 0) return repetitiveElements;
             this.collectRepetitiveElementsFromColumn(cellFragment.pseudoColumn.getColumn(), repetitiveElements);
@@ -572,8 +572,8 @@ goog.scope(function() {
      */
     TableFormattingContext.prototype.collectRepetitiveElementsOfHighestColumn = function() {
         var elementsInColumn = [];
-        this.rows.forEach( function( row ){
-            row.cells.forEach( function( cell, index ){
+        this.rows.forEach(function(row) {
+            row.cells.forEach(function(cell, index) {
                 if (!elementsInColumn[index]) elementsInColumn[index] = {collected:[], elements:[]};
                 var state = elementsInColumn[index];
                 var cellFragment = this.getCellFragmentOfCell(cell);
@@ -628,14 +628,14 @@ goog.scope(function() {
 
     /** @override */
     ElementsOffsetOfTableCell.prototype.calculateOffset = function(nodeContext) {
-        return this.calculateMaxOffsetOfColumn(nodeContext, function(offsets){
+        return this.calculateMaxOffsetOfColumn(nodeContext, function(offsets) {
             return offsets.current;
         });
     };
 
     /** @override */
     ElementsOffsetOfTableCell.prototype.calculateMinimumOffset = function(nodeContext) {
-        return this.calculateMaxOffsetOfColumn(nodeContext, function(offsets){
+        return this.calculateMaxOffsetOfColumn(nodeContext, function(offsets) {
             return offsets.minimum;
         });
     };
@@ -1761,7 +1761,7 @@ goog.scope(function() {
         }
         rowIndex = Math.min(formattingContext.cellFragments.length, rowIndex);
         var cellFragments = [];
-        for (var i=0; i < rowIndex; i++ ) {
+        for (var i=0; i < rowIndex; i++) {
             if (formattingContext.cellFragments[i]) {
                 cellFragments = cellFragments.concat(formattingContext.cellFragments[i]);
             }
