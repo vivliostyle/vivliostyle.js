@@ -472,12 +472,6 @@ goog.scope(function() {
         });
     };
 
-    /**
-     * @returns {!Array<!vivliostyle.table.TableCell>}
-     */
-    TableFormattingContext.prototype.getCellsOfLastRow = function() {
-        return this.getCellsFallingOnRow(this.rows.length-1);
-    };
 
     /**
      * @param {!vivliostyle.table.TableCell} cell
