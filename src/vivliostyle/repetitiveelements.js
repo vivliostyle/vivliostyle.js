@@ -188,25 +188,28 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!adapt.vtree.ClientLayout} clientLayout
+     * @param {!adapt.layout.Column} column
      */
-    RepetitiveElements.prototype.updateHeight = function(clientLayout) {
+    RepetitiveElements.prototype.updateHeight = function(column) {
         if (this.headerViewNode) {
-            this.headerHeight = this.getElementHeight(this.headerViewNode, clientLayout);
+            this.headerHeight = this.getElementHeight(this.headerViewNode, column);
         }
         if (this.footerViewNode) {
-            this.footerHeight = this.getElementHeight(this.footerViewNode, clientLayout);
+            this.footerHeight = this.getElementHeight(this.footerViewNode, column);
         }
     };
 
     /**
      * @private
      * @param {!Element} element
-     * @param {!adapt.vtree.ClientLayout} clientLayout
+     * @param {!adapt.layout.Column} column
      */
-    RepetitiveElements.prototype.getElementHeight = function(element, clientLayout) {
-        var rect = clientLayout.getElementClientRect(element);
-        return this.vertical ? rect["width"] : rect["height"];
+    RepetitiveElements.prototype.getElementHeight = function(element, column) {
+        var rect = column.clientLayout.getElementClientRect(element);
+        var margin = column.getComputedMargin(element);
+        return this.vertical
+            ? rect["width"]  + margin["left"] + margin["right"]
+            : rect["height"] + margin["top"]  + margin["bottom"];
     };
 
     RepetitiveElements.prototype.prepareLayoutFragment = function() {
@@ -477,7 +480,7 @@ goog.scope(function() {
         if (repetitiveElements) {
             goog.asserts.assert(column.clientLayout);
             if (!repetitiveElements.doneInitialLayout) {
-                repetitiveElements.updateHeight(column.clientLayout);
+                repetitiveElements.updateHeight(column);
                 repetitiveElements.doneInitialLayout = true;
             }
         }
