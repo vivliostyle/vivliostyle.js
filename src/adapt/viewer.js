@@ -615,7 +615,7 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
  * @param {number} pageIndex
  */
 adapt.viewer.Viewer.prototype.setPageSize = function(pageSize, pageSheetSize, spineIndex, pageIndex) {
-    this.pageSizes.push(pageSize);
+    this.pageSizes[pageIndex] = pageSize;
     this.setPageSizePageRules(pageSheetSize, spineIndex, pageIndex);
 };
 /**
