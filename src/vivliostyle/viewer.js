@@ -384,6 +384,12 @@ goog.scope(function() {
     };
 
     /**
+     * @return {Array<{width: number, height: number}>}
+     */
+    vivliostyle.viewer.Viewer.prototype.getPageSizes = function() {
+        return this.adaptViewer.pageSizes;
+    }    
+    /**
      * @enum {string}
      */
     vivliostyle.viewer.PageViewMode = adapt.viewer.PageViewMode;
