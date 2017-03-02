@@ -126,7 +126,7 @@
 <section>Empty</section>
 
 <section>
-    <h1>(2) The child and parent footer dropping takes precedence over the page break after parent content1</h1>
+    <h1>(2) The child and parent footer dropping takes precedence over the page break after parent content</h1>
     <div>
       <div class="p1" style="height: 30px">this content laid out in page 1 with parent header, child header</div>
       <div>
@@ -144,7 +144,7 @@
 <section>Empty</section>
 
 <section>
-    <h1>(3) The child and parent footer dropping takes precedence over the page break after parent content1</h1>
+    <h1>(3) The child and parent footer dropping takes precedence over the page break after parent content</h1>
     <div>
       <div class="header" style="height: 30px">parent header</div>
       <div style="height: 30px">this content laid out in page 1 with parent header, child header and footer</div>
@@ -193,7 +193,7 @@
 <section>Empty</section>
 
 <section>
-    <h1>(5) The child and parent footer dropping takes precedence over the page break after parent content1</h1>
+    <h1>(5) The child and parent footer dropping takes precedence over the page break after parent content</h1>
     <table class="table1">
         <thead>
             <tr>
@@ -228,7 +228,7 @@
 <section>Empty</section>
 
 <section>
-    <h1>(6) The child and parent footer dropping takes precedence over the page break after parent content1</h1>
+    <h1>(6) The child and parent footer dropping takes precedence over the page break after parent content</h1>
     <table class="table1">
         <thead>
             <tr>
@@ -310,6 +310,19 @@
       </table>
       <div class="header" style="height: 40px">parent header</div>
       <div class="footer" style="height: 40px">parent footer</div>
+    </div>
+</section>
+
+
+<section>
+    <h1>(8) the page break after the paragraph takes precedence over the footer dropping if `break-inside: avoid` specified  in the styles of owner element</h1>
+    <p>paragraph</p>
+    <div style="break-inside: avoid">
+      <div class="header" style="height: 50px">header</div>
+      <div class="c1" style="height: 80px">this content laid out in page 2 with header, footer</div>
+      <div class="c2" style="height: 80px">this content laid out in page 3 with header, footer</div>
+      <div class="c3" style="height: 80px">this content laid out in page 4 with header, footer</div>
+      <div class="footer" style="height: 50px">footer</div>
     </div>
 </section>
 
