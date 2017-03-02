@@ -388,7 +388,7 @@ goog.scope(function() {
      */
     vivliostyle.viewer.Viewer.prototype.getPageSizes = function() {
         return this.adaptViewer.pageSizes;
-    }    
+    };
     /**
      * @enum {string}
      */

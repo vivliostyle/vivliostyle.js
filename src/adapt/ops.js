@@ -214,7 +214,7 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
 
     /** @const {!Object<string, !{width: number, height: number}>} */ this.pageSheetSize = {};
     /** @type {number} */ this.pageSheetHeight = 0;
-    /** @type {number} */ this.pageSheetWidth = 0;    
+    /** @type {number} */ this.pageSheetWidth = 0;
 };
 goog.inherits(adapt.ops.StyleInstance, adapt.expr.Context);
 

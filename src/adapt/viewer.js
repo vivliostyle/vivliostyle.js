@@ -138,7 +138,7 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {boolean} */ this.waitForLoading = false;
     /** @type {boolean} */ this.renderAllPages = true;
     /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();
-    /** @type {!Array<{width: number, height: number}>} */ this.pageSizes = [];    
+    /** @type {!Array<{width: number, height: number}>} */ this.pageSizes = [];
 };
 
 adapt.viewer.Viewer.prototype.addLogListeners = function() {
@@ -617,7 +617,7 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
 adapt.viewer.Viewer.prototype.setPageSize = function(pageSize, pageSheetSize, spineIndex, pageIndex) {
     this.pageSizes.push(pageSize);
     this.setPageSizePageRules(pageSheetSize, spineIndex, pageIndex);
-}
+};
 /**
  * @private
  * @param {!Object<string, !{width: number, height: number}>} pageSheetSize
