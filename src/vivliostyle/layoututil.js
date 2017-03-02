@@ -355,8 +355,7 @@ goog.scope(function() {
         var pseudoColumn = this;
         this.column.openAllViews = function(position) {
             return adapt.layout.Column.prototype.openAllViews.call(this, position).thenAsync(function(result) {
-                var startNodeContext = result.copy();
-                pseudoColumn.startNodeContexts.push(startNodeContext);
+                pseudoColumn.startNodeContexts.push(result.copy());
                 return adapt.task.newResult(result);
             });
         };
@@ -379,15 +378,14 @@ goog.scope(function() {
     PseudoColumn.prototype.findAcceptableBreakPosition = function(allowBreakAtStartPosition) {
         var p = this.column.findAcceptableBreakPosition();
         if (allowBreakAtStartPosition) {
-            var penalty = p.breakPosition ? p.breakPosition.getMinBreakPenalty() : Number.MAX_VALUE;
-            var startNodeContext = this.startNodeContexts[0];
-            var bp = new adapt.layout.EdgeBreakPosition(startNodeContext.copy(), null,
+            var startNodeContext = this.startNodeContexts[0].copy();
+            var bp = new adapt.layout.EdgeBreakPosition(startNodeContext, null,
                 startNodeContext.overflow, 0);
-            var nodeContext = bp.findAcceptableBreak(this.column, penalty);
-            if (nodeContext && bp.getMinBreakPenalty() < penalty) {
+            bp.findAcceptableBreak(this.column, 0);
+            if (!p.nodeContext) {
                 return {
                     breakPosition: bp,
-                    nodeContext: nodeContext
+                    nodeContext: startNodeContext
                 };
             }
         }

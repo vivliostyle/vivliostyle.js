@@ -293,8 +293,8 @@
                           <div>child2 content1</div>
                           <div>child2 content2</div>
                           <div>child2 content3</div>
-                          <div>child1 content4</div>
-                          <div>child1 content5</div>
+                          <div>child2 content4</div>
+                          <div>child2 content5</div>
                       </div>
                     </td>
                 </tr>
@@ -306,6 +306,7 @@
         </table>
     </section>
 
+    <section>Empty</section>
 
     <section>
         <h1>(4) Nested table -> div / dropping header,footer</h1>
@@ -528,6 +529,53 @@
                 <tr>
                     <td>cell 2-1</td>
                     <td>cell 2-2</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h1>(8) table cell contains header/footer with different height </h1>
+        <table class="table1">
+            <thead>
+                <tr>
+                    <td>header 1</td>
+                    <td>header 2</td>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <td>footer 1</td>
+                    <td>footer 2</td>
+                </tr>
+            </tfoot>
+            <tbody>
+                <tr>
+                    <td>
+                      <div class="child1">
+                          <div class="box header" style="height: 70px">this is header of child1</div>
+                          <div class="box footer" style="height: 70px">this is footer of child1</div>
+                          <div>child1 content1</div>
+                          <div>child1 content2</div>
+                          <div>child1 content3</div>
+                          <div>child1 content4</div>
+                          <div>child1 content5</div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="child2">
+                          <div class="box header">this is header of child2</div>
+                          <div class="box footer">this is footer of child2</div>
+                          <div>child2 content1</div>
+                          <div>child2 content2</div>
+                          <div>child2 content3</div>
+                          <div>child2 content4</div>
+                          <div>child2 content5</div>
+                          <div>child2 content6</div>
+                          <div>child2 content7</div>
+                          <div>child2 content8</div>
+                      </div>
+                    </td>
                 </tr>
             </tbody>
         </table>
