@@ -24,7 +24,7 @@ goog.require('adapt.base');
 /**
  * @typedef {{fontFamily:string, lineHeight:number, margin:number, hyphenate:boolean,
  *   	columnWidth:number, horizontal:boolean, nightMode:boolean, spreadView:boolean,
- *      pageBorder:number, enabledMediaTypes:!Object.<string,boolean>}}
+ *      pageBorder:number, enabledMediaTypes:!Object.<string,boolean>,defaultPaperSize:(Object<number,number>|undefined)}}
  */
 adapt.expr.Preferences;
 
@@ -34,7 +34,7 @@ adapt.expr.Preferences;
 adapt.expr.defaultPreferences = function() {
     return {fontFamily:"serif", lineHeight:1.25, margin:8, hyphenate:true, columnWidth:25,
         horizontal:false, nightMode:false, spreadView:false, pageBorder:1,
-        enabledMediaTypes:{"print": true}};
+            enabledMediaTypes:{"print": true}, defaultPaperSize: undefined};
 };
 
 /**
@@ -45,7 +45,8 @@ adapt.expr.clonePreferences = function(pref) {
     return {fontFamily:pref.fontFamily, lineHeight:pref.lineHeight, margin:pref.margin,
         hyphenate:pref.hyphenate, columnWidth:pref.columnWidth, horizontal:pref.horizontal,
         nightMode:pref.nightMode, spreadView:pref.spreadView, pageBorder:pref.pageBorder,
-        enabledMediaTypes:Object.assign({}, pref.enabledMediaTypes)};
+            enabledMediaTypes:Object.assign({}, pref.enabledMediaTypes),
+            defaultPaperSize: pref.defaultPaperSize? Object.assign({}, pref.defaultPaperSize) : undefined};
 };
 
 /**

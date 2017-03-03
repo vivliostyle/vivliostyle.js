@@ -197,13 +197,21 @@ vivliostyle.page.evaluatePageSizeAndBleed = function(pageSizeAndBleed, context) 
     var cropOffset = bleed + bleedOffset;
     var width = pageSizeAndBleed.width;
     if (width === adapt.css.fullWidth) {
-        evaluated.pageWidth = (context.pref.spreadView ? Math.floor(context.viewportWidth / 2) - context.pref.pageBorder : context.viewportWidth) - cropOffset * 2;
+        if (context.pref.defaultPaperSize) {
+            evaluated.pageWidth = context.pref.defaultPaperSize.width * context.queryUnitSize("mm", false);;
+        } else {
+            evaluated.pageWidth = (context.pref.spreadView ? Math.floor(context.viewportWidth / 2) - context.pref.pageBorder : context.viewportWidth) - cropOffset * 2;
+        }
     } else {
         evaluated.pageWidth = width.num * context.queryUnitSize(width.unit, false);
     }
     var height = pageSizeAndBleed.height;
     if (height === adapt.css.fullHeight) {
-        evaluated.pageHeight = context.viewportHeight - cropOffset * 2;
+        if (context.pref.defaultPaperSize) {
+            evaluated.pageHeight = context.pref.defaultPaperSize.height * context.queryUnitSize("mm", false);
+        } else {
+            evaluated.pageHeight = context.viewportHeight - cropOffset * 2;
+        }
     } else {
         evaluated.pageHeight = height.num * context.queryUnitSize(height.unit, false);
     }

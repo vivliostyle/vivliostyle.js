@@ -394,6 +394,11 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
         this.needRefresh = true;
     }
 
+    if (typeof command["defaultPaperSize"] == "object" && typeof command["defaultPaperSize"].width == "number" && typeof command["defaultPaperSize"].height == "number") {
+        this.viewport = null;
+        this.pref.defaultPaperSize = command["defaultPaperSize"];
+        this.needResize = true;
+    }
     this.configurePlugins(command);
 
     return adapt.task.newResult(true);
