@@ -44,6 +44,13 @@ goog.scope(function() {
         "SIMPLE_PROPERTY": "SIMPLE_PROPERTY",
 
         /**
+         * Called when a single document (i.e. a single spine item) has been fetched, before parsing.
+         *
+         * The hook is called with the Document object.
+         */
+        "PREPROCESS_SINGLE_DOCUMENT": "PREPROCESS_SINGLE_DOCUMENT",
+
+        /**
          * Called before creating a text node for modifying a text content.
          *
          * The hook is called with an object with the following properties:
@@ -114,6 +121,11 @@ goog.scope(function() {
     };
 
     /** @const */ var HOOKS = vivliostyle.plugin.HOOKS;
+
+    /**
+     * @typedef {function(Document)}
+     */
+    vivliostyle.plugin.PreProcessSingleDocumentHook;
 
     /**
      * @typedef {function(
