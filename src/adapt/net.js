@@ -60,9 +60,15 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
         if (request.readyState === 4) {
             response.status = request.status;
             if (response.status == 200 || response.status == 0) {
-                if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.DOCUMENT) && request.responseXML) {
+                if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.DOCUMENT) &&
+                    request.responseXML &&
+                    request.responseXML.documentElement.localName != 'parsererror') {
                     response.responseXML = request.responseXML;
                     response.contentType = request.responseXML.contentType;
+                } else if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.DOCUMENT) &&
+                    request.response instanceof HTMLDocument) {
+                    response.responseXML = request.response;
+                    response.contentType = request.response.contentType;
                 } else {
                     var text = request.response;
                     if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.TEXT) && typeof text == "string") {
