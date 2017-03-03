@@ -66,8 +66,7 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
                     response.responseXML = request.responseXML;
                     response.contentType = request.responseXML.contentType;
                 } else if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.DOCUMENT) &&
-                    request.response instanceof HTMLDocument &&
-                    String(request.response) == '[object HTMLDocument]') {
+                    request.response instanceof HTMLDocument) {
                     response.responseXML = request.response;
                     response.contentType = request.response.contentType;
                 } else {
