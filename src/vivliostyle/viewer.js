@@ -53,7 +53,7 @@ goog.scope(function() {
      * - pageViewMode: Page view mode (singlePage / spread / autoSpread). default: singlePage
      * - zoom: Zoom factor with which pages are displayed. default: 1
      * - fitToScreen: Auto adjust zoom factor to fit the screen. default: false
-     * - defaultPaperSize: Default paper size in mm. Effective when @page size is set to auto. default: undefined (means the windows size is used as paper size).
+     * - defaultPaperSize: Default paper size in px. Effective when @page size is set to auto. default: undefined (means the windows size is used as paper size).
      * @dict
      * @typedef {{
      *     autoResize: (boolean|undefined),

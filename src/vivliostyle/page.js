@@ -198,7 +198,7 @@ vivliostyle.page.evaluatePageSizeAndBleed = function(pageSizeAndBleed, context) 
     var width = pageSizeAndBleed.width;
     if (width === adapt.css.fullWidth) {
         if (context.pref.defaultPaperSize) {
-            evaluated.pageWidth = context.pref.defaultPaperSize.width * context.queryUnitSize("mm", false);;
+            evaluated.pageWidth = context.pref.defaultPaperSize.width * context.queryUnitSize("px", false);
         } else {
             evaluated.pageWidth = (context.pref.spreadView ? Math.floor(context.viewportWidth / 2) - context.pref.pageBorder : context.viewportWidth) - cropOffset * 2;
         }
@@ -208,7 +208,7 @@ vivliostyle.page.evaluatePageSizeAndBleed = function(pageSizeAndBleed, context) 
     var height = pageSizeAndBleed.height;
     if (height === adapt.css.fullHeight) {
         if (context.pref.defaultPaperSize) {
-            evaluated.pageHeight = context.pref.defaultPaperSize.height * context.queryUnitSize("mm", false);
+            evaluated.pageHeight = context.pref.defaultPaperSize.height * context.queryUnitSize("px", false);
         } else {
             evaluated.pageHeight = context.viewportHeight - cropOffset * 2;
         }

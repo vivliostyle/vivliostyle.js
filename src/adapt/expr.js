@@ -24,7 +24,7 @@ goog.require('adapt.base');
 /**
  * @typedef {{fontFamily:string, lineHeight:number, margin:number, hyphenate:boolean,
  *   	columnWidth:number, horizontal:boolean, nightMode:boolean, spreadView:boolean,
- *      pageBorder:number, enabledMediaTypes:!Object.<string,boolean>,defaultPaperSize:(Object<number,number>|undefined)}}
+ *      pageBorder:number, enabledMediaTypes:!Object.<string,boolean>,defaultPaperSize:(Object<string,number>|undefined)}}
  */
 adapt.expr.Preferences;
 
