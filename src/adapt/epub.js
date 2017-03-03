@@ -1019,7 +1019,7 @@ adapt.epub.OPFViewItem;
  * @param {adapt.vgen.Viewport} viewport
  * @param {adapt.font.Mapper} fontMapper
  * @param {adapt.expr.Preferences} pref
- * @param {!function(!Object<string, !{width: number, height: number}>, number, number)} pageSheetSizeReporter
+ * @param {!function({width: number, height: number}, !Object<string, !{width: number, height: number}>, number, number)} pageSheetSizeReporter
  * @implements {adapt.vgen.CustomRendererFactory}
  */
 adapt.epub.OPFView = function(opf, viewport, fontMapper, pref, pageSheetSizeReporter) {
@@ -1084,7 +1084,8 @@ adapt.epub.OPFView.prototype.finishPageContainer = function(viewItem, page, page
     } else {
         viewItem.instance.viewport.contentContainer.appendChild(page.container);
     }
-    this.pageSheetSizeReporter(viewItem.instance.pageSheetSize, viewItem.item.spineIndex, pageIndex);
+    this.pageSheetSizeReporter({ width: viewItem.instance.pageSheetWidth, height: viewItem.instance.pageSheetHeight },
+                               viewItem.instance.pageSheetSize, viewItem.item.spineIndex, viewItem.instance.pageNumberOffset + pageIndex);
 };
 
 /**

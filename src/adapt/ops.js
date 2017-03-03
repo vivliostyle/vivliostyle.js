@@ -213,6 +213,8 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     }
 
     /** @const {!Object<string, !{width: number, height: number}>} */ this.pageSheetSize = {};
+    /** @type {number} */ this.pageSheetHeight = 0;
+    /** @type {number} */ this.pageSheetWidth = 0;
 };
 goog.inherits(adapt.ops.StyleInstance, adapt.expr.Context);
 
@@ -1178,8 +1180,10 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 adapt.ops.StyleInstance.prototype.setPageSizeAndBleed = function(evaluatedPageSizeAndBleed, page) {
     this.actualPageWidth = evaluatedPageSizeAndBleed.pageWidth;
     this.actualPageHeight = evaluatedPageSizeAndBleed.pageHeight;
-    page.container.style.width = (evaluatedPageSizeAndBleed.pageWidth + evaluatedPageSizeAndBleed.cropOffset * 2) + "px";
-    page.container.style.height = (evaluatedPageSizeAndBleed.pageHeight + evaluatedPageSizeAndBleed.cropOffset * 2) + "px";
+    this.pageSheetWidth = evaluatedPageSizeAndBleed.pageWidth + evaluatedPageSizeAndBleed.cropOffset * 2;
+    this.pageSheetHeight = evaluatedPageSizeAndBleed.pageHeight + evaluatedPageSizeAndBleed.cropOffset * 2;
+    page.container.style.width = this.pageSheetWidth + "px";
+    page.container.style.height = this.pageSheetHeight + "px";
     page.bleedBox.style.left = evaluatedPageSizeAndBleed.bleedOffset + "px";
     page.bleedBox.style.right = evaluatedPageSizeAndBleed.bleedOffset + "px";
     page.bleedBox.style.top = evaluatedPageSizeAndBleed.bleedOffset + "px";
