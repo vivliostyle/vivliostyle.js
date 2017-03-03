@@ -1421,6 +1421,7 @@ adapt.ops.OPSDocStore = function(fontDeobfuscator) {
     /** @type {Object.<string,Array.<adapt.vtree.Trigger>>} */ this.triggersByDocURL = {};
     /** @type {adapt.cssvalid.ValidatorSet} */ this.validatorSet = null;
     /** @private @const @type {Array.<adapt.ops.StyleSource>} */ this.styleSheets = [];
+    /** @private @type {boolean} */ this.triggerSingleDocumentPreprocessing = false;
 };
 goog.inherits(adapt.ops.OPSDocStore, adapt.net.ResourceStore);
 
@@ -1438,6 +1439,7 @@ adapt.ops.OPSDocStore.prototype.init = function(authorStyleSheets, userStyleShee
         self.validatorSet = validatorSet;
         adapt.ops.loadUABase().then(function() {
             self.load(userAgentXML).then(function() {
+                self.triggerSingleDocumentPreprocessing = true;
                 frame.finish(true);
             });
         });
@@ -1515,6 +1517,13 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
         if (!xmldoc) {
             frame.finish(null);
             return;
+        }
+        if (self.triggerSingleDocumentPreprocessing) {
+            /** @type {!Array<!vivliostyle.plugin.PreProcessSingleDocumentHook>} */ var hooks =
+                vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT);
+            for (var i = 0; i < hooks.length; i++) {
+                hooks[i](xmldoc.document);
+            }
         }
         var triggers = [];
         var triggerList = xmldoc.document.getElementsByTagNameNS(adapt.base.NS.epub, "trigger");
