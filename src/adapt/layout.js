@@ -239,7 +239,7 @@ adapt.layout.FragmentLayoutConstraint.prototype.nextCandidate = function(nodeCon
  * @param {adapt.vtree.NodeContext} initialPosition
  * @param {adapt.layout.Column} column
  */
-adapt.layout.FragmentLayoutConstraint.prototype.postLayout = function(allowed, nodeContext, initialPosition, column) {};
+adapt.layout.FragmentLayoutConstraint.prototype.postLayout = function(allowed, positionAfter, initialPosition, column) {};
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
