@@ -235,9 +235,11 @@ adapt.layout.FragmentLayoutConstraint.prototype.nextCandidate = function(nodeCon
 
 /**
  * @param {boolean} allowed
- * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {adapt.vtree.NodeContext} positionAfter
+ * @param {adapt.vtree.NodeContext} initialPosition
+ * @param {adapt.layout.Column} column
  */
-adapt.layout.FragmentLayoutConstraint.prototype.postLayout = function(allowed, nodeContext, column) {};
+adapt.layout.FragmentLayoutConstraint.prototype.postLayout = function(allowed, nodeContext, initialPosition, column) {};
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
@@ -3041,7 +3043,7 @@ adapt.layout.DefaultLayoutMode.prototype.postLayout = function(positionAfter, in
         });
     }
     column.fragmentLayoutConstraints.forEach(function(constraint) {
-        constraint.postLayout(accepted, positionAfter, column);
+        constraint.postLayout(accepted, positionAfter, initialPosition, column);
     });
 };
 

@@ -610,7 +610,7 @@ goog.scope(function() {
     };
 
     /** @override */
-    RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout = function(allowed, nodeContext, column) {
+    RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout = function(allowed, nodeContext, initialPosition, column) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(this.nodeContext.formattingContext);
         var repetitiveElements = this.getRepetitiveElements();
         if (!repetitiveElements) return;
