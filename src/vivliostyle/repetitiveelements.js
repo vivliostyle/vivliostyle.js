@@ -1006,12 +1006,10 @@ goog.scope(function() {
                     var repetitiveElement = constraint.getRepetitiveElements();
                     repetitiveElements.push(repetitiveElement);
                 }
-                if (column === current) {
-                    if (constraint instanceof vivliostyle.table.TableRowLayoutConstraint) {
-                        constraint.getRepetitiveElementsForTableCell(column).forEach(function(repetitiveElement) {
-                            repetitiveElements.push(repetitiveElement);
-                        });
-                    }
+                if (constraint instanceof vivliostyle.table.TableRowLayoutConstraint) {
+                    constraint.getRepetitiveElementsForTableCell(column).forEach(function(repetitiveElement) {
+                        repetitiveElements.push(repetitiveElement);
+                    });
                 }
             });
         }

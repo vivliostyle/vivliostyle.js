@@ -519,9 +519,9 @@ goog.scope(function() {
 
     /**
      * @param {adapt.layout.Column} column
-     * @return {({ rowIndex: number, columnIndex: number }|null)} position
+     * @return {vivliostyle.table.TableCell} cell
      */
-    TableFormattingContext.prototype.findCellPositionFromColumn = function(column) {
+    TableFormattingContext.prototype.findCellFromColumn = function(column) {
         if (!column) return null;
         var tableCell = null;
         for (var row=0; row < this.cellFragments.length; row++) {
@@ -529,16 +529,7 @@ goog.scope(function() {
             for (var col=0; col < this.cellFragments[row].length; col++) {
                 if (!this.cellFragments[row][col]) continue;
                 if (column === this.cellFragments[row][col].pseudoColumn.getColumn()) {
-                    tableCell = this.rows[row][col];
-                }
-            }
-        }
-        if (!tableCell) return null;
-        for (; row < this.slots.length; row++) {
-            for (; col < this.slots[row].length; col++) {
-                var slot = this.slots[row][col];
-                if (slot.cell === tableCell) {
-                    return {rowIndex: slot.rowIndex, columnIndex: slot.columnIndex };
+                    return this.rows[row].cells[col];
                 }
             }
         }
@@ -546,14 +537,14 @@ goog.scope(function() {
     };
 
     /**
-     * @param {({ rowIndex: number, columnIndex: number }|null)} position
+     * @param {vivliostyle.table.TableCell} cell
      * @return {!Array.<!vivliostyle.repetitiveelements.ElementsOffset>}
      */
-    TableFormattingContext.prototype.collectRepetitiveElementsOfUpperCells = function(position) {
+    TableFormattingContext.prototype.collectRepetitiveElementsOfUpperCells = function(cell) {
         var collected = [];
         return this.rows.reduce(function(repetitiveElements, row, index) {
-            if (index >= position.rowIndex) return repetitiveElements;
-            var cellFragment = this.getCellFragmentOfCell(row[position.columnIndex]);
+            if (index >= cell.rowIndex) return repetitiveElements;
+            var cellFragment = this.getCellFragmentOfCell(row.cells[cell.columnIndex]);
             if (!cellFragment || collected.indexOf(cellFragment) >= 0) return repetitiveElements;
             this.collectRepetitiveElementsFromColumn(cellFragment.pseudoColumn.getColumn(), repetitiveElements);
             collected.push(cellFragment);
@@ -1769,9 +1760,9 @@ goog.scope(function() {
      */
     TableRowLayoutConstraint.prototype.getRepetitiveElementsForTableCell = function(column) {
         var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
-        var position = formattingContext.findCellPositionFromColumn(column);
-        if (position) {
-            return formattingContext.collectRepetitiveElementsOfUpperCells(position);
+        var cell = formattingContext.findCellFromColumn(column);
+        if (cell) {
+            return formattingContext.collectRepetitiveElementsOfUpperCells(cell);
         } else {
             return formattingContext.collectRepetitiveElementsOfHighestColumn();
         }
