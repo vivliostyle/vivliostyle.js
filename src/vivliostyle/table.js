@@ -747,7 +747,7 @@ goog.scope(function() {
                 formattingContext.captions.push(captionView);
                 break;
             case "table-header-group":
-                if (!repetitiveElements.isHeaderRegisterd()) {
+                if (!repetitiveElements.isHeaderRegistered()) {
                     this.inHeaderOrFooter = true;
                     repetitiveElements.setHeaderElement(
                       /** @type {!Element} */ (nodeContext.viewNode),
@@ -755,7 +755,7 @@ goog.scope(function() {
                 }
                 return adapt.task.newResult(true);
             case "table-footer-group":
-                if (!repetitiveElements.isFooterRegisterd()) {
+                if (!repetitiveElements.isFooterRegistered()) {
                     this.inHeaderOrFooter = true;
                     repetitiveElements.setFooterElement(
                       /** @type {!Element} */ (nodeContext.viewNode),

@@ -425,13 +425,13 @@ goog.scope(function() {
     /**
      * @return {boolean}
      */
-    RepetitiveElements.prototype.isHeaderRegisterd = function() {
+    RepetitiveElements.prototype.isHeaderRegistered = function() {
         return !!this.headerViewNode;
     };
     /**
      * @return {boolean}
      */
-    RepetitiveElements.prototype.isFooterRegisterd = function() {
+    RepetitiveElements.prototype.isFooterRegistered = function() {
         return !!this.footerViewNode;
     };
     /**
@@ -705,7 +705,7 @@ goog.scope(function() {
         if (nodeContext.parent && formattingContext.rootSourceNode === nodeContext.parent.sourceNode) {
             switch (nodeContext.repeatOnBreak) {
                 case "header":
-                    if (!repetitiveElements.isHeaderRegisterd()) {
+                    if (!repetitiveElements.isHeaderRegistered()) {
                         repetitiveElements.setHeaderElement(
                             /** @type {!Element} */ (nodeContext.viewNode),
                             /** @type {!Element} */ (nodeContext.sourceNode));
@@ -715,7 +715,7 @@ goog.scope(function() {
                     }
                     break;
                 case "footer":
-                    if (!repetitiveElements.isFooterRegisterd()) {
+                    if (!repetitiveElements.isFooterRegistered()) {
                         repetitiveElements.setFooterElement(
                           /** @type {!Element} */ (nodeContext.viewNode),
                           /** @type {!Element} */ (nodeContext.sourceNode));
