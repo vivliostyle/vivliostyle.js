@@ -1608,7 +1608,7 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
         var edge = self.calculateEdge(resNodeContext, checkPoints, checkPointIndex,
             checkPoints[checkPointIndex].boxOffset);
         var overflown = false;
-        if (!adapt.layout.isOrphan(resNodeContext.viewNode)) {
+        if (!resNodeContext || !adapt.layout.isOrphan(resNodeContext.viewNode)) {
             var offsets = calculateOffsetOfRepetitiveElements(
                 resNodeContext, vivliostyle.repetitiveelements.collectRepetitiveElements(self));
             overflown = self.isOverflown(edge + ((self.vertical ? -1 : 1) * offsets.minimum));
