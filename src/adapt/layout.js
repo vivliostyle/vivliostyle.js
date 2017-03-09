@@ -243,8 +243,10 @@ adapt.layout.FragmentLayoutConstraint.prototype.postLayout = function(allowed, p
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {adapt.layout.Column} column
+ * @return {!adapt.task.Result.<boolean>}
  */
-adapt.layout.FragmentLayoutConstraint.prototype.finishBreak = function(nodeContext) {};
+adapt.layout.FragmentLayoutConstraint.prototype.finishBreak = function(nodeContext, column) {};
 
 /**
  * @param {adapt.layout.FragmentLayoutConstraint} constraint
@@ -2768,40 +2770,45 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
             var retryer = new adapt.layout.LayoutRetryer(leadingEdge);
             retryer.layout(nodeContext, self).then(function(nodeContextParam) {
                 self.doFinishBreak(nodeContextParam, retryer.context.overflownNodeContext, nodeContext).then(function(positionAfter) {
-
-                    if (!self.pseudoParent) self.resetConstraints(positionAfter);
-
-                    var footnoteArea = self.footnoteArea;
-                    if (footnoteArea) {
-                        self.element.appendChild(footnoteArea.element);
-                        if (self.vertical) {
-                            self.computedBlockSize = this.beforeEdge - this.afterEdge;
-                        } else {
-                            self.computedBlockSize = footnoteArea.top + footnoteArea.getInsetTop() +
-                                footnoteArea.computedBlockSize + footnoteArea.getInsetBottom();
-                        }
-                    }
-                    // TODO: look at footnotes and floats as well
-                    if (!positionAfter) {
-                        frame.finish(null);
-                    } else if (self.hasNewlyAddedPageFloats()) {
-                        frame.finish(null);
+                    var cont = null;
+                    if (!self.pseudoParent) {
+                        cont = self.resetConstraints(positionAfter);
                     } else {
-                        self.overflown = true;
-                        var result = new adapt.vtree.ChunkPosition(positionAfter.toNodePosition());
-                        // Transfer overflown footnotes
-                        if (self.footnoteItems) {
-                            var overflowFootnotes = [];
-                            for (var i = 0; i < self.footnoteItems.length; i++) {
-                                var overflowPosition = self.footnoteItems[i].overflowPosition;
-                                if (overflowPosition) {
-                                    overflowFootnotes.push(overflowPosition);
-                                }
-                            }
-                            result.footnotes = overflowFootnotes.length ? overflowFootnotes : null;
-                        }
-                        frame.finish(result);
+                        cont = adapt.task.newResult(null);
                     }
+                    cont.then(function() {
+                        var footnoteArea = self.footnoteArea;
+                        if (footnoteArea) {
+                            self.element.appendChild(footnoteArea.element);
+                            if (self.vertical) {
+                                self.computedBlockSize = this.beforeEdge - this.afterEdge;
+                            } else {
+                                self.computedBlockSize = footnoteArea.top + footnoteArea.getInsetTop() +
+                                    footnoteArea.computedBlockSize + footnoteArea.getInsetBottom();
+                            }
+                        }
+                        // TODO: look at footnotes and floats as well
+                        if (!positionAfter) {
+                            frame.finish(null);
+                        } else if (self.hasNewlyAddedPageFloats()) {
+                            frame.finish(null);
+                        } else {
+                            self.overflown = true;
+                            var result = new adapt.vtree.ChunkPosition(positionAfter.toNodePosition());
+                            // Transfer overflown footnotes
+                            if (self.footnoteItems) {
+                                var overflowFootnotes = [];
+                                for (var i = 0; i < self.footnoteItems.length; i++) {
+                                    var overflowPosition = self.footnoteItems[i].overflowPosition;
+                                    if (overflowPosition) {
+                                        overflowFootnotes.push(overflowPosition);
+                                    }
+                                }
+                                result.footnotes = overflowFootnotes.length ? overflowFootnotes : null;
+                            }
+                            frame.finish(result);
+                        }
+                    }.bind(this));
                 });
             });
         });
@@ -2810,9 +2817,19 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge) {
 };
 
 adapt.layout.Column.prototype.resetConstraints = function(nodeContext) {
-    this.fragmentLayoutConstraints.forEach(function(constraint) {
-        constraint.finishBreak(nodeContext);
+    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("resetConstraints");
+    var i = 0;
+    frame.loop(function() {
+        if (i < this.fragmentLayoutConstraints.length) {
+            var result = this.fragmentLayoutConstraints[i++].finishBreak(nodeContext, this);
+            return result.thenReturn(true);
+        } else {
+            return adapt.task.newResult(false);
+        }
+    }.bind(this)).then(function() {
+        frame.finish(true);
     });
+    return frame.result();
 };
 
 /**
