@@ -1739,20 +1739,17 @@ goog.scope(function() {
     TableRowLayoutConstraint.prototype.finishBreak = function(nodeContext, column) {
         var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
         /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("finishBreak");
-        var i=0, j=0;
+        var constraints = this.cellFragmentLayoutConstraints.reduce(function(constraints, array) {
+            return array.concat(constraints);
+        }, []);
+        var i=0;
         frame.loop(function() {
-            if (i < this.cellFragmentLayoutConstraints.length
-                && j < this.cellFragmentLayoutConstraints[i].length) {
-                var result = this.cellFragmentLayoutConstraints[i][j].finishBreak(nodeContext, column);
-                if (++j >= this.cellFragmentLayoutConstraints[i].length) {
-                    j=0;
-                    i++;
-                }
-                return result.thenReturn(true);
+            if (i < constraints.length) {
+                return constraints[i++].finishBreak(nodeContext, column).thenReturn(true);
             } else {
                 return adapt.task.newResult(false);
             }
-        }.bind(this)).then(function() {
+        }).then(function() {
             frame.finish(true);
         });
         return frame.result().thenAsync(function() {
