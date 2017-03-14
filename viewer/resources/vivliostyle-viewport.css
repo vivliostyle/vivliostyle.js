@@ -59,12 +59,6 @@
         max-height: 100%;
     }
 
-    [data-vivliostyle-page-container]:nth-last-child(n+2) {
-        top: -1px;
-        margin-top: 1px;
-        margin-bottom: -1px;
-    }
-
     [data-vivliostyle-bleed-box] {
         position: relative;
     }
