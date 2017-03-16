@@ -198,15 +198,6 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
     }
     var pseudoMap = adapt.csscasc.getStyleMap(this.style, "_pseudos");
     var style = pseudoMap[pseudoName] || /** @type {adapt.csscasc.ElementStyle} */ ({});
-    if (!this.contentProcessed[pseudoName]) {
-        this.contentProcessed[pseudoName] = true;
-        var content = style["content"];
-        if (content) {
-            var contentVal = content.evaluate(this.context);
-            if (adapt.vtree.nonTrivialContent(contentVal))
-                contentVal.visit(new adapt.vtree.ContentPropertyHandler(element, this.context, contentVal));
-        }
-    }
     if (pseudoName.match(/^first-/) && !style["x-first-pseudo"]) {
         var nest = 1;
         var r;
@@ -218,6 +209,21 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
         style["x-first-pseudo"] = new adapt.csscasc.CascadeValue(new adapt.css.Int(nest), 0);
     }
     return style;
+};
+
+/**
+ * @override
+ */
+adapt.vgen.PseudoelementStyler.prototype.processContent = function(element, style) {
+    var pseudoName = adapt.vgen.getPseudoName(element);
+    if (!this.contentProcessed[pseudoName]) {
+        this.contentProcessed[pseudoName] = true;
+        var contentVal = style["content"];
+        if (contentVal) {
+            if (adapt.vtree.nonTrivialContent(contentVal))
+                contentVal.visit(new adapt.vtree.ContentPropertyHandler(element, this.context, contentVal));
+        }
+    }
 };
 
 
@@ -451,7 +457,7 @@ adapt.vgen.ViewFactory.prototype.setViewRoot = function(viewRoot, isFootnote) {
  */
 adapt.vgen.ViewFactory.prototype.computeStyle = function(vertical, style, computedStyle) {
     var context = this.context;
-    var cascMap = adapt.csscasc.flattenCascadedStyle(style, context, this.regionIds, this.isFootnote);
+    var cascMap = adapt.csscasc.flattenCascadedStyle(style, context, this.regionIds, this.isFootnote, this.nodeContext);
     vertical = adapt.csscasc.isVertical(cascMap, context, vertical);
     var self = this;
     adapt.csscasc.convertToPhysical(cascMap, computedStyle, vertical, function(name, cascVal) {
@@ -665,7 +671,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         elementStyle = inheritedValues.elementStyle;
         self.nodeContext.lang = inheritedValues.lang;
     }
+    vivliostyle.fragmentselector.setFragmentSelectorIds(elementStyle, self.context, self.nodeContext);
     self.nodeContext.vertical = self.computeStyle(self.nodeContext.vertical, elementStyle, computedStyle);
+    styler.processContent(element, computedStyle);
 
     this.transferPolyfilledInheritedProps(computedStyle);
     this.inheritLangAttribute();

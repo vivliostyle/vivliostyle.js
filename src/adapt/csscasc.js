@@ -330,7 +330,8 @@ adapt.csscasc.ElementStyleMap;
  * @const
  */
 adapt.csscasc.SPECIALS = {
-    "region-id": true
+    "region-id": true,
+    "fragment-selector-id": true
 };
 
 /**
@@ -440,25 +441,26 @@ adapt.csscasc.getMutableSpecial = function(style, name) {
  * @param {number} specificity
  * @param {?string} pseudoelement
  * @param {?string} regionId
+ * @param {?Array.<string>} fragmentSelectorIds
  * @return {void}
  */
-adapt.csscasc.mergeIn = function(context, target, style, specificity, pseudoelement, regionId) {
-    if (pseudoelement) {
-        var pseudos = adapt.csscasc.getMutableStyleMap(target, "_pseudos");
-        target = pseudos[pseudoelement];
-        if (!target) {
-            target = /** @type {adapt.csscasc.ElementStyle} */ ({});
-            pseudos[pseudoelement] = target;
+adapt.csscasc.mergeIn = function(context, target, style, specificity, pseudoelement, regionId, fragmentSelectorIds) {
+    var fragmentSelectorIdString = fragmentSelectorIds ? fragmentSelectorIds.join(":") : null;
+    var hierarchy = [
+        {id: pseudoelement,            styleKey: "_pseudos"},
+        {id: regionId,                 styleKey: "_regions"},
+        {id: fragmentSelectorIdString, styleKey: "_fragmentSelectors"}
+    ];
+    hierarchy.forEach(function(item) {
+        if (item.id) {
+            var styleMap = adapt.csscasc.getMutableStyleMap(target, item.styleKey);
+            target = styleMap[item.id];
+            if (!target) {
+                target = /** @type {adapt.csscasc.ElementStyle} */ ({});
+                styleMap[item.id] = target;
+            }
         }
-    }
-    if (regionId) {
-        var regions = adapt.csscasc.getMutableStyleMap(target, "_regions");
-        target = regions[regionId];
-        if (!target) {
-            target = /** @type {adapt.csscasc.ElementStyle} */ ({});
-            regions[regionId] = target;
-        }
-    }
+    });
     for (var prop in style) {
         if (adapt.csscasc.isMapName(prop))
             continue;
@@ -484,7 +486,7 @@ adapt.csscasc.mergeIn = function(context, target, style, specificity, pseudoelem
 adapt.csscasc.mergeAll = function(context, styles) {
     var target = /** @type {adapt.csscasc.ElementStyle} */ ({});
     for (var k = 0; k < styles.length; k++) {
-        adapt.csscasc.mergeIn(context, target, styles[k], 0, null, null);
+        adapt.csscasc.mergeIn(context, target, styles[k], 0, null, null, null);
     }
     return target;
 };
@@ -678,15 +680,18 @@ adapt.csscasc.CompoundAction.prototype.clone = function() {
  * @param {number} specificity
  * @param {?string} pseudoelement
  * @param {?string} regionId
+ * @param {?Array.<string>} fragmentSelectorIds
  * @constructor
  * @extends {adapt.csscasc.CascadeAction}
  */
-adapt.csscasc.ApplyRuleAction = function(style, specificity, pseudoelement, regionId) {
+adapt.csscasc.ApplyRuleAction = function(style, specificity,
+    pseudoelement, regionId, fragmentSelectorIds) {
     adapt.csscasc.CascadeAction.call(this);
     /** @const */ this.style = style;
     /** @const */ this.specificity = specificity;
     /** @const */ this.pseudoelement = pseudoelement;
     /** @const */ this.regionId = regionId;
+    /** @const */ this.fragmentSelectorIds = fragmentSelectorIds;
 };
 goog.inherits(adapt.csscasc.ApplyRuleAction, adapt.csscasc.CascadeAction);
 
@@ -695,7 +700,7 @@ goog.inherits(adapt.csscasc.ApplyRuleAction, adapt.csscasc.CascadeAction);
  */
 adapt.csscasc.ApplyRuleAction.prototype.apply = function(cascadeInstance) {
     adapt.csscasc.mergeIn(cascadeInstance.context, cascadeInstance.currentStyle,
-        this.style, this.specificity, this.pseudoelement, this.regionId);
+        this.style, this.specificity, this.pseudoelement, this.regionId, this.fragmentSelectorIds);
 };
 
 
@@ -1164,8 +1169,18 @@ goog.inherits(adapt.csscasc.IsNthAction, adapt.csscasc.ChainedAction);
  * @returns {boolean}
  */
 adapt.csscasc.IsNthAction.prototype.matchANPlusB = function(order) {
-    var a = this.a;
-    order -= this.b;
+    return adapt.csscasc.matchANPlusB(order, this.a, this.b);
+};
+
+/**
+ * Checkes whether given order can be represented as an+b with a non-negative interger n
+ * @param {number} order
+ * @param {number} a
+ * @param {number} b
+ * @returns {boolean}
+ */
+adapt.csscasc.matchANPlusB = function(order, a, b) {
+    order -= b;
     if (a === 0) {
         return order === 0;
     } else {
@@ -2958,6 +2973,7 @@ adapt.csscasc.CascadeParserHandler = function(scope, owner, condition, parent, r
     /** @const */ this.regionId = regionId;
     /** @const */ this.validatorSet = validatorSet;
     /** @type {adapt.csscasc.ParseState} */ this.state = adapt.csscasc.ParseState.TOP;
+    /** @type {!Array.<string>} */ this.fragmentSelectorIds = [];
 };
 goog.inherits(adapt.csscasc.CascadeParserHandler, adapt.cssparse.SlaveParserHandler);
 
@@ -3170,6 +3186,12 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
                     break;
                 }
             }
+        case "nth-fragment":
+            var fragmentselectorId = "FS" + (adapt.csscasc.fragmentselectorCount++) + "_" + params[0] + "_" + params[1];
+            this.special("fragment-selector-id", adapt.css.getName(fragmentselectorId));
+            this.processChain(this.makeApplyRuleAction(this.specificity, []));
+            this.fragmentSelectorIds.push(fragmentselectorId);
+            break;
         default:
             vivliostyle.logging.logger.warn("Unrecognized pseudoelement: ::" + name);
             this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
@@ -3177,6 +3199,12 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
     }
     this.specificity += 1;
 };
+
+/**
+ * @private
+ * @type {number}
+ */
+adapt.csscasc.fragmentselectorCount = 0;
 
 /**
  * @override
@@ -3305,6 +3333,7 @@ adapt.csscasc.CascadeParserHandler.prototype.nextSelector = function() {
     this.finishChain();
     this.pseudoelement = null;
     this.footnoteContent = false;
+    this.fragmentSelectorIds = [];
     this.specificity = 0;
     this.chain = [];
 };
@@ -3319,6 +3348,7 @@ adapt.csscasc.CascadeParserHandler.prototype.startSelectorRule = function() {
     this.state = adapt.csscasc.ParseState.SELECTOR;
     this.elementStyle = /** @type {adapt.csscasc.ElementStyle} */ ({});
     this.pseudoelement = null;
+    this.fragmentSelectorIds = [];
     this.specificity = 0;
     this.footnoteContent = false;
     this.chain = [];
@@ -3367,9 +3397,10 @@ adapt.csscasc.CascadeParserHandler.prototype.endRule = function() {
 adapt.csscasc.CascadeParserHandler.prototype.finishChain = function() {
     if (this.chain) {
         /** @type {number} */ var specificity = this.specificity + this.cascade.nextOrder();
-        this.processChain(this.makeApplyRuleAction(specificity));
+        this.processChain(this.makeApplyRuleAction(specificity, this.fragmentSelectorIds));
         this.chain = null;
         this.pseudoelement = null;
+        this.fragmentSelectorIds = [];
         this.footnoteContent = false;
         this.specificity = 0;
     }
@@ -3378,9 +3409,10 @@ adapt.csscasc.CascadeParserHandler.prototype.finishChain = function() {
 /**
  * @protected
  * @param {number} specificity
+ * @param {!Array.<string>} fragmentSelectorIds
  * @return {adapt.csscasc.ApplyRuleAction}
  */
-adapt.csscasc.CascadeParserHandler.prototype.makeApplyRuleAction = function(specificity) {
+adapt.csscasc.CascadeParserHandler.prototype.makeApplyRuleAction = function(specificity, fragmentSelectorIds) {
     var regionId = this.regionId;
     if (this.footnoteContent) {
         if (regionId)
@@ -3389,7 +3421,7 @@ adapt.csscasc.CascadeParserHandler.prototype.makeApplyRuleAction = function(spec
             regionId = "footnote";
     }
     return new adapt.csscasc.ApplyRuleAction(this.elementStyle, specificity,
-        this.pseudoelement, regionId);
+        this.pseudoelement, regionId, fragmentSelectorIds);
 };
 
 /**
@@ -3707,14 +3739,17 @@ adapt.csscasc.isVertical = function(cascaded, context, vertical) {
  * @param {adapt.expr.Context} context
  * @param {Array.<string>} regionIds
  * @param {boolean} isFootnote
+ * @param {adapt.vtree.NodeContext} nodeContext
  * @return {!Object.<string,adapt.csscasc.CascadeValue>}
  */
-adapt.csscasc.flattenCascadedStyle = function(style, context, regionIds, isFootnote) {
+adapt.csscasc.flattenCascadedStyle = function(style, context, regionIds, isFootnote, nodeContext) {
     var cascMap = /** @type {!Object.<string,adapt.csscasc.CascadeValue>} */ ({});
     for (var n in style) {
         if (adapt.csscasc.isPropName(n))
             cascMap[n] = adapt.csscasc.getProp(style, n);
     }
+    vivliostyle.fragmentselector.mergeStylesOfFragmentSelectors(
+        cascMap, context, style, nodeContext);
     var regions = adapt.csscasc.getStyleMap(style, "_regions");
     if ((regionIds || isFootnote) && regions) {
         if (isFootnote) {
@@ -3735,6 +3770,8 @@ adapt.csscasc.flattenCascadedStyle = function(style, context, regionIds, isFootn
                         /** @type {!adapt.csscasc.CascadeValue} */ (newVal));
                 }
             }
+            vivliostyle.fragmentselector.mergeStylesOfFragmentSelectors(
+                cascMap, context, regionStyle, nodeContext);
         }
     }
     return cascMap;
