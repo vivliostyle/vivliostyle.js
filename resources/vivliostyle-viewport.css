@@ -58,8 +58,4 @@
         height: 100% !important;
         max-height: 100%;
     }
-
-    [data-vivliostyle-bleed-box] {
-        position: relative;
-    }
 }
