@@ -651,6 +651,7 @@ adapt.vtree.makeNodeContextFromNodePositionStep = function(step, parent) {
     nodeContext.shadowSibling = step.shadowSibling ?
         adapt.vtree.makeNodeContextFromNodePositionStep(step.shadowSibling, parent.copy()) : null;
     nodeContext.formattingContext = step.formattingContext;
+    nodeContext.fragmentIndex = step.fragmentIndex+1;
     return nodeContext;
 };
 
@@ -755,6 +756,8 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {?string} */ this.lang = null;
     /** @type {?Array.<vivliostyle.diff.Change>} */ this.preprocessedTextContent = null;
     /** @type {adapt.vtree.FormattingContext} */ this.formattingContext = parent ? parent.formattingContext : null;
+    /** @type {number} */ this.fragmentIndex = 1;
+    /** @type {!Array.<string>} */ this.fragmentSelectorIds = [];
 };
 
 /**
@@ -786,6 +789,8 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.nodeShadow = null;
     this.preprocessedTextContent = null;
     this.formattingContext = this.parent ? this.parent.formattingContext : null;
+    this.fragmentIndex = 1;
+    this.fragmentSelectorIds = [];
 };
 
 /**
@@ -826,6 +831,8 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.overflow = this.overflow;
     np.preprocessedTextContent = this.preprocessedTextContent;
     np.formattingContext = this.formattingContext;
+    np.fragmentIndex = this.fragmentIndex;
+    np.fragmentSelectorIds = [].concat(this.fragmentSelectorIds);
     return np;
 };
 
@@ -877,7 +884,8 @@ adapt.vtree.NodeContext.prototype.toNodePositionStep = function() {
         shadowContext: this.shadowContext,
         nodeShadow: this.nodeShadow,
         shadowSibling: this.shadowSibling ? this.shadowSibling.toNodePositionStep() : null,
-        formattingContext: this.formattingContext
+        formattingContext: this.formattingContext,
+        fragmentIndex: this.fragmentIndex
     };
 };
 

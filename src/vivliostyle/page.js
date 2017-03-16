@@ -2127,7 +2127,7 @@ vivliostyle.page.IsVersoPageAction.prototype.getPriority = function() {
  * @extends {adapt.csscasc.ApplyRuleAction}
  */
 vivliostyle.page.ApplyPageRuleAction = function(style, specificity) {
-    adapt.csscasc.ApplyRuleAction.call(this, style, specificity, null, null);
+    adapt.csscasc.ApplyRuleAction.call(this, style, specificity, null, null, null);
 };
 goog.inherits(vivliostyle.page.ApplyPageRuleAction, adapt.csscasc.ApplyRuleAction);
 
@@ -2149,7 +2149,7 @@ vivliostyle.page.ApplyPageRuleAction.prototype.apply = function(cascadeInstance)
  * @param {!adapt.csscasc.CascadeInstance} cascadeInstance
  */
 vivliostyle.page.mergeInPageRule = function(context, target, style, specificity, cascadeInstance) {
-    adapt.csscasc.mergeIn(context, target, style, specificity, null, null);
+    adapt.csscasc.mergeIn(context, target, style, specificity, null, null, null);
     var marginBoxes = style[vivliostyle.page.marginBoxesKey];
     if (marginBoxes) {
         var targetMap = adapt.csscasc.getMutableStyleMap(target, vivliostyle.page.marginBoxesKey);
@@ -2160,7 +2160,7 @@ vivliostyle.page.mergeInPageRule = function(context, target, style, specificity,
                     targetBox = /** @type {adapt.csscasc.ElementStyle} */ ({});
                     targetMap[boxName] = targetBox;
                 }
-                adapt.csscasc.mergeIn(context, targetBox, marginBoxes[boxName], specificity, null, null);
+                adapt.csscasc.mergeIn(context, targetBox, marginBoxes[boxName], specificity, null, null, null);
             }
         }
     }
