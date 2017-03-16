@@ -97,8 +97,11 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
                 opt_contentType || "text/plain; charset=UTF-8");
             request.send(opt_data);
         }
-        else
+        else {
+            if (url.match(/file:\/\/.*(\.html$|\.htm$)/))
+                request.overrideMimeType("text/html");
             request.send(null);
+        }
     } catch (e) {
         vivliostyle.logging.logger.warn(e, "Error fetching " + url);
         continuation.schedule(response);
