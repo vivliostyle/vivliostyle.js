@@ -3188,8 +3188,14 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
             }
         case "nth-fragment":
             var fragmentselectorId = "FS" + (adapt.csscasc.fragmentselectorCount++) + "_" + params[0] + "_" + params[1];
-            this.special("fragment-selector-id", adapt.css.getName(fragmentselectorId));
-            this.processChain(this.makeApplyRuleAction(this.specificity, []));
+            var currentElementStyle = this.elementStyle;
+            try {
+                this.elementStyle = {};
+                this.special("fragment-selector-id", adapt.css.getName(fragmentselectorId));
+                this.processChain(this.makeApplyRuleAction(this.specificity, []));
+            } finally {
+                this.elementStyle = currentElementStyle;
+            }
             this.fragmentSelectorIds.push(fragmentselectorId);
             break;
         default:
@@ -3770,6 +3776,7 @@ adapt.csscasc.flattenCascadedStyle = function(style, context, regionIds, isFootn
                         /** @type {!adapt.csscasc.CascadeValue} */ (newVal));
                 }
             }
+            vivliostyle.fragmentselector.setFragmentSelectorIds(regionStyle, context, nodeContext);
             vivliostyle.fragmentselector.mergeStylesOfFragmentSelectors(
                 cascMap, context, regionStyle, nodeContext);
         }
