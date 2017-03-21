@@ -301,7 +301,7 @@ adapt.vgen.ViewFactory.prototype.clone = function() {
  */
 adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, isRoot,
                                                                       cascStyle, computedStyle, styler, context, parentShadow, subShadow) {
-    var pseudoMap = adapt.csscasc.getStyleMap(cascStyle, "_pseudos");
+    var pseudoMap = this.getPseudoMap(cascStyle, this.regionIds, this.isFootnote, this.nodeContext, context);
     if (!pseudoMap) {
         return subShadow;
     }
@@ -347,6 +347,32 @@ adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, i
     var shadowStyler = new adapt.vgen.PseudoelementStyler(element, cascStyle, styler, context);
     return new adapt.vtree.ShadowContext(element, root, null, parentShadow,
         subShadow, adapt.vtree.ShadowType.ROOTLESS, shadowStyler);
+};
+
+
+/**
+ * @param {adapt.csscasc.ElementStyle} cascStyle
+ * @param {Array.<string>} regionIds
+ * @param {boolean} isFootnote
+ * @param {adapt.vtree.NodeContext} nodeContext
+ */
+adapt.vgen.ViewFactory.prototype.getPseudoMap = function(cascStyle, regionIds, isFootnote, nodeContext, context) {
+    var pseudoMap = adapt.csscasc.getStyleMap(cascStyle, "_pseudos");
+    if (!pseudoMap) return null;
+    var computedPseudoStyleMap = {};
+    for (var key in pseudoMap) {
+        var computedPseudoStyle = computedPseudoStyleMap[key] = {};
+        adapt.csscasc.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
+        vivliostyle.fragmentselector.mergeStylesOfFragmentSelectors(
+            computedPseudoStyle, context, pseudoMap[key], nodeContext);
+        adapt.csscasc.forEachStylesInRegion(pseudoMap[key], regionIds, isFootnote, function(regionId, regionStyle) {
+            adapt.csscasc.mergeStyle(computedPseudoStyle, regionStyle, context);
+            vivliostyle.fragmentselector.forEachStylesOfFragmentSelectors(regionStyle, nodeContext, function(stylesOfFragmentSelector) {
+                adapt.csscasc.mergeStyle(computedPseudoStyle, stylesOfFragmentSelector, context);
+            });
+        });
+    }
+    return computedPseudoStyleMap;
 };
 
 /**

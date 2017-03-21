@@ -116,30 +116,35 @@ goog.scope(function() {
      */
     vivliostyle.fragmentselector.mergeStylesOfFragmentSelectors = function(cascMap, context, style, nodeContext) {
         if (!nodeContext) return;
+        vivliostyle.fragmentselector.forEachStylesOfFragmentSelectors(style, nodeContext, function(stylesOfFragmentSelector) {
+            adapt.csscasc.mergeStyle(cascMap, stylesOfFragmentSelector, context);
+        });
+    };
+
+    /**
+     * @param {adapt.csscasc.ElementStyle} style
+     * @param {adapt.vtree.NodeContext} nodeContext
+     * @param {function(adapt.csscasc.ElementStyle)} callback
+     */
+    vivliostyle.fragmentselector.forEachStylesOfFragmentSelectors = function(style, nodeContext, callback) {
+        if (!nodeContext) return;
         var stylesOfNthFragment = adapt.csscasc.getStyleMap(style, "_fragmentSelectors");
         if (!stylesOfNthFragment) return;
         Object.keys(stylesOfNthFragment).forEach(function(fragmentSelectorIds) {
             var matcher = vivliostyle.fragmentselector.MatcherBuilder.instance.build(fragmentSelectorIds);
             if (!matcher.matches(nodeContext)) return;
-
             var styles = stylesOfNthFragment[fragmentSelectorIds];
-            for (var rn in styles) {
-                if (adapt.csscasc.isPropName(rn)) {
-                    var newVal = adapt.csscasc.getProp(styles, rn);
-                    var oldVal = cascMap[rn];
-                    cascMap[rn] = adapt.csscasc.cascadeValues(context, oldVal,
-                        /** @type {!adapt.csscasc.CascadeValue} */ (newVal));
-                }
-            }
+            callback(styles);
         });
     };
 
     /**
      * @param {adapt.csscasc.ElementStyle} style
      * @param {adapt.expr.Context} context
-     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {adapt.vtree.NodeContext} nodeContext
      */
     vivliostyle.fragmentselector.setFragmentSelectorIds = function(style, context, nodeContext) {
+        if (!nodeContext) return;
         var values = adapt.csscasc.getSpecial(style, "fragment-selector-id");
         if (!values) return;
         values.forEach(function(value) {

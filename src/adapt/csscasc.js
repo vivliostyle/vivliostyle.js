@@ -3190,7 +3190,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
             var fragmentselectorId = "FS" + (adapt.csscasc.fragmentselectorCount++) + "_" + params[0] + "_" + params[1];
             var currentElementStyle = this.elementStyle;
             try {
-                this.elementStyle = {};
+                this.elementStyle = /** @type {adapt.csscasc.ElementStyle} */ ({});
                 this.special("fragment-selector-id", adapt.css.getName(fragmentselectorId));
                 this.processChain(this.makeApplyRuleAction(this.specificity, []));
             } finally {
@@ -3756,6 +3756,22 @@ adapt.csscasc.flattenCascadedStyle = function(style, context, regionIds, isFootn
     }
     vivliostyle.fragmentselector.mergeStylesOfFragmentSelectors(
         cascMap, context, style, nodeContext);
+    adapt.csscasc.forEachStylesInRegion(style, regionIds, isFootnote, function(regionId, regionStyle) {
+        adapt.csscasc.mergeStyle(cascMap, regionStyle, context);
+        vivliostyle.fragmentselector.setFragmentSelectorIds(regionStyle, context, nodeContext);
+        vivliostyle.fragmentselector.mergeStylesOfFragmentSelectors(
+            cascMap, context, regionStyle, nodeContext);
+    });
+    return cascMap;
+};
+
+/**
+ * @param {adapt.csscasc.ElementStyle} style
+ * @param {Array.<string>} regionIds
+ * @param {boolean} isFootnote
+ * @param {function(string, adapt.csscasc.ElementStyle)} callback
+ */
+adapt.csscasc.forEachStylesInRegion = function(style, regionIds, isFootnote, callback) {
     var regions = adapt.csscasc.getStyleMap(style, "_regions");
     if ((regionIds || isFootnote) && regions) {
         if (isFootnote) {
@@ -3768,20 +3784,25 @@ adapt.csscasc.flattenCascadedStyle = function(style, context, regionIds, isFootn
         for (var i = 0; i < regionIds.length; i++) {
             var regionId = regionIds[i];
             var regionStyle = regions[regionId];
-            for (var rn in regionStyle) {
-                if (adapt.csscasc.isPropName(rn)) {
-                    var newVal = adapt.csscasc.getProp(regionStyle, rn);
-                    var oldVal = cascMap[rn];
-                    cascMap[rn] = adapt.csscasc.cascadeValues(context, oldVal,
-                        /** @type {!adapt.csscasc.CascadeValue} */ (newVal));
-                }
-            }
-            vivliostyle.fragmentselector.setFragmentSelectorIds(regionStyle, context, nodeContext);
-            vivliostyle.fragmentselector.mergeStylesOfFragmentSelectors(
-                cascMap, context, regionStyle, nodeContext);
+            callback(regionId, regionStyle);
         }
     }
-    return cascMap;
+};
+
+/**
+ * @param {!Object.<string,adapt.csscasc.CascadeValue>} to
+ * @param {adapt.csscasc.ElementStyle} from
+ * @param {adapt.expr.Context} context
+ */
+adapt.csscasc.mergeStyle = function(to, from, context) {
+    for (var property in from) {
+        if (adapt.csscasc.isPropName(property)) {
+            var newVal = adapt.csscasc.getProp(from, property);
+            var oldVal = to[property];
+            to[property] = adapt.csscasc.cascadeValues(context, oldVal,
+                /** @type {!adapt.csscasc.CascadeValue} */ (newVal));
+        }
+    }
 };
 
 /**
