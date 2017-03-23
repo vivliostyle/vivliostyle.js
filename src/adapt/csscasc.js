@@ -3187,21 +3187,25 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
                 }
             }
         case "nth-fragment":
-            var fragmentselectorId = "FS" + (adapt.csscasc.fragmentselectorCount++) + "_" + params[0] + "_" + params[1];
-            var currentElementStyle = this.elementStyle;
-            var currentChain = this.chain;
-            try {
-                this.elementStyle = /** @type {adapt.csscasc.ElementStyle} */ ({});
-                this.chain = currentChain.map(function(action) {
-                    return Object.create(action);
-                });
-                this.special("fragment-selector-id", adapt.css.getName(fragmentselectorId));
-                this.processChain(this.makeApplyRuleAction(this.specificity, []));
-            } finally {
-                this.chain = currentChain;
-                this.elementStyle = currentElementStyle;
+            if (params && params.length == 2) {
+                var fragmentselectorId = "FS" + (adapt.csscasc.fragmentselectorCount++) + "_" + params[0] + "_" + params[1];
+                var currentElementStyle = this.elementStyle;
+                var currentChain = this.chain;
+                try {
+                    this.elementStyle = /** @type {adapt.csscasc.ElementStyle} */ ({});
+                    this.chain = currentChain.map(function(action) {
+                        return Object.create(action);
+                    });
+                    this.special("fragment-selector-id", adapt.css.getName(fragmentselectorId));
+                    this.processChain(this.makeApplyRuleAction(this.specificity, []));
+                } finally {
+                    this.chain = currentChain;
+                    this.elementStyle = currentElementStyle;
+                }
+                this.fragmentSelectorIds.push(fragmentselectorId);
+            } else {
+                this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
             }
-            this.fragmentSelectorIds.push(fragmentselectorId);
             break;
         default:
             vivliostyle.logging.logger.warn("Unrecognized pseudoelement: ::" + name);
