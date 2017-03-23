@@ -3189,11 +3189,16 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
         case "nth-fragment":
             var fragmentselectorId = "FS" + (adapt.csscasc.fragmentselectorCount++) + "_" + params[0] + "_" + params[1];
             var currentElementStyle = this.elementStyle;
+            var currentChain = this.chain;
             try {
                 this.elementStyle = /** @type {adapt.csscasc.ElementStyle} */ ({});
+                this.chain = currentChain.map(function(action) {
+                    return Object.create(action);
+                });
                 this.special("fragment-selector-id", adapt.css.getName(fragmentselectorId));
                 this.processChain(this.makeApplyRuleAction(this.specificity, []));
             } finally {
+                this.chain = currentChain;
                 this.elementStyle = currentElementStyle;
             }
             this.fragmentSelectorIds.push(fragmentselectorId);
