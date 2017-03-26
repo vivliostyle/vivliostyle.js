@@ -403,13 +403,6 @@ goog.scope(function() {
     };
 
     /**
-     * @return {!Array.<adapt.layout.FragmentLayoutConstraint>}
-     */
-    PseudoColumn.prototype.getFragmentLayoutConstraints = function() {
-        return this.column.fragmentLayoutConstraints;
-    };
-
-    /**
      * @param {adapt.vtree.NodeContext} positionAfter
      */
     PseudoColumn.prototype.resetConstraints = function(positionAfter) {

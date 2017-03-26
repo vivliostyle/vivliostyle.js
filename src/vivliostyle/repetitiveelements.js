@@ -1,6 +1,6 @@
 /**
  * Copyright 2016 Vivliostyle Inc.
- * @fileoverview Utilities related to layout.
+ * @fileoverview Elements repeated in every fragment by repeat-on-break property.
  */
 goog.provide("vivliostyle.repetitiveelements");
 
@@ -11,10 +11,8 @@ goog.require("adapt.layout");
 
 goog.scope(function() {
 
-    /** @const */ var LayoutIteratorStrategy = vivliostyle.layoututil.LayoutIteratorStrategy;
     /** @const */ var LayoutIterator = vivliostyle.layoututil.LayoutIterator;
     /** @const */ var EdgeSkipper = vivliostyle.layoututil.EdgeSkipper;
-    /** @const */ var EdgeBreakPosition = adapt.layout.EdgeBreakPosition;
     /** @const */ var AbstractLayoutRetryer = vivliostyle.layoututil.AbstractLayoutRetryer;
     /** @const */ var BlockLayoutProcessor = adapt.layout.BlockLayoutProcessor;
     /** @const */ var PseudoColumn = vivliostyle.layoututil.PseudoColumn;
@@ -453,6 +451,7 @@ goog.scope(function() {
 
 
     /**
+     * @abstract
      * @constructor
      * @param {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext
      * @implements {vivliostyle.layoututil.LayoutMode}
@@ -489,6 +488,7 @@ goog.scope(function() {
     };
 
     /**
+     * @abstract
      * @constructor
      * @param {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext
      * @implements {vivliostyle.layoututil.LayoutMode}
@@ -581,7 +581,6 @@ goog.scope(function() {
 
     /** @override */
     RepetitiveElementsOwnerLayoutConstraint.prototype.allowLayout = function(nodeContext, overflownNodeContext, column) {
-        var formattingContext = getRepetitiveElementsOwnerFormattingContext(this.nodeContext.formattingContext);
         var repetitiveElements = this.getRepetitiveElements();
         if (!repetitiveElements) return true;
 
@@ -609,7 +608,6 @@ goog.scope(function() {
 
     /** @override */
     RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout = function(allowed, nodeContext, initialPosition, column) {
-        var formattingContext = getRepetitiveElementsOwnerFormattingContext(this.nodeContext.formattingContext);
         var repetitiveElements = this.getRepetitiveElements();
         if (!repetitiveElements) return;
         if (allowed) {
@@ -639,10 +637,6 @@ goog.scope(function() {
     RepetitiveElementsOwnerLayoutConstraint.prototype.getRepetitiveElements = function() {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(this.nodeContext.formattingContext);
         return formattingContext.getRepetitiveElements();
-    };
-
-    RepetitiveElementsOwnerLayoutConstraint.prototype.getRepetitiveElementsOfChildren = function() {
-        return [];
     };
 
     /** @override */
@@ -811,7 +805,6 @@ goog.scope(function() {
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.doInitialLayout = function(nodeContext, column) {
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
-        var repetitiveElements = formattingContext.getRepetitiveElements();
         var frame = adapt.task.newFrame("BlockLayoutProcessor.doInitialLayout");
         this.layoutEntireBlock(nodeContext, column).thenFinish(frame);
         return frame.result();
@@ -979,7 +972,7 @@ goog.scope(function() {
      * @param {adapt.vtree.NodeContext} nodeContext
      * @return {boolean}
      */
-    function isFirstContnetOfRepetitiveElementsOwner(nodeContext) {
+    function isFirstContentOfRepetitiveElementsOwner(nodeContext) {
         if (!nodeContext || !nodeContext.parent) return false;
         var formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext.parent);
         if (!formattingContext) return false;
@@ -990,8 +983,8 @@ goog.scope(function() {
 
     vivliostyle.repetitiveelements.eachAncestorRepetitiveElementsOwnerFormattingContext
         = eachAncestorRepetitiveElementsOwnerFormattingContext;
-    vivliostyle.repetitiveelements.isFirstContnetOfRepetitiveElementsOwner
-        = isFirstContnetOfRepetitiveElementsOwner;
+    vivliostyle.repetitiveelements.isFirstContentOfRepetitiveElementsOwner
+        = isFirstContentOfRepetitiveElementsOwner;
     vivliostyle.repetitiveelements.appendHeaderToAncestors = appendHeaderToAncestors;
     vivliostyle.repetitiveelements.appendHeader = appendHeader;
     vivliostyle.repetitiveelements.appendFooter = appendFooter;

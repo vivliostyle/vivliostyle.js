@@ -143,18 +143,18 @@ adapt.layout.LayoutProcessor.prototype.createEdgeBreakPosition = function(
     position, breakOnEdge, overflows, columnBlockSize) {};
 
 /**
- * process nodecontex of the after non inline element.
+ * process nodecontext at the start of a non inline element.
  * @param {!adapt.vtree.NodeContext} nodeContext
- * @return {boolean} return true if you skip the subsequent
+ * @return {boolean} return true if you skip the subsequent nodes
  */
 adapt.layout.LayoutProcessor.prototype.startNonInlineElementNode = function(
     nodeContext) {};
 
 /**
- * process nodecontex of the after non inline element.
+ * process nodecontext after a non inline element.
  * @param {!adapt.vtree.NodeContext} nodeContext
  * @param {boolean} stopAtOverflow
- * @return {boolean} return true if you skip the subsequent
+ * @return {boolean} return true if you skip the subsequent nodes
  */
 adapt.layout.LayoutProcessor.prototype.afterNonInlineElementNode = function(
     nodeContext, stopAtOverflow) {};
@@ -385,6 +385,7 @@ adapt.layout.EdgeBreakPosition = function(position, breakOnEdge, overflows,
     /** @const */ this.position = position;
     /** @const */ this.breakOnEdge = breakOnEdge;
     /** @type {boolean} */ this.overflows = overflows;
+    /** @type {boolean} */ this.overflowIfRepetitiveElementsDropped = overflows;
     /** @const */ this.computedBlockSize = computedBlockSize;
     /** @private @type {boolean} */ this.isEdgeUpdated = false;
     /** @private @type {number} */ this.edge = 0;
@@ -409,9 +410,9 @@ adapt.layout.EdgeBreakPosition.prototype.getMinBreakPenalty = function() {
     if (!this.isEdgeUpdated) {
         throw new Error("EdgeBreakPosition.prototype.updateEdge not called");
     }
-    var preferredDropping = this.isFirstContnetOfRepetitiveElementsOwner() && !this.overflowIfDropRepetitiveElements;
+    var preferDropping = this.isFirstContentOfRepetitiveElementsOwner() && !this.overflowIfRepetitiveElementsDropped;
     return (vivliostyle.break.isAvoidBreakValue(this.breakOnEdge) ? 1 : 0)
-        + (this.overflows && !preferredDropping ? 3 : 0)
+        + (this.overflows && !preferDropping ? 3 : 0)
         + (this.position.parent ? this.position.parent.breakPenalty : 0);
 };
 
@@ -434,7 +435,7 @@ adapt.layout.EdgeBreakPosition.prototype.updateOverflows = function(column) {
     }
     var edge = this.edge;
     var offsets = this.calculateOffsetOfRepetitiveElements(column);
-    this.overflowIfDropRepetitiveElements = column.isOverflown(edge + ((column.vertical ? -1 : 1) * offsets.minimum));
+    this.overflowIfRepetitiveElementsDropped = column.isOverflown(edge + ((column.vertical ? -1 : 1) * offsets.minimum));
     this.overflows = this.position.overflow = column.isOverflown(edge + ((column.vertical ? -1 : 1) * offsets.current));
 };
 
@@ -447,8 +448,8 @@ adapt.layout.EdgeBreakPosition.prototype.getNodeContext = function() {
  * @private
  * @return {boolean}
  */
-adapt.layout.EdgeBreakPosition.prototype.isFirstContnetOfRepetitiveElementsOwner = function() {
-    return vivliostyle.repetitiveelements.isFirstContnetOfRepetitiveElementsOwner(this.getNodeContext());
+adapt.layout.EdgeBreakPosition.prototype.isFirstContentOfRepetitiveElementsOwner = function() {
+    return vivliostyle.repetitiveelements.isFirstContentOfRepetitiveElementsOwner(this.getNodeContext());
 };
 
 /**
@@ -567,6 +568,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @type {boolean} */ this.stopAtOverflow = true;
     /** @type {!Array.<adapt.layout.FragmentLayoutConstraint>} */ this.fragmentLayoutConstraints = [];
     /** @type {adapt.layout.Column} */ this.pseudoParent = null;
+    /** @type {?adapt.vtree.NodeContext} */ this.nodeContextOverflowingDueToRepetitiveElements = null;
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
 
@@ -1615,8 +1617,8 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
                 resNodeContext, vivliostyle.repetitiveelements.collectRepetitiveElements(self));
             overflown = self.isOverflown(edge + ((self.vertical ? -1 : 1) * offsets.minimum));
             if (self.isOverflown(edge + ((self.vertical ? -1 : 1) * offsets.current))
-                && !self.overflowNodeContextAccordingToRepetitveElements) {
-                self.overflowNodeContextAccordingToRepetitveElements = resNodeContext;
+                && !self.nodeContextOverflowingDueToRepetitiveElements) {
+                self.nodeContextOverflowingDueToRepetitiveElements = resNodeContext;
             }
         }
 
@@ -2100,6 +2102,7 @@ adapt.layout.Column.prototype.findAcceptableBreakPosition = function() {
 };
 
 /**
+ * @param {adapt.vtree.NodeContext} nodeContext
  * @param {adapt.vtree.NodeContext} overflownNodeContext
  * @param {adapt.vtree.NodeContext} initialNodeContext
  * @return {adapt.task.Result.<adapt.vtree.NodeContext>}
@@ -2185,8 +2188,8 @@ adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext
         nodeContext, vivliostyle.repetitiveelements.collectRepetitiveElements(this));
     var overflown = this.isOverflown(edge + ((this.vertical ? -1 : 1) * offsets.minimum));
     if (this.isOverflown(edge + ((this.vertical ? -1 : 1) * offsets.current))
-        && !this.overflowNodeContextAccordingToRepetitveElements) {
-        this.overflowNodeContextAccordingToRepetitveElements = nodeContext;
+        && !this.nodeContextOverflowingDueToRepetitiveElements) {
+        this.nodeContextOverflowingDueToRepetitiveElements = nodeContext;
     }
     if (trailingEdgeContexts) {
         edge += this.getTrailingMarginEdgeAdjustment(trailingEdgeContexts);
@@ -2273,7 +2276,7 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
  * @param {adapt.vtree.FormattingContext} formattingContext
  * @returns {boolean}
  */
-adapt.layout.Column.prototype.isBFC = function(formattingContext, nodeContext) {
+adapt.layout.Column.prototype.isBFC = function(formattingContext) {
     if (formattingContext instanceof adapt.layout.BlockFormattingContext) return true;
     if (formattingContext instanceof vivliostyle.table.TableFormattingContext) return false;
     if (formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext) return true;
@@ -2292,7 +2295,7 @@ adapt.layout.Column.prototype.isBFC = function(formattingContext, nodeContext) {
 adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
     var fc = nodeContext.after ?
         (nodeContext.parent && nodeContext.parent.formattingContext) : nodeContext.formattingContext;
-    if (fc && !this.isBFC(fc, nodeContext)) {
+    if (fc && !this.isBFC(fc)) {
         return adapt.task.newResult(nodeContext);
     }
 
@@ -2357,7 +2360,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge) {
                         // clear
                         self.applyClearance(nodeContext);
                     }
-                    if (!self.isBFC(nodeContext.formattingContext, nodeContext)
+                    if (!self.isBFC(nodeContext.formattingContext)
                         || nodeContext.formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext
                         || nodeContext.floatSide || nodeContext.flexContainer) {
                         // new formatting context, or float or flex container (unbreakable)
@@ -2850,7 +2853,7 @@ adapt.layout.Column.prototype.doLayout = function(nodeContext, leadingEdge) {
     var initialNodeContext = nodeContext;
     // ------ init backtracking list -----
     self.breakPositions = [];
-    self.overflowNodeContextAccordingToRepetitveElements = null;
+    self.nodeContextOverflowingDueToRepetitiveElements = null;
     // ------- fill the column -------------
     frame.loopWithFrame(function(loopFrame) {
         while (nodeContext) {
@@ -2859,10 +2862,10 @@ adapt.layout.Column.prototype.doLayout = function(nodeContext, leadingEdge) {
             self.layoutNext(nodeContext, leadingEdge).then(function(nodeContextParam) {
                 leadingEdge = false;
 
-                if (self.overflowNodeContextAccordingToRepetitveElements && self.stopAtOverflow) {
+                if (self.nodeContextOverflowingDueToRepetitiveElements && self.stopAtOverflow) {
                     self.pageBreakType = null;
                     self.layoutContext.getPageFloatHolder().clearNewlyAddedFloats();
-                    nodeContext = self.overflowNodeContextAccordingToRepetitveElements;
+                    nodeContext = self.nodeContextOverflowingDueToRepetitiveElements;
                     nodeContext.overflow = true;
                 } else {
                     nodeContext = nodeContextParam;

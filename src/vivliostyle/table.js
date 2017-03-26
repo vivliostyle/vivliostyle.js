@@ -15,7 +15,6 @@ goog.require("vivliostyle.layoututil");
 goog.require("vivliostyle.repetitiveelements");
 
 goog.scope(function() {
-    /** @const */ var LayoutIteratorStrategy = vivliostyle.layoututil.LayoutIteratorStrategy;
     /** @const */ var LayoutIterator = vivliostyle.layoututil.LayoutIterator;
     /** @const */ var EdgeSkipper = vivliostyle.layoututil.EdgeSkipper;
     /** @const */ var PseudoColumn = vivliostyle.layoututil.PseudoColumn;
@@ -25,7 +24,6 @@ goog.scope(function() {
     /** @const */ var LayoutFragmentedBlock = vivliostyle.repetitiveelements.LayoutFragmentedBlock;
     /** @const */ var RepetitiveElementsOwnerFormattingContext = vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext;
     /** @const */ var RepetitiveElementsOwnerLayoutConstraint = vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutConstraint;
-    /** @const */ var RepetitiveElementsOwnerLayoutProcessor = vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutProcessor;
 
     /**
      * @param {number} rowIndex
@@ -1683,8 +1681,6 @@ goog.scope(function() {
 
     /** @override */
     TableRowLayoutConstraint.prototype.allowLayout = function(nodeContext, overflownNodeContext, column) {
-        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
-
         var repetitiveElements = this.getRepetitiveElements();
         if (!repetitiveElements) return true;
 
