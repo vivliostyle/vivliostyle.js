@@ -1,5 +1,19 @@
 /**
  * Copyright 2016 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview Plugin mechanism
  */
 goog.provide("vivliostyle.plugin");
@@ -28,6 +42,13 @@ goog.scope(function() {
          * After the shorthand declaration is interpreted and broken into non-shorthand declarations, the hook is called for each of the non-shorthand declarations.
          */
         "SIMPLE_PROPERTY": "SIMPLE_PROPERTY",
+
+        /**
+         * Called when a single document (i.e. a single spine item) has been fetched, before parsing.
+         *
+         * The hook is called with the Document object.
+         */
+        "PREPROCESS_SINGLE_DOCUMENT": "PREPROCESS_SINGLE_DOCUMENT",
 
         /**
          * Called before creating a text node for modifying a text content.
@@ -100,6 +121,11 @@ goog.scope(function() {
     };
 
     /** @const */ var HOOKS = vivliostyle.plugin.HOOKS;
+
+    /**
+     * @typedef {function(Document)}
+     */
+    vivliostyle.plugin.PreProcessSingleDocumentHook;
 
     /**
      * @typedef {function(

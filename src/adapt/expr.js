@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview Adaptive Layout expressions.
  */
 goog.provide('adapt.expr');
@@ -10,7 +24,7 @@ goog.require('adapt.base');
 /**
  * @typedef {{fontFamily:string, lineHeight:number, margin:number, hyphenate:boolean,
  *   	columnWidth:number, horizontal:boolean, nightMode:boolean, spreadView:boolean,
- *      pageBorder:number, enabledMediaTypes:!Object.<string,boolean>}}
+ *      pageBorder:number, enabledMediaTypes:!Object.<string,boolean>,defaultPaperSize:(Object<string,number>|undefined)}}
  */
 adapt.expr.Preferences;
 
@@ -20,7 +34,7 @@ adapt.expr.Preferences;
 adapt.expr.defaultPreferences = function() {
     return {fontFamily:"serif", lineHeight:1.25, margin:8, hyphenate:true, columnWidth:25,
         horizontal:false, nightMode:false, spreadView:false, pageBorder:1,
-        enabledMediaTypes:{"print": true}};
+        enabledMediaTypes:{"print": true}, defaultPaperSize: undefined};
 };
 
 /**
@@ -31,7 +45,8 @@ adapt.expr.clonePreferences = function(pref) {
     return {fontFamily:pref.fontFamily, lineHeight:pref.lineHeight, margin:pref.margin,
         hyphenate:pref.hyphenate, columnWidth:pref.columnWidth, horizontal:pref.horizontal,
         nightMode:pref.nightMode, spreadView:pref.spreadView, pageBorder:pref.pageBorder,
-        enabledMediaTypes:Object.assign({}, pref.enabledMediaTypes)};
+        enabledMediaTypes:Object.assign({}, pref.enabledMediaTypes),
+        defaultPaperSize: pref.defaultPaperSize? Object.assign({}, pref.defaultPaperSize) : undefined};
 };
 
 /**

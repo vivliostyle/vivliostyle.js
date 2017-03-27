@@ -843,11 +843,9 @@ goog.scope(function() {
                     var pending = true;
                     column.layoutNext(nextNodeContext, false).then(function(nodeContextParam) {
                         nextNodeContext = nodeContextParam;
-                        if (column.hasNewlyAddedPageFloats()) {
+                        if (column.pageFloatLayoutContext.isInvalidated()) {
                             loopFrame.breakLoop();
-                            return;
-                        }
-                        if (column.pageBreakType) {
+                        } else if (column.pageBreakType) {
                             loopFrame.breakLoop(); // Loop end
                         } else if (nextNodeContext && column.stopByOverflow(nextNodeContext)) {
                             loopFrame.breakLoop(); // Loop end
@@ -881,9 +879,9 @@ goog.scope(function() {
     /**
      * @override
      */
-    RepetitiveElementsOwnerLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {
+    RepetitiveElementsOwnerLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfColumn) {
         return adapt.layout.BlockLayoutProcessor.prototype.finishBreak.call(
-            this, column, nodeContext, forceRemoveSelf, endOfRegion);
+            this, column, nodeContext, forceRemoveSelf, endOfColumn);
     };
 
     /**

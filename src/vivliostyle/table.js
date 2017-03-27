@@ -1,5 +1,19 @@
 /**
  * Copyright 2016 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview Table formatting context and layout.
  */
 goog.provide("vivliostyle.table");
@@ -1477,7 +1491,7 @@ goog.scope(function() {
     /**
      * @override
      */
-    TableLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfRegion) {
+    TableLayoutProcessor.prototype.finishBreak = function(column, nodeContext, forceRemoveSelf, endOfColumn) {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
 
         if (nodeContext.display === "table-row") {
@@ -1538,7 +1552,7 @@ goog.scope(function() {
         }
         formattingContext.finishFragment();
         return adapt.layout.blockLayoutProcessor.finishBreak(
-            column, nodeContext, forceRemoveSelf, endOfRegion);
+            column, nodeContext, forceRemoveSelf, endOfColumn);
     };
 
     /** @override */

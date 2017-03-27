@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Defer column page floats by anchor</title>
+  <style>
+    @page {
+      size: 400px 220px;
+      margin: 10px;
+    }
+    :root, html {
+      line-height: 20px;
+      column-count: 2;
+      widows: 1;
+      orphans: 1;
+    }
+    body {
+      margin: 0;
+    }
+    .float {
+      float-reference: column;
+      float: block-start;
+      box-sizing: border-box;
+      width: 100%;
+      padding: 3px;
+      border: blue solid 2px;
+    }
+  </style>
+</head>
+<body>
+Both of<br>
+two floats<br>
+in the right column<br>
+should have<br>
+4 lines.<br>
+Float anchor→
+<div class="float">
+  <div>
+    (a) This<br>
+    block-start
+  </div>
+  <div>
+    column float<br>
+    has 4 lines
+  </div>
+</div>
+<div class="float">
+  <div>
+    (b) This<br>
+    block-start
+  </div>
+  <div>
+    column float<br>
+    has 4 lines
+  </div>
+</div>
+After page float.
+</body>
+</html>

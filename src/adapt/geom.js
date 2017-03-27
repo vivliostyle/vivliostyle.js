@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2016 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview Geometric utilities.
  */
 goog.provide('adapt.geom');
@@ -313,8 +327,8 @@ adapt.geom.rotatePoint = function(point) {
 
 /**
  * Vertical box to pseudo-horizontal coords.
- * @param {adapt.geom.Rect} box
- * @return {adapt.geom.Rect}
+ * @param {!adapt.geom.Rect} box
+ * @return {!adapt.geom.Rect}
  */
 adapt.geom.rotateBox = function(box) {
     return new adapt.geom.Rect(box.y1, -box.x2, box.y2, -box.x1);
@@ -338,7 +352,7 @@ adapt.geom.rotateShape = function(shape) {
 };
 
 /**
- * @param {adapt.geom.Rect} box
+ * @param {!adapt.geom.Rect} box
  * @param {Array.<adapt.geom.Shape>} include
  * @param {Array.<adapt.geom.Shape>} exclude
  * @param {number} granularity
@@ -386,7 +400,7 @@ adapt.geom.shapesToBands = function(box, include, exclude,
         // calculate the height of the band to work with
         var y2 = box.y2;  // band bottom
         // min possible y2
-        var y2min = adapt.geom.ceil(Math.ceil(y + granularity), snapHeight);
+        var y2min = Math.min(adapt.geom.ceil(Math.ceil(y + granularity), snapHeight), box.y2);
         for (k = 0; k < activeSegments.length && y2 > y2min; k++) {
             segment = activeSegments[k];
             if (segment.low.x == segment.high.x) {
@@ -478,26 +492,25 @@ adapt.geom.shapesToBands = function(box, include, exclude,
             }
         }
     }
-    adapt.geom.normalize(box, result, false);
+    adapt.geom.normalize(box, result);
     return result;
 };
 
 /**
  * @param {adapt.geom.Rect} box
  * @param {Array.<adapt.geom.Band>} bands
- * @param {boolean} keepNonExcludingAtBottom
  * @return {void}
  */
-adapt.geom.normalize = function(box, bands, keepNonExcludingAtBottom) {
+adapt.geom.normalize = function(box, bands) {
     var k = bands.length - 1;
     // Merge bands with the same x1, x2 and remove unneeded bands at the end.
     // Create fictious last band to merge unneeded bands at the end
-    var currBand = new adapt.geom.Band(box.y2, box.y2,
-        (keepNonExcludingAtBottom ? NaN: box.x1), box.x2);
+    var currBand = new adapt.geom.Band(box.y2, box.y2, box.x1, box.x2);
     while (k >= 0) {
         var prevBand = currBand; // result[k+1]
         currBand = bands[k];
-        if (currBand.x1 == prevBand.x1 && currBand.x2 == prevBand.x2) {
+        if ((currBand.y2 - currBand.y1 < 1) || // Remove bands with height less than 1px
+            currBand.x1 == prevBand.x1 && currBand.x2 == prevBand.x2) {
             prevBand.y1 = currBand.y1; // merge
             bands.splice(k, 1);
             currBand = prevBand;
@@ -523,6 +536,86 @@ adapt.geom.findBand = function(bands, y) {
             high = mid;
     }
     return low;
+};
+
+/**
+ * Find the uppermost rectangle contained in the specified rect which occupies full width of the rect without overlapping with any band in the specified bands.
+ * @param {Array<adapt.geom.Band>} bands
+ * @param {!adapt.geom.Rect} rect
+ * @returns {?adapt.geom.Rect} Returns null if such rectangle does not exist.
+ */
+adapt.geom.findUppermostFullyOpenRect = function(bands, rect) {
+    if (!bands.length)
+        return rect;
+    var topEdge = rect.y1;
+    var band;
+    for (var i = 0; i < bands.length; i++) {
+        band = bands[i];
+        if (band.y2 > rect.y1 && band.x1 - 0.1 <= rect.x1 && band.x2 + 0.1 >= rect.x2) {
+            break;
+        } else {
+            topEdge = Math.max(topEdge, band.y2);
+        }
+    }
+    var bottomEdge = topEdge;
+    for (; i < bands.length; i++) {
+        band = bands[i];
+        if (band.y1 >= rect.y2 || band.x1 - 0.1 > rect.x1 || band.x2 + 0.1 < rect.x2) {
+            break;
+        } else {
+            bottomEdge = band.y2;
+        }
+    }
+    if (i === bands.length) {
+        bottomEdge = rect.y2;
+    } else {
+        bottomEdge = Math.min(bottomEdge, rect.y2);
+    }
+
+    if (bottomEdge <= topEdge) {
+        return null;
+    } else {
+        return new adapt.geom.Rect(rect.x1, topEdge, rect.x2, bottomEdge);
+    }
+};
+
+/**
+ * Find the bottommost rectangle contained in the specified rect which occupies full width of the rect without overlapping with any band in the specified bands.
+ * @param {Array<adapt.geom.Band>} bands
+ * @param {!adapt.geom.Rect} rect
+ * @returns {?adapt.geom.Rect} Returns null if such rectangle does not exist.
+ */
+adapt.geom.findBottommostFullyOpenRect = function(bands, rect) {
+    if (!bands.length)
+        return rect;
+    var bottomEdge = rect.y2;
+    var band;
+    for (var i = bands.length - 1; i >= 0; i--) {
+        band = bands[i];
+        if (i === bands.length - 1 && band.y2 < rect.y2) {
+            break;
+        } else if (band.y1 < rect.y2 && band.x1 - 0.1 <= rect.x1 && band.x2 + 0.1 >= rect.x2) {
+            break;
+        } else {
+            bottomEdge = Math.min(bottomEdge, band.y1);
+        }
+    }
+    var topEdge = Math.min(bottomEdge, band.y2);
+    for (; i >= 0; i--) {
+        band = bands[i];
+        if (band.y2 <= rect.y1 || band.x1 - 0.1 > rect.x1 || band.x2 + 0.1 < rect.x2) {
+            break;
+        } else {
+            topEdge = band.y1;
+        }
+    }
+    topEdge = Math.max(topEdge, rect.y1);
+
+    if (bottomEdge <= topEdge) {
+        return null;
+    } else {
+        return new adapt.geom.Rect(rect.x1, topEdge, rect.x2, bottomEdge);
+    }
 };
 
 /**
@@ -628,5 +721,5 @@ adapt.geom.addFloatToBands = function(box, bands, floatBox, floatBands, side) {
                 break;
         }
     }
-    adapt.geom.normalize(box, bands, false);
+    adapt.geom.normalize(box, bands);
 };

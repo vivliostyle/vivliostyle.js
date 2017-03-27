@@ -33,9 +33,9 @@ Developer API documents are coming soon.
 
 ## License
 
-Licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+Licensed under [AGPL Version 3](http://www.gnu.org/licenses/agpl.html).
 
-Vivliostyle.js is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout).
+Vivliostyle.js is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout), which is licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
 Vivliostyle.js contains following components:
 

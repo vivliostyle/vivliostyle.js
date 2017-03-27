@@ -1,5 +1,19 @@
 /**
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview \@page rule (CSS Paged Media) support
  */
 goog.provide("vivliostyle.page");
@@ -183,13 +197,21 @@ vivliostyle.page.evaluatePageSizeAndBleed = function(pageSizeAndBleed, context) 
     var cropOffset = bleed + bleedOffset;
     var width = pageSizeAndBleed.width;
     if (width === adapt.css.fullWidth) {
-        evaluated.pageWidth = (context.pref.spreadView ? Math.floor(context.viewportWidth / 2) - context.pref.pageBorder : context.viewportWidth) - cropOffset * 2;
+        if (context.pref.defaultPaperSize) {
+            evaluated.pageWidth = context.pref.defaultPaperSize.width * context.queryUnitSize("px", false);
+        } else {
+            evaluated.pageWidth = (context.pref.spreadView ? Math.floor(context.viewportWidth / 2) - context.pref.pageBorder : context.viewportWidth) - cropOffset * 2;
+        }
     } else {
         evaluated.pageWidth = width.num * context.queryUnitSize(width.unit, false);
     }
     var height = pageSizeAndBleed.height;
     if (height === adapt.css.fullHeight) {
-        evaluated.pageHeight = context.viewportHeight - cropOffset * 2;
+        if (context.pref.defaultPaperSize) {
+            evaluated.pageHeight = context.pref.defaultPaperSize.height * context.queryUnitSize("px", false);
+        } else {
+            evaluated.pageHeight = context.viewportHeight - cropOffset * 2;
+        }
     } else {
         evaluated.pageHeight = height.num * context.queryUnitSize(height.unit, false);
     }

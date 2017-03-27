@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Fixed
+
+- Fix footnote layout bugs
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/332>
+
+## [2017.2](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.2) - 2017-2-22
+
 ### Added
 
 - Add support for Compositing and Blending Level 1
@@ -9,6 +16,15 @@
   - Spec: [Compositing and Blending Level 1](https://drafts.fxtf.org/compositing-1/)
 - pseudo element or page margin box with `content:url()` behave as a replaced element
   - Spec: [Inserting and replacing content with the content property](https://drafts.csswg.org/css-content/#content-property)
+- Experimental support of CSS Page Floats and `column-span`
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/324>
+  - Spec: [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
+  - Spec: [CSS Multi-column Layout Module Level 2 - `column-span`](https://drafts.csswg.org/css-multicol-2/#column-span)
+
+### Changed
+
+- Change license to AGPL 3.0
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/329>
 
 ### Fixed
 
@@ -27,6 +43,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/312>
 - Support repeating table header/footer across pages
   - <https://github.com/vivliostyle/vivliostyle.js/pull/319>
+- Fix incorrect widows behavior with footnote call close to the end of the page
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/328>
 
 ## [2016.10](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.10) - 2016-10-25
 

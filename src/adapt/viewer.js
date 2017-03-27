@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview Sample EPUB rendering application.
  */
 goog.provide('adapt.viewer');
@@ -124,6 +138,7 @@ adapt.viewer.Viewer.prototype.init = function() {
     /** @type {boolean} */ this.waitForLoading = false;
     /** @type {boolean} */ this.renderAllPages = true;
     /** @type {adapt.expr.Preferences} */ this.pref = adapt.expr.defaultPreferences();
+    /** @type {!Array<{width: number, height: number}>} */ this.pageSizes = [];
 };
 
 adapt.viewer.Viewer.prototype.addLogListeners = function() {
@@ -379,6 +394,11 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
         this.needRefresh = true;
     }
 
+    if (typeof command["defaultPaperSize"] == "object" && typeof command["defaultPaperSize"].width == "number" && typeof command["defaultPaperSize"].height == "number") {
+        this.viewport = null;
+        this.pref.defaultPaperSize = command["defaultPaperSize"];
+        this.needResize = true;
+    }
     this.configurePlugins(command);
 
     return adapt.task.newResult(true);
@@ -594,6 +614,17 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
 
 /**
  * @private
+ * @param {{width: number, height: number}} pageSize
+ * @param {!Object<string, !{width: number, height: number}>} pageSheetSize
+ * @param {number} spineIndex
+ * @param {number} pageIndex
+ */
+adapt.viewer.Viewer.prototype.setPageSize = function(pageSize, pageSheetSize, spineIndex, pageIndex) {
+    this.pageSizes[pageIndex] = pageSize;
+    this.setPageSizePageRules(pageSheetSize, spineIndex, pageIndex);
+};
+/**
+ * @private
  * @param {!Object<string, !{width: number, height: number}>} pageSheetSize
  * @param {number} spineIndex
  * @param {number} pageIndex
@@ -631,7 +662,7 @@ adapt.viewer.Viewer.prototype.reset = function() {
     this.viewport = this.createViewport();
     this.viewport.resetZoom();
     this.opfView = new adapt.epub.OPFView(this.opf, this.viewport, this.fontMapper, this.pref,
-        this.setPageSizePageRules.bind(this));
+        this.setPageSize.bind(this));
 };
 
 /**

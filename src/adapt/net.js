@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview Fetch resource from a URL.
  */
 goog.provide('adapt.net');
@@ -46,9 +60,15 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
         if (request.readyState === 4) {
             response.status = request.status;
             if (response.status == 200 || response.status == 0) {
-                if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.DOCUMENT) && request.responseXML) {
+                if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.DOCUMENT) &&
+                    request.responseXML &&
+                    request.responseXML.documentElement.localName != 'parsererror') {
                     response.responseXML = request.responseXML;
                     response.contentType = request.responseXML.contentType;
+                } else if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.DOCUMENT) &&
+                    request.response instanceof HTMLDocument) {
+                    response.responseXML = request.response;
+                    response.contentType = request.response.contentType;
                 } else {
                     var text = request.response;
                     if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.TEXT) && typeof text == "string") {
@@ -77,8 +97,11 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
                 opt_contentType || "text/plain; charset=UTF-8");
             request.send(opt_data);
         }
-        else
+        else {
+            if (url.match(/file:\/\/.*(\.html$|\.htm$)/))
+                request.overrideMimeType("text/html");
             request.send(null);
+        }
     } catch (e) {
         vivliostyle.logging.logger.warn(e, "Error fetching " + url);
         continuation.schedule(response);

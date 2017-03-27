@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview Deal with META-INF/ and .opf files in EPUB container.
  */
 goog.provide('adapt.epub');
@@ -1005,7 +1019,7 @@ adapt.epub.OPFViewItem;
  * @param {adapt.vgen.Viewport} viewport
  * @param {adapt.font.Mapper} fontMapper
  * @param {adapt.expr.Preferences} pref
- * @param {!function(!Object<string, !{width: number, height: number}>, number, number)} pageSheetSizeReporter
+ * @param {!function({width: number, height: number}, !Object<string, !{width: number, height: number}>, number, number)} pageSheetSizeReporter
  * @implements {adapt.vgen.CustomRendererFactory}
  */
 adapt.epub.OPFView = function(opf, viewport, fontMapper, pref, pageSheetSizeReporter) {
@@ -1070,7 +1084,8 @@ adapt.epub.OPFView.prototype.finishPageContainer = function(viewItem, page, page
     } else {
         viewItem.instance.viewport.contentContainer.appendChild(page.container);
     }
-    this.pageSheetSizeReporter(viewItem.instance.pageSheetSize, viewItem.item.spineIndex, pageIndex);
+    this.pageSheetSizeReporter({ width: viewItem.instance.pageSheetWidth, height: viewItem.instance.pageSheetHeight },
+                               viewItem.instance.pageSheetSize, viewItem.item.spineIndex, viewItem.instance.pageNumberOffset + pageIndex);
 };
 
 /**

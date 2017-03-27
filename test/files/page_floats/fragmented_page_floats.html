@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fragmented page floats</title>
+  <style>
+    @page {
+      size: 400px 220px;
+      margin: 10px;
+    }
+    :root, html {
+      line-height: 20px;
+      column-count: 2;
+      widows: 1;
+      orphans: 1;
+    }
+    body {
+      margin: 0;
+    }
+    section {
+      page-break-after: always;
+    }
+    .float {
+      float-reference: column;
+      float: block-start;
+      box-sizing: border-box;
+      width: 100%;
+      padding: 3px;
+      border: blue solid 2px;
+    }
+    .page-float {
+      float-reference: page;
+    }
+    .region-float {
+      float-reference: region;
+    }
+    .column-float {
+      float-reference: column;
+    }
+  </style>
+</head>
+<body>
+<section>
+  Text text text text text text.
+  Page float anchor→
+  <div class="float page-float">
+    This<br>
+    block-start<br>
+    page<br>
+    float<br>
+    has<br>
+    10<br>
+    lines<br>
+    foo<br>
+    bar<br>
+    baz
+  </div>
+  After page float.
+</section>
+<section>
+  Text text text text text text.
+  Region float anchor→
+  <div class="float region-float">
+    This<br>
+    block-start<br>
+    region<br>
+    float<br>
+    has<br>
+    10<br>
+    lines<br>
+    foo<br>
+    bar<br>
+    baz
+  </div>
+  After region float.
+</section>
+<section>
+  Text text text text text text.
+  Column float anchor→
+  <div class="float column-float">
+    This<br>
+    block-start<br>
+    column<br>
+    float<br>
+    has<br>
+    10<br>
+    lines<br>
+    foo<br>
+    bar<br>
+    baz
+  </div>
+  After column float.
+</section>
+</body>
+</html>

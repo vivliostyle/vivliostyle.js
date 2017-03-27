@@ -1,0 +1,89 @@
+/*
+ * Copyright 2017 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+@media screen {
+
+    [data-vivliostyle-viewer-viewport] {
+        background: #AAAAAA;
+    }
+
+    [data-vivliostyle-page-container] {
+        background: white;
+    }
+
+    [data-vivliostyle-viewer-viewport] {
+        display: -webkit-flex;
+        display: flex;
+        overflow: auto;
+        position: relative;
+    }
+
+    [data-vivliostyle-outer-zoom-box] {
+        margin: auto;
+        overflow: visible;
+        -webkit-flex: none;
+        flex: none;
+    }
+
+    [data-vivliostyle-viewer-viewport] [data-vivliostyle-spread-container] {
+        display: -webkit-flex;
+        display: flex;
+        -webkit-flex: none;
+        flex: none;
+        -webkit-justify-content: center;
+        justify-content: center;
+        -moz-transform-origin: left top;
+        -ms-transform-origin: left top;
+        -webkit-transform-origin: left top;
+        transform-origin: left top;
+    }
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=ltr] [data-vivliostyle-spread-container] {
+        -webkit-flex-direction: row;
+        flex-direction: row;
+    }
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=rtl] [data-vivliostyle-spread-container] {
+        -webkit-flex-direction: row-reverse;
+        flex-direction: row-reverse;
+    }
+
+    [data-vivliostyle-viewer-viewport] [data-vivliostyle-page-container] {
+        margin: 0 auto;
+        -webkit-flex: none;
+        flex: none;
+        transform-origin: center top;
+    }
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-page-side=left] {
+        margin-right: 1px;
+        transform-origin: right center;
+    }
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-page-side=right] {
+        margin-left: 1px;
+        transform-origin: left center;
+    }
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-unpaired-page=true] {
+        margin-left: auto;
+        margin-right: auto;
+        transform-origin: center center;
+    }
+
+}

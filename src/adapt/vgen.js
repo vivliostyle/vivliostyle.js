@@ -1,6 +1,20 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Vivliostyle Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * @fileoverview View tree generator.
  */
 goog.provide('adapt.vgen');
@@ -14,7 +28,6 @@ goog.require('adapt.cssstyler');
 goog.require('adapt.vtree');
 goog.require('adapt.xmldoc');
 goog.require('adapt.font');
-goog.require('vivliostyle.pagefloat');
 goog.require('vivliostyle.urls');
 
 /**
@@ -221,14 +234,13 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
  * @param {adapt.vtree.Page} page
  * @param {adapt.vgen.CustomRenderer} customRenderer
  * @param {Object.<string,string>} fallbackMap
- * @param {!vivliostyle.pagefloat.FloatHolder} pageFloatHolder
  * @param {!adapt.base.DocumentURLTransformer} documentURLTransformer
  * @constructor
  * @implements {adapt.vtree.LayoutContext}
  */
 adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds,
                                   xmldoc, docFaces, footnoteStyle, stylerProducer, page, customRenderer, fallbackMap,
-                                  pageFloatHolder, documentURLTransformer) {
+                                  documentURLTransformer) {
     // from constructor parameters
     /** @const */ this.flowName = flowName;
     /** @const */ this.context = context;
@@ -243,7 +255,6 @@ adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds
     /** @const */ this.page = page;
     /** @const */ this.customRenderer = customRenderer;
     /** @const */ this.fallbackMap = fallbackMap;
-    /** @const */ this.pageFloatHolder = pageFloatHolder;
     /** @const */ this.documentURLTransformer = documentURLTransformer;
 
     // provided by layout
@@ -265,7 +276,7 @@ adapt.vgen.ViewFactory.prototype.clone = function() {
     return new adapt.vgen.ViewFactory(this.flowName, this.context, this.viewport,
         this.styler, this.regionIds,
         this.xmldoc, this.docFaces, this.footnoteStyle, this.stylerProducer,
-        this.page, this.customRenderer, this.fallbackMap, this.pageFloatHolder, this.documentURLTransformer);
+        this.page, this.customRenderer, this.fallbackMap, this.documentURLTransformer);
 };
 
 /**
@@ -642,6 +653,15 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         elementStyle = inheritedValues.elementStyle;
         self.nodeContext.lang = inheritedValues.lang;
     }
+    var floatReference = elementStyle["float-reference"] &&
+        vivliostyle.pagefloat.FloatReference.of(elementStyle["float-reference"].value.toString());
+    if (self.nodeContext.parent && floatReference && vivliostyle.pagefloat.isPageFloat(floatReference)) {
+        // Since a page float will be detached from a view node of its parent,
+        // inherited properties need to be inherited from its source parent.
+        var inheritedValues = self.inheritFromSourceParent(elementStyle);
+        elementStyle = inheritedValues.elementStyle;
+        self.nodeContext.lang = inheritedValues.lang;
+    }
     self.nodeContext.vertical = self.computeStyle(self.nodeContext.vertical, elementStyle, computedStyle);
 
     this.transferPolyfilledInheritedProps(computedStyle);
@@ -668,7 +688,6 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     self.createShadows(element, isRoot, elementStyle, computedStyle, styler, self.context, self.nodeContext.shadowContext).then(function(shadowParam) {
         self.nodeContext.nodeShadow = shadowParam;
         var position = computedStyle["position"];
-        var floatReference = computedStyle["float-reference"];
         var floatSide = computedStyle["float"];
         var clearSide = computedStyle["clear"];
         var writingMode = self.nodeContext.vertical ? adapt.css.ident.vertical_rl : adapt.css.ident.horizontal_tb;
@@ -683,7 +702,8 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             // When the element is already inside a block formatting context (except one from the root),
             // float and clear can be controlled by the browser and we don't need to care.
             clearSide = null;
-            if (floatSide !== adapt.css.ident.footnote) {
+            if (floatSide !== adapt.css.ident.footnote &&
+                !(floatReference && vivliostyle.pagefloat.isPageFloat(floatReference))) {
                 floatSide = null;
             }
         }
@@ -732,7 +752,8 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         self.nodeContext.inline = !floating && !display || vivliostyle.display.isInlineLevel(display) || vivliostyle.display.isRubyInternalDisplay(display);
         self.nodeContext.display = display ? display.toString() : "inline";
         self.nodeContext.floatSide = floating ? floatSide.toString() : null;
-        self.nodeContext.floatReference = floatReference ? floatReference.toString() : null;
+        self.nodeContext.floatReference = floatReference || vivliostyle.pagefloat.FloatReference.INLINE;
+        self.nodeContext.columnSpan = computedStyle["column-span"];
         if (!self.nodeContext.inline) {
             var breakAfter = computedStyle["break-after"];
             if (breakAfter) {
@@ -1740,13 +1761,6 @@ adapt.vgen.ViewFactory.prototype.isSameNodePosition = function(nodePosition1, no
             var step2 = nodePosition2.steps[i];
             return this.isSameNodePositionStep(step1, step2);
         }.bind(this));
-};
-
-/**
- * @override
- */
-adapt.vgen.ViewFactory.prototype.getPageFloatHolder = function() {
-    return this.pageFloatHolder;
 };
 
 adapt.vgen.ViewFactory.prototype.isPseudoelement = function(elem) {
