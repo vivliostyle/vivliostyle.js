@@ -936,7 +936,9 @@ adapt.layout.Column.prototype.createFloats = function() {
  */
 adapt.layout.Column.prototype.calculateEdge = function(nodeContext, checkPoints, index, boxOffset) {
     var edge;
-    if (nodeContext && nodeContext.after && !nodeContext.inline) {
+    if (nodeContext && adapt.layout.isOrphan(nodeContext.viewNode)) {
+        return NaN;
+    } else if (nodeContext && nodeContext.after && !nodeContext.inline) {
         edge = adapt.layout.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
         if (!isNaN(edge))
             return edge;
@@ -2318,6 +2320,22 @@ adapt.layout.Column.prototype.calculateClonedPaddingBorder = function(nodeContex
 };
 
 /**
+ * @private
+ * @param {!adapt.layout.BreakPosition=} bp
+ * @returns {number}
+ */
+adapt.layout.Column.prototype.getOffsetByRepetitiveElements = function(bp) {
+    var offset;
+    if (bp) {
+        offset = bp.calculateOffsetOfRepetitiveElements(this);
+    } else {
+        offset = calculateOffsetOfRepetitiveElements(null,
+            vivliostyle.repetitiveelements.collectRepetitiveElements(this));
+    }
+    return offset.current;
+};
+
+/**
  * @param {adapt.layout.BoxBreakPosition} bp
  * @param {boolean} force
  * @return {adapt.vtree.NodeContext}
@@ -2349,7 +2367,8 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
     // Select the first overflowing line break position
     var linePositions = this.findLinePositions(checkPoints);
     var edge = this.footnoteEdge - clonedPaddingBorder;
-    edge -= (this.vertical ? -1 : 1) * bp.calculateOffsetOfRepetitiveElements(this).current;
+    var repetitiveElementsOffset = this.getOffsetByRepetitiveElements(bp);
+    edge -= this.getBoxDir() * repetitiveElementsOffset;
     var lineIndex = adapt.base.binarySearch(linePositions.length, function(i) {
         return self.vertical ? linePositions[i] < edge : linePositions[i] > edge;
     });
@@ -2362,7 +2381,8 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
     edge = linePositions[lineIndex-1];
     var nodeContext = this.findAcceptableBreakInside(bp.checkPoints, edge, force);
     if (nodeContext) {
-        this.computedBlockSize = this.getBoxDir() * (edge - this.beforeEdge);
+        this.computedBlockSize =
+            this.getBoxDir() * (edge - this.beforeEdge) + repetitiveElementsOffset;
     }
     return nodeContext;
 };
@@ -2372,7 +2392,8 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
  * @return {adapt.vtree.NodeContext}
  */
 adapt.layout.Column.prototype.findEdgeBreakPosition = function(bp) {
-    this.computedBlockSize = bp.computedBlockSize;
+    this.computedBlockSize =
+        bp.computedBlockSize + this.getOffsetByRepetitiveElements(bp);
     return bp.position;
 };
 
@@ -3051,8 +3072,10 @@ adapt.layout.Column.prototype.saveBoxBreakPosition = function(checkPoints) {
  * @param {number} afterEdge
  */
 adapt.layout.Column.prototype.updateMaxReachedAfterEdge = function(afterEdge) {
-    var size = this.getBoxDir() * (afterEdge - this.beforeEdge);
-    this.computedBlockSize = Math.max(size, this.computedBlockSize);
+    if (!isNaN(afterEdge)) {
+        var size = this.getBoxDir() * (afterEdge - this.beforeEdge);
+        this.computedBlockSize = Math.max(size, this.computedBlockSize);
+    }
 };
 
 /**
@@ -3244,6 +3267,7 @@ adapt.layout.Column.prototype.doLayout = function(nodeContext, leadingEdge, brea
             }
             // Sync case
         }
+        self.computedBlockSize += self.getOffsetByRepetitiveElements();
         loopFrame.breakLoop();
     }).then(function() {
         frame.finish({nodeContext: nodeContext, overflownNodeContext: overflownNodeContext});

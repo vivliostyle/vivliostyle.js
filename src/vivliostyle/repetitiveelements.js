@@ -767,6 +767,10 @@ goog.scope(function() {
      * @override
      */
     RepetitiveElementsOwnerLayoutProcessor.prototype.layout = function(nodeContext, column, leadingEdge) {
+        if (column.isFloatNodeContext(nodeContext)) {
+            return column.layoutFloatOrFootnote(nodeContext);
+        }
+
         var formattingContext = getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
         var rootViewNode = formattingContext.getRootViewNode(nodeContext);
         if (!rootViewNode) {
