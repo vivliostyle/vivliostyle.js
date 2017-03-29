@@ -3102,9 +3102,21 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, brea
     self.layoutOverflownFootnotes(chunkPosition).then(function() {
         // ------ start the column -----------
         self.openAllViews(chunkPosition.primary).then(function(nodeContext) {
+            var initialNodeContext = null;
+            if (nodeContext.viewNode) {
+                initialNodeContext = nodeContext.copy();
+            } else {
+                var nextInTreeListener = function(evt) {
+                    if (evt.nodeContext.viewNode) {
+                        initialNodeContext = evt.nodeContext;
+                        self.layoutContext.removeEventListener("nextInTree", nextInTreeListener);
+                    }
+                };
+                self.layoutContext.addEventListener("nextInTree", nextInTreeListener);
+            }
             var retryer = new adapt.layout.LayoutRetryer(leadingEdge, breakAfter);
             retryer.layout(nodeContext, self).then(function(nodeContextParam) {
-                self.doFinishBreak(nodeContextParam, retryer.context.overflownNodeContext, nodeContext, retryer.initialComputedBlockSize).then(function(positionAfter) {
+                self.doFinishBreak(nodeContextParam, retryer.context.overflownNodeContext, initialNodeContext, retryer.initialComputedBlockSize).then(function(positionAfter) {
                     var cont = null;
                     if (!self.pseudoParent) {
                         cont = self.resetConstraints(positionAfter);

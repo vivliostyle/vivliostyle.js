@@ -516,6 +516,28 @@ adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = function(nodeCo
 adapt.vtree.LayoutContext.prototype.isSameNodePosition = function(nodePosition1, nodePosition2) {};
 
 /**
+ * @param {string} type
+ * @param {adapt.base.EventListener} listener
+ * @param {boolean=} capture
+ * @return {void}
+ */
+adapt.vtree.LayoutContext.prototype.addEventListener = function(type, listener, capture) {};
+
+/**
+ * @param {string} type
+ * @param {adapt.base.EventListener} listener
+ * @param {boolean=} capture
+ * @return {void}
+ */
+adapt.vtree.LayoutContext.prototype.removeEventListener = function(type, listener, capture) {};
+
+/**
+ * @param {adapt.base.Event} evt
+ * @return {void}
+ */
+adapt.vtree.LayoutContext.prototype.dispatchEvent = function(evt) {};
+
+/**
  * Formatting context.
  * @interface
  */

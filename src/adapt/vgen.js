@@ -237,10 +237,12 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
  * @param {!adapt.base.DocumentURLTransformer} documentURLTransformer
  * @constructor
  * @implements {adapt.vtree.LayoutContext}
+ * @extends {adapt.base.SimpleEventTarget}
  */
 adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds,
                                   xmldoc, docFaces, footnoteStyle, stylerProducer, page, customRenderer, fallbackMap,
                                   documentURLTransformer) {
+    adapt.base.SimpleEventTarget.call(this);
     // from constructor parameters
     /** @const */ this.flowName = flowName;
     /** @const */ this.context = context;
@@ -268,6 +270,7 @@ adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds
     // TODO: only set it on NodeContext
     /** @type {Node} */ this.viewNode = null;
 };
+goog.inherits(adapt.vgen.ViewFactory, adapt.base.SimpleEventTarget);
 
 /**
  * @override
@@ -1532,8 +1535,12 @@ adapt.vgen.ViewFactory.prototype.nextInTree = function(nodeContext, atUnforcedBr
                 nodeContext.inline = true;
             }
         }
+        this.dispatchEvent({
+            type: "nextInTree",
+            nodeContext: nodeContext
+        });
         frame.finish(nodeContext);
-    });
+    }.bind(this));
     return frame.result();
 };
 

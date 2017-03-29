@@ -827,7 +827,7 @@ adapt.base.SimpleEventTarget.prototype.dispatchEvent = function(evt) {
 /**
  * @param {string} type
  * @param {adapt.base.EventListener} listener
- * @param {boolean} capture
+ * @param {boolean=} capture
  * @return {void}
  */
 adapt.base.SimpleEventTarget.prototype.addEventListener = function(type, listener, capture) {
@@ -845,7 +845,7 @@ adapt.base.SimpleEventTarget.prototype.addEventListener = function(type, listene
 /**
  * @param {string} type
  * @param {adapt.base.EventListener} listener
- * @param {boolean} capture
+ * @param {boolean=} capture
  * @return {void}
  */
 adapt.base.SimpleEventTarget.prototype.removeEventListener = function(type, listener, capture) {
