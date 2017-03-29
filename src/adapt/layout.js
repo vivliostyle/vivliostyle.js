@@ -3104,7 +3104,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, brea
         self.openAllViews(chunkPosition.primary).then(function(nodeContext) {
             var retryer = new adapt.layout.LayoutRetryer(leadingEdge, breakAfter);
             retryer.layout(nodeContext, self).then(function(nodeContextParam) {
-                self.doFinishBreak(nodeContextParam, retryer.context.overflownNodeContext, nodeContext, retryer.context.initialComputedBlockSize).then(function(positionAfter) {
+                self.doFinishBreak(nodeContextParam, retryer.context.overflownNodeContext, nodeContext, retryer.initialComputedBlockSize).then(function(positionAfter) {
                     var cont = null;
                     if (!self.pseudoParent) {
                         cont = self.resetConstraints(positionAfter);
@@ -3173,20 +3173,18 @@ adapt.layout.Column.prototype.resetConstraints = function(nodeContext) {
  * @param {adapt.vtree.NodeContext} nodeContext starting position.
  * @param {boolean} leadingEdge
  * @param {?string=} breakAfter
- * @return {!adapt.task.Result.<{nodeContext: adapt.vtree.NodeContext, overflownNodeContext: adapt.vtree.NodeContext, initialComputedBlockSize: number}>} holding end position.
+ * @return {!adapt.task.Result.<{nodeContext: adapt.vtree.NodeContext, overflownNodeContext: adapt.vtree.NodeContext}>} holding end position.
  */
 adapt.layout.Column.prototype.doLayout = function(nodeContext, leadingEdge, breakAfter) {
     var self = this;
     /**
      * @type {!adapt.task.Frame.<{
      *   nodeContext: adapt.vtree.NodeContext,
-     *   overflownNodeContext: adapt.vtree.NodeContext,
-     *   initialComputedBlockSize: number
+     *   overflownNodeContext: adapt.vtree.NodeContext
      * }>}
      */
     var frame = adapt.task.newFrame("doLayout");
     /** @type {adapt.vtree.NodeContext} */ var overflownNodeContext = null;
-    var initialComputedBlockSize = self.computedBlockSize;
     // ------ init backtracking list -----
     self.breakPositions = [];
     self.nodeContextOverflowingDueToRepetitiveElements = null;
@@ -3236,7 +3234,7 @@ adapt.layout.Column.prototype.doLayout = function(nodeContext, leadingEdge, brea
         }
         loopFrame.breakLoop();
     }).then(function() {
-        frame.finish({nodeContext: nodeContext, overflownNodeContext: overflownNodeContext, initialComputedBlockSize: initialComputedBlockSize});
+        frame.finish({nodeContext: nodeContext, overflownNodeContext: overflownNodeContext});
     });
     return frame.result();
 };
