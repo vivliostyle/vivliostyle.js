@@ -440,7 +440,7 @@ mix-blend-mode = BLEND_MODE;
 isolation = auto | isolate;
 background-blend-mode = COMMA( BLEND_MODE+ );
 
-repeat-on-break = auto | none | header | footer;
+[viv]repeat-on-break = auto | none | header | footer;
 
 DEFAULTS
 
