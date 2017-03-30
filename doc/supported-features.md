@@ -955,3 +955,10 @@ Note: This spec is not on a W3C standards track. Future version of Vivliostyle m
 - [-epubx-wrap-flow](http://www.idpf.org/epub/pgt/#prop-wrap-flow)
   - Supported in all browsers
   - Only effective when specified to EPUB Adaptive Layout partitions.
+
+## [CSS Repeated Headers and Footers](https://specs.rivoal.net/css-repeat/)
+
+Note: This spec proposal is not submitted to CSS Working Group yet.
+
+- [repeat-on-break](https://specs.rivoal.net/css-repeat/#propdef-repeat-on-break)
+  - Supported in all browsers

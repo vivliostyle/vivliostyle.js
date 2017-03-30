@@ -229,7 +229,7 @@
 
 <section>
     <table>
-        <caption>(3) Break at the inside row</caption>
+        <caption>(3) Break inside the row</caption>
         <thead>
             <tr>
                 <td>header-cell-1</td>
@@ -293,7 +293,84 @@
 </section>
 
 <section>
-  Empty
+    <table>
+        <caption>(4) If there are multiple headers/footers, only the first one is used</caption>
+        <thead>
+            <tr>
+                <td>header-cell-1</td>
+                <td>header-cell-2</td>
+                <td>header-cell-3</td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td>footer-cell-1</td>
+                <td>footer-cell-2</td>
+                <td>footer-cell-3</td>
+            </tr>
+        </tfoot>
+        <thead>
+            <tr>
+                <td>this header  treated as an ordinary table row</td>
+                <td>header-cell-2</td>
+                <td>header-cell-3</td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>row1-cell-1</td>
+                <td>row1-cell-2</td>
+                <td>row1-cell-3</td>
+            </tr>
+            <tr>
+                <td>row2-cell-1</td>
+                <td>row2-cell-2</td>
+                <td>row2-cell-3</td>
+            </tr>
+            <tr>
+                <td>row3-cell-1</td>
+                <td>row3-cell-2</td>
+                <td>row3-cell-3</td>
+            </tr>
+            <tr>
+                <td>row4-cell-1</td>
+                <td>row4-cell-2</td>
+                <td>row4-cell-3</td>
+            </tr>
+            <tr>
+                <td>row5-cell-1</td>
+                <td>row5-cell-2</td>
+                <td>row5-cell-3</td>
+            </tr>
+            <tr>
+                <td>row6-cell-1</td>
+                <td>row6-cell-2</td>
+                <td>row6-cell-3</td>
+            </tr>
+            <tr>
+                <td>row7-cell-1</td>
+                <td>row7-cell-2</td>
+                <td>row7-cell-3</td>
+            </tr>
+            <tr>
+                <td>row8-cell-1</td>
+                <td>row8-cell-2</td>
+                <td>row8-cell-3</td>
+            </tr>
+            <tr>
+                <td>row9-cell-1</td>
+                <td>row9-cell-2</td>
+                <td>row9-cell-3</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td>this footer treated as an ordinary table row</td>
+                <td>footer-cell-2</td>
+                <td>footer-cell-3</td>
+            </tr>
+        </tfoot>
+    </table>
 </section>
 
 <section>

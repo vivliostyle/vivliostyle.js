@@ -516,6 +516,28 @@ adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = function(nodeCo
 adapt.vtree.LayoutContext.prototype.isSameNodePosition = function(nodePosition1, nodePosition2) {};
 
 /**
+ * @param {string} type
+ * @param {adapt.base.EventListener} listener
+ * @param {boolean=} capture
+ * @return {void}
+ */
+adapt.vtree.LayoutContext.prototype.addEventListener = function(type, listener, capture) {};
+
+/**
+ * @param {string} type
+ * @param {adapt.base.EventListener} listener
+ * @param {boolean=} capture
+ * @return {void}
+ */
+adapt.vtree.LayoutContext.prototype.removeEventListener = function(type, listener, capture) {};
+
+/**
+ * @param {adapt.base.Event} evt
+ * @return {void}
+ */
+adapt.vtree.LayoutContext.prototype.dispatchEvent = function(evt) {};
+
+/**
  * Formatting context.
  * @interface
  */
@@ -539,9 +561,26 @@ adapt.vtree.FormattingContext.prototype.isFirstTime = function(nodeContext, firs
 adapt.vtree.FormattingContext.prototype.getParent = function() {};
 
 /**
- * @return {vivliostyle.layoututil.RepetitiveElements}
+ * @return {*}
  */
-adapt.vtree.FormattingContext.prototype.getRepetitiveElements = function() {};
+adapt.vtree.FormattingContext.prototype.saveState = function() {};
+
+/**
+ * @param {*} state
+ */
+adapt.vtree.FormattingContext.prototype.restoreState = function(state) {};
+
+
+/**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {function(adapt.vtree.FormattingContext)} callback
+ */
+adapt.vtree.eachAncestorFormattingContext = function(nodeContext, callback) {
+    if (!nodeContext) return;
+    for (var fc = nodeContext.formattingContext; fc; fc = fc.getParent()) {
+        callback(fc);
+    }
+};
 
 /**
  * @typedef {{
@@ -755,6 +794,7 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {?string} */ this.lang = null;
     /** @type {?Array.<vivliostyle.diff.Change>} */ this.preprocessedTextContent = null;
     /** @type {adapt.vtree.FormattingContext} */ this.formattingContext = parent ? parent.formattingContext : null;
+    /** @type {?string} */ this.repeatOnBreak = null;
 };
 
 /**
@@ -786,6 +826,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.nodeShadow = null;
     this.preprocessedTextContent = null;
     this.formattingContext = this.parent ? this.parent.formattingContext : null;
+    this.repeatOnBreak = null;
 };
 
 /**
@@ -826,6 +867,7 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.overflow = this.overflow;
     np.preprocessedTextContent = this.preprocessedTextContent;
     np.formattingContext = this.formattingContext;
+    np.repeatOnBreak = this.repeatOnBreak;
     return np;
 };
 
@@ -947,6 +989,18 @@ adapt.vtree.NodeContext.prototype.walkUpBlocks = function(callback) {
         nodeContext = nodeContext.parent;
     }
 };
+
+
+/**
+ * @param {adapt.vtree.FormattingContext} formattingContext
+ * @returns {boolean}
+ */
+adapt.vtree.NodeContext.prototype.belongsTo = function(formattingContext) {
+    return this.formattingContext === formattingContext
+        && !!this.parent
+        && this.parent.formattingContext === formattingContext;
+};
+
 
 /**
  * @param {adapt.vtree.NodePosition} primary
