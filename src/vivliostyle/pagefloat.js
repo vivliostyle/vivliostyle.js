@@ -150,6 +150,14 @@ goog.scope(function() {
     };
 
     /**
+     * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} pageFloatLayoutContext
+     * @returns {boolean}
+     */
+    PageFloat.prototype.isAllowedOnContext = function(pageFloatLayoutContext) {
+        return pageFloatLayoutContext.isAnchorAlreadyAppeared(this.getId());
+    };
+
+    /**
      * @private
      * @constructor
      */
@@ -646,9 +654,9 @@ goog.scope(function() {
     PageFloatLayoutContext.prototype.finish = function() {
         for (var i = this.floatFragments.length - 1; i >= 0; i--) {
             var fragment = this.floatFragments[i];
-            if (!this.isAnchorAlreadyAppeared(fragment.pageFloatId)) {
+            var float = this.getFloatOfFragment(fragment);
+            if (!float.isAllowedOnContext(this)) {
                 this.removePageFloatFragment(fragment);
-                var float = this.getFloatOfFragment(fragment);
                 this.forbid(float);
                 // If the removed float is a block-end/inline-end float,
                 // we should re-layout preceding floats with the same float direction.
@@ -658,7 +666,7 @@ goog.scope(function() {
         }
         for (var i = this.floatsDeferredToNext.length - 1; i >= 0; i--) {
             var continuation = this.floatsDeferredToNext[i];
-            if (!this.isAnchorAlreadyAppeared(continuation.float.getId())) {
+            if (!continuation.float.isAllowedOnContext(this)) {
                 this.floatsDeferredToNext.splice(i, 1);
             }
         }
