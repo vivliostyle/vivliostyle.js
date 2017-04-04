@@ -404,6 +404,7 @@
       - [CSS Writing Modes 3 - direction](https://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
       - [SVG 1.1 - direction](https://www.w3.org/TR/SVG/text.html#DirectionProperty)
   - Drafts
+      - [CSS Writing Modes 4 - direction](https://drafts.csswg.org/css-writing-modes-4/#propdef-direction)
       - [CSS 2.2 - direction](https://drafts.csswg.org/css2/visuren.html#propdef-direction)
       - [CSS 2.1 - direction](https://drafts.csswg.org/css21/visuren.html#propdef-direction)
       - [CSS Writing Modes 3 - direction](https://drafts.csswg.org/css-writing-modes-3/#propdef-direction)
@@ -453,6 +454,7 @@
       - [CSS Fonts 3 - font](https://www.w3.org/TR/css-fonts-3/#propdef-font)
       - [SVG 1.1 - font](https://www.w3.org/TR/SVG/text.html#FontProperty)
   - Drafts
+      - [CSS Fonts 4 - font](https://drafts.csswg.org/css-fonts-4/#propdef-font)
       - [CSS 2.2 - font](https://drafts.csswg.org/css2/fonts.html#propdef-font)
       - [CSS 2.1 - font](https://drafts.csswg.org/css21/fonts.html#propdef-font)
       - [CSS Fonts 3 - font](https://drafts.csswg.org/css-fonts-3/#propdef-font)
@@ -464,6 +466,7 @@
       - [CSS Fonts 3 - font-family](https://www.w3.org/TR/css-fonts-3/#propdef-font-family)
       - [SVG 1.1 - font-family](https://www.w3.org/TR/SVG/text.html#FontFamilyProperty)
   - Drafts
+      - [CSS Fonts 4 - font-family](https://drafts.csswg.org/css-fonts-4/#propdef-font-family)
       - [CSS 2.2 - font-family](https://drafts.csswg.org/css2/fonts.html#propdef-font-family)
       - [CSS 2.1 - font-family](https://drafts.csswg.org/css21/fonts.html#propdef-font-family)
       - [CSS Fonts 3 - font-family](https://drafts.csswg.org/css-fonts-3/#propdef-font-family)
@@ -989,6 +992,7 @@
       - [CSS Writing Modes 3 - unicode-bidi](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
       - [SVG 1.1 - unicode-bidi](https://www.w3.org/TR/SVG/text.html#UnicodeBidiProperty)
   - Drafts
+      - [CSS Writing Modes 4 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-4/#propdef-unicode-bidi)
       - [CSS 2.2 - unicode-bidi](https://drafts.csswg.org/css2/visuren.html#propdef-unicode-bidi)
       - [CSS 2.1 - unicode-bidi](https://drafts.csswg.org/css21/visuren.html#propdef-unicode-bidi)
       - [CSS Writing Modes 3 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-3/#propdef-unicode-bidi)
@@ -1591,6 +1595,7 @@
       - [CSS Fonts 3 - font](https://www.w3.org/TR/css-fonts-3/#propdef-font)
       - [SVG 1.1 - font](https://www.w3.org/TR/SVG/text.html#FontProperty)
   - Drafts
+      - [CSS Fonts 4 - font](https://drafts.csswg.org/css-fonts-4/#propdef-font)
       - [CSS 2.2 - font](https://drafts.csswg.org/css2/fonts.html#propdef-font)
       - [CSS 2.1 - font](https://drafts.csswg.org/css21/fonts.html#propdef-font)
       - [CSS Fonts 3 - font](https://drafts.csswg.org/css-fonts-3/#propdef-font)
@@ -1602,6 +1607,7 @@
       - [CSS Fonts 3 - font-family](https://www.w3.org/TR/css-fonts-3/#propdef-font-family)
       - [SVG 1.1 - font-family](https://www.w3.org/TR/SVG/text.html#FontFamilyProperty)
   - Drafts
+      - [CSS Fonts 4 - font-family](https://drafts.csswg.org/css-fonts-4/#propdef-font-family)
       - [CSS 2.2 - font-family](https://drafts.csswg.org/css2/fonts.html#propdef-font-family)
       - [CSS 2.1 - font-family](https://drafts.csswg.org/css21/fonts.html#propdef-font-family)
       - [CSS Fonts 3 - font-family](https://drafts.csswg.org/css-fonts-3/#propdef-font-family)
@@ -1636,6 +1642,7 @@
       - [CSS Fonts 3 - font-size-adjust](https://www.w3.org/TR/css-fonts-3/#propdef-font-size-adjust)
       - [SVG 1.1 - font-size-adjust](https://www.w3.org/TR/SVG/text.html#FontSizeAdjustProperty)
   - Drafts
+      - [CSS Fonts 4 - font-size-adjust](https://drafts.csswg.org/css-fonts-4/#propdef-font-size-adjust)
       - [CSS Fonts 3 - font-size-adjust](https://drafts.csswg.org/css-fonts-3/#propdef-font-size-adjust)
   - Values: `none | NNEG_NUM;`
 - [font-stretch](https://www.w3.org/TR/css-fonts-3/#propdef-font-stretch)
@@ -2004,7 +2011,7 @@
   - Drafts
       - [CSS Multicol 1 - column-span](https://drafts.csswg.org/css-multicol-1/#propdef-column-span)
       - [CSS Multicol 2 - column-span](https://drafts.csswg.org/css-multicol-2/#propdef-column-span)
-  - Values: `none | all;`
+  - Values: `none | auto | all;`
 - [column-width](https://www.w3.org/TR/css3-multicol/#column-width)
     - Allowed prefixes: moz, webkit
   - TR
@@ -2028,7 +2035,7 @@
   - Drafts
       - [CSS Multicol 1 - column-span](https://drafts.csswg.org/css-multicol-1/#propdef-column-span)
       - [CSS Multicol 2 - column-span](https://drafts.csswg.org/css-multicol-2/#propdef-column-span)
-  - Values: `none | all;`
+  - Values: `none | auto | all;`
 
 ## [CSS User Interface 3](https://www.w3.org/TR/css3-ui/)
 - [box-sizing](https://www.w3.org/TR/css3-ui/#propdef-box-sizing)
@@ -2098,6 +2105,7 @@
   - TR
       - [CSS User Interface 3 - text-overflow](https://www.w3.org/TR/css3-ui/#propdef-text-overflow)
   - Drafts
+      - [CSS User Interface 4 - text-overflow](https://drafts.csswg.org/css-ui-4/#propdef-text-overflow)
       - [CSS User Interface 3 - text-overflow](https://drafts.csswg.org/css-ui-3/#propdef-text-overflow)
   - Values: `[clip | ellipsis | STRING]{1,2};`
 
@@ -2109,6 +2117,7 @@
       - [CSS Writing Modes 3 - direction](https://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
       - [SVG 1.1 - direction](https://www.w3.org/TR/SVG/text.html#DirectionProperty)
   - Drafts
+      - [CSS Writing Modes 4 - direction](https://drafts.csswg.org/css-writing-modes-4/#propdef-direction)
       - [CSS 2.2 - direction](https://drafts.csswg.org/css2/visuren.html#propdef-direction)
       - [CSS 2.1 - direction](https://drafts.csswg.org/css21/visuren.html#propdef-direction)
       - [CSS Writing Modes 3 - direction](https://drafts.csswg.org/css-writing-modes-3/#propdef-direction)
@@ -2118,12 +2127,14 @@
       - [CSS Writing Modes 3 - glyph-orientation-vertical](https://www.w3.org/TR/css-writing-modes-3/#propdef-glyph-orientation-vertical)
       - [SVG 1.1 - glyph-orientation-vertical](https://www.w3.org/TR/SVG/text.html#GlyphOrientationVerticalProperty)
   - Drafts
+      - [CSS Writing Modes 4 - glyph-orientation-vertical](https://drafts.csswg.org/css-writing-modes-4/#propdef-glyph-orientation-vertical)
       - [CSS Writing Modes 3 - glyph-orientation-vertical](https://drafts.csswg.org/css-writing-modes-3/#propdef-glyph-orientation-vertical)
   - Values: `auto | NUM | ANGLE;`
 - [text-combine-upright](https://www.w3.org/TR/css-writing-modes-3/#propdef-text-combine-upright)
   - TR
       - [CSS Writing Modes 3 - text-combine-upright](https://www.w3.org/TR/css-writing-modes-3/#propdef-text-combine-upright)
   - Drafts
+      - [CSS Writing Modes 4 - text-combine-upright](https://drafts.csswg.org/css-writing-modes-4/#propdef-text-combine-upright)
       - [CSS Writing Modes 3 - text-combine-upright](https://drafts.csswg.org/css-writing-modes-3/#propdef-text-combine-upright)
   - Values: `none | all | [ digits POS_INT? ]; /* relaxed */`
 - [text-orientation](https://www.w3.org/TR/css-writing-modes-3/#propdef-text-orientation)
@@ -2131,6 +2142,7 @@
   - TR
       - [CSS Writing Modes 3 - text-orientation](https://www.w3.org/TR/css-writing-modes-3/#propdef-text-orientation)
   - Drafts
+      - [CSS Writing Modes 4 - text-orientation](https://drafts.csswg.org/css-writing-modes-4/#propdef-text-orientation)
       - [CSS Writing Modes 3 - text-orientation](https://drafts.csswg.org/css-writing-modes-3/#propdef-text-orientation)
   - Values: `mixed | upright | sideways-right | sideways-left | sideways | use-glyph-orientation /* the following values are kept for backward-compatibility */ | vertical-right | rotate-right | rotate-left | rotate-normal | auto;`
 - [unicode-bidi](https://www.w3.org/TR/CSS22/visuren.html#propdef-unicode-bidi)
@@ -2140,6 +2152,7 @@
       - [CSS Writing Modes 3 - unicode-bidi](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
       - [SVG 1.1 - unicode-bidi](https://www.w3.org/TR/SVG/text.html#UnicodeBidiProperty)
   - Drafts
+      - [CSS Writing Modes 4 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-4/#propdef-unicode-bidi)
       - [CSS 2.2 - unicode-bidi](https://drafts.csswg.org/css2/visuren.html#propdef-unicode-bidi)
       - [CSS 2.1 - unicode-bidi](https://drafts.csswg.org/css21/visuren.html#propdef-unicode-bidi)
       - [CSS Writing Modes 3 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-3/#propdef-unicode-bidi)
@@ -2150,6 +2163,7 @@
       - [CSS Writing Modes 3 - writing-mode](https://www.w3.org/TR/css-writing-modes-3/#propdef-writing-mode)
       - [SVG 1.1 - writing-mode](https://www.w3.org/TR/SVG/text.html#WritingModeProperty)
   - Drafts
+      - [CSS Writing Modes 4 - writing-mode](https://drafts.csswg.org/css-writing-modes-4/#propdef-writing-mode)
       - [CSS Writing Modes 3 - writing-mode](https://drafts.csswg.org/css-writing-modes-3/#propdef-writing-mode)
   - Values: `horizontal-tb | vertical-rl | lr-tb | rl-tb | tb-rl | lr | rl | tb;`
 
@@ -2516,7 +2530,7 @@
   - TR
       - [CSS Transforms 1 - backface-visibility](https://www.w3.org/TR/css-transforms-1/#propdef-backface-visibility)
   - Drafts
-      - [CSS Transforms 1 - backface-visibility](https://drafts.csswg.org/css-transforms-1/#propdef-backface-visibility)
+      - [CSS Transforms 2 - backface-visibility](https://drafts.csswg.org/css-transforms-2/#propdef-backface-visibility)
   - Values: `visible | hidden;`
 - [transform](https://www.w3.org/TR/css-transforms-1/#propdef-transform)
     - Allowed prefixes: epub, ms
@@ -2817,6 +2831,7 @@
       - [CSS Writing Modes 3 - direction](https://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
       - [SVG 1.1 - direction](https://www.w3.org/TR/SVG/text.html#DirectionProperty)
   - Drafts
+      - [CSS Writing Modes 4 - direction](https://drafts.csswg.org/css-writing-modes-4/#propdef-direction)
       - [CSS 2.2 - direction](https://drafts.csswg.org/css2/visuren.html#propdef-direction)
       - [CSS 2.1 - direction](https://drafts.csswg.org/css21/visuren.html#propdef-direction)
       - [CSS Writing Modes 3 - direction](https://drafts.csswg.org/css-writing-modes-3/#propdef-direction)
@@ -2845,7 +2860,6 @@
       - [SVG 1.1 - fill](https://www.w3.org/TR/SVG/painting.html#FillProperty)
       - [SVG 2 - fill](https://www.w3.org/TR/svg2/painting.html#FillProperty)
   - Drafts
-      - [CSS Text Decoration 4 - fill](https://drafts.csswg.org/css-text-decor-4/#propdef-fill)
       - [Fill & Stroke - fill](https://drafts.fxtf.org/paint/#propdef-fill)
       - [SVG 2 - fill](https://svgwg.org/svg2-draft/painting.html#FillProperty)
   - Values: `PAINT;`
@@ -2854,7 +2868,6 @@
       - [SVG 1.1 - fill-opacity](https://www.w3.org/TR/SVG/painting.html#FillOpacityProperty)
       - [SVG 2 - fill-opacity](https://www.w3.org/TR/svg2/painting.html#FillOpacityProperty)
   - Drafts
-      - [CSS Text Decoration 4 - fill-opacity](https://drafts.csswg.org/css-text-decor-4/#propdef-fill-opacity)
       - [Fill & Stroke - fill-opacity](https://drafts.fxtf.org/paint/#propdef-fill-opacity)
       - [SVG 2 - fill-opacity](https://svgwg.org/svg2-draft/painting.html#FillOpacityProperty)
   - Values: `OPACITY_VALUE;`
@@ -2887,6 +2900,7 @@
       - [CSS Fonts 3 - font](https://www.w3.org/TR/css-fonts-3/#propdef-font)
       - [SVG 1.1 - font](https://www.w3.org/TR/SVG/text.html#FontProperty)
   - Drafts
+      - [CSS Fonts 4 - font](https://drafts.csswg.org/css-fonts-4/#propdef-font)
       - [CSS 2.2 - font](https://drafts.csswg.org/css2/fonts.html#propdef-font)
       - [CSS 2.1 - font](https://drafts.csswg.org/css21/fonts.html#propdef-font)
       - [CSS Fonts 3 - font](https://drafts.csswg.org/css-fonts-3/#propdef-font)
@@ -2898,6 +2912,7 @@
       - [CSS Fonts 3 - font-family](https://www.w3.org/TR/css-fonts-3/#propdef-font-family)
       - [SVG 1.1 - font-family](https://www.w3.org/TR/SVG/text.html#FontFamilyProperty)
   - Drafts
+      - [CSS Fonts 4 - font-family](https://drafts.csswg.org/css-fonts-4/#propdef-font-family)
       - [CSS 2.2 - font-family](https://drafts.csswg.org/css2/fonts.html#propdef-font-family)
       - [CSS 2.1 - font-family](https://drafts.csswg.org/css21/fonts.html#propdef-font-family)
       - [CSS Fonts 3 - font-family](https://drafts.csswg.org/css-fonts-3/#propdef-font-family)
@@ -2919,6 +2934,7 @@
       - [CSS Fonts 3 - font-size-adjust](https://www.w3.org/TR/css-fonts-3/#propdef-font-size-adjust)
       - [SVG 1.1 - font-size-adjust](https://www.w3.org/TR/SVG/text.html#FontSizeAdjustProperty)
   - Drafts
+      - [CSS Fonts 4 - font-size-adjust](https://drafts.csswg.org/css-fonts-4/#propdef-font-size-adjust)
       - [CSS Fonts 3 - font-size-adjust](https://drafts.csswg.org/css-fonts-3/#propdef-font-size-adjust)
   - Values: `none | NNEG_NUM;`
 - [font-stretch](https://www.w3.org/TR/css-fonts-3/#propdef-font-stretch)
@@ -2969,6 +2985,7 @@
       - [CSS Writing Modes 3 - glyph-orientation-vertical](https://www.w3.org/TR/css-writing-modes-3/#propdef-glyph-orientation-vertical)
       - [SVG 1.1 - glyph-orientation-vertical](https://www.w3.org/TR/SVG/text.html#GlyphOrientationVerticalProperty)
   - Drafts
+      - [CSS Writing Modes 4 - glyph-orientation-vertical](https://drafts.csswg.org/css-writing-modes-4/#propdef-glyph-orientation-vertical)
       - [CSS Writing Modes 3 - glyph-orientation-vertical](https://drafts.csswg.org/css-writing-modes-3/#propdef-glyph-orientation-vertical)
   - Values: `auto | NUM | ANGLE;`
 - [letter-spacing](https://www.w3.org/TR/CSS22/text.html#propdef-letter-spacing)
@@ -3050,7 +3067,6 @@
       - [SVG 1.1 - stroke](https://www.w3.org/TR/SVG/painting.html#StrokeProperty)
       - [SVG 2 - stroke](https://www.w3.org/TR/svg2/painting.html#StrokeProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke)
       - [Fill & Stroke - stroke](https://drafts.fxtf.org/paint/#propdef-stroke)
       - [SVG 2 - stroke](https://svgwg.org/svg2-draft/painting.html#StrokeProperty)
   - Values: `PAINT;`
@@ -3059,7 +3075,6 @@
       - [SVG 1.1 - stroke-dasharray](https://www.w3.org/TR/SVG/painting.html#StrokeDasharrayProperty)
       - [SVG 2 - stroke-dasharray](https://www.w3.org/TR/svg2/painting.html#StrokeDasharrayProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-dasharray](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-dasharray)
       - [Fill & Stroke - stroke-dasharray](https://drafts.fxtf.org/paint/#propdef-stroke-dasharray)
       - [SVG 2 - stroke-dasharray](https://svgwg.org/svg2-draft/painting.html#StrokeDasharrayProperty)
   - Values: `none | DASH_ARRAY;`
@@ -3068,7 +3083,6 @@
       - [SVG 1.1 - stroke-dashoffset](https://www.w3.org/TR/SVG/painting.html#StrokeDashoffsetProperty)
       - [SVG 2 - stroke-dashoffset](https://www.w3.org/TR/svg2/painting.html#StrokeDashoffsetProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-dashoffset](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-dashoffset)
       - [Fill & Stroke - stroke-dashoffset](https://drafts.fxtf.org/paint/#propdef-stroke-dashoffset)
       - [SVG 2 - stroke-dashoffset](https://svgwg.org/svg2-draft/painting.html#StrokeDashoffsetProperty)
   - Values: `PERCENTAGE | LENGTH_OR_NUM;`
@@ -3077,7 +3091,6 @@
       - [SVG 1.1 - stroke-linecap](https://www.w3.org/TR/SVG/painting.html#StrokeLinecapProperty)
       - [SVG 2 - stroke-linecap](https://www.w3.org/TR/svg2/painting.html#StrokeLinecapProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-linecap](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-linecap)
       - [Fill & Stroke - stroke-linecap](https://drafts.fxtf.org/paint/#propdef-stroke-linecap)
       - [SVG 2 - stroke-linecap](https://svgwg.org/svg2-draft/painting.html#StrokeLinecapProperty)
   - Values: `butt | round | square;`
@@ -3086,7 +3099,6 @@
       - [SVG 1.1 - stroke-linejoin](https://www.w3.org/TR/SVG/painting.html#StrokeLinejoinProperty)
       - [SVG 2 - stroke-linejoin](https://www.w3.org/TR/svg2/painting.html#StrokeLinejoinProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-linejoin](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-linejoin)
       - [Fill & Stroke - stroke-linejoin](https://drafts.fxtf.org/paint/#propdef-stroke-linejoin)
       - [SVG 2 - stroke-linejoin](https://svgwg.org/svg2-draft/painting.html#StrokeLinejoinProperty)
   - Values: `miter | round | bevel;`
@@ -3095,7 +3107,6 @@
       - [SVG 1.1 - stroke-miterlimit](https://www.w3.org/TR/SVG/painting.html#StrokeMiterlimitProperty)
       - [SVG 2 - stroke-miterlimit](https://www.w3.org/TR/svg2/painting.html#StrokeMiterlimitProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-miterlimit](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-miterlimit)
       - [Fill & Stroke - stroke-miterlimit](https://drafts.fxtf.org/paint/#propdef-stroke-miterlimit)
       - [SVG 2 - stroke-miterlimit](https://svgwg.org/svg2-draft/painting.html#StrokeMiterlimitProperty)
   - Values: `NUM;`
@@ -3104,7 +3115,6 @@
       - [SVG 1.1 - stroke-opacity](https://www.w3.org/TR/SVG/painting.html#StrokeOpacityProperty)
       - [SVG 2 - stroke-opacity](https://www.w3.org/TR/svg2/painting.html#StrokeOpacityProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-opacity](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-opacity)
       - [Fill & Stroke - stroke-opacity](https://drafts.fxtf.org/paint/#propdef-stroke-opacity)
       - [SVG 2 - stroke-opacity](https://svgwg.org/svg2-draft/painting.html#StrokeOpacityProperty)
   - Values: `OPACITY_VALUE;`
@@ -3113,7 +3123,6 @@
       - [SVG 1.1 - stroke-width](https://www.w3.org/TR/SVG/painting.html#StrokeWidthProperty)
       - [SVG 2 - stroke-width](https://www.w3.org/TR/svg2/painting.html#StrokeWidthProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-width](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-width)
       - [Fill & Stroke - stroke-width](https://drafts.fxtf.org/paint/#propdef-stroke-width)
       - [SVG 2 - stroke-width](https://svgwg.org/svg2-draft/painting.html#StrokeWidthProperty)
   - Values: `PERCENTAGE | LENGTH_OR_NUM;`
@@ -3142,6 +3151,7 @@
       - [CSS Writing Modes 3 - unicode-bidi](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
       - [SVG 1.1 - unicode-bidi](https://www.w3.org/TR/SVG/text.html#UnicodeBidiProperty)
   - Drafts
+      - [CSS Writing Modes 4 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-4/#propdef-unicode-bidi)
       - [CSS 2.2 - unicode-bidi](https://drafts.csswg.org/css2/visuren.html#propdef-unicode-bidi)
       - [CSS 2.1 - unicode-bidi](https://drafts.csswg.org/css21/visuren.html#propdef-unicode-bidi)
       - [CSS Writing Modes 3 - unicode-bidi](https://drafts.csswg.org/css-writing-modes-3/#propdef-unicode-bidi)
@@ -3172,6 +3182,7 @@
       - [CSS Writing Modes 3 - writing-mode](https://www.w3.org/TR/css-writing-modes-3/#propdef-writing-mode)
       - [SVG 1.1 - writing-mode](https://www.w3.org/TR/SVG/text.html#WritingModeProperty)
   - Drafts
+      - [CSS Writing Modes 4 - writing-mode](https://drafts.csswg.org/css-writing-modes-4/#propdef-writing-mode)
       - [CSS Writing Modes 3 - writing-mode](https://drafts.csswg.org/css-writing-modes-3/#propdef-writing-mode)
   - Values: `horizontal-tb | vertical-rl | lr-tb | rl-tb | tb-rl | lr | rl | tb;`
 
@@ -3194,7 +3205,6 @@
       - [SVG 1.1 - fill](https://www.w3.org/TR/SVG/painting.html#FillProperty)
       - [SVG 2 - fill](https://www.w3.org/TR/svg2/painting.html#FillProperty)
   - Drafts
-      - [CSS Text Decoration 4 - fill](https://drafts.csswg.org/css-text-decor-4/#propdef-fill)
       - [Fill & Stroke - fill](https://drafts.fxtf.org/paint/#propdef-fill)
       - [SVG 2 - fill](https://svgwg.org/svg2-draft/painting.html#FillProperty)
   - Values: `PAINT;`
@@ -3203,7 +3213,6 @@
       - [SVG 1.1 - fill-opacity](https://www.w3.org/TR/SVG/painting.html#FillOpacityProperty)
       - [SVG 2 - fill-opacity](https://www.w3.org/TR/svg2/painting.html#FillOpacityProperty)
   - Drafts
-      - [CSS Text Decoration 4 - fill-opacity](https://drafts.csswg.org/css-text-decor-4/#propdef-fill-opacity)
       - [Fill & Stroke - fill-opacity](https://drafts.fxtf.org/paint/#propdef-fill-opacity)
       - [SVG 2 - fill-opacity](https://svgwg.org/svg2-draft/painting.html#FillOpacityProperty)
   - Values: `OPACITY_VALUE;`
@@ -3295,7 +3304,6 @@
       - [SVG 1.1 - stroke](https://www.w3.org/TR/SVG/painting.html#StrokeProperty)
       - [SVG 2 - stroke](https://www.w3.org/TR/svg2/painting.html#StrokeProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke)
       - [Fill & Stroke - stroke](https://drafts.fxtf.org/paint/#propdef-stroke)
       - [SVG 2 - stroke](https://svgwg.org/svg2-draft/painting.html#StrokeProperty)
   - Values: `PAINT;`
@@ -3304,7 +3312,6 @@
       - [SVG 1.1 - stroke-dasharray](https://www.w3.org/TR/SVG/painting.html#StrokeDasharrayProperty)
       - [SVG 2 - stroke-dasharray](https://www.w3.org/TR/svg2/painting.html#StrokeDasharrayProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-dasharray](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-dasharray)
       - [Fill & Stroke - stroke-dasharray](https://drafts.fxtf.org/paint/#propdef-stroke-dasharray)
       - [SVG 2 - stroke-dasharray](https://svgwg.org/svg2-draft/painting.html#StrokeDasharrayProperty)
   - Values: `none | DASH_ARRAY;`
@@ -3313,7 +3320,6 @@
       - [SVG 1.1 - stroke-dashoffset](https://www.w3.org/TR/SVG/painting.html#StrokeDashoffsetProperty)
       - [SVG 2 - stroke-dashoffset](https://www.w3.org/TR/svg2/painting.html#StrokeDashoffsetProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-dashoffset](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-dashoffset)
       - [Fill & Stroke - stroke-dashoffset](https://drafts.fxtf.org/paint/#propdef-stroke-dashoffset)
       - [SVG 2 - stroke-dashoffset](https://svgwg.org/svg2-draft/painting.html#StrokeDashoffsetProperty)
   - Values: `PERCENTAGE | LENGTH_OR_NUM;`
@@ -3322,7 +3328,6 @@
       - [SVG 1.1 - stroke-linecap](https://www.w3.org/TR/SVG/painting.html#StrokeLinecapProperty)
       - [SVG 2 - stroke-linecap](https://www.w3.org/TR/svg2/painting.html#StrokeLinecapProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-linecap](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-linecap)
       - [Fill & Stroke - stroke-linecap](https://drafts.fxtf.org/paint/#propdef-stroke-linecap)
       - [SVG 2 - stroke-linecap](https://svgwg.org/svg2-draft/painting.html#StrokeLinecapProperty)
   - Values: `butt | round | square;`
@@ -3331,7 +3336,6 @@
       - [SVG 1.1 - stroke-linejoin](https://www.w3.org/TR/SVG/painting.html#StrokeLinejoinProperty)
       - [SVG 2 - stroke-linejoin](https://www.w3.org/TR/svg2/painting.html#StrokeLinejoinProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-linejoin](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-linejoin)
       - [Fill & Stroke - stroke-linejoin](https://drafts.fxtf.org/paint/#propdef-stroke-linejoin)
       - [SVG 2 - stroke-linejoin](https://svgwg.org/svg2-draft/painting.html#StrokeLinejoinProperty)
   - Values: `miter | round | bevel;`
@@ -3340,7 +3344,6 @@
       - [SVG 1.1 - stroke-miterlimit](https://www.w3.org/TR/SVG/painting.html#StrokeMiterlimitProperty)
       - [SVG 2 - stroke-miterlimit](https://www.w3.org/TR/svg2/painting.html#StrokeMiterlimitProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-miterlimit](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-miterlimit)
       - [Fill & Stroke - stroke-miterlimit](https://drafts.fxtf.org/paint/#propdef-stroke-miterlimit)
       - [SVG 2 - stroke-miterlimit](https://svgwg.org/svg2-draft/painting.html#StrokeMiterlimitProperty)
   - Values: `NUM;`
@@ -3349,7 +3352,6 @@
       - [SVG 1.1 - stroke-opacity](https://www.w3.org/TR/SVG/painting.html#StrokeOpacityProperty)
       - [SVG 2 - stroke-opacity](https://www.w3.org/TR/svg2/painting.html#StrokeOpacityProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-opacity](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-opacity)
       - [Fill & Stroke - stroke-opacity](https://drafts.fxtf.org/paint/#propdef-stroke-opacity)
       - [SVG 2 - stroke-opacity](https://svgwg.org/svg2-draft/painting.html#StrokeOpacityProperty)
   - Values: `OPACITY_VALUE;`
@@ -3358,7 +3360,6 @@
       - [SVG 1.1 - stroke-width](https://www.w3.org/TR/SVG/painting.html#StrokeWidthProperty)
       - [SVG 2 - stroke-width](https://www.w3.org/TR/svg2/painting.html#StrokeWidthProperty)
   - Drafts
-      - [CSS Text Decoration 4 - stroke-width](https://drafts.csswg.org/css-text-decor-4/#propdef-stroke-width)
       - [Fill & Stroke - stroke-width](https://drafts.fxtf.org/paint/#propdef-stroke-width)
       - [SVG 2 - stroke-width](https://svgwg.org/svg2-draft/painting.html#StrokeWidthProperty)
   - Values: `PERCENTAGE | LENGTH_OR_NUM;`
@@ -3548,6 +3549,11 @@
 
 
   - Values: `column-count;`
+- [repeat-on-break]()
+    - Allowed prefixes: viv
+
+
+  - Values: `auto | none | header | footer;`
 - [required]()
     - Allowed prefixes: epubx
 

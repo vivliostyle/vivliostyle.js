@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+
+- Implement `repeat-on-break` property
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/323>
+  - Spec proposal: [CSS Repeated Headers and Footers](https://specs.rivoal.net/css-repeat/)
+
 ### Fixed
 
 - Fix footnote layout bugs

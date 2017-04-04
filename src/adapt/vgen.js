@@ -243,10 +243,12 @@ adapt.vgen.PseudoelementStyler.prototype.processContent = function(element, styl
  * @param {!adapt.base.DocumentURLTransformer} documentURLTransformer
  * @constructor
  * @implements {adapt.vtree.LayoutContext}
+ * @extends {adapt.base.SimpleEventTarget}
  */
 adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds,
                                   xmldoc, docFaces, footnoteStyle, stylerProducer, page, customRenderer, fallbackMap,
                                   documentURLTransformer) {
+    adapt.base.SimpleEventTarget.call(this);
     // from constructor parameters
     /** @const */ this.flowName = flowName;
     /** @const */ this.context = context;
@@ -274,6 +276,7 @@ adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds
     // TODO: only set it on NodeContext
     /** @type {Node} */ this.viewNode = null;
 };
+goog.inherits(adapt.vgen.ViewFactory, adapt.base.SimpleEventTarget);
 
 /**
  * @override
@@ -847,6 +850,11 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         if (self.nodeContext.parent && self.nodeContext.parent.formattingContext) {
             firstTime = self.nodeContext.parent.formattingContext.isFirstTime(self.nodeContext, firstTime);
         }
+        if (!self.nodeContext.inline) {
+            self.nodeContext.repeatOnBreak = self.processRepeatOnBreak(computedStyle);
+            self.findAndProcessRepeatingElements(element, styler);
+        }
+
         // Create the view element
         var custom = false;
         var inner = null;
@@ -1263,6 +1271,59 @@ adapt.vgen.ViewFactory.prototype.preprocessElementStyle = function(computedStyle
 
 /**
  * @private
+ * @param {Element} element
+ * @param {adapt.cssstyler.AbstractStyler} styler
+ */
+adapt.vgen.ViewFactory.prototype.findAndProcessRepeatingElements = function(element, styler) {
+    for (var child = element.firstChild; child; child = child.nextSibling) {
+        if (child.nodeType !== 1) continue;
+        var computedStyle = {};
+        var elementStyle = styler.getStyle(/** @type {Element}*/ (child), false);
+        this.computeStyle(this.nodeContext.vertical, elementStyle, computedStyle);
+        var processRepeatOnBreak = this.processRepeatOnBreak(computedStyle);
+        if (!processRepeatOnBreak) continue;
+
+        if (this.nodeContext.formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext
+            && !this.nodeContext.belongsTo(this.nodeContext.formattingContext)) {
+            return;
+        }
+
+        var parent = this.nodeContext.parent;
+        var parentFormattingContext = parent && parent.formattingContext;
+        this.nodeContext.formattingContext =
+            new vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext(
+                parentFormattingContext, /** @type {!Element}*/ (this.nodeContext.sourceNode));
+        this.nodeContext.formattingContext.initializeRepetitiveElements(this.nodeContext.vertical);
+        return;
+    }
+};
+
+/**
+ * @private
+ * @param {!Object.<string,adapt.css.Val>} computedStyle
+ */
+adapt.vgen.ViewFactory.prototype.processRepeatOnBreak = function(computedStyle) {
+    var repeatOnBreak = computedStyle["repeat-on-break"];
+    if (repeatOnBreak !== adapt.css.ident.none) {
+        if (repeatOnBreak === adapt.css.ident.auto) {
+            if (computedStyle["display"] === adapt.css.ident.table_header_group) {
+                repeatOnBreak = adapt.css.ident.header;
+            } else if (computedStyle["display"] === adapt.css.ident.table_footer_group) {
+                repeatOnBreak = adapt.css.ident.footer;
+            } else {
+                repeatOnBreak = adapt.css.ident.none;
+            }
+        }
+        if (repeatOnBreak && repeatOnBreak !== adapt.css.ident.none) {
+            return repeatOnBreak.toString();
+        }
+    }
+    return null;
+};
+
+
+/**
+ * @private
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.vgen.ViewFactory.prototype.createTextNodeView = function() {
@@ -1511,8 +1572,12 @@ adapt.vgen.ViewFactory.prototype.nextInTree = function(nodeContext, atUnforcedBr
                 nodeContext.inline = true;
             }
         }
+        this.dispatchEvent({
+            type: "nextInTree",
+            nodeContext: nodeContext
+        });
         frame.finish(nodeContext);
-    });
+    }.bind(this));
     return frame.result();
 };
 
