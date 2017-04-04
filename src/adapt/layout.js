@@ -1455,6 +1455,14 @@ adapt.layout.Column.prototype.setupFloatArea = function(area, floatList) {
     area.forceNonfitting = !floatLayoutContext.hasFloatFragments();
     area.innerShape = null;
 
+    if (floatList.floats[0] instanceof vivliostyle.footnote.Footnote) {
+        area.vertical = this.layoutContext.applyFootnoteStyle(floatContainer.vertical, element);
+        area.isFootnote = true;
+        this.setComputedInsets(element, area);
+        area.width -= area.getInsetLeft() + area.getInsetRight();
+        area.height -= area.getInsetTop() + area.getInsetBottom();
+    }
+
     // Calculate bands from the exclusions before setting float area dimensions
     area.init();
     var fitWithinContainer = floatLayoutContext.setFloatAreaDimensions(area, floatList, true,
@@ -1631,13 +1639,17 @@ adapt.layout.Column.prototype.layoutStashedPageFloats = function(floatReference)
  */
 adapt.layout.Column.prototype.setFloatAnchorViewNode = function(nodeContext) {
     var parent = nodeContext.viewNode.parentNode;
-    var dummy = parent.ownerDocument.createElement("span");
-    dummy.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
-    parent.appendChild(dummy);
+    var anchor = parent.ownerDocument.createElement("span");
+    anchor.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
+    if (nodeContext.floatSide === "footnote") {
+        // Defaults for footnote-call, can be overriden by the stylesheet.
+        this.layoutContext.applyPseudoelementStyle(nodeContext, "footnote-call", anchor);
+    }
+    parent.appendChild(anchor);
     parent.removeChild(nodeContext.viewNode);
     var nodeContextAfter = nodeContext.modify();
     nodeContextAfter.after = true;
-    nodeContextAfter.viewNode = dummy;
+    nodeContextAfter.viewNode = anchor;
     return nodeContextAfter;
 };
 

@@ -36,4 +36,11 @@ goog.scope(function() {
     /** @const */ var Footnote = vivliostyle.footnote.Footnote;
     goog.inherits(Footnote, PageFloat);
 
+    /**
+     * @override
+     */
+    Footnote.prototype.getOrder = function() {
+        return Infinity;
+    };
+
 });

@@ -842,11 +842,12 @@ goog.scope(function() {
 
         var logicalFloatSide = this.toLogical(float.floatSide);
         if (logicalFloatSide === "block-end" || logicalFloatSide === "inline-end") {
+            var order = float.getOrder();
             var i = 0;
             while (i < this.floatFragments.length) {
                 var fragment = this.floatFragments[i];
                 var logicalFloatSide2 = this.toLogical(fragment.floatSide);
-                if (logicalFloatSide2 === logicalFloatSide) {
+                if (logicalFloatSide2 === logicalFloatSide && order > fragment.getOrder()) {
                     this.stashedFloatFragments.push(fragment);
                     this.floatFragments.splice(i, 1);
                 } else {
