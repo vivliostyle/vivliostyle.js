@@ -360,12 +360,12 @@ adapt.vgen.ViewFactory.prototype.getPseudoMap = function(cascStyle, regionIds, i
     for (var key in pseudoMap) {
         var computedPseudoStyle = computedPseudoStyleMap[key] = {};
         adapt.csscasc.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
-        vivliostyle.fragmentselector.mergeStylesOfFragmentSelectors(
+        vivliostyle.selectors.mergeViewConditionalStyles(
             computedPseudoStyle, context, pseudoMap[key], nodeContext);
         adapt.csscasc.forEachStylesInRegion(pseudoMap[key], regionIds, isFootnote, function(regionId, regionStyle) {
             adapt.csscasc.mergeStyle(computedPseudoStyle, regionStyle, context);
-            vivliostyle.fragmentselector.forEachStylesOfFragmentSelectors(regionStyle, nodeContext, function(stylesOfFragmentSelector) {
-                adapt.csscasc.mergeStyle(computedPseudoStyle, stylesOfFragmentSelector, context);
+            vivliostyle.selectors.forEachViewConditionalStyles(regionStyle, nodeContext, function(viewConditionalStyles) {
+                adapt.csscasc.mergeStyle(computedPseudoStyle, viewConditionalStyles, context);
             });
         });
     }
@@ -679,6 +679,10 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     var styler = self.nodeContext.shadowContext ?
         /** @type {adapt.cssstyler.AbstractStyler} */ (self.nodeContext.shadowContext.styler) : self.styler;
     var elementStyle = styler.getStyle(element, false);
+    if (!self.nodeContext.shadowContext) {
+        var offset = this.xmldoc.getElementOffset(element);
+        vivliostyle.selectors.registerFragmentIndex(offset, self.nodeContext.fragmentIndex);
+    }
     var computedStyle = {};
     if (!self.nodeContext.parent) {
         var inheritedValues = self.inheritFromSourceParent(elementStyle);
@@ -694,7 +698,6 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         elementStyle = inheritedValues.elementStyle;
         self.nodeContext.lang = inheritedValues.lang;
     }
-    vivliostyle.fragmentselector.setFragmentSelectorIds(elementStyle, self.context, self.nodeContext);
     self.nodeContext.vertical = self.computeStyle(self.nodeContext.vertical, elementStyle, computedStyle);
     styler.processContent(element, computedStyle);
 

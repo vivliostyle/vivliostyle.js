@@ -37,7 +37,7 @@
         "vivliostyle/urls.js",
         "vivliostyle/plugin.js",
         "vivliostyle/logical.js",
-        "vivliostyle/fragmentselector.js",
+        "vivliostyle/selectors.js",
         "adapt/base.js",
         "adapt/sha1.js",
         "adapt/geom.js",

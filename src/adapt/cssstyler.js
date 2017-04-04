@@ -477,7 +477,7 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
 
     this.offsetMap.addStuckRange(rootOffset);
     var style = this.getAttrStyle(this.root);
-    this.cascade.pushElement(this.root, style);
+    this.cascade.pushElement(this.root, style, rootOffset);
     this.postprocessTopStyle(style, false);
     /** @type {boolean} */ this.bodyReached = true;
     switch (this.root.namespaceURI) {
@@ -867,7 +867,7 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
             var elem = /** @type {!Element} */ (this.last);
             var style = this.getAttrStyle(elem);
             this.primaryStack.push(this.primary);
-            this.cascade.pushElement(elem, style);
+            this.cascade.pushElement(elem, style, this.lastOffset);
             var id = elem.getAttribute("id") || elem.getAttributeNS(adapt.base.NS.XML, "id");
             if (id && id === this.idToReach) {
                 this.idToReach = null;

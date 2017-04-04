@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>nth fragment selector</title>
+    <title>nesting</title>
     <style>
         @page {
             size: 820px;
@@ -60,7 +60,6 @@
         }
         :root {
             font-size: 14px;
-            line-height: 12px;
             widows: 1;
             orphans: 1;
         }
@@ -73,76 +72,52 @@
           padding: 10px
         }
 
-        div.content::before {
-          content: "default before (show in page 8): ";
-        }
-        div.content::after {
-          content: "default after (should not display) ";
+        .container, .box {
+          border: 1px solid #999;
+          padding: 5px;
+          margin: 5px;
         }
 
-        section::nth-fragment(2n) {
+        div::nth-fragment(3) span {
           color: red;
         }
-        section::nth-fragment(2n+1) {
-          color: blue;
-        }
-
-        section::nth-fragment(1) div.content::before {
-          content: "page1: ";
-        }
-        section::nth-fragment(2) div.content::before {
-          content: "page2: ";
-        }
-        section::nth-fragment(3) div.content::before {
-          content: "page3: ";
-        }
-        section::nth-fragment(4) div.content::before {
-          content: "page4: ";
-        }
-        section::nth-fragment(5) div.content::before {
-          content: "page5: ";
-        }
-        section::nth-fragment(6) div.content::before {
-          content: "page6: ";
-        }
-        section::nth-fragment(7) div.content::before {
-          content: "page7: ";
-        }
-
-        section::nth-fragment(2n) > div.content::after {
-          content: "this content color should be red";
-        }
-        section::nth-fragment(2n+1) > div.content::after {
-          content: "this content color should be blue";
+        div::nth-fragment(2) div::nth-fragment(2n) /*span*/ {
+          font-weight: bold;
         }
     </style>
 </head>
 <body>
   <section>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
-    <div class="content"></div>
+    <div class="box">
+      <div class="container">
+        <div class="content"><span>content 1-1</span></div>
+        <div class="content"><span>content 1-2</span></div>
+        <div class="content"><span>content 1-3 : should be bold</span></div>
+        <div class="content"><span>content 1-4 : should be bold</span></div>
+      </div>
+      <div class="container">
+        <div class="content"><span>content 2-1</span></div>
+        <div class="content"><span>content 2-2 : should be red</span></div>
+        <div class="content"><span>content 2-3 : should be red</span></div>
+        <div class="content"><span>content 2-4 : should be red</span></div>
+      </div>
+      <div class="container">
+        <div class="content"><span>content 3-1</span></div>
+        <div class="content"><span>content 3-2</span></div>
+        <div class="content"><span>content 3-3</span></div>
+        <div class="content"><span>content 3-4</span></div>
+        <div class="content"><span>content 3-5</span></div>
+        <div class="content"><span>content 3-6</span></div>
+        <div class="content"><span>content 3-7 : should be red</span></div>
+        <div class="content"><span>content 3-8 : should be red</span></div>
+        <div class="content"><span>content 3-9 : should be red</span></div>
+        <div class="content"><span>content 3-10</span></div>
+        <div class="content"><span>content 3-11</span></div>
+        <div class="content"><span>content 3-12</span></div>
+        <div class="content"><span>content 3-13</span></div>
+        <div class="content"><span>content 3-14</span></div>
+      </div>
+    </div>
   </section>
 </body>
 </html>

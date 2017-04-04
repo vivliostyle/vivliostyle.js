@@ -757,7 +757,6 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {?Array.<vivliostyle.diff.Change>} */ this.preprocessedTextContent = null;
     /** @type {adapt.vtree.FormattingContext} */ this.formattingContext = parent ? parent.formattingContext : null;
     /** @type {number} */ this.fragmentIndex = 1;
-    /** @type {!Array.<string>} */ this.fragmentSelectorIds = [];
 };
 
 /**
@@ -790,7 +789,6 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.preprocessedTextContent = null;
     this.formattingContext = this.parent ? this.parent.formattingContext : null;
     this.fragmentIndex = 1;
-    this.fragmentSelectorIds = [];
 };
 
 /**
@@ -832,7 +830,6 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.preprocessedTextContent = this.preprocessedTextContent;
     np.formattingContext = this.formattingContext;
     np.fragmentIndex = this.fragmentIndex;
-    np.fragmentSelectorIds = [].concat(this.fragmentSelectorIds);
     return np;
 };
 
