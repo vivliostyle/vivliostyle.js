@@ -1028,13 +1028,13 @@ goog.scope(function() {
         var blockOffset = area.vertical ? area.originX : area.originY;
         var inlineOffset = area.vertical ? area.originY : area.originX;
         blockStart = area.vertical ?
-            Math.min(blockStart, area.left + area.width + blockOffset) :
+            Math.min(blockStart, area.left + area.getInsetLeft() + area.width + area.getInsetRight() + blockOffset) :
             Math.max(blockStart, area.top + blockOffset);
         blockEnd = area.vertical ?
             Math.max(blockEnd, area.left + blockOffset) :
-            Math.min(blockEnd, area.top + area.height + blockOffset);
+            Math.min(blockEnd, area.top + area.getInsetTop() + area.height + area.getInsetBottom() + blockOffset);
 
-        var blockSize, inlineSize;
+        var blockSize, inlineSize, outerBlockSize, outerInlineSize;
         if (init) {
             var rect = area.vertical ?
                 adapt.geom.rotateBox(new adapt.geom.Rect(blockEnd, inlineStart, blockStart, inlineEnd)) :
@@ -1077,18 +1077,20 @@ goog.scope(function() {
                     }
                     break;
             }
-            blockSize = (blockEnd - blockStart) * area.getBoxDir();
-            inlineSize = inlineEnd - inlineStart;
+            outerBlockSize = (blockEnd - blockStart) * area.getBoxDir();
+            blockSize = outerBlockSize - area.getInsetBefore() - area.getInsetAfter();
+            outerInlineSize = inlineEnd - inlineStart;
+            inlineSize = outerInlineSize - area.getInsetStart() - area.getInsetEnd();
             if (!force && (blockSize <= 0 || inlineSize <= 0))
                 return false;
         } else {
-            blockSize = area.computedBlockSize;
-            var availableBlockSize = (blockEnd - blockStart) * area.getBoxDir();
-            if (!force && availableBlockSize < blockSize)
-                return false;
             var margin = area.floatMargin;
-            blockSize = Math.min(blockSize + (area.vertical ? margin.left : margin.bottom),
-                availableBlockSize);
+            // block-start margin of floatMargin is included in computedBlockSize
+            blockSize = area.computedBlockSize + (area.vertical ? margin.left : margin.bottom);
+            outerBlockSize = blockSize + area.getInsetBefore() + area.getInsetAfter();
+            var availableBlockSize = (blockEnd - blockStart) * area.getBoxDir();
+            if (!force && availableBlockSize < outerBlockSize)
+                return false;
             if (logicalFloatSide === "inline-start" || logicalFloatSide === "inline-end") {
                 inlineSize = vivliostyle.sizing.getSize(area.clientLayout, area.element,
                     [vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE];
@@ -1098,8 +1100,9 @@ goog.scope(function() {
                     (area.vertical ? margin.top : margin.left) +
                     (area.vertical ? margin.bottom : margin.right);
             }
+            outerInlineSize = inlineSize + area.getInsetStart() + area.getInsetEnd();
             var availableInlineSize = inlineEnd - inlineStart;
-            if (!force && availableInlineSize < inlineSize)
+            if (!force && availableInlineSize < outerInlineSize)
                 return false;
         }
 
@@ -1116,8 +1119,8 @@ goog.scope(function() {
                 break;
             case "inline-end":
             case "block-end":
-                area.setInlinePosition(inlineEnd - inlineSize, inlineSize);
-                area.setBlockPosition(blockEnd - blockSize * area.getBoxDir(), blockSize);
+                area.setInlinePosition(inlineEnd - outerInlineSize, inlineSize);
+                area.setBlockPosition(blockEnd - outerBlockSize * area.getBoxDir(), blockSize);
                 break;
             default:
                 throw new Error("unknown float direction: " + floats.floatSide);
