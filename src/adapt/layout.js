@@ -1286,10 +1286,6 @@ adapt.layout.Column.prototype.layoutFootnote = function(nodeContext) {
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
-    if (vivliostyle.pagefloat.isPageFloat(nodeContext.floatReference)) {
-        return this.layoutPageFloat(nodeContext);
-    }
-
     var self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
         = adapt.task.newFrame("layoutFloat");
@@ -1690,26 +1686,55 @@ adapt.layout.Column.prototype.resolveFloatReferenceFromColumnSpan = function(
 
 /**
  * @param {!adapt.vtree.NodeContext} nodeContext
+ * @returns {!adapt.task.Result<!vivliostyle.pagefloat.PageFloat>}
+ */
+adapt.layout.Column.prototype.createPageFloat = function(nodeContext) {
+    var context = this.pageFloatLayoutContext;
+    var floatReference = nodeContext.floatReference;
+    goog.asserts.assert(nodeContext.floatSide);
+    /** @const {string} */ var floatSide = nodeContext.floatSide;
+    goog.asserts.assert(nodeContext.sourceNode);
+    /** @const {!Node} */ var sourceNode = nodeContext.sourceNode;
+    if (vivliostyle.pagefloat.isPageFloat(floatReference)) {
+        return this.resolveFloatReferenceFromColumnSpan(floatReference, nodeContext.columnSpan, nodeContext).thenAsync(function(ref) {
+            floatReference = ref;
+            var float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference, floatSide);
+            context.addPageFloat(float);
+            return adapt.task.newResult(float);
+        });
+    } else if (floatSide === "footnote") {
+        floatReference = vivliostyle.pagefloat.FloatReference.REGION;
+        // If the region context has the same container as the page context,
+        // use the page context as the context for the footnote.
+        var regionContext = context.getPageFloatLayoutContext(floatReference);
+        var pageContext = context.getPageFloatLayoutContext(
+            vivliostyle.pagefloat.FloatReference.PAGE);
+        if (pageContext.hasSameContainerAs(regionContext)) {
+            floatReference = vivliostyle.pagefloat.FloatReference.PAGE;
+        }
+        /** @type {!vivliostyle.pagefloat.PageFloat} */ var float =
+            new vivliostyle.footnote.Footnote(sourceNode, floatReference);
+        context.addPageFloat(float);
+        return adapt.task.newResult(float);
+    } else {
+        throw new Error("Column#createPageFloat: nodeContext that is not a page float nor a footnote is passed.");
+    }
+};
+
+/**
+ * @param {!adapt.vtree.NodeContext} nodeContext
  * @return {!adapt.task.Result<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
     var self = this;
     var context = this.pageFloatLayoutContext;
-    var floatReference = nodeContext.floatReference;
     goog.asserts.assert(nodeContext.sourceNode);
     /** @const {!Node} */ var sourceNode = nodeContext.sourceNode;
-    goog.asserts.assert(nodeContext.floatSide);
-    /** @const {string} */ var floatSide = nodeContext.floatSide;
 
     /** @type {adapt.task.Result<!vivliostyle.pagefloat.PageFloat>} */ var cont;
     var float = context.findPageFloatBySourceNode(sourceNode);
     if (!float) {
-        cont = this.resolveFloatReferenceFromColumnSpan(floatReference, nodeContext.columnSpan, nodeContext).thenAsync(function(ref) {
-            floatReference = ref;
-            float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference, floatSide);
-            context.addPageFloat(float);
-            return adapt.task.newResult(float);
-        });
+        cont = this.createPageFloat(nodeContext);
     } else {
         cont = adapt.task.newResult(float);
     }
@@ -2946,10 +2971,12 @@ adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.layoutFloatOrFootnote = function(nodeContext) {
-    if (nodeContext.floatSide == "footnote") {
-        return this.layoutFootnote(nodeContext);
+    if (vivliostyle.pagefloat.isPageFloat(nodeContext.floatReference) ||
+        nodeContext.floatSide === "footnote") {
+        return this.layoutPageFloat(nodeContext);
+    } else {
+        return this.layoutFloat(nodeContext);
     }
-    return this.layoutFloat(nodeContext);
 };
 
 /**

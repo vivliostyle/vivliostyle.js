@@ -749,13 +749,22 @@ goog.scope(function() {
         }, this);
     };
 
+    /**
+     * @param {!PageFloatLayoutContext} other
+     * @returns {boolean}
+     */
+    PageFloatLayoutContext.prototype.hasSameContainerAs = function(other) {
+        return !!this.container && !!other.container &&
+                this.container.element === other.container.element;
+    };
+
     PageFloatLayoutContext.prototype.invalidate = function() {
         if (this.container) {
             this.children.forEach(function(child) {
                 // Since the same container element is shared by a region page float layout context and
                 // a column page float layout context in a single column region,
                 // view elements of float fragments of the child (column) context need to be removed here.
-                if (child.container && child.container.element === this.container.element) {
+                if (this.hasSameContainerAs(child)) {
                     child.floatFragments.forEach(function(fragment) {
                         var elem = fragment.area.element;
                         if (elem && elem.parentNode)

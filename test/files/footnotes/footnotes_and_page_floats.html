@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Footnotes and page floats</title>
+  <style>
+    @page {
+      size: 300px;
+      margin: 20px;
+    }
+    :root {
+      font-size: 16px;
+      line-height: 20px;
+      font-family: Arial, sans-serif;
+      counter-reset: footnote;
+    }
+    section {
+      break-after: column;
+    }
+    .footnote {
+      float: footnote;
+      counter-increment: footnote;
+    }
+    .footnote::footnote-marker {
+      content: counter(footnote) ". ";
+    }
+    .footnote::footnote-call {
+      content: "[" counter(footnote) "]";
+    }
+    .column-float, .region-float, .page-float {
+      float: bottom;
+      margin: 3px;
+      padding: 3px;
+      border: blue dashed 2px;
+    }
+    .column-float {
+      float-reference: column;
+    }
+    .region-float {
+      float-reference: region;
+    }
+    .page-float {
+      float-reference: page;
+    }
+  </style>
+</head>
+<body>
+<section>
+  All footnotes<span class="footnote">footnote</span>
+  <span class="column-float">bottom column float</span>
+  <span class="region-float">bottom region float</span>
+  <span class="page-float">bottom page float</span>
+  should be
+  below page floats.
+</section>
+</body>
+</html>
