@@ -25,13 +25,13 @@ goog.scope(function() {
     /** @const */ var PageFloat = vivliostyle.pagefloat.PageFloat;
 
     /**
-     * @param {!Node} sourceNode
+     * @param {!adapt.vtree.NodePosition} nodePosition
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @constructor
      * @extends vivliostyle.pagefloat.PageFloat
      */
-    vivliostyle.footnote.Footnote = function(sourceNode, floatReference) {
-        PageFloat.call(this, sourceNode, floatReference, "block-end");
+    vivliostyle.footnote.Footnote = function(nodePosition, floatReference) {
+        PageFloat.call(this, nodePosition, floatReference, "block-end");
     };
     /** @const */ var Footnote = vivliostyle.footnote.Footnote;
     goog.inherits(Footnote, PageFloat);

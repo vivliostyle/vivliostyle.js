@@ -1705,12 +1705,11 @@ adapt.layout.Column.prototype.createPageFloat = function(nodeContext) {
     var floatReference = nodeContext.floatReference;
     goog.asserts.assert(nodeContext.floatSide);
     /** @const {string} */ var floatSide = nodeContext.floatSide;
-    goog.asserts.assert(nodeContext.sourceNode);
-    /** @const {!Node} */ var sourceNode = nodeContext.sourceNode;
+    /** @const */ var nodePosition = nodeContext.toNodePosition();
     if (vivliostyle.pagefloat.isPageFloat(floatReference)) {
         return this.resolveFloatReferenceFromColumnSpan(floatReference, nodeContext.columnSpan, nodeContext).thenAsync(function(ref) {
             floatReference = ref;
-            var float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference, floatSide);
+            var float = new vivliostyle.pagefloat.PageFloat(nodePosition, floatReference, floatSide);
             context.addPageFloat(float);
             return adapt.task.newResult(float);
         });
@@ -1725,7 +1724,7 @@ adapt.layout.Column.prototype.createPageFloat = function(nodeContext) {
             floatReference = vivliostyle.pagefloat.FloatReference.PAGE;
         }
         /** @type {!vivliostyle.pagefloat.PageFloat} */ var float =
-            new vivliostyle.footnote.Footnote(sourceNode, floatReference);
+            new vivliostyle.footnote.Footnote(nodePosition, floatReference);
         context.addPageFloat(float);
         return adapt.task.newResult(float);
     } else {
@@ -1740,11 +1739,9 @@ adapt.layout.Column.prototype.createPageFloat = function(nodeContext) {
 adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
     var self = this;
     var context = this.pageFloatLayoutContext;
-    goog.asserts.assert(nodeContext.sourceNode);
-    /** @const {!Node} */ var sourceNode = nodeContext.sourceNode;
 
     /** @type {adapt.task.Result<!vivliostyle.pagefloat.PageFloat>} */ var cont;
-    var float = context.findPageFloatBySourceNode(sourceNode);
+    var float = context.findPageFloatByNodePosition(nodeContext.toNodePosition());
     if (!float) {
         cont = this.createPageFloat(nodeContext);
     } else {

@@ -13,9 +13,11 @@
       line-height: 20px;
       font-family: Arial, sans-serif;
       counter-reset: footnote;
+      orphans: 1;
+      widows: 1;
     }
     section {
-      break-after: column;
+      break-after: page;
     }
     .footnote {
       float: footnote;
@@ -27,6 +29,17 @@
     .footnote::footnote-call {
       content: "[" counter(footnote) "]";
     }
+
+    .template-footnote {
+      -adapt-template: url(data:application/xml,%3Chtml%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%20xmlns%3As%3D%22http%3A%2F%2Fwww.pyroxy.com%2Fns%2Fshadow%22%3E%3Chead%3E%3Cstyle%3E.footnote-content%7Bfloat%3Afootnote%7D%3C%2Fstyle%3E%3C%2Fhead%3E%3Cbody%3E%3Cs%3Atemplate%20id%3D%22footnote%22%3E%3Cs%3Acontent%2F%3E%3Cs%3Ainclude%20class%3D%22footnote-content%22%2F%3E%3C%2Fs%3Atemplate%3E%3C%2Fbody%3E%3C%2Fhtml%3E#footnote);
+    }
+    .template-footnote-content {
+      display: none;
+    }
+    .template-footnote-content:footnote-content {
+      display: block;
+    }
+
     .column-float, .region-float, .page-float {
       float: bottom;
       margin: 3px;
@@ -52,6 +65,23 @@
   <span class="page-float">bottom page float</span>
   should be
   below page floats.
+  All footnotes <span class="footnote">footnote</span>
+  should be
+  below page floats.
+</section>
+
+<section>
+  All footnotes <a class="template-footnote" href="#template-footnote-1">[1]</a>
+  <span class="column-float">bottom column float</span>
+  <span class="region-float">bottom region float</span>
+  <span class="page-float">bottom page float</span>
+  should be
+  below page floats.
+  All footnotes <a class="template-footnote" href="#template-footnote-2">[2]</a>
+  should be
+  below page floats.
+  <div id="template-footnote-1" class="template-footnote-content">template footnote 1</div>
+  <div id="template-footnote-2" class="template-footnote-content">template footnote 2</div>
 </section>
 </body>
 </html>

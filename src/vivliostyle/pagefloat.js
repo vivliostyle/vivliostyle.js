@@ -110,13 +110,13 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!Node} sourceNode
+     * @param {!adapt.vtree.NodePosition} nodePosition
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @param {string} floatSide
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloat = function(sourceNode, floatReference, floatSide) {
-        /** @const */ this.sourceNode = sourceNode;
+    vivliostyle.pagefloat.PageFloat = function(nodePosition, floatReference, floatSide) {
+        /** @const */ this.nodePosition = nodePosition;
         /** @const */ this.floatReference = floatReference;
         /** @const */ this.floatSide = floatSide;
         /** @private @type {?number} */ this.order = null;
@@ -189,7 +189,7 @@ goog.scope(function() {
      */
     PageFloatStore.prototype.addPageFloat = function(float) {
         var index = this.floats.findIndex(function(f) {
-            return f.sourceNode === float.sourceNode;
+            return adapt.vtree.isSameNodePosition(f.nodePosition, float.nodePosition);
         });
         if (index >= 0) {
             throw new Error("A page float with the same source node is already registered");
@@ -201,12 +201,12 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!Node} sourceNode
+     * @param {!adapt.vtree.NodePosition} nodePosition
      * @returns {?vivliostyle.pagefloat.PageFloat}
      */
-    PageFloatStore.prototype.findPageFloatBySourceNode = function(sourceNode) {
+    PageFloatStore.prototype.findPageFloatByNodePosition = function(nodePosition) {
         var index = this.floats.findIndex(function(f) {
-            return f.sourceNode === sourceNode;
+            return adapt.vtree.isSameNodePosition(f.nodePosition, nodePosition);
         });
         return index >= 0 ? this.floats[index] : null;
     };
@@ -484,11 +484,11 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!Node} sourceNode
+     * @param {!adapt.vtree.NodePosition} nodePosition
      * @returns {?vivliostyle.pagefloat.PageFloat}
      */
-    PageFloatLayoutContext.prototype.findPageFloatBySourceNode = function(sourceNode) {
-        return this.floatStore.findPageFloatBySourceNode(sourceNode);
+    PageFloatLayoutContext.prototype.findPageFloatByNodePosition = function(nodePosition) {
+        return this.floatStore.findPageFloatByNodePosition(nodePosition);
     };
 
     /**
