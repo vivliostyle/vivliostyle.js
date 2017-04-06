@@ -2612,7 +2612,7 @@ adapt.csscasc.CascadeInstance.prototype.decrement = function(condition, viewCond
     this.viewConditions[condition] = this.viewConditions[condition].filter(function(item) {
         return item !== viewCondition;
     });
-    if (this.viewConditions[condition].length == 0) {
+    if (this.viewConditions[condition].length === 0) {
         delete this.viewConditions[condition];
     }
 };
@@ -2631,7 +2631,7 @@ adapt.csscasc.CascadeInstance.prototype.buildViewConditionMatcher = function(vie
     var dependentConditionMatchers = this.dependentConditions.map(function(conditionId) {
         var conditions = this.viewConditions[conditionId];
         if (conditions && conditions.length > 0) {
-            return matcherBuilder.buildAnyMatcher([].concat(conditions));
+            return conditions.length === 1 ? conditions[0] : matcherBuilder.buildAnyMatcher([].concat(conditions));
         } else {
             return null;
         }
@@ -2639,7 +2639,10 @@ adapt.csscasc.CascadeInstance.prototype.buildViewConditionMatcher = function(vie
         return item;
     });
     if (dependentConditionMatchers.length <= 0) return matcher;
-    if (matcher === null) return matcherBuilder.buildAllMatcher(dependentConditionMatchers);
+    if (matcher === null) {
+        return dependentConditionMatchers.length === 1
+            ? dependentConditionMatchers[0] : matcherBuilder.buildAllMatcher(dependentConditionMatchers);
+    }
     return  matcherBuilder.buildAllMatcher([matcher].concat(dependentConditionMatchers));
 };
 
