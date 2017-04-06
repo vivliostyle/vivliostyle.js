@@ -537,7 +537,7 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
     var invalidated = false;
     var i = 0;
     frame.loopWithFrame(function(loopFrame) {
-        if (i === deferredFloats.length || pageFloatLayoutContext.hasFloatsDeferredToNext()) {
+        if (i === deferredFloats.length) {
             loopFrame.breakLoop();
             return;
         }
@@ -546,6 +546,10 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
         var pageFloatFragment = pageFloatLayoutContext.findPageFloatFragment(float);
         if (pageFloatFragment) {
             loopFrame.continueLoop();
+            return;
+        } else if (pageFloatLayoutContext.isForbidden(float) ||
+            pageFloatLayoutContext.hasPrecedingFloatsDeferredToNext(float)) {
+            loopFrame.breakLoop();
             return;
         }
         column.layoutPageFloatInner(continuation.nodePosition, float).then(function(floatArea) {

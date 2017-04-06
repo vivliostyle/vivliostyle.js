@@ -658,19 +658,6 @@ goog.scope(function() {
     };
 
     /**
-     * @returns {boolean}
-     */
-    PageFloatLayoutContext.prototype.hasFloatsDeferredToNext = function() {
-        if (this.floatsDeferredToNext.length > 0) {
-            return true;
-        } else if (this.parent) {
-            return this.parent.hasFloatsDeferredToNext();
-        } else {
-            return false;
-        }
-    };
-
-    /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
      * @param {!adapt.vtree.NodePosition} nodePosition
      * @param {?string=} flowName
