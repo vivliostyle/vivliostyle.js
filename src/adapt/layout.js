@@ -781,6 +781,9 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
                     // TODO: implement floats and footnotes properly
                     self.layoutFloatOrFootnote(position).then(function(positionParam) {
                         position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
+                        if (self.pageFloatLayoutContext.isInvalidated()) {
+                            position = null;
+                        }
                         if (!position) {
                             bodyFrame.breakLoop();
                             return;
@@ -1517,7 +1520,7 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, floa
             floatArea.element.parentNode.removeChild(floatArea.element);
         }
         context.restoreStashedFragments(float.floatReference);
-        context.deferPageFloat(float, nodePosition);
+        context.deferPageFloatOrForbidFollowingFloat(float, nodePosition);
     }
 
     var floatList = vivliostyle.pagefloat.PageFloatList.fromFloat(float);

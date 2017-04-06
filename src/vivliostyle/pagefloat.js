@@ -671,6 +671,23 @@ goog.scope(function() {
     };
 
     /**
+     * @param {!vivliostyle.pagefloat.PageFloat} float
+     * @param {!adapt.vtree.NodePosition} nodePosition
+     * @param {?string=} flowName
+     */
+    PageFloatLayoutContext.prototype.deferPageFloatOrForbidFollowingFloat = function(float, nodePosition, flowName) {
+        var followingFloat = this.getLastFollowingFloatInFragments(float);
+        if (followingFloat) {
+            this.forbid(followingFloat);
+            var fragment = this.findPageFloatFragment(followingFloat);
+            goog.asserts.assert(fragment);
+            this.removePageFloatFragment(fragment);
+        } else {
+            this.deferPageFloat(float, nodePosition, flowName);
+        }
+    };
+
+    /**
      * @returns {boolean}
      */
     PageFloatLayoutContext.prototype.hasPrecedingFloatsDeferredToNext = function(float) {
@@ -685,6 +702,32 @@ goog.scope(function() {
         } else {
             return false;
         }
+    };
+
+    /**
+     * @param {!PageFloat} float
+     * @returns {?PageFloat}
+     */
+    PageFloatLayoutContext.prototype.getLastFollowingFloatInFragments = function(float) {
+        var order = float.getOrder();
+        var lastFollowing = null;
+        this.floatFragments.forEach(function(fragment) {
+            fragment.pageFloatList.floats.forEach(function(f) {
+                var o = f.getOrder();
+                if (o > order &&
+                    (!lastFollowing || o > lastFollowing.getOrder())) {
+                    lastFollowing = f;
+                }
+            });
+        });
+        if (this.parent) {
+            var lastFollowingOfParent = this.parent.getLastFollowingFloatInFragments(float);
+            if (lastFollowingOfParent &&
+                (!lastFollowing || lastFollowingOfParent.getOrder() > lastFollowing.getOrder())) {
+                lastFollowing = lastFollowingOfParent;
+            }
+        }
+        return lastFollowing;
     };
 
     /**
