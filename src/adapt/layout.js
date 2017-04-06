@@ -1508,11 +1508,22 @@ adapt.layout.Column.prototype.createPageFloatArea = function(floatList) {
 adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, float) {
     var context = this.pageFloatLayoutContext;
     context.stashEndFloats(float);
-    var floatList = vivliostyle.pagefloat.PageFloatList.fromFloat(float);
-    var floatArea = this.createPageFloatArea(floatList);
-    if (!floatArea) {
+
+    var floatArea = null, pageFloatFragment = null;
+    function cancelLayout() {
+        if (pageFloatFragment) {
+            context.removePageFloatFragment(pageFloatFragment, true);
+        } else if (floatArea) {
+            floatArea.element.parentNode.removeChild(floatArea.element);
+        }
         context.restoreStashedFragments(float.floatReference);
         context.deferPageFloat(float, nodePosition);
+    }
+
+    var floatList = vivliostyle.pagefloat.PageFloatList.fromFloat(float);
+    floatArea = this.createPageFloatArea(floatList);
+    if (!floatArea) {
+        cancelLayout();
         return adapt.task.newResult(/** @type {adapt.layout.Column} */ (null));
     }
     var floatChunkPosition = new adapt.vtree.ChunkPosition(nodePosition);
@@ -1521,26 +1532,23 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, floa
     var self = this;
     floatArea.layout(floatChunkPosition, true).then(function(newPosition) {
         if (newPosition && context.hasFloatFragments()) {
-            context.restoreStashedFragments(float.floatReference);
-            context.deferPageFloat(float, nodePosition);
-            floatArea.element.parentNode.removeChild(floatArea.element);
+            cancelLayout();
             frame.finish(null);
         } else {
             goog.asserts.assert(floatArea);
             var fitWithinContainer = context.setFloatAreaDimensions(floatArea, floatList, false,
                 !context.hasFloatFragments());
             if (!fitWithinContainer) {
-                context.restoreStashedFragments(float.floatReference);
-                context.deferPageFloat(float, nodePosition);
-                floatArea.element.parentNode.removeChild(floatArea.element);
+                cancelLayout();
                 frame.finish(null);
             } else {
-                var pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(
+                pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(
                     floatList, nodePosition, floatArea);
                 context.addPageFloatFragment(pageFloatFragment, true);
                 self.layoutStashedPageFloats(float.floatReference).then(function(success) {
                     if (success) {
                         // Add again to invalidate the context
+                        goog.asserts.assert(pageFloatFragment);
                         context.addPageFloatFragment(pageFloatFragment);
                         context.discardStashedFragments(float.floatReference);
                         if (newPosition) {
@@ -1548,9 +1556,7 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, floa
                         }
                         frame.finish(floatArea);
                     } else {
-                        context.removePageFloatFragment(pageFloatFragment, true);
-                        context.restoreStashedFragments(float.floatReference);
-                        context.deferPageFloat(float, nodePosition);
+                        cancelLayout();
                         frame.finish(null);
                     }
                 });
