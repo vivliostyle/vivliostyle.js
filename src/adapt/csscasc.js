@@ -412,6 +412,19 @@ adapt.csscasc.getMutableStyleMap = function(style, name) {
 
 /**
  * @param {adapt.csscasc.ElementStyle} style
+ * @return {Array.<{matcher:vivliostyle.selectors.Matcher, styles:adapt.csscasc.ElementStyleMap}>}
+ */
+adapt.csscasc.getViewConditionalStyleMap = function(style) {
+    var r = /** @type {Array.<{matcher:vivliostyle.selectors.Matcher, styles:adapt.csscasc.ElementStyleMap}>} */ (style["_viewConditionalStyles"]);
+    if (!r) {
+        r = [];
+        style["_viewConditionalStyles"] = r;
+    }
+    return r;
+};
+
+/**
+ * @param {adapt.csscasc.ElementStyle} style
  * @param {string} name
  * @return {Array.<adapt.csscasc.CascadeValue>}
  */
@@ -441,14 +454,13 @@ adapt.csscasc.getMutableSpecial = function(style, name) {
  * @param {number} specificity
  * @param {?string} pseudoelement
  * @param {?string} regionId
- * @param {?string} viewCondition
+ * @param {?vivliostyle.selectors.Matcher} viewConditionMatcher
  * @return {void}
  */
-adapt.csscasc.mergeIn = function(context, target, style, specificity, pseudoelement, regionId, viewCondition) {
+adapt.csscasc.mergeIn = function(context, target, style, specificity, pseudoelement, regionId, viewConditionMatcher) {
     var hierarchy = [
         {id: pseudoelement,            styleKey: "_pseudos"},
-        {id: regionId,                 styleKey: "_regions"},
-        {id: viewCondition,            styleKey: "_viewConditions"}
+        {id: regionId,                 styleKey: "_regions"}
     ];
     hierarchy.forEach(function(item) {
         if (item.id) {
@@ -460,6 +472,12 @@ adapt.csscasc.mergeIn = function(context, target, style, specificity, pseudoelem
             }
         }
     });
+    if (viewConditionMatcher) {
+        var styleMap  = adapt.csscasc.getViewConditionalStyleMap(target);
+        target = /** @type {adapt.csscasc.ElementStyle} */ ({});
+        styleMap.push({ styles: target, matcher: viewConditionMatcher });
+    }
+
     for (var prop in style) {
         if (adapt.csscasc.isMapName(prop))
             continue;
@@ -679,18 +697,18 @@ adapt.csscasc.CompoundAction.prototype.clone = function() {
  * @param {number} specificity
  * @param {?string} pseudoelement
  * @param {?string} regionId
- * @param {?string} viewCondition
+ * @param {?string} viewConditionId
  * @constructor
  * @extends {adapt.csscasc.CascadeAction}
  */
 adapt.csscasc.ApplyRuleAction = function(style, specificity,
-    pseudoelement, regionId, viewCondition) {
+    pseudoelement, regionId, viewConditionId) {
     adapt.csscasc.CascadeAction.call(this);
     /** @const */ this.style = style;
     /** @const */ this.specificity = specificity;
     /** @const */ this.pseudoelement = pseudoelement;
     /** @const */ this.regionId = regionId;
-    /** @const */ this.viewCondition = viewCondition;
+    /** @const */ this.viewConditionId = viewConditionId;
 };
 goog.inherits(adapt.csscasc.ApplyRuleAction, adapt.csscasc.CascadeAction);
 
@@ -700,7 +718,7 @@ goog.inherits(adapt.csscasc.ApplyRuleAction, adapt.csscasc.CascadeAction);
 adapt.csscasc.ApplyRuleAction.prototype.apply = function(cascadeInstance) {
     adapt.csscasc.mergeIn(cascadeInstance.context, cascadeInstance.currentStyle,
         this.style, this.specificity, this.pseudoelement, this.regionId,
-        cascadeInstance.buildViewCondition(this.viewCondition));
+        cascadeInstance.buildViewConditionMatcher(this.viewConditionId));
 };
 
 
@@ -1440,10 +1458,10 @@ goog.inherits(adapt.csscasc.CheckConditionAction, adapt.csscasc.ChainedAction);
 adapt.csscasc.CheckConditionAction.prototype.apply = function(cascadeInstance) {
     if (cascadeInstance.conditions[this.condition]) {
         try {
-            cascadeInstance.requiredConditions.push(this.condition);
+            cascadeInstance.dependentConditions.push(this.condition);
             this.chained.apply(cascadeInstance);
         } finally {
-            cascadeInstance.requiredConditions.pop();
+            cascadeInstance.dependentConditions.pop();
         }
     }
 };
@@ -1542,42 +1560,48 @@ adapt.csscasc.ConditionItem.prototype.pop = function(cascadeInstance, depth) {};
 
 /**
  * @param {string} condition
- * @param {?string} viewCondition
- * @param {?number} currentElementOffset
+ * @param {?string} viewConditionId
+ * @param {vivliostyle.selectors.Matcher} viewCondition
  * @constructor
  */
-adapt.csscasc.AbstractConditionItem = function(condition, viewCondition, currentElementOffset) {
+adapt.csscasc.AbstractConditionItem = function(condition, viewConditionId, viewCondition) {
     /** @const */ this.condition = condition;
+    /** @const */ this.viewConditionId = viewConditionId;
     /** @const */ this.viewCondition = viewCondition;
-    /** @const */ this.currentElementOffset = currentElementOffset;
 };
 
 /**
  * @param {adapt.csscasc.CascadeInstance} cascade
  */
 adapt.csscasc.AbstractConditionItem.prototype.increment = function(cascade) {
-    goog.asserts.assert(this.currentElementOffset !== null);
-    cascade.increment(this.condition, this.viewCondition ? this.currentElementOffset + "_" + this.viewCondition : null);
+    cascade.increment(this.condition, this.viewCondition);
 };
 
 /**
  * @param {adapt.csscasc.CascadeInstance} cascade
  */
 adapt.csscasc.AbstractConditionItem.prototype.decrement = function(cascade) {
-    goog.asserts.assert(this.currentElementOffset !== null);
-    cascade.decrement(this.condition, this.viewCondition ? this.currentElementOffset + "_" + this.viewCondition : null);
+    cascade.decrement(this.condition, this.viewCondition);
+};
+
+/**
+ * @param {adapt.csscasc.CascadeInstance} cascade
+ * @return {vivliostyle.selectors.Matcher}
+ */
+adapt.csscasc.AbstractConditionItem.prototype.buildViewConditionMatcher = function(cascade) {
+    return cascade.buildViewConditionMatcher(this.viewConditionId);
 };
 
 /**
  * @param {string} condition
- * @param {?string} viewCondition
- * @param {?number} currentElementOffset
+ * @param {?string} viewConditionId
+ * @param {vivliostyle.selectors.Matcher} viewCondition
  * @constructor
  * @extends {adapt.csscasc.AbstractConditionItem}
  * @implements {adapt.csscasc.ConditionItem}
  */
-adapt.csscasc.DescendantConditionItem = function(condition, viewCondition, currentElementOffset) {
-    adapt.csscasc.AbstractConditionItem.call(this, condition, viewCondition, currentElementOffset);
+adapt.csscasc.DescendantConditionItem = function(condition, viewConditionId, viewCondition) {
+    adapt.csscasc.AbstractConditionItem.call(this, condition, viewConditionId, viewCondition);
 };
 goog.inherits(adapt.csscasc.DescendantConditionItem, adapt.csscasc.AbstractConditionItem);
 
@@ -1586,7 +1610,7 @@ goog.inherits(adapt.csscasc.DescendantConditionItem, adapt.csscasc.AbstractCondi
  */
 adapt.csscasc.DescendantConditionItem.prototype.fresh = function(cascade) {
     return new adapt.csscasc.DescendantConditionItem(
-        this.condition, this.viewCondition, cascade.currentElementOffset);
+        this.condition, this.viewConditionId, this.buildViewConditionMatcher(cascade));
 };
 
 /**
@@ -1612,14 +1636,14 @@ adapt.csscasc.DescendantConditionItem.prototype.pop = function(cascade, depth) {
 
 /**
  * @param {string} condition
- * @param {?string} viewCondition
- * @param {?number} currentElementOffset
+ * @param {?string} viewConditionId
+ * @param {vivliostyle.selectors.Matcher} viewCondition
  * @constructor
  * @extends {adapt.csscasc.AbstractConditionItem}
  * @implements {adapt.csscasc.ConditionItem}
  */
-adapt.csscasc.ChildConditionItem = function(condition, viewCondition, currentElementOffset) {
-    adapt.csscasc.AbstractConditionItem.call(this, condition, viewCondition, currentElementOffset);
+adapt.csscasc.ChildConditionItem = function(condition, viewConditionId, viewCondition) {
+    adapt.csscasc.AbstractConditionItem.call(this, condition, viewConditionId, viewCondition);
 };
 goog.inherits(adapt.csscasc.ChildConditionItem, adapt.csscasc.AbstractConditionItem);
 
@@ -1628,7 +1652,7 @@ goog.inherits(adapt.csscasc.ChildConditionItem, adapt.csscasc.AbstractConditionI
  */
 adapt.csscasc.ChildConditionItem.prototype.fresh = function(cascade) {
     return new adapt.csscasc.ChildConditionItem(
-        this.condition, this.viewCondition, cascade.currentElementOffset);
+        this.condition, this.viewConditionId,  this.buildViewConditionMatcher(cascade));
 };
 
 /**
@@ -1658,14 +1682,14 @@ adapt.csscasc.ChildConditionItem.prototype.pop = function(cascade, depth) {
 
 /**
  * @param {string} condition
- * @param {?string} viewCondition
- * @param {?number} currentElementOffset
+ * @param {?string} viewConditionId
+ * @param {vivliostyle.selectors.Matcher} viewCondition
  * @constructor
  * @extends {adapt.csscasc.AbstractConditionItem}
  * @implements {adapt.csscasc.ConditionItem}
  */
-adapt.csscasc.AdjacentSiblingConditionItem = function(condition, viewCondition, currentElementOffset) {
-    adapt.csscasc.AbstractConditionItem.call(this, condition, viewCondition, currentElementOffset);
+adapt.csscasc.AdjacentSiblingConditionItem = function(condition, viewConditionId, viewCondition) {
+    adapt.csscasc.AbstractConditionItem.call(this, condition, viewConditionId, viewCondition);
     /** @type {boolean} */ this.fired = false;
 };
 goog.inherits(adapt.csscasc.AdjacentSiblingConditionItem, adapt.csscasc.AbstractConditionItem);
@@ -1675,7 +1699,7 @@ goog.inherits(adapt.csscasc.AdjacentSiblingConditionItem, adapt.csscasc.Abstract
  */
 adapt.csscasc.AdjacentSiblingConditionItem.prototype.fresh = function(cascade) {
     return new adapt.csscasc.AdjacentSiblingConditionItem(
-        this.condition, this.viewCondition, cascade.currentElementOffset);
+        this.condition, this.viewConditionId,  this.buildViewConditionMatcher(cascade));
 };
 
 /**
@@ -1707,14 +1731,14 @@ adapt.csscasc.AdjacentSiblingConditionItem.prototype.pop = function(cascade, dep
 
 /**
  * @param {string} condition
- * @param {?string} viewCondition
- * @param {?number} currentElementOffset
+ * @param {?string} viewConditionId
+ * @param {vivliostyle.selectors.Matcher} viewCondition
  * @constructor
  * @extends {adapt.csscasc.AbstractConditionItem}
  * @implements {adapt.csscasc.ConditionItem}
  */
-adapt.csscasc.FollowingSiblingConditionItem = function(condition, viewCondition, currentElementOffset) {
-    adapt.csscasc.AbstractConditionItem.call(this, condition, viewCondition, currentElementOffset);
+adapt.csscasc.FollowingSiblingConditionItem = function(condition, viewConditionId, viewCondition) {
+    adapt.csscasc.AbstractConditionItem.call(this, condition, viewConditionId, viewCondition);
     /** @type {boolean} */ this.fired = false;
 };
 goog.inherits(adapt.csscasc.FollowingSiblingConditionItem, adapt.csscasc.AbstractConditionItem);
@@ -1724,7 +1748,7 @@ goog.inherits(adapt.csscasc.FollowingSiblingConditionItem, adapt.csscasc.Abstrac
  */
 adapt.csscasc.FollowingSiblingConditionItem.prototype.fresh = function(cascade) {
     return new adapt.csscasc.FollowingSiblingConditionItem(
-        this.condition, this.viewCondition, cascade.currentElementOffset);
+        this.condition, this.viewConditionId,  this.buildViewConditionMatcher(cascade));
 };
 
 /**
@@ -2446,7 +2470,6 @@ adapt.csscasc.Cascade = function() {
     /** @type {!adapt.csscasc.ActionTable} */ this.ids = {};
     /** @type {!adapt.csscasc.ActionTable} */ this.pagetypes = {};
     /** @type {number} */ this.order = 0;
-    /** @type {!Object.<string,string>} */ this.conditionMap = {};
 };
 
 /**
@@ -2481,14 +2504,6 @@ adapt.csscasc.Cascade.prototype.insertInTable = function(table, key, action) {
     table[key] = action;
 };
 
-/**
- * @param {string} previous
- * @param {string} current
- * @return {void}
- */
-adapt.csscasc.Cascade.prototype.registerConditionMapEntry = function(previous, current) {
-    if (previous) this.conditionMap[current] = previous;
-};
 
 /**
  * @param {adapt.expr.Context} context
@@ -2553,8 +2568,8 @@ adapt.csscasc.CascadeInstance = function(cascade, context, counterListener, coun
     /** @const {!Array<!Object<string, !Object<string, number>>>} */ this.followingSiblingTypeCountsStack = [{}];
     /** @type {!Object<string, !Object<string, number>>} */ this.currentFollowingSiblingTypeCounts = this.siblingTypeCountsStack[0];
 
-    /** @const {!Object.<string, !Array.<!string>>} */ this.viewConditions = {};
-    /** @const {!Array.<!string>} */ this.requiredConditions = [];
+    /** @const {!Object.<string, !Array.<!vivliostyle.selectors.Matcher>>} */ this.viewConditions = {};
+    /** @const {!Array.<!string>} */ this.dependentConditions = [];
 
     if (goog.DEBUG) {
         /** @type {Array.<Element>} */ this.elementStack = [];
@@ -2571,7 +2586,7 @@ adapt.csscasc.CascadeInstance.prototype.pushConditionItem = function(item) {
 
 /**
  * @param {string} condition
- * @param {?string} viewCondition
+ * @param {vivliostyle.selectors.Matcher} viewCondition
  * @return {void}
  */
 adapt.csscasc.CascadeInstance.prototype.increment = function(condition, viewCondition) {
@@ -2587,13 +2602,13 @@ adapt.csscasc.CascadeInstance.prototype.increment = function(condition, viewCond
 
 /**
  * @param {string} condition
- * @param {?string} viewCondition
+ * @param {vivliostyle.selectors.Matcher} viewCondition
  * @return {void}
  */
 adapt.csscasc.CascadeInstance.prototype.decrement = function(condition, viewCondition) {
     this.conditions[condition]--;
 
-    if (!viewCondition) return;
+    if (!this.viewConditions[condition]) return;
     this.viewConditions[condition] = this.viewConditions[condition].filter(function(item) {
         return item !== viewCondition;
     });
@@ -2603,39 +2618,29 @@ adapt.csscasc.CascadeInstance.prototype.decrement = function(condition, viewCond
 };
 
 /**
- * @private
- * @param {?string} viewCondition of current selector
- * @return {?string}
+ * @param {?string} viewConditionId
+ * @return {vivliostyle.selectors.Matcher}
  */
-adapt.csscasc.CascadeInstance.prototype.buildViewCondition = function(viewCondition) {
-    var conditionString = viewCondition ? this.currentElementOffset + "_" + viewCondition : null;
-    var requiredConditions = this.collectRequiredConditions();
-    if (!requiredConditions || requiredConditions.length <= 0) return conditionString;
-    var conditionArray = conditionString ? [conditionString] : [];
-    return conditionArray.concat(requiredConditions.map(function(conditionId) {
+adapt.csscasc.CascadeInstance.prototype.buildViewConditionMatcher = function(viewConditionId) {
+    var matcherBuilder = vivliostyle.selectors.MatcherBuilder.instance;
+    var matcher = null;
+    if (viewConditionId) {
+        goog.asserts.assert(this.currentElementOffset);
+        matcher = matcherBuilder.buildViewConditionMatcher(this.currentElementOffset, viewConditionId);
+    }
+    var dependentConditionMatchers = this.dependentConditions.map(function(conditionId) {
         var conditions = this.viewConditions[conditionId];
         if (conditions && conditions.length > 0) {
-            return conditions.join('|');
+            return matcherBuilder.buildAnyMatcher([].concat(conditions));
         } else {
             return null;
         }
     }.bind(this)).filter(function(item) {
         return item;
-    })).join('&');
-};
-
-/**
- * @private
- * @return {Array.<!string>}
- */
-adapt.csscasc.CascadeInstance.prototype.collectRequiredConditions = function() {
-    var requiredConditions = [].concat(this.requiredConditions);
-    requiredConditions.forEach(function(condition) {
-        while (condition = this.code.conditionMap[condition]) {
-            requiredConditions.push(condition);
-        }
-    }.bind(this));
-    return requiredConditions;
+    });
+    if (dependentConditionMatchers.length <= 0) return matcher;
+    if (matcher === null) return matcherBuilder.buildAllMatcher(dependentConditionMatchers);
+    return  matcherBuilder.buildAllMatcher([matcher].concat(dependentConditionMatchers));
 };
 
 /**
@@ -3099,8 +3104,7 @@ adapt.csscasc.CascadeParserHandler = function(scope, owner, condition, parent, r
     /** @const */ this.regionId = regionId;
     /** @const */ this.validatorSet = validatorSet;
     /** @type {adapt.csscasc.ParseState} */ this.state = adapt.csscasc.ParseState.TOP;
-    /** @type {?string} */ this.viewCondition = null;
-    /** @type {?string} */ this.prevCondition = null;
+    /** @type {?string} */ this.viewConditionId = null;
 };
 goog.inherits(adapt.csscasc.CascadeParserHandler, adapt.cssparse.SlaveParserHandler);
 
@@ -3315,7 +3319,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
             }
         case "nth-fragment":
             if (params && params.length == 2) {
-                this.viewCondition = "NFS_" + params[0] + "_" + params[1];
+                this.viewConditionId = "NFS_" + params[0] + "_" + params[1];
             } else {
                 this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
             }
@@ -3413,11 +3417,9 @@ adapt.csscasc.conditionCount = 0;
 adapt.csscasc.CascadeParserHandler.prototype.descendantSelector = function() {
     var condition = "d" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
-        new adapt.csscasc.DescendantConditionItem(condition, this.viewCondition, null)));
+        new adapt.csscasc.DescendantConditionItem(condition, this.viewConditionId, null)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
-    this.viewCondition = null;
-    this.cascade.registerConditionMapEntry(this.prevCondition, condition);
-    this.prevCondition = condition;
+    this.viewConditionId = null;
 };
 
 /**
@@ -3426,11 +3428,9 @@ adapt.csscasc.CascadeParserHandler.prototype.descendantSelector = function() {
 adapt.csscasc.CascadeParserHandler.prototype.childSelector = function() {
     var condition = "c" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
-        new adapt.csscasc.ChildConditionItem(condition, this.viewCondition, null)));
+        new adapt.csscasc.ChildConditionItem(condition, this.viewConditionId, null)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
-    this.viewCondition = null;
-    this.cascade.registerConditionMapEntry(this.prevCondition, condition);
-    this.prevCondition = condition;
+    this.viewConditionId = null;
 };
 
 /**
@@ -3439,11 +3439,9 @@ adapt.csscasc.CascadeParserHandler.prototype.childSelector = function() {
 adapt.csscasc.CascadeParserHandler.prototype.adjacentSiblingSelector = function() {
     var condition = "a" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
-        new adapt.csscasc.AdjacentSiblingConditionItem(condition, this.viewCondition, null)));
+        new adapt.csscasc.AdjacentSiblingConditionItem(condition, this.viewConditionId, null)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
-    this.viewCondition = null;
-    this.cascade.registerConditionMapEntry(this.prevCondition, condition);
-    this.prevCondition = condition;
+    this.viewConditionId = null;
 };
 
 /**
@@ -3452,11 +3450,9 @@ adapt.csscasc.CascadeParserHandler.prototype.adjacentSiblingSelector = function(
 adapt.csscasc.CascadeParserHandler.prototype.followingSiblingSelector = function() {
     var condition = "f" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
-        new adapt.csscasc.FollowingSiblingConditionItem(condition, this.viewCondition, null)));
+        new adapt.csscasc.FollowingSiblingConditionItem(condition, this.viewConditionId, null)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
-    this.viewCondition = null;
-    this.cascade.registerConditionMapEntry(this.prevCondition, condition);
-    this.prevCondition = condition;
+    this.viewConditionId = null;
 };
 
 /**
@@ -3531,8 +3527,7 @@ adapt.csscasc.CascadeParserHandler.prototype.finishChain = function() {
         this.processChain(this.makeApplyRuleAction(specificity));
         this.chain = null;
         this.pseudoelement = null;
-        this.viewCondition = null;
-        this.prevCondition = null;
+        this.viewConditionId = null;
         this.footnoteContent = false;
         this.specificity = 0;
     }
@@ -3552,7 +3547,7 @@ adapt.csscasc.CascadeParserHandler.prototype.makeApplyRuleAction = function(spec
             regionId = "footnote";
     }
     return new adapt.csscasc.ApplyRuleAction(this.elementStyle, specificity,
-        this.pseudoelement, regionId, this.viewCondition);
+        this.pseudoelement, regionId, this.viewConditionId);
 };
 
 /**

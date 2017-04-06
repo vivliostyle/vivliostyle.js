@@ -99,23 +99,35 @@ goog.scope(function() {
     /** @const */ var MatcherBuilder = vivliostyle.selectors.MatcherBuilder;
 
     /**
-     * @param {string} condition
+     * @param {number} elementOffset
+     * @param {string} viewCondition
+     * @return {vivliostyle.selectors.Matcher}
      */
-    MatcherBuilder.prototype.build = function(condition) {
-        var andConditions = condition.split("&");
-        return new AllMatcher(andConditions.map(function(andCondition) {
-            var orConditions = andCondition.split("|");
-            return new AnyMatcher(orConditions.map(function(orCondition) {
-                var strs = orCondition.split("_");
-                if (strs[1] == "NFS") {
-                    return new NthFragmentMatcher(parseInt(strs[0], 10),
-                        parseInt(strs[2], 10), parseInt(strs[3], 10));
-                } else {
-                    goog.asserts.fail("unknown view condition. condition=" + condition);
-                    return null;
-                }
-            }));
-        }));
+    MatcherBuilder.prototype.buildViewConditionMatcher = function(elementOffset, viewCondition) {
+        var strs = viewCondition.split("_");
+        if (strs[0] == "NFS") {
+            return new NthFragmentMatcher(elementOffset,
+                parseInt(strs[1], 10), parseInt(strs[2], 10));
+        } else {
+            goog.asserts.fail("unknown view condition. condition=" + viewCondition);
+            return null;
+        }
+    };
+
+    /**
+     * @param {!Array.<!vivliostyle.selectors.Matcher>} matchers
+     * @return {vivliostyle.selectors.Matcher}
+     */
+    MatcherBuilder.prototype.buildAllMatcher = function(matchers) {
+        return new AllMatcher(matchers);
+    };
+
+    /**
+     * @param {!Array.<!vivliostyle.selectors.Matcher>} matchers
+     * @return {vivliostyle.selectors.Matcher}
+     */
+    MatcherBuilder.prototype.buildAnyMatcher = function(matchers) {
+        return new AnyMatcher(matchers);
     };
 
     /** @const */
@@ -142,13 +154,11 @@ goog.scope(function() {
      */
     vivliostyle.selectors.forEachViewConditionalStyles = function(style, nodeContext, callback) {
         if (!nodeContext) return;
-        var viewConditionalStyles = adapt.csscasc.getStyleMap(style, "_viewConditions");
+        var viewConditionalStyles = adapt.csscasc.getStyleMap(style, "_viewConditionalStyles");
         if (!viewConditionalStyles) return;
-        Object.keys(viewConditionalStyles).forEach(function(condition) {
-            var matcher = vivliostyle.selectors.MatcherBuilder.instance.build(condition);
-            if (!matcher.matches(nodeContext)) return;
-            var styles = viewConditionalStyles[condition];
-            callback(styles);
+        viewConditionalStyles.forEach(function(entry) {
+            if (!entry.matcher.matches(nodeContext)) return;
+            callback(entry.styles);
         });
     };
 

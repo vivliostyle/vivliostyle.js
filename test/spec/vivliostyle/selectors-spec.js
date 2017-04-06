@@ -216,15 +216,18 @@ describe("selectors", function() {
     describe("#mergeViewConditionalStyles", function() {
         it("merge styles associated with a fragment selector if the fragment selector matches a nodeContext", function() {
             var style = {
-                _viewConditions: {
-                    "100_NFS_2_1": {
+                _viewConditionalStyles: [{
+                    matcher: new NthFragmentMatcher(100, 2, 1),
+                    styles: {
                         "display": new adapt.csscasc.CascadeValue(adapt.css.ident.block, 0),
                         "visivility": new adapt.csscasc.CascadeValue(adapt.css.ident.hidden, 0)
-                    },
-                    "200_NFS_2_1": {
+                    }
+                }, {
+                    matcher: new NthFragmentMatcher(200, 2, 1),
+                    styles: {
                         "display": new adapt.csscasc.CascadeValue(adapt.css.ident.inline, 1)
                     }
-                }
+                }]
             };
 
             var cascMap = {};
@@ -250,15 +253,18 @@ describe("selectors", function() {
 
         it("do nothing if the fragment selector does not match a nodeContext", function() {
             var style = {
-                _viewConditions: {
-                    "100_NFS_2_1": {
+                _viewConditionalStyles: [{
+                    matcher: {matches: function() { return false; }},
+                    styles: {
                         "display": new adapt.csscasc.CascadeValue(adapt.css.ident.block, 0),
                         "visivility": new adapt.csscasc.CascadeValue(adapt.css.ident.hidden, 0)
-                    },
-                    "200_NFS_2_1": {
+                    }
+                }, {
+                    matcher: {matches: function() { return false; }},
+                    styles: {
                         "display": new adapt.csscasc.CascadeValue(adapt.css.ident.inline, 1)
                     }
-                }
+                }]
             };
             var cascMap = {};
             registerFragmentIndex(100, 2);
