@@ -37,10 +37,40 @@ goog.scope(function() {
     goog.inherits(Footnote, PageFloat);
 
     /**
+     * @constructor
+     * @implements {vivliostyle.pagefloat.PageFloatLayoutStrategy}
+     */
+    vivliostyle.pagefloat.FootnoteLayoutStrategy = function() {};
+    /** @const */ var FootnoteLayoutStrategy = vivliostyle.pagefloat.FootnoteLayoutStrategy;
+
+    /**
      * @override
      */
-    Footnote.prototype.getOrder = function() {
-        return Infinity;
+    FootnoteLayoutStrategy.prototype.appliesToNodeContext = function(nodeContext) {
+        return nodeContext.floatSide === "footnote";
     };
+
+    /**
+     * @override
+     */
+    FootnoteLayoutStrategy.prototype.createPageFloat = function(
+        nodeContext, pageFloatLayoutContext, column) {
+        var floatReference = vivliostyle.pagefloat.FloatReference.REGION;
+        // If the region context has the same container as the page context,
+        // use the page context as the context for the footnote.
+        var regionContext = pageFloatLayoutContext.getPageFloatLayoutContext(floatReference);
+        var pageContext = pageFloatLayoutContext.getPageFloatLayoutContext(
+            vivliostyle.pagefloat.FloatReference.PAGE);
+        if (pageContext.hasSameContainerAs(regionContext)) {
+            floatReference = vivliostyle.pagefloat.FloatReference.PAGE;
+        }
+        /** @const */ var nodePosition = nodeContext.toNodePosition();
+        /** @type {!vivliostyle.pagefloat.PageFloat} */ var float =
+            new vivliostyle.footnote.Footnote(nodePosition, floatReference);
+        pageFloatLayoutContext.addPageFloat(float);
+        return adapt.task.newResult(float);
+    };
+
+    vivliostyle.pagefloat.PageFloatLayoutStrategyResolver.register(new FootnoteLayoutStrategy());
 
 });

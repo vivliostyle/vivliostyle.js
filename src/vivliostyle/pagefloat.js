@@ -1200,4 +1200,90 @@ goog.scope(function() {
             }
         }, isVertical ? Infinity : 0);
     };
+
+    /**
+     * @interface
+     */
+    vivliostyle.pagefloat.PageFloatLayoutStrategy = function() {};
+    /** @const */ var PageFloatLayoutStrategy = vivliostyle.pagefloat.PageFloatLayoutStrategy;
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @returns {boolean}
+     */
+    PageFloatLayoutStrategy.prototype.appliesToNodeContext = function(nodeContext) {};
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!PageFloatLayoutContext} pageFloatLayoutContext
+     * @param {!adapt.layout.Column} column
+     * @returns {!adapt.task.Result<!PageFloat>}
+     */
+    PageFloatLayoutStrategy.prototype.createPageFloat =
+        function(nodeContext, pageFloatLayoutContext, column) {};
+
+    /** @const {Array<!PageFloatLayoutStrategy>} */
+    var pageFloatLayoutStrategies = [];
+
+    /**
+     * @constructor
+     */
+    vivliostyle.pagefloat.PageFloatLayoutStrategyResolver = function() {};
+    /** @const */ var PageFloatLayoutStrategyResolver =
+        vivliostyle.pagefloat.PageFloatLayoutStrategyResolver;
+
+    /**
+     * @param {!PageFloatLayoutStrategy} strategy
+     */
+    PageFloatLayoutStrategyResolver.register = function(strategy) {
+        pageFloatLayoutStrategies.push(strategy);
+    };
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @returns {!PageFloatLayoutStrategy}
+     */
+    PageFloatLayoutStrategyResolver.prototype.findByNodeContext = function(nodeContext) {
+        for (var i = pageFloatLayoutStrategies.length - 1; i >= 0; i--) {
+            var strategy = pageFloatLayoutStrategies[i];
+            if (strategy.appliesToNodeContext(nodeContext)) {
+                return strategy;
+            }
+        }
+        throw new Error("No PageFloatLayoutStrategy found for " + nodeContext);
+    };
+
+    /**
+     * @constructor
+     * @implements {PageFloatLayoutStrategy}
+     */
+    vivliostyle.pagefloat.NormalPageFloatLayoutStrategy = function() {};
+    /** @const */ var NormalPageFloatLayoutStrategy =
+        vivliostyle.pagefloat.NormalPageFloatLayoutStrategy;
+
+    /**
+     * @override
+     */
+    NormalPageFloatLayoutStrategy.prototype.appliesToNodeContext = function(nodeContext) {
+        return vivliostyle.pagefloat.isPageFloat(nodeContext.floatReference);
+    };
+
+    /**
+     * @override
+     */
+    NormalPageFloatLayoutStrategy.prototype.createPageFloat = function(
+        nodeContext, pageFloatLayoutContext, column) {
+        var floatReference = nodeContext.floatReference;
+        goog.asserts.assert(nodeContext.floatSide);
+        /** @const {string} */ var floatSide = nodeContext.floatSide;
+        /** @const */ var nodePosition = nodeContext.toNodePosition();
+        return column.resolveFloatReferenceFromColumnSpan(floatReference, nodeContext.columnSpan, nodeContext).thenAsync(function(ref) {
+            floatReference = ref;
+            var float = new vivliostyle.pagefloat.PageFloat(nodePosition, floatReference, floatSide);
+            pageFloatLayoutContext.addPageFloat(float);
+            return adapt.task.newResult(float);
+        });
+    };
+
+    PageFloatLayoutStrategyResolver.register(new NormalPageFloatLayoutStrategy());
 });
