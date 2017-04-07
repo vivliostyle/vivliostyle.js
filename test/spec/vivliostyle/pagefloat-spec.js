@@ -524,7 +524,7 @@ describe("pagefloat", function() {
             it("stores a PageFloatContinuation as a deferred float", function() {
                 float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
                 columnContext.addPageFloat(float);
-                columnContext.deferPageFloat(float, {});
+                columnContext.deferPageFloat(new PageFloatContinuation(float, {}));
 
                 expect(columnContext.floatsDeferredToNext.length).toBe(1);
                 expect(columnContext.floatsDeferredToNext[0].float).toBe(float);
@@ -534,14 +534,14 @@ describe("pagefloat", function() {
                 float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
                 columnContext.addPageFloat(float);
                 var position1 = {};
-                columnContext.deferPageFloat(float, position1);
+                columnContext.deferPageFloat(new PageFloatContinuation(float, position1));
 
                 expect(columnContext.floatsDeferredToNext.length).toBe(1);
                 expect(columnContext.floatsDeferredToNext[0].float).toBe(float);
                 expect(columnContext.floatsDeferredToNext[0].nodePosition).toBe(position1);
 
                 var position2 = {};
-                columnContext.deferPageFloat(float, position2);
+                columnContext.deferPageFloat(new PageFloatContinuation(float, position2));
 
                 expect(columnContext.floatsDeferredToNext.length).toBe(1);
                 expect(columnContext.floatsDeferredToNext[0].float).toBe(float);
@@ -551,7 +551,7 @@ describe("pagefloat", function() {
             it("stores a PageFloatContinuation in the corresponding context as a deferred float", function() {
                 float = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start", "body");
                 columnContext.addPageFloat(float);
-                columnContext.deferPageFloat(float, {});
+                columnContext.deferPageFloat(new PageFloatContinuation(float, {}));
 
                 expect(columnContext.floatsDeferredToNext.length).toBe(0);
                 expect(regionContext.floatsDeferredToNext.length).toBe(1);

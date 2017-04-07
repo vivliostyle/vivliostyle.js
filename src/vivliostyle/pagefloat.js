@@ -636,12 +636,11 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!vivliostyle.pagefloat.PageFloat} float
-     * @param {!adapt.vtree.NodePosition} nodePosition
+     * @param {!vivliostyle.pagefloat.PageFloatContinuation} continuation
      */
-    PageFloatLayoutContext.prototype.deferPageFloat = function(float, nodePosition) {
+    PageFloatLayoutContext.prototype.deferPageFloat = function(continuation) {
+        var float = continuation.float;
         if (float.floatReference === this.floatReference) {
-            var continuation = new PageFloatContinuation(float, nodePosition);
             var index = this.floatsDeferredToNext.findIndex(function(c) { return c.float === float; });
             if (index >= 0) {
                 this.floatsDeferredToNext.splice(index, 1, continuation);
@@ -650,23 +649,22 @@ goog.scope(function() {
             }
         } else {
             var parent = this.getParent(float.floatReference);
-            parent.deferPageFloat(float, nodePosition);
+            parent.deferPageFloat(continuation);
         }
     };
 
     /**
-     * @param {!vivliostyle.pagefloat.PageFloat} float
-     * @param {!adapt.vtree.NodePosition} nodePosition
+     * @param {!vivliostyle.pagefloat.PageFloatContinuation} continuation
      */
-    PageFloatLayoutContext.prototype.deferPageFloatOrForbidFollowingFloat = function(float, nodePosition) {
-        var followingFloat = this.getLastFollowingFloatInFragments(float);
+    PageFloatLayoutContext.prototype.deferPageFloatOrForbidFollowingFloat = function(continuation) {
+        var followingFloat = this.getLastFollowingFloatInFragments(continuation.float);
         if (followingFloat) {
             this.forbid(followingFloat);
             var fragment = this.findPageFloatFragment(followingFloat);
             goog.asserts.assert(fragment);
             this.removePageFloatFragment(fragment);
         } else {
-            this.deferPageFloat(float, nodePosition);
+            this.deferPageFloat(continuation);
         }
     };
 

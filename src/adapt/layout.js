@@ -1555,6 +1555,7 @@ adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
 adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, float) {
     var context = this.pageFloatLayoutContext;
     context.stashEndFloats(float);
+    var continuation = new vivliostyle.pagefloat.PageFloatContinuation(float, nodePosition);
 
     function cancelLayout(floatArea, pageFloatFragment) {
         if (pageFloatFragment) {
@@ -1563,7 +1564,7 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, floa
             floatArea.element.parentNode.removeChild(floatArea.element);
         }
         context.restoreStashedFragments(float.floatReference);
-        context.deferPageFloatOrForbidFollowingFloat(float, nodePosition);
+        context.deferPageFloatOrForbidFollowingFloat(continuation);
     }
 
     /** @const {!adapt.task.Frame<?adapt.layout.Column>} */ var frame = adapt.task.newFrame("layoutPageFloatInner");
@@ -1581,7 +1582,9 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, floa
                     context.addPageFloatFragment(pageFloatFragment);
                     context.discardStashedFragments(float.floatReference);
                     if (newPosition) {
-                        context.deferPageFloat(float, newPosition.primary);
+                        var continuation = new vivliostyle.pagefloat.PageFloatContinuation(
+                            float, newPosition.primary);
+                        context.deferPageFloat(continuation);
                     }
                     frame.finish(floatArea);
                 } else {
@@ -1747,7 +1750,8 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
             context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
             return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
         } else if (context.isForbidden(float) || context.hasPrecedingFloatsDeferredToNext(float)) {
-            context.deferPageFloat(float, nodePosition);
+            var continuation = new vivliostyle.pagefloat.PageFloatContinuation(float, nodePosition);
+            context.deferPageFloat(continuation);
             context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
             return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
         } else if (self.nodeContextOverflowingDueToRepetitiveElements) {

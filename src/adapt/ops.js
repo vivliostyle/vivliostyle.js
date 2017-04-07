@@ -549,7 +549,7 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
             return;
         } else if (pageFloatLayoutContext.isForbidden(float) ||
             pageFloatLayoutContext.hasPrecedingFloatsDeferredToNext(float)) {
-            pageFloatLayoutContext.deferPageFloat(float, continuation.nodePosition);
+            pageFloatLayoutContext.deferPageFloat(continuation);
             loopFrame.breakLoop();
             return;
         }
