@@ -1753,15 +1753,20 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
         } else if (self.nodeContextOverflowingDueToRepetitiveElements) {
             return adapt.task.newResult(null);
         } else {
-            return self.layoutPageFloatInner(nodePosition, float).thenAsync(function(floatArea) {
-                goog.asserts.assert(float);
-                if (!floatArea) {
-                    context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
-                    return adapt.task.newResult(nodeContextAfter);
-                } else {
-                    return adapt.task.newResult(null);
-                }
-            });
+            var edge = adapt.layout.calculateEdge(nodeContextAfter, self.clientLayout, 0, self.vertical);
+            if (self.isOverflown(edge)) {
+                return adapt.task.newResult(nodeContextAfter);
+            } else {
+                return self.layoutPageFloatInner(nodePosition, float).thenAsync(function(floatArea) {
+                    goog.asserts.assert(float);
+                    if (!floatArea) {
+                        context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
+                        return adapt.task.newResult(nodeContextAfter);
+                    } else {
+                        return adapt.task.newResult(null);
+                    }
+                });
+            }
         }
     });
 };
