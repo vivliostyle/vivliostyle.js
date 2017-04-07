@@ -113,12 +113,14 @@ goog.scope(function() {
      * @param {!adapt.vtree.NodePosition} nodePosition
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @param {string} floatSide
+     * @param {string} flowName
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloat = function(nodePosition, floatReference, floatSide) {
+    vivliostyle.pagefloat.PageFloat = function(nodePosition, floatReference, floatSide, flowName) {
         /** @const */ this.nodePosition = nodePosition;
         /** @const */ this.floatReference = floatReference;
         /** @const */ this.floatSide = floatSide;
+        /** @const */ this.flowName = flowName;
         /** @private @type {?number} */ this.order = null;
         /** @private @type {?vivliostyle.pagefloat.PageFloat.ID} */ this.id = null;
     };
@@ -328,13 +330,11 @@ goog.scope(function() {
     /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
      * @param {!adapt.vtree.NodePosition} nodePosition
-     * @param {string} flowName
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloatContinuation = function(float, nodePosition, flowName) {
+    vivliostyle.pagefloat.PageFloatContinuation = function(float, nodePosition) {
         /** @const */ this.float = float;
         /** @const */ this.nodePosition = nodePosition;
-        /** @const */ this.flowName = flowName;
     };
     /** @const */ var PageFloatContinuation = vivliostyle.pagefloat.PageFloatContinuation;
 
@@ -638,13 +638,10 @@ goog.scope(function() {
     /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
      * @param {!adapt.vtree.NodePosition} nodePosition
-     * @param {?string=} flowName
      */
-    PageFloatLayoutContext.prototype.deferPageFloat = function(float, nodePosition, flowName) {
-        flowName = flowName || this.flowName;
-        goog.asserts.assert(flowName);
+    PageFloatLayoutContext.prototype.deferPageFloat = function(float, nodePosition) {
         if (float.floatReference === this.floatReference) {
-            var continuation = new PageFloatContinuation(float, nodePosition, flowName);
+            var continuation = new PageFloatContinuation(float, nodePosition);
             var index = this.floatsDeferredToNext.findIndex(function(c) { return c.float === float; });
             if (index >= 0) {
                 this.floatsDeferredToNext.splice(index, 1, continuation);
@@ -653,16 +650,15 @@ goog.scope(function() {
             }
         } else {
             var parent = this.getParent(float.floatReference);
-            parent.deferPageFloat(float, nodePosition, flowName);
+            parent.deferPageFloat(float, nodePosition);
         }
     };
 
     /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
      * @param {!adapt.vtree.NodePosition} nodePosition
-     * @param {?string=} flowName
      */
-    PageFloatLayoutContext.prototype.deferPageFloatOrForbidFollowingFloat = function(float, nodePosition, flowName) {
+    PageFloatLayoutContext.prototype.deferPageFloatOrForbidFollowingFloat = function(float, nodePosition) {
         var followingFloat = this.getLastFollowingFloatInFragments(float);
         if (followingFloat) {
             this.forbid(followingFloat);
@@ -670,7 +666,7 @@ goog.scope(function() {
             goog.asserts.assert(fragment);
             this.removePageFloatFragment(fragment);
         } else {
-            this.deferPageFloat(float, nodePosition, flowName);
+            this.deferPageFloat(float, nodePosition);
         }
     };
 
@@ -724,7 +720,7 @@ goog.scope(function() {
     PageFloatLayoutContext.prototype.getDeferredPageFloatContinuations = function(flowName) {
         flowName = flowName || this.flowName;
         var result = this.floatsDeferredFromPrevious.filter(function(cont) {
-            return !flowName || cont.flowName === flowName;
+            return !flowName || cont.float.flowName === flowName;
         });
         if (this.parent) {
             result = this.parent.getDeferredPageFloatContinuations(flowName).concat(result);
@@ -741,7 +737,7 @@ goog.scope(function() {
     PageFloatLayoutContext.prototype.getPageFloatContinuationsDeferredToNext = function(flowName) {
         flowName = flowName || this.flowName;
         var result = this.floatsDeferredToNext.filter(function(cont) {
-            return !flowName || cont.flowName === flowName;
+            return !flowName || cont.float.flowName === flowName;
         });
         if (this.parent) {
             return this.parent.getPageFloatContinuationsDeferredToNext(flowName).concat(result);
@@ -1279,7 +1275,9 @@ goog.scope(function() {
         /** @const */ var nodePosition = nodeContext.toNodePosition();
         return column.resolveFloatReferenceFromColumnSpan(floatReference, nodeContext.columnSpan, nodeContext).thenAsync(function(ref) {
             floatReference = ref;
-            var float = new vivliostyle.pagefloat.PageFloat(nodePosition, floatReference, floatSide);
+            goog.asserts.assert(pageFloatLayoutContext.flowName);
+            var float = new vivliostyle.pagefloat.PageFloat(nodePosition, floatReference, floatSide,
+                pageFloatLayoutContext.flowName);
             pageFloatLayoutContext.addPageFloat(float);
             return adapt.task.newResult(float);
         });

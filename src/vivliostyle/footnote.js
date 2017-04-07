@@ -27,11 +27,12 @@ goog.scope(function() {
     /**
      * @param {!adapt.vtree.NodePosition} nodePosition
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
+     * @param {string} flowName
      * @constructor
      * @extends vivliostyle.pagefloat.PageFloat
      */
-    vivliostyle.footnote.Footnote = function(nodePosition, floatReference) {
-        PageFloat.call(this, nodePosition, floatReference, "block-end");
+    vivliostyle.footnote.Footnote = function(nodePosition, floatReference, flowName) {
+        PageFloat.call(this, nodePosition, floatReference, "block-end", flowName);
     };
     /** @const */ var Footnote = vivliostyle.footnote.Footnote;
     goog.inherits(Footnote, PageFloat);
@@ -65,8 +66,10 @@ goog.scope(function() {
             floatReference = vivliostyle.pagefloat.FloatReference.PAGE;
         }
         /** @const */ var nodePosition = nodeContext.toNodePosition();
+        goog.asserts.assert(pageFloatLayoutContext.flowName);
         /** @type {!vivliostyle.pagefloat.PageFloat} */ var float =
-            new vivliostyle.footnote.Footnote(nodePosition, floatReference);
+            new vivliostyle.footnote.Footnote(nodePosition, floatReference,
+                pageFloatLayoutContext.flowName);
         pageFloatLayoutContext.addPageFloat(float);
         return adapt.task.newResult(float);
     };

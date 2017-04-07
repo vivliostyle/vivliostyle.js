@@ -39,7 +39,7 @@ describe("pagefloat", function() {
 
         describe("#addPageFloat", function() {
             it("adds a PageFloat", function() {
-                var float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                var float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
 
                 expect(store.floats).not.toContain(float);
 
@@ -49,7 +49,7 @@ describe("pagefloat", function() {
             });
 
             it("assign a new ID to the PageFloat", function() {
-                var float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                var float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
 
                 expect(float.id).toBe(null);
 
@@ -57,7 +57,7 @@ describe("pagefloat", function() {
 
                 expect(float.id).toBe("pf0");
 
-                float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
                 store.addPageFloat(float);
 
                 expect(float.id).toBe("pf1");
@@ -65,12 +65,12 @@ describe("pagefloat", function() {
 
             it("throws an error if a float with the same node position is already registered", function() {
                 var nodePosition = dummyNodePosition();
-                var float = new PageFloat(nodePosition, FloatReference.COLUMN, "block-start");
+                var float = new PageFloat(nodePosition, FloatReference.COLUMN, "block-start", "body");
                 store.addPageFloat(float);
 
                 expect(store.floats).toContain(float);
 
-                float = new PageFloat(nodePosition, FloatReference.COLUMN, "block-start");
+                float = new PageFloat(nodePosition, FloatReference.COLUMN, "block-start", "body");
 
                 expect(function() { store.addPageFloat(float); }).toThrow();
             });
@@ -79,14 +79,14 @@ describe("pagefloat", function() {
         describe("#findPageFloatByNodePosition", function() {
             it("returns a registered page float associated with the specified node position", function() {
                 var nodePosition = dummyNodePosition();
-                var float = new PageFloat(nodePosition, FloatReference.COLUMN, "block-start");
+                var float = new PageFloat(nodePosition, FloatReference.COLUMN, "block-start", "body");
                 store.addPageFloat(float);
 
                 expect(store.findPageFloatByNodePosition(nodePosition)).toBe(float);
             });
 
             it("returns null when no page float with the specified node position is registered", function() {
-                var float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                var float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
                 store.addPageFloat(float);
 
                 expect(store.findPageFloatByNodePosition({})).toBe(null);
@@ -191,10 +191,10 @@ describe("pagefloat", function() {
                 var context2 = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
                     null, null, null);
                 var nodePosition1 = dummyNodePosition();
-                var float1 = new PageFloat(nodePosition1, FloatReference.PAGE, "block-start");
+                var float1 = new PageFloat(nodePosition1, FloatReference.PAGE, "block-start", "body");
                 context1.addPageFloat(float1);
                 var nodePosition2 = dummyNodePosition();
-                var float2 = new PageFloat(nodePosition2, FloatReference.PAGE, "block-start");
+                var float2 = new PageFloat(nodePosition2, FloatReference.PAGE, "block-start", "body");
                 context2.addPageFloat(float2);
 
                 expect(context1.findPageFloatByNodePosition(nodePosition1)).toBe(float1);
@@ -208,7 +208,7 @@ describe("pagefloat", function() {
             it("returns if the page float is forbidden in the context by #forbid method", function() {
                 var context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
                     null, null, null);
-                var float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start");
+                var float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start", "body");
                 context.addPageFloat(float);
 
                 expect(context.isForbidden(float)).toBe(false);
@@ -226,7 +226,7 @@ describe("pagefloat", function() {
                 var columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN,
                     null, null, null, null, null);
 
-                var float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                var float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
                 columnContext.addPageFloat(float);
                 columnContext.forbid(float);
 
@@ -238,7 +238,7 @@ describe("pagefloat", function() {
 
                 expect(columnContext.isForbidden(float)).toBe(false);
 
-                float = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start", "body");
                 columnContext.addPageFloat(float);
                 columnContext.forbid(float);
 
@@ -260,7 +260,7 @@ describe("pagefloat", function() {
                 expect(regionContext.isForbidden(float)).toBe(false);
                 expect(function() { pageContext.isForbidden(float); }).toThrow();
 
-                float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start", "body");
                 columnContext.addPageFloat(float);
                 columnContext.forbid(float);
 
@@ -316,7 +316,7 @@ describe("pagefloat", function() {
             it("A PageFloatFragment added by #addPageFloatFragment can be retrieved by #findPageFloatFragment", function() {
                 pageContext = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
                     null, null, null);
-                var float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start");
+                var float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start", "body");
                 pageContext.addPageFloat(float);
                 var fragment = new PageFloatFragment(PageFloatList.fromFloat(float), {}, area);
 
@@ -328,7 +328,7 @@ describe("pagefloat", function() {
             });
 
             it("A PageFloatFragment stored in one of the ancestors can be retrieved by #findPageFloatFragment", function() {
-                var float = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start");
+                var float = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start", "body");
                 columnContext.addPageFloat(float);
                 var fragment = new PageFloatFragment(PageFloatList.fromFloat(float), {}, area);
                 columnContext.addPageFloatFragment(fragment);
@@ -339,7 +339,7 @@ describe("pagefloat", function() {
                 expect(regionContext.findPageFloatFragment(float)).toBe(fragment);
                 expect(function() { pageContext.findPageFloatFragment(float); }).toThrow();
 
-                float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start", "body");
                 columnContext.addPageFloat(float);
                 fragment = new PageFloatFragment(PageFloatList.fromFloat(float), {}, area);
                 columnContext.addPageFloatFragment(fragment);
@@ -354,7 +354,7 @@ describe("pagefloat", function() {
             });
 
             it("When a PageFloatFragment is added by #addPageFloatFragment, the corresponding PageFloatLayoutContext is invalidated", function() {
-                var float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                var float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
                 columnContext.addPageFloat(float);
                 var fragment = new PageFloatFragment(PageFloatList.fromFloat(float), {}, area);
                 columnContext.addPageFloatFragment(fragment);
@@ -363,7 +363,7 @@ describe("pagefloat", function() {
                 expect(regionContext.addPageFloatFragment).not.toHaveBeenCalled();
 
                 reset();
-                float = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start", "body");
                 columnContext.addPageFloat(float);
                 fragment = new PageFloatFragment(PageFloatList.fromFloat(float), {}, area);
                 columnContext.addPageFloatFragment(fragment);
@@ -374,7 +374,7 @@ describe("pagefloat", function() {
                 expect(pageContext.addPageFloatFragment).not.toHaveBeenCalledWith(fragment);
 
                 reset();
-                float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start", "body");
                 columnContext.addPageFloat(float);
                 fragment = new PageFloatFragment(PageFloatList.fromFloat(float), area);
                 columnContext.addPageFloatFragment(fragment);
@@ -393,7 +393,7 @@ describe("pagefloat", function() {
                 context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, container, null,
                     null, null, null);
                 spyOn(context, "invalidate");
-                float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start", "body");
                 context.addPageFloat(float);
                 area = {
                     element: {
@@ -441,7 +441,7 @@ describe("pagefloat", function() {
             });
 
             it("stores the anchor view node", function() {
-                float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
                 columnContext.addPageFloat(float);
                 columnContext.registerPageFloatAnchor(float, anchorViewNode);
 
@@ -449,14 +449,14 @@ describe("pagefloat", function() {
             });
 
             it("stores the anchor view node to the corresponding context", function() {
-                float = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start", "body");
                 columnContext.addPageFloat(float);
                 columnContext.registerPageFloatAnchor(float, anchorViewNode);
 
                 expect(columnContext.floatAnchors[float.getId()]).toBeUndefined();
                 expect(regionContext.floatAnchors[float.getId()]).toBe(anchorViewNode);
 
-                float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start", "body");
                 columnContext.addPageFloat(float);
                 columnContext.registerPageFloatAnchor(float, anchorViewNode);
 
@@ -476,7 +476,7 @@ describe("pagefloat", function() {
                 };
                 context = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, container,
                     "foo", null, null, null);
-                float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "foo");
                 context.addPageFloat(float);
                 id = float.getId();
                 anchorViewNode = {};
@@ -504,7 +504,7 @@ describe("pagefloat", function() {
 
             it("returns true if the float is deferred from a previous fragment", function() {
                 container.element.contains.and.returnValue(false);
-                context.floatsDeferredFromPrevious.push(new PageFloatContinuation(float, {}, "foo"));
+                context.floatsDeferredFromPrevious.push(new PageFloatContinuation(float, {}));
 
                 expect(context.isAnchorAlreadyAppeared(id)).toBe(true);
             });
@@ -522,46 +522,46 @@ describe("pagefloat", function() {
             });
 
             it("stores a PageFloatContinuation as a deferred float", function() {
-                float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
                 columnContext.addPageFloat(float);
                 columnContext.deferPageFloat(float, {});
 
                 expect(columnContext.floatsDeferredToNext.length).toBe(1);
-                expect(columnContext.floatsDeferredToNext[0].flowName).toBe("foo");
+                expect(columnContext.floatsDeferredToNext[0].float).toBe(float);
             });
 
             it("replaces an existing deferred PageFloatContinuation with new one if there exists a deferred continuation of the same float", function() {
-                float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
                 columnContext.addPageFloat(float);
                 var position1 = {};
                 columnContext.deferPageFloat(float, position1);
 
                 expect(columnContext.floatsDeferredToNext.length).toBe(1);
-                expect(columnContext.floatsDeferredToNext[0].flowName).toBe("foo");
+                expect(columnContext.floatsDeferredToNext[0].float).toBe(float);
                 expect(columnContext.floatsDeferredToNext[0].nodePosition).toBe(position1);
 
                 var position2 = {};
                 columnContext.deferPageFloat(float, position2);
 
                 expect(columnContext.floatsDeferredToNext.length).toBe(1);
-                expect(columnContext.floatsDeferredToNext[0].flowName).toBe("foo");
+                expect(columnContext.floatsDeferredToNext[0].float).toBe(float);
                 expect(columnContext.floatsDeferredToNext[0].nodePosition).toBe(position2);
             });
 
             it("stores a PageFloatContinuation in the corresponding context as a deferred float", function() {
-                float = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start");
+                float = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start", "body");
                 columnContext.addPageFloat(float);
                 columnContext.deferPageFloat(float, {});
 
                 expect(columnContext.floatsDeferredToNext.length).toBe(0);
                 expect(regionContext.floatsDeferredToNext.length).toBe(1);
-                expect(regionContext.floatsDeferredToNext[0].flowName).toBe("foo");
+                expect(regionContext.floatsDeferredToNext[0].float).toBe(float);
             });
         });
 
         describe("getDeferredPageFloatContinuations", function() {
-            function addPageFloat(floatReference, context) {
-                var float = new PageFloat(dummyNodePosition(), floatReference, "block-start", {});
+            function addPageFloat(floatReference, context, flowName) {
+                var float = new PageFloat(dummyNodePosition(), floatReference, "block-start", flowName);
                 context.addPageFloat(float);
                 return float;
             }
@@ -574,23 +574,23 @@ describe("pagefloat", function() {
                     "foo", null, null, null);
                 columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
                     "foo", null, null, null);
-                var float1 = addPageFloat(FloatReference.PAGE, pageContext);
-                cont1 = new PageFloatContinuation(float1, {}, "foo");
+                var float1 = addPageFloat(FloatReference.PAGE, pageContext, "foo");
+                cont1 = new PageFloatContinuation(float1, {});
                 pageContext.floatsDeferredFromPrevious.push(cont1);
-                var float2 = addPageFloat(FloatReference.PAGE, pageContext);
-                cont2 = new PageFloatContinuation(float2, {}, "bar");
+                var float2 = addPageFloat(FloatReference.PAGE, pageContext, "bar");
+                cont2 = new PageFloatContinuation(float2, {});
                 pageContext.floatsDeferredFromPrevious.push(cont2);
-                var float3 = addPageFloat(FloatReference.REGION, regionContext);
-                cont3 = new PageFloatContinuation(float3, {}, "foo");
+                var float3 = addPageFloat(FloatReference.REGION, regionContext, "foo");
+                cont3 = new PageFloatContinuation(float3, {});
                 regionContext.floatsDeferredFromPrevious.push(cont3);
-                var float4 = addPageFloat(FloatReference.REGION, regionContext);
-                cont4 = new PageFloatContinuation(float4, {}, "bar");
+                var float4 = addPageFloat(FloatReference.REGION, regionContext, "bar");
+                cont4 = new PageFloatContinuation(float4, {});
                 regionContext.floatsDeferredFromPrevious.push(cont4);
-                var float5 = addPageFloat(FloatReference.COLUMN, columnContext);
-                cont5 = new PageFloatContinuation(float5, {}, "foo");
+                var float5 = addPageFloat(FloatReference.COLUMN, columnContext, "foo");
+                cont5 = new PageFloatContinuation(float5, {});
                 columnContext.floatsDeferredFromPrevious.push(cont5);
-                var float6 = addPageFloat(FloatReference.COLUMN, columnContext);
-                cont6 = new PageFloatContinuation(float6, {}, "bar");
+                var float6 = addPageFloat(FloatReference.COLUMN, columnContext, "bar");
+                cont6 = new PageFloatContinuation(float6, {});
                 columnContext.floatsDeferredFromPrevious.push(cont6);
             });
 
@@ -613,17 +613,17 @@ describe("pagefloat", function() {
                     "foo", null, null, null);
                 columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN, null,
                     "foo", null, null, null);
-                cont1 = new PageFloatContinuation({}, {}, "foo");
+                cont1 = new PageFloatContinuation({flowName: "foo"}, {});
                 pageContext.floatsDeferredToNext.push(cont1);
-                cont2 = new PageFloatContinuation({}, {}, "bar");
+                cont2 = new PageFloatContinuation({flowName: "bar"}, {});
                 pageContext.floatsDeferredToNext.push(cont2);
-                cont3 = new PageFloatContinuation({}, {}, "foo");
+                cont3 = new PageFloatContinuation({flowName: "foo"}, {});
                 regionContext.floatsDeferredToNext.push(cont3);
-                cont4 = new PageFloatContinuation({}, {}, "bar");
+                cont4 = new PageFloatContinuation({flowName: "bar"}, {});
                 regionContext.floatsDeferredToNext.push(cont4);
-                cont5 = new PageFloatContinuation({}, {}, "foo");
+                cont5 = new PageFloatContinuation({flowName: "foo"}, {});
                 columnContext.floatsDeferredToNext.push(cont5);
-                cont6 = new PageFloatContinuation({}, {}, "bar");
+                cont6 = new PageFloatContinuation({flowName: "bar"}, {});
                 columnContext.floatsDeferredToNext.push(cont6);
             });
 
@@ -644,21 +644,21 @@ describe("pagefloat", function() {
                     null, null, null);
                 spyOn(context, "isAnchorAlreadyAppeared");
                 spyOn(context, "removePageFloatFragment");
-                float1 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                float1 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "foo");
                 context.addPageFloat(float1);
                 fragment1 = new PageFloatFragment(PageFloatList.fromFloat(float1), {}, {});
                 context.addPageFloatFragment(fragment1);
-                cont1 = new PageFloatContinuation(float1, {}, "foo");
-                float2 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                cont1 = new PageFloatContinuation(float1, {});
+                float2 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
                 context.addPageFloat(float2);
                 fragment2 = new PageFloatFragment(PageFloatList.fromFloat(float2), {}, {});
                 context.addPageFloatFragment(fragment2);
-                float3 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
-                cont3 = new PageFloatContinuation(float3, {}, "bar");
+                float3 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "bar");
+                cont3 = new PageFloatContinuation(float3, {});
                 context.addPageFloat(float3);
-                float4 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                float4 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "baz");
                 context.addPageFloat(float4);
-                cont4 = new PageFloatContinuation(float4, {}, "baz");
+                cont4 = new PageFloatContinuation(float4, {});
                 context.floatsDeferredFromPrevious = [cont1, cont3, cont4];
                 context.floatsDeferredToNext = [cont3];
             });
@@ -688,9 +688,9 @@ describe("pagefloat", function() {
             });
 
             it("Removes floats deferred to next fragmentainers if their anchors have not appeared", function() {
-                var float5 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                var float5 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "aaa");
                 context.addPageFloat(float5);
-                var cont5 = new PageFloatContinuation(float5, {}, "aaa");
+                var cont5 = new PageFloatContinuation(float5, {});
                 context.floatsDeferredToNext = [cont3, cont5];
                 context.isAnchorAlreadyAppeared.and.callFake(function(id) {
                     return id === float1.getId() || id === float2.getId();
@@ -734,7 +734,7 @@ describe("pagefloat", function() {
             });
 
             it("removes all registered anchor view nodes", function() {
-                var float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start");
+                var float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start", "body");
                 context.addPageFloat(float);
                 var anchorViewNode = {};
                 context.registerPageFloatAnchor(float, anchorViewNode);
@@ -817,14 +817,14 @@ describe("pagefloat", function() {
                 var context = new PageFloatLayoutContext(rootContext, FloatReference.COLUMN, null,
                     null, null, null, null);
 
-                var float1 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                var float1 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
                 context.addPageFloat(float1);
                 var shape1 = { foo: "shape1" };
                 var area1 = { getOuterShape: jasmine.createSpy("getOuterShape").and.returnValue(shape1) };
                 var fragment1 = new PageFloatFragment(PageFloatList.fromFloat(float1), {}, area1);
                 context.addPageFloatFragment(fragment1);
 
-                var float2 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                var float2 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
                 context.addPageFloat(float2);
                 var shape2 = { foo: "shape2" };
                 var area2 = { getOuterShape: jasmine.createSpy("getOuterShape").and.returnValue(shape2) };
@@ -840,14 +840,14 @@ describe("pagefloat", function() {
                 var columnContext = new PageFloatLayoutContext(regionContext, FloatReference.COLUMN,
                     null, null, null, null, null);
 
-                var float1 = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start");
+                var float1 = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start", "body");
                 regionContext.addPageFloat(float1);
                 var shape1 = { foo: "shape1" };
                 var area1 = { getOuterShape: jasmine.createSpy("getOuterShape").and.returnValue(shape1) };
                 var fragment1 = new PageFloatFragment(PageFloatList.fromFloat(float1), {}, area1);
                 regionContext.addPageFloatFragment(fragment1);
 
-                var float2 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start");
+                var float2 = new PageFloat(dummyNodePosition(), FloatReference.COLUMN, "block-start", "body");
                 columnContext.addPageFloat(float2);
                 var shape2 = { foo: "shape2" };
                 var area2 = { getOuterShape: jasmine.createSpy("getOuterShape").and.returnValue(shape2) };
