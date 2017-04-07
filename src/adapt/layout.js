@@ -1504,6 +1504,50 @@ adapt.layout.Column.prototype.createPageFloatArea = function(floatList) {
 };
 
 /**
+ * @typedef {{
+ *   floatArea: ?adapt.layout.PageFloatArea,
+ *   pageFloatFragment: ?vivliostyle.pagefloat.PageFloatFragment,
+ *   newPosition: ?adapt.vtree.ChunkPosition
+ * }}
+ */
+adapt.layout.SinglePageFloatLayoutResult;
+
+/**
+ * @param {!adapt.vtree.NodePosition} nodePosition
+ * @param {!vivliostyle.pagefloat.PageFloatList} floatList
+ * @param {boolean} allowFragmented
+ * @returns {!adapt.task.Result.<!adapt.layout.SinglePageFloatLayoutResult>}
+ */
+adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
+    nodePosition, floatList, allowFragmented) {
+    var context = this.pageFloatLayoutContext;
+    var floatArea = this.createPageFloatArea(floatList);
+    /** @const {!adapt.layout.SinglePageFloatLayoutResult} */ var result =
+        {floatArea: floatArea, pageFloatFragment: null, newPosition: null};
+    if (!floatArea) {
+        return adapt.task.newResult(result);
+    }
+    var floatChunkPosition = new adapt.vtree.ChunkPosition(nodePosition);
+    var frame = adapt.task.newFrame("layoutSinglePageFloatFragment");
+    floatArea.layout(floatChunkPosition, true).then(function(newPosition) {
+        result.newPosition = newPosition;
+        if (!newPosition || allowFragmented) {
+            goog.asserts.assert(floatArea);
+            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, floatList, false,
+                allowFragmented);
+            if (fitWithinContainer) {
+                var pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(
+                    floatList, nodePosition, floatArea);
+                context.addPageFloatFragment(pageFloatFragment, true);
+                result.pageFloatFragment = pageFloatFragment;
+            }
+        }
+        frame.finish(result);
+    });
+    return frame.result();
+};
+
+/**
  * @param {!adapt.vtree.NodePosition} nodePosition
  * @param {!vivliostyle.pagefloat.PageFloat} float
  * @returns {!adapt.task.Result.<?adapt.layout.Column>}
@@ -1512,8 +1556,7 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, floa
     var context = this.pageFloatLayoutContext;
     context.stashEndFloats(float);
 
-    var floatArea = null, pageFloatFragment = null;
-    function cancelLayout() {
+    function cancelLayout(floatArea, pageFloatFragment) {
         if (pageFloatFragment) {
             context.removePageFloatFragment(pageFloatFragment, true);
         } else if (floatArea) {
@@ -1523,47 +1566,32 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, floa
         context.deferPageFloatOrForbidFollowingFloat(float, nodePosition);
     }
 
-    var floatList = vivliostyle.pagefloat.PageFloatList.fromFloat(float);
-    floatArea = this.createPageFloatArea(floatList);
-    if (!floatArea) {
-        cancelLayout();
-        return adapt.task.newResult(/** @type {adapt.layout.Column} */ (null));
-    }
-    var floatChunkPosition = new adapt.vtree.ChunkPosition(nodePosition);
-
     /** @const {!adapt.task.Frame<?adapt.layout.Column>} */ var frame = adapt.task.newFrame("layoutPageFloatInner");
     var self = this;
-    floatArea.layout(floatChunkPosition, true).then(function(newPosition) {
-        if (newPosition && context.hasFloatFragments()) {
-            cancelLayout();
-            frame.finish(null);
-        } else {
-            goog.asserts.assert(floatArea);
-            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, floatList, false,
-                !context.hasFloatFragments());
-            if (!fitWithinContainer) {
-                cancelLayout();
-                frame.finish(null);
-            } else {
-                pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(
-                    floatList, nodePosition, floatArea);
-                context.addPageFloatFragment(pageFloatFragment, true);
-                self.layoutStashedPageFloats(float.floatReference).then(function(success) {
-                    if (success) {
-                        // Add again to invalidate the context
-                        goog.asserts.assert(pageFloatFragment);
-                        context.addPageFloatFragment(pageFloatFragment);
-                        context.discardStashedFragments(float.floatReference);
-                        if (newPosition) {
-                            context.deferPageFloat(float, newPosition.primary);
-                        }
-                        frame.finish(floatArea);
-                    } else {
-                        cancelLayout();
-                        frame.finish(null);
+    var floatList = vivliostyle.pagefloat.PageFloatList.fromFloat(float);
+    this.layoutSinglePageFloatFragment(nodePosition, floatList, !context.hasFloatFragments()).then(function(result) {
+        var floatArea = result.floatArea;
+        var pageFloatFragment = result.pageFloatFragment;
+        var newPosition = result.newPosition;
+        if (pageFloatFragment) {
+            self.layoutStashedPageFloats(float.floatReference).then(function(success) {
+                if (success) {
+                    // Add again to invalidate the context
+                    goog.asserts.assert(pageFloatFragment);
+                    context.addPageFloatFragment(pageFloatFragment);
+                    context.discardStashedFragments(float.floatReference);
+                    if (newPosition) {
+                        context.deferPageFloat(float, newPosition.primary);
                     }
-                });
-            }
+                    frame.finish(floatArea);
+                } else {
+                    cancelLayout(floatArea, pageFloatFragment);
+                    frame.finish(null);
+                }
+            });
+        } else {
+            cancelLayout(floatArea, pageFloatFragment);
+            frame.finish(null);
         }
     });
     return frame.result();
@@ -1589,33 +1617,21 @@ adapt.layout.Column.prototype.layoutStashedPageFloats = function(floatReference)
             return;
         }
         var stashedFragment = stashedFloatFragments[i];
-        var float = context.getFloatsOfFragment(stashedFragment);
+        var floatList = context.getFloatsOfFragment(stashedFragment);
         var nodePosition = stashedFragment.nodePosition;
-        var floatArea = self.createPageFloatArea(float);
-        if (!floatArea) {
-            failed = true;
-            loopFrame.breakLoop();
-            return;
-        }
-        newFloatAreas.push(floatArea);
-        var chunkPosition = new adapt.vtree.ChunkPosition(nodePosition);
-        floatArea.layout(chunkPosition, true).then(function(newPosition) {
-            if (newPosition) {
-                failed = true;
-                loopFrame.breakLoop();
-                return;
+        self.layoutSinglePageFloatFragment(nodePosition, floatList, false).then(function(result) {
+            var floatArea = result.floatArea;
+            if (floatArea) {
+                newFloatAreas.push(floatArea);
             }
-            goog.asserts.assert(floatArea);
-            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, float, false, false);
-            if (!fitWithinContainer) {
-                failed = true;
-                loopFrame.breakLoop();
-            } else {
-                var fragment = new vivliostyle.pagefloat.PageFloatFragment(float, nodePosition, floatArea);
-                context.addPageFloatFragment(fragment, true);
+            var fragment = result.pageFloatFragment;
+            if (fragment) {
                 newFragments.push(fragment);
                 i++;
                 loopFrame.continueLoop();
+            } else {
+                failed = true;
+                loopFrame.breakLoop();
             }
         });
     }).then(function() {
