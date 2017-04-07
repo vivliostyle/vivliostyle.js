@@ -625,8 +625,8 @@ adapt.vtree.isSameNodePositionStep = function(nps1, nps2) {
 adapt.vtree.NodePosition;
 
 /**
- * @param {adapt.vtree.NodePosition} np1
- * @param {adapt.vtree.NodePosition} np2
+ * @param {?adapt.vtree.NodePosition} np1
+ * @param {?adapt.vtree.NodePosition} np2
  * @returns {boolean}
  */
 adapt.vtree.isSameNodePosition = function(np1, np2) {

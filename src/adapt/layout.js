@@ -1130,7 +1130,7 @@ adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnote
         var layoutContext = self.layoutContext.clone();
         var footnotePageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
             self.pageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.COLUMN,
-            null, self.pageFloatLayoutContext.flowName, footnoteNodePosition.steps[0].node,
+            null, self.pageFloatLayoutContext.flowName, footnoteNodePosition,
             null, null);
         footnoteArea = new adapt.layout.Column(footnoteContainer, layoutContext, self.clientLayout,
             self.layoutConstraint, footnotePageFloatLayoutContext);
@@ -1491,7 +1491,7 @@ adapt.layout.Column.prototype.createPageFloatArea = function(floatList) {
     // TODO: establish how to specify an appropriate generating element for the new page float layout context
     var pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
         parentPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.COLUMN, null,
-        this.pageFloatLayoutContext.flowName, floatList.floats[0].sourceNode, null, null);
+        this.pageFloatLayoutContext.flowName, floatList.floats[0].nodePosition, null, null);
     var parentContainer = parentPageFloatLayoutContext.getContainer();
     var floatArea = new adapt.layout.PageFloatArea(floatList, floatAreaElement, this.layoutContext.clone(),
         this.clientLayout, this.layoutConstraint, pageFloatLayoutContext, parentContainer);
