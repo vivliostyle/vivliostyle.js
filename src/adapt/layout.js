@@ -1435,11 +1435,13 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 
 /**
  * @param {!adapt.layout.PageFloatArea} area
- * @param {?vivliostyle.pagefloat.PageFloatList} floatList
+ * @param {!vivliostyle.pagefloat.FloatReference} floatReference
+ * @param {string} floatSide
+ * @param {boolean} isFootnote
  */
-adapt.layout.Column.prototype.setupFloatArea = function(area, floatList) {
+adapt.layout.Column.prototype.setupFloatArea = function(area, floatReference, floatSide, isFootnote) {
     var floatLayoutContext = this.pageFloatLayoutContext;
-    var floatContainer = floatLayoutContext.getContainer(floatList.floatReference);
+    var floatContainer = floatLayoutContext.getContainer(floatReference);
     var containingBlockRect = floatContainer.getPaddingRect();
     var element = area.element;
     floatContainer.element.parentNode.appendChild(element);
@@ -1458,7 +1460,7 @@ adapt.layout.Column.prototype.setupFloatArea = function(area, floatList) {
     area.forceNonfitting = !floatLayoutContext.hasFloatFragments();
     area.innerShape = null;
 
-    if (floatList.floats[0] instanceof vivliostyle.footnote.Footnote) {
+    if (isFootnote) {
         area.vertical = this.layoutContext.applyFootnoteStyle(floatContainer.vertical, element);
         area.isFootnote = true;
         this.setComputedInsets(element, area);
@@ -1468,7 +1470,7 @@ adapt.layout.Column.prototype.setupFloatArea = function(area, floatList) {
 
     // Calculate bands from the exclusions before setting float area dimensions
     area.init();
-    var fitWithinContainer = floatLayoutContext.setFloatAreaDimensions(area, floatList, true,
+    var fitWithinContainer = floatLayoutContext.setFloatAreaDimensions(area, floatReference, floatSide, true,
         !floatLayoutContext.hasFloatFragments());
     if (fitWithinContainer) {
         // New dimensions have been set, remove exclusion floats and re-init
@@ -1481,22 +1483,22 @@ adapt.layout.Column.prototype.setupFloatArea = function(area, floatList) {
 };
 
 /**
- * @param {?vivliostyle.pagefloat.PageFloatList} floatList
+ * @param {?vivliostyle.pagefloat.PageFloat} float
  * @returns {?adapt.layout.PageFloatArea}
  */
-adapt.layout.Column.prototype.createPageFloatArea = function(floatList) {
+adapt.layout.Column.prototype.createPageFloatArea = function(float) {
     var floatAreaElement = this.element.ownerDocument.createElement("div");
     adapt.base.setCSSProperty(floatAreaElement, "position", "absolute");
-    var parentPageFloatLayoutContext = this.pageFloatLayoutContext.getPageFloatLayoutContext(floatList.floatReference);
+    var parentPageFloatLayoutContext = this.pageFloatLayoutContext.getPageFloatLayoutContext(float.floatReference);
     // TODO: establish how to specify an appropriate generating element for the new page float layout context
     var pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
         parentPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.COLUMN, null,
-        this.pageFloatLayoutContext.flowName, floatList.floats[0].nodePosition, null, null);
+        this.pageFloatLayoutContext.flowName, float.nodePosition, null, null);
     var parentContainer = parentPageFloatLayoutContext.getContainer();
-    var floatArea = new adapt.layout.PageFloatArea(floatList, floatAreaElement, this.layoutContext.clone(),
+    var floatArea = new adapt.layout.PageFloatArea(float.floatSide, floatAreaElement, this.layoutContext.clone(),
         this.clientLayout, this.layoutConstraint, pageFloatLayoutContext, parentContainer);
     pageFloatLayoutContext.setContainer(floatArea);
-    if (this.setupFloatArea(floatArea, floatList)) {
+    if (this.setupFloatArea(floatArea, float.floatReference, float.floatSide, float instanceof vivliostyle.footnote.Footnote)) {
         return floatArea;
     } else {
         return null;
@@ -1513,31 +1515,31 @@ adapt.layout.Column.prototype.createPageFloatArea = function(floatList) {
 adapt.layout.SinglePageFloatLayoutResult;
 
 /**
- * @param {!adapt.vtree.NodePosition} nodePosition
- * @param {!vivliostyle.pagefloat.PageFloatList} floatList
+ * @param {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} continuations
  * @param {boolean} allowFragmented
  * @returns {!adapt.task.Result.<!adapt.layout.SinglePageFloatLayoutResult>}
  */
 adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
-    nodePosition, floatList, allowFragmented) {
+    continuations, allowFragmented) {
     var context = this.pageFloatLayoutContext;
-    var floatArea = this.createPageFloatArea(floatList);
+    var floatArea = this.createPageFloatArea(continuations[0].float);
     /** @const {!adapt.layout.SinglePageFloatLayoutResult} */ var result =
         {floatArea: floatArea, pageFloatFragment: null, newPosition: null};
     if (!floatArea) {
         return adapt.task.newResult(result);
     }
-    var floatChunkPosition = new adapt.vtree.ChunkPosition(nodePosition);
+    var c = continuations[0];
+    var floatChunkPosition = new adapt.vtree.ChunkPosition(c.nodePosition);
     var frame = adapt.task.newFrame("layoutSinglePageFloatFragment");
     floatArea.layout(floatChunkPosition, true).then(function(newPosition) {
         result.newPosition = newPosition;
         if (!newPosition || allowFragmented) {
             goog.asserts.assert(floatArea);
-            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, floatList, false,
+            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, c.float.floatReference, c.float.floatSide, false,
                 allowFragmented);
             if (fitWithinContainer) {
                 var pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(
-                    floatList, nodePosition, floatArea);
+                    c.float.floatReference, c.float.floatSide, [c], floatArea);
                 context.addPageFloatFragment(pageFloatFragment, true);
                 result.pageFloatFragment = pageFloatFragment;
             }
@@ -1569,8 +1571,7 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, floa
 
     /** @const {!adapt.task.Frame<?adapt.layout.Column>} */ var frame = adapt.task.newFrame("layoutPageFloatInner");
     var self = this;
-    var floatList = vivliostyle.pagefloat.PageFloatList.fromFloat(float);
-    this.layoutSinglePageFloatFragment(nodePosition, floatList, !context.hasFloatFragments()).then(function(result) {
+    this.layoutSinglePageFloatFragment([continuation], !context.hasFloatFragments()).then(function(result) {
         var floatArea = result.floatArea;
         var pageFloatFragment = result.pageFloatFragment;
         var newPosition = result.newPosition;
@@ -1620,9 +1621,7 @@ adapt.layout.Column.prototype.layoutStashedPageFloats = function(floatReference)
             return;
         }
         var stashedFragment = stashedFloatFragments[i];
-        var floatList = context.getFloatsOfFragment(stashedFragment);
-        var nodePosition = stashedFragment.nodePosition;
-        self.layoutSinglePageFloatFragment(nodePosition, floatList, false).then(function(result) {
+        self.layoutSinglePageFloatFragment(stashedFragment.continuations, false).then(function(result) {
             var floatArea = result.floatArea;
             if (floatArea) {
                 newFloatAreas.push(floatArea);
@@ -3578,7 +3577,7 @@ vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSO
 
 /**
  * @constructor
- * @param {!vivliostyle.pagefloat.PageFloatList} floatList
+ * @param {string} floatSide
  * @param {Element} element
  * @param {!adapt.vtree.LayoutContext} layoutContext
  * @param {adapt.vtree.ClientLayout} clientLayout
@@ -3587,11 +3586,11 @@ vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSO
  * @param {adapt.vtree.Container} parentContainer
  * @extends {adapt.layout.Column}
  */
-adapt.layout.PageFloatArea = function(floatList, element, layoutContext, clientLayout, layoutConstraint,
+adapt.layout.PageFloatArea = function(floatSide, element, layoutContext, clientLayout, layoutConstraint,
                                       pageFloatLayoutContext, parentContainer) {
     adapt.layout.Column.call(this, element, layoutContext, clientLayout, layoutConstraint,
         pageFloatLayoutContext);
-    /** @const */ this.floatList = floatList;
+    /** @const */ this.floatSide = floatSide;
     /** @const */ this.parentContainer = parentContainer;
     /** @type {?Element} */ this.rootViewNode = null;
     /** @type {?adapt.geom.Insets} */ this.floatMargin = null;
@@ -3652,7 +3651,7 @@ adapt.layout.PageFloatArea.prototype.fixFloatSizeAndPosition = function(nodeCont
 
     this.floatMargin = this.getComputedMargin(rootViewNode);
 
-    var floatSide = this.floatList.floatSide;
+    var floatSide = this.floatSide;
     var isVertical = this.parentContainer.vertical;
 
     if (isVertical) {
