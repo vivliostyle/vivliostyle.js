@@ -1528,21 +1528,42 @@ adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
     if (!floatArea) {
         return adapt.task.newResult(result);
     }
-    var c = continuations[0];
-    var floatChunkPosition = new adapt.vtree.ChunkPosition(c.nodePosition);
     var frame = adapt.task.newFrame("layoutSinglePageFloatFragment");
-    floatArea.layout(floatChunkPosition, true).then(function(newPosition) {
-        result.newPosition = newPosition;
-        if (!newPosition || allowFragmented) {
-            goog.asserts.assert(floatArea);
-            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, c.float.floatReference, c.float.floatSide, false,
-                allowFragmented);
-            if (fitWithinContainer) {
-                var pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(
-                    c.float.floatReference, c.float.floatSide, [c], floatArea);
-                context.addPageFloatFragment(pageFloatFragment, true);
-                result.pageFloatFragment = pageFloatFragment;
+    var failed = false;
+    var i = 0;
+    frame.loopWithFrame(function(loopFrame) {
+        if (i >= continuations.length) {
+            loopFrame.breakLoop();
+            return;
+        }
+        var c = continuations[i];
+        var floatChunkPosition = new adapt.vtree.ChunkPosition(c.nodePosition);
+        floatArea.layout(floatChunkPosition, true).then(function(newPosition) {
+            result.newPosition = newPosition;
+            if (!newPosition || allowFragmented) {
+                goog.asserts.assert(floatArea);
+                var fitWithinContainer = context.setFloatAreaDimensions(floatArea, c.float.floatReference, c.float.floatSide, false,
+                    allowFragmented);
+                if (fitWithinContainer) {
+                    i++;
+                    loopFrame.continueLoop();
+                } else {
+                    failed = true;
+                    loopFrame.breakLoop();
+                }
+            } else {
+                failed = true;
+                loopFrame.breakLoop();
             }
+        });
+    }).then(function() {
+        if (!failed) {
+            var f = continuations[0].float;
+            goog.asserts.assert(floatArea);
+            var pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(
+                f.floatReference, f.floatSide, continuations, floatArea);
+            context.addPageFloatFragment(pageFloatFragment, true);
+            result.pageFloatFragment = pageFloatFragment;
         }
         frame.finish(result);
     });
