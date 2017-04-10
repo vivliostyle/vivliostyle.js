@@ -543,8 +543,10 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
         }
         var continuation = deferredFloats[i++];
         var float = continuation.float;
-        var pageFloatFragment = pageFloatLayoutContext.findPageFloatFragment(float);
-        if (pageFloatFragment) {
+        var strategy = new vivliostyle.pagefloat.PageFloatLayoutStrategyResolver()
+            .findByFloat(float);
+        var pageFloatFragment = strategy.findPageFloatFragment(float, pageFloatLayoutContext);
+        if (pageFloatFragment && pageFloatFragment.hasFloat(float)) {
             loopFrame.continueLoop();
             return;
         } else if (pageFloatLayoutContext.isForbidden(float) ||
@@ -553,7 +555,7 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
             loopFrame.breakLoop();
             return;
         }
-        column.layoutPageFloatInner(continuation.nodePosition, float).then(function(floatArea) {
+        column.layoutPageFloatInner(continuation, strategy, pageFloatFragment).then(function(floatArea) {
             if (!floatArea) {
                 loopFrame.continueLoop();
                 return;
