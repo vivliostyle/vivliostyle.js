@@ -1079,6 +1079,19 @@ adapt.layout.Column.prototype.setComputedInsets = function(element, container) {
 };
 
 /**
+ * Set element's computed width and height to Column Container
+ * @param {Element} element
+ * @param {adapt.layout.Column} container
+ */
+adapt.layout.Column.prototype.setComputedWidthAndHeight = function(element, container) {
+    var style = this.clientLayout.getElementComputedStyle(element);
+    if (style) {
+        container.width = this.parseComputedLength(style.width);
+        container.height = this.parseComputedLength(style.height);
+    }
+};
+
+/**
  * Layout a single unbreakable element.
  * @param {adapt.vtree.NodeContext} nodeContextIn
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
@@ -1444,23 +1457,27 @@ adapt.layout.Column.prototype.setupFloatArea = function(
     area, floatReference, floatSide, strategy, isFirstTime) {
     var floatLayoutContext = this.pageFloatLayoutContext;
     var floatContainer = floatLayoutContext.getContainer(floatReference);
-    var containingBlockRect = floatContainer.getPaddingRect();
     var element = area.element;
     floatContainer.element.parentNode.appendChild(element);
-    area.copyFrom(floatContainer);
 
-    area.element = element;
-    area.isFloat = true;
-    area.width = containingBlockRect.x2 - containingBlockRect.x1;
-    area.height = containingBlockRect.y2 - containingBlockRect.y1;
-    area.marginLeft = area.marginRight = area.marginTop = area.marginBottom = 0;
-    area.borderLeft = area.borderRight = area.borderTop = area.borderBottom = 0;
-    area.paddingLeft = area.paddingRight = area.paddingTop = area.paddingBottom = 0;
-    area.setHorizontalPosition(containingBlockRect.x1 - floatContainer.originX, area.width);
-    area.setVerticalPosition(containingBlockRect.y1 - floatContainer.originY, area.height);
-    area.exclusions = (floatContainer.exclusions || []).concat();
-    area.forceNonfitting = !floatLayoutContext.hasFloatFragments();
-    area.innerShape = null;
+    if (isFirstTime) {
+        area.isFloat = true;
+        area.originX = floatContainer.originX;
+        area.originY = floatContainer.originY;
+        area.vertical = floatContainer.vertical;
+        area.marginLeft = area.marginRight = area.marginTop = area.marginBottom = 0;
+        area.borderLeft = area.borderRight = area.borderTop = area.borderBottom = 0;
+        area.paddingLeft = area.paddingRight = area.paddingTop = area.paddingBottom = 0;
+        area.exclusions = (floatContainer.exclusions || []).concat();
+        area.forceNonfitting = !floatLayoutContext.hasFloatFragments();
+        area.innerShape = null;
+    }
+
+    var containingBlockRect = floatContainer.getPaddingRect();
+    area.setHorizontalPosition(containingBlockRect.x1 - floatContainer.originX,
+        containingBlockRect.x2 - containingBlockRect.x1);
+    area.setVerticalPosition(containingBlockRect.y1 - floatContainer.originY,
+        containingBlockRect.y2 - containingBlockRect.y1);
 
     strategy.adjustPageFloatAreaStyle(area, floatContainer, this, isFirstTime);
 
@@ -3633,7 +3650,7 @@ adapt.layout.PageFloatArea = function(floatSide, element, layoutContext, clientL
     /** @const */ this.floatSide = floatSide;
     /** @const */ this.parentContainer = parentContainer;
     /** @private @type {!Array<!Element>} */ this.rootViewNodes = [];
-    /** @type {?adapt.geom.Insets} */ this.floatMargin = null;
+    /** @private @type {!Array<!adapt.geom.Insets>} */ this.floatMargins = [];
 };
 goog.inherits(adapt.layout.PageFloatArea, adapt.layout.Column);
 
@@ -3689,7 +3706,7 @@ adapt.layout.PageFloatArea.prototype.fixFloatSizeAndPosition = function(nodeCont
             adapt.base.setCSSProperty(rootViewNode, propName, "0");
     });
 
-    this.floatMargin = this.getComputedMargin(rootViewNode);
+    this.floatMargins.push(this.getComputedMargin(rootViewNode));
 
     var floatSide = this.floatSide;
     var isVertical = this.parentContainer.vertical;
@@ -3713,8 +3730,11 @@ adapt.layout.PageFloatArea.prototype.fixFloatSizeAndPosition = function(nodeCont
  * @returns {number}
  */
 adapt.layout.PageFloatArea.prototype.getContentInlineSize = function() {
-    return Math.max.apply(null, this.rootViewNodes.map(function(r) {
+    return Math.max.apply(null, this.rootViewNodes.map(function(r, i) {
         var box = this.clientLayout.getElementClientRect(r);
-        return this.vertical ? box.height : box.width;
+        var margin = this.floatMargins[i];
+        return this.vertical ?
+            margin.top + box.height + margin.bottom :
+            margin.left + box.width + margin.right;
     }, this));
 };

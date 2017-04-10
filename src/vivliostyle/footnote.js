@@ -126,8 +126,7 @@ goog.scope(function() {
             floatArea.vertical = column.layoutContext.applyFootnoteStyle(floatContainer.vertical, element);
             floatArea.isFootnote = true;
             column.setComputedInsets(element, floatArea);
-            floatArea.width -= floatArea.getInsetLeft() + floatArea.getInsetRight();
-            floatArea.height -= floatArea.getInsetTop() + floatArea.getInsetBottom();
+            column.setComputedWidthAndHeight(element, floatArea);
         }
     };
 

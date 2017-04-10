@@ -1067,9 +1067,7 @@ goog.scope(function() {
             if (!force && (blockSize <= 0 || inlineSize <= 0))
                 return false;
         } else {
-            var margin = area.floatMargin;
-            // block-start margin of floatMargin is included in computedBlockSize
-            blockSize = area.computedBlockSize + (area.vertical ? margin.left : margin.bottom);
+            blockSize = area.computedBlockSize;
             outerBlockSize = blockSize + area.getInsetBefore() + area.getInsetAfter();
             var availableBlockSize = (blockEnd - blockStart) * area.getBoxDir();
             if (!force && availableBlockSize < outerBlockSize)
@@ -1078,9 +1076,7 @@ goog.scope(function() {
                 inlineSize = vivliostyle.sizing.getSize(area.clientLayout, area.element,
                     [vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE];
             } else {
-                inlineSize = area.getContentInlineSize() +
-                    (area.vertical ? margin.top : margin.left) +
-                    (area.vertical ? margin.bottom : margin.right);
+                inlineSize = area.getContentInlineSize();
             }
             outerInlineSize = inlineSize + area.getInsetStart() + area.getInsetEnd();
             var availableInlineSize = inlineEnd - inlineStart;
