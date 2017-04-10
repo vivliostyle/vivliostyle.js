@@ -7,6 +7,9 @@
     @page {
       size: 300px;
       margin: 20px;
+      @bottom-center {
+        content: counter(page);
+      }
     }
     :root {
       font-size: 16px;
@@ -17,7 +20,7 @@
       widows: 1;
     }
     section {
-      break-after: page;
+      break-after: left;
     }
     .footnote {
       float: footnote;
@@ -28,12 +31,6 @@
     }
     .footnote::footnote-call {
       content: "[" counter(footnote) "]";
-    }
-    .footnote:footnote-content {
-      width: 50%;
-      background: lightgray;
-      margin-left: 10px;
-      margin-right: 30px;
     }
 
     .template-footnote {
@@ -48,46 +45,65 @@
 
     .column-float, .region-float, .page-float {
       float: bottom;
+      -ah-float:bottom;
       margin: 3px;
       padding: 3px;
       border: blue dashed 2px;
     }
+    .top {
+      float: top;
+      -ah-float: top;
+    }
+    .high {
+      height: 120px;
+    }
     .column-float {
+      -ah-float-reference: column;
       float-reference: column;
     }
     .region-float {
+      -ah-float-reference: page;
       float-reference: region;
     }
     .page-float {
+      -ah-float-reference: page;
       float-reference: page;
     }
 
     #fn1:footnote-content {
       margin-top: 10px;
+      width: 50%;
+      background: lightgray;
+      margin-left: 10px;
+      margin-right: 30px;
     }
     #fn2:footnote-content {
       margin-bottom: 20px;
+      width: 50%;
+      background: lightgray;
+      margin-left: 10px;
+      margin-right: 30px;
     }
   </style>
 </head>
 <body>
 <section>
   All footnotes <span id="fn1" class="footnote">footnote</span>
-  <span class="column-float">bottom column float</span>
-  <span class="region-float">bottom region float</span>
-  <span class="page-float">bottom page float</span>
+  <span class="column-float">bottom column float (P1)</span>
+  <span class="region-float">bottom region float (P1)</span>
   should be
   below page floats.
   All footnotes <span id="fn2" class="footnote">footnote</span>
+  <span class="page-float">bottom page float (P1)</span>
   should be
   below page floats.
 </section>
 
 <section>
   All footnotes <a class="template-footnote" href="#template-footnote-1">[1]</a>
-  <span class="column-float">bottom column float</span>
-  <span class="region-float">bottom region float</span>
-  <span class="page-float">bottom page float</span>
+  <span class="column-float">bottom column float (P2)</span>
+  <span class="region-float">bottom region float (P2)</span>
+  <span class="page-float">bottom page float (P2)</span>
   should be
   below page floats.
   All footnotes <a class="template-footnote" href="#template-footnote-2">[2]</a>
@@ -95,6 +111,20 @@
   below page floats.
   <div id="template-footnote-1" class="template-footnote-content">template footnote 1</div>
   <div id="template-footnote-2" class="template-footnote-content">template footnote 2</div>
+</section>
+
+<section>
+  This page (P4) should have one footnote <span class="footnote">footnote</span>
+  <span class="page-float top high">top page float (P4)</span>
+  and another footnote  <span class="footnote">A very long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long footnote</span>
+  should be deferred to the next page.
+</section>
+
+<section>
+  This page (P6) should have one footnote <span class="footnote">footnote</span>
+  <span class="page-float high">bottom page float (P6)</span>
+  and another footnote  <span class="footnote">A very long long long long long long long long long long long long long long long long long long long long long long long long long long long footnote</span>
+  should be deferred to the next page.
 </section>
 </body>
 </html>

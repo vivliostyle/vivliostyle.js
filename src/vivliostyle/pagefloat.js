@@ -1200,10 +1200,9 @@ goog.scope(function() {
      * @param {!adapt.layout.PageFloatArea} floatArea
      * @param {!adapt.vtree.Container} floatContainer
      * @param {!adapt.layout.Column} column
-     * @param {boolean} isFirstTime
      */
     PageFloatLayoutStrategy.prototype.adjustPageFloatAreaStyle =
-        function(floatArea, floatContainer, column, isFirstTime) {};
+        function(floatArea, floatContainer, column) {};
 
     /** @const {Array<!PageFloatLayoutStrategy>} */
     var pageFloatLayoutStrategies = [];
@@ -1312,7 +1311,7 @@ goog.scope(function() {
      * @override
      */
     NormalPageFloatLayoutStrategy.prototype.adjustPageFloatAreaStyle = function(
-        floatArea, floatContainer, column, isFirstTime) {};
+        floatArea, floatContainer, column) {};
 
     PageFloatLayoutStrategyResolver.register(new NormalPageFloatLayoutStrategy());
 });

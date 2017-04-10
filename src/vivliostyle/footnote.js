@@ -138,14 +138,12 @@ goog.scope(function() {
     /**
      * @override
      */
-    FootnoteLayoutStrategy.prototype.adjustPageFloatAreaStyle = function(floatArea, floatContainer, column, isFirstTime) {
-        if (isFirstTime) {
-            var element = floatArea.element;
-            floatArea.vertical = column.layoutContext.applyFootnoteStyle(floatContainer.vertical, element);
-            floatArea.isFootnote = true;
-            column.setComputedInsets(element, floatArea);
-            column.setComputedWidthAndHeight(element, floatArea);
-        }
+    FootnoteLayoutStrategy.prototype.adjustPageFloatAreaStyle = function(floatArea, floatContainer, column) {
+        var element = floatArea.element;
+        floatArea.vertical = column.layoutContext.applyFootnoteStyle(floatContainer.vertical, element);
+        floatArea.isFootnote = true;
+        column.setComputedInsets(element, floatArea);
+        column.setComputedWidthAndHeight(element, floatArea);
     };
 
     vivliostyle.pagefloat.PageFloatLayoutStrategyResolver.register(new FootnoteLayoutStrategy());

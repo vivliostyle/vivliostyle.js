@@ -1451,27 +1451,24 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
  * @param {!vivliostyle.pagefloat.FloatReference} floatReference
  * @param {string} floatSide
  * @param {!vivliostyle.pagefloat.PageFloatLayoutStrategy} strategy
- * @param {boolean} isFirstTime
  */
 adapt.layout.Column.prototype.setupFloatArea = function(
-    area, floatReference, floatSide, strategy, isFirstTime) {
+    area, floatReference, floatSide, strategy) {
     var floatLayoutContext = this.pageFloatLayoutContext;
     var floatContainer = floatLayoutContext.getContainer(floatReference);
     var element = area.element;
     floatContainer.element.parentNode.appendChild(element);
 
-    if (isFirstTime) {
-        area.isFloat = true;
-        area.originX = floatContainer.originX;
-        area.originY = floatContainer.originY;
-        area.vertical = floatContainer.vertical;
-        area.marginLeft = area.marginRight = area.marginTop = area.marginBottom = 0;
-        area.borderLeft = area.borderRight = area.borderTop = area.borderBottom = 0;
-        area.paddingLeft = area.paddingRight = area.paddingTop = area.paddingBottom = 0;
-        area.exclusions = (floatContainer.exclusions || []).concat();
-        area.forceNonfitting = !floatLayoutContext.hasFloatFragments();
-        area.innerShape = null;
-    }
+    area.isFloat = true;
+    area.originX = floatContainer.originX;
+    area.originY = floatContainer.originY;
+    area.vertical = floatContainer.vertical;
+    area.marginLeft = area.marginRight = area.marginTop = area.marginBottom = 0;
+    area.borderLeft = area.borderRight = area.borderTop = area.borderBottom = 0;
+    area.paddingLeft = area.paddingRight = area.paddingTop = area.paddingBottom = 0;
+    area.exclusions = (floatContainer.exclusions || []).concat();
+    area.forceNonfitting = !floatLayoutContext.hasFloatFragments();
+    area.innerShape = null;
 
     var containingBlockRect = floatContainer.getPaddingRect();
     area.setHorizontalPosition(containingBlockRect.x1 - floatContainer.originX,
@@ -1479,7 +1476,7 @@ adapt.layout.Column.prototype.setupFloatArea = function(
     area.setVerticalPosition(containingBlockRect.y1 - floatContainer.originY,
         containingBlockRect.y2 - containingBlockRect.y1);
 
-    strategy.adjustPageFloatAreaStyle(area, floatContainer, this, isFirstTime);
+    strategy.adjustPageFloatAreaStyle(area, floatContainer, this);
 
     // Calculate bands from the exclusions before setting float area dimensions
     area.init();
@@ -1512,7 +1509,7 @@ adapt.layout.Column.prototype.createPageFloatArea = function(float, strategy) {
     var floatArea = new adapt.layout.PageFloatArea(float.floatSide, floatAreaElement, this.layoutContext.clone(),
         this.clientLayout, this.layoutConstraint, pageFloatLayoutContext, parentContainer);
     pageFloatLayoutContext.setContainer(floatArea);
-    if (this.setupFloatArea(floatArea, float.floatReference, float.floatSide, strategy, true)) {
+    if (this.setupFloatArea(floatArea, float.floatReference, float.floatSide, strategy)) {
         return floatArea;
     } else {
         return null;
@@ -1538,14 +1535,9 @@ adapt.layout.SinglePageFloatLayoutResult;
 adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
     continuations, allowFragmented, strategy, pageFloatFragment) {
     var context = this.pageFloatLayoutContext;
-    var floatArea;
-    if (pageFloatFragment) {
-        floatArea = pageFloatFragment.area;
-        var fit = this.setupFloatArea(floatArea, pageFloatFragment.floatReference, pageFloatFragment.floatSide, strategy, false);
-        goog.asserts.assert(fit);
-    } else {
-        floatArea = this.createPageFloatArea(continuations[0].float, strategy);
-    }
+    var originalContinuations = pageFloatFragment ? pageFloatFragment.continuations : [];
+    continuations = originalContinuations.concat(continuations);
+    var floatArea = this.createPageFloatArea(continuations[0].float, strategy);
     /** @const {!adapt.layout.SinglePageFloatLayoutResult} */ var result =
         {floatArea: floatArea, pageFloatFragment: null, newPosition: null};
     if (!floatArea) {
@@ -1579,13 +1571,9 @@ adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
             if (!fitWithinContainer) {
                 failed = true;
             } else {
-                if (pageFloatFragment) {
-                    pageFloatFragment.addContinuations(continuations);
-                } else {
-                    pageFloatFragment = strategy.createPageFloatFragment(continuations, floatArea);
-                }
-                context.addPageFloatFragment(pageFloatFragment, true);
-                result.pageFloatFragment = pageFloatFragment;
+                var newFragment = strategy.createPageFloatFragment(continuations, floatArea);
+                context.addPageFloatFragment(newFragment, true);
+                result.pageFloatFragment = newFragment;
             }
         }
         frame.finish(result);
@@ -1619,14 +1607,14 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(continuation, stra
     var self = this;
     this.layoutSinglePageFloatFragment([continuation], !context.hasFloatFragments(), strategy, pageFloatFragment).then(function(result) {
         var floatArea = result.floatArea;
-        var pageFloatFragment = result.pageFloatFragment;
+        var newFragment = result.pageFloatFragment;
         var newPosition = result.newPosition;
-        if (pageFloatFragment) {
+        if (newFragment) {
             self.layoutStashedPageFloats(float.floatReference, [pageFloatFragment]).then(function(success) {
                 if (success) {
                     // Add again to invalidate the context
-                    goog.asserts.assert(pageFloatFragment);
-                    context.addPageFloatFragment(pageFloatFragment);
+                    goog.asserts.assert(newFragment);
+                    context.addPageFloatFragment(newFragment);
                     context.discardStashedFragments(float.floatReference);
                     if (newPosition) {
                         var continuation = new vivliostyle.pagefloat.PageFloatContinuation(
@@ -1635,12 +1623,12 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(continuation, stra
                     }
                     frame.finish(floatArea);
                 } else {
-                    cancelLayout(floatArea, pageFloatFragment);
+                    cancelLayout(floatArea, newFragment);
                     frame.finish(null);
                 }
             });
         } else {
-            cancelLayout(floatArea, pageFloatFragment);
+            cancelLayout(floatArea, newFragment);
             frame.finish(null);
         }
     });
@@ -1703,7 +1691,6 @@ adapt.layout.Column.prototype.layoutStashedPageFloats = function(floatReference,
             });
         } else {
             stashedFloatFragments.forEach(function(fragment) {
-                if (excluded.indexOf(fragment) >= 0) return;
                 var elem = fragment.area.element;
                 if (elem && elem.parentNode) {
                     elem.parentNode.removeChild(elem);
