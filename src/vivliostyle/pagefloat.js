@@ -282,6 +282,14 @@ goog.scope(function() {
     };
 
     /**
+     * @param {!PageFloat} float
+     * @returns {boolean}
+     */
+    PageFloatFragment.prototype.shouldBeStashedBefore = function(float) {
+        return this.getOrder() < float.getOrder();
+    };
+
+    /**
      * @param {!Array<!PageFloatContinuation>} continuations
      */
     PageFloatFragment.prototype.addContinuations = function(continuations) {
@@ -811,24 +819,22 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!FloatReference} floatReference
-     * @param {string} floatSide
-     * @param {number} order
+     * @param {!PageFloat} float
      */
-    PageFloatLayoutContext.prototype.stashEndFloatFragments = function(floatReference,
-                                                                       floatSide, order) {
+    PageFloatLayoutContext.prototype.stashEndFloatFragments = function(float) {
+        var floatReference = float.floatReference;
         if (floatReference !== this.floatReference) {
-            this.getParent(floatReference).stashEndFloatFragments(floatReference, floatSide, order);
+            this.getParent(floatReference).stashEndFloatFragments(float);
             return;
         }
 
-        var logicalFloatSide = this.toLogical(floatSide);
+        var logicalFloatSide = this.toLogical(float.floatSide);
         if (logicalFloatSide === "block-end" || logicalFloatSide === "inline-end") {
             var i = 0;
             while (i < this.floatFragments.length) {
                 var fragment = this.floatFragments[i];
                 var logicalFloatSide2 = this.toLogical(fragment.floatSide);
-                if (logicalFloatSide2 === logicalFloatSide && order > fragment.getOrder()) {
+                if (logicalFloatSide2 === logicalFloatSide && fragment.shouldBeStashedBefore(float)) {
                     this.stashedFloatFragments.push(fragment);
                     this.floatFragments.splice(i, 1);
                 } else {

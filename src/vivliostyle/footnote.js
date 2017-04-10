@@ -52,6 +52,24 @@ goog.scope(function() {
     goog.inherits(FootnoteFragment, PageFloatFragment);
 
     /**
+     * @override
+     */
+    FootnoteFragment.prototype.getOrder = function() {
+        return Infinity;
+    };
+
+    /**
+     * @override
+     */
+    FootnoteFragment.prototype.shouldBeStashedBefore = function(float) {
+        if (float instanceof Footnote) {
+            return true;
+        } else {
+            return this.getOrder() < float.getOrder();
+        }
+    };
+
+    /**
      * @constructor
      * @implements {vivliostyle.pagefloat.PageFloatLayoutStrategy}
      */

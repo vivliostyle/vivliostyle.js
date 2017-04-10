@@ -1564,16 +1564,8 @@ adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
         floatArea.layout(floatChunkPosition, true).then(function(newPosition) {
             result.newPosition = newPosition;
             if (!newPosition || allowFragmented) {
-                goog.asserts.assert(floatArea);
-                var fitWithinContainer = context.setFloatAreaDimensions(floatArea, c.float.floatReference, c.float.floatSide, false,
-                    allowFragmented);
-                if (fitWithinContainer) {
-                    i++;
-                    loopFrame.continueLoop();
-                } else {
-                    failed = true;
-                    loopFrame.breakLoop();
-                }
+                i++;
+                loopFrame.continueLoop();
             } else {
                 failed = true;
                 loopFrame.breakLoop();
@@ -1582,13 +1574,19 @@ adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
     }).then(function() {
         if (!failed) {
             goog.asserts.assert(floatArea);
-            if (pageFloatFragment) {
-                pageFloatFragment.addContinuations(continuations);
+            var float = continuations[0].float;
+            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, float.floatReference, float.floatSide, false, allowFragmented);
+            if (!fitWithinContainer) {
+                failed = true;
             } else {
-                pageFloatFragment = strategy.createPageFloatFragment(continuations, floatArea);
+                if (pageFloatFragment) {
+                    pageFloatFragment.addContinuations(continuations);
+                } else {
+                    pageFloatFragment = strategy.createPageFloatFragment(continuations, floatArea);
+                }
+                context.addPageFloatFragment(pageFloatFragment, true);
+                result.pageFloatFragment = pageFloatFragment;
             }
-            context.addPageFloatFragment(pageFloatFragment, true);
-            result.pageFloatFragment = pageFloatFragment;
         }
         frame.finish(result);
     });
@@ -1605,7 +1603,7 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(continuation, stra
                                                               pageFloatFragment) {
     var context = this.pageFloatLayoutContext;
     var float = continuation.float;
-    context.stashEndFloatFragments(float.floatReference, float.floatSide, float.getOrder());
+    context.stashEndFloatFragments(float);
 
     function cancelLayout(floatArea, pageFloatFragment) {
         if (pageFloatFragment) {
