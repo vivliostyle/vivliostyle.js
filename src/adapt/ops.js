@@ -555,9 +555,9 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
             loopFrame.breakLoop();
             return;
         }
-        column.layoutPageFloatInner(continuation, strategy, pageFloatFragment).then(function(floatArea) {
-            if (!floatArea) {
-                loopFrame.continueLoop();
+        column.layoutPageFloatInner(continuation, strategy, pageFloatFragment).then(function(success) {
+            if (!success) {
+                loopFrame.breakLoop();
                 return;
             }
             var parentInvalidated = pageFloatLayoutContext.parent.isInvalidated();

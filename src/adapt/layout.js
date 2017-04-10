@@ -1585,7 +1585,7 @@ adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
  * @param {!vivliostyle.pagefloat.PageFloatContinuation} continuation
  * @param {!vivliostyle.pagefloat.PageFloatLayoutStrategy} strategy
  * @param {vivliostyle.pagefloat.PageFloatFragment=} pageFloatFragment
- * @returns {!adapt.task.Result.<?adapt.layout.Column>}
+ * @returns {!adapt.task.Result.<boolean>}
  */
 adapt.layout.Column.prototype.layoutPageFloatInner = function(continuation, strategy,
                                                               pageFloatFragment) {
@@ -1603,7 +1603,7 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(continuation, stra
         context.deferPageFloatOrForbidFollowingFloat(continuation);
     }
 
-    /** @const {!adapt.task.Frame<?adapt.layout.Column>} */ var frame = adapt.task.newFrame("layoutPageFloatInner");
+    /** @const {!adapt.task.Frame<boolean>} */ var frame = adapt.task.newFrame("layoutPageFloatInner");
     var self = this;
     this.layoutSinglePageFloatFragment([continuation], !context.hasFloatFragments(), strategy, pageFloatFragment).then(function(result) {
         var floatArea = result.floatArea;
@@ -1621,15 +1621,15 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(continuation, stra
                             float, newPosition.primary);
                         context.deferPageFloat(continuation);
                     }
-                    frame.finish(floatArea);
+                    frame.finish(true);
                 } else {
                     cancelLayout(floatArea, newFragment);
-                    frame.finish(null);
+                    frame.finish(false);
                 }
             });
         } else {
             cancelLayout(floatArea, newFragment);
-            frame.finish(null);
+            frame.finish(false);
         }
     });
     return frame.result();
@@ -1802,9 +1802,9 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
             if (self.isOverflown(edge)) {
                 return adapt.task.newResult(nodeContextAfter);
             } else {
-                return self.layoutPageFloatInner(continuation, strategy, pageFloatFragment).thenAsync(function(floatArea) {
+                return self.layoutPageFloatInner(continuation, strategy, pageFloatFragment).thenAsync(function(success) {
                     goog.asserts.assert(float);
-                    if (!floatArea) {
+                    if (!success) {
                         context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
                         return adapt.task.newResult(nodeContextAfter);
                     } else {
