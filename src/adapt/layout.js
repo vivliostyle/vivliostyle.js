@@ -1476,7 +1476,7 @@ adapt.layout.Column.prototype.setupFloatArea = function(
     area.setVerticalPosition(containingBlockRect.y1 - floatContainer.originY,
         containingBlockRect.y2 - containingBlockRect.y1);
 
-    strategy.adjustPageFloatAreaStyle(area, floatContainer, this);
+    strategy.adjustPageFloatArea(area, floatContainer, this);
 
     // Calculate bands from the exclusions before setting float area dimensions
     area.init();
@@ -3636,6 +3636,7 @@ adapt.layout.PageFloatArea = function(floatSide, element, layoutContext, clientL
     /** @const */ this.parentContainer = parentContainer;
     /** @private @type {!Array<!Element>} */ this.rootViewNodes = [];
     /** @private @type {!Array<!adapt.geom.Insets>} */ this.floatMargins = [];
+    /** @type {boolean} */ this.adjustContentRelativeSize = true;
 };
 goog.inherits(adapt.layout.PageFloatArea, adapt.layout.Column);
 
@@ -3651,6 +3652,43 @@ adapt.layout.PageFloatArea.prototype.openAllViews = function(position) {
 };
 
 /**
+ * @param {!Element} target
+ */
+adapt.layout.PageFloatArea.prototype.convertPercentageSizesToPx = function(
+    target) {
+    var containingBlockRect = this.parentContainer.getPaddingRect();
+    var refWidth = containingBlockRect.x2 - containingBlockRect.x1;
+    var refHeight = containingBlockRect.y2 - containingBlockRect.y1;
+
+    /**
+     * @param {!Array<string>} props
+     * @param {number} refValue
+     */
+    function convertPercentageToPx(props, refValue) {
+        props.forEach(function(propName) {
+            var valueString = adapt.base.getCSSProperty(target, propName);
+            if (valueString && valueString.charAt(valueString.length - 1) === "%") {
+                var percentageValue = parseFloat(valueString);
+                var value = refValue * percentageValue / 100;
+                adapt.base.setCSSProperty(target, propName, value + "px");
+            }
+        });
+    }
+
+    convertPercentageToPx(["width", "max-width", "min-width"], refWidth);
+    convertPercentageToPx(["height", "max-height", "min-height"], refHeight);
+    convertPercentageToPx([
+        "margin-top", "margin-right", "margin-bottom", "margin-left",
+        "padding-top", "padding-right", "padding-bottom", "padding-left"
+    ], this.vertical ? refHeight : refWidth);
+    ["margin-top", "margin-right", "margin-bottom", "margin-left"].forEach(function(propName) {
+        var value = adapt.base.getCSSProperty(target, propName);
+        if (value === "auto")
+            adapt.base.setCSSProperty(target, propName, "0");
+    });
+};
+
+/**
  * @param {adapt.vtree.NodeContext} nodeContext
  */
 adapt.layout.PageFloatArea.prototype.fixFloatSizeAndPosition = function(nodeContext) {
@@ -3660,53 +3698,28 @@ adapt.layout.PageFloatArea.prototype.fixFloatSizeAndPosition = function(nodeCont
     goog.asserts.assert(nodeContext.viewNode.nodeType === 1);
     var rootViewNode = /** @type {!Element} */ (nodeContext.viewNode);
     this.rootViewNodes.push(rootViewNode);
-    var containingBlockRect = this.parentContainer.getPaddingRect();
-    var parentWidth = containingBlockRect.x2 - containingBlockRect.x1;
-    var parentHeight = containingBlockRect.y2 - containingBlockRect.y1;
 
-    /**
-     * @param {!Array<string>} props
-     * @param {number} refValue
-     */
-    function convertPercentageToPx(props, refValue) {
-        props.forEach(function(propName) {
-            var valueString = adapt.base.getCSSProperty(rootViewNode, propName);
-            if (valueString && valueString.charAt(valueString.length - 1) === "%") {
-                var percentageValue = parseFloat(valueString);
-                var value = refValue * percentageValue / 100;
-                adapt.base.setCSSProperty(rootViewNode, propName, value + "px");
-            }
-        });
+    if (this.adjustContentRelativeSize) {
+        this.convertPercentageSizesToPx(rootViewNode);
     }
-
-    convertPercentageToPx(["width", "max-width", "min-width"], parentWidth);
-    convertPercentageToPx(["height", "max-height", "min-height"], parentHeight);
-    convertPercentageToPx([
-        "margin-top", "margin-right", "margin-bottom", "margin-left",
-        "padding-top", "padding-right", "padding-bottom", "padding-left"
-    ], this.vertical ? parentHeight : parentWidth);
-    ["margin-top", "margin-right", "margin-bottom", "margin-left"].forEach(function(propName) {
-        var value = adapt.base.getCSSProperty(rootViewNode, propName);
-        if (value === "auto")
-            adapt.base.setCSSProperty(rootViewNode, propName, "0");
-    });
 
     this.floatMargins.push(this.getComputedMargin(rootViewNode));
 
-    var floatSide = this.floatSide;
-    var isVertical = this.parentContainer.vertical;
-
-    if (isVertical) {
-        if (floatSide === "block-end" || floatSide === "left") {
-            var height = adapt.base.getCSSProperty(rootViewNode, "height");
-            if (height !== "" && height !== "auto")
-                adapt.base.setCSSProperty(rootViewNode, "margin-top", "auto");
-        }
-    } else {
-        if (floatSide === "block-end" || floatSide === "bottom") {
-            var width = adapt.base.getCSSProperty(rootViewNode, "width");
-            if (width !== "" && width !== "auto")
-                adapt.base.setCSSProperty(rootViewNode, "margin-left", "auto");
+    if (this.adjustContentRelativeSize) {
+        var floatSide = this.floatSide;
+        var isVertical = this.parentContainer.vertical;
+        if (isVertical) {
+            if (floatSide === "block-end" || floatSide === "left") {
+                var height = adapt.base.getCSSProperty(rootViewNode, "height");
+                if (height !== "" && height !== "auto")
+                    adapt.base.setCSSProperty(rootViewNode, "margin-top", "auto");
+            }
+        } else {
+            if (floatSide === "block-end" || floatSide === "bottom") {
+                var width = adapt.base.getCSSProperty(rootViewNode, "width");
+                if (width !== "" && width !== "auto")
+                    adapt.base.setCSSProperty(rootViewNode, "margin-left", "auto");
+            }
         }
     }
 };

@@ -138,10 +138,13 @@ goog.scope(function() {
     /**
      * @override
      */
-    FootnoteLayoutStrategy.prototype.adjustPageFloatAreaStyle = function(floatArea, floatContainer, column) {
-        var element = floatArea.element;
-        floatArea.vertical = column.layoutContext.applyFootnoteStyle(floatContainer.vertical, element);
+    FootnoteLayoutStrategy.prototype.adjustPageFloatArea = function(floatArea, floatContainer, column) {
         floatArea.isFootnote = true;
+        floatArea.adjustContentRelativeSize = false;
+        var element = floatArea.element;
+        goog.asserts.assert(element);
+        floatArea.vertical = column.layoutContext.applyFootnoteStyle(floatContainer.vertical, element);
+        floatArea.convertPercentageSizesToPx(element);
         column.setComputedInsets(element, floatArea);
         column.setComputedWidthAndHeight(element, floatArea);
     };

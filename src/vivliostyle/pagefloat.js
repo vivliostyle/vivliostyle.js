@@ -1081,8 +1081,10 @@ goog.scope(function() {
             if (logicalFloatSide === "inline-start" || logicalFloatSide === "inline-end") {
                 inlineSize = vivliostyle.sizing.getSize(area.clientLayout, area.element,
                     [vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE];
-            } else {
+            } else if (area.adjustContentRelativeSize) {
                 inlineSize = area.getContentInlineSize();
+            } else {
+                inlineSize = area.vertical ? area.height : area.width;
             }
             outerInlineSize = inlineSize + area.getInsetStart() + area.getInsetEnd();
             var availableInlineSize = inlineEnd - inlineStart;
@@ -1201,7 +1203,7 @@ goog.scope(function() {
      * @param {!adapt.vtree.Container} floatContainer
      * @param {!adapt.layout.Column} column
      */
-    PageFloatLayoutStrategy.prototype.adjustPageFloatAreaStyle =
+    PageFloatLayoutStrategy.prototype.adjustPageFloatArea =
         function(floatArea, floatContainer, column) {};
 
     /** @const {Array<!PageFloatLayoutStrategy>} */
@@ -1310,7 +1312,7 @@ goog.scope(function() {
     /**
      * @override
      */
-    NormalPageFloatLayoutStrategy.prototype.adjustPageFloatAreaStyle = function(
+    NormalPageFloatLayoutStrategy.prototype.adjustPageFloatArea = function(
         floatArea, floatContainer, column) {};
 
     PageFloatLayoutStrategyResolver.register(new NormalPageFloatLayoutStrategy());
