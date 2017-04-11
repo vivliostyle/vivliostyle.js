@@ -160,6 +160,14 @@ goog.scope(function() {
     };
 
     /**
+     * @param {!PageFloat} other
+     * @returns {boolean}
+     */
+    PageFloat.prototype.isAllowedToPrecede = function(other) {
+        return false;
+    };
+
+    /**
      * @private
      * @constructor
      */
@@ -617,32 +625,22 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!vivliostyle.pagefloat.PageFloatContinuation} continuation
-     */
-    PageFloatLayoutContext.prototype.deferPageFloatOrForbidFollowingFloat = function(continuation) {
-        var followingFloat = this.getLastFollowingFloatInFragments(continuation.float);
-        if (followingFloat) {
-            this.forbid(followingFloat);
-            var fragment = this.findPageFloatFragment(followingFloat);
-            goog.asserts.assert(fragment);
-            this.removePageFloatFragment(fragment);
-        } else {
-            this.deferPageFloat(continuation);
-        }
-    };
-
-    /**
+     * @param {!PageFloat} float
+     * @param {boolean=} ignoreReference
      * @returns {boolean}
      */
-    PageFloatLayoutContext.prototype.hasPrecedingFloatsDeferredToNext = function(float) {
+    PageFloatLayoutContext.prototype.hasPrecedingFloatsDeferredToNext = function(float, ignoreReference) {
+        if (!ignoreReference && float.floatReference !== this.floatReference) {
+            return this.getParent(float.floatReference).hasPrecedingFloatsDeferredToNext(float, false);
+        }
         var order = float.getOrder();
         var hasPrecedingFloatsDeferredToNext = this.floatsDeferredToNext.some(function(c) {
-            return c.float.getOrder() < order;
+            return c.float.getOrder() < order && !float.isAllowedToPrecede(c.float);
         });
         if (hasPrecedingFloatsDeferredToNext) {
             return true;
         } else if (this.parent) {
-            return this.parent.hasPrecedingFloatsDeferredToNext(float);
+            return this.parent.hasPrecedingFloatsDeferredToNext(float, true);
         } else {
             return false;
         }
@@ -708,7 +706,56 @@ goog.scope(function() {
         }
     };
 
+    /**
+     * @returns {!Array<!PageFloat>}
+     */
+    PageFloatLayoutContext.prototype.getFloatsDeferredToNextInChildContexts = function() {
+        var result = [];
+        var done = [];
+        for (var i = this.children.length - 1; i >= 0; i--) {
+            var child = this.children[i];
+            if (done.indexOf(child.flowName) >= 0) continue;
+            done.push(child.flowName);
+            result = result.concat(child.floatsDeferredToNext.map(function(c) {
+                return c.float;
+            }));
+            result = result.concat(child.getFloatsDeferredToNextInChildContexts());
+        }
+        return result;
+    };
+
+    /**
+     * @returns {boolean}
+     */
+    PageFloatLayoutContext.prototype.checkAndForbidFloatFollowingDeferredFloat = function() {
+        var deferredFloats = this.getFloatsDeferredToNextInChildContexts();
+        var floatsInFragments = this.floatFragments.reduce(function(r, fr) {
+            return r.concat(fr.continuations.map(function(c) {
+                return c.float;
+            }));
+        }, []);
+        floatsInFragments.sort(function(f1, f2) {
+            return f2.getOrder() - f1.getOrder();
+        });
+        for (var i = 0; i < floatsInFragments.length; i++) {
+            var float = floatsInFragments[i];
+            var order = float.getOrder();
+            if (deferredFloats.some(function(d) {
+                return !float.isAllowedToPrecede(d) && order > d.getOrder();
+            })) {
+                this.forbid(float);
+                var fragment = this.findPageFloatFragment(float);
+                goog.asserts.assert(fragment);
+                this.removePageFloatFragment(fragment);
+                return true;
+            }
+        }
+        return false;
+    };
+
     PageFloatLayoutContext.prototype.finish = function() {
+        if (this.checkAndForbidFloatFollowingDeferredFloat())
+            return;
         for (var i = this.floatFragments.length - 1; i >= 0; i--) {
             var fragment = this.floatFragments[i];
             var notAllowedFloat = fragment.findNotAllowedFloat(this);

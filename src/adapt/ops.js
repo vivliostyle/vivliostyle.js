@@ -949,7 +949,9 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
                         loopFrame.breakLoop();
                         return;
                     }
-                    if (columnIndex === columnCount && !regionPageFloatLayoutContext.isInvalidated()) {
+                    var forcedRegionBreak = !!c.pageBreakType && (c.pageBreakType !== "column");
+                    if ((forcedRegionBreak || columnIndex === columnCount) &&
+                        !regionPageFloatLayoutContext.isInvalidated()) {
                         regionPageFloatLayoutContext.finish();
                     }
                     if (regionPageFloatLayoutContext.isInvalidated()) {

@@ -39,6 +39,13 @@ goog.scope(function() {
     goog.inherits(Footnote, PageFloat);
 
     /**
+     * @override
+     */
+    Footnote.prototype.isAllowedToPrecede = function(other) {
+        return !(other instanceof Footnote);
+    };
+
+    /**
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @param {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} continuations
      * @param {!adapt.vtree.Container} area

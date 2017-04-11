@@ -1600,7 +1600,7 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(continuation, stra
             floatArea.element.parentNode.removeChild(floatArea.element);
         }
         context.restoreStashedFragments(float.floatReference);
-        context.deferPageFloatOrForbidFollowingFloat(continuation);
+        context.deferPageFloat(continuation);
     }
 
     /** @const {!adapt.task.Frame<boolean>} */ var frame = adapt.task.newFrame("layoutPageFloatInner");
