@@ -468,19 +468,6 @@ adapt.layout.EdgeBreakPosition.prototype.isFirstContentOfRepetitiveElementsOwner
 };
 
 /**
- * Record describing added footnote
- * @constructor
- * @param {number} boxOffset
- * @param {adapt.vtree.NodePosition} startPosition
- * @param {?adapt.vtree.NodePosition} overflowPosition
- */
-adapt.layout.FootnoteItem = function(boxOffset, startPosition, overflowPosition) {
-    /** @const */ this.boxOffset = boxOffset;
-    /** @const */ this.startPosition = startPosition;
-    /** @const */ this.overflowPosition = overflowPosition;
-};
-
-/**
  * @param {Array.<adapt.vtree.NodeContext>} checkPoints
  */
 adapt.layout.validateCheckPoints = function(checkPoints) {
@@ -573,12 +560,10 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @type {number} */ this.afterEdge = 0;
     /** @type {number} */ this.footnoteEdge = 0;
     /** @type {adapt.geom.Rect} */ this.box = null;
-    /** @type {adapt.layout.Column} */ this.footnoteArea = null;
     /** @type {Array.<adapt.vtree.ChunkPosition>} */ this.chunkPositions = null;
     /** @type {Array.<adapt.geom.Band>} */ this.bands = null;
     /** @type {boolean} */ this.overflown = false;
     /** @type {Array.<adapt.layout.BreakPosition>} */ this.breakPositions = null;
-    /** @type {Array.<adapt.layout.FootnoteItem>} */ this.footnoteItems = null;
     /** @type {?string} */ this.pageBreakType = null;
     /** @type {boolean} */ this.forceNonfitting = true;
     /** @type {number} */ this.leftFloatEdge = 0;  // bottom of the bottommost left float
@@ -778,9 +763,11 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
                     }
                 }
                 if (self.isFloatNodeContext(position) && !self.vertical) {
-                    // TODO: implement floats and footnotes properly
                     self.layoutFloatOrFootnote(position).then(function(positionParam) {
                         position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
+                        if (self.pageFloatLayoutContext.isInvalidated()) {
+                            position = null;
+                        }
                         if (!position) {
                             bodyFrame.breakLoop();
                             return;
@@ -1076,6 +1063,19 @@ adapt.layout.Column.prototype.setComputedInsets = function(element, container) {
 };
 
 /**
+ * Set element's computed width and height to Column Container
+ * @param {Element} element
+ * @param {adapt.layout.Column} container
+ */
+adapt.layout.Column.prototype.setComputedWidthAndHeight = function(element, container) {
+    var style = this.clientLayout.getElementComputedStyle(element);
+    if (style) {
+        container.width = this.parseComputedLength(style.width);
+        container.height = this.parseComputedLength(style.height);
+    }
+};
+
+/**
  * Layout a single unbreakable element.
  * @param {adapt.vtree.NodeContext} nodeContextIn
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
@@ -1085,211 +1085,11 @@ adapt.layout.Column.prototype.layoutUnbreakable = function(nodeContextIn) {
 };
 
 /**
- * @param {number} boxOffset
- * @param {adapt.vtree.NodePosition} footnoteNodePosition
- */
-adapt.layout.Column.prototype.processFullyOverflownFootnote = function(boxOffset, footnoteNodePosition) {
-    // already have overflowing footnotes, just add to the list
-    var footnoteItem = new adapt.layout.FootnoteItem(boxOffset, footnoteNodePosition,
-        footnoteNodePosition);
-    if (this.footnoteItems) {
-        this.footnoteItems.push(footnoteItem);
-    } else {
-        this.footnoteItems = [footnoteItem];
-    }
-};
-
-/**
- * @param {number} boxOffset
- * @param {adapt.vtree.NodePosition} footnoteNodePosition
- * @param {number} boundingEdge
- * @return {!adapt.task.Result.<boolean>} holding true
- */
-adapt.layout.Column.prototype.layoutFootnoteInner = function(boxOffset, footnoteNodePosition, boundingEdge) {
-    var self = this;
-    if (self.footnoteItems) {
-        var lastItem = self.footnoteItems[self.footnoteItems.length - 1];
-        if (lastItem.overflowPosition) {
-            self.processFullyOverflownFootnote(boxOffset, footnoteNodePosition);
-            return adapt.task.newResult(true);
-        }
-    }
-    var columnRect = new adapt.geom.Rect(self.startEdge, self.beforeEdge, self.endEdge, self.afterEdge);
-    var uppermostFullyOpenRect = adapt.geom.findUppermostFullyOpenRect(self.bands, columnRect);
-    if (uppermostFullyOpenRect)
-        boundingEdge = Math.max(boundingEdge, uppermostFullyOpenRect.y1 * self.getBoxDir());
-    boundingEdge += self.getBoxDir() * 40; // Leave some space
-    var footnoteArea = self.footnoteArea;
-    var firstFootnoteInColumn = !footnoteArea;
-    if (firstFootnoteInColumn) {
-        var footnoteContainer = self.element.ownerDocument.createElement("div");
-        adapt.base.setCSSProperty(footnoteContainer, "position", "absolute");
-        var layoutContext = self.layoutContext.clone();
-        var footnotePageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
-            self.pageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.COLUMN,
-            null, self.pageFloatLayoutContext.flowName, footnoteNodePosition.steps[0].node,
-            null, null);
-        footnoteArea = new adapt.layout.Column(footnoteContainer, layoutContext, self.clientLayout,
-            self.layoutConstraint, footnotePageFloatLayoutContext);
-        footnoteArea.forceNonfitting = false;
-        footnotePageFloatLayoutContext.setContainer(footnoteArea);
-        self.footnoteArea = footnoteArea;
-        footnoteArea.vertical = self.layoutContext.applyFootnoteStyle(self.vertical, footnoteContainer);
-        footnoteArea.isFootnote = true;
-        if (self.vertical) {
-            footnoteArea.left = 0;
-            adapt.base.setCSSProperty(footnoteArea.element, "width", "2em");
-        } else {
-            footnoteArea.top = self.afterEdge;
-            adapt.base.setCSSProperty(footnoteArea.element, "height", "2em");
-        }
-    }
-    self.element.appendChild(footnoteArea.element);
-    self.setComputedInsets(footnoteArea.element, footnoteArea);
-    var before = self.getBoxDir() * (boundingEdge - self.beforeEdge);
-    if (self.vertical) {
-        footnoteArea.height = self.box.y2 - self.box.y1
-            - footnoteArea.getInsetTop() - footnoteArea.getInsetBottom();
-    } else {
-        footnoteArea.width = self.box.x2 - self.box.x1
-            - footnoteArea.getInsetLeft() - footnoteArea.getInsetRight();
-    }
-    var blockDirInsets = self.vertical ?
-    footnoteArea.getInsetLeft() - footnoteArea.getInsetRight() :
-    footnoteArea.getInsetTop() + footnoteArea.getInsetBottom();
-    var bottommostFullyOpenRect = adapt.geom.findBottommostFullyOpenRect(self.bands, columnRect);
-    var afterEdge = bottommostFullyOpenRect ? bottommostFullyOpenRect.y2 : self.afterEdge;
-    var extent = self.getBoxDir() * (afterEdge - boundingEdge) - blockDirInsets;
-    if (firstFootnoteInColumn && extent < 18) {
-        self.element.removeChild(footnoteArea.element);
-        self.footnoteArea = null;
-        self.processFullyOverflownFootnote(boxOffset, footnoteNodePosition);
-        return adapt.task.newResult(true);
-    }
-    if (!self.vertical && footnoteArea.top < before) {  // Can be removed???
-        self.element.removeChild(footnoteArea.element);
-        self.processFullyOverflownFootnote(boxOffset, footnoteNodePosition);
-        return adapt.task.newResult(true);
-    }
-
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame
-        = adapt.task.newFrame("layoutFootnoteInner");
-    if (self.vertical) {
-        footnoteArea.setHorizontalPosition(0, extent);
-    } else {
-        footnoteArea.setVerticalPosition(before, extent);
-    }
-    footnoteArea.originX = self.originX + self.left + self.getInsetLeft();
-    footnoteArea.originY = self.originY + self.top + self.getInsetTop();
-    footnoteArea.exclusions = self.exclusions;
-    var footnotePosition = new adapt.vtree.ChunkPosition(footnoteNodePosition);
-    var initResult;
-    if (firstFootnoteInColumn) {
-        footnoteArea.init();
-        initResult = adapt.task.newResult(true);
-    } else if (footnoteArea.getExclusions().length == 0) {
-        // No need to redo, just reset the geometry
-        footnoteArea.initGeom();
-        initResult = adapt.task.newResult(true);
-    } else {
-        // Don't expect overflow, as we gave it more space
-        initResult = footnoteArea.redoLayout();
-    }
-    initResult.then(function() {
-        footnoteArea.layout(footnotePosition).then(function(footnoteOverflowParam) {
-            var footnoteOverflow = /** @type {adapt.vtree.ChunkPosition} */ (footnoteOverflowParam);
-            // If the footnote overflows, defer it to the next column entirely.
-            // TODO: Possibility of infinite loops?
-            if (firstFootnoteInColumn && footnoteOverflow) {
-                self.element.removeChild(footnoteArea.element);
-                self.processFullyOverflownFootnote(boxOffset, footnoteNodePosition);
-                self.footnoteArea = null;
-                frame.finish(true);
-                return;
-            }
-            // Cancel a computation error
-            footnoteArea.computedBlockSize += 0.01;
-            if (self.vertical) {
-                self.footnoteEdge = afterEdge + (footnoteArea.computedBlockSize
-                    + footnoteArea.getInsetLeft() + footnoteArea.getInsetRight());
-                footnoteArea.setHorizontalPosition(0, footnoteArea.computedBlockSize);
-            } else {
-                self.footnoteEdge = afterEdge - (footnoteArea.computedBlockSize
-                    + footnoteArea.getInsetTop() + footnoteArea.getInsetBottom());
-                var footnoteTop = self.footnoteEdge - self.beforeEdge;
-                footnoteArea.setVerticalPosition(footnoteTop, footnoteArea.computedBlockSize);
-            }
-            var redoResult;
-            if (!self.vertical && footnoteArea.getExclusions().length > 0) {
-                redoResult = footnoteArea.redoLayout();
-            } else {
-                redoResult = adapt.task.newResult(footnoteOverflow);
-            }
-            redoResult.then(function(footnoteOverflow) {
-                var overflowPosition = footnoteOverflow ? footnoteOverflow.primary : null;
-                var footnoteItem = new adapt.layout.FootnoteItem(boxOffset, footnoteNodePosition,
-                    overflowPosition);
-                if (self.footnoteItems) {
-                    self.footnoteItems.push(footnoteItem);
-                } else {
-                    self.footnoteItems = [footnoteItem];
-                }
-                frame.finish(true);
-            });
-        });
-    });
-    return frame.result();
-};
-
-/**
- * Layout a footnote.
- * @param {adapt.vtree.NodeContext} nodeContext
- * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
- */
-adapt.layout.Column.prototype.layoutFootnote = function(nodeContext) {
-    var self = this;
-    /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
-        = adapt.task.newFrame("layoutFootnote");
-    var element = /** @type {Element} */ (nodeContext.viewNode);
-    element.setAttribute("style", ""); // clear styling
-    // Default footnote call style
-    adapt.base.setCSSProperty(element, "display", "inline-block");
-    element.textContent = "M";  // To measure position
-    var callBox = self.clientLayout.getElementClientRect(element);
-    var callBoxAfter = self.getAfterEdge(callBox);
-    element.textContent = "";
-    // Defaults for footnote-call, can be overriden by the stylesheet.
-    self.layoutContext.applyPseudoelementStyle(nodeContext, "footnote-call", element);
-    if (!element.textContent) {
-        element.parentNode.removeChild(element);
-        nodeContext.viewNode = null;
-    }
-    var footnoteNodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
-    var boxOffset = nodeContext.boxOffset;
-    nodeContext = nodeContext.modify();
-    nodeContext.after = true;
-    self.layoutFootnoteInner(boxOffset, footnoteNodePosition, callBoxAfter).then(function() {
-        if (self.footnoteArea && self.footnoteArea.element.parentNode) {
-            self.element.removeChild(self.footnoteArea.element);
-        }
-        if (self.isOverflown(callBoxAfter) && self.breakPositions.length != 0) {
-            nodeContext.overflow = true;
-        }
-        frame.finish(nodeContext);
-    });
-    return frame.result();
-};
-
-/**
  * Layout a single float element.
  * @param {!adapt.vtree.NodeContext} nodeContext
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
-    if (vivliostyle.pagefloat.isPageFloat(nodeContext.floatReference)) {
-        return this.layoutPageFloat(nodeContext);
-    }
-
     var self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
         = adapt.task.newFrame("layoutFloat");
@@ -1436,32 +1236,39 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 
 /**
  * @param {!adapt.layout.PageFloatArea} area
- * @param {?vivliostyle.pagefloat.PageFloat} float
+ * @param {!vivliostyle.pagefloat.FloatReference} floatReference
+ * @param {string} floatSide
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutStrategy} strategy
  */
-adapt.layout.Column.prototype.setupFloatArea = function(area, float) {
+adapt.layout.Column.prototype.setupFloatArea = function(
+    area, floatReference, floatSide, strategy) {
     var floatLayoutContext = this.pageFloatLayoutContext;
-    var floatContainer = floatLayoutContext.getContainer(float.floatReference);
-    var containingBlockRect = floatContainer.getPaddingRect();
+    var floatContainer = floatLayoutContext.getContainer(floatReference);
     var element = area.element;
     floatContainer.element.parentNode.appendChild(element);
-    area.copyFrom(floatContainer);
 
-    area.element = element;
     area.isFloat = true;
-    area.width = containingBlockRect.x2 - containingBlockRect.x1;
-    area.height = containingBlockRect.y2 - containingBlockRect.y1;
+    area.originX = floatContainer.originX;
+    area.originY = floatContainer.originY;
+    area.vertical = floatContainer.vertical;
     area.marginLeft = area.marginRight = area.marginTop = area.marginBottom = 0;
     area.borderLeft = area.borderRight = area.borderTop = area.borderBottom = 0;
     area.paddingLeft = area.paddingRight = area.paddingTop = area.paddingBottom = 0;
-    area.setHorizontalPosition(containingBlockRect.x1 - floatContainer.originX, area.width);
-    area.setVerticalPosition(containingBlockRect.y1 - floatContainer.originY, area.height);
     area.exclusions = (floatContainer.exclusions || []).concat();
     area.forceNonfitting = !floatLayoutContext.hasFloatFragments();
     area.innerShape = null;
 
+    var containingBlockRect = floatContainer.getPaddingRect();
+    area.setHorizontalPosition(containingBlockRect.x1 - floatContainer.originX,
+        containingBlockRect.x2 - containingBlockRect.x1);
+    area.setVerticalPosition(containingBlockRect.y1 - floatContainer.originY,
+        containingBlockRect.y2 - containingBlockRect.y1);
+
+    strategy.adjustPageFloatArea(area, floatContainer, this);
+
     // Calculate bands from the exclusions before setting float area dimensions
     area.init();
-    var fitWithinContainer = floatLayoutContext.setFloatAreaDimensions(area, float, true,
+    var fitWithinContainer = floatLayoutContext.setFloatAreaDimensions(area, floatReference, floatSide, true,
         !floatLayoutContext.hasFloatFragments());
     if (fitWithinContainer) {
         // New dimensions have been set, remove exclusion floats and re-init
@@ -1475,20 +1282,22 @@ adapt.layout.Column.prototype.setupFloatArea = function(area, float) {
 
 /**
  * @param {?vivliostyle.pagefloat.PageFloat} float
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutStrategy} strategy
  * @returns {?adapt.layout.PageFloatArea}
  */
-adapt.layout.Column.prototype.createPageFloatArea = function(float) {
+adapt.layout.Column.prototype.createPageFloatArea = function(float, strategy) {
     var floatAreaElement = this.element.ownerDocument.createElement("div");
     adapt.base.setCSSProperty(floatAreaElement, "position", "absolute");
     var parentPageFloatLayoutContext = this.pageFloatLayoutContext.getPageFloatLayoutContext(float.floatReference);
+    // TODO: establish how to specify an appropriate generating element for the new page float layout context
     var pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
         parentPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.COLUMN, null,
-        this.pageFloatLayoutContext.flowName, float.sourceNode, null, null);
+        this.pageFloatLayoutContext.flowName, float.nodePosition, null, null);
     var parentContainer = parentPageFloatLayoutContext.getContainer();
-    var floatArea = new adapt.layout.PageFloatArea(float, floatAreaElement, this.layoutContext.clone(),
+    var floatArea = new adapt.layout.PageFloatArea(float.floatSide, floatAreaElement, this.layoutContext.clone(),
         this.clientLayout, this.layoutConstraint, pageFloatLayoutContext, parentContainer);
     pageFloatLayoutContext.setContainer(floatArea);
-    if (this.setupFloatArea(floatArea, float)) {
+    if (this.setupFloatArea(floatArea, float.floatReference, float.floatSide, strategy)) {
         return floatArea;
     } else {
         return null;
@@ -1496,59 +1305,119 @@ adapt.layout.Column.prototype.createPageFloatArea = function(float) {
 };
 
 /**
- * @param {!adapt.vtree.NodePosition} nodePosition
- * @param {!vivliostyle.pagefloat.PageFloat} float
- * @returns {!adapt.task.Result.<?adapt.layout.Column>}
+ * @typedef {{
+ *   floatArea: ?adapt.layout.PageFloatArea,
+ *   pageFloatFragment: ?vivliostyle.pagefloat.PageFloatFragment,
+ *   newPosition: ?adapt.vtree.ChunkPosition
+ * }}
  */
-adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, float) {
-    var context = this.pageFloatLayoutContext;
-    context.stashEndFloats(float);
-    var floatArea = this.createPageFloatArea(float);
-    if (!floatArea) {
-        context.restoreStashedFragments(float.floatReference);
-        context.deferPageFloat(float, nodePosition);
-        return adapt.task.newResult(/** @type {adapt.layout.Column} */ (null));
-    }
-    var floatChunkPosition = new adapt.vtree.ChunkPosition(nodePosition);
+adapt.layout.SinglePageFloatLayoutResult;
 
-    /** @const {!adapt.task.Frame<?adapt.layout.Column>} */ var frame = adapt.task.newFrame("layoutPageFloatInner");
-    var self = this;
-    floatArea.layout(floatChunkPosition, true).then(function(newPosition) {
-        if (newPosition && context.hasFloatFragments()) {
-            context.restoreStashedFragments(float.floatReference);
-            context.deferPageFloat(float, nodePosition);
-            floatArea.element.parentNode.removeChild(floatArea.element);
-            frame.finish(null);
-        } else {
-            goog.asserts.assert(floatArea);
-            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, float, false,
-                !context.hasFloatFragments());
-            if (!fitWithinContainer) {
-                context.restoreStashedFragments(float.floatReference);
-                context.deferPageFloat(float, nodePosition);
-                floatArea.element.parentNode.removeChild(floatArea.element);
-                frame.finish(null);
+/**
+ * @param {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} continuations
+ * @param {boolean} allowFragmented
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutStrategy} strategy
+ * @param {?vivliostyle.pagefloat.PageFloatFragment=} pageFloatFragment
+ * @returns {!adapt.task.Result.<!adapt.layout.SinglePageFloatLayoutResult>}
+ */
+adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
+    continuations, allowFragmented, strategy, pageFloatFragment) {
+    var context = this.pageFloatLayoutContext;
+    var originalContinuations = pageFloatFragment ? pageFloatFragment.continuations : [];
+    continuations = originalContinuations.concat(continuations);
+    var floatArea = this.createPageFloatArea(continuations[0].float, strategy);
+    /** @const {!adapt.layout.SinglePageFloatLayoutResult} */ var result =
+        {floatArea: floatArea, pageFloatFragment: null, newPosition: null};
+    if (!floatArea) {
+        return adapt.task.newResult(result);
+    }
+    var frame = adapt.task.newFrame("layoutSinglePageFloatFragment");
+    var failed = false;
+    var i = 0;
+    frame.loopWithFrame(function(loopFrame) {
+        if (i >= continuations.length) {
+            loopFrame.breakLoop();
+            return;
+        }
+        var c = continuations[i];
+        var floatChunkPosition = new adapt.vtree.ChunkPosition(c.nodePosition);
+        floatArea.layout(floatChunkPosition, true).then(function(newPosition) {
+            result.newPosition = newPosition;
+            if (!newPosition || allowFragmented) {
+                i++;
+                loopFrame.continueLoop();
             } else {
-                var pageFloatFragment = new vivliostyle.pagefloat.PageFloatFragment(
-                    float, nodePosition, floatArea);
-                context.addPageFloatFragment(pageFloatFragment, true);
-                self.layoutStashedPageFloats(float.floatReference).then(function(success) {
-                    if (success) {
-                        // Add again to invalidate the context
-                        context.addPageFloatFragment(pageFloatFragment);
-                        context.discardStashedFragments(float.floatReference);
-                        if (newPosition) {
-                            context.deferPageFloat(float, newPosition.primary);
-                        }
-                        frame.finish(floatArea);
-                    } else {
-                        context.removePageFloatFragment(pageFloatFragment, true);
-                        context.restoreStashedFragments(float.floatReference);
-                        context.deferPageFloat(float, nodePosition);
-                        frame.finish(null);
-                    }
-                });
+                failed = true;
+                loopFrame.breakLoop();
             }
+        });
+    }).then(function() {
+        if (!failed) {
+            goog.asserts.assert(floatArea);
+            var float = continuations[0].float;
+            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, float.floatReference, float.floatSide, false, allowFragmented);
+            if (!fitWithinContainer) {
+                failed = true;
+            } else {
+                var newFragment = strategy.createPageFloatFragment(continuations, floatArea);
+                context.addPageFloatFragment(newFragment, true);
+                result.pageFloatFragment = newFragment;
+            }
+        }
+        frame.finish(result);
+    });
+    return frame.result();
+};
+
+/**
+ * @param {!vivliostyle.pagefloat.PageFloatContinuation} continuation
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutStrategy} strategy
+ * @param {vivliostyle.pagefloat.PageFloatFragment=} pageFloatFragment
+ * @returns {!adapt.task.Result.<boolean>}
+ */
+adapt.layout.Column.prototype.layoutPageFloatInner = function(continuation, strategy,
+                                                              pageFloatFragment) {
+    var context = this.pageFloatLayoutContext;
+    var float = continuation.float;
+    context.stashEndFloatFragments(float);
+
+    function cancelLayout(floatArea, pageFloatFragment) {
+        if (pageFloatFragment) {
+            context.removePageFloatFragment(pageFloatFragment, true);
+        } else if (floatArea) {
+            floatArea.element.parentNode.removeChild(floatArea.element);
+        }
+        context.restoreStashedFragments(float.floatReference);
+        context.deferPageFloat(continuation);
+    }
+
+    /** @const {!adapt.task.Frame<boolean>} */ var frame = adapt.task.newFrame("layoutPageFloatInner");
+    var self = this;
+    this.layoutSinglePageFloatFragment([continuation], !context.hasFloatFragments(), strategy, pageFloatFragment).then(function(result) {
+        var floatArea = result.floatArea;
+        var newFragment = result.pageFloatFragment;
+        var newPosition = result.newPosition;
+        if (newFragment) {
+            self.layoutStashedPageFloats(float.floatReference, [pageFloatFragment]).then(function(success) {
+                if (success) {
+                    // Add again to invalidate the context
+                    goog.asserts.assert(newFragment);
+                    context.addPageFloatFragment(newFragment);
+                    context.discardStashedFragments(float.floatReference);
+                    if (newPosition) {
+                        var continuation = new vivliostyle.pagefloat.PageFloatContinuation(
+                            float, newPosition.primary);
+                        context.deferPageFloat(continuation);
+                    }
+                    frame.finish(true);
+                } else {
+                    cancelLayout(floatArea, newFragment);
+                    frame.finish(false);
+                }
+            });
+        } else {
+            cancelLayout(floatArea, newFragment);
+            frame.finish(false);
         }
     });
     return frame.result();
@@ -1557,9 +1426,10 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(nodePosition, floa
 /**
  * @private
  * @param {!vivliostyle.pagefloat.FloatReference} floatReference
+ * @param {!Array<!vivliostyle.pagefloat.PageFloatFragment>} excluded
  * @returns {!adapt.task.Result.<boolean>} Represents if the layout was succeeded or not
  */
-adapt.layout.Column.prototype.layoutStashedPageFloats = function(floatReference) {
+adapt.layout.Column.prototype.layoutStashedPageFloats = function(floatReference, excluded) {
     var context = this.pageFloatLayoutContext;
     var stashedFloatFragments = context.getStashedFloatFragments(floatReference);
     var newFloatAreas = [];
@@ -1574,33 +1444,26 @@ adapt.layout.Column.prototype.layoutStashedPageFloats = function(floatReference)
             return;
         }
         var stashedFragment = stashedFloatFragments[i];
-        var float = context.getFloatOfFragment(stashedFragment);
-        var nodePosition = stashedFragment.nodePosition;
-        var floatArea = self.createPageFloatArea(float);
-        if (!floatArea) {
-            failed = true;
-            loopFrame.breakLoop();
+        if (excluded.indexOf(stashedFragment) >= 0) {
+            i++;
+            loopFrame.continueLoop();
             return;
         }
-        newFloatAreas.push(floatArea);
-        var chunkPosition = new adapt.vtree.ChunkPosition(nodePosition);
-        floatArea.layout(chunkPosition, true).then(function(newPosition) {
-            if (newPosition) {
-                failed = true;
-                loopFrame.breakLoop();
-                return;
+        var strategy = new vivliostyle.pagefloat.PageFloatLayoutStrategyResolver()
+            .findByFloat(stashedFragment.continuations[0].float);
+        self.layoutSinglePageFloatFragment(stashedFragment.continuations, false, strategy).then(function(result) {
+            var floatArea = result.floatArea;
+            if (floatArea) {
+                newFloatAreas.push(floatArea);
             }
-            goog.asserts.assert(floatArea);
-            var fitWithinContainer = context.setFloatAreaDimensions(floatArea, float, false, false);
-            if (!fitWithinContainer) {
-                failed = true;
-                loopFrame.breakLoop();
-            } else {
-                var fragment = new vivliostyle.pagefloat.PageFloatFragment(float, nodePosition, floatArea);
-                context.addPageFloatFragment(fragment, true);
+            var fragment = result.pageFloatFragment;
+            if (fragment) {
                 newFragments.push(fragment);
                 i++;
                 loopFrame.continueLoop();
+            } else {
+                failed = true;
+                loopFrame.breakLoop();
             }
         });
     }).then(function() {
@@ -1633,13 +1496,17 @@ adapt.layout.Column.prototype.layoutStashedPageFloats = function(floatReference)
  */
 adapt.layout.Column.prototype.setFloatAnchorViewNode = function(nodeContext) {
     var parent = nodeContext.viewNode.parentNode;
-    var dummy = parent.ownerDocument.createElement("span");
-    dummy.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
-    parent.appendChild(dummy);
+    var anchor = parent.ownerDocument.createElement("span");
+    anchor.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
+    if (nodeContext.floatSide === "footnote") {
+        // Defaults for footnote-call, can be overriden by the stylesheet.
+        this.layoutContext.applyPseudoelementStyle(nodeContext, "footnote-call", anchor);
+    }
+    parent.appendChild(anchor);
     parent.removeChild(nodeContext.viewNode);
     var nodeContextAfter = nodeContext.modify();
     nodeContextAfter.after = true;
-    nodeContextAfter.viewNode = dummy;
+    nodeContextAfter.viewNode = anchor;
     return nodeContextAfter;
 };
 
@@ -1693,21 +1560,13 @@ adapt.layout.Column.prototype.resolveFloatReferenceFromColumnSpan = function(
 adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
     var self = this;
     var context = this.pageFloatLayoutContext;
-    var floatReference = nodeContext.floatReference;
-    goog.asserts.assert(nodeContext.sourceNode);
-    /** @const {!Node} */ var sourceNode = nodeContext.sourceNode;
-    goog.asserts.assert(nodeContext.floatSide);
-    /** @const {string} */ var floatSide = nodeContext.floatSide;
+    var strategy = new vivliostyle.pagefloat.PageFloatLayoutStrategyResolver()
+        .findByNodeContext(nodeContext);
 
     /** @type {adapt.task.Result<!vivliostyle.pagefloat.PageFloat>} */ var cont;
-    var float = context.findPageFloatBySourceNode(sourceNode);
+    var float = context.findPageFloatByNodePosition(nodeContext.toNodePosition());
     if (!float) {
-        cont = this.resolveFloatReferenceFromColumnSpan(floatReference, nodeContext.columnSpan, nodeContext).thenAsync(function(ref) {
-            floatReference = ref;
-            float = new vivliostyle.pagefloat.PageFloat(sourceNode, floatReference, floatSide);
-            context.addPageFloat(float);
-            return adapt.task.newResult(float);
-        });
+        cont = strategy.createPageFloat(nodeContext, context, this);
     } else {
         cont = adapt.task.newResult(float);
     }
@@ -1715,26 +1574,32 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
     return cont.thenAsync(function(float) {
         var nodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
         var nodeContextAfter = self.setFloatAnchorViewNode(nodeContext);
-        var pageFloatFragment = context.findPageFloatFragment(float);
-        if (pageFloatFragment) {
+        var pageFloatFragment = strategy.findPageFloatFragment(float, context);
+        var continuation = new vivliostyle.pagefloat.PageFloatContinuation(float, nodePosition);
+        if (pageFloatFragment && pageFloatFragment.hasFloat(float)) {
             context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
             return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
         } else if (context.isForbidden(float) || context.hasPrecedingFloatsDeferredToNext(float)) {
-            context.deferPageFloat(float, nodePosition);
+            context.deferPageFloat(continuation);
             context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
             return adapt.task.newResult(/** @type {adapt.vtree.NodeContext} */ (nodeContextAfter));
         } else if (self.nodeContextOverflowingDueToRepetitiveElements) {
             return adapt.task.newResult(null);
         } else {
-            return self.layoutPageFloatInner(nodePosition, float).thenAsync(function(floatArea) {
-                goog.asserts.assert(float);
-                if (!floatArea) {
-                    context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
-                    return adapt.task.newResult(nodeContextAfter);
-                } else {
-                    return adapt.task.newResult(null);
-                }
-            });
+            var edge = adapt.layout.calculateEdge(nodeContextAfter, self.clientLayout, 0, self.vertical);
+            if (self.isOverflown(edge)) {
+                return adapt.task.newResult(nodeContextAfter);
+            } else {
+                return self.layoutPageFloatInner(continuation, strategy, pageFloatFragment).thenAsync(function(success) {
+                    goog.asserts.assert(float);
+                    if (!success) {
+                        context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
+                        return adapt.task.newResult(nodeContextAfter);
+                    } else {
+                        return adapt.task.newResult(null);
+                    }
+                });
+            }
         }
     });
 };
@@ -2254,50 +2119,6 @@ adapt.layout.Column.prototype.findLinePositions = function(checkPoints) {
         positions.reverse();
     }
     return positions;
-};
-
-/**
- * Removes footnotes that were introduced later than then given boxOffset
- * @param {number} boxOffset
- * @return {!adapt.task.Result.<boolean>} holding true
- */
-adapt.layout.Column.prototype.clearFootnotes = function(boxOffset) {
-    var self = this;
-    if (!self.footnoteItems) {
-        return adapt.task.newResult(true);
-    }
-    var redo = false;
-    for (var i = self.footnoteItems.length - 1; i >= 0; --i) {
-        var item = self.footnoteItems[i];
-        if (item.boxOffset <= boxOffset) {
-            break;
-        }
-        self.footnoteItems.pop();
-        if (item.overflowPosition !== item.startPosition) {
-            redo = true;
-        }
-    }
-    if (!redo) {
-        return adapt.task.newResult(true);
-    }
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("clearFootnotes");
-    var maxY = self.computedBlockSize + self.beforeEdge;
-    var items = self.footnoteItems;
-    self.footnoteArea = null;
-    self.footnoteItems = null;
-    var k = 0;
-    frame.loop(function() {
-        while (k < items.length) {
-            var item = items[k++];
-            var r = self.layoutFootnoteInner(item.boxOffset, item.startPosition, maxY);
-            if (r.isPending())
-                return r;
-        }
-        return adapt.task.newResult(false);
-    }).then(function() {
-        frame.finish(true);
-    });
-    return frame.result();
 };
 
 /**
@@ -2944,10 +2765,12 @@ adapt.layout.Column.prototype.skipTailEdges = function(nodeContext) {
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
 adapt.layout.Column.prototype.layoutFloatOrFootnote = function(nodeContext) {
-    if (nodeContext.floatSide == "footnote") {
-        return this.layoutFootnote(nodeContext);
+    if (vivliostyle.pagefloat.isPageFloat(nodeContext.floatReference) ||
+        nodeContext.floatSide === "footnote") {
+        return this.layoutPageFloat(nodeContext);
+    } else {
+        return this.layoutFloat(nodeContext);
     }
-    return this.layoutFloat(nodeContext);
 };
 
 /**
@@ -3024,7 +2847,6 @@ adapt.layout.Column.prototype.initGeom = function() {
     this.bands = adapt.geom.shapesToBands(this.box, [this.getInnerShape()],
         this.getExclusions(), 8, this.snapHeight, this.vertical);
     this.createFloats();
-    this.footnoteItems = null;
 };
 
 /**
@@ -3079,34 +2901,6 @@ adapt.layout.Column.prototype.updateMaxReachedAfterEdge = function(afterEdge) {
 };
 
 /**
- * Add footnotes overflown from the previous pages
- * @param {adapt.vtree.ChunkPosition} chunkPosition starting position.
- * @return {!adapt.task.Result.<boolean>}
- */
-adapt.layout.Column.prototype.layoutOverflownFootnotes = function(chunkPosition) {
-    var footnotes = chunkPosition.footnotes;
-    if (!footnotes) {
-        return adapt.task.newResult(true);
-    }
-    var self = this;
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("layoutOverflownFootnotes");
-    var i = 0;
-    frame.loop(function() {
-        while (i < footnotes.length) {
-            var footnote = footnotes[i++];
-            var result = self.layoutFootnoteInner(0, footnote, self.beforeEdge);
-            if (result.isPending()) {
-                return result;
-            }
-        }
-        return adapt.task.newResult(false);
-    }).then(function() {
-        frame.finish(true);
-    });
-    return frame.result();
-};
-
-/**
  * @param {adapt.vtree.ChunkPosition} chunkPosition starting position.
  * @param {boolean} leadingEdge
  * @param {?string=} breakAfter
@@ -3122,7 +2916,6 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, brea
     }
     var self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.ChunkPosition>} */ var frame = adapt.task.newFrame("layout");
-    self.layoutOverflownFootnotes(chunkPosition).then(function() {
         // ------ start the column -----------
         self.openAllViews(chunkPosition.primary).then(function(nodeContext) {
             var initialNodeContext = null;
@@ -3151,40 +2944,17 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, brea
                             frame.finish(null);
                             return;
                         }
-                        var footnoteArea = self.footnoteArea;
-                        if (footnoteArea) {
-                            self.element.appendChild(footnoteArea.element);
-                            if (self.vertical) {
-                                self.computedBlockSize = this.beforeEdge - this.afterEdge;
-                            } else {
-                                self.computedBlockSize = footnoteArea.top + footnoteArea.getInsetTop() +
-                                    footnoteArea.computedBlockSize + footnoteArea.getInsetBottom();
-                            }
-                        }
-                        // TODO: look at footnotes and floats as well
                         if (!positionAfter) {
                             frame.finish(null);
                         } else {
                             self.overflown = true;
                             var result = new adapt.vtree.ChunkPosition(positionAfter.toNodePosition());
-                            // Transfer overflown footnotes
-                            if (self.footnoteItems) {
-                                var overflowFootnotes = [];
-                                for (var i = 0; i < self.footnoteItems.length; i++) {
-                                    var overflowPosition = self.footnoteItems[i].overflowPosition;
-                                    if (overflowPosition) {
-                                        overflowFootnotes.push(overflowPosition);
-                                    }
-                                }
-                                result.footnotes = overflowFootnotes.length ? overflowFootnotes : null;
-                            }
                             frame.finish(result);
                         }
-                    }.bind(this));
+                    });
                 });
             });
         });
-    });
     return frame.result();
 };
 
@@ -3449,7 +3219,6 @@ adapt.layout.BlockLayoutProcessor = function() {};
  */
 adapt.layout.BlockLayoutProcessor.prototype.layout = function(nodeContext, column, leadingEdge) {
     if (column.isFloatNodeContext(nodeContext)) {
-        // TODO: implement floats and footnotes properly for vertical writing
         return column.layoutFloatOrFootnote(nodeContext);
     } else if (column.isBreakable(nodeContext)) {
         return column.layoutBreakableBlock(nodeContext);
@@ -3507,7 +3276,7 @@ adapt.layout.BlockLayoutProcessor.prototype.finishBreak = function(column, nodeC
         column.fixJustificationIfNeeded(nodeContext, true);
         column.layoutContext.processFragmentedBlockEdge(removeSelf ? nodeContext : nodeContext.parent);
     }
-    return column.clearFootnotes(nodeContext.boxOffset);
+    return adapt.task.newResult(true);
 };
 
 /**
@@ -3540,7 +3309,7 @@ vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSO
 
 /**
  * @constructor
- * @param {!vivliostyle.pagefloat.PageFloat} float
+ * @param {string} floatSide
  * @param {Element} element
  * @param {!adapt.vtree.LayoutContext} layoutContext
  * @param {adapt.vtree.ClientLayout} clientLayout
@@ -3549,14 +3318,15 @@ vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSO
  * @param {adapt.vtree.Container} parentContainer
  * @extends {adapt.layout.Column}
  */
-adapt.layout.PageFloatArea = function(float, element, layoutContext, clientLayout, layoutConstraint,
+adapt.layout.PageFloatArea = function(floatSide, element, layoutContext, clientLayout, layoutConstraint,
                                       pageFloatLayoutContext, parentContainer) {
     adapt.layout.Column.call(this, element, layoutContext, clientLayout, layoutConstraint,
         pageFloatLayoutContext);
-    /** @const */ this.float = float;
+    /** @const */ this.floatSide = floatSide;
     /** @const */ this.parentContainer = parentContainer;
-    /** @type {?Element} */ this.rootViewNode = null;
-    /** @type {?adapt.geom.Insets} */ this.floatMargin = null;
+    /** @private @type {!Array<!Element>} */ this.rootViewNodes = [];
+    /** @private @type {!Array<!adapt.geom.Insets>} */ this.floatMargins = [];
+    /** @type {boolean} */ this.adjustContentRelativeSize = true;
 };
 goog.inherits(adapt.layout.PageFloatArea, adapt.layout.Column);
 
@@ -3572,18 +3342,13 @@ adapt.layout.PageFloatArea.prototype.openAllViews = function(position) {
 };
 
 /**
- * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {!Element} target
  */
-adapt.layout.PageFloatArea.prototype.fixFloatSizeAndPosition = function(nodeContext) {
-    while (nodeContext.parent) {
-        nodeContext = nodeContext.parent;
-    }
-    goog.asserts.assert(this.rootViewNode === null);
-    goog.asserts.assert(nodeContext.viewNode.nodeType === 1);
-    var rootViewNode = this.rootViewNode = /** @type {Element} */ (nodeContext.viewNode);
+adapt.layout.PageFloatArea.prototype.convertPercentageSizesToPx = function(
+    target) {
     var containingBlockRect = this.parentContainer.getPaddingRect();
-    var parentWidth = containingBlockRect.x2 - containingBlockRect.x1;
-    var parentHeight = containingBlockRect.y2 - containingBlockRect.y1;
+    var refWidth = containingBlockRect.x2 - containingBlockRect.x1;
+    var refHeight = containingBlockRect.y2 - containingBlockRect.y1;
 
     /**
      * @param {!Array<string>} props
@@ -3591,43 +3356,73 @@ adapt.layout.PageFloatArea.prototype.fixFloatSizeAndPosition = function(nodeCont
      */
     function convertPercentageToPx(props, refValue) {
         props.forEach(function(propName) {
-            var valueString = adapt.base.getCSSProperty(rootViewNode, propName);
+            var valueString = adapt.base.getCSSProperty(target, propName);
             if (valueString && valueString.charAt(valueString.length - 1) === "%") {
                 var percentageValue = parseFloat(valueString);
                 var value = refValue * percentageValue / 100;
-                adapt.base.setCSSProperty(rootViewNode, propName, value + "px");
+                adapt.base.setCSSProperty(target, propName, value + "px");
             }
         });
     }
 
-    convertPercentageToPx(["width", "max-width", "min-width"], parentWidth);
-    convertPercentageToPx(["height", "max-height", "min-height"], parentHeight);
+    convertPercentageToPx(["width", "max-width", "min-width"], refWidth);
+    convertPercentageToPx(["height", "max-height", "min-height"], refHeight);
     convertPercentageToPx([
         "margin-top", "margin-right", "margin-bottom", "margin-left",
         "padding-top", "padding-right", "padding-bottom", "padding-left"
-    ], this.vertical ? parentHeight : parentWidth);
+    ], this.vertical ? refHeight : refWidth);
     ["margin-top", "margin-right", "margin-bottom", "margin-left"].forEach(function(propName) {
-        var value = adapt.base.getCSSProperty(rootViewNode, propName);
+        var value = adapt.base.getCSSProperty(target, propName);
         if (value === "auto")
-            adapt.base.setCSSProperty(rootViewNode, propName, "0");
+            adapt.base.setCSSProperty(target, propName, "0");
     });
+};
 
-    this.floatMargin = this.getComputedMargin(rootViewNode);
+/**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ */
+adapt.layout.PageFloatArea.prototype.fixFloatSizeAndPosition = function(nodeContext) {
+    while (nodeContext.parent) {
+        nodeContext = nodeContext.parent;
+    }
+    goog.asserts.assert(nodeContext.viewNode.nodeType === 1);
+    var rootViewNode = /** @type {!Element} */ (nodeContext.viewNode);
+    this.rootViewNodes.push(rootViewNode);
 
-    var floatSide = this.float.floatSide;
-    var isVertical = this.parentContainer.vertical;
+    if (this.adjustContentRelativeSize) {
+        this.convertPercentageSizesToPx(rootViewNode);
+    }
 
-    if (isVertical) {
-        if (floatSide === "block-end" || floatSide === "left") {
-            var height = adapt.base.getCSSProperty(rootViewNode, "height");
-            if (height !== "" && height !== "auto")
-                adapt.base.setCSSProperty(rootViewNode, "margin-top", "auto");
-        }
-    } else {
-        if (floatSide === "block-end" || floatSide === "bottom") {
-            var width = adapt.base.getCSSProperty(rootViewNode, "width");
-            if (width !== "" && width !== "auto")
-                adapt.base.setCSSProperty(rootViewNode, "margin-left", "auto");
+    this.floatMargins.push(this.getComputedMargin(rootViewNode));
+
+    if (this.adjustContentRelativeSize) {
+        var floatSide = this.floatSide;
+        var isVertical = this.parentContainer.vertical;
+        if (isVertical) {
+            if (floatSide === "block-end" || floatSide === "left") {
+                var height = adapt.base.getCSSProperty(rootViewNode, "height");
+                if (height !== "" && height !== "auto")
+                    adapt.base.setCSSProperty(rootViewNode, "margin-top", "auto");
+            }
+        } else {
+            if (floatSide === "block-end" || floatSide === "bottom") {
+                var width = adapt.base.getCSSProperty(rootViewNode, "width");
+                if (width !== "" && width !== "auto")
+                    adapt.base.setCSSProperty(rootViewNode, "margin-left", "auto");
+            }
         }
     }
+};
+
+/**
+ * @returns {number}
+ */
+adapt.layout.PageFloatArea.prototype.getContentInlineSize = function() {
+    return Math.max.apply(null, this.rootViewNodes.map(function(r, i) {
+        var box = this.clientLayout.getElementClientRect(r);
+        var margin = this.floatMargins[i];
+        return this.vertical ?
+            margin.top + box.height + margin.bottom :
+            margin.left + box.width + margin.right;
+    }, this));
 };

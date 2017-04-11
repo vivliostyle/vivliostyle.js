@@ -59,6 +59,7 @@
         "adapt/font.js",
         "adapt/pm.js",
         "vivliostyle/pagefloat.js",
+        "vivliostyle/footnote.js",
         "adapt/vgen.js",
         "vivliostyle/layoututil.js",
         "adapt/layout.js",
