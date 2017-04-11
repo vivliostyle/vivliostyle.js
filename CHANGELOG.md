@@ -7,6 +7,8 @@
 - Implement `repeat-on-break` property
   - <https://github.com/vivliostyle/vivliostyle.js/pull/323>
   - Spec proposal: [CSS Repeated Headers and Footers](https://specs.rivoal.net/css-repeat/)
+- Add support for `::nth-fragment()` pseudo-element selector
+  - Spec: [CSS Overflow Module Level 4 - Fragmen styling](https://drafts.csswg.org/css-overflow-4/#fragment-styling)
 
 ### Fixed
 
@@ -26,8 +28,6 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/324>
   - Spec: [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
   - Spec: [CSS Multi-column Layout Module Level 2 - `column-span`](https://drafts.csswg.org/css-multicol-2/#column-span)
-- Support `::nth-fragment()` pseudo-element selector
-    - Spec: [CSS Overflow Module Level 4 - Fragment styling](https://drafts.csswg.org/css-overflow-4/#fragment-styling)
 
 
 ### Changed
