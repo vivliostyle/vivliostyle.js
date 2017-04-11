@@ -3905,7 +3905,7 @@ adapt.csscasc.forEachStylesInRegion = function(style, regionIds, isFootnote, cal
         for (var i = 0; i < regionIds.length; i++) {
             var regionId = regionIds[i];
             var regionStyle = regions[regionId];
-            callback(regionId, regionStyle);
+            if (regionStyle) callback(regionId, regionStyle);
         }
     }
 };
