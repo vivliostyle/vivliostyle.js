@@ -150,6 +150,23 @@
         div.test5 div.footer {
           height: 120px;
         }
+
+        span.test6 {
+          line-height: 150%;
+          font-size: 16px;
+        }
+        span.test6::nth-fragment(n)::after-if-continues {
+          content: "(continue)";
+          background-color: #AAEEEE;
+        }
+        span.test6::after {
+          content: "after";
+          background-color: #EEEEAA;
+        }
+        span.test6::before {
+          content: "before";
+          background-color: #EEEEAA;
+        }
     </style>
 </head>
 <body>
@@ -233,6 +250,18 @@
       <div class="content">content6</div>
       <div class="footer">footer</div>
     </div>
+  </section>
+
+  <section>
+    <h1>(6) inline element</h1>
+    <span class="test6">
+      The '::before' content is laid out in the region prior to any other content coming from the flow.
+      The '::after' content is laid out in the region after laying out the flow fragment content into the RFCB.
+      Then, flow content is removed from the fragment to accommodate the '::after' content.
+      Accommodating means that the '::after' content is laid out without overflowing the region.
+      If there is not enough room to accommodate the ::before content, the '::after' content after removing
+      all flow fragment content, or a combination of the two, then the ::before and/or ::after content overflows that region.
+    </span>
   </section>
 
 </body>
