@@ -18,6 +18,7 @@
   - When `all` is specified, the block-start edge of the box gets pushed down so that the edge comes after any block-start/block-end page float of which anchors are before the box in the document order.
 - Add support for `::nth-fragment()` pseudo-element selector
   - Spec: [CSS Overflow Module Level 4 - Fragmen styling](https://drafts.csswg.org/css-overflow-4/#fragment-styling)
+- Add support for `::after-if-continues` pseudo-element
 
 
 ### Changed
