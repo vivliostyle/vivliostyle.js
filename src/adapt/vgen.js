@@ -364,10 +364,10 @@ adapt.vgen.ViewFactory.prototype.getPseudoMap = function(cascStyle, regionIds, i
         var computedPseudoStyle = computedPseudoStyleMap[key] = {};
         adapt.csscasc.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
         vivliostyle.selectors.mergeViewConditionalStyles(
-            computedPseudoStyle, context, pseudoMap[key], nodeContext);
+            computedPseudoStyle, context, pseudoMap[key]);
         adapt.csscasc.forEachStylesInRegion(pseudoMap[key], regionIds, isFootnote, function(regionId, regionStyle) {
             adapt.csscasc.mergeStyle(computedPseudoStyle, regionStyle, context);
-            vivliostyle.selectors.forEachViewConditionalStyles(regionStyle, nodeContext, function(viewConditionalStyles) {
+            vivliostyle.selectors.forEachViewConditionalStyles(regionStyle, function(viewConditionalStyles) {
                 adapt.csscasc.mergeStyle(computedPseudoStyle, viewConditionalStyles, context);
             });
         });

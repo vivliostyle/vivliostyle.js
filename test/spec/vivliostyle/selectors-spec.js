@@ -34,138 +34,138 @@ describe("selectors", function() {
                 var matcher = new NthFragmentMatcher(100, 2, 1);
                 it("matches 1", function() {
                     registerFragmentIndex(100, 1);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
                 it("does not match 2", function() {
                     registerFragmentIndex(100, 2);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("matches 3", function() {
                     registerFragmentIndex(100, 3);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
                 it("does not match 4", function() {
                     registerFragmentIndex(100, 4);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("matches 5", function() {
                     registerFragmentIndex(100, 5);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
                 it("does not match 6", function() {
                     registerFragmentIndex(100, 6);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("does not match 1 when nodeContext.fragmentSelectorIds does not include fragmentSelectorId", function() {
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
             });
             describe("nth-fragment(1)", function() {
                 var matcher = new NthFragmentMatcher(100, 0, 1);
                 it("matches 1", function() {
                     registerFragmentIndex(100, 1);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
                 it("does not match 2", function() {
                     registerFragmentIndex(100, 2);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("does not match 3", function() {
                     registerFragmentIndex(100, 3);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("does not match 4", function() {
                     registerFragmentIndex(100, 4);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("does not match 5", function() {
                     registerFragmentIndex(100, 5);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("does not match 6", function() {
                     registerFragmentIndex(100, 6);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
             });
             describe("nth-fragment(4)", function() {
                 var matcher = new NthFragmentMatcher(100, 0, 4);
                 it("does not match 1", function() {
                     registerFragmentIndex(100, 1);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("does not match 2", function() {
                     registerFragmentIndex(100, 2);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("does not match 3", function() {
                     registerFragmentIndex(100, 3);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("matches 4", function() {
                     registerFragmentIndex(100, 4);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
                 it("does not match 5", function() {
                     registerFragmentIndex(100, 5);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("does not match 6", function() {
                     registerFragmentIndex(100, 6);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
             });
             describe("nth-fragment(n)", function() {
                 var matcher = new NthFragmentMatcher(100, 1, 0);
                 it("matches 1", function() {
                     registerFragmentIndex(100, 1);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
                 it("matches 2", function() {
                     registerFragmentIndex(100, 2);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
                 it("matches 3", function() {
                     registerFragmentIndex(100, 3);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
                 it("matches 4", function() {
                     registerFragmentIndex(100, 4);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
                 it("matches 5", function() {
                     registerFragmentIndex(100, 5);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
                 it("matches 6", function() {
                     registerFragmentIndex(100, 6);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
             });
             describe("nth-fragment(2n)", function() {
                 var matcher = new NthFragmentMatcher(100, 2, 0);
                 it("does not match 1", function() {
                     registerFragmentIndex(100, 1);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("matches 2", function() {
                     registerFragmentIndex(100, 2);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
                 it("does not match 3", function() {
                     registerFragmentIndex(100, 3);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("matches 4", function() {
                     registerFragmentIndex(100, 4);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
                 it("does not match 5", function() {
                     registerFragmentIndex(100, 5);
-                    expect(matcher.matches({})).toBe(false);
+                    expect(matcher.matches()).toBe(false);
                 });
                 it("matches 6", function() {
                     registerFragmentIndex(100, 6);
-                    expect(matcher.matches({})).toBe(true);
+                    expect(matcher.matches()).toBe(true);
                 });
             });
         });
@@ -179,7 +179,7 @@ describe("selectors", function() {
                     {matches: function() { return true; }},
                     {matches: function() { return true; }}
                 ]);
-                expect(matcher.matches({})).toBe(true);
+                expect(matcher.matches()).toBe(true);
             });
             it("does not match if some matchers return false", function() {
                 var matcher = new AllMatcher([
@@ -187,7 +187,7 @@ describe("selectors", function() {
                     {matches: function() { return false; }},
                     {matches: function() { return true; }}
                 ]);
-                expect(matcher.matches({})).toBe(false);
+                expect(matcher.matches()).toBe(false);
             });
         });
     });
@@ -200,7 +200,7 @@ describe("selectors", function() {
                     {matches: function() { return true; }},
                     {matches: function() { return false; }}
                 ]);
-                expect(matcher.matches({})).toBe(true);
+                expect(matcher.matches()).toBe(true);
             });
             it("does not match if all matchers return false", function() {
                 var matcher = new AnyMatcher([
@@ -208,7 +208,7 @@ describe("selectors", function() {
                     {matches: function() { return false; }},
                     {matches: function() { return false; }}
                 ]);
-                expect(matcher.matches({})).toBe(false);
+                expect(matcher.matches()).toBe(false);
             });
         });
     });

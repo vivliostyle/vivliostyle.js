@@ -31,10 +31,9 @@ goog.scope(function() {
     /** @const */ var Matcher = vivliostyle.selectors.Matcher;
 
     /**
-     * @param {adapt.vtree.NodeContext} nodeContext
      * @return {boolean}
      */
-    Matcher.prototype.matches = function(nodeContext) {};
+    Matcher.prototype.matches = function() {};
 
 
     /**
@@ -52,7 +51,7 @@ goog.scope(function() {
     /** @const */ var NthFragmentMatcher = vivliostyle.selectors.NthFragmentMatcher;
 
     /** @override */
-    NthFragmentMatcher.prototype.matches = function(nodeContext) {
+    NthFragmentMatcher.prototype.matches = function() {
         var fragmentIndex = vivliostyle.selectors.fragmentIndices[this.elementOffset];
         return fragmentIndex != null
             && adapt.csscasc.matchANPlusB(fragmentIndex, this.a, this.b);
@@ -69,9 +68,9 @@ goog.scope(function() {
     /** @const */ var AnyMatcher = vivliostyle.selectors.AnyMatcher;
 
     /** @override */
-    AnyMatcher.prototype.matches = function(nodeContext) {
+    AnyMatcher.prototype.matches = function() {
         return this.matchers.some(function(matcher) {
-            return matcher.matches(nodeContext);
+            return matcher.matches();
         });
     };
 
@@ -86,9 +85,9 @@ goog.scope(function() {
     /** @const */ var AllMatcher = vivliostyle.selectors.AllMatcher;
 
     /** @override */
-    AllMatcher.prototype.matches = function(nodeContext) {
+    AllMatcher.prototype.matches = function() {
         return this.matchers.every(function(matcher) {
-            return matcher.matches(nodeContext);
+            return matcher.matches();
         });
     };
 
@@ -138,26 +137,22 @@ goog.scope(function() {
      * @param {!Object.<string,adapt.csscasc.CascadeValue>} cascMap
      * @param {adapt.expr.Context} context
      * @param {adapt.csscasc.ElementStyle} style
-     * @param {adapt.vtree.NodeContext} nodeContext
      */
-    vivliostyle.selectors.mergeViewConditionalStyles = function(cascMap, context, style, nodeContext) {
-        if (!nodeContext) return;
-        vivliostyle.selectors.forEachViewConditionalStyles(style, nodeContext, function(viewConditionalStyles) {
+    vivliostyle.selectors.mergeViewConditionalStyles = function(cascMap, context, style) {
+        vivliostyle.selectors.forEachViewConditionalStyles(style, function(viewConditionalStyles) {
             adapt.csscasc.mergeStyle(cascMap, viewConditionalStyles, context);
         });
     };
 
     /**
      * @param {adapt.csscasc.ElementStyle} style
-     * @param {adapt.vtree.NodeContext} nodeContext
      * @param {function(adapt.csscasc.ElementStyle)} callback
      */
-    vivliostyle.selectors.forEachViewConditionalStyles = function(style, nodeContext, callback) {
-        if (!nodeContext) return;
+    vivliostyle.selectors.forEachViewConditionalStyles = function(style, callback) {
         var viewConditionalStyles = adapt.csscasc.getStyleMap(style, "_viewConditionalStyles");
         if (!viewConditionalStyles) return;
         viewConditionalStyles.forEach(function(entry) {
-            if (!entry.matcher.matches(nodeContext)) return;
+            if (!entry.matcher.matches()) return;
             callback(entry.styles);
         });
     };

@@ -3877,12 +3877,11 @@ adapt.csscasc.flattenCascadedStyle = function(style, context, regionIds, isFootn
         if (adapt.csscasc.isPropName(n))
             cascMap[n] = adapt.csscasc.getProp(style, n);
     }
-    vivliostyle.selectors.mergeViewConditionalStyles(
-        cascMap, context, style, nodeContext);
+    vivliostyle.selectors.mergeViewConditionalStyles(cascMap, context, style);
     adapt.csscasc.forEachStylesInRegion(style, regionIds, isFootnote, function(regionId, regionStyle) {
         adapt.csscasc.mergeStyle(cascMap, regionStyle, context);
         vivliostyle.selectors.mergeViewConditionalStyles(
-            cascMap, context, regionStyle, nodeContext);
+            cascMap, context, regionStyle);
     });
     return cascMap;
 };
