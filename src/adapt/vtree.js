@@ -1034,7 +1034,6 @@ adapt.vtree.NodeContext.prototype.belongsTo = function(formattingContext) {
 adapt.vtree.ChunkPosition = function(primary) {
     /** @type {adapt.vtree.NodePosition} */ this.primary = primary;
     /** @type {Array.<adapt.vtree.NodePosition>} */ this.floats = null;
-    /** @type {Array.<adapt.vtree.NodePosition>} */ this.footnotes = null;
 };
 
 /**
@@ -1046,12 +1045,6 @@ adapt.vtree.ChunkPosition.prototype.clone = function() {
         result.floats = [];
         for (var i = 0; i < this.floats.length; ++i) {
             result.floats[i] = this.floats[i];
-        }
-    }
-    if (this.footnotes) {
-        result.footnotes = [];
-        for (var i = 0; i < this.footnotes.length; ++i) {
-            result.footnotes[i] = this.footnotes[i];
         }
     }
     return result;
@@ -1081,18 +1074,6 @@ adapt.vtree.ChunkPosition.prototype.isSamePosition = function(other) {
             }
         }
     } else if (other.floats) {
-        return false;
-    }
-    if (this.footnotes) {
-        if (!other.footnotes || this.footnotes.length !== other.footnotes.length) {
-            return false;
-        }
-        for (var i = 0; i < this.footnotes.length; i++) {
-            if (!adapt.vtree.isSameNodePosition(this.footnotes[i], other.footnotes[i])) {
-                return false;
-            }
-        }
-    } else if (other.footnotes) {
         return false;
     }
     return true;
