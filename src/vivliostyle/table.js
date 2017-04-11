@@ -1106,7 +1106,7 @@ goog.scope(function() {
             nodeContext.fragmentIndex = cellBreakPosition.cellNodePosition.steps[0].fragmentIndex+1;
             cont = adapt.task.newResult(cellBreakPosition.breakChunkPosition);
         } else {
-            var cont = this.column.layoutContext.nextInTree(nodeContext, state.atUnforcedBreak);
+            cont = this.column.layoutContext.nextInTree(nodeContext, state.atUnforcedBreak);
             cont = vivliostyle.selectors.processAfterIfContinues(cont, this.column).thenAsync(function(nextNodeContext) {
                 if (nextNodeContext.viewNode) {
                     nodeContext.viewNode.removeChild(nextNodeContext.viewNode);

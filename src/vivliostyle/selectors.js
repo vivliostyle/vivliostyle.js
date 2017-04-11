@@ -211,7 +211,7 @@ goog.scope(function() {
         return pseudoColumn.layout(this.createNodePositionForPseudoElement(), true).thenAsync(function() {
             this.styler.contentProcessed["after-if-continues"] = false;
             pseudoColumn.getColumn().pageBreakType = initialPageBreakType;
-            var pseudoElement = viewRoot.firstChild;
+            var pseudoElement = /** @type {!Element} */ (viewRoot.firstChild);
             adapt.base.setCSSProperty(pseudoElement, "display", "block");
             return adapt.task.newResult(pseudoElement);
         }.bind(this));
@@ -334,6 +334,27 @@ goog.scope(function() {
         return false;
     };
 
+
+    /**
+     * @param {adapt.vtree.NodeContext} nodeContext
+     * @param {!adapt.layout.Column} column
+     * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
+     */
+    function processAfterIfContinuesOfNodeContext(nodeContext, column) {
+        if (!nodeContext || !nodeContext.afterIfContinues || nodeContext.after) {
+            return adapt.task.newResult(nodeContext);
+        }
+
+        var afterIfContinues = nodeContext.afterIfContinues;
+        return afterIfContinues.createElement(column, nodeContext).thenAsync(function(pseudoElement) {
+            goog.asserts.assert(nodeContext !== null);
+            var pseudoElementHeight = vivliostyle.selectors.calculatePseudoElementHeight(nodeContext, column, pseudoElement);
+            column.fragmentLayoutConstraints.push(
+                new AfterIfContinuesLayoutConstraint(nodeContext, afterIfContinues, pseudoElementHeight));
+            return adapt.task.newResult(nodeContext);
+        });
+    };
+
     /**
      * @param {!adapt.task.Result.<adapt.vtree.NodeContext>} result
      * @param {!adapt.layout.Column} column
@@ -341,17 +362,7 @@ goog.scope(function() {
      */
     vivliostyle.selectors.processAfterIfContinues = function(result, column) {
         return result.thenAsync(function(nodeContext) {
-            if (!nodeContext || !nodeContext.afterIfContinues || nodeContext.after) {
-                return adapt.task.newResult(nodeContext);
-            }
-
-            var afterIfContinues = nodeContext.afterIfContinues;
-            return afterIfContinues.createElement(column, nodeContext).thenAsync(function(pseudoElement) {
-                var pseudoElementHeight = vivliostyle.selectors.calculatePseudoElementHeight(nodeContext, column, pseudoElement);
-                column.fragmentLayoutConstraints.push(
-                    new AfterIfContinuesLayoutConstraint(nodeContext, afterIfContinues, pseudoElementHeight));
-                return adapt.task.newResult(nodeContext);
-            });
+            return processAfterIfContinuesOfNodeContext(nodeContext, column);
         });
     };
 
@@ -363,11 +374,11 @@ goog.scope(function() {
     vivliostyle.selectors.processAfterIfContinuesOfAncestors = function(nodeContext, column) {
         /** @type {!adapt.task.Frame.<boolean>} */ var frame =
             adapt.task.newFrame("vivliostyle.selectors.processAfterIfContinuesOfAncestors");
+        /** @type {adapt.vtree.NodeContext} */ var parent =  nodeContext.parent;
         frame.loop(function() {
-            if (nodeContext.parent) {
-                var result = vivliostyle.selectors.processAfterIfContinues(
-                    adapt.task.newResult(nodeContext.parent), column);
-                nodeContext = nodeContext.parent;
+            if (parent !== null) {
+                var result = processAfterIfContinuesOfNodeContext(parent, column);
+                parent = parent.parent;
                 return result.thenReturn(true);
             } else {
                 return adapt.task.newResult(false);
@@ -375,7 +386,7 @@ goog.scope(function() {
         }).then(function() {
             frame.finish(true);
         });
-        return frame;
+        return frame.result();
     };
 
     /**
