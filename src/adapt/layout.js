@@ -237,7 +237,7 @@ adapt.layout.FragmentLayoutConstraint = function() {};
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {adapt.vtree.NodeContext} overflownNodeContext
- * @param {adapt.layout.Column} column
+ * @param {!adapt.layout.Column} column
  * @return {boolean}
  */
 adapt.layout.FragmentLayoutConstraint.prototype.allowLayout = function(nodeContext, overflownNodeContext, column) {};
@@ -252,13 +252,13 @@ adapt.layout.FragmentLayoutConstraint.prototype.nextCandidate = function(nodeCon
  * @param {boolean} allowed
  * @param {adapt.vtree.NodeContext} positionAfter
  * @param {adapt.vtree.NodeContext} initialPosition
- * @param {adapt.layout.Column} column
+ * @param {!adapt.layout.Column} column
  */
 adapt.layout.FragmentLayoutConstraint.prototype.postLayout = function(allowed, positionAfter, initialPosition, column) {};
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
- * @param {adapt.layout.Column} column
+ * @param {!adapt.layout.Column} column
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.layout.FragmentLayoutConstraint.prototype.finishBreak = function(nodeContext, column) {};
@@ -291,7 +291,7 @@ adapt.layout.BreakPosition.prototype.getMinBreakPenalty = function() {};
  * @param {!adapt.layout.Column} column
  * @return {{current:number, minimum:number}}
  */
-adapt.layout.BreakPosition.prototype.calculateOffsetOfRepetitiveElements = function(column) {};
+adapt.layout.BreakPosition.prototype.calculateOffset = function(column) {};
 
 /**
  * @abstract
@@ -313,9 +313,9 @@ adapt.layout.AbstractBreakPosition.prototype.getMinBreakPenalty = function() {};
 /**
  * @return {{current:number, minimum:number}}
  */
-adapt.layout.AbstractBreakPosition.prototype.calculateOffsetOfRepetitiveElements = function(column) {
-    return calculateOffsetOfRepetitiveElements(this.getNodeContext(),
-        vivliostyle.repetitiveelements.collectRepetitiveElements(column));
+adapt.layout.AbstractBreakPosition.prototype.calculateOffset = function(column) {
+    return calculateOffset(this.getNodeContext(),
+        vivliostyle.repetitiveelements.collectElementsOffset(column));
 };
 
 /**
@@ -330,7 +330,7 @@ adapt.layout.AbstractBreakPosition.prototype.getNodeContext = function() {
  * @param {Array.<vivliostyle.repetitiveelements.ElementsOffset>} elementsOffsets
  * @return {{current:number, minimum:number}}
  */
-function calculateOffsetOfRepetitiveElements(nodeContext, elementsOffsets) {
+function calculateOffset(nodeContext, elementsOffsets) {
     return {
         current: elementsOffsets.reduce(function(val, repetitiveElement) {
             return val + repetitiveElement.calculateOffset(nodeContext);
@@ -340,7 +340,7 @@ function calculateOffsetOfRepetitiveElements(nodeContext, elementsOffsets) {
         }, 0)
     };
 };
-adapt.layout.calculateOffsetOfRepetitiveElements = calculateOffsetOfRepetitiveElements;
+adapt.layout.calculateOffset = calculateOffset;
 
 /**
  * @typedef {{breakPosition: adapt.layout.BreakPosition, nodeContext: adapt.vtree.NodeContext}}
@@ -449,7 +449,7 @@ adapt.layout.EdgeBreakPosition.prototype.updateOverflows = function(column) {
         this.updateEdge(column);
     }
     var edge = this.edge;
-    var offsets = this.calculateOffsetOfRepetitiveElements(column);
+    var offsets = this.calculateOffset(column);
     this.overflowIfRepetitiveElementsDropped = column.isOverflown(edge + ((column.vertical ? -1 : 1) * offsets.minimum));
     this.overflows = this.position.overflow = column.isOverflown(edge + ((column.vertical ? -1 : 1) * offsets.current));
 };
@@ -747,7 +747,8 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
                 if (!adapt.layout.isSpecialNodeContext(position))
                     checkPoints.push(position.copy());
             }
-            self.layoutContext.nextInTree(position).then(function(positionParam) {
+            var cont = self.layoutContext.nextInTree(position);
+            vivliostyle.selectors.processAfterIfContinues(cont, self).then(function(positionParam) {
                 position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
                 if (!position) {
                     // Exit the loop
@@ -819,7 +820,8 @@ adapt.layout.Column.prototype.buildDeepElementView = function(position) {
                     return;
                 }
             }
-            self.layoutContext.nextInTree(position1).then(function(positionParam) {
+            var cont = self.layoutContext.nextInTree(position1);
+            vivliostyle.selectors.processAfterIfContinues(cont, self).then(function(positionParam) {
                 position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
                 if (!position || position.sourceNode == sourceNode) {
                     bodyFrame.breakLoop();
@@ -1791,8 +1793,8 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
             checkPoints[checkPointIndex].boxOffset);
         var overflown = false;
         if (!resNodeContext || !adapt.layout.isOrphan(resNodeContext.viewNode)) {
-            var offsets = calculateOffsetOfRepetitiveElements(
-                resNodeContext, vivliostyle.repetitiveelements.collectRepetitiveElements(self));
+            var offsets = calculateOffset(
+                resNodeContext, vivliostyle.repetitiveelements.collectElementsOffset(self));
             overflown = self.isOverflown(edge + ((self.vertical ? -1 : 1) * offsets.minimum));
             if (self.isOverflown(edge + ((self.vertical ? -1 : 1) * offsets.current))
                 && !self.nodeContextOverflowingDueToRepetitiveElements) {
@@ -2155,10 +2157,10 @@ adapt.layout.Column.prototype.calculateClonedPaddingBorder = function(nodeContex
 adapt.layout.Column.prototype.getOffsetByRepetitiveElements = function(bp) {
     var offset;
     if (bp) {
-        offset = bp.calculateOffsetOfRepetitiveElements(this);
+        offset = bp.calculateOffset(this);
     } else {
-        offset = calculateOffsetOfRepetitiveElements(null,
-            vivliostyle.repetitiveelements.collectRepetitiveElements(this));
+        offset = calculateOffset(null,
+            vivliostyle.repetitiveelements.collectElementsOffset(this));
     }
     return offset.current;
 };
@@ -2353,8 +2355,8 @@ adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext
         return false;
     }
     var edge = adapt.layout.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
-    var offsets = calculateOffsetOfRepetitiveElements(
-        nodeContext, vivliostyle.repetitiveelements.collectRepetitiveElements(this));
+    var offsets = calculateOffset(
+        nodeContext, vivliostyle.repetitiveelements.collectElementsOffset(this));
     var overflown = this.isOverflown(edge + ((this.vertical ? -1 : 1) * offsets.minimum));
     if (this.isOverflown(edge + ((this.vertical ? -1 : 1) * offsets.current))
         && !this.nodeContextOverflowingDueToRepetitiveElements) {
@@ -2644,6 +2646,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, for
                 }
             } while (false);  // End of block of code to use break
             var nextResult = self.layoutContext.nextInTree(nodeContext, atUnforcedBreak);
+            nextResult = vivliostyle.selectors.processAfterIfContinues(nextResult, self);
             if (nextResult.isPending()) {
                 nextResult.then(function(nodeContextParam) {
                     nodeContext = nodeContextParam;
@@ -3196,9 +3199,11 @@ adapt.layout.DefaultLayoutMode = function(leadingEdge, breakAfter, context) {
 adapt.layout.DefaultLayoutMode.prototype.doLayout = function(nodeContext, column) {
     /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
         adapt.task.newFrame("adapt.layout.DefaultLayoutMode.doLayout");
-    column.doLayout(nodeContext, this.leadingEdge, this.breakAfter).then(function(result) {
-        this.context.overflownNodeContext = result.overflownNodeContext;
-        frame.finish(result.nodeContext);
+    vivliostyle.selectors.processAfterIfContinuesOfAncestors(nodeContext, column).then(function() {
+        column.doLayout(nodeContext, this.leadingEdge, this.breakAfter).then(function(result) {
+            this.context.overflownNodeContext = result.overflownNodeContext;
+            frame.finish(result.nodeContext);
+        }.bind(this));
     }.bind(this));
     return frame.result();
 };
@@ -3447,4 +3452,18 @@ adapt.layout.PageFloatArea.prototype.getContentInlineSize = function() {
             margin.top + box.height + margin.bottom :
             margin.left + box.width + margin.right;
     }, this));
+};
+
+/**
+ * @param {!Element} element
+ * @param {!adapt.layout.Column} column
+ * @param {boolean} vertical
+ * @return {number}
+ */
+adapt.layout.getElementHeight = function(element, column, vertical) {
+    var rect = column.clientLayout.getElementClientRect(element);
+    var margin = column.getComputedMargin(element);
+    return vertical
+        ? rect["width"]  + margin["left"] + margin["right"]
+        : rect["height"] + margin["top"]  + margin["bottom"];
 };

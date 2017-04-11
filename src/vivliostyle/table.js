@@ -562,13 +562,13 @@ goog.scope(function() {
      * @param {({ rowIndex: number, columnIndex: number }|null)} position
      * @return {!Array.<!vivliostyle.repetitiveelements.ElementsOffset>}
      */
-    TableFormattingContext.prototype.collectRepetitiveElementsOfUpperCells = function(position) {
+    TableFormattingContext.prototype.collectElementsOffsetOfUpperCells = function(position) {
         var collected = [];
         return this.slots.reduce(function(repetitiveElements, row, index) {
             if (index >= position.rowIndex) return repetitiveElements;
             var cellFragment = this.getCellFragmentOfCell(row[position.columnIndex].cell);
             if (!cellFragment || collected.indexOf(cellFragment) >= 0) return repetitiveElements;
-            this.collectRepetitiveElementsFromColumn(cellFragment.pseudoColumn.getColumn(), repetitiveElements);
+            this.collectElementsOffsetFromColumn(cellFragment.pseudoColumn.getColumn(), repetitiveElements);
             collected.push(cellFragment);
             return repetitiveElements;
         }.bind(this), /** @type {!Array.<!vivliostyle.repetitiveelements.ElementsOffset>} */ ([]));
@@ -577,7 +577,7 @@ goog.scope(function() {
     /**
      * @return {!Array.<!vivliostyle.repetitiveelements.ElementsOffset>}
      */
-    TableFormattingContext.prototype.collectRepetitiveElementsOfHighestColumn = function() {
+    TableFormattingContext.prototype.collectElementsOffsetOfHighestColumn = function() {
         var elementsInColumn = [];
         this.rows.forEach(function(row) {
             row.cells.forEach(function(cell, index) {
@@ -585,7 +585,7 @@ goog.scope(function() {
                 var state = elementsInColumn[index];
                 var cellFragment = this.getCellFragmentOfCell(cell);
                 if (!cellFragment || state.collected.indexOf(cellFragment) >= 0) return;
-                this.collectRepetitiveElementsFromColumn(cellFragment.pseudoColumn.getColumn(), state.elements);
+                this.collectElementsOffsetFromColumn(cellFragment.pseudoColumn.getColumn(), state.elements);
                 state.collected.push(cellFragment);
             }.bind(this));
         }.bind(this));
@@ -599,14 +599,14 @@ goog.scope(function() {
      * @param {!adapt.layout.Column} column
      * @param {!Array.<!vivliostyle.repetitiveelements.ElementsOffset>} repetitiveElements
      */
-    TableFormattingContext.prototype.collectRepetitiveElementsFromColumn = function(column, repetitiveElements) {
+    TableFormattingContext.prototype.collectElementsOffsetFromColumn = function(column, repetitiveElements) {
         column.fragmentLayoutConstraints.forEach(function(constraint) {
             if (constraint instanceof RepetitiveElementsOwnerLayoutConstraint) {
                 var repetitiveElement = constraint.getRepetitiveElements();
                 repetitiveElements.push(repetitiveElement);
             }
             if (constraint instanceof vivliostyle.table.TableRowLayoutConstraint) {
-                constraint.getRepetitiveElementsForTableCell(null).forEach(function(repetitiveElement) {
+                constraint.getElementsOffsetsForTableCell(null).forEach(function(repetitiveElement) {
                     repetitiveElements.push(repetitiveElement);
                 });
             }
@@ -651,7 +651,7 @@ goog.scope(function() {
     ElementsOffsetOfTableCell.prototype.calculateMaxOffsetOfColumn = function(nodeContext, resolver) {
         var maxOffset = 0;
         this.repeatitiveElementsInColumns.forEach(function(repetitiveElements) {
-            var offsets = adapt.layout.calculateOffsetOfRepetitiveElements(nodeContext, repetitiveElements);
+            var offsets = adapt.layout.calculateOffset(nodeContext, repetitiveElements);
             maxOffset = Math.max(maxOffset, resolver(offsets));
         });
         return maxOffset;
@@ -1106,7 +1106,8 @@ goog.scope(function() {
             nodeContext.fragmentIndex = cellBreakPosition.cellNodePosition.steps[0].fragmentIndex+1;
             cont = adapt.task.newResult(cellBreakPosition.breakChunkPosition);
         } else {
-            cont = this.column.layoutContext.nextInTree(nodeContext, state.atUnforcedBreak).thenAsync(function(nextNodeContext) {
+            var cont = this.column.layoutContext.nextInTree(nodeContext, state.atUnforcedBreak);
+            cont = vivliostyle.selectors.processAfterIfContinues(cont, this.column).thenAsync(function(nextNodeContext) {
                 if (nextNodeContext.viewNode) {
                     nodeContext.viewNode.removeChild(nextNodeContext.viewNode);
                 }
@@ -1393,8 +1394,8 @@ goog.scope(function() {
             var tableElement = nodeContextAfter.viewNode;
             var tableBBox = column.clientLayout.getElementClientRect(tableElement);
             var edge = column.vertical ? tableBBox.left : tableBBox.bottom;
-            edge += (column.vertical ? -1 : 1) * adapt.layout.calculateOffsetOfRepetitiveElements(
-                nodeContext, vivliostyle.repetitiveelements.collectRepetitiveElements(column)).current;
+            edge += (column.vertical ? -1 : 1) * adapt.layout.calculateOffset(
+                nodeContext, vivliostyle.repetitiveelements.collectElementsOffset(column)).current;
             if (!column.isOverflown(edge)) {
                 frame.finish(nodeContextAfter);
                 return;
@@ -1817,13 +1818,13 @@ goog.scope(function() {
      * @param {adapt.layout.Column} column
      * @return {Array.<!vivliostyle.repetitiveelements.ElementsOffset>}
      */
-    TableRowLayoutConstraint.prototype.getRepetitiveElementsForTableCell = function(column) {
+    TableRowLayoutConstraint.prototype.getElementsOffsetsForTableCell = function(column) {
         var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
         var position = formattingContext.findCellFromColumn(column);
         if (position) {
-            return formattingContext.collectRepetitiveElementsOfUpperCells(position);
+            return formattingContext.collectElementsOffsetOfUpperCells(position);
         } else {
-            return formattingContext.collectRepetitiveElementsOfHighestColumn();
+            return formattingContext.collectElementsOffsetOfHighestColumn();
         }
     };
 

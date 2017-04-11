@@ -191,26 +191,13 @@ goog.scope(function() {
      */
     RepetitiveElements.prototype.updateHeight = function(column) {
         if (this.headerViewNode) {
-            this.headerHeight = this.getElementHeight(this.headerViewNode, column);
+            this.headerHeight = adapt.layout.getElementHeight(this.headerViewNode, column, this.vertical);
             this.headerViewNode = null;
         }
         if (this.footerViewNode) {
-            this.footerHeight = this.getElementHeight(this.footerViewNode, column);
+            this.footerHeight = adapt.layout.getElementHeight(this.footerViewNode, column, this.vertical);
             this.footerViewNode = null;
         }
-    };
-
-    /**
-     * @private
-     * @param {!Element} element
-     * @param {!adapt.layout.Column} column
-     */
-    RepetitiveElements.prototype.getElementHeight = function(element, column) {
-        var rect = column.clientLayout.getElementClientRect(element);
-        var margin = column.getComputedMargin(element);
-        return this.vertical
-            ? rect["width"]  + margin["left"] + margin["right"]
-            : rect["height"] + margin["top"]  + margin["bottom"];
     };
 
     RepetitiveElements.prototype.prepareLayoutFragment = function() {
@@ -840,7 +827,8 @@ goog.scope(function() {
          * @type {!adapt.task.Frame.<adapt.vtree.NodeContext>}
          */
         var frame = adapt.task.newFrame("doLayout");
-        column.layoutContext.nextInTree(nodeContext, false).then(function(resNodeContext) {
+        var cont = column.layoutContext.nextInTree(nodeContext, false);
+        vivliostyle.selectors.processAfterIfContinues(cont, column).then(function(resNodeContext) {
             var nextNodeContext = resNodeContext;
             frame.loopWithFrame(function(loopFrame) {
                 while (nextNodeContext) {
@@ -895,18 +883,6 @@ goog.scope(function() {
         adapt.layout.BlockLayoutProcessor.prototype.clearOverflownViewNodes(column, parentNodeContext, nodeContext, removeSelf);
     };
 
-
-    /**
-     * @param {adapt.vtree.NodeContext} nodeContext
-     * @param {function(vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext)} callback
-     */
-    function eachAncestorRepetitiveElementsOwnerFormattingContext(nodeContext, callback) {
-        adapt.vtree.eachAncestorFormattingContext(nodeContext, function(formattingContext) {
-            if (formattingContext && formattingContext instanceof RepetitiveElementsOwnerFormattingContext) {
-                callback(/** @type {RepetitiveElementsOwnerFormattingContext} */ (formattingContext));
-            }
-        });
-    };
 
     /**
      * @param {adapt.vtree.NodeContext} nodeContext
@@ -983,8 +959,6 @@ goog.scope(function() {
         return repetitiveElements.isFirstContentNode(nodeContext);
     };
 
-    vivliostyle.repetitiveelements.eachAncestorRepetitiveElementsOwnerFormattingContext
-        = eachAncestorRepetitiveElementsOwnerFormattingContext;
     vivliostyle.repetitiveelements.isFirstContentOfRepetitiveElementsOwner
         = isFirstContentOfRepetitiveElementsOwner;
     vivliostyle.repetitiveelements.appendHeaderToAncestors = appendHeaderToAncestors;
@@ -995,7 +969,7 @@ goog.scope(function() {
      * @param {!adapt.layout.Column} column
      * @return {Array.<!vivliostyle.repetitiveelements.ElementsOffset>}
      */
-    vivliostyle.repetitiveelements.collectRepetitiveElements = function(column) {
+    vivliostyle.repetitiveelements.collectElementsOffset = function(column) {
         /** @type {Array.<!vivliostyle.repetitiveelements.ElementsOffset>} */ var repetitiveElements = [];
         for (var current = column; current; current = current.pseudoParent) {
             current.fragmentLayoutConstraints.forEach(function(constraint) {
@@ -1003,8 +977,12 @@ goog.scope(function() {
                     var repetitiveElement = constraint.getRepetitiveElements();
                     repetitiveElements.push(repetitiveElement);
                 }
+                if (constraint instanceof vivliostyle.selectors.AfterIfContinuesLayoutConstraint) {
+                    var repetitiveElement = constraint.getRepetitiveElements();
+                    repetitiveElements.push(repetitiveElement);
+                }
                 if (constraint instanceof vivliostyle.table.TableRowLayoutConstraint) {
-                    constraint.getRepetitiveElementsForTableCell(column).forEach(function(repetitiveElement) {
+                    constraint.getElementsOffsetsForTableCell(column).forEach(function(repetitiveElement) {
                         repetitiveElements.push(repetitiveElement);
                     });
                 }

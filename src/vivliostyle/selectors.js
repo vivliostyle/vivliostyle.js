@@ -24,6 +24,8 @@ goog.scope(function() {
 
     "use strict";
 
+    /** @const */ var PseudoColumn = vivliostyle.layoututil.PseudoColumn;
+
     /**
      * @interface
      */
@@ -180,5 +182,215 @@ goog.scope(function() {
      * @type {!Object.<number,{fragmentIndex:number, priority:number}>}
      */
     vivliostyle.selectors.fragmentIndices = {};
+
+
+    /**
+     * @param {Element} sourceNode
+     * @param {adapt.vgen.PseudoelementStyler} styler
+     * @constructor
+     */
+    vivliostyle.selectors.AfterIfContinues = function(sourceNode, styler) {
+        /** @const */ this.styler = styler;
+        /** @const */ this.sourceNode = sourceNode;
+    };
+    /** @const */ var AfterIfContinues = vivliostyle.selectors.AfterIfContinues;
+
+
+    /**
+     * @param {!adapt.layout.Column} column
+     * @param {!adapt.vtree.NodeContext} parentNodeContext
+     * @return {!adapt.task.Result.<!Element>}
+     */
+    AfterIfContinues.prototype.createElement = function(column, parentNodeContext) {
+        var doc = parentNodeContext.viewNode.ownerDocument;
+        var fragment = doc.createDocumentFragment();
+        var viewRoot = doc.createElement("div");
+        var pseudoColumn = new PseudoColumn(column, viewRoot, parentNodeContext);
+        var initialPageBreakType = pseudoColumn.getColumn().pageBreakType;
+        pseudoColumn.getColumn().pageBreakType = null;
+        return pseudoColumn.layout(this.createNodePositionForPseudoElement(), true).thenAsync(function() {
+            this.styler.contentProcessed["after-if-continues"] = false;
+            pseudoColumn.getColumn().pageBreakType = initialPageBreakType;
+            var pseudoElement = viewRoot.firstChild;
+            adapt.base.setCSSProperty(pseudoElement, "display", "block");
+            return adapt.task.newResult(pseudoElement);
+        }.bind(this));
+    };
+
+    /**
+     * @private
+     * @return {!adapt.vtree.ChunkPosition}
+     */
+    AfterIfContinues.prototype.createNodePositionForPseudoElement = function() {
+        var sourceNode = adapt.vgen.pseudoelementDoc.createElementNS(adapt.base.NS.XHTML, "div");
+        adapt.vgen.setPseudoName(sourceNode, "after-if-continues");
+        var shadowContext = this.createShadowContext(sourceNode);
+        var step = {
+            node: sourceNode,
+            shadowType: shadowContext.type,
+            shadowContext: shadowContext,
+            nodeShadow: null,
+            shadowSibling: null
+        };
+        var nodePosition = {steps:[step], offsetInNode:0, after:false, preprocessedTextContent:null};
+        return new adapt.vtree.ChunkPosition(nodePosition);
+    };
+
+    /**
+     * @private
+     * @param {!Element} root
+     * @return {!adapt.vtree.ShadowContext}
+     */
+    AfterIfContinues.prototype.createShadowContext = function(root) {
+        return new adapt.vtree.ShadowContext(this.sourceNode, root, null, null,
+            null, adapt.vtree.ShadowType.ROOTED, this.styler);
+    };
+
+    /**
+     * @constructor
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!vivliostyle.selectors.AfterIfContinues} afterIfContinues
+     * @param {number} pseudoElementHeight
+     * @implements {adapt.layout.FragmentLayoutConstraint}
+     */
+    vivliostyle.selectors.AfterIfContinuesLayoutConstraint = function(
+        nodeContext, afterIfContinues, pseudoElementHeight) {
+        this.nodeContext = nodeContext;
+        this.afterIfContinues = afterIfContinues;
+        this.pseudoElementHeight = pseudoElementHeight;
+    };
+    /** @const */ var AfterIfContinuesLayoutConstraint = vivliostyle.selectors.AfterIfContinuesLayoutConstraint;
+
+    /** @override */
+    AfterIfContinuesLayoutConstraint.prototype.allowLayout = function(nodeContext, overflownNodeContext, column) {
+        if ((overflownNodeContext && !nodeContext) || (nodeContext && nodeContext.overflow)) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+    /** @override */
+    AfterIfContinuesLayoutConstraint.prototype.nextCandidate = function(nodeContext) {
+        return false;
+    };
+
+    /** @override */
+    AfterIfContinuesLayoutConstraint.prototype.postLayout = function(allowed, nodeContext, initialPosition, column) {};
+
+    /** @override */
+    AfterIfContinuesLayoutConstraint.prototype.finishBreak = function(nodeContext, column) {
+        if (!this.getRepetitiveElements().affectTo(nodeContext)) return adapt.task.newResult(true);
+        return this.afterIfContinues.createElement(column, this.nodeContext).thenAsync(function(element) {
+            this.nodeContext.viewNode.appendChild(element);
+            return adapt.task.newResult(true);
+        }.bind(this));
+    };
+    AfterIfContinuesLayoutConstraint.prototype.getRepetitiveElements = function() {
+        return new AfterIfContinuesElementsOffset(this.nodeContext, this.pseudoElementHeight);
+    };
+    /** @override */
+    AfterIfContinuesLayoutConstraint.prototype.equalsTo = function(constraint) {
+        if (!(constraint instanceof AfterIfContinuesLayoutConstraint)) return false;
+        return this.afterIfContinues == /** @type {AfterIfContinuesLayoutConstraint} */ (constraint).afterIfContinues;
+    };
+
+    /**
+     * @constructor
+     * @implements {vivliostyle.repetitiveelements.ElementsOffset}
+     */
+    vivliostyle.selectors.AfterIfContinuesElementsOffset = function(nodeContext, pseudoElementHeight) {
+        this.nodeContext = nodeContext;
+        this.pseudoElementHeight = pseudoElementHeight;
+    };
+    /** @const */ var AfterIfContinuesElementsOffset = vivliostyle.selectors.AfterIfContinuesElementsOffset;
+
+    /** @override */
+    AfterIfContinuesElementsOffset.prototype.calculateOffset = function(nodeContext) {
+        if (nodeContext && !this.affectTo(nodeContext)) return 0;
+        return this.pseudoElementHeight;
+    };
+
+    /** @override */
+    AfterIfContinuesElementsOffset.prototype.calculateMinimumOffset = function(nodeContext) {
+        return this.calculateOffset(nodeContext);
+    };
+
+    /**
+     * @private
+     * @param {adapt.vtree.NodeContext} nodeContext
+     * @return {boolean}
+     */
+    AfterIfContinuesElementsOffset.prototype.affectTo = function(nodeContext) {
+        if (!nodeContext) return false;
+        if (nodeContext.sourceNode === this.nodeContext.sourceNode) {
+            return !!nodeContext.after;
+        }
+        for (var n = nodeContext.parent; n; n = n.parent) {
+            if (n.sourceNode === this.nodeContext.sourceNode) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    /**
+     * @param {!adapt.task.Result.<adapt.vtree.NodeContext>} result
+     * @param {!adapt.layout.Column} column
+     * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
+     */
+    vivliostyle.selectors.processAfterIfContinues = function(result, column) {
+        return result.thenAsync(function(nodeContext) {
+            if (!nodeContext || !nodeContext.afterIfContinues || nodeContext.after) {
+                return adapt.task.newResult(nodeContext);
+            }
+
+            var afterIfContinues = nodeContext.afterIfContinues;
+            return afterIfContinues.createElement(column, nodeContext).thenAsync(function(pseudoElement) {
+                var pseudoElementHeight = vivliostyle.selectors.calculatePseudoElementHeight(nodeContext, column, pseudoElement);
+                column.fragmentLayoutConstraints.push(
+                    new AfterIfContinuesLayoutConstraint(nodeContext, afterIfContinues, pseudoElementHeight));
+                return adapt.task.newResult(nodeContext);
+            });
+        });
+    };
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!adapt.layout.Column} column
+     * @return {!adapt.task.Result.<boolean>}
+     */
+    vivliostyle.selectors.processAfterIfContinuesOfAncestors = function(nodeContext, column) {
+        /** @type {!adapt.task.Frame.<boolean>} */ var frame =
+            adapt.task.newFrame("vivliostyle.selectors.processAfterIfContinuesOfAncestors");
+        frame.loop(function() {
+            if (nodeContext.parent) {
+                var result = vivliostyle.selectors.processAfterIfContinues(
+                    adapt.task.newResult(nodeContext.parent), column);
+                nodeContext = nodeContext.parent;
+                return result.thenReturn(true);
+            } else {
+                return adapt.task.newResult(false);
+            }
+        }).then(function() {
+            frame.finish(true);
+        });
+        return frame;
+    };
+
+    /**
+     * @private
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!adapt.layout.Column} column
+     * @param {!Element} pseudoElement
+     * @return {number}
+     */
+    vivliostyle.selectors.calculatePseudoElementHeight = function(nodeContext, column, pseudoElement) {
+        var parentNode = /** @type {Element} */ (nodeContext.viewNode);
+        parentNode.appendChild(pseudoElement);
+        var height = adapt.layout.getElementHeight(pseudoElement, column, nodeContext.vertical);
+        parentNode.removeChild(pseudoElement);
+        return height;
+    };
 
 });

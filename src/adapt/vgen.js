@@ -834,6 +834,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             self.nodeContext.firstPseudo = new adapt.vtree.FirstPseudo(
                 outerPseudo, (/** adapt.css.Int */ (firstPseudo)).num);
         }
+        self.processAfterIfcontinues(element, elementStyle, styler, self.context);
         var whitespace = computedStyle["white-space"];
         if (whitespace) {
             var whitespaceValue = adapt.vtree.whitespaceFromPropertyValue(whitespace.toString());
@@ -1145,6 +1146,25 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         });
     });
     return frame.result();
+};
+
+/**
+ * @private
+ * @param {Element} element
+ * @param {adapt.csscasc.ElementStyle} cascStyle
+ * @param {adapt.cssstyler.AbstractStyler} styler
+ * @param {adapt.expr.Context} context
+ */
+adapt.vgen.ViewFactory.prototype.processAfterIfcontinues = function(element, cascStyle, styler, context) {
+    var pseudoMap = this.getPseudoMap(cascStyle, this.regionIds, this.isFootnote, this.nodeContext, context);
+    if (!pseudoMap) return;
+
+    if (pseudoMap['after-if-continues']
+        && pseudoMap['after-if-continues']['content']) {
+        var shadowStyler = new adapt.vgen.PseudoelementStyler(element, cascStyle, styler, context);
+        this.nodeContext.afterIfContinues =
+            new vivliostyle.selectors.AfterIfContinues(element, shadowStyler);
+    }
 };
 
 /**

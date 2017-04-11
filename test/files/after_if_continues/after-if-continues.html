@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>after-if-continues</title>
+    <style>
+        @page {
+            size: 820px;
+        }
+        @-epubx-page-template {
+            .partition {
+                width: 398px;
+                height: 198px;
+                border: rgba(0, 0, 255, 0.2) solid 1px;
+                -epubx-flow-from: body;
+            }
+            .left {
+                left: 10px;
+            }
+            .right {
+                right: 10px;
+            }
+
+            @-epubx-page-master {
+                @-epubx-partition {
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 10px;
+                    font-size: 10px;
+                    line-height: 10px;
+                    text-align: center;
+                    content: counter(page);
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 610px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 410px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 210px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 10px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 610px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 410px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 210px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 10px;
+                }
+            }
+        }
+
+
+        :root {
+            font-size: 14px;
+            line-height: 12px;
+            widows: 1;
+            orphans: 1;
+        }
+        body {
+            margin: 0 10px;
+        }
+
+        section {
+            break-after: column;
+        }
+
+        h1 {
+          font-size: 14px;
+        }
+
+        div.content {
+          height: 30px;
+          padding: 10px;
+          margin-bottom: 5px;
+          background-color: #EEEEEE;
+        }
+
+        div.header {
+          height: 30px;
+          background-color: #FF9999;
+          repeat-on-break: header;
+        }
+        div.footer {
+          height: 30px;
+          background-color: #9999FF;
+          repeat-on-break: footer;
+        }
+
+        div.container {
+          border: 1px solid #333;
+          padding: 5px;
+        }
+
+        div.test1.container::after-if-continues {
+          content: "(continue)";
+          background-color: #AAEEEE;
+        }
+        div.test1.container::after {
+          content: "after";
+          background-color: #EEEEAA;
+        }
+        div.test1.container::before {
+          content: "before";
+          background-color: #EEEEAA;
+        }
+
+
+        div.test2.container::nth-fragment(2n+1)::after-if-continues {
+          content: "(continue)";
+          background-color: #AAEEEE;
+          height: 15px;
+        }
+
+        div.test3.container::nth-fragment(n)::after-if-continues {
+          content: "after-if-continues of outer container";
+          background-color: #AAEEEE;
+          height: 15px;
+        }
+        div.test3.container.inner::after-if-continues {
+          content: "after-if-continues of inner container";
+          background-color: #EEEEAA;
+        }
+
+
+        div.test4.container::nth-fragment(n)::after-if-continues {
+          content: "(continue)";
+          background-color: #AAEEEE;
+          height: 15px;
+        }
+
+
+        div.test5.container::nth-fragment(n)::after-if-continues {
+          content: "(continue)";
+          background-color: #AAEEEE;
+          height: 15px;
+        }
+        div.test5 div.header {
+          height: 50px;
+        }
+        div.test5 div.footer {
+          height: 120px;
+        }
+    </style>
+</head>
+<body>
+
+  <section>
+    <h1>(1) ::after-if-continues</h1>
+    <div class="container test1">
+      <div class="content">content1</div>
+      <div class="content">content2</div>
+      <div class="content">content3</div>
+      <div class="content">content4</div>
+      <div class="content">content5</div>
+      <div class="content">content6</div>
+      <div class="content">content7</div>
+      <div class="content">content8</div>
+      <div class="content">content9</div>
+      <div class="content">content10</div>
+    </div>
+  </section>
+
+  <section>
+    <h1>(2) ::nth-fragment(2n+1)::after-if-continues</h1>
+    <div class="container test2">
+      <div class="content">content1</div>
+      <div class="content">content2</div>
+      <div class="content">content3</div>
+      <div class="content">content4</div>
+      <div class="content">content5</div>
+      <div class="content">content6</div>
+      <div class="content">content7</div>
+      <div class="content">content8</div>
+      <div class="content">content9</div>
+      <div class="content">content10</div>
+    </div>
+  </section>
+
+
+  <section>
+    <h1>(3) nesting after-if-continues</h1>
+    <div class="container test3 outer">
+      <div class="container test3 inner">
+        <div class="content">content1</div>
+        <div class="content">content2</div>
+        <div class="content">content3</div>
+      </div>
+      <div class="container test3 inner">
+        <div class="content">content4</div>
+        <div class="content">content5</div>
+        <div class="content">content6</div>
+        <div class="content">content7</div>
+        <div class="content">content8</div>
+        <div class="content">content9</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h1>(4) use with repeat-on-break</h1>
+    <div class="container test4">
+      <div class="header">header</div>
+      <div class="content">content1</div>
+      <div class="content">content2</div>
+      <div class="content">content3</div>
+      <div class="content">content4</div>
+      <div class="content">content5</div>
+      <div class="content">content6</div>
+      <div class="content">content7</div>
+      <div class="footer">footer</div>
+    </div>
+  </section>
+
+  <section>
+    <h1>(5) use with repeat-on-break and dropping header/footer</h1>
+    <div class="container test5">
+      <div class="header">header</div>
+      <div class="content">content1</div>
+      <div class="content">content2</div>
+      <div class="content">content3</div>
+      <div class="content">content4</div>
+      <div class="content">content5</div>
+      <div class="content">content6</div>
+      <div class="footer">footer</div>
+    </div>
+  </section>
+
+</body>
+</html>
