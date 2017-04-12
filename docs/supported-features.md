@@ -862,7 +862,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 ## [CSS Page Floats 3](https://drafts.csswg.org/css-page-floats-3/)
 - [float](https://drafts.csswg.org/css-page-floats-3/#propdef-float)
-  - Supports [`block-start`, `block-end`, `inline-start`, `inline-end`, `left`, `right`, `top`, `bottom` and `none`](https://drafts.csswg.org/css-page-floats/#propdef-float) values.
+  - Supports [`block-start`, `block-end`, `inline-start`, `inline-end`, `snap-block`, `left`, `right`, `top`, `bottom` and `none`](https://drafts.csswg.org/css-page-floats/#propdef-float) values.
   - Supported in all browsers
 - [float-reference](https://drafts.csswg.org/css-page-floats-3/#propdef-float-reference)
   - Supported in all browsers
