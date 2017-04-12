@@ -2917,44 +2917,44 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, brea
     var self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.ChunkPosition>} */ var frame = adapt.task.newFrame("layout");
         // ------ start the column -----------
-        self.openAllViews(chunkPosition.primary).then(function(nodeContext) {
-            var initialNodeContext = null;
-            if (nodeContext.viewNode) {
-                initialNodeContext = nodeContext.copy();
-            } else {
-                var nextInTreeListener = function(evt) {
-                    if (evt.nodeContext.viewNode) {
-                        initialNodeContext = evt.nodeContext;
-                        self.layoutContext.removeEventListener("nextInTree", nextInTreeListener);
+    self.openAllViews(chunkPosition.primary).then(function(nodeContext) {
+        var initialNodeContext = null;
+        if (nodeContext.viewNode) {
+            initialNodeContext = nodeContext.copy();
+        } else {
+            var nextInTreeListener = function(evt) {
+                if (evt.nodeContext.viewNode) {
+                    initialNodeContext = evt.nodeContext;
+                    self.layoutContext.removeEventListener("nextInTree", nextInTreeListener);
+                }
+            };
+            self.layoutContext.addEventListener("nextInTree", nextInTreeListener);
+        }
+        var retryer = new adapt.layout.LayoutRetryer(leadingEdge, breakAfter);
+        retryer.layout(nodeContext, self).then(function(nodeContextParam) {
+            self.doFinishBreak(nodeContextParam, retryer.context.overflownNodeContext, initialNodeContext, retryer.initialComputedBlockSize).then(function(positionAfter) {
+                var cont = null;
+                if (!self.pseudoParent) {
+                    cont = self.resetConstraints(positionAfter);
+                } else {
+                    cont = adapt.task.newResult(null);
+                }
+                cont.then(function() {
+                    if (self.pageFloatLayoutContext.isInvalidated()) {
+                        frame.finish(null);
+                        return;
                     }
-                };
-                self.layoutContext.addEventListener("nextInTree", nextInTreeListener);
-            }
-            var retryer = new adapt.layout.LayoutRetryer(leadingEdge, breakAfter);
-            retryer.layout(nodeContext, self).then(function(nodeContextParam) {
-                self.doFinishBreak(nodeContextParam, retryer.context.overflownNodeContext, initialNodeContext, retryer.initialComputedBlockSize).then(function(positionAfter) {
-                    var cont = null;
-                    if (!self.pseudoParent) {
-                        cont = self.resetConstraints(positionAfter);
+                    if (!positionAfter) {
+                        frame.finish(null);
                     } else {
-                        cont = adapt.task.newResult(null);
+                        self.overflown = true;
+                        var result = new adapt.vtree.ChunkPosition(positionAfter.toNodePosition());
+                        frame.finish(result);
                     }
-                    cont.then(function() {
-                        if (self.pageFloatLayoutContext.isInvalidated()) {
-                            frame.finish(null);
-                            return;
-                        }
-                        if (!positionAfter) {
-                            frame.finish(null);
-                        } else {
-                            self.overflown = true;
-                            var result = new adapt.vtree.ChunkPosition(positionAfter.toNodePosition());
-                            frame.finish(result);
-                        }
-                    });
                 });
             });
         });
+    });
     return frame.result();
 };
 
