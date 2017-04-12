@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>float: snap-block</title>
+  <style>
+    @page {
+      size: 540px;
+      margin: 20px;
+      @bottom-center {
+        content: counter(page);
+      }
+    }
+    :root {
+      widows: 1;
+      orphans: 1;
+      column-count: 2;
+    }
+    body {
+      margin: 0;
+    }
+    section {
+      page-break-after: always;
+    }
+    p {
+      margin: 10px;
+      line-height: 20px;
+    }
+    .column-float, .page-float {
+      float: snap-block;
+      height: 200px;
+      border: 2px blue solid;
+      width: 90%;
+    }
+    .small {
+      height: 100px;
+    }
+    .column-float {
+      float-reference: column;
+    }
+    .page-float {
+      float-reference: page;
+    }
+  </style>
+</head>
+<body>
+<section>
+  <div class="column-float">This float should be at the top of the page 1, column 1</div>
+  <p>Text on page 1, column 1</p>
+  <div class="column-float">This float should be at the bottom of the page 1, column 1</div>
+  <p>Text on page 1, column 1</p>
+  <div class="column-float">This float should be at the top of the page 1, column 2</div>
+  <div class="column-float">This float should be at the top of the page 1, column 2</div>
+  <p>Text on page 1, column 1</p>
+  <p>Text on page 1, column 2</p>
+  <p>Text on page 1, column 2</p>
+  <p>Text on page 1, column 2</p>
+</section>
+<section>
+  <p>Text on page 2, column 1</p>
+  <p>Text on page 2, column 1</p>
+  <div class="page-float">This float should be at the top of the page 2</div>
+  <p>Text on page 2, column 1</p>
+  <div class="page-float">This float should be at the bottom of the page 2</div>
+  <p>Text on page 2, column 2</p>
+  <div class="page-float">This float should be at the top of the page 3</div>
+  <div class="page-float">This float should be at the top of the page 3</div>
+  <p>Text on page 2, column 2</p>
+  <p>Text on page 2, column 2</p>
+  <p>Text on page 3, column 1</p>
+  <p>Text on page 3, column 1</p>
+  <p>Text on page 3, column 1</p>
+  <p>Text on page 3, column 2</p>
+  <p>Text on page 3, column 2</p>
+  <p>Text on page 3, column 2</p>
+</section>
+<section>
+  <p>Text on page 4, column 1</p>
+  <div class="column-float">This float should be at the top of the page 4, column 1</div>
+  <p>Text on page 4, column 1</p>
+  <div class="page-float">This float should be at the bottom of the page 4</div>
+</section>
+<section>
+  <p>Text on page 5, column 1</p>
+  <div class="page-float">This float should be at the top of the page 5</div>
+  <p>Text on page 5, column 1</p>
+  <div class="column-float">This float should be at the bottom of the page 5, column 1</div>
+</section>
+<section>
+  <p>Text on page 6, column 1</p>
+  <p>Text on page 6, column 1</p>
+  <div class="column-float">This float should be at the bottom of the page 6, column 1</div>
+  <p>Text on page 6, column 1</p>
+  <p>Text on page 6, column 2</p>
+  <p>Text on page 6, column 2</p>
+  <p>Text on page 6, column 2</p>
+  <p>Text on page 6, column 2</p>
+  <p>Text on page 6, column 2</p>
+  <p>Text on page 6, column 2</p>
+  <p>Text on page 6, column 2</p>
+  <p>Text on page 6, column 2</p>
+<div class="page-float">This float should be at the top of the page 6</div>
+</section>
+<section>
+  <p>Text on page 7, column 1</p>
+  <p>Text on page 7, column 1</p>
+  <p>Text on page 7, column 1</p>
+  <p>Text on page 7, column 1</p>
+  <p>Text on page 7, column 1</p>
+  <p>Text on page 7, column 1</p>
+  <p>Text on page 7, column 1</p>
+  <div class="column-float small">(A) This float should be at the bottom of the page 6, column 1</div>
+  <div class="column-float small">(B) This float should be at the bottom of the page 6, column 1</div>
+</section>
+</body>
+</html>

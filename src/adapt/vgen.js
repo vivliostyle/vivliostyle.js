@@ -718,6 +718,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             floatSide === adapt.css.ident.inline_end ||
             floatSide === adapt.css.ident.block_start ||
             floatSide === adapt.css.ident.block_end ||
+            floatSide === adapt.css.ident.snap_block ||
             floatSide === adapt.css.ident.footnote;
         if (floatSide) {
             // Don't want to set it in view DOM CSS.

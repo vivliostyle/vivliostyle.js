@@ -124,7 +124,7 @@ goog.scope(function() {
      * @override
      */
     FootnoteLayoutStrategy.prototype.createPageFloatFragment = function(
-        continuations, floatArea) {
+        continuations, floatSide, floatArea) {
         /** @const */ var f = continuations[0].float;
         return new FootnoteFragment(f.floatReference, continuations, floatArea);
     };

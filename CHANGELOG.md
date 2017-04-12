@@ -7,6 +7,11 @@
 - Implement `repeat-on-break` property
   - <https://github.com/vivliostyle/vivliostyle.js/pull/323>
   - Spec proposal: [CSS Repeated Headers and Footers](https://specs.rivoal.net/css-repeat/)
+- Support `float: snap-block`
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/344>
+  - Spec: [CSS Page Floats - The float property](https://drafts.csswg.org/css-page-floats/#valdef-float-snap-block)
+  - Note that the function value `snap-block()` is not supported yet.
+  - Also note that behavior of this value is different from that defined in the above spec: The element always turns into a page float regardless of its distance from edges of its float reference. It is snapped to the nearer edge of the float reference.
 
 ### Changed
 
