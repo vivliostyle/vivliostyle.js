@@ -717,7 +717,6 @@ adapt.vtree.ShadowType = {
 adapt.vtree.ShadowContext = function(owner, root, xmldoc, parentShadow, superShadow, type, styler) {
     /** @const */ this.owner = owner;
     /** @const */ this.parentShadow = parentShadow;
-    /** @const */ this.superShadow = superShadow;
     /** @type {adapt.vtree.ShadowContext} */ this.subShadow = null;
     /** @const */ this.root = root;
     /** @const */ this.xmldoc = xmldoc;
@@ -736,11 +735,9 @@ adapt.vtree.ShadowContext.prototype.equals = function(other) {
     if (!other)
         return false;
     return this.owner === other.owner &&
-        this.root === other.root &&
         this.xmldoc === other.xmldoc &&
         this.type === other.type &&
-        adapt.vtree.isSameShadowContext(this.parentShadow, other.parentShadow) &&
-        adapt.vtree.isSameShadowContext(this.superShadow, other.superShadow);
+        adapt.vtree.isSameShadowContext(this.parentShadow, other.parentShadow);
 };
 
 /**
