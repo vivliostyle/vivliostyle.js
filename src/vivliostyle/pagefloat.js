@@ -876,12 +876,15 @@ goog.scope(function() {
         }
 
         var logicalFloatSide = this.toLogical(float.floatSide);
-        if (logicalFloatSide === "block-end" || logicalFloatSide === "inline-end") {
+        if (logicalFloatSide === "block-end" || logicalFloatSide === "snap-block" ||
+            logicalFloatSide === "inline-end") {
             var i = 0;
             while (i < this.floatFragments.length) {
                 var fragment = this.floatFragments[i];
-                var logicalFloatSide2 = this.toLogical(fragment.floatSide);
-                if (logicalFloatSide2 === logicalFloatSide && fragment.shouldBeStashedBefore(float)) {
+                var fragmentFloatSide = this.toLogical(fragment.floatSide);
+                if ((fragmentFloatSide === logicalFloatSide ||
+                    (logicalFloatSide === "snap-block" && fragmentFloatSide === "block-end")) &&
+                    fragment.shouldBeStashedBefore(float)) {
                     this.stashedFloatFragments.push(fragment);
                     this.floatFragments.splice(i, 1);
                 } else {
@@ -1044,15 +1047,16 @@ goog.scope(function() {
      * @param {!adapt.layout.PageFloatArea} area
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @param {string} floatSide
+     * @param {?number} anchorEdge Null indicates that the anchor is not in the current container.
      * @param {boolean} init
      * @param {boolean} force
-     * @return {boolean} Indicates if the float area fits inside the container or not
+     * @return {?string} Logical float side (snap-block is resolved when init=false). Null indicates that the float area does not fit inside the container
      */
     PageFloatLayoutContext.prototype.setFloatAreaDimensions = function(
-        area, floatReference, floatSide, init, force) {
+        area, floatReference, floatSide, anchorEdge, init, force) {
         if (floatReference !== this.floatReference) {
             var parent = this.getParent(floatReference);
-            return parent.setFloatAreaDimensions(area, floatReference, floatSide, init, force);
+            return parent.setFloatAreaDimensions(area, floatReference, floatSide, anchorEdge, init, force);
         }
 
         var logicalFloatSide = this.toLogical(floatSide);
@@ -1070,61 +1074,72 @@ goog.scope(function() {
             Math.max(blockEnd, area.left + blockOffset) :
             Math.min(blockEnd, area.top + area.getInsetTop() + area.height + area.getInsetBottom() + blockOffset);
 
+        function limitBlockStartEndValueWithOpenRect(getRect, rect) {
+            var openRect = getRect(area.bands, rect);
+            if (openRect) {
+                if (area.vertical) {
+                    openRect = adapt.geom.unrotateBox(openRect);
+                }
+                blockStart = area.vertical ?
+                    Math.min(blockStart, openRect.x2) :
+                    Math.max(blockStart, openRect.y1);
+                blockEnd = area.vertical ?
+                    Math.max(blockEnd, openRect.x1) :
+                    Math.min(blockEnd, openRect.y2);
+                return true;
+            } else {
+                return force;
+            }
+        }
+
         var blockSize, inlineSize, outerBlockSize, outerInlineSize;
         if (init) {
             var rect = area.vertical ?
                 adapt.geom.rotateBox(new adapt.geom.Rect(blockEnd, inlineStart, blockStart, inlineEnd)) :
                 new adapt.geom.Rect(inlineStart, blockStart, inlineEnd, blockEnd);
-            switch (logicalFloatSide) {
-                case "block-start":
-                case "inline-start":
-                    var uppermostFullyOpenRect = adapt.geom.findUppermostFullyOpenRect(area.bands,
-                        rect);
-                    if (uppermostFullyOpenRect) {
-                        if (area.vertical) {
-                            uppermostFullyOpenRect = adapt.geom.unrotateBox(uppermostFullyOpenRect);
-                        }
-                        blockStart = area.vertical ?
-                            Math.min(blockStart, uppermostFullyOpenRect.x2) :
-                            Math.max(blockStart, uppermostFullyOpenRect.y1);
-                        blockEnd = area.vertical ?
-                            Math.max(blockEnd, uppermostFullyOpenRect.x1) :
-                            Math.min(blockEnd, uppermostFullyOpenRect.y2);
-                    } else if (!force) {
-                        return false;
-                    }
-                    break;
-                case "block-end":
-                case "inline-end":
-                    var bottommostFullyOpenRect = adapt.geom.findBottommostFullyOpenRect(area.bands,
-                        rect);
-                    if (bottommostFullyOpenRect) {
-                        if (area.vertical) {
-                            bottommostFullyOpenRect = adapt.geom.unrotateBox(bottommostFullyOpenRect);
-                        }
-                        blockStart = area.vertical ?
-                            Math.min(blockStart, bottommostFullyOpenRect.x2) :
-                            Math.max(blockStart, bottommostFullyOpenRect.y1);
-                        blockEnd = area.vertical ?
-                            Math.max(blockEnd, bottommostFullyOpenRect.x1) :
-                            Math.min(blockEnd, bottommostFullyOpenRect.y2);
-                    } else if (!force) {
-                        return false;
-                    }
-                    break;
+
+            if (logicalFloatSide === "block-start" || logicalFloatSide === "snap-block"
+                || logicalFloatSide === "inline-start") {
+                if (!limitBlockStartEndValueWithOpenRect(adapt.geom.findUppermostFullyOpenRect, rect))
+                    return null;
+            }
+            if (logicalFloatSide === "block-end" || logicalFloatSide === "snap-block"
+                || logicalFloatSide === "inline-start") {
+                if (!limitBlockStartEndValueWithOpenRect(adapt.geom.findBottommostFullyOpenRect, rect))
+                    return null;
             }
             outerBlockSize = (blockEnd - blockStart) * area.getBoxDir();
             blockSize = outerBlockSize - area.getInsetBefore() - area.getInsetAfter();
             outerInlineSize = inlineEnd - inlineStart;
             inlineSize = outerInlineSize - area.getInsetStart() - area.getInsetEnd();
             if (!force && (blockSize <= 0 || inlineSize <= 0))
-                return false;
+                return null;
         } else {
             blockSize = area.computedBlockSize;
             outerBlockSize = blockSize + area.getInsetBefore() + area.getInsetAfter();
             var availableBlockSize = (blockEnd - blockStart) * area.getBoxDir();
+
+            if (logicalFloatSide === "snap-block") {
+                if (anchorEdge === null) {
+                    // Deferred from previous container
+                    logicalFloatSide = "block-start";
+                } else {
+                    var containerRect = this.container.getPaddingRect();
+                    var fromStart = this.container.getBoxDir() *
+                        (anchorEdge - (this.container.vertical ? containerRect.x2 : containerRect.y1));
+                    var fromEnd = this.container.getBoxDir() *
+                        ((this.container.vertical ? containerRect.x1 : containerRect.y2)
+                        - anchorEdge - outerBlockSize);
+                    if (fromStart <= fromEnd) {
+                        logicalFloatSide = "block-start";
+                    } else {
+                        logicalFloatSide = "block-end";
+                    }
+                }
+            }
+
             if (!force && availableBlockSize < outerBlockSize)
-                return false;
+                return null;
             if (logicalFloatSide === "inline-start" || logicalFloatSide === "inline-end") {
                 inlineSize = vivliostyle.sizing.getSize(area.clientLayout, area.element,
                     [vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE];
@@ -1136,7 +1151,7 @@ goog.scope(function() {
             outerInlineSize = inlineSize + area.getInsetStart() + area.getInsetEnd();
             var availableInlineSize = inlineEnd - inlineStart;
             if (!force && availableInlineSize < outerInlineSize)
-                return false;
+                return null;
         }
 
         blockStart -= blockOffset;
@@ -1147,6 +1162,7 @@ goog.scope(function() {
         switch (logicalFloatSide) {
             case "inline-start":
             case "block-start":
+            case "snap-block":
                 area.setInlinePosition(inlineStart, inlineSize);
                 area.setBlockPosition(blockStart, blockSize);
                 break;
@@ -1159,7 +1175,7 @@ goog.scope(function() {
                 throw new Error("unknown float direction: " + floatSide);
         }
 
-        return true;
+        return logicalFloatSide;
     };
 
     /**
@@ -1232,10 +1248,11 @@ goog.scope(function() {
 
     /**
      * @param {!Array<!PageFloatContinuation>} continuations
+     * @param {string} logicalFloatSide
      * @param {!adapt.layout.PageFloatArea} floatArea
      * @returns {!PageFloatFragment}
      */
-    PageFloatLayoutStrategy.prototype.createPageFloatFragment = function(continuations, floatArea) {};
+    PageFloatLayoutStrategy.prototype.createPageFloatFragment = function(continuations, logicalFloatSide, floatArea) {};
 
     /**
      * @param {!PageFloat} float
@@ -1343,9 +1360,9 @@ goog.scope(function() {
      * @override
      */
     NormalPageFloatLayoutStrategy.prototype.createPageFloatFragment = function(
-        continuations, floatArea) {
+        continuations, floatSide, floatArea) {
         /** @const */ var f = continuations[0].float;
-        return new PageFloatFragment(f.floatReference, f.floatSide, continuations, floatArea);
+        return new PageFloatFragment(f.floatReference, floatSide, continuations, floatArea);
     };
 
     /**

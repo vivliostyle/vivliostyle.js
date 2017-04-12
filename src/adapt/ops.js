@@ -555,7 +555,7 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
             loopFrame.breakLoop();
             return;
         }
-        column.layoutPageFloatInner(continuation, strategy, pageFloatFragment).then(function(success) {
+        column.layoutPageFloatInner(continuation, strategy, null, pageFloatFragment).then(function(success) {
             if (!success) {
                 loopFrame.breakLoop();
                 return;
