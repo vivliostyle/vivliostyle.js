@@ -939,16 +939,17 @@ goog.scope(function() {
     /**
      * @private
      * @param {string} side
+     * @param {function(PageFloatFragment, PageFloatLayoutContext):boolean=} condition
      * @returns {number}
      */
-    PageFloatLayoutContext.prototype.getLimitValue = function(side) {
+    PageFloatLayoutContext.prototype.getLimitValue = function(side, condition) {
         goog.asserts.assert(this.container);
         var logicalSide = this.toLogical(side);
         var physicalSide = this.toPhysical(side);
-        var limit = this.getLimitValueInner(logicalSide);
+        var limit = this.getLimitValueInner(logicalSide, condition);
         goog.asserts.assert(limit >= 0);
         if (this.parent && this.parent.container) {
-            var parentLimit = this.parent.getLimitValue(physicalSide);
+            var parentLimit = this.parent.getLimitValue(physicalSide, condition);
             switch (physicalSide) {
                 case "top":
                     return Math.max(limit, parentLimit);
@@ -967,11 +968,12 @@ goog.scope(function() {
 
     /**
      * @private
+     * @param {string} logicalSide
+     * @param {function(PageFloatFragment, PageFloatLayoutContext):boolean=} condition
      * @return {number}
      */
-    PageFloatLayoutContext.prototype.getLimitValueInner = function(logicalSide) {
+    PageFloatLayoutContext.prototype.getLimitValueInner = function(logicalSide, condition) {
         goog.asserts.assert(this.container);
-        var self = this;
         var offsetX = this.container.originX;
         var offsetY = this.container.originY;
         var paddingRect = this.container.getPaddingRect();
@@ -985,6 +987,8 @@ goog.scope(function() {
         var fragments = this.floatFragments;
         if (fragments.length > 0) {
             limits = fragments.reduce(function(l, f) {
+                if (condition && !condition(f, this))
+                    return l;
                 var logicalFloatSide = this.toLogical(f.floatSide);
                 var area = f.area;
                 var top = l.top, left = l.left, bottom = l.bottom, right = l.right;
@@ -1217,6 +1221,40 @@ goog.scope(function() {
                 return Math.max(edge, rect.y2);
             }
         }, isVertical ? Infinity : 0);
+    };
+
+    /**
+     * @param {string} clear
+     * @param {!adapt.layout.Column} column
+     * @returns {number}
+     */
+    PageFloatLayoutContext.prototype.getPageFloatClearEdge = function(clear, column) {
+        function isContinuationOfAlreadyAppearedFloat(context) {
+            return function(continuation) {
+                return context.isAnchorAlreadyAppeared(continuation.float.getId());
+            };
+        }
+        function isFragmentWithAlreadyAppearedFloat(fragment, context) {
+            return fragment.continuations.some(isContinuationOfAlreadyAppearedFloat(context));
+        }
+
+        var columnRect = column.getPaddingRect();
+        var columnBlockEnd = column.vertical ? columnRect.x1 : columnRect.y2;
+        var context = this;
+        while (context) {
+            if (context.floatsDeferredToNext.some(isContinuationOfAlreadyAppearedFloat(context)))
+                return columnBlockEnd;
+            context = context.parent;
+        }
+        var blockStartLimit = this.getLimitValue(
+            "block-start", isFragmentWithAlreadyAppearedFloat);
+        var blockEndLimit = this.getLimitValue(
+            "block-end", isFragmentWithAlreadyAppearedFloat);
+        if (blockEndLimit * column.getBoxDir() < columnBlockEnd * column.getBoxDir()) {
+            return columnBlockEnd;
+        } else {
+            return blockStartLimit;
+        }
     };
 
     /**
