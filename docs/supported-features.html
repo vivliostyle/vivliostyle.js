@@ -1903,6 +1903,14 @@
 
 <h2><a href="https://drafts.csswg.org/css-page-floats-3/">CSS Page Floats 3</a></h2>
 <ul>
+  <li><a href="https://drafts.csswg.org/css-page-floats-3/#propdef-clear">clear</a>
+    <ul>
+      <li>Supports <a href="https://drafts.csswg.org/css-page-floats-3/#propdef-clear"><code>none</code>, <code>left</code>, <code>right</code>, <code>both</code>, <code>all</code></a> values.</li>
+      <li>Note that <code>all</code> is only effective on block-level boxes (i.e. not page floats).</li>
+      <li>When <code>all</code> is specified, the block-start edge of the box gets pushed down so that the edge comes after any block-start/block-end page float of which anchors are before the box in the document order.</li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
   <li><a href="https://drafts.csswg.org/css-page-floats-3/#propdef-float">float</a>
     <ul>
       <li>Supports <a href="https://drafts.csswg.org/css-page-floats/#propdef-float"><code>block-start</code>, <code>block-end</code>, <code>inline-start</code>, <code>inline-end</code>, <code>snap-block</code>, <code>left</code>, <code>right</code>, <code>top</code>, <code>bottom</code> and <code>none</code></a> values.</li>
