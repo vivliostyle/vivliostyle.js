@@ -12,6 +12,11 @@
   - Spec: [CSS Page Floats - The float property](https://drafts.csswg.org/css-page-floats/#valdef-float-snap-block)
   - Note that the function value `snap-block()` is not supported yet.
   - Also note that behavior of this value is different from that defined in the above spec: The element always turns into a page float regardless of its distance from edges of its float reference. It is snapped to the nearer edge of the float reference.
+- Support `clear: all` for block-level boxes
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/345>
+  - Note that `all` is only effective on block-level boxes (i.e. not page floats).
+  - When `all` is specified, the block-start edge of the box gets pushed down so that the edge comes after any block-start/block-end page float of which anchors are before the box in the document order.
+
 
 ### Changed
 

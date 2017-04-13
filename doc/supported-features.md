@@ -861,6 +861,11 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Support depends on browser capabilities
 
 ## [CSS Page Floats 3](https://drafts.csswg.org/css-page-floats-3/)
+- [clear](https://drafts.csswg.org/css-page-floats-3/#propdef-clear)
+  - Supports [`none`, `left`, `right`, `both`, `all`](https://drafts.csswg.org/css-page-floats-3/#propdef-clear) values.
+  - Note that `all` is only effective on block-level boxes (i.e. not page floats).
+  - When `all` is specified, the block-start edge of the box gets pushed down so that the edge comes after any block-start/block-end page float of which anchors are before the box in the document order.
+  - Supported in all browsers
 - [float](https://drafts.csswg.org/css-page-floats-3/#propdef-float)
   - Supports [`block-start`, `block-end`, `inline-start`, `inline-end`, `snap-block`, `left`, `right`, `top`, `bottom` and `none`](https://drafts.csswg.org/css-page-floats/#propdef-float) values.
   - Supported in all browsers
