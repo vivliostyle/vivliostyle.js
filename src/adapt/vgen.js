@@ -684,7 +684,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     var elementStyle = styler.getStyle(element, false);
     if (!self.nodeContext.shadowContext) {
         var offset = this.xmldoc.getElementOffset(element);
-        vivliostyle.selectors.registerFragmentIndex(offset, self.nodeContext.fragmentIndex);
+        vivliostyle.selectors.registerFragmentIndex(offset, self.nodeContext.fragmentIndex, 0);
     }
     var computedStyle = {};
     if (!self.nodeContext.parent) {

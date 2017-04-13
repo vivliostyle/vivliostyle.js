@@ -1003,6 +1003,7 @@ goog.scope(function() {
                                 cellNodePosition.steps[0], rowNodeContext);
                             cellNodeContext.offsetInNode = cellNodePosition.offsetInNode;
                             cellNodeContext.after = cellNodePosition.after;
+                            cellNodeContext.fragmentIndex = cellNodePosition.steps[0].fragmentIndex+1;
                             return layoutContext.setCurrent(cellNodeContext, false).thenAsync(function() {
                                 var breakChunkPosition = cellBreakPosition.breakChunkPosition;
                                 for (var i = 0; i < cell.colSpan; i++) {
@@ -1050,6 +1051,7 @@ goog.scope(function() {
         this.currentColumnIndex = 0;
         this.inRow = true;
         return this.layoutRowSpanningCellsFromPreviousFragment(state).thenAsync(function() {
+            this.registerCellFragmentIndex();
             var overflown = this.column.saveEdgeAndCheckForOverflow(state.lastAfterNodeContext, null, true,
                 state.breakAtTheEdge);
             if (overflown &&
@@ -1059,6 +1061,19 @@ goog.scope(function() {
                 state.break = true;
             }
             return adapt.task.newResult(true);
+        }.bind(this));
+    };
+
+    /** @private */
+    TableLayoutStrategy.prototype.registerCellFragmentIndex = function() {
+        var cells = this.formattingContext.getRowByIndex(this.currentRowIndex).cells;
+        cells.forEach(function(cell) {
+            var cellBreakPosition = this.formattingContext.cellBreakPositions[cell.columnIndex];
+            if (cellBreakPosition && cellBreakPosition.cell.anchorSlot.columnIndex == cell.anchorSlot.columnIndex) {
+                var tdNodeStep = cellBreakPosition.cellNodePosition.steps[0];
+                var offset = this.column.layoutContext.xmldoc.getElementOffset(tdNodeStep.node);
+                vivliostyle.selectors.registerFragmentIndex(offset, tdNodeStep.fragmentIndex+1, 1);
+            }
         }.bind(this));
     };
 
@@ -1088,6 +1103,7 @@ goog.scope(function() {
         var cont;
         if (this.hasBrokenCellAtSlot(cell.anchorSlot.columnIndex)) {
             var cellBreakPosition = this.formattingContext.cellBreakPositions.shift();
+            nodeContext.fragmentIndex = cellBreakPosition.cellNodePosition.steps[0].fragmentIndex+1;
             cont = adapt.task.newResult(cellBreakPosition.breakChunkPosition);
         } else {
             cont = this.column.layoutContext.nextInTree(nodeContext, state.atUnforcedBreak).thenAsync(function(nextNodeContext) {

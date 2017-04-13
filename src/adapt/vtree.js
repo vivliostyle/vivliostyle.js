@@ -589,7 +589,8 @@ adapt.vtree.eachAncestorFormattingContext = function(nodeContext, callback) {
  *      shadowContext:adapt.vtree.ShadowContext,
  *      nodeShadow:adapt.vtree.ShadowContext,
  *      shadowSibling:adapt.vtree.NodePositionStep,
- *      formattingContext:adapt.vtree.FormattingContext
+ *      formattingContext:adapt.vtree.FormattingContext,
+ *      fragmentIndex: number
  * }}
  */
 adapt.vtree.NodePositionStep;
@@ -657,7 +658,8 @@ adapt.vtree.newNodePositionFromNode = function(node) {
         shadowType: adapt.vtree.ShadowType.NONE,
         shadowContext: null,
         nodeShadow: null,
-        shadowSibling: null
+        shadowSibling: null,
+        fragmentIndex: 0
     };
     return {steps:[step], offsetInNode:0, after:false, preprocessedTextContent:null};
 };
@@ -672,7 +674,8 @@ adapt.vtree.newNodePositionFromNodeContext = function(nodeContext) {
         shadowType: adapt.vtree.ShadowType.NONE,
         shadowContext: nodeContext.shadowContext,
         nodeShadow: null,
-        shadowSibling: null
+        shadowSibling: null,
+        fragmentIndex: nodeContext.fragmentIndex
     };
     return {steps:[step], offsetInNode:0, after:false, preprocessedTextContent:nodeContext.preprocessedTextContent};
 };

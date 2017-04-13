@@ -52,9 +52,9 @@ goog.scope(function() {
 
     /** @override */
     NthFragmentMatcher.prototype.matches = function() {
-        var fragmentIndex = vivliostyle.selectors.fragmentIndices[this.elementOffset];
-        return fragmentIndex != null
-            && adapt.csscasc.matchANPlusB(fragmentIndex, this.a, this.b);
+        var entry = vivliostyle.selectors.fragmentIndices[this.elementOffset];
+        return entry != null && entry.fragmentIndex != null
+            && adapt.csscasc.matchANPlusB(entry.fragmentIndex, this.a, this.b);
     };
 
     /**
@@ -161,16 +161,23 @@ goog.scope(function() {
     /**
      * @param {number} elementOffset
      * @param {number} fragmentIndex
+     * @param {number} priority
      */
-    vivliostyle.selectors.registerFragmentIndex = function(elementOffset, fragmentIndex) {
-        vivliostyle.selectors.fragmentIndices[elementOffset] = fragmentIndex;
+    vivliostyle.selectors.registerFragmentIndex = function(elementOffset, fragmentIndex, priority) {
+        var indices = vivliostyle.selectors.fragmentIndices;
+        if (!indices[elementOffset] || indices[elementOffset].priority <= priority) {
+            indices[elementOffset] = {
+                fragmentIndex: fragmentIndex,
+                priority: priority
+            };
+        }
     };
 
     vivliostyle.selectors.clearFragmentIndices = function() {
         vivliostyle.selectors.fragmentIndices = {};
     };
     /**
-     * @type {!Object.<number,number>}
+     * @type {!Object.<number,{fragmentIndex:number, priority:number}>}
      */
     vivliostyle.selectors.fragmentIndices = {};
 

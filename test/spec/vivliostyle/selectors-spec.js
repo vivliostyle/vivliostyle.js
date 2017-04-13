@@ -231,21 +231,21 @@ describe("selectors", function() {
             };
 
             var cascMap = {};
-            registerFragmentIndex(100, 3);
+            registerFragmentIndex(100, 3, 0);
             mergeViewConditionalStyles(cascMap, {}, style, {});
             expect(cascMap["display"].evaluate({}, "display").toString()).toBe("block");
             expect(cascMap["visivility"].evaluate({}, "visivility").toString()).toBe("hidden");
 
             cascMap = {};
-            registerFragmentIndex(100, 2);
-            registerFragmentIndex(200, 5);
+            registerFragmentIndex(100, 2, 0);
+            registerFragmentIndex(200, 5, 0);
             mergeViewConditionalStyles(cascMap, {}, style, {});
             expect(cascMap["display"].evaluate({}, "display").toString()).toBe("inline");
             expect(cascMap["visivility"]).toBe(undefined);
 
             cascMap = {};
-            registerFragmentIndex(100, 3);
-            registerFragmentIndex(200, 3);
+            registerFragmentIndex(100, 3, 0);
+            registerFragmentIndex(200, 3, 0);
             mergeViewConditionalStyles(cascMap, {}, style, {});
             expect(cascMap["display"].evaluate({}, "display").toString()).toBe("inline");
             expect(cascMap["visivility"].evaluate({}, "visivility").toString()).toBe("hidden");
@@ -267,7 +267,7 @@ describe("selectors", function() {
                 }]
             };
             var cascMap = {};
-            registerFragmentIndex(100, 2);
+            registerFragmentIndex(100, 2, 0);
             mergeViewConditionalStyles(cascMap, {}, style, {});
             expect(cascMap["visivility"]).toBe(undefined);
             expect(cascMap["display"]).toBe(undefined);
@@ -276,8 +276,8 @@ describe("selectors", function() {
         it("do nothing if styles associated with fragment selectors are not registered", function() {
             var style = {};
             var cascMap = {};
-            registerFragmentIndex(100, 3);
-            registerFragmentIndex(200, 3);
+            registerFragmentIndex(100, 3, 0);
+            registerFragmentIndex(200, 3, 0);
             mergeViewConditionalStyles(cascMap, {}, style, {});
             expect(cascMap["visivility"]).toBe(undefined);
             expect(cascMap["display"]).toBe(undefined);
