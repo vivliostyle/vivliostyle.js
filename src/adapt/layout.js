@@ -2556,6 +2556,11 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, for
                 }
                 var style = (/** @type {HTMLElement} */ (nodeContext.viewNode)).style;
                 if (nodeContext.after) {
+                    if (nodeContext.inline)
+                        // Skip an empty inline box at the start of a block
+                        // (An anonymous block consisting entirely of
+                        // collapsible white space is removed from the rendering tree)
+                        break;
                     if (layoutProcessor) {
                         if (layoutProcessor.afterNonInlineElementNode(nodeContext, self.stopAtOverflow)) break;
                     }
