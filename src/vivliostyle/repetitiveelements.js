@@ -633,6 +633,12 @@ goog.scope(function() {
            === getRepetitiveElementsOwnerFormattingContext(constraint.nodeContext.formattingContext);
     };
 
+    /** @override */
+    RepetitiveElementsOwnerLayoutConstraint.prototype.getPriorityOfFinishBreak = function() {
+        return 10;
+    };
+
+
     /**
      * @constructor
      * @param {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext

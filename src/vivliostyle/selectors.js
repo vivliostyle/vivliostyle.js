@@ -294,6 +294,10 @@ goog.scope(function() {
         if (!(constraint instanceof AfterIfContinuesLayoutConstraint)) return false;
         return this.afterIfContinues == /** @type {AfterIfContinuesLayoutConstraint} */ (constraint).afterIfContinues;
     };
+    /** @override */
+    AfterIfContinuesLayoutConstraint.prototype.getPriorityOfFinishBreak = function() {
+        return 9;
+    };
 
     /**
      * @constructor

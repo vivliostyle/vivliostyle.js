@@ -419,8 +419,8 @@ goog.scope(function() {
     /**
      * @param {adapt.vtree.NodeContext} positionAfter
      */
-    PseudoColumn.prototype.resetConstraints = function(positionAfter) {
-        this.column.resetConstraints(positionAfter);
+    PseudoColumn.prototype.doFinishBreakOfFragmentLayoutConstraints = function(positionAfter) {
+        this.column.doFinishBreakOfFragmentLayoutConstraints(positionAfter);
     };
 
     /**

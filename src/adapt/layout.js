@@ -270,6 +270,11 @@ adapt.layout.FragmentLayoutConstraint.prototype.finishBreak = function(nodeConte
 adapt.layout.FragmentLayoutConstraint.prototype.equalsTo = function(constraint) {};
 
 /**
+ * @return {number}
+ */
+adapt.layout.FragmentLayoutConstraint.prototype.getPriorityOfFinishBreak = function() {};
+
+/**
  * Potential breaking position.
  * @interface
  */
@@ -2960,7 +2965,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, brea
             self.doFinishBreak(nodeContextParam, retryer.context.overflownNodeContext, initialNodeContext, retryer.initialComputedBlockSize).then(function(positionAfter) {
                 var cont = null;
                 if (!self.pseudoParent) {
-                    cont = self.resetConstraints(positionAfter);
+                    cont = self.doFinishBreakOfFragmentLayoutConstraints(positionAfter);
                 } else {
                     cont = adapt.task.newResult(null);
                 }
@@ -2983,12 +2988,16 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, brea
     return frame.result();
 };
 
-adapt.layout.Column.prototype.resetConstraints = function(nodeContext) {
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("resetConstraints");
+adapt.layout.Column.prototype.doFinishBreakOfFragmentLayoutConstraints = function(nodeContext) {
+    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("doFinishBreakOfFragmentLayoutConstraints");
+    var sortedFragmentLayoutConstraints = [].concat(this.fragmentLayoutConstraints);
+    sortedFragmentLayoutConstraints.sort(function(a, b) {
+        return a.getPriorityOfFinishBreak() - b.getPriorityOfFinishBreak();
+    });
     var i = 0;
     frame.loop(function() {
-        if (i < this.fragmentLayoutConstraints.length) {
-            var result = this.fragmentLayoutConstraints[i++].finishBreak(nodeContext, this);
+        if (i < sortedFragmentLayoutConstraints.length) {
+            var result = sortedFragmentLayoutConstraints[i++].finishBreak(nodeContext, this);
             return result.thenReturn(true);
         } else {
             return adapt.task.newResult(false);
