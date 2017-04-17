@@ -1264,7 +1264,7 @@ adapt.layout.Column.prototype.layoutFootnote = function(nodeContext) {
         element.parentNode.removeChild(element);
         nodeContext.viewNode = null;
     }
-    var footnoteNodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
+    var footnoteNodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext, 0);
     var boxOffset = nodeContext.boxOffset;
     nodeContext = nodeContext.modify();
     nodeContext.after = true;
@@ -1713,7 +1713,7 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
     }
 
     return cont.thenAsync(function(float) {
-        var nodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
+        var nodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext, 0);
         var nodeContextAfter = self.setFloatAnchorViewNode(nodeContext);
         var pageFloatFragment = context.findPageFloatFragment(float);
         if (pageFloatFragment) {

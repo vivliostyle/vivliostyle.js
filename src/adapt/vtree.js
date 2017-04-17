@@ -666,16 +666,17 @@ adapt.vtree.newNodePositionFromNode = function(node) {
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {?number} initialFragmentIndex
  * @return {adapt.vtree.NodePosition}
  */
-adapt.vtree.newNodePositionFromNodeContext = function(nodeContext) {
+adapt.vtree.newNodePositionFromNodeContext = function(nodeContext, initialFragmentIndex) {
     var step = {
         node: nodeContext.sourceNode,
         shadowType: adapt.vtree.ShadowType.NONE,
         shadowContext: nodeContext.shadowContext,
         nodeShadow: null,
         shadowSibling: null,
-        fragmentIndex: nodeContext.fragmentIndex
+        fragmentIndex: initialFragmentIndex != null ?  initialFragmentIndex : nodeContext.fragmentIndex
     };
     return {steps:[step], offsetInNode:0, after:false, preprocessedTextContent:nodeContext.preprocessedTextContent};
 };

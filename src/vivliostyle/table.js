@@ -1110,7 +1110,7 @@ goog.scope(function() {
                 if (nextNodeContext.viewNode) {
                     nodeContext.viewNode.removeChild(nextNodeContext.viewNode);
                 }
-                var startNodePosition = adapt.vtree.newNodePositionFromNodeContext(nextNodeContext);
+                var startNodePosition = adapt.vtree.newNodePositionFromNodeContext(nextNodeContext, 0);
                 return adapt.task.newResult(new adapt.vtree.ChunkPosition(startNodePosition));
             });
         }

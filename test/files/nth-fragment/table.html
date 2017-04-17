@@ -114,6 +114,20 @@
         table2.td {
             width: 110px;
         }
+
+        .table1 thead::nth-fragment(1) {
+            font-weight: bold;
+        }
+        .table1 tfoot::nth-fragment(1) {
+            font-weight: bold;
+        }
+
+        .table2 thead::nth-fragment(2) {
+            font-weight: bold;
+        }
+        .table2 tfoot::nth-fragment(2) {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -121,7 +135,8 @@
     <section>
         <p>
           The table border of the 2n fragment should be red.<br/>
-          The table cell border of the 2n fragment should be blue.
+          The table cell border of the 2n fragment should be blue.<br/>
+          the table header, footer should be bold.
         </p>
         <table class="table1">
             <thead>
