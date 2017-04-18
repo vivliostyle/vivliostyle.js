@@ -609,9 +609,9 @@ adapt.vtree.isSameNodePositionStep = function(nps1, nps2) {
     }
     return nps1.node === nps2.node &&
         nps1.shadowType === nps2.shadowType &&
-        nps1.shadowContext === nps2.shadowContext &&
-        nps1.nodeShadow === nps2.nodeShadow &&
-        nps1.shadowSibling === nps2.shadowSibling;
+        adapt.vtree.isSameShadowContext(nps1.shadowContext, nps2.shadowContext) &&
+        adapt.vtree.isSameShadowContext(nps1.nodeShadow, nps2.nodeShadow) &&
+        adapt.vtree.isSameNodePositionStep(nps1.shadowSibling, nps2.shadowSibling);
 };
 
 /**
@@ -626,8 +626,8 @@ adapt.vtree.isSameNodePositionStep = function(nps1, nps2) {
 adapt.vtree.NodePosition;
 
 /**
- * @param {adapt.vtree.NodePosition} np1
- * @param {adapt.vtree.NodePosition} np2
+ * @param {?adapt.vtree.NodePosition} np1
+ * @param {?adapt.vtree.NodePosition} np2
  * @returns {boolean}
  */
 adapt.vtree.isSameNodePosition = function(np1, np2) {
@@ -641,7 +641,7 @@ adapt.vtree.isSameNodePosition = function(np1, np2) {
         return false;
     }
     for (var i = 0; i < np1.steps.length; i++) {
-        if (!adapt.vtree.isSameNodePositionStep(np1[i], np2[i])) {
+        if (!adapt.vtree.isSameNodePositionStep(np1.steps[i], np2.steps[i])) {
             return false;
         }
     }
@@ -722,7 +722,6 @@ adapt.vtree.ShadowType = {
 adapt.vtree.ShadowContext = function(owner, root, xmldoc, parentShadow, superShadow, type, styler) {
     /** @const */ this.owner = owner;
     /** @const */ this.parentShadow = parentShadow;
-    /** @const */ this.superShadow = superShadow;
     /** @type {adapt.vtree.ShadowContext} */ this.subShadow = null;
     /** @const */ this.root = root;
     /** @const */ this.xmldoc = xmldoc;
@@ -731,6 +730,29 @@ adapt.vtree.ShadowContext = function(owner, root, xmldoc, parentShadow, superSha
         superShadow.subShadow = this;
     }
     /** @const */ this.styler = styler;
+};
+
+/**
+ * @param {adapt.vtree.ShadowContext} other
+ * @returns {boolean}
+ */
+adapt.vtree.ShadowContext.prototype.equals = function(other) {
+    if (!other)
+        return false;
+    return this.owner === other.owner &&
+        this.xmldoc === other.xmldoc &&
+        this.type === other.type &&
+        adapt.vtree.isSameShadowContext(this.parentShadow, other.parentShadow);
+};
+
+/**
+ * @param {adapt.vtree.ShadowContext} sc1
+ * @param {adapt.vtree.ShadowContext} sc2
+ * @returns {boolean}
+ */
+adapt.vtree.isSameShadowContext = function(sc1, sc2) {
+    return sc1 === sc2 ||
+        (!!sc1 && !!sc2 && sc1.equals(sc2));
 };
 
 /**
@@ -1018,7 +1040,6 @@ adapt.vtree.NodeContext.prototype.belongsTo = function(formattingContext) {
 adapt.vtree.ChunkPosition = function(primary) {
     /** @type {adapt.vtree.NodePosition} */ this.primary = primary;
     /** @type {Array.<adapt.vtree.NodePosition>} */ this.floats = null;
-    /** @type {Array.<adapt.vtree.NodePosition>} */ this.footnotes = null;
 };
 
 /**
@@ -1030,12 +1051,6 @@ adapt.vtree.ChunkPosition.prototype.clone = function() {
         result.floats = [];
         for (var i = 0; i < this.floats.length; ++i) {
             result.floats[i] = this.floats[i];
-        }
-    }
-    if (this.footnotes) {
-        result.footnotes = [];
-        for (var i = 0; i < this.footnotes.length; ++i) {
-            result.footnotes[i] = this.footnotes[i];
         }
     }
     return result;
@@ -1065,18 +1080,6 @@ adapt.vtree.ChunkPosition.prototype.isSamePosition = function(other) {
             }
         }
     } else if (other.floats) {
-        return false;
-    }
-    if (this.footnotes) {
-        if (!other.footnotes || this.footnotes.length !== other.footnotes.length) {
-            return false;
-        }
-        for (var i = 0; i < this.footnotes.length; i++) {
-            if (!adapt.vtree.isSameNodePosition(this.footnotes[i], other.footnotes[i])) {
-                return false;
-            }
-        }
-    } else if (other.footnotes) {
         return false;
     }
     return true;

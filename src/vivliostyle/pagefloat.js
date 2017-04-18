@@ -110,15 +110,17 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!Node} sourceNode
+     * @param {!adapt.vtree.NodePosition} nodePosition
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @param {string} floatSide
+     * @param {string} flowName
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloat = function(sourceNode, floatReference, floatSide) {
-        /** @const */ this.sourceNode = sourceNode;
+    vivliostyle.pagefloat.PageFloat = function(nodePosition, floatReference, floatSide, flowName) {
+        /** @const */ this.nodePosition = nodePosition;
         /** @const */ this.floatReference = floatReference;
         /** @const */ this.floatSide = floatSide;
+        /** @const */ this.flowName = flowName;
         /** @private @type {?number} */ this.order = null;
         /** @private @type {?vivliostyle.pagefloat.PageFloat.ID} */ this.id = null;
     };
@@ -147,6 +149,22 @@ goog.scope(function() {
             throw new Error("The page float is not yet added");
         }
         return this.id;
+    };
+
+    /**
+     * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} pageFloatLayoutContext
+     * @returns {boolean}
+     */
+    PageFloat.prototype.isAllowedOnContext = function(pageFloatLayoutContext) {
+        return pageFloatLayoutContext.isAnchorAlreadyAppeared(this.getId());
+    };
+
+    /**
+     * @param {!PageFloat} other
+     * @returns {boolean}
+     */
+    PageFloat.prototype.isAllowedToPrecede = function(other) {
+        return false;
     };
 
     /**
@@ -181,7 +199,7 @@ goog.scope(function() {
      */
     PageFloatStore.prototype.addPageFloat = function(float) {
         var index = this.floats.findIndex(function(f) {
-            return f.sourceNode === float.sourceNode;
+            return adapt.vtree.isSameNodePosition(f.nodePosition, float.nodePosition);
         });
         if (index >= 0) {
             throw new Error("A page float with the same source node is already registered");
@@ -193,12 +211,12 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!Node} sourceNode
+     * @param {!adapt.vtree.NodePosition} nodePosition
      * @returns {?vivliostyle.pagefloat.PageFloat}
      */
-    PageFloatStore.prototype.findPageFloatBySourceNode = function(sourceNode) {
+    PageFloatStore.prototype.findPageFloatByNodePosition = function(nodePosition) {
         var index = this.floats.findIndex(function(f) {
-            return f.sourceNode === sourceNode;
+            return adapt.vtree.isSameNodePosition(f.nodePosition, nodePosition);
         });
         return index >= 0 ? this.floats[index] : null;
     };
@@ -214,17 +232,40 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!vivliostyle.pagefloat.PageFloat} float
-     * @param {!adapt.vtree.NodePosition} nodePosition
+     * @param {!vivliostyle.pagefloat.FloatReference} floatReference
+     * @param {string} floatSide
+     * @param {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} continuations
      * @param {!adapt.vtree.Container} area
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloatFragment = function(float, nodePosition, area) {
-        /** @const */ this.pageFloatId = float.getId();
-        /** @const */ this.nodePosition = nodePosition;
+    vivliostyle.pagefloat.PageFloatFragment = function(floatReference, floatSide, continuations, area) {
+        /** @const */ this.floatReference = floatReference;
+        /** @const */ this.floatSide = floatSide;
+        /** @const */ this.continuations = continuations;
         /** @const */ this.area = area;
     };
     /** @const */ var PageFloatFragment = vivliostyle.pagefloat.PageFloatFragment;
+
+    /**
+     * @param {!PageFloat} float
+     * @returns {boolean}
+     */
+    PageFloatFragment.prototype.hasFloat = function(float) {
+        return this.continuations.some(function(c) { return c.float === float; });
+    };
+
+    /**
+     * @param {!PageFloatLayoutContext} context
+     * @returns {?PageFloat}
+     */
+    PageFloatFragment.prototype.findNotAllowedFloat = function(context) {
+        for (var i = this.continuations.length - 1; i >= 0; i--) {
+            var f = this.continuations[i].float;
+            if (!f.isAllowedOnContext(context))
+                return f;
+        }
+        return null;
+    };
 
     /**
      * @returns {adapt.geom.Shape}
@@ -241,15 +282,38 @@ goog.scope(function() {
     };
 
     /**
+     * @returns {number}
+     */
+    PageFloatFragment.prototype.getOrder = function() {
+        /** @const */ var floats = this.continuations.map(function(c) { return c.float; });
+        return Math.min.apply(null, floats.map(function(f) { return f.getOrder(); }));
+    };
+
+    /**
+     * @param {!PageFloat} float
+     * @returns {boolean}
+     */
+    PageFloatFragment.prototype.shouldBeStashedBefore = function(float) {
+        return this.getOrder() < float.getOrder();
+    };
+
+    /**
+     * @param {!Array<!PageFloatContinuation>} continuations
+     */
+    PageFloatFragment.prototype.addContinuations = function(continuations) {
+        continuations.forEach(function(c) {
+            this.continuations.push(c);
+        }, this);
+    };
+
+    /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
      * @param {!adapt.vtree.NodePosition} nodePosition
-     * @param {string} flowName
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloatContinuation = function(float, nodePosition, flowName) {
+    vivliostyle.pagefloat.PageFloatContinuation = function(float, nodePosition) {
         /** @const */ this.float = float;
         /** @const */ this.nodePosition = nodePosition;
-        /** @const */ this.flowName = flowName;
     };
     /** @const */ var PageFloatContinuation = vivliostyle.pagefloat.PageFloatContinuation;
 
@@ -269,13 +333,13 @@ goog.scope(function() {
      * @param {?vivliostyle.pagefloat.FloatReference} floatReference
      * @param {adapt.vtree.Container} container
      * @param {?string} flowName
-     * @param {?Node} generatingElement Source element generating the context. Specify when a column context is generated by a non-root element (foe example page floats)
+     * @param {?adapt.vtree.NodePosition} generatingNodePosition Source NodePosition generating the context. Specify when a column context is generated by a non-root element (for example page floats)
      * @param {?adapt.css.Val} writingMode
      * @param {?adapt.css.Val} direction
      * @constructor
      */
     vivliostyle.pagefloat.PageFloatLayoutContext = function(parent, floatReference, container, flowName,
-                                                            generatingElement, writingMode, direction) {
+                                                            generatingNodePosition, writingMode, direction) {
         /** @const */ this.parent = parent;
         if (parent) {
             parent.children.push(this);
@@ -284,7 +348,7 @@ goog.scope(function() {
         /** @private @const */ this.floatReference = floatReference;
         /** @private */ this.container = container;
         /** @const */ this.flowName = flowName;
-        /** @const */ this.generatingElement = generatingElement;
+        /** @const */ this.generatingNodePosition = generatingNodePosition;
         /** @const {!adapt.css.Val} */ this.writingMode =
             writingMode || (parent && parent.writingMode) || adapt.css.ident.horizontal_tb;
         /** @const {!adapt.css.Val} */ this.direction =
@@ -292,7 +356,7 @@ goog.scope(function() {
         /** @private @type {boolean} */ this.invalidated = false;
         /** @private @const */ this.floatStore = parent ? parent.floatStore : new PageFloatStore();
         /** @private @const {!Array<vivliostyle.pagefloat.PageFloat.ID>} */ this.forbiddenFloats = [];
-        /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatFragment>} */ this.floatFragments = [];
+        /** @const {!Array<!vivliostyle.pagefloat.PageFloatFragment>} */ this.floatFragments = [];
         /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatFragment>} */ this.stashedFloatFragments = [];
         /** @private @const {!Object<vivliostyle.pagefloat.PageFloat.ID, Node>} */ this.floatAnchors = {};
         /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} */ this.floatsDeferredToNext = [];
@@ -319,11 +383,11 @@ goog.scope(function() {
      * @param {?vivliostyle.pagefloat.PageFloatLayoutContext} child
      * @param {?vivliostyle.pagefloat.FloatReference} floatReference
      * @param {?string} flowName
-     * @param {?Node} generatingElement
+     * @param {?adapt.vtree.NodePosition} generatingNodePosition
      * @returns {?vivliostyle.pagefloat.PageFloatLayoutContext}
      */
     PageFloatLayoutContext.prototype.getPreviousSiblingOf = function(child, floatReference,
-                                                                     flowName, generatingElement) {
+                                                                     flowName, generatingNodePosition) {
         var index = this.children.indexOf(/** @type {!vivliostyle.pagefloat.PageFloatLayoutContext} */ (child));
         if (index < 0) {
             index = this.children.length;
@@ -331,10 +395,10 @@ goog.scope(function() {
         for (var i = index - 1; i >= 0; i--) {
             var result = this.children[i];
             if (result.floatReference === floatReference && result.flowName === flowName &&
-                result.generatingElement === generatingElement) {
+                adapt.vtree.isSameNodePosition(result.generatingNodePosition, generatingNodePosition)) {
                 return result;
             } else {
-                result = result.getPreviousSiblingOf(null, floatReference, flowName, generatingElement);
+                result = result.getPreviousSiblingOf(null, floatReference, flowName, generatingNodePosition);
                 if (result) {
                     return result;
                 }
@@ -353,7 +417,7 @@ goog.scope(function() {
         var result;
         while (parent) {
             result = parent.getPreviousSiblingOf(child, this.floatReference, this.flowName,
-                this.generatingElement);
+                this.generatingNodePosition);
             if (result) return result;
             child = parent;
             parent = parent.parent;
@@ -399,11 +463,11 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!Node} sourceNode
+     * @param {!adapt.vtree.NodePosition} nodePosition
      * @returns {?vivliostyle.pagefloat.PageFloat}
      */
-    PageFloatLayoutContext.prototype.findPageFloatBySourceNode = function(sourceNode) {
-        return this.floatStore.findPageFloatBySourceNode(sourceNode);
+    PageFloatLayoutContext.prototype.findPageFloatByNodePosition = function(nodePosition) {
+        return this.floatStore.findPageFloatByNodePosition(nodePosition);
     };
 
     /**
@@ -440,31 +504,18 @@ goog.scope(function() {
 
     /**
      * @param {!vivliostyle.pagefloat.PageFloatFragment} floatFragment
-     * @returns {!PageFloat}
-     */
-    PageFloatLayoutContext.prototype.getFloatOfFragment = function(floatFragment) {
-        var id = floatFragment.pageFloatId;
-        return this.floatStore.findPageFloatById(id);
-    };
-
-    /**
-     * @param {!vivliostyle.pagefloat.PageFloatFragment} floatFragment
      * @param {boolean=} dontInvalidate
      */
     PageFloatLayoutContext.prototype.addPageFloatFragment = function(floatFragment, dontInvalidate) {
-        var float = this.getFloatOfFragment(floatFragment);
-        goog.asserts.assert(float);
-        var floatReference = float.floatReference;
+        var floatReference = floatFragment.floatReference;
         if (floatReference !== this.floatReference) {
             var parent = this.getParent(floatReference);
             parent.addPageFloatFragment(floatFragment, dontInvalidate);
         } else if (this.floatFragments.indexOf(floatFragment) < 0) {
             this.floatFragments.push(floatFragment);
             this.floatFragments.sort(function(fr1, fr2) {
-                var f1 = this.getFloatOfFragment(fr1);
-                var f2 = this.getFloatOfFragment(fr2);
-                return f1.getOrder() - f2.getOrder();
-            }.bind(this));
+                return fr1.getOrder() - fr2.getOrder();
+            });
         }
         if (!dontInvalidate)
             this.invalidate();
@@ -475,9 +526,7 @@ goog.scope(function() {
      * @param {boolean=} dontInvalidate
      */
     PageFloatLayoutContext.prototype.removePageFloatFragment = function(floatFragment, dontInvalidate) {
-        var float = this.getFloatOfFragment(floatFragment);
-        goog.asserts.assert(float);
-        var floatReference = float.floatReference;
+        var floatReference = floatFragment.floatReference;
         if (floatReference !== this.floatReference) {
             var parent = this.getParent(floatReference);
             parent.removePageFloatFragment(floatFragment, dontInvalidate);
@@ -504,9 +553,8 @@ goog.scope(function() {
             var parent = this.getParent(float.floatReference);
             return parent.findPageFloatFragment(float);
         }
-        var id = float.getId();
         var index = this.floatFragments.findIndex(function(f) {
-            return f.pageFloatId === id;
+            return f.hasFloat(float);
         });
         if (index >= 0) {
             return this.floatFragments[index];
@@ -559,15 +607,11 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!vivliostyle.pagefloat.PageFloat} float
-     * @param {!adapt.vtree.NodePosition} nodePosition
-     * @param {?string=} flowName
+     * @param {!vivliostyle.pagefloat.PageFloatContinuation} continuation
      */
-    PageFloatLayoutContext.prototype.deferPageFloat = function(float, nodePosition, flowName) {
-        flowName = flowName || this.flowName;
-        goog.asserts.assert(flowName);
+    PageFloatLayoutContext.prototype.deferPageFloat = function(continuation) {
+        var float = continuation.float;
         if (float.floatReference === this.floatReference) {
-            var continuation = new PageFloatContinuation(float, nodePosition, flowName);
             var index = this.floatsDeferredToNext.findIndex(function(c) { return c.float === float; });
             if (index >= 0) {
                 this.floatsDeferredToNext.splice(index, 1, continuation);
@@ -576,38 +620,57 @@ goog.scope(function() {
             }
         } else {
             var parent = this.getParent(float.floatReference);
-            parent.deferPageFloat(float, nodePosition, flowName);
+            parent.deferPageFloat(continuation);
         }
     };
 
     /**
+     * @param {!PageFloat} float
+     * @param {boolean=} ignoreReference
      * @returns {boolean}
      */
-    PageFloatLayoutContext.prototype.hasFloatsDeferredToNext = function() {
-        if (this.floatsDeferredToNext.length > 0) {
-            return true;
-        } else if (this.parent) {
-            return this.parent.hasFloatsDeferredToNext();
-        } else {
-            return false;
+    PageFloatLayoutContext.prototype.hasPrecedingFloatsDeferredToNext = function(float, ignoreReference) {
+        if (!ignoreReference && float.floatReference !== this.floatReference) {
+            return this.getParent(float.floatReference).hasPrecedingFloatsDeferredToNext(float, false);
         }
-    };
-
-    /**
-     * @returns {boolean}
-     */
-    PageFloatLayoutContext.prototype.hasPrecedingFloatsDeferredToNext = function(float) {
         var order = float.getOrder();
         var hasPrecedingFloatsDeferredToNext = this.floatsDeferredToNext.some(function(c) {
-            return c.float.getOrder() < order;
+            return c.float.getOrder() < order && !float.isAllowedToPrecede(c.float);
         });
         if (hasPrecedingFloatsDeferredToNext) {
             return true;
         } else if (this.parent) {
-            return this.parent.hasPrecedingFloatsDeferredToNext(float);
+            return this.parent.hasPrecedingFloatsDeferredToNext(float, true);
         } else {
             return false;
         }
+    };
+
+    /**
+     * @param {!PageFloat} float
+     * @returns {?PageFloat}
+     */
+    PageFloatLayoutContext.prototype.getLastFollowingFloatInFragments = function(float) {
+        var order = float.getOrder();
+        var lastFollowing = null;
+        this.floatFragments.forEach(function(fragment) {
+            fragment.continuations.forEach(function(c) {
+                var f = c.float;
+                var o = f.getOrder();
+                if (o > order &&
+                    (!lastFollowing || o > lastFollowing.getOrder())) {
+                    lastFollowing = f;
+                }
+            });
+        });
+        if (this.parent) {
+            var lastFollowingOfParent = this.parent.getLastFollowingFloatInFragments(float);
+            if (lastFollowingOfParent &&
+                (!lastFollowing || lastFollowingOfParent.getOrder() > lastFollowing.getOrder())) {
+                lastFollowing = lastFollowingOfParent;
+            }
+        }
+        return lastFollowing;
     };
 
     /**
@@ -617,7 +680,7 @@ goog.scope(function() {
     PageFloatLayoutContext.prototype.getDeferredPageFloatContinuations = function(flowName) {
         flowName = flowName || this.flowName;
         var result = this.floatsDeferredFromPrevious.filter(function(cont) {
-            return !flowName || cont.flowName === flowName;
+            return !flowName || cont.float.flowName === flowName;
         });
         if (this.parent) {
             result = this.parent.getDeferredPageFloatContinuations(flowName).concat(result);
@@ -634,7 +697,7 @@ goog.scope(function() {
     PageFloatLayoutContext.prototype.getPageFloatContinuationsDeferredToNext = function(flowName) {
         flowName = flowName || this.flowName;
         var result = this.floatsDeferredToNext.filter(function(cont) {
-            return !flowName || cont.flowName === flowName;
+            return !flowName || cont.float.flowName === flowName;
         });
         if (this.parent) {
             return this.parent.getPageFloatContinuationsDeferredToNext(flowName).concat(result);
@@ -643,33 +706,90 @@ goog.scope(function() {
         }
     };
 
+    /**
+     * @returns {!Array<!PageFloat>}
+     */
+    PageFloatLayoutContext.prototype.getFloatsDeferredToNextInChildContexts = function() {
+        var result = [];
+        var done = [];
+        for (var i = this.children.length - 1; i >= 0; i--) {
+            var child = this.children[i];
+            if (done.indexOf(child.flowName) >= 0) continue;
+            done.push(child.flowName);
+            result = result.concat(child.floatsDeferredToNext.map(function(c) {
+                return c.float;
+            }));
+            result = result.concat(child.getFloatsDeferredToNextInChildContexts());
+        }
+        return result;
+    };
+
+    /**
+     * @returns {boolean}
+     */
+    PageFloatLayoutContext.prototype.checkAndForbidFloatFollowingDeferredFloat = function() {
+        var deferredFloats = this.getFloatsDeferredToNextInChildContexts();
+        var floatsInFragments = this.floatFragments.reduce(function(r, fr) {
+            return r.concat(fr.continuations.map(function(c) {
+                return c.float;
+            }));
+        }, []);
+        floatsInFragments.sort(function(f1, f2) {
+            return f2.getOrder() - f1.getOrder();
+        });
+        for (var i = 0; i < floatsInFragments.length; i++) {
+            var float = floatsInFragments[i];
+            var order = float.getOrder();
+            if (deferredFloats.some(function(d) {
+                return !float.isAllowedToPrecede(d) && order > d.getOrder();
+            })) {
+                this.forbid(float);
+                var fragment = this.findPageFloatFragment(float);
+                goog.asserts.assert(fragment);
+                this.removePageFloatFragment(fragment);
+                return true;
+            }
+        }
+        return false;
+    };
+
     PageFloatLayoutContext.prototype.finish = function() {
+        if (this.checkAndForbidFloatFollowingDeferredFloat())
+            return;
         for (var i = this.floatFragments.length - 1; i >= 0; i--) {
             var fragment = this.floatFragments[i];
-            if (!this.isAnchorAlreadyAppeared(fragment.pageFloatId)) {
+            var notAllowedFloat = fragment.findNotAllowedFloat(this);
+            if (notAllowedFloat) {
                 this.removePageFloatFragment(fragment);
-                var float = this.getFloatOfFragment(fragment);
-                this.forbid(float);
+                this.forbid(notAllowedFloat);
                 // If the removed float is a block-end/inline-end float,
                 // we should re-layout preceding floats with the same float direction.
-                this.removeEndFloatFragments(float);
+                this.removeEndFloatFragments(fragment.floatSide);
                 return;
             }
         }
         for (var i = this.floatsDeferredToNext.length - 1; i >= 0; i--) {
             var continuation = this.floatsDeferredToNext[i];
-            if (!this.isAnchorAlreadyAppeared(continuation.float.getId())) {
+            if (!continuation.float.isAllowedOnContext(this)) {
                 this.floatsDeferredToNext.splice(i, 1);
             }
         }
         this.floatsDeferredFromPrevious.forEach(function(continuation) {
             if (this.floatsDeferredToNext.findIndex(function(c) { return continuation.equals(c); }) >= 0)
                 return;
-            var pageFloatId = continuation.float.getId();
-            if (this.floatFragments.some(function(f) { return f.pageFloatId === pageFloatId; }))
+            if (this.floatFragments.some(function(f) { return f.hasFloat(continuation.float); }))
                 return;
             this.floatsDeferredToNext.push(continuation);
         }, this);
+    };
+
+    /**
+     * @param {!PageFloatLayoutContext} other
+     * @returns {boolean}
+     */
+    PageFloatLayoutContext.prototype.hasSameContainerAs = function(other) {
+        return !!this.container && !!other.container &&
+                this.container.element === other.container.element;
     };
 
     PageFloatLayoutContext.prototype.invalidate = function() {
@@ -678,7 +798,7 @@ goog.scope(function() {
                 // Since the same container element is shared by a region page float layout context and
                 // a column page float layout context in a single column region,
                 // view elements of float fragments of the child (column) context need to be removed here.
-                if (child.container && child.container.element === this.container.element) {
+                if (this.hasSameContainerAs(child)) {
                     child.floatFragments.forEach(function(fragment) {
                         var elem = fragment.area.element;
                         if (elem && elem.parentNode)
@@ -727,15 +847,15 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!vivliostyle.pagefloat.PageFloat} float
+     * @param {string} floatSide
      */
-    PageFloatLayoutContext.prototype.removeEndFloatFragments = function(float) {
-        var logicalFloatSide = this.toLogical(float.floatSide);
+    PageFloatLayoutContext.prototype.removeEndFloatFragments = function(floatSide) {
+        var logicalFloatSide = this.toLogical(floatSide);
         if (logicalFloatSide === "block-end" || logicalFloatSide === "inline-end") {
             var i = 0;
             while (i < this.floatFragments.length) {
                 var fragment = this.floatFragments[i];
-                var logicalFloatSide2 = this.toLogical(this.getFloatOfFragment(fragment).floatSide);
+                var logicalFloatSide2 = this.toLogical(fragment.floatSide);
                 if (logicalFloatSide2 === logicalFloatSide) {
                     this.removePageFloatFragment(fragment);
                 } else {
@@ -746,21 +866,25 @@ goog.scope(function() {
     };
 
     /**
-     * @param {!vivliostyle.pagefloat.PageFloat} float
+     * @param {!PageFloat} float
      */
-    PageFloatLayoutContext.prototype.stashEndFloats = function(float) {
-        if (float.floatReference !== this.floatReference) {
-            this.getParent(float.floatReference).stashEndFloats(float);
+    PageFloatLayoutContext.prototype.stashEndFloatFragments = function(float) {
+        var floatReference = float.floatReference;
+        if (floatReference !== this.floatReference) {
+            this.getParent(floatReference).stashEndFloatFragments(float);
             return;
         }
 
         var logicalFloatSide = this.toLogical(float.floatSide);
-        if (logicalFloatSide === "block-end" || logicalFloatSide === "inline-end") {
+        if (logicalFloatSide === "block-end" || logicalFloatSide === "snap-block" ||
+            logicalFloatSide === "inline-end") {
             var i = 0;
             while (i < this.floatFragments.length) {
                 var fragment = this.floatFragments[i];
-                var logicalFloatSide2 = this.toLogical(this.getFloatOfFragment(fragment).floatSide);
-                if (logicalFloatSide2 === logicalFloatSide) {
+                var fragmentFloatSide = this.toLogical(fragment.floatSide);
+                if ((fragmentFloatSide === logicalFloatSide ||
+                    (logicalFloatSide === "snap-block" && fragmentFloatSide === "block-end")) &&
+                    fragment.shouldBeStashedBefore(float)) {
                     this.stashedFloatFragments.push(fragment);
                     this.floatFragments.splice(i, 1);
                 } else {
@@ -804,11 +928,9 @@ goog.scope(function() {
     PageFloatLayoutContext.prototype.getStashedFloatFragments = function(floatReference) {
         if (floatReference === this.floatReference) {
             return this.stashedFloatFragments.concat().sort(function(fr1, fr2) {
-                var f1 = this.getFloatOfFragment(fr1);
-                var f2 = this.getFloatOfFragment(fr2);
                 // return in reverse order
-                return f2.getOrder() - f1.getOrder();
-            }.bind(this));
+                return fr2.getOrder() - fr1.getOrder();
+            });
         } else {
             return this.getParent(floatReference).getStashedFloatFragments(floatReference);
         }
@@ -817,16 +939,17 @@ goog.scope(function() {
     /**
      * @private
      * @param {string} side
+     * @param {function(PageFloatFragment, PageFloatLayoutContext):boolean=} condition
      * @returns {number}
      */
-    PageFloatLayoutContext.prototype.getLimitValue = function(side) {
+    PageFloatLayoutContext.prototype.getLimitValue = function(side, condition) {
         goog.asserts.assert(this.container);
         var logicalSide = this.toLogical(side);
         var physicalSide = this.toPhysical(side);
-        var limit = this.getLimitValueInner(logicalSide);
+        var limit = this.getLimitValueInner(logicalSide, condition);
         goog.asserts.assert(limit >= 0);
         if (this.parent && this.parent.container) {
-            var parentLimit = this.parent.getLimitValue(physicalSide);
+            var parentLimit = this.parent.getLimitValue(physicalSide, condition);
             switch (physicalSide) {
                 case "top":
                     return Math.max(limit, parentLimit);
@@ -845,11 +968,12 @@ goog.scope(function() {
 
     /**
      * @private
+     * @param {string} logicalSide
+     * @param {function(PageFloatFragment, PageFloatLayoutContext):boolean=} condition
      * @return {number}
      */
-    PageFloatLayoutContext.prototype.getLimitValueInner = function(logicalSide) {
+    PageFloatLayoutContext.prototype.getLimitValueInner = function(logicalSide, condition) {
         goog.asserts.assert(this.container);
-        var self = this;
         var offsetX = this.container.originX;
         var offsetY = this.container.originY;
         var paddingRect = this.container.getPaddingRect();
@@ -863,8 +987,9 @@ goog.scope(function() {
         var fragments = this.floatFragments;
         if (fragments.length > 0) {
             limits = fragments.reduce(function(l, f) {
-                var float = self.getFloatOfFragment(f);
-                var logicalFloatSide = this.toLogical(float.floatSide);
+                if (condition && !condition(f, this))
+                    return l;
+                var logicalFloatSide = this.toLogical(f.floatSide);
                 var area = f.area;
                 var top = l.top, left = l.left, bottom = l.bottom, right = l.right;
                 switch (logicalFloatSide) {
@@ -924,18 +1049,21 @@ goog.scope(function() {
 
     /**
      * @param {!adapt.layout.PageFloatArea} area
-     * @param {!vivliostyle.pagefloat.PageFloat} float
+     * @param {!vivliostyle.pagefloat.FloatReference} floatReference
+     * @param {string} floatSide
+     * @param {?number} anchorEdge Null indicates that the anchor is not in the current container.
      * @param {boolean} init
      * @param {boolean} force
-     * @return {boolean} Indicates if the float area fits inside the container or not
+     * @return {?string} Logical float side (snap-block is resolved when init=false). Null indicates that the float area does not fit inside the container
      */
-    PageFloatLayoutContext.prototype.setFloatAreaDimensions = function(area, float, init, force) {
-        if (float.floatReference !== this.floatReference) {
-            var parent = this.getParent(float.floatReference);
-            return parent.setFloatAreaDimensions(area, float, init, force);
+    PageFloatLayoutContext.prototype.setFloatAreaDimensions = function(
+        area, floatReference, floatSide, anchorEdge, init, force) {
+        if (floatReference !== this.floatReference) {
+            var parent = this.getParent(floatReference);
+            return parent.setFloatAreaDimensions(area, floatReference, floatSide, anchorEdge, init, force);
         }
 
-        var logicalFloatSide = this.toLogical(float.floatSide);
+        var logicalFloatSide = this.toLogical(floatSide);
         var blockStart = this.getLimitValue("block-start");
         var blockEnd = this.getLimitValue("block-end");
         var inlineStart = this.getLimitValue("inline-start");
@@ -944,79 +1072,90 @@ goog.scope(function() {
         var blockOffset = area.vertical ? area.originX : area.originY;
         var inlineOffset = area.vertical ? area.originY : area.originX;
         blockStart = area.vertical ?
-            Math.min(blockStart, area.left + area.width + blockOffset) :
+            Math.min(blockStart, area.left + area.getInsetLeft() + area.width + area.getInsetRight() + blockOffset) :
             Math.max(blockStart, area.top + blockOffset);
         blockEnd = area.vertical ?
             Math.max(blockEnd, area.left + blockOffset) :
-            Math.min(blockEnd, area.top + area.height + blockOffset);
+            Math.min(blockEnd, area.top + area.getInsetTop() + area.height + area.getInsetBottom() + blockOffset);
 
-        var blockSize, inlineSize;
+        function limitBlockStartEndValueWithOpenRect(getRect, rect) {
+            var openRect = getRect(area.bands, rect);
+            if (openRect) {
+                if (area.vertical) {
+                    openRect = adapt.geom.unrotateBox(openRect);
+                }
+                blockStart = area.vertical ?
+                    Math.min(blockStart, openRect.x2) :
+                    Math.max(blockStart, openRect.y1);
+                blockEnd = area.vertical ?
+                    Math.max(blockEnd, openRect.x1) :
+                    Math.min(blockEnd, openRect.y2);
+                return true;
+            } else {
+                return force;
+            }
+        }
+
+        var blockSize, inlineSize, outerBlockSize, outerInlineSize;
         if (init) {
             var rect = area.vertical ?
                 adapt.geom.rotateBox(new adapt.geom.Rect(blockEnd, inlineStart, blockStart, inlineEnd)) :
                 new adapt.geom.Rect(inlineStart, blockStart, inlineEnd, blockEnd);
-            switch (logicalFloatSide) {
-                case "block-start":
-                case "inline-start":
-                    var uppermostFullyOpenRect = adapt.geom.findUppermostFullyOpenRect(area.bands,
-                        rect);
-                    if (uppermostFullyOpenRect) {
-                        if (area.vertical) {
-                            uppermostFullyOpenRect = adapt.geom.unrotateBox(uppermostFullyOpenRect);
-                        }
-                        blockStart = area.vertical ?
-                            Math.min(blockStart, uppermostFullyOpenRect.x2) :
-                            Math.max(blockStart, uppermostFullyOpenRect.y1);
-                        blockEnd = area.vertical ?
-                            Math.max(blockEnd, uppermostFullyOpenRect.x1) :
-                            Math.min(blockEnd, uppermostFullyOpenRect.y2);
-                    } else if (!force) {
-                        return false;
-                    }
-                    break;
-                case "block-end":
-                case "inline-end":
-                    var bottommostFullyOpenRect = adapt.geom.findBottommostFullyOpenRect(area.bands,
-                        rect);
-                    if (bottommostFullyOpenRect) {
-                        if (area.vertical) {
-                            bottommostFullyOpenRect = adapt.geom.unrotateBox(bottommostFullyOpenRect);
-                        }
-                        blockStart = area.vertical ?
-                            Math.min(blockStart, bottommostFullyOpenRect.x2) :
-                            Math.max(blockStart, bottommostFullyOpenRect.y1);
-                        blockEnd = area.vertical ?
-                            Math.max(blockEnd, bottommostFullyOpenRect.x1) :
-                            Math.min(blockEnd, bottommostFullyOpenRect.y2);
-                    } else if (!force) {
-                        return false;
-                    }
-                    break;
+
+            if (logicalFloatSide === "block-start" || logicalFloatSide === "snap-block"
+                || logicalFloatSide === "inline-start") {
+                if (!limitBlockStartEndValueWithOpenRect(adapt.geom.findUppermostFullyOpenRect, rect))
+                    return null;
             }
-            blockSize = (blockEnd - blockStart) * area.getBoxDir();
-            inlineSize = inlineEnd - inlineStart;
+            if (logicalFloatSide === "block-end" || logicalFloatSide === "snap-block"
+                || logicalFloatSide === "inline-start") {
+                if (!limitBlockStartEndValueWithOpenRect(adapt.geom.findBottommostFullyOpenRect, rect))
+                    return null;
+            }
+            outerBlockSize = (blockEnd - blockStart) * area.getBoxDir();
+            blockSize = outerBlockSize - area.getInsetBefore() - area.getInsetAfter();
+            outerInlineSize = inlineEnd - inlineStart;
+            inlineSize = outerInlineSize - area.getInsetStart() - area.getInsetEnd();
             if (!force && (blockSize <= 0 || inlineSize <= 0))
-                return false;
+                return null;
         } else {
             blockSize = area.computedBlockSize;
+            outerBlockSize = blockSize + area.getInsetBefore() + area.getInsetAfter();
             var availableBlockSize = (blockEnd - blockStart) * area.getBoxDir();
-            if (!force && availableBlockSize < blockSize)
-                return false;
-            var margin = area.floatMargin;
-            blockSize = Math.min(blockSize + (area.vertical ? margin.left : margin.bottom),
-                availableBlockSize);
+
+            if (logicalFloatSide === "snap-block") {
+                if (anchorEdge === null) {
+                    // Deferred from previous container
+                    logicalFloatSide = "block-start";
+                } else {
+                    var containerRect = this.container.getPaddingRect();
+                    var fromStart = this.container.getBoxDir() *
+                        (anchorEdge - (this.container.vertical ? containerRect.x2 : containerRect.y1));
+                    var fromEnd = this.container.getBoxDir() *
+                        ((this.container.vertical ? containerRect.x1 : containerRect.y2)
+                        - anchorEdge - outerBlockSize);
+                    if (fromStart <= fromEnd) {
+                        logicalFloatSide = "block-start";
+                    } else {
+                        logicalFloatSide = "block-end";
+                    }
+                }
+            }
+
+            if (!force && availableBlockSize < outerBlockSize)
+                return null;
             if (logicalFloatSide === "inline-start" || logicalFloatSide === "inline-end") {
                 inlineSize = vivliostyle.sizing.getSize(area.clientLayout, area.element,
                     [vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE])[vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE];
+            } else if (area.adjustContentRelativeSize) {
+                inlineSize = area.getContentInlineSize();
             } else {
-                var floatBBox = area.clientLayout.getElementClientRect(area.rootViewNode);
-                inlineSize = floatBBox[area.vertical ? "height" : "width"] +
-                    (area.vertical ? margin.top : margin.left) +
-                    (area.vertical ? margin.bottom : margin.right);
+                inlineSize = area.vertical ? area.height : area.width;
             }
+            outerInlineSize = inlineSize + area.getInsetStart() + area.getInsetEnd();
             var availableInlineSize = inlineEnd - inlineStart;
-            if (!force && availableInlineSize < inlineSize)
-                return false;
+            if (!force && availableInlineSize < outerInlineSize)
+                return null;
         }
 
         blockStart -= blockOffset;
@@ -1027,19 +1166,20 @@ goog.scope(function() {
         switch (logicalFloatSide) {
             case "inline-start":
             case "block-start":
+            case "snap-block":
                 area.setInlinePosition(inlineStart, inlineSize);
                 area.setBlockPosition(blockStart, blockSize);
                 break;
             case "inline-end":
             case "block-end":
-                area.setInlinePosition(inlineEnd - inlineSize, inlineSize);
-                area.setBlockPosition(blockEnd - blockSize * area.getBoxDir(), blockSize);
+                area.setInlinePosition(inlineEnd - outerInlineSize, inlineSize);
+                area.setBlockPosition(blockEnd - outerBlockSize * area.getBoxDir(), blockSize);
                 break;
             default:
-                throw new Error("unknown float direction: " + float.floatSide);
+                throw new Error("unknown float direction: " + floatSide);
         }
 
-        return true;
+        return logicalFloatSide;
     };
 
     /**
@@ -1082,4 +1222,200 @@ goog.scope(function() {
             }
         }, isVertical ? Infinity : 0);
     };
+
+    /**
+     * @param {string} clear
+     * @param {!adapt.layout.Column} column
+     * @returns {number}
+     */
+    PageFloatLayoutContext.prototype.getPageFloatClearEdge = function(clear, column) {
+        function isContinuationOfAlreadyAppearedFloat(context) {
+            return function(continuation) {
+                return context.isAnchorAlreadyAppeared(continuation.float.getId());
+            };
+        }
+        function isFragmentWithAlreadyAppearedFloat(fragment, context) {
+            return fragment.continuations.some(isContinuationOfAlreadyAppearedFloat(context));
+        }
+
+        var columnRect = column.getPaddingRect();
+        var columnBlockEnd = column.vertical ? columnRect.x1 : columnRect.y2;
+        var context = this;
+        while (context) {
+            if (context.floatsDeferredToNext.some(isContinuationOfAlreadyAppearedFloat(context)))
+                return columnBlockEnd;
+            context = context.parent;
+        }
+        var blockStartLimit = this.getLimitValue(
+            "block-start", isFragmentWithAlreadyAppearedFloat);
+        var blockEndLimit = this.getLimitValue(
+            "block-end", isFragmentWithAlreadyAppearedFloat);
+        if (blockEndLimit * column.getBoxDir() < columnBlockEnd * column.getBoxDir()) {
+            return columnBlockEnd;
+        } else {
+            return blockStartLimit;
+        }
+    };
+
+    /**
+     * @interface
+     */
+    vivliostyle.pagefloat.PageFloatLayoutStrategy = function() {};
+    /** @const */ var PageFloatLayoutStrategy = vivliostyle.pagefloat.PageFloatLayoutStrategy;
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @returns {boolean}
+     */
+    PageFloatLayoutStrategy.prototype.appliesToNodeContext = function(nodeContext) {};
+
+    /**
+     * @param {!PageFloat} float
+     * @returns {boolean}
+     */
+    PageFloatLayoutStrategy.prototype.appliesToFloat = function(float) {};
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @param {!PageFloatLayoutContext} pageFloatLayoutContext
+     * @param {!adapt.layout.Column} column
+     * @returns {!adapt.task.Result<!PageFloat>}
+     */
+    PageFloatLayoutStrategy.prototype.createPageFloat =
+        function(nodeContext, pageFloatLayoutContext, column) {};
+
+    /**
+     * @param {!Array<!PageFloatContinuation>} continuations
+     * @param {string} logicalFloatSide
+     * @param {!adapt.layout.PageFloatArea} floatArea
+     * @returns {!PageFloatFragment}
+     */
+    PageFloatLayoutStrategy.prototype.createPageFloatFragment = function(continuations, logicalFloatSide, floatArea) {};
+
+    /**
+     * @param {!PageFloat} float
+     * @param {!PageFloatLayoutContext} pageFloatLayoutContext
+     * @returns {?PageFloatFragment}
+     */
+    PageFloatLayoutStrategy.prototype.findPageFloatFragment =
+        function(float, pageFloatLayoutContext) {};
+
+    /**
+     * @param {!adapt.layout.PageFloatArea} floatArea
+     * @param {!adapt.vtree.Container} floatContainer
+     * @param {!adapt.layout.Column} column
+     */
+    PageFloatLayoutStrategy.prototype.adjustPageFloatArea =
+        function(floatArea, floatContainer, column) {};
+
+    /** @const {Array<!PageFloatLayoutStrategy>} */
+    var pageFloatLayoutStrategies = [];
+
+    /**
+     * @constructor
+     */
+    vivliostyle.pagefloat.PageFloatLayoutStrategyResolver = function() {};
+    /** @const */ var PageFloatLayoutStrategyResolver =
+        vivliostyle.pagefloat.PageFloatLayoutStrategyResolver;
+
+    /**
+     * @param {!PageFloatLayoutStrategy} strategy
+     */
+    PageFloatLayoutStrategyResolver.register = function(strategy) {
+        pageFloatLayoutStrategies.push(strategy);
+    };
+
+    /**
+     * @param {!adapt.vtree.NodeContext} nodeContext
+     * @returns {!PageFloatLayoutStrategy}
+     */
+    PageFloatLayoutStrategyResolver.prototype.findByNodeContext = function(nodeContext) {
+        for (var i = pageFloatLayoutStrategies.length - 1; i >= 0; i--) {
+            var strategy = pageFloatLayoutStrategies[i];
+            if (strategy.appliesToNodeContext(nodeContext)) {
+                return strategy;
+            }
+        }
+        throw new Error("No PageFloatLayoutStrategy found for " + nodeContext);
+    };
+
+    /**
+     * @param {!PageFloat} float
+     * @returns {!PageFloatLayoutStrategy}
+     */
+    PageFloatLayoutStrategyResolver.prototype.findByFloat = function(float) {
+        for (var i = pageFloatLayoutStrategies.length - 1; i >= 0; i--) {
+            var strategy = pageFloatLayoutStrategies[i];
+            if (strategy.appliesToFloat(float)) {
+                return strategy;
+            }
+        }
+        throw new Error("No PageFloatLayoutStrategy found for " + float);
+    };
+
+    /**
+     * @constructor
+     * @implements {PageFloatLayoutStrategy}
+     */
+    vivliostyle.pagefloat.NormalPageFloatLayoutStrategy = function() {};
+    /** @const */ var NormalPageFloatLayoutStrategy =
+        vivliostyle.pagefloat.NormalPageFloatLayoutStrategy;
+
+    /**
+     * @override
+     */
+    NormalPageFloatLayoutStrategy.prototype.appliesToNodeContext = function(nodeContext) {
+        return vivliostyle.pagefloat.isPageFloat(nodeContext.floatReference);
+    };
+
+    /**
+     * @override
+     */
+    NormalPageFloatLayoutStrategy.prototype.appliesToFloat = function(float) {
+        return true;
+    };
+
+    /**
+     * @override
+     */
+    NormalPageFloatLayoutStrategy.prototype.createPageFloat = function(
+        nodeContext, pageFloatLayoutContext, column) {
+        var floatReference = nodeContext.floatReference;
+        goog.asserts.assert(nodeContext.floatSide);
+        /** @const {string} */ var floatSide = nodeContext.floatSide;
+        /** @const */ var nodePosition = nodeContext.toNodePosition();
+        return column.resolveFloatReferenceFromColumnSpan(floatReference, nodeContext.columnSpan, nodeContext).thenAsync(function(ref) {
+            floatReference = ref;
+            goog.asserts.assert(pageFloatLayoutContext.flowName);
+            var float = new vivliostyle.pagefloat.PageFloat(nodePosition, floatReference, floatSide,
+                pageFloatLayoutContext.flowName);
+            pageFloatLayoutContext.addPageFloat(float);
+            return adapt.task.newResult(float);
+        });
+    };
+
+    /**
+     * @override
+     */
+    NormalPageFloatLayoutStrategy.prototype.createPageFloatFragment = function(
+        continuations, floatSide, floatArea) {
+        /** @const */ var f = continuations[0].float;
+        return new PageFloatFragment(f.floatReference, floatSide, continuations, floatArea);
+    };
+
+    /**
+     * @override
+     */
+    NormalPageFloatLayoutStrategy.prototype.findPageFloatFragment = function(
+        float, pageFloatLayoutContext) {
+        return pageFloatLayoutContext.findPageFloatFragment(float);
+    };
+
+    /**
+     * @override
+     */
+    NormalPageFloatLayoutStrategy.prototype.adjustPageFloatArea = function(
+        floatArea, floatContainer, column) {};
+
+    PageFloatLayoutStrategyResolver.register(new NormalPageFloatLayoutStrategy());
 });

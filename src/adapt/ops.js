@@ -537,20 +537,27 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
     var invalidated = false;
     var i = 0;
     frame.loopWithFrame(function(loopFrame) {
-        if (i === deferredFloats.length || pageFloatLayoutContext.hasFloatsDeferredToNext()) {
+        if (i === deferredFloats.length) {
             loopFrame.breakLoop();
             return;
         }
         var continuation = deferredFloats[i++];
         var float = continuation.float;
-        var pageFloatFragment = pageFloatLayoutContext.findPageFloatFragment(float);
-        if (pageFloatFragment) {
+        var strategy = new vivliostyle.pagefloat.PageFloatLayoutStrategyResolver()
+            .findByFloat(float);
+        var pageFloatFragment = strategy.findPageFloatFragment(float, pageFloatLayoutContext);
+        if (pageFloatFragment && pageFloatFragment.hasFloat(float)) {
             loopFrame.continueLoop();
             return;
+        } else if (pageFloatLayoutContext.isForbidden(float) ||
+            pageFloatLayoutContext.hasPrecedingFloatsDeferredToNext(float)) {
+            pageFloatLayoutContext.deferPageFloat(continuation);
+            loopFrame.breakLoop();
+            return;
         }
-        column.layoutPageFloatInner(continuation.nodePosition, float).then(function(floatArea) {
-            if (!floatArea) {
-                loopFrame.continueLoop();
+        column.layoutPageFloatInner(continuation, strategy, null, pageFloatFragment).then(function(success) {
+            if (!success) {
+                loopFrame.breakLoop();
                 return;
             }
             var parentInvalidated = pageFloatLayoutContext.parent.isInvalidated();
@@ -942,7 +949,9 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
                         loopFrame.breakLoop();
                         return;
                     }
-                    if (columnIndex === columnCount && !regionPageFloatLayoutContext.isInvalidated()) {
+                    var forcedRegionBreak = !!c.pageBreakType && (c.pageBreakType !== "column");
+                    if ((forcedRegionBreak || columnIndex === columnCount) &&
+                        !regionPageFloatLayoutContext.isInvalidated()) {
                         regionPageFloatLayoutContext.finish();
                     }
                     if (regionPageFloatLayoutContext.isInvalidated()) {
