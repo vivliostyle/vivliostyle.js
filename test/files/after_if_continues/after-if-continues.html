@@ -101,6 +101,26 @@
           padding: 5px;
         }
 
+        table {
+            border: 2px black solid;
+            border-spacing: 2px;
+        }
+        tr, .tr {
+            border: 1px blue solid;
+        }
+        th, td, .th, .td {
+            border: 1px gray solid;
+            line-height: 16px;
+            width: 160px;
+        }
+        thead, .thead {
+            background-color: #FFAAAA;
+        }
+        tfoot, .tfoot {
+            background-color: #AAAAFF;
+        }
+
+
         div.test1.container::after-if-continues {
           content: "(continue)";
           background-color: #AAEEEE;
@@ -166,6 +186,28 @@
         span.test6::before {
           content: "before";
           background-color: #EEEEAA;
+        }
+
+        div.test7.container::after-if-continues {
+          content: "(continue)";
+          background-color: #AAEEEE;
+        }
+
+        div.test8.container::after-if-continues {
+          content: "(continue)";
+          background-color: #AAEEEE;
+        }
+
+        div.test9.container::after-if-continues {
+          content: "(continue)";
+          background-color: #AAEEEE;
+        }
+        div.test9 div.container {
+          font-weight: bold;
+        }
+        div.test9 div.container::after-if-continues {
+          content: "(continue)";
+          background-color: #AAEEEE;
         }
     </style>
 </head>
@@ -262,6 +304,64 @@
       If there is not enough room to accommodate the ::before content, the '::after' content after removing
       all flow fragment content, or a combination of the two, then the ::before and/or ::after content overflows that region.
     </span>
+  </section>
+
+  <section>
+  empty
+  </section>
+
+  <section>
+    <h1>(7) table</h1>
+    <div class="container test7">
+      <table>
+        <tbody>
+          <tr><td>cell 1</td></tr>
+          <tr><td>cell 2</td></tr>
+          <tr><td>cell 3</td></tr>
+          <tr><td>cell 4</td></tr>
+          <tr><td>cell 5</td></tr>
+          <tr><td>cell 6</td></tr>
+          <tr><td>cell 7</td></tr>
+          <tr><td>cell 8</td></tr>
+          <tr><td>cell 9<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>end</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+  empty
+  </section>
+
+  <section>
+    <h1>(8) table with heaer/footer</h1>
+    <div class="container test8">
+      <table>
+        <thead>
+          <tr>
+            <td>header 1</td>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <td>footer 1</td>
+          </tr>
+        </tfoot>
+        <tbody>
+          <tr><td>cell 1</td></tr>
+          <tr><td>cell 2</td></tr>
+          <tr><td>cell 3</td></tr>
+          <tr><td>cell 4</td></tr>
+          <tr><td>cell 5</td></tr>
+          <tr><td>cell 6</td></tr>
+          <tr><td>cell 7<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>end</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+  empty
   </section>
 
 </body>

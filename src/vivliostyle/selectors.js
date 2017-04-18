@@ -327,11 +327,13 @@ goog.scope(function() {
      */
     AfterIfContinuesElementsOffset.prototype.affectTo = function(nodeContext) {
         if (!nodeContext) return false;
-        if (nodeContext.sourceNode === this.nodeContext.sourceNode) {
+        var sourceNode = nodeContext.shadowContext ?
+            nodeContext.shadowContext.owner : nodeContext.sourceNode;
+        if (sourceNode === this.nodeContext.sourceNode) {
             return !!nodeContext.after;
         }
-        for (var n = nodeContext.parent; n; n = n.parent) {
-            if (n.sourceNode === this.nodeContext.sourceNode) {
+        for (var n = sourceNode.parentNode; n; n = n.parentNode) {
+            if (n === this.nodeContext.sourceNode) {
                 return true;
             }
         }
