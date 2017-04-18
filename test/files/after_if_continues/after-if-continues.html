@@ -191,23 +191,22 @@
         div.test7.container::after-if-continues {
           content: "(continue)";
           background-color: #AAEEEE;
+          height: 15px;
         }
 
         div.test8.container::after-if-continues {
           content: "(continue)";
           background-color: #AAEEEE;
+          height: 15px;
         }
 
-        div.test9.container::after-if-continues {
-          content: "(continue)";
-          background-color: #AAEEEE;
-        }
         div.test9 div.container {
           font-weight: bold;
         }
         div.test9 div.container::after-if-continues {
           content: "(continue)";
           background-color: #AAEEEE;
+          height: 15px;
         }
     </style>
 </head>
@@ -303,6 +302,8 @@
       Accommodating means that the '::after' content is laid out without overflowing the region.
       If there is not enough room to accommodate the ::before content, the '::after' content after removing
       all flow fragment content, or a combination of the two, then the ::before and/or ::after content overflows that region.
+      The named flow mechanism can be used in several different ways - some of which are custom overflow handling, aggregating content,
+      linked display boxes, magazine-style layout, and flowing content through areas in a paginated view.
     </span>
   </section>
 
@@ -362,6 +363,40 @@
 
   <section>
   empty
+  </section>
+
+  <section>
+    <h1>(9) table cell</h1>
+    <div class="test9">
+      <table>
+        <thead>
+          <tr>
+            <td>header 1</td>
+            <td>header 2</td>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <td>footer 1</td>
+            <td>footer 2</td>
+          </tr>
+        </tfoot>
+        <tbody>
+          <tr>
+            <td>
+              <div class="container">
+                cell 1<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>end
+              </div>
+            </td>
+            <td>
+              <div>
+                cell 2<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>end
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
 </body>
