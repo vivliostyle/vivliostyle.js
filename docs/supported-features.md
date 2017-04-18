@@ -117,6 +117,11 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 - [General sibling combinator `E ~ F`](https://www.w3.org/TR/css3-selectors/#general-sibling-combinators)
   - Supported in all browsers
 
+### [CSS Overflow 4](https://drafts.csswg.org/css-overflow-4/)
+
+- [`:nth-fragment()` pseudo-element](https://drafts.csswg.org/css-overflow-4/#fragment-pseudo-element)
+  - Supported in all browsers
+
 #### Not supported selectors
 
 - [Type selectors without namespaces `|E`](https://www.w3.org/TR/css3-selectors/#typenmsp)
