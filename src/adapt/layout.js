@@ -1579,7 +1579,7 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
     }
 
     return cont.thenAsync(function(float) {
-        var nodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
+        var nodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext, 0);
         var nodeContextAfter = self.setFloatAnchorViewNode(nodeContext);
         var pageFloatFragment = strategy.findPageFloatFragment(float, context);
         var continuation = new vivliostyle.pagefloat.PageFloatContinuation(float, nodePosition);

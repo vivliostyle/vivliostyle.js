@@ -172,7 +172,7 @@ goog.scope(function() {
      */
     RepetitiveElements.prototype.setHeaderNodeContext = function(nodeContext) {
         if (this.headerNodePosition) return; // use first one.
-        this.headerNodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
+        this.headerNodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext, 0);
         this.headerSourceNode = /** @type {Element} */ (nodeContext.sourceNode);
         this.headerViewNode = /** @type {Element} */ (nodeContext.viewNode);
     };
@@ -181,7 +181,7 @@ goog.scope(function() {
      */
     RepetitiveElements.prototype.setFooterNodeContext = function(nodeContext) {
         if (this.footerNodePosition) return; // use first one.
-        this.footerNodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext);
+        this.footerNodePosition = adapt.vtree.newNodePositionFromNodeContext(nodeContext, 0);
         this.footerSourceNode = /** @type {Element} */ (nodeContext.sourceNode);
         this.footerViewNode = /** @type {Element} */ (nodeContext.viewNode);
     };

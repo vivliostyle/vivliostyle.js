@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>nesting</title>
+    <style>
+        @page {
+            size: 820px;
+        }
+        @-epubx-page-template {
+            .partition {
+                width: 398px;
+                height: 198px;
+                border: rgba(0, 0, 255, 0.2) solid 1px;
+                -epubx-flow-from: body;
+            }
+            .left {
+                left: 10px;
+            }
+            .right {
+                right: 10px;
+            }
+
+            @-epubx-page-master {
+                @-epubx-partition {
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 10px;
+                    font-size: 10px;
+                    line-height: 10px;
+                    text-align: center;
+                    content: counter(page);
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 610px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 410px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 210px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 10px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 610px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 410px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 210px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 10px;
+                }
+            }
+        }
+        :root {
+            font-size: 14px;
+            widows: 1;
+            orphans: 1;
+        }
+        body {
+            margin: 0 10px;
+        }
+
+        div.content {
+          height: 40px;
+          padding: 10px
+        }
+
+        .container, .box {
+          border: 1px solid #999;
+          padding: 5px;
+          margin: 5px;
+        }
+
+        div::nth-fragment(3) span {
+          color: red;
+        }
+        div::nth-fragment(2) div::nth-fragment(2n) span {
+          font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+  <section>
+    <div class="box">
+      <div class="container">
+        <div class="content"><span>content 1-1</span></div>
+        <div class="content"><span>content 1-2</span></div>
+        <div class="content"><span>content 1-3 : should be bold</span></div>
+        <div class="content"><span>content 1-4 : should be bold</span></div>
+      </div>
+      <div class="container">
+        <div class="content"><span>content 2-1</span></div>
+        <div class="content"><span>content 2-2 : should be red</span></div>
+        <div class="content"><span>content 2-3 : should be red</span></div>
+        <div class="content"><span>content 2-4 : should be red</span></div>
+      </div>
+      <div class="container">
+        <div class="content"><span>content 3-1</span></div>
+        <div class="content"><span>content 3-2</span></div>
+        <div class="content"><span>content 3-3</span></div>
+        <div class="content"><span>content 3-4</span></div>
+        <div class="content"><span>content 3-5</span></div>
+        <div class="content"><span>content 3-6</span></div>
+        <div class="content"><span>content 3-7 : should be red</span></div>
+        <div class="content"><span>content 3-8 : should be red</span></div>
+        <div class="content"><span>content 3-9 : should be red</span></div>
+        <div class="content"><span>content 3-10</span></div>
+        <div class="content"><span>content 3-11</span></div>
+        <div class="content"><span>content 3-12</span></div>
+        <div class="content"><span>content 3-13</span></div>
+        <div class="content"><span>content 3-14</span></div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

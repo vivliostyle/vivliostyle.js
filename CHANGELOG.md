@@ -16,6 +16,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/345>
   - Note that `all` is only effective on block-level boxes (i.e. not page floats).
   - When `all` is specified, the block-start edge of the box gets pushed down so that the edge comes after any block-start/block-end page float of which anchors are before the box in the document order.
+- Add support for `::nth-fragment()` pseudo-element selector
+  - Spec: [CSS Overflow Module Level 4 - Fragmen styling](https://drafts.csswg.org/css-overflow-4/#fragment-styling)
 
 
 ### Changed
@@ -41,6 +43,7 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/324>
   - Spec: [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
   - Spec: [CSS Multi-column Layout Module Level 2 - `column-span`](https://drafts.csswg.org/css-multicol-2/#column-span)
+
 
 ### Changed
 

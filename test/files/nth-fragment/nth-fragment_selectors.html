@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>nth fragment selector</title>
+    <style>
+        @page {
+            size: 820px;
+        }
+        @-epubx-page-template {
+            .partition {
+                width: 398px;
+                height: 198px;
+                border: rgba(0, 0, 255, 0.2) solid 1px;
+                -epubx-flow-from: body;
+            }
+            .left {
+                left: 10px;
+            }
+            .right {
+                right: 10px;
+            }
+
+            @-epubx-page-master {
+                @-epubx-partition {
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 10px;
+                    font-size: 10px;
+                    line-height: 10px;
+                    text-align: center;
+                    content: counter(page);
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 610px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 410px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 210px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 10px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 610px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 410px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 210px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 10px;
+                }
+            }
+        }
+        :root {
+            font-size: 14px;
+            line-height: 12px;
+            widows: 1;
+            orphans: 1;
+        }
+        body {
+            margin: 0 10px;
+        }
+
+        div.content {
+          height: 40px;
+          padding: 10px
+        }
+
+        div.content::before {
+          content: "default before (show in page 8): ";
+        }
+        div.content::after {
+          content: "default after (should not display) ";
+        }
+
+        section::nth-fragment(2n) {
+          color: red;
+        }
+        section::nth-fragment(2n+1) {
+          color: blue;
+        }
+
+        section::nth-fragment(1) div.content::before {
+          content: "page1: ";
+        }
+        section::nth-fragment(2) div.content::before {
+          content: "page2: ";
+        }
+        section::nth-fragment(3) div.content::before {
+          content: "page3: ";
+        }
+        section::nth-fragment(4) div.content::before {
+          content: "page4: ";
+        }
+        section::nth-fragment(5) div.content::before {
+          content: "page5: ";
+        }
+        section::nth-fragment(6) div.content::before {
+          content: "page6: ";
+        }
+        section::nth-fragment(7) div.content::before {
+          content: "page7: ";
+        }
+
+        section::nth-fragment(2n) > div.content::after {
+          content: "this content color should be red";
+        }
+        section::nth-fragment(2n+1) > div.content::after {
+          content: "this content color should be blue";
+        }
+    </style>
+</head>
+<body>
+  <section>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+    <div class="content"></div>
+  </section>
+</body>
+</html>

@@ -589,7 +589,8 @@ adapt.vtree.eachAncestorFormattingContext = function(nodeContext, callback) {
  *      shadowContext:adapt.vtree.ShadowContext,
  *      nodeShadow:adapt.vtree.ShadowContext,
  *      shadowSibling:adapt.vtree.NodePositionStep,
- *      formattingContext:adapt.vtree.FormattingContext
+ *      formattingContext:adapt.vtree.FormattingContext,
+ *      fragmentIndex: number
  * }}
  */
 adapt.vtree.NodePositionStep;
@@ -657,22 +658,25 @@ adapt.vtree.newNodePositionFromNode = function(node) {
         shadowType: adapt.vtree.ShadowType.NONE,
         shadowContext: null,
         nodeShadow: null,
-        shadowSibling: null
+        shadowSibling: null,
+        fragmentIndex: 0
     };
     return {steps:[step], offsetInNode:0, after:false, preprocessedTextContent:null};
 };
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {?number} initialFragmentIndex
  * @return {adapt.vtree.NodePosition}
  */
-adapt.vtree.newNodePositionFromNodeContext = function(nodeContext) {
+adapt.vtree.newNodePositionFromNodeContext = function(nodeContext, initialFragmentIndex) {
     var step = {
         node: nodeContext.sourceNode,
         shadowType: adapt.vtree.ShadowType.NONE,
         shadowContext: nodeContext.shadowContext,
         nodeShadow: null,
-        shadowSibling: null
+        shadowSibling: null,
+        fragmentIndex: initialFragmentIndex != null ?  initialFragmentIndex : nodeContext.fragmentIndex
     };
     return {steps:[step], offsetInNode:0, after:false, preprocessedTextContent:nodeContext.preprocessedTextContent};
 };
@@ -690,6 +694,7 @@ adapt.vtree.makeNodeContextFromNodePositionStep = function(step, parent) {
     nodeContext.shadowSibling = step.shadowSibling ?
         adapt.vtree.makeNodeContextFromNodePositionStep(step.shadowSibling, parent.copy()) : null;
     nodeContext.formattingContext = step.formattingContext;
+    nodeContext.fragmentIndex = step.fragmentIndex+1;
     return nodeContext;
 };
 
@@ -817,6 +822,7 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {?Array.<vivliostyle.diff.Change>} */ this.preprocessedTextContent = null;
     /** @type {adapt.vtree.FormattingContext} */ this.formattingContext = parent ? parent.formattingContext : null;
     /** @type {?string} */ this.repeatOnBreak = null;
+    /** @type {number} */ this.fragmentIndex = 1;
 };
 
 /**
@@ -849,6 +855,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.preprocessedTextContent = null;
     this.formattingContext = this.parent ? this.parent.formattingContext : null;
     this.repeatOnBreak = null;
+    this.fragmentIndex = 1;
 };
 
 /**
@@ -890,6 +897,7 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.preprocessedTextContent = this.preprocessedTextContent;
     np.formattingContext = this.formattingContext;
     np.repeatOnBreak = this.repeatOnBreak;
+    np.fragmentIndex = this.fragmentIndex;
     return np;
 };
 
@@ -941,7 +949,8 @@ adapt.vtree.NodeContext.prototype.toNodePositionStep = function() {
         shadowContext: this.shadowContext,
         nodeShadow: this.nodeShadow,
         shadowSibling: this.shadowSibling ? this.shadowSibling.toNodePositionStep() : null,
-        formattingContext: this.formattingContext
+        formattingContext: this.formattingContext,
+        fragmentIndex: this.fragmentIndex
     };
 };
 

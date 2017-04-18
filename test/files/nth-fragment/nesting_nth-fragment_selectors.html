@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>nesting</title>
+    <style>
+        @page {
+            size: 820px;
+        }
+        @-epubx-page-template {
+            .partition {
+                width: 398px;
+                height: 198px;
+                border: rgba(0, 0, 255, 0.2) solid 1px;
+                -epubx-flow-from: body;
+            }
+            .left {
+                left: 10px;
+            }
+            .right {
+                right: 10px;
+            }
+
+            @-epubx-page-master {
+                @-epubx-partition {
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 10px;
+                    font-size: 10px;
+                    line-height: 10px;
+                    text-align: center;
+                    content: counter(page);
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 610px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 410px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 210px;
+                }
+                @-epubx-partition class(partition) class(right) {
+                    top: 10px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 610px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 410px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 210px;
+                }
+                @-epubx-partition class(partition) class(left) {
+                    top: 10px;
+                }
+            }
+        }
+        :root {
+            font-size: 14px;
+            widows: 1;
+            orphans: 1;
+        }
+        body {
+            margin: 0 10px;
+        }
+
+        div.content {
+          height: 40px;
+          padding: 10px
+        }
+
+        section::nth-fragment(1) div.content::before {
+          content: "page1: ";
+        }
+        section::nth-fragment(2) div.content::before {
+          content: "page2: ";
+        }
+        section::nth-fragment(3) div.content::before {
+          content: "page3: ";
+        }
+        section::nth-fragment(4) div.content::before {
+          content: "page4: ";
+        }
+        section::nth-fragment(5) div.content::before {
+          content: "page5: ";
+        }
+        section::nth-fragment(6) div.content::before {
+          content: "page6: ";
+        }
+        section::nth-fragment(7) div.content::before {
+          content: "page7: ";
+        }
+        section::nth-fragment(8) div.content::before {
+          content: "page8: ";
+        }
+
+        .container {
+          margin: 5px;
+          padding: 5px;
+          background-color: #EEE;
+        }
+
+        section::nth-fragment(2n) .container::nth-fragment(2),
+        section::nth-fragment(2n+1) .container::nth-fragment(3) {
+          color: red;
+        }
+        section::nth-fragment(2n) .container::nth-fragment(2) div.content::after,
+        section::nth-fragment(2n+1) .container::nth-fragment(3) div.content::after {
+          content: " this content color should be red";
+        }
+    </style>
+</head>
+<body>
+  <section>
+    <div class="container">
+      <div class="content">content 1-1</div>
+      <div class="content">content 1-2</div>
+      <div class="content">content 1-3</div>
+      <div class="content">content 1-4</div>
+      <div class="content">content 1-5</div>
+      <div class="content">content 1-6</div>
+      <div class="content">content 1-7</div>
+      <div class="content">content 1-8</div>
+    </div>
+    <div class="container">
+      <div class="content">content 2-1</div>
+      <div class="content">content 2-2</div>
+      <div class="content">content 2-3</div>
+      <div class="content">content 2-4</div>
+      <div class="content">content 2-5</div>
+      <div class="content">content 2-6</div>
+      <div class="content">content 2-7</div>
+      <div class="content">content 2-8</div>
+      <div class="content">content 2-9</div>
+      <div class="content">content 2-10</div>
+      <div class="content">content 2-11</div>
+      <div class="content">content 2-12</div>
+      <div class="content">content 2-13</div>
+      <div class="content">content 2-14</div>
+      <div class="content">content 2-15</div>
+      <div class="content">content 2-16</div>
+    </div>
+  </section>
+</body>
+</html>

@@ -1909,7 +1909,12 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     case adapt.csstok.TokenType.FUNC:
                         text = token.text;
                         tokenizer.consume();
-                        params = this.readPseudoParams();
+                        if (text == "nth-fragment") {
+                            params = this.readNthPseudoParams();
+                            if (params === null) break;
+                        } else {
+                            params = this.readPseudoParams();
+                        }
                         token = tokenizer.token();
                         if (token.type == adapt.csstok.TokenType.C_PAR) {
                             handler.pseudoelementSelector(/** @type {string} */ (text), params);

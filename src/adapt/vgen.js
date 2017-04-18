@@ -198,15 +198,6 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
     }
     var pseudoMap = adapt.csscasc.getStyleMap(this.style, "_pseudos");
     var style = pseudoMap[pseudoName] || /** @type {adapt.csscasc.ElementStyle} */ ({});
-    if (!this.contentProcessed[pseudoName]) {
-        this.contentProcessed[pseudoName] = true;
-        var content = style["content"];
-        if (content) {
-            var contentVal = content.evaluate(this.context);
-            if (adapt.vtree.nonTrivialContent(contentVal))
-                contentVal.visit(new adapt.vtree.ContentPropertyHandler(element, this.context, contentVal));
-        }
-    }
     if (pseudoName.match(/^first-/) && !style["x-first-pseudo"]) {
         var nest = 1;
         var r;
@@ -218,6 +209,21 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
         style["x-first-pseudo"] = new adapt.csscasc.CascadeValue(new adapt.css.Int(nest), 0);
     }
     return style;
+};
+
+/**
+ * @override
+ */
+adapt.vgen.PseudoelementStyler.prototype.processContent = function(element, style) {
+    var pseudoName = adapt.vgen.getPseudoName(element);
+    if (!this.contentProcessed[pseudoName]) {
+        this.contentProcessed[pseudoName] = true;
+        var contentVal = style["content"];
+        if (contentVal) {
+            if (adapt.vtree.nonTrivialContent(contentVal))
+                contentVal.visit(new adapt.vtree.ContentPropertyHandler(element, this.context, contentVal));
+        }
+    }
 };
 
 
@@ -295,7 +301,7 @@ adapt.vgen.ViewFactory.prototype.clone = function() {
  */
 adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, isRoot,
                                                                       cascStyle, computedStyle, styler, context, parentShadow, subShadow) {
-    var pseudoMap = adapt.csscasc.getStyleMap(cascStyle, "_pseudos");
+    var pseudoMap = this.getPseudoMap(cascStyle, this.regionIds, this.isFootnote, this.nodeContext, context);
     if (!pseudoMap) {
         return subShadow;
     }
@@ -341,6 +347,32 @@ adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, i
     var shadowStyler = new adapt.vgen.PseudoelementStyler(element, cascStyle, styler, context);
     return new adapt.vtree.ShadowContext(element, root, null, parentShadow,
         subShadow, adapt.vtree.ShadowType.ROOTLESS, shadowStyler);
+};
+
+
+/**
+ * @param {adapt.csscasc.ElementStyle} cascStyle
+ * @param {Array.<string>} regionIds
+ * @param {boolean} isFootnote
+ * @param {adapt.vtree.NodeContext} nodeContext
+ */
+adapt.vgen.ViewFactory.prototype.getPseudoMap = function(cascStyle, regionIds, isFootnote, nodeContext, context) {
+    var pseudoMap = adapt.csscasc.getStyleMap(cascStyle, "_pseudos");
+    if (!pseudoMap) return null;
+    var computedPseudoStyleMap = {};
+    for (var key in pseudoMap) {
+        var computedPseudoStyle = computedPseudoStyleMap[key] = {};
+        adapt.csscasc.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
+        vivliostyle.selectors.mergeViewConditionalStyles(
+            computedPseudoStyle, context, pseudoMap[key]);
+        adapt.csscasc.forEachStylesInRegion(pseudoMap[key], regionIds, isFootnote, function(regionId, regionStyle) {
+            adapt.csscasc.mergeStyle(computedPseudoStyle, regionStyle, context);
+            vivliostyle.selectors.forEachViewConditionalStyles(regionStyle, function(viewConditionalStyles) {
+                adapt.csscasc.mergeStyle(computedPseudoStyle, viewConditionalStyles, context);
+            });
+        });
+    }
+    return computedPseudoStyleMap;
 };
 
 /**
@@ -451,7 +483,7 @@ adapt.vgen.ViewFactory.prototype.setViewRoot = function(viewRoot, isFootnote) {
  */
 adapt.vgen.ViewFactory.prototype.computeStyle = function(vertical, style, computedStyle) {
     var context = this.context;
-    var cascMap = adapt.csscasc.flattenCascadedStyle(style, context, this.regionIds, this.isFootnote);
+    var cascMap = adapt.csscasc.flattenCascadedStyle(style, context, this.regionIds, this.isFootnote, this.nodeContext);
     vertical = adapt.csscasc.isVertical(cascMap, context, vertical);
     var self = this;
     adapt.csscasc.convertToPhysical(cascMap, computedStyle, vertical, function(name, cascVal) {
@@ -650,6 +682,10 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     var styler = self.nodeContext.shadowContext ?
         /** @type {adapt.cssstyler.AbstractStyler} */ (self.nodeContext.shadowContext.styler) : self.styler;
     var elementStyle = styler.getStyle(element, false);
+    if (!self.nodeContext.shadowContext) {
+        var offset = this.xmldoc.getElementOffset(element);
+        vivliostyle.selectors.registerFragmentIndex(offset, self.nodeContext.fragmentIndex, 0);
+    }
     var computedStyle = {};
     if (!self.nodeContext.parent) {
         var inheritedValues = self.inheritFromSourceParent(elementStyle);
@@ -666,6 +702,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         self.nodeContext.lang = inheritedValues.lang;
     }
     self.nodeContext.vertical = self.computeStyle(self.nodeContext.vertical, elementStyle, computedStyle);
+    styler.processContent(element, computedStyle);
 
     this.transferPolyfilledInheritedProps(computedStyle);
     this.inheritLangAttribute();

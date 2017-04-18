@@ -845,7 +845,7 @@ adapt.pm.PageBoxInstance.prototype.init = function(context) {
     var self = this;
 
     var regionIds = this.parentInstance ? this.parentInstance.getActiveRegions(context) : null;
-    var cascMap = adapt.csscasc.flattenCascadedStyle(this.cascaded, context, regionIds, false);
+    var cascMap = adapt.csscasc.flattenCascadedStyle(this.cascaded, context, regionIds, false, null);
     this.vertical = adapt.csscasc.isVertical(cascMap, context, this.parentInstance ? this.parentInstance.vertical : false);
     adapt.csscasc.convertToPhysical(cascMap, style, this.vertical, function(name, cascVal) {
         return cascVal.value;
