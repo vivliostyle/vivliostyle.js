@@ -752,8 +752,7 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
                 if (!adapt.layout.isSpecialNodeContext(position))
                     checkPoints.push(position.copy());
             }
-            var cont = self.layoutContext.nextInTree(position);
-            vivliostyle.selectors.processAfterIfContinues(cont, self).then(function(positionParam) {
+            var cont = self.nextInTree(position).then(function(positionParam) {
                 position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
                 if (!position) {
                     // Exit the loop
@@ -796,6 +795,16 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
 };
 
 /**
+ * @param {adapt.vtree.NodeContext} position
+ * @param {boolean=} atUnforcedBreak
+ * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
+ */
+adapt.layout.Column.prototype.nextInTree = function(position, atUnforcedBreak) {
+    var cont = this.layoutContext.nextInTree(position, atUnforcedBreak);
+    return vivliostyle.selectors.processAfterIfContinues(cont, this);
+};
+
+/**
  * Builds the view for a single unbreakable element.
  * @param {adapt.vtree.NodeContext} position start source position.
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>} holding box edge position reached
@@ -825,8 +834,7 @@ adapt.layout.Column.prototype.buildDeepElementView = function(position) {
                     return;
                 }
             }
-            var cont = self.layoutContext.nextInTree(position1);
-            vivliostyle.selectors.processAfterIfContinues(cont, self).then(function(positionParam) {
+            self.nextInTree(position1).then(function(positionParam) {
                 position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
                 if (!position || position.sourceNode == sourceNode) {
                     bodyFrame.breakLoop();
@@ -2650,8 +2658,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, for
                     onStartEdges = true; // we are now on starting edges.
                 }
             } while (false);  // End of block of code to use break
-            var nextResult = self.layoutContext.nextInTree(nodeContext, atUnforcedBreak);
-            nextResult = vivliostyle.selectors.processAfterIfContinues(nextResult, self);
+            var nextResult = self.nextInTree(nodeContext, atUnforcedBreak);
             if (nextResult.isPending()) {
                 nextResult.then(function(nodeContextParam) {
                     nodeContext = nodeContextParam;

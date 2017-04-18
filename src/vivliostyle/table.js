@@ -1106,8 +1106,7 @@ goog.scope(function() {
             nodeContext.fragmentIndex = cellBreakPosition.cellNodePosition.steps[0].fragmentIndex+1;
             cont = adapt.task.newResult(cellBreakPosition.breakChunkPosition);
         } else {
-            cont = this.column.layoutContext.nextInTree(nodeContext, state.atUnforcedBreak);
-            cont = vivliostyle.selectors.processAfterIfContinues(cont, this.column).thenAsync(function(nextNodeContext) {
+            cont = this.column.nextInTree(nodeContext, state.atUnforcedBreak).thenAsync(function(nextNodeContext) {
                 if (nextNodeContext.viewNode) {
                     nodeContext.viewNode.removeChild(nextNodeContext.viewNode);
                 }
@@ -1829,7 +1828,7 @@ goog.scope(function() {
         var cellFragments = [];
         for (var i=0; i < rowIndex; i++) {
             if (!formattingContext.cellFragments[i]) continue;
-            formattingContext.cellFragments[i].forEach(function(cellFragment){
+            formattingContext.cellFragments[i].forEach(function(cellFragment) {
                 if (!cellFragment) return;
                 cellFragments.push({
                     fragment: cellFragment,
