@@ -1,8 +1,8 @@
+sudo: false
+dist: trusty
 language: node_js
 node_js:
 - stable
-before_install:
-- sudo pip install virtualenv
 script:
 - build/update-version.sh
 - npm run lint
