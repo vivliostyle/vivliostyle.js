@@ -380,11 +380,11 @@ goog.scope(function() {
     vivliostyle.selectors.processAfterIfContinuesOfAncestors = function(nodeContext, column) {
         /** @type {!adapt.task.Frame.<boolean>} */ var frame =
             adapt.task.newFrame("vivliostyle.selectors.processAfterIfContinuesOfAncestors");
-        /** @type {adapt.vtree.NodeContext} */ var parent =  nodeContext.parent;
+        /** @type {adapt.vtree.NodeContext} */ var current =  nodeContext;
         frame.loop(function() {
-            if (parent !== null) {
-                var result = processAfterIfContinuesOfNodeContext(parent, column);
-                parent = parent.parent;
+            if (current !== null) {
+                var result = processAfterIfContinuesOfNodeContext(current, column);
+                current = current.parent;
                 return result.thenReturn(true);
             } else {
                 return adapt.task.newResult(false);
