@@ -3242,13 +3242,19 @@ adapt.layout.DefaultLayoutMode.prototype.accept = function(nodeContext, column) 
  */
 adapt.layout.DefaultLayoutMode.prototype.postLayout = function(positionAfter, initialPosition, column, accepted) {
     if (!accepted) {
-        column.fragmentLayoutConstraints.some(function(constraint) {
+        var hasNextCandidate = column.fragmentLayoutConstraints.some(function(constraint) {
             return constraint.nextCandidate(positionAfter);
         });
+        // If there is no next candidate, we accept the current layout trial.
+        // Later Column#doFinishBreak decides whether the overflowing content
+        // should be placed as is or be deferred to the next column,
+        // depending on the value of Column#forceNonfitting.
+        accepted = !hasNextCandidate;
     }
     column.fragmentLayoutConstraints.forEach(function(constraint) {
         constraint.postLayout(accepted, positionAfter, initialPosition, column);
     });
+    return accepted;
 };
 
 /**

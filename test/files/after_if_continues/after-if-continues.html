@@ -208,6 +208,12 @@
           background-color: #AAEEEE;
           height: 15px;
         }
+
+        div.test10.container::after-if-continues {
+          content: "(continue)";
+          background-color: #AAEEEE;
+          height: 40px;
+        }
     </style>
 </head>
 <body>
@@ -396,6 +402,14 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </section>
+
+  <section>
+    <h1>(10) overflowing ::after-if-continues</h1>
+    <div class="container test10">
+      <div class="content" style="height: 140px">content1</div>
+      <div class="content">content2</div>
     </div>
   </section>
 

@@ -472,6 +472,7 @@ goog.scope(function() {
                 repetitiveElements.doneInitialLayout = true;
             }
         }
+        return accepted;
     };
 
     /**
@@ -500,7 +501,9 @@ goog.scope(function() {
     /**
      * @override
      */
-    LayoutFragmentedBlock.prototype.postLayout = function(positionAfter, initialPosition, column, accepted) {};
+    LayoutFragmentedBlock.prototype.postLayout = function(positionAfter, initialPosition, column, accepted) {
+        return accepted;
+    };
 
     /**
      * @constructor

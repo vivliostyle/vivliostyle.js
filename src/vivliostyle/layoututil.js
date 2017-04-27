@@ -482,7 +482,7 @@ goog.scope(function() {
         var mode = this.resolveLayoutMode(nodeContext);
         mode.doLayout(nodeContext, column).then(function(positionAfter) {
             var accepted = mode.accept(positionAfter, column);
-            mode.postLayout(positionAfter, this.initialPosition, column, accepted);
+            accepted = mode.postLayout(positionAfter, this.initialPosition, column, accepted);
             if (accepted) {
                 frame.finish(positionAfter);
             } else {
@@ -577,6 +577,7 @@ goog.scope(function() {
      * @param {!adapt.vtree.NodeContext} initialPosition
      * @param {!adapt.layout.Column} column
      * @param {boolean} accepted
+     * @returns {boolean}
      */
     LayoutMode.prototype.postLayout = function(positionAfter, initialPosition, column, accepted) {};
 
