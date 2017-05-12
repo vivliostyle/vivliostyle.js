@@ -1500,7 +1500,9 @@ adapt.ops.OPSDocStore.prototype.clearStyleSheets = function() {
  * @param {adapt.ops.StyleSource} stylesheet
  */
 adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
-    this.styleSheets.push({url: stylesheet.url, text: stylesheet.text,
+    var url = stylesheet.url;
+    if (url) url = adapt.base.resolveURL(url, adapt.base.baseURL);
+    this.styleSheets.push({url: url, text: stylesheet.text,
         flavor: adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
 };
 
@@ -1509,7 +1511,9 @@ adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
  * @param {adapt.ops.StyleSource} stylesheet
  */
 adapt.ops.OPSDocStore.prototype.addUserStyleSheet = function(stylesheet) {
-    this.styleSheets.push({url: stylesheet.url, text: stylesheet.text,
+    var url = stylesheet.url;
+    if (url) url = adapt.base.resolveURL(url, adapt.base.baseURL);
+    this.styleSheets.push({url: url, text: stylesheet.text,
         flavor: adapt.cssparse.StylesheetFlavor.USER, classes: null, media: null});
 };
 
