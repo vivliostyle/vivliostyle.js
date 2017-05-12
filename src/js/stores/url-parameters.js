@@ -28,6 +28,12 @@ function URLParameterStore() {
     this.location = window ? window.location : {url: ""};
 }
 
+URLParameterStore.prototype.getBaseURL = function() {
+    var url = this.location.href;
+    url = url.replace(/#.*$/, "");
+    return url.replace(/\/[^/]*$/, "/");
+};
+
 URLParameterStore.prototype.getParameter = function(name) {
     var url = this.location.href;
     var regexp = getRegExpForParameter(name);
