@@ -34,6 +34,18 @@ describe("URLParameterStore", function() {
         urlParameters.location = location;
     });
 
+    describe("getBaseURL", function() {
+        it("returns a URL of a directory in which the viewer entry point is located", function() {
+            urlParameters.location = {href: "http://example.com/aa/bb/cc/viewer.html?foo#x=bar"};
+
+            expect(urlParameters.getBaseURL()).toEqual("http://example.com/aa/bb/cc/")
+
+            urlParameters.location = {href: "http://example.com/aa/bb/cc/?foo#x=bar"};
+
+            expect(urlParameters.getBaseURL()).toEqual("http://example.com/aa/bb/cc/")
+        });
+    });
+
     describe("getParameter", function() {
         it("returns an array containing values corresponding to the key in the URL hash", function() {
             urlParameters.location = {href: "http://example.com#aa=bb&cc=dd&cc=ee"};
