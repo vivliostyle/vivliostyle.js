@@ -7579,6 +7579,12 @@ function URLParameterStore() {
     this.location = window ? window.location : { url: "" };
 }
 
+URLParameterStore.prototype.getBaseURL = function () {
+    var url = this.location.href;
+    url = url.replace(/#.*$/, "");
+    return url.replace(/\/[^/]*$/, "/");
+};
+
 URLParameterStore.prototype.getParameter = function (name) {
     var url = this.location.href;
     var regexp = getRegExpForParameter(name);
@@ -8260,7 +8266,7 @@ function ViewerApp() {
     }
     this.isDebug = _storesUrlParameters2["default"].getParameter("debug")[0] === "true";
     this.viewerSettings = {
-        userAgentRootURL: "resources/",
+        userAgentRootURL: _storesUrlParameters2["default"].getBaseURL() + "resources/",
         viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
         debug: this.isDebug
     };
