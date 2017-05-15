@@ -834,7 +834,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             self.nodeContext.firstPseudo = new adapt.vtree.FirstPseudo(
                 outerPseudo, (/** adapt.css.Int */ (firstPseudo)).num);
         }
-        self.processAfterIfcontinues(element, elementStyle, styler, self.context);
+        if (!self.nodeContext.inline) self.processAfterIfcontinues(element, elementStyle, styler, self.context);
         var whitespace = computedStyle["white-space"];
         if (whitespace) {
             var whitespaceValue = adapt.vtree.whitespaceFromPropertyValue(whitespace.toString());

@@ -389,6 +389,12 @@ adapt.layout.BoxBreakPosition.prototype.getMinBreakPenalty = function() {
     return this.penalty;
 };
 
+/** @override */
+adapt.layout.BoxBreakPosition.prototype.getNodeContext = function() {
+    return this.alreadyEvaluated
+        ? this.breakNodeContext
+        : this.checkPoints[this.checkPoints.length-1];
+};
 
 /**
  * Potential edge breaking position.

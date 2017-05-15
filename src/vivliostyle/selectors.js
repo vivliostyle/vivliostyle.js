@@ -311,7 +311,7 @@ goog.scope(function() {
 
     /** @override */
     AfterIfContinuesElementsOffset.prototype.calculateOffset = function(nodeContext) {
-        if (nodeContext && !this.affectTo(nodeContext)) return 0;
+        if (!this.affectTo(nodeContext)) return 0;
         return this.pseudoElementHeight;
     };
 
