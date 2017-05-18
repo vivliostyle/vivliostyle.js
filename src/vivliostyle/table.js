@@ -1707,7 +1707,7 @@ goog.scope(function() {
         RepetitiveElementsOwnerLayoutConstraint.call(this, nodeContext);
 
         /** @type {Array.<{constraints: Array.<adapt.layout.FragmentLayoutConstraint>, breakPosition:adapt.vtree.NodeContext}>} */
-        this.cellFragmentConstraints = [];
+        this.cellFragmentLayoutConstraints = [];
     };
     /** @const */ var TableRowLayoutConstraint = vivliostyle.table.TableRowLayoutConstraint;
     goog.inherits(TableRowLayoutConstraint, RepetitiveElementsOwnerLayoutConstraint);
