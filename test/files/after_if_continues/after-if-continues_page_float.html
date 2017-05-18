@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>::after-if-continues on page floats</title>
+  <style>
+    @page {
+      size: 240px;
+      margin: 20px;
+    }
+    :root {
+      column-count: 2;
+      column-rule: 1px solid black;
+      line-height: 20px;
+    }
+    section {
+      page-break-after: always;
+    }
+    figure {
+      float-reference: column;
+      float: top;
+      border: 2px solid blue;
+      margin: 0;
+    }
+    figure::after-if-continues {
+      content: "(continue)";
+      background-color: #AAEEEE;
+    }
+  </style>
+</head>
+<body>
+<section>
+  <figure>
+    1<br>
+    2<br>
+    3<br>
+    4<br>
+    5<br>
+    6<br>
+    7<br>
+    8<br>
+    9<br>
+    10<br>
+    11<br>
+    12<br>
+    13<br>
+    14<br>
+    15
+  </figure>
+  <p>test</p>
+</section>
+
+<section>
+  <figure>
+    <table>
+      <tr><td>1</td></tr>
+      <tr><td>2</td></tr>
+      <tr><td>3</td></tr>
+      <tr><td>4</td></tr>
+      <tr><td>5</td></tr>
+      <tr><td>6</td></tr>
+      <tr><td>7</td></tr>
+      <tr><td>8</td></tr>
+      <tr><td>9</td></tr>
+      <tr><td>10</td></tr>
+      <tr><td>11</td></tr>
+      <tr><td>12</td></tr>
+      <tr><td>13</td></tr>
+      <tr><td>14</td></tr>
+      <tr><td>15</td></tr>
+    </table>
+  </figure>
+</section>
+</body>
+</html>
