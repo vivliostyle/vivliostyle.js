@@ -117,7 +117,17 @@ goog.scope(function() {
          * The hook is called with a formatting context (adapt.vtree.FormattingContext).
          * Functions called by this hook are expected to return a layout processor corresponding to the formatting context.
          */
-        "RESOLVE_LAYOUT_PROCESSOR": "RESOLVE_LAYOUT_PROCESSOR"
+        "RESOLVE_LAYOUT_PROCESSOR": "RESOLVE_LAYOUT_PROCESSOR",
+
+        /**
+         * Called after laid out a block contents.
+         *
+         * The hook is called with an object with the following properties:
+         *  {adapt.vtree.NodeContext} nodeContext
+         *  {Array.<adapt.vtree.NodeContext>} checkPoints
+         *  {adapt.layout.Column} column
+         */
+        "POST_LAYOUT_BLOCK": "POST_LAYOUT_BLOCK"
     };
 
     /** @const */ var HOOKS = vivliostyle.plugin.HOOKS;
@@ -168,6 +178,16 @@ goog.scope(function() {
      * @typedef {function(!adapt.vtree.FormattingContext):adapt.layout.LayoutProcessor}
      */
     vivliostyle.plugin.ResolveLayoutProcessorHook;
+
+    /**
+     * @typedef {function(
+     *   adapt.vtree.NodeContext,
+     *   Array.<adapt.vtree.NodeContext>,
+     *   adapt.layout.Column
+     * ):undefined}
+     */
+    vivliostyle.plugin.PostLayoutBlockHook;
+
 
     /**
      * @private

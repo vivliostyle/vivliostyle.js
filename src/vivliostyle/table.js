@@ -734,6 +734,7 @@ goog.scope(function() {
         /** @type {number} */ this.rowIndex = -1;
         /** @type {number} */ this.columnIndex = 0;
         /** @type {boolean} */ this.inRow = false;
+        /** @type {Array.<adapt.vtree.NodeContext>} */ this.checkPoints = [];
     };
     /** @const */ var EntireTableLayoutStrategy = vivliostyle.table.EntireTableLayoutStrategy;
     goog.inherits(EntireTableLayoutStrategy, EdgeSkipper);
@@ -745,6 +746,8 @@ goog.scope(function() {
         /** @const */ var formattingContext = this.formattingContext;
         var r = skipNestedTable(state, formattingContext, this.column);
         if (r) return r;
+
+        this.postLayoutBlockContents(state);
 
         /** @const */ var nodeContext = state.nodeContext;
         /** @const */ var display = nodeContext.display;
@@ -794,6 +797,9 @@ goog.scope(function() {
         /** @const */ var nodeContext = state.nodeContext;
         /** @const */ var display = nodeContext.display;
         /** @const */ var clientLayout = this.column.clientLayout;
+
+        this.postLayoutBlockContents(state);
+
         if (nodeContext.sourceNode === formattingContext.tableSourceNode) {
             var computedStyle = clientLayout.getElementComputedStyle(formattingContext.getRootViewNode(nodeContext));
             formattingContext.tableWidth = parseFloat(computedStyle[formattingContext.vertical ? "height" : "width"]);
@@ -830,6 +836,46 @@ goog.scope(function() {
             }
         }
         return EdgeSkipper.prototype.afterNonInlineElementNode.call(this, state);
+    };
+
+    /** @override */
+    EntireTableLayoutStrategy.prototype.startNonElementNode = function(state) {
+        this.registerCheckPoint(state);
+    };
+
+    /** @override */
+    EntireTableLayoutStrategy.prototype.afterNonElementNode = function(state) {
+        this.registerCheckPoint(state);
+    };
+
+    /** @override */
+    EntireTableLayoutStrategy.prototype.startInlineElementNode = function(state) {
+        this.registerCheckPoint(state);
+    };
+
+    /** @override */
+    EntireTableLayoutStrategy.prototype.afterInlineElementNode = function(state) {
+        this.registerCheckPoint(state);
+    };
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    EntireTableLayoutStrategy.prototype.registerCheckPoint = function(state) {
+        var nodeContext = state.nodeContext;
+        if (nodeContext && nodeContext.viewNode && !adapt.layout.isSpecialNodeContext(nodeContext)) {
+            this.checkPoints.push(nodeContext.clone());
+        }
+    };
+
+    /**
+     * @param {!vivliostyle.layoututil.LayoutIteratorState} state
+     */
+    EntireTableLayoutStrategy.prototype.postLayoutBlockContents = function(state) {
+        if (this.checkPoints.length > 0) {
+            this.column.postLayoutBlock(state.nodeContext, this.checkPoints);
+        }
+        this.checkPoints = [];
     };
 
     /**

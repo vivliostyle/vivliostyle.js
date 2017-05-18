@@ -24,9 +24,9 @@ goog.scope(function() {
 
     "use strict";
 
-    /* eslint-disable global-require */
+    /* eslint-disable global-require,no-undef */
     var fastdiff = require('node_modules/fast-diff/diff');
-    /* eslint-enable global-require */
+    /* eslint-enable global-require,no-undef */
 
     /**
      * @typedef {Array.<(number|string)>}

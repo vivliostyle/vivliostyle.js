@@ -495,9 +495,7 @@ adapt.layout.validateCheckPoints = function(checkPoints) {
                     vivliostyle.logging.logger.warn("validateCheckPoints: duplicate after points");
                 }
             } else {
-                if (cp0.after) {
-                    vivliostyle.logging.logger.warn("validateCheckPoints: inconsistent after point");
-                } else {
+                if (!cp0.after) {
                     if (cp1.boxOffset - cp0.boxOffset != cp1.offsetInNode - cp0.offsetInNode) {
                         vivliostyle.logging.logger.warn("validateCheckPoints: boxOffset inconsistent with offsetInNode");
                     }
@@ -820,12 +818,22 @@ adapt.layout.Column.prototype.buildDeepElementView = function(position) {
     if (!position.viewNode) {
         return adapt.task.newResult(position);
     }
+    /** @type {Array.<adapt.vtree.NodeContext>} */ var checkPoints = [];
     var sourceNode = position.sourceNode;
     var self = this;
+
     /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame =
         adapt.task.newFrame("buildDeepElementView");
     // TODO: end the loop based on depth, not sourceNode comparison
     frame.loopWithFrame(function(bodyFrame) {
+        if (position.viewNode && position.inline && !adapt.layout.isSpecialNodeContext(position)) {
+            checkPoints.push(position.copy());
+        } else {
+            if (checkPoints.length > 0) {
+                self.postLayoutBlock(position, checkPoints);
+            }
+            checkPoints = [];
+        }
         self.maybePeelOff(position, 0).then(function(position1Param) {
             var position1 = /** @type {adapt.vtree.NodeContext} */ (position1Param);
             if (position1 !== position) {
@@ -839,6 +847,8 @@ adapt.layout.Column.prototype.buildDeepElementView = function(position) {
                     bodyFrame.breakLoop();
                     return;
                 }
+                if (!adapt.layout.isSpecialNodeContext(position1))
+                    checkPoints.push(position1.copy());
             }
             self.nextInTree(position1).then(function(positionParam) {
                 position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
@@ -858,6 +868,9 @@ adapt.layout.Column.prototype.buildDeepElementView = function(position) {
             });
         });
     }).then(function() {
+        if (checkPoints.length > 0) {
+            self.postLayoutBlock(position, checkPoints);
+        }
         frame.finish(position);
     });
     return frame.result();
@@ -1655,24 +1668,7 @@ adapt.layout.Column.prototype.fixJustificationIfNeeded = function(nodeContext, e
         return;
     node = nodeContext.viewNode;
     var doc = node.ownerDocument;
-    var span = /** @type {HTMLElement} */ (doc.createElement("span"));
-    span.style.visibility = "hidden";
-    if (adapt.base.checkInlineBlockJustificationBug(document.body)) {
-        if (nodeContext.vertical) {
-            span.style.marginTop = "100%";
-        } else {
-            span.style.marginLeft = "100%";
-        }
-    } else {
-        span.style.display = "inline-block";
-        if (nodeContext.vertical) {
-            span.style.height = "100%";
-        } else {
-            span.style.width = "100%";
-        }
-    }
-    span.textContent = " #";
-    span.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
+    var span = adapt.layout.createJustificationAdjustmentElement(doc, nodeContext.vertical);
     var insertionPoint = endOfColumn && (nodeContext.after || node.nodeType != 1) ? node.nextSibling : node;
     var parent = node.parentNode;
     if (!parent) {
@@ -1685,8 +1681,13 @@ adapt.layout.Column.prototype.fixJustificationIfNeeded = function(nodeContext, e
         parent.insertBefore(br, insertionPoint);
         // TODO: see if it can be reduced
         span.style.lineHeight = "80px";
-        br.style.marginTop = "-80px";
-        br.style.height = "0px";
+        if (nodeContext.vertical) {
+            br.style.marginRight = "-80px";
+            br.style.width = "0px";
+        } else {
+            br.style.marginTop = "-80px";
+            br.style.height = "0px";
+        }
         br.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
     }
 };
@@ -1806,6 +1807,7 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
             frame.finish(resNodeContext);
             return;
         }
+
         // Record the height
         // TODO: should this be done after first-line calculation?
         var edge = self.calculateEdge(resNodeContext, checkPoints, checkPointIndex,
@@ -1833,6 +1835,7 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
             lineCont = adapt.task.newResult(resNodeContext);
         }
         lineCont.then(function(nodeContext) {
+            self.postLayoutBlock(nodeContext, checkPoints);
             if (checkPoints.length > 0) {
                 self.saveBoxBreakPosition(checkPoints);
                 // TODO: how to signal overflow in the last pagargaph???
@@ -1848,12 +1851,24 @@ adapt.layout.Column.prototype.layoutBreakableBlock = function(nodeContext) {
 };
 
 /**
+ * @param {adapt.vtree.NodeContext} nodeContext
  * @param {Array.<adapt.vtree.NodeContext>} checkPoints
- * @param {number} edgePosition
- * @param {boolean} force
- * @return {adapt.vtree.NodeContext}
  */
-adapt.layout.Column.prototype.findAcceptableBreakInside = function(checkPoints, edgePosition, force) {
+adapt.layout.Column.prototype.postLayoutBlock = function(nodeContext, checkPoints) {
+    /** @type {!Array.<vivliostyle.plugin.PostLayoutBlockHook>} */ var hooks =
+        vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.POST_LAYOUT_BLOCK);
+    hooks.forEach(function(hook) {
+        hook(nodeContext, checkPoints, this);
+    }.bind(this));
+};
+
+/**
+ * @param {number} linePosition
+ * @param {Array.<adapt.vtree.NodeContext>} checkPoints
+ * @param {boolean} isUpdateMaxReachedAfterEdge
+ * @return {{nodeContext: adapt.vtree.NodeContext, index: number, checkPointIndex: number}}
+ */
+adapt.layout.Column.prototype.findEndOfLine = function(linePosition, checkPoints, isUpdateMaxReachedAfterEdge) {
     if (goog.DEBUG) {
         adapt.layout.validateCheckPoints(checkPoints);
     }
@@ -1877,25 +1892,36 @@ adapt.layout.Column.prototype.findAcceptableBreakInside = function(checkPoints, 
                 low1 = mid1;
         }
         var edge = this.calculateEdge(null, checkPoints, low1, mid);
-        if (this.vertical ? edge < edgePosition : edge > edgePosition) {
+        if (this.vertical ? edge < linePosition : edge > linePosition) {
             high = mid - 1;
             while (checkPoints[low1].boxOffset == mid)
                 low1--;
             highCP = low1;
         } else {
-            this.updateMaxReachedAfterEdge(edge);
+            if (isUpdateMaxReachedAfterEdge) this.updateMaxReachedAfterEdge(edge);
             low = mid;
             lowCP = low1;
         }
     }
 
-    var nodeContext = checkPoints[low1];
+    return {nodeContext: checkPoints[low1], index: low, checkPointIndex: low1};
+};
+
+/**
+ * @param {Array.<adapt.vtree.NodeContext>} checkPoints
+ * @param {number} edgePosition
+ * @param {boolean} force
+ * @return {adapt.vtree.NodeContext}
+ */
+adapt.layout.Column.prototype.findAcceptableBreakInside = function(checkPoints, edgePosition, force) {
+    var position = this.findEndOfLine(edgePosition, checkPoints, true);
+    var nodeContext = position.nodeContext;
     var viewNode = nodeContext.viewNode;
     if (viewNode.nodeType != 1) {
         var textNode = /** @type {Text} */ (viewNode);
         var textNodeBreaker = this.resolveTextNodeBreaker(nodeContext);
         return textNodeBreaker.breakTextNode(textNode, nodeContext,
-            low, checkPoints, low1, force);
+            position.index, checkPoints, position.checkPointIndex, force);
     } else {
         return nodeContext;
     }
@@ -2017,7 +2043,6 @@ adapt.layout.isSpecial = function(e) {
 };
 
 /**
- * @private
  * @param {adapt.vtree.NodeContext} nodeContext
  * @returns {boolean}
  */
@@ -3148,6 +3173,34 @@ adapt.layout.isOrphan = function(node) {
         node = node.parentNode;
     }
     return true;
+};
+
+/**
+ * @param {Document} doc
+ * @param {boolean} vertical
+ * @return {HTMLElement}
+ */
+adapt.layout.createJustificationAdjustmentElement = function(doc, vertical) {
+    var span = /** @type {HTMLElement} */ (doc.createElement("span"));
+    span.style.visibility = "hidden";
+    if (adapt.base.checkInlineBlockJustificationBug(document.body)) {
+        if (vertical) {
+            span.style.marginTop = "100%";
+        } else {
+            span.style.marginLeft = "100%";
+        }
+    } else {
+        span.style.display = "inline-block";
+        if (vertical) {
+            span.style.height = "100%";
+        } else {
+            span.style.width = "100%";
+        }
+    }
+    span.textContent = " #";
+    span.style.lineHeight = "80px";
+    span.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
+    return span;
 };
 
 /**

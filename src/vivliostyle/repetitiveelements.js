@@ -234,16 +234,17 @@ goog.scope(function() {
      */
     RepetitiveElements.prototype.appendElementToFragment = function(nodePosition, rootNodeContext, firstChild, column) {
         var doc = rootNodeContext.viewNode.ownerDocument;
-        var fragment = doc.createDocumentFragment();
+        var rootViewNode = /** @type {Element} */ (rootNodeContext.viewNode);
         var viewRoot = doc.createElement("div");
-        fragment.appendChild(viewRoot);
+        rootViewNode.appendChild(viewRoot);
         var pseudoColumn = new PseudoColumn(column, viewRoot, rootNodeContext);
         var initialPageBreakType = pseudoColumn.getColumn().pageBreakType;
         pseudoColumn.getColumn().pageBreakType = null;
         this.allowInsertRepeatitiveElements = true;
         return pseudoColumn.layout(new adapt.vtree.ChunkPosition(nodePosition), true).thenAsync(function() {
             this.allowInsertRepeatitiveElements = false;
-            this.moveChildren(viewRoot, /** @type {Element} */ (rootNodeContext.viewNode), firstChild);
+            rootViewNode.removeChild(viewRoot);
+            this.moveChildren(viewRoot, rootViewNode, firstChild);
             pseudoColumn.getColumn().pageBreakType = initialPageBreakType;
             return adapt.task.newResult(true);
         }.bind(this));
