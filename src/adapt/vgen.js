@@ -828,6 +828,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                 }
             }
         }
+        self.nodeContext.footnotePolicy = computedStyle["footnote-policy"];
         var firstPseudo = computedStyle["x-first-pseudo"];
         if (firstPseudo) {
             var outerPseudo = self.nodeContext.parent ? self.nodeContext.parent.firstPseudo : null;
@@ -1626,7 +1627,8 @@ adapt.vgen.propertiesNotPassedToDOM = {
     "flow-priority": true,
     "flow-options": true,
     "page": true,
-    "float-reference": true
+    "float-reference": true,
+    "footnote-policy": true
 };
 
 /**

@@ -227,6 +227,25 @@ adapt.layout.LayoutConstraint = function() {};
  */
 adapt.layout.LayoutConstraint.prototype.allowLayout = function(nodeContext) {};
 
+/**
+ * Represents a constraint that allows layout if all the constraints it contains allow layout.
+ * @param {!Array<!adapt.layout.LayoutConstraint>} constraints
+ * @constructor
+ * @implements {adapt.layout.LayoutConstraint}
+ */
+adapt.layout.AllLayoutConstraint = function(constraints) {
+    /** @const */ this.constraints = constraints;
+};
+
+/**
+ * @override
+ */
+adapt.layout.AllLayoutConstraint.prototype.allowLayout = function(nodeContext) {
+    return this.constraints.every(function(c) {
+        return c.allowLayout(nodeContext);
+    });
+};
+
 
 /**
  * Represents constraints on laying out fragments
