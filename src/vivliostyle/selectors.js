@@ -203,7 +203,6 @@ goog.scope(function() {
      */
     AfterIfContinues.prototype.createElement = function(column, parentNodeContext) {
         var doc = parentNodeContext.viewNode.ownerDocument;
-        var fragment = doc.createDocumentFragment();
         var viewRoot = doc.createElement("div");
         var pseudoColumn = new PseudoColumn(column, viewRoot, parentNodeContext);
         var initialPageBreakType = pseudoColumn.getColumn().pageBreakType;

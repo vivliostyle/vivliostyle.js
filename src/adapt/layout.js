@@ -758,7 +758,7 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
                 if (!adapt.layout.isSpecialNodeContext(position))
                     checkPoints.push(position.copy());
             }
-            var cont = self.nextInTree(position).then(function(positionParam) {
+            self.nextInTree(position).then(function(positionParam) {
                 position = /** @type {adapt.vtree.NodeContext} */ (positionParam);
                 if (!position) {
                     // Exit the loop
