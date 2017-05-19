@@ -19,7 +19,8 @@
 - Add support for `::nth-fragment()` pseudo-element selector
   - Spec: [CSS Overflow Module Level 4 - Fragmen styling](https://drafts.csswg.org/css-overflow-4/#fragment-styling)
 - Add support for `::after-if-continues` pseudo-element
-
+- Support `footnote-policy: line`
+  - Spec: [CSS Generated Content for Paged Media Module Level 3 - Rendering footnotes and footnote policy](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy)
 
 ### Changed
 
