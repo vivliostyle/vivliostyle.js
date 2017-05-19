@@ -313,7 +313,7 @@
       - [CSS 2.2 - clear](https://drafts.csswg.org/css2/visuren.html#propdef-clear)
       - [CSS 2.1 - clear](https://drafts.csswg.org/css21/visuren.html#propdef-clear)
       - [CSS Page Floats 3 - clear](https://drafts.csswg.org/css-page-floats-3/#propdef-clear)
-  - Values: `none | left | right | both;`
+  - Values: `none | left | right | both | all;`
 - [clip](https://www.w3.org/TR/CSS22/visufx.html#propdef-clip)
   - TR
       - [CSS 2.2 - clip](https://www.w3.org/TR/CSS22/visufx.html#propdef-clip)
@@ -1526,9 +1526,8 @@
   - Values: `INSETS_SLASH border-top-left-radius border-top-right-radius border-bottom-right-radius border-bottom-left-radius;`
 
 ## [CSS Images 3](https://www.w3.org/TR/css3-images/)
-- [image-rendering](https://www.w3.org/TR/css4-images/#image-rendering)
+- [image-rendering](https://www.w3.org/TR/svg2/painting.html#ImageRenderingProperty)
   - TR
-      - [CSS Images 4 - image-rendering](https://www.w3.org/TR/css4-images/#image-rendering)
       - [SVG 2 - image-rendering](https://www.w3.org/TR/svg2/painting.html#ImageRenderingProperty)
   - Drafts
       - [CSS Images 3 - image-rendering](https://drafts.csswg.org/css-images-3/#propdef-image-rendering)
@@ -1537,55 +1536,31 @@
 - [image-resolution](https://www.w3.org/TR/css3-images/#image-resolution)
   - TR
       - [CSS Images 3 - image-resolution](https://www.w3.org/TR/css3-images/#image-resolution)
-      - [CSS Images 4 - image-resolution](https://www.w3.org/TR/css4-images/#image-resolution)
+      - [CSS Images 4 - image-resolution](https://www.w3.org/TR/css4-images/#propdef-image-resolution)
   - Drafts
-      - [CSS Images 3 - image-resolution](https://drafts.csswg.org/css-images-3/#propdef-image-resolution)
+      - [CSS Images 4 - image-resolution](https://drafts.csswg.org/css-images-4/#propdef-image-resolution)
   - Values: `RESOLUTION;`
 - [object-fit](https://www.w3.org/TR/css3-images/#object-fit)
   - TR
       - [CSS Images 3 - object-fit](https://www.w3.org/TR/css3-images/#object-fit)
-      - [CSS Images 4 - object-fit](https://www.w3.org/TR/css4-images/#object-fit)
   - Drafts
       - [CSS Images 3 - object-fit](https://drafts.csswg.org/css-images-3/#propdef-object-fit)
   - Values: `fill | contain | cover | none | scale-down;`
 - [object-position](https://www.w3.org/TR/css3-images/#object-position)
   - TR
       - [CSS Images 3 - object-position](https://www.w3.org/TR/css3-images/#object-position)
-      - [CSS Images 4 - object-position](https://www.w3.org/TR/css4-images/#object-position)
   - Drafts
       - [CSS Images 3 - object-position](https://drafts.csswg.org/css-images-3/#propdef-object-position)
   - Values: `COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */`
 
 ## [CSS Images 4](https://www.w3.org/TR/css4-images/)
-- [image-rendering](https://www.w3.org/TR/css4-images/#image-rendering)
-  - TR
-      - [CSS Images 4 - image-rendering](https://www.w3.org/TR/css4-images/#image-rendering)
-      - [SVG 2 - image-rendering](https://www.w3.org/TR/svg2/painting.html#ImageRenderingProperty)
-  - Drafts
-      - [CSS Images 3 - image-rendering](https://drafts.csswg.org/css-images-3/#propdef-image-rendering)
-      - [SVG 2 - image-rendering](https://svgwg.org/svg2-draft/painting.html#ImageRenderingProperty)
-  - Values: `auto | optimizeSpeed | optimizeQuality | crisp-edges | pixelated;`
 - [image-resolution](https://www.w3.org/TR/css3-images/#image-resolution)
   - TR
       - [CSS Images 3 - image-resolution](https://www.w3.org/TR/css3-images/#image-resolution)
-      - [CSS Images 4 - image-resolution](https://www.w3.org/TR/css4-images/#image-resolution)
+      - [CSS Images 4 - image-resolution](https://www.w3.org/TR/css4-images/#propdef-image-resolution)
   - Drafts
-      - [CSS Images 3 - image-resolution](https://drafts.csswg.org/css-images-3/#propdef-image-resolution)
+      - [CSS Images 4 - image-resolution](https://drafts.csswg.org/css-images-4/#propdef-image-resolution)
   - Values: `RESOLUTION;`
-- [object-fit](https://www.w3.org/TR/css3-images/#object-fit)
-  - TR
-      - [CSS Images 3 - object-fit](https://www.w3.org/TR/css3-images/#object-fit)
-      - [CSS Images 4 - object-fit](https://www.w3.org/TR/css4-images/#object-fit)
-  - Drafts
-      - [CSS Images 3 - object-fit](https://drafts.csswg.org/css-images-3/#propdef-object-fit)
-  - Values: `fill | contain | cover | none | scale-down;`
-- [object-position](https://www.w3.org/TR/css3-images/#object-position)
-  - TR
-      - [CSS Images 3 - object-position](https://www.w3.org/TR/css3-images/#object-position)
-      - [CSS Images 4 - object-position](https://www.w3.org/TR/css4-images/#object-position)
-  - Drafts
-      - [CSS Images 3 - object-position](https://drafts.csswg.org/css-images-3/#propdef-object-position)
-  - Values: `COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */`
 
 ## [CSS Fonts 3](https://www.w3.org/TR/css-fonts-3/)
 - [font](https://www.w3.org/TR/CSS22/fonts.html#propdef-font)
@@ -1876,7 +1851,6 @@
       - [CSS Text Decoration 3 - text-decoration-skip](https://www.w3.org/TR/css-text-decor-3/#text-decoration-skip)
   - Drafts
       - [CSS Text Decoration 4 - text-decoration-skip](https://drafts.csswg.org/css-text-decor-4/#propdef-text-decoration-skip)
-      - [CSS Text Decoration 3 - text-decoration-skip](https://drafts.csswg.org/css-text-decor-3/#propdef-text-decoration-skip)
   - Values: `none | [ objects || spaces || ink || edges || box-decoration ];`
 - [text-decoration-style](https://www.w3.org/TR/css-text-decor-3/#text-decoration-style)
     - Allowed prefixes: webkit
@@ -2708,7 +2682,7 @@
       - [CSS 2.2 - clear](https://drafts.csswg.org/css2/visuren.html#propdef-clear)
       - [CSS 2.1 - clear](https://drafts.csswg.org/css21/visuren.html#propdef-clear)
       - [CSS Page Floats 3 - clear](https://drafts.csswg.org/css-page-floats-3/#propdef-clear)
-  - Values: `none | left | right | both;`
+  - Values: `none | left | right | both | all;`
 - [float](https://www.w3.org/TR/CSS22/visuren.html#propdef-float)
   - TR
       - [CSS 2.2 - float](https://www.w3.org/TR/CSS22/visuren.html#propdef-float)
@@ -2775,6 +2749,14 @@
       - [Compositing 2 - mix-blend-mode](https://drafts.fxtf.org/compositing-2/#propdef-mix-blend-mode)
       - [Compositing 1 - mix-blend-mode](https://drafts.fxtf.org/compositing-1/#propdef-mix-blend-mode)
   - Values: `BLEND_MODE;`
+
+## [CSS GCPM 3](https://www.w3.org/TR/css-gcpm-3/)
+- [footnote-policy](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy)
+  - TR
+      - [CSS GCPM 3 - footnote-policy](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy)
+  - Drafts
+      - [CSS GCPM 3 - footnote-policy](https://drafts.csswg.org/css-gcpm-3/#propdef-footnote-policy)
+  - Values: `auto | line;`
 
 ## [SVG 1.1](https://www.w3.org/TR/SVG/)
 - [alignment-baseline](https://www.w3.org/TR/css-inline-3/#propdef-alignment-baseline)
@@ -2855,28 +2837,31 @@
   - Drafts
       - [CSS Inline Layout 3 - dominant-baseline](https://drafts.csswg.org/css-inline-3/#propdef-dominant-baseline)
   - Values: `auto | use-script | no-change | reset-size | ideographic | alphabetic | hanging | mathematical | central | middle | text-after-edge | text-before-edge;`
-- [fill](https://www.w3.org/TR/SVG/painting.html#FillProperty)
+- [fill](https://www.w3.org/TR/fill-stroke-3/#propdef-fill)
   - TR
+      - [Fill & Stroke - fill](https://www.w3.org/TR/fill-stroke-3/#propdef-fill)
       - [SVG 1.1 - fill](https://www.w3.org/TR/SVG/painting.html#FillProperty)
       - [SVG 2 - fill](https://www.w3.org/TR/svg2/painting.html#FillProperty)
   - Drafts
-      - [Fill & Stroke - fill](https://drafts.fxtf.org/paint/#propdef-fill)
+      - [Fill & Stroke - fill](https://drafts.fxtf.org/fill-stroke-3/#propdef-fill)
       - [SVG 2 - fill](https://svgwg.org/svg2-draft/painting.html#FillProperty)
   - Values: `PAINT;`
-- [fill-opacity](https://www.w3.org/TR/SVG/painting.html#FillOpacityProperty)
+- [fill-opacity](https://www.w3.org/TR/fill-stroke-3/#propdef-fill-opacity)
   - TR
+      - [Fill & Stroke - fill-opacity](https://www.w3.org/TR/fill-stroke-3/#propdef-fill-opacity)
       - [SVG 1.1 - fill-opacity](https://www.w3.org/TR/SVG/painting.html#FillOpacityProperty)
       - [SVG 2 - fill-opacity](https://www.w3.org/TR/svg2/painting.html#FillOpacityProperty)
   - Drafts
-      - [Fill & Stroke - fill-opacity](https://drafts.fxtf.org/paint/#propdef-fill-opacity)
+      - [Fill & Stroke - fill-opacity](https://drafts.fxtf.org/fill-stroke-3/#propdef-fill-opacity)
       - [SVG 2 - fill-opacity](https://svgwg.org/svg2-draft/painting.html#FillOpacityProperty)
   - Values: `OPACITY_VALUE;`
-- [fill-rule](https://www.w3.org/TR/SVG/painting.html#FillRuleProperty)
+- [fill-rule](https://www.w3.org/TR/fill-stroke-3/#propdef-fill-rule)
   - TR
+      - [Fill & Stroke - fill-rule](https://www.w3.org/TR/fill-stroke-3/#propdef-fill-rule)
       - [SVG 1.1 - fill-rule](https://www.w3.org/TR/SVG/painting.html#FillRuleProperty)
       - [SVG 2 - fill-rule](https://www.w3.org/TR/svg2/painting.html#FillRuleProperty)
   - Drafts
-      - [Fill & Stroke - fill-rule](https://drafts.fxtf.org/paint/#propdef-fill-rule)
+      - [Fill & Stroke - fill-rule](https://drafts.fxtf.org/fill-stroke-3/#propdef-fill-rule)
       - [SVG 2 - fill-rule](https://svgwg.org/svg2-draft/painting.html#FillRuleProperty)
   - Values: `nonzero | evenodd;`
 - [flood-color](https://www.w3.org/TR/filter-effects-1/#propdef-flood-color)
@@ -3062,68 +3047,76 @@
   - Drafts
       - [SVG 2 - stop-opacity](https://svgwg.org/svg2-draft/pservers.html#StopOpacityProperty)
   - Values: `OPACITY_VALUE;`
-- [stroke](https://www.w3.org/TR/SVG/painting.html#StrokeProperty)
+- [stroke](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke)
   - TR
+      - [Fill & Stroke - stroke](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke)
       - [SVG 1.1 - stroke](https://www.w3.org/TR/SVG/painting.html#StrokeProperty)
       - [SVG 2 - stroke](https://www.w3.org/TR/svg2/painting.html#StrokeProperty)
   - Drafts
-      - [Fill & Stroke - stroke](https://drafts.fxtf.org/paint/#propdef-stroke)
+      - [Fill & Stroke - stroke](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke)
       - [SVG 2 - stroke](https://svgwg.org/svg2-draft/painting.html#StrokeProperty)
   - Values: `PAINT;`
-- [stroke-dasharray](https://www.w3.org/TR/SVG/painting.html#StrokeDasharrayProperty)
+- [stroke-dasharray](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-dasharray)
   - TR
+      - [Fill & Stroke - stroke-dasharray](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-dasharray)
       - [SVG 1.1 - stroke-dasharray](https://www.w3.org/TR/SVG/painting.html#StrokeDasharrayProperty)
       - [SVG 2 - stroke-dasharray](https://www.w3.org/TR/svg2/painting.html#StrokeDasharrayProperty)
   - Drafts
-      - [Fill & Stroke - stroke-dasharray](https://drafts.fxtf.org/paint/#propdef-stroke-dasharray)
+      - [Fill & Stroke - stroke-dasharray](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-dasharray)
       - [SVG 2 - stroke-dasharray](https://svgwg.org/svg2-draft/painting.html#StrokeDasharrayProperty)
   - Values: `none | DASH_ARRAY;`
-- [stroke-dashoffset](https://www.w3.org/TR/SVG/painting.html#StrokeDashoffsetProperty)
+- [stroke-dashoffset](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-dashoffset)
   - TR
+      - [Fill & Stroke - stroke-dashoffset](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-dashoffset)
       - [SVG 1.1 - stroke-dashoffset](https://www.w3.org/TR/SVG/painting.html#StrokeDashoffsetProperty)
       - [SVG 2 - stroke-dashoffset](https://www.w3.org/TR/svg2/painting.html#StrokeDashoffsetProperty)
   - Drafts
-      - [Fill & Stroke - stroke-dashoffset](https://drafts.fxtf.org/paint/#propdef-stroke-dashoffset)
+      - [Fill & Stroke - stroke-dashoffset](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-dashoffset)
       - [SVG 2 - stroke-dashoffset](https://svgwg.org/svg2-draft/painting.html#StrokeDashoffsetProperty)
   - Values: `PERCENTAGE | LENGTH_OR_NUM;`
-- [stroke-linecap](https://www.w3.org/TR/SVG/painting.html#StrokeLinecapProperty)
+- [stroke-linecap](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-linecap)
   - TR
+      - [Fill & Stroke - stroke-linecap](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-linecap)
       - [SVG 1.1 - stroke-linecap](https://www.w3.org/TR/SVG/painting.html#StrokeLinecapProperty)
       - [SVG 2 - stroke-linecap](https://www.w3.org/TR/svg2/painting.html#StrokeLinecapProperty)
   - Drafts
-      - [Fill & Stroke - stroke-linecap](https://drafts.fxtf.org/paint/#propdef-stroke-linecap)
+      - [Fill & Stroke - stroke-linecap](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-linecap)
       - [SVG 2 - stroke-linecap](https://svgwg.org/svg2-draft/painting.html#StrokeLinecapProperty)
   - Values: `butt | round | square;`
-- [stroke-linejoin](https://www.w3.org/TR/SVG/painting.html#StrokeLinejoinProperty)
+- [stroke-linejoin](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-linejoin)
   - TR
+      - [Fill & Stroke - stroke-linejoin](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-linejoin)
       - [SVG 1.1 - stroke-linejoin](https://www.w3.org/TR/SVG/painting.html#StrokeLinejoinProperty)
       - [SVG 2 - stroke-linejoin](https://www.w3.org/TR/svg2/painting.html#StrokeLinejoinProperty)
   - Drafts
-      - [Fill & Stroke - stroke-linejoin](https://drafts.fxtf.org/paint/#propdef-stroke-linejoin)
+      - [Fill & Stroke - stroke-linejoin](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-linejoin)
       - [SVG 2 - stroke-linejoin](https://svgwg.org/svg2-draft/painting.html#StrokeLinejoinProperty)
   - Values: `miter | round | bevel;`
-- [stroke-miterlimit](https://www.w3.org/TR/SVG/painting.html#StrokeMiterlimitProperty)
+- [stroke-miterlimit](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-miterlimit)
   - TR
+      - [Fill & Stroke - stroke-miterlimit](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-miterlimit)
       - [SVG 1.1 - stroke-miterlimit](https://www.w3.org/TR/SVG/painting.html#StrokeMiterlimitProperty)
       - [SVG 2 - stroke-miterlimit](https://www.w3.org/TR/svg2/painting.html#StrokeMiterlimitProperty)
   - Drafts
-      - [Fill & Stroke - stroke-miterlimit](https://drafts.fxtf.org/paint/#propdef-stroke-miterlimit)
+      - [Fill & Stroke - stroke-miterlimit](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-miterlimit)
       - [SVG 2 - stroke-miterlimit](https://svgwg.org/svg2-draft/painting.html#StrokeMiterlimitProperty)
   - Values: `NUM;`
-- [stroke-opacity](https://www.w3.org/TR/SVG/painting.html#StrokeOpacityProperty)
+- [stroke-opacity](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-opacity)
   - TR
+      - [Fill & Stroke - stroke-opacity](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-opacity)
       - [SVG 1.1 - stroke-opacity](https://www.w3.org/TR/SVG/painting.html#StrokeOpacityProperty)
       - [SVG 2 - stroke-opacity](https://www.w3.org/TR/svg2/painting.html#StrokeOpacityProperty)
   - Drafts
-      - [Fill & Stroke - stroke-opacity](https://drafts.fxtf.org/paint/#propdef-stroke-opacity)
+      - [Fill & Stroke - stroke-opacity](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-opacity)
       - [SVG 2 - stroke-opacity](https://svgwg.org/svg2-draft/painting.html#StrokeOpacityProperty)
   - Values: `OPACITY_VALUE;`
-- [stroke-width](https://www.w3.org/TR/SVG/painting.html#StrokeWidthProperty)
+- [stroke-width](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-width)
   - TR
+      - [Fill & Stroke - stroke-width](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-width)
       - [SVG 1.1 - stroke-width](https://www.w3.org/TR/SVG/painting.html#StrokeWidthProperty)
       - [SVG 2 - stroke-width](https://www.w3.org/TR/svg2/painting.html#StrokeWidthProperty)
   - Drafts
-      - [Fill & Stroke - stroke-width](https://drafts.fxtf.org/paint/#propdef-stroke-width)
+      - [Fill & Stroke - stroke-width](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-width)
       - [SVG 2 - stroke-width](https://svgwg.org/svg2-draft/painting.html#StrokeWidthProperty)
   - Values: `PERCENTAGE | LENGTH_OR_NUM;`
 - [text-anchor](https://www.w3.org/TR/SVG/text.html#TextAnchorProperty)
@@ -3200,33 +3193,35 @@
   - Drafts
       - [SVG 2 - color-rendering](https://svgwg.org/svg2-draft/painting.html#ColorRenderingProperty)
   - Values: `auto | optimizeSpeed | optimizeQuality;`
-- [fill](https://www.w3.org/TR/SVG/painting.html#FillProperty)
+- [fill](https://www.w3.org/TR/fill-stroke-3/#propdef-fill)
   - TR
+      - [Fill & Stroke - fill](https://www.w3.org/TR/fill-stroke-3/#propdef-fill)
       - [SVG 1.1 - fill](https://www.w3.org/TR/SVG/painting.html#FillProperty)
       - [SVG 2 - fill](https://www.w3.org/TR/svg2/painting.html#FillProperty)
   - Drafts
-      - [Fill & Stroke - fill](https://drafts.fxtf.org/paint/#propdef-fill)
+      - [Fill & Stroke - fill](https://drafts.fxtf.org/fill-stroke-3/#propdef-fill)
       - [SVG 2 - fill](https://svgwg.org/svg2-draft/painting.html#FillProperty)
   - Values: `PAINT;`
-- [fill-opacity](https://www.w3.org/TR/SVG/painting.html#FillOpacityProperty)
+- [fill-opacity](https://www.w3.org/TR/fill-stroke-3/#propdef-fill-opacity)
   - TR
+      - [Fill & Stroke - fill-opacity](https://www.w3.org/TR/fill-stroke-3/#propdef-fill-opacity)
       - [SVG 1.1 - fill-opacity](https://www.w3.org/TR/SVG/painting.html#FillOpacityProperty)
       - [SVG 2 - fill-opacity](https://www.w3.org/TR/svg2/painting.html#FillOpacityProperty)
   - Drafts
-      - [Fill & Stroke - fill-opacity](https://drafts.fxtf.org/paint/#propdef-fill-opacity)
+      - [Fill & Stroke - fill-opacity](https://drafts.fxtf.org/fill-stroke-3/#propdef-fill-opacity)
       - [SVG 2 - fill-opacity](https://svgwg.org/svg2-draft/painting.html#FillOpacityProperty)
   - Values: `OPACITY_VALUE;`
-- [fill-rule](https://www.w3.org/TR/SVG/painting.html#FillRuleProperty)
+- [fill-rule](https://www.w3.org/TR/fill-stroke-3/#propdef-fill-rule)
   - TR
+      - [Fill & Stroke - fill-rule](https://www.w3.org/TR/fill-stroke-3/#propdef-fill-rule)
       - [SVG 1.1 - fill-rule](https://www.w3.org/TR/SVG/painting.html#FillRuleProperty)
       - [SVG 2 - fill-rule](https://www.w3.org/TR/svg2/painting.html#FillRuleProperty)
   - Drafts
-      - [Fill & Stroke - fill-rule](https://drafts.fxtf.org/paint/#propdef-fill-rule)
+      - [Fill & Stroke - fill-rule](https://drafts.fxtf.org/fill-stroke-3/#propdef-fill-rule)
       - [SVG 2 - fill-rule](https://svgwg.org/svg2-draft/painting.html#FillRuleProperty)
   - Values: `nonzero | evenodd;`
-- [image-rendering](https://www.w3.org/TR/css4-images/#image-rendering)
+- [image-rendering](https://www.w3.org/TR/svg2/painting.html#ImageRenderingProperty)
   - TR
-      - [CSS Images 4 - image-rendering](https://www.w3.org/TR/css4-images/#image-rendering)
       - [SVG 2 - image-rendering](https://www.w3.org/TR/svg2/painting.html#ImageRenderingProperty)
   - Drafts
       - [CSS Images 3 - image-rendering](https://drafts.csswg.org/css-images-3/#propdef-image-rendering)
@@ -3299,68 +3294,76 @@
   - Drafts
       - [SVG 2 - stop-opacity](https://svgwg.org/svg2-draft/pservers.html#StopOpacityProperty)
   - Values: `OPACITY_VALUE;`
-- [stroke](https://www.w3.org/TR/SVG/painting.html#StrokeProperty)
+- [stroke](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke)
   - TR
+      - [Fill & Stroke - stroke](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke)
       - [SVG 1.1 - stroke](https://www.w3.org/TR/SVG/painting.html#StrokeProperty)
       - [SVG 2 - stroke](https://www.w3.org/TR/svg2/painting.html#StrokeProperty)
   - Drafts
-      - [Fill & Stroke - stroke](https://drafts.fxtf.org/paint/#propdef-stroke)
+      - [Fill & Stroke - stroke](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke)
       - [SVG 2 - stroke](https://svgwg.org/svg2-draft/painting.html#StrokeProperty)
   - Values: `PAINT;`
-- [stroke-dasharray](https://www.w3.org/TR/SVG/painting.html#StrokeDasharrayProperty)
+- [stroke-dasharray](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-dasharray)
   - TR
+      - [Fill & Stroke - stroke-dasharray](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-dasharray)
       - [SVG 1.1 - stroke-dasharray](https://www.w3.org/TR/SVG/painting.html#StrokeDasharrayProperty)
       - [SVG 2 - stroke-dasharray](https://www.w3.org/TR/svg2/painting.html#StrokeDasharrayProperty)
   - Drafts
-      - [Fill & Stroke - stroke-dasharray](https://drafts.fxtf.org/paint/#propdef-stroke-dasharray)
+      - [Fill & Stroke - stroke-dasharray](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-dasharray)
       - [SVG 2 - stroke-dasharray](https://svgwg.org/svg2-draft/painting.html#StrokeDasharrayProperty)
   - Values: `none | DASH_ARRAY;`
-- [stroke-dashoffset](https://www.w3.org/TR/SVG/painting.html#StrokeDashoffsetProperty)
+- [stroke-dashoffset](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-dashoffset)
   - TR
+      - [Fill & Stroke - stroke-dashoffset](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-dashoffset)
       - [SVG 1.1 - stroke-dashoffset](https://www.w3.org/TR/SVG/painting.html#StrokeDashoffsetProperty)
       - [SVG 2 - stroke-dashoffset](https://www.w3.org/TR/svg2/painting.html#StrokeDashoffsetProperty)
   - Drafts
-      - [Fill & Stroke - stroke-dashoffset](https://drafts.fxtf.org/paint/#propdef-stroke-dashoffset)
+      - [Fill & Stroke - stroke-dashoffset](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-dashoffset)
       - [SVG 2 - stroke-dashoffset](https://svgwg.org/svg2-draft/painting.html#StrokeDashoffsetProperty)
   - Values: `PERCENTAGE | LENGTH_OR_NUM;`
-- [stroke-linecap](https://www.w3.org/TR/SVG/painting.html#StrokeLinecapProperty)
+- [stroke-linecap](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-linecap)
   - TR
+      - [Fill & Stroke - stroke-linecap](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-linecap)
       - [SVG 1.1 - stroke-linecap](https://www.w3.org/TR/SVG/painting.html#StrokeLinecapProperty)
       - [SVG 2 - stroke-linecap](https://www.w3.org/TR/svg2/painting.html#StrokeLinecapProperty)
   - Drafts
-      - [Fill & Stroke - stroke-linecap](https://drafts.fxtf.org/paint/#propdef-stroke-linecap)
+      - [Fill & Stroke - stroke-linecap](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-linecap)
       - [SVG 2 - stroke-linecap](https://svgwg.org/svg2-draft/painting.html#StrokeLinecapProperty)
   - Values: `butt | round | square;`
-- [stroke-linejoin](https://www.w3.org/TR/SVG/painting.html#StrokeLinejoinProperty)
+- [stroke-linejoin](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-linejoin)
   - TR
+      - [Fill & Stroke - stroke-linejoin](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-linejoin)
       - [SVG 1.1 - stroke-linejoin](https://www.w3.org/TR/SVG/painting.html#StrokeLinejoinProperty)
       - [SVG 2 - stroke-linejoin](https://www.w3.org/TR/svg2/painting.html#StrokeLinejoinProperty)
   - Drafts
-      - [Fill & Stroke - stroke-linejoin](https://drafts.fxtf.org/paint/#propdef-stroke-linejoin)
+      - [Fill & Stroke - stroke-linejoin](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-linejoin)
       - [SVG 2 - stroke-linejoin](https://svgwg.org/svg2-draft/painting.html#StrokeLinejoinProperty)
   - Values: `miter | round | bevel;`
-- [stroke-miterlimit](https://www.w3.org/TR/SVG/painting.html#StrokeMiterlimitProperty)
+- [stroke-miterlimit](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-miterlimit)
   - TR
+      - [Fill & Stroke - stroke-miterlimit](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-miterlimit)
       - [SVG 1.1 - stroke-miterlimit](https://www.w3.org/TR/SVG/painting.html#StrokeMiterlimitProperty)
       - [SVG 2 - stroke-miterlimit](https://www.w3.org/TR/svg2/painting.html#StrokeMiterlimitProperty)
   - Drafts
-      - [Fill & Stroke - stroke-miterlimit](https://drafts.fxtf.org/paint/#propdef-stroke-miterlimit)
+      - [Fill & Stroke - stroke-miterlimit](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-miterlimit)
       - [SVG 2 - stroke-miterlimit](https://svgwg.org/svg2-draft/painting.html#StrokeMiterlimitProperty)
   - Values: `NUM;`
-- [stroke-opacity](https://www.w3.org/TR/SVG/painting.html#StrokeOpacityProperty)
+- [stroke-opacity](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-opacity)
   - TR
+      - [Fill & Stroke - stroke-opacity](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-opacity)
       - [SVG 1.1 - stroke-opacity](https://www.w3.org/TR/SVG/painting.html#StrokeOpacityProperty)
       - [SVG 2 - stroke-opacity](https://www.w3.org/TR/svg2/painting.html#StrokeOpacityProperty)
   - Drafts
-      - [Fill & Stroke - stroke-opacity](https://drafts.fxtf.org/paint/#propdef-stroke-opacity)
+      - [Fill & Stroke - stroke-opacity](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-opacity)
       - [SVG 2 - stroke-opacity](https://svgwg.org/svg2-draft/painting.html#StrokeOpacityProperty)
   - Values: `OPACITY_VALUE;`
-- [stroke-width](https://www.w3.org/TR/SVG/painting.html#StrokeWidthProperty)
+- [stroke-width](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-width)
   - TR
+      - [Fill & Stroke - stroke-width](https://www.w3.org/TR/fill-stroke-3/#propdef-stroke-width)
       - [SVG 1.1 - stroke-width](https://www.w3.org/TR/SVG/painting.html#StrokeWidthProperty)
       - [SVG 2 - stroke-width](https://www.w3.org/TR/svg2/painting.html#StrokeWidthProperty)
   - Drafts
-      - [Fill & Stroke - stroke-width](https://drafts.fxtf.org/paint/#propdef-stroke-width)
+      - [Fill & Stroke - stroke-width](https://drafts.fxtf.org/fill-stroke-3/#propdef-stroke-width)
       - [SVG 2 - stroke-width](https://svgwg.org/svg2-draft/painting.html#StrokeWidthProperty)
   - Values: `PERCENTAGE | LENGTH_OR_NUM;`
 - [text-anchor](https://www.w3.org/TR/SVG/text.html#TextAnchorProperty)

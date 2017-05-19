@@ -825,6 +825,7 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
     /** @type {Object.<string,(string|number|undefined|null|Array.<?number>)>} */ this.pluginProps = {};
     /** @type {number} */ this.fragmentIndex = 1;
     /** @type {vivliostyle.selectors.AfterIfContinues} */ this.afterIfContinues = null;
+    /** @type {?adapt.css.Ident} */ this.footnotePolicy = null;
 };
 
 /**
@@ -860,6 +861,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.pluginProps = {};
     this.fragmentIndex = 1;
     this.afterIfContinues = null;
+    this.footnotePolicy = null;
 };
 
 /**
@@ -904,6 +906,7 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.pluginProps = Object.create(this.pluginProps);
     np.fragmentIndex = this.fragmentIndex;
     np.afterIfContinues = this.afterIfContinues;
+    np.footnotePolicy = this.footnotePolicy;
     return np;
 };
 

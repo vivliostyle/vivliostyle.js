@@ -731,9 +731,15 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
     return frame.result();
 };
 
-adapt.ops.StyleInstance.prototype.createLayoutConstraint = function() {
+/**
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} pageFloatLayoutContext
+ * @returns {!adapt.layout.LayoutConstraint}
+ */
+adapt.ops.StyleInstance.prototype.createLayoutConstraint = function(pageFloatLayoutContext) {
     var pageIndex = this.currentLayoutPosition.page - 1;
-    return this.counterStore.createLayoutConstraint(pageIndex);
+    var counterConstraint = this.counterStore.createLayoutConstraint(pageIndex);
+    return new adapt.layout.AllLayoutConstraint(
+        [counterConstraint].concat(pageFloatLayoutContext.getLayoutConstraints()));
 };
 
 /**
@@ -751,14 +757,13 @@ adapt.ops.StyleInstance.prototype.createLayoutConstraint = function() {
  * @param {number} columnWidth
  * @param {adapt.geom.Shape} innerShape
  * @param {!adapt.vtree.LayoutContext} layoutContext
- * @param {!adapt.layout.LayoutConstraint} layoutConstraint
  * @returns {!adapt.task.Result.<!adapt.layout.Column>}
  */
 adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, offsetX, offsetY, exclusions,
                                                                    layoutContainer, currentColumnIndex,
                                                                    flowNameStr, regionPageFloatLayoutContext,
                                                                    columnCount, columnGap, columnWidth,
-                                                                   innerShape, layoutContext, layoutConstraint) {
+                                                                   innerShape, layoutContext) {
     var self = this;
     var dontApplyExclusions = boxInstance.vertical
         ? boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth
@@ -771,6 +776,7 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
     /** @type {!adapt.task.Frame<!adapt.layout.Column>} */ var frame = adapt.task.newFrame("createAndLayoutColumn");
     var column;
     frame.loopWithFrame(function(loopFrame) {
+        var layoutConstraint = self.createLayoutConstraint(columnPageFloatLayoutContext);
         if (columnCount > 1) {
             var columnContainer = self.viewport.document.createElement("div");
             adapt.base.setCSSProperty(columnContainer, "position", "absolute");
@@ -938,13 +944,12 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
             self.viewport, self.styler, regionIds, self.xmldoc, self.faces,
             self.style.footnoteProps, self, page, self.customRenderer,
             self.fallbackMap, this.documentURLTransformer);
-        var layoutConstraint = this.createLayoutConstraint();
         var columnIndex = 0;
         var column = null;
         frame.loopWithFrame(function(loopFrame) {
             self.createAndLayoutColumn(boxInstance, offsetX, offsetY, exclusions, layoutContainer,
                 columnIndex++, flowNameStr, regionPageFloatLayoutContext, columnCount, columnGap,
-                columnWidth, innerShape, layoutContext, layoutConstraint).then(function(c) {
+                columnWidth, innerShape, layoutContext).then(function(c) {
                     if (pagePageFloatLayoutContext.isInvalidated()) {
                         loopFrame.breakLoop();
                         return;

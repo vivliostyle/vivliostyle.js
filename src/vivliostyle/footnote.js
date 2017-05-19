@@ -29,11 +29,13 @@ goog.scope(function() {
      * @param {!adapt.vtree.NodePosition} nodePosition
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @param {string} flowName
+     * @param {?adapt.css.Ident} footnotePolicy
      * @constructor
      * @extends vivliostyle.pagefloat.PageFloat
      */
-    vivliostyle.footnote.Footnote = function(nodePosition, floatReference, flowName) {
+    vivliostyle.footnote.Footnote = function(nodePosition, floatReference, flowName, footnotePolicy) {
         PageFloat.call(this, nodePosition, floatReference, "block-end", flowName);
+        /** @const */ this.footnotePolicy = footnotePolicy;
     };
     /** @const */ var Footnote = vivliostyle.footnote.Footnote;
     goog.inherits(Footnote, PageFloat);
@@ -77,11 +79,26 @@ goog.scope(function() {
     };
 
     /**
+     * @param {!Footnote} footnote
+     * @constructor
+     * @implements {adapt.layout.LayoutConstraint}
+     */
+    vivliostyle.footnote.LineFootnotePolicyLayoutConstraint = function(footnote) {
+        /** @const */ this.footnote = footnote;
+    };
+    /** @const */ var LineFootnotePolicyLayoutConstraint = vivliostyle.footnote.LineFootnotePolicyLayoutConstraint;
+
+    LineFootnotePolicyLayoutConstraint.prototype.allowLayout = function(nodeContext) {
+        var nodePosition = nodeContext.toNodePosition();
+        return !adapt.vtree.isSameNodePosition(nodePosition, this.footnote.nodePosition);
+    };
+
+    /**
      * @constructor
      * @implements {vivliostyle.pagefloat.PageFloatLayoutStrategy}
      */
-    vivliostyle.pagefloat.FootnoteLayoutStrategy = function() {};
-    /** @const */ var FootnoteLayoutStrategy = vivliostyle.pagefloat.FootnoteLayoutStrategy;
+    vivliostyle.footnote.FootnoteLayoutStrategy = function() {};
+    /** @const */ var FootnoteLayoutStrategy = vivliostyle.footnote.FootnoteLayoutStrategy;
 
     /**
      * @override
@@ -115,7 +132,7 @@ goog.scope(function() {
         goog.asserts.assert(pageFloatLayoutContext.flowName);
         /** @type {!vivliostyle.pagefloat.PageFloat} */ var float =
             new vivliostyle.footnote.Footnote(nodePosition, floatReference,
-                pageFloatLayoutContext.flowName);
+                pageFloatLayoutContext.flowName, nodeContext.footnotePolicy);
         pageFloatLayoutContext.addPageFloat(float);
         return adapt.task.newResult(float);
     };
@@ -154,6 +171,19 @@ goog.scope(function() {
         floatArea.convertPercentageSizesToPx(element);
         column.setComputedInsets(element, floatArea);
         column.setComputedWidthAndHeight(element, floatArea);
+    };
+
+    /**
+     * @override
+     */
+    FootnoteLayoutStrategy.prototype.forbid = function(float, pageFloatLayoutContext) {
+        var footnote = /** @type {!Footnote} */ (float);
+        switch (footnote.footnotePolicy) {
+            case adapt.css.ident.line:
+                var constraint = new LineFootnotePolicyLayoutConstraint(footnote);
+                pageFloatLayoutContext.addLayoutConstraint(constraint, footnote.floatReference);
+                break;
+        }
     };
 
     vivliostyle.pagefloat.PageFloatLayoutStrategyResolver.register(new FootnoteLayoutStrategy());

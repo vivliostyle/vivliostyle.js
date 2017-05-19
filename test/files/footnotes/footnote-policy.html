@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>footnote-policy</title>
+  <style>
+    @page {
+      size: 850px 220px;
+    }
+    @-epubx-page-template {
+      .region {
+        width: 200px;
+        height: 200px;
+        top: 10px;
+        outline: rgba(255, 0, 0, 0.5) solid 2px;
+      }
+      @-epubx-page-master {
+        @-epubx-partition class(region) {
+          -epubx-flow-from: body;
+          left: 640px;
+        }
+        @-epubx-partition class(region) {
+          -epubx-flow-from: body;
+          left: 430px;
+        }
+        @-epubx-partition class(region) {
+          -epubx-flow-from: body;
+          left: 220px;
+        }
+        @-epubx-partition class(region) {
+          -epubx-flow-from: body;
+          left: 10px;
+        }
+      }
+    }
+    :root {
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+      line-height: 20px;
+      widows: 2;
+      orphans: 2;
+      counter-reset: footnote;
+    }
+    body, p {
+      margin: 0;
+    }
+    .footnote {
+      float: footnote;
+      counter-increment: footnote;
+    }
+    .footnote::footnote-marker, .footnote::footnote-call {
+      content: "[" counter(footnote) "]";
+      color: blue;
+    }
+    .policy-line {
+      footnote-policy: line;
+    }
+    .policy-block {
+      footnote-policy: block;
+    }
+  </style>
+</head>
+<body>
+<p>
+  Footnote [1] should be in the 2nd region.<br>
+  Line 3 in region 1<br>
+  Line 4 in region 1<br>
+  Line 5 in region 1<br>
+  Line 6 in region 1<br>
+  Line 7 in region 1<br>
+  Line 8<span class="footnote">footnote 1</span> in region 1<br>
+  Line 9 in region 1<br>
+  Line 10 in region 1<br>
+  Footnote [2] should be in the 3rd region.<br>
+  Line 3 in region 2<br>
+  Line 4 in region 2<br>
+  Line 5 in region 2<br>
+  Line 6 in region 2<br>
+  Line 1<span class="footnote policy-line">footnote 2</span> in region 3<br>
+  Line 2 in region 3<br>
+  Line 3 in region 3
+</p>
+<p>
+  Line 1 in region 4<br>
+  Line 2 in region 4<br>
+  Line 3<span class="footnote policy-block">footnote 3</span> in region 4
+</p>
+</body>
+</html>

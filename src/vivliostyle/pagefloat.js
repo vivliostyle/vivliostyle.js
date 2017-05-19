@@ -363,6 +363,7 @@ goog.scope(function() {
         var previousSibling = this.getPreviousSibling();
         /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} */
         this.floatsDeferredFromPrevious = previousSibling ? [].concat(previousSibling.floatsDeferredToNext) : [];
+        /** @private @const {!Array<!adapt.layout.LayoutConstraint>} */ this.layoutConstraints = [];
     };
     /** @const */ var PageFloatLayoutContext = vivliostyle.pagefloat.PageFloatLayoutContext;
 
@@ -480,6 +481,8 @@ goog.scope(function() {
         if (floatReference === this.floatReference) {
             if (this.forbiddenFloats.indexOf(id) < 0) {
                 this.forbiddenFloats.push(id);
+                var strategy = new PageFloatLayoutStrategyResolver().findByFloat(float);
+                strategy.forbid(float, this);
             }
         } else {
             var parent = this.getParent(floatReference);
@@ -808,6 +811,9 @@ goog.scope(function() {
             }, this);
             this.container.clear();
         }
+        this.children.forEach(function(child) {
+            child.layoutConstraints.splice(0);
+        });
         this.children.splice(0);
         Object.keys(this.floatAnchors).forEach(function(k) {
             delete this.floatAnchors[k];
@@ -1258,6 +1264,26 @@ goog.scope(function() {
     };
 
     /**
+     * @returns {!Array.<!adapt.layout.LayoutConstraint>}
+     */
+    PageFloatLayoutContext.prototype.getLayoutConstraints = function() {
+        var constraints = this.parent ? this.parent.getLayoutConstraints() : [];
+        return constraints.concat(this.layoutConstraints);
+    };
+
+    /**
+     * @param {!adapt.layout.LayoutConstraint} layoutConstraint
+     * @param {!FloatReference} floatReference
+     */
+    PageFloatLayoutContext.prototype.addLayoutConstraint = function(layoutConstraint, floatReference) {
+        if (floatReference === this.floatReference) {
+            this.layoutConstraints.push(layoutConstraint);
+        } else {
+            this.getParent(floatReference).addLayoutConstraint(layoutConstraint, floatReference);
+        }
+    };
+
+    /**
      * @interface
      */
     vivliostyle.pagefloat.PageFloatLayoutStrategy = function() {};
@@ -1307,6 +1333,12 @@ goog.scope(function() {
      */
     PageFloatLayoutStrategy.prototype.adjustPageFloatArea =
         function(floatArea, floatContainer, column) {};
+
+    /**
+     * @param {!PageFloat} float
+     * @param {!PageFloatLayoutContext} pageFloatLayoutContext
+     */
+    PageFloatLayoutStrategy.prototype.forbid = function(float, pageFloatLayoutContext) {};
 
     /** @const {Array<!PageFloatLayoutStrategy>} */
     var pageFloatLayoutStrategies = [];
@@ -1416,6 +1448,11 @@ goog.scope(function() {
      */
     NormalPageFloatLayoutStrategy.prototype.adjustPageFloatArea = function(
         floatArea, floatContainer, column) {};
+
+    /**
+     * @override
+     */
+    NormalPageFloatLayoutStrategy.prototype.forbid = function(float, pageFloatLayoutContext) {};
 
     PageFloatLayoutStrategyResolver.register(new NormalPageFloatLayoutStrategy());
 });

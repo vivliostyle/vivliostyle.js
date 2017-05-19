@@ -925,6 +925,7 @@ adapt.css.ident = {
     inline_start: adapt.css.getName("inline-start"),
     landscape: adapt.css.getName("landscape"),
     left: adapt.css.getName("left"),
+    line: adapt.css.getName("line"),
     list_item: adapt.css.getName("list-item"),
     ltr: adapt.css.getName("ltr"),
     manual: adapt.css.getName("manual"),
