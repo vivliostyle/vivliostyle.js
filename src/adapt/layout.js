@@ -763,6 +763,7 @@ adapt.layout.Column.prototype.maybePeelOff = function(position, count) {
  */
 adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, checkPoints) {
     var self = this;
+    var violateConstraint = false;
     /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
         = adapt.task.newFrame("buildViewToNextBlockEdge");
     frame.loopWithFrame(function(bodyFrame) {
@@ -782,13 +783,10 @@ adapt.layout.Column.prototype.buildViewToNextBlockEdge = function(position, chec
                     bodyFrame.breakLoop();
                     return;
                 }
-                if (!self.layoutConstraint.allowLayout(position)) {
+                if (violateConstraint || !self.layoutConstraint.allowLayout(position)) {
+                    violateConstraint = true;
                     position = position.modify();
                     position.overflow = true;
-                    if (self.stopAtOverflow) {
-                        bodyFrame.breakLoop();
-                        return;
-                    }
                 }
                 if (self.isFloatNodeContext(position) && !self.vertical) {
                     self.layoutFloatOrFootnote(position).then(function(positionParam) {
@@ -2260,11 +2258,30 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
     // Select the first overflowing line break position
     var linePositions = this.findLinePositions(checkPoints);
     var edge = this.footnoteEdge - clonedPaddingBorder;
+    var dir = this.getBoxDir();
     var repetitiveElementsOffset = this.getOffsetByRepetitiveElements(bp);
-    edge -= this.getBoxDir() * repetitiveElementsOffset;
+    edge -= dir * repetitiveElementsOffset;
+
+    // If an "overflowing" checkpoint (e.g. not allowed by LayoutConstraint) exists before the edge,
+    // a line containing the checkpoint should be deferred to the next column.
+    var firstOverflowing = this.findFirstOverflowingEdgeAndCheckPoint(checkPoints);
+    if (isNaN(firstOverflowing.edge))
+        firstOverflowing.edge = dir * Infinity;
     var lineIndex = adapt.base.binarySearch(linePositions.length, function(i) {
-        return self.vertical ? linePositions[i] < edge : linePositions[i] > edge;
+        var p = linePositions[i];
+        return self.vertical ?
+            (p < edge || p <= firstOverflowing.edge) :
+            (p > edge || p >= firstOverflowing.edge);
     });
+    // If no break point is found due to the "overflowing" checkpoint,
+    // give up deferring a line containing the checkpoint and try to cut the line just before it.
+    var forceCutBeforeOverflowing = lineIndex <= 0;
+    if (forceCutBeforeOverflowing) {
+        lineIndex = adapt.base.binarySearch(linePositions.length, function(i) {
+            return self.vertical ? linePositions[i] < edge : linePositions[i] > edge;
+        });
+    }
+
     // First edge after the one that both fits and satisfies widows constraint.
     lineIndex = Math.min(linePositions.length - widows, lineIndex);
     if (lineIndex < orphans) {
@@ -2272,12 +2289,33 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
         return null;
     }
     edge = linePositions[lineIndex-1];
-    var nodeContext = this.findAcceptableBreakInside(bp.checkPoints, edge, force);
+    var nodeContext;
+    if (forceCutBeforeOverflowing) {
+        nodeContext = firstOverflowing.checkPoint;
+    } else {
+        nodeContext = this.findAcceptableBreakInside(bp.checkPoints, edge, force);
+    }
     if (nodeContext) {
         this.computedBlockSize =
-            this.getBoxDir() * (edge - this.beforeEdge) + repetitiveElementsOffset;
+            dir * (edge - this.beforeEdge) + repetitiveElementsOffset;
     }
     return nodeContext;
+};
+
+/**
+ * @param {Array.<adapt.vtree.NodeContext>} checkPoints
+ * @returns {!{edge: number, checkPoint: ?adapt.vtree.NodeContext}}
+ */
+adapt.layout.Column.prototype.findFirstOverflowingEdgeAndCheckPoint = function(checkPoints) {
+    var index = checkPoints.findIndex(function(cp) {
+        return cp.overflow;
+    });
+    if (index < 0) return { edge: NaN, checkPoint: null };
+    var cp = checkPoints[index];
+    return {
+        edge: this.calculateEdge(null, checkPoints, index, cp.boxOffset),
+        checkPoint: cp
+    };
 };
 
 /**
