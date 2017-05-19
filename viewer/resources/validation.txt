@@ -440,6 +440,9 @@ mix-blend-mode = BLEND_MODE;
 isolation = auto | isolate;
 background-blend-mode = COMMA( BLEND_MODE+ );
 
+/* CSS GCPM */
+footnote-policy = auto | line;
+
 [viv]repeat-on-break = auto | none | header | footer;
 
 DEFAULTS

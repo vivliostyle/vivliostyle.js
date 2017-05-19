@@ -877,6 +877,11 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 - [float-reference](https://drafts.csswg.org/css-page-floats-3/#propdef-float-reference)
   - Supported in all browsers
 
+## [CSS GCPM 3](https://www.w3.org/TR/css-gcpm-3/)
+- [footnote-policy](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy)
+  - Supports [`auto`, `line`](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy) values.
+  - Supported in all browsers
+
 ## [Filter Effects 1](https://www.w3.org/TR/filter-effects-1/)
 - [filter](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
   - Allowed prefixes: webkit
