@@ -46,6 +46,7 @@ var orderedSpecs = [
     "css-page-floats-3",
     "filters-1",
     "compositing-1",
+    "css-gcpm-3",
     "svg",
     "svg2",
     "uncategorized"
