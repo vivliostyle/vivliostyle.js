@@ -40,13 +40,14 @@ URLParameterStore.prototype.getParameter = function(name) {
     var results = [];
     var r;
     while (r = regexp.exec(url)) {
-        results.push(r[1]);
+        results.push(stringUtil.percentDecodeAmpersandAndPercent(r[1]));
     }
     return results;
 };
 
 URLParameterStore.prototype.setParameter = function(name, value) {
     var url = this.location.href;
+    value = stringUtil.percentEncodeAmpersandAndPercent(value);
     var updated;
     var regexp = getRegExpForParameter(name);
     var r = regexp.exec(url);

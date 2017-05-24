@@ -52,6 +52,11 @@ describe("URLParameterStore", function() {
 
             expect(urlParameters.getParameter("aa")).toEqual(["bb"]);
             expect(urlParameters.getParameter("cc")).toEqual(["dd", "ee"]);
+
+            urlParameters.location = {href: "http://example.com#aa=b#b&cc=dd&cc=ee"};
+
+            expect(urlParameters.getParameter("aa")).toEqual(["b#b"]);
+            expect(urlParameters.getParameter("cc")).toEqual(["dd", "ee"]);
         });
 
         it("can retrieve a value for a unicode key", function() {
@@ -59,6 +64,13 @@ describe("URLParameterStore", function() {
             urlParameters.location = {href: "http://example.com#aa=bb&" + key + "=dd"};
 
             expect(urlParameters.getParameter(key)).toEqual(["dd"]);
+        });
+
+        it("can retrieve values containing '=', percent-encoded '&' and '%'", function() {
+            urlParameters.location = {href: "http://example.com#aa=foo%2525bar%26baz&bb=c=d"};
+
+            expect(urlParameters.getParameter("aa")).toEqual(["foo%25bar&baz"]);
+            expect(urlParameters.getParameter("bb")).toEqual(["c=d"]);
         });
     });
 
@@ -97,6 +109,14 @@ describe("URLParameterStore", function() {
             urlParameters.setParameter("あいうえお", "さしすせそ");
 
             expect(urlParameters.location.href).toBe("http://example.com#あいうえお=さしすせそ");
+        });
+
+        it("can set values containing '=', '&' and '%'", function() {
+            urlParameters.location = {href: "http://example.com#aa=bb"};
+            urlParameters.setParameter("aa", "foo%25bar&baz");
+            urlParameters.setParameter("bb", "c=d");
+
+            expect(urlParameters.location.href).toBe("http://example.com#aa=foo%2525bar%26baz&bb=c=d");
         });
 
         it("use history.replaceState if available", function() {

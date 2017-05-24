@@ -23,5 +23,11 @@ export default {
     },
     escapeUnicodeString: function(str) {
         return str.replace(/[^-a-zA-Z0-9_]/g, this.escapeUnicodeChar);
+    },
+    percentEncodeAmpersandAndPercent: function(str) {
+        return str.replace(/%/g, "%25").replace(/&/g, "%26");
+    },
+    percentDecodeAmpersandAndPercent: function(str) {
+        return str.replace(/%26/g, "&").replace(/%25/g, "%");
     }
 };
