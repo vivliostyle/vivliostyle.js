@@ -24,7 +24,7 @@ import PageSize from "./page-size";
 function getDocumentOptionsFromURL() {
     var epubUrl = urlParameters.getParameter("b");
     var url = urlParameters.getParameter("x");
-    var fragment = urlParameters.getParameter("f");
+    var fragment = urlParameters.getParameter("f", true);
     var style = urlParameters.getParameter("style");
     var userStyle = urlParameters.getParameter("userStyle");
     return {
@@ -48,7 +48,7 @@ function DocumentOptions() {
     // write fragment back to URL when updated
     this.fragment.subscribe(function(fragment) {
         var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
-        urlParameters.setParameter("f", encoded);
+        urlParameters.setParameter("f", encoded, true);
     });
 }
 

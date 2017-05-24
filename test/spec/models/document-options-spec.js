@@ -36,12 +36,12 @@ describe("DocumentOptions", function() {
 
     describe("constructor", function() {
         it("retrieves parameters from URL", function() {
-            urlParameters.location = {href: "http://example.com#x=abc/def.html&f=ghi&x=jkl/mno.html"};
+            urlParameters.location = {href: "http://example.com#x=abc/def.html&f=ghi%25&x=jkl/mno.html"};
             var options = new DocumentOptions();
 
             expect(options.epubUrl()).toBe("");
             expect(options.url()).toEqual(["abc/def.html", "jkl/mno.html"]);
-            expect(options.fragment()).toBe("ghi");
+            expect(options.fragment()).toBe("ghi%25");
             expect(options.userStyleSheet()).toEqual([]);
 
             urlParameters.location = {href: "http://example.com#b=abc/&f=ghi&style=style1&style=style2&userStyle=style3"};
@@ -58,9 +58,9 @@ describe("DocumentOptions", function() {
     it("write fragment back to URL when updated", function() {
         urlParameters.location = {href: "http://example.com#x=abc/def.html&f=ghi"};
         var options = new DocumentOptions();
-        options.fragment("jkl");
+        options.fragment("jkl%25");
 
-        expect(urlParameters.location.href).toBe("http://example.com#x=abc/def.html&f=jkl");
+        expect(urlParameters.location.href).toBe("http://example.com#x=abc/def.html&f=jkl%25");
     });
 
     describe("toObject", function() {
