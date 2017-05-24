@@ -6952,7 +6952,7 @@ var _pageSize2 = _interopRequireDefault(_pageSize);
 function getDocumentOptionsFromURL() {
     var epubUrl = _storesUrlParameters2["default"].getParameter("b");
     var url = _storesUrlParameters2["default"].getParameter("x");
-    var fragment = _storesUrlParameters2["default"].getParameter("f");
+    var fragment = _storesUrlParameters2["default"].getParameter("f", true);
     var style = _storesUrlParameters2["default"].getParameter("style");
     var userStyle = _storesUrlParameters2["default"].getParameter("userStyle");
     return {
@@ -6976,7 +6976,7 @@ function DocumentOptions() {
     // write fragment back to URL when updated
     this.fragment.subscribe(function (fragment) {
         var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
-        _storesUrlParameters2["default"].setParameter("f", encoded);
+        _storesUrlParameters2["default"].setParameter("f", encoded, true);
     });
 }
 
@@ -7591,20 +7591,22 @@ URLParameterStore.prototype.getBaseURL = function () {
     return url.replace(/\/[^/]*$/, "/");
 };
 
-URLParameterStore.prototype.getParameter = function (name) {
+URLParameterStore.prototype.getParameter = function (name, dontPercentDecode) {
     var url = this.location.href;
     var regexp = getRegExpForParameter(name);
     var results = [];
     var r;
     while (r = regexp.exec(url)) {
-        results.push(_utilsStringUtil2["default"].percentDecodeAmpersandAndPercent(r[1]));
+        var value = r[1];
+        if (!dontPercentDecode) value = _utilsStringUtil2["default"].percentDecodeAmpersandAndPercent(value);
+        results.push(value);
     }
     return results;
 };
 
-URLParameterStore.prototype.setParameter = function (name, value) {
+URLParameterStore.prototype.setParameter = function (name, value, dontPercentEncode) {
     var url = this.location.href;
-    value = _utilsStringUtil2["default"].percentEncodeAmpersandAndPercent(value);
+    if (!dontPercentEncode) value = _utilsStringUtil2["default"].percentEncodeAmpersandAndPercent(value);
     var updated;
     var regexp = getRegExpForParameter(name);
     var r = regexp.exec(url);
