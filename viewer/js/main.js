@@ -7597,13 +7597,14 @@ URLParameterStore.prototype.getParameter = function (name) {
     var results = [];
     var r;
     while (r = regexp.exec(url)) {
-        results.push(r[1]);
+        results.push(_utilsStringUtil2["default"].percentDecodeAmpersandAndPercent(r[1]));
     }
     return results;
 };
 
 URLParameterStore.prototype.setParameter = function (name, value) {
     var url = this.location.href;
+    value = _utilsStringUtil2["default"].percentEncodeAmpersandAndPercent(value);
     var updated;
     var regexp = getRegExpForParameter(name);
     var r = regexp.exec(url);
@@ -7762,20 +7763,26 @@ module.exports = exports["default"];
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-'use strict';
+"use strict";
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports['default'] = {
+exports["default"] = {
     escapeUnicodeChar: function escapeUnicodeChar(ch) {
-        return '\\u' + (0x10000 | ch.charCodeAt(0)).toString(16).substring(1);
+        return "\\u" + (0x10000 | ch.charCodeAt(0)).toString(16).substring(1);
     },
     escapeUnicodeString: function escapeUnicodeString(str) {
         return str.replace(/[^-a-zA-Z0-9_]/g, this.escapeUnicodeChar);
+    },
+    percentEncodeAmpersandAndPercent: function percentEncodeAmpersandAndPercent(str) {
+        return str.replace(/%/g, "%25").replace(/&/g, "%26");
+    },
+    percentDecodeAmpersandAndPercent: function percentDecodeAmpersandAndPercent(str) {
+        return str.replace(/%26/g, "&").replace(/%25/g, "%");
     }
 };
-module.exports = exports['default'];
+module.exports = exports["default"];
 
 },{}],17:[function(require,module,exports){
 /*
