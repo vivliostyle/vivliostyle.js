@@ -34,20 +34,22 @@ URLParameterStore.prototype.getBaseURL = function() {
     return url.replace(/\/[^/]*$/, "/");
 };
 
-URLParameterStore.prototype.getParameter = function(name) {
+URLParameterStore.prototype.getParameter = function(name, dontPercentDecode) {
     var url = this.location.href;
     var regexp = getRegExpForParameter(name);
     var results = [];
     var r;
     while (r = regexp.exec(url)) {
-        results.push(stringUtil.percentDecodeAmpersandAndPercent(r[1]));
+        var value = r[1];
+        if (!dontPercentDecode) value = stringUtil.percentDecodeAmpersandAndPercent(value);
+        results.push(value);
     }
     return results;
 };
 
-URLParameterStore.prototype.setParameter = function(name, value) {
+URLParameterStore.prototype.setParameter = function(name, value, dontPercentEncode) {
     var url = this.location.href;
-    value = stringUtil.percentEncodeAmpersandAndPercent(value);
+    if (!dontPercentEncode) value = stringUtil.percentEncodeAmpersandAndPercent(value);
     var updated;
     var regexp = getRegExpForParameter(name);
     var r = regexp.exec(url);

@@ -72,6 +72,12 @@ describe("URLParameterStore", function() {
             expect(urlParameters.getParameter("aa")).toEqual(["foo%25bar&baz"]);
             expect(urlParameters.getParameter("bb")).toEqual(["c=d"]);
         });
+
+        it("does not percent-decode when dontPercentDecode=true", function() {
+            urlParameters.location = {href: "http://example.com#aa=foo%2525bar%26baz"};
+
+            expect(urlParameters.getParameter("aa", true)).toEqual(["foo%2525bar%26baz"]);
+        });
     });
 
     describe("setParameter", function() {
@@ -117,6 +123,13 @@ describe("URLParameterStore", function() {
             urlParameters.setParameter("bb", "c=d");
 
             expect(urlParameters.location.href).toBe("http://example.com#aa=foo%2525bar%26baz&bb=c=d");
+        });
+
+        it("does not percent-encode when dontPercentEncode=true", function() {
+            urlParameters.location = {href: "http://example.com#aa=bb"};
+            urlParameters.setParameter("aa", "foo%25bar", true);
+
+            expect(urlParameters.location.href).toBe("http://example.com#aa=foo%25bar");
         });
 
         it("use history.replaceState if available", function() {
