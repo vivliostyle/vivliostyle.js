@@ -82,23 +82,23 @@ describe("layout", function() {
             });
         });
 
-        describe("#resolveHyphenateCharacter", function() {
-            it("returns a value of `hyphenateCharacter` in the nodeContext.", function() {
-                expect(breaker.resolveHyphenateCharacter({
-                    hyphenateCharacter: 'a',
-                    parent: { hyphenateCharacter: 'b' }
-                })).toEqual('a');
-            });
-            it("returns a value of `hyphenateCharacter` in the parent nodeContext if nodeContext's `hyphenateCharacter` is undefined.", function() {
-                expect(breaker.resolveHyphenateCharacter({
-                    parent: { hyphenateCharacter: 'b' }
-                })).toEqual('b');
-            });
-            it("returns a default value if `hyphenateCharacter` of nodeContext and parent nodeContext are undefined.", function() {
-                expect(breaker.resolveHyphenateCharacter({})).toEqual('-');
-            });
-        });
+    });
 
+    describe("adapt.layout.resolveHyphenateCharacter", function() {
+        it("returns a value of `hyphenateCharacter` in the nodeContext.", function() {
+            expect(adapt.layout.resolveHyphenateCharacter({
+                hyphenateCharacter: 'a',
+                parent: { hyphenateCharacter: 'b' }
+            })).toEqual('a');
+        });
+        it("returns a value of `hyphenateCharacter` in the parent nodeContext if nodeContext's `hyphenateCharacter` is undefined.", function() {
+            expect(adapt.layout.resolveHyphenateCharacter({
+                parent: { hyphenateCharacter: 'b' }
+            })).toEqual('b');
+        });
+        it("returns a default value if `hyphenateCharacter` of nodeContext and parent nodeContext are undefined.", function() {
+            expect(adapt.layout.resolveHyphenateCharacter({})).toEqual('-');
+        });
     });
 
 });
