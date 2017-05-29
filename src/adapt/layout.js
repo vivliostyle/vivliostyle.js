@@ -1663,6 +1663,49 @@ adapt.layout.Column.prototype.layoutPageFloat = function(nodeContext) {
 };
 
 /**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {boolean} insertAfter
+ * @param {Node} node
+ * @param {Node} insertionPoint
+ */
+adapt.layout.fixJustificationOnHyphen = function(nodeContext, insertAfter, node, insertionPoint) {
+    if (adapt.base.checkSoftWrapOpportunityAfterHyphenBug(document.body)) {
+        var hyphenChar = adapt.layout.resolveHyphenateCharacter(nodeContext);
+        var prevSibling = insertAfter ? node : node.previousSibling;
+        var prevText = prevSibling ? prevSibling.textContent : "";
+        if (prevText.charAt(prevText.length - 1) === hyphenChar) {
+            var doc = node.ownerDocument;
+            var parent = node.parentNode;
+            if (adapt.base.checkSoftWrapOpportunityByWbrBug(document.body)) {
+                // For IE
+                parent.insertBefore(doc.createTextNode(" "), insertionPoint);
+            } else {
+                // For Edge
+                parent.insertBefore(doc.createElement("wbr"), insertionPoint);
+            }
+        }
+    }
+};
+
+/**
+ * @param {Element} span
+ * @param {Element} br
+ * @param {adapt.vtree.NodeContext} nodeContext
+ */
+adapt.layout.Column.prototype.compensateJustificationLineHeight = function(span, br, nodeContext) {
+    var spanRect = this.clientLayout.getElementClientRect(span);
+    var brRect = this.clientLayout.getElementClientRect(br);
+    if (nodeContext.vertical) {
+        br.style.marginRight = (brRect.right - spanRect.right) + "px";
+        br.style.width = "0px";
+    } else {
+        br.style.marginTop = (spanRect.top - brRect.top) + "px";
+        br.style.height = "0px";
+    }
+    br.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
+};
+
+/**
  * Fix justification of the last line of text broken across pages (if
  * needed).
  * @param {adapt.vtree.NodeContext} nodeContext
@@ -1678,34 +1721,26 @@ adapt.layout.Column.prototype.fixJustificationIfNeeded = function(nodeContext, e
         if (node.nodeType != 1)
             continue;
         textAlign = (/** @type {HTMLElement} */ (node)).style.textAlign;
-        if (!endOfColumn)
-            break;
     }
     if (endOfColumn && textAlign != "justify")
         return;
+
     node = nodeContext.viewNode;
     var doc = node.ownerDocument;
-    var span = adapt.layout.createJustificationAdjustmentElement(doc, nodeContext.vertical);
-    var insertionPoint = endOfColumn && (nodeContext.after || node.nodeType != 1) ? node.nextSibling : node;
+    var insertAfter = endOfColumn && (nodeContext.after || node.nodeType != 1);
+    var insertionPoint = insertAfter ? node.nextSibling : node;
     var parent = node.parentNode;
     if (!parent) {
         // Possible if nothing was added to the column
         return;
     }
+    var span = adapt.layout.createJustificationAdjustmentElement(doc, nodeContext.vertical);
+    adapt.layout.fixJustificationOnHyphen(nodeContext, insertAfter, node, insertionPoint);
     parent.insertBefore(span, insertionPoint);
     if (!endOfColumn) {
         var br = /** @type {HTMLElement} */ (doc.createElement("div"));
         parent.insertBefore(br, insertionPoint);
-        // TODO: see if it can be reduced
-        span.style.lineHeight = "80px";
-        if (nodeContext.vertical) {
-            br.style.marginRight = "-80px";
-            br.style.width = "0px";
-        } else {
-            br.style.marginTop = "-80px";
-            br.style.height = "0px";
-        }
-        br.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
+        this.compensateJustificationLineHeight(span, br, nodeContext);
     }
 };
 
@@ -1992,16 +2027,6 @@ adapt.layout.TextNodeBreaker.prototype.breakTextNode = function(textNode,
 };
 
 /**
- * @param {adapt.vtree.NodeContext} nodeContext
- * @return {string}
- */
-adapt.layout.TextNodeBreaker.prototype.resolveHyphenateCharacter = function(nodeContext) {
-    return nodeContext.hyphenateCharacter
-        || (nodeContext.parent && nodeContext.parent.hyphenateCharacter)
-        || "-";
-};
-
-/**
  * @param {Text} textNode
  * @param {string} text
  * @param {number} viewIndex
@@ -2012,7 +2037,7 @@ adapt.layout.TextNodeBreaker.prototype.breakAfterSoftHyphen = function(
     textNode, text, viewIndex, nodeContext) {
     // convert trailing soft hyphen to a real hyphen
     textNode.replaceData(viewIndex, text.length - viewIndex,
-        !nodeContext.breakWord ? this.resolveHyphenateCharacter(nodeContext) : "");
+        !nodeContext.breakWord ? adapt.layout.resolveHyphenateCharacter(nodeContext) : "");
     return viewIndex+1;
 };
 /**
@@ -2032,7 +2057,7 @@ adapt.layout.TextNodeBreaker.prototype.breakAfterOtherCharacter = function(
     // If automatic hyphen was inserted here, add a real hyphen.
     textNode.replaceData(viewIndex, text.length - viewIndex,
         !nodeContext.breakWord && adapt.base.isLetter(ch0) && adapt.base.isLetter(ch1)
-            ? this.resolveHyphenateCharacter(nodeContext) : "");
+            ? adapt.layout.resolveHyphenateCharacter(nodeContext) : "");
     return viewIndex;
 };
 
@@ -2050,6 +2075,16 @@ adapt.layout.TextNodeBreaker.prototype.updateNodeContext = function(nodeContext,
 };
 
 adapt.layout.TextNodeBreaker.instance = new adapt.layout.TextNodeBreaker();
+
+/**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @return {string}
+ */
+adapt.layout.resolveHyphenateCharacter = function(nodeContext) {
+    return nodeContext.hyphenateCharacter
+        || (nodeContext.parent && nodeContext.parent.hyphenateCharacter)
+        || "-";
+};
 
 /**
  * @param {Element} e
@@ -3241,12 +3276,14 @@ adapt.layout.createJustificationAdjustmentElement = function(doc, vertical) {
     var span = /** @type {HTMLElement} */ (doc.createElement("span"));
     span.style.visibility = "hidden";
     if (adapt.base.checkInlineBlockJustificationBug(document.body)) {
+        // For Chrome
         if (vertical) {
             span.style.marginTop = "100%";
         } else {
             span.style.marginLeft = "100%";
         }
     } else {
+        // For Firefox, Edge and IE
         span.style.display = "inline-block";
         if (vertical) {
             span.style.height = "100%";
@@ -3255,7 +3292,7 @@ adapt.layout.createJustificationAdjustmentElement = function(doc, vertical) {
         }
     }
     span.textContent = " #";
-    span.style.lineHeight = "80px";
+    span.style.verticalAlign = "top";
     span.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
     return span;
 };

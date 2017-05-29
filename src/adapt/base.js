@@ -989,3 +989,80 @@ adapt.base.checkInlineBlockJustificationBug = function(body) {
     }
     return adapt.base.hasInlineBlockJustificationBug;
 };
+
+/**
+ * @type {boolean|null}
+ */
+adapt.base.hasSoftWrapOpportunityAfterHyphenBug = null;
+
+/**
+ * @param {HTMLElement} body
+ * @returns {boolean}
+ */
+adapt.base.checkSoftWrapOpportunityAfterHyphenBug = function(body) {
+    if (adapt.base.hasSoftWrapOpportunityAfterHyphenBug === null) {
+        var doc = body.ownerDocument;
+        var container = /** @type {HTMLElement} */ (doc.createElement("div"));
+        container.style.position = "absolute";
+        container.style.top = "0px";
+        container.style.left = "0px";
+        container.style.width = "40px";
+        container.style.height = "100px";
+        container.style.lineHeight = "16px";
+        container.style.fontSize = "16px";
+        container.style.textAlign = "justify";
+        body.appendChild(container);
+        var t = doc.createTextNode("a a-");
+        container.appendChild(t);
+        var inlineBlock = doc.createElement("span");
+        inlineBlock.style.display = "inline-block";
+        inlineBlock.style.width = "40px";
+        container.appendChild(inlineBlock);
+        var range = doc.createRange();
+        range.setStart(t, 2);
+        range.setEnd(t, 4);
+        var box = range.getBoundingClientRect();
+        adapt.base.hasSoftWrapOpportunityAfterHyphenBug = box.right < 37;
+        body.removeChild(container);
+    }
+    return adapt.base.hasSoftWrapOpportunityAfterHyphenBug;
+};
+
+/**
+ * @type {boolean|null}
+ */
+adapt.base.hasSoftWrapOpportunityByWbrBug = null;
+
+/**
+ * @param {HTMLElement} body
+ * @returns {boolean}
+ */
+adapt.base.checkSoftWrapOpportunityByWbrBug = function(body) {
+    if (adapt.base.hasSoftWrapOpportunityByWbrBug === null) {
+        var doc = body.ownerDocument;
+        var container = /** @type {HTMLElement} */ (doc.createElement("div"));
+        container.style.position = "absolute";
+        container.style.top = "0px";
+        container.style.left = "0px";
+        container.style.width = "40px";
+        container.style.height = "100px";
+        container.style.lineHeight = "16px";
+        container.style.fontSize = "16px";
+        container.style.textAlign = "justify";
+        body.appendChild(container);
+        var t = doc.createTextNode("a a-");
+        container.appendChild(t);
+        container.appendChild(doc.createElement("wbr"));
+        var inlineBlock = doc.createElement("span");
+        inlineBlock.style.display = "inline-block";
+        inlineBlock.style.width = "40px";
+        container.appendChild(inlineBlock);
+        var range = doc.createRange();
+        range.setStart(t, 2);
+        range.setEnd(t, 4);
+        var box = range.getBoundingClientRect();
+        adapt.base.hasSoftWrapOpportunityByWbrBug = box.right < 37;
+        body.removeChild(container);
+    }
+    return adapt.base.hasSoftWrapOpportunityByWbrBug;
+};
