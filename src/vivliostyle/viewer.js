@@ -371,6 +371,10 @@ goog.scope(function() {
         this.adaptViewer.sendCommand({"a": "moveTo", "url": url});
     };
 
+    Viewer.prototype.resize = function() {
+        this.adaptViewer.sendCommand({"a": "resize"});
+    };
+
     /**
      * @enum {string}
      */
@@ -409,6 +413,7 @@ goog.scope(function() {
     goog.exportProperty(Viewer.prototype, "navigateToInternalUrl", Viewer.prototype.navigateToInternalUrl);
     goog.exportProperty(Viewer.prototype, "queryZoomFactor", Viewer.prototype.queryZoomFactor);
     goog.exportProperty(Viewer.prototype, "getPageSizes", Viewer.prototype.getPageSizes);
+    goog.exportProperty(Viewer.prototype, "resize", Viewer.prototype.resize);
     vivliostyle.namespace.exportSymbol("vivliostyle.viewer.ZoomType", ZoomType);
     goog.exportProperty(ZoomType, "FIT_INSIDE_VIEWPORT", ZoomType.FIT_INSIDE_VIEWPORT);
     vivliostyle.namespace.exportSymbol("vivliostyle.viewer.PageViewMode", PageViewMode);

@@ -108,7 +108,8 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
         "loadXML": this.loadXML,
         "configure": this.configure,
         "moveTo": this.moveTo,
-        "toc": this.showTOC
+        "toc": this.showTOC,
+        "resize": this.doResize
     };
     this.addLogListeners();
 };
@@ -956,6 +957,15 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
         });
     });
     return frame.result();
+};
+
+/**
+ * @param {adapt.base.JSON} command
+ * @return {!adapt.task.Result.<boolean>}
+ */
+adapt.viewer.Viewer.prototype.doResize = function(command) {
+    this.needResize = true;
+    return adapt.task.newResult(true);
 };
 
 /**
