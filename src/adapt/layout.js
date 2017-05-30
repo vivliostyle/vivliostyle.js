@@ -1715,31 +1715,35 @@ adapt.layout.Column.prototype.compensateJustificationLineHeight = function(span,
 adapt.layout.Column.prototype.fixJustificationIfNeeded = function(nodeContext, endOfColumn) {
     if (nodeContext.after && !nodeContext.inline)
         return;
-    var node = nodeContext.viewNode;
-    var textAlign = "";
-    for (; node && endOfColumn && !textAlign; node = node.parentNode) {
-        if (node.nodeType != 1)
-            continue;
-        textAlign = (/** @type {HTMLElement} */ (node)).style.textAlign;
+    if (endOfColumn) {
+        var textAlign = "";
+        for (var parent = nodeContext.parent; parent && !textAlign; parent = parent.parent) {
+            if (!parent.inline && parent.viewNode)
+                textAlign = (/** @type {HTMLElement} */ (parent.viewNode)).style.textAlign;
+        }
+        if (textAlign !== "justify")
+            return;
     }
-    if (endOfColumn && textAlign != "justify")
-        return;
 
-    node = nodeContext.viewNode;
+    var node = nodeContext.viewNode;
     var doc = node.ownerDocument;
     var insertAfter = endOfColumn && (nodeContext.after || node.nodeType != 1);
     var insertionPoint = insertAfter ? node.nextSibling : node;
-    var parent = node.parentNode;
-    if (!parent) {
+    if (insertionPoint && !insertionPoint.parentNode) {
+        // Possible if removeSelf = false in finishBreak()
+        insertionPoint = null;
+    }
+    var parentNode = node.parentNode || (nodeContext.parent && nodeContext.parent.viewNode);
+    if (!parentNode) {
         // Possible if nothing was added to the column
         return;
     }
     var span = adapt.layout.createJustificationAdjustmentElement(doc, nodeContext.vertical);
     adapt.layout.fixJustificationOnHyphen(nodeContext, insertAfter, node, insertionPoint);
-    parent.insertBefore(span, insertionPoint);
+    parentNode.insertBefore(span, insertionPoint);
     if (!endOfColumn) {
         var br = /** @type {HTMLElement} */ (doc.createElement("div"));
-        parent.insertBefore(br, insertionPoint);
+        parentNode.insertBefore(br, insertionPoint);
         this.compensateJustificationLineHeight(span, br, nodeContext);
     }
 };
