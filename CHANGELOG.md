@@ -34,6 +34,7 @@
 - Fix justification bugs
   - <https://github.com/vivliostyle/vivliostyle.js/pull/356>
   - <https://github.com/vivliostyle/vivliostyle.js/pull/357>
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/358>
 
 ## [2017.2](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.2) - 2017-2-22
 

@@ -1688,6 +1688,67 @@ adapt.layout.fixJustificationOnHyphen = function(nodeContext, insertAfter, node,
 };
 
 /**
+ * @param {Node} insertionPoint
+ * @param {Document} doc
+ * @param {Node} parentNode
+ * @param {boolean} vertical
+ * @return {HTMLElement}
+ */
+adapt.layout.Column.prototype.createJustificationAdjustmentElement = function(insertionPoint, doc, parentNode, vertical) {
+    var span = /** @type {HTMLElement} */ (doc.createElement("span"));
+    span.style.visibility = "hidden";
+
+    span.style.verticalAlign = "top";
+    span.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
+    var inner = /** @type {HTMLElement} */ (doc.createElement("span"));
+    inner.style.fontSize = "0";
+    inner.style.lineHeight = "0";
+    inner.textContent = " #";
+    span.appendChild(inner);
+
+    // Measure inline-start and inline-end edge positions of the line box,
+    // taking (exclusion) floats into consideration
+    span.style.display = "block";
+    span.style.textAlign = "left";
+    parentNode.insertBefore(span, insertionPoint);
+    var leftPos = this.clientLayout.getElementClientRect(inner);
+    span.style.textAlign = "right";
+    var rightPos = this.clientLayout.getElementClientRect(inner);
+    span.style.textAlign = "";
+
+    if (adapt.base.checkInlineBlockJustificationBug(document.body)) {
+        // For Chrome
+        span.style.display = "inline";
+    } else {
+        // For Firefox, Edge and IE
+        span.style.display = "inline-block";
+    }
+
+    if (vertical) {
+        span.style.paddingTop = (rightPos.top - leftPos.top - 1) + "px";
+    } else {
+        span.style.paddingLeft = (rightPos.left - leftPos.left - 1) + "px";
+    }
+
+    return span;
+};
+
+/**
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {boolean} insertAfter
+ * @param {Node} node
+ * @param {Node} insertionPoint
+ * @param {Document} doc
+ * @param {Node} parentNode
+ * @returns {HTMLElement}
+ */
+adapt.layout.Column.prototype.addAndAdjustJustificationElement = function(nodeContext, insertAfter, node, insertionPoint, doc, parentNode) {
+    adapt.layout.fixJustificationOnHyphen(nodeContext, insertAfter, node, insertionPoint);
+    return this.createJustificationAdjustmentElement(
+        insertionPoint, doc, parentNode, nodeContext.vertical);
+};
+
+/**
  * @param {Element} span
  * @param {Element} br
  * @param {adapt.vtree.NodeContext} nodeContext
@@ -1738,9 +1799,8 @@ adapt.layout.Column.prototype.fixJustificationIfNeeded = function(nodeContext, e
         // Possible if nothing was added to the column
         return;
     }
-    var span = adapt.layout.createJustificationAdjustmentElement(doc, nodeContext.vertical);
-    adapt.layout.fixJustificationOnHyphen(nodeContext, insertAfter, node, insertionPoint);
-    parentNode.insertBefore(span, insertionPoint);
+    var span = this.addAndAdjustJustificationElement(
+        nodeContext, insertAfter, node, insertionPoint, doc, parentNode);
     if (!endOfColumn) {
         var br = /** @type {HTMLElement} */ (doc.createElement("div"));
         parentNode.insertBefore(br, insertionPoint);
@@ -3269,40 +3329,6 @@ adapt.layout.isOrphan = function(node) {
         node = node.parentNode;
     }
     return true;
-};
-
-/**
- * @param {Document} doc
- * @param {boolean} vertical
- * @return {HTMLElement}
- */
-adapt.layout.createJustificationAdjustmentElement = function(doc, vertical) {
-    var span = /** @type {HTMLElement} */ (doc.createElement("span"));
-    span.style.visibility = "hidden";
-    if (adapt.base.checkInlineBlockJustificationBug(document.body)) {
-        // For Chrome
-        if (vertical) {
-            span.style.marginTop = "100%";
-        } else {
-            span.style.marginLeft = "100%";
-        }
-    } else {
-        // For Firefox, Edge and IE
-        span.style.display = "inline-block";
-        if (vertical) {
-            span.style.height = "100%";
-        } else {
-            span.style.width = "100%";
-        }
-    }
-    span.style.verticalAlign = "top";
-    span.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
-    var inner = /** @type {HTMLElement} */ (doc.createElement("span"));
-    inner.style.fontSize = "0";
-    inner.style.lineHeight = "0";
-    inner.textContent = " #";
-    span.appendChild(inner);
-    return span;
 };
 
 /**
