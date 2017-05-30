@@ -31,6 +31,9 @@
 
 - Fix footnote layout bugs
   - <https://github.com/vivliostyle/vivliostyle.js/pull/332>
+- Fix justification bugs
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/356>
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/357>
 
 ## [2017.2](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.2) - 2017-2-22
 
