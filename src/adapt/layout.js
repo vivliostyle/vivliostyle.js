@@ -3295,9 +3295,13 @@ adapt.layout.createJustificationAdjustmentElement = function(doc, vertical) {
             span.style.width = "100%";
         }
     }
-    span.textContent = " #";
     span.style.verticalAlign = "top";
     span.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
+    var inner = /** @type {HTMLElement} */ (doc.createElement("span"));
+    inner.style.fontSize = "0";
+    inner.style.lineHeight = "0";
+    inner.textContent = " #";
+    span.appendChild(inner);
     return span;
 };
 
