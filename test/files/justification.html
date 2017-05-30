@@ -30,6 +30,18 @@
         .no-hyphens {
             hyphens: none;
         }
+        .float {
+            border: orange solid;
+            width: 30px;
+            padding: 3px;
+            margin: 3px;
+        }
+        .left {
+            float: left;
+        }
+        .right {
+            float: right;
+        }
     </style>
 </head>
 <body>
@@ -40,7 +52,15 @@ Justify justify and justify justify justify justify justify justify justify just
     Justify justify and justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify &amp; justify justify justify justify justify justify justify.
 </p>
 <p class="no-hyphens">
-  Justify justify justify justify justify justify justify justify justify <span>justify</span> justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify justify
+  Justify justify justify justify justify justify justify justify justify <span>justify</span> justify justify justify justify justify.
+</p>
+<div class="left float">left float</div>
+<p class="hyphens">
+  Justify justify justify justify justify justify.
+</p>
+<div class="right float">right float</div>
+<p class="hyphens">
+  Justify justify justify justify justify justify.
 </p>
 </body>
 </html>
