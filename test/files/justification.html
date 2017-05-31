@@ -13,6 +13,8 @@
             font-family: Helvetica, Arial, sans-serif;
             font-size: 16px;
             line-height: 18px;
+            widows: 1;
+            orphans: 1;
         }
         body {
             outline: blue dashed 1px;
@@ -42,6 +44,15 @@
         .right {
             float: right;
         }
+        .page-float {
+            border: orange solid;
+            box-sizing: border-box;
+            width: 100%;
+            height: 100px;
+            padding: 3px;
+            float-reference: page;
+            float: bottom;
+        }
     </style>
 </head>
 <body>
@@ -56,11 +67,15 @@ Justify justify and justify justify justify justify justify justify justify just
 </p>
 <div class="left float">left float</div>
 <p class="hyphens">
-  Justify justify justify justify justify justify.
+  Justify justify justify justify justify justify justify justify.
 </p>
 <div class="right float">right float</div>
-<p class="hyphens">
-  Justify justify justify justify justify justify.
+<p class="hyphens" style="break-after: page">
+  Justify justify justify justify justify justify justify justify.
+</p>
+<span class="page-float">page bottom float</span>
+<p class="no-hyphens">
+  Justify justify justify justify justify justify justify justify justify justify justify justify justify justify.
 </p>
 </body>
 </html>
