@@ -1540,7 +1540,11 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
             /** @type {!Array<!vivliostyle.plugin.PreProcessSingleDocumentHook>} */ var hooks =
                 vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT);
             for (var i = 0; i < hooks.length; i++) {
-                hooks[i](xmldoc.document);
+                try {
+                    hooks[i](xmldoc.document);
+                } catch (e) {
+                    vivliostyle.logging.logger.warn("Error during single document preprocessing:", e);
+                }
             }
         }
         var triggers = [];
