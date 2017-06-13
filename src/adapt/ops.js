@@ -698,6 +698,10 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
                             return;
                         }
                     }
+                    // Since at least one flowChunk has been placed in the column,
+                    // the next flowChunk of the primary flow can be deferred to the next partition
+                    // if there is not enough space in the current partition.
+                    column.forceNonfitting = !self.primaryFlows[flowName];
                     if (pending) {
                         // Sync result
                         pending = false;

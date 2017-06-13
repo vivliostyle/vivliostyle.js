@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flowchunk overflow bug</title>
+  <style>
+    @-epubx-page-template {
+      .partition {
+        -epubx-flow-from: d;
+        border: 3px solid rgba(255, 0, 0, 0.5);
+        padding: 5px;
+        left: 10px;
+        right: 10px;
+        height: 30px;
+        overflow: visible;
+      }
+
+      @-epubx-page-master {
+        @-epubx-partition class(partition) {
+          top: 100px;
+        }
+        @-epubx-partition class(partition) {
+          top: 10px;
+        }
+      }
+
+      @-epubx-flow body {
+        -epubx-flow-consume: some;
+      }
+      @-epubx-flow d {
+        -epubx-flow-consume: all;
+      }
+    }
+
+    body {
+      margin: 0;
+    }
+    div {
+      -epubx-flow-into: d;
+      box-sizing: border-box;
+      min-height: 26px;
+      break-inside: avoid;
+      border: 3px solid rgba(0, 255, 0, 0.5);
+    }
+  </style>
+</head>
+<body>
+<div>div1</div>
+<div>div2: should be in the 2nd partition</div>
+</body>
+</html>
