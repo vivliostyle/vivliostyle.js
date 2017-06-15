@@ -1724,10 +1724,12 @@ adapt.layout.Column.prototype.createJustificationAdjustmentElement = function(in
         span.style.display = "inline-block";
     }
 
+    var padding = vertical ? rightPos.top - leftPos.top : rightPos.left - leftPos.left;
+    var paddingStr = padding >= 1 ? (padding - 1) + "px" : "100%";
     if (vertical) {
-        span.style.paddingTop = (rightPos.top - leftPos.top - 1) + "px";
+        span.style.paddingTop = paddingStr;
     } else {
-        span.style.paddingLeft = (rightPos.left - leftPos.left - 1) + "px";
+        span.style.paddingLeft = paddingStr;
     }
 
     return span;

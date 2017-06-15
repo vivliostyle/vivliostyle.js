@@ -698,6 +698,10 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
                             return;
                         }
                     }
+                    // Since at least one flowChunk has been placed in the column,
+                    // the next flowChunk of the flow can be deferred to the next partition
+                    // if there is not enough space in the current partition.
+                    column.forceNonfitting = false;
                     if (pending) {
                         // Sync result
                         pending = false;
@@ -1540,7 +1544,11 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
             /** @type {!Array<!vivliostyle.plugin.PreProcessSingleDocumentHook>} */ var hooks =
                 vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT);
             for (var i = 0; i < hooks.length; i++) {
-                hooks[i](xmldoc.document);
+                try {
+                    hooks[i](xmldoc.document);
+                } catch (e) {
+                    vivliostyle.logging.logger.warn("Error during single document preprocessing:", e);
+                }
             }
         }
         var triggers = [];
