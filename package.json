@@ -7,7 +7,8 @@
     "build": "mkdirp lib && java -jar node_modules/google-closure-compiler/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --language_in ECMASCRIPT5 --warning_level VERBOSE --output_wrapper_file src/wrapper.js --externs src/externs.js --process_common_js_modules --hide_warnings_for node_modules/fast-diff/diff.js --js_output_file lib/vivliostyle.min.js src/closure/goog/base.js src/closure/goog/*/*.js src/adapt/*.js src/vivliostyle/*.js plugins/*/src/*.js node_modules/fast-diff/diff.js",
     "typecheck": "java -jar node_modules/google-closure-compiler/compiler.jar --checks_only --compilation_level ADVANCED_OPTIMIZATIONS --language_in ECMASCRIPT5 --warning_level VERBOSE --externs src/externs.js --process_common_js_modules --hide_warnings_for node_modules/fast-diff/diff.js src/closure/goog/base.js src/closure/goog/*/*.js src/adapt/*.js src/vivliostyle/*.js plugins/*/src/*.js node_modules/fast-diff/diff.js",
     "test": "karma start test/conf/karma-sauce.conf.js",
-    "test:local": "karma start test/conf/karma-local.conf.js"
+    "test:local": "karma start test/conf/karma-local.conf.js",
+    "visual-regression": "wdio test/visual/wdio.conf.js"
   },
   "repository": {
     "type": "git",
@@ -29,19 +30,24 @@
   "main": "lib/vivliostyle.min.js",
   "homepage": "https://github.com/vivliostyle/vivliostyle.js",
   "devDependencies": {
-    "fast-diff":      "1.1.1",
-
     "eslint": "^3.3.1",
+    "fast-diff": "1.1.1",
+    "glob": "^7.1.1",
     "google-closure-compiler": "^20160911.0.0",
     "jasmine-core": "^2.3.4",
     "karma": "^0.13.7",
     "karma-cli": "^0.1.0",
+    "karma-commonjs": "^1.0.0",
     "karma-jasmine": "^0.3.6",
     "karma-sauce-launcher": "^0.2.14",
     "karma-verbose-reporter": "0.0.3",
-    "karma-commonjs": "^1.0.0",
     "mkdirp": "^0.5.1",
     "mustache": "^2.2.1",
-    "glob": "^7.1.1"
+    "wdio-jasmine-framework": "^0.3.1",
+    "wdio-sauce-service": "^0.4.0",
+    "wdio-spec-reporter": "^0.1.0",
+    "wdio-static-server-service": "^1.0.1",
+    "wdio-visual-regression-service": "^0.8.0",
+    "webdriverio": "^4.8.0"
   }
 }
