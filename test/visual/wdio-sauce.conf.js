@@ -1,5 +1,7 @@
 /* eslint-disable no-process-env */
-const commonConfig = require('./wdio-common.conf').config;
+const {config: commonConfig, getVisualRegressionCompare} = require('./wdio-common.conf');
+
+const screenshotBasePath = './test/visual/screenshots/sauce/';
 
 exports.config = Object.assign({}, commonConfig, {
     //
@@ -70,10 +72,24 @@ exports.config = Object.assign({}, commonConfig, {
             screenResolution: '2560x1600'
         }
     ],
+    //
+    // Saves a screenshot to a given path if a command fails.
+    screenshotPath: screenshotBasePath + 'error/',
     services: commonConfig.services.concat('sauce'),
     sauceConnect: true,
     sauceConnectOpts: {
         verbose: true,
         verboseDebugging: true
+    },
+    visualRegression: {
+        compare: getVisualRegressionCompare(screenshotBasePath)
+    },
+    /**
+     * Gets executed once before all workers get launched.
+     * @param {Object} config wdio configuration object
+     * @param {Array.<Object>} capabilities list of capabilities details
+     */
+    before: function(config, capabilities) {
+        browser.setViewportSize({ width: 2360, height: 1500 });
     }
 });

@@ -1,2 +1,5 @@
-screenshots/taken
-screenshots/diff
+local-selenium.log
+
+screenshots/*/diff
+screenshots/*/error
+screenshots/*/taken
