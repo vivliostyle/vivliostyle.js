@@ -9,7 +9,9 @@
     "test": "karma start test/conf/karma-sauce.conf.js",
     "test:local": "karma start test/conf/karma-local.conf.js",
     "visual-regression": "wdio test/visual/wdio-sauce.conf.js",
-    "visual-regression:local": "wdio test/visual/wdio-local.conf.js"
+    "visual-updateref": "wdio test/visual/wdio-sauce-updateref.conf.js",
+    "visual-regression:local": "wdio test/visual/wdio-local.conf.js",
+    "visual-updateref:local": "wdio test/visual/wdio-local-updateref.conf.js"
   },
   "repository": {
     "type": "git",

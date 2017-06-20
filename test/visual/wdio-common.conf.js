@@ -21,6 +21,11 @@ module.exports = {
             misMatchTolerance: 0
         });
     },
+    getSaveScreenshotMethod: (screenshotBasePath) => {
+        return new VisualRegressionCompare.SaveScreenshot({
+            screenshotName: getScreenshotName(path.join(process.cwd(), screenshotBasePath + 'reference'))
+        });
+    },
     config: {
         //
         // ==================
