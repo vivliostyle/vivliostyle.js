@@ -15,11 +15,39 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-describe("Visual regression tests", () => {
-    it("diff", () => {
-        browser.url("files/");
-        browser.pause(500);
-        const report = browser.checkDocument();
-        report.forEach((result) => expect(result.isExactSameImage).toBe(true));
+const testCaseGroups = require("../files/file-list");
+const testCaseRelativeDir = "../files/";
+
+function resolveTestCasePath(path) {
+    return testCaseRelativeDir + path;
+}
+
+function run(pathParam) {
+    browser.url("visual/visual-regression-test.html?x=" + pathParam);
+    browser.waitUntil(() => {
+        const classValue = browser.getAttribute("html", "class");
+        return classValue.indexOf("reftest-wait") < 0;
+    }, 60000);
+    const report = browser.checkDocument();
+    report.forEach((result) => expect(result.isExactSameImage).toBe(true));
+}
+
+function test(entry) {
+    it(entry.title, () => {
+        const files = Array.isArray(entry.file) ? entry.file : [entry.file];
+        const pathParam = files.map(resolveTestCasePath).join("&x=");
+        run(pathParam);
     });
+}
+
+function testGroup(group) {
+    describe(group.category, () => {
+        const entries = group.files;
+        entries.forEach(test);
+    });
+}
+
+describe("Visual regression tests", () => {
+
+    testCaseGroups.forEach(testGroup);
 });

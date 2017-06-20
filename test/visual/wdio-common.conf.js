@@ -3,7 +3,7 @@ const VisualRegressionCompare = require('wdio-visual-regression-service/compare'
 
 function getScreenshotName(basePath) {
     return function(context) {
-        const testName = context.test.title;
+        const testName = context.test.title.replace(/\//, '_');
         const browserName = context.browser.name;
         const viewport = context.meta.viewport;
         const width = viewport.width;

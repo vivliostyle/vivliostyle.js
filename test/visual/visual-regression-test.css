@@ -1,0 +1,9 @@
+body {
+    margin: 0;
+}
+
+[data-vivliostyle-page-container] {
+    display: block !important;
+    outline: rgba(255, 0, 0, 0.2) solid 1px;
+    outline-offset: -1px;
+}

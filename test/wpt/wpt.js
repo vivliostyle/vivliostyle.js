@@ -22,7 +22,9 @@
         a.forEach(function(pair) {
             var m = pair.match(r);
             if (m) {
-                params[m[1]] = m[2];
+                var arr = params[m[1]];
+                if (!arr) arr = params[m[1]] = [];
+                arr.push(m[2]);
             }
         });
         return params;
@@ -40,10 +42,13 @@
         var params = getURLParams();
         var docURL = params["x"];
         var uaRoot = (arg && arg["uaRoot"]) || null;
+        var configUrlParam = docURL.map(function(url) {
+            return {"url": url, "startPage": null, "skipPagesBefore": null};
+        });
 
         var config = {
             "a": "loadXML",
-            "url": [{"url": docURL, "startPage": null, "skipPagesBefore": null}],
+            "url": configUrlParam,
             "autoresize": false,
             "fragment": null,
             "renderAllPages": true,
