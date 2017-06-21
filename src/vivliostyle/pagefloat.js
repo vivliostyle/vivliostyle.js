@@ -1114,7 +1114,7 @@ goog.scope(function() {
                     return null;
             }
             if (logicalFloatSide === "block-end" || logicalFloatSide === "snap-block"
-                || logicalFloatSide === "inline-start") {
+                || logicalFloatSide === "inline-end") {
                 if (!limitBlockStartEndValueWithOpenRect(adapt.geom.findBottommostFullyOpenRect, rect))
                     return null;
             }
