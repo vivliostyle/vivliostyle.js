@@ -26,6 +26,8 @@
 
 - Place footnotes at the bottom of pages (or regions) rather than columns
   - <https://github.com/vivliostyle/vivliostyle.js/pull/343>
+- Disable hyphenation by default
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/363>
 
 ### Fixed
 
