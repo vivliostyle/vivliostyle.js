@@ -9,10 +9,10 @@ module.exports = [
             {file: "adaptive-layout/candle/index.xhtml", title: "Candle"},
             {file: "fixed-page-size/TheMalayArchipelago/main.xhtml", title: "The Malay Archipelago"},
 
-            // On gh-pages
-            // {file: "gutenberg/Alice.html", title: "Project gutenberg"},
-            // {file: "scholarly/index.html", title: "Scholarly HTML"},
-            // {file: "news/index.html", title: "新聞"},
+            // To long for automated test
+            // {file: "http://vivliostyle.github.io/vivliostyle.js/samples/gutenberg/Alice.html", title: "Project gutenberg"},
+            {file: "http://vivliostyle.github.io/vivliostyle.js/samples/scholarly/index.html", title: "Scholarly HTML"},
+            {file: "http://vivliostyle.github.io/vivliostyle.js/samples/news/index.html", title: "新聞"}
         ]
     }
 ];

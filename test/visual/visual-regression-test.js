@@ -61,7 +61,7 @@ const sampleGroups = require("../../samples/file-list");
 const sampleRelativeDir = "../../samples/";
 
 function resolveSamplePath(path) {
-    return sampleRelativeDir + path;
+    return path.startsWith("http") ? path : (sampleRelativeDir + path);
 }
 
 describe("Public samples", () => {
