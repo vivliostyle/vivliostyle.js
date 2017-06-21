@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## [2017.6](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.6) - 2017-6-22
 
 ### Added
 
