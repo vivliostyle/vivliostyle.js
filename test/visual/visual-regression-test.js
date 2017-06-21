@@ -15,6 +15,37 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+function run(pathParam) {
+    browser.url("visual/visual-regression-test.html?x=" + pathParam);
+    browser.waitUntil(() => {
+        const classValue = browser.getAttribute("html", "class");
+        return classValue.indexOf("reftest-wait") < 0;
+    }, 60000, "Layout did not complete after 60s", 500);
+    const report = browser.checkDocument();
+    report.forEach((result) => expect(result.isExactSameImage).toBe(true));
+}
+
+function test(pathResolver) {
+    return (entry) => {
+        describe(entry.title, () => {
+            const files = Array.isArray(entry.file) ? entry.file : [entry.file];
+            const pathParam = files.map(pathResolver).join("&x=");
+            it(files.join("_"), () => {
+                run(pathParam);
+            });
+        });
+    };
+}
+
+function testGroup(pathResolver) {
+    return (group) => {
+        describe(group.category, () => {
+            const entries = group.files;
+            entries.forEach(test(pathResolver));
+        });
+    };
+}
+
 const testCaseGroups = require("../files/file-list");
 const testCaseRelativeDir = "../files/";
 
@@ -22,32 +53,17 @@ function resolveTestCasePath(path) {
     return testCaseRelativeDir + path;
 }
 
-function run(pathParam) {
-    browser.url("visual/visual-regression-test.html?x=" + pathParam);
-    browser.waitUntil(() => {
-        const classValue = browser.getAttribute("html", "class");
-        return classValue.indexOf("reftest-wait") < 0;
-    }, 60000);
-    const report = browser.checkDocument();
-    report.forEach((result) => expect(result.isExactSameImage).toBe(true));
-}
-
-function test(entry) {
-    it(entry.title, () => {
-        const files = Array.isArray(entry.file) ? entry.file : [entry.file];
-        const pathParam = files.map(resolveTestCasePath).join("&x=");
-        run(pathParam);
-    });
-}
-
-function testGroup(group) {
-    describe(group.category, () => {
-        const entries = group.files;
-        entries.forEach(test);
-    });
-}
-
 describe("Visual regression tests", () => {
+    testCaseGroups.forEach(testGroup(resolveTestCasePath));
+});
 
-    testCaseGroups.forEach(testGroup);
+const sampleGroups = require("../../samples/file-list");
+const sampleRelativeDir = "../../samples/";
+
+function resolveSamplePath(path) {
+    return sampleRelativeDir + path;
+}
+
+describe("Public samples", () => {
+    sampleGroups.forEach(testGroup(resolveSamplePath));
 });
