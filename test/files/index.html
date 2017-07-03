@@ -3,247 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <title>Test cases</title>
+    <style>
+      table {
+        border-collapse: collapse;
+      }
+      tr:nth-child(even) {
+        background: lavender;
+      }
+      td {
+        border: gray solid 1px;
+        padding: 0.5em;
+      }
+    </style>
 </head>
 <body>
-<ul>
-    <li><a href="print_media/">Print media</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/print_media/&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/print_media/">prod</a>]</li>
-    <li><a href="running_header_adaptive.html">Running header emulation with Adaptive Layout</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/running_header_adaptive.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/running_header_adaptive.html">prod</a>]</li>
-    <li><a href="case_sensitivity/html.html">HTML case sensitivity</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/case_sensitivity/html.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/case_sensitivity/html.html">prod</a>]</li>
-    <li><a href="attr_selectors.html">Attribute selectors</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/attr_selectors.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/attr_selectors.html">prod</a>]</li>
-    <li><a href="ruby-broken-pagination.html">Ruby broken pagination</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/ruby-broken-pagination.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/ruby-broken-pagination.html">prod</a>]</li>
-    <li><a href="css-parse-error/gradient-background-image.html">Gradient background-image</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/css-parse-error/gradient-background-image.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/css-parse-error/gradient-background-image.html">prod</a>]</li>
-    <li><a href="rem_in_page_margin.html">rem in page margin</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/rem_in_page_margin.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/rem_in_page_margin.html">prod</a>]</li>
-    <li><a href="web_font_in_page_margin.html">Web font in page margin</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/web_font_in_page_margin.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/web_font_in_page_margin.html">prod</a>]</li>
-    <li><a href="crop-marks.html">Printer marks</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/crop-marks.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/crop-marks.html">prod</a>]</li>
-    <li><a href="empty_page.html">Empty page</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/empty_page.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/empty_page.html">prod</a>]</li>
-    <li>Multiple HTML files: <a href="multiple_html/first.html">first HTML</a>, <a href="multiple_html/second.html">second HTML</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/multiple_html/first.html&amp;x=../../vivliostyle.js/test/files/multiple_html/second.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/multiple_html/first.html&amp;x=../../vivliostyle.js/test/files/multiple_html/second.html">prod</a>]</li>
-    <li><a href="absolute_positioning.html">Absolute positioning</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/absolute_positioning.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/absolute_positioning.html">prod</a>]</li>
-    <li><a href="relative_positioning_pagination.html">Relative positioning pagination</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/relative_positioning_pagination.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/relative_positioning_pagination.html">prod</a>]</li>
-    <li><a href="relative_positioning_columns.html">Relative positioning columns</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/relative_positioning_columns.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/relative_positioning_columns.html">prod</a>]</li>
-    <li><a href="flex_and_large_img.html">Flex box pagination</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/flex_and_large_img.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/flex_and_large_img.html">prod</a>]</li>
-    <li><a href="unbreakable_box.html">Unbreakable box at the end of a flow</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/unbreakable_box.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/unbreakable_box.html">prod</a>]</li>
-    <li><a href="selector_bug.html">Selector bug</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/selector_bug.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/selector_bug.html">prod</a>]</li>
-    <li><a href="outline.html">Outline</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/outline.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/outline.html">prod</a>]</li>
-    <li><a href="font-feature-settings.html">Font feature settings</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/font-feature-settings.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/font-feature-settings.html">prod</a>]</li>
-    <li><a href="background-gradient.html">Background gradient</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/background-gradient.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/background-gradient.html">prod</a>]</li>
-    <li><a href="incorrect_layout_with_empty_partition.html">Incorrect layout with empty partition</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/incorrect_layout_with_empty_partition.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/incorrect_layout_with_empty_partition.html">prod</a>]</li>
-    <li><a href="nth_selectors.html">nth selectors</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/nth_selectors.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/nth_selectors.html">prod</a>]</li>
-    <li><a href="empty_selector.html">empty selector</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/empty_selector.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/empty_selector.html">prod</a>]</li>
-    <li><a href="ui_state_selectors.html">UI state selectors</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/ui_state_selectors.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/ui_state_selectors.html">prod</a>]</li>
-    <li><a href="not-pseudo-selector.html">:not pseudo selector</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/not-pseudo-selector.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/not-pseudo-selector.html">prod</a>]</li>
-    <li><a href="math-sample.html">MathJax</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/math-sample.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/math-sample.html">prod</a>]</li>
-    <li><a href="background-shorthand.html">Background shorthand</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/background-shorthand.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/background-shorthand.html">prod</a>]</li>
-    <li><a href="prefixed_properties.html">Prefixed properties</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/prefixed_properties.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/prefixed_properties.html">prod</a>]</li>
-    <li><a href="filter_property.html">Filter property</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/filter_property.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/filter_property.html">prod</a>]</li>
-    <li><a href="float-bug-test.html">Float bug test</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/float-bug-test.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/float-bug-test.html">prod</a>]</li>
-    <li><a href="left-float-bug.html">Float bug test: Left float</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/left-float-bug.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/left-float-bug.html">prod</a>]</li>
-    <li><a href="white-space_clear.html">Combination of white-space and clear</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/white-space_clear.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/white-space_clear.html">prod</a>]</li>
-    <li><a href="clear-bug-test.html">Float clear bug</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/clear-bug-test.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/clear-bug-test.html">prod</a>]</li>
-    <li><a href="float-text-offset-bug.html">Float text offset bug</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/float-text-offset-bug.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/float-text-offset-bug.html">prod</a>]</li>
-    <li><a href="content-attr.html">Content attr()</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/content-attr.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/content-attr.html">prod</a>]</li>
-    <li><a href="relative_floats.html">Floats with position: relative</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/relative_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/relative_floats.html">prod</a>]</li>
-    <li><a href="target-counter.html">target-counter</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/target-counter.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/target-counter.html">prod</a>]</li>
-    <li><a href="exclusion_with_printer_marks.html">Exclusion with printer marks</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/exclusion_with_printer_marks.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/exclusion_with_printer_marks.html">prod</a>]</li>
-    <li><a href="box-decoration-break.html">box-decoration-break</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/box-decoration-break.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/box-decoration-break.html">prod</a>]</li>
-    <li><a href="image-resolution.html">image-resolution</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/image-resolution.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/image-resolution.html">prod</a>]</li>
-    <li><a href="target_blank_link.html">target=_blank links</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/target_blank_link.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/target_blank_link.html">prod</a>]</li>
-    <li><a href="rem_in_relpos.html">rem in position: relative element</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/rem_in_relpos.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/rem_in_relpos.html">prod</a>]</li>
-    <li><a href="svg_properties.html">SVG properties</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/svg_properties.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/svg_properties.html">prod</a>]</li>
-    <li><a href="font_property.html">Font property</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/font_property.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/font_property.html">prod</a>]</li>
-    <li><a href="justification.html">Justification</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/justification.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/justification.html">prod</a>]</li>
-    <li><a href="justification_vertical.html">Justification (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/justification_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/justification.html">prod</a>]</li>
-    <li><a href="compositing.html">Compositing and Blending</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/compositing.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/compositing.html">prod</a>]</li>
-    <li><a href="content-url-element.html">Content URL</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/content-url-element.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/content-url-element.html">prod</a>]</li>
-    <li><a href="content-in-page-margin-box.html">Content in page margin box</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/content-in-page-margin-box.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/content-in-page-margin-box.html">prod</a>]</li>
-  <li><a href="flowchunk_overflow_bug.html">Flowchunk overflow bug</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/flowchunk_overflow_bug.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/flowchunk_overflow_bug.html">prod</a>]</li>
-</ul>
-<h2>Page breaks</h2>
-<ul>
-    <li><a href="page_breaks/break-inside_values.html">break-inside values</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_breaks/break-inside_values.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_breaks/break-inside_values.html">prod</a>]</li>
-    <li><a href="page_breaks/break_values.html">break values</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_breaks/break_values.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_breaks/break_values.html">prod</a>]</li>
-    <li><a href="page_breaks/truncate_margin_at_breaks.html">Truncate margin at breaks</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_breaks/truncate_margin_at_breaks.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_breaks/truncate_margin_at_breaks.html">prod</a>]</li>
-    <li><a href="page_breaks/combine_breaks.html">Combine forced break values</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_breaks/combine_breaks.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_breaks/combine_breaks.html">prod</a>]</li>
-    <li><a href="page_breaks/break_left_right.html">break-before/after: left/right</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_breaks/break_left_right.html&amp;debug=true&amp;spread=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_breaks/break_left_right.html&amp;spread=true">prod</a>]</li>
-    <li><a href="page_breaks/page_break_between_flow_elements.html">Page break between flow elements</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_breaks/page_break_between_flow_elements.html&amp;debug=true&amp;spread=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_breaks/page_break_between_flow_elements.html&amp;spread=true">prod</a>]</li>
-    <li><a href="page_breaks/break_on_pseudo_of_flow_elements.html">Break on pseudoelements of flow elements</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_breaks/break_on_pseudo_of_flow_elements.html&amp;debug=true&amp;spread=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_breaks/break_on_pseudo_of_flow_elements.html&amp;spread=true">prod</a>]</li>
-    <li><a href="page_breaks/page_break_bug_with_exclusions.html">Page break bug with exclusions (on Firefox)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_breaks/page_break_bug_with_exclusions.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_breaks/page_break_bug_with_exclusions.html">prod</a>]</li>
-    <li><a href="page_breaks/page_break_bug_in_vertical_text.html">Page break bug in vertical text (on Firefox)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_breaks/page_break_bug_in_vertical_text.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_breaks/page_break_bug_in_vertical_text.html">prod</a>]</li>
-</ul>
-<h2>Table</h2>
-<ul>
-  <li><a href="table/table_at_flow_root.html">Table at flow root</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/table/table_at_flow_root.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/table/table_at_flow_root.html">prod</a>]</li>
-    <li><a href="table/table_col_width.html">Table column width</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/table/table_col_width.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/table/table_col_width.html">prod</a>]</li>
-    <li><a href="table/table_col_width_vertical.html">Table column width (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/table/table_col_width_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/table/table_col_width_vertical.html">prod</a>]</li>
-    <li><a href="table/table_rowspan.html">Table rowspan</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/table/table_rowspan.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/table/table_rowspan.html">prod</a>]</li>
-    <li><a href="table/table_rowspan_vertical.html">Table rowspan (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/table/table_rowspan_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/table/table_rowspan_vertical.html">prod</a>]</li>
-    <li><a href="table/table_colspan.html">Table colspan</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/table/table_colspan.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/table/table_colspan.html">prod</a>]</li>
-    <li><a href="table/table_colspan_vertical.html">Table colspan (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/table/table_colspan_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/table/table_colspan_vertical.html">prod</a>]</li>
-    <li><a href="table/table_vertical_align.html">Table vertical-align</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/table/table_vertical_align.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/table/table_vertical_align.html">prod</a>]</li>
-    <li><a href="table/table_vertical_align_vertical.html">Table vertical-align (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/table/table_vertical_align_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/table/table_vertical_align_vertical.html">prod</a>]</li>
-    <li><a href="table/table_repeating_header_footer.html">Table repeating header/footer</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/table/table_repeating_header_footer.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/table/table_repeating_header_footer.html">prod</a>]</li>
-    <li><a href="table/table_repeating_header_footer_vertical.html">Table repeating header/footer (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/table/table_repeating_header_footer_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/table/table_repeating_header_footer_vertical.html">prod</a>]</li>
-</ul>
+<h1>Test cases</h1>
+<script>var module = {};</script>
+<script src="file-list.js"></script>
+<script>
+  function makeA(link, text) {
+    var a = document.createElement("a");
+    a.href = link;
+    a.textContent = text;
+    return a;
+  }
 
-<h2>Page floats</h2>
-<ul>
-  <li><a href="page_floats/page_page_floats.html">'Page' page floats</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/page_page_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/page_page_floats.html">prod</a>]</li>
-  <li><a href="page_floats/page_page_floats_vertical.html">'Page' page floats (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/page_page_floats_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/page_page_floats_vertical.html">prod</a>]</li>
-  <li><a href="page_floats/region_page_floats.html">'Region' page floats</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/region_page_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/region_page_floats.html">prod</a>]</li>
-  <li><a href="page_floats/region_page_floats_vertical.html">'Region' page floats (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/region_page_floats_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/region_page_floats_vertical.html">prod</a>]</li>
-  <li><a href="page_floats/column_page_floats.html">'Column' page floats</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/column_page_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/column_page_floats.html">prod</a>]</li>
-  <li><a href="page_floats/column_page_floats_vertical.html">'Column' page floats (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/column_page_floats_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/column_page_floats_vertical.html">prod</a>]</li>
-  <li><a href="page_floats/region_page_floats_with_exclusions.html">'Region' page floats with exclusions</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/region_page_floats_with_exclusions.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/region_page_floats_with_exclusions.html">prod</a>]</li>
-  <li><a href="page_floats/region_page_floats_with_exclusions_vertical.html">'Region' page floats with exclusions (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/region_page_floats_with_exclusions_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/region_page_floats_with_exclusions_vertical.html">prod</a>]</li>
-  <li><a href="page_floats/column_page_floats_with_exclusions.html">'Column' page floats with exclusions</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/column_page_floats_with_exclusions.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/column_page_floats_with_exclusions.html">prod</a>]</li>
-  <li><a href="page_floats/column_page_floats_with_exclusions_vertical.html">'Column' page floats with exclusions (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/column_page_floats_with_exclusions_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/column_page_floats_with_exclusions_vertical.html">prod</a>]</li>
-  <li><a href="page_floats/multiple_kind_of_page_floats.html">Multiple kind of page floats</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/multiple_kind_of_page_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/multiple_kind_of_page_floats.html">prod</a>]</li>
-  <li><a href="page_floats/multiple_kind_of_page_floats_vertical.html">Multiple kind of page floats (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/multiple_kind_of_page_floats_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/multiple_kind_of_page_floats_vertical.html">prod</a>]</li>
-  <li><a href="page_floats/column_region_page_floats.html">'Column' and 'region' page floats in single column</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/column_region_page_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/column_region_page_floats.html">prod</a>]</li>
-  <li><a href="page_floats/inline_page_floats.html">Inline page floats</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/inline_page_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/inline_page_floats.html">prod</a>]</li>
-  <li><a href="page_floats/inline_page_floats_vertical.html">Inline page floats (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/inline_page_floats_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/inline_page_floats_vertical.html">prod</a>]</li>
-  <li><a href="page_floats/forced_break_and_page_floats.html">Forced break and page floats</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/forced_break_and_page_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/forced_break_and_page_floats.html">prod</a>]</li>
-  <li><a href="page_floats/defer_page_page_floats_by_anchor.html">Defer page page floats by anchor</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/defer_page_page_floats_by_anchor.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/defer_page_page_floats_by_anchor.html">prod</a>]</li>
-  <li><a href="page_floats/defer_region_page_floats_by_anchor.html">Defer region page floats by anchor</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/defer_region_page_floats_by_anchor.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/defer_region_page_floats_by_anchor.html">prod</a>]</li>
-  <li><a href="page_floats/defer_column_page_floats_by_anchor.html">Defer column page floats by anchor</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/defer_column_page_floats_by_anchor.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/defer_column_page_floats_by_anchor.html">prod</a>]</li>
-  <li><a href="page_floats/fragmented_page_floats.html">Fragmented page floats</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/fragmented_page_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/fragmented_page_floats.html">prod</a>]</li>
-  <li><a href="page_floats/multiple_deferred_page_floats.html">Multiple deferred page floats</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/multiple_deferred_page_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/multiple_deferred_page_floats.html">prod</a>]</li>
-  <li><a href="page_floats/test_pagefloatlayoutcontext_previous_sibling.html">Test PageFloatLayoutContext previous sibling</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/test_pagefloatlayoutcontext_previous_sibling.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/test_pagefloatlayoutcontext_previous_sibling.html">prod</a>]</li>
-  <li><a href="page_floats/floats_deferred_by_larger_floats.html">Floats deferred by larger floats</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/floats_deferred_by_larger_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/floats_deferred_by_larger_floats.html">prod</a>]</li>
-  <li><a href="page_floats/deferred_floats.html">Deferred page floats</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/deferred_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/deferred_floats.html">prod</a>]</li>
-  <li><a href="page_floats/column-span_on_page_floats.html">column-span on page floats</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/column-span_on_page_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/column-span_on_page_floats.html">prod</a>]</li>
-  <li><a href="page_floats/float_snap-block.html">float: snap-block</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/float_snap-block.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/float_snap-block.html">prod</a>]</li>
-  <li><a href="page_floats/clear_page_floats.html">Clear page floats</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/clear_page_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/clear_page_floats.html">prod</a>]</li>
-  <li><a href="page_floats/clear_page_floats_vertical.html">Clear page floats (vertical writing-mode)</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/page_floats/clear_page_floats_vertical.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/page_floats/clear_page_floats_vertical.html">prod</a>]</li>
-</ul>
+  function makeTd(links, text) {
+    var td = document.createElement("td");
+    if (Array.isArray(links)) {
+      td.appendChild(document.createTextNode(text + " "));
+      links.forEach(function(link, i) {
+        td.appendChild(makeA(link, "[" + (i+1) + "]"));
+      });
+    } else {
+        td.appendChild(makeA(links, text));
+    }
+    return td;
+  }
 
-<h2>Footnotes</h2>
-<ul>
-  <li><a href="footnotes/footnotes_widows_bug.html">Footnotes widows bug</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/footnotes/footnotes_widows_bug.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/footnotes/footnotes_widows_bug.html">prod</a>]</li>
-  <li><a href="footnotes/footnotes_and_page_floats.html">Footnotes and page floats</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/footnotes/footnotes_and_page_floats.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/footnotes/footnotes_and_page_floats.html">prod</a>]</li>
-  <li><a href="footnotes/footnote_with_pseudoelement.html">Footnote with pseudoelement</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/footnotes/footnote_with_pseudoelement.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/footnotes/footnote_with_pseudoelement.html">prod</a>]</li>
-  <li><a href="footnotes/footnote-policy.html">footnote-policy</a> [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/footnotes/footnote-policy.html&amp;debug=true">dev</a>|<a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/footnotes/footnote-policy.html">prod</a>]</li>
-</ul>
+  var fileList = module.exports;
+  fileList.forEach(function(group) {
+    var heading = document.createElement("h2");
+    heading.textContent = group.category;
+    document.body.appendChild(heading);
+    var table = document.createElement("table");
+    document.body.appendChild(table);
+    group.files.forEach(function(entry) {
+      var tr = document.createElement("tr");
+      table.appendChild(tr);
 
-<h2>Repeating Elements</h2>
-<ul>
-  <li>
-    <a href="repeating_elements/repeating_element.html">repeating elements across fragment</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/repeating_elements/repeating_element.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/repeating_elements/repeating_element.html">prod</a>]
-  </li>
-  <li>
-    <a href="repeating_elements/repeating_element.html">repeating elements across fragment (vertical writing-mode)</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/repeating_elements/repeating_element_vertical.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/repeating_elements/repeating_element_vertical.html">prod</a>]
-  </li>
-  <li>
-    <a href="repeating_elements/nesting.html">nesting repeating elements</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/repeating_elements/nesting.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/repeating_elements/nesting.html">prod</a>]
-  </li>
-  <li>
-    <a href="repeating_elements/nesting.html">nesting repeating elements (vertical writing-mode)</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/repeating_elements/nesting_vertical.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/repeating_elements/nesting_vertical.html">prod</a>]
-  </li>
-  <li>
-    <a href="repeating_elements/nesting.html">nesting table</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/repeating_elements/nesting_table.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/repeating_elements/nesting_table.html">prod</a>]
-  </li>
-  <li>
-    <a href="repeating_elements/nesting.html">nesting table (vertical writing-mode)</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/repeating_elements/nesting_table_vertical.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/repeating_elements/nesting_table_vertical.html">prod</a>]
-  </li>
-  <li>
-    <a href="repeating_elements/repeat-on-break_auto.html">repeat-on-break: auto</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/repeating_elements/repeat-on-break_auto.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/repeating_elements/repeat-on-break_auto.html">prod</a>]
-  </li>
-  <li>
-    <a href="repeating_elements/flexbox.html">flexbox</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/repeating_elements/flexbox.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/repeating_elements/flexbox.html">prod</a>]
-  </li>
-  <li>
-    <a href="repeating_elements/priority_of_dropping.html">priority of dropping</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/repeating_elements/priority_of_dropping.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/repeating_elements/priority_of_dropping.html">prod</a>]
-  </li>
-  <li>
-    <a href="repeating_elements/repeating_page_floats.html">Page floats with repeating elements</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/repeating_elements/repeating_page_floats.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/repeating_elements/repeating_page_floats.html">prod</a>]
-  </li>
-  <li>
-    <a href="repeating_elements/repeating_page_floats_vertical.html">Page floats with repeating elements (vertical writing-mode)</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/repeating_elements/repeating_page_floats_vertical.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/repeating_elements/repeating_page_floats_vertical.html">prod</a>]
-  </li>
-</ul>
+      var path = "";
+      if (Array.isArray(entry.file)) {
+          path = entry.file.map(function(file) {
+              return "../../vivliostyle.js/test/files/" + file
+          }).join("&x=");
+      } else {
+          path = "../../vivliostyle.js/test/files/" + entry.file;
+      }
 
-<h2>nth-fragment selectors</h2>
-<ul>
-  <li>
-    <a href="nth-fragment/nth-fragment_selectors.html">nth-fragment selectors</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/nth-fragment/nth-fragment_selectors.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/nth-fragment/nth-fragment_selectors.html">prod</a>]
-  </li>
-  <li>
-    <a href="nth-fragment/nth-fragment_selectors_with_region_rule.html">nth-fragment selectors with region rule</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/nth-fragment/nth-fragment_selectors_with_region_rule.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/nth-fragment/nth-fragment_selectors_with_region_rule.html">prod</a>]
-  </li>
-  <li>
-    <a href="nth-fragment/nesting_nth-fragment_selectors.html">nesting nth-fragment selectors</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/nth-fragment/nesting_nth-fragment_selectors.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/nth-fragment/nesting_nth-fragment_selectors.html">prod</a>]
-  </li>
-  <li>
-    <a href="nth-fragment/nesting_nth-fragment_selectors2.html">nesting nth-fragment selectors (2)</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/nth-fragment/nesting_nth-fragment_selectors2.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/nth-fragment/nesting_nth-fragment_selectors2.html">prod</a>]
-  </li>
-  <li>
-    <a href="nth-fragment/matching_multiple_elements_in_hierarchy.html">matching multiple elements in the hierarchy</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/nth-fragment/matching_multiple_elements_in_hierarchy.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/nth-fragment/matching_multiple_elements_in_hierarchy.html">prod</a>]
-  </li>
-  <li>
-    <a href="nth-fragment/sibling_selector.html">use nth-fragment with sibling selectors</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/nth-fragment/sibling_selector.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/nth-fragment/sibling_selector.html">prod</a>]
-  </li>
-  <li>
-    <a href="nth-fragment/table.html">table</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/nth-fragment/table.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/nth-fragment/table.html">prod</a>]
-  </li>
-  <li>
-    <a href="nth-fragment/float.html">page floats</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/nth-fragment/float.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/nth-fragment/float.html">prod</a>]
-  </li>
-</ul>
+      var dev = makeTd("../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#debug=true&x=" + path, "dev");
+      tr.appendChild(dev);
 
-<h2>after-if-continues psuedo elements</h2>
-<ul>
-  <li>
-    <a href="after_if_continues/after-if-continues.html">create and insert an after-if-continues psuedo element</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/after_if_continues/after-if-continues.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/after_if_continues/after-if-continues.html">prod</a>]
-  </li>
-  <li>
-    <a href="after_if_continues/after-if-continues_vertical.html">create and insert an after-if-continues psuedo element (vertical writing-mode)</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/after_if_continues/after-if-continues_vertical.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/after_if_continues/after-if-continues_vertical.html">prod</a>]
-  </li>
-  <li>
-    <a href="after_if_continues/after-if-continues_page_float.html">after-if-continues on page_float</a>
-    [<a href="../../../vivliostyle-ui/build/vivliostyle-viewer-dev.html#x=../../vivliostyle.js/test/files/after_if_continues/after-if-continues_page_float.html&amp;debug=true">dev</a>|
-    <a href="../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=../../vivliostyle.js/test/files/after_if_continues/after-if-continues_page_float.html">prod</a>]
-  </li>
-</ul>
+      var prod = makeTd("../../../vivliostyle-ui/build/vivliostyle-viewer.html#x=" + path, "prod");
+      tr.appendChild(prod);
+
+      var raw = makeTd(entry.file, entry.title);
+      tr.appendChild(raw);
+    });
+  });
+</script>
 </body>
 </html>
