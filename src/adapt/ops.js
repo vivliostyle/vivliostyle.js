@@ -915,7 +915,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
                 innerContainerTag = "img";
             }
             var innerContainer = self.viewport.document.createElement(innerContainerTag);
-            contentVal.visit(new adapt.vtree.ContentPropertyHandler(innerContainer, self, contentVal));
+            contentVal.visit(new adapt.vtree.ContentPropertyHandler(innerContainer, self, contentVal, self.counterStore.getExprContentListener()));
             boxContainer.appendChild(innerContainer);
             if (innerContainerTag == "img")
                 boxInstance.transferSinglUriContentProps(self, innerContainer, self.faces);

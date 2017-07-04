@@ -175,14 +175,16 @@ adapt.vgen.setPseudoName = function(element, name) {
  * @param {adapt.csscasc.ElementStyle} style
  * @param {adapt.cssstyler.AbstractStyler} styler
  * @param {adapt.expr.Context} context
+ * @param {!adapt.vtree.ExprContentListener} exprContentListener
  * @constructor
  * @implements {adapt.cssstyler.AbstractStyler}
  */
-adapt.vgen.PseudoelementStyler = function(element, style, styler, context) {
+adapt.vgen.PseudoelementStyler = function(element, style, styler, context, exprContentListener) {
     /** @type {adapt.csscasc.ElementStyle} */ this.style = style;
     /** @const */ this.element = element;
     /** @type {adapt.cssstyler.AbstractStyler} */ this.styler = styler;
     /** @const */ this.context = context;
+    /** @const */ this.exprContentListener = exprContentListener;
     /** @type {Object.<string,boolean>} */ this.contentProcessed = {};
 };
 
@@ -221,7 +223,8 @@ adapt.vgen.PseudoelementStyler.prototype.processContent = function(element, styl
         var contentVal = style["content"];
         if (contentVal) {
             if (adapt.vtree.nonTrivialContent(contentVal))
-                contentVal.visit(new adapt.vtree.ContentPropertyHandler(element, this.context, contentVal));
+                contentVal.visit(new adapt.vtree.ContentPropertyHandler(element, this.context,
+                    contentVal, this.exprContentListener));
         }
     }
 };
@@ -255,6 +258,7 @@ adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds
     /** @const */ this.viewport = viewport;
     /** @const */ this.document = viewport.document;
     /** @const */ this.styler = styler;
+    /** @const */ this.exprContentListener = styler.counterListener.getExprContentListener();
     /** @const */ this.regionIds = regionIds;
     /** @const */ this.xmldoc = xmldoc;
     /** @const */ this.docFaces = docFaces;
@@ -344,7 +348,8 @@ adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, i
     if (!addedNames.length) {
         return subShadow;
     }
-    var shadowStyler = new adapt.vgen.PseudoelementStyler(element, cascStyle, styler, context);
+    var shadowStyler = new adapt.vgen.PseudoelementStyler(element, cascStyle, styler, context,
+        this.exprContentListener);
     return new adapt.vtree.ShadowContext(element, root, null, parentShadow,
         subShadow, adapt.vtree.ShadowType.ROOTLESS, shadowStyler);
 };
@@ -1162,7 +1167,8 @@ adapt.vgen.ViewFactory.prototype.processAfterIfcontinues = function(element, cas
 
     if (pseudoMap['after-if-continues']
         && pseudoMap['after-if-continues']['content']) {
-        var shadowStyler = new adapt.vgen.PseudoelementStyler(element, cascStyle, styler, context);
+        var shadowStyler = new adapt.vgen.PseudoelementStyler(element, cascStyle, styler, context,
+            this.exprContentListener);
         this.nodeContext.afterIfContinues =
             new vivliostyle.selectors.AfterIfContinues(element, shadowStyler);
     }
@@ -1683,7 +1689,8 @@ adapt.vgen.ViewFactory.prototype.applyPseudoelementStyle = function(nodeContext,
     nodeContext.vertical = this.computeStyle(nodeContext.vertical, elementStyle, computedStyle);
     var content = computedStyle["content"];
     if (adapt.vtree.nonTrivialContent(content)) {
-        content.visit(new adapt.vtree.ContentPropertyHandler(target, this.context, content));
+        content.visit(new adapt.vtree.ContentPropertyHandler(target, this.context, content,
+            this.exprContentListener));
         delete computedStyle["content"];
     }
     this.applyComputedStyles(target, computedStyle);

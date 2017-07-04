@@ -114,6 +114,13 @@ goog.scope(function() {
     };
 
     /**
+     * @returns {!adapt.vtree.ExprContentListener}
+     */
+    CounterListener.prototype.getExprContentListener = function() {
+        return this.counterStore.getExprContentListener();
+    };
+
+    /**
      * @param {!vivliostyle.counters.CounterStore} counterStore
      * @param {string} baseURL
      * @param {adapt.expr.LexicalScope} rootScope
@@ -170,9 +177,14 @@ goog.scope(function() {
             var values = self.counterStore.currentPageCounters[name];
             return (values && values.length) ? values[values.length - 1] : null;
         }
-        return new adapt.expr.Native(this.pageScope, function() {
+        var expr = new adapt.expr.Native(this.pageScope, function() {
             return format(getCounterNumber());
         }, "page-counter-" + name);
+
+        function arrayFormat(arr) { return format(arr[0]); }
+        this.counterStore.registerPageCounterExpr(name, arrayFormat, expr);
+
+        return expr;
     };
 
     /**
@@ -183,9 +195,11 @@ goog.scope(function() {
         function getCounterNumbers() {
             return self.counterStore.currentPageCounters[name] || [];
         }
-        return new adapt.expr.Native(this.pageScope, function() {
+        var expr = new adapt.expr.Native(this.pageScope, function() {
             return format(getCounterNumbers());
         }, "page-counters-" + name);
+        this.counterStore.registerPageCounterExpr(name, format, expr);
+        return expr;
     };
 
     /**
@@ -314,6 +328,7 @@ goog.scope(function() {
         /** @type {!Array<!Array<!vivliostyle.counters.TargetCounterReference>>} */ this.referencesToSolveStack = [];
         /** @const {!Object<string, !Array<vivliostyle.counters.TargetCounterReference>>} */ this.unresolvedReferences = {};
         /** @const {!Object<string, !Array<vivliostyle.counters.TargetCounterReference>>} */ this.resolvedReferences = {};
+        /** @private @const {!Array<{expr: !adapt.expr.Val, format: function(!Array<number>):string}>} */ this.pagesCounterExprs = [];
     };
 
     /**
@@ -584,6 +599,55 @@ goog.scope(function() {
      */
     vivliostyle.counters.CounterStore.prototype.popReferencesToSolve = function() {
         this.referencesToSolve = this.referencesToSolveStack.pop();
+    };
+
+    vivliostyle.counters.PAGES_COUNTER_ATTR = "data-vivliostyle-pages-counter";
+
+    /**
+     * @param {string} name
+     * @param {function(!Array<number>):string} format
+     * @param {!adapt.expr.Val} expr
+     */
+    vivliostyle.counters.CounterStore.prototype.registerPageCounterExpr = function(name, format, expr) {
+        if (name === "pages")
+            this.pagesCounterExprs.push({expr: expr, format: format});
+    };
+
+    /**
+     * @returns {!adapt.vtree.ExprContentListener}
+     */
+    vivliostyle.counters.CounterStore.prototype.getExprContentListener = function() {
+        return this.exprContentListener.bind(this);
+    };
+
+    /**
+     * @private
+     * @type {adapt.vtree.ExprContentListener}
+     */
+    vivliostyle.counters.CounterStore.prototype.exprContentListener = function(expr, val, document) {
+        var found = this.pagesCounterExprs.findIndex(function(o) { return o.expr === expr; }) >= 0;
+        if (found) {
+            var node = document.createElement("span");
+            node.textContent = val;
+            node.setAttribute(vivliostyle.counters.PAGES_COUNTER_ATTR, expr.key);
+            return node;
+        } else {
+            return null;
+        }
+    };
+
+    /**
+     * @param {!adapt.vgen.Viewport} viewport
+     */
+    vivliostyle.counters.CounterStore.prototype.finishLastPage = function(viewport) {
+        var nodes = viewport.root.querySelectorAll("[" + vivliostyle.counters.PAGES_COUNTER_ATTR + "]");
+        var pages = this.currentPageCounters["page"][0];
+        Array.from(nodes).forEach(function(node) {
+            var key = node.getAttribute(vivliostyle.counters.PAGES_COUNTER_ATTR);
+            var i = this.pagesCounterExprs.findIndex(function(o) { return o.expr.key === key; });
+            goog.asserts.assert(i >= 0);
+            node.textContent = this.pagesCounterExprs[i].format([pages]);
+        }, this);
     };
 
     /**

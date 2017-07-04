@@ -1317,6 +1317,10 @@ adapt.epub.OPFView.prototype.renderPage = function(position) {
                     pageIndex = result.pageAndPosition.position.pageIndex;
                     viewItem.complete = true;
                     page.isLastPage = viewItem.item.spineIndex === self.opf.spine.length - 1;
+                    if (page.isLastPage) {
+                        goog.asserts.assert(self.viewport);
+                        self.counterStore.finishLastPage(self.viewport);
+                    }
                     loopFrame.breakLoop();
                 }
             });

@@ -1,5 +1,13 @@
 # Change Log
 
+## Unreleased
+
+### Added
+
+- Implement `pages` counter
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/367>
+  - Spec: [CSS Paged Media Module Level 3 - Page-based counters](https://drafts.csswg.org/css-page/#page-based-counters)
+
 ## [2017.6](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.6) - 2017-6-22
 
 ### Added

@@ -1915,6 +1915,11 @@ adapt.csscasc.CounterListener = function() {};
 adapt.csscasc.CounterListener.prototype.countersOfId = function(id, counters) {};
 
 /**
+ * @returns {!adapt.vtree.ExprContentListener}
+ */
+adapt.csscasc.CounterListener.prototype.getExprContentListener = function() {};
+
+/**
  * @interface
  */
 adapt.csscasc.CounterResolver = function() {};

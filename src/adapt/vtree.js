@@ -1567,27 +1567,36 @@ adapt.vtree.Container.prototype.getOuterRect = function() {
 };
 
 
+/** @typedef {function(!adapt.expr.Val, string, !Document):?Node} */
+adapt.vtree.ExprContentListener;
+
 /**
  * @constructor
  * @param {Element} elem
  * @param {adapt.expr.Context} context
  * @param {adapt.css.Val} rootContentValue
+ * @param {!adapt.vtree.ExprContentListener} exprContentListener
  * @extends {adapt.css.Visitor}
  */
-adapt.vtree.ContentPropertyHandler = function(elem, context, rootContentValue) {
+adapt.vtree.ContentPropertyHandler = function(elem, context, rootContentValue,
+                                              exprContentListener) {
     adapt.css.Visitor.call(this);
     /** @const */ this.elem = elem;
     /** @const */ this.context = context;
     /** @const */ this.rootContentValue = rootContentValue;
+    /** @const */ this.exprContentListener = exprContentListener;
 };
 goog.inherits(adapt.vtree.ContentPropertyHandler, adapt.css.Visitor);
 
 /**
  * @private
  * @param {string} str
+ * @param {?Node=} node
  */
-adapt.vtree.ContentPropertyHandler.prototype.visitStrInner = function(str) {
-    this.elem.appendChild(this.elem.ownerDocument.createTextNode(str));
+adapt.vtree.ContentPropertyHandler.prototype.visitStrInner = function(str, node) {
+    if (!node)
+        node = this.elem.ownerDocument.createTextNode(str);
+    this.elem.appendChild(node);
 };
 
 /** @override */
@@ -1616,9 +1625,12 @@ adapt.vtree.ContentPropertyHandler.prototype.visitSpaceList = function(list) {
 
 /** @override */
 adapt.vtree.ContentPropertyHandler.prototype.visitExpr = function(expr) {
-    var val = expr.toExpr().evaluate(this.context);
+    var ex = expr.toExpr();
+    var val = ex.evaluate(this.context);
     if (typeof val === "string") {
-        this.visitStrInner(val);
+        goog.asserts.assert(this.elem.ownerDocument);
+        var node = this.exprContentListener(ex, val, this.elem.ownerDocument);
+        this.visitStrInner(val, node);
     }
     return null;
 };
