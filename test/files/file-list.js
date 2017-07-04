@@ -51,7 +51,8 @@ module.exports = [
             {file: "compositing.html", title: "Compositing and Blending"},
             {file: "content-url-element.html", title: "Content URL"},
             {file: "content-in-page-margin-box.html", title: "Content in page margin box"},
-            {file: "flowchunk_overflow_bug.html", title: "Flowchunk overflow bug"}
+            {file: "flowchunk_overflow_bug.html", title: "Flowchunk overflow bug"},
+            {file: "pages_counter.html", title: "pages counter"}
         ]
     },
     {

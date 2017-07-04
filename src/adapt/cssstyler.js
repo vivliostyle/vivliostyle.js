@@ -463,6 +463,7 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
     /** @type {adapt.cssstyler.FlowListener} */ this.flowListener = null;
     /** @type {?string} */ this.flowToReach = null;
     /** @type {?string} */ this.idToReach = null;
+    /** @const */ this.counterListener = counterListener;
     /** @const */ this.cascade = cascade.createInstance(context, counterListener, counterResolver, xmldoc.lang);
     /** @const */ this.offsetMap = new adapt.cssstyler.SlipMap();
     /** @type {boolean} */ this.primary = true;
