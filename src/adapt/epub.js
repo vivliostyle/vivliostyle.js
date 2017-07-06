@@ -1166,6 +1166,12 @@ adapt.epub.OPFView.prototype.renderSinglePage = function(viewItem, pos) {
                     });
                 });
             }).then(function() {
+                page.isLastPage = !pos &&
+                    (viewItem.item.spineIndex === self.opf.spine.length - 1);
+                if (page.isLastPage) {
+                    goog.asserts.assert(self.viewport);
+                    self.counterStore.finishLastPage(self.viewport);
+                }
                 frame.finish({
                     pageAndPosition: adapt.epub.makePageAndPosition(page, pageIndex),
                     nextLayoutPosition: pos
@@ -1316,11 +1322,6 @@ adapt.epub.OPFView.prototype.renderPage = function(position) {
                     resultPage = page;
                     pageIndex = result.pageAndPosition.position.pageIndex;
                     viewItem.complete = true;
-                    page.isLastPage = viewItem.item.spineIndex === self.opf.spine.length - 1;
-                    if (page.isLastPage) {
-                        goog.asserts.assert(self.viewport);
-                        self.counterStore.finishLastPage(self.viewport);
-                    }
                     loopFrame.breakLoop();
                 }
             });
@@ -1334,8 +1335,6 @@ adapt.epub.OPFView.prototype.renderPage = function(position) {
             self.renderSinglePage(viewItem, pos).then(function(result) {
                 if (!result.nextLayoutPosition) {
                     viewItem.complete = true;
-                    result.pageAndPosition.page.isLastPage =
-                        viewItem.item.spineIndex === self.opf.spine.length - 1;
                 }
                 frame.finish(result.pageAndPosition);
             });
