@@ -12,6 +12,8 @@
 
 - Fix a bug that a bottom margin on a page float is not taken into account when the float has a bottom padding or border
   - <https://github.com/vivliostyle/vivliostyle.js/pull/376>
+- Fix a bug that `box-decoration-break: clone` makes a block incorrectly overflow
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/377>
 
 ## [2017.6](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.6) - 2017-6-22
 

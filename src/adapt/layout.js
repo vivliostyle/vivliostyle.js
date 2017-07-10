@@ -418,7 +418,7 @@ adapt.layout.BoxBreakPosition.prototype.getNodeContext = function() {
 /**
  * Potential edge breaking position.
  * @constructor
- * @param {adapt.vtree.NodeContext} position
+ * @param {!adapt.vtree.NodeContext} position
  * @param {?string} breakOnEdge
  * @param {boolean} overflows
  * @param {number} computedBlockSize
@@ -466,7 +466,8 @@ adapt.layout.EdgeBreakPosition.prototype.getMinBreakPenalty = function() {
  * @param {!adapt.layout.Column} column
  */
 adapt.layout.EdgeBreakPosition.prototype.updateEdge = function(column) {
-    this.edge = adapt.layout.calculateEdge(this.position, column.clientLayout, 0, column.vertical);
+    var clonedPaddingBorder = column.calculateClonedPaddingBorder(this.position);
+    this.edge = adapt.layout.calculateEdge(this.position, column.clientLayout, 0, column.vertical) + clonedPaddingBorder;
     this.isEdgeUpdated = true;
 };
 
@@ -3102,7 +3103,8 @@ adapt.layout.Column.prototype.saveEdgeBreakPosition = function(position, breakAt
     goog.asserts.assert(position.formattingContext);
     var copy = position.copy();
     var layoutProcessor = new adapt.layout.LayoutProcessorResolver().find(position.formattingContext);
-    var bp = layoutProcessor.createEdgeBreakPosition(copy, breakAtEdge, overflows, this.computedBlockSize);
+    var clonedPaddingBorder = this.calculateClonedPaddingBorder(copy);
+    var bp = layoutProcessor.createEdgeBreakPosition(copy, breakAtEdge, overflows, this.computedBlockSize + clonedPaddingBorder);
     this.breakPositions.push(bp);
 };
 
