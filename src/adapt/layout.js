@@ -2799,7 +2799,9 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, for
                     breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakAfter);
                     if (style && !(self.zeroIndent(style.paddingBottom) && self.zeroIndent(style.borderBottomWidth))) {
                         // Non-zero trailing inset.
-                        if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
+                        // Margins don't collapse across non-zero borders and paddings.
+                        trailingEdgeContexts = [lastAfterNodeContext];
+                        if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, true, breakAtTheEdge)) {
                             // overflow
                             nodeContext = (self.stopAtOverflow ? (lastAfterNodeContext || nodeContext) : nodeContext).modify();
                             nodeContext.overflow = true;
@@ -2808,8 +2810,6 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, for
                                 return;
                             }
                         }
-                        // Margins don't collapse across non-zero borders and paddings.
-                        trailingEdgeContexts = [lastAfterNodeContext];
                         lastAfterNodeContext = null;
                     }
                 } else {

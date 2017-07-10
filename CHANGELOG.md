@@ -8,6 +8,11 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/367>
   - Spec: [CSS Paged Media Module Level 3 - Page-based counters](https://drafts.csswg.org/css-page/#page-based-counters)
 
+### Fixed
+
+- Fix a bug that a bottom margin on a page float is not taken into account when the float has a bottom padding or border
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/376>
+
 ## [2017.6](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.6) - 2017-6-22
 
 ### Added
