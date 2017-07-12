@@ -1071,16 +1071,23 @@ goog.scope(function() {
      * @param {?number} anchorEdge Null indicates that the anchor is not in the current container.
      * @param {boolean} init
      * @param {boolean} force
+     * @param {!PageFloatPlacementCondition} condition
      * @return {?string} Logical float side (snap-block is resolved when init=false). Null indicates that the float area does not fit inside the container
      */
     PageFloatLayoutContext.prototype.setFloatAreaDimensions = function(
-        area, floatReference, floatSide, anchorEdge, init, force) {
+        area, floatReference, floatSide, anchorEdge, init, force, condition) {
         if (floatReference !== this.floatReference) {
             var parent = this.getParent(floatReference);
-            return parent.setFloatAreaDimensions(area, floatReference, floatSide, anchorEdge, init, force);
+            return parent.setFloatAreaDimensions(area, floatReference, floatSide, anchorEdge, init, force, condition);
         }
 
         var logicalFloatSide = this.toLogical(floatSide);
+        if (logicalFloatSide === "snap-block") {
+            if (!condition["block-start"] && !condition["block-end"]) return null;
+        } else {
+            if (!condition[logicalFloatSide]) return null;
+        }
+
         var blockStart = this.getLimitValue("block-start");
         var blockEnd = this.getLimitValue("block-end");
         var inlineStart = this.getLimitValue("inline-start");
@@ -1155,6 +1162,13 @@ goog.scope(function() {
                         logicalFloatSide = "block-start";
                     } else {
                         logicalFloatSide = "block-end";
+                    }
+                }
+                if (!condition[logicalFloatSide]) {
+                    if (condition["block-end"]) {
+                        logicalFloatSide = "block-end";
+                    } else {
+                        return null;
                     }
                 }
             }

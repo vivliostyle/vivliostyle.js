@@ -1292,10 +1292,11 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
  * @param {string} floatSide
  * @param {?number} anchorEdge
  * @param {!vivliostyle.pagefloat.PageFloatLayoutStrategy} strategy
+ * @param {!vivliostyle.pagefloat.PageFloatPlacementCondition} condition
  * @returns {boolean}
  */
 adapt.layout.Column.prototype.setupFloatArea = function(
-    area, floatReference, floatSide, anchorEdge, strategy) {
+    area, floatReference, floatSide, anchorEdge, strategy, condition) {
     var floatLayoutContext = this.pageFloatLayoutContext;
     var floatContainer = floatLayoutContext.getContainer(floatReference);
     var element = area.element;
@@ -1323,7 +1324,7 @@ adapt.layout.Column.prototype.setupFloatArea = function(
     // Calculate bands from the exclusions before setting float area dimensions
     area.init();
     var fitWithinContainer = !!floatLayoutContext.setFloatAreaDimensions(
-        area, floatReference, floatSide, anchorEdge, true, !floatLayoutContext.hasFloatFragments());
+        area, floatReference, floatSide, anchorEdge, true, !floatLayoutContext.hasFloatFragments(), condition);
     if (fitWithinContainer) {
         // New dimensions have been set, remove exclusion floats and re-init
         area.killFloats();
@@ -1339,9 +1340,10 @@ adapt.layout.Column.prototype.setupFloatArea = function(
  * @param {string} floatSide
  * @param {?number} anchorEdge
  * @param {!vivliostyle.pagefloat.PageFloatLayoutStrategy} strategy
+ * @param {!vivliostyle.pagefloat.PageFloatPlacementCondition} condition
  * @returns {?adapt.layout.PageFloatArea}
  */
-adapt.layout.Column.prototype.createPageFloatArea = function(float, floatSide, anchorEdge, strategy) {
+adapt.layout.Column.prototype.createPageFloatArea = function(float, floatSide, anchorEdge, strategy, condition) {
     var floatAreaElement = this.element.ownerDocument.createElement("div");
     adapt.base.setCSSProperty(floatAreaElement, "position", "absolute");
     var parentPageFloatLayoutContext = this.pageFloatLayoutContext.getPageFloatLayoutContext(float.floatReference);
@@ -1353,7 +1355,7 @@ adapt.layout.Column.prototype.createPageFloatArea = function(float, floatSide, a
     var floatArea = new adapt.layout.PageFloatArea(floatSide, floatAreaElement, this.layoutContext.clone(),
         this.clientLayout, this.layoutConstraint, pageFloatLayoutContext, parentContainer);
     pageFloatLayoutContext.setContainer(floatArea);
-    if (this.setupFloatArea(floatArea, float.floatReference, floatSide, anchorEdge, strategy)) {
+    if (this.setupFloatArea(floatArea, float.floatReference, floatSide, anchorEdge, strategy, condition)) {
         return floatArea;
     } else {
         return null;
@@ -1386,7 +1388,7 @@ adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
     continuations = originalContinuations.concat(continuations);
     var firstFloat = continuations[0].float;
     var condition = context.getPageFloatPlacementCondition(firstFloat, floatSide, clearSide);
-    var floatArea = this.createPageFloatArea(firstFloat, floatSide, anchorEdge, strategy);
+    var floatArea = this.createPageFloatArea(firstFloat, floatSide, anchorEdge, strategy, condition);
     /** @const {!adapt.layout.SinglePageFloatLayoutResult} */ var result =
         {floatArea: floatArea, pageFloatFragment: null, newPosition: null};
     if (!floatArea) {
@@ -1415,7 +1417,7 @@ adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
     }).then(function() {
         if (!failed) {
             goog.asserts.assert(floatArea);
-            var logicalFloatSide = context.setFloatAreaDimensions(floatArea, firstFloat.floatReference, floatSide, anchorEdge, false, allowFragmented);
+            var logicalFloatSide = context.setFloatAreaDimensions(floatArea, firstFloat.floatReference, floatSide, anchorEdge, false, allowFragmented, condition);
             if (!logicalFloatSide) {
                 failed = true;
             } else {
