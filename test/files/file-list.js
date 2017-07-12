@@ -116,7 +116,7 @@ module.exports = [
             {file: "page_floats/float_snap-block.html", title: "float: snap-block"},
             {file: "page_floats/clear_page_floats.html", title: "Clear page floats"},
             {file: "page_floats/clear_page_floats_vertical.html", title: "Clear page floats (vertical writing-mode)"},
-            {file: "page_floats/clear_same_on_page_floats.html", title: "clear: same on page floats"}
+            {file: "page_floats/clear_on_page_floats.html", title: "clear on page floats"}
         ]
     },
     {

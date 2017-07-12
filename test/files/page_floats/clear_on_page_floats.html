@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>clear: same on page floats</title>
+  <title>clear on page floats</title>
   <style>
     @page {
       size: 640px;
@@ -40,8 +40,16 @@
       float-reference: column;
     }
 
+    .clear-top {
+      clear: top;
+    }
+    .clear-bottom {
+      clear: bottom;
+    }
     .clear-same {
       clear: same;
+    }
+    .clear-top, .clear-bottom, .clear-same {
       border: 2px green dashed;
     }
   </style>
@@ -68,6 +76,28 @@
   <p>(4-1) Text on P4, col1.</p>
   <div class="page-float block-end">(4-2) page block-end float on P4, col 1; should be at the block-end of the page</div>
   <div class="column-float block-end clear-same">(4-3) column block-end float on P4, col 1 with clear: same; should be at the block-end of P5, col1</div>
+</section>
+<section>
+  <p>(5-1) Text on P5, col1.</p>
+  <div class="column-float snap-block">(5-2) column snap-block float on P5, col 1; should be at the top of the column</div>
+  <div class="page-float snap-block clear-top">(5-3) page snap-block float on P5, col 1 with clear: top; should be at the bottom of P5</div>
+  <p>(5-4) Text</p>
+</section>
+<section>
+  <p>(6-1) Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1. Text on P6, col1.</p>
+  <div class="page-float snap-block">(6-2) page snap-block float on P6, col 1; should be at the bottom of the page</div>
+  <div class="column-float snap-block clear-bottom">(2-3) column snap-block float on P6, col 1 with clear: bottom; should be at the top of P6, col2</div>
+</section>
+<section>
+  <p>(7-1) Text on P7, col1.</p>
+  <div class="column-float block-start">(7-2) column block-start float on P7, col 1; should be at the block-start of the column</div>
+  <div class="page-float block-start clear-top">(7-3) page block-start float on P7, col 1 with clear: top; should be at the block-start of P7</div>
+  <p>(7-4) Text</p>
+</section>
+<section>
+  <p>(8-1) Text on P8, col1.</p>
+  <div class="page-float block-end">(8-2) page block-end float on P8, col 1; should be at the block-end of the page</div>
+  <div class="column-float block-end clear-bottom">(8-3) column block-end float on P8, col 1 with clear: bottom; should be at the block-end of P9, col1</div>
 </section>
 </body>
 </html>
