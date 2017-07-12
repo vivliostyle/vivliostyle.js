@@ -867,9 +867,11 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 ## [CSS Page Floats 3](https://drafts.csswg.org/css-page-floats-3/)
 - [clear](https://drafts.csswg.org/css-page-floats-3/#propdef-clear)
-  - Supports [`none`, `left`, `right`, `both`, `all`](https://drafts.csswg.org/css-page-floats-3/#propdef-clear) values.
-  - Note that `all` is only effective on block-level boxes (i.e. not page floats).
-  - When `all` is specified, the block-start edge of the box gets pushed down so that the edge comes after any block-start/block-end page float of which anchors are before the box in the document order.
+  - Supports [`none`, `left`, `right`, `top`, `bottom`, `both`, `all`, `same`](https://drafts.csswg.org/css-page-floats-3/#propdef-clear) values.
+  - When `all` is specified on a block-level box (not a page float), the block-start edge of the box gets pushed down so that the edge comes after any block-start/block-end page float of which anchors are before the box in the document order.
+  - When a `clear` value is specified on a page float, it is placed so that it comes after any of preceding page floats.
+  - `same` value means the same direction as one which the page float is floated to.
+  - If a page float with `float: snap-block` would be placed at the block-start end but a `clear` value on it forbidden such placement, the float is instead placed at the block-end side (unless the `clear` value also forbidden such placement).
   - Supported in all browsers
 - [float](https://drafts.csswg.org/css-page-floats-3/#propdef-float)
   - Supports [`block-start`, `block-end`, `inline-start`, `inline-end`, `snap-block`, `left`, `right`, `top`, `bottom` and `none`](https://drafts.csswg.org/css-page-floats/#propdef-float) values.
