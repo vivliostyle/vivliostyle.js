@@ -1372,6 +1372,7 @@ adapt.layout.SinglePageFloatLayoutResult;
 /**
  * @param {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} continuations
  * @param {string} floatSide
+ * @param {?string} clearSide
  * @param {boolean} allowFragmented
  * @param {!vivliostyle.pagefloat.PageFloatLayoutStrategy} strategy
  * @param {?number} anchorEdge
@@ -1379,11 +1380,13 @@ adapt.layout.SinglePageFloatLayoutResult;
  * @returns {!adapt.task.Result.<!adapt.layout.SinglePageFloatLayoutResult>}
  */
 adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
-    continuations, floatSide, allowFragmented, strategy, anchorEdge, pageFloatFragment) {
+    continuations, floatSide, clearSide, allowFragmented, strategy, anchorEdge, pageFloatFragment) {
     var context = this.pageFloatLayoutContext;
     var originalContinuations = pageFloatFragment ? pageFloatFragment.continuations : [];
     continuations = originalContinuations.concat(continuations);
-    var floatArea = this.createPageFloatArea(continuations[0].float, floatSide, anchorEdge, strategy);
+    var firstFloat = continuations[0].float;
+    var condition = context.getPageFloatPlacementCondition(firstFloat, floatSide, clearSide);
+    var floatArea = this.createPageFloatArea(firstFloat, floatSide, anchorEdge, strategy);
     /** @const {!adapt.layout.SinglePageFloatLayoutResult} */ var result =
         {floatArea: floatArea, pageFloatFragment: null, newPosition: null};
     if (!floatArea) {
@@ -1412,8 +1415,7 @@ adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
     }).then(function() {
         if (!failed) {
             goog.asserts.assert(floatArea);
-            var float = continuations[0].float;
-            var logicalFloatSide = context.setFloatAreaDimensions(floatArea, float.floatReference, floatSide, anchorEdge, false, allowFragmented);
+            var logicalFloatSide = context.setFloatAreaDimensions(floatArea, firstFloat.floatReference, floatSide, anchorEdge, false, allowFragmented);
             if (!logicalFloatSide) {
                 failed = true;
             } else {
@@ -1452,7 +1454,7 @@ adapt.layout.Column.prototype.layoutPageFloatInner = function(continuation, stra
 
     /** @const {!adapt.task.Frame<boolean>} */ var frame = adapt.task.newFrame("layoutPageFloatInner");
     var self = this;
-    this.layoutSinglePageFloatFragment([continuation], float.floatSide, !context.hasFloatFragments(), strategy, anchorEdge, pageFloatFragment).then(function(result) {
+    this.layoutSinglePageFloatFragment([continuation], float.floatSide, float.clearSide, !context.hasFloatFragments(), strategy, anchorEdge, pageFloatFragment).then(function(result) {
         var floatArea = result.floatArea;
         var newFragment = result.pageFloatFragment;
         var newPosition = result.newPosition;
@@ -1510,7 +1512,10 @@ adapt.layout.Column.prototype.layoutStashedPageFloats = function(floatReference,
         }
         var strategy = new vivliostyle.pagefloat.PageFloatLayoutStrategyResolver()
             .findByFloat(stashedFragment.continuations[0].float);
-        self.layoutSinglePageFloatFragment(stashedFragment.continuations, stashedFragment.floatSide, false, strategy, null).then(function(result) {
+        // Value of 'clear' is irrelevant when laying out stashed floats
+        // since whether the 'clear' value allows placing the float
+        // here is already resolved.
+        self.layoutSinglePageFloatFragment(stashedFragment.continuations, stashedFragment.floatSide, null, false, strategy, null).then(function(result) {
             var floatArea = result.floatArea;
             if (floatArea) {
                 newFloatAreas.push(floatArea);

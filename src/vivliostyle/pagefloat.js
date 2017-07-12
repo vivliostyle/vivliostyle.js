@@ -331,6 +331,15 @@ goog.scope(function() {
     };
 
     /**
+     * Represents whether a page float can be placed at each logical side of its container.
+     * A false value means that the page float cannot be placed at the side
+     * (e.g. due to 'clear' property)
+     * @typedef {Object<string, boolean>}
+     */
+    vivliostyle.pagefloat.PageFloatPlacementCondition;
+    /** @const */ var PageFloatPlacementCondition = vivliostyle.pagefloat.PageFloatPlacementCondition;
+
+    /**
      * @param {vivliostyle.pagefloat.PageFloatLayoutContext} parent
      * @param {?vivliostyle.pagefloat.FloatReference} floatReference
      * @param {adapt.vtree.Container} container
@@ -1263,6 +1272,95 @@ goog.scope(function() {
         } else {
             return blockStartLimit;
         }
+    };
+
+    /**
+     * @param {!PageFloat} float
+     * @param {string} floatSide
+     * @param {?string} clearSide
+     * @returns {!PageFloatPlacementCondition}
+     */
+    PageFloatLayoutContext.prototype.getPageFloatPlacementCondition = function(float, floatSide, clearSide) {
+        if (float.floatReference !== this.floatReference) {
+            var parent = this.getParent(float.floatReference);
+            return parent.getPageFloatPlacementCondition(float, floatSide, clearSide);
+        }
+
+        /** @const {!PageFloatPlacementCondition} */ var result = {
+            "block-start": true,
+            "block-end": true,
+            "inline-start": true,
+            "inline-end": true
+        };
+        if (!clearSide) return result;
+
+        var logicalFloatSide = this.toLogical(floatSide);
+        var logicalClearSide = this.toLogical(clearSide);
+        /** @type {Array<string>} */ var logicalSides;
+        if (logicalClearSide === "all") {
+            logicalSides = ["block-start", "block-end", "inline-start", "inline-end"];
+        } else if (logicalClearSide === "same") {
+            if (logicalFloatSide === "snap-block") {
+                logicalSides = ["block-start", "block-end"];
+            } else {
+                logicalSides = [logicalFloatSide];
+            }
+        } else {
+            logicalSides = [logicalClearSide];
+        }
+
+        var floatOrder = float.getOrder();
+
+        /**
+         * @param {string} side
+         * @returns {function(!PageFloatFragment):boolean}
+         */
+        function isPrecedingFragment(side) {
+            return function(fragment) {
+                return fragment.floatSide === side && fragment.getOrder() < floatOrder;
+            };
+        }
+
+        /**
+         * @param {!PageFloatLayoutContext} context
+         * @param {string} side
+         * @returns {boolean}
+         */
+        function hasPrecedingFragmentInChildren(context, side) {
+            return context.children.some(function(child) {
+                return child.floatFragments.some(isPrecedingFragment(side)) ||
+                    hasPrecedingFragmentInChildren(child, side);
+            });
+        }
+
+        /**
+         * @param {!PageFloatLayoutContext} context
+         * @param {string} side
+         * @returns {boolean}
+         */
+        function hasPrecedingFragmentInParents(context, side) {
+            var parent = context.parent;
+            return !!parent &&
+                (parent.floatFragments.some(isPrecedingFragment(side)) ||
+                hasPrecedingFragmentInParents(parent, side));
+        }
+
+        logicalSides.forEach(function(side) {
+            switch (side) {
+                case "block-start":
+                case "inline-start":
+                    result[side] = !hasPrecedingFragmentInChildren(this, side);
+                    break;
+                case "block-end":
+                case "inline-end":
+                    result[side] = !hasPrecedingFragmentInParents(this, side);
+                    break;
+                default:
+                    throw new Error("Unexpected side: " + side);
+            }
+        }, this);
+
+        return result;
     };
 
     /**
