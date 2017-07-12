@@ -113,13 +113,15 @@ goog.scope(function() {
      * @param {!adapt.vtree.NodePosition} nodePosition
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @param {string} floatSide
+     * @param {?string} clearSide
      * @param {string} flowName
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloat = function(nodePosition, floatReference, floatSide, flowName) {
+    vivliostyle.pagefloat.PageFloat = function(nodePosition, floatReference, floatSide, clearSide, flowName) {
         /** @const */ this.nodePosition = nodePosition;
         /** @const */ this.floatReference = floatReference;
         /** @const */ this.floatSide = floatSide;
+        /** @const */ this.clearSide = clearSide;
         /** @const */ this.flowName = flowName;
         /** @private @type {?number} */ this.order = null;
         /** @private @type {?vivliostyle.pagefloat.PageFloat.ID} */ this.id = null;
@@ -1420,7 +1422,7 @@ goog.scope(function() {
             floatReference = ref;
             goog.asserts.assert(pageFloatLayoutContext.flowName);
             var float = new vivliostyle.pagefloat.PageFloat(nodePosition, floatReference, floatSide,
-                pageFloatLayoutContext.flowName);
+                nodeContext.clearSide, pageFloatLayoutContext.flowName);
             pageFloatLayoutContext.addPageFloat(float);
             return adapt.task.newResult(float);
         });
