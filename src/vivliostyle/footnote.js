@@ -51,11 +51,12 @@ goog.scope(function() {
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @param {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} continuations
      * @param {!adapt.vtree.Container} area
+     * @param {boolean} continues
      * @constructor
      * @extends PageFloatFragment
      */
-    vivliostyle.footnote.FootnoteFragment = function(floatReference, continuations, area) {
-        PageFloatFragment.call(this, floatReference, "block-end", continuations, area);
+    vivliostyle.footnote.FootnoteFragment = function(floatReference, continuations, area, continues) {
+        PageFloatFragment.call(this, floatReference, "block-end", continuations, area, continues);
     };
     /** @const */ var FootnoteFragment = vivliostyle.footnote.FootnoteFragment;
     goog.inherits(FootnoteFragment, PageFloatFragment);
@@ -141,9 +142,9 @@ goog.scope(function() {
      * @override
      */
     FootnoteLayoutStrategy.prototype.createPageFloatFragment = function(
-        continuations, floatSide, floatArea) {
+        continuations, floatSide, floatArea, continues) {
         /** @const */ var f = continuations[0].float;
-        return new FootnoteFragment(f.floatReference, continuations, floatArea);
+        return new FootnoteFragment(f.floatReference, continuations, floatArea, continues);
     };
 
     /**

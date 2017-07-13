@@ -238,13 +238,15 @@ goog.scope(function() {
      * @param {string} floatSide
      * @param {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} continuations
      * @param {!adapt.vtree.Container} area
+     * @param {boolean} continues Represents whether the float is fragmented and continues after this fragment
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloatFragment = function(floatReference, floatSide, continuations, area) {
+    vivliostyle.pagefloat.PageFloatFragment = function(floatReference, floatSide, continuations, area, continues) {
         /** @const */ this.floatReference = floatReference;
         /** @const */ this.floatSide = floatSide;
         /** @const */ this.continuations = continuations;
         /** @const */ this.area = area;
+        /** @const */ this.continues = continues;
     };
     /** @const */ var PageFloatFragment = vivliostyle.pagefloat.PageFloatFragment;
 
@@ -1428,9 +1430,10 @@ goog.scope(function() {
      * @param {!Array<!PageFloatContinuation>} continuations
      * @param {string} logicalFloatSide
      * @param {!adapt.layout.PageFloatArea} floatArea
+     * @param {boolean} continues
      * @returns {!PageFloatFragment}
      */
-    PageFloatLayoutStrategy.prototype.createPageFloatFragment = function(continuations, logicalFloatSide, floatArea) {};
+    PageFloatLayoutStrategy.prototype.createPageFloatFragment = function(continuations, logicalFloatSide, floatArea, continues) {};
 
     /**
      * @param {!PageFloat} float
@@ -1544,9 +1547,9 @@ goog.scope(function() {
      * @override
      */
     NormalPageFloatLayoutStrategy.prototype.createPageFloatFragment = function(
-        continuations, floatSide, floatArea) {
+        continuations, floatSide, floatArea, continues) {
         /** @const */ var f = continuations[0].float;
-        return new PageFloatFragment(f.floatReference, floatSide, continuations, floatArea);
+        return new PageFloatFragment(f.floatReference, floatSide, continuations, floatArea, continues);
     };
 
     /**
