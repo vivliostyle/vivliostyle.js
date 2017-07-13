@@ -13,6 +13,11 @@
   - `same` value means the same direction as one which the page float is floated to.
   - If a page float with `float: snap-block` would be placed at the block-start end but a `clear` value on it forbidden such placement, the float is instead placed at the block-end side (unless the `clear` value also forbidden such placement).
 
+### Changed
+
+- Avoid text wrapping around fragmented page floats
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/379>
+
 ### Fixed
 
 - Fix a bug that a bottom margin on a page float is not taken into account when the float has a bottom padding or border
