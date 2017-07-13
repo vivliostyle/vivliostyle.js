@@ -238,13 +238,15 @@ goog.scope(function() {
      * @param {string} floatSide
      * @param {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} continuations
      * @param {!adapt.vtree.Container} area
+     * @param {boolean} continues Represents whether the float is fragmented and continues after this fragment
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloatFragment = function(floatReference, floatSide, continuations, area) {
+    vivliostyle.pagefloat.PageFloatFragment = function(floatReference, floatSide, continuations, area, continues) {
         /** @const */ this.floatReference = floatReference;
         /** @const */ this.floatSide = floatSide;
         /** @const */ this.continuations = continuations;
         /** @const */ this.area = area;
+        /** @const */ this.continues = continues;
     };
     /** @const */ var PageFloatFragment = vivliostyle.pagefloat.PageFloatFragment;
 
@@ -306,6 +308,17 @@ goog.scope(function() {
         continuations.forEach(function(c) {
             this.continuations.push(c);
         }, this);
+    };
+
+    /**
+     * @returns {string}
+     */
+    PageFloatFragment.prototype.getFlowName = function() {
+        var flowName = this.continuations[0].float.flowName;
+        goog.asserts.assert(this.continuations.every(function(c) {
+            return c.float.flowName === flowName;
+        }));
+        return flowName;
     };
 
     /**
@@ -578,16 +591,30 @@ goog.scope(function() {
     };
 
     /**
+     * @param {!function(!PageFloatFragment):boolean=} condition
      * @returns {boolean}
      */
-    PageFloatLayoutContext.prototype.hasFloatFragments = function() {
+    PageFloatLayoutContext.prototype.hasFloatFragments = function(condition) {
         if (this.floatFragments.length > 0) {
-            return true;
-        } else if (this.parent) {
-            return this.parent.hasFloatFragments();
+            if (!condition || this.floatFragments.some(condition))
+                return true;
+        }
+
+        if (this.parent) {
+            return this.parent.hasFloatFragments(condition);
         } else {
             return false;
         }
+    };
+
+    /**
+     * @param {string} flowName
+     * @returns {boolean}
+     */
+    PageFloatLayoutContext.prototype.hasContinuingFloatFragmentsInFlow = function(flowName) {
+        return this.hasFloatFragments(function(fragment) {
+            return fragment.continues && fragment.getFlowName() === flowName;
+        });
     };
 
     /**
@@ -1428,9 +1455,10 @@ goog.scope(function() {
      * @param {!Array<!PageFloatContinuation>} continuations
      * @param {string} logicalFloatSide
      * @param {!adapt.layout.PageFloatArea} floatArea
+     * @param {boolean} continues
      * @returns {!PageFloatFragment}
      */
-    PageFloatLayoutStrategy.prototype.createPageFloatFragment = function(continuations, logicalFloatSide, floatArea) {};
+    PageFloatLayoutStrategy.prototype.createPageFloatFragment = function(continuations, logicalFloatSide, floatArea, continues) {};
 
     /**
      * @param {!PageFloat} float
@@ -1544,9 +1572,9 @@ goog.scope(function() {
      * @override
      */
     NormalPageFloatLayoutStrategy.prototype.createPageFloatFragment = function(
-        continuations, floatSide, floatArea) {
+        continuations, floatSide, floatArea, continues) {
         /** @const */ var f = continuations[0].float;
-        return new PageFloatFragment(f.floatReference, floatSide, continuations, floatArea);
+        return new PageFloatFragment(f.floatReference, floatSide, continuations, floatArea, continues);
     };
 
     /**

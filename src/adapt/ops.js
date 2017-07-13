@@ -630,6 +630,10 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
             frame.finish(true);
             return;
         }
+        if (column.pageFloatLayoutContext.hasContinuingFloatFragmentsInFlow(flowName)) {
+            frame.finish(true);
+            return;
+        }
         // Record indices of repeated positions and removed positions
         var repeatedIndices = /** @type {Array.<number>} */ ([]);
         var removedIndices = /** @type {Array.<number>} */ ([]);

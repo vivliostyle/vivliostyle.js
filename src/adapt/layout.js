@@ -1421,7 +1421,7 @@ adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
             if (!logicalFloatSide) {
                 failed = true;
             } else {
-                var newFragment = strategy.createPageFloatFragment(continuations, logicalFloatSide, floatArea);
+                var newFragment = strategy.createPageFloatFragment(continuations, logicalFloatSide, floatArea, !!result.newPosition);
                 context.addPageFloatFragment(newFragment, true);
                 result.pageFloatFragment = newFragment;
             }
