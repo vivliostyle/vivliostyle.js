@@ -743,16 +743,13 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         self.nodeContext.establishesBFC = vivliostyle.display.establishesBFC(display, position, floatSide,
             computedStyle["overflow"], writingMode, parentWritingMode, isFlowRoot);
         self.nodeContext.containingBlockForAbsolute = vivliostyle.display.establishesCBForAbsolute(position);
-        if (self.nodeContext.isInsideBFC()) {
+        if (self.nodeContext.isInsideBFC() &&
+            floatSide !== adapt.css.ident.footnote &&
+            !(floatReference && vivliostyle.pagefloat.isPageFloat(floatReference))) {
             // When the element is already inside a block formatting context (except one from the root),
             // float and clear can be controlled by the browser and we don't need to care.
-            if (clearSide !== adapt.css.ident.all) {
-                clearSide = null;
-            }
-            if (floatSide !== adapt.css.ident.footnote &&
-                !(floatReference && vivliostyle.pagefloat.isPageFloat(floatReference))) {
-                floatSide = null;
-            }
+            floatSide = null;
+            clearSide = null;
         }
         var floating = floatSide === adapt.css.ident.left ||
             floatSide === adapt.css.ident.right ||
@@ -785,7 +782,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                 }
             }
             if (clearSide === adapt.css.ident.left || clearSide === adapt.css.ident.right ||
-                clearSide === adapt.css.ident.both || clearSide === adapt.css.ident.all) {
+                clearSide === adapt.css.ident.top || clearSide === adapt.css.ident.bottom ||
+                clearSide === adapt.css.ident.both || clearSide === adapt.css.ident.all ||
+                clearSide === adapt.css.ident.same) {
                 delete computedStyle["clear"];
                 if (computedStyle["display"] && computedStyle["display"] != adapt.css.ident.inline) {
                     self.nodeContext.clearSide = clearSide.toString();

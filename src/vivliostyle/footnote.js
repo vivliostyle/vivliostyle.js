@@ -34,7 +34,7 @@ goog.scope(function() {
      * @extends vivliostyle.pagefloat.PageFloat
      */
     vivliostyle.footnote.Footnote = function(nodePosition, floatReference, flowName, footnotePolicy) {
-        PageFloat.call(this, nodePosition, floatReference, "block-end", flowName);
+        PageFloat.call(this, nodePosition, floatReference, "block-end", null, flowName);
         /** @const */ this.footnotePolicy = footnotePolicy;
     };
     /** @const */ var Footnote = vivliostyle.footnote.Footnote;

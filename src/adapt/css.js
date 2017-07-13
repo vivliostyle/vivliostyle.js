@@ -936,6 +936,7 @@ adapt.css.ident = {
     page: adapt.css.getName("page"),
     relative: adapt.css.getName("relative"),
     right: adapt.css.getName("right"),
+    same: adapt.css.getName("same"),
     scale: adapt.css.getName("scale"),
     snap_block: adapt.css.getName("snap-block"),
     spread: adapt.css.getName("spread"),
