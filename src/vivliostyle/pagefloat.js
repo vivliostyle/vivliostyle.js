@@ -311,6 +311,17 @@ goog.scope(function() {
     };
 
     /**
+     * @returns {string}
+     */
+    PageFloatFragment.prototype.getFlowName = function() {
+        var flowName = this.continuations[0].float.flowName;
+        goog.asserts.assert(this.continuations.every(function(c) {
+            return c.float.flowName === flowName;
+        }));
+        return flowName;
+    };
+
+    /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
      * @param {!adapt.vtree.NodePosition} nodePosition
      * @constructor
@@ -580,16 +591,30 @@ goog.scope(function() {
     };
 
     /**
+     * @param {!function(!PageFloatFragment):boolean=} condition
      * @returns {boolean}
      */
-    PageFloatLayoutContext.prototype.hasFloatFragments = function() {
+    PageFloatLayoutContext.prototype.hasFloatFragments = function(condition) {
         if (this.floatFragments.length > 0) {
-            return true;
-        } else if (this.parent) {
-            return this.parent.hasFloatFragments();
+            if (!condition || this.floatFragments.some(condition))
+                return true;
+        }
+
+        if (this.parent) {
+            return this.parent.hasFloatFragments(condition);
         } else {
             return false;
         }
+    };
+
+    /**
+     * @param {string} flowName
+     * @returns {boolean}
+     */
+    PageFloatLayoutContext.prototype.hasContinuingFloatFragmentsInFlow = function(flowName) {
+        return this.hasFloatFragments(function(fragment) {
+            return fragment.continues && fragment.getFlowName() === flowName;
+        });
     };
 
     /**

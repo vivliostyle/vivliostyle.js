@@ -5,7 +5,7 @@
   <title>Forbid text around fragmented page floats</title>
   <style>
     @page {
-      size: 300px;
+      size: 400px 300px;
     }
     @-epubx-page-template {
       @-epubx-page-master {
@@ -30,7 +30,7 @@
           bottom: 20px;
           left: 20px;
           right: 20px;
-          column-count: 2;
+          column-count: 3;
           column-gap: 10px;
         }
       }
@@ -46,6 +46,9 @@
       line-height: 20px;
       widows: 1;
       orphans: 1;
+    }
+    body {
+      margin: 0;
     }
     section {
       break-after: page;
@@ -74,6 +77,9 @@
 <body>
 <section>
   <div class="footer">footer 1</div>
+  <p>
+    This text should be placed in the 1st column of P1. Blah blah blah blah blah blah blah blah.
+  </p>
   <div class="column-float">
     Column block-start float.<br>
     Column block-start float.<br>
@@ -86,10 +92,15 @@
       Column block-start float.<br>
     </div>
   </div>
-  This text should be placed in the 2nd column of P1. It shouldn't be in the 1st column.
+  <p>
+    This text should be placed in the 1st and 3rd columns of P1. It shouldn't be in the 2nd column.
+  </p>
 </section>
 <section>
   <div class="footer">footer 2</div>
+  <p>
+    This text should be placed in P2.
+  </p>
   <div class="region-float">
     Region block-start-float.<br>
     Region block-start-float.<br>
@@ -109,10 +120,15 @@
       Region block-start-float.<br>
     </div>
   </div>
-  This text should be placed in P3. It shouldn't be in P2.
+  <p>
+    This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3.
+  </p>
 </section>
 <section>
   <div class="footer">footer 3</div>
+  <p>
+    This text should be placed in P5.
+  </p>
   <div class="page-float">
     Page block-start-float.<br>
     Page block-start-float.<br>
@@ -132,7 +148,9 @@
       Page block-start-float.<br>
     </div>
   </div>
-  This text should be placed in P5. It shouldn't be in P4.
+  <p>
+    This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6.
+  </p>
 </section>
 </body>
 </html>
