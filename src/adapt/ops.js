@@ -630,15 +630,15 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
             frame.finish(true);
             return;
         }
-        if (column.pageFloatLayoutContext.hasContinuingFloatFragmentsInFlow(flowName)) {
-            frame.finish(true);
-            return;
-        }
         // Record indices of repeated positions and removed positions
         var repeatedIndices = /** @type {Array.<number>} */ ([]);
         var removedIndices = /** @type {Array.<number>} */ ([]);
         var leadingEdge = true;
         frame.loopWithFrame(function(loopFrame) {
+            if (column.pageFloatLayoutContext.hasContinuingFloatFragmentsInFlow(flowName)) {
+                loopFrame.breakLoop();
+                return;
+            }
             while (flowPosition.positions.length - removedIndices.length > 0) {
                 var index = 0;
                 // Skip all removed positions
