@@ -239,7 +239,6 @@ adapt.expr.defaultUnitSizes = {
     "em": 16,
     "rem": 16,
     "ex": 8,
-    "rex": 8,
     // <resolution>
     "dppx": 1,
     "dpi": 1/96,
@@ -255,7 +254,6 @@ adapt.expr.needUnitConversion = function(unit) {
     switch (unit) {
         case "q":
         case "rem":
-        case "rex":
             return true;
         default:
             return false;
@@ -344,7 +342,7 @@ adapt.expr.Context.prototype.queryUnitSize = function(unit, isRoot) {
         return this.pageHeight() / 100;
     if (unit == "em" || unit == "rem")
         return isRoot ? this.initialFontSize : this.fontSize();
-    if (unit == "ex" || unit == "rex")
+    if (unit == "ex")
         return adapt.expr.defaultUnitSizes["ex"] * (isRoot ? this.initialFontSize : this.fontSize()) / adapt.expr.defaultUnitSizes["em"];
     return adapt.expr.defaultUnitSizes[unit];
 };

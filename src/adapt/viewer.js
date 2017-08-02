@@ -288,7 +288,7 @@ adapt.viewer.Viewer.prototype.resolveLength = function(specified) {
         if (unit === "em" || unit === "rem") {
             return value * this.fontSize;
         }
-        if (unit === "ex" || unit === "rex") {
+        if (unit === "ex") {
             return value * adapt.expr.defaultUnitSizes["ex"] * this.fontSize / adapt.expr.defaultUnitSizes["em"];
         }
         var unitSize = adapt.expr.defaultUnitSizes[unit];
