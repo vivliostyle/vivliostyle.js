@@ -2473,7 +2473,8 @@ adapt.layout.Column.prototype.findAcceptableBreakPosition = function() {
                 nextPenalty = Math.min(nextPenalty, minPenalty);
             }
         }
-    } while (nextPenalty > penalty && !nodeContext);
+    // Don't need to find a non-optimal break position if forceNonfitting=false
+    } while (nextPenalty > penalty && !nodeContext && this.forceNonfitting);
     return {
         breakPosition: nodeContext ? bp : null,
         nodeContext: nodeContext
@@ -2496,9 +2497,9 @@ adapt.layout.Column.prototype.doFinishBreak = function(nodeContext, overflownNod
         adapt.task.newFrame("doFinishBreak");
     var forceRemoveSelf = false;
     if (!nodeContext) {
-        vivliostyle.logging.logger.warn("Could not find any page breaks?!!");
         // Last resort
         if (this.forceNonfitting) {
+            vivliostyle.logging.logger.warn("Could not find any page breaks?!!");
             self.skipTailEdges(overflownNodeContext).then(function(nodeContext) {
                 if (nodeContext) {
                     nodeContext = nodeContext.modify();
