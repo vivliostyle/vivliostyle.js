@@ -115,14 +115,16 @@ goog.scope(function() {
      * @param {string} floatSide
      * @param {?string} clearSide
      * @param {string} flowName
+     * @param {?adapt.css.Numeric} floatMinWrapBlock
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloat = function(nodePosition, floatReference, floatSide, clearSide, flowName) {
+    vivliostyle.pagefloat.PageFloat = function(nodePosition, floatReference, floatSide, clearSide, flowName, floatMinWrapBlock) {
         /** @const */ this.nodePosition = nodePosition;
         /** @const */ this.floatReference = floatReference;
         /** @const */ this.floatSide = floatSide;
         /** @const */ this.clearSide = clearSide;
         /** @const */ this.flowName = flowName;
+        /** @const */ this.floatMinWrapBlock = floatMinWrapBlock;
         /** @private @type {?number} */ this.order = null;
         /** @private @type {?vivliostyle.pagefloat.PageFloat.ID} */ this.id = null;
     };
@@ -983,17 +985,19 @@ goog.scope(function() {
     /**
      * @private
      * @param {string} side
+     * @param {!adapt.vtree.LayoutContext} layoutContext
+     * @param {!adapt.vtree.ClientLayout} clientLayout
      * @param {function(PageFloatFragment, PageFloatLayoutContext):boolean=} condition
      * @returns {number}
      */
-    PageFloatLayoutContext.prototype.getLimitValue = function(side, condition) {
+    PageFloatLayoutContext.prototype.getLimitValue = function(side, layoutContext, clientLayout, condition) {
         goog.asserts.assert(this.container);
         var logicalSide = this.toLogical(side);
         var physicalSide = this.toPhysical(side);
-        var limit = this.getLimitValueInner(logicalSide, condition);
+        var limit = this.getLimitValueInner(logicalSide, layoutContext, clientLayout, condition);
         goog.asserts.assert(limit >= 0);
         if (this.parent && this.parent.container) {
-            var parentLimit = this.parent.getLimitValue(physicalSide, condition);
+            var parentLimit = this.parent.getLimitValue(physicalSide, layoutContext, clientLayout, condition);
             switch (physicalSide) {
                 case "top":
                     return Math.max(limit, parentLimit);
@@ -1013,69 +1017,14 @@ goog.scope(function() {
     /**
      * @private
      * @param {string} logicalSide
+     * @param {!adapt.vtree.LayoutContext} layoutContext
+     * @param {!adapt.vtree.ClientLayout} clientLayout
      * @param {function(PageFloatFragment, PageFloatLayoutContext):boolean=} condition
      * @return {number}
      */
-    PageFloatLayoutContext.prototype.getLimitValueInner = function(logicalSide, condition) {
+    PageFloatLayoutContext.prototype.getLimitValueInner = function(logicalSide, layoutContext, clientLayout, condition) {
         goog.asserts.assert(this.container);
-        var offsetX = this.container.originX;
-        var offsetY = this.container.originY;
-        var paddingRect = this.container.getPaddingRect();
-        var limits = {
-            top: paddingRect.y1 - offsetY,
-            left: paddingRect.x1 - offsetX,
-            bottom: paddingRect.y2 - offsetY,
-            right: paddingRect.x2 - offsetX
-        };
-
-        var fragments = this.floatFragments;
-        if (fragments.length > 0) {
-            limits = fragments.reduce(function(l, f) {
-                if (condition && !condition(f, this))
-                    return l;
-                var logicalFloatSide = this.toLogical(f.floatSide);
-                var area = f.area;
-                var top = l.top, left = l.left, bottom = l.bottom, right = l.right;
-                switch (logicalFloatSide) {
-                    case "inline-start":
-                        if (area.vertical) {
-                            top = Math.max(top, area.top + area.height);
-                        } else {
-                            left = Math.max(left, area.left + area.width);
-                        }
-                        break;
-                    case "block-start":
-                        if (area.vertical) {
-                            right = Math.min(right, area.left);
-                        } else {
-                            top = Math.max(top, area.top + area.height);
-                        }
-                        break;
-                    case "inline-end":
-                        if (area.vertical) {
-                            bottom = Math.min(bottom, area.top);
-                        } else {
-                            right = Math.min(right, area.left);
-                        }
-                        break;
-                    case "block-end":
-                        if (area.vertical) {
-                            left = Math.max(left, area.left + area.width);
-                        } else {
-                            bottom = Math.min(bottom, area.top);
-                        }
-                        break;
-                    default:
-                        throw new Error("Unknown logical float side: " + logicalFloatSide);
-                }
-                return { top: top, left: left, bottom: bottom, right: right };
-            }.bind(this), limits);
-        }
-
-        limits.left += offsetX;
-        limits.right += offsetX;
-        limits.top += offsetY;
-        limits.bottom += offsetY;
+        var limits = this.getLimitValuesInner(layoutContext, clientLayout, condition);
 
         switch (logicalSide) {
             case "block-start":
@@ -1089,6 +1038,113 @@ goog.scope(function() {
             default:
                 throw new Error("Unknown logical side: " + logicalSide);
         }
+    };
+
+    /**
+     * @private
+     * @param {!adapt.vtree.LayoutContext} layoutContext
+     * @param {!adapt.vtree.ClientLayout} clientLayout
+     * @param {function(PageFloatFragment, PageFloatLayoutContext):boolean=} condition
+     * @returns {{top: number, left: number, bottom: number, right: number}}
+     */
+    PageFloatLayoutContext.prototype.getLimitValuesInner = function(layoutContext, clientLayout, condition) {
+        goog.asserts.assert(this.container);
+        var offsetX = this.container.originX;
+        var offsetY = this.container.originY;
+        var paddingRect = this.container.getPaddingRect();
+        var limits = {
+            top: paddingRect.y1 - offsetY,
+            left: paddingRect.x1 - offsetX,
+            bottom: paddingRect.y2 - offsetY,
+            right: paddingRect.x2 - offsetX,
+            floatMinWrapBlockStart: 0,
+            floatMinWrapBlockEnd: 0
+        };
+
+        function resolveLengthPercentage(numeric, viewNode, containerLength) {
+            if (numeric.unit === "%") {
+                return containerLength * numeric.num / 100;
+            } else {
+                return layoutContext.convertLengthToPx(numeric, viewNode, clientLayout);
+            }
+        }
+
+        var fragments = this.floatFragments;
+        if (fragments.length > 0) {
+            limits = fragments.reduce(function(l, f) {
+                if (condition && !condition(f, this))
+                    return l;
+                var logicalFloatSide = this.toLogical(f.floatSide);
+                var area = f.area;
+                var floatMinWrapBlock = f.continuations[0].float.floatMinWrapBlock;
+                var top = l.top, left = l.left, bottom = l.bottom, right = l.right;
+                var floatMinWrapBlockStart = l.floatMinWrapBlockStart;
+                var floatMinWrapBlockEnd = l.floatMinWrapBlockEnd;
+                switch (logicalFloatSide) {
+                    case "inline-start":
+                        if (area.vertical) {
+                            top = Math.max(top, area.top + area.height);
+                        } else {
+                            left = Math.max(left, area.left + area.width);
+                        }
+                        break;
+                    case "block-start":
+                        if (area.vertical) {
+                            if (floatMinWrapBlock && area.left < right) {
+                                floatMinWrapBlockStart = resolveLengthPercentage(
+                                    floatMinWrapBlock, area.rootViewNodes[0],
+                                    paddingRect.x2 - paddingRect.x1);
+                            }
+                            right = Math.min(right, area.left);
+                        } else {
+                            if (floatMinWrapBlock && area.top + area.height > top) {
+                                floatMinWrapBlockStart = resolveLengthPercentage(
+                                    floatMinWrapBlock, area.rootViewNodes[0],
+                                    paddingRect.y2 - paddingRect.y1);
+                            }
+                            top = Math.max(top, area.top + area.height);
+                        }
+                        break;
+                    case "inline-end":
+                        if (area.vertical) {
+                            bottom = Math.min(bottom, area.top);
+                        } else {
+                            right = Math.min(right, area.left);
+                        }
+                        break;
+                    case "block-end":
+                        if (area.vertical) {
+                            if (floatMinWrapBlock && area.left + area.width > left) {
+                                floatMinWrapBlockEnd = resolveLengthPercentage(
+                                    floatMinWrapBlock, area.rootViewNodes[0],
+                                    paddingRect.x2 - paddingRect.x1);
+                            }
+                            left = Math.max(left, area.left + area.width);
+                        } else {
+                            if (floatMinWrapBlock && area.top < bottom) {
+                                floatMinWrapBlockEnd = resolveLengthPercentage(
+                                    floatMinWrapBlock, area.rootViewNodes[0],
+                                    paddingRect.y2 - paddingRect.y1);
+                            }
+                            bottom = Math.min(bottom, area.top);
+                        }
+                        break;
+                    default:
+                        throw new Error("Unknown logical float side: " + logicalFloatSide);
+                }
+                return {
+                    top: top, left: left, bottom: bottom, right: right,
+                    floatMinWrapBlockStart: floatMinWrapBlockStart,
+                    floatMinWrapBlockEnd: floatMinWrapBlockEnd
+                };
+            }.bind(this), limits);
+        }
+
+        limits.left += offsetX;
+        limits.right += offsetX;
+        limits.top += offsetY;
+        limits.bottom += offsetY;
+        return limits;
     };
 
     /**
@@ -1115,10 +1171,11 @@ goog.scope(function() {
             if (!condition[logicalFloatSide]) return null;
         }
 
-        var blockStart = this.getLimitValue("block-start");
-        var blockEnd = this.getLimitValue("block-end");
-        var inlineStart = this.getLimitValue("inline-start");
-        var inlineEnd = this.getLimitValue("inline-end");
+        goog.asserts.assert(area.clientLayout);
+        var blockStart = this.getLimitValue("block-start", area.layoutContext, area.clientLayout);
+        var blockEnd = this.getLimitValue("block-end", area.layoutContext, area.clientLayout);
+        var inlineStart = this.getLimitValue("inline-start", area.layoutContext, area.clientLayout);
+        var inlineEnd = this.getLimitValue("inline-end", area.layoutContext, area.clientLayout);
 
         var blockOffset = area.vertical ? area.originX : area.originY;
         var inlineOffset = area.vertical ? area.originY : area.originX;
@@ -1304,10 +1361,13 @@ goog.scope(function() {
                 return columnBlockEnd;
             context = context.parent;
         }
+        goog.asserts.assert(column.clientLayout);
         var blockStartLimit = this.getLimitValue(
-            "block-start", isFragmentWithAlreadyAppearedFloat);
+            "block-start", column.layoutContext, column.clientLayout,
+            isFragmentWithAlreadyAppearedFloat);
         var blockEndLimit = this.getLimitValue(
-            "block-end", isFragmentWithAlreadyAppearedFloat);
+            "block-end", column.layoutContext, column.clientLayout,
+            isFragmentWithAlreadyAppearedFloat);
         if (blockEndLimit * column.getBoxDir() < columnBlockEnd * column.getBoxDir()) {
             return columnBlockEnd;
         } else {
@@ -1422,6 +1482,49 @@ goog.scope(function() {
         } else {
             this.getParent(floatReference).addLayoutConstraint(layoutConstraint, floatReference);
         }
+    };
+
+    /**
+     * @param {!adapt.layout.Column} column
+     * @returns {boolean}
+     */
+    PageFloatLayoutContext.prototype.isColumnFullWithPageFloats = function(column) {
+        var layoutContext = column.layoutContext;
+        var clientLayout = column.clientLayout;
+        goog.asserts.assert(clientLayout);
+        var context = this;
+        var limits = null;
+        while (context && context.container) {
+            var l = context.getLimitValuesInner(layoutContext, clientLayout);
+            if (limits) {
+                if (column.vertical) {
+                    if (l.right < limits.right) {
+                        limits.right = l.right;
+                        limits.floatMinWrapBlockStart = l.floatMinWrapBlockStart;
+                    }
+                    if (l.left > limits.left) {
+                        limits.left = l.left;
+                        limits.floatMinWrapBlockEnd = l.floatMinWrapBlockEnd;
+                    }
+                } else {
+                    if (l.top > limits.top) {
+                        limits.top = l.top;
+                        limits.floatMinWrapBlockStart = l.floatMinWrapBlockStart;
+                    }
+                    if (l.bottom < limits.bottom) {
+                        limits.bottom = l.bottom;
+                        limits.floatMinWrapBlockEnd = l.floatMinWrapBlockEnd;
+                    }
+                }
+            } else {
+                limits = l;
+            }
+            context = context.parent;
+        }
+        var floatMinWrapBlock =
+            Math.max(limits.floatMinWrapBlockStart, limits.floatMinWrapBlockEnd);
+        var blockSpace = column.vertical ? limits.right - limits.left : limits.bottom - limits.top;
+        return blockSpace <= floatMinWrapBlock;
     };
 
     /**
@@ -1562,7 +1665,8 @@ goog.scope(function() {
             floatReference = ref;
             goog.asserts.assert(pageFloatLayoutContext.flowName);
             var float = new vivliostyle.pagefloat.PageFloat(nodePosition, floatReference, floatSide,
-                nodeContext.clearSide, pageFloatLayoutContext.flowName);
+                nodeContext.clearSide, pageFloatLayoutContext.flowName,
+                nodeContext.floatMinWrapBlock);
             pageFloatLayoutContext.addPageFloat(float);
             return adapt.task.newResult(float);
         });

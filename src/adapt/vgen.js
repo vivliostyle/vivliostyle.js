@@ -800,6 +800,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         self.nodeContext.display = display ? display.toString() : "inline";
         self.nodeContext.floatSide = floating ? floatSide.toString() : null;
         self.nodeContext.floatReference = floatReference || vivliostyle.pagefloat.FloatReference.INLINE;
+        self.nodeContext.floatMinWrapBlock = computedStyle["float-min-wrap-block"] || null;
         self.nodeContext.columnSpan = computedStyle["column-span"];
         if (!self.nodeContext.inline) {
             var breakAfter = computedStyle["break-after"];
@@ -1627,13 +1628,14 @@ adapt.vgen.ViewFactory.prototype.addImageFetchers = function(bg) {
  */
 adapt.vgen.propertiesNotPassedToDOM = {
     "box-decoration-break": true,
+    "float-min-wrap-block": true,
+    "float-reference": true,
     "flow-into": true,
     "flow-linger": true,
-    "flow-priority": true,
     "flow-options": true,
-    "page": true,
-    "float-reference": true,
-    "footnote-policy": true
+    "flow-priority": true,
+    "footnote-policy": true,
+    "page": true
 };
 
 /**

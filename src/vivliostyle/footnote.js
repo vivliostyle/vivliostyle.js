@@ -30,11 +30,12 @@ goog.scope(function() {
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @param {string} flowName
      * @param {?adapt.css.Ident} footnotePolicy
+     * @param {?adapt.css.Numeric} floatMinWrapBlock
      * @constructor
      * @extends vivliostyle.pagefloat.PageFloat
      */
-    vivliostyle.footnote.Footnote = function(nodePosition, floatReference, flowName, footnotePolicy) {
-        PageFloat.call(this, nodePosition, floatReference, "block-end", null, flowName);
+    vivliostyle.footnote.Footnote = function(nodePosition, floatReference, flowName, footnotePolicy, floatMinWrapBlock) {
+        PageFloat.call(this, nodePosition, floatReference, "block-end", null, flowName, floatMinWrapBlock);
         /** @const */ this.footnotePolicy = footnotePolicy;
     };
     /** @const */ var Footnote = vivliostyle.footnote.Footnote;
@@ -133,7 +134,8 @@ goog.scope(function() {
         goog.asserts.assert(pageFloatLayoutContext.flowName);
         /** @type {!vivliostyle.pagefloat.PageFloat} */ var float =
             new vivliostyle.footnote.Footnote(nodePosition, floatReference,
-                pageFloatLayoutContext.flowName, nodeContext.footnotePolicy);
+                pageFloatLayoutContext.flowName, nodeContext.footnotePolicy,
+                nodeContext.floatMinWrapBlock);
         pageFloatLayoutContext.addPageFloat(float);
         return adapt.task.newResult(float);
     };
