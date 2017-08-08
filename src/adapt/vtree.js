@@ -508,6 +508,14 @@ adapt.vtree.LayoutContext.prototype.peelOff = function(nodeContext, nodeOffset) 
 adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = function(nodeContext) {};
 
 /**
+ * @param {!adapt.css.Numeric} numeric
+ * @param {Node} viewNode
+ * @param {!adapt.vtree.ClientLayout} clientLayout
+ * @return {number|!adapt.css.Numeric}
+ */
+adapt.vtree.LayoutContext.prototype.convertLengthToPx = function(numeric, viewNode, clientLayout) {};
+
+/**
  * Returns if two NodePositions represents the same position in the document.
  * @param {!adapt.vtree.NodePosition} nodePosition1
  * @param {!adapt.vtree.NodePosition} nodePosition2
@@ -799,6 +807,7 @@ adapt.vtree.NodeContext = function(sourceNode, parent, boxOffset) {
         vivliostyle.pagefloat.FloatReference.INLINE;
     /** @type {?string} */ this.floatSide = null;
     /** @type {?string} */ this.clearSide = null;
+    /** @type {?adapt.css.Numeric} */ this.floatMinWrapBlock = null;
     /** @type {?adapt.css.Val} */ this.columnSpan = null;
     /** @type {string} */ this.verticalAlign = "baseline";
     /** @type {string} */ this.captionSide = "top";
@@ -842,6 +851,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
     this.floatReference = vivliostyle.pagefloat.FloatReference.INLINE;
     this.floatSide = null;
     this.clearSide = null;
+    this.floatMinWrapBlock = null;
     this.columnSpan = null;
     this.verticalAlign = "baseline";
     this.flexContainer = false;
@@ -882,6 +892,7 @@ adapt.vtree.NodeContext.prototype.cloneItem = function() {
     np.floatReference = this.floatReference;
     np.floatSide = this.floatSide;
     np.clearSide = this.clearSide;
+    np.floatMinWrapBlock = this.floatMinWrapBlock;
     np.columnSpan = this.columnSpan;
     np.verticalAlign = this.verticalAlign;
     np.captionSide = this.captionSide;

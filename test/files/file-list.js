@@ -117,7 +117,10 @@ module.exports = [
             {file: "page_floats/clear_page_floats.html", title: "Clear page floats"},
             {file: "page_floats/clear_page_floats_vertical.html", title: "Clear page floats (vertical writing-mode)"},
             {file: "page_floats/clear_on_page_floats.html", title: "clear on page floats"},
-            {file: "page_floats/text_around_fragmented_page_floats.html", title: "Forbid text around fragmented page floats"}
+            {file: "page_floats/text_around_fragmented_page_floats.html", title: "Forbid text around fragmented page floats"},
+            {file: "page_floats/page_floats_and_break_avoid.html", title: "Page floats and break-*: avoid"},
+            {file: "page_floats/float-min-wrap-block.html", title: "float-min-wrap-block"},
+            {file: "page_floats/float-min-wrap-block_vertical.html", title: "float-min-wrap-block (vertical writing-mode)"}
         ]
     },
     {

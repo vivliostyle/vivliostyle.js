@@ -2473,7 +2473,8 @@ adapt.layout.Column.prototype.findAcceptableBreakPosition = function() {
                 nextPenalty = Math.min(nextPenalty, minPenalty);
             }
         }
-    } while (nextPenalty > penalty && !nodeContext);
+    // Don't need to find a non-optimal break position if forceNonfitting=false
+    } while (nextPenalty > penalty && !nodeContext && this.forceNonfitting);
     return {
         breakPosition: nodeContext ? bp : null,
         nodeContext: nodeContext
@@ -2496,9 +2497,9 @@ adapt.layout.Column.prototype.doFinishBreak = function(nodeContext, overflownNod
         adapt.task.newFrame("doFinishBreak");
     var forceRemoveSelf = false;
     if (!nodeContext) {
-        vivliostyle.logging.logger.warn("Could not find any page breaks?!!");
         // Last resort
         if (this.forceNonfitting) {
+            vivliostyle.logging.logger.warn("Could not find any page breaks?!!");
             self.skipTailEdges(overflownNodeContext).then(function(nodeContext) {
                 if (nodeContext) {
                     nodeContext = nodeContext.modify();
@@ -3149,6 +3150,9 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, brea
     if (this.stopAtOverflow && this.overflown) {
         return adapt.task.newResult(/** @type {adapt.vtree.ChunkPosition} */ (chunkPosition));
     }
+    if (this.isFullWithPageFloats()) {
+        return adapt.task.newResult(/** @type {adapt.vtree.ChunkPosition} */ (chunkPosition));
+    }
     var self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.ChunkPosition>} */ var frame = adapt.task.newFrame("layout");
         // ------ start the column -----------
@@ -3191,6 +3195,13 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, brea
         });
     });
     return frame.result();
+};
+
+/**
+ * @returns {boolean}
+ */
+adapt.layout.Column.prototype.isFullWithPageFloats = function() {
+    return this.pageFloatLayoutContext.isColumnFullWithPageFloats(this);
 };
 
 adapt.layout.Column.prototype.doFinishBreakOfFragmentLayoutConstraints = function(nodeContext) {
