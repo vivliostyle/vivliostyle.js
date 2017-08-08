@@ -579,7 +579,6 @@ adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBod
                     px *= this.context.initialFontSize;
                     break;
                 case "ex":
-                case "rex":
                     px *= this.context.initialFontSize * adapt.expr.defaultUnitSizes["ex"] / adapt.expr.defaultUnitSizes["em"];
                     break;
                 case "%":

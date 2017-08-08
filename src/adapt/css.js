@@ -80,7 +80,7 @@ adapt.css.Visitor.prototype.visitIdent = function(ident) {
 };
 
 /**
- * @param {adapt.css.Numeric} numeric
+ * @param {!adapt.css.Numeric} numeric
  * @return {adapt.css.Val}
  */
 adapt.css.Visitor.prototype.visitNumeric = function(numeric) {

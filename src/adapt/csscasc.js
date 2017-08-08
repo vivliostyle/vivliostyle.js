@@ -575,16 +575,13 @@ adapt.csscasc.InheritanceVisitor.prototype.getFontSize = function() {
  * @override
  */
 adapt.csscasc.InheritanceVisitor.prototype.visitNumeric = function(numeric) {
-    if (numeric.unit == "em" || numeric.unit == "ex") {
-        var ratio = this.context.queryUnitSize(numeric.unit, false) / this.context.queryUnitSize("em", false);
-        return new adapt.css.Numeric(numeric.num * ratio * this.getFontSize(), "px");
-    } else if (numeric.unit == "rem" || numeric.unit == "rex") {
-        var ratio = this.context.queryUnitSize(numeric.unit, false) / this.context.queryUnitSize("rem", false);
-        return new adapt.css.Numeric(numeric.num * ratio * this.context.fontSize(), "px");
+    goog.asserts.assert(this.context);
+    if (this.propName === "font-size") {
+        return adapt.csscasc.convertFontSizeToPx(numeric, this.getFontSize(), this.context);
+    } else if (numeric.unit == "em" || numeric.unit == "ex" || numeric.unit == "rem") {
+        return adapt.csscasc.convertFontRelativeLengthToPx(numeric, this.getFontSize(), this.context);
     } else if (numeric.unit == "%") {
-        if (this.propName === "font-size") {
-            return new adapt.css.Numeric(numeric.num / 100 * this.getFontSize(), "px");
-        } else if (this.propName === "line-height") {
+        if (this.propName === "line-height") {
             return numeric;
         }
         var unit = this.propName.match(/height|^(top|bottom)$/) ? "vh" : "vw";
@@ -602,6 +599,44 @@ adapt.csscasc.InheritanceVisitor.prototype.visitExpr = function(expr) {
         return val.visit(this);
     }
     return expr;
+};
+
+/**
+ * @param {!adapt.css.Numeric} numeric
+ * @param {number} baseFontSize
+ * @param {!adapt.expr.Context} context
+ * @returns {!adapt.css.Numeric}
+ */
+adapt.csscasc.convertFontRelativeLengthToPx = function(numeric, baseFontSize, context) {
+    var unit = numeric.unit;
+    var num = numeric.num;
+    if (unit === "em" || unit === "ex") {
+        var ratio = adapt.expr.defaultUnitSizes[unit] / adapt.expr.defaultUnitSizes["em"];
+        return new adapt.css.Numeric(num * ratio * baseFontSize, "px");
+    } else if (unit === "rem") {
+        return new adapt.css.Numeric(num * context.fontSize(), "px");
+    } else {
+        return numeric;
+    }
+};
+
+/**
+ * @param {!adapt.css.Numeric} numeric
+ * @param {number} parentFontSize
+ * @param {!adapt.expr.Context} context
+ * @returns {!adapt.css.Numeric}
+ */
+adapt.csscasc.convertFontSizeToPx = function(numeric, parentFontSize, context) {
+    numeric = adapt.csscasc.convertFontRelativeLengthToPx(numeric, parentFontSize, context);
+    var unit = numeric.unit;
+    var num = numeric.num;
+    if (unit === "px") {
+        return numeric;
+    } else if (unit === "%") {
+        return new adapt.css.Numeric(num / 100 * parentFontSize, "px");
+    } else {
+        return new adapt.css.Numeric(num * context.queryUnitSize(unit, false), "px");
+    }
 };
 
 
