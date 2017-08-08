@@ -1806,6 +1806,31 @@ adapt.vgen.ViewFactory.prototype.processFragmentedBlockEdge = function(nodeConte
 };
 
 /**
+ * @override
+ */
+adapt.vgen.ViewFactory.prototype.convertLengthToPx = function(numeric, viewNode, clientLayout) {
+    var num = numeric.num;
+    var unit = numeric.unit;
+    if (adapt.expr.isFontRelativeLengthUnit(unit)) {
+        var elem = viewNode;
+        while (elem && elem.nodeType !== 1) {
+            elem = elem.parentNode;
+        }
+        goog.asserts.assert(elem);
+        var fontSize = parseFloat(clientLayout.getElementComputedStyle(/** @type {Element} */ (elem))["font-size"]);
+        goog.asserts.assert(this.context);
+        return adapt.csscasc.convertFontRelativeLengthToPx(numeric, fontSize, this.context).num;
+    } else {
+        var unitSize = this.context.queryUnitSize(unit, false);
+        if (unitSize) {
+            return num * unitSize;
+        } else {
+            return numeric;
+        }
+    }
+};
+
+/**
  * Returns if two NodePositionStep are equivalent.
  * @param {!adapt.vtree.NodePositionStep} step1
  * @param {!adapt.vtree.NodePositionStep} step2

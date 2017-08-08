@@ -225,6 +225,21 @@ adapt.expr.isAbsoluteLengthUnit = function(unit) {
 };
 
 /**
+ * @param {string} unit
+ * @returns {boolean}
+ */
+adapt.expr.isFontRelativeLengthUnit = function(unit) {
+    switch (unit.toLowerCase()) {
+        case "em":
+        case "ex":
+        case "rem":
+            return true;
+        default:
+            return false;
+    }
+};
+
+/**
  * @const
  * @type {!Object.<string,number>}
  */

@@ -508,6 +508,14 @@ adapt.vtree.LayoutContext.prototype.peelOff = function(nodeContext, nodeOffset) 
 adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = function(nodeContext) {};
 
 /**
+ * @param {!adapt.css.Numeric} numeric
+ * @param {Node} viewNode
+ * @param {!adapt.vtree.ClientLayout} clientLayout
+ * @return {number|!adapt.css.Numeric}
+ */
+adapt.vtree.LayoutContext.prototype.convertLengthToPx = function(numeric, viewNode, clientLayout) {};
+
+/**
  * Returns if two NodePositions represents the same position in the document.
  * @param {!adapt.vtree.NodePosition} nodePosition1
  * @param {!adapt.vtree.NodePosition} nodePosition2
