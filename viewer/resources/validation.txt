@@ -320,6 +320,7 @@ size = POS_LENGTH{1,2} | auto | [ PAGE_SIZE || [ portrait | landscape ] ];
 /* CSS Page Floats */
 float-reference = inline | column | region | page;
 float = block-start | block-end | inline-start | inline-end | snap-block | snap-inline | left | right | top | bottom | none | footnote;
+float-min-wrap-block = PPLENGTH;
 
 /* CSS Ruby */
 ruby-align = start | center | space-between | space-around;
