@@ -66,7 +66,8 @@ module.exports = [
             {file: "page_breaks/page_break_between_flow_elements.html", title: "Page break between flow elements"},
             {file: "page_breaks/break_on_pseudo_of_flow_elements.html", title: "Break on pseudoelements of flow elements"},
             {file: "page_breaks/page_break_bug_with_exclusions.html", title: "Page break bug with exclusions (on Firefox)"},
-            {file: "page_breaks/page_break_bug_in_vertical_text.html", title: "Page break bug in vertical text (on Firefox)"}
+            {file: "page_breaks/page_break_bug_in_vertical_text.html", title: "Page break bug in vertical text (on Firefox)"},
+            {file: "page_breaks/class_C_break_point.html", title: "Class C break point"}
         ]
     },
     {
