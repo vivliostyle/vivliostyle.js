@@ -2810,16 +2810,6 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, for
                         // Non-zero trailing inset.
                         // Margins don't collapse across non-zero borders and paddings.
                         trailingEdgeContexts = [lastAfterNodeContext];
-                        if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, true, breakAtTheEdge)) {
-                            // overflow
-                            nodeContext = (self.stopAtOverflow ? (lastAfterNodeContext || nodeContext) : nodeContext).modify();
-                            nodeContext.overflow = true;
-                            if (self.stopAtOverflow) {
-                                loopFrame.breakLoop();
-                                return;
-                            }
-                        }
-                        lastAfterNodeContext = null;
                     }
                 } else {
                     // Leading edge

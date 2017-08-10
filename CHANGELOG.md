@@ -24,6 +24,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/376>
 - Fix a bug that `box-decoration-break: clone` makes a block incorrectly overflow
   - <https://github.com/vivliostyle/vivliostyle.js/pull/377>
+- Avoid invalid fragmentation occurring between an edge of a block container and its child
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/383>
 
 ## [2017.6](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.6) - 2017-6-22
 
