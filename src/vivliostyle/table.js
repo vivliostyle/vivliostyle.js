@@ -1437,8 +1437,15 @@ goog.scope(function() {
         var frame = adapt.task.newFrame("TableLayoutProcessor.doInitialLayout");
         this.layoutEntireTable(nodeContext, column).then(function(nodeContextAfter) {
             var tableElement = nodeContextAfter.viewNode;
+            var tableBBox = column.clientLayout.getElementClientRect(tableElement);
+            var edge = column.vertical ? tableBBox.left : tableBBox.bottom;
+            edge += (column.vertical ? -1 : 1) * adapt.layout.calculateOffset(
+                nodeContext, vivliostyle.repetitiveelements.collectElementsOffset(column)).current;
+            if (!column.isOverflown(edge)) {
+                frame.finish(nodeContextAfter);
+                return;
+            }
             this.normalizeColGroups(formattingContext, tableElement, column);
-            goog.asserts.assert(column.clientLayout);
             formattingContext.updateCellSizes(column.clientLayout);
             frame.finish(null);
         }.bind(this));
