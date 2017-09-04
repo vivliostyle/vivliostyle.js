@@ -58,4 +58,13 @@
         height: 100% !important;
         max-height: 100%;
     }
+
+    /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
+    @-moz-document regexp('.*') {
+        [data-vivliostyle-page-container]:nth-last-child(n+2) {
+            top: -1px;
+            margin-top: 1px;
+            margin-bottom: -1px;
+        }
+    }
 }
