@@ -27,7 +27,7 @@
 - Avoid invalid fragmentation occurring between an edge of a block container and its child
   - <https://github.com/vivliostyle/vivliostyle.js/pull/383>
 - Fix a bug that a table is not fragmented correctly
-  - <https://github.com/vivliostyle/vivliostyle.js/pull/384>
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/386>
 
 ## [2017.6](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.6) - 2017-6-22
 

@@ -1263,6 +1263,32 @@ goog.scope(function() {
     };
 
     /**
+     * @typedef {{calculateBreakPositionsInside: boolean}}
+     */
+    var TableLayoutOption;
+
+    /**
+     *  @type {Array<{root: !Node, tableLayoutOption: !TableLayoutOption}>}
+     */
+    var tableLayoutOptionCache = [];
+
+    /**
+     * @param {!Node} tableRootSourceNode
+     * @returns {?TableLayoutOption}
+     */
+    function getTableLayoutOption(tableRootSourceNode) {
+        var i = tableLayoutOptionCache.findIndex(function(c) {
+            return c.root === tableRootSourceNode;
+        });
+        var pair = tableLayoutOptionCache[i];
+        return pair ? pair.tableLayoutOption : null;
+    }
+
+    function clearTableLayoutOptionCache() {
+        tableLayoutOptionCache = [];
+    }
+
+    /**
      * @constructor
      * @implements {adapt.layout.LayoutProcessor}
      */
@@ -1434,11 +1460,24 @@ goog.scope(function() {
         var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
         formattingContext.vertical = nodeContext.vertical;
         formattingContext.initializeRepetitiveElements(nodeContext.vertical);
+        goog.asserts.assert(nodeContext.sourceNode);
+        var tableLayoutOption = getTableLayoutOption(nodeContext.sourceNode);
+        clearTableLayoutOptionCache();
         var frame = adapt.task.newFrame("TableLayoutProcessor.doInitialLayout");
+        var initialNodeContext = nodeContext.copy();
         this.layoutEntireTable(nodeContext, column).then(function(nodeContextAfter) {
             var tableElement = nodeContextAfter.viewNode;
+            var tableBBox = column.clientLayout.getElementClientRect(tableElement);
+            var edge = column.vertical ? tableBBox.left : tableBBox.bottom;
+            edge += (column.vertical ? -1 : 1) * adapt.layout.calculateOffset(
+                nodeContext, vivliostyle.repetitiveelements.collectElementsOffset(column)).current;
+            if (!column.isOverflown(edge) &&
+                (!tableLayoutOption || !tableLayoutOption.calculateBreakPositionsInside)) {
+                column.breakPositions.push(new EntireTableBreakPosition(initialNodeContext));
+                frame.finish(nodeContextAfter);
+                return;
+            }
             this.normalizeColGroups(formattingContext, tableElement, column);
-            goog.asserts.assert(column.clientLayout);
             formattingContext.updateCellSizes(column.clientLayout);
             frame.finish(null);
         }.bind(this));
@@ -1708,6 +1747,95 @@ goog.scope(function() {
         return this.processor.doInitialLayout(nodeContext, column);
     };
 
+    /**
+     * @constructor
+     * @param {!adapt.vtree.NodeContext} tableNodeContext
+     * @extends {adapt.layout.EdgeBreakPosition}
+     */
+    vivliostyle.table.EntireTableBreakPosition = function(tableNodeContext) {
+        adapt.layout.EdgeBreakPosition.call(this, tableNodeContext, null, tableNodeContext.overflow, 0);
+    };
+    /** @const */ var EntireTableBreakPosition = vivliostyle.table.EntireTableBreakPosition;
+    goog.inherits(EntireTableBreakPosition, adapt.layout.EdgeBreakPosition);
+
+    /**
+     * @override
+     */
+    EntireTableBreakPosition.prototype.getMinBreakPenalty = function() {
+        if (!this.isEdgeUpdated) {
+            throw new Error("EdgeBreakPosition.prototype.updateEdge not called");
+        }
+        return (this.overflows ? 3 : 0)
+            + (this.position.parent ? this.position.parent.breakPenalty : 0);
+    };
+
+    /**
+     * @override
+     */
+    EntireTableBreakPosition.prototype.breakPositionChosen = function(column) {
+        column.fragmentLayoutConstraints.push(
+            new EntireTableLayoutConstraint(this.position.sourceNode));
+    };
+
+    /**
+     * @constructor
+     * @param {Node} tableRootNode
+     * @implements {adapt.layout.FragmentLayoutConstraint}
+     */
+    vivliostyle.table.EntireTableLayoutConstraint = function(tableRootNode) {
+        this.tableRootNode = tableRootNode;
+    };
+    /** @const */ var EntireTableLayoutConstraint = vivliostyle.table.EntireTableLayoutConstraint;
+
+    /**
+     * @override
+     */
+    EntireTableLayoutConstraint.prototype.allowLayout = function(nodeContext, overflownNodeContext, column) {
+        // If the nodeContext overflows, any EntireTableLayoutConstraint should not be registered in the first place.
+        // See TableLayoutProcessor.prototype.doInitialLayout.
+        goog.asserts.assert(!nodeContext.overflow);
+        return false;
+    };
+
+    /**
+     * @override
+     */
+    EntireTableLayoutConstraint.prototype.nextCandidate = function(nodeContext) {
+        return true;
+    };
+
+    /**
+     * @override
+     */
+    EntireTableLayoutConstraint.prototype.postLayout = function(allowed, positionAfter, initialPosition, column) {
+        goog.asserts.assert(positionAfter.sourceNode);
+        tableLayoutOptionCache.push({
+            root: positionAfter.sourceNode,
+            tableLayoutOption: /** @type {!TableLayoutOption} */({calculateBreakPositionsInside: true})
+        });
+    };
+
+    /**
+     * @override
+     */
+    EntireTableLayoutConstraint.prototype.finishBreak = function(nodeContext, column) {
+        return adapt.task.newResult(true);
+    };
+
+    /**
+     * @override
+     */
+    EntireTableLayoutConstraint.prototype.equalsTo = function(constraint) {
+        return (constraint instanceof EntireTableLayoutConstraint) &&
+            constraint.tableRootNode === this.tableRootNode;
+    };
+
+    /**
+     * @override
+     */
+    EntireTableLayoutConstraint.prototype.getPriorityOfFinishBreak = function() {
+        return 0;
+    };
 
     /**
      * @constructor
