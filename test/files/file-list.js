@@ -83,7 +83,8 @@ module.exports = [
             {file: "table/table_vertical_align.html", title: "Table vertical-align"},
             {file: "table/table_vertical_align_vertical.html", title: "Table vertical-align (vertical writing-mode)"},
             {file: "table/table_repeating_header_footer.html", title: "Table repeating header/footer"},
-            {file: "table/table_repeating_header_footer_vertical.html", title: "Table repeating header/footer (vertical writing-mode)"}
+            {file: "table/table_repeating_header_footer_vertical.html", title: "Table repeating header/footer (vertical writing-mode)"},
+            {file: "table/fragment_non-overflowing_table.html", title: "Fragment a non-overflowing table"}
         ]
     },
     {

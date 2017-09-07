@@ -318,6 +318,11 @@ adapt.layout.BreakPosition.prototype.getMinBreakPenalty = function() {};
 adapt.layout.BreakPosition.prototype.calculateOffset = function(column) {};
 
 /**
+ * @param {!adapt.layout.Column} column
+ */
+adapt.layout.BreakPosition.prototype.breakPositionChosen = function(column) {};
+
+/**
  * @abstract
  * @constructor
  * @implements {adapt.layout.BreakPosition}
@@ -341,6 +346,11 @@ adapt.layout.AbstractBreakPosition.prototype.calculateOffset = function(column) 
     return calculateOffset(this.getNodeContext(),
         vivliostyle.repetitiveelements.collectElementsOffset(column));
 };
+
+/**
+ * @override
+ */
+adapt.layout.AbstractBreakPosition.prototype.breakPositionChosen = function(column) {};
 
 /**
  * @return {adapt.vtree.NodeContext}
@@ -432,7 +442,7 @@ adapt.layout.EdgeBreakPosition = function(position, breakOnEdge, overflows,
     /** @type {boolean} */ this.overflows = overflows;
     /** @type {boolean} */ this.overflowIfRepetitiveElementsDropped = overflows;
     /** @const */ this.computedBlockSize = computedBlockSize;
-    /** @private @type {boolean} */ this.isEdgeUpdated = false;
+    /** @protected @type {boolean} */ this.isEdgeUpdated = false;
     /** @private @type {number} */ this.edge = 0;
 };
 goog.inherits(adapt.layout.EdgeBreakPosition, adapt.layout.AbstractBreakPosition);
@@ -3258,7 +3268,10 @@ adapt.layout.Column.prototype.doLayout = function(nodeContext, leadingEdge, brea
                 } else if (nodeContext && self.stopByOverflow(nodeContext)) {
                     // overflow (implicit page break): back up and find a page break
                     overflownNodeContext = nodeContext;
-                    nodeContext = self.findAcceptableBreakPosition().nodeContext;
+                    var bp = self.findAcceptableBreakPosition();
+                    nodeContext = bp.nodeContext;
+                    if (bp.breakPosition)
+                        bp.breakPosition.breakPositionChosen(self);
                     loopFrame.breakLoop(); // Loop end
                 } else {
                     if (pending) {
