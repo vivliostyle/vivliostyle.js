@@ -27,12 +27,17 @@
     section {
       break-after: page;
     }
-    .column-top-float {
+    .column-top-float, .column-bottom-float {
       float-reference: column;
-      float: top;
       height: 16px;
       line-height: 16px;
       border: blue solid 2px;
+    }
+    .column-top-float {
+      float: top;
+    }
+    .column-bottom-float {
+      float: bottom;
     }
   </style>
 </head>
@@ -296,11 +301,91 @@
     1-8<br>
     1-9<br>
     <span class="column-top-float">
-      column float
+      top column float
     </span>
     1-10 Second column<br>
     1-11 should have<br>
     1-12 a top float<br>
+    1-13 and<br>
+    1-14 eight<br>
+    1-15 lines<br>
+    1-16<br>
+    1-17<br>
+    1-18<br>
+    1-19<br>
+    1-20
+  </p>
+  <p>
+    2-1 Third<br>
+    2-2 column<br>
+    2-3 should<br>
+    2-4 have<br>
+    2-5 nine<br>
+    2-6 lines<br>
+    2-7<br>
+    2-8<br>
+    2-9<br>
+    2-10
+  </p>
+</section>
+
+<section>
+  <p>
+    <span class="column-bottom-float">
+      bottom column float
+    </span>
+    1-1 First column<br>
+    1-2 should have<br>
+    1-3 a bottom float<br>
+    1-4 and<br>
+    1-5 eight lines<br>
+    1-6<br>
+    1-7<br>
+    1-8<br>
+    1-9 Second<br>
+    1-10 column<br>
+    1-11 should<br>
+    1-12 have<br>
+    1-13 nine<br>
+    1-14 lines<br>
+    1-15<br>
+    1-16<br>
+    1-17<br>
+    1-18<br>
+    1-19<br>
+    1-20
+  </p>
+  <p>
+    2-1 Third<br>
+    2-2 column<br>
+    2-3 should<br>
+    2-4 have<br>
+    2-5 nine<br>
+    2-6 lines<br>
+    2-7<br>
+    2-8<br>
+    2-9<br>
+    2-10
+  </p>
+</section>
+
+<section>
+  <p>
+    1-1 First<br>
+    1-2 column<br>
+    1-3 should<br>
+    1-4 have<br>
+    1-5 nine<br>
+    1-6 lines<br>
+    1-7<br>
+    1-8<br>
+    1-9<br>
+    <span class="column-bottom-float">
+      bottom column float
+    </span>
+    1-10 Second column<br>
+    1-11 should have<br>
+    1-12 a bottom float<br>
     1-13 and<br>
     1-14 eight<br>
     1-15 lines<br>
