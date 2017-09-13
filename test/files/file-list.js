@@ -71,6 +71,12 @@ module.exports = [
         ]
     },
     {
+        category: "Column",
+        files: [
+            {file: "column/column-fill_balance-all.html", title: "column-fill: balance-all"}
+        ]
+    },
+    {
         category: "Table",
         files: [
             {file: "table/table_at_flow_root.html", title: "Table at flow root"},

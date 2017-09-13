@@ -41,6 +41,7 @@ goog.require('adapt.xmldoc');
 goog.require('adapt.font');
 goog.require('vivliostyle.break');
 goog.require('vivliostyle.page');
+goog.require('vivliostyle.column');
 
 /**
  * @type {adapt.taskutil.Fetcher.<boolean>}
@@ -872,6 +873,54 @@ adapt.ops.StyleInstance.prototype.getRegionPageFloatLayoutContext = function(
 };
 
 /**
+ * @param {!adapt.vtree.Page} page
+ * @param {!adapt.pm.PageBoxInstance} boxInstance
+ * @param {number} offsetX
+ * @param {number} offsetY
+ * @param {Array.<adapt.geom.Shape>} exclusions
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} pagePageFloatLayoutContext
+ * @param {!adapt.vtree.Container} layoutContainer
+ * @param {string} flowNameStr
+ * @param {number} columnCount
+ * @returns {!adapt.task.Result.<!Array.<!adapt.layout.Column>>}
+ */
+adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
+    page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, layoutContainer,
+    flowNameStr, columnCount) {
+    var self = this;
+    var positionAtContainerStart = self.currentLayoutPosition.clone();
+
+    /**
+     * @type {!vivliostyle.column.ColumnGenerator}
+     */
+    function layoutColumns() {
+        self.currentLayoutPosition = positionAtContainerStart.clone();
+        return self.layoutFlowColumns(
+            page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, layoutContainer,
+            flowNameStr, columnCount).thenAsync(function(columns) {
+            return adapt.task.newResult({
+                columns: columns,
+                position: self.currentLayoutPosition
+            });
+        });
+    }
+
+    return layoutColumns().thenAsync(function(generatorResult) {
+        if (columnCount <= 1)
+            return adapt.task.newResult(generatorResult.columns);
+        var columnFill = boxInstance.getProp(self, "column-fill") || adapt.css.ident.balance;
+        var columnBalancer = vivliostyle.column.createColumnBalancer(columnFill, layoutColumns, layoutContainer);
+        if (!columnBalancer)
+            return adapt.task.newResult(generatorResult.columns);
+
+        return columnBalancer.balanceColumns(generatorResult).thenAsync(function(result) {
+            self.currentLayoutPosition = result.position;
+            return adapt.task.newResult(result.columns);
+        });
+    });
+};
+
+/**
  *
  * @param {!adapt.vtree.Page} page
  * @param {!adapt.pm.PageBoxInstance} boxInstance
@@ -1018,7 +1067,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
         // for now only a single column in vertical case
         var columnCount = boxInstance.getPropAsNumber(self, "column-count");
 
-        self.layoutFlowColumns(page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, layoutContainer, flowNameStr, columnCount).then(function(columns) {
+        self.layoutFlowColumnsWithBalancing(page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, layoutContainer, flowNameStr, columnCount).then(function(columns) {
             if (!pagePageFloatLayoutContext.isInvalidated()) {
                 var column = columns[0];
                 goog.asserts.assert(column);

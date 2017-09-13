@@ -898,6 +898,8 @@ adapt.css.ident = {
     always: adapt.css.getName("always"),
     auto: adapt.css.getName("auto"),
     avoid: adapt.css.getName("avoid"),
+    balance: adapt.css.getName("balance"),
+    balance_all: adapt.css.getName("balance-all"),
     block: adapt.css.getName("block"),
     block_end: adapt.css.getName("block-end"),
     block_start: adapt.css.getName("block-start"),
