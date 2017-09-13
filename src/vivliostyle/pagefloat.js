@@ -861,6 +861,41 @@ goog.scope(function() {
         this.invalidated = true;
     };
 
+    /**
+     * @returns {!Array.<!PageFloatLayoutContext>}
+     */
+    PageFloatLayoutContext.prototype.detachChildren = function() {
+        var children = this.children.splice(0);
+        children.forEach(function(child) {
+            child.floatFragments.forEach(function(fragment) {
+                var elem = fragment.area.element;
+                if (elem && elem.parentNode)
+                    elem.parentNode.removeChild(elem);
+            });
+        });
+        return children;
+    };
+
+    /**
+     * @param {!Array.<!PageFloatLayoutContext>} children
+     */
+    PageFloatLayoutContext.prototype.attachChildren = function(children) {
+        var parent = null;
+        if (this.container) {
+            parent = this.container.element.parentNode;
+        }
+        children.forEach(function(child) {
+            this.children.push(child);
+            if (parent) {
+                child.floatFragments.forEach(function(fragment) {
+                    var elem = fragment.area.element;
+                    if (elem)
+                        parent.appendChild(fragment.area.element);
+                });
+            }
+        }, this);
+    };
+
     PageFloatLayoutContext.prototype.isInvalidated = function() {
         return this.invalidated ||
             (!!this.parent && this.parent.isInvalidated());

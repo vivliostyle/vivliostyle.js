@@ -28,6 +28,14 @@ describe("column", function() {
         };
     });
 
+    function createDummyPageFloatLayoutContext(children) {
+        return {
+            children: children,
+            attachChildren: jasmine.createSpy("attachChildren"),
+            detachChildren: jasmine.createSpy("detachChildren").and.returnValue(children)
+        };
+    }
+
     function createDummyColumn(computedBlockSize) {
         return {
             element: {parentNode: parentNode},
@@ -36,34 +44,47 @@ describe("column", function() {
     }
 
     describe("ColumnBalancer", function() {
-        var balancer;
+        var columns, columnPageFloatLayoutContexts, regionPageFloatLayoutContext, balancer;
 
         beforeEach(function() {
-            balancer = new ColumnBalancer();
+            columns = [1, 2, 3].map(createDummyColumn);
+            columnPageFloatLayoutContexts = [];
+            regionPageFloatLayoutContext = createDummyPageFloatLayoutContext(columnPageFloatLayoutContexts);
+            balancer = new ColumnBalancer(null, regionPageFloatLayoutContext);
         });
 
-        describe("replaceColumns", function() {
-            it("removes column elements if only one array of Columns is passed", function() {
-                var columns = [1, 2, 3].map(createDummyColumn);
-                balancer.replaceColumns(columns);
+        describe("replaceContents", function() {
+            it("removes column and page float elements if only one array of Columns is passed", function() {
+                var layoutResult = {columns: columns};
+                balancer.replaceContents(layoutResult);
 
                 columns.forEach(function(c) {
                     expect(parentNode.removeChild).toHaveBeenCalledWith(c.element);
                 });
+                expect(regionPageFloatLayoutContext.detachChildren).toHaveBeenCalled();
+                expect(layoutResult.columnPageFloatLayoutContexts).toBe(columnPageFloatLayoutContexts);
             });
 
             it("replaces column elements with new ones if two arrays of Columns are passed", function() {
-                var columns = [1, 2, 3].map(createDummyColumn);
+                var layoutResult = {columns: columns};
                 var newColumns = [1, 2, 3].map(createDummyColumn);
-                balancer.replaceColumns(columns, newColumns);
+                var newColumnPageFloatLayoutContexts = [];
+                var newLayoutResult = {
+                    columns: newColumns,
+                    columnPageFloatLayoutContexts: newColumnPageFloatLayoutContexts
+                };
+                balancer.replaceContents(layoutResult, newLayoutResult);
 
                 columns.forEach(function(c) {
                     expect(parentNode.removeChild).toHaveBeenCalledWith(c.element);
                 });
+                expect(regionPageFloatLayoutContext.detachChildren).toHaveBeenCalled();
+                expect(layoutResult.columnPageFloatLayoutContexts).toBe(columnPageFloatLayoutContexts);
 
                 newColumns.forEach(function(c) {
                     expect(parentNode.appendChild).toHaveBeenCalledWith(c.element);
                 });
+                expect(regionPageFloatLayoutContext.attachChildren).toHaveBeenCalledWith(newColumnPageFloatLayoutContexts);
             });
         });
     });
@@ -80,7 +101,7 @@ describe("column", function() {
         }
 
         function createBalancer(vertical) {
-            return new BalanceNonLastColumnBalancer(null, createDummyContainer(vertical));
+            return new BalanceNonLastColumnBalancer(null, null, createDummyContainer(vertical));
         }
 
         describe("calculatePenalty", function() {
@@ -132,7 +153,7 @@ describe("column", function() {
                 var balancer = createBalancer(false);
                 var candidates = [
                     {},
-                    {columns: [901, 700, 800].map(createDummyColumn)}
+                    {layoutResult: {columns: [901, 700, 800].map(createDummyColumn)}}
                 ];
 
                 expect(balancer.hasNextCandidate(candidates)).toBe(true);
@@ -146,7 +167,7 @@ describe("column", function() {
                 var balancer = createBalancer(false);
                 var candidates = [
                     {},
-                    {columns: [900, 700, 800].map(createDummyColumn)}
+                    {layoutResult: {columns: [900, 700, 800].map(createDummyColumn)}}
                 ];
 
                 expect(balancer.hasNextCandidate(candidates)).toBe(false);
@@ -161,7 +182,7 @@ describe("column", function() {
             it("sets a value slightly smaller than the last max column block size to the layoutContainer's block size", function() {
                 var candidates = [
                     {},
-                    {columns: [901, 700, 800].map(createDummyColumn)}
+                    {layoutResult: {columns: [901, 700, 800].map(createDummyColumn)}}
                 ];
 
                 var balancer = createBalancer(false);

@@ -889,6 +889,8 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
     flowNameStr, columnCount) {
     var self = this;
     var positionAtContainerStart = self.currentLayoutPosition.clone();
+    var regionPageFloatLayoutContext =
+        self.getRegionPageFloatLayoutContext(pagePageFloatLayoutContext, boxInstance, layoutContainer, flowNameStr);
 
     /**
      * @type {!vivliostyle.column.ColumnGenerator}
@@ -896,8 +898,8 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
     function layoutColumns() {
         self.currentLayoutPosition = positionAtContainerStart.clone();
         return self.layoutFlowColumns(
-            page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, layoutContainer,
-            flowNameStr, columnCount).thenAsync(function(columns) {
+            page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, regionPageFloatLayoutContext,
+            layoutContainer, flowNameStr, columnCount).thenAsync(function(columns) {
                 return adapt.task.newResult({
                     columns: columns,
                     position: self.currentLayoutPosition
@@ -911,8 +913,8 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
         var columnFill = boxInstance.getProp(self, "column-fill") || adapt.css.ident.balance;
         var flowPosition = self.currentLayoutPosition.flowPositions[flowNameStr];
         goog.asserts.assert(flowPosition);
-        var columnBalancer = vivliostyle.column.createColumnBalancer(columnFill, layoutColumns, layoutContainer,
-            generatorResult.columns, flowPosition);
+        var columnBalancer = vivliostyle.column.createColumnBalancer(columnFill, layoutColumns,
+            regionPageFloatLayoutContext, layoutContainer, generatorResult.columns, flowPosition);
         if (!columnBalancer)
             return adapt.task.newResult(generatorResult.columns);
 
@@ -931,20 +933,19 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
  * @param {number} offsetY
  * @param {Array.<adapt.geom.Shape>} exclusions
  * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} pagePageFloatLayoutContext
+ * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} regionPageFloatLayoutContext
  * @param {!adapt.vtree.Container} layoutContainer
  * @param {string} flowNameStr
  * @param {number} columnCount
  * @returns {!adapt.task.Result.<!Array.<!adapt.layout.Column>>}
  */
 adapt.ops.StyleInstance.prototype.layoutFlowColumns = function(
-    page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, layoutContainer,
-    flowNameStr, columnCount) {
+    page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, regionPageFloatLayoutContext,
+    layoutContainer, flowNameStr, columnCount) {
     var self = this;
     /** @type {adapt.task.Frame<!Array<!adapt.layout.Column>>} */ var frame =
         adapt.task.newFrame("layoutFlowColumns");
     var positionAtContainerStart = self.currentLayoutPosition.clone();
-    var regionPageFloatLayoutContext =
-        self.getRegionPageFloatLayoutContext(pagePageFloatLayoutContext, boxInstance, layoutContainer, flowNameStr);
     var columnGap = boxInstance.getPropAsNumber(self, "column-gap");
     // Don't query columnWidth when it's not needed, so that width calculation can be delayed
     // for width: auto columns.
