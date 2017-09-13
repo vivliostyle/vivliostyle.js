@@ -7,6 +7,11 @@
     @page {
       size: 640px 220px;
       margin: 10px;
+      @bottom-center {
+        content: counter(page);
+        font-size: 10px;
+        line-height: 10px;
+      }
     }
     :root {
       column-count: 3;

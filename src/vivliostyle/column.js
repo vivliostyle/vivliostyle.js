@@ -222,18 +222,26 @@ goog.scope(function() {
      * @param {!adapt.css.Ident} columnFill
      * @param {!ColumnGenerator} columnGenerator
      * @param {!adapt.vtree.Container} layoutContainer
+     * @param {!Array<!adapt.layout.Column>} columns
+     * @param {!adapt.vtree.FlowPosition} flowPosition
      * @returns {?ColumnBalancer}
      */
-    vivliostyle.column.createColumnBalancer = function(columnFill, columnGenerator, layoutContainer) {
-        switch (columnFill) {
-            case adapt.css.ident.auto:
+    vivliostyle.column.createColumnBalancer = function(columnFill, columnGenerator, layoutContainer, columns, flowPosition) {
+        if (columnFill === adapt.css.ident.auto) {
+            return null;
+        } else {
+            var noMoreContent = flowPosition.positions.length === 0;
+            var lastColumn = columns[columns.length - 1];
+            var isLastColumnForceBroken = !!(lastColumn && lastColumn.pageBreakType);
+            if (noMoreContent || isLastColumnForceBroken) {
+                // TODO balancer for last page
                 return null;
-            case adapt.css.ident.balance:
-                return null;
-            case adapt.css.ident.balance_all:
+            } else if (columnFill === adapt.css.ident.balance_all) {
                 return new BalanceNonLastColumnBalancer(columnGenerator, layoutContainer);
-            default:
-                throw new Error("unknown column-fill value " + columnFill);
+            } else {
+                goog.asserts.assert(columnFill === adapt.css.ident.balance);
+                return null;
+            }
         }
     };
 });

@@ -909,7 +909,10 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
         if (columnCount <= 1)
             return adapt.task.newResult(generatorResult.columns);
         var columnFill = boxInstance.getProp(self, "column-fill") || adapt.css.ident.balance;
-        var columnBalancer = vivliostyle.column.createColumnBalancer(columnFill, layoutColumns, layoutContainer);
+        var flowPosition = self.currentLayoutPosition.flowPositions[flowNameStr];
+        goog.asserts.assert(flowPosition);
+        var columnBalancer = vivliostyle.column.createColumnBalancer(columnFill, layoutColumns, layoutContainer,
+            generatorResult.columns, flowPosition);
         if (!columnBalancer)
             return adapt.task.newResult(generatorResult.columns);
 
