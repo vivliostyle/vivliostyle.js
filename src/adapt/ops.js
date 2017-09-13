@@ -898,11 +898,11 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
         return self.layoutFlowColumns(
             page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, layoutContainer,
             flowNameStr, columnCount).thenAsync(function(columns) {
-            return adapt.task.newResult({
-                columns: columns,
-                position: self.currentLayoutPosition
+                return adapt.task.newResult({
+                    columns: columns,
+                    position: self.currentLayoutPosition
+                });
             });
-        });
     }
 
     return layoutColumns().thenAsync(function(generatorResult) {

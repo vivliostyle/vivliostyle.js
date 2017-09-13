@@ -96,7 +96,7 @@ describe("column", function() {
                 var columns = [1000, 999, 1000].map(createDummyColumn);
 
                 expect(balancer.calculatePenalty(columns)).toBeGreaterThan(0);
-            })
+            });
 
             it("returns a greater value when computedBlockSizes of columns have a greater variance", function() {
                 var balancer = createBalancer(false);
@@ -106,6 +106,14 @@ describe("column", function() {
                 var penalty1 = balancer.calculatePenalty(columns1);
                 var penalty2 = balancer.calculatePenalty(columns2);
                 expect(penalty2).toBeGreaterThan(penalty1);
+            });
+
+            it("excludes columns ending with forced breaks", function() {
+                var balancer = createBalancer(false);
+                var columns = [1000, 900, 1000].map(createDummyColumn);
+                columns[1].pageBreakType = "column";
+
+                expect(balancer.calculatePenalty(columns)).toBe(0);
             });
         });
 

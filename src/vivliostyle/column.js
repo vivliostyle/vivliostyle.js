@@ -170,7 +170,9 @@ goog.scope(function() {
      * @override
      */
     BalanceNonLastColumnBalancer.prototype.calculatePenalty = function(columns) {
-        var computedBlockSizes = columns.map(function(c) {
+        var computedBlockSizes = columns.filter(function(c) {
+            return !c.pageBreakType;
+        }).map(function(c) {
             return c.computedBlockSize;
         });
         return vivliostyle.math.variance(computedBlockSizes);
