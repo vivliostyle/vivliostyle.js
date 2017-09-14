@@ -880,19 +880,9 @@ goog.scope(function() {
      * @param {!Array.<!PageFloatLayoutContext>} children
      */
     PageFloatLayoutContext.prototype.attachChildren = function(children) {
-        var parent = null;
-        if (this.container) {
-            parent = this.container.element.parentNode;
-        }
         children.forEach(function(child) {
             this.children.push(child);
-            if (parent) {
-                child.floatFragments.forEach(function(fragment) {
-                    var elem = fragment.area.element;
-                    if (elem)
-                        parent.appendChild(fragment.area.element);
-                });
-            }
+            child.reattachFloatFragments();
         }, this);
     };
 
