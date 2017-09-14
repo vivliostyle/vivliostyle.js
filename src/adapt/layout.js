@@ -3228,6 +3228,13 @@ adapt.layout.Column.prototype.isFullWithPageFloats = function() {
     return this.pageFloatLayoutContext.isColumnFullWithPageFloats(this);
 };
 
+/**
+ * @returns {number}
+ */
+adapt.layout.Column.prototype.getMaxBlockSizeOfPageFloats = function() {
+    return this.pageFloatLayoutContext.getMaxBlockSizeOfPageFloats();
+};
+
 adapt.layout.Column.prototype.doFinishBreakOfFragmentLayoutConstraints = function(nodeContext) {
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("doFinishBreakOfFragmentLayoutConstraints");
     var sortedFragmentLayoutConstraints = [].concat(this.fragmentLayoutConstraints);

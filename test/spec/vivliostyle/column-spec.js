@@ -36,10 +36,11 @@ describe("column", function() {
         };
     }
 
-    function createDummyColumn(computedBlockSize) {
+    function createDummyColumn(computedBlockSize, pageFloatBlockSize) {
         return {
             element: {parentNode: parentNode},
-            computedBlockSize: computedBlockSize || 1000
+            computedBlockSize: computedBlockSize || 1000,
+            getMaxBlockSizeOfPageFloats: jasmine.createSpy("getMaxBlockSizeOfPageFloats").and.returnValue(pageFloatBlockSize || 0)
         };
     }
 
@@ -168,6 +169,24 @@ describe("column", function() {
                 var candidates = [
                     {},
                     {layoutResult: {columns: [900, 700, 800].map(createDummyColumn)}}
+                ];
+
+                expect(balancer.hasNextCandidate(candidates)).toBe(false);
+
+                balancer = createBalancer(true);
+
+                expect(balancer.hasNextCandidate(candidates)).toBe(false);
+            });
+
+            it("returns false if the last max column block size is equal or less than the max block size of column page floats + 1px", function() {
+                var balancer = createBalancer(false);
+                var candidates = [
+                    {},
+                    {layoutResult: {columns:
+                        [[950, 949], [700, 0], [800, 0]].map(function(a) {
+                            return createDummyColumn(a[0], a[1]);
+                        })
+                    }}
                 ];
 
                 expect(balancer.hasNextCandidate(candidates)).toBe(false);

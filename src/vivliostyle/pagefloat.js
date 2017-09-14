@@ -1563,6 +1563,22 @@ goog.scope(function() {
     };
 
     /**
+     * @returns {number}
+     */
+    PageFloatLayoutContext.prototype.getMaxBlockSizeOfPageFloats = function() {
+        var isVertical = this.getContainer().vertical;
+        if (!this.floatFragments.length)
+            return 0;
+        return Math.max.apply(null, this.floatFragments.map(function(fragment) {
+            var area = fragment.area;
+            if (isVertical)
+                return area.width;
+            else
+                return area.height;
+        }));
+    };
+
+    /**
      * @interface
      */
     vivliostyle.pagefloat.PageFloatLayoutStrategy = function() {};

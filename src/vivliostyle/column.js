@@ -196,7 +196,10 @@ goog.scope(function() {
         var maxColumnBlockSize = Math.max.apply(null, columns.map(function(c) {
             return c.computedBlockSize;
         }));
-        return maxColumnBlockSize > this.originalContainerBlockSize * 0.9;
+        var maxPageFloatBlockSize = Math.max.apply(null, columns.map(function(c) {
+            return c.getMaxBlockSizeOfPageFloats();
+        }));
+        return maxColumnBlockSize > Math.max(this.originalContainerBlockSize * 0.9, maxPageFloatBlockSize + 1);
     };
 
     /**
