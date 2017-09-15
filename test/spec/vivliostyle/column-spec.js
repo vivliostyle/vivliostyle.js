@@ -28,6 +28,19 @@ describe("column", function() {
         };
     });
 
+    function createDummyContainer(vertical) {
+        var element = {
+            appendChild: jasmine.createSpy("appendChild")
+        };
+        var container = new adapt.vtree.Container(element);
+        container.vertical = vertical;
+        if (vertical)
+            container.width = 1000;
+        else
+            container.height = 1000;
+        return container;
+    }
+
     function createDummyPageFloatLayoutContext(children) {
         return {
             children: children,
@@ -45,45 +58,38 @@ describe("column", function() {
     }
 
     describe("ColumnBalancer", function() {
-        var columns, columnPageFloatLayoutContexts, regionPageFloatLayoutContext, balancer;
+        var columns, columnPageFloatLayoutContexts, regionPageFloatLayoutContext, layoutContainer, balancer;
 
         beforeEach(function() {
             columns = [1, 2, 3].map(createDummyColumn);
             columnPageFloatLayoutContexts = [];
             regionPageFloatLayoutContext = createDummyPageFloatLayoutContext(columnPageFloatLayoutContexts);
-            balancer = new ColumnBalancer(null, regionPageFloatLayoutContext);
+            layoutContainer = createDummyContainer(false);
+            balancer = new ColumnBalancer(layoutContainer, null, regionPageFloatLayoutContext);
         });
 
-        describe("replaceContents", function() {
-            it("removes column and page float elements if only one array of Columns is passed", function() {
+        describe("savePageFloatLayoutContexts", function() {
+            it("detaches column PageFloatLayoutContexts and save them in the passed ColumnLayoutResult", function() {
                 var layoutResult = {columns: columns};
-                balancer.replaceContents(layoutResult);
+                balancer.savePageFloatLayoutContexts(layoutResult);
 
-                columns.forEach(function(c) {
-                    expect(parentNode.removeChild).toHaveBeenCalledWith(c.element);
-                });
                 expect(regionPageFloatLayoutContext.detachChildren).toHaveBeenCalled();
                 expect(layoutResult.columnPageFloatLayoutContexts).toBe(columnPageFloatLayoutContexts);
             });
+        });
 
-            it("replaces column elements with new ones if two arrays of Columns are passed", function() {
-                var layoutResult = {columns: columns};
+        describe("restoreContents", function() {
+            it("restore column elements and column PageFloatLayoutContexts with new ones", function() {
                 var newColumns = [1, 2, 3].map(createDummyColumn);
                 var newColumnPageFloatLayoutContexts = [];
                 var newLayoutResult = {
                     columns: newColumns,
                     columnPageFloatLayoutContexts: newColumnPageFloatLayoutContexts
                 };
-                balancer.replaceContents(layoutResult, newLayoutResult);
-
-                columns.forEach(function(c) {
-                    expect(parentNode.removeChild).toHaveBeenCalledWith(c.element);
-                });
-                expect(regionPageFloatLayoutContext.detachChildren).toHaveBeenCalled();
-                expect(layoutResult.columnPageFloatLayoutContexts).toBe(columnPageFloatLayoutContexts);
+                balancer.restoreContents(newLayoutResult);
 
                 newColumns.forEach(function(c) {
-                    expect(parentNode.appendChild).toHaveBeenCalledWith(c.element);
+                    expect(layoutContainer.element.appendChild).toHaveBeenCalledWith(c.element);
                 });
                 expect(regionPageFloatLayoutContext.attachChildren).toHaveBeenCalledWith(newColumnPageFloatLayoutContexts);
             });
@@ -91,16 +97,6 @@ describe("column", function() {
     });
 
     describe("BalanceNonLastColumnBalancer", function() {
-        function createDummyContainer(vertical) {
-            var container = new adapt.vtree.Container(null);
-            container.vertical = vertical;
-            if (vertical)
-                container.width = 1000;
-            else
-                container.height = 1000;
-            return container;
-        }
-
         function createBalancer(vertical) {
             return new BalanceNonLastColumnBalancer(null, null, createDummyContainer(vertical));
         }

@@ -900,14 +900,20 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
         return self.layoutFlowColumns(
             page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, regionPageFloatLayoutContext,
             layoutContainer, flowNameStr, columnCount).thenAsync(function(columns) {
-                return adapt.task.newResult({
-                    columns: columns,
-                    position: self.currentLayoutPosition
-                });
+                if (columns) {
+                    return adapt.task.newResult({
+                        columns: columns,
+                        position: self.currentLayoutPosition
+                    });
+                } else {
+                    return adapt.task.newResult(null);
+                }
             });
     }
 
     return layoutColumns().thenAsync(function(generatorResult) {
+        if (!generatorResult)
+            return adapt.task.newResult(null);
         if (columnCount <= 1)
             return adapt.task.newResult(generatorResult.columns);
         var columnFill = boxInstance.getProp(self, "column-fill") || adapt.css.ident.balance;
@@ -937,13 +943,13 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
  * @param {!adapt.vtree.Container} layoutContainer
  * @param {string} flowNameStr
  * @param {number} columnCount
- * @returns {!adapt.task.Result.<!Array.<!adapt.layout.Column>>}
+ * @returns {!adapt.task.Result.<?Array.<!adapt.layout.Column>>}
  */
 adapt.ops.StyleInstance.prototype.layoutFlowColumns = function(
     page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, regionPageFloatLayoutContext,
     layoutContainer, flowNameStr, columnCount) {
     var self = this;
-    /** @type {adapt.task.Frame<!Array<!adapt.layout.Column>>} */ var frame =
+    /** @type {adapt.task.Frame<?Array<!adapt.layout.Column>>} */ var frame =
         adapt.task.newFrame("layoutFlowColumns");
     var positionAtContainerStart = self.currentLayoutPosition.clone();
     var columnGap = boxInstance.getPropAsNumber(self, "column-gap");
@@ -966,6 +972,7 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumns = function(
             columnIndex++, flowNameStr, regionPageFloatLayoutContext, columnCount, columnGap,
             columnWidth, innerShape, layoutContext).then(function(c) {
                 if (pagePageFloatLayoutContext.isInvalidated()) {
+                    columns = null;
                     loopFrame.breakLoop();
                     return;
                 }

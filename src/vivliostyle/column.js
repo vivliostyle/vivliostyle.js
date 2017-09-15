@@ -34,7 +34,7 @@ goog.scope(function() {
     /** @const */ var ColumnLayoutResult = vivliostyle.column.ColumnLayoutResult;
 
     /**
-     * @typedef {function():!adapt.task.Result<!ColumnLayoutResult>}
+     * @typedef {function():!adapt.task.Result<?ColumnLayoutResult>}
      */
     vivliostyle.column.ColumnGenerator;
     /** @const */ var ColumnGenerator = vivliostyle.column.ColumnGenerator;
@@ -52,11 +52,13 @@ goog.scope(function() {
 
     /**
      * @abstract
+     * @param {!adapt.vtree.Container} layoutContainer
      * @param {!ColumnGenerator} columnGenerator
      * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} regionPageFloatLayoutContext
      * @constructor
      */
-    vivliostyle.column.ColumnBalancer = function(columnGenerator, regionPageFloatLayoutContext) {
+    vivliostyle.column.ColumnBalancer = function(layoutContainer, columnGenerator, regionPageFloatLayoutContext) {
+        /** @const */ this.layoutContainer = layoutContainer;
         /** @const */ this.columnGenerator = columnGenerator;
         /** @const */ this.regionPageFloatLayoutContext = regionPageFloatLayoutContext;
     };
@@ -70,6 +72,8 @@ goog.scope(function() {
         var self = this;
         /** @type {!adapt.task.Frame.<!ColumnLayoutResult>} */ var frame =
             adapt.task.newFrame("ColumnBalancer#balanceColumns");
+        self.savePageFloatLayoutContexts(layoutResult);
+        self.layoutContainer.clear();
         var candidates = [self.createTrialResult(layoutResult)];
         frame.loopWithFrame(function(loopFrame) {
             if (!self.hasNextCandidate(candidates)) {
@@ -77,9 +81,14 @@ goog.scope(function() {
                 return;
             }
 
-            self.replaceContents(candidates[candidates.length - 1].layoutResult);
             self.updateCondition(candidates);
             self.columnGenerator().then(function(layoutResult) {
+                self.savePageFloatLayoutContexts(layoutResult);
+                self.layoutContainer.clear();
+                if (!layoutResult) {
+                    loopFrame.breakLoop();
+                    return;
+                }
                 candidates.push(self.createTrialResult(layoutResult));
                 loopFrame.continueLoop();
             });
@@ -87,10 +96,7 @@ goog.scope(function() {
             var result = candidates.reduce(function(prev, curr) {
                 return curr.penalty < prev.penalty ? curr : prev;
             }, candidates[0]);
-            var lastCandidate = candidates[candidates.length - 1];
-            if (lastCandidate !== result) {
-                self.replaceContents(lastCandidate.layoutResult, result.layoutResult);
-            }
+            self.restoreContents(result.layoutResult);
             self.postBalance();
             frame.finish(result.layoutResult);
         });
@@ -136,26 +142,25 @@ goog.scope(function() {
     ColumnBalancer.prototype.postBalance = function() {};
 
     /**
-     * @private
-     * @param {!ColumnLayoutResult} layoutResult
-     * @param {!ColumnLayoutResult=} newLayoutResult
+     * @param {?ColumnLayoutResult} layoutResult
      */
-    ColumnBalancer.prototype.replaceContents = function(layoutResult, newLayoutResult) {
-        var parent;
-        layoutResult.columns.forEach(function(c) {
-            var el = c.element;
-            parent = el.parentNode;
-            goog.asserts.assert(parent);
-            parent.removeChild(el);
+    ColumnBalancer.prototype.savePageFloatLayoutContexts = function(layoutResult) {
+        var children = this.regionPageFloatLayoutContext.detachChildren();
+        if (layoutResult)
+            layoutResult.columnPageFloatLayoutContexts = children;
+    };
+
+    /**
+     * @private
+     * @param {!ColumnLayoutResult} newLayoutResult
+     */
+    ColumnBalancer.prototype.restoreContents = function(newLayoutResult) {
+        var parent = this.layoutContainer.element;
+        newLayoutResult.columns.forEach(function(c) {
+            parent.appendChild(c.element);
         });
-        layoutResult.columnPageFloatLayoutContexts = this.regionPageFloatLayoutContext.detachChildren();
-        if (newLayoutResult) {
-            newLayoutResult.columns.forEach(function(c) {
-                parent.appendChild(c.element);
-            });
-            goog.asserts.assert(newLayoutResult.columnPageFloatLayoutContexts);
-            this.regionPageFloatLayoutContext.attachChildren(newLayoutResult.columnPageFloatLayoutContexts);
-        }
+        goog.asserts.assert(newLayoutResult.columnPageFloatLayoutContexts);
+        this.regionPageFloatLayoutContext.attachChildren(newLayoutResult.columnPageFloatLayoutContexts);
     };
 
 
@@ -166,8 +171,7 @@ goog.scope(function() {
      * @extends {ColumnBalancer}
      */
     vivliostyle.column.BalanceNonLastColumnBalancer = function(columnGenerator, regionPageFloatLayoutContext, layoutContainer) {
-        ColumnBalancer.call(this, columnGenerator, regionPageFloatLayoutContext);
-        this.layoutContainer = layoutContainer;
+        ColumnBalancer.call(this, layoutContainer, columnGenerator, regionPageFloatLayoutContext);
         this.originalContainerBlockSize = layoutContainer.vertical ? layoutContainer.width : layoutContainer.height;
     };
     /** @const */ var BalanceNonLastColumnBalancer = vivliostyle.column.BalanceNonLastColumnBalancer;
