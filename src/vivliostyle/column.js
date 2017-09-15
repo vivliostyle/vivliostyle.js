@@ -246,6 +246,7 @@ goog.scope(function() {
         if (columnFill === adapt.css.ident.auto) {
             return null;
         } else {
+            // TODO: how to handle a case where no more in-flow contents but some page floats
             var noMoreContent = flowPosition.positions.length === 0;
             var lastColumn = columns[columns.length - 1];
             var isLastColumnForceBroken = !!(lastColumn && lastColumn.pageBreakType);
