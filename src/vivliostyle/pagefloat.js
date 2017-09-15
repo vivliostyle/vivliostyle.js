@@ -817,10 +817,14 @@ goog.scope(function() {
             if (deferredFloats.some(function(d) {
                 return !float.isAllowedToPrecede(d) && order > d.getOrder();
             })) {
-                this.forbid(float);
-                var fragment = this.findPageFloatFragment(float);
-                goog.asserts.assert(fragment);
-                this.removePageFloatFragment(fragment);
+                if (this.locked) {
+                    this.invalidate();
+                } else {
+                    this.forbid(float);
+                    var fragment = this.findPageFloatFragment(float);
+                    goog.asserts.assert(fragment);
+                    this.removePageFloatFragment(fragment);
+                }
                 return true;
             }
         }
