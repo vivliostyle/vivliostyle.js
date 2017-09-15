@@ -613,6 +613,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @type {!Array.<adapt.layout.FragmentLayoutConstraint>} */ this.fragmentLayoutConstraints = [];
     /** @type {adapt.layout.Column} */ this.pseudoParent = null;
     /** @type {?adapt.vtree.NodeContext} */ this.nodeContextOverflowingDueToRepetitiveElements = null;
+    /** @type {number} */ this.blockDistanceToBlockEndFloats = NaN;
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
 
@@ -3372,6 +3373,13 @@ adapt.layout.Column.prototype.redoLayout = function() {
         frame.finish(res);
     });
     return frame.result();
+};
+
+adapt.layout.Column.prototype.saveDistanceToBlockEndFloats = function() {
+    var blockStartEdgeOfBlockEndFloats = this.pageFloatLayoutContext.getBlockStartEdgeOfBlockEndFloats();
+    if (blockStartEdgeOfBlockEndFloats > 0 && isFinite(blockStartEdgeOfBlockEndFloats)) {
+        this.blockDistanceToBlockEndFloats = this.getBoxDir() * (blockStartEdgeOfBlockEndFloats - this.beforeEdge - this.computedBlockSize);
+    }
 };
 
 

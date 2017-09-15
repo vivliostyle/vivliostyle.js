@@ -731,6 +731,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
                 });
                 if (flowPosition.breakAfter === "column")
                     flowPosition.breakAfter = null;
+                column.saveDistanceToBlockEndFloats();
                 var edge = column.pageFloatLayoutContext.getMaxReachedAfterEdge();
                 column.updateMaxReachedAfterEdge(edge);
             }

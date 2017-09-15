@@ -212,12 +212,25 @@ goog.scope(function() {
     BalanceNonLastColumnBalancer.prototype.updateCondition = function(candidates) {
         var columns = candidates[candidates.length - 1].layoutResult.columns;
         var maxColumnBlockSize = Math.max.apply(null, columns.map(function(c) {
-            return c.computedBlockSize;
+            if (!isNaN(c.blockDistanceToBlockEndFloats)) {
+                return c.computedBlockSize - c.blockDistanceToBlockEndFloats + 1;
+            } else {
+                return c.computedBlockSize;
+            }
         }));
+        var newEdge = maxColumnBlockSize - 1;
         if (this.layoutContainer.vertical) {
-            this.layoutContainer.width = maxColumnBlockSize - 1;
+            if (newEdge < this.layoutContainer.width) {
+                this.layoutContainer.width = newEdge;
+            } else {
+                this.layoutContainer.width--;
+            }
         } else {
-            this.layoutContainer.height = maxColumnBlockSize - 1;
+            if (newEdge < this.layoutContainer.height) {
+                this.layoutContainer.height = newEdge;
+            } else {
+                this.layoutContainer.height--;
+            }
         }
     };
 

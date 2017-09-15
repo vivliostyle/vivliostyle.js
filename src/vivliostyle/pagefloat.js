@@ -1389,6 +1389,23 @@ goog.scope(function() {
     };
 
     /**
+     * @returns {number}
+     */
+    PageFloatLayoutContext.prototype.getBlockStartEdgeOfBlockEndFloats = function() {
+        var isVertical = this.getContainer().vertical;
+        return this.floatFragments.filter(function(fragment) {
+            return fragment.floatSide === "block-end";
+        }).reduce(function(edge, fragment) {
+            var rect = fragment.getOuterRect();
+            if (isVertical) {
+                return Math.max(edge, rect.x2);
+            } else {
+                return Math.min(edge, rect.y1);
+            }
+        }, isVertical ? 0 : Infinity);
+    };
+
+    /**
      * @param {string} clear
      * @param {!adapt.layout.Column} column
      * @returns {number}
