@@ -390,6 +390,7 @@ goog.scope(function() {
         /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} */
         this.floatsDeferredFromPrevious = previousSibling ? [].concat(previousSibling.floatsDeferredToNext) : [];
         /** @private @const {!Array<!adapt.layout.LayoutConstraint>} */ this.layoutConstraints = [];
+        /** @private @type {boolean} */ this.locked = false;
     };
     /** @const */ var PageFloatLayoutContext = vivliostyle.pagefloat.PageFloatLayoutContext;
 
@@ -773,6 +774,33 @@ goog.scope(function() {
     /**
      * @returns {boolean}
      */
+    PageFloatLayoutContext.prototype.checkAndForbidNotAllowedFloat = function() {
+        if (this.checkAndForbidFloatFollowingDeferredFloat())
+            return true;
+        for (var i = this.floatFragments.length - 1; i >= 0; i--) {
+            var fragment = this.floatFragments[i];
+            var notAllowedFloat = fragment.findNotAllowedFloat(this);
+            if (notAllowedFloat) {
+                if (this.locked) {
+                    this.invalidate();
+                } else {
+                    this.removePageFloatFragment(fragment);
+                    this.forbid(notAllowedFloat);
+                    // If the removed float is a block-end/inline-end float,
+                    // we should re-layout preceding floats with the same float direction.
+                    this.removeEndFloatFragments(fragment.floatSide);
+                }
+                return true;
+            }
+        }
+        if (this.floatReference === FloatReference.REGION && this.parent.locked)
+            return this.parent.checkAndForbidNotAllowedFloat();
+        return false;
+    };
+
+    /**
+     * @returns {boolean}
+     */
     PageFloatLayoutContext.prototype.checkAndForbidFloatFollowingDeferredFloat = function() {
         var deferredFloats = this.getFloatsDeferredToNextInChildContexts();
         var floatsInFragments = this.floatFragments.reduce(function(r, fr) {
@@ -800,20 +828,8 @@ goog.scope(function() {
     };
 
     PageFloatLayoutContext.prototype.finish = function() {
-        if (this.checkAndForbidFloatFollowingDeferredFloat())
+        if (this.checkAndForbidNotAllowedFloat())
             return;
-        for (var i = this.floatFragments.length - 1; i >= 0; i--) {
-            var fragment = this.floatFragments[i];
-            var notAllowedFloat = fragment.findNotAllowedFloat(this);
-            if (notAllowedFloat) {
-                this.removePageFloatFragment(fragment);
-                this.forbid(notAllowedFloat);
-                // If the removed float is a block-end/inline-end float,
-                // we should re-layout preceding floats with the same float direction.
-                this.removeEndFloatFragments(fragment.floatSide);
-                return;
-            }
-        }
         for (var i = this.floatsDeferredToNext.length - 1; i >= 0; i--) {
             var continuation = this.floatsDeferredToNext[i];
             if (!continuation.float.isAllowedOnContext(this)) {
@@ -839,6 +855,9 @@ goog.scope(function() {
     };
 
     PageFloatLayoutContext.prototype.invalidate = function() {
+        this.invalidated = true;
+        if (this.locked)
+            return;
         if (this.container) {
             this.children.forEach(function(child) {
                 // Since the same container element is shared by a region page float layout context and
@@ -861,7 +880,6 @@ goog.scope(function() {
         Object.keys(this.floatAnchors).forEach(function(k) {
             delete this.floatAnchors[k];
         }, this);
-        this.invalidated = true;
     };
 
     /**
@@ -1569,6 +1587,21 @@ goog.scope(function() {
             else
                 return area.height;
         }));
+    };
+
+    PageFloatLayoutContext.prototype.lock = function() {
+        this.locked = true;
+    };
+
+    PageFloatLayoutContext.prototype.unlock = function() {
+        this.locked = false;
+    };
+
+    /**
+     * @returns {boolean}
+     */
+    PageFloatLayoutContext.prototype.isLocked = function() {
+        return this.locked;
     };
 
     /**

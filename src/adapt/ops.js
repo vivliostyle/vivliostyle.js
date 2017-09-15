@@ -924,7 +924,12 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
         if (!columnBalancer)
             return adapt.task.newResult(generatorResult.columns);
 
+        pagePageFloatLayoutContext.lock();
+        regionPageFloatLayoutContext.lock();
         return columnBalancer.balanceColumns(generatorResult).thenAsync(function(result) {
+            pagePageFloatLayoutContext.unlock();
+            pagePageFloatLayoutContext.validate();
+            regionPageFloatLayoutContext.unlock();
             self.currentLayoutPosition = result.position;
             return adapt.task.newResult(result.columns);
         });
@@ -985,7 +990,12 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumns = function(
                     columnIndex = 0;
                     self.currentLayoutPosition = positionAtContainerStart.clone();
                     regionPageFloatLayoutContext.validate();
-                    loopFrame.continueLoop();
+                    if (regionPageFloatLayoutContext.isLocked()) {
+                        columns = null;
+                        loopFrame.breakLoop();
+                    } else {
+                        loopFrame.continueLoop();
+                    }
                     return;
                 }
                 column = c;
