@@ -624,12 +624,14 @@ goog.scope(function() {
      * @param {Node} anchorViewNode
      */
     PageFloatLayoutContext.prototype.registerPageFloatAnchor = function(float, anchorViewNode) {
-        if (float.floatReference === this.floatReference) {
-            this.floatAnchors[float.getId()] = anchorViewNode;
-        } else {
-            var parent = this.getParent(float.floatReference);
-            parent.registerPageFloatAnchor(float, anchorViewNode);
-        }
+        this.floatAnchors[float.getId()] = anchorViewNode;
+    };
+
+    PageFloatLayoutContext.prototype.collectPageFloatAnchors = function() {
+        var anchors = Object.assign({}, this.floatAnchors);
+        return this.children.reduce(function(prev, child) {
+            return Object.assign(prev, child.collectPageFloatAnchors());
+        }, anchors);
     };
 
     /**
@@ -641,7 +643,8 @@ goog.scope(function() {
         if (deferredFloats.some(function(cont) { return cont.float.getId() === floatId; })) {
             return true;
         }
-        var anchorViewNode = this.floatAnchors[floatId];
+        var floatAnchors = this.collectPageFloatAnchors();
+        var anchorViewNode = floatAnchors[floatId];
         if (!anchorViewNode) return false;
         if (this.container && this.container.element) {
             return this.container.element.contains(anchorViewNode);
