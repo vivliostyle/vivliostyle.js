@@ -73,6 +73,7 @@ module.exports = [
     {
         category: "Column",
         files: [
+            {file: "column/column-fill_balance.html", title: "column-fill: balance"},
             {file: "column/column-fill_balance-all.html", title: "column-fill: balance-all"}
         ]
     },

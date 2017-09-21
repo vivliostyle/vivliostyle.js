@@ -51,6 +51,29 @@ goog.scope(function() {
     /** @const */ var ColumnBalancingTrialResult = vivliostyle.column.ColumnBalancingTrialResult;
 
     /**
+     * @param {!adapt.vtree.Container} container
+     * @returns {number}
+     */
+    function getBlockSize(container) {
+        if (container.vertical) {
+            return container.width;
+        } else {
+            return container.height;
+        }
+    }
+
+    /**
+     * @param {!adapt.vtree.Container} container
+     */
+    function setBlockSize(container, size) {
+        if (container.vertical) {
+            container.width = size;
+        } else {
+            container.height = size;
+        }
+    }
+
+    /**
      * @abstract
      * @param {!adapt.vtree.Container} layoutContainer
      * @param {!ColumnGenerator} columnGenerator
@@ -61,6 +84,7 @@ goog.scope(function() {
         /** @const */ this.layoutContainer = layoutContainer;
         /** @const */ this.columnGenerator = columnGenerator;
         /** @const */ this.regionPageFloatLayoutContext = regionPageFloatLayoutContext;
+        /** @const */ this.originalContainerBlockSize = getBlockSize(layoutContainer);
     };
     /** @const */ var ColumnBalancer = vivliostyle.column.ColumnBalancer;
 
@@ -72,6 +96,7 @@ goog.scope(function() {
         var self = this;
         /** @type {!adapt.task.Frame.<!ColumnLayoutResult>} */ var frame =
             adapt.task.newFrame("ColumnBalancer#balanceColumns");
+        self.preBalance(layoutResult);
         self.savePageFloatLayoutContexts(layoutResult);
         self.layoutContainer.clear();
         var candidates = [self.createTrialResult(layoutResult)];
@@ -109,17 +134,23 @@ goog.scope(function() {
      * @returns {!ColumnBalancingTrialResult}
      */
     ColumnBalancer.prototype.createTrialResult = function(layoutResult) {
-        var penalty = this.calculatePenalty(layoutResult.columns);
+        var penalty = this.calculatePenalty(layoutResult);
         return new ColumnBalancingTrialResult(layoutResult, penalty);
     };
 
     /**
+     * @protected
+     * @param {!ColumnLayoutResult} layoutResult
+     */
+    ColumnBalancer.prototype.preBalance = function(layoutResult) {};
+
+    /**
      * @abstract
      * @protected
-     * @param {!Array<!adapt.layout.Column>} columns
+     * @param {!ColumnLayoutResult} layoutResult
      * @returns {number}
      */
-    ColumnBalancer.prototype.calculatePenalty = function(columns) {};
+    ColumnBalancer.prototype.calculatePenalty = function(layoutResult) {};
 
     /**
      * @abstract
@@ -139,7 +170,9 @@ goog.scope(function() {
     /**
      * @protected
      */
-    ColumnBalancer.prototype.postBalance = function() {};
+    ColumnBalancer.prototype.postBalance = function() {
+        setBlockSize(this.layoutContainer, this.originalContainerBlockSize);
+    };
 
     /**
      * @param {?ColumnLayoutResult} layoutResult
@@ -164,37 +197,14 @@ goog.scope(function() {
     };
 
 
-    /**
-     * @param {!ColumnGenerator} columnGenerator
-     * @param {!adapt.vtree.Container} layoutContainer
-     * @constructor
-     * @extends {ColumnBalancer}
-     */
-    vivliostyle.column.BalanceNonLastColumnBalancer = function(columnGenerator, regionPageFloatLayoutContext, layoutContainer) {
-        ColumnBalancer.call(this, layoutContainer, columnGenerator, regionPageFloatLayoutContext);
-        this.originalContainerBlockSize = layoutContainer.vertical ? layoutContainer.width : layoutContainer.height;
-    };
-    /** @const */ var BalanceNonLastColumnBalancer = vivliostyle.column.BalanceNonLastColumnBalancer;
-    goog.inherits(BalanceNonLastColumnBalancer, ColumnBalancer);
+    /** @const */ var COLUMN_LENGTH_STEP = 1;
 
     /**
-     * @override
+     * @private
+     * @param {!Array<!ColumnBalancingTrialResult>} candidates
+     * @returns {boolean}
      */
-    BalanceNonLastColumnBalancer.prototype.calculatePenalty = function(columns) {
-        var computedBlockSizes = columns.filter(function(c) {
-            return !c.pageBreakType;
-        }).map(function(c) {
-            return c.computedBlockSize;
-        });
-        return vivliostyle.math.variance(computedBlockSizes);
-    };
-
-    var COLUMN_LENGTH_STEP = 1;
-
-    /**
-     * @override
-     */
-    BalanceNonLastColumnBalancer.prototype.hasNextCandidate = function(candidates) {
+    vivliostyle.column.canReduceContainerSize = function(candidates) {
         var lastCandidate = candidates[candidates.length - 1];
         if (lastCandidate.penalty === 0)
             return false;
@@ -212,9 +222,11 @@ goog.scope(function() {
     };
 
     /**
-     * @override
+     * @private
+     * @param {!Array<!ColumnBalancingTrialResult>} candidates
+     * @param {!adapt.vtree.Container} container
      */
-    BalanceNonLastColumnBalancer.prototype.updateCondition = function(candidates) {
+    vivliostyle.column.reduceContainerSize = function(candidates, container) {
         var columns = candidates[candidates.length - 1].layoutResult.columns;
         var maxColumnBlockSize = Math.max.apply(null, columns.map(function(c) {
             if (!isNaN(c.blockDistanceToBlockEndFloats)) {
@@ -224,33 +236,155 @@ goog.scope(function() {
             }
         }));
         var newEdge = maxColumnBlockSize - COLUMN_LENGTH_STEP;
-        if (this.layoutContainer.vertical) {
-            if (newEdge < this.layoutContainer.width) {
-                this.layoutContainer.width = newEdge;
-            } else {
-                this.layoutContainer.width--;
-            }
+        if (newEdge < getBlockSize(container)) {
+            setBlockSize(container, newEdge);
         } else {
-            if (newEdge < this.layoutContainer.height) {
-                this.layoutContainer.height = newEdge;
-            } else {
-                this.layoutContainer.height--;
+            setBlockSize(container, getBlockSize(container) - 1);
+        }
+    };
+
+
+    /**
+     * @param {!ColumnGenerator} columnGenerator
+     * @param {!adapt.vtree.Container} layoutContainer
+     * @param {number} columnCount
+     * @constructor
+     * @extends {ColumnBalancer}
+     */
+    vivliostyle.column.BalanceLastColumnBalancer = function(columnGenerator, regionPageFloatLayoutContext, layoutContainer, columnCount) {
+        ColumnBalancer.call(this, layoutContainer, columnGenerator, regionPageFloatLayoutContext);
+        /** @const */ this.columnCount = columnCount;
+        /** @type {?adapt.vtree.LayoutPosition} */ this.originalPosition = null;
+        /** @type {boolean} */ this.foundUpperBound = false;
+    };
+    /** @const */ var BalanceLastColumnBalancer = vivliostyle.column.BalanceLastColumnBalancer;
+    goog.inherits(BalanceLastColumnBalancer, ColumnBalancer);
+
+    /**
+     * @override
+     */
+    BalanceLastColumnBalancer.prototype.preBalance = function(layoutResult) {
+        var columns = layoutResult.columns;
+        var totalBlockSize = columns.reduce(function(prev, c) {
+            return prev + c.computedBlockSize;
+        }, 0);
+        setBlockSize(this.layoutContainer, totalBlockSize / this.columnCount);
+        this.originalPosition = layoutResult.position;
+    };
+
+    /**
+     * @private
+     * @param {?adapt.vtree.LayoutPosition} position
+     * @returns {boolean}
+     */
+    BalanceLastColumnBalancer.prototype.checkPosition = function(position) {
+        if (this.originalPosition) {
+            return this.originalPosition.isSamePosition(position);
+        } else {
+            return position === null;
+        }
+    };
+
+    /**
+     * @param {!Array<!adapt.layout.Column>} columns
+     * @returns {boolean}
+     */
+    function isLastColumnLongerThanAnyOtherColumn(columns) {
+        if (columns.length <= 1)
+            return false;
+        var lastColumnBlockSize = columns[columns.length - 1].computedBlockSize;
+        var otherColumns = columns.slice(0, columns.length - 1);
+        return otherColumns.every(function(c) {
+            return lastColumnBlockSize > c.computedBlockSize;
+        });
+    }
+
+    /**
+     * @override
+     */
+    BalanceLastColumnBalancer.prototype.calculatePenalty = function(layoutResult) {
+        if (!this.checkPosition(layoutResult.position))
+            return Infinity;
+        var columns = layoutResult.columns;
+        if (isLastColumnLongerThanAnyOtherColumn(columns))
+            return Infinity;
+        return Math.max.apply(null, columns.map(function(c) {
+            return c.computedBlockSize;
+        }));
+    };
+
+    /**
+     * @override
+     */
+    BalanceLastColumnBalancer.prototype.hasNextCandidate = function(candidates) {
+        if (candidates.length === 1) {
+            return true;
+        } else if (this.foundUpperBound) {
+            return vivliostyle.column.canReduceContainerSize(candidates);
+        } else {
+            var lastCandidate = candidates[candidates.length - 1];
+            if (this.checkPosition(lastCandidate.layoutResult.position)) {
+                if (!isLastColumnLongerThanAnyOtherColumn(lastCandidate.layoutResult.columns)) {
+                    this.foundUpperBound = true;
+                    return true;
+                }
             }
+            return getBlockSize(this.layoutContainer) < this.originalContainerBlockSize;
         }
     };
 
     /**
      * @override
      */
-    BalanceNonLastColumnBalancer.prototype.postBalance = function() {
-        if (this.layoutContainer.vertical) {
-            this.layoutContainer.width = this.originalContainerBlockSize;
+    BalanceLastColumnBalancer.prototype.updateCondition = function(candidates) {
+        if (this.foundUpperBound) {
+            vivliostyle.column.reduceContainerSize(candidates, this.layoutContainer);
         } else {
-            this.layoutContainer.height = this.originalContainerBlockSize;
+            var newEdge = Math.min(this.originalContainerBlockSize,
+                getBlockSize(this.layoutContainer) + this.originalContainerBlockSize * 0.1);
+            setBlockSize(this.layoutContainer, newEdge);
         }
     };
 
     /**
+     * @param {!ColumnGenerator} columnGenerator
+     * @param {!adapt.vtree.Container} layoutContainer
+     * @constructor
+     * @extends {ColumnBalancer}
+     */
+    vivliostyle.column.BalanceNonLastColumnBalancer = function(columnGenerator, regionPageFloatLayoutContext, layoutContainer) {
+        ColumnBalancer.call(this, layoutContainer, columnGenerator, regionPageFloatLayoutContext);
+    };
+    /** @const */ var BalanceNonLastColumnBalancer = vivliostyle.column.BalanceNonLastColumnBalancer;
+    goog.inherits(BalanceNonLastColumnBalancer, ColumnBalancer);
+
+    /**
+     * @override
+     */
+    BalanceNonLastColumnBalancer.prototype.calculatePenalty = function(layoutResult) {
+        var computedBlockSizes = layoutResult.columns.filter(function(c) {
+            return !c.pageBreakType;
+        }).map(function(c) {
+            return c.computedBlockSize;
+        });
+        return vivliostyle.math.variance(computedBlockSizes);
+    };
+    /**
+     * @override
+     */
+    BalanceNonLastColumnBalancer.prototype.hasNextCandidate = function(candidates) {
+        return vivliostyle.column.canReduceContainerSize(candidates);
+    };
+
+    /**
+     * @override
+     */
+    BalanceNonLastColumnBalancer.prototype.updateCondition = function(candidates) {
+        vivliostyle.column.reduceContainerSize(candidates, this.layoutContainer);
+    };
+
+    /**
+     * @param {number} columnCount
      * @param {!adapt.css.Ident} columnFill
      * @param {!ColumnGenerator} columnGenerator
      * @param {!adapt.vtree.Container} layoutContainer
@@ -259,7 +393,7 @@ goog.scope(function() {
      * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} regionPageFloatLayoutContext
      * @returns {?ColumnBalancer}
      */
-    vivliostyle.column.createColumnBalancer = function(columnFill, columnGenerator, regionPageFloatLayoutContext,
+    vivliostyle.column.createColumnBalancer = function(columnCount, columnFill, columnGenerator, regionPageFloatLayoutContext,
                                                        layoutContainer, columns, flowPosition) {
         if (columnFill === adapt.css.ident.auto) {
             return null;
@@ -269,8 +403,7 @@ goog.scope(function() {
             var lastColumn = columns[columns.length - 1];
             var isLastColumnForceBroken = !!(lastColumn && lastColumn.pageBreakType);
             if (noMoreContent || isLastColumnForceBroken) {
-                // TODO balancer for last page
-                return null;
+                return new BalanceLastColumnBalancer(columnGenerator, regionPageFloatLayoutContext, layoutContainer, columnCount);
             } else if (columnFill === adapt.css.ident.balance_all) {
                 return new BalanceNonLastColumnBalancer(columnGenerator, regionPageFloatLayoutContext, layoutContainer);
             } else {
