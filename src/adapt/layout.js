@@ -2418,9 +2418,10 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
     if (nodeContext) {
         // When line-height is small, the edge calculated above (using Range)
         // can be larger than the edge of the block container containing the text.
-        // We updated the edge by measuring the block edge.
+        // We update the edge by measuring the block edge.
         var blockEdge = this.getAfterEdgeOfBlockContainer(nodeContext);
-        if (!isNaN(blockEdge)) edge = blockEdge;
+        if (!isNaN(blockEdge) && blockEdge < edge)
+            edge = blockEdge;
         this.computedBlockSize =
             dir * (edge - this.beforeEdge) + repetitiveElementsOffset;
     }
