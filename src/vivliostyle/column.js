@@ -189,12 +189,17 @@ goog.scope(function() {
         return vivliostyle.math.variance(computedBlockSizes);
     };
 
+    var COLUMN_LENGTH_STEP = 1;
+
     /**
      * @override
      */
     BalanceNonLastColumnBalancer.prototype.hasNextCandidate = function(candidates) {
         var lastCandidate = candidates[candidates.length - 1];
         if (lastCandidate.penalty === 0)
+            return false;
+        var secondLastCandidate = candidates[candidates.length - 2];
+        if (secondLastCandidate && lastCandidate.penalty >= secondLastCandidate.penalty)
             return false;
         var columns = lastCandidate.layoutResult.columns;
         var maxColumnBlockSize = Math.max.apply(null, columns.map(function(c) {
@@ -203,7 +208,7 @@ goog.scope(function() {
         var maxPageFloatBlockSize = Math.max.apply(null, columns.map(function(c) {
             return c.getMaxBlockSizeOfPageFloats();
         }));
-        return maxColumnBlockSize > Math.max(this.originalContainerBlockSize * 0.9, maxPageFloatBlockSize + 1);
+        return maxColumnBlockSize > maxPageFloatBlockSize + COLUMN_LENGTH_STEP;
     };
 
     /**
@@ -213,12 +218,12 @@ goog.scope(function() {
         var columns = candidates[candidates.length - 1].layoutResult.columns;
         var maxColumnBlockSize = Math.max.apply(null, columns.map(function(c) {
             if (!isNaN(c.blockDistanceToBlockEndFloats)) {
-                return c.computedBlockSize - c.blockDistanceToBlockEndFloats + 1;
+                return c.computedBlockSize - c.blockDistanceToBlockEndFloats + COLUMN_LENGTH_STEP;
             } else {
                 return c.computedBlockSize;
             }
         }));
-        var newEdge = maxColumnBlockSize - 1;
+        var newEdge = maxColumnBlockSize - COLUMN_LENGTH_STEP;
         if (this.layoutContainer.vertical) {
             if (newEdge < this.layoutContainer.width) {
                 this.layoutContainer.width = newEdge;

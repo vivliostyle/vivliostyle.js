@@ -146,30 +146,21 @@ describe("column", function() {
                 expect(balancer.hasNextCandidate(candidates)).toBe(false);
             });
 
-            it("returns true if the last max column block size is larger than 90% of the container block size", function() {
+            it("returns false if penalty of the last candidate is equal or greater than the previous candidate", function() {
                 var balancer = createBalancer(false);
                 var candidates = [
                     {},
-                    {layoutResult: {columns: [901, 700, 800].map(createDummyColumn)}}
-                ];
-
-                expect(balancer.hasNextCandidate(candidates)).toBe(true);
-
-                balancer = createBalancer(true);
-
-                expect(balancer.hasNextCandidate(candidates)).toBe(true);
-            });
-
-            it("returns false if the last max column block size is equal or less than 90% of the container block size", function() {
-                var balancer = createBalancer(false);
-                var candidates = [
-                    {},
-                    {layoutResult: {columns: [900, 700, 800].map(createDummyColumn)}}
+                    {penalty: 10, layoutResult: {columns: [900, 700, 800].map(createDummyColumn)}},
+                    {penalty: 20, layoutResult: {columns: [900, 700, 800].map(createDummyColumn)}}
                 ];
 
                 expect(balancer.hasNextCandidate(candidates)).toBe(false);
 
-                balancer = createBalancer(true);
+                var candidates = [
+                    {},
+                    {penalty: 10, layoutResult: {columns: [900, 700, 800].map(createDummyColumn)}},
+                    {penalty: 10, layoutResult: {columns: [900, 700, 800].map(createDummyColumn)}}
+                ];
 
                 expect(balancer.hasNextCandidate(candidates)).toBe(false);
             });
