@@ -653,6 +653,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Allowed prefixes: webkit
   - Supported in all browsers
   - Note: Currently `column-span` is effective only when specified on a page float.
+- [column-fill](https://drafts.csswg.org/css-multicol-1/#propdef-column-fill)
+  - Supported in all browsers
 
 ## [CSS Multi-column Layout 2](https://drafts.csswg.org/css-multicol-2/)
 

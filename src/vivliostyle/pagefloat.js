@@ -390,6 +390,7 @@ goog.scope(function() {
         /** @private @const {!Array<!vivliostyle.pagefloat.PageFloatContinuation>} */
         this.floatsDeferredFromPrevious = previousSibling ? [].concat(previousSibling.floatsDeferredToNext) : [];
         /** @private @const {!Array<!adapt.layout.LayoutConstraint>} */ this.layoutConstraints = [];
+        /** @private @type {boolean} */ this.locked = false;
     };
     /** @const */ var PageFloatLayoutContext = vivliostyle.pagefloat.PageFloatLayoutContext;
 
@@ -624,12 +625,14 @@ goog.scope(function() {
      * @param {Node} anchorViewNode
      */
     PageFloatLayoutContext.prototype.registerPageFloatAnchor = function(float, anchorViewNode) {
-        if (float.floatReference === this.floatReference) {
-            this.floatAnchors[float.getId()] = anchorViewNode;
-        } else {
-            var parent = this.getParent(float.floatReference);
-            parent.registerPageFloatAnchor(float, anchorViewNode);
-        }
+        this.floatAnchors[float.getId()] = anchorViewNode;
+    };
+
+    PageFloatLayoutContext.prototype.collectPageFloatAnchors = function() {
+        var anchors = Object.assign({}, this.floatAnchors);
+        return this.children.reduce(function(prev, child) {
+            return Object.assign(prev, child.collectPageFloatAnchors());
+        }, anchors);
     };
 
     /**
@@ -641,7 +644,8 @@ goog.scope(function() {
         if (deferredFloats.some(function(cont) { return cont.float.getId() === floatId; })) {
             return true;
         }
-        var anchorViewNode = this.floatAnchors[floatId];
+        var floatAnchors = this.collectPageFloatAnchors();
+        var anchorViewNode = floatAnchors[floatId];
         if (!anchorViewNode) return false;
         if (this.container && this.container.element) {
             return this.container.element.contains(anchorViewNode);
@@ -770,6 +774,33 @@ goog.scope(function() {
     /**
      * @returns {boolean}
      */
+    PageFloatLayoutContext.prototype.checkAndForbidNotAllowedFloat = function() {
+        if (this.checkAndForbidFloatFollowingDeferredFloat())
+            return true;
+        for (var i = this.floatFragments.length - 1; i >= 0; i--) {
+            var fragment = this.floatFragments[i];
+            var notAllowedFloat = fragment.findNotAllowedFloat(this);
+            if (notAllowedFloat) {
+                if (this.locked) {
+                    this.invalidate();
+                } else {
+                    this.removePageFloatFragment(fragment);
+                    this.forbid(notAllowedFloat);
+                    // If the removed float is a block-end/inline-end float,
+                    // we should re-layout preceding floats with the same float direction.
+                    this.removeEndFloatFragments(fragment.floatSide);
+                }
+                return true;
+            }
+        }
+        if (this.floatReference === FloatReference.REGION && this.parent.locked)
+            return this.parent.checkAndForbidNotAllowedFloat();
+        return false;
+    };
+
+    /**
+     * @returns {boolean}
+     */
     PageFloatLayoutContext.prototype.checkAndForbidFloatFollowingDeferredFloat = function() {
         var deferredFloats = this.getFloatsDeferredToNextInChildContexts();
         var floatsInFragments = this.floatFragments.reduce(function(r, fr) {
@@ -786,10 +817,14 @@ goog.scope(function() {
             if (deferredFloats.some(function(d) {
                 return !float.isAllowedToPrecede(d) && order > d.getOrder();
             })) {
-                this.forbid(float);
-                var fragment = this.findPageFloatFragment(float);
-                goog.asserts.assert(fragment);
-                this.removePageFloatFragment(fragment);
+                if (this.locked) {
+                    this.invalidate();
+                } else {
+                    this.forbid(float);
+                    var fragment = this.findPageFloatFragment(float);
+                    goog.asserts.assert(fragment);
+                    this.removePageFloatFragment(fragment);
+                }
                 return true;
             }
         }
@@ -797,20 +832,8 @@ goog.scope(function() {
     };
 
     PageFloatLayoutContext.prototype.finish = function() {
-        if (this.checkAndForbidFloatFollowingDeferredFloat())
+        if (this.checkAndForbidNotAllowedFloat())
             return;
-        for (var i = this.floatFragments.length - 1; i >= 0; i--) {
-            var fragment = this.floatFragments[i];
-            var notAllowedFloat = fragment.findNotAllowedFloat(this);
-            if (notAllowedFloat) {
-                this.removePageFloatFragment(fragment);
-                this.forbid(notAllowedFloat);
-                // If the removed float is a block-end/inline-end float,
-                // we should re-layout preceding floats with the same float direction.
-                this.removeEndFloatFragments(fragment.floatSide);
-                return;
-            }
-        }
         for (var i = this.floatsDeferredToNext.length - 1; i >= 0; i--) {
             var continuation = this.floatsDeferredToNext[i];
             if (!continuation.float.isAllowedOnContext(this)) {
@@ -836,6 +859,9 @@ goog.scope(function() {
     };
 
     PageFloatLayoutContext.prototype.invalidate = function() {
+        this.invalidated = true;
+        if (this.locked)
+            return;
         if (this.container) {
             this.children.forEach(function(child) {
                 // Since the same container element is shared by a region page float layout context and
@@ -858,7 +884,31 @@ goog.scope(function() {
         Object.keys(this.floatAnchors).forEach(function(k) {
             delete this.floatAnchors[k];
         }, this);
-        this.invalidated = true;
+    };
+
+    /**
+     * @returns {!Array.<!PageFloatLayoutContext>}
+     */
+    PageFloatLayoutContext.prototype.detachChildren = function() {
+        var children = this.children.splice(0);
+        children.forEach(function(child) {
+            child.floatFragments.forEach(function(fragment) {
+                var elem = fragment.area.element;
+                if (elem && elem.parentNode)
+                    elem.parentNode.removeChild(elem);
+            });
+        });
+        return children;
+    };
+
+    /**
+     * @param {!Array.<!PageFloatLayoutContext>} children
+     */
+    PageFloatLayoutContext.prototype.attachChildren = function(children) {
+        children.forEach(function(child) {
+            this.children.push(child);
+            child.reattachFloatFragments();
+        }, this);
     };
 
     PageFloatLayoutContext.prototype.isInvalidated = function() {
@@ -1339,6 +1389,23 @@ goog.scope(function() {
     };
 
     /**
+     * @returns {number}
+     */
+    PageFloatLayoutContext.prototype.getBlockStartEdgeOfBlockEndFloats = function() {
+        var isVertical = this.getContainer().vertical;
+        return this.floatFragments.filter(function(fragment) {
+            return fragment.floatSide === "block-end";
+        }).reduce(function(edge, fragment) {
+            var rect = fragment.getOuterRect();
+            if (isVertical) {
+                return Math.max(edge, rect.x2);
+            } else {
+                return Math.min(edge, rect.y1);
+            }
+        }, isVertical ? 0 : Infinity);
+    };
+
+    /**
      * @param {string} clear
      * @param {!adapt.layout.Column} column
      * @returns {number}
@@ -1525,6 +1592,37 @@ goog.scope(function() {
             Math.max(limits.floatMinWrapBlockStart, limits.floatMinWrapBlockEnd);
         var blockSpace = column.vertical ? limits.right - limits.left : limits.bottom - limits.top;
         return blockSpace <= floatMinWrapBlock;
+    };
+
+    /**
+     * @returns {number}
+     */
+    PageFloatLayoutContext.prototype.getMaxBlockSizeOfPageFloats = function() {
+        var isVertical = this.getContainer().vertical;
+        if (!this.floatFragments.length)
+            return 0;
+        return Math.max.apply(null, this.floatFragments.map(function(fragment) {
+            var area = fragment.area;
+            if (isVertical)
+                return area.width;
+            else
+                return area.height;
+        }));
+    };
+
+    PageFloatLayoutContext.prototype.lock = function() {
+        this.locked = true;
+    };
+
+    PageFloatLayoutContext.prototype.unlock = function() {
+        this.locked = false;
+    };
+
+    /**
+     * @returns {boolean}
+     */
+    PageFloatLayoutContext.prototype.isLocked = function() {
+        return this.locked;
     };
 
     /**

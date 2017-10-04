@@ -12,6 +12,9 @@
   - When a `clear` value is specified on a page float, it is placed so that it comes after any of preceding page floats.
   - `same` value means the same direction as one which the page float is floated to.
   - If a page float with `float: snap-block` would be placed at the block-start end but a `clear` value on it forbidden such placement, the float is instead placed at the block-end side (unless the `clear` value also forbidden such placement).
+- Support `column-fill` property
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/387>
+  - Spec: [CSS Multi-column Layout Module Level 1 - column-fill](https://drafts.csswg.org/css-multicol/#cf)
 
 ### Changed
 

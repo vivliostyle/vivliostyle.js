@@ -29,6 +29,7 @@
         "closure/goog/asserts/asserts.js",
 
         "vivliostyle/namespace.js",
+        "vivliostyle/math.js",
         "vivliostyle/logging.js",
         "vivliostyle/profile.js",
         "vivliostyle/constants.js",
@@ -68,6 +69,7 @@
         "vivliostyle/table.js",
         "vivliostyle/page.js",
         "vivliostyle/counters.js",
+        "vivliostyle/column.js",
         "adapt/ops.js",
         "adapt/cfi.js",
         "adapt/toc.js",

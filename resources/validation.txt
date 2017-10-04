@@ -274,7 +274,7 @@ break-before = BREAK;
 break-after = BREAK;
 break-inside = auto | avoid | avoid-page | avoid-column | avoid-region;
 [webkit]column-span = none | auto | all;
-[moz]column-fill = auto | balance;
+[moz]column-fill = auto | balance | balance-all;
 
 src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */
 
@@ -483,7 +483,7 @@ column-width: auto;
 column-rule-color: currentColor;
 column-rule-style: none;
 column-rule-width: 3px;
-column-fill: auto;
+column-fill: balance;
 outline-color: currentColor;
 outline-style: none;
 outline-width: 3px;

@@ -613,6 +613,7 @@ adapt.layout.Column = function(element, layoutContext, clientLayout, layoutConst
     /** @type {!Array.<adapt.layout.FragmentLayoutConstraint>} */ this.fragmentLayoutConstraints = [];
     /** @type {adapt.layout.Column} */ this.pseudoParent = null;
     /** @type {?adapt.vtree.NodeContext} */ this.nodeContextOverflowingDueToRepetitiveElements = null;
+    /** @type {number} */ this.blockDistanceToBlockEndFloats = NaN;
 };
 goog.inherits(adapt.layout.Column, adapt.vtree.Container);
 
@@ -2056,11 +2057,11 @@ adapt.layout.Column.prototype.findAcceptableBreakInside = function(checkPoints, 
     if (viewNode.nodeType != 1) {
         var textNode = /** @type {Text} */ (viewNode);
         var textNodeBreaker = this.resolveTextNodeBreaker(nodeContext);
-        return textNodeBreaker.breakTextNode(textNode, nodeContext,
+        nodeContext = textNodeBreaker.breakTextNode(textNode, nodeContext,
             position.index, checkPoints, position.checkPointIndex, force);
-    } else {
-        return nodeContext;
     }
+    this.clearOverflownViewNodes(nodeContext, false);
+    return nodeContext;
 };
 
 /**
@@ -2415,10 +2416,35 @@ adapt.layout.Column.prototype.findBoxBreakPosition = function(bp, force) {
         nodeContext = this.findAcceptableBreakInside(bp.checkPoints, edge, force);
     }
     if (nodeContext) {
+        // When line-height is small, the edge calculated above (using Range)
+        // can be larger than the edge of the block container containing the text.
+        // We update the edge by measuring the block edge.
+        var blockEdge = this.getAfterEdgeOfBlockContainer(nodeContext);
+        if (!isNaN(blockEdge) && blockEdge < edge)
+            edge = blockEdge;
         this.computedBlockSize =
             dir * (edge - this.beforeEdge) + repetitiveElementsOffset;
     }
     return nodeContext;
+};
+
+/**
+ * @param {!adapt.vtree.NodeContext} nodeContext
+ * @returns {number}
+ */
+adapt.layout.Column.prototype.getAfterEdgeOfBlockContainer = function(nodeContext) {
+    var blockParent = nodeContext;
+    do {
+        blockParent = blockParent.parent;
+    } while (blockParent && blockParent.inline);
+
+    if (blockParent) {
+        blockParent = blockParent.copy();
+        blockParent.after = true;
+        return adapt.layout.calculateEdge(blockParent, this.clientLayout, 0, this.vertical);
+    } else {
+        return NaN;
+    }
 };
 
 /**
@@ -3204,6 +3230,13 @@ adapt.layout.Column.prototype.isFullWithPageFloats = function() {
     return this.pageFloatLayoutContext.isColumnFullWithPageFloats(this);
 };
 
+/**
+ * @returns {number}
+ */
+adapt.layout.Column.prototype.getMaxBlockSizeOfPageFloats = function() {
+    return this.pageFloatLayoutContext.getMaxBlockSizeOfPageFloats();
+};
+
 adapt.layout.Column.prototype.doFinishBreakOfFragmentLayoutConstraints = function(nodeContext) {
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("doFinishBreakOfFragmentLayoutConstraints");
     var sortedFragmentLayoutConstraints = [].concat(this.fragmentLayoutConstraints);
@@ -3341,6 +3374,13 @@ adapt.layout.Column.prototype.redoLayout = function() {
         frame.finish(res);
     });
     return frame.result();
+};
+
+adapt.layout.Column.prototype.saveDistanceToBlockEndFloats = function() {
+    var blockStartEdgeOfBlockEndFloats = this.pageFloatLayoutContext.getBlockStartEdgeOfBlockEndFloats();
+    if (blockStartEdgeOfBlockEndFloats > 0 && isFinite(blockStartEdgeOfBlockEndFloats)) {
+        this.blockDistanceToBlockEndFloats = this.getBoxDir() * (blockStartEdgeOfBlockEndFloats - this.beforeEdge - this.computedBlockSize);
+    }
 };
 
 

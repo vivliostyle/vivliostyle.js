@@ -528,7 +528,7 @@ adapt.cssstyler.Styler.prototype.transferPropsToRoot = function(srcStyle, map) {
 /**
  * @const
  */
-adapt.cssstyler.columnProps = ["column-count", "column-width"];
+adapt.cssstyler.columnProps = ["column-count", "column-width", "column-fill"];
 
 /**
  * Transfer properties that should be applied on the container (partition) level

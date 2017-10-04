@@ -447,23 +447,6 @@ describe("pagefloat", function() {
 
                 expect(columnContext.floatAnchors[float.getId()]).toBe(anchorViewNode);
             });
-
-            it("stores the anchor view node to the corresponding context", function() {
-                float = new PageFloat(dummyNodePosition(), FloatReference.REGION, "block-start", null, "body");
-                columnContext.addPageFloat(float);
-                columnContext.registerPageFloatAnchor(float, anchorViewNode);
-
-                expect(columnContext.floatAnchors[float.getId()]).toBeUndefined();
-                expect(regionContext.floatAnchors[float.getId()]).toBe(anchorViewNode);
-
-                float = new PageFloat(dummyNodePosition(), FloatReference.PAGE, "block-start", null, "body");
-                columnContext.addPageFloat(float);
-                columnContext.registerPageFloatAnchor(float, anchorViewNode);
-
-                expect(columnContext.floatAnchors[float.getId()]).toBeUndefined();
-                expect(regionContext.floatAnchors[float.getId()]).toBeUndefined();
-                expect(pageContext.floatAnchors[float.getId()]).toBe(anchorViewNode);
-            });
         });
 
         describe("#isAnchorAlreadyAppeared", function() {
