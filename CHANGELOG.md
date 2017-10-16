@@ -31,6 +31,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/383>
 - Fix a bug that a table is not fragmented correctly
   - <https://github.com/vivliostyle/vivliostyle.js/pull/386>
+- Fix a bug that a float inside an element with position:relative is positioned incorrectly
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/388>
 
 ## [2017.6](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.6) - 2017-6-22
 
@@ -202,7 +204,7 @@
   - Spec: [CSS Filter Effect Module Level 3 - filter property](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
 - Support string and URL values in `attr()` function
   - <https://github.com/vivliostyle/vivliostyle.js/pull/234>
-  - Spec: [CSS Values and Units Module Level 3 - Attribute References: ‘attr()’](https://drafts.csswg.org/css-values/#attr-notation)
+  - Spec: [CSS Values and Units Module Level 3 - Attribute References: ???attr()???](https://drafts.csswg.org/css-values/#attr-notation)
 - Support `left`/`right`/`recto`/`verso` values for `(page-)break-before`/`(page-)break-after`
   - <https://github.com/vivliostyle/vivliostyle.js/issues/25>
   - Spec: [CSS Fragmentation - Page Break Values](http://dev.w3.org/csswg/css-break/#page-break-values)
