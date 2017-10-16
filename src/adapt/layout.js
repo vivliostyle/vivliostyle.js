@@ -1252,18 +1252,22 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
             offsets = self.clientLayout.getElementClientRect(probe);
             containingBlockForAbsolute.viewNode.removeChild(probe);
         } else {
-            offsets = {left: self.getLeftEdge(), right: self.getRightEdge(), top: self.getTopEdge()};
+            offsets = {
+                left: self.getLeftEdge() - self.paddingLeft,
+                right: self.getRightEdge() + self.paddingRight,
+                top: self.getTopEdge() - self.paddingTop
+            };
         }
 
         if (containingBlockForAbsolute ? containingBlockForAbsolute.vertical : self.vertical) {
             adapt.base.setCSSProperty(element, "right",
-                (offsets.right - floatBox.x2 + self.paddingRight) + "px");
+                (offsets.right - floatBox.x2) + "px");
         } else {
             adapt.base.setCSSProperty(element, "left",
-                (floatBox.x1 - offsets.left + self.paddingLeft) + "px");
+                (floatBox.x1 - offsets.left) + "px");
         }
         adapt.base.setCSSProperty(element, "top",
-            (floatBox.y1 - offsets.top + self.paddingTop) + "px");
+            (floatBox.y1 - offsets.top) + "px");
         if (nodeContext.clearSpacer) {
             nodeContext.clearSpacer.parentNode.removeChild(nodeContext.clearSpacer);
             nodeContext.clearSpacer = null;
