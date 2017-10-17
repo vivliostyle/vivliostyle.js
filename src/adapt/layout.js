@@ -3181,7 +3181,12 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, brea
         return adapt.task.newResult(/** @type {adapt.vtree.ChunkPosition} */ (chunkPosition));
     }
     if (this.isFullWithPageFloats()) {
-        return adapt.task.newResult(/** @type {adapt.vtree.ChunkPosition} */ (chunkPosition));
+        if (chunkPosition.primary.after && chunkPosition.primary.steps.length === 1) {
+            // End of contents
+            return adapt.task.newResult(/** @type {adapt.vtree.ChunkPosition} */ (null));
+        } else {
+            return adapt.task.newResult(/** @type {adapt.vtree.ChunkPosition} */ (chunkPosition));
+        }
     }
     var self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.ChunkPosition>} */ var frame = adapt.task.newFrame("layout");
