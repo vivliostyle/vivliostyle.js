@@ -2443,7 +2443,7 @@ adapt.layout.Column.prototype.getAfterEdgeOfBlockContainer = function(nodeContex
     } while (blockParent && blockParent.inline);
 
     if (blockParent) {
-        blockParent = blockParent.copy();
+        blockParent = blockParent.copy().modify();
         blockParent.after = true;
         return adapt.layout.calculateEdge(blockParent, this.clientLayout, 0, this.vertical);
     } else {
