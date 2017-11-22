@@ -630,7 +630,7 @@ adapt.viewer.Viewer.prototype.setPageSize = function(pageSize, pageSheetSize, sp
  * @param {number} pageIndex
  */
 adapt.viewer.Viewer.prototype.setPageSizePageRules = function(pageSheetSize, spineIndex, pageIndex) {
-    if (!this.pageSheetSizeAlreadySet && this.pageRuleStyleElement && spineIndex === 0 && pageIndex === 0) {
+    if (!this.pageSheetSizeAlreadySet && this.pageRuleStyleElement) {
         var styleText = "";
         Object.keys(pageSheetSize).forEach(function(selector) {
             styleText += "@page " + selector + "{size:";
