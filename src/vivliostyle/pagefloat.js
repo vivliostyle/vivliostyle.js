@@ -1045,7 +1045,6 @@ goog.scope(function() {
         var logicalSide = this.toLogical(side);
         var physicalSide = this.toPhysical(side);
         var limit = this.getLimitValueInner(logicalSide, layoutContext, clientLayout, condition);
-        goog.asserts.assert(limit >= 0);
         if (this.parent && this.parent.container) {
             var parentLimit = this.parent.getLimitValue(physicalSide, layoutContext, clientLayout, condition);
             switch (physicalSide) {
