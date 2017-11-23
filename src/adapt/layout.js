@@ -2215,7 +2215,13 @@ adapt.layout.Column.prototype.getRangeBoxes = function(start, end) {
         do {
             var next = null;
             if (node == end) {
-                endNotReached = false;
+                if (end.nodeType === 1) {
+                    // If end is an element, continue traversing its children to find the last text node inside it.
+                    // Finish when end has no child or when came back from its children (wentUp==true).
+                    endNotReached = !(!end.firstChild || wentUp);
+                } else {
+                    endNotReached = false;
+                }
             }
             if (node.nodeType != 1) {
                 if (!haveStart) {
