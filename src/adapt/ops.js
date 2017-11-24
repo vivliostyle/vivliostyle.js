@@ -767,13 +767,14 @@ adapt.ops.StyleInstance.prototype.createLayoutConstraint = function(pageFloatLay
  * @param {number} columnWidth
  * @param {adapt.geom.Shape} innerShape
  * @param {!adapt.vtree.LayoutContext} layoutContext
+ * @param {boolean} forceNonFitting
  * @returns {!adapt.task.Result.<!adapt.layout.Column>}
  */
 adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, offsetX, offsetY, exclusions,
                                                                    layoutContainer, currentColumnIndex,
                                                                    flowNameStr, regionPageFloatLayoutContext,
                                                                    columnCount, columnGap, columnWidth,
-                                                                   innerShape, layoutContext) {
+                                                                   innerShape, layoutContext, forceNonFitting) {
     var self = this;
     var dontApplyExclusions = boxInstance.vertical
         ? boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth
@@ -793,6 +794,7 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
             boxContainer.appendChild(columnContainer);
             column = new adapt.layout.Column(columnContainer, layoutContext, self.clientLayout,
                 layoutConstraint, columnPageFloatLayoutContext);
+            column.forceNonfitting = forceNonFitting;
             column.vertical = layoutContainer.vertical;
             column.snapHeight = layoutContainer.snapHeight;
             column.snapWidth = layoutContainer.snapWidth;
@@ -892,6 +894,7 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
     var positionAtContainerStart = self.currentLayoutPosition.clone();
     var regionPageFloatLayoutContext =
         self.getRegionPageFloatLayoutContext(pagePageFloatLayoutContext, boxInstance, layoutContainer, flowNameStr);
+    var isFirstTime = true;
 
     /**
      * @type {!vivliostyle.column.ColumnGenerator}
@@ -900,7 +903,7 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
         self.currentLayoutPosition = positionAtContainerStart.clone();
         return self.layoutFlowColumns(
             page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, regionPageFloatLayoutContext,
-            layoutContainer, flowNameStr, columnCount).thenAsync(function(columns) {
+            layoutContainer, flowNameStr, columnCount, isFirstTime).thenAsync(function(columns) {
                 if (columns) {
                     return adapt.task.newResult({
                         columns: columns,
@@ -925,6 +928,7 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
         if (!columnBalancer)
             return adapt.task.newResult(generatorResult.columns);
 
+        isFirstTime = false;
         pagePageFloatLayoutContext.lock();
         regionPageFloatLayoutContext.lock();
         return columnBalancer.balanceColumns(generatorResult).thenAsync(function(result) {
@@ -949,11 +953,12 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
  * @param {!adapt.vtree.Container} layoutContainer
  * @param {string} flowNameStr
  * @param {number} columnCount
+ * @param {boolean} forceNonFitting
  * @returns {!adapt.task.Result.<?Array.<!adapt.layout.Column>>}
  */
 adapt.ops.StyleInstance.prototype.layoutFlowColumns = function(
     page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, regionPageFloatLayoutContext,
-    layoutContainer, flowNameStr, columnCount) {
+    layoutContainer, flowNameStr, columnCount, forceNonFitting) {
     var self = this;
     /** @type {adapt.task.Frame<?Array<!adapt.layout.Column>>} */ var frame =
         adapt.task.newFrame("layoutFlowColumns");
@@ -976,7 +981,7 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumns = function(
     frame.loopWithFrame(function(loopFrame) {
         self.createAndLayoutColumn(boxInstance, offsetX, offsetY, exclusions, layoutContainer,
             columnIndex++, flowNameStr, regionPageFloatLayoutContext, columnCount, columnGap,
-            columnWidth, innerShape, layoutContext).then(function(c) {
+            columnWidth, innerShape, layoutContext, forceNonFitting).then(function(c) {
                 if (pagePageFloatLayoutContext.isInvalidated()) {
                     columns = null;
                     loopFrame.breakLoop();
