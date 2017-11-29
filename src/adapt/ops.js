@@ -1317,8 +1317,6 @@ adapt.ops.StyleInstance.prototype.setPageSizeAndBleed = function(evaluatedPageSi
     page.bleedBox.style.top = evaluatedPageSizeAndBleed.bleedOffset + "px";
     page.bleedBox.style.bottom = evaluatedPageSizeAndBleed.bleedOffset + "px";
     page.bleedBox.style.padding = evaluatedPageSizeAndBleed.bleed + "px";
-    // Shift 1px to workaround Chrome printing bug
-    page.bleedBox.style.paddingTop = (evaluatedPageSizeAndBleed.bleed+1) + "px";
 };
 
 /**

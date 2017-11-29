@@ -898,8 +898,7 @@ vivliostyle.page.PageRuleMasterInstance.prototype.initHorizontal = function() {
  */
 vivliostyle.page.PageRuleMasterInstance.prototype.initVertical = function() {
     var style = this.style;
-    // Shift 1px to workaround Chrome printing bug
-    style["top"] = new adapt.css.Numeric(-1, "px");
+    style["top"] = adapt.css.numericZero;
     style["margin-top"] = adapt.css.numericZero;
     style["border-top-width"] = adapt.css.numericZero;
     style["padding-top"] = adapt.css.numericZero;

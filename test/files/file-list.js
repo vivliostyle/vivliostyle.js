@@ -73,12 +73,6 @@ module.exports = [
         ]
     },
     {
-        category: "Print",
-        files: [
-            {file: "print/chrome_page_top_margin_bug.html", title: "Chrome page top margin bug"}
-        ]
-    },
-    {
         category: "Column",
         files: [
             {file: "column/column-fill_balance.html", title: "column-fill: balance"},
