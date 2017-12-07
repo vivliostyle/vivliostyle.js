@@ -837,6 +837,10 @@ goog.scope(function() {
         for (var i = this.floatsDeferredToNext.length - 1; i >= 0; i--) {
             var continuation = this.floatsDeferredToNext[i];
             if (!continuation.float.isAllowedOnContext(this)) {
+                if (this.locked) {
+                    this.invalidate();
+                    return;
+                }
                 this.floatsDeferredToNext.splice(i, 1);
             }
         }
