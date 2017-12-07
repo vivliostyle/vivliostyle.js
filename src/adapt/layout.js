@@ -1732,6 +1732,7 @@ adapt.layout.Column.prototype.createJustificationAdjustmentElement = function(in
     // Measure inline-start and inline-end edge positions of the line box,
     // taking (exclusion) floats into consideration
     span.style.display = "block";
+    span.style.textIndent = "0";
     span.style.textAlign = "left";
     parentNode.insertBefore(span, insertionPoint);
     var leftPos = this.clientLayout.getElementClientRect(inner);
