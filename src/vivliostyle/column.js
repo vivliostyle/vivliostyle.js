@@ -362,6 +362,8 @@ goog.scope(function() {
      * @override
      */
     BalanceNonLastColumnBalancer.prototype.calculatePenalty = function(layoutResult) {
+        if (layoutResult.columns.every(function(c) { return c.computedBlockSize === 0; }))
+            return Infinity;
         var computedBlockSizes = layoutResult.columns.filter(function(c) {
             return !c.pageBreakType;
         }).map(function(c) {
