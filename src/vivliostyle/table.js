@@ -254,7 +254,9 @@ goog.scope(function() {
         var allCellsBreakable = acceptableCellBreakPositions.every(function(bp) {
             return !!bp.nodeContext;
         }) && acceptableCellBreakPositions.some(function(bp, index) {
-            return !cellFragments[index].pseudoColumn.isStartNodeContext(bp.nodeContext);
+            var pseudoColumn = cellFragments[index].pseudoColumn;
+            var nodeContext = bp.nodeContext;
+            return !pseudoColumn.isStartNodeContext(nodeContext) && !pseudoColumn.isLastAfterNodeContext(nodeContext);
         });
         this.beforeNodeContext.overflow = acceptableCellBreakPositions.some(function(bp) {
             return bp.nodeContext && bp.nodeContext.overflow;
@@ -1098,7 +1100,7 @@ goog.scope(function() {
         this.inRow = true;
         return this.layoutRowSpanningCellsFromPreviousFragment(state).thenAsync(function() {
             this.registerCellFragmentIndex();
-            var overflown = this.column.saveEdgeAndCheckForOverflow(state.lastAfterNodeContext, null, true,
+            var overflown = this.column.checkOverflowAndSaveEdgeAndBreakPosition(state.lastAfterNodeContext, null, true,
                 state.breakAtTheEdge);
             if (overflown &&
                 formattingContext.getRowSpanningCellsOverflowingTheRow(this.currentRowIndex - 1).length === 0) {
@@ -1249,11 +1251,7 @@ goog.scope(function() {
         if (display && TableLayoutStrategy.ignoreList[display]) {
             nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
         } else if (nodeContext.sourceNode === this.formattingContext.tableSourceNode) {
-            var style = (/** @type {HTMLElement} */ (nodeContext.viewNode)).style;
-            if (style && !(this.column.zeroIndent(style.paddingBottom) && this.column.zeroIndent(style.borderBottomWidth))) {
-                nodeContext.overflow = this.column.saveEdgeAndCheckForOverflow(
-                    state.lastAfterNodeContext, null, false, state.breakAtTheEdge);
-            }
+            nodeContext.overflow = this.column.checkOverflowAndSaveEdge(nodeContext, null);
             this.resetColumn();
             state.break = true;
         } else {

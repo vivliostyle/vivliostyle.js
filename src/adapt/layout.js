@@ -2597,15 +2597,11 @@ adapt.layout.Column.prototype.zeroIndent = function(val) {
 };
 
 /**
- * Save a possible page break position on a CSS block edge. Check if it overflows.
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {Array.<adapt.vtree.NodeContext>} trailingEdgeContexts
- * @param {boolean} saveEvenOverflown
- * @param {?string} breakAtTheEdge
  * @return {boolean} true if overflows
  */
-adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext,
-                                                                     trailingEdgeContexts, saveEvenOverflown, breakAtTheEdge) {
+adapt.layout.Column.prototype.checkOverflowAndSaveEdge = function(nodeContext, trailingEdgeContexts) {
     if (!nodeContext) {
         return false;
     }
@@ -2624,8 +2620,26 @@ adapt.layout.Column.prototype.saveEdgeAndCheckForOverflow = function(nodeContext
         edge += this.getTrailingMarginEdgeAdjustment(trailingEdgeContexts);
     }
     this.updateMaxReachedAfterEdge(edge);
-    // Always save if this.stopAtOverflow is false
-    saveEvenOverflown = this.stopAtOverflow ? saveEvenOverflown : true;
+    return overflown;
+};
+
+/**
+ * Save a possible page break position on a CSS block edge. Check if it overflows.
+ * @param {adapt.vtree.NodeContext} nodeContext
+ * @param {Array.<adapt.vtree.NodeContext>} trailingEdgeContexts
+ * @param {boolean} saveEvenOverflown
+ * @param {?string} breakAtTheEdge
+ * @return {boolean} true if overflows
+ */
+adapt.layout.Column.prototype.checkOverflowAndSaveEdgeAndBreakPosition = function(nodeContext,
+                                                                                  trailingEdgeContexts, saveEvenOverflown, breakAtTheEdge) {
+    if (!nodeContext) {
+        return false;
+    }
+    if (adapt.layout.isOrphan(nodeContext.viewNode)) {
+        return false;
+    }
+    var overflown = this.checkOverflowAndSaveEdge(nodeContext, trailingEdgeContexts);
     if (saveEvenOverflown || !overflown) {
         this.saveEdgeBreakPosition(nodeContext, breakAtTheEdge, overflown);
     }
@@ -2780,7 +2794,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, for
                         // Leading edge of non-empty block -> finished going through all starting edges of the box
                         if (needForcedBreak()) {
                             processForcedBreak();
-                        } else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
+                        } else if (self.checkOverflowAndSaveEdgeAndBreakPosition(lastAfterNodeContext, null, true, breakAtTheEdge)) {
                             nodeContext = (self.stopAtOverflow ? (lastAfterNodeContext || nodeContext) : nodeContext).modify();
                             nodeContext.overflow = true;
                         } else {
@@ -2811,7 +2825,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, for
                         // check if a forced break must occur before the block.
                         if (needForcedBreak()) {
                             processForcedBreak();
-                        } else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge) || !self.layoutConstraint.allowLayout(nodeContext)) {
+                        } else if (self.checkOverflowAndSaveEdgeAndBreakPosition(lastAfterNodeContext, null, true, breakAtTheEdge) || !self.layoutConstraint.allowLayout(nodeContext)) {
                             // overflow
                             nodeContext = (self.stopAtOverflow ? (lastAfterNodeContext || nodeContext) : nodeContext).modify();
                             nodeContext.overflow = true;
@@ -2863,7 +2877,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, for
                     leadingEdgeContexts.push(nodeContext.copy());
                     breakAtTheEdge = vivliostyle.break.resolveEffectiveBreakValue(breakAtTheEdge, nodeContext.breakBefore);
                     if (!self.layoutConstraint.allowLayout(nodeContext)) {
-                        self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, false, breakAtTheEdge);
+                        self.checkOverflowAndSaveEdgeAndBreakPosition(lastAfterNodeContext, null, !self.stopAtOverflow, breakAtTheEdge);
                         nodeContext = nodeContext.modify();
                         nodeContext.overflow = true;
                         if (self.stopAtOverflow) {
@@ -2877,7 +2891,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, for
                         // check if a forced break must occur before the block.
                         if (needForcedBreak()) {
                             processForcedBreak();
-                        } else if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, null, true, breakAtTheEdge)) {
+                        } else if (self.checkOverflowAndSaveEdgeAndBreakPosition(lastAfterNodeContext, null, true, breakAtTheEdge)) {
                             // overflow
                             nodeContext = (self.stopAtOverflow ? (lastAfterNodeContext || nodeContext) : nodeContext).modify();
                             nodeContext.overflow = true;
@@ -2904,7 +2918,7 @@ adapt.layout.Column.prototype.skipEdges = function(nodeContext, leadingEdge, for
                 nodeContext = nextResult.get();
             }
         }
-        if (self.saveEdgeAndCheckForOverflow(lastAfterNodeContext, trailingEdgeContexts, false, breakAtTheEdge)) {
+        if (self.checkOverflowAndSaveEdgeAndBreakPosition(lastAfterNodeContext, trailingEdgeContexts, !self.stopAtOverflow, breakAtTheEdge)) {
             if (lastAfterNodeContext && self.stopAtOverflow) {
                 nodeContext = lastAfterNodeContext.modify();
                 nodeContext.overflow = true;

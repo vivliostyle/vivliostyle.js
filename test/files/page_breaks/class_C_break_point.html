@@ -10,6 +10,7 @@
     }
     :root {
       column-count: 2;
+      column-fill: auto;
       font-size: 16px;
       line-height: 20px;
       orphans: 1;
@@ -20,6 +21,10 @@
     }
     section {
       break-after: page;
+    }
+    td {
+      padding: 0;
+      padding-top: 1px;
     }
     .outer {
       border: 3px solid blue;
@@ -47,6 +52,21 @@
     </div>
   </div>
   <p>↑ Should not be broken between blue and orange borders.</p>
+</section>
+<section>
+  <table class="outer">
+    <tbody class="inner">
+    <tr><td>1</td></tr>
+    <tr><td>2</td></tr>
+    <tr><td>3</td></tr>
+    <tr><td>4</td></tr>
+    <tr><td>5</td></tr>
+    <tr><td>6</td></tr>
+    <tr><td>7</td></tr>
+    <tr><td>8</td></tr>
+    </tbody>
+  </table>
+  <p>↑ Should not be broken after "8" (inside blue border).</p>
 </section>
 <section>
   <div class="outer" style="height: 190px">

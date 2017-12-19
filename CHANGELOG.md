@@ -33,6 +33,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/386>
 - Fix a bug that a float inside an element with position:relative is positioned incorrectly
   - <https://github.com/vivliostyle/vivliostyle.js/pull/388>
+- Fix a bug that a table is occasionally fragmented immediately before the end of it
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/397>
 
 ## [2017.6](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.6) - 2017-6-22
 
