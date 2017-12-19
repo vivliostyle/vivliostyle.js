@@ -268,7 +268,7 @@ goog.scope(function() {
      * @return {boolean} Returns true if the node overflows the column.
      */
     EdgeSkipper.prototype.saveEdgeAndProcessOverflow = function(state, column) {
-        var overflow = column.saveEdgeAndCheckForOverflow(state.lastAfterNodeContext, null, true, state.breakAtTheEdge);
+        var overflow = column.checkOverflowAndSaveEdgeAndBreakPosition(state.lastAfterNodeContext, null, true, state.breakAtTheEdge);
         if (overflow) {
             state.nodeContext = (state.lastAfterNodeContext || state.nodeContext).modify();
             state.nodeContext.overflow = true;
@@ -286,7 +286,7 @@ goog.scope(function() {
         var nodeContext = state.nodeContext;
         var violateConstraint = !layoutConstraint.allowLayout(nodeContext);
         if (violateConstraint) {
-            column.saveEdgeAndCheckForOverflow(state.lastAfterNodeContext, null, false, state.breakAtTheEdge);
+            column.checkOverflowAndSaveEdgeAndBreakPosition(state.lastAfterNodeContext, null, false, state.breakAtTheEdge);
             nodeContext = state.nodeContext = nodeContext.modify();
             nodeContext.overflow = true;
         }
@@ -432,6 +432,14 @@ goog.scope(function() {
         return startNodeContext.viewNode === nodeContext.viewNode
             && startNodeContext.after === nodeContext.after
             && startNodeContext.offsetInNode === nodeContext.offsetInNode;
+    };
+
+    /**
+     * @param {adapt.vtree.NodeContext} nodeContext
+     * @return {boolean}
+     */
+    PseudoColumn.prototype.isLastAfterNodeContext = function(nodeContext) {
+        return adapt.vtree.isSameNodePosition(nodeContext.toNodePosition(), this.column.lastAfterPosition);
     };
 
     /**
