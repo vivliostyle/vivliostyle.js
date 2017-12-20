@@ -2615,9 +2615,12 @@ adapt.layout.Column.prototype.checkOverflowAndSaveEdge = function(nodeContext, t
     if (this.isOverflown(edge + ((this.vertical ? -1 : 1) * offsets.current))
         && !this.nodeContextOverflowingDueToRepetitiveElements) {
         this.nodeContextOverflowingDueToRepetitiveElements = nodeContext;
-    }
-    if (trailingEdgeContexts) {
-        edge += this.getTrailingMarginEdgeAdjustment(trailingEdgeContexts);
+    } else if (trailingEdgeContexts) {
+        // If the edge does not overflow add the trailing margin, which is truncated to the remaining fragmentainer extent.
+        var marginEdge = edge + this.getTrailingMarginEdgeAdjustment(trailingEdgeContexts);
+        var footnoteEdge = this.footnoteEdge - this.getBoxDir() * offsets.current;
+        edge = this.vertical ? Math.min(edge, Math.max(marginEdge, footnoteEdge)) :
+            Math.max(edge, Math.min(marginEdge, footnoteEdge));
     }
     this.updateMaxReachedAfterEdge(edge);
     return overflown;
