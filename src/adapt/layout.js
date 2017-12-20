@@ -686,7 +686,7 @@ adapt.layout.Column.prototype.getExclusions = function() {
  * @param {Node} viewNode
  * @return {void}
  */
-adapt.layout.Column.prototype.removeFollowingSiblings = function(parentNode, viewNode) {
+adapt.layout.removeFollowingSiblings = function(parentNode, viewNode) {
     if (!parentNode)
         return;
     /** @type {Node} */ var lastChild;
@@ -3464,6 +3464,21 @@ adapt.layout.LayoutRetryer.prototype.prepareLayout = function(nodeContext, colum
 /**
  * @override
  */
+adapt.layout.LayoutRetryer.prototype.clearNodes = function(initialPosition) {
+    vivliostyle.layoututil.AbstractLayoutRetryer.prototype.clearNodes.call(this, initialPosition);
+    var nodeContext = initialPosition;
+    while (nodeContext) {
+        var viewNode = nodeContext.viewNode;
+        if (viewNode) {
+            adapt.layout.removeFollowingSiblings(viewNode.parentNode, viewNode);
+        }
+        nodeContext = nodeContext.parent;
+    }
+};
+
+/**
+ * @override
+ */
 adapt.layout.LayoutRetryer.prototype.saveState = function(nodeContext, column) {
     vivliostyle.layoututil.AbstractLayoutRetryer.prototype.saveState.call(this, nodeContext, column);
     this.initialPageBreakType = column.pageBreakType;
@@ -3589,7 +3604,7 @@ adapt.layout.BlockLayoutProcessor.prototype.clearOverflownViewNodes = function(c
     if (!nodeContext.viewNode.parentNode) return;
     var parentNode = nodeContext.viewNode.parentNode;
 
-    column.removeFollowingSiblings(parentNode, nodeContext.viewNode);
+    adapt.layout.removeFollowingSiblings(parentNode, nodeContext.viewNode);
     if (removeSelf) {
         parentNode.removeChild(nodeContext.viewNode);
     }
