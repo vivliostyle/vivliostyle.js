@@ -2014,6 +2014,9 @@ adapt.layout.Column.prototype.findEndOfLine = function(linePosition, checkPoints
     if (goog.DEBUG) {
         adapt.layout.validateCheckPoints(checkPoints);
     }
+    // Workaround for Blink not returning correct fractional values for Range.getClientRects.
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=629828
+    var effectiveLinePosition = this.vertical ? linePosition - 1 : linePosition + 1;
     // find the first character which is out
     var lowCP = 0;
     var low = checkPoints[0].boxOffset;
@@ -2034,7 +2037,7 @@ adapt.layout.Column.prototype.findEndOfLine = function(linePosition, checkPoints
                 low1 = mid1;
         }
         var edge = this.calculateEdge(null, checkPoints, low1, mid);
-        if (this.vertical ? edge < linePosition : edge > linePosition) {
+        if (this.vertical ? edge <= effectiveLinePosition : edge >= effectiveLinePosition) {
             high = mid - 1;
             while (checkPoints[low1].boxOffset == mid)
                 low1--;
