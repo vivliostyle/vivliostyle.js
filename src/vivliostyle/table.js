@@ -1282,8 +1282,15 @@ goog.scope(function() {
         return pair ? pair.tableLayoutOption : null;
     }
 
-    function clearTableLayoutOptionCache() {
-        tableLayoutOptionCache = [];
+    /**
+     * @param {!Node} tableRootSourceNode
+     */
+    function clearTableLayoutOptionCache(tableRootSourceNode) {
+        var i = tableLayoutOptionCache.findIndex(function(c) {
+            return c.root === tableRootSourceNode;
+        });
+        if (i >= 0)
+            tableLayoutOptionCache.splice(i, 1);
     }
 
     /**
@@ -1460,7 +1467,7 @@ goog.scope(function() {
         formattingContext.initializeRepetitiveElements(nodeContext.vertical);
         goog.asserts.assert(nodeContext.sourceNode);
         var tableLayoutOption = getTableLayoutOption(nodeContext.sourceNode);
-        clearTableLayoutOptionCache();
+        clearTableLayoutOptionCache(nodeContext.sourceNode);
         var frame = adapt.task.newFrame("TableLayoutProcessor.doInitialLayout");
         var initialNodeContext = nodeContext.copy();
         this.layoutEntireTable(nodeContext, column).then(function(nodeContextAfter) {
