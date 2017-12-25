@@ -91,11 +91,15 @@ adapt.layout.calculateEdge = function(nodeContext, clientLayout,
     if (!node)
         return NaN;
     if (node.nodeType == 1) {
-        if (nodeContext.after) {
+        if (nodeContext.after || !nodeContext.inline) {
             var cbox = clientLayout.getElementClientRect(
                 /** @type {Element} */ (node));
             if (cbox.right >= cbox.left && cbox.bottom >= cbox.top) {
-                return vertical ? cbox.left : cbox.bottom;
+                if (nodeContext.after) {
+                    return vertical ? cbox.left : cbox.bottom;
+                } else {
+                    return vertical ? cbox.right : cbox.top;
+                }
             }
         }
         return NaN;
