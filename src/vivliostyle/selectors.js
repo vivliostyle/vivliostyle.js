@@ -346,7 +346,7 @@ goog.scope(function() {
      * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
      */
     function processAfterIfContinuesOfNodeContext(nodeContext, column) {
-        if (!nodeContext || !nodeContext.afterIfContinues || nodeContext.after) {
+        if (!nodeContext || !nodeContext.afterIfContinues || nodeContext.after || column.isFloatNodeContext(nodeContext)) {
             return adapt.task.newResult(nodeContext);
         }
 
