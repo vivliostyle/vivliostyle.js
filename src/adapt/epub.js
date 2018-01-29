@@ -1803,6 +1803,7 @@ adapt.epub.OPFView.prototype.makeMathJaxView = function(xmldoc, srcElem, viewPar
         var span = doc.createElement("span");
         viewParent.appendChild(span);
         var clonedMath = doc.importNode(srcElem, true);
+        this.resolveURLsInMathML(clonedMath, xmldoc);
         span.appendChild(clonedMath);
         var queue = hub["queue"];
         queue["Push"](["Typeset", hub, span]);
@@ -1816,6 +1817,31 @@ adapt.epub.OPFView.prototype.makeMathJaxView = function(xmldoc, srcElem, viewPar
     }
     return adapt.task.newResult(/** @type {Element} */ (null));
 };
+
+/**
+ * @private
+ * @param {Node} node
+ * @param {adapt.xmldoc.XMLDocHolder} xmldoc
+ */
+adapt.epub.OPFView.prototype.resolveURLsInMathML = function(node, xmldoc) {
+    if (node == null) return;
+    if (node.nodeType === 1 && node.tagName === "mglyph") {
+        var attrs = node.attributes;
+        for (var i=0; i<attrs.length; i++) {
+            var attr = attrs[i];
+            if (attr.name !== "src") continue;
+            var newUrl = adapt.base.resolveURL(attr.nodeValue, xmldoc.url);
+            if (attr.namespaceURI) {
+                node.setAttributeNS(attr.namespaceURI, attr.name, newUrl);
+            } else {
+                node.setAttribute(attr.name, newUrl);
+            }
+        }
+    }
+    if (node.firstChild) this.resolveURLsInMathML(node.firstChild, xmldoc);
+    if (node.nextSibling) this.resolveURLsInMathML(node.nextSibling, xmldoc);
+};
+
 
 // TODO move makeSSEView to a more appropriate class (SSE XML content is not allowed in EPUB)
 /**
