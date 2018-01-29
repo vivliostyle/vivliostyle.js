@@ -1368,7 +1368,7 @@ adapt.layout.Column.prototype.createPageFloatArea = function(float, floatSide, a
     var parentPageFloatLayoutContext = this.pageFloatLayoutContext.getPageFloatLayoutContext(float.floatReference);
     // TODO: establish how to specify an appropriate generating element for the new page float layout context
     var pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
-        parentPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.COLUMN, null,
+        null, vivliostyle.pagefloat.FloatReference.COLUMN, null,
         this.pageFloatLayoutContext.flowName, float.nodePosition, null, null);
     var parentContainer = parentPageFloatLayoutContext.getContainer();
     var floatArea = new adapt.layout.PageFloatArea(floatSide, floatAreaElement, this.layoutContext.clone(),
