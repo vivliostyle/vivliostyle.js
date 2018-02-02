@@ -335,7 +335,7 @@ overflow-wrap = normal | break-word;
 [moz]tab-size = NNEG_INT | NNEG_LENGTH;
 [moz,ms]text-align-last = auto | start | end | left | right | center | justify;
 [ms]text-justify = auto | none | inter-word | inter-character | inter-ideograph /* specified in UA stylesheet for IE */;
-[ms]word-break = normal | keep-all | break-all;
+[ms]word-break = normal | keep-all | break-all | break-word;
 [ms]word-wrap = normal | break-word;
 
 /* CSS Text Decoration */
