@@ -15,6 +15,9 @@
 - Support `column-fill` property
   - <https://github.com/vivliostyle/vivliostyle.js/pull/387>
   - Spec: [CSS Multi-column Layout Module Level 1 - column-fill](https://drafts.csswg.org/css-multicol/#cf)
+- Add support for `break-word` value of `word-break` property
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/409>
+  - Spec: [CSS Text Module Level 3 - Breaking Rules for Letters: the word-break property](https://www.w3.org/TR/css-text-3/#word-break-property)
 
 ### Changed
 
