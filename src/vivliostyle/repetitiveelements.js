@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Vivliostyle Inc.
+ * Copyright 2016 Trim-marks Inc.
  * @fileoverview Elements repeated in every fragment by repeat-on-break property.
  */
 goog.provide("vivliostyle.repetitiveelements");

@@ -1,6 +1,6 @@
 /**
  * Copyright 2013 Google, Inc.
- * Copyright 2017 Vivliostyle Inc.
+ * Copyright 2017 Trim-marks Inc.
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
