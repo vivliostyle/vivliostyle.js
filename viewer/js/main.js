@@ -7746,7 +7746,7 @@ module.exports = exports["default"];
 },{"./bindings/menuButton.js":2,"./viewmodels/viewer-app":19,"knockout":1}],22:[function(require,module,exports){
 /*
  * Copyright 2013 Google, Inc.
- * Copyright 2015 Vivliostyle Inc.
+ * Copyright 2015 Trim-marks Inc.
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -7761,7 +7761,7 @@ module.exports = exports["default"];
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Vivliostyle core 2017.6.1-pre.20180202072919
+ * Vivliostyle core 2017.6.1-pre.20180322133443
  */"use strict";(function(factory){if(typeof define === "function" && define.amd){ // AMD
 define([],factory);}else if(typeof module === "object"){ // Node.js
 var enclosingObject={};module.exports = factory(enclosingObject);}else if(typeof exports === "object"){ // CommonJS
