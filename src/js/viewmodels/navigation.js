@@ -30,7 +30,7 @@ function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
         return this.settingsPanel_.opened() || !this.viewer_.state.navigatable();
     }, this);
 
-    var navigationDisabled = ko.pureComputed(function() {
+    const navigationDisabled = ko.pureComputed(function() {
         return navigationOptions.disablePageNavigation || this.isDisabled();
     }, this);
 
@@ -42,7 +42,7 @@ function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
     this.isNavigateToLastDisabled = navigationDisabled;
     this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
 
-    var zoomDisabled = ko.pureComputed(function() {
+    const zoomDisabled = ko.pureComputed(function() {
         return navigationOptions.disableZoom || this.isDisabled();
     }, this);
 
@@ -54,7 +54,7 @@ function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
 
     this.fitToScreen = ko.pureComputed(() => viewerOptions.zoom().fitToScreen, this);
 
-    var fontSizeChangeDisabled = ko.pureComputed(function() {
+    const fontSizeChangeDisabled = ko.pureComputed(function() {
         return navigationOptions.disableFontSizeChange || this.isDisabled();
     }, this);
 
@@ -139,7 +139,7 @@ Navigation.prototype.navigateToLast = function() {
 
 Navigation.prototype.zoomIn = function() {
     if (!this.isZoomInDisabled()) {
-        var zoom = this.viewerOptions_.zoom();
+        const zoom = this.viewerOptions_.zoom();
         this.viewerOptions_.zoom(zoom.zoomIn(this.viewer_));
         return true;
     } else {
@@ -149,7 +149,7 @@ Navigation.prototype.zoomIn = function() {
 
 Navigation.prototype.zoomOut = function() {
     if (!this.isZoomOutDisabled()) {
-        var zoom = this.viewerOptions_.zoom();
+        const zoom = this.viewerOptions_.zoom();
         this.viewerOptions_.zoom(zoom.zoomOut(this.viewer_));
         return true;
     } else {
@@ -159,7 +159,7 @@ Navigation.prototype.zoomOut = function() {
 
 Navigation.prototype.zoomToActualSize = function() {
     if (!this.isZoomToActualSizeDisabled()) {
-        var zoom = this.viewerOptions_.zoom();
+        const zoom = this.viewerOptions_.zoom();
         this.viewerOptions_.zoom(zoom.zoomToActualSize());
         return true;
     } else {
@@ -169,7 +169,7 @@ Navigation.prototype.zoomToActualSize = function() {
 
 Navigation.prototype.toggleFitToScreen = function() {
     if (!this.isToggleFitToScreenDisabled()) {
-        var zoom = this.viewerOptions_.zoom();
+        const zoom = this.viewerOptions_.zoom();
         this.viewerOptions_.zoom(zoom.toggleFitToScreen());
         return true;
     } else {
@@ -179,7 +179,7 @@ Navigation.prototype.toggleFitToScreen = function() {
 
 Navigation.prototype.increaseFontSize = function() {
     if (!this.isIncreaseFontSizeDisabled()) {
-        var fontSize = this.viewerOptions_.fontSize();
+        const fontSize = this.viewerOptions_.fontSize();
         this.viewerOptions_.fontSize(fontSize * 1.25);
         return true;
     } else {
@@ -189,7 +189,7 @@ Navigation.prototype.increaseFontSize = function() {
 
 Navigation.prototype.decreaseFontSize = function() {
     if (!this.isDecreaseFontSizeDisabled()) {
-        var fontSize = this.viewerOptions_.fontSize();
+        const fontSize = this.viewerOptions_.fontSize();
         this.viewerOptions_.fontSize(fontSize * 0.8);
         return true;
     } else {
@@ -199,7 +199,7 @@ Navigation.prototype.decreaseFontSize = function() {
 
 Navigation.prototype.defaultFontSize = function() {
     if (!this.isDefaultFontSizeDisabled()) {
-        var fontSize = ViewerOptions.getDefaultValues().fontSize;
+        const fontSize = ViewerOptions.getDefaultValues().fontSize;
         this.viewerOptions_.fontSize(fontSize);
         return true;
     } else {

@@ -19,7 +19,7 @@
 
 import messageQueue from "../models/message-queue";
 
-var LogLevel = {
+const LogLevel = {
     DEBUG: "debug",
     INFO: "info",
     WARN: "warn",
@@ -78,7 +78,7 @@ Logger.prototype.error = function(content) {
     }
 };
 
-var instance = new Logger();
+const instance = new Logger();
 
 Logger.getLogger = () => instance;
 

@@ -25,8 +25,8 @@ function MessageDialog(queue) {
 }
 
 MessageDialog.prototype.getDisplayMessage = errorInfo => {
-    var e = errorInfo.error;
-    var msg = e && (e.toString() || e.frameTrace || e.stack);
+    const e = errorInfo.error;
+    let msg = e && (e.toString() || e.frameTrace || e.stack);
     if (msg) {
         msg = msg.split("\n", 1)[0];
     }

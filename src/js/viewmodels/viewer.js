@@ -26,7 +26,7 @@ function Viewer(viewerSettings, viewerOptions) {
     this.viewerOptions_ = viewerOptions;
     this.documentOptions_ = null;
     this.viewer_ = new vivliostyle.viewer.Viewer(viewerSettings, viewerOptions.toObject());
-    var state_ = this.state_= {
+    const state_ = this.state_= {
         status: obs.readonlyObservable(vivliostyle.constants.ReadyState.LOADING),
         pageProgression: obs.readonlyObservable(vivliostyle.constants.LTR)
     };
@@ -43,7 +43,7 @@ function Viewer(viewerSettings, viewerOptions) {
 }
 
 Viewer.prototype.setupViewerEventHandler = function() {
-    var logger = Logger.getLogger();
+    const logger = Logger.getLogger();
     this.viewer_.addListener("debug", payload => {
         logger.debug(payload.content);
     });
@@ -57,7 +57,7 @@ Viewer.prototype.setupViewerEventHandler = function() {
         logger.error(payload.content);
     });
     this.viewer_.addListener("readystatechange", () => {
-        var readyState = this.viewer_.readyState;
+        const readyState = this.viewer_.readyState;
         if (readyState === vivliostyle.constants.ReadyState.INTERACTIVE || vivliostyle.constants.ReadyState.COMPLETE) {
             this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
         }
@@ -69,7 +69,7 @@ Viewer.prototype.setupViewerEventHandler = function() {
         }
     });
     this.viewer_.addListener("nav", payload => {
-        var cfi = payload.cfi;
+        const cfi = payload.cfi;
         if (cfi) {
             this.documentOptions_.fragment(cfi);
         }
@@ -85,7 +85,7 @@ Viewer.prototype.setupViewerEventHandler = function() {
 
 Viewer.prototype.setupViewerOptionSubscriptions = function() {
     ko.computed(function() {
-        var viewerOptions = this.viewerOptions_.toObject();
+        const viewerOptions = this.viewerOptions_.toObject();
         this.viewer_.setOptions(viewerOptions);
     }, this).extend({rateLimit: 0});
 };

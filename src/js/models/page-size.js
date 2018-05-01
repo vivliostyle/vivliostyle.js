@@ -19,13 +19,13 @@
 
 import ko from "knockout";
 
-var Mode = {
+const Mode = {
     AUTO: "auto",
     PRESET: "preset",
     CUSTOM: "custom"
 };
 
-var PresetSize = [
+const PresetSize = [
     {name: "A5", description: "A5"},
     {name: "A4", description: "A4"},
     {name: "A3", description: "A3"},
@@ -66,7 +66,7 @@ PageSize.prototype.equivalentTo = function(other) {
     if (this.isImportant() !== other.isImportant()) {
         return false;
     }
-    var mode = this.mode();
+    const mode = this.mode();
     if (other.mode() === mode) {
         switch (mode) {
             case Mode.AUTO:
@@ -84,7 +84,7 @@ PageSize.prototype.equivalentTo = function(other) {
 };
 
 PageSize.prototype.toCSSDeclarationString = function() {
-    var declaration = "size: ";
+    let declaration = "size: ";
     switch (this.mode()) {
         case Mode.AUTO:
             declaration += "auto";

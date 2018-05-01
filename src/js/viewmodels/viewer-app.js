@@ -45,7 +45,7 @@ function ViewerApp() {
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
     this.messageDialog = new MessageDialog(messageQueue);
 
-    var settingsPanelOptions = {
+    const settingsPanelOptions = {
         disablePageSizeChange: false,
         disablePageViewModeChange: false
     };
@@ -53,7 +53,7 @@ function ViewerApp() {
     this.settingsPanel = new SettingsPanel(this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog,
         settingsPanelOptions);
 
-    var navigationOptions = {
+    const navigationOptions = {
         disablePageNavigation: false,
         disableZoom: false,
         disableFontSizeChange: false
@@ -62,8 +62,8 @@ function ViewerApp() {
     this.navigation = new Navigation(this.viewerOptions, this.viewer, this.settingsPanel, navigationOptions);
 
     this.handleKey = (data, event) => {
-        var key = keyUtil.identifyKeyFromEvent(event);
-        var ret = this.settingsPanel.handleKey(key);
+        const key = keyUtil.identifyKeyFromEvent(event);
+        let ret = this.settingsPanel.handleKey(key);
         if (ret) {
             ret = this.navigation.handleKey(key);
         }

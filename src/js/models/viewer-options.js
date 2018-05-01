@@ -46,8 +46,8 @@ function ViewerOptions(options) {
     if (options) {
         this.copyFrom(options);
     } else {
-        var defaultValues = getDefaultValues();
-        var urlOptions = getViewerOptionsFromURL();
+        const defaultValues = getDefaultValues();
+        const urlOptions = getViewerOptionsFromURL();
         this.fontSize(defaultValues.fontSize);
         this.profile(urlOptions.profile || defaultValues.profile);
         this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);

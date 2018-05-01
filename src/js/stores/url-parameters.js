@@ -29,18 +29,18 @@ function URLParameterStore() {
 }
 
 URLParameterStore.prototype.getBaseURL = function() {
-    var url = this.location.href;
+    let url = this.location.href;
     url = url.replace(/#.*$/, "");
     return url.replace(/\/[^/]*$/, "/");
 };
 
 URLParameterStore.prototype.getParameter = function(name, dontPercentDecode) {
-    var url = this.location.href;
-    var regexp = getRegExpForParameter(name);
-    var results = [];
-    var r;
+    const url = this.location.href;
+    const regexp = getRegExpForParameter(name);
+    const results = [];
+    let r;
     while (r = regexp.exec(url)) {
-        var value = r[1];
+        let value = r[1];
         if (!dontPercentDecode) value = stringUtil.percentDecodeAmpersandAndPercent(value);
         results.push(value);
     }
@@ -48,14 +48,14 @@ URLParameterStore.prototype.getParameter = function(name, dontPercentDecode) {
 };
 
 URLParameterStore.prototype.setParameter = function(name, value, dontPercentEncode) {
-    var url = this.location.href;
+    const url = this.location.href;
     if (!dontPercentEncode) value = stringUtil.percentEncodeAmpersandAndPercent(value);
-    var updated;
-    var regexp = getRegExpForParameter(name);
-    var r = regexp.exec(url);
+    let updated;
+    const regexp = getRegExpForParameter(name);
+    const r = regexp.exec(url);
     if (r) {
-        var l = r[1].length;
-        var start = r.index + r[0].length - l;
+        const l = r[1].length;
+        const start = r.index + r[0].length - l;
         updated = url.substring(0, start) + value + url.substring(start + l);
     } else {
         updated = url + (url.match(/#/) ? "&" : "#") + name + "=" + value;
