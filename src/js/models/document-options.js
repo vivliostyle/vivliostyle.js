@@ -55,7 +55,7 @@ function DocumentOptions() {
 DocumentOptions.prototype.toObject = function() {
     function convertStyleSheetArray(arr) {
         return arr.map(url => ({
-            url: url
+            url
         }));
     }
     var uss = convertStyleSheetArray(this.userStyleSheet());

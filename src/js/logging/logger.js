@@ -40,7 +40,7 @@ Logger.prototype.debug = function(content) {
     if (this.logLevel === LogLevel.DEBUG) {
         messageQueue.push({
             type: "debug",
-            content: content
+            content
         });
     }
 };
@@ -50,7 +50,7 @@ Logger.prototype.info = function(content) {
         this.logLevel === LogLevel.INFO) {
         messageQueue.push({
             type: "info",
-            content: content
+            content
         });
     }
 };
@@ -61,7 +61,7 @@ Logger.prototype.warn = function(content) {
         this.logLevel === LogLevel.WARN) {
         messageQueue.push({
             type: "warn",
-            content: content
+            content
         });
     }
 };
@@ -73,7 +73,7 @@ Logger.prototype.error = function(content) {
         this.logLevel === LogLevel.ERROR) {
         messageQueue.push({
             type: "error",
-            content: content
+            content
         });
     }
 };
