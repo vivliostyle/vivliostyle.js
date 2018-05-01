@@ -18,16 +18,16 @@
  */
 
 export default {
-    escapeUnicodeChar: function(ch) {
+    escapeUnicodeChar(ch) {
         return '\\u' + (0x10000|ch.charCodeAt(0)).toString(16).substring(1);
     },
-    escapeUnicodeString: function(str) {
+    escapeUnicodeString(str) {
         return str.replace(/[^-a-zA-Z0-9_]/g, this.escapeUnicodeChar);
     },
-    percentEncodeAmpersandAndPercent: function(str) {
+    percentEncodeAmpersandAndPercent(str) {
         return str.replace(/%/g, "%25").replace(/&/g, "%26");
     },
-    percentDecodeAmpersandAndPercent: function(str) {
+    percentDecodeAmpersandAndPercent(str) {
         return str.replace(/%26/g, "&").replace(/%25/g, "%");
     }
 };
