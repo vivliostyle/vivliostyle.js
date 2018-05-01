@@ -66,7 +66,7 @@ class DocumentOptions {
             fragment: this.fragment(),
             authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
             userStyleSheet: [{
-                text: "@page {" + this.pageSize.toCSSDeclarationString() + "}"
+                text: `@page {${this.pageSize.toCSSDeclarationString()}}`
             }].concat(uss)
         };
     }

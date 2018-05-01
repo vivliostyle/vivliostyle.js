@@ -38,7 +38,7 @@ function ViewerApp() {
     }
     this.isDebug = urlParameters.getParameter("debug")[0] === "true";
     this.viewerSettings = {
-        userAgentRootURL: urlParameters.getBaseURL() + "resources/",
+        userAgentRootURL: `${urlParameters.getBaseURL()}resources/`,
         viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
         debug: this.isDebug
     };

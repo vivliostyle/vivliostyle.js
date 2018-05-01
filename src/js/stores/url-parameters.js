@@ -20,7 +20,7 @@
 import stringUtil from "../utils/string-util"
 
 function getRegExpForParameter(name) {
-    return new RegExp("[#&]" + stringUtil.escapeUnicodeString(name) + "=([^&]*)", "g");
+    return new RegExp(`[#&]${stringUtil.escapeUnicodeString(name)}=([^&]*)`, "g");
 }
 
 class URLParameterStore {
@@ -59,7 +59,7 @@ class URLParameterStore {
             const start = r.index + r[0].length - l;
             updated = url.substring(0, start) + value + url.substring(start + l);
         } else {
-            updated = url + (url.match(/#/) ? "&" : "#") + name + "=" + value;
+            updated = `${url + (url.match(/#/) ? "&" : "#") + name}=${value}`;
         }
         if (this.history.replaceState) {
             this.history.replaceState(null, "", updated);

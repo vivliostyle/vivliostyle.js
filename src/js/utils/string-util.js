@@ -19,7 +19,7 @@
 
 export default {
     escapeUnicodeChar(ch) {
-        return '\\u' + (0x10000|ch.charCodeAt(0)).toString(16).substring(1);
+        return `\\u${(0x10000|ch.charCodeAt(0)).toString(16).substring(1)}`;
     },
     escapeUnicodeString(str) {
         return str.replace(/[^-a-zA-Z0-9_]/g, this.escapeUnicodeChar);

@@ -74,7 +74,7 @@ class PageSize {
                 case Mode.CUSTOM:
                     return this.customWidth() === other.customWidth() && this.customHeight() === other.customHeight();
                 default:
-                    throw new Error("Unknown mode " + mode);
+                    throw new Error(`Unknown mode ${mode}`);
             }
         } else {
             return false;
@@ -94,17 +94,17 @@ class PageSize {
                 }
                 break;
             case Mode.CUSTOM:
-                declaration += this.customWidth() + " " + this.customHeight();
+                declaration += `${this.customWidth()} ${this.customHeight()}`;
                 break;
             default:
-                throw new Error("Unknown mode " + this.mode());
+                throw new Error(`Unknown mode ${this.mode()}`);
         }
 
         if (this.isImportant()) {
             declaration += " !important";
         }
 
-        return declaration + ";";
+        return `${declaration};`;
     }
 }
 
