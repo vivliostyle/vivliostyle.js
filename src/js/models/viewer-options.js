@@ -54,7 +54,7 @@ function ViewerOptions(options) {
         this.zoom(defaultValues.zoom);
 
         // write spread parameter back to URL when updated
-        this.pageViewMode.subscribe(function(pageViewMode) {
+        this.pageViewMode.subscribe(pageViewMode => {
             urlParameters.setParameter("spread", pageViewMode.toSpreadViewString());
         });
     }

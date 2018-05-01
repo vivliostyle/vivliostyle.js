@@ -80,8 +80,6 @@ Logger.prototype.error = function(content) {
 
 var instance = new Logger();
 
-Logger.getLogger = function() {
-    return instance;
-};
+Logger.getLogger = () => instance;
 
 export default Logger;

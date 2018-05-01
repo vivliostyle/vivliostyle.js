@@ -61,14 +61,14 @@ function ViewerApp() {
 
     this.navigation = new Navigation(this.viewerOptions, this.viewer, this.settingsPanel, navigationOptions);
 
-    this.handleKey = function(data, event) {
+    this.handleKey = (data, event) => {
         var key = keyUtil.identifyKeyFromEvent(event);
         var ret = this.settingsPanel.handleKey(key);
         if (ret) {
             ret = this.navigation.handleKey(key);
         }
         return ret;
-    }.bind(this);
+    };
 
     this.viewer.loadDocument(this.documentOptions);
 }

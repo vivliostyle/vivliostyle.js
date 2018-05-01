@@ -34,9 +34,7 @@ function Viewer(viewerSettings, viewerOptions) {
         status: state_.status.getter.extend({
             rateLimit: { timeout: 100, method: "notifyWhenChangesStop" }
         }),
-        navigatable: ko.pureComputed(function() {
-            return state_.status.value() !== vivliostyle.constants.ReadyState.LOADING;
-        }),
+        navigatable: ko.pureComputed(() => state_.status.value() !== vivliostyle.constants.ReadyState.LOADING),
         pageProgression: state_.pageProgression.getter
     };
 
@@ -46,43 +44,43 @@ function Viewer(viewerSettings, viewerOptions) {
 
 Viewer.prototype.setupViewerEventHandler = function() {
     var logger = Logger.getLogger();
-    this.viewer_.addListener("debug", function(payload) {
+    this.viewer_.addListener("debug", payload => {
         logger.debug(payload.content);
     });
-    this.viewer_.addListener("info", function(payload) {
+    this.viewer_.addListener("info", payload => {
         logger.info(payload.content);
     });
-    this.viewer_.addListener("warn", function(payload) {
+    this.viewer_.addListener("warn", payload => {
         logger.warn(payload.content);
     });
-    this.viewer_.addListener("error", function(payload) {
+    this.viewer_.addListener("error", payload => {
         logger.error(payload.content);
     });
-    this.viewer_.addListener("readystatechange", function() {
+    this.viewer_.addListener("readystatechange", () => {
         var readyState = this.viewer_.readyState;
         if (readyState === vivliostyle.constants.ReadyState.INTERACTIVE || vivliostyle.constants.ReadyState.COMPLETE) {
             this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
         }
         this.state_.status.value(readyState);
-    }.bind(this));
-    this.viewer_.addListener("loaded", function() {
+    });
+    this.viewer_.addListener("loaded", () => {
         if (this.viewerOptions_.profile()) {
             vivliostyle.profile.profiler.printTimings();
         }
-    }.bind(this));
-    this.viewer_.addListener("nav", function(payload) {
+    });
+    this.viewer_.addListener("nav", payload => {
         var cfi = payload.cfi;
         if (cfi) {
             this.documentOptions_.fragment(cfi);
         }
-    }.bind(this));
-    this.viewer_.addListener("hyperlink", function(payload) {
+    });
+    this.viewer_.addListener("hyperlink", payload => {
         if (payload.internal) {
             this.viewer_.navigateToInternalUrl(payload.href);
         } else {
             window.location.href = payload.href;
         }
-    }.bind(this));
+    });
 };
 
 Viewer.prototype.setupViewerOptionSubscriptions = function() {

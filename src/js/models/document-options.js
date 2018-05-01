@@ -46,7 +46,7 @@ function DocumentOptions() {
     this.pageSize = new PageSize();
 
     // write fragment back to URL when updated
-    this.fragment.subscribe(function(fragment) {
+    this.fragment.subscribe(fragment => {
         var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
         urlParameters.setParameter("f", encoded, true);
     });
@@ -54,7 +54,9 @@ function DocumentOptions() {
 
 DocumentOptions.prototype.toObject = function() {
     function convertStyleSheetArray(arr) {
-        return arr.map(function(url) { return {url: url}; });
+        return arr.map(url => ({
+            url: url
+        }));
     }
     var uss = convertStyleSheetArray(this.userStyleSheet());
     // Do not include url

@@ -52,9 +52,7 @@ function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
     this.isToggleFitToScreenDisabled = zoomDisabled;
     this.hideZoom = !!navigationOptions.disableZoom;
 
-    this.fitToScreen = ko.pureComputed(function() {
-        return viewerOptions.zoom().fitToScreen;
-    }, this);
+    this.fitToScreen = ko.pureComputed(() => viewerOptions.zoom().fitToScreen, this);
 
     var fontSizeChangeDisabled = ko.pureComputed(function() {
         return navigationOptions.disableFontSizeChange || this.isDisabled();

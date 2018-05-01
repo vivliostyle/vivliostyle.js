@@ -21,12 +21,10 @@ import ko from "knockout";
 
 function MessageDialog(queue) {
     this.list = queue;
-    this.visible = ko.pureComputed(function() {
-        return queue().length > 0;
-    });
+    this.visible = ko.pureComputed(() => queue().length > 0);
 }
 
-MessageDialog.prototype.getDisplayMessage = function(errorInfo) {
+MessageDialog.prototype.getDisplayMessage = errorInfo => {
     var e = errorInfo.error;
     var msg = e && (e.toString() || e.frameTrace || e.stack);
     if (msg) {
