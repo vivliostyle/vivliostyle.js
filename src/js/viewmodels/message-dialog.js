@@ -19,22 +19,24 @@
 
 import ko from "knockout";
 
-function MessageDialog(queue) {
-    this.list = queue;
-    this.visible = ko.pureComputed(() => queue().length > 0);
-}
+class MessageDialog {
+    constructor(queue) {
+        this.list = queue;
+        this.visible = ko.pureComputed(() => queue().length > 0);
+    }
 
-MessageDialog.prototype.getDisplayMessage = errorInfo => {
-    const e = errorInfo.error;
-    let msg = e && (e.toString() || e.frameTrace || e.stack);
-    if (msg) {
-        msg = msg.split("\n", 1)[0];
+    getDisplayMessage(errorInfo) {
+        const e = errorInfo.error;
+        let msg = e && (e.toString() || e.frameTrace || e.stack);
+        if (msg) {
+            msg = msg.split("\n", 1)[0];
+        }
+        if (!msg) {
+            msg = errorInfo.messages.join("\n");
+        }
+        return msg;
     }
-    if (!msg) {
-        msg = errorInfo.messages.join("\n");
-    }
-    return msg;
-};
+}
 
 export default MessageDialog;
 

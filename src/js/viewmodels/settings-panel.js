@@ -23,69 +23,77 @@ import PageSize from "../models/page-size";
 import PageViewMode from "../models/page-view-mode";
 import {Keys} from "../utils/key-util";
 
-function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, settingsPanelOptions) {
-    this.viewerOptions_ = viewerOptions;
-    this.documentOptions_ = documentOptions;
-    this.viewer_ = viewer;
+class SettingsPanel {
+    constructor(
+        viewerOptions,
+        documentOptions,
+        viewer,
+        messageDialog,
+        settingsPanelOptions
+    ) {
+        this.viewerOptions_ = viewerOptions;
+        this.documentOptions_ = documentOptions;
+        this.viewer_ = viewer;
 
-    this.isPageSizeChangeDisabled = !!settingsPanelOptions.disablePageSizeChange;
-    this.isOverrideDocumentStyleSheetDisabled = this.isPageSizeChangeDisabled;
-    this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
+        this.isPageSizeChangeDisabled = !!settingsPanelOptions.disablePageSizeChange;
+        this.isOverrideDocumentStyleSheetDisabled = this.isPageSizeChangeDisabled;
+        this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
 
-    this.opened = ko.observable(false);
-    this.state = {
-        viewerOptions: new ViewerOptions(viewerOptions),
-        pageSize: new PageSize(documentOptions.pageSize),
-        pageViewMode: ko.pureComputed({
-            read: () => {
-                return this.state.viewerOptions.pageViewMode().toString();
-            },
-            write: value => {
-                this.state.viewerOptions.pageViewMode(PageViewMode.of(value));
-            }
-        })
-    };
+        this.opened = ko.observable(false);
+        this.state = {
+            viewerOptions: new ViewerOptions(viewerOptions),
+            pageSize: new PageSize(documentOptions.pageSize),
+            pageViewMode: ko.pureComputed({
+                read: () => {
+                    return this.state.viewerOptions.pageViewMode().toString();
+                },
+                write: value => {
+                    this.state.viewerOptions.pageViewMode(PageViewMode.of(value));
+                }
+            })
+        };
 
-    ["close", "toggle", "apply", "reset"].forEach(function(methodName) {
-        this[methodName] = this[methodName].bind(this);
-    }, this);
+        ["close", "toggle", "apply", "reset"].forEach(function(methodName) {
+            this[methodName] = this[methodName].bind(this);
+        }, this);
 
-    messageDialog.visible.subscribe(function(visible) {
-        if (visible) this.close();
-    }, this);
+        messageDialog.visible.subscribe(function(visible) {
+            if (visible) this.close();
+        }, this);
+    }
+
+    close() {
+        this.opened(false);
+        return true;
+    }
+
+    toggle() {
+        this.opened(!this.opened());
+    }
+
+    apply() {
+        if (this.state.pageSize.equivalentTo(this.documentOptions_.pageSize)) {
+            this.viewerOptions_.copyFrom(this.state.viewerOptions);
+        } else {
+            this.documentOptions_.pageSize.copyFrom(this.state.pageSize);
+            this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
+        }
+    }
+
+    reset() {
+        this.state.viewerOptions.copyFrom(this.viewerOptions_);
+        this.state.pageSize.copyFrom(this.documentOptions_.pageSize);
+    }
+
+    handleKey(key) {
+        switch (key) {
+            case Keys.Escape:
+                this.close();
+                return true;
+            default:
+                return true;
+        }
+    }
 }
-
-SettingsPanel.prototype.close = function() {
-    this.opened(false);
-    return true;
-};
-
-SettingsPanel.prototype.toggle = function() {
-    this.opened(!this.opened());
-};
-
-SettingsPanel.prototype.apply = function() {
-    if (this.state.pageSize.equivalentTo(this.documentOptions_.pageSize)) {
-        this.viewerOptions_.copyFrom(this.state.viewerOptions);
-    } else {
-        this.documentOptions_.pageSize.copyFrom(this.state.pageSize);
-        this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
-    }
-};
-
-SettingsPanel.prototype.reset = function() {
-    this.state.viewerOptions.copyFrom(this.viewerOptions_);
-    this.state.pageSize.copyFrom(this.documentOptions_.pageSize);
-};
-
-SettingsPanel.prototype.handleKey = function(key) {
-    switch (key) {
-        case Keys.Escape:
-            this.close();
-            return true;
-        default:
-            return true;
-    }
-};
 
 export default SettingsPanel;

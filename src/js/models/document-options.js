@@ -36,38 +36,40 @@ function getDocumentOptionsFromURL() {
     };
 }
 
-function DocumentOptions() {
-    const urlOptions = getDocumentOptionsFromURL();
-    this.epubUrl = ko.observable(urlOptions.epubUrl || "");
-    this.url = ko.observable(urlOptions.url || null);
-    this.fragment = ko.observable(urlOptions.fragment || "");
-    this.authorStyleSheet = ko.observable(urlOptions.authorStyleSheet);
-    this.userStyleSheet = ko.observable(urlOptions.userStyleSheet);
-    this.pageSize = new PageSize();
+class DocumentOptions {
+    constructor() {
+        const urlOptions = getDocumentOptionsFromURL();
+        this.epubUrl = ko.observable(urlOptions.epubUrl || "");
+        this.url = ko.observable(urlOptions.url || null);
+        this.fragment = ko.observable(urlOptions.fragment || "");
+        this.authorStyleSheet = ko.observable(urlOptions.authorStyleSheet);
+        this.userStyleSheet = ko.observable(urlOptions.userStyleSheet);
+        this.pageSize = new PageSize();
 
-    // write fragment back to URL when updated
-    this.fragment.subscribe(fragment => {
-        const encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
-        urlParameters.setParameter("f", encoded, true);
-    });
-}
-
-DocumentOptions.prototype.toObject = function() {
-    function convertStyleSheetArray(arr) {
-        return arr.map(url => ({
-            url
-        }));
+        // write fragment back to URL when updated
+        this.fragment.subscribe(fragment => {
+            const encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
+            urlParameters.setParameter("f", encoded, true);
+        });
     }
-    const uss = convertStyleSheetArray(this.userStyleSheet());
-    // Do not include url
-    // (url is a required argument to Viewer.loadDocument, separated from other options)
-    return {
-        fragment: this.fragment(),
-        authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
-        userStyleSheet: [{
-            text: "@page {" + this.pageSize.toCSSDeclarationString() + "}"
-        }].concat(uss)
-    };
-};
+
+    toObject() {
+        function convertStyleSheetArray(arr) {
+            return arr.map(url => ({
+                url
+            }));
+        }
+        const uss = convertStyleSheetArray(this.userStyleSheet());
+        // Do not include url
+        // (url is a required argument to Viewer.loadDocument, separated from other options)
+        return {
+            fragment: this.fragment(),
+            authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
+            userStyleSheet: [{
+                text: "@page {" + this.pageSize.toCSSDeclarationString() + "}"
+            }].concat(uss)
+        };
+    }
+}
 
 export default DocumentOptions;

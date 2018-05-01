@@ -26,57 +26,59 @@ const LogLevel = {
     ERROR: "error"
 };
 
-function Logger() {
-    this.logLevel = LogLevel.ERROR;
+class Logger {
+    constructor() {
+        this.logLevel = LogLevel.ERROR;
+    }
+
+    setLogLevel(logLevel) {
+        this.logLevel = logLevel;
+    }
+
+    debug(content) {
+        if (this.logLevel === LogLevel.DEBUG) {
+            messageQueue.push({
+                type: "debug",
+                content
+            });
+        }
+    }
+
+    info(content) {
+        if (this.logLevel === LogLevel.DEBUG ||
+            this.logLevel === LogLevel.INFO) {
+            messageQueue.push({
+                type: "info",
+                content
+            });
+        }
+    }
+
+    warn(content) {
+        if (this.logLevel === LogLevel.DEBUG ||
+            this.logLevel === LogLevel.INFO ||
+            this.logLevel === LogLevel.WARN) {
+            messageQueue.push({
+                type: "warn",
+                content
+            });
+        }
+    }
+
+    error(content) {
+        if (this.logLevel === LogLevel.DEBUG ||
+            this.logLevel === LogLevel.INFO ||
+            this.logLevel === LogLevel.WARN ||
+            this.logLevel === LogLevel.ERROR) {
+            messageQueue.push({
+                type: "error",
+                content
+            });
+        }
+    }
 }
 
 Logger.LogLevel = LogLevel;
-
-Logger.prototype.setLogLevel = function(logLevel) {
-    this.logLevel = logLevel;
-};
-
-Logger.prototype.debug = function(content) {
-    if (this.logLevel === LogLevel.DEBUG) {
-        messageQueue.push({
-            type: "debug",
-            content
-        });
-    }
-};
-
-Logger.prototype.info = function(content) {
-    if (this.logLevel === LogLevel.DEBUG ||
-        this.logLevel === LogLevel.INFO) {
-        messageQueue.push({
-            type: "info",
-            content
-        });
-    }
-};
-
-Logger.prototype.warn = function(content) {
-    if (this.logLevel === LogLevel.DEBUG ||
-        this.logLevel === LogLevel.INFO ||
-        this.logLevel === LogLevel.WARN) {
-        messageQueue.push({
-            type: "warn",
-            content
-        });
-    }
-};
-
-Logger.prototype.error = function(content) {
-    if (this.logLevel === LogLevel.DEBUG ||
-        this.logLevel === LogLevel.INFO ||
-        this.logLevel === LogLevel.WARN ||
-        this.logLevel === LogLevel.ERROR) {
-        messageQueue.push({
-            type: "error",
-            content
-        });
-    }
-};
 
 const instance = new Logger();
 
