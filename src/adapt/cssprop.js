@@ -175,8 +175,8 @@ adapt.cssprop.ShapeVisitor.prototype.visitFunc = function(func) {
 adapt.cssprop.ShapeVisitor.prototype.getShape = function(x, y, width, height, context) {
     if (this.coords.length > 0) {
         /** @type {Array.<number>} */ const numbers = [];
-        for (let i = 0; i < this.coords.length; i++) {
-            const coord = this.coords[i];
+
+        this.coords.forEach((coord, i) => {
             if (coord.unit == "%") {
                 let ref = i % 2 == 0 ? width : height;
                 if (i == 3 && this.name == "circle")
@@ -185,7 +185,8 @@ adapt.cssprop.ShapeVisitor.prototype.getShape = function(x, y, width, height, co
             } else {
                 numbers.push(coord.num * context.queryUnitSize(coord.unit, false));
             }
-        }
+        });
+
         switch (this.name) {
             case "polygon":
                 if (numbers.length % 2 == 0) {
