@@ -561,44 +561,47 @@ adapt.epub.OPFDoc.prototype.createDocumentURLTransformer = function() {
      * @constructor
      * @implements {adapt.base.DocumentURLTransformer}
      */
-    function OPFDocumentURLTransformer() {}
-    /**
-     * @override
-     */
-    OPFDocumentURLTransformer.prototype.transformFragment = (fragment, baseURL) => {
-        const url = baseURL + (fragment ? "#" + fragment : "");
-        return adapt.epub.transformedIdPrefix + adapt.base.escapeNameStrToHex(url, ":");
-    };
-    /**
-     * @override
-     */
-    OPFDocumentURLTransformer.prototype.transformURL = function(url, baseURL) {
-        const r = url.match(/^([^#]*)#?(.*)$/);
-        if (r) {
-            const path = r[1] || baseURL;
-            const fragment = r[2];
-            if (path) {
-                if (self.items.some(item => item.src === path)) {
-                    return "#" + this.transformFragment(fragment, path);
+    class OPFDocumentURLTransformer {
+        /**
+         * @override
+         */
+        transformFragment(fragment, baseURL) {
+            const url = baseURL + (fragment ? "#" + fragment : "");
+            return adapt.epub.transformedIdPrefix + adapt.base.escapeNameStrToHex(url, ":");
+        }
+
+        /**
+         * @override
+         */
+        transformURL(url, baseURL) {
+            const r = url.match(/^([^#]*)#?(.*)$/);
+            if (r) {
+                const path = r[1] || baseURL;
+                const fragment = r[2];
+                if (path) {
+                    if (self.items.some(item => item.src === path)) {
+                        return "#" + this.transformFragment(fragment, path);
+                    }
                 }
             }
+            return url;
         }
-        return url;
-    };
-    /**
-     * @override
-     */
-    OPFDocumentURLTransformer.prototype.restoreURL = encoded => {
-        if (encoded.charAt(0) === "#") {
-            encoded = encoded.substring(1);
+
+        /**
+         * @override
+         */
+        restoreURL(encoded) {
+            if (encoded.charAt(0) === "#") {
+                encoded = encoded.substring(1);
+            }
+            if (encoded.indexOf(adapt.epub.transformedIdPrefix) === 0) {
+                encoded = encoded.substring(adapt.epub.transformedIdPrefix.length);
+            }
+            const decoded = adapt.base.unescapeStrFromHex(encoded, ":");
+            const r = decoded.match(/^([^#]*)#?(.*)$/);
+            return r ? [r[1], r[2]] : [];
         }
-        if (encoded.indexOf(adapt.epub.transformedIdPrefix) === 0) {
-            encoded = encoded.substring(adapt.epub.transformedIdPrefix.length);
-        }
-        const decoded = adapt.base.unescapeStrFromHex(encoded, ":");
-        const r = decoded.match(/^([^#]*)#?(.*)$/);
-        return r ? [r[1], r[2]] : [];
-    };
+    }
 
     return new OPFDocumentURLTransformer();
 };

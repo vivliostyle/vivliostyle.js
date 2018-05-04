@@ -27,7 +27,6 @@ goog.require("adapt.cssstyler");
 goog.require("adapt.layout");
 
 goog.scope(() => {
-
     /**
      * Clone counter values.
      * @param {!adapt.csscasc.CounterValues} counters
@@ -100,25 +99,27 @@ goog.scope(() => {
      * @constructor
      * @implements {adapt.csscasc.CounterListener}
      */
-    function CounterListener(counterStore, baseURL) {
-        /** @const */ this.counterStore = counterStore;
-        /** @const */ this.baseURL = baseURL;
+    class CounterListener {
+        constructor(counterStore, baseURL) {
+            /** @const */ this.counterStore = counterStore;
+            /** @const */ this.baseURL = baseURL;
+        }
+
+        /**
+         * @override
+         */
+        countersOfId(id, counters) {
+            id = this.counterStore.documentURLTransformer.transformFragment(id, this.baseURL);
+            this.counterStore.countersById[id] = counters;
+        }
+
+        /**
+         * @returns {!adapt.vtree.ExprContentListener}
+         */
+        getExprContentListener() {
+            return this.counterStore.getExprContentListener();
+        }
     }
-
-    /**
-     * @override
-     */
-    CounterListener.prototype.countersOfId = function(id, counters) {
-        id = this.counterStore.documentURLTransformer.transformFragment(id, this.baseURL);
-        this.counterStore.countersById[id] = counters;
-    };
-
-    /**
-     * @returns {!adapt.vtree.ExprContentListener}
-     */
-    CounterListener.prototype.getExprContentListener = function() {
-        return this.counterStore.getExprContentListener();
-    };
 
     /**
      * @param {!vivliostyle.counters.CounterStore} counterStore
@@ -128,182 +129,184 @@ goog.scope(() => {
      * @constructor
      * @implements {adapt.csscasc.CounterResolver}
      */
-    function CounterResolver(counterStore, baseURL, rootScope, pageScope) {
-        /** @const */ this.counterStore = counterStore;
-        /** @const */ this.baseURL = baseURL;
-        /** @const */ this.rootScope = rootScope;
-        /** @const */ this.pageScope = pageScope;
-        /** @type {?adapt.cssstyler.Styler} */ this.styler = null;
-    }
-
-    /**
-     *
-     * @param {!adapt.cssstyler.Styler} styler
-     */
-    CounterResolver.prototype.setStyler = function(styler) {
-        this.styler = styler;
-    };
-
-    /**
-     * @private
-     * @param {string} url
-     * @returns {?string}
-     */
-    CounterResolver.prototype.getFragment = url => {
-        const r = url.match(/^[^#]*#(.*)$/);
-        return r ? r[1] : null;
-    };
-
-    /**
-     * @private
-     * @param {string} url
-     * @returns {string}
-     */
-    CounterResolver.prototype.getTransformedId = function(url) {
-        let transformedId = this.counterStore.documentURLTransformer.transformURL(
-            adapt.base.resolveURL(url, this.baseURL), this.baseURL);
-        if (transformedId.charAt(0) === "#") {
-            transformedId = transformedId.substring(1);
-        }
-        return transformedId;
-    };
-
-    /**
-     * @override
-     */
-    CounterResolver.prototype.getPageCounterVal = function(name, format) {
-        const self = this;
-        function getCounterNumber() {
-            const values = self.counterStore.currentPageCounters[name];
-            return (values && values.length) ? values[values.length - 1] : null;
-        }
-        const expr = new adapt.expr.Native(this.pageScope, () => format(getCounterNumber()), "page-counter-" + name);
-
-        function arrayFormat(arr) { return format(arr[0]); }
-        this.counterStore.registerPageCounterExpr(name, arrayFormat, expr);
-
-        return expr;
-    };
-
-    /**
-     * @override
-     */
-    CounterResolver.prototype.getPageCountersVal = function(name, format) {
-        const self = this;
-        function getCounterNumbers() {
-            return self.counterStore.currentPageCounters[name] || [];
-        }
-        const expr = new adapt.expr.Native(this.pageScope, () => format(getCounterNumbers()), "page-counters-" + name);
-        this.counterStore.registerPageCounterExpr(name, format, expr);
-        return expr;
-    };
-
-    /**
-     * Returns (non page-based) counter values for an element with the specified ID.
-     * Returns null if the style of the elements has not been calculated yet (i.e. the element does not exit or it is in a source document which is not loaded yet).
-     * @private
-     * @param {?string} id Original ID value
-     * @param {string} transformedId ID transformed by DocumentURLTransformer to handle a reference across multiple source documents
-     * @param {boolean} lookForElement If true, look ahead for an element with the ID in the current source document when such an element has not appeared yet. Do not set to true during Styler.styleUntil is being called, since in that case Styler.styleUntil can be called again and may lead to internal inconsistency.
-     * @returns {?adapt.csscasc.CounterValues}
-     */
-    CounterResolver.prototype.getTargetCounters = function(id, transformedId, lookForElement) {
-        let targetCounters = this.counterStore.countersById[transformedId];
-        if (!targetCounters && lookForElement && id) {
-            this.styler.styleUntilIdIsReached(id);
-            targetCounters = this.counterStore.countersById[transformedId];
-        }
-        return targetCounters || null;
-    };
-
-    /**
-     * Returns page-based counter values for an element with the specified ID.
-     * Returns null if the element has not been laid out yet.
-     * @private
-     * @param {string} transformedId ID transformed by DocumentURLTransformer to handle a reference across multiple source documents
-     * @returns {?adapt.csscasc.CounterValues}
-     */
-    CounterResolver.prototype.getTargetPageCounters = function(transformedId) {
-        if (this.counterStore.currentPage.elementsById[transformedId]) {
-            return this.counterStore.currentPageCounters;
-        } else {
-            return this.counterStore.pageCountersById[transformedId] || null;
-        }
-    };
-
-    /**
-     * @override
-     */
-    CounterResolver.prototype.getTargetCounterVal = function(url, name, format) {
-        const id = this.getFragment(url);
-        const transformedId = this.getTransformedId(url);
-
-        // Since this method is executed during Styler.styleUntil is being called, set false to lookForElement argument.
-        let counters = this.getTargetCounters(id, transformedId, false);
-        if (counters && counters[name]) {
-            // Since an element-based counter is defined, any page-based counter is obscured even if it exists.
-            const countersOfName = counters[name];
-            return new adapt.expr.Const(this.rootScope, format(countersOfName[countersOfName.length - 1] || null));
+    class CounterResolver {
+        constructor(counterStore, baseURL, rootScope, pageScope) {
+            /** @const */ this.counterStore = counterStore;
+            /** @const */ this.baseURL = baseURL;
+            /** @const */ this.rootScope = rootScope;
+            /** @const */ this.pageScope = pageScope;
+            /** @type {?adapt.cssstyler.Styler} */ this.styler = null;
         }
 
-        const self = this;
-        return new adapt.expr.Native(this.pageScope, () => {
-            // Since This block is evaluated during layout, lookForElement argument can be set to true.
-            counters = self.getTargetCounters(id, transformedId, true);
-            if (counters) {
-                if (counters[name]) {
-                    // Since an element-based counter is defined, any page-based counter is obscured even if it exists.
-                    const countersOfName = counters[name];
-                    return format(countersOfName[countersOfName.length - 1] || null);
-                } else {
-                    const pageCounters = self.getTargetPageCounters(transformedId);
-                    if (pageCounters) {
-                        // The target element has already been laid out.
-                        self.counterStore.resolveReference(transformedId);
-                        if (pageCounters[name]) {
-                            const pageCountersOfName = pageCounters[name];
-                            return format(pageCountersOfName[pageCountersOfName.length - 1] || null);
-                        } else {
-                            // No corresponding counter with the name.
-                            return format(0);
-                        }
+        /**
+         *
+         * @param {!adapt.cssstyler.Styler} styler
+         */
+        setStyler(styler) {
+            this.styler = styler;
+        }
+
+        /**
+         * @private
+         * @param {string} url
+         * @returns {?string}
+         */
+        getFragment(url) {
+            const r = url.match(/^[^#]*#(.*)$/);
+            return r ? r[1] : null;
+        }
+
+        /**
+         * @private
+         * @param {string} url
+         * @returns {string}
+         */
+        getTransformedId(url) {
+            let transformedId = this.counterStore.documentURLTransformer.transformURL(
+                adapt.base.resolveURL(url, this.baseURL), this.baseURL);
+            if (transformedId.charAt(0) === "#") {
+                transformedId = transformedId.substring(1);
+            }
+            return transformedId;
+        }
+
+        /**
+         * @override
+         */
+        getPageCounterVal(name, format) {
+            const self = this;
+            function getCounterNumber() {
+                const values = self.counterStore.currentPageCounters[name];
+                return (values && values.length) ? values[values.length - 1] : null;
+            }
+            const expr = new adapt.expr.Native(this.pageScope, () => format(getCounterNumber()), "page-counter-" + name);
+
+            function arrayFormat(arr) { return format(arr[0]); }
+            this.counterStore.registerPageCounterExpr(name, arrayFormat, expr);
+
+            return expr;
+        }
+
+        /**
+         * @override
+         */
+        getPageCountersVal(name, format) {
+            const self = this;
+            function getCounterNumbers() {
+                return self.counterStore.currentPageCounters[name] || [];
+            }
+            const expr = new adapt.expr.Native(this.pageScope, () => format(getCounterNumbers()), "page-counters-" + name);
+            this.counterStore.registerPageCounterExpr(name, format, expr);
+            return expr;
+        }
+
+        /**
+         * Returns (non page-based) counter values for an element with the specified ID.
+         * Returns null if the style of the elements has not been calculated yet (i.e. the element does not exit or it is in a source document which is not loaded yet).
+         * @private
+         * @param {?string} id Original ID value
+         * @param {string} transformedId ID transformed by DocumentURLTransformer to handle a reference across multiple source documents
+         * @param {boolean} lookForElement If true, look ahead for an element with the ID in the current source document when such an element has not appeared yet. Do not set to true during Styler.styleUntil is being called, since in that case Styler.styleUntil can be called again and may lead to internal inconsistency.
+         * @returns {?adapt.csscasc.CounterValues}
+         */
+        getTargetCounters(id, transformedId, lookForElement) {
+            let targetCounters = this.counterStore.countersById[transformedId];
+            if (!targetCounters && lookForElement && id) {
+                this.styler.styleUntilIdIsReached(id);
+                targetCounters = this.counterStore.countersById[transformedId];
+            }
+            return targetCounters || null;
+        }
+
+        /**
+         * Returns page-based counter values for an element with the specified ID.
+         * Returns null if the element has not been laid out yet.
+         * @private
+         * @param {string} transformedId ID transformed by DocumentURLTransformer to handle a reference across multiple source documents
+         * @returns {?adapt.csscasc.CounterValues}
+         */
+        getTargetPageCounters(transformedId) {
+            if (this.counterStore.currentPage.elementsById[transformedId]) {
+                return this.counterStore.currentPageCounters;
+            } else {
+                return this.counterStore.pageCountersById[transformedId] || null;
+            }
+        }
+
+        /**
+         * @override
+         */
+        getTargetCounterVal(url, name, format) {
+            const id = this.getFragment(url);
+            const transformedId = this.getTransformedId(url);
+
+            // Since this method is executed during Styler.styleUntil is being called, set false to lookForElement argument.
+            let counters = this.getTargetCounters(id, transformedId, false);
+            if (counters && counters[name]) {
+                // Since an element-based counter is defined, any page-based counter is obscured even if it exists.
+                const countersOfName = counters[name];
+                return new adapt.expr.Const(this.rootScope, format(countersOfName[countersOfName.length - 1] || null));
+            }
+
+            const self = this;
+            return new adapt.expr.Native(this.pageScope, () => {
+                // Since This block is evaluated during layout, lookForElement argument can be set to true.
+                counters = self.getTargetCounters(id, transformedId, true);
+                if (counters) {
+                    if (counters[name]) {
+                        // Since an element-based counter is defined, any page-based counter is obscured even if it exists.
+                        const countersOfName = counters[name];
+                        return format(countersOfName[countersOfName.length - 1] || null);
                     } else {
-                        // The target element has not been laid out yet.
-                        self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
-                        return "??"; // TODO more reasonable placeholder?
+                        const pageCounters = self.getTargetPageCounters(transformedId);
+                        if (pageCounters) {
+                            // The target element has already been laid out.
+                            self.counterStore.resolveReference(transformedId);
+                            if (pageCounters[name]) {
+                                const pageCountersOfName = pageCounters[name];
+                                return format(pageCountersOfName[pageCountersOfName.length - 1] || null);
+                            } else {
+                                // No corresponding counter with the name.
+                                return format(0);
+                            }
+                        } else {
+                            // The target element has not been laid out yet.
+                            self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
+                            return "??"; // TODO more reasonable placeholder?
+                        }
                     }
+                } else {
+                    // The style of target element has not been calculated yet.
+                    // (The element is in another source document that is not parsed yet)
+                    self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
+                    return "??"; // TODO more reasonable placeholder?
                 }
-            } else {
-                // The style of target element has not been calculated yet.
-                // (The element is in another source document that is not parsed yet)
-                self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
-                return "??"; // TODO more reasonable placeholder?
-            }
-        }, "target-counter-" + name + "-of-" + url);
-    };
+            }, "target-counter-" + name + "-of-" + url);
+        }
 
-    /**
-     * @override
-     */
-    CounterResolver.prototype.getTargetCountersVal = function(url, name, format) {
-        const id = this.getFragment(url);
-        const transformedId = this.getTransformedId(url);
-        const self = this;
-        return new adapt.expr.Native(this.pageScope, () => {
-            const pageCounters = self.getTargetPageCounters(transformedId);
-            if (!pageCounters) {
-                // The target element has not been laid out yet.
-                self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
-                return "??"; // TODO more reasonable placeholder?
-            } else {
-                self.counterStore.resolveReference(transformedId);
-                const pageCountersOfName = pageCounters[name] || [];
-                const elementCounters = self.getTargetCounters(id, transformedId, true);
-                const elementCountersOfName = elementCounters[name] || [];
-                return format(pageCountersOfName.concat(elementCountersOfName));
-            }
-        }, "target-counters-" + name + "-of-" + url);
-    };
+        /**
+         * @override
+         */
+        getTargetCountersVal(url, name, format) {
+            const id = this.getFragment(url);
+            const transformedId = this.getTransformedId(url);
+            const self = this;
+            return new adapt.expr.Native(this.pageScope, () => {
+                const pageCounters = self.getTargetPageCounters(transformedId);
+                if (!pageCounters) {
+                    // The target element has not been laid out yet.
+                    self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
+                    return "??"; // TODO more reasonable placeholder?
+                } else {
+                    self.counterStore.resolveReference(transformedId);
+                    const pageCountersOfName = pageCounters[name] || [];
+                    const elementCounters = self.getTargetCounters(id, transformedId, true);
+                    const elementCountersOfName = elementCounters[name] || [];
+                    return format(pageCountersOfName.concat(elementCountersOfName));
+                }
+            }, "target-counters-" + name + "-of-" + url);
+        }
+    }
 
     /**
      * @param {!adapt.base.DocumentURLTransformer} documentURLTransformer
@@ -650,35 +653,37 @@ goog.scope(() => {
      * @constructor
      * @implements {adapt.layout.LayoutConstraint}
      */
-    function LayoutConstraint(counterStore, pageIndex) {
-        /** @const */ this.counterStore = counterStore;
-        /** @const */ this.pageIndex = pageIndex;
-    }
+    class LayoutConstraint {
+        constructor(counterStore, pageIndex) {
+            /** @const */ this.counterStore = counterStore;
+            /** @const */ this.pageIndex = pageIndex;
+        }
 
-    /**
-     * @override
-     */
-    LayoutConstraint.prototype.allowLayout = function(nodeContext) {
-        if (!nodeContext || nodeContext.after) {
-            return true;
+        /**
+         * @override
+         */
+        allowLayout(nodeContext) {
+            if (!nodeContext || nodeContext.after) {
+                return true;
+            }
+            const viewNode = nodeContext.viewNode;
+            if (!viewNode || viewNode.nodeType !== 1) {
+                return true;
+            }
+            const id = viewNode.getAttribute("id") || viewNode.getAttribute("name");
+            if (!id) {
+                return true;
+            }
+            if (!this.counterStore.resolvedReferences[id] && !this.counterStore.unresolvedReferences[id]) {
+                return true;
+            }
+            const pageIndex = this.counterStore.pageIndicesById[id];
+            if (!pageIndex) {
+                return true;
+            }
+            return this.pageIndex >= pageIndex.pageIndex;
         }
-        const viewNode = nodeContext.viewNode;
-        if (!viewNode || viewNode.nodeType !== 1) {
-            return true;
-        }
-        const id = viewNode.getAttribute("id") || viewNode.getAttribute("name");
-        if (!id) {
-            return true;
-        }
-        if (!this.counterStore.resolvedReferences[id] && !this.counterStore.unresolvedReferences[id]) {
-            return true;
-        }
-        const pageIndex = this.counterStore.pageIndicesById[id];
-        if (!pageIndex) {
-            return true;
-        }
-        return this.pageIndex >= pageIndex.pageIndex;
-    };
+    }
 
     /**
      * @param {number} pageIndex
