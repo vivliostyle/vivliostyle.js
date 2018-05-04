@@ -387,7 +387,7 @@ adapt.pm.toExprBool = (scope, val, def) => {
 /**
  * @interface
  */
-adapt.pm.InstanceHolder = () => {};
+adapt.pm.InstanceHolder = function() {};
 
 /**
  * @param {string} key

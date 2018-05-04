@@ -314,7 +314,7 @@ adapt.csscasc.cascadeValues = (context, tv, av) => {
  * @dict
  * @constructor
  */
-adapt.csscasc.ElementStyle = () => {};
+adapt.csscasc.ElementStyle = function() {};
 
 /**
  * @typedef {Object.<string,adapt.csscasc.ElementStyle>}
@@ -632,7 +632,7 @@ adapt.csscasc.ActionTable;
 /**
  * @constructor
  */
-adapt.csscasc.CascadeAction = () => {};
+adapt.csscasc.CascadeAction = function() {};
 
 /**
  * @param {adapt.csscasc.CascadeInstance} cascade
@@ -1519,7 +1519,7 @@ adapt.csscasc.NegateActionsSet.prototype.getPriority = function() {
  * controls a "named condition" (which is a count associated with a name).
  * @interface
  */
-adapt.csscasc.ConditionItem = () => {};
+adapt.csscasc.ConditionItem = function() {};
 
 /**
  * Returns a "fresh" copy of this item. May be this if immutable.
@@ -1886,7 +1886,7 @@ adapt.csscasc.CounterValues;
 /**
  * @interface
  */
-adapt.csscasc.CounterListener = () => {};
+adapt.csscasc.CounterListener = function() {};
 
 /**
  * @param {string} id
@@ -1902,7 +1902,7 @@ adapt.csscasc.CounterListener.prototype.getExprContentListener = () => {};
 /**
  * @interface
  */
-adapt.csscasc.CounterResolver = () => {};
+adapt.csscasc.CounterResolver = function() {};
 
 /**
  * Returns an adapt.expr.Val, whose value is calculated at the layout time by retrieving the innermost page-based counter (null if it does not exist) by its name and formatting the value into a string.

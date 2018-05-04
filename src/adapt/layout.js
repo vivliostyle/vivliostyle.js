@@ -138,7 +138,7 @@ adapt.layout.calculateEdge = (nodeContext, clientLayout, extraOffset, vertical) 
  * Processor doing some special layout (e.g. table layout)
  * @interface
  */
-adapt.layout.LayoutProcessor = () => {};
+adapt.layout.LayoutProcessor = function() {};
 
 /**
  * Do actual layout in the column starting from given NodeContext.
@@ -195,7 +195,7 @@ adapt.layout.LayoutProcessor.prototype.clearOverflownViewNodes = (column, parent
  * Resolver finding an appropriate LayoutProcessor given a formatting context
  * @constructor
  */
-adapt.layout.LayoutProcessorResolver = () => {};
+adapt.layout.LayoutProcessorResolver = function() {};
 
 /**
  * Find LayoutProcessor corresponding to given formatting context.
@@ -218,7 +218,7 @@ adapt.layout.LayoutProcessorResolver.prototype.find = formattingContext => {
  * Represents a constraint on layout
  * @interface
  */
-adapt.layout.LayoutConstraint = () => {};
+adapt.layout.LayoutConstraint = function() {};
 
 /**
  * Returns if this constraint allows the node context to be laid out at the current position.
@@ -249,7 +249,7 @@ adapt.layout.AllLayoutConstraint.prototype.allowLayout = function(nodeContext) {
  * Represents constraints on laying out fragments
  * @interface
  */
-adapt.layout.FragmentLayoutConstraint = () => {};
+adapt.layout.FragmentLayoutConstraint = function() {};
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
@@ -295,7 +295,7 @@ adapt.layout.FragmentLayoutConstraint.prototype.getPriorityOfFinishBreak = () =>
  * Potential breaking position.
  * @interface
  */
-adapt.layout.BreakPosition = () => {};
+adapt.layout.BreakPosition = function() {};
 
 /**
  * @param {!adapt.layout.Column} column
@@ -325,7 +325,7 @@ adapt.layout.BreakPosition.prototype.breakPositionChosen = column => {};
  * @constructor
  * @implements {adapt.layout.BreakPosition}
  */
-adapt.layout.AbstractBreakPosition = () => {};
+adapt.layout.AbstractBreakPosition = function() {};
 
 /**
  * @abstract
@@ -2072,7 +2072,7 @@ adapt.layout.Column.prototype.resolveTextNodeBreaker = nodeContext => {
 * breaking point resolver for Text Node.
 * @constructor
  */
-adapt.layout.TextNodeBreaker = () => {};
+adapt.layout.TextNodeBreaker = function() {};
 
 /**
  * @param {Text} textNode
@@ -3532,7 +3532,7 @@ adapt.layout.DefaultLayoutMode.prototype.postLayout = (positionAfter, initialPos
  * @constructor
  * @implements {adapt.layout.LayoutProcessor}
  */
-adapt.layout.BlockLayoutProcessor = () => {};
+adapt.layout.BlockLayoutProcessor = function() {};
 
 /**
  * @override

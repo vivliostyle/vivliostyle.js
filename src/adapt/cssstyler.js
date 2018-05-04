@@ -120,7 +120,7 @@ adapt.cssstyler.SlipMap.prototype.fixedBySlipped = function(slipped) {
 /**
  * @interface
  */
-adapt.cssstyler.FlowListener = () => {};
+adapt.cssstyler.FlowListener = function() {};
 
 /**
  * @param {adapt.vtree.FlowChunk} flowChunk
@@ -132,7 +132,7 @@ adapt.cssstyler.FlowListener.prototype.encounteredFlowChunk = (flowChunk, flow) 
 /**
  * @interface
  */
-adapt.cssstyler.AbstractStyler = () => {};
+adapt.cssstyler.AbstractStyler = function() {};
 
 /**
  * @param {Element} element

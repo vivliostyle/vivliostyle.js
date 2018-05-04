@@ -1581,7 +1581,7 @@ goog.scope(() => {
     /**
      * @interface
      */
-    vivliostyle.pagefloat.PageFloatLayoutStrategy = () => {};
+    vivliostyle.pagefloat.PageFloatLayoutStrategy = function() {};
     /** @const */ var PageFloatLayoutStrategy = vivliostyle.pagefloat.PageFloatLayoutStrategy;
 
     /**
@@ -1642,7 +1642,7 @@ goog.scope(() => {
     /**
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloatLayoutStrategyResolver = () => {};
+    vivliostyle.pagefloat.PageFloatLayoutStrategyResolver = function() {};
     /** @const */ var PageFloatLayoutStrategyResolver =
         vivliostyle.pagefloat.PageFloatLayoutStrategyResolver;
 
@@ -1685,7 +1685,7 @@ goog.scope(() => {
      * @constructor
      * @implements {PageFloatLayoutStrategy}
      */
-    vivliostyle.pagefloat.NormalPageFloatLayoutStrategy = () => {};
+    vivliostyle.pagefloat.NormalPageFloatLayoutStrategy = function() {};
     /** @const */ var NormalPageFloatLayoutStrategy =
         vivliostyle.pagefloat.NormalPageFloatLayoutStrategy;
 

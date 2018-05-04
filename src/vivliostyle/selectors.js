@@ -29,7 +29,7 @@ goog.scope(() => {
     /**
      * @interface
      */
-    vivliostyle.selectors.Matcher = () => {};
+    vivliostyle.selectors.Matcher = function() {};
     /** @const */ var Matcher = vivliostyle.selectors.Matcher;
 
     /**
@@ -92,7 +92,7 @@ goog.scope(() => {
     /**
      * @constructor
      */
-    vivliostyle.selectors.MatcherBuilder = () => {};
+    vivliostyle.selectors.MatcherBuilder = function() {};
     /** @const */ var MatcherBuilder = vivliostyle.selectors.MatcherBuilder;
 
     /**

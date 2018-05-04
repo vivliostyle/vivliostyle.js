@@ -949,7 +949,7 @@ vivliostyle.page.PageRuleMasterInstance.prototype.adjustPageLayout = function(co
  * @private
  * @interface
  */
-vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam = () => {};
+vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam = function() {};
 
 /**
  *  @returns {boolean}

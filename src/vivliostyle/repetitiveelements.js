@@ -117,7 +117,7 @@ goog.scope(() => {
     /**
      * @interface
      */
-    vivliostyle.repetitiveelements.ElementsOffset = () => {};
+    vivliostyle.repetitiveelements.ElementsOffset = function() {};
     /** @const */ var ElementsOffset = vivliostyle.repetitiveelements.ElementsOffset;
 
     /**
@@ -734,7 +734,7 @@ goog.scope(() => {
      * @implements {adapt.layout.LayoutProcessor}
      * @extends {adapt.layout.BlockLayoutProcessor}
      */
-    vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutProcessor = () => {};
+    vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutProcessor = function() {};
     /** @const */ var RepetitiveElementsOwnerLayoutProcessor = vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutProcessor;
     goog.inherits(RepetitiveElementsOwnerLayoutProcessor, BlockLayoutProcessor);
 

@@ -24,7 +24,7 @@ goog.require('adapt.base');
 /**
  * @interface
  */
-adapt.csstok.TokenizerHandler = () => {};
+adapt.csstok.TokenizerHandler = function() {};
 
 /**
  * @param {string} mnemonics

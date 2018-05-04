@@ -122,7 +122,7 @@ adapt.base.resolveURL = (relURL, baseURL) => {
 /**
  * @interface
  */
-adapt.base.DocumentURLTransformer = () => {};
+adapt.base.DocumentURLTransformer = function() {};
 
 /**
  * @param {string} fragment
@@ -212,7 +212,7 @@ adapt.base.asString = v => {
 /**
  * @interface
  */
-adapt.base.Comparable = () => {};
+adapt.base.Comparable = function() {};
 
 /**
  * @param {!adapt.base.Comparable} other

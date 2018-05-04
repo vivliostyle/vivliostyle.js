@@ -34,7 +34,7 @@ adapt.css.nameTable = {};
 /**
  * @constructor
  */
-adapt.css.Visitor = () => {
+adapt.css.Visitor = function() {
 };
 
 /**
@@ -261,7 +261,7 @@ adapt.css.FilterVisitor.prototype.visitExpr = expr => expr;
 /**
  * @constructor
  */
-adapt.css.Val = () => {
+adapt.css.Val = function() {
 };
 
 /**

@@ -1267,7 +1267,7 @@ goog.scope(() => {
      * @constructor
      * @implements {adapt.layout.LayoutProcessor}
      */
-    vivliostyle.table.TableLayoutProcessor = () => {};
+    vivliostyle.table.TableLayoutProcessor = function() {};
     /** @const */ var TableLayoutProcessor = vivliostyle.table.TableLayoutProcessor;
 
     /**

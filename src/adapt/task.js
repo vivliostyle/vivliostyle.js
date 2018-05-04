@@ -27,7 +27,7 @@ goog.provide('adapt.task');
  * External timer. Only needed for testing.
  * @interface
  */
-adapt.task.Timer = () => {};
+adapt.task.Timer = function() {};
 
 /**
  * @return {number} current time in milliseconds.
@@ -56,7 +56,7 @@ adapt.task.Timer.prototype.clearTimeout = token => {};
  * @template T
  * @interface
  */
-adapt.task.Result = () => {};
+adapt.task.Result = function() {};
 
 /**
  * Call the given function when asynchronous function is finished. Callback
@@ -208,7 +208,7 @@ adapt.task.FrameState = {
  * @constructor
  * @implements {adapt.task.Timer}
  */
-adapt.task.TimerImpl = () => {};
+adapt.task.TimerImpl = function() {};
 
 /**
  * @override

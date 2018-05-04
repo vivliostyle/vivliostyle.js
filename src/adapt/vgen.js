@@ -91,7 +91,7 @@ adapt.vgen.CustomRenderer;
 /**
  * @interface
  */
-adapt.vgen.CustomRendererFactory = () => {};
+adapt.vgen.CustomRendererFactory = function() {};
 
 /**
  * @param {adapt.xmldoc.XMLDocHolder} xmldoc
@@ -131,7 +131,7 @@ adapt.vgen.initIFrame = iframe => {
 /**
  * @interface
  */
-adapt.vgen.StylerProducer = () => {};
+adapt.vgen.StylerProducer = function() {};
 
 /**
  * @param {adapt.xmldoc.XMLDocHolder} xmldoc

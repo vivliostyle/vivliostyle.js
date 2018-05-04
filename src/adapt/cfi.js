@@ -112,7 +112,7 @@ adapt.cfi.parseExt = extstr => {
 /**
  * @interface
  */
-adapt.cfi.Step = () => {};
+adapt.cfi.Step = function() {};
 
 /**
  * @param {adapt.base.StringBuffer} sb
@@ -130,7 +130,7 @@ adapt.cfi.Step.prototype.applyTo = pos => {};
  * @constructor
  * @implements {adapt.cfi.Step}
  */
-adapt.cfi.RefStep = () => {};
+adapt.cfi.RefStep = function() {};
 
 /**
  * @param {adapt.base.StringBuffer} sb

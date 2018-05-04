@@ -411,7 +411,7 @@ adapt.vtree.clientrectDecreasingRight = (r1, r2) => r2.right - r1.right;
  * browser.
  * @interface
  */
-adapt.vtree.ClientLayout = () => {};
+adapt.vtree.ClientLayout = function() {};
 
 /**
  * @param {Range} range
@@ -435,7 +435,7 @@ adapt.vtree.ClientLayout.prototype.getElementComputedStyle = element => {};
  * Styling, creating a single node's view, etc.
  * @interface
  */
-adapt.vtree.LayoutContext = () => {};
+adapt.vtree.LayoutContext = function() {};
 
 /**
  * Creates a functionally equivalent, but uninitialized layout context,
@@ -545,7 +545,7 @@ adapt.vtree.LayoutContext.prototype.dispatchEvent = evt => {};
  * Formatting context.
  * @interface
  */
-adapt.vtree.FormattingContext = () => {};
+adapt.vtree.FormattingContext = function() {};
 
 /**
  * @return {string}

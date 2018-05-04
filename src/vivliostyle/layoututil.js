@@ -31,7 +31,7 @@ goog.scope(() => {
     /**
      * @constructor
      */
-    vivliostyle.layoututil.LayoutIteratorStrategy = () => {};
+    vivliostyle.layoututil.LayoutIteratorStrategy = function() {};
     /** @const */ var LayoutIteratorStrategy = vivliostyle.layoututil.LayoutIteratorStrategy;
 
     /**
@@ -561,7 +561,7 @@ goog.scope(() => {
     /**
      * @interface
      */
-    vivliostyle.layoututil.LayoutMode = () => {};
+    vivliostyle.layoututil.LayoutMode = function() {};
     /** @const */ var LayoutMode = vivliostyle.layoututil.LayoutMode;
 
     /**

@@ -95,7 +95,7 @@ goog.scope(() => {
      * @constructor
      * @implements {vivliostyle.pagefloat.PageFloatLayoutStrategy}
      */
-    vivliostyle.footnote.FootnoteLayoutStrategy = () => {};
+    vivliostyle.footnote.FootnoteLayoutStrategy = function() {};
     /** @const */ var FootnoteLayoutStrategy = vivliostyle.footnote.FootnoteLayoutStrategy;
 
     /**

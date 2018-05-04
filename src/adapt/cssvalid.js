@@ -32,7 +32,7 @@ goog.require('adapt.expr');
 /**
  * @interface
  */
-adapt.cssvalid.PropertyReceiver = () => {};
+adapt.cssvalid.PropertyReceiver = function() {};
 
 /**
  * @param {string} name
@@ -992,7 +992,7 @@ adapt.cssvalid.FuncValidator.prototype.visitFunc = function(func) {
 /**
  * @constructor
  */
-adapt.cssvalid.ShorthandSyntaxNode = () => {};
+adapt.cssvalid.ShorthandSyntaxNode = function() {};
 
 /**
  * @param {Array.<adapt.css.Val>} values
