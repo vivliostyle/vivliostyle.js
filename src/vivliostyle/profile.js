@@ -121,9 +121,9 @@ goog.scope(() => {
                 const t = stamps[i];
                 st += name;
                 if (l > 1) {
-                    st += "(" + i + ")";
+                    st += `(${i})`;
                 }
-                st += " => start: " + t["start"] + ", end: " + t["end"] + ", duration: " + (t["end"] - t["start"]) + "\n";
+                st += ` => start: ${t["start"]}, end: ${t["end"]}, duration: ${t["end"] - t["start"]}\n`;
             }
         });
         vivliostyle.logging.logger.info(st);

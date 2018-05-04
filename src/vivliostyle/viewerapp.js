@@ -267,7 +267,7 @@ function setViewportSize(width, height, size, orientation, config) {
         if (width && height) {
             pageSpec = size;
             if (orientation === "landscape") {
-                pageSpec = pageSpec ? pageSpec + " landscape" : null;
+                pageSpec = pageSpec ? `${pageSpec} landscape` : null;
                 // swap
                 const tmp = width;
                 width = height;
@@ -275,13 +275,13 @@ function setViewportSize(width, height, size, orientation, config) {
             }
         }
     } else {
-        pageSpec = width + " " + height;
+        pageSpec = `${width} ${height}`;
     }
 
     if (width && height) {
         config.viewport = {"width": width, "height": height};
         const s = document.createElement("style");
-        s.textContent = "@page { size: " + pageSpec + "; margin: 0; }";
+        s.textContent = `@page { size: ${pageSpec}; margin: 0; }`;
         document.head.appendChild(s);
     }
 }

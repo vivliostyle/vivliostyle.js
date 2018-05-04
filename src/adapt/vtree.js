@@ -255,7 +255,7 @@ adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
  * @param {number} scale Factor to which the page will be scaled.
  */
 adapt.vtree.Page.prototype.zoom = function(scale) {
-    adapt.base.setCSSProperty(this.container, "transform", "scale(" + scale + ")");
+    adapt.base.setCSSProperty(this.container, "transform", `scale(${scale})`);
 };
 
 /**
@@ -325,7 +325,7 @@ adapt.vtree.canIgnore = (node, whitespace) => {
         case adapt.vtree.Whitespace.PRESERVE:
             return text.length == 0;
     }
-    throw new Error("Unexpected whitespace: " + whitespace);
+    throw new Error(`Unexpected whitespace: ${whitespace}`);
 };
 
 /**
@@ -1468,8 +1468,8 @@ adapt.vtree.Container.prototype.copyFrom = function(other) {
 adapt.vtree.Container.prototype.setVerticalPosition = function(top, height) {
     this.top = top;
     this.height = height;
-    adapt.base.setCSSProperty(this.element, "top", top + "px");
-    adapt.base.setCSSProperty(this.element, "height", height + "px");
+    adapt.base.setCSSProperty(this.element, "top", `${top}px`);
+    adapt.base.setCSSProperty(this.element, "height", `${height}px`);
 };
 
 /**
@@ -1480,8 +1480,8 @@ adapt.vtree.Container.prototype.setVerticalPosition = function(top, height) {
 adapt.vtree.Container.prototype.setHorizontalPosition = function(left, width) {
     this.left = left;
     this.width = width;
-    adapt.base.setCSSProperty(this.element, "left", left + "px");
-    adapt.base.setCSSProperty(this.element, "width", width + "px");
+    adapt.base.setCSSProperty(this.element, "left", `${left}px`);
+    adapt.base.setCSSProperty(this.element, "width", `${width}px`);
 };
 
 /**

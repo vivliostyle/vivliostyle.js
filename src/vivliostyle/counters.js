@@ -179,7 +179,7 @@ goog.scope(() => {
                 const values = self.counterStore.currentPageCounters[name];
                 return (values && values.length) ? values[values.length - 1] : null;
             }
-            const expr = new adapt.expr.Native(this.pageScope, () => format(getCounterNumber()), "page-counter-" + name);
+            const expr = new adapt.expr.Native(this.pageScope, () => format(getCounterNumber()), `page-counter-${name}`);
 
             function arrayFormat(arr) { return format(arr[0]); }
             this.counterStore.registerPageCounterExpr(name, arrayFormat, expr);
@@ -195,7 +195,7 @@ goog.scope(() => {
             function getCounterNumbers() {
                 return self.counterStore.currentPageCounters[name] || [];
             }
-            const expr = new adapt.expr.Native(this.pageScope, () => format(getCounterNumbers()), "page-counters-" + name);
+            const expr = new adapt.expr.Native(this.pageScope, () => format(getCounterNumbers()), `page-counters-${name}`);
             this.counterStore.registerPageCounterExpr(name, format, expr);
             return expr;
         }
@@ -281,7 +281,7 @@ goog.scope(() => {
                     self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
                     return "??"; // TODO more reasonable placeholder?
                 }
-            }, "target-counter-" + name + "-of-" + url);
+            }, `target-counter-${name}-of-${url}`);
         }
 
         /**
@@ -304,7 +304,7 @@ goog.scope(() => {
                     const elementCountersOfName = elementCounters[name] || [];
                     return format(pageCountersOfName.concat(elementCountersOfName));
                 }
-            }, "target-counters-" + name + "-of-" + url);
+            }, `target-counters-${name}-of-${url}`);
         }
     }
 
@@ -637,7 +637,7 @@ goog.scope(() => {
      * @param {!adapt.vgen.Viewport} viewport
      */
     vivliostyle.counters.CounterStore.prototype.finishLastPage = function(viewport) {
-        const nodes = viewport.root.querySelectorAll("[" + vivliostyle.counters.PAGES_COUNTER_ATTR + "]");
+        const nodes = viewport.root.querySelectorAll(`[${vivliostyle.counters.PAGES_COUNTER_ATTR}]`);
         const pages = this.currentPageCounters["page"][0];
         Array.from(nodes).forEach(function(node) {
             const key = node.getAttribute(vivliostyle.counters.PAGES_COUNTER_ATTR);

@@ -103,7 +103,7 @@ goog.scope(() => {
             return new NthFragmentMatcher(elementOffset,
                 parseInt(strs[1], 10), parseInt(strs[2], 10));
         } else {
-            goog.asserts.fail("unknown view condition. condition=" + viewCondition);
+            goog.asserts.fail(`unknown view condition. condition=${viewCondition}`);
             return null;
         }
     };

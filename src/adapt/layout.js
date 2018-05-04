@@ -213,7 +213,7 @@ adapt.layout.LayoutProcessorResolver.prototype.find = formattingContext => {
             return processor;
         }
     }
-    throw new Error("No processor found for a formatting context: " + formattingContext.getName());
+    throw new Error(`No processor found for a formatting context: ${formattingContext.getName()}`);
 };
 
 /**
@@ -908,14 +908,14 @@ adapt.layout.Column.prototype.createFloat = function(ref, side, width,
         if (height >= this.height) {
             height -= 0.1;
         }
-        adapt.base.setCSSProperty(div, "height", width + "px");
-        adapt.base.setCSSProperty(div, "width", height + "px");
+        adapt.base.setCSSProperty(div, "height", `${width}px`);
+        adapt.base.setCSSProperty(div, "width", `${height}px`);
     } else {
         if (width >= this.width) {
             width -= 0.1;
         }
-        adapt.base.setCSSProperty(div, "width", width + "px");
-        adapt.base.setCSSProperty(div, "height", height + "px");
+        adapt.base.setCSSProperty(div, "width", `${width}px`);
+        adapt.base.setCSSProperty(div, "height", `${height}px`);
     }
     adapt.base.setCSSProperty(div, "float", side);
     adapt.base.setCSSProperty(div, "clear", side);
@@ -1212,8 +1212,8 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
             floatBox = adapt.geom.unrotateBox(floatHorBox);
         }
         const insets = self.getComputedInsets(element);
-        adapt.base.setCSSProperty(element, "width", floatBox.x2 - floatBox.x1 - insets.left - insets.right + "px");
-        adapt.base.setCSSProperty(element, "height", floatBox.y2 - floatBox.y1 - insets.top - insets.bottom + "px");
+        adapt.base.setCSSProperty(element, "width", `${floatBox.x2 - floatBox.x1 - insets.left - insets.right}px`);
+        adapt.base.setCSSProperty(element, "height", `${floatBox.y2 - floatBox.y1 - insets.top - insets.bottom}px`);
         adapt.base.setCSSProperty(element, "position", "absolute");
         goog.asserts.assert(nodeContext.display);
         adapt.base.setCSSProperty(element, "display", nodeContext.display);
@@ -1249,13 +1249,13 @@ adapt.layout.Column.prototype.layoutFloat = function(nodeContext) {
 
         if (containingBlockForAbsolute ? containingBlockForAbsolute.vertical : self.vertical) {
             adapt.base.setCSSProperty(element, "right",
-                (offsets.right - floatBox.x2) + "px");
+                `${offsets.right - floatBox.x2}px`);
         } else {
             adapt.base.setCSSProperty(element, "left",
-                (floatBox.x1 - offsets.left) + "px");
+                `${floatBox.x1 - offsets.left}px`);
         }
         adapt.base.setCSSProperty(element, "top",
-            (floatBox.y1 - offsets.top) + "px");
+            `${floatBox.y1 - offsets.top}px`);
         if (nodeContext.clearSpacer) {
             nodeContext.clearSpacer.parentNode.removeChild(nodeContext.clearSpacer);
             nodeContext.clearSpacer = null;
@@ -1737,7 +1737,7 @@ adapt.layout.Column.prototype.createJustificationAdjustmentElement = function(in
     }
 
     const padding = vertical ? rightPos.top - leftPos.top : rightPos.left - leftPos.left;
-    const paddingStr = padding >= 1 ? (padding - 1) + "px" : "100%";
+    const paddingStr = padding >= 1 ? `${padding - 1}px` : "100%";
     if (vertical) {
         span.style.paddingTop = paddingStr;
     } else {
@@ -1771,10 +1771,10 @@ adapt.layout.Column.prototype.compensateJustificationLineHeight = function(span,
     const spanRect = this.clientLayout.getElementClientRect(span);
     const brRect = this.clientLayout.getElementClientRect(br);
     if (nodeContext.vertical) {
-        br.style.marginRight = (brRect.right - spanRect.right) + "px";
+        br.style.marginRight = `${brRect.right - spanRect.right}px`;
         br.style.width = "0px";
     } else {
-        br.style.marginTop = (spanRect.top - brRect.top) + "px";
+        br.style.marginTop = `${spanRect.top - brRect.top}px`;
         br.style.height = "0px";
     }
     br.setAttribute(adapt.vtree.SPECIAL_ATTR, "1");
@@ -2643,11 +2643,11 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
     if (this.vertical) {
         spacer.style.bottom = "0px";
         spacer.style.width = "1px";
-        spacer.style.marginRight = margin.right + "px";
+        spacer.style.marginRight = `${margin.right}px`;
     } else {
         spacer.style.right = "0px";
         spacer.style.height = "1px";
-        spacer.style.marginTop = margin.top + "px";
+        spacer.style.marginTop = `${margin.top}px`;
     }
     nodeContext.viewNode.parentNode.insertBefore(spacer, nodeContext.viewNode);
     let spacerBox = this.clientLayout.getElementClientRect(spacer);
@@ -2680,9 +2680,9 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
         // clearance was introduced).
         const height = Math.max(1, (clearEdge - edge) * dir);
         if (this.vertical) {
-            spacer.style.width = height + "px";
+            spacer.style.width = `${height}px`;
         } else {
-            spacer.style.height = height + "px";
+            spacer.style.height = `${height}px`;
         }
         spacerBox = this.clientLayout.getElementClientRect(spacer);
         const afterEdge = this.getAfterEdge(spacerBox);
@@ -2692,14 +2692,14 @@ adapt.layout.Column.prototype.applyClearance = function(nodeContext) {
                 // In addition to collapsed portion
                 wAdj += margin.right;
             }
-            spacer.style.marginLeft = wAdj + "px";
+            spacer.style.marginLeft = `${wAdj}px`;
         } else {
             let hAdj = clearEdge - (afterEdge + margin.top);
             if ((hAdj > 0) == (margin.top >= 0)) {
                 // In addition to collapsed portion
                 hAdj += margin.top;
             }
-            spacer.style.marginBottom = hAdj + "px";
+            spacer.style.marginBottom = `${hAdj}px`;
         }
         nodeContext.clearSpacer = spacer;
         return true;
@@ -3093,10 +3093,10 @@ adapt.layout.Column.prototype.initGeom = function() {
     // which is wrong for our purposes.
     const probe = /** @type {HTMLElement} */ (this.element.ownerDocument.createElement("div"));
     probe.style.position = "absolute";
-    probe.style.top = this.paddingTop + "px";
-    probe.style.right = this.paddingRight + "px";
-    probe.style.bottom = this.paddingBottom + "px";
-    probe.style.left = this.paddingLeft + "px";
+    probe.style.top = `${this.paddingTop}px`;
+    probe.style.right = `${this.paddingRight}px`;
+    probe.style.bottom = `${this.paddingBottom}px`;
+    probe.style.left = `${this.paddingLeft}px`;
     this.element.appendChild(probe);
     const columnBBox = this.clientLayout.getElementClientRect(probe);
     this.element.removeChild(probe);
@@ -3122,8 +3122,8 @@ adapt.layout.Column.prototype.initGeom = function() {
  */
 adapt.layout.Column.prototype.init = function() {
     this.chunkPositions = [];
-    adapt.base.setCSSProperty(this.element, "width", this.width + "px");
-    adapt.base.setCSSProperty(this.element, "height", this.height + "px");
+    adapt.base.setCSSProperty(this.element, "width", `${this.width}px`);
+    adapt.base.setCSSProperty(this.element, "height", `${this.height}px`);
     this.initGeom();
     this.computedBlockSize = 0;
     this.overflown = false;
@@ -3675,7 +3675,7 @@ adapt.layout.PageFloatArea.prototype.convertPercentageSizesToPx = function(
             if (valueString && valueString.charAt(valueString.length - 1) === "%") {
                 const percentageValue = parseFloat(valueString);
                 const value = refValue * percentageValue / 100;
-                adapt.base.setCSSProperty(target, propName, value + "px");
+                adapt.base.setCSSProperty(target, propName, `${value}px`);
             }
         });
     }

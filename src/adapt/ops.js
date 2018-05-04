@@ -384,7 +384,7 @@ adapt.ops.StyleInstance.prototype.dumpLocation = function(position) {
         const flowPosition = this.currentLayoutPosition.flowPositions[flowName];
 
         for (const p of flowPosition.positions) {
-            vivliostyle.logging.logger.debug("  Chunk", flowName + ":", p.flowChunk.startOffset);
+            vivliostyle.logging.logger.debug("  Chunk", `${flowName}:`, p.flowChunk.startOffset);
         }
     }
 };
@@ -399,7 +399,9 @@ adapt.ops.StyleInstance.prototype.matchPageSide = function(side) {
         case "right":
         case "recto":
         case "verso":
-            return /** @type {boolean} */ (new adapt.expr.Named(this.style.pageScope, side + "-page").evaluate(this));
+            return (
+                /** @type {boolean} */ new adapt.expr.Named(this.style.pageScope, `${side}-page`).evaluate(this)
+            );
         default:
             return true;
     }
@@ -1300,15 +1302,15 @@ adapt.ops.StyleInstance.prototype.setPageSizeAndBleed = function(evaluatedPageSi
     this.actualPageHeight = evaluatedPageSizeAndBleed.pageHeight;
     this.pageSheetWidth = evaluatedPageSizeAndBleed.pageWidth + evaluatedPageSizeAndBleed.cropOffset * 2;
     this.pageSheetHeight = evaluatedPageSizeAndBleed.pageHeight + evaluatedPageSizeAndBleed.cropOffset * 2;
-    page.container.style.width = this.pageSheetWidth + "px";
-    page.container.style.height = this.pageSheetHeight + "px";
-    page.bleedBox.style.left = evaluatedPageSizeAndBleed.bleedOffset + "px";
-    page.bleedBox.style.right = evaluatedPageSizeAndBleed.bleedOffset + "px";
-    page.bleedBox.style.top = evaluatedPageSizeAndBleed.bleedOffset + "px";
-    page.bleedBox.style.bottom = evaluatedPageSizeAndBleed.bleedOffset + "px";
-    page.bleedBox.style.padding = evaluatedPageSizeAndBleed.bleed + "px";
+    page.container.style.width = `${this.pageSheetWidth}px`;
+    page.container.style.height = `${this.pageSheetHeight}px`;
+    page.bleedBox.style.left = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
+    page.bleedBox.style.right = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
+    page.bleedBox.style.top = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
+    page.bleedBox.style.bottom = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
+    page.bleedBox.style.padding = `${evaluatedPageSizeAndBleed.bleed}px`;
     // Shift 1px to workaround Chrome printing bug
-    page.bleedBox.style.paddingTop = (evaluatedPageSizeAndBleed.bleed+1) + "px";
+    page.bleedBox.style.paddingTop = `${evaluatedPageSizeAndBleed.bleed+1}px`;
 };
 
 /**
@@ -1441,7 +1443,7 @@ adapt.ops.BaseParserHandler.prototype.startRuleBody = function() {
     adapt.csscasc.CascadeParserHandler.prototype.startRuleBody.call(this);
     if (this.insideRegion) {
         this.insideRegion = false;
-        const regionId = "R" + this.masterHandler.regionCount++;
+        const regionId = `R${this.masterHandler.regionCount++}`;
         this.special("region-id", adapt.css.getName(regionId));
         this.endRule();
         const regionHandler = new adapt.ops.BaseParserHandler(this.masterHandler, this.condition,
@@ -1470,7 +1472,7 @@ adapt.ops.processViewportMeta = meta => {
     const width = vals["width"] - 0;
     const height = vals["height"] - 0;
     if (width && height) {
-        return "@-epubx-viewport{width:" + width + "px;height:" + height + "px;}";
+        return `@-epubx-viewport{width:${width}px;height:${height}px;}`;
     }
     return "";
 };
@@ -1761,7 +1763,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
                     innerFrame.finish(style);
                 });
                 return innerFrame.result();
-            }, "FetchStylesheet " + url);
+            }, `FetchStylesheet ${url}`);
             self.styleFetcherByKey[key] = fetcher;
             fetcher.start();
         }

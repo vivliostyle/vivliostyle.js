@@ -39,8 +39,8 @@ goog.scope(() => {
                     const from = toPhysical ? p.logical : p.physical;
                     const to = toPhysical ? p.physical : p.logical;
                     return {
-                        regexp: new RegExp("(-?)" + from + "(-?)"),
-                        to: "$1" + to + "$2"
+                        regexp: new RegExp(`(-?)${from}(-?)`),
+                        to: `$1${to}$2`
                     };
                 });
             });
@@ -58,11 +58,11 @@ goog.scope(() => {
     function convert(value, writingMode, direction, maps) {
         const maps2 = maps[writingMode];
         if (!maps2) {
-            throw new Error("unknown writing-mode: " + writingMode);
+            throw new Error(`unknown writing-mode: ${writingMode}`);
         }
         const map = maps2[direction || "ltr"];
         if (!map) {
-            throw new Error("unknown direction: " + direction);
+            throw new Error(`unknown direction: ${direction}`);
         }
 
         for (const p of map) {
@@ -185,7 +185,7 @@ goog.scope(() => {
     vivliostyle.logical.toLineRelative = (value, writingMode) => {
         const maps = lineRelativeValues[writingMode];
         if (!maps) {
-            throw new Error("unknown writing-mode: " + writingMode);
+            throw new Error(`unknown writing-mode: ${writingMode}`);
         }
         for (let i = 0; i < maps.length; i++) {
             if (maps[i].physical === value) {

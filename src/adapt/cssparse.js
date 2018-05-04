@@ -2385,7 +2385,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                             tokenizer.nthToken(1).type == adapt.csstok.TokenType.SEMICOL) {
                             text = token.text.toLowerCase();
                             if (text != "utf-8" && text != "utf-16") {
-                                handler.error("E_CSS_UNEXPECTED_CHARSET " + text, token);
+                                handler.error(`E_CSS_UNEXPECTED_CHARSET ${text}`, token);
                             }
                             tokenizer.consume();
                             tokenizer.consume();
@@ -2559,16 +2559,16 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                         break;
                     case "":
                         // No text after @
-                        handler.error("E_CSS_UNEXPECTED_AT" + text, token);
+                        handler.error(`E_CSS_UNEXPECTED_AT${text}`, token);
                         // Error recovery using selector rules.
                         this.actions = adapt.cssparse.actionsErrorSelector;
                         continue;
                     default:
-                        handler.error("E_CSS_AT_UNKNOWN " + text, token);
+                        handler.error(`E_CSS_AT_UNKNOWN ${text}`, token);
                         this.actions = adapt.cssparse.actionsError;
                         continue;
                 }
-                handler.error("E_CSS_AT_SYNTAX " + text, token);
+                handler.error(`E_CSS_AT_SYNTAX ${text}`, token);
                 this.actions = adapt.cssparse.actionsError;
                 continue;
             case adapt.cssparse.Action.ERROR_PUSH:  // Open bracket while skipping error syntax
@@ -2750,7 +2750,7 @@ adapt.cssparse.parseStylesheetFromText = (text, handler, baseURL, classes, media
     const tok = new adapt.csstok.Tokenizer(text, handler);
     adapt.cssparse.parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
 }, (frame, err) => {
-    vivliostyle.logging.logger.warn(err, "Failed to parse stylesheet text: " + text);
+    vivliostyle.logging.logger.warn(err, `Failed to parse stylesheet text: ${text}`);
     frame.finish(false);
 });
 
@@ -2772,7 +2772,7 @@ adapt.cssparse.parseStylesheetFromURL = (url, handler, classes, media) => adapt.
                     handler, url, classes, media)
                     .then(result => {
                         if (!result) {
-                            vivliostyle.logging.logger.warn("Failed to parse stylesheet from " + url);
+                            vivliostyle.logging.logger.warn(`Failed to parse stylesheet from ${url}`);
                         }
                         frame.finish(true);
                     });

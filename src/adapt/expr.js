@@ -97,20 +97,20 @@ adapt.expr.PendingResult;
  */
 adapt.expr.letterbox = (viewW, viewH, objW, objH) => {
     const scale = Math.min((viewW - 0) / objW, (viewH - 0) / objH);
-    return "matrix(" + scale + ",0,0," + scale + ",0,0)";
+    return `matrix(${scale},0,0,${scale},0,0)`;
 };
 
 /**
  * @param {string} str
  * @return {string} string that can be parsed as CSS string with value str
  */
-adapt.expr.cssString = str => '"' + adapt.base.escapeCSSStr(str + "") + '"';
+adapt.expr.cssString = str => `"${adapt.base.escapeCSSStr(`${str}`)}"`;
 
 /**
  * @param {string} name
  * @return {string} string that can be parsed as CSS name
  */
-adapt.expr.cssIdent = name => adapt.base.escapeCSSIdent(name + "");
+adapt.expr.cssIdent = name => adapt.base.escapeCSSIdent(`${name}`);
 
 /**
  * @param {?string} objName
@@ -119,8 +119,7 @@ adapt.expr.cssIdent = name => adapt.base.escapeCSSIdent(name + "");
  */
 adapt.expr.makeQualifiedName = (objName, memberName) => {
     if (objName) {
-        return adapt.base.escapeCSSIdent(objName) + "." +
-            adapt.base.escapeCSSIdent(memberName);
+        return `${adapt.base.escapeCSSIdent(objName)}.${adapt.base.escapeCSSIdent(memberName)}`;
     }
     return adapt.base.escapeCSSIdent(memberName);
 };
@@ -139,7 +138,7 @@ adapt.expr.nextKeyIndex = 0;
  */
 adapt.expr.LexicalScope = function(parent, resolver) {
     this.parent = parent;
-    /** @type {string} */ this.scopeKey = "S" + (adapt.expr.nextKeyIndex++);
+    /** @type {string} */ this.scopeKey = `S${adapt.expr.nextKeyIndex++}`;
     /** @type {Array.<adapt.expr.LexicalScope>} */ this.children = [];
     /** @type {adapt.expr.Const} */ this.zero = new adapt.expr.Const(this, 0);
     /** @type {adapt.expr.Const} */ this.one = new adapt.expr.Const(this, 1);
@@ -391,7 +390,7 @@ adapt.expr.Context.prototype.evalName = function(scope, qualifiedName) {
         }
         scope = scope.parent;
     } while (scope);
-    throw new Error("Name '" + qualifiedName + "' is undefined");
+    throw new Error(`Name '${qualifiedName}' is undefined`);
 };
 
 /**
@@ -423,7 +422,7 @@ adapt.expr.Context.prototype.evalCall = function(scope, qualifiedName, params, n
         }
         scope = scope.parent;
     } while (scope);
-    throw new Error("Function '" + qualifiedName + "' is undefined");
+    throw new Error(`Function '${qualifiedName}' is undefined`);
 };
 
 /**
@@ -525,7 +524,7 @@ adapt.expr.DependencyCache;
  */
 adapt.expr.Val = function(scope) {
     this.scope = scope;
-    this.key = "_" + adapt.expr.nextKeyIndex++;
+    this.key = `_${adapt.expr.nextKeyIndex++}`;
 };
 
 /**
@@ -1658,7 +1657,7 @@ adapt.expr.Param.prototype.appendTo = function(buf, priority) {
 adapt.expr.Param.prototype.expand = function(context, params) {
     const v = params[this.index];
     if (!v)
-        throw new Error("Parameter missing: " + this.index);
+        throw new Error(`Parameter missing: ${this.index}`);
     return /** @type {adapt.expr.Val} */ (v);
 };
 

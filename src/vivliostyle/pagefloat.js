@@ -54,7 +54,7 @@ goog.scope(() => {
             case "page":
                 return FloatReference.PAGE;
             default:
-                throw new Error("Unknown float-reference: " + str);
+                throw new Error(`Unknown float-reference: ${str}`);
         }
     };
 
@@ -71,7 +71,7 @@ goog.scope(() => {
             case FloatReference.PAGE:
                 return true;
             default:
-                throw new Error("Unknown float-reference: " + floatReference);
+                throw new Error(`Unknown float-reference: ${floatReference}`);
         }
     };
 
@@ -103,7 +103,7 @@ goog.scope(() => {
             }
         }
         if (floatSide !== "left" && floatSide !== "right") {
-            vivliostyle.logging.logger.warn("Invalid float value: " + floatSide + ". Fallback to left.");
+            vivliostyle.logging.logger.warn(`Invalid float value: ${floatSide}. Fallback to left.`);
             floatSide = "left";
         }
         return floatSide;
@@ -192,7 +192,7 @@ goog.scope(() => {
      * @param {number} order
      * @returns {vivliostyle.pagefloat.PageFloat.ID}
      */
-    PageFloatStore.prototype.createPageFloatId = order => "pf" + order;
+    PageFloatStore.prototype.createPageFloatId = order => `pf${order}`;
 
     /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
@@ -389,7 +389,7 @@ goog.scope(() => {
      */
     PageFloatLayoutContext.prototype.getParent = function(floatReference) {
         if (!this.parent) {
-            throw new Error("No PageFloatLayoutContext for " + floatReference);
+            throw new Error(`No PageFloatLayoutContext for ${floatReference}`);
         }
         return this.parent;
     };
@@ -1050,7 +1050,7 @@ goog.scope(() => {
             case "inline-end":
                 return this.container.vertical ? limits.bottom : limits.right;
             default:
-                throw new Error("Unknown logical side: " + logicalSide);
+                throw new Error(`Unknown logical side: ${logicalSide}`);
         }
     };
 
@@ -1147,7 +1147,7 @@ goog.scope(() => {
                         }
                         break;
                     default:
-                        throw new Error("Unknown logical float side: " + logicalFloatSide);
+                        throw new Error(`Unknown logical float side: ${logicalFloatSide}`);
                 }
                 return {
                     top, left, bottom, right,
@@ -1311,7 +1311,7 @@ goog.scope(() => {
                 area.setBlockPosition(blockEnd - outerBlockSize * area.getBoxDir(), blockSize);
                 break;
             default:
-                throw new Error("unknown float direction: " + floatSide);
+                throw new Error(`unknown float direction: ${floatSide}`);
         }
 
         return logicalFloatSide;
@@ -1484,7 +1484,7 @@ goog.scope(() => {
                     result[side] = !hasPrecedingFragmentInParents(this, side);
                     break;
                 default:
-                    throw new Error("Unexpected side: " + side);
+                    throw new Error(`Unexpected side: ${side}`);
             }
         }, this);
 
@@ -1671,7 +1671,7 @@ goog.scope(() => {
                 return strategy;
             }
         }
-        throw new Error("No PageFloatLayoutStrategy found for " + nodeContext);
+        throw new Error(`No PageFloatLayoutStrategy found for ${nodeContext}`);
     };
 
     /**
@@ -1685,7 +1685,7 @@ goog.scope(() => {
                 return strategy;
             }
         }
-        throw new Error("No PageFloatLayoutStrategy found for " + float);
+        throw new Error(`No PageFloatLayoutStrategy found for ${float}`);
     };
 
     /**

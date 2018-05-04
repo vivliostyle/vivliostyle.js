@@ -50,7 +50,7 @@ adapt.cfi.getId = node => {
  * @param {string} ch
  * @return {string}
  */
-adapt.cfi.escapeChar = ch => "^" + ch;
+adapt.cfi.escapeChar = ch => `^${ch}`;
 
 /**
  * @param {string} str

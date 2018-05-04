@@ -371,7 +371,7 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
     }
     if (typeof command["rootURL"] == "string") {
         adapt.base.baseURL = command["rootURL"];
-        adapt.base.resourceBaseURL = adapt.base.baseURL + "resources/";
+        adapt.base.resourceBaseURL = `${adapt.base.baseURL}resources/`;
     }
     if (typeof command["pageViewMode"] == "string" && command["pageViewMode"] !== this.pageViewMode) {
         this.pageViewMode = command["pageViewMode"];
@@ -546,10 +546,10 @@ adapt.viewer.Viewer.prototype.createViewport = function() {
     const viewportElement = this.viewportElement;
     if (this.viewportSize) {
         const vs = this.viewportSize;
-        viewportElement.style.marginLeft = vs.marginLeft + "px";
-        viewportElement.style.marginRight = vs.marginRight + "px";
-        viewportElement.style.marginTop = vs.marginTop + "px";
-        viewportElement.style.marginBottom = vs.marginBottom + "px";
+        viewportElement.style.marginLeft = `${vs.marginLeft}px`;
+        viewportElement.style.marginRight = `${vs.marginRight}px`;
+        viewportElement.style.marginTop = `${vs.marginTop}px`;
+        viewportElement.style.marginBottom = `${vs.marginBottom}px`;
         return new adapt.vgen.Viewport(this.window, this.fontSize, viewportElement, vs.width, vs.height);
     } else {
         return new adapt.vgen.Viewport(this.window, this.fontSize, viewportElement);
@@ -631,9 +631,9 @@ adapt.viewer.Viewer.prototype.setPageSizePageRules = function(pageSheetSize, spi
     if (!this.pageSheetSizeAlreadySet && this.pageRuleStyleElement) {
         let styleText = "";
         Object.keys(pageSheetSize).forEach(selector => {
-            styleText += "@page " + selector + "{size:";
+            styleText += `@page ${selector}{size:`;
             const size = pageSheetSize[selector];
-            styleText += size.width + "px " + size.height + "px;}";
+            styleText += `${size.width}px ${size.height}px;}`;
         });
         this.pageRuleStyleElement.textContent = styleText;
         this.pageSheetSizeAlreadySet = true;
@@ -764,7 +764,7 @@ adapt.viewer.Viewer.prototype.queryZoomFactor = function(type) {
             }
             return this.calculateZoomFactorToFitInsideViewPort(pageDim);
         default:
-            throw new Error("unknown zoom type: " + type);
+            throw new Error(`unknown zoom type: ${type}`);
     }
 };
 

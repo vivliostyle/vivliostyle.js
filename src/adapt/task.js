@@ -597,7 +597,7 @@ adapt.task.Task.prototype.raise = function(err, opt_frame) {
 adapt.task.Task.prototype.fillStack = function(err) {
     let out = err['frameTrace'];
     if (!out) {
-        out = err["stack"] ? err["stack"] + "\n\t---- async ---\n" : "";
+        out = err["stack"] ? `${err["stack"]}\n\t---- async ---\n` : "";
         for (let f = this.top; f; f = f.parent) {
             out += '\t';
             out += f.getName();
@@ -848,7 +848,7 @@ adapt.task.Frame.prototype.then = function(callback) {
         case adapt.task.FrameState.DEAD:
             throw new Error('F_TASK_DEAD_FRAME');
         default:
-            throw new Error('F_TASK_UNEXPECTED_FRAME_STATE ' + this.state);
+            throw new Error(`F_TASK_UNEXPECTED_FRAME_STATE ${this.state}`);
     }
 };
 

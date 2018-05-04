@@ -103,7 +103,7 @@ adapt.net.ajax = (url, opt_type, opt_method, opt_data, opt_contentType) => {
             request.send(null);
         }
     } catch (e) {
-        vivliostyle.logging.logger.warn(e, "Error fetching " + url);
+        vivliostyle.logging.logger.warn(e, `Error fetching ${url}`);
         continuation.schedule(response);
     }
     return frame.result();
@@ -196,7 +196,7 @@ adapt.net.ResourceStore.prototype.fetchInner = function(url, opt_required, opt_m
     /** @type {adapt.task.Frame.<Resource>} */ const frame = adapt.task.newFrame("fetch");
     adapt.net.ajax(url, self.type).then(response => {
         if (opt_required && response.status >= 400) {
-            throw new Error(opt_message || ("Failed to fetch required resource: " + url));
+            throw new Error(opt_message || (`Failed to fetch required resource: ${url}`));
         }
         self.parser(response, self).then(resource => {
             delete self.fetchers[url];
@@ -222,7 +222,7 @@ adapt.net.ResourceStore.prototype.fetch = function(url, opt_required, opt_messag
     let fetcher = this.fetchers[url];
     if (!fetcher) {
         const self = this;
-        fetcher = new adapt.taskutil.Fetcher(() => self.fetchInner(url, opt_required, opt_message), "Fetch " + url);
+        fetcher = new adapt.taskutil.Fetcher(() => self.fetchInner(url, opt_required, opt_message), `Fetch ${url}`);
         self.fetchers[url] = fetcher;
         fetcher.start();
     }

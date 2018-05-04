@@ -919,7 +919,7 @@ goog.scope(() => {
         if (colSpan > 1) {
             adapt.base.setCSSProperty(cellViewNode, "box-sizing", "border-box");
             adapt.base.setCSSProperty(cellViewNode, this.formattingContext.vertical ? "height" : "width",
-                this.getColSpanningCellWidth(cell) + "px");
+                `${this.getColSpanningCellWidth(cell)}px`);
         }
 
         const pseudoColumnContainer = cellViewNode.ownerDocument.createElement("div");
@@ -1417,7 +1417,7 @@ goog.scope(() => {
 
         // Assign width to col elements
         cols.forEach((col, i) => {
-            adapt.base.setCSSProperty(col, vertical ? "height" : "width", colWidths[i] + "px");
+            adapt.base.setCSSProperty(col, vertical ? "height" : "width", `${colWidths[i]}px`);
         });
 
         colGroups.forEach(colGroup => {
@@ -1640,10 +1640,10 @@ goog.scope(() => {
         const padding = column.getComputedPaddingBorder(cellElement);
         if (vertical) {
             const width = (cellElementRect.right - column.footnoteEdge - repetitiveElements.calculateOffset(breakNodeContext) - padding.right);
-            adapt.base.setCSSProperty(cellContentElement, "max-width", width + "px");
+            adapt.base.setCSSProperty(cellContentElement, "max-width", `${width}px`);
         } else {
             const height = (column.footnoteEdge - repetitiveElements.calculateOffset(breakNodeContext) - cellElementRect.top - padding.top);
-            adapt.base.setCSSProperty(cellContentElement, "max-height", height + "px");
+            adapt.base.setCSSProperty(cellContentElement, "max-height", `${height}px`);
         }
         adapt.base.setCSSProperty(cellContentElement, "overflow", "hidden");
     }

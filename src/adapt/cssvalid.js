@@ -562,7 +562,7 @@ adapt.cssvalid.PrimitiveValidator.prototype.visitInt = function(num) {
         return null;
     if (this.allowed & (adapt.cssvalid.ALLOW_POS_INT|adapt.cssvalid.ALLOW_POS_NUM))
         return num;
-    const val = this.idents["" + num.num];
+    const val = this.idents[`${num.num}`];
     if (val)
         return val;
     return null;
@@ -1887,9 +1887,9 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
          */
         const setop = currop => {
             if (expectval)
-                throw new Error("'" + currop + "': unexpected");
+                throw new Error(`'${currop}': unexpected`);
             if (op && op != currop)
-                throw new Error("mixed operators: '" + currop + "' and '" + op + "'");
+                throw new Error(`mixed operators: '${currop}' and '${op}'`);
             op = currop;
             expectval = true;
         };
@@ -1905,7 +1905,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
                     if (this.isBuiltIn(token.text)) {
                         const builtIn = this.namedValidators[token.text];
                         if (!builtIn)
-                            throw new Error("'" + token.text + "' unexpected");
+                            throw new Error(`'${token.text}' unexpected`);
                         vals.push(builtIn.clone());
                     } else {
                         var idents = {};
@@ -1916,7 +1916,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
                     break;
                 case adapt.csstok.TokenType.INT:
                     var idents = {};
-                    idents["" + token.num] = new adapt.css.Int(token.num);
+                    idents[`${token.num}`] = new adapt.css.Int(token.num);
                     vals.push(this.primitive(new adapt.cssvalid.PrimitiveValidator(0, idents, adapt.cssvalid.NO_IDENTS)));
                     expectval = false;
                     break;
@@ -2008,7 +2008,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
                 case adapt.csstok.TokenType.SEMICOL:
                     result = reduce();
                     if (stack.length > 0)
-                        throw new Error("unclosed '" + stack.pop().b + "'");
+                        throw new Error(`unclosed '${stack.pop().b}'`);
                     break;
                 default:
                     throw new Error("unexpected token");
@@ -2105,8 +2105,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseShorthands = function(tok) {
                         syntax.push(insetShorthand.createSyntaxNode());
                         propList.push(...insetShorthand.propList);
                     } else {
-                        throw new Error('\'' + token.text +
-                            '\' is neither a simple property nor an inset shorthand');
+                        throw new Error(`'${token.text}' is neither a simple property nor an inset shorthand`);
                     }
                     break;
                 case adapt.csstok.TokenType.SLASH :

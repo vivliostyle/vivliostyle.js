@@ -270,7 +270,7 @@ adapt.cssstyler.Box.prototype.hasBox = function() {
 adapt.cssstyler.Box.prototype.getBreakValue = function(edge) {
     let breakValue = null;
     if (this.isBlock()) {
-        const val = this.styleValue("break-" + edge);
+        const val = this.styleValue(`break-${edge}`);
         if (val)
             breakValue = val.toString();
     }
@@ -483,7 +483,7 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
     }
     this.primaryStack.push(true);
     this.styleMap = {};
-    this.styleMap["e" + rootOffset] = style;
+    this.styleMap[`e${rootOffset}`] = style;
     this.lastOffset++;
     this.replayFlowElementsFromOffset(-1);
 };
@@ -899,7 +899,7 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
                 if (offset != this.lastOffset)
                     throw new Error("Inconsistent offset");
             }
-            this.styleMap["e"+this.lastOffset] = style;
+            this.styleMap[`e${this.lastOffset}`] = style;
             this.lastOffset++;
             if (this.primary)
                 this.offsetMap.addStuckRange(this.lastOffset);
@@ -924,7 +924,7 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
  */
 adapt.cssstyler.Styler.prototype.getStyle = function(element, deep) {
     let offset = this.xmldoc.getElementOffset(element);
-    const key = "e" + offset;
+    const key = `e${offset}`;
     if (deep) {
         offset = this.xmldoc.getNodeOffset(element, 0, true);
     }

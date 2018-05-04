@@ -911,7 +911,7 @@ adapt.csscasc.CheckNSTagAction.prototype.makePrimary = function(cascade) {
     if (this.chained) {
         let prefix = cascade.nsPrefix[this.ns];
         if (!prefix) {
-            prefix = "ns" + (cascade.nsCount++) + ":";
+            prefix = `ns${cascade.nsCount++}:`;
             cascade.nsPrefix[this.ns] = prefix;
         }
         const nsTag = prefix + this.localName;
@@ -2196,7 +2196,7 @@ adapt.csscasc.chineseTradInformal = {
  */
 adapt.csscasc.chineseCounter = (num, numbering) => {
     if (num > 9999 || num < -9999)
-        return "" + num;  // TODO: should be cjk-decimal
+        return `${num}`;  // TODO: should be cjk-decimal
     if (num == 0)
         return numbering.digits.charAt(0);
     const res = new adapt.base.StringBuffer();
@@ -2261,13 +2261,13 @@ adapt.csscasc.ContentPropVisitor.prototype.format = (num, type) => {
     } else if (adapt.csscasc.fixed[type] != null) {
         result = adapt.csscasc.fixed[type];
     } else if (type == "decimal-leading-zero") {
-        result = num + "";
+        result = `${num}`;
         if (result.length == 1)
-            result = "0" + result;
+            result = `0${result}`;
     } else if (type == "cjk-ideographic" || type == "trad-chinese-informal") {
         result = adapt.csscasc.chineseCounter(num, adapt.csscasc.chineseTradInformal);
     } else {
-        result = num + "";
+        result = `${num}`;
     }
     if (upper) {
         return result.toUpperCase();
@@ -3140,7 +3140,7 @@ adapt.csscasc.CascadeParserHandler.prototype.tagSelector = function(ns, name) {
  */
 adapt.csscasc.CascadeParserHandler.prototype.classSelector = function(name) {
     if (this.pseudoelement) {
-        vivliostyle.logging.logger.warn("::" + this.pseudoelement, "followed by ." + name);
+        vivliostyle.logging.logger.warn(`::${this.pseudoelement}`, `followed by .${name}`);
         this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
         return;
     }
@@ -3164,7 +3164,7 @@ adapt.csscasc.nthSelectorActionClasses = {
  */
 adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name, params) {
     if (this.pseudoelement) {
-        vivliostyle.logging.logger.warn("::" + this.pseudoelement, "followed by :" + name);
+        vivliostyle.logging.logger.warn(`::${this.pseudoelement}`, `followed by :${name}`);
         this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
         return;
     }
@@ -3189,7 +3189,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
         case "href-epub-type":
             if (params && params.length == 1 && typeof params[0] == "string") {
                 const value = /** @type {string} */ (params[0]);
-                const patt = new RegExp("(^|\s)" + adapt.base.escapeRegExp(value) + "($|\s)");
+                const patt = new RegExp(`(^|\s)${adapt.base.escapeRegExp(value)}($|\s)`);
                 this.chain.push(new adapt.csscasc.CheckTargetEpubTypeAction(patt));
             } else {
                 this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
@@ -3210,7 +3210,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
             if (params && params.length == 1 && typeof params[0] == "string") {
                 const langValue = /** @type {string} */ (params[0]);
                 this.chain.push(new adapt.csscasc.CheckLangAction(
-                    new RegExp("^" + adapt.base.escapeRegExp(langValue.toLowerCase()) + "($|-)")));
+                    new RegExp(`^${adapt.base.escapeRegExp(langValue.toLowerCase())}($|-)`)));
             } else {
                 this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fais
             }
@@ -3256,7 +3256,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
             this.pseudoelementSelector(name, params);
             return;
         default:
-            vivliostyle.logging.logger.warn("unknown pseudo-class selector: " + name);
+            vivliostyle.logging.logger.warn(`unknown pseudo-class selector: ${name}`);
             this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
             break;
     }
@@ -3279,7 +3279,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
             if (!this.pseudoelement) {
                 this.pseudoelement = name;
             } else {
-                vivliostyle.logging.logger.warn("Double pseudoelement ::" + this.pseudoelement + "::" + name);
+                vivliostyle.logging.logger.warn(`Double pseudoelement ::${this.pseudoelement}::${name}`);
                 this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
             }
             break;
@@ -3288,9 +3288,9 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
                 const n = Math.round(params[0]);
                 if (n > 0 && n == params[0]) {
                     if (!this.pseudoelement) {
-                        this.pseudoelement = "first-" + n + "-lines";
+                        this.pseudoelement = `first-${n}-lines`;
                     } else {
-                        vivliostyle.logging.logger.warn("Double pseudoelement ::" + this.pseudoelement + "::" + name);
+                        vivliostyle.logging.logger.warn(`Double pseudoelement ::${this.pseudoelement}::${name}`);
                         this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
                     }
                     break;
@@ -3298,13 +3298,13 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
             }
         case "nth-fragment":
             if (params && params.length == 2) {
-                this.viewConditionId = "NFS_" + params[0] + "_" + params[1];
+                this.viewConditionId = `NFS_${params[0]}_${params[1]}`;
             } else {
                 this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
             }
             break;
         default:
-            vivliostyle.logging.logger.warn("Unrecognized pseudoelement: ::" + name);
+            vivliostyle.logging.logger.warn(`Unrecognized pseudoelement: ::${name}`);
             this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
             break;
     }
@@ -3338,19 +3338,19 @@ adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, na
                 action = new adapt.csscasc.CheckConditionAction(""); // always fails
             } else {
                 action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
-                    new RegExp("(^|\\s)" + adapt.base.escapeRegExp(value) + "($|\\s)"));
+                    new RegExp(`(^|\\s)${adapt.base.escapeRegExp(value)}($|\\s)`));
             }
             break;
         case adapt.csstok.TokenType.BAR_EQ:
             action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
-                new RegExp("^" + adapt.base.escapeRegExp(value) + "($|-)"));
+                new RegExp(`^${adapt.base.escapeRegExp(value)}($|-)`));
             break;
         case adapt.csstok.TokenType.HAT_EQ:
             if (!value) {
                 action = new adapt.csscasc.CheckConditionAction(""); // always fails
             } else {
                 action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
-                    new RegExp("^" + adapt.base.escapeRegExp(value)));
+                    new RegExp(`^${adapt.base.escapeRegExp(value)}`));
             }
             break;
         case adapt.csstok.TokenType.DOLLAR_EQ:
@@ -3358,7 +3358,7 @@ adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, na
                 action = new adapt.csscasc.CheckConditionAction(""); // always fails
             } else {
                 action = new adapt.csscasc.CheckAttributeRegExpAction(ns, name,
-                    new RegExp(adapt.base.escapeRegExp(value) + "$"));
+                    new RegExp(`${adapt.base.escapeRegExp(value)}$`));
             }
             break;
         case adapt.csstok.TokenType.STAR_EQ:
@@ -3394,7 +3394,7 @@ adapt.csscasc.conditionCount = 0;
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.descendantSelector = function() {
-    const condition = "d" + (adapt.csscasc.conditionCount++);
+    const condition = `d${adapt.csscasc.conditionCount++}`;
     this.processChain(new adapt.csscasc.ConditionItemAction(
         new adapt.csscasc.DescendantConditionItem(condition, this.viewConditionId, null)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -3405,7 +3405,7 @@ adapt.csscasc.CascadeParserHandler.prototype.descendantSelector = function() {
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.childSelector = function() {
-    const condition = "c" + (adapt.csscasc.conditionCount++);
+    const condition = `c${adapt.csscasc.conditionCount++}`;
     this.processChain(new adapt.csscasc.ConditionItemAction(
         new adapt.csscasc.ChildConditionItem(condition, this.viewConditionId, null)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -3416,7 +3416,7 @@ adapt.csscasc.CascadeParserHandler.prototype.childSelector = function() {
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.adjacentSiblingSelector = function() {
-    const condition = "a" + (adapt.csscasc.conditionCount++);
+    const condition = `a${adapt.csscasc.conditionCount++}`;
     this.processChain(new adapt.csscasc.ConditionItemAction(
         new adapt.csscasc.AdjacentSiblingConditionItem(condition, this.viewConditionId, null)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -3427,7 +3427,7 @@ adapt.csscasc.CascadeParserHandler.prototype.adjacentSiblingSelector = function(
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.followingSiblingSelector = function() {
-    const condition = "f" + (adapt.csscasc.conditionCount++);
+    const condition = `f${adapt.csscasc.conditionCount++}`;
     this.processChain(new adapt.csscasc.ConditionItemAction(
         new adapt.csscasc.FollowingSiblingConditionItem(condition, this.viewConditionId, null)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -3554,14 +3554,14 @@ adapt.csscasc.CascadeParserHandler.prototype.property = function(name, value, im
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.invalidPropertyValue = function(name, value) {
-    this.report("E_INVALID_PROPERTY_VALUE " + name + ": " + value.toString());
+    this.report(`E_INVALID_PROPERTY_VALUE ${name}: ${value.toString()}`);
 };
 
 /**
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.unknownProperty = function(name, value) {
-    this.report("E_INVALID_PROPERTY " + name + ": " + value.toString());
+    this.report(`E_INVALID_PROPERTY ${name}: ${value.toString()}`);
 };
 
 /**
@@ -3691,7 +3691,7 @@ goog.inherits(adapt.csscasc.DefineParserHandler, adapt.cssparse.SlaveParserHandl
  */
 adapt.csscasc.DefineParserHandler.prototype.property = function(propName, value, important) {
     if (this.scope.values[propName]) {
-        this.error("E_CSS_NAME_REDEFINED " + propName, this.getCurrentToken());
+        this.error(`E_CSS_NAME_REDEFINED ${propName}`, this.getCurrentToken());
     } else {
         const unit = propName.match(/height|^(top|bottom)$/) ? "vh" : "vw";
         const dim = new adapt.expr.Numeric(this.scope, 100, unit);
@@ -3732,14 +3732,14 @@ adapt.csscasc.PropSetParserHandler.prototype.property = function(name, value, im
  * @override
  */
 adapt.csscasc.PropSetParserHandler.prototype.invalidPropertyValue = (name, value) => {
-    vivliostyle.logging.logger.warn("E_INVALID_PROPERTY_VALUE", name + ":", value.toString());
+    vivliostyle.logging.logger.warn("E_INVALID_PROPERTY_VALUE", `${name}:`, value.toString());
 };
 
 /**
  * @override
  */
 adapt.csscasc.PropSetParserHandler.prototype.unknownProperty = (name, value) => {
-    vivliostyle.logging.logger.warn("E_INVALID_PROPERTY", name + ":", value.toString());
+    vivliostyle.logging.logger.warn("E_INVALID_PROPERTY", `${name}:`, value.toString());
 };
 
 /**
@@ -3782,14 +3782,14 @@ adapt.csscasc.PropertyParserHandler.prototype.property = function(name, value, i
  * @override
  */
 adapt.csscasc.PropertyParserHandler.prototype.invalidPropertyValue = (name, value) => {
-    vivliostyle.logging.logger.warn("E_INVALID_PROPERTY_VALUE", name + ":", value.toString());
+    vivliostyle.logging.logger.warn("E_INVALID_PROPERTY_VALUE", `${name}:`, value.toString());
 };
 
 /**
  * @override
  */
 adapt.csscasc.PropertyParserHandler.prototype.unknownProperty = (name, value) => {
-    vivliostyle.logging.logger.warn("E_INVALID_PROPERTY", name + ":", value.toString());
+    vivliostyle.logging.logger.warn("E_INVALID_PROPERTY", `${name}:`, value.toString());
 };
 
 /**

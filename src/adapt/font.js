@@ -39,7 +39,7 @@ adapt.font.traitProps = {
 /**
  * @const
  */
-adapt.font.bogusFontData = "OTTO" + (new Date()).valueOf();
+adapt.font.bogusFontData = `OTTO${(new Date()).valueOf()}`;
 
 /**
  * @type {number}
@@ -166,7 +166,7 @@ adapt.font.DocumentFaces.prototype.registerFamily = function(srcFace, viewFace) 
     const viewFamilyFromView = viewFace.family;
     if (viewFamilyFromSrc) {
         if (viewFamilyFromSrc != viewFamilyFromView)
-            throw new Error("E_FONT_FAMILY_INCONSISTENT " + srcFace.family);
+            throw new Error(`E_FONT_FAMILY_INCONSISTENT ${srcFace.family}`);
     } else {
         this.familyMap[srcFamily] = /** @type {string} */ (viewFamilyFromView);
     }
@@ -337,7 +337,7 @@ adapt.font.Mapper.prototype.loadFont = function(srcFace, documentFaces) {
                 self.initFont(srcFace, null, documentFaces).thenFinish(frame);
             }
             return frame.result();
-        }, "loadFont " + src);
+        }, `loadFont ${src}`);
         this.srcURLMap[src] = fetcher;
         fetcher.start();
     }

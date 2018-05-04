@@ -206,7 +206,7 @@ goog.scope(() => {
      */
     vivliostyle.plugin.registerHook = (name, fn) => {
         if (!HOOKS[name]) {
-            vivliostyle.logging.logger.warn(new Error("Skipping unknown plugin hook '" + name + "'."));
+            vivliostyle.logging.logger.warn(new Error(`Skipping unknown plugin hook '${name}'.`));
         } else {
             let hooksForName = vivliostyle.plugin.hooks[name];
             if (!hooksForName) {
@@ -224,7 +224,7 @@ goog.scope(() => {
      */
     vivliostyle.plugin.removeHook = (name, fn) => {
         if (!HOOKS[name]) {
-            vivliostyle.logging.logger.warn(new Error("Ignoring unknown plugin hook '" + name + "'."));
+            vivliostyle.logging.logger.warn(new Error(`Ignoring unknown plugin hook '${name}'.`));
         } else {
             const hooksForName = vivliostyle.plugin.hooks[name];
             if (hooksForName) {

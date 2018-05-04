@@ -49,7 +49,7 @@ goog.scope(() => {
             case "rtl":
                 return PageProgression.RTL;
             default:
-                throw new Error("unknown PageProgression: " + str);
+                throw new Error(`unknown PageProgression: ${str}`);
         }
     };
 

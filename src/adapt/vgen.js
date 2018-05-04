@@ -141,7 +141,7 @@ adapt.vgen.StylerProducer.prototype.getStylerForDoc = xmldoc => {};
 
 
 adapt.vgen.pseudoelementDoc = (new DOMParser()).parseFromString(
-    '<root xmlns="' + adapt.base.NS.SHADOW + '"/>', "text/xml");
+    `<root xmlns="${adapt.base.NS.SHADOW}"/>`, "text/xml");
 
 /**
  * Pseudoelement names in the order they should be inserted in the shadow DOM, empty string
@@ -896,8 +896,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                     if (imageBinary) {
                         inner = self.createElement(ns, "img");
                         const mediaType = imageBinary.getAttribute("content-type") || "image/jpeg";
-                        const innerSrc = "data:" + mediaType + ";base64," +
-                            imageBinary.textContent.replace(/[ \t\n\t]/g, "");
+                        const innerSrc = `data:${mediaType};base64,${imageBinary.textContent.replace(/[ \t\n\t]/g, "")}`;
                         fetchers.push(adapt.taskutil.loadElement(inner, innerSrc));
                     }
                 }
@@ -1066,7 +1065,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                     if (attributeNS) {
                         const attributePrefix = adapt.vgen.namespacePrefixMap[attributeNS];
                         if (attributePrefix)
-                            attributeName = attributePrefix + ":" + attributeName;
+                            attributeName = `${attributePrefix}:${attributeName}`;
                     }
                     if (attributeName == "src" && !attributeNS && (tag == "img" || tag == "input") && ns == adapt.base.NS.XHTML) {
                         // HTML img element should start loading only once all attributes are assigned.
@@ -1219,11 +1218,11 @@ adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = functi
                     const maxWidth = computedStyle["max-width"] || adapt.css.ident.none;
                     const maxHeight = computedStyle["max-height"] || adapt.css.ident.none;
                     if (maxWidth === adapt.css.ident.none && maxHeight === adapt.css.ident.none) {
-                        adapt.base.setCSSProperty(elem, "max-width", scaledWidth + "px");
+                        adapt.base.setCSSProperty(elem, "max-width", `${scaledWidth}px`);
                     } else if (maxWidth !== adapt.css.ident.none && maxHeight === adapt.css.ident.none) {
-                        adapt.base.setCSSProperty(elem, "width", scaledWidth + "px");
+                        adapt.base.setCSSProperty(elem, "width", `${scaledWidth}px`);
                     } else if (maxWidth === adapt.css.ident.none && maxHeight !== adapt.css.ident.none) {
-                        adapt.base.setCSSProperty(elem, "height", scaledHeight + "px");
+                        adapt.base.setCSSProperty(elem, "height", `${scaledHeight}px`);
                     } else {
                         // maxWidth != none && maxHeight != none
                         goog.asserts.assert(maxWidth.isNumeric());
@@ -1232,15 +1231,15 @@ adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = functi
                         const numericMaxHeight = /** @type {adapt.css.Numeric} */ (maxHeight);
                         if (numericMaxWidth.unit !== "%") {
                             adapt.base.setCSSProperty(elem, "max-width",
-                                Math.min(scaledWidth, adapt.css.toNumber(numericMaxWidth, self.context)) + "px");
+                                `${Math.min(scaledWidth, adapt.css.toNumber(numericMaxWidth, self.context))}px`);
                         } else if (numericMaxHeight.unit !== "%") {
                             adapt.base.setCSSProperty(elem, "max-height",
-                                Math.min(scaledHeight, adapt.css.toNumber(numericMaxHeight, self.context)) + "px");
+                                `${Math.min(scaledHeight, adapt.css.toNumber(numericMaxHeight, self.context))}px`);
                         } else {
                             if (isVertical) {
-                                adapt.base.setCSSProperty(elem, "height", scaledHeight + "px");
+                                adapt.base.setCSSProperty(elem, "height", `${scaledHeight}px`);
                             } else {
-                                adapt.base.setCSSProperty(elem, "width", scaledWidth + "px");
+                                adapt.base.setCSSProperty(elem, "width", `${scaledWidth}px`);
                             }
                         }
                     }
@@ -1252,24 +1251,24 @@ adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = functi
                     const numericMinWidth = /** @type {adapt.css.Numeric} */ (minWidth);
                     const numericMinHeight = /** @type {adapt.css.Numeric} */ (minHeight);
                     if (numericMinWidth.num === 0 && numericMinHeight.num === 0) {
-                        adapt.base.setCSSProperty(elem, "min-width", scaledWidth + "px");
+                        adapt.base.setCSSProperty(elem, "min-width", `${scaledWidth}px`);
                     } else if (numericMinWidth.num !== 0 && numericMinHeight.num === 0) {
-                        adapt.base.setCSSProperty(elem, "width", scaledWidth + "px");
+                        adapt.base.setCSSProperty(elem, "width", `${scaledWidth}px`);
                     } else if (numericMinWidth.num === 0 && numericMinHeight.num !== 0) {
-                        adapt.base.setCSSProperty(elem, "height", scaledHeight + "px");
+                        adapt.base.setCSSProperty(elem, "height", `${scaledHeight}px`);
                     } else {
                         // minWidth != 0 && minHeight != 0
                         if (numericMinWidth.unit !== "%") {
                             adapt.base.setCSSProperty(elem, "min-width",
-                                Math.max(scaledWidth, adapt.css.toNumber(numericMinWidth, self.context)) + "px");
+                                `${Math.max(scaledWidth, adapt.css.toNumber(numericMinWidth, self.context))}px`);
                         } else if (numericMinHeight.unit !== "%") {
                             adapt.base.setCSSProperty(elem, "min-height",
-                                Math.max(scaledHeight, adapt.css.toNumber(numericMinHeight, self.context)) + "px");
+                                `${Math.max(scaledHeight, adapt.css.toNumber(numericMinHeight, self.context))}px`);
                         } else {
                             if (isVertical) {
-                                adapt.base.setCSSProperty(elem, "height", scaledHeight + "px");
+                                adapt.base.setCSSProperty(elem, "height", `${scaledHeight}px`);
                             } else {
-                                adapt.base.setCSSProperty(elem, "width", scaledWidth + "px");
+                                adapt.base.setCSSProperty(elem, "width", `${scaledWidth}px`);
                             }
                         }
                     }
@@ -1975,11 +1974,11 @@ adapt.vgen.Viewport.prototype.resetZoom = function() {
  * @param {number} scale Factor to which the viewport will be scaled.
  */
 adapt.vgen.Viewport.prototype.zoom = function(width, height, scale) {
-    adapt.base.setCSSProperty(this.outerZoomBox, "width", width*scale + "px");
-    adapt.base.setCSSProperty(this.outerZoomBox, "height", height*scale + "px");
-    adapt.base.setCSSProperty(this.contentContainer, "width", width + "px");
-    adapt.base.setCSSProperty(this.contentContainer, "height", height + "px");
-    adapt.base.setCSSProperty(this.contentContainer, "transform", "scale(" + scale + ")");
+    adapt.base.setCSSProperty(this.outerZoomBox, "width", `${width*scale}px`);
+    adapt.base.setCSSProperty(this.outerZoomBox, "height", `${height*scale}px`);
+    adapt.base.setCSSProperty(this.contentContainer, "width", `${width}px`);
+    adapt.base.setCSSProperty(this.contentContainer, "height", `${height}px`);
+    adapt.base.setCSSProperty(this.contentContainer, "transform", `scale(${scale})`);
 };
 
 /**

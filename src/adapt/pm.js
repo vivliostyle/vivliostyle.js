@@ -51,7 +51,7 @@ adapt.pm.PageBox = function(scope, name, pseudoName, classes, parent) {
     /** @const */ this.pseudoName = pseudoName;
     /** @const */ this.classes = classes;
     /** @const */ this.parent = parent;
-    /** @const */ this.key = "p" + (adapt.pm.keyCount++);
+    /** @const */ this.key = `p${adapt.pm.keyCount++}`;
     if (parent) {
         this.index = parent.children.length;
         parent.children.push(this);
@@ -976,9 +976,9 @@ adapt.pm.PageBoxInstance.prototype.assignLeftPosition = function(context, contai
     const borderLeftWidth = this.getPropAsNumber(context, "border-left-width");
     const width = this.getPropAsNumber(context, "width");
     container.setHorizontalPosition(left, width);
-    adapt.base.setCSSProperty(container.element, "margin-left", marginLeft + "px");
-    adapt.base.setCSSProperty(container.element, "padding-left", paddingLeft + "px");
-    adapt.base.setCSSProperty(container.element, "border-left-width", borderLeftWidth + "px");
+    adapt.base.setCSSProperty(container.element, "margin-left", `${marginLeft}px`);
+    adapt.base.setCSSProperty(container.element, "padding-left", `${paddingLeft}px`);
+    adapt.base.setCSSProperty(container.element, "border-left-width", `${borderLeftWidth}px`);
     container.marginLeft = marginLeft;
     container.borderLeft = borderLeftWidth;
     container.paddingLeft = paddingLeft;
@@ -996,9 +996,9 @@ adapt.pm.PageBoxInstance.prototype.assignRightPosition = function(context, conta
     const marginRight = this.getPropAsNumber(context, "margin-right");
     let paddingRight = this.getPropAsNumber(context, "padding-right");
     const borderRightWidth = this.getPropAsNumber(context, "border-right-width");
-    adapt.base.setCSSProperty(container.element, "margin-right", marginRight + "px");
-    adapt.base.setCSSProperty(container.element, "padding-right", paddingRight + "px");
-    adapt.base.setCSSProperty(container.element, "border-right-width", borderRightWidth + "px");
+    adapt.base.setCSSProperty(container.element, "margin-right", `${marginRight}px`);
+    adapt.base.setCSSProperty(container.element, "padding-right", `${paddingRight}px`);
+    adapt.base.setCSSProperty(container.element, "border-right-width", `${borderRightWidth}px`);
     container.marginRight = marginRight;
     container.borderRight = borderRightWidth;
     if (this.vertical && snapWidth > 0) {
@@ -1037,10 +1037,10 @@ adapt.pm.PageBoxInstance.prototype.assignTopPosition = function(context, contain
         }
     }
     container.paddingTop = paddingTop;
-    adapt.base.setCSSProperty(container.element, "top", top + "px");
-    adapt.base.setCSSProperty(container.element, "margin-top", marginTop + "px");
-    adapt.base.setCSSProperty(container.element, "padding-top", paddingTop + "px");
-    adapt.base.setCSSProperty(container.element, "border-top-width", borderTopWidth + "px");
+    adapt.base.setCSSProperty(container.element, "top", `${top}px`);
+    adapt.base.setCSSProperty(container.element, "margin-top", `${marginTop}px`);
+    adapt.base.setCSSProperty(container.element, "padding-top", `${paddingTop}px`);
+    adapt.base.setCSSProperty(container.element, "border-top-width", `${borderTopWidth}px`);
 };
 
 /**
@@ -1053,10 +1053,10 @@ adapt.pm.PageBoxInstance.prototype.assignBottomPosition = function(context, cont
     const paddingBottom = this.getPropAsNumber(context, "padding-bottom");
     const borderBottomWidth = this.getPropAsNumber(context, "border-bottom-width");
     const height = this.getPropAsNumber(context, "height") - container.snapOffsetY;
-    adapt.base.setCSSProperty(container.element, "height", height + "px");
-    adapt.base.setCSSProperty(container.element, "margin-bottom", marginBottom + "px");
-    adapt.base.setCSSProperty(container.element, "padding-bottom", paddingBottom + "px");
-    adapt.base.setCSSProperty(container.element, "border-bottom-width", borderBottomWidth + "px");
+    adapt.base.setCSSProperty(container.element, "height", `${height}px`);
+    adapt.base.setCSSProperty(container.element, "margin-bottom", `${marginBottom}px`);
+    adapt.base.setCSSProperty(container.element, "padding-bottom", `${paddingBottom}px`);
+    adapt.base.setCSSProperty(container.element, "border-bottom-width", `${borderBottomWidth}px`);
     container.height = height - container.snapOffsetY;
     container.marginBottom = marginBottom;
     container.borderBottom = borderBottomWidth;
@@ -1117,7 +1117,7 @@ adapt.pm.PageBoxInstance.prototype.sizeWithMaxHeight = function(context, contain
         this.assignTopPosition(context, container);
         height -= container.snapOffsetY;
         container.height = height;
-        adapt.base.setCSSProperty(container.element, "height", height + "px");
+        adapt.base.setCSSProperty(container.element, "height", `${height}px`);
     }
 };
 
@@ -1136,8 +1136,8 @@ adapt.pm.PageBoxInstance.prototype.sizeWithMaxWidth = function(context, containe
         width -= container.snapOffsetX;
         container.width = width;
         const right = this.getPropAsNumber(context, "right");
-        adapt.base.setCSSProperty(container.element, "right", right + "px");
-        adapt.base.setCSSProperty(container.element, "width", width + "px");
+        adapt.base.setCSSProperty(container.element, "right", `${right}px`);
+        adapt.base.setCSSProperty(container.element, "width", `${width}px`);
     }
 };
 
@@ -1350,11 +1350,11 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
                 const rule = container.element.ownerDocument.createElement("div");
                 adapt.base.setCSSProperty(rule, "position", "absolute");
                 adapt.base.setCSSProperty(rule, this.vertical ? "left" : "top", "0px");
-                adapt.base.setCSSProperty(rule, this.vertical ? "top" : "left", pos + "px");
+                adapt.base.setCSSProperty(rule, this.vertical ? "top" : "left", `${pos}px`);
                 adapt.base.setCSSProperty(rule, this.vertical ? "height" : "width", "0px");
-                adapt.base.setCSSProperty(rule, this.vertical ? "width" : "height", size + "px");
+                adapt.base.setCSSProperty(rule, this.vertical ? "width" : "height", `${size}px`);
                 adapt.base.setCSSProperty(rule, border,
-                    ruleWidth + "px " + ruleStyle.toString() + (ruleColor ? " " + ruleColor.toString() : ""));
+                    `${ruleWidth}px ${ruleStyle.toString()}${ruleColor ? ` ${ruleColor.toString()}` : ""}`);
                 container.element.insertBefore(rule, container.element.firstChild);
             }
         }
@@ -1608,14 +1608,14 @@ adapt.pm.PageBoxParserHandler.prototype.property = function(name, value, importa
  * @override
  */
 adapt.pm.PageBoxParserHandler.prototype.unknownProperty = function(name, value) {
-    this.report("E_INVALID_PROPERTY " + name + ": " + value.toString());
+    this.report(`E_INVALID_PROPERTY ${name}: ${value.toString()}`);
 };
 
 /**
  * @override
  */
 adapt.pm.PageBoxParserHandler.prototype.invalidPropertyValue = function(name, value) {
-    this.report("E_INVALID_PROPERTY_VALUE " + name + ": " + value.toString());
+    this.report(`E_INVALID_PROPERTY_VALUE ${name}: ${value.toString()}`);
 };
 
 /**

@@ -84,7 +84,7 @@ adapt.base.resolveURL = (relURL, baseURL) => {
         return relURL;
     }
     if (baseURL.match(/^\w{2,}:\/\/[^\/]+$/))
-        baseURL = baseURL + '/';
+        baseURL = `${baseURL}/`;
     /** @type {Array.<string>} */ let r;
     if (relURL.match(/^\/\//)) {
         r = baseURL.match(/^(\w{2,}:)\/\//);
@@ -170,7 +170,7 @@ adapt.base.NS = {
  * @return {?string} parameter value
  */
 adapt.base.getURLParam = (name, opt_url) => {
-    const rg = new RegExp('#(.*&)?' + adapt.base.escapeRegExp(name) + '=([^#&]*)');
+    const rg = new RegExp(`#(.*&)?${adapt.base.escapeRegExp(name)}=([^#&]*)`);
     const url = opt_url || window.location.href;
     const r = url.match(rg);
     if (r)
@@ -185,7 +185,7 @@ adapt.base.getURLParam = (name, opt_url) => {
  * @return {string} new url
  */
 adapt.base.setURLParam = (url, name, value) => {
-    const rg = new RegExp('#(.*&)?' + adapt.base.escapeRegExp(name) + '=([^#&]*)');
+    const rg = new RegExp(`#(.*&)?${adapt.base.escapeRegExp(name)}=([^#&]*)`);
     const r = url.match(rg);
     if (r) {
         const length = r[2].length;
@@ -193,9 +193,9 @@ adapt.base.setURLParam = (url, name, value) => {
         return url.substr(0, index) + value + url.substr(index + length);
     }
     if (!url.match(/#/)) {
-        return url + "#" + name + "=" + value;
+        return `${url}#${name}=${value}`;
     } else {
-        return url + "&" + name + "=" + value;
+        return `${url}&${name}=${value}`;
     }
 };
 
@@ -304,7 +304,7 @@ adapt.base.PriorityQueue.prototype.remove = function() {
  */
 adapt.base.cssToJSProp = (prefix, cssPropName) => {
     if (prefix) {
-        cssPropName = "-" + cssPropName;
+        cssPropName = `-${cssPropName}`;
         prefix = prefix.replace(/-/g, "");
         if (prefix === "moz") {
             prefix = "Moz";
@@ -496,7 +496,7 @@ adapt.base.StringBuffer.prototype.toString = function() {
  * @return {string}
  */
 adapt.base.escapeChar = str => // not called for surrogate pairs, no need to worry about them
-'\\' + str.charCodeAt(0).toString(16) + ' ';
+`\\${str.charCodeAt(0).toString(16)} `;
 
 /**
  * @param {string} name
@@ -574,7 +574,7 @@ adapt.base.unescapeStrFromHex = (str, prefix) => {
     function unescapeChar(s) {
         return adapt.base.unescapeCharFromHex(s, prefix);
     }
-    const regexp = new RegExp(adapt.base.escapeRegExp(prefix) + "[0-9a-fA-F]{4}", "g");
+    const regexp = new RegExp(`${adapt.base.escapeRegExp(prefix)}[0-9a-fA-F]{4}`, "g");
     return str.replace(regexp, unescapeChar);
 };
 

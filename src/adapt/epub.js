@@ -104,16 +104,16 @@ adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
     /** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ const frame
         = adapt.task.newFrame("loadEPUBDoc");
     if (url.substring(url.length - 1) !== "/") {
-        url = url + "/";
+        url = `${url}/`;
     }
     if (haveZipMetadata) {
-        self.startLoadingAsJSON(url + "?r=list");
+        self.startLoadingAsJSON(`${url}?r=list`);
     }
-    self.startLoadingAsPlainXML(url + "META-INF/encryption.xml");
-    const containerURL = url + "META-INF/container.xml";
-    self.loadAsPlainXML(containerURL, true, "Failed to fetch EPUB container.xml from " + containerURL).then(containerXML => {
+    self.startLoadingAsPlainXML(`${url}META-INF/encryption.xml`);
+    const containerURL = `${url}META-INF/container.xml`;
+    self.loadAsPlainXML(containerURL, true, `Failed to fetch EPUB container.xml from ${containerURL}`).then(containerXML => {
         if (!containerXML) {
-            vivliostyle.logging.logger.error("Received an empty response for EPUB container.xml " + containerURL + ". This may be caused by the server not allowing cross origin requests.");
+            vivliostyle.logging.logger.error(`Received an empty response for EPUB container.xml ${containerURL}. This may be caused by the server not allowing cross origin requests.`);
         } else {
             const roots = containerXML.doc().child("container").child("rootfiles")
                 .child("rootfile").attribute("full-path");
@@ -148,14 +148,14 @@ adapt.epub.EPUBDocStore.prototype.loadOPF = function(epubURL, root, haveZipMetad
         = adapt.task.newFrame("loadOPF");
     self.loadAsPlainXML(url).then(opfXML => {
         if (!opfXML) {
-            vivliostyle.logging.logger.error("Received an empty response for EPUB OPF " + url + ". This may be caused by the server not allowing cross origin requests.");
+            vivliostyle.logging.logger.error(`Received an empty response for EPUB OPF ${url}. This may be caused by the server not allowing cross origin requests.`);
         } else {
-            self.loadAsPlainXML(epubURL + "META-INF/encryption.xml").then(encXML => {
+            self.loadAsPlainXML(`${epubURL}META-INF/encryption.xml`).then(encXML => {
                 const zipMetadataResult = haveZipMetadata ?
-                    self.loadAsJSON(epubURL + "?r=list") : adapt.task.newResult(null);
+                    self.loadAsJSON(`${epubURL}?r=list`) : adapt.task.newResult(null);
                 zipMetadataResult.then(zipMetadata => {
                     opf = new adapt.epub.OPFDoc(self, epubURL);
-                    opf.initWithXMLDoc(opfXML, encXML, zipMetadata, epubURL + "?r=manifest").then(() => {
+                    opf.initWithXMLDoc(opfXML, encXML, zipMetadata, `${epubURL}?r=manifest`).then(() => {
                         self.opfByURL[url] = opf;
                         self.primaryOPFByEPubURL[epubURL] = opf;
                         frame.finish(opf);
@@ -191,10 +191,10 @@ adapt.epub.EPUBDocStore.prototype.load = function(url) {
         return r.isPending() ? r : adapt.task.newResult(r.get());
     } else {
         const frame = adapt.task.newFrame("EPUBDocStore.load");
-        r = adapt.epub.EPUBDocStore.superClass_.load.call(this, docURL, true, "Failed to fetch a source document from " + docURL);
+        r = adapt.epub.EPUBDocStore.superClass_.load.call(this, docURL, true, `Failed to fetch a source document from ${docURL}`);
         r.then(xmldoc => {
             if (!xmldoc) {
-                vivliostyle.logging.logger.error("Received an empty response for " + docURL + ". This may be caused by the server not allowing cross origin requests.");
+                vivliostyle.logging.logger.error(`Received an empty response for ${docURL}. This may be caused by the server not allowing cross origin requests.`);
             } else {
                 frame.finish(xmldoc);
             }
@@ -251,7 +251,7 @@ adapt.epub.OPFItem.prototype.initWithElement = function(itemElem, opfURL) {
  */
 adapt.epub.OPFItem.prototype.initWithParam = function(param) {
     this.spineIndex = param.index;
-    this.id = "item" + (param.index+1);
+    this.id = `item${param.index+1}`;
     this.src = param.url;
     this.startPage = param.startPage;
     this.skipPagesBefore = param.skipPagesBefore;
@@ -298,7 +298,7 @@ adapt.epub.makeDeobfuscator = uid => {
  * @param {string} uid
  * @return {string}
  */
-adapt.epub.makeObfuscationKey = uid => "1040:" + adapt.sha1.bytesToSHA1Hex(uid);
+adapt.epub.makeObfuscationKey = uid => `1040:${adapt.sha1.bytesToSHA1Hex(uid)}`;
 
 /**
  * @typedef {{
@@ -334,12 +334,12 @@ adapt.epub.defaultIRI = "http://idpf.org/epub/vocab/package/#";
  * @const
  */
 adapt.epub.metaTerms = {
-    language: adapt.epub.predefinedPrefixes["dcterms"] + "language",
-    title: adapt.epub.predefinedPrefixes["dcterms"] + "title",
-    creator: adapt.epub.predefinedPrefixes["dcterms"] + "creator",
-    titleType: adapt.epub.defaultIRI + "title-type",
-    displaySeq: adapt.epub.defaultIRI + "display-seq",
-    alternateScript: adapt.epub.defaultIRI + "alternate-script"
+    language: `${adapt.epub.predefinedPrefixes["dcterms"]}language`,
+    title: `${adapt.epub.predefinedPrefixes["dcterms"]}title`,
+    creator: `${adapt.epub.predefinedPrefixes["dcterms"]}creator`,
+    titleType: `${adapt.epub.defaultIRI}title-type`,
+    displaySeq: `${adapt.epub.defaultIRI}display-seq`,
+    alternateScript: `${adapt.epub.defaultIRI}alternate-script`
 };
 
 /**
@@ -566,7 +566,7 @@ adapt.epub.OPFDoc.prototype.createDocumentURLTransformer = function() {
          * @override
          */
         transformFragment(fragment, baseURL) {
-            const url = baseURL + (fragment ? "#" + fragment : "");
+            const url = baseURL + (fragment ? `#${fragment}` : "");
             return adapt.epub.transformedIdPrefix + adapt.base.escapeNameStrToHex(url, ":");
         }
 
@@ -580,7 +580,7 @@ adapt.epub.OPFDoc.prototype.createDocumentURLTransformer = function() {
                 const fragment = r[2];
                 if (path) {
                     if (self.items.some(item => item.src === path)) {
-                        return "#" + this.transformFragment(fragment, path);
+                        return `#${this.transformFragment(fragment, path)}`;
                     }
                 }
             }
@@ -648,7 +648,7 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
     const pkg = opfXML.doc().child("package");
     const uidref = pkg.attribute("unique-identifier")[0];
     if (uidref) {
-        const uidElem = opfXML.getElement(opfXML.url + "#" + uidref);
+        const uidElem = opfXML.getElement(`${opfXML.url}#${uidref}`);
         if (uidElem) {
             this.uid = uidElem.textContent.replace(/[ \n\r\t]/g, '');
         }
@@ -1610,7 +1610,7 @@ adapt.epub.OPFView.prototype.navigateTo = function(href, position) {
             } else {
                 path = restored[0];
             }
-            href = path + (restored[1] ? "#" + restored[1] : "");
+            href = path + (restored[1] ? `#${restored[1]}` : "");
         }
         if (path == null) {
             return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
@@ -2014,8 +2014,8 @@ adapt.epub.OPFView.prototype.showTOC = function(autohide) {
     pageCont.style.visibility = "hidden";
     pageCont.style.left = "3px";
     pageCont.style.top = "3px";
-    pageCont.style.width = (tocWidth + 10) + "px";
-    pageCont.style.maxHeight = tocHeight + "px";
+    pageCont.style.width = `${tocWidth + 10}px`;
+    pageCont.style.maxHeight = `${tocHeight}px`;
     pageCont.style.overflow = "scroll";
     pageCont.style.overflowX = "hidden";
     pageCont.style.background = "#EEE";

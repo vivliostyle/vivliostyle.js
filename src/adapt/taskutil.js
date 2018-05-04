@@ -174,7 +174,7 @@ adapt.taskutil.loadElement = (elem, src) => {
             elem.src = src;
         }
         return frame.result();
-    }, "loadElement " + src);
+    }, `loadElement ${src}`);
     fetcher.start();
     return fetcher;
 };
