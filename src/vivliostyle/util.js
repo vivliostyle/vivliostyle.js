@@ -45,7 +45,7 @@ goog.provide("vivliostyle.util");
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex#Polyfill
     if (!Array.prototype.findIndex) {
         Object.defineProperty(Array.prototype, 'findIndex', {
-            value: function(predicate) {
+            value(predicate) {
                 'use strict';
                 if (this == null) {
                     throw new TypeError('Array.prototype.findIndex called on null or undefined');

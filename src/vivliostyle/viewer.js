@@ -156,7 +156,7 @@ goog.scope(() => {
         /** @const @private */ this.eventTarget = new adapt.base.SimpleEventTarget();
 
         Object.defineProperty(this, "readyState", {
-            get: function() {
+            get() {
                 return this.adaptViewer.readyState;
             }
         });

@@ -125,7 +125,7 @@ adapt.vtree.Page = function(container, bleedBox) {
                 currentTarget: null,
                 anchorElement: anchorElement,
                 href: href,
-                preventDefault: function() { e.preventDefault(); }
+                preventDefault() { e.preventDefault(); }
             };
             self.dispatchEvent(evt);
         }
