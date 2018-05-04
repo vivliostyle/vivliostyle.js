@@ -21,7 +21,7 @@ goog.provide("vivliostyle.column");
 goog.require("goog.asserts");
 goog.require("adapt.css");
 
-goog.scope(function() {
+goog.scope(() => {
 
     /**
      * @typedef {{
@@ -100,14 +100,14 @@ goog.scope(function() {
         self.savePageFloatLayoutContexts(layoutResult);
         self.layoutContainer.clear();
         var candidates = [self.createTrialResult(layoutResult)];
-        frame.loopWithFrame(function(loopFrame) {
+        frame.loopWithFrame(loopFrame => {
             if (!self.hasNextCandidate(candidates)) {
                 loopFrame.breakLoop();
                 return;
             }
 
             self.updateCondition(candidates);
-            self.columnGenerator().then(function(layoutResult) {
+            self.columnGenerator().then(layoutResult => {
                 self.savePageFloatLayoutContexts(layoutResult);
                 self.layoutContainer.clear();
                 if (!layoutResult) {
@@ -117,10 +117,8 @@ goog.scope(function() {
                 candidates.push(self.createTrialResult(layoutResult));
                 loopFrame.continueLoop();
             });
-        }).then(function() {
-            var result = candidates.reduce(function(prev, curr) {
-                return curr.penalty < prev.penalty ? curr : prev;
-            }, candidates[0]);
+        }).then(() => {
+            var result = candidates.reduce((prev, curr) => curr.penalty < prev.penalty ? curr : prev, candidates[0]);
             self.restoreContents(result.layoutResult);
             self.postBalance();
             frame.finish(result.layoutResult);
@@ -142,7 +140,7 @@ goog.scope(function() {
      * @protected
      * @param {!ColumnLayoutResult} layoutResult
      */
-    ColumnBalancer.prototype.preBalance = function(layoutResult) {};
+    ColumnBalancer.prototype.preBalance = layoutResult => {};
 
     /**
      * @abstract
@@ -150,7 +148,7 @@ goog.scope(function() {
      * @param {!ColumnLayoutResult} layoutResult
      * @returns {number}
      */
-    ColumnBalancer.prototype.calculatePenalty = function(layoutResult) {};
+    ColumnBalancer.prototype.calculatePenalty = layoutResult => {};
 
     /**
      * @abstract
@@ -158,14 +156,14 @@ goog.scope(function() {
      * @param {!Array<!ColumnBalancingTrialResult>} candidates
      * @returns {boolean}
      */
-    ColumnBalancer.prototype.hasNextCandidate = function(candidates) {};
+    ColumnBalancer.prototype.hasNextCandidate = candidates => {};
 
     /**
      * @abstract
      * @protected
      * @param {!Array<!ColumnBalancingTrialResult>} candidates
      */
-    ColumnBalancer.prototype.updateCondition = function(candidates) {};
+    ColumnBalancer.prototype.updateCondition = candidates => {};
 
     /**
      * @protected
@@ -189,7 +187,7 @@ goog.scope(function() {
      */
     ColumnBalancer.prototype.restoreContents = function(newLayoutResult) {
         var parent = this.layoutContainer.element;
-        newLayoutResult.columns.forEach(function(c) {
+        newLayoutResult.columns.forEach(c => {
             parent.appendChild(c.element);
         });
         goog.asserts.assert(newLayoutResult.columnPageFloatLayoutContexts);
@@ -204,7 +202,7 @@ goog.scope(function() {
      * @param {!Array<!ColumnBalancingTrialResult>} candidates
      * @returns {boolean}
      */
-    vivliostyle.column.canReduceContainerSize = function(candidates) {
+    vivliostyle.column.canReduceContainerSize = candidates => {
         var lastCandidate = candidates[candidates.length - 1];
         if (lastCandidate.penalty === 0)
             return false;
@@ -212,12 +210,8 @@ goog.scope(function() {
         if (secondLastCandidate && lastCandidate.penalty >= secondLastCandidate.penalty)
             return false;
         var columns = lastCandidate.layoutResult.columns;
-        var maxColumnBlockSize = Math.max.apply(null, columns.map(function(c) {
-            return c.computedBlockSize;
-        }));
-        var maxPageFloatBlockSize = Math.max.apply(null, columns.map(function(c) {
-            return c.getMaxBlockSizeOfPageFloats();
-        }));
+        var maxColumnBlockSize = Math.max.apply(null, columns.map(c => c.computedBlockSize));
+        var maxPageFloatBlockSize = Math.max.apply(null, columns.map(c => c.getMaxBlockSizeOfPageFloats()));
         return maxColumnBlockSize > maxPageFloatBlockSize + COLUMN_LENGTH_STEP;
     };
 
@@ -226,9 +220,9 @@ goog.scope(function() {
      * @param {!Array<!ColumnBalancingTrialResult>} candidates
      * @param {!adapt.vtree.Container} container
      */
-    vivliostyle.column.reduceContainerSize = function(candidates, container) {
+    vivliostyle.column.reduceContainerSize = (candidates, container) => {
         var columns = candidates[candidates.length - 1].layoutResult.columns;
-        var maxColumnBlockSize = Math.max.apply(null, columns.map(function(c) {
+        var maxColumnBlockSize = Math.max.apply(null, columns.map(c => {
             if (!isNaN(c.blockDistanceToBlockEndFloats)) {
                 return c.computedBlockSize - c.blockDistanceToBlockEndFloats + COLUMN_LENGTH_STEP;
             } else {
@@ -265,9 +259,7 @@ goog.scope(function() {
      */
     BalanceLastColumnBalancer.prototype.preBalance = function(layoutResult) {
         var columns = layoutResult.columns;
-        var totalBlockSize = columns.reduce(function(prev, c) {
-            return prev + c.computedBlockSize;
-        }, 0);
+        var totalBlockSize = columns.reduce((prev, c) => prev + c.computedBlockSize, 0);
         setBlockSize(this.layoutContainer, totalBlockSize / this.columnCount);
         this.originalPosition = layoutResult.position;
     };
@@ -294,9 +286,7 @@ goog.scope(function() {
             return false;
         var lastColumnBlockSize = columns[columns.length - 1].computedBlockSize;
         var otherColumns = columns.slice(0, columns.length - 1);
-        return otherColumns.every(function(c) {
-            return lastColumnBlockSize > c.computedBlockSize;
-        });
+        return otherColumns.every(c => lastColumnBlockSize > c.computedBlockSize);
     }
 
     /**
@@ -308,9 +298,7 @@ goog.scope(function() {
         var columns = layoutResult.columns;
         if (isLastColumnLongerThanAnyOtherColumn(columns))
             return Infinity;
-        return Math.max.apply(null, columns.map(function(c) {
-            return c.computedBlockSize;
-        }));
+        return Math.max.apply(null, columns.map(c => c.computedBlockSize));
     };
 
     /**
@@ -361,22 +349,16 @@ goog.scope(function() {
     /**
      * @override
      */
-    BalanceNonLastColumnBalancer.prototype.calculatePenalty = function(layoutResult) {
-        if (layoutResult.columns.every(function(c) { return c.computedBlockSize === 0; }))
+    BalanceNonLastColumnBalancer.prototype.calculatePenalty = layoutResult => {
+        if (layoutResult.columns.every(c => c.computedBlockSize === 0))
             return Infinity;
-        var computedBlockSizes = layoutResult.columns.filter(function(c) {
-            return !c.pageBreakType;
-        }).map(function(c) {
-            return c.computedBlockSize;
-        });
+        var computedBlockSizes = layoutResult.columns.filter(c => !c.pageBreakType).map(c => c.computedBlockSize);
         return vivliostyle.math.variance(computedBlockSizes);
     };
     /**
      * @override
      */
-    BalanceNonLastColumnBalancer.prototype.hasNextCandidate = function(candidates) {
-        return vivliostyle.column.canReduceContainerSize(candidates);
-    };
+    BalanceNonLastColumnBalancer.prototype.hasNextCandidate = candidates => vivliostyle.column.canReduceContainerSize(candidates);
 
     /**
      * @override
@@ -395,8 +377,15 @@ goog.scope(function() {
      * @param {!vivliostyle.pagefloat.PageFloatLayoutContext} regionPageFloatLayoutContext
      * @returns {?ColumnBalancer}
      */
-    vivliostyle.column.createColumnBalancer = function(columnCount, columnFill, columnGenerator, regionPageFloatLayoutContext,
-                                                       layoutContainer, columns, flowPosition) {
+    vivliostyle.column.createColumnBalancer = (
+        columnCount,
+        columnFill,
+        columnGenerator,
+        regionPageFloatLayoutContext,
+        layoutContainer,
+        columns,
+        flowPosition
+    ) => {
         if (columnFill === adapt.css.ident.auto) {
             return null;
         } else {

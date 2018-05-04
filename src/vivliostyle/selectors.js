@@ -20,7 +20,7 @@ goog.provide("vivliostyle.selectors");
 
 goog.require("vivliostyle.namespace");
 
-goog.scope(function() {
+goog.scope(() => {
 
     "use strict";
 
@@ -29,13 +29,13 @@ goog.scope(function() {
     /**
      * @interface
      */
-    vivliostyle.selectors.Matcher = function() {};
+    vivliostyle.selectors.Matcher = () => {};
     /** @const */ var Matcher = vivliostyle.selectors.Matcher;
 
     /**
      * @return {boolean}
      */
-    Matcher.prototype.matches = function() {};
+    Matcher.prototype.matches = () => {};
 
 
     /**
@@ -71,9 +71,7 @@ goog.scope(function() {
 
     /** @override */
     AnyMatcher.prototype.matches = function() {
-        return this.matchers.some(function(matcher) {
-            return matcher.matches();
-        });
+        return this.matchers.some(matcher => matcher.matches());
     };
 
     /**
@@ -88,15 +86,13 @@ goog.scope(function() {
 
     /** @override */
     AllMatcher.prototype.matches = function() {
-        return this.matchers.every(function(matcher) {
-            return matcher.matches();
-        });
+        return this.matchers.every(matcher => matcher.matches());
     };
 
     /**
      * @constructor
      */
-    vivliostyle.selectors.MatcherBuilder = function() {};
+    vivliostyle.selectors.MatcherBuilder = () => {};
     /** @const */ var MatcherBuilder = vivliostyle.selectors.MatcherBuilder;
 
     /**
@@ -104,7 +100,7 @@ goog.scope(function() {
      * @param {string} viewCondition
      * @return {vivliostyle.selectors.Matcher}
      */
-    MatcherBuilder.prototype.buildViewConditionMatcher = function(elementOffset, viewCondition) {
+    MatcherBuilder.prototype.buildViewConditionMatcher = (elementOffset, viewCondition) => {
         var strs = viewCondition.split("_");
         if (strs[0] == "NFS") {
             return new NthFragmentMatcher(elementOffset,
@@ -119,17 +115,13 @@ goog.scope(function() {
      * @param {!Array.<!vivliostyle.selectors.Matcher>} matchers
      * @return {vivliostyle.selectors.Matcher}
      */
-    MatcherBuilder.prototype.buildAllMatcher = function(matchers) {
-        return new AllMatcher(matchers);
-    };
+    MatcherBuilder.prototype.buildAllMatcher = matchers => new AllMatcher(matchers);
 
     /**
      * @param {!Array.<!vivliostyle.selectors.Matcher>} matchers
      * @return {vivliostyle.selectors.Matcher}
      */
-    MatcherBuilder.prototype.buildAnyMatcher = function(matchers) {
-        return new AnyMatcher(matchers);
-    };
+    MatcherBuilder.prototype.buildAnyMatcher = matchers => new AnyMatcher(matchers);
 
     /** @const */
     vivliostyle.selectors.MatcherBuilder.instance =
@@ -140,8 +132,8 @@ goog.scope(function() {
      * @param {adapt.expr.Context} context
      * @param {adapt.csscasc.ElementStyle} style
      */
-    vivliostyle.selectors.mergeViewConditionalStyles = function(cascMap, context, style) {
-        vivliostyle.selectors.forEachViewConditionalStyles(style, function(viewConditionalStyles) {
+    vivliostyle.selectors.mergeViewConditionalStyles = (cascMap, context, style) => {
+        vivliostyle.selectors.forEachViewConditionalStyles(style, viewConditionalStyles => {
             adapt.csscasc.mergeStyle(cascMap, viewConditionalStyles, context);
         });
     };
@@ -150,10 +142,10 @@ goog.scope(function() {
      * @param {adapt.csscasc.ElementStyle} style
      * @param {function(adapt.csscasc.ElementStyle)} callback
      */
-    vivliostyle.selectors.forEachViewConditionalStyles = function(style, callback) {
+    vivliostyle.selectors.forEachViewConditionalStyles = (style, callback) => {
         var viewConditionalStyles = adapt.csscasc.getStyleMap(style, "_viewConditionalStyles");
         if (!viewConditionalStyles) return;
-        viewConditionalStyles.forEach(function(entry) {
+        viewConditionalStyles.forEach(entry => {
             if (!entry.matcher.matches()) return;
             callback(entry.styles);
         });
@@ -165,7 +157,7 @@ goog.scope(function() {
      * @param {number} fragmentIndex
      * @param {number} priority
      */
-    vivliostyle.selectors.registerFragmentIndex = function(elementOffset, fragmentIndex, priority) {
+    vivliostyle.selectors.registerFragmentIndex = (elementOffset, fragmentIndex, priority) => {
         var indices = vivliostyle.selectors.fragmentIndices;
         if (!indices[elementOffset] || indices[elementOffset].priority <= priority) {
             indices[elementOffset] = {
@@ -175,7 +167,7 @@ goog.scope(function() {
         }
     };
 
-    vivliostyle.selectors.clearFragmentIndices = function() {
+    vivliostyle.selectors.clearFragmentIndices = () => {
         vivliostyle.selectors.fragmentIndices = {};
     };
     /**
@@ -207,13 +199,13 @@ goog.scope(function() {
         var pseudoColumn = new PseudoColumn(column, viewRoot, parentNodeContext);
         var initialPageBreakType = pseudoColumn.getColumn().pageBreakType;
         pseudoColumn.getColumn().pageBreakType = null;
-        return pseudoColumn.layout(this.createNodePositionForPseudoElement(), true).thenAsync(function() {
+        return pseudoColumn.layout(this.createNodePositionForPseudoElement(), true).thenAsync(() => {
             this.styler.contentProcessed["after-if-continues"] = false;
             pseudoColumn.getColumn().pageBreakType = initialPageBreakType;
             var pseudoElement = /** @type {!Element} */ (viewRoot.firstChild);
             adapt.base.setCSSProperty(pseudoElement, "display", "block");
             return adapt.task.newResult(pseudoElement);
-        }.bind(this));
+        });
     };
 
     /**
@@ -261,7 +253,7 @@ goog.scope(function() {
     /** @const */ var AfterIfContinuesLayoutConstraint = vivliostyle.selectors.AfterIfContinuesLayoutConstraint;
 
     /** @override */
-    AfterIfContinuesLayoutConstraint.prototype.allowLayout = function(nodeContext, overflownNodeContext, column) {
+    AfterIfContinuesLayoutConstraint.prototype.allowLayout = (nodeContext, overflownNodeContext, column) => {
         if ((overflownNodeContext && !nodeContext) || (nodeContext && nodeContext.overflow)) {
             return false;
         } else {
@@ -270,20 +262,18 @@ goog.scope(function() {
     };
 
     /** @override */
-    AfterIfContinuesLayoutConstraint.prototype.nextCandidate = function(nodeContext) {
-        return false;
-    };
+    AfterIfContinuesLayoutConstraint.prototype.nextCandidate = nodeContext => false;
 
     /** @override */
-    AfterIfContinuesLayoutConstraint.prototype.postLayout = function(allowed, nodeContext, initialPosition, column) {};
+    AfterIfContinuesLayoutConstraint.prototype.postLayout = (allowed, nodeContext, initialPosition, column) => {};
 
     /** @override */
     AfterIfContinuesLayoutConstraint.prototype.finishBreak = function(nodeContext, column) {
         if (!this.getRepetitiveElements().affectTo(nodeContext)) return adapt.task.newResult(true);
-        return this.afterIfContinues.createElement(column, this.nodeContext).thenAsync(function(element) {
+        return this.afterIfContinues.createElement(column, this.nodeContext).thenAsync(element => {
             this.nodeContext.viewNode.appendChild(element);
             return adapt.task.newResult(true);
-        }.bind(this));
+        });
     };
     AfterIfContinuesLayoutConstraint.prototype.getRepetitiveElements = function() {
         return new AfterIfContinuesElementsOffset(this.nodeContext, this.pseudoElementHeight);
@@ -294,9 +284,7 @@ goog.scope(function() {
         return this.afterIfContinues == /** @type {AfterIfContinuesLayoutConstraint} */ (constraint).afterIfContinues;
     };
     /** @override */
-    AfterIfContinuesLayoutConstraint.prototype.getPriorityOfFinishBreak = function() {
-        return 9;
-    };
+    AfterIfContinuesLayoutConstraint.prototype.getPriorityOfFinishBreak = () => 9;
 
     /**
      * @constructor
@@ -351,7 +339,7 @@ goog.scope(function() {
         }
 
         var afterIfContinues = nodeContext.afterIfContinues;
-        return afterIfContinues.createElement(column, nodeContext).thenAsync(function(pseudoElement) {
+        return afterIfContinues.createElement(column, nodeContext).thenAsync(pseudoElement => {
             goog.asserts.assert(nodeContext !== null);
             var pseudoElementHeight = vivliostyle.selectors.calculatePseudoElementHeight(nodeContext, column, pseudoElement);
             column.fragmentLayoutConstraints.push(
@@ -365,22 +353,18 @@ goog.scope(function() {
      * @param {!adapt.layout.Column} column
      * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
      */
-    vivliostyle.selectors.processAfterIfContinues = function(result, column) {
-        return result.thenAsync(function(nodeContext) {
-            return processAfterIfContinuesOfNodeContext(nodeContext, column);
-        });
-    };
+    vivliostyle.selectors.processAfterIfContinues = (result, column) => result.thenAsync(nodeContext => processAfterIfContinuesOfNodeContext(nodeContext, column));
 
     /**
      * @param {!adapt.vtree.NodeContext} nodeContext
      * @param {!adapt.layout.Column} column
      * @return {!adapt.task.Result.<boolean>}
      */
-    vivliostyle.selectors.processAfterIfContinuesOfAncestors = function(nodeContext, column) {
+    vivliostyle.selectors.processAfterIfContinuesOfAncestors = (nodeContext, column) => {
         /** @type {!adapt.task.Frame.<boolean>} */ var frame =
             adapt.task.newFrame("vivliostyle.selectors.processAfterIfContinuesOfAncestors");
         /** @type {adapt.vtree.NodeContext} */ var current =  nodeContext;
-        frame.loop(function() {
+        frame.loop(() => {
             if (current !== null) {
                 var result = processAfterIfContinuesOfNodeContext(current, column);
                 current = current.parent;
@@ -388,7 +372,7 @@ goog.scope(function() {
             } else {
                 return adapt.task.newResult(false);
             }
-        }).then(function() {
+        }).then(() => {
             frame.finish(true);
         });
         return frame.result();
@@ -401,7 +385,7 @@ goog.scope(function() {
      * @param {!Element} pseudoElement
      * @return {number}
      */
-    vivliostyle.selectors.calculatePseudoElementHeight = function(nodeContext, column, pseudoElement) {
+    vivliostyle.selectors.calculatePseudoElementHeight = (nodeContext, column, pseudoElement) => {
         var parentNode = /** @type {Element} */ (nodeContext.viewNode);
         parentNode.appendChild(pseudoElement);
         var height = adapt.layout.getElementHeight(pseudoElement, column, nodeContext.vertical);

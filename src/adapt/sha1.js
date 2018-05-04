@@ -25,15 +25,13 @@ goog.require("adapt.base");
  * @param {number} n
  * @return {string} big-endian byte sequence
  */
-adapt.sha1.encode32 = function(n) {
-    return String.fromCharCode((n >>> 24)&0xFF, (n >>> 16)&0xFF, (n >>> 8)&0xFF, n&0xFF);
-};
+adapt.sha1.encode32 = n => String.fromCharCode((n >>> 24)&0xFF, (n >>> 16)&0xFF, (n >>> 8)&0xFF, n&0xFF);
 
 /**
  * @param {string} bytes big-endian byte sequence
  * @return {number}
  */
-adapt.sha1.decode32 = function(bytes) {
+adapt.sha1.decode32 = bytes => {
     // Important facts: "".charCodeAt(0) == NaN, NaN & 0xFF == 0
     var b0 = bytes.charCodeAt(0) & 0xFF;
     var b1 = bytes.charCodeAt(1) & 0xFF;
@@ -46,7 +44,7 @@ adapt.sha1.decode32 = function(bytes) {
  * @param {string} bytes chars with codes 0 - 255 that represent message byte values
  * @return {Array.<number>} big-endian uint32 numbers representing sha1 hash
  */
-adapt.sha1.bytesToSHA1Int32 = function(bytes) {
+adapt.sha1.bytesToSHA1Int32 = bytes => {
     var sb = new adapt.base.StringBuffer();
     sb.append(bytes);
     var appendCount = (55 - bytes.length) & 63;
@@ -113,7 +111,7 @@ adapt.sha1.bytesToSHA1Int32 = function(bytes) {
  * @param {string} bytes chars with codes 0 - 255 that represent message byte values
  * @return {Array.<number>} uint8 numbers representing sha1 hash
  */
-adapt.sha1.bytesToSHA1Int8 = function(bytes) {
+adapt.sha1.bytesToSHA1Int8 = bytes => {
     var h = adapt.sha1.bytesToSHA1Int32(bytes);
     var res = [];
     for (var i = 0; i < h.length; i++) {
@@ -127,7 +125,7 @@ adapt.sha1.bytesToSHA1Int8 = function(bytes) {
  * @param {string} bytes chars with codes 0 - 255 that represent message byte values
  * @return {string} chars with codes 0 - 255 equal to SHA1 hash of the input
  */
-adapt.sha1.bytesToSHA1Bytes = function(bytes) {
+adapt.sha1.bytesToSHA1Bytes = bytes => {
     var h = adapt.sha1.bytesToSHA1Int32(bytes);
     var sb = new adapt.base.StringBuffer();
     for (var i = 0; i < h.length; i++) {
@@ -140,7 +138,7 @@ adapt.sha1.bytesToSHA1Bytes = function(bytes) {
  * @param {string} bytes chars with codes 0 - 255 that represent message byte values
  * @return {string} hex-encoded SHA1 hash
  */
-adapt.sha1.bytesToSHA1Hex = function(bytes) {
+adapt.sha1.bytesToSHA1Hex = bytes => {
     var sha1 = adapt.sha1.bytesToSHA1Bytes(bytes);
     var sb = new adapt.base.StringBuffer();
     for (var i = 0; i < sha1.length; i++) {
@@ -153,7 +151,7 @@ adapt.sha1.bytesToSHA1Hex = function(bytes) {
  * @param {string} bytes chars with codes 0 - 255 that represent message byte values
  * @return {string} base64-encoded SHA1 hash of the input
  */
-adapt.sha1.bytesToSHA1Base64 = function(bytes) {
+adapt.sha1.bytesToSHA1Base64 = bytes => {
     var sha1 = adapt.sha1.bytesToSHA1Bytes(bytes);
     var sb = new adapt.base.StringBuffer();
     adapt.base.appendBase64(sb, sha1);

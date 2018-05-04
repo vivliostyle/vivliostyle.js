@@ -96,9 +96,7 @@ adapt.geom.Band = function(y1, y2, x1, x2) {
  * @param {adapt.geom.Segment} s2
  * @return {number}
  */
-adapt.geom.segmentCompare = function(s1, s2) {
-    return s1.low.y - s2.low.y || s1.low.x - s2.low.x;
-};
+adapt.geom.segmentCompare = (s1, s2) => s1.low.y - s2.low.y || s1.low.x - s2.low.x;
 
 /**
  * @param {Array.<adapt.geom.Point>} points
@@ -147,7 +145,7 @@ adapt.geom.Shape.prototype.withOffset = function(offsetX, offsetY) {
  * @param {number} ry
  * @return {adapt.geom.Shape}
  */
-adapt.geom.shapeForEllipse = function(cx, cy, rx, ry) {
+adapt.geom.shapeForEllipse = (cx, cy, rx, ry) => {
     var count = 20;
     /** @type {Array.<adapt.geom.Point>} */ var points = [];
     for (var i = 0; i < count; i++) {
@@ -165,21 +163,17 @@ adapt.geom.shapeForEllipse = function(cx, cy, rx, ry) {
  * @param {number} y2
  * @return {adapt.geom.Shape}
  */
-adapt.geom.shapeForRect = function(x1, y1, x2, y2) {
-    return new adapt.geom.Shape([new adapt.geom.Point(x1, y1),
-        new adapt.geom.Point(x2, y1), new adapt.geom.Point(x2, y2),
-        new adapt.geom.Point(x1, y2)]);
-};
+adapt.geom.shapeForRect = (x1, y1, x2, y2) => new adapt.geom.Shape([new adapt.geom.Point(x1, y1),
+    new adapt.geom.Point(x2, y1), new adapt.geom.Point(x2, y2),
+    new adapt.geom.Point(x1, y2)]);
 
 /**
  * @param {adapt.geom.Rect} r
  * @return {adapt.geom.Shape}
  */
-adapt.geom.shapeForRectObj = function(r) {
-    return new adapt.geom.Shape([new adapt.geom.Point(r.x1, r.y1),
-        new adapt.geom.Point(r.x2, r.y1), new adapt.geom.Point(r.x2, r.y2),
-        new adapt.geom.Point(r.x1, r.y2)]);
-};
+adapt.geom.shapeForRectObj = r => new adapt.geom.Shape([new adapt.geom.Point(r.x1, r.y1),
+    new adapt.geom.Point(r.x2, r.y1), new adapt.geom.Point(r.x2, r.y2),
+    new adapt.geom.Point(r.x1, r.y2)]);
 
 /**
  * @param {number} x
@@ -200,7 +194,7 @@ adapt.geom.BandIntersection = function(x, winding, shapeId, lowOrHigh) {
  * @param {number} y
  * @return {number}
  */
-adapt.geom.intersectY = function(s, y) {
+adapt.geom.intersectY = (s, y) => {
     var x = s.low.x + (s.high.x - s.low.x) * (y - s.low.y) /
         (s.high.y - s.low.y);
     if (isNaN(x))
@@ -215,7 +209,7 @@ adapt.geom.intersectY = function(s, y) {
  * @param {number} y2
  * @return {void}
  */
-adapt.geom.addBandIntersections = function(intersections, s, y1, y2) {
+adapt.geom.addBandIntersections = (intersections, s, y1, y2) => {
     /** @type {number} */ var x1;
     /** @type {number} */ var w1;
     /** @type {number} */ var x2;
@@ -258,8 +252,7 @@ adapt.geom.addBandIntersections = function(intersections, s, y1, y2) {
  * @param {number} excludeCount
  * @return {Array.<number>}
  */
-adapt.geom.mergeIntersections = function(intersections, includeCount,
-                                         excludeCount) {
+adapt.geom.mergeIntersections = (intersections, includeCount, excludeCount) => {
     var shapeCount = includeCount + excludeCount;
     /** @type {Array.<number>} */ var windings1 = Array(shapeCount);
     /** @type {Array.<number>} */ var windings2 = Array(shapeCount);
@@ -303,9 +296,7 @@ adapt.geom.mergeIntersections = function(intersections, includeCount,
  * @param {number} unit
  * @return {number}
  */
-adapt.geom.ceil = function(v, unit) {
-    return unit ? Math.ceil(v/unit)*unit : v;
-};
+adapt.geom.ceil = (v, unit) => unit ? Math.ceil(v/unit)*unit : v;
 
 /**
  * Round v down to make it a multiple of unit. If unit is zero, return v.
@@ -313,43 +304,33 @@ adapt.geom.ceil = function(v, unit) {
  * @param {number} unit
  * @return {number}
  */
-adapt.geom.floor = function(v, unit) {
-    return unit ? Math.floor(v/unit)*unit : v;
-};
+adapt.geom.floor = (v, unit) => unit ? Math.floor(v/unit)*unit : v;
 
 /**
  * @param {adapt.geom.Point} point
  * @return {adapt.geom.Point}
  */
-adapt.geom.rotatePoint = function(point) {
-    return new adapt.geom.Point(point.y, -point.x);
-};
+adapt.geom.rotatePoint = point => new adapt.geom.Point(point.y, -point.x);
 
 /**
  * Vertical box to pseudo-horizontal coords.
  * @param {!adapt.geom.Rect} box
  * @return {!adapt.geom.Rect}
  */
-adapt.geom.rotateBox = function(box) {
-    return new adapt.geom.Rect(box.y1, -box.x2, box.y2, -box.x1);
-};
+adapt.geom.rotateBox = box => new adapt.geom.Rect(box.y1, -box.x2, box.y2, -box.x1);
 
 /**
  * Pseudo-horizontal coords to vertical.
  * @param {adapt.geom.Rect} box
  * @return {adapt.geom.Rect}
  */
-adapt.geom.unrotateBox = function(box) {
-    return new adapt.geom.Rect(-box.y2, box.x1, -box.y1, box.x2);
-};
+adapt.geom.unrotateBox = box => new adapt.geom.Rect(-box.y2, box.x1, -box.y1, box.x2);
 
 /**
  * @param {adapt.geom.Shape} shape
  * @return {adapt.geom.Shape}
  */
-adapt.geom.rotateShape = function(shape) {
-    return new adapt.geom.Shape(adapt.base.map(shape.points, adapt.geom.rotatePoint));
-};
+adapt.geom.rotateShape = shape => new adapt.geom.Shape(adapt.base.map(shape.points, adapt.geom.rotatePoint));
 
 /**
  * @param {!adapt.geom.Rect} box
@@ -360,8 +341,7 @@ adapt.geom.rotateShape = function(shape) {
  * @param {boolean} vertical
  * @return {Array.<adapt.geom.Band>}
  */
-adapt.geom.shapesToBands = function(box, include, exclude,
-                                    granularity, snapHeight, vertical) {
+adapt.geom.shapesToBands = (box, include, exclude, granularity, snapHeight, vertical) => {
     if (vertical) {
         box = adapt.geom.rotateBox(box);
         include = adapt.base.map(include, adapt.geom.rotateShape);
@@ -451,14 +431,7 @@ adapt.geom.shapesToBands = function(box, include, exclude,
                 activeSegments[k], y, y2);
         }
         bandIntersections.sort(
-            /**
-             * @param {adapt.geom.BandIntersection} bi1
-             * @param {adapt.geom.BandIntersection} bi2
-             * @return {number}
-             */
-            function(bi1, bi2) {
-                return bi1.x - bi2.x || bi1.lowOrHigh - bi2.lowOrHigh;
-            });
+            (bi1, bi2) => bi1.x - bi2.x || bi1.lowOrHigh - bi2.lowOrHigh);
         var xranges = adapt.geom.mergeIntersections(bandIntersections,
             includeCount, excludeCount);
         if (xranges.length == 0) {
@@ -501,7 +474,7 @@ adapt.geom.shapesToBands = function(box, include, exclude,
  * @param {Array.<adapt.geom.Band>} bands
  * @return {void}
  */
-adapt.geom.normalize = function(box, bands) {
+adapt.geom.normalize = (box, bands) => {
     var k = bands.length - 1;
     // Merge bands with the same x1, x2 and remove unneeded bands at the end.
     // Create fictious last band to merge unneeded bands at the end
@@ -525,7 +498,7 @@ adapt.geom.normalize = function(box, bands) {
  * @param {number} y
  * @return {number}
  */
-adapt.geom.findBand = function(bands, y) {
+adapt.geom.findBand = (bands, y) => {
     var low = 0;
     var high = bands.length;
     while (low < high) {
@@ -544,7 +517,7 @@ adapt.geom.findBand = function(bands, y) {
  * @param {!adapt.geom.Rect} rect
  * @returns {?adapt.geom.Rect} Returns null if such rectangle does not exist.
  */
-adapt.geom.findUppermostFullyOpenRect = function(bands, rect) {
+adapt.geom.findUppermostFullyOpenRect = (bands, rect) => {
     if (!bands.length)
         return rect;
     var topEdge = rect.y1;
@@ -585,7 +558,7 @@ adapt.geom.findUppermostFullyOpenRect = function(bands, rect) {
  * @param {!adapt.geom.Rect} rect
  * @returns {?adapt.geom.Rect} Returns null if such rectangle does not exist.
  */
-adapt.geom.findBottommostFullyOpenRect = function(bands, rect) {
+adapt.geom.findBottommostFullyOpenRect = (bands, rect) => {
     if (!bands.length)
         return rect;
     var bottomEdge = rect.y2;
@@ -625,7 +598,7 @@ adapt.geom.findBottommostFullyOpenRect = function(bands, rect) {
  * @param {string} side either "left" or "right"
  * @return {boolean}
  */
-adapt.geom.positionFloat = function(box, bands, floatBox, side) {
+adapt.geom.positionFloat = (box, bands, floatBox, side) => {
     var y = floatBox.y1;
     var floatWidth = floatBox.x2 - floatBox.x1;
     var floatHeight = floatBox.y2 - floatBox.y1;
@@ -669,7 +642,7 @@ adapt.geom.positionFloat = function(box, bands, floatBox, side) {
  * @param {string} side
  * @return {void}
  */
-adapt.geom.addFloatToBands = function(box, bands, floatBox, floatBands, side) {
+adapt.geom.addFloatToBands = (box, bands, floatBox, floatBands, side) => {
     if (!floatBands) {
         floatBands = [new adapt.geom.Band(floatBox.y1, floatBox.y2,
             floatBox.x1, floatBox.x2)];

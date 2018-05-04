@@ -91,13 +91,13 @@ adapt.vgen.CustomRenderer;
 /**
  * @interface
  */
-adapt.vgen.CustomRendererFactory = function() {};
+adapt.vgen.CustomRendererFactory = () => {};
 
 /**
  * @param {adapt.xmldoc.XMLDocHolder} xmldoc
  * @return {adapt.vgen.CustomRenderer}
  */
-adapt.vgen.CustomRendererFactory.prototype.makeCustomRenderer = function(xmldoc) {};
+adapt.vgen.CustomRendererFactory.prototype.makeCustomRenderer = xmldoc => {};
 
 
 /**
@@ -111,8 +111,8 @@ adapt.vgen.namespacePrefixMap = {};
  * load event fires.
  * @param {HTMLIFrameElement} iframe
  */
-adapt.vgen.initIFrame = function(iframe) {
-    iframe.addEventListener("load", function() {
+adapt.vgen.initIFrame = iframe => {
+    iframe.addEventListener("load", () => {
         iframe.contentWindow.navigator["epubReadingSystem"] = {
             "name": "adapt",
             "version": "0.1",
@@ -131,13 +131,13 @@ adapt.vgen.initIFrame = function(iframe) {
 /**
  * @interface
  */
-adapt.vgen.StylerProducer = function() {};
+adapt.vgen.StylerProducer = () => {};
 
 /**
  * @param {adapt.xmldoc.XMLDocHolder} xmldoc
  * @return {adapt.cssstyler.AbstractStyler}
  */
-adapt.vgen.StylerProducer.prototype.getStylerForDoc = function(xmldoc) {};
+adapt.vgen.StylerProducer.prototype.getStylerForDoc = xmldoc => {};
 
 
 adapt.vgen.pseudoelementDoc = (new DOMParser()).parseFromString(
@@ -158,15 +158,13 @@ adapt.vgen.PSEUDO_ATTR = "data-adapt-pseudo";
  * @param {Element} element
  * @returns {string}
  */
-adapt.vgen.getPseudoName = function(element) {
-    return element.getAttribute(adapt.vgen.PSEUDO_ATTR) || "";
-};
+adapt.vgen.getPseudoName = element => element.getAttribute(adapt.vgen.PSEUDO_ATTR) || "";
 
 /**
  * @param {!Element} element
  * @param {string} name
  */
-adapt.vgen.setPseudoName = function(element, name) {
+adapt.vgen.setPseudoName = (element, name) => {
     element.setAttribute(adapt.vgen.PSEUDO_ATTR, name);
 };
 
@@ -361,7 +359,7 @@ adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, i
  * @param {boolean} isFootnote
  * @param {adapt.vtree.NodeContext} nodeContext
  */
-adapt.vgen.ViewFactory.prototype.getPseudoMap = function(cascStyle, regionIds, isFootnote, nodeContext, context) {
+adapt.vgen.ViewFactory.prototype.getPseudoMap = (cascStyle, regionIds, isFootnote, nodeContext, context) => {
     var pseudoMap = adapt.csscasc.getStyleMap(cascStyle, "_pseudos");
     if (!pseudoMap) return null;
     var computedPseudoStyleMap = {};
@@ -370,9 +368,9 @@ adapt.vgen.ViewFactory.prototype.getPseudoMap = function(cascStyle, regionIds, i
         adapt.csscasc.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
         vivliostyle.selectors.mergeViewConditionalStyles(
             computedPseudoStyle, context, pseudoMap[key]);
-        adapt.csscasc.forEachStylesInRegion(pseudoMap[key], regionIds, isFootnote, function(regionId, regionStyle) {
+        adapt.csscasc.forEachStylesInRegion(pseudoMap[key], regionIds, isFootnote, (regionId, regionStyle) => {
             adapt.csscasc.mergeStyle(computedPseudoStyle, regionStyle, context);
-            vivliostyle.selectors.forEachViewConditionalStyles(regionStyle, function(viewConditionalStyles) {
+            vivliostyle.selectors.forEachViewConditionalStyles(regionStyle, viewConditionalStyles => {
                 adapt.csscasc.mergeStyle(computedPseudoStyle, viewConditionalStyles, context);
             });
         });
@@ -391,7 +389,7 @@ adapt.vgen.ViewFactory.prototype.createRefShadow = function(href, type, element,
     var self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.ShadowContext>} */ var frame
         = adapt.task.newFrame("createRefShadow");
-    self.xmldoc.store.load(href).then(function(refDocParam) {
+    self.xmldoc.store.load(href).then(refDocParam => {
         var refDoc = /** @type {adapt.xmldoc.XMLDocHolder} */ (refDocParam);
         if (refDoc) {
             var refElement = refDoc.getElement(href);
@@ -430,7 +428,7 @@ adapt.vgen.ViewFactory.prototype.createShadows = function(element, isRoot, cascS
     } else {
         cont = adapt.task.newResult(shadow);
     }
-    cont.then(function(shadow) {
+    cont.then(shadow => {
         var cont1 = null;
         if (element.namespaceURI == adapt.base.NS.SHADOW) {
             if (element.localName == "include") {
@@ -455,7 +453,7 @@ adapt.vgen.ViewFactory.prototype.createShadows = function(element, isRoot, cascS
         if (cont1 == null)
             cont1 = adapt.task.newResult(shadow);
         var cont2 = null;
-        cont1.then(function(shadow) {
+        cont1.then(shadow => {
             if (computedStyle["display"] === adapt.css.ident.table_cell) {
                 var url = adapt.base.resolveURL("user-agent.xml#table-cell", adapt.base.resourceBaseURL);
                 cont2 = self.createRefShadow(url, adapt.vtree.ShadowType.ROOTLESS, element, shadowContext, shadow);
@@ -463,7 +461,7 @@ adapt.vgen.ViewFactory.prototype.createShadows = function(element, isRoot, cascS
                 cont2 = adapt.task.newResult(shadow);
             }
         });
-        cont2.then(function(shadow) {
+        cont2.then(shadow => {
             shadow = self.createPseudoelementShadow(element, isRoot, cascStyle, computedStyle,
                 styler, context, shadowContext, shadow);
             frame.finish(shadow);
@@ -491,7 +489,7 @@ adapt.vgen.ViewFactory.prototype.computeStyle = function(vertical, style, comput
     var cascMap = adapt.csscasc.flattenCascadedStyle(style, context, this.regionIds, this.isFootnote, this.nodeContext);
     vertical = adapt.csscasc.isVertical(cascMap, context, vertical);
     var self = this;
-    adapt.csscasc.convertToPhysical(cascMap, computedStyle, vertical, function(name, cascVal) {
+    adapt.csscasc.convertToPhysical(cascMap, computedStyle, vertical, (name, cascVal) => {
         var value = cascVal.evaluate(context, name);
         if (name == "font-family") {
             value = self.docFaces.filterFontFamily(value);
@@ -503,7 +501,7 @@ adapt.vgen.ViewFactory.prototype.computeStyle = function(vertical, style, comput
     var float = /** @type {adapt.css.Ident} */ (computedStyle["float"]);
     var displayValues = vivliostyle.display.getComputedDislayValue(
         computedStyle["display"] || adapt.css.ident.inline, position, float, this.sourceNode === this.xmldoc.root);
-    ["display", "position", "float"].forEach(function(name) {
+    ["display", "position", "float"].forEach(name => {
         if (displayValues[name]) {
             computedStyle[name] = displayValues[name];
         }
@@ -614,9 +612,7 @@ adapt.vgen.ViewFactory.prototype.inheritLangAttribute = function() {
  * @param {!Object.<string,adapt.css.Val>} computedStyle
  */
 adapt.vgen.ViewFactory.prototype.transferPolyfilledInheritedProps = function(computedStyle) {
-    var polyfilledInheritedProps = adapt.csscasc.getPolyfilledInheritedProps().filter(function(name) {
-        return computedStyle[name];
-    });
+    var polyfilledInheritedProps = adapt.csscasc.getPolyfilledInheritedProps().filter(name => computedStyle[name]);
     if (polyfilledInheritedProps.length) {
         var props = this.nodeContext.inheritedProps;
         if (this.nodeContext.parent) {
@@ -625,7 +621,7 @@ adapt.vgen.ViewFactory.prototype.transferPolyfilledInheritedProps = function(com
                 props[n] = this.nodeContext.parent.inheritedProps[n];
             }
         }
-        polyfilledInheritedProps.forEach(function(name) {
+        polyfilledInheritedProps.forEach(name => {
             var value = computedStyle[name];
             if (value) {
                 if (value instanceof adapt.css.Int) {
@@ -658,8 +654,7 @@ adapt.vgen.ViewFactory.prototype.transferPolyfilledInheritedProps = function(com
  * @param {adapt.css.Ident} float
  * @param {boolean} isRoot
  */
-adapt.vgen.ViewFactory.prototype.resolveFormattingContext = function(nodeContext, firstTime, display,
-                                                                     position, float, isRoot) {
+adapt.vgen.ViewFactory.prototype.resolveFormattingContext = (nodeContext, firstTime, display, position, float, isRoot) => {
     /** @type {!Array<!vivliostyle.plugin.ResolveFormattingContextHook>} */ var hooks =
         vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT);
     for (var i = 0; i < hooks.length; i++) {
@@ -730,7 +725,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
     }
     var isRoot = self.nodeContext.parent == null;
     self.nodeContext.flexContainer = (display === adapt.css.ident.flex);
-    self.createShadows(element, isRoot, elementStyle, computedStyle, styler, self.context, self.nodeContext.shadowContext).then(function(shadowParam) {
+    self.createShadows(element, isRoot, elementStyle, computedStyle, styler, self.context, self.nodeContext.shadowContext).then(shadowParam => {
         self.nodeContext.nodeShadow = shadowParam;
         var position = computedStyle["position"];
         var floatSide = computedStyle["float"];
@@ -981,7 +976,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         } else {
             elemResult = adapt.task.newResult(null);
         }
-        elemResult.then(/** @param {Element} result */ function(result) {
+        elemResult.then(result => {
             if (result) {
                 if (custom) {
                     needToProcessChildren = result.getAttribute("data-adapt-process-children") == "true";
@@ -1041,9 +1036,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                                     attributeValue, self.xmldoc.url);
                             }
                         } else if (attributeName == "srcset") {
-                            attributeValue = attributeValue.split(",").map(function(value) {
-                                return self.resolveURL(value.trim());
-                            }).join(",");
+                            attributeValue = attributeValue.split(",").map(value => self.resolveURL(value.trim())).join(",");
                         }
                         if (attributeName === "poster" && tag === "video" && ns === adapt.base.NS.XHTML &&
                             hasAutoWidth && hasAutoHeight) {
@@ -1138,14 +1131,14 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             }
             self.viewNode = result;
             if (fetchers.length) {
-                adapt.taskutil.waitForFetchers(fetchers).then(function() {
+                adapt.taskutil.waitForFetchers(fetchers).then(() => {
                     if (imageResolution > 0) {
                         self.modifyElemDimensionWithImageResolution(images, imageResolution, computedStyle, self.nodeContext.vertical);
                     }
                     frame.finish(needToProcessChildren);
                 });
             } else {
-                frame.timeSlice().then(function() {
+                frame.timeSlice().then(() => {
                     frame.finish(needToProcessChildren);
                 });
             }
@@ -1189,9 +1182,7 @@ adapt.vgen.ViewFactory.SVG_URL_ATTRIBUTES = [
  * @param {string} attributeName
  * @return {boolean} isSVGUrlAttribute
  */
-adapt.vgen.ViewFactory.prototype.isSVGUrlAttribute = function(attributeName) {
-    return adapt.vgen.ViewFactory.SVG_URL_ATTRIBUTES.indexOf(attributeName.toLowerCase()) != -1;
-};
+adapt.vgen.ViewFactory.prototype.isSVGUrlAttribute = attributeName => adapt.vgen.ViewFactory.SVG_URL_ATTRIBUTES.indexOf(attributeName.toLowerCase()) != -1;
 
 /**
  * @param {!Array<!{image: !HTMLElement, element: !HTMLElement, fetcher: !adapt.taskutil.Fetcher<string>}>} images
@@ -1201,7 +1192,7 @@ adapt.vgen.ViewFactory.prototype.isSVGUrlAttribute = function(attributeName) {
  */
 adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = function(images, imageResolution, computedStyle, isVertical) {
     var self = this;
-    images.forEach(function(param) {
+    images.forEach(param => {
         if (param.fetcher.get().get() === "load") {
             var img = param.image;
             var scaledWidth = img.width / imageResolution;
@@ -1294,7 +1285,7 @@ adapt.vgen.ViewFactory.prototype.preprocessElementStyle = function(computedStyle
     var self = this;
     /** @type {!Array.<vivliostyle.plugin.PreProcessElementStyleHook>} */ var hooks =
         vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.PREPROCESS_ELEMENT_STYLE);
-    hooks.forEach(function(hook) {
+    hooks.forEach(hook => {
         hook(self.nodeContext, computedStyle);
     });
 };
@@ -1332,7 +1323,7 @@ adapt.vgen.ViewFactory.prototype.findAndProcessRepeatingElements = function(elem
  * @private
  * @param {!Object.<string,adapt.css.Val>} computedStyle
  */
-adapt.vgen.ViewFactory.prototype.processRepeatOnBreak = function(computedStyle) {
+adapt.vgen.ViewFactory.prototype.processRepeatOnBreak = computedStyle => {
     var repeatOnBreak = computedStyle["repeat-on-break"];
     if (repeatOnBreak !== adapt.css.ident.none) {
         if (repeatOnBreak === adapt.css.ident.auto) {
@@ -1360,7 +1351,7 @@ adapt.vgen.ViewFactory.prototype.createTextNodeView = function() {
     var self = this;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame
         = adapt.task.newFrame("createTextNodeView");
-    this.preprocessTextContent().then(function() {
+    this.preprocessTextContent().then(() => {
         var offsetInNode = self.offsetInNode || 0;
         var textContent = vivliostyle.diff.restoreNewText(
             self.nodeContext.preprocessedTextContent).substr(offsetInNode);
@@ -1386,13 +1377,13 @@ adapt.vgen.ViewFactory.prototype.preprocessTextContent = function() {
     /** @type {!Array.<vivliostyle.plugin.PreProcessTextContentHook>} */ var hooks =
         vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.PREPROCESS_TEXT_CONTENT);
     var index = 0;
-    frame.loop(function() {
+    frame.loop(() => {
         if (index >= hooks.length) return adapt.task.newResult(false);
-        return hooks[index++](self.nodeContext, textContent).thenAsync(function(processedText) {
+        return hooks[index++](self.nodeContext, textContent).thenAsync(processedText => {
             textContent = processedText;
             return adapt.task.newResult(true);
         });
-    }).then(function() {
+    }).then(() => {
         self.nodeContext.preprocessedTextContent =
             vivliostyle.diff.diffChars(originl, textContent);
         frame.finish(true);
@@ -1421,7 +1412,7 @@ adapt.vgen.ViewFactory.prototype.createNodeView = function(firstTime, atUnforced
             result = self.createTextNodeView();
         }
     }
-    result.then(function(processChildren) {
+    result.then(processChildren => {
         needToProcessChildren = processChildren;
         self.nodeContext.viewNode = self.viewNode;
         if (self.viewNode) {
@@ -1454,7 +1445,7 @@ adapt.vgen.ViewFactory.prototype.setCurrent = function(nodeContext, firstTime, a
     return adapt.task.newResult(true);
 };
 
-adapt.vgen.ViewFactory.prototype.processShadowContent = function(pos) {
+adapt.vgen.ViewFactory.prototype.processShadowContent = pos => {
     if (pos.shadowContext == null ||
         pos.sourceNode.localName != "content" || pos.sourceNode.namespaceURI != adapt.base.NS.SHADOW) {
         return pos;
@@ -1594,7 +1585,7 @@ adapt.vgen.ViewFactory.prototype.nextInTree = function(nodeContext, atUnforcedBr
     }
     /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
         = adapt.task.newFrame("nextInTree");
-    this.setCurrent(nodeContext, true, atUnforcedBreak).then(function(processChildren) {
+    this.setCurrent(nodeContext, true, atUnforcedBreak).then(processChildren => {
         if (!nodeContext.viewNode || !processChildren) {
             nodeContext = nodeContext.modify();
             nodeContext.after = true; // skip
@@ -1607,7 +1598,7 @@ adapt.vgen.ViewFactory.prototype.nextInTree = function(nodeContext, atUnforcedBr
             nodeContext: nodeContext
         });
         frame.finish(nodeContext);
-    }.bind(this));
+    });
     return frame.result();
 };
 
@@ -1724,7 +1715,7 @@ adapt.vgen.ViewFactory.prototype.peelOff = function(nodeContext, nodeOffset) {
     var pn = arr.pop(); // container for that pseudoelement
     var shadowSibling = pn.shadowSibling;
     var self = this;
-    frame.loop(function() {
+    frame.loop(() => {
         while (arr.length > 0) {
             pn = arr.pop();
             nodeContext = new adapt.vtree.NodeContext(pn.sourceNode, nodeContext, boxOffset);
@@ -1742,7 +1733,7 @@ adapt.vgen.ViewFactory.prototype.peelOff = function(nodeContext, nodeOffset) {
                 return result;
         }
         return adapt.task.newResult(false);
-    }).then(function() {
+    }).then(() => {
         frame.finish(nodeContext);
     });
     return frame.result();
@@ -1784,9 +1775,9 @@ adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target)
 /**
  * @override
  */
-adapt.vgen.ViewFactory.prototype.processFragmentedBlockEdge = function(nodeContext) {
+adapt.vgen.ViewFactory.prototype.processFragmentedBlockEdge = nodeContext => {
     if (nodeContext) {
-        nodeContext.walkUpBlocks(function(block) {
+        nodeContext.walkUpBlocks(block => {
             var boxDecorationBreak = block.inheritedProps["box-decoration-break"];
             if (!boxDecorationBreak || boxDecorationBreak === "slice") {
                 var elem = block.viewNode;
@@ -1838,7 +1829,7 @@ adapt.vgen.ViewFactory.prototype.convertLengthToPx = function(numeric, viewNode,
  * @param {!adapt.vtree.NodePositionStep} step2
  * @returns {boolean}
  */
-adapt.vgen.ViewFactory.prototype.isSameNodePositionStep = function(step1, step2) {
+adapt.vgen.ViewFactory.prototype.isSameNodePositionStep = (step1, step2) => {
     if (step1.shadowContext) {
         if (!step2.shadowContext) {
             return false;
@@ -1859,15 +1850,13 @@ adapt.vgen.ViewFactory.prototype.isSameNodePosition = function(nodePosition1, no
     return nodePosition1.offsetInNode === nodePosition2.offsetInNode
         && nodePosition1.after == nodePosition2.after
         && nodePosition1.steps.length === nodePosition2.steps.length
-        && nodePosition1.steps.every(function(step1, i) {
+        && nodePosition1.steps.every((step1, i) => {
             var step2 = nodePosition2.steps[i];
             return this.isSameNodePositionStep(step1, step2);
-        }.bind(this));
+        });
 };
 
-adapt.vgen.ViewFactory.prototype.isPseudoelement = function(elem) {
-    return !!adapt.vgen.getPseudoName(elem);
-};
+adapt.vgen.ViewFactory.prototype.isPseudoelement = elem => !!adapt.vgen.getPseudoName(elem);
 
 /**
  * @param {adapt.vgen.Viewport} viewport
@@ -1885,7 +1874,7 @@ adapt.vgen.DefaultClientLayout = function(viewport) {
  * @param {adapt.vtree.ClientRect} originRect
  * @returns {adapt.vtree.ClientRect}
  */
-adapt.vgen.DefaultClientLayout.prototype.subtractOffsets = function(rect, originRect) {
+adapt.vgen.DefaultClientLayout.prototype.subtractOffsets = (rect, originRect) => {
     var viewportLeft = originRect.left;
     var viewportTop = originRect.top;
     return /** @type {adapt.vtree.ClientRect} */ ({

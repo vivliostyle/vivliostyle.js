@@ -131,12 +131,10 @@ adapt.csscasc.polyfilledInheritedProps = [
 /**
  * @return {Array.<string>}
  */
-adapt.csscasc.getPolyfilledInheritedProps = function() {
+adapt.csscasc.getPolyfilledInheritedProps = () => {
     /** @type {!Array.<vivliostyle.plugin.PolyfilledInheritedPropsHook>} */ var hooks =
         vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.POLYFILLED_INHERITED_PROPS);
-    return hooks.reduce(function(props, f) {
-        return props.concat(f());
-    }, [].concat(adapt.csscasc.polyfilledInheritedProps));
+    return hooks.reduce((props, f) => props.concat(f()), [].concat(adapt.csscasc.polyfilledInheritedProps));
 };
 
 /** @const */
@@ -154,7 +152,7 @@ adapt.csscasc.coupledPatterns = ["margin-%", "padding-%", "border-%-width", "bor
  * @const
  * @type {Object.<string,boolean>}
  */
-adapt.csscasc.geomNames = (function() {
+adapt.csscasc.geomNames = ((() => {
     var sides = ["left", "right", "top", "bottom"];
     var names = {"width": true, "height": true};
     for (var i = 0; i < adapt.csscasc.coupledPatterns.length; i++) {
@@ -164,13 +162,13 @@ adapt.csscasc.geomNames = (function() {
         }
     }
     return names;
-})();
+}))();
 
 /**
  * @param {Object.<string,string>} sideMap
  * @return {Object.<string,string>}
  */
-adapt.csscasc.buildCouplingMap = function(sideMap) {
+adapt.csscasc.buildCouplingMap = sideMap => {
     var map = {};
     for (var i = 0; i < adapt.csscasc.coupledPatterns.length; i++) {
         for (var side in sideMap) {
@@ -246,9 +244,7 @@ adapt.csscasc.CascadeValue.prototype.evaluate = function(context, propName) {
  * @param {adapt.expr.Context} context
  * @return {boolean}
  */
-adapt.csscasc.CascadeValue.prototype.isEnabled = function(context) {
-    return true;
-};
+adapt.csscasc.CascadeValue.prototype.isEnabled = context => true;
 
 
 /**
@@ -307,7 +303,7 @@ adapt.csscasc.ConditionalCascadeValue.prototype.isEnabled = function(context) {
  * @param {!adapt.csscasc.CascadeValue} av cascaded value (can be conditional)
  * @return {adapt.csscasc.CascadeValue}
  */
-adapt.csscasc.cascadeValues = function(context, tv, av) {
+adapt.csscasc.cascadeValues = (context, tv, av) => {
     if ((tv == null || av.priority > tv.priority) && av.isEnabled(context)) {
         return av.getBaseValue();
     }
@@ -318,7 +314,7 @@ adapt.csscasc.cascadeValues = function(context, tv, av) {
  * @dict
  * @constructor
  */
-adapt.csscasc.ElementStyle = function() {};
+adapt.csscasc.ElementStyle = () => {};
 
 /**
  * @typedef {Object.<string,adapt.csscasc.ElementStyle>}
@@ -337,40 +333,30 @@ adapt.csscasc.SPECIALS = {
 /**
  * @param {string} name
  */
-adapt.csscasc.isSpecialName = function(name) {
-    return !!adapt.csscasc.SPECIALS[name];
-};
+adapt.csscasc.isSpecialName = name => !!adapt.csscasc.SPECIALS[name];
 
 /**
  * @param {string} name
  */
-adapt.csscasc.isMapName = function(name) {
-    return name.charAt(0) == "_";
-};
+adapt.csscasc.isMapName = name => name.charAt(0) == "_";
 
 /**
  * @param {string} name
  */
-adapt.csscasc.isPropName = function(name) {
-    return name.charAt(0) != "_" && !adapt.csscasc.SPECIALS[name];
-};
+adapt.csscasc.isPropName = name => name.charAt(0) != "_" && !adapt.csscasc.SPECIALS[name];
 
 /**
  * @param {string} name
  * @return {boolean}
  */
-adapt.csscasc.isInherited = function(name) {
-    return !!adapt.csscasc.inheritedProps[name];
-};
+adapt.csscasc.isInherited = name => !!adapt.csscasc.inheritedProps[name];
 
 /**
  * @param {adapt.csscasc.ElementStyle} style
  * @param {string} name
  * @return {adapt.csscasc.CascadeValue}
  */
-adapt.csscasc.getProp = function(style, name) {
-    return /** @type {adapt.csscasc.CascadeValue} */ (style[name]);
-};
+adapt.csscasc.getProp = (style, name) => /** @type {adapt.csscasc.CascadeValue} */ style[name];
 
 
 /**
@@ -379,7 +365,7 @@ adapt.csscasc.getProp = function(style, name) {
  * @param {adapt.csscasc.CascadeValue} value
  * @return void
  */
-adapt.csscasc.setProp = function(style, name, value) {
+adapt.csscasc.setProp = (style, name, value) => {
     if (!value) {
         delete style[name];
     } else {
@@ -392,16 +378,14 @@ adapt.csscasc.setProp = function(style, name, value) {
  * @param {string} name
  * @return {adapt.csscasc.ElementStyleMap}
  */
-adapt.csscasc.getStyleMap = function(style, name) {
-    return /** @type {adapt.csscasc.ElementStyleMap} */ (style[name]);
-};
+adapt.csscasc.getStyleMap = (style, name) => /** @type {adapt.csscasc.ElementStyleMap} */ style[name];
 
 /**
  * @param {adapt.csscasc.ElementStyle} style
  * @param {string} name
  * @return {adapt.csscasc.ElementStyleMap}
  */
-adapt.csscasc.getMutableStyleMap = function(style, name) {
+adapt.csscasc.getMutableStyleMap = (style, name) => {
     var r = /** @type {adapt.csscasc.ElementStyleMap} */ (style[name]);
     if (!r) {
         r = {};
@@ -414,7 +398,7 @@ adapt.csscasc.getMutableStyleMap = function(style, name) {
  * @param {adapt.csscasc.ElementStyle} style
  * @return {Array.<{matcher:vivliostyle.selectors.Matcher, styles:adapt.csscasc.ElementStyleMap}>}
  */
-adapt.csscasc.getViewConditionalStyleMap = function(style) {
+adapt.csscasc.getViewConditionalStyleMap = style => {
     var r = /** @type {Array.<{matcher:vivliostyle.selectors.Matcher, styles:adapt.csscasc.ElementStyleMap}>} */ (style["_viewConditionalStyles"]);
     if (!r) {
         r = [];
@@ -428,16 +412,14 @@ adapt.csscasc.getViewConditionalStyleMap = function(style) {
  * @param {string} name
  * @return {Array.<adapt.csscasc.CascadeValue>}
  */
-adapt.csscasc.getSpecial = function(style, name) {
-    return /** @type {Array.<adapt.csscasc.CascadeValue>} */ (style[name]);
-};
+adapt.csscasc.getSpecial = (style, name) => /** @type {Array.<adapt.csscasc.CascadeValue>} */ style[name];
 
 /**
  * @param {adapt.csscasc.ElementStyle} style
  * @param {string} name
  * @return {Array.<adapt.csscasc.CascadeValue>}
  */
-adapt.csscasc.getMutableSpecial = function(style, name) {
+adapt.csscasc.getMutableSpecial = (style, name) => {
     var r = /** @type {Array.<adapt.csscasc.CascadeValue>} */ (style[name]);
     if (!r) {
         r = [];
@@ -457,12 +439,20 @@ adapt.csscasc.getMutableSpecial = function(style, name) {
  * @param {?vivliostyle.selectors.Matcher} viewConditionMatcher
  * @return {void}
  */
-adapt.csscasc.mergeIn = function(context, target, style, specificity, pseudoelement, regionId, viewConditionMatcher) {
+adapt.csscasc.mergeIn = (
+    context,
+    target,
+    style,
+    specificity,
+    pseudoelement,
+    regionId,
+    viewConditionMatcher
+) => {
     var hierarchy = [
         {id: pseudoelement,            styleKey: "_pseudos"},
         {id: regionId,                 styleKey: "_regions"}
     ];
-    hierarchy.forEach(function(item) {
+    hierarchy.forEach(item => {
         if (item.id) {
             var styleMap = adapt.csscasc.getMutableStyleMap(target, item.styleKey);
             target = styleMap[item.id];
@@ -500,7 +490,7 @@ adapt.csscasc.mergeIn = function(context, target, style, specificity, pseudoelem
  * @param {Array.<adapt.csscasc.ElementStyle>} styles
  * @return {adapt.csscasc.ElementStyle}
  */
-adapt.csscasc.mergeAll = function(context, styles) {
+adapt.csscasc.mergeAll = (context, styles) => {
     var target = /** @type {adapt.csscasc.ElementStyle} */ ({});
     for (var k = 0; k < styles.length; k++) {
         adapt.csscasc.mergeIn(context, target, styles[k], 0, null, null, null);
@@ -514,17 +504,10 @@ adapt.csscasc.mergeAll = function(context, styles) {
  * @param {adapt.csscasc.CascadeAction} action
  * @return {adapt.csscasc.CascadeAction}
  */
-adapt.csscasc.chainActions = function(chain, action) {
+adapt.csscasc.chainActions = (chain, action) => {
     if (chain.length > 0) {
         chain.sort(
-            /**
-             * @param {adapt.csscasc.ChainedAction} a
-             * @param {adapt.csscasc.ChainedAction} b
-             * @return {number}
-             */
-            function(a, b) {
-                return b.getPriority() - a.getPriority();
-            });
+            (a, b) => b.getPriority() - a.getPriority());
         var chained = null;
         for (var i = chain.length - 1; i >= 0; i--) {
             chained = chain[i];
@@ -607,7 +590,7 @@ adapt.csscasc.InheritanceVisitor.prototype.visitExpr = function(expr) {
  * @param {!adapt.expr.Context} context
  * @returns {!adapt.css.Numeric}
  */
-adapt.csscasc.convertFontRelativeLengthToPx = function(numeric, baseFontSize, context) {
+adapt.csscasc.convertFontRelativeLengthToPx = (numeric, baseFontSize, context) => {
     var unit = numeric.unit;
     var num = numeric.num;
     if (unit === "em" || unit === "ex") {
@@ -626,7 +609,7 @@ adapt.csscasc.convertFontRelativeLengthToPx = function(numeric, baseFontSize, co
  * @param {!adapt.expr.Context} context
  * @returns {!adapt.css.Numeric}
  */
-adapt.csscasc.convertFontSizeToPx = function(numeric, parentFontSize, context) {
+adapt.csscasc.convertFontSizeToPx = (numeric, parentFontSize, context) => {
     numeric = adapt.csscasc.convertFontRelativeLengthToPx(numeric, parentFontSize, context);
     var unit = numeric.unit;
     var num = numeric.num;
@@ -649,13 +632,13 @@ adapt.csscasc.ActionTable;
 /**
  * @constructor
  */
-adapt.csscasc.CascadeAction = function() {};
+adapt.csscasc.CascadeAction = () => {};
 
 /**
  * @param {adapt.csscasc.CascadeInstance} cascade
  * @return {void}
  */
-adapt.csscasc.CascadeAction.prototype.apply = function(cascade) {};
+adapt.csscasc.CascadeAction.prototype.apply = cascade => {};
 
 /**
  * @param {!adapt.csscasc.CascadeAction} other
@@ -777,17 +760,14 @@ adapt.csscasc.ChainedAction.prototype.apply = function(cascadeInstance) {
 /**
  * @return {number}
  */
-adapt.csscasc.ChainedAction.prototype.getPriority = function() {
-    return 0;
-};
+adapt.csscasc.ChainedAction.prototype.getPriority = () => 0;
 
 /**
  * @param {adapt.csscasc.Cascade} cascade
  * @return {boolean}
  */
-adapt.csscasc.ChainedAction.prototype.makePrimary = function(cascade) {
-    return false; // cannot be made primary
-};
+adapt.csscasc.ChainedAction.prototype.makePrimary = cascade => // cannot be made primary
+false;
 
 /**
  * @param {string} className
@@ -811,9 +791,8 @@ adapt.csscasc.CheckClassAction.prototype.apply = function(cascadeInstance) {
 /**
  * @override
  */
-adapt.csscasc.CheckClassAction.prototype.getPriority = function() {
-    return 10; // class should be checked after id
-};
+adapt.csscasc.CheckClassAction.prototype.getPriority = () => // class should be checked after id
+10;
 
 /**
  * @override
@@ -848,9 +827,8 @@ adapt.csscasc.CheckIdAction.prototype.apply = function(cascadeInstance) {
 /**
  * @override
  */
-adapt.csscasc.CheckIdAction.prototype.getPriority = function() {
-    return 11; // id should be checked after :root
-};
+adapt.csscasc.CheckIdAction.prototype.getPriority = () => // id should be checked after :root
+11;
 
 /**
  * @override
@@ -885,9 +863,8 @@ adapt.csscasc.CheckLocalNameAction.prototype.apply = function(cascadeInstance) {
 /**
  * @override
  */
-adapt.csscasc.CheckLocalNameAction.prototype.getPriority = function() {
-    return 8; // tag is a pretty good thing to check, after epub:type
-};
+adapt.csscasc.CheckLocalNameAction.prototype.getPriority = () => // tag is a pretty good thing to check, after epub:type
+8;
 
 /**
  * @override
@@ -924,9 +901,8 @@ adapt.csscasc.CheckNSTagAction.prototype.apply = function(cascadeInstance) {
 /**
  * @override
  */
-adapt.csscasc.CheckNSTagAction.prototype.getPriority = function() {
-    return 8; // tag is a pretty good thing to check, after epub:type
-};
+adapt.csscasc.CheckNSTagAction.prototype.getPriority = () => // tag is a pretty good thing to check, after epub:type
+8;
 
 /**
  * @override
@@ -1095,16 +1071,12 @@ adapt.csscasc.CheckNamespaceSupportedAction.prototype.apply = function(cascadeIn
 /**
  * @override
  */
-adapt.csscasc.CheckNamespaceSupportedAction.prototype.getPriority = function() {
-    return 0;
-};
+adapt.csscasc.CheckNamespaceSupportedAction.prototype.getPriority = () => 0;
 
 /**
  * @override
  */
-adapt.csscasc.CheckNamespaceSupportedAction.prototype.makePrimary = function(cascade) {
-    return false;
-};
+adapt.csscasc.CheckNamespaceSupportedAction.prototype.makePrimary = cascade => false;
 
 
 /**
@@ -1173,9 +1145,7 @@ adapt.csscasc.IsFirstAction.prototype.apply = function(cascadeInstance) {
 /**
  * @override
  */
-adapt.csscasc.IsFirstAction.prototype.getPriority = function() {
-    return 6;
-};
+adapt.csscasc.IsFirstAction.prototype.getPriority = () => 6;
 
 /**
  * @constructor
@@ -1197,9 +1167,8 @@ adapt.csscasc.IsRootAction.prototype.apply = function(cascadeInstance) {
 /**
  * @override
  */
-adapt.csscasc.IsRootAction.prototype.getPriority = function() {
-    return 12; // :root is the first thing to check
-};
+adapt.csscasc.IsRootAction.prototype.getPriority = () => // :root is the first thing to check
+12;
 
 /**
  * @param {number} a
@@ -1232,7 +1201,7 @@ adapt.csscasc.IsNthAction.prototype.matchANPlusB = function(order) {
  * @param {number} b
  * @returns {boolean}
  */
-adapt.csscasc.matchANPlusB = function(order, a, b) {
+adapt.csscasc.matchANPlusB = (order, a, b) => {
     order -= b;
     if (a === 0) {
         return order === 0;
@@ -1263,9 +1232,7 @@ adapt.csscasc.IsNthSiblingAction.prototype.apply = function(cascadeInstance) {
 /**
  * @override
  */
-adapt.csscasc.IsNthSiblingAction.prototype.getPriority = function() {
-    return 5;
-};
+adapt.csscasc.IsNthSiblingAction.prototype.getPriority = () => 5;
 
 /**
  * @param {number} a
@@ -1290,9 +1257,7 @@ adapt.csscasc.IsNthSiblingOfTypeAction.prototype.apply = function(cascadeInstanc
 /**
  * @override
  */
-adapt.csscasc.IsNthSiblingOfTypeAction.prototype.getPriority = function() {
-    return 5;
-};
+adapt.csscasc.IsNthSiblingOfTypeAction.prototype.getPriority = () => 5;
 
 /**
  * @param {number} a
@@ -1320,9 +1285,7 @@ adapt.csscasc.IsNthLastSiblingAction.prototype.apply = function(cascadeInstance)
 /**
  * @override
  */
-adapt.csscasc.IsNthLastSiblingAction.prototype.getPriority = function() {
-    return 4;
-};
+adapt.csscasc.IsNthLastSiblingAction.prototype.getPriority = () => 4;
 
 /**
  * @param {number} a
@@ -1359,9 +1322,7 @@ adapt.csscasc.IsNthLastSiblingOfTypeAction.prototype.apply = function(cascadeIns
 /**
  * @override
  */
-adapt.csscasc.IsNthLastSiblingOfTypeAction.prototype.getPriority = function() {
-    return 4;
-};
+adapt.csscasc.IsNthLastSiblingOfTypeAction.prototype.getPriority = () => 4;
 
 /**
  * @constructor
@@ -1394,9 +1355,7 @@ adapt.csscasc.IsEmptyAction.prototype.apply = function(cascadeInstance) {
 /**
  * @override
  */
-adapt.csscasc.IsEmptyAction.prototype.getPriority = function() {
-    return 4;
-};
+adapt.csscasc.IsEmptyAction.prototype.getPriority = () => 4;
 
 /**
  * @constructor
@@ -1420,9 +1379,7 @@ adapt.csscasc.IsEnabledAction.prototype.apply = function(cascadeInstance) {
 /**
  * @override
  */
-adapt.csscasc.IsEnabledAction.prototype.getPriority = function() {
-    return 5;
-};
+adapt.csscasc.IsEnabledAction.prototype.getPriority = () => 5;
 
 /**
  * @constructor
@@ -1446,9 +1403,7 @@ adapt.csscasc.IsDisabledAction.prototype.apply = function(cascadeInstance) {
 /**
  * @override
  */
-adapt.csscasc.IsDisabledAction.prototype.getPriority = function() {
-    return 5;
-};
+adapt.csscasc.IsDisabledAction.prototype.getPriority = () => 5;
 
 /**
  * @constructor
@@ -1472,9 +1427,7 @@ adapt.csscasc.IsCheckedAction.prototype.apply = function(cascadeInstance) {
 /**
  * @override
  */
-adapt.csscasc.IsCheckedAction.prototype.getPriority = function() {
-    return 5;
-};
+adapt.csscasc.IsCheckedAction.prototype.getPriority = () => 5;
 
 /**
  * @param {string} condition
@@ -1504,9 +1457,7 @@ adapt.csscasc.CheckConditionAction.prototype.apply = function(cascadeInstance) {
 /**
  * @override
  */
-adapt.csscasc.CheckConditionAction.prototype.getPriority = function() {
-    return 5;
-};
+adapt.csscasc.CheckConditionAction.prototype.getPriority = () => 5;
 
 /**
  * @constructor
@@ -1568,14 +1519,14 @@ adapt.csscasc.NegateActionsSet.prototype.getPriority = function() {
  * controls a "named condition" (which is a count associated with a name).
  * @interface
  */
-adapt.csscasc.ConditionItem = function() {};
+adapt.csscasc.ConditionItem = () => {};
 
 /**
  * Returns a "fresh" copy of this item. May be this if immutable.
  * @param {adapt.csscasc.CascadeInstance} cascadeInstance
  * @return {adapt.csscasc.ConditionItem}
  */
-adapt.csscasc.ConditionItem.prototype.fresh = function(cascadeInstance) {};
+adapt.csscasc.ConditionItem.prototype.fresh = cascadeInstance => {};
 
 
 /**
@@ -1584,14 +1535,14 @@ adapt.csscasc.ConditionItem.prototype.fresh = function(cascadeInstance) {};
  * @param {number} depth
  * @return {boolean}
  */
-adapt.csscasc.ConditionItem.prototype.push = function(cascadeInstance, depth) {};
+adapt.csscasc.ConditionItem.prototype.push = (cascadeInstance, depth) => {};
 
 /**
  * @param {adapt.csscasc.CascadeInstance} cascadeInstance
  * @param {number} depth
  * @return {boolean} return true if no more notifications are desired
  */
-adapt.csscasc.ConditionItem.prototype.pop = function(cascadeInstance, depth) {};
+adapt.csscasc.ConditionItem.prototype.pop = (cascadeInstance, depth) => {};
 
 /**
  * @param {string} condition
@@ -1844,9 +1795,7 @@ adapt.csscasc.AfterPseudoelementItem.prototype.fresh = function() {
 /**
  * @override
  */
-adapt.csscasc.AfterPseudoelementItem.prototype.push = function(cascade, depth) {
-    return false;
-};
+adapt.csscasc.AfterPseudoelementItem.prototype.push = (cascade, depth) => false;
 
 /**
  * @override
@@ -1880,9 +1829,7 @@ adapt.csscasc.RestoreLangItem.prototype.fresh = function() {
 /**
  * @override
  */
-adapt.csscasc.RestoreLangItem.prototype.push = function(cascade, depth) {
-    return false;
-};
+adapt.csscasc.RestoreLangItem.prototype.push = (cascade, depth) => false;
 
 /**
  * @override
@@ -1916,9 +1863,7 @@ adapt.csscasc.QuotesScopeItem.prototype.fresh = function() {
 /**
  * @override
  */
-adapt.csscasc.QuotesScopeItem.prototype.push = function(cascade, depth) {
-    return false;
-};
+adapt.csscasc.QuotesScopeItem.prototype.push = (cascade, depth) => false;
 
 /**
  * @override
@@ -1941,23 +1886,23 @@ adapt.csscasc.CounterValues;
 /**
  * @interface
  */
-adapt.csscasc.CounterListener = function() {};
+adapt.csscasc.CounterListener = () => {};
 
 /**
  * @param {string} id
  * @param {!adapt.csscasc.CounterValues} counters
  */
-adapt.csscasc.CounterListener.prototype.countersOfId = function(id, counters) {};
+adapt.csscasc.CounterListener.prototype.countersOfId = (id, counters) => {};
 
 /**
  * @returns {!adapt.vtree.ExprContentListener}
  */
-adapt.csscasc.CounterListener.prototype.getExprContentListener = function() {};
+adapt.csscasc.CounterListener.prototype.getExprContentListener = () => {};
 
 /**
  * @interface
  */
-adapt.csscasc.CounterResolver = function() {};
+adapt.csscasc.CounterResolver = () => {};
 
 /**
  * Returns an adapt.expr.Val, whose value is calculated at the layout time by retrieving the innermost page-based counter (null if it does not exist) by its name and formatting the value into a string.
@@ -1965,7 +1910,7 @@ adapt.csscasc.CounterResolver = function() {};
  * @param {function(?number):string} format A function that formats the counter value into a string
  * @returns {adapt.expr.Val}
  */
-adapt.csscasc.CounterResolver.prototype.getPageCounterVal = function(name, format) {};
+adapt.csscasc.CounterResolver.prototype.getPageCounterVal = (name, format) => {};
 
 /**
  * Returns an adapt.expr.Val, whose value is calculated at the layout time by retrieving the page-based counters by its name and formatting the values into a string.
@@ -1973,7 +1918,7 @@ adapt.csscasc.CounterResolver.prototype.getPageCounterVal = function(name, forma
  * @param {function(!Array.<number>):string} format A function that formats the counter values (passed as an array ordered by the nesting depth with the outermost counter first and the innermost last) into a string
  * @returns {adapt.expr.Val}
  */
-adapt.csscasc.CounterResolver.prototype.getPageCountersVal = function(name, format) {};
+adapt.csscasc.CounterResolver.prototype.getPageCountersVal = (name, format) => {};
 
 /**
  * @param {string} url
@@ -1981,7 +1926,7 @@ adapt.csscasc.CounterResolver.prototype.getPageCountersVal = function(name, form
  * @param {function(?number):string} format
  * @returns {!adapt.expr.Val}
  */
-adapt.csscasc.CounterResolver.prototype.getTargetCounterVal = function(url, name, format) {};
+adapt.csscasc.CounterResolver.prototype.getTargetCounterVal = (url, name, format) => {};
 
 /**
  * @param {string} url
@@ -1989,7 +1934,7 @@ adapt.csscasc.CounterResolver.prototype.getTargetCounterVal = function(url, name
  * @param {function(!Array<number>):string} format
  * @returns {!adapt.expr.Val}
  */
-adapt.csscasc.CounterResolver.prototype.getTargetCountersVal = function(url, name, format) {};
+adapt.csscasc.CounterResolver.prototype.getTargetCountersVal = (url, name, format) => {};
 
 /**
  * @constructor
@@ -2008,7 +1953,7 @@ goog.inherits(adapt.csscasc.AttrValueFilterVisitor, adapt.css.FilterVisitor);
  * @param {string} type
  * @return {adapt.css.Val}
  */
-adapt.csscasc.AttrValueFilterVisitor.prototype.createValueFromString = function(str, type) {
+adapt.csscasc.AttrValueFilterVisitor.prototype.createValueFromString = (str, type) => {
     switch (type) {
         case "url":
             if (str)
@@ -2094,7 +2039,7 @@ adapt.csscasc.ContentPropVisitor.prototype.visitIdent = function(ident) {
     return ident;
 };
 
-adapt.csscasc.roman = function(num) {
+adapt.csscasc.roman = num => {
     if (num <= 0 || num != Math.round(num) || num > 3999) {
         return "";
     }
@@ -2173,7 +2118,7 @@ adapt.csscasc.fixed = {
  * @param {Array} entries
  * @param {number} num
  */
-adapt.csscasc.additiveFormat = function(entries, num) {
+adapt.csscasc.additiveFormat = (entries, num) => {
     var max = /** @type {number} */ (entries[0]);
     if (num > max || num <= 0 || num != Math.round(num))
         return "";
@@ -2192,7 +2137,7 @@ adapt.csscasc.additiveFormat = function(entries, num) {
     return result;
 };
 
-adapt.csscasc.expandAlphabet = function(str) {
+adapt.csscasc.expandAlphabet = str => {
     var arr = [];
     var i = 0;
     while (i < str.length) {
@@ -2214,7 +2159,7 @@ adapt.csscasc.expandAlphabet = function(str) {
  * @param {String} alphabetStr
  * @param {number} num
  */
-adapt.csscasc.alphabeticFormat = function(alphabetStr, num) {
+adapt.csscasc.alphabeticFormat = (alphabetStr, num) => {
     if (num <= 0 || num != Math.round(num))
         return "";
     var alphabet = adapt.csscasc.expandAlphabet(alphabetStr);
@@ -2249,7 +2194,7 @@ adapt.csscasc.chineseTradInformal = {
  * @param {number} num
  * @param {adapt.csscasc.ChineseNumbering} numbering
  */
-adapt.csscasc.chineseCounter = function(num, numbering) {
+adapt.csscasc.chineseCounter = (num, numbering) => {
     if (num > 9999 || num < -9999)
         return "" + num;  // TODO: should be cjk-decimal
     if (num == 0)
@@ -2297,7 +2242,7 @@ adapt.csscasc.chineseCounter = function(num, numbering) {
  * @param {string} type
  * @return {string}
  */
-adapt.csscasc.ContentPropVisitor.prototype.format = function(num, type) {
+adapt.csscasc.ContentPropVisitor.prototype.format = (num, type) => {
     var upper = false; // type == "armenian"; // content-counter-10.xht assumes armenian is uppercase, enable if desired
     var lower = false;
     var r;
@@ -2346,9 +2291,7 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounter = function(values) {
         return new adapt.css.Str(this.format(numval, type));
     } else {
         var self = this;
-        var c = new adapt.css.Expr(this.counterResolver.getPageCounterVal(counterName, function(numval) {
-            return self.format(numval || 0, type);
-        }));
+        var c = new adapt.css.Expr(this.counterResolver.getPageCounterVal(counterName, numval => self.format(numval || 0, type)));
         return new adapt.css.SpaceList([c]);
     }
 };
@@ -2371,7 +2314,7 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounters = function(values) 
         }
     }
     var self = this;
-    var c = new adapt.css.Expr(this.counterResolver.getPageCountersVal(counterName, function(numvals) {
+    var c = new adapt.css.Expr(this.counterResolver.getPageCountersVal(counterName, numvals => {
         var parts = /** @type {Array.<string>} */ ([]);
         if (numvals.length) {
             for (var i = 0; i < numvals.length; i++) {
@@ -2407,9 +2350,7 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncTargetCounter = function(val
     var type = values.length > 2 ? values[2].stringValue() : "decimal";
 
     var self = this;
-    var c = new adapt.css.Expr(this.counterResolver.getTargetCounterVal(targetUrlStr, counterName, function(numval) {
-        return self.format(numval || 0, type);
-    }));
+    var c = new adapt.css.Expr(this.counterResolver.getTargetCounterVal(targetUrlStr, counterName, numval => self.format(numval || 0, type)));
     return new adapt.css.SpaceList([c]);
 };
 
@@ -2430,10 +2371,8 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncTargetCounters = function(va
     var type = values.length > 3 ? values[3].stringValue() : "decimal";
 
     var self = this;
-    var c = new adapt.css.Expr(this.counterResolver.getTargetCountersVal(targetUrlStr, counterName, function(numvals) {
-        var parts = numvals.map(function(numval) {
-            return self.format(numval, type);
-        });
+    var c = new adapt.css.Expr(this.counterResolver.getTargetCountersVal(targetUrlStr, counterName, numvals => {
+        var parts = numvals.map(numval => self.format(numval, type));
         if (parts.length) {
             return parts.join(separator);
         } else {
@@ -2490,7 +2429,7 @@ adapt.csscasc.ORDER_INCREMENT = 1 / 0x100000;
  * @param {!adapt.csscasc.ActionTable} dst
  * @return {void}
  */
-adapt.csscasc.copyTable = function(src, dst) {
+adapt.csscasc.copyTable = (src, dst) => {
     for (var n in src) {
         dst[n] = src[n].clone();
     }
@@ -2537,7 +2476,7 @@ adapt.csscasc.Cascade.prototype.clone = function() {
  * @param {!adapt.csscasc.CascadeAction} action
  * @return {void}
  */
-adapt.csscasc.Cascade.prototype.insertInTable = function(table, key, action) {
+adapt.csscasc.Cascade.prototype.insertInTable = (table, key, action) => {
     var a = table[key];
     if (a)
         action = a.mergeWith(action);
@@ -2649,9 +2588,7 @@ adapt.csscasc.CascadeInstance.prototype.decrement = function(condition, viewCond
     this.conditions[condition]--;
 
     if (!this.viewConditions[condition]) return;
-    this.viewConditions[condition] = this.viewConditions[condition].filter(function(item) {
-        return item !== viewCondition;
-    });
+    this.viewConditions[condition] = this.viewConditions[condition].filter(item => item !== viewCondition);
     if (this.viewConditions[condition].length === 0) {
         delete this.viewConditions[condition];
     }
@@ -2668,16 +2605,14 @@ adapt.csscasc.CascadeInstance.prototype.buildViewConditionMatcher = function(vie
         goog.asserts.assert(this.currentElementOffset);
         matcher = matcherBuilder.buildViewConditionMatcher(this.currentElementOffset, viewConditionId);
     }
-    var dependentConditionMatchers = this.dependentConditions.map(function(conditionId) {
+    var dependentConditionMatchers = this.dependentConditions.map(conditionId => {
         var conditions = this.viewConditions[conditionId];
         if (conditions && conditions.length > 0) {
             return conditions.length === 1 ? conditions[0] : matcherBuilder.buildAnyMatcher([].concat(conditions));
         } else {
             return null;
         }
-    }.bind(this)).filter(function(item) {
-        return item;
-    });
+    }).filter(item => item);
     if (dependentConditionMatchers.length <= 0) return matcher;
     if (matcher === null) {
         return dependentConditionMatchers.length === 1
@@ -2992,7 +2927,7 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
  * @private
  * @return {void}
  */
-adapt.csscasc.CascadeInstance.prototype.applyAttrFilterInner = function(visitor, elementStyle) {
+adapt.csscasc.CascadeInstance.prototype.applyAttrFilterInner = (visitor, elementStyle) => {
     for (var propName in elementStyle) {
         if (adapt.csscasc.isPropName(propName))
             elementStyle[propName] = elementStyle[propName].filterValue(visitor);
@@ -3642,7 +3577,7 @@ adapt.csscasc.CascadeParserHandler.prototype.simpleProperty = function(name, val
     }
 
     var hooks = vivliostyle.plugin.getHooksForName("SIMPLE_PROPERTY");
-    hooks.forEach(function(hook) {
+    hooks.forEach(hook => {
         var original = {"name": name, "value": value, "important": important};
         var converted = hook(original);
         name = converted["name"];
@@ -3796,14 +3731,14 @@ adapt.csscasc.PropSetParserHandler.prototype.property = function(name, value, im
 /**
  * @override
  */
-adapt.csscasc.PropSetParserHandler.prototype.invalidPropertyValue = function(name, value) {
+adapt.csscasc.PropSetParserHandler.prototype.invalidPropertyValue = (name, value) => {
     vivliostyle.logging.logger.warn("E_INVALID_PROPERTY_VALUE", name + ":", value.toString());
 };
 
 /**
  * @override
  */
-adapt.csscasc.PropSetParserHandler.prototype.unknownProperty = function(name, value) {
+adapt.csscasc.PropSetParserHandler.prototype.unknownProperty = (name, value) => {
     vivliostyle.logging.logger.warn("E_INVALID_PROPERTY", name + ":", value.toString());
 };
 
@@ -3846,14 +3781,14 @@ adapt.csscasc.PropertyParserHandler.prototype.property = function(name, value, i
 /**
  * @override
  */
-adapt.csscasc.PropertyParserHandler.prototype.invalidPropertyValue = function(name, value) {
+adapt.csscasc.PropertyParserHandler.prototype.invalidPropertyValue = (name, value) => {
     vivliostyle.logging.logger.warn("E_INVALID_PROPERTY_VALUE", name + ":", value.toString());
 };
 
 /**
  * @override
  */
-adapt.csscasc.PropertyParserHandler.prototype.unknownProperty = function(name, value) {
+adapt.csscasc.PropertyParserHandler.prototype.unknownProperty = (name, value) => {
     vivliostyle.logging.logger.warn("E_INVALID_PROPERTY", name + ":", value.toString());
 };
 
@@ -3876,7 +3811,7 @@ adapt.csscasc.PropertyParserHandler.prototype.simpleProperty = function(name, va
  * @param {string} styleAttrValue
  * @return {adapt.csscasc.ElementStyle}
  */
-adapt.csscasc.parseStyleAttribute = function(scope, validatorSet, baseURL, styleAttrValue) {
+adapt.csscasc.parseStyleAttribute = (scope, validatorSet, baseURL, styleAttrValue) => {
     var handler = new adapt.csscasc.PropertyParserHandler(scope, validatorSet);
     var tokenizer = new adapt.csstok.Tokenizer(styleAttrValue, handler);
     try {
@@ -3893,7 +3828,7 @@ adapt.csscasc.parseStyleAttribute = function(scope, validatorSet, baseURL, style
  * @param {boolean} vertical
  * @return {boolean}
  */
-adapt.csscasc.isVertical = function(cascaded, context, vertical) {
+adapt.csscasc.isVertical = (cascaded, context, vertical) => {
     var writingModeCasc = cascaded["writing-mode"];
     if (writingModeCasc) {
         var writingMode = writingModeCasc.evaluate(context, "writing-mode");
@@ -3912,14 +3847,14 @@ adapt.csscasc.isVertical = function(cascaded, context, vertical) {
  * @param {adapt.vtree.NodeContext} nodeContext
  * @return {!Object.<string,adapt.csscasc.CascadeValue>}
  */
-adapt.csscasc.flattenCascadedStyle = function(style, context, regionIds, isFootnote, nodeContext) {
+adapt.csscasc.flattenCascadedStyle = (style, context, regionIds, isFootnote, nodeContext) => {
     var cascMap = /** @type {!Object.<string,adapt.csscasc.CascadeValue>} */ ({});
     for (var n in style) {
         if (adapt.csscasc.isPropName(n))
             cascMap[n] = adapt.csscasc.getProp(style, n);
     }
     vivliostyle.selectors.mergeViewConditionalStyles(cascMap, context, style);
-    adapt.csscasc.forEachStylesInRegion(style, regionIds, isFootnote, function(regionId, regionStyle) {
+    adapt.csscasc.forEachStylesInRegion(style, regionIds, isFootnote, (regionId, regionStyle) => {
         adapt.csscasc.mergeStyle(cascMap, regionStyle, context);
         vivliostyle.selectors.mergeViewConditionalStyles(
             cascMap, context, regionStyle);
@@ -3933,7 +3868,7 @@ adapt.csscasc.flattenCascadedStyle = function(style, context, regionIds, isFootn
  * @param {boolean} isFootnote
  * @param {function(string, adapt.csscasc.ElementStyle)} callback
  */
-adapt.csscasc.forEachStylesInRegion = function(style, regionIds, isFootnote, callback) {
+adapt.csscasc.forEachStylesInRegion = (style, regionIds, isFootnote, callback) => {
     var regions = adapt.csscasc.getStyleMap(style, "_regions");
     if ((regionIds || isFootnote) && regions) {
         if (isFootnote) {
@@ -3956,7 +3891,7 @@ adapt.csscasc.forEachStylesInRegion = function(style, regionIds, isFootnote, cal
  * @param {adapt.csscasc.ElementStyle} from
  * @param {adapt.expr.Context} context
  */
-adapt.csscasc.mergeStyle = function(to, from, context) {
+adapt.csscasc.mergeStyle = (to, from, context) => {
     for (var property in from) {
         if (adapt.csscasc.isPropName(property)) {
             var newVal = adapt.csscasc.getProp(from, property);
@@ -3975,7 +3910,7 @@ adapt.csscasc.mergeStyle = function(to, from, context) {
  * @param {function(string, !adapt.csscasc.CascadeValue): T} transform If supplied, property values are transformed by this function before inserted into the destination map. The first parameter is the property name and the second one is the property value.
  * @template T
  */
-adapt.csscasc.convertToPhysical = function(src, dest, vertical, transform) {
+adapt.csscasc.convertToPhysical = (src, dest, vertical, transform) => {
     var couplingMap = vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
     for (var propName in src) {
         if (src.hasOwnProperty(propName)) {

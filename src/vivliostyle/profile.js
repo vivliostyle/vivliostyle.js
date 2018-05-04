@@ -21,7 +21,7 @@ goog.provide("vivliostyle.profile");
 goog.require("vivliostyle.namespace");
 goog.require("vivliostyle.logging");
 
-goog.scope(function() {
+goog.scope(() => {
     /**
      * Performance profiler measuring execution time of the script.
      * @param {Performance} performanceInstance
@@ -113,7 +113,7 @@ goog.scope(function() {
     Profiler.prototype.printTimings = function() {
         var timestamps = this.timestamps;
         var st = "";
-        Object.keys(timestamps).forEach(function(name) {
+        Object.keys(timestamps).forEach(name => {
             var stamps = timestamps[name];
             var l = stamps.length;
             for (var i = 0; i < l; i++) {

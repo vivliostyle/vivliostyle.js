@@ -26,7 +26,7 @@ goog.require("adapt.geom");
 goog.require("adapt.vtree");
 goog.require("vivliostyle.logical");
 
-goog.scope(function() {
+goog.scope(() => {
 
     /**
      * @enum {string}
@@ -43,7 +43,7 @@ goog.scope(function() {
      * @param {string} str
      * @returns {!vivliostyle.pagefloat.FloatReference}
      */
-    FloatReference.of = function(str) {
+    FloatReference.of = str => {
         switch (str) {
             case "inline":
                 return FloatReference.INLINE;
@@ -62,7 +62,7 @@ goog.scope(function() {
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
      * @returns {boolean}
      */
-    vivliostyle.pagefloat.isPageFloat = function(floatReference) {
+    vivliostyle.pagefloat.isPageFloat = floatReference => {
         switch (floatReference) {
             case FloatReference.INLINE:
                 return false;
@@ -82,7 +82,7 @@ goog.scope(function() {
      * @param {string} direction
      * @returns {string}
      */
-    vivliostyle.pagefloat.resolveInlineFloatDirection = function(floatSide, vertical, direction) {
+    vivliostyle.pagefloat.resolveInlineFloatDirection = (floatSide, vertical, direction) => {
         var writingMode = vertical ? "vertical-rl" : "horizontal-tb";
         if (floatSide === "top" || floatSide === "bottom") {
             floatSide = vivliostyle.logical.toLogical(floatSide, writingMode, direction);
@@ -167,9 +167,7 @@ goog.scope(function() {
      * @param {!PageFloat} other
      * @returns {boolean}
      */
-    PageFloat.prototype.isAllowedToPrecede = function(other) {
-        return false;
-    };
+    PageFloat.prototype.isAllowedToPrecede = other => false;
 
     /**
      * @private
@@ -194,17 +192,13 @@ goog.scope(function() {
      * @param {number} order
      * @returns {vivliostyle.pagefloat.PageFloat.ID}
      */
-    PageFloatStore.prototype.createPageFloatId = function(order) {
-        return "pf" + order;
-    };
+    PageFloatStore.prototype.createPageFloatId = order => "pf" + order;
 
     /**
      * @param {!vivliostyle.pagefloat.PageFloat} float
      */
     PageFloatStore.prototype.addPageFloat = function(float) {
-        var index = this.floats.findIndex(function(f) {
-            return adapt.vtree.isSameNodePosition(f.nodePosition, float.nodePosition);
-        });
+        var index = this.floats.findIndex(f => adapt.vtree.isSameNodePosition(f.nodePosition, float.nodePosition));
         if (index >= 0) {
             throw new Error("A page float with the same source node is already registered");
         } else {
@@ -219,9 +213,7 @@ goog.scope(function() {
      * @returns {?vivliostyle.pagefloat.PageFloat}
      */
     PageFloatStore.prototype.findPageFloatByNodePosition = function(nodePosition) {
-        var index = this.floats.findIndex(function(f) {
-            return adapt.vtree.isSameNodePosition(f.nodePosition, nodePosition);
-        });
+        var index = this.floats.findIndex(f => adapt.vtree.isSameNodePosition(f.nodePosition, nodePosition));
         return index >= 0 ? this.floats[index] : null;
     };
 
@@ -229,9 +221,7 @@ goog.scope(function() {
      * @param {vivliostyle.pagefloat.PageFloat.ID} id
      */
     PageFloatStore.prototype.findPageFloatById = function(id) {
-        var index = this.floats.findIndex(function(f) {
-            return f.id === id;
-        });
+        var index = this.floats.findIndex(f => f.id === id);
         return index >= 0 ? this.floats[index] : null;
     };
 
@@ -257,7 +247,7 @@ goog.scope(function() {
      * @returns {boolean}
      */
     PageFloatFragment.prototype.hasFloat = function(float) {
-        return this.continuations.some(function(c) { return c.float === float; });
+        return this.continuations.some(c => c.float === float);
     };
 
     /**
@@ -291,8 +281,8 @@ goog.scope(function() {
      * @returns {number}
      */
     PageFloatFragment.prototype.getOrder = function() {
-        /** @const */ var floats = this.continuations.map(function(c) { return c.float; });
-        return Math.min.apply(null, floats.map(function(f) { return f.getOrder(); }));
+        /** @const */ var floats = this.continuations.map(c => c.float);
+        return Math.min.apply(null, floats.map(f => f.getOrder()));
     };
 
     /**
@@ -317,9 +307,7 @@ goog.scope(function() {
      */
     PageFloatFragment.prototype.getFlowName = function() {
         var flowName = this.continuations[0].float.flowName;
-        goog.asserts.assert(this.continuations.every(function(c) {
-            return c.float.flowName === flowName;
-        }));
+        goog.asserts.assert(this.continuations.every(c => c.float.flowName === flowName));
         return flowName;
     };
 
@@ -543,9 +531,7 @@ goog.scope(function() {
             parent.addPageFloatFragment(floatFragment, dontInvalidate);
         } else if (this.floatFragments.indexOf(floatFragment) < 0) {
             this.floatFragments.push(floatFragment);
-            this.floatFragments.sort(function(fr1, fr2) {
-                return fr1.getOrder() - fr2.getOrder();
-            });
+            this.floatFragments.sort((fr1, fr2) => fr1.getOrder() - fr2.getOrder());
         }
         if (!dontInvalidate)
             this.invalidate();
@@ -583,9 +569,7 @@ goog.scope(function() {
             var parent = this.getParent(float.floatReference);
             return parent.findPageFloatFragment(float);
         }
-        var index = this.floatFragments.findIndex(function(f) {
-            return f.hasFloat(float);
-        });
+        var index = this.floatFragments.findIndex(f => f.hasFloat(float));
         if (index >= 0) {
             return this.floatFragments[index];
         } else {
@@ -615,9 +599,7 @@ goog.scope(function() {
      * @returns {boolean}
      */
     PageFloatLayoutContext.prototype.hasContinuingFloatFragmentsInFlow = function(flowName) {
-        return this.hasFloatFragments(function(fragment) {
-            return fragment.continues && fragment.getFlowName() === flowName;
-        });
+        return this.hasFloatFragments(fragment => fragment.continues && fragment.getFlowName() === flowName);
     };
 
     /**
@@ -630,9 +612,7 @@ goog.scope(function() {
 
     PageFloatLayoutContext.prototype.collectPageFloatAnchors = function() {
         var anchors = Object.assign({}, this.floatAnchors);
-        return this.children.reduce(function(prev, child) {
-            return Object.assign(prev, child.collectPageFloatAnchors());
-        }, anchors);
+        return this.children.reduce((prev, child) => Object.assign(prev, child.collectPageFloatAnchors()), anchors);
     };
 
     /**
@@ -641,7 +621,7 @@ goog.scope(function() {
      */
     PageFloatLayoutContext.prototype.isAnchorAlreadyAppeared = function(floatId) {
         var deferredFloats = this.getDeferredPageFloatContinuations();
-        if (deferredFloats.some(function(cont) { return cont.float.getId() === floatId; })) {
+        if (deferredFloats.some(cont => cont.float.getId() === floatId)) {
             return true;
         }
         var floatAnchors = this.collectPageFloatAnchors();
@@ -659,7 +639,7 @@ goog.scope(function() {
     PageFloatLayoutContext.prototype.deferPageFloat = function(continuation) {
         var float = continuation.float;
         if (float.floatReference === this.floatReference) {
-            var index = this.floatsDeferredToNext.findIndex(function(c) { return c.float === float; });
+            var index = this.floatsDeferredToNext.findIndex(c => c.float === float);
             if (index >= 0) {
                 this.floatsDeferredToNext.splice(index, 1, continuation);
             } else {
@@ -681,9 +661,7 @@ goog.scope(function() {
             return this.getParent(float.floatReference).hasPrecedingFloatsDeferredToNext(float, false);
         }
         var order = float.getOrder();
-        var hasPrecedingFloatsDeferredToNext = this.floatsDeferredToNext.some(function(c) {
-            return c.float.getOrder() < order && !float.isAllowedToPrecede(c.float);
-        });
+        var hasPrecedingFloatsDeferredToNext = this.floatsDeferredToNext.some(c => c.float.getOrder() < order && !float.isAllowedToPrecede(c.float));
         if (hasPrecedingFloatsDeferredToNext) {
             return true;
         } else if (this.parent) {
@@ -700,8 +678,8 @@ goog.scope(function() {
     PageFloatLayoutContext.prototype.getLastFollowingFloatInFragments = function(float) {
         var order = float.getOrder();
         var lastFollowing = null;
-        this.floatFragments.forEach(function(fragment) {
-            fragment.continuations.forEach(function(c) {
+        this.floatFragments.forEach(fragment => {
+            fragment.continuations.forEach(c => {
                 var f = c.float;
                 var o = f.getOrder();
                 if (o > order &&
@@ -726,15 +704,11 @@ goog.scope(function() {
      */
     PageFloatLayoutContext.prototype.getDeferredPageFloatContinuations = function(flowName) {
         flowName = flowName || this.flowName;
-        var result = this.floatsDeferredFromPrevious.filter(function(cont) {
-            return !flowName || cont.float.flowName === flowName;
-        });
+        var result = this.floatsDeferredFromPrevious.filter(cont => !flowName || cont.float.flowName === flowName);
         if (this.parent) {
             result = this.parent.getDeferredPageFloatContinuations(flowName).concat(result);
         }
-        return result.sort(function(c1, c2) {
-            return c1.float.getOrder() - c2.float.getOrder();
-        });
+        return result.sort((c1, c2) => c1.float.getOrder() - c2.float.getOrder());
     };
 
     /**
@@ -743,9 +717,7 @@ goog.scope(function() {
      */
     PageFloatLayoutContext.prototype.getPageFloatContinuationsDeferredToNext = function(flowName) {
         flowName = flowName || this.flowName;
-        var result = this.floatsDeferredToNext.filter(function(cont) {
-            return !flowName || cont.float.flowName === flowName;
-        });
+        var result = this.floatsDeferredToNext.filter(cont => !flowName || cont.float.flowName === flowName);
         if (this.parent) {
             return this.parent.getPageFloatContinuationsDeferredToNext(flowName).concat(result);
         } else {
@@ -763,9 +735,7 @@ goog.scope(function() {
             var child = this.children[i];
             if (done.indexOf(child.flowName) >= 0) continue;
             done.push(child.flowName);
-            result = result.concat(child.floatsDeferredToNext.map(function(c) {
-                return c.float;
-            }));
+            result = result.concat(child.floatsDeferredToNext.map(c => c.float));
             result = result.concat(child.getFloatsDeferredToNextInChildContexts());
         }
         return result;
@@ -803,20 +773,12 @@ goog.scope(function() {
      */
     PageFloatLayoutContext.prototype.checkAndForbidFloatFollowingDeferredFloat = function() {
         var deferredFloats = this.getFloatsDeferredToNextInChildContexts();
-        var floatsInFragments = this.floatFragments.reduce(function(r, fr) {
-            return r.concat(fr.continuations.map(function(c) {
-                return c.float;
-            }));
-        }, []);
-        floatsInFragments.sort(function(f1, f2) {
-            return f2.getOrder() - f1.getOrder();
-        });
+        var floatsInFragments = this.floatFragments.reduce((r, fr) => r.concat(fr.continuations.map(c => c.float)), []);
+        floatsInFragments.sort((f1, f2) => f2.getOrder() - f1.getOrder());
         for (var i = 0; i < floatsInFragments.length; i++) {
             var float = floatsInFragments[i];
             var order = float.getOrder();
-            if (deferredFloats.some(function(d) {
-                return !float.isAllowedToPrecede(d) && order > d.getOrder();
-            })) {
+            if (deferredFloats.some(d => !float.isAllowedToPrecede(d) && order > d.getOrder())) {
                 if (this.locked) {
                     this.invalidate();
                 } else {
@@ -845,9 +807,9 @@ goog.scope(function() {
             }
         }
         this.floatsDeferredFromPrevious.forEach(function(continuation) {
-            if (this.floatsDeferredToNext.findIndex(function(c) { return continuation.equals(c); }) >= 0)
+            if (this.floatsDeferredToNext.findIndex(c => continuation.equals(c)) >= 0)
                 return;
-            if (this.floatFragments.some(function(f) { return f.hasFloat(continuation.float); }))
+            if (this.floatFragments.some(f => f.hasFloat(continuation.float)))
                 return;
             this.floatsDeferredToNext.push(continuation);
         }, this);
@@ -872,7 +834,7 @@ goog.scope(function() {
                 // a column page float layout context in a single column region,
                 // view elements of float fragments of the child (column) context need to be removed here.
                 if (this.hasSameContainerAs(child)) {
-                    child.floatFragments.forEach(function(fragment) {
+                    child.floatFragments.forEach(fragment => {
                         var elem = fragment.area.element;
                         if (elem && elem.parentNode)
                             elem.parentNode.removeChild(elem);
@@ -881,7 +843,7 @@ goog.scope(function() {
             }, this);
             this.container.clear();
         }
-        this.children.forEach(function(child) {
+        this.children.forEach(child => {
             child.layoutConstraints.splice(0);
         });
         this.children.splice(0);
@@ -895,8 +857,8 @@ goog.scope(function() {
      */
     PageFloatLayoutContext.prototype.detachChildren = function() {
         var children = this.children.splice(0);
-        children.forEach(function(child) {
-            child.floatFragments.forEach(function(fragment) {
+        children.forEach(child => {
+            child.floatFragments.forEach(fragment => {
                 var elem = fragment.area.element;
                 if (elem && elem.parentNode)
                     elem.parentNode.removeChild(elem);
@@ -1027,10 +989,8 @@ goog.scope(function() {
      */
     PageFloatLayoutContext.prototype.getStashedFloatFragments = function(floatReference) {
         if (floatReference === this.floatReference) {
-            return this.stashedFloatFragments.concat().sort(function(fr1, fr2) {
-                // return in reverse order
-                return fr2.getOrder() - fr1.getOrder();
-            });
+            return this.stashedFloatFragments.concat().sort((fr1, fr2) => // return in reverse order
+            fr2.getOrder() - fr1.getOrder());
         } else {
             return this.getParent(floatReference).getStashedFloatFragments(floatReference);
         }
@@ -1124,7 +1084,7 @@ goog.scope(function() {
 
         var fragments = this.floatFragments;
         if (fragments.length > 0) {
-            limits = fragments.reduce(function(l, f) {
+            limits = fragments.reduce((l, f) => {
                 if (condition && !condition(f, this))
                     return l;
                 var logicalFloatSide = this.toLogical(f.floatSide);
@@ -1190,7 +1150,7 @@ goog.scope(function() {
                     floatMinWrapBlockStart: floatMinWrapBlockStart,
                     floatMinWrapBlockEnd: floatMinWrapBlockEnd
                 };
-            }.bind(this), limits);
+            }, limits);
         }
 
         limits.left += offsetX;
@@ -1354,9 +1314,7 @@ goog.scope(function() {
      * @returns {!Array<adapt.geom.Shape>}
      */
     PageFloatLayoutContext.prototype.getFloatFragmentExclusions = function() {
-        var result = this.floatFragments.map(function(fragment) {
-            return fragment.getOuterShape();
-        });
+        var result = this.floatFragments.map(fragment => fragment.getOuterShape());
         if (this.parent) {
             return this.parent.getFloatFragmentExclusions().concat(result);
         } else {
@@ -1370,7 +1328,7 @@ goog.scope(function() {
     PageFloatLayoutContext.prototype.reattachFloatFragments = function() {
         var parent = this.container.element && this.container.element.parentNode;
         if (parent) {
-            this.floatFragments.forEach(function(fragment) {
+            this.floatFragments.forEach(fragment => {
                 parent.appendChild(fragment.area.element);
             });
         }
@@ -1381,7 +1339,7 @@ goog.scope(function() {
      */
     PageFloatLayoutContext.prototype.getMaxReachedAfterEdge = function() {
         var isVertical = this.getContainer().vertical;
-        return this.floatFragments.reduce(function(edge, fragment) {
+        return this.floatFragments.reduce((edge, fragment) => {
             var rect = fragment.getOuterRect();
             if (isVertical) {
                 return Math.min(edge, rect.x1);
@@ -1396,9 +1354,7 @@ goog.scope(function() {
      */
     PageFloatLayoutContext.prototype.getBlockStartEdgeOfBlockEndFloats = function() {
         var isVertical = this.getContainer().vertical;
-        return this.floatFragments.filter(function(fragment) {
-            return fragment.floatSide === "block-end";
-        }).reduce(function(edge, fragment) {
+        return this.floatFragments.filter(fragment => fragment.floatSide === "block-end").reduce((edge, fragment) => {
             var rect = fragment.getOuterRect();
             if (isVertical) {
                 return Math.max(edge, rect.x2);
@@ -1415,9 +1371,7 @@ goog.scope(function() {
      */
     PageFloatLayoutContext.prototype.getPageFloatClearEdge = function(clear, column) {
         function isContinuationOfAlreadyAppearedFloat(context) {
-            return function(continuation) {
-                return context.isAnchorAlreadyAppeared(continuation.float.getId());
-            };
+            return continuation => context.isAnchorAlreadyAppeared(continuation.float.getId());
         }
         function isFragmentWithAlreadyAppearedFloat(fragment, context) {
             return fragment.continuations.some(isContinuationOfAlreadyAppearedFloat(context));
@@ -1487,9 +1441,7 @@ goog.scope(function() {
          * @returns {function(!PageFloatFragment):boolean}
          */
         function isPrecedingFragment(side) {
-            return function(fragment) {
-                return fragment.floatSide === side && fragment.getOrder() < floatOrder;
-            };
+            return fragment => fragment.floatSide === side && fragment.getOrder() < floatOrder;
         }
 
         /**
@@ -1498,10 +1450,8 @@ goog.scope(function() {
          * @returns {boolean}
          */
         function hasPrecedingFragmentInChildren(context, side) {
-            return context.children.some(function(child) {
-                return child.floatFragments.some(isPrecedingFragment(side)) ||
-                    hasPrecedingFragmentInChildren(child, side);
-            });
+            return context.children.some(child => child.floatFragments.some(isPrecedingFragment(side)) ||
+                hasPrecedingFragmentInChildren(child, side));
         }
 
         /**
@@ -1604,7 +1554,7 @@ goog.scope(function() {
         var isVertical = this.getContainer().vertical;
         if (!this.floatFragments.length)
             return 0;
-        return Math.max.apply(null, this.floatFragments.map(function(fragment) {
+        return Math.max.apply(null, this.floatFragments.map(fragment => {
             var area = fragment.area;
             if (isVertical)
                 return area.width;
@@ -1631,20 +1581,20 @@ goog.scope(function() {
     /**
      * @interface
      */
-    vivliostyle.pagefloat.PageFloatLayoutStrategy = function() {};
+    vivliostyle.pagefloat.PageFloatLayoutStrategy = () => {};
     /** @const */ var PageFloatLayoutStrategy = vivliostyle.pagefloat.PageFloatLayoutStrategy;
 
     /**
      * @param {!adapt.vtree.NodeContext} nodeContext
      * @returns {boolean}
      */
-    PageFloatLayoutStrategy.prototype.appliesToNodeContext = function(nodeContext) {};
+    PageFloatLayoutStrategy.prototype.appliesToNodeContext = nodeContext => {};
 
     /**
      * @param {!PageFloat} float
      * @returns {boolean}
      */
-    PageFloatLayoutStrategy.prototype.appliesToFloat = function(float) {};
+    PageFloatLayoutStrategy.prototype.appliesToFloat = float => {};
 
     /**
      * @param {!adapt.vtree.NodeContext} nodeContext
@@ -1653,7 +1603,7 @@ goog.scope(function() {
      * @returns {!adapt.task.Result<!PageFloat>}
      */
     PageFloatLayoutStrategy.prototype.createPageFloat =
-        function(nodeContext, pageFloatLayoutContext, column) {};
+        (nodeContext, pageFloatLayoutContext, column) => {};
 
     /**
      * @param {!Array<!PageFloatContinuation>} continuations
@@ -1662,7 +1612,7 @@ goog.scope(function() {
      * @param {boolean} continues
      * @returns {!PageFloatFragment}
      */
-    PageFloatLayoutStrategy.prototype.createPageFloatFragment = function(continuations, logicalFloatSide, floatArea, continues) {};
+    PageFloatLayoutStrategy.prototype.createPageFloatFragment = (continuations, logicalFloatSide, floatArea, continues) => {};
 
     /**
      * @param {!PageFloat} float
@@ -1670,7 +1620,7 @@ goog.scope(function() {
      * @returns {?PageFloatFragment}
      */
     PageFloatLayoutStrategy.prototype.findPageFloatFragment =
-        function(float, pageFloatLayoutContext) {};
+        (float, pageFloatLayoutContext) => {};
 
     /**
      * @param {!adapt.layout.PageFloatArea} floatArea
@@ -1678,13 +1628,13 @@ goog.scope(function() {
      * @param {!adapt.layout.Column} column
      */
     PageFloatLayoutStrategy.prototype.adjustPageFloatArea =
-        function(floatArea, floatContainer, column) {};
+        (floatArea, floatContainer, column) => {};
 
     /**
      * @param {!PageFloat} float
      * @param {!PageFloatLayoutContext} pageFloatLayoutContext
      */
-    PageFloatLayoutStrategy.prototype.forbid = function(float, pageFloatLayoutContext) {};
+    PageFloatLayoutStrategy.prototype.forbid = (float, pageFloatLayoutContext) => {};
 
     /** @const {Array<!PageFloatLayoutStrategy>} */
     var pageFloatLayoutStrategies = [];
@@ -1692,14 +1642,14 @@ goog.scope(function() {
     /**
      * @constructor
      */
-    vivliostyle.pagefloat.PageFloatLayoutStrategyResolver = function() {};
+    vivliostyle.pagefloat.PageFloatLayoutStrategyResolver = () => {};
     /** @const */ var PageFloatLayoutStrategyResolver =
         vivliostyle.pagefloat.PageFloatLayoutStrategyResolver;
 
     /**
      * @param {!PageFloatLayoutStrategy} strategy
      */
-    PageFloatLayoutStrategyResolver.register = function(strategy) {
+    PageFloatLayoutStrategyResolver.register = strategy => {
         pageFloatLayoutStrategies.push(strategy);
     };
 
@@ -1707,7 +1657,7 @@ goog.scope(function() {
      * @param {!adapt.vtree.NodeContext} nodeContext
      * @returns {!PageFloatLayoutStrategy}
      */
-    PageFloatLayoutStrategyResolver.prototype.findByNodeContext = function(nodeContext) {
+    PageFloatLayoutStrategyResolver.prototype.findByNodeContext = nodeContext => {
         for (var i = pageFloatLayoutStrategies.length - 1; i >= 0; i--) {
             var strategy = pageFloatLayoutStrategies[i];
             if (strategy.appliesToNodeContext(nodeContext)) {
@@ -1721,7 +1671,7 @@ goog.scope(function() {
      * @param {!PageFloat} float
      * @returns {!PageFloatLayoutStrategy}
      */
-    PageFloatLayoutStrategyResolver.prototype.findByFloat = function(float) {
+    PageFloatLayoutStrategyResolver.prototype.findByFloat = float => {
         for (var i = pageFloatLayoutStrategies.length - 1; i >= 0; i--) {
             var strategy = pageFloatLayoutStrategies[i];
             if (strategy.appliesToFloat(float)) {
@@ -1735,34 +1685,29 @@ goog.scope(function() {
      * @constructor
      * @implements {PageFloatLayoutStrategy}
      */
-    vivliostyle.pagefloat.NormalPageFloatLayoutStrategy = function() {};
+    vivliostyle.pagefloat.NormalPageFloatLayoutStrategy = () => {};
     /** @const */ var NormalPageFloatLayoutStrategy =
         vivliostyle.pagefloat.NormalPageFloatLayoutStrategy;
 
     /**
      * @override
      */
-    NormalPageFloatLayoutStrategy.prototype.appliesToNodeContext = function(nodeContext) {
-        return vivliostyle.pagefloat.isPageFloat(nodeContext.floatReference);
-    };
+    NormalPageFloatLayoutStrategy.prototype.appliesToNodeContext = nodeContext => vivliostyle.pagefloat.isPageFloat(nodeContext.floatReference);
 
     /**
      * @override
      */
-    NormalPageFloatLayoutStrategy.prototype.appliesToFloat = function(float) {
-        return true;
-    };
+    NormalPageFloatLayoutStrategy.prototype.appliesToFloat = float => true;
 
     /**
      * @override
      */
-    NormalPageFloatLayoutStrategy.prototype.createPageFloat = function(
-        nodeContext, pageFloatLayoutContext, column) {
+    NormalPageFloatLayoutStrategy.prototype.createPageFloat = (nodeContext, pageFloatLayoutContext, column) => {
         var floatReference = nodeContext.floatReference;
         goog.asserts.assert(nodeContext.floatSide);
         /** @const {string} */ var floatSide = nodeContext.floatSide;
         /** @const */ var nodePosition = nodeContext.toNodePosition();
-        return column.resolveFloatReferenceFromColumnSpan(floatReference, nodeContext.columnSpan, nodeContext).thenAsync(function(ref) {
+        return column.resolveFloatReferenceFromColumnSpan(floatReference, nodeContext.columnSpan, nodeContext).thenAsync(ref => {
             floatReference = ref;
             goog.asserts.assert(pageFloatLayoutContext.flowName);
             var float = new vivliostyle.pagefloat.PageFloat(nodePosition, floatReference, floatSide,
@@ -1776,8 +1721,7 @@ goog.scope(function() {
     /**
      * @override
      */
-    NormalPageFloatLayoutStrategy.prototype.createPageFloatFragment = function(
-        continuations, floatSide, floatArea, continues) {
+    NormalPageFloatLayoutStrategy.prototype.createPageFloatFragment = (continuations, floatSide, floatArea, continues) => {
         /** @const */ var f = continuations[0].float;
         return new PageFloatFragment(f.floatReference, floatSide, continuations, floatArea, continues);
     };
@@ -1785,21 +1729,17 @@ goog.scope(function() {
     /**
      * @override
      */
-    NormalPageFloatLayoutStrategy.prototype.findPageFloatFragment = function(
-        float, pageFloatLayoutContext) {
-        return pageFloatLayoutContext.findPageFloatFragment(float);
-    };
+    NormalPageFloatLayoutStrategy.prototype.findPageFloatFragment = (float, pageFloatLayoutContext) => pageFloatLayoutContext.findPageFloatFragment(float);
 
     /**
      * @override
      */
-    NormalPageFloatLayoutStrategy.prototype.adjustPageFloatArea = function(
-        floatArea, floatContainer, column) {};
+    NormalPageFloatLayoutStrategy.prototype.adjustPageFloatArea = (floatArea, floatContainer, column) => {};
 
     /**
      * @override
      */
-    NormalPageFloatLayoutStrategy.prototype.forbid = function(float, pageFloatLayoutContext) {};
+    NormalPageFloatLayoutStrategy.prototype.forbid = (float, pageFloatLayoutContext) => {};
 
     PageFloatLayoutStrategyResolver.register(new NormalPageFloatLayoutStrategy());
 });

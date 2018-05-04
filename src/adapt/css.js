@@ -34,7 +34,7 @@ adapt.css.nameTable = {};
 /**
  * @constructor
  */
-adapt.css.Visitor = function() {
+adapt.css.Visitor = () => {
 };
 
 /**
@@ -51,7 +51,7 @@ adapt.css.Visitor.prototype.visitValues = function(values) {
  * @param {adapt.css.Val} empty
  * @return {adapt.css.Val}
  */
-adapt.css.Visitor.prototype.visitEmpty = function(empty) {
+adapt.css.Visitor.prototype.visitEmpty = empty => {
     throw new Error("E_CSS_EMPTY_NOT_ALLOWED");
 };
 
@@ -59,7 +59,7 @@ adapt.css.Visitor.prototype.visitEmpty = function(empty) {
  * @param {adapt.css.Val} slash
  * @return {adapt.css.Val}
  */
-adapt.css.Visitor.prototype.visitSlash = function(slash) {
+adapt.css.Visitor.prototype.visitSlash = slash => {
     throw new Error("E_CSS_SLASH_NOT_ALLOWED");
 };
 
@@ -67,7 +67,7 @@ adapt.css.Visitor.prototype.visitSlash = function(slash) {
  * @param {adapt.css.Str} str
  * @return {adapt.css.Val}
  */
-adapt.css.Visitor.prototype.visitStr = function(str) {
+adapt.css.Visitor.prototype.visitStr = str => {
     throw new Error("E_CSS_STR_NOT_ALLOWED");
 };
 
@@ -75,7 +75,7 @@ adapt.css.Visitor.prototype.visitStr = function(str) {
  * @param {adapt.css.Ident} ident
  * @return {adapt.css.Val}
  */
-adapt.css.Visitor.prototype.visitIdent = function(ident) {
+adapt.css.Visitor.prototype.visitIdent = ident => {
     throw new Error("E_CSS_IDENT_NOT_ALLOWED");
 };
 
@@ -83,7 +83,7 @@ adapt.css.Visitor.prototype.visitIdent = function(ident) {
  * @param {!adapt.css.Numeric} numeric
  * @return {adapt.css.Val}
  */
-adapt.css.Visitor.prototype.visitNumeric = function(numeric) {
+adapt.css.Visitor.prototype.visitNumeric = numeric => {
     throw new Error("E_CSS_NUMERIC_NOT_ALLOWED");
 };
 
@@ -91,7 +91,7 @@ adapt.css.Visitor.prototype.visitNumeric = function(numeric) {
  * @param {adapt.css.Num} num
  * @return {adapt.css.Val}
  */
-adapt.css.Visitor.prototype.visitNum = function(num) {
+adapt.css.Visitor.prototype.visitNum = num => {
     throw new Error("E_CSS_NUM_NOT_ALLOWED");
 };
 
@@ -107,7 +107,7 @@ adapt.css.Visitor.prototype.visitInt = function(num) {
  * @param {adapt.css.Color} color
  * @return {adapt.css.Val}
  */
-adapt.css.Visitor.prototype.visitColor = function(color) {
+adapt.css.Visitor.prototype.visitColor = color => {
     throw new Error("E_CSS_COLOR_NOT_ALLOWED");
 };
 
@@ -115,7 +115,7 @@ adapt.css.Visitor.prototype.visitColor = function(color) {
  * @param {adapt.css.URL} url
  * @return {adapt.css.Val}
  */
-adapt.css.Visitor.prototype.visitURL = function(url) {
+adapt.css.Visitor.prototype.visitURL = url => {
     throw new Error("E_CSS_URL_NOT_ALLOWED");
 };
 
@@ -123,7 +123,7 @@ adapt.css.Visitor.prototype.visitURL = function(url) {
  * @param {adapt.css.SpaceList} list
  * @return {adapt.css.Val}
  */
-adapt.css.Visitor.prototype.visitSpaceList = function(list) {
+adapt.css.Visitor.prototype.visitSpaceList = list => {
     throw new Error("E_CSS_LIST_NOT_ALLOWED");
 };
 
@@ -131,7 +131,7 @@ adapt.css.Visitor.prototype.visitSpaceList = function(list) {
  * @param {adapt.css.CommaList} list
  * @return {adapt.css.Val}
  */
-adapt.css.Visitor.prototype.visitCommaList = function(list) {
+adapt.css.Visitor.prototype.visitCommaList = list => {
     throw new Error("E_CSS_COMMA_NOT_ALLOWED");
 };
 
@@ -139,7 +139,7 @@ adapt.css.Visitor.prototype.visitCommaList = function(list) {
  * @param {adapt.css.Func} func
  * @return {adapt.css.Val}
  */
-adapt.css.Visitor.prototype.visitFunc = function(func) {
+adapt.css.Visitor.prototype.visitFunc = func => {
     throw new Error("E_CSS_FUNC_NOT_ALLOWED");
 };
 
@@ -147,7 +147,7 @@ adapt.css.Visitor.prototype.visitFunc = function(func) {
  * @param {adapt.css.Expr} expr
  * @return {adapt.css.Val}
  */
-adapt.css.Visitor.prototype.visitExpr = function(expr) {
+adapt.css.Visitor.prototype.visitExpr = expr => {
     throw new Error("E_CSS_EXPR_NOT_ALLOWED");
 };
 
@@ -185,58 +185,42 @@ adapt.css.FilterVisitor.prototype.visitValues = function(values) {
 /**
  * @override
  */
-adapt.css.FilterVisitor.prototype.visitStr = function(str) {
-    return str;
-};
+adapt.css.FilterVisitor.prototype.visitStr = str => str;
 
 /**
  * @override
  */
-adapt.css.FilterVisitor.prototype.visitIdent = function(ident) {
-    return ident;
-};
+adapt.css.FilterVisitor.prototype.visitIdent = ident => ident;
 
 /**
  * @override
  */
-adapt.css.FilterVisitor.prototype.visitSlash = function(slash) {
-    return slash;
-};
+adapt.css.FilterVisitor.prototype.visitSlash = slash => slash;
 
 /**
  * @override
  */
-adapt.css.FilterVisitor.prototype.visitNumeric = function(numeric) {
-    return numeric;
-};
+adapt.css.FilterVisitor.prototype.visitNumeric = numeric => numeric;
 
 /**
  * @override
  */
-adapt.css.FilterVisitor.prototype.visitNum = function(num) {
-    return num;
-};
+adapt.css.FilterVisitor.prototype.visitNum = num => num;
 
 /**
  * @override
  */
-adapt.css.FilterVisitor.prototype.visitInt = function(num) {
-    return num;
-};
+adapt.css.FilterVisitor.prototype.visitInt = num => num;
 
 /**
  * @override
  */
-adapt.css.FilterVisitor.prototype.visitColor = function(color) {
-    return color;
-};
+adapt.css.FilterVisitor.prototype.visitColor = color => color;
 
 /**
  * @override
  */
-adapt.css.FilterVisitor.prototype.visitURL = function(url) {
-    return url;
-};
+adapt.css.FilterVisitor.prototype.visitURL = url => url;
 
 /**
  * @override
@@ -271,15 +255,13 @@ adapt.css.FilterVisitor.prototype.visitFunc = function(func) {
 /**
  * @override
  */
-adapt.css.FilterVisitor.prototype.visitExpr = function(expr) {
-    return expr;
-};
+adapt.css.FilterVisitor.prototype.visitExpr = expr => expr;
 
 
 /**
  * @constructor
  */
-adapt.css.Val = function() {
+adapt.css.Val = () => {
 };
 
 /**
@@ -306,7 +288,7 @@ adapt.css.Val.prototype.stringValue = function() {
  * @param {adapt.expr.Val} ref
  * @return {adapt.expr.Val}
  */
-adapt.css.Val.prototype.toExpr = function(scope, ref) {
+adapt.css.Val.prototype.toExpr = (scope, ref) => {
     throw new Error("F_ABSTRACT");
 };
 
@@ -315,7 +297,7 @@ adapt.css.Val.prototype.toExpr = function(scope, ref) {
  * @param {boolean} toString
  * @return {void}
  */
-adapt.css.Val.prototype.appendTo = function(buf, toString) {
+adapt.css.Val.prototype.appendTo = (buf, toString) => {
     buf.append("[error]");
 };
 
@@ -328,37 +310,27 @@ adapt.css.Val.prototype.visit = goog.abstractMethod;
 /**
  * @return {boolean}
  */
-adapt.css.Val.prototype.isExpr = function() {
-    return false;
-};
+adapt.css.Val.prototype.isExpr = () => false;
 
 /**
  * @return {boolean}
  */
-adapt.css.Val.prototype.isNumeric = function() {
-    return false;
-};
+adapt.css.Val.prototype.isNumeric = () => false;
 
 /**
  * @return {boolean}
  */
-adapt.css.Val.prototype.isNum = function() {
-    return false;
-};
+adapt.css.Val.prototype.isNum = () => false;
 
 /**
  * @return {boolean}
  */
-adapt.css.Val.prototype.isIdent = function() {
-    return false;
-};
+adapt.css.Val.prototype.isIdent = () => false;
 
 /**
  * @return {boolean}
  */
-adapt.css.Val.prototype.isSpaceList = function() {
-    return false;
-};
+adapt.css.Val.prototype.isSpaceList = () => false;
 
 
 /**
@@ -375,14 +347,12 @@ goog.inherits(adapt.css.Empty, adapt.css.Val);
 /**
  * @override
  */
-adapt.css.Empty.prototype.toExpr = function(scope, ref) {
-    return new adapt.expr.Const(scope, "");
-};
+adapt.css.Empty.prototype.toExpr = (scope, ref) => new adapt.expr.Const(scope, "");
 
 /**
  * @override
  */
-adapt.css.Empty.prototype.appendTo = function(buf, toString) {
+adapt.css.Empty.prototype.appendTo = (buf, toString) => {
 };
 
 /**
@@ -414,14 +384,12 @@ goog.inherits(adapt.css.Slash, adapt.css.Val);
 /**
  * @override
  */
-adapt.css.Slash.prototype.toExpr = function(scope, ref) {
-    return new adapt.expr.Const(scope, "/");
-};
+adapt.css.Slash.prototype.toExpr = (scope, ref) => new adapt.expr.Const(scope, "/");
 
 /**
  * @override
  */
-adapt.css.Slash.prototype.appendTo = function(buf, toString) {
+adapt.css.Slash.prototype.appendTo = (buf, toString) => {
     buf.append("/");
 };
 
@@ -523,16 +491,14 @@ adapt.css.Ident.prototype.visit = function(visitor) {
 /**
  * @override
  */
-adapt.css.Ident.prototype.isIdent = function() {
-    return true;
-};
+adapt.css.Ident.prototype.isIdent = () => true;
 
 
 /**
  * @param {string} name
  * @return {!adapt.css.Ident}
  */
-adapt.css.getName = function(name) {
+adapt.css.getName = name => {
     var r = adapt.css.nameTable[name];
     if (!r) {
         r = new adapt.css.Ident(name);
@@ -586,9 +552,7 @@ adapt.css.Numeric.prototype.visit = function(visitor) {
 /**
  * @override
  */
-adapt.css.Numeric.prototype.isNumeric = function() {
-    return true;
-};
+adapt.css.Numeric.prototype.isNumeric = () => true;
 
 
 /**
@@ -630,9 +594,7 @@ adapt.css.Num.prototype.visit = function(visitor) {
 /**
  * @override
  */
-adapt.css.Num.prototype.isNum = function() {
-    return true;
-};
+adapt.css.Num.prototype.isNum = () => true;
 
 
 /**
@@ -718,7 +680,7 @@ adapt.css.URL.prototype.visit = function(visitor) {
  * @param {boolean} toString
  * @return {void}
  */
-adapt.css.appendList = function(buf, values, separator, toString) {
+adapt.css.appendList = (buf, values, separator, toString) => {
     var length = values.length;
     values[0].appendTo(buf, toString);
     for (var i = 1; i < length; i++) {
@@ -756,9 +718,7 @@ adapt.css.SpaceList.prototype.visit = function(visitor) {
 /**
  * @override
  */
-adapt.css.SpaceList.prototype.isSpaceList = function() {
-    return true;
-};
+adapt.css.SpaceList.prototype.isSpaceList = () => true;
 
 
 /**
@@ -855,16 +815,14 @@ adapt.css.Expr.prototype.visit = function(visitor) {
 /**
  * @override
  */
-adapt.css.Expr.prototype.isExpr = function() {
-    return true;
-};
+adapt.css.Expr.prototype.isExpr = () => true;
 
 /**
  * @param {adapt.css.Val} val
  * @param {adapt.expr.Context} context
  * @return {number}
  */
-adapt.css.toNumber = function(val, context) {
+adapt.css.toNumber = (val, context) => {
     if (val) {
         if (val.isNumeric()) {
             var numeric = /** @type {adapt.css.Numeric} */ (val);
@@ -883,9 +841,7 @@ adapt.css.toNumber = function(val, context) {
  * @param {adapt.expr.Context} context
  * @returns {!adapt.css.Numeric}
  */
-adapt.css.convertNumericToPx = function(val, context) {
-    return new adapt.css.Numeric(adapt.css.toNumber(val, context), "px");
-};
+adapt.css.convertNumericToPx = (val, context) => new adapt.css.Numeric(adapt.css.toNumber(val, context), "px");
 
 
 /**
@@ -993,7 +949,7 @@ adapt.css.processingOrder = {
  * @param {string} name2
  * @return {number}
  */
-adapt.css.processingOrderFn = function(name1, name2) {
+adapt.css.processingOrderFn = (name1, name2) => {
     var n1 = adapt.css.processingOrder[name1] || Number.MAX_VALUE;
     var n2 = adapt.css.processingOrder[name2] || Number.MAX_VALUE;
     return n1 - n2;

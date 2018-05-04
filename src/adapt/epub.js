@@ -57,15 +57,7 @@ goog.inherits(adapt.epub.EPUBDocStore, adapt.ops.OPSDocStore);
  */
 adapt.epub.EPUBDocStore.prototype.makeDeobfuscatorFactory = function() {
     var self = this;
-    return (
-        /**
-         * @param {string} url
-         * @return {?function(Blob):adapt.task.Result.<Blob>}
-         */
-        function(url) {
-            return self.deobfuscators[url];
-        }
-    );
+    return url => self.deobfuscators[url];
 };
 
 /**
@@ -119,7 +111,7 @@ adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
     }
     self.startLoadingAsPlainXML(url + "META-INF/encryption.xml");
     var containerURL = url + "META-INF/container.xml";
-    self.loadAsPlainXML(containerURL, true, "Failed to fetch EPUB container.xml from " + containerURL).then(function(containerXML) {
+    self.loadAsPlainXML(containerURL, true, "Failed to fetch EPUB container.xml from " + containerURL).then(containerXML => {
         if (!containerXML) {
             vivliostyle.logging.logger.error("Received an empty response for EPUB container.xml " + containerURL + ". This may be caused by the server not allowing cross origin requests.");
         } else {
@@ -153,16 +145,16 @@ adapt.epub.EPUBDocStore.prototype.loadOPF = function(epubURL, root, haveZipMetad
     }
     /** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ var frame
         = adapt.task.newFrame("loadOPF");
-    self.loadAsPlainXML(url).then(function(opfXML) {
+    self.loadAsPlainXML(url).then(opfXML => {
         if (!opfXML) {
             vivliostyle.logging.logger.error("Received an empty response for EPUB OPF " + url + ". This may be caused by the server not allowing cross origin requests.");
         } else {
-            self.loadAsPlainXML(epubURL + "META-INF/encryption.xml").then(function(encXML) {
+            self.loadAsPlainXML(epubURL + "META-INF/encryption.xml").then(encXML => {
                 var zipMetadataResult = haveZipMetadata ?
                     self.loadAsJSON(epubURL + "?r=list") : adapt.task.newResult(null);
-                zipMetadataResult.then(function(zipMetadata) {
+                zipMetadataResult.then(zipMetadata => {
                     opf = new adapt.epub.OPFDoc(self, epubURL);
-                    opf.initWithXMLDoc(opfXML, encXML, zipMetadata, epubURL + "?r=manifest").then(function() {
+                    opf.initWithXMLDoc(opfXML, encXML, zipMetadata, epubURL + "?r=manifest").then(() => {
                         self.opfByURL[url] = opf;
                         self.primaryOPFByEPubURL[epubURL] = opf;
                         frame.finish(opf);
@@ -199,7 +191,7 @@ adapt.epub.EPUBDocStore.prototype.load = function(url) {
     } else {
         var frame = adapt.task.newFrame("EPUBDocStore.load");
         r = adapt.epub.EPUBDocStore.superClass_.load.call(this, docURL, true, "Failed to fetch a source document from " + docURL);
-        r.then(function(xmldoc) {
+        r.then(xmldoc => {
             if (!xmldoc) {
                 vivliostyle.logging.logger.error("Received an empty response for " + docURL + ". This may be caused by the server not allowing cross origin requests.");
             } else {
@@ -268,18 +260,16 @@ adapt.epub.OPFItem.prototype.initWithParam = function(param) {
  * @param {adapt.epub.OPFItem} item
  * @return {?string}
  */
-adapt.epub.getOPFItemId = function(item) {
-    return item.id;
-};
+adapt.epub.getOPFItemId = item => item.id;
 
 /**
  * @param {string} uid
  * @return {function(Blob):adapt.task.Result.<Blob>}
  */
-adapt.epub.makeDeobfuscator = function(uid) {
+adapt.epub.makeDeobfuscator = uid => {
     // TODO: use UTF8 of uid
     var sha1 = adapt.sha1.bytesToSHA1Int8(uid);
-    return /** @param {Blob} blob */ function(blob) {
+    return blob => {
         var frame = /** @type {adapt.task.Frame.<Blob>} */ (adapt.task.newFrame("deobfuscator"));
         var head;
         var tail;
@@ -290,7 +280,7 @@ adapt.epub.makeDeobfuscator = function(uid) {
             head = blob["webkitSlice"](0, 1040);
             tail = blob["webkitSlice"](1040, blob.size - 1040);
         }
-        adapt.net.readBlob(head).then(function(buf) {
+        adapt.net.readBlob(head).then(buf => {
             var dataView = new DataView(buf);
             for (var k = 0; k < dataView.byteLength; k++) {
                 var b = dataView.getUint8(k);
@@ -307,9 +297,7 @@ adapt.epub.makeDeobfuscator = function(uid) {
  * @param {string} uid
  * @return {string}
  */
-adapt.epub.makeObfuscationKey = function(uid) {
-    return "1040:" + adapt.sha1.bytesToSHA1Hex(uid);
-};
+adapt.epub.makeObfuscationKey = uid => "1040:" + adapt.sha1.bytesToSHA1Hex(uid);
 
 /**
  * @typedef {{
@@ -358,9 +346,9 @@ adapt.epub.metaTerms = {
  * @param {string} lang
  * @return {function(adapt.base.JSON,adapt.base.JSON):number}
  */
-adapt.epub.getMetadataComparator = function(term, lang) {
+adapt.epub.getMetadataComparator = (term, lang) => {
     var empty = {};
-    return function(item1, item2) {
+    return (item1, item2) => {
         var m1, m2;
         var r1 = item1["r"] || empty;
         var r2 = item2["r"] || empty;
@@ -399,7 +387,7 @@ adapt.epub.getMetadataComparator = function(term, lang) {
  * @param {?string} prefixes
  * @return {adapt.base.JSON}
  */
-adapt.epub.readMetadata = function(mroot, prefixes) {
+adapt.epub.readMetadata = (mroot, prefixes) => {
     // Parse prefix map (if any)
     var prefixMap;
     if (!prefixes) {
@@ -420,7 +408,7 @@ adapt.epub.readMetadata = function(mroot, prefixes) {
      * @param {?string} val
      * @return {?string}
      */
-    var resolveProperty = function(val) {
+    var resolveProperty = val => {
         if (val) {
             var r = val.match(/^\s*(([^:]*):)?(\S+)\s*$/);
             if (r) {
@@ -434,7 +422,7 @@ adapt.epub.readMetadata = function(mroot, prefixes) {
     };
     var order = 1;
     // List of metadata items.
-    var rawItems = mroot.childElements().forEachNonNull(/** @return {?adapt.epub.RawMetaItem} */ function(node) {
+    var rawItems = mroot.childElements().forEachNonNull(node => {
         if (node.localName == "meta") {
             var p = resolveProperty(node.getAttribute("property"));
             if (p) {
@@ -452,44 +440,42 @@ adapt.epub.readMetadata = function(mroot, prefixes) {
     });
     // Items grouped by their target id.
     var rawItemsByTarget = adapt.base.multiIndexArray(rawItems,
-        function(rawItem) { return rawItem.refines; });
-    var makeMetadata = function(map) {
-        return adapt.base.mapObj(map, /** @return {Array} */ function(rawItemArr, itemName) {
-            var result = adapt.base.map(rawItemArr, function(rawItem) {
-                var entry = {"v": rawItem.value, "o": rawItem.order};
-                if (rawItem.schema) {
-                    entry["s"] = rawItem.scheme;
-                }
-                if (rawItem.id || rawItem.lang) {
-                    var refs = rawItemsByTarget[rawItem.id];
-                    if (refs || rawItem.lang) {
-                        if (rawItem.lang) {
-                            // Special handling for xml:lang
-                            var langItem = {name:adapt.epub.metaTerms.language, value:rawItem.lang,
-                                lang:null, id:null, refines:rawItem.id, scheme:null,
-                                order: rawItem.order};
-                            if (refs) {
-                                refs.push(langItem);
-                            } else {
-                                refs = [langItem];
-                            }
+        rawItem => rawItem.refines);
+    var makeMetadata = map => adapt.base.mapObj(map, (rawItemArr, itemName) => {
+        var result = adapt.base.map(rawItemArr, rawItem => {
+            var entry = {"v": rawItem.value, "o": rawItem.order};
+            if (rawItem.schema) {
+                entry["s"] = rawItem.scheme;
+            }
+            if (rawItem.id || rawItem.lang) {
+                var refs = rawItemsByTarget[rawItem.id];
+                if (refs || rawItem.lang) {
+                    if (rawItem.lang) {
+                        // Special handling for xml:lang
+                        var langItem = {name:adapt.epub.metaTerms.language, value:rawItem.lang,
+                            lang:null, id:null, refines:rawItem.id, scheme:null,
+                            order: rawItem.order};
+                        if (refs) {
+                            refs.push(langItem);
+                        } else {
+                            refs = [langItem];
                         }
-                        var entryMap = adapt.base.multiIndexArray(refs, function(rawItem) { return rawItem.name; });
-                        entry["r"] = makeMetadata(entryMap);
                     }
+                    var entryMap = adapt.base.multiIndexArray(refs, rawItem => rawItem.name);
+                    entry["r"] = makeMetadata(entryMap);
                 }
-                return entry;
-            });
-            return result;
+            }
+            return entry;
         });
-    };
+        return result;
+    });
     var metadata = makeMetadata(adapt.base.multiIndexArray(rawItems,
-        function(rawItem) { return rawItem.refines ? null : rawItem.name; }));
+        rawItem => rawItem.refines ? null : rawItem.name));
     var lang = null;
     if (metadata[adapt.epub.metaTerms.language]) {
         lang = metadata[adapt.epub.metaTerms.language][0]["v"];
     }
-    var sortMetadata = function(metadata) {
+    var sortMetadata = metadata => {
         for (var term in metadata) {
             var arr = /** @type {Array} */ (metadata[term]);
             arr.sort(adapt.epub.getMetadataComparator(term, lang));
@@ -508,7 +494,7 @@ adapt.epub.readMetadata = function(mroot, prefixes) {
 /**
  * @return {Object}
  */
-adapt.epub.getMathJaxHub = function() {
+adapt.epub.getMathJaxHub = () => {
     var math = window["MathJax"];
     if (math) {
         return math["Hub"];
@@ -519,7 +505,7 @@ adapt.epub.getMathJaxHub = function() {
 /**
  * @return {void}
  */
-adapt.epub.checkMathJax = function() {
+adapt.epub.checkMathJax = () => {
     if (adapt.epub.getMathJaxHub()) {
         adapt.csscasc.supportedNamespaces[adapt.base.NS.MATHML] = true;
     }
@@ -577,7 +563,7 @@ adapt.epub.OPFDoc.prototype.createDocumentURLTransformer = function() {
     /**
      * @override
      */
-    OPFDocumentURLTransformer.prototype.transformFragment = function(fragment, baseURL) {
+    OPFDocumentURLTransformer.prototype.transformFragment = (fragment, baseURL) => {
         var url = baseURL + (fragment ? "#" + fragment : "");
         return adapt.epub.transformedIdPrefix + adapt.base.escapeNameStrToHex(url, ":");
     };
@@ -590,7 +576,7 @@ adapt.epub.OPFDoc.prototype.createDocumentURLTransformer = function() {
             var path = r[1] || baseURL;
             var fragment = r[2];
             if (path) {
-                if (self.items.some(function(item) { return item.src === path; })) {
+                if (self.items.some(item => item.src === path)) {
                     return "#" + this.transformFragment(fragment, path);
                 }
             }
@@ -600,7 +586,7 @@ adapt.epub.OPFDoc.prototype.createDocumentURLTransformer = function() {
     /**
      * @override
      */
-    OPFDocumentURLTransformer.prototype.restoreURL = function(encoded) {
+    OPFDocumentURLTransformer.prototype.restoreURL = encoded => {
         if (encoded.charAt(0) === "#") {
             encoded = encoded.substring(1);
         }
@@ -664,7 +650,7 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
     }
     var srcToFallbackId = {};
     this.items = adapt.base.map(pkg.child("manifest").child("item").asArray(),
-        function(node) {
+        node => {
             var item = new adapt.epub.OPFItem();
             var elem = /** @type {Element} */ (node);
             item.initWithElement(elem, opfXML.url);
@@ -682,9 +668,7 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
         });
     this.itemMap = adapt.base.indexArray(this.items,
         /** @type {function(adapt.epub.OPFItem):?string} */ (adapt.epub.getOPFItemId));
-    this.itemMapByPath = adapt.base.indexArray(this.items, function(item) {
-        return self.getPathFromURL(item.src);
-    });
+    this.itemMapByPath = adapt.base.indexArray(this.items, item => self.getPathFromURL(item.src));
     for (var src in srcToFallbackId) {
         var fallbackSrc = src;
         while (true) {
@@ -700,7 +684,7 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
         }
     }
     this.spine = adapt.base.map(pkg.child("spine").child("itemref").asArray(),
-        function(node, index) {
+        (node, index) => {
             var elem = /** @type {Element} */ (node);
             var id = elem.getAttribute("idref");
             var item = self.itemMap[/** @type {string} */ (id)];
@@ -843,7 +827,7 @@ adapt.epub.OPFDoc.prototype.initWithChapters = function(params, doc) {
 adapt.epub.OPFDoc.prototype.getCFI = function(spineIndex, offsetInItem) {
     var item = this.spine[spineIndex];
     /** @type {!adapt.task.Frame.<?string>} */ var frame = adapt.task.newFrame("getCFI");
-    this.store.load(item.src).then(function(xmldoc) {
+    this.store.load(item.src).then(xmldoc => {
         var node = xmldoc.getNodeByOffset(offsetInItem);
         var cfi = null;
         if (node) {
@@ -868,11 +852,7 @@ adapt.epub.OPFDoc.prototype.getCFI = function(spineIndex, offsetInItem) {
 adapt.epub.OPFDoc.prototype.resolveFragment = function(fragstr) {
     var self = this;
     return adapt.task.handle("resolveFragment",
-        /**
-         * @param {!adapt.task.Frame.<?adapt.epub.Position>} frame
-         * @return {void}
-         */
-        function(frame) {
+        frame => {
             if (!fragstr) {
                 frame.finish(null);
                 return;
@@ -897,18 +877,13 @@ adapt.epub.OPFDoc.prototype.resolveFragment = function(fragstr) {
             } else {
                 item = self.spine[0];
             }
-            self.store.load(item.src).then(function(xmldoc) {
+            self.store.load(item.src).then(xmldoc => {
                 var nodeNav = fragment.navigate(xmldoc.document);
                 var offset = xmldoc.getNodeOffset(nodeNav.node, nodeNav.offset, nodeNav.after);
                 frame.finish({spineIndex: item.spineIndex, offsetInItem: offset, pageIndex: -1});
             });
         },
-        /**
-         * @param {!adapt.task.Frame.<?adapt.epub.Position>} frame
-         * @param {Error} err
-         * @return {void}
-         */
-        function(frame, err) {
+        (frame, err) => {
             vivliostyle.logging.logger.warn(err, "Cannot resolve fragment:", fragstr);
             frame.finish(null);
         });
@@ -921,21 +896,17 @@ adapt.epub.OPFDoc.prototype.resolveFragment = function(fragstr) {
 adapt.epub.OPFDoc.prototype.resolveEPage = function(epage) {
     var self = this;
     return adapt.task.handle("resolveEPage",
-        /**
-         * @param {!adapt.task.Frame.<?adapt.epub.Position>} frame
-         * @return {void}
-         */
-        function(frame) {
+        frame => {
             if (epage <= 0) {
                 frame.finish({spineIndex: 0, offsetInItem: 0, pageIndex: -1});
                 return;
             }
-            var spineIndex = adapt.base.binarySearch(self.spine.length, function(index) {
+            var spineIndex = adapt.base.binarySearch(self.spine.length, index => {
                 var item = self.spine[index];
                 return item.epage + item.epageCount > epage;
             });
             var item = self.spine[spineIndex];
-            self.store.load(item.src).then(function(xmldoc) {
+            self.store.load(item.src).then(xmldoc => {
                 epage -= item.epage;
                 if (epage > item.epageCount) {
                     epage = item.epageCount;
@@ -951,12 +922,7 @@ adapt.epub.OPFDoc.prototype.resolveEPage = function(epage) {
                 frame.finish({spineIndex: spineIndex, offsetInItem: offset, pageIndex: -1});
             });
         },
-        /**
-         * @param {!adapt.task.Frame.<?adapt.epub.Position>} frame
-         * @param {Error} err
-         * @return {void}
-         */
-        function(frame, err) {
+        (frame, err) => {
             vivliostyle.logging.logger.warn(err, "Cannot resolve epage:", epage);
             frame.finish(null);
         });
@@ -972,7 +938,7 @@ adapt.epub.OPFDoc.prototype.getEPageFromPosition = function(position) {
         return adapt.task.newResult(item.epage);
     }
     /** @type {!adapt.task.Frame.<number>} */ var frame = adapt.task.newFrame("getEPage");
-    this.store.load(item.src).then(function(xmldoc) {
+    this.store.load(item.src).then(xmldoc => {
         var totalOffset = xmldoc.getTotalOffset();
         var offset = Math.min(totalOffset, position.offsetInItem);
         frame.finish(item.epage + offset * item.epageCount / totalOffset);
@@ -990,16 +956,15 @@ adapt.epub.PageAndPosition;
  * @param {number} pageIndex
  * @returns {!adapt.epub.PageAndPosition}
  */
-adapt.epub.makePageAndPosition = function(page, pageIndex) {
-    return {
-        page: page,
-        position: {
-            spineIndex: page.spineIndex,
-            pageIndex: pageIndex,
-            offsetInItem: page.offset
-        }
-    };
-};
+adapt.epub.makePageAndPosition = (page, pageIndex) => ({
+    page: page,
+
+    position: {
+        spineIndex: page.spineIndex,
+        pageIndex: pageIndex,
+        offsetInItem: page.offset
+    }
+});
 
 /**
  * @typedef {{
@@ -1109,7 +1074,7 @@ adapt.epub.OPFView.prototype.renderSinglePage = function(viewItem, pos) {
         = adapt.task.newFrame("renderSinglePage");
     var page = this.makePage(viewItem, pos);
     var self = this;
-    viewItem.instance.layoutNextPage(page, pos).then(function(posParam) {
+    viewItem.instance.layoutNextPage(page, pos).then(posParam => {
         pos = /** @type {adapt.vtree.LayoutPosition} */ (posParam);
         var pageIndex = pos ? pos.page - 1 : viewItem.layoutPositions.length - 1;
         self.finishPageContainer(viewItem, page, pageIndex);
@@ -1131,23 +1096,23 @@ adapt.epub.OPFView.prototype.renderSinglePage = function(viewItem, pos) {
             cont = adapt.task.newResult(true);
         }
 
-        cont.then(function() {
+        cont.then(() => {
             var unresolvedRefs = self.counterStore.getUnresolvedRefsToPage(page);
             var index = 0;
-            frame.loopWithFrame(function(loopFrame) {
+            frame.loopWithFrame(loopFrame => {
                 index++;
                 if (index > unresolvedRefs.length) {
                     loopFrame.breakLoop();
                     return;
                 }
                 var refs = unresolvedRefs[index - 1];
-                refs.refs = refs.refs.filter(function(ref) { return !ref.isResolved(); });
+                refs.refs = refs.refs.filter(ref => !ref.isResolved());
                 if (refs.refs.length === 0) {
                     loopFrame.continueLoop();
                     return;
                 }
 
-                self.getPageViewItem(refs.spineIndex).then(function(viewItem) {
+                self.getPageViewItem(refs.spineIndex).then(viewItem => {
                     if (!viewItem) {
                         loopFrame.continueLoop();
                         return;
@@ -1155,7 +1120,7 @@ adapt.epub.OPFView.prototype.renderSinglePage = function(viewItem, pos) {
                     self.counterStore.pushPageCounters(refs.pageCounters);
                     self.counterStore.pushReferencesToSolve(refs.refs);
                     var pos = viewItem.layoutPositions[refs.pageIndex];
-                    self.renderSinglePage(viewItem, pos).then(function(result) {
+                    self.renderSinglePage(viewItem, pos).then(result => {
                         self.counterStore.popPageCounters();
                         self.counterStore.popReferencesToSolve();
                         var resultPosition = result.pageAndPosition.position;
@@ -1165,7 +1130,7 @@ adapt.epub.OPFView.prototype.renderSinglePage = function(viewItem, pos) {
                         loopFrame.continueLoop();
                     });
                 });
-            }).then(function() {
+            }).then(() => {
                 page.isLastPage = !pos &&
                     (viewItem.item.spineIndex === self.opf.spine.length - 1);
                 if (page.isLastPage) {
@@ -1189,14 +1154,14 @@ adapt.epub.OPFView.prototype.renderSinglePage = function(viewItem, pos) {
  * @param {!adapt.epub.OPFViewItem} viewItem
  * @returns {?adapt.epub.Position}
  */
-adapt.epub.OPFView.prototype.normalizeSeekPosition = function(position, viewItem) {
+adapt.epub.OPFView.prototype.normalizeSeekPosition = (position, viewItem) => {
     var pageIndex = position.pageIndex;
     var seekOffset = -1;
     if (pageIndex < 0) {
         seekOffset = position.offsetInItem;
         // page with offset higher than seekOffset
         var seekOffsetPageIndex = adapt.base.binarySearch(viewItem.layoutPositions.length,
-            function(pageIndex) {
+            pageIndex => {
                 // 'noLookAhead' argument of getPosition must be true, since otherwise
                 // StyleInstance.currentLayoutPosition is modified unintentionally.
                 var offset = viewItem.instance.getPosition(viewItem.layoutPositions[pageIndex], true);
@@ -1232,14 +1197,14 @@ adapt.epub.OPFView.prototype.findPage = function(position, sync) {
     var self = this;
     /** @type {!adapt.task.Frame.<?adapt.epub.PageAndPosition>} */ var frame
         = adapt.task.newFrame("findPage");
-    self.getPageViewItem(position.spineIndex).then(function(viewItem) {
+    self.getPageViewItem(position.spineIndex).then(viewItem => {
         if (!viewItem) {
             frame.finish(null);
             return;
         }
         var resultPage = null;
         var pageIndex;
-        frame.loopWithFrame(function(loopFrame) {
+        frame.loopWithFrame(loopFrame => {
             var normalizedPosition = self.normalizeSeekPosition(position, viewItem);
             pageIndex = normalizedPosition.pageIndex;
             resultPage = viewItem.pages[pageIndex];
@@ -1250,7 +1215,7 @@ adapt.epub.OPFView.prototype.findPage = function(position, sync) {
                 resultPage = viewItem.pages[pageIndex];
                 loopFrame.breakLoop();
             } else if (sync) {
-                self.renderPage(normalizedPosition).then(function(result) {
+                self.renderPage(normalizedPosition).then(result => {
                     if (result) {
                         resultPage = result.page;
                     }
@@ -1258,11 +1223,11 @@ adapt.epub.OPFView.prototype.findPage = function(position, sync) {
                 });
             } else {
                 // Wait for the layout task and retry
-                frame.sleep(100).then(function() {
+                frame.sleep(100).then(() => {
                     loopFrame.continueLoop();
                 });
             }
-        }).then(function() {
+        }).then(() => {
             goog.asserts.assert(resultPage);
             frame.finish(adapt.epub.makePageAndPosition(resultPage, pageIndex));
         });
@@ -1279,7 +1244,7 @@ adapt.epub.OPFView.prototype.renderPage = function(position) {
     var self = this;
     /** @type {!adapt.task.Frame.<?adapt.epub.PageAndPosition>} */ var frame
         = adapt.task.newFrame("renderPage");
-    self.getPageViewItem(position.spineIndex).then(function(viewItem) {
+    self.getPageViewItem(position.spineIndex).then(viewItem => {
         if (!viewItem) {
             frame.finish(null);
             return;
@@ -1292,7 +1257,7 @@ adapt.epub.OPFView.prototype.renderPage = function(position) {
             frame.finish(adapt.epub.makePageAndPosition(resultPage, pageIndex));
             return;
         }
-        frame.loopWithFrame(function(loopFrame) {
+        frame.loopWithFrame(loopFrame => {
             if (pageIndex < viewItem.layoutPositions.length) {
                 loopFrame.breakLoop();
                 return;
@@ -1303,7 +1268,7 @@ adapt.epub.OPFView.prototype.renderPage = function(position) {
                 return;
             }
             var pos = viewItem.layoutPositions[viewItem.layoutPositions.length - 1];
-            self.renderSinglePage(viewItem, pos).then(function(result) {
+            self.renderSinglePage(viewItem, pos).then(result => {
                 var page = result.pageAndPosition.page;
                 pos = result.nextLayoutPosition;
                 if (pos) {
@@ -1325,14 +1290,14 @@ adapt.epub.OPFView.prototype.renderPage = function(position) {
                     loopFrame.breakLoop();
                 }
             });
-        }).then(function() {
+        }).then(() => {
             resultPage = resultPage || viewItem.pages[pageIndex];
             var pos = viewItem.layoutPositions[pageIndex];
             if (resultPage) {
                 frame.finish(adapt.epub.makePageAndPosition(resultPage, pageIndex));
                 return;
             }
-            self.renderSinglePage(viewItem, pos).then(function(result) {
+            self.renderSinglePage(viewItem, pos).then(result => {
                 if (!result.nextLayoutPosition) {
                     viewItem.complete = true;
                 }
@@ -1375,13 +1340,13 @@ adapt.epub.OPFView.prototype.renderPagesUpto = function(position) {
     var pageIndex = position.pageIndex;
     var s = 0;
     var lastResult;
-    frame.loopWithFrame(function(loopFrame) {
+    frame.loopWithFrame(loopFrame => {
         var pos = {
             spineIndex: s,
             pageIndex: s === spineIndex ? pageIndex : Number.POSITIVE_INFINITY,
             offsetInItem: s === spineIndex ? position.offsetInItem : -1
         };
-        self.renderPage(pos).then(function(result) {
+        self.renderPage(pos).then(result => {
             lastResult = result;
             if (++s > spineIndex) {
                 loopFrame.breakLoop();
@@ -1389,7 +1354,7 @@ adapt.epub.OPFView.prototype.renderPagesUpto = function(position) {
                 loopFrame.continueLoop();
             }
         });
-    }).then(function() {
+    }).then(() => {
         frame.finish(lastResult);
     });
     return frame.result();
@@ -1431,7 +1396,7 @@ adapt.epub.OPFView.prototype.nextPage = function(position, sync) {
     var pageIndex = position.pageIndex;
     /** @type {!adapt.task.Frame.<?adapt.epub.PageAndPosition>} */ var frame
         = adapt.task.newFrame("nextPage");
-    self.getPageViewItem(spineIndex).then(function(viewItem) {
+    self.getPageViewItem(spineIndex).then(viewItem => {
         if (!viewItem) {
             frame.finish(null);
             return;
@@ -1513,7 +1478,7 @@ adapt.epub.OPFView.prototype.getSpread = function(position, sync) {
     } else {
         other = this.nextPage(position, sync);
     }
-    other.then(function(otherPageAndPosition) {
+    other.then(otherPageAndPosition => {
         var otherPage = otherPageAndPosition && otherPageAndPosition.page;
         if (isLeft) {
             frame.finish({left: page, right: otherPage});
@@ -1542,7 +1507,7 @@ adapt.epub.OPFView.prototype.nextSpread = function(position, sync) {
         return next;
     } else {
         var self = this;
-        return next.thenAsync(function(result) {
+        return next.thenAsync(result => {
             if (result) {
                 return self.nextPage(result.position, !!sync);
             } else {
@@ -1566,7 +1531,7 @@ adapt.epub.OPFView.prototype.previousSpread = function(position) {
     var prev = this.previousPage(position);
     if (isRecto) {
         var self = this;
-        return prev.thenAsync(function(result) {
+        return prev.thenAsync(result => {
             if (result) {
                 return self.previousPage(result.position);
             } else {
@@ -1587,7 +1552,7 @@ adapt.epub.OPFView.prototype.navigateToEPage = function(epage) {
     /** @type {!adapt.task.Frame.<?adapt.epub.PageAndPosition>} */ var frame
         = adapt.task.newFrame("navigateToEPage");
     var self = this;
-    this.opf.resolveEPage(epage).then(function(position) {
+    this.opf.resolveEPage(epage).then(position => {
         if (position) {
             self.findPage(position).thenFinish(frame);
         } else {
@@ -1606,7 +1571,7 @@ adapt.epub.OPFView.prototype.navigateToFragment = function(fragment) {
     /** @type {!adapt.task.Frame.<?adapt.epub.PageAndPosition>} */ var frame
         = adapt.task.newFrame("navigateToCFI");
     var self = this;
-    self.opf.resolveFragment(fragment).then(function(position) {
+    self.opf.resolveFragment(fragment).then(position => {
         if (position) {
             self.findPage(position).thenFinish(frame);
         } else {
@@ -1657,7 +1622,7 @@ adapt.epub.OPFView.prototype.navigateTo = function(href, position) {
     /** @type {!adapt.task.Frame.<?adapt.epub.PageAndPosition>} */ var frame
         = adapt.task.newFrame("navigateTo");
     var self = this;
-    self.getPageViewItem(item.spineIndex).then(function(viewItem) {
+    self.getPageViewItem(item.spineIndex).then(viewItem => {
         var target = viewItem.xmldoc.getElement(href);
         if (target) {
             self.findPage({
@@ -1810,7 +1775,7 @@ adapt.epub.OPFView.prototype.makeMathJaxView = function(xmldoc, srcElem, viewPar
         /** @type {!adapt.task.Frame.<Element>} */ var frame
             = adapt.task.newFrame("makeMathJaxView");
         var continuation = frame.suspend();
-        queue["Push"](function() {
+        queue["Push"](() => {
             continuation.schedule(span);
         });
         return frame.result();
@@ -1886,25 +1851,18 @@ adapt.epub.OPFView.prototype.makeSSEView = function(xmldoc, srcElem, viewParent,
  */
 adapt.epub.OPFView.prototype.makeCustomRenderer = function(xmldoc) {
     var self = this;
-    return (
-        /**
-         * @param {Element} srcElem
-         * @param {Element} viewParent
-         * @return {!adapt.task.Result.<Element>}
-         */
-        function(srcElem, viewParent, computedStyle) {
-            if (srcElem.localName == "object" && srcElem.namespaceURI == adapt.base.NS.XHTML) {
-                return self.makeObjectView(xmldoc, srcElem, viewParent, computedStyle);
-            } else if (srcElem.namespaceURI == adapt.base.NS.MATHML) {
-                return self.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
-            } else if (srcElem.namespaceURI == adapt.base.NS.SSE) {
-                return self.makeSSEView(xmldoc, srcElem, viewParent, computedStyle);
-            } else if (srcElem.dataset && srcElem.dataset["mathTypeset"] == "true") {
-                return self.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
-            }
-            return adapt.task.newResult(/** @type {Element} */ (null));
+    return (srcElem, viewParent, computedStyle) => {
+        if (srcElem.localName == "object" && srcElem.namespaceURI == adapt.base.NS.XHTML) {
+            return self.makeObjectView(xmldoc, srcElem, viewParent, computedStyle);
+        } else if (srcElem.namespaceURI == adapt.base.NS.MATHML) {
+            return self.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
+        } else if (srcElem.namespaceURI == adapt.base.NS.SSE) {
+            return self.makeSSEView(xmldoc, srcElem, viewParent, computedStyle);
+        } else if (srcElem.dataset && srcElem.dataset["mathTypeset"] == "true") {
+            return self.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
         }
-    );
+        return adapt.task.newResult(/** @type {Element} */ (null));
+    };
 };
 
 /**
@@ -1935,7 +1893,7 @@ adapt.epub.OPFView.prototype.getPageViewItem = function(spineIndex) {
 
     var item = self.opf.spine[spineIndex];
     var store = self.opf.store;
-    store.load(item.src).then(function(xmldoc) {
+    store.load(item.src).then(xmldoc => {
         if (item.epageCount == 0 && self.opf.spine.length == 1) {
             // Single-chapter doc without epages (e.g. FB2).
             // Estimate that offset=2700 roughly corresponds to 1024 bytes of compressed size.
@@ -1968,12 +1926,12 @@ adapt.epub.OPFView.prototype.getPageViewItem = function(spineIndex) {
             self.opf.documentURLTransformer, self.counterStore);
 
         instance.pref = self.pref;
-        instance.init().then(function() {
+        instance.init().then(() => {
             viewItem = {item: item, xmldoc: xmldoc, instance: instance,
                 layoutPositions: [null], pages: [], complete: false};
             self.spineItems[spineIndex] = viewItem;
             frame.finish(viewItem);
-            loadingContinuations.forEach(function(c) {
+            loadingContinuations.forEach(c => {
                 c.schedule(viewItem);
             });
         });
@@ -2017,9 +1975,7 @@ adapt.epub.OPFView.prototype.hasAutoSizedPages = function() {
  * @returns {boolean}
  */
 adapt.epub.OPFView.prototype.hasPages = function() {
-    return this.spineItems.some(function(item) {
-        return item && item.pages.length > 0;
-    });
+    return this.spineItems.some(item => item && item.pages.length > 0);
 };
 
 /**
@@ -2056,7 +2012,7 @@ adapt.epub.OPFView.prototype.showTOC = function(autohide) {
     pageCont.style.border = "1px outset #999";
     pageCont.style["borderRadius"] = "2px";
     pageCont.style["boxShadow"] = " 5px 5px rgba(128,128,128,0.3)";
-    this.tocView.showTOC(pageCont, viewport, tocWidth, tocHeight, this.viewport.fontSize).then(function(page) {
+    this.tocView.showTOC(pageCont, viewport, tocWidth, tocHeight, this.viewport.fontSize).then(page => {
         pageCont.style.visibility = "visible";
         frame.finish(page);
     });

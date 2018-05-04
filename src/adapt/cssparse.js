@@ -90,7 +90,7 @@ adapt.cssparse.StylesheetFlavor = {
  * @param {string} text
  * @return {adapt.css.Color}
  */
-adapt.cssparse.colorFromHash = function(text) {
+adapt.cssparse.colorFromHash = text => {
     var num = parseInt(text, 16);
     if (isNaN(num))
         throw new Error("E_CSS_COLOR");
@@ -117,9 +117,7 @@ adapt.cssparse.ParserHandler = function(scope) {
 /**
  * @return {adapt.csstok.Token}
  */
-adapt.cssparse.ParserHandler.prototype.getCurrentToken = function() {
-    return null;
-};
+adapt.cssparse.ParserHandler.prototype.getCurrentToken = () => null;
 
 /**
  * @return {adapt.expr.LexicalScope}
@@ -133,7 +131,7 @@ adapt.cssparse.ParserHandler.prototype.getScope = function() {
  * @param {adapt.csstok.Token} token
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.error = function(mnemonics, token) {
+adapt.cssparse.ParserHandler.prototype.error = (mnemonics, token) => {
 };
 
 /**
@@ -149,22 +147,14 @@ adapt.cssparse.ParserHandler.prototype.startStylesheet = function(flavor) {
  * @param {?string} name
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.tagSelector = function(ns, name) {
+adapt.cssparse.ParserHandler.prototype.tagSelector = (ns, name) => {
 };
 
 /**
  * @param {string} name
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.classSelector = function(name) {
-};
-
-/**
- * @param {string} name
- * @param {Array.<number|string>} params
- * @return {void}
- */
-adapt.cssparse.ParserHandler.prototype.pseudoclassSelector = function(name, params) {
+adapt.cssparse.ParserHandler.prototype.classSelector = name => {
 };
 
 /**
@@ -172,14 +162,22 @@ adapt.cssparse.ParserHandler.prototype.pseudoclassSelector = function(name, para
  * @param {Array.<number|string>} params
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.pseudoelementSelector = function(name, params) {
+adapt.cssparse.ParserHandler.prototype.pseudoclassSelector = (name, params) => {
+};
+
+/**
+ * @param {string} name
+ * @param {Array.<number|string>} params
+ * @return {void}
+ */
+adapt.cssparse.ParserHandler.prototype.pseudoelementSelector = (name, params) => {
 };
 
 /**
  * @param {string} id
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.idSelector = function(id) {
+adapt.cssparse.ParserHandler.prototype.idSelector = id => {
 };
 
 /**
@@ -189,94 +187,94 @@ adapt.cssparse.ParserHandler.prototype.idSelector = function(id) {
  * @param {?string} value
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.attributeSelector = function(ns, name, op, value) {
+adapt.cssparse.ParserHandler.prototype.attributeSelector = (ns, name, op, value) => {
 };
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.descendantSelector = function() {
+adapt.cssparse.ParserHandler.prototype.descendantSelector = () => {
 };
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.childSelector = function() {
+adapt.cssparse.ParserHandler.prototype.childSelector = () => {
 };
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.adjacentSiblingSelector = function() {
+adapt.cssparse.ParserHandler.prototype.adjacentSiblingSelector = () => {
 };
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.followingSiblingSelector = function() {
+adapt.cssparse.ParserHandler.prototype.followingSiblingSelector = () => {
 };
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.nextSelector = function() {
+adapt.cssparse.ParserHandler.prototype.nextSelector = () => {
 };
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startSelectorRule = function() {
+adapt.cssparse.ParserHandler.prototype.startSelectorRule = () => {
 };
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startFontFaceRule = function() {
+adapt.cssparse.ParserHandler.prototype.startFontFaceRule = () => {
 };
 
 /**
  * @param {?string} pseudoelem
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startFootnoteRule = function(pseudoelem) {
+adapt.cssparse.ParserHandler.prototype.startFootnoteRule = pseudoelem => {
 };
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startViewportRule = function() {
+adapt.cssparse.ParserHandler.prototype.startViewportRule = () => {
 };
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startDefineRule = function() {
+adapt.cssparse.ParserHandler.prototype.startDefineRule = () => {
 };
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startRegionRule = function() {
+adapt.cssparse.ParserHandler.prototype.startRegionRule = () => {
 };
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startPageRule = function() {
+adapt.cssparse.ParserHandler.prototype.startPageRule = () => {
 };
 
 /**
  * @param {string} name
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startPageMarginBoxRule = function(name) {
+adapt.cssparse.ParserHandler.prototype.startPageMarginBoxRule = name => {
 };
 
 /**
  * @param {adapt.css.Expr} expr
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startWhenRule = function(expr) {
+adapt.cssparse.ParserHandler.prototype.startWhenRule = expr => {
 };
 
 /**
@@ -291,22 +289,13 @@ adapt.cssparse.ParserHandler.prototype.startMediaRule = function(expr) {
  * @param {string} flowName
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startFlowRule = function(flowName) {
+adapt.cssparse.ParserHandler.prototype.startFlowRule = flowName => {
 };
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startPageTemplateRule = function() {
-};
-
-/**
- * @param {?string} name
- * @param {?string} pseudoName
- * @param {Array.<string>} classes
- * @return {void}
- */
-adapt.cssparse.ParserHandler.prototype.startPageMasterRule = function(name, pseudoName, classes) {
+adapt.cssparse.ParserHandler.prototype.startPageTemplateRule = () => {
 };
 
 /**
@@ -315,7 +304,7 @@ adapt.cssparse.ParserHandler.prototype.startPageMasterRule = function(name, pseu
  * @param {Array.<string>} classes
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startPartitionRule = function(name, pseudoName, classes) {
+adapt.cssparse.ParserHandler.prototype.startPageMasterRule = (name, pseudoName, classes) => {
 };
 
 /**
@@ -324,14 +313,23 @@ adapt.cssparse.ParserHandler.prototype.startPartitionRule = function(name, pseud
  * @param {Array.<string>} classes
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startPartitionGroupRule = function(name, pseudoName, classes) {
+adapt.cssparse.ParserHandler.prototype.startPartitionRule = (name, pseudoName, classes) => {
+};
+
+/**
+ * @param {?string} name
+ * @param {?string} pseudoName
+ * @param {Array.<string>} classes
+ * @return {void}
+ */
+adapt.cssparse.ParserHandler.prototype.startPartitionGroupRule = (name, pseudoName, classes) => {
 };
 
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startRuleBody = function() {
+adapt.cssparse.ParserHandler.prototype.startRuleBody = () => {
 };
 
 /**
@@ -340,27 +338,27 @@ adapt.cssparse.ParserHandler.prototype.startRuleBody = function() {
  * @param {boolean} important
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.property = function(name, value, important) {
+adapt.cssparse.ParserHandler.prototype.property = (name, value, important) => {
 };
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.endRule = function() {
+adapt.cssparse.ParserHandler.prototype.endRule = () => {
 };
 
 /**
  * @param {string} funcName The name of the function taking a selector list as an argument
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.startFuncWithSelector = function(funcName) {
+adapt.cssparse.ParserHandler.prototype.startFuncWithSelector = funcName => {
 };
 
 
 /**
  * @return {void}
  */
-adapt.cssparse.ParserHandler.prototype.endFuncWithSelector = function() {
+adapt.cssparse.ParserHandler.prototype.endFuncWithSelector = () => {
 };
 
 /**
@@ -450,7 +448,7 @@ adapt.cssparse.DispatchParserHandler.prototype.error = function(mnemonics, token
  * @param {adapt.csstok.Token} token
  * @return {void}
  */
-adapt.cssparse.DispatchParserHandler.prototype.errorMsg = function(mnemonics, token) {
+adapt.cssparse.DispatchParserHandler.prototype.errorMsg = (mnemonics, token) => {
     vivliostyle.logging.logger.warn(mnemonics);
 };
 
@@ -1016,7 +1014,7 @@ adapt.cssparse.Action = {
  */
 adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
 
-(function() {
+((() => {
     var actionsBase = adapt.cssparse.actionsBase;
     actionsBase[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.IDENT;
     actionsBase[adapt.csstok.TokenType.STAR] = adapt.cssparse.Action.SELECTOR_START;
@@ -1164,7 +1162,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     priority[adapt.csstok.TokenType.PERCENT] = 5;
     priority[adapt.csstok.TokenType.EOF] = 6;
     priority[adapt.cssparse.OP_MEDIA_AND] = 2;
-})();
+}))();
 
 /**
  * @enum {number}
@@ -2672,7 +2670,7 @@ goog.inherits(adapt.cssparse.ErrorHandler, adapt.cssparse.ParserHandler);
 /**
  * @override
  */
-adapt.cssparse.ErrorHandler.prototype.error = function(mnemonics, token) {
+adapt.cssparse.ErrorHandler.prototype.error = (mnemonics, token) => {
     throw new Error(mnemonics);
 };
 
@@ -2691,7 +2689,7 @@ adapt.cssparse.ErrorHandler.prototype.getScope = function() {
  * @param {?string} media
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL, classes, media) {
+adapt.cssparse.parseStylesheet = (tokenizer, handler, baseURL, classes, media) => {
     /** @type {adapt.task.Frame.<boolean>} */ var frame =
         adapt.task.newFrame("parseStylesheet");
     var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsBase, tokenizer, handler, baseURL);
@@ -2705,7 +2703,7 @@ adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL, classes, 
         handler.startMediaRule(condition);
         handler.startRuleBody();
     }
-    frame.loop(function() {
+    frame.loop(() => {
         while (!parser.runParser(100, false, false, false, false)) {
             if (parser.importReady) {
                 var resolvedURL = adapt.base.resolveURL(/** @type {string} */ (parser.importURL), baseURL);
@@ -2715,7 +2713,7 @@ adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL, classes, 
                 }
                 /** @type {adapt.task.Frame.<boolean>} */ var innerFrame =
                     adapt.task.newFrame("parseStylesheet.import");
-                adapt.cssparse.parseStylesheetFromURL(resolvedURL, handler, null, null).then(function() {
+                adapt.cssparse.parseStylesheetFromURL(resolvedURL, handler, null, null).then(() => {
                     if (parser.importCondition) {
                         handler.endRule();
                     }
@@ -2731,7 +2729,7 @@ adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL, classes, 
                 return r;
         }
         return adapt.task.newResult(false);
-    }).then(function() {
+    }).then(() => {
         if (condition) {
             handler.endRule();
         }
@@ -2748,15 +2746,13 @@ adapt.cssparse.parseStylesheet = function(tokenizer, handler, baseURL, classes, 
  * @param {?string} media
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.cssparse.parseStylesheetFromText = function(text, handler, baseURL, classes, media) {
-    return adapt.task.handle("parseStylesheetFromText", function(frame) {
-        var tok = new adapt.csstok.Tokenizer(text, handler);
-        adapt.cssparse.parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
-    }, function(frame, err) {
-        vivliostyle.logging.logger.warn(err, "Failed to parse stylesheet text: " + text);
-        frame.finish(false);
-    });
-};
+adapt.cssparse.parseStylesheetFromText = (text, handler, baseURL, classes, media) => adapt.task.handle("parseStylesheetFromText", frame => {
+    var tok = new adapt.csstok.Tokenizer(text, handler);
+    adapt.cssparse.parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
+}, (frame, err) => {
+    vivliostyle.logging.logger.warn(err, "Failed to parse stylesheet text: " + text);
+    frame.finish(false);
+});
 
 /**
  * @param {string} url
@@ -2765,39 +2761,28 @@ adapt.cssparse.parseStylesheetFromText = function(text, handler, baseURL, classe
  * @param {?string} media
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.cssparse.parseStylesheetFromURL = function(url, handler, classes, media) {
-    return adapt.task.handle("parseStylesheetFromURL",
-        /**
-         * @param {!adapt.task.Frame.<boolean>} frame
-         * @return {void}
-         */
-        function(frame) {
-            adapt.net.ajax(url).then(function(xhrParam) {
-                var xhr = /** @type {XMLHttpRequest} */ (xhrParam);
-                if (!xhr.responseText) {
-                    frame.finish(true);
-                } else {
-                    adapt.cssparse.parseStylesheetFromText(xhr.responseText,
-                        handler, url, classes, media)
-                        .then(function(result) {
-                            if (!result) {
-                                vivliostyle.logging.logger.warn("Failed to parse stylesheet from " + url);
-                            }
-                            frame.finish(true);
-                        });
-                }
-            });
-        },
-        /**
-         * @param {!adapt.task.Frame.<boolean>} frame
-         * @param {Error} err
-         * @return {void}
-         */
-        function(frame, err) {
-            vivliostyle.logging.logger.warn(err, "Exception while fetching and parsing:", url);
-            frame.finish(true);
+adapt.cssparse.parseStylesheetFromURL = (url, handler, classes, media) => adapt.task.handle("parseStylesheetFromURL",
+    frame => {
+        adapt.net.ajax(url).then(xhrParam => {
+            var xhr = /** @type {XMLHttpRequest} */ (xhrParam);
+            if (!xhr.responseText) {
+                frame.finish(true);
+            } else {
+                adapt.cssparse.parseStylesheetFromText(xhr.responseText,
+                    handler, url, classes, media)
+                    .then(result => {
+                        if (!result) {
+                            vivliostyle.logging.logger.warn("Failed to parse stylesheet from " + url);
+                        }
+                        frame.finish(true);
+                    });
+            }
         });
-};
+    },
+    (frame, err) => {
+        vivliostyle.logging.logger.warn(err, "Exception while fetching and parsing:", url);
+        frame.finish(true);
+    });
 
 /**
  * @param {adapt.expr.LexicalScope} scope
@@ -2805,7 +2790,7 @@ adapt.cssparse.parseStylesheetFromURL = function(url, handler, classes, media) {
  * @param {string} baseURL
  * @return {adapt.css.Val}
  */
-adapt.cssparse.parseValue = function(scope, tokenizer, baseURL) {
+adapt.cssparse.parseValue = (scope, tokenizer, baseURL) => {
     var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsPropVal, tokenizer,
         new adapt.cssparse.ErrorHandler(scope), baseURL);
     parser.runParser(Number.POSITIVE_INFINITY, true, false, false, false);
@@ -2818,7 +2803,7 @@ adapt.cssparse.parseValue = function(scope, tokenizer, baseURL) {
  * @param {string} baseURL
  * @return {void}
  */
-adapt.cssparse.parseStyleAttribute = function(tokenizer, handler, baseURL) {
+adapt.cssparse.parseStyleAttribute = (tokenizer, handler, baseURL) => {
     var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsStyleAttribute, tokenizer,
         handler, baseURL);
     parser.runParser(Number.POSITIVE_INFINITY, false, true, false, false);
@@ -2830,7 +2815,7 @@ adapt.cssparse.parseStyleAttribute = function(tokenizer, handler, baseURL) {
  * @param {string} baseURL
  * @return {adapt.css.Expr}
  */
-adapt.cssparse.parseMediaQuery = function(tokenizer, handler, baseURL) {
+adapt.cssparse.parseMediaQuery = (tokenizer, handler, baseURL) => {
     var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsExprVal, tokenizer, handler, baseURL);
     parser.runParser(Number.POSITIVE_INFINITY, false, false, true, false);
     return /** @type {adapt.css.Expr} */ (parser.result);
@@ -2853,9 +2838,7 @@ adapt.cssparse.numProp = {
  * @param {string} propName
  * @return {boolean}
  */
-adapt.cssparse.takesOnlyNum = function(propName) {
-    return !!adapt.cssparse.numProp[propName];
-};
+adapt.cssparse.takesOnlyNum = propName => !!adapt.cssparse.numProp[propName];
 
 /**
  * @param {adapt.expr.Context} context
@@ -2863,7 +2846,7 @@ adapt.cssparse.takesOnlyNum = function(propName) {
  * @param {string} propName
  * @return {adapt.css.Val} val
  */
-adapt.cssparse.evaluateExprToCSS = function(context, val, propName) {
+adapt.cssparse.evaluateExprToCSS = (context, val, propName) => {
     var result = val.evaluate(context);
     switch (typeof result) {
         case "number" :
@@ -2892,7 +2875,7 @@ adapt.cssparse.evaluateExprToCSS = function(context, val, propName) {
  * @param {string} propName
  * @return {adapt.css.Val} val
  */
-adapt.cssparse.evaluateCSSToCSS = function(context, val, propName) {
+adapt.cssparse.evaluateCSSToCSS = (context, val, propName) => {
     if (val.isExpr())
         return adapt.cssparse.evaluateExprToCSS(context, (/** @type {adapt.css.Expr} */ (val)).expr, propName);
     return val;

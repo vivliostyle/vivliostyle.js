@@ -21,7 +21,7 @@ goog.provide("vivliostyle.plugin");
 goog.require("vivliostyle.namespace");
 goog.require("vivliostyle.logging");
 
-goog.scope(function() {
+goog.scope(() => {
 
     /**
      * Type of implemented hooks.
@@ -204,7 +204,7 @@ goog.scope(function() {
      * @param {string} name Name of the hook.
      * @param {!function(...)} fn Function to be registered to the hook.
      */
-    vivliostyle.plugin.registerHook = function(name, fn) {
+    vivliostyle.plugin.registerHook = (name, fn) => {
         if (!HOOKS[name]) {
             vivliostyle.logging.logger.warn(new Error("Skipping unknown plugin hook '" + name + "'."));
         } else {
@@ -222,7 +222,7 @@ goog.scope(function() {
      * @param {string} name Name of the hook.
      * @param {!function(...)} fn Function to be removed from the hook.
      */
-    vivliostyle.plugin.removeHook = function(name, fn) {
+    vivliostyle.plugin.removeHook = (name, fn) => {
         if (!HOOKS[name]) {
             vivliostyle.logging.logger.warn(new Error("Ignoring unknown plugin hook '" + name + "'."));
         } else {
@@ -242,7 +242,7 @@ goog.scope(function() {
      * @param {string} name
      * @returns {!Array.<!function(...)>}
      */
-    vivliostyle.plugin.getHooksForName = function(name) {
+    vivliostyle.plugin.getHooksForName = name => {
         var hooksForName = vivliostyle.plugin.hooks[name];
         return hooksForName || [];
     };

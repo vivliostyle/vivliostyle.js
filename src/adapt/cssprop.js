@@ -60,7 +60,7 @@ adapt.cssprop.SetVisitor.prototype.visitSpaceList = function(list) {
  * @param {adapt.css.Val} val
  * @return {Object.<string,boolean>}
  */
-adapt.cssprop.toSet = function(val) {
+adapt.cssprop.toSet = val => {
     if (val) {
         var visitor = new adapt.cssprop.SetVisitor();
         try {
@@ -99,7 +99,7 @@ adapt.cssprop.IntVisitor.prototype.visitInt = function(num) {
  * @param {number} def
  * @return {number}
  */
-adapt.cssprop.toInt = function(val, def) {
+adapt.cssprop.toInt = (val, def) => {
     if (val) {
         var visitor = new adapt.cssprop.IntVisitor(def);
         try {
@@ -226,7 +226,7 @@ adapt.cssprop.ShapeVisitor.prototype.getShape = function(x, y, width, height, co
  * @param {adapt.expr.Context} context
  * @return {adapt.geom.Shape}
  */
-adapt.cssprop.toShape = function(val, x, y, width, height, context) {
+adapt.cssprop.toShape = (val, x, y, width, height, context) => {
     if (val) {
         var visitor = new adapt.cssprop.ShapeVisitor();
         try {
@@ -282,7 +282,7 @@ adapt.cssprop.CountersVisitor.prototype.visitSpaceList = function(list) {
  * @param {boolean} reset
  * @return {Object.<string,number>}
  */
-adapt.cssprop.toCounters = function(val, reset) {
+adapt.cssprop.toCounters = (val, reset) => {
     var visitor = new adapt.cssprop.CountersVisitor(reset);
     try {
         val.visit(visitor);

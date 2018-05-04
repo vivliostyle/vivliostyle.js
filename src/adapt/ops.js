@@ -46,10 +46,10 @@ goog.require('vivliostyle.column');
 /**
  * @type {adapt.taskutil.Fetcher.<boolean>}
  */
-adapt.ops.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(function() {
+adapt.ops.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(() => {
     /** @type {!adapt.task.Frame.<boolean>} */ var frame =
         adapt.task.newFrame("uaStylesheetBase");
-    adapt.cssvalid.loadValidatorSet().then(function(validatorSet) {
+    adapt.cssvalid.loadValidatorSet().then(validatorSet => {
         var url = adapt.base.resolveURL("user-agent-base.css", adapt.base.resourceBaseURL);
         var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
             validatorSet, true);
@@ -63,9 +63,7 @@ adapt.ops.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(function() {
 /**
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.ops.loadUABase = function() {
-    return adapt.ops.uaStylesheetBaseFetcher.get();
-};
+adapt.ops.loadUABase = () => adapt.ops.uaStylesheetBaseFetcher.get();
 
 
 
@@ -496,9 +494,7 @@ adapt.ops.StyleInstance.prototype.flowChunkIsAfterParentFlowForcedBreak = functi
             return false;
         }
         var breakOffsetBeforeStartIndex = adapt.base.binarySearch(forcedBreakOffsets.length,
-                function(i) {
-                    return forcedBreakOffsets[i] > startOffset;
-                }) - 1;
+                i => forcedBreakOffsets[i] > startOffset) - 1;
         var breakOffsetBeforeStart = forcedBreakOffsets[breakOffsetBeforeStartIndex];
         var parentFlowPosition = this.layoutPositionAtPageStart.flowPositions[parentFlowName];
         var parentStartOffset = this.getConsumedOffset(parentFlowPosition);
@@ -531,13 +527,13 @@ adapt.ops.StyleInstance.prototype.setFormattingContextToColumn = function(column
  * @param {!adapt.layout.Column} column
  * @returns {!adapt.task.Result.<boolean>}
  */
-adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
+adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = column => {
     var pageFloatLayoutContext = column.pageFloatLayoutContext;
     var deferredFloats = pageFloatLayoutContext.getDeferredPageFloatContinuations();
     var frame = adapt.task.newFrame("layoutDeferredPageFloats");
     var invalidated = false;
     var i = 0;
-    frame.loopWithFrame(function(loopFrame) {
+    frame.loopWithFrame(loopFrame => {
         if (i === deferredFloats.length) {
             loopFrame.breakLoop();
             return;
@@ -556,7 +552,7 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
             loopFrame.breakLoop();
             return;
         }
-        column.layoutPageFloatInner(continuation, strategy, null, pageFloatFragment).then(function(success) {
+        column.layoutPageFloatInner(continuation, strategy, null, pageFloatFragment).then(success => {
             if (!success) {
                 loopFrame.breakLoop();
                 return;
@@ -571,7 +567,7 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
             }
             loopFrame.continueLoop();
         });
-    }).then(function() {
+    }).then(() => {
         if (invalidated)
             pageFloatLayoutContext.invalidate();
         frame.finish(true);
@@ -584,7 +580,7 @@ adapt.ops.StyleInstance.prototype.layoutDeferredPageFloats = function(column) {
  * @param {?adapt.vtree.ChunkPosition} newPosition
  * @returns {?adapt.vtree.ChunkPosition}
  */
-adapt.ops.StyleInstance.prototype.getLastAfterPositionIfDeferredFloatsExists = function(column, newPosition) {
+adapt.ops.StyleInstance.prototype.getLastAfterPositionIfDeferredFloatsExists = (column, newPosition) => {
     var pageFloatLayoutContext = column.pageFloatLayoutContext;
     var deferredFloats = pageFloatLayoutContext.getPageFloatContinuationsDeferredToNext();
     if (deferredFloats.length > 0) {
@@ -626,7 +622,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
     }
     var self = this;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("layoutColumn");
-    this.layoutDeferredPageFloats(column).then(function() {
+    this.layoutDeferredPageFloats(column).then(() => {
         if (column.pageFloatLayoutContext.isInvalidated()) {
             frame.finish(true);
             return;
@@ -635,7 +631,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
         var repeatedIndices = /** @type {Array.<number>} */ ([]);
         var removedIndices = /** @type {Array.<number>} */ ([]);
         var leadingEdge = true;
-        frame.loopWithFrame(function(loopFrame) {
+        frame.loopWithFrame(loopFrame => {
             if (column.pageFloatLayoutContext.hasContinuingFloatFragmentsInFlow(flowName)) {
                 loopFrame.breakLoop();
                 return;
@@ -662,7 +658,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
                 }
                 var flowChunk = selected.flowChunk;
                 var pending = true;
-                column.layout(selected.chunkPosition, leadingEdge, flowPosition.breakAfter).then(function(newPosition) {
+                column.layout(selected.chunkPosition, leadingEdge, flowPosition.breakAfter).then(newPosition => {
                     if (column.pageFloatLayoutContext.isInvalidated()) {
                         loopFrame.breakLoop();
                         return;
@@ -723,12 +719,10 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
                 // Sync result
             }
             loopFrame.breakLoop();
-        }).then(function() {
+        }).then(() => {
             if (!column.pageFloatLayoutContext.isInvalidated()) {
                 // Keep positions repeated or not removed
-                flowPosition.positions = flowPosition.positions.filter(function(pos, i) {
-                    return repeatedIndices.indexOf(i) >= 0 || removedIndices.indexOf(i) < 0;
-                });
+                flowPosition.positions = flowPosition.positions.filter((pos, i) => repeatedIndices.indexOf(i) >= 0 || removedIndices.indexOf(i) < 0);
                 if (flowPosition.breakAfter === "column")
                     flowPosition.breakAfter = null;
                 column.saveDistanceToBlockEndFloats();
@@ -786,7 +780,7 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
     var positionAtColumnStart = self.currentLayoutPosition.clone();
     /** @type {!adapt.task.Frame<!adapt.layout.Column>} */ var frame = adapt.task.newFrame("createAndLayoutColumn");
     var column;
-    frame.loopWithFrame(function(loopFrame) {
+    frame.loopWithFrame(loopFrame => {
         var layoutConstraint = self.createLayoutConstraint(columnPageFloatLayoutContext);
         if (columnCount > 1) {
             var columnContainer = self.viewport.document.createElement("div");
@@ -819,7 +813,7 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
         columnPageFloatLayoutContext.setContainer(column);
         if (column.width >= 0) {
             // column.element.style.outline = "1px dotted green";
-            self.layoutColumn(column, flowNameStr).then(function() {
+            self.layoutColumn(column, flowNameStr).then(() => {
                 if (!columnPageFloatLayoutContext.isInvalidated()) {
                     columnPageFloatLayoutContext.finish();
                 }
@@ -838,7 +832,7 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
             columnPageFloatLayoutContext.finish();
             loopFrame.breakLoop();
         }
-    }).then(function() {
+    }).then(() => {
         frame.finish(column);
     });
     return frame.result();
@@ -849,8 +843,7 @@ adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, 
  * @param {!adapt.pm.PageBoxInstance} boxInstance
  * @param {!adapt.vtree.Container} layoutContainer
  */
-adapt.ops.StyleInstance.prototype.setPagePageFloatLayoutContextContainer = function(
-    pagePageFloatLayoutContext, boxInstance, layoutContainer) {
+adapt.ops.StyleInstance.prototype.setPagePageFloatLayoutContextContainer = (pagePageFloatLayoutContext, boxInstance, layoutContainer) => {
     if (boxInstance instanceof vivliostyle.page.PageRulePartitionInstance ||
         (boxInstance instanceof adapt.pm.PageMasterInstance &&
         !(boxInstance instanceof vivliostyle.page.PageRuleMasterInstance))) {
@@ -903,7 +896,7 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
         self.currentLayoutPosition = positionAtContainerStart.clone();
         return self.layoutFlowColumns(
             page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, regionPageFloatLayoutContext,
-            layoutContainer, flowNameStr, columnCount, isFirstTime).thenAsync(function(columns) {
+            layoutContainer, flowNameStr, columnCount, isFirstTime).thenAsync(columns => {
                 if (columns) {
                     return adapt.task.newResult({
                         columns: columns,
@@ -915,7 +908,7 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
             });
     }
 
-    return layoutColumns().thenAsync(function(generatorResult) {
+    return layoutColumns().thenAsync(generatorResult => {
         if (!generatorResult)
             return adapt.task.newResult(null);
         if (columnCount <= 1)
@@ -931,7 +924,7 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
         isFirstTime = false;
         pagePageFloatLayoutContext.lock();
         regionPageFloatLayoutContext.lock();
-        return columnBalancer.balanceColumns(generatorResult).thenAsync(function(result) {
+        return columnBalancer.balanceColumns(generatorResult).thenAsync(result => {
             pagePageFloatLayoutContext.unlock();
             pagePageFloatLayoutContext.validate();
             regionPageFloatLayoutContext.unlock();
@@ -978,10 +971,10 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumns = function(
     var columnIndex = 0;
     var column = null;
     var columns = [];
-    frame.loopWithFrame(function(loopFrame) {
+    frame.loopWithFrame(loopFrame => {
         self.createAndLayoutColumn(boxInstance, offsetX, offsetY, exclusions, layoutContainer,
             columnIndex++, flowNameStr, regionPageFloatLayoutContext, columnCount, columnGap,
-            columnWidth, innerShape, layoutContext, forceNonFitting).then(function(c) {
+            columnWidth, innerShape, layoutContext, forceNonFitting).then(c => {
                 if (pagePageFloatLayoutContext.isInvalidated()) {
                     columns = null;
                     loopFrame.breakLoop();
@@ -1022,7 +1015,7 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumns = function(
                     loopFrame.breakLoop();
                 }
             });
-    }).then(function() {
+    }).then(() => {
         frame.finish(columns);
     });
     return frame.result();
@@ -1094,16 +1087,14 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
         // for now only a single column in vertical case
         var columnCount = boxInstance.getPropAsNumber(self, "column-count");
 
-        self.layoutFlowColumnsWithBalancing(page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, layoutContainer, flowNameStr, columnCount).then(function(columns) {
+        self.layoutFlowColumnsWithBalancing(page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, layoutContainer, flowNameStr, columnCount).then(columns => {
             if (!pagePageFloatLayoutContext.isInvalidated()) {
                 var column = columns[0];
                 goog.asserts.assert(column);
                 if (column.element === boxContainer) {
                     layoutContainer = column;
                 }
-                layoutContainer.computedBlockSize = Math.max.apply(null, columns.map(function(c) {
-                    return c.computedBlockSize;
-                }));
+                layoutContainer.computedBlockSize = Math.max.apply(null, columns.map(c => c.computedBlockSize));
                 boxInstance.finishContainer(self, layoutContainer, page, column,
                     columnCount, self.clientLayout, self.faces);
                 var flowPosition = self.currentLayoutPosition.flowPositions[flowNameStr];
@@ -1119,7 +1110,7 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
         }
         cont = adapt.task.newResult(true);
     }
-    cont.then(function() {
+    cont.then(() => {
         if (pagePageFloatLayoutContext.isInvalidated()) {
             frame.finish(true);
             return;
@@ -1141,21 +1132,19 @@ adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, 
             return;
         }
         var i = boxInstance.children.length - 1;
-        frame.loop(function() {
+        frame.loop(() => {
             while (i >= 0) {
                 var child = boxInstance.children[i--];
                 var r = self.layoutContainer(page, child, /** @type {HTMLElement} */ (boxContainer),
                     offsetX, offsetY, exclusions, pagePageFloatLayoutContext);
                 if (r.isPending()) {
-                    return r.thenAsync(function() {
-                        return adapt.task.newResult(!pagePageFloatLayoutContext.isInvalidated());
-                    });
+                    return r.thenAsync(() => adapt.task.newResult(!pagePageFloatLayoutContext.isInvalidated()));
                 } else if (pagePageFloatLayoutContext.isInvalidated()) {
                     break;
                 }
             }
             return adapt.task.newResult(false);
-        }).then(function() {
+        }).then(() => {
             frame.finish(true);
         });
     });
@@ -1260,9 +1249,9 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
 
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ var frame
         = adapt.task.newFrame("layoutNextPage");
-    frame.loopWithFrame(function(loopFrame) {
+    frame.loopWithFrame(loopFrame => {
         self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge+1, // Compensate 'top: -1px' on page master
-            [], pageFloatLayoutContext).then(function() {
+            [], pageFloatLayoutContext).then(() => {
                 if (!pageFloatLayoutContext.isInvalidated()) {
                     pageFloatLayoutContext.finish();
                 }
@@ -1274,13 +1263,13 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
                     loopFrame.breakLoop();
                 }
             });
-    }).then(function() {
+    }).then(() => {
         pageMaster.adjustPageLayout(self, page, self.clientLayout);
         var isLeftPage = new adapt.expr.Named(pageMaster.pageBox.scope, "left-page");
         page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;
         self.processLinger();
         cp = self.currentLayoutPosition;
-        Object.keys(cp.flowPositions).forEach(function(flowName) {
+        Object.keys(cp.flowPositions).forEach(flowName => {
             var flowPosition = cp.flowPositions[flowName];
             var breakAfter = flowPosition.breakAfter;
             if (breakAfter && (breakAfter === "page" || !self.matchPageSide(breakAfter))) {
@@ -1340,7 +1329,7 @@ goog.inherits(adapt.ops.BaseParserHandler, adapt.csscasc.CascadeParserHandler);
 /**
  * @override
  */
-adapt.ops.BaseParserHandler.prototype.startPageTemplateRule = function() {
+adapt.ops.BaseParserHandler.prototype.startPageTemplateRule = () => {
     // override, so we don't register an error
 };
 
@@ -1466,7 +1455,7 @@ adapt.ops.BaseParserHandler.prototype.startRuleBody = function() {
  * @param {Element} meta
  * @return {string}
  */
-adapt.ops.processViewportMeta = function(meta) {
+adapt.ops.processViewportMeta = meta => {
     var content = meta.getAttribute("content");
     if (!content) {
         return "";
@@ -1513,7 +1502,7 @@ goog.inherits(adapt.ops.StyleParserHandler, adapt.cssparse.DispatchParserHandler
 /**
  * @override
  */
-adapt.ops.StyleParserHandler.prototype.error = function(mnemonics, token) {
+adapt.ops.StyleParserHandler.prototype.error = (mnemonics, token) => {
     vivliostyle.logging.logger.warn("CSS parser:", mnemonics);
 };
 
@@ -1533,9 +1522,7 @@ adapt.ops.StyleSource;
  * @param {adapt.xmldoc.XMLDocStore} store
  * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
  */
-adapt.ops.parseOPSResource = function(response, store) {
-    return (/** @type {adapt.ops.OPSDocStore} */ (store)).parseOPSResource(response);
-};
+adapt.ops.parseOPSResource = (response, store) => (/** @type {adapt.ops.OPSDocStore} */ (store)).parseOPSResource(response);
 
 /**
  * @param {?function(string):?function(Blob):adapt.task.Result.<Blob>} fontDeobfuscator
@@ -1565,10 +1552,10 @@ adapt.ops.OPSDocStore.prototype.init = function(authorStyleSheets, userStyleShee
     var userAgentXML = adapt.base.resolveURL("user-agent.xml", adapt.base.resourceBaseURL);
     var frame = adapt.task.newFrame("OPSDocStore.init");
     var self = this;
-    adapt.cssvalid.loadValidatorSet().then(function(validatorSet) {
+    adapt.cssvalid.loadValidatorSet().then(validatorSet => {
         self.validatorSet = validatorSet;
-        adapt.ops.loadUABase().then(function() {
-            self.load(userAgentXML).then(function() {
+        adapt.ops.loadUABase().then(() => {
+            self.load(userAgentXML).then(() => {
                 self.triggerSingleDocumentPreprocessing = true;
                 frame.finish(true);
             });
@@ -1647,7 +1634,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
         = adapt.task.newFrame("OPSDocStore.load");
     var self = this;
     var url = response.url;
-    adapt.xmldoc.parseXMLResource(response, self).then(function(xmldoc) {
+    adapt.xmldoc.parseXMLResource(response, self).then(xmldoc => {
         if (!xmldoc) {
             frame.finish(null);
             return;
@@ -1748,12 +1735,12 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
         }
         var fetcher = self.styleFetcherByKey[key];
         if (!fetcher) {
-            fetcher = new adapt.taskutil.Fetcher(function() {
+            fetcher = new adapt.taskutil.Fetcher(() => {
                 /** @type {!adapt.task.Frame.<adapt.ops.Style>} */ var innerFrame
                     = adapt.task.newFrame("fetchStylesheet");
                 var index = 0;
                 var sph = new adapt.ops.StyleParserHandler(self.validatorSet);
-                innerFrame.loop(function() {
+                innerFrame.loop(() => {
                     if (index < sources.length) {
                         var source = sources[index++];
                         sph.startStylesheet(source.flavor);
@@ -1764,7 +1751,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
                         }
                     }
                     return adapt.task.newResult(false);
-                }).then(function() {
+                }).then(() => {
                     var cascade = sph.cascadeParserHandler.finish();
                     style = new adapt.ops.Style(self, sph.rootScope, sph.pageScope, cascade, sph.rootBox,
                         sph.fontFaces, sph.footnoteProps, sph.flowProps, sph.viewportProps, sph.pageProps);
@@ -1777,7 +1764,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
             self.styleFetcherByKey[key] = fetcher;
             fetcher.start();
         }
-        fetcher.get().then(function(style) {
+        fetcher.get().then(style => {
             self.styleByDocURL[url] = style;
             frame.finish(xmldoc);
         });

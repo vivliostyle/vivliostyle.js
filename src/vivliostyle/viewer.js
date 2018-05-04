@@ -25,7 +25,7 @@ goog.require("vivliostyle.util");
 goog.require("adapt.base");
 goog.require("adapt.viewer");
 
-goog.scope(function() {
+goog.scope(() => {
     /** @const */ var PageProgression = vivliostyle.constants.PageProgression;
 
     /**
@@ -90,7 +90,7 @@ goog.scope(function() {
      */
     function convertViewerOptions(options) {
         var converted = {};
-        Object.keys(options).forEach(function(key) {
+        Object.keys(options).forEach(key => {
             var v = options[key];
             switch (key) {
                 case "autoResize":
@@ -180,7 +180,7 @@ goog.scope(function() {
     Viewer.prototype.dispatcher = function(msg) {
         /** @dict */ var event = {"type": msg["t"]};
         var o = /** @type {!Object} */ (msg);
-        Object.keys(o).forEach(function(key) {
+        Object.keys(o).forEach(key => {
             if (key !== "t") {
                 event[key] = o[key];
             }
@@ -283,9 +283,10 @@ goog.scope(function() {
 
         function convertStyleSheetArray(arr) {
             if (arr) {
-                return arr.map(function(s) {
-                    return { url: s.url || null, text: s.text || null };
-                });
+                return arr.map(s => ({
+                    url: s.url || null,
+                    text: s.text || null
+                }));
             } else {
                 return undefined;
             }

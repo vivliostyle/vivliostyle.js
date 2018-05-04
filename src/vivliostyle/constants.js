@@ -20,7 +20,7 @@ goog.provide("vivliostyle.constants");
 
 goog.require("vivliostyle.namespace");
 
-goog.scope(function() {
+goog.scope(() => {
     /**
      * Debug flag.
      * @type {boolean}
@@ -42,7 +42,7 @@ goog.scope(function() {
      * @param {string} str
      * @returns {vivliostyle.constants.PageProgression}
      */
-    vivliostyle.constants.PageProgression.of = function(str) {
+    vivliostyle.constants.PageProgression.of = str => {
         switch (str) {
             case "ltr":
                 return PageProgression.LTR;

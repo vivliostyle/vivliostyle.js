@@ -45,7 +45,7 @@ adapt.net.Response;
  * @param {string=} opt_contentType
  * @return {!adapt.task.Result.<adapt.net.Response>}
  */
-adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) {
+adapt.net.ajax = (url, opt_type, opt_method, opt_data, opt_contentType) => {
     /** @type {!adapt.task.Frame.<adapt.net.Response>} */ var frame =
         adapt.task.newFrame("ajax");
     var request = new XMLHttpRequest();
@@ -56,7 +56,7 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
     if (opt_type) {
         request.responseType = opt_type;
     }
-    request.onreadystatechange = function() {
+    request.onreadystatechange = () => {
         if (request.readyState === 4) {
             response.status = request.status;
             if (response.status == 200 || response.status == 0) {
@@ -114,7 +114,7 @@ adapt.net.ajax = function(url, opt_type, opt_method, opt_data, opt_contentType) 
  * @param {string=} opt_type
  * @return Blob
  */
-adapt.net.makeBlob = function(parts, opt_type) {
+adapt.net.makeBlob = (parts, opt_type) => {
     var type = opt_type || "application/octet-stream";
     var builderCtr = window["WebKitBlobBuilder"] || window["MSBlobBuilder"]; // deprecated
     if (builderCtr) {
@@ -131,12 +131,12 @@ adapt.net.makeBlob = function(parts, opt_type) {
  * @param {!Blob} blob
  * @return adapt.task.Result.<ArrayBuffer>
  */
-adapt.net.readBlob = function(blob) {
+adapt.net.readBlob = blob => {
     /** @type {!adapt.task.Frame.<ArrayBuffer>} */ var frame =
         adapt.task.newFrame("readBlob");
     var fileReader = new FileReader();
     var continuation = frame.suspend(fileReader);
-    fileReader.addEventListener("load", function() {
+    fileReader.addEventListener("load", () => {
         continuation.schedule(/** @type {ArrayBuffer} */ (fileReader.result));
     }, false);
     fileReader.readAsArrayBuffer(blob);
@@ -146,7 +146,7 @@ adapt.net.readBlob = function(blob) {
 /**
  * @param {string} url
  */
-adapt.net.revokeObjectURL = function(url) {
+adapt.net.revokeObjectURL = url => {
     (window["URL"] || window["webkitURL"]).revokeObjectURL(url);
 };
 
@@ -154,9 +154,7 @@ adapt.net.revokeObjectURL = function(url) {
  * @param {Blob} blob
  * @return {string} url
  */
-adapt.net.createObjectURL = function(blob) {
-    return (window["URL"] || window["webkitURL"]).createObjectURL(blob);
-};
+adapt.net.createObjectURL = blob => (window["URL"] || window["webkitURL"]).createObjectURL(blob);
 
 /**
  * @template Resource
@@ -196,11 +194,11 @@ adapt.net.ResourceStore.prototype.load = function(url, opt_required, opt_message
 adapt.net.ResourceStore.prototype.fetchInner = function(url, opt_required, opt_message) {
     var self = this;
     /** @type {adapt.task.Frame.<Resource>} */ var frame = adapt.task.newFrame("fetch");
-    adapt.net.ajax(url, self.type).then(function(response) {
+    adapt.net.ajax(url, self.type).then(response => {
         if (opt_required && response.status >= 400) {
             throw new Error(opt_message || ("Failed to fetch required resource: " + url));
         }
-        self.parser(response, self).then(function(resource) {
+        self.parser(response, self).then(resource => {
             delete self.fetchers[url];
             self.resources[url] = resource;
             frame.finish(resource);
@@ -224,9 +222,7 @@ adapt.net.ResourceStore.prototype.fetch = function(url, opt_required, opt_messag
     var fetcher = this.fetchers[url];
     if (!fetcher) {
         var self = this;
-        fetcher = new adapt.taskutil.Fetcher(function() {
-            return self.fetchInner(url, opt_required, opt_message);
-        }, "Fetch " + url);
+        fetcher = new adapt.taskutil.Fetcher(() => self.fetchInner(url, opt_required, opt_message), "Fetch " + url);
         self.fetchers[url] = fetcher;
         fetcher.start();
     }
@@ -258,7 +254,7 @@ adapt.net.JSONStore;
  * @param {adapt.net.JSONStore} store
  * @return {!adapt.task.Result.<adapt.base.JSON>}
  */
-adapt.net.parseJSONResource = function(response, store) {
+adapt.net.parseJSONResource = (response, store) => {
     var text = response.responseText;
     return adapt.task.newResult(text ? adapt.base.stringToJSON(text) : null);
 };
@@ -266,6 +262,4 @@ adapt.net.parseJSONResource = function(response, store) {
 /**
  * return {adapt.net.JSONStore}
  */
-adapt.net.newJSONStore = function() {
-    return new adapt.net.ResourceStore(adapt.net.parseJSONResource, adapt.net.XMLHttpRequestResponseType.TEXT);
-};
+adapt.net.newJSONStore = () => new adapt.net.ResourceStore(adapt.net.parseJSONResource, adapt.net.XMLHttpRequestResponseType.TEXT);

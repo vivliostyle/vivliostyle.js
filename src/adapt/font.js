@@ -50,7 +50,7 @@ adapt.font.bogusFontCounter = 1;
  * @param {Object.<string,adapt.css.Val>} properties
  * @return {string}
  */
-adapt.font.makeFontTraitKey = function(properties) {
+adapt.font.makeFontTraitKey = properties => {
     var sb = new adapt.base.StringBuffer();
     for (var prop in adapt.font.traitProps) {
         sb.append(" ");
@@ -62,7 +62,7 @@ adapt.font.makeFontTraitKey = function(properties) {
 /**
  * @param {Object.<string,adapt.css.Val>} properties
  */
-adapt.font.fillDefaults = function(properties) {
+adapt.font.fillDefaults = properties => {
     for (var prop in adapt.font.traitProps) {
         if (!properties[prop])
             properties[prop] = adapt.font.traitProps[prop];
@@ -75,7 +75,7 @@ adapt.font.fillDefaults = function(properties) {
  * @param {adapt.expr.Context} context
  * @return {Object.<string,adapt.css.Val>}
  */
-adapt.font.prepareProperties = function(properties, context) {
+adapt.font.prepareProperties = (properties, context) => {
     var result = /** @type {Object.<string,adapt.css.Val>} */ ({});
     for (var prop in properties) {
         result[prop] = adapt.csscasc.getProp(properties, prop).evaluate(context, prop);
@@ -273,7 +273,7 @@ adapt.font.Mapper.prototype.initFont = function(srcFace, fontBytes, documentFace
     style.textContent = viewFontFace.makeAtRule(src, fontBytes);
     vivliostyle.logging.logger.info("Starting to load font:", src);
     var loaded = false;
-    frame.loop(function() {
+    frame.loop(() => {
         var rect = probe.getBoundingClientRect();
         var currWidth = rect.right - rect.left;
         var currHeight = rect.bottom - rect.top;
@@ -286,7 +286,7 @@ adapt.font.Mapper.prototype.initFont = function(srcFace, fontBytes, documentFace
             return adapt.task.newResult(false);
         }
         return frame.sleep(10);
-    }).then(function() {
+    }).then(() => {
         if (loaded) {
             vivliostyle.logging.logger.info("Loaded font:", src);
         } else {
@@ -308,7 +308,7 @@ adapt.font.Mapper.prototype.loadFont = function(srcFace, documentFaces) {
     var fetcher = this.srcURLMap[src];
     var self = this;
     if (fetcher) {
-        fetcher.piggyback(function(viewFaceParam) {
+        fetcher.piggyback(viewFaceParam => {
             var viewFace = /** @type {adapt.font.Face} */ (viewFaceParam);
             if (!viewFace.traitsEqual(srcFace)) {
                 vivliostyle.logging.logger.warn("E_FONT_FACE_INCOMPATIBLE", srcFace.src);
@@ -318,17 +318,17 @@ adapt.font.Mapper.prototype.loadFont = function(srcFace, documentFaces) {
             }
         });
     } else {
-        fetcher = new adapt.taskutil.Fetcher(function() {
+        fetcher = new adapt.taskutil.Fetcher(() => {
             /** @type {!adapt.task.Frame.<adapt.font.Face>} */ var frame =
                 adapt.task.newFrame("loadFont");
             var deobfuscator = documentFaces.deobfuscator ? documentFaces.deobfuscator(src) : null;
             if (deobfuscator) {
-                adapt.net.ajax(src, adapt.net.XMLHttpRequestResponseType.BLOB).then(function(xhr) {
+                adapt.net.ajax(src, adapt.net.XMLHttpRequestResponseType.BLOB).then(xhr => {
                     if (!xhr.responseBlob) {
                         frame.finish(null);
                         return;
                     }
-                    deobfuscator(xhr.responseBlob).then(function(fontBytes) {
+                    deobfuscator(xhr.responseBlob).then(fontBytes => {
                         self.initFont(srcFace, fontBytes, documentFaces).thenFinish(frame);
                     });
                 });

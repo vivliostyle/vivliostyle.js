@@ -93,7 +93,7 @@ adapt.toc.TOCView.prototype.setAutoHeight = function(elem, depth) {
 /**
  * @param {Event} evt
  */
-adapt.toc.toggleNodeExpansion = function(evt) {
+adapt.toc.toggleNodeExpansion = evt => {
     var elem = /** @type {Element} */ (evt.target);
     var open = elem.textContent == adapt.toc.bulletClosed;
     elem.textContent = open ? adapt.toc.bulletOpen : adapt.toc.bulletClosed;
@@ -123,51 +123,45 @@ adapt.toc.toggleNodeExpansion = function(evt) {
  */
 adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
     var renderer = this.rendererFactory.makeCustomRenderer(xmldoc);
-    return (
-        /**
-         * @param {Element} srcElem
-         * @param {Element} viewParent
-         * @return {!adapt.task.Result.<Element>}
-         */
-        function(srcElem, viewParent, computedStyle) {
-            var behavior = computedStyle["behavior"];
-            if (!behavior || (behavior.toString() != "toc-node" && behavior.toString() != "toc-container")) {
-                return renderer(srcElem, viewParent, computedStyle);
+    return (srcElem, viewParent, computedStyle) => {
+        var behavior = computedStyle["behavior"];
+        if (!behavior || (behavior.toString() != "toc-node" && behavior.toString() != "toc-container")) {
+            return renderer(srcElem, viewParent, computedStyle);
+        }
+        var adaptParentClass = viewParent.getAttribute("data-adapt-class");
+        if (adaptParentClass == "toc-node") {
+            var button = /** @type {Element} */ (viewParent.firstChild);
+            if (button.textContent != adapt.toc.bulletClosed) {
+                button.textContent = adapt.toc.bulletClosed;
+                adapt.base.setCSSProperty(button, "cursor", "pointer");
+                button.addEventListener("click", adapt.toc.toggleNodeExpansion, false);
             }
-            var adaptParentClass = viewParent.getAttribute("data-adapt-class");
+        }
+        var element = viewParent.ownerDocument.createElement("div");
+        element.setAttribute("data-adapt-process-children", "true");
+        if (behavior.toString() == "toc-node") {
+            var button = viewParent.ownerDocument.createElement("div");
+            button.textContent = adapt.toc.bulletEmpty;
+            // TODO: define pseudo-element for the button?
+            adapt.base.setCSSProperty(button, "margin-left", "-1em");
+            adapt.base.setCSSProperty(button, "display", "inline-block");
+            adapt.base.setCSSProperty(button, "width", "1em");
+            adapt.base.setCSSProperty(button, "text-align", "left");
+            adapt.base.setCSSProperty(button, "cursor", "default");
+            adapt.base.setCSSProperty(button, "font-family", "Menlo,sans-serif");
+            element.appendChild(button);
+            adapt.base.setCSSProperty(element, "overflow", "hidden");
+            element.setAttribute("data-adapt-class", "toc-node");
+            if (adaptParentClass == "toc-node" || adaptParentClass == "toc-container") {
+                adapt.base.setCSSProperty(element, "height", "0px");
+            }
+        } else {
             if (adaptParentClass == "toc-node") {
-                var button = /** @type {Element} */ (viewParent.firstChild);
-                if (button.textContent != adapt.toc.bulletClosed) {
-                    button.textContent = adapt.toc.bulletClosed;
-                    adapt.base.setCSSProperty(button, "cursor", "pointer");
-                    button.addEventListener("click", adapt.toc.toggleNodeExpansion, false);
-                }
+                element.setAttribute("data-adapt-class", "toc-container");
             }
-            var element = viewParent.ownerDocument.createElement("div");
-            element.setAttribute("data-adapt-process-children", "true");
-            if (behavior.toString() == "toc-node") {
-                var button = viewParent.ownerDocument.createElement("div");
-                button.textContent = adapt.toc.bulletEmpty;
-                // TODO: define pseudo-element for the button?
-                adapt.base.setCSSProperty(button, "margin-left", "-1em");
-                adapt.base.setCSSProperty(button, "display", "inline-block");
-                adapt.base.setCSSProperty(button, "width", "1em");
-                adapt.base.setCSSProperty(button, "text-align", "left");
-                adapt.base.setCSSProperty(button, "cursor", "default");
-                adapt.base.setCSSProperty(button, "font-family", "Menlo,sans-serif");
-                element.appendChild(button);
-                adapt.base.setCSSProperty(element, "overflow", "hidden");
-                element.setAttribute("data-adapt-class", "toc-node");
-                if (adaptParentClass == "toc-node" || adaptParentClass == "toc-container") {
-                    adapt.base.setCSSProperty(element, "height", "0px");
-                }
-            } else {
-                if (adaptParentClass == "toc-node") {
-                    element.setAttribute("data-adapt-class", "toc-container");
-                }
-            }
-            return adapt.task.newResult(/** @type {Element} */ (element));
-        });
+        }
+        return adapt.task.newResult(/** @type {Element} */ (element));
+    };
 };
 
 /**
@@ -186,7 +180,7 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
     /** @type {!adapt.task.Frame.<adapt.vtree.Page>} */ var frame = adapt.task.newFrame("showTOC");
     var page = new adapt.vtree.Page(elem, elem);
     this.page = page;
-    this.store.load(this.url).then(function(xmldoc) {
+    this.store.load(this.url).then(xmldoc => {
         var style = self.store.getStyleForDoc(xmldoc);
         var viewportSize = style.sizeViewport(width, 100000, fontSize);
         viewport = new adapt.vgen.Viewport(viewport.window, viewportSize.fontSize, viewport.root,
@@ -197,8 +191,8 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
             self.documentURLTransformer, self.counterStore);
         self.instance = instance;
         instance.pref = self.pref;
-        instance.init().then(function() {
-            instance.layoutNextPage(page, null).then(function() {
+        instance.init().then(() => {
+            instance.layoutNextPage(page, null).then(() => {
                 self.setAutoHeight(elem, 2);
                 frame.finish(page);
             });

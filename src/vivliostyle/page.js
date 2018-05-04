@@ -34,7 +34,7 @@ goog.require("adapt.pm");
  * @param {!adapt.csscasc.ElementStyle} style
  * @returns {vivliostyle.constants.PageProgression}
  */
-vivliostyle.page.resolvePageProgression = function(style) {
+vivliostyle.page.resolvePageProgression = style => {
     var writingMode = style["writing-mode"];
     writingMode = writingMode && writingMode.value;
     var direction = style["direction"];
@@ -110,7 +110,7 @@ vivliostyle.page.PageSizeAndBleed;
  * @param {!Object.<string, adapt.csscasc.CascadeValue>} style
  * @return {!vivliostyle.page.PageSizeAndBleed}
  */
-vivliostyle.page.resolvePageSizeAndBleed = function(style) {
+vivliostyle.page.resolvePageSizeAndBleed = style => {
     // default value (fit to viewport, no bleed)
     /** @type {!vivliostyle.page.PageSizeAndBleed} */ var pageSizeAndBleed = {
         width: adapt.css.fullWidth,
@@ -164,7 +164,7 @@ vivliostyle.page.resolvePageSizeAndBleed = function(style) {
         if (marks) {
             var hasCrop = false;
             if (marks.value.isSpaceList()) {
-                hasCrop = marks.value.values.some(function(v) { return v === adapt.css.ident.crop;});
+                hasCrop = marks.value.values.some(v => v === adapt.css.ident.crop);
             } else {
                 hasCrop = marks.value === adapt.css.ident.crop;
             }
@@ -190,7 +190,7 @@ vivliostyle.page.EvaluatedPageSizeAndBleed;
  * @param {!adapt.expr.Context} context
  * @returns {!vivliostyle.page.EvaluatedPageSizeAndBleed}
  */
-vivliostyle.page.evaluatePageSizeAndBleed = function(pageSizeAndBleed, context) {
+vivliostyle.page.evaluatePageSizeAndBleed = (pageSizeAndBleed, context) => {
     var evaluated = /** @type {!vivliostyle.page.EvaluatedPageSizeAndBleed} */ ({});
     var bleed = pageSizeAndBleed.bleed.num * context.queryUnitSize(pageSizeAndBleed.bleed.unit, false);
     var bleedOffset = pageSizeAndBleed.bleedOffset.num * context.queryUnitSize(pageSizeAndBleed.bleedOffset.unit, false);
@@ -229,7 +229,7 @@ vivliostyle.page.evaluatePageSizeAndBleed = function(pageSizeAndBleed, context) 
  * @param {number} height
  * @returns {!Element}
  */
-vivliostyle.page.createPrinterMarkSvg = function(doc, width, height) {
+vivliostyle.page.createPrinterMarkSvg = (doc, width, height) => {
     var mark = doc.createElementNS(adapt.base.NS.SVG, "svg");
     mark.setAttribute("width", width);
     mark.setAttribute("height", height);
@@ -245,7 +245,7 @@ vivliostyle.page.createPrinterMarkSvg = function(doc, width, height) {
  * @param {string=} elementType Specifies which type of element to create. Default value is "polyline".
  * @returns {!Element}
  */
-vivliostyle.page.createPrinterMarkElement = function(doc, lineWidth, elementType) {
+vivliostyle.page.createPrinterMarkElement = (doc, lineWidth, elementType) => {
     elementType = elementType || "polyline";
     var line = doc.createElementNS(adapt.base.NS.SVG, elementType);
     line.setAttribute("stroke", "black");
@@ -277,7 +277,7 @@ vivliostyle.page.CornerMarkPosition = {
  * @param {number} offset
  * @return {!Element}
  */
-vivliostyle.page.createCornerMark = function(doc, position, lineWidth, cropMarkLineLength, bleed, offset) {
+vivliostyle.page.createCornerMark = (doc, position, lineWidth, cropMarkLineLength, bleed, offset) => {
     var bleedMarkLineLength = cropMarkLineLength;
     // bleed mark line should be longer than bleed + 2mm
     if (bleedMarkLineLength <= bleed + 2 * adapt.expr.defaultUnitSizes["mm"]) {
@@ -289,27 +289,27 @@ vivliostyle.page.createCornerMark = function(doc, position, lineWidth, cropMarkL
 
     var points1 = [[0, bleed + cropMarkLineLength], [cropMarkLineLength, bleed + cropMarkLineLength], [cropMarkLineLength, bleed + cropMarkLineLength - bleedMarkLineLength]];
     // reflect with respect to y=x
-    var points2 = points1.map(function(p) { return [p[1], p[0]]; });
+    var points2 = points1.map(p => [p[1], p[0]]);
     if (position === vivliostyle.page.CornerMarkPosition.TOP_RIGHT || position === vivliostyle.page.CornerMarkPosition.BOTTOM_RIGHT) {
         // reflect with respect to a vertical axis
-        points1 = points1.map(function(p) { return [bleed + maxLineLength - p[0], p[1]]; });
-        points2 = points2.map(function(p) { return [bleed + maxLineLength - p[0], p[1]]; });
+        points1 = points1.map(p => [bleed + maxLineLength - p[0], p[1]]);
+        points2 = points2.map(p => [bleed + maxLineLength - p[0], p[1]]);
     }
     if (position === vivliostyle.page.CornerMarkPosition.BOTTOM_LEFT || position === vivliostyle.page.CornerMarkPosition.BOTTOM_RIGHT) {
         // reflect with respect to a vertical axis
-        points1 = points1.map(function(p) { return [p[0], bleed + maxLineLength - p[1]]; });
-        points2 = points2.map(function(p) { return [p[0], bleed + maxLineLength - p[1]]; });
+        points1 = points1.map(p => [p[0], bleed + maxLineLength - p[1]]);
+        points2 = points2.map(p => [p[0], bleed + maxLineLength - p[1]]);
     }
 
     var line1 = vivliostyle.page.createPrinterMarkElement(doc, lineWidth);
-    line1.setAttribute("points", points1.map(function(p) { return p.join(","); }).join(" "));
+    line1.setAttribute("points", points1.map(p => p.join(",")).join(" "));
     mark.appendChild(line1);
 
     var line2 = vivliostyle.page.createPrinterMarkElement(doc, lineWidth);
-    line2.setAttribute("points", points2.map(function(p) { return p.join(","); }).join(" "));
+    line2.setAttribute("points", points2.map(p => p.join(",")).join(" "));
     mark.appendChild(line2);
 
-    position.split(" ").forEach(function(side) {
+    position.split(" ").forEach(side => {
         mark.style[side] = offset + "px";
     });
 
@@ -338,7 +338,7 @@ vivliostyle.page.CrossMarkPosition = {
  * @param {number} offset
  * @returns {!Element}
  */
-vivliostyle.page.createCrossMark = function(doc, position, lineWidth, lineLength, offset) {
+vivliostyle.page.createCrossMark = (doc, position, lineWidth, lineLength, offset) => {
     var longLineLength = lineLength * 2;
     var width, height;
     if (position === vivliostyle.page.CrossMarkPosition.TOP || position === vivliostyle.page.CrossMarkPosition.BOTTOM) {
@@ -379,7 +379,7 @@ vivliostyle.page.createCrossMark = function(doc, position, lineWidth, lineLength
             opposite = vivliostyle.page.CrossMarkPosition.LEFT;
             break;
     }
-    Object.keys(vivliostyle.page.CrossMarkPosition).forEach(function(key) {
+    Object.keys(vivliostyle.page.CrossMarkPosition).forEach(key => {
         var side = vivliostyle.page.CrossMarkPosition[key];
         if (side === position) {
             mark.style[side] = offset + "px";
@@ -399,13 +399,13 @@ vivliostyle.page.createCrossMark = function(doc, position, lineWidth, lineLength
  * @param {!adapt.vtree.Page} page
  * @param {!adapt.expr.Context} context
  */
-vivliostyle.page.addPrinterMarks = function(cascadedPageStyle, evaluatedPageSizeAndBleed, page, context) {
+vivliostyle.page.addPrinterMarks = (cascadedPageStyle, evaluatedPageSizeAndBleed, page, context) => {
     var crop = false, cross = false;
     var marks = cascadedPageStyle["marks"];
     if (marks) {
         var value = marks.value;
         if (value.isSpaceList()) {
-            value.values.forEach(function(v) {
+            value.values.forEach(v => {
                 if (v === adapt.css.ident.crop) {
                     crop = true;
                 } else if (v === adapt.css.ident.cross) {
@@ -432,7 +432,7 @@ vivliostyle.page.addPrinterMarks = function(cascadedPageStyle, evaluatedPageSize
 
     // corner marks
     if (crop) {
-        Object.keys(vivliostyle.page.CornerMarkPosition).forEach(function(key) {
+        Object.keys(vivliostyle.page.CornerMarkPosition).forEach(key => {
             var position = vivliostyle.page.CornerMarkPosition[key];
             var mark = vivliostyle.page.createCornerMark(doc, position, lineWidth, lineLength, bleed, printerMarkOffset);
             container.appendChild(mark);
@@ -441,7 +441,7 @@ vivliostyle.page.addPrinterMarks = function(cascadedPageStyle, evaluatedPageSize
 
     // cross marks
     if (cross) {
-        Object.keys(vivliostyle.page.CrossMarkPosition).forEach(function(key) {
+        Object.keys(vivliostyle.page.CrossMarkPosition).forEach(key => {
             var position = vivliostyle.page.CrossMarkPosition[key];
             var mark = vivliostyle.page.createCrossMark(doc, position, lineWidth, lineLength, printerMarkOffset);
             container.appendChild(mark);
@@ -454,7 +454,7 @@ vivliostyle.page.addPrinterMarks = function(cascadedPageStyle, evaluatedPageSize
  * @private
  * @const
  */
-vivliostyle.page.propertiesAppliedToPartition = (function() {
+vivliostyle.page.propertiesAppliedToPartition = ((() => {
     var sides = [
         "left", "right", "top", "bottom",
         "before", "after", "start", "end",
@@ -473,7 +473,7 @@ vivliostyle.page.propertiesAppliedToPartition = (function() {
         "outline-style": true,
         "outline-color": true
     };
-    sides.forEach(function(side) {
+    sides.forEach(side => {
         props["margin-" + side] = true;
         props["padding-" + side] = true;
         props["border-" + side + "-width"] = true;
@@ -481,7 +481,7 @@ vivliostyle.page.propertiesAppliedToPartition = (function() {
         props["border-" + side + "-color"] = true;
     });
     return props;
-})();
+}))();
 
 /**
  * Represents position of a margin box along the variable dimension of the page.
@@ -654,12 +654,10 @@ vivliostyle.page.pageMarginBoxes = {
  * @const
  * @type {!Array.<string>}
  */
-vivliostyle.page.pageMarginBoxNames = (function() {
+vivliostyle.page.pageMarginBoxNames = ((() => {
     var boxes = vivliostyle.page.pageMarginBoxes;
-    return Object.keys(boxes).sort(function(a, b) {
-        return boxes[a].order - boxes[b].order;
-    });
-})();
+    return Object.keys(boxes).sort((a, b) => boxes[a].order - boxes[b].order);
+}))();
 
 /**
  * Indicates that the page master is generated for @page rules.
@@ -707,7 +705,7 @@ vivliostyle.page.PageRuleMaster.prototype.createPageMarginBoxes = function(style
     var marginBoxesMap = style[vivliostyle.page.marginBoxesKey];
     if (marginBoxesMap) {
         var self = this;
-        vivliostyle.page.pageMarginBoxNames.forEach(function(name) {
+        vivliostyle.page.pageMarginBoxNames.forEach(name => {
             if (marginBoxesMap[name]) {
                 self.pageMarginBoxes[name] = new vivliostyle.page.PageMarginBoxPartition(self.scope, self, name, style);
             }
@@ -951,27 +949,27 @@ vivliostyle.page.PageRuleMasterInstance.prototype.adjustPageLayout = function(co
  * @private
  * @interface
  */
-vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam = function() {};
+vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam = () => {};
 
 /**
  *  @returns {boolean}
  */
-vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam.prototype.hasAutoSize = function() {};
+vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam.prototype.hasAutoSize = () => {};
 
 /**
  *  @returns {number}
  */
-vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam.prototype.getOuterMaxContentSize = function() {};
+vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam.prototype.getOuterMaxContentSize = () => {};
 
 /**
  *  @returns {number}
  */
-vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam.prototype.getOuterMinContentSize = function() {};
+vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam.prototype.getOuterMinContentSize = () => {};
 
 /**
  *  @returns {number}
  */
-vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam.prototype.getOuterSize = function() {};
+vivliostyle.page.PageRuleMasterInstance.MarginBoxSizingParam.prototype.getOuterSize = () => {};
 
 /**
  * MarginBoxSizingParam for a single page-margin box.
@@ -1062,18 +1060,14 @@ vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam = func
  * @override
  */
 vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam.prototype.hasAutoSize = function() {
-    return this.params.some(function(p) {
-        return p.hasAutoSize();
-    });
+    return this.params.some(p => p.hasAutoSize());
 };
 
 /**
  *  @override
  */
 vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam.prototype.getOuterMaxContentSize = function() {
-    var sizes = this.params.map(function(p) {
-        return p.getOuterMaxContentSize();
-    });
+    var sizes = this.params.map(p => p.getOuterMaxContentSize());
     return Math.max.apply(null, sizes) * sizes.length;
 };
 
@@ -1081,9 +1075,7 @@ vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam.protot
  *  @override
  */
 vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam.prototype.getOuterMinContentSize = function() {
-    var sizes = this.params.map(function(p) {
-        return p.getOuterMinContentSize();
-    });
+    var sizes = this.params.map(p => p.getOuterMinContentSize());
     return Math.max.apply(null, sizes) * sizes.length;
 };
 
@@ -1091,9 +1083,7 @@ vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam.protot
  *  @override
  */
 vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam.prototype.getOuterSize = function() {
-    var sizes = this.params.map(function(p) {
-        return p.getOuterSize();
-    });
+    var sizes = this.params.map(p => p.getOuterSize());
     return Math.max.apply(null, sizes) * sizes.length;
 };
 
@@ -1117,9 +1107,7 @@ goog.inherits(vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingPa
 /**
  * @override
  */
-vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam.prototype.hasAutoSize = function() {
-    return false;
-};
+vivliostyle.page.PageRuleMasterInstance.FixedSizeMarginBoxSizingParam.prototype.hasAutoSize = () => false;
 
 /**
  *  @override
@@ -1189,7 +1177,7 @@ vivliostyle.page.PageRuleMasterInstance.prototype.sizeMarginBoxesAlongVariableDi
 
     // Check max-width/max-height
     /** @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, number>} */ var maxOuterSizes = {};
-    Object.keys(containers).forEach(function(n) {
+    Object.keys(containers).forEach(n => {
         var name = /** @type {vivliostyle.page.MarginBoxPositionAlongVariableDimension} */ (n);
         var maxSize = adapt.pm.toExprAuto(scope, boxInstances[name].style[isHorizontal ? "max-width" : "max-height"], dimensions.extent);
         if (maxSize) {
@@ -1204,14 +1192,14 @@ vivliostyle.page.PageRuleMasterInstance.prototype.sizeMarginBoxesAlongVariableDi
     if (needRecalculate) {
         sizes = this.getSizesOfMarginBoxesAlongVariableDimension(boxParams, evaluatedDim.extent);
         needRecalculate = false;
-        [START, CENTER, END].forEach(function(name) {
+        [START, CENTER, END].forEach(name => {
             sizes[name] = maxOuterSizes[name] || sizes[name];
         });
     }
 
     // Check min-width/min-height
     /** @type {!Object.<vivliostyle.page.MarginBoxPositionAlongVariableDimension, number>} */ var minOuterSizes = {};
-    Object.keys(containers).forEach(function(n) {
+    Object.keys(containers).forEach(n => {
         var name = /** @type {vivliostyle.page.MarginBoxPositionAlongVariableDimension} */ (n);
         var minSize = adapt.pm.toExprAuto(scope, boxInstances[name].style[isHorizontal ? "min-width" : "min-height"], dimensions.extent);
         if (minSize) {
@@ -1225,7 +1213,7 @@ vivliostyle.page.PageRuleMasterInstance.prototype.sizeMarginBoxesAlongVariableDi
     });
     if (needRecalculate) {
         sizes = this.getSizesOfMarginBoxesAlongVariableDimension(boxParams, evaluatedDim.extent);
-        [START, CENTER, END].forEach(function(name) {
+        [START, CENTER, END].forEach(name => {
             sizes[name] = minOuterSizes[name] || sizes[name];
         });
     }
@@ -1233,7 +1221,7 @@ vivliostyle.page.PageRuleMasterInstance.prototype.sizeMarginBoxesAlongVariableDi
     // set sizes
     var endEdge = evaluatedDim.start + evaluatedDim.extent;
     var startEndSum = evaluatedDim.start + (evaluatedDim.start + evaluatedDim.extent);
-    [START, CENTER, END].forEach(function(name) {
+    [START, CENTER, END].forEach(name => {
         var outerSize = sizes[name];
         if (outerSize) {
             var container = containers[name];
@@ -1278,7 +1266,7 @@ vivliostyle.page.PageRuleMasterInstance.prototype.getSizesOfMarginBoxesAlongVari
             sizes[vivliostyle.page.MarginBoxPositionAlongVariableDimension.END] = startEndSizes.ySize;
         }
     } else {
-        var params = [startBoxParam, endBoxParam].filter(function(p) { return p; });
+        var params = [startBoxParam, endBoxParam].filter(p => p);
         var startEndBoxParam = params.length ?
             new vivliostyle.page.PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam(params) : null;
         var centerSizes = this.distributeAutoMarginBoxSizes(centerBoxParam, startEndBoxParam, availableSize);
@@ -1305,7 +1293,7 @@ vivliostyle.page.PageRuleMasterInstance.prototype.getSizesOfMarginBoxesAlongVari
  * @param {number} availableSize Available size for the margin boxes.
  * @returns {!{xSize: number?, ySize: number?}} Determined sizes for the two boxes. Each value is present only when the size of the corresponding box is 'auto'.
  */
-vivliostyle.page.PageRuleMasterInstance.prototype.distributeAutoMarginBoxSizes = function(x, y, availableSize) {
+vivliostyle.page.PageRuleMasterInstance.prototype.distributeAutoMarginBoxSizes = (x, y, availableSize) => {
     /** @type {!{xSize: number?, ySize: number?}} */ var result = {xSize: null, ySize: null};
     if (x && y) {
         if (x.hasAutoSize() && y.hasAutoSize()) {
@@ -1651,7 +1639,7 @@ vivliostyle.page.PageMarginBoxPartitionInstance.prototype.positionAndSizeAlongFi
             };
             var pageMarginValue = pageMargin.evaluate(context);
             var borderAndPadding = 0;
-            [borderInsideWidth, paddingInside, paddingOutside, borderOutsideWidth].forEach(function(x) {
+            [borderInsideWidth, paddingInside, paddingOutside, borderOutsideWidth].forEach(x => {
                 if (x) {
                     borderAndPadding += x.evaluate(context);
                 }
@@ -1930,7 +1918,7 @@ vivliostyle.page.PageManager.prototype.generateCascadedPageMaster = function(sty
 
     // Transfer counter properties to the page style so that these specified in the page master are
     // also effective. Note that these values (if specified) always override values in page contexts.
-    ["counter-reset", "counter-increment"].forEach(function(name) {
+    ["counter-reset", "counter-increment"].forEach(name => {
         if (pageMasterStyle[name]) {
             style[name] = pageMasterStyle[name];
         }
@@ -1966,9 +1954,7 @@ vivliostyle.page.CheckPageTypeAction.prototype.apply = function(cascadeInstance)
 /**
  * @override
  */
-vivliostyle.page.CheckPageTypeAction.prototype.getPriority = function() {
-    return 3;
-};
+vivliostyle.page.CheckPageTypeAction.prototype.getPriority = () => 3;
 
 /**
  * @override
@@ -2004,9 +1990,7 @@ vivliostyle.page.IsFirstPageAction.prototype.apply = function(cascadeInstace) {
 /**
  * @override
  */
-vivliostyle.page.IsFirstPageAction.prototype.getPriority = function() {
-    return 2;
-};
+vivliostyle.page.IsFirstPageAction.prototype.getPriority = () => 2;
 
 /**
  * @param {adapt.expr.LexicalScope} scope
@@ -2032,9 +2016,7 @@ vivliostyle.page.IsLeftPageAction.prototype.apply = function(cascadeInstace) {
 /**
  * @override
  */
-vivliostyle.page.IsLeftPageAction.prototype.getPriority = function() {
-    return 1;
-};
+vivliostyle.page.IsLeftPageAction.prototype.getPriority = () => 1;
 
 /**
  * @param {adapt.expr.LexicalScope} scope
@@ -2060,9 +2042,7 @@ vivliostyle.page.IsRightPageAction.prototype.apply = function(cascadeInstace) {
 /**
  * @override
  */
-vivliostyle.page.IsRightPageAction.prototype.getPriority = function() {
-    return 1;
-};
+vivliostyle.page.IsRightPageAction.prototype.getPriority = () => 1;
 
 /**
  * @param {adapt.expr.LexicalScope} scope
@@ -2088,9 +2068,7 @@ vivliostyle.page.IsRectoPageAction.prototype.apply = function(cascadeInstace) {
 /**
  * @override
  */
-vivliostyle.page.IsRectoPageAction.prototype.getPriority = function() {
-    return 1;
-};
+vivliostyle.page.IsRectoPageAction.prototype.getPriority = () => 1;
 
 /**
  * @param {adapt.expr.LexicalScope} scope
@@ -2116,9 +2094,7 @@ vivliostyle.page.IsVersoPageAction.prototype.apply = function(cascadeInstace) {
 /**
  * @override
  */
-vivliostyle.page.IsVersoPageAction.prototype.getPriority = function() {
-    return 1;
-};
+vivliostyle.page.IsVersoPageAction.prototype.getPriority = () => 1;
 
 /**
  * Action applying an at-page rule
@@ -2149,7 +2125,7 @@ vivliostyle.page.ApplyPageRuleAction.prototype.apply = function(cascadeInstance)
  * @param {number} specificity
  * @param {!adapt.csscasc.CascadeInstance} cascadeInstance
  */
-vivliostyle.page.mergeInPageRule = function(context, target, style, specificity, cascadeInstance) {
+vivliostyle.page.mergeInPageRule = (context, target, style, specificity, cascadeInstance) => {
     adapt.csscasc.mergeIn(context, target, style, specificity, null, null, null);
     var marginBoxes = style[vivliostyle.page.marginBoxesKey];
     if (marginBoxes) {
@@ -2280,9 +2256,7 @@ vivliostyle.page.PageParserHandler.prototype.startRuleBody = function() {
 vivliostyle.page.PageParserHandler.prototype.simpleProperty = function(name, value, important) {
     // we limit 'bleed' and 'marks' to be effective only when specified without page selectors
     if ((name === "bleed" || name === "marks") &&
-        !this.currentPageSelectors.some(function(s) {
-            return s.selectors === null;
-        })) {
+        !this.currentPageSelectors.some(s => s.selectors === null)) {
         return;
     }
 
@@ -2297,7 +2271,7 @@ vivliostyle.page.PageParserHandler.prototype.simpleProperty = function(name, val
         }
         // we can simply overwrite without considering specificity
         // since 'bleed' and 'marks' always come from a page rule without page selectors.
-        Object.keys(pageProps).forEach(function(selector) {
+        Object.keys(pageProps).forEach(selector => {
             adapt.csscasc.setProp(pageProps[selector], name, cascVal);
         });
     } else if (name === "size") {
@@ -2313,7 +2287,7 @@ vivliostyle.page.PageParserHandler.prototype.simpleProperty = function(name, val
                 props = pageProps[selector] = /** @type {!adapt.csscasc.ElementStyle} */ ({});
                 adapt.csscasc.setProp(props, name, result);
                 if (noPageSelectorProps) {
-                    ["bleed", "marks"].forEach(function(n) {
+                    ["bleed", "marks"].forEach(n => {
                         if (noPageSelectorProps[n]) {
                             adapt.csscasc.setProp(props, n, noPageSelectorProps[n]);
                         }

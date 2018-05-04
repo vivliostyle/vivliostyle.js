@@ -20,7 +20,7 @@ goog.provide("vivliostyle.logging");
 
 goog.require("vivliostyle.namespace");
 
-goog.scope(function() {
+goog.scope(() => {
     "use strict";
 
     /**
@@ -49,9 +49,7 @@ goog.scope(function() {
         var c = opt_console || console;
 
         function makeConsoleMethod(method) {
-            return function(args) {
-                return method.apply(c, args);
-            };
+            return args => method.apply(c, args);
         }
 
         /** @const @private */ this.consoleDebug = makeConsoleMethod(c.debug || c.log);
@@ -71,7 +69,7 @@ goog.scope(function() {
     Logger.prototype.triggerListeners = function(level, args) {
         var listeners = this.listeners[level];
         if (listeners) {
-            listeners.forEach(function(listener) {
+            listeners.forEach(listener => {
                 listener(args);
             });
         }

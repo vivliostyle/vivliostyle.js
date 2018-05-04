@@ -24,20 +24,20 @@ goog.require('adapt.base');
 /**
  * @interface
  */
-adapt.csstok.TokenizerHandler = function() {};
+adapt.csstok.TokenizerHandler = () => {};
 
 /**
  * @param {string} mnemonics
  * @param {adapt.csstok.Token} token
  * @return {void}
  */
-adapt.csstok.TokenizerHandler.prototype.error = function(mnemonics, token) {};
+adapt.csstok.TokenizerHandler.prototype.error = (mnemonics, token) => {};
 
 /**
  * @param {string} str
  * @return {string}
  */
-adapt.csstok.escapeParseSingle = function(str) {
+adapt.csstok.escapeParseSingle = str => {
     str = str.substr(1);
     if (str.match(/^[^0-9a-fA-F\n\r]$/))
         return str;
@@ -58,10 +58,8 @@ adapt.csstok.escapeParseSingle = function(str) {
  * @param {string} str
  * @return {string}
  */
-adapt.csstok.escapeParse = function(str) {
-    return str.replace(/\\([0-9a-fA-F]{0,6}(\r\n|[ \n\r\t\f])?|[^0-9a-fA-F\n\r])/g,
-        adapt.csstok.escapeParseSingle);
-};
+adapt.csstok.escapeParse = str => str.replace(/\\([0-9a-fA-F]{0,6}(\r\n|[ \n\r\t\f])?|[^0-9a-fA-F\n\r])/g,
+    adapt.csstok.escapeParseSingle);
 
 /**
  * @enum {number}
@@ -220,7 +218,7 @@ adapt.csstok.Action = {
  * @param {Array.<adapt.csstok.Action>} spec
  * @return {Array.<adapt.csstok.Action>}
  */
-adapt.csstok.makeActions = function(def, spec) {
+adapt.csstok.makeActions = (def, spec) => {
     /** @type {Array.<number>} */ var a = Array(128);
     /** @type {number} */ var i;
     for (i = 0; i < 128; i++) {

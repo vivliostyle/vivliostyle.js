@@ -18,7 +18,7 @@
  */
 goog.provide("vivliostyle.logical");
 
-goog.scope(function() {
+goog.scope(() => {
     /**
      * @typedef {{regexp: !RegExp, to: string}}
      */
@@ -31,11 +31,11 @@ goog.scope(function() {
      */
     function createRegExpMap(valueMaps, toPhysical) {
         var map = {};
-        Object.keys(/** @type {!Object} */ (valueMaps)).forEach(function(writingMode) {
+        Object.keys(/** @type {!Object} */ (valueMaps)).forEach(writingMode => {
             var dest = map[writingMode] = {};
             var src = valueMaps[writingMode];
-            Object.keys(/** @type {!Object} */ (src)).forEach(function(direction) {
-                dest[direction] = src[direction].map(function(p) {
+            Object.keys(/** @type {!Object} */ (src)).forEach(direction => {
+                dest[direction] = src[direction].map(p => {
                     var from = toPhysical ? p.logical : p.physical;
                     var to = toPhysical ? p.physical : p.logical;
                     return {
@@ -141,9 +141,7 @@ goog.scope(function() {
      * @param {?string=} direction
      * @returns {string}
      */
-    vivliostyle.logical.toPhysical = function(value, writingMode, direction) {
-        return convert(value, writingMode, direction || null, toPhysicalMaps);
-    };
+    vivliostyle.logical.toPhysical = (value, writingMode, direction) => convert(value, writingMode, direction || null, toPhysicalMaps);
 
     var toLogicalMaps = createRegExpMap(values, false);
     /**
@@ -152,9 +150,7 @@ goog.scope(function() {
      * @param {?string=} direction
      * @returns {string}
      */
-    vivliostyle.logical.toLogical = function(value, writingMode, direction) {
-        return convert(value, writingMode, direction || null, toLogicalMaps);
-    };
+    vivliostyle.logical.toLogical = (value, writingMode, direction) => convert(value, writingMode, direction || null, toLogicalMaps);
 
     /**
      * @type {!Object.<string, !Array.<!{logical: string, physical: string}>>}
@@ -185,7 +181,7 @@ goog.scope(function() {
      * @param {string} writingMode
      * @returns {string}
      */
-    vivliostyle.logical.toLineRelative = function(value, writingMode) {
+    vivliostyle.logical.toLineRelative = (value, writingMode) => {
         var maps = lineRelativeValues[writingMode];
         if (!maps) {
             throw new Error("unknown writing-mode: " + writingMode);

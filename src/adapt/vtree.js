@@ -85,10 +85,10 @@ adapt.vtree.actions = {
  * @param {string} action
  * @return {?Function}
  */
-adapt.vtree.makeListener = function(refs, action) {
+adapt.vtree.makeListener = (refs, action) => {
     var actionFn = adapt.vtree.actions[action];
     if (actionFn) {
-        return function() {
+        return () => {
             for (var k = 0; k < refs.length; k++) {
                 try {
                     actionFn(refs[k]);
@@ -114,7 +114,7 @@ adapt.vtree.Page = function(container, bleedBox) {
     /** @type {Array.<adapt.vtree.DelayedItem>} */ this.delayedItems = [];
     var self = this;
     /** @param {Event} e */
-    this.hrefHandler = function(e) {
+    this.hrefHandler = e => {
         var anchorElement = /** @type {Element} */ (e.currentTarget);
         var href = anchorElement.getAttribute("href") ||
             anchorElement.getAttributeNS(adapt.base.NS.XLINK, "href");
@@ -293,7 +293,7 @@ adapt.vtree.Whitespace = {
  * @param {string} whitespace The value of 'white-space' property
  * @returns {?adapt.vtree.Whitespace}
  */
-adapt.vtree.whitespaceFromPropertyValue = function(whitespace) {
+adapt.vtree.whitespaceFromPropertyValue = whitespace => {
     switch (whitespace) {
         case "normal" :
         case "nowrap" :
@@ -313,7 +313,7 @@ adapt.vtree.whitespaceFromPropertyValue = function(whitespace) {
  * @param {adapt.vtree.Whitespace} whitespace
  * @return {boolean}
  */
-adapt.vtree.canIgnore = function(node, whitespace) {
+adapt.vtree.canIgnore = (node, whitespace) => {
     if (node.nodeType == 1)
         return false;
     var text = node.textContent;
@@ -397,56 +397,52 @@ adapt.vtree.ClientRect;
  * @param {adapt.vtree.ClientRect} r2
  * @return {number}
  */
-adapt.vtree.clientrectIncreasingTop = function(r1, r2) {
-    return r1.top - r2.top;
-};
+adapt.vtree.clientrectIncreasingTop = (r1, r2) => r1.top - r2.top;
 
 /**
  * @param {adapt.vtree.ClientRect} r1
  * @param {adapt.vtree.ClientRect} r2
  * @return {number}
  */
-adapt.vtree.clientrectDecreasingRight = function(r1, r2) {
-    return r2.right - r1.right;
-};
+adapt.vtree.clientrectDecreasingRight = (r1, r2) => r2.right - r1.right;
 
 /**
  * Interface to read the position assigned to the elements and ranges by the
  * browser.
  * @interface
  */
-adapt.vtree.ClientLayout = function() {};
+adapt.vtree.ClientLayout = () => {};
 
 /**
  * @param {Range} range
  * @return {Array.<adapt.vtree.ClientRect>}
  */
-adapt.vtree.ClientLayout.prototype.getRangeClientRects = function(range) {};
+adapt.vtree.ClientLayout.prototype.getRangeClientRects = range => {};
 
 /**
  * @param {Element} element
  * @return {adapt.vtree.ClientRect}
  */
-adapt.vtree.ClientLayout.prototype.getElementClientRect = function(element) {};
+adapt.vtree.ClientLayout.prototype.getElementClientRect = element => {};
 
 /**
  * @param {Element} element
  * @return {CSSStyleDeclaration} element's computed style
  */
-adapt.vtree.ClientLayout.prototype.getElementComputedStyle = function(element) {};
+adapt.vtree.ClientLayout.prototype.getElementComputedStyle = element => {};
 
 /**
  * Styling, creating a single node's view, etc.
  * @interface
  */
-adapt.vtree.LayoutContext = function() {};
+adapt.vtree.LayoutContext = () => {};
 
 /**
  * Creates a functionally equivalent, but uninitialized layout context,
  * suitable for building a separate column.
  * @return {!adapt.vtree.LayoutContext}
  */
-adapt.vtree.LayoutContext.prototype.clone = function() {};
+adapt.vtree.LayoutContext.prototype.clone = () => {};
 
 /**
  * Set the current source node and create a view. Parameter firstTime
@@ -457,14 +453,14 @@ adapt.vtree.LayoutContext.prototype.clone = function() {};
  * @param {boolean=} atUnforcedBreak
  * @return {!adapt.task.Result.<boolean>} true if children should be processed as well
  */
-adapt.vtree.LayoutContext.prototype.setCurrent = function(nodeContext, firstTime, atUnforcedBreak) {};
+adapt.vtree.LayoutContext.prototype.setCurrent = (nodeContext, firstTime, atUnforcedBreak) => {};
 
 /**
  * Set the container element that holds view elements produced from the source.
  * @param {Element} container
  * @param {boolean} isFootnote
  */
-adapt.vtree.LayoutContext.prototype.setViewRoot = function(container, isFootnote) {};
+adapt.vtree.LayoutContext.prototype.setViewRoot = (container, isFootnote) => {};
 
 /**
  * Moves to the next view node, creating it and appending it to the view tree if needed.
@@ -472,7 +468,7 @@ adapt.vtree.LayoutContext.prototype.setViewRoot = function(container, isFootnote
  * @param {boolean=} atUnforcedBreak
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>} that corresponds to the next view node
  */
-adapt.vtree.LayoutContext.prototype.nextInTree = function(nodeContext, atUnforcedBreak) {};
+adapt.vtree.LayoutContext.prototype.nextInTree = (nodeContext, atUnforcedBreak) => {};
 
 /**
  * Apply pseudo-element styles (if any).
@@ -481,7 +477,7 @@ adapt.vtree.LayoutContext.prototype.nextInTree = function(nodeContext, atUnforce
  * @param {Element} element element to apply styles to
  * @return {void}
  */
-adapt.vtree.LayoutContext.prototype.applyPseudoelementStyle = function(nodeContext, pseudoName, element) {};
+adapt.vtree.LayoutContext.prototype.applyPseudoelementStyle = (nodeContext, pseudoName, element) => {};
 
 /**
  * Apply styles to footnote container.
@@ -489,7 +485,7 @@ adapt.vtree.LayoutContext.prototype.applyPseudoelementStyle = function(nodeConte
  * @param {Element} element element to apply styles to
  * @return {boolean} vertical
  */
-adapt.vtree.LayoutContext.prototype.applyFootnoteStyle = function(vertical, element) {};
+adapt.vtree.LayoutContext.prototype.applyFootnoteStyle = (vertical, element) => {};
 
 
 /**
@@ -499,13 +495,13 @@ adapt.vtree.LayoutContext.prototype.applyFootnoteStyle = function(vertical, elem
  * @param {number} nodeOffset
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
-adapt.vtree.LayoutContext.prototype.peelOff = function(nodeContext, nodeOffset) {};
+adapt.vtree.LayoutContext.prototype.peelOff = (nodeContext, nodeOffset) => {};
 
 /**
  * Process a block-end edge of a fragmented block.
  * @param {adapt.vtree.NodeContext} nodeContext
  */
-adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = function(nodeContext) {};
+adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = nodeContext => {};
 
 /**
  * @param {!adapt.css.Numeric} numeric
@@ -513,7 +509,7 @@ adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = function(nodeCo
  * @param {!adapt.vtree.ClientLayout} clientLayout
  * @return {number|!adapt.css.Numeric}
  */
-adapt.vtree.LayoutContext.prototype.convertLengthToPx = function(numeric, viewNode, clientLayout) {};
+adapt.vtree.LayoutContext.prototype.convertLengthToPx = (numeric, viewNode, clientLayout) => {};
 
 /**
  * Returns if two NodePositions represents the same position in the document.
@@ -521,7 +517,7 @@ adapt.vtree.LayoutContext.prototype.convertLengthToPx = function(numeric, viewNo
  * @param {!adapt.vtree.NodePosition} nodePosition2
  * @return {boolean}
  */
-adapt.vtree.LayoutContext.prototype.isSameNodePosition = function(nodePosition1, nodePosition2) {};
+adapt.vtree.LayoutContext.prototype.isSameNodePosition = (nodePosition1, nodePosition2) => {};
 
 /**
  * @param {string} type
@@ -529,7 +525,7 @@ adapt.vtree.LayoutContext.prototype.isSameNodePosition = function(nodePosition1,
  * @param {boolean=} capture
  * @return {void}
  */
-adapt.vtree.LayoutContext.prototype.addEventListener = function(type, listener, capture) {};
+adapt.vtree.LayoutContext.prototype.addEventListener = (type, listener, capture) => {};
 
 /**
  * @param {string} type
@@ -537,53 +533,53 @@ adapt.vtree.LayoutContext.prototype.addEventListener = function(type, listener, 
  * @param {boolean=} capture
  * @return {void}
  */
-adapt.vtree.LayoutContext.prototype.removeEventListener = function(type, listener, capture) {};
+adapt.vtree.LayoutContext.prototype.removeEventListener = (type, listener, capture) => {};
 
 /**
  * @param {adapt.base.Event} evt
  * @return {void}
  */
-adapt.vtree.LayoutContext.prototype.dispatchEvent = function(evt) {};
+adapt.vtree.LayoutContext.prototype.dispatchEvent = evt => {};
 
 /**
  * Formatting context.
  * @interface
  */
-adapt.vtree.FormattingContext = function() {};
+adapt.vtree.FormattingContext = () => {};
 
 /**
  * @return {string}
  */
-adapt.vtree.FormattingContext.prototype.getName = function() {};
+adapt.vtree.FormattingContext.prototype.getName = () => {};
 
 /**
  * @param {!adapt.vtree.NodeContext} nodeContext
  * @param {boolean} firstTime
  * @return {boolean}
  */
-adapt.vtree.FormattingContext.prototype.isFirstTime = function(nodeContext, firstTime) {};
+adapt.vtree.FormattingContext.prototype.isFirstTime = (nodeContext, firstTime) => {};
 
 /**
  * @return {adapt.vtree.FormattingContext}
  */
-adapt.vtree.FormattingContext.prototype.getParent = function() {};
+adapt.vtree.FormattingContext.prototype.getParent = () => {};
 
 /**
  * @return {*}
  */
-adapt.vtree.FormattingContext.prototype.saveState = function() {};
+adapt.vtree.FormattingContext.prototype.saveState = () => {};
 
 /**
  * @param {*} state
  */
-adapt.vtree.FormattingContext.prototype.restoreState = function(state) {};
+adapt.vtree.FormattingContext.prototype.restoreState = state => {};
 
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {function(adapt.vtree.FormattingContext)} callback
  */
-adapt.vtree.eachAncestorFormattingContext = function(nodeContext, callback) {
+adapt.vtree.eachAncestorFormattingContext = (nodeContext, callback) => {
     if (!nodeContext) return;
     for (var fc = nodeContext.formattingContext; fc; fc = fc.getParent()) {
         callback(fc);
@@ -608,7 +604,7 @@ adapt.vtree.NodePositionStep;
  * @param {adapt.vtree.NodePositionStep} nps2
  * @returns {boolean}
  */
-adapt.vtree.isSameNodePositionStep = function(nps1, nps2) {
+adapt.vtree.isSameNodePositionStep = (nps1, nps2) => {
     if (nps1 === nps2) {
         return true;
     }
@@ -638,7 +634,7 @@ adapt.vtree.NodePosition;
  * @param {?adapt.vtree.NodePosition} np2
  * @returns {boolean}
  */
-adapt.vtree.isSameNodePosition = function(np1, np2) {
+adapt.vtree.isSameNodePosition = (np1, np2) => {
     if (np1 === np2) {
         return true;
     }
@@ -660,7 +656,7 @@ adapt.vtree.isSameNodePosition = function(np1, np2) {
  * @param {Node} node
  * @return {adapt.vtree.NodePosition}
  */
-adapt.vtree.newNodePositionFromNode = function(node) {
+adapt.vtree.newNodePositionFromNode = node => {
     var step = {
         node: node,
         shadowType: adapt.vtree.ShadowType.NONE,
@@ -677,7 +673,7 @@ adapt.vtree.newNodePositionFromNode = function(node) {
  * @param {?number} initialFragmentIndex
  * @return {adapt.vtree.NodePosition}
  */
-adapt.vtree.newNodePositionFromNodeContext = function(nodeContext, initialFragmentIndex) {
+adapt.vtree.newNodePositionFromNodeContext = (nodeContext, initialFragmentIndex) => {
     var step = {
         node: nodeContext.sourceNode,
         shadowType: adapt.vtree.ShadowType.NONE,
@@ -694,7 +690,7 @@ adapt.vtree.newNodePositionFromNodeContext = function(nodeContext, initialFragme
  * @param {adapt.vtree.NodeContext} parent
  * @return {!adapt.vtree.NodeContext}
  */
-adapt.vtree.makeNodeContextFromNodePositionStep = function(step, parent) {
+adapt.vtree.makeNodeContextFromNodePositionStep = (step, parent) => {
     var nodeContext = new adapt.vtree.NodeContext(step.node, parent, 0);
     nodeContext.shadowType = step.shadowType;
     nodeContext.shadowContext = step.shadowContext;
@@ -758,10 +754,8 @@ adapt.vtree.ShadowContext.prototype.equals = function(other) {
  * @param {adapt.vtree.ShadowContext} sc2
  * @returns {boolean}
  */
-adapt.vtree.isSameShadowContext = function(sc1, sc2) {
-    return sc1 === sc2 ||
-        (!!sc1 && !!sc2 && sc1.equals(sc2));
-};
+adapt.vtree.isSameShadowContext = (sc1, sc2) => sc1 === sc2 ||
+    (!!sc1 && !!sc2 && sc1.equals(sc2));
 
 /**
  * Information about :first-letter or :first-line pseudoelements
@@ -1430,9 +1424,7 @@ adapt.vtree.Container.prototype.getBoxDir = function() {
 /**
  * @return {number}
  */
-adapt.vtree.Container.prototype.getInlineDir = function() {
-    return 1;
-};
+adapt.vtree.Container.prototype.getInlineDir = () => 1;
 
 
 /**
@@ -1650,7 +1642,5 @@ adapt.vtree.ContentPropertyHandler.prototype.visitExpr = function(expr) {
  * @param {adapt.css.Val} val
  * @return {boolean}
  */
-adapt.vtree.nonTrivialContent = function(val) {
-    return val != null && val !== adapt.css.ident.normal && val !== adapt.css.ident.none
-        && val !== adapt.css.ident.inherit;
-};
+adapt.vtree.nonTrivialContent = val => val != null && val !== adapt.css.ident.normal && val !== adapt.css.ident.none
+    && val !== adapt.css.ident.inherit;

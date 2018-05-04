@@ -51,7 +51,7 @@ vivliostyle.sizing.Size = {
  * @param {!Array.<vivliostyle.sizing.Size>} sizes
  * @returns {!Object.<vivliostyle.sizing.Size, number>}
  */
-vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
+vivliostyle.sizing.getSize = (clientLayout, element, sizes) => {
     var original = {
         display: element.style.display,
         position: element.style.position,
@@ -151,7 +151,7 @@ vivliostyle.sizing.getSize = function(clientLayout, element, sizes) {
     }
 
     var result = /** @type {!Object.<vivliostyle.sizing.Size, number>} */ ({});
-    sizes.forEach(function(size) {
+    sizes.forEach(size => {
         /** @type {string} */ var r;
         switch (size) {
             case vivliostyle.sizing.Size.FILL_AVAILABLE_INLINE_SIZE:

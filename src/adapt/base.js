@@ -30,23 +30,19 @@ adapt.base.JSON;
  * @param {adapt.base.JSON} json
  * @return {string}
  */
-adapt.base.jsonToString = function(json) {
-    return JSON.stringify(json);
-};
+adapt.base.jsonToString = json => JSON.stringify(json);
 
 /**
  * @param {string} str
  * @return {adapt.base.JSON}
  */
-adapt.base.stringToJSON = function(str) {
-    return JSON.parse(str);
-};
+adapt.base.stringToJSON = str => JSON.parse(str);
 
 /**
  * @param {string} url
  * @return {string}
  */
-adapt.base.stripFragment = function(url) {
+adapt.base.stripFragment = url => {
     var r = url.match(/^([^#]*)/);
     if (r)
         return r[1];
@@ -57,7 +53,7 @@ adapt.base.stripFragment = function(url) {
  * @param {string} url
  * @return {string}
  */
-adapt.base.stripFragmentAndQuery = function(url) {
+adapt.base.stripFragmentAndQuery = url => {
     var r = url.match(/^([^#?]*)/);
     if (r)
         return r[1];
@@ -80,7 +76,7 @@ adapt.base.resourceBaseURL = window.location.href;
  * @param {string} baseURL base (absolute) URL
  * @return {string} resolved (absolute) URL
  */
-adapt.base.resolveURL = function(relURL, baseURL) {
+adapt.base.resolveURL = (relURL, baseURL) => {
     if (!baseURL || relURL.match(/^\w{2,}:/)) {
         if (relURL.toLowerCase().match("^javascript:")) {
             return "#";
@@ -126,27 +122,27 @@ adapt.base.resolveURL = function(relURL, baseURL) {
 /**
  * @interface
  */
-adapt.base.DocumentURLTransformer = function() {};
+adapt.base.DocumentURLTransformer = () => {};
 
 /**
  * @param {string} fragment
  * @param {string} baseURL
  * @returns {string}
  */
-adapt.base.DocumentURLTransformer.prototype.transformFragment = function(fragment, baseURL) {};
+adapt.base.DocumentURLTransformer.prototype.transformFragment = (fragment, baseURL) => {};
 
 /**
  * @param {string} url
  * @param {string} baseURL
  * @returns {string}
  */
-adapt.base.DocumentURLTransformer.prototype.transformURL = function(url, baseURL) {};
+adapt.base.DocumentURLTransformer.prototype.transformURL = (url, baseURL) => {};
 
 /**
  * @param {string} encoded
  * @returns {!Array<string>}
  */
-adapt.base.DocumentURLTransformer.prototype.restoreURL = function(encoded) {};
+adapt.base.DocumentURLTransformer.prototype.restoreURL = encoded => {};
 
 /**
  * Various namespaces.
@@ -173,7 +169,7 @@ adapt.base.NS = {
  * @param {string=} opt_url URL; window.location.href is used if not provided
  * @return {?string} parameter value
  */
-adapt.base.getURLParam = function(name, opt_url) {
+adapt.base.getURLParam = (name, opt_url) => {
     var rg = new RegExp('#(.*&)?' + adapt.base.escapeRegExp(name) + '=([^#&]*)');
     var url = opt_url || window.location.href;
     var r = url.match(rg);
@@ -188,7 +184,7 @@ adapt.base.getURLParam = function(name, opt_url) {
  * @param {string} value parameter value
  * @return {string} new url
  */
-adapt.base.setURLParam = function(url, name, value) {
+adapt.base.setURLParam = (url, name, value) => {
     var rg = new RegExp('#(.*&)?' + adapt.base.escapeRegExp(name) + '=([^#&]*)');
     var r = url.match(rg);
     if (r) {
@@ -207,7 +203,7 @@ adapt.base.setURLParam = function(url, name, value) {
  * @param {*} v
  * @return ?string
  */
-adapt.base.asString = function(v) {
+adapt.base.asString = v => {
     if (v == null)
         return v;
     return v.toString();
@@ -216,13 +212,13 @@ adapt.base.asString = function(v) {
 /**
  * @interface
  */
-adapt.base.Comparable = function() {};
+adapt.base.Comparable = () => {};
 
 /**
  * @param {!adapt.base.Comparable} other
  * @return {number} -1 when this less then other, 0 when this equals other
  */
-adapt.base.Comparable.prototype.compare = function(other) {};
+adapt.base.Comparable.prototype.compare = other => {};
 
 
 /**
@@ -306,7 +302,7 @@ adapt.base.PriorityQueue.prototype.remove = function() {
  * @param {string} cssPropName CSS property name
  * @return {string} JavaScript property name
  */
-adapt.base.cssToJSProp = function(prefix, cssPropName) {
+adapt.base.cssToJSProp = (prefix, cssPropName) => {
     if (prefix) {
         cssPropName = "-" + cssPropName;
         prefix = prefix.replace(/-/g, "");
@@ -314,7 +310,7 @@ adapt.base.cssToJSProp = function(prefix, cssPropName) {
             prefix = "Moz";
         }
     }
-    return prefix + cssPropName.replace(/-[a-z]/g, function(txt) {return txt.substr(1).toUpperCase();});
+    return prefix + cssPropName.replace(/-[a-z]/g, txt => txt.substr(1).toUpperCase());
 };
 
 /**
@@ -335,7 +331,7 @@ adapt.base.propNameMap = {};
  * @param {string} prop
  * @returns {boolean}
  */
-adapt.base.checkIfPropertySupported = function(prefix, prop) {
+adapt.base.checkIfPropertySupported = (prefix, prop) => {
     // Special case
     if (prop === "writing-mode") {
         var probe = document.createElement("span");
@@ -356,7 +352,7 @@ adapt.base.checkIfPropertySupported = function(prefix, prop) {
  * @param {string} prop
  * @returns {?Array.<string>}
  */
-adapt.base.getPrefixedPropertyNames = function(prop) {
+adapt.base.getPrefixedPropertyNames = prop => {
     var prefixed = adapt.base.propNameMap[prop];
     if (prefixed || prefixed === null) { // null means the browser does not support the property
         return prefixed;
@@ -405,13 +401,13 @@ adapt.base.getPrefixedPropertyNames = function(prop) {
  * @param {string} value
  * @return {void}
  */
-adapt.base.setCSSProperty = function(elem, prop, value) {
+adapt.base.setCSSProperty = (elem, prop, value) => {
     try {
         var prefixedPropertyNames = adapt.base.getPrefixedPropertyNames(prop);
         if (!prefixedPropertyNames) {
             return;
         }
-        prefixedPropertyNames.forEach(function(prefixed) {
+        prefixedPropertyNames.forEach(prefixed => {
             if (prefixed === "-ms-writing-mode") {
                 switch (value) {
                     case "horizontal-tb":
@@ -440,7 +436,7 @@ adapt.base.setCSSProperty = function(elem, prop, value) {
  * @param {string=} opt_value
  * @return {string}
  */
-adapt.base.getCSSProperty = function(elem, prop, opt_value) {
+adapt.base.getCSSProperty = (elem, prop, opt_value) => {
     try {
         var propertyNames = adapt.base.propNameMap[prop];
         return (/** @type {HTMLElement} */ (elem)).style.getPropertyValue(
@@ -454,7 +450,7 @@ adapt.base.getCSSProperty = function(elem, prop, opt_value) {
  * @param {Element} element
  * @return {string}
  */
-adapt.base.getLangAttribute = function(element) {
+adapt.base.getLangAttribute = element => {
     var lang = element.getAttributeNS(adapt.base.NS.XML, "lang");
     if (!lang && element.namespaceURI == adapt.base.NS.XHTML) {
         lang = element.getAttribute("lang");
@@ -499,49 +495,39 @@ adapt.base.StringBuffer.prototype.toString = function() {
  * @param {string} str
  * @return {string}
  */
-adapt.base.escapeChar = function(str) {
-    // not called for surrogate pairs, no need to worry about them
-    return '\\' + str.charCodeAt(0).toString(16) + ' ';
-};
+adapt.base.escapeChar = str => // not called for surrogate pairs, no need to worry about them
+'\\' + str.charCodeAt(0).toString(16) + ' ';
 
 /**
  * @param {string} name
  * @return {string}
  */
-adapt.base.escapeCSSIdent = function(name) {
-    return name.replace(/[^-_a-zA-Z0-9\u0080-\uFFFF]/g, adapt.base.escapeChar);
-};
+adapt.base.escapeCSSIdent = name => name.replace(/[^-_a-zA-Z0-9\u0080-\uFFFF]/g, adapt.base.escapeChar);
 
 /**
  * @param {string} str
  * @return {string}
  */
-adapt.base.escapeCSSStr = function(str) {
-    return str.replace(/[\u0000-\u001F"]/g, adapt.base.escapeChar);
-};
+adapt.base.escapeCSSStr = str => str.replace(/[\u0000-\u001F"]/g, adapt.base.escapeChar);
 
 /**
  * @param {string} str
  * @return {string}
  */
-adapt.base.lightURLEncode = function(str) {
-    return str.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
-};
+adapt.base.lightURLEncode = str => str.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
 
 /**
  * @param {string} ch
  * @return {boolean}
  */
-adapt.base.isLetter = function(ch) {
-    return !!ch.match(/^[a-zA-Z\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]$/);
-};
+adapt.base.isLetter = ch => !!ch.match(/^[a-zA-Z\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]$/);
 
 /**
  * @param {string} str
  * @param {string=} prefix
  * @return {string}
  */
-adapt.base.escapeCharToHex = function(str, prefix) {
+adapt.base.escapeCharToHex = (str, prefix) => {
     prefix = typeof prefix === "string" ? prefix : '\\u';
     return prefix + (0x10000|str.charCodeAt(0)).toString(16).substr(1);
 };
@@ -551,7 +537,7 @@ adapt.base.escapeCharToHex = function(str, prefix) {
  * @param {string=} prefix
  * @return {string}
  */
-adapt.base.escapeNameStrToHex = function(str, prefix) {
+adapt.base.escapeNameStrToHex = (str, prefix) => {
     function escapeChar(s) {
         return adapt.base.escapeCharToHex(s, prefix);
     }
@@ -562,16 +548,14 @@ adapt.base.escapeNameStrToHex = function(str, prefix) {
  * @param {string} str
  * @return {string}
  */
-adapt.base.escapeRegExp = function(str) {
-    return adapt.base.escapeNameStrToHex(str);
-};
+adapt.base.escapeRegExp = str => adapt.base.escapeNameStrToHex(str);
 
 /**
  * @param {string} str
  * @param {string=} prefix
  * @return {string}
  */
-adapt.base.unescapeCharFromHex = function(str, prefix) {
+adapt.base.unescapeCharFromHex = (str, prefix) => {
     prefix = typeof prefix === "string" ? prefix : '\\u';
     if (str.indexOf(prefix) === 0) {
         return String.fromCharCode(parseInt(str.substring(prefix.length), 16));
@@ -585,7 +569,7 @@ adapt.base.unescapeCharFromHex = function(str, prefix) {
  * @param {string=} prefix
  * @return {string}
  */
-adapt.base.unescapeStrFromHex = function(str, prefix) {
+adapt.base.unescapeStrFromHex = (str, prefix) => {
     prefix = typeof prefix === "string" ? prefix : '\\u';
     function unescapeChar(s) {
         return adapt.base.unescapeCharFromHex(s, prefix);
@@ -598,7 +582,7 @@ adapt.base.unescapeStrFromHex = function(str, prefix) {
  * @param {boolean} cond
  * @return {void}
  */
-adapt.base.assert = function(cond) {
+adapt.base.assert = cond => {
     if (!cond) {
         throw "Assert failed";
     }
@@ -614,7 +598,7 @@ adapt.base.assert = function(cond) {
  * @param {function(number): boolean} good
  * @return {number}
  */
-adapt.base.binarySearch = function(high, good) {
+adapt.base.binarySearch = (high, good) => {
     var l = 0;
     var h = high;
     while (true) {
@@ -639,9 +623,7 @@ adapt.base.binarySearch = function(high, good) {
  * @param {number} b
  * @return {number}
  */
-adapt.base.numberCompare = function(a, b) {
-    return a - b;
-};
+adapt.base.numberCompare = (a, b) => a - b;
 
 /** @const */
 adapt.base.base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -651,7 +633,7 @@ adapt.base.base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01
  * @param {string} data
  * @return {void}
  */
-adapt.base.appendBase64 = function(sb, data) {
+adapt.base.appendBase64 = (sb, data) => {
     var length = data.length;
     var length3 = Math.floor(length / 3) * 3;
     for (var i = 0; i < length3; i += 3) {
@@ -686,7 +668,7 @@ adapt.base.appendBase64 = function(sb, data) {
  * @param {T} param
  * @return {T}
  */
-adapt.base.identity = function(param) {return param;};
+adapt.base.identity = param => param;
 
 /**
  * Index array using key function. First encountered item wins on collision. Elements with
@@ -696,7 +678,7 @@ adapt.base.identity = function(param) {return param;};
  * @param {function(T):?string} key
  * @return {Object.<string,T>}
  */
-adapt.base.indexArray = function(arr, key) {
+adapt.base.indexArray = (arr, key) => {
     var map = {};
     for (var i = 0; i < arr.length; i++) {
         var v = arr[i];
@@ -716,7 +698,7 @@ adapt.base.emptyObj = {};
  * @param {Array.<string>} arr
  * @return {Object.<string,boolean>}
  */
-adapt.base.arrayToSet = function(arr) {
+adapt.base.arrayToSet = arr => {
     var set = {};
     for (var i = 0; i < arr.length; i++) {
         set[arr[i]] = true;
@@ -732,7 +714,7 @@ adapt.base.arrayToSet = function(arr) {
  * @param {function(T):?string} key
  * @return {Object.<string,Array.<T>>}
  */
-adapt.base.multiIndexArray = function(arr, key) {
+adapt.base.multiIndexArray = (arr, key) => {
     var map = {};
     for (var i = 0; i < arr.length; i++) {
         var v = arr[i];
@@ -755,7 +737,7 @@ adapt.base.multiIndexArray = function(arr, key) {
  * @param {function(P,number):R} fn second parameter is the index
  * @return {Array.<R>}
  */
-adapt.base.map = function(arr, fn) {
+adapt.base.map = (arr, fn) => {
     var res = Array(arr.length);
     for (var i = 0; i < arr.length; i++) {
         res[i] = fn(arr[i], i);
@@ -770,7 +752,7 @@ adapt.base.map = function(arr, fn) {
  * @param {function(P,string):R} fn second parameter is the key
  * @return {Object.<string, R>}
  */
-adapt.base.mapObj = function(obj, fn) {
+adapt.base.mapObj = (obj, fn) => {
     var res = {};
     for (var n in obj) {
         res[n] = fn(obj[n], n);
@@ -782,7 +764,7 @@ adapt.base.mapObj = function(obj, fn) {
  * @param {Object} obj
  * @return {number}
  */
-adapt.base.mapSize = function(obj) {
+adapt.base.mapSize = obj => {
     var n = 0;
     for (var key in obj) {
         n++;
@@ -876,7 +858,7 @@ adapt.base.hasLShapeFloatBug = null;
  * @param {HTMLElement} body
  * @return {boolean}
  */
-adapt.base.checkLShapeFloatBug = function(body) {
+adapt.base.checkLShapeFloatBug = body => {
     if (adapt.base.hasLShapeFloatBug == null) {
         var doc = body.ownerDocument;
         var container = /** @type {HTMLElement} */ (doc.createElement("div"));
@@ -926,7 +908,7 @@ adapt.base.hasVerticalBBoxBug = null;
  * @param {HTMLElement} body
  * @return {boolean}
  */
-adapt.base.checkVerticalBBoxBug = function(body) {
+adapt.base.checkVerticalBBoxBug = body => {
     if (adapt.base.hasVerticalBBoxBug == null) {
         var doc = body.ownerDocument;
         var container = /** @type {HTMLElement} */ (doc.createElement("div"));
@@ -961,7 +943,7 @@ adapt.base.hasInlineBlockJustificationBug = null;
  * @param {HTMLElement} body
  * @returns {boolean}
  */
-adapt.base.checkInlineBlockJustificationBug = function(body) {
+adapt.base.checkInlineBlockJustificationBug = body => {
     if (adapt.base.hasInlineBlockJustificationBug === null) {
         var doc = body.ownerDocument;
         var container = /** @type {HTMLElement} */ (doc.createElement("div"));
@@ -999,7 +981,7 @@ adapt.base.hasSoftWrapOpportunityAfterHyphenBug = null;
  * @param {HTMLElement} body
  * @returns {boolean}
  */
-adapt.base.checkSoftWrapOpportunityAfterHyphenBug = function(body) {
+adapt.base.checkSoftWrapOpportunityAfterHyphenBug = body => {
     if (adapt.base.hasSoftWrapOpportunityAfterHyphenBug === null) {
         var doc = body.ownerDocument;
         var container = /** @type {HTMLElement} */ (doc.createElement("div"));
@@ -1037,7 +1019,7 @@ adapt.base.hasSoftWrapOpportunityByWbrBug = null;
  * @param {HTMLElement} body
  * @returns {boolean}
  */
-adapt.base.checkSoftWrapOpportunityByWbrBug = function(body) {
+adapt.base.checkSoftWrapOpportunityByWbrBug = body => {
     if (adapt.base.hasSoftWrapOpportunityByWbrBug === null) {
         var doc = body.ownerDocument;
         var container = /** @type {HTMLElement} */ (doc.createElement("div"));

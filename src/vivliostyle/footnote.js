@@ -20,7 +20,7 @@ goog.provide("vivliostyle.footnote");
 
 goog.require("vivliostyle.pagefloat");
 
-goog.scope(function() {
+goog.scope(() => {
 
     /** @const */ var PageFloat = vivliostyle.pagefloat.PageFloat;
     /** @const */ var PageFloatFragment = vivliostyle.pagefloat.PageFloatFragment;
@@ -44,9 +44,7 @@ goog.scope(function() {
     /**
      * @override
      */
-    Footnote.prototype.isAllowedToPrecede = function(other) {
-        return !(other instanceof Footnote);
-    };
+    Footnote.prototype.isAllowedToPrecede = other => !(other instanceof Footnote);
 
     /**
      * @param {!vivliostyle.pagefloat.FloatReference} floatReference
@@ -65,9 +63,7 @@ goog.scope(function() {
     /**
      * @override
      */
-    FootnoteFragment.prototype.getOrder = function() {
-        return Infinity;
-    };
+    FootnoteFragment.prototype.getOrder = () => Infinity;
 
     /**
      * @override
@@ -99,28 +95,23 @@ goog.scope(function() {
      * @constructor
      * @implements {vivliostyle.pagefloat.PageFloatLayoutStrategy}
      */
-    vivliostyle.footnote.FootnoteLayoutStrategy = function() {};
+    vivliostyle.footnote.FootnoteLayoutStrategy = () => {};
     /** @const */ var FootnoteLayoutStrategy = vivliostyle.footnote.FootnoteLayoutStrategy;
 
     /**
      * @override
      */
-    FootnoteLayoutStrategy.prototype.appliesToNodeContext = function(nodeContext) {
-        return nodeContext.floatSide === "footnote";
-    };
+    FootnoteLayoutStrategy.prototype.appliesToNodeContext = nodeContext => nodeContext.floatSide === "footnote";
 
     /**
      * @override
      */
-    FootnoteLayoutStrategy.prototype.appliesToFloat = function(float) {
-        return float instanceof Footnote;
-    };
+    FootnoteLayoutStrategy.prototype.appliesToFloat = float => float instanceof Footnote;
 
     /**
      * @override
      */
-    FootnoteLayoutStrategy.prototype.createPageFloat = function(
-        nodeContext, pageFloatLayoutContext, column) {
+    FootnoteLayoutStrategy.prototype.createPageFloat = (nodeContext, pageFloatLayoutContext, column) => {
         var floatReference = vivliostyle.pagefloat.FloatReference.REGION;
         // If the region context has the same container as the page context,
         // use the page context as the context for the footnote.
@@ -143,8 +134,7 @@ goog.scope(function() {
     /**
      * @override
      */
-    FootnoteLayoutStrategy.prototype.createPageFloatFragment = function(
-        continuations, floatSide, floatArea, continues) {
+    FootnoteLayoutStrategy.prototype.createPageFloatFragment = (continuations, floatSide, floatArea, continues) => {
         /** @const */ var f = continuations[0].float;
         return new FootnoteFragment(f.floatReference, continuations, floatArea, continues);
     };
@@ -152,11 +142,9 @@ goog.scope(function() {
     /**
      * @override
      */
-    FootnoteLayoutStrategy.prototype.findPageFloatFragment = function(float, pageFloatLayoutContext) {
+    FootnoteLayoutStrategy.prototype.findPageFloatFragment = (float, pageFloatLayoutContext) => {
         var context = pageFloatLayoutContext.getPageFloatLayoutContext(float.floatReference);
-        var fragments = context.floatFragments.filter(function(fr) {
-            return fr instanceof FootnoteFragment;
-        });
+        var fragments = context.floatFragments.filter(fr => fr instanceof FootnoteFragment);
         goog.asserts.assert(fragments.length <= 1);
         return fragments[0] || null;
     };
@@ -165,7 +153,7 @@ goog.scope(function() {
     /**
      * @override
      */
-    FootnoteLayoutStrategy.prototype.adjustPageFloatArea = function(floatArea, floatContainer, column) {
+    FootnoteLayoutStrategy.prototype.adjustPageFloatArea = (floatArea, floatContainer, column) => {
         floatArea.isFootnote = true;
         floatArea.adjustContentRelativeSize = false;
         var element = floatArea.element;
@@ -179,7 +167,7 @@ goog.scope(function() {
     /**
      * @override
      */
-    FootnoteLayoutStrategy.prototype.forbid = function(float, pageFloatLayoutContext) {
+    FootnoteLayoutStrategy.prototype.forbid = (float, pageFloatLayoutContext) => {
         var footnote = /** @type {!Footnote} */ (float);
         switch (footnote.footnotePolicy) {
             case adapt.css.ident.line:

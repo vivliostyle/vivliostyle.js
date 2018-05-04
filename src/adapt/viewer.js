@@ -89,14 +89,14 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
     var document = window.document;
     /** @const */ this.fontMapper = new adapt.font.Mapper(document.head, viewportElement);
     this.init();
-    /** @type {function():void} */ this.kick = function() {};
-    /** @type {function((adapt.base.JSON|string)):void} */ this.sendCommand = function() {};
-    /** @const */ this.resizeListener = function() {
+    /** @type {function():void} */ this.kick = () => {};
+    /** @type {function((adapt.base.JSON|string)):void} */ this.sendCommand = () => {};
+    /** @const */ this.resizeListener = () => {
         self.needResize = true;
         self.kick();
     };
     /** @const */ this.pageReplacedListener = this.pageReplacedListener.bind(this);
-    /** @type {adapt.base.EventListener} */ this.hyperlinkListener = function(evt) {};
+    /** @type {adapt.base.EventListener} */ this.hyperlinkListener = evt => {};
     /** @const */ this.pageRuleStyleElement = document.getElementById("vivliostyle-page-rules");
     /** @type {boolean} */ this.pageSheetSizeAlreadySet = false;
     /** @type {?adapt.task.Task} */ this.renderTask = null;
@@ -143,18 +143,18 @@ adapt.viewer.Viewer.prototype.init = function() {
 
 adapt.viewer.Viewer.prototype.addLogListeners = function() {
     /** @const */ var LogLevel = vivliostyle.logging.LogLevel;
-    vivliostyle.logging.logger.addListener(LogLevel.DEBUG, function(info) {
+    vivliostyle.logging.logger.addListener(LogLevel.DEBUG, info => {
         this.callback({"t": "debug", "content": info});
-    }.bind(this));
-    vivliostyle.logging.logger.addListener(LogLevel.INFO, function(info) {
+    });
+    vivliostyle.logging.logger.addListener(LogLevel.INFO, info => {
         this.callback({"t": "info", "content": info});
-    }.bind(this));
-    vivliostyle.logging.logger.addListener(LogLevel.WARN, function(info) {
+    });
+    vivliostyle.logging.logger.addListener(LogLevel.WARN, info => {
         this.callback({"t": "warn", "content": info});
-    }.bind(this));
-    vivliostyle.logging.logger.addListener(LogLevel.ERROR, function(info) {
+    });
+    vivliostyle.logging.logger.addListener(LogLevel.ERROR, info => {
         this.callback({"t": "error", "content": info});
-    }.bind(this));
+    });
 };
 
 /**
@@ -195,14 +195,14 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     this.viewport = null;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadEPUB");
     var self = this;
-    self.configure(command).then(function() {
+    self.configure(command).then(() => {
         var store = new adapt.epub.EPUBDocStore();
-        store.init(authorStyleSheet, userStyleSheet).then(function() {
+        store.init(authorStyleSheet, userStyleSheet).then(() => {
             var epubURL = adapt.base.resolveURL(url, self.window.location.href);
             self.packageURL = [epubURL];
-            store.loadEPUBDoc(epubURL, haveZipMetadata).then(function(opf) {
+            store.loadEPUBDoc(epubURL, haveZipMetadata).then(opf => {
                 self.opf = opf;
-                self.render(fragment).then(function() {
+                self.render(fragment).then(() => {
                     frame.finish(true);
                 });
             });
@@ -227,21 +227,19 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
     this.viewport = null;
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadXML");
     var self = this;
-    self.configure(command).then(function() {
+    self.configure(command).then(() => {
         var store = new adapt.epub.EPUBDocStore();
-        store.init(authorStyleSheet, userStyleSheet).then(function() {
-            /** @type {!Array<!adapt.epub.OPFItemParam>} */ var resolvedParams = params.map(function(p, index) {
-                return {
-                    url: adapt.base.resolveURL(p.url, self.window.location.href),
-                    index: index,
-                    startPage: p.startPage,
-                    skipPagesBefore: p.skipPagesBefore
-                };
-            });
-            self.packageURL = resolvedParams.map(function(p) { return p.url; });
+        store.init(authorStyleSheet, userStyleSheet).then(() => {
+            /** @type {!Array<!adapt.epub.OPFItemParam>} */ var resolvedParams = params.map((p, index) => ({
+            url: adapt.base.resolveURL(p.url, self.window.location.href),
+            index: index,
+            startPage: p.startPage,
+            skipPagesBefore: p.skipPagesBefore
+        }));
+            self.packageURL = resolvedParams.map(p => p.url);
             self.opf = new adapt.epub.OPFDoc(store, "");
-            self.opf.initWithChapters(resolvedParams, doc).then(function() {
-                self.render(fragment).then(function() {
+            self.opf.initWithChapters(resolvedParams, doc).then(() => {
+                self.render(fragment).then(() => {
                     frame.finish(true);
                 });
             });
@@ -260,7 +258,7 @@ adapt.viewer.Viewer.prototype.render = function(fragment) {
     var self = this;
     var cont;
     if (fragment) {
-        cont = this.opf.resolveFragment(fragment).thenAsync(function(position) {
+        cont = this.opf.resolveFragment(fragment).thenAsync(position => {
             self.pagePosition = position;
             return adapt.task.newResult(true);
         });
@@ -268,7 +266,7 @@ adapt.viewer.Viewer.prototype.render = function(fragment) {
         cont = adapt.task.newResult(true);
     }
 
-    return cont.thenAsync(function() {
+    return cont.thenAsync(() => {
         vivliostyle.profile.profiler.registerEndTiming("beforeRender");
         return self.resize();
     });
@@ -410,11 +408,11 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
 adapt.viewer.Viewer.prototype.configurePlugins = function(command) {
     /** @type {!Array.<vivliostyle.plugin.ConfigurationHook>} */ var hooks =
         vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.CONFIGURATION);
-    hooks.forEach(function(hook) {
+    hooks.forEach(hook => {
         var result = hook(command);
         this.needResize  = result.needResize  || this.needResize;
         this.needRefresh = result.needRefresh || this.needRefresh;
-    }.bind(this));
+    });
 };
 
 /**
@@ -448,7 +446,7 @@ adapt.viewer.Viewer.prototype.forCurrentPages = function(fn) {
         pages.push(this.currentSpread.left);
         pages.push(this.currentSpread.right);
     }
-    pages.forEach(function(page) {
+    pages.forEach(page => {
         if (page) {
             fn(page);
         }
@@ -459,10 +457,10 @@ adapt.viewer.Viewer.prototype.forCurrentPages = function(fn) {
  * @private
  */
 adapt.viewer.Viewer.prototype.removePageListeners = function() {
-    this.forCurrentPages(function(page) {
+    this.forCurrentPages(page => {
         page.removeEventListener("hyperlink", this.hyperlinkListener, false);
         page.removeEventListener("replaced", this.pageReplacedListener, false);
-    }.bind(this));
+    });
 };
 
 /**
@@ -471,7 +469,7 @@ adapt.viewer.Viewer.prototype.removePageListeners = function() {
  */
 adapt.viewer.Viewer.prototype.hidePages = function() {
     this.removePageListeners();
-    this.forCurrentPages(function(page) {
+    this.forCurrentPages(page => {
         adapt.base.setCSSProperty(page.container, "display", "none");
     });
     this.currentPage = null;
@@ -529,11 +527,11 @@ adapt.viewer.Viewer.prototype.reportPosition = function() {
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("reportPosition");
     var self = this;
     goog.asserts.assert(self.pagePosition);
-    self.opf.getCFI(this.pagePosition.spineIndex, this.pagePosition.offsetInItem).then(function(cfi) {
+    self.opf.getCFI(this.pagePosition.spineIndex, this.pagePosition.offsetInItem).then(cfi => {
         var page = self.currentPage;
         var r = self.waitForLoading && page.fetchers.length > 0
             ? adapt.taskutil.waitForFetchers(page.fetchers) : adapt.task.newResult(true);
-        r.then(function() {
+        r.then(() => {
             self.sendLocationNotification(page, cfi).thenFinish(frame);
         });
     });
@@ -632,7 +630,7 @@ adapt.viewer.Viewer.prototype.setPageSize = function(pageSize, pageSheetSize, sp
 adapt.viewer.Viewer.prototype.setPageSizePageRules = function(pageSheetSize, spineIndex, pageIndex) {
     if (!this.pageSheetSizeAlreadySet && this.pageRuleStyleElement) {
         var styleText = "";
-        Object.keys(pageSheetSize).forEach(function(selector) {
+        Object.keys(pageSheetSize).forEach(selector => {
             styleText += "@page " + selector + "{size:";
             var size = pageSheetSize[selector];
             styleText += size.width + "px " + size.height + "px;}";
@@ -677,7 +675,7 @@ adapt.viewer.Viewer.prototype.showCurrent = function(page, sync) {
     this.removePageListeners();
     var self = this;
     if (this.pref.spreadView) {
-        return this.opfView.getSpread(this.pagePosition, sync).thenAsync(function(spread) {
+        return this.opfView.getSpread(this.pagePosition, sync).thenAsync(spread => {
             self.showSpread(spread);
             self.setSpreadZoom(spread);
             self.currentPage = page;
@@ -814,48 +812,46 @@ adapt.viewer.Viewer.prototype.resize = function() {
     var self = this;
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     this.cancelRenderingTask();
-    var task = adapt.task.currentTask().getScheduler().run(function() {
-        return adapt.task.handle("resize", function(frame) {
-            self.renderTask = task;
-            vivliostyle.profile.profiler.registerStartTiming("render (resize)");
-            self.reset();
+    var task = adapt.task.currentTask().getScheduler().run(() => adapt.task.handle("resize", frame => {
+        self.renderTask = task;
+        vivliostyle.profile.profiler.registerStartTiming("render (resize)");
+        self.reset();
 
-            if (self.pagePosition) {
-                // When resizing, do not use the current page index, for a page index corresponding to
-                // the current position in the document (offsetInItem) can change due to different layout
-                // caused by different viewport size.
-                self.pagePosition.pageIndex = -1;
-            }
+        if (self.pagePosition) {
+            // When resizing, do not use the current page index, for a page index corresponding to
+            // the current position in the document (offsetInItem) can change due to different layout
+            // caused by different viewport size.
+            self.pagePosition.pageIndex = -1;
+        }
 
-            // With renderAllPages option specified, the rendering is performed after the initial page display,
-            // otherwise users are forced to wait the rendering finish in front of a blank page.
-            self.opfView.renderPagesUpto(self.pagePosition).then(function(result) {
-                self.pagePosition = result.position;
-                self.showCurrent(result.page, true).then(function() {
-                    self.reportPosition().then(function(p) {
-                        self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
-                        var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
-                        r.then(function() {
-                            if (self.renderTask === task) {
-                                self.renderTask = null;
-                            }
-                            vivliostyle.profile.profiler.registerEndTiming("render (resize)");
-                            self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
-                            self.callback({"t":"loaded"});
-                            frame.finish(p);
-                        });
+        // With renderAllPages option specified, the rendering is performed after the initial page display,
+        // otherwise users are forced to wait the rendering finish in front of a blank page.
+        self.opfView.renderPagesUpto(self.pagePosition).then(result => {
+            self.pagePosition = result.position;
+            self.showCurrent(result.page, true).then(() => {
+                self.reportPosition().then(p => {
+                    self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
+                    var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
+                    r.then(() => {
+                        if (self.renderTask === task) {
+                            self.renderTask = null;
+                        }
+                        vivliostyle.profile.profiler.registerEndTiming("render (resize)");
+                        self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
+                        self.callback({"t":"loaded"});
+                        frame.finish(p);
                     });
                 });
             });
-        }, function(frame, err) {
-            if (err instanceof adapt.viewer.Viewer.RenderingCanceledError) {
-                vivliostyle.profile.profiler.registerEndTiming("render (resize)");
-                vivliostyle.logging.logger.debug(err.message);
-            } else {
-                throw err;
-            }
         });
-    });
+    }, (frame, err) => {
+        if (err instanceof adapt.viewer.Viewer.RenderingCanceledError) {
+            vivliostyle.profile.profiler.registerEndTiming("render (resize)");
+            vivliostyle.logging.logger.debug(err.message);
+        } else {
+            throw err;
+        }
+    }));
     return adapt.task.newResult(true);
 };
 
@@ -870,7 +866,7 @@ adapt.viewer.Viewer.prototype.sendLocationNotification = function(page, cfi) {
     var notification = {"t": "nav", "first": page.isFirstPage,
         "last": page.isLastPage};
     var self = this;
-    this.opf.getEPageFromPosition(/** @type {adapt.epub.Position} */(self.pagePosition)).then(function(epage) {
+    this.opf.getEPageFromPosition(/** @type {adapt.epub.Position} */(self.pagePosition)).then(epage => {
         notification["epage"] = epage;
         notification["epageCount"] = self.opf.epageCount;
         if (cfi) {
@@ -918,37 +914,31 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
         }
         if (method) {
             var m = method;
-            method = function() {
-                return m.call(self.opfView, self.pagePosition);
-            };
+            method = () => m.call(self.opfView, self.pagePosition);
         }
     } else if (typeof command["epage"] == "number") {
         var epage = /** @type {number} */ (command["epage"]);
-        method = function() {
-            return self.opfView.navigateToEPage(epage);
-        };
+        method = () => self.opfView.navigateToEPage(epage);
     } else if (typeof command["url"] == "string") {
         var url = /** @type {string} */ (command["url"]);
-        method = function() {
-            return self.opfView.navigateTo(url, self.pagePosition);
-        };
+        method = () => self.opfView.navigateTo(url, self.pagePosition);
     } else {
         return adapt.task.newResult(true);
     }
     /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("moveTo");
-    method.call(self.opfView).then(/** @param {adapt.epub.PageAndPosition} result */ function(result) {
+    method.call(self.opfView).then(result => {
         var cont;
         if (result) {
             self.pagePosition = result.position;
             /** @type {!adapt.task.Frame<boolean>} */ var innerFrame = adapt.task.newFrame("moveTo.showCurrent");
             cont = innerFrame.result();
-            self.showCurrent(result.page).then(function() {
+            self.showCurrent(result.page).then(() => {
                 self.reportPosition().thenFinish(innerFrame);
             });
         } else {
             cont = adapt.task.newResult(true);
         }
-        cont.then(function(res) {
+        cont.then(res => {
             if (self.readyState === vivliostyle.constants.ReadyState.LOADING) {
                 self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
             }
@@ -981,10 +971,10 @@ adapt.viewer.Viewer.prototype.showTOC = function(command) {
     } else {
         var self = this;
         /** @type {adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("showTOC");
-        this.opfView.showTOC(autohide).then(function(page) {
+        this.opfView.showTOC(autohide).then(page => {
             if (page) {
                 if (autohide) {
-                    var hideTOC = function() {self.opfView.hideTOC();};
+                    var hideTOC = () => {self.opfView.hideTOC();};
                     page.addEventListener("hyperlink", hideTOC, false);
                     page.container.addEventListener("click", hideTOC, false);
                 }
@@ -1003,10 +993,10 @@ adapt.viewer.Viewer.prototype.showTOC = function(command) {
 adapt.viewer.Viewer.prototype.runCommand = function(command) {
     var self = this;
     var actionName = command["a"] || "";
-    return adapt.task.handle("runCommand", function(frame) {
+    return adapt.task.handle("runCommand", frame => {
         var action = self.actions[actionName];
         if (action) {
-            action.call(self, command).then(function() {
+            action.call(self, command).then(() => {
                 self.callback({"t": "done", "a": actionName});
                 frame.finish(true);
             });
@@ -1014,7 +1004,7 @@ adapt.viewer.Viewer.prototype.runCommand = function(command) {
             vivliostyle.logging.logger.error("No such action:", actionName);
             frame.finish(true);
         }
-    }, function(frame, err) {
+    }, (frame, err) => {
         vivliostyle.logging.logger.error(err, "Error during action:", actionName);
         frame.finish(true);
     });
@@ -1025,7 +1015,7 @@ adapt.viewer.Viewer.prototype.runCommand = function(command) {
  * @param {*} cmd
  * @return {adapt.base.JSON}
  */
-adapt.viewer.maybeParse = function(cmd) {
+adapt.viewer.maybeParse = cmd => {
     if (typeof cmd == "string") {
         return adapt.base.stringToJSON(cmd);
     }
@@ -1040,46 +1030,44 @@ adapt.viewer.Viewer.prototype.initEmbed = function(cmd) {
     var command = adapt.viewer.maybeParse(cmd);
     var continuation = null;
     var viewer = this;
-    adapt.task.start(function() {
+    adapt.task.start(() => {
         /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("commandLoop");
         var scheduler = adapt.task.currentTask().getScheduler();
-        viewer.hyperlinkListener = function(evt) {
+        viewer.hyperlinkListener = evt => {
             var hrefEvent = /** @type {adapt.vtree.PageHyperlinkEvent} */ (evt);
             var internal = hrefEvent.href.charAt(0) === "#" ||
-                viewer.packageURL.some(function(url) {
-                    return hrefEvent.href.substr(0, url.length) == url;
-                });
+                viewer.packageURL.some(url => hrefEvent.href.substr(0, url.length) == url);
             if (internal) {
                 evt.preventDefault();
                 var msg = {"t":"hyperlink", "href":hrefEvent.href, "internal": internal};
-                scheduler.run(function() {
+                scheduler.run(() => {
                     viewer.callback(msg);
                     return adapt.task.newResult(true);
                 });
             }
         };
-        frame.loopWithFrame(function(loopFrame) {
+        frame.loopWithFrame(loopFrame => {
             if (viewer.needResize) {
-                viewer.resize().then(function() {
+                viewer.resize().then(() => {
                     loopFrame.continueLoop();
                 });
             } else if (viewer.needRefresh) {
                 if (viewer.currentPage) {
-                    viewer.showCurrent(viewer.currentPage).then(function() {
+                    viewer.showCurrent(viewer.currentPage).then(() => {
                         loopFrame.continueLoop();
                     });
                 }
             } else if (command) {
                 var cmd = command;
                 command = null;
-                viewer.runCommand(cmd).then(function() {
+                viewer.runCommand(cmd).then(() => {
                     loopFrame.continueLoop();
                 });
             } else {
                 /** @type {!adapt.task.Frame.<boolean>} */ var frameInternal =
                     adapt.task.newFrame('waitForCommand');
                 continuation = frameInternal.suspend(self);
-                frameInternal.result().then(function() {
+                frameInternal.result().then(() => {
                     loopFrame.continueLoop();
                 });
             }
@@ -1087,7 +1075,7 @@ adapt.viewer.Viewer.prototype.initEmbed = function(cmd) {
         return frame.result();
     });
 
-    viewer.kick = function() {
+    viewer.kick = () => {
         var cont = continuation;
         if (cont) {
             continuation = null;
@@ -1095,7 +1083,7 @@ adapt.viewer.Viewer.prototype.initEmbed = function(cmd) {
         }
     };
 
-    viewer.sendCommand = function(cmd) {
+    viewer.sendCommand = cmd => {
         if (command) {
             return false;
         }

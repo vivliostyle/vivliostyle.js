@@ -36,7 +36,7 @@ adapt.cfi.Position;
  * @param {Node} node
  * @return {?string}
  */
-adapt.cfi.getId = function(node) {
+adapt.cfi.getId = node => {
     if (node.nodeType == 1) {
         var idtxt = (/** @type {Element} */ (node)).getAttribute("id");
         if (idtxt && idtxt.match(/^[-a-zA-Z_0-9.\u007F-\uFFFF]+$/)) {
@@ -50,32 +50,26 @@ adapt.cfi.getId = function(node) {
  * @param {string} ch
  * @return {string}
  */
-adapt.cfi.escapeChar = function(ch) {
-    return "^" + ch;
-};
+adapt.cfi.escapeChar = ch => "^" + ch;
 
 /**
  * @param {string} str
  * @return {string}
  */
-adapt.cfi.escape = function(str) {
-    return str.replace(/[\[\]\(\),=;^]/g, adapt.cfi.escapeChar);
-};
+adapt.cfi.escape = str => str.replace(/[\[\]\(\),=;^]/g, adapt.cfi.escapeChar);
 
 /**
  * @param {string} str
  * @return {string}
  */
-adapt.cfi.unescapeChar = function(str) {
-    return str.substr(1);
-};
+adapt.cfi.unescapeChar = str => str.substr(1);
 
 
 /**
  * @param {string} str
  * @return {string}
  */
-adapt.cfi.unescape = function(str) {
+adapt.cfi.unescape = str => {
     if (!str)
         return str;
     return str.replace(/\^[\[\]\(\),=;^]/g, adapt.cfi.unescapeChar);
@@ -85,7 +79,7 @@ adapt.cfi.unescape = function(str) {
  * @param {string} extstr
  * @return {string|Array.<string>}
  */
-adapt.cfi.parseExtVal = function(extstr) {
+adapt.cfi.parseExtVal = extstr => {
     var result = [];
     do {
         var r = extstr.match(/^(\^,|[^,])*/);
@@ -102,7 +96,7 @@ adapt.cfi.parseExtVal = function(extstr) {
  * @param {string} extstr
  * @return {Object.<string,string|Array.<string>>}
  */
-adapt.cfi.parseExt = function(extstr) {
+adapt.cfi.parseExt = extstr => {
     var ext = {};
     while (extstr) {
         var r = extstr.match(/^;([^;=]+)=(([^;]|\^;)*)/);
@@ -118,39 +112,37 @@ adapt.cfi.parseExt = function(extstr) {
 /**
  * @interface
  */
-adapt.cfi.Step = function() {};
+adapt.cfi.Step = () => {};
 
 /**
  * @param {adapt.base.StringBuffer} sb
  * @return {void}
  */
-adapt.cfi.Step.prototype.appendTo = function(sb) {};
+adapt.cfi.Step.prototype.appendTo = sb => {};
 
 /**
  * @param {adapt.cfi.Position} pos
  * @return {boolean}
  */
-adapt.cfi.Step.prototype.applyTo = function(pos) {};
+adapt.cfi.Step.prototype.applyTo = pos => {};
 
 /**
  * @constructor
  * @implements {adapt.cfi.Step}
  */
-adapt.cfi.RefStep = function() {};
+adapt.cfi.RefStep = () => {};
 
 /**
  * @param {adapt.base.StringBuffer} sb
  */
-adapt.cfi.RefStep.prototype.appendTo = function(sb) {
+adapt.cfi.RefStep.prototype.appendTo = sb => {
     sb.append("!");
 };
 
 /**
  * @override
  */
-adapt.cfi.RefStep.prototype.applyTo = function(pos) {
-    return false;
-};
+adapt.cfi.RefStep.prototype.applyTo = pos => false;
 
 /**
  * @constructor
@@ -387,11 +379,9 @@ adapt.cfi.Fragment.prototype.navigate = function(doc) {
  * @param {boolean} after
  * @return {string}
  */
-adapt.cfi.Fragment.prototype.trim = function(text, after) {
-    return text.replace(/\s+/g, " ").match(
-        after ? /^[ -\uD7FF\uE000-\uFFFF]{0,8}/ : /[ -\uD7FF\uE000-\uFFFF]{0,8}$/
-    )[0].replace(/^\s/, "").replace(/\s$/, "");
-};
+adapt.cfi.Fragment.prototype.trim = (text, after) => text.replace(/\s+/g, " ").match(
+    after ? /^[ -\uD7FF\uE000-\uFFFF]{0,8}/ : /[ -\uD7FF\uE000-\uFFFF]{0,8}$/
+)[0].replace(/^\s/, "").replace(/\s$/, "");
 
 /**
  * Initialize from a node and an offset.

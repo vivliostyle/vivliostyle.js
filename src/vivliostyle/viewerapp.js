@@ -35,18 +35,18 @@ goog.require('adapt.viewer');
 /**
  * @param {adapt.base.JSON} cmd
  */
-vivliostyle.viewerapp.sendCommand = function(cmd) {
+vivliostyle.viewerapp.sendCommand = cmd => {
     window["adapt_command"](cmd);
 };
 
-vivliostyle.viewerapp.navigateToLeftPage = function() {
+vivliostyle.viewerapp.navigateToLeftPage = () => {
     vivliostyle.viewerapp.sendCommand({
         "a": "moveTo",
         "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "previous" : "next"
     });
 };
 
-vivliostyle.viewerapp.navigateToRightPage = function() {
+vivliostyle.viewerapp.navigateToRightPage = () => {
     vivliostyle.viewerapp.sendCommand({
         "a": "moveTo",
         "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "next" : "previous"
@@ -57,7 +57,7 @@ vivliostyle.viewerapp.navigateToRightPage = function() {
  * @param {KeyboardEvent} evt
  * @return {void}
  */
-vivliostyle.viewerapp.keydown = function(evt) {
+vivliostyle.viewerapp.keydown = evt => {
     var key = evt.key;
     var keyIdentifier = evt.keyIdentifier;
     var location = evt.location;
@@ -119,7 +119,7 @@ vivliostyle.viewerapp.keydown = function(evt) {
  * @param {TouchEvent} evt
  * @return {void}
  */
-vivliostyle.viewerapp.touch = function(evt) {
+vivliostyle.viewerapp.touch = evt => {
     if (evt.type == "touchmove") {
         evt.preventDefault();
     }
@@ -174,7 +174,7 @@ vivliostyle.viewerapp.touch = function(evt) {
     }
 };
 
-vivliostyle.viewerapp.callback = function(msg) {
+vivliostyle.viewerapp.callback = msg => {
     switch (msg["t"]) {
         case "loaded" :
             var viewer = msg["viewer"];
@@ -194,9 +194,9 @@ vivliostyle.viewerapp.callback = function(msg) {
             leftButton.addEventListener("click", /** @type {Function} */ (vivliostyle.viewerapp.navigateToLeftPage), false);
             var rightButton = document.getElementById("vivliostyle-page-navigation-right");
             rightButton.addEventListener("click", /** @type {Function} */ (vivliostyle.viewerapp.navigateToRightPage), false);
-            [leftButton, rightButton].forEach(function(button) {
+            [leftButton, rightButton].forEach(button => {
                 button.setAttribute("data-vivliostyle-ui-state", "attention");
-                window.setTimeout(function() {
+                window.setTimeout(() => {
                     button.removeAttribute("data-vivliostyle-ui-state");
                 }, 1000);
             });
@@ -289,7 +289,7 @@ function setViewportSize(width, height, size, orientation, config) {
 /**
  * @return {void}
  */
-vivliostyle.viewerapp.main = function(arg) {
+vivliostyle.viewerapp.main = arg => {
     var fragment = (arg && arg["fragment"]) || adapt.base.getURLParam("f");
     var epubURL = (arg && arg["epubURL"]) || adapt.base.getURLParam("b");
     var xmlURL = (arg && arg["xmlURL"]) || adapt.base.getURLParam("x");

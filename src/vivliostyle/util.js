@@ -19,7 +19,7 @@
 /* eslint no-extend-native: "off" */
 goog.provide("vivliostyle.util");
 
-(function() {
+((() => {
     if (!Array.from) {
         /**
          * Very simple polyfill of Array.from.
@@ -28,7 +28,7 @@ goog.provide("vivliostyle.util");
          * @param {S=} thisArg
          * @returns {!Array<R>}
          */
-        Array.from = function(arrayLike, mapFn, thisArg) {
+        Array.from = (arrayLike, mapFn, thisArg) => {
             if (mapFn && thisArg) {
                 mapFn = mapFn.bind(thisArg);
             }
@@ -79,12 +79,12 @@ goog.provide("vivliostyle.util");
          * @param {Object=} source
          * @returns {!Object}
          */
-        Object.assign = function(target, source) {
+        Object.assign = (target, source) => {
             if (!source) return target;
-            Object.keys(source).forEach(function(key) {
+            Object.keys(source).forEach(key => {
                 target[key] = source[key];
             });
             return target;
         };
     }
-})();
+}))();

@@ -27,12 +27,12 @@ goog.provide('adapt.task');
  * External timer. Only needed for testing.
  * @interface
  */
-adapt.task.Timer = function() {};
+adapt.task.Timer = () => {};
 
 /**
  * @return {number} current time in milliseconds.
  */
-adapt.task.Timer.prototype.currentTime = function() {};
+adapt.task.Timer.prototype.currentTime = () => {};
 
 /**
  * Calls function after a given timeout.
@@ -40,14 +40,14 @@ adapt.task.Timer.prototype.currentTime = function() {};
  * @param {number} delay timeout in milliseconds.
  * @return {number} unique number that can be used to clear the timeout.
  */
-adapt.task.Timer.prototype.setTimeout = function(fn, delay) {};
+adapt.task.Timer.prototype.setTimeout = (fn, delay) => {};
 
 /**
  * Calls function after a given timeout.
  * @param {number} token timeout token.
  * @return {void}.
  */
-adapt.task.Timer.prototype.clearTimeout = function(token) {};
+adapt.task.Timer.prototype.clearTimeout = token => {};
 
 
 /**
@@ -56,7 +56,7 @@ adapt.task.Timer.prototype.clearTimeout = function(token) {};
  * @template T
  * @interface
  */
-adapt.task.Result = function() {};
+adapt.task.Result = () => {};
 
 /**
  * Call the given function when asynchronous function is finished. Callback
@@ -64,7 +64,7 @@ adapt.task.Result = function() {};
  * @param {function(T): void} callback
  * @return {void}
  */
-adapt.task.Result.prototype.then = function(callback) {};
+adapt.task.Result.prototype.then = callback => {};
 
 /**
  * Call the given asynchronous function when some asynchronous function is
@@ -73,7 +73,7 @@ adapt.task.Result.prototype.then = function(callback) {};
  * @param {function(T): !adapt.task.Result.<T1>} callback
  * @return {!adapt.task.Result.<T1>}
  */
-adapt.task.Result.prototype.thenAsync = function(callback) {};
+adapt.task.Result.prototype.thenAsync = callback => {};
 
 /**
  * Produce a Result that resolves to the given value when this Result is resolved.
@@ -81,26 +81,26 @@ adapt.task.Result.prototype.thenAsync = function(callback) {};
  * @param {T1} result
  * @return {!adapt.task.Result.<T1>}
  */
-adapt.task.Result.prototype.thenReturn = function(result) {};
+adapt.task.Result.prototype.thenReturn = result => {};
 
 /**
  * Finish given frame with the result value when result becomes ready.
  * @param {!adapt.task.Frame.<T>} frame
  * @return {void}
  */
-adapt.task.Result.prototype.thenFinish = function(frame) {};
+adapt.task.Result.prototype.thenFinish = frame => {};
 
 /**
  * Check if this Result is still pending.
  * @return {boolean}
  */
-adapt.task.Result.prototype.isPending = function() {};
+adapt.task.Result.prototype.isPending = () => {};
 
 /**
  * If this Result is resolved, return the value that it holds.
  * @return {?T}
  */
-adapt.task.Result.prototype.get = function() {};
+adapt.task.Result.prototype.get = () => {};
 
 
 /**
@@ -120,9 +120,7 @@ adapt.task.primaryScheduler = null;
  * Returns current task.
  * @return {adapt.task.Task}
  */
-adapt.task.currentTask = function() {
-    return adapt.task.privateCurrentTask;
-};
+adapt.task.currentTask = () => adapt.task.privateCurrentTask;
 
 
 /**
@@ -130,7 +128,7 @@ adapt.task.currentTask = function() {
  * @param {string} name
  * @return {!adapt.task.Frame}
  */
-adapt.task.newFrame = function(name) {
+adapt.task.newFrame = name => {
     if (!adapt.task.privateCurrentTask)
         throw new Error('E_TASK_NO_CONTEXT');
     if (!adapt.task.privateCurrentTask.name)
@@ -145,27 +143,21 @@ adapt.task.newFrame = function(name) {
 /**
  * @return {adapt.task.EventSource}
  */
-adapt.task.newEventSource = function() {
-    return new adapt.task.EventSource();
-};
+adapt.task.newEventSource = () => new adapt.task.EventSource();
 
 /**
  * @param {adapt.task.Timer=} opt_timer
  * @return {adapt.task.Scheduler}
  */
-adapt.task.newScheduler = function(opt_timer) {
-    return new adapt.task.Scheduler(
-        opt_timer || new adapt.task.TimerImpl());
-};
+adapt.task.newScheduler = opt_timer => new adapt.task.Scheduler(
+    opt_timer || new adapt.task.TimerImpl());
 
 /**
  * @template T
  * @param {T} opt_value
  * @return {!adapt.task.Result.<T>}
  */
-adapt.task.newResult = function(opt_value) {
-    return new adapt.task.SyncResultImpl(opt_value);
-};
+adapt.task.newResult = opt_value => new adapt.task.SyncResultImpl(opt_value);
 
 /**
  * Creates a new frame and runs code in its context, catching synchronous and
@@ -177,7 +169,7 @@ adapt.task.newResult = function(opt_value) {
  * @param {function(!adapt.task.Frame.<T>,Error):void} onErr
  * @return {!adapt.task.Result.<T>}
  */
-adapt.task.handle = function(name, code, onErr) {
+adapt.task.handle = (name, code, onErr) => {
     var frame = adapt.task.newFrame(name);
     frame.handler = onErr;
     try {
@@ -194,7 +186,7 @@ adapt.task.handle = function(name, code, onErr) {
  * @param {string=} opt_name
  * @return {adapt.task.Task}
  */
-adapt.task.start = function(func, opt_name) {
+adapt.task.start = (func, opt_name) => {
     var scheduler = adapt.task.privateCurrentTask
         ? adapt.task.privateCurrentTask.getScheduler()
         : adapt.task.primaryScheduler || adapt.task.newScheduler();
@@ -216,26 +208,22 @@ adapt.task.FrameState = {
  * @constructor
  * @implements {adapt.task.Timer}
  */
-adapt.task.TimerImpl = function() {};
+adapt.task.TimerImpl = () => {};
 
 /**
  * @override
  */
-adapt.task.TimerImpl.prototype.currentTime = function() {
-    return (new Date()).valueOf();
-};
+adapt.task.TimerImpl.prototype.currentTime = () => (new Date()).valueOf();
 
 /**
  * @override
  */
-adapt.task.TimerImpl.prototype.setTimeout = function(fn, delay) {
-    return setTimeout(fn, delay);
-};
+adapt.task.TimerImpl.prototype.setTimeout = (fn, delay) => setTimeout(fn, delay);
 
 /**
  * @override
  */
-adapt.task.TimerImpl.prototype.clearTimeout = function(token) {
+adapt.task.TimerImpl.prototype.clearTimeout = token => {
     clearTimeout(token);
 };
 
@@ -309,7 +297,7 @@ adapt.task.Scheduler.prototype.arm = function() {
         timeout = this.timeout;
     this.wakeupTime = now + timeout;
     var self = this;
-    this.timeoutToken = this.timer.setTimeout(function() {
+    this.timeoutToken = this.timer.setTimeout(() => {
         self.timeoutToken = null;
         self.doTimeSlice();
     }, timeout);
@@ -374,8 +362,8 @@ adapt.task.Scheduler.prototype.run = function(func, opt_name) {
     var task = new adapt.task.Task(this, opt_name || "");
     task.top = new adapt.task.Frame(task, null, 'bootstrap');
     task.top.state = adapt.task.FrameState.ACTIVE;
-    task.top.then(function() {
-        var done = function() {
+    task.top.then(() => {
+        var done = () => {
             task.running = false;
             for (var i = 0; i < task.callbacks.length; i++) {
                 var callback = task.callbacks[i];
@@ -387,7 +375,7 @@ adapt.task.Scheduler.prototype.run = function(func, opt_name) {
             }
         };
         try {
-            func().then(function(result) {
+            func().then(result => {
                 task.result = result;
                 done();
             });
@@ -553,7 +541,7 @@ adapt.task.Task.prototype.join = function() {
     } else {
         var continuation = frame.suspend(this);
         var self = this;
-        this.whenDone(function() {
+        this.whenDone(() => {
             continuation.schedule(self.result);
         });
     }
@@ -648,9 +636,7 @@ adapt.task.SyncResultImpl.prototype.thenAsync = function(callback) {
 /**
  * @override
  */
-adapt.task.SyncResultImpl.prototype.thenReturn = function(result) {
-    return new adapt.task.SyncResultImpl(result);
-};
+adapt.task.SyncResultImpl.prototype.thenReturn = result => new adapt.task.SyncResultImpl(result);
 
 /**
  * @override
@@ -662,9 +648,7 @@ adapt.task.SyncResultImpl.prototype.thenFinish = function(frame) {
 /**
  * @override
  */
-adapt.task.SyncResultImpl.prototype.isPending = function() {
-    return false;
-};
+adapt.task.SyncResultImpl.prototype.isPending = () => false;
 
 /**
  * @override
@@ -701,8 +685,8 @@ adapt.task.ResultImpl.prototype.thenAsync = function(callback) {
             this.frame.parent, 'AsyncResult.thenAsync');
         frame.state = adapt.task.FrameState.ACTIVE;
         this.frame.parent = frame;
-        this.frame.then(function(res1) {
-            callback(res1).then(function(res2) {
+        this.frame.then(res1 => {
+            callback(res1).then(res2 => {
                 frame.finish(res2);
             });
         });
@@ -717,9 +701,7 @@ adapt.task.ResultImpl.prototype.thenAsync = function(callback) {
  */
 adapt.task.ResultImpl.prototype.thenReturn = function(result) {
     if (this.isPending()) {
-        return this.thenAsync(function() {
-            return new adapt.task.SyncResultImpl(result);
-        });
+        return this.thenAsync(() => new adapt.task.SyncResultImpl(result));
     } else {
         return new adapt.task.SyncResultImpl(result);
     }
@@ -730,7 +712,7 @@ adapt.task.ResultImpl.prototype.thenReturn = function(result) {
  */
 adapt.task.ResultImpl.prototype.thenFinish = function(frame) {
     if (this.isPending()) {
-        this.then(function(res) {
+        this.then(res => {
             frame.finish(res);
         });
     } else {
@@ -874,7 +856,7 @@ adapt.task.Frame.prototype.then = function(callback) {
  * If this task was executed longer than task's slice parameter.
  * @return {!adapt.task.Result.<boolean>} holds true
  */
-adapt.task.Frame.prototype.timeSlice = function() {
+adapt.task.Frame.prototype.timeSlice = () => {
     var frame = adapt.task.newFrame('Frame.timeSlice');
     var scheduler = frame.getScheduler();
     if (scheduler.isTimeSliceOver()) {
@@ -891,7 +873,7 @@ adapt.task.Frame.prototype.timeSlice = function() {
  * @param {number} delay in milliseconds.
  * @return {!adapt.task.Result.<boolean>} holds true
  */
-adapt.task.Frame.prototype.sleep = function(delay) {
+adapt.task.Frame.prototype.sleep = delay => {
     var frame = adapt.task.newFrame('Frame.sleep');
     frame.suspend().schedule(true, delay);
     return frame.result();
@@ -902,9 +884,9 @@ adapt.task.Frame.prototype.sleep = function(delay) {
  * @param {function(): !adapt.task.Result.<boolean>} func
  * @return {!adapt.task.Result.<boolean>} holds true.
  */
-adapt.task.Frame.prototype.loop = function(func) {
+adapt.task.Frame.prototype.loop = func => {
     var frame = adapt.task.newFrame('Frame.loop');
-    var step = function(more) {
+    var step = more => {
         try {
             while (more) {
                 var result = func();
@@ -912,7 +894,7 @@ adapt.task.Frame.prototype.loop = function(func) {
                     result.then(step);
                     return;
                 } else {
-                    result.then(function(m) {
+                    result.then(m => {
                         more = m;
                     });
                 }
@@ -936,7 +918,7 @@ adapt.task.Frame.prototype.loopWithFrame = function(func) {
     if (!task) {
         throw new Error("E_TASK_NO_CONTEXT");
     }
-    return this.loop(function() {
+    return this.loop(() => {
         var result;
         do {
             var frame = new adapt.task.LoopBodyFrame(/** @type {!adapt.task.Task} */ (task), task.top);
@@ -1029,7 +1011,7 @@ adapt.task.EventSource = function() {
  */
 adapt.task.EventSource.prototype.attach = function(target, type, opt_preventDefault) {
     var self = this;
-    var listener = /** @param {adapt.base.Event} event */ function(event) {
+    var listener = event => {
         if (opt_preventDefault) {
             event.preventDefault();
         }
@@ -1077,7 +1059,7 @@ adapt.task.EventSource.prototype.nextEvent = function() {
     /** @type {!adapt.task.Frame.<adapt.base.Event>} */ var frame =
         adapt.task.newFrame('EventSource.nextEvent');
     var self = this;
-    var readEvent = function() {
+    var readEvent = () => {
         if (self.head.event) {
             var event = self.head.event;
             if (self.head.next)

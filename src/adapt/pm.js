@@ -62,7 +62,7 @@ adapt.pm.PageBox = function(scope, name, pseudoName, classes, parent) {
  * @param {!adapt.pm.PageBoxInstance} parentInstance
  * @return {!adapt.pm.PageBoxInstance}
  */
-adapt.pm.PageBox.prototype.createInstance = function(parentInstance) {
+adapt.pm.PageBox.prototype.createInstance = parentInstance => {
     throw new Error("E_UNEXPECTED_CALL");
 };
 
@@ -71,7 +71,7 @@ adapt.pm.PageBox.prototype.createInstance = function(parentInstance) {
  * @param {{parent: (!adapt.pm.PageBox|undefined), pseudoName: (string|undefined)}} param parent: The parent of the cloned PageBox. pseudoName: Assign this value as the pseudoName of the cloned PageBox.
  * @return {adapt.pm.PageBox}
  */
-adapt.pm.PageBox.prototype.clone = function(param) {
+adapt.pm.PageBox.prototype.clone = param => {
     throw new Error("E_UNEXPECTED_CALL");
 };
 
@@ -294,7 +294,7 @@ adapt.pm.Partition.prototype.clone = function(param) {
  * @param {string} def default value
  * @return {adapt.expr.Val}
  */
-adapt.pm.toExprIdent = function(scope, val, def) {
+adapt.pm.toExprIdent = (scope, val, def) => {
     if (!val)
         return new adapt.expr.Const(scope, def);
     return val.toExpr(scope, scope.zero);
@@ -306,7 +306,7 @@ adapt.pm.toExprIdent = function(scope, val, def) {
  * @param {adapt.expr.Val} ref
  * @return {adapt.expr.Val}
  */
-adapt.pm.toExprAuto = function(scope, val, ref) {
+adapt.pm.toExprAuto = (scope, val, ref) => {
     if (!val || val === adapt.css.ident.auto)
         return null;
     return val.toExpr(scope, ref);
@@ -318,7 +318,7 @@ adapt.pm.toExprAuto = function(scope, val, ref) {
  * @param {adapt.expr.Val} ref
  * @return {adapt.expr.Val}
  */
-adapt.pm.toExprNormal = function(scope, val, ref) {
+adapt.pm.toExprNormal = (scope, val, ref) => {
     if (!val || val === adapt.css.ident.normal)
         return null;
     return val.toExpr(scope, ref);
@@ -330,7 +330,7 @@ adapt.pm.toExprNormal = function(scope, val, ref) {
  * @param {adapt.expr.Val} ref
  * @return {adapt.expr.Val}
  */
-adapt.pm.toExprZero = function(scope, val, ref) {
+adapt.pm.toExprZero = (scope, val, ref) => {
     if (!val || val === adapt.css.ident.auto)
         return scope.zero;
     return val.toExpr(scope, ref);
@@ -345,7 +345,7 @@ adapt.pm.toExprZero = function(scope, val, ref) {
  * @param {adapt.expr.Val} ref
  * @returns {adapt.expr.Val}
  */
-adapt.pm.toExprZeroAuto = function(scope, val, ref) {
+adapt.pm.toExprZeroAuto = (scope, val, ref) => {
     if (!val) {
         return scope.zero;
     } else if (val === adapt.css.ident.auto) {
@@ -362,7 +362,7 @@ adapt.pm.toExprZeroAuto = function(scope, val, ref) {
  * @param {adapt.expr.Val} ref
  * @return {adapt.expr.Val}
  */
-adapt.pm.toExprZeroBorder = function(scope, val, styleVal, ref) {
+adapt.pm.toExprZeroBorder = (scope, val, styleVal, ref) => {
     if (!val || styleVal === adapt.css.ident.none)
         return scope.zero;
     return val.toExpr(scope, ref);
@@ -374,7 +374,7 @@ adapt.pm.toExprZeroBorder = function(scope, val, styleVal, ref) {
  * @param {adapt.expr.Val} def
  * @return {adapt.expr.Val}
  */
-adapt.pm.toExprBool = function(scope, val, def) {
+adapt.pm.toExprBool = (scope, val, def) => {
     if (!val)
         return def;
     if (val === adapt.css.ident._true)
@@ -387,20 +387,20 @@ adapt.pm.toExprBool = function(scope, val, def) {
 /**
  * @interface
  */
-adapt.pm.InstanceHolder = function() {};
+adapt.pm.InstanceHolder = () => {};
 
 /**
  * @param {string} key
  * @param {adapt.pm.PageBoxInstance} instance
  * @return {void}
  */
-adapt.pm.InstanceHolder.prototype.registerInstance = function(key, instance) {};
+adapt.pm.InstanceHolder.prototype.registerInstance = (key, instance) => {};
 
 /**
  * @param {string} key
  * @return {adapt.pm.PageBoxInstance} instance
  */
-adapt.pm.InstanceHolder.prototype.lookupInstance = function(key) {};
+adapt.pm.InstanceHolder.prototype.lookupInstance = key => {};
 
 /**
  * @param {adapt.pm.PageBoxInstance} parentInstance
@@ -594,9 +594,7 @@ adapt.pm.PageBoxInstance.prototype.initEnabled = function() {
  * @param {adapt.expr.Val} enabled
  * @return {adapt.expr.Val}
  */
-adapt.pm.PageBoxInstance.prototype.boxSpecificEnabled = function(enabled) {
-    return enabled;
-};
+adapt.pm.PageBoxInstance.prototype.boxSpecificEnabled = enabled => enabled;
 
 /**
  * @protected
@@ -849,17 +847,11 @@ adapt.pm.PageBoxInstance.prototype.init = function(context) {
     var regionIds = this.parentInstance ? this.parentInstance.getActiveRegions(context) : null;
     var cascMap = adapt.csscasc.flattenCascadedStyle(this.cascaded, context, regionIds, false, null);
     this.vertical = adapt.csscasc.isVertical(cascMap, context, this.parentInstance ? this.parentInstance.vertical : false);
-    adapt.csscasc.convertToPhysical(cascMap, style, this.vertical, function(name, cascVal) {
-        return cascVal.value;
-    });
+    adapt.csscasc.convertToPhysical(cascMap, style, this.vertical, (name, cascVal) => cascVal.value);
     this.autoWidth = new adapt.expr.Native(scope,
-        function() {
-            return self.calculatedWidth;
-        }, "autoWidth");
+        () => self.calculatedWidth, "autoWidth");
     this.autoHeight = new adapt.expr.Native(scope,
-        function() {
-            return self.calculatedHeight;
-        }, "autoHeight");
+        () => self.calculatedHeight, "autoHeight");
     this.initHorizontal();
     this.initVertical();
     this.initColumns();
@@ -1461,14 +1453,7 @@ adapt.pm.RootPageBoxInstance.prototype.applyCascadeAndInit = function(cascade, d
     // Sort page masters using order and specificity.
     var pageMasters = this.children;
     (/** @type {Array.<adapt.pm.PageMasterInstance>} */ (pageMasters)).sort(
-        /**
-         * @param {adapt.pm.PageMasterInstance} a
-         * @param {adapt.pm.PageMasterInstance} b
-         * @return {number}
-         */
-        function(a, b) {
-            return b.pageBox.specificity - a.pageBox.specificity || a.pageBox.index - b.pageBox.index;
-        }
+        (a, b) => b.pageBox.specificity - a.pageBox.specificity || a.pageBox.index - b.pageBox.index
     );
 };
 
@@ -1502,7 +1487,7 @@ adapt.pm.PageMasterInstance.prototype.boxSpecificEnabled = function(enabled) {
  * @param {adapt.vtree.Page} page
  * @param {adapt.vtree.ClientLayout} clientLayout
  */
-adapt.pm.PageMasterInstance.prototype.adjustPageLayout = function(context, page, clientLayout) {
+adapt.pm.PageMasterInstance.prototype.adjustPageLayout = (context, page, clientLayout) => {
 };
 
 /**
