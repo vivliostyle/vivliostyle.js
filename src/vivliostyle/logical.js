@@ -22,7 +22,7 @@ goog.scope(() => {
     /**
      * @typedef {{regexp: !RegExp, to: string}}
      */
-    var ConversionMap;
+    let ConversionMap;
 
     /**
      * @param {!Object.<string, !Object.<string, !Array.<!{logical: string, physical: string}>>>} valueMaps
@@ -30,14 +30,14 @@ goog.scope(() => {
      * @returns {!Object.<string, !Object.<string, !Array.<!ConversionMap>>>}
      */
     function createRegExpMap(valueMaps, toPhysical) {
-        var map = {};
+        const map = {};
         Object.keys(/** @type {!Object} */ (valueMaps)).forEach(writingMode => {
-            var dest = map[writingMode] = {};
-            var src = valueMaps[writingMode];
+            const dest = map[writingMode] = {};
+            const src = valueMaps[writingMode];
             Object.keys(/** @type {!Object} */ (src)).forEach(direction => {
                 dest[direction] = src[direction].map(p => {
-                    var from = toPhysical ? p.logical : p.physical;
-                    var to = toPhysical ? p.physical : p.logical;
+                    const from = toPhysical ? p.logical : p.physical;
+                    const to = toPhysical ? p.physical : p.logical;
                     return {
                         regexp: new RegExp("(-?)" + from + "(-?)"),
                         to: "$1" + to + "$2"
@@ -56,17 +56,17 @@ goog.scope(() => {
      * @returns {string}
      */
     function convert(value, writingMode, direction, maps) {
-        var maps2 = maps[writingMode];
+        const maps2 = maps[writingMode];
         if (!maps2) {
             throw new Error("unknown writing-mode: " + writingMode);
         }
-        var map = maps2[direction || "ltr"];
+        const map = maps2[direction || "ltr"];
         if (!map) {
             throw new Error("unknown direction: " + direction);
         }
-        for (var i = 0; i < map.length; i++) {
-            var p = map[i];
-            var replaced = value.replace(p.regexp, p.to);
+        for (let i = 0; i < map.length; i++) {
+            const p = map[i];
+            const replaced = value.replace(p.regexp, p.to);
             if (replaced !== value) {
                 return replaced;
             }
@@ -77,7 +77,7 @@ goog.scope(() => {
     /**
      * @type {!Object.<string, !Object.<string, !Array.<!{logical: string, physical: string}>>>}
      */
-    var values = {
+    const values = {
         "horizontal-tb": {
             "ltr": [
                 {logical: "inline-start", physical: "left"},
@@ -134,7 +134,7 @@ goog.scope(() => {
         }
     };
 
-    var toPhysicalMaps = createRegExpMap(values, true);
+    const toPhysicalMaps = createRegExpMap(values, true);
     /**
      * @param {string} value
      * @param {string} writingMode
@@ -143,7 +143,7 @@ goog.scope(() => {
      */
     vivliostyle.logical.toPhysical = (value, writingMode, direction) => convert(value, writingMode, direction || null, toPhysicalMaps);
 
-    var toLogicalMaps = createRegExpMap(values, false);
+    const toLogicalMaps = createRegExpMap(values, false);
     /**
      * @param {string} value
      * @param {string} writingMode
@@ -155,7 +155,7 @@ goog.scope(() => {
     /**
      * @type {!Object.<string, !Array.<!{logical: string, physical: string}>>}
      */
-    var lineRelativeValues = {
+    const lineRelativeValues = {
         "horizontal-tb": [
             {logical: "line-left", physical: "left"},
             {logical: "line-right", physical: "right"},
@@ -182,11 +182,11 @@ goog.scope(() => {
      * @returns {string}
      */
     vivliostyle.logical.toLineRelative = (value, writingMode) => {
-        var maps = lineRelativeValues[writingMode];
+        const maps = lineRelativeValues[writingMode];
         if (!maps) {
             throw new Error("unknown writing-mode: " + writingMode);
         }
-        for (var i = 0; i < maps.length; i++) {
+        for (let i = 0; i < maps.length; i++) {
             if (maps[i].physical === value) {
                 return maps[i].logical;
             }

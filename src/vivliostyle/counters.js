@@ -34,7 +34,7 @@ goog.scope(() => {
      * @returns {!adapt.csscasc.CounterValues}
      */
     function cloneCounterValues(counters) {
-        var result = {};
+        const result = {};
         Object.keys(counters).forEach(name => {
             result[name] = Array.from(counters[name]);
         });
@@ -150,7 +150,7 @@ goog.scope(() => {
      * @returns {?string}
      */
     CounterResolver.prototype.getFragment = url => {
-        var r = url.match(/^[^#]*#(.*)$/);
+        const r = url.match(/^[^#]*#(.*)$/);
         return r ? r[1] : null;
     };
 
@@ -160,7 +160,7 @@ goog.scope(() => {
      * @returns {string}
      */
     CounterResolver.prototype.getTransformedId = function(url) {
-        var transformedId = this.counterStore.documentURLTransformer.transformURL(
+        let transformedId = this.counterStore.documentURLTransformer.transformURL(
             adapt.base.resolveURL(url, this.baseURL), this.baseURL);
         if (transformedId.charAt(0) === "#") {
             transformedId = transformedId.substring(1);
@@ -172,12 +172,12 @@ goog.scope(() => {
      * @override
      */
     CounterResolver.prototype.getPageCounterVal = function(name, format) {
-        var self = this;
+        const self = this;
         function getCounterNumber() {
-            var values = self.counterStore.currentPageCounters[name];
+            const values = self.counterStore.currentPageCounters[name];
             return (values && values.length) ? values[values.length - 1] : null;
         }
-        var expr = new adapt.expr.Native(this.pageScope, () => format(getCounterNumber()), "page-counter-" + name);
+        const expr = new adapt.expr.Native(this.pageScope, () => format(getCounterNumber()), "page-counter-" + name);
 
         function arrayFormat(arr) { return format(arr[0]); }
         this.counterStore.registerPageCounterExpr(name, arrayFormat, expr);
@@ -189,11 +189,11 @@ goog.scope(() => {
      * @override
      */
     CounterResolver.prototype.getPageCountersVal = function(name, format) {
-        var self = this;
+        const self = this;
         function getCounterNumbers() {
             return self.counterStore.currentPageCounters[name] || [];
         }
-        var expr = new adapt.expr.Native(this.pageScope, () => format(getCounterNumbers()), "page-counters-" + name);
+        const expr = new adapt.expr.Native(this.pageScope, () => format(getCounterNumbers()), "page-counters-" + name);
         this.counterStore.registerPageCounterExpr(name, format, expr);
         return expr;
     };
@@ -208,7 +208,7 @@ goog.scope(() => {
      * @returns {?adapt.csscasc.CounterValues}
      */
     CounterResolver.prototype.getTargetCounters = function(id, transformedId, lookForElement) {
-        var targetCounters = this.counterStore.countersById[transformedId];
+        let targetCounters = this.counterStore.countersById[transformedId];
         if (!targetCounters && lookForElement && id) {
             this.styler.styleUntilIdIsReached(id);
             targetCounters = this.counterStore.countersById[transformedId];
@@ -235,33 +235,33 @@ goog.scope(() => {
      * @override
      */
     CounterResolver.prototype.getTargetCounterVal = function(url, name, format) {
-        var id = this.getFragment(url);
-        var transformedId = this.getTransformedId(url);
+        const id = this.getFragment(url);
+        const transformedId = this.getTransformedId(url);
 
         // Since this method is executed during Styler.styleUntil is being called, set false to lookForElement argument.
-        var counters = this.getTargetCounters(id, transformedId, false);
+        let counters = this.getTargetCounters(id, transformedId, false);
         if (counters && counters[name]) {
             // Since an element-based counter is defined, any page-based counter is obscured even if it exists.
-            var countersOfName = counters[name];
+            const countersOfName = counters[name];
             return new adapt.expr.Const(this.rootScope, format(countersOfName[countersOfName.length - 1] || null));
         }
 
-        var self = this;
+        const self = this;
         return new adapt.expr.Native(this.pageScope, () => {
             // Since This block is evaluated during layout, lookForElement argument can be set to true.
             counters = self.getTargetCounters(id, transformedId, true);
             if (counters) {
                 if (counters[name]) {
                     // Since an element-based counter is defined, any page-based counter is obscured even if it exists.
-                    var countersOfName = counters[name];
+                    const countersOfName = counters[name];
                     return format(countersOfName[countersOfName.length - 1] || null);
                 } else {
-                    var pageCounters = self.getTargetPageCounters(transformedId);
+                    const pageCounters = self.getTargetPageCounters(transformedId);
                     if (pageCounters) {
                         // The target element has already been laid out.
                         self.counterStore.resolveReference(transformedId);
                         if (pageCounters[name]) {
-                            var pageCountersOfName = pageCounters[name];
+                            const pageCountersOfName = pageCounters[name];
                             return format(pageCountersOfName[pageCountersOfName.length - 1] || null);
                         } else {
                             // No corresponding counter with the name.
@@ -286,20 +286,20 @@ goog.scope(() => {
      * @override
      */
     CounterResolver.prototype.getTargetCountersVal = function(url, name, format) {
-        var id = this.getFragment(url);
-        var transformedId = this.getTransformedId(url);
-        var self = this;
+        const id = this.getFragment(url);
+        const transformedId = this.getTransformedId(url);
+        const self = this;
         return new adapt.expr.Native(this.pageScope, () => {
-            var pageCounters = self.getTargetPageCounters(transformedId);
+            const pageCounters = self.getTargetPageCounters(transformedId);
             if (!pageCounters) {
                 // The target element has not been laid out yet.
                 self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
                 return "??"; // TODO more reasonable placeholder?
             } else {
                 self.counterStore.resolveReference(transformedId);
-                var pageCountersOfName = pageCounters[name] || [];
-                var elementCounters = self.getTargetCounters(id, transformedId, true);
-                var elementCountersOfName = elementCounters[name] || [];
+                const pageCountersOfName = pageCounters[name] || [];
+                const elementCounters = self.getTargetCounters(id, transformedId, true);
+                const elementCountersOfName = elementCounters[name] || [];
                 return format(pageCountersOfName.concat(elementCountersOfName));
             }
         }, "target-counters-" + name + "-of-" + url);
@@ -370,7 +370,7 @@ goog.scope(() => {
      * @param {number} pageNumber
      */
     vivliostyle.counters.CounterStore.prototype.forceSetPageCounter = function(pageNumber) {
-        var counters = this.currentPageCounters["page"];
+        const counters = this.currentPageCounters["page"];
         if (!counters || !counters.length) {
             this.currentPageCounters["page"] = [pageNumber];
         } else {
@@ -387,24 +387,24 @@ goog.scope(() => {
         // Save page counters to previousPageCounters before updating
         this.previousPageCounters = cloneCounterValues(this.currentPageCounters);
 
-        var resetMap;
-        var reset = cascadedPageStyle["counter-reset"];
+        let resetMap;
+        const reset = cascadedPageStyle["counter-reset"];
         if (reset) {
-            var resetVal = reset.evaluate(context);
+            const resetVal = reset.evaluate(context);
             if (resetVal) {
                 resetMap = adapt.cssprop.toCounters(resetVal, true);
             }
         }
         if (resetMap) {
-            for (var resetCounterName in resetMap) {
+            for (const resetCounterName in resetMap) {
                 this.definePageCounter(resetCounterName, resetMap[resetCounterName]);
             }
         }
 
-        var incrementMap;
-        var increment = cascadedPageStyle["counter-increment"];
+        let incrementMap;
+        const increment = cascadedPageStyle["counter-increment"];
         if (increment) {
-            var incrementVal = increment.evaluate(context);
+            const incrementVal = increment.evaluate(context);
             if (incrementVal) {
                 incrementMap = adapt.cssprop.toCounters(incrementVal, false);
             }
@@ -418,11 +418,11 @@ goog.scope(() => {
             incrementMap = {};
             incrementMap["page"] = 1;
         }
-        for (var incrementCounterName in incrementMap) {
+        for (const incrementCounterName in incrementMap) {
             if (!this.currentPageCounters[incrementCounterName]) {
                 this.definePageCounter(incrementCounterName, 0);
             }
-            var counterValues = this.currentPageCounters[incrementCounterName];
+            const counterValues = this.currentPageCounters[incrementCounterName];
             counterValues[counterValues.length - 1] += incrementMap[incrementCounterName];
         }
     };
@@ -449,19 +449,19 @@ goog.scope(() => {
      * @param {string} id
      */
     vivliostyle.counters.CounterStore.prototype.resolveReference = function(id) {
-        var unresolvedRefs = this.unresolvedReferences[id];
-        var resolvedRefs = this.resolvedReferences[id];
+        const unresolvedRefs = this.unresolvedReferences[id];
+        let resolvedRefs = this.resolvedReferences[id];
         if (!resolvedRefs) {
             resolvedRefs = this.resolvedReferences[id] = [];
         }
-        var pushed = false;
-        for (var i = 0; i < this.referencesToSolve.length;) {
-            var ref = this.referencesToSolve[i];
+        let pushed = false;
+        for (let i = 0; i < this.referencesToSolve.length;) {
+            const ref = this.referencesToSolve[i];
             if (ref.targetId === id) {
                 ref.resolve();
                 this.referencesToSolve.splice(i, 1);
                 if (unresolvedRefs) {
-                    var j = unresolvedRefs.indexOf(ref);
+                    const j = unresolvedRefs.indexOf(ref);
                     if (j >= 0) {
                         unresolvedRefs.splice(j, 1);
                     }
@@ -484,7 +484,7 @@ goog.scope(() => {
      */
     vivliostyle.counters.CounterStore.prototype.saveReferenceOfCurrentPage = function(id, resolved) {
         if (!this.newReferencesOfCurrentPage.some(ref => ref.targetId === id)) {
-            var ref = new vivliostyle.counters.TargetCounterReference(id, resolved);
+            const ref = new vivliostyle.counters.TargetCounterReference(id, resolved);
             this.newReferencesOfCurrentPage.push(ref);
         }
     };
@@ -495,20 +495,20 @@ goog.scope(() => {
      * @param {number} pageIndex Index of the currently laid out page in its spine item
      */
     vivliostyle.counters.CounterStore.prototype.finishPage = function(spineIndex, pageIndex) {
-        var ids = Object.keys(this.currentPage.elementsById);
+        const ids = Object.keys(this.currentPage.elementsById);
         if (ids.length > 0) {
-            var currentPageCounters = cloneCounterValues(this.currentPageCounters);
+            const currentPageCounters = cloneCounterValues(this.currentPageCounters);
             ids.forEach(function(id) {
                 this.pageCountersById[id] = currentPageCounters;
-                var oldPageIndex = this.pageIndicesById[id];
+                const oldPageIndex = this.pageIndicesById[id];
                 if (oldPageIndex && oldPageIndex.pageIndex < pageIndex) {
-                    var resolvedRefs = this.resolvedReferences[id];
+                    const resolvedRefs = this.resolvedReferences[id];
                     if (resolvedRefs) {
-                        var unresolvedRefs = this.unresolvedReferences[id];
+                        let unresolvedRefs = this.unresolvedReferences[id];
                         if (!unresolvedRefs) {
                             unresolvedRefs = this.unresolvedReferences[id] = [];
                         }
-                        var ref;
+                        let ref;
                         while (ref = resolvedRefs.shift()) {
                             ref.unresolve();
                             unresolvedRefs.push(ref);
@@ -519,13 +519,13 @@ goog.scope(() => {
             }, this);
         }
 
-        var prevPageCounters = this.previousPageCounters;
-        var ref;
+        const prevPageCounters = this.previousPageCounters;
+        let ref;
         while (ref = this.newReferencesOfCurrentPage.shift()) {
             ref.pageCounters = prevPageCounters;
             ref.spineIndex = spineIndex;
             ref.pageIndex = pageIndex;
-            var arr;
+            let arr;
             if (ref.isResolved()) {
                 arr = this.resolvedReferences[ref.targetId];
                 if (!arr) {
@@ -551,17 +551,17 @@ goog.scope(() => {
      * @returns {!Array<{spineIndex: number, pageIndex: number, pageCounters: !adapt.csscasc.CounterValues, refs: !Array<!vivliostyle.counters.TargetCounterReference>}>}
      */
     vivliostyle.counters.CounterStore.prototype.getUnresolvedRefsToPage = function(page) {
-        var refs = [];
-        var ids = Object.keys(page.elementsById);
+        let refs = [];
+        const ids = Object.keys(page.elementsById);
         ids.forEach(function(id) {
-            var idRefs = this.unresolvedReferences[id];
+            const idRefs = this.unresolvedReferences[id];
             if (idRefs) {
                 refs = refs.concat(idRefs);
             }
         }, this);
         refs.sort((r1, r2) => (r1.spineIndex - r2.spineIndex) || (r1.pageIndex - r2.pageIndex));
-        var result = [];
-        var o = null;
+        const result = [];
+        let o = null;
         refs.forEach(ref => {
             if (!o || o.spineIndex !== ref.spineIndex || o.pageIndex !== ref.pageIndex) {
                 o = {
@@ -619,9 +619,9 @@ goog.scope(() => {
      * @type {adapt.vtree.ExprContentListener}
      */
     vivliostyle.counters.CounterStore.prototype.exprContentListener = function(expr, val, document) {
-        var found = this.pagesCounterExprs.findIndex(o => o.expr === expr) >= 0;
+        const found = this.pagesCounterExprs.findIndex(o => o.expr === expr) >= 0;
         if (found) {
-            var node = document.createElement("span");
+            const node = document.createElement("span");
             node.textContent = val;
             node.setAttribute(vivliostyle.counters.PAGES_COUNTER_ATTR, expr.key);
             return node;
@@ -634,11 +634,11 @@ goog.scope(() => {
      * @param {!adapt.vgen.Viewport} viewport
      */
     vivliostyle.counters.CounterStore.prototype.finishLastPage = function(viewport) {
-        var nodes = viewport.root.querySelectorAll("[" + vivliostyle.counters.PAGES_COUNTER_ATTR + "]");
-        var pages = this.currentPageCounters["page"][0];
+        const nodes = viewport.root.querySelectorAll("[" + vivliostyle.counters.PAGES_COUNTER_ATTR + "]");
+        const pages = this.currentPageCounters["page"][0];
         Array.from(nodes).forEach(function(node) {
-            var key = node.getAttribute(vivliostyle.counters.PAGES_COUNTER_ATTR);
-            var i = this.pagesCounterExprs.findIndex(o => o.expr.key === key);
+            const key = node.getAttribute(vivliostyle.counters.PAGES_COUNTER_ATTR);
+            const i = this.pagesCounterExprs.findIndex(o => o.expr.key === key);
             goog.asserts.assert(i >= 0);
             node.textContent = this.pagesCounterExprs[i].format([pages]);
         }, this);
@@ -662,18 +662,18 @@ goog.scope(() => {
         if (!nodeContext || nodeContext.after) {
             return true;
         }
-        var viewNode = nodeContext.viewNode;
+        const viewNode = nodeContext.viewNode;
         if (!viewNode || viewNode.nodeType !== 1) {
             return true;
         }
-        var id = viewNode.getAttribute("id") || viewNode.getAttribute("name");
+        const id = viewNode.getAttribute("id") || viewNode.getAttribute("name");
         if (!id) {
             return true;
         }
         if (!this.counterStore.resolvedReferences[id] && !this.counterStore.unresolvedReferences[id]) {
             return true;
         }
-        var pageIndex = this.counterStore.pageIndicesById[id];
+        const pageIndex = this.counterStore.pageIndicesById[id];
         if (!pageIndex) {
             return true;
         }

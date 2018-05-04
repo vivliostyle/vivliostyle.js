@@ -25,16 +25,16 @@ goog.scope(() => {
      * @returns {number}
      */
     vivliostyle.math.mean = array => array.reduce((prev, curr) => prev + curr, 0) / array.length;
-    /** @const */ var mean = vivliostyle.math.mean;
+    /** @const */ const mean = vivliostyle.math.mean;
 
     /**
      * @param {!Array<number>} array
      * @returns {number}
      */
     vivliostyle.math.variance = array => {
-        var meanValue = mean(array);
+        const meanValue = mean(array);
         return mean(array.map(x => {
-            var d = x - meanValue;
+            const d = x - meanValue;
             return d * d;
         }));
     };

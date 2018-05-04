@@ -31,7 +31,7 @@ goog.scope(() => {
         WARN: 3,
         ERROR: 4
     };
-    /** @const */ var LogLevel = vivliostyle.logging.LogLevel;
+    /** @const */ const LogLevel = vivliostyle.logging.LogLevel;
 
     /**
      * @dict @typedef {{error: Error, messages: !Array<*>}}
@@ -44,7 +44,7 @@ goog.scope(() => {
      * @constructor
      */
     vivliostyle.logging.Logger = function(opt_console) {
-        var c = opt_console || console;
+        const c = opt_console || console;
 
         function makeConsoleMethod(method) {
             return args => method.apply(c, args);
@@ -57,7 +57,7 @@ goog.scope(() => {
 
         /** @const @private @type {Object<vivliostyle.logging.LogLevel, Array<!function(vivliostyle.logging.ErrorInfo):void>>} */ this.listeners = {};
     };
-    /** @const */ var Logger = vivliostyle.logging.Logger;
+    /** @const */ const Logger = vivliostyle.logging.Logger;
 
     /**
      * @private
@@ -65,7 +65,7 @@ goog.scope(() => {
      * @param {!vivliostyle.logging.ErrorInfo} args
      */
     Logger.prototype.triggerListeners = function(level, args) {
-        var listeners = this.listeners[level];
+        const listeners = this.listeners[level];
         if (listeners) {
             listeners.forEach(listener => {
                 listener(args);
@@ -79,7 +79,7 @@ goog.scope(() => {
      * @param {!function(vivliostyle.logging.ErrorInfo):void} listener
      */
     Logger.prototype.addListener = function(level, listener) {
-        var listeners = this.listeners[level];
+        let listeners = this.listeners[level];
         if (!listeners) {
             listeners = this.listeners[level] = [];
         }
@@ -91,8 +91,8 @@ goog.scope(() => {
      * @returns {!vivliostyle.logging.ErrorInfo}
      */
     function argumentsToErrorInfo(args) {
-        var a = Array.from(args);
-        var e = null;
+        const a = Array.from(args);
+        let e = null;
         if (a[0] instanceof Error) {
             e = a.shift();
         }
@@ -107,9 +107,9 @@ goog.scope(() => {
      * @returns {Array.<string>}
      */
     function buildMessageAndStackTrace(args) {
-        var e = args.error;
-        var stack = e && (e["frameTrace"] || e["stack"]);
-        var messages = [].concat(args["messages"]);
+        const e = args.error;
+        const stack = e && (e["frameTrace"] || e["stack"]);
+        let messages = [].concat(args["messages"]);
         if (e) {
             if (messages.length > 0) {
                 messages = messages.concat(["\n"]);
@@ -126,7 +126,7 @@ goog.scope(() => {
      * @param {...} var_args
      */
     Logger.prototype.debug = function(var_args) {
-        var args = argumentsToErrorInfo(arguments);
+        const args = argumentsToErrorInfo(arguments);
         this.consoleDebug(buildMessageAndStackTrace(args));
         this.triggerListeners(LogLevel.DEBUG, args);
     };
@@ -135,7 +135,7 @@ goog.scope(() => {
      * @param {...} var_args
      */
     Logger.prototype.info = function(var_args) {
-        var args = argumentsToErrorInfo(arguments);
+        const args = argumentsToErrorInfo(arguments);
         this.consoleInfo(buildMessageAndStackTrace(args));
         this.triggerListeners(LogLevel.INFO, args);
     };
@@ -144,7 +144,7 @@ goog.scope(() => {
      * @param {...} var_args
      */
     Logger.prototype.warn = function(var_args) {
-        var args = argumentsToErrorInfo(arguments);
+        const args = argumentsToErrorInfo(arguments);
         this.consoleWarn(buildMessageAndStackTrace(args));
         this.triggerListeners(LogLevel.WARN, args);
     };
@@ -153,7 +153,7 @@ goog.scope(() => {
      * @param {...} var_args
      */
     Logger.prototype.error = function(var_args) {
-        var args = argumentsToErrorInfo(arguments);
+        const args = argumentsToErrorInfo(arguments);
         this.consoleError(buildMessageAndStackTrace(args));
         this.triggerListeners(LogLevel.ERROR, args);
     };

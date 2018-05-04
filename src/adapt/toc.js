@@ -75,9 +75,9 @@ adapt.toc.TOCView.prototype.setAutoHeight = function(elem, depth) {
     if (depth-- == 0) {
         return;
     }
-    for (var c = elem.firstChild; c; c = c.nextSibling) {
+    for (let c = elem.firstChild; c; c = c.nextSibling) {
         if (c.nodeType == 1) {
-            var e = /** @type {Element} */ (c);
+            const e = /** @type {Element} */ (c);
             if (adapt.base.getCSSProperty(e, "height", "auto") != "auto") {
                 adapt.base.setCSSProperty(e, "height", "auto");
                 this.setAutoHeight(e, depth);
@@ -94,18 +94,18 @@ adapt.toc.TOCView.prototype.setAutoHeight = function(elem, depth) {
  * @param {Event} evt
  */
 adapt.toc.toggleNodeExpansion = evt => {
-    var elem = /** @type {Element} */ (evt.target);
-    var open = elem.textContent == adapt.toc.bulletClosed;
+    const elem = /** @type {Element} */ (evt.target);
+    const open = elem.textContent == adapt.toc.bulletClosed;
     elem.textContent = open ? adapt.toc.bulletOpen : adapt.toc.bulletClosed;
-    var tocNodeElem = /** @type {Element} */ (elem.parentNode);
-    var c = tocNodeElem.firstChild;
+    const tocNodeElem = /** @type {Element} */ (elem.parentNode);
+    let c = tocNodeElem.firstChild;
     while (c) {
         if (c.nodeType != 1) {
             c = c.nextSibling;
             continue;
         }
-        var ce = /** @type {HTMLElement} */ (c);
-        var adaptClass = ce.getAttribute("data-adapt-class");
+        const ce = /** @type {HTMLElement} */ (c);
+        const adaptClass = ce.getAttribute("data-adapt-class");
         if (adaptClass == "toc-container") {
             c = ce.firstChild;
             continue;
@@ -122,13 +122,13 @@ adapt.toc.toggleNodeExpansion = evt => {
  * @override
  */
 adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
-    var renderer = this.rendererFactory.makeCustomRenderer(xmldoc);
+    const renderer = this.rendererFactory.makeCustomRenderer(xmldoc);
     return (srcElem, viewParent, computedStyle) => {
-        var behavior = computedStyle["behavior"];
+        const behavior = computedStyle["behavior"];
         if (!behavior || (behavior.toString() != "toc-node" && behavior.toString() != "toc-container")) {
             return renderer(srcElem, viewParent, computedStyle);
         }
-        var adaptParentClass = viewParent.getAttribute("data-adapt-class");
+        const adaptParentClass = viewParent.getAttribute("data-adapt-class");
         if (adaptParentClass == "toc-node") {
             var button = /** @type {Element} */ (viewParent.firstChild);
             if (button.textContent != adapt.toc.bulletClosed) {
@@ -137,7 +137,7 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
                 button.addEventListener("click", adapt.toc.toggleNodeExpansion, false);
             }
         }
-        var element = viewParent.ownerDocument.createElement("div");
+        const element = viewParent.ownerDocument.createElement("div");
         element.setAttribute("data-adapt-process-children", "true");
         if (behavior.toString() == "toc-node") {
             var button = viewParent.ownerDocument.createElement("div");
@@ -176,17 +176,17 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
     if (this.page) {
         return adapt.task.newResult(/** @type {adapt.vtree.Page} */ (this.page));
     }
-    var self = this;
-    /** @type {!adapt.task.Frame.<adapt.vtree.Page>} */ var frame = adapt.task.newFrame("showTOC");
-    var page = new adapt.vtree.Page(elem, elem);
+    const self = this;
+    /** @type {!adapt.task.Frame.<adapt.vtree.Page>} */ const frame = adapt.task.newFrame("showTOC");
+    const page = new adapt.vtree.Page(elem, elem);
     this.page = page;
     this.store.load(this.url).then(xmldoc => {
-        var style = self.store.getStyleForDoc(xmldoc);
-        var viewportSize = style.sizeViewport(width, 100000, fontSize);
+        const style = self.store.getStyleForDoc(xmldoc);
+        const viewportSize = style.sizeViewport(width, 100000, fontSize);
         viewport = new adapt.vgen.Viewport(viewport.window, viewportSize.fontSize, viewport.root,
             viewportSize.width, viewportSize.height);
-        var customRenderer = self.makeCustomRenderer(xmldoc);
-        var instance = new adapt.ops.StyleInstance(style, xmldoc, self.lang,
+        const customRenderer = self.makeCustomRenderer(xmldoc);
+        const instance = new adapt.ops.StyleInstance(style, xmldoc, self.lang,
             viewport, self.clientLayout, self.fontMapper, customRenderer, self.fallbackMap, 0,
             self.documentURLTransformer, self.counterStore);
         self.instance = instance;
@@ -206,11 +206,11 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
  */
 adapt.toc.TOCView.prototype.hideTOC = function() {
     if (this.page) {
-        var page = this.page;
+        const page = this.page;
         this.page = null;
         this.instance = null;
         adapt.base.setCSSProperty(page.container, "visibility", "none");
-        var parent = page.container.parentNode;
+        const parent = page.container.parentNode;
         if (parent) {
             parent.removeChild(page.container);
         }

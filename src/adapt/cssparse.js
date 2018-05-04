@@ -91,7 +91,7 @@ adapt.cssparse.StylesheetFlavor = {
  * @return {adapt.css.Color}
  */
 adapt.cssparse.colorFromHash = text => {
-    var num = parseInt(text, 16);
+    let num = parseInt(text, 16);
     if (isNaN(num))
         throw new Error("E_CSS_COLOR");
     if (text.length == 6)
@@ -1015,7 +1015,7 @@ adapt.cssparse.Action = {
 adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
 
 ((() => {
-    var actionsBase = adapt.cssparse.actionsBase;
+    const actionsBase = adapt.cssparse.actionsBase;
     actionsBase[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.IDENT;
     actionsBase[adapt.csstok.TokenType.STAR] = adapt.cssparse.Action.SELECTOR_START;
     actionsBase[adapt.csstok.TokenType.HASH] = adapt.cssparse.Action.SELECTOR_START;
@@ -1025,17 +1025,17 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsBase[adapt.csstok.TokenType.AT] = adapt.cssparse.Action.AT;
     actionsBase[adapt.csstok.TokenType.C_BRC] = adapt.cssparse.Action.RULE_END;
     actionsBase[adapt.csstok.TokenType.EOF] = adapt.cssparse.Action.DONE;
-    var actionsStyleAttribute = adapt.cssparse.actionsStyleAttribute;
+    const actionsStyleAttribute = adapt.cssparse.actionsStyleAttribute;
     actionsStyleAttribute[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.PROP;
     actionsStyleAttribute[adapt.csstok.TokenType.EOF] = adapt.cssparse.Action.DONE;
-    var actionsSelectorStart = adapt.cssparse.actionsSelectorStart;
+    const actionsSelectorStart = adapt.cssparse.actionsSelectorStart;
     actionsSelectorStart[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.SELECTOR_NAME;
     actionsSelectorStart[adapt.csstok.TokenType.STAR] = adapt.cssparse.Action.SELECTOR_ANY;
     actionsSelectorStart[adapt.csstok.TokenType.HASH] = adapt.cssparse.Action.SELECTOR_ID;
     actionsSelectorStart[adapt.csstok.TokenType.CLASS] = adapt.cssparse.Action.SELECTOR_CLASS;
     actionsSelectorStart[adapt.csstok.TokenType.O_BRK] = adapt.cssparse.Action.SELECTOR_ATTR;
     actionsSelectorStart[adapt.csstok.TokenType.COLON] = adapt.cssparse.Action.SELECTOR_PSEUDOCLASS;
-    var actionsSelector = adapt.cssparse.actionsSelector;
+    const actionsSelector = adapt.cssparse.actionsSelector;
     actionsSelector[adapt.csstok.TokenType.GT] = adapt.cssparse.Action.SELECTOR_CHILD;
     actionsSelector[adapt.csstok.TokenType.PLUS] = adapt.cssparse.Action.SELECTOR_SIBLING;
     actionsSelector[adapt.csstok.TokenType.TILDE] = adapt.cssparse.Action.SELECTOR_FOLLOWING_SIBLING;
@@ -1048,7 +1048,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsSelector[adapt.csstok.TokenType.COLON] = adapt.cssparse.Action.SELECTOR_PSEUDOCLASS_1;
     actionsSelector[adapt.csstok.TokenType.COL_COL] = adapt.cssparse.Action.SELECTOR_PSEUDOELEM;
     actionsSelector[adapt.csstok.TokenType.COMMA] = adapt.cssparse.Action.SELECTOR_NEXT;
-    var actionsSelectorInFunc = adapt.cssparse.actionsSelectorInFunc;
+    const actionsSelectorInFunc = adapt.cssparse.actionsSelectorInFunc;
     actionsSelectorInFunc[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.SELECTOR_NAME_1;
     actionsSelectorInFunc[adapt.csstok.TokenType.STAR] = adapt.cssparse.Action.SELECTOR_ANY_1;
     actionsSelectorInFunc[adapt.csstok.TokenType.HASH] = adapt.cssparse.Action.SELECTOR_ID_1;
@@ -1056,7 +1056,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsSelectorInFunc[adapt.csstok.TokenType.O_BRK] = adapt.cssparse.Action.SELECTOR_ATTR_1;
     actionsSelectorInFunc[adapt.csstok.TokenType.C_PAR] = adapt.cssparse.Action.DONE;
     actionsSelectorInFunc[adapt.csstok.TokenType.COLON] = adapt.cssparse.Action.SELECTOR_PSEUDOCLASS_1;
-    var actionsSelectorCont = adapt.cssparse.actionsSelectorCont;
+    const actionsSelectorCont = adapt.cssparse.actionsSelectorCont;
     actionsSelectorCont[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.SELECTOR_NAME;
     actionsSelectorCont[adapt.csstok.TokenType.STAR] = adapt.cssparse.Action.SELECTOR_ANY;
     actionsSelectorCont[adapt.csstok.TokenType.HASH] = adapt.cssparse.Action.SELECTOR_ID;
@@ -1065,7 +1065,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsSelectorCont[adapt.csstok.TokenType.COL_COL] = adapt.cssparse.Action.SELECTOR_PSEUDOELEM;
     actionsSelectorCont[adapt.csstok.TokenType.O_BRK] = adapt.cssparse.Action.SELECTOR_ATTR;
     actionsSelectorCont[adapt.csstok.TokenType.O_BRC] = adapt.cssparse.Action.SELECTOR_BODY;
-    var actionsPropVal = adapt.cssparse.actionsPropVal;
+    const actionsPropVal = adapt.cssparse.actionsPropVal;
     actionsPropVal[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.VAL_IDENT;
     actionsPropVal[adapt.csstok.TokenType.HASH] = adapt.cssparse.Action.VAL_HASH;
     actionsPropVal[adapt.csstok.TokenType.NUM] = adapt.cssparse.Action.VAL_NUM;
@@ -1082,7 +1082,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsPropVal[adapt.csstok.TokenType.BANG] = adapt.cssparse.Action.VAL_BANG;
     actionsPropVal[adapt.csstok.TokenType.PLUS] = adapt.cssparse.Action.VAL_PLUS;
     actionsPropVal[adapt.csstok.TokenType.EOF] = adapt.cssparse.Action.VAL_FINISH;
-    var actionsExprVal = adapt.cssparse.actionsExprVal;
+    const actionsExprVal = adapt.cssparse.actionsExprVal;
     actionsExprVal[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.EXPR_IDENT;
     actionsExprVal[adapt.csstok.TokenType.NUM] = adapt.cssparse.Action.EXPR_NUM;
     actionsExprVal[adapt.csstok.TokenType.INT] = adapt.cssparse.Action.EXPR_NUM;
@@ -1093,7 +1093,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsExprVal[adapt.csstok.TokenType.BANG] = adapt.cssparse.Action.EXPR_PREFIX;
     actionsExprVal[adapt.csstok.TokenType.MINUS] = adapt.cssparse.Action.EXPR_PREFIX;
     actionsExprVal[adapt.csstok.TokenType.DOLLAR] = adapt.cssparse.Action.EXPR_PARAM;
-    var actionsExprOp = adapt.cssparse.actionsExprOp;
+    const actionsExprOp = adapt.cssparse.actionsExprOp;
     actionsExprOp[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.EXPR_INFIX_NAME;
     actionsExprOp[adapt.csstok.TokenType.COMMA] = adapt.cssparse.Action.EXPR_INFIX;
     actionsExprOp[adapt.csstok.TokenType.GT] = adapt.cssparse.Action.EXPR_INFIX;
@@ -1114,7 +1114,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsExprOp[adapt.csstok.TokenType.C_PAR] = adapt.cssparse.Action.EXPR_C_PAR;
     actionsExprOp[adapt.csstok.TokenType.O_BRC] = adapt.cssparse.Action.EXPR_O_BRC;
     actionsExprOp[adapt.csstok.TokenType.SEMICOL] = adapt.cssparse.Action.EXPR_SEMICOL;
-    var actionsError = adapt.cssparse.actionsError;
+    const actionsError = adapt.cssparse.actionsError;
     actionsError[adapt.csstok.TokenType.EOF] = adapt.cssparse.Action.DONE;
     actionsError[adapt.csstok.TokenType.O_BRC] = adapt.cssparse.Action.ERROR_PUSH;
     actionsError[adapt.csstok.TokenType.C_BRC] = adapt.cssparse.Action.ERROR_POP;
@@ -1123,7 +1123,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsError[adapt.csstok.TokenType.O_PAR] = adapt.cssparse.Action.ERROR_PUSH;
     actionsError[adapt.csstok.TokenType.C_PAR] = adapt.cssparse.Action.ERROR_POP;
     actionsError[adapt.csstok.TokenType.SEMICOL] = adapt.cssparse.Action.ERROR_SEMICOL;
-    var actionsErrorDecl = adapt.cssparse.actionsErrorDecl;
+    const actionsErrorDecl = adapt.cssparse.actionsErrorDecl;
     actionsErrorDecl[adapt.csstok.TokenType.EOF] = adapt.cssparse.Action.DONE;
     actionsErrorDecl[adapt.csstok.TokenType.O_BRC] = adapt.cssparse.Action.ERROR_PUSH;
     actionsErrorDecl[adapt.csstok.TokenType.C_BRC] = adapt.cssparse.Action.ERROR_POP_DECL;
@@ -1132,7 +1132,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsErrorDecl[adapt.csstok.TokenType.O_PAR] = adapt.cssparse.Action.ERROR_PUSH;
     actionsErrorDecl[adapt.csstok.TokenType.C_PAR] = adapt.cssparse.Action.ERROR_POP;
     actionsErrorDecl[adapt.csstok.TokenType.SEMICOL] = adapt.cssparse.Action.ERROR_SEMICOL;
-    var actionsErrorSelector = adapt.cssparse.actionsErrorSelector;
+    const actionsErrorSelector = adapt.cssparse.actionsErrorSelector;
     actionsErrorSelector[adapt.csstok.TokenType.EOF] = adapt.cssparse.Action.DONE;
     actionsErrorSelector[adapt.csstok.TokenType.O_BRC] = adapt.cssparse.Action.ERROR_PUSH;
     actionsErrorSelector[adapt.csstok.TokenType.C_BRC] = adapt.cssparse.Action.ERROR_POP;
@@ -1141,7 +1141,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsErrorSelector[adapt.csstok.TokenType.O_PAR] = adapt.cssparse.Action.ERROR_PUSH;
     actionsErrorSelector[adapt.csstok.TokenType.C_PAR] = adapt.cssparse.Action.ERROR_POP;
 
-    var priority = adapt.cssparse.priority;
+    const priority = adapt.cssparse.priority;
     priority[adapt.csstok.TokenType.C_PAR] = 0;
     priority[adapt.csstok.TokenType.COMMA] = 0;
     priority[adapt.csstok.TokenType.QMARK] = 1;
@@ -1208,8 +1208,8 @@ adapt.cssparse.Parser = function(actions, tokenizer, handler, baseURL) {
  * @return {Array.<adapt.css.Val>}
  */
 adapt.cssparse.Parser.prototype.extractVals = function(sep, index) {
-    /** @type {Array.<adapt.css.Val>} */ var arr = [];
-    var valStack = this.valStack;
+    /** @type {Array.<adapt.css.Val>} */ const arr = [];
+    const valStack = this.valStack;
     while (true) {
         arr.push(/** @type {adapt.css.Val} */(valStack[index++]));
         if (index == valStack.length)
@@ -1226,14 +1226,14 @@ adapt.cssparse.Parser.prototype.extractVals = function(sep, index) {
  * @return {adapt.css.Val}
  */
 adapt.cssparse.Parser.prototype.valStackReduce = function(sep, token) {
-    var valStack = this.valStack;
-    var index = valStack.length;
-    var v;
+    const valStack = this.valStack;
+    let index = valStack.length;
+    let v;
     do {
         v = valStack[--index];
     }
     while (typeof v != "undefined" && typeof v != "string");
-    var count = valStack.length - (index + 1);
+    let count = valStack.length - (index + 1);
     if (count > 1)
         valStack.splice(index + 1, count,
             new adapt.css.SpaceList(valStack.slice(index + 1, valStack.length)));
@@ -1250,7 +1250,7 @@ adapt.cssparse.Parser.prototype.valStackReduce = function(sep, token) {
             this.actions = adapt.cssparse.actionsErrorDecl;
             return null;
         }
-        var func = new adapt.css.Func(/** @type {string} */ (valStack[index - 1]),
+        const func = new adapt.css.Func(/** @type {string} */ (valStack[index - 1]),
             this.extractVals(",", index + 1));
         valStack.splice(index - 1, count + 2, func);
         return null;
@@ -1280,14 +1280,14 @@ adapt.cssparse.Parser.prototype.exprError = function(mnemonics, token) {
  * @return {boolean}
  */
 adapt.cssparse.Parser.prototype.exprStackReduce = function(op, token) {
-    var valStack = this.valStack;
-    var handler = this.handler;
-    var val = /** @type {adapt.expr.Val} */ (valStack.pop());
-    /** @type {adapt.expr.Val} */ var val2;
+    const valStack = this.valStack;
+    const handler = this.handler;
+    let val = /** @type {adapt.expr.Val} */ (valStack.pop());
+    /** @type {adapt.expr.Val} */ let val2;
     while (true) {
-        var tok = valStack.pop();
+        let tok = valStack.pop();
         if (op == adapt.csstok.TokenType.C_PAR) {
-            /** @type {Array.<adapt.expr.Val>} */ var args = [val];
+            /** @type {Array.<adapt.expr.Val>} */ const args = [val];
             while (tok == adapt.csstok.TokenType.COMMA) {
                 args.unshift(valStack.pop());
                 tok = valStack.pop();
@@ -1296,17 +1296,17 @@ adapt.cssparse.Parser.prototype.exprStackReduce = function(op, token) {
                 if (tok == "{") {
                     // reached CSS portion of the stack
                     while (args.length >= 2) {
-                        var e1 = args.shift();
-                        var e2 = args.shift();
-                        var er = new adapt.expr.OrMedia(handler.getScope(), e1, e2);
+                        const e1 = args.shift();
+                        const e2 = args.shift();
+                        const er = new adapt.expr.OrMedia(handler.getScope(), e1, e2);
                         args.unshift(er);
                     }
                     valStack.push(new adapt.css.Expr(args[0]));
                     return true;
                 } else if (tok == "(") {
                     // call
-                    var name2 = /** @type {string} */ (valStack.pop());
-                    var name1 = /** @type {?string} */ (valStack.pop());
+                    const name2 = /** @type {string} */ (valStack.pop());
+                    const name1 = /** @type {?string} */ (valStack.pop());
                     val = new adapt.expr.Call(handler.getScope(),
                         adapt.expr.makeQualifiedName(name1, name2), args);
                     op = adapt.csstok.TokenType.EOF;
@@ -1437,9 +1437,9 @@ adapt.cssparse.Parser.prototype.exprStackReduce = function(op, token) {
  * @return {Array.<number|string>}
  */
 adapt.cssparse.Parser.prototype.readPseudoParams = function() {
-    var arr = [];
+    const arr = [];
     while (true) {
-        var token = this.tokenizer.token();
+        const token = this.tokenizer.token();
         switch (token.type) {
             case adapt.csstok.TokenType.IDENT:
                 arr.push(token.text);
@@ -1464,9 +1464,9 @@ adapt.cssparse.Parser.prototype.readPseudoParams = function() {
  * @return {?Array<number>}
  */
 adapt.cssparse.Parser.prototype.readNthPseudoParams = function() {
-    var hasLeadingPlus = false;
+    let hasLeadingPlus = false;
 
-    var token = this.tokenizer.token();
+    let token = this.tokenizer.token();
 
     if (token.type === adapt.csstok.TokenType.PLUS) {
         // '+'
@@ -1501,12 +1501,12 @@ adapt.cssparse.Parser.prototype.readNthPseudoParams = function() {
                 if (token.type === adapt.csstok.TokenType.NUMERIC) {
                     a = token.num;
                 }
-                var b = 0;
+                let b = 0;
 
                 this.tokenizer.consume();
                 token = this.tokenizer.token();
-                var hasMinusSign = token.type === adapt.csstok.TokenType.MINUS;
-                var hasSign = token.type === adapt.csstok.TokenType.PLUS || hasMinusSign;
+                const hasMinusSign = token.type === adapt.csstok.TokenType.MINUS;
+                const hasSign = token.type === adapt.csstok.TokenType.PLUS || hasMinusSign;
                 if (hasSign) {
                     // 'an +b', 'an - b'
                     this.tokenizer.consume();
@@ -1553,7 +1553,7 @@ adapt.cssparse.Parser.prototype.readNthPseudoParams = function() {
                     }
                 }
             } else {
-                var r = token.text.match(/^n(-[0-9]+)$/);
+                let r = token.text.match(/^n(-[0-9]+)$/);
                 if (r) {
                     // 'n-b', 'an-b'
                     if (hasLeadingPlus && token.precededBySpace) {
@@ -1587,14 +1587,14 @@ adapt.cssparse.Parser.prototype.readNthPseudoParams = function() {
  * @return {adapt.css.Expr}
  */
 adapt.cssparse.Parser.prototype.makeCondition = function(classes, condition) {
-    var scope = this.handler.getScope();
+    const scope = this.handler.getScope();
     if (!scope)
         return null;
     condition = condition || scope._true;
     if (classes) {
-        var classList = classes.split(/\s+/);
-        for (var i = 0; i < classList.length; i++) {
-            var className = classList[i];
+        const classList = classes.split(/\s+/);
+        for (let i = 0; i < classList.length; i++) {
+            const className = classList[i];
             switch (className) {
                 case "vertical":
                     condition = adapt.expr.and(scope, condition, new adapt.expr.Not(scope, new adapt.expr.Named(scope, "pref-horizontal")));
@@ -1641,17 +1641,17 @@ adapt.cssparse.Parser.prototype.isInsidePropertyOnlyRule = function() {
  * @return {boolean}
  */
 adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsingStyleAttr, parsingMediaQuery, parsingFunctionParam) {
-    var handler = this.handler;
-    var tokenizer = this.tokenizer;
-    var valStack = this.valStack;
+    const handler = this.handler;
+    const tokenizer = this.tokenizer;
+    const valStack = this.valStack;
 
-    /** @type {adapt.csstok.Token} */ var token;
-    /** @type {adapt.csstok.Token} */ var token1;
-    /** @type {?string} */ var ns;
-    /** @type {?string} */ var text;
-    /** @type {number} */ var num;
-    /** @type {adapt.css.Val} */ var val;
-    /** @type {Array.<number|string>} */ var params;
+    /** @type {adapt.csstok.Token} */ let token;
+    /** @type {adapt.csstok.Token} */ let token1;
+    /** @type {?string} */ let ns;
+    /** @type {?string} */ let text;
+    /** @type {number} */ let num;
+    /** @type {adapt.css.Val} */ let val;
+    /** @type {Array.<number|string>} */ let params;
 
     if (parsingMediaQuery) {
         this.exprContext = adapt.cssparse.ExprContext.MEDIA;
@@ -2515,9 +2515,9 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                     case "-epubx-partition-group":
                         tokenizer.consume();
                         token = tokenizer.token();
-                        /** @type {?string} */ var ruleName = null;
-                        /** @type {?string} */ var rulePseudoName = null;
-                        /** @type {Array.<string>} */ var classes = [];
+                        /** @type {?string} */ let ruleName = null;
+                        /** @type {?string} */ let rulePseudoName = null;
+                        /** @type {Array.<string>} */ const classes = [];
                         if (token.type == adapt.csstok.TokenType.IDENT) {
                             ruleName = token.text;
                             tokenizer.consume();
@@ -2690,11 +2690,11 @@ adapt.cssparse.ErrorHandler.prototype.getScope = function() {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.cssparse.parseStylesheet = (tokenizer, handler, baseURL, classes, media) => {
-    /** @type {adapt.task.Frame.<boolean>} */ var frame =
+    /** @type {adapt.task.Frame.<boolean>} */ const frame =
         adapt.task.newFrame("parseStylesheet");
-    var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsBase, tokenizer, handler, baseURL);
+    const parser = new adapt.cssparse.Parser(adapt.cssparse.actionsBase, tokenizer, handler, baseURL);
 
-    var condition = null;
+    let condition = null;
     if (media) {
         condition = adapt.cssparse.parseMediaQuery(new adapt.csstok.Tokenizer(media, handler), handler, baseURL);
     }
@@ -2706,12 +2706,12 @@ adapt.cssparse.parseStylesheet = (tokenizer, handler, baseURL, classes, media) =
     frame.loop(() => {
         while (!parser.runParser(100, false, false, false, false)) {
             if (parser.importReady) {
-                var resolvedURL = adapt.base.resolveURL(/** @type {string} */ (parser.importURL), baseURL);
+                const resolvedURL = adapt.base.resolveURL(/** @type {string} */ (parser.importURL), baseURL);
                 if (parser.importCondition) {
                     handler.startMediaRule(parser.importCondition);
                     handler.startRuleBody();
                 }
-                /** @type {adapt.task.Frame.<boolean>} */ var innerFrame =
+                /** @type {adapt.task.Frame.<boolean>} */ const innerFrame =
                     adapt.task.newFrame("parseStylesheet.import");
                 adapt.cssparse.parseStylesheetFromURL(resolvedURL, handler, null, null).then(() => {
                     if (parser.importCondition) {
@@ -2724,7 +2724,7 @@ adapt.cssparse.parseStylesheet = (tokenizer, handler, baseURL, classes, media) =
                 });
                 return innerFrame.result();
             }
-            var r = frame.timeSlice();
+            const r = frame.timeSlice();
             if (r.isPending)
                 return r;
         }
@@ -2747,7 +2747,7 @@ adapt.cssparse.parseStylesheet = (tokenizer, handler, baseURL, classes, media) =
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.cssparse.parseStylesheetFromText = (text, handler, baseURL, classes, media) => adapt.task.handle("parseStylesheetFromText", frame => {
-    var tok = new adapt.csstok.Tokenizer(text, handler);
+    const tok = new adapt.csstok.Tokenizer(text, handler);
     adapt.cssparse.parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
 }, (frame, err) => {
     vivliostyle.logging.logger.warn(err, "Failed to parse stylesheet text: " + text);
@@ -2764,7 +2764,7 @@ adapt.cssparse.parseStylesheetFromText = (text, handler, baseURL, classes, media
 adapt.cssparse.parseStylesheetFromURL = (url, handler, classes, media) => adapt.task.handle("parseStylesheetFromURL",
     frame => {
         adapt.net.ajax(url).then(xhrParam => {
-            var xhr = /** @type {XMLHttpRequest} */ (xhrParam);
+            const xhr = /** @type {XMLHttpRequest} */ (xhrParam);
             if (!xhr.responseText) {
                 frame.finish(true);
             } else {
@@ -2791,7 +2791,7 @@ adapt.cssparse.parseStylesheetFromURL = (url, handler, classes, media) => adapt.
  * @return {adapt.css.Val}
  */
 adapt.cssparse.parseValue = (scope, tokenizer, baseURL) => {
-    var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsPropVal, tokenizer,
+    const parser = new adapt.cssparse.Parser(adapt.cssparse.actionsPropVal, tokenizer,
         new adapt.cssparse.ErrorHandler(scope), baseURL);
     parser.runParser(Number.POSITIVE_INFINITY, true, false, false, false);
     return parser.result;
@@ -2804,7 +2804,7 @@ adapt.cssparse.parseValue = (scope, tokenizer, baseURL) => {
  * @return {void}
  */
 adapt.cssparse.parseStyleAttribute = (tokenizer, handler, baseURL) => {
-    var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsStyleAttribute, tokenizer,
+    const parser = new adapt.cssparse.Parser(adapt.cssparse.actionsStyleAttribute, tokenizer,
         handler, baseURL);
     parser.runParser(Number.POSITIVE_INFINITY, false, true, false, false);
 };
@@ -2816,7 +2816,7 @@ adapt.cssparse.parseStyleAttribute = (tokenizer, handler, baseURL) => {
  * @return {adapt.css.Expr}
  */
 adapt.cssparse.parseMediaQuery = (tokenizer, handler, baseURL) => {
-    var parser = new adapt.cssparse.Parser(adapt.cssparse.actionsExprVal, tokenizer, handler, baseURL);
+    const parser = new adapt.cssparse.Parser(adapt.cssparse.actionsExprVal, tokenizer, handler, baseURL);
     parser.runParser(Number.POSITIVE_INFINITY, false, false, true, false);
     return /** @type {adapt.css.Expr} */ (parser.result);
 };
@@ -2847,7 +2847,7 @@ adapt.cssparse.takesOnlyNum = propName => !!adapt.cssparse.numProp[propName];
  * @return {adapt.css.Val} val
  */
 adapt.cssparse.evaluateExprToCSS = (context, val, propName) => {
-    var result = val.evaluate(context);
+    const result = val.evaluate(context);
     switch (typeof result) {
         case "number" :
             if (!adapt.cssparse.takesOnlyNum(propName))

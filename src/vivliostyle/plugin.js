@@ -130,7 +130,7 @@ goog.scope(() => {
         "POST_LAYOUT_BLOCK": "POST_LAYOUT_BLOCK"
     };
 
-    /** @const */ var HOOKS = vivliostyle.plugin.HOOKS;
+    /** @const */ const HOOKS = vivliostyle.plugin.HOOKS;
 
     /**
      * @typedef {function(Document)}
@@ -208,7 +208,7 @@ goog.scope(() => {
         if (!HOOKS[name]) {
             vivliostyle.logging.logger.warn(new Error("Skipping unknown plugin hook '" + name + "'."));
         } else {
-            var hooksForName = vivliostyle.plugin.hooks[name];
+            let hooksForName = vivliostyle.plugin.hooks[name];
             if (!hooksForName) {
                 hooksForName = vivliostyle.plugin.hooks[name] = [];
             }
@@ -226,9 +226,9 @@ goog.scope(() => {
         if (!HOOKS[name]) {
             vivliostyle.logging.logger.warn(new Error("Ignoring unknown plugin hook '" + name + "'."));
         } else {
-            var hooksForName = vivliostyle.plugin.hooks[name];
+            const hooksForName = vivliostyle.plugin.hooks[name];
             if (hooksForName) {
-                var index = hooksForName.indexOf(fn);
+                const index = hooksForName.indexOf(fn);
                 if (index >= 0) {
                     hooksForName.splice(index, 1);
                 }
@@ -243,7 +243,7 @@ goog.scope(() => {
      * @returns {!Array.<!function(...)>}
      */
     vivliostyle.plugin.getHooksForName = name => {
-        var hooksForName = vivliostyle.plugin.hooks[name];
+        const hooksForName = vivliostyle.plugin.hooks[name];
         return hooksForName || [];
     };
 

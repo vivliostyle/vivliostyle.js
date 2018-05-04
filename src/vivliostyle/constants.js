@@ -35,7 +35,7 @@ goog.scope(() => {
         LTR: "ltr",
         RTL: "rtl"
     };
-    var PageProgression = vivliostyle.constants.PageProgression;
+    const PageProgression = vivliostyle.constants.PageProgression;
 
     /**
      * Return PageProgressino corresponding to the specified string
@@ -65,7 +65,7 @@ goog.scope(() => {
         LEFT: "left",
         RIGHT: "right"
     };
-    var PageSide = vivliostyle.constants.PageSide;
+    const PageSide = vivliostyle.constants.PageSide;
     vivliostyle.namespace.exportSymbol("vivliostyle.constants.PageSide", PageSide);
     goog.exportProperty(PageSide, "LEFT", PageSide.LEFT);
     goog.exportProperty(PageSide, "RIGHT", PageSide.RIGHT);
@@ -79,7 +79,7 @@ goog.scope(() => {
         INTERACTIVE: "interactive",
         COMPLETE: "complete"
     };
-    var ReadyState = vivliostyle.constants.ReadyState;
+    const ReadyState = vivliostyle.constants.ReadyState;
     vivliostyle.namespace.exportSymbol("vivliostyle.constants.ReadyState", ReadyState);
     goog.exportProperty(ReadyState, "LOADING", ReadyState.LOADING);
     goog.exportProperty(ReadyState, "INTERACTIVE", ReadyState.INTERACTIVE);

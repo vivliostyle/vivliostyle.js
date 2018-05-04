@@ -31,8 +31,8 @@ goog.scope(() => {
      * @returns {!{name: string, value: !adapt.css.Val, important: boolean}}
      */
     vivliostyle.break.convertPageBreakAliases = original => {
-        var name = original["name"];
-        var value = original["value"];
+        const name = original["name"];
+        const value = original["value"];
         switch (name) {
             case "page-break-before":
             case "page-break-after":
@@ -105,8 +105,8 @@ goog.scope(() => {
         } else if (!second) {
             return first;
         } else {
-            var firstIsForcedBreakValue = vivliostyle.break.isForcedBreakValue(first);
-            var secondIsForcedBreakValue = vivliostyle.break.isForcedBreakValue(second);
+            const firstIsForcedBreakValue = vivliostyle.break.isForcedBreakValue(first);
+            const secondIsForcedBreakValue = vivliostyle.break.isForcedBreakValue(second);
             if (firstIsForcedBreakValue && secondIsForcedBreakValue) {
                 switch (second) {
                     case "column":

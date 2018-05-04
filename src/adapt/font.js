@@ -51,8 +51,8 @@ adapt.font.bogusFontCounter = 1;
  * @return {string}
  */
 adapt.font.makeFontTraitKey = properties => {
-    var sb = new adapt.base.StringBuffer();
-    for (var prop in adapt.font.traitProps) {
+    const sb = new adapt.base.StringBuffer();
+    for (const prop in adapt.font.traitProps) {
         sb.append(" ");
         sb.append(properties[prop].toString());
     }
@@ -63,7 +63,7 @@ adapt.font.makeFontTraitKey = properties => {
  * @param {Object.<string,adapt.css.Val>} properties
  */
 adapt.font.fillDefaults = properties => {
-    for (var prop in adapt.font.traitProps) {
+    for (const prop in adapt.font.traitProps) {
         if (!properties[prop])
             properties[prop] = adapt.font.traitProps[prop];
     }
@@ -76,8 +76,8 @@ adapt.font.fillDefaults = properties => {
  * @return {Object.<string,adapt.css.Val>}
  */
 adapt.font.prepareProperties = (properties, context) => {
-    var result = /** @type {Object.<string,adapt.css.Val>} */ ({});
-    for (var prop in properties) {
+    const result = /** @type {Object.<string,adapt.css.Val>} */ ({});
+    for (const prop in properties) {
         result[prop] = adapt.csscasc.getProp(properties, prop).evaluate(context, prop);
     }
     adapt.font.fillDefaults(result);
@@ -95,7 +95,7 @@ adapt.font.Face = function(properties) {
     /** @const */ this.src = this.properties["src"] ? this.properties["src"].toString() : null;
     /** @type {Array.<string>} */ this.blobURLs = [];
     /** @type {Array.<Blob>} */ this.blobs = [];
-    var family = this.properties["font-family"];
+    const family = this.properties["font-family"];
     /** @const */ this.family = family ? family.stringValue() : null;
 };
 
@@ -115,11 +115,11 @@ adapt.font.Face.prototype.traitsEqual = function(other) {
  * @return {string}
  */
 adapt.font.Face.prototype.makeAtRule = function(src, fontBytes) {
-    var sb = new adapt.base.StringBuffer();
+    const sb = new adapt.base.StringBuffer();
     sb.append('@font-face {\n  font-family: ');
     sb.append(/** @type {string} */ (this.family));
     sb.append(';\n  ');
-    for (var prop in adapt.font.traitProps) {
+    for (const prop in adapt.font.traitProps) {
         sb.append(prop);
         sb.append(': ');
         this.properties[prop].appendTo(sb, true);
@@ -127,7 +127,7 @@ adapt.font.Face.prototype.makeAtRule = function(src, fontBytes) {
     }
     if (fontBytes) {
         sb.append('src: url("');
-        var blobURL = adapt.net.createObjectURL(fontBytes);
+        const blobURL = adapt.net.createObjectURL(fontBytes);
         sb.append(blobURL);
         this.blobURLs.push(blobURL);
         this.blobs.push(fontBytes);
@@ -161,9 +161,9 @@ adapt.font.DocumentFaces = function(deobfuscator) {
  * @return {void}
  */
 adapt.font.DocumentFaces.prototype.registerFamily = function(srcFace, viewFace) {
-    var srcFamily = /** @type {string} */ (srcFace.family);
-    var viewFamilyFromSrc = this.familyMap[srcFamily];
-    var viewFamilyFromView = viewFace.family;
+    const srcFamily = /** @type {string} */ (srcFace.family);
+    const viewFamilyFromSrc = this.familyMap[srcFamily];
+    const viewFamilyFromView = viewFace.family;
     if (viewFamilyFromSrc) {
         if (viewFamilyFromSrc != viewFamilyFromView)
             throw new Error("E_FONT_FAMILY_INCONSISTENT " + srcFace.family);
@@ -178,11 +178,11 @@ adapt.font.DocumentFaces.prototype.registerFamily = function(srcFace, viewFace) 
  */
 adapt.font.DocumentFaces.prototype.filterFontFamily = function(val) {
     if (val instanceof adapt.css.CommaList) {
-        var list = (/** @type {adapt.css.CommaList} */ (val)).values;
-        var newValues = /** @type {Array.<adapt.css.Val>} */ ([]);
-        for (var i = 0; i < list.length; i++) {
-            var v = list[i];
-            var r = this.familyMap[v.stringValue()];
+        const list = (/** @type {adapt.css.CommaList} */ (val)).values;
+        const newValues = /** @type {Array.<adapt.css.Val>} */ ([]);
+        for (let i = 0; i < list.length; i++) {
+            const v = list[i];
+            const r = this.familyMap[v.stringValue()];
             if (r) {
                 newValues.push(adapt.css.getName(r));
             }
@@ -190,7 +190,7 @@ adapt.font.DocumentFaces.prototype.filterFontFamily = function(val) {
         }
         return new adapt.css.CommaList(newValues);
     } else {
-        var rf = this.familyMap[val.stringValue()];
+        const rf = this.familyMap[val.stringValue()];
         if (rf) {
             return new adapt.css.CommaList([adapt.css.getName(rf), val]);
         }
@@ -225,8 +225,8 @@ adapt.font.Mapper = function(head, body, opt_familyPrefix) {
  * @return {string}
  */
 adapt.font.Mapper.prototype.getViewFontFamily = function(srcFace, documentFaces) {
-    var srcFamily = /** @type {string} */ (srcFace.family);
-    var viewFamily = documentFaces.familyMap[srcFamily];
+    const srcFamily = /** @type {string} */ (srcFace.family);
+    let viewFamily = documentFaces.familyMap[srcFamily];
     if (viewFamily) {
         return viewFamily;
     }
@@ -243,45 +243,45 @@ adapt.font.Mapper.prototype.getViewFontFamily = function(srcFace, documentFaces)
  * @return {!adapt.task.Result.<adapt.font.Face>}
  */
 adapt.font.Mapper.prototype.initFont = function(srcFace, fontBytes, documentFaces) {
-    /** @type {adapt.task.Frame.<adapt.font.Face>} */ var frame =
+    /** @type {adapt.task.Frame.<adapt.font.Face>} */ const frame =
         adapt.task.newFrame("initFont");
-    var self = this;
-    var src = /** @type {string} */ (srcFace.src);
-    var props = /** @type {Object.<string,adapt.css.Val>} */ ({});
-    for (var prop in adapt.font.traitProps) {
+    const self = this;
+    const src = /** @type {string} */ (srcFace.src);
+    const props = /** @type {Object.<string,adapt.css.Val>} */ ({});
+    for (const prop in adapt.font.traitProps) {
         props[prop] = srcFace.properties[prop];
     }
-    var fontFamily = self.getViewFontFamily(srcFace, documentFaces);
+    const fontFamily = self.getViewFontFamily(srcFace, documentFaces);
     props["font-family"] = adapt.css.getName(fontFamily);
-    var viewFontFace = new adapt.font.Face(props);
-    var probe = /** @type {HTMLElement} */ (self.body.ownerDocument.createElement("span"));
+    const viewFontFace = new adapt.font.Face(props);
+    const probe = /** @type {HTMLElement} */ (self.body.ownerDocument.createElement("span"));
     probe.textContent = "M";
-    var killTime = (new Date()).valueOf() + 1000;
-    var style = self.head.ownerDocument.createElement("style");
-    var bogusData = adapt.font.bogusFontData + (adapt.font.bogusFontCounter++);
+    const killTime = (new Date()).valueOf() + 1000;
+    const style = self.head.ownerDocument.createElement("style");
+    const bogusData = adapt.font.bogusFontData + (adapt.font.bogusFontCounter++);
     style.textContent = viewFontFace.makeAtRule("", adapt.net.makeBlob([bogusData]));
     self.head.appendChild(style);
     self.body.appendChild(probe);
     probe.style.visibility = "hidden";
     probe.style.fontFamily = fontFamily;
-    for (var pname in adapt.font.traitProps) {
+    for (const pname in adapt.font.traitProps) {
         adapt.base.setCSSProperty(probe, pname, props[pname].toString());
     }
-    var rect = probe.getBoundingClientRect();
-    var initWidth = rect.right - rect.left;
-    var initHeight = rect.bottom - rect.top;
+    const rect = probe.getBoundingClientRect();
+    const initWidth = rect.right - rect.left;
+    const initHeight = rect.bottom - rect.top;
     style.textContent = viewFontFace.makeAtRule(src, fontBytes);
     vivliostyle.logging.logger.info("Starting to load font:", src);
-    var loaded = false;
+    let loaded = false;
     frame.loop(() => {
-        var rect = probe.getBoundingClientRect();
-        var currWidth = rect.right - rect.left;
-        var currHeight = rect.bottom - rect.top;
+        const rect = probe.getBoundingClientRect();
+        const currWidth = rect.right - rect.left;
+        const currHeight = rect.bottom - rect.top;
         if (initWidth != currWidth || initHeight != currHeight) {
             loaded = true;
             return adapt.task.newResult(false);
         }
-        var currTime = (new Date()).valueOf();
+        const currTime = (new Date()).valueOf();
         if (currTime > killTime) {
             return adapt.task.newResult(false);
         }
@@ -304,12 +304,12 @@ adapt.font.Mapper.prototype.initFont = function(srcFace, fontBytes, documentFace
  * @return {!adapt.taskutil.Fetcher.<adapt.font.Face>}
  */
 adapt.font.Mapper.prototype.loadFont = function(srcFace, documentFaces) {
-    var src = /** @type {string} */ (srcFace.src);
-    var fetcher = this.srcURLMap[src];
-    var self = this;
+    const src = /** @type {string} */ (srcFace.src);
+    let fetcher = this.srcURLMap[src];
+    const self = this;
     if (fetcher) {
         fetcher.piggyback(viewFaceParam => {
-            var viewFace = /** @type {adapt.font.Face} */ (viewFaceParam);
+            const viewFace = /** @type {adapt.font.Face} */ (viewFaceParam);
             if (!viewFace.traitsEqual(srcFace)) {
                 vivliostyle.logging.logger.warn("E_FONT_FACE_INCOMPATIBLE", srcFace.src);
             } else {
@@ -319,9 +319,9 @@ adapt.font.Mapper.prototype.loadFont = function(srcFace, documentFaces) {
         });
     } else {
         fetcher = new adapt.taskutil.Fetcher(() => {
-            /** @type {!adapt.task.Frame.<adapt.font.Face>} */ var frame =
+            /** @type {!adapt.task.Frame.<adapt.font.Face>} */ const frame =
                 adapt.task.newFrame("loadFont");
-            var deobfuscator = documentFaces.deobfuscator ? documentFaces.deobfuscator(src) : null;
+            const deobfuscator = documentFaces.deobfuscator ? documentFaces.deobfuscator(src) : null;
             if (deobfuscator) {
                 adapt.net.ajax(src, adapt.net.XMLHttpRequestResponseType.BLOB).then(xhr => {
                     if (!xhr.responseBlob) {
@@ -349,9 +349,9 @@ adapt.font.Mapper.prototype.loadFont = function(srcFace, documentFaces) {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.font.Mapper.prototype.findOrLoadFonts = function(srcFaces, documentFaces) {
-    var fetchers = /** @type {Array.<adapt.taskutil.Fetcher.<adapt.font.Face>>} */ ([]);
-    for (var i = 0; i < srcFaces.length; i++) {
-        var srcFace = srcFaces[i];
+    const fetchers = /** @type {Array.<adapt.taskutil.Fetcher.<adapt.font.Face>>} */ ([]);
+    for (let i = 0; i < srcFaces.length; i++) {
+        const srcFace = srcFaces[i];
         if (!srcFace.src || !srcFace.family) {
             vivliostyle.logging.logger.warn("E_FONT_FACE_INVALID");
             continue;

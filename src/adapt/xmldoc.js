@@ -47,8 +47,8 @@ adapt.xmldoc.XMLDocHolder = function(store, url, document) {
      * @const
      */
     this.root = document.documentElement;  // html element
-    var body = null;
-    var head = null;
+    let body = null;
+    let head = null;
     if (this.root.namespaceURI == adapt.base.NS.XHTML) {
         for (var child = this.root.firstChild; child; child = child.nextSibling) {
             if (child.nodeType != 1)
@@ -78,7 +78,7 @@ adapt.xmldoc.XMLDocHolder = function(store, url, document) {
                 }
             }
         }
-        var langs = this.doc().child("FictionBook").child("description")
+        const langs = this.doc().child("FictionBook").child("description")
             .child("title-info").child("lang").textContent();
         if (langs.length > 0) {
             this.lang = langs[0];
@@ -86,7 +86,7 @@ adapt.xmldoc.XMLDocHolder = function(store, url, document) {
     } else if (this.root.namespaceURI == adapt.base.NS.SSE) {
         // treat <meta> element as "head" of the document
         for (var elem = this.root.firstElementChild; elem; elem = elem.nextElementSibling) {
-            var localName = elem.localName;
+            const localName = elem.localName;
             if (localName === "meta") {
                 head = elem;
             } else if (localName === "body") {
@@ -121,13 +121,13 @@ adapt.xmldoc.XMLDocHolder.prototype.doc = function() {
  * @return {number}
  */
 adapt.xmldoc.XMLDocHolder.prototype.getElementOffset = function(element) {
-    var offsetStr = element.getAttribute(adapt.xmldoc.ELEMENT_OFFSET_ATTR);
+    const offsetStr = element.getAttribute(adapt.xmldoc.ELEMENT_OFFSET_ATTR);
     if (offsetStr)
         return parseInt(offsetStr, 10);
-    var offset = this.lastOffset;
-    var last = this.last;
+    let offset = this.lastOffset;
+    let last = this.last;
     while (last != element) {
-        var next = last.firstChild;
+        let next = last.firstChild;
         if (!next) {
             while (true) {
                 next = last.nextSibling;
@@ -140,7 +140,7 @@ adapt.xmldoc.XMLDocHolder.prototype.getElementOffset = function(element) {
         }
         last = next;
         if (next.nodeType == 1) {
-            var nextElement = /** @type {Element} */ (next);
+            const nextElement = /** @type {Element} */ (next);
             nextElement.setAttribute(adapt.xmldoc.ELEMENT_OFFSET_ATTR, offset.toString());
             ++offset;
         } else {
@@ -158,9 +158,9 @@ adapt.xmldoc.XMLDocHolder.prototype.getElementOffset = function(element) {
  * @param {boolean} after
  */
 adapt.xmldoc.XMLDocHolder.prototype.getNodeOffset = function(srcNode, offsetInNode, after) {
-    var extraOffset = 0;
-    var node = srcNode;
-    var prev = null;
+    let extraOffset = 0;
+    let node = srcNode;
+    let prev = null;
     if (node.nodeType == 1) {
         // after = true is only valid for elements
         if (!after)
@@ -211,22 +211,22 @@ adapt.xmldoc.XMLDocHolder.prototype.getTotalOffset = function() {
  * @return {Node} last node such that its offset is less or equal to the given
  */
 adapt.xmldoc.XMLDocHolder.prototype.getNodeByOffset = function(offset) {
-    var elementOffset;
+    let elementOffset;
     // First, find the last element in the document, such that
     // this.getElementOffset(element) <= offset; if offest matches
     // exactly, just return it.
-    var self = this;
-    var element = this.root;
+    const self = this;
+    let element = this.root;
     while (true) {
         elementOffset = this.getElementOffset(element);
         if (elementOffset >= offset)
             return element;
-        var children = element.children; // Element children
+        const children = element.children; // Element children
         if (!children)
             break;
-        var index = adapt.base.binarySearch(children.length, index => {
-            var child = children[index];
-            var childOffset = self.getElementOffset(child);
+        const index = adapt.base.binarySearch(children.length, index => {
+            const child = children[index];
+            const childOffset = self.getElementOffset(child);
             return childOffset > offset;
         });
         if (index == 0) {
@@ -234,7 +234,7 @@ adapt.xmldoc.XMLDocHolder.prototype.getNodeByOffset = function(offset) {
         }
         if (goog.DEBUG) {
             if (index < children.length) {
-                var elemOffset = self.getElementOffset(children[index]);
+                const elemOffset = self.getElementOffset(children[index]);
                 if (elemOffset <= offset)
                     throw new Error("Consistency check failed!");
             }
@@ -243,10 +243,10 @@ adapt.xmldoc.XMLDocHolder.prototype.getNodeByOffset = function(offset) {
     }
     // Now we have element with offset less than desired. Find following (non-element)
     // node with the right offset.
-    var nodeOffset = elementOffset + 1;
-    var node = element;
-    var next = node.firstChild || node.nextSibling;
-    var lastGood = null;
+    let nodeOffset = elementOffset + 1;
+    let node = element;
+    let next = node.firstChild || node.nextSibling;
+    let lastGood = null;
     while (true) {
         if (next) {
             if (next.nodeType == 1)
@@ -272,15 +272,15 @@ adapt.xmldoc.XMLDocHolder.prototype.getNodeByOffset = function(offset) {
  * @return {void}
  */
 adapt.xmldoc.XMLDocHolder.prototype.buildIdMap = function(e) {
-    var id = e.getAttribute("id");
+    const id = e.getAttribute("id");
     if (id && !this.idMap[id]) {
         this.idMap[id] = e;
     }
-    var xmlid = e.getAttributeNS(adapt.base.NS.XML, "id");
+    const xmlid = e.getAttributeNS(adapt.base.NS.XML, "id");
     if (xmlid && !this.idMap[xmlid]) {
         this.idMap[xmlid] = e;
     }
-    for (var c = e.firstElementChild; c; c = c.nextElementSibling) {
+    for (let c = e.firstElementChild; c; c = c.nextElementSibling) {
         this.buildIdMap(c);
     }
 };
@@ -292,12 +292,12 @@ adapt.xmldoc.XMLDocHolder.prototype.buildIdMap = function(e) {
  * @return {Element}
  */
 adapt.xmldoc.XMLDocHolder.prototype.getElement = function(url) {
-    var m = url.match(/([^#]*)\#(.+)$/);
+    const m = url.match(/([^#]*)\#(.+)$/);
     if (!m || (m[1] && m[1] != this.url)) {
         return null;
     }
-    var id = m[2];
-    var r = this.document.getElementById(id);
+    const id = m[2];
+    let r = this.document.getElementById(id);
     if (!r && this.document.getElementsByName) {
         r = this.document.getElementsByName(id)[0];
     }
@@ -338,8 +338,8 @@ adapt.xmldoc.DOMParserSupportedType = {
  * @returns {Document}
  */
 adapt.xmldoc.parseAndReturnNullIfError = (str, type, opt_parser) => {
-    var parser = opt_parser || new DOMParser();
-    var doc;
+    const parser = opt_parser || new DOMParser();
+    let doc;
     try {
         doc = parser.parseFromString(str, type);
     } catch (e) {}
@@ -347,12 +347,12 @@ adapt.xmldoc.parseAndReturnNullIfError = (str, type, opt_parser) => {
     if (!doc) {
         return null;
     } else {
-        var docElement = doc.documentElement;
-        var errorTagName = "parsererror";
+        const docElement = doc.documentElement;
+        const errorTagName = "parsererror";
         if (docElement.localName === errorTagName) {
             return null;
         } else {
-            for (var c = docElement.firstChild; c; c = c.nextSibling) {
+            for (let c = docElement.firstChild; c; c = c.nextSibling) {
                 if (c.localName === errorTagName) {
                     return null;
                 }
@@ -368,10 +368,10 @@ adapt.xmldoc.parseAndReturnNullIfError = (str, type, opt_parser) => {
  * @returns {?string} null if contentType cannot be inferred from HTTP header and file extension
  */
 adapt.xmldoc.resolveContentType = response => {
-    var contentType = response.contentType;
+    const contentType = response.contentType;
     if (contentType) {
-        var supportedKeys = Object.keys(adapt.xmldoc.DOMParserSupportedType);
-        for (var i = 0; i < supportedKeys.length; i++) {
+        const supportedKeys = Object.keys(adapt.xmldoc.DOMParserSupportedType);
+        for (let i = 0; i < supportedKeys.length; i++) {
             if (adapt.xmldoc.DOMParserSupportedType[supportedKeys[i]] === contentType) {
                 return contentType;
             }
@@ -380,9 +380,9 @@ adapt.xmldoc.resolveContentType = response => {
             return adapt.xmldoc.DOMParserSupportedType.APPLICATION_XML;
         }
     }
-    var match = response.url.match(/\.([^./]+)$/);
+    const match = response.url.match(/\.([^./]+)$/);
     if (match) {
-        var extension = match[1];
+        const extension = match[1];
         switch (extension) {
             case "html":
             case "htm":
@@ -407,19 +407,19 @@ adapt.xmldoc.resolveContentType = response => {
  * @return {!adapt.task.Result.<adapt.xmldoc.XMLDocHolder>}
  */
 adapt.xmldoc.parseXMLResource = (response, store) => {
-    var doc = response.responseXML;
+    let doc = response.responseXML;
     if (!doc) {
-        var parser = new DOMParser();
-        var text = response.responseText;
+        const parser = new DOMParser();
+        const text = response.responseText;
         if (text) {
-            var contentType = adapt.xmldoc.resolveContentType(response);
+            const contentType = adapt.xmldoc.resolveContentType(response);
             doc = adapt.xmldoc.parseAndReturnNullIfError(text, contentType || adapt.xmldoc.DOMParserSupportedType.APPLICATION_XML, parser);
 
             // When contentType cannot be inferred from HTTP header and file extension,
             // we use root element's tag name to infer the contentType.
             // If it is html or svg, we re-parse the source with an appropriate contentType.
             if (doc && !contentType) {
-                var root = doc.documentElement;
+                const root = doc.documentElement;
                 if (root.localName.toLowerCase() === "html" && !root.namespaceURI) {
                     doc = adapt.xmldoc.parseAndReturnNullIfError(text, adapt.xmldoc.DOMParserSupportedType.TEXT_HTML, parser);
                 } else if (root.localName.toLowerCase() === "svg" && doc.contentType !== adapt.xmldoc.DOMParserSupportedType.IMAGE_SVG_XML) {
@@ -433,7 +433,7 @@ adapt.xmldoc.parseXMLResource = (response, store) => {
             }
         }
     }
-    var xmldoc = doc ? new adapt.xmldoc.XMLDocHolder(store, response.url, doc) : null;
+    const xmldoc = doc ? new adapt.xmldoc.XMLDocHolder(store, response.url, doc) : null;
     return adapt.task.newResult(xmldoc);
 };
 
@@ -464,7 +464,7 @@ adapt.xmldoc.Predicate.prototype.check = function(node) {
  * @return {adapt.xmldoc.Predicate}
  */
 adapt.xmldoc.Predicate.prototype.withAttribute = function(name, value) {
-    var self = this;
+    const self = this;
     return new adapt.xmldoc.Predicate(node => self.check(node) && node.nodeType == 1 &&
         (/** @type {Element} */ (node)).getAttribute(name) == value);
 };
@@ -475,12 +475,12 @@ adapt.xmldoc.Predicate.prototype.withAttribute = function(name, value) {
  * @return {adapt.xmldoc.Predicate}
  */
 adapt.xmldoc.Predicate.prototype.withChild = function(name, opt_childPredicate) {
-    var self = this;
+    const self = this;
     return new adapt.xmldoc.Predicate(node => {
         if (!self.check(node)) {
             return false;
         }
-        var list = new adapt.xmldoc.NodeList([node]);
+        let list = new adapt.xmldoc.NodeList([node]);
         list = list.child(name);
         if (opt_childPredicate) {
             list = list.predicate(opt_childPredicate);
@@ -523,9 +523,9 @@ adapt.xmldoc.NodeList.prototype.size = function() {
  * @return {adapt.xmldoc.NodeList}
  */
 adapt.xmldoc.NodeList.prototype.predicate = function(pr) {
-    var arr = [];
-    for (var i = 0; i < this.nodes.length; i++) {
-        var n = this.nodes[i];
+    const arr = [];
+    for (let i = 0; i < this.nodes.length; i++) {
+        const n = this.nodes[i];
         if (pr.check(n)) {
             arr.push(n);
         }
@@ -538,9 +538,9 @@ adapt.xmldoc.NodeList.prototype.predicate = function(pr) {
  * @return {adapt.xmldoc.NodeList}
  */
 adapt.xmldoc.NodeList.prototype.forEachNode = function(fn) {
-    var arr = [];
-    var add = n => {arr.push(n);};
-    for (var i = 0; i < this.nodes.length; i++) {
+    const arr = [];
+    const add = n => {arr.push(n);};
+    for (let i = 0; i < this.nodes.length; i++) {
         fn(this.nodes[i], add);
     }
     return new adapt.xmldoc.NodeList(arr);
@@ -552,8 +552,8 @@ adapt.xmldoc.NodeList.prototype.forEachNode = function(fn) {
  * @return {Array.<T>}
  */
 adapt.xmldoc.NodeList.prototype.forEach = function(fn) {
-    var arr = [];
-    for (var i = 0; i < this.nodes.length; i++) {
+    const arr = [];
+    for (let i = 0; i < this.nodes.length; i++) {
         arr.push(fn(this.nodes[i]));
     }
     return arr;
@@ -565,9 +565,9 @@ adapt.xmldoc.NodeList.prototype.forEach = function(fn) {
  * @return {Array.<T>}
  */
 adapt.xmldoc.NodeList.prototype.forEachNonNull = function(fn) {
-    var arr = [];
-    for (var i = 0; i < this.nodes.length; i++) {
-        var t = fn(this.nodes[i]);
+    const arr = [];
+    for (let i = 0; i < this.nodes.length; i++) {
+        const t = fn(this.nodes[i]);
         if (t != null) {
             arr.push(t);
         }
@@ -581,7 +581,7 @@ adapt.xmldoc.NodeList.prototype.forEachNonNull = function(fn) {
  */
 adapt.xmldoc.NodeList.prototype.child = function(tag) {
     return this.forEachNode((node, add) => {
-        for (var c = node.firstChild; c; c = c.nextSibling) {
+        for (let c = node.firstChild; c; c = c.nextSibling) {
             if (c.localName == tag) {
                 add(c);
             }
@@ -594,7 +594,7 @@ adapt.xmldoc.NodeList.prototype.child = function(tag) {
  */
 adapt.xmldoc.NodeList.prototype.childElements = function() {
     return this.forEachNode((node, add) => {
-        for (var c = node.firstChild; c; c = c.nextSibling) {
+        for (let c = node.firstChild; c; c = c.nextSibling) {
             if (c.nodeType == 1) {
                 add(c);
             }

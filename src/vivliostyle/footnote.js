@@ -22,8 +22,8 @@ goog.require("vivliostyle.pagefloat");
 
 goog.scope(() => {
 
-    /** @const */ var PageFloat = vivliostyle.pagefloat.PageFloat;
-    /** @const */ var PageFloatFragment = vivliostyle.pagefloat.PageFloatFragment;
+    /** @const */ const PageFloat = vivliostyle.pagefloat.PageFloat;
+    /** @const */ const PageFloatFragment = vivliostyle.pagefloat.PageFloatFragment;
 
     /**
      * @param {!adapt.vtree.NodePosition} nodePosition
@@ -38,7 +38,7 @@ goog.scope(() => {
         PageFloat.call(this, nodePosition, floatReference, "block-end", null, flowName, floatMinWrapBlock);
         /** @const */ this.footnotePolicy = footnotePolicy;
     };
-    /** @const */ var Footnote = vivliostyle.footnote.Footnote;
+    /** @const */ const Footnote = vivliostyle.footnote.Footnote;
     goog.inherits(Footnote, PageFloat);
 
     /**
@@ -57,7 +57,7 @@ goog.scope(() => {
     vivliostyle.footnote.FootnoteFragment = function(floatReference, continuations, area, continues) {
         PageFloatFragment.call(this, floatReference, "block-end", continuations, area, continues);
     };
-    /** @const */ var FootnoteFragment = vivliostyle.footnote.FootnoteFragment;
+    /** @const */ const FootnoteFragment = vivliostyle.footnote.FootnoteFragment;
     goog.inherits(FootnoteFragment, PageFloatFragment);
 
     /**
@@ -84,10 +84,10 @@ goog.scope(() => {
     vivliostyle.footnote.LineFootnotePolicyLayoutConstraint = function(footnote) {
         /** @const */ this.footnote = footnote;
     };
-    /** @const */ var LineFootnotePolicyLayoutConstraint = vivliostyle.footnote.LineFootnotePolicyLayoutConstraint;
+    /** @const */ const LineFootnotePolicyLayoutConstraint = vivliostyle.footnote.LineFootnotePolicyLayoutConstraint;
 
     LineFootnotePolicyLayoutConstraint.prototype.allowLayout = function(nodeContext) {
-        var nodePosition = nodeContext.toNodePosition();
+        const nodePosition = nodeContext.toNodePosition();
         return !adapt.vtree.isSameNodePosition(nodePosition, this.footnote.nodePosition);
     };
 
@@ -96,7 +96,7 @@ goog.scope(() => {
      * @implements {vivliostyle.pagefloat.PageFloatLayoutStrategy}
      */
     vivliostyle.footnote.FootnoteLayoutStrategy = function() {};
-    /** @const */ var FootnoteLayoutStrategy = vivliostyle.footnote.FootnoteLayoutStrategy;
+    /** @const */ const FootnoteLayoutStrategy = vivliostyle.footnote.FootnoteLayoutStrategy;
 
     /**
      * @override
@@ -112,18 +112,18 @@ goog.scope(() => {
      * @override
      */
     FootnoteLayoutStrategy.prototype.createPageFloat = (nodeContext, pageFloatLayoutContext, column) => {
-        var floatReference = vivliostyle.pagefloat.FloatReference.REGION;
+        let floatReference = vivliostyle.pagefloat.FloatReference.REGION;
         // If the region context has the same container as the page context,
         // use the page context as the context for the footnote.
-        var regionContext = pageFloatLayoutContext.getPageFloatLayoutContext(floatReference);
-        var pageContext = pageFloatLayoutContext.getPageFloatLayoutContext(
+        const regionContext = pageFloatLayoutContext.getPageFloatLayoutContext(floatReference);
+        const pageContext = pageFloatLayoutContext.getPageFloatLayoutContext(
             vivliostyle.pagefloat.FloatReference.PAGE);
         if (pageContext.hasSameContainerAs(regionContext)) {
             floatReference = vivliostyle.pagefloat.FloatReference.PAGE;
         }
-        /** @const */ var nodePosition = nodeContext.toNodePosition();
+        /** @const */ const nodePosition = nodeContext.toNodePosition();
         goog.asserts.assert(pageFloatLayoutContext.flowName);
-        /** @type {!vivliostyle.pagefloat.PageFloat} */ var float =
+        /** @type {!vivliostyle.pagefloat.PageFloat} */ const float =
             new vivliostyle.footnote.Footnote(nodePosition, floatReference,
                 pageFloatLayoutContext.flowName, nodeContext.footnotePolicy,
                 nodeContext.floatMinWrapBlock);
@@ -135,7 +135,7 @@ goog.scope(() => {
      * @override
      */
     FootnoteLayoutStrategy.prototype.createPageFloatFragment = (continuations, floatSide, floatArea, continues) => {
-        /** @const */ var f = continuations[0].float;
+        /** @const */ const f = continuations[0].float;
         return new FootnoteFragment(f.floatReference, continuations, floatArea, continues);
     };
 
@@ -143,8 +143,8 @@ goog.scope(() => {
      * @override
      */
     FootnoteLayoutStrategy.prototype.findPageFloatFragment = (float, pageFloatLayoutContext) => {
-        var context = pageFloatLayoutContext.getPageFloatLayoutContext(float.floatReference);
-        var fragments = context.floatFragments.filter(fr => fr instanceof FootnoteFragment);
+        const context = pageFloatLayoutContext.getPageFloatLayoutContext(float.floatReference);
+        const fragments = context.floatFragments.filter(fr => fr instanceof FootnoteFragment);
         goog.asserts.assert(fragments.length <= 1);
         return fragments[0] || null;
     };
@@ -156,7 +156,7 @@ goog.scope(() => {
     FootnoteLayoutStrategy.prototype.adjustPageFloatArea = (floatArea, floatContainer, column) => {
         floatArea.isFootnote = true;
         floatArea.adjustContentRelativeSize = false;
-        var element = floatArea.element;
+        const element = floatArea.element;
         goog.asserts.assert(element);
         floatArea.vertical = column.layoutContext.applyFootnoteStyle(floatContainer.vertical, element);
         floatArea.convertPercentageSizesToPx(element);
@@ -168,10 +168,10 @@ goog.scope(() => {
      * @override
      */
     FootnoteLayoutStrategy.prototype.forbid = (float, pageFloatLayoutContext) => {
-        var footnote = /** @type {!Footnote} */ (float);
+        const footnote = /** @type {!Footnote} */ (float);
         switch (footnote.footnotePolicy) {
             case adapt.css.ident.line:
-                var constraint = new LineFootnotePolicyLayoutConstraint(footnote);
+                const constraint = new LineFootnotePolicyLayoutConstraint(footnote);
                 pageFloatLayoutContext.addLayoutConstraint(constraint, footnote.floatReference);
                 break;
         }

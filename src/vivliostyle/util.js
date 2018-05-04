@@ -32,9 +32,9 @@ goog.provide("vivliostyle.util");
             if (mapFn && thisArg) {
                 mapFn = mapFn.bind(thisArg);
             }
-            var to = [];
-            var len = arrayLike.length;
-            for (var i = 0; i < len; i++) {
+            const to = [];
+            const len = arrayLike.length;
+            for (let i = 0; i < len; i++) {
                 to[i] = mapFn ? mapFn(arrayLike[i], i) : arrayLike[i];
             }
             return to;
@@ -52,12 +52,12 @@ goog.provide("vivliostyle.util");
                 if (typeof predicate !== 'function') {
                     throw new TypeError('predicate must be a function');
                 }
-                var list = Object(this);
-                var length = list.length >>> 0;
-                var thisArg = arguments[1];
-                var value;
+                const list = Object(this);
+                const length = list.length >>> 0;
+                const thisArg = arguments[1];
+                let value;
 
-                for (var i = 0; i < length; i++) {
+                for (let i = 0; i < length; i++) {
                     value = list[i];
                     if (predicate.call(thisArg, value, i, list)) {
                         return i;

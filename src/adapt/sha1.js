@@ -33,10 +33,10 @@ adapt.sha1.encode32 = n => String.fromCharCode((n >>> 24)&0xFF, (n >>> 16)&0xFF,
  */
 adapt.sha1.decode32 = bytes => {
     // Important facts: "".charCodeAt(0) == NaN, NaN & 0xFF == 0
-    var b0 = bytes.charCodeAt(0) & 0xFF;
-    var b1 = bytes.charCodeAt(1) & 0xFF;
-    var b2 = bytes.charCodeAt(2) & 0xFF;
-    var b3 = bytes.charCodeAt(3) & 0xFF;
+    const b0 = bytes.charCodeAt(0) & 0xFF;
+    const b1 = bytes.charCodeAt(1) & 0xFF;
+    const b2 = bytes.charCodeAt(2) & 0xFF;
+    const b3 = bytes.charCodeAt(3) & 0xFF;
     return (b0 << 24) | (b1 << 16) | (b2 << 8) | b3;
 };
 
@@ -45,9 +45,9 @@ adapt.sha1.decode32 = bytes => {
  * @return {Array.<number>} big-endian uint32 numbers representing sha1 hash
  */
 adapt.sha1.bytesToSHA1Int32 = bytes => {
-    var sb = new adapt.base.StringBuffer();
+    const sb = new adapt.base.StringBuffer();
     sb.append(bytes);
-    var appendCount = (55 - bytes.length) & 63;
+    let appendCount = (55 - bytes.length) & 63;
     sb.append('\u0080');
     while (appendCount > 0) {
         appendCount--;
@@ -57,26 +57,26 @@ adapt.sha1.bytesToSHA1Int32 = bytes => {
     sb.append(adapt.sha1.encode32(bytes.length*8));
     bytes = sb.toString();
 
-    var h = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
+    const h = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
 
-    var w = /** @type Array.<number> */ ([]);
-    var i;
+    const w = /** @type Array.<number> */ ([]);
+    let i;
 
-    for (var bi = 0; bi < bytes.length; bi += 64) {
+    for (let bi = 0; bi < bytes.length; bi += 64) {
         for (i = 0; i < 16; i++) {
             w[i] = adapt.sha1.decode32(bytes.substr(bi + 4*i, 4));
         }
         for (; i < 80; i++) {
-            var q = w[i-3] ^ w[i-8] ^ w[i-14] ^ w[i-16];
+            const q = w[i-3] ^ w[i-8] ^ w[i-14] ^ w[i-16];
             w[i] = (q << 1) | (q >>> 31);
         }
 
-        var a = h[0];
-        var b = h[1];
-        var c = h[2];
-        var d = h[3];
-        var e = h[4];
-        var f;
+        let a = h[0];
+        let b = h[1];
+        let c = h[2];
+        let d = h[3];
+        let e = h[4];
+        let f;
 
         for (i = 0; i < 80; i++) {
             if (i < 20) {
@@ -112,10 +112,10 @@ adapt.sha1.bytesToSHA1Int32 = bytes => {
  * @return {Array.<number>} uint8 numbers representing sha1 hash
  */
 adapt.sha1.bytesToSHA1Int8 = bytes => {
-    var h = adapt.sha1.bytesToSHA1Int32(bytes);
-    var res = [];
-    for (var i = 0; i < h.length; i++) {
-        var n = h[i];
+    const h = adapt.sha1.bytesToSHA1Int32(bytes);
+    const res = [];
+    for (let i = 0; i < h.length; i++) {
+        const n = h[i];
         res.push((n >>> 24)&0xFF, (n >>> 16)&0xFF, (n >>> 8)&0xFF, n&0xFF);
     }
     return res;
@@ -126,9 +126,9 @@ adapt.sha1.bytesToSHA1Int8 = bytes => {
  * @return {string} chars with codes 0 - 255 equal to SHA1 hash of the input
  */
 adapt.sha1.bytesToSHA1Bytes = bytes => {
-    var h = adapt.sha1.bytesToSHA1Int32(bytes);
-    var sb = new adapt.base.StringBuffer();
-    for (var i = 0; i < h.length; i++) {
+    const h = adapt.sha1.bytesToSHA1Int32(bytes);
+    const sb = new adapt.base.StringBuffer();
+    for (let i = 0; i < h.length; i++) {
         sb.append(adapt.sha1.encode32(h[i]));
     }
     return sb.toString();
@@ -139,9 +139,9 @@ adapt.sha1.bytesToSHA1Bytes = bytes => {
  * @return {string} hex-encoded SHA1 hash
  */
 adapt.sha1.bytesToSHA1Hex = bytes => {
-    var sha1 = adapt.sha1.bytesToSHA1Bytes(bytes);
-    var sb = new adapt.base.StringBuffer();
-    for (var i = 0; i < sha1.length; i++) {
+    const sha1 = adapt.sha1.bytesToSHA1Bytes(bytes);
+    const sb = new adapt.base.StringBuffer();
+    for (let i = 0; i < sha1.length; i++) {
         sb.append((sha1.charCodeAt(i)|0x100).toString(16).substr(1));
     }
     return sb.toString();
@@ -152,8 +152,8 @@ adapt.sha1.bytesToSHA1Hex = bytes => {
  * @return {string} base64-encoded SHA1 hash of the input
  */
 adapt.sha1.bytesToSHA1Base64 = bytes => {
-    var sha1 = adapt.sha1.bytesToSHA1Bytes(bytes);
-    var sb = new adapt.base.StringBuffer();
+    const sha1 = adapt.sha1.bytesToSHA1Bytes(bytes);
+    const sb = new adapt.base.StringBuffer();
     adapt.base.appendBase64(sb, sha1);
     return sb.toString();
 };

@@ -46,11 +46,11 @@ adapt.net.Response;
  * @return {!adapt.task.Result.<adapt.net.Response>}
  */
 adapt.net.ajax = (url, opt_type, opt_method, opt_data, opt_contentType) => {
-    /** @type {!adapt.task.Frame.<adapt.net.Response>} */ var frame =
+    /** @type {!adapt.task.Frame.<adapt.net.Response>} */ const frame =
         adapt.task.newFrame("ajax");
-    var request = new XMLHttpRequest();
-    var continuation = frame.suspend(request);
-    /** @type {adapt.net.Response} */ var response =
+    const request = new XMLHttpRequest();
+    const continuation = frame.suspend(request);
+    /** @type {adapt.net.Response} */ const response =
     {status: 0, url, contentType: null, responseText: null, responseXML: null, responseBlob: null};
     request.open(opt_method || "GET", url, true);
     if (opt_type) {
@@ -70,7 +70,7 @@ adapt.net.ajax = (url, opt_type, opt_method, opt_data, opt_contentType) => {
                     response.responseXML = request.response;
                     response.contentType = request.response.contentType;
                 } else {
-                    var text = request.response;
+                    const text = request.response;
                     if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.TEXT) && typeof text == "string") {
                         response.responseText = text;
                     } else if (!text) {
@@ -82,7 +82,7 @@ adapt.net.ajax = (url, opt_type, opt_method, opt_data, opt_contentType) => {
                             response.responseBlob = /** @type {Blob} */ (text);
                         }
                     }
-                    var contentTypeHeader = request.getResponseHeader("Content-Type");
+                    const contentTypeHeader = request.getResponseHeader("Content-Type");
                     if (contentTypeHeader) {
                         response.contentType = contentTypeHeader.replace(/(.*);.*$/, "$1");
                     }
@@ -115,11 +115,11 @@ adapt.net.ajax = (url, opt_type, opt_method, opt_data, opt_contentType) => {
  * @return Blob
  */
 adapt.net.makeBlob = (parts, opt_type) => {
-    var type = opt_type || "application/octet-stream";
-    var builderCtr = window["WebKitBlobBuilder"] || window["MSBlobBuilder"]; // deprecated
+    const type = opt_type || "application/octet-stream";
+    const builderCtr = window["WebKitBlobBuilder"] || window["MSBlobBuilder"]; // deprecated
     if (builderCtr) {
-        var builder = new builderCtr();
-        for (var i = 0; i < parts.length; i++) {
+        const builder = new builderCtr();
+        for (let i = 0; i < parts.length; i++) {
             builder.append(parts[i]);
         }
         return builder.getBlob(type);
@@ -132,10 +132,10 @@ adapt.net.makeBlob = (parts, opt_type) => {
  * @return adapt.task.Result.<ArrayBuffer>
  */
 adapt.net.readBlob = blob => {
-    /** @type {!adapt.task.Frame.<ArrayBuffer>} */ var frame =
+    /** @type {!adapt.task.Frame.<ArrayBuffer>} */ const frame =
         adapt.task.newFrame("readBlob");
-    var fileReader = new FileReader();
-    var continuation = frame.suspend(fileReader);
+    const fileReader = new FileReader();
+    const continuation = frame.suspend(fileReader);
     fileReader.addEventListener("load", () => {
         continuation.schedule(/** @type {ArrayBuffer} */ (fileReader.result));
     }, false);
@@ -177,7 +177,7 @@ adapt.net.ResourceStore = function(parser, type) {
  */
 adapt.net.ResourceStore.prototype.load = function(url, opt_required, opt_message) {
     url = adapt.base.stripFragment(url);
-    var resource = this.resources[url];
+    const resource = this.resources[url];
     if (typeof resource != "undefined") {
         return adapt.task.newResult(resource);
     }
@@ -192,8 +192,8 @@ adapt.net.ResourceStore.prototype.load = function(url, opt_required, opt_message
  * @return {!adapt.task.Result.<Resource>}
  */
 adapt.net.ResourceStore.prototype.fetchInner = function(url, opt_required, opt_message) {
-    var self = this;
-    /** @type {adapt.task.Frame.<Resource>} */ var frame = adapt.task.newFrame("fetch");
+    const self = this;
+    /** @type {adapt.task.Frame.<Resource>} */ const frame = adapt.task.newFrame("fetch");
     adapt.net.ajax(url, self.type).then(response => {
         if (opt_required && response.status >= 400) {
             throw new Error(opt_message || ("Failed to fetch required resource: " + url));
@@ -215,13 +215,13 @@ adapt.net.ResourceStore.prototype.fetchInner = function(url, opt_required, opt_m
  */
 adapt.net.ResourceStore.prototype.fetch = function(url, opt_required, opt_message) {
     url = adapt.base.stripFragment(url);
-    var resource = this.resources[url];
+    const resource = this.resources[url];
     if (resource) {
         return null;
     }
-    var fetcher = this.fetchers[url];
+    let fetcher = this.fetchers[url];
     if (!fetcher) {
-        var self = this;
+        const self = this;
         fetcher = new adapt.taskutil.Fetcher(() => self.fetchInner(url, opt_required, opt_message), "Fetch " + url);
         self.fetchers[url] = fetcher;
         fetcher.start();
@@ -255,7 +255,7 @@ adapt.net.JSONStore;
  * @return {!adapt.task.Result.<adapt.base.JSON>}
  */
 adapt.net.parseJSONResource = (response, store) => {
-    var text = response.responseText;
+    const text = response.responseText;
     return adapt.task.newResult(text ? adapt.base.stringToJSON(text) : null);
 };
 

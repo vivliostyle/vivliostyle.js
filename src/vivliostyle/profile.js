@@ -36,7 +36,7 @@ goog.scope(() => {
         /** @type {function(string, number=)} */ this["registerStartTiming"] = this.registerStartTiming = noop;
         /** @type {function(string, number=)} */ this["registerEndTiming"] = this.registerEndTiming = noop;
     };
-    /** @const */ var Profiler = vivliostyle.profile.Profiler;
+    /** @const */ const Profiler = vivliostyle.profile.Profiler;
 
     function noop() {}
 
@@ -51,13 +51,13 @@ goog.scope(() => {
         if (!timestamp) {
             timestamp = this.performanceInstance.now();
         }
-        var timestamps = this.timestamps[name];
+        let timestamps = this.timestamps[name];
         if (!timestamps) {
             timestamps = this.timestamps[name] = [];
         }
-        var t;
-        var l = timestamps.length;
-        for (var i = l-1; i >=0; i--) {
+        let t;
+        const l = timestamps.length;
+        for (let i = l-1; i >=0; i--) {
             t = timestamps[i];
             if (t && !t[startEnd]) break;
             t = null;
@@ -112,13 +112,13 @@ goog.scope(() => {
      * All values are printed in ms unit.
      */
     Profiler.prototype.printTimings = function() {
-        var timestamps = this.timestamps;
-        var st = "";
+        const timestamps = this.timestamps;
+        let st = "";
         Object.keys(timestamps).forEach(name => {
-            var stamps = timestamps[name];
-            var l = stamps.length;
-            for (var i = 0; i < l; i++) {
-                var t = stamps[i];
+            const stamps = timestamps[name];
+            const l = stamps.length;
+            for (let i = 0; i < l; i++) {
+                const t = stamps[i];
                 st += name;
                 if (l > 1) {
                     st += "(" + i + ")";
@@ -157,9 +157,9 @@ goog.scope(() => {
         return this.registerStartTiming === registerStartTiming;
     };
 
-    var fallbackPerformanceInstance = /** @type {Performance} */ ({ now: Date.now });
-    var performanceInstance = window && window.performance;
-    var profiler = vivliostyle.profile.profiler = new Profiler(performanceInstance || fallbackPerformanceInstance);
+    const fallbackPerformanceInstance = /** @type {Performance} */ ({ now: Date.now });
+    const performanceInstance = window && window.performance;
+    const profiler = vivliostyle.profile.profiler = new Profiler(performanceInstance || fallbackPerformanceInstance);
     profiler.forceRegisterStartTiming("load_vivliostyle");
 
     vivliostyle.namespace.exportSymbol("vivliostyle.profile.profiler", profiler);

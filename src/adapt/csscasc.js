@@ -132,7 +132,7 @@ adapt.csscasc.polyfilledInheritedProps = [
  * @return {Array.<string>}
  */
 adapt.csscasc.getPolyfilledInheritedProps = () => {
-    /** @type {!Array.<vivliostyle.plugin.PolyfilledInheritedPropsHook>} */ var hooks =
+    /** @type {!Array.<vivliostyle.plugin.PolyfilledInheritedPropsHook>} */ const hooks =
         vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.POLYFILLED_INHERITED_PROPS);
     return hooks.reduce((props, f) => props.concat(f()), [].concat(adapt.csscasc.polyfilledInheritedProps));
 };
@@ -153,11 +153,11 @@ adapt.csscasc.coupledPatterns = ["margin-%", "padding-%", "border-%-width", "bor
  * @type {Object.<string,boolean>}
  */
 adapt.csscasc.geomNames = ((() => {
-    var sides = ["left", "right", "top", "bottom"];
-    var names = {"width": true, "height": true};
-    for (var i = 0; i < adapt.csscasc.coupledPatterns.length; i++) {
-        for (var k = 0; k < sides.length; k++) {
-            var name = adapt.csscasc.coupledPatterns[i].replace("%", sides[k]);
+    const sides = ["left", "right", "top", "bottom"];
+    const names = {"width": true, "height": true};
+    for (let i = 0; i < adapt.csscasc.coupledPatterns.length; i++) {
+        for (let k = 0; k < sides.length; k++) {
+            const name = adapt.csscasc.coupledPatterns[i].replace("%", sides[k]);
             names[name] = true;
         }
     }
@@ -169,11 +169,11 @@ adapt.csscasc.geomNames = ((() => {
  * @return {Object.<string,string>}
  */
 adapt.csscasc.buildCouplingMap = sideMap => {
-    var map = {};
-    for (var i = 0; i < adapt.csscasc.coupledPatterns.length; i++) {
-        for (var side in sideMap) {
-            var name1 = adapt.csscasc.coupledPatterns[i].replace("%", side);
-            var name2 = adapt.csscasc.coupledPatterns[i].replace("%", sideMap[side]);
+    const map = {};
+    for (let i = 0; i < adapt.csscasc.coupledPatterns.length; i++) {
+        for (const side in sideMap) {
+            const name1 = adapt.csscasc.coupledPatterns[i].replace("%", side);
+            const name2 = adapt.csscasc.coupledPatterns[i].replace("%", sideMap[side]);
             map[name1] = name2;
             map[name2] = name1;
         }
@@ -215,7 +215,7 @@ adapt.csscasc.CascadeValue.prototype.getBaseValue = function() { return this; };
  * @return {!adapt.csscasc.CascadeValue}
  */
 adapt.csscasc.CascadeValue.prototype.filterValue = function(visitor) {
-    var value = this.value.visit(visitor);
+    const value = this.value.visit(visitor);
     if (value === this.value)
         return this;
     return new adapt.csscasc.CascadeValue(value, this.priority);
@@ -273,7 +273,7 @@ adapt.csscasc.ConditionalCascadeValue.prototype.getBaseValue = function() {
  * @override
  */
 adapt.csscasc.ConditionalCascadeValue.prototype.filterValue = function(visitor) {
-    var value = this.value.visit(visitor);
+    const value = this.value.visit(visitor);
     if (value === this.value)
         return this;
     return new adapt.csscasc.ConditionalCascadeValue(value, this.priority, this.condition);
@@ -386,7 +386,7 @@ adapt.csscasc.getStyleMap = (style, name) => /** @type {adapt.csscasc.ElementSty
  * @return {adapt.csscasc.ElementStyleMap}
  */
 adapt.csscasc.getMutableStyleMap = (style, name) => {
-    var r = /** @type {adapt.csscasc.ElementStyleMap} */ (style[name]);
+    let r = /** @type {adapt.csscasc.ElementStyleMap} */ (style[name]);
     if (!r) {
         r = {};
         style[name] = r;
@@ -399,7 +399,7 @@ adapt.csscasc.getMutableStyleMap = (style, name) => {
  * @return {Array.<{matcher:vivliostyle.selectors.Matcher, styles:adapt.csscasc.ElementStyleMap}>}
  */
 adapt.csscasc.getViewConditionalStyleMap = style => {
-    var r = /** @type {Array.<{matcher:vivliostyle.selectors.Matcher, styles:adapt.csscasc.ElementStyleMap}>} */ (style["_viewConditionalStyles"]);
+    let r = /** @type {Array.<{matcher:vivliostyle.selectors.Matcher, styles:adapt.csscasc.ElementStyleMap}>} */ (style["_viewConditionalStyles"]);
     if (!r) {
         r = [];
         style["_viewConditionalStyles"] = r;
@@ -420,7 +420,7 @@ adapt.csscasc.getSpecial = (style, name) => /** @type {Array.<adapt.csscasc.Casc
  * @return {Array.<adapt.csscasc.CascadeValue>}
  */
 adapt.csscasc.getMutableSpecial = (style, name) => {
-    var r = /** @type {Array.<adapt.csscasc.CascadeValue>} */ (style[name]);
+    let r = /** @type {Array.<adapt.csscasc.CascadeValue>} */ (style[name]);
     if (!r) {
         r = [];
         style[name] = r;
@@ -448,13 +448,13 @@ adapt.csscasc.mergeIn = (
     regionId,
     viewConditionMatcher
 ) => {
-    var hierarchy = [
+    const hierarchy = [
         {id: pseudoelement,            styleKey: "_pseudos"},
         {id: regionId,                 styleKey: "_regions"}
     ];
     hierarchy.forEach(item => {
         if (item.id) {
-            var styleMap = adapt.csscasc.getMutableStyleMap(target, item.styleKey);
+            const styleMap = adapt.csscasc.getMutableStyleMap(target, item.styleKey);
             target = styleMap[item.id];
             if (!target) {
                 target = /** @type {adapt.csscasc.ElementStyle} */ ({});
@@ -463,23 +463,23 @@ adapt.csscasc.mergeIn = (
         }
     });
     if (viewConditionMatcher) {
-        var styleMap  = adapt.csscasc.getViewConditionalStyleMap(target);
+        const styleMap  = adapt.csscasc.getViewConditionalStyleMap(target);
         target = /** @type {adapt.csscasc.ElementStyle} */ ({});
         styleMap.push({ styles: target, matcher: viewConditionMatcher });
     }
 
-    for (var prop in style) {
+    for (const prop in style) {
         if (adapt.csscasc.isMapName(prop))
             continue;
         if (adapt.csscasc.isSpecialName(prop)) {
             // special properties: list of all assigned values
-            var as = adapt.csscasc.getSpecial(style, prop);
-            var ts = adapt.csscasc.getMutableSpecial(target, prop);
+            const as = adapt.csscasc.getSpecial(style, prop);
+            const ts = adapt.csscasc.getMutableSpecial(target, prop);
             Array.prototype.push.apply(ts, as);
         } else {
             // regular properties: higher priority wins
-            var av = adapt.csscasc.getProp(style, prop).increaseSpecificity(specificity);
-            var tv = adapt.csscasc.getProp(target, prop);
+            const av = adapt.csscasc.getProp(style, prop).increaseSpecificity(specificity);
+            const tv = adapt.csscasc.getProp(target, prop);
             adapt.csscasc.setProp(target, prop, adapt.csscasc.cascadeValues(context, tv, av));
         }
     }
@@ -491,8 +491,8 @@ adapt.csscasc.mergeIn = (
  * @return {adapt.csscasc.ElementStyle}
  */
 adapt.csscasc.mergeAll = (context, styles) => {
-    var target = /** @type {adapt.csscasc.ElementStyle} */ ({});
-    for (var k = 0; k < styles.length; k++) {
+    const target = /** @type {adapt.csscasc.ElementStyle} */ ({});
+    for (let k = 0; k < styles.length; k++) {
         adapt.csscasc.mergeIn(context, target, styles[k], 0, null, null, null);
     }
     return target;
@@ -508,8 +508,8 @@ adapt.csscasc.chainActions = (chain, action) => {
     if (chain.length > 0) {
         chain.sort(
             (a, b) => b.getPriority() - a.getPriority());
-        var chained = null;
-        for (var i = chain.length - 1; i >= 0; i--) {
+        let chained = null;
+        for (let i = chain.length - 1; i >= 0; i--) {
             chained = chain[i];
             chained.chained = action;
             action = chained;
@@ -546,8 +546,8 @@ adapt.csscasc.InheritanceVisitor.prototype.setPropName = function(name) {
  * @private
  */
 adapt.csscasc.InheritanceVisitor.prototype.getFontSize = function() {
-    var cascval = adapt.csscasc.getProp(this.props, "font-size");
-    var n = /** @type {adapt.css.Numeric} */ (cascval.value);
+    const cascval = adapt.csscasc.getProp(this.props, "font-size");
+    const n = /** @type {adapt.css.Numeric} */ (cascval.value);
     if (!adapt.expr.isAbsoluteLengthUnit(n.unit)) {
         throw new Error("Unexpected state");
     }
@@ -567,7 +567,7 @@ adapt.csscasc.InheritanceVisitor.prototype.visitNumeric = function(numeric) {
         if (this.propName === "line-height") {
             return numeric;
         }
-        var unit = this.propName.match(/height|^(top|bottom)$/) ? "vh" : "vw";
+        const unit = this.propName.match(/height|^(top|bottom)$/) ? "vh" : "vw";
         return new adapt.css.Numeric(numeric.num, unit);
     }
     return numeric;
@@ -578,7 +578,7 @@ adapt.csscasc.InheritanceVisitor.prototype.visitNumeric = function(numeric) {
  */
 adapt.csscasc.InheritanceVisitor.prototype.visitExpr = function(expr) {
     if (this.propName == "font-size") {
-        var val = adapt.cssparse.evaluateCSSToCSS(this.context, expr, this.propName);
+        const val = adapt.cssparse.evaluateCSSToCSS(this.context, expr, this.propName);
         return val.visit(this);
     }
     return expr;
@@ -591,10 +591,10 @@ adapt.csscasc.InheritanceVisitor.prototype.visitExpr = function(expr) {
  * @returns {!adapt.css.Numeric}
  */
 adapt.csscasc.convertFontRelativeLengthToPx = (numeric, baseFontSize, context) => {
-    var unit = numeric.unit;
-    var num = numeric.num;
+    const unit = numeric.unit;
+    const num = numeric.num;
     if (unit === "em" || unit === "ex") {
-        var ratio = adapt.expr.defaultUnitSizes[unit] / adapt.expr.defaultUnitSizes["em"];
+        const ratio = adapt.expr.defaultUnitSizes[unit] / adapt.expr.defaultUnitSizes["em"];
         return new adapt.css.Numeric(num * ratio * baseFontSize, "px");
     } else if (unit === "rem") {
         return new adapt.css.Numeric(num * context.fontSize(), "px");
@@ -611,8 +611,8 @@ adapt.csscasc.convertFontRelativeLengthToPx = (numeric, baseFontSize, context) =
  */
 adapt.csscasc.convertFontSizeToPx = (numeric, parentFontSize, context) => {
     numeric = adapt.csscasc.convertFontRelativeLengthToPx(numeric, parentFontSize, context);
-    var unit = numeric.unit;
-    var num = numeric.num;
+    const unit = numeric.unit;
+    const num = numeric.num;
     if (unit === "px") {
         return numeric;
     } else if (unit === "%") {
@@ -691,7 +691,7 @@ goog.inherits(adapt.csscasc.CompoundAction, adapt.csscasc.CascadeAction);
  * @override
  */
 adapt.csscasc.CompoundAction.prototype.apply = function(cascadeInstance) {
-    for (var i = 0; i < this.list.length; i++)
+    for (let i = 0; i < this.list.length; i++)
         this.list[i].apply(cascadeInstance);
 };
 
@@ -909,12 +909,12 @@ adapt.csscasc.CheckNSTagAction.prototype.getPriority = () => // tag is a pretty 
  */
 adapt.csscasc.CheckNSTagAction.prototype.makePrimary = function(cascade) {
     if (this.chained) {
-        var prefix = cascade.nsPrefix[this.ns];
+        let prefix = cascade.nsPrefix[this.ns];
         if (!prefix) {
             prefix = "ns" + (cascade.nsCount++) + ":";
             cascade.nsPrefix[this.ns] = prefix;
         }
-        var nsTag = prefix + this.localName;
+        const nsTag = prefix + this.localName;
         cascade.insertInTable(cascade.nstags, nsTag, this.chained);
     }
     return true;
@@ -936,14 +936,14 @@ goog.inherits(adapt.csscasc.CheckTargetEpubTypeAction, adapt.csscasc.ChainedActi
  * @override
  */
 adapt.csscasc.CheckTargetEpubTypeAction.prototype.apply = function(cascadeInstance) {
-    var elem = cascadeInstance.currentElement;
+    const elem = cascadeInstance.currentElement;
     if (elem && cascadeInstance.currentLocalName == "a") {
-        var href = elem.getAttribute("href");
+        const href = elem.getAttribute("href");
         if (href && href.match(/^#/)) {
-            var id = href.substring(1);
-            var target = elem.ownerDocument.getElementById(id);
+            const id = href.substring(1);
+            const target = elem.ownerDocument.getElementById(id);
             if (target) {
-                var epubType = target.getAttributeNS(adapt.base.NS.epub, "type");
+                const epubType = target.getAttributeNS(adapt.base.NS.epub, "type");
                 if (epubType && epubType.match(this.epubTypePatt)) {
                     this.chained.apply(cascadeInstance);
                 }
@@ -1061,7 +1061,7 @@ goog.inherits(adapt.csscasc.CheckNamespaceSupportedAction, adapt.csscasc.Chained
  */
 adapt.csscasc.CheckNamespaceSupportedAction.prototype.apply = function(cascadeInstance) {
     if (cascadeInstance.currentElement) {
-        var ns = cascadeInstance.currentElement.getAttributeNS(this.ns, this.name);
+        const ns = cascadeInstance.currentElement.getAttributeNS(this.ns, this.name);
         if (ns && adapt.csscasc.supportedNamespaces[ns]) {
             this.chained.apply(cascadeInstance);
         }
@@ -1099,7 +1099,7 @@ goog.inherits(adapt.csscasc.CheckAttributeRegExpAction, adapt.csscasc.ChainedAct
  */
 adapt.csscasc.CheckAttributeRegExpAction.prototype.apply = function(cascadeInstance) {
     if (cascadeInstance.currentElement) {
-        var attr = cascadeInstance.currentElement.getAttributeNS(this.ns, this.name);
+        const attr = cascadeInstance.currentElement.getAttributeNS(this.ns, this.name);
         if (attr && attr.match(this.regexp))
             this.chained.apply(cascadeInstance);
     }
@@ -1249,7 +1249,7 @@ goog.inherits(adapt.csscasc.IsNthSiblingOfTypeAction, adapt.csscasc.IsNthAction)
  * @override
  */
 adapt.csscasc.IsNthSiblingOfTypeAction.prototype.apply = function(cascadeInstance) {
-    var order = cascadeInstance.currentSiblingTypeCounts[cascadeInstance.currentNamespace][cascadeInstance.currentLocalName];
+    const order = cascadeInstance.currentSiblingTypeCounts[cascadeInstance.currentNamespace][cascadeInstance.currentLocalName];
     if (this.matchANPlusB(order))
         this.chained.apply(cascadeInstance);
 };
@@ -1274,7 +1274,7 @@ goog.inherits(adapt.csscasc.IsNthLastSiblingAction, adapt.csscasc.IsNthAction);
  * @override
  */
 adapt.csscasc.IsNthLastSiblingAction.prototype.apply = function(cascadeInstance) {
-    var order = cascadeInstance.currentFollowingSiblingOrder;
+    let order = cascadeInstance.currentFollowingSiblingOrder;
     if (order === null) {
         order = cascadeInstance.currentFollowingSiblingOrder = cascadeInstance.currentElement.parentNode.childElementCount - cascadeInstance.currentSiblingOrder + 1;
     }
@@ -1302,13 +1302,13 @@ goog.inherits(adapt.csscasc.IsNthLastSiblingOfTypeAction, adapt.csscasc.IsNthAct
  * @override
  */
 adapt.csscasc.IsNthLastSiblingOfTypeAction.prototype.apply = function(cascadeInstance) {
-    var counts = cascadeInstance.currentFollowingSiblingTypeCounts;
+    const counts = cascadeInstance.currentFollowingSiblingTypeCounts;
     if (!counts[cascadeInstance.currentNamespace]) {
-        var elem = cascadeInstance.currentElement;
+        let elem = cascadeInstance.currentElement;
         do {
-            var ns = elem.namespaceURI;
-            var localName = elem.localName;
-            var nsCounts = counts[ns];
+            const ns = elem.namespaceURI;
+            const localName = elem.localName;
+            let nsCounts = counts[ns];
             if (!nsCounts) {
                 nsCounts = counts[ns] = {};
             }
@@ -1337,7 +1337,7 @@ goog.inherits(adapt.csscasc.IsEmptyAction, adapt.csscasc.ChainedAction);
  * @override
  */
 adapt.csscasc.IsEmptyAction.prototype.apply = function(cascadeInstance) {
-    var node = cascadeInstance.currentElement.firstChild;
+    let node = cascadeInstance.currentElement.firstChild;
     while (node) {
         switch (node.nodeType) {
             case Node.ELEMENT_NODE:
@@ -1370,7 +1370,7 @@ goog.inherits(adapt.csscasc.IsEnabledAction, adapt.csscasc.ChainedAction);
  * @override
  */
 adapt.csscasc.IsEnabledAction.prototype.apply = function(cascadeInstance) {
-    var elem = cascadeInstance.currentElement;
+    const elem = cascadeInstance.currentElement;
     if (elem.disabled === false) {
         this.chained.apply(cascadeInstance);
     }
@@ -1394,7 +1394,7 @@ goog.inherits(adapt.csscasc.IsDisabledAction, adapt.csscasc.ChainedAction);
  * @override
  */
 adapt.csscasc.IsDisabledAction.prototype.apply = function(cascadeInstance) {
-    var elem = cascadeInstance.currentElement;
+    const elem = cascadeInstance.currentElement;
     if (elem.disabled === true) {
         this.chained.apply(cascadeInstance);
     }
@@ -1418,7 +1418,7 @@ goog.inherits(adapt.csscasc.IsCheckedAction, adapt.csscasc.ChainedAction);
  * @override
  */
 adapt.csscasc.IsCheckedAction.prototype.apply = function(cascadeInstance) {
-    var elem = cascadeInstance.currentElement;
+    const elem = cascadeInstance.currentElement;
     if (elem.selected === true || elem.checked === true) {
         this.chained.apply(cascadeInstance);
     }
@@ -1480,7 +1480,7 @@ adapt.csscasc.CheckAppliedAction.prototype.apply = function(cascadeInstance) {
  * @override
  */
 adapt.csscasc.CheckAppliedAction.prototype.clone = function() {
-    var cloned = new adapt.csscasc.CheckAppliedAction();
+    const cloned = new adapt.csscasc.CheckAppliedAction();
     cloned.applied = this.applied;
     return cloned;
 };
@@ -1974,9 +1974,9 @@ adapt.csscasc.AttrValueFilterVisitor.prototype.createValueFromString = (str, typ
 adapt.csscasc.AttrValueFilterVisitor.prototype.visitFunc = function(func) {
     if (func.name !== "attr")
         return adapt.css.FilterVisitor.prototype.visitFunc.call(this, func);
-    var type = "string";
-    var attributeName = null;
-    /** @type {adapt.css.Val} */ var defaultValue = null;
+    let type = "string";
+    let attributeName = null;
+    /** @type {adapt.css.Val} */ let defaultValue = null;
 
     if (func.values[0] instanceof adapt.css.SpaceList) {
         if (func.values[0].values.length >= 2)
@@ -2016,12 +2016,12 @@ goog.inherits(adapt.csscasc.ContentPropVisitor, adapt.css.FilterVisitor);
  * @override
  */
 adapt.csscasc.ContentPropVisitor.prototype.visitIdent = function(ident) {
-    var cascade = this.cascade;
-    var quotes = cascade.quotes;
-    var maxDepth = Math.floor(quotes.length / 2) - 1;
+    const cascade = this.cascade;
+    const quotes = cascade.quotes;
+    const maxDepth = Math.floor(quotes.length / 2) - 1;
     switch (ident.name) {
         case "open-quote":
-            var result = quotes[2 * Math.min(maxDepth, cascade.quoteDepth)];
+            const result = quotes[2 * Math.min(maxDepth, cascade.quoteDepth)];
             cascade.quoteDepth++;
             return result;
         case "close-quote":
@@ -2043,13 +2043,13 @@ adapt.csscasc.roman = num => {
     if (num <= 0 || num != Math.round(num) || num > 3999) {
         return "";
     }
-    var digits = ['I', 'V', 'X', 'L', 'C', 'D', 'M'];
-    var offset = 0;
-    var acc = "";
+    const digits = ['I', 'V', 'X', 'L', 'C', 'D', 'M'];
+    let offset = 0;
+    let acc = "";
     while (num > 0) {
-        var digit = num % 10;
+        let digit = num % 10;
         num = (num - digit) / 10;
-        var result = "";
+        let result = "";
         if (digit == 9) {
             result += digits[offset] + digits[offset+2];
         } else if (digit == 4) {
@@ -2119,13 +2119,13 @@ adapt.csscasc.fixed = {
  * @param {number} num
  */
 adapt.csscasc.additiveFormat = (entries, num) => {
-    var max = /** @type {number} */ (entries[0]);
+    const max = /** @type {number} */ (entries[0]);
     if (num > max || num <= 0 || num != Math.round(num))
         return "";
-    var result = "";
-    for (var i = 1; i < entries.length; i+=2) {
-        var value = /** @type {number} */ (entries[i]);
-        var count = Math.floor(num / value);
+    let result = "";
+    for (let i = 1; i < entries.length; i+=2) {
+        const value = /** @type {number} */ (entries[i]);
+        let count = Math.floor(num / value);
         if (count > 20)
             return "";
         num -= count * value;
@@ -2138,14 +2138,14 @@ adapt.csscasc.additiveFormat = (entries, num) => {
 };
 
 adapt.csscasc.expandAlphabet = str => {
-    var arr = [];
-    var i = 0;
+    const arr = [];
+    let i = 0;
     while (i < str.length) {
         if (str.substr(i+1, 1) == "-") {
-            var first = str.charCodeAt(i);
-            var last = str.charCodeAt(i+2);
+            const first = str.charCodeAt(i);
+            const last = str.charCodeAt(i+2);
             i += 3;
-            for (var k = first; k <= last; k++) {
+            for (let k = first; k <= last; k++) {
                 arr.push(String.fromCharCode(k));
             }
         } else {
@@ -2162,11 +2162,11 @@ adapt.csscasc.expandAlphabet = str => {
 adapt.csscasc.alphabeticFormat = (alphabetStr, num) => {
     if (num <= 0 || num != Math.round(num))
         return "";
-    var alphabet = adapt.csscasc.expandAlphabet(alphabetStr);
-    var result = "";
+    const alphabet = adapt.csscasc.expandAlphabet(alphabetStr);
+    let result = "";
     do {
         num--;
-        var digit = num % alphabet.length;
+        const digit = num % alphabet.length;
         result = alphabet[digit] + result;
         num = (num - digit) / alphabet.length;
     } while (num > 0);
@@ -2199,7 +2199,7 @@ adapt.csscasc.chineseCounter = (num, numbering) => {
         return "" + num;  // TODO: should be cjk-decimal
     if (num == 0)
         return numbering.digits.charAt(0);
-    var res = new adapt.base.StringBuffer();
+    const res = new adapt.base.StringBuffer();
     if (num < 0) {
         res.append(numbering.negative);
         num = -num;
@@ -2212,22 +2212,22 @@ adapt.csscasc.chineseCounter = (num, numbering) => {
             res.append(numbering.markers.charAt(num - 10));
         }
     } else {
-        var thousands = Math.floor(num/1000);
+        const thousands = Math.floor(num/1000);
         if (thousands) {
             res.append(numbering.digits.charAt(thousands));
             res.append(numbering.markers.charAt(2));
         }
-        var hundreds = Math.floor(num/100) % 10;
+        const hundreds = Math.floor(num/100) % 10;
         if (hundreds) {
             res.append(numbering.digits.charAt(hundreds));
             res.append(numbering.markers.charAt(1));
         }
-        var tens = Math.floor(num/10) % 10;
+        const tens = Math.floor(num/10) % 10;
         if (tens) {
             res.append(numbering.digits.charAt(tens));
             res.append(numbering.markers.charAt(0));
         }
-        var ones = num % 10;
+        const ones = num % 10;
         if (ones) {
             res.append(numbering.digits.charAt(ones));
         }
@@ -2243,9 +2243,9 @@ adapt.csscasc.chineseCounter = (num, numbering) => {
  * @return {string}
  */
 adapt.csscasc.ContentPropVisitor.prototype.format = (num, type) => {
-    var upper = false; // type == "armenian"; // content-counter-10.xht assumes armenian is uppercase, enable if desired
-    var lower = false;
-    var r;
+    let upper = false; // type == "armenian"; // content-counter-10.xht assumes armenian is uppercase, enable if desired
+    let lower = false;
+    let r;
     if ((r = type.match(/^upper-(.*)/)) != null) {
         upper = true;
         type = r[1];
@@ -2253,7 +2253,7 @@ adapt.csscasc.ContentPropVisitor.prototype.format = (num, type) => {
         lower = true;
         type = r[1];
     }
-    var result = "";
+    let result = "";
     if (adapt.csscasc.additiveNumbering[type]) {
         result = adapt.csscasc.additiveFormat(adapt.csscasc.additiveNumbering[type], num);
     } else if (adapt.csscasc.alphabeticNumbering[type]) {
@@ -2283,15 +2283,15 @@ adapt.csscasc.ContentPropVisitor.prototype.format = (num, type) => {
  * @return {adapt.css.Val}
  */
 adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounter = function(values) {
-    var counterName = values[0].toString();
-    var type = values.length > 1 ? values[1].stringValue() : "decimal";
-    var arr = this.cascade.counters[counterName];
+    const counterName = values[0].toString();
+    const type = values.length > 1 ? values[1].stringValue() : "decimal";
+    const arr = this.cascade.counters[counterName];
     if (arr && arr.length) {
-        var numval = (arr && arr.length && arr[arr.length - 1]) || 0;
+        const numval = (arr && arr.length && arr[arr.length - 1]) || 0;
         return new adapt.css.Str(this.format(numval, type));
     } else {
-        var self = this;
-        var c = new adapt.css.Expr(this.counterResolver.getPageCounterVal(counterName, numval => self.format(numval || 0, type)));
+        const self = this;
+        const c = new adapt.css.Expr(this.counterResolver.getPageCounterVal(counterName, numval => self.format(numval || 0, type)));
         return new adapt.css.SpaceList([c]);
     }
 };
@@ -2301,27 +2301,27 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounter = function(values) {
  * @return {adapt.css.Val}
  */
 adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounters = function(values) {
-    var counterName = values[0].toString();
-    var separator = values[1].stringValue();
-    var type = values.length > 2 ? values[2].stringValue() : "decimal";
-    var arr = this.cascade.counters[counterName];
-    var sb = new adapt.base.StringBuffer();
+    const counterName = values[0].toString();
+    const separator = values[1].stringValue();
+    const type = values.length > 2 ? values[2].stringValue() : "decimal";
+    const arr = this.cascade.counters[counterName];
+    const sb = new adapt.base.StringBuffer();
     if (arr && arr.length) {
-        for (var i = 0; i < arr.length; i++) {
+        for (let i = 0; i < arr.length; i++) {
             if (i > 0)
                 sb.append(separator);
             sb.append(this.format(arr[i], type));
         }
     }
-    var self = this;
-    var c = new adapt.css.Expr(this.counterResolver.getPageCountersVal(counterName, numvals => {
-        var parts = /** @type {Array.<string>} */ ([]);
+    const self = this;
+    const c = new adapt.css.Expr(this.counterResolver.getPageCountersVal(counterName, numvals => {
+        const parts = /** @type {Array.<string>} */ ([]);
         if (numvals.length) {
-            for (var i = 0; i < numvals.length; i++) {
+            for (let i = 0; i < numvals.length; i++) {
                 parts.push(self.format(numvals[i], type));
             }
         }
-        var elementCounters = sb.toString();
+        const elementCounters = sb.toString();
         if (elementCounters.length) {
             parts.push(elementCounters);
         }
@@ -2339,18 +2339,18 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncCounters = function(values) 
  * @return {adapt.css.Val}
  */
 adapt.csscasc.ContentPropVisitor.prototype.visitFuncTargetCounter = function(values) {
-    var targetUrl = values[0];
-    var targetUrlStr;
+    const targetUrl = values[0];
+    let targetUrlStr;
     if (targetUrl instanceof adapt.css.URL) {
         targetUrlStr = targetUrl.url;
     } else {
         targetUrlStr = targetUrl.stringValue();
     }
-    var counterName = values[1].toString();
-    var type = values.length > 2 ? values[2].stringValue() : "decimal";
+    const counterName = values[1].toString();
+    const type = values.length > 2 ? values[2].stringValue() : "decimal";
 
-    var self = this;
-    var c = new adapt.css.Expr(this.counterResolver.getTargetCounterVal(targetUrlStr, counterName, numval => self.format(numval || 0, type)));
+    const self = this;
+    const c = new adapt.css.Expr(this.counterResolver.getTargetCounterVal(targetUrlStr, counterName, numval => self.format(numval || 0, type)));
     return new adapt.css.SpaceList([c]);
 };
 
@@ -2359,20 +2359,20 @@ adapt.csscasc.ContentPropVisitor.prototype.visitFuncTargetCounter = function(val
  * @returns {adapt.css.Val}
  */
 adapt.csscasc.ContentPropVisitor.prototype.visitFuncTargetCounters = function(values) {
-    var targetUrl = values[0];
-    var targetUrlStr;
+    const targetUrl = values[0];
+    let targetUrlStr;
     if (targetUrl instanceof adapt.css.URL) {
         targetUrlStr = targetUrl.url;
     } else {
         targetUrlStr = targetUrl.stringValue();
     }
-    var counterName = values[1].toString();
-    var separator = values[2].stringValue();
-    var type = values.length > 3 ? values[3].stringValue() : "decimal";
+    const counterName = values[1].toString();
+    const separator = values[2].stringValue();
+    const type = values.length > 3 ? values[3].stringValue() : "decimal";
 
-    var self = this;
-    var c = new adapt.css.Expr(this.counterResolver.getTargetCountersVal(targetUrlStr, counterName, numvals => {
-        var parts = numvals.map(numval => self.format(numval, type));
+    const self = this;
+    const c = new adapt.css.Expr(this.counterResolver.getTargetCountersVal(targetUrlStr, counterName, numvals => {
+        const parts = numvals.map(numval => self.format(numval, type));
         if (parts.length) {
             return parts.join(separator);
         } else {
@@ -2430,7 +2430,7 @@ adapt.csscasc.ORDER_INCREMENT = 1 / 0x100000;
  * @return {void}
  */
 adapt.csscasc.copyTable = (src, dst) => {
-    for (var n in src) {
+    for (const n in src) {
         dst[n] = src[n].clone();
     }
 };
@@ -2455,9 +2455,9 @@ adapt.csscasc.Cascade = function() {
  * @return {adapt.csscasc.Cascade}
  */
 adapt.csscasc.Cascade.prototype.clone = function() {
-    var r = new adapt.csscasc.Cascade();
+    const r = new adapt.csscasc.Cascade();
     r.nsCount = this.nsCount;
-    for (var p in this.nsPrefix) {
+    for (const p in this.nsPrefix) {
         r.nsPrefix[p] = this.nsPrefix[p];
     }
     adapt.csscasc.copyTable(this.tags, r.tags);
@@ -2477,7 +2477,7 @@ adapt.csscasc.Cascade.prototype.clone = function() {
  * @return {void}
  */
 adapt.csscasc.Cascade.prototype.insertInTable = (table, key, action) => {
-    var a = table[key];
+    const a = table[key];
     if (a)
         action = a.mergeWith(action);
     table[key] = action;
@@ -2599,14 +2599,14 @@ adapt.csscasc.CascadeInstance.prototype.decrement = function(condition, viewCond
  * @return {vivliostyle.selectors.Matcher}
  */
 adapt.csscasc.CascadeInstance.prototype.buildViewConditionMatcher = function(viewConditionId) {
-    var matcherBuilder = vivliostyle.selectors.MatcherBuilder.instance;
-    var matcher = null;
+    const matcherBuilder = vivliostyle.selectors.MatcherBuilder.instance;
+    let matcher = null;
     if (viewConditionId) {
         goog.asserts.assert(this.currentElementOffset);
         matcher = matcherBuilder.buildViewConditionMatcher(this.currentElementOffset, viewConditionId);
     }
-    var dependentConditionMatchers = this.dependentConditions.map(conditionId => {
-        var conditions = this.viewConditions[conditionId];
+    const dependentConditionMatchers = this.dependentConditions.map(conditionId => {
+        const conditions = this.viewConditions[conditionId];
         if (conditions && conditions.length > 0) {
             return conditions.length === 1 ? conditions[0] : matcherBuilder.buildAnyMatcher([].concat(conditions));
         } else {
@@ -2627,7 +2627,7 @@ adapt.csscasc.CascadeInstance.prototype.buildViewConditionMatcher = function(vie
  * @return {void}
  */
 adapt.csscasc.CascadeInstance.prototype.applyAction = function(table, key) {
-    var action = table[key];
+    const action = table[key];
     action && action.apply(this);
 };
 
@@ -2666,7 +2666,7 @@ adapt.csscasc.CascadeInstance.prototype.defineCounter = function(counterName, va
         this.counters[counterName].push(value);
     else
         this.counters[counterName] = [value];
-    var scoping = this.counterScoping[this.counterScoping.length - 1];
+    let scoping = this.counterScoping[this.counterScoping.length - 1];
     if (!scoping) {
         scoping = {};
         this.counterScoping[this.counterScoping.length - 1] = scoping;
@@ -2679,32 +2679,32 @@ adapt.csscasc.CascadeInstance.prototype.defineCounter = function(counterName, va
  * @return {void}
  */
 adapt.csscasc.CascadeInstance.prototype.pushCounters = function(props) {
-    var displayVal = adapt.css.ident.inline;
-    var display = props["display"];
+    let displayVal = adapt.css.ident.inline;
+    const display = props["display"];
     if (display) {
         displayVal = display.evaluate(this.context);
     }
-    var resetMap = null;
-    var incrementMap = null;
-    var setMap = null;
+    let resetMap = null;
+    let incrementMap = null;
+    let setMap = null;
 
-    var reset = props["counter-reset"];
+    const reset = props["counter-reset"];
     if (reset) {
-        var resetVal = reset.evaluate(this.context);
+        const resetVal = reset.evaluate(this.context);
         if (resetVal) {
             resetMap = adapt.cssprop.toCounters(resetVal, true);
         }
     }
-    var set = props["counter-set"];
+    const set = props["counter-set"];
     if (set) {
-        var setVal = set.evaluate(this.context);
+        const setVal = set.evaluate(this.context);
         if (setVal) {
             setMap = adapt.cssprop.toCounters(setVal, false);
         }
     }
-    var increment = props["counter-increment"];
+    const increment = props["counter-increment"];
     if (increment) {
-        var incrementVal = increment.evaluate(this.context);
+        const incrementVal = increment.evaluate(this.context);
         if (incrementVal) {
             incrementMap = adapt.cssprop.toCounters(incrementVal, false);
         }
@@ -2721,12 +2721,12 @@ adapt.csscasc.CascadeInstance.prototype.pushCounters = function(props) {
         incrementMap["ua-list-item"] = 1;
     }
     if (resetMap) {
-        for (var resetCounterName in resetMap) {
+        for (const resetCounterName in resetMap) {
             this.defineCounter(resetCounterName, resetMap[resetCounterName]);
         }
     }
     if (setMap) {
-        for (var setCounterName in setMap) {
+        for (const setCounterName in setMap) {
             if (!this.counters[setCounterName]) {
                 this.defineCounter(setCounterName, setMap[setCounterName]);
             } else {
@@ -2736,7 +2736,7 @@ adapt.csscasc.CascadeInstance.prototype.pushCounters = function(props) {
         }
     }
     if (incrementMap) {
-        for (var incrementCounterName in incrementMap) {
+        for (const incrementCounterName in incrementMap) {
             if (!this.counters[incrementCounterName]) {
                 this.defineCounter(incrementCounterName, 0);
             }
@@ -2745,8 +2745,8 @@ adapt.csscasc.CascadeInstance.prototype.pushCounters = function(props) {
         }
     }
     if (displayVal === adapt.css.ident.list_item) {
-        var listItemCounts = this.counters["ua-list-item"];
-        var listItemCount = listItemCounts[listItemCounts.length - 1];
+        const listItemCounts = this.counters["ua-list-item"];
+        const listItemCount = listItemCounts[listItemCounts.length - 1];
         props["ua-list-item-count"] =
             new adapt.csscasc.CascadeValue(new adapt.css.Num(listItemCount), 0);
     }
@@ -2757,10 +2757,10 @@ adapt.csscasc.CascadeInstance.prototype.pushCounters = function(props) {
  * @return {void}
  */
 adapt.csscasc.CascadeInstance.prototype.popCounters = function() {
-    var scoping = this.counterScoping.pop();
+    const scoping = this.counterScoping.pop();
     if (scoping) {
-        for (var counterName in scoping) {
-            var arr = this.counters[counterName];
+        for (const counterName in scoping) {
+            const arr = this.counters[counterName];
             if (arr) {
                 if (arr.length == 1) {
                     delete this.counters[counterName];
@@ -2812,7 +2812,7 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
     this.currentStyle = baseStyle;
     this.currentNamespace = element.namespaceURI;
     this.currentLocalName = element.localName;
-    var prefix = this.code.nsPrefix[this.currentNamespace];
+    const prefix = this.code.nsPrefix[this.currentNamespace];
     if (prefix) {
         this.currentNSTag = prefix + this.currentLocalName;
     } else {
@@ -2820,13 +2820,13 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
     }
     this.currentId = element.getAttribute("id");
     this.currentXmlId = element.getAttributeNS(adapt.base.NS.XML, "id");
-    var classes = element.getAttribute("class");
+    const classes = element.getAttribute("class");
     if (classes) {
         this.currentClassNames = classes.split(/\s+/);
     } else {
         this.currentClassNames = adapt.csscasc.EMPTY;
     }
-    var types = element.getAttributeNS(adapt.base.NS.epub, "type");
+    const types = element.getAttributeNS(adapt.base.NS.epub, "type");
     if (types) {
         this.currentEpubTypes = types.split(/\s+/);
     } else {
@@ -2834,31 +2834,31 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
     }
     if (this.currentLocalName == "style" && this.currentNamespace == adapt.base.NS.FB2) {
         // special case
-        var className = element.getAttribute("name") || "";
+        const className = element.getAttribute("name") || "";
         this.currentClassNames = [className];
     }
-    var lang = adapt.base.getLangAttribute(element);
+    const lang = adapt.base.getLangAttribute(element);
     if (lang) {
         this.stack[this.stack.length - 1].push(
             new adapt.csscasc.RestoreLangItem(this.lang));
         this.lang = lang.toLowerCase();
     }
-    var isRoot = this.isRoot;
+    const isRoot = this.isRoot;
 
-    var siblingOrderStack = this.siblingOrderStack;
+    const siblingOrderStack = this.siblingOrderStack;
     this.currentSiblingOrder = ++siblingOrderStack[siblingOrderStack.length - 1];
     siblingOrderStack.push(0);
 
-    var siblingTypeCountsStack = this.siblingTypeCountsStack;
-    var currentSiblingTypeCounts = this.currentSiblingTypeCounts = siblingTypeCountsStack[siblingTypeCountsStack.length - 1];
-    var currentNamespaceTypeCounts = currentSiblingTypeCounts[this.currentNamespace];
+    const siblingTypeCountsStack = this.siblingTypeCountsStack;
+    const currentSiblingTypeCounts = this.currentSiblingTypeCounts = siblingTypeCountsStack[siblingTypeCountsStack.length - 1];
+    let currentNamespaceTypeCounts = currentSiblingTypeCounts[this.currentNamespace];
     if (!currentNamespaceTypeCounts) {
         currentNamespaceTypeCounts = currentSiblingTypeCounts[this.currentNamespace] = {};
     }
     currentNamespaceTypeCounts[this.currentLocalName] = (currentNamespaceTypeCounts[this.currentLocalName] || 0) + 1;
     siblingTypeCountsStack.push({});
 
-    var followingSiblingOrderStack = this.followingSiblingOrderStack;
+    const followingSiblingOrderStack = this.followingSiblingOrderStack;
     if (followingSiblingOrderStack[followingSiblingOrderStack.length - 1] !== null) {
         this.currentFollowingSiblingOrder = --followingSiblingOrderStack[followingSiblingOrderStack.length - 1];
     } else {
@@ -2866,8 +2866,8 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
     }
     followingSiblingOrderStack.push(null);
 
-    var followingSiblingTypeCountsStack = this.followingSiblingTypeCountsStack;
-    var currentFollowingSiblingTypeCounts = this.currentFollowingSiblingTypeCounts = followingSiblingTypeCountsStack[followingSiblingTypeCountsStack.length - 1];
+    const followingSiblingTypeCountsStack = this.followingSiblingTypeCountsStack;
+    const currentFollowingSiblingTypeCounts = this.currentFollowingSiblingTypeCounts = followingSiblingTypeCountsStack[followingSiblingTypeCountsStack.length - 1];
     if (currentFollowingSiblingTypeCounts && currentFollowingSiblingTypeCounts[this.currentNamespace]) {
         currentFollowingSiblingTypeCounts[this.currentNamespace][this.currentLocalName]--;
     }
@@ -2875,10 +2875,10 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
 
     this.applyActions();
     this.applyAttrFilter(element);
-    var quotesCasc = baseStyle["quotes"];
-    var itemToPushLast = null;
+    const quotesCasc = baseStyle["quotes"];
+    let itemToPushLast = null;
     if (quotesCasc) {
-        var quotesVal = quotesCasc.evaluate(this.context);
+        const quotesVal = quotesCasc.evaluate(this.context);
         if (quotesVal) {
             itemToPushLast = new adapt.csscasc.QuotesScopeItem(this.quotes);
             if (quotesVal === adapt.css.ident.none)
@@ -2889,24 +2889,24 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
         }
     }
     this.pushCounters(this.currentStyle);
-    var id = this.currentId || this.currentXmlId || element.getAttribute("name") || "";
+    const id = this.currentId || this.currentXmlId || element.getAttribute("name") || "";
     if (isRoot || id) {
-        /** @type {!Object<string, Array<number>>} */ var counters = {};
+        /** @type {!Object<string, Array<number>>} */ const counters = {};
         Object.keys(this.counters).forEach(function(name) {
             counters[name] = Array.from(this.counters[name]);
         }, this);
         this.counterListener.countersOfId(id, counters);
     }
-    var pseudos = adapt.csscasc.getStyleMap(this.currentStyle, "_pseudos");
+    const pseudos = adapt.csscasc.getStyleMap(this.currentStyle, "_pseudos");
     if (pseudos) {
-        var before = true;
-        for (var k = 0; k < adapt.csscasc.pseudoNames.length; k++) {
-            var pseudoName = adapt.csscasc.pseudoNames[k];
+        let before = true;
+        for (let k = 0; k < adapt.csscasc.pseudoNames.length; k++) {
+            const pseudoName = adapt.csscasc.pseudoNames[k];
             if (!pseudoName) {
                 // content
                 before = false;
             }
-            var pseudoProps = pseudos[pseudoName];
+            const pseudoProps = pseudos[pseudoName];
             if (pseudoProps) {
                 if (before) {
                     this.processPseudoelementProps(pseudoProps, element);
@@ -2928,7 +2928,7 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
  * @return {void}
  */
 adapt.csscasc.CascadeInstance.prototype.applyAttrFilterInner = (visitor, elementStyle) => {
-    for (var propName in elementStyle) {
+    for (const propName in elementStyle) {
         if (adapt.csscasc.isPropName(propName))
             elementStyle[propName] = elementStyle[propName].filterValue(visitor);
     }
@@ -2938,10 +2938,10 @@ adapt.csscasc.CascadeInstance.prototype.applyAttrFilterInner = (visitor, element
  * @return {void}
  */
 adapt.csscasc.CascadeInstance.prototype.applyAttrFilter = function(element) {
-    var visitor = new adapt.csscasc.AttrValueFilterVisitor(element);
-    var currentStyle = this.currentStyle;
-    var pseudoMap = adapt.csscasc.getStyleMap(currentStyle, "_pseudos");
-    for (var pseudoName in pseudoMap) {
+    const visitor = new adapt.csscasc.AttrValueFilterVisitor(element);
+    const currentStyle = this.currentStyle;
+    const pseudoMap = adapt.csscasc.getStyleMap(currentStyle, "_pseudos");
+    for (const pseudoName in pseudoMap) {
         this.applyAttrFilterInner(visitor, pseudoMap[pseudoName]);
     }
     this.applyAttrFilterInner(visitor, currentStyle);
@@ -2951,7 +2951,7 @@ adapt.csscasc.CascadeInstance.prototype.applyAttrFilter = function(element) {
  * @return {void}
  */
 adapt.csscasc.CascadeInstance.prototype.applyActions = function() {
-    var i;
+    let i;
     for (i = 0; i < this.currentClassNames.length; i++) {
         this.applyAction(this.code.classes, this.currentClassNames[i]);
     }
@@ -2974,8 +2974,8 @@ adapt.csscasc.CascadeInstance.prototype.applyActions = function() {
     this.currentElement = null;
     this.currentDoc = null;
     this.stack.push([]);
-    for (var depth = 1; depth >= -1; --depth) {
-        var list = this.stack[this.stack.length - depth - 2];
+    for (let depth = 1; depth >= -1; --depth) {
+        const list = this.stack[this.stack.length - depth - 2];
         i = 0;
         while (i < list.length) {
             if (list[i].push(this, depth)) {
@@ -2995,9 +2995,9 @@ adapt.csscasc.CascadeInstance.prototype.applyActions = function() {
  * @return {void}
  */
 adapt.csscasc.CascadeInstance.prototype.pop = function() {
-    for (var depth = 1; depth >= -1; --depth) {
-        var list = this.stack[this.stack.length - depth - 2];
-        var i = 0;
+    for (let depth = 1; depth >= -1; --depth) {
+        const list = this.stack[this.stack.length - depth - 2];
+        let i = 0;
         while (i < list.length) {
             if (list[i].pop(this, depth)) {
                 // done
@@ -3024,7 +3024,7 @@ adapt.csscasc.CascadeInstance.prototype.popRule = function() {
  */
 adapt.csscasc.CascadeInstance.prototype.popElement = function(element) {
     if (goog.DEBUG) {
-        var e = this.elementStack.pop();
+        const e = this.elementStack.pop();
         if (e !== element) {
             throw new Error("Invalid call to popElement");
         }
@@ -3100,7 +3100,7 @@ adapt.csscasc.CascadeParserHandler.prototype.insertNonPrimary = function(action)
  * @return {void}
  */
 adapt.csscasc.CascadeParserHandler.prototype.processChain = function(action) {
-    var chained = adapt.csscasc.chainActions(this.chain, action);
+    const chained = adapt.csscasc.chainActions(this.chain, action);
     if (chained !== action && chained.makePrimary(this.cascade))
         return;
     this.insertNonPrimary(chained);
@@ -3188,8 +3188,8 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
         case "-adapt-href-epub-type":
         case "href-epub-type":
             if (params && params.length == 1 && typeof params[0] == "string") {
-                var value = /** @type {string} */ (params[0]);
-                var patt = new RegExp("(^|\s)" + adapt.base.escapeRegExp(value) + "($|\s)");
+                const value = /** @type {string} */ (params[0]);
+                const patt = new RegExp("(^|\s)" + adapt.base.escapeRegExp(value) + "($|\s)");
                 this.chain.push(new adapt.csscasc.CheckTargetEpubTypeAction(patt));
             } else {
                 this.chain.push(new adapt.csscasc.CheckConditionAction("")); // always fails
@@ -3208,7 +3208,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
             break;
         case "lang":
             if (params && params.length == 1 && typeof params[0] == "string") {
-                var langValue = /** @type {string} */ (params[0]);
+                const langValue = /** @type {string} */ (params[0]);
                 this.chain.push(new adapt.csscasc.CheckLangAction(
                     new RegExp("^" + adapt.base.escapeRegExp(langValue.toLowerCase()) + "($|-)")));
             } else {
@@ -3219,7 +3219,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoclassSelector = function(name
         case "nth-last-child":
         case "nth-of-type":
         case "nth-last-of-type":
-            var ActionClass = adapt.csscasc.nthSelectorActionClasses[name.toLowerCase()];
+            const ActionClass = adapt.csscasc.nthSelectorActionClasses[name.toLowerCase()];
             if (params && params.length == 2) {
                 this.chain.push(new ActionClass(/** @type {number} */ (params[0]), /** @type {number} */ (params[1])));
             } else {
@@ -3285,7 +3285,7 @@ adapt.csscasc.CascadeParserHandler.prototype.pseudoelementSelector = function(na
             break;
         case "first-n-lines":
             if (params && params.length == 1 && typeof params[0] == "number") {
-                var n = Math.round(params[0]);
+                const n = Math.round(params[0]);
                 if (n > 0 && n == params[0]) {
                     if (!this.pseudoelement) {
                         this.pseudoelement = "first-" + n + "-lines";
@@ -3325,7 +3325,7 @@ adapt.csscasc.CascadeParserHandler.prototype.attributeSelector = function(ns, na
     this.specificity += 0x100;
     name = name.toLowerCase();
     value = value || "";
-    var action;
+    let action;
     switch (op) {
         case adapt.csstok.TokenType.EOF:
             action = new adapt.csscasc.CheckAttributePresentAction(ns, name);
@@ -3394,7 +3394,7 @@ adapt.csscasc.conditionCount = 0;
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.descendantSelector = function() {
-    var condition = "d" + (adapt.csscasc.conditionCount++);
+    const condition = "d" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
         new adapt.csscasc.DescendantConditionItem(condition, this.viewConditionId, null)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -3405,7 +3405,7 @@ adapt.csscasc.CascadeParserHandler.prototype.descendantSelector = function() {
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.childSelector = function() {
-    var condition = "c" + (adapt.csscasc.conditionCount++);
+    const condition = "c" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
         new adapt.csscasc.ChildConditionItem(condition, this.viewConditionId, null)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -3416,7 +3416,7 @@ adapt.csscasc.CascadeParserHandler.prototype.childSelector = function() {
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.adjacentSiblingSelector = function() {
-    var condition = "a" + (adapt.csscasc.conditionCount++);
+    const condition = "a" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
         new adapt.csscasc.AdjacentSiblingConditionItem(condition, this.viewConditionId, null)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -3427,7 +3427,7 @@ adapt.csscasc.CascadeParserHandler.prototype.adjacentSiblingSelector = function(
  * @override
  */
 adapt.csscasc.CascadeParserHandler.prototype.followingSiblingSelector = function() {
-    var condition = "f" + (adapt.csscasc.conditionCount++);
+    const condition = "f" + (adapt.csscasc.conditionCount++);
     this.processChain(new adapt.csscasc.ConditionItemAction(
         new adapt.csscasc.FollowingSiblingConditionItem(condition, this.viewConditionId, null)));
     this.chain = [new adapt.csscasc.CheckConditionAction(condition)];
@@ -3502,7 +3502,7 @@ adapt.csscasc.CascadeParserHandler.prototype.endRule = function() {
  */
 adapt.csscasc.CascadeParserHandler.prototype.finishChain = function() {
     if (this.chain) {
-        /** @type {number} */ var specificity = this.specificity + this.cascade.nextOrder();
+        /** @type {number} */ const specificity = this.specificity + this.cascade.nextOrder();
         this.processChain(this.makeApplyRuleAction(specificity));
         this.chain = null;
         this.pseudoelement = null;
@@ -3518,7 +3518,7 @@ adapt.csscasc.CascadeParserHandler.prototype.finishChain = function() {
  * @return {adapt.csscasc.ApplyRuleAction}
  */
 adapt.csscasc.CascadeParserHandler.prototype.makeApplyRuleAction = function(specificity) {
-    var regionId = this.regionId;
+    let regionId = this.regionId;
     if (this.footnoteContent) {
         if (regionId)
             regionId = "xxx-bogus-xxx";
@@ -3534,12 +3534,12 @@ adapt.csscasc.CascadeParserHandler.prototype.makeApplyRuleAction = function(spec
  * @param {adapt.css.Val} value
  */
 adapt.csscasc.CascadeParserHandler.prototype.special = function(name, value) {
-    var val;
+    let val;
     if (!this.condition)
         val = new adapt.csscasc.CascadeValue(value, 0);
     else
         val = new adapt.csscasc.ConditionalCascadeValue(value, 0, this.condition);
-    var arr = adapt.csscasc.getMutableSpecial(this.elementStyle, name);
+    const arr = adapt.csscasc.getMutableSpecial(this.elementStyle, name);
     arr.push(val);
 };
 
@@ -3576,17 +3576,17 @@ adapt.csscasc.CascadeParserHandler.prototype.simpleProperty = function(name, val
         value = adapt.css.ident.block;
     }
 
-    var hooks = vivliostyle.plugin.getHooksForName("SIMPLE_PROPERTY");
+    const hooks = vivliostyle.plugin.getHooksForName("SIMPLE_PROPERTY");
     hooks.forEach(hook => {
-        var original = {"name": name, "value": value, "important": important};
-        var converted = hook(original);
+        const original = {"name": name, "value": value, "important": important};
+        const converted = hook(original);
         name = converted["name"];
         value = converted["value"];
         important = converted["important"];
     });
 
-    var specificity = important ? this.getImportantSpecificity() : this.getBaseSpecificity();
-    var cascval = this.condition
+    const specificity = important ? this.getImportantSpecificity() : this.getBaseSpecificity();
+    const cascval = this.condition
         ? new adapt.csscasc.ConditionalCascadeValue(value, specificity, this.condition)
         : new adapt.csscasc.CascadeValue(value, specificity);
     adapt.csscasc.setProp(this.elementStyle, name, cascval);
@@ -3606,7 +3606,7 @@ adapt.csscasc.CascadeParserHandler.prototype.finish = function() {
 adapt.csscasc.CascadeParserHandler.prototype.startFuncWithSelector = function(funcName) {
     switch (funcName) {
         case "not":
-            var notParserHandler = new adapt.csscasc.NotParameterParserHandler(this);
+            const notParserHandler = new adapt.csscasc.NotParameterParserHandler(this);
             notParserHandler.startSelectorRule();
             this.owner.pushHandler(notParserHandler);
             break;
@@ -3693,8 +3693,8 @@ adapt.csscasc.DefineParserHandler.prototype.property = function(propName, value,
     if (this.scope.values[propName]) {
         this.error("E_CSS_NAME_REDEFINED " + propName, this.getCurrentToken());
     } else {
-        var unit = propName.match(/height|^(top|bottom)$/) ? "vh" : "vw";
-        var dim = new adapt.expr.Numeric(this.scope, 100, unit);
+        const unit = propName.match(/height|^(top|bottom)$/) ? "vh" : "vw";
+        const dim = new adapt.expr.Numeric(this.scope, 100, unit);
         this.scope.defineName(propName, value.toExpr(this.scope, dim));
     }
 };
@@ -3746,10 +3746,10 @@ adapt.csscasc.PropSetParserHandler.prototype.unknownProperty = (name, value) => 
  * @override
  */
 adapt.csscasc.PropSetParserHandler.prototype.simpleProperty = function(name, value, important) {
-    var specificity = important ? this.getImportantSpecificity() : this.getBaseSpecificity();
+    let specificity = important ? this.getImportantSpecificity() : this.getBaseSpecificity();
     specificity += this.order;
     this.order += adapt.csscasc.ORDER_INCREMENT;
-    var av = this.condition
+    const av = this.condition
         ? new adapt.csscasc.ConditionalCascadeValue(value, specificity, this.condition)
         : new adapt.csscasc.CascadeValue(value, specificity);
     adapt.csscasc.setProp(this.elementStyle, name, av);
@@ -3796,10 +3796,10 @@ adapt.csscasc.PropertyParserHandler.prototype.unknownProperty = (name, value) =>
  * @override
  */
 adapt.csscasc.PropertyParserHandler.prototype.simpleProperty = function(name, value, important) {
-    var specificity = important ? adapt.cssparse.SPECIFICITY_STYLE_IMPORTANT : adapt.cssparse.SPECIFICITY_STYLE;
+    let specificity = important ? adapt.cssparse.SPECIFICITY_STYLE_IMPORTANT : adapt.cssparse.SPECIFICITY_STYLE;
     specificity += this.order;
     this.order += adapt.csscasc.ORDER_INCREMENT;
-    var cascval = new adapt.csscasc.CascadeValue(value, specificity);
+    const cascval = new adapt.csscasc.CascadeValue(value, specificity);
     adapt.csscasc.setProp(this.elementStyle, name, cascval);
 };
 
@@ -3812,8 +3812,8 @@ adapt.csscasc.PropertyParserHandler.prototype.simpleProperty = function(name, va
  * @return {adapt.csscasc.ElementStyle}
  */
 adapt.csscasc.parseStyleAttribute = (scope, validatorSet, baseURL, styleAttrValue) => {
-    var handler = new adapt.csscasc.PropertyParserHandler(scope, validatorSet);
-    var tokenizer = new adapt.csstok.Tokenizer(styleAttrValue, handler);
+    const handler = new adapt.csscasc.PropertyParserHandler(scope, validatorSet);
+    const tokenizer = new adapt.csstok.Tokenizer(styleAttrValue, handler);
     try {
         adapt.cssparse.parseStyleAttribute(tokenizer, handler, baseURL);
     } catch (err) {
@@ -3829,9 +3829,9 @@ adapt.csscasc.parseStyleAttribute = (scope, validatorSet, baseURL, styleAttrValu
  * @return {boolean}
  */
 adapt.csscasc.isVertical = (cascaded, context, vertical) => {
-    var writingModeCasc = cascaded["writing-mode"];
+    const writingModeCasc = cascaded["writing-mode"];
     if (writingModeCasc) {
-        var writingMode = writingModeCasc.evaluate(context, "writing-mode");
+        const writingMode = writingModeCasc.evaluate(context, "writing-mode");
         if (writingMode && writingMode !== adapt.css.ident.inherit) {
             return writingMode === adapt.css.ident.vertical_rl;
         }
@@ -3848,8 +3848,8 @@ adapt.csscasc.isVertical = (cascaded, context, vertical) => {
  * @return {!Object.<string,adapt.csscasc.CascadeValue>}
  */
 adapt.csscasc.flattenCascadedStyle = (style, context, regionIds, isFootnote, nodeContext) => {
-    var cascMap = /** @type {!Object.<string,adapt.csscasc.CascadeValue>} */ ({});
-    for (var n in style) {
+    const cascMap = /** @type {!Object.<string,adapt.csscasc.CascadeValue>} */ ({});
+    for (const n in style) {
         if (adapt.csscasc.isPropName(n))
             cascMap[n] = adapt.csscasc.getProp(style, n);
     }
@@ -3869,18 +3869,18 @@ adapt.csscasc.flattenCascadedStyle = (style, context, regionIds, isFootnote, nod
  * @param {function(string, adapt.csscasc.ElementStyle)} callback
  */
 adapt.csscasc.forEachStylesInRegion = (style, regionIds, isFootnote, callback) => {
-    var regions = adapt.csscasc.getStyleMap(style, "_regions");
+    const regions = adapt.csscasc.getStyleMap(style, "_regions");
     if ((regionIds || isFootnote) && regions) {
         if (isFootnote) {
-            var footnoteRegion = ["footnote"];
+            const footnoteRegion = ["footnote"];
             if (!regionIds)
                 regionIds = footnoteRegion;
             else
                 regionIds = regionIds.concat(footnoteRegion);
         }
-        for (var i = 0; i < regionIds.length; i++) {
-            var regionId = regionIds[i];
-            var regionStyle = regions[regionId];
+        for (let i = 0; i < regionIds.length; i++) {
+            const regionId = regionIds[i];
+            const regionStyle = regions[regionId];
             if (regionStyle) callback(regionId, regionStyle);
         }
     }
@@ -3892,10 +3892,10 @@ adapt.csscasc.forEachStylesInRegion = (style, regionIds, isFootnote, callback) =
  * @param {adapt.expr.Context} context
  */
 adapt.csscasc.mergeStyle = (to, from, context) => {
-    for (var property in from) {
+    for (const property in from) {
         if (adapt.csscasc.isPropName(property)) {
-            var newVal = adapt.csscasc.getProp(from, property);
-            var oldVal = to[property];
+            const newVal = adapt.csscasc.getProp(from, property);
+            const oldVal = to[property];
             to[property] = adapt.csscasc.cascadeValues(context, oldVal,
                 /** @type {!adapt.csscasc.CascadeValue} */ (newVal));
         }
@@ -3911,15 +3911,15 @@ adapt.csscasc.mergeStyle = (to, from, context) => {
  * @template T
  */
 adapt.csscasc.convertToPhysical = (src, dest, vertical, transform) => {
-    var couplingMap = vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
-    for (var propName in src) {
+    const couplingMap = vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
+    for (const propName in src) {
         if (src.hasOwnProperty(propName)) {
-            var cascVal = src[propName];
+            const cascVal = src[propName];
             if (!cascVal) continue;
-            var coupledName = couplingMap[propName];
-            var targetName;
+            const coupledName = couplingMap[propName];
+            let targetName;
             if (coupledName) {
-                var coupledCascVal = src[coupledName];
+                const coupledCascVal = src[coupledName];
                 if (coupledCascVal && coupledCascVal.priority > cascVal.priority) {
                     continue;
                 }

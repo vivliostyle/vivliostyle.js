@@ -133,8 +133,8 @@ adapt.task.newFrame = name => {
         throw new Error('E_TASK_NO_CONTEXT');
     if (!adapt.task.privateCurrentTask.name)
         adapt.task.privateCurrentTask.name = name;
-    var task = adapt.task.privateCurrentTask;
-    var frame = new adapt.task.Frame(task, task.top, name);
+    const task = adapt.task.privateCurrentTask;
+    const frame = new adapt.task.Frame(task, task.top, name);
     task.top = frame;
     frame.state = adapt.task.FrameState.ACTIVE;
     return frame;
@@ -170,7 +170,7 @@ adapt.task.newResult = opt_value => new adapt.task.SyncResultImpl(opt_value);
  * @return {!adapt.task.Result.<T>}
  */
 adapt.task.handle = (name, code, onErr) => {
-    var frame = adapt.task.newFrame(name);
+    const frame = adapt.task.newFrame(name);
     frame.handler = onErr;
     try {
         code(frame);
@@ -187,7 +187,7 @@ adapt.task.handle = (name, code, onErr) => {
  * @return {adapt.task.Task}
  */
 adapt.task.start = (func, opt_name) => {
-    var scheduler = adapt.task.privateCurrentTask
+    const scheduler = adapt.task.privateCurrentTask
         ? adapt.task.privateCurrentTask.getScheduler()
         : adapt.task.primaryScheduler || adapt.task.newScheduler();
     return scheduler.run(func, opt_name);
@@ -272,7 +272,7 @@ adapt.task.Scheduler.prototype.setTimeout = function(timeout) {
  * @return {boolean}
  */
 adapt.task.Scheduler.prototype.isTimeSliceOver = function() {
-    var now = this.timer.currentTime();
+    const now = this.timer.currentTime();
     return now >= this.sliceOverTime;
 };
 
@@ -283,20 +283,20 @@ adapt.task.Scheduler.prototype.isTimeSliceOver = function() {
 adapt.task.Scheduler.prototype.arm = function() {
     if (this.inTimeSlice)
         return;
-    var nextInQueue =
+    const nextInQueue =
         /** @type {adapt.task.Continuation} */ (this.queue.peek());
-    var newTime = nextInQueue.scheduledTime;
-    var now = this.timer.currentTime();
+    const newTime = nextInQueue.scheduledTime;
+    const now = this.timer.currentTime();
     if (this.timeoutToken != null) {
         if (now + this.timeout > this.wakeupTime)
             return; // no use re-arming
         this.timer.clearTimeout(this.timeoutToken);
     }
-    var timeout = newTime - now;
+    let timeout = newTime - now;
     if (timeout <= this.timeout)
         timeout = this.timeout;
     this.wakeupTime = now + timeout;
-    var self = this;
+    const self = this;
     this.timeoutToken = this.timer.setTimeout(() => {
         self.timeoutToken = null;
         self.doTimeSlice();
@@ -311,8 +311,8 @@ adapt.task.Scheduler.prototype.arm = function() {
  */
 adapt.task.Scheduler.prototype.schedule = function(
     continuation, opt_delay) {
-    var c = /** @type {adapt.task.Continuation} */ (continuation);
-    var now = this.timer.currentTime();
+    const c = /** @type {adapt.task.Continuation} */ (continuation);
+    const now = this.timer.currentTime();
     c.order = this.order++;
     c.scheduledTime = now + (opt_delay || 0);
     this.queue.add(c);
@@ -330,10 +330,10 @@ adapt.task.Scheduler.prototype.doTimeSlice = function() {
     }
     this.inTimeSlice = true;
     try {
-        var now = this.timer.currentTime();
+        let now = this.timer.currentTime();
         this.sliceOverTime = now + this.slice;
         while (this.queue.length()) {
-            var continuation =
+            const continuation =
                 /** @type {adapt.task.Continuation} */ (this.queue.peek());
             if (continuation.scheduledTime > now)
                 break; // too early
@@ -359,14 +359,14 @@ adapt.task.Scheduler.prototype.doTimeSlice = function() {
  * @return {adapt.task.Task}
  */
 adapt.task.Scheduler.prototype.run = function(func, opt_name) {
-    var task = new adapt.task.Task(this, opt_name || "");
+    const task = new adapt.task.Task(this, opt_name || "");
     task.top = new adapt.task.Frame(task, null, 'bootstrap');
     task.top.state = adapt.task.FrameState.ACTIVE;
     task.top.then(() => {
-        var done = () => {
+        const done = () => {
             task.running = false;
-            for (var i = 0; i < task.callbacks.length; i++) {
-                var callback = task.callbacks[i];
+            for (let i = 0; i < task.callbacks.length; i++) {
+                const callback = task.callbacks[i];
                 try {
                     callback();
                 } catch (err) {
@@ -384,7 +384,7 @@ adapt.task.Scheduler.prototype.run = function(func, opt_name) {
             done();
         }
     });
-    var savedTask = adapt.task.privateCurrentTask;
+    const savedTask = adapt.task.privateCurrentTask;
     adapt.task.privateCurrentTask = task;
     this.schedule(task.top.suspend('bootstrap'));
     adapt.task.privateCurrentTask = savedTask;
@@ -414,7 +414,7 @@ adapt.task.Continuation = function(task) {
  */
 adapt.task.Continuation.prototype.compare = function(otherComp) {
     // earlier wins
-    var other = /** @type {adapt.task.Continuation} */ (otherComp);
+    const other = /** @type {adapt.task.Continuation} */ (otherComp);
     return other.scheduledTime - this.scheduledTime || other.order - this.order;
 };
 
@@ -442,11 +442,11 @@ adapt.task.Continuation.prototype.schedule = function(result, opt_delay) {
  * @return {boolean}
  */
 adapt.task.Continuation.prototype.resumeInternal = function() {
-    var task = this.task;
+    const task = this.task;
     this.task = null;
     if (task && task.continuation == this) {
         task.continuation = null;
-        var savedTask = adapt.task.privateCurrentTask;
+        const savedTask = adapt.task.privateCurrentTask;
         adapt.task.privateCurrentTask = task;
         task.top.finish(this.result);
         adapt.task.privateCurrentTask = savedTask;
@@ -498,7 +498,7 @@ adapt.task.Task.prototype.interrupt = function(err) {
     if (this !== adapt.task.privateCurrentTask && this.continuation) {
         // blocked on something
         this.continuation.cancel();
-        var continuation = new adapt.task.Continuation(this);
+        const continuation = new adapt.task.Continuation(this);
         this.waitTarget = 'interrupt';
         this.continuation = continuation;
         this.scheduler.schedule(continuation);
@@ -535,12 +535,12 @@ adapt.task.Task.prototype.whenDone = function(callback) {
  * @return {!adapt.task.Result}
  */
 adapt.task.Task.prototype.join = function() {
-    var frame = adapt.task.newFrame('Task.join');
+    const frame = adapt.task.newFrame('Task.join');
     if (!this.running) {
         frame.finish(this.result);
     } else {
-        var continuation = frame.suspend(this);
-        var self = this;
+        const continuation = frame.suspend(this);
+        const self = this;
         this.whenDone(() => {
             continuation.schedule(self.result);
         });
@@ -559,7 +559,7 @@ adapt.task.Task.prototype.unwind = function() {
     }
     if (this.top) {
         // found a handler
-        var err = this.exception;
+        const err = this.exception;
         this.exception = null;
         this.top.handler(this.top, err);
     } else {
@@ -578,7 +578,7 @@ adapt.task.Task.prototype.unwind = function() {
 adapt.task.Task.prototype.raise = function(err, opt_frame) {
     this.fillStack(err);
     if (opt_frame) {
-        var f = this.top;
+        let f = this.top;
         while (f && f != opt_frame) {
             f = f.parent;
         }
@@ -595,10 +595,10 @@ adapt.task.Task.prototype.raise = function(err, opt_frame) {
  * @param {Error} err exception
  */
 adapt.task.Task.prototype.fillStack = function(err) {
-    var out = err['frameTrace'];
+    let out = err['frameTrace'];
     if (!out) {
         out = err["stack"] ? err["stack"] + "\n\t---- async ---\n" : "";
-        for (var f = this.top; f; f = f.parent) {
+        for (let f = this.top; f; f = f.parent) {
             out += '\t';
             out += f.getName();
             out += '\n';
@@ -681,7 +681,7 @@ adapt.task.ResultImpl.prototype.then = function(callback) {
 adapt.task.ResultImpl.prototype.thenAsync = function(callback) {
     if (this.isPending()) {
         // thenAsync is special, do the trick with the context
-        var frame = new adapt.task.Frame(this.frame.task,
+        const frame = new adapt.task.Frame(this.frame.task,
             this.frame.parent, 'AsyncResult.thenAsync');
         frame.state = adapt.task.FrameState.ACTIVE;
         this.frame.parent = frame;
@@ -785,7 +785,7 @@ adapt.task.Frame.prototype.finish = function(res) {
     if (!adapt.task.privateCurrentTask.exception)
         this.res = res;
     this.state = adapt.task.FrameState.FINISHED;
-    var frame = this.parent;
+    const frame = this.parent;
     adapt.task.privateCurrentTask.top = frame;
     if (this.callback) {
         try {
@@ -835,8 +835,8 @@ adapt.task.Frame.prototype.then = function(callback) {
             }
             break;
         case adapt.task.FrameState.FINISHED:
-            var task = this.task;
-            var frame = this.parent;
+            const task = this.task;
+            const frame = this.parent;
             try {
                 callback(this.res);
                 this.state = adapt.task.FrameState.DEAD;
@@ -857,8 +857,8 @@ adapt.task.Frame.prototype.then = function(callback) {
  * @return {!adapt.task.Result.<boolean>} holds true
  */
 adapt.task.Frame.prototype.timeSlice = () => {
-    var frame = adapt.task.newFrame('Frame.timeSlice');
-    var scheduler = frame.getScheduler();
+    const frame = adapt.task.newFrame('Frame.timeSlice');
+    const scheduler = frame.getScheduler();
     if (scheduler.isTimeSliceOver()) {
         vivliostyle.logging.logger.debug("-- time slice --");
         frame.suspend().schedule(true);
@@ -874,7 +874,7 @@ adapt.task.Frame.prototype.timeSlice = () => {
  * @return {!adapt.task.Result.<boolean>} holds true
  */
 adapt.task.Frame.prototype.sleep = delay => {
-    var frame = adapt.task.newFrame('Frame.sleep');
+    const frame = adapt.task.newFrame('Frame.sleep');
     frame.suspend().schedule(true, delay);
     return frame.result();
 };
@@ -885,11 +885,11 @@ adapt.task.Frame.prototype.sleep = delay => {
  * @return {!adapt.task.Result.<boolean>} holds true.
  */
 adapt.task.Frame.prototype.loop = func => {
-    var frame = adapt.task.newFrame('Frame.loop');
-    var step = more => {
+    const frame = adapt.task.newFrame('Frame.loop');
+    const step = more => {
         try {
             while (more) {
-                var result = func();
+                const result = func();
                 if (result.isPending()) {
                     result.then(step);
                     return;
@@ -914,14 +914,14 @@ adapt.task.Frame.prototype.loop = func => {
  * @return {!adapt.task.Result.<boolean>} holds true.
  */
 adapt.task.Frame.prototype.loopWithFrame = function(func) {
-    var task = adapt.task.privateCurrentTask;
+    const task = adapt.task.privateCurrentTask;
     if (!task) {
         throw new Error("E_TASK_NO_CONTEXT");
     }
     return this.loop(() => {
-        var result;
+        let result;
         do {
-            var frame = new adapt.task.LoopBodyFrame(/** @type {!adapt.task.Task} */ (task), task.top);
+            const frame = new adapt.task.LoopBodyFrame(/** @type {!adapt.task.Task} */ (task), task.top);
             task.top = frame;
             frame.state = adapt.task.FrameState.ACTIVE;
             func(frame);
@@ -939,7 +939,7 @@ adapt.task.Frame.prototype.suspend = function(opt_waitTarget) {
     this.checkEnvironment();
     if (this.task.continuation)
         throw new Error('E_TASK_ALREADY_SUSPENDED');
-    /** @type {adapt.task.Continuation.<T>} */ var continuation =
+    /** @type {adapt.task.Continuation.<T>} */ const continuation =
         new adapt.task.Continuation(this.task);
     this.task.continuation = continuation;
     adapt.task.privateCurrentTask = null;
@@ -1010,8 +1010,8 @@ adapt.task.EventSource = function() {
  * @return {void}
  */
 adapt.task.EventSource.prototype.attach = function(target, type, opt_preventDefault) {
-    var self = this;
-    var listener = event => {
+    const self = this;
+    const listener = event => {
         if (opt_preventDefault) {
             event.preventDefault();
         }
@@ -1020,7 +1020,7 @@ adapt.task.EventSource.prototype.attach = function(target, type, opt_preventDefa
             self.tail = self.tail.next;
         } else {
             self.tail.event = event;
-            var continuation = self.continuation;
+            const continuation = self.continuation;
             if (continuation) {
                 self.continuation = null;
                 continuation.schedule(true);
@@ -1037,8 +1037,8 @@ adapt.task.EventSource.prototype.attach = function(target, type, opt_preventDefa
  * @return {void}
  */
 adapt.task.EventSource.prototype.detach = function(target, type) {
-    var i = 0;
-    var item = null;
+    let i = 0;
+    let item = null;
     while (i < this.listeners.length) {
         item = this.listeners[i];
         if (item.type == type && item.target === target) {
@@ -1056,12 +1056,12 @@ adapt.task.EventSource.prototype.detach = function(target, type) {
  * @return {!adapt.task.Result.<adapt.base.Event>}
  */
 adapt.task.EventSource.prototype.nextEvent = function() {
-    /** @type {!adapt.task.Frame.<adapt.base.Event>} */ var frame =
+    /** @type {!adapt.task.Frame.<adapt.base.Event>} */ const frame =
         adapt.task.newFrame('EventSource.nextEvent');
-    var self = this;
-    var readEvent = () => {
+    const self = this;
+    const readEvent = () => {
         if (self.head.event) {
-            var event = self.head.event;
+            const event = self.head.event;
             if (self.head.next)
                 self.head = self.head.next;
             else
@@ -1070,7 +1070,7 @@ adapt.task.EventSource.prototype.nextEvent = function() {
         } else if (self.continuation) {
             throw new Error('E_TASK_EVENT_SOURCE_OTHER_TASK_WAITING');
         } else {
-            /** @type {!adapt.task.Frame.<boolean>} */ var frameInternal =
+            /** @type {!adapt.task.Frame.<boolean>} */ const frameInternal =
                 adapt.task.newFrame('EventSource.nextEventInternal');
             self.continuation = frameInternal.suspend(self);
             frameInternal.result().then(readEvent);

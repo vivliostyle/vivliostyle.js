@@ -32,7 +32,7 @@ goog.scope(() => {
      * @constructor
      */
     vivliostyle.layoututil.LayoutIteratorStrategy = function() {};
-    /** @const */ var LayoutIteratorStrategy = vivliostyle.layoututil.LayoutIteratorStrategy;
+    /** @const */ const LayoutIteratorStrategy = vivliostyle.layoututil.LayoutIteratorStrategy;
 
     /**
      * @param {!adapt.vtree.NodeContext} initialNodeContext
@@ -119,18 +119,18 @@ goog.scope(() => {
         /** @private @const */ this.strategy = strategy;
         /** @private @const */ this.layoutContext = layoutContext;
     };
-    /** @const */ var LayoutIterator = vivliostyle.layoututil.LayoutIterator;
+    /** @const */ const LayoutIterator = vivliostyle.layoututil.LayoutIterator;
 
     /**
      * @param {!adapt.vtree.NodeContext} initialNodeContext
      * @return {!adapt.task.Result<adapt.vtree.NodeContext>}
      */
     LayoutIterator.prototype.iterate = function(initialNodeContext) {
-        /** @const */ var strategy = this.strategy;
-        /** @const */ var state = strategy.initialState(initialNodeContext);
-        /** @const {!adapt.task.Frame<adapt.vtree.NodeContext>} */ var frame = adapt.task.newFrame("LayoutIterator");
+        /** @const */ const strategy = this.strategy;
+        /** @const */ const state = strategy.initialState(initialNodeContext);
+        /** @const {!adapt.task.Frame<adapt.vtree.NodeContext>} */ const frame = adapt.task.newFrame("LayoutIterator");
         frame.loopWithFrame(loopFrame => {
-            var r;
+            let r;
             while (state.nodeContext) {
                 if (!state.nodeContext.viewNode) {
                     if (state.nodeContext.after) {
@@ -167,8 +167,8 @@ goog.scope(() => {
                         }
                     }
                 }
-                var cont = (r && r.isPending()) ? r : adapt.task.newResult(true);
-                var nextResult = cont.thenAsync(() => {
+                const cont = (r && r.isPending()) ? r : adapt.task.newResult(true);
+                const nextResult = cont.thenAsync(() => {
                     if (state.break) {
                         return adapt.task.newResult(null);
                     }
@@ -207,7 +207,7 @@ goog.scope(() => {
     vivliostyle.layoututil.EdgeSkipper = function(leadingEdge) {
         /** @protected @const */ this.leadingEdge = leadingEdge;
     };
-    /** @const */ var EdgeSkipper = vivliostyle.layoututil.EdgeSkipper;
+    /** @const */ const EdgeSkipper = vivliostyle.layoututil.EdgeSkipper;
     goog.inherits(EdgeSkipper, LayoutIteratorStrategy);
 
     /**
@@ -251,9 +251,9 @@ goog.scope(() => {
      * @return {boolean} Returns true if a forced break occurs.
      */
     EdgeSkipper.prototype.processForcedBreak = (state, column) => {
-        var needForcedBreak = !state.leadingEdge && vivliostyle.break.isForcedBreakValue(state.breakAtTheEdge);
+        const needForcedBreak = !state.leadingEdge && vivliostyle.break.isForcedBreakValue(state.breakAtTheEdge);
         if (needForcedBreak) {
-            var nodeContext = state.nodeContext = state.leadingEdgeContexts[0] || state.nodeContext;
+            const nodeContext = state.nodeContext = state.leadingEdgeContexts[0] || state.nodeContext;
             nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
             column.pageBreakType = state.breakAtTheEdge;
         }
@@ -266,7 +266,7 @@ goog.scope(() => {
      * @return {boolean} Returns true if the node overflows the column.
      */
     EdgeSkipper.prototype.saveEdgeAndProcessOverflow = (state, column) => {
-        var overflow = column.checkOverflowAndSaveEdgeAndBreakPosition(state.lastAfterNodeContext, null, true, state.breakAtTheEdge);
+        const overflow = column.checkOverflowAndSaveEdgeAndBreakPosition(state.lastAfterNodeContext, null, true, state.breakAtTheEdge);
         if (overflow) {
             state.nodeContext = (state.lastAfterNodeContext || state.nodeContext).modify();
             state.nodeContext.overflow = true;
@@ -281,8 +281,8 @@ goog.scope(() => {
      * @returns {boolean} Returns true if the layout constraint is violated.
      */
     EdgeSkipper.prototype.processLayoutConstraint = (state, layoutConstraint, column) => {
-        var nodeContext = state.nodeContext;
-        var violateConstraint = !layoutConstraint.allowLayout(nodeContext);
+        let nodeContext = state.nodeContext;
+        const violateConstraint = !layoutConstraint.allowLayout(nodeContext);
         if (violateConstraint) {
             column.checkOverflowAndSaveEdgeAndBreakPosition(state.lastAfterNodeContext, null, false, state.breakAtTheEdge);
             nodeContext = state.nodeContext = nodeContext.modify();
@@ -312,8 +312,8 @@ goog.scope(() => {
      * @override
      */
     EdgeSkipper.prototype.afterNonInlineElementNode = function(state) {
-        var r;
-        var cont;
+        let r;
+        let cont;
         if (state.onStartEdges) {
             r = this.endEmptyNonInlineBox(state);
             cont = (r && r.isPending()) ? r : adapt.task.newResult(true);
@@ -361,10 +361,10 @@ goog.scope(() => {
         this.column.flowRootFormattingContext = parentNodeContext.formattingContext;
         this.column.pseudoParent = column;
 
-        var parentClonedPaddingBorder = this.column.calculateClonedPaddingBorder(parentNodeContext);
+        const parentClonedPaddingBorder = this.column.calculateClonedPaddingBorder(parentNodeContext);
         this.column.footnoteEdge = this.column.footnoteEdge - parentClonedPaddingBorder;
 
-        var pseudoColumn = this;
+        const pseudoColumn = this;
         this.column.openAllViews = function(position) {
             return adapt.layout.Column.prototype.openAllViews.call(this, position).thenAsync(result => {
                 pseudoColumn.startNodeContexts.push(result.copy());
@@ -372,7 +372,7 @@ goog.scope(() => {
             });
         };
     };
-    /** @const */ var PseudoColumn = vivliostyle.layoututil.PseudoColumn;
+    /** @const */ const PseudoColumn = vivliostyle.layoututil.PseudoColumn;
 
     /**
      * @param {adapt.vtree.ChunkPosition} chunkPosition starting position.
@@ -388,10 +388,10 @@ goog.scope(() => {
      * @returns {!adapt.layout.BreakPositionAndNodeContext}
      */
     PseudoColumn.prototype.findAcceptableBreakPosition = function(allowBreakAtStartPosition) {
-        var p = this.column.findAcceptableBreakPosition();
+        const p = this.column.findAcceptableBreakPosition();
         if (allowBreakAtStartPosition) {
-            var startNodeContext = this.startNodeContexts[0].copy();
-            var bp = new adapt.layout.EdgeBreakPosition(startNodeContext, null,
+            const startNodeContext = this.startNodeContexts[0].copy();
+            const bp = new adapt.layout.EdgeBreakPosition(startNodeContext, null,
                 startNodeContext.overflow, 0);
             bp.findAcceptableBreak(this.column, 0);
             if (!p.nodeContext) {
@@ -426,7 +426,7 @@ goog.scope(() => {
      * @return {boolean}
      */
     PseudoColumn.prototype.isStartNodeContext = function(nodeContext) {
-        var startNodeContext = this.startNodeContexts[0];
+        const startNodeContext = this.startNodeContexts[0];
         return startNodeContext.viewNode === nodeContext.viewNode
             && startNodeContext.after === nodeContext.after
             && startNodeContext.offsetInNode === nodeContext.offsetInNode;
@@ -463,7 +463,7 @@ goog.scope(() => {
         /** @type {Array.<adapt.layout.BreakPosition>} */this.initialBreakPositions = null;
         /** @type {*} */ this.initialStateOfFormattingContext = null;
     };
-    /** @const */ var AbstractLayoutRetryer = vivliostyle.layoututil.AbstractLayoutRetryer;
+    /** @const */ const AbstractLayoutRetryer = vivliostyle.layoututil.AbstractLayoutRetryer;
 
     /**
      * @param {!adapt.vtree.NodeContext} nodeContext
@@ -481,13 +481,13 @@ goog.scope(() => {
      * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
      */
     AbstractLayoutRetryer.prototype.tryLayout = function(nodeContext, column) {
-        var frame = adapt.task.newFrame("vivliostyle.layoututil.AbstractLayoutRetryer.tryLayout");
+        const frame = adapt.task.newFrame("vivliostyle.layoututil.AbstractLayoutRetryer.tryLayout");
 
         this.saveState(nodeContext, column);
 
-        var mode = this.resolveLayoutMode(nodeContext);
+        const mode = this.resolveLayoutMode(nodeContext);
         mode.doLayout(nodeContext, column).then(positionAfter => {
-            var accepted = mode.accept(positionAfter, column);
+            let accepted = mode.accept(positionAfter, column);
             accepted = mode.postLayout(positionAfter, this.initialPosition, column, accepted);
             if (accepted) {
                 frame.finish(positionAfter);
@@ -518,12 +518,12 @@ goog.scope(() => {
      * @param {!adapt.vtree.NodeContext} initialPosition
      */
     AbstractLayoutRetryer.prototype.clearNodes = initialPosition => {
-        var viewNode = initialPosition.viewNode || initialPosition.parent.viewNode;
-        var child;
+        const viewNode = initialPosition.viewNode || initialPosition.parent.viewNode;
+        let child;
         while (child = viewNode.lastChild) {
             viewNode.removeChild(child);
         }
-        var sibling;
+        let sibling;
         while (sibling = viewNode.nextSibling) {
             sibling.parentNode.removeChild(sibling);
         }
@@ -562,7 +562,7 @@ goog.scope(() => {
      * @interface
      */
     vivliostyle.layoututil.LayoutMode = function() {};
-    /** @const */ var LayoutMode = vivliostyle.layoututil.LayoutMode;
+    /** @const */ const LayoutMode = vivliostyle.layoututil.LayoutMode;
 
     /**
      * @param {!adapt.vtree.NodeContext} nodeContext

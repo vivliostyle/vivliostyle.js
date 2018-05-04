@@ -190,17 +190,17 @@ adapt.vgen.PseudoelementStyler = function(element, style, styler, context, exprC
  * @override
  */
 adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
-    var pseudoName = adapt.vgen.getPseudoName(element);
+    const pseudoName = adapt.vgen.getPseudoName(element);
     if (this.styler && pseudoName && pseudoName.match(/after$/)) {
         // after content: update style
         this.style = this.styler.getStyle(this.element, true);
         this.styler = null;
     }
-    var pseudoMap = adapt.csscasc.getStyleMap(this.style, "_pseudos");
-    var style = pseudoMap[pseudoName] || /** @type {adapt.csscasc.ElementStyle} */ ({});
+    const pseudoMap = adapt.csscasc.getStyleMap(this.style, "_pseudos");
+    const style = pseudoMap[pseudoName] || /** @type {adapt.csscasc.ElementStyle} */ ({});
     if (pseudoName.match(/^first-/) && !style["x-first-pseudo"]) {
-        var nest = 1;
-        var r;
+        let nest = 1;
+        let r;
         if (pseudoName == "first-letter") {
             nest = 0;
         } else if ((r = pseudoName.match(/^first-([0-9]+)-lines$/)) != null) {
@@ -215,10 +215,10 @@ adapt.vgen.PseudoelementStyler.prototype.getStyle = function(element, deep) {
  * @override
  */
 adapt.vgen.PseudoelementStyler.prototype.processContent = function(element, style) {
-    var pseudoName = adapt.vgen.getPseudoName(element);
+    const pseudoName = adapt.vgen.getPseudoName(element);
     if (!this.contentProcessed[pseudoName]) {
         this.contentProcessed[pseudoName] = true;
-        var contentVal = style["content"];
+        const contentVal = style["content"];
         if (contentVal) {
             if (adapt.vtree.nonTrivialContent(contentVal))
                 contentVal.visit(new adapt.vtree.ContentPropertyHandler(element, this.context,
@@ -303,16 +303,16 @@ adapt.vgen.ViewFactory.prototype.clone = function() {
  */
 adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, isRoot,
                                                                       cascStyle, computedStyle, styler, context, parentShadow, subShadow) {
-    var pseudoMap = this.getPseudoMap(cascStyle, this.regionIds, this.isFootnote, this.nodeContext, context);
+    const pseudoMap = this.getPseudoMap(cascStyle, this.regionIds, this.isFootnote, this.nodeContext, context);
     if (!pseudoMap) {
         return subShadow;
     }
-    var addedNames = [];
-    var root = adapt.vgen.pseudoelementDoc.createElementNS(adapt.base.NS.SHADOW, "root");
-    var att = root;
-    for (var i = 0; i < adapt.vgen.pseudoNames.length; i++) {
-        var name = adapt.vgen.pseudoNames[i];
-        var elem;
+    const addedNames = [];
+    const root = adapt.vgen.pseudoelementDoc.createElementNS(adapt.base.NS.SHADOW, "root");
+    let att = root;
+    for (let i = 0; i < adapt.vgen.pseudoNames.length; i++) {
+        const name = adapt.vgen.pseudoNames[i];
+        let elem;
         if (name) {
             if (!pseudoMap[name]) {
                 continue;
@@ -321,13 +321,13 @@ adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, i
                 continue;
             }
             if (name.match(/^first-/)) {
-                var display = computedStyle["display"];
+                const display = computedStyle["display"];
                 if (!display || display === adapt.css.ident.inline) {
                     continue;
                 }
             }
             if (name === "before" || name === "after") {
-                var content = pseudoMap[name]["content"];
+                const content = pseudoMap[name]["content"];
                 if (!content || content === adapt.css.ident.normal || content === adapt.css.ident.none) {
                     continue;
                 }
@@ -346,7 +346,7 @@ adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, i
     if (!addedNames.length) {
         return subShadow;
     }
-    var shadowStyler = new adapt.vgen.PseudoelementStyler(element, cascStyle, styler, context,
+    const shadowStyler = new adapt.vgen.PseudoelementStyler(element, cascStyle, styler, context,
         this.exprContentListener);
     return new adapt.vtree.ShadowContext(element, root, null, parentShadow,
         subShadow, adapt.vtree.ShadowType.ROOTLESS, shadowStyler);
@@ -360,11 +360,11 @@ adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, i
  * @param {adapt.vtree.NodeContext} nodeContext
  */
 adapt.vgen.ViewFactory.prototype.getPseudoMap = (cascStyle, regionIds, isFootnote, nodeContext, context) => {
-    var pseudoMap = adapt.csscasc.getStyleMap(cascStyle, "_pseudos");
+    const pseudoMap = adapt.csscasc.getStyleMap(cascStyle, "_pseudos");
     if (!pseudoMap) return null;
-    var computedPseudoStyleMap = {};
-    for (var key in pseudoMap) {
-        var computedPseudoStyle = computedPseudoStyleMap[key] = {};
+    const computedPseudoStyleMap = {};
+    for (const key in pseudoMap) {
+        const computedPseudoStyle = computedPseudoStyleMap[key] = {};
         adapt.csscasc.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
         vivliostyle.selectors.mergeViewConditionalStyles(
             computedPseudoStyle, context, pseudoMap[key]);
@@ -386,15 +386,15 @@ adapt.vgen.ViewFactory.prototype.getPseudoMap = (cascStyle, regionIds, isFootnot
  * @return {adapt.task.Result.<adapt.vtree.ShadowContext>}
  */
 adapt.vgen.ViewFactory.prototype.createRefShadow = function(href, type, element, parentShadow, subShadow) {
-    var self = this;
-    /** @type {!adapt.task.Frame.<adapt.vtree.ShadowContext>} */ var frame
+    const self = this;
+    /** @type {!adapt.task.Frame.<adapt.vtree.ShadowContext>} */ const frame
         = adapt.task.newFrame("createRefShadow");
     self.xmldoc.store.load(href).then(refDocParam => {
-        var refDoc = /** @type {adapt.xmldoc.XMLDocHolder} */ (refDocParam);
+        const refDoc = /** @type {adapt.xmldoc.XMLDocHolder} */ (refDocParam);
         if (refDoc) {
-            var refElement = refDoc.getElement(href);
+            const refElement = refDoc.getElement(href);
             if (refElement) {
-                var refStyler = self.stylerProducer.getStylerForDoc(refDoc);
+                const refStyler = self.stylerProducer.getStylerForDoc(refDoc);
                 subShadow = new adapt.vtree.ShadowContext(element, refElement, refDoc, parentShadow,
                     subShadow, type, refStyler);
             }
@@ -415,25 +415,25 @@ adapt.vgen.ViewFactory.prototype.createRefShadow = function(href, type, element,
  */
 adapt.vgen.ViewFactory.prototype.createShadows = function(element, isRoot, cascStyle,
                                                           computedStyle, styler, context, shadowContext) {
-    var self = this;
-    /** @type {!adapt.task.Frame.<adapt.vtree.ShadowContext>} */ var frame
+    const self = this;
+    /** @type {!adapt.task.Frame.<adapt.vtree.ShadowContext>} */ const frame
         = adapt.task.newFrame("createShadows");
-    var shadow = null;
-    var templateURLVal = computedStyle["template"];
-    var cont;
+    const shadow = null;
+    const templateURLVal = computedStyle["template"];
+    let cont;
     if (templateURLVal instanceof adapt.css.URL) {
-        var url = (/** @type {adapt.css.URL} */ (templateURLVal)).url;
+        const url = (/** @type {adapt.css.URL} */ (templateURLVal)).url;
         cont = self.createRefShadow(url, adapt.vtree.ShadowType.ROOTLESS,
             element, shadowContext, shadow);
     } else {
         cont = adapt.task.newResult(shadow);
     }
     cont.then(shadow => {
-        var cont1 = null;
+        let cont1 = null;
         if (element.namespaceURI == adapt.base.NS.SHADOW) {
             if (element.localName == "include") {
-                var href = element.getAttribute("href");
-                var xmldoc = null;
+                let href = element.getAttribute("href");
+                let xmldoc = null;
                 if (href) {
                     xmldoc = shadowContext ? shadowContext.xmldoc : self.xmldoc;
                 } else if (shadowContext) {
@@ -452,10 +452,10 @@ adapt.vgen.ViewFactory.prototype.createShadows = function(element, isRoot, cascS
         }
         if (cont1 == null)
             cont1 = adapt.task.newResult(shadow);
-        var cont2 = null;
+        let cont2 = null;
         cont1.then(shadow => {
             if (computedStyle["display"] === adapt.css.ident.table_cell) {
-                var url = adapt.base.resolveURL("user-agent.xml#table-cell", adapt.base.resourceBaseURL);
+                const url = adapt.base.resolveURL("user-agent.xml#table-cell", adapt.base.resourceBaseURL);
                 cont2 = self.createRefShadow(url, adapt.vtree.ShadowType.ROOTLESS, element, shadowContext, shadow);
             } else {
                 cont2 = adapt.task.newResult(shadow);
@@ -485,21 +485,21 @@ adapt.vgen.ViewFactory.prototype.setViewRoot = function(viewRoot, isFootnote) {
  * @return {boolean} vertical
  */
 adapt.vgen.ViewFactory.prototype.computeStyle = function(vertical, style, computedStyle) {
-    var context = this.context;
-    var cascMap = adapt.csscasc.flattenCascadedStyle(style, context, this.regionIds, this.isFootnote, this.nodeContext);
+    const context = this.context;
+    const cascMap = adapt.csscasc.flattenCascadedStyle(style, context, this.regionIds, this.isFootnote, this.nodeContext);
     vertical = adapt.csscasc.isVertical(cascMap, context, vertical);
-    var self = this;
+    const self = this;
     adapt.csscasc.convertToPhysical(cascMap, computedStyle, vertical, (name, cascVal) => {
-        var value = cascVal.evaluate(context, name);
+        let value = cascVal.evaluate(context, name);
         if (name == "font-family") {
             value = self.docFaces.filterFontFamily(value);
         }
         return value;
     });
     // Compute values of display, position and float
-    var position = /** @type {adapt.css.Ident} */ (computedStyle["position"]);
-    var float = /** @type {adapt.css.Ident} */ (computedStyle["float"]);
-    var displayValues = vivliostyle.display.getComputedDislayValue(
+    const position = /** @type {adapt.css.Ident} */ (computedStyle["position"]);
+    const float = /** @type {adapt.css.Ident} */ (computedStyle["float"]);
+    const displayValues = vivliostyle.display.getComputedDislayValue(
         computedStyle["display"] || adapt.css.ident.inline, position, float, this.sourceNode === this.xmldoc.root);
     ["display", "position", "float"].forEach(name => {
         if (displayValues[name]) {
@@ -515,20 +515,20 @@ adapt.vgen.ViewFactory.prototype.computeStyle = function(vertical, style, comput
  * @return {{lang:?string, elementStyle:adapt.csscasc.ElementStyle}}
  */
 adapt.vgen.ViewFactory.prototype.inheritFromSourceParent = function(elementStyle) {
-    var node = this.nodeContext.sourceNode;
-    var styles = [];
-    var lang = null;
+    let node = this.nodeContext.sourceNode;
+    const styles = [];
+    let lang = null;
     // TODO: this is hacky. We need to recover the path through the shadow trees, but we do not
     // have the full shadow tree structure at this point. This code handles coming out of the
     // shadow trees, but does not go back in (through shadow:content element).
-    var shadowContext = this.nodeContext.shadowContext;
-    var steps = -1;
+    let shadowContext = this.nodeContext.shadowContext;
+    let steps = -1;
     while (node && node.nodeType == 1) {
-        var shadowRoot = shadowContext && shadowContext.root == node;
+        const shadowRoot = shadowContext && shadowContext.root == node;
         if (!shadowRoot || shadowContext.type == adapt.vtree.ShadowType.ROOTLESS) {
-            var styler = shadowContext ?
+            const styler = shadowContext ?
                 /** @type {adapt.cssstyler.AbstractStyler} */ (shadowContext.styler) : this.styler;
-            var nodeStyle = styler.getStyle(/** @type {Element} */ (node), false);
+            const nodeStyle = styler.getStyle(/** @type {Element} */ (node), false);
             styles.push(nodeStyle);
             lang = lang || adapt.base.getLangAttribute(/** @type {Element} */ (node));
         }
@@ -540,30 +540,30 @@ adapt.vgen.ViewFactory.prototype.inheritFromSourceParent = function(elementStyle
             steps++;
         }
     }
-    var isRoot = steps === 0;
-    var fontSize = this.context.queryUnitSize("em", isRoot);
-    var props = /** @type {adapt.csscasc.ElementStyle} */
+    const isRoot = steps === 0;
+    const fontSize = this.context.queryUnitSize("em", isRoot);
+    const props = /** @type {adapt.csscasc.ElementStyle} */
         ({"font-size": new adapt.csscasc.CascadeValue(new adapt.css.Numeric(fontSize, "px"), 0)});
-    var inheritanceVisitor = new adapt.csscasc.InheritanceVisitor(props, this.context);
-    for (var i = styles.length - 1; i >= 0; --i) {
-        var style = styles[i];
-        var propList = [];
-        for (var propName in style) {
+    const inheritanceVisitor = new adapt.csscasc.InheritanceVisitor(props, this.context);
+    for (let i = styles.length - 1; i >= 0; --i) {
+        const style = styles[i];
+        const propList = [];
+        for (const propName in style) {
             if (adapt.csscasc.isInherited(propName)) {
                 propList.push(propName);
             }
         }
         propList.sort(adapt.css.processingOrderFn);
-        for (var k = 0; k < propList.length; k++) {
-            var name = propList[k];
+        for (let k = 0; k < propList.length; k++) {
+            const name = propList[k];
             inheritanceVisitor.setPropName(name);
-            var value = adapt.csscasc.getProp(style, name);
+            const value = adapt.csscasc.getProp(style, name);
             if (value.value !== adapt.css.ident.inherit) {
                 props[name] = value.filterValue(inheritanceVisitor);
             }
         }
     }
-    for (var sname in elementStyle) {
+    for (const sname in elementStyle) {
         if (!adapt.csscasc.isInherited(sname)) {
             props[sname] = elementStyle[sname];
         }
@@ -612,24 +612,24 @@ adapt.vgen.ViewFactory.prototype.inheritLangAttribute = function() {
  * @param {!Object.<string,adapt.css.Val>} computedStyle
  */
 adapt.vgen.ViewFactory.prototype.transferPolyfilledInheritedProps = function(computedStyle) {
-    var polyfilledInheritedProps = adapt.csscasc.getPolyfilledInheritedProps().filter(name => computedStyle[name]);
+    const polyfilledInheritedProps = adapt.csscasc.getPolyfilledInheritedProps().filter(name => computedStyle[name]);
     if (polyfilledInheritedProps.length) {
-        var props = this.nodeContext.inheritedProps;
+        let props = this.nodeContext.inheritedProps;
         if (this.nodeContext.parent) {
             props = this.nodeContext.inheritedProps = {};
-            for (var n in this.nodeContext.parent.inheritedProps) {
+            for (const n in this.nodeContext.parent.inheritedProps) {
                 props[n] = this.nodeContext.parent.inheritedProps[n];
             }
         }
         polyfilledInheritedProps.forEach(name => {
-            var value = computedStyle[name];
+            const value = computedStyle[name];
             if (value) {
                 if (value instanceof adapt.css.Int) {
                     props[name] = (/** @type {adapt.css.Int} */ (value)).num;
                 } else if (value instanceof adapt.css.Ident) {
                     props[name] = (/** @type {adapt.css.Ident} */ (value)).name;
                 } else if (value instanceof adapt.css.Numeric) {
-                    var numericVal = (/** @type {adapt.css.Numeric} */ (value));
+                    const numericVal = (/** @type {adapt.css.Numeric} */ (value));
                     switch (numericVal.unit) {
                         case "dpi":
                         case "dpcm":
@@ -655,10 +655,10 @@ adapt.vgen.ViewFactory.prototype.transferPolyfilledInheritedProps = function(com
  * @param {boolean} isRoot
  */
 adapt.vgen.ViewFactory.prototype.resolveFormattingContext = (nodeContext, firstTime, display, position, float, isRoot) => {
-    /** @type {!Array<!vivliostyle.plugin.ResolveFormattingContextHook>} */ var hooks =
+    /** @type {!Array<!vivliostyle.plugin.ResolveFormattingContextHook>} */ const hooks =
         vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT);
-    for (var i = 0; i < hooks.length; i++) {
-        var formattingContext = hooks[i](nodeContext, firstTime, display, position, float, isRoot);
+    for (let i = 0; i < hooks.length; i++) {
+        const formattingContext = hooks[i](nodeContext, firstTime, display, position, float, isRoot);
         if (formattingContext) {
             nodeContext.formattingContext = formattingContext;
             return;
@@ -673,26 +673,26 @@ adapt.vgen.ViewFactory.prototype.resolveFormattingContext = (nodeContext, firstT
  * @return {!adapt.task.Result.<boolean>} holding true if children should be processed
  */
 adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnforcedBreak) {
-    var self = this;
-    var needToProcessChildren = true;
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame
+    const self = this;
+    let needToProcessChildren = true;
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame
         = adapt.task.newFrame("createElementView");
     // Figure out element's styles
-    var element = /** @type {Element} */ (self.sourceNode);
-    var styler = self.nodeContext.shadowContext ?
+    let element = /** @type {Element} */ (self.sourceNode);
+    const styler = self.nodeContext.shadowContext ?
         /** @type {adapt.cssstyler.AbstractStyler} */ (self.nodeContext.shadowContext.styler) : self.styler;
-    var elementStyle = styler.getStyle(element, false);
+    let elementStyle = styler.getStyle(element, false);
     if (!self.nodeContext.shadowContext) {
-        var offset = this.xmldoc.getElementOffset(element);
+        const offset = this.xmldoc.getElementOffset(element);
         vivliostyle.selectors.registerFragmentIndex(offset, self.nodeContext.fragmentIndex, 0);
     }
-    var computedStyle = {};
+    const computedStyle = {};
     if (!self.nodeContext.parent) {
         var inheritedValues = self.inheritFromSourceParent(elementStyle);
         elementStyle = inheritedValues.elementStyle;
         self.nodeContext.lang = inheritedValues.lang;
     }
-    var floatReference = elementStyle["float-reference"] &&
+    const floatReference = elementStyle["float-reference"] &&
         vivliostyle.pagefloat.FloatReference.of(elementStyle["float-reference"].value.toString());
     if (self.nodeContext.parent && floatReference && vivliostyle.pagefloat.isPageFloat(floatReference)) {
         // Since a page float will be detached from a view node of its parent,
@@ -711,30 +711,30 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         self.nodeContext.direction = computedStyle["direction"].toString();
     }
     // Sort out the properties
-    var flow = computedStyle["flow-into"];
+    const flow = computedStyle["flow-into"];
     if (flow && flow.toString() != self.flowName) {
         // foreign flow, don't create a view
         frame.finish(false);
         return frame.result();
     }
-    var display = computedStyle["display"];
+    let display = computedStyle["display"];
     if (display === adapt.css.ident.none) {
         // no content
         frame.finish(false);
         return frame.result();
     }
-    var isRoot = self.nodeContext.parent == null;
+    const isRoot = self.nodeContext.parent == null;
     self.nodeContext.flexContainer = (display === adapt.css.ident.flex);
     self.createShadows(element, isRoot, elementStyle, computedStyle, styler, self.context, self.nodeContext.shadowContext).then(shadowParam => {
         self.nodeContext.nodeShadow = shadowParam;
-        var position = computedStyle["position"];
-        var floatSide = computedStyle["float"];
-        var clearSide = computedStyle["clear"];
-        var writingMode = self.nodeContext.vertical ? adapt.css.ident.vertical_rl : adapt.css.ident.horizontal_tb;
-        var parentWritingMode = self.nodeContext.parent ?
+        const position = computedStyle["position"];
+        let floatSide = computedStyle["float"];
+        let clearSide = computedStyle["clear"];
+        const writingMode = self.nodeContext.vertical ? adapt.css.ident.vertical_rl : adapt.css.ident.horizontal_tb;
+        const parentWritingMode = self.nodeContext.parent ?
             (self.nodeContext.parent.vertical ? adapt.css.ident.vertical_rl : adapt.css.ident.horizontal_tb) :
             writingMode;
-        var isFlowRoot = vivliostyle.display.isFlowRoot(element);
+        const isFlowRoot = vivliostyle.display.isFlowRoot(element);
         self.nodeContext.establishesBFC = vivliostyle.display.establishesBFC(display, position, floatSide,
             computedStyle["overflow"], writingMode, parentWritingMode, isFlowRoot);
         self.nodeContext.containingBlockForAbsolute = vivliostyle.display.establishesCBForAbsolute(position);
@@ -746,7 +746,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             floatSide = null;
             clearSide = null;
         }
-        var floating = floatSide === adapt.css.ident.left ||
+        let floating = floatSide === adapt.css.ident.left ||
             floatSide === adapt.css.ident.right ||
             floatSide === adapt.css.ident.top ||
             floatSide === adapt.css.ident.bottom ||
@@ -786,7 +786,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                 }
             }
         }
-        var listItem = display === adapt.css.ident.list_item && computedStyle["ua-list-item-count"];
+        const listItem = display === adapt.css.ident.list_item && computedStyle["ua-list-item-count"];
         if (floating ||
             (computedStyle["break-inside"] && computedStyle["break-inside"] !== adapt.css.ident.auto)) {
             self.nodeContext.breakPenalty++;
@@ -798,22 +798,22 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         self.nodeContext.floatMinWrapBlock = computedStyle["float-min-wrap-block"] || null;
         self.nodeContext.columnSpan = computedStyle["column-span"];
         if (!self.nodeContext.inline) {
-            var breakAfter = computedStyle["break-after"];
+            const breakAfter = computedStyle["break-after"];
             if (breakAfter) {
                 self.nodeContext.breakAfter = breakAfter.toString();
             }
-            var breakBefore = computedStyle["break-before"];
+            const breakBefore = computedStyle["break-before"];
             if (breakBefore) {
                 self.nodeContext.breakBefore = breakBefore.toString();
             }
         }
         self.nodeContext.verticalAlign = computedStyle["vertical-align"] && computedStyle["vertical-align"].toString() || "baseline";
         self.nodeContext.captionSide = computedStyle["caption-side"] && computedStyle["caption-side"].toString() || "top";
-        var borderCollapse = computedStyle["border-collapse"];
+        const borderCollapse = computedStyle["border-collapse"];
         if (!borderCollapse || borderCollapse === adapt.css.getName("separate")) {
-            var borderSpacing = computedStyle["border-spacing"];
-            var inlineBorderSpacing;
-            var blockBorderSpacing;
+            const borderSpacing = computedStyle["border-spacing"];
+            let inlineBorderSpacing;
+            let blockBorderSpacing;
             if (borderSpacing) {
                 if (borderSpacing.isSpaceList()) {
                     inlineBorderSpacing = borderSpacing.values[0];
@@ -830,26 +830,26 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             }
         }
         self.nodeContext.footnotePolicy = computedStyle["footnote-policy"];
-        var firstPseudo = computedStyle["x-first-pseudo"];
+        const firstPseudo = computedStyle["x-first-pseudo"];
         if (firstPseudo) {
-            var outerPseudo = self.nodeContext.parent ? self.nodeContext.parent.firstPseudo : null;
+            const outerPseudo = self.nodeContext.parent ? self.nodeContext.parent.firstPseudo : null;
             self.nodeContext.firstPseudo = new adapt.vtree.FirstPseudo(
                 outerPseudo, (/** adapt.css.Int */ (firstPseudo)).num);
         }
         if (!self.nodeContext.inline) self.processAfterIfcontinues(element, elementStyle, styler, self.context);
-        var whitespace = computedStyle["white-space"];
+        const whitespace = computedStyle["white-space"];
         if (whitespace) {
-            var whitespaceValue = adapt.vtree.whitespaceFromPropertyValue(whitespace.toString());
+            const whitespaceValue = adapt.vtree.whitespaceFromPropertyValue(whitespace.toString());
             if (whitespaceValue !== null) {
                 self.nodeContext.whitespace = whitespaceValue;
             }
         }
-        var hyphenateCharacter = computedStyle["hyphenate-character"];
+        const hyphenateCharacter = computedStyle["hyphenate-character"];
         if (hyphenateCharacter && hyphenateCharacter !== adapt.css.ident.auto) {
             self.nodeContext.hyphenateCharacter = hyphenateCharacter.str;
         }
-        var wordBreak = computedStyle["word-break"];
-        var overflowWrap = computedStyle["overflow-wrap"] || ["word-wrap"];
+        const wordBreak = computedStyle["word-break"];
+        const overflowWrap = computedStyle["overflow-wrap"] || ["word-wrap"];
         self.nodeContext.breakWord = (wordBreak === adapt.css.ident.break_all) || (overflowWrap === adapt.css.ident.break_word);
         // Resolve formatting context
         self.resolveFormattingContext(self.nodeContext, firstTime, display, position, floatSide, isRoot);
@@ -862,11 +862,11 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         }
 
         // Create the view element
-        var custom = false;
-        var inner = null;
-        var fetchers = [];
-        var ns = element.namespaceURI;
-        var tag = element.localName;
+        let custom = false;
+        let inner = null;
+        const fetchers = [];
+        let ns = element.namespaceURI;
+        let tag = element.localName;
         if (ns == adapt.base.NS.XHTML) {
             if (tag == "html" || tag == "body" || tag == "script" || tag == "link" || tag == "meta")
                 tag = "div";
@@ -889,13 +889,13 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
             ns = adapt.base.NS.XHTML;
             if (tag == "image") {
                 tag = "div";
-                var imageRef = element.getAttributeNS(adapt.base.NS.XLINK, "href");
+                const imageRef = element.getAttributeNS(adapt.base.NS.XLINK, "href");
                 if (imageRef && imageRef.charAt(0) == "#") {
-                    var imageBinary = self.xmldoc.getElement(imageRef);
+                    const imageBinary = self.xmldoc.getElement(imageRef);
                     if (imageBinary) {
                         inner = self.createElement(ns, "img");
-                        var mediaType = imageBinary.getAttribute("content-type") || "image/jpeg";
-                        var innerSrc = "data:" + mediaType + ";base64," +
+                        const mediaType = imageBinary.getAttribute("content-type") || "image/jpeg";
+                        const innerSrc = "data:" + mediaType + ";base64," +
                             imageBinary.textContent.replace(/[ \t\n\t]/g, "");
                         fetchers.push(adapt.taskutil.loadElement(inner, innerSrc));
                     }
@@ -914,15 +914,15 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                 // Cheat here. Translate source to HTML, so it will plug in into the rest of the
                 // pipeline.
                 tag = "span";
-                var navParent = element.parentNode;
+                const navParent = element.parentNode;
                 if (navParent) {
                     // find the content element
-                    var href = null;
-                    for (var c = navParent.firstChild; c; c = c.nextSibling) {
+                    let href = null;
+                    for (let c = navParent.firstChild; c; c = c.nextSibling) {
                         if (c.nodeType != 1) {
                             continue;
                         }
-                        var childElement = /** @type {Element} */ (c);
+                        const childElement = /** @type {Element} */ (c);
                         if (childElement.namespaceURI == adapt.base.NS.NCX
                             && childElement.localName == "content") {
                             href = childElement.getAttribute("src");
@@ -957,22 +957,22 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         } else if (tag == "q") {
             tag = "span";
         } else if (tag == "a") {
-            var hp = computedStyle["hyperlink-processing"];
+            const hp = computedStyle["hyperlink-processing"];
             if (hp && hp.toString() != "normal") {
                 tag = "span";
             }
         }
         if (computedStyle["behavior"]) {
-            var behavior = computedStyle["behavior"].toString();
+            const behavior = computedStyle["behavior"].toString();
             if (behavior != "none" && self.customRenderer) {
                 custom = true;
             }
         }
         if (element.dataset && element.getAttribute("data-math-typeset") === "true")
             custom = true;
-        var elemResult;
+        let elemResult;
         if (custom) {
-            var parentNode = self.nodeContext.parent ? self.nodeContext.parent.viewNode : null;
+            const parentNode = self.nodeContext.parent ? self.nodeContext.parent.viewNode : null;
             elemResult = self.customRenderer(element, /** @type {Element} */ (parentNode), computedStyle);
         } else {
             elemResult = adapt.task.newResult(null);
@@ -996,25 +996,25 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                 adapt.vgen.initIFrame(/** @type {HTMLIFrameElement} */ (result));
             }
 
-            var imageResolution = /** @type {(number|undefined)} */
+            const imageResolution = /** @type {(number|undefined)} */
                 (self.nodeContext.inheritedProps["image-resolution"]);
-            /** @const {!Array<!{image: !Element, element: !Element, fetcher: !adapt.taskutil.Fetcher<string>}>} */ var images = [];
-            var cssWidth = computedStyle["width"];
-            var cssHeight = computedStyle["height"];
-            var attrWidth = element.getAttribute("width");
-            var attrHeight = element.getAttribute("height");
-            var hasAutoWidth = cssWidth === adapt.css.ident.auto || (!cssWidth && !attrWidth);
-            var hasAutoHeight = cssHeight === adapt.css.ident.auto || (!cssHeight && !attrHeight);
+            /** @const {!Array<!{image: !Element, element: !Element, fetcher: !adapt.taskutil.Fetcher<string>}>} */ const images = [];
+            const cssWidth = computedStyle["width"];
+            const cssHeight = computedStyle["height"];
+            const attrWidth = element.getAttribute("width");
+            const attrHeight = element.getAttribute("height");
+            const hasAutoWidth = cssWidth === adapt.css.ident.auto || (!cssWidth && !attrWidth);
+            const hasAutoHeight = cssHeight === adapt.css.ident.auto || (!cssHeight && !attrHeight);
 
             if (element.namespaceURI != adapt.base.NS.FB2 || tag == "td") {
-                var attributes = element.attributes;
-                var attributeCount = attributes.length;
-                var delayedSrc = null;
-                for (var i = 0; i < attributeCount; i++) {
-                    var attribute = attributes[i];
-                    var attributeNS = attribute.namespaceURI;
-                    var attributeName = attribute.localName;
-                    var attributeValue = attribute.nodeValue;
+                const attributes = element.attributes;
+                const attributeCount = attributes.length;
+                let delayedSrc = null;
+                for (let i = 0; i < attributeCount; i++) {
+                    const attribute = attributes[i];
+                    const attributeNS = attribute.namespaceURI;
+                    let attributeName = attribute.localName;
+                    let attributeValue = attribute.nodeValue;
                     if (!attributeNS) {
                         if (attributeName.match(/^on/))
                             continue; // don't propagate JavaScript code
@@ -1042,7 +1042,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                         if (attributeName === "poster" && tag === "video" && ns === adapt.base.NS.XHTML &&
                             hasAutoWidth && hasAutoHeight) {
                             var image = new Image();
-                            var fetcher = adapt.taskutil.loadElement(image, attributeValue);
+                            const fetcher = adapt.taskutil.loadElement(image, attributeValue);
                             fetchers.push(fetcher);
                             images.push({image, element: result, fetcher});
                         }
@@ -1063,7 +1063,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                             attributeValue, self.xmldoc.url, self.documentURLTransformer);
                     }
                     if (attributeNS) {
-                        var attributePrefix = adapt.vgen.namespacePrefixMap[attributeNS];
+                        const attributePrefix = adapt.vgen.namespacePrefixMap[attributeNS];
                         if (attributePrefix)
                             attributeName = attributePrefix + ":" + attributeName;
                     }
@@ -1084,7 +1084,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                 }
                 if (delayedSrc) {
                     var image = tag === "input" ? new Image() : result;
-                    var imageFetcher = adapt.taskutil.loadElement(image, delayedSrc);
+                    const imageFetcher = adapt.taskutil.loadElement(image, delayedSrc);
                     if (image !== result) {
                         result.src = delayedSrc;
                     }
@@ -1100,9 +1100,9 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                 }
             }
             delete computedStyle["content"];
-            var listStyleImage = computedStyle["list-style-image"];
+            const listStyleImage = computedStyle["list-style-image"];
             if (listStyleImage && listStyleImage instanceof adapt.css.URL) {
-                var listStyleURL = (/** @type {adapt.css.URL} */ (listStyleImage)).url;
+                const listStyleURL = (/** @type {adapt.css.URL} */ (listStyleImage)).url;
                 fetchers.push(adapt.taskutil.loadElement(new Image(), listStyleURL));
             }
 
@@ -1110,7 +1110,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
 
             self.applyComputedStyles(result, computedStyle);
             if (!self.nodeContext.inline) {
-                var blackList = null;
+                let blackList = null;
                 if (!firstTime) {
                     if (self.nodeContext.inheritedProps["box-decoration-break"] !== "clone") {
                         blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeBlackListVert : adapt.vgen.frontEdgeBlackListHor;
@@ -1122,7 +1122,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                     blackList = self.nodeContext.vertical ? adapt.vgen.frontEdgeUnforcedBreakBlackListVert : adapt.vgen.frontEdgeUnforcedBreakBlackListHor;
                 }
                 if (blackList) {
-                    for (var propName in blackList) {
+                    for (const propName in blackList) {
                         adapt.base.setCSSProperty(result, propName, blackList[propName]);
                     }
                 }
@@ -1156,12 +1156,12 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
  * @param {adapt.expr.Context} context
  */
 adapt.vgen.ViewFactory.prototype.processAfterIfcontinues = function(element, cascStyle, styler, context) {
-    var pseudoMap = this.getPseudoMap(cascStyle, this.regionIds, this.isFootnote, this.nodeContext, context);
+    const pseudoMap = this.getPseudoMap(cascStyle, this.regionIds, this.isFootnote, this.nodeContext, context);
     if (!pseudoMap) return;
 
     if (pseudoMap['after-if-continues']
         && pseudoMap['after-if-continues']['content']) {
-        var shadowStyler = new adapt.vgen.PseudoelementStyler(element, cascStyle, styler, context,
+        const shadowStyler = new adapt.vgen.PseudoelementStyler(element, cascStyle, styler, context,
             this.exprContentListener);
         this.nodeContext.afterIfContinues =
             new vivliostyle.selectors.AfterIfContinues(element, shadowStyler);
@@ -1192,13 +1192,13 @@ adapt.vgen.ViewFactory.prototype.isSVGUrlAttribute = attributeName => adapt.vgen
  * @param {boolean} isVertical
  */
 adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = function(images, imageResolution, computedStyle, isVertical) {
-    var self = this;
+    const self = this;
     images.forEach(param => {
         if (param.fetcher.get().get() === "load") {
-            var img = param.image;
-            var scaledWidth = img.width / imageResolution;
-            var scaledHeight = img.height / imageResolution;
-            var elem = param.element;
+            const img = param.image;
+            let scaledWidth = img.width / imageResolution;
+            let scaledHeight = img.height / imageResolution;
+            const elem = param.element;
             if (scaledWidth > 0 && scaledHeight > 0) {
                 if (computedStyle["box-sizing"] === adapt.css.ident.border_box) {
                     if (computedStyle["border-left-style"] !== adapt.css.ident.none) {
@@ -1215,8 +1215,8 @@ adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = functi
                     }
                 }
                 if (imageResolution > 1) {
-                    var maxWidth = computedStyle["max-width"] || adapt.css.ident.none;
-                    var maxHeight = computedStyle["max-height"] || adapt.css.ident.none;
+                    const maxWidth = computedStyle["max-width"] || adapt.css.ident.none;
+                    const maxHeight = computedStyle["max-height"] || adapt.css.ident.none;
                     if (maxWidth === adapt.css.ident.none && maxHeight === adapt.css.ident.none) {
                         adapt.base.setCSSProperty(elem, "max-width", scaledWidth + "px");
                     } else if (maxWidth !== adapt.css.ident.none && maxHeight === adapt.css.ident.none) {
@@ -1227,8 +1227,8 @@ adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = functi
                         // maxWidth != none && maxHeight != none
                         goog.asserts.assert(maxWidth.isNumeric());
                         goog.asserts.assert(maxHeight.isNumeric());
-                        var numericMaxWidth = /** @type {adapt.css.Numeric} */ (maxWidth);
-                        var numericMaxHeight = /** @type {adapt.css.Numeric} */ (maxHeight);
+                        const numericMaxWidth = /** @type {adapt.css.Numeric} */ (maxWidth);
+                        const numericMaxHeight = /** @type {adapt.css.Numeric} */ (maxHeight);
                         if (numericMaxWidth.unit !== "%") {
                             adapt.base.setCSSProperty(elem, "max-width",
                                 Math.min(scaledWidth, adapt.css.toNumber(numericMaxWidth, self.context)) + "px");
@@ -1244,12 +1244,12 @@ adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = functi
                         }
                     }
                 } else if (imageResolution < 1) {
-                    var minWidth = computedStyle["min-width"] || adapt.css.numericZero;
-                    var minHeight = computedStyle["min-height"] || adapt.css.numericZero;
+                    const minWidth = computedStyle["min-width"] || adapt.css.numericZero;
+                    const minHeight = computedStyle["min-height"] || adapt.css.numericZero;
                     goog.asserts.assert(minWidth.isNumeric());
                     goog.asserts.assert(minWidth.isNumeric());
-                    var numericMinWidth = /** @type {adapt.css.Numeric} */ (minWidth);
-                    var numericMinHeight = /** @type {adapt.css.Numeric} */ (minHeight);
+                    const numericMinWidth = /** @type {adapt.css.Numeric} */ (minWidth);
+                    const numericMinHeight = /** @type {adapt.css.Numeric} */ (minHeight);
                     if (numericMinWidth.num === 0 && numericMinHeight.num === 0) {
                         adapt.base.setCSSProperty(elem, "min-width", scaledWidth + "px");
                     } else if (numericMinWidth.num !== 0 && numericMinHeight.num === 0) {
@@ -1283,8 +1283,8 @@ adapt.vgen.ViewFactory.prototype.modifyElemDimensionWithImageResolution = functi
  * @param {!Object.<string,adapt.css.Val>} computedStyle
  */
 adapt.vgen.ViewFactory.prototype.preprocessElementStyle = function(computedStyle) {
-    var self = this;
-    /** @type {!Array.<vivliostyle.plugin.PreProcessElementStyleHook>} */ var hooks =
+    const self = this;
+    /** @type {!Array.<vivliostyle.plugin.PreProcessElementStyleHook>} */ const hooks =
         vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.PREPROCESS_ELEMENT_STYLE);
     hooks.forEach(hook => {
         hook(self.nodeContext, computedStyle);
@@ -1297,12 +1297,12 @@ adapt.vgen.ViewFactory.prototype.preprocessElementStyle = function(computedStyle
  * @param {adapt.cssstyler.AbstractStyler} styler
  */
 adapt.vgen.ViewFactory.prototype.findAndProcessRepeatingElements = function(element, styler) {
-    for (var child = element.firstChild; child; child = child.nextSibling) {
+    for (let child = element.firstChild; child; child = child.nextSibling) {
         if (child.nodeType !== 1) continue;
-        var computedStyle = {};
-        var elementStyle = styler.getStyle(/** @type {Element}*/ (child), false);
+        const computedStyle = {};
+        const elementStyle = styler.getStyle(/** @type {Element}*/ (child), false);
         this.computeStyle(this.nodeContext.vertical, elementStyle, computedStyle);
-        var processRepeatOnBreak = this.processRepeatOnBreak(computedStyle);
+        const processRepeatOnBreak = this.processRepeatOnBreak(computedStyle);
         if (!processRepeatOnBreak) continue;
 
         if (this.nodeContext.formattingContext instanceof vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext
@@ -1310,8 +1310,8 @@ adapt.vgen.ViewFactory.prototype.findAndProcessRepeatingElements = function(elem
             return;
         }
 
-        var parent = this.nodeContext.parent;
-        var parentFormattingContext = parent && parent.formattingContext;
+        const parent = this.nodeContext.parent;
+        const parentFormattingContext = parent && parent.formattingContext;
         this.nodeContext.formattingContext =
             new vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext(
                 parentFormattingContext, /** @type {!Element}*/ (this.nodeContext.sourceNode));
@@ -1325,7 +1325,7 @@ adapt.vgen.ViewFactory.prototype.findAndProcessRepeatingElements = function(elem
  * @param {!Object.<string,adapt.css.Val>} computedStyle
  */
 adapt.vgen.ViewFactory.prototype.processRepeatOnBreak = computedStyle => {
-    var repeatOnBreak = computedStyle["repeat-on-break"];
+    let repeatOnBreak = computedStyle["repeat-on-break"];
     if (repeatOnBreak !== adapt.css.ident.none) {
         if (repeatOnBreak === adapt.css.ident.auto) {
             if (computedStyle["display"] === adapt.css.ident.table_header_group) {
@@ -1349,12 +1349,12 @@ adapt.vgen.ViewFactory.prototype.processRepeatOnBreak = computedStyle => {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.vgen.ViewFactory.prototype.createTextNodeView = function() {
-    var self = this;
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame
+    const self = this;
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame
         = adapt.task.newFrame("createTextNodeView");
     this.preprocessTextContent().then(() => {
-        var offsetInNode = self.offsetInNode || 0;
-        var textContent = vivliostyle.diff.restoreNewText(
+        const offsetInNode = self.offsetInNode || 0;
+        const textContent = vivliostyle.diff.restoreNewText(
             self.nodeContext.preprocessedTextContent).substr(offsetInNode);
         self.viewNode = document.createTextNode(textContent);
         frame.finish(true);
@@ -1370,14 +1370,14 @@ adapt.vgen.ViewFactory.prototype.preprocessTextContent = function() {
     if (this.nodeContext.preprocessedTextContent != null) {
         return adapt.task.newResult(true);
     }
-    var self = this;
-    var originl;
-    var textContent = originl = self.sourceNode.textContent;
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame
+    const self = this;
+    let originl;
+    let textContent = originl = self.sourceNode.textContent;
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame
         = adapt.task.newFrame("preprocessTextContent");
-    /** @type {!Array.<vivliostyle.plugin.PreProcessTextContentHook>} */ var hooks =
+    /** @type {!Array.<vivliostyle.plugin.PreProcessTextContentHook>} */ const hooks =
         vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.PREPROCESS_TEXT_CONTENT);
-    var index = 0;
+    let index = 0;
     frame.loop(() => {
         if (index >= hooks.length) return adapt.task.newResult(false);
         return hooks[index++](self.nodeContext, textContent).thenAsync(processedText => {
@@ -1398,11 +1398,11 @@ adapt.vgen.ViewFactory.prototype.preprocessTextContent = function() {
  * @return {!adapt.task.Result.<boolean>} holding true if children should be processed
  */
 adapt.vgen.ViewFactory.prototype.createNodeView = function(firstTime, atUnforcedBreak) {
-    var self = this;
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame
+    const self = this;
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame
         = adapt.task.newFrame("createNodeView");
-    var result;
-    var needToProcessChildren = true;
+    let result;
+    let needToProcessChildren = true;
     if (self.sourceNode.nodeType == 1) {
         result = self.createElementView(firstTime, atUnforcedBreak);
     } else {
@@ -1417,7 +1417,7 @@ adapt.vgen.ViewFactory.prototype.createNodeView = function(firstTime, atUnforced
         needToProcessChildren = processChildren;
         self.nodeContext.viewNode = self.viewNode;
         if (self.viewNode) {
-            var parent = self.nodeContext.parent ? self.nodeContext.parent.viewNode : self.viewRoot;
+            const parent = self.nodeContext.parent ? self.nodeContext.parent.viewNode : self.viewRoot;
             if (parent) {
                 parent.appendChild(self.viewNode);
             }
@@ -1451,14 +1451,14 @@ adapt.vgen.ViewFactory.prototype.processShadowContent = pos => {
         pos.sourceNode.localName != "content" || pos.sourceNode.namespaceURI != adapt.base.NS.SHADOW) {
         return pos;
     }
-    var boxOffset = pos.boxOffset;
-    var shadow = pos.shadowContext;
-    var parent = pos.parent;
+    const boxOffset = pos.boxOffset;
+    const shadow = pos.shadowContext;
+    const parent = pos.parent;
 
     // content that will be inserted
-    var contentNode;
-    var contentShadowType;
-    var contentShadow;
+    let contentNode;
+    let contentShadowType;
+    let contentShadow;
     if (shadow.subShadow) {
         contentShadow = shadow.subShadow;
         contentNode = shadow.root;
@@ -1471,7 +1471,7 @@ adapt.vgen.ViewFactory.prototype.processShadowContent = pos => {
         contentNode = shadow.owner.firstChild;
         contentShadowType = adapt.vtree.ShadowType.ROOTLESS;
     }
-    var nextSibling = pos.sourceNode.nextSibling;
+    const nextSibling = pos.sourceNode.nextSibling;
     if (nextSibling) {
         pos.sourceNode = nextSibling;
         pos.resetView();
@@ -1484,7 +1484,7 @@ adapt.vgen.ViewFactory.prototype.processShadowContent = pos => {
         pos.after = true;
     }
     if (contentNode) {
-        var r = new adapt.vtree.NodeContext(contentNode, parent, boxOffset);
+        const r = new adapt.vtree.NodeContext(contentNode, parent, boxOffset);
         r.shadowContext = contentShadow;
         r.shadowType = contentShadowType;
         r.shadowSibling = pos;
@@ -1500,14 +1500,14 @@ adapt.vgen.ViewFactory.prototype.processShadowContent = pos => {
  * @return {adapt.vtree.NodeContext}
  */
 adapt.vgen.ViewFactory.prototype.nextPositionInTree = function(pos) {
-    var boxOffset = pos.boxOffset + 1; // offset for the next position
+    let boxOffset = pos.boxOffset + 1; // offset for the next position
     if (pos.after) {
         if (!pos.parent)  // root, that was the last possible position
             return null;
         // we are done with this sourceNode, see if there is a next sibling, unless
         // this is the root of the shadow tree
         if (pos.shadowType != adapt.vtree.ShadowType.ROOTED) {
-            var next = pos.sourceNode.nextSibling;
+            const next = pos.sourceNode.nextSibling;
             if (next) {
                 pos = pos.modify();
                 // keep shadowType
@@ -1532,25 +1532,25 @@ adapt.vgen.ViewFactory.prototype.nextPositionInTree = function(pos) {
     } else {
         // any shadow trees?
         if (pos.nodeShadow) {
-            var shadowNode = pos.nodeShadow.root;
+            let shadowNode = pos.nodeShadow.root;
             if (pos.nodeShadow.type == adapt.vtree.ShadowType.ROOTLESS) {
                 shadowNode = shadowNode.firstChild;
             }
             if (shadowNode) {
-                var sr = new adapt.vtree.NodeContext(shadowNode, pos, boxOffset);
+                const sr = new adapt.vtree.NodeContext(shadowNode, pos, boxOffset);
                 sr.shadowContext = pos.nodeShadow;
                 sr.shadowType = pos.nodeShadow.type;
                 return this.processShadowContent(sr);
             }
         }
         // any children?
-        var child = pos.sourceNode.firstChild;
+        const child = pos.sourceNode.firstChild;
         if (child) {
             return this.processShadowContent(new adapt.vtree.NodeContext(child, pos, boxOffset));
         }
         // no children - was there text content?
         if (pos.sourceNode.nodeType != 1) {
-            var content = vivliostyle.diff.restoreNewText(pos.preprocessedTextContent);
+            const content = vivliostyle.diff.restoreNewText(pos.preprocessedTextContent);
             boxOffset += content.length - 1 - pos.offsetInNode;
         }
         pos = pos.modify();
@@ -1566,10 +1566,10 @@ adapt.vgen.ViewFactory.prototype.nextPositionInTree = function(pos) {
  * @param {?string} transclusionType
  */
 adapt.vgen.ViewFactory.prototype.isTransclusion = function(element, elementStyle, transclusionType) {
-    var proc = adapt.csscasc.getProp(elementStyle, "hyperlink-processing");
+    const proc = adapt.csscasc.getProp(elementStyle, "hyperlink-processing");
     if (!proc)
         return false;
-    var prop = proc.evaluate(this.context, "hyperlink-processing");
+    const prop = proc.evaluate(this.context, "hyperlink-processing");
     if (!prop)
         return false;
     return prop.toString() == transclusionType;
@@ -1584,7 +1584,7 @@ adapt.vgen.ViewFactory.prototype.nextInTree = function(nodeContext, atUnforcedBr
     if (!nodeContext || nodeContext.after) {
         return adapt.task.newResult(nodeContext);
     }
-    /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
+    /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ const frame
         = adapt.task.newFrame("nextInTree");
     this.setCurrent(nodeContext, true, atUnforcedBreak).then(processChildren => {
         if (!nodeContext.viewNode || !processChildren) {
@@ -1605,12 +1605,12 @@ adapt.vgen.ViewFactory.prototype.nextInTree = function(nodeContext, atUnforcedBr
 
 adapt.vgen.ViewFactory.prototype.addImageFetchers = function(bg) {
     if (bg instanceof adapt.css.CommaList) {
-        var values = (/** @type {adapt.css.CommaList} */ (bg)).values;
-        for (var i = 0; i < values.length; i++) {
+        const values = (/** @type {adapt.css.CommaList} */ (bg)).values;
+        for (let i = 0; i < values.length; i++) {
             this.addImageFetchers(values[i]);
         }
     } else if (bg instanceof adapt.css.URL) {
-        var url = (/** @type {adapt.css.URL} */(bg)).url;
+        const url = (/** @type {adapt.css.URL} */(bg)).url;
         this.page.fetchers.push(adapt.taskutil.loadElement(new Image(), url));
     }
 };
@@ -1635,16 +1635,16 @@ adapt.vgen.propertiesNotPassedToDOM = {
  * @param {Object.<string,adapt.css.Val>} computedStyle
  */
 adapt.vgen.ViewFactory.prototype.applyComputedStyles = function(target, computedStyle) {
-    var bg = computedStyle["background-image"];
+    const bg = computedStyle["background-image"];
     if (bg) {
         this.addImageFetchers(bg);
     }
-    var isRelativePositioned = computedStyle["position"] === adapt.css.ident.relative;
-    for (var propName in computedStyle) {
+    const isRelativePositioned = computedStyle["position"] === adapt.css.ident.relative;
+    for (const propName in computedStyle) {
         if (adapt.vgen.propertiesNotPassedToDOM[propName]) {
             continue;
         }
-        var value = computedStyle[propName];
+        let value = computedStyle[propName];
         value = value.visit(new adapt.cssprop.UrlTransformVisitor(
             this.xmldoc.url, this.documentURLTransformer));
         if (value.isNumeric() && adapt.expr.needUnitConversion(value.unit)) {
@@ -1668,19 +1668,19 @@ adapt.vgen.ViewFactory.prototype.applyComputedStyles = function(target, computed
 adapt.vgen.ViewFactory.prototype.applyPseudoelementStyle = function(nodeContext, pseudoName, target) {
     if (nodeContext.after)
         return;
-    var element = /** @type {Element} */ (this.sourceNode);
-    var styler = nodeContext.shadowContext ?
+    const element = /** @type {Element} */ (this.sourceNode);
+    const styler = nodeContext.shadowContext ?
         /** @type {adapt.cssstyler.AbstractStyler} */ (nodeContext.shadowContext.styler) : this.styler;
-    var elementStyle = styler.getStyle(element, false);
-    var pseudoMap = adapt.csscasc.getStyleMap(elementStyle, "_pseudos");
+    let elementStyle = styler.getStyle(element, false);
+    const pseudoMap = adapt.csscasc.getStyleMap(elementStyle, "_pseudos");
     if (!pseudoMap)
         return;
     elementStyle = pseudoMap[pseudoName];
     if (!elementStyle)
         return;
-    var computedStyle = {};
+    const computedStyle = {};
     nodeContext.vertical = this.computeStyle(nodeContext.vertical, elementStyle, computedStyle);
-    var content = computedStyle["content"];
+    const content = computedStyle["content"];
     if (adapt.vtree.nonTrivialContent(content)) {
         content.visit(new adapt.vtree.ContentPropertyHandler(target, this.context, content,
             this.exprContentListener));
@@ -1693,29 +1693,29 @@ adapt.vgen.ViewFactory.prototype.applyPseudoelementStyle = function(nodeContext,
  * @override
  */
 adapt.vgen.ViewFactory.prototype.peelOff = function(nodeContext, nodeOffset) {
-    /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ var frame
+    /** @type {!adapt.task.Frame.<adapt.vtree.NodeContext>} */ const frame
         = adapt.task.newFrame("peelOff");
-    var firstPseudo = nodeContext.firstPseudo;
-    var offsetInNode = nodeContext.offsetInNode;
-    var after = nodeContext.after;
+    const firstPseudo = nodeContext.firstPseudo;
+    let offsetInNode = nodeContext.offsetInNode;
+    const after = nodeContext.after;
     if (nodeOffset > 0) {
-        var text = nodeContext.viewNode.textContent;
+        const text = nodeContext.viewNode.textContent;
         nodeContext.viewNode.textContent = text.substr(0, nodeOffset);
         offsetInNode += nodeOffset;
     } else if (!after && nodeContext.viewNode && offsetInNode == 0) {
-        var parent = nodeContext.viewNode.parentNode;
+        const parent = nodeContext.viewNode.parentNode;
         if (parent)
             parent.removeChild(nodeContext.viewNode);
     }
-    var boxOffset = nodeContext.boxOffset + nodeOffset;
-    var arr = [];
+    const boxOffset = nodeContext.boxOffset + nodeOffset;
+    const arr = [];
     while (nodeContext.firstPseudo === firstPseudo) {
         arr.push(nodeContext);
         nodeContext = nodeContext.parent;
     }
-    var pn = arr.pop(); // container for that pseudoelement
-    var shadowSibling = pn.shadowSibling;
-    var self = this;
+    let pn = arr.pop(); // container for that pseudoelement
+    let shadowSibling = pn.shadowSibling;
+    const self = this;
     frame.loop(() => {
         while (arr.length > 0) {
             pn = arr.pop();
@@ -1729,7 +1729,7 @@ adapt.vgen.ViewFactory.prototype.peelOff = function(nodeContext, nodeOffset) {
                 nodeContext.nodeShadow = pn.nodeShadow;
             nodeContext.shadowSibling = pn.shadowSibling ? pn.shadowSibling : shadowSibling;
             shadowSibling = null;
-            var result = self.setCurrent(nodeContext, false);
+            const result = self.setCurrent(nodeContext, false);
             if (result.isPending())
                 return result;
         }
@@ -1756,12 +1756,12 @@ adapt.vgen.ViewFactory.prototype.createElement = function(ns, tag) {
  * @override
  */
 adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target) {
-    var computedStyle = {};
-    var pseudoMap = adapt.csscasc.getStyleMap(this.footnoteStyle, "_pseudos");
+    const computedStyle = {};
+    const pseudoMap = adapt.csscasc.getStyleMap(this.footnoteStyle, "_pseudos");
     vertical = this.computeStyle(vertical, this.footnoteStyle, computedStyle);
     if (pseudoMap && pseudoMap["before"]) {
-        var childComputedStyle = {};
-        var span = this.createElement(adapt.base.NS.XHTML, "span");
+        const childComputedStyle = {};
+        const span = this.createElement(adapt.base.NS.XHTML, "span");
         adapt.vgen.setPseudoName(span, "before");
         target.appendChild(span);
         this.computeStyle(vertical, pseudoMap["before"], childComputedStyle);
@@ -1779,9 +1779,9 @@ adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target)
 adapt.vgen.ViewFactory.prototype.processFragmentedBlockEdge = nodeContext => {
     if (nodeContext) {
         nodeContext.walkUpBlocks(block => {
-            var boxDecorationBreak = block.inheritedProps["box-decoration-break"];
+            const boxDecorationBreak = block.inheritedProps["box-decoration-break"];
             if (!boxDecorationBreak || boxDecorationBreak === "slice") {
-                var elem = block.viewNode;
+                const elem = block.viewNode;
                 goog.asserts.assert(elem instanceof Element);
                 if (block.vertical) {
                     adapt.base.setCSSProperty(elem, "padding-left", "0");
@@ -1803,19 +1803,19 @@ adapt.vgen.ViewFactory.prototype.processFragmentedBlockEdge = nodeContext => {
  * @override
  */
 adapt.vgen.ViewFactory.prototype.convertLengthToPx = function(numeric, viewNode, clientLayout) {
-    var num = numeric.num;
-    var unit = numeric.unit;
+    const num = numeric.num;
+    const unit = numeric.unit;
     if (adapt.expr.isFontRelativeLengthUnit(unit)) {
-        var elem = viewNode;
+        let elem = viewNode;
         while (elem && elem.nodeType !== 1) {
             elem = elem.parentNode;
         }
         goog.asserts.assert(elem);
-        var fontSize = parseFloat(clientLayout.getElementComputedStyle(/** @type {Element} */ (elem))["font-size"]);
+        const fontSize = parseFloat(clientLayout.getElementComputedStyle(/** @type {Element} */ (elem))["font-size"]);
         goog.asserts.assert(this.context);
         return adapt.csscasc.convertFontRelativeLengthToPx(numeric, fontSize, this.context).num;
     } else {
-        var unitSize = this.context.queryUnitSize(unit, false);
+        const unitSize = this.context.queryUnitSize(unit, false);
         if (unitSize) {
             return num * unitSize;
         } else {
@@ -1835,8 +1835,8 @@ adapt.vgen.ViewFactory.prototype.isSameNodePositionStep = (step1, step2) => {
         if (!step2.shadowContext) {
             return false;
         }
-        var elem1 = step1.node.nodeType === 1 ? /** @type {Element} */ (step1.node) : step1.node.parentElement;
-        var elem2 = step2.node.nodeType === 1 ? /** @type {Element} */ (step2.node) : step2.node.parentElement;
+        const elem1 = step1.node.nodeType === 1 ? /** @type {Element} */ (step1.node) : step1.node.parentElement;
+        const elem2 = step2.node.nodeType === 1 ? /** @type {Element} */ (step2.node) : step2.node.parentElement;
         return step1.shadowContext.owner === step2.shadowContext.owner
             && adapt.vgen.getPseudoName(elem1) === adapt.vgen.getPseudoName(elem2);
     } else {
@@ -1852,7 +1852,7 @@ adapt.vgen.ViewFactory.prototype.isSameNodePosition = function(nodePosition1, no
         && nodePosition1.after == nodePosition2.after
         && nodePosition1.steps.length === nodePosition2.steps.length
         && nodePosition1.steps.every((step1, i) => {
-            var step2 = nodePosition2.steps[i];
+            const step2 = nodePosition2.steps[i];
             return this.isSameNodePositionStep(step1, step2);
         });
 };
@@ -1876,8 +1876,8 @@ adapt.vgen.DefaultClientLayout = function(viewport) {
  * @returns {adapt.vtree.ClientRect}
  */
 adapt.vgen.DefaultClientLayout.prototype.subtractOffsets = (rect, originRect) => {
-    var viewportLeft = originRect.left;
-    var viewportTop = originRect.top;
+    const viewportLeft = originRect.left;
+    const viewportTop = originRect.top;
     return /** @type {adapt.vtree.ClientRect} */ ({
         left: rect.left - viewportLeft,
         top: rect.top - viewportTop,
@@ -1892,8 +1892,8 @@ adapt.vgen.DefaultClientLayout.prototype.subtractOffsets = (rect, originRect) =>
  * @override
  */
 adapt.vgen.DefaultClientLayout.prototype.getRangeClientRects = function(range) {
-    var rects = range["getClientRects"]();
-    var layoutBoxRect = this.layoutBox.getBoundingClientRect();
+    const rects = range["getClientRects"]();
+    const layoutBoxRect = this.layoutBox.getBoundingClientRect();
     return Array.from(rects).map(function(rect) {
         return this.subtractOffsets(rect, layoutBoxRect);
     }, this);
@@ -1903,9 +1903,9 @@ adapt.vgen.DefaultClientLayout.prototype.getRangeClientRects = function(range) {
  * @override
  */
 adapt.vgen.DefaultClientLayout.prototype.getElementClientRect = function(element) {
-    var htmlElement = /** @type {HTMLElement} */ (element);
-    var rect = /** @type {adapt.vtree.ClientRect} */ (htmlElement.getBoundingClientRect());
-    var layoutBoxRect = this.layoutBox.getBoundingClientRect();
+    const htmlElement = /** @type {HTMLElement} */ (element);
+    const rect = /** @type {adapt.vtree.ClientRect} */ (htmlElement.getBoundingClientRect());
+    const layoutBoxRect = this.layoutBox.getBoundingClientRect();
     return this.subtractOffsets(rect, layoutBoxRect);
 };
 
@@ -1929,19 +1929,19 @@ adapt.vgen.Viewport = function(window, fontSize, opt_root, opt_width, opt_height
     /** @const */ this.fontSize = fontSize;
     /** @const */ this.document = window.document;
     /** @type {HTMLElement} */ this.root = opt_root || this.document.body;
-    var outerZoomBox = this.root.firstElementChild;
+    let outerZoomBox = this.root.firstElementChild;
     if (!outerZoomBox) {
         outerZoomBox = this.document.createElement("div");
         outerZoomBox.setAttribute("data-vivliostyle-outer-zoom-box", true);
         this.root.appendChild(outerZoomBox);
     }
-    var contentContainer = outerZoomBox.firstElementChild;
+    let contentContainer = outerZoomBox.firstElementChild;
     if (!contentContainer) {
         contentContainer = this.document.createElement("div");
         contentContainer.setAttribute("data-vivliostyle-spread-container", true);
         outerZoomBox.appendChild(contentContainer);
     }
-    var layoutBox = outerZoomBox.nextElementSibling;
+    let layoutBox = outerZoomBox.nextElementSibling;
     if (!layoutBox) {
         layoutBox = this.document.createElement("div");
         layoutBox.setAttribute("data-vivliostyle-layout-box", true);
@@ -1950,8 +1950,8 @@ adapt.vgen.Viewport = function(window, fontSize, opt_root, opt_width, opt_height
     /** @private @type {!HTMLElement} */ this.outerZoomBox = /** @type {!HTMLElement} */ (outerZoomBox);
     /** @type {!HTMLElement} */ this.contentContainer = /** @type {!HTMLElement} */ (contentContainer);
     /** @const */ this.layoutBox = /** @type {!HTMLElement} */ (layoutBox);
-    var clientLayout = new adapt.vgen.DefaultClientLayout(this);
-    var computedStyle = clientLayout.getElementComputedStyle(this.root);
+    const clientLayout = new adapt.vgen.DefaultClientLayout(this);
+    const computedStyle = clientLayout.getElementComputedStyle(this.root);
     /** @type {number} */ this.width = opt_width || parseFloat(computedStyle["width"]) || window.innerWidth;
     /** @type {number} */ this.height = opt_height || parseFloat(computedStyle["height"]) || window.innerHeight;
 };
@@ -1985,7 +1985,7 @@ adapt.vgen.Viewport.prototype.zoom = function(width, height, scale) {
  * Remove all pages inside the viewport.
  */
 adapt.vgen.Viewport.prototype.clear = function() {
-    var root = this.root;
+    const root = this.root;
     while (root.lastChild) {
         root.removeChild(root.lastChild);
     }

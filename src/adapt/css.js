@@ -42,7 +42,7 @@ adapt.css.Visitor = function() {
  * @return void
  */
 adapt.css.Visitor.prototype.visitValues = function(values) {
-    for (var i = 0; i < values.length; i++) {
+    for (let i = 0; i < values.length; i++) {
         values[i].visit(this);
     }
 };
@@ -165,15 +165,15 @@ goog.inherits(adapt.css.FilterVisitor, adapt.css.Visitor);
  * @return {Array.<adapt.css.Val>}
  */
 adapt.css.FilterVisitor.prototype.visitValues = function(values) {
-    /** @type {Array.<adapt.css.Val>} */ var arr = null;
-    for (var i = 0; i < values.length; i++) {
-        var before = values[i];
-        var after = before.visit(this);
+    /** @type {Array.<adapt.css.Val>} */ let arr = null;
+    for (let i = 0; i < values.length; i++) {
+        const before = values[i];
+        const after = before.visit(this);
         if (arr) {
             arr[i] = after;
         } else if (before !== after) {
             arr = new Array(values.length);
-            for (var k = 0; k < i; k++) {
+            for (let k = 0; k < i; k++) {
                 arr[k] = values[k];
             }
             arr[i] = after;
@@ -226,7 +226,7 @@ adapt.css.FilterVisitor.prototype.visitURL = url => url;
  * @override
  */
 adapt.css.FilterVisitor.prototype.visitSpaceList = function(list) {
-    var values = this.visitValues(list.values);
+    const values = this.visitValues(list.values);
     if (values === list.values)
         return list;
     return new adapt.css.SpaceList(values);
@@ -236,7 +236,7 @@ adapt.css.FilterVisitor.prototype.visitSpaceList = function(list) {
  * @override
  */
 adapt.css.FilterVisitor.prototype.visitCommaList = function(list) {
-    var values = this.visitValues(list.values);
+    const values = this.visitValues(list.values);
     if (values === list.values)
         return list;
     return new adapt.css.CommaList(values);
@@ -246,7 +246,7 @@ adapt.css.FilterVisitor.prototype.visitCommaList = function(list) {
  * @override
  */
 adapt.css.FilterVisitor.prototype.visitFunc = function(func) {
-    var values = this.visitValues(func.values);
+    const values = this.visitValues(func.values);
     if (values === func.values)
         return func;
     return new adapt.css.Func(func.name, values);
@@ -269,7 +269,7 @@ adapt.css.Val = function() {
  * @return {string}
  */
 adapt.css.Val.prototype.toString = function() {
-    var buf = new adapt.base.StringBuffer();
+    const buf = new adapt.base.StringBuffer();
     this.appendTo(buf, true);
     return buf.toString();
 };
@@ -278,7 +278,7 @@ adapt.css.Val.prototype.toString = function() {
  * @return {string}
  */
 adapt.css.Val.prototype.stringValue = function() {
-    var buf = new adapt.base.StringBuffer();
+    const buf = new adapt.base.StringBuffer();
     this.appendTo(buf, false);
     return buf.toString();
 };
@@ -499,7 +499,7 @@ adapt.css.Ident.prototype.isIdent = () => true;
  * @return {!adapt.css.Ident}
  */
 adapt.css.getName = name => {
-    var r = adapt.css.nameTable[name];
+    let r = adapt.css.nameTable[name];
     if (!r) {
         r = new adapt.css.Ident(name);
     }
@@ -631,7 +631,7 @@ goog.inherits(adapt.css.Color, adapt.css.Val);
  */
 adapt.css.Color.prototype.appendTo = function(buf, toString) {
     buf.append("#");
-    var str = this.rgb.toString(16);
+    const str = this.rgb.toString(16);
     buf.append("000000".substr(str.length));
     buf.append(str);
 };
@@ -681,9 +681,9 @@ adapt.css.URL.prototype.visit = function(visitor) {
  * @return {void}
  */
 adapt.css.appendList = (buf, values, separator, toString) => {
-    var length = values.length;
+    const length = values.length;
     values[0].appendTo(buf, toString);
-    for (var i = 1; i < length; i++) {
+    for (let i = 1; i < length; i++) {
         buf.append(separator);
         values[i].appendTo(buf, toString);
     }
@@ -825,7 +825,7 @@ adapt.css.Expr.prototype.isExpr = () => true;
 adapt.css.toNumber = (val, context) => {
     if (val) {
         if (val.isNumeric()) {
-            var numeric = /** @type {adapt.css.Numeric} */ (val);
+            const numeric = /** @type {adapt.css.Numeric} */ (val);
             return context.queryUnitSize(numeric.unit, false) * numeric.num;
         }
         if (val.isNum()) {
@@ -950,7 +950,7 @@ adapt.css.processingOrder = {
  * @return {number}
  */
 adapt.css.processingOrderFn = (name1, name2) => {
-    var n1 = adapt.css.processingOrder[name1] || Number.MAX_VALUE;
-    var n2 = adapt.css.processingOrder[name2] || Number.MAX_VALUE;
+    const n1 = adapt.css.processingOrder[name1] || Number.MAX_VALUE;
+    const n2 = adapt.css.processingOrder[name2] || Number.MAX_VALUE;
     return n1 - n2;
 };

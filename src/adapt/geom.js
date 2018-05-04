@@ -114,12 +114,12 @@ adapt.geom.Shape = function(points) {
  * @return {void}
  */
 adapt.geom.Shape.prototype.addSegments = function(arr, id) {
-    var points = this.points;
-    var length = points.length;
-    var prev = points[length - 1];
-    for (var i = 0; i < length; i++) {
-        var curr = points[i];
-        /** @type {adapt.geom.Segment} */ var s;
+    const points = this.points;
+    const length = points.length;
+    let prev = points[length - 1];
+    for (let i = 0; i < length; i++) {
+        const curr = points[i];
+        /** @type {adapt.geom.Segment} */ let s;
         if (prev.y < curr.y)
             s = new adapt.geom.Segment(prev, curr, 1, id);
         else
@@ -130,9 +130,9 @@ adapt.geom.Shape.prototype.addSegments = function(arr, id) {
 };
 
 adapt.geom.Shape.prototype.withOffset = function(offsetX, offsetY) {
-    var points = [];
-    for (var i = 0; i < this.points.length; i++) {
-        var p = this.points[i];
+    const points = [];
+    for (let i = 0; i < this.points.length; i++) {
+        const p = this.points[i];
         points.push(new adapt.geom.Point(p.x + offsetX, p.y + offsetY));
     }
     return new adapt.geom.Shape(points);
@@ -146,10 +146,10 @@ adapt.geom.Shape.prototype.withOffset = function(offsetX, offsetY) {
  * @return {adapt.geom.Shape}
  */
 adapt.geom.shapeForEllipse = (cx, cy, rx, ry) => {
-    var count = 20;
-    /** @type {Array.<adapt.geom.Point>} */ var points = [];
-    for (var i = 0; i < count; i++) {
-        var a = i * 2 * Math.PI / count;
+    const count = 20;
+    /** @type {Array.<adapt.geom.Point>} */ const points = [];
+    for (let i = 0; i < count; i++) {
+        const a = i * 2 * Math.PI / count;
         points.push(new adapt.geom.Point(cx + rx * Math.sin(a),
             cy + ry * Math.cos(a)));
     }
@@ -195,7 +195,7 @@ adapt.geom.BandIntersection = function(x, winding, shapeId, lowOrHigh) {
  * @return {number}
  */
 adapt.geom.intersectY = (s, y) => {
-    var x = s.low.x + (s.high.x - s.low.x) * (y - s.low.y) /
+    const x = s.low.x + (s.high.x - s.low.x) * (y - s.low.y) /
         (s.high.y - s.low.y);
     if (isNaN(x))
         throw new Error("Bad intersection");
@@ -210,10 +210,10 @@ adapt.geom.intersectY = (s, y) => {
  * @return {void}
  */
 adapt.geom.addBandIntersections = (intersections, s, y1, y2) => {
-    /** @type {number} */ var x1;
-    /** @type {number} */ var w1;
-    /** @type {number} */ var x2;
-    /** @type {number} */ var w2;
+    /** @type {number} */ let x1;
+    /** @type {number} */ let w1;
+    /** @type {number} */ let x2;
+    /** @type {number} */ let w2;
     if (s.high.y < y1) {
         vivliostyle.logging.logger.warn("Error: inconsistent segment (1)");
     }
@@ -253,21 +253,21 @@ adapt.geom.addBandIntersections = (intersections, s, y1, y2) => {
  * @return {Array.<number>}
  */
 adapt.geom.mergeIntersections = (intersections, includeCount, excludeCount) => {
-    var shapeCount = includeCount + excludeCount;
-    /** @type {Array.<number>} */ var windings1 = Array(shapeCount);
-    /** @type {Array.<number>} */ var windings2 = Array(shapeCount);
+    const shapeCount = includeCount + excludeCount;
+    /** @type {Array.<number>} */ const windings1 = Array(shapeCount);
+    /** @type {Array.<number>} */ const windings2 = Array(shapeCount);
     for (var i = 0; i <= shapeCount; i++) {
         windings1[i] = 0;
         windings2[i] = 0;
     }
-    /** @type {Array.<number>} */ var xranges = [];
-    /** @type {boolean} */ var inside = false;
-    var intersectionCount = intersections.length;
-    for (var k = 0; k < intersectionCount; k++) {
-        var intersection = intersections[k];
+    /** @type {Array.<number>} */ const xranges = [];
+    /** @type {boolean} */ let inside = false;
+    const intersectionCount = intersections.length;
+    for (let k = 0; k < intersectionCount; k++) {
+        const intersection = intersections[k];
         windings1[intersection.shapeId] += intersection.winding;
         windings2[intersection.shapeId] += intersection.lowOrHigh;
-        var stillInside = false;
+        let stillInside = false;
         for (i = 0; i < includeCount; i++) {
             if (windings1[i] && !windings2[i]) {
                 stillInside = true;
@@ -347,29 +347,29 @@ adapt.geom.shapesToBands = (box, include, exclude, granularity, snapHeight, vert
         include = adapt.base.map(include, adapt.geom.rotateShape);
         exclude = adapt.base.map(exclude, adapt.geom.rotateShape);
     }
-    var includeCount = include.length;
-    var excludeCount = exclude ? exclude.length : 0;
-    /** @type {!Array.<adapt.geom.Band>} */ var result = [];
-    /** @type {!Array.<adapt.geom.Segment>} */ var segments = [];
-    /** @type {number} */ var i;
-    /** @type {number} */ var k;
-    /** @type {adapt.geom.Segment} */ var segment;
+    const includeCount = include.length;
+    const excludeCount = exclude ? exclude.length : 0;
+    /** @type {!Array.<adapt.geom.Band>} */ const result = [];
+    /** @type {!Array.<adapt.geom.Segment>} */ const segments = [];
+    /** @type {number} */ let i;
+    /** @type {number} */ let k;
+    /** @type {adapt.geom.Segment} */ let segment;
     for (i = 0; i < includeCount; i++)
         include[i].addSegments(segments, i);
     for (i = 0; i < excludeCount; i++)
         exclude[i].addSegments(segments, i + includeCount);
-    var segmentCount = segments.length;
+    const segmentCount = segments.length;
     segments.sort(adapt.geom.segmentCompare);
-    var lowestIncludeIndex = 0;
+    let lowestIncludeIndex = 0;
     while (segments[lowestIncludeIndex].shapeId >= includeCount) {
         lowestIncludeIndex++;
     }
-    var y = segments[lowestIncludeIndex].low.y;
+    let y = segments[lowestIncludeIndex].low.y;
     if (y > box.y1) {
         result.push(new adapt.geom.Band(box.y1, y, box.x2, box.x2));
     }
-    var segmentIndex = 0;
-    /** @type {!Array.<adapt.geom.Segment>} */ var activeSegments = [];
+    let segmentIndex = 0;
+    /** @type {!Array.<adapt.geom.Segment>} */ const activeSegments = [];
     while (segmentIndex < segmentCount && (segment = segments[segmentIndex]).low.y < y) {
         if (segment.high.y > y)
             activeSegments.push(segment);
@@ -378,9 +378,9 @@ adapt.geom.shapesToBands = (box, include, exclude, granularity, snapHeight, vert
     // process the segments from low to high y values
     while (segmentIndex < segmentCount || activeSegments.length > 0) {
         // calculate the height of the band to work with
-        var y2 = box.y2;  // band bottom
+        let y2 = box.y2;  // band bottom
         // min possible y2
-        var y2min = Math.min(adapt.geom.ceil(Math.ceil(y + granularity), snapHeight), box.y2);
+        const y2min = Math.min(adapt.geom.ceil(Math.ceil(y + granularity), snapHeight), box.y2);
         for (k = 0; k < activeSegments.length && y2 > y2min; k++) {
             segment = activeSegments[k];
             if (segment.low.x == segment.high.x) {
@@ -411,7 +411,7 @@ adapt.geom.shapesToBands = (box, include, exclude, granularity, snapHeight, vert
                 segmentIndex++;
             } else {
                 // Do not consume it, consider bottom edge "outside"
-                var yn = adapt.geom.floor(segment.low.y, snapHeight);
+                const yn = adapt.geom.floor(segment.low.y, snapHeight);
                 if (yn < y2) {
                     y2 = yn;
                 }
@@ -425,24 +425,24 @@ adapt.geom.shapesToBands = (box, include, exclude, granularity, snapHeight, vert
         /**
          * @type {!Array.<adapt.geom.BandIntersection>}
          */
-        var bandIntersections = [];
+        const bandIntersections = [];
         for (k = 0; k < activeSegments.length; k++) {
             adapt.geom.addBandIntersections(bandIntersections,
                 activeSegments[k], y, y2);
         }
         bandIntersections.sort(
             (bi1, bi2) => bi1.x - bi2.x || bi1.lowOrHigh - bi2.lowOrHigh);
-        var xranges = adapt.geom.mergeIntersections(bandIntersections,
+        const xranges = adapt.geom.mergeIntersections(bandIntersections,
             includeCount, excludeCount);
         if (xranges.length == 0) {
             result.push(new adapt.geom.Band(y, y2, box.x2, box.x2));
         } else {
             // get the widest
-            var width = 0;
-            var x = box.x1;
+            let width = 0;
+            let x = box.x1;
             for (k = 0; k < xranges.length; k += 2) {
-                var rx = Math.max(box.x1, xranges[k]);
-                var rw = Math.min(box.x2, xranges[k + 1]) - rx;
+                const rx = Math.max(box.x1, xranges[k]);
+                const rw = Math.min(box.x2, xranges[k + 1]) - rx;
                 if (rw > width) {
                     width = rw;
                     x = rx;
@@ -475,12 +475,12 @@ adapt.geom.shapesToBands = (box, include, exclude, granularity, snapHeight, vert
  * @return {void}
  */
 adapt.geom.normalize = (box, bands) => {
-    var k = bands.length - 1;
+    let k = bands.length - 1;
     // Merge bands with the same x1, x2 and remove unneeded bands at the end.
     // Create fictious last band to merge unneeded bands at the end
-    var currBand = new adapt.geom.Band(box.y2, box.y2, box.x1, box.x2);
+    let currBand = new adapt.geom.Band(box.y2, box.y2, box.x1, box.x2);
     while (k >= 0) {
-        var prevBand = currBand; // result[k+1]
+        const prevBand = currBand; // result[k+1]
         currBand = bands[k];
         if ((currBand.y2 - currBand.y1 < 1) || // Remove bands with height less than 1px
             currBand.x1 == prevBand.x1 && currBand.x2 == prevBand.x2) {
@@ -499,10 +499,10 @@ adapt.geom.normalize = (box, bands) => {
  * @return {number}
  */
 adapt.geom.findBand = (bands, y) => {
-    var low = 0;
-    var high = bands.length;
+    let low = 0;
+    let high = bands.length;
     while (low < high) {
-        var mid = Math.floor((low + high) / 2);
+        const mid = Math.floor((low + high) / 2);
         if (y >= bands[mid].y2)
             low = mid + 1;
         else
@@ -520,8 +520,8 @@ adapt.geom.findBand = (bands, y) => {
 adapt.geom.findUppermostFullyOpenRect = (bands, rect) => {
     if (!bands.length)
         return rect;
-    var topEdge = rect.y1;
-    var band;
+    let topEdge = rect.y1;
+    let band;
     for (var i = 0; i < bands.length; i++) {
         band = bands[i];
         if (band.y2 > rect.y1 && band.x1 - 0.1 <= rect.x1 && band.x2 + 0.1 >= rect.x2) {
@@ -530,7 +530,7 @@ adapt.geom.findUppermostFullyOpenRect = (bands, rect) => {
             topEdge = Math.max(topEdge, band.y2);
         }
     }
-    var bottomEdge = topEdge;
+    let bottomEdge = topEdge;
     for (; i < bands.length; i++) {
         band = bands[i];
         if (band.y1 >= rect.y2 || band.x1 - 0.1 > rect.x1 || band.x2 + 0.1 < rect.x2) {
@@ -561,8 +561,8 @@ adapt.geom.findUppermostFullyOpenRect = (bands, rect) => {
 adapt.geom.findBottommostFullyOpenRect = (bands, rect) => {
     if (!bands.length)
         return rect;
-    var bottomEdge = rect.y2;
-    var band;
+    let bottomEdge = rect.y2;
+    let band;
     for (var i = bands.length - 1; i >= 0; i--) {
         band = bands[i];
         if (i === bands.length - 1 && band.y2 < rect.y2) {
@@ -573,7 +573,7 @@ adapt.geom.findBottommostFullyOpenRect = (bands, rect) => {
             bottomEdge = Math.min(bottomEdge, band.y1);
         }
     }
-    var topEdge = Math.min(bottomEdge, band.y2);
+    let topEdge = Math.min(bottomEdge, band.y2);
     for (; i >= 0; i--) {
         band = bands[i];
         if (band.y2 <= rect.y1 || band.x1 - 0.1 > rect.x1 || band.x2 + 0.1 < rect.x2) {
@@ -599,19 +599,19 @@ adapt.geom.findBottommostFullyOpenRect = (bands, rect) => {
  * @return {boolean}
  */
 adapt.geom.positionFloat = (box, bands, floatBox, side) => {
-    var y = floatBox.y1;
-    var floatWidth = floatBox.x2 - floatBox.x1;
-    var floatHeight = floatBox.y2 - floatBox.y1;
-    var index = adapt.geom.findBand(bands, y);
+    let y = floatBox.y1;
+    const floatWidth = floatBox.x2 - floatBox.x1;
+    const floatHeight = floatBox.y2 - floatBox.y1;
+    let index = adapt.geom.findBand(bands, y);
     while (true) {
         // Check if it fits
-        var floatBottom = y + floatHeight;
+        const floatBottom = y + floatHeight;
         if (floatBottom > box.y2)
             return false; // does not fit vertically
-        var x1 = box.x1;
-        var x2 = box.x2;
-        for (var i = index; i < bands.length && bands[i].y1 < floatBottom; i++) {
-            var band = bands[i];
+        let x1 = box.x1;
+        let x2 = box.x2;
+        for (let i = index; i < bands.length && bands[i].y1 < floatBottom; i++) {
+            const band = bands[i];
             if (band.x1 > x1)
                 x1 = band.x1;
             if (band.x2 < x2)
@@ -654,15 +654,15 @@ adapt.geom.addFloatToBands = (box, bands, floatBox, floatBands, side) => {
         return;
     if (floatBands[0].y1 < box.y1)
         floatBands[0].y1 = box.y1;
-    /** @type {adapt.geom.Band} */ var band;
-    var lastY = bands.length == 0 ? box.y1 : bands[bands.length - 1].y2;
+    /** @type {adapt.geom.Band} */ let band;
+    const lastY = bands.length == 0 ? box.y1 : bands[bands.length - 1].y2;
     if (lastY < box.y2) {
         // add the tail band that we typically don't keep, it will be cleared by normalize()
         bands.push(new adapt.geom.Band(lastY, box.y2, box.x1, box.x2));
     }
-    var index = adapt.geom.findBand(bands, floatBands[0].y1);
-    for (var floatBandIndex = 0; floatBandIndex < floatBands.length; floatBandIndex++) {
-        var floatBand = floatBands[floatBandIndex];
+    let index = adapt.geom.findBand(bands, floatBands[0].y1);
+    for (let floatBandIndex = 0; floatBandIndex < floatBands.length; floatBandIndex++) {
+        const floatBand = floatBands[floatBandIndex];
         if (index == bands.length) {
             break;
         }

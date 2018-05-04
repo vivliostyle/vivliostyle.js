@@ -62,7 +62,7 @@ adapt.cssprop.SetVisitor.prototype.visitSpaceList = function(list) {
  */
 adapt.cssprop.toSet = val => {
     if (val) {
-        var visitor = new adapt.cssprop.SetVisitor();
+        const visitor = new adapt.cssprop.SetVisitor();
         try {
             val.visit(visitor);
             return visitor.propSet;
@@ -101,7 +101,7 @@ adapt.cssprop.IntVisitor.prototype.visitInt = function(num) {
  */
 adapt.cssprop.toInt = (val, def) => {
     if (val) {
-        var visitor = new adapt.cssprop.IntVisitor(def);
+        const visitor = new adapt.cssprop.IntVisitor(def);
         try {
             val.visit(visitor);
             return visitor.value;
@@ -174,11 +174,11 @@ adapt.cssprop.ShapeVisitor.prototype.visitFunc = function(func) {
  */
 adapt.cssprop.ShapeVisitor.prototype.getShape = function(x, y, width, height, context) {
     if (this.coords.length > 0) {
-        /** @type {Array.<number>} */ var numbers = [];
-        for (var i = 0; i < this.coords.length; i++) {
-            var coord = this.coords[i];
+        /** @type {Array.<number>} */ const numbers = [];
+        for (let i = 0; i < this.coords.length; i++) {
+            const coord = this.coords[i];
             if (coord.unit == "%") {
-                var ref = i % 2 == 0 ? width : height;
+                let ref = i % 2 == 0 ? width : height;
                 if (i == 3 && this.name == "circle")
                     ref = Math.sqrt((width * width + height * height) / 2);
                 numbers.push(coord.num * ref / 100);
@@ -189,8 +189,8 @@ adapt.cssprop.ShapeVisitor.prototype.getShape = function(x, y, width, height, co
         switch (this.name) {
             case "polygon":
                 if (numbers.length % 2 == 0) {
-                    /** @type {Array.<adapt.geom.Point>} */ var points = [];
-                    for (var k = 0; k < numbers.length; k += 2) {
+                    /** @type {Array.<adapt.geom.Point>} */ const points = [];
+                    for (let k = 0; k < numbers.length; k += 2) {
                         points.push(new adapt.geom.Point(x + numbers[k], y + numbers[k + 1]));
                     }
                     return new adapt.geom.Shape(points);
@@ -228,7 +228,7 @@ adapt.cssprop.ShapeVisitor.prototype.getShape = function(x, y, width, height, co
  */
 adapt.cssprop.toShape = (val, x, y, width, height, context) => {
     if (val) {
-        var visitor = new adapt.cssprop.ShapeVisitor();
+        const visitor = new adapt.cssprop.ShapeVisitor();
         try {
             val.visit(visitor);
             return visitor.getShape(x, y, width, height, context);
@@ -283,7 +283,7 @@ adapt.cssprop.CountersVisitor.prototype.visitSpaceList = function(list) {
  * @return {Object.<string,number>}
  */
 adapt.cssprop.toCounters = (val, reset) => {
-    var visitor = new adapt.cssprop.CountersVisitor(reset);
+    const visitor = new adapt.cssprop.CountersVisitor(reset);
     try {
         val.visit(visitor);
     } catch (err) {

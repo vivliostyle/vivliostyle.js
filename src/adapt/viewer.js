@@ -76,7 +76,7 @@ adapt.viewer.SingleDocumentParam;
  * @constructor
  */
 adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) {
-    var self = this;
+    const self = this;
     /** @const */ this.window = window;
     /** @const */ this.viewportElement = viewportElement;
     viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
@@ -86,7 +86,7 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
     viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
     /** @const */ this.instanceId = instanceId;
     /** @const */ this.callbackFn = callbackFn;
-    var document = window.document;
+    const document = window.document;
     /** @const */ this.fontMapper = new adapt.font.Mapper(document.head, viewportElement);
     this.init();
     /** @type {function():void} */ this.kick = () => {};
@@ -142,7 +142,7 @@ adapt.viewer.Viewer.prototype.init = function() {
 };
 
 adapt.viewer.Viewer.prototype.addLogListeners = function() {
-    /** @const */ var LogLevel = vivliostyle.logging.LogLevel;
+    /** @const */ const LogLevel = vivliostyle.logging.LogLevel;
     vivliostyle.logging.logger.addListener(LogLevel.DEBUG, info => {
         this.callback({"t": "debug", "content": info});
     });
@@ -186,19 +186,19 @@ adapt.viewer.Viewer.prototype.setReadyState = function(readyState) {
 adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     vivliostyle.profile.profiler.registerStartTiming("beforeRender");
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
-    var url = /** @type {string} */ (command["url"]);
-    var fragment = /** @type {?string} */ (command["fragment"]);
-    var haveZipMetadata = !!command["zipmeta"];
-    var authorStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["authorStyleSheet"]);
-    var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
+    const url = /** @type {string} */ (command["url"]);
+    const fragment = /** @type {?string} */ (command["fragment"]);
+    const haveZipMetadata = !!command["zipmeta"];
+    const authorStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["authorStyleSheet"]);
+    const userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
     // force relayout
     this.viewport = null;
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadEPUB");
-    var self = this;
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("loadEPUB");
+    const self = this;
     self.configure(command).then(() => {
-        var store = new adapt.epub.EPUBDocStore();
+        const store = new adapt.epub.EPUBDocStore();
         store.init(authorStyleSheet, userStyleSheet).then(() => {
-            var epubURL = adapt.base.resolveURL(url, self.window.location.href);
+            const epubURL = adapt.base.resolveURL(url, self.window.location.href);
             self.packageURL = [epubURL];
             store.loadEPUBDoc(epubURL, haveZipMetadata).then(opf => {
                 self.opf = opf;
@@ -218,19 +218,19 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
 adapt.viewer.Viewer.prototype.loadXML = function(command) {
     vivliostyle.profile.profiler.registerStartTiming("beforeRender");
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
-    /** @type {!Array<!adapt.viewer.SingleDocumentParam>} */ var params = command["url"];
-    var doc = /** @type {Document} */ (command["document"]);
-    var fragment = /** @type {?string} */ (command["fragment"]);
-    var authorStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["authorStyleSheet"]);
-    var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
+    /** @type {!Array<!adapt.viewer.SingleDocumentParam>} */ const params = command["url"];
+    const doc = /** @type {Document} */ (command["document"]);
+    const fragment = /** @type {?string} */ (command["fragment"]);
+    const authorStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["authorStyleSheet"]);
+    const userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
     // force relayout
     this.viewport = null;
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadXML");
-    var self = this;
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("loadXML");
+    const self = this;
     self.configure(command).then(() => {
-        var store = new adapt.epub.EPUBDocStore();
+        const store = new adapt.epub.EPUBDocStore();
         store.init(authorStyleSheet, userStyleSheet).then(() => {
-            /** @type {!Array<!adapt.epub.OPFItemParam>} */ var resolvedParams = params.map((p, index) => ({
+            /** @type {!Array<!adapt.epub.OPFItemParam>} */ const resolvedParams = params.map((p, index) => ({
             url: adapt.base.resolveURL(p.url, self.window.location.href),
             index,
             startPage: p.startPage,
@@ -255,8 +255,8 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
  */
 adapt.viewer.Viewer.prototype.render = function(fragment) {
     this.cancelRenderingTask();
-    var self = this;
-    var cont;
+    const self = this;
+    let cont;
     if (fragment) {
         cont = this.opf.resolveFragment(fragment).thenAsync(position => {
             self.pagePosition = position;
@@ -278,18 +278,18 @@ adapt.viewer.Viewer.prototype.render = function(fragment) {
  * @returns {number}
  */
 adapt.viewer.Viewer.prototype.resolveLength = function(specified) {
-    var value = parseFloat(specified);
-    var unitPattern = /[a-z]+$/;
-    var matched;
+    const value = parseFloat(specified);
+    const unitPattern = /[a-z]+$/;
+    let matched;
     if (typeof specified === "string" && (matched = specified.match(unitPattern))) {
-        var unit = matched[0];
+        const unit = matched[0];
         if (unit === "em" || unit === "rem") {
             return value * this.fontSize;
         }
         if (unit === "ex") {
             return value * adapt.expr.defaultUnitSizes["ex"] * this.fontSize / adapt.expr.defaultUnitSizes["em"];
         }
-        var unitSize = adapt.expr.defaultUnitSizes[unit];
+        const unitSize = adapt.expr.defaultUnitSizes[unit];
         if (unitSize) {
             return value * unitSize;
         }
@@ -312,15 +312,15 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
         }
     }
     if (typeof command["fontSize"] == "number") {
-        var fontSize = /** @type {number} */ (command["fontSize"]);
+        const fontSize = /** @type {number} */ (command["fontSize"]);
         if (fontSize >= 5 && fontSize <= 72 && this.fontSize != fontSize) {
             this.fontSize = fontSize;
             this.needResize = true;
         }
     }
     if (typeof command["viewport"] == "object" && command["viewport"]) {
-        var vp = command["viewport"];
-        var viewportSize = {
+        const vp = command["viewport"];
+        const viewportSize = {
             marginLeft: this.resolveLength(vp["margin-left"]) || 0,
             marginRight: this.resolveLength(vp["margin-right"]) || 0,
             marginTop: this.resolveLength(vp["margin-top"]) || 0,
@@ -406,10 +406,10 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
  * @param {adapt.base.JSON} command
  */
 adapt.viewer.Viewer.prototype.configurePlugins = function(command) {
-    /** @type {!Array.<vivliostyle.plugin.ConfigurationHook>} */ var hooks =
+    /** @type {!Array.<vivliostyle.plugin.ConfigurationHook>} */ const hooks =
         vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.CONFIGURATION);
     hooks.forEach(hook => {
-        var result = hook(command);
+        const result = hook(command);
         this.needResize  = result.needResize  || this.needResize;
         this.needRefresh = result.needRefresh || this.needRefresh;
     });
@@ -420,9 +420,9 @@ adapt.viewer.Viewer.prototype.configurePlugins = function(command) {
  * @param {adapt.base.Event} evt
  */
 adapt.viewer.Viewer.prototype.pageReplacedListener = function(evt) {
-    var currentPage = this.currentPage;
-    var spread = this.currentSpread;
-    var target = evt.target;
+    const currentPage = this.currentPage;
+    const spread = this.currentSpread;
+    const target = evt.target;
     if (spread) {
         if (spread.left === target || spread.right === target) {
             this.showCurrent(evt.newPage);
@@ -438,7 +438,7 @@ adapt.viewer.Viewer.prototype.pageReplacedListener = function(evt) {
  * @param {!function(!adapt.vtree.Page)} fn
  */
 adapt.viewer.Viewer.prototype.forCurrentPages = function(fn) {
-    var pages = [];
+    const pages = [];
     if (this.currentPage) {
         pages.push(this.currentPage);
     }
@@ -524,12 +524,12 @@ adapt.viewer.Viewer.prototype.showSpread = function(spread) {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.reportPosition = function() {
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("reportPosition");
-    var self = this;
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("reportPosition");
+    const self = this;
     goog.asserts.assert(self.pagePosition);
     self.opf.getCFI(this.pagePosition.spineIndex, this.pagePosition.offsetInItem).then(cfi => {
-        var page = self.currentPage;
-        var r = self.waitForLoading && page.fetchers.length > 0
+        const page = self.currentPage;
+        const r = self.waitForLoading && page.fetchers.length > 0
             ? adapt.taskutil.waitForFetchers(page.fetchers) : adapt.task.newResult(true);
         r.then(() => {
             self.sendLocationNotification(page, cfi).thenFinish(frame);
@@ -543,9 +543,9 @@ adapt.viewer.Viewer.prototype.reportPosition = function() {
  * @return {!adapt.vgen.Viewport}
  */
 adapt.viewer.Viewer.prototype.createViewport = function() {
-    var viewportElement = this.viewportElement;
+    const viewportElement = this.viewportElement;
     if (this.viewportSize) {
-        var vs = this.viewportSize;
+        const vs = this.viewportSize;
         viewportElement.style.marginLeft = vs.marginLeft + "px";
         viewportElement.style.marginRight = vs.marginRight + "px";
         viewportElement.style.marginTop = vs.marginTop + "px";
@@ -588,10 +588,10 @@ adapt.viewer.Viewer.prototype.updateSpreadView = function(spreadView) {
  * @return {boolean}
  */
 adapt.viewer.Viewer.prototype.sizeIsGood = function() {
-    var viewport = this.createViewport();
+    const viewport = this.createViewport();
 
-    var spreadView = this.resolveSpreadView(viewport);
-    var spreadViewChanged = this.pref.spreadView !== spreadView;
+    const spreadView = this.resolveSpreadView(viewport);
+    const spreadViewChanged = this.pref.spreadView !== spreadView;
     this.updateSpreadView(spreadView);
 
     if (this.viewportSize || !this.viewport || this.viewport.fontSize != this.fontSize) {
@@ -629,10 +629,10 @@ adapt.viewer.Viewer.prototype.setPageSize = function(pageSize, pageSheetSize, sp
  */
 adapt.viewer.Viewer.prototype.setPageSizePageRules = function(pageSheetSize, spineIndex, pageIndex) {
     if (!this.pageSheetSizeAlreadySet && this.pageRuleStyleElement) {
-        var styleText = "";
+        let styleText = "";
         Object.keys(pageSheetSize).forEach(selector => {
             styleText += "@page " + selector + "{size:";
-            var size = pageSheetSize[selector];
+            const size = pageSheetSize[selector];
             styleText += size.width + "px " + size.height + "px;}";
         });
         this.pageRuleStyleElement.textContent = styleText;
@@ -673,7 +673,7 @@ adapt.viewer.Viewer.prototype.reset = function() {
 adapt.viewer.Viewer.prototype.showCurrent = function(page, sync) {
     this.needRefresh = false;
     this.removePageListeners();
-    var self = this;
+    const self = this;
     if (this.pref.spreadView) {
         return this.opfView.getSpread(this.pagePosition, sync).thenAsync(spread => {
             self.showSpread(spread);
@@ -693,7 +693,7 @@ adapt.viewer.Viewer.prototype.showCurrent = function(page, sync) {
  * @param {!adapt.vtree.Page} page
  */
 adapt.viewer.Viewer.prototype.setPageZoom = function(page) {
-    var zoom = this.getAdjustedZoomFactor(page.dimensions);
+    const zoom = this.getAdjustedZoomFactor(page.dimensions);
     this.viewport.zoom(page.dimensions.width, page.dimensions.height, zoom);
 };
 
@@ -701,7 +701,7 @@ adapt.viewer.Viewer.prototype.setPageZoom = function(page) {
  * @param {!adapt.vtree.Spread} spread
  */
 adapt.viewer.Viewer.prototype.setSpreadZoom = function(spread) {
-    var dim = this.getSpreadDimensions(spread);
+    const dim = this.getSpreadDimensions(spread);
     this.viewport.zoom(dim.width, dim.height, this.getAdjustedZoomFactor(dim));
 };
 
@@ -721,8 +721,8 @@ adapt.viewer.Viewer.prototype.getAdjustedZoomFactor = function(pageDimension) {
  * @returns {!{width: number, height: number}}
  */
 adapt.viewer.Viewer.prototype.getSpreadDimensions = function(spread) {
-    var width = 0;
-    var height = 0;
+    let width = 0;
+    let height = 0;
     if (spread.left) {
         width += spread.left.dimensions.width;
         height = spread.left.dimensions.height;
@@ -755,7 +755,7 @@ adapt.viewer.Viewer.prototype.queryZoomFactor = function(type) {
     }
     switch (type) {
         case adapt.viewer.ZoomType.FIT_INSIDE_VIEWPORT:
-            var pageDim;
+            let pageDim;
             if (this.pref.spreadView) {
                 goog.asserts.assert(this.currentSpread);
                 pageDim = this.getSpreadDimensions(this.currentSpread);
@@ -773,8 +773,8 @@ adapt.viewer.Viewer.prototype.queryZoomFactor = function(type) {
  * @returns {number} zoom factor to fit inside viewport
  */
 adapt.viewer.Viewer.prototype.calculateZoomFactorToFitInsideViewPort = function(pageDimension) {
-    var widthZoom = this.viewport.width / pageDimension.width;
-    var heightZoom = this.viewport.height / pageDimension.height;
+    const widthZoom = this.viewport.width / pageDimension.width;
+    const heightZoom = this.viewport.height / pageDimension.height;
     return Math.min(widthZoom, heightZoom);
 };
 
@@ -810,10 +810,10 @@ adapt.viewer.Viewer.prototype.resize = function() {
     if (this.sizeIsGood()) {
         return adapt.task.newResult(true);
     }
-    var self = this;
+    const self = this;
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     this.cancelRenderingTask();
-    var task = adapt.task.currentTask().getScheduler().run(() => adapt.task.handle("resize", frame => {
+    const task = adapt.task.currentTask().getScheduler().run(() => adapt.task.handle("resize", frame => {
         self.renderTask = task;
         vivliostyle.profile.profiler.registerStartTiming("render (resize)");
         self.reset();
@@ -832,7 +832,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
             self.showCurrent(result.page, true).then(() => {
                 self.reportPosition().then(p => {
                     self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
-                    var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
+                    const r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
                     r.then(() => {
                         if (self.renderTask === task) {
                             self.renderTask = null;
@@ -863,10 +863,10 @@ adapt.viewer.Viewer.prototype.resize = function() {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.sendLocationNotification = function(page, cfi) {
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("sendLocationNotification");
-    var notification = {"t": "nav", "first": page.isFirstPage,
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("sendLocationNotification");
+    const notification = {"t": "nav", "first": page.isFirstPage,
         "last": page.isLastPage};
-    var self = this;
+    const self = this;
     this.opf.getEPageFromPosition(/** @type {adapt.epub.Position} */(self.pagePosition)).then(epage => {
         notification["epage"] = epage;
         notification["epageCount"] = self.opf.epageCount;
@@ -891,8 +891,8 @@ adapt.viewer.Viewer.prototype.getCurrentPageProgression = function() {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.moveTo = function(command) {
-    var method;
-    var self = this;
+    let method;
+    const self = this;
     if (this.readyState !== vivliostyle.constants.ReadyState.COMPLETE) {
         this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     }
@@ -914,24 +914,24 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
                 return adapt.task.newResult(true);
         }
         if (method) {
-            var m = method;
+            const m = method;
             method = () => m.call(self.opfView, self.pagePosition);
         }
     } else if (typeof command["epage"] == "number") {
-        var epage = /** @type {number} */ (command["epage"]);
+        const epage = /** @type {number} */ (command["epage"]);
         method = () => self.opfView.navigateToEPage(epage);
     } else if (typeof command["url"] == "string") {
-        var url = /** @type {string} */ (command["url"]);
+        const url = /** @type {string} */ (command["url"]);
         method = () => self.opfView.navigateTo(url, self.pagePosition);
     } else {
         return adapt.task.newResult(true);
     }
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("moveTo");
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("moveTo");
     method.call(self.opfView).then(result => {
-        var cont;
+        let cont;
         if (result) {
             self.pagePosition = result.position;
-            /** @type {!adapt.task.Frame<boolean>} */ var innerFrame = adapt.task.newFrame("moveTo.showCurrent");
+            /** @type {!adapt.task.Frame<boolean>} */ const innerFrame = adapt.task.newFrame("moveTo.showCurrent");
             cont = innerFrame.result();
             self.showCurrent(result.page).then(() => {
                 self.reportPosition().thenFinish(innerFrame);
@@ -954,9 +954,9 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.showTOC = function(command) {
-    var autohide = !!command["autohide"];
-    var visibility = command["v"];
-    var currentVisibility = this.opfView.isTOCVisible();
+    const autohide = !!command["autohide"];
+    const visibility = command["v"];
+    const currentVisibility = this.opfView.isTOCVisible();
     if (currentVisibility) {
         if (visibility == "show") {
             return adapt.task.newResult(true);
@@ -970,12 +970,12 @@ adapt.viewer.Viewer.prototype.showTOC = function(command) {
         this.opfView.hideTOC();
         return adapt.task.newResult(true);
     } else {
-        var self = this;
-        /** @type {adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("showTOC");
+        const self = this;
+        /** @type {adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("showTOC");
         this.opfView.showTOC(autohide).then(page => {
             if (page) {
                 if (autohide) {
-                    var hideTOC = () => {self.opfView.hideTOC();};
+                    const hideTOC = () => {self.opfView.hideTOC();};
                     page.addEventListener("hyperlink", hideTOC, false);
                     page.container.addEventListener("click", hideTOC, false);
                 }
@@ -992,10 +992,10 @@ adapt.viewer.Viewer.prototype.showTOC = function(command) {
  * @return {adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.runCommand = function(command) {
-    var self = this;
-    var actionName = command["a"] || "";
+    const self = this;
+    const actionName = command["a"] || "";
     return adapt.task.handle("runCommand", frame => {
-        var action = self.actions[actionName];
+        const action = self.actions[actionName];
         if (action) {
             action.call(self, command).then(() => {
                 self.callback({"t": "done", "a": actionName});
@@ -1028,19 +1028,19 @@ adapt.viewer.maybeParse = cmd => {
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.initEmbed = function(cmd) {
-    var command = adapt.viewer.maybeParse(cmd);
-    var continuation = null;
-    var viewer = this;
+    let command = adapt.viewer.maybeParse(cmd);
+    let continuation = null;
+    const viewer = this;
     adapt.task.start(() => {
-        /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("commandLoop");
-        var scheduler = adapt.task.currentTask().getScheduler();
+        /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("commandLoop");
+        const scheduler = adapt.task.currentTask().getScheduler();
         viewer.hyperlinkListener = evt => {
-            var hrefEvent = /** @type {adapt.vtree.PageHyperlinkEvent} */ (evt);
-            var internal = hrefEvent.href.charAt(0) === "#" ||
+            const hrefEvent = /** @type {adapt.vtree.PageHyperlinkEvent} */ (evt);
+            const internal = hrefEvent.href.charAt(0) === "#" ||
                 viewer.packageURL.some(url => hrefEvent.href.substr(0, url.length) == url);
             if (internal) {
                 evt.preventDefault();
-                var msg = {"t":"hyperlink", "href":hrefEvent.href, "internal": internal};
+                const msg = {"t":"hyperlink", "href":hrefEvent.href, "internal": internal};
                 scheduler.run(() => {
                     viewer.callback(msg);
                     return adapt.task.newResult(true);
@@ -1059,13 +1059,13 @@ adapt.viewer.Viewer.prototype.initEmbed = function(cmd) {
                     });
                 }
             } else if (command) {
-                var cmd = command;
+                const cmd = command;
                 command = null;
                 viewer.runCommand(cmd).then(() => {
                     loopFrame.continueLoop();
                 });
             } else {
-                /** @type {!adapt.task.Frame.<boolean>} */ var frameInternal =
+                /** @type {!adapt.task.Frame.<boolean>} */ const frameInternal =
                     adapt.task.newFrame('waitForCommand');
                 continuation = frameInternal.suspend(self);
                 frameInternal.result().then(() => {
@@ -1077,7 +1077,7 @@ adapt.viewer.Viewer.prototype.initEmbed = function(cmd) {
     });
 
     viewer.kick = () => {
-        var cont = continuation;
+        const cont = continuation;
         if (cont) {
             continuation = null;
             cont.schedule();

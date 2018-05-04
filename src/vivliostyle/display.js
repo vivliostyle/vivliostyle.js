@@ -39,8 +39,8 @@ goog.scope(() => {
      * @returns {!adapt.css.Ident}
      */
     vivliostyle.display.blockify = display => {
-        var displayStr = display.toString();
-        var blockifiedStr;
+        const displayStr = display.toString();
+        let blockifiedStr;
         switch (displayStr) {
             case "inline-flex":
                 blockifiedStr = "flex";

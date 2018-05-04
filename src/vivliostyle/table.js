@@ -29,15 +29,15 @@ goog.require("vivliostyle.layoututil");
 goog.require("vivliostyle.repetitiveelements");
 
 goog.scope(() => {
-    /** @const */ var LayoutIterator = vivliostyle.layoututil.LayoutIterator;
-    /** @const */ var EdgeSkipper = vivliostyle.layoututil.EdgeSkipper;
-    /** @const */ var PseudoColumn = vivliostyle.layoututil.PseudoColumn;
-    /** @const */ var EdgeBreakPosition = adapt.layout.EdgeBreakPosition;
-    /** @const */ var AbstractLayoutRetryer = vivliostyle.layoututil.AbstractLayoutRetryer;
-    /** @const */ var LayoutEntireBlock = vivliostyle.repetitiveelements.LayoutEntireBlock;
-    /** @const */ var LayoutFragmentedBlock = vivliostyle.repetitiveelements.LayoutFragmentedBlock;
-    /** @const */ var RepetitiveElementsOwnerFormattingContext = vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext;
-    /** @const */ var RepetitiveElementsOwnerLayoutConstraint = vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutConstraint;
+    /** @const */ const LayoutIterator = vivliostyle.layoututil.LayoutIterator;
+    /** @const */ const EdgeSkipper = vivliostyle.layoututil.EdgeSkipper;
+    /** @const */ const PseudoColumn = vivliostyle.layoututil.PseudoColumn;
+    /** @const */ const EdgeBreakPosition = adapt.layout.EdgeBreakPosition;
+    /** @const */ const AbstractLayoutRetryer = vivliostyle.layoututil.AbstractLayoutRetryer;
+    /** @const */ const LayoutEntireBlock = vivliostyle.repetitiveelements.LayoutEntireBlock;
+    /** @const */ const LayoutFragmentedBlock = vivliostyle.repetitiveelements.LayoutFragmentedBlock;
+    /** @const */ const RepetitiveElementsOwnerFormattingContext = vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext;
+    /** @const */ const RepetitiveElementsOwnerLayoutConstraint = vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutConstraint;
 
     /**
      * @param {number} rowIndex
@@ -49,7 +49,7 @@ goog.scope(() => {
         /** @const */ this.sourceNode = sourceNode;
         /** @const {!Array<!vivliostyle.table.TableCell>} */ this.cells = [];
     };
-    /** @const */ var TableRow = vivliostyle.table.TableRow;
+    /** @const */ const TableRow = vivliostyle.table.TableRow;
 
     /**
      * @param {!vivliostyle.table.TableCell} cell
@@ -80,7 +80,7 @@ goog.scope(() => {
         /** @type {number} */ this.height = 0;
         /** @type {vivliostyle.table.TableSlot} */ this.anchorSlot = null;
     };
-    /** @const */ var TableCell = vivliostyle.table.TableCell;
+    /** @const */ const TableCell = vivliostyle.table.TableCell;
 
     /**
      * @param {number} height
@@ -107,7 +107,7 @@ goog.scope(() => {
         /** @const */ this.columnIndex = columnIndex;
         /** @const */ this.cell = cell;
     };
-    /** @const */ var TableSlot = vivliostyle.table.TableSlot;
+    /** @const */ const TableSlot = vivliostyle.table.TableSlot;
 
     /**
      * @param {!adapt.layout.Column} column
@@ -121,18 +121,18 @@ goog.scope(() => {
         /** @const */ this.pseudoColumn = new PseudoColumn(column, pseudoColumnContainer, cellNodeContext);
         /** @type {boolean} */ this.empty = false;
     };
-    /** @const */ var TableCellFragment = vivliostyle.table.TableCellFragment;
+    /** @const */ const TableCellFragment = vivliostyle.table.TableCellFragment;
 
     /**
      * @returns {!adapt.layout.BreakPositionAndNodeContext}
      */
     TableCellFragment.prototype.findAcceptableBreakPosition = function() {
-        var element = /** @type {Element} */ (this.cellNodeContext.viewNode);
-        var verticalAlign = this.cellNodeContext.verticalAlign;
+        const element = /** @type {Element} */ (this.cellNodeContext.viewNode);
+        const verticalAlign = this.cellNodeContext.verticalAlign;
         if (verticalAlign === "middle" || verticalAlign === "bottom") {
             adapt.base.setCSSProperty(element, "vertical-align", "top");
         }
-        var bp = this.pseudoColumn.findAcceptableBreakPosition(true);
+        const bp = this.pseudoColumn.findAcceptableBreakPosition(true);
         adapt.base.setCSSProperty(element, "vertical-align", verticalAlign);
         return bp;
     };
@@ -146,7 +146,7 @@ goog.scope(() => {
         /** @const */ this.viewNode = viewNode;
         /** @const */ this.side = side;
     };
-    /** @const */ var TableCaptionView = vivliostyle.table.TableCaptionView;
+    /** @const */ const TableCaptionView = vivliostyle.table.TableCaptionView;
 
     /**
      * @param {!adapt.vtree.NodeContext} position
@@ -163,17 +163,17 @@ goog.scope(() => {
         /** Array<!adapt.layout.BreakPositionAndNodeContext> */ this.acceptableCellBreakPositions = null;
         /** @private @type {number|null} */ this.rowIndex = null;
     };
-    /** @const */ var BetweenTableRowBreakPosition = vivliostyle.table.BetweenTableRowBreakPosition;
+    /** @const */ const BetweenTableRowBreakPosition = vivliostyle.table.BetweenTableRowBreakPosition;
     goog.inherits(BetweenTableRowBreakPosition, EdgeBreakPosition);
 
     /**
      * @override
      */
     BetweenTableRowBreakPosition.prototype.findAcceptableBreak = function(column, penalty) {
-        var breakNodeContext = EdgeBreakPosition.prototype.findAcceptableBreak.call(this, column, penalty);
+        const breakNodeContext = EdgeBreakPosition.prototype.findAcceptableBreak.call(this, column, penalty);
         if (penalty < this.getMinBreakPenalty())
             return null;
-        var allCellsBreakable = this.getAcceptableCellBreakPositions().every(bp => !!bp.nodeContext);
+        const allCellsBreakable = this.getAcceptableCellBreakPositions().every(bp => !!bp.nodeContext);
         if (allCellsBreakable) {
             return breakNodeContext;
         } else {
@@ -185,7 +185,7 @@ goog.scope(() => {
      * @override
      */
     BetweenTableRowBreakPosition.prototype.getMinBreakPenalty = function() {
-        var penalty = EdgeBreakPosition.prototype.getMinBreakPenalty.call(this);
+        let penalty = EdgeBreakPosition.prototype.getMinBreakPenalty.call(this);
         this.getAcceptableCellBreakPositions().forEach(bp => {
             penalty += bp.breakPosition.getMinBreakPenalty();
         });
@@ -197,8 +197,8 @@ goog.scope(() => {
      */
     BetweenTableRowBreakPosition.prototype.getAcceptableCellBreakPositions = function() {
         if (!this.acceptableCellBreakPositions) {
-            var formattingContext = this.formattingContext;
-            var cellFragments = this.getCellFragments();
+            const formattingContext = this.formattingContext;
+            const cellFragments = this.getCellFragments();
             this.acceptableCellBreakPositions = cellFragments.map(cellFragment => cellFragment.findAcceptableBreakPosition());
         }
         return this.acceptableCellBreakPositions;
@@ -236,7 +236,7 @@ goog.scope(() => {
         /** @const */ this.formattingContext = formattingContext;
         /** @type {Array<!adapt.layout.BreakPositionAndNodeContext>} */ this.acceptableCellBreakPositions = null;
     };
-    /** @const */ var InsideTableRowBreakPosition = vivliostyle.table.InsideTableRowBreakPosition;
+    /** @const */ const InsideTableRowBreakPosition = vivliostyle.table.InsideTableRowBreakPosition;
     goog.inherits(InsideTableRowBreakPosition, adapt.layout.AbstractBreakPosition);
 
     /**
@@ -245,11 +245,11 @@ goog.scope(() => {
     InsideTableRowBreakPosition.prototype.findAcceptableBreak = function(column, penalty) {
         if (penalty < this.getMinBreakPenalty())
             return null;
-        var cellFragments = this.getCellFragments();
-        var acceptableCellBreakPositions = this.getAcceptableCellBreakPositions();
-        var allCellsBreakable = acceptableCellBreakPositions.every(bp => !!bp.nodeContext) && acceptableCellBreakPositions.some((bp, index) => {
-            var pseudoColumn = cellFragments[index].pseudoColumn;
-            var nodeContext = bp.nodeContext;
+        const cellFragments = this.getCellFragments();
+        const acceptableCellBreakPositions = this.getAcceptableCellBreakPositions();
+        const allCellsBreakable = acceptableCellBreakPositions.every(bp => !!bp.nodeContext) && acceptableCellBreakPositions.some((bp, index) => {
+            const pseudoColumn = cellFragments[index].pseudoColumn;
+            const nodeContext = bp.nodeContext;
             return !pseudoColumn.isStartNodeContext(nodeContext) && !pseudoColumn.isLastAfterNodeContext(nodeContext);
         });
         this.beforeNodeContext.overflow = acceptableCellBreakPositions.some(bp => bp.nodeContext && bp.nodeContext.overflow);
@@ -264,9 +264,9 @@ goog.scope(() => {
      * @override
      */
     InsideTableRowBreakPosition.prototype.getMinBreakPenalty = function() {
-        var formattingContext = this.formattingContext;
-        var row = formattingContext.getRowByIndex(this.rowIndex);
-        var penalty = 0;
+        const formattingContext = this.formattingContext;
+        const row = formattingContext.getRowByIndex(this.rowIndex);
+        let penalty = 0;
         if (!formattingContext.isFreelyFragmentableRow(row)) {
             penalty += 10;
         }
@@ -281,7 +281,7 @@ goog.scope(() => {
      */
     InsideTableRowBreakPosition.prototype.getAcceptableCellBreakPositions = function() {
         if (!this.acceptableCellBreakPositions) {
-            var cellFragments = this.getCellFragments();
+            const cellFragments = this.getCellFragments();
             this.acceptableCellBreakPositions = cellFragments.map(cellFragment => cellFragment.findAcceptableBreakPosition());
         }
         return this.acceptableCellBreakPositions;
@@ -329,7 +329,7 @@ goog.scope(() => {
         /** @type {!Array<!vivliostyle.table.BrokenTableCellPosition>} */ this.cellBreakPositions = [];
         /** @type {vivliostyle.repetitiveelements.RepetitiveElements} */ this.repetitiveElements = null;
     };
-    /** @const */ var TableFormattingContext = vivliostyle.table.TableFormattingContext;
+    /** @const */ const TableFormattingContext = vivliostyle.table.TableFormattingContext;
     goog.inherits(TableFormattingContext, RepetitiveElementsOwnerFormattingContext);
 
     /**
@@ -378,7 +378,7 @@ goog.scope(() => {
      * @returns {!Array<!vivliostyle.table.TableSlot>}
      */
     TableFormattingContext.prototype.getRowSlots = function(rowIndex) {
-        var rowSlots = this.slots[rowIndex];
+        let rowSlots = this.slots[rowIndex];
         if (!rowSlots) {
             rowSlots = this.slots[rowIndex] = [];
         }
@@ -390,23 +390,23 @@ goog.scope(() => {
      * @param {!vivliostyle.table.TableCell} cell
      */
     TableFormattingContext.prototype.addCell = function(rowIndex, cell) {
-        var row = this.rows[rowIndex];
+        let row = this.rows[rowIndex];
         if (!row) {
             this.addRow(rowIndex, new TableRow(rowIndex, null));
             row = this.rows[rowIndex];
         }
         goog.asserts.assert(row);
         row.addCell(cell);
-        var rowUpper = rowIndex + cell.rowSpan;
-        var rowSlots = this.getRowSlots(rowIndex);
-        var startColIndex = 0;
+        const rowUpper = rowIndex + cell.rowSpan;
+        let rowSlots = this.getRowSlots(rowIndex);
+        let startColIndex = 0;
         while (rowSlots[startColIndex]) {
             startColIndex++;
         }
         for (; rowIndex < rowUpper; rowIndex++) {
             rowSlots = this.getRowSlots(rowIndex);
-            for (var i = startColIndex; i < startColIndex + cell.colSpan; i++) {
-                var slot = rowSlots[i] = new TableSlot(rowIndex, i, cell);
+            for (let i = startColIndex; i < startColIndex + cell.colSpan; i++) {
+                const slot = rowSlots[i] = new TableSlot(rowIndex, i, cell);
                 if (!cell.anchorSlot) {
                     cell.setAnchorSlot(slot);
                 }
@@ -419,7 +419,7 @@ goog.scope(() => {
      * @returns {!vivliostyle.table.TableRow}
      */
     TableFormattingContext.prototype.getRowByIndex = function(index) {
-        var row = this.rows[index];
+        const row = this.rows[index];
         goog.asserts.assert(row);
         return row;
     };
@@ -438,7 +438,7 @@ goog.scope(() => {
      * @param {!vivliostyle.table.TableCellFragment} cellFragment
      */
     TableFormattingContext.prototype.addCellFragment = function(rowIndex, columnIndex, cellFragment) {
-        var list = this.cellFragments[rowIndex];
+        let list = this.cellFragments[rowIndex];
         if (!list) {
             list = this.cellFragments[rowIndex] = [];
         }
@@ -450,7 +450,7 @@ goog.scope(() => {
      * @returns {!Array<!vivliostyle.table.TableCell>}
      */
     TableFormattingContext.prototype.getCellsFallingOnRow = function(rowIndex) {
-        var rowSlots = this.getRowSlots(rowIndex);
+        const rowSlots = this.getRowSlots(rowIndex);
         return rowSlots.reduce((uniqueCells, slot) => {
             if (slot.cell !== uniqueCells[uniqueCells.length - 1]) {
                 return uniqueCells.concat(slot.cell);
@@ -502,7 +502,7 @@ goog.scope(() => {
     TableFormattingContext.prototype.updateCellSizes = function(clientLayout) {
         this.rows.forEach(function(row) {
             row.cells.forEach(function(cell) {
-                var rect = clientLayout.getElementClientRect(cell.viewElement);
+                const rect = clientLayout.getElementClientRect(cell.viewElement);
                 cell.viewElement = null;
                 cell.setHeight(this.vertical ? rect["width"] : rect["height"]);
             }, this);
@@ -515,7 +515,7 @@ goog.scope(() => {
      */
     TableFormattingContext.prototype.findCellFromColumn = function(column) {
         if (!column) return null;
-        var tableCell = null;
+        let tableCell = null;
         loop: for (var row=0; row < this.cellFragments.length; row++) {
             if (!this.cellFragments[row]) continue;
             for (var col=0; col < this.cellFragments[row].length; col++) {
@@ -529,7 +529,7 @@ goog.scope(() => {
         if (!tableCell) return null;
         for (; row < this.slots.length; row++) {
             for (; col < this.slots[row].length; col++) {
-                var slot = this.slots[row][col];
+                const slot = this.slots[row][col];
                 if (slot.cell === tableCell) {
                     return {rowIndex: slot.rowIndex, columnIndex: slot.columnIndex };
                 }
@@ -543,10 +543,10 @@ goog.scope(() => {
      * @return {!Array.<!vivliostyle.repetitiveelements.ElementsOffset>}
      */
     TableFormattingContext.prototype.collectElementsOffsetOfUpperCells = function(position) {
-        var collected = [];
+        const collected = [];
         return this.slots.reduce((repetitiveElements, row, index) => {
             if (index >= position.rowIndex) return repetitiveElements;
-            var cellFragment = this.getCellFragmentOfCell(row[position.columnIndex].cell);
+            const cellFragment = this.getCellFragmentOfCell(row[position.columnIndex].cell);
             if (!cellFragment || collected.indexOf(cellFragment) >= 0) return repetitiveElements;
             this.collectElementsOffsetFromColumn(cellFragment.pseudoColumn.getColumn(), repetitiveElements);
             collected.push(cellFragment);
@@ -558,12 +558,12 @@ goog.scope(() => {
      * @return {!Array.<!vivliostyle.repetitiveelements.ElementsOffset>}
      */
     TableFormattingContext.prototype.collectElementsOffsetOfHighestColumn = function() {
-        var elementsInColumn = [];
+        const elementsInColumn = [];
         this.rows.forEach(row => {
             row.cells.forEach((cell, index) => {
                 if (!elementsInColumn[index]) elementsInColumn[index] = {collected:[], elements:[]};
-                var state = elementsInColumn[index];
-                var cellFragment = this.getCellFragmentOfCell(cell);
+                const state = elementsInColumn[index];
+                const cellFragment = this.getCellFragmentOfCell(cell);
                 if (!cellFragment || state.collected.indexOf(cellFragment) >= 0) return;
                 this.collectElementsOffsetFromColumn(cellFragment.pseudoColumn.getColumn(), state.elements);
                 state.collected.push(cellFragment);
@@ -582,7 +582,7 @@ goog.scope(() => {
     TableFormattingContext.prototype.collectElementsOffsetFromColumn = (column, repetitiveElements) => {
         column.fragmentLayoutConstraints.forEach(constraint => {
             if (constraint instanceof RepetitiveElementsOwnerLayoutConstraint) {
-                var repetitiveElement = constraint.getRepetitiveElements();
+                const repetitiveElement = constraint.getRepetitiveElements();
                 repetitiveElements.push(repetitiveElement);
             }
             if (constraint instanceof vivliostyle.table.TableRowLayoutConstraint) {
@@ -625,9 +625,9 @@ goog.scope(() => {
 
     /** @private */
     ElementsOffsetOfTableCell.prototype.calculateMaxOffsetOfColumn = function(nodeContext, resolver) {
-        var maxOffset = 0;
+        let maxOffset = 0;
         this.repeatitiveElementsInColumns.forEach(repetitiveElements => {
-            var offsets = adapt.layout.calculateOffset(nodeContext, repetitiveElements);
+            const offsets = adapt.layout.calculateOffset(nodeContext, repetitiveElements);
             maxOffset = Math.max(maxOffset, resolver(offsets));
         });
         return maxOffset;
@@ -680,10 +680,10 @@ goog.scope(() => {
      * @returns {?adapt.task.Result<boolean>}
      */
     function skipNestedTable(state, formattingContext, column) {
-        var nodeContext = state.nodeContext;
-        var display = nodeContext.display;
-        var parentDisplay = nodeContext.parent ? nodeContext.parent.display : null;
-        var isNestedTable =
+        const nodeContext = state.nodeContext;
+        const display = nodeContext.display;
+        const parentDisplay = nodeContext.parent ? nodeContext.parent.display : null;
+        const isNestedTable =
             (display === "table-row" && !isValidParentOfTableRow(parentDisplay)) ||
             (display === "table-cell" && parentDisplay !== "table-row" && !isValidParentOfTableRow(parentDisplay)) ||
             (nodeContext.formattingContext instanceof TableFormattingContext &&
@@ -712,28 +712,28 @@ goog.scope(() => {
         /** @type {boolean} */ this.inRow = false;
         /** @type {Array.<adapt.vtree.NodeContext>} */ this.checkPoints = [];
     };
-    /** @const */ var EntireTableLayoutStrategy = vivliostyle.table.EntireTableLayoutStrategy;
+    /** @const */ const EntireTableLayoutStrategy = vivliostyle.table.EntireTableLayoutStrategy;
     goog.inherits(EntireTableLayoutStrategy, EdgeSkipper);
 
     /**
      * @override
      */
     EntireTableLayoutStrategy.prototype.startNonInlineElementNode = function(state) {
-        /** @const */ var formattingContext = this.formattingContext;
-        var r = skipNestedTable(state, formattingContext, this.column);
+        /** @const */ const formattingContext = this.formattingContext;
+        const r = skipNestedTable(state, formattingContext, this.column);
         if (r) return r;
 
         this.postLayoutBlockContents(state);
 
-        /** @const */ var nodeContext = state.nodeContext;
-        /** @const */ var display = nodeContext.display;
-        var repetitiveElements = formattingContext.getRepetitiveElements();
+        /** @const */ const nodeContext = state.nodeContext;
+        /** @const */ const display = nodeContext.display;
+        const repetitiveElements = formattingContext.getRepetitiveElements();
         switch (display) {
             case "table":
                 formattingContext.inlineBorderSpacing = nodeContext.inlineBorderSpacing;
                 break;
             case "table-caption":
-                var captionView = new TableCaptionView(/** @type {!Element} */ (nodeContext.viewNode),
+                const captionView = new TableCaptionView(/** @type {!Element} */ (nodeContext.viewNode),
                     nodeContext.captionSide);
                 formattingContext.captions.push(captionView);
                 break;
@@ -769,15 +769,15 @@ goog.scope(() => {
      * @override
      */
     EntireTableLayoutStrategy.prototype.afterNonInlineElementNode = function(state) {
-        /** @const */ var formattingContext = this.formattingContext;
-        /** @const */ var nodeContext = state.nodeContext;
-        /** @const */ var display = nodeContext.display;
-        /** @const */ var clientLayout = this.column.clientLayout;
+        /** @const */ const formattingContext = this.formattingContext;
+        /** @const */ const nodeContext = state.nodeContext;
+        /** @const */ const display = nodeContext.display;
+        /** @const */ const clientLayout = this.column.clientLayout;
 
         this.postLayoutBlockContents(state);
 
         if (nodeContext.sourceNode === formattingContext.tableSourceNode) {
-            var computedStyle = clientLayout.getElementComputedStyle(formattingContext.getRootViewNode(nodeContext));
+            const computedStyle = clientLayout.getElementComputedStyle(formattingContext.getRootViewNode(nodeContext));
             formattingContext.tableWidth = parseFloat(computedStyle[formattingContext.vertical ? "height" : "width"]);
             formattingContext.getRepetitiveElements().lastContentSourceNode =
                 state.lastAfterNodeContext && state.lastAfterNodeContext.sourceNode;
@@ -804,7 +804,7 @@ goog.scope(() => {
                             this.columnIndex = 0;
                             this.inRow = true;
                         }
-                        var elem = /** @type {!Element} */ (nodeContext.viewNode);
+                        const elem = /** @type {!Element} */ (nodeContext.viewNode);
                         formattingContext.addCell(this.rowIndex, new TableCell(this.rowIndex, this.columnIndex, elem));
                         this.columnIndex++;
                     }
@@ -838,7 +838,7 @@ goog.scope(() => {
      * @param {!vivliostyle.layoututil.LayoutIteratorState} state
      */
     EntireTableLayoutStrategy.prototype.registerCheckPoint = function(state) {
-        var nodeContext = state.nodeContext;
+        const nodeContext = state.nodeContext;
         if (nodeContext && nodeContext.viewNode && !adapt.layout.isSpecialNodeContext(nodeContext)) {
             this.checkPoints.push(nodeContext.clone());
         }
@@ -871,7 +871,7 @@ goog.scope(() => {
         /** @type {boolean} */ this.originalStopAtOverflow = column.stopAtOverflow;
         column.stopAtOverflow = false;
     };
-    /** @const */ var TableLayoutStrategy = vivliostyle.table.TableLayoutStrategy;
+    /** @const */ const TableLayoutStrategy = vivliostyle.table.TableLayoutStrategy;
     goog.inherits(TableLayoutStrategy, EdgeSkipper);
 
     /**
@@ -893,10 +893,10 @@ goog.scope(() => {
      * @returns {number}
      */
     TableLayoutStrategy.prototype.getColSpanningCellWidth = function(cell) {
-        var colWidths = this.formattingContext.colWidths;
+        const colWidths = this.formattingContext.colWidths;
         goog.asserts.assert(colWidths);
-        var width = 0;
-        for (var i = 0; i < cell.colSpan; i++) {
+        let width = 0;
+        for (let i = 0; i < cell.colSpan; i++) {
             width += colWidths[cell.anchorSlot.columnIndex + i];
         }
         width += this.formattingContext.inlineBorderSpacing * (cell.colSpan - 1);
@@ -910,11 +910,11 @@ goog.scope(() => {
      * @returns {!adapt.task.Result<boolean>}
      */
     TableLayoutStrategy.prototype.layoutCell = function(cell, cellNodeContext, startChunkPosition) {
-        var rowIndex = cell.rowIndex;
-        var columnIndex = cell.columnIndex;
-        var colSpan = cell.colSpan;
-        var cellViewNode = /** @type {Element} */ (cellNodeContext.viewNode);
-        var verticalAlign = cellNodeContext.verticalAlign;
+        const rowIndex = cell.rowIndex;
+        const columnIndex = cell.columnIndex;
+        const colSpan = cell.colSpan;
+        const cellViewNode = /** @type {Element} */ (cellNodeContext.viewNode);
+        const verticalAlign = cellNodeContext.verticalAlign;
 
         if (colSpan > 1) {
             adapt.base.setCSSProperty(cellViewNode, "box-sizing", "border-box");
@@ -922,10 +922,10 @@ goog.scope(() => {
                 this.getColSpanningCellWidth(cell) + "px");
         }
 
-        var pseudoColumnContainer = cellViewNode.ownerDocument.createElement("div");
+        const pseudoColumnContainer = cellViewNode.ownerDocument.createElement("div");
         cellViewNode.appendChild(pseudoColumnContainer);
 
-        var cellFragment = new TableCellFragment(this.column, pseudoColumnContainer, cellNodeContext);
+        const cellFragment = new TableCellFragment(this.column, pseudoColumnContainer, cellNodeContext);
         this.formattingContext.addCellFragment(rowIndex, columnIndex, cellFragment);
 
         if (startChunkPosition.primary.steps.length === 1 && startChunkPosition.primary.after) {
@@ -940,7 +940,7 @@ goog.scope(() => {
      * @returns {boolean}
      */
     TableLayoutStrategy.prototype.hasBrokenCellAtSlot = function(slotIndex) {
-        var cellBreakPosition = this.formattingContext.cellBreakPositions[0];
+        const cellBreakPosition = this.formattingContext.cellBreakPositions[0];
         if (cellBreakPosition) {
             return cellBreakPosition.cell.anchorSlot.columnIndex === slotIndex;
         }
@@ -952,18 +952,18 @@ goog.scope(() => {
      * @returns {!Array<!Array<!vivliostyle.table.BrokenTableCellPosition>>}
      */
     TableLayoutStrategy.prototype.extractRowSpanningCellBreakPositions = function() {
-        var cellBreakPositions = this.formattingContext.cellBreakPositions;
+        const cellBreakPositions = this.formattingContext.cellBreakPositions;
         if (cellBreakPositions.length === 0) {
             return [];
         }
 
-        var rowSpanningCellBreakPositions = [];
-        var i = 0;
+        const rowSpanningCellBreakPositions = [];
+        let i = 0;
         do {
-            var p = cellBreakPositions[i];
-            var rowIndex = p.cell.rowIndex;
+            const p = cellBreakPositions[i];
+            const rowIndex = p.cell.rowIndex;
             if (rowIndex < this.currentRowIndex) {
-                var arr = rowSpanningCellBreakPositions[rowIndex];
+                let arr = rowSpanningCellBreakPositions[rowIndex];
                 if (!arr) {
                     arr = rowSpanningCellBreakPositions[rowIndex] = [];
                 }
@@ -981,34 +981,34 @@ goog.scope(() => {
      * @returns {!adapt.task.Result<boolean>}
      */
     TableLayoutStrategy.prototype.layoutRowSpanningCellsFromPreviousFragment = function(state) {
-        var formattingContext = this.formattingContext;
-        var rowSpanningCellBreakPositions = this.extractRowSpanningCellBreakPositions();
-        var rowCount = rowSpanningCellBreakPositions.reduce(s => s + 1, 0);
+        const formattingContext = this.formattingContext;
+        const rowSpanningCellBreakPositions = this.extractRowSpanningCellBreakPositions();
+        const rowCount = rowSpanningCellBreakPositions.reduce(s => s + 1, 0);
         if (rowCount === 0) {
             return adapt.task.newResult(true);
         }
 
-        var layoutContext = this.column.layoutContext;
-        var currentRow = state.nodeContext;
+        const layoutContext = this.column.layoutContext;
+        const currentRow = state.nodeContext;
         currentRow.viewNode.parentNode.removeChild(currentRow.viewNode);
 
-        var frame = adapt.task.newFrame("layoutRowSpanningCellsFromPreviousFragment");
-        var cont = adapt.task.newResult(true);
-        var spanningCellRowIndex = 0;
-        var occupiedSlotIndices = [];
+        const frame = adapt.task.newFrame("layoutRowSpanningCellsFromPreviousFragment");
+        let cont = adapt.task.newResult(true);
+        let spanningCellRowIndex = 0;
+        const occupiedSlotIndices = [];
         rowSpanningCellBreakPositions.forEach(function(rowCellBreakPositions) {
             cont = cont.thenAsync(() => {
                 // Is it always correct to assume steps[1] to be the row?
-                var rowNodeContext = adapt.vtree.makeNodeContextFromNodePositionStep(
+                const rowNodeContext = adapt.vtree.makeNodeContextFromNodePositionStep(
                     rowCellBreakPositions[0].cellNodePosition.steps[1], currentRow.parent);
                 return layoutContext.setCurrent(rowNodeContext, false).thenAsync(() => {
-                    var cont1 = adapt.task.newResult(true);
-                    var columnIndex = 0;
+                    let cont1 = adapt.task.newResult(true);
+                    let columnIndex = 0;
 
                     function addDummyCellUntil(upperColumnIndex) {
                         while (columnIndex < upperColumnIndex) {
                             if (!(occupiedSlotIndices.indexOf(columnIndex) >= 0)) {
-                                var dummy = rowNodeContext.viewNode.ownerDocument.createElement("td");
+                                const dummy = rowNodeContext.viewNode.ownerDocument.createElement("td");
                                 adapt.base.setCSSProperty(dummy, "padding", "0");
                                 rowNodeContext.viewNode.appendChild(dummy);
                             }
@@ -1018,17 +1018,17 @@ goog.scope(() => {
 
                     rowCellBreakPositions.forEach(function(cellBreakPosition) {
                         cont1 = cont1.thenAsync(() => {
-                            var cell = cellBreakPosition.cell;
+                            const cell = cellBreakPosition.cell;
                             addDummyCellUntil(cell.anchorSlot.columnIndex);
-                            var cellNodePosition = cellBreakPosition.cellNodePosition;
-                            var cellNodeContext = adapt.vtree.makeNodeContextFromNodePositionStep(
+                            const cellNodePosition = cellBreakPosition.cellNodePosition;
+                            const cellNodeContext = adapt.vtree.makeNodeContextFromNodePositionStep(
                                 cellNodePosition.steps[0], rowNodeContext);
                             cellNodeContext.offsetInNode = cellNodePosition.offsetInNode;
                             cellNodeContext.after = cellNodePosition.after;
                             cellNodeContext.fragmentIndex = cellNodePosition.steps[0].fragmentIndex+1;
                             return layoutContext.setCurrent(cellNodeContext, false).thenAsync(() => {
-                                var breakChunkPosition = cellBreakPosition.breakChunkPosition;
-                                for (var i = 0; i < cell.colSpan; i++) {
+                                const breakChunkPosition = cellBreakPosition.breakChunkPosition;
+                                for (let i = 0; i < cell.colSpan; i++) {
                                     occupiedSlotIndices.push(columnIndex + i);
                                 }
                                 columnIndex += cell.colSpan;
@@ -1062,8 +1062,8 @@ goog.scope(() => {
      */
     TableLayoutStrategy.prototype.startTableRow = function(state) {
         if (this.inHeader || this.inFooter) return adapt.task.newResult(true);
-        var nodeContext = state.nodeContext;
-        var formattingContext = this.formattingContext;
+        const nodeContext = state.nodeContext;
+        const formattingContext = this.formattingContext;
         if (this.currentRowIndex < 0) {
             goog.asserts.assert(nodeContext.sourceNode);
             this.currentRowIndex = formattingContext.findRowIndexBySourceNode(nodeContext.sourceNode);
@@ -1074,7 +1074,7 @@ goog.scope(() => {
         this.inRow = true;
         return this.layoutRowSpanningCellsFromPreviousFragment(state).thenAsync(() => {
             this.registerCellFragmentIndex();
-            var overflown = this.column.checkOverflowAndSaveEdgeAndBreakPosition(state.lastAfterNodeContext, null, true,
+            const overflown = this.column.checkOverflowAndSaveEdgeAndBreakPosition(state.lastAfterNodeContext, null, true,
                 state.breakAtTheEdge);
             if (overflown &&
                 formattingContext.getRowSpanningCellsOverflowingTheRow(this.currentRowIndex - 1).length === 0) {
@@ -1088,12 +1088,12 @@ goog.scope(() => {
 
     /** @private */
     TableLayoutStrategy.prototype.registerCellFragmentIndex = function() {
-        var cells = this.formattingContext.getRowByIndex(this.currentRowIndex).cells;
+        const cells = this.formattingContext.getRowByIndex(this.currentRowIndex).cells;
         cells.forEach(cell => {
-            var cellBreakPosition = this.formattingContext.cellBreakPositions[cell.columnIndex];
+            const cellBreakPosition = this.formattingContext.cellBreakPositions[cell.columnIndex];
             if (cellBreakPosition && cellBreakPosition.cell.anchorSlot.columnIndex == cell.anchorSlot.columnIndex) {
-                var tdNodeStep = cellBreakPosition.cellNodePosition.steps[0];
-                var offset = this.column.layoutContext.xmldoc.getElementOffset(tdNodeStep.node);
+                const tdNodeStep = cellBreakPosition.cellNodePosition.steps[0];
+                const offset = this.column.layoutContext.xmldoc.getElementOffset(tdNodeStep.node);
                 vivliostyle.selectors.registerFragmentIndex(offset, tdNodeStep.fragmentIndex+1, 1);
             }
         });
@@ -1105,7 +1105,7 @@ goog.scope(() => {
      */
     TableLayoutStrategy.prototype.startTableCell = function(state) {
         if (this.inHeader || this.inFooter) return adapt.task.newResult(true);
-        var nodeContext = state.nodeContext;
+        const nodeContext = state.nodeContext;
         if (!this.inRow) {
             if (this.currentRowIndex < 0) {
                 this.currentRowIndex = 0;
@@ -1115,16 +1115,16 @@ goog.scope(() => {
             this.currentColumnIndex = 0;
             this.inRow = true;
         }
-        var cell = this.formattingContext.getRowByIndex(this.currentRowIndex).cells[this.currentColumnIndex];
+        const cell = this.formattingContext.getRowByIndex(this.currentRowIndex).cells[this.currentColumnIndex];
 
-        var afterNodeContext = nodeContext.copy().modify();
+        const afterNodeContext = nodeContext.copy().modify();
         afterNodeContext.after = true;
         state.nodeContext = afterNodeContext;
 
-        var frame = adapt.task.newFrame("startTableCell");
-        var cont;
+        const frame = adapt.task.newFrame("startTableCell");
+        let cont;
         if (this.hasBrokenCellAtSlot(cell.anchorSlot.columnIndex)) {
-            var cellBreakPosition = this.formattingContext.cellBreakPositions.shift();
+            const cellBreakPosition = this.formattingContext.cellBreakPositions.shift();
             nodeContext.fragmentIndex = cellBreakPosition.cellNodePosition.steps[0].fragmentIndex+1;
             cont = adapt.task.newResult(cellBreakPosition.breakChunkPosition);
         } else {
@@ -1132,7 +1132,7 @@ goog.scope(() => {
                 if (nextNodeContext.viewNode) {
                     nodeContext.viewNode.removeChild(nextNodeContext.viewNode);
                 }
-                var startNodePosition = adapt.vtree.newNodePositionFromNodeContext(nextNodeContext, 0);
+                const startNodePosition = adapt.vtree.newNodePositionFromNodeContext(nextNodeContext, 0);
                 return adapt.task.newResult(new adapt.vtree.ChunkPosition(startNodePosition));
             });
         }
@@ -1152,12 +1152,12 @@ goog.scope(() => {
      * @return {!adapt.task.Result<boolean>}
      */
     TableLayoutStrategy.prototype.startNonInlineBox = function(state) {
-        var r = skipNestedTable(state, getTableFormattingContext(this.formattingContext), this.column);
+        const r = skipNestedTable(state, getTableFormattingContext(this.formattingContext), this.column);
         if (r) return r;
 
-        var nodeContext = state.nodeContext;
-        var repetitiveElements = this.formattingContext.getRepetitiveElements();
-        var display = nodeContext.display;
+        const nodeContext = state.nodeContext;
+        const repetitiveElements = this.formattingContext.getRepetitiveElements();
+        const display = nodeContext.display;
         if (display === "table-header-group"
           && repetitiveElements
           && repetitiveElements.isHeaderSourceNode(nodeContext.sourceNode)) {
@@ -1182,14 +1182,14 @@ goog.scope(() => {
      * @return {!adapt.task.Result<boolean>}
      */
     TableLayoutStrategy.prototype.endNonInlineBox = function(state) {
-        var nodeContext = state.nodeContext;
-        var display = nodeContext.display;
+        const nodeContext = state.nodeContext;
+        const display = nodeContext.display;
         if (display === "table-row") {
             this.inRow = false;
             if (!this.inHeader && !this.inFooter) {
-                var beforeNodeContext = nodeContext.copy().modify();
+                const beforeNodeContext = nodeContext.copy().modify();
                 beforeNodeContext.after = false;
-                var bp = new InsideTableRowBreakPosition(this.currentRowIndex,
+                const bp = new InsideTableRowBreakPosition(this.currentRowIndex,
                     beforeNodeContext, this.formattingContext);
                 this.column.breakPositions.push(bp);
             }
@@ -1202,9 +1202,9 @@ goog.scope(() => {
      * @return {undefined|adapt.task.Result<boolean>}
      */
     TableLayoutStrategy.prototype.afterNonInlineElementNode = function(state) {
-        var nodeContext = state.nodeContext;
-        var repetitiveElements = this.formattingContext.getRepetitiveElements();
-        var display = nodeContext.display;
+        const nodeContext = state.nodeContext;
+        const repetitiveElements = this.formattingContext.getRepetitiveElements();
+        const display = nodeContext.display;
         if (display === "table-header-group") {
             if (repetitiveElements && !repetitiveElements.allowInsertRepeatitiveElements
                 && repetitiveElements.isHeaderSourceNode(nodeContext.sourceNode)) {
@@ -1237,20 +1237,20 @@ goog.scope(() => {
     /**
      * @typedef {{calculateBreakPositionsInside: boolean}}
      */
-    var TableLayoutOption;
+    let TableLayoutOption;
 
     /**
      *  @type {Array<{root: !Node, tableLayoutOption: !TableLayoutOption}>}
      */
-    var tableLayoutOptionCache = [];
+    const tableLayoutOptionCache = [];
 
     /**
      * @param {!Node} tableRootSourceNode
      * @returns {?TableLayoutOption}
      */
     function getTableLayoutOption(tableRootSourceNode) {
-        var i = tableLayoutOptionCache.findIndex(c => c.root === tableRootSourceNode);
-        var pair = tableLayoutOptionCache[i];
+        const i = tableLayoutOptionCache.findIndex(c => c.root === tableRootSourceNode);
+        const pair = tableLayoutOptionCache[i];
         return pair ? pair.tableLayoutOption : null;
     }
 
@@ -1258,7 +1258,7 @@ goog.scope(() => {
      * @param {!Node} tableRootSourceNode
      */
     function clearTableLayoutOptionCache(tableRootSourceNode) {
-        var i = tableLayoutOptionCache.findIndex(c => c.root === tableRootSourceNode);
+        const i = tableLayoutOptionCache.findIndex(c => c.root === tableRootSourceNode);
         if (i >= 0)
             tableLayoutOptionCache.splice(i, 1);
     }
@@ -1268,7 +1268,7 @@ goog.scope(() => {
      * @implements {adapt.layout.LayoutProcessor}
      */
     vivliostyle.table.TableLayoutProcessor = function() {};
-    /** @const */ var TableLayoutProcessor = vivliostyle.table.TableLayoutProcessor;
+    /** @const */ const TableLayoutProcessor = vivliostyle.table.TableLayoutProcessor;
 
     /**
      * @private
@@ -1277,9 +1277,9 @@ goog.scope(() => {
      * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
      */
     TableLayoutProcessor.prototype.layoutEntireTable = (nodeContext, column) => {
-        /** @const */ var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
-        /** @const */ var strategy = new EntireTableLayoutStrategy(formattingContext, column);
-        /** @const */ var iterator = new LayoutIterator(strategy, column.layoutContext);
+        /** @const */ const formattingContext = getTableFormattingContext(nodeContext.formattingContext);
+        /** @const */ const strategy = new EntireTableLayoutStrategy(formattingContext, column);
+        /** @const */ const iterator = new LayoutIterator(strategy, column.layoutContext);
         return iterator.iterate(nodeContext);
     };
 
@@ -1292,17 +1292,17 @@ goog.scope(() => {
      * @returns {!Array<number>}
      */
     TableLayoutProcessor.prototype.getColumnWidths = (lastRow, columnCount, vertical, clientLayout) => {
-        /** @const */ var doc = lastRow.ownerDocument;
-        /** @const */ var dummyRow = doc.createElement("tr");
-        /** @const */ var dummyCells = [];
-        for (var i = 0; i < columnCount; i++) {
-            var cell = doc.createElement("td");
+        /** @const */ const doc = lastRow.ownerDocument;
+        /** @const */ const dummyRow = doc.createElement("tr");
+        /** @const */ const dummyCells = [];
+        for (let i = 0; i < columnCount; i++) {
+            const cell = doc.createElement("td");
             dummyRow.appendChild(cell);
             dummyCells.push(cell);
         }
         lastRow.parentNode.insertBefore(dummyRow, lastRow.nextSibling);
-        /** @const */ var colWidths = dummyCells.map(cell => {
-            var rect = clientLayout.getElementClientRect(cell);
+        /** @const */ const colWidths = dummyCells.map(cell => {
+            const rect = clientLayout.getElementClientRect(cell);
             return vertical ? rect["height"] : rect["width"];
         });
         lastRow.parentNode.removeChild(dummyRow);
@@ -1315,8 +1315,8 @@ goog.scope(() => {
      * @returns {!Array<!Element>}
      */
     TableLayoutProcessor.prototype.getColGroupElements = tableElement => {
-        var colGroups = [];
-        var child = tableElement.firstElementChild;
+        const colGroups = [];
+        let child = tableElement.firstElementChild;
         while (child) {
             if (child.localName === "colgroup") {
                 colGroups.push(child);
@@ -1332,20 +1332,20 @@ goog.scope(() => {
      * @returns {!Array<!Element>}
      */
     TableLayoutProcessor.prototype.normalizeAndGetColElements = colGroups => {
-        var cols = [];
+        const cols = [];
         colGroups.forEach(colGroup => {
             // Replace colgroup[span=n] with colgroup with n col elements
-            var span = colGroup.span;
+            let span = colGroup.span;
             colGroup.removeAttribute("span");
-            var col = colGroup.firstElementChild;
+            let col = colGroup.firstElementChild;
             while (col) {
                 if (col.localName === "col") {
                     // Replace col[span=n] with n col elements
-                    var s = col.span;
+                    let s = col.span;
                     col.removeAttribute("span");
                     span -= s;
                     while (s-- > 1) {
-                        var cloned = col.cloneNode(true);
+                        const cloned = col.cloneNode(true);
                         colGroup.insertBefore(cloned, col);
                         cols.push(cloned);
                     }
@@ -1371,10 +1371,10 @@ goog.scope(() => {
      */
     TableLayoutProcessor.prototype.addMissingColElements = (cols, colGroups, columnCount, tableElement) => {
         if (cols.length < columnCount) {
-            var colGroup = tableElement.ownerDocument.createElement("colgroup");
+            const colGroup = tableElement.ownerDocument.createElement("colgroup");
             colGroups.push(colGroup);
-            for (var i = cols.length; i < columnCount; i++) {
-                var col = tableElement.ownerDocument.createElement("col");
+            for (let i = cols.length; i < columnCount; i++) {
+                const col = tableElement.ownerDocument.createElement("col");
                 colGroup.appendChild(col);
                 cols.push(col);
             }
@@ -1389,28 +1389,28 @@ goog.scope(() => {
      * @param {!adapt.layout.Column} column
      */
     TableLayoutProcessor.prototype.normalizeColGroups = function(formattingContext, tableElement, column) {
-        /** @const */ var vertical = formattingContext.vertical;
-        /** @const */ var lastRow = formattingContext.lastRowViewNode;
+        /** @const */ const vertical = formattingContext.vertical;
+        /** @const */ const lastRow = formattingContext.lastRowViewNode;
         if (!lastRow) return;
         goog.asserts.assert(lastRow);
         formattingContext.lastRowViewNode = null;
-        /** @const */ var doc = lastRow.ownerDocument;
-        /** @const */ var fragment = doc.createDocumentFragment();
+        /** @const */ const doc = lastRow.ownerDocument;
+        /** @const */ const fragment = doc.createDocumentFragment();
 
         // Count columns
-        /** @const */ var columnCount = formattingContext.getColumnCount();
+        /** @const */ const columnCount = formattingContext.getColumnCount();
         if (!(columnCount > 0)) {
             formattingContext.colGroups = fragment;
             return;
         }
 
         // Measure column widths
-        /** @const */ var colWidths = formattingContext.colWidths =
+        /** @const */ const colWidths = formattingContext.colWidths =
             this.getColumnWidths(lastRow, columnCount, vertical, column.clientLayout);
 
         // Normalize colgroup and col elements
-        /** @const */ var colGroups = this.getColGroupElements(tableElement);
-        /** @const */ var cols = this.normalizeAndGetColElements(colGroups);
+        /** @const */ const colGroups = this.getColGroupElements(tableElement);
+        /** @const */ const cols = this.normalizeAndGetColElements(colGroups);
 
         // Add missing col elements for remaining columns
         this.addMissingColElements(cols, colGroups, columnCount, tableElement);
@@ -1432,18 +1432,18 @@ goog.scope(() => {
      * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
      */
     TableLayoutProcessor.prototype.doInitialLayout = function(nodeContext, column) {
-        var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
+        const formattingContext = getTableFormattingContext(nodeContext.formattingContext);
         formattingContext.vertical = nodeContext.vertical;
         formattingContext.initializeRepetitiveElements(nodeContext.vertical);
         goog.asserts.assert(nodeContext.sourceNode);
-        var tableLayoutOption = getTableLayoutOption(nodeContext.sourceNode);
+        const tableLayoutOption = getTableLayoutOption(nodeContext.sourceNode);
         clearTableLayoutOptionCache(nodeContext.sourceNode);
-        var frame = adapt.task.newFrame("TableLayoutProcessor.doInitialLayout");
-        var initialNodeContext = nodeContext.copy();
+        const frame = adapt.task.newFrame("TableLayoutProcessor.doInitialLayout");
+        const initialNodeContext = nodeContext.copy();
         this.layoutEntireTable(nodeContext, column).then(nodeContextAfter => {
-            var tableElement = nodeContextAfter.viewNode;
-            var tableBBox = column.clientLayout.getElementClientRect(tableElement);
-            var edge = column.vertical ? tableBBox.left : tableBBox.bottom;
+            const tableElement = nodeContextAfter.viewNode;
+            const tableBBox = column.clientLayout.getElementClientRect(tableElement);
+            let edge = column.vertical ? tableBBox.left : tableBBox.bottom;
             edge += (column.vertical ? -1 : 1) * adapt.layout.calculateOffset(
                 nodeContext, vivliostyle.repetitiveelements.collectElementsOffset(column)).current;
             if (!column.isOverflown(edge) &&
@@ -1465,7 +1465,7 @@ goog.scope(() => {
      * @param {?Node} firstChild
      */
     TableLayoutProcessor.prototype.addCaptions = (formattingContext, rootViewNode, firstChild) => {
-        var captions = formattingContext.captions;
+        const captions = formattingContext.captions;
         captions.forEach((caption, i) => {
             if (caption) {
                 rootViewNode.insertBefore(caption.viewNode, firstChild);
@@ -1493,7 +1493,7 @@ goog.scope(() => {
      */
     TableLayoutProcessor.prototype.removeColGroups = function(formattingContext, rootViewNode) {
         if (formattingContext.colGroups && rootViewNode) {
-            var colGroups = this.getColGroupElements(rootViewNode);
+            const colGroups = this.getColGroupElements(rootViewNode);
             if (colGroups) {
                 colGroups.forEach(colGroup => {
                     rootViewNode.removeChild(colGroup);
@@ -1508,15 +1508,15 @@ goog.scope(() => {
      * @returns {!adapt.task.Result.<adapt.vtree.NodeContext>}
      */
     TableLayoutProcessor.prototype.doLayout = function(nodeContext, column) {
-        var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
-        var rootViewNode = formattingContext.getRootViewNode(nodeContext);
-        var firstChild = rootViewNode.firstChild;
+        const formattingContext = getTableFormattingContext(nodeContext.formattingContext);
+        const rootViewNode = formattingContext.getRootViewNode(nodeContext);
+        const firstChild = rootViewNode.firstChild;
         this.addCaptions(formattingContext, rootViewNode, firstChild);
         this.addColGroups(formattingContext, rootViewNode, firstChild);
 
-        var strategy = new TableLayoutStrategy(formattingContext, column);
-        var iterator = new LayoutIterator(strategy, column.layoutContext);
-        var frame = adapt.task.newFrame("TableFormattingContext.doLayout");
+        const strategy = new TableLayoutStrategy(formattingContext, column);
+        const iterator = new LayoutIterator(strategy, column.layoutContext);
+        const frame = adapt.task.newFrame("TableFormattingContext.doLayout");
         iterator.iterate(nodeContext).thenFinish(frame);
         return frame.result();
     };
@@ -1525,8 +1525,8 @@ goog.scope(() => {
      * @override
      */
     TableLayoutProcessor.prototype.layout = function(nodeContext, column, leadingEdge) {
-        var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
-        var rootViewNode = formattingContext.getRootViewNode(nodeContext);
+        const formattingContext = getTableFormattingContext(nodeContext.formattingContext);
+        const rootViewNode = formattingContext.getRootViewNode(nodeContext);
         if (!rootViewNode) {
             return column.buildDeepElementView(nodeContext);
         } else {
@@ -1554,34 +1554,34 @@ goog.scope(() => {
      * @override
      */
     TableLayoutProcessor.prototype.finishBreak = (column, nodeContext, forceRemoveSelf, endOfColumn) => {
-        var formattingContext = getTableFormattingContext(nodeContext.formattingContext);
+        const formattingContext = getTableFormattingContext(nodeContext.formattingContext);
 
         if (nodeContext.display === "table-row") {
             goog.asserts.assert(nodeContext.sourceNode);
-            var rowIndex = formattingContext.findRowIndexBySourceNode(nodeContext.sourceNode);
+            const rowIndex = formattingContext.findRowIndexBySourceNode(nodeContext.sourceNode);
             formattingContext.cellBreakPositions = [];
 
-            var cells;
+            let cells;
             if (!nodeContext.after) {
                 cells = formattingContext.getCellsFallingOnRow(rowIndex);
             } else {
                 cells = formattingContext.getRowSpanningCellsOverflowingTheRow(rowIndex);
             }
             if (cells.length) {
-                var frame = adapt.task.newFrame("TableLayoutProcessor.finishBreak");
-                var i = 0;
+                const frame = adapt.task.newFrame("TableLayoutProcessor.finishBreak");
+                let i = 0;
                 frame.loopWithFrame(loopFrame => {
                     if (i === cells.length) {
                         loopFrame.breakLoop();
                         return;
                     }
-                    var cell = cells[i++];
-                    var cellFragment = formattingContext.getCellFragmentOfCell(cell);
-                    var breakNodeContext = cellFragment.findAcceptableBreakPosition().nodeContext;
+                    const cell = cells[i++];
+                    const cellFragment = formattingContext.getCellFragmentOfCell(cell);
+                    const breakNodeContext = cellFragment.findAcceptableBreakPosition().nodeContext;
                     goog.asserts.assert(breakNodeContext);
-                    var cellNodeContext = cellFragment.cellNodeContext;
-                    var cellNodePosition = cellNodeContext.toNodePosition();
-                    var breakChunkPosition = new adapt.vtree.ChunkPosition(breakNodeContext.toNodePosition());
+                    const cellNodeContext = cellFragment.cellNodeContext;
+                    const cellNodePosition = cellNodeContext.toNodePosition();
+                    const breakChunkPosition = new adapt.vtree.ChunkPosition(breakNodeContext.toNodePosition());
                     formattingContext.cellBreakPositions.push(
                         /** @type {vivliostyle.table.BrokenTableCellPosition} */ ({
                             cellNodePosition,
@@ -1589,7 +1589,7 @@ goog.scope(() => {
                             cell
                         })
                     );
-                    var cellViewNode = /** @type {Element} */ (cellNodeContext.viewNode);
+                    const cellViewNode = /** @type {Element} */ (cellNodeContext.viewNode);
                     cellFragment.column.layoutContext.processFragmentedBlockEdge(cellFragment.cellNodeContext);
                     if (rowIndex < cell.rowIndex + cell.rowSpan - 1) {
                         cellViewNode.rowSpan = rowIndex - cell.rowIndex + 1;
@@ -1628,21 +1628,21 @@ goog.scope(() => {
      * @param {adapt.vtree.NodeContext} breakNodeContext
      */
     function adjustCellHeight(cellFragment, formattingContext, breakNodeContext) {
-        var repetitiveElements = formattingContext.getRepetitiveElements();
+        const repetitiveElements = formattingContext.getRepetitiveElements();
         if (!repetitiveElements) return;
 
-        var vertical = formattingContext.vertical;
-        var column = cellFragment.column;
-        var cellContentElement = cellFragment.pseudoColumn.getColumnElement();
-        var cellElement = /** @type {Element} */ (cellFragment.cellNodeContext.viewNode);
+        const vertical = formattingContext.vertical;
+        const column = cellFragment.column;
+        const cellContentElement = cellFragment.pseudoColumn.getColumnElement();
+        const cellElement = /** @type {Element} */ (cellFragment.cellNodeContext.viewNode);
 
-        var cellElementRect = column.clientLayout.getElementClientRect(cellElement);
-        var padding = column.getComputedPaddingBorder(cellElement);
+        const cellElementRect = column.clientLayout.getElementClientRect(cellElement);
+        const padding = column.getComputedPaddingBorder(cellElement);
         if (vertical) {
-            var width = (cellElementRect.right - column.footnoteEdge - repetitiveElements.calculateOffset(breakNodeContext) - padding.right);
+            const width = (cellElementRect.right - column.footnoteEdge - repetitiveElements.calculateOffset(breakNodeContext) - padding.right);
             adapt.base.setCSSProperty(cellContentElement, "max-width", width + "px");
         } else {
-            var height = (column.footnoteEdge - repetitiveElements.calculateOffset(breakNodeContext) - cellElementRect.top - padding.top);
+            const height = (column.footnoteEdge - repetitiveElements.calculateOffset(breakNodeContext) - cellElementRect.top - padding.top);
             adapt.base.setCSSProperty(cellContentElement, "max-height", height + "px");
         }
         adapt.base.setCSSProperty(cellContentElement, "overflow", "hidden");
@@ -1666,7 +1666,7 @@ goog.scope(() => {
      * @override
      */
     LayoutRetryer.prototype.resolveLayoutMode = function(nodeContext) {
-        var repetitiveElements = this.tableFormattingContext.getRepetitiveElements();
+        const repetitiveElements = this.tableFormattingContext.getRepetitiveElements();
         if (!repetitiveElements || !repetitiveElements.doneInitialLayout) {
             return new LayoutEntireTable(this.tableFormattingContext, this.processor);
         } else {
@@ -1682,7 +1682,7 @@ goog.scope(() => {
      */
     LayoutRetryer.prototype.clearNodes = function(initialPosition) {
         AbstractLayoutRetryer.prototype.clearNodes.call(this, initialPosition);
-        var rootViewNode = this.tableFormattingContext.getRootViewNode(initialPosition);
+        const rootViewNode = this.tableFormattingContext.getRootViewNode(initialPosition);
         this.processor.removeColGroups(this.tableFormattingContext, rootViewNode);
     };
 
@@ -1816,9 +1816,9 @@ goog.scope(() => {
      * @override
      */
     LayoutFragmentedTable.prototype.doLayout = function(nodeContext, column) {
-        var repetitiveElements = this.formattingContext.getRepetitiveElements();
+        const repetitiveElements = this.formattingContext.getRepetitiveElements();
         if (repetitiveElements && !repetitiveElements.isAfterLastContent(nodeContext)) {
-            var constraint = new TableRowLayoutConstraint(nodeContext);
+            const constraint = new TableRowLayoutConstraint(nodeContext);
             if (!column.fragmentLayoutConstraints.some(c => constraint.equalsTo(c))) {
                 column.fragmentLayoutConstraints.unshift(constraint);
             }
@@ -1843,7 +1843,7 @@ goog.scope(() => {
 
     /** @override */
     TableRowLayoutConstraint.prototype.allowLayout = function(nodeContext, overflownNodeContext, column) {
-        var repetitiveElements = this.getRepetitiveElements();
+        const repetitiveElements = this.getRepetitiveElements();
         if (!repetitiveElements) return true;
 
         if (column.pseudoParent) return true;
@@ -1861,8 +1861,8 @@ goog.scope(() => {
 
     /** @override */
     TableRowLayoutConstraint.prototype.nextCandidate = function(nodeContext) {
-        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
-        var cellFragmentConstraints = this.collectCellFragmentLayoutConstraints(nodeContext, formattingContext);
+        const formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
+        const cellFragmentConstraints = this.collectCellFragmentLayoutConstraints(nodeContext, formattingContext);
         if (cellFragmentConstraints.some(entry => entry.constraints.some(constraint => constraint.nextCandidate(nodeContext)))) {
             return true;
         }
@@ -1871,7 +1871,7 @@ goog.scope(() => {
 
     /** @override */
     TableRowLayoutConstraint.prototype.postLayout = function(allowed, nodeContext, initialPosition, column) {
-        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
+        const formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
         this.cellFragmentLayoutConstraints = this.collectCellFragmentLayoutConstraints(nodeContext, formattingContext);
         this.cellFragmentLayoutConstraints.forEach(entry => {
             entry.constraints.forEach(constraint => {
@@ -1880,7 +1880,7 @@ goog.scope(() => {
         });
 
         if (!allowed) {
-            var rootViewNode = formattingContext.getRootViewNode(this.nodeContext);
+            const rootViewNode = formattingContext.getRootViewNode(this.nodeContext);
             new vivliostyle.table.TableLayoutProcessor().removeColGroups(formattingContext, rootViewNode);
             this.removeDummyRowNodes(initialPosition);
         }
@@ -1890,16 +1890,16 @@ goog.scope(() => {
 
     /** @override */
     TableRowLayoutConstraint.prototype.finishBreak = function(nodeContext, column) {
-        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
-        /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("finishBreak");
-        var constraints = this.cellFragmentLayoutConstraints.reduce((array, entry) => array.concat(entry.constraints.map(constraint => ({
+        const formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
+        /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("finishBreak");
+        const constraints = this.cellFragmentLayoutConstraints.reduce((array, entry) => array.concat(entry.constraints.map(constraint => ({
             constraint,
             breakPosition: entry.breakPosition
         }))), []);
-        var i=0;
+        let i=0;
         frame.loop(() => {
             if (i < constraints.length) {
-                var entry = constraints[i++];
+                const entry = constraints[i++];
                 return entry.constraint.finishBreak(entry.breakPosition, column).thenReturn(true);
             } else {
                 return adapt.task.newResult(false);
@@ -1914,7 +1914,7 @@ goog.scope(() => {
         if (!nodeContext || nodeContext.display !== "table-row" || !nodeContext.viewNode) return;
 
         while (nodeContext.viewNode.previousElementSibling) {
-            var dummyNode = nodeContext.viewNode.previousElementSibling;
+            const dummyNode = nodeContext.viewNode.previousElementSibling;
             if (dummyNode.parentNode) dummyNode.parentNode.removeChild(dummyNode);
         }
     };
@@ -1939,14 +1939,14 @@ goog.scope(() => {
      * @return {Array.<{fragment: vivliostyle.table.TableCellFragment, breakPosition:adapt.vtree.NodeContext}>}
      */
     TableRowLayoutConstraint.prototype.getCellFragemnts = (nodeContext, formattingContext) => {
-        var rowIndex = Number.MAX_VALUE;
+        let rowIndex = Number.MAX_VALUE;
         if (nodeContext && nodeContext.display === "table-row") {
             goog.asserts.assert(nodeContext.sourceNode);
             rowIndex = formattingContext.findRowIndexBySourceNode(nodeContext.sourceNode)+1;
         }
         rowIndex = Math.min(formattingContext.cellFragments.length, rowIndex);
-        var cellFragments = [];
-        for (var i=0; i < rowIndex; i++) {
+        const cellFragments = [];
+        for (let i=0; i < rowIndex; i++) {
             if (!formattingContext.cellFragments[i]) continue;
             formattingContext.cellFragments[i].forEach(cellFragment => {
                 if (!cellFragment) return;
@@ -1964,8 +1964,8 @@ goog.scope(() => {
      * @return {Array.<!vivliostyle.repetitiveelements.ElementsOffset>}
      */
     TableRowLayoutConstraint.prototype.getElementsOffsetsForTableCell = function(column) {
-        var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
-        var position = formattingContext.findCellFromColumn(column);
+        const formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
+        const position = formattingContext.findCellFromColumn(column);
         if (position) {
             return formattingContext.collectElementsOffsetOfUpperCells(position);
         } else {
@@ -1983,7 +1983,7 @@ goog.scope(() => {
     /**
      * @const
      */
-    var tableLayoutProcessor = new TableLayoutProcessor();
+    const tableLayoutProcessor = new TableLayoutProcessor();
 
     /**
      * @type {vivliostyle.plugin.ResolveFormattingContextHook}
@@ -1992,7 +1992,7 @@ goog.scope(() => {
         if (!firstTime)
             return null;
         if (display === adapt.css.ident.table) {
-            var parent = nodeContext.parent;
+            const parent = nodeContext.parent;
             return new TableFormattingContext(parent ? parent.formattingContext : null,
                 /** @type {!Element} */ (nodeContext.sourceNode));
         }
@@ -2010,7 +2010,7 @@ goog.scope(() => {
     }
 
     function registerHooks() {
-        var plugin = vivliostyle.plugin;
+        const plugin = vivliostyle.plugin;
         plugin.registerHook(plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
             resolveFormattingContextHook);
         plugin.registerHook(plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,

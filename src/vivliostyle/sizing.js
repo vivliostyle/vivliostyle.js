@@ -52,7 +52,7 @@ vivliostyle.sizing.Size = {
  * @returns {!Object.<vivliostyle.sizing.Size, number>}
  */
 vivliostyle.sizing.getSize = (clientLayout, element, sizes) => {
-    var original = {
+    const original = {
         display: element.style.display,
         position: element.style.position,
         width: /** @type {string} */ (element.style.width),
@@ -62,11 +62,11 @@ vivliostyle.sizing.getSize = (clientLayout, element, sizes) => {
         maxHeight: /** @type {string} */ (element.style.maxHeight),
         minHeight: /** @type {string} */ (element.style.minHeight)
     };
-    var doc = element.ownerDocument;
-    var parent = element.parentNode;
+    const doc = element.ownerDocument;
+    const parent = element.parentNode;
 
     // wrap the element with a dummy container element
-    var container = doc.createElement("div");
+    const container = doc.createElement("div");
     adapt.base.setCSSProperty(container, "position", original.position);
     parent.insertBefore(container, element);
     container.appendChild(element);
@@ -86,13 +86,13 @@ vivliostyle.sizing.getSize = (clientLayout, element, sizes) => {
         return clientLayout.getElementComputedStyle(element).getPropertyValue(name);
     }
 
-    var writingModeProperty = adapt.base.getPrefixedPropertyNames("writing-mode");
-    var writingModeValue = (writingModeProperty ? getComputedValue(writingModeProperty[0]) : null) ||
+    const writingModeProperty = adapt.base.getPrefixedPropertyNames("writing-mode");
+    const writingModeValue = (writingModeProperty ? getComputedValue(writingModeProperty[0]) : null) ||
         getComputedValue("writing-mode");
-    var isVertical = writingModeValue === "vertical-rl" || writingModeValue === "tb-rl" ||
+    const isVertical = writingModeValue === "vertical-rl" || writingModeValue === "tb-rl" ||
                      writingModeValue === "vertical-lr" || writingModeValue === "tb-lr";
-    var inlineSizeName = isVertical ? "height" : "width";
-    var blockSizeName = isVertical ? "width" : "height";
+    const inlineSizeName = isVertical ? "height" : "width";
+    const blockSizeName = isVertical ? "width" : "height";
 
     /** @returns {string} */
     function getFillAvailableInline() {
@@ -108,7 +108,7 @@ vivliostyle.sizing.getSize = (clientLayout, element, sizes) => {
         adapt.base.setCSSProperty(element, "display", "inline-block");
         // When the available inline size is sufficiently large, the fit-content inline size equals to the max-content inline size.
         adapt.base.setCSSProperty(container, inlineSizeName, "99999999px"); // 'sufficiently large' value
-        var r = getComputedValue(inlineSizeName);
+        const r = getComputedValue(inlineSizeName);
         adapt.base.setCSSProperty(container, inlineSizeName, "");
         return r;
     }
@@ -118,20 +118,20 @@ vivliostyle.sizing.getSize = (clientLayout, element, sizes) => {
         adapt.base.setCSSProperty(element, "display", "inline-block");
         // When the available inline size is zero, the fit-content inline size equals to the min-content inline size.
         adapt.base.setCSSProperty(container, inlineSizeName, "0");
-        var r = getComputedValue(inlineSizeName);
+        const r = getComputedValue(inlineSizeName);
         adapt.base.setCSSProperty(container, inlineSizeName, "");
         return r;
     }
 
     /** @returns {string} */
     function getFitContentInline() {
-        var fillAvailableInline = getFillAvailableInline();
-        var minContentInline = getMinContentInline();
-        var parsedFillAvailable = parseFloat(fillAvailableInline);
+        const fillAvailableInline = getFillAvailableInline();
+        const minContentInline = getMinContentInline();
+        const parsedFillAvailable = parseFloat(fillAvailableInline);
         if (parsedFillAvailable <= parseFloat(minContentInline)) {
             return minContentInline;
         } else {
-            var maxContentInline = getMaxContentInline();
+            const maxContentInline = getMaxContentInline();
             if (parsedFillAvailable <= parseFloat(maxContentInline)) {
                 return fillAvailableInline;
             } else {
@@ -150,9 +150,9 @@ vivliostyle.sizing.getSize = (clientLayout, element, sizes) => {
         throw new Error("Getting fill-available block size is not implemented");
     }
 
-    var result = /** @type {!Object.<vivliostyle.sizing.Size, number>} */ ({});
+    const result = /** @type {!Object.<vivliostyle.sizing.Size, number>} */ ({});
     sizes.forEach(size => {
-        /** @type {string} */ var r;
+        /** @type {string} */ let r;
         switch (size) {
             case vivliostyle.sizing.Size.FILL_AVAILABLE_INLINE_SIZE:
                 r = getFillAvailableInline();

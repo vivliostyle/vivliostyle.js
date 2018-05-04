@@ -48,7 +48,7 @@ adapt.cssstyler.SlipMap = function() {
 adapt.cssstyler.SlipMap.prototype.getMaxFixed = function() {
     if (this.map.length == 0)
         return 0;
-    var range = this.map[this.map.length - 1];
+    const range = this.map[this.map.length - 1];
     return range.endFixed;
 };
 
@@ -58,7 +58,7 @@ adapt.cssstyler.SlipMap.prototype.getMaxFixed = function() {
 adapt.cssstyler.SlipMap.prototype.getMaxSlipped = function() {
     if (this.map.length == 0)
         return 0;
-    var range = this.map[this.map.length - 1];
+    const range = this.map[this.map.length - 1];
     return range.endSlipped;
 };
 
@@ -70,8 +70,8 @@ adapt.cssstyler.SlipMap.prototype.addStuckRange = function(endFixed) {
     if (this.map.length == 0) {
         this.map.push(new adapt.cssstyler.SlipRange(endFixed, endFixed, endFixed));
     } else {
-        var range = this.map[this.map.length - 1];
-        var endSlipped = range.endSlipped + endFixed - range.endFixed;
+        const range = this.map[this.map.length - 1];
+        const endSlipped = range.endSlipped + endFixed - range.endFixed;
         if (range.endFixed == range.endStuckFixed) {
             range.endFixed = endFixed;
             range.endStuckFixed = endFixed;
@@ -99,9 +99,9 @@ adapt.cssstyler.SlipMap.prototype.addSlippedRange = function(endFixed) {
  * @return {number}
  */
 adapt.cssstyler.SlipMap.prototype.slippedByFixed = function(fixed) {
-    var self = this;
-    var index = adapt.base.binarySearch(this.map.length, index => fixed <= self.map[index].endFixed);
-    var range = this.map[index];
+    const self = this;
+    const index = adapt.base.binarySearch(this.map.length, index => fixed <= self.map[index].endFixed);
+    const range = this.map[index];
     return range.endSlipped - Math.max(0, range.endStuckFixed - fixed);
 };
 
@@ -111,9 +111,9 @@ adapt.cssstyler.SlipMap.prototype.slippedByFixed = function(fixed) {
  * @return {number}
  */
 adapt.cssstyler.SlipMap.prototype.fixedBySlipped = function(slipped) {
-    var self = this;
-    var index = adapt.base.binarySearch(this.map.length, index => slipped <= self.map[index].endSlipped);
-    var range = this.map[index];
+    const self = this;
+    const index = adapt.base.binarySearch(this.map.length, index => slipped <= self.map[index].endSlipped);
+    const range = this.map[index];
     return range.endStuckFixed - (range.endSlipped - slipped);
 };
 
@@ -179,12 +179,12 @@ adapt.cssstyler.Box = function(context, style, offset, isRoot, flowChunk, atBloc
     /** @type {adapt.cssstyler.Box} */ this.afterBox = null;
     /** @type {?string} */ this.breakBefore = null;
     if (this.hasBox()) {
-        var pseudoMap = style["_pseudos"];
+        const pseudoMap = style["_pseudos"];
         if (pseudoMap) {
             if (pseudoMap["before"]) {
-                var beforeBox = new adapt.cssstyler.Box(context, pseudoMap["before"], offset, false, flowChunk,
+                const beforeBox = new adapt.cssstyler.Box(context, pseudoMap["before"], offset, false, flowChunk,
                     this.isBlock(), atFlowStart, true);
-                var beforeContent = beforeBox.styleValue("content");
+                const beforeContent = beforeBox.styleValue("content");
                 if (adapt.vtree.nonTrivialContent(beforeContent)) {
                     this.beforeBox = beforeBox;
                     this.breakBefore = beforeBox.breakBefore;
@@ -206,12 +206,12 @@ adapt.cssstyler.Box = function(context, style, offset, isRoot, flowChunk, atBloc
  */
 adapt.cssstyler.Box.prototype.buildAfterPseudoElementBox = function(offset, atBlockStart, atFlowStart) {
     if (this.hasBox()) {
-        var pseudoMap = this.style["_pseudos"];
+        const pseudoMap = this.style["_pseudos"];
         if (pseudoMap) {
             if (pseudoMap["after"]) {
-                var afterBox = new adapt.cssstyler.Box(this.context, pseudoMap["after"], offset, false,
+                const afterBox = new adapt.cssstyler.Box(this.context, pseudoMap["after"], offset, false,
                     this.flowChunk, atBlockStart, atFlowStart, true);
-                var afterContent = afterBox.styleValue("content");
+                const afterContent = afterBox.styleValue("content");
                 if (adapt.vtree.nonTrivialContent(afterContent)) {
                     this.afterBox = afterBox;
                 }
@@ -227,7 +227,7 @@ adapt.cssstyler.Box.prototype.buildAfterPseudoElementBox = function(offset, atBl
  */
 adapt.cssstyler.Box.prototype.styleValue = function(name, defaultValue) {
     if (!(name in this.styleValues)) {
-        var cv = this.style[name];
+        const cv = this.style[name];
         this.styleValues[name] = cv ? cv.evaluate(this.context, name) : (defaultValue || null);
     }
     return this.styleValues[name];
@@ -245,9 +245,9 @@ adapt.cssstyler.Box.prototype.displayValue = function() {
  */
 adapt.cssstyler.Box.prototype.isBlock = function() {
     if (this.isBlockValue === null) {
-        var display = /** @type {!adapt.css.Ident} */ (this.displayValue());
-        var position = /** @type {adapt.css.Ident} */ (this.styleValue("position"));
-        var float = /** @type {adapt.css.Ident} */ (this.styleValue("float"));
+        const display = /** @type {!adapt.css.Ident} */ (this.displayValue());
+        const position = /** @type {adapt.css.Ident} */ (this.styleValue("position"));
+        const float = /** @type {adapt.css.Ident} */ (this.styleValue("float"));
         this.isBlockValue = vivliostyle.display.isBlock(display, position, float, this.isRoot);
     }
     return this.isBlockValue;
@@ -268,9 +268,9 @@ adapt.cssstyler.Box.prototype.hasBox = function() {
  * @returns {?string}
  */
 adapt.cssstyler.Box.prototype.getBreakValue = function(edge) {
-    var breakValue = null;
+    let breakValue = null;
     if (this.isBlock()) {
-        var val = this.styleValue("break-" + edge);
+        const val = this.styleValue("break-" + edge);
         if (val)
             breakValue = val.toString();
     }
@@ -312,7 +312,7 @@ adapt.cssstyler.BoxStack.prototype.lastBox = function() {
  * @returns {?string}
  */
 adapt.cssstyler.BoxStack.prototype.lastFlowName = function() {
-    var lastBox = this.lastBox();
+    const lastBox = this.lastBox();
     return lastBox ? lastBox.flowChunk.flowName : null;
 };
 
@@ -333,17 +333,17 @@ adapt.cssstyler.BoxStack.prototype.isCurrentBoxDisplayed = function() {
  * @returns {!adapt.cssstyler.Box}
  */
 adapt.cssstyler.BoxStack.prototype.push = function(style, offset, isRoot, newFlowChunk) {
-    var lastBox = this.lastBox();
+    const lastBox = this.lastBox();
     if (newFlowChunk && lastBox && newFlowChunk.flowName !== lastBox.flowName) {
         this.atStartStack.push({
             atBlockStart: this.atBlockStart,
             atFlowStart: this.atFlowStart
         });
     }
-    var flowChunk = newFlowChunk || lastBox.flowChunk;
-    var isAtFlowStart = this.atFlowStart || !!newFlowChunk;
-    var isParentBoxDisplayed = this.isCurrentBoxDisplayed();
-    var box = new adapt.cssstyler.Box(this.context, style, offset, isRoot, flowChunk,
+    const flowChunk = newFlowChunk || lastBox.flowChunk;
+    const isAtFlowStart = this.atFlowStart || !!newFlowChunk;
+    const isParentBoxDisplayed = this.isCurrentBoxDisplayed();
+    const box = new adapt.cssstyler.Box(this.context, style, offset, isRoot, flowChunk,
         isAtFlowStart || this.atBlockStart, isAtFlowStart, isParentBoxDisplayed);
     this.stack.push(box);
 
@@ -357,10 +357,10 @@ adapt.cssstyler.BoxStack.prototype.push = function(style, offset, isRoot, newFlo
  * @param {Node} node
  */
 adapt.cssstyler.BoxStack.prototype.encounteredTextNode = function(node) {
-    var box = this.lastBox();
+    const box = this.lastBox();
     if ((this.atBlockStart || this.atFlowStart) && box.hasBox()) {
-        var whitespaceValue = box.styleValue("white-space", adapt.css.ident.normal).toString();
-        var whitespace = adapt.vtree.whitespaceFromPropertyValue(whitespaceValue);
+        const whitespaceValue = box.styleValue("white-space", adapt.css.ident.normal).toString();
+        const whitespace = adapt.vtree.whitespaceFromPropertyValue(whitespaceValue);
         goog.asserts.assert(whitespace !== null);
         if (!adapt.vtree.canIgnore(node, whitespace)) {
             this.atBlockStart = false;
@@ -375,22 +375,22 @@ adapt.cssstyler.BoxStack.prototype.encounteredTextNode = function(node) {
  * @returns {!adapt.cssstyler.Box}
  */
 adapt.cssstyler.BoxStack.prototype.pop = function(offset) {
-    var box = this.stack.pop();
+    const box = this.stack.pop();
     box.buildAfterPseudoElementBox(offset, this.atBlockStart, this.atFlowStart);
     if (this.atFlowStart && box.afterBox) {
-        var breakBefore = box.afterBox.getBreakValue("before");
+        const breakBefore = box.afterBox.getBreakValue("before");
         box.flowChunk.breakBefore =
             vivliostyle.break.resolveEffectiveBreakValue(box.flowChunk.breakBefore, breakBefore);
     }
 
-    var parent = this.lastBox();
+    const parent = this.lastBox();
     if (parent) {
         if (parent.flowName === box.flowName) {
             if (box.hasBox()) {
                 this.atBlockStart = this.atFlowStart = false;
             }
         } else {
-            var atStart = this.atStartStack.pop();
+            const atStart = this.atStartStack.pop();
             this.atBlockStart = atStart.atBlockStart;
             this.atFlowStart = atStart.atFlowStart;
         }
@@ -407,8 +407,8 @@ adapt.cssstyler.BoxStack.prototype.nearestBlockStartOffset = function(box) {
     if (!box.atBlockStart) {
         return box.offset;
     }
-    var i = this.stack.length - 1;
-    var parent = this.stack[i];
+    let i = this.stack.length - 1;
+    let parent = this.stack[i];
     // When called just after the box is popped out, the last box in the stack is different from the box and it is the parent of the box. When called after the box is pushed, the last box in the stack is identical to the box and the parent of the box is a box right before the specified box.
     if (parent === box) {
         i--;
@@ -465,13 +465,13 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
     /** @const */ this.primaryFlows = primaryFlows;
     /** @type {boolean} */ this.rootBackgroundAssigned = false;
     /** @type {boolean} */ this.rootLayoutAssigned = false;
-    var rootOffset = xmldoc.getElementOffset(this.root);
+    const rootOffset = xmldoc.getElementOffset(this.root);
     /** @type {number} */ this.lastOffset = rootOffset;
     /** @const */ this.breakBeforeValues = /** @type {!Object<number, ?string>} */ ({});
     /** @const */ this.boxStack = new adapt.cssstyler.BoxStack(context);
 
     this.offsetMap.addStuckRange(rootOffset);
-    var style = this.getAttrStyle(this.root);
+    const style = this.getAttrStyle(this.root);
     this.cascade.pushElement(this.root, style, rootOffset);
     this.postprocessTopStyle(style, false);
     /** @type {boolean} */ this.bodyReached = true;
@@ -495,7 +495,7 @@ adapt.cssstyler.Styler = function(xmldoc, cascade, scope, context, primaryFlows,
  * @return {boolean}
  **/
 adapt.cssstyler.Styler.prototype.hasProp = function(style, map, name) {
-    var cascVal = style[name];
+    const cascVal = style[name];
     return cascVal && cascVal.evaluate(this.context) !== map[name];
 };
 
@@ -505,13 +505,13 @@ adapt.cssstyler.Styler.prototype.hasProp = function(style, map, name) {
  * @return {void}
  **/
 adapt.cssstyler.Styler.prototype.transferPropsToRoot = function(srcStyle, map) {
-    for (var pname in map) {
-        var cascval = srcStyle[pname];
+    for (const pname in map) {
+        const cascval = srcStyle[pname];
         if (cascval) {
             this.rootStyle[pname] = cascval;
             delete srcStyle[pname];
         } else {
-            var val = map[pname];
+            const val = map[pname];
             if (val) {
                 this.rootStyle[pname] = new adapt.csscasc.CascadeValue(val, adapt.cssparse.SPECIFICITY_AUTHOR);
             }
@@ -541,10 +541,10 @@ adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBod
         }, this);
     }
     if (!this.rootBackgroundAssigned) {
-        var backgroundColor = /** @type {adapt.css.Val} */
+        const backgroundColor = /** @type {adapt.css.Val} */
             (this.hasProp(elemStyle, this.validatorSet.backgroundProps, "background-color") ?
                 elemStyle["background-color"].evaluate(this.context) : null);
-        var backgroundImage = /** @type {adapt.css.Val} */
+        const backgroundImage = /** @type {adapt.css.Val} */
             (this.hasProp(elemStyle, this.validatorSet.backgroundProps, "background-image") ?
                 elemStyle["background-image"].evaluate(this.context) : null);
         if ((backgroundColor && backgroundColor !== adapt.css.ident.inherit) ||
@@ -554,7 +554,7 @@ adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBod
         }
     }
     if (!this.rootLayoutAssigned) {
-        for (var i = 0; i < adapt.cssstyler.columnProps.length; i++) {
+        for (let i = 0; i < adapt.cssstyler.columnProps.length; i++) {
             if (this.hasProp(elemStyle, this.validatorSet.layoutProps, adapt.cssstyler.columnProps[i])) {
                 this.transferPropsToRoot(elemStyle, this.validatorSet.layoutProps);
                 this.rootLayoutAssigned = true;
@@ -563,10 +563,10 @@ adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBod
         }
     }
     if (!isBody) {
-        var fontSize = elemStyle["font-size"];
+        const fontSize = elemStyle["font-size"];
         if (fontSize) {
-            var val = fontSize.evaluate(this.context);
-            var px = val.num;
+            const val = fontSize.evaluate(this.context);
+            let px = val.num;
             switch (val.unit) {
                 case "em":
                 case "rem":
@@ -579,7 +579,7 @@ adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBod
                     px *= this.context.initialFontSize / 100;
                     break;
                 default:
-                    var unitSize = adapt.expr.defaultUnitSizes[val.unit];
+                    const unitSize = adapt.expr.defaultUnitSizes[val.unit];
                     if (unitSize) {
                         px *= unitSize;
                     }
@@ -593,7 +593,7 @@ adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBod
  * @return {!adapt.csscasc.ElementStyle}
  */
 adapt.cssstyler.Styler.prototype.getTopContainerStyle = function() {
-    var offset = 0;
+    let offset = 0;
     while (!this.bodyReached) {
         offset += 5000;
         if (this.styleUntil(offset, 0) == Number.POSITIVE_INFINITY)
@@ -609,7 +609,7 @@ adapt.cssstyler.Styler.prototype.getAttrStyle = function(elem) {
     // skip cases in which elements for XML other than HTML or SVG
     // have 'style' attribute not for CSS declaration
     if (elem.style instanceof CSSStyleDeclaration) {
-        var styleAttrValue = elem.getAttribute("style");
+        const styleAttrValue = elem.getAttribute("style");
         if (styleAttrValue) {
             return adapt.csscasc.parseStyleAttribute(this.scope, this.validatorSet,
                 this.xmldoc.url, styleAttrValue);
@@ -633,33 +633,33 @@ adapt.cssstyler.Styler.prototype.getReachedOffset = function() {
 adapt.cssstyler.Styler.prototype.replayFlowElementsFromOffset = function(offset) {
     if (offset >= this.lastOffset)
         return;
-    var context = this.context;
-    var rootOffset = this.xmldoc.getElementOffset(this.root);
+    const context = this.context;
+    const rootOffset = this.xmldoc.getElementOffset(this.root);
     if (offset < rootOffset) {
-        var rootStyle = this.getStyle(this.root, false);
+        const rootStyle = this.getStyle(this.root, false);
         goog.asserts.assert(rootStyle);
         var flowName = adapt.csscasc.getProp(rootStyle, "flow-into");
         var flowNameStr = flowName ? flowName.evaluate(context, "flow-into").toString() : "body";
-        var newFlowChunk = this.encounteredFlowElement(flowNameStr, rootStyle, this.root, rootOffset);
+        const newFlowChunk = this.encounteredFlowElement(flowNameStr, rootStyle, this.root, rootOffset);
         if (this.boxStack.empty()) {
             this.boxStack.push(rootStyle, rootOffset, true, newFlowChunk);
         }
     }
-    var node = this.xmldoc.getNodeByOffset(offset);
-    var nodeOffset = this.xmldoc.getNodeOffset(node, 0, false);
+    let node = this.xmldoc.getNodeByOffset(offset);
+    let nodeOffset = this.xmldoc.getNodeOffset(node, 0, false);
     if (nodeOffset >= this.lastOffset)
         return;
     while (true) {
         if (node.nodeType != 1) {
             nodeOffset += node.textContent.length;
         } else {
-            var elem = /** @type {!Element} */ (node);
+            const elem = /** @type {!Element} */ (node);
             if (goog.DEBUG) {
                 if (nodeOffset != this.xmldoc.getElementOffset(elem)) {
                     throw new Error("Inconsistent offset");
                 }
             }
-            var style = this.getStyle(elem, false);
+            const style = this.getStyle(elem, false);
             var flowName = style["flow-into"];
             if (flowName) {
                 var flowNameStr = flowName.evaluate(context, "flow-into").toString();
@@ -669,7 +669,7 @@ adapt.cssstyler.Styler.prototype.replayFlowElementsFromOffset = function(offset)
         }
         if (nodeOffset >= this.lastOffset)
             break;
-        var next = node.firstChild;
+        let next = node.firstChild;
         if (next == null) {
             while (true) {
                 next = node.nextSibling;
@@ -691,7 +691,7 @@ adapt.cssstyler.Styler.prototype.replayFlowElementsFromOffset = function(offset)
  */
 adapt.cssstyler.Styler.prototype.resetFlowChunkStream = function(flowListener) {
     this.flowListener = flowListener;
-    for (var i = 0; i < this.flowChunks.length; i++) {
+    for (let i = 0; i < this.flowChunks.length; i++) {
         this.flowListener.encounteredFlowChunk(this.flowChunks[i], this.flows[this.flowChunks[i].flowName]);
     }
 };
@@ -701,7 +701,7 @@ adapt.cssstyler.Styler.prototype.resetFlowChunkStream = function(flowListener) {
  */
 adapt.cssstyler.Styler.prototype.styleUntilFlowIsReached = function(flowName) {
     this.flowToReach = flowName;
-    var offset = 0;
+    let offset = 0;
     while (true) {
         if (this.flowToReach == null)
             break;
@@ -717,7 +717,7 @@ adapt.cssstyler.Styler.prototype.styleUntilFlowIsReached = function(flowName) {
 adapt.cssstyler.Styler.prototype.styleUntilIdIsReached = function(id) {
     if (!id) return;
     this.idToReach = id;
-    var offset = 0;
+    let offset = 0;
     while (true) {
         if (!this.idToReach)
             break;
@@ -737,34 +737,34 @@ adapt.cssstyler.Styler.prototype.styleUntilIdIsReached = function(id) {
  * @return {!adapt.vtree.FlowChunk}
  */
 adapt.cssstyler.Styler.prototype.encounteredFlowElement = function(flowName, style, elem, startOffset) {
-    var priority = 0;
-    var linger = Number.POSITIVE_INFINITY;
-    var exclusive = false;
-    var repeated = false;
-    var last = false;
-    var optionsCV = style["flow-options"];
+    let priority = 0;
+    let linger = Number.POSITIVE_INFINITY;
+    let exclusive = false;
+    let repeated = false;
+    let last = false;
+    const optionsCV = style["flow-options"];
     if (optionsCV) {
-        var options = adapt.cssprop.toSet(optionsCV.evaluate(this.context, "flow-options"));
+        const options = adapt.cssprop.toSet(optionsCV.evaluate(this.context, "flow-options"));
         exclusive = !!options["exclusive"];
         repeated = !!options["static"];
         last = !!options["last"];
     }
-    var lingerCV = style["flow-linger"];
+    const lingerCV = style["flow-linger"];
     if (lingerCV) {
         linger = adapt.cssprop.toInt(lingerCV.evaluate(this.context, "flow-linger"),
             Number.POSITIVE_INFINITY);
     }
-    var priorityCV = style["flow-priority"];
+    const priorityCV = style["flow-priority"];
     if (priorityCV) {
         priority = adapt.cssprop.toInt(priorityCV.evaluate(this.context, "flow-priority"), 0);
     }
-    var breakBefore = this.breakBeforeValues[startOffset] || null;
-    var flow = this.flows[flowName];
+    const breakBefore = this.breakBeforeValues[startOffset] || null;
+    let flow = this.flows[flowName];
     if (!flow) {
-        var parentFlowName = this.boxStack.lastFlowName();
+        const parentFlowName = this.boxStack.lastFlowName();
         flow = this.flows[flowName] = new adapt.vtree.Flow(flowName, parentFlowName);
     }
-    var flowChunk = new adapt.vtree.FlowChunk(flowName, elem,
+    const flowChunk = new adapt.vtree.FlowChunk(flowName, elem,
         startOffset, priority, linger, exclusive, repeated, last, breakBefore);
     this.flowChunks.push(flowChunk);
     if (this.flowToReach == flowName)
@@ -781,13 +781,13 @@ adapt.cssstyler.Styler.prototype.encounteredFlowElement = function(flowName, sty
  */
 adapt.cssstyler.Styler.prototype.registerForcedBreakOffset = function(breakValue, offset, flowName) {
     if (vivliostyle.break.isForcedBreakValue(breakValue)) {
-        var forcedBreakOffsets = this.flows[flowName].forcedBreakOffsets;
+        const forcedBreakOffsets = this.flows[flowName].forcedBreakOffsets;
         if (forcedBreakOffsets.length === 0 ||
             forcedBreakOffsets[forcedBreakOffsets.length - 1] < offset) {
             forcedBreakOffsets.push(offset);
         }
     }
-    var previousValue = this.breakBeforeValues[offset];
+    const previousValue = this.breakBeforeValues[offset];
     this.breakBeforeValues[offset] = vivliostyle.break.resolveEffectiveBreakValue(previousValue, breakValue);
 };
 
@@ -797,8 +797,8 @@ adapt.cssstyler.Styler.prototype.registerForcedBreakOffset = function(breakValue
  * @return {number} lookup offset in the document for the next page
  */
 adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
-    var targetSlippedOffset = -1;
-    var slippedOffset;
+    let targetSlippedOffset = -1;
+    let slippedOffset;
     if (startOffset <= this.lastOffset) {
         slippedOffset = this.offsetMap.slippedByFixed(startOffset);
         targetSlippedOffset = slippedOffset + lookup;
@@ -810,18 +810,18 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
     if (this.last == null) {
         return Number.POSITIVE_INFINITY;
     }
-    var context = this.context;
+    const context = this.context;
     while (true) {
-        var next = this.last.firstChild;
+        let next = this.last.firstChild;
         if (next == null) {
             while (true) {
                 if (this.last.nodeType == 1) {
                     this.cascade.popElement(/** @type {Element} */ (this.last));
                     this.primary = this.primaryStack.pop();
                     var box = this.boxStack.pop(this.lastOffset);
-                    var breakAfter = null;
+                    let breakAfter = null;
                     if (box.afterBox) {
-                        var afterPseudoBreakBefore = box.afterBox.getBreakValue("before");
+                        const afterPseudoBreakBefore = box.afterBox.getBreakValue("before");
                         this.registerForcedBreakOffset(afterPseudoBreakBefore, box.afterBox.atBlockStart ?
                             this.boxStack.nearestBlockStartOffset(box) : box.afterBox.offset, box.flowName);
                         breakAfter = box.afterBox.getBreakValue("after");
@@ -858,11 +858,11 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
             else
                 this.offsetMap.addSlippedRange(this.lastOffset);
         } else {
-            var elem = /** @type {!Element} */ (this.last);
-            var style = this.getAttrStyle(elem);
+            const elem = /** @type {!Element} */ (this.last);
+            const style = this.getAttrStyle(elem);
             this.primaryStack.push(this.primary);
             this.cascade.pushElement(elem, style, this.lastOffset);
-            var id = elem.getAttribute("id") || elem.getAttributeNS(adapt.base.NS.XML, "id");
+            const id = elem.getAttribute("id") || elem.getAttributeNS(adapt.base.NS.XML, "id");
             if (id && id === this.idToReach) {
                 this.idToReach = null;
             }
@@ -871,19 +871,19 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
                 this.bodyReached = true;
             }
             var box;
-            var flowName = style["flow-into"];
+            const flowName = style["flow-into"];
             if (flowName) {
-                var flowNameStr = flowName.evaluate(context, "flow-into").toString();
-                var newFlowChunk = this.encounteredFlowElement(flowNameStr, style, elem, this.lastOffset);
+                const flowNameStr = flowName.evaluate(context, "flow-into").toString();
+                const newFlowChunk = this.encounteredFlowElement(flowNameStr, style, elem, this.lastOffset);
                 this.primary = !!this.primaryFlows[flowNameStr];
                 box = this.boxStack.push(style, this.lastOffset, elem === this.root, newFlowChunk);
             } else {
                 box = this.boxStack.push(style, this.lastOffset, elem === this.root);
             }
-            var blockStartOffset = this.boxStack.nearestBlockStartOffset(box);
+            const blockStartOffset = this.boxStack.nearestBlockStartOffset(box);
             this.registerForcedBreakOffset(box.breakBefore, blockStartOffset, box.flowName);
             if (box.beforeBox) {
-                var beforePseudoBreakAfter = box.beforeBox.getBreakValue("after");
+                const beforePseudoBreakAfter = box.beforeBox.getBreakValue("after");
                 this.registerForcedBreakOffset(beforePseudoBreakAfter,
                     box.beforeBox.atBlockStart ? blockStartOffset : box.offset,
                     box.flowName);
@@ -895,7 +895,7 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
                 }
             }
             if (goog.DEBUG) {
-                var offset = this.xmldoc.getElementOffset(/** @type {Element} */ (this.last));
+                const offset = this.xmldoc.getElementOffset(/** @type {Element} */ (this.last));
                 if (offset != this.lastOffset)
                     throw new Error("Inconsistent offset");
             }
@@ -923,8 +923,8 @@ adapt.cssstyler.Styler.prototype.styleUntil = function(startOffset, lookup) {
  * @override
  */
 adapt.cssstyler.Styler.prototype.getStyle = function(element, deep) {
-    var offset = this.xmldoc.getElementOffset(element);
-    var key = "e" + offset;
+    let offset = this.xmldoc.getElementOffset(element);
+    const key = "e" + offset;
     if (deep) {
         offset = this.xmldoc.getNodeOffset(element, 0, true);
     }

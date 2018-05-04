@@ -96,7 +96,7 @@ adapt.expr.PendingResult;
  * @return {string}
  */
 adapt.expr.letterbox = (viewW, viewH, objW, objH) => {
-    var scale = Math.min((viewW - 0) / objW, (viewH - 0) / objH);
+    const scale = Math.min((viewW - 0) / objW, (viewH - 0) / objH);
     return "matrix(" + scale + ",0,0," + scale + ",0,0)";
 };
 
@@ -154,7 +154,7 @@ adapt.expr.LexicalScope = function(parent, resolver) {
     /** @const */ this.resolver = resolver;
     if (!parent) {
         // root scope
-        var builtIns = this.builtIns;
+        const builtIns = this.builtIns;
         builtIns["floor"] = Math.floor;
         builtIns["ceil"] = Math.ceil;
         builtIns["round"] = Math.round;
@@ -336,7 +336,7 @@ adapt.expr.Context = function(rootScope, viewportWidth, viewportHeight, fontSize
  * @return {!adapt.expr.ScopeContext}
  */
 adapt.expr.Context.prototype.getScopeContext = function(scope) {
-    var s = this.scopes[scope.scopeKey];
+    let s = this.scopes[scope.scopeKey];
     if (!s) {
         s = {};
         this.scopes[scope.scopeKey] = s;
@@ -350,7 +350,7 @@ adapt.expr.Context.prototype.getScopeContext = function(scope) {
  */
 adapt.expr.Context.prototype.clearScope = function(scope) {
     this.scopes[scope.scopeKey] = {};
-    for (var k = 0; k < scope.children.length; k++) {
+    for (let k = 0; k < scope.children.length; k++) {
         this.clearScope(scope.children[k]);
     }
 };
@@ -381,7 +381,7 @@ adapt.expr.Context.prototype.queryUnitSize = function(unit, isRoot) {
  */
 adapt.expr.Context.prototype.evalName = function(scope, qualifiedName) {
     do {
-        var val = scope.values[qualifiedName];
+        let val = scope.values[qualifiedName];
         if (val)
             return val;
         if (scope.resolver) {
@@ -403,7 +403,7 @@ adapt.expr.Context.prototype.evalName = function(scope, qualifiedName) {
  */
 adapt.expr.Context.prototype.evalCall = function(scope, qualifiedName, params, noBuiltInEval) {
     do {
-        var body = scope.funcs[qualifiedName];
+        let body = scope.funcs[qualifiedName];
         if (body)
             return body; // will be expanded by callee
         if (scope.resolver) {
@@ -411,12 +411,12 @@ adapt.expr.Context.prototype.evalCall = function(scope, qualifiedName, params, n
             if (body)
                 return body;
         }
-        var fn = scope.builtIns[qualifiedName];
+        const fn = scope.builtIns[qualifiedName];
         if (fn) {
             if (noBuiltInEval)
                 return scope.zero;
-            var args = Array(params.length);
-            for (var i = 0; i < params.length; i++) {
+            const args = Array(params.length);
+            for (let i = 0; i < params.length; i++) {
                 args[i] = params[i].evaluate(this);
             }
             return new adapt.expr.Const(scope, fn.apply(this, args));
@@ -432,7 +432,7 @@ adapt.expr.Context.prototype.evalCall = function(scope, qualifiedName, params, n
  * @returns {boolean}
  */
 adapt.expr.Context.prototype.evalMediaName = function(name, not) {
-    var enabled = (name === "all") || !!this.pref.enabledMediaTypes[name];
+    const enabled = (name === "all") || !!this.pref.enabledMediaTypes[name];
     return not ? !enabled : enabled;
 };
 
@@ -442,14 +442,14 @@ adapt.expr.Context.prototype.evalMediaName = function(name, not) {
  * @return {boolean}
  */
 adapt.expr.Context.prototype.evalMediaTest = function(feature, value) {
-    var prefix = "";
-    var r = feature.match(/^(min|max)-(.*)$/);
+    let prefix = "";
+    const r = feature.match(/^(min|max)-(.*)$/);
     if (r) {
         prefix = r[1];
         feature = r[2];
     }
-    var req = null;
-    var actual = null;
+    let req = null;
+    let actual = null;
     switch (feature) {
         case "width":
         case "height":
@@ -498,7 +498,7 @@ adapt.expr.Context.prototype.evalMediaTest = function(feature, value) {
  * @return {adapt.expr.Result|undefined}
  */
 adapt.expr.Context.prototype.queryVal = function(scope, key) {
-    var s = this.scopes[scope.scopeKey];
+    const s = this.scopes[scope.scopeKey];
     return s ? s[key] : undefined;
 };
 
@@ -533,7 +533,7 @@ adapt.expr.Val = function(scope) {
  * @override
  */
 adapt.expr.Val.prototype.toString = function() {
-    var buf = new adapt.base.StringBuffer();
+    const buf = new adapt.base.StringBuffer();
     this.appendTo(buf, 0);
     return buf.toString();
 };
@@ -584,14 +584,14 @@ adapt.expr.Val.prototype.dependCore = function(other, context, dependencyCache) 
  * @return {boolean}
  */
 adapt.expr.Val.prototype.dependOuter = function(other, context, dependencyCache) {
-    var cached = dependencyCache[this.key];
+    const cached = dependencyCache[this.key];
     if (cached != null) {
         if (cached === adapt.expr.Special.PENDING)
             return false;
         return /** @type {boolean} */ (cached);
     } else {
         dependencyCache[this.key] = adapt.expr.Special.PENDING;
-        var result = this.dependCore(other, context, dependencyCache);
+        const result = this.dependCore(other, context, dependencyCache);
         dependencyCache[this.key] = result;
         return result;
     }
@@ -611,7 +611,7 @@ adapt.expr.Val.prototype.depend = function(other, context) {
  * @return {adapt.expr.Result}
  */
 adapt.expr.Val.prototype.evaluate = function(context) {
-    var result = context.queryVal(this.scope, this.key);
+    let result = context.queryVal(this.scope, this.key);
     if (typeof result != "undefined")
         return result;
     result = this.evaluateCore(context);
@@ -657,7 +657,7 @@ adapt.expr.Prefix.prototype.evalPrefix = val => {
  * @override
  */
 adapt.expr.Prefix.prototype.evaluateCore = function(context) {
-    var val = this.val.evaluate(context);
+    const val = this.val.evaluate(context);
     return this.evalPrefix(val);
 };
 
@@ -684,10 +684,10 @@ adapt.expr.Prefix.prototype.appendTo = function(buf, priority) {
  * @override
  */
 adapt.expr.Prefix.prototype.expand = function(context, params) {
-    var val = this.val.expand(context, params);
+    const val = this.val.expand(context, params);
     if (val === this.val)
         return this;
-    var r = new this.constructor(this.scope, val);
+    const r = new this.constructor(this.scope, val);
     return r;
 };
 
@@ -733,8 +733,8 @@ adapt.expr.Infix.prototype.evalInfix = (lhs, rhs) => {
  * @override
  */
 adapt.expr.Infix.prototype.evaluateCore = function(context) {
-    var lhs = this.lhs.evaluate(context);
-    var rhs = this.rhs.evaluate(context);
+    const lhs = this.lhs.evaluate(context);
+    const rhs = this.rhs.evaluate(context);
     return this.evalInfix(lhs, rhs);
 };
 
@@ -750,7 +750,7 @@ adapt.expr.Infix.prototype.dependCore = function(other, context, dependencyCache
  * @override
  */
 adapt.expr.Infix.prototype.appendTo = function(buf, priority) {
-    var thisPriority = this.getPriority();
+    const thisPriority = this.getPriority();
     if (thisPriority <= priority)
         buf.append("(");
     this.lhs.appendTo(buf, thisPriority);
@@ -764,11 +764,11 @@ adapt.expr.Infix.prototype.appendTo = function(buf, priority) {
  * @override
  */
 adapt.expr.Infix.prototype.expand = function(context, params) {
-    var lhs = this.lhs.expand(context, params);
-    var rhs = this.rhs.expand(context, params);
+    const lhs = this.lhs.expand(context, params);
+    const rhs = this.rhs.expand(context, params);
     if (lhs === this.lhs && rhs === this.rhs)
         return this;
-    var r = new this.constructor(this.scope, lhs, rhs);
+    const r = new this.constructor(this.scope, lhs, rhs);
     return r;
 };
 
@@ -1380,7 +1380,7 @@ adapt.expr.Native.prototype.evaluateCore = function(context) {
  */
 adapt.expr.appendValArray = (buf, arr) => {
     buf.append("(");
-    for (var i = 0; i < arr.length; i++) {
+    for (let i = 0; i < arr.length; i++) {
         if (i)
             buf.append(",");
         arr[i].appendTo(buf, 0);
@@ -1395,14 +1395,14 @@ adapt.expr.appendValArray = (buf, arr) => {
  * @return {Array.<adapt.expr.Val>}
  */
 adapt.expr.expandValArray = (context, arr, params) => {
-    /** @type {Array.<adapt.expr.Val>} */ var expanded = arr;
-    for (var i = 0; i < arr.length; i++) {
-        var p = arr[i].expand(context, params);
+    /** @type {Array.<adapt.expr.Val>} */ let expanded = arr;
+    for (let i = 0; i < arr.length; i++) {
+        const p = arr[i].expand(context, params);
         if (arr !== expanded) {
             expanded[i] = p;
         } else if (p !== arr[i]) {
             expanded = Array(arr.length);
-            for (var j = 0; j < i; j++) {
+            for (let j = 0; j < i; j++) {
                 expanded[j] = arr[j];
             }
             expanded[i] = p;
@@ -1417,8 +1417,8 @@ adapt.expr.expandValArray = (context, arr, params) => {
  * @return {Array.<adapt.expr.Result>}
  */
 adapt.expr.evalValArray = (context, arr) => {
-    /** @type {Array.<adapt.expr.Result>} */ var result = Array(arr.length);
-    for (var i = 0; i < arr.length; i++) {
+    /** @type {Array.<adapt.expr.Result>} */ const result = Array(arr.length);
+    for (let i = 0; i < arr.length; i++) {
         result[i] = arr[i].evaluate(context);
     }
     return result;
@@ -1450,7 +1450,7 @@ adapt.expr.Call.prototype.appendTo = function(buf, priority) {
  * @override
  */
 adapt.expr.Call.prototype.evaluateCore = function(context) {
-    var body = context.evalCall(this.scope, this.qualifiedName, this.params, false);
+    const body = context.evalCall(this.scope, this.qualifiedName, this.params, false);
     return body.expand(context, this.params).evaluate(context);
 };
 
@@ -1460,11 +1460,11 @@ adapt.expr.Call.prototype.evaluateCore = function(context) {
 adapt.expr.Call.prototype.dependCore = function(other, context, dependencyCache) {
     if (other === this)
         return true;
-    for (var i = 0; i < this.params.length; i++) {
+    for (let i = 0; i < this.params.length; i++) {
         if (this.params[i].dependOuter(other, context, dependencyCache))
             return true;
     }
-    var body = context.evalCall(this.scope, this.qualifiedName, this.params, true);
+    const body = context.evalCall(this.scope, this.qualifiedName, this.params, true);
     // No expansion here!
     return body.dependOuter(other, context, dependencyCache);
 };
@@ -1473,7 +1473,7 @@ adapt.expr.Call.prototype.dependCore = function(other, context, dependencyCache)
  * @override
  */
 adapt.expr.Call.prototype.expand = function(context, params) {
-    var expandedParams = adapt.expr.expandValArray(context, this.params, params);
+    const expandedParams = adapt.expr.expandValArray(context, this.params, params);
     if (expandedParams === this.params)
         return this;
     return new adapt.expr.Call(this.scope, this.qualifiedName, expandedParams);
@@ -1533,12 +1533,12 @@ adapt.expr.Cond.prototype.dependCore = function(other, context, dependencyCache)
  * @override
  */
 adapt.expr.Cond.prototype.expand = function(context, params) {
-    var cond = this.cond.expand(context, params);
-    var ifTrue = this.ifTrue.expand(context, params);
-    var ifFalse = this.ifFalse.expand(context, params);
+    const cond = this.cond.expand(context, params);
+    const ifTrue = this.ifTrue.expand(context, params);
+    const ifFalse = this.ifFalse.expand(context, params);
     if (cond === this.cond && ifTrue === this.ifTrue && ifFalse === this.ifFalse)
         return this;
-    var r = new adapt.expr.Cond(this.scope, cond, ifTrue, ifFalse);
+    const r = new adapt.expr.Cond(this.scope, cond, ifTrue, ifFalse);
     return r;
 };
 
@@ -1625,10 +1625,10 @@ adapt.expr.MediaTest.prototype.dependCore = function(other, context, dependencyC
  * @override
  */
 adapt.expr.MediaTest.prototype.expand = function(context, params) {
-    var value = this.value.expand(context, params);
+    const value = this.value.expand(context, params);
     if (value === this.value)
         return this;
-    var r = new adapt.expr.MediaTest(this.scope, this.name, value);
+    const r = new adapt.expr.MediaTest(this.scope, this.name, value);
     return r;
 };
 
@@ -1656,7 +1656,7 @@ adapt.expr.Param.prototype.appendTo = function(buf, priority) {
  * @override
  */
 adapt.expr.Param.prototype.expand = function(context, params) {
-    var v = params[this.index];
+    const v = params[this.index];
     if (!v)
         throw new Error("Parameter missing: " + this.index);
     return /** @type {adapt.expr.Val} */ (v);

@@ -22,7 +22,7 @@ goog.require("vivliostyle.namespace");
 
 goog.scope(() => {
     /* eslint-disable global-require,no-undef */
-    var fastdiff = require('node_modules/fast-diff/diff');
+    const fastdiff = require('node_modules/fast-diff/diff');
     /* eslint-enable global-require,no-undef */
 
     /**
@@ -77,10 +77,10 @@ goog.scope(() => {
      * @returns {number}
      */
     vivliostyle.diff.resolveIndex = (changes, index, coef) => {
-        var diff     = 0;
-        var current  = 0;
+        let diff     = 0;
+        let current  = 0;
         changes.some(change => {
-            for (var i=0; i<change[1].length; i++) {
+            for (let i=0; i<change[1].length; i++) {
                 switch (change[0]*coef) {
                     case fastdiff.INSERT:
                         diff++;
