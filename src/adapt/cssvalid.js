@@ -205,9 +205,9 @@ adapt.cssvalid.ValidatingGroup.prototype.clone = function() {
         groupConnection.what = connection.what;
         group.connections.push(groupConnection);
     }
-    group.match.push.apply(group.match, this.match);
-    group.nomatch.push.apply(group.nomatch, this.nomatch);
-    group.error.push.apply(group.error, this.error);
+    group.match.push(...this.match);
+    group.nomatch.push(...this.nomatch);
+    group.error.push(...this.error);
     return group;
 };
 
@@ -2104,7 +2104,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseShorthands = function(tok) {
                         var insetShorthand = /** @type {adapt.cssvalid.InsetsShorthandValidator} */
                             (this.shorthands[token.text]);
                         syntax.push(insetShorthand.createSyntaxNode());
-                        propList.push.apply(propList, insetShorthand.propList);
+                        propList.push(...insetShorthand.propList);
                     } else {
                         throw new Error('\'' + token.text +
                             '\' is neither a simple property nor an inset shorthand');
