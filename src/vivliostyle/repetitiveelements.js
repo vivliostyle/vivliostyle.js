@@ -354,7 +354,7 @@ goog.scope(() => {
                 return includeChildren ? index === 0 : false;
             } else {
                 for (let current=currentParent; current; current=current.previousElementSibling) {
-                    if (parentsOfNode.indexOf(current) >= 0) {
+                    if (parentsOfNode.includes(current)) {
                         return true;
                     }
                 }

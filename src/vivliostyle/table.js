@@ -547,7 +547,7 @@ goog.scope(() => {
         return this.slots.reduce((repetitiveElements, row, index) => {
             if (index >= position.rowIndex) return repetitiveElements;
             const cellFragment = this.getCellFragmentOfCell(row[position.columnIndex].cell);
-            if (!cellFragment || collected.indexOf(cellFragment) >= 0) return repetitiveElements;
+            if (!cellFragment || collected.includes(cellFragment)) return repetitiveElements;
             this.collectElementsOffsetFromColumn(cellFragment.pseudoColumn.getColumn(), repetitiveElements);
             collected.push(cellFragment);
             return repetitiveElements;
@@ -564,7 +564,7 @@ goog.scope(() => {
                 if (!elementsInColumn[index]) elementsInColumn[index] = {collected:[], elements:[]};
                 const state = elementsInColumn[index];
                 const cellFragment = this.getCellFragmentOfCell(cell);
-                if (!cellFragment || state.collected.indexOf(cellFragment) >= 0) return;
+                if (!cellFragment || state.collected.includes(cellFragment)) return;
                 this.collectElementsOffsetFromColumn(cellFragment.pseudoColumn.getColumn(), state.elements);
                 state.collected.push(cellFragment);
             });
@@ -1007,7 +1007,7 @@ goog.scope(() => {
 
                     function addDummyCellUntil(upperColumnIndex) {
                         while (columnIndex < upperColumnIndex) {
-                            if (!(occupiedSlotIndices.indexOf(columnIndex) >= 0)) {
+                            if (!(occupiedSlotIndices.includes(columnIndex))) {
                                 const dummy = rowNodeContext.viewNode.ownerDocument.createElement("td");
                                 adapt.base.setCSSProperty(dummy, "padding", "0");
                                 rowNodeContext.viewNode.appendChild(dummy);

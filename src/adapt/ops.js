@@ -642,14 +642,14 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
             while (flowPosition.positions.length - removedIndices.length > 0) {
                 let index = 0;
                 // Skip all removed positions
-                while (removedIndices.indexOf(index) >= 0)
+                while (removedIndices.includes(index))
                     index++;
                 let selected = flowPosition.positions[index];
                 if (selected.flowChunk.startOffset > self.lookupOffset ||
                     self.flowChunkIsAfterParentFlowForcedBreak(selected.flowChunk))
                     break;
                 for (let k = index + 1; k < flowPosition.positions.length; k++) {
-                    if (removedIndices.indexOf(k) >= 0) continue; // Skip removed positions
+                    if (removedIndices.includes(k)) continue; // Skip removed positions
                     const alt = flowPosition.positions[k];
                     if (alt.flowChunk.startOffset > self.lookupOffset ||
                         self.flowChunkIsAfterParentFlowForcedBreak(alt.flowChunk))
@@ -725,7 +725,7 @@ adapt.ops.StyleInstance.prototype.layoutColumn = function(column, flowName) {
         }).then(() => {
             if (!column.pageFloatLayoutContext.isInvalidated()) {
                 // Keep positions repeated or not removed
-                flowPosition.positions = flowPosition.positions.filter((pos, i) => repeatedIndices.indexOf(i) >= 0 || removedIndices.indexOf(i) < 0);
+                flowPosition.positions = flowPosition.positions.filter((pos, i) => repeatedIndices.includes(i) || !removedIndices.includes(i));
                 if (flowPosition.breakAfter === "column")
                     flowPosition.breakAfter = null;
                 column.saveDistanceToBlockEndFloats();

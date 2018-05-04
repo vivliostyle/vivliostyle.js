@@ -1510,7 +1510,7 @@ adapt.layout.Column.prototype.layoutStashedPageFloats = function(floatReference,
             return;
         }
         const stashedFragment = stashedFloatFragments[i];
-        if (excluded.indexOf(stashedFragment) >= 0) {
+        if (excluded.includes(stashedFragment)) {
             i++;
             loopFrame.continueLoop();
             return;

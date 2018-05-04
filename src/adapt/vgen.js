@@ -1183,7 +1183,7 @@ adapt.vgen.ViewFactory.SVG_URL_ATTRIBUTES = [
  * @param {string} attributeName
  * @return {boolean} isSVGUrlAttribute
  */
-adapt.vgen.ViewFactory.prototype.isSVGUrlAttribute = attributeName => adapt.vgen.ViewFactory.SVG_URL_ATTRIBUTES.indexOf(attributeName.toLowerCase()) != -1;
+adapt.vgen.ViewFactory.prototype.isSVGUrlAttribute = attributeName => adapt.vgen.ViewFactory.SVG_URL_ATTRIBUTES.includes(attributeName.toLowerCase());
 
 /**
  * @param {!Array<!{image: !HTMLElement, element: !HTMLElement, fetcher: !adapt.taskutil.Fetcher<string>}>} images

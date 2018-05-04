@@ -494,7 +494,7 @@ goog.scope(() => {
         const id = float.getId();
         const floatReference = float.floatReference;
         if (floatReference === this.floatReference) {
-            if (this.forbiddenFloats.indexOf(id) < 0) {
+            if (!this.forbiddenFloats.includes(id)) {
                 this.forbiddenFloats.push(id);
                 const strategy = new PageFloatLayoutStrategyResolver().findByFloat(float);
                 strategy.forbid(float, this);
@@ -513,7 +513,7 @@ goog.scope(() => {
         const id = float.getId();
         const floatReference = float.floatReference;
         if (floatReference === this.floatReference) {
-            return this.forbiddenFloats.indexOf(id) >= 0;
+            return this.forbiddenFloats.includes(id);
         } else {
             const parent = this.getParent(floatReference);
             return parent.isForbidden(float);
@@ -529,7 +529,7 @@ goog.scope(() => {
         if (floatReference !== this.floatReference) {
             const parent = this.getParent(floatReference);
             parent.addPageFloatFragment(floatFragment, dontInvalidate);
-        } else if (this.floatFragments.indexOf(floatFragment) < 0) {
+        } else if (!this.floatFragments.includes(floatFragment)) {
             this.floatFragments.push(floatFragment);
             this.floatFragments.sort((fr1, fr2) => fr1.getOrder() - fr2.getOrder());
         }
@@ -733,7 +733,7 @@ goog.scope(() => {
         const done = [];
         for (let i = this.children.length - 1; i >= 0; i--) {
             const child = this.children[i];
-            if (done.indexOf(child.flowName) >= 0) continue;
+            if (done.includes(child.flowName)) continue;
             done.push(child.flowName);
             result = result.concat(child.floatsDeferredToNext.map(c => c.float));
             result = result.concat(child.getFloatsDeferredToNextInChildContexts());

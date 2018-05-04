@@ -784,7 +784,7 @@ goog.inherits(adapt.csscasc.CheckClassAction, adapt.csscasc.ChainedAction);
  * @override
  */
 adapt.csscasc.CheckClassAction.prototype.apply = function(cascadeInstance) {
-    if (cascadeInstance.currentClassNames.indexOf(this.className) >= 0)
+    if (cascadeInstance.currentClassNames.includes(this.className))
         this.chained.apply(cascadeInstance);
 };
 
