@@ -180,14 +180,15 @@ adapt.font.DocumentFaces.prototype.filterFontFamily = function(val) {
     if (val instanceof adapt.css.CommaList) {
         const list = (/** @type {adapt.css.CommaList} */ (val)).values;
         const newValues = /** @type {Array.<adapt.css.Val>} */ ([]);
-        for (let i = 0; i < list.length; i++) {
-            const v = list[i];
+
+        for (const v of list) {
             const r = this.familyMap[v.stringValue()];
             if (r) {
                 newValues.push(adapt.css.getName(r));
             }
             newValues.push(v);
         }
+
         return new adapt.css.CommaList(newValues);
     } else {
         const rf = this.familyMap[val.stringValue()];
@@ -350,13 +351,14 @@ adapt.font.Mapper.prototype.loadFont = function(srcFace, documentFaces) {
  */
 adapt.font.Mapper.prototype.findOrLoadFonts = function(srcFaces, documentFaces) {
     const fetchers = /** @type {Array.<adapt.taskutil.Fetcher.<adapt.font.Face>>} */ ([]);
-    for (let i = 0; i < srcFaces.length; i++) {
-        const srcFace = srcFaces[i];
+
+    for (const srcFace of srcFaces) {
         if (!srcFace.src || !srcFace.family) {
             vivliostyle.logging.logger.warn("E_FONT_FACE_INVALID");
             continue;
         }
         fetchers.push(this.loadFont(srcFace, documentFaces));
     }
+
     return adapt.taskutil.waitForFetchers(fetchers);
 };

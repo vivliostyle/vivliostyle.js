@@ -64,13 +64,14 @@ goog.scope(() => {
         if (!map) {
             throw new Error("unknown direction: " + direction);
         }
-        for (let i = 0; i < map.length; i++) {
-            const p = map[i];
+
+        for (const p of map) {
             const replaced = value.replace(p.regexp, p.to);
             if (replaced !== value) {
                 return replaced;
             }
         }
+
         return value;
     }
 

@@ -400,13 +400,14 @@ adapt.cssvalid.ValidatingGroup.prototype.finish = function(successTerminal, fail
     this.connect(this.match, index);
     this.connect(this.nomatch, index + 1);
     this.connect(this.error, index + 1);
-    for (let i = 0; i < this.connections.length; i++) {
-        const connection = this.connections[i];
+
+    for (const connection of this.connections) {
         if (connection.success)
             this.nodes[connection.where].success = this.nodes[connection.what];
         else
             this.nodes[connection.where].failure = this.nodes[connection.what];
     }
+
     // make sure that our data structure is correct
     for (let j = 0; j < index; j++) {
         if (this.nodes[j].failure == null || this.nodes[j].success == null)
@@ -1166,10 +1167,10 @@ adapt.cssvalid.ShorthandValidator.prototype.init = function(syntax, propList) {
  */
 adapt.cssvalid.ShorthandValidator.prototype.finish = function(important, receiver) {
     if (!this.error) {
-        for (let i = 0; i < this.propList.length; i++) {
-            const name = this.propList[i];
+        for (const name of this.propList) {
             receiver.simpleProperty(name, this.values[name] || this.validatorSet.defaultValues[name], important);
         }
+
         return true;
     }
     return false;
@@ -1181,8 +1182,7 @@ adapt.cssvalid.ShorthandValidator.prototype.finish = function(important, receive
  * @return {void}
  */
 adapt.cssvalid.ShorthandValidator.prototype.propagateInherit = function(important, receiver) {
-    for (let i = 0; i < this.propList.length; i++) {
-        const name = this.propList[i];
+    for (const name of this.propList) {
         receiver.simpleProperty(name, adapt.css.ident.inherit, important);
     }
 };
@@ -1424,8 +1424,7 @@ goog.inherits(adapt.cssvalid.CommaShorthandValidator, adapt.cssvalid.SimpleShort
  * @param {adapt.cssvalid.ValueMap} values
  */
 adapt.cssvalid.CommaShorthandValidator.prototype.mergeIn = function(acc, values) {
-    for (let i = 0; i < this.propList.length; i++) {
-        const name = this.propList[i];
+    for (const name of this.propList) {
         const val = values[name] || this.validatorSet.defaultValues[name];
         let arr = acc[name];
         if (!arr) {
@@ -2161,12 +2160,12 @@ adapt.cssvalid.ValidatorSet.prototype.parse = function(text) {
  */
 adapt.cssvalid.ValidatorSet.prototype.makePropSet = function(propList) {
     const map = {};
-    for (let i = 0; i < propList.length; i++) {
-        const prop = propList[i];
+
+    for (const prop of propList) {
         const shorthand = this.shorthands[prop];
         const list = shorthand ? shorthand.propList : [prop];
-        for (let k = 0; k < list.length; k++) {
-            const pname = list[k];
+
+        for (const pname of list) {
             const pval = this.defaultValues[pname];
             if (!pval) {
                 vivliostyle.logging.logger.warn("Unknown property in makePropSet:", pname);
@@ -2175,6 +2174,7 @@ adapt.cssvalid.ValidatorSet.prototype.makePropSet = function(propList) {
             }
         }
     }
+
     return map;
 };
 

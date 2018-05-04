@@ -524,12 +524,13 @@ adapt.xmldoc.NodeList.prototype.size = function() {
  */
 adapt.xmldoc.NodeList.prototype.predicate = function(pr) {
     const arr = [];
-    for (let i = 0; i < this.nodes.length; i++) {
-        const n = this.nodes[i];
+
+    for (const n of this.nodes) {
         if (pr.check(n)) {
             arr.push(n);
         }
     }
+
     return new adapt.xmldoc.NodeList(arr);
 };
 

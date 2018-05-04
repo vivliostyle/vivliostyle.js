@@ -310,8 +310,8 @@ adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, i
     const addedNames = [];
     const root = adapt.vgen.pseudoelementDoc.createElementNS(adapt.base.NS.SHADOW, "root");
     let att = root;
-    for (let i = 0; i < adapt.vgen.pseudoNames.length; i++) {
-        const name = adapt.vgen.pseudoNames[i];
+
+    for (const name of adapt.vgen.pseudoNames) {
         let elem;
         if (name) {
             if (!pseudoMap[name]) {
@@ -343,6 +343,7 @@ adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, i
             att = elem;
         }
     }
+
     if (!addedNames.length) {
         return subShadow;
     }
@@ -554,8 +555,8 @@ adapt.vgen.ViewFactory.prototype.inheritFromSourceParent = function(elementStyle
             }
         }
         propList.sort(adapt.css.processingOrderFn);
-        for (let k = 0; k < propList.length; k++) {
-            const name = propList[k];
+
+        for (const name of propList) {
             inheritanceVisitor.setPropName(name);
             const value = adapt.csscasc.getProp(style, name);
             if (value.value !== adapt.css.ident.inherit) {

@@ -1402,11 +1402,12 @@ adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit = function(cascade, docEl
             new adapt.csscasc.ContentPropVisitor(cascade, null, cascade.counterResolver));
     }
     this.init(cascade.context);
-    for (let i = 0; i < this.pageBox.children.length; i++) {
-        const child = this.pageBox.children[i];
+
+    for (const child of this.pageBox.children) {
         const childInstance = child.createInstance(this);
         childInstance.applyCascadeAndInit(cascade, docElementStyle);
     }
+
     cascade.popRule();
 };
 
@@ -1428,8 +1429,8 @@ adapt.pm.PageBoxInstance.prototype.resolveAutoSizing = function(context) {
             this.depends("border-top-width", this.autoHeight, context) ||
             this.depends("padding-top", this.autoHeight, context);
     }
-    for (let i = 0; i < this.children.length; i++) {
-        const childInstance = this.children[i];
+
+    for (const childInstance of this.children) {
         childInstance.resolveAutoSizing(context);
     }
 };

@@ -223,7 +223,7 @@ goog.inherits(adapt.ops.StyleInstance, adapt.expr.Context);
 adapt.ops.StyleInstance.prototype.init = function() {
     const self = this;
     /** @type {!adapt.task.Frame.<boolean>} */ const frame
-        = adapt.task.newFrame("StyleInstance.init");
+            = adapt.task.newFrame("StyleInstance.init");
     const counterListener = self.counterStore.createCounterListener(self.xmldoc.url);
     const counterResolver = self.counterStore.createCounterResolver(self.xmldoc.url, self.style.rootScope, self.style.pageScope);
     self.styler = new adapt.cssstyler.Styler(self.xmldoc, self.style.cascade,
@@ -241,14 +241,15 @@ adapt.ops.StyleInstance.prototype.init = function() {
     this.rootPageBoxInstance.resolveAutoSizing(self);
     this.pageManager = new vivliostyle.page.PageManager(cascadeInstance, this.style.pageScope, this.rootPageBoxInstance, self, docElementStyle);
     const srcFaces = /** @type {Array.<adapt.font.Face>} */ ([]);
-    for (let i = 0; i < self.style.fontFaces.length; i++) {
-        const fontFace = self.style.fontFaces[i];
+
+    for (const fontFace of self.style.fontFaces) {
         if (fontFace.condition && !fontFace.condition.evaluate(self))
             continue;
         const properties = adapt.font.prepareProperties(fontFace.properties, self);
         const srcFace = new adapt.font.Face(properties);
         srcFaces.push(srcFace);
     }
+
     self.fontMapper.findOrLoadFonts(srcFaces, self.faces).thenFinish(frame);
 
     // Determine page sheet sizes corresponding to page selectors
@@ -381,8 +382,8 @@ adapt.ops.StyleInstance.prototype.dumpLocation = function(position) {
     vivliostyle.logging.logger.debug("  lookup:", this.lookupOffset);
     for (const flowName in this.currentLayoutPosition.flowPositions) {
         const flowPosition = this.currentLayoutPosition.flowPositions[flowName];
-        for (let i = 0; i < flowPosition.positions.length; i++) {
-            const p = flowPosition.positions[i];
+
+        for (const p of flowPosition.positions) {
             vivliostyle.logging.logger.debug("  Chunk", flowName + ":", p.flowChunk.startOffset);
         }
     }

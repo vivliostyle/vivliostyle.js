@@ -775,8 +775,8 @@ goog.scope(() => {
         const deferredFloats = this.getFloatsDeferredToNextInChildContexts();
         const floatsInFragments = this.floatFragments.reduce((r, fr) => r.concat(fr.continuations.map(c => c.float)), []);
         floatsInFragments.sort((f1, f2) => f2.getOrder() - f1.getOrder());
-        for (let i = 0; i < floatsInFragments.length; i++) {
-            const float = floatsInFragments[i];
+
+        for (const float of floatsInFragments) {
             const order = float.getOrder();
             if (deferredFloats.some(d => !float.isAllowedToPrecede(d) && order > d.getOrder())) {
                 if (this.locked) {
@@ -790,6 +790,7 @@ goog.scope(() => {
                 return true;
             }
         }
+
         return false;
     };
 

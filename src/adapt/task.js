@@ -365,8 +365,8 @@ adapt.task.Scheduler.prototype.run = function(func, opt_name) {
     task.top.then(() => {
         const done = () => {
             task.running = false;
-            for (let i = 0; i < task.callbacks.length; i++) {
-                const callback = task.callbacks[i];
+
+            for (const callback of task.callbacks) {
                 try {
                     callback();
                 } catch (err) {

@@ -1593,8 +1593,8 @@ adapt.cssparse.Parser.prototype.makeCondition = function(classes, condition) {
     condition = condition || scope._true;
     if (classes) {
         const classList = classes.split(/\s+/);
-        for (let i = 0; i < classList.length; i++) {
-            const className = classList[i];
+
+        for (const className of classList) {
             switch (className) {
                 case "vertical":
                     condition = adapt.expr.and(scope, condition, new adapt.expr.Not(scope, new adapt.expr.Named(scope, "pref-horizontal")));

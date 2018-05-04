@@ -114,10 +114,11 @@ adapt.sha1.bytesToSHA1Int32 = bytes => {
 adapt.sha1.bytesToSHA1Int8 = bytes => {
     const h = adapt.sha1.bytesToSHA1Int32(bytes);
     const res = [];
-    for (let i = 0; i < h.length; i++) {
-        const n = h[i];
+
+    for (const n of h) {
         res.push((n >>> 24)&0xFF, (n >>> 16)&0xFF, (n >>> 8)&0xFF, n&0xFF);
     }
+
     return res;
 };
 

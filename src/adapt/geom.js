@@ -131,10 +131,11 @@ adapt.geom.Shape.prototype.addSegments = function(arr, id) {
 
 adapt.geom.Shape.prototype.withOffset = function(offsetX, offsetY) {
     const points = [];
-    for (let i = 0; i < this.points.length; i++) {
-        const p = this.points[i];
+
+    for (const p of this.points) {
         points.push(new adapt.geom.Point(p.x + offsetX, p.y + offsetY));
     }
+
     return new adapt.geom.Shape(points);
 };
 
@@ -661,8 +662,8 @@ adapt.geom.addFloatToBands = (box, bands, floatBox, floatBands, side) => {
         bands.push(new adapt.geom.Band(lastY, box.y2, box.x1, box.x2));
     }
     let index = adapt.geom.findBand(bands, floatBands[0].y1);
-    for (let floatBandIndex = 0; floatBandIndex < floatBands.length; floatBandIndex++) {
-        const floatBand = floatBands[floatBandIndex];
+
+    for (const floatBand of floatBands) {
         if (index == bands.length) {
             break;
         }
@@ -694,5 +695,6 @@ adapt.geom.addFloatToBands = (box, bands, floatBox, floatBands, side) => {
                 break;
         }
     }
+
     adapt.geom.normalize(box, bands);
 };

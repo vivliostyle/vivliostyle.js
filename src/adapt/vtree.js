@@ -1242,12 +1242,13 @@ adapt.vtree.LayoutPosition.prototype.isSamePosition = function(other) {
     if (thisFlowNames.length !== otherFlowNames.length) {
         return false;
     }
-    for (let i = 0; i < thisFlowNames.length; i++) {
-        const flowName = thisFlowNames[i];
+
+    for (const flowName of thisFlowNames) {
         if (!this.flowPositions[flowName].isSamePosition(other.flowPositions[flowName])) {
             return false;
         }
     }
+
     return true;
 };
 

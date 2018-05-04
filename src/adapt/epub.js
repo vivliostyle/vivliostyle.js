@@ -117,13 +117,14 @@ adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
         } else {
             const roots = containerXML.doc().child("container").child("rootfiles")
                 .child("rootfile").attribute("full-path");
-            for (let i = 0; i < roots.length; i++) {
-                const root = roots[i];
+
+            for (const root of roots) {
                 if (root) {
                     self.loadOPF(url, root, haveZipMetadata).thenFinish(frame);
                     return;
                 }
             }
+
             frame.finish(null);
         }
     });
@@ -775,13 +776,14 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
  */
 adapt.epub.OPFDoc.prototype.assignAutoPages = function() {
     let epage = 0;
-    for (let i = 0; i < this.spine.length; i++) {
-        const item = this.spine[i];
+
+    for (const item of this.spine) {
         const epageCount = Math.ceil(item.compressedSize / 1024);
         item.epage = epage;
         item.epageCount = epageCount;
         epage += epageCount;
     }
+
     this.epageCount = epage;
 };
 
@@ -1795,8 +1797,8 @@ adapt.epub.OPFView.prototype.resolveURLsInMathML = function(node, xmldoc) {
     if (node == null) return;
     if (node.nodeType === 1 && node.tagName === "mglyph") {
         const attrs = node.attributes;
-        for (let i=0; i<attrs.length; i++) {
-            const attr = attrs[i];
+
+        for (const attr of attrs) {
             if (attr.name !== "src") continue;
             const newUrl = adapt.base.resolveURL(attr.nodeValue, xmldoc.url);
             if (attr.namespaceURI) {
@@ -1944,12 +1946,13 @@ adapt.epub.OPFView.prototype.getPageViewItem = function(spineIndex) {
 
 adapt.epub.OPFView.prototype.removeRenderedPages = function() {
     const items = this.spineItems;
-    for (let i = 0; i < items.length; i++) {
-        const item = items[i];
+
+    for (const item of items) {
         if (item) {
             item.pages.splice(0);
         }
     }
+
     this.viewport.clear();
 };
 
@@ -1959,18 +1962,19 @@ adapt.epub.OPFView.prototype.removeRenderedPages = function() {
  */
 adapt.epub.OPFView.prototype.hasAutoSizedPages = function() {
     const items = this.spineItems;
-    for (let i = 0; i < items.length; i++) {
-        const item = items[i];
+
+    for (const item of items) {
         if (item) {
             const pages = item.pages;
-            for (let j = 0; j < pages.length; j++) {
-                const page = pages[j];
+
+            for (const page of pages) {
                 if (page.isAutoPageWidth && page.isAutoPageHeight) {
                     return true;
                 }
             }
         }
     }
+
     return false;
 };
 

@@ -2900,8 +2900,8 @@ adapt.csscasc.CascadeInstance.prototype.pushElement = function(element, baseStyl
     const pseudos = adapt.csscasc.getStyleMap(this.currentStyle, "_pseudos");
     if (pseudos) {
         let before = true;
-        for (let k = 0; k < adapt.csscasc.pseudoNames.length; k++) {
-            const pseudoName = adapt.csscasc.pseudoNames[k];
+
+        for (const pseudoName of adapt.csscasc.pseudoNames) {
             if (!pseudoName) {
                 // content
                 before = false;
@@ -3878,8 +3878,8 @@ adapt.csscasc.forEachStylesInRegion = (style, regionIds, isFootnote, callback) =
             else
                 regionIds = regionIds.concat(footnoteRegion);
         }
-        for (let i = 0; i < regionIds.length; i++) {
-            const regionId = regionIds[i];
+
+        for (const regionId of regionIds) {
             const regionStyle = regions[regionId];
             if (regionStyle) callback(regionId, regionStyle);
         }

@@ -381,14 +381,14 @@ adapt.base.getPrefixedPropertyNames = prop => {
     }
 
 
-    for (let i = 0; i < adapt.base.knownPrefixes.length; i++) {
-        const prefix = adapt.base.knownPrefixes[i];
+    for (const prefix of adapt.base.knownPrefixes) {
         if (adapt.base.checkIfPropertySupported(prefix, prop)) {
             prefixed = prefix + prop;
             adapt.base.propNameMap[prop] = [prefixed];
             return [prefixed];
         }
     }
+
     // Not supported by the browser
     vivliostyle.logging.logger.warn("Property not supported by the browser: ", prop);
     adapt.base.propNameMap[prop] = null;
@@ -680,13 +680,14 @@ adapt.base.identity = param => param;
  */
 adapt.base.indexArray = (arr, key) => {
     const map = {};
-    for (let i = 0; i < arr.length; i++) {
-        const v = arr[i];
+
+    for (const v of arr) {
         const k = key(v);
         if (k && !map[k]) {
             map[k] = v;
         }
     }
+
     return map;
 };
 
@@ -716,8 +717,8 @@ adapt.base.arrayToSet = arr => {
  */
 adapt.base.multiIndexArray = (arr, key) => {
     const map = {};
-    for (let i = 0; i < arr.length; i++) {
-        const v = arr[i];
+
+    for (const v of arr) {
         const k = key(v);
         if (k) {
             if (map[k]) {
@@ -727,6 +728,7 @@ adapt.base.multiIndexArray = (arr, key) => {
             }
         }
     }
+
     return map;
 };
 

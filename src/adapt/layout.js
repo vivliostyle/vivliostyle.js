@@ -55,8 +55,8 @@ adapt.layout.fixBoxesForNode = (clientLayout, boxes, node) => {
     fullRange.setEnd(node, node.textContent.length);
     const fullBoxes = clientLayout.getRangeClientRects(fullRange);
     const result = [];
-    for (let i = 0; i < boxes.length; i++) {
-        const box = boxes[i];
+
+    for (const box of boxes) {
         let k;
         for (k = 0; k < fullBoxes.length; k++) {
             const fullBox = fullBoxes[k];
@@ -71,6 +71,7 @@ adapt.layout.fixBoxesForNode = (clientLayout, boxes, node) => {
             result.push(box);
         }
     }
+
     return result;
 };
 
@@ -120,9 +121,9 @@ adapt.layout.calculateEdge = (nodeContext, clientLayout, extraOffset, vertical) 
             boxes = adapt.layout.fixBoxesForNode(clientLayout, boxes, node);
         }
         let maxSize = 0;
+
         // Get first of the widest boxes (works around Chrome results for soft hyphens).
-        for (let i = 0; i < boxes.length; i++) {
-            const box = boxes[i];
+        for (const box of boxes) {
             const boxSize = vertical ? box.bottom - box.top : box.right - box.left;
             if (box.right > box.left && box.bottom > box.top &&
                 (isNaN(edge) || boxSize > maxSize)) {
@@ -130,6 +131,7 @@ adapt.layout.calculateEdge = (nodeContext, clientLayout, extraOffset, vertical) 
                 maxSize = boxSize;
             }
         }
+
         return edge; // NaN or not NaN
     }
 };
@@ -953,8 +955,8 @@ adapt.layout.Column.prototype.createFloats = function() {
     const bands = this.bands;
     const x1 = this.vertical ? this.getTopEdge() : this.getLeftEdge();
     const x2 = this.vertical ? this.getBottomEdge() : this.getRightEdge();
-    for (let ri = 0; ri < bands.length; ri++) {
-        const band = bands[ri];
+
+    for (const band of bands) {
         const height = band.y2 - band.y1;
         band.left = this.createFloat(
             ref, "left", band.x1 - x1, height);
