@@ -919,7 +919,7 @@ adapt.epub.OPFDoc.prototype.resolveEPage = function(epage) {
                         offset--;
                     }
                 }
-                frame.finish({spineIndex: spineIndex, offsetInItem: offset, pageIndex: -1});
+                frame.finish({spineIndex, offsetInItem: offset, pageIndex: -1});
             });
         },
         (frame, err) => {
@@ -957,11 +957,11 @@ adapt.epub.PageAndPosition;
  * @returns {!adapt.epub.PageAndPosition}
  */
 adapt.epub.makePageAndPosition = (page, pageIndex) => ({
-    page: page,
+    page,
 
     position: {
         spineIndex: page.spineIndex,
-        pageIndex: pageIndex,
+        pageIndex,
         offsetInItem: page.offset
     }
 });
@@ -1179,11 +1179,13 @@ adapt.epub.OPFView.prototype.normalizeSeekPosition = (position, viewItem) => {
             pageIndex = seekOffsetPageIndex - 1;
         }
     }
-    return /** @type {!adapt.epub.Position} */ ({
-        spineIndex: position.spineIndex,
-        pageIndex: pageIndex,
-        offsetInItem: seekOffset
-    });
+    return (
+        /** @type {!adapt.epub.Position} */ {
+            spineIndex: position.spineIndex,
+            pageIndex,
+            offsetInItem: seekOffset
+        }
+    );
 };
 
 /**
@@ -1412,8 +1414,8 @@ adapt.epub.OPFView.prototype.nextPage = function(position, sync) {
             pageIndex++;
         }
         self.findPage({
-            spineIndex: spineIndex,
-            pageIndex: pageIndex,
+            spineIndex,
+            pageIndex,
             offsetInItem: -1
         }, sync).thenFinish(frame);
     });
@@ -1438,8 +1440,8 @@ adapt.epub.OPFView.prototype.previousPage = function(position) {
         pageIndex--;
     }
     return this.findPage({
-        spineIndex: spineIndex,
-        pageIndex: pageIndex,
+        spineIndex,
+        pageIndex,
         offsetInItem: -1
     });
 };
@@ -1927,7 +1929,7 @@ adapt.epub.OPFView.prototype.getPageViewItem = function(spineIndex) {
 
         instance.pref = self.pref;
         instance.init().then(() => {
-            viewItem = {item: item, xmldoc: xmldoc, instance: instance,
+            viewItem = {item, xmldoc, instance,
                 layoutPositions: [null], pages: [], complete: false};
             self.spineItems[spineIndex] = viewItem;
             frame.finish(viewItem);

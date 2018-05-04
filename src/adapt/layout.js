@@ -1391,7 +1391,7 @@ adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
     var condition = context.getPageFloatPlacementCondition(firstFloat, floatSide, clearSide);
     var floatArea = this.createPageFloatArea(firstFloat, floatSide, anchorEdge, strategy, condition);
     /** @const {!adapt.layout.SinglePageFloatLayoutResult} */ var result =
-        {floatArea: floatArea, pageFloatFragment: null, newPosition: null};
+        {floatArea, pageFloatFragment: null, newPosition: null};
     if (!floatArea) {
         return adapt.task.newResult(result);
     }
@@ -2501,7 +2501,7 @@ adapt.layout.Column.prototype.findAcceptableBreakPosition = function() {
     } while (nextPenalty > penalty && !nodeContext && this.forceNonfitting);
     return {
         breakPosition: nodeContext ? bp : null,
-        nodeContext: nodeContext
+        nodeContext
     };
 };
 
@@ -3334,7 +3334,7 @@ adapt.layout.Column.prototype.doLayout = function(nodeContext, leadingEdge, brea
         self.computedBlockSize += self.getOffsetByRepetitiveElements();
         loopFrame.breakLoop();
     }).then(() => {
-        frame.finish({nodeContext: nodeContext, overflownNodeContext: overflownNodeContext});
+        frame.finish({nodeContext, overflownNodeContext});
     });
     return frame.result();
 };

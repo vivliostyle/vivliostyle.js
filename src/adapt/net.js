@@ -51,7 +51,7 @@ adapt.net.ajax = (url, opt_type, opt_method, opt_data, opt_contentType) => {
     var request = new XMLHttpRequest();
     var continuation = frame.suspend(request);
     /** @type {adapt.net.Response} */ var response =
-    {status: 0, url: url, contentType: null, responseText: null, responseXML: null, responseBlob: null};
+    {status: 0, url, contentType: null, responseText: null, responseXML: null, responseBlob: null};
     request.open(opt_method || "GET", url, true);
     if (opt_type) {
         request.responseType = opt_type;
@@ -124,7 +124,7 @@ adapt.net.makeBlob = (parts, opt_type) => {
         }
         return builder.getBlob(type);
     }
-    return new Blob(parts, {type: type});
+    return new Blob(parts, {type});
 };
 
 /**

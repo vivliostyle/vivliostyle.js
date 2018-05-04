@@ -161,8 +161,8 @@ goog.scope(() => {
         var indices = vivliostyle.selectors.fragmentIndices;
         if (!indices[elementOffset] || indices[elementOffset].priority <= priority) {
             indices[elementOffset] = {
-                fragmentIndex: fragmentIndex,
-                priority: priority
+                fragmentIndex,
+                priority
             };
         }
     };
@@ -219,7 +219,7 @@ goog.scope(() => {
         var step = {
             node: sourceNode,
             shadowType: shadowContext.type,
-            shadowContext: shadowContext,
+            shadowContext,
             nodeShadow: null,
             shadowSibling: null
         };

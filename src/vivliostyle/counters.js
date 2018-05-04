@@ -515,7 +515,7 @@ goog.scope(() => {
                         }
                     }
                 }
-                this.pageIndicesById[id] = {spineIndex: spineIndex, pageIndex: pageIndex};
+                this.pageIndicesById[id] = {spineIndex, pageIndex};
             }, this);
         }
 
@@ -604,7 +604,7 @@ goog.scope(() => {
      */
     vivliostyle.counters.CounterStore.prototype.registerPageCounterExpr = function(name, format, expr) {
         if (name === "pages")
-            this.pagesCounterExprs.push({expr: expr, format: format});
+            this.pagesCounterExprs.push({expr, format});
     };
 
     /**

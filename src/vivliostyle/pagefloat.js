@@ -1146,9 +1146,9 @@ goog.scope(() => {
                         throw new Error("Unknown logical float side: " + logicalFloatSide);
                 }
                 return {
-                    top: top, left: left, bottom: bottom, right: right,
-                    floatMinWrapBlockStart: floatMinWrapBlockStart,
-                    floatMinWrapBlockEnd: floatMinWrapBlockEnd
+                    top, left, bottom, right,
+                    floatMinWrapBlockStart,
+                    floatMinWrapBlockEnd
                 };
             }, limits);
         }

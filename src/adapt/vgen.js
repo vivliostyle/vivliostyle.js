@@ -568,7 +568,7 @@ adapt.vgen.ViewFactory.prototype.inheritFromSourceParent = function(elementStyle
             props[sname] = elementStyle[sname];
         }
     }
-    return {lang:lang, elementStyle:props};
+    return {lang, elementStyle:props};
 };
 
 adapt.vgen.fb2Remap = {
@@ -1043,7 +1043,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                             var image = new Image();
                             var fetcher = adapt.taskutil.loadElement(image, attributeValue);
                             fetchers.push(fetcher);
-                            images.push({image: image, element: result, fetcher: fetcher});
+                            images.push({image, element: result, fetcher});
                         }
                     }
                     else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
@@ -1092,7 +1092,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
                         self.page.fetchers.push(imageFetcher);
                     } else {
                         if (hasAutoWidth && hasAutoHeight && imageResolution && imageResolution !== 1) {
-                            images.push({image: image, element: result, fetcher: imageFetcher});
+                            images.push({image, element: result, fetcher: imageFetcher});
                         }
                         fetchers.push(imageFetcher);
                     }
@@ -1595,7 +1595,7 @@ adapt.vgen.ViewFactory.prototype.nextInTree = function(nodeContext, atUnforcedBr
         }
         this.dispatchEvent({
             type: "nextInTree",
-            nodeContext: nodeContext
+            nodeContext
         });
         frame.finish(nodeContext);
     });

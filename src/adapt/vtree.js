@@ -123,8 +123,8 @@ adapt.vtree.Page = function(container, bleedBox) {
                 type: "hyperlink",
                 target: null,
                 currentTarget: null,
-                anchorElement: anchorElement,
-                href: href,
+                anchorElement,
+                href,
                 preventDefault() { e.preventDefault(); }
             };
             self.dispatchEvent(evt);
@@ -658,7 +658,7 @@ adapt.vtree.isSameNodePosition = (np1, np2) => {
  */
 adapt.vtree.newNodePositionFromNode = node => {
     var step = {
-        node: node,
+        node,
         shadowType: adapt.vtree.ShadowType.NONE,
         shadowContext: null,
         nodeShadow: null,
@@ -986,7 +986,7 @@ adapt.vtree.NodeContext.prototype.toNodePosition = function() {
         ? vivliostyle.diff.resolveOriginalIndex(this.preprocessedTextContent, this.offsetInNode)
         : this.offsetInNode;
     return {
-        steps:steps,
+        steps,
         offsetInNode: actualOffsetInNode,
         after: this.after,
         preprocessedTextContent: this.preprocessedTextContent

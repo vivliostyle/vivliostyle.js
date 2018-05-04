@@ -232,7 +232,7 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
         store.init(authorStyleSheet, userStyleSheet).then(() => {
             /** @type {!Array<!adapt.epub.OPFItemParam>} */ var resolvedParams = params.map((p, index) => ({
             url: adapt.base.resolveURL(p.url, self.window.location.href),
-            index: index,
+            index,
             startPage: p.startPage,
             skipPagesBefore: p.skipPagesBefore
         }));
@@ -733,7 +733,7 @@ adapt.viewer.Viewer.prototype.getSpreadDimensions = function(spread) {
     if (spread.left && spread.right) {
         width += this.pref.pageBorder * 2;
     }
-    return {width: width, height: height};
+    return {width, height};
 };
 
 /**

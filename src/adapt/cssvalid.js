@@ -1930,7 +1930,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
                 case adapt.csstok.TokenType.O_BRK:
                     if (!expectval)
                         setop(" ");
-                    stack.push({ vals: vals, op: op, b: "[" });
+                    stack.push({ vals, op, b: "[" });
                     op = "";
                     vals = [];
                     expectval = true;
@@ -1938,7 +1938,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
                 case adapt.csstok.TokenType.FUNC:
                     if (!expectval)
                         setop(" ");
-                    stack.push({ vals: vals, op: op, b: "(", fn: token.text });
+                    stack.push({ vals, op, b: "(", fn: token.text });
                     op = "";
                     vals = [];
                     expectval = true;
@@ -2116,7 +2116,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseShorthands = function(tok) {
                     slash = true;
                     break;
                 case adapt.csstok.TokenType.O_BRK :
-                    stack.push({ slash: slash, syntax: syntax });
+                    stack.push({ slash, syntax });
                     syntax = [];
                     slash = false;
                     break;

@@ -326,7 +326,7 @@ goog.scope(() => {
         } else {
             var result = calculator(nodeContext);
             cache.push({
-                nodeContext: nodeContext, result: result
+                nodeContext, result
             });
             return result;
         }

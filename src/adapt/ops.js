@@ -142,12 +142,12 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
                 var widthVal = adapt.css.toNumber(width.evaluate(context, "width"), context);
                 var heightVal = adapt.css.toNumber(height.evaluate(context, "height"), context);
                 if (widthVal > 0 && heightVal > 0) {
-                    return {width:widthVal, height:heightVal, fontSize: fontSize};
+                    return {width:widthVal, height:heightVal, fontSize};
                 }
             }
         }
     }
-    return {width:viewportWidth, height:viewportHeight, fontSize:fontSize};
+    return {width:viewportWidth, height:viewportHeight, fontSize};
 };
 
 //-------------------------------------------------------------------------------
@@ -899,7 +899,7 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
             layoutContainer, flowNameStr, columnCount, isFirstTime).thenAsync(columns => {
                 if (columns) {
                     return adapt.task.newResult({
-                        columns: columns,
+                        columns,
                         position: self.currentLayoutPosition
                     });
                 } else {
@@ -1367,7 +1367,7 @@ adapt.ops.BaseParserHandler.prototype.startDefineRule = function() {
  */
 adapt.ops.BaseParserHandler.prototype.startFontFaceRule = function() {
     var properties = /** @type {adapt.csscasc.ElementStyle} */ ({});
-    this.masterHandler.fontFaces.push({properties: properties, condition: this.condition});
+    this.masterHandler.fontFaces.push({properties, condition: this.condition});
     this.masterHandler.pushHandler(new adapt.csscasc.PropSetParserHandler(
         this.scope, this.owner, null, properties, this.masterHandler.validatorSet));
 };
@@ -1610,7 +1610,7 @@ adapt.ops.OPSDocStore.prototype.clearStyleSheets = function() {
 adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
     var url = stylesheet.url;
     if (url) url = adapt.base.resolveURL(url, adapt.base.baseURL);
-    this.styleSheets.push({url: url, text: stylesheet.text,
+    this.styleSheets.push({url, text: stylesheet.text,
         flavor: adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
 };
 
@@ -1621,7 +1621,7 @@ adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
 adapt.ops.OPSDocStore.prototype.addUserStyleSheet = function(stylesheet) {
     var url = stylesheet.url;
     if (url) url = adapt.base.resolveURL(url, adapt.base.baseURL);
-    this.styleSheets.push({url: url, text: stylesheet.text,
+    this.styleSheets.push({url, text: stylesheet.text,
         flavor: adapt.cssparse.StylesheetFlavor.USER, classes: null, media: null});
 };
 
@@ -1659,7 +1659,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
             var action = triggerElem.getAttribute("action");
             var ref = triggerElem.getAttribute("ref");
             if (observer && event && action && ref) {
-                triggers.push({observer:observer, event:event, action:action, ref:ref});
+                triggers.push({observer, event, action, ref});
             }
         }
         self.triggersByDocURL[url] = triggers;
@@ -1677,7 +1677,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
                 var localName = child.localName;
                 if (ns == adapt.base.NS.XHTML) {
                     if (localName == "style") {
-                        sources.push({url:url, text:child.textContent,
+                        sources.push({url, text:child.textContent,
                             flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
                     } else if (localName == "link") {
                         var rel = child.getAttribute("rel");
@@ -1686,16 +1686,16 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
                         if (rel == "stylesheet" || (rel == "alternate stylesheet" && classes)) {
                             var src = child.getAttribute("href");
                             src = adapt.base.resolveURL(src, url);
-                            sources.push({url:src, text:null, classes: classes, media: media,
+                            sources.push({url:src, text:null, classes, media,
                                 flavor:adapt.cssparse.StylesheetFlavor.AUTHOR});
                         }
                     } else if (localName == "meta" && child.getAttribute("name") == "viewport") {
-                        sources.push({url:url, text: adapt.ops.processViewportMeta(child),
+                        sources.push({url, text: adapt.ops.processViewportMeta(child),
                             flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
                     }
                 } else if (ns == adapt.base.NS.FB2) {
                     if (localName == "stylesheet" && child.getAttribute("type") == "text/css") {
-                        sources.push({url:url, text:child.textContent,
+                        sources.push({url, text:child.textContent,
                             flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
                     }
                 } else if (ns == adapt.base.NS.SSE && localName === "property") {

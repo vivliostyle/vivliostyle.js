@@ -1028,7 +1028,7 @@ adapt.task.EventSource.prototype.attach = function(target, type, opt_preventDefa
         }
     };
     target.addEventListener(type, listener, false);
-    this.listeners.push({target:target, type:type, listener:listener});
+    this.listeners.push({target, type, listener});
 };
 
 /**

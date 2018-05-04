@@ -1584,9 +1584,9 @@ goog.scope(() => {
                     var breakChunkPosition = new adapt.vtree.ChunkPosition(breakNodeContext.toNodePosition());
                     formattingContext.cellBreakPositions.push(
                         /** @type {vivliostyle.table.BrokenTableCellPosition} */ ({
-                            cellNodePosition: cellNodePosition,
-                            breakChunkPosition: breakChunkPosition,
-                            cell: cell
+                            cellNodePosition,
+                            breakChunkPosition,
+                            cell
                         })
                     );
                     var cellViewNode = /** @type {Element} */ (cellNodeContext.viewNode);
@@ -1893,7 +1893,7 @@ goog.scope(() => {
         var formattingContext = getTableFormattingContext(this.nodeContext.formattingContext);
         /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("finishBreak");
         var constraints = this.cellFragmentLayoutConstraints.reduce((array, entry) => array.concat(entry.constraints.map(constraint => ({
-            constraint: constraint,
+            constraint,
             breakPosition: entry.breakPosition
         }))), []);
         var i=0;

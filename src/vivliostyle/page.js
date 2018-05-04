@@ -1483,8 +1483,8 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
 
     return {
         borderBoxExtent: adapt.expr.sub(scope, pageExtent, adapt.expr.add(scope, marginStart, marginEnd)),
-        marginStart: marginStart,
-        marginEnd: marginEnd
+        marginStart,
+        marginEnd
     };
 };
 
@@ -2229,7 +2229,7 @@ vivliostyle.page.PageParserHandler.prototype.finishSelector = function() {
     } else {
         selectors = [this.currentNamedPageSelector].concat(this.currentPseudoPageClassSelectors.sort());
     }
-    this.currentPageSelectors.push({selectors: selectors, specificity: this.specificity});
+    this.currentPageSelectors.push({selectors, specificity: this.specificity});
     this.currentNamedPageSelector = "";
     this.currentPseudoPageClassSelectors = [];
 };

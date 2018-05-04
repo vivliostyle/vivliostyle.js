@@ -96,9 +96,9 @@ goog.scope(() => {
             display = vivliostyle.display.blockify(display);
         }
         return {
-            display: display,
-            position: position,
-            float: float
+            display,
+            position,
+            float
         };
     };
 

@@ -98,7 +98,7 @@ adapt.pm.PageBox.prototype.copySpecified = function(dest) {
 adapt.pm.PageBox.prototype.cloneChildren = function(parent) {
     for (var i = 0; i < this.children.length; i++) {
         // the cloned child is added to parent.children in the child constructor.
-        this.children[i].clone({parent: parent});
+        this.children[i].clone({parent});
     }
 };
 
