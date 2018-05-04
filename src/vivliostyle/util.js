@@ -46,7 +46,6 @@ goog.provide("vivliostyle.util");
     if (!Array.prototype.findIndex) {
         Object.defineProperty(Array.prototype, 'findIndex', {
             value(predicate) {
-                'use strict';
                 if (this == null) {
                     throw new TypeError('Array.prototype.findIndex called on null or undefined');
                 }

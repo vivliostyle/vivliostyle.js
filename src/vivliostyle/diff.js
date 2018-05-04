@@ -21,9 +21,6 @@ goog.provide("vivliostyle.diff");
 goog.require("vivliostyle.namespace");
 
 goog.scope(() => {
-
-    "use strict";
-
     /* eslint-disable global-require,no-undef */
     var fastdiff = require('node_modules/fast-diff/diff');
     /* eslint-enable global-require,no-undef */
@@ -102,5 +99,4 @@ goog.scope(() => {
         });
         return Math.max(Math.min(index, current-1) + diff, 0);
     };
-
 });

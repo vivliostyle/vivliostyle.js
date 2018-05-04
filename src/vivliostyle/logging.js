@@ -21,8 +21,6 @@ goog.provide("vivliostyle.logging");
 goog.require("vivliostyle.namespace");
 
 goog.scope(() => {
-    "use strict";
-
     /**
      * Log level.
      * @enum {number}

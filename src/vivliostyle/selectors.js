@@ -21,9 +21,6 @@ goog.provide("vivliostyle.selectors");
 goog.require("vivliostyle.namespace");
 
 goog.scope(() => {
-
-    "use strict";
-
     /** @const */ var PseudoColumn = vivliostyle.layoututil.PseudoColumn;
 
     /**
@@ -346,7 +343,7 @@ goog.scope(() => {
                 new AfterIfContinuesLayoutConstraint(nodeContext, afterIfContinues, pseudoElementHeight));
             return adapt.task.newResult(nodeContext);
         });
-    };
+    }
 
     /**
      * @param {!adapt.task.Result.<adapt.vtree.NodeContext>} result
@@ -392,5 +389,4 @@ goog.scope(() => {
         parentNode.removeChild(pseudoElement);
         return height;
     };
-
 });
