@@ -812,7 +812,8 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         var borderCollapse = computedStyle["border-collapse"];
         if (!borderCollapse || borderCollapse === adapt.css.getName("separate")) {
             var borderSpacing = computedStyle["border-spacing"];
-            var inlineBorderSpacing, blockBorderSpacing;
+            var inlineBorderSpacing;
+            var blockBorderSpacing;
             if (borderSpacing) {
                 if (borderSpacing.isSpaceList()) {
                     inlineBorderSpacing = borderSpacing.values[0];

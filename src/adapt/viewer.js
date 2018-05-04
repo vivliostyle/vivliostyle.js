@@ -721,7 +721,8 @@ adapt.viewer.Viewer.prototype.getAdjustedZoomFactor = function(pageDimension) {
  * @returns {!{width: number, height: number}}
  */
 adapt.viewer.Viewer.prototype.getSpreadDimensions = function(spread) {
-    var width = 0, height = 0;
+    var width = 0;
+    var height = 0;
     if (spread.left) {
         width += spread.left.dimensions.width;
         height = spread.left.dimensions.height;

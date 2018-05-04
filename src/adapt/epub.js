@@ -349,7 +349,8 @@ adapt.epub.metaTerms = {
 adapt.epub.getMetadataComparator = (term, lang) => {
     var empty = {};
     return (item1, item2) => {
-        var m1, m2;
+        var m1;
+        var m2;
         var r1 = item1["r"] || empty;
         var r2 = item2["r"] || empty;
         if (term == adapt.epub.metaTerms.title) {

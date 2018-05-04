@@ -1090,7 +1090,10 @@ goog.scope(() => {
                 var logicalFloatSide = this.toLogical(f.floatSide);
                 var area = f.area;
                 var floatMinWrapBlock = f.continuations[0].float.floatMinWrapBlock;
-                var top = l.top, left = l.left, bottom = l.bottom, right = l.right;
+                var top = l.top;
+                var left = l.left;
+                var bottom = l.bottom;
+                var right = l.right;
                 var floatMinWrapBlockStart = l.floatMinWrapBlockStart;
                 var floatMinWrapBlockEnd = l.floatMinWrapBlockEnd;
                 switch (logicalFloatSide) {
@@ -1217,7 +1220,10 @@ goog.scope(() => {
             }
         }
 
-        var blockSize, inlineSize, outerBlockSize, outerInlineSize;
+        var blockSize;
+        var inlineSize;
+        var outerBlockSize;
+        var outerInlineSize;
         if (init) {
             var rect = area.vertical ?
                 adapt.geom.rotateBox(new adapt.geom.Rect(blockEnd, inlineStart, blockStart, inlineEnd)) :

@@ -55,7 +55,8 @@ goog.scope(() => {
         if (!timestamps) {
             timestamps = this.timestamps[name] = [];
         }
-        var t, l = timestamps.length;
+        var t;
+        var l = timestamps.length;
         for (var i = l-1; i >=0; i--) {
             t = timestamps[i];
             if (t && !t[startEnd]) break;

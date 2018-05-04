@@ -124,7 +124,8 @@ vivliostyle.page.resolvePageSizeAndBleed = style => {
         // if size is auto, fit to the viewport (use default value)
     } else {
         /** !type {!adapt.css.Val} */ var value = size.value;
-        var val1, val2;
+        var val1;
+        var val2;
         if (value.isSpaceList()) {
             val1 = value.values[0];
             val2 = value.values[1];
@@ -340,7 +341,8 @@ vivliostyle.page.CrossMarkPosition = {
  */
 vivliostyle.page.createCrossMark = (doc, position, lineWidth, lineLength, offset) => {
     var longLineLength = lineLength * 2;
-    var width, height;
+    var width;
+    var height;
     if (position === vivliostyle.page.CrossMarkPosition.TOP || position === vivliostyle.page.CrossMarkPosition.BOTTOM) {
         width = longLineLength;
         height = lineLength;
@@ -400,7 +402,8 @@ vivliostyle.page.createCrossMark = (doc, position, lineWidth, lineLength, offset
  * @param {!adapt.expr.Context} context
  */
 vivliostyle.page.addPrinterMarks = (cascadedPageStyle, evaluatedPageSizeAndBleed, page, context) => {
-    var crop = false, cross = false;
+    var crop = false;
+    var cross = false;
     var marks = cascadedPageStyle["marks"];
     if (marks) {
         var value = marks.value;
