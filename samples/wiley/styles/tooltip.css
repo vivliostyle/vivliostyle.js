@@ -1,0 +1,69 @@
+/* ============================================================================
+tooltip.css Version 1.0.0
+
+Tooltips (pop-ups)
+
+Last Modified: August 4, 2015                                         
+
+Copyright (c) 2017 by John Wiley & Sons, Inc. 
+
+This stylesheet is proprietary confidential material owned by Wiley, and may be used and disclosed only in connection with agreed Wiley-related work. 
+By using the stylesheets, you hereby agree to the terms set forth herein.
+=============================================================================== */
+
+#tooltip {
+	display: block;
+	position: absolute;
+	overflow: auto;
+	max-width: 500px;
+	min-width: 300px;
+	box-shadow: 3px 3px 3px rgba(100, 100, 100, 0.9);
+	background-color: #fff;
+	border: 1px solid #666;
+	border-radius: 5px;
+	z-index: 9;
+}
+
+#tooltip-content {
+	padding: 5px;
+	clear: both;
+	border-radius: 0 0 5px 5px;	
+}
+
+#tooltip-header {
+	font-size: 11pt;
+	color: white;
+	background-color: #bbb;	
+	padding: 0 5px;
+	vertical-align: middle;
+}
+
+#tooltip-close {
+	font-family: sans-serif;
+	font-size: 12pt;
+	cursor: pointer;
+	float: right;
+}
+
+.note-label {
+	color: blue;
+	background-color: inherit;
+	cursor: pointer;
+	vertical-align: super;
+	text-decoration: none;
+	font-size: smaller;
+}
+.note-label:hover {text-decoration: underline;}
+
+.term-label {
+	color: blue;
+	background-color: inherit;
+	cursor: pointer;
+	vertical-align: super;
+	font-size: smaller;
+	font-weight: bold;
+	margin-left: 1px;
+}
+.term-label:hover {text-decoration: underline;}
+
+.displayForm {font-weight: bold;}

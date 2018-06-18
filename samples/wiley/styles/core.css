@@ -1,0 +1,2096 @@
+/* ============================================================================
+core.css Version 1.0.1
+
+WileyML to Melville rendering
+
+Last Modified: February 27, 2018                                       
+
+Copyright (c) 2017 by John Wiley & Sons, Inc. 
+
+This stylesheet is proprietary confidential material owned by Wiley, and may be used and disclosed only in connection with agreed Wiley-related work. 
+By using the stylesheets, you hereby agree to the terms set forth herein.
+=============================================================================== */
+/* ================================ mixins =================================== */
+/* ============================ fonts ============================ */
+@font-face {
+  font-family: wmlpua;
+  src: url("../fonts/WileyML-PUA.eot"); }
+@font-face {
+  font-family: wmlpua;
+  src: url("../fonts/WileyML-PUA.eot?#iefix") format("embedded-opentype"); }
+@font-face {
+  font-family: wmlpua;
+  src: url("../fonts/WileyML-PUA.svg#font") format("svg"); }
+@font-face {
+  font-family: wmlpua;
+  src: url("../fonts/WileyML-PUA.otf") format("opentype"); }
+/* =========================== general =========================== */
+/* line 32, sass/core.scss */
+html[data-type="serialArticle"] .personName > * {
+  display: none; }
+
+/* line 34, sass/core.scss */
+body {
+  font-family: sans-serif;
+  font-size: 11pt;
+  color: #000;
+  background-color: #fff;
+  margin: 0;
+  padding: 10px 40px;
+  text-align: left; }
+  /* line 42, sass/core.scss */
+  body > header {
+    display: none; }
+  /* line 45, sass/core.scss */
+  body:not([data-bibliographic_style]) .journalTitle {
+    font-style: italic; }
+  /* line 46, sass/core.scss */
+  body:not([data-bibliographic_style]) .bookTitle {
+    font-style: italic; }
+  /* line 49, sass/core.scss */
+  body[data-bibliographic_style="AMA"] .journalTitle {
+    font-style: italic; }
+  /* line 50, sass/core.scss */
+  body[data-bibliographic_style="AMA"] .bookTitle {
+    font-style: italic; }
+  /* line 52, sass/core.scss */
+  body[data-bibliographic_style="AMA"] span.link[data-bib_callout_style="numbered"] {
+    vertical-align: super;
+    font-size: smaller; }
+    /* line 55, sass/core.scss */
+    body[data-bibliographic_style="AMA"] span.link[data-bib_callout_style="numbered"]:not([data-style="unformatted"])::before {
+      content: ""; }
+    /* line 56, sass/core.scss */
+    body[data-bibliographic_style="AMA"] span.link[data-bib_callout_style="numbered"]:not([data-style="unformatted"])::after {
+      content: ""; }
+  /* line 60, sass/core.scss */
+  body[data-bibliographic_style="APA"] .journalTitle {
+    font-style: italic; }
+  /* line 61, sass/core.scss */
+  body[data-bibliographic_style="APA"] .bookTitle {
+    font-style: italic; }
+  /* line 62, sass/core.scss */
+  body[data-bibliographic_style="APA"] .otherTitle {
+    font-style: italic; }
+  /* line 63, sass/core.scss */
+  body[data-bibliographic_style="APA"] .vol {
+    font-style: italic; }
+  /* line 66, sass/core.scss */
+  body[data-bibliographic_style="Vancouver"] span.link[data-bib_callout_style="numbered"] {
+    vertical-align: super;
+    font-size: smaller; }
+    /* line 69, sass/core.scss */
+    body[data-bibliographic_style="Vancouver"] span.link[data-bib_callout_style="numbered"]:not([data-style="unformatted"])::before {
+      content: ""; }
+    /* line 70, sass/core.scss */
+    body[data-bibliographic_style="Vancouver"] span.link[data-bib_callout_style="numbered"]:not([data-style="unformatted"])::after {
+      content: ""; }
+  /* line 74, sass/core.scss */
+  body[data-bibliographic_style="ChemMatSci"] .journalTitle {
+    font-style: italic; }
+  /* line 75, sass/core.scss */
+  body[data-bibliographic_style="ChemMatSci"] .bookTitle {
+    font-style: italic; }
+  /* line 76, sass/core.scss */
+  body[data-bibliographic_style="ChemMatSci"] .pubYear {
+    font-weight: bold; }
+  /* line 77, sass/core.scss */
+  body[data-bibliographic_style="ChemMatSci"] .vol {
+    font-style: italic; }
+  /* line 79, sass/core.scss */
+  body[data-bibliographic_style="ChemMatSci"] span.link[data-bib_callout_style="numbered"] {
+    vertical-align: super;
+    font-size: smaller; }
+  /* line 85, sass/core.scss */
+  body[data-bibliographic_style="AMS"] .articleTitle {
+    font-style: italic; }
+  /* line 86, sass/core.scss */
+  body[data-bibliographic_style="AMS"] .bookTitle {
+    font-style: italic; }
+  /* line 87, sass/core.scss */
+  body[data-bibliographic_style="AMS"] .vol {
+    font-weight: bold; }
+
+/* line 91, sass/core.scss */
+#footer {
+  border-top: 1px solid lightgrey;
+  margin-top: 10px;
+  padding: 5px 20px;
+  font-size: 8pt;
+  color: grey;
+  text-align: right; }
+
+/* line 100, sass/core.scss */
+.displayed-content {
+  /* ============================ global =========================== */
+  /* =============================== ? ============================= */
+  /* ============================= typo ============================ */
+  /* ============================ align ============================ */
+  /* =========================== indent ============================ */
+  /* ============================== p ============================== */
+  /* =========================== titles ============================ */
+  /* line break in case there is no breaking elements */
+  /* multiple languages titles */
+  /* inline headers */
+  /* ========================= main titles ========================= */
+  /* generated titles */
+  /* ======================== main spacings ======================== */
+  /* ========================== elements =========================== */
+  /*	.displayedItem {
+  		position: relative;
+  		text-align: center;	
+  	    p {text-align: center;}	
+  		>.generated-labeling {
+  			position: absolute;
+  			right: 40px;
+  			>.extraLabel {vertical-align: super;}
+  			>.extraLabelSub {vertical-align: sub;}
+  		}
+  	}*/
+  /* =========================== blocks ============================ */
+  /* ========================== features =========================== */
+  /* ============================= list ============================ */
+  /* ========================== listPaired ========================= */
+  /* ============================= eRights ========================= */
+  /* ==================== figure / mediaResource =================== */
+  /* ============================ tables =========================== */
+  /* ========================= bibliography ======================== */
+  /* ========================= computerCode ======================== */
+  /* ============================ recipe =========================== */
+  /* =========================== protocols ========================= */
+  /* ======================== semanticGroup ======================== */
+  /* ========================= objectNotes ========================= */
+  /* ========================== noteGroup ========================== */
+  /* ========================== exercises ========================== */
+  /* ============================ blanks =========================== */
+  /* ========================== creators =========================== */
+  /* ============================ header =========================== */
+  /* from denormalization */
+  /* ========================== marginText ========================= */
+  /* ============================ span ============================ */
+  /* ======================== miscellaneous ======================== */ }
+  /* line 102, sass/core.scss */
+  .displayed-content > header > {
+    background-color: lightgray;
+    padding: 8px;
+    border-radius: 7px 7px 0 0;
+    margin-bottom: 1em; }
+    /* line 108, sass/core.scss */
+    .displayed-content > header > span.abbreviatedSelfCitation, .displayed-content > header > a.journalUrl {
+      display: none; }
+    /* line 109, sass/core.scss */
+    .displayed-content > header > .link {
+      display: block;
+      margin: 1em 0; }
+    /* line 115, sass/core.scss */
+    .displayed-content > header > .title[data-type="subtitle"] {
+      font-size: 1.60em; }
+    /* line 116, sass/core.scss */
+    .displayed-content > header > .title[data-type="main"], .displayed-content > header > .title[data-type="main"] + .title[data-type="subtitle"] {
+      display: inline;
+      font-size: 12pt;
+      font-weight: 700; }
+    /* line 121, sass/core.scss */
+    .displayed-content > header > .title[data-type="supplementTitle"], .displayed-content > header > .title[data-type="supplementSeriesTitle"], .displayed-content > header > .title[data-type="specialIssueTitle"] {
+      display: block;
+      color: darkgray;
+      font-size: 11pt;
+      font-weight: 700; }
+    /* line 127, sass/core.scss */
+    .displayed-content > header > .title[data-type="supplementTitle"]::before, .displayed-content > header > .title[data-type="supplementSeriesTitle"]::before {
+      content: "Supplement: "; }
+    /* line 128, sass/core.scss */
+    .displayed-content > header > .title[data-type="specialIssueTitle"]::before {
+      content: "Special Issue: "; }
+    /* line 129, sass/core.scss */
+    .displayed-content > header > .title[data-type="main"] + .generated-text::before {
+      content: "\A";
+      white-space: pre; }
+    /* line 133, sass/core.scss */
+    .displayed-content > header > .title[data-type="articleCategory"] {
+      display: block;
+      color: darkgray;
+      font-weight: 700; }
+    /* line 139, sass/core.scss */
+    .displayed-content > header > .generated-text {
+      font-size: 10pt;
+      font-weight: 400; }
+    /* line 144, sass/core.scss */
+    .displayed-content > header > .numbering[data-type="journalVolume"], .displayed-content > header > .numbering[data-type="journalIssue"], .displayed-content > header > .numbering[data-type="supplement"], .displayed-content > header > .numbering[data-type="pageFirst"], .displayed-content > header > .numbering[data-type="pageLast"] {
+      font-size: 12pt;
+      color: #007E8B;
+      font-weight: 700; }
+    /* line 150, sass/core.scss */
+    .displayed-content > header > .numbering[data-type="journalVolume"]::before {
+      content: "Volume "; }
+    /* line 151, sass/core.scss */
+    .displayed-content > header > .numbering ~ .numbering[data-type="journalIssue"]::before {
+      content: ", Issue "; }
+    /* line 152, sass/core.scss */
+    .displayed-content > header > .numbering[data-type="journalIssue"]::before {
+      content: "Issue "; }
+    /* line 153, sass/core.scss */
+    .displayed-content > header > .numbering ~ .numbering[data-type="supplement"]::before {
+      content: ", Supplement "; }
+    /* line 154, sass/core.scss */
+    .displayed-content > header > .numbering[data-type="supplement"]::before {
+      content: "Supplement "; }
+    /* line 156, sass/core.scss */
+    .displayed-content > header > .numbering ~ .numbering[data-type="pageFirst"]::before {
+      content: ", Pages "; }
+    /* line 157, sass/core.scss */
+    .displayed-content > header > .numbering ~ .numbering[data-type="pageFirst"][data-single_page="yes"]::before {
+      content: ", Page "; }
+    /* line 160, sass/core.scss */
+    .displayed-content > header > .numbering[data-type="pageFirst"]::before {
+      content: "Pages "; }
+    /* line 161, sass/core.scss */
+    .displayed-content > header > .numbering[data-type="pageFirst"][data-single_page="yes"]::before {
+      content: "Page "; }
+    /* line 163, sass/core.scss */
+    .displayed-content > header > .numbering[data-type="pageLast"]::before {
+      content: "-"; }
+    /* line 164, sass/core.scss */
+    .displayed-content > header > .numbering[data-single_page="yes"] ~ .numbering[data-type="pageLast"] {
+      display: none; }
+    /* line 166, sass/core.scss */
+    .displayed-content > header > .numbering ~ .id[data-type="eLocator"]::before {
+      content: ", "; }
+    /* line 167, sass/core.scss */
+    .displayed-content > header > .numbering .id[data-type="eLocator"]::before, .displayed-content > header > .numbering .coverDate::before {
+      content: ""; }
+    /* line 168, sass/core.scss */
+    .displayed-content > header > .numbering ~ .coverDate::before, .displayed-content > header > .numbering .eLocator ~ .coverDate::before {
+      content: ", "; }
+    /* line 170, sass/core.scss */
+    .displayed-content > header > .coverDate, .displayed-content > header > .id[data-type="eLocator"] {
+      font-size: 12pt;
+      color: #007E8B;
+      font-weight: 700; }
+  /* line 176, sass/core.scss */
+  .displayed-content > .bibliography, .displayed-content > .exerciseSection, .displayed-content > .feature, .displayed-content > .noteGroup, .displayed-content > .protocol, .displayed-content > .section {
+    margin: 12pt 0 12pt 0; }
+  /* line 181, sass/core.scss */
+  .displayed-content .subComponent > header, .displayed-content *[data-only-channels="print"], .displayed-content span[data-display-title="no"], .displayed-content .title[data-type="tocForm"], .displayed-content .choiceGroup .explanation, .displayed-content *[data-type="chemicalCompound"], .displayed-content .pi, .displayed-content header[data-titlegroup_display="no"], .displayed-content span.rawtex {
+    display: none !important; }
+  /* line 183, sass/core.scss */
+  .displayed-content section.section[data-only-channels="print"], .displayed-content .footnotes, .displayed-content .termDefinitions, .displayed-content *[data-display="no"] {
+    display: none; }
+  /* line 185, sass/core.scss */
+  .displayed-content .labelOnNoteOnly-yes > .note-content {
+    display: inline !important; }
+  /* line 187, sass/core.scss */
+  .displayed-content sup, .displayed-content sub, .displayed-content math {
+    white-space: nowrap; }
+  /* line 189, sass/core.scss */
+  .displayed-content .caption, .displayed-content .caption-titled {
+    font-size: 10pt; }
+  /* line 191, sass/core.scss */
+  .displayed-content .source {
+    display: block;
+    font-size: 10pt;
+    margin-top: 1em;
+    text-align: left; }
+  /* line 198, sass/core.scss */
+  .displayed-content p > .source, .displayed-content figcaption > .source, .displayed-content .termDefinition > .source, .displayed-content .caption > .source {
+    display: inline; }
+  /* line 200, sass/core.scss */
+  .displayed-content .sup {
+    vertical-align: super; }
+  /* line 202, sass/core.scss */
+  .displayed-content a > img {
+    border: none; }
+  /* line 204, sass/core.scss */
+  .displayed-content *[data-content-priority="2"] {
+    background-color: lightgray !important;
+    padding: 5px !important; }
+  /* line 209, sass/core.scss */
+  .displayed-content .generated-labeling {
+    margin-right: .4em;
+    white-space: nowrap; }
+  /* line 214, sass/core.scss */
+  .displayed-content .link > .generated-labeling, .displayed-content .linkAnchor > .generated-labeling {
+    margin-right: 0; }
+  /* line 216, sass/core.scss */
+  .displayed-content section > *:last-child {
+    margin-bottom: 0; }
+  /* line 219, sass/core.scss */
+  .displayed-content .subComponent {
+    color: darkgrey !important;
+    padding-left: 40px; }
+  /* line 224, sass/core.scss */
+  .displayed-content .term {
+    font-style: italic; }
+    /* line 226, sass/core.scss */
+    .displayed-content .term[data-emphasis="no"] {
+      font-style: normal; }
+    /* line 227, sass/core.scss */
+    .displayed-content .term[data-type="displayForm"], .displayed-content .term[data-type="glossaryForm"] {
+      display: none !important; }
+  /* line 230, sass/core.scss */
+  .displayed-content .note[data-label-on-note-only="yes"] > .generated-labeling {
+    /* LD: isn't working now */
+    vertical-align: super;
+    font-size: smaller;
+    margin-left: .8em; }
+  /* line 237, sass/core.scss */
+  .displayed-content .sc {
+    font-variant: small-caps; }
+  /* line 238, sass/core.scss */
+  .displayed-content .fr {
+    font-style: normal; }
+  /* line 239, sass/core.scss */
+  .displayed-content .fc {
+    text-transform: none;
+    font-variant: normal; }
+  /* line 240, sass/core.scss */
+  .displayed-content .fi {
+    font-style: italic; }
+  /* line 243, sass/core.scss */
+  .displayed-content .valign-top {
+    vertical-align: top; }
+  /* line 244, sass/core.scss */
+  .displayed-content .valign-middle {
+    vertical-align: middle; }
+  /* line 245, sass/core.scss */
+  .displayed-content .valign-bottom {
+    vertical-align: bottom; }
+  /* line 246, sass/core.scss */
+  .displayed-content .vlign-baseline {
+    vertical-align: baseline; }
+  /* line 247, sass/core.scss */
+  .displayed-content .align-left {
+    text-align: left; }
+  /* line 248, sass/core.scss */
+  .displayed-content .align-right {
+    text-align: right; }
+  /* line 249, sass/core.scss */
+  .displayed-content .align-center {
+    text-align: center; }
+  /* line 250, sass/core.scss */
+  .displayed-content .align-justify {
+    text-align: justify; }
+  /* line 253, sass/core.scss */
+  .displayed-content *[data-indent-level="1"], .displayed-content .indentLevel-1, .displayed-content .align-left .indentLevel-1 {
+    padding-left: 25px; }
+  /* line 254, sass/core.scss */
+  .displayed-content *[data-indent-level="2"], .displayed-content .indentLevel-2, .displayed-content .align-left .indentLevel-2 {
+    padding-left: 45px; }
+  /* line 255, sass/core.scss */
+  .displayed-content *[data-indent-level="3"], .displayed-content .indentLevel-3, .displayed-content .align-left .indentLevel-3 {
+    padding-left: 65px; }
+  /* line 256, sass/core.scss */
+  .displayed-content *[data-indent-level="4"], .displayed-content .indentLevel-4, .displayed-content .align-left .indentLevel-4 {
+    padding-left: 85px; }
+  /* line 257, sass/core.scss */
+  .displayed-content *[data-indent-level="5"], .displayed-content .indentLevel-5, .displayed-content .align-left .indentLevel-5 {
+    padding-left: 105px; }
+  /* line 258, sass/core.scss */
+  .displayed-content *[data-indent-level="flushRight"], .displayed-content .indentLevel-flushRight {
+    text-align: right; }
+  /* line 259, sass/core.scss */
+  .displayed-content *[data-indent-level="flushLeft"], .displayed-content .indentLevel-flushLeft {
+    text-align: left; }
+  /* line 260, sass/core.scss */
+  .displayed-content *[data-indent-level="centered"] {
+    text-align: center; }
+  /* line 262, sass/core.scss */
+  .displayed-content .align-right .indentLevel-1 {
+    padding-right: 25px; }
+  /* line 263, sass/core.scss */
+  .displayed-content .align-right .indentLevel-2 {
+    padding-right: 45px; }
+  /* line 264, sass/core.scss */
+  .displayed-content .align-right .indentLevel-3 {
+    padding-right: 65px; }
+  /* line 265, sass/core.scss */
+  .displayed-content .align-right .indentLevel-4 {
+    padding-right: 85px; }
+  /* line 266, sass/core.scss */
+  .displayed-content .align-right .indentLevel-5 {
+    padding-right: 105px; }
+  /* line 269, sass/core.scss */
+  .displayed-content p {
+    margin: 0;
+    text-align: left; }
+  /* line 274, sass/core.scss */
+  .displayed-content p ~ p, .displayed-content div.split-p ~ p, .displayed-content p ~ div.split-p, .displayed-content div.split-p ~ div.split-p {
+    margin-top: 1em; }
+  /* line 276, sass/core.scss */
+  .displayed-content div.split-p > *:first-child {
+    margin-top: 0; }
+  /* line 277, sass/core.scss */
+  .displayed-content div.split-p > *:last-child {
+    margin-bottom: 0; }
+  /* line 279, sass/core.scss */
+  .displayed-content .exerciseSection > p, .displayed-content .exerciseParts > p {
+    margin-bottom: 1em; }
+  /* line 281, sass/core.scss */
+  .displayed-content li > p, .displayed-content .listItem > p, .displayed-content figcaption > p, .displayed-content .caption > p, .displayed-content .noteGroup > p, .displayed-content hint > p {
+    margin-top: 0; }
+  /* line 283, sass/core.scss */
+  .displayed-content figure > p {
+    margin-top: .5em; }
+  /* line 287, sass/core.scss */
+  .displayed-content h1 {
+    display: inline;
+    font-size: 1.60em;
+    font-weight: 700;
+    margin: 0; }
+    /* line 292, sass/core.scss */
+    .displayed-content h1 > .title[data-type="name"] {
+      margin-right: .4em; }
+  /* line 295, sass/core.scss */
+  .displayed-content .numbering + h1::before, .displayed-content .coverDate + h1::before, .displayed-content .title[data-type="main"] + h1::before, .displayed-content .subtitle + h1::before {
+    content: "\A";
+    white-space: pre; }
+  /* line 297, sass/core.scss */
+  .displayed-content h2, .displayed-content h3, .displayed-content h4, .displayed-content h5, .displayed-content h6 {
+    font-size: inherit;
+    font-weight: 700;
+    margin: 0; }
+  /* line 304, sass/core.scss */
+  .displayed-content html[data-type="learningObjective"] h1, .displayed-content html[data-type="overview"] h1, .displayed-content html[data-type="slideSet"] h1, .displayed-content html[data-type="studyText"] h1, .displayed-content html[data-type="video"] h1 {
+    display: block;
+    margin: 0; }
+  /* line 310, sass/core.scss */
+  .displayed-content .title[data-type="main"] + .title[data-type="main"]::before, .displayed-content .title[data-type="subtitle"] + .title[data-type="main"]::before {
+    content: "\A";
+    white-space: pre; }
+  /* line 312, sass/core.scss */
+  .displayed-content header {
+    font-weight: 700;
+    margin-bottom: .3em;
+    /* eventually this is for main titles and subtitles only (as up to last statement) */
+    /* in case there is subtitle */
+    /* if main title is the last or the last is subtitle */
+    /* margins are taken care on inner elements (elementIcon and object-name-title above)*/ }
+    /* line 316, sass/core.scss */
+    .displayed-content header > .title {
+      margin-right: .4em; }
+    /* line 317, sass/core.scss */
+    .displayed-content header > .title[data-type="main"] {
+      margin-right: 0; }
+    /* line 318, sass/core.scss */
+    .displayed-content header > .title:last-child {
+      margin-right: .4em; }
+    /* line 319, sass/core.scss */
+    .displayed-content header > .title[data-type="objectName"] {
+      margin-right: 0; }
+  /* line 322, sass/core.scss */
+  .displayed-content figcaption > header, .displayed-content .blockFixed[data-type="proof"] > header, .displayed-content .mathStatement > header, .displayed-content li > header, .displayed-content .feature > header, .displayed-content .featureFixed > header {
+    margin-bottom: 0; }
+  /* line 324, sass/core.scss */
+  .displayed-content .elementIcon {
+    font-size: 11pt;
+    font-weight: normal;
+    margin-right: .4em; }
+  /* line 330, sass/core.scss */
+  .displayed-content .object-name-title {
+    margin: 0; }
+  /* line 333, sass/core.scss */
+  .displayed-content .title[data-type="objectName"] {
+    display: block; }
+  /* line 334, sass/core.scss */
+  .displayed-content .title[data-type="main"] {
+    display: inline; }
+  /* line 337, sass/core.scss */
+  .displayed-content figcaption > header > .title[data-type="objectName"] {
+    display: inline; }
+  /* line 339, sass/core.scss */
+  .displayed-content .title[data-type="subtitle"]::before {
+    content: ": "; }
+  /* line 343, sass/core.scss */
+  .displayed-content > section > header {
+    font-size: 1.65em; }
+  /* line 345, sass/core.scss */
+  .displayed-content > section > section > header {
+    font-size: 1.50em; }
+  /* line 347, sass/core.scss */
+  .displayed-content > section > section > section > header {
+    font-size: 1.35em; }
+  /* line 349, sass/core.scss */
+  .displayed-content > section > section > section > section > header {
+    font-size: 1.20em;
+    font-style: italic; }
+  /* line 354, sass/core.scss */
+  .displayed-content > section > section > section > section > section > header {
+    font-size: 1.20em; }
+  /* line 356, sass/core.scss */
+  .displayed-content > section > section > section > section > section > section > header {
+    font-size: 1.10em;
+    font-style: italic; }
+  /* line 360, sass/core.scss */
+  .displayed-content > section > section > section > section > section > section > section > header {
+    font-size: 1.10em; }
+  /* line 369, sass/core.scss */
+  .displayed-content section[data-type="superSection"] > header {
+    font-size: 1.75em; }
+  /* line 371, sass/core.scss */
+  .displayed-content section[data-type="superSection"] > section > header {
+    font-size: 1.65em; }
+  /* line 373, sass/core.scss */
+  .displayed-content section[data-type="superSection"] > section > section > header {
+    font-size: 1.50em; }
+  /* line 375, sass/core.scss */
+  .displayed-content section[data-type="superSection"] > section > section > section > header {
+    font-size: 1.35em; }
+  /* line 377, sass/core.scss */
+  .displayed-content section[data-type="superSection"] > section > section > section > section > header {
+    font-size: 1.20em;
+    font-style: italic; }
+  /* line 382, sass/core.scss */
+  .displayed-content section[data-type="superSection"] > section > section > section > section > section > header {
+    font-size: 1.20em; }
+  /* line 384, sass/core.scss */
+  .displayed-content section[data-type="superSection"] > section > section > section > section > section > section > header {
+    font-size: 1.10em;
+    font-style: italic; }
+  /* line 388, sass/core.scss */
+  .displayed-content section[data-type="superSection"] > section > section > section > section > section > section > section > header {
+    font-size: 1.10em; }
+  /* line 397, sass/core.scss */
+  .displayed-content .abstract > header {
+    font-size: 1.30em;
+    font-weight: 700; }
+  /* line 403, sass/core.scss */
+  .displayed-content .abstractBody > section > header {
+    font-size: 1.20em; }
+  /* line 405, sass/core.scss */
+  .displayed-content .abstractBody > section > section > header {
+    font-size: 1.15em; }
+  /* line 407, sass/core.scss */
+  .displayed-content .abstractBody > section > section > section > header {
+    font-size: 1.10em; }
+  /* line 408, sass/core.scss */
+  .displayed-content .abstractBody > section > section > section > section > header {
+    font-size: 1.05em; }
+  /* line 414, sass/core.scss */
+  .displayed-content .subComponent h1 {
+    font-size: 1.40em !important; }
+  /* line 416, sass/core.scss */
+  .displayed-content .subComponent .displayed-content > section > header {
+    font-size: 1.35em;
+    font-style: normal; }
+  /* line 421, sass/core.scss */
+  .displayed-content .subComponent .displayed-content > section > section > header {
+    font-size: 1.30em;
+    font-style: normal; }
+  /* line 426, sass/core.scss */
+  .displayed-content .subComponent .displayed-content > section > section > section > header {
+    font-size: 1.25em;
+    font-style: normal; }
+  /* line 431, sass/core.scss */
+  .displayed-content .subComponent .displayed-content > section > section > section > section > header {
+    font-size: 1.20em;
+    font-style: italic; }
+  /* line 436, sass/core.scss */
+  .displayed-content .subComponent .displayed-content > section > section > section > section > section > header {
+    font-size: 1.15em;
+    font-style: normal; }
+  /* line 441, sass/core.scss */
+  .displayed-content .subComponent .displayed-content > section > section > section > section > section > section > header {
+    font-size: 1.10em;
+    font-style: italic; }
+  /* line 445, sass/core.scss */
+  .displayed-content .subComponent .displayed-content > section > section > section > section > section > section > section > header {
+    font-size: 1.05em;
+    font-style: normal; }
+  /* line 457, sass/core.scss */
+  .displayed-content .keywordGroup > h2, .displayed-content .fundingInfoGroup > h2, .displayed-content .creators > h2, .displayed-content .affiliationGroup > h2, .displayed-content .biographyInfo > h2 {
+    margin-bottom: .1em; }
+  /* line 461, sass/core.scss */
+  .displayed-content div[role="contentinfo"] {
+    margin-bottom: 2em;
+    margin-top: 1em; }
+  /* line 466, sass/core.scss */
+  .displayed-content .bibliography, .displayed-content .bibSection, .displayed-content .exerciseSection, .displayed-content .section, .displayed-content .definitionList, .displayed-content .definitionListGenerated, .displayed-content .appendix {
+    margin: 12pt 0 12pt 0; }
+  /* line 467, sass/core.scss */
+  .displayed-content .bibSection:first-of-type, .displayed-content .exerciseSection:first-of-type, .displayed-content .section:first-of-type {
+    margin-top: 8pt; }
+  /* line 468, sass/core.scss */
+  .displayed-content .letter, .displayed-content .feature, .displayed-content .featureFixed, .displayed-content .mathStatement, .displayed-content .displayedItem, .displayed-content .abstract, .displayed-content .keywordGroup, .displayed-content .fundingInfoGroup {
+    margin: 1em 0; }
+  /* line 483, sass/core.scss */
+  .displayed-content .displayedItem {
+    display: flex;
+    width: 100%;
+    flex-direction: row-reverse;
+    align-items: center;
+    break-inside: avoid;
+    position: relative;
+    text-align: center; }
+    /* line 492, sass/core.scss */
+    .displayed-content .displayedItem > * {
+      flex: auto; }
+    /* line 493, sass/core.scss */
+    .displayed-content .displayedItem > p {
+      text-align: center; }
+    /* line 494, sass/core.scss */
+    .displayed-content .displayedItem > .generated-labeling {
+      flex: none;
+      right: 0;
+      position: absolute;
+      margin-left: 0.4em;
+      margin-right: 0; }
+      /* line 500, sass/core.scss */
+      .displayed-content .displayedItem > .generated-labeling > .extraLabel {
+        vertical-align: super; }
+      /* line 501, sass/core.scss */
+      .displayed-content .displayedItem > .generated-labeling > .extraLabelSub {
+        vertical-align: sub; }
+  /* line 507, sass/core.scss */
+  .displayed-content .mathStatement > header {
+    display: inline;
+    font-size: 1em; }
+    /* line 510, sass/core.scss */
+    .displayed-content .mathStatement > header > .title {
+      display: inline; }
+      /* line 512, sass/core.scss */
+      .displayed-content .mathStatement > header > .title[data-type="main"] {
+        font-weight: 400;
+        font-style: italic; }
+  /* line 518, sass/core.scss */
+  .displayed-content .mathStatement > p {
+    margin-top: .4em; }
+    /* line 520, sass/core.scss */
+    .displayed-content .mathStatement > p:first-of-type {
+      display: inline; }
+  /* line 523, sass/core.scss */
+  .displayed-content .mathStatement > .mathDetail::before {
+    content: "("; }
+  /* line 524, sass/core.scss */
+  .displayed-content .mathStatement > .mathDetail::after {
+    content: ") "; }
+  /* line 527, sass/core.scss */
+  .displayed-content .mathStatement:not([data-provable="no"]) > p {
+    font-style: italic; }
+    /* line 529, sass/core.scss */
+    .displayed-content .mathStatement:not([data-provable="no"]) > p i {
+      font-style: normal; }
+  /* line 532, sass/core.scss */
+  .displayed-content .record {
+    margin: 0.5em 0; }
+    /* line 535, sass/core.scss */
+    .displayed-content .record > .generated-labeling {
+      font-weight: 700; }
+    /* line 536, sass/core.scss */
+    .displayed-content .record > .field {
+      display: table-row;
+      position: relative;
+      vertical-align: baseline; }
+      /* line 540, sass/core.scss */
+      .displayed-content .record > .field > .generated-labeling {
+        display: table-cell;
+        padding-right: 0.5em;
+        font-weight: 700; }
+        /* line 544, sass/core.scss */
+        .displayed-content .record > .field > .generated-labeling::after {
+          content: ":"; }
+  /* line 551, sass/core.scss */
+  .displayed-content .block, .displayed-content .blockFixed {
+    margin: 1em 3em;
+    text-align: left; }
+    /* line 554, sass/core.scss */
+    .displayed-content .block > header, .displayed-content .blockFixed > header {
+      font-size: 1.2em; }
+  /* line 557, sass/core.scss */
+  .displayed-content figure.block[data-type="graphic"], .displayed-content figure.block[data-type="media"], .displayed-content figure.blockFixed[data-type="graphic"], .displayed-content figure.blockFixed[data-type="media"] {
+    margin: 1em 40px;
+    text-align: center; }
+  /* line 563, sass/core.scss */
+  .displayed-content .blockFixed[data-type="box"], .displayed-content .blockFixed[data-type="poetry"], .displayed-content .blockFixed[data-type="standFirst"], .displayed-content .blockFixed[data-type="dialogue"] {
+    border: 1pt solid black;
+    border-radius: 5px;
+    margin: 1em 40px;
+    padding: 8pt; }
+  /* line 569, sass/core.scss */
+  .displayed-content .blockFixed[data-type="quotation"] {
+    margin: 1em 40px; }
+  /* line 570, sass/core.scss */
+  .displayed-content .blockFixed[data-type="proof"] {
+    margin: 1em 0; }
+    /* line 573, sass/core.scss */
+    .displayed-content .blockFixed[data-type="proof"] > header {
+      display: inline;
+      font-size: 1em; }
+      /* line 576, sass/core.scss */
+      .displayed-content .blockFixed[data-type="proof"] > header > .title {
+        display: inline; }
+        /* line 578, sass/core.scss */
+        .displayed-content .blockFixed[data-type="proof"] > header > .title::after {
+          content: ". "; }
+    /* line 581, sass/core.scss */
+    .displayed-content .blockFixed[data-type="proof"] > p:first-of-type {
+      display: inline; }
+  /* line 584, sass/core.scss */
+  .displayed-content .blockFixed[data-position="indented"] {
+    margin-left: 3em; }
+  /* line 588, sass/core.scss */
+  .displayed-content .block[data-type="box"] {
+    border: 1pt solid black;
+    border-radius: 5px;
+    margin: 1em 40px;
+    padding: 8pt; }
+  /* line 594, sass/core.scss */
+  .displayed-content .block[data-type="floatQuote"] {
+    margin: 1em 40px; }
+  /* line 595, sass/core.scss */
+  .displayed-content .block[data-type="pullQuote"] {
+    margin: 1em auto;
+    width: 50%;
+    font-size: 12pt !important;
+    font-weight: 700 !important; }
+    /* line 600, sass/core.scss */
+    .displayed-content .block[data-type="pullQuote"] * {
+      font-size: 12pt !important;
+      font-weight: 700 !important; }
+  /* line 608, sass/core.scss */
+  .displayed-content .feature, .displayed-content .featureFixed {
+    border: 1px solid darkgrey;
+    border-radius: 6px;
+    text-align: left; }
+    /* line 612, sass/core.scss */
+    .displayed-content .feature > header, .displayed-content .featureFixed > header {
+      font-size: 1.3em;
+      padding: 8px;
+      border-radius: 6px 6px 0 0; }
+      /* line 616, sass/core.scss */
+      .displayed-content .feature > header > .title[data-type="objectName"], .displayed-content .featureFixed > header > .title[data-type="objectName"] {
+        color: brown;
+        font-size: 0.85em; }
+  /* line 624, sass/core.scss */
+  .displayed-content .feature > header {
+    background-color: #d6dfe7; }
+  /* line 625, sass/core.scss */
+  .displayed-content .feature > .featureBody {
+    background-color: #e8ecf1;
+    padding: 3px 8px 3px 8px;
+    border-radius: 0 0 6px 6px; }
+    /* line 629, sass/core.scss */
+    .displayed-content .feature > .featureBody > *:first-child {
+      margin-top: 0.5em; }
+    /* line 630, sass/core.scss */
+    .displayed-content .feature > .featureBody > *:last-child {
+      margin-bottom: 0.5em; }
+    /* line 632, sass/core.scss */
+    .displayed-content .feature > .featureBody > section > header {
+      font-size: 1.15em; }
+    /* line 634, sass/core.scss */
+    .displayed-content .feature > .featureBody > section > section > header {
+      font-size: 1.12em; }
+    /* line 636, sass/core.scss */
+    .displayed-content .feature > .featureBody > section > section > section > header {
+      font-size: 1.09em; }
+    /* line 637, sass/core.scss */
+    .displayed-content .feature > .featureBody > section > section > section > section > header {
+      font-size: 1.06em; }
+  /* line 642, sass/core.scss */
+  .displayed-content .feature > header[data-titlegroup_display="no"] ~ .featureFixedBody {
+    border-radius: 6px; }
+  /* line 646, sass/core.scss */
+  .displayed-content .featureFixed > header {
+    background-color: #dfe7d6; }
+  /* line 647, sass/core.scss */
+  .displayed-content .featureFixed > .featureFixedBody {
+    background-color: #ecf1e8;
+    padding: 3px 8px 3px 8px;
+    border-radius: 0 0 6px 6px; }
+    /* line 651, sass/core.scss */
+    .displayed-content .featureFixed > .featureFixedBody > *:first-child {
+      margin-top: 0.5em; }
+    /* line 652, sass/core.scss */
+    .displayed-content .featureFixed > .featureFixedBody > *:last-child {
+      margin-bottom: 0.5em; }
+  /* line 654, sass/core.scss */
+  .displayed-content .featureFixed > header[data-titlegroup_display="no"] ~ .featureFixedBody {
+    border-radius: 6px; }
+  /* line 657, sass/core.scss */
+  .displayed-content *[data-formatted="no"], .displayed-content *[data-formatted="no"] > .featureBody, .displayed-content *[data-formatted="no"] > .featureFixedBody, .displayed-content *[data-formatted="no"] > header {
+    background-color: inherit !important;
+    padding: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    border: none; }
+  /* line 666, sass/core.scss */
+  .displayed-content .list {
+    margin: 0.8em 0; }
+    /* line 668, sass/core.scss */
+    .displayed-content .list > header {
+      font-size: 12pt;
+      margin-left: 20px; }
+      /* line 671, sass/core.scss */
+      .displayed-content .list > header ~ ol {
+        margin-top: 0; }
+      /* line 672, sass/core.scss */
+      .displayed-content .list > header ~ ul {
+        margin-top: 0; }
+    /* line 674, sass/core.scss */
+    .displayed-content .list:not([data-formatted="paragraph"]) > p {
+      margin-left: 20px;
+      margin-top: 1em; }
+  /* line 681, sass/core.scss */
+  .displayed-content ol[data-type="1"] {
+    list-style-type: decimal; }
+  /* line 682, sass/core.scss */
+  .displayed-content ol[data-type="A"] {
+    list-style-type: upper-alpha; }
+  /* line 683, sass/core.scss */
+  .displayed-content ol[data-type="a"] {
+    list-style-type: lower-alpha; }
+  /* line 684, sass/core.scss */
+  .displayed-content ol[data-type="I"] {
+    list-style-type: upper-roman; }
+  /* line 685, sass/core.scss */
+  .displayed-content ol[data-type="i"] {
+    list-style-type: lower-roman; }
+  /* line 689, sass/core.scss */
+  .displayed-content ul > *:first-child {
+    margin-top: 0; }
+  /* line 690, sass/core.scss */
+  .displayed-content ul[data-type="plain"] {
+    list-style-type: none; }
+  /* line 691, sass/core.scss */
+  .displayed-content ul[data-type="custom"], .displayed-content ul[data-type="checkbox"], .displayed-content ul[data-type="hotspot"] {
+    list-style-type: none;
+    padding-left: 20px; }
+    /* line 694, sass/core.scss */
+    .displayed-content ul[data-type="custom"] > li, .displayed-content ul[data-type="checkbox"] > li, .displayed-content ul[data-type="hotspot"] > li {
+      display: table-row;
+      position: relative;
+      vertical-align: baseline; }
+      /* line 698, sass/core.scss */
+      .displayed-content ul[data-type="custom"] > li > .generated-labeling, .displayed-content ul[data-type="checkbox"] > li > .generated-labeling, .displayed-content ul[data-type="hotspot"] > li > .generated-labeling {
+        display: table-cell;
+        padding-right: 0.4em;
+        text-align: right; }
+  /* line 708, sass/core.scss */
+  .displayed-content li > header {
+    display: inline;
+    font-size: 11pt; }
+    /* line 711, sass/core.scss */
+    .displayed-content li > header > .title {
+      display: inline; }
+  /* line 713, sass/core.scss */
+  .displayed-content li > .list {
+    margin: 0; }
+  /* line 714, sass/core.scss */
+  .displayed-content li > p:first-of-type {
+    display: inline; }
+  /* line 717, sass/core.scss */
+  .displayed-content ol[data-formatted="paragraph"], .displayed-content ul[data-formatted="paragraph"], .displayed-content *[data-formatted="paragraph"] > ol, .displayed-content *[data-formatted="paragraph"] > ul {
+    list-style-position: inside;
+    padding-left: 0px; }
+  /* line 721, sass/core.scss */
+  .displayed-content *[data-formatted="paragraph"] > header {
+    margin-left: 0px; }
+  /* line 722, sass/core.scss */
+  .displayed-content ul[data-type="custom"][data-formatted="paragraph"], .displayed-content ul[data-type="checkbox"][data-formatted="paragraph"],
+  .displayed-content *[data-type="custom"][data-formatted="paragraph"] > ul, .displayed-content *[data-type="checkbox"][data-formatted="paragraph"] > ul {
+    list-style-position: inherit; }
+  /* line 724, sass/core.scss */
+  .displayed-content ul[data-type="custom"][data-formatted="paragraph"] > li, .displayed-content ul[data-type="checkbox"][data-formatted="paragraph"] > li,
+  .displayed-content *[data-type="custom"][data-formatted="paragraph"] > ul > li, .displayed-content *[data-type="checkbox"][data-formatted="paragraph"] > ul > li {
+    display: list-item;
+    position: static; }
+  /* line 729, sass/core.scss */
+  .displayed-content ul[data-type="custom"][data-formatted="paragraph"] > li > .generated-labeling, .displayed-content *[data-type="custom"][data-formatted="paragraph"] > ul > li > .generated-labeling {
+    display: inline; }
+  /* line 731, sass/core.scss */
+  .displayed-content *:not([data-compact="no"]) > ul {
+    border-spacing: 0; }
+  /* line 733, sass/core.scss */
+  .displayed-content *[data-compact="no"] > ul {
+    border-spacing: 0 1em; }
+  /* line 734, sass/core.scss */
+  .displayed-content *[data-compact="no"] > li, .displayed-content *[data-compact="no"] > ol > li, .displayed-content *[data-compact="no"] > ul > li {
+    margin-top: 1em; }
+  /* line 738, sass/core.scss */
+  .displayed-content .listPaired {
+    margin: 1em 0;
+    text-align: left; }
+    /* line 742, sass/core.scss */
+    .displayed-content .listPaired > .listPairHead {
+      font-weight: 700; }
+    /* line 743, sass/core.scss */
+    .displayed-content .listPaired > figcaption, .displayed-content .listPaired > caption {
+      text-align: left;
+      margin-bottom: .3em; }
+      /* line 746, sass/core.scss */
+      .displayed-content .listPaired > figcaption > .header, .displayed-content .listPaired > caption > .header {
+        font-size: 12pt; }
+    /* line 748, sass/core.scss */
+    .displayed-content .listPaired > table {
+      margin: 0; }
+    /* line 751, sass/core.scss */
+    .displayed-content .listPaired[data-compact="no"] > table > tbody > tr > td, .displayed-content .listPaired[data-compact="no"] > table > thead > tr > th {
+      padding: 5px; }
+  /* line 756, sass/core.scss */
+  .displayed-content *[data-compact="no"] > dt, .displayed-content *[data-compact="no"] > dl > dt {
+    margin-top: 8px; }
+  /* line 759, sass/core.scss */
+  .displayed-content figure.listPaired > dl, .displayed-content .listItem > .listPaired {
+    margin: 0; }
+  /* line 761, sass/core.scss */
+  .displayed-content tr.listPairHead > th:first-of-type, .displayed-content tr.listItemPair > td:first-of-type {
+    padding-left: 0 !important; }
+  /* line 762, sass/core.scss */
+  .displayed-content tr.listItemPair > td:not([class]) {
+    padding-right: 0 !important;
+    text-align: right; }
+  /* line 765, sass/core.scss */
+  .displayed-content *[data-e-rights="no"] > table, .displayed-content *[data-e-rights="unknown"] > table {
+    border: 1px black dashed;
+    background: #F7F7F7;
+    padding: 5px;
+    border-radius: 3px; }
+  /* line 771, sass/core.scss */
+  .displayed-content *[data-e-rights="no"] > *:not(table), .displayed-content *[data-e-rights="unknown"] > *:not(table) {
+    display: none; }
+  /* line 772, sass/core.scss */
+  .displayed-content *[data-e-rights="no"] > table > *, .displayed-content *[data-e-rights="unknown"] > table > * {
+    display: none; }
+  /* line 773, sass/core.scss */
+  .displayed-content *[data-e-rights="no"] > table:after, .displayed-content *[data-e-rights="unknown"] > table:after {
+    content: "eRights not secured, please consult the print"; }
+  /* line 775, sass/core.scss */
+  .displayed-content .mediaResource[data-e-rights="no"]:after, .displayed-content .mediaResource[data-e-rights="unknown"]:after {
+    content: "eRights not secured, please consult the print"; }
+  /* line 778, sass/core.scss */
+  .displayed-content section.figure {
+    margin: 1.5em 40px !important; }
+  /* line 780, sass/core.scss */
+  .displayed-content figure, .displayed-content div.mediaResource {
+    text-align: center; }
+  /* line 782, sass/core.scss */
+  .displayed-content div.figureBody {
+    border: 1px grey solid;
+    padding: 10px; }
+    /* line 785, sass/core.scss */
+    .displayed-content div.figureBody > *:first-child {
+      margin-top: 0; }
+    /* line 786, sass/core.scss */
+    .displayed-content div.figureBody > *:last-child {
+      margin-bottom: 0; }
+  /* line 790, sass/core.scss */
+  .displayed-content figcaption.caption, .displayed-content figcaption.caption-titled {
+    max-width: 600px;
+    margin-top: 8pt; }
+  /* line 794, sass/core.scss */
+  .displayed-content figcaption.caption {
+    display: inline-block;
+    text-align: left; }
+  /* line 801, sass/core.scss */
+  .displayed-content figure.figure {
+    margin: 1em 40px; }
+    /* line 804, sass/core.scss */
+    .displayed-content figure.figure > figcaption {
+      display: inline-block;
+      text-align: left;
+      max-width: 600px;
+      margin-top: 8pt; }
+      /* line 809, sass/core.scss */
+      .displayed-content figure.figure > figcaption > p:first-of-type {
+        display: inline; }
+      /* line 810, sass/core.scss */
+      .displayed-content figure.figure > figcaption > header {
+        display: inline;
+        font-size: 11pt; }
+        /* line 813, sass/core.scss */
+        .displayed-content figure.figure > figcaption > header > .title {
+          display: inline; }
+    /* line 816, sass/core.scss */
+    .displayed-content figure.figure > div.figureBody {
+      max-width: 580px;
+      margin-right: auto !important;
+      margin-left: auto !important; }
+    /* line 822, sass/core.scss */
+    .displayed-content figure.figure > section > header {
+      font-size: 1.105em; }
+    /* line 823, sass/core.scss */
+    .displayed-content figure.figure > section > section > header {
+      font-size: 1.05em; }
+  /* line 828, sass/core.scss */
+  .displayed-content figure.figurePart > figcaption {
+    display: inline-block;
+    text-align: left;
+    max-width: 500px;
+    margin-top: 6pt; }
+  /* line 834, sass/core.scss */
+  .displayed-content figure.figurePart > p, .displayed-content figure.figurePart > section {
+    max-width: 500px;
+    margin-right: auto !important;
+    margin-left: auto !important; }
+  /* line 840, sass/core.scss */
+  .displayed-content figure.figurePart > section > header {
+    font-size: 1.105em; }
+  /* line 841, sass/core.scss */
+  .displayed-content figure.figurePart > section > section > header {
+    font-size: 1.05em; }
+  /* line 845, sass/core.scss */
+  .displayed-content figure.chemicalStructure > p, .displayed-content figure.chemicalStructure > section {
+    text-align: center !important; }
+  /* line 846, sass/core.scss */
+  .displayed-content figure.chemicalStructure > figcaption {
+    text-align: center; }
+    /* line 848, sass/core.scss */
+    .displayed-content figure.chemicalStructure > figcaption > .generated-labeling {
+      font-size: 11pt;
+      display: block;
+      margin-right: 0; }
+  /* line 855, sass/core.scss */
+  .displayed-content figure > math {
+    display: block; }
+  /* line 858, sass/core.scss */
+  .displayed-content .mediaResource {
+    display: block;
+    margin: 0 auto; }
+  /* line 863, sass/core.scss */
+  .displayed-content img {
+    vertical-align: middle; }
+  /* line 864, sass/core.scss */
+  .displayed-content img[onclick] {
+    cursor: pointer; }
+  /* line 867, sass/core.scss */
+  .displayed-content figure.tabular, .displayed-content figure.tabularFixed {
+    margin: 1em 40px;
+    text-align: center; }
+    /* line 870, sass/core.scss */
+    .displayed-content figure.tabular figure, .displayed-content figure.tabularFixed figure {
+      margin-right: 0;
+      margin-left: 0; }
+      /* line 873, sass/core.scss */
+      .displayed-content figure.tabular figure > figcaption, .displayed-content figure.tabularFixed figure > figcaption {
+        min-width: 0 !important; }
+    /* line 876, sass/core.scss */
+    .displayed-content figure.tabular td.align-left > p, .displayed-content figure.tabular th.align-left > p, .displayed-content figure.tabularFixed td.align-left > p, .displayed-content figure.tabularFixed th.align-left > p {
+      text-align: left; }
+    /* line 877, sass/core.scss */
+    .displayed-content figure.tabular td.align-right > p, .displayed-content figure.tabular th.align-right > p, .displayed-content figure.tabularFixed td.align-right > p, .displayed-content figure.tabularFixed th.align-right > p {
+      text-align: right; }
+    /* line 878, sass/core.scss */
+    .displayed-content figure.tabular td.align-center > p, .displayed-content figure.tabular th.align-center > p, .displayed-content figure.tabularFixed td.align-center > p, .displayed-content figure.tabularFixed th.align-center > p {
+      text-align: center; }
+    /* line 879, sass/core.scss */
+    .displayed-content figure.tabular td.align-justify > p, .displayed-content figure.tabular th.align-justify > p, .displayed-content figure.tabularFixed td.align-justify > p, .displayed-content figure.tabularFixed th.align-justify > p {
+      text-align: justify; }
+    /* line 881, sass/core.scss */
+    .displayed-content figure.tabular td > *:last-child, .displayed-content figure.tabular th > *:last-child, .displayed-content figure.tabularFixed td > *:last-child, .displayed-content figure.tabularFixed th > *:last-child {
+      margin-bottom: 0; }
+    /* line 882, sass/core.scss */
+    .displayed-content figure.tabular td > *:first-child, .displayed-content figure.tabular th > *:first-child, .displayed-content figure.tabularFixed td > *:first-child, .displayed-content figure.tabularFixed th > *:first-child {
+      margin-top: 0; }
+    /* line 883, sass/core.scss */
+    .displayed-content figure.tabular td > *, .displayed-content figure.tabular th > *, .displayed-content figure.tabularFixed td > *, .displayed-content figure.tabularFixed th > * {
+      margin-top: .5em; }
+    /* line 886, sass/core.scss */
+    .displayed-content figure.tabular > *, .displayed-content figure.tabularFixed > * {
+      margin-top: .5em;
+      margin-bottom: 0; }
+    /* line 887, sass/core.scss */
+    .displayed-content figure.tabular > figcaption, .displayed-content figure.tabularFixed > figcaption {
+      display: inline-block;
+      text-align: left;
+      margin-bottom: 3pt;
+      min-width: 300px; }
+      /* line 892, sass/core.scss */
+      .displayed-content figure.tabular > figcaption > figure, .displayed-content figure.tabularFixed > figcaption > figure {
+        margin-left: 0;
+        margin-right: 0; }
+      /* line 896, sass/core.scss */
+      .displayed-content figure.tabular > figcaption > header, .displayed-content figure.tabularFixed > figcaption > header {
+        font-size: 11pt;
+        display: inline; }
+        /* line 899, sass/core.scss */
+        .displayed-content figure.tabular > figcaption > header > .title, .displayed-content figure.tabularFixed > figcaption > header > .title {
+          display: inline; }
+          /* line 901, sass/core.scss */
+          .displayed-content figure.tabular > figcaption > header > .title[data-type="main"], .displayed-content figure.tabularFixed > figcaption > header > .title[data-type="main"] {
+            font-weight: normal; }
+    /* line 905, sass/core.scss */
+    .displayed-content figure.tabular > table *[data-note_label], .displayed-content figure.tabularFixed > table *[data-note_label] {
+      font-style: italic;
+      font-weight: normal; }
+    /* line 909, sass/core.scss */
+    .displayed-content figure.tabular > .source, .displayed-content figure.tabularFixed > .source {
+      text-align: left;
+      margin: 0 0 0 0.5em; }
+    /* line 913, sass/core.scss */
+    .displayed-content figure.tabular > .noteGroup, .displayed-content figure.tabularFixed > .noteGroup {
+      text-align: left;
+      font-size: 10pt;
+      margin: 0; }
+      /* line 917, sass/core.scss */
+      .displayed-content figure.tabular > .noteGroup > li.note > .generated-labeling, .displayed-content figure.tabularFixed > .noteGroup > li.note > .generated-labeling {
+        font-style: italic;
+        margin-right: 0; }
+  /* line 925, sass/core.scss */
+  .displayed-content td > .tabular, .displayed-content td > .tabularFixed, .displayed-content th > .tabular, .displayed-content th > .tabularFixed {
+    margin: 0 0 .5em 0; }
+  /* line 927, sass/core.scss */
+  .displayed-content table {
+    border-spacing: 0;
+    text-align: left;
+    margin: 0 auto; }
+  /* line 933, sass/core.scss */
+  .displayed-content .align-left table, .displayed-content .align-right table, .displayed-content li .tabularFixed table {
+    margin: 0; }
+  /* line 935, sass/core.scss */
+  .displayed-content thead {
+    vertical-align: bottom; }
+  /* line 936, sass/core.scss */
+  .displayed-content tbody {
+    vertical-align: top; }
+  /* line 937, sass/core.scss */
+  .displayed-content td, .displayed-content th {
+    padding: 2px 5px; }
+  /* line 938, sass/core.scss */
+  .displayed-content td, .displayed-content th, .displayed-content .none {
+    border: hidden; }
+  /* line 940, sass/core.scss */
+  .displayed-content table.top {
+    border-top: 1px solid #000000; }
+  /* line 941, sass/core.scss */
+  .displayed-content table.bottom {
+    border-bottom: 1px solid #000000; }
+  /* line 942, sass/core.scss */
+  .displayed-content table.all {
+    border: 1px solid #000000; }
+  /* line 943, sass/core.scss */
+  .displayed-content table.topbot {
+    border-top: 1px solid #000000;
+    border-bottom: 1px solid #000000; }
+  /* line 947, sass/core.scss */
+  .displayed-content table.sides {
+    border-right: 1px solid #000000;
+    border-left: 1px solid #000000; }
+  /* line 951, sass/core.scss */
+  .displayed-content table.pgwide {
+    width: 100%; }
+  /* line 952, sass/core.scss */
+  .displayed-content table.exclude-top {
+    border-top: none; }
+  /* line 953, sass/core.scss */
+  .displayed-content table.exclude-bottom {
+    border-bottom: none; }
+  /* line 955, sass/core.scss */
+  .displayed-content .eC {
+    border-right: 1px solid #000000; }
+  /* line 956, sass/core.scss */
+  .displayed-content .eR {
+    border-bottom: 1px solid #000000; }
+  /* line 957, sass/core.scss */
+  .displayed-content .eR2 {
+    border-bottom: 3px double #000000; }
+  /* line 959, sass/core.scss */
+  .displayed-content .formatting {
+    display: table;
+    width: 100%; }
+  /* line 964, sass/core.scss */
+  .displayed-content div.align-char {
+    display: table-row; }
+    /* line 967, sass/core.scss */
+    .displayed-content div.align-char div.left, .displayed-content div.align-char div.right {
+      display: table-cell;
+      white-space: nowrap; }
+    /* line 971, sass/core.scss */
+    .displayed-content div.align-char div.left {
+      text-align: right; }
+    /* line 972, sass/core.scss */
+    .displayed-content div.align-char div.right {
+      text-align: left; }
+  /* line 977, sass/core.scss */
+  .displayed-content ul.biblioentrylist {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+    border-spacing: 0 3px; }
+    /* line 982, sass/core.scss */
+    .displayed-content ul.biblioentrylist > li {
+      display: table-row;
+      position: relative;
+      vertical-align: baseline; }
+      /* line 986, sass/core.scss */
+      .displayed-content ul.biblioentrylist > li > .generated-labeling {
+        display: table-cell;
+        padding-right: 0.5em;
+        text-align: right; }
+  /* line 994, sass/core.scss */
+  .displayed-content .bibliography[data-style="nameDate"] > ul.biblioentrylist, .displayed-content .bibSection[data-style="nameDate"] > ul.biblioentrylist {
+    margin-left: 1em; }
+  /* line 995, sass/core.scss */
+  .displayed-content .bibliography[data-style="nameDate"] > ul.biblioentrylist > li, .displayed-content .bibSection[data-style="nameDate"] > ul.biblioentrylist > li {
+    text-indent: -1em; }
+  /* line 997, sass/core.scss */
+  .displayed-content .vol {
+    margin-left: .4em; }
+  /* line 998, sass/core.scss */
+  .displayed-content .selfCitationGroup .vol {
+    margin-left: 0; }
+  /* line 1000, sass/core.scss */
+  .displayed-content span.link[data-bib_callout_style="numbered"]:not([data-style="unformatted"])::before {
+    content: "["; }
+  /* line 1001, sass/core.scss */
+  .displayed-content span.link[data-bib_callout_style="numbered"]:not([data-style="unformatted"])::after {
+    content: "]"; }
+  /* line 1004, sass/core.scss */
+  .displayed-content .computerCode {
+    font-family: "Courier New", monospace;
+    margin: 15pt 0 15pt 20px; }
+    /* line 1007, sass/core.scss */
+    .displayed-content .computerCode > header {
+      font-size: 11pt; }
+    /* line 1008, sass/core.scss */
+    .displayed-content .computerCode[data-monospace="no"] {
+      font-family: sans-serif; }
+      /* line 1010, sass/core.scss */
+      .displayed-content .computerCode[data-monospace="no"] > .lineatedText > code.line {
+        font-family: sans-serif; }
+    /* line 1012, sass/core.scss */
+    .displayed-content .computerCode > .lineatedText[data-line-wrap="wrapWithIndent"][data-number-lines="yes"] > code.line {
+      padding-left: 0;
+      text-indent: 0; }
+      /* line 1015, sass/core.scss */
+      .displayed-content .computerCode > .lineatedText[data-line-wrap="wrapWithIndent"][data-number-lines="yes"] > code.line > span.lineContent {
+        display: block;
+        padding-left: 12px;
+        text-indent: -12px; }
+        /* line 16, sass/core.scss */
+        .displayed-content .computerCode > .lineatedText[data-line-wrap="wrapWithIndent"][data-number-lines="yes"] > code.line > span.lineContent[data-indent-level="1"] {
+          padding-left: 37px; }
+        /* line 17, sass/core.scss */
+        .displayed-content .computerCode > .lineatedText[data-line-wrap="wrapWithIndent"][data-number-lines="yes"] > code.line > span.lineContent[data-indent-level="2"] {
+          padding-left: 57px; }
+        /* line 18, sass/core.scss */
+        .displayed-content .computerCode > .lineatedText[data-line-wrap="wrapWithIndent"][data-number-lines="yes"] > code.line > span.lineContent[data-indent-level="3"] {
+          padding-left: 87px; }
+        /* line 19, sass/core.scss */
+        .displayed-content .computerCode > .lineatedText[data-line-wrap="wrapWithIndent"][data-number-lines="yes"] > code.line > span.lineContent[data-indent-level="4"] {
+          padding-left: 97px; }
+        /* line 20, sass/core.scss */
+        .displayed-content .computerCode > .lineatedText[data-line-wrap="wrapWithIndent"][data-number-lines="yes"] > code.line > span.lineContent[data-indent-level="5"] {
+          padding-left: 117px; }
+  /* line 1025, sass/core.scss */
+  .displayed-content figure[data-type="poetry"]:not([data-block-align]) > *, .displayed-content figure[data-type="poetry"][data-block-align="indent"] > * {
+    margin-left: 40px; }
+  /* line 1026, sass/core.scss */
+  .displayed-content figure[data-type="poetry"][data-block-align="centered"] > * {
+    text-align: center; }
+  /* line 1027, sass/core.scss */
+  .displayed-content figure[data-type="poetry"][data-block-align="left"] > * {
+    text-align: left; }
+  /* line 1030, sass/core.scss */
+  .displayed-content .lineatedText {
+    margin: 10pt 0; }
+    /* line 1032, sass/core.scss */
+    .displayed-content .lineatedText > .line {
+      display: block;
+      min-height: 1em; }
+      /* line 1035, sass/core.scss */
+      .displayed-content .lineatedText > .line[data-type="highlight"] {
+        background-color: lightgrey; }
+    /* line 1037, sass/core.scss */
+    .displayed-content .lineatedText:not([data-block-align]), .displayed-content .lineatedText[data-block-align="left"] {
+      text-align: left; }
+      /* line 1039, sass/core.scss */
+      .displayed-content .lineatedText:not([data-block-align])[data-line-wrap="wrapWithIndent"] > .line, .displayed-content .lineatedText[data-block-align="left"][data-line-wrap="wrapWithIndent"] > .line {
+        padding-left: 12px;
+        text-indent: -12px; }
+        /* line 16, sass/core.scss */
+        .displayed-content .lineatedText:not([data-block-align])[data-line-wrap="wrapWithIndent"] > .line[data-indent-level="1"], .displayed-content .lineatedText[data-block-align="left"][data-line-wrap="wrapWithIndent"] > .line[data-indent-level="1"] {
+          padding-left: 37px; }
+        /* line 17, sass/core.scss */
+        .displayed-content .lineatedText:not([data-block-align])[data-line-wrap="wrapWithIndent"] > .line[data-indent-level="2"], .displayed-content .lineatedText[data-block-align="left"][data-line-wrap="wrapWithIndent"] > .line[data-indent-level="2"] {
+          padding-left: 57px; }
+        /* line 18, sass/core.scss */
+        .displayed-content .lineatedText:not([data-block-align])[data-line-wrap="wrapWithIndent"] > .line[data-indent-level="3"], .displayed-content .lineatedText[data-block-align="left"][data-line-wrap="wrapWithIndent"] > .line[data-indent-level="3"] {
+          padding-left: 87px; }
+        /* line 19, sass/core.scss */
+        .displayed-content .lineatedText:not([data-block-align])[data-line-wrap="wrapWithIndent"] > .line[data-indent-level="4"], .displayed-content .lineatedText[data-block-align="left"][data-line-wrap="wrapWithIndent"] > .line[data-indent-level="4"] {
+          padding-left: 97px; }
+        /* line 20, sass/core.scss */
+        .displayed-content .lineatedText:not([data-block-align])[data-line-wrap="wrapWithIndent"] > .line[data-indent-level="5"], .displayed-content .lineatedText[data-block-align="left"][data-line-wrap="wrapWithIndent"] > .line[data-indent-level="5"] {
+          padding-left: 117px; }
+    /* line 1045, sass/core.scss */
+    .displayed-content .lineatedText[data-block-align="indent"] {
+      margin-left: 36px; }
+      /* line 1047, sass/core.scss */
+      .displayed-content .lineatedText[data-block-align="indent"][data-line-wrap="wrapWithIndent"] > .line {
+        padding-left: 12px;
+        text-indent: -12px; }
+        /* line 16, sass/core.scss */
+        .displayed-content .lineatedText[data-block-align="indent"][data-line-wrap="wrapWithIndent"] > .line[data-indent-level="1"] {
+          padding-left: 37px; }
+        /* line 17, sass/core.scss */
+        .displayed-content .lineatedText[data-block-align="indent"][data-line-wrap="wrapWithIndent"] > .line[data-indent-level="2"] {
+          padding-left: 57px; }
+        /* line 18, sass/core.scss */
+        .displayed-content .lineatedText[data-block-align="indent"][data-line-wrap="wrapWithIndent"] > .line[data-indent-level="3"] {
+          padding-left: 87px; }
+        /* line 19, sass/core.scss */
+        .displayed-content .lineatedText[data-block-align="indent"][data-line-wrap="wrapWithIndent"] > .line[data-indent-level="4"] {
+          padding-left: 97px; }
+        /* line 20, sass/core.scss */
+        .displayed-content .lineatedText[data-block-align="indent"][data-line-wrap="wrapWithIndent"] > .line[data-indent-level="5"] {
+          padding-left: 117px; }
+    /* line 1053, sass/core.scss */
+    .displayed-content .lineatedText[data-block-align="centered"] {
+      text-align: center !important; }
+  /* line 1056, sass/core.scss */
+  .displayed-content cite.source > .line {
+    display: block; }
+  /* line 1059, sass/core.scss */
+  .displayed-content *[data-number-lines="yes"] > .line {
+    display: table-row;
+    position: relative;
+    vertical-align: baseline; }
+    /* line 1063, sass/core.scss */
+    .displayed-content *[data-number-lines="yes"] > .line > span.lineContent {
+      display: table-cell; }
+    /* line 1064, sass/core.scss */
+    .displayed-content *[data-number-lines="yes"] > .line > span.generated-labeling {
+      display: table-cell;
+      padding-right: 0.4em; }
+    /* line 1068, sass/core.scss */
+    .displayed-content *[data-number-lines="yes"] > .line[data-indent-level="1"] > span.lineContent {
+      padding-left: 25px; }
+    /* line 1069, sass/core.scss */
+    .displayed-content *[data-number-lines="yes"] > .line[data-indent-level="2"] > span.lineContent {
+      padding-left: 45px; }
+    /* line 1070, sass/core.scss */
+    .displayed-content *[data-number-lines="yes"] > .line[data-indent-level="3"] > span.lineContent {
+      padding-left: 65px; }
+    /* line 1071, sass/core.scss */
+    .displayed-content *[data-number-lines="yes"] > .line[data-indent-level="4"] > span.lineContent {
+      padding-left: 85px; }
+    /* line 1072, sass/core.scss */
+    .displayed-content *[data-number-lines="yes"] > .line[data-indent-level="5"] > span.lineContent {
+      padding-left: 105px; }
+    /* line 1073, sass/core.scss */
+    .displayed-content *[data-number-lines="yes"] > .line[data-indent-level="centered"] > span.lineContent {
+      text-align: center; }
+    /* line 1074, sass/core.scss */
+    .displayed-content *[data-number-lines="yes"] > .line[data-indent-level="flushRight"] > span.lineContent {
+      text-align: right; }
+    /* line 1075, sass/core.scss */
+    .displayed-content *[data-number-lines="yes"] > .line[data-indent-level="flushLeft"] > span.lineContent {
+      text-align: left; }
+  /* line 1077, sass/core.scss */
+  .displayed-content *[data-space="pre"] {
+    white-space: pre-wrap; }
+  /* line 1081, sass/core.scss */
+  .displayed-content .recipe {
+    background-color: #ace1af;
+    border: 1px solid #00aa00;
+    margin: 10pt 0;
+    padding: 5px; }
+    /* line 1087, sass/core.scss */
+    .displayed-content .recipe > header {
+      border: 1px solid;
+      display: inline-block;
+      font-size: 1.2em !important;
+      font-weight: normal !important;
+      padding: 2px;
+      margin-bottom: .8em !important; }
+    /* line 1095, sass/core.scss */
+    .displayed-content .recipe > .generated-text {
+      background-color: darkgreen;
+      color: #ffffff;
+      display: inline-block;
+      margin-right: 5px;
+      padding: 1px 5px;
+      margin: 3px 0 0 .5em; }
+    /* line 1103, sass/core.scss */
+    .displayed-content .recipe > p {
+      margin: 1em 0; }
+    /* line 1106, sass/core.scss */
+    .displayed-content .recipe .recipeVariations > header, .displayed-content .recipe .recipeTools > header, .displayed-content .recipe .recipeIntro > header, .displayed-content .recipe .recipeIngredientsList > header, .displayed-content .recipe .recipeProcedure > header, .displayed-content .recipe .recipeNutritionInfo > header {
+      font-size: 1.2em; }
+    /* line 1107, sass/core.scss */
+    .displayed-content .recipe .recipeVariation > header {
+      font-size: 1.05em; }
+    /* line 1108, sass/core.scss */
+    .displayed-content .recipe .recipeVariations > header {
+      font-style: italic; }
+    /* line 1109, sass/core.scss */
+    .displayed-content .recipe .recipeYield, .displayed-content .recipe .recipeTime, .displayed-content .recipe .recipeIntro, .displayed-content .recipe .recipeTools {
+      margin: 0 0 .8em 0; }
+    /* line 1110, sass/core.scss */
+    .displayed-content .recipe .recipeVariation, .displayed-content .recipe .recipeVariations > p {
+      margin: 0 0 .5em 0; }
+    /* line 1111, sass/core.scss */
+    .displayed-content .recipe .recipeNutritionInfo {
+      font-size: 0.8em;
+      margin-top: .8em; }
+    /* line 1112, sass/core.scss */
+    .displayed-content .recipe .recipeTime > .generated-text {
+      background-color: darkgreen;
+      color: #ffffff;
+      display: inline-block;
+      margin-right: 5px;
+      padding: 1px 5px; }
+  /* line 1123, sass/core.scss */
+  .displayed-content .protocol .protocolSection {
+    margin: 0 auto .6em 0; }
+    /* line 1126, sass/core.scss */
+    .displayed-content .protocol .protocolSection > header {
+      font-style: italic; }
+    /* line 1127, sass/core.scss */
+    .displayed-content .protocol .protocolSection > .protocolStep {
+      display: table-row;
+      position: relative;
+      vertical-align: baseline; }
+      /* line 1131, sass/core.scss */
+      .displayed-content .protocol .protocolSection > .protocolStep > .generated-labeling {
+        display: table-cell;
+        padding-right: 0.5em;
+        font-weight: normal; }
+      /* line 1136, sass/core.scss */
+      .displayed-content .protocol .protocolSection > .protocolStep > header {
+        font-size: 1.0em !important; }
+  /* line 1141, sass/core.scss */
+  .displayed-content .protocol > header {
+    font-size: 1.4em !important; }
+    /* line 1143, sass/core.scss */
+    .displayed-content .protocol > header > .title > .generated-text {
+      margin-right: .4em; }
+  /* line 1145, sass/core.scss */
+  .displayed-content .protocol > .protocolMaterials {
+    margin-top: .3em;
+    margin-bottom: .6em; }
+    /* line 1148, sass/core.scss */
+    .displayed-content .protocol > .protocolMaterials > header {
+      font-size: 1.1em !important;
+      font-style: italic; }
+  /* line 1154, sass/core.scss */
+  .displayed-content .protocol > .protocolSection > header {
+    font-size: 1.1em !important; }
+  /* line 1156, sass/core.scss */
+  .displayed-content .protocol > .protocolSection > .protocolSection > header {
+    font-size: 1.05em !important;
+    font-weight: normal !important; }
+  /* line 1160, sass/core.scss */
+  .displayed-content .protocol > .protocolSection > .protocolSection > .protocolSection > header {
+    font-size: 1.0em !important;
+    font-weight: normal !important; }
+  /* line 1169, sass/core.scss */
+  .displayed-content .protocolRecipe {
+    margin-bottom: .6em; }
+    /* line 1171, sass/core.scss */
+    .displayed-content .protocolRecipe > header {
+      font-size: 1.1em !important;
+      font-style: italic; }
+    /* line 1175, sass/core.scss */
+    .displayed-content .protocolRecipe > div > ul {
+      margin: 0 0 0 auto; }
+  /* line 1178, sass/core.scss */
+  .displayed-content p[data-type="annotation"] {
+    font-style: italic;
+    padding-left: 18pt;
+    margin: .6em 0; }
+  /* line 1185, sass/core.scss */
+  .displayed-content .semanticGroup > * {
+    vertical-align: top; }
+  /* line 1187, sass/core.scss */
+  .displayed-content *[data-semantic_group_num] > * > figcaption {
+    min-width: 0 !important; }
+  /* line 1188, sass/core.scss */
+  .displayed-content *[data-semantic_group_num] > * {
+    display: inline-block;
+    margin-left: 0 !important;
+    margin-right: 0 !important; }
+  /* line 1194, sass/core.scss */
+  .displayed-content *[data-semantic_group_num="2"] > * {
+    width: 49%; }
+  /* line 1195, sass/core.scss */
+  .displayed-content *[data-semantic_group_num="3"] > * {
+    width: 33%; }
+  /* line 1196, sass/core.scss */
+  .displayed-content *[data-semantic_group_num="4"] > * {
+    width: 24%; }
+  /* line 1197, sass/core.scss */
+  .displayed-content *[data-semantic_group_num="5"] > * {
+    width: 19%; }
+  /* line 1198, sass/core.scss */
+  .displayed-content *[data-semantic_group_num="6"] > * {
+    width: 16%; }
+  /* line 1199, sass/core.scss */
+  .displayed-content *[data-semantic_group_num="7"] > * {
+    width: 14%; }
+  /* line 1200, sass/core.scss */
+  .displayed-content *[data-semantic_group_num="8"] > * {
+    width: 12%; }
+  /* line 1201, sass/core.scss */
+  .displayed-content *[data-semantic_group_num="9"] > * {
+    width: 11%; }
+  /* line 1202, sass/core.scss */
+  .displayed-content *[data-semantic_group_num="10"] > * {
+    width: 9%; }
+  /* line 1205, sass/core.scss */
+  .displayed-content p > .objectNotes, .displayed-content li > .objectNotes {
+    margin-right: .1em; }
+  /* line 1207, sass/core.scss */
+  .displayed-content .objectNotes {
+    vertical-align: super;
+    font-size: smaller; }
+    /* line 1211, sass/core.scss */
+    .displayed-content .objectNotes > .note-label {
+      vertical-align: text-bottom; }
+    /* line 1213, sass/core.scss */
+    .displayed-content .objectNotes > .link > a {
+      vertical-align: text-bottom;
+      text-decoration: none; }
+      /* line 1216, sass/core.scss */
+      .displayed-content .objectNotes > .link > a:hover {
+        text-decoration: underline; }
+      /* line 1217, sass/core.scss */
+      .displayed-content .objectNotes > .link > a > .generated-labeling {
+        margin: 0 .1em; }
+    /* line 1219, sass/core.scss */
+    .displayed-content .objectNotes > .link:not(:last-child):after {
+      content: ", "; }
+  /* line 1225, sass/core.scss */
+  .displayed-content .noteGroup > h2 {
+    margin-bottom: 0; }
+  /* line 1226, sass/core.scss */
+  .displayed-content .noteGroup > header {
+    font-size: 1.4em; }
+  /* line 1229, sass/core.scss */
+  .displayed-content ol.notes, .displayed-content ol.noteGroup {
+    list-style-type: none;
+    padding-left: 0;
+    margin: .5em 0;
+    border-spacing: 0 5px; }
+  /* line 1235, sass/core.scss */
+  .displayed-content ol.notes > li.note:not([data-numbered="no"]), .displayed-content ol.noteGroup > li.note:not([data-numbered="no"]) {
+    display: table-row;
+    position: relative;
+    vertical-align: baseline; }
+    /* line 1239, sass/core.scss */
+    .displayed-content ol.notes > li.note:not([data-numbered="no"]) > .generated-labeling, .displayed-content ol.noteGroup > li.note:not([data-numbered="no"]) > .generated-labeling {
+      display: table-cell;
+      padding-right: .2em;
+      font-size: smaller;
+      text-align: right;
+      vertical-align: top;
+      line-height: 0.9em; }
+  /* line 1248, sass/core.scss */
+  .displayed-content ol.notes > li.note[data-numbered="no"] > .generated-labeling, .displayed-content ol.noteGroup > li.note[data-numbered="no"] > .generated-labeling {
+    display: none; }
+  /* line 1251, sass/core.scss */
+  .displayed-content *[data-note_label="yes"] {
+    vertical-align: super;
+    font-size: smaller; }
+    /* line 1254, sass/core.scss */
+    .displayed-content *[data-note_label="yes"] > a {
+      text-decoration: none; }
+      /* line 1256, sass/core.scss */
+      .displayed-content *[data-note_label="yes"] > a:hover {
+        text-decoration: underline; }
+  /* line 1260, sass/core.scss */
+  .displayed-content li[data-type="associatedArticle"] {
+    background-color: #D5F1FA; }
+  /* line 1262, sass/core.scss */
+  .displayed-content .feature .noteGroup, .displayed-content .appendix .noteGroup, .displayed-content .letter .noteGroup {
+    border-top: 1px solid darkgrey;
+    padding-top: 8px;
+    margin-top: 8px; }
+  /* line 1269, sass/core.scss */
+  .displayed-content .exerciseSection {
+    border-spacing: 0 .3em; }
+  /* line 1271, sass/core.scss */
+  .displayed-content .exercise {
+    padding-bottom: 0.5em;
+    display: table-row;
+    position: relative;
+    vertical-align: baseline;
+    text-align: left; }
+    /* line 1278, sass/core.scss */
+    .displayed-content .exercise > .generated-labeling {
+      display: table-cell;
+      padding-right: 0.5em;
+      font-weight: 700; }
+      /* line 1282, sass/core.scss */
+      .displayed-content .exercise > .generated-labeling > .blank {
+        margin-right: 2pt; }
+    /* line 1284, sass/core.scss */
+    .displayed-content .exercise > .source {
+      margin-bottom: .3em; }
+    /* line 1285, sass/core.scss */
+    .displayed-content .exercise > header {
+      display: inline-block;
+      font-size: 1.02em;
+      margin-bottom: .1em; }
+      /* line 1289, sass/core.scss */
+      .displayed-content .exercise > header > .title {
+        display: inline; }
+    /* line 1293, sass/core.scss */
+    .displayed-content .exercise[data-answer-place="chapter"]:not([onlineAnswerPlace]) > .answer, .displayed-content .exercise[data-answer-place="chapter"]:not([onlineAnswerPlace]) > exerciseBody > .answer, .displayed-content .exercise[data-answer-place="chapter"]:not([onlineAnswerPlace]) > .exerciseBody > .question .blank > .answer, .displayed-content .exercise[data-answer-place="chapter"]:not([onlineAnswerPlace]) > .question .blank > .answer {
+      display: none; }
+    /* line 1296, sass/core.scss */
+    .displayed-content .exercise[data-answer-place="back"]:not([onlineAnswerPlace]) > .answer, .displayed-content .exercise[data-answer-place="back"]:not([onlineAnswerPlace]) > exerciseBody > .answer, .displayed-content .exercise[data-answer-place="back"]:not([onlineAnswerPlace]) > .exerciseBody > .question .blank > .answer, .displayed-content .exercise[data-answer-place="back"]:not([onlineAnswerPlace]) > .question .blank > .answer {
+      display: none; }
+    /* line 1299, sass/core.scss */
+    .displayed-content .exercise[data-answer-place="instructorManual"]:not([onlineAnswerPlace]) > .answer, .displayed-content .exercise[data-answer-place="instructorManual"]:not([onlineAnswerPlace]) > exerciseBody > .answer, .displayed-content .exercise[data-answer-place="instructorManual"]:not([onlineAnswerPlace]) > .exerciseBody > .question .blank > .answer, .displayed-content .exercise[data-answer-place="instructorManual"]:not([onlineAnswerPlace]) > .question .blank > .answer {
+      display: none; }
+    /* line 1302, sass/core.scss */
+    .displayed-content .exercise[data-answer-place="chapter"]:not([onlineAnswerPlace]) > .answerWrapper, .displayed-content .exercise[data-answer-place="chapter"]:not([onlineAnswerPlace]) > exerciseBody > .answerWrapper, .displayed-content .exercise[data-answer-place="chapter"]:not([onlineAnswerPlace]) > .exerciseBody > .question .blank > .answerWrapper, .displayed-content .exercise[data-answer-place="chapter"]:not([onlineAnswerPlace]) > .question .blank > .answerWrapper {
+      display: none; }
+    /* line 1305, sass/core.scss */
+    .displayed-content .exercise[data-answer-place="back"]:not([onlineAnswerPlace]) > .answerWrapper, .displayed-content .exercise[data-answer-place="back"]:not([onlineAnswerPlace]) > exerciseBody > .answerWrapper, .displayed-content .exercise[data-answer-place="back"]:not([onlineAnswerPlace]) > .exerciseBody > .question .blank > .answerWrapper, .displayed-content .exercise[data-answer-place="back"]:not([onlineAnswerPlace]) > .question .blank > .answerWrapper {
+      display: none; }
+    /* line 1308, sass/core.scss */
+    .displayed-content .exercise[data-answer-place="instructorManual"]:not([onlineAnswerPlace]) > .answerWrapper, .displayed-content .exercise[data-answer-place="instructorManual"]:not([onlineAnswerPlace]) > exerciseBody > .answerWrapper, .displayed-content .exercise[data-answer-place="instructorManual"]:not([onlineAnswerPlace]) > .exerciseBody > .question .blank > .answerWrapper, .displayed-content .exercise[data-answer-place="instructorManual"]:not([onlineAnswerPlace]) > .question .blank > .answerWrapper {
+      display: none; }
+  /* line 1312, sass/core.scss */
+  .displayed-content .exerciseSetup > header, .displayed-content .exerciseBody > header, .displayed-content .hint > header, .displayed-content .workedSolution > header {
+    display: inline-block;
+    font-size: 1.02em; }
+  /* line 1317, sass/core.scss */
+  .displayed-content .question > header {
+    margin-bottom: 0; }
+  /* line 1319, sass/core.scss */
+  .displayed-content .exerciseInstruction, .displayed-content .question, .displayed-content .answer, .displayed-content .answerWrapper, .displayed-content .workedSolution, .displayed-content .explanation, .displayed-content .exerciseSetup {
+    margin-bottom: .8em; }
+  /* line 1323, sass/core.scss */
+  .displayed-content .hint {
+    margin: .5em 0; }
+  /* line 1325, sass/core.scss */
+  .displayed-content .explanation {
+    margin-left: 1em; }
+    /* line 1327, sass/core.scss */
+    .displayed-content .explanation[data-generated_text]::before {
+      content: "Explanation";
+      display: block;
+      font-weight: 700;
+      margin-bottom: .3em;
+      margin-left: -1em; }
+    /* line 1334, sass/core.scss */
+    .displayed-content .explanation > header > .title {
+      display: block !important;
+      margin-bottom: .3em;
+      margin-left: -1em; }
+  /* line 1341, sass/core.scss */
+  .displayed-content .answer[data-generated_text], .displayed-content .answerWrapper[data-generated_text] {
+    margin-left: 1em; }
+  /* line 1343, sass/core.scss */
+  .displayed-content .answer[data-generated_text]::before, .displayed-content .answerWrapper[data-generated_text]::before {
+    content: "Answer ";
+    display: block;
+    font-weight: 700;
+    margin-bottom: .3em;
+    margin-left: -1em; }
+  /* line 1351, sass/core.scss */
+  .displayed-content .hint[data-generated_text] {
+    margin-left: 1em; }
+    /* line 1353, sass/core.scss */
+    .displayed-content .hint[data-generated_text]::before {
+      content: "Hint ";
+      display: block;
+      font-weight: 700;
+      margin-bottom: .3em;
+      margin-left: -1em; }
+  /* line 1362, sass/core.scss */
+  .displayed-content .choiceGroup {
+    margin: 0.5em 0; }
+  /* line 1364, sass/core.scss */
+  .displayed-content .answerGenerated {
+    margin: .5em 0 .5em -1em; }
+    /* line 1366, sass/core.scss */
+    .displayed-content .answerGenerated[data-type="plain"] {
+      margin-left: -2em; }
+  /* line 1369, sass/core.scss */
+  .displayed-content .question .computerCode {
+    margin-top: 0; }
+  /* line 1372, sass/core.scss */
+  .displayed-content .blank {
+    display: inline-block;
+    width: 40px;
+    border-bottom: 1px solid black;
+    margin: 0 .1em; }
+    /* line 1377, sass/core.scss */
+    .displayed-content .blank[data-type="displayBeforeNumber"] {
+      width: 20px; }
+  /* line 1380, sass/core.scss */
+  .displayed-content .blankContent {
+    margin: 0 0 0 1em; }
+    /* line 1382, sass/core.scss */
+    .displayed-content .blankContent p {
+      margin: 0; }
+    /* line 1383, sass/core.scss */
+    .displayed-content .blankContent .choice {
+      margin: .5em 0 0 1em; }
+    /* line 1384, sass/core.scss */
+    .displayed-content .blankContent .generated-labeling {
+      margin-left: -1em;
+      font-weight: 700;
+      margin-right: 0; }
+    /* line 1390, sass/core.scss */
+    .displayed-content .blankContent *[data-is-correct="yes"]::before {
+      content: "correct: ";
+      font-weight: 700;
+      margin-left: -1em; }
+    /* line 1395, sass/core.scss */
+    .displayed-content .blankContent *[data-is-correct="no"]::before {
+      content: "incorrect: ";
+      font-weight: 700;
+      margin-left: -1em; }
+  /* line 1404, sass/core.scss */
+  .displayed-content .creators, .displayed-content .affiliationGroup {
+    font-size: 10pt;
+    font-weight: normal; }
+  /* line 1409, sass/core.scss */
+  .displayed-content .creators {
+    margin-top: 1em; }
+    /* line 1412, sass/core.scss */
+    .displayed-content .creators > h2 {
+      font-size: 11pt;
+      font-style: normal; }
+    /* line 1416, sass/core.scss */
+    .displayed-content .creators > ul, .displayed-content .creators > ol {
+      list-style: none;
+      padding-left: 0;
+      margin: 0; }
+  /* line 1424, sass/core.scss */
+  .displayed-content .creator {
+    display: inline; }
+    /* line 1426, sass/core.scss */
+    .displayed-content .creator .generated-labeling {
+      margin-right: 0; }
+    /* line 1427, sass/core.scss */
+    .displayed-content .creator * {
+      display: inline; }
+    /* line 1428, sass/core.scss */
+    .displayed-content .creator .nameAlternative, .displayed-content .creator .biographyInfo, .displayed-content .creator .contactDetails {
+      display: none; }
+    /* line 1429, sass/core.scss */
+    .displayed-content .creator .affiliationRef {
+      margin-right: 0; }
+    /* line 1430, sass/core.scss */
+    .displayed-content .creator .jobTitle::before {
+      content: ", "; }
+    /* line 1431, sass/core.scss */
+    .displayed-content .creator span.correspondingIcon {
+      vertical-align: super;
+      font-size: 90%; }
+    /* line 1435, sass/core.scss */
+    .displayed-content .creator a img[alt="orcid link"] {
+      vertical-align: super;
+      margin-left: 1px; }
+  /* line 1442, sass/core.scss */
+  .displayed-content li.creator[data-creator-role="checker"], .displayed-content li.creator[data-creator-role="contributionsBy"], .displayed-content li.creator[data-creator-role="editorInChief"], .displayed-content li.creator[data-creator-role="executiveEditor"], .displayed-content li.creator[data-creator-role="guestEditor"], .displayed-content li.creator[data-creator-role="illustrator"], .displayed-content li.creator[data-creator-role="investigator"], .displayed-content li.creator[data-creator-role="specialEditor"], .displayed-content li.creator[data-creator-role="sponsoringEditor"], .displayed-content li.creator[data-creator-role="translator"] {
+    display: none; }
+  /* line 1445, sass/core.scss */
+  .displayed-content li.affiliation[data-display="no"] {
+    display: none; }
+  /* line 1448, sass/core.scss */
+  .displayed-content .personName > .honorifics:not(:last-child):after, .displayed-content .personName > .givenNames:not(:last-child):after, .displayed-content .personName > .familyNamePrefix:not(:last-child):after, .displayed-content .personName > .familyName:not(:last-child):after, .displayed-content .personName > .nameSuffix:not(:last-child):after, .displayed-content .personName > .titlesAfterNames:not(:last-child):after, .displayed-content .personName > .degrees:not(:last-child):after {
+    content: " "; }
+  /* line 1451, sass/core.scss */
+  .displayed-content section[class="subComponent"] .personName > *, .displayed-content .personName > span[property="schema:name"] {
+    display: inline; }
+  /* line 1453, sass/core.scss */
+  .displayed-content .idGroup {
+    display: none; }
+  /* line 1455, sass/core.scss */
+  .displayed-content .affiliationRef {
+    vertical-align: super;
+    font-size: smaller;
+    margin-right: .2em; }
+  /* line 1461, sass/core.scss */
+  .displayed-content .affiliationGroup {
+    display: block;
+    margin-top: .8em;
+    margin-bottom: 1em;
+    font-style: italic; }
+    /* line 1467, sass/core.scss */
+    .displayed-content .affiliationGroup > h2 {
+      font-size: 11pt;
+      font-style: normal; }
+    /* line 1471, sass/core.scss */
+    .displayed-content .affiliationGroup > ul, .displayed-content .affiliationGroup > ol {
+      list-style: none;
+      padding-left: 0;
+      margin: 0; }
+  /* line 1479, sass/core.scss */
+  .displayed-content .affiliation {
+    display: inline;
+    margin-right: 0.5em; }
+    /* line 1482, sass/core.scss */
+    .displayed-content .affiliation .orgName::before, .displayed-content .affiliation .orgDiv::before, .displayed-content .affiliation .address::before, .displayed-content .affiliation .url::before, .displayed-content .affiliation .unparsedAffiliation::before, .displayed-content .affiliation .street::before, .displayed-content .affiliation .city::before, .displayed-content .affiliation .countryPart::before, .displayed-content .affiliation .country::before, .displayed-content .affiliation .postCode::before {
+      content: ", "; }
+    /* line 1484, sass/core.scss */
+    .displayed-content .affiliation > .url, .displayed-content .affiliation > span[property="schema:name"] {
+      display: none; }
+    /* line 1485, sass/core.scss */
+    .displayed-content .affiliation > span[property="schema:name"]::before, .displayed-content .affiliation > .idGroup::before, .displayed-content .affiliation > span[property="schema:name"] + *::before, .displayed-content .affiliation > .affiliationRef + *::before, .displayed-content .affiliation > .idGroup + *::before {
+      content: ""; }
+    /* line 1487, sass/core.scss */
+    .displayed-content .affiliation > .address::before, .displayed-content .affiliation > .address > *:first-child::before, .displayed-content .affiliation > .address > meta[property="wbas:addressDepartment"] + *::before {
+      content: ""; }
+  /* line 1493, sass/core.scss */
+  .displayed-content section.biographyInfo > h2 {
+    font-size: 1.4em; }
+  /* line 1495, sass/core.scss */
+  .displayed-content section.biographyInfo > div.biographyInfo > .mediaResourceGroup > img.mediaResource, .displayed-content section.biographyInfo > div.biographyInfo > img.mediaResource {
+    margin: 1em 0 5pt 0; }
+  /* line 1499, sass/core.scss */
+  .displayed-content span.correspondingIcon {
+    font-size: 1.1em; }
+  /* line 1501, sass/core.scss */
+  .displayed-content div[role="contentinfo"] span.creator[data-creator-role="editor"] span[property="schema:name"]::before {
+    content: "Edited by: ";
+    font-weight: 700; }
+  /* line 1507, sass/core.scss */
+  .displayed-content span.rule {
+    display: block;
+    border-bottom: 1px solid black; }
+  /* line 1514, sass/core.scss */
+  .displayed-content .title[data-type="main"] + .numbering[data-type="journalVolume"]::before {
+    content: "\AVolume ";
+    white-space: pre; }
+  /* line 1515, sass/core.scss */
+  .displayed-content .title[data-type="main"] + .numbering[data-type="journalIssue"]::before {
+    content: "\AIssue ";
+    white-space: pre; }
+  /* line 1516, sass/core.scss */
+  .displayed-content .title[data-type="main"] + .numbering[data-type="supplement"]::before {
+    content: "\ASupplement ";
+    white-space: pre; }
+  /* line 1517, sass/core.scss */
+  .displayed-content .title[data-type="main"] + .numbering[data-type="pageFirst"]::before {
+    content: "\APages ";
+    white-space: pre; }
+  /* line 1519, sass/core.scss */
+  .displayed-content .title[data-type="main"] + .coverDate::before, .displayed-content .title[data-type="main"] + .id[data-type="eLocator"]::before {
+    content: "\A";
+    white-space: pre; }
+  /* line 1522, sass/core.scss */
+  .displayed-content .keywordGroup > ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0; }
+    /* line 1526, sass/core.scss */
+    .displayed-content .keywordGroup > ul .keyword {
+      display: inline; }
+      /* line 1528, sass/core.scss */
+      .displayed-content .keywordGroup > ul .keyword * {
+        display: inline; }
+      /* line 1529, sass/core.scss */
+      .displayed-content .keywordGroup > ul .keyword:not(:last-child):after {
+        content: "; "; }
+  /* line 1533, sass/core.scss */
+  .displayed-content .fundingInfoGroup > ul {
+    margin: .3em 0 0 0;
+    padding-left: 0; }
+    /* line 1536, sass/core.scss */
+    .displayed-content .fundingInfoGroup > ul > li {
+      display: inline; }
+  /* line 1541, sass/core.scss */
+  .displayed-content .fundingInfo > .fundingNumber::after {
+    content: ", "; }
+  /* line 1542, sass/core.scss */
+  .displayed-content .fundingInfo > .fundingNumber:last-of-type::after {
+    content: ""; }
+  /* line 1543, sass/core.scss */
+  .displayed-content .fundingInfo > .fundingNumber:nth-last-of-type(2)::after {
+    content: " and "; }
+  /* line 1545, sass/core.scss */
+  .displayed-content .fundingInfo::after {
+    content: ";"; }
+  /* line 1546, sass/core.scss */
+  .displayed-content .fundingInfo:last-of-type::after {
+    content: ""; }
+  /* line 1549, sass/core.scss */
+  .displayed-content .dedication {
+    font-weight: 700;
+    font-size: 0.9em;
+    font-style: italic;
+    margin: 1em 0; }
+  /* line 1556, sass/core.scss */
+  .displayed-content .supportingInformation {
+    border: 1px solid #e0e0e0;
+    margin: 1em 0;
+    padding: 3px;
+    clear: both; }
+    /* line 1561, sass/core.scss */
+    .displayed-content .supportingInformation table {
+      margin: .5em 0 0 0; }
+    /* line 1562, sass/core.scss */
+    .displayed-content .supportingInformation .caption {
+      font-size: 11pt;
+      text-align: left; }
+  /* line 1568, sass/core.scss */
+  .displayed-content .copyright {
+    display: block;
+    color: darkgray;
+    margin: 1em 0; }
+  /* line 1574, sass/core.scss */
+  .displayed-content .legalStatement {
+    color: darkgray;
+    margin: 1em 0; }
+  /* line 1579, sass/core.scss */
+  .displayed-content .correspondenceTo {
+    font-size: 0.9em;
+    margin: 1em 0; }
+  /* line 1584, sass/core.scss */
+  .displayed-content .doi {
+    display: block;
+    margin: 1em 0; }
+    /* line 1587, sass/core.scss */
+    .displayed-content .doi::before {
+      content: "DOI: "; }
+  /* line 1590, sass/core.scss */
+  .displayed-content div[role="contentinfo"] > .doi > a::before, .displayed-content .selfCitationGroup > .citation > .url > a::before {
+    content: "https://doi.org/"; }
+  /* line 1592, sass/core.scss */
+  .displayed-content .event[data-type="firstOnline"] {
+    display: block; }
+  /* line 1593, sass/core.scss */
+  .displayed-content .event[data-type="firstOnline"]::before {
+    content: "First published: "; }
+  /* line 1594, sass/core.scss */
+  .displayed-content .creators + .event[data-type="firstOnline"]::before {
+    content: "\A First published: ";
+    white-space: pre; }
+  /* line 1596, sass/core.scss */
+  .displayed-content .event[data-type="publishedOnlineAccepted"] {
+    display: block; }
+  /* line 1597, sass/core.scss */
+  .displayed-content .event[data-type="publishedOnlineAccepted"]::before {
+    content: "Accepted manuscript online: "; }
+  /* line 1598, sass/core.scss */
+  .displayed-content .creators + .event[data-type="publishedOnlineAccepted"]::before {
+    content: "\A Accepted manuscript online: ";
+    white-space: pre; }
+  /* line 1600, sass/core.scss */
+  .displayed-content .event[data-type="manuscriptReceived"]::before {
+    content: "Manuscript Received: "; }
+  /* line 1601, sass/core.scss */
+  .displayed-content .event[data-type="manuscriptRevised"]::before {
+    content: "Manuscript Revised: "; }
+  /* line 1602, sass/core.scss */
+  .displayed-content .event[data-type="manuscriptAccepted"]::before {
+    content: "Manuscript Accepted: "; }
+  /* line 1604, sass/core.scss */
+  .displayed-content .event[data-type="manuscriptReceived"] ~ .event[data-type="manuscriptRevised"]::before {
+    content: "     Manuscript Revised: ";
+    white-space: pre; }
+  /* line 1605, sass/core.scss */
+  .displayed-content .event[data-type="manuscriptRevised"] ~ .event[data-type="manuscriptAccepted"]::before {
+    content: "     Manuscript Accepted: ";
+    white-space: pre; }
+  /* line 1606, sass/core.scss */
+  .displayed-content .event[data-type="manuscriptReceived"] ~ .event[data-type="manuscriptAccepted"]::before {
+    content: "     Manuscript Accepted: ";
+    white-space: pre; }
+  /* line 1608, sass/core.scss */
+  .displayed-content div[role="contentinfo"] > .citation, .displayed-content > .citation {
+    display: block;
+    font-size: 0.9em;
+    margin: 1em 0; }
+  /* line 1614, sass/core.scss */
+  .displayed-content div[role="contentinfo"] > .citation {
+    margin-top: 1em; }
+  /* line 1616, sass/core.scss */
+  .displayed-content .citation[data-type="erratumTarget"]::before {
+    content: "This article corrects: ";
+    font-weight: 700;
+    white-space: pre; }
+  /* line 1617, sass/core.scss */
+  .displayed-content .citation[data-type="retractionTarget"]::before {
+    content: "This article retracts: ";
+    font-weight: 700;
+    white-space: pre; }
+  /* line 1618, sass/core.scss */
+  .displayed-content .citation[data-type="self"]::before {
+    content: "How to cite: ";
+    font-weight: 700;
+    white-space: pre; }
+  /* line 1620, sass/core.scss */
+  .displayed-content div[role="contentinfo"] > section.noteGroup {
+    font-size: 0.9em; }
+  /* line 1622, sass/core.scss */
+  .displayed-content .abstract[data-type="short"], .displayed-content .abstract[data-type="graphical"] {
+    background-color: lightgray; }
+  /* line 1625, sass/core.scss */
+  .displayed-content .note[data-position~="adjacentAlwaysVisible"] {
+    border: 1px solid #e0e0e0;
+    margin: 8px 0 8px 40px;
+    padding: 3px;
+    width: 50%; }
+    /* line 1631, sass/core.scss */
+    .displayed-content .note[data-position~="adjacentAlwaysVisible"] > * {
+      margin: 0; }
+    /* line 1632, sass/core.scss */
+    .displayed-content .note[data-position~="adjacentAlwaysVisible"] > header {
+      background-color: #eee;
+      padding: 1px 8px;
+      margin-bottom: 3px; }
+  /* line 1642, sass/core.scss */
+  .displayed-content *[data-css-style~="font-family:monospace"] {
+    font-family: monospace; }
+  /* line 1643, sass/core.scss */
+  .displayed-content *[data-css-style~="font-family:serif"] {
+    font-family: serif; }
+  /* line 1644, sass/core.scss */
+  .displayed-content *[data-css-style~="font-family:sans-serif"] {
+    font-family: sans-serif; }
+  /* line 1649, sass/core.scss */
+  .displayed-content .definitionListGenerated dt, .displayed-content .definitionList dt {
+    font-weight: 700; }
+  /* line 1651, sass/core.scss */
+  .displayed-content .useSectionTitles {
+    padding-left: 0; }
+    /* line 1653, sass/core.scss */
+    .displayed-content .useSectionTitles > li > .generated-labeling {
+      padding-right: 0.5em; }
+  /* line 1656, sass/core.scss */
+  .displayed-content .link[data-style="chemicalCompound"] {
+    font-weight: 700; }
+  /* line 1658, sass/core.scss */
+  .displayed-content .salutation {
+    display: block;
+    margin-bottom: 1em; }
+  /* line 1663, sass/core.scss */
+  .displayed-content .infoAsset[data-type="corporateName"] {
+    color: #AA0000; }
+  /* line 1665, sass/core.scss */
+  .displayed-content .bib .infoAsset[data-type="corporateName"] {
+    color: black; }
+  /* line 1667, sass/core.scss */
+  .displayed-content .span[data-type="highlight"], .displayed-content .split-span[data-type="highlight"] {
+    background-color: chartreuse !important;
+    padding: 2px; }
+  /* line 1672, sass/core.scss */
+  .displayed-content .span[data-type="warning"], .displayed-content .split-span[data-type="warning"] {
+    color: red !important; }
+  /* line 1674, sass/core.scss */
+  .displayed-content *[data-semantics~="highlight"], .displayed-content *[data-semantics~="generated-highlight"] {
+    background-color: chartreuse !important;
+    padding: 2px; }
+  /* line 1675, sass/core.scss */
+  .displayed-content *[data-semantics~="warning"], .displayed-content *[data-semantics~="generated-warning"] {
+    color: red !important; }
+  /* line 1677, sass/core.scss */
+  .displayed-content figcaption > a.accessionIdAnchor, .displayed-content .supportingInfoItem a.accessionIdAnchor {
+    margin-left: .4em; }
+  /* line 1679, sass/core.scss */
+  .displayed-content .fakeLink {
+    color: blue;
+    text-decoration: underline;
+    outline-style: none;
+    outline-width: medium;
+    border: 0pt none;
+    cursor: pointer; }
+  /* line 1688, sass/core.scss */
+  .displayed-content figure.scroll {
+    overflow-x: scroll; }
+
+/* ===================== GECMS specific styles =================== */
+/* line 1692, sass/core.scss */
+div.ge-explanation {
+  display: none; }
+
+/*# sourceMappingURL=core.css.map */

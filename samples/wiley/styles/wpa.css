@@ -1,0 +1,696 @@
+/* ============================================================================
+wpa.css Version 1.0.0
+
+WOL2/WPA Anywhere Article look-and-feel
+
+Last Modified: January 12, 2018                                     
+
+Copyright (c) 2017 by John Wiley & Sons, Inc. 
+
+This stylesheet is proprietary confidential material owned by Wiley, and may be used and disclosed only in connection with agreed Wiley-related work. 
+By using the stylesheets, you hereby agree to the terms set forth herein.
+=============================================================================== */
+@import url("https://fonts.googleapis.com/css?family=Open+Sans");
+/* =============================== variables ================================== */
+/* ================================ mixins =================================== */
+/* ================================ classes ================================== */
+/* line 81, sass/wpa.scss */
+html {
+  font-size: 12pt; }
+
+/* line 83, sass/wpa.scss */
+body {
+  font-family: "Open Sans",Arial,Helvetica,Lucida Sans Unicode,sans-serif;
+  font-size: 12pt;
+  color: #333;
+  font-weight: 400;
+  margin: 20px 40px;
+  padding: 20px 40px 10px 20px;
+  border: 1px solid #afafaf;
+  border-radius: 2px; }
+
+/* line 94, sass/wpa.scss */
+.displayed-content {
+  /* ==== */
+  /*	.displayedItem > .generated-labeling {
+  		right: 0;
+  		margin-right: 0;
+  	}
+  
+  	math[display="block"] {text-align: left;}	*/ }
+  /* line 96, sass/wpa.scss */
+  .displayed-content > header {
+    background-color: #ffffff;
+    border-radius: 0;
+    margin: 0;
+    padding: 0; }
+    /* line 103, sass/wpa.scss */
+    .displayed-content > header > .title[data-type="main"] {
+      font-size: 0.9rem;
+      color: #767676;
+      font-weight: 700; }
+      /* line 105, sass/wpa.scss */
+      .displayed-content > header > .title[data-type="main"] + .title[data-type="subtitle"] {
+        font-size: 0.9rem;
+        color: #767676;
+        font-weight: 700; }
+    /* line 108, sass/wpa.scss */
+    .displayed-content > header > .title[data-type="articleCategory"] {
+      font-size: 0.9rem;
+      color: #767676;
+      font-weight: 700;
+      margin-top: .5em; }
+    /* line 113, sass/wpa.scss */
+    .displayed-content > header > h1, .displayed-content > header > .title[data-type="subtitle"] {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #000; }
+    /* line 118, sass/wpa.scss */
+    .displayed-content > header > .generated-text + h1::before {
+      content: "\A";
+      white-space: pre; }
+  /* line 122, sass/wpa.scss */
+  .displayed-content > .section, .displayed-content > .appendix, .displayed-content > .supportingInformation, .displayed-content > .bibliography, .displayed-content > .noteGroup, .displayed-content > .biographyInfo, .displayed-content > .selfCitationGroup, .displayed-content > .feature, .displayed-content > .citation, .displayed-content > .keywordGroup {
+    margin-left: 20px; }
+  /* line 124, sass/wpa.scss */
+  .displayed-content > .feature, .displayed-content > .noteGroup, .displayed-content > .protocol {
+    margin-top: 1.2em;
+    margin-bottom: 1.2em; }
+  /* line 130, sass/wpa.scss */
+  .displayed-content > section > header {
+    font-size: 1.5rem;
+    color: #00a185;
+    font-weight: 700; }
+    /* line 132, sass/wpa.scss */
+    .displayed-content > section > header * {
+      font-weight: 700; }
+  /* line 135, sass/wpa.scss */
+  .displayed-content > section > section > header {
+    font-size: 1.2rem;
+    font-weight: 400; }
+    /* line 138, sass/wpa.scss */
+    .displayed-content > section > section > header * {
+      font-weight: 400; }
+  /* line 141, sass/wpa.scss */
+  .displayed-content > section > section > section > header {
+    color: #000;
+    font-size: 1.02rem;
+    font-weight: 700; }
+    /* line 145, sass/wpa.scss */
+    .displayed-content > section > section > section > header * {
+      font-weight: 700; }
+  /* line 148, sass/wpa.scss */
+  .displayed-content > section > section > section > section > header {
+    color: #000;
+    font-size: 1.02rem;
+    font-weight: 700;
+    font-style: normal; }
+    /* line 153, sass/wpa.scss */
+    .displayed-content > section > section > section > section > header * {
+      font-weight: 700; }
+  /* line 156, sass/wpa.scss */
+  .displayed-content > section > section > section > section > section > header {
+    color: #000;
+    font-size: 1.02rem;
+    font-weight: 700; }
+    /* line 160, sass/wpa.scss */
+    .displayed-content > section > section > section > section > section > header * {
+      font-weight: 700; }
+  /* line 162, sass/wpa.scss */
+  .displayed-content > section > section > section > section > section > section > header {
+    color: #000;
+    font-size: 1.02rem;
+    font-weight: 700;
+    font-style: normal; }
+    /* line 167, sass/wpa.scss */
+    .displayed-content > section > section > section > section > section > section > header * {
+      font-weight: 700; }
+  /* line 175, sass/wpa.scss */
+  .displayed-content > .citation {
+    border: 1px solid #e0e0e0;
+    padding: 5px 10px; }
+  /* line 180, sass/wpa.scss */
+  .displayed-content > div[role="contentinfo"] > section.noteGroup > ol {
+    border-spacing: 0; }
+  /* line 182, sass/wpa.scss */
+  .displayed-content > .noteGroup > ol.notes > li.note > span.generated-labeling {
+    font-size: inherit;
+    vertical-align: inherit;
+    padding-right: 2em; }
+  /* line 47, sass/wpa.scss */
+  .displayed-content > section.creators li.creator, .displayed-content > section.affiliationGroup li.affiliation {
+    text-align: right;
+    display: block;
+    margin-top: 0; }
+  /* line 52, sass/wpa.scss */
+  .displayed-content > section.creators li.creator {
+    color: #000;
+    font-size: 0.9rem; }
+    /* line 55, sass/wpa.scss */
+    .displayed-content > section.creators li.creator span.generated-text:last-of-type {
+      display: none; }
+    /* line 56, sass/wpa.scss */
+    .displayed-content > section.creators li.creator span.jobTitle.editor {
+      display: block;
+      font-style: italic;
+      font-size: 10pt; }
+    /* line 61, sass/wpa.scss */
+    .displayed-content > section.creators li.creator a.email {
+      display: block; }
+  /* line 63, sass/wpa.scss */
+  .displayed-content > div.correspondenceTo {
+    text-align: right; }
+  /* line 64, sass/wpa.scss */
+  .displayed-content > section.keywordGroup {
+    font-size: 0.9rem;
+    text-align: right; }
+  /* line 68, sass/wpa.scss */
+  .displayed-content > ol.notes {
+    display: block;
+    font-size: 0.8rem;
+    text-align: right; }
+    /* line 72, sass/wpa.scss */
+    .displayed-content > ol.notes > li.note {
+      display: block !important; }
+      /* line 74, sass/wpa.scss */
+      .displayed-content > ol.notes > li.note span.generated-labeling {
+        display: inline !important; }
+  /* line 193, sass/wpa.scss */
+  .displayed-content span.rule {
+    display: none; }
+  /* line 195, sass/wpa.scss */
+  .displayed-content .abstract {
+    margin-left: 20pt;
+    padding: 10pt 20pt 10pt 20pt;
+    background: #f9f9f9; }
+    /* line 200, sass/wpa.scss */
+    .displayed-content .abstract[data-type="synopsis"] {
+      background: transparent; }
+      /* line 202, sass/wpa.scss */
+      .displayed-content .abstract[data-type="synopsis"] > header {
+        font-size: 1.5rem;
+        color: #00a185;
+        font-weight: 700; }
+        /* line 204, sass/wpa.scss */
+        .displayed-content .abstract[data-type="synopsis"] > header * {
+          font-weight: 700; }
+    /* line 208, sass/wpa.scss */
+    .displayed-content .abstract > header {
+      font-size: 1.5em;
+      color: #414141;
+      font-weight: 400; }
+    /* line 214, sass/wpa.scss */
+    .displayed-content .abstract > .abstractBody > section > header {
+      font-size: 1.17em;
+      font-weight: 400; }
+  /* line 220, sass/wpa.scss */
+  .displayed-content .bibliography, .displayed-content .bibSection, .displayed-content .exerciseSection, .displayed-content .section, .displayed-content .definitionList, .displayed-content .definitionListGenerated, .displayed-content .appendix {
+    margin-top: 1.2em;
+    margin-bottom: 1.2em; }
+  /* line 225, sass/wpa.scss */
+  .displayed-content .keywordGroup {
+    margin-left: 20px; }
+    /* line 227, sass/wpa.scss */
+    .displayed-content .keywordGroup > h2 {
+      font-weight: 600; }
+  /* line 230, sass/wpa.scss */
+  .displayed-content h2, .displayed-content h3, .displayed-content h4, .displayed-content h5, .displayed-content h6 {
+    font-weight: 400; }
+  /* line 232, sass/wpa.scss */
+  .displayed-content section.letter {
+    margin-left: 10pt; }
+    /* line 234, sass/wpa.scss */
+    .displayed-content section.letter .salutation {
+      margin-left: -10pt; }
+    /* line 47, sass/wpa.scss */
+    .displayed-content section.letter section.creators li.creator, .displayed-content section.letter section.affiliationGroup li.affiliation {
+      text-align: right;
+      display: block;
+      margin-top: 0; }
+    /* line 52, sass/wpa.scss */
+    .displayed-content section.letter section.creators li.creator {
+      color: #000;
+      font-size: 0.9rem; }
+      /* line 55, sass/wpa.scss */
+      .displayed-content section.letter section.creators li.creator span.generated-text:last-of-type {
+        display: none; }
+      /* line 56, sass/wpa.scss */
+      .displayed-content section.letter section.creators li.creator span.jobTitle.editor {
+        display: block;
+        font-style: italic;
+        font-size: 10pt; }
+      /* line 61, sass/wpa.scss */
+      .displayed-content section.letter section.creators li.creator a.email {
+        display: block; }
+    /* line 63, sass/wpa.scss */
+    .displayed-content section.letter div.correspondenceTo {
+      text-align: right; }
+    /* line 64, sass/wpa.scss */
+    .displayed-content section.letter section.keywordGroup {
+      font-size: 0.9rem;
+      text-align: right; }
+    /* line 68, sass/wpa.scss */
+    .displayed-content section.letter ol.notes {
+      display: block;
+      font-size: 0.8rem;
+      text-align: right; }
+      /* line 72, sass/wpa.scss */
+      .displayed-content section.letter ol.notes > li.note {
+        display: block !important; }
+        /* line 74, sass/wpa.scss */
+        .displayed-content section.letter ol.notes > li.note span.generated-labeling {
+          display: inline !important; }
+  /* line 239, sass/wpa.scss */
+  .displayed-content section.creators {
+    color: #2f7bae;
+    font-size: 1em; }
+  /* line 244, sass/wpa.scss */
+  .displayed-content .doi, .displayed-content .event, .displayed-content .legalStatement, .displayed-content .copyright {
+    font-size: 0.9rem; }
+  /* line 245, sass/wpa.scss */
+  .displayed-content .doi::before, .displayed-content .event::before {
+    font-weight: 700; }
+  /* line 255, sass/wpa.scss */
+  .displayed-content .displayedItem > math, .displayed-content .displayedItem > .math > math, .displayed-content .displayedItem > p {
+    text-align: left; }
+  /* line 258, sass/wpa.scss */
+  .displayed-content img.mediaResource {
+    border: 1px solid #afafaf;
+    box-sizing: border-box;
+    padding: 12px;
+    margin-bottom: 1.8em; }
+  /* line 265, sass/wpa.scss */
+  .displayed-content .caption, .displayed-content .caption-titled {
+    font-size: 0.9rem; }
+  /* line 267, sass/wpa.scss */
+  .displayed-content figcaption.caption, .displayed-content figcaption.caption-titled, .displayed-content figure.figure > figcaption {
+    margin: 0 4em;
+    display: block;
+    max-width: none; }
+  /* line 273, sass/wpa.scss */
+  .displayed-content .figure > figcaption > header, .displayed-content .figure > figcaption > header > .title {
+    display: block;
+    font-size: 1.15em;
+    font-weight: 600;
+    margin-bottom: 1em; }
+  /* line 280, sass/wpa.scss */
+  .displayed-content .figure > figcaption > header * {
+    font-weight: 600; }
+  /* line 282, sass/wpa.scss */
+  .displayed-content a {
+    color: #2f7bae;
+    text-decoration: none; }
+    /* line 285, sass/wpa.scss */
+    .displayed-content a:active, .displayed-content a:hover, .displayed-content a:focus {
+      text-decoration: underline; }
+  /* line 288, sass/wpa.scss */
+  .displayed-content .link[data-bib_callout_style] > a {
+    font-weight: 700;
+    transition-duration: 0.25s;
+    transition-property: background, color;
+    transition-timing-function: ease-in-out;
+    padding: 1px 2px; }
+    /* line 294, sass/wpa.scss */
+    .displayed-content .link[data-bib_callout_style] > a:hover {
+      color: #fff;
+      background-color: #3498db;
+      text-decoration: none; }
+  /* line 301, sass/wpa.scss */
+  .displayed-content table, .displayed-content table * {
+    border-color: #b2b2b2; }
+  /* line 302, sass/wpa.scss */
+  .displayed-content td, .displayed-content th {
+    padding: 0.9em; }
+    /* line 304, sass/wpa.scss */
+    .displayed-content td ul > li, .displayed-content td ol > li, .displayed-content th ul > li, .displayed-content th ol > li {
+      margin-top: .5em; }
+  /* line 307, sass/wpa.scss */
+  .displayed-content figure.tabular, .displayed-content figure.tabularFixed {
+    margin: 1em 0; }
+    /* line 311, sass/wpa.scss */
+    .displayed-content figure.tabular > table, .displayed-content figure.tabular > .tgroup > table, .displayed-content figure.tabularFixed > table, .displayed-content figure.tabularFixed > .tgroup > table {
+      font-size: .8rem; }
+      /* line 313, sass/wpa.scss */
+      .displayed-content figure.tabular > table > thead, .displayed-content figure.tabular > .tgroup > table > thead, .displayed-content figure.tabularFixed > table > thead, .displayed-content figure.tabularFixed > .tgroup > table > thead {
+        font-size: .9rem;
+        background: #ddd; }
+      /* line 317, sass/wpa.scss */
+      .displayed-content figure.tabular > table *[data-note_label], .displayed-content figure.tabular > .tgroup > table *[data-note_label], .displayed-content figure.tabularFixed > table *[data-note_label], .displayed-content figure.tabularFixed > .tgroup > table *[data-note_label] {
+        font-style: normal;
+        margin-left: .2em; }
+      /* line 322, sass/wpa.scss */
+      .displayed-content figure.tabular > table div.eR, .displayed-content figure.tabular > .tgroup > table div.eR, .displayed-content figure.tabularFixed > table div.eR, .displayed-content figure.tabularFixed > .tgroup > table div.eR {
+        margin: 0 -0.4em -0.9em -0.4em;
+        padding: 0 0.4em 0.9em 0.4em; }
+    /* line 328, sass/wpa.scss */
+    .displayed-content figure.tabular > .noteGroup, .displayed-content figure.tabularFixed > .noteGroup {
+      font-size: 0.7rem; }
+      /* line 330, sass/wpa.scss */
+      .displayed-content figure.tabular > .noteGroup > li.note, .displayed-content figure.tabularFixed > .noteGroup > li.note {
+        margin-top: .5rem; }
+        /* line 332, sass/wpa.scss */
+        .displayed-content figure.tabular > .noteGroup > li.note > .generated-labeling, .displayed-content figure.tabularFixed > .noteGroup > li.note > .generated-labeling {
+          font-size: inherit;
+          font-style: normal;
+          padding-right: 1em;
+          vertical-align: inherit; }
+    /* line 341, sass/wpa.scss */
+    .displayed-content figure.tabular > figcaption, .displayed-content figure.tabularFixed > figcaption {
+      margin-bottom: 1rem; }
+      /* line 343, sass/wpa.scss */
+      .displayed-content figure.tabular > figcaption > header, .displayed-content figure.tabularFixed > figcaption > header {
+        font-size: 1.2rem; }
+    /* line 347, sass/wpa.scss */
+    .displayed-content figure.tabular tr[data-shaded="yes"], .displayed-content figure.tabularFixed tr[data-shaded="yes"] {
+      background: #eee; }
+  /* line 350, sass/wpa.scss */
+  .displayed-content span.citation > span.vol {
+    margin-left: 0; }
+  /* line 352, sass/wpa.scss */
+  .displayed-content li[data-type="associatedArticle"] {
+    background-color: transparent; }
+  /* line 354, sass/wpa.scss */
+  .displayed-content div.correspondenceTo > .lineatedText {
+    margin-left: 0; }
+  /* line 356, sass/wpa.scss */
+  .displayed-content div.computerCode {
+    font-size: 1.2em; }
+  /* line 359, sass/wpa.scss */
+  .displayed-content *:not([data-compact="no"]) > ul {
+    border-spacing: 1em; }
+  /* line 360, sass/wpa.scss */
+  .displayed-content *[data-compact="no"] > ul {
+    border-spacing: 0 2em; }
+  /* line 363, sass/wpa.scss */
+  .displayed-content ul > li, .displayed-content ol > li {
+    margin-top: 1em; }
+  /* line 366, sass/wpa.scss */
+  .displayed-content *[data-compact="no"] > li, .displayed-content *[data-compact="no"] > ol > li, .displayed-content *[data-compact="no"] > ul > li {
+    margin-top: 2em; }
+  /* line 369, sass/wpa.scss */
+  .displayed-content div.biographyInfo {
+    margin-bottom: 1em; }
+  /* line 371, sass/wpa.scss */
+  .displayed-content code.line {
+    margin-bottom: .7em; }
+    /* line 372, sass/wpa.scss */
+    .displayed-content code.line:not([data-space="pre"]) {
+      white-space: normal; }
+  /* line 377, sass/wpa.scss */
+  .displayed-content div.lineatedText {
+    margin-left: 3em !important;
+    text-align: left !important; }
+    /* line 380, sass/wpa.scss */
+    .displayed-content div.lineatedText[data-block-align="centered"] {
+      text-align: left !important; }
+    /* line 381, sass/wpa.scss */
+    .displayed-content div.lineatedText > .line {
+      padding-left: 0 !important;
+      text-indent: 0 !important; }
+      /* line 384, sass/wpa.scss */
+      .displayed-content div.lineatedText > .line > .lineContent {
+        padding-left: 0 !important;
+        text-indent: 0 !important; }
+  /* line 390, sass/wpa.scss */
+  .displayed-content figure[data-type="poetry"] > * {
+    text-align: left !important; }
+  /* line 392, sass/wpa.scss */
+  .displayed-content figure.chemicalStructure {
+    margin: 0;
+    text-align: left; }
+    /* line 395, sass/wpa.scss */
+    .displayed-content figure.chemicalStructure img.mediaResource {
+      border: none;
+      margin-bottom: 0;
+      padding: 0; }
+    /* line 400, sass/wpa.scss */
+    .displayed-content figure.chemicalStructure > figcaption {
+      text-align: left; }
+  /* line 403, sass/wpa.scss */
+  .displayed-content table.listPaired {
+    display: block; }
+    /* line 405, sass/wpa.scss */
+    .displayed-content table.listPaired > tbody {
+      display: block; }
+      /* line 407, sass/wpa.scss */
+      .displayed-content table.listPaired > tbody > tr {
+        display: block; }
+        /* line 409, sass/wpa.scss */
+        .displayed-content table.listPaired > tbody > tr > td {
+          display: block;
+          padding: 0; }
+          /* line 412, sass/wpa.scss */
+          .displayed-content table.listPaired > tbody > tr > td:nth-child(1) {
+            font-weight: 700; }
+          /* line 413, sass/wpa.scss */
+          .displayed-content table.listPaired > tbody > tr > td:not(:nth-child(1)) {
+            margin-left: 20px; }
+          /* line 414, sass/wpa.scss */
+          .displayed-content table.listPaired > tbody > tr > td:last-child {
+            font-weight: 400;
+            margin-left: 20px; }
+  /* line 424, sass/wpa.scss */
+  .displayed-content figure.listPaired > figcaption {
+    display: inline; }
+    /* line 426, sass/wpa.scss */
+    .displayed-content figure.listPaired > figcaption > header {
+      display: inline; }
+      /* line 428, sass/wpa.scss */
+      .displayed-content figure.listPaired > figcaption > header > span:last-of-type::after {
+        content: ":"; }
+  /* line 431, sass/wpa.scss */
+  .displayed-content figure.listPaired > dl {
+    display: inline; }
+    /* line 433, sass/wpa.scss */
+    .displayed-content figure.listPaired > dl > dt {
+      display: inline; }
+      /* line 435, sass/wpa.scss */
+      .displayed-content figure.listPaired > dl > dt::after {
+        content: ", "; }
+    /* line 437, sass/wpa.scss */
+    .displayed-content figure.listPaired > dl > dd {
+      display: inline;
+      margin-left: 0; }
+      /* line 440, sass/wpa.scss */
+      .displayed-content figure.listPaired > dl > dd + dd::before {
+        content: ", "; }
+      /* line 441, sass/wpa.scss */
+      .displayed-content figure.listPaired > dl > dd + dt::before {
+        content: "; "; }
+      /* line 442, sass/wpa.scss */
+      .displayed-content figure.listPaired > dl > dd:last-of-type::after {
+        content: "."; }
+  /* line 448, sass/wpa.scss */
+  .displayed-content section.fundingInfoGroup > h2 {
+    font-weight: 600; }
+  /* line 449, sass/wpa.scss */
+  .displayed-content section.fundingInfoGroup > ul {
+    font-size: 0.9rem; }
+  /* line 453, sass/wpa.scss */
+  .displayed-content section.currentAffiliations > h2 {
+    font-weight: 600; }
+  /* line 454, sass/wpa.scss */
+  .displayed-content section.currentAffiliations > ol {
+    font-size: 0.9rem;
+    margin-top: .3em;
+    padding-left: 0; }
+  /* line 462, sass/wpa.scss */
+  .displayed-content section.noteGroup > header {
+    font-size: 1.25em;
+    color: #000;
+    margin-bottom: 0; }
+    /* line 466, sass/wpa.scss */
+    .displayed-content section.noteGroup > header * {
+      font-weight: 400; }
+  /* line 468, sass/wpa.scss */
+  .displayed-content section.noteGroup > ol {
+    font-size: 0.8rem;
+    border-spacing: 0 1em;
+    margin-top: 0; }
+  /* line 476, sass/wpa.scss */
+  .displayed-content section.bibliography ul {
+    font-size: 0.9rem;
+    border-spacing: 0 1em; }
+    /* line 479, sass/wpa.scss */
+    .displayed-content section.bibliography ul > li.bib > span.generated-labeling {
+      padding-right: 1.8em; }
+  /* line 481, sass/wpa.scss */
+  .displayed-content section.bibliography[data-style="nameDate"] > ul.biblioentrylist {
+    margin-left: 0; }
+  /* line 486, sass/wpa.scss */
+  .displayed-content section.bibSection[data-style="nameDate"] > ul.biblioentrylist {
+    margin-left: 0; }
+    /* line 488, sass/wpa.scss */
+    .displayed-content section.bibSection[data-style="nameDate"] > ul.biblioentrylist > li {
+      text-indent: 0; }
+  /* line 491, sass/wpa.scss */
+  .displayed-content section.biographyInfo > h2 {
+    font-size: 1.5rem;
+    color: #00a185;
+    font-weight: 700;
+    margin-bottom: .7em; }
+  /* line 497, sass/wpa.scss */
+  .displayed-content section.appendix > header *, .displayed-content section.appendix > header .title {
+    display: inline; }
+  /* line 499, sass/wpa.scss */
+  .displayed-content section.appendix > header > span.title[data-type="objectName"] > span.generated-labeling {
+    margin-right: 0; }
+  /* line 500, sass/wpa.scss */
+  .displayed-content section.appendix > header > span.title[data-type="objectName"] ~ .title[data-type="main"]::before {
+    content: ": "; }
+  /* line 504, sass/wpa.scss */
+  .displayed-content .blockFixed, .displayed-content .block {
+    border: none !important;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-bottom: 0.5em !important;
+    padding: 1.2em 2.2em !important; }
+  /* line 515, sass/wpa.scss */
+  .displayed-content .blockFixed[data-type="box"] {
+    font-size: 0.9rem; }
+    /* line 517, sass/wpa.scss */
+    .displayed-content .blockFixed[data-type="box"] > header, .displayed-content .blockFixed[data-type="box"] > section > header {
+      font-size: 1.3em;
+      margin-bottom: 1em; }
+  /* line 523, sass/wpa.scss */
+  .displayed-content .blockFixed[data-type="poetry"] {
+    background-image: url("poetry.png");
+    background-repeat: no-repeat;
+    background-position: 10px 12px;
+    max-width: 30em;
+    text-align: center; }
+    /* line 529, sass/wpa.scss */
+    .displayed-content .blockFixed[data-type="poetry"] > p {
+      text-align: center; }
+    /* line 530, sass/wpa.scss */
+    .displayed-content .blockFixed[data-type="poetry"] > span.source {
+      text-align: left; }
+  /* line 533, sass/wpa.scss */
+  .displayed-content .blockFixed[data-type="graphic"] {
+    background-color: transparent;
+    padding: 0 !important; }
+    /* line 536, sass/wpa.scss */
+    .displayed-content .blockFixed[data-type="graphic"] > figcaption {
+      text-align: center; }
+  /* line 539, sass/wpa.scss */
+  .displayed-content .blockFixed[data-type="dialogue"] {
+    background-image: url("dialogue.png");
+    background-repeat: no-repeat;
+    background-position: 10px 12px; }
+  /* line 544, sass/wpa.scss */
+  .displayed-content .blockFixed[data-type="signatureBlock"] {
+    background-color: transparent;
+    text-align: right;
+    padding: 0;
+    border-top: 1px solid #afafaf; }
+  /* line 551, sass/wpa.scss */
+  .displayed-content .blockFixed[data-type="standFirst"] {
+    background-color: transparent;
+    padding: 0 !important; }
+    /* line 554, sass/wpa.scss */
+    .displayed-content .blockFixed[data-type="standFirst"] > p {
+      font-weight: 600; }
+    /* line 555, sass/wpa.scss */
+    .displayed-content .blockFixed[data-type="standFirst"] > cite {
+      font-size: 1em; }
+  /* line 558, sass/wpa.scss */
+  .displayed-content .blockFixed[data-type="proof"] {
+    background-color: transparent;
+    padding: 0 !important; }
+  /* line 564, sass/wpa.scss */
+  .displayed-content blockquote.blockFixed[data-type="quotation"], .displayed-content blockquote.block[data-type="floatQuote"] {
+    background-image: url("quotation.png");
+    background-repeat: no-repeat;
+    background-position: 10px 12px;
+    margin: 1em 0; }
+  /* line 571, sass/wpa.scss */
+  .displayed-content .block[data-type="graphic"] {
+    background-color: transparent;
+    padding: 0 !important; }
+  /* line 577, sass/wpa.scss */
+  .displayed-content aside.block[data-type="pullQuote"] {
+    background-image: url("quotation.png");
+    background-repeat: no-repeat;
+    background-position: 15px 12px;
+    margin: 1em 0;
+    width: 100%;
+    border-left: 5px solid #D2D2D2 !important;
+    padding: 37px 10px 20px 12px !important; }
+    /* line 585, sass/wpa.scss */
+    .displayed-content aside.block[data-type="pullQuote"] * {
+      font-size: .95em !important;
+      font-weight: 400 !important; }
+  /* line 591, sass/wpa.scss */
+  .displayed-content aside.block[data-type="sidebar"] {
+    margin: 1em 0;
+    width: 100%;
+    border-left: 5px solid #D2D2D2 !important;
+    padding: 1em 1em !important; }
+    /* line 596, sass/wpa.scss */
+    .displayed-content aside.block[data-type="sidebar"] * {
+      font-size: .95rem !important; }
+  /* line 600, sass/wpa.scss */
+  .displayed-content aside.block[data-type="box"] * {
+    font-size: .95rem !important; }
+  /* line 601, sass/wpa.scss */
+  .displayed-content aside.block[data-type="box"] > header, .displayed-content aside.block[data-type="box"] > section > header {
+    font-size: 1.3em !important; }
+  /* line 604, sass/wpa.scss */
+  .displayed-content aside.block[data-type="text"] {
+    background-color: transparent;
+    margin: 1em 0;
+    width: 100%;
+    padding: 0 !important; }
+  /* line 612, sass/wpa.scss */
+  .displayed-content aside.feature {
+    border: none; }
+    /* line 614, sass/wpa.scss */
+    .displayed-content aside.feature > header {
+      background: transparent;
+      padding: 0;
+      margin-left: -20px; }
+      /* line 618, sass/wpa.scss */
+      .displayed-content aside.feature > header > .title[data-type="objectName"] {
+        color: #000;
+        font-size: 1em;
+        display: inline; }
+      /* line 623, sass/wpa.scss */
+      .displayed-content aside.feature > header * {
+        font-size: 1em;
+        display: inline; }
+      /* line 627, sass/wpa.scss */
+      .displayed-content aside.feature > header span.generated-labeling {
+        margin-right: 0; }
+        /* line 629, sass/wpa.scss */
+        .displayed-content aside.feature > header span.generated-labeling::after {
+          content: ". "; }
+    /* line 633, sass/wpa.scss */
+    .displayed-content aside.feature > .featureBody {
+      background: transparent;
+      padding: 0; }
+      /* line 636, sass/wpa.scss */
+      .displayed-content aside.feature > .featureBody > section > header * {
+        font-size: 1rem;
+        font-weight: 400; }
+  /* line 643, sass/wpa.scss */
+  .displayed-content div.featureFixed {
+    border: none; }
+    /* line 645, sass/wpa.scss */
+    .displayed-content div.featureFixed > header {
+      background: transparent; }
+      /* line 647, sass/wpa.scss */
+      .displayed-content div.featureFixed > header > .title[data-type="objectName"] {
+        color: #000; }
+    /* line 649, sass/wpa.scss */
+    .displayed-content div.featureFixed > .featureFixedBody {
+      background: transparent; }
+  /* line 652, sass/wpa.scss */
+  .displayed-content figure.tabular > figcaption > header > .title > .generated-labeling::after, .displayed-content figure.figure > figcaption > header > .title > .generated-labeling::after {
+    content: "."; }
+  /* line 654, sass/wpa.scss */
+  .displayed-content .orcidDetails > .personName {
+    font-style: italic; }
+
+/*# sourceMappingURL=wpa.css.map */

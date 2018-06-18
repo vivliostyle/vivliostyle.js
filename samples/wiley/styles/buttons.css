@@ -1,0 +1,77 @@
+/* ============================================================================
+buttons.css Version 1.0.0
+
+Exercise buttons
+
+Last Modified: April 20, 2017                                         
+
+Copyright (c) 2017 by John Wiley & Sons, Inc. 
+
+This stylesheet is proprietary confidential material owned by Wiley, and may be used and disclosed only in connection with agreed Wiley-related work. 
+By using the stylesheets, you hereby agree to the terms set forth herein.
+=============================================================================== */
+
+div.button {
+	display: inline-block;
+	background-color: #EAEEF2;
+	background: linear-gradient(to bottom, #FFF 0%, #CDD5DE 70%, #9FB0C1 100%);
+	border: 1px solid #9FB0C1; 
+	border-spacing: 0;	
+	border-radius: 4px;
+	font-family: sans-serif;	
+	font-size: 12px;
+	font-weight: 700;
+	color: #426295; 
+	cursor: pointer;
+	margin-bottom: 5px;
+	margin-right: 5px;
+	height: 17px;
+	padding: 2px 8px 2px 8px;	
+}
+div.minus {
+	border-radius: 4px 4px 0 0;
+	border-bottom: none;
+}
+
+div.button ~ div.button.minus {height: 19px;}
+
+div.button>div.button-text {
+	display: inline-block; 
+	margin-right: 6px;
+	margin-top: 1px;
+	vertical-align: top;
+}
+
+div.button>div.button-status {
+	display: inline-block; 
+	border: 1px solid #9FB0C1; 
+	width: 12px;
+	height: 12px; 
+	border-radius: 20px; 
+	vertical-align: middle;
+}
+div.button-status>table {
+	width: 6px;
+	height: 6px;
+	border-spacing: 0;
+	margin: 3px auto;
+}
+div.button-status>table * {
+	margin: 0;
+	padding: 0;
+}
+td.plus, td.minus {
+	padding: 1;
+	background-color: #426295;
+}
+
+.question>div.button {margin-top: .5em;}
+
+.hint[data-online-place="button"], .workedSolution[data-online-place="button"], *[data-online-answer-place="button"]>.answer, *[data-online-answer-place="button"]>.answerWrapper {
+	padding: 12px 20px;
+	margin: 0;	
+	border: 1px solid #9FB0C1;
+	border-radius: 0 4px 4px 4px;
+	position: relative;
+	top: -5px;
+}
