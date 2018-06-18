@@ -165,22 +165,21 @@ goog.inherits(adapt.css.FilterVisitor, adapt.css.Visitor);
  * @return {Array.<adapt.css.Val>}
  */
 adapt.css.FilterVisitor.prototype.visitValues = function(values) {
- /** @type {Array.<adapt.css.Val>} */ let arr = null;
-
- values.forEach((before, i) => {
-  const after = before.visit(this);
-  if (arr) {
-      arr[i] = after;
-  } else if (before !== after) {
-      arr = new Array(values.length);
-      for (let k = 0; k < i; k++) {
-          arr[k] = values[k];
-      }
-      arr[i] = after;
-  }
- });
-
- return arr || values;
+    /** @type {Array.<adapt.css.Val>} */ let arr = null;
+    for (let i = 0; i < values.length; i++) {
+        const before = values[i];
+        const after = before.visit(this);
+        if (arr) {
+            arr[i] = after;
+        } else if (before !== after) {
+            arr = new Array(values.length);
+            for (let k = 0; k < i; k++) {
+                arr[k] = values[k];
+            }
+            arr[i] = after;
+        }
+    }
+    return arr || values;
 };
 
 /**
