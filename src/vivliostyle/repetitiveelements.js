@@ -599,7 +599,8 @@ goog.scope(() => {
         if (!repetitiveElements) return adapt.task.newResult(true);
 
         const rootNodeContext = this.nodeContext;
-        return vivliostyle.repetitiveelements.appendHeader(formattingContext, rootNodeContext, column).thenAsync(() => vivliostyle.repetitiveelements.appendFooter(formattingContext, rootNodeContext, column).thenAsync(() => {
+        return vivliostyle.repetitiveelements.appendHeader(formattingContext, rootNodeContext, column).thenAsync(() =>
+            vivliostyle.repetitiveelements.appendFooter(formattingContext, rootNodeContext, column).thenAsync(() => {
             repetitiveElements.prepareLayoutFragment();
             return adapt.task.newResult(true);
         }));

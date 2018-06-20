@@ -3552,7 +3552,9 @@ adapt.layout.BlockLayoutProcessor.prototype.layout = (nodeContext, column, leadi
 /**
  * @override
  */
-adapt.layout.BlockLayoutProcessor.prototype.createEdgeBreakPosition = (position, breakOnEdge, overflows, columnBlockSize) => new adapt.layout.EdgeBreakPosition(position.copy(), breakOnEdge, overflows, columnBlockSize);
+adapt.layout.BlockLayoutProcessor.prototype.createEdgeBreakPosition =
+    (position, breakOnEdge, overflows, columnBlockSize) =>
+        new adapt.layout.EdgeBreakPosition(position.copy(), breakOnEdge, overflows, columnBlockSize);
 /**
  * @override
  */

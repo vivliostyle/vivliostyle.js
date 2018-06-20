@@ -57,7 +57,15 @@ goog.inherits(adapt.epub.EPUBDocStore, adapt.ops.OPSDocStore);
  */
 adapt.epub.EPUBDocStore.prototype.makeDeobfuscatorFactory = function() {
     const self = this;
-    return url => self.deobfuscators[url];
+    return (
+        /**
+         * @param {string} url
+         * @return {?function(Blob):adapt.task.Result.<Blob>}
+         */
+        url => {
+            return self.deobfuscators[url];
+        }
+    );
 };
 
 /**
@@ -558,7 +566,6 @@ adapt.epub.OPFDoc.prototype.createDocumentURLTransformer = function() {
     const self = this;
 
     /**
-     * @constructor
      * @implements {adapt.base.DocumentURLTransformer}
      */
     class OPFDocumentURLTransformer {
@@ -858,6 +865,10 @@ adapt.epub.OPFDoc.prototype.getCFI = function(spineIndex, offsetInItem) {
 adapt.epub.OPFDoc.prototype.resolveFragment = function(fragstr) {
     const self = this;
     return adapt.task.handle("resolveFragment",
+        /**
+         * @param {!adapt.task.Frame.<?adapt.epub.Position>} frame
+         * @return {void}
+         */
         frame => {
             if (!fragstr) {
                 frame.finish(null);
@@ -889,6 +900,11 @@ adapt.epub.OPFDoc.prototype.resolveFragment = function(fragstr) {
                 frame.finish({spineIndex: item.spineIndex, offsetInItem: offset, pageIndex: -1});
             });
         },
+        /**
+         * @param {!adapt.task.Frame.<?adapt.epub.Position>} frame
+         * @param {Error} err
+         * @return {void}
+         */
         (frame, err) => {
             vivliostyle.logging.logger.warn(err, "Cannot resolve fragment:", fragstr);
             frame.finish(null);
@@ -902,6 +918,10 @@ adapt.epub.OPFDoc.prototype.resolveFragment = function(fragstr) {
 adapt.epub.OPFDoc.prototype.resolveEPage = function(epage) {
     const self = this;
     return adapt.task.handle("resolveEPage",
+        /**
+         * @param {!adapt.task.Frame.<?adapt.epub.Position>} frame
+         * @return {void}
+         */
         frame => {
             if (epage <= 0) {
                 frame.finish({spineIndex: 0, offsetInItem: 0, pageIndex: -1});
@@ -928,6 +948,11 @@ adapt.epub.OPFDoc.prototype.resolveEPage = function(epage) {
                 frame.finish({spineIndex, offsetInItem: offset, pageIndex: -1});
             });
         },
+        /**
+         * @param {!adapt.task.Frame.<?adapt.epub.Position>} frame
+         * @param {Error} err
+         * @return {void}
+         */
         (frame, err) => {
             vivliostyle.logging.logger.warn(err, "Cannot resolve epage:", epage);
             frame.finish(null);
@@ -1186,11 +1211,11 @@ adapt.epub.OPFView.prototype.normalizeSeekPosition = (position, viewItem) => {
         }
     }
     return (
-        /** @type {!adapt.epub.Position} */ {
+        /** @type {!adapt.epub.Position} */ ({
             spineIndex: position.spineIndex,
             pageIndex,
             offsetInItem: seekOffset
-        }
+        })
     );
 };
 
@@ -1859,18 +1884,25 @@ adapt.epub.OPFView.prototype.makeSSEView = function(xmldoc, srcElem, viewParent,
  */
 adapt.epub.OPFView.prototype.makeCustomRenderer = function(xmldoc) {
     const self = this;
-    return (srcElem, viewParent, computedStyle) => {
-        if (srcElem.localName == "object" && srcElem.namespaceURI == adapt.base.NS.XHTML) {
-            return self.makeObjectView(xmldoc, srcElem, viewParent, computedStyle);
-        } else if (srcElem.namespaceURI == adapt.base.NS.MATHML) {
-            return self.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
-        } else if (srcElem.namespaceURI == adapt.base.NS.SSE) {
-            return self.makeSSEView(xmldoc, srcElem, viewParent, computedStyle);
-        } else if (srcElem.dataset && srcElem.dataset["mathTypeset"] == "true") {
-            return self.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
+    return (
+        /**
+         * @param {Element} srcElem
+         * @param {Element} viewParent
+         * @return {!adapt.task.Result.<Element>}
+         */
+        (srcElem, viewParent, computedStyle) => {
+            if (srcElem.localName == "object" && srcElem.namespaceURI == adapt.base.NS.XHTML) {
+                return self.makeObjectView(xmldoc, srcElem, viewParent, computedStyle);
+            } else if (srcElem.namespaceURI == adapt.base.NS.MATHML) {
+                return self.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
+            } else if (srcElem.namespaceURI == adapt.base.NS.SSE) {
+                return self.makeSSEView(xmldoc, srcElem, viewParent, computedStyle);
+            } else if (srcElem.dataset && srcElem.dataset["mathTypeset"] == "true") {
+                return self.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
+            }
+            return adapt.task.newResult(/** @type {Element} */ (null));
         }
-        return adapt.task.newResult(/** @type {Element} */ (null));
-    };
+    );
 };
 
 /**

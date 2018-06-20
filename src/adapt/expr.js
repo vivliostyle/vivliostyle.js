@@ -32,16 +32,16 @@ adapt.expr.Preferences;
  * @return {adapt.expr.Preferences}
  */
 adapt.expr.defaultPreferences = () => ({
-    fontFamily:"serif",
-    lineHeight:1.25,
-    margin:8,
-    hyphenate:false,
-    columnWidth:25,
-    horizontal:false,
-    nightMode:false,
-    spreadView:false,
-    pageBorder:1,
-    enabledMediaTypes:{"print": true},
+    fontFamily: "serif",
+    lineHeight: 1.25,
+    margin: 8,
+    hyphenate: false,
+    columnWidth: 25,
+    horizontal: false,
+    nightMode: false,
+    spreadView: false,
+    pageBorder: 1,
+    enabledMediaTypes: {"print": true},
     defaultPaperSize: undefined
 });
 
@@ -50,16 +50,16 @@ adapt.expr.defaultPreferences = () => ({
  * @return {adapt.expr.Preferences}
  */
 adapt.expr.clonePreferences = pref => ({
-    fontFamily:pref.fontFamily,
-    lineHeight:pref.lineHeight,
-    margin:pref.margin,
-    hyphenate:pref.hyphenate,
-    columnWidth:pref.columnWidth,
-    horizontal:pref.horizontal,
-    nightMode:pref.nightMode,
-    spreadView:pref.spreadView,
-    pageBorder:pref.pageBorder,
-    enabledMediaTypes:Object.assign({}, pref.enabledMediaTypes),
+    fontFamily: pref.fontFamily,
+    lineHeight: pref.lineHeight,
+    margin: pref.margin,
+    hyphenate: pref.hyphenate,
+    columnWidth: pref.columnWidth,
+    horizontal: pref.horizontal,
+    nightMode: pref.nightMode,
+    spreadView: pref.spreadView,
+    pageBorder: pref.pageBorder,
+    enabledMediaTypes: Object.assign({}, pref.enabledMediaTypes),
     defaultPaperSize: pref.defaultPaperSize? Object.assign({}, pref.defaultPaperSize) : undefined
 });
 

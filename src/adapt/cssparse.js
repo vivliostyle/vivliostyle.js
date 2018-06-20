@@ -1014,7 +1014,7 @@ adapt.cssparse.Action = {
  */
 adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
 
-((() => {
+(() => {
     const actionsBase = adapt.cssparse.actionsBase;
     actionsBase[adapt.csstok.TokenType.IDENT] = adapt.cssparse.Action.IDENT;
     actionsBase[adapt.csstok.TokenType.STAR] = adapt.cssparse.Action.SELECTOR_START;
@@ -1162,7 +1162,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     priority[adapt.csstok.TokenType.PERCENT] = 5;
     priority[adapt.csstok.TokenType.EOF] = 6;
     priority[adapt.cssparse.OP_MEDIA_AND] = 2;
-}))();
+})();
 
 /**
  * @enum {number}
@@ -2746,13 +2746,15 @@ adapt.cssparse.parseStylesheet = (tokenizer, handler, baseURL, classes, media) =
  * @param {?string} media
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.cssparse.parseStylesheetFromText = (text, handler, baseURL, classes, media) => adapt.task.handle("parseStylesheetFromText", frame => {
-    const tok = new adapt.csstok.Tokenizer(text, handler);
-    adapt.cssparse.parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
-}, (frame, err) => {
-    vivliostyle.logging.logger.warn(err, `Failed to parse stylesheet text: ${text}`);
-    frame.finish(false);
-});
+adapt.cssparse.parseStylesheetFromText = (text, handler, baseURL, classes, media) => {
+    return adapt.task.handle("parseStylesheetFromText", frame => {
+        const tok = new adapt.csstok.Tokenizer(text, handler);
+        adapt.cssparse.parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
+    }, (frame, err) => {
+        vivliostyle.logging.logger.warn(err, `Failed to parse stylesheet text: ${text}`);
+        frame.finish(false);
+    });
+};
 
 /**
  * @param {string} url

@@ -19,7 +19,7 @@
 /* eslint no-extend-native: "off" */
 goog.provide("vivliostyle.util");
 
-((() => {
+(() => {
     if (!Array.from) {
         /**
          * Very simple polyfill of Array.from.
@@ -86,4 +86,4 @@ goog.provide("vivliostyle.util");
             return target;
         };
     }
-}))();
+})();

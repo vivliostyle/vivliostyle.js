@@ -26,4 +26,20 @@ goog.provide("vivliostyle.urls");
  * @param {adapt.base.DocumentURLTransformer} documentURLTransformer
  * @returns {string} transformed attributeValue
  */
-vivliostyle.urls.transformURIs = (attributeValue, baseUrl, documentURLTransformer) => attributeValue.replace(/[uU][rR][lL]\(\s*\"((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^\"\r\n])+)\"/gm, (match, m1) => `url("${documentURLTransformer.transformURL(m1, baseUrl)}"`).replace(/[uU][rR][lL]\(\s*\'((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^\'\r\n])+)\'/gm, (match, m1) => `url('${documentURLTransformer.transformURL(m1, baseUrl)}'`).replace(/[uU][rR][lL]\(\s*((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^\"\'\r\n\)\s])+)/gm, (match, m1) => `url(${documentURLTransformer.transformURL(m1, baseUrl)}`);
+vivliostyle.urls.transformURIs = function(attributeValue, baseUrl, documentURLTransformer) {
+    return attributeValue.replace(/[uU][rR][lL]\(\s*\"((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^\"\r\n])+)\"/gm, function(match, m1) {
+        return 'url("' + documentURLTransformer.transformURL(m1, baseUrl)+ '"';
+    }).replace(/[uU][rR][lL]\(\s*\'((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^\'\r\n])+)\'/gm, function(match, m1) {
+        return "url('" + documentURLTransformer.transformURL(m1, baseUrl)+ "'";
+    }).replace(/[uU][rR][lL]\(\s*((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^\"\'\r\n\)\s])+)/gm, function(match, m1) {
+        return "url(" + documentURLTransformer.transformURL(m1, baseUrl);
+    });
+};
+vivliostyle.urls.transformURIs = (attributeValue, baseUrl, documentURLTransformer) =>
+    attributeValue.replace(/[uU][rR][lL]\(\s*\"((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^\"\r\n])+)\"/gm,
+        (match, m1) => `url("${documentURLTransformer.transformURL(m1, baseUrl)}"`
+    ).replace(/[uU][rR][lL]\(\s*\'((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^\'\r\n])+)\'/gm,
+        (match, m1) => `url('${documentURLTransformer.transformURL(m1, baseUrl)}'`
+    ).replace(/[uU][rR][lL]\(\s*((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^\"\'\r\n\)\s])+)/gm,
+        (match, m1) => `url(${documentURLTransformer.transformURL(m1, baseUrl)}`
+    );

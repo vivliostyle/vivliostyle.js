@@ -1440,7 +1440,7 @@ goog.scope(() => {
         clearTableLayoutOptionCache(nodeContext.sourceNode);
         const frame = adapt.task.newFrame("TableLayoutProcessor.doInitialLayout");
         const initialNodeContext = nodeContext.copy();
-        this.layoutEntireTable(nodeContext, column).then(nodeContextAfter => {
+        this.layoutEntireTable(nodeContext, column).then(function(nodeContextAfter) {
             const tableElement = nodeContextAfter.viewNode;
             const tableBBox = column.clientLayout.getElementClientRect(tableElement);
             let edge = column.vertical ? tableBBox.left : tableBBox.bottom;
@@ -1455,7 +1455,7 @@ goog.scope(() => {
             this.normalizeColGroups(formattingContext, tableElement, column);
             formattingContext.updateCellSizes(column.clientLayout);
             frame.finish(null);
-        });
+        }.bind(this));
         return frame.result();
     };
 

@@ -94,12 +94,13 @@ goog.scope(() => {
     };
 
     /**
-     * @param {!vivliostyle.counters.CounterStore} counterStore
-     * @param {string} baseURL
-     * @constructor
      * @implements {adapt.csscasc.CounterListener}
      */
     class CounterListener {
+        /**
+         * @param {!vivliostyle.counters.CounterStore} counterStore
+         * @param {string} baseURL
+         */
         constructor(counterStore, baseURL) {
             /** @const */ this.counterStore = counterStore;
             /** @const */ this.baseURL = baseURL;
@@ -122,14 +123,15 @@ goog.scope(() => {
     }
 
     /**
-     * @param {!vivliostyle.counters.CounterStore} counterStore
-     * @param {string} baseURL
-     * @param {adapt.expr.LexicalScope} rootScope
-     * @param {adapt.expr.LexicalScope} pageScope
-     * @constructor
      * @implements {adapt.csscasc.CounterResolver}
      */
     class CounterResolver {
+        /**
+         * @param {!vivliostyle.counters.CounterStore} counterStore
+         * @param {string} baseURL
+         * @param {adapt.expr.LexicalScope} rootScope
+         * @param {adapt.expr.LexicalScope} pageScope
+         */
         constructor(counterStore, baseURL, rootScope, pageScope) {
             /** @const */ this.counterStore = counterStore;
             /** @const */ this.baseURL = baseURL;
@@ -648,12 +650,13 @@ goog.scope(() => {
     };
 
     /**
-     * @param {!vivliostyle.counters.CounterStore} counterStore
-     * @param {number} pageIndex
-     * @constructor
      * @implements {adapt.layout.LayoutConstraint}
      */
     class LayoutConstraint {
+        /**
+         * @param {!vivliostyle.counters.CounterStore} counterStore
+         * @param {number} pageIndex
+         */
         constructor(counterStore, pageIndex) {
             /** @const */ this.counterStore = counterStore;
             /** @const */ this.pageIndex = pageIndex;

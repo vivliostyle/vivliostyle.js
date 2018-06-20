@@ -400,7 +400,7 @@ adapt.ops.StyleInstance.prototype.matchPageSide = function(side) {
         case "recto":
         case "verso":
             return (
-                /** @type {boolean} */ new adapt.expr.Named(this.style.pageScope, `${side}-page`).evaluate(this)
+                /** @type {boolean} */ (new adapt.expr.Named(this.style.pageScope, `${side}-page`).evaluate(this))
             );
         default:
             return true;

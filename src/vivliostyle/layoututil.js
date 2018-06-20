@@ -486,7 +486,7 @@ goog.scope(() => {
         this.saveState(nodeContext, column);
 
         const mode = this.resolveLayoutMode(nodeContext);
-        mode.doLayout(nodeContext, column).then(positionAfter => {
+        mode.doLayout(nodeContext, column).then(function(positionAfter) {
             let accepted = mode.accept(positionAfter, column);
             accepted = mode.postLayout(positionAfter, this.initialPosition, column, accepted);
             if (accepted) {
@@ -497,7 +497,7 @@ goog.scope(() => {
                 this.restoreState(nodeContext, column);
                 this.tryLayout(this.initialPosition, column).thenFinish(frame);
             }
-        });
+        }.bind(this));
         return frame.result();
     };
 

@@ -123,45 +123,52 @@ adapt.toc.toggleNodeExpansion = evt => {
  */
 adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
     const renderer = this.rendererFactory.makeCustomRenderer(xmldoc);
-    return (srcElem, viewParent, computedStyle) => {
-        const behavior = computedStyle["behavior"];
-        if (!behavior || (behavior.toString() != "toc-node" && behavior.toString() != "toc-container")) {
-            return renderer(srcElem, viewParent, computedStyle);
-        }
-        const adaptParentClass = viewParent.getAttribute("data-adapt-class");
-        if (adaptParentClass == "toc-node") {
-            var button = /** @type {Element} */ (viewParent.firstChild);
-            if (button.textContent != adapt.toc.bulletClosed) {
-                button.textContent = adapt.toc.bulletClosed;
-                adapt.base.setCSSProperty(button, "cursor", "pointer");
-                button.addEventListener("click", adapt.toc.toggleNodeExpansion, false);
+    return (
+        /**
+         * @param {Element} srcElem
+         * @param {Element} viewParent
+         * @return {!adapt.task.Result.<Element>}
+         */
+        (srcElem, viewParent, computedStyle) => {
+            const behavior = computedStyle["behavior"];
+            if (!behavior || (behavior.toString() != "toc-node" && behavior.toString() != "toc-container")) {
+                return renderer(srcElem, viewParent, computedStyle);
             }
-        }
-        const element = viewParent.ownerDocument.createElement("div");
-        element.setAttribute("data-adapt-process-children", "true");
-        if (behavior.toString() == "toc-node") {
-            var button = viewParent.ownerDocument.createElement("div");
-            button.textContent = adapt.toc.bulletEmpty;
-            // TODO: define pseudo-element for the button?
-            adapt.base.setCSSProperty(button, "margin-left", "-1em");
-            adapt.base.setCSSProperty(button, "display", "inline-block");
-            adapt.base.setCSSProperty(button, "width", "1em");
-            adapt.base.setCSSProperty(button, "text-align", "left");
-            adapt.base.setCSSProperty(button, "cursor", "default");
-            adapt.base.setCSSProperty(button, "font-family", "Menlo,sans-serif");
-            element.appendChild(button);
-            adapt.base.setCSSProperty(element, "overflow", "hidden");
-            element.setAttribute("data-adapt-class", "toc-node");
-            if (adaptParentClass == "toc-node" || adaptParentClass == "toc-container") {
-                adapt.base.setCSSProperty(element, "height", "0px");
-            }
-        } else {
+            const adaptParentClass = viewParent.getAttribute("data-adapt-class");
             if (adaptParentClass == "toc-node") {
-                element.setAttribute("data-adapt-class", "toc-container");
+                var button = /** @type {Element} */ (viewParent.firstChild);
+                if (button.textContent != adapt.toc.bulletClosed) {
+                    button.textContent = adapt.toc.bulletClosed;
+                    adapt.base.setCSSProperty(button, "cursor", "pointer");
+                    button.addEventListener("click", adapt.toc.toggleNodeExpansion, false);
+                }
             }
+            const element = viewParent.ownerDocument.createElement("div");
+            element.setAttribute("data-adapt-process-children", "true");
+            if (behavior.toString() == "toc-node") {
+                var button = viewParent.ownerDocument.createElement("div");
+                button.textContent = adapt.toc.bulletEmpty;
+                // TODO: define pseudo-element for the button?
+                adapt.base.setCSSProperty(button, "margin-left", "-1em");
+                adapt.base.setCSSProperty(button, "display", "inline-block");
+                adapt.base.setCSSProperty(button, "width", "1em");
+                adapt.base.setCSSProperty(button, "text-align", "left");
+                adapt.base.setCSSProperty(button, "cursor", "default");
+                adapt.base.setCSSProperty(button, "font-family", "Menlo,sans-serif");
+                element.appendChild(button);
+                adapt.base.setCSSProperty(element, "overflow", "hidden");
+                element.setAttribute("data-adapt-class", "toc-node");
+                if (adaptParentClass == "toc-node" || adaptParentClass == "toc-container") {
+                    adapt.base.setCSSProperty(element, "height", "0px");
+                }
+            } else {
+                if (adaptParentClass == "toc-node") {
+                    element.setAttribute("data-adapt-class", "toc-container");
+                }
+            }
+            return adapt.task.newResult(/** @type {Element} */ (element));
         }
-        return adapt.task.newResult(/** @type {Element} */ (element));
-    };
+    );
 };
 
 /**

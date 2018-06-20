@@ -356,7 +356,7 @@ adapt.csscasc.isInherited = name => !!adapt.csscasc.inheritedProps[name];
  * @param {string} name
  * @return {adapt.csscasc.CascadeValue}
  */
-adapt.csscasc.getProp = (style, name) => /** @type {adapt.csscasc.CascadeValue} */ style[name];
+adapt.csscasc.getProp = (style, name) => /** @type {adapt.csscasc.CascadeValue} */ (style[name]);
 
 
 /**
@@ -378,7 +378,7 @@ adapt.csscasc.setProp = (style, name, value) => {
  * @param {string} name
  * @return {adapt.csscasc.ElementStyleMap}
  */
-adapt.csscasc.getStyleMap = (style, name) => /** @type {adapt.csscasc.ElementStyleMap} */ style[name];
+adapt.csscasc.getStyleMap = (style, name) => /** @type {adapt.csscasc.ElementStyleMap} */ (style[name]);
 
 /**
  * @param {adapt.csscasc.ElementStyle} style
@@ -412,7 +412,7 @@ adapt.csscasc.getViewConditionalStyleMap = style => {
  * @param {string} name
  * @return {Array.<adapt.csscasc.CascadeValue>}
  */
-adapt.csscasc.getSpecial = (style, name) => /** @type {Array.<adapt.csscasc.CascadeValue>} */ style[name];
+adapt.csscasc.getSpecial = (style, name) => /** @type {Array.<adapt.csscasc.CascadeValue>} */ (style[name]);
 
 /**
  * @param {adapt.csscasc.ElementStyle} style
