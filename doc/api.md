@@ -20,8 +20,6 @@
     - [`new Viewer(settings, options)`](#new-viewerviewersettings-options)
     - [`PageViewMode`](#viewerpageviewmode)
     - [`ZoomType`](#viewerzoomtype)
-  - [viewerapp](#viewerapp)
-    - [`main(arg)`](#viewerappmainarg)
 
 - [Classes](#classes)
   - [`Viewer`](#viewer-1)
@@ -138,26 +136,6 @@ Enum `PageViewMode`.
 
 Enum `ZoomType`.
 `ZoomType` has only one member, `FIT_INSIDE_VIEWPORT`.
-
-## viewerapp
-
-### `viewerapp.main(arg)`
-
-##### Parameter
-
-- `arg` (object)
-  - `fragment`
-  - `epubURL`
-  - `xmlURL`
-  - `defaultPageWidth`
-  - `defaultPageHeight`
-  - `defaultPageSize`
-  - `orientation`
-  - `spreadView`
-  - `uaRoot`
-  - `document`
-  - `userStyleSheet`
-  - `viewportElement`
 
 # Classes
 
