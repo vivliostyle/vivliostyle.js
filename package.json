@@ -29,18 +29,18 @@
   "main": "lib/vivliostyle.min.js",
   "homepage": "https://github.com/vivliostyle/vivliostyle.js",
   "devDependencies": {
+    "eslint": "^4.19.1",
     "fast-diff": "1.1.1",
-    "eslint": "^3.3.1",
+    "glob": "^7.1.1",
     "google-closure-compiler": "^20160911.0.0",
     "jasmine-core": "^2.3.4",
     "karma": "^0.13.7",
     "karma-cli": "^0.1.0",
+    "karma-commonjs": "^1.0.0",
     "karma-jasmine": "^0.3.6",
     "karma-sauce-launcher": "^0.2.14",
     "karma-verbose-reporter": "0.0.3",
-    "karma-commonjs": "^1.0.0",
     "mkdirp": "^0.5.1",
-    "mustache": "^2.2.1",
-    "glob": "^7.1.1"
+    "mustache": "^2.2.1"
   }
 }
