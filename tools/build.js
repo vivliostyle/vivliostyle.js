@@ -16,7 +16,7 @@ const outputFiles = [
 const execScript = `
 java -jar node_modules/google-closure-compiler/compiler.jar \
 --compilation_level ADVANCED_OPTIMIZATIONS \
---language_in ECMASCRIPT5 \
+--language_in ECMASCRIPT6 \
 --warning_level VERBOSE \
 --output_wrapper_file src/wrapper.js \
 --externs src/externs.js \
