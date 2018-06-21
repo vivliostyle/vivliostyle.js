@@ -73,7 +73,7 @@ describe("page", function() {
 
         it("has the width and height of the paper size specified in size property", function() {
             var resolved = module.resolvePageSizeAndBleed({
-                size: new adapt.csscasc.CascadeValue(new adapt.css.getName("A5"), 0)
+                size: new adapt.csscasc.CascadeValue(adapt.css.getName("A5"), 0)
             });
             expected.width = new adapt.css.Numeric(148, "mm");
             expected.height = new adapt.css.Numeric(210, "mm");
@@ -81,7 +81,7 @@ describe("page", function() {
 
             resolved = module.resolvePageSizeAndBleed({
                 size: new adapt.csscasc.CascadeValue(
-                    new adapt.css.SpaceList([new adapt.css.getName("A5"), new adapt.css.getName("portrait")]), 0)
+                    new adapt.css.SpaceList([adapt.css.getName("A5"), adapt.css.getName("portrait")]), 0)
             });
             expected.width = new adapt.css.Numeric(148, "mm");
             expected.height = new adapt.css.Numeric(210, "mm");
@@ -89,7 +89,7 @@ describe("page", function() {
 
             resolved = module.resolvePageSizeAndBleed({
                 size: new adapt.csscasc.CascadeValue(
-                    new adapt.css.SpaceList([new adapt.css.getName("A5"), adapt.css.ident.landscape]), 0)
+                    new adapt.css.SpaceList([adapt.css.getName("A5"), adapt.css.ident.landscape]), 0)
             });
             expected.width = new adapt.css.Numeric(210, "mm");
             expected.height = new adapt.css.Numeric(148, "mm");
