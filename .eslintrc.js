@@ -16,6 +16,7 @@
  */
 module.exports = {
     "env": {
+        "es6": true,
         "browser": true,
         "jasmine": true,
         "commonjs": true

@@ -31,23 +31,37 @@ adapt.expr.Preferences;
 /**
  * @return {adapt.expr.Preferences}
  */
-adapt.expr.defaultPreferences = function() {
-    return {fontFamily:"serif", lineHeight:1.25, margin:8, hyphenate:false, columnWidth:25,
-        horizontal:false, nightMode:false, spreadView:false, pageBorder:1,
-        enabledMediaTypes:{"print": true}, defaultPaperSize: undefined};
-};
+adapt.expr.defaultPreferences = () => ({
+    fontFamily: "serif",
+    lineHeight: 1.25,
+    margin: 8,
+    hyphenate: false,
+    columnWidth: 25,
+    horizontal: false,
+    nightMode: false,
+    spreadView: false,
+    pageBorder: 1,
+    enabledMediaTypes: {"print": true},
+    defaultPaperSize: undefined
+});
 
 /**
  * @param {adapt.expr.Preferences} pref
  * @return {adapt.expr.Preferences}
  */
-adapt.expr.clonePreferences = function(pref) {
-    return {fontFamily:pref.fontFamily, lineHeight:pref.lineHeight, margin:pref.margin,
-        hyphenate:pref.hyphenate, columnWidth:pref.columnWidth, horizontal:pref.horizontal,
-        nightMode:pref.nightMode, spreadView:pref.spreadView, pageBorder:pref.pageBorder,
-        enabledMediaTypes:Object.assign({}, pref.enabledMediaTypes),
-        defaultPaperSize: pref.defaultPaperSize? Object.assign({}, pref.defaultPaperSize) : undefined};
-};
+adapt.expr.clonePreferences = pref => ({
+    fontFamily: pref.fontFamily,
+    lineHeight: pref.lineHeight,
+    margin: pref.margin,
+    hyphenate: pref.hyphenate,
+    columnWidth: pref.columnWidth,
+    horizontal: pref.horizontal,
+    nightMode: pref.nightMode,
+    spreadView: pref.spreadView,
+    pageBorder: pref.pageBorder,
+    enabledMediaTypes: Object.assign({}, pref.enabledMediaTypes),
+    defaultPaperSize: pref.defaultPaperSize? Object.assign({}, pref.defaultPaperSize) : undefined
+});
 
 /**
  * @const
@@ -81,36 +95,31 @@ adapt.expr.PendingResult;
  * @param {number} objH
  * @return {string}
  */
-adapt.expr.letterbox = function(viewW, viewH, objW, objH) {
-    var scale = Math.min((viewW - 0) / objW, (viewH - 0) / objH);
-    return "matrix(" + scale + ",0,0," + scale + ",0,0)";
+adapt.expr.letterbox = (viewW, viewH, objW, objH) => {
+    const scale = Math.min((viewW - 0) / objW, (viewH - 0) / objH);
+    return `matrix(${scale},0,0,${scale},0,0)`;
 };
 
 /**
  * @param {string} str
  * @return {string} string that can be parsed as CSS string with value str
  */
-adapt.expr.cssString = function(str) {
-    return '"' + adapt.base.escapeCSSStr(str + "") + '"';
-};
+adapt.expr.cssString = str => `"${adapt.base.escapeCSSStr(`${str}`)}"`;
 
 /**
  * @param {string} name
  * @return {string} string that can be parsed as CSS name
  */
-adapt.expr.cssIdent = function(name) {
-    return adapt.base.escapeCSSIdent(name + "");
-};
+adapt.expr.cssIdent = name => adapt.base.escapeCSSIdent(`${name}`);
 
 /**
  * @param {?string} objName
  * @param {string} memberName
  * @return {string}
  */
-adapt.expr.makeQualifiedName = function(objName, memberName) {
+adapt.expr.makeQualifiedName = (objName, memberName) => {
     if (objName) {
-        return adapt.base.escapeCSSIdent(objName) + "." +
-            adapt.base.escapeCSSIdent(memberName);
+        return `${adapt.base.escapeCSSIdent(objName)}.${adapt.base.escapeCSSIdent(memberName)}`;
     }
     return adapt.base.escapeCSSIdent(memberName);
 };
@@ -129,7 +138,7 @@ adapt.expr.nextKeyIndex = 0;
  */
 adapt.expr.LexicalScope = function(parent, resolver) {
     this.parent = parent;
-    /** @type {string} */ this.scopeKey = "S" + (adapt.expr.nextKeyIndex++);
+    /** @type {string} */ this.scopeKey = `S${adapt.expr.nextKeyIndex++}`;
     /** @type {Array.<adapt.expr.LexicalScope>} */ this.children = [];
     /** @type {adapt.expr.Const} */ this.zero = new adapt.expr.Const(this, 0);
     /** @type {adapt.expr.Const} */ this.one = new adapt.expr.Const(this, 1);
@@ -144,7 +153,7 @@ adapt.expr.LexicalScope = function(parent, resolver) {
     /** @const */ this.resolver = resolver;
     if (!parent) {
         // root scope
-        var builtIns = this.builtIns;
+        const builtIns = this.builtIns;
         builtIns["floor"] = Math.floor;
         builtIns["ceil"] = Math.ceil;
         builtIns["round"] = Math.round;
@@ -154,7 +163,7 @@ adapt.expr.LexicalScope = function(parent, resolver) {
         builtIns["letterbox"] = adapt.expr.letterbox;
         builtIns["css-string"] = adapt.expr.cssString;
         builtIns["css-name"] = adapt.expr.cssIdent;
-        builtIns["typeof"] = function(x) { return typeof x; };
+        builtIns["typeof"] = x => typeof x;
         this.defineBuiltInName("page-width", function() { return this.pageWidth(); });
         this.defineBuiltInName("page-height", function() { return this.pageHeight(); });
         this.defineBuiltInName("pref-font-family", function() { return this.pref.fontFamily; });
@@ -209,7 +218,7 @@ adapt.expr.LexicalScope.prototype.defineBuiltIn = function(qualifiedName, fn) {
  * @param {string} unit
  * @returns {boolean}
  */
-adapt.expr.isAbsoluteLengthUnit = function(unit) {
+adapt.expr.isAbsoluteLengthUnit = unit => {
     switch (unit.toLowerCase()) {
         case "px":
         case "in":
@@ -228,7 +237,7 @@ adapt.expr.isAbsoluteLengthUnit = function(unit) {
  * @param {string} unit
  * @returns {boolean}
  */
-adapt.expr.isFontRelativeLengthUnit = function(unit) {
+adapt.expr.isFontRelativeLengthUnit = unit => {
     switch (unit.toLowerCase()) {
         case "em":
         case "ex":
@@ -265,7 +274,7 @@ adapt.expr.defaultUnitSizes = {
  * @param {string} unit
  * @returns {boolean}
  */
-adapt.expr.needUnitConversion = function(unit) {
+adapt.expr.needUnitConversion = unit => {
     switch (unit) {
         case "q":
         case "rem":
@@ -326,7 +335,7 @@ adapt.expr.Context = function(rootScope, viewportWidth, viewportHeight, fontSize
  * @return {!adapt.expr.ScopeContext}
  */
 adapt.expr.Context.prototype.getScopeContext = function(scope) {
-    var s = this.scopes[scope.scopeKey];
+    let s = this.scopes[scope.scopeKey];
     if (!s) {
         s = {};
         this.scopes[scope.scopeKey] = s;
@@ -340,7 +349,7 @@ adapt.expr.Context.prototype.getScopeContext = function(scope) {
  */
 adapt.expr.Context.prototype.clearScope = function(scope) {
     this.scopes[scope.scopeKey] = {};
-    for (var k = 0; k < scope.children.length; k++) {
+    for (let k = 0; k < scope.children.length; k++) {
         this.clearScope(scope.children[k]);
     }
 };
@@ -371,7 +380,7 @@ adapt.expr.Context.prototype.queryUnitSize = function(unit, isRoot) {
  */
 adapt.expr.Context.prototype.evalName = function(scope, qualifiedName) {
     do {
-        var val = scope.values[qualifiedName];
+        let val = scope.values[qualifiedName];
         if (val)
             return val;
         if (scope.resolver) {
@@ -381,7 +390,7 @@ adapt.expr.Context.prototype.evalName = function(scope, qualifiedName) {
         }
         scope = scope.parent;
     } while (scope);
-    throw new Error("Name '" + qualifiedName + "' is undefined");
+    throw new Error(`Name '${qualifiedName}' is undefined`);
 };
 
 /**
@@ -393,7 +402,7 @@ adapt.expr.Context.prototype.evalName = function(scope, qualifiedName) {
  */
 adapt.expr.Context.prototype.evalCall = function(scope, qualifiedName, params, noBuiltInEval) {
     do {
-        var body = scope.funcs[qualifiedName];
+        let body = scope.funcs[qualifiedName];
         if (body)
             return body; // will be expanded by callee
         if (scope.resolver) {
@@ -401,19 +410,19 @@ adapt.expr.Context.prototype.evalCall = function(scope, qualifiedName, params, n
             if (body)
                 return body;
         }
-        var fn = scope.builtIns[qualifiedName];
+        const fn = scope.builtIns[qualifiedName];
         if (fn) {
             if (noBuiltInEval)
                 return scope.zero;
-            var args = Array(params.length);
-            for (var i = 0; i < params.length; i++) {
+            const args = Array(params.length);
+            for (let i = 0; i < params.length; i++) {
                 args[i] = params[i].evaluate(this);
             }
             return new adapt.expr.Const(scope, fn.apply(this, args));
         }
         scope = scope.parent;
     } while (scope);
-    throw new Error("Function '" + qualifiedName + "' is undefined");
+    throw new Error(`Function '${qualifiedName}' is undefined`);
 };
 
 /**
@@ -422,7 +431,7 @@ adapt.expr.Context.prototype.evalCall = function(scope, qualifiedName, params, n
  * @returns {boolean}
  */
 adapt.expr.Context.prototype.evalMediaName = function(name, not) {
-    var enabled = (name === "all") || !!this.pref.enabledMediaTypes[name];
+    const enabled = (name === "all") || !!this.pref.enabledMediaTypes[name];
     return not ? !enabled : enabled;
 };
 
@@ -432,14 +441,14 @@ adapt.expr.Context.prototype.evalMediaName = function(name, not) {
  * @return {boolean}
  */
 adapt.expr.Context.prototype.evalMediaTest = function(feature, value) {
-    var prefix = "";
-    var r = feature.match(/^(min|max)-(.*)$/);
+    let prefix = "";
+    const r = feature.match(/^(min|max)-(.*)$/);
     if (r) {
         prefix = r[1];
         feature = r[2];
     }
-    var req = null;
-    var actual = null;
+    let req = null;
+    let actual = null;
     switch (feature) {
         case "width":
         case "height":
@@ -488,7 +497,7 @@ adapt.expr.Context.prototype.evalMediaTest = function(feature, value) {
  * @return {adapt.expr.Result|undefined}
  */
 adapt.expr.Context.prototype.queryVal = function(scope, key) {
-    var s = this.scopes[scope.scopeKey];
+    const s = this.scopes[scope.scopeKey];
     return s ? s[key] : undefined;
 };
 
@@ -515,7 +524,7 @@ adapt.expr.DependencyCache;
  */
 adapt.expr.Val = function(scope) {
     this.scope = scope;
-    this.key = "_" + adapt.expr.nextKeyIndex++;
+    this.key = `_${adapt.expr.nextKeyIndex++}`;
 };
 
 /**
@@ -523,7 +532,7 @@ adapt.expr.Val = function(scope) {
  * @override
  */
 adapt.expr.Val.prototype.toString = function() {
-    var buf = new adapt.base.StringBuffer();
+    const buf = new adapt.base.StringBuffer();
     this.appendTo(buf, 0);
     return buf.toString();
 };
@@ -533,7 +542,7 @@ adapt.expr.Val.prototype.toString = function() {
  * @param {number} priority
  * @return {void}
  */
-adapt.expr.Val.prototype.appendTo = function(buf, priority) {
+adapt.expr.Val.prototype.appendTo = (buf, priority) => {
     throw new Error("F_ABSTRACT");
 };
 
@@ -542,7 +551,7 @@ adapt.expr.Val.prototype.appendTo = function(buf, priority) {
  * @param {adapt.expr.Context} context
  * @return {adapt.expr.Result}
  */
-adapt.expr.Val.prototype.evaluateCore = function(context) {
+adapt.expr.Val.prototype.evaluateCore = context => {
     throw new Error("F_ABSTRACT");
 };
 
@@ -574,14 +583,14 @@ adapt.expr.Val.prototype.dependCore = function(other, context, dependencyCache) 
  * @return {boolean}
  */
 adapt.expr.Val.prototype.dependOuter = function(other, context, dependencyCache) {
-    var cached = dependencyCache[this.key];
+    const cached = dependencyCache[this.key];
     if (cached != null) {
         if (cached === adapt.expr.Special.PENDING)
             return false;
         return /** @type {boolean} */ (cached);
     } else {
         dependencyCache[this.key] = adapt.expr.Special.PENDING;
-        var result = this.dependCore(other, context, dependencyCache);
+        const result = this.dependCore(other, context, dependencyCache);
         dependencyCache[this.key] = result;
         return result;
     }
@@ -601,7 +610,7 @@ adapt.expr.Val.prototype.depend = function(other, context) {
  * @return {adapt.expr.Result}
  */
 adapt.expr.Val.prototype.evaluate = function(context) {
-    var result = context.queryVal(this.scope, this.key);
+    let result = context.queryVal(this.scope, this.key);
     if (typeof result != "undefined")
         return result;
     result = this.evaluateCore(context);
@@ -612,9 +621,7 @@ adapt.expr.Val.prototype.evaluate = function(context) {
 /**
  * @return {boolean}
  */
-adapt.expr.Val.prototype.isMediaName = function() {
-    return false;
-};
+adapt.expr.Val.prototype.isMediaName = () => false;
 
 
 /**
@@ -633,7 +640,7 @@ goog.inherits(adapt.expr.Prefix, adapt.expr.Val);
  * @protected
  * @return {string}
  */
-adapt.expr.Prefix.prototype.getOp = function() {
+adapt.expr.Prefix.prototype.getOp = () => {
     throw new Error("F_ABSTRACT");
 };
 
@@ -641,7 +648,7 @@ adapt.expr.Prefix.prototype.getOp = function() {
  * @param {adapt.expr.Result} val
  * @return {adapt.expr.Result}
  */
-adapt.expr.Prefix.prototype.evalPrefix = function(val) {
+adapt.expr.Prefix.prototype.evalPrefix = val => {
     throw new Error("F_ABSTRACT");
 };
 
@@ -649,7 +656,7 @@ adapt.expr.Prefix.prototype.evalPrefix = function(val) {
  * @override
  */
 adapt.expr.Prefix.prototype.evaluateCore = function(context) {
-    var val = this.val.evaluate(context);
+    const val = this.val.evaluate(context);
     return this.evalPrefix(val);
 };
 
@@ -676,10 +683,10 @@ adapt.expr.Prefix.prototype.appendTo = function(buf, priority) {
  * @override
  */
 adapt.expr.Prefix.prototype.expand = function(context, params) {
-    var val = this.val.expand(context, params);
+    const val = this.val.expand(context, params);
     if (val === this.val)
         return this;
-    var r = new this.constructor(this.scope, val);
+    const r = new this.constructor(this.scope, val);
     return r;
 };
 
@@ -701,14 +708,14 @@ goog.inherits(adapt.expr.Infix, adapt.expr.Val);
 /**
  * @return {number}
  */
-adapt.expr.Infix.prototype.getPriority = function() {
+adapt.expr.Infix.prototype.getPriority = () => {
     throw new Error("F_ABSTRACT");
 };
 
 /**
  * @return {string}
  */
-adapt.expr.Infix.prototype.getOp = function() {
+adapt.expr.Infix.prototype.getOp = () => {
     throw new Error("F_ABSTRACT");
 };
 
@@ -717,7 +724,7 @@ adapt.expr.Infix.prototype.getOp = function() {
  * @param {adapt.expr.Result} rhs
  * @return {adapt.expr.Result}
  */
-adapt.expr.Infix.prototype.evalInfix = function(lhs, rhs) {
+adapt.expr.Infix.prototype.evalInfix = (lhs, rhs) => {
     throw new Error("F_ABSTRACT");
 };
 
@@ -725,8 +732,8 @@ adapt.expr.Infix.prototype.evalInfix = function(lhs, rhs) {
  * @override
  */
 adapt.expr.Infix.prototype.evaluateCore = function(context) {
-    var lhs = this.lhs.evaluate(context);
-    var rhs = this.rhs.evaluate(context);
+    const lhs = this.lhs.evaluate(context);
+    const rhs = this.rhs.evaluate(context);
     return this.evalInfix(lhs, rhs);
 };
 
@@ -742,7 +749,7 @@ adapt.expr.Infix.prototype.dependCore = function(other, context, dependencyCache
  * @override
  */
 adapt.expr.Infix.prototype.appendTo = function(buf, priority) {
-    var thisPriority = this.getPriority();
+    const thisPriority = this.getPriority();
     if (thisPriority <= priority)
         buf.append("(");
     this.lhs.appendTo(buf, thisPriority);
@@ -756,11 +763,11 @@ adapt.expr.Infix.prototype.appendTo = function(buf, priority) {
  * @override
  */
 adapt.expr.Infix.prototype.expand = function(context, params) {
-    var lhs = this.lhs.expand(context, params);
-    var rhs = this.rhs.expand(context, params);
+    const lhs = this.lhs.expand(context, params);
+    const rhs = this.rhs.expand(context, params);
     if (lhs === this.lhs && rhs === this.rhs)
         return this;
-    var r = new this.constructor(this.scope, lhs, rhs);
+    const r = new this.constructor(this.scope, lhs, rhs);
     return r;
 };
 
@@ -780,9 +787,7 @@ goog.inherits(adapt.expr.Logical, adapt.expr.Infix);
 /**
  * @override
  */
-adapt.expr.Logical.prototype.getPriority = function() {
-    return 1;
-};
+adapt.expr.Logical.prototype.getPriority = () => 1;
 
 
 /**
@@ -800,9 +805,7 @@ goog.inherits(adapt.expr.Comparison, adapt.expr.Infix);
 /**
  * @override
  */
-adapt.expr.Comparison.prototype.getPriority = function() {
-    return 2;
-};
+adapt.expr.Comparison.prototype.getPriority = () => 2;
 
 
 /**
@@ -820,9 +823,7 @@ goog.inherits(adapt.expr.Additive, adapt.expr.Infix);
 /**
  * @override
  */
-adapt.expr.Additive.prototype.getPriority = function() {
-    return 3;
-};
+adapt.expr.Additive.prototype.getPriority = () => 3;
 
 
 /**
@@ -840,9 +841,7 @@ goog.inherits(adapt.expr.Multiplicative, adapt.expr.Infix);
 /**
  * @override
  */
-adapt.expr.Multiplicative.prototype.getPriority = function() {
-    return 4;
-};
+adapt.expr.Multiplicative.prototype.getPriority = () => 4;
 
 
 /**
@@ -859,16 +858,12 @@ goog.inherits(adapt.expr.Not, adapt.expr.Prefix);
 /**
  * @override
  */
-adapt.expr.Not.prototype.getOp = function() {
-    return "!";
-};
+adapt.expr.Not.prototype.getOp = () => "!";
 
 /**
  * @override
  */
-adapt.expr.Not.prototype.evalPrefix = function(val) {
-    return !val;
-};
+adapt.expr.Not.prototype.evalPrefix = val => !val;
 
 
 /**
@@ -885,16 +880,12 @@ goog.inherits(adapt.expr.Negate, adapt.expr.Prefix);
 /**
  * @override
  */
-adapt.expr.Negate.prototype.getOp = function() {
-    return "-";
-};
+adapt.expr.Negate.prototype.getOp = () => "-";
 
 /**
  * @override
  */
-adapt.expr.Negate.prototype.evalPrefix = function(val) {
-    return -val;
-};
+adapt.expr.Negate.prototype.evalPrefix = val => -val;
 
 
 /**
@@ -912,9 +903,7 @@ goog.inherits(adapt.expr.And, adapt.expr.Logical);
 /**
  * @override
  */
-adapt.expr.And.prototype.getOp = function() {
-    return "&&";
-};
+adapt.expr.And.prototype.getOp = () => "&&";
 
 /**
  * @override
@@ -939,9 +928,7 @@ goog.inherits(adapt.expr.AndMedia, adapt.expr.And);
 /**
  * @override
  */
-adapt.expr.AndMedia.prototype.getOp = function() {
-    return " and ";
-};
+adapt.expr.AndMedia.prototype.getOp = () => " and ";
 
 
 /**
@@ -959,9 +946,7 @@ goog.inherits(adapt.expr.Or, adapt.expr.Logical);
 /**
  * @override
  */
-adapt.expr.Or.prototype.getOp = function() {
-    return "||";
-};
+adapt.expr.Or.prototype.getOp = () => "||";
 
 /**
  * @override
@@ -986,9 +971,7 @@ goog.inherits(adapt.expr.OrMedia, adapt.expr.Or);
 /**
  * @override
  */
-adapt.expr.OrMedia.prototype.getOp = function() {
-    return ", ";
-};
+adapt.expr.OrMedia.prototype.getOp = () => ", ";
 
 
 /**
@@ -1006,16 +989,12 @@ goog.inherits(adapt.expr.Lt, adapt.expr.Comparison);
 /**
  * @override
  */
-adapt.expr.Lt.prototype.getOp = function() {
-    return "<";
-};
+adapt.expr.Lt.prototype.getOp = () => "<";
 
 /**
  * @override
  */
-adapt.expr.Lt.prototype.evalInfix = function(lhs, rhs) {
-    return lhs < rhs;
-};
+adapt.expr.Lt.prototype.evalInfix = (lhs, rhs) => lhs < rhs;
 
 
 /**
@@ -1033,16 +1012,12 @@ goog.inherits(adapt.expr.Le, adapt.expr.Comparison);
 /**
  * @override
  */
-adapt.expr.Le.prototype.getOp = function() {
-    return "<=";
-};
+adapt.expr.Le.prototype.getOp = () => "<=";
 
 /**
  * @override
  */
-adapt.expr.Le.prototype.evalInfix = function(lhs, rhs) {
-    return lhs <= rhs;
-};
+adapt.expr.Le.prototype.evalInfix = (lhs, rhs) => lhs <= rhs;
 
 
 /**
@@ -1060,16 +1035,12 @@ goog.inherits(adapt.expr.Gt, adapt.expr.Comparison);
 /**
  * @override
  */
-adapt.expr.Gt.prototype.getOp = function() {
-    return ">";
-};
+adapt.expr.Gt.prototype.getOp = () => ">";
 
 /**
  * @override
  */
-adapt.expr.Gt.prototype.evalInfix = function(lhs, rhs) {
-    return lhs > rhs;
-};
+adapt.expr.Gt.prototype.evalInfix = (lhs, rhs) => lhs > rhs;
 
 
 /**
@@ -1087,16 +1058,12 @@ goog.inherits(adapt.expr.Ge, adapt.expr.Comparison);
 /**
  * @override
  */
-adapt.expr.Ge.prototype.getOp = function() {
-    return ">=";
-};
+adapt.expr.Ge.prototype.getOp = () => ">=";
 
 /**
  * @override
  */
-adapt.expr.Ge.prototype.evalInfix = function(lhs, rhs) {
-    return lhs >= rhs;
-};
+adapt.expr.Ge.prototype.evalInfix = (lhs, rhs) => lhs >= rhs;
 
 
 /**
@@ -1114,16 +1081,12 @@ goog.inherits(adapt.expr.Eq, adapt.expr.Comparison);
 /**
  * @override
  */
-adapt.expr.Eq.prototype.getOp = function() {
-    return "==";
-};
+adapt.expr.Eq.prototype.getOp = () => "==";
 
 /**
  * @override
  */
-adapt.expr.Eq.prototype.evalInfix = function(lhs, rhs) {
-    return lhs == rhs;
-};
+adapt.expr.Eq.prototype.evalInfix = (lhs, rhs) => lhs == rhs;
 
 
 /**
@@ -1141,16 +1104,12 @@ goog.inherits(adapt.expr.Ne, adapt.expr.Comparison);
 /**
  * @override
  */
-adapt.expr.Ne.prototype.getOp = function() {
-    return "!=";
-};
+adapt.expr.Ne.prototype.getOp = () => "!=";
 
 /**
  * @override
  */
-adapt.expr.Ne.prototype.evalInfix = function(lhs, rhs) {
-    return lhs != rhs;
-};
+adapt.expr.Ne.prototype.evalInfix = (lhs, rhs) => lhs != rhs;
 
 
 /**
@@ -1168,16 +1127,12 @@ goog.inherits(adapt.expr.Add, adapt.expr.Additive);
 /**
  * @override
  */
-adapt.expr.Add.prototype.getOp = function() {
-    return "+";
-};
+adapt.expr.Add.prototype.getOp = () => "+";
 
 /**
  * @override
  */
-adapt.expr.Add.prototype.evalInfix = function(lhs, rhs) {
-    return lhs + rhs;
-};
+adapt.expr.Add.prototype.evalInfix = (lhs, rhs) => lhs + rhs;
 
 
 /**
@@ -1195,16 +1150,12 @@ goog.inherits(adapt.expr.Subtract, adapt.expr.Additive);
 /**
  * @override
  */
-adapt.expr.Subtract.prototype.getOp = function() {
-    return " - ";
-};
+adapt.expr.Subtract.prototype.getOp = () => " - ";
 
 /**
  * @override
  */
-adapt.expr.Subtract.prototype.evalInfix = function(lhs, rhs) {
-    return lhs - rhs;
-};
+adapt.expr.Subtract.prototype.evalInfix = (lhs, rhs) => lhs - rhs;
 
 
 /**
@@ -1222,16 +1173,12 @@ goog.inherits(adapt.expr.Multiply, adapt.expr.Multiplicative);
 /**
  * @override
  */
-adapt.expr.Multiply.prototype.getOp = function() {
-    return "*";
-};
+adapt.expr.Multiply.prototype.getOp = () => "*";
 
 /**
  * @override
  */
-adapt.expr.Multiply.prototype.evalInfix = function(lhs, rhs) {
-    return lhs * rhs;
-};
+adapt.expr.Multiply.prototype.evalInfix = (lhs, rhs) => lhs * rhs;
 
 
 /**
@@ -1249,16 +1196,12 @@ goog.inherits(adapt.expr.Divide, adapt.expr.Multiplicative);
 /**
  * @override
  */
-adapt.expr.Divide.prototype.getOp = function() {
-    return "/";
-};
+adapt.expr.Divide.prototype.getOp = () => "/";
 
 /**
  * @override
  */
-adapt.expr.Divide.prototype.evalInfix = function(lhs, rhs) {
-    return lhs / rhs;
-};
+adapt.expr.Divide.prototype.evalInfix = (lhs, rhs) => lhs / rhs;
 
 
 /**
@@ -1276,16 +1219,12 @@ goog.inherits(adapt.expr.Modulo, adapt.expr.Multiplicative);
 /**
  * @override
  */
-adapt.expr.Modulo.prototype.getOp = function() {
-    return "%";
-};
+adapt.expr.Modulo.prototype.getOp = () => "%";
 
 /**
  * @override
  */
-adapt.expr.Modulo.prototype.evalInfix = function(lhs, rhs) {
-    return lhs % rhs;
-};
+adapt.expr.Modulo.prototype.evalInfix = (lhs, rhs) => lhs % rhs;
 
 
 /**
@@ -1396,9 +1335,7 @@ adapt.expr.MediaName.prototype.dependCore = function(other, context, dependencyC
 /**
  * @override
  */
-adapt.expr.MediaName.prototype.isMediaName = function() {
-    return true;
-};
+adapt.expr.MediaName.prototype.isMediaName = () => true;
 
 /**
  * A value that is calculated by calling a JavaScript function. Note that the
@@ -1440,9 +1377,9 @@ adapt.expr.Native.prototype.evaluateCore = function(context) {
  * @param {Array.<adapt.expr.Val>} arr
  * @return {void}
  */
-adapt.expr.appendValArray = function(buf, arr) {
+adapt.expr.appendValArray = (buf, arr) => {
     buf.append("(");
-    for (var i = 0; i < arr.length; i++) {
+    for (let i = 0; i < arr.length; i++) {
         if (i)
             buf.append(",");
         arr[i].appendTo(buf, 0);
@@ -1456,15 +1393,15 @@ adapt.expr.appendValArray = function(buf, arr) {
  * @param {Array.<adapt.expr.Val>} params
  * @return {Array.<adapt.expr.Val>}
  */
-adapt.expr.expandValArray = function(context, arr, params) {
-    /** @type {Array.<adapt.expr.Val>} */ var expanded = arr;
-    for (var i = 0; i < arr.length; i++) {
-        var p = arr[i].expand(context, params);
+adapt.expr.expandValArray = (context, arr, params) => {
+    /** @type {Array.<adapt.expr.Val>} */ let expanded = arr;
+    for (let i = 0; i < arr.length; i++) {
+        const p = arr[i].expand(context, params);
         if (arr !== expanded) {
             expanded[i] = p;
         } else if (p !== arr[i]) {
             expanded = Array(arr.length);
-            for (var j = 0; j < i; j++) {
+            for (let j = 0; j < i; j++) {
                 expanded[j] = arr[j];
             }
             expanded[i] = p;
@@ -1478,9 +1415,9 @@ adapt.expr.expandValArray = function(context, arr, params) {
  * @param {Array.<adapt.expr.Val>} arr
  * @return {Array.<adapt.expr.Result>}
  */
-adapt.expr.evalValArray = function(context, arr) {
-    /** @type {Array.<adapt.expr.Result>} */ var result = Array(arr.length);
-    for (var i = 0; i < arr.length; i++) {
+adapt.expr.evalValArray = (context, arr) => {
+    /** @type {Array.<adapt.expr.Result>} */ const result = Array(arr.length);
+    for (let i = 0; i < arr.length; i++) {
         result[i] = arr[i].evaluate(context);
     }
     return result;
@@ -1512,7 +1449,7 @@ adapt.expr.Call.prototype.appendTo = function(buf, priority) {
  * @override
  */
 adapt.expr.Call.prototype.evaluateCore = function(context) {
-    var body = context.evalCall(this.scope, this.qualifiedName, this.params, false);
+    const body = context.evalCall(this.scope, this.qualifiedName, this.params, false);
     return body.expand(context, this.params).evaluate(context);
 };
 
@@ -1522,11 +1459,11 @@ adapt.expr.Call.prototype.evaluateCore = function(context) {
 adapt.expr.Call.prototype.dependCore = function(other, context, dependencyCache) {
     if (other === this)
         return true;
-    for (var i = 0; i < this.params.length; i++) {
+    for (let i = 0; i < this.params.length; i++) {
         if (this.params[i].dependOuter(other, context, dependencyCache))
             return true;
     }
-    var body = context.evalCall(this.scope, this.qualifiedName, this.params, true);
+    const body = context.evalCall(this.scope, this.qualifiedName, this.params, true);
     // No expansion here!
     return body.dependOuter(other, context, dependencyCache);
 };
@@ -1535,7 +1472,7 @@ adapt.expr.Call.prototype.dependCore = function(other, context, dependencyCache)
  * @override
  */
 adapt.expr.Call.prototype.expand = function(context, params) {
-    var expandedParams = adapt.expr.expandValArray(context, this.params, params);
+    const expandedParams = adapt.expr.expandValArray(context, this.params, params);
     if (expandedParams === this.params)
         return this;
     return new adapt.expr.Call(this.scope, this.qualifiedName, expandedParams);
@@ -1595,12 +1532,12 @@ adapt.expr.Cond.prototype.dependCore = function(other, context, dependencyCache)
  * @override
  */
 adapt.expr.Cond.prototype.expand = function(context, params) {
-    var cond = this.cond.expand(context, params);
-    var ifTrue = this.ifTrue.expand(context, params);
-    var ifFalse = this.ifFalse.expand(context, params);
+    const cond = this.cond.expand(context, params);
+    const ifTrue = this.ifTrue.expand(context, params);
+    const ifFalse = this.ifFalse.expand(context, params);
     if (cond === this.cond && ifTrue === this.ifTrue && ifFalse === this.ifFalse)
         return this;
-    var r = new adapt.expr.Cond(this.scope, cond, ifTrue, ifFalse);
+    const r = new adapt.expr.Cond(this.scope, cond, ifTrue, ifFalse);
     return r;
 };
 
@@ -1687,10 +1624,10 @@ adapt.expr.MediaTest.prototype.dependCore = function(other, context, dependencyC
  * @override
  */
 adapt.expr.MediaTest.prototype.expand = function(context, params) {
-    var value = this.value.expand(context, params);
+    const value = this.value.expand(context, params);
     if (value === this.value)
         return this;
-    var r = new adapt.expr.MediaTest(this.scope, this.name, value);
+    const r = new adapt.expr.MediaTest(this.scope, this.name, value);
     return r;
 };
 
@@ -1718,9 +1655,9 @@ adapt.expr.Param.prototype.appendTo = function(buf, priority) {
  * @override
  */
 adapt.expr.Param.prototype.expand = function(context, params) {
-    var v = params[this.index];
+    const v = params[this.index];
     if (!v)
-        throw new Error("Parameter missing: " + this.index);
+        throw new Error(`Parameter missing: ${this.index}`);
     return /** @type {adapt.expr.Val} */ (v);
 };
 
@@ -1731,7 +1668,7 @@ adapt.expr.Param.prototype.expand = function(context, params) {
  * @param {adapt.expr.Val} v2
  * @return {adapt.expr.Val}
  */
-adapt.expr.and = function(scope, v1, v2) {
+adapt.expr.and = (scope, v1, v2) => {
     if (v1 === scope._false || v1 === scope.zero ||
         v2 == scope._false || v2 == scope.zero)
         return scope._false;
@@ -1748,7 +1685,7 @@ adapt.expr.and = function(scope, v1, v2) {
  * @param {adapt.expr.Val} v2
  * @return {adapt.expr.Val}
  */
-adapt.expr.add = function(scope, v1, v2) {
+adapt.expr.add = (scope, v1, v2) => {
     if (v1 === scope.zero)
         return v2;
     if (v2 === scope.zero)
@@ -1762,7 +1699,7 @@ adapt.expr.add = function(scope, v1, v2) {
  * @param {adapt.expr.Val} v2
  * @return {adapt.expr.Val}
  */
-adapt.expr.sub = function(scope, v1, v2) {
+adapt.expr.sub = (scope, v1, v2) => {
     if (v1 === scope.zero)
         return new adapt.expr.Negate(scope, v2);
     if (v2 === scope.zero)
@@ -1776,7 +1713,7 @@ adapt.expr.sub = function(scope, v1, v2) {
  * @param {adapt.expr.Val} v2
  * @return {adapt.expr.Val}
  */
-adapt.expr.mul = function(scope, v1, v2) {
+adapt.expr.mul = (scope, v1, v2) => {
     if (v1 === scope.zero || v2 === scope.zero)
         return scope.zero;
     if (v1 === scope.one)
@@ -1792,7 +1729,7 @@ adapt.expr.mul = function(scope, v1, v2) {
  * @param {adapt.expr.Val} v2
  * @return {adapt.expr.Val}
  */
-adapt.expr.div = function(scope, v1, v2) {
+adapt.expr.div = (scope, v1, v2) => {
     if (v1 === scope.zero)
         return scope.zero;
     if (v2 === scope.one)

@@ -18,27 +18,23 @@
  */
 goog.provide("vivliostyle.math");
 
-goog.scope(function() {
+goog.scope(() => {
 
     /**
      * @param {!Array<number>} array
      * @returns {number}
      */
-    vivliostyle.math.mean = function(array) {
-        return array.reduce(function(prev, curr) {
-            return prev + curr;
-        }, 0) / array.length;
-    };
-    /** @const */ var mean = vivliostyle.math.mean;
+    vivliostyle.math.mean = array => array.reduce((prev, curr) => prev + curr, 0) / array.length;
+    /** @const */ const mean = vivliostyle.math.mean;
 
     /**
      * @param {!Array<number>} array
      * @returns {number}
      */
-    vivliostyle.math.variance = function(array) {
-        var meanValue = mean(array);
-        return mean(array.map(function(x) {
-            var d = x - meanValue;
+    vivliostyle.math.variance = array => {
+        const meanValue = mean(array);
+        return mean(array.map(x => {
+            const d = x - meanValue;
             return d * d;
         }));
     };

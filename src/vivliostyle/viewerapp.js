@@ -35,18 +35,18 @@ goog.require('adapt.viewer');
 /**
  * @param {adapt.base.JSON} cmd
  */
-vivliostyle.viewerapp.sendCommand = function(cmd) {
+vivliostyle.viewerapp.sendCommand = cmd => {
     window["adapt_command"](cmd);
 };
 
-vivliostyle.viewerapp.navigateToLeftPage = function() {
+vivliostyle.viewerapp.navigateToLeftPage = () => {
     vivliostyle.viewerapp.sendCommand({
         "a": "moveTo",
         "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "previous" : "next"
     });
 };
 
-vivliostyle.viewerapp.navigateToRightPage = function() {
+vivliostyle.viewerapp.navigateToRightPage = () => {
     vivliostyle.viewerapp.sendCommand({
         "a": "moveTo",
         "where": vivliostyle.viewerapp.currentPageProgression === vivliostyle.constants.PageProgression.LTR ? "next" : "previous"
@@ -57,10 +57,10 @@ vivliostyle.viewerapp.navigateToRightPage = function() {
  * @param {KeyboardEvent} evt
  * @return {void}
  */
-vivliostyle.viewerapp.keydown = function(evt) {
-    var key = evt.key;
-    var keyIdentifier = evt.keyIdentifier;
-    var location = evt.location;
+vivliostyle.viewerapp.keydown = evt => {
+    const key = evt.key;
+    const keyIdentifier = evt.keyIdentifier;
+    const location = evt.location;
     if (key === "End" || keyIdentifier === "End") {
         vivliostyle.viewerapp.sendCommand({"a": "moveTo", "where": "last"});
         evt.preventDefault();
@@ -119,20 +119,20 @@ vivliostyle.viewerapp.keydown = function(evt) {
  * @param {TouchEvent} evt
  * @return {void}
  */
-vivliostyle.viewerapp.touch = function(evt) {
+vivliostyle.viewerapp.touch = evt => {
     if (evt.type == "touchmove") {
         evt.preventDefault();
     }
     if (evt.touches.length == 1) {
-        var x = evt.touches[0].pageX;
-        var y = evt.touches[0].pageY;
+        const x = evt.touches[0].pageX;
+        const y = evt.touches[0].pageY;
         if (evt.type == "touchstart") {
             vivliostyle.viewerapp.touchActive = true;
             vivliostyle.viewerapp.touchX = x;
             vivliostyle.viewerapp.touchY = y;
         } else if (vivliostyle.viewerapp.touchActive) {
-            var dx = x - vivliostyle.viewerapp.touchX;
-            var dy = y - vivliostyle.viewerapp.touchY;
+            const dx = x - vivliostyle.viewerapp.touchX;
+            const dy = y - vivliostyle.viewerapp.touchY;
             if (evt.type == "touchend") {
                 vivliostyle.viewerapp.touchActive = false;
             }
@@ -152,9 +152,9 @@ vivliostyle.viewerapp.touch = function(evt) {
             }
         }
     } else if (evt.touches.length == 2) {
-        var px = evt.touches[0].pageX - evt.touches[1].pageX;
-        var py = evt.touches[0].pageY - evt.touches[1].pageY;
-        var pinchDist = Math.sqrt(px*px + py*py);
+        const px = evt.touches[0].pageX - evt.touches[1].pageX;
+        const py = evt.touches[0].pageY - evt.touches[1].pageY;
+        const pinchDist = Math.sqrt(px*px + py*py);
         if (evt.type == "touchstart") {
             vivliostyle.viewerapp.zoomActive = true;
             vivliostyle.viewerapp.zoomDist = pinchDist;
@@ -162,7 +162,7 @@ vivliostyle.viewerapp.touch = function(evt) {
             if (evt.type == "touchend") {
                 vivliostyle.viewerapp.zoomActive = false;
             }
-            var scale = pinchDist / vivliostyle.viewerapp.zoomDist;
+            const scale = pinchDist / vivliostyle.viewerapp.zoomDist;
             if (scale > 1.5) {
                 vivliostyle.viewerapp.fontSize *= 1.2;
                 vivliostyle.viewerapp.sendCommand({"a": "configure", "fontSize": Math.round(vivliostyle.viewerapp.fontSize)});
@@ -174,11 +174,11 @@ vivliostyle.viewerapp.touch = function(evt) {
     }
 };
 
-vivliostyle.viewerapp.callback = function(msg) {
+vivliostyle.viewerapp.callback = msg => {
     switch (msg["t"]) {
         case "loaded" :
-            var viewer = msg["viewer"];
-            var pageProgression = vivliostyle.viewerapp.currentPageProgression
+            const viewer = msg["viewer"];
+            const pageProgression = vivliostyle.viewerapp.currentPageProgression
                 = viewer.getCurrentPageProgression();
             viewer.viewportElement.setAttribute("data-vivliostyle-page-progression", pageProgression);
             viewer.viewportElement.setAttribute("data-vivliostyle-spread-view", viewer.pref.spreadView);
@@ -190,13 +190,13 @@ vivliostyle.viewerapp.callback = function(msg) {
 
             document.body.setAttribute("data-vivliostyle-viewer-status", "complete");
 
-            var leftButton = document.getElementById("vivliostyle-page-navigation-left");
+            const leftButton = document.getElementById("vivliostyle-page-navigation-left");
             leftButton.addEventListener("click", /** @type {Function} */ (vivliostyle.viewerapp.navigateToLeftPage), false);
-            var rightButton = document.getElementById("vivliostyle-page-navigation-right");
+            const rightButton = document.getElementById("vivliostyle-page-navigation-right");
             rightButton.addEventListener("click", /** @type {Function} */ (vivliostyle.viewerapp.navigateToRightPage), false);
-            [leftButton, rightButton].forEach(function(button) {
+            [leftButton, rightButton].forEach(button => {
                 button.setAttribute("data-vivliostyle-ui-state", "attention");
-                window.setTimeout(function() {
+                window.setTimeout(() => {
                     button.removeAttribute("data-vivliostyle-ui-state");
                 }, 1000);
             });
@@ -206,7 +206,7 @@ vivliostyle.viewerapp.callback = function(msg) {
             // adapt.base.log("Error: " + msg["content"]);
             break;
         case "nav" :
-            var cfi = msg["cfi"];
+            const cfi = msg["cfi"];
             if (cfi) {
                 location.replace(adapt.base.setURLParam(location.href,
                     "f", adapt.base.lightURLEncode(cfi || "")));
@@ -228,7 +228,7 @@ vivliostyle.viewerapp.callback = function(msg) {
  * @return {void}
  */
 function setViewportSize(width, height, size, orientation, config) {
-    var pageSpec;
+    let pageSpec;
     if (!width || !height) {
         switch (size) {
             case "A5":
@@ -267,21 +267,21 @@ function setViewportSize(width, height, size, orientation, config) {
         if (width && height) {
             pageSpec = size;
             if (orientation === "landscape") {
-                pageSpec = pageSpec ? pageSpec + " landscape" : null;
+                pageSpec = pageSpec ? `${pageSpec} landscape` : null;
                 // swap
-                var tmp = width;
+                const tmp = width;
                 width = height;
                 height = tmp;
             }
         }
     } else {
-        pageSpec = width + " " + height;
+        pageSpec = `${width} ${height}`;
     }
 
     if (width && height) {
         config.viewport = {"width": width, "height": height};
-        var s = document.createElement("style");
-        s.textContent = "@page { size: " + pageSpec + "; margin: 0; }";
+        const s = document.createElement("style");
+        s.textContent = `@page { size: ${pageSpec}; margin: 0; }`;
         document.head.appendChild(s);
     }
 }
@@ -289,22 +289,22 @@ function setViewportSize(width, height, size, orientation, config) {
 /**
  * @return {void}
  */
-vivliostyle.viewerapp.main = function(arg) {
-    var fragment = (arg && arg["fragment"]) || adapt.base.getURLParam("f");
-    var epubURL = (arg && arg["epubURL"]) || adapt.base.getURLParam("b");
-    var xmlURL = (arg && arg["xmlURL"]) || adapt.base.getURLParam("x");
-    var width = (arg && arg["defaultPageWidth"]) || adapt.base.getURLParam("w");
-    var height = (arg && arg["defaultPageHeight"]) || adapt.base.getURLParam("h");
-    var size = (arg && arg["defaultPageSize"]) || adapt.base.getURLParam("size");
-    var orientation = (arg && arg["orientation"]) || adapt.base.getURLParam("orientation");
-    var spreadView = adapt.base.getURLParam("spread");
+vivliostyle.viewerapp.main = arg => {
+    const fragment = (arg && arg["fragment"]) || adapt.base.getURLParam("f");
+    const epubURL = (arg && arg["epubURL"]) || adapt.base.getURLParam("b");
+    const xmlURL = (arg && arg["xmlURL"]) || adapt.base.getURLParam("x");
+    const width = (arg && arg["defaultPageWidth"]) || adapt.base.getURLParam("w");
+    const height = (arg && arg["defaultPageHeight"]) || adapt.base.getURLParam("h");
+    const size = (arg && arg["defaultPageSize"]) || adapt.base.getURLParam("size");
+    const orientation = (arg && arg["orientation"]) || adapt.base.getURLParam("orientation");
+    let spreadView = adapt.base.getURLParam("spread");
     spreadView = (arg && arg["spreadView"]) || (!!spreadView && spreadView != "false");
-    var uaRoot = (arg && arg["uaRoot"]) || null;
-    var doc = (arg && arg["document"]) || null;
-    var userStyleSheet = (arg && arg["userStyleSheet"]) || null;
-    var viewportElement = (arg && arg["viewportElement"]) || document.body;
+    const uaRoot = (arg && arg["uaRoot"]) || null;
+    const doc = (arg && arg["document"]) || null;
+    const userStyleSheet = (arg && arg["userStyleSheet"]) || null;
+    const viewportElement = (arg && arg["viewportElement"]) || document.body;
 
-    var config = {
+    const config = {
         "a": epubURL ? "loadEPUB" : "loadXML",
         "url": epubURL || xmlURL,
         "autoresize": true,
@@ -319,7 +319,7 @@ vivliostyle.viewerapp.main = function(arg) {
     };
     setViewportSize(width, height, size, orientation, config);
 
-    var viewer = new adapt.viewer.Viewer(window, viewportElement, "main", vivliostyle.viewerapp.callback);
+    const viewer = new adapt.viewer.Viewer(window, viewportElement, "main", vivliostyle.viewerapp.callback);
     viewer.initEmbed(config);
 };
 

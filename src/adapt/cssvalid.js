@@ -39,21 +39,21 @@ adapt.cssvalid.PropertyReceiver = function() {};
  * @param {adapt.css.Val} value
  * @return {void}
  */
-adapt.cssvalid.PropertyReceiver.prototype.unknownProperty = function(name, value) {};
+adapt.cssvalid.PropertyReceiver.prototype.unknownProperty = (name, value) => {};
 
 /**
  * @param {string} name
  * @param {adapt.css.Val} value
  * @return {void}
  */
-adapt.cssvalid.PropertyReceiver.prototype.invalidPropertyValue = function(name, value) {};
+adapt.cssvalid.PropertyReceiver.prototype.invalidPropertyValue = (name, value) => {};
 
 /**
  * @param {string} name
  * @param {adapt.css.Val} value
  * @return {void}
  */
-adapt.cssvalid.PropertyReceiver.prototype.simpleProperty = function(name, value, important) {};
+adapt.cssvalid.PropertyReceiver.prototype.simpleProperty = (name, value, important) => {};
 
 
 /**
@@ -182,7 +182,7 @@ adapt.cssvalid.ValidatingGroup = function() {
  * @return {void}
  */
 adapt.cssvalid.ValidatingGroup.prototype.connect = function(arr, nodeIndex) {
-    for (var i = 0; i < arr.length; i++) {
+    for (let i = 0; i < arr.length; i++) {
         this.connections[arr[i]].what = nodeIndex;
     }
     arr.splice(0, arr.length);
@@ -192,22 +192,22 @@ adapt.cssvalid.ValidatingGroup.prototype.connect = function(arr, nodeIndex) {
  * @return {adapt.cssvalid.ValidatingGroup}
  */
 adapt.cssvalid.ValidatingGroup.prototype.clone = function() {
-    var group = new adapt.cssvalid.ValidatingGroup();
+    const group = new adapt.cssvalid.ValidatingGroup();
     for (var i = 0; i < this.nodes.length; i++) {
-        var node = this.nodes[i];
-        var clonedNode = new adapt.cssvalid.Node(node.validator);
+        const node = this.nodes[i];
+        const clonedNode = new adapt.cssvalid.Node(node.validator);
         clonedNode.code = node.code;
         group.nodes.push(clonedNode);
     }
     for (var i = 0; i < this.connections.length; i++) {
-        var connection = this.connections[i];
-        var groupConnection = new adapt.cssvalid.Connection(connection.where, connection.success);
+        const connection = this.connections[i];
+        const groupConnection = new adapt.cssvalid.Connection(connection.where, connection.success);
         groupConnection.what = connection.what;
         group.connections.push(groupConnection);
     }
-    group.match.push.apply(group.match, this.match);
-    group.nomatch.push.apply(group.nomatch, this.nomatch);
-    group.error.push.apply(group.error, this.error);
+    group.match.push(...this.match);
+    group.nomatch.push(...this.nomatch);
+    group.error.push(...this.error);
     return group;
 };
 
@@ -220,8 +220,8 @@ adapt.cssvalid.ValidatingGroup.prototype.clone = function() {
  * @return {void}
  */
 adapt.cssvalid.ValidatingGroup.prototype.addSpecialToArr = function(arr, start, clause) {
-    var index = this.nodes.length;
-    var node = new adapt.cssvalid.Node(adapt.cssvalid.ALWAYS_FAIL);
+    const index = this.nodes.length;
+    const node = new adapt.cssvalid.Node(adapt.cssvalid.ALWAYS_FAIL);
     if (clause >= 0) {
         if (start)
             node.markAsStartAlternate(clause);
@@ -235,8 +235,8 @@ adapt.cssvalid.ValidatingGroup.prototype.addSpecialToArr = function(arr, start, 
     }
     this.nodes.push(node);
     this.connect(arr, index);
-    var success = new adapt.cssvalid.Connection(index, true);
-    var failure = new adapt.cssvalid.Connection(index, false);
+    const success = new adapt.cssvalid.Connection(index, true);
+    const failure = new adapt.cssvalid.Connection(index, false);
     arr.push(this.connections.length);
     this.connections.push(failure);
     arr.push(this.connections.length);
@@ -247,8 +247,8 @@ adapt.cssvalid.ValidatingGroup.prototype.addSpecialToArr = function(arr, start, 
  * @return {void}
  */
 adapt.cssvalid.ValidatingGroup.prototype.endSpecialGroup = function() {
-    var arrs = [this.match, this.nomatch, this.error];
-    for (var i = 0; i < arrs.length; i++) {
+    const arrs = [this.match, this.nomatch, this.error];
+    for (let i = 0; i < arrs.length; i++) {
         this.addSpecialToArr(arrs[i], false, -1);
     }
 };
@@ -277,11 +277,11 @@ adapt.cssvalid.ValidatingGroup.prototype.endClause = function(clause) {
 adapt.cssvalid.ValidatingGroup.prototype.startClause = function(clause) {
     if (this.nodes.length)
         throw new Error("invalid call");
-    var node = new adapt.cssvalid.Node(adapt.cssvalid.ALWAYS_FAIL);
+    const node = new adapt.cssvalid.Node(adapt.cssvalid.ALWAYS_FAIL);
     node.markAsStartAlternate(clause);
     this.nodes.push(node);
-    var success = new adapt.cssvalid.Connection(0, true);
-    var failure = new adapt.cssvalid.Connection(0, false);
+    const success = new adapt.cssvalid.Connection(0, true);
+    const failure = new adapt.cssvalid.Connection(0, false);
     this.nomatch.push(this.connections.length);
     this.connections.push(failure);
     this.match.push(this.connections.length);
@@ -293,10 +293,10 @@ adapt.cssvalid.ValidatingGroup.prototype.startClause = function(clause) {
  * @return {void}
  */
 adapt.cssvalid.ValidatingGroup.prototype.addPrimitive = function(validator) {
-    var index = this.nodes.length;
+    const index = this.nodes.length;
     this.nodes.push(new adapt.cssvalid.Node(validator));
-    var success = new adapt.cssvalid.Connection(index, true);
-    var failure = new adapt.cssvalid.Connection(index, false);
+    const success = new adapt.cssvalid.Connection(index, true);
+    const failure = new adapt.cssvalid.Connection(index, false);
     this.connect(this.match, index);
     if (this.emptyHead) {
         // if did not validate -> no match
@@ -333,7 +333,7 @@ adapt.cssvalid.ValidatingGroup.prototype.isPrimitive = function() {
 adapt.cssvalid.ValidatingGroup.prototype.addGroup = function(group, how) {
     if (group.nodes.length == 0)
         return;
-    var index = this.nodes.length;
+    const index = this.nodes.length;
     // optimization for alternate primitive validators
     if (how == adapt.cssvalid.Add.ALTERNATE && index == 1 && group.isPrimitive() &&
         this.isPrimitive()) {
@@ -352,9 +352,9 @@ adapt.cssvalid.ValidatingGroup.prototype.addGroup = function(group, how) {
     } else {
         this.connect(this.match, index);
     }
-    var connectionIndex = this.connections.length;
+    const connectionIndex = this.connections.length;
     for (var i = 0; i < group.connections.length; i++) {
-        var connection = group.connections[i];
+        const connection = group.connections[i];
         connection.where += index;
         if (connection.what >= 0)
             connection.what += index;
@@ -394,21 +394,22 @@ adapt.cssvalid.ValidatingGroup.prototype.addGroup = function(group, how) {
  * @return {adapt.cssvalid.Node} how
  */
 adapt.cssvalid.ValidatingGroup.prototype.finish = function(successTerminal, failTerminal) {
-    var index = this.nodes.length;
+    const index = this.nodes.length;
     this.nodes.push(successTerminal);
     this.nodes.push(failTerminal);
     this.connect(this.match, index);
     this.connect(this.nomatch, index + 1);
     this.connect(this.error, index + 1);
-    for (var i = 0; i < this.connections.length; i++) {
-        var connection = this.connections[i];
+
+    for (const connection of this.connections) {
         if (connection.success)
             this.nodes[connection.where].success = this.nodes[connection.what];
         else
             this.nodes[connection.where].failure = this.nodes[connection.what];
     }
+
     // make sure that our data structure is correct
-    for (var j = 0; j < index; j++) {
+    for (let j = 0; j < index; j++) {
         if (this.nodes[j].failure == null || this.nodes[j].success == null)
             throw new Error("Invalid validator state");
     }
@@ -458,7 +459,7 @@ goog.inherits(adapt.cssvalid.PropertyValidator, adapt.css.Visitor);
  * @return {Array.<adapt.css.Val>}
  */
 adapt.cssvalid.PropertyValidator.prototype.validateForShorthand = function(values, index) {
-    var rval = values[index].visit(this);
+    const rval = values[index].visit(this);
     if (rval)
         return [rval];
     return null;
@@ -512,7 +513,7 @@ adapt.cssvalid.PrimitiveValidator.prototype.visitStr = function(str) {
  * @override
  */
 adapt.cssvalid.PrimitiveValidator.prototype.visitIdent = function(ident) {
-    var val = this.idents[ident.name.toLowerCase()];
+    const val = this.idents[ident.name.toLowerCase()];
     if (val)
         return val;
     if (this.allowed & adapt.cssvalid.ALLOW_IDENT)
@@ -561,7 +562,7 @@ adapt.cssvalid.PrimitiveValidator.prototype.visitInt = function(num) {
         return null;
     if (this.allowed & (adapt.cssvalid.ALLOW_POS_INT|adapt.cssvalid.ALLOW_POS_NUM))
         return num;
-    var val = this.idents["" + num.num];
+    const val = this.idents[`${num.num}`];
     if (val)
         return val;
     return null;
@@ -588,38 +589,30 @@ adapt.cssvalid.PrimitiveValidator.prototype.visitURL = function(url) {
 /**
  * @override
  */
-adapt.cssvalid.PrimitiveValidator.prototype.visitSpaceList = function(list) {
-    return null;
-};
+adapt.cssvalid.PrimitiveValidator.prototype.visitSpaceList = list => null;
 
 /**
  * @override
  */
-adapt.cssvalid.PrimitiveValidator.prototype.visitCommaList = function(list) {
-    return null;
-};
+adapt.cssvalid.PrimitiveValidator.prototype.visitCommaList = list => null;
 
 /**
  * @override
  */
-adapt.cssvalid.PrimitiveValidator.prototype.visitFunc = function(func) {
-    return null;
-};
+adapt.cssvalid.PrimitiveValidator.prototype.visitFunc = func => null;
 
 /**
  * @override
  */
-adapt.cssvalid.PrimitiveValidator.prototype.visitExpr = function(expr) {
-    return null;
-};
+adapt.cssvalid.PrimitiveValidator.prototype.visitExpr = expr => null;
 
 /**
  * @param {adapt.cssvalid.PrimitiveValidator} other
  * @return {adapt.cssvalid.PrimitiveValidator}
  */
 adapt.cssvalid.PrimitiveValidator.prototype.combine = function(other) {
-    /** @type {adapt.cssvalid.ValueMap} */ var idents = {};
-    /** @type {adapt.cssvalid.ValueMap} */ var units = {};
+    /** @type {adapt.cssvalid.ValueMap} */ const idents = {};
+    /** @type {adapt.cssvalid.ValueMap} */ const units = {};
     for (var ident in this.idents) {
         idents[ident] = this.idents[ident];
     }
@@ -665,20 +658,20 @@ goog.inherits(adapt.cssvalid.ListValidator, adapt.cssvalid.PropertyValidator);
  * @return {Array.<adapt.css.Val>}
  */
 adapt.cssvalid.ListValidator.prototype.validateList = function(arr, slice, startIndex) {
-    /** @type {Array.<adapt.css.Val>} */ var out = slice ? [] : arr;
-    var current = this.first;
-    var index = startIndex;
-    var alternativeStack = null;
-    var alternatives = null;
+    /** @type {Array.<adapt.css.Val>} */ let out = slice ? [] : arr;
+    let current = this.first;
+    let index = startIndex;
+    let alternativeStack = null;
+    let alternatives = null;
     while (current !== this.successTerminal && current !== this.failureTerminal) {
         if (index >= arr.length) {
             current = current.failure;
             continue;
         }
-        var inval = arr[index];
-        var outval = inval;
+        const inval = arr[index];
+        let outval = inval;
         if (current.isSpecial()) {
-            var success = true;
+            let success = true;
             if (current.isStartGroup()) {
                 if (alternativeStack) {
                     alternativeStack.push(alternatives);
@@ -729,7 +722,7 @@ adapt.cssvalid.ListValidator.prototype.validateList = function(arr, slice, start
             if (outval !== inval && arr === out) {
                 // startIndex is zero here
                 out = [];
-                for (var k = 0; k < index; k++) {
+                for (let k = 0; k < index; k++) {
                     out[k] = arr[k];
                 }
             }
@@ -753,8 +746,8 @@ adapt.cssvalid.ListValidator.prototype.validateList = function(arr, slice, start
  */
 adapt.cssvalid.ListValidator.prototype.validateSingle = function(inval) {
     // no need to worry about "specials"
-    /** @type {adapt.css.Val} */ var outval = null;
-    var current = this.first;
+    /** @type {adapt.css.Val} */ let outval = null;
+    let current = this.first;
     while (current !== this.successTerminal && current !== this.failureTerminal) {
         if (!inval) {
             current = current.failure;
@@ -843,16 +836,12 @@ adapt.cssvalid.ListValidator.prototype.visitURL = function(url) {
 /**
  * @override
  */
-adapt.cssvalid.ListValidator.prototype.visitSpaceList = function(list) {
-    return null;
-};
+adapt.cssvalid.ListValidator.prototype.visitSpaceList = list => null;
 
 /**
  * @override
  */
-adapt.cssvalid.ListValidator.prototype.visitCommaList = function(list) {
-    return null;
-};
+adapt.cssvalid.ListValidator.prototype.visitCommaList = list => null;
 
 /**
  * @override
@@ -864,9 +853,7 @@ adapt.cssvalid.ListValidator.prototype.visitFunc = function(func) {
 /**
  * @override
  */
-adapt.cssvalid.ListValidator.prototype.visitExpr = function(expr) {
-    return null;
-};
+adapt.cssvalid.ListValidator.prototype.visitExpr = expr => null;
 
 
 /**
@@ -883,7 +870,7 @@ goog.inherits(adapt.cssvalid.SpaceListValidator, adapt.cssvalid.ListValidator);
  * @override
  */
 adapt.cssvalid.SpaceListValidator.prototype.visitSpaceList = function(list) {
-    var arr = this.validateList(list.values, false, 0);
+    const arr = this.validateList(list.values, false, 0);
     if (arr === list.values)
         return list;
     if (!arr)
@@ -896,8 +883,8 @@ adapt.cssvalid.SpaceListValidator.prototype.visitSpaceList = function(list) {
  */
 adapt.cssvalid.SpaceListValidator.prototype.visitCommaList = function(list) {
     // Special Case : Issue #156
-    var node = this.first;
-    var hasCommaListValidator = false;
+    let node = this.first;
+    let hasCommaListValidator = false;
     while (node) {
         if (node.validator instanceof adapt.cssvalid.CommaListValidator) {
             hasCommaListValidator = true;
@@ -906,7 +893,7 @@ adapt.cssvalid.SpaceListValidator.prototype.visitCommaList = function(list) {
         node = node.failure;
     }
     if (hasCommaListValidator) {
-        var arr = this.validateList(list.values, false, 0);
+        const arr = this.validateList(list.values, false, 0);
         if (arr === list.values)
             return list;
         if (!arr)
@@ -946,7 +933,7 @@ adapt.cssvalid.CommaListValidator.prototype.visitSpaceList = function(list) {
  * @override
  */
 adapt.cssvalid.CommaListValidator.prototype.visitCommaList = function(list) {
-    var arr = this.validateList(list.values, false, 0);
+    const arr = this.validateList(list.values, false, 0);
     if (arr === list.values)
         return list;
     if (!arr)
@@ -958,8 +945,8 @@ adapt.cssvalid.CommaListValidator.prototype.visitCommaList = function(list) {
  * @override
  */
 adapt.cssvalid.CommaListValidator.prototype.validateForShorthand = function(values, index) {
-    var current = this.first;
-    var rval;
+    let current = this.first;
+    let rval;
     while (current !== this.failureTerminal) {
         rval = current.validator.validateForShorthand(values, index);
         if (rval)
@@ -985,9 +972,7 @@ goog.inherits(adapt.cssvalid.FuncValidator, adapt.cssvalid.ListValidator);
 /**
  * @override
  */
-adapt.cssvalid.FuncValidator.prototype.validateSingle = function(inval) {
-    return null;
-};
+adapt.cssvalid.FuncValidator.prototype.validateSingle = inval => null;
 
 /**
  * @override
@@ -995,7 +980,7 @@ adapt.cssvalid.FuncValidator.prototype.validateSingle = function(inval) {
 adapt.cssvalid.FuncValidator.prototype.visitFunc = function(func) {
     if (func.name.toLowerCase() != this.name)
         return null;
-    var arr = this.validateList(func.values, false, 0);
+    const arr = this.validateList(func.values, false, 0);
     if (arr === func.values)
         return func;
     if (!arr)
@@ -1016,16 +1001,14 @@ adapt.cssvalid.ShorthandSyntaxNode = function() {};
  * @param {adapt.cssvalid.ShorthandValidator} shorthandValidator
  * @return {number} new index.
  */
-adapt.cssvalid.ShorthandSyntaxNode.prototype.tryParse = function(values, index, shorthandValidator) {
-    return index;
-};
+adapt.cssvalid.ShorthandSyntaxNode.prototype.tryParse = (values, index, shorthandValidator) => index;
 
 /**
  * @param {adapt.css.Val} rval
  * @param {adapt.cssvalid.ShorthandValidator} shorthandValidator
  * @return {void}
  */
-adapt.cssvalid.ShorthandSyntaxNode.prototype.success = function(rval, shorthandValidator) {
+adapt.cssvalid.ShorthandSyntaxNode.prototype.success = (rval, shorthandValidator) => {
 };
 
 /**
@@ -1048,10 +1031,10 @@ adapt.cssvalid.ShorthandSyntaxProperty.prototype.tryParse = function(values, ind
     if (shorthandValidator.values[this.name]) {
         return index;
     }
-    var rvals = this.validator.validateForShorthand(values, index);
+    const rvals = this.validator.validateForShorthand(values, index);
     if (rvals) {
-        var len = rvals.length;
-        var rval = len > 1 ? new adapt.css.SpaceList(rvals) : rvals[0];
+        const len = rvals.length;
+        const rval = len > 1 ? new adapt.css.SpaceList(rvals) : rvals[0];
         this.success(rval, shorthandValidator);
         return index + len;
     }
@@ -1082,7 +1065,7 @@ goog.inherits(adapt.cssvalid.ShorthandSyntaxPropertyN, adapt.cssvalid.ShorthandS
  * @override
  */
 adapt.cssvalid.ShorthandSyntaxPropertyN.prototype.success = function(rval, shorthandValidator) {
-    for (var i = 0; i < this.names.length; i++) {
+    for (let i = 0; i < this.names.length; i++) {
         shorthandValidator.values[this.names[i]] = rval;
     }
 };
@@ -1105,7 +1088,7 @@ goog.inherits(adapt.cssvalid.ShorthandSyntaxCompound, adapt.cssvalid.ShorthandSy
  * @override
  */
 adapt.cssvalid.ShorthandSyntaxCompound.prototype.tryParse = function(values, index, shorthandValidator) {
-    var index0 = index;
+    const index0 = index;
     if (this.slash) {
         if (values[index] == adapt.css.slash) {
             if (++index == values.length) {
@@ -1115,11 +1098,11 @@ adapt.cssvalid.ShorthandSyntaxCompound.prototype.tryParse = function(values, ind
             return index0;
         }
     }
-    var newIndex = this.nodes[0].tryParse(values, index, shorthandValidator);
+    let newIndex = this.nodes[0].tryParse(values, index, shorthandValidator);
     if (newIndex == index)
         return index0;
     index = newIndex;
-    for (var i = 1; i < this.nodes.length && index < values.length; i++) {
+    for (let i = 1; i < this.nodes.length && index < values.length; i++) {
         newIndex = this.nodes[i].tryParse(values, index, shorthandValidator);
         if (newIndex == index)
             break;
@@ -1160,7 +1143,7 @@ adapt.cssvalid.ShorthandValidator.prototype.syntaxNodeForProperty = function(nam
  * @return {adapt.cssvalid.ShorthandValidator}
  */
 adapt.cssvalid.ShorthandValidator.prototype.clone = function() {
-    var other = /** @type {adapt.cssvalid.ShorthandValidator} */ (new this.constructor());
+    const other = /** @type {adapt.cssvalid.ShorthandValidator} */ (new this.constructor());
     other.syntax = this.syntax;
     other.propList = this.propList;
     other.validatorSet = this.validatorSet;
@@ -1184,10 +1167,10 @@ adapt.cssvalid.ShorthandValidator.prototype.init = function(syntax, propList) {
  */
 adapt.cssvalid.ShorthandValidator.prototype.finish = function(important, receiver) {
     if (!this.error) {
-        for (var i = 0; i < this.propList.length; i++) {
-            var name = this.propList[i];
+        for (const name of this.propList) {
             receiver.simpleProperty(name, this.values[name] || this.validatorSet.defaultValues[name], important);
         }
+
         return true;
     }
     return false;
@@ -1199,8 +1182,7 @@ adapt.cssvalid.ShorthandValidator.prototype.finish = function(important, receive
  * @return {void}
  */
 adapt.cssvalid.ShorthandValidator.prototype.propagateInherit = function(important, receiver) {
-    for (var i = 0; i < this.propList.length; i++) {
-        var name = this.propList[i];
+    for (const name of this.propList) {
         receiver.simpleProperty(name, adapt.css.ident.inherit, important);
     }
 };
@@ -1324,10 +1306,10 @@ goog.inherits(adapt.cssvalid.SimpleShorthandValidator, adapt.cssvalid.ShorthandV
  * @override
  */
 adapt.cssvalid.SimpleShorthandValidator.prototype.validateList = function(list) {
-    var index = 0;
-    var i = 0;
+    let index = 0;
+    let i = 0;
     while (index < list.length) {
-        var newIndex = this.syntax[i].tryParse(list, index, this);
+        const newIndex = this.syntax[i].tryParse(list, index, this);
         if (newIndex > index) {
             index = newIndex;
             i = 0;
@@ -1359,8 +1341,8 @@ adapt.cssvalid.InsetsShorthandValidator.prototype.validateList = function(list) 
         this.error = true;
         return 0;
     }
-    for (var i = 0; i < this.syntax.length; i++) {
-        var index = i;
+    for (let i = 0; i < this.syntax.length; i++) {
+        let index = i;
         while (index >= list.length) {
             index = index == 1 ? 0 : index - 2;
         }
@@ -1393,7 +1375,7 @@ goog.inherits(adapt.cssvalid.InsetsSlashShorthandValidator, adapt.cssvalid.Short
  * @override
  */
 adapt.cssvalid.InsetsSlashShorthandValidator.prototype.validateList = function(list) {
-    var slashIndex = list.length;
+    let slashIndex = list.length;
     for (var i = 0; i < list.length; i++) {
         if (list[i] === adapt.css.slash) {
             slashIndex = i;
@@ -1405,11 +1387,11 @@ adapt.cssvalid.InsetsSlashShorthandValidator.prototype.validateList = function(l
         return 0;
     }
     for (var i = 0; i < this.syntax.length; i++) {
-        var index0 = i;
+        let index0 = i;
         while (index0 >= slashIndex) {
             index0 = index0 == 1 ? 0 : index0 - 2;
         }
-        var index1;
+        let index1;
         if (slashIndex + 1 < list.length) {
             index1 = slashIndex + i + 1;
             while (index1 >= list.length) {
@@ -1418,7 +1400,7 @@ adapt.cssvalid.InsetsSlashShorthandValidator.prototype.validateList = function(l
         } else {
             index1 = index0;
         }
-        var vals = [list[index0], list[index1]];
+        const vals = [list[index0], list[index1]];
         if (this.syntax[i].tryParse(vals, 0, this) != 2) {
             this.error = true;
             return 0;
@@ -1442,10 +1424,9 @@ goog.inherits(adapt.cssvalid.CommaShorthandValidator, adapt.cssvalid.SimpleShort
  * @param {adapt.cssvalid.ValueMap} values
  */
 adapt.cssvalid.CommaShorthandValidator.prototype.mergeIn = function(acc, values) {
-    for (var i = 0; i < this.propList.length; i++) {
-        var name = this.propList[i];
-        var val = values[name] || this.validatorSet.defaultValues[name];
-        var arr = acc[name];
+    for (const name of this.propList) {
+        const val = values[name] || this.validatorSet.defaultValues[name];
+        let arr = acc[name];
         if (!arr) {
             arr = [];
             acc[name] = arr;
@@ -1458,8 +1439,8 @@ adapt.cssvalid.CommaShorthandValidator.prototype.mergeIn = function(acc, values)
  * @override
  */
 adapt.cssvalid.CommaShorthandValidator.prototype.visitCommaList = function(list) {
-    /** @type {Object.<string,Array.<adapt.css.Val>>} */ var acc = {};
-    for (var i = 0; i < list.values.length; i++) {
+    /** @type {Object.<string,Array.<adapt.css.Val>>} */ const acc = {};
+    for (let i = 0; i < list.values.length; i++) {
         this.values = {};
         if (list.values[i] instanceof adapt.css.CommaList) {
             this.error = true;
@@ -1474,7 +1455,7 @@ adapt.cssvalid.CommaShorthandValidator.prototype.visitCommaList = function(list)
             return null;
     }
     this.values = {};
-    for (var name in acc) {
+    for (const name in acc) {
         if (name == "background-color") {
             this.values[name] = acc[name].pop();
         } else {
@@ -1506,14 +1487,14 @@ adapt.cssvalid.FontShorthandValidator.prototype.init = function(syntax, propList
  * @override
  */
 adapt.cssvalid.FontShorthandValidator.prototype.validateList = function(list) {
-    var index = adapt.cssvalid.SimpleShorthandValidator.prototype.validateList.call(this, list);
+    let index = adapt.cssvalid.SimpleShorthandValidator.prototype.validateList.call(this, list);
     // must at least have font-size and font-family at the end
     if (index + 2 > list.length) {
         this.error = true;
         return index;
     }
     this.error = false;
-    var validators = this.validatorSet.validators;
+    const validators = this.validatorSet.validators;
     if (!list[index].visit(validators["font-size"])) {
         this.error = true;
         return index;
@@ -1532,7 +1513,7 @@ adapt.cssvalid.FontShorthandValidator.prototype.validateList = function(list) {
         }
         this.values["line-height"] = list[index++];
     }
-    var fontFamily = index == list.length - 1 ? list[index] : new adapt.css.SpaceList(list.slice(index, list.length));
+    const fontFamily = index == list.length - 1 ? list[index] : new adapt.css.SpaceList(list.slice(index, list.length));
     if (!fontFamily.visit(validators["font-family"])) {
         this.error = true;
         return index;
@@ -1548,11 +1529,11 @@ adapt.cssvalid.FontShorthandValidator.prototype.visitCommaList = function(list) 
     list.values[0].visit(this);
     if (this.error)
         return null;
-    var familyList = [this.values["font-family"]];
-    for (var i = 1; i < list.values.length; i++) {
+    const familyList = [this.values["font-family"]];
+    for (let i = 1; i < list.values.length; i++) {
         familyList.push(list.values[i]);
     }
-    var family = new adapt.css.CommaList(familyList);
+    const family = new adapt.css.CommaList(familyList);
     if (!family.visit(this.validatorSet.validators["font-family"])) {
         this.error = true;
     } else {
@@ -1565,9 +1546,9 @@ adapt.cssvalid.FontShorthandValidator.prototype.visitCommaList = function(list) 
  * @override
  */
 adapt.cssvalid.FontShorthandValidator.prototype.visitIdent = function(ident) {
-    var props = this.validatorSet.systemFonts[ident.name];
+    const props = this.validatorSet.systemFonts[ident.name];
     if (props) {
-        for (var name in props) {
+        for (const name in props) {
             this.values[name] = props[name];
         }
     } else {
@@ -1612,8 +1593,8 @@ adapt.cssvalid.ValidatorSet = function() {
  * @param {adapt.csstok.Token} token
  * @return {adapt.cssvalid.ValidatingGroup}
  */
-adapt.cssvalid.ValidatorSet.prototype.addReplacement = function(val, token) {
-    /** @type {adapt.css.Val} */ var cssval;
+adapt.cssvalid.ValidatorSet.prototype.addReplacement = (val, token) => {
+    /** @type {adapt.css.Val} */ let cssval;
     if (token.type == adapt.csstok.TokenType.NUMERIC) {
         cssval = new adapt.css.Numeric(token.num, token.text);
     } else if (token.type == adapt.csstok.TokenType.HASH) {
@@ -1624,9 +1605,9 @@ adapt.cssvalid.ValidatorSet.prototype.addReplacement = function(val, token) {
         throw new Error("unexpected replacement");
     }
     if (val.isPrimitive()) {
-        var validator = /** @type {adapt.cssvalid.PrimitiveValidator} */ (val.nodes[0].validator);
-        var idents = validator.idents;
-        for (var ident in idents) {
+        const validator = /** @type {adapt.cssvalid.PrimitiveValidator} */ (val.nodes[0].validator);
+        const idents = validator.idents;
+        for (const ident in idents) {
             idents[ident] = cssval;
         }
         return val;
@@ -1640,23 +1621,23 @@ adapt.cssvalid.ValidatorSet.prototype.addReplacement = function(val, token) {
  * @param {Array.<adapt.cssvalid.ValidatingGroup>} vals
  * @return {adapt.cssvalid.ValidatingGroup}
  */
-adapt.cssvalid.ValidatorSet.prototype.newGroup = function(op, vals) {
-    var group = new adapt.cssvalid.ValidatingGroup();
+adapt.cssvalid.ValidatorSet.prototype.newGroup = (op, vals) => {
+    const group = new adapt.cssvalid.ValidatingGroup();
     if (op == "||") {
         for (var i = 0; i < vals.length; i++) {
-            var subgroup = new adapt.cssvalid.ValidatingGroup();
+            const subgroup = new adapt.cssvalid.ValidatingGroup();
             subgroup.startClause(i);
             subgroup.addGroup(vals[i], adapt.cssvalid.Add.FOLLOW);
             subgroup.endClause(i);
             group.addGroup(subgroup, i == 0 ? adapt.cssvalid.Add.FOLLOW : adapt.cssvalid.Add.ALTERNATE);
         }
-        var outer = new adapt.cssvalid.ValidatingGroup();
+        const outer = new adapt.cssvalid.ValidatingGroup();
         outer.startSpecialGroup();
         outer.addGroup(group, adapt.cssvalid.Add.REPEATED);
         outer.endSpecialGroup();
         return outer;
     } else {
-        /** @type {adapt.cssvalid.Add} */ var how;
+        /** @type {adapt.cssvalid.Add} */ let how;
         switch (op) {
             case " ":
                 how = adapt.cssvalid.Add.FOLLOW;
@@ -1682,8 +1663,8 @@ adapt.cssvalid.ValidatorSet.prototype.newGroup = function(op, vals) {
  * @param {number} max
  * @return {adapt.cssvalid.ValidatingGroup}
  */
-adapt.cssvalid.ValidatorSet.prototype.addCounts = function(val, min, max) {
-    var group = new adapt.cssvalid.ValidatingGroup();
+adapt.cssvalid.ValidatorSet.prototype.addCounts = (val, min, max) => {
+    const group = new adapt.cssvalid.ValidatingGroup();
     for (var i = 0; i < min; i++) {
         group.addGroup(val.clone(), adapt.cssvalid.Add.FOLLOW);
     }
@@ -1702,8 +1683,8 @@ adapt.cssvalid.ValidatorSet.prototype.addCounts = function(val, min, max) {
  * @param {adapt.cssvalid.PropertyValidator} validator
  * @return {adapt.cssvalid.ValidatingGroup}
  */
-adapt.cssvalid.ValidatorSet.prototype.primitive = function(validator) {
-    var group = new adapt.cssvalid.ValidatingGroup();
+adapt.cssvalid.ValidatorSet.prototype.primitive = validator => {
+    const group = new adapt.cssvalid.ValidatingGroup();
     group.addPrimitive(validator);
     return group;
 };
@@ -1715,7 +1696,7 @@ adapt.cssvalid.ValidatorSet.prototype.primitive = function(validator) {
  * @return {adapt.cssvalid.ValidatingGroup}
  */
 adapt.cssvalid.ValidatorSet.prototype.newFunc = function(fn, val) {
-    /**@type {adapt.cssvalid.PropertyValidator} */ var validator;
+    /**@type {adapt.cssvalid.PropertyValidator} */ let validator;
     switch (fn) {
         case "COMMA":
             validator = new adapt.cssvalid.CommaListValidator(val);
@@ -1801,7 +1782,7 @@ adapt.cssvalid.ValidatorSet.prototype.initBuiltInValidators = function() {
     this.namedValidators["SLASH"] = this.primitive(new adapt.cssvalid.PrimitiveValidator(
         adapt.cssvalid.ALLOW_SLASH, adapt.cssvalid.NO_IDENTS, adapt.cssvalid.NO_IDENTS));
 
-    var stdfont = {
+    const stdfont = {
         "font-family": adapt.css.getName("sans-serif")
     };
     this.systemFonts["caption"] = stdfont;
@@ -1817,9 +1798,7 @@ adapt.cssvalid.ValidatorSet.prototype.initBuiltInValidators = function() {
  * @param {string} name
  * @return {boolean}
  */
-adapt.cssvalid.ValidatorSet.prototype.isBuiltIn = function(name) {
-    return !!name.match(/^[A-Z_0-9]+$/);
-};
+adapt.cssvalid.ValidatorSet.prototype.isBuiltIn = name => !!name.match(/^[A-Z_0-9]+$/);
 
 /**
  * @private
@@ -1828,12 +1807,12 @@ adapt.cssvalid.ValidatorSet.prototype.isBuiltIn = function(name) {
  * @return {?string}
  */
 adapt.cssvalid.ValidatorSet.prototype.readNameAndPrefixes = function(tok, section) {
-    var token = tok.token();
+    let token = tok.token();
     if (token.type == adapt.csstok.TokenType.EOF) {
         // Finished normally
         return null;
     }
-    /** @type {!Object.<string,boolean>} */ var rulePrefixes = {"": true};
+    /** @type {!Object.<string,boolean>} */ const rulePrefixes = {"": true};
     if (token.type == adapt.csstok.TokenType.O_BRK) {
         do {
             tok.consume();
@@ -1856,7 +1835,7 @@ adapt.cssvalid.ValidatorSet.prototype.readNameAndPrefixes = function(tok, sectio
         tok.consume();
         return null;
     }
-    var name = token.text;
+    const name = token.text;
     tok.consume();
     if (section != 2) {
         if (tok.token().type != adapt.csstok.TokenType.EQ) {
@@ -1880,21 +1859,21 @@ adapt.cssvalid.ValidatorSet.prototype.readNameAndPrefixes = function(tok, sectio
  */
 adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
     while (true) {
-        var ruleName = this.readNameAndPrefixes(tok, 1);
+        const ruleName = this.readNameAndPrefixes(tok, 1);
         if (!ruleName)
             return;
 
-        /** @type {Array.<adapt.cssvalid.ValidatingGroup>} */ var vals = [];
-        var stack = [];
-        var op = "";
-        var val;
-        var expectval = true;
-        var self = this;
+        /** @type {Array.<adapt.cssvalid.ValidatingGroup>} */ let vals = [];
+        const stack = [];
+        let op = "";
+        let val;
+        let expectval = true;
+        const self = this;
 
         /**
          * @return {adapt.cssvalid.ValidatingGroup}
          */
-        var reduce = function() {
+        const reduce = () => {
             if (vals.length == 0)
                 throw new Error("No values");
             if (vals.length == 1)
@@ -1906,27 +1885,27 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
          * @param {string} currop
          * @return {void}
          */
-        var setop = function(currop) {
+        const setop = currop => {
             if (expectval)
-                throw new Error("'" + currop + "': unexpected");
+                throw new Error(`'${currop}': unexpected`);
             if (op && op != currop)
-                throw new Error("mixed operators: '" + currop + "' and '" + op + "'");
+                throw new Error(`mixed operators: '${currop}' and '${op}'`);
             op = currop;
             expectval = true;
         };
 
-        /** @type {adapt.cssvalid.ValidatingGroup} */ var result = null;
+        /** @type {adapt.cssvalid.ValidatingGroup} */ let result = null;
         while (!result) {
             tok.consume();
-            var token = tok.token();
+            let token = tok.token();
             switch (token.type) {
                 case adapt.csstok.TokenType.IDENT:
                     if (!expectval)
                         setop(" ");
                     if (this.isBuiltIn(token.text)) {
-                        var builtIn = this.namedValidators[token.text];
+                        const builtIn = this.namedValidators[token.text];
                         if (!builtIn)
-                            throw new Error("'" + token.text + "' unexpected");
+                            throw new Error(`'${token.text}' unexpected`);
                         vals.push(builtIn.clone());
                     } else {
                         var idents = {};
@@ -1937,7 +1916,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
                     break;
                 case adapt.csstok.TokenType.INT:
                     var idents = {};
-                    idents["" + token.num] = new adapt.css.Int(token.num);
+                    idents[`${token.num}`] = new adapt.css.Int(token.num);
                     vals.push(this.primitive(new adapt.cssvalid.PrimitiveValidator(0, idents, adapt.cssvalid.NO_IDENTS)));
                     expectval = false;
                     break;
@@ -1950,7 +1929,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
                 case adapt.csstok.TokenType.O_BRK:
                     if (!expectval)
                         setop(" ");
-                    stack.push({ vals: vals, op: op, b: "[" });
+                    stack.push({ vals, op, b: "[" });
                     op = "";
                     vals = [];
                     expectval = true;
@@ -1958,7 +1937,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
                 case adapt.csstok.TokenType.FUNC:
                     if (!expectval)
                         setop(" ");
-                    stack.push({ vals: vals, op: op, b: "(", fn: token.text });
+                    stack.push({ vals, op, b: "(", fn: token.text });
                     op = "";
                     vals = [];
                     expectval = true;
@@ -2009,8 +1988,8 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
                     token = tok.token();
                     if (token.type != adapt.csstok.TokenType.INT)
                         throw new Error("<int> expected");
-                    var min = token.num;
-                    var max = min;
+                    const min = token.num;
+                    let max = min;
                     tok.consume();
                     token = tok.token();
                     if (token.type == adapt.csstok.TokenType.COMMA) {
@@ -2029,7 +2008,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
                 case adapt.csstok.TokenType.SEMICOL:
                     result = reduce();
                     if (stack.length > 0)
-                        throw new Error("unclosed '" + stack.pop().b + "'");
+                        throw new Error(`unclosed '${stack.pop().b}'`);
                     break;
                 default:
                     throw new Error("unexpected token");
@@ -2055,13 +2034,13 @@ adapt.cssvalid.ValidatorSet.prototype.parseValidators = function(tok) {
  */
 adapt.cssvalid.ValidatorSet.prototype.parseDefaults = function(tok) {
     while (true) {
-        var propName = this.readNameAndPrefixes(tok, 2);
+        const propName = this.readNameAndPrefixes(tok, 2);
         if (!propName)
             return;
-        /** @type {Array.<adapt.css.Val>} */ var vals = [];
+        /** @type {Array.<adapt.css.Val>} */ const vals = [];
         while (true) {
             tok.consume();
-            var token = tok.token();
+            const token = tok.token();
             if (token.type == adapt.csstok.TokenType.SEMICOL) {
                 tok.consume();
                 break;
@@ -2094,11 +2073,11 @@ adapt.cssvalid.ValidatorSet.prototype.parseDefaults = function(tok) {
  */
 adapt.cssvalid.ValidatorSet.prototype.parseShorthands = function(tok) {
     while (true) {
-        var ruleName = this.readNameAndPrefixes(tok, 3);
+        const ruleName = this.readNameAndPrefixes(tok, 3);
         if (!ruleName)
             return;
-        var token = tok.nthToken(1);
-        var shorthandValidator;
+        let token = tok.nthToken(1);
+        let shorthandValidator;
         if (token.type == adapt.csstok.TokenType.IDENT && adapt.cssvalid.shorthandValidators[token.text]) {
             shorthandValidator = new adapt.cssvalid.shorthandValidators[token.text]();
             tok.consume();
@@ -2106,11 +2085,11 @@ adapt.cssvalid.ValidatorSet.prototype.parseShorthands = function(tok) {
             shorthandValidator = new adapt.cssvalid.SimpleShorthandValidator();
         }
         shorthandValidator.setOwner(this);
-        var result = false;
-        /** @type {Array.<adapt.cssvalid.ShorthandSyntaxNode>} */ var syntax = [];
-        var slash = false;
-        var stack = [];
-        var propList = [];
+        let result = false;
+        /** @type {Array.<adapt.cssvalid.ShorthandSyntaxNode>} */ let syntax = [];
+        let slash = false;
+        const stack = [];
+        const propList = [];
         while (!result) {
             tok.consume();
             token = tok.token();
@@ -2121,13 +2100,12 @@ adapt.cssvalid.ValidatorSet.prototype.parseShorthands = function(tok) {
                         propList.push(token.text);
                     } else if (this.shorthands[token.text] instanceof
                         adapt.cssvalid.InsetsShorthandValidator) {
-                        var insetShorthand = /** @type {adapt.cssvalid.InsetsShorthandValidator} */
+                        const insetShorthand = /** @type {adapt.cssvalid.InsetsShorthandValidator} */
                             (this.shorthands[token.text]);
                         syntax.push(insetShorthand.createSyntaxNode());
-                        propList.push.apply(propList, insetShorthand.propList);
+                        propList.push(...insetShorthand.propList);
                     } else {
-                        throw new Error('\'' + token.text +
-                            '\' is neither a simple property nor an inset shorthand');
+                        throw new Error(`'${token.text}' is neither a simple property nor an inset shorthand`);
                     }
                     break;
                 case adapt.csstok.TokenType.SLASH :
@@ -2136,13 +2114,13 @@ adapt.cssvalid.ValidatorSet.prototype.parseShorthands = function(tok) {
                     slash = true;
                     break;
                 case adapt.csstok.TokenType.O_BRK :
-                    stack.push({ slash: slash, syntax: syntax });
+                    stack.push({ slash, syntax });
                     syntax = [];
                     slash = false;
                     break;
                 case adapt.csstok.TokenType.C_BRK :
-                    var compound = new adapt.cssvalid.ShorthandSyntaxCompound(syntax, slash);
-                    var item = stack.pop();
+                    const compound = new adapt.cssvalid.ShorthandSyntaxCompound(syntax, slash);
+                    const item = stack.pop();
                     syntax = item.syntax;
                     slash = item.slash;
                     syntax.push(compound);
@@ -2167,7 +2145,7 @@ adapt.cssvalid.ValidatorSet.prototype.parseShorthands = function(tok) {
  */
 adapt.cssvalid.ValidatorSet.prototype.parse = function(text) {
     // Not as robust as CSS parser.
-    var tok = new adapt.csstok.Tokenizer(text, null);
+    const tok = new adapt.csstok.Tokenizer(text, null);
     this.parseValidators(tok);
     this.parseDefaults(tok);
     this.parseShorthands(tok);
@@ -2180,14 +2158,14 @@ adapt.cssvalid.ValidatorSet.prototype.parse = function(text) {
  * @param {Array.<string>} propList
  */
 adapt.cssvalid.ValidatorSet.prototype.makePropSet = function(propList) {
-    var map = {};
-    for (var i = 0; i < propList.length; i++) {
-        var prop = propList[i];
-        var shorthand = this.shorthands[prop];
-        var list = shorthand ? shorthand.propList : [prop];
-        for (var k = 0; k < list.length; k++) {
-            var pname = list[k];
-            var pval = this.defaultValues[pname];
+    const map = {};
+
+    for (const prop of propList) {
+        const shorthand = this.shorthands[prop];
+        const list = shorthand ? shorthand.propList : [prop];
+
+        for (const pname of list) {
+            const pval = this.defaultValues[pname];
             if (!pval) {
                 vivliostyle.logging.logger.warn("Unknown property in makePropSet:", pname);
             } else {
@@ -2195,6 +2173,7 @@ adapt.cssvalid.ValidatorSet.prototype.makePropSet = function(propList) {
             }
         }
     }
+
     return map;
 };
 
@@ -2207,29 +2186,29 @@ adapt.cssvalid.ValidatorSet.prototype.makePropSet = function(propList) {
  */
 adapt.cssvalid.ValidatorSet.prototype.validatePropertyAndHandleShorthand =
     function(name, value, important, receiver) {
-        var prefix = "";
-        var origName = name;
+        let prefix = "";
+        const origName = name;
         name = name.toLowerCase();
-        var r = name.match(/^-([a-z]+)-([-a-z0-9]+)$/);
+        const r = name.match(/^-([a-z]+)-([-a-z0-9]+)$/);
         if (r) {
             prefix = r[1];
             name = r[2];
         }
-        var px = this.prefixes[name];
+        const px = this.prefixes[name];
         if (!px || !px[prefix]) {
             receiver.unknownProperty(origName, value);
             return;
         }
-        var validator = this.validators[name];
+        const validator = this.validators[name];
         if (validator) {
-            var rvalue = value === adapt.css.ident.inherit || value.isExpr() ? value : value.visit(validator);
+            const rvalue = value === adapt.css.ident.inherit || value.isExpr() ? value : value.visit(validator);
             if (rvalue) {
                 receiver.simpleProperty(name, rvalue, important);
             } else {
                 receiver.invalidPropertyValue(origName, value);
             }
         } else {
-            var shorthand = this.shorthands[name].clone();
+            const shorthand = this.shorthands[name].clone();
             if (value === adapt.css.ident.inherit) {
                 shorthand.propagateInherit(important, receiver);
             } else {
@@ -2245,14 +2224,14 @@ adapt.cssvalid.ValidatorSet.prototype.validatePropertyAndHandleShorthand =
 /**
  * @type {adapt.taskutil.Fetcher.<adapt.cssvalid.ValidatorSet>}
  */
-adapt.cssvalid.validatorFetcher = new adapt.taskutil.Fetcher(function() {
-    /** @type {!adapt.task.Frame.<adapt.cssvalid.ValidatorSet>} */ var frame =
+adapt.cssvalid.validatorFetcher = new adapt.taskutil.Fetcher(() => {
+    /** @type {!adapt.task.Frame.<adapt.cssvalid.ValidatorSet>} */ const frame =
         adapt.task.newFrame("loadValidatorSet.load");
-    var url = adapt.base.resolveURL("validation.txt", adapt.base.resourceBaseURL);
-    var result = adapt.net.ajax(url);
-    var validatorSet = new adapt.cssvalid.ValidatorSet();
+    const url = adapt.base.resolveURL("validation.txt", adapt.base.resourceBaseURL);
+    const result = adapt.net.ajax(url);
+    const validatorSet = new adapt.cssvalid.ValidatorSet();
     validatorSet.initBuiltInValidators();
-    result.then(function(xhr) {
+    result.then(xhr => {
         try {
             if (xhr.responseText) {
                 validatorSet.parse(xhr.responseText);
@@ -2270,6 +2249,4 @@ adapt.cssvalid.validatorFetcher = new adapt.taskutil.Fetcher(function() {
 /**
  * @return {!adapt.task.Result.<adapt.cssvalid.ValidatorSet>}
  */
-adapt.cssvalid.loadValidatorSet = function() {
-    return adapt.cssvalid.validatorFetcher.get();
-};
+adapt.cssvalid.loadValidatorSet = () => adapt.cssvalid.validatorFetcher.get();

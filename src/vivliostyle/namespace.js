@@ -25,7 +25,7 @@ goog.provide("vivliostyle.namespace");
  * @private
  * @returns {!Object}
  */
-vivliostyle.namespace.getEnclosingObject = function() {
+vivliostyle.namespace.getEnclosingObject = () => {
     if (typeof enclosingObject !== "undefined" && enclosingObject) {
         return enclosingObject;
     } else {
@@ -38,6 +38,6 @@ vivliostyle.namespace.getEnclosingObject = function() {
  * @param {string} publicPath Unobfuscated name to export.
  * @param {*} object Object the name should point to.
  */
-vivliostyle.namespace.exportSymbol = function(publicPath, object) {
+vivliostyle.namespace.exportSymbol = (publicPath, object) => {
     goog.exportSymbol(publicPath, object, vivliostyle.namespace.getEnclosingObject());
 };

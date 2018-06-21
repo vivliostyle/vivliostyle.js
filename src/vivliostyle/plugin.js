@@ -21,7 +21,7 @@ goog.provide("vivliostyle.plugin");
 goog.require("vivliostyle.namespace");
 goog.require("vivliostyle.logging");
 
-goog.scope(function() {
+goog.scope(() => {
 
     /**
      * Type of implemented hooks.
@@ -130,7 +130,7 @@ goog.scope(function() {
         "POST_LAYOUT_BLOCK": "POST_LAYOUT_BLOCK"
     };
 
-    /** @const */ var HOOKS = vivliostyle.plugin.HOOKS;
+    /** @const */ const HOOKS = vivliostyle.plugin.HOOKS;
 
     /**
      * @typedef {function(Document)}
@@ -204,11 +204,11 @@ goog.scope(function() {
      * @param {string} name Name of the hook.
      * @param {!function(...)} fn Function to be registered to the hook.
      */
-    vivliostyle.plugin.registerHook = function(name, fn) {
+    vivliostyle.plugin.registerHook = (name, fn) => {
         if (!HOOKS[name]) {
-            vivliostyle.logging.logger.warn(new Error("Skipping unknown plugin hook '" + name + "'."));
+            vivliostyle.logging.logger.warn(new Error(`Skipping unknown plugin hook '${name}'.`));
         } else {
-            var hooksForName = vivliostyle.plugin.hooks[name];
+            let hooksForName = vivliostyle.plugin.hooks[name];
             if (!hooksForName) {
                 hooksForName = vivliostyle.plugin.hooks[name] = [];
             }
@@ -222,13 +222,13 @@ goog.scope(function() {
      * @param {string} name Name of the hook.
      * @param {!function(...)} fn Function to be removed from the hook.
      */
-    vivliostyle.plugin.removeHook = function(name, fn) {
+    vivliostyle.plugin.removeHook = (name, fn) => {
         if (!HOOKS[name]) {
-            vivliostyle.logging.logger.warn(new Error("Ignoring unknown plugin hook '" + name + "'."));
+            vivliostyle.logging.logger.warn(new Error(`Ignoring unknown plugin hook '${name}'.`));
         } else {
-            var hooksForName = vivliostyle.plugin.hooks[name];
+            const hooksForName = vivliostyle.plugin.hooks[name];
             if (hooksForName) {
-                var index = hooksForName.indexOf(fn);
+                const index = hooksForName.indexOf(fn);
                 if (index >= 0) {
                     hooksForName.splice(index, 1);
                 }
@@ -242,8 +242,8 @@ goog.scope(function() {
      * @param {string} name
      * @returns {!Array.<!function(...)>}
      */
-    vivliostyle.plugin.getHooksForName = function(name) {
-        var hooksForName = vivliostyle.plugin.hooks[name];
+    vivliostyle.plugin.getHooksForName = name => {
+        const hooksForName = vivliostyle.plugin.hooks[name];
         return hooksForName || [];
     };
 

@@ -15,7 +15,7 @@ const execScript = `
 java -jar node_modules/google-closure-compiler/compiler.jar \
 --checks_only \
 --compilation_level ADVANCED_OPTIMIZATIONS \
---language_in ECMASCRIPT5 \
+--language_in ECMASCRIPT6 \
 --warning_level VERBOSE \
 --externs src/externs.js \
 --process_common_js_modules \

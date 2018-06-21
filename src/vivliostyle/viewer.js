@@ -25,8 +25,8 @@ goog.require("vivliostyle.util");
 goog.require("adapt.base");
 goog.require("adapt.viewer");
 
-goog.scope(function() {
-    /** @const */ var PageProgression = vivliostyle.constants.PageProgression;
+goog.scope(() => {
+    /** @const */ const PageProgression = vivliostyle.constants.PageProgression;
 
     /**
      * Viewer settings that must be passed to Viewer's constructor.
@@ -89,9 +89,9 @@ goog.scope(function() {
      * @returns {!Object}
      */
     function convertViewerOptions(options) {
-        var converted = {};
-        Object.keys(options).forEach(function(key) {
-            var v = options[key];
+        const converted = {};
+        Object.keys(options).forEach(key => {
+            const v = options[key];
             switch (key) {
                 case "autoResize":
                     converted["autoresize"] = v;
@@ -156,19 +156,19 @@ goog.scope(function() {
         /** @const @private */ this.eventTarget = new adapt.base.SimpleEventTarget();
 
         Object.defineProperty(this, "readyState", {
-            get: function() {
+            get() {
                 return this.adaptViewer.readyState;
             }
         });
     };
-    /** @const */ var Viewer = vivliostyle.viewer.Viewer;
+    /** @const */ const Viewer = vivliostyle.viewer.Viewer;
 
     /**
      * Set ViewerOptions to the viewer.
      * @param {!vivliostyle.viewer.ViewerOptions} options
      */
     Viewer.prototype.setOptions = function(options) {
-        var command = Object.assign({"a": "configure"}, convertViewerOptions(options));
+        const command = Object.assign({"a": "configure"}, convertViewerOptions(options));
         this.adaptViewer.sendCommand(command);
         Object.assign(this.options, options);
     };
@@ -178,9 +178,9 @@ goog.scope(function() {
      * @param {!adapt.base.JSON} msg
      */
     Viewer.prototype.dispatcher = function(msg) {
-        /** @dict */ var event = {"type": msg["t"]};
-        var o = /** @type {!Object} */ (msg);
-        Object.keys(o).forEach(function(key) {
+        /** @dict */ const event = {"type": msg["t"]};
+        const o = /** @type {!Object} */ (msg);
+        Object.keys(o).forEach(key => {
             if (key !== "t") {
                 event[key] = o[key];
             }
@@ -279,26 +279,27 @@ goog.scope(function() {
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
      */
     Viewer.prototype.loadDocumentOrEPUB = function(singleDocumentOptions, epubUrl, opt_documentOptions, opt_viewerOptions) {
-        var documentOptions = opt_documentOptions || {};
+        const documentOptions = opt_documentOptions || {};
 
         function convertStyleSheetArray(arr) {
             if (arr) {
-                return arr.map(function(s) {
-                    return { url: s.url || null, text: s.text || null };
-                });
+                return arr.map(s => ({
+                    url: s.url || null,
+                    text: s.text || null
+                }));
             } else {
                 return undefined;
             }
         }
 
-        var authorStyleSheet = convertStyleSheetArray(documentOptions["authorStyleSheet"]);
-        var userStyleSheet = convertStyleSheetArray(documentOptions["userStyleSheet"]);
+        const authorStyleSheet = convertStyleSheetArray(documentOptions["authorStyleSheet"]);
+        const userStyleSheet = convertStyleSheetArray(documentOptions["userStyleSheet"]);
 
         if (opt_viewerOptions) {
             Object.assign(this.options, opt_viewerOptions);
         }
 
-        var command = Object.assign({
+        const command = Object.assign({
             "a": singleDocumentOptions ? "loadXML" : "loadEPUB",
 
             "userAgentRootURL": this.settings["userAgentRootURL"],
@@ -337,7 +338,7 @@ goog.scope(function() {
         FIRST: "first",
         LAST: "last"
     };
-    /** @const */ var Navigation = vivliostyle.viewer.Navigation;
+    /** @const */ const Navigation = vivliostyle.viewer.Navigation;
 
     /**
      * @private
@@ -375,7 +376,7 @@ goog.scope(function() {
      * @enum {string}
      */
     vivliostyle.viewer.ZoomType = adapt.viewer.ZoomType;
-    /** @const */ var ZoomType = vivliostyle.viewer.ZoomType;
+    /** @const */ const ZoomType = vivliostyle.viewer.ZoomType;
 
     /**
      * Returns zoom factor corresponding to the specified zoom type.

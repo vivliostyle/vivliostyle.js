@@ -20,7 +20,7 @@ goog.provide("vivliostyle.display");
 
 goog.require("adapt.css");
 
-goog.scope(function() {
+goog.scope(() => {
 
     /** @private @const */
     vivliostyle.display.FLOW_ROOT_ATTR = "data-vivliostyle-flow-root";
@@ -29,9 +29,7 @@ goog.scope(function() {
      * @param {!Element} element
      * @returns {boolean}
      */
-    vivliostyle.display.isFlowRoot = function(element) {
-        return element.getAttribute(vivliostyle.display.FLOW_ROOT_ATTR) === "true";
-    };
+    vivliostyle.display.isFlowRoot = element => element.getAttribute(vivliostyle.display.FLOW_ROOT_ATTR) === "true";
 
     /**
      * 'Blockify' a display value.
@@ -40,9 +38,9 @@ goog.scope(function() {
      * @param {!adapt.css.Ident} display
      * @returns {!adapt.css.Ident}
      */
-    vivliostyle.display.blockify = function(display) {
-        var displayStr = display.toString();
-        var blockifiedStr;
+    vivliostyle.display.blockify = display => {
+        const displayStr = display.toString();
+        let blockifiedStr;
         switch (displayStr) {
             case "inline-flex":
                 blockifiedStr = "flex";
@@ -76,9 +74,7 @@ goog.scope(function() {
      * @param {adapt.css.Ident} position
      * @returns {boolean}
      */
-    vivliostyle.display.isAbsolutelyPositioned = function(position) {
-        return position === adapt.css.ident.absolute || position === adapt.css.ident.fixed;
-    };
+    vivliostyle.display.isAbsolutelyPositioned = position => position === adapt.css.ident.absolute || position === adapt.css.ident.fixed;
 
     /**
      * Get computed values of display, position and float.
@@ -90,7 +86,7 @@ goog.scope(function() {
      * @param {boolean} isRoot
      * @returns {{display: !adapt.css.Ident, position: adapt.css.Ident, float: adapt.css.Ident}}
      */
-    vivliostyle.display.getComputedDislayValue = function(display, position, float, isRoot) {
+    vivliostyle.display.getComputedDislayValue = (display, position, float, isRoot) => {
         if (display === adapt.css.ident.none) {
             // no need to convert values when 'display' is 'none'
         } else if (vivliostyle.display.isAbsolutelyPositioned(position)) {
@@ -100,9 +96,9 @@ goog.scope(function() {
             display = vivliostyle.display.blockify(display);
         }
         return {
-            display: display,
-            position: position,
-            float: float
+            display,
+            position,
+            float
         };
     };
 
@@ -114,16 +110,14 @@ goog.scope(function() {
      * @param {boolean} isRoot
      * @returns {boolean}
      */
-    vivliostyle.display.isBlock = function(display, position, float, isRoot) {
-        return vivliostyle.display.getComputedDislayValue(display, position, float, isRoot).display
-            === adapt.css.ident.block;
-    };
+    vivliostyle.display.isBlock = (display, position, float, isRoot) => vivliostyle.display.getComputedDislayValue(display, position, float, isRoot).display
+        === adapt.css.ident.block;
 
     /**
      * @param {!adapt.css.Ident} display
      * @returns {boolean}
      */
-    vivliostyle.display.isInlineLevel = function(display) {
+    vivliostyle.display.isInlineLevel = display => {
         switch (display.toString()) {
             case "inline":
             case "inline-block":
@@ -142,7 +136,7 @@ goog.scope(function() {
      * @param {!adapt.css.Ident} display
      * @returns {boolean}
      */
-    vivliostyle.display.isRubyInternalDisplay = function(display) {
+    vivliostyle.display.isRubyInternalDisplay = display => {
         switch (display.toString()) {
             case "ruby-base":
             case "ruby-text":
@@ -165,7 +159,15 @@ goog.scope(function() {
      * @param {boolean=} isFlowRoot
      * @returns {boolean}
      */
-    vivliostyle.display.establishesBFC = function(display, position, float, overflow, writingMode, parentWritingMode, isFlowRoot) {
+    vivliostyle.display.establishesBFC = (
+        display,
+        position,
+        float,
+        overflow,
+        writingMode,
+        parentWritingMode,
+        isFlowRoot
+    ) => {
         writingMode = writingMode || parentWritingMode || adapt.css.ident.horizontal_tb;
         return !!isFlowRoot || (!!float && float !== adapt.css.ident.none) ||
             vivliostyle.display.isAbsolutelyPositioned(position) ||
@@ -180,7 +182,5 @@ goog.scope(function() {
      * @param {adapt.css.Ident} position
      * @returns {boolean}
      */
-    vivliostyle.display.establishesCBForAbsolute = function(position) {
-        return position === adapt.css.ident.relative || position === adapt.css.ident.absolute || position === adapt.css.ident.fixed;
-    };
+    vivliostyle.display.establishesCBForAbsolute = position => position === adapt.css.ident.relative || position === adapt.css.ident.absolute || position === adapt.css.ident.fixed;
 });

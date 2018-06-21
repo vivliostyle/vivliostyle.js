@@ -31,17 +31,17 @@ adapt.csstok.TokenizerHandler = function() {};
  * @param {adapt.csstok.Token} token
  * @return {void}
  */
-adapt.csstok.TokenizerHandler.prototype.error = function(mnemonics, token) {};
+adapt.csstok.TokenizerHandler.prototype.error = (mnemonics, token) => {};
 
 /**
  * @param {string} str
  * @return {string}
  */
-adapt.csstok.escapeParseSingle = function(str) {
+adapt.csstok.escapeParseSingle = str => {
     str = str.substr(1);
     if (str.match(/^[^0-9a-fA-F\n\r]$/))
         return str;
-    var code = parseInt(str, 16);
+    const code = parseInt(str, 16);
     if (isNaN(code))
         return "";
     if (code <= 0xFFFF)
@@ -58,10 +58,8 @@ adapt.csstok.escapeParseSingle = function(str) {
  * @param {string} str
  * @return {string}
  */
-adapt.csstok.escapeParse = function(str) {
-    return str.replace(/\\([0-9a-fA-F]{0,6}(\r\n|[ \n\r\t\f])?|[^0-9a-fA-F\n\r])/g,
-        adapt.csstok.escapeParseSingle);
-};
+adapt.csstok.escapeParse = str => str.replace(/\\([0-9a-fA-F]{0,6}(\r\n|[ \n\r\t\f])?|[^0-9a-fA-F\n\r])/g,
+    adapt.csstok.escapeParseSingle);
 
 /**
  * @enum {number}
@@ -220,9 +218,9 @@ adapt.csstok.Action = {
  * @param {Array.<adapt.csstok.Action>} spec
  * @return {Array.<adapt.csstok.Action>}
  */
-adapt.csstok.makeActions = function(def, spec) {
-    /** @type {Array.<number>} */ var a = Array(128);
-    /** @type {number} */ var i;
+adapt.csstok.makeActions = (def, spec) => {
+    /** @type {Array.<number>} */ const a = Array(128);
+    /** @type {number} */ let i;
     for (i = 0; i < 128; i++) {
         a[i] = def;
     }
@@ -556,7 +554,7 @@ adapt.csstok.Tokenizer = function(input, handler) {
     /** @type {number} */ this.tail = 0; // available, ready to write
     /** @type {number} */ this.curr = 0; // ready to read
     /** @type {number} */ this.position = 0;
-    for (var i = 0; i <= this.indexMask; i++)
+    for (let i = 0; i <= this.indexMask; i++)
         this.buffer[i] = new adapt.csstok.Token();
 };
 
@@ -624,10 +622,10 @@ adapt.csstok.Tokenizer.prototype.hasMark = function() {
  * @return {void}
  */
 adapt.csstok.Tokenizer.prototype.reallocate = function() {
-    var newIndexMask = 2 * (this.indexMask + 1) - 1;
-    /** @type {Array.<adapt.csstok.Token>} */ var newBuffer = Array(newIndexMask + 1);
-    var oldIndex = this.head;
-    var newIndex = 0;
+    const newIndexMask = 2 * (this.indexMask + 1) - 1;
+    /** @type {Array.<adapt.csstok.Token>} */ const newBuffer = Array(newIndexMask + 1);
+    let oldIndex = this.head;
+    let newIndex = 0;
     while (oldIndex != this.tail) {
         newBuffer[newIndex] = this.buffer[oldIndex];
         if (oldIndex == this.curr)
@@ -658,9 +656,9 @@ adapt.csstok.Tokenizer.prototype.error = function(position, token, mnemonics) {
  * @return {void}
  */
 adapt.csstok.Tokenizer.prototype.fillBuffer = function() {
-    var tail = this.tail;
-    var head = this.head >= 0 ? this.head : this.curr;
-    var indexMask = this.indexMask;
+    let tail = this.tail;
+    let head = this.head >= 0 ? this.head : this.curr;
+    let indexMask = this.indexMask;
     if (tail >= head)
         head += indexMask;
     else
@@ -674,19 +672,19 @@ adapt.csstok.Tokenizer.prototype.fillBuffer = function() {
         indexMask = this.indexMask;
         head = indexMask; // this.head is zero
     }
-    var actions = adapt.csstok.actionsNormal;
-    var input = this.input;
-    var position = this.position;
-    var buffer = this.buffer;
-    /** @type {adapt.csstok.TokenType} */ var tokenType = adapt.csstok.TokenType.EOF;
-    /** @type {number} */ var tokenPosition = 0;
-    /** @type {string} */ var tokenText = "";
-    /** @type {number} */ var tokenNum = 0;
-    var seenSpace = false;
-    /** @type {adapt.csstok.Token} */ var token = buffer[tail];
-    var backslashPos = -9; // far enough before the start of the string
+    let actions = adapt.csstok.actionsNormal;
+    const input = this.input;
+    let position = this.position;
+    const buffer = this.buffer;
+    /** @type {adapt.csstok.TokenType} */ let tokenType = adapt.csstok.TokenType.EOF;
+    /** @type {number} */ let tokenPosition = 0;
+    /** @type {string} */ let tokenText = "";
+    /** @type {number} */ let tokenNum = 0;
+    let seenSpace = false;
+    /** @type {adapt.csstok.Token} */ let token = buffer[tail];
+    let backslashPos = -9; // far enough before the start of the string
     while (true) {
-        var charCode = input.charCodeAt(position);
+        const charCode = input.charCodeAt(position);
         switch (actions[charCode] || actions[65/*A*/]) {
             case adapt.csstok.Action.INVALID:
                 tokenType = adapt.csstok.TokenType.INVALID;

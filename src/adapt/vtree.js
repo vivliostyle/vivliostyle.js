@@ -85,11 +85,11 @@ adapt.vtree.actions = {
  * @param {string} action
  * @return {?Function}
  */
-adapt.vtree.makeListener = function(refs, action) {
-    var actionFn = adapt.vtree.actions[action];
+adapt.vtree.makeListener = (refs, action) => {
+    const actionFn = adapt.vtree.actions[action];
     if (actionFn) {
-        return function() {
-            for (var k = 0; k < refs.length; k++) {
+        return () => {
+            for (let k = 0; k < refs.length; k++) {
                 try {
                     actionFn(refs[k]);
                 } catch (err) {
@@ -112,20 +112,20 @@ adapt.vtree.Page = function(container, bleedBox) {
     /** @const */ this.bleedBox = bleedBox;
     /** @type {HTMLElement} */ this.pageAreaElement = null;
     /** @type {Array.<adapt.vtree.DelayedItem>} */ this.delayedItems = [];
-    var self = this;
+    const self = this;
     /** @param {Event} e */
-    this.hrefHandler = function(e) {
-        var anchorElement = /** @type {Element} */ (e.currentTarget);
-        var href = anchorElement.getAttribute("href") ||
+    this.hrefHandler = e => {
+        const anchorElement = /** @type {Element} */ (e.currentTarget);
+        const href = anchorElement.getAttribute("href") ||
             anchorElement.getAttributeNS(adapt.base.NS.XLINK, "href");
         if (href) {
-            var evt = {
+            const evt = {
                 type: "hyperlink",
                 target: null,
                 currentTarget: null,
-                anchorElement: anchorElement,
-                href: href,
-                preventDefault: function() { e.preventDefault(); }
+                anchorElement,
+                href,
+                preventDefault() { e.preventDefault(); }
             };
             self.dispatchEvent(evt);
         }
@@ -194,7 +194,7 @@ adapt.vtree.Page.prototype.setAutoPageHeight = function(isAuto) {
  * @param {string} id
  */
 adapt.vtree.Page.prototype.registerElementWithId = function(element, id) {
-    var arr = this.elementsById[id];
+    const arr = this.elementsById[id];
     if (!arr) {
         this.elementsById[id] = [element];
     } else {
@@ -211,8 +211,8 @@ adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
     // Remove ID of elements which eventually did not fit in the page
     // (Some nodes may have been removed after registration if they did not fit in the page)
     Object.keys(this.elementsById).forEach(function(id) {
-        var elems = this.elementsById[id];
-        for (var i = 0; i < elems.length;) {
+        const elems = this.elementsById[id];
+        for (let i = 0; i < elems.length;) {
             if (this.container.contains(elems[i])) {
                 i++;
             } else {
@@ -224,25 +224,25 @@ adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
         }
     }, this);
 
-    var list = this.delayedItems;
+    const list = this.delayedItems;
     for (var i = 0; i < list.length; i++) {
-        var item = list[i];
+        const item = list[i];
         adapt.base.setCSSProperty(item.target, item.name, item.value.toString());
     }
 
     // use size of the container of the PageMasterInstance
-    var rect = clientLayout.getElementClientRect(this.container);
+    const rect = clientLayout.getElementClientRect(this.container);
     this.dimensions.width = rect.width;
     this.dimensions.height = rect.height;
 
     for (var i = 0; i < triggers.length; i++) {
-        var trigger = triggers[i];
-        var refs = this.elementsById[trigger.ref];
-        var observers = this.elementsById[trigger.observer];
+        const trigger = triggers[i];
+        const refs = this.elementsById[trigger.ref];
+        const observers = this.elementsById[trigger.observer];
         if (refs && observers) {
-            var listener = adapt.vtree.makeListener(refs, trigger.action);
+            const listener = adapt.vtree.makeListener(refs, trigger.action);
             if (listener) {
-                for (var k = 0; k < observers.length; k++) {
+                for (let k = 0; k < observers.length; k++) {
                     observers[k].addEventListener(trigger.event, listener, false);
                 }
             }
@@ -255,7 +255,7 @@ adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
  * @param {number} scale Factor to which the page will be scaled.
  */
 adapt.vtree.Page.prototype.zoom = function(scale) {
-    adapt.base.setCSSProperty(this.container, "transform", "scale(" + scale + ")");
+    adapt.base.setCSSProperty(this.container, "transform", `scale(${scale})`);
 };
 
 /**
@@ -293,7 +293,7 @@ adapt.vtree.Whitespace = {
  * @param {string} whitespace The value of 'white-space' property
  * @returns {?adapt.vtree.Whitespace}
  */
-adapt.vtree.whitespaceFromPropertyValue = function(whitespace) {
+adapt.vtree.whitespaceFromPropertyValue = whitespace => {
     switch (whitespace) {
         case "normal" :
         case "nowrap" :
@@ -313,10 +313,10 @@ adapt.vtree.whitespaceFromPropertyValue = function(whitespace) {
  * @param {adapt.vtree.Whitespace} whitespace
  * @return {boolean}
  */
-adapt.vtree.canIgnore = function(node, whitespace) {
+adapt.vtree.canIgnore = (node, whitespace) => {
     if (node.nodeType == 1)
         return false;
-    var text = node.textContent;
+    const text = node.textContent;
     switch (whitespace) {
         case adapt.vtree.Whitespace.IGNORE:
             return !!text.match(/^\s*$/);
@@ -325,7 +325,7 @@ adapt.vtree.canIgnore = function(node, whitespace) {
         case adapt.vtree.Whitespace.PRESERVE:
             return text.length == 0;
     }
-    throw new Error("Unexpected whitespace: " + whitespace);
+    throw new Error(`Unexpected whitespace: ${whitespace}`);
 };
 
 /**
@@ -397,18 +397,14 @@ adapt.vtree.ClientRect;
  * @param {adapt.vtree.ClientRect} r2
  * @return {number}
  */
-adapt.vtree.clientrectIncreasingTop = function(r1, r2) {
-    return r1.top - r2.top;
-};
+adapt.vtree.clientrectIncreasingTop = (r1, r2) => r1.top - r2.top;
 
 /**
  * @param {adapt.vtree.ClientRect} r1
  * @param {adapt.vtree.ClientRect} r2
  * @return {number}
  */
-adapt.vtree.clientrectDecreasingRight = function(r1, r2) {
-    return r2.right - r1.right;
-};
+adapt.vtree.clientrectDecreasingRight = (r1, r2) => r2.right - r1.right;
 
 /**
  * Interface to read the position assigned to the elements and ranges by the
@@ -421,19 +417,19 @@ adapt.vtree.ClientLayout = function() {};
  * @param {Range} range
  * @return {Array.<adapt.vtree.ClientRect>}
  */
-adapt.vtree.ClientLayout.prototype.getRangeClientRects = function(range) {};
+adapt.vtree.ClientLayout.prototype.getRangeClientRects = range => {};
 
 /**
  * @param {Element} element
  * @return {adapt.vtree.ClientRect}
  */
-adapt.vtree.ClientLayout.prototype.getElementClientRect = function(element) {};
+adapt.vtree.ClientLayout.prototype.getElementClientRect = element => {};
 
 /**
  * @param {Element} element
  * @return {CSSStyleDeclaration} element's computed style
  */
-adapt.vtree.ClientLayout.prototype.getElementComputedStyle = function(element) {};
+adapt.vtree.ClientLayout.prototype.getElementComputedStyle = element => {};
 
 /**
  * Styling, creating a single node's view, etc.
@@ -446,7 +442,7 @@ adapt.vtree.LayoutContext = function() {};
  * suitable for building a separate column.
  * @return {!adapt.vtree.LayoutContext}
  */
-adapt.vtree.LayoutContext.prototype.clone = function() {};
+adapt.vtree.LayoutContext.prototype.clone = () => {};
 
 /**
  * Set the current source node and create a view. Parameter firstTime
@@ -457,14 +453,14 @@ adapt.vtree.LayoutContext.prototype.clone = function() {};
  * @param {boolean=} atUnforcedBreak
  * @return {!adapt.task.Result.<boolean>} true if children should be processed as well
  */
-adapt.vtree.LayoutContext.prototype.setCurrent = function(nodeContext, firstTime, atUnforcedBreak) {};
+adapt.vtree.LayoutContext.prototype.setCurrent = (nodeContext, firstTime, atUnforcedBreak) => {};
 
 /**
  * Set the container element that holds view elements produced from the source.
  * @param {Element} container
  * @param {boolean} isFootnote
  */
-adapt.vtree.LayoutContext.prototype.setViewRoot = function(container, isFootnote) {};
+adapt.vtree.LayoutContext.prototype.setViewRoot = (container, isFootnote) => {};
 
 /**
  * Moves to the next view node, creating it and appending it to the view tree if needed.
@@ -472,7 +468,7 @@ adapt.vtree.LayoutContext.prototype.setViewRoot = function(container, isFootnote
  * @param {boolean=} atUnforcedBreak
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>} that corresponds to the next view node
  */
-adapt.vtree.LayoutContext.prototype.nextInTree = function(nodeContext, atUnforcedBreak) {};
+adapt.vtree.LayoutContext.prototype.nextInTree = (nodeContext, atUnforcedBreak) => {};
 
 /**
  * Apply pseudo-element styles (if any).
@@ -481,7 +477,7 @@ adapt.vtree.LayoutContext.prototype.nextInTree = function(nodeContext, atUnforce
  * @param {Element} element element to apply styles to
  * @return {void}
  */
-adapt.vtree.LayoutContext.prototype.applyPseudoelementStyle = function(nodeContext, pseudoName, element) {};
+adapt.vtree.LayoutContext.prototype.applyPseudoelementStyle = (nodeContext, pseudoName, element) => {};
 
 /**
  * Apply styles to footnote container.
@@ -489,7 +485,7 @@ adapt.vtree.LayoutContext.prototype.applyPseudoelementStyle = function(nodeConte
  * @param {Element} element element to apply styles to
  * @return {boolean} vertical
  */
-adapt.vtree.LayoutContext.prototype.applyFootnoteStyle = function(vertical, element) {};
+adapt.vtree.LayoutContext.prototype.applyFootnoteStyle = (vertical, element) => {};
 
 
 /**
@@ -499,13 +495,13 @@ adapt.vtree.LayoutContext.prototype.applyFootnoteStyle = function(vertical, elem
  * @param {number} nodeOffset
  * @return {!adapt.task.Result.<adapt.vtree.NodeContext>}
  */
-adapt.vtree.LayoutContext.prototype.peelOff = function(nodeContext, nodeOffset) {};
+adapt.vtree.LayoutContext.prototype.peelOff = (nodeContext, nodeOffset) => {};
 
 /**
  * Process a block-end edge of a fragmented block.
  * @param {adapt.vtree.NodeContext} nodeContext
  */
-adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = function(nodeContext) {};
+adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = nodeContext => {};
 
 /**
  * @param {!adapt.css.Numeric} numeric
@@ -513,7 +509,7 @@ adapt.vtree.LayoutContext.prototype.processFragmentedBlockEdge = function(nodeCo
  * @param {!adapt.vtree.ClientLayout} clientLayout
  * @return {number|!adapt.css.Numeric}
  */
-adapt.vtree.LayoutContext.prototype.convertLengthToPx = function(numeric, viewNode, clientLayout) {};
+adapt.vtree.LayoutContext.prototype.convertLengthToPx = (numeric, viewNode, clientLayout) => {};
 
 /**
  * Returns if two NodePositions represents the same position in the document.
@@ -521,7 +517,7 @@ adapt.vtree.LayoutContext.prototype.convertLengthToPx = function(numeric, viewNo
  * @param {!adapt.vtree.NodePosition} nodePosition2
  * @return {boolean}
  */
-adapt.vtree.LayoutContext.prototype.isSameNodePosition = function(nodePosition1, nodePosition2) {};
+adapt.vtree.LayoutContext.prototype.isSameNodePosition = (nodePosition1, nodePosition2) => {};
 
 /**
  * @param {string} type
@@ -529,7 +525,7 @@ adapt.vtree.LayoutContext.prototype.isSameNodePosition = function(nodePosition1,
  * @param {boolean=} capture
  * @return {void}
  */
-adapt.vtree.LayoutContext.prototype.addEventListener = function(type, listener, capture) {};
+adapt.vtree.LayoutContext.prototype.addEventListener = (type, listener, capture) => {};
 
 /**
  * @param {string} type
@@ -537,13 +533,13 @@ adapt.vtree.LayoutContext.prototype.addEventListener = function(type, listener, 
  * @param {boolean=} capture
  * @return {void}
  */
-adapt.vtree.LayoutContext.prototype.removeEventListener = function(type, listener, capture) {};
+adapt.vtree.LayoutContext.prototype.removeEventListener = (type, listener, capture) => {};
 
 /**
  * @param {adapt.base.Event} evt
  * @return {void}
  */
-adapt.vtree.LayoutContext.prototype.dispatchEvent = function(evt) {};
+adapt.vtree.LayoutContext.prototype.dispatchEvent = evt => {};
 
 /**
  * Formatting context.
@@ -554,38 +550,38 @@ adapt.vtree.FormattingContext = function() {};
 /**
  * @return {string}
  */
-adapt.vtree.FormattingContext.prototype.getName = function() {};
+adapt.vtree.FormattingContext.prototype.getName = () => {};
 
 /**
  * @param {!adapt.vtree.NodeContext} nodeContext
  * @param {boolean} firstTime
  * @return {boolean}
  */
-adapt.vtree.FormattingContext.prototype.isFirstTime = function(nodeContext, firstTime) {};
+adapt.vtree.FormattingContext.prototype.isFirstTime = (nodeContext, firstTime) => {};
 
 /**
  * @return {adapt.vtree.FormattingContext}
  */
-adapt.vtree.FormattingContext.prototype.getParent = function() {};
+adapt.vtree.FormattingContext.prototype.getParent = () => {};
 
 /**
  * @return {*}
  */
-adapt.vtree.FormattingContext.prototype.saveState = function() {};
+adapt.vtree.FormattingContext.prototype.saveState = () => {};
 
 /**
  * @param {*} state
  */
-adapt.vtree.FormattingContext.prototype.restoreState = function(state) {};
+adapt.vtree.FormattingContext.prototype.restoreState = state => {};
 
 
 /**
  * @param {adapt.vtree.NodeContext} nodeContext
  * @param {function(adapt.vtree.FormattingContext)} callback
  */
-adapt.vtree.eachAncestorFormattingContext = function(nodeContext, callback) {
+adapt.vtree.eachAncestorFormattingContext = (nodeContext, callback) => {
     if (!nodeContext) return;
-    for (var fc = nodeContext.formattingContext; fc; fc = fc.getParent()) {
+    for (let fc = nodeContext.formattingContext; fc; fc = fc.getParent()) {
         callback(fc);
     }
 };
@@ -608,7 +604,7 @@ adapt.vtree.NodePositionStep;
  * @param {adapt.vtree.NodePositionStep} nps2
  * @returns {boolean}
  */
-adapt.vtree.isSameNodePositionStep = function(nps1, nps2) {
+adapt.vtree.isSameNodePositionStep = (nps1, nps2) => {
     if (nps1 === nps2) {
         return true;
     }
@@ -638,7 +634,7 @@ adapt.vtree.NodePosition;
  * @param {?adapt.vtree.NodePosition} np2
  * @returns {boolean}
  */
-adapt.vtree.isSameNodePosition = function(np1, np2) {
+adapt.vtree.isSameNodePosition = (np1, np2) => {
     if (np1 === np2) {
         return true;
     }
@@ -648,7 +644,7 @@ adapt.vtree.isSameNodePosition = function(np1, np2) {
     if (np1.offsetInNode !== np2.offsetInNode || np1.after !== np2.after || np1.steps.length !== np2.steps.length) {
         return false;
     }
-    for (var i = 0; i < np1.steps.length; i++) {
+    for (let i = 0; i < np1.steps.length; i++) {
         if (!adapt.vtree.isSameNodePositionStep(np1.steps[i], np2.steps[i])) {
             return false;
         }
@@ -660,9 +656,9 @@ adapt.vtree.isSameNodePosition = function(np1, np2) {
  * @param {Node} node
  * @return {adapt.vtree.NodePosition}
  */
-adapt.vtree.newNodePositionFromNode = function(node) {
-    var step = {
-        node: node,
+adapt.vtree.newNodePositionFromNode = node => {
+    const step = {
+        node,
         shadowType: adapt.vtree.ShadowType.NONE,
         shadowContext: null,
         nodeShadow: null,
@@ -677,8 +673,8 @@ adapt.vtree.newNodePositionFromNode = function(node) {
  * @param {?number} initialFragmentIndex
  * @return {adapt.vtree.NodePosition}
  */
-adapt.vtree.newNodePositionFromNodeContext = function(nodeContext, initialFragmentIndex) {
-    var step = {
+adapt.vtree.newNodePositionFromNodeContext = (nodeContext, initialFragmentIndex) => {
+    const step = {
         node: nodeContext.sourceNode,
         shadowType: adapt.vtree.ShadowType.NONE,
         shadowContext: nodeContext.shadowContext,
@@ -694,8 +690,8 @@ adapt.vtree.newNodePositionFromNodeContext = function(nodeContext, initialFragme
  * @param {adapt.vtree.NodeContext} parent
  * @return {!adapt.vtree.NodeContext}
  */
-adapt.vtree.makeNodeContextFromNodePositionStep = function(step, parent) {
-    var nodeContext = new adapt.vtree.NodeContext(step.node, parent, 0);
+adapt.vtree.makeNodeContextFromNodePositionStep = (step, parent) => {
+    const nodeContext = new adapt.vtree.NodeContext(step.node, parent, 0);
     nodeContext.shadowType = step.shadowType;
     nodeContext.shadowContext = step.shadowContext;
     nodeContext.nodeShadow = step.nodeShadow;
@@ -758,10 +754,8 @@ adapt.vtree.ShadowContext.prototype.equals = function(other) {
  * @param {adapt.vtree.ShadowContext} sc2
  * @returns {boolean}
  */
-adapt.vtree.isSameShadowContext = function(sc1, sc2) {
-    return sc1 === sc2 ||
-        (!!sc1 && !!sc2 && sc1.equals(sc2));
-};
+adapt.vtree.isSameShadowContext = (sc1, sc2) => sc1 === sc2 ||
+    (!!sc1 && !!sc2 && sc1.equals(sc2));
 
 /**
  * Information about :first-letter or :first-line pseudoelements
@@ -879,7 +873,7 @@ adapt.vtree.NodeContext.prototype.resetView = function() {
  * @return {!adapt.vtree.NodeContext}
  */
 adapt.vtree.NodeContext.prototype.cloneItem = function() {
-    var np = new adapt.vtree.NodeContext(this.sourceNode, this.parent, this.boxOffset);
+    const np = new adapt.vtree.NodeContext(this.sourceNode, this.parent, this.boxOffset);
     np.offsetInNode = this.offsetInNode;
     np.after = this.after;
     np.nodeShadow = this.nodeShadow;
@@ -934,7 +928,7 @@ adapt.vtree.NodeContext.prototype.modify = function() {
  * @return {!adapt.vtree.NodeContext}
  */
 adapt.vtree.NodeContext.prototype.copy = function() {
-    var np = this;
+    let np = this;
     do {
         if (np.shared)
             break;
@@ -948,9 +942,9 @@ adapt.vtree.NodeContext.prototype.copy = function() {
  * @return {adapt.vtree.NodeContext}
  */
 adapt.vtree.NodeContext.prototype.clone = function() {
-    var np = this.cloneItem();
-    var npc = np;
-    var npp;
+    const np = this.cloneItem();
+    let npc = np;
+    let npp;
     while ((npp = npc.parent) != null) {
         npp = npp.cloneItem();
         npc.parent = npp;
@@ -978,8 +972,8 @@ adapt.vtree.NodeContext.prototype.toNodePositionStep = function() {
  * @return {adapt.vtree.NodePosition}
  */
 adapt.vtree.NodeContext.prototype.toNodePosition = function() {
-    var nc = this;
-    var steps = [];
+    let nc = this;
+    const steps = [];
     do {
         // We need fully "peeled" path, so don't record first-XXX pseudoelement containers
         if (!nc.firstPseudo || !nc.parent || nc.parent.firstPseudo === nc.firstPseudo) {
@@ -988,11 +982,11 @@ adapt.vtree.NodeContext.prototype.toNodePosition = function() {
         nc = nc.parent;
     } while (nc);
 
-    var actualOffsetInNode = this.preprocessedTextContent
+    const actualOffsetInNode = this.preprocessedTextContent
         ? vivliostyle.diff.resolveOriginalIndex(this.preprocessedTextContent, this.offsetInNode)
         : this.offsetInNode;
     return {
-        steps:steps,
+        steps,
         offsetInNode: actualOffsetInNode,
         after: this.after,
         preprocessedTextContent: this.preprocessedTextContent
@@ -1003,7 +997,7 @@ adapt.vtree.NodeContext.prototype.toNodePosition = function() {
  * @returns {boolean}
  */
 adapt.vtree.NodeContext.prototype.isInsideBFC = function() {
-    var parent = this.parent;
+    let parent = this.parent;
     while (parent) {
         if (parent.establishesBFC) {
             return true;
@@ -1017,7 +1011,7 @@ adapt.vtree.NodeContext.prototype.isInsideBFC = function() {
  * @returns {adapt.vtree.NodeContext}
  */
 adapt.vtree.NodeContext.prototype.getContainingBlockForAbsolute = function() {
-    var parent = this.parent;
+    let parent = this.parent;
     while (parent) {
         if (parent.containingBlockForAbsolute) {
             return parent;
@@ -1032,7 +1026,7 @@ adapt.vtree.NodeContext.prototype.getContainingBlockForAbsolute = function() {
  * @param {!function(!adapt.vtree.NodeContext)} callback
  */
 adapt.vtree.NodeContext.prototype.walkUpBlocks = function(callback) {
-    var nodeContext = this;
+    let nodeContext = this;
     while (nodeContext) {
         if (!nodeContext.inline) {
             callback(nodeContext);
@@ -1066,10 +1060,10 @@ adapt.vtree.ChunkPosition = function(primary) {
  * @return {adapt.vtree.ChunkPosition}
  */
 adapt.vtree.ChunkPosition.prototype.clone = function() {
-    var result = new adapt.vtree.ChunkPosition(this.primary);
+    const result = new adapt.vtree.ChunkPosition(this.primary);
     if (this.floats) {
         result.floats = [];
-        for (var i = 0; i < this.floats.length; ++i) {
+        for (let i = 0; i < this.floats.length; ++i) {
             result.floats[i] = this.floats[i];
         }
     }
@@ -1094,7 +1088,7 @@ adapt.vtree.ChunkPosition.prototype.isSamePosition = function(other) {
         if (!other.floats || this.floats.length !== other.floats.length) {
             return false;
         }
-        for (var i = 0; i < this.floats.length; i++) {
+        for (let i = 0; i < this.floats.length; i++) {
             if (!adapt.vtree.isSameNodePosition(this.floats[i], other.floats[i])) {
                 return false;
             }
@@ -1153,10 +1147,10 @@ adapt.vtree.FlowPosition = function() {
  * @return {adapt.vtree.FlowPosition}
  */
 adapt.vtree.FlowPosition.prototype.clone = function() {
-    var newfp = new adapt.vtree.FlowPosition();
-    var arr = this.positions;
-    var newarr = newfp.positions;
-    for (var i = 0; i < arr.length; i++) {
+    const newfp = new adapt.vtree.FlowPosition();
+    const arr = this.positions;
+    const newarr = newfp.positions;
+    for (let i = 0; i < arr.length; i++) {
         newarr[i] = arr[i].clone();
     }
     newfp.startSide = this.startSide;
@@ -1175,7 +1169,7 @@ adapt.vtree.FlowPosition.prototype.isSamePosition = function(other) {
     if (!other || this.positions.length !== other.positions.length) {
         return false;
     }
-    for (var i = 0; i < this.positions.length; i++) {
+    for (let i = 0; i < this.positions.length; i++) {
         if (!this.positions[i].isSamePosition(other.positions[i])) {
             return false;
         }
@@ -1220,13 +1214,13 @@ adapt.vtree.LayoutPosition = function() {
  * @return {adapt.vtree.LayoutPosition}
  */
 adapt.vtree.LayoutPosition.prototype.clone = function() {
-    var newcp = new adapt.vtree.LayoutPosition();
+    const newcp = new adapt.vtree.LayoutPosition();
     newcp.page = this.page;
     newcp.highestSeenNode = this.highestSeenNode;
     newcp.highestSeenOffset = this.highestSeenOffset;
     newcp.lookupPositionOffset = this.lookupPositionOffset;
     newcp.flows = this.flows;
-    for (var name in this.flowPositions) {
+    for (const name in this.flowPositions) {
         newcp.flowPositions[name] = this.flowPositions[name].clone();
     }
     return newcp;
@@ -1243,17 +1237,18 @@ adapt.vtree.LayoutPosition.prototype.isSamePosition = function(other) {
     if (!other || this.page !== other.page || this.highestSeenOffset !== other.highestSeenOffset) {
         return false;
     }
-    var thisFlowNames = Object.keys(this.flowPositions);
-    var otherFlowNames = Object.keys(other.flowPositions);
+    const thisFlowNames = Object.keys(this.flowPositions);
+    const otherFlowNames = Object.keys(other.flowPositions);
     if (thisFlowNames.length !== otherFlowNames.length) {
         return false;
     }
-    for (var i = 0; i < thisFlowNames.length; i++) {
-        var flowName = thisFlowNames[i];
+
+    for (const flowName of thisFlowNames) {
         if (!this.flowPositions[flowName].isSamePosition(other.flowPositions[flowName])) {
             return false;
         }
     }
+
     return true;
 };
 
@@ -1263,7 +1258,7 @@ adapt.vtree.LayoutPosition.prototype.isSamePosition = function(other) {
  * @return {boolean}
  */
 adapt.vtree.LayoutPosition.prototype.hasContent = function(name, offset) {
-    var flowPos = this.flowPositions[name];
+    const flowPos = this.flowPositions[name];
     if (!flowPos)
         return false;
     return flowPos.hasContent(offset);
@@ -1274,7 +1269,7 @@ adapt.vtree.LayoutPosition.prototype.hasContent = function(name, offset) {
  * @returns {string}
  */
 adapt.vtree.LayoutPosition.prototype.startSideOfFlow = function(name) {
-    var flowPos = this.flowPositions[name];
+    const flowPos = this.flowPositions[name];
     if (!flowPos)
         return "any";
     return flowPos.startSide;
@@ -1285,10 +1280,10 @@ adapt.vtree.LayoutPosition.prototype.startSideOfFlow = function(name) {
  * @returns {?adapt.vtree.FlowChunk}
  */
 adapt.vtree.LayoutPosition.prototype.firstFlowChunkOfFlow = function(name) {
-    var flowPos = this.flowPositions[name];
+    const flowPos = this.flowPositions[name];
     if (!flowPos)
         return null;
-    var flowChunkPosition = flowPos.positions[0];
+    const flowChunkPosition = flowPos.positions[0];
     if (!flowChunkPosition)
         return null;
     return flowChunkPosition.flowChunk;
@@ -1430,9 +1425,7 @@ adapt.vtree.Container.prototype.getBoxDir = function() {
 /**
  * @return {number}
  */
-adapt.vtree.Container.prototype.getInlineDir = function() {
-    return 1;
-};
+adapt.vtree.Container.prototype.getInlineDir = () => 1;
 
 
 /**
@@ -1475,8 +1468,8 @@ adapt.vtree.Container.prototype.copyFrom = function(other) {
 adapt.vtree.Container.prototype.setVerticalPosition = function(top, height) {
     this.top = top;
     this.height = height;
-    adapt.base.setCSSProperty(this.element, "top", top + "px");
-    adapt.base.setCSSProperty(this.element, "height", height + "px");
+    adapt.base.setCSSProperty(this.element, "top", `${top}px`);
+    adapt.base.setCSSProperty(this.element, "height", `${height}px`);
 };
 
 /**
@@ -1487,8 +1480,8 @@ adapt.vtree.Container.prototype.setVerticalPosition = function(top, height) {
 adapt.vtree.Container.prototype.setHorizontalPosition = function(left, width) {
     this.left = left;
     this.width = width;
-    adapt.base.setCSSProperty(this.element, "left", left + "px");
-    adapt.base.setCSSProperty(this.element, "width", width + "px");
+    adapt.base.setCSSProperty(this.element, "left", `${left}px`);
+    adapt.base.setCSSProperty(this.element, "width", `${width}px`);
 };
 
 /**
@@ -1518,8 +1511,8 @@ adapt.vtree.Container.prototype.setInlinePosition = function(start, extent) {
 };
 
 adapt.vtree.Container.prototype.clear = function() {
-    var parent = this.element;
-    var c;
+    const parent = this.element;
+    let c;
     while (c = parent.lastChild) {
         parent.removeChild(c);
     }
@@ -1529,7 +1522,7 @@ adapt.vtree.Container.prototype.clear = function() {
  * @return {adapt.geom.Shape}
  */
 adapt.vtree.Container.prototype.getInnerShape = function() {
-    var rect = this.getInnerRect();
+    const rect = this.getInnerRect();
     if (this.innerShape)
         return this.innerShape.withOffset(rect.x1, rect.y1);
     return adapt.geom.shapeForRect(rect.x1, rect.y1, rect.x2, rect.y2);
@@ -1539,8 +1532,8 @@ adapt.vtree.Container.prototype.getInnerShape = function() {
  * @returns {!adapt.geom.Rect}
  */
 adapt.vtree.Container.prototype.getInnerRect = function() {
-    var offsetX = this.originX + this.left + this.getInsetLeft();
-    var offsetY = this.originY + this.top + this.getInsetTop();
+    const offsetX = this.originX + this.left + this.getInsetLeft();
+    const offsetY = this.originY + this.top + this.getInsetTop();
     return new adapt.geom.Rect(offsetX, offsetY, offsetX + this.width, offsetY + this.height);
 };
 
@@ -1548,10 +1541,10 @@ adapt.vtree.Container.prototype.getInnerRect = function() {
  * @returns {!adapt.geom.Rect}
  */
 adapt.vtree.Container.prototype.getPaddingRect = function() {
-    var paddingX = this.originX + this.left + this.marginLeft + this.borderLeft;
-    var paddingY = this.originY + this.top + this.marginTop + this.borderTop;
-    var paddingWidth = this.paddingLeft + this.width + this.paddingRight;
-    var paddingHeight = this.paddingTop + this.height + this.paddingBottom;
+    const paddingX = this.originX + this.left + this.marginLeft + this.borderLeft;
+    const paddingY = this.originY + this.top + this.marginTop + this.borderTop;
+    const paddingWidth = this.paddingLeft + this.width + this.paddingRight;
+    const paddingHeight = this.paddingTop + this.height + this.paddingBottom;
     return new adapt.geom.Rect(paddingX, paddingY, paddingX + paddingWidth, paddingY + paddingHeight);
 };
 
@@ -1561,7 +1554,7 @@ adapt.vtree.Container.prototype.getPaddingRect = function() {
  * @returns {adapt.geom.Shape}
  */
 adapt.vtree.Container.prototype.getOuterShape = function(outerShapeProp, context) {
-    var rect = this.getOuterRect();
+    const rect = this.getOuterRect();
     return adapt.cssprop.toShape(outerShapeProp, rect.x1, rect.y1,
         rect.x2 - rect.x1, rect.y2 - rect.y1, context);
 };
@@ -1570,10 +1563,10 @@ adapt.vtree.Container.prototype.getOuterShape = function(outerShapeProp, context
  * @returns {!adapt.geom.Rect}
  */
 adapt.vtree.Container.prototype.getOuterRect = function() {
-    var outerX = this.originX + this.left;
-    var outerY = this.originY + this.top;
-    var outerWidth = this.getInsetLeft() + this.width + this.getInsetRight();
-    var outerHeight = this.getInsetTop() + this.height + this.getInsetBottom();
+    const outerX = this.originX + this.left;
+    const outerY = this.originY + this.top;
+    const outerWidth = this.getInsetLeft() + this.width + this.getInsetRight();
+    const outerHeight = this.getInsetTop() + this.height + this.getInsetBottom();
     return new adapt.geom.Rect(outerX, outerY, outerX + outerWidth, outerY + outerHeight);
 };
 
@@ -1621,7 +1614,7 @@ adapt.vtree.ContentPropertyHandler.prototype.visitURL = function(url) {
     if (this.rootContentValue.url) {
         this.elem.setAttribute("src", url.url);
     } else {
-        var img = this.elem.ownerDocument.createElementNS(adapt.base.NS.XHTML, "img");
+        const img = this.elem.ownerDocument.createElementNS(adapt.base.NS.XHTML, "img");
         img.setAttribute("src", url.url);
         this.elem.appendChild(img);
     }
@@ -1636,11 +1629,11 @@ adapt.vtree.ContentPropertyHandler.prototype.visitSpaceList = function(list) {
 
 /** @override */
 adapt.vtree.ContentPropertyHandler.prototype.visitExpr = function(expr) {
-    var ex = expr.toExpr();
-    var val = ex.evaluate(this.context);
+    const ex = expr.toExpr();
+    const val = ex.evaluate(this.context);
     if (typeof val === "string") {
         goog.asserts.assert(this.elem.ownerDocument);
-        var node = this.exprContentListener(ex, val, this.elem.ownerDocument);
+        const node = this.exprContentListener(ex, val, this.elem.ownerDocument);
         this.visitStrInner(val, node);
     }
     return null;
@@ -1650,7 +1643,5 @@ adapt.vtree.ContentPropertyHandler.prototype.visitExpr = function(expr) {
  * @param {adapt.css.Val} val
  * @return {boolean}
  */
-adapt.vtree.nonTrivialContent = function(val) {
-    return val != null && val !== adapt.css.ident.normal && val !== adapt.css.ident.none
-        && val !== adapt.css.ident.inherit;
-};
+adapt.vtree.nonTrivialContent = val => val != null && val !== adapt.css.ident.normal && val !== adapt.css.ident.none
+    && val !== adapt.css.ident.inherit;

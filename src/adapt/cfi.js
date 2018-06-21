@@ -36,9 +36,9 @@ adapt.cfi.Position;
  * @param {Node} node
  * @return {?string}
  */
-adapt.cfi.getId = function(node) {
+adapt.cfi.getId = node => {
     if (node.nodeType == 1) {
-        var idtxt = (/** @type {Element} */ (node)).getAttribute("id");
+        const idtxt = (/** @type {Element} */ (node)).getAttribute("id");
         if (idtxt && idtxt.match(/^[-a-zA-Z_0-9.\u007F-\uFFFF]+$/)) {
             return idtxt;
         }
@@ -50,32 +50,26 @@ adapt.cfi.getId = function(node) {
  * @param {string} ch
  * @return {string}
  */
-adapt.cfi.escapeChar = function(ch) {
-    return "^" + ch;
-};
+adapt.cfi.escapeChar = ch => `^${ch}`;
 
 /**
  * @param {string} str
  * @return {string}
  */
-adapt.cfi.escape = function(str) {
-    return str.replace(/[\[\]\(\),=;^]/g, adapt.cfi.escapeChar);
-};
+adapt.cfi.escape = str => str.replace(/[\[\]\(\),=;^]/g, adapt.cfi.escapeChar);
 
 /**
  * @param {string} str
  * @return {string}
  */
-adapt.cfi.unescapeChar = function(str) {
-    return str.substr(1);
-};
+adapt.cfi.unescapeChar = str => str.substr(1);
 
 
 /**
  * @param {string} str
  * @return {string}
  */
-adapt.cfi.unescape = function(str) {
+adapt.cfi.unescape = str => {
     if (!str)
         return str;
     return str.replace(/\^[\[\]\(\),=;^]/g, adapt.cfi.unescapeChar);
@@ -85,11 +79,11 @@ adapt.cfi.unescape = function(str) {
  * @param {string} extstr
  * @return {string|Array.<string>}
  */
-adapt.cfi.parseExtVal = function(extstr) {
-    var result = [];
+adapt.cfi.parseExtVal = extstr => {
+    const result = [];
     do {
-        var r = extstr.match(/^(\^,|[^,])*/);
-        var p = adapt.cfi.unescape(r[0]);
+        const r = extstr.match(/^(\^,|[^,])*/);
+        const p = adapt.cfi.unescape(r[0]);
         extstr = extstr.substr(r[0].length + 1);
         if (!extstr && !result.length)
             return p;
@@ -102,10 +96,10 @@ adapt.cfi.parseExtVal = function(extstr) {
  * @param {string} extstr
  * @return {Object.<string,string|Array.<string>>}
  */
-adapt.cfi.parseExt = function(extstr) {
-    var ext = {};
+adapt.cfi.parseExt = extstr => {
+    const ext = {};
     while (extstr) {
-        var r = extstr.match(/^;([^;=]+)=(([^;]|\^;)*)/);
+        const r = extstr.match(/^;([^;=]+)=(([^;]|\^;)*)/);
         if (!r) {
             return ext;
         }
@@ -124,13 +118,13 @@ adapt.cfi.Step = function() {};
  * @param {adapt.base.StringBuffer} sb
  * @return {void}
  */
-adapt.cfi.Step.prototype.appendTo = function(sb) {};
+adapt.cfi.Step.prototype.appendTo = sb => {};
 
 /**
  * @param {adapt.cfi.Position} pos
  * @return {boolean}
  */
-adapt.cfi.Step.prototype.applyTo = function(pos) {};
+adapt.cfi.Step.prototype.applyTo = pos => {};
 
 /**
  * @constructor
@@ -141,16 +135,14 @@ adapt.cfi.RefStep = function() {};
 /**
  * @param {adapt.base.StringBuffer} sb
  */
-adapt.cfi.RefStep.prototype.appendTo = function(sb) {
+adapt.cfi.RefStep.prototype.appendTo = sb => {
     sb.append("!");
 };
 
 /**
  * @override
  */
-adapt.cfi.RefStep.prototype.applyTo = function(pos) {
-    return false;
-};
+adapt.cfi.RefStep.prototype.applyTo = pos => false;
 
 /**
  * @constructor
@@ -191,18 +183,18 @@ adapt.cfi.ChildStep.prototype.applyTo = function(pos) {
     if (pos.node.nodeType != 1) {
         throw new Error("E_CFI_NOT_ELEMENT");
     }
-    var elem = /** @type {Element} */ (pos.node);
-    var childElements = elem.children;
-    var childElementCount = childElements.length;
-    var child;
-    var childIndex = Math.floor(this.index / 2) - 1;
+    const elem = /** @type {Element} */ (pos.node);
+    const childElements = elem.children;
+    const childElementCount = childElements.length;
+    let child;
+    const childIndex = Math.floor(this.index / 2) - 1;
     if (childIndex < 0 || childElementCount == 0) {
         child = elem.firstChild;
         pos.node = child || elem;
     } else {
         child = childElements[Math.min(childIndex, childElementCount - 1)];
         if (this.index & 1) {
-            var next = child.nextSibling;
+            const next = child.nextSibling;
             if (!next || next.nodeType == 1) {
                 pos.after = true;
             } else {
@@ -236,16 +228,16 @@ adapt.cfi.OffsetStep = function(offset, textBefore, textAfter, sideBias) {
 
 adapt.cfi.OffsetStep.prototype.applyTo = function(pos) {
     if (this.offset > 0 && !pos.after) {
-        var offset = this.offset;
-        var node = pos.node;
+        let offset = this.offset;
+        let node = pos.node;
         while (true) {
-            var nodeType = node.nodeType;
+            const nodeType = node.nodeType;
             if (nodeType == 1) {
                 break;
             }
-            var next = node.nextSibling;
+            const next = node.nextSibling;
             if (3 <= nodeType && nodeType <= 5) {
-                var textLength = node.textContent.length;
+                const textLength = node.textContent.length;
                 if (offset <= textLength) {
                     break;
                 }
@@ -306,13 +298,13 @@ adapt.cfi.Fragment = function() {
  * @return {void}
  */
 adapt.cfi.Fragment.prototype.fromString = function(fragstr) {
-    var r = fragstr.match(/^#?epubcfi\((.*)\)$/);
+    let r = fragstr.match(/^#?epubcfi\((.*)\)$/);
     if (!r) {
         throw new Error("E_CFI_NOT_CFI");
     }
-    var str = r[1];
-    var i = 0;
-    var steps = [];
+    const str = r[1];
+    let i = 0;
+    const steps = [];
     while (true) {
         switch (str.charAt(i)) {
             case "/":
@@ -322,8 +314,8 @@ adapt.cfi.Fragment.prototype.fromString = function(fragstr) {
                     throw new Error("E_CFI_NUMBER_EXPECTED");
                 }
                 i += r[0].length;
-                var index = parseInt(r[1], 10);
-                var id = r[3];
+                const index = parseInt(r[1], 10);
+                const id = r[3];
                 var ext = adapt.cfi.parseExt(r[4]);
                 steps.push(new adapt.cfi.ChildStep(index, id, adapt.base.asString(ext["s"])));
                 break;
@@ -334,12 +326,12 @@ adapt.cfi.Fragment.prototype.fromString = function(fragstr) {
                     throw new Error("E_CFI_NUMBER_EXPECTED");
                 }
                 i += r[0].length;
-                var offset = parseInt(r[1], 10);
-                var textBefore = r[4];
+                const offset = parseInt(r[1], 10);
+                let textBefore = r[4];
                 if (textBefore) {
                     textBefore = adapt.cfi.unescape(textBefore);
                 }
-                var textAfter = r[7];
+                let textAfter = r[7];
                 if (textAfter) {
                     textAfter = adapt.cfi.unescape(textAfter);
                 }
@@ -369,8 +361,8 @@ adapt.cfi.Fragment.prototype.fromString = function(fragstr) {
  * @return {adapt.cfi.Position}
  */
 adapt.cfi.Fragment.prototype.navigate = function(doc) {
-    var pos = {node:doc.documentElement, offset:0, after:false, sideBias:null, ref:null};
-    for (var i = 0; i < this.steps.length; i++) {
+    const pos = {node:doc.documentElement, offset:0, after:false, sideBias:null, ref:null};
+    for (let i = 0; i < this.steps.length; i++) {
         if (!this.steps[i].applyTo(pos)) {
             if (++i < this.steps.length) {
                 pos.ref = new adapt.cfi.Fragment();
@@ -387,11 +379,9 @@ adapt.cfi.Fragment.prototype.navigate = function(doc) {
  * @param {boolean} after
  * @return {string}
  */
-adapt.cfi.Fragment.prototype.trim = function(text, after) {
-    return text.replace(/\s+/g, " ").match(
-        after ? /^[ -\uD7FF\uE000-\uFFFF]{0,8}/ : /[ -\uD7FF\uE000-\uFFFF]{0,8}$/
-    )[0].replace(/^\s/, "").replace(/\s$/, "");
-};
+adapt.cfi.Fragment.prototype.trim = (text, after) => text.replace(/\s+/g, " ").match(
+    after ? /^[ -\uD7FF\uE000-\uFFFF]{0,8}/ : /[ -\uD7FF\uE000-\uFFFF]{0,8}$/
+)[0].replace(/^\s/, "").replace(/\s$/, "");
 
 /**
  * Initialize from a node and an offset.
@@ -401,17 +391,17 @@ adapt.cfi.Fragment.prototype.trim = function(text, after) {
  * @param {?string} sideBias
  */
 adapt.cfi.Fragment.prototype.prependPathFromNode = function(node, offset, after, sideBias) {
-    var steps = [];
-    var parent = node.parentNode;
-    var textBefore = "";
-    var textAfter = "";
+    const steps = [];
+    let parent = node.parentNode;
+    let textBefore = "";
+    let textAfter = "";
     while (node) {
         switch (node.nodeType) {
             case 3:  // Text nodes
             case 4:
             case 5:
-                var text = node.textContent;
-                var textLength = text.length;
+                const text = node.textContent;
+                const textLength = text.length;
                 if (after) {
                     offset += textLength;
                     if (!textBefore) {
@@ -443,8 +433,8 @@ adapt.cfi.Fragment.prototype.prependPathFromNode = function(node, offset, after,
         if (!parent || parent.nodeType == 9) {
             break;
         }
-        var id = after ? null : adapt.cfi.getId(node);
-        var index = after ? 1 : 0;
+        const id = after ? null : adapt.cfi.getId(node);
+        let index = after ? 1 : 0;
         while (node) {
             if (node.nodeType == 1) {
                 index += 2;
@@ -469,9 +459,9 @@ adapt.cfi.Fragment.prototype.prependPathFromNode = function(node, offset, after,
 adapt.cfi.Fragment.prototype.toString = function() {
     if (!this.steps)
         return "";
-    var sb = new adapt.base.StringBuffer();
+    const sb = new adapt.base.StringBuffer();
     sb.append("epubcfi(");
-    for (var i = 0; i < this.steps.length; i++) {
+    for (let i = 0; i < this.steps.length; i++) {
         this.steps[i].appendTo(sb);
     }
     sb.append(")");

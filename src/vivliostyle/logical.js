@@ -18,11 +18,11 @@
  */
 goog.provide("vivliostyle.logical");
 
-goog.scope(function() {
+goog.scope(() => {
     /**
      * @typedef {{regexp: !RegExp, to: string}}
      */
-    var ConversionMap;
+    let ConversionMap;
 
     /**
      * @param {!Object.<string, !Object.<string, !Array.<!{logical: string, physical: string}>>>} valueMaps
@@ -30,17 +30,17 @@ goog.scope(function() {
      * @returns {!Object.<string, !Object.<string, !Array.<!ConversionMap>>>}
      */
     function createRegExpMap(valueMaps, toPhysical) {
-        var map = {};
-        Object.keys(/** @type {!Object} */ (valueMaps)).forEach(function(writingMode) {
-            var dest = map[writingMode] = {};
-            var src = valueMaps[writingMode];
-            Object.keys(/** @type {!Object} */ (src)).forEach(function(direction) {
-                dest[direction] = src[direction].map(function(p) {
-                    var from = toPhysical ? p.logical : p.physical;
-                    var to = toPhysical ? p.physical : p.logical;
+        const map = {};
+        Object.keys(/** @type {!Object} */ (valueMaps)).forEach(writingMode => {
+            const dest = map[writingMode] = {};
+            const src = valueMaps[writingMode];
+            Object.keys(/** @type {!Object} */ (src)).forEach(direction => {
+                dest[direction] = src[direction].map(p => {
+                    const from = toPhysical ? p.logical : p.physical;
+                    const to = toPhysical ? p.physical : p.logical;
                     return {
-                        regexp: new RegExp("(-?)" + from + "(-?)"),
-                        to: "$1" + to + "$2"
+                        regexp: new RegExp(`(-?)${from}(-?)`),
+                        to: `$1${to}$2`
                     };
                 });
             });
@@ -56,28 +56,29 @@ goog.scope(function() {
      * @returns {string}
      */
     function convert(value, writingMode, direction, maps) {
-        var maps2 = maps[writingMode];
+        const maps2 = maps[writingMode];
         if (!maps2) {
-            throw new Error("unknown writing-mode: " + writingMode);
+            throw new Error(`unknown writing-mode: ${writingMode}`);
         }
-        var map = maps2[direction || "ltr"];
+        const map = maps2[direction || "ltr"];
         if (!map) {
-            throw new Error("unknown direction: " + direction);
+            throw new Error(`unknown direction: ${direction}`);
         }
-        for (var i = 0; i < map.length; i++) {
-            var p = map[i];
-            var replaced = value.replace(p.regexp, p.to);
+
+        for (const p of map) {
+            const replaced = value.replace(p.regexp, p.to);
             if (replaced !== value) {
                 return replaced;
             }
         }
+
         return value;
     }
 
     /**
      * @type {!Object.<string, !Object.<string, !Array.<!{logical: string, physical: string}>>>}
      */
-    var values = {
+    const values = {
         "horizontal-tb": {
             "ltr": [
                 {logical: "inline-start", physical: "left"},
@@ -134,32 +135,28 @@ goog.scope(function() {
         }
     };
 
-    var toPhysicalMaps = createRegExpMap(values, true);
+    const toPhysicalMaps = createRegExpMap(values, true);
     /**
      * @param {string} value
      * @param {string} writingMode
      * @param {?string=} direction
      * @returns {string}
      */
-    vivliostyle.logical.toPhysical = function(value, writingMode, direction) {
-        return convert(value, writingMode, direction || null, toPhysicalMaps);
-    };
+    vivliostyle.logical.toPhysical = (value, writingMode, direction) => convert(value, writingMode, direction || null, toPhysicalMaps);
 
-    var toLogicalMaps = createRegExpMap(values, false);
+    const toLogicalMaps = createRegExpMap(values, false);
     /**
      * @param {string} value
      * @param {string} writingMode
      * @param {?string=} direction
      * @returns {string}
      */
-    vivliostyle.logical.toLogical = function(value, writingMode, direction) {
-        return convert(value, writingMode, direction || null, toLogicalMaps);
-    };
+    vivliostyle.logical.toLogical = (value, writingMode, direction) => convert(value, writingMode, direction || null, toLogicalMaps);
 
     /**
      * @type {!Object.<string, !Array.<!{logical: string, physical: string}>>}
      */
-    var lineRelativeValues = {
+    const lineRelativeValues = {
         "horizontal-tb": [
             {logical: "line-left", physical: "left"},
             {logical: "line-right", physical: "right"},
@@ -185,12 +182,12 @@ goog.scope(function() {
      * @param {string} writingMode
      * @returns {string}
      */
-    vivliostyle.logical.toLineRelative = function(value, writingMode) {
-        var maps = lineRelativeValues[writingMode];
+    vivliostyle.logical.toLineRelative = (value, writingMode) => {
+        const maps = lineRelativeValues[writingMode];
         if (!maps) {
-            throw new Error("unknown writing-mode: " + writingMode);
+            throw new Error(`unknown writing-mode: ${writingMode}`);
         }
-        for (var i = 0; i < maps.length; i++) {
+        for (let i = 0; i < maps.length; i++) {
             if (maps[i].physical === value) {
                 return maps[i].logical;
             }

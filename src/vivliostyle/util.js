@@ -19,7 +19,7 @@
 /* eslint no-extend-native: "off" */
 goog.provide("vivliostyle.util");
 
-(function() {
+(() => {
     if (!Array.from) {
         /**
          * Very simple polyfill of Array.from.
@@ -28,13 +28,13 @@ goog.provide("vivliostyle.util");
          * @param {S=} thisArg
          * @returns {!Array<R>}
          */
-        Array.from = function(arrayLike, mapFn, thisArg) {
+        Array.from = (arrayLike, mapFn, thisArg) => {
             if (mapFn && thisArg) {
                 mapFn = mapFn.bind(thisArg);
             }
-            var to = [];
-            var len = arrayLike.length;
-            for (var i = 0; i < len; i++) {
+            const to = [];
+            const len = arrayLike.length;
+            for (let i = 0; i < len; i++) {
                 to[i] = mapFn ? mapFn(arrayLike[i], i) : arrayLike[i];
             }
             return to;
@@ -45,20 +45,19 @@ goog.provide("vivliostyle.util");
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex#Polyfill
     if (!Array.prototype.findIndex) {
         Object.defineProperty(Array.prototype, 'findIndex', {
-            value: function(predicate) {
-                'use strict';
+            value(predicate) {
                 if (this == null) {
                     throw new TypeError('Array.prototype.findIndex called on null or undefined');
                 }
                 if (typeof predicate !== 'function') {
                     throw new TypeError('predicate must be a function');
                 }
-                var list = Object(this);
-                var length = list.length >>> 0;
-                var thisArg = arguments[1];
-                var value;
+                const list = Object(this);
+                const length = list.length >>> 0;
+                const thisArg = arguments[1];
+                let value;
 
-                for (var i = 0; i < length; i++) {
+                for (let i = 0; i < length; i++) {
                     value = list[i];
                     if (predicate.call(thisArg, value, i, list)) {
                         return i;
@@ -79,9 +78,9 @@ goog.provide("vivliostyle.util");
          * @param {Object=} source
          * @returns {!Object}
          */
-        Object.assign = function(target, source) {
+        Object.assign = (target, source) => {
             if (!source) return target;
-            Object.keys(source).forEach(function(key) {
+            Object.keys(source).forEach(key => {
                 target[key] = source[key];
             });
             return target;

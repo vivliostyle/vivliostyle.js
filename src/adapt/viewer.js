@@ -76,7 +76,7 @@ adapt.viewer.SingleDocumentParam;
  * @constructor
  */
 adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) {
-    var self = this;
+    const self = this;
     /** @const */ this.window = window;
     /** @const */ this.viewportElement = viewportElement;
     viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
@@ -86,17 +86,17 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
     viewportElement.setAttribute(adapt.viewer.VIEWPORT_STATUS_ATTRIBUTE, "loading");
     /** @const */ this.instanceId = instanceId;
     /** @const */ this.callbackFn = callbackFn;
-    var document = window.document;
+    const document = window.document;
     /** @const */ this.fontMapper = new adapt.font.Mapper(document.head, viewportElement);
     this.init();
-    /** @type {function():void} */ this.kick = function() {};
-    /** @type {function((adapt.base.JSON|string)):void} */ this.sendCommand = function() {};
-    /** @const */ this.resizeListener = function() {
+    /** @type {function():void} */ this.kick = () => {};
+    /** @type {function((adapt.base.JSON|string)):void} */ this.sendCommand = () => {};
+    /** @const */ this.resizeListener = () => {
         self.needResize = true;
         self.kick();
     };
     /** @const */ this.pageReplacedListener = this.pageReplacedListener.bind(this);
-    /** @type {adapt.base.EventListener} */ this.hyperlinkListener = function(evt) {};
+    /** @type {adapt.base.EventListener} */ this.hyperlinkListener = evt => {};
     /** @const */ this.pageRuleStyleElement = document.getElementById("vivliostyle-page-rules");
     /** @type {boolean} */ this.pageSheetSizeAlreadySet = false;
     /** @type {?adapt.task.Task} */ this.renderTask = null;
@@ -142,19 +142,19 @@ adapt.viewer.Viewer.prototype.init = function() {
 };
 
 adapt.viewer.Viewer.prototype.addLogListeners = function() {
-    /** @const */ var LogLevel = vivliostyle.logging.LogLevel;
-    vivliostyle.logging.logger.addListener(LogLevel.DEBUG, function(info) {
+    /** @const */ const LogLevel = vivliostyle.logging.LogLevel;
+    vivliostyle.logging.logger.addListener(LogLevel.DEBUG, info => {
         this.callback({"t": "debug", "content": info});
-    }.bind(this));
-    vivliostyle.logging.logger.addListener(LogLevel.INFO, function(info) {
+    });
+    vivliostyle.logging.logger.addListener(LogLevel.INFO, info => {
         this.callback({"t": "info", "content": info});
-    }.bind(this));
-    vivliostyle.logging.logger.addListener(LogLevel.WARN, function(info) {
+    });
+    vivliostyle.logging.logger.addListener(LogLevel.WARN, info => {
         this.callback({"t": "warn", "content": info});
-    }.bind(this));
-    vivliostyle.logging.logger.addListener(LogLevel.ERROR, function(info) {
+    });
+    vivliostyle.logging.logger.addListener(LogLevel.ERROR, info => {
         this.callback({"t": "error", "content": info});
-    }.bind(this));
+    });
 };
 
 /**
@@ -186,23 +186,23 @@ adapt.viewer.Viewer.prototype.setReadyState = function(readyState) {
 adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     vivliostyle.profile.profiler.registerStartTiming("beforeRender");
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
-    var url = /** @type {string} */ (command["url"]);
-    var fragment = /** @type {?string} */ (command["fragment"]);
-    var haveZipMetadata = !!command["zipmeta"];
-    var authorStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["authorStyleSheet"]);
-    var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
+    const url = /** @type {string} */ (command["url"]);
+    const fragment = /** @type {?string} */ (command["fragment"]);
+    const haveZipMetadata = !!command["zipmeta"];
+    const authorStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["authorStyleSheet"]);
+    const userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
     // force relayout
     this.viewport = null;
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadEPUB");
-    var self = this;
-    self.configure(command).then(function() {
-        var store = new adapt.epub.EPUBDocStore();
-        store.init(authorStyleSheet, userStyleSheet).then(function() {
-            var epubURL = adapt.base.resolveURL(url, self.window.location.href);
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("loadEPUB");
+    const self = this;
+    self.configure(command).then(() => {
+        const store = new adapt.epub.EPUBDocStore();
+        store.init(authorStyleSheet, userStyleSheet).then(() => {
+            const epubURL = adapt.base.resolveURL(url, self.window.location.href);
             self.packageURL = [epubURL];
-            store.loadEPUBDoc(epubURL, haveZipMetadata).then(function(opf) {
+            store.loadEPUBDoc(epubURL, haveZipMetadata).then(opf => {
                 self.opf = opf;
-                self.render(fragment).then(function() {
+                self.render(fragment).then(() => {
                     frame.finish(true);
                 });
             });
@@ -218,30 +218,28 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
 adapt.viewer.Viewer.prototype.loadXML = function(command) {
     vivliostyle.profile.profiler.registerStartTiming("beforeRender");
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
-    /** @type {!Array<!adapt.viewer.SingleDocumentParam>} */ var params = command["url"];
-    var doc = /** @type {Document} */ (command["document"]);
-    var fragment = /** @type {?string} */ (command["fragment"]);
-    var authorStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["authorStyleSheet"]);
-    var userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
+    /** @type {!Array<!adapt.viewer.SingleDocumentParam>} */ const params = command["url"];
+    const doc = /** @type {Document} */ (command["document"]);
+    const fragment = /** @type {?string} */ (command["fragment"]);
+    const authorStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["authorStyleSheet"]);
+    const userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
     // force relayout
     this.viewport = null;
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("loadXML");
-    var self = this;
-    self.configure(command).then(function() {
-        var store = new adapt.epub.EPUBDocStore();
-        store.init(authorStyleSheet, userStyleSheet).then(function() {
-            /** @type {!Array<!adapt.epub.OPFItemParam>} */ var resolvedParams = params.map(function(p, index) {
-                return {
-                    url: adapt.base.resolveURL(p.url, self.window.location.href),
-                    index: index,
-                    startPage: p.startPage,
-                    skipPagesBefore: p.skipPagesBefore
-                };
-            });
-            self.packageURL = resolvedParams.map(function(p) { return p.url; });
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("loadXML");
+    const self = this;
+    self.configure(command).then(() => {
+        const store = new adapt.epub.EPUBDocStore();
+        store.init(authorStyleSheet, userStyleSheet).then(() => {
+            /** @type {!Array<!adapt.epub.OPFItemParam>} */ const resolvedParams = params.map((p, index) => ({
+            url: adapt.base.resolveURL(p.url, self.window.location.href),
+            index,
+            startPage: p.startPage,
+            skipPagesBefore: p.skipPagesBefore
+        }));
+            self.packageURL = resolvedParams.map(p => p.url);
             self.opf = new adapt.epub.OPFDoc(store, "");
-            self.opf.initWithChapters(resolvedParams, doc).then(function() {
-                self.render(fragment).then(function() {
+            self.opf.initWithChapters(resolvedParams, doc).then(() => {
+                self.render(fragment).then(() => {
                     frame.finish(true);
                 });
             });
@@ -257,10 +255,10 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
  */
 adapt.viewer.Viewer.prototype.render = function(fragment) {
     this.cancelRenderingTask();
-    var self = this;
-    var cont;
+    const self = this;
+    let cont;
     if (fragment) {
-        cont = this.opf.resolveFragment(fragment).thenAsync(function(position) {
+        cont = this.opf.resolveFragment(fragment).thenAsync(position => {
             self.pagePosition = position;
             return adapt.task.newResult(true);
         });
@@ -268,7 +266,7 @@ adapt.viewer.Viewer.prototype.render = function(fragment) {
         cont = adapt.task.newResult(true);
     }
 
-    return cont.thenAsync(function() {
+    return cont.thenAsync(() => {
         vivliostyle.profile.profiler.registerEndTiming("beforeRender");
         return self.resize();
     });
@@ -280,18 +278,18 @@ adapt.viewer.Viewer.prototype.render = function(fragment) {
  * @returns {number}
  */
 adapt.viewer.Viewer.prototype.resolveLength = function(specified) {
-    var value = parseFloat(specified);
-    var unitPattern = /[a-z]+$/;
-    var matched;
+    const value = parseFloat(specified);
+    const unitPattern = /[a-z]+$/;
+    let matched;
     if (typeof specified === "string" && (matched = specified.match(unitPattern))) {
-        var unit = matched[0];
+        const unit = matched[0];
         if (unit === "em" || unit === "rem") {
             return value * this.fontSize;
         }
         if (unit === "ex") {
             return value * adapt.expr.defaultUnitSizes["ex"] * this.fontSize / adapt.expr.defaultUnitSizes["em"];
         }
-        var unitSize = adapt.expr.defaultUnitSizes[unit];
+        const unitSize = adapt.expr.defaultUnitSizes[unit];
         if (unitSize) {
             return value * unitSize;
         }
@@ -314,15 +312,15 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
         }
     }
     if (typeof command["fontSize"] == "number") {
-        var fontSize = /** @type {number} */ (command["fontSize"]);
+        const fontSize = /** @type {number} */ (command["fontSize"]);
         if (fontSize >= 5 && fontSize <= 72 && this.fontSize != fontSize) {
             this.fontSize = fontSize;
             this.needResize = true;
         }
     }
     if (typeof command["viewport"] == "object" && command["viewport"]) {
-        var vp = command["viewport"];
-        var viewportSize = {
+        const vp = command["viewport"];
+        const viewportSize = {
             marginLeft: this.resolveLength(vp["margin-left"]) || 0,
             marginRight: this.resolveLength(vp["margin-right"]) || 0,
             marginTop: this.resolveLength(vp["margin-top"]) || 0,
@@ -373,7 +371,7 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
     }
     if (typeof command["rootURL"] == "string") {
         adapt.base.baseURL = command["rootURL"];
-        adapt.base.resourceBaseURL = adapt.base.baseURL + "resources/";
+        adapt.base.resourceBaseURL = `${adapt.base.baseURL}resources/`;
     }
     if (typeof command["pageViewMode"] == "string" && command["pageViewMode"] !== this.pageViewMode) {
         this.pageViewMode = command["pageViewMode"];
@@ -408,13 +406,13 @@ adapt.viewer.Viewer.prototype.configure = function(command) {
  * @param {adapt.base.JSON} command
  */
 adapt.viewer.Viewer.prototype.configurePlugins = function(command) {
-    /** @type {!Array.<vivliostyle.plugin.ConfigurationHook>} */ var hooks =
+    /** @type {!Array.<vivliostyle.plugin.ConfigurationHook>} */ const hooks =
         vivliostyle.plugin.getHooksForName(vivliostyle.plugin.HOOKS.CONFIGURATION);
-    hooks.forEach(function(hook) {
-        var result = hook(command);
+    hooks.forEach(hook => {
+        const result = hook(command);
         this.needResize  = result.needResize  || this.needResize;
         this.needRefresh = result.needRefresh || this.needRefresh;
-    }.bind(this));
+    });
 };
 
 /**
@@ -422,9 +420,9 @@ adapt.viewer.Viewer.prototype.configurePlugins = function(command) {
  * @param {adapt.base.Event} evt
  */
 adapt.viewer.Viewer.prototype.pageReplacedListener = function(evt) {
-    var currentPage = this.currentPage;
-    var spread = this.currentSpread;
-    var target = evt.target;
+    const currentPage = this.currentPage;
+    const spread = this.currentSpread;
+    const target = evt.target;
     if (spread) {
         if (spread.left === target || spread.right === target) {
             this.showCurrent(evt.newPage);
@@ -440,7 +438,7 @@ adapt.viewer.Viewer.prototype.pageReplacedListener = function(evt) {
  * @param {!function(!adapt.vtree.Page)} fn
  */
 adapt.viewer.Viewer.prototype.forCurrentPages = function(fn) {
-    var pages = [];
+    const pages = [];
     if (this.currentPage) {
         pages.push(this.currentPage);
     }
@@ -448,7 +446,7 @@ adapt.viewer.Viewer.prototype.forCurrentPages = function(fn) {
         pages.push(this.currentSpread.left);
         pages.push(this.currentSpread.right);
     }
-    pages.forEach(function(page) {
+    pages.forEach(page => {
         if (page) {
             fn(page);
         }
@@ -459,10 +457,10 @@ adapt.viewer.Viewer.prototype.forCurrentPages = function(fn) {
  * @private
  */
 adapt.viewer.Viewer.prototype.removePageListeners = function() {
-    this.forCurrentPages(function(page) {
+    this.forCurrentPages(page => {
         page.removeEventListener("hyperlink", this.hyperlinkListener, false);
         page.removeEventListener("replaced", this.pageReplacedListener, false);
-    }.bind(this));
+    });
 };
 
 /**
@@ -471,7 +469,7 @@ adapt.viewer.Viewer.prototype.removePageListeners = function() {
  */
 adapt.viewer.Viewer.prototype.hidePages = function() {
     this.removePageListeners();
-    this.forCurrentPages(function(page) {
+    this.forCurrentPages(page => {
         adapt.base.setCSSProperty(page.container, "display", "none");
     });
     this.currentPage = null;
@@ -526,14 +524,14 @@ adapt.viewer.Viewer.prototype.showSpread = function(spread) {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.reportPosition = function() {
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("reportPosition");
-    var self = this;
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("reportPosition");
+    const self = this;
     goog.asserts.assert(self.pagePosition);
-    self.opf.getCFI(this.pagePosition.spineIndex, this.pagePosition.offsetInItem).then(function(cfi) {
-        var page = self.currentPage;
-        var r = self.waitForLoading && page.fetchers.length > 0
+    self.opf.getCFI(this.pagePosition.spineIndex, this.pagePosition.offsetInItem).then(cfi => {
+        const page = self.currentPage;
+        const r = self.waitForLoading && page.fetchers.length > 0
             ? adapt.taskutil.waitForFetchers(page.fetchers) : adapt.task.newResult(true);
-        r.then(function() {
+        r.then(() => {
             self.sendLocationNotification(page, cfi).thenFinish(frame);
         });
     });
@@ -545,13 +543,13 @@ adapt.viewer.Viewer.prototype.reportPosition = function() {
  * @return {!adapt.vgen.Viewport}
  */
 adapt.viewer.Viewer.prototype.createViewport = function() {
-    var viewportElement = this.viewportElement;
+    const viewportElement = this.viewportElement;
     if (this.viewportSize) {
-        var vs = this.viewportSize;
-        viewportElement.style.marginLeft = vs.marginLeft + "px";
-        viewportElement.style.marginRight = vs.marginRight + "px";
-        viewportElement.style.marginTop = vs.marginTop + "px";
-        viewportElement.style.marginBottom = vs.marginBottom + "px";
+        const vs = this.viewportSize;
+        viewportElement.style.marginLeft = `${vs.marginLeft}px`;
+        viewportElement.style.marginRight = `${vs.marginRight}px`;
+        viewportElement.style.marginTop = `${vs.marginTop}px`;
+        viewportElement.style.marginBottom = `${vs.marginBottom}px`;
         return new adapt.vgen.Viewport(this.window, this.fontSize, viewportElement, vs.width, vs.height);
     } else {
         return new adapt.vgen.Viewport(this.window, this.fontSize, viewportElement);
@@ -590,10 +588,10 @@ adapt.viewer.Viewer.prototype.updateSpreadView = function(spreadView) {
  * @return {boolean}
  */
 adapt.viewer.Viewer.prototype.sizeIsGood = function() {
-    var viewport = this.createViewport();
+    const viewport = this.createViewport();
 
-    var spreadView = this.resolveSpreadView(viewport);
-    var spreadViewChanged = this.pref.spreadView !== spreadView;
+    const spreadView = this.resolveSpreadView(viewport);
+    const spreadViewChanged = this.pref.spreadView !== spreadView;
     this.updateSpreadView(spreadView);
 
     if (this.viewportSize || !this.viewport || this.viewport.fontSize != this.fontSize) {
@@ -631,11 +629,11 @@ adapt.viewer.Viewer.prototype.setPageSize = function(pageSize, pageSheetSize, sp
  */
 adapt.viewer.Viewer.prototype.setPageSizePageRules = function(pageSheetSize, spineIndex, pageIndex) {
     if (!this.pageSheetSizeAlreadySet && this.pageRuleStyleElement) {
-        var styleText = "";
-        Object.keys(pageSheetSize).forEach(function(selector) {
-            styleText += "@page " + selector + "{size:";
-            var size = pageSheetSize[selector];
-            styleText += size.width + "px " + size.height + "px;}";
+        let styleText = "";
+        Object.keys(pageSheetSize).forEach(selector => {
+            styleText += `@page ${selector}{size:`;
+            const size = pageSheetSize[selector];
+            styleText += `${size.width}px ${size.height}px;}`;
         });
         this.pageRuleStyleElement.textContent = styleText;
         this.pageSheetSizeAlreadySet = true;
@@ -675,9 +673,9 @@ adapt.viewer.Viewer.prototype.reset = function() {
 adapt.viewer.Viewer.prototype.showCurrent = function(page, sync) {
     this.needRefresh = false;
     this.removePageListeners();
-    var self = this;
+    const self = this;
     if (this.pref.spreadView) {
-        return this.opfView.getSpread(this.pagePosition, sync).thenAsync(function(spread) {
+        return this.opfView.getSpread(this.pagePosition, sync).thenAsync(spread => {
             self.showSpread(spread);
             self.setSpreadZoom(spread);
             self.currentPage = page;
@@ -695,7 +693,7 @@ adapt.viewer.Viewer.prototype.showCurrent = function(page, sync) {
  * @param {!adapt.vtree.Page} page
  */
 adapt.viewer.Viewer.prototype.setPageZoom = function(page) {
-    var zoom = this.getAdjustedZoomFactor(page.dimensions);
+    const zoom = this.getAdjustedZoomFactor(page.dimensions);
     this.viewport.zoom(page.dimensions.width, page.dimensions.height, zoom);
 };
 
@@ -703,7 +701,7 @@ adapt.viewer.Viewer.prototype.setPageZoom = function(page) {
  * @param {!adapt.vtree.Spread} spread
  */
 adapt.viewer.Viewer.prototype.setSpreadZoom = function(spread) {
-    var dim = this.getSpreadDimensions(spread);
+    const dim = this.getSpreadDimensions(spread);
     this.viewport.zoom(dim.width, dim.height, this.getAdjustedZoomFactor(dim));
 };
 
@@ -723,7 +721,8 @@ adapt.viewer.Viewer.prototype.getAdjustedZoomFactor = function(pageDimension) {
  * @returns {!{width: number, height: number}}
  */
 adapt.viewer.Viewer.prototype.getSpreadDimensions = function(spread) {
-    var width = 0, height = 0;
+    let width = 0;
+    let height = 0;
     if (spread.left) {
         width += spread.left.dimensions.width;
         height = spread.left.dimensions.height;
@@ -735,7 +734,7 @@ adapt.viewer.Viewer.prototype.getSpreadDimensions = function(spread) {
     if (spread.left && spread.right) {
         width += this.pref.pageBorder * 2;
     }
-    return {width: width, height: height};
+    return {width, height};
 };
 
 /**
@@ -756,7 +755,7 @@ adapt.viewer.Viewer.prototype.queryZoomFactor = function(type) {
     }
     switch (type) {
         case adapt.viewer.ZoomType.FIT_INSIDE_VIEWPORT:
-            var pageDim;
+            let pageDim;
             if (this.pref.spreadView) {
                 goog.asserts.assert(this.currentSpread);
                 pageDim = this.getSpreadDimensions(this.currentSpread);
@@ -765,7 +764,7 @@ adapt.viewer.Viewer.prototype.queryZoomFactor = function(type) {
             }
             return this.calculateZoomFactorToFitInsideViewPort(pageDim);
         default:
-            throw new Error("unknown zoom type: " + type);
+            throw new Error(`unknown zoom type: ${type}`);
     }
 };
 
@@ -774,8 +773,8 @@ adapt.viewer.Viewer.prototype.queryZoomFactor = function(type) {
  * @returns {number} zoom factor to fit inside viewport
  */
 adapt.viewer.Viewer.prototype.calculateZoomFactorToFitInsideViewPort = function(pageDimension) {
-    var widthZoom = this.viewport.width / pageDimension.width;
-    var heightZoom = this.viewport.height / pageDimension.height;
+    const widthZoom = this.viewport.width / pageDimension.width;
+    const heightZoom = this.viewport.height / pageDimension.height;
     return Math.min(widthZoom, heightZoom);
 };
 
@@ -811,51 +810,49 @@ adapt.viewer.Viewer.prototype.resize = function() {
     if (this.sizeIsGood()) {
         return adapt.task.newResult(true);
     }
-    var self = this;
+    const self = this;
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     this.cancelRenderingTask();
-    var task = adapt.task.currentTask().getScheduler().run(function() {
-        return adapt.task.handle("resize", function(frame) {
-            self.renderTask = task;
-            vivliostyle.profile.profiler.registerStartTiming("render (resize)");
-            self.reset();
+    const task = adapt.task.currentTask().getScheduler().run(() => adapt.task.handle("resize", frame => {
+        self.renderTask = task;
+        vivliostyle.profile.profiler.registerStartTiming("render (resize)");
+        self.reset();
 
-            if (self.pagePosition) {
-                // When resizing, do not use the current page index, for a page index corresponding to
-                // the current position in the document (offsetInItem) can change due to different layout
-                // caused by different viewport size.
-                self.pagePosition.pageIndex = -1;
-            }
+        if (self.pagePosition) {
+            // When resizing, do not use the current page index, for a page index corresponding to
+            // the current position in the document (offsetInItem) can change due to different layout
+            // caused by different viewport size.
+            self.pagePosition.pageIndex = -1;
+        }
 
-            // With renderAllPages option specified, the rendering is performed after the initial page display,
-            // otherwise users are forced to wait the rendering finish in front of a blank page.
-            self.opfView.renderPagesUpto(self.pagePosition).then(function(result) {
-                self.pagePosition = result.position;
-                self.showCurrent(result.page, true).then(function() {
-                    self.reportPosition().then(function(p) {
-                        self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
-                        var r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
-                        r.then(function() {
-                            if (self.renderTask === task) {
-                                self.renderTask = null;
-                            }
-                            vivliostyle.profile.profiler.registerEndTiming("render (resize)");
-                            self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
-                            self.callback({"t":"loaded"});
-                            frame.finish(p);
-                        });
+        // With renderAllPages option specified, the rendering is performed after the initial page display,
+        // otherwise users are forced to wait the rendering finish in front of a blank page.
+        self.opfView.renderPagesUpto(self.pagePosition).then(result => {
+            self.pagePosition = result.position;
+            self.showCurrent(result.page, true).then(() => {
+                self.reportPosition().then(p => {
+                    self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
+                    const r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
+                    r.then(() => {
+                        if (self.renderTask === task) {
+                            self.renderTask = null;
+                        }
+                        vivliostyle.profile.profiler.registerEndTiming("render (resize)");
+                        self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
+                        self.callback({"t":"loaded"});
+                        frame.finish(p);
                     });
                 });
             });
-        }, function(frame, err) {
-            if (err instanceof adapt.viewer.Viewer.RenderingCanceledError) {
-                vivliostyle.profile.profiler.registerEndTiming("render (resize)");
-                vivliostyle.logging.logger.debug(err.message);
-            } else {
-                throw err;
-            }
         });
-    });
+    }, (frame, err) => {
+        if (err instanceof adapt.viewer.Viewer.RenderingCanceledError) {
+            vivliostyle.profile.profiler.registerEndTiming("render (resize)");
+            vivliostyle.logging.logger.debug(err.message);
+        } else {
+            throw err;
+        }
+    }));
     return adapt.task.newResult(true);
 };
 
@@ -866,11 +863,11 @@ adapt.viewer.Viewer.prototype.resize = function() {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.sendLocationNotification = function(page, cfi) {
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("sendLocationNotification");
-    var notification = {"t": "nav", "first": page.isFirstPage,
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("sendLocationNotification");
+    const notification = {"t": "nav", "first": page.isFirstPage,
         "last": page.isLastPage};
-    var self = this;
-    this.opf.getEPageFromPosition(/** @type {adapt.epub.Position} */(self.pagePosition)).then(function(epage) {
+    const self = this;
+    this.opf.getEPageFromPosition(/** @type {adapt.epub.Position} */(self.pagePosition)).then(epage => {
         notification["epage"] = epage;
         notification["epageCount"] = self.opf.epageCount;
         if (cfi) {
@@ -894,8 +891,8 @@ adapt.viewer.Viewer.prototype.getCurrentPageProgression = function() {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.moveTo = function(command) {
-    var method;
-    var self = this;
+    let method;
+    const self = this;
     if (this.readyState !== vivliostyle.constants.ReadyState.COMPLETE) {
         this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     }
@@ -917,38 +914,32 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
                 return adapt.task.newResult(true);
         }
         if (method) {
-            var m = method;
-            method = function() {
-                return m.call(self.opfView, self.pagePosition);
-            };
+            const m = method;
+            method = () => m.call(self.opfView, self.pagePosition);
         }
     } else if (typeof command["epage"] == "number") {
-        var epage = /** @type {number} */ (command["epage"]);
-        method = function() {
-            return self.opfView.navigateToEPage(epage);
-        };
+        const epage = /** @type {number} */ (command["epage"]);
+        method = () => self.opfView.navigateToEPage(epage);
     } else if (typeof command["url"] == "string") {
-        var url = /** @type {string} */ (command["url"]);
-        method = function() {
-            return self.opfView.navigateTo(url, self.pagePosition);
-        };
+        const url = /** @type {string} */ (command["url"]);
+        method = () => self.opfView.navigateTo(url, self.pagePosition);
     } else {
         return adapt.task.newResult(true);
     }
-    /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("moveTo");
-    method.call(self.opfView).then(/** @param {adapt.epub.PageAndPosition} result */ function(result) {
-        var cont;
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("moveTo");
+    method.call(self.opfView).then(result => {
+        let cont;
         if (result) {
             self.pagePosition = result.position;
-            /** @type {!adapt.task.Frame<boolean>} */ var innerFrame = adapt.task.newFrame("moveTo.showCurrent");
+            /** @type {!adapt.task.Frame<boolean>} */ const innerFrame = adapt.task.newFrame("moveTo.showCurrent");
             cont = innerFrame.result();
-            self.showCurrent(result.page).then(function() {
+            self.showCurrent(result.page).then(() => {
                 self.reportPosition().thenFinish(innerFrame);
             });
         } else {
             cont = adapt.task.newResult(true);
         }
-        cont.then(function(res) {
+        cont.then(res => {
             if (self.readyState === vivliostyle.constants.ReadyState.LOADING) {
                 self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
             }
@@ -963,9 +954,9 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
  * @return {!adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.showTOC = function(command) {
-    var autohide = !!command["autohide"];
-    var visibility = command["v"];
-    var currentVisibility = this.opfView.isTOCVisible();
+    const autohide = !!command["autohide"];
+    const visibility = command["v"];
+    const currentVisibility = this.opfView.isTOCVisible();
     if (currentVisibility) {
         if (visibility == "show") {
             return adapt.task.newResult(true);
@@ -979,12 +970,12 @@ adapt.viewer.Viewer.prototype.showTOC = function(command) {
         this.opfView.hideTOC();
         return adapt.task.newResult(true);
     } else {
-        var self = this;
-        /** @type {adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("showTOC");
-        this.opfView.showTOC(autohide).then(function(page) {
+        const self = this;
+        /** @type {adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("showTOC");
+        this.opfView.showTOC(autohide).then(page => {
             if (page) {
                 if (autohide) {
-                    var hideTOC = function() {self.opfView.hideTOC();};
+                    const hideTOC = () => {self.opfView.hideTOC();};
                     page.addEventListener("hyperlink", hideTOC, false);
                     page.container.addEventListener("click", hideTOC, false);
                 }
@@ -1001,12 +992,12 @@ adapt.viewer.Viewer.prototype.showTOC = function(command) {
  * @return {adapt.task.Result.<boolean>}
  */
 adapt.viewer.Viewer.prototype.runCommand = function(command) {
-    var self = this;
-    var actionName = command["a"] || "";
-    return adapt.task.handle("runCommand", function(frame) {
-        var action = self.actions[actionName];
+    const self = this;
+    const actionName = command["a"] || "";
+    return adapt.task.handle("runCommand", frame => {
+        const action = self.actions[actionName];
         if (action) {
-            action.call(self, command).then(function() {
+            action.call(self, command).then(() => {
                 self.callback({"t": "done", "a": actionName});
                 frame.finish(true);
             });
@@ -1014,7 +1005,7 @@ adapt.viewer.Viewer.prototype.runCommand = function(command) {
             vivliostyle.logging.logger.error("No such action:", actionName);
             frame.finish(true);
         }
-    }, function(frame, err) {
+    }, (frame, err) => {
         vivliostyle.logging.logger.error(err, "Error during action:", actionName);
         frame.finish(true);
     });
@@ -1025,7 +1016,7 @@ adapt.viewer.Viewer.prototype.runCommand = function(command) {
  * @param {*} cmd
  * @return {adapt.base.JSON}
  */
-adapt.viewer.maybeParse = function(cmd) {
+adapt.viewer.maybeParse = cmd => {
     if (typeof cmd == "string") {
         return adapt.base.stringToJSON(cmd);
     }
@@ -1037,49 +1028,47 @@ adapt.viewer.maybeParse = function(cmd) {
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.initEmbed = function(cmd) {
-    var command = adapt.viewer.maybeParse(cmd);
-    var continuation = null;
-    var viewer = this;
-    adapt.task.start(function() {
-        /** @type {!adapt.task.Frame.<boolean>} */ var frame = adapt.task.newFrame("commandLoop");
-        var scheduler = adapt.task.currentTask().getScheduler();
-        viewer.hyperlinkListener = function(evt) {
-            var hrefEvent = /** @type {adapt.vtree.PageHyperlinkEvent} */ (evt);
-            var internal = hrefEvent.href.charAt(0) === "#" ||
-                viewer.packageURL.some(function(url) {
-                    return hrefEvent.href.substr(0, url.length) == url;
-                });
+    let command = adapt.viewer.maybeParse(cmd);
+    let continuation = null;
+    const viewer = this;
+    adapt.task.start(() => {
+        /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("commandLoop");
+        const scheduler = adapt.task.currentTask().getScheduler();
+        viewer.hyperlinkListener = evt => {
+            const hrefEvent = /** @type {adapt.vtree.PageHyperlinkEvent} */ (evt);
+            const internal = hrefEvent.href.charAt(0) === "#" ||
+                viewer.packageURL.some(url => hrefEvent.href.substr(0, url.length) == url);
             if (internal) {
                 evt.preventDefault();
-                var msg = {"t":"hyperlink", "href":hrefEvent.href, "internal": internal};
-                scheduler.run(function() {
+                const msg = {"t":"hyperlink", "href":hrefEvent.href, "internal": internal};
+                scheduler.run(() => {
                     viewer.callback(msg);
                     return adapt.task.newResult(true);
                 });
             }
         };
-        frame.loopWithFrame(function(loopFrame) {
+        frame.loopWithFrame(loopFrame => {
             if (viewer.needResize) {
-                viewer.resize().then(function() {
+                viewer.resize().then(() => {
                     loopFrame.continueLoop();
                 });
             } else if (viewer.needRefresh) {
                 if (viewer.currentPage) {
-                    viewer.showCurrent(viewer.currentPage).then(function() {
+                    viewer.showCurrent(viewer.currentPage).then(() => {
                         loopFrame.continueLoop();
                     });
                 }
             } else if (command) {
-                var cmd = command;
+                const cmd = command;
                 command = null;
-                viewer.runCommand(cmd).then(function() {
+                viewer.runCommand(cmd).then(() => {
                     loopFrame.continueLoop();
                 });
             } else {
-                /** @type {!adapt.task.Frame.<boolean>} */ var frameInternal =
+                /** @type {!adapt.task.Frame.<boolean>} */ const frameInternal =
                     adapt.task.newFrame('waitForCommand');
                 continuation = frameInternal.suspend(self);
-                frameInternal.result().then(function() {
+                frameInternal.result().then(() => {
                     loopFrame.continueLoop();
                 });
             }
@@ -1087,15 +1076,15 @@ adapt.viewer.Viewer.prototype.initEmbed = function(cmd) {
         return frame.result();
     });
 
-    viewer.kick = function() {
-        var cont = continuation;
+    viewer.kick = () => {
+        const cont = continuation;
         if (cont) {
             continuation = null;
             cont.schedule();
         }
     };
 
-    viewer.sendCommand = function(cmd) {
+    viewer.sendCommand = cmd => {
         if (command) {
             return false;
         }

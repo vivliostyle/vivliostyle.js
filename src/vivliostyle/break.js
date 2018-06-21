@@ -21,7 +21,7 @@ goog.provide("vivliostyle.break");
 goog.require("vivliostyle.plugin");
 goog.require("adapt.css");
 
-goog.scope(function() {
+goog.scope(() => {
 
     /**
      * Convert old page-break-* properties to break-* properties with appropriate values
@@ -30,9 +30,9 @@ goog.scope(function() {
      * @param {!{name: string, value: !adapt.css.Val, important: boolean}} original
      * @returns {!{name: string, value: !adapt.css.Val, important: boolean}}
      */
-    vivliostyle.break.convertPageBreakAliases = function(original)  {
-        var name = original["name"];
-        var value = original["value"];
+    vivliostyle.break.convertPageBreakAliases = original => {
+        const name = original["name"];
+        const value = original["value"];
         switch (name) {
             case "page-break-before":
             case "page-break-after":
@@ -67,9 +67,7 @@ goog.scope(function() {
      * @param {?string} value The break value to be judged. Treats null as 'auto'.
      * @returns {boolean}
      */
-    vivliostyle.break.isForcedBreakValue = function(value) {
-        return !!vivliostyle.break.forcedBreakValues[value];
-    };
+    vivliostyle.break.isForcedBreakValue = value => !!vivliostyle.break.forcedBreakValues[value];
 
     /**
      * @private
@@ -87,9 +85,7 @@ goog.scope(function() {
      * @param {?string} value The break value to be judged. Treats null as 'auto'.
      * @returns {boolean}
      */
-    vivliostyle.break.isAvoidBreakValue = function(value) {
-        return !!vivliostyle.break.avoidBreakValues[value];
-    };
+    vivliostyle.break.isAvoidBreakValue = value => !!vivliostyle.break.avoidBreakValues[value];
 
     /**
      * Resolves the effective break value given two break values at a single break point.
@@ -103,14 +99,14 @@ goog.scope(function() {
      * @param {?string} second The break value specified on the latter element. null means 'auto' (not specified)
      * @returns {?string}
      */
-    vivliostyle.break.resolveEffectiveBreakValue = function(first, second) {
+    vivliostyle.break.resolveEffectiveBreakValue = (first, second) => {
         if (!first) {
             return second;
         } else if (!second) {
             return first;
         } else {
-            var firstIsForcedBreakValue = vivliostyle.break.isForcedBreakValue(first);
-            var secondIsForcedBreakValue = vivliostyle.break.isForcedBreakValue(second);
+            const firstIsForcedBreakValue = vivliostyle.break.isForcedBreakValue(first);
+            const secondIsForcedBreakValue = vivliostyle.break.isForcedBreakValue(second);
             if (firstIsForcedBreakValue && secondIsForcedBreakValue) {
                 switch (second) {
                     case "column":
@@ -141,7 +137,7 @@ goog.scope(function() {
      * @param {?string} breakValue
      * @returns {string}
      */
-    vivliostyle.break.breakValueToStartSideValue = function(breakValue) {
+    vivliostyle.break.breakValueToStartSideValue = breakValue => {
         switch (breakValue) {
             case "left":
             case "right":
@@ -157,7 +153,7 @@ goog.scope(function() {
      * @param {string} startSideValue
      * @returns {?string}
      */
-    vivliostyle.break.startSideValueToBreakValue = function(startSideValue) {
+    vivliostyle.break.startSideValueToBreakValue = startSideValue => {
         switch (startSideValue) {
             case "left":
             case "right":

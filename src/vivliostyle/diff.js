@@ -20,12 +20,9 @@ goog.provide("vivliostyle.diff");
 
 goog.require("vivliostyle.namespace");
 
-goog.scope(function() {
-
-    "use strict";
-
+goog.scope(() => {
     /* eslint-disable global-require,no-undef */
-    var fastdiff = require('node_modules/fast-diff/diff');
+    const fastdiff = require('node_modules/fast-diff/diff');
     /* eslint-enable global-require,no-undef */
 
     /**
@@ -38,49 +35,39 @@ goog.scope(function() {
      * @param {string} newText
      * @returns {Array.<vivliostyle.diff.Change>}
      */
-    vivliostyle.diff.diffChars = function(originalText, newText) {
-        return fastdiff(originalText, newText, 0);
-    };
+    vivliostyle.diff.diffChars = (originalText, newText) => fastdiff(originalText, newText, 0);
 
     /**
      * @param {Array.<vivliostyle.diff.Change>} changes
      * @returns string
      */
-    vivliostyle.diff.restoreOriginalText = function(changes) {
-        return changes.reduce(function(result, item) {
-            if (item[0] === fastdiff.INSERT) return result;
-            return result + item[1];
-        }, "");
-    };
+    vivliostyle.diff.restoreOriginalText = changes => changes.reduce((result, item) => {
+        if (item[0] === fastdiff.INSERT) return result;
+        return result + item[1];
+    }, "");
 
     /**
      * @param {Array.<vivliostyle.diff.Change>} changes
      * @returns string
      */
-    vivliostyle.diff.restoreNewText = function(changes) {
-        return changes.reduce(function(result, item) {
-            if (item[0] === fastdiff.DELETE) return result;
-            return result + item[1];
-        }, "");
-    };
+    vivliostyle.diff.restoreNewText = changes => changes.reduce((result, item) => {
+        if (item[0] === fastdiff.DELETE) return result;
+        return result + item[1];
+    }, "");
 
     /**
      * @param {Array.<vivliostyle.diff.Change>} changes
      * @param {number} oldIndex
      * @returns {number}
      */
-    vivliostyle.diff.resolveNewIndex = function(changes, oldIndex) {
-        return vivliostyle.diff.resolveIndex(changes, oldIndex, 1);
-    };
+    vivliostyle.diff.resolveNewIndex = (changes, oldIndex) => vivliostyle.diff.resolveIndex(changes, oldIndex, 1);
 
     /**
      * @param {Array.<vivliostyle.diff.Change>} changes
      * @param {number} newIndex
      * @returns {number}
      */
-    vivliostyle.diff.resolveOriginalIndex = function(changes, newIndex) {
-        return vivliostyle.diff.resolveIndex(changes, newIndex, -1);
-    };
+    vivliostyle.diff.resolveOriginalIndex = (changes, newIndex) => vivliostyle.diff.resolveIndex(changes, newIndex, -1);
 
     /**
      * @private
@@ -89,11 +76,11 @@ goog.scope(function() {
      * @param {number} coef
      * @returns {number}
      */
-    vivliostyle.diff.resolveIndex = function(changes, index, coef) {
-        var diff     = 0;
-        var current  = 0;
-        changes.some(function(change) {
-            for (var i=0; i<change[1].length; i++) {
+    vivliostyle.diff.resolveIndex = (changes, index, coef) => {
+        let diff     = 0;
+        let current  = 0;
+        changes.some(change => {
+            for (let i=0; i<change[1].length; i++) {
                 switch (change[0]*coef) {
                     case fastdiff.INSERT:
                         diff++;
@@ -112,5 +99,4 @@ goog.scope(function() {
         });
         return Math.max(Math.min(index, current-1) + diff, 0);
     };
-
 });

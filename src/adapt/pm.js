@@ -51,7 +51,7 @@ adapt.pm.PageBox = function(scope, name, pseudoName, classes, parent) {
     /** @const */ this.pseudoName = pseudoName;
     /** @const */ this.classes = classes;
     /** @const */ this.parent = parent;
-    /** @const */ this.key = "p" + (adapt.pm.keyCount++);
+    /** @const */ this.key = `p${adapt.pm.keyCount++}`;
     if (parent) {
         this.index = parent.children.length;
         parent.children.push(this);
@@ -62,7 +62,7 @@ adapt.pm.PageBox = function(scope, name, pseudoName, classes, parent) {
  * @param {!adapt.pm.PageBoxInstance} parentInstance
  * @return {!adapt.pm.PageBoxInstance}
  */
-adapt.pm.PageBox.prototype.createInstance = function(parentInstance) {
+adapt.pm.PageBox.prototype.createInstance = parentInstance => {
     throw new Error("E_UNEXPECTED_CALL");
 };
 
@@ -71,7 +71,7 @@ adapt.pm.PageBox.prototype.createInstance = function(parentInstance) {
  * @param {{parent: (!adapt.pm.PageBox|undefined), pseudoName: (string|undefined)}} param parent: The parent of the cloned PageBox. pseudoName: Assign this value as the pseudoName of the cloned PageBox.
  * @return {adapt.pm.PageBox}
  */
-adapt.pm.PageBox.prototype.clone = function(param) {
+adapt.pm.PageBox.prototype.clone = param => {
     throw new Error("E_UNEXPECTED_CALL");
 };
 
@@ -81,9 +81,9 @@ adapt.pm.PageBox.prototype.clone = function(param) {
  * @param {!adapt.pm.PageBox} dest The PageBox into which 'specified' properties are copied
  */
 adapt.pm.PageBox.prototype.copySpecified = function(dest) {
-    var specified = this.specified;
-    var destSpecified = dest.specified;
-    for (var prop in specified) {
+    const specified = this.specified;
+    const destSpecified = dest.specified;
+    for (const prop in specified) {
         if (Object.prototype.hasOwnProperty.call(specified, prop)) {
             destSpecified[prop] = specified[prop];
         }
@@ -96,9 +96,9 @@ adapt.pm.PageBox.prototype.copySpecified = function(dest) {
  * @param {!adapt.pm.PageBox} parent
  */
 adapt.pm.PageBox.prototype.cloneChildren = function(parent) {
-    for (var i = 0; i < this.children.length; i++) {
+    for (let i = 0; i < this.children.length; i++) {
         // the cloned child is added to parent.children in the child constructor.
-        this.children[i].clone({parent: parent});
+        this.children[i].clone({parent});
     }
 };
 
@@ -125,14 +125,14 @@ goog.inherits(adapt.pm.RootPageBox, adapt.pm.PageBox);
  */
 adapt.pm.PageMasterScope = function(scope, pageMaster) {
     this.pageMaster = pageMaster;
-    var self = this;
+    const self = this;
     adapt.expr.LexicalScope.call(this, scope, function(qualifiedName, isFunc) {
-        var r = qualifiedName.match(/^([^.]+)\.([^.]+)$/);
+        const r = qualifiedName.match(/^([^.]+)\.([^.]+)$/);
         if (r) {
-            var key = self.pageMaster.keyMap[r[1]];
+            const key = self.pageMaster.keyMap[r[1]];
             if (key) {
-                var holder = /** @type {adapt.pm.InstanceHolder} */ (this);
-                var boxInstance = holder.lookupInstance(key);
+                const holder = /** @type {adapt.pm.InstanceHolder} */ (this);
+                const boxInstance = holder.lookupInstance(key);
                 if (boxInstance) {
                     if (isFunc)
                         return boxInstance.resolveFunc(r[2]);
@@ -159,7 +159,7 @@ goog.inherits(adapt.pm.PageMasterScope, adapt.expr.LexicalScope);
  * @extends {adapt.pm.PageBox}
  */
 adapt.pm.PageMaster = function(scope, name, pseudoName, classes, parent, condition, specificity) {
-    var pageMasterScope;
+    let pageMasterScope;
     if (scope instanceof adapt.pm.PageMasterScope) {
         // if PageMasterScope object is passed, use (share) it.
         pageMasterScope = scope;
@@ -195,7 +195,7 @@ adapt.pm.PageMaster.prototype.createInstance = function(parentInstance) {
  */
 adapt.pm.PageMaster.prototype.clone = function(param) {
     // The cloned page master shares the same scope object with the original one.
-    var cloned = new adapt.pm.PageMaster(this.scope, this.name, param.pseudoName || this.pseudoName, this.classes, /** @type {adapt.pm.RootPageBox} */ (this.parent), this.condition, this.specificity);
+    const cloned = new adapt.pm.PageMaster(this.scope, this.name, param.pseudoName || this.pseudoName, this.classes, /** @type {adapt.pm.RootPageBox} */ (this.parent), this.condition, this.specificity);
     this.copySpecified(cloned);
     this.cloneChildren(cloned);
     return cloned;
@@ -242,7 +242,7 @@ adapt.pm.PartitionGroup.prototype.createInstance = function(parentInstance) {
  * @returns {adapt.pm.PartitionGroup}
  */
 adapt.pm.PartitionGroup.prototype.clone = function(param) {
-    var cloned = new adapt.pm.PartitionGroup(param.parent.scope, this.name, this.pseudoName, this.classes, param.parent);
+    const cloned = new adapt.pm.PartitionGroup(param.parent.scope, this.name, this.pseudoName, this.classes, param.parent);
     this.copySpecified(cloned);
     this.cloneChildren(cloned);
     return cloned;
@@ -280,7 +280,7 @@ adapt.pm.Partition.prototype.createInstance = function(parentInstance) {
  * @returns {adapt.pm.Partition}
  */
 adapt.pm.Partition.prototype.clone = function(param) {
-    var cloned = new adapt.pm.Partition(param.parent.scope, this.name, this.pseudoName, this.classes, param.parent);
+    const cloned = new adapt.pm.Partition(param.parent.scope, this.name, this.pseudoName, this.classes, param.parent);
     this.copySpecified(cloned);
     this.cloneChildren(cloned);
     return cloned;
@@ -294,7 +294,7 @@ adapt.pm.Partition.prototype.clone = function(param) {
  * @param {string} def default value
  * @return {adapt.expr.Val}
  */
-adapt.pm.toExprIdent = function(scope, val, def) {
+adapt.pm.toExprIdent = (scope, val, def) => {
     if (!val)
         return new adapt.expr.Const(scope, def);
     return val.toExpr(scope, scope.zero);
@@ -306,7 +306,7 @@ adapt.pm.toExprIdent = function(scope, val, def) {
  * @param {adapt.expr.Val} ref
  * @return {adapt.expr.Val}
  */
-adapt.pm.toExprAuto = function(scope, val, ref) {
+adapt.pm.toExprAuto = (scope, val, ref) => {
     if (!val || val === adapt.css.ident.auto)
         return null;
     return val.toExpr(scope, ref);
@@ -318,7 +318,7 @@ adapt.pm.toExprAuto = function(scope, val, ref) {
  * @param {adapt.expr.Val} ref
  * @return {adapt.expr.Val}
  */
-adapt.pm.toExprNormal = function(scope, val, ref) {
+adapt.pm.toExprNormal = (scope, val, ref) => {
     if (!val || val === adapt.css.ident.normal)
         return null;
     return val.toExpr(scope, ref);
@@ -330,7 +330,7 @@ adapt.pm.toExprNormal = function(scope, val, ref) {
  * @param {adapt.expr.Val} ref
  * @return {adapt.expr.Val}
  */
-adapt.pm.toExprZero = function(scope, val, ref) {
+adapt.pm.toExprZero = (scope, val, ref) => {
     if (!val || val === adapt.css.ident.auto)
         return scope.zero;
     return val.toExpr(scope, ref);
@@ -345,7 +345,7 @@ adapt.pm.toExprZero = function(scope, val, ref) {
  * @param {adapt.expr.Val} ref
  * @returns {adapt.expr.Val}
  */
-adapt.pm.toExprZeroAuto = function(scope, val, ref) {
+adapt.pm.toExprZeroAuto = (scope, val, ref) => {
     if (!val) {
         return scope.zero;
     } else if (val === adapt.css.ident.auto) {
@@ -362,7 +362,7 @@ adapt.pm.toExprZeroAuto = function(scope, val, ref) {
  * @param {adapt.expr.Val} ref
  * @return {adapt.expr.Val}
  */
-adapt.pm.toExprZeroBorder = function(scope, val, styleVal, ref) {
+adapt.pm.toExprZeroBorder = (scope, val, styleVal, ref) => {
     if (!val || styleVal === adapt.css.ident.none)
         return scope.zero;
     return val.toExpr(scope, ref);
@@ -374,7 +374,7 @@ adapt.pm.toExprZeroBorder = function(scope, val, styleVal, ref) {
  * @param {adapt.expr.Val} def
  * @return {adapt.expr.Val}
  */
-adapt.pm.toExprBool = function(scope, val, def) {
+adapt.pm.toExprBool = (scope, val, def) => {
     if (!val)
         return def;
     if (val === adapt.css.ident._true)
@@ -394,13 +394,13 @@ adapt.pm.InstanceHolder = function() {};
  * @param {adapt.pm.PageBoxInstance} instance
  * @return {void}
  */
-adapt.pm.InstanceHolder.prototype.registerInstance = function(key, instance) {};
+adapt.pm.InstanceHolder.prototype.registerInstance = (key, instance) => {};
 
 /**
  * @param {string} key
  * @return {adapt.pm.PageBoxInstance} instance
  */
-adapt.pm.InstanceHolder.prototype.lookupInstance = function(key) {};
+adapt.pm.InstanceHolder.prototype.lookupInstance = key => {};
 
 /**
  * @param {adapt.pm.PageBoxInstance} parentInstance
@@ -450,8 +450,8 @@ adapt.pm.PageBoxInstance.prototype.reset = function() {
  * @return {adapt.expr.Val}
  */
 adapt.pm.PageBoxInstance.prototype.addNamedValues = function(name1, name2) {
-    var v1 = this.resolveName(name1);
-    var v2 = this.resolveName(name2);
+    const v1 = this.resolveName(name1);
+    const v2 = this.resolveName(name2);
     if (!v1 || !v2)
         throw new Error("E_INTERNAL");
     return adapt.expr.add(this.pageBox.scope, v1, v2);
@@ -462,10 +462,10 @@ adapt.pm.PageBoxInstance.prototype.addNamedValues = function(name1, name2) {
  * @return {adapt.expr.Val}
  */
 adapt.pm.PageBoxInstance.prototype.resolveName = function(name) {
-    var expr = this.namedValues[name];
+    let expr = this.namedValues[name];
     if (expr)
         return expr;
-    var val = this.style[name];
+    const val = this.style[name];
     if (val)
         expr = val.toExpr(this.pageBox.scope, this.pageBox.scope.zero);
     switch (name) {
@@ -519,15 +519,15 @@ adapt.pm.PageBoxInstance.prototype.resolveName = function(name) {
             break;
     }
     if (!expr) {
-        var altName;
+        let altName;
         if (name == "extent") {
             altName = this.vertical ? "width" : "height";
         } else if (name == "measure") {
             altName = this.vertical ? "height" : "width";
         } else {
-            var map = this.vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
+            const map = this.vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
             altName = name;
-            for (var key in map) {
+            for (const key in map) {
                 altName = altName.replace(key, map[key]);
             }
         }
@@ -541,17 +541,17 @@ adapt.pm.PageBoxInstance.prototype.resolveName = function(name) {
 };
 
 adapt.pm.PageBoxInstance.prototype.resolveFunc = function(name) {
-    var expr = this.namedFuncs[name];
+    let expr = this.namedFuncs[name];
     if (expr)
         return expr;
     switch (name) {
         case "columns":
             // min(count,column-count) * (column-width + column-gap) - column-gap
-            var scope = this.pageBox.scope;
-            var count = new adapt.expr.Param(scope, 0);
-            var columnCount = this.resolveName("column-count");
-            var columnWidth = this.resolveName("column-width");
-            var columnGap = this.resolveName("column-gap");
+            const scope = this.pageBox.scope;
+            const count = new adapt.expr.Param(scope, 0);
+            const columnCount = this.resolveName("column-count");
+            const columnWidth = this.resolveName("column-width");
+            const columnGap = this.resolveName("column-gap");
             expr = adapt.expr.sub(scope, adapt.expr.mul(scope,
                 new adapt.expr.Call(scope, "min", [count, columnCount]),
                 adapt.expr.add(scope, columnWidth, columnGap)), columnGap);
@@ -567,20 +567,20 @@ adapt.pm.PageBoxInstance.prototype.resolveFunc = function(name) {
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.initEnabled = function() {
-    var scope = this.pageBox.scope;
-    var style = this.style;
-    var enabled = adapt.pm.toExprBool(scope, style["enabled"], scope._true);
-    var page = adapt.pm.toExprAuto(scope, style["page"], scope.zero);
+    const scope = this.pageBox.scope;
+    const style = this.style;
+    let enabled = adapt.pm.toExprBool(scope, style["enabled"], scope._true);
+    const page = adapt.pm.toExprAuto(scope, style["page"], scope.zero);
     if (page) {
-        var currentPage = new adapt.expr.Named(scope, "page-number");
+        const currentPage = new adapt.expr.Named(scope, "page-number");
         enabled = adapt.expr.and(scope, enabled, new adapt.expr.Eq(scope, page, currentPage));
     }
-    var minPageWidth = adapt.pm.toExprAuto(scope, style["min-page-width"], scope.zero);
+    const minPageWidth = adapt.pm.toExprAuto(scope, style["min-page-width"], scope.zero);
     if (minPageWidth) {
         enabled = adapt.expr.and(scope, enabled,
             new adapt.expr.Ge(scope, new adapt.expr.Named(scope, "page-width"), minPageWidth));
     }
-    var minPageHeight = adapt.pm.toExprAuto(scope, style["min-page-height"], scope.zero);
+    const minPageHeight = adapt.pm.toExprAuto(scope, style["min-page-height"], scope.zero);
     if (minPageHeight) {
         enabled = adapt.expr.and(scope, enabled,
             new adapt.expr.Ge(scope, new adapt.expr.Named(scope, "page-height"), minPageHeight));
@@ -594,33 +594,31 @@ adapt.pm.PageBoxInstance.prototype.initEnabled = function() {
  * @param {adapt.expr.Val} enabled
  * @return {adapt.expr.Val}
  */
-adapt.pm.PageBoxInstance.prototype.boxSpecificEnabled = function(enabled) {
-    return enabled;
-};
+adapt.pm.PageBoxInstance.prototype.boxSpecificEnabled = enabled => enabled;
 
 /**
  * @protected
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
-    var scope = this.pageBox.scope;
-    var style = this.style;
-    var parentWidth = this.parentInstance ?
+    const scope = this.pageBox.scope;
+    const style = this.style;
+    const parentWidth = this.parentInstance ?
         this.parentInstance.style["width"].toExpr(scope, null) : null;
-    var left = adapt.pm.toExprAuto(scope, style["left"], parentWidth);
-    var marginLeft = adapt.pm.toExprAuto(scope, style["margin-left"], parentWidth);
-    var borderLeftWidth = adapt.pm.toExprZeroBorder(scope, style["border-left-width"], style["border-left-style"], parentWidth);
-    var paddingLeft = adapt.pm.toExprZero(scope, style["padding-left"], parentWidth);
-    var width = adapt.pm.toExprAuto(scope, style["width"], parentWidth);
-    var maxWidth = adapt.pm.toExprAuto(scope, style["max-width"], parentWidth);
-    var paddingRight = adapt.pm.toExprZero(scope, style["padding-right"], parentWidth);
-    var borderRightWidth = adapt.pm.toExprZeroBorder(scope, style["border-right-width"], style["border-right-style"], parentWidth);
-    var marginRight = adapt.pm.toExprAuto(scope, style["margin-right"], parentWidth);
-    var right = adapt.pm.toExprAuto(scope, style["right"], parentWidth);
-    var leftBP = adapt.expr.add(scope, borderLeftWidth, paddingLeft);
-    var rightBP = adapt.expr.add(scope, borderLeftWidth, paddingRight);
+    let left = adapt.pm.toExprAuto(scope, style["left"], parentWidth);
+    let marginLeft = adapt.pm.toExprAuto(scope, style["margin-left"], parentWidth);
+    const borderLeftWidth = adapt.pm.toExprZeroBorder(scope, style["border-left-width"], style["border-left-style"], parentWidth);
+    const paddingLeft = adapt.pm.toExprZero(scope, style["padding-left"], parentWidth);
+    let width = adapt.pm.toExprAuto(scope, style["width"], parentWidth);
+    let maxWidth = adapt.pm.toExprAuto(scope, style["max-width"], parentWidth);
+    const paddingRight = adapt.pm.toExprZero(scope, style["padding-right"], parentWidth);
+    const borderRightWidth = adapt.pm.toExprZeroBorder(scope, style["border-right-width"], style["border-right-style"], parentWidth);
+    let marginRight = adapt.pm.toExprAuto(scope, style["margin-right"], parentWidth);
+    let right = adapt.pm.toExprAuto(scope, style["right"], parentWidth);
+    const leftBP = adapt.expr.add(scope, borderLeftWidth, paddingLeft);
+    const rightBP = adapt.expr.add(scope, borderLeftWidth, paddingRight);
     if (left && right && width) {
-        var extra = adapt.expr.sub(scope, parentWidth, adapt.expr.add(scope, width,
+        let extra = adapt.expr.sub(scope, parentWidth, adapt.expr.add(scope, width,
             adapt.expr.add(scope, adapt.expr.add(scope, left, leftBP), rightBP)));
         if (!marginLeft) {
             extra = adapt.expr.sub(scope, extra, right);
@@ -654,7 +652,7 @@ adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
             width = this.autoWidth;
             this.isAutoWidth = true;
         }
-        var remains = adapt.expr.sub(scope, parentWidth,
+        const remains = adapt.expr.sub(scope, parentWidth,
             adapt.expr.add(scope, adapt.expr.add(scope, marginLeft, leftBP),
                 adapt.expr.add(scope, marginRight, rightBP)));
         if (this.isAutoWidth) {
@@ -678,9 +676,9 @@ adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
         }
     }
     // snap-width is inherited
-    var snapWidthVal = style["snap-width"] ||
+    const snapWidthVal = style["snap-width"] ||
         (this.parentInstance ? this.parentInstance.style["snap-width"] : null);
-    var snapWidth = adapt.pm.toExprZero(scope, snapWidthVal, parentWidth);
+    const snapWidth = adapt.pm.toExprZero(scope, snapWidthVal, parentWidth);
     style["left"] = new adapt.css.Expr(left);
     style["margin-left"] = new adapt.css.Expr(marginLeft);
     style["border-left-width"] = new adapt.css.Expr(borderLeftWidth);
@@ -699,26 +697,26 @@ adapt.pm.PageBoxInstance.prototype.initHorizontal = function() {
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.initVertical = function() {
-    var scope = this.pageBox.scope;
-    var style = this.style;
-    var parentWidth = this.parentInstance ?
+    const scope = this.pageBox.scope;
+    const style = this.style;
+    const parentWidth = this.parentInstance ?
         this.parentInstance.style["width"].toExpr(scope, null) : null;
-    var parentHeight = this.parentInstance ?
+    const parentHeight = this.parentInstance ?
         this.parentInstance.style["height"].toExpr(scope, null) : null;
-    var top = adapt.pm.toExprAuto(scope, style["top"], parentHeight);
-    var marginTop = adapt.pm.toExprAuto(scope, style["margin-top"], parentWidth);
-    var borderTopWidth = adapt.pm.toExprZeroBorder(scope, style["border-top-width"], style["border-top-style"], parentWidth);
-    var paddingTop = adapt.pm.toExprZero(scope, style["padding-top"], parentWidth);
-    var height = adapt.pm.toExprAuto(scope, style["height"], parentHeight);
-    var maxHeight = adapt.pm.toExprAuto(scope, style["max-height"], parentHeight);
-    var paddingBottom = adapt.pm.toExprZero(scope, style["padding-bottom"], parentWidth);
-    var borderBottomWidth = adapt.pm.toExprZeroBorder(scope, style["border-bottom-width"], style["border-bottom-style"], parentWidth);
-    var marginBottom = adapt.pm.toExprAuto(scope, style["margin-bottom"], parentWidth);
-    var bottom = adapt.pm.toExprAuto(scope, style["bottom"], parentHeight);
-    var topBP = adapt.expr.add(scope, borderTopWidth, paddingTop);
-    var bottomBP = adapt.expr.add(scope, borderBottomWidth, paddingBottom);
+    let top = adapt.pm.toExprAuto(scope, style["top"], parentHeight);
+    let marginTop = adapt.pm.toExprAuto(scope, style["margin-top"], parentWidth);
+    const borderTopWidth = adapt.pm.toExprZeroBorder(scope, style["border-top-width"], style["border-top-style"], parentWidth);
+    const paddingTop = adapt.pm.toExprZero(scope, style["padding-top"], parentWidth);
+    let height = adapt.pm.toExprAuto(scope, style["height"], parentHeight);
+    let maxHeight = adapt.pm.toExprAuto(scope, style["max-height"], parentHeight);
+    const paddingBottom = adapt.pm.toExprZero(scope, style["padding-bottom"], parentWidth);
+    const borderBottomWidth = adapt.pm.toExprZeroBorder(scope, style["border-bottom-width"], style["border-bottom-style"], parentWidth);
+    let marginBottom = adapt.pm.toExprAuto(scope, style["margin-bottom"], parentWidth);
+    let bottom = adapt.pm.toExprAuto(scope, style["bottom"], parentHeight);
+    const topBP = adapt.expr.add(scope, borderTopWidth, paddingTop);
+    const bottomBP = adapt.expr.add(scope, borderBottomWidth, paddingBottom);
     if (top && bottom && height) {
-        var extra = adapt.expr.sub(scope, parentHeight,
+        let extra = adapt.expr.sub(scope, parentHeight,
             adapt.expr.add(scope, height, adapt.expr.add(scope,
                 adapt.expr.add(scope, top, topBP), bottomBP)));
         if (!marginTop) {
@@ -754,7 +752,7 @@ adapt.pm.PageBoxInstance.prototype.initVertical = function() {
             height = this.autoHeight;
             this.isAutoHeight = true;
         }
-        var remains = adapt.expr.sub(scope, parentHeight,
+        const remains = adapt.expr.sub(scope, parentHeight,
             adapt.expr.add(scope, adapt.expr.add(scope, marginTop, topBP),
                 adapt.expr.add(scope, marginBottom, bottomBP)));
         if (this.isAutoHeight) {
@@ -778,9 +776,9 @@ adapt.pm.PageBoxInstance.prototype.initVertical = function() {
         }
     }
     // snap-height is inherited
-    var snapHeightVal = style["snap-height"] ||
+    const snapHeightVal = style["snap-height"] ||
         (this.parentInstance ? this.parentInstance.style["snap-height"] : null);
-    var snapHeight = adapt.pm.toExprZero(scope, snapHeightVal, parentWidth);
+    const snapHeight = adapt.pm.toExprZero(scope, snapHeightVal, parentWidth);
     style["top"] = new adapt.css.Expr(top);
     style["margin-top"] = new adapt.css.Expr(marginTop);
     style["border-top-width"] = new adapt.css.Expr(borderTopWidth);
@@ -799,12 +797,12 @@ adapt.pm.PageBoxInstance.prototype.initVertical = function() {
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.initColumns = function() {
-    var scope = this.pageBox.scope;
-    var style = this.style;
-    var width = adapt.pm.toExprAuto(scope, style[this.vertical ? "height" : "width"], null);
-    var columnWidth = adapt.pm.toExprAuto(scope, style["column-width"], width);
-    var columnCount = adapt.pm.toExprAuto(scope, style["column-count"], null);
-    var columnGap = adapt.pm.toExprNormal(scope, style["column-gap"], null);
+    const scope = this.pageBox.scope;
+    const style = this.style;
+    const width = adapt.pm.toExprAuto(scope, style[this.vertical ? "height" : "width"], null);
+    let columnWidth = adapt.pm.toExprAuto(scope, style["column-width"], width);
+    let columnCount = adapt.pm.toExprAuto(scope, style["column-count"], null);
+    let columnGap = adapt.pm.toExprNormal(scope, style["column-gap"], null);
     if (!columnGap)
         columnGap = new adapt.expr.Numeric(scope, 1, "em");
     if (columnWidth && !columnCount) {
@@ -840,26 +838,20 @@ adapt.pm.PageBoxInstance.prototype.depends = function(propName, val, context) {
 adapt.pm.PageBoxInstance.prototype.init = function(context) {
     // If context does not implement InstanceHolder we would not be able to resolve
     // "partition.property" names later.
-    var holder = /** @type {adapt.pm.InstanceHolder} */ (context);
+    const holder = /** @type {adapt.pm.InstanceHolder} */ (context);
     holder.registerInstance(this.pageBox.key, this);
-    var scope = this.pageBox.scope;
-    var style = this.style;
-    var self = this;
+    const scope = this.pageBox.scope;
+    const style = this.style;
+    const self = this;
 
-    var regionIds = this.parentInstance ? this.parentInstance.getActiveRegions(context) : null;
-    var cascMap = adapt.csscasc.flattenCascadedStyle(this.cascaded, context, regionIds, false, null);
+    const regionIds = this.parentInstance ? this.parentInstance.getActiveRegions(context) : null;
+    const cascMap = adapt.csscasc.flattenCascadedStyle(this.cascaded, context, regionIds, false, null);
     this.vertical = adapt.csscasc.isVertical(cascMap, context, this.parentInstance ? this.parentInstance.vertical : false);
-    adapt.csscasc.convertToPhysical(cascMap, style, this.vertical, function(name, cascVal) {
-        return cascVal.value;
-    });
+    adapt.csscasc.convertToPhysical(cascMap, style, this.vertical, (name, cascVal) => cascVal.value);
     this.autoWidth = new adapt.expr.Native(scope,
-        function() {
-            return self.calculatedWidth;
-        }, "autoWidth");
+        () => self.calculatedWidth, "autoWidth");
     this.autoHeight = new adapt.expr.Native(scope,
-        function() {
-            return self.calculatedHeight;
-        }, "autoHeight");
+        () => self.calculatedHeight, "autoHeight");
     this.initHorizontal();
     this.initVertical();
     this.initColumns();
@@ -872,7 +864,7 @@ adapt.pm.PageBoxInstance.prototype.init = function(context) {
  * @return {adapt.css.Val}
  */
 adapt.pm.PageBoxInstance.prototype.getProp = function(context, name) {
-    var val = this.style[name];
+    let val = this.style[name];
     if (val) {
         val = adapt.cssparse.evaluateCSSToCSS(context, val, name);
     }
@@ -885,7 +877,7 @@ adapt.pm.PageBoxInstance.prototype.getProp = function(context, name) {
  * @return {number}
  */
 adapt.pm.PageBoxInstance.prototype.getPropAsNumber = function(context, name) {
-    var val = this.style[name];
+    let val = this.style[name];
     if (val) {
         val = adapt.cssparse.evaluateCSSToCSS(context, val, name);
     }
@@ -898,11 +890,11 @@ adapt.pm.PageBoxInstance.prototype.getPropAsNumber = function(context, name) {
  * @return {Array.<adapt.css.Val>}
  */
 adapt.pm.PageBoxInstance.prototype.getSpecial = function(context, name) {
-    var arr = adapt.csscasc.getSpecial(this.cascaded, name);
+    const arr = adapt.csscasc.getSpecial(this.cascaded, name);
     if (arr) {
-        var result = /** @type {Array.<adapt.css.Val>} */ ([]);
-        for (var i = 0; i < arr.length; i++) {
-            var v = arr[i].evaluate(context, "");
+        const result = /** @type {Array.<adapt.css.Val>} */ ([]);
+        for (let i = 0; i < arr.length; i++) {
+            const v = arr[i].evaluate(context, "");
             if (v && v !== adapt.css.empty)
                 result.push(v);
         }
@@ -917,10 +909,10 @@ adapt.pm.PageBoxInstance.prototype.getSpecial = function(context, name) {
  * @return {Array.<string>}
  */
 adapt.pm.PageBoxInstance.prototype.getActiveRegions = function(context) {
-    var arr = this.getSpecial(context, "region-id");
+    const arr = this.getSpecial(context, "region-id");
     if (arr) {
-        var result = /** @type {Array.<string>} */ ([]);
-        for (var i = 0; i < arr.length; i++) {
+        const result = /** @type {Array.<string>} */ ([]);
+        for (let i = 0; i < arr.length; i++) {
             result[i] = arr[i].toString();
         }
         return result;
@@ -947,7 +939,7 @@ adapt.pm.PageBoxInstance.prototype.propagateProperty = function(context, contain
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.propagatePropertyToElement = function(context, element, name, docFaces) {
-    var val = this.getProp(context, name);
+    let val = this.getProp(context, name);
     if (val) {
         if (val.isNumeric() && adapt.expr.needUnitConversion(val.unit)) {
             val = adapt.css.convertNumericToPx(val, context);
@@ -967,7 +959,7 @@ adapt.pm.PageBoxInstance.prototype.propagatePropertyToElement = function(context
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.propagateDelayedProperty = function(context, container, name, delayedItems) {
-    var val = this.getProp(context, name);
+    const val = this.getProp(context, name);
     if (val)
         delayedItems.push(new adapt.vtree.DelayedItem(container.element, name, val));
 };
@@ -978,15 +970,15 @@ adapt.pm.PageBoxInstance.prototype.propagateDelayedProperty = function(context, 
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.assignLeftPosition = function(context, container) {
-    var left = this.getPropAsNumber(context, "left");
-    var marginLeft = this.getPropAsNumber(context, "margin-left");
-    var paddingLeft = this.getPropAsNumber(context, "padding-left");
-    var borderLeftWidth = this.getPropAsNumber(context, "border-left-width");
-    var width = this.getPropAsNumber(context, "width");
+    const left = this.getPropAsNumber(context, "left");
+    const marginLeft = this.getPropAsNumber(context, "margin-left");
+    const paddingLeft = this.getPropAsNumber(context, "padding-left");
+    const borderLeftWidth = this.getPropAsNumber(context, "border-left-width");
+    const width = this.getPropAsNumber(context, "width");
     container.setHorizontalPosition(left, width);
-    adapt.base.setCSSProperty(container.element, "margin-left", marginLeft + "px");
-    adapt.base.setCSSProperty(container.element, "padding-left", paddingLeft + "px");
-    adapt.base.setCSSProperty(container.element, "border-left-width", borderLeftWidth + "px");
+    adapt.base.setCSSProperty(container.element, "margin-left", `${marginLeft}px`);
+    adapt.base.setCSSProperty(container.element, "padding-left", `${paddingLeft}px`);
+    adapt.base.setCSSProperty(container.element, "border-left-width", `${borderLeftWidth}px`);
     container.marginLeft = marginLeft;
     container.borderLeft = borderLeftWidth;
     container.paddingLeft = paddingLeft;
@@ -999,19 +991,19 @@ adapt.pm.PageBoxInstance.prototype.assignLeftPosition = function(context, contai
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.assignRightPosition = function(context, container) {
-    var right = this.getPropAsNumber(context, "right");
-    var snapWidth = this.getPropAsNumber(context, "snap-height");
-    var marginRight = this.getPropAsNumber(context, "margin-right");
-    var paddingRight = this.getPropAsNumber(context, "padding-right");
-    var borderRightWidth = this.getPropAsNumber(context, "border-right-width");
-    adapt.base.setCSSProperty(container.element, "margin-right", marginRight + "px");
-    adapt.base.setCSSProperty(container.element, "padding-right", paddingRight + "px");
-    adapt.base.setCSSProperty(container.element, "border-right-width", borderRightWidth + "px");
+    const right = this.getPropAsNumber(context, "right");
+    const snapWidth = this.getPropAsNumber(context, "snap-height");
+    const marginRight = this.getPropAsNumber(context, "margin-right");
+    let paddingRight = this.getPropAsNumber(context, "padding-right");
+    const borderRightWidth = this.getPropAsNumber(context, "border-right-width");
+    adapt.base.setCSSProperty(container.element, "margin-right", `${marginRight}px`);
+    adapt.base.setCSSProperty(container.element, "padding-right", `${paddingRight}px`);
+    adapt.base.setCSSProperty(container.element, "border-right-width", `${borderRightWidth}px`);
     container.marginRight = marginRight;
     container.borderRight = borderRightWidth;
     if (this.vertical && snapWidth > 0) {
-        var xpos = right + container.getInsetRight();
-        var r = xpos - Math.floor(xpos / snapWidth) * snapWidth;
+        const xpos = right + container.getInsetRight();
+        const r = xpos - Math.floor(xpos / snapWidth) * snapWidth;
         if (r > 0) {
             container.snapOffsetX = snapWidth - r;
             paddingRight += container.snapOffsetX;
@@ -1027,28 +1019,28 @@ adapt.pm.PageBoxInstance.prototype.assignRightPosition = function(context, conta
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.assignTopPosition = function(context, container) {
-    var snapHeight = this.getPropAsNumber(context, "snap-height");
-    var top = this.getPropAsNumber(context, "top");
-    var marginTop = this.getPropAsNumber(context, "margin-top");
-    var paddingTop = this.getPropAsNumber(context, "padding-top");
-    var borderTopWidth = this.getPropAsNumber(context, "border-top-width");
+    const snapHeight = this.getPropAsNumber(context, "snap-height");
+    const top = this.getPropAsNumber(context, "top");
+    const marginTop = this.getPropAsNumber(context, "margin-top");
+    let paddingTop = this.getPropAsNumber(context, "padding-top");
+    const borderTopWidth = this.getPropAsNumber(context, "border-top-width");
     container.top = top;
     container.marginTop = marginTop;
     container.borderTop = borderTopWidth;
     container.snapHeight = snapHeight;
     if (!this.vertical && snapHeight > 0) {
-        var ypos = top + container.getInsetTop();
-        var r = ypos - Math.floor(ypos / snapHeight) * snapHeight;
+        const ypos = top + container.getInsetTop();
+        const r = ypos - Math.floor(ypos / snapHeight) * snapHeight;
         if (r > 0) {
             container.snapOffsetY = snapHeight - r;
             paddingTop += container.snapOffsetY;
         }
     }
     container.paddingTop = paddingTop;
-    adapt.base.setCSSProperty(container.element, "top", top + "px");
-    adapt.base.setCSSProperty(container.element, "margin-top", marginTop + "px");
-    adapt.base.setCSSProperty(container.element, "padding-top", paddingTop + "px");
-    adapt.base.setCSSProperty(container.element, "border-top-width", borderTopWidth + "px");
+    adapt.base.setCSSProperty(container.element, "top", `${top}px`);
+    adapt.base.setCSSProperty(container.element, "margin-top", `${marginTop}px`);
+    adapt.base.setCSSProperty(container.element, "padding-top", `${paddingTop}px`);
+    adapt.base.setCSSProperty(container.element, "border-top-width", `${borderTopWidth}px`);
 };
 
 /**
@@ -1057,14 +1049,14 @@ adapt.pm.PageBoxInstance.prototype.assignTopPosition = function(context, contain
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.assignBottomPosition = function(context, container) {
-    var marginBottom = this.getPropAsNumber(context, "margin-bottom");
-    var paddingBottom = this.getPropAsNumber(context, "padding-bottom");
-    var borderBottomWidth = this.getPropAsNumber(context, "border-bottom-width");
-    var height = this.getPropAsNumber(context, "height") - container.snapOffsetY;
-    adapt.base.setCSSProperty(container.element, "height", height + "px");
-    adapt.base.setCSSProperty(container.element, "margin-bottom", marginBottom + "px");
-    adapt.base.setCSSProperty(container.element, "padding-bottom", paddingBottom + "px");
-    adapt.base.setCSSProperty(container.element, "border-bottom-width", borderBottomWidth + "px");
+    const marginBottom = this.getPropAsNumber(context, "margin-bottom");
+    const paddingBottom = this.getPropAsNumber(context, "padding-bottom");
+    const borderBottomWidth = this.getPropAsNumber(context, "border-bottom-width");
+    const height = this.getPropAsNumber(context, "height") - container.snapOffsetY;
+    adapt.base.setCSSProperty(container.element, "height", `${height}px`);
+    adapt.base.setCSSProperty(container.element, "margin-bottom", `${marginBottom}px`);
+    adapt.base.setCSSProperty(container.element, "padding-bottom", `${paddingBottom}px`);
+    adapt.base.setCSSProperty(container.element, "border-bottom-width", `${borderBottomWidth}px`);
     container.height = height - container.snapOffsetY;
     container.marginBottom = marginBottom;
     container.borderBottom = borderBottomWidth;
@@ -1118,14 +1110,14 @@ adapt.pm.PageBoxInstance.prototype.assignStartEndPosition = function(context, co
  */
 adapt.pm.PageBoxInstance.prototype.sizeWithMaxHeight = function(context, container) {
     adapt.base.setCSSProperty(container.element, "border-top-width", "0px");
-    var height = this.getPropAsNumber(context, "max-height");
+    let height = this.getPropAsNumber(context, "max-height");
     if (this.isTopDependentOnAutoHeight) {
         container.setVerticalPosition(0, height);
     } else {
         this.assignTopPosition(context, container);
         height -= container.snapOffsetY;
         container.height = height;
-        adapt.base.setCSSProperty(container.element, "height", height + "px");
+        adapt.base.setCSSProperty(container.element, "height", `${height}px`);
     }
 };
 
@@ -1136,16 +1128,16 @@ adapt.pm.PageBoxInstance.prototype.sizeWithMaxHeight = function(context, contain
  */
 adapt.pm.PageBoxInstance.prototype.sizeWithMaxWidth = function(context, container) {
     adapt.base.setCSSProperty(container.element, "border-left-width", "0px");
-    var width = this.getPropAsNumber(context, "max-width");
+    let width = this.getPropAsNumber(context, "max-width");
     if (this.isRightDependentOnAutoWidth) {
         container.setHorizontalPosition(0, width);
     } else {
         this.assignRightPosition(context, container);
         width -= container.snapOffsetX;
         container.width = width;
-        var right = this.getPropAsNumber(context, "right");
-        adapt.base.setCSSProperty(container.element, "right", right + "px");
-        adapt.base.setCSSProperty(container.element, "width", width + "px");
+        const right = this.getPropAsNumber(context, "right");
+        adapt.base.setCSSProperty(container.element, "right", `${right}px`);
+        adapt.base.setCSSProperty(container.element, "width", `${width}px`);
     }
 };
 
@@ -1261,7 +1253,7 @@ adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, containe
     } else {
         this.assignStartEndPosition(context, container);
     }
-    for (var i = 0; i < adapt.pm.passPreProperties.length; i++) {
+    for (let i = 0; i < adapt.pm.passPreProperties.length; i++) {
         this.propagateProperty(context, container, adapt.pm.passPreProperties[i], docFaces);
     }
 };
@@ -1274,7 +1266,7 @@ adapt.pm.PageBoxInstance.prototype.prepareContainer = function(context, containe
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.transferContentProps = function(context, container, page, docFaces) {
-    for (var i = 0; i < adapt.pm.passContentProperties.length; i++) {
+    for (let i = 0; i < adapt.pm.passContentProperties.length; i++) {
         this.propagateProperty(context, container, adapt.pm.passContentProperties[i], docFaces);
     }
 };
@@ -1286,7 +1278,7 @@ adapt.pm.PageBoxInstance.prototype.transferContentProps = function(context, cont
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.transferSinglUriContentProps = function(context, element, docFaces) {
-    for (var i = 0; i < adapt.pm.passSingleUriContentProperties.length; i++) {
+    for (let i = 0; i < adapt.pm.passSingleUriContentProperties.length; i++) {
         this.propagatePropertyToElement(context, element, adapt.pm.passSingleUriContentProperties[i], docFaces);
     }
 };
@@ -1308,9 +1300,9 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
         this.calculatedWidth = container.computedBlockSize + container.snapOffsetX;
     else
         this.calculatedHeight = container.computedBlockSize + container.snapOffsetY;
-    var readHeight = (this.vertical || !column) && this.isAutoHeight;
-    var readWidth = (!this.vertical || !column) && this.isAutoWidth;
-    var bbox = null;
+    const readHeight = (this.vertical || !column) && this.isAutoHeight;
+    const readWidth = (!this.vertical || !column) && this.isAutoWidth;
+    let bbox = null;
     if (readWidth || readHeight) {
         if (readWidth) {
             adapt.base.setCSSProperty(container.element, "width", "auto");
@@ -1343,26 +1335,26 @@ adapt.pm.PageBoxInstance.prototype.finishContainer = function(
         this.assignAfterPosition(context, container);
     }
     if (columnCount > 1) {
-        var ruleWidth = this.getPropAsNumber(context, "column-rule-width");
-        var ruleStyle = this.getProp(context, "column-rule-style");
-        var ruleColor = this.getProp(context, "column-rule-color");
+        const ruleWidth = this.getPropAsNumber(context, "column-rule-width");
+        const ruleStyle = this.getProp(context, "column-rule-style");
+        const ruleColor = this.getProp(context, "column-rule-color");
         if (ruleWidth > 0 && ruleStyle && ruleStyle != adapt.css.ident.none &&
             ruleColor != adapt.css.ident.transparent) {
-            var columnGap = this.getPropAsNumber(context, "column-gap");
-            var containerSize = this.vertical ? container.height : container.width;
-            var border = this.vertical ? "border-top" : "border-left";
+            const columnGap = this.getPropAsNumber(context, "column-gap");
+            const containerSize = this.vertical ? container.height : container.width;
+            const border = this.vertical ? "border-top" : "border-left";
             for (var i = 1; i < columnCount; i++) {
-                var pos = (containerSize + columnGap) * i / columnCount - columnGap/2
+                const pos = (containerSize + columnGap) * i / columnCount - columnGap/2
                     + container.paddingLeft - ruleWidth/2;
-                var size = container.height + container.paddingTop + container.paddingBottom;
-                var rule = container.element.ownerDocument.createElement("div");
+                const size = container.height + container.paddingTop + container.paddingBottom;
+                const rule = container.element.ownerDocument.createElement("div");
                 adapt.base.setCSSProperty(rule, "position", "absolute");
                 adapt.base.setCSSProperty(rule, this.vertical ? "left" : "top", "0px");
-                adapt.base.setCSSProperty(rule, this.vertical ? "top" : "left", pos + "px");
+                adapt.base.setCSSProperty(rule, this.vertical ? "top" : "left", `${pos}px`);
                 adapt.base.setCSSProperty(rule, this.vertical ? "height" : "width", "0px");
-                adapt.base.setCSSProperty(rule, this.vertical ? "width" : "height", size + "px");
+                adapt.base.setCSSProperty(rule, this.vertical ? "width" : "height", `${size}px`);
                 adapt.base.setCSSProperty(rule, border,
-                    ruleWidth + "px " + ruleStyle.toString() + (ruleColor ? " " + ruleColor.toString() : ""));
+                    `${ruleWidth}px ${ruleStyle.toString()}${ruleColor ? ` ${ruleColor.toString()}` : ""}`);
                 container.element.insertBefore(rule, container.element.firstChild);
             }
         }
@@ -1383,8 +1375,8 @@ adapt.pm.userAgentPageMasterPseudo = "background-host";
  * @return {void}
  */
 adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit = function(cascade, docElementStyle) {
-    var style = this.cascaded;
-    var specified = this.pageBox.specified;
+    const style = this.cascaded;
+    const specified = this.pageBox.specified;
     for (var name in specified) {
         if (adapt.csscasc.isPropName(name)) {
             adapt.csscasc.setProp(style, name, adapt.csscasc.getProp(specified, name));
@@ -1410,11 +1402,12 @@ adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit = function(cascade, docEl
             new adapt.csscasc.ContentPropVisitor(cascade, null, cascade.counterResolver));
     }
     this.init(cascade.context);
-    for (var i = 0; i < this.pageBox.children.length; i++) {
-        var child = this.pageBox.children[i];
-        var childInstance = child.createInstance(this);
+
+    for (const child of this.pageBox.children) {
+        const childInstance = child.createInstance(this);
         childInstance.applyCascadeAndInit(cascade, docElementStyle);
     }
+
     cascade.popRule();
 };
 
@@ -1436,8 +1429,8 @@ adapt.pm.PageBoxInstance.prototype.resolveAutoSizing = function(context) {
             this.depends("border-top-width", this.autoHeight, context) ||
             this.depends("padding-top", this.autoHeight, context);
     }
-    for (var i = 0; i < this.children.length; i++) {
-        var childInstance = this.children[i];
+
+    for (const childInstance of this.children) {
         childInstance.resolveAutoSizing(context);
     }
 };
@@ -1459,16 +1452,9 @@ goog.inherits(adapt.pm.RootPageBoxInstance, adapt.pm.PageBoxInstance);
 adapt.pm.RootPageBoxInstance.prototype.applyCascadeAndInit = function(cascade, docElementStyle) {
     adapt.pm.PageBoxInstance.prototype.applyCascadeAndInit.call(this, cascade, docElementStyle);
     // Sort page masters using order and specificity.
-    var pageMasters = this.children;
+    const pageMasters = this.children;
     (/** @type {Array.<adapt.pm.PageMasterInstance>} */ (pageMasters)).sort(
-        /**
-         * @param {adapt.pm.PageMasterInstance} a
-         * @param {adapt.pm.PageMasterInstance} b
-         * @return {number}
-         */
-        function(a, b) {
-            return b.pageBox.specificity - a.pageBox.specificity || a.pageBox.index - b.pageBox.index;
-        }
+        (a, b) => b.pageBox.specificity - a.pageBox.specificity || a.pageBox.index - b.pageBox.index
     );
 };
 
@@ -1488,7 +1474,7 @@ goog.inherits(adapt.pm.PageMasterInstance, adapt.pm.PageBoxInstance);
  * @override
  */
 adapt.pm.PageMasterInstance.prototype.boxSpecificEnabled = function(enabled) {
-    var pageMaster = this.pageBox.pageMaster;
+    const pageMaster = this.pageBox.pageMaster;
     if (pageMaster.condition) {
         enabled = adapt.expr.and(pageMaster.scope, enabled, pageMaster.condition);
     }
@@ -1502,7 +1488,7 @@ adapt.pm.PageMasterInstance.prototype.boxSpecificEnabled = function(enabled) {
  * @param {adapt.vtree.Page} page
  * @param {adapt.vtree.ClientLayout} clientLayout
  */
-adapt.pm.PageMasterInstance.prototype.adjustPageLayout = function(context, page, clientLayout) {
+adapt.pm.PageMasterInstance.prototype.adjustPageLayout = (context, page, clientLayout) => {
 };
 
 /**
@@ -1537,7 +1523,7 @@ goog.inherits(adapt.pm.PartitionInstance, adapt.pm.PageBoxInstance);
  * @return {adapt.expr.Val}
  */
 adapt.pm.PartitionInstance.prototype.processPartitionList = function(enabled, listVal, conflicting) {
-    var list = null;
+    let list = null;
     if (listVal instanceof adapt.css.Ident) {
         list = [listVal];
     }
@@ -1545,12 +1531,12 @@ adapt.pm.PartitionInstance.prototype.processPartitionList = function(enabled, li
         list = (/** @type {adapt.css.CommaList} */ (listVal)).values;
     }
     if (list) {
-        var scope = this.pageBox.scope;
-        for (var i = 0; i < list.length; i++) {
+        const scope = this.pageBox.scope;
+        for (let i = 0; i < list.length; i++) {
             if (list[i] instanceof adapt.css.Ident) {
-                var qname = adapt.expr.makeQualifiedName(
+                const qname = adapt.expr.makeQualifiedName(
                     (/** @type {adapt.css.Ident} */ (list[i])).name, "enabled");
-                var term = new adapt.expr.Named(scope, qname);
+                let term = new adapt.expr.Named(scope, qname);
                 if (conflicting) {
                     term = new adapt.expr.Not(scope, term);
                 }
@@ -1565,19 +1551,19 @@ adapt.pm.PartitionInstance.prototype.processPartitionList = function(enabled, li
  * @override
  */
 adapt.pm.PartitionInstance.prototype.boxSpecificEnabled = function(enabled) {
-    var scope = this.pageBox.scope;
-    var style = this.style;
-    var required = adapt.pm.toExprBool(scope, style["required"], scope._false) !== scope._false;
+    const scope = this.pageBox.scope;
+    const style = this.style;
+    const required = adapt.pm.toExprBool(scope, style["required"], scope._false) !== scope._false;
     if (required || this.isAutoHeight) {
-        var flowName = adapt.pm.toExprIdent(scope, style["flow-from"], "body");
-        var hasContent = new adapt.expr.Call(scope, "has-content", [flowName]);
+        const flowName = adapt.pm.toExprIdent(scope, style["flow-from"], "body");
+        const hasContent = new adapt.expr.Call(scope, "has-content", [flowName]);
         enabled = adapt.expr.and(scope, enabled, hasContent);
     }
     enabled = this.processPartitionList(enabled, style["required-partitions"], false);
     enabled = this.processPartitionList(enabled, style["conflicting-partitions"], true);
     if (required) {
-        var pmEnabledVal = this.pageMasterInstance.style["enabled"];
-        var pmEnabled = pmEnabledVal ? pmEnabledVal.toExpr(scope, null) : scope._true;
+        const pmEnabledVal = this.pageMasterInstance.style["enabled"];
+        let pmEnabled = pmEnabledVal ? pmEnabledVal.toExpr(scope, null) : scope._true;
         pmEnabled = adapt.expr.and(scope, pmEnabled, enabled);
         this.pageMasterInstance.style["enabled"] = new adapt.css.Expr(pmEnabled);
     }
@@ -1622,14 +1608,14 @@ adapt.pm.PageBoxParserHandler.prototype.property = function(name, value, importa
  * @override
  */
 adapt.pm.PageBoxParserHandler.prototype.unknownProperty = function(name, value) {
-    this.report("E_INVALID_PROPERTY " + name + ": " + value.toString());
+    this.report(`E_INVALID_PROPERTY ${name}: ${value.toString()}`);
 };
 
 /**
  * @override
  */
 adapt.pm.PageBoxParserHandler.prototype.invalidPropertyValue = function(name, value) {
-    this.report("E_INVALID_PROPERTY_VALUE " + name + ": " + value.toString());
+    this.report(`E_INVALID_PROPERTY_VALUE ${name}: ${value.toString()}`);
 };
 
 /**
@@ -1674,8 +1660,8 @@ goog.inherits(adapt.pm.PartitionGroupParserHandler, adapt.pm.PageBoxParserHandle
  * @override
  */
 adapt.pm.PartitionGroupParserHandler.prototype.startPartitionRule = function(name, pseudoName, classes) {
-    var partition = new adapt.pm.Partition(this.scope, name, pseudoName, classes, this.target);
-    var handler = new adapt.pm.PartitionParserHandler(this.scope, this.owner,
+    const partition = new adapt.pm.Partition(this.scope, name, pseudoName, classes, this.target);
+    const handler = new adapt.pm.PartitionParserHandler(this.scope, this.owner,
         partition, this.validatorSet);
     this.owner.pushHandler(handler);
 };
@@ -1684,8 +1670,8 @@ adapt.pm.PartitionGroupParserHandler.prototype.startPartitionRule = function(nam
  * @override
  */
 adapt.pm.PartitionGroupParserHandler.prototype.startPartitionGroupRule = function(name, pseudoName, classes) {
-    var partitionGroup = new adapt.pm.PartitionGroup(this.scope, name, pseudoName, classes, this.target);
-    var handler = new adapt.pm.PartitionGroupParserHandler(this.scope, this.owner,
+    const partitionGroup = new adapt.pm.PartitionGroup(this.scope, name, pseudoName, classes, this.target);
+    const handler = new adapt.pm.PartitionGroupParserHandler(this.scope, this.owner,
         partitionGroup, this.validatorSet);
     this.owner.pushHandler(handler);
 };
@@ -1708,8 +1694,8 @@ goog.inherits(adapt.pm.PageMasterParserHandler, adapt.pm.PageBoxParserHandler);
  * @override
  */
 adapt.pm.PageMasterParserHandler.prototype.startPartitionRule = function(name, pseudoName, classes) {
-    var partition = new adapt.pm.Partition(this.scope, name, pseudoName, classes, this.target);
-    var handler = new adapt.pm.PartitionParserHandler(this.scope, this.owner,
+    const partition = new adapt.pm.Partition(this.scope, name, pseudoName, classes, this.target);
+    const handler = new adapt.pm.PartitionParserHandler(this.scope, this.owner,
         partition, this.validatorSet);
     this.owner.pushHandler(handler);
 };
@@ -1718,8 +1704,8 @@ adapt.pm.PageMasterParserHandler.prototype.startPartitionRule = function(name, p
  * @override
  */
 adapt.pm.PageMasterParserHandler.prototype.startPartitionGroupRule = function(name, pseudoName, classes) {
-    var partitionGroup = new adapt.pm.PartitionGroup(this.scope, name, pseudoName, classes, this.target);
-    var handler = new adapt.pm.PartitionGroupParserHandler(this.scope, this.owner,
+    const partitionGroup = new adapt.pm.PartitionGroup(this.scope, name, pseudoName, classes, this.target);
+    const handler = new adapt.pm.PartitionGroupParserHandler(this.scope, this.owner,
         partitionGroup, this.validatorSet);
     this.owner.pushHandler(handler);
 };

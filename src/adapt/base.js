@@ -30,24 +30,20 @@ adapt.base.JSON;
  * @param {adapt.base.JSON} json
  * @return {string}
  */
-adapt.base.jsonToString = function(json) {
-    return JSON.stringify(json);
-};
+adapt.base.jsonToString = json => JSON.stringify(json);
 
 /**
  * @param {string} str
  * @return {adapt.base.JSON}
  */
-adapt.base.stringToJSON = function(str) {
-    return JSON.parse(str);
-};
+adapt.base.stringToJSON = str => JSON.parse(str);
 
 /**
  * @param {string} url
  * @return {string}
  */
-adapt.base.stripFragment = function(url) {
-    var r = url.match(/^([^#]*)/);
+adapt.base.stripFragment = url => {
+    const r = url.match(/^([^#]*)/);
     if (r)
         return r[1];
     return url;
@@ -57,8 +53,8 @@ adapt.base.stripFragment = function(url) {
  * @param {string} url
  * @return {string}
  */
-adapt.base.stripFragmentAndQuery = function(url) {
-    var r = url.match(/^([^#?]*)/);
+adapt.base.stripFragmentAndQuery = url => {
+    const r = url.match(/^([^#?]*)/);
     if (r)
         return r[1];
     return url;
@@ -80,7 +76,7 @@ adapt.base.resourceBaseURL = window.location.href;
  * @param {string} baseURL base (absolute) URL
  * @return {string} resolved (absolute) URL
  */
-adapt.base.resolveURL = function(relURL, baseURL) {
+adapt.base.resolveURL = (relURL, baseURL) => {
     if (!baseURL || relURL.match(/^\w{2,}:/)) {
         if (relURL.toLowerCase().match("^javascript:")) {
             return "#";
@@ -88,8 +84,8 @@ adapt.base.resolveURL = function(relURL, baseURL) {
         return relURL;
     }
     if (baseURL.match(/^\w{2,}:\/\/[^\/]+$/))
-        baseURL = baseURL + '/';
-    /** @type {Array.<string>} */ var r;
+        baseURL = `${baseURL}/`;
+    /** @type {Array.<string>} */ let r;
     if (relURL.match(/^\/\//)) {
         r = baseURL.match(/^(\w{2,}:)\/\//);
         if (r)
@@ -107,15 +103,15 @@ adapt.base.resolveURL = function(relURL, baseURL) {
     baseURL = adapt.base.stripFragmentAndQuery(baseURL);
     if (relURL.match(/^\#/))
         return baseURL + relURL;
-    var i = baseURL.lastIndexOf('/');
+    let i = baseURL.lastIndexOf('/');
     if (i < 0)
         return relURL;
-    var url = baseURL.substr(0, i + 1) + relURL;
+    let url = baseURL.substr(0, i + 1) + relURL;
     while (true) {
         i = url.indexOf('/../');
         if (i <= 0)
             break;
-        var j = url.lastIndexOf('/', i - 1);
+        const j = url.lastIndexOf('/', i - 1);
         if (j <= 0)
             break;
         url = url.substr(0, j) + url.substr(i + 3);
@@ -133,20 +129,20 @@ adapt.base.DocumentURLTransformer = function() {};
  * @param {string} baseURL
  * @returns {string}
  */
-adapt.base.DocumentURLTransformer.prototype.transformFragment = function(fragment, baseURL) {};
+adapt.base.DocumentURLTransformer.prototype.transformFragment = (fragment, baseURL) => {};
 
 /**
  * @param {string} url
  * @param {string} baseURL
  * @returns {string}
  */
-adapt.base.DocumentURLTransformer.prototype.transformURL = function(url, baseURL) {};
+adapt.base.DocumentURLTransformer.prototype.transformURL = (url, baseURL) => {};
 
 /**
  * @param {string} encoded
  * @returns {!Array<string>}
  */
-adapt.base.DocumentURLTransformer.prototype.restoreURL = function(encoded) {};
+adapt.base.DocumentURLTransformer.prototype.restoreURL = encoded => {};
 
 /**
  * Various namespaces.
@@ -173,10 +169,10 @@ adapt.base.NS = {
  * @param {string=} opt_url URL; window.location.href is used if not provided
  * @return {?string} parameter value
  */
-adapt.base.getURLParam = function(name, opt_url) {
-    var rg = new RegExp('#(.*&)?' + adapt.base.escapeRegExp(name) + '=([^#&]*)');
-    var url = opt_url || window.location.href;
-    var r = url.match(rg);
+adapt.base.getURLParam = (name, opt_url) => {
+    const rg = new RegExp(`#(.*&)?${adapt.base.escapeRegExp(name)}=([^#&]*)`);
+    const url = opt_url || window.location.href;
+    const r = url.match(rg);
     if (r)
         return r[2];
     return null;
@@ -188,18 +184,18 @@ adapt.base.getURLParam = function(name, opt_url) {
  * @param {string} value parameter value
  * @return {string} new url
  */
-adapt.base.setURLParam = function(url, name, value) {
-    var rg = new RegExp('#(.*&)?' + adapt.base.escapeRegExp(name) + '=([^#&]*)');
-    var r = url.match(rg);
+adapt.base.setURLParam = (url, name, value) => {
+    const rg = new RegExp(`#(.*&)?${adapt.base.escapeRegExp(name)}=([^#&]*)`);
+    const r = url.match(rg);
     if (r) {
-        var length = r[2].length;
-        var index = r.index + r[0].length - length;
+        const length = r[2].length;
+        const index = r.index + r[0].length - length;
         return url.substr(0, index) + value + url.substr(index + length);
     }
     if (!url.match(/#/)) {
-        return url + "#" + name + "=" + value;
+        return `${url}#${name}=${value}`;
     } else {
-        return url + "&" + name + "=" + value;
+        return `${url}&${name}=${value}`;
     }
 };
 
@@ -207,7 +203,7 @@ adapt.base.setURLParam = function(url, name, value) {
  * @param {*} v
  * @return ?string
  */
-adapt.base.asString = function(v) {
+adapt.base.asString = v => {
     if (v == null)
         return v;
     return v.toString();
@@ -222,7 +218,7 @@ adapt.base.Comparable = function() {};
  * @param {!adapt.base.Comparable} other
  * @return {number} -1 when this less then other, 0 when this equals other
  */
-adapt.base.Comparable.prototype.compare = function(other) {};
+adapt.base.Comparable.prototype.compare = other => {};
 
 
 /**
@@ -245,10 +241,10 @@ adapt.base.PriorityQueue.prototype.length = function() {
  * @return {void}
  */
 adapt.base.PriorityQueue.prototype.add = function(item) {
-    var index = this.queue.length;
+    let index = this.queue.length;
     while (index > 1) {
-        var parentIndex = Math.floor(index / 2);
-        var parent = this.queue[parentIndex];
+        const parentIndex = Math.floor(index / 2);
+        const parent = this.queue[parentIndex];
         if (parent.compare(item) > 0) {
             this.queue[index] = item;
             return;
@@ -272,13 +268,13 @@ adapt.base.PriorityQueue.prototype.peek = function() {
  * @return {!adapt.base.Comparable} removed item.
  */
 adapt.base.PriorityQueue.prototype.remove = function() {
-    var result = /** @type {!adapt.base.Comparable} */ (this.queue[1]);
-    var curr = /** @type {!adapt.base.Comparable} */ (this.queue.pop());
-    var size = this.queue.length;
+    const result = /** @type {!adapt.base.Comparable} */ (this.queue[1]);
+    const curr = /** @type {!adapt.base.Comparable} */ (this.queue.pop());
+    const size = this.queue.length;
     if (size > 1) {
-        var index = 1;
+        let index = 1;
         while (true) {
-            var childIndex = index*2;
+            let childIndex = index*2;
             if (childIndex >= size)
                 break;
             if (this.queue[childIndex].compare(curr) > 0) {
@@ -306,15 +302,15 @@ adapt.base.PriorityQueue.prototype.remove = function() {
  * @param {string} cssPropName CSS property name
  * @return {string} JavaScript property name
  */
-adapt.base.cssToJSProp = function(prefix, cssPropName) {
+adapt.base.cssToJSProp = (prefix, cssPropName) => {
     if (prefix) {
-        cssPropName = "-" + cssPropName;
+        cssPropName = `-${cssPropName}`;
         prefix = prefix.replace(/-/g, "");
         if (prefix === "moz") {
             prefix = "Moz";
         }
     }
-    return prefix + cssPropName.replace(/-[a-z]/g, function(txt) {return txt.substr(1).toUpperCase();});
+    return prefix + cssPropName.replace(/-[a-z]/g, txt => txt.substr(1).toUpperCase());
 };
 
 /**
@@ -335,10 +331,10 @@ adapt.base.propNameMap = {};
  * @param {string} prop
  * @returns {boolean}
  */
-adapt.base.checkIfPropertySupported = function(prefix, prop) {
+adapt.base.checkIfPropertySupported = (prefix, prop) => {
     // Special case
     if (prop === "writing-mode") {
-        var probe = document.createElement("span");
+        const probe = document.createElement("span");
         if (prefix === "-ms-") {
             probe.style.setProperty(prefix + prop, "tb-rl");
             return probe.style["writing-mode"] === "tb-rl";
@@ -347,7 +343,7 @@ adapt.base.checkIfPropertySupported = function(prefix, prop) {
             return probe.style[prefix + prop] === "vertical-rl";
         }
     } else {
-        var style = document.documentElement.style;
+        const style = document.documentElement.style;
         return typeof style[adapt.base.cssToJSProp(prefix, prop)] === "string";
     }
 };
@@ -356,8 +352,8 @@ adapt.base.checkIfPropertySupported = function(prefix, prop) {
  * @param {string} prop
  * @returns {?Array.<string>}
  */
-adapt.base.getPrefixedPropertyNames = function(prop) {
-    var prefixed = adapt.base.propNameMap[prop];
+adapt.base.getPrefixedPropertyNames = prop => {
+    let prefixed = adapt.base.propNameMap[prop];
     if (prefixed || prefixed === null) { // null means the browser does not support the property
         return prefixed;
     }
@@ -385,14 +381,14 @@ adapt.base.getPrefixedPropertyNames = function(prop) {
     }
 
 
-    for (var i = 0; i < adapt.base.knownPrefixes.length; i++) {
-        var prefix = adapt.base.knownPrefixes[i];
+    for (const prefix of adapt.base.knownPrefixes) {
         if (adapt.base.checkIfPropertySupported(prefix, prop)) {
             prefixed = prefix + prop;
             adapt.base.propNameMap[prop] = [prefixed];
             return [prefixed];
         }
     }
+
     // Not supported by the browser
     vivliostyle.logging.logger.warn("Property not supported by the browser: ", prop);
     adapt.base.propNameMap[prop] = null;
@@ -405,13 +401,13 @@ adapt.base.getPrefixedPropertyNames = function(prop) {
  * @param {string} value
  * @return {void}
  */
-adapt.base.setCSSProperty = function(elem, prop, value) {
+adapt.base.setCSSProperty = (elem, prop, value) => {
     try {
-        var prefixedPropertyNames = adapt.base.getPrefixedPropertyNames(prop);
+        const prefixedPropertyNames = adapt.base.getPrefixedPropertyNames(prop);
         if (!prefixedPropertyNames) {
             return;
         }
-        prefixedPropertyNames.forEach(function(prefixed) {
+        prefixedPropertyNames.forEach(prefixed => {
             if (prefixed === "-ms-writing-mode") {
                 switch (value) {
                     case "horizontal-tb":
@@ -440,9 +436,9 @@ adapt.base.setCSSProperty = function(elem, prop, value) {
  * @param {string=} opt_value
  * @return {string}
  */
-adapt.base.getCSSProperty = function(elem, prop, opt_value) {
+adapt.base.getCSSProperty = (elem, prop, opt_value) => {
     try {
-        var propertyNames = adapt.base.propNameMap[prop];
+        const propertyNames = adapt.base.propNameMap[prop];
         return (/** @type {HTMLElement} */ (elem)).style.getPropertyValue(
              propertyNames ? propertyNames[0] : prop);
     } catch (err) {
@@ -454,8 +450,8 @@ adapt.base.getCSSProperty = function(elem, prop, opt_value) {
  * @param {Element} element
  * @return {string}
  */
-adapt.base.getLangAttribute = function(element) {
-    var lang = element.getAttributeNS(adapt.base.NS.XML, "lang");
+adapt.base.getLangAttribute = element => {
+    let lang = element.getAttributeNS(adapt.base.NS.XML, "lang");
     if (!lang && element.namespaceURI == adapt.base.NS.XHTML) {
         lang = element.getAttribute("lang");
     }
@@ -490,7 +486,7 @@ adapt.base.StringBuffer.prototype.clear = function() {
  * @return {string}
  */
 adapt.base.StringBuffer.prototype.toString = function() {
-    var str = this.list.join('');
+    const str = this.list.join('');
     this.list = [str];
     return str;
 };
@@ -499,49 +495,39 @@ adapt.base.StringBuffer.prototype.toString = function() {
  * @param {string} str
  * @return {string}
  */
-adapt.base.escapeChar = function(str) {
-    // not called for surrogate pairs, no need to worry about them
-    return '\\' + str.charCodeAt(0).toString(16) + ' ';
-};
+adapt.base.escapeChar = str => // not called for surrogate pairs, no need to worry about them
+`\\${str.charCodeAt(0).toString(16)} `;
 
 /**
  * @param {string} name
  * @return {string}
  */
-adapt.base.escapeCSSIdent = function(name) {
-    return name.replace(/[^-_a-zA-Z0-9\u0080-\uFFFF]/g, adapt.base.escapeChar);
-};
+adapt.base.escapeCSSIdent = name => name.replace(/[^-_a-zA-Z0-9\u0080-\uFFFF]/g, adapt.base.escapeChar);
 
 /**
  * @param {string} str
  * @return {string}
  */
-adapt.base.escapeCSSStr = function(str) {
-    return str.replace(/[\u0000-\u001F"]/g, adapt.base.escapeChar);
-};
+adapt.base.escapeCSSStr = str => str.replace(/[\u0000-\u001F"]/g, adapt.base.escapeChar);
 
 /**
  * @param {string} str
  * @return {string}
  */
-adapt.base.lightURLEncode = function(str) {
-    return str.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
-};
+adapt.base.lightURLEncode = str => str.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
 
 /**
  * @param {string} ch
  * @return {boolean}
  */
-adapt.base.isLetter = function(ch) {
-    return !!ch.match(/^[a-zA-Z\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]$/);
-};
+adapt.base.isLetter = ch => !!ch.match(/^[a-zA-Z\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]$/);
 
 /**
  * @param {string} str
  * @param {string=} prefix
  * @return {string}
  */
-adapt.base.escapeCharToHex = function(str, prefix) {
+adapt.base.escapeCharToHex = (str, prefix) => {
     prefix = typeof prefix === "string" ? prefix : '\\u';
     return prefix + (0x10000|str.charCodeAt(0)).toString(16).substr(1);
 };
@@ -551,7 +537,7 @@ adapt.base.escapeCharToHex = function(str, prefix) {
  * @param {string=} prefix
  * @return {string}
  */
-adapt.base.escapeNameStrToHex = function(str, prefix) {
+adapt.base.escapeNameStrToHex = (str, prefix) => {
     function escapeChar(s) {
         return adapt.base.escapeCharToHex(s, prefix);
     }
@@ -562,16 +548,14 @@ adapt.base.escapeNameStrToHex = function(str, prefix) {
  * @param {string} str
  * @return {string}
  */
-adapt.base.escapeRegExp = function(str) {
-    return adapt.base.escapeNameStrToHex(str);
-};
+adapt.base.escapeRegExp = str => adapt.base.escapeNameStrToHex(str);
 
 /**
  * @param {string} str
  * @param {string=} prefix
  * @return {string}
  */
-adapt.base.unescapeCharFromHex = function(str, prefix) {
+adapt.base.unescapeCharFromHex = (str, prefix) => {
     prefix = typeof prefix === "string" ? prefix : '\\u';
     if (str.indexOf(prefix) === 0) {
         return String.fromCharCode(parseInt(str.substring(prefix.length), 16));
@@ -585,12 +569,12 @@ adapt.base.unescapeCharFromHex = function(str, prefix) {
  * @param {string=} prefix
  * @return {string}
  */
-adapt.base.unescapeStrFromHex = function(str, prefix) {
+adapt.base.unescapeStrFromHex = (str, prefix) => {
     prefix = typeof prefix === "string" ? prefix : '\\u';
     function unescapeChar(s) {
         return adapt.base.unescapeCharFromHex(s, prefix);
     }
-    var regexp = new RegExp(adapt.base.escapeRegExp(prefix) + "[0-9a-fA-F]{4}", "g");
+    const regexp = new RegExp(`${adapt.base.escapeRegExp(prefix)}[0-9a-fA-F]{4}`, "g");
     return str.replace(regexp, unescapeChar);
 };
 
@@ -598,7 +582,7 @@ adapt.base.unescapeStrFromHex = function(str, prefix) {
  * @param {boolean} cond
  * @return {void}
  */
-adapt.base.assert = function(cond) {
+adapt.base.assert = cond => {
     if (!cond) {
         throw "Assert failed";
     }
@@ -614,9 +598,9 @@ adapt.base.assert = function(cond) {
  * @param {function(number): boolean} good
  * @return {number}
  */
-adapt.base.binarySearch = function(high, good) {
-    var l = 0;
-    var h = high;
+adapt.base.binarySearch = (high, good) => {
+    let l = 0;
+    let h = high;
     while (true) {
         if (goog.DEBUG) {
             adapt.base.assert(l <= h);
@@ -625,7 +609,7 @@ adapt.base.binarySearch = function(high, good) {
         }
         if (l == h)
             return l;
-        var m = (l + h) >> 1;
+        const m = (l + h) >> 1;
         if (good(m))
             h = m;
         else
@@ -639,9 +623,7 @@ adapt.base.binarySearch = function(high, good) {
  * @param {number} b
  * @return {number}
  */
-adapt.base.numberCompare = function(a, b) {
-    return a - b;
-};
+adapt.base.numberCompare = (a, b) => a - b;
 
 /** @const */
 adapt.base.base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -651,13 +633,13 @@ adapt.base.base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01
  * @param {string} data
  * @return {void}
  */
-adapt.base.appendBase64 = function(sb, data) {
-    var length = data.length;
-    var length3 = Math.floor(length / 3) * 3;
-    for (var i = 0; i < length3; i += 3) {
-        var c1 = data.charCodeAt(i) & 0xFF;
-        var c2 = data.charCodeAt(i+1) & 0xFF;
-        var c3 = data.charCodeAt(i+2) & 0xFF;
+adapt.base.appendBase64 = (sb, data) => {
+    const length = data.length;
+    const length3 = Math.floor(length / 3) * 3;
+    for (let i = 0; i < length3; i += 3) {
+        const c1 = data.charCodeAt(i) & 0xFF;
+        const c2 = data.charCodeAt(i+1) & 0xFF;
+        const c3 = data.charCodeAt(i+2) & 0xFF;
         sb.append(adapt.base.base64Chars.charAt(c1 >> 2));
         sb.append(adapt.base.base64Chars.charAt(((c1 << 4) | (c2 >> 4)) & 0x3F));
         sb.append(adapt.base.base64Chars.charAt(((c2 << 2) | (c3 >> 6)) & 0x3F));
@@ -665,14 +647,14 @@ adapt.base.appendBase64 = function(sb, data) {
     }
     switch (length - length3) {
         case 1:
-            var p1 = data.charCodeAt(length3) & 0xFF;
+            const p1 = data.charCodeAt(length3) & 0xFF;
             sb.append(adapt.base.base64Chars.charAt(p1 >> 2));
             sb.append(adapt.base.base64Chars.charAt((p1 << 4) & 0x3F));
             sb.append("==");
             break;
         case 2:
-            var q1 = data.charCodeAt(length3) & 0xFF;
-            var q2 = data.charCodeAt(length3+1) & 0xFF;
+            const q1 = data.charCodeAt(length3) & 0xFF;
+            const q2 = data.charCodeAt(length3+1) & 0xFF;
             sb.append(adapt.base.base64Chars.charAt(q1 >> 2));
             sb.append(adapt.base.base64Chars.charAt(((q1 << 4) | (q2 >> 4)) & 0x3F));
             sb.append(adapt.base.base64Chars.charAt((q2 << 2) & 0x3F));
@@ -686,7 +668,7 @@ adapt.base.appendBase64 = function(sb, data) {
  * @param {T} param
  * @return {T}
  */
-adapt.base.identity = function(param) {return param;};
+adapt.base.identity = param => param;
 
 /**
  * Index array using key function. First encountered item wins on collision. Elements with
@@ -696,15 +678,16 @@ adapt.base.identity = function(param) {return param;};
  * @param {function(T):?string} key
  * @return {Object.<string,T>}
  */
-adapt.base.indexArray = function(arr, key) {
-    var map = {};
-    for (var i = 0; i < arr.length; i++) {
-        var v = arr[i];
-        var k = key(v);
+adapt.base.indexArray = (arr, key) => {
+    const map = {};
+
+    for (const v of arr) {
+        const k = key(v);
         if (k && !map[k]) {
             map[k] = v;
         }
     }
+
     return map;
 };
 
@@ -716,9 +699,9 @@ adapt.base.emptyObj = {};
  * @param {Array.<string>} arr
  * @return {Object.<string,boolean>}
  */
-adapt.base.arrayToSet = function(arr) {
-    var set = {};
-    for (var i = 0; i < arr.length; i++) {
+adapt.base.arrayToSet = arr => {
+    const set = {};
+    for (let i = 0; i < arr.length; i++) {
         set[arr[i]] = true;
     }
     return set;
@@ -732,11 +715,11 @@ adapt.base.arrayToSet = function(arr) {
  * @param {function(T):?string} key
  * @return {Object.<string,Array.<T>>}
  */
-adapt.base.multiIndexArray = function(arr, key) {
-    var map = {};
-    for (var i = 0; i < arr.length; i++) {
-        var v = arr[i];
-        var k = key(v);
+adapt.base.multiIndexArray = (arr, key) => {
+    const map = {};
+
+    for (const v of arr) {
+        const k = key(v);
         if (k) {
             if (map[k]) {
                 map[k].push(v);
@@ -745,6 +728,7 @@ adapt.base.multiIndexArray = function(arr, key) {
             }
         }
     }
+
     return map;
 };
 
@@ -755,9 +739,9 @@ adapt.base.multiIndexArray = function(arr, key) {
  * @param {function(P,number):R} fn second parameter is the index
  * @return {Array.<R>}
  */
-adapt.base.map = function(arr, fn) {
-    var res = Array(arr.length);
-    for (var i = 0; i < arr.length; i++) {
+adapt.base.map = (arr, fn) => {
+    const res = Array(arr.length);
+    for (let i = 0; i < arr.length; i++) {
         res[i] = fn(arr[i], i);
     }
     return res;
@@ -770,9 +754,9 @@ adapt.base.map = function(arr, fn) {
  * @param {function(P,string):R} fn second parameter is the key
  * @return {Object.<string, R>}
  */
-adapt.base.mapObj = function(obj, fn) {
-    var res = {};
-    for (var n in obj) {
+adapt.base.mapObj = (obj, fn) => {
+    const res = {};
+    for (const n in obj) {
         res[n] = fn(obj[n], n);
     }
     return res;
@@ -782,9 +766,9 @@ adapt.base.mapObj = function(obj, fn) {
  * @param {Object} obj
  * @return {number}
  */
-adapt.base.mapSize = function(obj) {
-    var n = 0;
-    for (var key in obj) {
+adapt.base.mapSize = obj => {
+    let n = 0;
+    for (const key in obj) {
         n++;
     }
     return n;
@@ -814,11 +798,11 @@ adapt.base.SimpleEventTarget = function() {
  * @return {void}
  */
 adapt.base.SimpleEventTarget.prototype.dispatchEvent = function(evt) {
-    var list = this.listeners[evt.type];
+    const list = this.listeners[evt.type];
     if (list) {
         evt.target = this;
         evt.currentTarget = this;
-        for (var i = 0; i < list.length; i++) {
+        for (let i = 0; i < list.length; i++) {
             list[i](evt);
         }
     }
@@ -834,7 +818,7 @@ adapt.base.SimpleEventTarget.prototype.addEventListener = function(type, listene
     if (capture) {
         return;
     }
-    var list = this.listeners[type];
+    const list = this.listeners[type];
     if (list) {
         list.push(listener);
     } else {
@@ -852,9 +836,9 @@ adapt.base.SimpleEventTarget.prototype.removeEventListener = function(type, list
     if (capture) {
         return;
     }
-    var list = this.listeners[type];
+    const list = this.listeners[type];
     if (list) {
-        var index = list.indexOf(listener);
+        const index = list.indexOf(listener);
         if (index >= 0) {
             list.splice(index, 1);
         }
@@ -876,10 +860,10 @@ adapt.base.hasLShapeFloatBug = null;
  * @param {HTMLElement} body
  * @return {boolean}
  */
-adapt.base.checkLShapeFloatBug = function(body) {
+adapt.base.checkLShapeFloatBug = body => {
     if (adapt.base.hasLShapeFloatBug == null) {
-        var doc = body.ownerDocument;
-        var container = /** @type {HTMLElement} */ (doc.createElement("div"));
+        const doc = body.ownerDocument;
+        const container = /** @type {HTMLElement} */ (doc.createElement("div"));
         container.style.position = "absolute";
         container.style.top = "0px";
         container.style.left = "0px";
@@ -889,23 +873,23 @@ adapt.base.checkLShapeFloatBug = function(body) {
         container.style.lineHeight = "16px";
         container.style.fontSize = "16px";
         body.appendChild(container);
-        var f1 = /** @type {HTMLElement} */ (doc.createElement("div"));
+        const f1 = /** @type {HTMLElement} */ (doc.createElement("div"));
         f1.style.width = "0px";
         f1.style.height = "14px";
         f1.style.cssFloat = "left";
         container.appendChild(f1);
-        var f2 = /** @type {HTMLElement} */ (doc.createElement("div"));
+        const f2 = /** @type {HTMLElement} */ (doc.createElement("div"));
         f2.style.width = "50px";
         f2.style.height = "50px";
         f2.style.cssFloat = "left";
         f2.style.clear = "left";
         container.appendChild(f2);
-        var t = doc.createTextNode("a a a a a a a a a a a a a a a a");
+        const t = doc.createTextNode("a a a a a a a a a a a a a a a a");
         container.appendChild(t);
-        var range = doc.createRange();
+        const range = doc.createRange();
         range.setStart(t, 0);
         range.setEnd(t, 1);
-        var leftEdge = range.getBoundingClientRect().left;
+        const leftEdge = range.getBoundingClientRect().left;
         adapt.base.hasLShapeFloatBug = leftEdge < 40;
         body.removeChild(container);
     }
@@ -926,10 +910,10 @@ adapt.base.hasVerticalBBoxBug = null;
  * @param {HTMLElement} body
  * @return {boolean}
  */
-adapt.base.checkVerticalBBoxBug = function(body) {
+adapt.base.checkVerticalBBoxBug = body => {
     if (adapt.base.hasVerticalBBoxBug == null) {
-        var doc = body.ownerDocument;
-        var container = /** @type {HTMLElement} */ (doc.createElement("div"));
+        const doc = body.ownerDocument;
+        const container = /** @type {HTMLElement} */ (doc.createElement("div"));
         container.style.position = "absolute";
         container.style.top = "0px";
         container.style.left = "0px";
@@ -940,12 +924,12 @@ adapt.base.checkVerticalBBoxBug = function(body) {
         container.style.fontSize = "16px";
         adapt.base.setCSSProperty(container, "writing-mode", "vertical-rl");
         body.appendChild(container);
-        var t = doc.createTextNode("a a a a a a a a a a a a a a a a");
+        const t = doc.createTextNode("a a a a a a a a a a a a a a a a");
         container.appendChild(t);
-        var range = doc.createRange();
+        const range = doc.createRange();
         range.setStart(t, 0);
         range.setEnd(t, 1);
-        var box = range.getBoundingClientRect();
+        const box = range.getBoundingClientRect();
         adapt.base.hasVerticalBBoxBug = (box.right - box.left < 10);
         body.removeChild(container);
     }
@@ -961,10 +945,10 @@ adapt.base.hasInlineBlockJustificationBug = null;
  * @param {HTMLElement} body
  * @returns {boolean}
  */
-adapt.base.checkInlineBlockJustificationBug = function(body) {
+adapt.base.checkInlineBlockJustificationBug = body => {
     if (adapt.base.hasInlineBlockJustificationBug === null) {
-        var doc = body.ownerDocument;
-        var container = /** @type {HTMLElement} */ (doc.createElement("div"));
+        const doc = body.ownerDocument;
+        const container = /** @type {HTMLElement} */ (doc.createElement("div"));
         container.style.position = "absolute";
         container.style.top = "0px";
         container.style.left = "0px";
@@ -974,16 +958,16 @@ adapt.base.checkInlineBlockJustificationBug = function(body) {
         container.style.fontSize = "16px";
         container.style.textAlign = "justify";
         body.appendChild(container);
-        var t = doc.createTextNode("a | ");
+        const t = doc.createTextNode("a | ");
         container.appendChild(t);
-        var inlineBlock = doc.createElement("span");
+        const inlineBlock = doc.createElement("span");
         inlineBlock.style.display = "inline-block";
         inlineBlock.style.width = "30px";
         container.appendChild(inlineBlock);
-        var range = doc.createRange();
+        const range = doc.createRange();
         range.setStart(t, 0);
         range.setEnd(t, 3);
-        var box = range.getBoundingClientRect();
+        const box = range.getBoundingClientRect();
         adapt.base.hasInlineBlockJustificationBug = box.right < 27;
         body.removeChild(container);
     }
@@ -999,10 +983,10 @@ adapt.base.hasSoftWrapOpportunityAfterHyphenBug = null;
  * @param {HTMLElement} body
  * @returns {boolean}
  */
-adapt.base.checkSoftWrapOpportunityAfterHyphenBug = function(body) {
+adapt.base.checkSoftWrapOpportunityAfterHyphenBug = body => {
     if (adapt.base.hasSoftWrapOpportunityAfterHyphenBug === null) {
-        var doc = body.ownerDocument;
-        var container = /** @type {HTMLElement} */ (doc.createElement("div"));
+        const doc = body.ownerDocument;
+        const container = /** @type {HTMLElement} */ (doc.createElement("div"));
         container.style.position = "absolute";
         container.style.top = "0px";
         container.style.left = "0px";
@@ -1012,16 +996,16 @@ adapt.base.checkSoftWrapOpportunityAfterHyphenBug = function(body) {
         container.style.fontSize = "16px";
         container.style.textAlign = "justify";
         body.appendChild(container);
-        var t = doc.createTextNode("a a-");
+        const t = doc.createTextNode("a a-");
         container.appendChild(t);
-        var inlineBlock = doc.createElement("span");
+        const inlineBlock = doc.createElement("span");
         inlineBlock.style.display = "inline-block";
         inlineBlock.style.width = "40px";
         container.appendChild(inlineBlock);
-        var range = doc.createRange();
+        const range = doc.createRange();
         range.setStart(t, 2);
         range.setEnd(t, 4);
-        var box = range.getBoundingClientRect();
+        const box = range.getBoundingClientRect();
         adapt.base.hasSoftWrapOpportunityAfterHyphenBug = box.right < 37;
         body.removeChild(container);
     }
@@ -1037,10 +1021,10 @@ adapt.base.hasSoftWrapOpportunityByWbrBug = null;
  * @param {HTMLElement} body
  * @returns {boolean}
  */
-adapt.base.checkSoftWrapOpportunityByWbrBug = function(body) {
+adapt.base.checkSoftWrapOpportunityByWbrBug = body => {
     if (adapt.base.hasSoftWrapOpportunityByWbrBug === null) {
-        var doc = body.ownerDocument;
-        var container = /** @type {HTMLElement} */ (doc.createElement("div"));
+        const doc = body.ownerDocument;
+        const container = /** @type {HTMLElement} */ (doc.createElement("div"));
         container.style.position = "absolute";
         container.style.top = "0px";
         container.style.left = "0px";
@@ -1050,17 +1034,17 @@ adapt.base.checkSoftWrapOpportunityByWbrBug = function(body) {
         container.style.fontSize = "16px";
         container.style.textAlign = "justify";
         body.appendChild(container);
-        var t = doc.createTextNode("a a-");
+        const t = doc.createTextNode("a a-");
         container.appendChild(t);
         container.appendChild(doc.createElement("wbr"));
-        var inlineBlock = doc.createElement("span");
+        const inlineBlock = doc.createElement("span");
         inlineBlock.style.display = "inline-block";
         inlineBlock.style.width = "40px";
         container.appendChild(inlineBlock);
-        var range = doc.createRange();
+        const range = doc.createRange();
         range.setStart(t, 2);
         range.setEnd(t, 4);
-        var box = range.getBoundingClientRect();
+        const box = range.getBoundingClientRect();
         adapt.base.hasSoftWrapOpportunityByWbrBug = box.right < 37;
         body.removeChild(container);
     }

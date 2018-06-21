@@ -48,17 +48,17 @@ adapt.taskutil.Fetcher = function(fetch, opt_name) {
  */
 adapt.taskutil.Fetcher.prototype.start = function() {
     if (!this.task) {
-        var self = this;
-        this.task = adapt.task.currentTask().getScheduler().run(function() {
-            var frame = adapt.task.newFrame("Fetcher.run");
-            self.fetch().then(function(resource) {
-                var piggibacks = self.piggybacks;
+        const self = this;
+        this.task = adapt.task.currentTask().getScheduler().run(() => {
+            const frame = adapt.task.newFrame("Fetcher.run");
+            self.fetch().then(resource => {
+                const piggibacks = self.piggybacks;
                 self.arrived = true;
                 self.resource = resource;
                 self.task = null;
                 self.piggybacks = [];
                 if (piggibacks) {
-                    for (var i = 0; i < piggibacks.length; i++) {
+                    for (let i = 0; i < piggibacks.length; i++) {
                         try {
                             piggibacks[i](resource);
                         } catch (err) {
@@ -108,21 +108,21 @@ adapt.taskutil.Fetcher.prototype.hasArrived = function() {
  * @param {Array.<adapt.taskutil.Fetcher>} fetchers
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.taskutil.waitForFetchers = function(fetchers) {
+adapt.taskutil.waitForFetchers = fetchers => {
     if (fetchers.length == 0)
         return adapt.task.newResult(true);
     if (fetchers.length == 1)
         return fetchers[0].get().thenReturn(true);
-    var frame = adapt.task.newFrame("waitForFetches");
-    var i = 0;
-    frame.loop(function() {
+    const frame = adapt.task.newFrame("waitForFetches");
+    let i = 0;
+    frame.loop(() => {
         while (i < fetchers.length) {
-            var fetcher = fetchers[i++];
+            const fetcher = fetchers[i++];
             if (!fetcher.hasArrived())
                 return fetcher.get().thenReturn(true);
         }
         return adapt.task.newResult(false);
-    }).then(function() {
+    }).then(() => {
         frame.finish(true);
     });
     return frame.result();
@@ -133,19 +133,19 @@ adapt.taskutil.waitForFetchers = function(fetchers) {
  * @param {string} src
  * @return {!adapt.taskutil.Fetcher.<string>} holding event type (load/error/abort)
  */
-adapt.taskutil.loadElement = function(elem, src) {
-    var width = null;
-    var height = null;
+adapt.taskutil.loadElement = (elem, src) => {
+    let width = null;
+    let height = null;
     if (elem.localName == "img") {
         width = elem.getAttribute("width");
         height = elem.getAttribute("height");
     }
-    var fetcher = new adapt.taskutil.Fetcher(function() {
-        /** @type {!adapt.task.Frame.<string>} */ var frame = adapt.task.newFrame("loadImage");
-        var continuation = frame.suspend(elem);
-        var done = false;
+    const fetcher = new adapt.taskutil.Fetcher(() => {
+        /** @type {!adapt.task.Frame.<string>} */ const frame = adapt.task.newFrame("loadImage");
+        const continuation = frame.suspend(elem);
+        let done = false;
         /** @param {Event} evt */
-        var handler = function(evt) {
+        const handler = evt => {
             if (done) {
                 return;
             } else {
@@ -174,7 +174,7 @@ adapt.taskutil.loadElement = function(elem, src) {
             elem.src = src;
         }
         return frame.result();
-    }, "loadElement " + src);
+    }, `loadElement ${src}`);
     fetcher.start();
     return fetcher;
 };

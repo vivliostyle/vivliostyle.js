@@ -35,3 +35,11 @@ vivliostyle.urls.transformURIs = function(attributeValue, baseUrl, documentURLTr
         return "url(" + documentURLTransformer.transformURL(m1, baseUrl);
     });
 };
+vivliostyle.urls.transformURIs = (attributeValue, baseUrl, documentURLTransformer) =>
+    attributeValue.replace(/[uU][rR][lL]\(\s*\"((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^\"\r\n])+)\"/gm,
+        (match, m1) => `url("${documentURLTransformer.transformURL(m1, baseUrl)}"`
+    ).replace(/[uU][rR][lL]\(\s*\'((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^\'\r\n])+)\'/gm,
+        (match, m1) => `url('${documentURLTransformer.transformURL(m1, baseUrl)}'`
+    ).replace(/[uU][rR][lL]\(\s*((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^\"\'\r\n\)\s])+)/gm,
+        (match, m1) => `url(${documentURLTransformer.transformURL(m1, baseUrl)}`
+    );
