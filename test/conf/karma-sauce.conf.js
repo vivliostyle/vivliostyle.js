@@ -34,9 +34,9 @@ module.exports = function(config) {
             browserName: "safari",
             platform: "OS X 10.11"
         },
-        sl_ie_11: {
+        sl_edge: {
             base: "SauceLabs",
-            browserName: "internet explorer",
+            browserName: "MicrosoftEdge",
             platform: "Windows 10"
         }
     };
