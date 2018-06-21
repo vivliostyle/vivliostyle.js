@@ -73,7 +73,7 @@ const PageViewMode = {
             case vivliostyle.viewer.PageViewMode.AUTO_SPREAD:
                 return this.AUTO_SPREAD;
             default:
-                throw new Error("Invalid PageViewMode name: " + name)
+                throw new Error(`Invalid PageViewMode name: ${name}`)
         }
     }
 };

@@ -38,43 +38,45 @@ function getDefaultValues() {
     };
 }
 
-function ViewerOptions(options) {
-    this.fontSize = ko.observable();
-    this.profile = ko.observable();
-    this.pageViewMode = ko.observable();
-    this.zoom = ko.observable();
-    if (options) {
-        this.copyFrom(options);
-    } else {
-        var defaultValues = getDefaultValues();
-        var urlOptions = getViewerOptionsFromURL();
-        this.fontSize(defaultValues.fontSize);
-        this.profile(urlOptions.profile || defaultValues.profile);
-        this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
-        this.zoom(defaultValues.zoom);
+class ViewerOptions {
+    constructor(options) {
+        this.fontSize = ko.observable();
+        this.profile = ko.observable();
+        this.pageViewMode = ko.observable();
+        this.zoom = ko.observable();
+        if (options) {
+            this.copyFrom(options);
+        } else {
+            const defaultValues = getDefaultValues();
+            const urlOptions = getViewerOptionsFromURL();
+            this.fontSize(defaultValues.fontSize);
+            this.profile(urlOptions.profile || defaultValues.profile);
+            this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
+            this.zoom(defaultValues.zoom);
 
-        // write spread parameter back to URL when updated
-        this.pageViewMode.subscribe(function(pageViewMode) {
-            urlParameters.setParameter("spread", pageViewMode.toSpreadViewString());
-        });
+            // write spread parameter back to URL when updated
+            this.pageViewMode.subscribe(pageViewMode => {
+                urlParameters.setParameter("spread", pageViewMode.toSpreadViewString());
+            });
+        }
+    }
+
+    copyFrom(other) {
+        this.fontSize(other.fontSize());
+        this.profile(other.profile());
+        this.pageViewMode(other.pageViewMode());
+        this.zoom(other.zoom());
+    }
+
+    toObject() {
+        return {
+            fontSize: this.fontSize(),
+            pageViewMode: this.pageViewMode().toString(),
+            zoom: this.zoom().zoom,
+            fitToScreen: this.zoom().fitToScreen
+        }
     }
 }
-
-ViewerOptions.prototype.copyFrom = function(other) {
-    this.fontSize(other.fontSize());
-    this.profile(other.profile());
-    this.pageViewMode(other.pageViewMode());
-    this.zoom(other.zoom());
-};
-
-ViewerOptions.prototype.toObject = function() {
-    return {
-        fontSize: this.fontSize(),
-        pageViewMode: this.pageViewMode().toString(),
-        zoom: this.zoom().zoom,
-        fitToScreen: this.zoom().fitToScreen
-    }
-};
 
 ViewerOptions.getDefaultValues = getDefaultValues;
 

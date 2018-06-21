@@ -38,14 +38,14 @@ function ViewerApp() {
     }
     this.isDebug = urlParameters.getParameter("debug")[0] === "true";
     this.viewerSettings = {
-        userAgentRootURL: urlParameters.getBaseURL() + "resources/",
+        userAgentRootURL: `${urlParameters.getBaseURL()}resources/`,
         viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
         debug: this.isDebug
     };
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
     this.messageDialog = new MessageDialog(messageQueue);
 
-    var settingsPanelOptions = {
+    const settingsPanelOptions = {
         disablePageSizeChange: false,
         disablePageViewModeChange: false
     };
@@ -53,7 +53,7 @@ function ViewerApp() {
     this.settingsPanel = new SettingsPanel(this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog,
         settingsPanelOptions);
 
-    var navigationOptions = {
+    const navigationOptions = {
         disablePageNavigation: false,
         disableZoom: false,
         disableFontSizeChange: false
@@ -61,14 +61,14 @@ function ViewerApp() {
 
     this.navigation = new Navigation(this.viewerOptions, this.viewer, this.settingsPanel, navigationOptions);
 
-    this.handleKey = function(data, event) {
-        var key = keyUtil.identifyKeyFromEvent(event);
-        var ret = this.settingsPanel.handleKey(key);
+    this.handleKey = (data, event) => {
+        const key = keyUtil.identifyKeyFromEvent(event);
+        let ret = this.settingsPanel.handleKey(key);
         if (ret) {
             ret = this.navigation.handleKey(key);
         }
         return ret;
-    }.bind(this);
+    };
 
     this.viewer.loadDocument(this.documentOptions);
 }

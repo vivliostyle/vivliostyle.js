@@ -19,29 +19,29 @@
 
 import ko from "knockout";
 
-var supportTouchEvents = ("ontouchstart" in window);
+const supportTouchEvents = ("ontouchstart" in window);
 
 ko.bindingHandlers.menuButton = {
-    init: function(element, valueAccessor) {
+    init(element, valueAccessor) {
         if (ko.unwrap(valueAccessor())) {
             if (supportTouchEvents) {
-                element.addEventListener("touchstart", function() {
+                element.addEventListener("touchstart", () => {
                     ko.utils.toggleDomNodeCssClass(element, "hover active", true);
                 });
-                element.addEventListener("touchend", function() {
+                element.addEventListener("touchend", () => {
                     ko.utils.toggleDomNodeCssClass(element, "hover active", false);
                 });
             } else {
-                element.addEventListener("mouseover", function() {
+                element.addEventListener("mouseover", () => {
                     ko.utils.toggleDomNodeCssClass(element, "hover", true);
                 });
-                element.addEventListener("mousedown", function() {
+                element.addEventListener("mousedown", () => {
                     ko.utils.toggleDomNodeCssClass(element, "active", true);
                 });
-                element.addEventListener("mouseup", function() {
+                element.addEventListener("mouseup", () => {
                     ko.utils.toggleDomNodeCssClass(element, "active", false);
                 });
-                element.addEventListener("mouseout", function() {
+                element.addEventListener("mouseout", () => {
                     ko.utils.toggleDomNodeCssClass(element, "hover", false);
                 });
             }

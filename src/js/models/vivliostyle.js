@@ -17,16 +17,18 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function Vivliostyle() {
-    this.viewer = null;
-    this.constants = null;
-    this.profile = null;
-}
+class Vivliostyle {
+    constructor() {
+        this.viewer = null;
+        this.constants = null;
+        this.profile = null;
+    }
 
-Vivliostyle.prototype.setInstance = function(vivliostyle) {
-    this.viewer = vivliostyle.viewer;
-    this.constants = vivliostyle.constants;
-    this.profile = vivliostyle.profile;
-};
+    setInstance(vivliostyle) {
+        this.viewer = vivliostyle.viewer;
+        this.constants = vivliostyle.constants;
+        this.profile = vivliostyle.profile;
+    }
+}
 
 export default new Vivliostyle();

@@ -18,7 +18,7 @@
  */
 
 // cf. http://www.w3.org/TR/DOM-Level-3-Events-key/
-var Keys = {
+const Keys = {
     Unidentified: "Unidentified",
     ArrowDown: "ArrowDown",
     ArrowLeft: "ArrowLeft",
@@ -33,9 +33,9 @@ var Keys = {
 
 // CAUTION: This function covers only part of common keys on a keyboard. Keys not covered by the implementation are identified as KeyboardEvent.key, KeyboardEvent.keyIdentifier, or "Unidentified".
 function identifyKeyFromEvent(event) {
-    var key = event.key;
-    var keyIdentifier = event.keyIdentifier;
-    var location = event.location;
+    const key = event.key;
+    const keyIdentifier = event.keyIdentifier;
+    const location = event.location;
     if (key === Keys.ArrowDown || key === "Down" || keyIdentifier === "Down") {
         return Keys.ArrowDown;
     } else if (key === Keys.ArrowLeft || key === "Left" || keyIdentifier === "Left") {
@@ -60,6 +60,6 @@ function identifyKeyFromEvent(event) {
 }
 
 export default {
-    Keys: Keys,
-    identifyKeyFromEvent: identifyKeyFromEvent
+    Keys,
+    identifyKeyFromEvent
 };

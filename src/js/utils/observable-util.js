@@ -19,11 +19,11 @@
 
 import ko from "knockout"
 
-var util = {
-    readonlyObservable: function(value) {
-        var obs = ko.observable(value);
+const util = {
+    readonlyObservable(value) {
+        const obs = ko.observable(value);
         return {
-            getter: ko.pureComputed(function() { return obs(); }),
+            getter: ko.pureComputed(() => obs()),
             value: obs
         };
     }

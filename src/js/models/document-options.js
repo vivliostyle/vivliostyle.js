@@ -22,11 +22,11 @@ import urlParameters from "../stores/url-parameters";
 import PageSize from "./page-size";
 
 function getDocumentOptionsFromURL() {
-    var epubUrl = urlParameters.getParameter("b");
-    var url = urlParameters.getParameter("x");
-    var fragment = urlParameters.getParameter("f", true);
-    var style = urlParameters.getParameter("style");
-    var userStyle = urlParameters.getParameter("userStyle");
+    const epubUrl = urlParameters.getParameter("b");
+    const url = urlParameters.getParameter("x");
+    const fragment = urlParameters.getParameter("f", true);
+    const style = urlParameters.getParameter("style");
+    const userStyle = urlParameters.getParameter("userStyle");
     return {
         epubUrl: epubUrl[0] || null,
         url: url.length ? url : null,
@@ -36,36 +36,40 @@ function getDocumentOptionsFromURL() {
     };
 }
 
-function DocumentOptions() {
-    var urlOptions = getDocumentOptionsFromURL();
-    this.epubUrl = ko.observable(urlOptions.epubUrl || "");
-    this.url = ko.observable(urlOptions.url || null);
-    this.fragment = ko.observable(urlOptions.fragment || "");
-    this.authorStyleSheet = ko.observable(urlOptions.authorStyleSheet);
-    this.userStyleSheet = ko.observable(urlOptions.userStyleSheet);
-    this.pageSize = new PageSize();
+class DocumentOptions {
+    constructor() {
+        const urlOptions = getDocumentOptionsFromURL();
+        this.epubUrl = ko.observable(urlOptions.epubUrl || "");
+        this.url = ko.observable(urlOptions.url || null);
+        this.fragment = ko.observable(urlOptions.fragment || "");
+        this.authorStyleSheet = ko.observable(urlOptions.authorStyleSheet);
+        this.userStyleSheet = ko.observable(urlOptions.userStyleSheet);
+        this.pageSize = new PageSize();
 
-    // write fragment back to URL when updated
-    this.fragment.subscribe(function(fragment) {
-        var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
-        urlParameters.setParameter("f", encoded, true);
-    });
-}
-
-DocumentOptions.prototype.toObject = function() {
-    function convertStyleSheetArray(arr) {
-        return arr.map(function(url) { return {url: url}; });
+        // write fragment back to URL when updated
+        this.fragment.subscribe(fragment => {
+            const encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
+            urlParameters.setParameter("f", encoded, true);
+        });
     }
-    var uss = convertStyleSheetArray(this.userStyleSheet());
-    // Do not include url
-    // (url is a required argument to Viewer.loadDocument, separated from other options)
-    return {
-        fragment: this.fragment(),
-        authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
-        userStyleSheet: [{
-            text: "@page {" + this.pageSize.toCSSDeclarationString() + "}"
-        }].concat(uss)
-    };
-};
+
+    toObject() {
+        function convertStyleSheetArray(arr) {
+            return arr.map(url => ({
+                url
+            }));
+        }
+        const uss = convertStyleSheetArray(this.userStyleSheet());
+        // Do not include url
+        // (url is a required argument to Viewer.loadDocument, separated from other options)
+        return {
+            fragment: this.fragment(),
+            authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
+            userStyleSheet: [{
+                text: `@page {${this.pageSize.toCSSDeclarationString()}}`
+            }].concat(uss)
+        };
+    }
+}
 
 export default DocumentOptions;

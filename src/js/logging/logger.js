@@ -19,69 +19,69 @@
 
 import messageQueue from "../models/message-queue";
 
-var LogLevel = {
+const LogLevel = {
     DEBUG: "debug",
     INFO: "info",
     WARN: "warn",
     ERROR: "error"
 };
 
-function Logger() {
-    this.logLevel = LogLevel.ERROR;
+class Logger {
+    constructor() {
+        this.logLevel = LogLevel.ERROR;
+    }
+
+    setLogLevel(logLevel) {
+        this.logLevel = logLevel;
+    }
+
+    debug(content) {
+        if (this.logLevel === LogLevel.DEBUG) {
+            messageQueue.push({
+                type: "debug",
+                content
+            });
+        }
+    }
+
+    info(content) {
+        if (this.logLevel === LogLevel.DEBUG ||
+            this.logLevel === LogLevel.INFO) {
+            messageQueue.push({
+                type: "info",
+                content
+            });
+        }
+    }
+
+    warn(content) {
+        if (this.logLevel === LogLevel.DEBUG ||
+            this.logLevel === LogLevel.INFO ||
+            this.logLevel === LogLevel.WARN) {
+            messageQueue.push({
+                type: "warn",
+                content
+            });
+        }
+    }
+
+    error(content) {
+        if (this.logLevel === LogLevel.DEBUG ||
+            this.logLevel === LogLevel.INFO ||
+            this.logLevel === LogLevel.WARN ||
+            this.logLevel === LogLevel.ERROR) {
+            messageQueue.push({
+                type: "error",
+                content
+            });
+        }
+    }
 }
 
 Logger.LogLevel = LogLevel;
 
-Logger.prototype.setLogLevel = function(logLevel) {
-    this.logLevel = logLevel;
-};
+const instance = new Logger();
 
-Logger.prototype.debug = function(content) {
-    if (this.logLevel === LogLevel.DEBUG) {
-        messageQueue.push({
-            type: "debug",
-            content: content
-        });
-    }
-};
-
-Logger.prototype.info = function(content) {
-    if (this.logLevel === LogLevel.DEBUG ||
-        this.logLevel === LogLevel.INFO) {
-        messageQueue.push({
-            type: "info",
-            content: content
-        });
-    }
-};
-
-Logger.prototype.warn = function(content) {
-    if (this.logLevel === LogLevel.DEBUG ||
-        this.logLevel === LogLevel.INFO ||
-        this.logLevel === LogLevel.WARN) {
-        messageQueue.push({
-            type: "warn",
-            content: content
-        });
-    }
-};
-
-Logger.prototype.error = function(content) {
-    if (this.logLevel === LogLevel.DEBUG ||
-        this.logLevel === LogLevel.INFO ||
-        this.logLevel === LogLevel.WARN ||
-        this.logLevel === LogLevel.ERROR) {
-        messageQueue.push({
-            type: "error",
-            content: content
-        });
-    }
-};
-
-var instance = new Logger();
-
-Logger.getLogger = function() {
-    return instance;
-};
+Logger.getLogger = () => instance;
 
 export default Logger;
