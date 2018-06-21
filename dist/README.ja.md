@@ -3,7 +3,7 @@
 Vivliostyle Viewerは、HTML(XML)/CSS文書を組版・表示するWebアプリケーションです。
 このパッケージは[Vivliostyle core engine](https://github.com/vivliostyle/vivliostyle.js)、[Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui)およびその他の組版ライブラリーを組み合わせたものです。
 
-- オンラインでサンプルを見る <http://vivliostyle.com/ja/sample/>
+- オンラインでサンプルを見る <https://vivliostyle.org/samples/>
 - リリース版のダウンロード <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-2017.6.zip>
 - 開発最新版のダウンロード <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-latest.zip>
 

@@ -13,8 +13,8 @@ git clone --depth=1 --branch=gh-pages git@github.com:vivliostyle/vivliostyle.js.
 cd gh-pages
 
 # git configuration
-git config user.email "kwkbtr@vivliostyle.com"
-git config user.name "kwkbtr (Travis CI)"
+git config user.email "murakami@vivliostyle.org"
+git config user.name "MurakamiShinyu (Travis CI)"
 
 # update gh-pages branch
 cp -R ../vivliostyle-ui/node_modules/vivliostyle/samples/* samples/

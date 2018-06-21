@@ -3,7 +3,7 @@
 Vivliostyle Viewer is a web application displaying and typesetting HTML(XML)/CSS documents.
 This is a bundled package of [Vivliostyle core engine](https://github.com/vivliostyle/vivliostyle.js), [Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui) and other typesetting libraries.
 
-- View samples online: <http://vivliostyle.com/en/sample/>
+- View samples online: <https://vivliostyle.org/samples/>
 - Download latest release version: <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-2017.6.zip>
 - Download latest development version: <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-latest.zip>
 
