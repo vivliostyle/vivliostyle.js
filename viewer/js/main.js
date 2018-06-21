@@ -6828,7 +6828,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _modelsMessageQueue = require("../models/message-queue");
 
@@ -6841,51 +6845,64 @@ var LogLevel = {
     ERROR: "error"
 };
 
-function Logger() {
-    this.logLevel = LogLevel.ERROR;
-}
+var Logger = (function () {
+    function Logger() {
+        _classCallCheck(this, Logger);
+
+        this.logLevel = LogLevel.ERROR;
+    }
+
+    _createClass(Logger, [{
+        key: "setLogLevel",
+        value: function setLogLevel(logLevel) {
+            this.logLevel = logLevel;
+        }
+    }, {
+        key: "debug",
+        value: function debug(content) {
+            if (this.logLevel === LogLevel.DEBUG) {
+                _modelsMessageQueue2["default"].push({
+                    type: "debug",
+                    content: content
+                });
+            }
+        }
+    }, {
+        key: "info",
+        value: function info(content) {
+            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO) {
+                _modelsMessageQueue2["default"].push({
+                    type: "info",
+                    content: content
+                });
+            }
+        }
+    }, {
+        key: "warn",
+        value: function warn(content) {
+            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN) {
+                _modelsMessageQueue2["default"].push({
+                    type: "warn",
+                    content: content
+                });
+            }
+        }
+    }, {
+        key: "error",
+        value: function error(content) {
+            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN || this.logLevel === LogLevel.ERROR) {
+                _modelsMessageQueue2["default"].push({
+                    type: "error",
+                    content: content
+                });
+            }
+        }
+    }]);
+
+    return Logger;
+})();
 
 Logger.LogLevel = LogLevel;
-
-Logger.prototype.setLogLevel = function (logLevel) {
-    this.logLevel = logLevel;
-};
-
-Logger.prototype.debug = function (content) {
-    if (this.logLevel === LogLevel.DEBUG) {
-        _modelsMessageQueue2["default"].push({
-            type: "debug",
-            content: content
-        });
-    }
-};
-
-Logger.prototype.info = function (content) {
-    if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO) {
-        _modelsMessageQueue2["default"].push({
-            type: "info",
-            content: content
-        });
-    }
-};
-
-Logger.prototype.warn = function (content) {
-    if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN) {
-        _modelsMessageQueue2["default"].push({
-            type: "warn",
-            content: content
-        });
-    }
-};
-
-Logger.prototype.error = function (content) {
-    if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN || this.logLevel === LogLevel.ERROR) {
-        _modelsMessageQueue2["default"].push({
-            type: "error",
-            content: content
-        });
-    }
-};
 
 var instance = new Logger();
 
@@ -6961,7 +6978,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _knockout = require("knockout");
 
@@ -6990,39 +7011,50 @@ function getDocumentOptionsFromURL() {
     };
 }
 
-function DocumentOptions() {
-    var urlOptions = getDocumentOptionsFromURL();
-    this.epubUrl = _knockout2["default"].observable(urlOptions.epubUrl || "");
-    this.url = _knockout2["default"].observable(urlOptions.url || null);
-    this.fragment = _knockout2["default"].observable(urlOptions.fragment || "");
-    this.authorStyleSheet = _knockout2["default"].observable(urlOptions.authorStyleSheet);
-    this.userStyleSheet = _knockout2["default"].observable(urlOptions.userStyleSheet);
-    this.pageSize = new _pageSize2["default"]();
+var DocumentOptions = (function () {
+    function DocumentOptions() {
+        _classCallCheck(this, DocumentOptions);
 
-    // write fragment back to URL when updated
-    this.fragment.subscribe(function (fragment) {
-        var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
-        _storesUrlParameters2["default"].setParameter("f", encoded, true);
-    });
-}
+        var urlOptions = getDocumentOptionsFromURL();
+        this.epubUrl = _knockout2["default"].observable(urlOptions.epubUrl || "");
+        this.url = _knockout2["default"].observable(urlOptions.url || null);
+        this.fragment = _knockout2["default"].observable(urlOptions.fragment || "");
+        this.authorStyleSheet = _knockout2["default"].observable(urlOptions.authorStyleSheet);
+        this.userStyleSheet = _knockout2["default"].observable(urlOptions.userStyleSheet);
+        this.pageSize = new _pageSize2["default"]();
 
-DocumentOptions.prototype.toObject = function () {
-    function convertStyleSheetArray(arr) {
-        return arr.map(function (url) {
-            return { url: url };
+        // write fragment back to URL when updated
+        this.fragment.subscribe(function (fragment) {
+            var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
+            _storesUrlParameters2["default"].setParameter("f", encoded, true);
         });
     }
-    var uss = convertStyleSheetArray(this.userStyleSheet());
-    // Do not include url
-    // (url is a required argument to Viewer.loadDocument, separated from other options)
-    return {
-        fragment: this.fragment(),
-        authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
-        userStyleSheet: [{
-            text: "@page {" + this.pageSize.toCSSDeclarationString() + "}"
-        }].concat(uss)
-    };
-};
+
+    _createClass(DocumentOptions, [{
+        key: "toObject",
+        value: function toObject() {
+            function convertStyleSheetArray(arr) {
+                return arr.map(function (url) {
+                    return {
+                        url: url
+                    };
+                });
+            }
+            var uss = convertStyleSheetArray(this.userStyleSheet());
+            // Do not include url
+            // (url is a required argument to Viewer.loadDocument, separated from other options)
+            return {
+                fragment: this.fragment(),
+                authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
+                userStyleSheet: [{
+                    text: "@page {" + this.pageSize.toCSSDeclarationString() + "}"
+                }].concat(uss)
+            };
+        }
+    }]);
+
+    return DocumentOptions;
+})();
 
 exports["default"] = DocumentOptions;
 module.exports = exports["default"];
@@ -7092,7 +7124,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _knockout = require("knockout");
 
@@ -7106,76 +7142,87 @@ var Mode = {
 
 var PresetSize = [{ name: "A5", description: "A5" }, { name: "A4", description: "A4" }, { name: "A3", description: "A3" }, { name: "B5", description: "B5 (ISO)" }, { name: "B4", description: "B4 (ISO)" }, { name: "JIS-B5", description: "B5 (JIS)" }, { name: "JIS-B4", description: "B4 (JIS)" }, { name: "letter", description: "letter" }, { name: "legal", description: "legal" }, { name: "ledger", description: "ledger" }];
 
-function PageSize(pageSize) {
-    this.mode = _knockout2["default"].observable(Mode.AUTO);
-    this.presetSize = _knockout2["default"].observable(PresetSize[0]);
-    this.isLandscape = _knockout2["default"].observable(false);
-    this.customWidth = _knockout2["default"].observable("210mm");
-    this.customHeight = _knockout2["default"].observable("297mm");
-    this.isImportant = _knockout2["default"].observable(false);
-    if (pageSize) {
-        this.copyFrom(pageSize);
+var PageSize = (function () {
+    function PageSize(pageSize) {
+        _classCallCheck(this, PageSize);
+
+        this.mode = _knockout2["default"].observable(Mode.AUTO);
+        this.presetSize = _knockout2["default"].observable(PresetSize[0]);
+        this.isLandscape = _knockout2["default"].observable(false);
+        this.customWidth = _knockout2["default"].observable("210mm");
+        this.customHeight = _knockout2["default"].observable("297mm");
+        this.isImportant = _knockout2["default"].observable(false);
+        if (pageSize) {
+            this.copyFrom(pageSize);
+        }
     }
-}
+
+    _createClass(PageSize, [{
+        key: "copyFrom",
+        value: function copyFrom(other) {
+            this.mode(other.mode());
+            this.presetSize(other.presetSize());
+            this.isLandscape(other.isLandscape());
+            this.customWidth(other.customWidth());
+            this.customHeight(other.customHeight());
+            this.isImportant(other.isImportant());
+        }
+    }, {
+        key: "equivalentTo",
+        value: function equivalentTo(other) {
+            if (this.isImportant() !== other.isImportant()) {
+                return false;
+            }
+            var mode = this.mode();
+            if (other.mode() === mode) {
+                switch (mode) {
+                    case Mode.AUTO:
+                        return true;
+                    case Mode.PRESET:
+                        return this.presetSize() === other.presetSize() && this.isLandscape() === other.isLandscape();
+                    case Mode.CUSTOM:
+                        return this.customWidth() === other.customWidth() && this.customHeight() === other.customHeight();
+                    default:
+                        throw new Error("Unknown mode " + mode);
+                }
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "toCSSDeclarationString",
+        value: function toCSSDeclarationString() {
+            var declaration = "size: ";
+            switch (this.mode()) {
+                case Mode.AUTO:
+                    declaration += "auto";
+                    break;
+                case Mode.PRESET:
+                    declaration += this.presetSize().name;
+                    if (this.isLandscape()) {
+                        declaration += " landscape";
+                    }
+                    break;
+                case Mode.CUSTOM:
+                    declaration += this.customWidth() + " " + this.customHeight();
+                    break;
+                default:
+                    throw new Error("Unknown mode " + this.mode());
+            }
+
+            if (this.isImportant()) {
+                declaration += " !important";
+            }
+
+            return declaration + ";";
+        }
+    }]);
+
+    return PageSize;
+})();
 
 PageSize.Mode = Mode;
 PageSize.PresetSize = PageSize.prototype.PresetSize = PresetSize;
-
-PageSize.prototype.copyFrom = function (other) {
-    this.mode(other.mode());
-    this.presetSize(other.presetSize());
-    this.isLandscape(other.isLandscape());
-    this.customWidth(other.customWidth());
-    this.customHeight(other.customHeight());
-    this.isImportant(other.isImportant());
-};
-
-PageSize.prototype.equivalentTo = function (other) {
-    if (this.isImportant() !== other.isImportant()) {
-        return false;
-    }
-    var mode = this.mode();
-    if (other.mode() === mode) {
-        switch (mode) {
-            case Mode.AUTO:
-                return true;
-            case Mode.PRESET:
-                return this.presetSize() === other.presetSize() && this.isLandscape() === other.isLandscape();
-            case Mode.CUSTOM:
-                return this.customWidth() === other.customWidth() && this.customHeight() === other.customHeight();
-            default:
-                throw new Error("Unknown mode " + mode);
-        }
-    } else {
-        return false;
-    }
-};
-
-PageSize.prototype.toCSSDeclarationString = function () {
-    var declaration = "size: ";
-    switch (this.mode()) {
-        case Mode.AUTO:
-            declaration += "auto";
-            break;
-        case Mode.PRESET:
-            declaration += this.presetSize().name;
-            if (this.isLandscape()) {
-                declaration += " landscape";
-            }
-            break;
-        case Mode.CUSTOM:
-            declaration += this.customWidth() + " " + this.customHeight();
-            break;
-        default:
-            throw new Error("Unknown mode " + this.mode());
-    }
-
-    if (this.isImportant()) {
-        declaration += " !important";
-    }
-
-    return declaration + ";";
-};
 
 exports["default"] = PageSize;
 module.exports = exports["default"];
@@ -7315,7 +7362,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _knockout = require("knockout");
 
@@ -7349,43 +7400,53 @@ function getDefaultValues() {
     };
 }
 
-function ViewerOptions(options) {
-    this.fontSize = _knockout2["default"].observable();
-    this.profile = _knockout2["default"].observable();
-    this.pageViewMode = _knockout2["default"].observable();
-    this.zoom = _knockout2["default"].observable();
-    if (options) {
-        this.copyFrom(options);
-    } else {
-        var defaultValues = getDefaultValues();
-        var urlOptions = getViewerOptionsFromURL();
-        this.fontSize(defaultValues.fontSize);
-        this.profile(urlOptions.profile || defaultValues.profile);
-        this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
-        this.zoom(defaultValues.zoom);
+var ViewerOptions = (function () {
+    function ViewerOptions(options) {
+        _classCallCheck(this, ViewerOptions);
 
-        // write spread parameter back to URL when updated
-        this.pageViewMode.subscribe(function (pageViewMode) {
-            _storesUrlParameters2["default"].setParameter("spread", pageViewMode.toSpreadViewString());
-        });
+        this.fontSize = _knockout2["default"].observable();
+        this.profile = _knockout2["default"].observable();
+        this.pageViewMode = _knockout2["default"].observable();
+        this.zoom = _knockout2["default"].observable();
+        if (options) {
+            this.copyFrom(options);
+        } else {
+            var defaultValues = getDefaultValues();
+            var urlOptions = getViewerOptionsFromURL();
+            this.fontSize(defaultValues.fontSize);
+            this.profile(urlOptions.profile || defaultValues.profile);
+            this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
+            this.zoom(defaultValues.zoom);
+
+            // write spread parameter back to URL when updated
+            this.pageViewMode.subscribe(function (pageViewMode) {
+                _storesUrlParameters2["default"].setParameter("spread", pageViewMode.toSpreadViewString());
+            });
+        }
     }
-}
 
-ViewerOptions.prototype.copyFrom = function (other) {
-    this.fontSize(other.fontSize());
-    this.profile(other.profile());
-    this.pageViewMode(other.pageViewMode());
-    this.zoom(other.zoom());
-};
+    _createClass(ViewerOptions, [{
+        key: "copyFrom",
+        value: function copyFrom(other) {
+            this.fontSize(other.fontSize());
+            this.profile(other.profile());
+            this.pageViewMode(other.pageViewMode());
+            this.zoom(other.zoom());
+        }
+    }, {
+        key: "toObject",
+        value: function toObject() {
+            return {
+                fontSize: this.fontSize(),
+                pageViewMode: this.pageViewMode().toString(),
+                zoom: this.zoom().zoom,
+                fitToScreen: this.zoom().fitToScreen
+            };
+        }
+    }]);
 
-ViewerOptions.prototype.toObject = function () {
-    return {
-        fontSize: this.fontSize(),
-        pageViewMode: this.pageViewMode().toString(),
-        zoom: this.zoom().zoom,
-        fitToScreen: this.zoom().fitToScreen
-    };
-};
+    return ViewerOptions;
+})();
 
 ViewerOptions.getDefaultValues = getDefaultValues;
 
@@ -7417,17 +7478,31 @@ module.exports = exports["default"];
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-function Vivliostyle() {
-    this.viewer = null;
-    this.constants = null;
-    this.profile = null;
-}
 
-Vivliostyle.prototype.setInstance = function (vivliostyle) {
-    this.viewer = vivliostyle.viewer;
-    this.constants = vivliostyle.constants;
-    this.profile = vivliostyle.profile;
-};
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Vivliostyle = (function () {
+    function Vivliostyle() {
+        _classCallCheck(this, Vivliostyle);
+
+        this.viewer = null;
+        this.constants = null;
+        this.profile = null;
+    }
+
+    _createClass(Vivliostyle, [{
+        key: "setInstance",
+        value: function setInstance(vivliostyle) {
+            this.viewer = vivliostyle.viewer;
+            this.constants = vivliostyle.constants;
+            this.profile = vivliostyle.profile;
+        }
+    }]);
+
+    return Vivliostyle;
+})();
 
 exports["default"] = new Vivliostyle();
 module.exports = exports["default"];
@@ -7596,7 +7671,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _utilsStringUtil = require("../utils/string-util");
 
@@ -7606,49 +7685,60 @@ function getRegExpForParameter(name) {
     return new RegExp("[#&]" + _utilsStringUtil2["default"].escapeUnicodeString(name) + "=([^&]*)", "g");
 }
 
-function URLParameterStore() {
-    this.history = window ? window.history : {};
-    this.location = window ? window.location : { url: "" };
-}
+var URLParameterStore = (function () {
+    function URLParameterStore() {
+        _classCallCheck(this, URLParameterStore);
 
-URLParameterStore.prototype.getBaseURL = function () {
-    var url = this.location.href;
-    url = url.replace(/#.*$/, "");
-    return url.replace(/\/[^/]*$/, "/");
-};
+        this.history = window ? window.history : {};
+        this.location = window ? window.location : { url: "" };
+    }
 
-URLParameterStore.prototype.getParameter = function (name, dontPercentDecode) {
-    var url = this.location.href;
-    var regexp = getRegExpForParameter(name);
-    var results = [];
-    var r;
-    while (r = regexp.exec(url)) {
-        var value = r[1];
-        if (!dontPercentDecode) value = _utilsStringUtil2["default"].percentDecodeAmpersandAndPercent(value);
-        results.push(value);
-    }
-    return results;
-};
+    _createClass(URLParameterStore, [{
+        key: "getBaseURL",
+        value: function getBaseURL() {
+            var url = this.location.href;
+            url = url.replace(/#.*$/, "");
+            return url.replace(/\/[^/]*$/, "/");
+        }
+    }, {
+        key: "getParameter",
+        value: function getParameter(name, dontPercentDecode) {
+            var url = this.location.href;
+            var regexp = getRegExpForParameter(name);
+            var results = [];
+            var r = undefined;
+            while (r = regexp.exec(url)) {
+                var value = r[1];
+                if (!dontPercentDecode) value = _utilsStringUtil2["default"].percentDecodeAmpersandAndPercent(value);
+                results.push(value);
+            }
+            return results;
+        }
+    }, {
+        key: "setParameter",
+        value: function setParameter(name, value, dontPercentEncode) {
+            var url = this.location.href;
+            if (!dontPercentEncode) value = _utilsStringUtil2["default"].percentEncodeAmpersandAndPercent(value);
+            var updated = undefined;
+            var regexp = getRegExpForParameter(name);
+            var r = regexp.exec(url);
+            if (r) {
+                var l = r[1].length;
+                var start = r.index + r[0].length - l;
+                updated = url.substring(0, start) + value + url.substring(start + l);
+            } else {
+                updated = url + (url.match(/#/) ? "&" : "#") + name + "=" + value;
+            }
+            if (this.history.replaceState) {
+                this.history.replaceState(null, "", updated);
+            } else {
+                this.location.href = updated;
+            }
+        }
+    }]);
 
-URLParameterStore.prototype.setParameter = function (name, value, dontPercentEncode) {
-    var url = this.location.href;
-    if (!dontPercentEncode) value = _utilsStringUtil2["default"].percentEncodeAmpersandAndPercent(value);
-    var updated;
-    var regexp = getRegExpForParameter(name);
-    var r = regexp.exec(url);
-    if (r) {
-        var l = r[1].length;
-        var start = r.index + r[0].length - l;
-        updated = url.substring(0, start) + value + url.substring(start + l);
-    } else {
-        updated = url + (url.match(/#/) ? "&" : "#") + name + "=" + value;
-    }
-    if (this.history.replaceState) {
-        this.history.replaceState(null, "", updated);
-    } else {
-        this.location.href = updated;
-    }
-};
+    return URLParameterStore;
+})();
 
 exports["default"] = new URLParameterStore();
 module.exports = exports["default"];
@@ -7838,30 +7928,43 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _knockout = require("knockout");
 
 var _knockout2 = _interopRequireDefault(_knockout);
 
-function MessageDialog(queue) {
-    this.list = queue;
-    this.visible = _knockout2["default"].pureComputed(function () {
-        return queue().length > 0;
-    });
-}
+var MessageDialog = (function () {
+    function MessageDialog(queue) {
+        _classCallCheck(this, MessageDialog);
 
-MessageDialog.prototype.getDisplayMessage = function (errorInfo) {
-    var e = errorInfo.error;
-    var msg = e && (e.toString() || e.frameTrace || e.stack);
-    if (msg) {
-        msg = msg.split("\n", 1)[0];
+        this.list = queue;
+        this.visible = _knockout2["default"].pureComputed(function () {
+            return queue().length > 0;
+        });
     }
-    if (!msg) {
-        msg = errorInfo.messages.join("\n");
-    }
-    return msg;
-};
+
+    _createClass(MessageDialog, [{
+        key: "getDisplayMessage",
+        value: function getDisplayMessage(errorInfo) {
+            var e = errorInfo.error;
+            var msg = e && (e.toString() || e.frameTrace || e.stack);
+            if (msg) {
+                msg = msg.split("\n", 1)[0];
+            }
+            if (!msg) {
+                msg = errorInfo.messages.join("\n");
+            }
+            return msg;
+        }
+    }]);
+
+    return MessageDialog;
+})();
 
 exports["default"] = MessageDialog;
 module.exports = exports["default"];
@@ -7892,7 +7995,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _knockout = require("knockout");
 
@@ -7904,205 +8011,227 @@ var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
 
 var _utilsKeyUtil = require("../utils/key-util");
 
-function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
-    this.viewerOptions_ = viewerOptions;
-    this.viewer_ = viewer;
-    this.settingsPanel_ = settingsPanel;
+var Navigation = (function () {
+    function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
+        _classCallCheck(this, Navigation);
 
-    this.isDisabled = _knockout2["default"].pureComputed(function () {
-        return this.settingsPanel_.opened() || !this.viewer_.state.navigatable();
-    }, this);
+        this.viewerOptions_ = viewerOptions;
+        this.viewer_ = viewer;
+        this.settingsPanel_ = settingsPanel;
 
-    var navigationDisabled = _knockout2["default"].pureComputed(function () {
-        return navigationOptions.disablePageNavigation || this.isDisabled();
-    }, this);
+        this.isDisabled = _knockout2["default"].pureComputed(function () {
+            return this.settingsPanel_.opened() || !this.viewer_.state.navigatable();
+        }, this);
 
-    this.isNavigateToPreviousDisabled = navigationDisabled;
-    this.isNavigateToNextDisabled = navigationDisabled;
-    this.isNavigateToLeftDisabled = navigationDisabled;
-    this.isNavigateToRightDisabled = navigationDisabled;
-    this.isNavigateToFirstDisabled = navigationDisabled;
-    this.isNavigateToLastDisabled = navigationDisabled;
-    this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
+        var navigationDisabled = _knockout2["default"].pureComputed(function () {
+            return navigationOptions.disablePageNavigation || this.isDisabled();
+        }, this);
 
-    var zoomDisabled = _knockout2["default"].pureComputed(function () {
-        return navigationOptions.disableZoom || this.isDisabled();
-    }, this);
+        this.isNavigateToPreviousDisabled = navigationDisabled;
+        this.isNavigateToNextDisabled = navigationDisabled;
+        this.isNavigateToLeftDisabled = navigationDisabled;
+        this.isNavigateToRightDisabled = navigationDisabled;
+        this.isNavigateToFirstDisabled = navigationDisabled;
+        this.isNavigateToLastDisabled = navigationDisabled;
+        this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
 
-    this.isZoomOutDisabled = zoomDisabled;
-    this.isZoomInDisabled = zoomDisabled;
-    this.isZoomToActualSizeDisabled = zoomDisabled;
-    this.isToggleFitToScreenDisabled = zoomDisabled;
-    this.hideZoom = !!navigationOptions.disableZoom;
+        var zoomDisabled = _knockout2["default"].pureComputed(function () {
+            return navigationOptions.disableZoom || this.isDisabled();
+        }, this);
 
-    this.fitToScreen = _knockout2["default"].pureComputed(function () {
-        return viewerOptions.zoom().fitToScreen;
-    }, this);
+        this.isZoomOutDisabled = zoomDisabled;
+        this.isZoomInDisabled = zoomDisabled;
+        this.isZoomToActualSizeDisabled = zoomDisabled;
+        this.isToggleFitToScreenDisabled = zoomDisabled;
+        this.hideZoom = !!navigationOptions.disableZoom;
 
-    var fontSizeChangeDisabled = _knockout2["default"].pureComputed(function () {
-        return navigationOptions.disableFontSizeChange || this.isDisabled();
-    }, this);
+        this.fitToScreen = _knockout2["default"].pureComputed(function () {
+            return viewerOptions.zoom().fitToScreen;
+        }, this);
 
-    this.isIncreaseFontSizeDisabled = fontSizeChangeDisabled;
-    this.isDecreaseFontSizeDisabled = fontSizeChangeDisabled;
-    this.isDefaultFontSizeDisabled = fontSizeChangeDisabled;
-    this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
+        var fontSizeChangeDisabled = _knockout2["default"].pureComputed(function () {
+            return navigationOptions.disableFontSizeChange || this.isDisabled();
+        }, this);
 
-    ["navigateToPrevious", "navigateToNext", "navigateToLeft", "navigateToRight", "navigateToFirst", "navigateToLast", "zoomIn", "zoomOut", "zoomToActualSize", "toggleFitToScreen", "increaseFontSize", "decreaseFontSize", "defaultFontSize", "handleKey"].forEach(function (methodName) {
-        this[methodName] = this[methodName].bind(this);
-    }, this);
-}
+        this.isIncreaseFontSizeDisabled = fontSizeChangeDisabled;
+        this.isDecreaseFontSizeDisabled = fontSizeChangeDisabled;
+        this.isDefaultFontSizeDisabled = fontSizeChangeDisabled;
+        this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
 
-Navigation.prototype.navigateToPrevious = function () {
-    if (!this.isNavigateToPreviousDisabled()) {
-        this.viewer_.navigateToPrevious();
-        return true;
-    } else {
-        return false;
+        ["navigateToPrevious", "navigateToNext", "navigateToLeft", "navigateToRight", "navigateToFirst", "navigateToLast", "zoomIn", "zoomOut", "zoomToActualSize", "toggleFitToScreen", "increaseFontSize", "decreaseFontSize", "defaultFontSize", "handleKey"].forEach(function (methodName) {
+            this[methodName] = this[methodName].bind(this);
+        }, this);
     }
-};
 
-Navigation.prototype.navigateToNext = function () {
-    if (!this.isNavigateToNextDisabled()) {
-        this.viewer_.navigateToNext();
-        return true;
-    } else {
-        return false;
-    }
-};
+    _createClass(Navigation, [{
+        key: "navigateToPrevious",
+        value: function navigateToPrevious() {
+            if (!this.isNavigateToPreviousDisabled()) {
+                this.viewer_.navigateToPrevious();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToNext",
+        value: function navigateToNext() {
+            if (!this.isNavigateToNextDisabled()) {
+                this.viewer_.navigateToNext();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToLeft",
+        value: function navigateToLeft() {
+            if (!this.isNavigateToLeftDisabled()) {
+                this.viewer_.navigateToLeft();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToRight",
+        value: function navigateToRight() {
+            if (!this.isNavigateToRightDisabled()) {
+                this.viewer_.navigateToRight();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToFirst",
+        value: function navigateToFirst() {
+            if (!this.isNavigateToFirstDisabled()) {
+                this.viewer_.navigateToFirst();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToLast",
+        value: function navigateToLast() {
+            if (!this.isNavigateToLastDisabled()) {
+                this.viewer_.navigateToLast();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "zoomIn",
+        value: function zoomIn() {
+            if (!this.isZoomInDisabled()) {
+                var zoom = this.viewerOptions_.zoom();
+                this.viewerOptions_.zoom(zoom.zoomIn(this.viewer_));
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "zoomOut",
+        value: function zoomOut() {
+            if (!this.isZoomOutDisabled()) {
+                var zoom = this.viewerOptions_.zoom();
+                this.viewerOptions_.zoom(zoom.zoomOut(this.viewer_));
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "zoomToActualSize",
+        value: function zoomToActualSize() {
+            if (!this.isZoomToActualSizeDisabled()) {
+                var zoom = this.viewerOptions_.zoom();
+                this.viewerOptions_.zoom(zoom.zoomToActualSize());
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "toggleFitToScreen",
+        value: function toggleFitToScreen() {
+            if (!this.isToggleFitToScreenDisabled()) {
+                var zoom = this.viewerOptions_.zoom();
+                this.viewerOptions_.zoom(zoom.toggleFitToScreen());
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "increaseFontSize",
+        value: function increaseFontSize() {
+            if (!this.isIncreaseFontSizeDisabled()) {
+                var fontSize = this.viewerOptions_.fontSize();
+                this.viewerOptions_.fontSize(fontSize * 1.25);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "decreaseFontSize",
+        value: function decreaseFontSize() {
+            if (!this.isDecreaseFontSizeDisabled()) {
+                var fontSize = this.viewerOptions_.fontSize();
+                this.viewerOptions_.fontSize(fontSize * 0.8);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "defaultFontSize",
+        value: function defaultFontSize() {
+            if (!this.isDefaultFontSizeDisabled()) {
+                var fontSize = _modelsViewerOptions2["default"].getDefaultValues().fontSize;
+                this.viewerOptions_.fontSize(fontSize);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "handleKey",
+        value: function handleKey(key) {
+            switch (key) {
+                case _utilsKeyUtil.Keys.ArrowDown:
+                case _utilsKeyUtil.Keys.PageDown:
+                    return !this.navigateToNext();
+                case _utilsKeyUtil.Keys.ArrowLeft:
+                    return !this.navigateToLeft();
+                case _utilsKeyUtil.Keys.ArrowRight:
+                    return !this.navigateToRight();
+                case _utilsKeyUtil.Keys.ArrowUp:
+                case _utilsKeyUtil.Keys.PageUp:
+                    return !this.navigateToPrevious();
+                case _utilsKeyUtil.Keys.Home:
+                    return !this.navigateToFirst();
+                case _utilsKeyUtil.Keys.End:
+                    return !this.navigateToLast();
+                case "+":
+                    return !this.increaseFontSize();
+                case "-":
+                    return !this.decreaseFontSize();
+                case "0":
+                    return !this.defaultFontSize();
+                default:
+                    return true;
+            }
+        }
+    }]);
 
-Navigation.prototype.navigateToLeft = function () {
-    if (!this.isNavigateToLeftDisabled()) {
-        this.viewer_.navigateToLeft();
-        return true;
-    } else {
-        return false;
-    }
-};
-
-Navigation.prototype.navigateToRight = function () {
-    if (!this.isNavigateToRightDisabled()) {
-        this.viewer_.navigateToRight();
-        return true;
-    } else {
-        return false;
-    }
-};
-
-Navigation.prototype.navigateToFirst = function () {
-    if (!this.isNavigateToFirstDisabled()) {
-        this.viewer_.navigateToFirst();
-        return true;
-    } else {
-        return false;
-    }
-};
-
-Navigation.prototype.navigateToLast = function () {
-    if (!this.isNavigateToLastDisabled()) {
-        this.viewer_.navigateToLast();
-        return true;
-    } else {
-        return false;
-    }
-};
-
-Navigation.prototype.zoomIn = function () {
-    if (!this.isZoomInDisabled()) {
-        var zoom = this.viewerOptions_.zoom();
-        this.viewerOptions_.zoom(zoom.zoomIn(this.viewer_));
-        return true;
-    } else {
-        return false;
-    }
-};
-
-Navigation.prototype.zoomOut = function () {
-    if (!this.isZoomOutDisabled()) {
-        var zoom = this.viewerOptions_.zoom();
-        this.viewerOptions_.zoom(zoom.zoomOut(this.viewer_));
-        return true;
-    } else {
-        return false;
-    }
-};
-
-Navigation.prototype.zoomToActualSize = function () {
-    if (!this.isZoomToActualSizeDisabled()) {
-        var zoom = this.viewerOptions_.zoom();
-        this.viewerOptions_.zoom(zoom.zoomToActualSize());
-        return true;
-    } else {
-        return false;
-    }
-};
-
-Navigation.prototype.toggleFitToScreen = function () {
-    if (!this.isToggleFitToScreenDisabled()) {
-        var zoom = this.viewerOptions_.zoom();
-        this.viewerOptions_.zoom(zoom.toggleFitToScreen());
-        return true;
-    } else {
-        return false;
-    }
-};
-
-Navigation.prototype.increaseFontSize = function () {
-    if (!this.isIncreaseFontSizeDisabled()) {
-        var fontSize = this.viewerOptions_.fontSize();
-        this.viewerOptions_.fontSize(fontSize * 1.25);
-        return true;
-    } else {
-        return false;
-    }
-};
-
-Navigation.prototype.decreaseFontSize = function () {
-    if (!this.isDecreaseFontSizeDisabled()) {
-        var fontSize = this.viewerOptions_.fontSize();
-        this.viewerOptions_.fontSize(fontSize * 0.8);
-        return true;
-    } else {
-        return false;
-    }
-};
-
-Navigation.prototype.defaultFontSize = function () {
-    if (!this.isDefaultFontSizeDisabled()) {
-        var fontSize = _modelsViewerOptions2["default"].getDefaultValues().fontSize;
-        this.viewerOptions_.fontSize(fontSize);
-        return true;
-    } else {
-        return false;
-    }
-};
-
-Navigation.prototype.handleKey = function (key) {
-    switch (key) {
-        case _utilsKeyUtil.Keys.ArrowDown:
-        case _utilsKeyUtil.Keys.PageDown:
-            return !this.navigateToNext();
-        case _utilsKeyUtil.Keys.ArrowLeft:
-            return !this.navigateToLeft();
-        case _utilsKeyUtil.Keys.ArrowRight:
-            return !this.navigateToRight();
-        case _utilsKeyUtil.Keys.ArrowUp:
-        case _utilsKeyUtil.Keys.PageUp:
-            return !this.navigateToPrevious();
-        case _utilsKeyUtil.Keys.Home:
-            return !this.navigateToFirst();
-        case _utilsKeyUtil.Keys.End:
-            return !this.navigateToLast();
-        case "+":
-            return !this.increaseFontSize();
-        case "-":
-            return !this.decreaseFontSize();
-        case "0":
-            return !this.defaultFontSize();
-        default:
-            return true;
-    }
-};
+    return Navigation;
+})();
 
 exports["default"] = Navigation;
 module.exports = exports["default"];
@@ -8133,7 +8262,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _knockout = require("knockout");
 
@@ -8153,72 +8286,85 @@ var _modelsPageViewMode2 = _interopRequireDefault(_modelsPageViewMode);
 
 var _utilsKeyUtil = require("../utils/key-util");
 
-function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, settingsPanelOptions) {
-    var _this = this;
+var SettingsPanel = (function () {
+    function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, settingsPanelOptions) {
+        var _this = this;
 
-    this.viewerOptions_ = viewerOptions;
-    this.documentOptions_ = documentOptions;
-    this.viewer_ = viewer;
+        _classCallCheck(this, SettingsPanel);
 
-    this.isPageSizeChangeDisabled = !!settingsPanelOptions.disablePageSizeChange;
-    this.isOverrideDocumentStyleSheetDisabled = this.isPageSizeChangeDisabled;
-    this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
+        this.viewerOptions_ = viewerOptions;
+        this.documentOptions_ = documentOptions;
+        this.viewer_ = viewer;
 
-    this.opened = _knockout2["default"].observable(false);
-    this.state = {
-        viewerOptions: new _modelsViewerOptions2["default"](viewerOptions),
-        pageSize: new _modelsPageSize2["default"](documentOptions.pageSize),
-        pageViewMode: _knockout2["default"].pureComputed({
-            read: function read() {
-                return _this.state.viewerOptions.pageViewMode().toString();
-            },
-            write: function write(value) {
-                _this.state.viewerOptions.pageViewMode(_modelsPageViewMode2["default"].of(value));
+        this.isPageSizeChangeDisabled = !!settingsPanelOptions.disablePageSizeChange;
+        this.isOverrideDocumentStyleSheetDisabled = this.isPageSizeChangeDisabled;
+        this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
+
+        this.opened = _knockout2["default"].observable(false);
+        this.state = {
+            viewerOptions: new _modelsViewerOptions2["default"](viewerOptions),
+            pageSize: new _modelsPageSize2["default"](documentOptions.pageSize),
+            pageViewMode: _knockout2["default"].pureComputed({
+                read: function read() {
+                    return _this.state.viewerOptions.pageViewMode().toString();
+                },
+                write: function write(value) {
+                    _this.state.viewerOptions.pageViewMode(_modelsPageViewMode2["default"].of(value));
+                }
+            })
+        };
+
+        ["close", "toggle", "apply", "reset"].forEach(function (methodName) {
+            this[methodName] = this[methodName].bind(this);
+        }, this);
+
+        messageDialog.visible.subscribe(function (visible) {
+            if (visible) this.close();
+        }, this);
+    }
+
+    _createClass(SettingsPanel, [{
+        key: "close",
+        value: function close() {
+            this.opened(false);
+            return true;
+        }
+    }, {
+        key: "toggle",
+        value: function toggle() {
+            this.opened(!this.opened());
+        }
+    }, {
+        key: "apply",
+        value: function apply() {
+            if (this.state.pageSize.equivalentTo(this.documentOptions_.pageSize)) {
+                this.viewerOptions_.copyFrom(this.state.viewerOptions);
+            } else {
+                this.documentOptions_.pageSize.copyFrom(this.state.pageSize);
+                this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
             }
-        })
-    };
+        }
+    }, {
+        key: "reset",
+        value: function reset() {
+            this.state.viewerOptions.copyFrom(this.viewerOptions_);
+            this.state.pageSize.copyFrom(this.documentOptions_.pageSize);
+        }
+    }, {
+        key: "handleKey",
+        value: function handleKey(key) {
+            switch (key) {
+                case _utilsKeyUtil.Keys.Escape:
+                    this.close();
+                    return true;
+                default:
+                    return true;
+            }
+        }
+    }]);
 
-    ["close", "toggle", "apply", "reset"].forEach(function (methodName) {
-        this[methodName] = this[methodName].bind(this);
-    }, this);
-
-    messageDialog.visible.subscribe(function (visible) {
-        if (visible) this.close();
-    }, this);
-}
-
-SettingsPanel.prototype.close = function () {
-    this.opened(false);
-    return true;
-};
-
-SettingsPanel.prototype.toggle = function () {
-    this.opened(!this.opened());
-};
-
-SettingsPanel.prototype.apply = function () {
-    if (this.state.pageSize.equivalentTo(this.documentOptions_.pageSize)) {
-        this.viewerOptions_.copyFrom(this.state.viewerOptions);
-    } else {
-        this.documentOptions_.pageSize.copyFrom(this.state.pageSize);
-        this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
-    }
-};
-
-SettingsPanel.prototype.reset = function () {
-    this.state.viewerOptions.copyFrom(this.viewerOptions_);
-    this.state.pageSize.copyFrom(this.documentOptions_.pageSize);
-};
-
-SettingsPanel.prototype.handleKey = function (key) {
-    switch (key) {
-        case _utilsKeyUtil.Keys.Escape:
-            this.close();
-            return true;
-        default:
-            return true;
-    }
-};
+    return SettingsPanel;
+})();
 
 exports["default"] = SettingsPanel;
 module.exports = exports["default"];
@@ -8300,6 +8446,8 @@ var _storesUrlParameters = require("../stores/url-parameters");
 var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
 
 function ViewerApp() {
+    var _this = this;
+
     this.documentOptions = new _modelsDocumentOptions2["default"]();
     this.viewerOptions = new _modelsViewerOptions2["default"]();
     if (this.viewerOptions.profile()) {
@@ -8329,14 +8477,14 @@ function ViewerApp() {
 
     this.navigation = new _navigation2["default"](this.viewerOptions, this.viewer, this.settingsPanel, navigationOptions);
 
-    this.handleKey = (function (data, event) {
+    this.handleKey = function (data, event) {
         var key = _utilsKeyUtil2["default"].identifyKeyFromEvent(event);
-        var ret = this.settingsPanel.handleKey(key);
+        var ret = _this.settingsPanel.handleKey(key);
         if (ret) {
-            ret = this.navigation.handleKey(key);
+            ret = _this.navigation.handleKey(key);
         }
         return ret;
-    }).bind(this);
+    };
 
     this.viewer.loadDocument(this.documentOptions);
 }
@@ -8370,7 +8518,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _knockout = require("knockout");
 
@@ -8388,116 +8540,136 @@ var _modelsVivliostyle = require("../models/vivliostyle");
 
 var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
 
-function Viewer(viewerSettings, viewerOptions) {
-    this.viewerOptions_ = viewerOptions;
-    this.documentOptions_ = null;
-    this.viewer_ = new _modelsVivliostyle2["default"].viewer.Viewer(viewerSettings, viewerOptions.toObject());
-    var state_ = this.state_ = {
-        status: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.ReadyState.LOADING),
-        pageProgression: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.LTR)
-    };
-    this.state = {
-        status: state_.status.getter.extend({
-            rateLimit: { timeout: 100, method: "notifyWhenChangesStop" }
-        }),
-        navigatable: _knockout2["default"].pureComputed(function () {
-            return state_.status.value() !== _modelsVivliostyle2["default"].constants.ReadyState.LOADING;
-        }),
-        pageProgression: state_.pageProgression.getter
-    };
+var Viewer = (function () {
+    function Viewer(viewerSettings, viewerOptions) {
+        _classCallCheck(this, Viewer);
 
-    this.setupViewerEventHandler();
-    this.setupViewerOptionSubscriptions();
-}
+        this.viewerOptions_ = viewerOptions;
+        this.documentOptions_ = null;
+        this.viewer_ = new _modelsVivliostyle2["default"].viewer.Viewer(viewerSettings, viewerOptions.toObject());
+        var state_ = this.state_ = {
+            status: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.ReadyState.LOADING),
+            pageProgression: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.LTR)
+        };
+        this.state = {
+            status: state_.status.getter.extend({
+                rateLimit: { timeout: 100, method: "notifyWhenChangesStop" }
+            }),
+            navigatable: _knockout2["default"].pureComputed(function () {
+                return state_.status.value() !== _modelsVivliostyle2["default"].constants.ReadyState.LOADING;
+            }),
+            pageProgression: state_.pageProgression.getter
+        };
 
-Viewer.prototype.setupViewerEventHandler = function () {
-    var logger = _loggingLogger2["default"].getLogger();
-    this.viewer_.addListener("debug", function (payload) {
-        logger.debug(payload.content);
-    });
-    this.viewer_.addListener("info", function (payload) {
-        logger.info(payload.content);
-    });
-    this.viewer_.addListener("warn", function (payload) {
-        logger.warn(payload.content);
-    });
-    this.viewer_.addListener("error", function (payload) {
-        logger.error(payload.content);
-    });
-    this.viewer_.addListener("readystatechange", (function () {
-        var readyState = this.viewer_.readyState;
-        if (readyState === _modelsVivliostyle2["default"].constants.ReadyState.INTERACTIVE || _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
-            this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
-        }
-        this.state_.status.value(readyState);
-    }).bind(this));
-    this.viewer_.addListener("loaded", (function () {
-        if (this.viewerOptions_.profile()) {
-            _modelsVivliostyle2["default"].profile.profiler.printTimings();
-        }
-    }).bind(this));
-    this.viewer_.addListener("nav", (function (payload) {
-        var cfi = payload.cfi;
-        if (cfi) {
-            this.documentOptions_.fragment(cfi);
-        }
-    }).bind(this));
-    this.viewer_.addListener("hyperlink", (function (payload) {
-        if (payload.internal) {
-            this.viewer_.navigateToInternalUrl(payload.href);
-        } else {
-            window.location.href = payload.href;
-        }
-    }).bind(this));
-};
-
-Viewer.prototype.setupViewerOptionSubscriptions = function () {
-    _knockout2["default"].computed(function () {
-        var viewerOptions = this.viewerOptions_.toObject();
-        this.viewer_.setOptions(viewerOptions);
-    }, this).extend({ rateLimit: 0 });
-};
-
-Viewer.prototype.loadDocument = function (documentOptions, viewerOptions) {
-    this.state_.status.value("loading");
-    if (viewerOptions) {
-        this.viewerOptions_.copyFrom(viewerOptions);
+        this.setupViewerEventHandler();
+        this.setupViewerOptionSubscriptions();
     }
-    this.documentOptions_ = documentOptions;
-    if (documentOptions.url()) {
-        this.viewer_.loadDocument(documentOptions.url(), documentOptions.toObject(), this.viewerOptions_.toObject());
-    } else if (documentOptions.epubUrl()) {
-        this.viewer_.loadEPUB(documentOptions.epubUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
-    }
-};
 
-Viewer.prototype.navigateToPrevious = function () {
-    this.viewer_.navigateToPage("previous");
-};
+    _createClass(Viewer, [{
+        key: "setupViewerEventHandler",
+        value: function setupViewerEventHandler() {
+            var _this = this;
 
-Viewer.prototype.navigateToNext = function () {
-    this.viewer_.navigateToPage("next");
-};
+            var logger = _loggingLogger2["default"].getLogger();
+            this.viewer_.addListener("debug", function (payload) {
+                logger.debug(payload.content);
+            });
+            this.viewer_.addListener("info", function (payload) {
+                logger.info(payload.content);
+            });
+            this.viewer_.addListener("warn", function (payload) {
+                logger.warn(payload.content);
+            });
+            this.viewer_.addListener("error", function (payload) {
+                logger.error(payload.content);
+            });
+            this.viewer_.addListener("readystatechange", function () {
+                var readyState = _this.viewer_.readyState;
+                if (readyState === _modelsVivliostyle2["default"].constants.ReadyState.INTERACTIVE || _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
+                    _this.state_.pageProgression.value(_this.viewer_.getCurrentPageProgression());
+                }
+                _this.state_.status.value(readyState);
+            });
+            this.viewer_.addListener("loaded", function () {
+                if (_this.viewerOptions_.profile()) {
+                    _modelsVivliostyle2["default"].profile.profiler.printTimings();
+                }
+            });
+            this.viewer_.addListener("nav", function (payload) {
+                var cfi = payload.cfi;
+                if (cfi) {
+                    _this.documentOptions_.fragment(cfi);
+                }
+            });
+            this.viewer_.addListener("hyperlink", function (payload) {
+                if (payload.internal) {
+                    _this.viewer_.navigateToInternalUrl(payload.href);
+                } else {
+                    window.location.href = payload.href;
+                }
+            });
+        }
+    }, {
+        key: "setupViewerOptionSubscriptions",
+        value: function setupViewerOptionSubscriptions() {
+            _knockout2["default"].computed(function () {
+                var viewerOptions = this.viewerOptions_.toObject();
+                this.viewer_.setOptions(viewerOptions);
+            }, this).extend({ rateLimit: 0 });
+        }
+    }, {
+        key: "loadDocument",
+        value: function loadDocument(documentOptions, viewerOptions) {
+            this.state_.status.value("loading");
+            if (viewerOptions) {
+                this.viewerOptions_.copyFrom(viewerOptions);
+            }
+            this.documentOptions_ = documentOptions;
+            if (documentOptions.url()) {
+                this.viewer_.loadDocument(documentOptions.url(), documentOptions.toObject(), this.viewerOptions_.toObject());
+            } else if (documentOptions.epubUrl()) {
+                this.viewer_.loadEPUB(documentOptions.epubUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+            }
+        }
+    }, {
+        key: "navigateToPrevious",
+        value: function navigateToPrevious() {
+            this.viewer_.navigateToPage("previous");
+        }
+    }, {
+        key: "navigateToNext",
+        value: function navigateToNext() {
+            this.viewer_.navigateToPage("next");
+        }
+    }, {
+        key: "navigateToLeft",
+        value: function navigateToLeft() {
+            this.viewer_.navigateToPage("left");
+        }
+    }, {
+        key: "navigateToRight",
+        value: function navigateToRight() {
+            this.viewer_.navigateToPage("right");
+        }
+    }, {
+        key: "navigateToFirst",
+        value: function navigateToFirst() {
+            this.viewer_.navigateToPage("first");
+        }
+    }, {
+        key: "navigateToLast",
+        value: function navigateToLast() {
+            this.viewer_.navigateToPage("last");
+        }
+    }, {
+        key: "queryZoomFactor",
+        value: function queryZoomFactor(type) {
+            return this.viewer_.queryZoomFactor(type);
+        }
+    }]);
 
-Viewer.prototype.navigateToLeft = function () {
-    this.viewer_.navigateToPage("left");
-};
-
-Viewer.prototype.navigateToRight = function () {
-    this.viewer_.navigateToPage("right");
-};
-
-Viewer.prototype.navigateToFirst = function () {
-    this.viewer_.navigateToPage("first");
-};
-
-Viewer.prototype.navigateToLast = function () {
-    this.viewer_.navigateToPage("last");
-};
-
-Viewer.prototype.queryZoomFactor = function (type) {
-    return this.viewer_.queryZoomFactor(type);
-};
+    return Viewer;
+})();
 
 exports["default"] = Viewer;
 module.exports = exports["default"];
