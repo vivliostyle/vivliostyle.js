@@ -1,6 +1,6 @@
 {
   "name": "vivliostyle",
-  "version": "2017.6.1-pre",
+  "version": "2018.7.0-pre",
   "description": "Library for web sites with rich paged viewing and EPUB support, shared with Vivliostyle Formatter & Browser",
   "scripts": {
     "lint": "eslint src test plugins/*/src plugins/*/test",
