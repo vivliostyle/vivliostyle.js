@@ -223,6 +223,34 @@ adapt.csscasc.couplingMapHor = adapt.csscasc.buildCouplingMap(
     }
 );
 
+/** @const */
+adapt.csscasc.couplingMapVertRtl = adapt.csscasc.buildCouplingMap(
+    {
+        "block-start": "right",
+        "block-end": "left",
+        "inline-start": "bottom",
+        "inline-end": "top"
+    },
+    {
+        "block-size": "width",
+        "inline-size": "height"
+    }
+);
+
+/** @const */
+adapt.csscasc.couplingMapHorRtl = adapt.csscasc.buildCouplingMap(
+    {
+        "block-start": "top",
+        "block-end": "bottom",
+        "inline-start": "right",
+        "inline-end": "left",
+    },
+    {
+        "block-size": "height",
+        "inline-size": "width"
+    }
+);
+
 /**
  * @param {adapt.css.Val} value
  * @param {number} priority
@@ -3868,6 +3896,23 @@ adapt.csscasc.isVertical = (cascaded, context, vertical) => {
 };
 
 /**
+ * @param {Object.<string,adapt.csscasc.CascadeValue>} cascaded
+ * @param {adapt.expr.Context} context
+ * @param {boolean} rtl
+ * @return {boolean}
+ */
+adapt.csscasc.isRtl = (cascaded, context, rtl) => {
+    const directionCasc = cascaded["direction"];
+    if (directionCasc) {
+        const direction = directionCasc.evaluate(context, "direction");
+        if (direction && direction !== adapt.css.ident.inherit) {
+            return direction === adapt.css.ident.rtl;
+        }
+    }
+    return rtl;
+};
+
+/**
  * @param {adapt.csscasc.ElementStyle} style
  * @param {adapt.expr.Context} context
  * @param {Array.<string>} regionIds
@@ -3935,11 +3980,14 @@ adapt.csscasc.mergeStyle = (to, from, context) => {
  * @param {!Object.<string, adapt.csscasc.CascadeValue>} src Source properties map
  * @param {!Object.<string, T>} dest Destination map
  * @param {boolean} vertical
+ * @param {boolean} rtl
  * @param {function(string, !adapt.csscasc.CascadeValue): T} transform If supplied, property values are transformed by this function before inserted into the destination map. The first parameter is the property name and the second one is the property value.
  * @template T
  */
-adapt.csscasc.convertToPhysical = (src, dest, vertical, transform) => {
-    const couplingMap = vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
+adapt.csscasc.convertToPhysical = (src, dest, vertical, rtl, transform) => {
+    const couplingMap = vertical ?
+        (rtl ? adapt.csscasc.couplingMapVertRtl : adapt.csscasc.couplingMapVert) :
+        (rtl ? adapt.csscasc.couplingMapHorRtl : adapt.csscasc.couplingMapHor);
     for (const propName in src) {
         if (src.hasOwnProperty(propName)) {
             const cascVal = src[propName];

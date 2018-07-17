@@ -429,6 +429,7 @@ adapt.pm.PageBoxInstance = function(parentInstance, pageBox) {
     /** @type {Object.<string,adapt.expr.Val>} */ this.namedValues = {};
     /** @type {Object.<string,adapt.expr.Val>} */ this.namedFuncs = {};
     /** @type {boolean} */ this.vertical = false;
+    /** @type {boolean} */ this.rtl = false;
     /** @type {boolean} */ this.suppressEmptyBoxGeneration = false;
     if (parentInstance) {
         parentInstance.children.push(this);
@@ -847,7 +848,8 @@ adapt.pm.PageBoxInstance.prototype.init = function(context) {
     const regionIds = this.parentInstance ? this.parentInstance.getActiveRegions(context) : null;
     const cascMap = adapt.csscasc.flattenCascadedStyle(this.cascaded, context, regionIds, false, null);
     this.vertical = adapt.csscasc.isVertical(cascMap, context, this.parentInstance ? this.parentInstance.vertical : false);
-    adapt.csscasc.convertToPhysical(cascMap, style, this.vertical, (name, cascVal) => cascVal.value);
+    this.rtl = adapt.csscasc.isRtl(cascMap, context, this.parentInstance ? this.parentInstance.rtl : false);
+    adapt.csscasc.convertToPhysical(cascMap, style, this.vertical, this.rtl, (name, cascVal) => cascVal.value);
     this.autoWidth = new adapt.expr.Native(scope,
         () => self.calculatedWidth, "autoWidth");
     this.autoHeight = new adapt.expr.Native(scope,

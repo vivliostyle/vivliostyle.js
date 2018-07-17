@@ -482,10 +482,11 @@ adapt.vtree.LayoutContext.prototype.applyPseudoelementStyle = (nodeContext, pseu
 /**
  * Apply styles to footnote container.
  * @param {boolean} vertical
+ * @param {boolean} rtl
  * @param {Element} element element to apply styles to
  * @return {boolean} vertical
  */
-adapt.vtree.LayoutContext.prototype.applyFootnoteStyle = (vertical, element) => {};
+adapt.vtree.LayoutContext.prototype.applyFootnoteStyle = (vertical, rtl, element) => {};
 
 
 /**
