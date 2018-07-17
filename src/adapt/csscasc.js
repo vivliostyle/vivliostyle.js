@@ -215,7 +215,7 @@ adapt.csscasc.couplingMapHor = adapt.csscasc.buildCouplingMap(
         "block-start": "top",
         "block-end": "bottom",
         "inline-start": "left",
-        "inline-end": "right",
+        "inline-end": "right"
     },
     {
         "block-size": "height",
@@ -243,7 +243,7 @@ adapt.csscasc.couplingMapHorRtl = adapt.csscasc.buildCouplingMap(
         "block-start": "top",
         "block-end": "bottom",
         "inline-start": "right",
-        "inline-end": "left",
+        "inline-end": "left"
     },
     {
         "block-size": "height",
