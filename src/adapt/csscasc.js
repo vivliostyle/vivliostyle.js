@@ -148,13 +148,18 @@ adapt.csscasc.supportedNamespaces = {
 adapt.csscasc.coupledPatterns = ["margin-%", "padding-%", "border-%-width", "border-%-style",
     "border-%-color", "%"];
 
+/** @const */
+adapt.csscasc.coupledExtentPatterns = ["max-%", "min-%", "%"];
+
 /**
  * @const
  * @type {Object.<string,boolean>}
  */
 adapt.csscasc.geomNames = ((() => {
     const sides = ["left", "right", "top", "bottom"];
-    const names = {"width": true, "height": true};
+    const names = {"width": true, "height": true,
+        "max-width": true, "max-height": true,
+        "min-width": true, "min-height": true};
     for (let i = 0; i < adapt.csscasc.coupledPatterns.length; i++) {
         for (let k = 0; k < sides.length; k++) {
             const name = adapt.csscasc.coupledPatterns[i].replace("%", sides[k]);
@@ -166,14 +171,23 @@ adapt.csscasc.geomNames = ((() => {
 
 /**
  * @param {Object.<string,string>} sideMap
+ * @param {Object.<string,string>} extentMap
  * @return {Object.<string,string>}
  */
-adapt.csscasc.buildCouplingMap = sideMap => {
+adapt.csscasc.buildCouplingMap = (sideMap, extentMap) => {
     const map = {};
-    for (let i = 0; i < adapt.csscasc.coupledPatterns.length; i++) {
+    for (const pattern of adapt.csscasc.coupledPatterns) {
         for (const side in sideMap) {
-            const name1 = adapt.csscasc.coupledPatterns[i].replace("%", side);
-            const name2 = adapt.csscasc.coupledPatterns[i].replace("%", sideMap[side]);
+            const name1 = pattern.replace("%", side);
+            const name2 = pattern.replace("%", sideMap[side]);
+            map[name1] = name2;
+            map[name2] = name1;
+        }
+    }
+    for (const extentPattern of adapt.csscasc.coupledExtentPatterns) {
+        for (const extent in extentMap) {
+            const name1 = extentPattern.replace("%", extent);
+            const name2 = extentPattern.replace("%", extentMap[extent]);
             map[name1] = name2;
             map[name2] = name1;
         }
@@ -182,18 +196,60 @@ adapt.csscasc.buildCouplingMap = sideMap => {
 };
 
 /** @const */
-adapt.csscasc.couplingMapVert = adapt.csscasc.buildCouplingMap({
-    "before": "right",
-    "after": "left",
-    "start": "top",
-    "end": "bottom"});
+adapt.csscasc.couplingMapVert = adapt.csscasc.buildCouplingMap(
+    {
+        "block-start": "right",
+        "block-end": "left",
+        "inline-start": "top",
+        "inline-end": "bottom"
+    },
+    {
+        "block-size": "width",
+        "inline-size": "height"
+    }
+);
 
 /** @const */
-adapt.csscasc.couplingMapHor = adapt.csscasc.buildCouplingMap({
-    "before": "top",
-    "after": "bottom",
-    "start": "left",
-    "end": "right"});
+adapt.csscasc.couplingMapHor = adapt.csscasc.buildCouplingMap(
+    {
+        "block-start": "top",
+        "block-end": "bottom",
+        "inline-start": "left",
+        "inline-end": "right"
+    },
+    {
+        "block-size": "height",
+        "inline-size": "width"
+    }
+);
+
+/** @const */
+adapt.csscasc.couplingMapVertRtl = adapt.csscasc.buildCouplingMap(
+    {
+        "block-start": "right",
+        "block-end": "left",
+        "inline-start": "bottom",
+        "inline-end": "top"
+    },
+    {
+        "block-size": "width",
+        "inline-size": "height"
+    }
+);
+
+/** @const */
+adapt.csscasc.couplingMapHorRtl = adapt.csscasc.buildCouplingMap(
+    {
+        "block-start": "top",
+        "block-end": "bottom",
+        "inline-start": "right",
+        "inline-end": "left"
+    },
+    {
+        "block-size": "height",
+        "inline-size": "width"
+    }
+);
 
 /**
  * @param {adapt.css.Val} value
@@ -3840,6 +3896,23 @@ adapt.csscasc.isVertical = (cascaded, context, vertical) => {
 };
 
 /**
+ * @param {Object.<string,adapt.csscasc.CascadeValue>} cascaded
+ * @param {adapt.expr.Context} context
+ * @param {boolean} rtl
+ * @return {boolean}
+ */
+adapt.csscasc.isRtl = (cascaded, context, rtl) => {
+    const directionCasc = cascaded["direction"];
+    if (directionCasc) {
+        const direction = directionCasc.evaluate(context, "direction");
+        if (direction && direction !== adapt.css.ident.inherit) {
+            return direction === adapt.css.ident.rtl;
+        }
+    }
+    return rtl;
+};
+
+/**
  * @param {adapt.csscasc.ElementStyle} style
  * @param {adapt.expr.Context} context
  * @param {Array.<string>} regionIds
@@ -3907,11 +3980,14 @@ adapt.csscasc.mergeStyle = (to, from, context) => {
  * @param {!Object.<string, adapt.csscasc.CascadeValue>} src Source properties map
  * @param {!Object.<string, T>} dest Destination map
  * @param {boolean} vertical
+ * @param {boolean} rtl
  * @param {function(string, !adapt.csscasc.CascadeValue): T} transform If supplied, property values are transformed by this function before inserted into the destination map. The first parameter is the property name and the second one is the property value.
  * @template T
  */
-adapt.csscasc.convertToPhysical = (src, dest, vertical, transform) => {
-    const couplingMap = vertical ? adapt.csscasc.couplingMapVert : adapt.csscasc.couplingMapHor;
+adapt.csscasc.convertToPhysical = (src, dest, vertical, rtl, transform) => {
+    const couplingMap = vertical ?
+        (rtl ? adapt.csscasc.couplingMapVertRtl : adapt.csscasc.couplingMapVert) :
+        (rtl ? adapt.csscasc.couplingMapHorRtl : adapt.csscasc.couplingMapHor);
     for (const propName in src) {
         if (src.hasOwnProperty(propName)) {
             const cascVal = src[propName];

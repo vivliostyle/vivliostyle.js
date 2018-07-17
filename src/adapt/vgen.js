@@ -481,16 +481,18 @@ adapt.vgen.ViewFactory.prototype.setViewRoot = function(viewRoot, isFootnote) {
 
 /**
  * @param {boolean} vertical
+ * @param {boolean} rtl
  * @param {adapt.csscasc.ElementStyle} style
  * @param {!Object.<string,adapt.css.Val>} computedStyle
  * @return {boolean} vertical
  */
-adapt.vgen.ViewFactory.prototype.computeStyle = function(vertical, style, computedStyle) {
+adapt.vgen.ViewFactory.prototype.computeStyle = function(vertical, rtl, style, computedStyle) {
     const context = this.context;
     const cascMap = adapt.csscasc.flattenCascadedStyle(style, context, this.regionIds, this.isFootnote, this.nodeContext);
     vertical = adapt.csscasc.isVertical(cascMap, context, vertical);
+    rtl = adapt.csscasc.isRtl(cascMap, context, rtl);
     const self = this;
-    adapt.csscasc.convertToPhysical(cascMap, computedStyle, vertical, (name, cascVal) => {
+    adapt.csscasc.convertToPhysical(cascMap, computedStyle, vertical, rtl, (name, cascVal) => {
         let value = cascVal.evaluate(context, name);
         if (name == "font-family") {
             value = self.docFaces.filterFontFamily(value);
@@ -702,7 +704,7 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         elementStyle = inheritedValues.elementStyle;
         self.nodeContext.lang = inheritedValues.lang;
     }
-    self.nodeContext.vertical = self.computeStyle(self.nodeContext.vertical, elementStyle, computedStyle);
+    self.nodeContext.vertical = self.computeStyle(self.nodeContext.vertical, self.nodeContext.direction === "rtl", elementStyle, computedStyle);
     styler.processContent(element, computedStyle);
 
     this.transferPolyfilledInheritedProps(computedStyle);
@@ -1301,7 +1303,7 @@ adapt.vgen.ViewFactory.prototype.findAndProcessRepeatingElements = function(elem
         if (child.nodeType !== 1) continue;
         const computedStyle = {};
         const elementStyle = styler.getStyle(/** @type {Element}*/ (child), false);
-        this.computeStyle(this.nodeContext.vertical, elementStyle, computedStyle);
+        this.computeStyle(this.nodeContext.vertical, this.nodeContext.direction === "rtl", elementStyle, computedStyle);
         const processRepeatOnBreak = this.processRepeatOnBreak(computedStyle);
         if (!processRepeatOnBreak) continue;
 
@@ -1679,7 +1681,7 @@ adapt.vgen.ViewFactory.prototype.applyPseudoelementStyle = function(nodeContext,
     if (!elementStyle)
         return;
     const computedStyle = {};
-    nodeContext.vertical = this.computeStyle(nodeContext.vertical, elementStyle, computedStyle);
+    nodeContext.vertical = this.computeStyle(nodeContext.vertical, nodeContext.direction === "rtl", elementStyle, computedStyle);
     const content = computedStyle["content"];
     if (adapt.vtree.nonTrivialContent(content)) {
         content.visit(new adapt.vtree.ContentPropertyHandler(target, this.context, content,
@@ -1755,16 +1757,16 @@ adapt.vgen.ViewFactory.prototype.createElement = function(ns, tag) {
 /**
  * @override
  */
-adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, target) {
+adapt.vgen.ViewFactory.prototype.applyFootnoteStyle = function(vertical, rtl, target) {
     const computedStyle = {};
     const pseudoMap = adapt.csscasc.getStyleMap(this.footnoteStyle, "_pseudos");
-    vertical = this.computeStyle(vertical, this.footnoteStyle, computedStyle);
+    vertical = this.computeStyle(vertical, rtl, this.footnoteStyle, computedStyle);
     if (pseudoMap && pseudoMap["before"]) {
         const childComputedStyle = {};
         const span = this.createElement(adapt.base.NS.XHTML, "span");
         adapt.vgen.setPseudoName(span, "before");
         target.appendChild(span);
-        this.computeStyle(vertical, pseudoMap["before"], childComputedStyle);
+        this.computeStyle(vertical, rtl, pseudoMap["before"], childComputedStyle);
         delete childComputedStyle["content"];
         this.applyComputedStyles(span, childComputedStyle);
     }
