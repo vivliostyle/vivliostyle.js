@@ -903,6 +903,18 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Allowed prefixes: ms
   - Support depends on browser capabilities
 
+## [CSS Logical Properties and Values 1](https://www.w3.org/TR/css-logical-1/)
+- [block-size, inline-size, min-block-size, min-inline-size, max-block-size, max-inline-size](https://www.w3.org/TR/css-logical-1/#dimension-properties)
+  - Supported in all browsers
+- [margin-block-start, margin-block-end, margin-inline-start, margin-inline-end, margin-block, margin-inline](https://www.w3.org/TR/css-logical-1/#margin-properties)
+  - Supported in all browsers
+- [inset-block-start, inset-block-end, inset-inline-start, inset-inline-end, inset-block, inset-inline](https://www.w3.org/TR/css-logical-1/#inset-properties)
+  - Supported in all browsers
+- [padding-block-start, padding-block-end, padding-inline-start, padding-inline-end, padding-block, padding-inline](https://www.w3.org/TR/css-logical-1/#padding-properties)
+  - Supported in all browsers
+- [border-block-start-width, border-block-end-width, border-inline-start-width, border-inline-end-width, border-block-width, border-inline-width, border-block-start-style, border-block-end-style, border-inline-start-style, border-inline-end-style, border-block-style, border-inline-style, border-block-start-color, border-block-end-color, border-inline-start-color, border-inline-end-color, border-block-color, border-inline-color, border-block-start, border-block-end, border-inline-start, border-inline-end, border-block, border-inline](https://www.w3.org/TR/css-logical-1/#border-properties)
+  - Supported in all browsers
+
 ## [EPUB Adaptive Layout](http://www.idpf.org/epub/pgt/)
 
 Note: This spec is not on a W3C standards track. Future version of Vivliostyle may drop support for this spec.

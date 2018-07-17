@@ -57,31 +57,31 @@ html|body {
 }
 html|h1 {
     font-size: 2em;
-	-adapt-margin-before: 0.67em;
-	-adapt-margin-after: 0.67em;
-	-adapt-margin-start: 0em;
-	-adapt-margin-end: 0em;
+	margin-block-start: 0.67em;
+	margin-block-end: 0.67em;
+	margin-inline-start: 0em;
+	margin-inline-end: 0em;
 }
 html|h2 {
     font-size: 1.5em;
-	-adapt-margin-before: 0.75em;
-	-adapt-margin-after: 0.75em;
-	-adapt-margin-start: 0em;
-	-adapt-margin-end: 0em;
+	margin-block-start: 0.75em;
+	margin-block-end: 0.75em;
+	margin-inline-start: 0em;
+	margin-inline-end: 0em;
 }
 html|h3 {
     font-size: 1.17em;
-	-adapt-margin-before: 0.83em;
-	-adapt-margin-after: 0.83em;
-	-adapt-margin-start: 0em;
-	-adapt-margin-end: 0em;
+	margin-block-start: 0.83em;
+	margin-block-end: 0.83em;
+	margin-inline-start: 0em;
+	margin-inline-end: 0em;
 }
 html|h4, html|p, html|blockquote, html|ul, html|fieldset,
 html|form, html|ol, html|dl, html|dir, html|menu, html|h5, html|h6 {
-	-adapt-margin-before: 1em;
-	-adapt-margin-after: 1em;
-	-adapt-margin-start: 0em;
-	-adapt-margin-end: 0em;
+	margin-block-start: 1em;
+	margin-block-end: 1em;
+	margin-inline-start: 0em;
+	margin-inline-end: 0em;
 }
 html|h5 {
     font-size: .83em;
@@ -93,10 +93,10 @@ html|h1, html|h2, html|h3, html|h4, html|h5, html|h6, html|b, html|strong {
     font-weight: bolder;
 }
 html|blockquote {
-    -adapt-margin-before: 0px;
-    -adapt-margin-after: 0px;
-    -adapt-margin-start: 40px;
-    -adapt-margin-end: 40px;
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+    margin-inline-start: 40px;
+    margin-inline-end: 40px;
 }
 html|i, html|cite, html|em, html|var, html|address {
     font-style: italic;
@@ -143,7 +143,7 @@ html|hr {
 }
 html|ol, html|ul, html|dir, html|menu, html|dd {
 	margin: 0px;
-    -adapt-margin-start: 40px;
+    margin-inline-start: 40px;
 }
 html|ol { 
     list-style-type: decimal;
@@ -213,6 +213,24 @@ html|rtc:lang(zh-TW), html|rt:lang(zh-TW) {
 
 html|rtc > html|rt, html|rtc > html|rt:lang(zh-TW) {
     font-size: 100%;
+}
+
+/* Bidi settings */
+html|bdo[dir="ltr"] {
+    direction: ltr;
+    unicode-bidi: bidi-override;
+}
+html|bdo[dir="rtl"] {
+    direction: rtl;
+    unicode-bidi: bidi-override;
+}
+html|*[dir="ltr"] {
+    direction: ltr;
+    unicode-bidi: embed;
+}
+html|*[dir="rtl"] {
+    direction: rtl;
+    unicode-bidi: embed;
 }
 
 /*------------------ epub-specific ---------------------*/
