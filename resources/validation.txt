@@ -556,6 +556,10 @@ font = FONT font-style font-variant font-weight font-stretch /* font-size line-h
 marker = INSETS marker-start marker-mid marker-end;
 
 /* css-logical */
+margin-block = INSETS margin-block-start margin-block-end;
+margin-inline = INSETS margin-inline-start margin-inline-end;
+padding-block = INSETS padding-block-start padding-block-end;
+padding-inline = INSETS padding-inline-start padding-inline-end;
 border-block-start = border-block-start-width border-block-start-style border-block-start-color;
 border-block-end = border-block-end-width border-block-end-style border-block-end-color;
 border-inline-start = border-inline-start-width border-inline-start-style border-inline-start-color;
@@ -564,6 +568,8 @@ inset-block-start = block-start;
 inset-block-end = block-end;
 inset-inline-start = inline-start;
 inset-inline-end = inline-end;
+inset-block = INSETS block-start block-end;
+inset-inline = INSETS inline-start inline-end;
 
 /* old names  */
 [adapt,webkit]margin-before = margin-block-start;
