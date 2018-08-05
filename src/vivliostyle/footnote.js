@@ -158,7 +158,9 @@ goog.scope(() => {
         floatArea.adjustContentRelativeSize = false;
         const element = floatArea.element;
         goog.asserts.assert(element);
-        floatArea.vertical = column.layoutContext.applyFootnoteStyle(floatContainer.vertical, element);
+        floatArea.vertical = column.layoutContext.applyFootnoteStyle(floatContainer.vertical,
+            column.layoutContext.nodeContext && column.layoutContext.nodeContext.direction === "rtl",
+            element);
         floatArea.convertPercentageSizesToPx(element);
         column.setComputedInsets(element, floatArea);
         column.setComputedWidthAndHeight(element, floatArea);
