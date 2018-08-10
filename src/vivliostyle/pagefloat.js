@@ -1431,6 +1431,8 @@ goog.scope(() => {
         /** @type {Array<string>} */ let logicalSides;
         if (logicalClearSide === "all") {
             logicalSides = ["block-start", "block-end", "inline-start", "inline-end"];
+        } else if (logicalClearSide === "both") {
+            logicalSides = ["inline-start", "inline-end"];
         } else if (logicalClearSide === "same") {
             if (logicalFloatSide === "snap-block") {
                 logicalSides = ["block-start", "block-end"];
