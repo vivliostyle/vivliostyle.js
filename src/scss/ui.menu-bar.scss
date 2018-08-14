@@ -227,9 +227,11 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					background-position: center center;
 					background-size: contain;
 					-webkit-filter: grayscale(0%); filter: grayscale(0%);
-					&:hover {
-						opacity: 0.75;
-						-webkit-filter: grayscale(50%); filter: grayscale(50%);
+					@media (hover: hover), (-moz-touch-enabled: 0) {
+						&:hover {
+							opacity: 0.75;
+							-webkit-filter: grayscale(50%); filter: grayscale(50%);
+						}
 					}
 				}
 			}
@@ -398,9 +400,11 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 						text-decoration: none;
 						border-bottom: solid 1px rgb(192,192,192);
 						@include transition(linear .1s);
-						&:hover {
-							color: black;
-							border-bottom-color: black;
+						@media (hover: hover), (-moz-touch-enabled: 0) {
+							&:hover {
+								color: black;
+								border-bottom-color: black;
+							}
 						}
 						small {
 							letter-spacing: 0;

@@ -32,10 +32,12 @@ $button-offset: 0;
 		background: rgba(0, 0, 0, 0.25);
 		@include transition(.25s ease-in);
 	}
-	&:hover {
-		color: rgba(255, 255, 255, 0.75);
-		background: rgba(0, 0, 0, 0.25);
-		@include transition(.1s linear !important);
+	@media (hover: hover), (-moz-touch-enabled: 0) {
+		&:hover {
+			color: rgba(255, 255, 255, 0.75);
+			background: rgba(0, 0, 0, 0.25);
+			@include transition(.1s linear !important);
+		}
 	}
 	&:active {
 		color: rgba(255, 255, 255, 1.00);
@@ -76,8 +78,10 @@ $button-offset: 0;
 	&:after {
 		content: $fa-var-arrow-circle-up;
 	}
-	&:hover {
-		cursor: n-resize;
+	@media (hover: hover), (-moz-touch-enabled: 0) {
+		&:hover {
+			cursor: n-resize;
+		}
 	}
 }
 #vivliostyle-page-navigation-down {
