@@ -564,6 +564,10 @@ fb2|body[name="notes"] fb2|section {
 	font-size: 1.2em;
 }
 
+/* MS Edge bug workaround */
 :root {
-    -ms-text-justify: inter-ideograph;
+    text-justify: inter-ideograph;
+}
+* {
+    text-justify: inherit;
 }
