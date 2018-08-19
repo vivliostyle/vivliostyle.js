@@ -19,6 +19,7 @@
 
 import ko from "knockout";
 import menuButtonBinding from "./bindings/menuButton.js";
+import swipePagesBinding from "./bindings/swipePages.js";
 import ViewerApp from "./viewmodels/viewer-app";
 
 export default {
