@@ -37,12 +37,18 @@ function identifyKeyFromEvent(event) {
     const keyIdentifier = event.keyIdentifier;
     const location = event.location;
     if (key === Keys.ArrowDown || key === "Down" || keyIdentifier === "Down") {
+        if (event.metaKey) {    // Mac Cmd+Down -> End
+            return Keys.End;
+        }
         return Keys.ArrowDown;
     } else if (key === Keys.ArrowLeft || key === "Left" || keyIdentifier === "Left") {
         return Keys.ArrowLeft;
     } else if (key === Keys.ArrowRight || key === "Right" || keyIdentifier === "Right") {
         return Keys.ArrowRight;
     } else if (key === Keys.ArrowUp || key === "Up" || keyIdentifier === "Up") {
+        if (event.metaKey) {    // Mac Cmd+Up -> Home
+            return Keys.Home;
+        }
         return Keys.ArrowUp;
     } else if (key === Keys.Escape || key === "Esc" || keyIdentifier === "U+001B") {
         return Keys.Escape;
