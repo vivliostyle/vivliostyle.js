@@ -28,11 +28,11 @@ import * as expr from './expr';
 import * as geom from './geom';
 
 //---------------------- value parsers ----------------------------------
-export class SetVisitor extends adapt.css.Visitor {
+export class SetVisitor extends css.Visitor {
   propSet: {[key: string]: boolean} = {};
 
   constructor() {
-    css.Visitor.call(this);
+    super();
   }
 
   /**
@@ -51,7 +51,6 @@ export class SetVisitor extends adapt.css.Visitor {
     return list;
   }
 }
-goog.inherits(SetVisitor, css.Visitor);
 
 export const toSet = (val: css.Val): {[key: string]: boolean} => {
   if (val) {
@@ -66,11 +65,11 @@ export const toSet = (val: css.Val): {[key: string]: boolean} => {
   return {};
 };
 
-export class IntVisitor extends adapt.css.Visitor {
+export class IntVisitor extends css.Visitor {
   value: any;
 
   constructor(public value: number) {
-    css.Visitor.call(this);
+    super();
   }
 
   /**
@@ -81,7 +80,6 @@ export class IntVisitor extends adapt.css.Visitor {
     return num;
   }
 }
-goog.inherits(IntVisitor, css.Visitor);
 
 export const toInt = (val: css.Val, def: number): number => {
   if (val) {
@@ -96,13 +94,13 @@ export const toInt = (val: css.Val, def: number): number => {
   return def;
 };
 
-export class ShapeVisitor extends adapt.css.Visitor {
+export class ShapeVisitor extends css.Visitor {
   collect: boolean = false;
   coords: css.Numeric[] = [];
   name: string|null = null;
 
   constructor() {
-    css.Visitor.call(this);
+    super();
   }
 
   /**
@@ -196,7 +194,6 @@ export class ShapeVisitor extends adapt.css.Visitor {
     return null;
   }
 }
-goog.inherits(ShapeVisitor, css.Visitor);
 
 export const toShape = (val: css.Val, x: number, y: number, width: number,
                         height: number, context: expr.Context): geom.Shape => {
@@ -212,12 +209,12 @@ export const toShape = (val: css.Val, x: number, y: number, width: number,
   return geom.shapeForRect(x, y, x + width, y + height);
 };
 
-export class CountersVisitor extends adapt.css.Visitor {
+export class CountersVisitor extends css.Visitor {
   counters: {[key: string]: number} = {};
   name: string|null = null;
 
   constructor(public readonly reset: boolean) {
-    css.Visitor.call(this);
+    super();
   }
 
   /** @override */
@@ -245,7 +242,6 @@ export class CountersVisitor extends adapt.css.Visitor {
     return list;
   }
 }
-goog.inherits(CountersVisitor, css.Visitor);
 
 export const toCounters =
     (val: css.Val, reset: boolean): {[key: string]: number} => {
@@ -258,12 +254,12 @@ export const toCounters =
       return visitor.counters;
     };
 
-export class UrlTransformVisitor extends adapt.css.FilterVisitor {
+export class UrlTransformVisitor extends css.FilterVisitor {
   baseUrl: any;
   transformer: any;
 
   constructor(baseUrl, transformer) {
-    css.FilterVisitor.call(this);
+    super();
     this.baseUrl = baseUrl;
     this.transformer = transformer;
   }
@@ -273,4 +269,3 @@ export class UrlTransformVisitor extends adapt.css.FilterVisitor {
     return new css.URL(this.transformer.transformURL(url.url, this.baseUrl));
   }
 }
-goog.inherits(UrlTransformVisitor, css.FilterVisitor);

@@ -17,22 +17,31 @@
  *
  * @fileoverview View tree generator.
  */
+import {restoreNewText, diffChars} from '../vivliostyle/diff';
 import * as display from '../vivliostyle/display';
 import {ResolveFormattingContextHook} from '../vivliostyle/plugin';
 import {PreProcessElementStyleHook} from '../vivliostyle/plugin';
 import {PreProcessTextContentHook} from '../vivliostyle/plugin';
 import * as urls from '../vivliostyle/urls';
+import * as selectors from '../vivliostyle/selectors';
+import * as plugin from '../vivliostyle/plugin';
+import * as pagefloat from '../vivliostyle/pagefloat';
+import {RepetitiveElementsOwnerFormattingContext} from '../vivliostyle/repetitiveelements';
 
 import {DocumentURLTransformer} from './base';
+import * as base from './base';
 import * as css from './css';
 import * as csscasc from './csscasc';
+import {UrlTransformVisitor} from './cssprop';
 import * as cssstyler from './cssstyler';
-import {Context} from './expr';
+import {Context, defaultUnitSizes, isFontRelativeLengthUnit, needUnitConversion} from './expr';
 import * as font from './font';
 import * as task from './task';
 import * as taskutil from './taskutil';
 import * as vtree from './vtree';
 import * as xmldoc from './xmldoc';
+
+import * as asserts from '../closure/goog/asserts/asserts';
 
 export const frontEdgeBlackListHor: {[key: string]: string} = {
   'text-indent': '0px',
@@ -100,7 +109,7 @@ export interface StylerProducer {
 
 export const pseudoelementDoc =
     (new DOMParser())
-        .parseFromString(`<root xmlns="${adapt.base.NS.SHADOW}"/>`, 'text/xml');
+        .parseFromString(`<root xmlns="${base.NS.SHADOW}"/>`, 'text/xml');
 
 /**
  * Pseudoelement names in the order they should be inserted in the shadow DOM,
@@ -178,7 +187,7 @@ export class PseudoelementStyler implements cssstyler.AbstractStyler {
   }
 }
 
-export class ViewFactory extends adapt.base.SimpleEventTarget implements
+export class ViewFactory extends base.SimpleEventTarget implements
     vtree.LayoutContext {
   private static SVG_URL_ATTRIBUTES: string[] = [
     'color-profile', 'clip-path', 'cursor', 'filter', 'marker', 'marker-start',
@@ -238,7 +247,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
       return subShadow;
     }
     const addedNames = [];
-    const root = pseudoelementDoc.createElementNS(adapt.base.NS.SHADOW, 'root');
+    const root = pseudoelementDoc.createElementNS(base.NS.SHADOW, 'root');
     let att = root;
     for (const name of pseudoNames) {
       let elem;
@@ -263,11 +272,11 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
           }
         }
         addedNames.push(name);
-        elem = pseudoelementDoc.createElementNS(adapt.base.NS.XHTML, 'span');
+        elem = pseudoelementDoc.createElementNS(base.NS.XHTML, 'span');
         setPseudoName(elem, name);
       } else {
         elem =
-            pseudoelementDoc.createElementNS(adapt.base.NS.SHADOW, 'content');
+            pseudoelementDoc.createElementNS(base.NS.SHADOW, 'content');
       }
       att.appendChild(elem);
       if (name.match(/^first-/)) {
@@ -295,12 +304,12 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
     for (const key in pseudoMap) {
       const computedPseudoStyle = computedPseudoStyleMap[key] = {};
       csscasc.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
-      vivliostyle.selectors.mergeViewConditionalStyles(
+      selectors.mergeViewConditionalStyles(
           computedPseudoStyle, context, pseudoMap[key]);
       csscasc.forEachStylesInRegion(
           pseudoMap[key], regionIds, isFootnote, (regionId, regionStyle) => {
             csscasc.mergeStyle(computedPseudoStyle, regionStyle, context);
-            vivliostyle.selectors.forEachViewConditionalStyles(
+            selectors.forEachViewConditionalStyles(
                 regionStyle, (viewConditionalStyles) => {
                   csscasc.mergeStyle(
                       computedPseudoStyle, viewConditionalStyles, context);
@@ -352,7 +361,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
     }
     cont.then((shadow) => {
       let cont1 = null;
-      if (element.namespaceURI == adapt.base.NS.SHADOW) {
+      if (element.namespaceURI == base.NS.SHADOW) {
         if (element.localName == 'include') {
           let href = element.getAttribute('href');
           let xmldoc = null;
@@ -360,11 +369,11 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
             xmldoc = shadowContext ? shadowContext.xmldoc : self.xmldoc;
           } else {
             if (shadowContext) {
-              if (shadowContext.owner.namespaceURI == adapt.base.NS.XHTML) {
+              if (shadowContext.owner.namespaceURI == base.NS.XHTML) {
                 href = shadowContext.owner.getAttribute('href');
               } else {
                 href = shadowContext.owner.getAttributeNS(
-                    adapt.base.NS.XLINK, 'href');
+                    base.NS.XLINK, 'href');
               }
               xmldoc = shadowContext.parentShadow ?
                   shadowContext.parentShadow.xmldoc :
@@ -372,7 +381,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
             }
           }
           if (href) {
-            href = adapt.base.resolveURL(href, xmldoc.url);
+            href = base.resolveURL(href, xmldoc.url);
             cont1 = self.createRefShadow(
                 href, vtree.ShadowType.ROOTED, element, shadowContext, shadow);
           }
@@ -384,8 +393,8 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
       let cont2 = null;
       cont1.then((shadow) => {
         if (computedStyle['display'] === css.ident.table_cell) {
-          const url = adapt.base.resolveURL(
-              'user-agent.xml#table-cell', adapt.base.resourceBaseURL);
+          const url = base.resolveURL(
+              'user-agent.xml#table-cell', base.resourceBaseURL);
           cont2 = self.createRefShadow(
               url, vtree.ShadowType.ROOTLESS, element, shadowContext, shadow);
         } else {
@@ -465,7 +474,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
             this.styler;
         const nodeStyle = styler.getStyle((node as Element), false);
         styles.push(nodeStyle);
-        lang = lang || adapt.base.getLangAttribute((node as Element));
+        lang = lang || base.getLangAttribute((node as Element));
       }
       if (shadowRoot) {
         node = shadowContext.owner;
@@ -508,13 +517,13 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
   }
 
   resolveURL(url: string): string {
-    url = adapt.base.resolveURL(url, this.xmldoc.url);
+    url = base.resolveURL(url, this.xmldoc.url);
     return this.fallbackMap[url] || url;
   }
 
   inheritLangAttribute() {
     this.nodeContext.lang =
-        adapt.base.getLangAttribute((this.nodeContext.sourceNode as Element)) ||
+        base.getLangAttribute((this.nodeContext.sourceNode as Element)) ||
         this.nodeContext.parent && this.nodeContext.parent.lang ||
         this.nodeContext.lang;
   }
@@ -547,7 +556,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
                   case 'dpcm':
                   case 'dppx':
                     props[name] = numericVal.num *
-                        adapt.expr.defaultUnitSizes[numericVal.unit];
+                        defaultUnitSizes[numericVal.unit];
                     break;
                 }
               } else {
@@ -565,8 +574,8 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
       nodeContext: vtree.NodeContext, firstTime: boolean, display: css.Ident,
       position: css.Ident, float: css.Ident, isRoot: boolean) {
     const hooks: ResolveFormattingContextHook[] =
-        vivliostyle.plugin.getHooksForName(
-            vivliostyle.plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT);
+        plugin.getHooksForName(
+            plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT);
     for (let i = 0; i < hooks.length; i++) {
       const formattingContext =
           hooks[i](nodeContext, firstTime, display, position, float, isRoot);
@@ -594,7 +603,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
     let elementStyle = styler.getStyle(element, false);
     if (!self.nodeContext.shadowContext) {
       const offset = this.xmldoc.getElementOffset(element);
-      vivliostyle.selectors.registerFragmentIndex(
+      selectors.registerFragmentIndex(
           offset, self.nodeContext.fragmentIndex, 0);
     }
     const computedStyle = {};
@@ -604,10 +613,10 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
       self.nodeContext.lang = inheritedValues.lang;
     }
     const floatReference = elementStyle['float-reference'] &&
-        vivliostyle.pagefloat.FloatReference.of(
+        pagefloat.FloatReference.of(
             elementStyle['float-reference'].value.toString());
     if (self.nodeContext.parent && floatReference &&
-        vivliostyle.pagefloat.isPageFloat(floatReference)) {
+        pagefloat.isPageFloat(floatReference)) {
       // Since a page float will be detached from a view node of its parent,
       // inherited properties need to be inherited from its source parent.
       let inheritedValues = self.inheritFromSourceParent(elementStyle);
@@ -663,7 +672,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
           if (self.nodeContext.isInsideBFC() &&
               floatSide !== css.ident.footnote &&
               !(floatReference &&
-                vivliostyle.pagefloat.isPageFloat(floatReference))) {
+                pagefloat.isPageFloat(floatReference))) {
             // When the element is already inside a block formatting context
             // (except one from the root), float and clear can be controlled by
             // the browser and we don't need to care.
@@ -725,7 +734,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
           self.nodeContext.display = display ? display.toString() : 'inline';
           self.nodeContext.floatSide = floating ? floatSide.toString() : null;
           self.nodeContext.floatReference =
-              floatReference || vivliostyle.pagefloat.FloatReference.INLINE;
+              floatReference || pagefloat.FloatReference.INLINE;
           self.nodeContext.floatMinWrapBlock =
               computedStyle['float-min-wrap-block'] || null;
           self.nodeContext.columnSpan = computedStyle['column-span'];
@@ -775,7 +784,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
                 null;
             self.nodeContext.firstPseudo = new vtree.FirstPseudo(
                 outerPseudo,
-                /** adapt.css.Int */
+                /** css.Int */
                 firstPseudo.num);
           }
           if (!self.nodeContext.inline) {
@@ -820,7 +829,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
           const fetchers = [];
           let ns = element.namespaceURI;
           let tag = element.localName;
-          if (ns == adapt.base.NS.XHTML) {
+          if (ns == base.NS.XHTML) {
             if (tag == 'html' || tag == 'body' || tag == 'script' ||
                 tag == 'link' || tag == 'meta') {
               tag = 'div';
@@ -844,16 +853,16 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
               }
             }
           } else {
-            if (ns == adapt.base.NS.epub) {
+            if (ns == base.NS.epub) {
               tag = 'span';
-              ns = adapt.base.NS.XHTML;
+              ns = base.NS.XHTML;
             } else {
-              if (ns == adapt.base.NS.FB2) {
-                ns = adapt.base.NS.XHTML;
+              if (ns == base.NS.FB2) {
+                ns = base.NS.XHTML;
                 if (tag == 'image') {
                   tag = 'div';
                   const imageRef =
-                      element.getAttributeNS(adapt.base.NS.XLINK, 'href');
+                      element.getAttributeNS(base.NS.XLINK, 'href');
                   if (imageRef && imageRef.charAt(0) == '#') {
                     const imageBinary = self.xmldoc.getElement(imageRef);
                     if (imageBinary) {
@@ -873,8 +882,8 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
                   tag = self.nodeContext.inline ? 'span' : 'div';
                 }
               } else {
-                if (ns == adapt.base.NS.NCX) {
-                  ns = adapt.base.NS.XHTML;
+                if (ns == base.NS.NCX) {
+                  ns = base.NS.XHTML;
                   if (tag == 'ncx' || tag == 'navPoint') {
                     tag = 'div';
                   } else {
@@ -892,7 +901,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
                             continue;
                           }
                           const childElement = (c as Element);
-                          if (childElement.namespaceURI == adapt.base.NS.NCX &&
+                          if (childElement.namespaceURI == base.NS.NCX &&
                               childElement.localName == 'content') {
                             href = childElement.getAttribute('src');
                             break;
@@ -910,8 +919,8 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
                     }
                   }
                 } else {
-                  if (ns == adapt.base.NS.SHADOW) {
-                    ns = adapt.base.NS.XHTML;
+                  if (ns == base.NS.SHADOW) {
+                    ns = base.NS.XHTML;
                     tag = self.nodeContext.inline ? 'span' : 'div';
                   } else {
                     custom = !!self.customRenderer;
@@ -982,7 +991,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
               result.appendChild(inner);
             }
             if (result.localName == 'iframe' &&
-                result.namespaceURI == adapt.base.NS.XHTML) {
+                result.namespaceURI == base.NS.XHTML) {
               initIFrame((result as HTMLIFrameElement));
             }
             const imageResolution =
@@ -1001,7 +1010,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
                 cssWidth === css.ident.auto || !cssWidth && !attrWidth;
             const hasAutoHeight =
                 cssHeight === css.ident.auto || !cssHeight && !attrHeight;
-            if (element.namespaceURI != adapt.base.NS.FB2 || tag == 'td') {
+            if (element.namespaceURI != base.NS.FB2 || tag == 'td') {
               const attributes = element.attributes;
               const attributeCount = attributes.length;
               let delayedSrc = null;
@@ -1051,7 +1060,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
                     }
                   }
                   if (attributeName === 'poster' && tag === 'video' &&
-                      ns === adapt.base.NS.XHTML && hasAutoWidth &&
+                      ns === base.NS.XHTML && hasAutoWidth &&
                       hasAutoHeight) {
                     let image = new Image();
                     const fetcher = taskutil.loadElement(image, attributeValue);
@@ -1063,14 +1072,14 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
                   if (attributeNS == 'http://www.w3.org/2000/xmlns/') {
                     continue;
                   } else {
-                    if (attributeNS == adapt.base.NS.XLINK) {
+                    if (attributeNS == base.NS.XLINK) {
                       if (attributeName == 'href') {
                         attributeValue = self.resolveURL(attributeValue);
                       }
                     }
                   }
                 }
-                if (ns == adapt.base.NS.SVG &&
+                if (ns == base.NS.SVG &&
                     /^[A-Z\-]+$/.test(attributeName)) {
                   // Workaround for Edge bug
                   // See
@@ -1090,14 +1099,14 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
                 }
                 if (attributeName == 'src' && !attributeNS &&
                     (tag == 'img' || tag == 'input') &&
-                    ns == adapt.base.NS.XHTML) {
+                    ns == base.NS.XHTML) {
                   // HTML img element should start loading only once all
                   // attributes are assigned.
                   delayedSrc = attributeValue;
                 } else {
                   if (attributeName == 'href' && tag == 'image' &&
-                      ns == adapt.base.NS.SVG &&
-                      attributeNS == adapt.base.NS.XLINK) {
+                      ns == base.NS.SVG &&
+                      attributeNS == base.NS.XLINK) {
                     self.page.fetchers.push(
                         taskutil.loadElement(result, attributeValue));
                   } else {
@@ -1163,7 +1172,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
               }
               if (blackList) {
                 for (const propName in blackList) {
-                  adapt.base.setCSSProperty(
+                  base.setCSSProperty(
                       result, propName, blackList[propName]);
                 }
               }
@@ -1205,7 +1214,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
       const shadowStyler = new PseudoelementStyler(
           element, cascStyle, styler, context, this.exprContentListener);
       this.nodeContext.afterIfContinues =
-          new vivliostyle.selectors.AfterIfContinues(element, shadowStyler);
+          new selectors.AfterIfContinues(element, shadowStyler);
     }
   }
 
@@ -1253,23 +1262,23 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
             const maxWidth = computedStyle['max-width'] || css.ident.none;
             const maxHeight = computedStyle['max-height'] || css.ident.none;
             if (maxWidth === css.ident.none && maxHeight === css.ident.none) {
-              adapt.base.setCSSProperty(elem, 'max-width', `${scaledWidth}px`);
+              base.setCSSProperty(elem, 'max-width', `${scaledWidth}px`);
             } else {
               if (maxWidth !== css.ident.none && maxHeight === css.ident.none) {
-                adapt.base.setCSSProperty(elem, 'width', `${scaledWidth}px`);
+                base.setCSSProperty(elem, 'width', `${scaledWidth}px`);
               } else {
                 if (maxWidth === css.ident.none &&
                     maxHeight !== css.ident.none) {
-                  adapt.base.setCSSProperty(
+                  base.setCSSProperty(
                       elem, 'height', `${scaledHeight}px`);
                 } else {
                   // maxWidth != none && maxHeight != none
-                  goog.asserts.assert(maxWidth.isNumeric());
-                  goog.asserts.assert(maxHeight.isNumeric());
+                  asserts.assert(maxWidth.isNumeric());
+                  asserts.assert(maxHeight.isNumeric());
                   const numericMaxWidth = (maxWidth as css.Numeric);
                   const numericMaxHeight = (maxHeight as css.Numeric);
                   if (numericMaxWidth.unit !== '%') {
-                    adapt.base.setCSSProperty(
+                    base.setCSSProperty(
                         elem, 'max-width',
                         `${
                             Math.min(
@@ -1278,7 +1287,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
                                     numericMaxWidth, self.context))}px`);
                   } else {
                     if (numericMaxHeight.unit !== '%') {
-                      adapt.base.setCSSProperty(
+                      base.setCSSProperty(
                           elem, 'max-height',
                           `${
                               Math.min(
@@ -1287,10 +1296,10 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
                                       numericMaxHeight, self.context))}px`);
                     } else {
                       if (isVertical) {
-                        adapt.base.setCSSProperty(
+                        base.setCSSProperty(
                             elem, 'height', `${scaledHeight}px`);
                       } else {
-                        adapt.base.setCSSProperty(
+                        base.setCSSProperty(
                             elem, 'width', `${scaledWidth}px`);
                       }
                     }
@@ -1302,24 +1311,24 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
             if (imageResolution < 1) {
               const minWidth = computedStyle['min-width'] || css.numericZero;
               const minHeight = computedStyle['min-height'] || css.numericZero;
-              goog.asserts.assert(minWidth.isNumeric());
-              goog.asserts.assert(minWidth.isNumeric());
+              asserts.assert(minWidth.isNumeric());
+              asserts.assert(minWidth.isNumeric());
               const numericMinWidth = (minWidth as css.Numeric);
               const numericMinHeight = (minHeight as css.Numeric);
               if (numericMinWidth.num === 0 && numericMinHeight.num === 0) {
-                adapt.base.setCSSProperty(
+                base.setCSSProperty(
                     elem, 'min-width', `${scaledWidth}px`);
               } else {
                 if (numericMinWidth.num !== 0 && numericMinHeight.num === 0) {
-                  adapt.base.setCSSProperty(elem, 'width', `${scaledWidth}px`);
+                  base.setCSSProperty(elem, 'width', `${scaledWidth}px`);
                 } else {
                   if (numericMinWidth.num === 0 && numericMinHeight.num !== 0) {
-                    adapt.base.setCSSProperty(
+                    base.setCSSProperty(
                         elem, 'height', `${scaledHeight}px`);
                   } else {
                     // minWidth != 0 && minHeight != 0
                     if (numericMinWidth.unit !== '%') {
-                      adapt.base.setCSSProperty(
+                      base.setCSSProperty(
                           elem, 'min-width',
                           `${
                               Math.max(
@@ -1328,7 +1337,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
                                       numericMinWidth, self.context))}px`);
                     } else {
                       if (numericMinHeight.unit !== '%') {
-                        adapt.base.setCSSProperty(
+                        base.setCSSProperty(
                             elem, 'min-height',
                             `${
                                 Math.max(
@@ -1337,10 +1346,10 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
                                         numericMinHeight, self.context))}px`);
                       } else {
                         if (isVertical) {
-                          adapt.base.setCSSProperty(
+                          base.setCSSProperty(
                               elem, 'height', `${scaledHeight}px`);
                         } else {
-                          adapt.base.setCSSProperty(
+                          base.setCSSProperty(
                               elem, 'width', `${scaledWidth}px`);
                         }
                       }
@@ -1358,8 +1367,8 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
   private preprocessElementStyle(computedStyle: {[key: string]: css.Val}) {
     const self = this;
     const hooks: PreProcessElementStyleHook[] =
-        vivliostyle.plugin.getHooksForName(
-            vivliostyle.plugin.HOOKS.PREPROCESS_ELEMENT_STYLE);
+        plugin.getHooksForName(
+            plugin.HOOKS.PREPROCESS_ELEMENT_STYLE);
     hooks.forEach((hook) => {
       hook(self.nodeContext, computedStyle);
     });
@@ -1381,16 +1390,14 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
         continue;
       }
       if (this.nodeContext.formattingContext instanceof
-              vivliostyle.repetitiveelements
-                  .RepetitiveElementsOwnerFormattingContext &&
+              RepetitiveElementsOwnerFormattingContext &&
           !this.nodeContext.belongsTo(this.nodeContext.formattingContext)) {
         return;
       }
       const parent = this.nodeContext.parent;
       const parentFormattingContext = parent && parent.formattingContext;
       this.nodeContext.formattingContext =
-          new vivliostyle.repetitiveelements
-              .RepetitiveElementsOwnerFormattingContext(
+          new RepetitiveElementsOwnerFormattingContext(
                   parentFormattingContext,
                   (this.nodeContext.sourceNode as Element));
       this.nodeContext.formattingContext.initializeRepetitiveElements(
@@ -1426,8 +1433,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
     this.preprocessTextContent().then(() => {
       const offsetInNode = self.offsetInNode || 0;
       const textContent =
-          vivliostyle.diff
-              .restoreNewText(self.nodeContext.preprocessedTextContent)
+          diff.restoreNewText(self.nodeContext.preprocessedTextContent)
               .substr(offsetInNode);
       self.viewNode = document.createTextNode(textContent);
       frame.finish(true);
@@ -1444,8 +1450,8 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
     let textContent = originl = self.sourceNode.textContent;
     const frame: task.Frame<boolean> = task.newFrame('preprocessTextContent');
     const hooks: PreProcessTextContentHook[] =
-        vivliostyle.plugin.getHooksForName(
-            vivliostyle.plugin.HOOKS.PREPROCESS_TEXT_CONTENT);
+        plugin.getHooksForName(
+            plugin.HOOKS.PREPROCESS_TEXT_CONTENT);
     let index = 0;
     frame
         .loop(() => {
@@ -1460,7 +1466,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
         })
         .then(() => {
           self.nodeContext.preprocessedTextContent =
-              vivliostyle.diff.diffChars(originl, textContent);
+              diff.diffChars(originl, textContent);
           frame.finish(true);
         });
     return frame.result();
@@ -1524,7 +1530,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
 
   processShadowContent(pos) {
     if (pos.shadowContext == null || pos.sourceNode.localName != 'content' ||
-        pos.sourceNode.namespaceURI != adapt.base.NS.SHADOW) {
+        pos.sourceNode.namespaceURI != base.NS.SHADOW) {
       return pos;
     }
     const boxOffset = pos.boxOffset;
@@ -1638,7 +1644,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
       // no children - was there text content?
       if (pos.sourceNode.nodeType != 1) {
         const content =
-            vivliostyle.diff.restoreNewText(pos.preprocessedTextContent);
+            diff.restoreNewText(pos.preprocessedTextContent);
         boxOffset += content.length - 1 - pos.offsetInNode;
       }
       pos = pos.modify();
@@ -1715,9 +1721,9 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
         continue;
       }
       let value = computedStyle[propName];
-      value = value.visit(new adapt.cssprop.UrlTransformVisitor(
+      value = value.visit(new UrlTransformVisitor(
           this.xmldoc.url, this.documentURLTransformer));
-      if (value.isNumeric() && adapt.expr.needUnitConversion(value.unit)) {
+      if (value.isNumeric() && needUnitConversion(value.unit)) {
         // font-size for the root element is already converted to px
         value = css.convertNumericToPx(value, this.context);
       }
@@ -1729,7 +1735,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
             new vtree.DelayedItem(target, propName, value));
         continue;
       }
-      adapt.base.setCSSProperty(target, propName, value.toString());
+      base.setCSSProperty(target, propName, value.toString());
     }
   }
 
@@ -1827,7 +1833,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
   }
 
   createElement(ns: string, tag: string): Element {
-    if (ns == adapt.base.NS.XHTML) {
+    if (ns == base.NS.XHTML) {
       return this.document.createElement(tag);
     }
     return this.document.createElementNS(ns, tag);
@@ -1843,7 +1849,7 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
         this.computeStyle(vertical, rtl, this.footnoteStyle, computedStyle);
     if (pseudoMap && pseudoMap['before']) {
       const childComputedStyle = {};
-      const span = this.createElement(adapt.base.NS.XHTML, 'span');
+      const span = this.createElement(base.NS.XHTML, 'span');
       setPseudoName(span, 'before');
       target.appendChild(span);
       this.computeStyle(vertical, rtl, pseudoMap['before'], childComputedStyle);
@@ -1864,17 +1870,17 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
         const boxDecorationBreak = block.inheritedProps['box-decoration-break'];
         if (!boxDecorationBreak || boxDecorationBreak === 'slice') {
           const elem = block.viewNode;
-          goog.asserts.assert(elem instanceof Element);
+          asserts.assert(elem instanceof Element);
           if (block.vertical) {
-            adapt.base.setCSSProperty(elem, 'padding-left', '0');
-            adapt.base.setCSSProperty(elem, 'border-left', 'none');
-            adapt.base.setCSSProperty(elem, 'border-top-left-radius', '0');
-            adapt.base.setCSSProperty(elem, 'border-bottom-left-radius', '0');
+            base.setCSSProperty(elem, 'padding-left', '0');
+            base.setCSSProperty(elem, 'border-left', 'none');
+            base.setCSSProperty(elem, 'border-top-left-radius', '0');
+            base.setCSSProperty(elem, 'border-bottom-left-radius', '0');
           } else {
-            adapt.base.setCSSProperty(elem, 'padding-bottom', '0');
-            adapt.base.setCSSProperty(elem, 'border-bottom', 'none');
-            adapt.base.setCSSProperty(elem, 'border-bottom-left-radius', '0');
-            adapt.base.setCSSProperty(elem, 'border-bottom-right-radius', '0');
+            base.setCSSProperty(elem, 'padding-bottom', '0');
+            base.setCSSProperty(elem, 'border-bottom', 'none');
+            base.setCSSProperty(elem, 'border-bottom-left-radius', '0');
+            base.setCSSProperty(elem, 'border-bottom-right-radius', '0');
           }
         }
       });
@@ -1887,15 +1893,15 @@ export class ViewFactory extends adapt.base.SimpleEventTarget implements
   convertLengthToPx(numeric, viewNode, clientLayout) {
     const num = numeric.num;
     const unit = numeric.unit;
-    if (adapt.expr.isFontRelativeLengthUnit(unit)) {
+    if (isFontRelativeLengthUnit(unit)) {
       let elem = viewNode;
       while (elem && elem.nodeType !== 1) {
         elem = elem.parentNode;
       }
-      goog.asserts.assert(elem);
+      asserts.assert(elem);
       const fontSize = parseFloat(
           clientLayout.getElementComputedStyle((elem as Element))['font-size']);
-      goog.asserts.assert(this.context);
+      asserts.assert(this.context);
       return csscasc
           .convertFontRelativeLengthToPx(numeric, fontSize, this.context)
           .num;
@@ -2075,11 +2081,11 @@ export class Viewport {
    * Reset zoom.
    */
   resetZoom() {
-    adapt.base.setCSSProperty(this.outerZoomBox, 'width', '');
-    adapt.base.setCSSProperty(this.outerZoomBox, 'height', '');
-    adapt.base.setCSSProperty(this.contentContainer, 'width', '');
-    adapt.base.setCSSProperty(this.contentContainer, 'height', '');
-    adapt.base.setCSSProperty(this.contentContainer, 'transform', '');
+    base.setCSSProperty(this.outerZoomBox, 'width', '');
+    base.setCSSProperty(this.outerZoomBox, 'height', '');
+    base.setCSSProperty(this.contentContainer, 'width', '');
+    base.setCSSProperty(this.contentContainer, 'height', '');
+    base.setCSSProperty(this.contentContainer, 'transform', '');
   }
 
   /**
@@ -2089,12 +2095,12 @@ export class Viewport {
    * @param scale Factor to which the viewport will be scaled.
    */
   zoom(width: number, height: number, scale: number) {
-    adapt.base.setCSSProperty(this.outerZoomBox, 'width', `${width * scale}px`);
-    adapt.base.setCSSProperty(
+    base.setCSSProperty(this.outerZoomBox, 'width', `${width * scale}px`);
+    base.setCSSProperty(
         this.outerZoomBox, 'height', `${height * scale}px`);
-    adapt.base.setCSSProperty(this.contentContainer, 'width', `${width}px`);
-    adapt.base.setCSSProperty(this.contentContainer, 'height', `${height}px`);
-    adapt.base.setCSSProperty(
+    base.setCSSProperty(this.contentContainer, 'width', `${width}px`);
+    base.setCSSProperty(this.contentContainer, 'height', `${height}px`);
+    base.setCSSProperty(
         this.contentContainer, 'transform', `scale(${scale})`);
   }
 

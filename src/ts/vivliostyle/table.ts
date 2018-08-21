@@ -17,6 +17,7 @@
  * @fileoverview Table formatting context and layout.
  */
 import * as base from '../adapt/base';
+import {ident} from '../adapt/css';
 import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';
 import * as asserts from '../closure/goog/asserts/asserts';
@@ -27,17 +28,7 @@ import * as break from './break';
 import * as layout from '../adapt/layout';
 import * as layoututil from './layoututil';
 import * as repetitiveelements from './repetitiveelements';
-const LayoutIterator = layoututil.LayoutIterator;
-const EdgeSkipper = layoututil.EdgeSkipper;
-const PseudoColumn = layoututil.PseudoColumn;
-const EdgeBreakPosition = layout.EdgeBreakPosition;
-const AbstractLayoutRetryer = layoututil.AbstractLayoutRetryer;
-const LayoutEntireBlock = repetitiveelements.LayoutEntireBlock;
-const LayoutFragmentedBlock = repetitiveelements.LayoutFragmentedBlock;
-const RepetitiveElementsOwnerFormattingContext =
-    repetitiveelements.RepetitiveElementsOwnerFormattingContext;
-const RepetitiveElementsOwnerLayoutConstraint =
-    repetitiveelements.RepetitiveElementsOwnerLayoutConstraint;
+import {registerFragmentIndex} from './selectors';
 
 export class TableRow {
   cells: TableCell[] = [];
@@ -95,7 +86,7 @@ export class TableCellFragment {
       public readonly column: layout.Column, pseudoColumnContainer: Element,
       public readonly cellNodeContext: vtree.NodeContext) {
     this.pseudoColumn =
-        new PseudoColumn(column, pseudoColumnContainer, cellNodeContext);
+        new layoututil.PseudoColumn(column, pseudoColumnContainer, cellNodeContext);
   }
 
   findAcceptableBreakPosition(): layout.BreakPositionAndNodeContext {
@@ -117,8 +108,7 @@ export class TableCaptionView {
 }
 const TableCaptionView = TableCaptionView;
 
-export class BetweenTableRowBreakPosition extends
-    adapt.layout.EdgeBreakPosition {
+export class BetweenTableRowBreakPosition extends layout.EdgeBreakPosition {
   private formattingContext: any;
 
   /** Array<!adapt.layout.BreakPositionAndNodeContext> */
@@ -128,8 +118,7 @@ export class BetweenTableRowBreakPosition extends
   constructor(
       position: vtree.NodeContext, breakOnEdge: string|null, overflows: boolean,
       columnBlockSize: number) {
-    EdgeBreakPosition.call(
-        this, position, breakOnEdge, overflows, columnBlockSize);
+    super(position, breakOnEdge, overflows, columnBlockSize);
     this.formattingContext = position.formattingContext;
   }
 
@@ -138,8 +127,7 @@ export class BetweenTableRowBreakPosition extends
    */
   findAcceptableBreak(column, penalty) {
     const breakNodeContext =
-        EdgeBreakPosition.prototype.findAcceptableBreak.call(
-            this, column, penalty);
+        super.findAcceptableBreak(column, penalty);
     if (penalty < this.getMinBreakPenalty()) {
       return null;
     }
@@ -156,7 +144,7 @@ export class BetweenTableRowBreakPosition extends
    * @override
    */
   getMinBreakPenalty() {
-    let penalty = EdgeBreakPosition.prototype.getMinBreakPenalty.call(this);
+    let penalty = super.getMinBreakPenalty();
     this.getAcceptableCellBreakPositions().forEach((bp) => {
       penalty += bp.breakPosition.getMinBreakPenalty();
     });
@@ -189,18 +177,16 @@ export class BetweenTableRowBreakPosition extends
             this.formattingContext);
   }
 }
-const BetweenTableRowBreakPosition = BetweenTableRowBreakPosition;
-goog.inherits(BetweenTableRowBreakPosition, EdgeBreakPosition);
 
 export class InsideTableRowBreakPosition extends
-    adapt.layout.AbstractBreakPosition {
+    layout.AbstractBreakPosition {
   acceptableCellBreakPositions: layout.BreakPositionAndNodeContext[] = null;
 
   constructor(
       public readonly rowIndex: number,
       public readonly beforeNodeContext: vtree.NodeContext,
       public readonly formattingContext: TableFormattingContext) {
-    layout.AbstractBreakPosition.call(this);
+    super();
   }
 
   /**
@@ -261,8 +247,7 @@ export class InsideTableRowBreakPosition extends
             this.formattingContext);
   }
 }
-const InsideTableRowBreakPosition = InsideTableRowBreakPosition;
-goog.inherits(InsideTableRowBreakPosition, layout.AbstractBreakPosition);
+
 type BrokenTableCellPosition = {
   cellNodePosition: vtree.NodePosition,
   breakChunkPosition: vtree.ChunkPosition,
@@ -275,7 +260,7 @@ export {BrokenTableCellPosition};
  * @param tableSourceNode Source node of the table
  */
 export class TableFormattingContext extends
-    vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext
+    repetitiveelements.RepetitiveElementsOwnerFormattingContext
         implements vtree.FormattingContext {
   vertical: boolean = false;
   columnCount: number = -1;
@@ -294,8 +279,7 @@ export class TableFormattingContext extends
   constructor(
       parent: vtree.FormattingContext,
       public readonly tableSourceNode: Element) {
-    RepetitiveElementsOwnerFormattingContext.call(
-        this, parent, tableSourceNode);
+    super(parent, tableSourceNode);
   }
 
   /**
@@ -515,7 +499,7 @@ export class TableFormattingContext extends
       column: layout.Column,
       repetitiveElements: repetitiveelements.ElementsOffset[]) {
     column.fragmentLayoutConstraints.forEach((constraint) => {
-      if (constraint instanceof RepetitiveElementsOwnerLayoutConstraint) {
+      if (constraint instanceof repetitiveelements.RepetitiveElementsOwnerLayoutConstraint) {
         const repetitiveElement = constraint.getRepetitiveElements();
         repetitiveElements.push(repetitiveElement);
       }
@@ -538,8 +522,6 @@ export class TableFormattingContext extends
     this.cellBreakPositions = (state as BrokenTableCellPosition[]);
   }
 }
-const TableFormattingContext = TableFormattingContext;
-goog.inherits(TableFormattingContext, RepetitiveElementsOwnerFormattingContext);
 
 export class ElementsOffsetOfTableCell implements
     repetitiveelements.ElementsOffset {
@@ -613,7 +595,7 @@ function skipNestedTable(
 }
 
 export class EntireTableLayoutStrategy extends
-    vivliostyle.layoututil.EdgeSkipper {
+    layoututil.EdgeSkipper {
   rowIndex: number = -1;
   columnIndex: number = 0;
   inRow: boolean = false;
@@ -674,7 +656,7 @@ export class EntireTableLayoutStrategy extends
         }
         break;
     }
-    return EdgeSkipper.prototype.startNonInlineElementNode.call(this, state);
+    return super.startNonInlineElementNode(state);
   }
 
   /**
@@ -726,7 +708,7 @@ export class EntireTableLayoutStrategy extends
           break;
       }
     }
-    return EdgeSkipper.prototype.afterNonInlineElementNode.call(this, state);
+    return super.afterNonInlineElementNode(state);
   }
 
   /** @override */
@@ -764,10 +746,8 @@ export class EntireTableLayoutStrategy extends
     this.checkPoints = [];
   }
 }
-const EntireTableLayoutStrategy = EntireTableLayoutStrategy;
-goog.inherits(EntireTableLayoutStrategy, EdgeSkipper);
 
-export class TableLayoutStrategy extends vivliostyle.layoututil.EdgeSkipper {
+export class TableLayoutStrategy extends layoututil.EdgeSkipper {
   private static ignoreList: {[key: string]: boolean} = {
     'table-caption': true,
     'table-column-group': true,
@@ -783,7 +763,7 @@ export class TableLayoutStrategy extends vivliostyle.layoututil.EdgeSkipper {
   constructor(
       public readonly formattingContext: TableFormattingContext,
       public readonly column: layout.Column) {
-    EdgeSkipper.call(this, true);
+    super(true);
     this.originalStopAtOverflow = column.stopAtOverflow;
     column.stopAtOverflow = false;
   }
@@ -994,7 +974,7 @@ export class TableLayoutStrategy extends vivliostyle.layoututil.EdgeSkipper {
         const tdNodeStep = cellBreakPosition.cellNodePosition.steps[0];
         const offset =
             this.column.layoutContext.xmldoc.getElementOffset(tdNodeStep.node);
-        vivliostyle.selectors.registerFragmentIndex(
+        registerFragmentIndex(
             offset, tdNodeStep.fragmentIndex + 1, 1);
       }
     });
@@ -1136,15 +1116,13 @@ export class TableLayoutStrategy extends vivliostyle.layoututil.EdgeSkipper {
         this.resetColumn();
         state.break = true;
       } else {
-        return EdgeSkipper.prototype.afterNonInlineElementNode.call(
-            this, state);
+        return super.afterNonInlineElementNode(state);
       }
     }
     return task.newResult(true);
   }
 }
-const TableLayoutStrategy = TableLayoutStrategy;
-goog.inherits(TableLayoutStrategy, EdgeSkipper);
+
 type TableLayoutOption = {
   calculateBreakPositionsInside: boolean
 };
@@ -1174,7 +1152,7 @@ export class TableLayoutProcessor implements layout.LayoutProcessor {
     const formattingContext =
         getTableFormattingContext(nodeContext.formattingContext);
     const strategy = new EntireTableLayoutStrategy(formattingContext, column);
-    const iterator = new LayoutIterator(strategy, column.layoutContext);
+    const iterator = new layoututil.LayoutIterator(strategy, column.layoutContext);
     return iterator.iterate(nodeContext);
   }
 
@@ -1384,7 +1362,7 @@ export class TableLayoutProcessor implements layout.LayoutProcessor {
     this.addCaptions(formattingContext, rootViewNode, firstChild);
     this.addColGroups(formattingContext, rootViewNode, firstChild);
     const strategy = new TableLayoutStrategy(formattingContext, column);
-    const iterator = new LayoutIterator(strategy, column.layoutContext);
+    const iterator = new layoututil.LayoutIterator(strategy, column.layoutContext);
     const frame = task.newFrame('TableFormattingContext.doLayout');
     iterator.iterate(nodeContext).thenFinish(frame);
     return frame.result();
@@ -1532,13 +1510,13 @@ function adjustCellHeight(
 }
 
 export class LayoutRetryer extends
-    vivliostyle.layoututil.AbstractLayoutRetryer {
+    layoututil.AbstractLayoutRetryer {
   private tableFormattingContext: any;
 
   constructor(
       formattingContext: TableFormattingContext,
       private readonly processor: TableLayoutProcessor) {
-    AbstractLayoutRetryer.call(this);
+    super();
     this.tableFormattingContext = formattingContext;
   }
 
@@ -1567,7 +1545,7 @@ export class LayoutRetryer extends
    * @override
    */
   clearNodes(initialPosition) {
-    AbstractLayoutRetryer.prototype.clearNodes.call(this, initialPosition);
+    super.clearNodes(initialPosition);
     const rootViewNode =
         this.tableFormattingContext.getRootViewNode(initialPosition);
     this.processor.removeColGroups(this.tableFormattingContext, rootViewNode);
@@ -1577,37 +1555,31 @@ export class LayoutRetryer extends
    * @override
    */
   restoreState(nodeContext, column) {
-    AbstractLayoutRetryer.prototype.restoreState.call(
-        this, nodeContext, column);
+    super.restoreState(nodeContext, column);
     this.tableFormattingContext.finishFragment();
   }
 }
-const LayoutRetryer = LayoutRetryer;
-goog.inherits(LayoutRetryer, AbstractLayoutRetryer);
 
 export class LayoutEntireTable extends
-    vivliostyle.repetitiveelements.LayoutEntireBlock {
+    repetitiveelements.LayoutEntireBlock {
   constructor(
       formattingContext: TableFormattingContext,
       public readonly processor: TableLayoutProcessor) {
-    LayoutEntireBlock.call(this, formattingContext);
+    super(formattingContext);
   }
 
   /**
    * @override
    */
   doLayout(nodeContext, column) {
-    LayoutEntireBlock.prototype.doLayout.call(this, nodeContext, column);
+    super.doLayout(nodeContext, column);
     return this.processor.doInitialLayout(nodeContext, column);
   }
 }
-const LayoutEntireTable = LayoutEntireTable;
-goog.inherits(LayoutEntireTable, LayoutEntireBlock);
 
-export class EntireTableBreakPosition extends adapt.layout.EdgeBreakPosition {
+export class EntireTableBreakPosition extends layout.EdgeBreakPosition {
   constructor(tableNodeContext: vtree.NodeContext) {
-    layout.EdgeBreakPosition.call(
-        this, tableNodeContext, null, tableNodeContext.overflow, 0);
+    super(tableNodeContext, null, tableNodeContext.overflow, 0);
   }
 
   /**
@@ -1629,8 +1601,6 @@ export class EntireTableBreakPosition extends adapt.layout.EdgeBreakPosition {
         new EntireTableLayoutConstraint(this.position.sourceNode));
   }
 }
-const EntireTableBreakPosition = EntireTableBreakPosition;
-goog.inherits(EntireTableBreakPosition, layout.EdgeBreakPosition);
 
 export class EntireTableLayoutConstraint implements
     layout.FragmentLayoutConstraint {
@@ -1686,14 +1656,13 @@ export class EntireTableLayoutConstraint implements
    */
   getPriorityOfFinishBreak() 0
 }
-const EntireTableLayoutConstraint = EntireTableLayoutConstraint;
 
 export class LayoutFragmentedTable extends
-    vivliostyle.repetitiveelements.LayoutFragmentedBlock {
+    repetitiveelements.LayoutFragmentedBlock {
   constructor(
       formattingContext: TableFormattingContext,
       public readonly processor: TableLayoutProcessor) {
-    LayoutFragmentedBlock.call(this, formattingContext);
+    super(formattingContext);
   }
 
   /**
@@ -1712,18 +1681,16 @@ export class LayoutFragmentedTable extends
     return this.processor.doLayout(nodeContext, column);
   }
 }
-const LayoutFragmentedTable = LayoutFragmentedTable;
-goog.inherits(LayoutFragmentedTable, LayoutFragmentedBlock);
 
 export class TableRowLayoutConstraint extends
-    vivliostyle.repetitiveelements.RepetitiveElementsOwnerLayoutConstraint {
+    repetitiveelements.RepetitiveElementsOwnerLayoutConstraint {
   cellFragmentLayoutConstraints: {
     constraints: layout.FragmentLayoutConstraint[],
     breakPosition: vtree.NodeContext
   }[] = [];
 
   constructor(nodeContext: vtree.NodeContext) {
-    RepetitiveElementsOwnerLayoutConstraint.call(this, nodeContext);
+    super(nodeContext);
   }
 
   /** @override */
@@ -1760,8 +1727,7 @@ export class TableRowLayoutConstraint extends
                 (constraint) => constraint.nextCandidate(nodeContext)))) {
       return true;
     }
-    return RepetitiveElementsOwnerLayoutConstraint.prototype.nextCandidate.call(
-        this, nodeContext);
+    return super.nextCandidate(nodeContext);
   }
 
   /** @override */
@@ -1783,8 +1749,7 @@ export class TableRowLayoutConstraint extends
           .removeColGroups(formattingContext, rootViewNode);
       this.removeDummyRowNodes(initialPosition);
     }
-    RepetitiveElementsOwnerLayoutConstraint.prototype.postLayout.call(
-        this, allowed, nodeContext, initialPosition, column);
+    super.postLayout(allowed, nodeContext, initialPosition, column);
   }
 
   /** @override */
@@ -1812,9 +1777,8 @@ export class TableRowLayoutConstraint extends
           frame.finish(true);
         });
     return frame.result().thenAsync(
-        () =>
-            RepetitiveElementsOwnerLayoutConstraint.prototype.finishBreak.call(
-                this, nodeContext, column));
+        () => super.finishBreak(this, nodeContext, column)
+    );
   }
 
   removeDummyRowNodes(nodeContext) {
@@ -1895,9 +1859,7 @@ export class TableRowLayoutConstraint extends
         getTableFormattingContext(constraint.nodeContext.formattingContext);
   }
 }
-const TableRowLayoutConstraint = TableRowLayoutConstraint;
-goog.inherits(
-    TableRowLayoutConstraint, RepetitiveElementsOwnerLayoutConstraint);
+
 const tableLayoutProcessor = new TableLayoutProcessor();
 
 function resolveFormattingContextHook(
@@ -1905,7 +1867,7 @@ function resolveFormattingContextHook(
   if (!firstTime) {
     return null;
   }
-  if (display === adapt.css.ident.table) {
+  if (display === ident.table) {
     const parent = nodeContext.parent;
     return new TableFormattingContext(
         parent ? parent.formattingContext : null,
@@ -1922,7 +1884,6 @@ function resolveLayoutProcessor(formattingContext) {
 }
 
 function registerHooks() {
-  const plugin = vivliostyle.plugin;
   plugin.registerHook(
       plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT, resolveFormattingContextHook);
   plugin.registerHook(

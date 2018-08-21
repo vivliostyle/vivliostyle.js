@@ -18,6 +18,7 @@
  * @fileoverview Utilities asynchronous execution and cooperative multitasking.
  */
 import * as logging from '../vivliostyle/logging';
+import * as base from './base';
 import * as task from './task';
 
 /**
@@ -156,8 +157,8 @@ export const loadElement = (elem: Element, src: string): Fetcher<string> => {
     elem.addEventListener('load', handler, false);
     elem.addEventListener('error', handler, false);
     elem.addEventListener('abort', handler, false);
-    if (elem.namespaceURI == adapt.base.NS.SVG) {
-      elem.setAttributeNS(adapt.base.NS.XLINK, 'xlink:href', src);
+    if (elem.namespaceURI == base.NS.SVG) {
+      elem.setAttributeNS(base.NS.XLINK, 'xlink:href', src);
 
       // SVG handlers are not reliable
       setTimeout(handler, 300);

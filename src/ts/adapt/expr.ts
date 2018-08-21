@@ -535,9 +535,9 @@ export class Val {
   isMediaName(): boolean false
 }
 
-export class Prefix extends adapt.expr.Val {
+export class Prefix extends Val {
   constructor(scope: LexicalScope, public val: Val) {
-    Val.call(this, scope);
+    super(scope);
   }
 
   protected getOp(): string {
@@ -590,11 +590,10 @@ export class Prefix extends adapt.expr.Val {
     return r;
   }
 }
-goog.inherits(Prefix, Val);
 
-export class Infix extends adapt.expr.Val {
+export class Infix extends Val {
   constructor(scope: LexicalScope, public lhs: Val, public rhs: Val) {
-    Val.call(this, scope);
+    super(scope);
   }
 
   getPriority(): number {
@@ -656,11 +655,10 @@ export class Infix extends adapt.expr.Val {
     return r;
   }
 }
-goog.inherits(Infix, Val);
 
-export class Logical extends adapt.expr.Infix {
+export class Logical extends Infix {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Infix.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -668,11 +666,10 @@ export class Logical extends adapt.expr.Infix {
    */
   getPriority() 1
 }
-goog.inherits(Logical, Infix);
 
-export class Comparison extends adapt.expr.Infix {
+export class Comparison extends Infix {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Infix.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -680,11 +677,10 @@ export class Comparison extends adapt.expr.Infix {
    */
   getPriority() 2
 }
-goog.inherits(Comparison, Infix);
 
-export class Additive extends adapt.expr.Infix {
+export class Additive extends Infix {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Infix.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -692,11 +688,10 @@ export class Additive extends adapt.expr.Infix {
    */
   getPriority() 3
 }
-goog.inherits(Additive, Infix);
 
-export class Multiplicative extends adapt.expr.Infix {
+export class Multiplicative extends Infix {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Infix.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -704,11 +699,10 @@ export class Multiplicative extends adapt.expr.Infix {
    */
   getPriority() 4
 }
-goog.inherits(Multiplicative, Infix);
 
-export class Not extends adapt.expr.Prefix {
+export class Not extends Prefix {
   constructor(scope: LexicalScope, val: Val) {
-    Prefix.call(this, scope, val);
+    super(scope, val);
   }
 
   /**
@@ -721,11 +715,10 @@ export class Not extends adapt.expr.Prefix {
    */
   evalPrefix(val)!val
 }
-goog.inherits(Not, Prefix);
 
-export class Negate extends adapt.expr.Prefix {
+export class Negate extends Prefix {
   constructor(scope: LexicalScope, val: Val) {
-    Prefix.call(this, scope, val);
+    super(scope, val);
   }
 
   /**
@@ -738,11 +731,10 @@ export class Negate extends adapt.expr.Prefix {
    */
   evalPrefix(val) - val
 }
-goog.inherits(Negate, Prefix);
 
-export class And extends adapt.expr.Logical {
+export class And extends Logical {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Logical.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -757,11 +749,10 @@ export class And extends adapt.expr.Logical {
     return this.lhs.evaluate(context) && this.rhs.evaluate(context);
   }
 }
-goog.inherits(And, Logical);
 
-export class AndMedia extends adapt.expr.And {
+export class AndMedia extends And {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    And.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -769,11 +760,10 @@ export class AndMedia extends adapt.expr.And {
    */
   getOp() ' and '
 }
-goog.inherits(AndMedia, And);
 
-export class Or extends adapt.expr.Logical {
+export class Or extends Logical {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Logical.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -788,11 +778,10 @@ export class Or extends adapt.expr.Logical {
     return this.lhs.evaluate(context) || this.rhs.evaluate(context);
   }
 }
-goog.inherits(Or, Logical);
 
-export class OrMedia extends adapt.expr.Or {
+export class OrMedia extends Or {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Or.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -800,11 +789,10 @@ export class OrMedia extends adapt.expr.Or {
    */
   getOp() ', '
 }
-goog.inherits(OrMedia, Or);
 
-export class Lt extends adapt.expr.Comparison {
+export class Lt extends Comparison {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Comparison.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -817,11 +805,10 @@ export class Lt extends adapt.expr.Comparison {
    */
   evalInfix(lhs, rhs) lhs < rhs
 }
-goog.inherits(Lt, Comparison);
 
-export class Le extends adapt.expr.Comparison {
+export class Le extends Comparison {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Comparison.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -834,11 +821,10 @@ export class Le extends adapt.expr.Comparison {
    */
   evalInfix(lhs, rhs) lhs <= rhs
 }
-goog.inherits(Le, Comparison);
 
-export class Gt extends adapt.expr.Comparison {
+export class Gt extends Comparison {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Comparison.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -851,11 +837,10 @@ export class Gt extends adapt.expr.Comparison {
    */
   evalInfix(lhs, rhs) lhs > rhs
 }
-goog.inherits(Gt, Comparison);
 
-export class Ge extends adapt.expr.Comparison {
+export class Ge extends Comparison {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Comparison.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -868,11 +853,10 @@ export class Ge extends adapt.expr.Comparison {
    */
   evalInfix(lhs, rhs) lhs >= rhs
 }
-goog.inherits(Ge, Comparison);
 
-export class Eq extends adapt.expr.Comparison {
+export class Eq extends Comparison {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Comparison.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -885,11 +869,10 @@ export class Eq extends adapt.expr.Comparison {
    */
   evalInfix(lhs, rhs) lhs == rhs
 }
-goog.inherits(Eq, Comparison);
 
-export class Ne extends adapt.expr.Comparison {
+export class Ne extends Comparison {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Comparison.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -902,11 +885,10 @@ export class Ne extends adapt.expr.Comparison {
    */
   evalInfix(lhs, rhs) lhs != rhs
 }
-goog.inherits(Ne, Comparison);
 
-export class Add extends adapt.expr.Additive {
+export class Add extends Additive {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Additive.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -919,11 +901,10 @@ export class Add extends adapt.expr.Additive {
    */
   evalInfix(lhs, rhs) lhs + rhs
 }
-goog.inherits(Add, Additive);
 
-export class Subtract extends adapt.expr.Additive {
+export class Subtract extends Additive {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Additive.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -936,11 +917,10 @@ export class Subtract extends adapt.expr.Additive {
    */
   evalInfix(lhs, rhs) lhs - rhs
 }
-goog.inherits(Subtract, Additive);
 
-export class Multiply extends adapt.expr.Multiplicative {
+export class Multiply extends Multiplicative {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Multiplicative.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -953,11 +933,10 @@ export class Multiply extends adapt.expr.Multiplicative {
    */
   evalInfix(lhs, rhs) lhs * rhs
 }
-goog.inherits(Multiply, Multiplicative);
 
-export class Divide extends adapt.expr.Multiplicative {
+export class Divide extends Multiplicative {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Multiplicative.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -970,11 +949,10 @@ export class Divide extends adapt.expr.Multiplicative {
    */
   evalInfix(lhs, rhs) lhs / rhs
 }
-goog.inherits(Divide, Multiplicative);
 
-export class Modulo extends adapt.expr.Multiplicative {
+export class Modulo extends Multiplicative {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
-    Multiplicative.call(this, scope, lhs, rhs);
+    super(scope, lhs, rhs);
   }
 
   /**
@@ -987,16 +965,15 @@ export class Modulo extends adapt.expr.Multiplicative {
    */
   evalInfix(lhs, rhs) lhs % rhs
 }
-goog.inherits(Modulo, Multiplicative);
 
 /**
  * Numerical value with a unit.
  */
-export class Numeric extends adapt.expr.Val {
+export class Numeric extends Val {
   unit: string;
 
   constructor(scope: LexicalScope, public num: number, unit: string) {
-    Val.call(this, scope);
+    super(scope);
     this.unit = unit.toLowerCase();
   }
 
@@ -1016,18 +993,15 @@ export class Numeric extends adapt.expr.Val {
   }
 }
 
-// units are case-insensitive in CSS
-goog.inherits(Numeric, Val);
-
 /**
  * Named value.
  * @param qualifiedName CSS-escaped name sequence separated by dots.
  */
-export class Named extends adapt.expr.Val {
+export class Named extends Val {
   qualifiedName: any;
 
   constructor(scope: LexicalScope, qualifiedName: string) {
-    Val.call(this, scope);
+    super(scope);
     this.qualifiedName = qualifiedName;
   }
 
@@ -1054,14 +1028,13 @@ export class Named extends adapt.expr.Val {
             .dependOuter(other, context, dependencyCache);
   }
 }
-goog.inherits(Named, Val);
 
 /**
  * Named value.
  */
-export class MediaName extends adapt.expr.Val {
+export class MediaName extends Val {
   constructor(scope: LexicalScope, public not: boolean, public name: string) {
-    Val.call(this, scope);
+    super(scope);
   }
 
   /**
@@ -1094,7 +1067,6 @@ export class MediaName extends adapt.expr.Val {
    */
   isMediaName() true
 }
-goog.inherits(MediaName, Val);
 
 /**
  * A value that is calculated by calling a JavaScript function. Note that the
@@ -1103,10 +1075,10 @@ goog.inherits(MediaName, Val);
  * @param fn function to call.
  * @param str a way to represent this value in toString() call.
  */
-export class Native extends adapt.expr.Val {
+export class Native extends Val {
   constructor(
       scope: LexicalScope, public fn: () => Result, public str: string) {
-    Val.call(this, scope);
+    super(scope);
   }
 
   /**
@@ -1123,7 +1095,6 @@ export class Native extends adapt.expr.Val {
     return this.fn.call(context);
   }
 }
-goog.inherits(Native, Val);
 
 export const appendValArray = (buf: base.StringBuffer, arr: Val[]): void => {
   buf.append('(');
@@ -1164,10 +1135,10 @@ export const evalValArray = (context: Context, arr: Val[]): Result[] => {
   return result;
 };
 
-export class Call extends adapt.expr.Val {
+export class Call extends Val {
   constructor(
       scope: LexicalScope, public qualifiedName: string, public params: Val[]) {
-    Val.call(this, scope);
+    super(scope);
   }
 
   /**
@@ -1217,13 +1188,12 @@ export class Call extends adapt.expr.Val {
     return new Call(this.scope, this.qualifiedName, expandedParams);
   }
 }
-goog.inherits(Call, Val);
 
-export class Cond extends adapt.expr.Val {
+export class Cond extends Val {
   constructor(
       scope: LexicalScope, public cond: Val, public ifTrue: Val,
       public ifFalse: Val) {
-    Val.call(this, scope);
+    super(scope);
   }
 
   /**
@@ -1279,13 +1249,12 @@ export class Cond extends adapt.expr.Val {
     return r;
   }
 }
-goog.inherits(Cond, Val);
 
-export class Const extends adapt.expr.Val {
+export class Const extends Val {
   val: any;
 
   constructor(scope: LexicalScope, val: Result) {
-    Val.call(this, scope);
+    super(scope);
     this.val = val;
   }
 
@@ -1315,14 +1284,13 @@ export class Const extends adapt.expr.Val {
     return this.val;
   }
 }
-goog.inherits(Const, Val);
 
-export class MediaTest extends adapt.expr.Val {
+export class MediaTest extends Val {
   name: any;
   value: any;
 
   constructor(scope: LexicalScope, name: MediaName, value: Val) {
-    Val.call(this, scope);
+    super(scope);
     this.name = name;
     this.value = value;
   }
@@ -1365,13 +1333,12 @@ export class MediaTest extends adapt.expr.Val {
     return r;
   }
 }
-goog.inherits(MediaTest, Val);
 
-export class Param extends adapt.expr.Val {
+export class Param extends Val {
   index: any;
 
   constructor(scope: LexicalScope, index: number) {
-    Val.call(this, scope);
+    super(scope);
     this.index = index;
   }
 
@@ -1394,7 +1361,6 @@ export class Param extends adapt.expr.Val {
     return (v as Val);
   }
 }
-goog.inherits(Param, Val);
 
 export const and = (scope: LexicalScope, v1: Val, v2: Val): Val => {
   if (v1 === scope._false || v1 === scope.zero || v2 == scope._false ||

@@ -17,7 +17,7 @@
  * @fileoverview CSS Page Floats
  */
 import * as base from '../adapt/base';
-import {Numeric} from '../adapt/css';
+import {Numeric, ident} from '../adapt/css';
 import {Val} from '../adapt/css';
 import * as geom from '../adapt/geom';
 import {LayoutConstraint} from '../adapt/layout';
@@ -29,6 +29,7 @@ import * as asserts from '../closure/goog/asserts/asserts';
 
 import * as logging from './logging';
 import * as logical from './logical';
+import {Size, getSize} from './sizing'
 
 /**
  * @enum {string}
@@ -289,9 +290,9 @@ export class PageFloatLayoutContext {
       parent.children.push(this);
     }
     this.writingMode = writingMode || parent && parent.writingMode ||
-        adapt.css.ident.horizontal_tb;
+        ident.horizontal_tb;
     this.direction =
-        direction || parent && parent.direction || adapt.css.ident.ltr;
+        direction || parent && parent.direction || ident.ltr;
     this.floatStore = parent ? parent.floatStore : new PageFloatStore();
     const previousSibling = this.getPreviousSibling();
     this.floatsDeferredFromPrevious =
@@ -1122,9 +1123,9 @@ export class PageFloatLayoutContext {
       if (logicalFloatSide === 'inline-start' ||
           logicalFloatSide === 'inline-end') {
         inlineSize =
-            vivliostyle.sizing.getSize(area.clientLayout, area.element, [
-              vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE
-            ])[vivliostyle.sizing.Size.FIT_CONTENT_INLINE_SIZE];
+            getSize(area.clientLayout, area.element, [
+              Size.FIT_CONTENT_INLINE_SIZE
+            ])[Size.FIT_CONTENT_INLINE_SIZE];
       } else {
         if (area.adjustContentRelativeSize) {
           inlineSize = area.getContentInlineSize();

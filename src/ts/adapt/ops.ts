@@ -24,11 +24,14 @@ import * as counters from '../vivliostyle/counters';
 import * as logging from '../vivliostyle/logging';
 import * as pagefloat from '../vivliostyle/pagefloat';
 import {PreProcessSingleDocumentHook} from '../vivliostyle/plugin';
+import * as plugin from '../vivliostyle/plugin';
 
 import {DocumentURLTransformer} from './base';
+import * as base from './base';
 import * as css from './css';
 import * as csscasc from './csscasc';
 import * as cssparse from './cssparse';
+import {toShape} from './cssprop'
 import * as cssstyler from './cssstyler';
 import * as csstok from './csstok';
 import * as cssvalid from './cssvalid';
@@ -36,7 +39,7 @@ import * as expr from './expr';
 import * as font from './font';
 import * as geom from './geom';
 import * as layout from './layout';
-import {Response} from './net';
+import {Response, XMLHttpRequestResponseType} from './net';
 import * as pm from './pm';
 import * as task from './task';
 import {Fetcher} from './taskutil';
@@ -49,11 +52,11 @@ import * as page from '../vivliostyle/page';
 import * as column from '../vivliostyle/column';
 
 export const uaStylesheetBaseFetcher: Fetcher<boolean> =
-    new adapt.taskutil.Fetcher(() => {
+    new Fetcher(() => {
       const frame: task.Frame<boolean> = task.newFrame('uaStylesheetBase');
       cssvalid.loadValidatorSet().then((validatorSet) => {
-        const url = adapt.base.resolveURL(
-            'user-agent-base.css', adapt.base.resourceBaseURL);
+        const url = base.resolveURL(
+            'user-agent-base.css', base.resourceBaseURL);
         const handler = new csscasc.CascadeParserHandler(
             null, null, null, null, null, validatorSet, true);
         handler.startStylesheet(cssparse.StylesheetFlavor.USER_AGENT);
@@ -145,7 +148,7 @@ export class Style {
 }
 
 //-------------------------------------------------------------------------------
-export class StyleInstance extends adapt.expr.Context implements
+export class StyleInstance extends expr.Context implements
     cssstyler.FlowListener, pm.InstanceHolder, vgen.StylerProducer {
   lang: any;
   primaryFlows: any = ({'body': true} as {[key: string]: boolean});
@@ -177,8 +180,8 @@ export class StyleInstance extends adapt.expr.Context implements
       public readonly pageNumberOffset: number,
       public readonly documentURLTransformer: DocumentURLTransformer,
       public readonly counterStore: counters.CounterStore) {
-    expr.Context.call(
-        this, style.rootScope, viewport.width, viewport.height,
+    super(
+        style.rootScope, viewport.width, viewport.height,
         viewport.fontSize);
     this.lang = xmldoc.lang || defaultLang;
     this.faces = new font.DocumentFaces(this.style.fontDeobfuscator);
@@ -498,7 +501,7 @@ export class StyleInstance extends adapt.expr.Context implements
         return false;
       }
       const breakOffsetBeforeStartIndex =
-          adapt.base.binarySearch(
+          base.binarySearch(
               forcedBreakOffsets.length,
               (i) => forcedBreakOffsets[i] > startOffset) -
           1;
@@ -821,7 +824,7 @@ export class StyleInstance extends adapt.expr.Context implements
               self.createLayoutConstraint(columnPageFloatLayoutContext);
           if (columnCount > 1) {
             const columnContainer = self.viewport.document.createElement('div');
-            adapt.base.setCSSProperty(columnContainer, 'position', 'absolute');
+            base.setCSSProperty(columnContainer, 'position', 'absolute');
             boxContainer.appendChild(columnContainer);
             column = new layout.Column(
                 columnContainer, layoutContext, self.clientLayout,
@@ -986,7 +989,7 @@ export class StyleInstance extends adapt.expr.Context implements
         layoutContainer.width;
     const regionIds = boxInstance.getActiveRegions(self);
     const innerShapeVal = boxInstance.getProp(self, 'shape-inside');
-    const innerShape = adapt.cssprop.toShape(
+    const innerShape = toShape(
         innerShapeVal, 0, 0, layoutContainer.width, layoutContainer.height,
         self);
     const layoutContext = new vgen.ViewFactory(
@@ -1073,7 +1076,7 @@ export class StyleInstance extends adapt.expr.Context implements
     const flowName = boxInstance.getProp(self, 'flow-from');
     const boxContainer = self.viewport.document.createElement('div');
     const position = boxInstance.getProp(self, 'position');
-    adapt.base.setCSSProperty(
+    base.setCSSProperty(
         boxContainer, 'position', position ? position.name : 'absolute');
     parentContainer.insertBefore(boxContainer, parentContainer.firstChild);
     let layoutContainer = new vtree.Container(boxContainer);
@@ -1179,7 +1182,7 @@ export class StyleInstance extends adapt.expr.Context implements
           // Though it seems that LShapeFloatBug still exists in Firefox, it
           // apparently does not occur on exclusion floats. See the test file:
           // test/files/column-break-bug.html if
-          // (adapt.base.checkLShapeFloatBug(self.viewport.root)) {
+          // (base.checkLShapeFloatBug(self.viewport.root)) {
           // 	// Simplistic bug workaround: add a copy of the shape translated
           // up.
           //     exclusions.push(outerShape.withOffset(0, -1.25 *
@@ -1382,16 +1385,15 @@ export class StyleInstance extends adapt.expr.Context implements
     page.bleedBox.style.paddingTop = `${evaluatedPageSizeAndBleed.bleed + 1}px`;
   }
 }
-goog.inherits(StyleInstance, expr.Context);
 
-export class BaseParserHandler extends adapt.csscasc.CascadeParserHandler {
+export class BaseParserHandler extends csscasc.CascadeParserHandler {
   insideRegion: boolean = false;
 
   constructor(
       public masterHandler: StyleParserHandler, condition: expr.Val,
       parent: BaseParserHandler, regionId: string|null) {
-    csscasc.CascadeParserHandler.call(
-        this, masterHandler.rootScope, masterHandler, condition, parent,
+    super(
+        masterHandler.rootScope, masterHandler, condition, parent,
         regionId, masterHandler.validatorSet, !parent);
   }
 
@@ -1520,7 +1522,6 @@ export class BaseParserHandler extends adapt.csscasc.CascadeParserHandler {
     }
   }
 }
-goog.inherits(BaseParserHandler, csscasc.CascadeParserHandler);
 
 // override, so we don't register an error
 export const processViewportMeta = (meta: Element): string => {
@@ -1545,7 +1546,7 @@ export const processViewportMeta = (meta: Element): string => {
   return '';
 };
 
-export class StyleParserHandler extends adapt.cssparse.DispatchParserHandler {
+export class StyleParserHandler extends cssparse.DispatchParserHandler {
   rootScope: any;
   pageScope: any;
   rootBox: any;
@@ -1559,7 +1560,7 @@ export class StyleParserHandler extends adapt.cssparse.DispatchParserHandler {
   slave: any;
 
   constructor(public readonly validatorSet: cssvalid.ValidatorSet) {
-    cssparse.DispatchParserHandler.call(this);
+    super();
     this.rootScope = new expr.LexicalScope(null);
     this.pageScope = new expr.LexicalScope(this.rootScope);
     this.rootBox = new pm.RootPageBox(this.rootScope);
@@ -1574,7 +1575,7 @@ export class StyleParserHandler extends adapt.cssparse.DispatchParserHandler {
     logging.logger.warn('CSS parser:', mnemonics);
   }
 }
-goog.inherits(StyleParserHandler, cssparse.DispatchParserHandler);
+
 type StyleSource = {
   url: string,
   text: string|null,
@@ -1589,7 +1590,7 @@ export const parseOPSResource = (response: Response, store: xmldoc.XMLDocStore):
                                     task.Result<xmldoc.XMLDocHolder> =>
     (store as OPSDocStore).parseOPSResource(response);
 
-export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
+export class OPSDocStore extends xmldoc.XMLDocStore {
   styleByKey: {[key: string]: Style} = {};
   styleFetcherByKey: {[key: string]: Fetcher<Style>} = {};
   styleByDocURL: {[key: string]: Style} = {};
@@ -1601,8 +1602,8 @@ export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
   constructor(public fontDeobfuscator:
                   ((p1: string) => ((p1: Blob) => task.Result<Blob>) | null)|
               null) {
-    adapt.net.ResourceStore.call(
-        this, parseOPSResource, adapt.net.XMLHttpRequestResponseType.DOCUMENT);
+    super(
+        parseOPSResource, XMLHttpRequestResponseType.DOCUMENT);
   }
 
   init(
@@ -1611,7 +1612,7 @@ export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
       null): task.Result<boolean> {
     this.setStyleSheets(authorStyleSheets, userStyleSheets);
     const userAgentXML =
-        adapt.base.resolveURL('user-agent.xml', adapt.base.resourceBaseURL);
+        base.resolveURL('user-agent.xml', base.resourceBaseURL);
     const frame = task.newFrame('OPSDocStore.init');
     const self = this;
     cssvalid.loadValidatorSet().then((validatorSet) => {
@@ -1657,7 +1658,7 @@ export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
   private addAuthorStyleSheet(stylesheet: StyleSource) {
     let url = stylesheet.url;
     if (url) {
-      url = adapt.base.resolveURL(url, adapt.base.baseURL);
+      url = base.resolveURL(url, base.baseURL);
     }
     this.styleSheets.push({
       url,
@@ -1671,7 +1672,7 @@ export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
   private addUserStyleSheet(stylesheet: StyleSource) {
     let url = stylesheet.url;
     if (url) {
-      url = adapt.base.resolveURL(url, adapt.base.baseURL);
+      url = base.resolveURL(url, base.baseURL);
     }
     this.styleSheets.push({
       url,
@@ -1694,8 +1695,8 @@ export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
       }
       if (self.triggerSingleDocumentPreprocessing) {
         const hooks: PreProcessSingleDocumentHook[] =
-            vivliostyle.plugin.getHooksForName(
-                vivliostyle.plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT);
+            plugin.getHooksForName(
+                plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT);
         for (let i = 0; i < hooks.length; i++) {
           try {
             hooks[i](xmldoc.document);
@@ -1707,12 +1708,12 @@ export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
       }
       const triggers = [];
       const triggerList =
-          xmldoc.document.getElementsByTagNameNS(adapt.base.NS.epub, 'trigger');
+          xmldoc.document.getElementsByTagNameNS(base.NS.epub, 'trigger');
       for (let i = 0; i < triggerList.length; i++) {
         const triggerElem = triggerList[i];
         const observer =
-            triggerElem.getAttributeNS(adapt.base.NS.EV, 'observer');
-        const event = triggerElem.getAttributeNS(adapt.base.NS.EV, 'event');
+            triggerElem.getAttributeNS(base.NS.EV, 'observer');
+        const event = triggerElem.getAttributeNS(base.NS.EV, 'event');
         const action = triggerElem.getAttribute('action');
         const ref = triggerElem.getAttribute('ref');
         if (observer && event && action && ref) {
@@ -1721,8 +1722,8 @@ export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
       }
       self.triggersByDocURL[url] = triggers;
       const sources = ([] as StyleSource[]);
-      const userAgentURL = adapt.base.resolveURL(
-          'user-agent-page.css', adapt.base.resourceBaseURL);
+      const userAgentURL = base.resolveURL(
+          'user-agent-page.css', base.resourceBaseURL);
       sources.push({
         url: userAgentURL,
         text: null,
@@ -1739,7 +1740,7 @@ export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
           const child = (c as Element);
           const ns = child.namespaceURI;
           const localName = child.localName;
-          if (ns == adapt.base.NS.XHTML) {
+          if (ns == base.NS.XHTML) {
             if (localName == 'style') {
               sources.push({
                 url,
@@ -1756,7 +1757,7 @@ export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
                 if (rel == 'stylesheet' ||
                     rel == 'alternate stylesheet' && classes) {
                   let src = child.getAttribute('href');
-                  src = adapt.base.resolveURL(src, url);
+                  src = base.resolveURL(src, url);
                   sources.push({
                     url: src,
                     text: null,
@@ -1779,7 +1780,7 @@ export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
               }
             }
           } else {
-            if (ns == adapt.base.NS.FB2) {
+            if (ns == base.NS.FB2) {
               if (localName == 'stylesheet' &&
                   child.getAttribute('type') == 'text/css') {
                 sources.push({
@@ -1791,14 +1792,14 @@ export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
                 });
               }
             } else {
-              if (ns == adapt.base.NS.SSE && localName === 'property') {
+              if (ns == base.NS.SSE && localName === 'property') {
                 // look for stylesheet specification like:
                 // <property><name>stylesheet</name><value>style.css</value></property>
                 const name = child.getElementsByTagName('name')[0];
                 if (name && name.textContent === 'stylesheet') {
                   const value = child.getElementsByTagName('value')[0];
                   if (value) {
-                    let src = adapt.base.resolveURL(value.textContent, url);
+                    let src = base.resolveURL(value.textContent, url);
                     sources.push({
                       url: src,
                       text: null,
@@ -1833,7 +1834,7 @@ export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
       }
       let fetcher = self.styleFetcherByKey[key];
       if (!fetcher) {
-        fetcher = new adapt.taskutil.Fetcher(() => {
+        fetcher = new Fetcher(() => {
           const innerFrame: task.Frame<Style> =
               task.newFrame('fetchStylesheet');
           let index = 0;
@@ -1879,4 +1880,3 @@ export class OPSDocStore extends adapt.xmldoc.XMLDocStore {
     return frame.result();
   }
 }
-goog.inherits(OPSDocStore, adapt.net.ResourceStore);

@@ -16,6 +16,8 @@
  *
  * @fileoverview Footnotes
  */
+import * as asserts from '../closure/goog/asserts/asserts';
+
 import {Ident} from '../adapt/css';
 import {Numeric} from '../adapt/css';
 import {LayoutConstraint} from '../adapt/layout';
@@ -27,16 +29,13 @@ import * as pagefloat from './pagefloat';
 const PageFloat = pagefloat.PageFloat;
 const PageFloatFragment = pagefloat.PageFloatFragment;
 
-/**
- * @extends vivliostyle.pagefloat.PageFloat
- */
-export class Footnote extends vivliostyle.pagefloat.PageFloat {
+export class Footnote extends pagefloat.PageFloat {
   constructor(
       nodePosition: NodePosition, floatReference: pagefloat.FloatReference,
       flowName: string, public readonly footnotePolicy: Ident|null,
       floatMinWrapBlock: Numeric|null) {
-    PageFloat.call(
-        this, nodePosition, floatReference, 'block-end', null, flowName,
+    super(
+        nodePosition, floatReference, 'block-end', null, flowName,
         floatMinWrapBlock);
   }
 
@@ -45,8 +44,6 @@ export class Footnote extends vivliostyle.pagefloat.PageFloat {
    */
   isAllowedToPrecede(other)!(other instanceof Footnote)
 }
-const Footnote = Footnote;
-goog.inherits(Footnote, PageFloat);
 
 /**
  * @extends PageFloatFragment
@@ -116,7 +113,7 @@ export class FootnoteLayoutStrategy implements
       floatReference = pagefloat.FloatReference.PAGE;
     }
     const nodePosition = nodeContext.toNodePosition();
-    goog.asserts.assert(pageFloatLayoutContext.flowName);
+    asserts.assert(pageFloatLayoutContext.flowName);
     const float: pagefloat.PageFloat = new Footnote(
         nodePosition, floatReference, pageFloatLayoutContext.flowName,
         nodeContext.footnotePolicy, nodeContext.floatMinWrapBlock);
@@ -141,7 +138,7 @@ export class FootnoteLayoutStrategy implements
         pageFloatLayoutContext.getPageFloatLayoutContext(float.floatReference);
     const fragments =
         context.floatFragments.filter((fr) => fr instanceof FootnoteFragment);
-    goog.asserts.assert(fragments.length <= 1);
+    asserts.assert(fragments.length <= 1);
     return fragments[0] || null;
   }
 
@@ -152,7 +149,7 @@ export class FootnoteLayoutStrategy implements
     floatArea.isFootnote = true;
     floatArea.adjustContentRelativeSize = false;
     const element = floatArea.element;
-    goog.asserts.assert(element);
+    asserts.assert(element);
     floatArea.vertical = column.layoutContext.applyFootnoteStyle(
         floatContainer.vertical,
         column.layoutContext.nodeContext &&

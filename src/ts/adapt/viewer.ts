@@ -21,13 +21,18 @@ import * as asserts from '../closure/goog/asserts/asserts';
 import * as constants from '../vivliostyle/constants';
 import * as logging from '../vivliostyle/logging';
 import {ConfigurationHook} from '../vivliostyle/plugin';
+import * as plugin from '../vivliostyle/plugin';
+import * as profile from '../vivliostyle/profile';
 
 import {JSON} from './base';
 import {EventListener} from './base';
 import {Event} from './base';
+import * as base from './base';
 import * as epub from './epub';
 import * as expr from './expr';
+import {Mapper} from './font';
 import * as task from './task';
+import {waitForFetchers} from './taskutil';
 import * as vgen from './vgen';
 import {Page} from './vtree';
 import {Spread} from './vtree';
@@ -116,7 +121,7 @@ export class Viewer {
     }
     viewportElement.setAttribute(VIEWPORT_STATUS_ATTRIBUTE, 'loading');
     const document = window.document;
-    this.fontMapper = new adapt.font.Mapper(document.head, viewportElement);
+    this.fontMapper = new Mapper(document.head, viewportElement);
     this.init();
     this.kick = () => {};
     this.sendCommand = () => {};
@@ -212,7 +217,7 @@ export class Viewer {
     self.configure(command).then(() => {
       const store = new epub.EPUBDocStore();
       store.init(authorStyleSheet, userStyleSheet).then(() => {
-        const epubURL = adapt.base.resolveURL(url, self.window.location.href);
+        const epubURL = base.resolveURL(url, self.window.location.href);
         self.packageURL = [epubURL];
         store.loadEPUBDoc(epubURL, haveZipMetadata).then((opf) => {
           self.opf = opf;
@@ -247,7 +252,7 @@ export class Viewer {
       store.init(authorStyleSheet, userStyleSheet).then(() => {
         const resolvedParams: epub.OPFItemParam[] = params.map(
             (p, index) => ({
-              url: adapt.base.resolveURL(p.url, self.window.location.href),
+              url: base.resolveURL(p.url, self.window.location.href),
               index,
               startPage: p.startPage,
               skipPagesBefore: p.skipPagesBefore
@@ -372,13 +377,13 @@ export class Viewer {
 
     // for backward compatibility
     if (typeof command['userAgentRootURL'] == 'string') {
-      adapt.base.baseURL =
+      base.baseURL =
           command['userAgentRootURL'].replace(/resources\/?$/, '');
-      adapt.base.resourceBaseURL = command['userAgentRootURL'];
+      base.resourceBaseURL = command['userAgentRootURL'];
     }
     if (typeof command['rootURL'] == 'string') {
-      adapt.base.baseURL = command['rootURL'];
-      adapt.base.resourceBaseURL = `${adapt.base.baseURL}resources/`;
+      base.baseURL = command['rootURL'];
+      base.resourceBaseURL = `${base.baseURL}resources/`;
     }
     if (typeof command['pageViewMode'] == 'string' &&
         command['pageViewMode'] !== this.pageViewMode) {
@@ -413,8 +418,8 @@ export class Viewer {
   }
 
   configurePlugins(command: JSON) {
-    const hooks: ConfigurationHook[] = vivliostyle.plugin.getHooksForName(
-        vivliostyle.plugin.HOOKS.CONFIGURATION);
+    const hooks: ConfigurationHook[] = plugin.getHooksForName(
+        plugin.HOOKS.CONFIGURATION);
     hooks.forEach((hook) => {
       const result = hook(command);
       this.needResize = result.needResize || this.needResize;
@@ -473,7 +478,7 @@ export class Viewer {
   private hidePages() {
     this.removePageListeners();
     this.forCurrentPages((page) => {
-      adapt.base.setCSSProperty(page.container, 'display', 'none');
+      base.setCSSProperty(page.container, 'display', 'none');
     });
     this.currentPage = null;
     this.currentSpread = null;
@@ -482,8 +487,8 @@ export class Viewer {
   private showSinglePage(page: Page) {
     page.addEventListener('hyperlink', this.hyperlinkListener, false);
     page.addEventListener('replaced', this.pageReplacedListener, false);
-    adapt.base.setCSSProperty(page.container, 'visibility', 'visible');
-    adapt.base.setCSSProperty(page.container, 'display', 'block');
+    base.setCSSProperty(page.container, 'visibility', 'visible');
+    base.setCSSProperty(page.container, 'display', 'block');
   }
 
   private showPage(page: Page): void {
@@ -520,7 +525,7 @@ export class Viewer {
         .then((cfi) => {
           const page = self.currentPage;
           const r = self.waitForLoading && page.fetchers.length > 0 ?
-              adapt.taskutil.waitForFetchers(page.fetchers) :
+              waitForFetchers(page.fetchers) :
               task.newResult(true);
           r.then(() => {
             self.sendLocationNotification(page, cfi).thenFinish(frame);
@@ -1052,7 +1057,7 @@ Viewer.RenderingCanceledError = class extends Error {
 
 export const maybeParse = (cmd: any): JSON => {
   if (typeof cmd == 'string') {
-    return adapt.base.stringToJSON(cmd);
+    return base.stringToJSON(cmd);
   }
   return cmd;
 };

@@ -24,7 +24,14 @@ import * as logging from '../vivliostyle/logging';
 import {ResolveLayoutProcessorHook} from '../vivliostyle/plugin';
 import {PostLayoutBlockHook} from '../vivliostyle/plugin';
 import {ResolveTextNodeBreakerHook} from '../vivliostyle/plugin';
+import * as plugin from '../vivliostyle/plugin';
 import {ElementsOffset} from '../vivliostyle/repetitiveelements';
+import * as repetitiveelements from '../vivliostyle/repetitiveelements';
+import {processAfterIfContinuesOfAncestors} from '../vivliostyle/selectors';
+import {Size, getSize} from '../vivliostyle/sizing';
+import {resolveNewIndex} from '../vivliostyle/diff';
+import {TableFormattingContext} from '../vivliostyle/table';
+import {isBlock} from '../vivliostyle/display';
 
 import * as base from './base';
 import {Val} from './css';
@@ -195,8 +202,8 @@ export class LayoutProcessorResolver {
    */
   find(formattingContext: vtree.FormattingContext): LayoutProcessor {
     const hooks: ResolveLayoutProcessorHook[] =
-        vivliostyle.plugin.getHooksForName(
-            vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR);
+        plugin.getHooksForName(
+            plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR);
     for (let i = 0; i < hooks.length; i++) {
       const processor = hooks[i](formattingContext);
       if (processor) {
@@ -292,7 +299,7 @@ export class AbstractBreakPosition implements BreakPosition {
   calculateOffset(column): {current: number, minimum: number} {
     return calculateOffset(
         this.getNodeContext(),
-        vivliostyle.repetitiveelements.collectElementsOffset(column));
+        repetitiveelements.collectElementsOffset(column));
   }
 
   /**
@@ -329,14 +336,14 @@ export {BreakPositionAndNodeContext};
  * @param checkPoints array of breaking points for
  *    breakable block
  */
-export class BoxBreakPosition extends adapt.layout.AbstractBreakPosition {
+export class BoxBreakPosition extends AbstractBreakPosition {
   private alreadyEvaluated: boolean = false;
   breakNodeContext: vtree.NodeContext = null;
 
   constructor(
       public readonly checkPoints: vtree.NodeContext[],
       public readonly penalty: number) {
-    AbstractBreakPosition.call(this);
+    super();
   }
 
   /**
@@ -367,12 +374,11 @@ export class BoxBreakPosition extends adapt.layout.AbstractBreakPosition {
         this.checkPoints[this.checkPoints.length - 1];
   }
 }
-goog.inherits(BoxBreakPosition, AbstractBreakPosition);
 
 /**
  * Potential edge breaking position.
  */
-export class EdgeBreakPosition extends adapt.layout.AbstractBreakPosition {
+export class EdgeBreakPosition extends AbstractBreakPosition {
   overflowIfRepetitiveElementsDropped: boolean;
   protected isEdgeUpdated: boolean = false;
   private edge: number = 0;
@@ -382,7 +388,7 @@ export class EdgeBreakPosition extends adapt.layout.AbstractBreakPosition {
       public readonly position: vtree.NodeContext,
       public readonly breakOnEdge: string|null, public overflows: boolean,
       public readonly computedBlockSize: number) {
-    AbstractBreakPosition.call(this);
+    super();
     this.overflowIfRepetitiveElementsDropped = overflows;
   }
 
@@ -438,11 +444,10 @@ export class EdgeBreakPosition extends adapt.layout.AbstractBreakPosition {
   }
 
   private isFirstContentOfRepetitiveElementsOwner(): boolean {
-    return vivliostyle.repetitiveelements
+    return repetitiveelements
         .isFirstContentOfRepetitiveElementsOwner(this.getNodeContext());
   }
 }
-goog.inherits(EdgeBreakPosition, AbstractBreakPosition);
 
 export const validateCheckPoints = (checkPoints: vtree.NodeContext[]) => {
   for (let i = 1; i < checkPoints.length; i++) {
@@ -481,7 +486,7 @@ export class BlockFormattingContext implements vtree.FormattingContext {
   /**
    * @override
    */
-  getName() 'Block formatting context (adapt.layout.BlockFormattingContext)'
+  getName() 'Block formatting context (BlockFormattingContext)'
 
   /**
    * @override
@@ -502,7 +507,7 @@ export class BlockFormattingContext implements vtree.FormattingContext {
   restoreState(state) {}
 }
 
-export class Column extends adapt.vtree.Container {
+export class Column extends vtree.Container {
   last: Node;
   viewDocument: Document;
   flowRootFormattingContext: vtree.FormattingContext = null;
@@ -543,7 +548,7 @@ export class Column extends adapt.vtree.Container {
       public readonly layoutConstraint: LayoutConstraint,
       public readonly pageFloatLayoutContext:
           pagefloat.PageFloatLayoutContext) {
-    vtree.Container.call(this, element);
+    super(element);
     this.last = element.lastChild;
     this.viewDocument = element.ownerDocument;
     pageFloatLayoutContext.setContainer(this);
@@ -632,8 +637,7 @@ export class Column extends adapt.vtree.Container {
   }
 
   calculateOffsetInNodeForNodeContext(position: vtree.NodePosition):
-      number position.preprocessedTextContent? vivliostyle.diff
-          .resolveNewIndex(
+      number position.preprocessedTextContent? resolveNewIndex(
               position.preprocessedTextContent, position.offsetInNode):
               position.offsetInNode
 
@@ -728,7 +732,7 @@ export class Column extends adapt.vtree.Container {
   nextInTree(position: vtree.NodeContext, atUnforcedBreak?: boolean):
       task.Result<vtree.NodeContext> {
     const cont = this.layoutContext.nextInTree(position, atUnforcedBreak);
-    return vivliostyle.selectors.processAfterIfContinues(cont, this);
+    return processAfterIfContinues(cont, this);
   }
 
   /**
@@ -1504,9 +1508,9 @@ export class Column extends adapt.vtree.Container {
         this.buildDeepElementView(nodeContext.copy()).then((position) => {
           const element = (position.viewNode as Element);
           let inlineSize =
-              vivliostyle.sizing.getSize(self.clientLayout, element, [
-                vivliostyle.sizing.Size.MIN_CONTENT_INLINE_SIZE
-              ])[vivliostyle.sizing.Size.MIN_CONTENT_INLINE_SIZE];
+              getSize(self.clientLayout, element, [
+                Size.MIN_CONTENT_INLINE_SIZE
+              ])[Size.MIN_CONTENT_INLINE_SIZE];
           const margin = self.getComputedMargin(element);
           if (self.vertical) {
             inlineSize += margin.top + margin.bottom;
@@ -1829,7 +1833,7 @@ export class Column extends adapt.vtree.Container {
           if (!resNodeContext || !isOrphan(resNodeContext.viewNode)) {
             const offsets = calculateOffset(
                 resNodeContext,
-                vivliostyle.repetitiveelements.collectElementsOffset(self));
+                repetitiveelements.collectElementsOffset(self));
             overflown = self.isOverflown(
                 edge + (self.vertical ? -1 : 1) * offsets.minimum);
             if (self.isOverflown(
@@ -1870,8 +1874,8 @@ export class Column extends adapt.vtree.Container {
 
   postLayoutBlock(
       nodeContext: vtree.NodeContext, checkPoints: vtree.NodeContext[]) {
-    const hooks: PostLayoutBlockHook[] = vivliostyle.plugin.getHooksForName(
-        vivliostyle.plugin.HOOKS.POST_LAYOUT_BLOCK);
+    const hooks: PostLayoutBlockHook[] = plugin.getHooksForName(
+        plugin.HOOKS.POST_LAYOUT_BLOCK);
     hooks.forEach((hook) => {
       hook(nodeContext, checkPoints, this);
     });
@@ -1950,8 +1954,8 @@ export class Column extends adapt.vtree.Container {
 
   resolveTextNodeBreaker(nodeContext: vtree.NodeContext): TextNodeBreaker {
     const hooks: ResolveTextNodeBreakerHook[] =
-        vivliostyle.plugin.getHooksForName(
-            vivliostyle.plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER);
+        plugin.getHooksForName(
+            plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER);
     return hooks.reduce(
         (prev, hook) => hook(nodeContext) || prev, TextNodeBreaker.instance);
   }
@@ -2114,7 +2118,7 @@ export class Column extends adapt.vtree.Container {
       offset = bp.calculateOffset(this);
     } else {
       offset = calculateOffset(
-          null, vivliostyle.repetitiveelements.collectElementsOffset(this));
+          null, repetitiveelements.collectElementsOffset(this));
     }
     return offset.current;
   }
@@ -2357,7 +2361,7 @@ export class Column extends adapt.vtree.Container {
     let edge = calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
     const offsets = calculateOffset(
         nodeContext,
-        vivliostyle.repetitiveelements.collectElementsOffset(this));
+        repetitiveelements.collectElementsOffset(this));
     const overflown =
         this.isOverflown(edge + (this.vertical ? -1 : 1) * offsets.minimum);
     if (this.isOverflown(edge + (this.vertical ? -1 : 1) * offsets.current) &&
@@ -2486,11 +2490,11 @@ export class Column extends adapt.vtree.Container {
     if (formattingContext instanceof BlockFormattingContext) {
       return true;
     }
-    if (formattingContext instanceof vivliostyle.table.TableFormattingContext) {
+    if (formattingContext instanceof TableFormattingContext) {
       return false;
     }
     if (formattingContext instanceof
-        vivliostyle.repetitiveelements
+        repetitiveelements
             .RepetitiveElementsOwnerFormattingContext) {
       return true;
     }
@@ -2594,7 +2598,7 @@ export class Column extends adapt.vtree.Container {
                 }
                 if (!self.isBFC(nodeContext.formattingContext) ||
                     nodeContext.formattingContext instanceof
-                        vivliostyle.repetitiveelements
+                        repetitiveelements
                             .RepetitiveElementsOwnerFormattingContext ||
                     self.isFloatNodeContext(nodeContext) ||
                     nodeContext.flexContainer) {
@@ -3278,7 +3282,6 @@ export class Column extends adapt.vtree.Container {
     }
   }
 }
-goog.inherits(Column, vtree.Container);
 
 export const removeFollowingSiblings =
     (parentNode: Node, viewNode: Node): void => {
@@ -3420,7 +3423,7 @@ export const isOrphan = (node: Node): boolean => {
 };
 
 export class LayoutRetryer extends
-    vivliostyle.layoututil.AbstractLayoutRetryer {
+    layoututil.AbstractLayoutRetryer {
   breakAfter: any;
   private initialPageBreakType: string|null = null;
   private initialComputedBlockSize: number = 0;
@@ -3429,7 +3432,7 @@ export class LayoutRetryer extends
       {overflownNodeContext: vtree.NodeContext} = {overflownNodeContext: null};
 
   constructor(public readonly leadingEdge: boolean, breakAfter?: string|null) {
-    layoututil.AbstractLayoutRetryer.call(this);
+    super();
     this.breakAfter = breakAfter || null;
   }
 
@@ -3447,7 +3450,7 @@ export class LayoutRetryer extends
   prepareLayout(nodeContext, column) {
     column.fragmentLayoutConstraints = [];
     if (!column.pseudoParent) {
-      vivliostyle.repetitiveelements.clearCache();
+      repetitiveelements.clearCache();
     }
   }
 
@@ -3455,8 +3458,7 @@ export class LayoutRetryer extends
    * @override
    */
   clearNodes(initialPosition) {
-    layoututil.AbstractLayoutRetryer.prototype.clearNodes.call(
-        this, initialPosition);
+    super.clearNodes(initialPosition);
     let nodeContext = initialPosition;
     while (nodeContext) {
       const viewNode = nodeContext.viewNode;
@@ -3471,8 +3473,7 @@ export class LayoutRetryer extends
    * @override
    */
   saveState(nodeContext, column) {
-    layoututil.AbstractLayoutRetryer.prototype.saveState.call(
-        this, nodeContext, column);
+    super.saveState(nodeContext, column);
     this.initialPageBreakType = column.pageBreakType;
     this.initialComputedBlockSize = column.computedBlockSize;
     this.initialOverflown = column.overflown;
@@ -3482,14 +3483,12 @@ export class LayoutRetryer extends
    * @override
    */
   restoreState(nodeContext, column) {
-    layoututil.AbstractLayoutRetryer.prototype.restoreState.call(
-        this, nodeContext, column);
+    superrestoreState(nodeContext, column);
     column.pageBreakType = this.initialPageBreakType;
     column.computedBlockSize = this.initialComputedBlockSize;
     column.overflown = this.initialOverflown;
   }
 }
-goog.inherits(LayoutRetryer, layoututil.AbstractLayoutRetryer);
 
 export class DefaultLayoutMode implements layoututil.LayoutMode {
   constructor(
@@ -3502,8 +3501,8 @@ export class DefaultLayoutMode implements layoututil.LayoutMode {
    */
   doLayout(nodeContext, column) {
     const frame: task.Frame<vtree.NodeContext> =
-        task.newFrame('adapt.layout.DefaultLayoutMode.doLayout');
-    vivliostyle.selectors
+        task.newFrame('DefaultLayoutMode.doLayout');
+    selectors
         .processAfterIfContinuesOfAncestors(nodeContext, column)
         .then(() => {
           column.doLayout(nodeContext, this.leadingEdge, this.breakAfter)
@@ -3621,8 +3620,8 @@ export class BlockLayoutProcessor implements LayoutProcessor {
 }
 
 export const blockLayoutProcessor = new BlockLayoutProcessor();
-vivliostyle.plugin.registerHook(
-    vivliostyle.plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
+plugin.registerHook(
+    plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
     (nodeContext, firstTime, display, position, floatSide, isRoot) => {
       const parent = nodeContext.parent;
       if (!parent && nodeContext.formattingContext) {
@@ -3634,7 +3633,7 @@ vivliostyle.plugin.registerHook(
         } else {
           if (nodeContext.establishesBFC ||
               !nodeContext.formattingContext &&
-                  vivliostyle.display.isBlock(
+                  isBlock(
                       display, position, floatSide, isRoot)) {
             return new BlockFormattingContext(
                 parent ? parent.formattingContext : null);
@@ -3644,15 +3643,15 @@ vivliostyle.plugin.registerHook(
         }
       }
     });
-vivliostyle.plugin.registerHook(
-    vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, (formattingContext) => {
+plugin.registerHook(
+    plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, (formattingContext) => {
       if (formattingContext instanceof BlockFormattingContext) {
         return blockLayoutProcessor;
       }
       return null;
     });
 
-export class PageFloatArea extends adapt.layout.Column {
+export class PageFloatArea extends Column {
   private rootViewNodes: Element[] = [];
   private floatMargins: geom.Insets[] = [];
   adjustContentRelativeSize: boolean = true;
@@ -3663,8 +3662,8 @@ export class PageFloatArea extends adapt.layout.Column {
       layoutConstraint: LayoutConstraint,
       pageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
       public readonly parentContainer: vtree.Container) {
-    Column.call(
-        this, element, layoutContext, clientLayout, layoutConstraint,
+    super(
+        element, layoutContext, clientLayout, layoutConstraint,
         pageFloatLayoutContext);
   }
 
@@ -3672,7 +3671,7 @@ export class PageFloatArea extends adapt.layout.Column {
    * @override
    */
   openAllViews(position) {
-    return Column.prototype.openAllViews.call(this, position)
+    return super.openAllViews(position)
         .thenAsync((nodeContext) => {
           if (nodeContext) {
             this.fixFloatSizeAndPosition(nodeContext);
@@ -3754,7 +3753,6 @@ export class PageFloatArea extends adapt.layout.Column {
     }, this));
   }
 }
-goog.inherits(PageFloatArea, Column);
 
 export const getElementHeight =
     (element: Element, column: Column, vertical: boolean): number => {

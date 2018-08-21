@@ -83,9 +83,9 @@ export class Visitor {
   }
 }
 
-export class FilterVisitor extends adapt.css.Visitor {
+export class FilterVisitor extends Visitor {
   constructor() {
-    Visitor.call(this);
+    super();
   }
 
   visitValues(values: Val[]): Val[] {
@@ -186,7 +186,6 @@ export class FilterVisitor extends adapt.css.Visitor {
    */
   visitExpr(expr) expr
 }
-goog.inherits(FilterVisitor, Visitor);
 
 export class Val {
   /**
@@ -224,9 +223,9 @@ export class Val {
 }
 Val.prototype.visit = goog.abstractMethod;
 
-export class Empty extends adapt.css.Val {
+export class Empty extends Val {
   constructor() {
-    Val.call(this);
+    super();
     if (empty) {
       throw new Error('E_INVALID_CALL');
     }
@@ -249,13 +248,12 @@ export class Empty extends adapt.css.Val {
     return visitor.visitEmpty(this);
   }
 }
-goog.inherits(Empty, Val);
 
 export const empty: Empty = new Empty();
 
-export class Slash extends adapt.css.Val {
+export class Slash extends Val {
   constructor() {
-    Val.call(this);
+    super();
     if (slash) {
       throw new Error('E_INVALID_CALL');
     }
@@ -280,13 +278,12 @@ export class Slash extends adapt.css.Val {
     return visitor.visitSlash(this);
   }
 }
-goog.inherits(Slash, Val);
 
 export const slash: Slash = new Slash();
 
-export class Str extends adapt.css.Val {
+export class Str extends Val {
   constructor(public str: string) {
-    Val.call(this);
+    super();
   }
 
   /**
@@ -316,11 +313,10 @@ export class Str extends adapt.css.Val {
     return visitor.visitStr(this);
   }
 }
-goog.inherits(Str, Val);
 
-export class Ident extends adapt.css.Val {
+export class Ident extends Val {
   constructor(public name: string) {
-    Val.call(this);
+    super();
     if (nameTable[name]) {
       throw new Error('E_INVALID_CALL');
     }
@@ -357,7 +353,6 @@ export class Ident extends adapt.css.Val {
    */
   isIdent() true
 }
-goog.inherits(Ident, Val);
 
 export const getName = (name: string): Ident => {
   let r = nameTable[name];
@@ -367,11 +362,11 @@ export const getName = (name: string): Ident => {
   return r;
 };
 
-export class Numeric extends adapt.css.Val {
+export class Numeric extends Val {
   unit: string;
 
   constructor(public num: number, unit: string) {
-    Val.call(this);
+    super();
     this.unit = unit.toLowerCase();
   }
 
@@ -413,14 +408,11 @@ export class Numeric extends adapt.css.Val {
   isNumeric() true
 }
 
-// units are case-insensitive in CSS
-goog.inherits(Numeric, Val);
-
-export class Num extends adapt.css.Val {
+export class Num extends Val {
   num: any;
 
   constructor(num: number) {
-    Val.call(this);
+    super();
     this.num = num;
   }
 
@@ -456,11 +448,10 @@ export class Num extends adapt.css.Val {
    */
   isNum() true
 }
-goog.inherits(Num, Val);
 
-export class Int extends adapt.css.Num {
+export class Int extends Num {
   constructor(num: number) {
-    Num.call(this, num);
+    super(num);
   }
 
   /**
@@ -470,11 +461,10 @@ export class Int extends adapt.css.Num {
     return visitor.visitInt(this);
   }
 }
-goog.inherits(Int, Num);
 
-export class Color extends adapt.css.Val {
+export class Color extends Val {
   constructor(public rgb: number) {
-    Val.call(this);
+    super();
   }
 
   /**
@@ -494,11 +484,10 @@ export class Color extends adapt.css.Val {
     return visitor.visitColor(this);
   }
 }
-goog.inherits(Color, Val);
 
-export class URL extends adapt.css.Val {
+export class URL extends Val {
   constructor(public url: string) {
-    Val.call(this);
+    super();
   }
 
   /**
@@ -517,7 +506,6 @@ export class URL extends adapt.css.Val {
     return visitor.visitURL(this);
   }
 }
-goog.inherits(URL, Val);
 
 export const appendList =
     (buf: base.StringBuffer, values: Val[], separator: string,
@@ -530,9 +518,9 @@ export const appendList =
       }
     };
 
-export class SpaceList extends adapt.css.Val {
+export class SpaceList extends Val {
   constructor(public values: Val[]) {
-    Val.call(this);
+    super();
   }
 
   /**
@@ -554,11 +542,10 @@ export class SpaceList extends adapt.css.Val {
    */
   isSpaceList() true
 }
-goog.inherits(SpaceList, Val);
 
-export class CommaList extends adapt.css.Val {
+export class CommaList extends Val {
   constructor(public values: Val[]) {
-    Val.call(this);
+    super();
   }
 
   /**
@@ -575,11 +562,10 @@ export class CommaList extends adapt.css.Val {
     return visitor.visitCommaList(this);
   }
 }
-goog.inherits(CommaList, Val);
 
-export class Func extends adapt.css.Val {
+export class Func extends Val {
   constructor(public name: string, public values: Val[]) {
-    Val.call(this);
+    super();
   }
 
   /**
@@ -599,11 +585,10 @@ export class Func extends adapt.css.Val {
     return visitor.visitFunc(this);
   }
 }
-goog.inherits(Func, Val);
 
-export class Expr extends adapt.css.Val {
+export class Expr extends Val {
   constructor(public expr: expr.Val) {
-    Val.call(this);
+    super();
   }
 
   /**
@@ -634,7 +619,6 @@ export class Expr extends adapt.css.Val {
    */
   isExpr() true
 }
-goog.inherits(Expr, Val);
 
 export const toNumber = (val: Val, context: expr.Context): number => {
   if (val) {

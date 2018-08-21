@@ -190,13 +190,13 @@ export const touch = (evt: TouchEvent): void => {
       const pinchDist = Math.sqrt(px * px + py * py);
       if (evt.type == 'touchstart') {
         zoomActive = true;
-        vivliostyle.viewerapp.zoomDist = pinchDist;
+        .zoomDist = pinchDist;
       } else {
         if (zoomActive) {
           if (evt.type == 'touchend') {
             zoomActive = false;
           }
-          const scale = pinchDist / vivliostyle.viewerapp.zoomDist;
+          const scale = pinchDist / .zoomDist;
           if (scale > 1.5) {
             fontSize *= 1.2;
             sendCommand({'a': 'configure', 'fontSize': Math.round(fontSize)});
@@ -225,11 +225,11 @@ export const callback = (msg) => {
       window.addEventListener('keydown', (keydown as Function), false);
 
       //        window.addEventListener("touchstart", /** @type {Function} */
-      //        (vivliostyle.viewerapp.touch), false);
+      //        (.touch), false);
       //        window.addEventListener("touchmove", /** @type {Function} */
-      //        (vivliostyle.viewerapp.touch), false);
+      //        (.touch), false);
       //        window.addEventListener("touchend", /** @type {Function} */
-      //        (vivliostyle.viewerapp.touch), false);
+      //        (.touch), false);
       document.body.setAttribute('data-vivliostyle-viewer-status', 'complete');
       const leftButton =
           document.getElementById('vivliostyle-page-navigation-left');
@@ -248,7 +248,7 @@ export const callback = (msg) => {
       break;
     case 'error':
 
-      // adapt.base.log("Error: " + msg["content"]);
+      // base.log("Error: " + msg["content"]);
       break;
     case 'nav':
       const cfi = msg['cfi'];
@@ -358,4 +358,4 @@ export const main = (arg): void => {
   const viewer = new viewer.Viewer(window, viewportElement, 'main', callback);
   viewer.initEmbed(config);
 };
-namespace.exportSymbol('vivliostyle.viewerapp.main', main);
+namespace.exportSymbol('.main', main);

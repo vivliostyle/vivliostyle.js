@@ -21,6 +21,7 @@ import * as base from './base';
 import * as css from './css';
 import * as csscasc from './csscasc';
 import {DispatchParserHandler} from './cssparse';
+import * as cssparse from './cssparse';
 import {ValidatorSet} from './cssvalid';
 import {PropertyReceiver} from './cssvalid';
 import * as expr from './expr';
@@ -95,22 +96,21 @@ export class PageBox {
 /**
  * Parent of all page masters
  */
-export class RootPageBox extends adapt.pm.PageBox {
+export class RootPageBox extends PageBox {
   constructor(scope: expr.LexicalScope) {
-    PageBox.call(this, scope, null, null, [], null);
+    super(scope, null, null, [], null);
     this.specified['width'] = new csscasc.CascadeValue(css.fullWidth, 0);
     this.specified['height'] = new csscasc.CascadeValue(css.fullHeight, 0);
   }
 }
-goog.inherits(RootPageBox, PageBox);
 
-export class PageMasterScope extends adapt.expr.LexicalScope {
+export class PageMasterScope extends expr.LexicalScope {
   pageMaster: any;
 
   private constructor(scope: expr.LexicalScope, pageMaster: PageMaster) {
     this.pageMaster = pageMaster;
     const self = this;
-    expr.LexicalScope.call(this, scope, function(qualifiedName, isFunc) {
+    super(scope, function(qualifiedName, isFunc) {
       const r = qualifiedName.match(/^([^.]+)\.([^.]+)$/);
       if (r) {
         const key = self.pageMaster.keyMap[r[1]];
@@ -130,12 +130,11 @@ export class PageMasterScope extends adapt.expr.LexicalScope {
     });
   }
 }
-goog.inherits(PageMasterScope, expr.LexicalScope);
 
 /**
  * Represent a page-master rule
  */
-export class PageMaster extends adapt.pm.PageBox {
+export class PageMaster extends PageBox {
   pageMaster: any;
   keyMap: {[key: string]: string} = {};
 
@@ -151,7 +150,7 @@ export class PageMaster extends adapt.pm.PageBox {
     } else {
       pageMasterScope = new PageMasterScope(scope, this);
     }
-    PageBox.call(this, pageMasterScope, name, pseudoName, classes, parent);
+    super(pageMasterScope, name, pseudoName, classes, parent);
     this.pageMaster = this;
     this.specified['width'] = new csscasc.CascadeValue(css.fullWidth, 0);
     this.specified['height'] = new csscasc.CascadeValue(css.fullHeight, 0);
@@ -190,7 +189,7 @@ export class PageMaster extends adapt.pm.PageBox {
   /**
    * Point the pageMaster reference in the PageMasterScope to the current page
    * master. This is needed when a page master is cloned and shares a common
-   * scope with the original page master. Since every adapt.expr.Val which the
+   * scope with the original page master. Since every expr.Val which the
    * page master holds has a reference to the scope and uses it for variable
    * resolution, this reference must be updated properly before the page master
    * instance is used.
@@ -199,18 +198,17 @@ export class PageMaster extends adapt.pm.PageBox {
     this.scope.pageMaster = this;
   }
 }
-goog.inherits(PageMaster, PageBox);
 
 /**
  * Represent a partition-group rule
  */
-export class PartitionGroup extends adapt.pm.PageBox {
+export class PartitionGroup extends PageBox {
   pageMaster: any;
 
   constructor(
       scope: expr.LexicalScope, name: string|null, pseudoName: string|null,
       classes: string[], parent: PageBox) {
-    PageBox.call(this, scope, name, pseudoName, classes, parent);
+    super(scope, name, pseudoName, classes, parent);
     this.pageMaster = parent.pageMaster;
     if (name) {
       this.pageMaster.keyMap[name] = this.key;
@@ -237,18 +235,17 @@ export class PartitionGroup extends adapt.pm.PageBox {
     return cloned;
   }
 }
-goog.inherits(PartitionGroup, PageBox);
 
 /**
  * Represent a partition rule
  */
-export class Partition extends adapt.pm.PageBox {
+export class Partition extends PageBox {
   pageMaster: any;
 
   constructor(
       scope: expr.LexicalScope, name: string|null, pseudoName: string|null,
       classes: string[], parent: PageBox) {
-    PageBox.call(this, scope, name, pseudoName, classes, parent);
+    super(scope, name, pseudoName, classes, parent);
     this.pageMaster = parent.pageMaster;
     if (name) {
       this.pageMaster.keyMap[name] = this.key;
@@ -274,7 +271,6 @@ export class Partition extends adapt.pm.PageBox {
     return cloned;
   }
 }
-goog.inherits(Partition, PageBox);
 
 //---------------------------- Instance --------------------------------
 
@@ -365,7 +361,7 @@ export interface InstanceHolder {
 
 export class PageBoxInstance {
   /**
-   * cascaded styles, geometric ones converted to adapt.css.Expr
+   * cascaded styles, geometric ones converted to css.Expr
    */
   protected cascaded: any = ({} as csscasc.ElementStyle);
   protected style: any = ({} as {[key: string]: css.Val});
@@ -863,7 +859,7 @@ export class PageBoxInstance {
   getProp(context: expr.Context, name: string): css.Val {
     let val = this.style[name];
     if (val) {
-      val = adapt.cssparse.evaluateCSSToCSS(context, val, name);
+      val = cssparse.evaluateCSSToCSS(context, val, name);
     }
     return val;
   }
@@ -871,7 +867,7 @@ export class PageBoxInstance {
   getPropAsNumber(context: expr.Context, name: string): number {
     let val = this.style[name];
     if (val) {
-      val = adapt.cssparse.evaluateCSSToCSS(context, val, name);
+      val = cssparse.evaluateCSSToCSS(context, val, name);
     }
     return css.toNumber(val, context);
   }
@@ -1323,16 +1319,16 @@ export const delayedProperties = ['transform', 'transform-origin'];
 
 export const userAgentPageMasterPseudo = 'background-host';
 
-export class RootPageBoxInstance extends adapt.pm.PageBoxInstance {
+export class RootPageBoxInstance extends PageBoxInstance {
   constructor(pageBox: RootPageBox) {
-    PageBoxInstance.call(this, null, pageBox);
+    super(null, pageBox);
   }
 
   /**
    * @override
    */
   applyCascadeAndInit(cascade, docElementStyle) {
-    PageBoxInstance.prototype.applyCascadeAndInit.call(
+    super.applyCascadeAndInit(
         this, cascade, docElementStyle);
 
     // Sort page masters using order and specificity.
@@ -1343,13 +1339,12 @@ export class RootPageBoxInstance extends adapt.pm.PageBoxInstance {
                 a.pageBox.index - b.pageBox.index);
   }
 }
-goog.inherits(RootPageBoxInstance, PageBoxInstance);
 
-export class PageMasterInstance extends adapt.pm.PageBoxInstance {
+export class PageMasterInstance extends PageBoxInstance {
   pageMasterInstance: any;
 
   constructor(parentInstance: PageBoxInstance, pageBox: PageBox) {
-    PageBoxInstance.call(this, parentInstance, pageBox);
+    super(parentInstance, pageBox);
     this.pageMasterInstance = this;
   }
 
@@ -1372,23 +1367,21 @@ export class PageMasterInstance extends adapt.pm.PageBoxInstance {
       context: expr.Context, page: vtree.Page,
       clientLayout: vtree.ClientLayout) {}
 }
-goog.inherits(PageMasterInstance, PageBoxInstance);
 
-export class PartitionGroupInstance extends adapt.pm.PageBoxInstance {
+export class PartitionGroupInstance extends PageBoxInstance {
   pageMasterInstance: any;
 
   constructor(parentInstance: PageBoxInstance, pageBox: PageBox) {
-    PageBoxInstance.call(this, parentInstance, pageBox);
+    super(parentInstance, pageBox);
     this.pageMasterInstance = parentInstance.pageMasterInstance;
   }
 }
-goog.inherits(PartitionGroupInstance, PageBoxInstance);
 
-export class PartitionInstance extends adapt.pm.PageBoxInstance {
+export class PartitionInstance extends PageBoxInstance {
   pageMasterInstance: any;
 
   constructor(parentInstance: PageBoxInstance, pageBox: PageBox) {
-    PageBoxInstance.call(this, parentInstance, pageBox);
+    super(parentInstance, pageBox);
     this.pageMasterInstance = parentInstance.pageMasterInstance;
   }
 
@@ -1452,15 +1445,14 @@ export class PartitionInstance extends adapt.pm.PageBoxInstance {
     base.setCSSProperty(container.element, 'overflow', 'hidden');
 
     // default value
-    PageBoxInstance.prototype.prepareContainer.call(
-        this, context, container, delayedItems, docFaces, clientLayout);
+    super.prepareContainer(
+        context, container, delayedItems, docFaces, clientLayout);
   }
 }
-goog.inherits(PartitionInstance, PageBoxInstance);
 
 //--------------------- parsing -----------------------
 export class PageBoxParserHandler extends
-    adapt.cssparse.SlaveParserHandler implements PropertyReceiver {
+    cssparse.SlaveParserHandler implements PropertyReceiver {
   constructor(
       scope: expr.LexicalScope, owner: DispatchParserHandler,
       public readonly target: PageBox,
@@ -1496,25 +1488,24 @@ export class PageBoxParserHandler extends
   simpleProperty(name, value, important) {
     this.target.specified[name] = new csscasc.CascadeValue(
         value,
-        important ? adapt.cssparse.SPECIFICITY_STYLE :
-                    adapt.cssparse.SPECIFICITY_STYLE_IMPORTANT);
+        important ? cssparse.SPECIFICITY_STYLE :
+                    cssparse.SPECIFICITY_STYLE_IMPORTANT);
   }
 }
 
-export class PartitionParserHandler extends adapt.pm.PageBoxParserHandler {
+export class PartitionParserHandler extends PageBoxParserHandler {
   constructor(
       scope: expr.LexicalScope, owner: DispatchParserHandler, target: Partition,
       validatorSet: ValidatorSet) {
-    PageBoxParserHandler.call(this, scope, owner, target, validatorSet);
+    super(scope, owner, target, validatorSet);
   }
 }
-goog.inherits(PartitionParserHandler, PageBoxParserHandler);
 
-export class PartitionGroupParserHandler extends adapt.pm.PageBoxParserHandler {
+export class PartitionGroupParserHandler extends PageBoxParserHandler {
   constructor(
       scope: expr.LexicalScope, owner: DispatchParserHandler,
       target: PartitionGroup, validatorSet: ValidatorSet) {
-    PageBoxParserHandler.call(this, scope, owner, target, validatorSet);
+    super(scope, owner, target, validatorSet);
     target.specified['width'] = new csscasc.CascadeValue(css.hundredPercent, 0);
     target.specified['height'] =
         new csscasc.CascadeValue(css.hundredPercent, 0);
@@ -1542,13 +1533,12 @@ export class PartitionGroupParserHandler extends adapt.pm.PageBoxParserHandler {
     this.owner.pushHandler(handler);
   }
 }
-goog.inherits(PartitionGroupParserHandler, PageBoxParserHandler);
 
-export class PageMasterParserHandler extends adapt.pm.PageBoxParserHandler {
+export class PageMasterParserHandler extends PageBoxParserHandler {
   constructor(
       scope: expr.LexicalScope, owner: DispatchParserHandler,
       target: PageMaster, validatorSet: ValidatorSet) {
-    PageBoxParserHandler.call(this, scope, owner, target, validatorSet);
+    super(scope, owner, target, validatorSet);
   }
 
   /**
@@ -1573,4 +1563,3 @@ export class PageMasterParserHandler extends adapt.pm.PageBoxParserHandler {
     this.owner.pushHandler(handler);
   }
 }
-goog.inherits(PageMasterParserHandler, PageBoxParserHandler);

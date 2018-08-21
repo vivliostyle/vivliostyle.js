@@ -20,6 +20,7 @@
 import * as logging from '../vivliostyle/logging';
 
 import {JSON} from './base';
+import * as base from './base';
 import * as task from './task';
 import {Fetcher} from './taskutil';
 import {XMLDocHolder} from './xmldoc';
@@ -145,7 +146,7 @@ export const makeBlob =
     };
 
 /**
- * @return adapt.task.Result.<ArrayBuffer>
+ * @return task.Result.<ArrayBuffer>
  */
 export const readBlob = (blob: Blob): any => {
   const frame: task.Frame<ArrayBuffer> = task.newFrame('readBlob');
@@ -185,7 +186,7 @@ export class ResourceStore {
    */
   load(url: string, opt_required?: boolean, opt_message?: string):
       task.Result<Resource> {
-    url = adapt.base.stripFragment(url);
+    url = base.stripFragment(url);
     const resource = this.resources[url];
     if (typeof resource != 'undefined') {
       return task.newResult(resource);
@@ -216,7 +217,7 @@ export class ResourceStore {
    */
   fetch(url: string, opt_required?: boolean, opt_message?: string):
       Fetcher<Resource> {
-    url = adapt.base.stripFragment(url);
+    url = base.stripFragment(url);
     const resource = this.resources[url];
     if (resource) {
       return null;
@@ -224,7 +225,7 @@ export class ResourceStore {
     let fetcher = this.fetchers[url];
     if (!fetcher) {
       const self = this;
-      fetcher = new adapt.taskutil.Fetcher(
+      fetcher = new Fetcher(
           () => self.fetchInner(url, opt_required, opt_message),
           `Fetch ${url}`);
       self.fetchers[url] = fetcher;
@@ -234,11 +235,11 @@ export class ResourceStore {
   }
 
   get(url: string): XMLDocHolder {
-    return this.resources[adapt.base.stripFragment(url)];
+    return this.resources[base.stripFragment(url)];
   }
 
   delete(url: string) {
-    delete this.resources[adapt.base.stripFragment(url)];
+    delete this.resources[base.stripFragment(url)];
   }
 }
 type JSONStore = ResourceStore<JSON>;
@@ -248,7 +249,7 @@ export {JSONStore};
 export const parseJSONResource =
     (response: Response, store: JSONStore): task.Result<JSON> => {
       const text = response.responseText;
-      return task.newResult(text ? adapt.base.stringToJSON(text) : null);
+      return task.newResult(text ? base.stringToJSON(text) : null);
     };
 
 /**

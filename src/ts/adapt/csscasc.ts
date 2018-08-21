@@ -20,10 +20,13 @@
 import * as logging from '../vivliostyle/logging';
 import * as plugin from '../vivliostyle/plugin';
 import {Matcher} from '../vivliostyle/selectors';
+import * as selectors from '../vivliostyle/selectors';
 
+import * as base from './base';
 import * as css from './css';
 import * as cssparse from './cssparse';
 import * as cssprop from './cssprop';
+import * as csstok from './csstok';
 import * as cssvalid from './cssvalid';
 import * as expr from './expr';
 import * as task from './task';
@@ -261,10 +264,10 @@ export class CascadeValue {
  * Internal subclass of CascadeValue. Should never be seen outside of the
  * cascade engine.
  */
-export class ConditionalCascadeValue extends adapt.csscasc.CascadeValue {
+export class ConditionalCascadeValue extends CascadeValue {
   constructor(
       value: css.Val, priority: number, public readonly condition: expr.Val) {
-    CascadeValue.call(this, value, priority);
+    super(value, priority);
   }
 
   /**
@@ -300,7 +303,6 @@ export class ConditionalCascadeValue extends adapt.csscasc.CascadeValue {
     return !!this.condition.evaluate(context);
   }
 }
-goog.inherits(ConditionalCascadeValue, CascadeValue);
 
 /**
  * @param tv current value (cannot be conditional)
@@ -458,13 +460,13 @@ export const chainActions =
       return action;
     };
 
-export class InheritanceVisitor extends adapt.css.FilterVisitor {
+export class InheritanceVisitor extends css.FilterVisitor {
   propName: string = '';
 
   constructor(
       public readonly props: ElementStyle,
       public readonly context: expr.Context) {
-    css.Visitor.call(this);
+    super();
   }
 
   setPropName(name: string): void {
@@ -517,7 +519,6 @@ export class InheritanceVisitor extends adapt.css.FilterVisitor {
     return expr;
   }
 }
-goog.inherits(InheritanceVisitor, css.FilterVisitor);
 
 export const convertFontRelativeLengthToPx =
     (numeric: css.Numeric, baseFontSize: number,
@@ -571,9 +572,9 @@ export class CascadeAction {
   }
 }
 
-export class ConditionItemAction extends adapt.csscasc.CascadeAction {
+export class ConditionItemAction extends CascadeAction {
   constructor(public readonly conditionItem: ConditionItem) {
-    CascadeAction.call(this);
+    super();
   }
 
   /**
@@ -584,11 +585,10 @@ export class ConditionItemAction extends adapt.csscasc.CascadeAction {
         this.conditionItem.fresh(cascadeInstance));
   }
 }
-goog.inherits(ConditionItemAction, CascadeAction);
 
-export class CompoundAction extends adapt.csscasc.CascadeAction {
+export class CompoundAction extends CascadeAction {
   constructor(public readonly list: CascadeAction[]) {
-    CascadeAction.call(this);
+    super();
   }
 
   /**
@@ -615,15 +615,14 @@ export class CompoundAction extends adapt.csscasc.CascadeAction {
     return new CompoundAction([].concat(this.list));
   }
 }
-goog.inherits(CompoundAction, CascadeAction);
 
-export class ApplyRuleAction extends adapt.csscasc.CascadeAction {
+export class ApplyRuleAction extends CascadeAction {
   constructor(
       public readonly style: ElementStyle, public readonly specificity: number,
       public readonly pseudoelement: string|null,
       public readonly regionId: string|null,
       public readonly viewConditionId: string|null) {
-    CascadeAction.call(this);
+    super();
   }
 
   /**
@@ -636,13 +635,12 @@ export class ApplyRuleAction extends adapt.csscasc.CascadeAction {
         cascadeInstance.buildViewConditionMatcher(this.viewConditionId));
   }
 }
-goog.inherits(ApplyRuleAction, CascadeAction);
 
-export class ChainedAction extends adapt.csscasc.CascadeAction {
+export class ChainedAction extends CascadeAction {
   chained: CascadeAction = null;
 
   constructor() {
-    CascadeAction.call(this);
+    super();
   }
 
   /**
@@ -658,11 +656,10 @@ export class ChainedAction extends adapt.csscasc.CascadeAction {
   // cannot be made primary
   false
 }
-goog.inherits(ChainedAction, CascadeAction);
 
-export class CheckClassAction extends adapt.csscasc.ChainedAction {
+export class CheckClassAction extends ChainedAction {
   constructor(public readonly className: string) {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -691,11 +688,10 @@ export class CheckClassAction extends adapt.csscasc.ChainedAction {
     return true;
   }
 }
-goog.inherits(CheckClassAction, ChainedAction);
 
-export class CheckIdAction extends adapt.csscasc.ChainedAction {
+export class CheckIdAction extends ChainedAction {
   constructor(public readonly id: string) {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -725,11 +721,10 @@ export class CheckIdAction extends adapt.csscasc.ChainedAction {
     return true;
   }
 }
-goog.inherits(CheckIdAction, ChainedAction);
 
-export class CheckLocalNameAction extends adapt.csscasc.ChainedAction {
+export class CheckLocalNameAction extends ChainedAction {
   constructor(public readonly localName: string) {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -758,11 +753,10 @@ export class CheckLocalNameAction extends adapt.csscasc.ChainedAction {
     return true;
   }
 }
-goog.inherits(CheckLocalNameAction, ChainedAction);
 
-export class CheckNSTagAction extends adapt.csscasc.ChainedAction {
+export class CheckNSTagAction extends ChainedAction {
   constructor(public readonly ns: string, public readonly localName: string) {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -798,11 +792,10 @@ export class CheckNSTagAction extends adapt.csscasc.ChainedAction {
     return true;
   }
 }
-goog.inherits(CheckNSTagAction, ChainedAction);
 
-export class CheckTargetEpubTypeAction extends adapt.csscasc.ChainedAction {
+export class CheckTargetEpubTypeAction extends ChainedAction {
   constructor(public readonly epubTypePatt: RegExp) {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -816,7 +809,7 @@ export class CheckTargetEpubTypeAction extends adapt.csscasc.ChainedAction {
         const id = href.substring(1);
         const target = elem.ownerDocument.getElementById(id);
         if (target) {
-          const epubType = target.getAttributeNS(adapt.base.NS.epub, 'type');
+          const epubType = target.getAttributeNS(base.NS.epub, 'type');
           if (epubType && epubType.match(this.epubTypePatt)) {
             this.chained.apply(cascadeInstance);
           }
@@ -825,11 +818,10 @@ export class CheckTargetEpubTypeAction extends adapt.csscasc.ChainedAction {
     }
   }
 }
-goog.inherits(CheckTargetEpubTypeAction, ChainedAction);
 
-export class CheckNamespaceAction extends adapt.csscasc.ChainedAction {
+export class CheckNamespaceAction extends ChainedAction {
   constructor(public readonly ns: string) {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -841,11 +833,10 @@ export class CheckNamespaceAction extends adapt.csscasc.ChainedAction {
     }
   }
 }
-goog.inherits(CheckNamespaceAction, ChainedAction);
 
-export class CheckAttributePresentAction extends adapt.csscasc.ChainedAction {
+export class CheckAttributePresentAction extends ChainedAction {
   constructor(public readonly ns: string, public readonly name: string) {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -858,13 +849,12 @@ export class CheckAttributePresentAction extends adapt.csscasc.ChainedAction {
     }
   }
 }
-goog.inherits(CheckAttributePresentAction, ChainedAction);
 
-export class CheckAttributeEqAction extends adapt.csscasc.ChainedAction {
+export class CheckAttributeEqAction extends ChainedAction {
   constructor(
       public readonly ns: string, public readonly name: string,
       public readonly value: string) {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -882,7 +872,7 @@ export class CheckAttributeEqAction extends adapt.csscasc.ChainedAction {
    * @override
    */
   getPriority() {
-    if (this.name == 'type' && this.ns == adapt.base.NS.epub) {
+    if (this.name == 'type' && this.ns == base.NS.epub) {
       return 9;
     }
 
@@ -894,7 +884,7 @@ export class CheckAttributeEqAction extends adapt.csscasc.ChainedAction {
    * @override
    */
   makePrimary(cascade) {
-    if (this.name == 'type' && this.ns == adapt.base.NS.epub) {
+    if (this.name == 'type' && this.ns == base.NS.epub) {
       if (this.chained) {
         cascade.insertInTable(cascade.epubtypes, this.value, this.chained);
       }
@@ -903,11 +893,10 @@ export class CheckAttributeEqAction extends adapt.csscasc.ChainedAction {
     return false;
   }
 }
-goog.inherits(CheckAttributeEqAction, ChainedAction);
 
-export class CheckNamespaceSupportedAction extends adapt.csscasc.ChainedAction {
+export class CheckNamespaceSupportedAction extends ChainedAction {
   constructor(public readonly ns: string, public readonly name: string) {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -933,13 +922,12 @@ export class CheckNamespaceSupportedAction extends adapt.csscasc.ChainedAction {
    */
   makePrimary(cascade) false
 }
-goog.inherits(CheckNamespaceSupportedAction, ChainedAction);
 
-export class CheckAttributeRegExpAction extends adapt.csscasc.ChainedAction {
+export class CheckAttributeRegExpAction extends ChainedAction {
   constructor(
       public readonly ns: string, public readonly name: string,
       public readonly regexp: RegExp) {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -955,11 +943,10 @@ export class CheckAttributeRegExpAction extends adapt.csscasc.ChainedAction {
     }
   }
 }
-goog.inherits(CheckAttributeRegExpAction, ChainedAction);
 
-export class CheckLangAction extends adapt.csscasc.ChainedAction {
+export class CheckLangAction extends ChainedAction {
   constructor(public readonly langRegExp: RegExp) {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -971,11 +958,10 @@ export class CheckLangAction extends adapt.csscasc.ChainedAction {
     }
   }
 }
-goog.inherits(CheckLangAction, ChainedAction);
 
-export class IsFirstAction extends adapt.csscasc.ChainedAction {
+export class IsFirstAction extends ChainedAction {
   constructor() {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -992,11 +978,10 @@ export class IsFirstAction extends adapt.csscasc.ChainedAction {
    */
   getPriority() 6
 }
-goog.inherits(IsFirstAction, ChainedAction);
 
-export class IsRootAction extends adapt.csscasc.ChainedAction {
+export class IsRootAction extends ChainedAction {
   constructor() {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -1015,11 +1000,10 @@ export class IsRootAction extends adapt.csscasc.ChainedAction {
   // :root is the first thing to check
   12
 }
-goog.inherits(IsRootAction, ChainedAction);
 
-export class IsNthAction extends adapt.csscasc.ChainedAction {
+export class IsNthAction extends ChainedAction {
   private constructor(public readonly a: number, public readonly b: number) {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -1030,7 +1014,6 @@ export class IsNthAction extends adapt.csscasc.ChainedAction {
     return matchANPlusB(order, this.a, this.b);
   }
 }
-goog.inherits(IsNthAction, ChainedAction);
 
 /**
  * Checkes whether given order can be represented as an+b with a non-negative
@@ -1045,9 +1028,9 @@ export const matchANPlusB = (order: number, a: number, b: number): boolean => {
   }
 };
 
-export class IsNthSiblingAction extends adapt.csscasc.IsNthAction {
+export class IsNthSiblingAction extends IsNthAction {
   constructor(a: number, b: number) {
-    IsNthAction.call(this, a, b);
+    super(a, b);
   }
 
   /**
@@ -1064,11 +1047,10 @@ export class IsNthSiblingAction extends adapt.csscasc.IsNthAction {
    */
   getPriority() 5
 }
-goog.inherits(IsNthSiblingAction, IsNthAction);
 
-export class IsNthSiblingOfTypeAction extends adapt.csscasc.IsNthAction {
+export class IsNthSiblingOfTypeAction extends IsNthAction {
   constructor(a: number, b: number) {
-    IsNthAction.call(this, a, b);
+    super(a, b);
   }
 
   /**
@@ -1090,11 +1072,10 @@ export class IsNthSiblingOfTypeAction extends adapt.csscasc.IsNthAction {
    */
   getPriority() 5
 }
-goog.inherits(IsNthSiblingOfTypeAction, IsNthAction);
 
-export class IsNthLastSiblingAction extends adapt.csscasc.IsNthAction {
+export class IsNthLastSiblingAction extends IsNthAction {
   constructor(a: number, b: number) {
-    IsNthAction.call(this, a, b);
+    super(a, b);
   }
 
   /**
@@ -1117,11 +1098,10 @@ export class IsNthLastSiblingAction extends adapt.csscasc.IsNthAction {
    */
   getPriority() 4
 }
-goog.inherits(IsNthLastSiblingAction, IsNthAction);
 
-export class IsNthLastSiblingOfTypeAction extends adapt.csscasc.IsNthAction {
+export class IsNthLastSiblingOfTypeAction extends IsNthAction {
   constructor(a: number, b: number) {
-    IsNthAction.call(this, a, b);
+    super(a, b);
   }
 
   /**
@@ -1152,11 +1132,10 @@ export class IsNthLastSiblingOfTypeAction extends adapt.csscasc.IsNthAction {
    */
   getPriority() 4
 }
-goog.inherits(IsNthLastSiblingOfTypeAction, IsNthAction);
 
-export class IsEmptyAction extends adapt.csscasc.ChainedAction {
+export class IsEmptyAction extends ChainedAction {
   constructor() {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -1183,11 +1162,10 @@ export class IsEmptyAction extends adapt.csscasc.ChainedAction {
    */
   getPriority() 4
 }
-goog.inherits(IsEmptyAction, ChainedAction);
 
-export class IsEnabledAction extends adapt.csscasc.ChainedAction {
+export class IsEnabledAction extends ChainedAction {
   constructor() {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -1205,11 +1183,10 @@ export class IsEnabledAction extends adapt.csscasc.ChainedAction {
    */
   getPriority() 5
 }
-goog.inherits(IsEnabledAction, ChainedAction);
 
-export class IsDisabledAction extends adapt.csscasc.ChainedAction {
+export class IsDisabledAction extends ChainedAction {
   constructor() {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -1227,11 +1204,10 @@ export class IsDisabledAction extends adapt.csscasc.ChainedAction {
    */
   getPriority() 5
 }
-goog.inherits(IsDisabledAction, ChainedAction);
 
-export class IsCheckedAction extends adapt.csscasc.ChainedAction {
+export class IsCheckedAction extends ChainedAction {
   constructor() {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -1249,11 +1225,10 @@ export class IsCheckedAction extends adapt.csscasc.ChainedAction {
    */
   getPriority() 5
 }
-goog.inherits(IsCheckedAction, ChainedAction);
 
-export class CheckConditionAction extends adapt.csscasc.ChainedAction {
+export class CheckConditionAction extends ChainedAction {
   constructor(public readonly condition: string) {
-    ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -1275,13 +1250,12 @@ export class CheckConditionAction extends adapt.csscasc.ChainedAction {
    */
   getPriority() 5
 }
-goog.inherits(CheckConditionAction, ChainedAction);
 
-export class CheckAppliedAction extends adapt.csscasc.CascadeAction {
+export class CheckAppliedAction extends CascadeAction {
   applied: any = false;
 
   constructor() {
-    CascadeAction.call(this);
+    super();
   }
 
   /**
@@ -1300,14 +1274,13 @@ export class CheckAppliedAction extends adapt.csscasc.CascadeAction {
     return cloned;
   }
 }
-goog.inherits(CheckAppliedAction, CascadeAction);
 
-export class NegateActionsSet extends adapt.csscasc.ChainedAction {
+export class NegateActionsSet extends ChainedAction {
   checkAppliedAction: any;
   firstAction: any;
 
   constructor(list: ChainedAction[]) {
-    ChainedAction.call(this);
+    super();
     this.checkAppliedAction = new CheckAppliedAction();
     this.firstAction = chainActions(list, this.checkAppliedAction);
   }
@@ -1330,7 +1303,6 @@ export class NegateActionsSet extends adapt.csscasc.ChainedAction {
     return this.firstAction.getPriority();
   }
 }
-goog.inherits(NegateActionsSet, ChainedAction);
 
 /**
  * An object that is notified as elements are pushed and popped and typically
@@ -1374,10 +1346,10 @@ export class AbstractConditionItem {
 }
 
 export class DescendantConditionItem extends
-    adapt.csscasc.AbstractConditionItem implements ConditionItem {
+    AbstractConditionItem implements ConditionItem {
   constructor(
       condition: string, viewConditionId: string|null, viewCondition: Matcher) {
-    AbstractConditionItem.call(this, condition, viewConditionId, viewCondition);
+    super(condition, viewConditionId, viewCondition);
   }
 
   /**
@@ -1410,13 +1382,12 @@ export class DescendantConditionItem extends
     return false;
   }
 }
-goog.inherits(DescendantConditionItem, AbstractConditionItem);
 
 export class ChildConditionItem extends
-    adapt.csscasc.AbstractConditionItem implements ConditionItem {
+    AbstractConditionItem implements ConditionItem {
   constructor(
       condition: string, viewConditionId: string|null, viewCondition: Matcher) {
-    AbstractConditionItem.call(this, condition, viewConditionId, viewCondition);
+    super(condition, viewConditionId, viewCondition);
   }
 
   /**
@@ -1457,15 +1428,14 @@ export class ChildConditionItem extends
     return false;
   }
 }
-goog.inherits(ChildConditionItem, AbstractConditionItem);
 
 export class AdjacentSiblingConditionItem extends
-    adapt.csscasc.AbstractConditionItem implements ConditionItem {
+    AbstractConditionItem implements ConditionItem {
   fired: boolean = false;
 
   constructor(
       condition: string, viewConditionId: string|null, viewCondition: Matcher) {
-    AbstractConditionItem.call(this, condition, viewConditionId, viewCondition);
+    super(condition, viewConditionId, viewCondition);
   }
 
   /**
@@ -1504,15 +1474,14 @@ export class AdjacentSiblingConditionItem extends
     return false;
   }
 }
-goog.inherits(AdjacentSiblingConditionItem, AbstractConditionItem);
 
 export class FollowingSiblingConditionItem extends
-    adapt.csscasc.AbstractConditionItem implements ConditionItem {
+    AbstractConditionItem implements ConditionItem {
   fired: boolean = false;
 
   constructor(
       condition: string, viewConditionId: string|null, viewCondition: Matcher) {
-    AbstractConditionItem.call(this, condition, viewConditionId, viewCondition);
+    super(condition, viewConditionId, viewCondition);
   }
 
   /**
@@ -1563,7 +1532,6 @@ export class FollowingSiblingConditionItem extends
     return false;
   }
 }
-goog.inherits(FollowingSiblingConditionItem, AbstractConditionItem);
 
 /**
  * Not a true condition item, this class manages proper handling of "after"
@@ -1671,7 +1639,7 @@ export interface CounterListener {
 
 export interface CounterResolver {
   /**
-   * Returns an adapt.expr.Val, whose value is calculated at the layout time by
+   * Returns an expr.Val, whose value is calculated at the layout time by
    * retrieving the innermost page-based counter (null if it does not exist) by
    * its name and formatting the value into a string.
    * @param name Name of the page-based counter to be retrieved
@@ -1681,7 +1649,7 @@ export interface CounterResolver {
       expr.Val;
 
   /**
-   * Returns an adapt.expr.Val, whose value is calculated at the layout time by
+   * Returns an expr.Val, whose value is calculated at the layout time by
    * retrieving the page-based counters by its name and formatting the values
    * into a string.
    * @param name Name of the page-based counters to be retrieved
@@ -1698,11 +1666,11 @@ export interface CounterResolver {
       url: string, name: string, format: (p1: number[]) => string): expr.Val;
 }
 
-export class AttrValueFilterVisitor extends adapt.css.FilterVisitor {
+export class AttrValueFilterVisitor extends css.FilterVisitor {
   element: any;
 
   constructor(element: Element) {
-    css.FilterVisitor.call(this);
+    super();
     this.element = element;
   }
 
@@ -1731,7 +1699,7 @@ export class AttrValueFilterVisitor extends adapt.css.FilterVisitor {
    */
   visitFunc(func) {
     if (func.name !== 'attr') {
-      return css.FilterVisitor.prototype.visitFunc.call(this, func);
+      return super.visitFunc(func);
     }
     let type = 'string';
     let attributeName = null;
@@ -1757,16 +1725,15 @@ export class AttrValueFilterVisitor extends adapt.css.FilterVisitor {
     return defaultValue;
   }
 }
-goog.inherits(AttrValueFilterVisitor, css.FilterVisitor);
 
-export class ContentPropVisitor extends adapt.css.FilterVisitor {
+export class ContentPropVisitor extends css.FilterVisitor {
   cascade: any;
   element: any;
 
   constructor(
       cascade: CascadeInstance, element: Element,
       public readonly counterResolver: CounterResolver) {
-    css.FilterVisitor.call(this);
+    super();
     this.cascade = cascade;
     this.element = element;
   }
@@ -1870,7 +1837,7 @@ export class ContentPropVisitor extends adapt.css.FilterVisitor {
     const separator = values[1].stringValue();
     const type = values.length > 2 ? values[2].stringValue() : 'decimal';
     const arr = this.cascade.counters[counterName];
-    const sb = new adapt.base.StringBuffer();
+    const sb = new base.StringBuffer();
     if (arr && arr.length) {
       for (let i = 0; i < arr.length; i++) {
         if (i > 0) {
@@ -1971,7 +1938,6 @@ export class ContentPropVisitor extends adapt.css.FilterVisitor {
     return new css.Str('');
   }
 }
-goog.inherits(ContentPropVisitor, css.FilterVisitor);
 
 export const roman = (num) => {
   if (num <= 0 || num != Math.round(num) || num > 3999) {
@@ -2189,7 +2155,7 @@ export const chineseCounter = (num: number, numbering: ChineseNumbering) => {
   if (num == 0) {
     return numbering.digits.charAt(0);
   }
-  const res = new adapt.base.StringBuffer();
+  const res = new base.StringBuffer();
   if (num < 0) {
     res.append(numbering.negative);
     num = -num;
@@ -2372,7 +2338,7 @@ export class CascadeInstance {
   }
 
   buildViewConditionMatcher(viewConditionId: string|null): Matcher {
-    const matcherBuilder = vivliostyle.selectors.MatcherBuilder.instance;
+    const matcherBuilder = selectors.MatcherBuilder.instance;
     let matcher = null;
     if (viewConditionId) {
       goog.asserts.assert(this.currentElementOffset);
@@ -2470,7 +2436,7 @@ export class CascadeInstance {
       }
     }
     if ((this.currentLocalName == 'ol' || this.currentLocalName == 'ul') &&
-        this.currentNamespace == adapt.base.NS.XHTML) {
+        this.currentNamespace == base.NS.XHTML) {
       if (!resetMap) {
         resetMap = {};
       }
@@ -2561,26 +2527,26 @@ export class CascadeInstance {
       this.currentNSTag = '';
     }
     this.currentId = element.getAttribute('id');
-    this.currentXmlId = element.getAttributeNS(adapt.base.NS.XML, 'id');
+    this.currentXmlId = element.getAttributeNS(base.NS.XML, 'id');
     const classes = element.getAttribute('class');
     if (classes) {
       this.currentClassNames = classes.split(/\s+/);
     } else {
       this.currentClassNames = EMPTY;
     }
-    const types = element.getAttributeNS(adapt.base.NS.epub, 'type');
+    const types = element.getAttributeNS(base.NS.epub, 'type');
     if (types) {
       this.currentEpubTypes = types.split(/\s+/);
     } else {
       this.currentEpubTypes = EMPTY;
     }
     if (this.currentLocalName == 'style' &&
-        this.currentNamespace == adapt.base.NS.FB2) {
+        this.currentNamespace == base.NS.FB2) {
       // special case
       const className = element.getAttribute('name') || '';
       this.currentClassNames = [className];
     }
-    const lang = adapt.base.getLangAttribute(element);
+    const lang = base.getLangAttribute(element);
     if (lang) {
       this.stack[this.stack.length - 1].push(new RestoreLangItem(this.lang));
       this.lang = lang.toLowerCase();
@@ -2798,7 +2764,7 @@ export const uaBaseCascade: Cascade = null;
 
 //------------- parsing ------------
 export class CascadeParserHandler extends
-    adapt.cssparse.SlaveParserHandler implements cssvalid.PropertyReceiver {
+    cssparse.SlaveParserHandler implements cssvalid.PropertyReceiver {
   chain: ChainedAction[] = null;
   specificity: number = 0;
   elementStyle: ElementStyle = null;
@@ -2815,7 +2781,7 @@ export class CascadeParserHandler extends
       public readonly condition: expr.Val, parent: CascadeParserHandler,
       public readonly regionId: string|null,
       public readonly validatorSet: cssvalid.ValidatorSet, topLevel: boolean) {
-    cssparse.SlaveParserHandler.call(this, scope, owner, topLevel);
+    super(scope, owner, topLevel);
     this.cascade = parent ?
         parent.cascade :
         uaBaseCascade ? uaBaseCascade.clone() : new Cascade();
@@ -2909,7 +2875,7 @@ export class CascadeParserHandler extends
         if (params && params.length == 1 && typeof params[0] == 'string') {
           const value = (params[0] as string);
           const patt =
-              new RegExp(`(^|s)${adapt.base.escapeRegExp(value)}(\$|s)`);
+              new RegExp(`(^|s)${base.escapeRegExp(value)}(\$|s)`);
           this.chain.push(new CheckTargetEpubTypeAction(patt));
         } else {
           this.chain.push(new CheckConditionAction(''));
@@ -2935,7 +2901,7 @@ export class CascadeParserHandler extends
         if (params && params.length == 1 && typeof params[0] == 'string') {
           const langValue = (params[0] as string);
           this.chain.push(new CheckLangAction(new RegExp(
-              `^${adapt.base.escapeRegExp(langValue.toLowerCase())}(\$|-)`)));
+              `^${base.escapeRegExp(langValue.toLowerCase())}(\$|-)`)));
         } else {
           this.chain.push(new CheckConditionAction(''));
         }
@@ -3070,13 +3036,13 @@ export class CascadeParserHandler extends
     value = value || '';
     let action;
     switch (op) {
-      case adapt.csstok.TokenType.EOF:
+      case csstok.TokenType.EOF:
         action = new CheckAttributePresentAction(ns, name);
         break;
-      case adapt.csstok.TokenType.EQ:
+      case csstok.TokenType.EQ:
         action = new CheckAttributeEqAction(ns, name, value);
         break;
-      case adapt.csstok.TokenType.TILDE_EQ:
+      case csstok.TokenType.TILDE_EQ:
 
         // always fails
         if (!value || value.match(/\s/)) {
@@ -3084,44 +3050,44 @@ export class CascadeParserHandler extends
         } else {
           action = new CheckAttributeRegExpAction(
               ns, name,
-              new RegExp(`(^|\\s)${adapt.base.escapeRegExp(value)}(\$|\\s)`));
+              new RegExp(`(^|\\s)${base.escapeRegExp(value)}(\$|\\s)`));
         }
         break;
-      case adapt.csstok.TokenType.BAR_EQ:
+      case csstok.TokenType.BAR_EQ:
         action = new CheckAttributeRegExpAction(
-            ns, name, new RegExp(`^${adapt.base.escapeRegExp(value)}(\$|-)`));
+            ns, name, new RegExp(`^${base.escapeRegExp(value)}(\$|-)`));
         break;
-      case adapt.csstok.TokenType.HAT_EQ:
+      case csstok.TokenType.HAT_EQ:
 
         // always fails
         if (!value) {
           action = new CheckConditionAction('');
         } else {
           action = new CheckAttributeRegExpAction(
-              ns, name, new RegExp(`^${adapt.base.escapeRegExp(value)}`));
+              ns, name, new RegExp(`^${base.escapeRegExp(value)}`));
         }
         break;
-      case adapt.csstok.TokenType.DOLLAR_EQ:
+      case csstok.TokenType.DOLLAR_EQ:
 
         // always fails
         if (!value) {
           action = new CheckConditionAction('');
         } else {
           action = new CheckAttributeRegExpAction(
-              ns, name, new RegExp(`${adapt.base.escapeRegExp(value)}\$`));
+              ns, name, new RegExp(`${base.escapeRegExp(value)}\$`));
         }
         break;
-      case adapt.csstok.TokenType.STAR_EQ:
+      case csstok.TokenType.STAR_EQ:
 
         // always fails
         if (!value) {
           action = new CheckConditionAction('');
         } else {
           action = new CheckAttributeRegExpAction(
-              ns, name, new RegExp(adapt.base.escapeRegExp(value)));
+              ns, name, new RegExp(base.escapeRegExp(value)));
         }
         break;
-      case adapt.csstok.TokenType.COL_COL:
+      case csstok.TokenType.COL_COL:
         if (value == 'supported') {
           action = new CheckNamespaceSupportedAction(ns, name);
         } else {
@@ -3214,7 +3180,7 @@ export class CascadeParserHandler extends
    * @override
    */
   error(message, token) {
-    cssparse.SlaveParserHandler.prototype.error.call(this, message, token);
+    super.error(message, token);
     if (this.state == ParseState.SELECTOR) {
       this.state = ParseState.TOP;
     }
@@ -3224,7 +3190,7 @@ export class CascadeParserHandler extends
    * @override
    */
   startStylesheet(flavor) {
-    cssparse.SlaveParserHandler.prototype.startStylesheet.call(this, flavor);
+    super.startStylesheet(flavor);
     this.state = ParseState.TOP;
   }
 
@@ -3233,7 +3199,7 @@ export class CascadeParserHandler extends
    */
   startRuleBody() {
     this.finishChain();
-    cssparse.SlaveParserHandler.prototype.startRuleBody.call(this);
+    super.startRuleBody();
     if (this.state == ParseState.SELECTOR) {
       this.state = ParseState.TOP;
     }
@@ -3243,7 +3209,7 @@ export class CascadeParserHandler extends
    * @override
    */
   endRule() {
-    cssparse.SlaveParserHandler.prototype.endRule.call(this);
+    supers.endRule();
     this.insideSelectorRule = ParseState.TOP;
   }
 
@@ -3357,7 +3323,6 @@ export class CascadeParserHandler extends
     }
   }
 }
-goog.inherits(CascadeParserHandler, cssparse.SlaveParserHandler);
 
 export const nthSelectorActionClasses:
     {[key: string]: (p1: number, p2: number) => any} = {
@@ -3370,12 +3335,12 @@ export const nthSelectorActionClasses:
 export const conditionCount: number = 0;
 
 export class NotParameterParserHandler extends
-    adapt.csscasc.CascadeParserHandler {
+    CascadeParserHandler {
   parentChain: any;
 
   constructor(public readonly parent: CascadeParserHandler) {
-    CascadeParserHandler.call(
-        this, parent.scope, parent.owner, parent.condition, parent,
+    super(
+        parent.scope, parent.owner, parent.condition, parent,
         parent.regionId, parent.validatorSet, false);
     this.parentChain = parent.chain;
   }
@@ -3418,18 +3383,17 @@ export class NotParameterParserHandler extends
    * @override
    */
   error(mnemonics, token) {
-    CascadeParserHandler.prototype.error.call(this, mnemonics, token);
+    super.error(mnemonics, token);
     this.owner.popHandler();
   }
 }
-goog.inherits(NotParameterParserHandler, CascadeParserHandler);
 
 /**
  * @override
  */
-export class DefineParserHandler extends adapt.cssparse.SlaveParserHandler {
+export class DefineParserHandler extends cssparse.SlaveParserHandler {
   constructor(scope: expr.LexicalScope, owner: cssparse.DispatchParserHandler) {
-    cssparse.SlaveParserHandler.call(this, scope, owner, false);
+    super(scope, owner, false);
   }
 
   /**
@@ -3445,16 +3409,15 @@ export class DefineParserHandler extends adapt.cssparse.SlaveParserHandler {
     }
   }
 }
-goog.inherits(DefineParserHandler, cssparse.SlaveParserHandler);
 
 export class PropSetParserHandler extends
-    adapt.cssparse.SlaveParserHandler implements cssvalid.PropertyReceiver {
+    cssparse.SlaveParserHandler implements cssvalid.PropertyReceiver {
   constructor(
       scope: expr.LexicalScope, owner: cssparse.DispatchParserHandler,
       public readonly condition: expr.Val,
       public readonly elementStyle: ElementStyle,
       public readonly validatorSet: cssvalid.ValidatorSet) {
-    cssparse.SlaveParserHandler.call(this, scope, owner, false);
+    super(scope, owner, false);
   }
 
   /**
@@ -3498,17 +3461,16 @@ export class PropSetParserHandler extends
     setProp(this.elementStyle, name, av);
   }
 }
-goog.inherits(PropSetParserHandler, cssparse.SlaveParserHandler);
 
 export class PropertyParserHandler extends
-    adapt.cssparse.ErrorHandler implements cssvalid.PropertyReceiver {
+    cssparse.ErrorHandler implements cssvalid.PropertyReceiver {
   elementStyle: any = ({} as ElementStyle);
   order: number = 0;
 
   constructor(
       scope: expr.LexicalScope,
       public readonly validatorSet: cssvalid.ValidatorSet) {
-    cssparse.ErrorHandler.call(this, scope);
+    super(scope);
   }
 
   /**
@@ -3546,13 +3508,12 @@ export class PropertyParserHandler extends
     setProp(this.elementStyle, name, cascval);
   }
 }
-goog.inherits(PropertyParserHandler, cssparse.ErrorHandler);
 
 export const parseStyleAttribute =
     (scope: expr.LexicalScope, validatorSet: cssvalid.ValidatorSet,
      baseURL: string, styleAttrValue: string): ElementStyle => {
       const handler = new PropertyParserHandler(scope, validatorSet);
-      const tokenizer = new adapt.csstok.Tokenizer(styleAttrValue, handler);
+      const tokenizer = new csstok.Tokenizer(styleAttrValue, handler);
       try {
         cssparse.parseStyleAttribute(tokenizer, handler, baseURL);
       } catch (err) {
@@ -3597,11 +3558,11 @@ export const flattenCascadedStyle =
           cascMap[n] = getProp(style, n);
         }
       }
-      vivliostyle.selectors.mergeViewConditionalStyles(cascMap, context, style);
+      selectors.mergeViewConditionalStyles(cascMap, context, style);
       forEachStylesInRegion(
           style, regionIds, isFootnote, (regionId, regionStyle) => {
             mergeStyle(cascMap, regionStyle, context);
-            vivliostyle.selectors.mergeViewConditionalStyles(
+            selectors.mergeViewConditionalStyles(
                 cascMap, context, regionStyle);
           });
       return cascMap;

@@ -16,6 +16,7 @@
  *
  * @fileoverview \@page rule (CSS Paged Media) support
  */
+import * as base from '../adapt/base';
 import * as css from '../adapt/css';
 import * as csscasc from '../adapt/csscasc';
 import * as cssparse from '../adapt/cssparse';
@@ -118,7 +119,7 @@ export const resolvePageSizeAndBleed =
       // if size is auto, fit to the viewport (use default value)
       if (!size || size.value === css.ident.auto) {
       } else {
-        /** !type {!adapt.css.Val} */
+        /** !type {!css.Val} */
         const value = size.value;
         let val1;
         let val2;
@@ -241,7 +242,7 @@ export const evaluatePageSizeAndBleed =
  */
 export const createPrinterMarkSvg =
     (doc: Document, width: number, height: number): Element => {
-      const mark = doc.createElementNS(adapt.base.NS.SVG, 'svg');
+      const mark = doc.createElementNS(base.NS.SVG, 'svg');
       mark.setAttribute('width', width);
       mark.setAttribute('height', height);
       mark.style.position = 'absolute';
@@ -256,7 +257,7 @@ export const createPrinterMarkSvg =
 export const createPrinterMarkElement =
     (doc: Document, lineWidth: number, elementType?: string): Element => {
       elementType = elementType || 'polyline';
-      const line = doc.createElementNS(adapt.base.NS.SVG, elementType);
+      const line = doc.createElementNS(base.NS.SVG, elementType);
       line.setAttribute('stroke', 'black');
       line.setAttribute('stroke-width', lineWidth);
       line.setAttribute('fill', 'none');
@@ -680,7 +681,7 @@ export const marginBoxesKey: string = '_marginBoxes';
  * Represent a page master generated for @page rules
  * @param style Cascaded style for @page rules
  */
-export class PageRuleMaster extends adapt.pm.PageMaster {
+export class PageRuleMaster extends pm.PageMaster {
   private bodyPartitionKey: any;
   private pageMarginBoxes: any =
       ({} as {[key: string]: PageMarginBoxPartition});
@@ -688,8 +689,7 @@ export class PageRuleMaster extends adapt.pm.PageMaster {
   constructor(
       scope: expr.LexicalScope, parent: pm.RootPageBox,
       style: csscasc.ElementStyle) {
-    pm.PageMaster.call(
-        this, scope, null, pageRuleMasterPseudoName, [], parent, null, 0);
+    super(scope, null, pageRuleMasterPseudoName, [], parent, null, 0);
     const pageSize = resolvePageSizeAndBleed(style);
     const partition = new PageRulePartition(this.scope, this, style, pageSize);
     this.bodyPartitionKey = partition.key;
@@ -736,17 +736,16 @@ export class PageRuleMaster extends adapt.pm.PageMaster {
     return new PageRuleMasterInstance(parentInstance, this);
   }
 }
-goog.inherits(PageRuleMaster, pm.PageMaster);
 
 /**
  * Represent a partition placed in a PageRuleMaster
  * @param style Cascaded style for @page rules
  */
-export class PageRulePartition extends adapt.pm.Partition {
+export class PageRulePartition extends pm.Partition {
   constructor(
       scope: expr.LexicalScope, parent: PageRuleMaster,
       style: csscasc.ElementStyle, public readonly pageSize: PageSize) {
-    pm.Partition.call(this, scope, null, null, [], parent);
+    super(scope, null, null, [], parent);
     this.specified['z-index'] = new csscasc.CascadeValue(new css.Int(0), 0);
     this.applySpecified(style);
   }
@@ -778,16 +777,15 @@ export class PageRulePartition extends adapt.pm.Partition {
     return new PageRulePartitionInstance(parentInstance, this);
   }
 }
-goog.inherits(PageRulePartition, pm.Partition);
 
 /**
  * Represent a partition for a page-margin box
  */
-export class PageMarginBoxPartition extends adapt.pm.Partition {
+export class PageMarginBoxPartition extends pm.Partition {
   constructor(
       scope: expr.LexicalScope, parent: PageRuleMaster,
       public readonly marginBoxName: string, style: csscasc.ElementStyle) {
-    pm.Partition.call(this, scope, null, null, [], parent);
+    super(scope, null, null, [], parent);
     this.applySpecified(style);
   }
 
@@ -825,7 +823,6 @@ export class PageMarginBoxPartition extends adapt.pm.Partition {
     return new PageMarginBoxPartitionInstance(parentInstance, this);
   }
 }
-goog.inherits(PageMarginBoxPartition, pm.Partition);
 
 //---------------------------- Instance --------------------------------
 type PageAreaDimension = {
@@ -839,13 +836,13 @@ type PageAreaDimension = {
 
 export {PageAreaDimension};
 
-export class PageRuleMasterInstance extends adapt.pm.PageMasterInstance {
+export class PageRuleMasterInstance extends pm.PageMasterInstance {
   pageAreaDimension: PageAreaDimension|null = null;
   pageMarginBoxInstances: {[key: string]: PageMarginBoxPartitionInstance} = {};
 
   constructor(
       parentInstance: pm.PageBoxInstance, pageRuleMaster: PageRuleMaster) {
-    pm.PageMasterInstance.call(this, parentInstance, pageRuleMaster);
+    super(parentInstance, pageRuleMaster);
   }
 
   /**
@@ -862,8 +859,8 @@ export class PageRuleMasterInstance extends adapt.pm.PageMasterInstance {
         }
       }
     }
-    pm.PageMasterInstance.prototype.applyCascadeAndInit.call(
-        this, cascade, docElementStyle);
+    super.applyCascadeAndInit(
+        cascade, docElementStyle);
   }
 
   /**
@@ -1218,15 +1215,14 @@ export class PageRuleMasterInstance extends adapt.pm.PageMasterInstance {
    * @override
    */
   prepareContainer(context, container, page, docFaces, clientLayout) {
-    PageRuleMasterInstance.superClass_.prepareContainer.call(
-        this, context, container, page, docFaces, clientLayout);
+    super.prepareContainer(
+        context, container, page, docFaces, clientLayout);
 
     // Add an attribute to the element so that it can be refered from external
     // style sheets.
     container.element.setAttribute('data-vivliostyle-page-box', true);
   }
 }
-goog.inherits(PageRuleMasterInstance, pm.PageMasterInstance);
 
 /**
  * Interface used for parameters passed to distributeAutoMarginBoxSizes method.
@@ -1374,7 +1370,7 @@ PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam =
  * @param size The fixed size (width or height) along the variable dimension.
  */
 PageRuleMasterInstance.FixedSizeMarginBoxSizingParam =
-    class extends vivliostyle.page.PageRuleMasterInstance
+    class extends PageRuleMasterInstance
                       .SingleBoxMarginBoxSizingParam {
   private fixedSize: any;
 
@@ -1382,8 +1378,8 @@ PageRuleMasterInstance.FixedSizeMarginBoxSizingParam =
       container: vtree.Container, style: {[key: string]: css.Val},
       isHorizontal: boolean, scope: expr.LexicalScope,
       clientLayout: vtree.ClientLayout, size: number) {
-    PageRuleMasterInstance.SingleBoxMarginBoxSizingParam.call(
-        this, container, style, isHorizontal, scope, clientLayout);
+    super(
+        container, style, isHorizontal, scope, clientLayout);
     this.fixedSize = size;
   }
 
@@ -1419,11 +1415,8 @@ PageRuleMasterInstance.FixedSizeMarginBoxSizingParam =
     }
   }
 };
-goog.inherits(
-    PageRuleMasterInstance.FixedSizeMarginBoxSizingParam,
-    PageRuleMasterInstance.SingleBoxMarginBoxSizingParam);
 
-export class PageRulePartitionInstance extends adapt.pm.PartitionInstance {
+export class PageRulePartitionInstance extends pm.PartitionInstance {
   borderBoxWidth: expr.Val = null;
   borderBoxHeight: expr.Val = null;
   marginTop: expr.Val = null;
@@ -1434,7 +1427,7 @@ export class PageRulePartitionInstance extends adapt.pm.PartitionInstance {
   constructor(
       parentInstance: pm.PageBoxInstance,
       pageRulePartition: PageRulePartition) {
-    pm.PartitionInstance.call(this, parentInstance, pageRulePartition);
+    super(parentInstance, pageRulePartition);
   }
 
   /**
@@ -1449,8 +1442,8 @@ export class PageRulePartitionInstance extends adapt.pm.PartitionInstance {
         }
       }
     }
-    pm.PartitionInstance.prototype.applyCascadeAndInit.call(
-        this, cascade, docElementStyle);
+    super.applyCascadeAndInit(
+        cascade, docElementStyle);
     const pageRuleMasterInstance =
         (this.parentInstance as PageRuleMasterInstance);
     pageRuleMasterInstance.setPageAreaDimension({
@@ -1574,21 +1567,20 @@ export class PageRulePartitionInstance extends adapt.pm.PartitionInstance {
    * @override
    */
   prepareContainer(context, container, page, docFaces, clientLayout) {
-    pm.PartitionInstance.prototype.prepareContainer.call(
-        this, context, container, page, docFaces, clientLayout);
+    super.prepareContainer(
+        context, container, page, docFaces, clientLayout);
     page.pageAreaElement = (container.element as HTMLElement);
   }
 }
-goog.inherits(PageRulePartitionInstance, pm.PartitionInstance);
 
-export class PageMarginBoxPartitionInstance extends adapt.pm.PartitionInstance {
+export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
   boxInfo: PageMarginBoxInformation;
   suppressEmptyBoxGeneration: any = true;
 
   constructor(
       parentInstance: pm.PageBoxInstance,
       pageMarginBoxPartition: PageMarginBoxPartition) {
-    pm.PartitionInstance.call(this, parentInstance, pageMarginBoxPartition);
+    super(parentInstance, pageMarginBoxPartition);
     const name = pageMarginBoxPartition.marginBoxName;
     this.boxInfo = pageMarginBoxes[name];
     const pageRuleMasterInstance = (parentInstance as PageRuleMasterInstance);
@@ -1600,12 +1592,12 @@ export class PageMarginBoxPartitionInstance extends adapt.pm.PartitionInstance {
    */
   prepareContainer(context, container, page, docFaces, clientLayout) {
     this.applyVerticalAlign(context, container.element);
-    pm.PartitionInstance.prototype.prepareContainer.call(
-        this, context, container, page, docFaces, clientLayout);
+    super(
+        context, container, page, docFaces, clientLayout);
   }
 
   private applyVerticalAlign(context: expr.Context, element: Element) {
-    adapt.base.setCSSProperty(element, 'display', 'flex');
+    base.setCSSProperty(element, 'display', 'flex');
     const verticalAlign: css.Val = this.getProp(context, 'vertical-align');
     let flexAlign: string|null = null;
     if (verticalAlign === css.getName('middle')) {
@@ -1620,9 +1612,9 @@ export class PageMarginBoxPartitionInstance extends adapt.pm.PartitionInstance {
       }
     }
     if (flexAlign) {
-      adapt.base.setCSSProperty(
+      base.setCSSProperty(
           element, 'flex-flow', this.vertical ? 'row' : 'column');
-      adapt.base.setCSSProperty(element, 'justify-content', flexAlign);
+      base.setCSSProperty(element, 'justify-content', flexAlign);
     }
   }
 
@@ -1857,8 +1849,8 @@ export class PageMarginBoxPartitionInstance extends adapt.pm.PartitionInstance {
    */
   finishContainer(
       context, container, page, column, columnCount, clientLayout, docFaces) {
-    pm.PartitionInstance.prototype.finishContainer.call(
-        this, context, container, page, column, columnCount, clientLayout,
+    super(
+        context, container, page, column, columnCount, clientLayout,
         docFaces);
 
     // finishContainer is called only when the margin box is generated.
@@ -1889,7 +1881,6 @@ export class PageMarginBoxPartitionInstance extends adapt.pm.PartitionInstance {
     }
   }
 }
-goog.inherits(PageMarginBoxPartitionInstance, pm.PartitionInstance);
 
 /**
  * Dynamically generate and manage page masters corresponding to page at-rules.
@@ -2060,9 +2051,9 @@ export class PageManager {
   }
 }
 
-export class CheckPageTypeAction extends adapt.csscasc.ChainedAction {
+export class CheckPageTypeAction extends csscasc.ChainedAction {
   constructor(public readonly pageType: string) {
-    csscasc.ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -2089,11 +2080,10 @@ export class CheckPageTypeAction extends adapt.csscasc.ChainedAction {
     return true;
   }
 }
-goog.inherits(CheckPageTypeAction, csscasc.ChainedAction);
 
-export class IsFirstPageAction extends adapt.csscasc.ChainedAction {
+export class IsFirstPageAction extends csscasc.ChainedAction {
   constructor(public readonly scope: expr.LexicalScope) {
-    csscasc.ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -2111,11 +2101,10 @@ export class IsFirstPageAction extends adapt.csscasc.ChainedAction {
    */
   getPriority() 2
 }
-goog.inherits(IsFirstPageAction, csscasc.ChainedAction);
 
-export class IsLeftPageAction extends adapt.csscasc.ChainedAction {
+export class IsLeftPageAction extends csscasc.ChainedAction {
   constructor(public readonly scope: expr.LexicalScope) {
-    csscasc.ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -2133,11 +2122,10 @@ export class IsLeftPageAction extends adapt.csscasc.ChainedAction {
    */
   getPriority() 1
 }
-goog.inherits(IsLeftPageAction, csscasc.ChainedAction);
 
-export class IsRightPageAction extends adapt.csscasc.ChainedAction {
+export class IsRightPageAction extends csscasc.ChainedAction {
   constructor(public readonly scope: expr.LexicalScope) {
-    csscasc.ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -2155,11 +2143,10 @@ export class IsRightPageAction extends adapt.csscasc.ChainedAction {
    */
   getPriority() 1
 }
-goog.inherits(IsRightPageAction, csscasc.ChainedAction);
 
-export class IsRectoPageAction extends adapt.csscasc.ChainedAction {
+export class IsRectoPageAction extends csscasc.ChainedAction {
   constructor(public readonly scope: expr.LexicalScope) {
-    csscasc.ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -2177,11 +2164,10 @@ export class IsRectoPageAction extends adapt.csscasc.ChainedAction {
    */
   getPriority() 1
 }
-goog.inherits(IsRectoPageAction, csscasc.ChainedAction);
 
-export class IsVersoPageAction extends adapt.csscasc.ChainedAction {
+export class IsVersoPageAction extends csscasc.ChainedAction {
   constructor(public readonly scope: expr.LexicalScope) {
-    csscasc.ChainedAction.call(this);
+    super();
   }
 
   /**
@@ -2199,14 +2185,13 @@ export class IsVersoPageAction extends adapt.csscasc.ChainedAction {
    */
   getPriority() 1
 }
-goog.inherits(IsVersoPageAction, csscasc.ChainedAction);
 
 /**
  * Action applying an at-page rule
  */
-export class ApplyPageRuleAction extends adapt.csscasc.ApplyRuleAction {
+export class ApplyPageRuleAction extends csscasc.ApplyRuleAction {
   constructor(style: csscasc.ElementStyle, specificity: number) {
-    csscasc.ApplyRuleAction.call(this, style, specificity, null, null, null);
+    super(style, specificity, null, null, null);
   }
 
   /**
@@ -2218,12 +2203,11 @@ export class ApplyPageRuleAction extends adapt.csscasc.ApplyRuleAction {
         this.specificity, cascadeInstance);
   }
 }
-goog.inherits(ApplyPageRuleAction, csscasc.ApplyRuleAction);
 
 /**
  * Merge page styles, including styles specified on page-margin boxes,
  * considering specificity. Intended to be used in place of
- * adapt.csscasc.mergeIn, which is for element styles.
+ * csscasc.mergeIn, which is for element styles.
  */
 export const mergeInPageRule =
     (context: expr.Context, target: csscasc.ElementStyle,
@@ -2257,7 +2241,7 @@ export const mergeInPageRule =
  * PDF renderer (Chromium) to determine page sizes.
  */
 export class PageParserHandler extends
-    adapt.csscasc.CascadeParserHandler implements cssvalid.PropertyReceiver {
+    csscasc.CascadeParserHandler implements cssvalid.PropertyReceiver {
   private currentPageSelectors: {selectors: string[]|null,
                                  specificity: number}[] = [];
   private currentNamedPageSelector: string = '';
@@ -2267,8 +2251,7 @@ export class PageParserHandler extends
       scope: expr.LexicalScope, owner: cssparse.DispatchParserHandler,
       parent: csscasc.CascadeParserHandler, validatorSet: cssvalid.ValidatorSet,
       private readonly pageProps: {[key: string]: csscasc.ElementStyle}) {
-    csscasc.CascadeParserHandler.call(
-        this, scope, owner, null, parent, null, validatorSet, false);
+    super(scope, owner, null, parent, null, validatorSet, false);
   }
 
   /**
@@ -2348,7 +2331,7 @@ export class PageParserHandler extends
    */
   nextSelector() {
     this.finishSelector();
-    csscasc.CascadeParserHandler.prototype.nextSelector.call(this);
+    super.nextSelector();
   }
 
   /**
@@ -2356,7 +2339,7 @@ export class PageParserHandler extends
    */
   startRuleBody() {
     this.finishSelector();
-    csscasc.CascadeParserHandler.prototype.startRuleBody.call(this);
+    super.startRuleBody();
   }
 
   /**
@@ -2369,8 +2352,7 @@ export class PageParserHandler extends
         !this.currentPageSelectors.some((s) => s.selectors === null)) {
       return;
     }
-    csscasc.CascadeParserHandler.prototype.simpleProperty.call(
-        this, name, value, important);
+    super.simpleProperty(name, value, important);
     const cascVal = csscasc.getProp(this.elementStyle, name);
     const pageProps = this.pageProps;
     if (name === 'bleed' || name === 'marks') {
@@ -2452,18 +2434,17 @@ export class PageParserHandler extends
     this.owner.pushHandler(handler);
   }
 }
-goog.inherits(PageParserHandler, csscasc.CascadeParserHandler);
 
 /**
  * Parser handler for a page-margin box rule.
  */
 export class PageMarginBoxParserHandler extends
-    adapt.cssparse.SlaveParserHandler implements cssvalid.PropertyReceiver {
+    cssparse.SlaveParserHandler implements cssvalid.PropertyReceiver {
   constructor(
       scope: expr.LexicalScope, owner: cssparse.DispatchParserHandler,
       public readonly validatorSet: cssvalid.ValidatorSet,
       public readonly boxStyle: csscasc.ElementStyle) {
-    cssparse.SlaveParserHandler.call(this, scope, owner, false);
+    super(scope, owner, false);
   }
 
   /**
@@ -2498,4 +2479,3 @@ export class PageMarginBoxParserHandler extends
     csscasc.setProp(this.boxStyle, name, cascval);
   }
 }
-goog.inherits(PageMarginBoxParserHandler, cssparse.SlaveParserHandler);

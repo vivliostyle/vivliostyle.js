@@ -20,14 +20,16 @@
  */
 import * as asserts from '../closure/goog/asserts/asserts';
 
-import {Val} from './css';
-import {Ident} from './css';
+import * as break from '../vivliostyle/break';
+import {isBlock} from '../vivliostyle/display';
+
+import * as base from './base';
+import {Val, Ident, ident} from './css';
 import * as csscasc from './csscasc';
 import * as cssprop from './cssprop';
-import {ValidatorSet} from './cssvalid';
-import {ValueMap} from './cssvalid';
-import {Context} from './expr';
-import {LexicalScope} from './expr';
+import {ValidatorSet, ValueMap} from './cssvalid';
+import * as cssparse from './cssparse';
+import {Context, defaultUnitSizes, LexicalScope} from './expr';
 import * as vtree from './vtree';
 import * as xmldoc from './xmldoc';
 
@@ -91,7 +93,7 @@ export class SlipMap {
 
   slippedByFixed(fixed: number): number {
     const self = this;
-    const index = adapt.base.binarySearch(
+    const index = base.binarySearch(
         this.map.length, (index) => fixed <= self.map[index].endFixed);
     const range = this.map[index];
     return range.endSlipped - Math.max(0, range.endStuckFixed - fixed);
@@ -102,7 +104,7 @@ export class SlipMap {
    */
   fixedBySlipped(slipped: number): number {
     const self = this;
-    const index = adapt.base.binarySearch(
+    const index = base.binarySearch(
         this.map.length, (index) => slipped <= self.map[index].endSlipped);
     const range = this.map[index];
     return range.endStuckFixed - (range.endSlipped - slipped);
@@ -173,11 +175,11 @@ export class Box {
         }
       }
     }
-    this.breakBefore = vivliostyle.break.resolveEffectiveBreakValue(
+    this.breakBefore = break.resolveEffectiveBreakValue(
         this.getBreakValue('before'), this.breakBefore);
     if (this.atFlowStart &&
-        vivliostyle.break.isForcedBreakValue(this.breakBefore)) {
-      flowChunk.breakBefore = vivliostyle.break.resolveEffectiveBreakValue(
+        break.isForcedBreakValue(this.breakBefore)) {
+      flowChunk.breakBefore = break.resolveEffectiveBreakValue(
           flowChunk.breakBefore, this.breakBefore);
     }
   }
@@ -218,7 +220,7 @@ export class Box {
   }
 
   displayValue(): Val {
-    return this.styleValue('display', adapt.css.ident.inline);
+    return this.styleValue('display', ident.inline);
   }
 
   isBlock(): boolean {
@@ -227,7 +229,7 @@ export class Box {
       const position = (this.styleValue('position') as Ident);
       const float = (this.styleValue('float') as Ident);
       this.isBlockValue =
-          vivliostyle.display.isBlock(display, position, float, this.isRoot);
+          isBlock(display, position, float, this.isRoot);
     }
     return this.isBlockValue;
   }
@@ -235,7 +237,7 @@ export class Box {
   hasBox(): boolean {
     if (this.hasBoxValue === null) {
       this.hasBoxValue = this.isParentBoxDisplayed &&
-          this.displayValue() !== adapt.css.ident.none;
+          this.displayValue() !== ident.none;
     }
     return this.hasBoxValue;
   }
@@ -294,7 +296,7 @@ export class BoxStack {
    */
   isCurrentBoxDisplayed(): boolean {
     return this.stack.every(
-        (box) => box.displayValue() !== adapt.css.ident.none);
+        (box) => box.displayValue() !== ident.none);
   }
 
   /**
@@ -332,7 +334,7 @@ export class BoxStack {
     const box = this.lastBox();
     if ((this.atBlockStart || this.atFlowStart) && box.hasBox()) {
       const whitespaceValue =
-          box.styleValue('white-space', adapt.css.ident.normal).toString();
+          box.styleValue('white-space', ident.normal).toString();
       const whitespace = vtree.whitespaceFromPropertyValue(whitespaceValue);
       asserts.assert(whitespace !== null);
       if (!vtree.canIgnore(node, whitespace)) {
@@ -350,7 +352,7 @@ export class BoxStack {
     box.buildAfterPseudoElementBox(offset, this.atBlockStart, this.atFlowStart);
     if (this.atFlowStart && box.afterBox) {
       const breakBefore = box.afterBox.getBreakValue('before');
-      box.flowChunk.breakBefore = vivliostyle.break.resolveEffectiveBreakValue(
+      box.flowChunk.breakBefore = break.resolveEffectiveBreakValue(
           box.flowChunk.breakBefore, breakBefore);
     }
     const parent = this.lastBox();
@@ -450,8 +452,8 @@ export class Styler implements AbstractStyler {
     this.cascade.pushElement(this.root, style, rootOffset);
     this.postprocessTopStyle(style, false);
     switch (this.root.namespaceURI) {
-      case adapt.base.NS.XHTML:
-      case adapt.base.NS.FB2:
+      case base.NS.XHTML:
+      case base.NS.FB2:
         this.bodyReached = false;
         break;
     }
@@ -477,7 +479,7 @@ export class Styler implements AbstractStyler {
         const val = map[pname];
         if (val) {
           this.rootStyle[pname] =
-              new csscasc.CascadeValue(val, adapt.cssparse.SPECIFICITY_AUTHOR);
+              new csscasc.CascadeValue(val, cssparse.SPECIFICITY_AUTHOR);
         }
       }
     }
@@ -510,8 +512,8 @@ export class Styler implements AbstractStyler {
                'background-image') ?
                elemStyle['background-image'].evaluate(this.context) :
                null as Val);
-      if (backgroundColor && backgroundColor !== adapt.css.ident.inherit ||
-          backgroundImage && backgroundImage !== adapt.css.ident.inherit) {
+      if (backgroundColor && backgroundColor !== ident.inherit ||
+          backgroundImage && backgroundImage !== ident.inherit) {
         this.transferPropsToRoot(elemStyle, this.validatorSet.backgroundProps);
         this.rootBackgroundAssigned = true;
       }
@@ -538,14 +540,14 @@ export class Styler implements AbstractStyler {
             break;
           case 'ex':
             px *= this.context.initialFontSize *
-                adapt.expr.defaultUnitSizes['ex'] /
-                adapt.expr.defaultUnitSizes['em'];
+                expr.defaultUnitSizes['ex'] /
+                expr.defaultUnitSizes['em'];
             break;
           case '%':
             px *= this.context.initialFontSize / 100;
             break;
           default:
-            const unitSize = adapt.expr.defaultUnitSizes[val.unit];
+            const unitSize = expr.defaultUnitSizes[val.unit];
             if (unitSize) {
               px *= unitSize;
             }
@@ -739,7 +741,7 @@ export class Styler implements AbstractStyler {
 
   registerForcedBreakOffset(
       breakValue: string|null, offset: number, flowName: string) {
-    if (vivliostyle.break.isForcedBreakValue(breakValue)) {
+    if (break.isForcedBreakValue(breakValue)) {
       const forcedBreakOffsets = this.flows[flowName].forcedBreakOffsets;
       if (forcedBreakOffsets.length === 0 ||
           forcedBreakOffsets[forcedBreakOffsets.length - 1] < offset) {
@@ -748,7 +750,7 @@ export class Styler implements AbstractStyler {
     }
     const previousValue = this.breakBeforeValues[offset];
     this.breakBeforeValues[offset] =
-        vivliostyle.break.resolveEffectiveBreakValue(previousValue, breakValue);
+        break.resolveEffectiveBreakValue(previousValue, breakValue);
   }
 
   /**
@@ -791,7 +793,7 @@ export class Styler implements AbstractStyler {
                   box.flowName);
               breakAfter = box.afterBox.getBreakValue('after');
             }
-            breakAfter = vivliostyle.break.resolveEffectiveBreakValue(
+            breakAfter = break.resolveEffectiveBreakValue(
                 breakAfter, box.getBreakValue('after'));
             this.registerForcedBreakOffset(
                 breakAfter, this.lastOffset, box.flowName);
@@ -832,7 +834,7 @@ export class Styler implements AbstractStyler {
         this.primaryStack.push(this.primary);
         this.cascade.pushElement(elem, style, this.lastOffset);
         const id = elem.getAttribute('id') ||
-            elem.getAttributeNS(adapt.base.NS.XML, 'id');
+            elem.getAttributeNS(base.NS.XML, 'id');
         if (id && id === this.idToReach) {
           this.idToReach = null;
         }
@@ -865,7 +867,7 @@ export class Styler implements AbstractStyler {
               box.flowName);
         }
         if (this.primary) {
-          if (box.displayValue() === adapt.css.ident.none) {
+          if (box.displayValue() === ident.none) {
             this.primary = false;
           }
         }

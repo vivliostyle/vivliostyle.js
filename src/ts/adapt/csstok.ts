@@ -1225,9 +1225,9 @@ export class Tokenizer {
           break;
         case Action.FUNC:
 
-          // tokenType can be adapt.csstok.TokenType.IDENT,
-          // adapt.csstok.TokenType.CLASS, adapt.csstok.TokenType.AT,
-          // adapt.csstok.TokenType.HASH, adapt.csstok.TokenType.NUMERIC
+          // tokenType can be TokenType.IDENT,
+          // TokenType.CLASS, TokenType.AT,
+          // TokenType.HASH, TokenType.NUMERIC
           tokenText = input.substring(tokenPosition, position);
           if (tokenType == TokenType.IDENT) {
             position++;
@@ -1242,9 +1242,9 @@ export class Tokenizer {
           break;
         case Action.FUNCES:
 
-          // tokenType can be adapt.csstok.TokenType.IDENT,
-          // adapt.csstok.TokenType.CLASS, adapt.csstok.TokenType.AT,
-          // adapt.csstok.TokenType.HASH, T_NUMERIC
+          // tokenType can be TokenType.IDENT,
+          // TokenType.CLASS, TokenType.AT,
+          // TokenType.HASH, T_NUMERIC
           tokenText = escapeParse(input.substring(tokenPosition, position));
           if (tokenType == TokenType.IDENT) {
             position++;

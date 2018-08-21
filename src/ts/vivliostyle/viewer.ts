@@ -19,7 +19,6 @@
 import * as namespace from './namespace';
 import * as profile from './profile';
 import * as constants from './constants';
-import './util';
 import * as base from '../adapt/base';
 import * as viewer from '../adapt/viewer';
 const PageProgression = constants.PageProgression;
@@ -36,7 +35,7 @@ type ViewerOptions = {
   fontSize: number|undefined,
   pageBorderWidth: number|undefined,
   renderAllPages: boolean|undefined,
-  pageViewMode: vivliostyle.viewer.PageViewMode|undefined,
+  pageViewMode: PageViewMode|undefined,
   zoom: number|undefined,
   fitToScreen: boolean|undefined,
   defaultPaperSize: {width: number, height: number}|undefined
@@ -327,7 +326,7 @@ export enum Navigation {
 const Navigation = Navigation;
 const ZoomType = viewer.ZoomType;
 const PageViewMode = viewer.PageViewMode;
-namespace.exportSymbol('vivliostyle.viewer.Viewer', Viewer);
+namespace.exportSymbol('Viewer', Viewer);
 goog.exportProperty(
     Viewer.prototype, 'setOptions', Viewer.prototype.setOptions);
 goog.exportProperty(
@@ -349,11 +348,11 @@ goog.exportProperty(
     Viewer.prototype, 'queryZoomFactor', Viewer.prototype.queryZoomFactor);
 goog.exportProperty(
     Viewer.prototype, 'getPageSizes', Viewer.prototype.getPageSizes);
-namespace.exportSymbol('vivliostyle.viewer.ZoomType', ZoomType);
+namespace.exportSymbol('ZoomType', ZoomType);
 goog.exportProperty(
     ZoomType, 'FIT_INSIDE_VIEWPORT', ZoomType.FIT_INSIDE_VIEWPORT);
-namespace.exportSymbol('vivliostyle.viewer.PageViewMode', PageViewMode);
+namespace.exportSymbol('PageViewMode', PageViewMode);
 goog.exportProperty(PageViewMode, 'SINGLE_PAGE', PageViewMode.SINGLE_PAGE);
 goog.exportProperty(PageViewMode, 'SPREAD', PageViewMode.SPREAD);
 goog.exportProperty(PageViewMode, 'AUTO_SPREAD', PageViewMode.AUTO_SPREAD);
-vivliostyle.profile.profiler.forceRegisterEndTiming('load_vivliostyle');
+profile.profiler.forceRegisterEndTiming('load_vivliostyle');

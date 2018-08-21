@@ -18,12 +18,13 @@
  * @fileoverview Basic view tree data structures and support utilities.
  */
 import * as constants from '../vivliostyle/constants';
-import {Change} from '../vivliostyle/diff';
+import {Change, resolveOriginalIndex} from '../vivliostyle/diff';
 import {FloatReference} from '../vivliostyle/pagefloat';
 import {AfterIfContinues} from '../vivliostyle/selectors';
 
 import * as base from './base';
 import * as css from './css';
+import {toShape} from './cssprop';
 import {Context} from './expr';
 import {Val} from './expr';
 import * as geom from './geom';
@@ -113,7 +114,7 @@ export const makeListener =
       return null;
     };
 
-export class Page extends adapt.base.SimpleEventTarget {
+export class Page extends base.SimpleEventTarget {
   private static AUTO_PAGE_WIDTH_ATTRIBUTE: string =
       'data-vivliostyle-auto-page-width';
   private static AUTO_PAGE_HEIGHT_ATTRIBUTE: string =
@@ -701,7 +702,7 @@ export class NodeContext {
     this.shadowType = ShadowType.NONE;
     this.shadowContext = parent ? parent.shadowContext : null;
     this.breakPenalty = parent ? parent.breakPenalty : 0;
-    this.floatReference = vivliostyle.pagefloat.FloatReference.INLINE;
+    this.floatReference = FloatReference.INLINE;
     this.whitespace = parent ? parent.whitespace : Whitespace.IGNORE;
     this.hyphenateCharacter = parent ? parent.hyphenateCharacter : null;
     this.breakWord = parent ? parent.breakWord : false;
@@ -720,7 +721,7 @@ export class NodeContext {
     this.offsetInNode = 0;
     this.after = false;
     this.display = null;
-    this.floatReference = vivliostyle.pagefloat.FloatReference.INLINE;
+    this.floatReference = FloatReference.INLINE;
     this.floatSide = null;
     this.clearSide = null;
     this.floatMinWrapBlock = null;
@@ -847,7 +848,7 @@ export class NodeContext {
       nc = nc.parent;
     } while (nc);
     const actualOffsetInNode = this.preprocessedTextContent ?
-        vivliostyle.diff.resolveOriginalIndex(
+        resolveOriginalIndex(
             this.preprocessedTextContent, this.offsetInNode) :
         this.offsetInNode;
     return {
@@ -1280,7 +1281,7 @@ export class Container {
 
   getOuterShape(outerShapeProp: css.Val, context: Context): geom.Shape {
     const rect = this.getOuterRect();
-    return adapt.cssprop.toShape(
+    return toShape(
         outerShapeProp, rect.x1, rect.y1, rect.x2 - rect.x1, rect.y2 - rect.y1,
         context);
   }
@@ -1301,7 +1302,7 @@ type ExprContentListener = (p1: Val, p2: string, p3: Document) => Node|null;
 
 export {ExprContentListener};
 
-export class ContentPropertyHandler extends adapt.css.Visitor {
+export class ContentPropertyHandler extends css.Visitor {
   constructor(
       public readonly elem: Element, public readonly context: Context,
       public readonly rootContentValue: css.Val,

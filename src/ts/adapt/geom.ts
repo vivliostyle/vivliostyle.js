@@ -18,6 +18,7 @@
  * @fileoverview Geometric utilities.
  */
 import * as logging from '../vivliostyle/logging';
+import * as base from './base';
 
 export class Rect {
   constructor(
@@ -234,15 +235,15 @@ export const unrotateBox = (box: Rect): Rect =>
     new Rect(-box.y2, box.x1, -box.y1, box.x2);
 
 export const rotateShape = (shape: Shape): Shape =>
-    new Shape(adapt.base.map(shape.points, rotatePoint));
+    new Shape(base.map(shape.points, rotatePoint));
 
 export const shapesToBands =
     (box: Rect, include: Shape[], exclude: Shape[], granularity: number,
      snapHeight: number, vertical: boolean): Band[] => {
       if (vertical) {
         box = rotateBox(box);
-        include = adapt.base.map(include, rotateShape);
-        exclude = adapt.base.map(exclude, rotateShape);
+        include = base.map(include, rotateShape);
+        exclude = base.map(exclude, rotateShape);
       }
       const includeCount = include.length;
       const excludeCount = exclude ? exclude.length : 0;

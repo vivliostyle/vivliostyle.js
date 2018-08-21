@@ -18,6 +18,7 @@
  */
 import * as namespace from './namespace';
 import * as logging from './logging';
+import * as profile from './profile';
 
 /**
  * Performance profiler measuring execution time of the script.
@@ -113,7 +114,7 @@ function noop() {}
 
 /**
  * Registers start/end timing of some event.
- * @this {vivliostyle.profile.Profiler}
+ * @this {profile.Profiler}
  * @param name Name of event
  * @param startEnd Either of "start" or "end"
  * @param timestamp Used as the actual timestamp of the event if specified,
@@ -145,7 +146,7 @@ function registerTiming(name: string, startEnd: string, timestamp?: number) {
 
 /**
  * Registers start timing of some event.
- * @this {vivliostyle.profile.Profiler}
+ * @this {profile.Profiler}
  * @param name Name of event
  * @param timestamp Used as the actual timestamp of the event if specified,
  *     instead of "now"
@@ -156,7 +157,7 @@ function registerStartTiming(name: string, timestamp?: number) {
 
 /**
  * Registers end timing of some event.
- * @this {vivliostyle.profile.Profiler}
+ * @this {profile.Profiler}
  * @param name Name of event
  * @param timestamp Used as the actual timestamp of the event if specified,
  *     instead of "now"
@@ -166,7 +167,7 @@ function registerEndTiming(name: string, timestamp?: number) {
 }
 const fallbackPerformanceInstance = ({now: Date.now} as Performance);
 const performanceInstance = window && window.performance;
-const profiler = vivliostyle.profile.profiler =
+const profiler = profile.profiler =
     new Profiler(performanceInstance || fallbackPerformanceInstance);
 profiler.forceRegisterStartTiming('load_vivliostyle');
 namespace.exportSymbol('vivliostyle.profile.profiler', profiler);

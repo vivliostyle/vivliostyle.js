@@ -20,6 +20,7 @@
  */
 import * as logging from '../vivliostyle/logging';
 import * as base from './base';
+import {Frame} from './task';
 
 /**
  * External timer. Only needed for testing.
@@ -834,9 +835,9 @@ export class Frame {
   }
 }
 
-export class LoopBodyFrame extends adapt.task.Frame {
+export class LoopBodyFrame extends Frame {
   constructor(task: Task, parent: Frame) {
-    Frame.call(this, task, parent, 'loop');
+    super(task, parent, 'loop');
   }
 
   continueLoop(): void {
@@ -847,7 +848,6 @@ export class LoopBodyFrame extends adapt.task.Frame {
     this.finish(false);
   }
 }
-goog.inherits(LoopBodyFrame, Frame);
 
 export class EventItem {
   next: EventItem = null;

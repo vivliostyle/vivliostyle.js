@@ -363,9 +363,9 @@ export {ValueMap};
 /**
  * Abstract class to validate simple CSS property value (not a shorthand)
  */
-export class PropertyValidator extends adapt.css.Visitor {
+export class PropertyValidator extends css.Visitor {
   constructor() {
-    css.Visitor.call(this);
+    super();
   }
 
   /**
@@ -380,17 +380,16 @@ export class PropertyValidator extends adapt.css.Visitor {
     return null;
   }
 }
-goog.inherits(PropertyValidator, css.Visitor);
 
 /**
  * Validate a primitive CSS value (not a list or function).
- * @param allowed mask of adapt.cssvalid.ALLOW_*** constants.
+ * @param allowed mask of ALLOW_*** constants.
  */
-export class PrimitiveValidator extends adapt.cssvalid.PropertyValidator {
+export class PrimitiveValidator extends PropertyValidator {
   constructor(
       public readonly allowed: number, public readonly idents: ValueMap,
       public readonly units: ValueMap) {
-    PropertyValidator.call(this);
+    super();
   }
 
   /**
@@ -550,20 +549,19 @@ export class PrimitiveValidator extends adapt.cssvalid.PropertyValidator {
     return new PrimitiveValidator(this.allowed | other.allowed, idents, units);
   }
 }
-goog.inherits(PrimitiveValidator, PropertyValidator);
 
 export const ALWAYS_FAIL = new PrimitiveValidator(0, NO_IDENTS, NO_IDENTS);
 
 /**
  * Base class for list validation.
  */
-export class ListValidator extends adapt.cssvalid.PropertyValidator {
+export class ListValidator extends PropertyValidator {
   successTerminal: Node;
   failureTerminal: Node;
   first: Node;
 
   constructor(group: ValidatingGroup) {
-    PropertyValidator.call(this);
+    super();
     this.successTerminal = new Node(null);
     this.failureTerminal = new Node(null);
     this.first = group.finish(this.successTerminal, this.failureTerminal);
@@ -773,11 +771,10 @@ export class ListValidator extends adapt.cssvalid.PropertyValidator {
    */
   visitExpr(expr) null
 }
-goog.inherits(ListValidator, PropertyValidator);
 
-export class SpaceListValidator extends adapt.cssvalid.ListValidator {
+export class SpaceListValidator extends ListValidator {
   constructor(group: ValidatingGroup) {
-    ListValidator.call(this, group);
+    super();
   }
 
   /**
@@ -828,11 +825,10 @@ export class SpaceListValidator extends adapt.cssvalid.ListValidator {
     return this.validateList(values, true, index);
   }
 }
-goog.inherits(SpaceListValidator, ListValidator);
 
-export class CommaListValidator extends adapt.cssvalid.ListValidator {
+export class CommaListValidator extends ListValidator {
   constructor(group: ValidatingGroup) {
-    ListValidator.call(this, group);
+    super(group);
   }
 
   /**
@@ -872,11 +868,10 @@ export class CommaListValidator extends adapt.cssvalid.ListValidator {
     return null;
   }
 }
-goog.inherits(CommaListValidator, ListValidator);
 
-export class FuncValidator extends adapt.cssvalid.ListValidator {
+export class FuncValidator extends ListValidator {
   constructor(public readonly name: string, group: ValidatingGroup) {
-    ListValidator.call(this, group);
+    super(group);
   }
 
   /**
@@ -901,7 +896,6 @@ export class FuncValidator extends adapt.cssvalid.ListValidator {
     return new css.Func(func.name, arr);
   }
 }
-goog.inherits(FuncValidator, ListValidator);
 
 //----------------------- Shorthands
 //------------------------------------------------------------
@@ -917,11 +911,11 @@ export class ShorthandSyntaxNode {
 }
 
 export class ShorthandSyntaxProperty extends
-    adapt.cssvalid.ShorthandSyntaxNode {
+    ShorthandSyntaxNode {
   validator: PropertyValidator;
 
   constructor(validatorSet: ValidatorSet, public readonly name: string) {
-    ShorthandSyntaxNode.call(this);
+    super();
     this.validator = validatorSet.validators[this.name];
   }
 
@@ -949,12 +943,11 @@ export class ShorthandSyntaxProperty extends
     shorthandValidator.values[this.name] = rval;
   }
 }
-goog.inherits(ShorthandSyntaxProperty, ShorthandSyntaxNode);
 
 export class ShorthandSyntaxPropertyN extends
-    adapt.cssvalid.ShorthandSyntaxProperty {
+    ShorthandSyntaxProperty {
   constructor(validatorSet: ValidatorSet, public readonly names: string[]) {
-    ShorthandSyntaxProperty.call(this, validatorSet, names[0]);
+    super(validatorSet, names[0]);
   }
 
   /**
@@ -966,14 +959,13 @@ export class ShorthandSyntaxPropertyN extends
     }
   }
 }
-goog.inherits(ShorthandSyntaxPropertyN, ShorthandSyntaxProperty);
 
 export class ShorthandSyntaxCompound extends
-    adapt.cssvalid.ShorthandSyntaxNode {
+    ShorthandSyntaxNode {
   constructor(
       public readonly nodes: ShorthandSyntaxNode[],
       public readonly slash: boolean) {
-    ShorthandSyntaxNode.call(this);
+    super();
   }
 
   /**
@@ -1005,9 +997,8 @@ export class ShorthandSyntaxCompound extends
     return index;
   }
 }
-goog.inherits(ShorthandSyntaxCompound, ShorthandSyntaxNode);
 
-export class ShorthandValidator extends adapt.css.Visitor {
+export class ShorthandValidator extends css.Visitor {
   syntax: ShorthandSyntaxNode[] = null;
   propList: string[] = null;
   error: boolean = false;
@@ -1152,11 +1143,11 @@ export class ShorthandValidator extends adapt.css.Visitor {
 }
 
 export class SimpleShorthandValidator extends
-    adapt.cssvalid.ShorthandValidator {
+    ShorthandValidator {
   error: any;
 
   constructor() {
-    ShorthandValidator.call(this);
+    super();
   }
 
   /**
@@ -1180,14 +1171,13 @@ export class SimpleShorthandValidator extends
     return index;
   }
 }
-goog.inherits(SimpleShorthandValidator, ShorthandValidator);
 
 export class InsetsShorthandValidator extends
-    adapt.cssvalid.ShorthandValidator {
+    ShorthandValidator {
   error: any;
 
   constructor() {
-    ShorthandValidator.call(this);
+    super();
   }
 
   /**
@@ -1215,14 +1205,13 @@ export class InsetsShorthandValidator extends
     return new ShorthandSyntaxPropertyN(this.validatorSet, this.propList);
   }
 }
-goog.inherits(InsetsShorthandValidator, ShorthandValidator);
 
 export class InsetsSlashShorthandValidator extends
-    adapt.cssvalid.ShorthandValidator {
+    ShorthandValidator {
   error: any;
 
   constructor() {
-    ShorthandValidator.call(this);
+    super();
   }
 
   /**
@@ -1263,15 +1252,14 @@ export class InsetsSlashShorthandValidator extends
     return list.length;
   }
 }
-goog.inherits(InsetsSlashShorthandValidator, ShorthandValidator);
 
 export class CommaShorthandValidator extends
-    adapt.cssvalid.SimpleShorthandValidator {
+    SimpleShorthandValidator {
   values: any;
   error: any;
 
   constructor() {
-    SimpleShorthandValidator.call(this);
+    super();
   }
 
   mergeIn(acc: {[key: string]: css.Val[]}, values: ValueMap) {
@@ -1317,21 +1305,20 @@ export class CommaShorthandValidator extends
     return null;
   }
 }
-goog.inherits(CommaShorthandValidator, SimpleShorthandValidator);
 
 export class FontShorthandValidator extends
-    adapt.cssvalid.SimpleShorthandValidator {
+    SimpleShorthandValidator {
   error: any;
 
   constructor() {
-    SimpleShorthandValidator.call(this);
+    super();
   }
 
   /**
    * @override
    */
   init(syntax, propList) {
-    SimpleShorthandValidator.prototype.init.call(this, syntax, propList);
+    super.init(syntax, propList);
     this.propList.push('font-family', 'line-height', 'font-size');
   }
 
@@ -1340,7 +1327,7 @@ export class FontShorthandValidator extends
    */
   validateList(list) {
     let index =
-        SimpleShorthandValidator.prototype.validateList.call(this, list);
+        super.validateList(list);
 
     // must at least have font-size and font-family at the end
     if (index + 2 > list.length) {
@@ -1415,7 +1402,6 @@ export class FontShorthandValidator extends
     return null;
   }
 }
-goog.inherits(FontShorthandValidator, SimpleShorthandValidator);
 
 export const shorthandValidators: {[key: string]: () => any} = {
   'SIMPLE': SimpleShorthandValidator,

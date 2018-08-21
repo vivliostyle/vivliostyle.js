@@ -206,13 +206,13 @@ export class ParserHandler implements csstok.TokenizerHandler {
   }
 }
 
-export class DispatchParserHandler extends adapt.cssparse.ParserHandler {
+export class DispatchParserHandler extends ParserHandler {
   stack: ParserHandler[] = [];
   tokenizer: csstok.Tokenizer = null;
   slave: ParserHandler = null;
 
   constructor() {
-    ParserHandler.call(this, null);
+    super(null);
   }
 
   pushHandler(slave: ParserHandler): void {
@@ -260,7 +260,7 @@ export class DispatchParserHandler extends adapt.cssparse.ParserHandler {
    * @override
    */
   startStylesheet(flavor) {
-    ParserHandler.prototype.startStylesheet.call(this, flavor);
+    super.startStylesheet(flavor);
     if (this.stack.length > 0) {
       // This can occur as a result of an error
       this.slave = this.stack[0];
@@ -479,16 +479,15 @@ export class DispatchParserHandler extends adapt.cssparse.ParserHandler {
     this.slave.endFuncWithSelector();
   }
 }
-goog.inherits(DispatchParserHandler, ParserHandler);
 
-export class SkippingParserHandler extends adapt.cssparse.ParserHandler {
+export class SkippingParserHandler extends ParserHandler {
   depth: number = 0;
   flavor: any;
 
   constructor(
       scope: expr.LexicalScope, public owner: DispatchParserHandler,
       public readonly topLevel) {
-    ParserHandler.call(this, scope);
+    super(scope);
     if (owner) {
       this.flavor = owner.flavor;
     }
@@ -524,13 +523,12 @@ export class SkippingParserHandler extends adapt.cssparse.ParserHandler {
     }
   }
 }
-goog.inherits(SkippingParserHandler, ParserHandler);
 
-export class SlaveParserHandler extends adapt.cssparse.SkippingParserHandler {
+export class SlaveParserHandler extends SkippingParserHandler {
   constructor(
       scope: expr.LexicalScope, owner: DispatchParserHandler,
       topLevel: boolean) {
-    SkippingParserHandler.call(this, scope, owner, topLevel);
+    super(scope, owner, topLevel);
   }
 
   report(message: string): void {
@@ -655,7 +653,6 @@ export class SlaveParserHandler extends adapt.cssparse.SkippingParserHandler {
     this.error('E_CSS_UNEXPECTED_PROPERTY', this.getCurrentToken());
   }
 }
-goog.inherits(SlaveParserHandler, SkippingParserHandler);
 
 export const actionsBase: Action[] = [];
 
@@ -2473,9 +2470,9 @@ export class Parser {
 }
 
 // Not done yet.
-export class ErrorHandler extends adapt.cssparse.ParserHandler {
+export class ErrorHandler extends ParserHandler {
   constructor(public readonly scope: expr.LexicalScope) {
-    ParserHandler.call(this, null);
+    super(null);
   }
 
   /**
@@ -2492,7 +2489,6 @@ export class ErrorHandler extends adapt.cssparse.ParserHandler {
     return this.scope;
   }
 }
-goog.inherits(ErrorHandler, ParserHandler);
 
 export const parseStylesheet = (tokenizer: csstok.Tokenizer,
                                 handler: ParserHandler, baseURL: string,

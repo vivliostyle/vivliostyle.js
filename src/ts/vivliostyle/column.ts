@@ -26,6 +26,7 @@ import {FlowPosition} from '../adapt/vtree';
 import * as asserts from '../closure/goog/asserts/asserts';
 
 import {PageFloatLayoutContext} from './pagefloat';
+import {variance} from './math';
 
 type ColumnLayoutResult = {
   columns: Column[],
@@ -309,7 +310,7 @@ export class BalanceNonLastColumnBalancer extends ColumnBalancer {
     const computedBlockSizes =
         layoutResult.columns.filter((c) => !c.pageBreakType)
             .map((c) => c.computedBlockSize);
-    return vivliostyle.math.variance(computedBlockSizes);
+    return variance(computedBlockSizes);
   }
 
   /**

@@ -19,8 +19,9 @@
  */
 import * as logging from '../vivliostyle/logging';
 
+import * as base from './base';
 import * as css from './css';
-import {ElementStyle} from './csscasc';
+import {ElementStyle, getProp} from './csscasc';
 import * as cssparse from './cssparse';
 import * as cssprop from './cssprop';
 import * as expr from './expr';
@@ -40,7 +41,7 @@ export const bogusFontCounter: number = 1;
 
 export const makeFontTraitKey =
     (properties: {[key: string]: css.Val}): string => {
-      const sb = new adapt.base.StringBuffer();
+      const sb = new base.StringBuffer();
       for (const prop in traitProps) {
         sb.append(' ');
         sb.append(properties[prop].toString());
@@ -62,7 +63,7 @@ export const prepareProperties =
           const result = ({} as {[key: string]: css.Val});
           for (const prop in properties) {
             result[prop] =
-                adapt.csscasc.getProp(properties, prop).evaluate(context, prop);
+                getProp(properties, prop).evaluate(context, prop);
           }
           fillDefaults(result);
           return result;
@@ -97,7 +98,7 @@ export class Face {
    * Create "at" font-face rule.
    */
   makeAtRule(src: string, fontBytes: Blob): string {
-    const sb = new adapt.base.StringBuffer();
+    const sb = new base.StringBuffer();
     sb.append('@font-face {\n  font-family: ');
     sb.append((this.family as string));
     sb.append(';\n  ');
@@ -232,7 +233,7 @@ export class Mapper {
     probe.style.visibility = 'hidden';
     probe.style.fontFamily = fontFamily;
     for (const pname in traitProps) {
-      adapt.base.setCSSProperty(probe, pname, props[pname].toString());
+      base.setCSSProperty(probe, pname, props[pname].toString());
     }
     const rect = probe.getBoundingClientRect();
     const initWidth = rect.right - rect.left;

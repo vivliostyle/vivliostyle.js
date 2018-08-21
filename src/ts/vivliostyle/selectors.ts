@@ -16,6 +16,8 @@
  *
  * @fileoverview Utilities for selectors.
  */
+import * as asserts from '../closure/goog/asserts/asserts';
+
 import {CascadeValue} from '../adapt/csscasc';
 import {ElementStyle} from '../adapt/csscasc';
 import {Context} from '../adapt/expr';
@@ -28,10 +30,10 @@ import {NodeContext} from '../adapt/vtree';
 import {ChunkPosition} from '../adapt/vtree';
 import {ShadowContext} from '../adapt/vtree';
 
+import {PseudoColumn} from './layoututil';
 import {ElementsOffset} from './repetitiveelements';
 
 import * as namespace from './namespace';
-const PseudoColumn = vivliostyle.layoututil.PseudoColumn;
 
 export interface Matcher {
   matches(): boolean;
@@ -80,7 +82,7 @@ export class MatcherBuilder {
       return new NthFragmentMatcher(
           elementOffset, parseInt(strs[1], 10), parseInt(strs[2], 10));
     } else {
-      goog.asserts.fail(`unknown view condition. condition=${viewCondition}`);
+      asserts.fail(`unknown view condition. condition=${viewCondition}`);
       return null;
     }
   }
@@ -291,7 +293,7 @@ function processAfterIfContinuesOfNodeContext(
   const afterIfContinues = nodeContext.afterIfContinues;
   return afterIfContinues.createElement(column, nodeContext)
       .thenAsync((pseudoElement) => {
-        goog.asserts.assert(nodeContext !== null);
+        asserts.assert(nodeContext !== null);
         const pseudoElementHeight =
             calculatePseudoElementHeight(nodeContext, column, pseudoElement);
         column.fragmentLayoutConstraints.push(

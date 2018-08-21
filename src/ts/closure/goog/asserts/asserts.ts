@@ -33,6 +33,7 @@
 import {Error} from '../debug/error';
 import {NodeType} from '../dom/nodetype';
 import * as string from '../string/string';
+import * as debug from '../debug';
 
 /**
  * @define {boolean} Whether to strip out asserts or to leave them in.
@@ -45,17 +46,16 @@ goog.define('goog.asserts.ENABLE_ASSERTS', goog.DEBUG);
  * @param messageArgs The items to substitute into the pattern.
  * @final
  */
-export class AssertionError extends goog.debug.Error {
+export class AssertionError extends debug.Error {
   constructor(public messagePattern: string, messageArgs: any[]) {
     messageArgs.unshift(messagePattern);
-    Error.call(this, string.subs.apply(null, messageArgs));
+    super(string.subs.apply(null, messageArgs));
 
     // Remove the messagePattern afterwards to avoid permenantly modifying the
     // passed in array.
     messageArgs.shift();
   }
 }
-goog.inherits(AssertionError, Error);
 
 /** @override */
 AssertionError.prototype.name = 'AssertionError';

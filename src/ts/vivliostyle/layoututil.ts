@@ -16,6 +16,8 @@
  *
  * @fileoverview Utilities related to layout.
  */
+import * as asserts from '../closure/goog/asserts/asserts';
+
 import {Column} from '../adapt/layout';
 import {LayoutConstraint} from '../adapt/layout';
 import {BreakPositionAndNodeContext} from '../adapt/layout';
@@ -164,8 +166,10 @@ export class LayoutIterator {
 }
 const LayoutIterator = LayoutIterator;
 
-export class EdgeSkipper extends vivliostyle.layoututil.LayoutIteratorStrategy {
-  constructor(protected readonly leadingEdge: boolean) {}
+export class EdgeSkipper extends LayoutIteratorStrategy {
+  constructor(protected readonly leadingEdge: boolean) {
+      super()
+  }
 
   startNonInlineBox(state: LayoutIteratorState): undefined
       |task.Result<boolean> {}
@@ -286,8 +290,6 @@ export class EdgeSkipper extends vivliostyle.layoututil.LayoutIteratorStrategy {
     });
   }
 }
-const EdgeSkipper = EdgeSkipper;
-goog.inherits(EdgeSkipper, LayoutIteratorStrategy);
 
 /**
  * Represents a "pseudo"-column nested inside a real column.
@@ -415,7 +417,7 @@ export class AbstractLayoutRetryer {
       if (accepted) {
         frame.finish(positionAfter);
       } else {
-        goog.asserts.assert(this.initialPosition);
+        asserts.assert(this.initialPosition);
         this.clearNodes(this.initialPosition);
         this.restoreState(nodeContext, column);
         this.tryLayout(this.initialPosition, column).thenFinish(frame);

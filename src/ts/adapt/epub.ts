@@ -23,10 +23,13 @@ import * as counters from '../vivliostyle/counters';
 import * as logging from '../vivliostyle/logging';
 
 import {JSON} from './base';
+import * as base from './base';
 import {DocumentURLTransformer} from './base';
 import * as cfi from './cfi';
 import * as csscasc from './csscasc';
-import {Preferences} from './expr';
+import {parseValue} from './cssparse';
+import {Tokenizer} from './csstok';
+import {Preferences, clonePreferences, letterbox} from './expr';
 import * as font from './font';
 import * as net from './net';
 import * as ops from './ops';
@@ -34,13 +37,10 @@ import * as sha1 from './sha1';
 import {Result} from './task';
 import {Frame} from './task';
 import {Continuation} from './task';
+import * as task from './task';
 import * as toc from './toc';
-import {Viewport} from './vgen';
-import {CustomRenderer} from './vgen';
-import {CustomRendererFactory} from './vgen';
-import {Page} from './vtree';
-import {LayoutPosition} from './vtree';
-import {Spread} from './vtree';
+import {CustomRenderer, CustomRendererFactory, DefaultClientLayout, Viewport} from './vgen';
+import {Page, DelayedItem, LayoutPosition, Spread} from './vtree';
 import * as xmldoc from './xmldoc';
 
 type Position = {
@@ -51,7 +51,7 @@ type Position = {
 
 export {Position};
 
-export class EPUBDocStore extends adapt.ops.OPSDocStore {
+export class EPUBDocStore extends ops.OPSDocStore {
   plainXMLStore: any;
   jsonStore: any;
   opfByURL: {[key: string]: OPFDoc} = {};
@@ -60,7 +60,7 @@ export class EPUBDocStore extends adapt.ops.OPSDocStore {
   documents: {[key: string]: Result<xmldoc.XMLDocHolder>} = {};
 
   constructor() {
-    ops.OPSDocStore.call(this, this.makeDeobfuscatorFactory());
+    super(this.makeDeobfuscatorFactory());
     this.plainXMLStore = xmldoc.newXMLDocStore();
     this.jsonStore = net.newJSONStore();
   }
@@ -92,7 +92,7 @@ export class EPUBDocStore extends adapt.ops.OPSDocStore {
 
   loadEPUBDoc(url: string, haveZipMetadata: boolean): Result<OPFDoc> {
     const self = this;
-    const frame: Frame<OPFDoc> = adapt.task.newFrame('loadEPUBDoc');
+    const frame: Frame<OPFDoc> = task.newFrame('loadEPUBDoc');
     if (url.substring(url.length - 1) !== '/') {
       url = `${url}/`;
     }
@@ -132,9 +132,9 @@ export class EPUBDocStore extends adapt.ops.OPSDocStore {
     const url = epubURL + root;
     let opf = self.opfByURL[url];
     if (opf) {
-      return adapt.task.newResult(opf);
+      return task.newResult(opf);
     }
-    const frame: Frame<OPFDoc> = adapt.task.newFrame('loadOPF');
+    const frame: Frame<OPFDoc> = task.newFrame('loadOPF');
     self.loadAsPlainXML(url).then((opfXML) => {
       if (!opfXML) {
         logging.logger.error(`Received an empty response for EPUB OPF ${
@@ -144,7 +144,7 @@ export class EPUBDocStore extends adapt.ops.OPSDocStore {
             .then((encXML) => {
               const zipMetadataResult = haveZipMetadata ?
                   self.loadAsJSON(`${epubURL}?r=list`) :
-                  adapt.task.newResult(null);
+                  task.newResult(null);
               zipMetadataResult.then((zipMetadata) => {
                 opf = new OPFDoc(self, epubURL);
                 opf.initWithXMLDoc(
@@ -162,8 +162,8 @@ export class EPUBDocStore extends adapt.ops.OPSDocStore {
   }
 
   addDocument(url: string, doc: Document) {
-    const frame = adapt.task.newFrame('EPUBDocStore.load');
-    const docURL = adapt.base.stripFragment(url);
+    const frame = task.newFrame('EPUBDocStore.load');
+    const docURL = base.stripFragment(url);
     const r = this.documents[docURL] = this.parseOPSResource({
       status: 200,
       url: docURL,
@@ -180,14 +180,14 @@ export class EPUBDocStore extends adapt.ops.OPSDocStore {
    * @override
    */
   load(url) {
-    const docURL = adapt.base.stripFragment(url);
+    const docURL = base.stripFragment(url);
     let r = this.documents[docURL];
     if (r) {
-      return r.isPending() ? r : adapt.task.newResult(r.get());
+      return r.isPending() ? r : task.newResult(r.get());
     } else {
-      const frame = adapt.task.newFrame('EPUBDocStore.load');
-      r = EPUBDocStore.superClass_.load.call(
-          this, docURL, true,
+      const frame = task.newFrame('EPUBDocStore.load');
+      r = super(
+          docURL, true,
           `Failed to fetch a source document from ${docURL}`);
       r.then((xmldoc) => {
         if (!xmldoc) {
@@ -201,7 +201,7 @@ export class EPUBDocStore extends adapt.ops.OPSDocStore {
     }
   }
 }
-goog.inherits(EPUBDocStore, ops.OPSDocStore);
+
 type OPFItemParam = {
   url: string,
   index: number,
@@ -226,16 +226,16 @@ export class OPFItem {
   itemProperties: {[key: string]: boolean};
 
   constructor() {
-    this.itemProperties = adapt.base.emptyObj;
+    this.itemProperties = base.emptyObj;
   }
 
   initWithElement(itemElem: Element, opfURL: string): void {
     this.id = itemElem.getAttribute('id');
-    this.src = adapt.base.resolveURL(itemElem.getAttribute('href'), opfURL);
+    this.src = base.resolveURL(itemElem.getAttribute('href'), opfURL);
     this.mediaType = itemElem.getAttribute('media-type');
     const propStr = itemElem.getAttribute('properties');
     if (propStr) {
-      this.itemProperties = adapt.base.arrayToSet(propStr.split(/\s+/));
+      this.itemProperties = base.arrayToSet(propStr.split(/\s+/));
     }
   }
 
@@ -254,7 +254,7 @@ export const makeDeobfuscator = (uid: string): (p1: Blob) => Result<Blob> => {
   // TODO: use UTF8 of uid
   const sha1 = sha1.bytesToSHA1Int8(uid);
   return (blob) => {
-    const frame = (adapt.task.newFrame('deobfuscator') as Frame<Blob>);
+    const frame = (task.newFrame('deobfuscator') as Frame<Blob>);
     let head;
     let tail;
     if (blob.slice) {
@@ -399,7 +399,7 @@ export const readMetadata = (mroot: xmldoc.NodeList, prefixes: string|null): JSO
         };
       }
     } else {
-      if (node.namespaceURI == adapt.base.NS.DC) {
+      if (node.namespaceURI == base.NS.DC) {
         return {
           name: predefinedPrefixes['dcterms'] + node.localName,
           order: order++,
@@ -416,10 +416,10 @@ export const readMetadata = (mroot: xmldoc.NodeList, prefixes: string|null): JSO
 
   // Items grouped by their target id.
   const rawItemsByTarget =
-      adapt.base.multiIndexArray(rawItems, (rawItem) => rawItem.refines);
+      base.multiIndexArray(rawItems, (rawItem) => rawItem.refines);
   const makeMetadata = (map) =>
-      adapt.base.mapObj(map, (rawItemArr, itemName) => {
-        const result = adapt.base.map(rawItemArr, (rawItem) => {
+      base.mapObj(map, (rawItemArr, itemName) => {
+        const result = base.map(rawItemArr, (rawItem) => {
           const entry = {'v': rawItem.value, 'o': rawItem.order};
           if (rawItem.schema) {
             entry['s'] = rawItem.scheme;
@@ -445,7 +445,7 @@ export const readMetadata = (mroot: xmldoc.NodeList, prefixes: string|null): JSO
                 }
               }
               const entryMap =
-                  adapt.base.multiIndexArray(refs, (rawItem) => rawItem.name);
+                  base.multiIndexArray(refs, (rawItem) => rawItem.name);
               entry['r'] = makeMetadata(entryMap);
             }
           }
@@ -453,7 +453,7 @@ export const readMetadata = (mroot: xmldoc.NodeList, prefixes: string|null): JSO
         });
         return result;
       });
-  const metadata = makeMetadata(adapt.base.multiIndexArray(
+  const metadata = makeMetadata(base.multiIndexArray(
       rawItems, (rawItem) => rawItem.refines ? null : rawItem.name));
   let lang = null;
   if (metadata[metaTerms.language]) {
@@ -485,7 +485,7 @@ export const getMathJaxHub = (): Object => {
 
 export const checkMathJax = (): void => {
   if (getMathJaxHub()) {
-    csscasc.supportedNamespaces[adapt.base.NS.MATHML] = true;
+    csscasc.supportedNamespaces[base.NS.MATHML] = true;
   }
 };
 
@@ -534,7 +534,7 @@ export class OPFDoc {
        */
       transformFragment(fragment, baseURL) {
         const url = baseURL + (fragment ? `#${fragment}` : '');
-        return transformedIdPrefix + adapt.base.escapeNameStrToHex(url, ':');
+        return transformedIdPrefix + base.escapeNameStrToHex(url, ':');
       }
 
       /**
@@ -564,7 +564,7 @@ export class OPFDoc {
         if (encoded.indexOf(transformedIdPrefix) === 0) {
           encoded = encoded.substring(transformedIdPrefix.length);
         }
-        const decoded = adapt.base.unescapeStrFromHex(encoded, ':');
+        const decoded = base.unescapeStrFromHex(encoded, ':');
         const r = decoded.match(/^([^#]*)#?(.*)$/);
         return r ? [r[1], r[2]] : [];
       }
@@ -612,7 +612,7 @@ export class OPFDoc {
       }
     }
     const srcToFallbackId = {};
-    this.items = adapt.base.map(
+    this.items = base.map(
         pkg.child('manifest').child('item').asArray(), (node) => {
           const item = new OPFItem();
           const elem = (node as Element);
@@ -629,9 +629,9 @@ export class OPFDoc {
           }
           return item;
         });
-    this.itemMap = adapt.base.indexArray(
+    this.itemMap = base.indexArray(
         this.items, (getOPFItemId as (p1: OPFItem) => string | null));
-    this.itemMapByPath = adapt.base.indexArray(
+    this.itemMapByPath = base.indexArray(
         this.items, (item) => self.getPathFromURL(item.src));
     for (const src in srcToFallbackId) {
       let fallbackSrc = src;
@@ -647,7 +647,7 @@ export class OPFDoc {
         fallbackSrc = item.src;
       }
     }
-    this.spine = adapt.base.map(
+    this.spine = base.map(
         pkg.child('spine').child('itemref').asArray(), (node, index) => {
           const elem = (node as Element);
           const id = elem.getAttribute('idref');
@@ -701,9 +701,9 @@ export class OPFDoc {
               deobfuscator;
         }
       }
-      return adapt.task.newResult(true);
+      return task.newResult(true);
     }
-    const manifestText = new adapt.base.StringBuffer();
+    const manifestText = new base.StringBuffer();
     const obfuscations = {};
     if (idpfObfURLs.length > 0 && this.uid) {
       // Deobfuscate in the server.
@@ -784,7 +784,7 @@ export class OPFDoc {
     if (doc) {
       return this.store.addDocument(params[0].url, doc);
     } else {
-      return adapt.task.newResult(null);
+      return task.newResult(null);
     }
   }
 
@@ -793,7 +793,7 @@ export class OPFDoc {
    */
   getCFI(spineIndex: number, offsetInItem: number): Result<string|null> {
     const item = this.spine[spineIndex];
-    const frame: Frame<string|null> = adapt.task.newFrame('getCFI');
+    const frame: Frame<string|null> = task.newFrame('getCFI');
     this.store.load(item.src).then((xmldoc) => {
       const node = xmldoc.getNodeByOffset(offsetInItem);
       let cfi = null;
@@ -814,7 +814,7 @@ export class OPFDoc {
 
   resolveFragment(fragstr: string|null): Result<Position|null> {
     const self = this;
-    return adapt.task.handle(
+    return task.handle(
         'resolveFragment',
         (frame: Frame<Position|null>):
             void => {
@@ -863,7 +863,7 @@ export class OPFDoc {
 
   resolveEPage(epage: number): Result<Position|null> {
     const self = this;
-    return adapt.task.handle(
+    return task.handle(
         'resolveEPage',
         (frame: Frame<Position|null>):
             void => {
@@ -872,7 +872,7 @@ export class OPFDoc {
                 return;
               }
               const spineIndex =
-                  adapt.base.binarySearch(self.spine.length, (index) => {
+                  base.binarySearch(self.spine.length, (index) => {
                     const item = self.spine[index];
                     return item.epage + item.epageCount > epage;
                   });
@@ -903,9 +903,9 @@ export class OPFDoc {
   getEPageFromPosition(position: Position): Result<number> {
     const item = this.spine[position.spineIndex];
     if (position.offsetInItem <= 0) {
-      return adapt.task.newResult(item.epage);
+      return task.newResult(item.epage);
     }
-    const frame: Frame<number> = adapt.task.newFrame('getEPage');
+    const frame: Frame<number> = task.newFrame('getEPage');
     this.store.load(item.src).then((xmldoc) => {
       const totalOffset = xmldoc.getTotalOffset();
       const offset = Math.min(totalOffset, position.offsetInItem);
@@ -953,8 +953,8 @@ export class OPFView implements CustomRendererFactory {
           (p1: {width: number, height: number},
            p2: {[key: string]: {width: number, height: number}}, p3: number,
            p4: number) => any) {
-    this.pref = adapt.expr.clonePreferences(pref);
-    this.clientLayout = new adapt.vgen.DefaultClientLayout(viewport);
+    this.pref = clonePreferences(pref);
+    this.clientLayout = new DefaultClientLayout(viewport);
     this.counterStore = new counters.CounterStore(opf.documentURLTransformer);
   }
 
@@ -1010,7 +1010,7 @@ export class OPFView implements CustomRendererFactory {
   private renderSinglePage(viewItem: OPFViewItem, pos: LayoutPosition):
       Result<OPFView.RenderSinglePageResult> {
     const frame: Frame<OPFView.RenderSinglePageResult> =
-        adapt.task.newFrame('renderSinglePage');
+        task.newFrame('renderSinglePage');
     let page = this.makePage(viewItem, pos);
     const self = this;
     viewItem.instance.layoutNextPage(page, pos).then((posParam) => {
@@ -1033,7 +1033,7 @@ export class OPFView implements CustomRendererFactory {
         }
       }
       if (!cont) {
-        cont = adapt.task.newResult(true);
+        cont = task.newResult(true);
       }
       cont.then(() => {
         const unresolvedRefs = self.counterStore.getUnresolvedRefsToPage(page);
@@ -1096,7 +1096,7 @@ export class OPFView implements CustomRendererFactory {
       seekOffset = position.offsetInItem;
 
       // page with offset higher than seekOffset
-      const seekOffsetPageIndex = adapt.base.binarySearch(
+      const seekOffsetPageIndex = base.binarySearch(
           viewItem.layoutPositions.length, (pageIndex) => {
             // 'noLookAhead' argument of getPosition must be true, since
             // otherwise StyleInstance.currentLayoutPosition is modified
@@ -1133,7 +1133,7 @@ export class OPFView implements CustomRendererFactory {
   private findPage(position: Position, sync?: boolean):
       Result<PageAndPosition|null> {
     const self = this;
-    const frame: Frame<PageAndPosition|null> = adapt.task.newFrame('findPage');
+    const frame: Frame<PageAndPosition|null> = task.newFrame('findPage');
     self.getPageViewItem(position.spineIndex).then((viewItem) => {
       if (!viewItem) {
         frame.finish(null);
@@ -1185,7 +1185,7 @@ export class OPFView implements CustomRendererFactory {
   renderPage(position: Position): Result<PageAndPosition|null> {
     const self = this;
     const frame: Frame<PageAndPosition|null> =
-        adapt.task.newFrame('renderPage');
+        task.newFrame('renderPage');
     self.getPageViewItem(position.spineIndex).then((viewItem) => {
       if (!viewItem) {
         frame.finish(null);
@@ -1268,7 +1268,7 @@ export class OPFView implements CustomRendererFactory {
   renderPagesUpto(position: Position): Result<PageAndPosition|null> {
     const self = this;
     const frame: Frame<PageAndPosition|null> =
-        adapt.task.newFrame('renderAllPages');
+        task.newFrame('renderAllPages');
     if (!position) {
       position = {spineIndex: 0, pageIndex: 0, offsetInItem: 0};
     }
@@ -1325,7 +1325,7 @@ export class OPFView implements CustomRendererFactory {
     const self = this;
     let spineIndex = position.spineIndex;
     let pageIndex = position.pageIndex;
-    const frame: Frame<PageAndPosition|null> = adapt.task.newFrame('nextPage');
+    const frame: Frame<PageAndPosition|null> = task.newFrame('nextPage');
     self.getPageViewItem(spineIndex).then((viewItem) => {
       if (!viewItem) {
         frame.finish(null);
@@ -1356,7 +1356,7 @@ export class OPFView implements CustomRendererFactory {
     let pageIndex = position.pageIndex;
     if (pageIndex == 0) {
       if (spineIndex == 0) {
-        return adapt.task.newResult((null as PageAndPosition | null));
+        return task.newResult((null as PageAndPosition | null));
       }
       spineIndex--;
       pageIndex = Number.POSITIVE_INFINITY;
@@ -1382,11 +1382,11 @@ export class OPFView implements CustomRendererFactory {
    *     rendering task)
    */
   getSpread(position: Position, sync: boolean): Result<Spread> {
-    const frame: Frame<Spread> = adapt.task.newFrame('getCurrentSpread');
+    const frame: Frame<Spread> = task.newFrame('getCurrentSpread');
     const page = this.getPage(position);
     if (!page) {
-      return adapt.task.newResult(
-          /** @type adapt.vtree.Spread */
+      return task.newResult(
+          /** @type Spread */
           ({left: null, right: null} as Spread));
     }
     const isLeft = page.side === constants.PageSide.LEFT;
@@ -1416,7 +1416,7 @@ export class OPFView implements CustomRendererFactory {
   nextSpread(position: Position, sync?: boolean): Result<PageAndPosition|null> {
     const page = this.getPage(position);
     if (!page) {
-      return adapt.task.newResult((null as PageAndPosition | null));
+      return task.newResult((null as PageAndPosition | null));
     }
     const isRecto = this.isRectoPage(page, position);
     const next = this.nextPage(position, !!sync);
@@ -1428,7 +1428,7 @@ export class OPFView implements CustomRendererFactory {
         if (result) {
           return self.nextPage(result.position, !!sync);
         } else {
-          return adapt.task.newResult((null as PageAndPosition | null));
+          return task.newResult((null as PageAndPosition | null));
         }
       });
     }
@@ -1441,7 +1441,7 @@ export class OPFView implements CustomRendererFactory {
   previousSpread(position: Position): Result<PageAndPosition|null> {
     const page = this.getPage(position);
     if (!page) {
-      return adapt.task.newResult((null as PageAndPosition | null));
+      return task.newResult((null as PageAndPosition | null));
     }
     const isRecto = this.isRectoPage(page, position);
     const prev = this.previousPage(position);
@@ -1451,7 +1451,7 @@ export class OPFView implements CustomRendererFactory {
         if (result) {
           return self.previousPage(result.position);
         } else {
-          return adapt.task.newResult((null as PageAndPosition | null));
+          return task.newResult((null as PageAndPosition | null));
         }
       });
     } else {
@@ -1464,7 +1464,7 @@ export class OPFView implements CustomRendererFactory {
    */
   navigateToEPage(epage: number): Result<PageAndPosition|null> {
     const frame: Frame<PageAndPosition|null> =
-        adapt.task.newFrame('navigateToEPage');
+        task.newFrame('navigateToEPage');
     const self = this;
     this.opf.resolveEPage(epage).then((position) => {
       if (position) {
@@ -1481,7 +1481,7 @@ export class OPFView implements CustomRendererFactory {
    */
   navigateToFragment(fragment: string): Result<PageAndPosition|null> {
     const frame: Frame<PageAndPosition|null> =
-        adapt.task.newFrame('navigateToCFI');
+        task.newFrame('navigateToCFI');
     const self = this;
     self.opf.resolveFragment(fragment).then((position) => {
       if (position) {
@@ -1498,7 +1498,7 @@ export class OPFView implements CustomRendererFactory {
    */
   navigateTo(href: string, position: Position): Result<PageAndPosition|null> {
     logging.logger.debug('Navigate to', href);
-    let path = this.opf.getPathFromURL(adapt.base.stripFragment(href));
+    let path = this.opf.getPathFromURL(base.stripFragment(href));
     if (!path) {
       if (this.opf.opfXML && href.match(/^#epubcfi\(/)) {
         // CFI fragment is "relative" to OPF.
@@ -1515,7 +1515,7 @@ export class OPFView implements CustomRendererFactory {
         }
       }
       if (path == null) {
-        return adapt.task.newResult((null as PageAndPosition | null));
+        return task.newResult((null as PageAndPosition | null));
       }
     }
     const item = this.opf.itemMapByPath[path];
@@ -1528,10 +1528,10 @@ export class OPFView implements CustomRendererFactory {
           return this.navigateToFragment(href.substr(fragmentIndex + 1));
         }
       }
-      return adapt.task.newResult((null as PageAndPosition | null));
+      return task.newResult((null as PageAndPosition | null));
     }
     const frame: Frame<PageAndPosition|null> =
-        adapt.task.newFrame('navigateTo');
+        task.newFrame('navigateTo');
     const self = this;
     self.getPageViewItem(item.spineIndex).then((viewItem) => {
       const target = viewItem.xmldoc.getElement(href);
@@ -1570,7 +1570,7 @@ export class OPFView implements CustomRendererFactory {
     const bleedBox = (viewport.document.createElement('div') as HTMLElement);
     bleedBox.setAttribute('data-vivliostyle-bleed-box', true);
     pageCont.appendChild(bleedBox);
-    const page = new adapt.vtree.Page(pageCont, bleedBox);
+    const page = new Page(pageCont, bleedBox);
     page.spineIndex = viewItem.item.spineIndex;
     page.position = pos;
     page.offset = viewItem.instance.getPosition(pos);
@@ -1581,13 +1581,13 @@ export class OPFView implements CustomRendererFactory {
       page.registerElementWithId(bleedBox, id);
     }
     if (viewport !== this.viewport) {
-      const matrix = adapt.expr.letterbox(
+      const matrix = letterbox(
           this.viewport.width, this.viewport.height, viewport.width,
           viewport.height);
-      const cssMatrix = adapt.cssparse.parseValue(
-          null, new adapt.csstok.Tokenizer(matrix, null), '');
+      const cssMatrix = parseValue(
+          null, new Tokenizer(matrix, null), '');
       page.delayedItems.push(
-          new adapt.vtree.DelayedItem(pageCont, 'transform', cssMatrix));
+          new DelayedItem(pageCont, 'transform', cssMatrix));
     }
     return page;
   }
@@ -1598,7 +1598,7 @@ export class OPFView implements CustomRendererFactory {
     let data = srcElem.getAttribute('data');
     let result: Element = null;
     if (data) {
-      data = adapt.base.resolveURL(data, xmldoc.url);
+      data = base.resolveURL(data, xmldoc.url);
       let mediaType = srcElem.getAttribute('media-type');
       if (!mediaType) {
         const path = this.opf.getPathFromURL(data);
@@ -1614,9 +1614,9 @@ export class OPFView implements CustomRendererFactory {
         if (handlerSrc) {
           result = this.viewport.document.createElement('iframe');
           result.style.border = 'none';
-          const srcParam = adapt.base.lightURLEncode(data);
-          const typeParam = adapt.base.lightURLEncode(mediaType);
-          const sb = new adapt.base.StringBuffer();
+          const srcParam = base.lightURLEncode(data);
+          const typeParam = base.lightURLEncode(mediaType);
+          const sb = new base.StringBuffer();
           sb.append(handlerSrc);
           sb.append('?src=');
           sb.append(srcParam);
@@ -1626,7 +1626,7 @@ export class OPFView implements CustomRendererFactory {
             if (c.nodeType == 1) {
               const ce = (c as Element);
               if (ce.localName == 'param' &&
-                  ce.namespaceURI == adapt.base.NS.XHTML) {
+                  ce.namespaceURI == base.NS.XHTML) {
                 const pname = ce.getAttribute('name');
                 const pvalue = ce.getAttribute('value');
                 if (pname && pvalue) {
@@ -1656,7 +1656,7 @@ export class OPFView implements CustomRendererFactory {
     }
 
     // Need to cast because we need {Element}, not {!Element}
-    return adapt.task.newResult((result as Element));
+    return task.newResult((result as Element));
   }
 
   makeMathJaxView(
@@ -1673,14 +1673,14 @@ export class OPFView implements CustomRendererFactory {
       span.appendChild(clonedMath);
       const queue = hub['queue'];
       queue['Push'](['Typeset', hub, span]);
-      const frame: Frame<Element> = adapt.task.newFrame('makeMathJaxView');
+      const frame: Frame<Element> = task.newFrame('makeMathJaxView');
       const continuation = frame.suspend();
       queue['Push'](() => {
         continuation.schedule(span);
       });
       return frame.result();
     }
-    return adapt.task.newResult((null as Element));
+    return task.newResult((null as Element));
   }
 
   private resolveURLsInMathML(node: Node, xmldoc: xmldoc.XMLDocHolder) {
@@ -1693,7 +1693,7 @@ export class OPFView implements CustomRendererFactory {
         if (attr.name !== 'src') {
           continue;
         }
-        const newUrl = adapt.base.resolveURL(attr.nodeValue, xmldoc.url);
+        const newUrl = base.resolveURL(attr.nodeValue, xmldoc.url);
         if (attr.namespaceURI) {
           node.setAttributeNS(attr.namespaceURI, attr.name, newUrl);
         } else {
@@ -1742,7 +1742,7 @@ export class OPFView implements CustomRendererFactory {
     result.setAttribute('data-adapt-process-children', 'true');
 
     // Need to cast because we need {Element}, not {!Element}
-    return adapt.task.newResult((result as Element));
+    return task.newResult((result as Element));
   }
 
   /**
@@ -1753,14 +1753,14 @@ export class OPFView implements CustomRendererFactory {
     return (srcElem: Element, viewParent: Element,
             computedStyle): Result<Element> => {
       if (srcElem.localName == 'object' &&
-          srcElem.namespaceURI == adapt.base.NS.XHTML) {
+          srcElem.namespaceURI == base.NS.XHTML) {
         return self.makeObjectView(xmldoc, srcElem, viewParent, computedStyle);
       } else {
-        if (srcElem.namespaceURI == adapt.base.NS.MATHML) {
+        if (srcElem.namespaceURI == base.NS.MATHML) {
           return self.makeMathJaxView(
               xmldoc, srcElem, viewParent, computedStyle);
         } else {
-          if (srcElem.namespaceURI == adapt.base.NS.SSE) {
+          if (srcElem.namespaceURI == base.NS.SSE) {
             return self.makeSSEView(xmldoc, srcElem, viewParent, computedStyle);
           } else {
             if (srcElem.dataset && srcElem.dataset['mathTypeset'] == 'true') {
@@ -1770,20 +1770,20 @@ export class OPFView implements CustomRendererFactory {
           }
         }
       }
-      return adapt.task.newResult((null as Element));
+      return task.newResult((null as Element));
     };
   }
 
   getPageViewItem(spineIndex: number): Result<OPFViewItem> {
     const self = this;
     if (spineIndex >= self.opf.spine.length) {
-      return adapt.task.newResult((null as OPFViewItem));
+      return task.newResult((null as OPFViewItem));
     }
     let viewItem = self.spineItems[spineIndex];
     if (viewItem) {
-      return adapt.task.newResult(viewItem);
+      return task.newResult(viewItem);
     }
-    const frame: Frame<OPFViewItem> = adapt.task.newFrame('getPageViewItem');
+    const frame: Frame<OPFViewItem> = task.newFrame('getPageViewItem');
 
     // If loading for the item has already been started, suspend and wait for
     // the result.
@@ -1814,7 +1814,7 @@ export class OPFView implements CustomRendererFactory {
       if (viewportSize.width != viewport.width ||
           viewportSize.height != viewport.height ||
           viewportSize.fontSize != viewport.fontSize) {
-        viewport = new adapt.vgen.Viewport(
+        viewport = new Viewport(
             viewport.window, viewportSize.fontSize, viewport.root,
             viewportSize.width, viewportSize.height);
       }
@@ -1892,9 +1892,9 @@ export class OPFView implements CustomRendererFactory {
     const opf = this.opf;
     const toc = opf.xhtmlToc || opf.ncxToc;
     if (!toc) {
-      return adapt.task.newResult((null as Page));
+      return task.newResult((null as Page));
     }
-    const frame: Frame<Page> = adapt.task.newFrame('showTOC');
+    const frame: Frame<Page> = task.newFrame('showTOC');
     if (!this.tocView) {
       this.tocView = new toc.TOCView(
           opf.store, toc.src, opf.lang, this.clientLayout, this.fontMapper,

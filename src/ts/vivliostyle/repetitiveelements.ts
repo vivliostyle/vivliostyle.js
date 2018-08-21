@@ -3,18 +3,19 @@
  * @fileoverview Elements repeated in every fragment by repeat-on-break
  * property.
  */
+import * as asserts from '../closure/goog/asserts/asserts';
+
 import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';
 
-import {LayoutMode} from './layoututil';
+import {LayoutMode, LayoutIterator, EdgeSkippers, AbstractLayoutRetryer, PseudoColumn} from './layoututil';
 
 import * as break from './break';
 import * as layout from '../adapt/layout';
-const LayoutIterator = vivliostyle.layoututil.LayoutIterator;
-const EdgeSkipper = vivliostyle.layoututil.EdgeSkipper;
-const AbstractLayoutRetryer = vivliostyle.layoututil.AbstractLayoutRetryer;
-const BlockLayoutProcessor = layout.BlockLayoutProcessor;
-const PseudoColumn = vivliostyle.layoututil.PseudoColumn;
+
+import * as selectors from './selectors';
+import * as table from './table';
+import * as plugin from './plugin';
 
 export class RepetitiveElementsOwnerFormattingContext implements
     vtree.FormattingContext {
@@ -28,7 +29,7 @@ export class RepetitiveElementsOwnerFormattingContext implements
   /**
    * @override
    */
-  getName() 'Repetitive elements owner formatting context (vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext)'
+  getName() 'Repetitive elements owner formatting context (RepetitiveElementsOwnerFormattingContext)'
 
   /**
    * @override
@@ -402,7 +403,7 @@ export class LayoutEntireBlock implements LayoutMode {
   postLayout(positionAfter, initialPosition, column, accepted) {
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
     if (repetitiveElements) {
-      goog.asserts.assert(column.clientLayout);
+      asserts.assert(column.clientLayout);
       if (!repetitiveElements.doneInitialLayout) {
         repetitiveElements.updateHeight(column);
         repetitiveElements.doneInitialLayout = true;
@@ -441,11 +442,11 @@ export class LayoutFragmentedBlock implements LayoutMode {
 const LayoutFragmentedBlock = LayoutFragmentedBlock;
 
 export class LayoutEntireOwnerBlock extends
-    vivliostyle.repetitiveelements.LayoutEntireBlock {
+    LayoutEntireBlock {
   constructor(
       formattingContext: RepetitiveElementsOwnerFormattingContext,
       public readonly processor: RepetitiveElementsOwnerLayoutProcessor) {
-    LayoutEntireBlock.call(this, formattingContext);
+    super(formattingContext);
   }
 
   /**
@@ -461,11 +462,9 @@ export class LayoutEntireOwnerBlock extends
    */
   accept(nodeContext, column) false
 }
-const LayoutEntireOwnerBlock = LayoutEntireOwnerBlock;
-goog.inherits(LayoutEntireOwnerBlock, LayoutEntireBlock);
 
 export class LayoutFragmentedOwnerBlock extends
-    vivliostyle.repetitiveelements.LayoutFragmentedBlock {
+    LayoutFragmentedBlock {
   constructor(
       formattingContext: RepetitiveElementsOwnerFormattingContext,
       public readonly processor: RepetitiveElementsOwnerLayoutProcessor) {
@@ -483,8 +482,6 @@ export class LayoutFragmentedOwnerBlock extends
     return this.processor.doLayout(nodeContext, column);
   }
 }
-const LayoutFragmentedOwnerBlock = LayoutFragmentedOwnerBlock;
-goog.inherits(LayoutFragmentedOwnerBlock, LayoutFragmentedBlock);
 
 export class RepetitiveElementsOwnerLayoutConstraint implements
     layout.FragmentLayoutConstraint {
@@ -588,7 +585,7 @@ const RepetitiveElementsOwnerLayoutConstraint =
     RepetitiveElementsOwnerLayoutConstraint;
 
 export class RepetitiveElementsOwnerLayoutRetryer extends
-    vivliostyle.layoututil.AbstractLayoutRetryer {
+    AbstractLayoutRetryer {
   constructor(
       public readonly formattingContext:
           RepetitiveElementsOwnerFormattingContext,
@@ -616,12 +613,9 @@ export class RepetitiveElementsOwnerLayoutRetryer extends
     }
   }
 }
-const RepetitiveElementsOwnerLayoutRetryer =
-    RepetitiveElementsOwnerLayoutRetryer;
-goog.inherits(RepetitiveElementsOwnerLayoutRetryer, AbstractLayoutRetryer);
 
 export class EntireBlockLayoutStrategy extends
-    vivliostyle.layoututil.EdgeSkipper {
+    EdgeSkipper {
   constructor(
       public readonly formattingContext:
           RepetitiveElementsOwnerFormattingContext,
@@ -681,21 +675,17 @@ export class EntireBlockLayoutStrategy extends
     }
   }
 }
-const EntireBlockLayoutStrategy = EntireBlockLayoutStrategy;
-goog.inherits(EntireBlockLayoutStrategy, EdgeSkipper);
 
 export class FragmentedBlockLayoutStrategy extends
-    vivliostyle.layoututil.EdgeSkipper {
+    EdgeSkipper {
   constructor(
       public readonly formattingContext:
           RepetitiveElementsOwnerFormattingContext,
       public readonly column: layout.Column) {}
 }
-const FragmentedBlockLayoutStrategy = FragmentedBlockLayoutStrategy;
-goog.inherits(FragmentedBlockLayoutStrategy, EdgeSkipper);
 
 export class RepetitiveElementsOwnerLayoutProcessor extends
-    adapt.layout.BlockLayoutProcessor implements layout.LayoutProcessor {
+    layout.BlockLayoutProcessor implements layout.LayoutProcessor {
   /**
    * @override
    */
@@ -766,7 +756,7 @@ export class RepetitiveElementsOwnerLayoutProcessor extends
         nodeContext.formattingContext);
     const frame: task.Frame<vtree.NodeContext> = task.newFrame('doLayout');
     const cont = column.layoutContext.nextInTree(nodeContext, false);
-    vivliostyle.selectors.processAfterIfContinues(cont, column)
+    selectors.processAfterIfContinues(cont, column)
         .then((resNodeContext) => {
           let nextNodeContext = resNodeContext;
           frame
@@ -839,9 +829,6 @@ export class RepetitiveElementsOwnerLayoutProcessor extends
         column, parentNodeContext, nodeContext, removeSelf);
   }
 }
-const RepetitiveElementsOwnerLayoutProcessor =
-    RepetitiveElementsOwnerLayoutProcessor;
-goog.inherits(RepetitiveElementsOwnerLayoutProcessor, BlockLayoutProcessor);
 
 function eachAncestorNodeContext(
     nodeContext: vtree.NodeContext,
@@ -867,7 +854,7 @@ export function appendHeaderToAncestors(
       nodeContext.after ? nodeContext.parent : nodeContext,
       (formattingContext, nc) => {
         if (formattingContext instanceof
-            vivliostyle.table.TableFormattingContext) {
+            table.TableFormattingContext) {
           return;
         }
         column.fragmentLayoutConstraints.push(
@@ -933,11 +920,11 @@ export const collectElementsOffset = (column:
         repetitiveElements.push(repetitiveElement);
       }
       if (constraint instanceof
-          vivliostyle.selectors.AfterIfContinuesLayoutConstraint) {
+          selectors.AfterIfContinuesLayoutConstraint) {
         let repetitiveElement = constraint.getRepetitiveElements();
         repetitiveElements.push(repetitiveElement);
       }
-      if (constraint instanceof vivliostyle.table.TableRowLayoutConstraint) {
+      if (constraint instanceof table.TableRowLayoutConstraint) {
         constraint.getElementsOffsetsForTableCell(column).forEach(
             (repetitiveElement) => {
               repetitiveElements.push(repetitiveElement);
@@ -964,17 +951,17 @@ function getRepetitiveElementsOwnerFormattingContextOrNull(
 export function getRepetitiveElementsOwnerFormattingContext(
     formattingContext: vtree.FormattingContext):
     RepetitiveElementsOwnerFormattingContext {
-  goog.asserts.assert(
+  asserts.assert(
       formattingContext instanceof RepetitiveElementsOwnerFormattingContext);
   return (formattingContext as RepetitiveElementsOwnerFormattingContext);
 }
 const layoutProcessor = new RepetitiveElementsOwnerLayoutProcessor();
-vivliostyle.plugin.registerHook(
-    vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, (formattingContext) => {
+plugin.registerHook(
+    plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, (formattingContext) => {
       if (formattingContext instanceof
               RepetitiveElementsOwnerFormattingContext &&
           !(formattingContext instanceof
-            vivliostyle.table.TableFormattingContext)) {
+            table.TableFormattingContext)) {
         return layoutProcessor;
       }
       return null;
