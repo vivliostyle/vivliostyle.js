@@ -200,7 +200,7 @@ export class Viewer {
   }
 
   loadEPUB(command: JSON): task.Result<boolean> {
-    vivliostyle.profile.profiler.registerStartTiming('beforeRender');
+    profile.profiler.registerStartTiming('beforeRender');
     this.setReadyState(constants.ReadyState.LOADING);
     const url = (command['url'] as string);
     const fragment = (command['fragment'] as string | null);
@@ -231,7 +231,7 @@ export class Viewer {
   }
 
   loadXML(command: JSON): task.Result<boolean> {
-    vivliostyle.profile.profiler.registerStartTiming('beforeRender');
+    profile.profiler.registerStartTiming('beforeRender');
     this.setReadyState(constants.ReadyState.LOADING);
     const params: SingleDocumentParam[] = command['url'];
     const doc = (command['document'] as Document);
@@ -282,7 +282,7 @@ export class Viewer {
       cont = task.newResult(true);
     }
     return cont.thenAsync(() => {
-      vivliostyle.profile.profiler.registerEndTiming('beforeRender');
+      profile.profiler.registerEndTiming('beforeRender');
       return self.resize();
     });
   }
@@ -755,7 +755,7 @@ export class Viewer {
             'resize',
             (frame) => {
               self.renderTask = task;
-              vivliostyle.profile.profiler.registerStartTiming(
+              profile.profiler.registerStartTiming(
                   'render (resize)');
               self.reset();
               if (self.pagePosition) {
@@ -781,7 +781,7 @@ export class Viewer {
                       if (self.renderTask === task) {
                         self.renderTask = null;
                       }
-                      vivliostyle.profile.profiler.registerEndTiming(
+                      profile.profiler.registerEndTiming(
                           'render (resize)');
                       self.setReadyState(constants.ReadyState.COMPLETE);
                       self.callback({'t': 'loaded'});
@@ -793,7 +793,7 @@ export class Viewer {
             },
             (frame, err) => {
               if (err instanceof Viewer.RenderingCanceledError) {
-                vivliostyle.profile.profiler.registerEndTiming(
+                profile.profiler.registerEndTiming(
                     'render (resize)');
                 logging.logger.debug(err.message);
               } else {

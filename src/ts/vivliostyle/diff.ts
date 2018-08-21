@@ -16,12 +16,11 @@
  *
  * @fileoverview Diff utility
  */
+
+import * as fastdiff from 'fast-diff';
+
 import * as namespace from './namespace';
 
-/* eslint-disable global-require,no-undef */
-const fastdiff = require('node_modules/fast-diff/diff');
-
-/* eslint-enable global-require,no-undef */
 type Change = (number|string)[];
 
 export {Change};
