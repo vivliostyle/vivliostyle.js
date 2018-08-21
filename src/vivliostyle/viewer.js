@@ -372,15 +372,11 @@ goog.scope(() => {
         this.adaptViewer.sendCommand({"a": "moveTo", "url": url});
     };
 
-    /**
-     * @enum {string}
-     */
-    vivliostyle.viewer.ZoomType = adapt.viewer.ZoomType;
-    /** @const */ const ZoomType = vivliostyle.viewer.ZoomType;
+    /** @const */ const ZoomType = adapt.viewer.ZoomType;
 
     /**
      * Returns zoom factor corresponding to the specified zoom type.
-     * @param {vivliostyle.viewer.ZoomType} type
+     * @param {adapt.viewer.ZoomType} type
      * @returns {number}
      */
     Viewer.prototype.queryZoomFactor = function(type) {
@@ -393,11 +389,8 @@ goog.scope(() => {
     vivliostyle.viewer.Viewer.prototype.getPageSizes = function() {
         return this.adaptViewer.pageSizes;
     };
-    /**
-     * @enum {string}
-     */
-    vivliostyle.viewer.PageViewMode = adapt.viewer.PageViewMode;
-    /** @const */ var PageViewMode = vivliostyle.viewer.PageViewMode;
+
+    /** @const */ var PageViewMode = adapt.viewer.PageViewMode;
 
     vivliostyle.namespace.exportSymbol("vivliostyle.viewer.Viewer", Viewer);
     goog.exportProperty(Viewer.prototype, "setOptions", Viewer.prototype.setOptions);

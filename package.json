@@ -42,5 +42,8 @@
     "karma-verbose-reporter": "0.0.3",
     "mkdirp": "^0.5.1",
     "mustache": "^2.2.1"
+  },
+  "dependencies": {
+    "clang-format": "^1.2.4"
   }
 }

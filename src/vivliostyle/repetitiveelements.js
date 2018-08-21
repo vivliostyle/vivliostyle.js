@@ -877,7 +877,7 @@ goog.scope(() => {
      * @param {adapt.vtree.NodeContext} nodeContext
      * @param {!function(!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext, !adapt.vtree.NodeContext)} callback
      */
-    function eachAncestorNodeContext(nodeContext, callback) {
+    const eachAncestorNodeContext = function(nodeContext, callback) {
         for (let nc = nodeContext; nc; nc = nc.parent) {
             const formattingContext = nc.formattingContext;
             if (formattingContext
@@ -893,7 +893,7 @@ goog.scope(() => {
      * @param {adapt.vtree.NodeContext} nodeContext
      * @param {!adapt.layout.Column} column
      */
-    function appendHeaderToAncestors(nodeContext, column) {
+    const appendHeaderToAncestors = function(nodeContext, column) {
         if (!nodeContext) return;
         eachAncestorNodeContext(nodeContext.after ? nodeContext.parent : nodeContext, (formattingContext, nc) => {
             if (formattingContext instanceof vivliostyle.table.TableFormattingContext) return;
@@ -906,7 +906,7 @@ goog.scope(() => {
      * @param {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext
      * @param {!adapt.vtree.NodeContext} nodeContext
      */
-    function appendHeader(formattingContext, nodeContext, column) {
+    const appendHeader = function(formattingContext, nodeContext, column) {
         const repetitiveElements = formattingContext.getRepetitiveElements();
         if (repetitiveElements) {
             const rootNodeContext = formattingContext.getRootNodeContext(nodeContext);
@@ -922,7 +922,7 @@ goog.scope(() => {
      * @param {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} formattingContext
      * @param {!adapt.vtree.NodeContext} nodeContext
      */
-    function appendFooter(formattingContext, nodeContext, column) {
+    const appendFooter = function(formattingContext, nodeContext, column) {
         const repetitiveElements = formattingContext.getRepetitiveElements();
         if (repetitiveElements) {
             if (!repetitiveElements.isSkipFooter) {
@@ -939,7 +939,7 @@ goog.scope(() => {
      * @param {adapt.vtree.NodeContext} nodeContext
      * @return {boolean}
      */
-    function isFirstContentOfRepetitiveElementsOwner(nodeContext) {
+    const isFirstContentOfRepetitiveElementsOwner = function(nodeContext) {
         if (!nodeContext || !nodeContext.parent) return false;
         const formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext.parent);
         if (!formattingContext) return false;
@@ -984,7 +984,7 @@ goog.scope(() => {
      * @param {adapt.vtree.NodeContext} nodeContext
      * @return {vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext}
      */
-    function getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext) {
+    const getRepetitiveElementsOwnerFormattingContextOrNull = function(nodeContext) {
         const formattingContext = nodeContext.formattingContext;
         if (!formattingContext) return null;
         if (!(formattingContext instanceof RepetitiveElementsOwnerFormattingContext)) return null;
@@ -996,7 +996,7 @@ goog.scope(() => {
      * @param {adapt.vtree.FormattingContext} formattingContext
      * @returns {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext}
      */
-    function getRepetitiveElementsOwnerFormattingContext(formattingContext) {
+    const getRepetitiveElementsOwnerFormattingContext = function(formattingContext) {
         goog.asserts.assert(formattingContext instanceof RepetitiveElementsOwnerFormattingContext);
         return /** @type {!vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext} */ (formattingContext);
     }
