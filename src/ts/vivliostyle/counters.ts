@@ -48,7 +48,7 @@ export class TargetCounterReference {
   pageCounters: csscasc.CounterValues = null;
   spineIndex: number = -1;
   pageIndex: number = -1;
-  resolved: any;
+  resolved: boolean;
 
   constructor(public readonly targetId: string, public resolved: boolean) {}
 
@@ -143,15 +143,15 @@ class CounterResolver implements csscasc.CounterResolver {
       const values = self.counterStore.currentPageCounters[name];
       return values && values.length ? values[values.length - 1] : null;
     }
-    const expr = new expr.Native(
+    const expression = new expr.Native(
         this.pageScope, () => format(getCounterNumber()),
         `page-counter-${name}`);
 
     function arrayFormat(arr) {
       return format(arr[0]);
     }
-    this.counterStore.registerPageCounterExpr(name, arrayFormat, expr);
-    return expr;
+    this.counterStore.registerPageCounterExpr(name, arrayFormat, expression);
+    return expression;
   }
 
   /**

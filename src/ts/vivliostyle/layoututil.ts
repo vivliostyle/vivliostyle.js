@@ -72,7 +72,6 @@ export class LayoutIteratorStrategy {
 
   finish(state: LayoutIteratorState): undefined|task.Result<boolean> {}
 }
-const LayoutIteratorStrategy = LayoutIteratorStrategy;
 
 export class LayoutIterator {
   constructor(

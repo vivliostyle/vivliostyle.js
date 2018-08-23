@@ -18,7 +18,7 @@
  */
 import * as css from '../adapt/css';
 import {Column} from '../adapt/layout';
-import {Result} from '../adapt/task';
+import {Result, newFrame} from '../adapt/task';
 import {Frame} from '../adapt/task';
 import {LayoutPosition} from '../adapt/vtree';
 import {Container} from '../adapt/vtree';
@@ -80,7 +80,7 @@ export class ColumnBalancer {
   balanceColumns(layoutResult: ColumnLayoutResult): Result<ColumnLayoutResult> {
     const self = this;
     const frame: Frame<ColumnLayoutResult> =
-        adapt.task.newFrame('ColumnBalancer#balanceColumns');
+        newFrame('ColumnBalancer#balanceColumns');
     self.preBalance(layoutResult);
     self.savePageFloatLayoutContexts(layoutResult);
     self.layoutContainer.clear();
