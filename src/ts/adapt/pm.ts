@@ -548,7 +548,7 @@ export class PageBoxInstance {
     style['enabled'] = new css.Expr(enabled);
   }
 
-  private boxSpecificEnabled(enabled: expr.Val): expr.Val enabled
+  private boxSpecificEnabled(enabled: expr.Val): expr.Val {return enabled}
 
       protected initHorizontal(): void {
     const scope = this.pageBox.scope;

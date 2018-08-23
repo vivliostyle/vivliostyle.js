@@ -1222,7 +1222,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
    * @return isSVGUrlAttribute
    */
   isSVGUrlAttribute(attributeName: string): boolean
-      ViewFactory.SVG_URL_ATTRIBUTES.includes(attributeName.toLowerCase())
+      {return ViewFactory.SVG_URL_ATTRIBUTES.includes(attributeName.toLowerCase());}
 
   modifyElemDimensionWithImageResolution(
       images: {
@@ -1948,7 +1948,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
         });
   }
 
-  isPseudoelement(elem)!!getPseudoName(elem)
+  isPseudoelement(elem) {return !!getPseudoName(elem);}
 }
 
 export const fb2Remap = {

@@ -18,11 +18,12 @@
  */
 import * as asserts from '../closure/goog/asserts/asserts';
 
-import {Ident} from '../adapt/css';
+import {Ident, ident} from '../adapt/css';
 import {Numeric} from '../adapt/css';
 import {LayoutConstraint} from '../adapt/layout';
-import {NodePosition} from '../adapt/vtree';
+import {NodePosition, isSameNodePosition} from '../adapt/vtree';
 import {Container} from '../adapt/vtree';
+import {newResult} from '../adapt/task';
 
 import * as pagefloat from './pagefloat';
 
@@ -42,7 +43,7 @@ export class Footnote extends pagefloat.PageFloat {
   /**
    * @override
    */
-  isAllowedToPrecede(other)!(other instanceof Footnote)
+  isAllowedToPrecede(other) {return !(other instanceof Footnote);}
 }
 
 /**
@@ -59,7 +60,7 @@ export class FootnoteFragment extends PageFloatFragment {
   /**
    * @override
    */
-  getOrder() Infinity
+  getOrder() {return Infinity;}
 
   /**
    * @override
@@ -79,7 +80,7 @@ export class LineFootnotePolicyLayoutConstraint implements LayoutConstraint {
 
   allowLayout(nodeContext) {
     const nodePosition = nodeContext.toNodePosition();
-    return !adapt.vtree.isSameNodePosition(
+    return !isSameNodePosition(
         nodePosition, this.footnote.nodePosition);
   }
 }
@@ -90,12 +91,12 @@ export class FootnoteLayoutStrategy implements
   /**
    * @override
    */
-  appliesToNodeContext(nodeContext) nodeContext.floatSide === 'footnote'
+  appliesToNodeContext(nodeContext) {return nodeContext.floatSide === 'footnote';}
 
   /**
    * @override
    */
-  appliesToFloat(float) float instanceof Footnote
+  appliesToFloat(float) {return float instanceof Footnote;}
 
   /**
    * @override
@@ -118,7 +119,7 @@ export class FootnoteLayoutStrategy implements
         nodePosition, floatReference, pageFloatLayoutContext.flowName,
         nodeContext.footnotePolicy, nodeContext.floatMinWrapBlock);
     pageFloatLayoutContext.addPageFloat(float);
-    return adapt.task.newResult(float);
+    return newResult(float);
   }
 
   /**
@@ -166,7 +167,7 @@ export class FootnoteLayoutStrategy implements
   forbid(float, pageFloatLayoutContext) {
     const footnote = (float as Footnote);
     switch (footnote.footnotePolicy) {
-      case adapt.css.ident.line:
+      case ident.line:
         const constraint = new LineFootnotePolicyLayoutConstraint(footnote);
         pageFloatLayoutContext.addLayoutConstraint(
             constraint, footnote.floatReference);

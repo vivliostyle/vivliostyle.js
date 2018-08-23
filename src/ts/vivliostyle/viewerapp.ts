@@ -30,7 +30,7 @@ export const touchX: number = 0;
 
 export const touchY: number = 0;
 
-export const zoomActive: boolean = false;
+export let zoomActive: boolean = false;
 
 export const pinchDist: number = 0;
 
@@ -143,6 +143,8 @@ export const keydown = (evt: KeyboardEvent): void => {
   }
 };
 
+let zoomDist;
+
 export const touch = (evt: TouchEvent): void => {
   if (evt.type == 'touchmove') {
     evt.preventDefault();
@@ -190,13 +192,13 @@ export const touch = (evt: TouchEvent): void => {
       const pinchDist = Math.sqrt(px * px + py * py);
       if (evt.type == 'touchstart') {
         zoomActive = true;
-        .zoomDist = pinchDist;
+        zoomDist = pinchDist;
       } else {
         if (zoomActive) {
           if (evt.type == 'touchend') {
             zoomActive = false;
           }
-          const scale = pinchDist / .zoomDist;
+          const scale = pinchDist / zoomDist;
           if (scale > 1.5) {
             fontSize *= 1.2;
             sendCommand({'a': 'configure', 'fontSize': Math.round(fontSize)});
@@ -355,7 +357,7 @@ export const main = (arg): void => {
     'pageBorder': 1
   };
   setViewportSize(width, height, size, orientation, config);
-  const viewer = new viewer.Viewer(window, viewportElement, 'main', callback);
-  viewer.initEmbed(config);
+  const viewerInstance = new viewer.Viewer(window, viewportElement, 'main', callback);
+  viewerInstance.initEmbed(config);
 };
 namespace.exportSymbol('.main', main);

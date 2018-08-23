@@ -34,11 +34,11 @@ import {TableFormattingContext} from '../vivliostyle/table';
 import {isBlock} from '../vivliostyle/display';
 
 import * as base from './base';
-import {Val} from './css';
+import {ident, Val} from './css';
 import * as geom from './geom';
 import * as task from './task';
 
-import * as break from '../vivliostyle/break';
+import * as breaks from '../vivliostyle/break';
 import * as vtree from './vtree';
 import * as layoututil from '../vivliostyle/layoututil';
 import * as pagefloat from '../vivliostyle/pagefloat';
@@ -307,7 +307,7 @@ export class AbstractBreakPosition implements BreakPosition {
    */
   breakPositionChosen(column) {}
 
-  getNodeContext(): vtree.NodeContext null
+  getNodeContext(): vtree.NodeContext {return null;}
 }
 
 export function calculateOffset(
@@ -412,7 +412,7 @@ export class EdgeBreakPosition extends AbstractBreakPosition {
     }
     const preferDropping = this.isFirstContentOfRepetitiveElementsOwner() &&
         !this.overflowIfRepetitiveElementsDropped;
-    return (break.isAvoidBreakValue(this.breakOnEdge) ? 1 : 0) +
+    return (breaks.isAvoidBreakValue(this.breakOnEdge) ? 1 : 0) +
         (this.overflows && !preferDropping ? 3 : 0) +
         (this.position.parent ? this.position.parent.breakPenalty : 0);
   }
@@ -486,12 +486,12 @@ export class BlockFormattingContext implements vtree.FormattingContext {
   /**
    * @override
    */
-  getName() 'Block formatting context (BlockFormattingContext)'
+  getName() {return 'Block formatting context (BlockFormattingContext)';}
 
   /**
    * @override
    */
-  isFirstTime(nodeContext, firstTime) firstTime
+  isFirstTime(nodeContext, firstTime) {return firstTime;}
 
   /**
    * @override
@@ -637,9 +637,9 @@ export class Column extends vtree.Container {
   }
 
   calculateOffsetInNodeForNodeContext(position: vtree.NodePosition):
-      number position.preprocessedTextContent? resolveNewIndex(
+      number {return position.preprocessedTextContent? resolveNewIndex(
               position.preprocessedTextContent, position.offsetInNode):
-              position.offsetInNode
+              position.offsetInNode;}
 
   /**
    * @param count first-XXX nesting identifier
@@ -1504,7 +1504,7 @@ export class Column extends vtree.Container {
     const isRegionWider =
         columnContext.getContainer().width < regionContext.getContainer().width;
     if (isRegionWider && floatReference === pagefloat.FloatReference.COLUMN) {
-      if (columnSpan === adapt.css.ident.auto) {
+      if (columnSpan === ident.auto) {
         this.buildDeepElementView(nodeContext.copy()).then((position) => {
           const element = (position.viewNode as Element);
           let inlineSize =
@@ -1524,7 +1524,7 @@ export class Column extends vtree.Container {
           }
         });
       } else {
-        if (columnSpan === adapt.css.ident.all) {
+        if (columnSpan === ident.all) {
           frame.finish(pagefloat.FloatReference.REGION);
         } else {
           frame.finish(floatReference);
@@ -2532,7 +2532,7 @@ export class Column extends vtree.Container {
       // leadingEdge=true means that we are at the beginning of the new column
       // and hence must avoid a break (Otherwise leading to an infinite loop)
       return !!forcedBreakValue ||
-          !leadingEdge && break.isForcedBreakValue(breakAtTheEdge);
+          !leadingEdge && breaks.isForcedBreakValue(breakAtTheEdge);
     }
 
     function processForcedBreak() {
@@ -2605,7 +2605,7 @@ export class Column extends vtree.Container {
                   // new formatting context, or float or flex container
                   // (unbreakable)
                   leadingEdgeContexts.push(nodeContext.copy());
-                  breakAtTheEdge = break.resolveEffectiveBreakValue(
+                  breakAtTheEdge = breaks.resolveEffectiveBreakValue(
                       breakAtTheEdge, nodeContext.breakBefore);
 
                   // check if a forced break must occur before the block.
@@ -2668,7 +2668,7 @@ export class Column extends vtree.Container {
                 // we are now on end edges.
                 lastAfterNodeContext = nodeContext.copy();
                 trailingEdgeContexts.push(lastAfterNodeContext);
-                breakAtTheEdge = break.resolveEffectiveBreakValue(
+                breakAtTheEdge = breaks.resolveEffectiveBreakValue(
                     breakAtTheEdge, nodeContext.breakAfter);
                 if (style &&
                     !(self.zeroIndent(style.paddingBottom) &&
@@ -2681,7 +2681,7 @@ export class Column extends vtree.Container {
               } else {
                 // Leading edge
                 leadingEdgeContexts.push(nodeContext.copy());
-                breakAtTheEdge = break.resolveEffectiveBreakValue(
+                breakAtTheEdge = breaks.resolveEffectiveBreakValue(
                     breakAtTheEdge, nodeContext.breakBefore);
                 if (!self.layoutConstraint.allowLayout(nodeContext)) {
                   self.checkOverflowAndSaveEdgeAndBreakPosition(
@@ -2750,7 +2750,7 @@ export class Column extends vtree.Container {
             } else {
             }
           } else {
-            if (break.isForcedBreakValue(breakAtTheEdge)) {
+            if (breaks.isForcedBreakValue(breakAtTheEdge)) {
               self.pageBreakType = breakAtTheEdge;
             }
           }
@@ -2796,7 +2796,7 @@ export class Column extends vtree.Container {
                 if (!nodeContext.after) {
                   // Leading edge of non-empty block -> finished going through
                   // all starting edges of the box
-                  if (break.isForcedBreakValue(breakAtTheEdge)) {
+                  if (breaks.isForcedBreakValue(breakAtTheEdge)) {
                     self.pageBreakType = breakAtTheEdge;
                   }
                   loopFrame.breakLoop();
@@ -2807,11 +2807,11 @@ export class Column extends vtree.Container {
                 if (self.isFloatNodeContext(nodeContext) ||
                     nodeContext.flexContainer) {
                   // float or flex container (unbreakable)
-                  breakAtTheEdge = break.resolveEffectiveBreakValue(
+                  breakAtTheEdge = breaks.resolveEffectiveBreakValue(
                       breakAtTheEdge, nodeContext.breakBefore);
 
                   // check if a forced break must occur before the block.
-                  if (break.isForcedBreakValue(breakAtTheEdge)) {
+                  if (breaks.isForcedBreakValue(breakAtTheEdge)) {
                     self.pageBreakType = breakAtTheEdge;
                   }
                   loopFrame.breakLoop();
@@ -2828,7 +2828,7 @@ export class Column extends vtree.Container {
                 if (onStartEdges) {
                   // finished going through all starting edges of the box.
                   // check if a forced break must occur before the block.
-                  if (break.isForcedBreakValue(breakAtTheEdge)) {
+                  if (breaks.isForcedBreakValue(breakAtTheEdge)) {
                     self.pageBreakType = breakAtTheEdge;
                     loopFrame.breakLoop();
                     return;
@@ -2840,17 +2840,17 @@ export class Column extends vtree.Container {
                 onStartEdges = false;
 
                 // we are now on end edges.
-                breakAtTheEdge = break.resolveEffectiveBreakValue(
+                breakAtTheEdge = breaks.resolveEffectiveBreakValue(
                     breakAtTheEdge, nodeContext.breakAfter);
               } else {
                 // Leading edge
-                breakAtTheEdge = break.resolveEffectiveBreakValue(
+                breakAtTheEdge = breaks.resolveEffectiveBreakValue(
                     breakAtTheEdge, nodeContext.breakBefore);
                 const viewTag = nodeContext.viewNode.localName;
                 if (mediaTags[viewTag]) {
                   // elements that have inherent content
                   // check if a forced break must occur before the block.
-                  if (break.isForcedBreakValue(breakAtTheEdge)) {
+                  if (breaks.isForcedBreakValue(breakAtTheEdge)) {
                     self.pageBreakType = breakAtTheEdge;
                   }
                   loopFrame.breakLoop();
@@ -3569,18 +3569,18 @@ export class BlockLayoutProcessor implements LayoutProcessor {
   /**
    * @override
    */
-  createEdgeBreakPosition(position, breakOnEdge, overflows, columnBlockSize) new EdgeBreakPosition(
-      position.copy(), breakOnEdge, overflows, columnBlockSize)
+  createEdgeBreakPosition(position, breakOnEdge, overflows, columnBlockSize) {return new EdgeBreakPosition(
+      position.copy(), breakOnEdge, overflows, columnBlockSize);}
 
   /**
    * @override
    */
-  startNonInlineElementNode(nodeContext) false
+  startNonInlineElementNode(nodeContext) {return false;}
 
   /**
    * @override
    */
-  afterNonInlineElementNode(nodeContext) false
+  afterNonInlineElementNode(nodeContext) {return false;}
 
   /**
    * @override

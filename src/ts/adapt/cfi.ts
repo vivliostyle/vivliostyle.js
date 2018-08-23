@@ -93,7 +93,7 @@ export class RefStep implements Step {
   /**
    * @override
    */
-  applyTo(pos) false
+  applyTo(pos) {return false;}
 }
 
 export class ChildStep implements Step {
@@ -233,6 +233,7 @@ export class Fragment {
     let i = 0;
     const steps = [];
     while (true) {
+      let ext;
       switch (str.charAt(i)) {
         case '/':
           i++;
@@ -244,7 +245,7 @@ export class Fragment {
           i += r[0].length;
           const index = parseInt(r[1], 10);
           const id = r[3];
-          let ext = parseExt(r[4]);
+          ext = parseExt(r[4]);
           steps.push(new ChildStep(index, id, base.asString(ext['s'])));
           break;
         case ':':
@@ -264,7 +265,7 @@ export class Fragment {
           if (textAfter) {
             textAfter = unescape(textAfter);
           }
-          let ext = parseExt(r[10]);
+          ext = parseExt(r[10]);
           steps.push(new OffsetStep(
               offset, textBefore, textAfter, base.asString(ext['s'])));
           break;
@@ -306,11 +307,13 @@ export class Fragment {
     return pos;
   }
 
-  trim(text: string, after: boolean): string text.replace(/\s+/g, ' ')
+  trim(text: string, after: boolean): string {
+      return text.replace(/\s+/g, ' ')
       .match(after? /^[ -\uD7FF\uE000-\uFFFF]{0,8}/:
                  /[ -\uD7FF\uE000-\uFFFF]{0,8}$/)[0]
       .replace(/^\s/, '')
       .replace(/\s$/, '')
+  }
 
   /**
    * Initialize from a node and an offset.

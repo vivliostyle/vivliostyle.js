@@ -1186,7 +1186,7 @@ export class Container {
     return this.vertical ? -1 : 1;
   }
 
-  getInlineDir(): number 1
+  getInlineDir(): number {return 1;}
 
   copyFrom(other: Container): void {
     this.element = other.element;

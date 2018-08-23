@@ -98,7 +98,7 @@ export class ParserHandler implements csstok.TokenizerHandler {
     this.flavor = StylesheetFlavor.AUTHOR;
   }
 
-  getCurrentToken(): csstok.Token null
+  getCurrentToken(): csstok.Token {return null;}
 
   getScope(): expr.LexicalScope {
     return this.scope;

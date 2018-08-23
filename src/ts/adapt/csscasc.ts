@@ -257,7 +257,7 @@ export class CascadeValue {
     return cssparse.evaluateCSSToCSS(context, this.value, propName);
   }
 
-  isEnabled(context: expr.Context): boolean true
+  isEnabled(context: expr.Context): boolean {return true;}
 }
 
 /**
@@ -650,11 +650,11 @@ export class ChainedAction extends CascadeAction {
     this.chained.apply(cascadeInstance);
   }
 
-  getPriority(): number 0
+  getPriority(): number {return 0;}
 
   makePrimary(cascade: Cascade): boolean
   // cannot be made primary
-  false
+  {return false;}
 }
 
 export class CheckClassAction extends ChainedAction {
@@ -915,12 +915,12 @@ export class CheckNamespaceSupportedAction extends ChainedAction {
   /**
    * @override
    */
-  getPriority() 0
+  getPriority() {return 0;}
 
   /**
    * @override
    */
-  makePrimary(cascade) false
+  makePrimary(cascade) {return false;}
 }
 
 export class CheckAttributeRegExpAction extends ChainedAction {
@@ -976,7 +976,7 @@ export class IsFirstAction extends ChainedAction {
   /**
    * @override
    */
-  getPriority() 6
+  getPriority() {return 6;}
 }
 
 export class IsRootAction extends ChainedAction {
@@ -1045,7 +1045,7 @@ export class IsNthSiblingAction extends IsNthAction {
   /**
    * @override
    */
-  getPriority() 5
+  getPriority() {return 5;}
 }
 
 export class IsNthSiblingOfTypeAction extends IsNthAction {
@@ -1070,7 +1070,7 @@ export class IsNthSiblingOfTypeAction extends IsNthAction {
   /**
    * @override
    */
-  getPriority() 5
+  getPriority() {return 5;}
 }
 
 export class IsNthLastSiblingAction extends IsNthAction {
@@ -1096,7 +1096,7 @@ export class IsNthLastSiblingAction extends IsNthAction {
   /**
    * @override
    */
-  getPriority() 4
+  getPriority() {return 4;}
 }
 
 export class IsNthLastSiblingOfTypeAction extends IsNthAction {
@@ -1130,7 +1130,7 @@ export class IsNthLastSiblingOfTypeAction extends IsNthAction {
   /**
    * @override
    */
-  getPriority() 4
+  getPriority() {return 4;}
 }
 
 export class IsEmptyAction extends ChainedAction {
@@ -1160,7 +1160,7 @@ export class IsEmptyAction extends ChainedAction {
   /**
    * @override
    */
-  getPriority() 4
+  getPriority() {return 4;}
 }
 
 export class IsEnabledAction extends ChainedAction {
@@ -1181,7 +1181,7 @@ export class IsEnabledAction extends ChainedAction {
   /**
    * @override
    */
-  getPriority() 5
+  getPriority() {return 5;}
 }
 
 export class IsDisabledAction extends ChainedAction {
@@ -1202,7 +1202,7 @@ export class IsDisabledAction extends ChainedAction {
   /**
    * @override
    */
-  getPriority() 5
+  getPriority() {return 5;}
 }
 
 export class IsCheckedAction extends ChainedAction {
@@ -1223,7 +1223,7 @@ export class IsCheckedAction extends ChainedAction {
   /**
    * @override
    */
-  getPriority() 5
+  getPriority() {return 5;}
 }
 
 export class CheckConditionAction extends ChainedAction {
@@ -1248,7 +1248,7 @@ export class CheckConditionAction extends ChainedAction {
   /**
    * @override
    */
-  getPriority() 5
+  getPriority() {return 5;}
 }
 
 export class CheckAppliedAction extends CascadeAction {
@@ -1552,7 +1552,7 @@ export class AfterPseudoelementItem implements ConditionItem {
   /**
    * @override
    */
-  push(cascade, depth) false
+  push(cascade, depth) {return false;}
 
   /**
    * @override
@@ -1582,7 +1582,7 @@ export class RestoreLangItem implements ConditionItem {
   /**
    * @override
    */
-  push(cascade, depth) false
+  push(cascade, depth) {return false;}
 
   /**
    * @override
@@ -1612,7 +1612,7 @@ export class QuotesScopeItem implements ConditionItem {
   /**
    * @override
    */
-  push(cascade, depth) false
+  push(cascade, depth) {return false;}
 
   /**
    * @override

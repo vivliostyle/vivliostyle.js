@@ -167,8 +167,7 @@ function registerEndTiming(name: string, timestamp?: number) {
 }
 const fallbackPerformanceInstance = ({now: Date.now} as Performance);
 const performanceInstance = window && window.performance;
-const profiler = profile.profiler =
-    new Profiler(performanceInstance || fallbackPerformanceInstance);
+export const profiler = new Profiler(performanceInstance || fallbackPerformanceInstance);
 profiler.forceRegisterStartTiming('load_vivliostyle');
 namespace.exportSymbol('vivliostyle.profile.profiler', profiler);
 goog.exportProperty(

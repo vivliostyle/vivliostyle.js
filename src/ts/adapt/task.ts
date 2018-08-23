@@ -175,12 +175,12 @@ export class TimerImpl implements Timer {
   /**
    * @override
    */
-  currentTime()(new Date()).valueOf()
+  currentTime() {return (new Date()).valueOf();}
 
   /**
    * @override
    */
-  setTimeout(fn, delay) setTimeout(fn, delay)
+  setTimeout(fn, delay) {return setTimeout(fn, delay);}
 
   /**
    * @override
@@ -551,7 +551,7 @@ export class SyncResultImpl implements Result<T> {
   /**
    * @override
    */
-  thenReturn(result) new SyncResultImpl(result)
+  thenReturn(result) {return new SyncResultImpl(result);}
 
   /**
    * @override
@@ -563,7 +563,7 @@ export class SyncResultImpl implements Result<T> {
   /**
    * @override
    */
-  isPending() false
+  isPending() {return false;}
 
   /**
    * @override

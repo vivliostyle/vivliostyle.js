@@ -111,42 +111,42 @@ export class FilterVisitor extends Visitor {
   /**
    * @override
    */
-  visitStr(str) str
+  visitStr(str) {return str;}
 
   /**
    * @override
    */
-  visitIdent(ident) ident
+  visitIdent(ident) {return ident;}
 
   /**
    * @override
    */
-  visitSlash(slash) slash
+  visitSlash(slash) {return slash;}
 
   /**
    * @override
    */
-  visitNumeric(numeric) numeric
+  visitNumeric(numeric) {return numeric;}
 
   /**
    * @override
    */
-  visitNum(num) num
+  visitNum(num) {return num;}
 
   /**
    * @override
    */
-  visitInt(num) num
+  visitInt(num) {return num;}
 
   /**
    * @override
    */
-  visitColor(color) color
+  visitColor(color) {return color;}
 
   /**
    * @override
    */
-  visitURL(url) url
+  visitURL(url) {return url;}
 
   /**
    * @override
@@ -184,7 +184,7 @@ export class FilterVisitor extends Visitor {
   /**
    * @override
    */
-  visitExpr(expr) expr
+  visitExpr(expr) {return expr;}
 }
 
 export class Val {
@@ -211,15 +211,15 @@ export class Val {
     buf.append('[error]');
   }
 
-  isExpr(): boolean false
+  isExpr(): boolean {return false;}
 
-  isNumeric(): boolean false
+  isNumeric(): boolean {return false;}
 
-  isNum(): boolean false
+  isNum(): boolean {return false;}
 
-  isIdent(): boolean false
+  isIdent(): boolean {return false;}
 
-  isSpaceList(): boolean false
+  isSpaceList(): boolean {return false;}
 }
 Val.prototype.visit = goog.abstractMethod;
 
@@ -234,7 +234,7 @@ export class Empty extends Val {
   /**
    * @override
    */
-  toExpr(scope, ref) new expr.Const(scope, '')
+  toExpr(scope, ref) {return new expr.Const(scope, '');}
 
   /**
    * @override
@@ -262,7 +262,7 @@ export class Slash extends Val {
   /**
    * @override
    */
-  toExpr(scope, ref) new expr.Const(scope, '/')
+  toExpr(scope, ref) {return new expr.Const(scope, '/');}
 
   /**
    * @override
@@ -314,6 +314,8 @@ export class Str extends Val {
   }
 }
 
+const nameTable = {};
+
 export class Ident extends Val {
   constructor(public name: string) {
     super();
@@ -351,7 +353,7 @@ export class Ident extends Val {
   /**
    * @override
    */
-  isIdent() true
+  isIdent() {return true;}
 }
 
 export const getName = (name: string): Ident => {
@@ -405,7 +407,7 @@ export class Numeric extends Val {
   /**
    * @override
    */
-  isNumeric() true
+  isNumeric() {return true;}
 }
 
 export class Num extends Val {
@@ -446,7 +448,7 @@ export class Num extends Val {
   /**
    * @override
    */
-  isNum() true
+  isNum() {return true;}
 }
 
 export class Int extends Num {
@@ -540,7 +542,7 @@ export class SpaceList extends Val {
   /**
    * @override
    */
-  isSpaceList() true
+  isSpaceList() {return true;}
 }
 
 export class CommaList extends Val {
@@ -617,7 +619,7 @@ export class Expr extends Val {
   /**
    * @override
    */
-  isExpr() true
+  isExpr() {return true;}
 }
 
 export const toNumber = (val: Val, context: expr.Context): number => {

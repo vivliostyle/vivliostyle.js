@@ -8,9 +8,8 @@ import * as asserts from '../closure/goog/asserts/asserts';
 import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';
 
-import {LayoutMode, LayoutIterator, EdgeSkippers, AbstractLayoutRetryer, PseudoColumn} from './layoututil';
+import {LayoutMode, LayoutIterator, EdgeSkipper, AbstractLayoutRetryer, PseudoColumn} from './layoututil';
 
-import * as break from './break';
 import * as layout from '../adapt/layout';
 
 import * as selectors from './selectors';
@@ -29,12 +28,12 @@ export class RepetitiveElementsOwnerFormattingContext implements
   /**
    * @override
    */
-  getName() 'Repetitive elements owner formatting context (RepetitiveElementsOwnerFormattingContext)'
+  getName() {return 'Repetitive elements owner formatting context (RepetitiveElementsOwnerFormattingContext)';}
 
   /**
    * @override
    */
-  isFirstTime(nodeContext, firstTime) firstTime
+  isFirstTime(nodeContext, firstTime) {return firstTime;}
 
   /**
    * @override
@@ -395,7 +394,7 @@ export class LayoutEntireBlock implements LayoutMode {
   /**
    * @override
    */
-  accept(nodeContext, column)!!nodeContext
+  accept(nodeContext, column) {return !!nodeContext;}
 
   /**
    * @override
@@ -432,12 +431,12 @@ export class LayoutFragmentedBlock implements LayoutMode {
   /**
    * @override
    */
-  accept(nodeContext, column) true
+  accept(nodeContext, column) {return true;}
 
   /**
    * @override
    */
-  postLayout(positionAfter, initialPosition, column, accepted) accepted
+  postLayout(positionAfter, initialPosition, column, accepted) {return accepted;}
 }
 const LayoutFragmentedBlock = LayoutFragmentedBlock;
 
@@ -460,7 +459,7 @@ export class LayoutEntireOwnerBlock extends
   /**
    * @override
    */
-  accept(nodeContext, column) false
+  accept(nodeContext, column) {return false;}
 }
 
 export class LayoutFragmentedOwnerBlock extends
@@ -579,7 +578,7 @@ export class RepetitiveElementsOwnerLayoutConstraint implements
   }
 
   /** @override */
-  getPriorityOfFinishBreak() 10
+  getPriorityOfFinishBreak() {return 10;}
 }
 const RepetitiveElementsOwnerLayoutConstraint =
     RepetitiveElementsOwnerLayoutConstraint;

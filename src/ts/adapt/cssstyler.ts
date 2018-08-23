@@ -20,7 +20,7 @@
  */
 import * as asserts from '../closure/goog/asserts/asserts';
 
-import * as break from '../vivliostyle/break';
+import * as breaks from '../vivliostyle/break';
 import {isBlock} from '../vivliostyle/display';
 
 import * as base from './base';
@@ -175,11 +175,11 @@ export class Box {
         }
       }
     }
-    this.breakBefore = break.resolveEffectiveBreakValue(
+    this.breakBefore = breaks.resolveEffectiveBreakValue(
         this.getBreakValue('before'), this.breakBefore);
     if (this.atFlowStart &&
-        break.isForcedBreakValue(this.breakBefore)) {
-      flowChunk.breakBefore = break.resolveEffectiveBreakValue(
+        breaks.isForcedBreakValue(this.breakBefore)) {
+      flowChunk.breakBefore = breaks.resolveEffectiveBreakValue(
           flowChunk.breakBefore, this.breakBefore);
     }
   }
@@ -352,7 +352,7 @@ export class BoxStack {
     box.buildAfterPseudoElementBox(offset, this.atBlockStart, this.atFlowStart);
     if (this.atFlowStart && box.afterBox) {
       const breakBefore = box.afterBox.getBreakValue('before');
-      box.flowChunk.breakBefore = break.resolveEffectiveBreakValue(
+      box.flowChunk.breakBefore = breaks.resolveEffectiveBreakValue(
           box.flowChunk.breakBefore, breakBefore);
     }
     const parent = this.lastBox();
@@ -741,7 +741,7 @@ export class Styler implements AbstractStyler {
 
   registerForcedBreakOffset(
       breakValue: string|null, offset: number, flowName: string) {
-    if (break.isForcedBreakValue(breakValue)) {
+    if (breaks.isForcedBreakValue(breakValue)) {
       const forcedBreakOffsets = this.flows[flowName].forcedBreakOffsets;
       if (forcedBreakOffsets.length === 0 ||
           forcedBreakOffsets[forcedBreakOffsets.length - 1] < offset) {
@@ -750,7 +750,7 @@ export class Styler implements AbstractStyler {
     }
     const previousValue = this.breakBeforeValues[offset];
     this.breakBeforeValues[offset] =
-        break.resolveEffectiveBreakValue(previousValue, breakValue);
+        breaks.resolveEffectiveBreakValue(previousValue, breakValue);
   }
 
   /**
@@ -793,7 +793,7 @@ export class Styler implements AbstractStyler {
                   box.flowName);
               breakAfter = box.afterBox.getBreakValue('after');
             }
-            breakAfter = break.resolveEffectiveBreakValue(
+            breakAfter = breaks.resolveEffectiveBreakValue(
                 breakAfter, box.getBreakValue('after'));
             this.registerForcedBreakOffset(
                 breakAfter, this.lastOffset, box.flowName);

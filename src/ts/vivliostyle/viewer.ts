@@ -35,7 +35,7 @@ type ViewerOptions = {
   fontSize: number|undefined,
   pageBorderWidth: number|undefined,
   renderAllPages: boolean|undefined,
-  pageViewMode: PageViewMode|undefined,
+  pageViewMode: viewer.PageViewMode|undefined,
   zoom: number|undefined,
   fitToScreen: boolean|undefined,
   defaultPaperSize: {width: number, height: number}|undefined

@@ -47,7 +47,7 @@ import * as vgen from './vgen';
 import * as vtree from './vtree';
 import * as xmldoc from './xmldoc';
 
-import * as break from '../vivliostyle/break';
+import * as breaks from '../vivliostyle/break';
 import * as page from '../vivliostyle/page';
 import * as column from '../vivliostyle/column';
 
@@ -408,9 +408,9 @@ export class StyleInstance extends expr.Context implements
           const flowChunkBreakBefore =
               flowPos.positions[0].flowChunk.breakBefore;
           const flowBreakAfter =
-              break.startSideValueToBreakValue(flowPos.startSide);
+              breaks.startSideValueToBreakValue(flowPos.startSide);
           flowPos.startSide =
-              break.breakValueToStartSideValue(break.resolveEffectiveBreakValue(
+              breaks.breakValueToStartSideValue(breaks.resolveEffectiveBreakValue(
                   flowBreakAfter, flowChunkBreakBefore));
         }
       }
@@ -735,7 +735,7 @@ export class StyleInstance extends expr.Context implements
                         if (column.pageBreakType) {
                           // forced break
                           flowPosition.startSide =
-                              break.breakValueToStartSideValue(
+                              breaks.breakValueToStartSideValue(
                                   column.pageBreakType);
                         }
                       }

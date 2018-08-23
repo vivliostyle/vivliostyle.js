@@ -173,7 +173,8 @@ export const mergeIntersections =
       const shapeCount = includeCount + excludeCount;
       const windings1: number[] = Array(shapeCount);
       const windings2: number[] = Array(shapeCount);
-      for (let i = 0; i <= shapeCount; i++) {
+      let i: number;
+      for (i = 0; i <= shapeCount; i++) {
         windings1[i] = 0;
         windings2[i] = 0;
       }
@@ -444,6 +445,7 @@ export const findUppermostFullyOpenRect =
         }
       }
       let bottomEdge = topEdge;
+      let i: number;
       for (; i < bands.length; i++) {
         band = bands[i];
         if (band.y1 >= rect.y2 || band.x1 - 0.1 > rect.x1 ||
@@ -492,6 +494,7 @@ export const findBottommostFullyOpenRect =
         }
       }
       let topEdge = Math.min(bottomEdge, band.y2);
+      let i: number;
       for (; i >= 0; i--) {
         band = bands[i];
         if (band.y2 <= rect.y1 || band.x1 - 0.1 > rect.x1 ||

@@ -41,9 +41,11 @@
     "karma-sauce-launcher": "^0.2.14",
     "karma-verbose-reporter": "0.0.3",
     "mkdirp": "^0.5.1",
-    "mustache": "^2.2.1"
+    "mustache": "^2.2.1",
+    "typescript": "^3.0.1"
   },
   "dependencies": {
-    "clang-format": "^1.2.4"
+    "clang-format": "^1.2.4",
+    "tslint": "^5.11.0"
   }
 }

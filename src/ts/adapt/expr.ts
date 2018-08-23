@@ -532,7 +532,7 @@ export class Val {
     return result;
   }
 
-  isMediaName(): boolean false
+  isMediaName(): boolean {return false;}
 }
 
 export class Prefix extends Val {
@@ -664,7 +664,7 @@ export class Logical extends Infix {
   /**
    * @override
    */
-  getPriority() 1
+  getPriority() {return 1;}
 }
 
 export class Comparison extends Infix {
@@ -675,7 +675,7 @@ export class Comparison extends Infix {
   /**
    * @override
    */
-  getPriority() 2
+  getPriority() {return 2;}
 }
 
 export class Additive extends Infix {
@@ -686,7 +686,7 @@ export class Additive extends Infix {
   /**
    * @override
    */
-  getPriority() 3
+  getPriority() {return 3;}
 }
 
 export class Multiplicative extends Infix {
@@ -697,7 +697,7 @@ export class Multiplicative extends Infix {
   /**
    * @override
    */
-  getPriority() 4
+  getPriority() {return 4;}
 }
 
 export class Not extends Prefix {
@@ -708,12 +708,12 @@ export class Not extends Prefix {
   /**
    * @override
    */
-  getOp() '!'
+  getOp() {return '!';}
 
   /**
    * @override
    */
-  evalPrefix(val)!val
+  evalPrefix(val) {return !val;}
 }
 
 export class Negate extends Prefix {
@@ -724,12 +724,12 @@ export class Negate extends Prefix {
   /**
    * @override
    */
-  getOp() '-'
+  getOp() {return '-';}
 
   /**
    * @override
    */
-  evalPrefix(val) - val
+  evalPrefix(val) {return - val;}
 }
 
 export class And extends Logical {
@@ -740,7 +740,7 @@ export class And extends Logical {
   /**
    * @override
    */
-  getOp() '&&'
+  getOp() {return '&&';}
 
   /**
    * @override
@@ -758,7 +758,7 @@ export class AndMedia extends And {
   /**
    * @override
    */
-  getOp() ' and '
+  getOp() {return ' and ';}
 }
 
 export class Or extends Logical {
@@ -769,7 +769,7 @@ export class Or extends Logical {
   /**
    * @override
    */
-  getOp() '||'
+  getOp() {return '||';}
 
   /**
    * @override
@@ -787,7 +787,7 @@ export class OrMedia extends Or {
   /**
    * @override
    */
-  getOp() ', '
+  getOp() {return ', ';}
 }
 
 export class Lt extends Comparison {
@@ -798,12 +798,12 @@ export class Lt extends Comparison {
   /**
    * @override
    */
-  getOp() '<'
+  getOp() {return '<';}
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) lhs < rhs
+  evalInfix(lhs, rhs) {return lhs < rhs;}
 }
 
 export class Le extends Comparison {
@@ -814,12 +814,12 @@ export class Le extends Comparison {
   /**
    * @override
    */
-  getOp() '<='
+  getOp() {return '<=';}
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) lhs <= rhs
+  evalInfix(lhs, rhs) {return lhs <= rhs;}
 }
 
 export class Gt extends Comparison {
@@ -830,12 +830,12 @@ export class Gt extends Comparison {
   /**
    * @override
    */
-  getOp() '>'
+  getOp() {return '>';}
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) lhs > rhs
+  evalInfix(lhs, rhs) {return lhs > rhs;}
 }
 
 export class Ge extends Comparison {
@@ -846,12 +846,12 @@ export class Ge extends Comparison {
   /**
    * @override
    */
-  getOp() '>='
+  getOp() {return '>=';}
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) lhs >= rhs
+  evalInfix(lhs, rhs) {return lhs >= rhs;}
 }
 
 export class Eq extends Comparison {
@@ -862,12 +862,12 @@ export class Eq extends Comparison {
   /**
    * @override
    */
-  getOp() '=='
+  getOp() {return '==';}
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) lhs == rhs
+  evalInfix(lhs, rhs) {return lhs == rhs;}
 }
 
 export class Ne extends Comparison {
@@ -878,12 +878,12 @@ export class Ne extends Comparison {
   /**
    * @override
    */
-  getOp() '!='
+  getOp() {return '!=';}
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) lhs != rhs
+  evalInfix(lhs, rhs) {return lhs != rhs;}
 }
 
 export class Add extends Additive {
@@ -894,12 +894,12 @@ export class Add extends Additive {
   /**
    * @override
    */
-  getOp() '+'
+  getOp() {return '+';}
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) lhs + rhs
+  evalInfix(lhs, rhs) {return lhs + rhs;}
 }
 
 export class Subtract extends Additive {
@@ -910,12 +910,12 @@ export class Subtract extends Additive {
   /**
    * @override
    */
-  getOp() ' - '
+  getOp() {return ' - ';}
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) lhs - rhs
+  evalInfix(lhs, rhs) {return lhs - rhs;}
 }
 
 export class Multiply extends Multiplicative {
@@ -926,12 +926,12 @@ export class Multiply extends Multiplicative {
   /**
    * @override
    */
-  getOp() '*'
+  getOp() {return '*';}
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) lhs * rhs
+  evalInfix(lhs, rhs) {return lhs * rhs;}
 }
 
 export class Divide extends Multiplicative {
@@ -942,12 +942,12 @@ export class Divide extends Multiplicative {
   /**
    * @override
    */
-  getOp() '/'
+  getOp() {return '/';}
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) lhs / rhs
+  evalInfix(lhs, rhs) {return lhs / rhs;}
 }
 
 export class Modulo extends Multiplicative {
@@ -958,12 +958,12 @@ export class Modulo extends Multiplicative {
   /**
    * @override
    */
-  getOp() '%'
+  getOp() {return '%';}
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) lhs % rhs
+  evalInfix(lhs, rhs) {return lhs % rhs;}
 }
 
 /**
@@ -1065,7 +1065,7 @@ export class MediaName extends Val {
   /**
    * @override
    */
-  isMediaName() true
+  isMediaName() {return true;}
 }
 
 /**

@@ -24,7 +24,7 @@ import {BreakPositionAndNodeContext} from '../adapt/layout';
 import {BreakPosition} from '../adapt/layout';
 import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';
-import * as break from './break';
+import * as breaks from './break';
 type LayoutIteratorState = {
   nodeContext: vtree.NodeContext,
   atUnforcedBreak: boolean,
@@ -197,7 +197,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
    */
   processForcedBreak(state: LayoutIteratorState, column: Column): boolean {
     const needForcedBreak =
-        !state.leadingEdge && break.isForcedBreakValue(state.breakAtTheEdge);
+        !state.leadingEdge && breaks.isForcedBreakValue(state.breakAtTheEdge);
     if (needForcedBreak) {
       const nodeContext = state.nodeContext =
           state.leadingEdgeContexts[0] || state.nodeContext;
@@ -251,7 +251,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
    */
   startNonInlineElementNode(state) {
     state.leadingEdgeContexts.push(state.nodeContext.copy());
-    state.breakAtTheEdge = break.resolveEffectiveBreakValue(
+    state.breakAtTheEdge = breaks.resolveEffectiveBreakValue(
         state.breakAtTheEdge, state.nodeContext.breakBefore);
     state.onStartEdges = true;
     return this.startNonInlineBox(state);
@@ -283,7 +283,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
       if (!state.break) {
         state.onStartEdges = false;
         state.lastAfterNodeContext = state.nodeContext.copy();
-        state.breakAtTheEdge = break.resolveEffectiveBreakValue(
+        state.breakAtTheEdge = breaks.resolveEffectiveBreakValue(
             state.breakAtTheEdge, state.nodeContext.breakAfter);
       }
       return task.newResult(true);

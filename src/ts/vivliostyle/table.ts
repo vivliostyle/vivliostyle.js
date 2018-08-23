@@ -24,7 +24,6 @@ import * as asserts from '../closure/goog/asserts/asserts';
 
 import * as plugin from './plugin';
 
-import * as break from './break';
 import * as layout from '../adapt/layout';
 import * as layoututil from './layoututil';
 import * as repetitiveelements from './repetitiveelements';
@@ -285,7 +284,7 @@ export class TableFormattingContext extends
   /**
    * @override
    */
-  getName() 'Table formatting context (vivliostyle.table.TableFormattingContext)'
+  getName() {return 'Table formatting context (vivliostyle.table.TableFormattingContext)';}
 
   /**
    * @override
@@ -1389,18 +1388,18 @@ export class TableLayoutProcessor implements layout.LayoutProcessor {
   /**
    * @override
    */
-  createEdgeBreakPosition(position, breakOnEdge, overflows, columnBlockSize) new BetweenTableRowBreakPosition(
-      position, breakOnEdge, overflows, columnBlockSize)
+  createEdgeBreakPosition(position, breakOnEdge, overflows, columnBlockSize) {return new BetweenTableRowBreakPosition(
+      position, breakOnEdge, overflows, columnBlockSize);}
 
   /**
    * @override
    */
-  startNonInlineElementNode(nodeContext) false
+  startNonInlineElementNode(nodeContext) {return false;}
 
   /**
    * @override
    */
-  afterNonInlineElementNode(nodeContext) false
+  afterNonInlineElementNode(nodeContext) {return false;}
 
   /**
    * @override
@@ -1624,7 +1623,7 @@ export class EntireTableLayoutConstraint implements
   /**
    * @override
    */
-  nextCandidate(nodeContext) true
+  nextCandidate(nodeContext) {return true;}
 
   /**
    * @override
@@ -1641,7 +1640,7 @@ export class EntireTableLayoutConstraint implements
   /**
    * @override
    */
-  finishBreak(nodeContext, column) task.newResult(true)
+  finishBreak(nodeContext, column) {return task.newResult(true);}
 
   /**
    * @override
@@ -1654,7 +1653,7 @@ export class EntireTableLayoutConstraint implements
   /**
    * @override
    */
-  getPriorityOfFinishBreak() 0
+  getPriorityOfFinishBreak() {return 0;}
 }
 
 export class LayoutFragmentedTable extends

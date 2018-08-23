@@ -66,7 +66,7 @@ export const toSet = (val: css.Val): {[key: string]: boolean} => {
 };
 
 export class IntVisitor extends css.Visitor {
-  value: any;
+  value: number;
 
   constructor(public value: number) {
     super();

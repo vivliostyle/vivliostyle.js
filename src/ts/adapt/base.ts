@@ -280,6 +280,8 @@ export const cssToJSProp = (prefix: string, cssPropName: string): string => {
 
 export const knownPrefixes = ['', '-webkit-', '-moz-', '-ms-', '-o-', '-epub-'];
 
+export const propNameMap = {};
+
 export const checkIfPropertySupported =
     (prefix: string, prop: string): boolean => {
       // Special case

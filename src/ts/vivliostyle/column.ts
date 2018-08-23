@@ -316,7 +316,7 @@ export class BalanceNonLastColumnBalancer extends ColumnBalancer {
   /**
    * @override
    */
-  hasNextCandidate(candidates) canReduceContainerSize(candidates)
+  hasNextCandidate(candidates) {return canReduceContainerSize(candidates);}
 
   /**
    * @override

@@ -18,6 +18,7 @@
  */
 import * as base from '../adapt/base';
 import * as csscasc from '../adapt/csscasc';
+import {toCounters} from '../adapt/cssprop'
 import * as cssstyler from '../adapt/cssstyler';
 import * as expr from '../adapt/expr';
 import * as layout from '../adapt/layout';
@@ -371,7 +372,7 @@ export class CounterStore {
     if (reset) {
       const resetVal = reset.evaluate(context);
       if (resetVal) {
-        resetMap = adapt.cssprop.toCounters(resetVal, true);
+        resetMap = toCounters(resetVal, true);
       }
     }
     if (resetMap) {
@@ -384,7 +385,7 @@ export class CounterStore {
     if (increment) {
       const incrementVal = increment.evaluate(context);
       if (incrementVal) {
-        incrementMap = adapt.cssprop.toCounters(incrementVal, false);
+        incrementMap = toCounters(incrementVal, false);
       }
     }
 

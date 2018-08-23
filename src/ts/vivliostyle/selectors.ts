@@ -18,17 +18,20 @@
  */
 import * as asserts from '../closure/goog/asserts/asserts';
 
-import {CascadeValue} from '../adapt/csscasc';
-import {ElementStyle} from '../adapt/csscasc';
+import * as base from '../adapt/base';
+
+import {CascadeValue, ElementStyle, matchANPlusB, mergeStyle, getStyleMap} from '../adapt/csscasc';
 import {Context} from '../adapt/expr';
-import {Column} from '../adapt/layout';
+import {Column, getElementHeight} from '../adapt/layout';
 import {FragmentLayoutConstraint} from '../adapt/layout';
-import {Result} from '../adapt/task';
-import {Frame} from '../adapt/task';
+import {Frame, newResult, Result} from '../adapt/task';
+import * as task from '../adapt/task';
 import {PseudoelementStyler} from '../adapt/vgen';
+import * as vgen from '../adapt/vgen';
 import {NodeContext} from '../adapt/vtree';
 import {ChunkPosition} from '../adapt/vtree';
 import {ShadowContext} from '../adapt/vtree';
+import * as vtree from '../adapt/vtree';
 
 import {PseudoColumn} from './layoututil';
 import {ElementsOffset} from './repetitiveelements';
@@ -38,7 +41,8 @@ import * as namespace from './namespace';
 export interface Matcher {
   matches(): boolean;
 }
-const Matcher = Matcher;
+
+const fragmentIndices = {};
 
 export class NthFragmentMatcher implements Matcher {
   constructor(
@@ -49,10 +53,9 @@ export class NthFragmentMatcher implements Matcher {
   matches() {
     const entry = fragmentIndices[this.elementOffset];
     return entry != null && entry.fragmentIndex != null &&
-        adapt.csscasc.matchANPlusB(entry.fragmentIndex, this.a, this.b);
+        matchANPlusB(entry.fragmentIndex, this.a, this.b);
   }
 }
-const NthFragmentMatcher = NthFragmentMatcher;
 
 export class AnyMatcher implements Matcher {
   constructor(public readonly matchers: Matcher[]) {}
@@ -87,25 +90,24 @@ export class MatcherBuilder {
     }
   }
 
-  buildAllMatcher(matchers: Matcher[]): Matcher new AllMatcher(matchers)
+  buildAllMatcher(matchers: Matcher[]): Matcher {return new AllMatcher(matchers);}
 
-  buildAnyMatcher(matchers: Matcher[]): Matcher new AnyMatcher(matchers)
+  buildAnyMatcher(matchers: Matcher[]): Matcher {return new AnyMatcher(matchers);}
 }
-const MatcherBuilder = MatcherBuilder;
+
 MatcherBuilder.instance = new MatcherBuilder();
 
 export const mergeViewConditionalStyles =
     (cascMap: {[key: string]: CascadeValue}, context: Context,
      style: ElementStyle) => {
       forEachViewConditionalStyles(style, (viewConditionalStyles) => {
-        adapt.csscasc.mergeStyle(cascMap, viewConditionalStyles, context);
+        mergeStyle(cascMap, viewConditionalStyles, context);
       });
     };
 
 export const forEachViewConditionalStyles =
     (style: ElementStyle, callback: (p1: ElementStyle) => any) => {
-      const viewConditionalStyles =
-          adapt.csscasc.getStyleMap(style, '_viewConditionalStyles');
+      const viewConditionalStyles = getStyleMap(style, '_viewConditionalStyles');
       if (!viewConditionalStyles) {
         return;
       }
@@ -147,15 +149,15 @@ export class AfterIfContinues {
           this.styler.contentProcessed['after-if-continues'] = false;
           pseudoColumn.getColumn().pageBreakType = initialPageBreakType;
           const pseudoElement = (viewRoot.firstChild as Element);
-          adapt.base.setCSSProperty(pseudoElement, 'display', 'block');
-          return adapt.task.newResult(pseudoElement);
+          base.setCSSProperty(pseudoElement, 'display', 'block');
+          return newResult(pseudoElement);
         });
   }
 
   private createNodePositionForPseudoElement(): ChunkPosition {
     const sourceNode =
-        adapt.vgen.pseudoelementDoc.createElementNS(adapt.base.NS.XHTML, 'div');
-    adapt.vgen.setPseudoName(sourceNode, 'after-if-continues');
+        vgen.pseudoelementDoc.createElementNS(base.NS.XHTML, 'div');
+    vgen.setPseudoName(sourceNode, 'after-if-continues');
     const shadowContext = this.createShadowContext(sourceNode);
     const step = {
       node: sourceNode,
@@ -170,12 +172,12 @@ export class AfterIfContinues {
       after: false,
       preprocessedTextContent: null
     };
-    return new adapt.vtree.ChunkPosition(nodePosition);
+    return new vtree.ChunkPosition(nodePosition);
   }
 
   private createShadowContext(root: Element): ShadowContext {
-    return new adapt.vtree.ShadowContext(
-        this.sourceNode, root, null, null, null, adapt.vtree.ShadowType.ROOTED,
+    return new vtree.ShadowContext(
+        this.sourceNode, root, null, null, null, vtree.ShadowType.ROOTED,
         this.styler);
   }
 }
@@ -206,7 +208,7 @@ export class AfterIfContinuesLayoutConstraint implements
   }
 
   /** @override */
-  nextCandidate(nodeContext) false
+  nextCandidate(nodeContext) {return false;}
 
   /** @override */
   postLayout(allowed, nodeContext, initialPosition, column) {}
@@ -214,12 +216,12 @@ export class AfterIfContinuesLayoutConstraint implements
   /** @override */
   finishBreak(nodeContext, column) {
     if (!this.getRepetitiveElements().affectTo(nodeContext)) {
-      return adapt.task.newResult(true);
+      return task.newResult(true);
     }
     return this.afterIfContinues.createElement(column, this.nodeContext)
         .thenAsync((element) => {
           this.nodeContext.viewNode.appendChild(element);
-          return adapt.task.newResult(true);
+          return task.newResult(true);
         });
   }
 
@@ -238,7 +240,7 @@ export class AfterIfContinuesLayoutConstraint implements
   }
 
   /** @override */
-  getPriorityOfFinishBreak() 9
+  getPriorityOfFinishBreak() {return 9;}
 }
 const AfterIfContinuesLayoutConstraint = AfterIfContinuesLayoutConstraint;
 
@@ -288,7 +290,7 @@ function processAfterIfContinuesOfNodeContext(
     nodeContext: NodeContext, column: Column): Result<NodeContext> {
   if (!nodeContext || !nodeContext.afterIfContinues || nodeContext.after ||
       column.isFloatNodeContext(nodeContext)) {
-    return adapt.task.newResult(nodeContext);
+    return task.newResult(nodeContext);
   }
   const afterIfContinues = nodeContext.afterIfContinues;
   return afterIfContinues.createElement(column, nodeContext)
@@ -299,7 +301,7 @@ function processAfterIfContinuesOfNodeContext(
         column.fragmentLayoutConstraints.push(
             new AfterIfContinuesLayoutConstraint(
                 nodeContext, afterIfContinues, pseudoElementHeight));
-        return adapt.task.newResult(nodeContext);
+        return task.newResult(nodeContext);
       });
 }
 
@@ -311,7 +313,7 @@ export const processAfterIfContinues =
 
 export const processAfterIfContinuesOfAncestors =
     (nodeContext: NodeContext, column: Column): Result<boolean> => {
-      const frame: Frame<boolean> = adapt.task.newFrame(
+      const frame: Frame<boolean> = task.newFrame(
           'vivliostyle.selectors.processAfterIfContinuesOfAncestors');
       let current: NodeContext = nodeContext;
       frame
@@ -322,7 +324,7 @@ export const processAfterIfContinuesOfAncestors =
               current = current.parent;
               return result.thenReturn(true);
             } else {
-              return adapt.task.newResult(false);
+              return task.newResult(false);
             }
           })
           .then(() => {
@@ -336,7 +338,7 @@ export const calculatePseudoElementHeight =
         number => {
           const parentNode = (nodeContext.viewNode as Element);
           parentNode.appendChild(pseudoElement);
-          const height = adapt.layout.getElementHeight(
+          const height = getElementHeight(
               pseudoElement, column, nodeContext.vertical);
           parentNode.removeChild(pseudoElement);
           return height;

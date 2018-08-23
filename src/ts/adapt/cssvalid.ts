@@ -514,22 +514,22 @@ export class PrimitiveValidator extends PropertyValidator {
   /**
    * @override
    */
-  visitSpaceList(list) null
+  visitSpaceList(list) {return null;}
 
   /**
    * @override
    */
-  visitCommaList(list) null
+  visitCommaList(list) {return null;}
 
   /**
    * @override
    */
-  visitFunc(func) null
+  visitFunc(func) {return null;}
 
   /**
    * @override
    */
-  visitExpr(expr) null
+  visitExpr(expr) {return null;}
 
   combine(other: PrimitiveValidator): PrimitiveValidator {
     const idents: ValueMap = {};
@@ -549,6 +549,8 @@ export class PrimitiveValidator extends PropertyValidator {
     return new PrimitiveValidator(this.allowed | other.allowed, idents, units);
   }
 }
+
+const NO_IDENTS = {};
 
 export const ALWAYS_FAIL = new PrimitiveValidator(0, NO_IDENTS, NO_IDENTS);
 
@@ -752,12 +754,12 @@ export class ListValidator extends PropertyValidator {
   /**
    * @override
    */
-  visitSpaceList(list) null
+  visitSpaceList(list) {return null;}
 
   /**
    * @override
    */
-  visitCommaList(list) null
+  visitCommaList(list) {return null;}
 
   /**
    * @override
@@ -769,7 +771,7 @@ export class ListValidator extends PropertyValidator {
   /**
    * @override
    */
-  visitExpr(expr) null
+  visitExpr(expr) {return null;}
 }
 
 export class SpaceListValidator extends ListValidator {
@@ -877,7 +879,7 @@ export class FuncValidator extends ListValidator {
   /**
    * @override
    */
-  validateSingle(inval) null
+  validateSingle(inval) {return null;}
 
   /**
    * @override
@@ -905,7 +907,7 @@ export class ShorthandSyntaxNode {
    */
   tryParse(
       values: css.Val[], index: number,
-      shorthandValidator: ShorthandValidator): number index
+      shorthandValidator: ShorthandValidator): number {return index;}
 
   success(rval: css.Val, shorthandValidator: ShorthandValidator): void {}
 }
@@ -1592,7 +1594,7 @@ export class ValidatorSet {
     this.systemFonts['status-bar'] = stdfont;
   }
 
-  private isBuiltIn(name: string): boolean!!name.match(/^[A-Z_0-9]+$/)
+  private isBuiltIn(name: string): boolean {return !!name.match(/^[A-Z_0-9]+$/);}
 
       private readNameAndPrefixes(tok: csstok.Tokenizer, section: number):
           string|null {
