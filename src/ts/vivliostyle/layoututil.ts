@@ -34,10 +34,12 @@ type LayoutIteratorState = {
 export {LayoutIteratorState};
 
 export class LayoutIteratorStrategy {
-  initialState(initialNodeContext: vtree.NodeContext): LayoutIteratorState{
-    nodeContext: initialNodeContext,
-    atUnforcedBreak: false,
-    break: false
+  initialState(initialNodeContext: vtree.NodeContext): LayoutIteratorState {
+    return {
+      nodeContext: initialNodeContext,
+      atUnforcedBreak: false,
+      break: false
+    };
   }
 
   startNonDisplayableNode(state: LayoutIteratorState): undefined

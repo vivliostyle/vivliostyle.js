@@ -1386,7 +1386,7 @@ PageRuleMasterInstance.FixedSizeMarginBoxSizingParam =
   /**
    * @override
    */
-  hasAutoSize() false
+  hasAutoSize() {return false;}
 
   /**
    *  @override
@@ -2068,7 +2068,7 @@ export class CheckPageTypeAction extends csscasc.ChainedAction {
   /**
    * @override
    */
-  getPriority() 3
+  getPriority() {return 3;}
 
   /**
    * @override
@@ -2099,7 +2099,7 @@ export class IsFirstPageAction extends csscasc.ChainedAction {
   /**
    * @override
    */
-  getPriority() 2
+  getPriority() {return 2;}
 }
 
 export class IsLeftPageAction extends csscasc.ChainedAction {
@@ -2120,7 +2120,7 @@ export class IsLeftPageAction extends csscasc.ChainedAction {
   /**
    * @override
    */
-  getPriority() 1
+  getPriority() {return 1;}
 }
 
 export class IsRightPageAction extends csscasc.ChainedAction {
@@ -2141,7 +2141,7 @@ export class IsRightPageAction extends csscasc.ChainedAction {
   /**
    * @override
    */
-  getPriority() 1
+  getPriority() {return 1;}
 }
 
 export class IsRectoPageAction extends csscasc.ChainedAction {
@@ -2162,7 +2162,7 @@ export class IsRectoPageAction extends csscasc.ChainedAction {
   /**
    * @override
    */
-  getPriority() 1
+  getPriority() {return 1;}
 }
 
 export class IsVersoPageAction extends csscasc.ChainedAction {
@@ -2183,7 +2183,7 @@ export class IsVersoPageAction extends csscasc.ChainedAction {
   /**
    * @override
    */
-  getPriority() 1
+  getPriority() {return 1;}
 }
 
 /**

@@ -135,7 +135,7 @@ export class PageFloat {
     return pageFloatLayoutContext.isAnchorAlreadyAppeared(this.getId());
   }
 
-  isAllowedToPrecede(other: PageFloat): boolean false
+  isAllowedToPrecede(other: PageFloat): boolean {return false;}
 }
 const PageFloat = PageFloat;
 type ID = string;
@@ -148,7 +148,7 @@ export class PageFloatStore {
     return this.nextPageFloatIndex++;
   }
 
-  private createPageFloatId(order: number): PageFloat.ID`pf${order}`
+  private createPageFloatId(order: number): PageFloat.ID {return `pf${order}`;}
 
   addPageFloat(float: PageFloat) {
     const index = this.floats.findIndex(
@@ -1459,12 +1459,14 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   /**
    * @override
    */
-  appliesToNodeContext(nodeContext) isPageFloat(nodeContext.floatReference)
+  appliesToNodeContext(nodeContext) {
+    return isPageFloat(nodeContext.floatReference);
+  }
 
   /**
    * @override
    */
-  appliesToFloat(float) true
+  appliesToFloat(float) {return true;}
 
   /**
    * @override
@@ -1500,8 +1502,9 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   /**
    * @override
    */
-  findPageFloatFragment(float, pageFloatLayoutContext)
-      pageFloatLayoutContext.findPageFloatFragment(float)
+  findPageFloatFragment(float, pageFloatLayoutContext) {
+    return pageFloatLayoutContext.findPageFloatFragment(float);
+  }
 
   /**
    * @override
