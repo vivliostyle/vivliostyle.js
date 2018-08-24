@@ -964,8 +964,7 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
           PageMarginBoxPartitionInstance
     } = {};
     const boxParams: {
-      [key: MarginBoxPositionAlongVariableDimension]: PageRuleMasterInstance
-                                                        .MarginBoxSizingParam
+      [key: MarginBoxPositionAlongVariableDimension]: MarginBoxSizingParam
     } = {};
     for (const name in marginBoxContainers) {
       const boxInfo = pageMarginBoxes[name];
@@ -973,7 +972,7 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
         const container = marginBoxContainers[name];
         const boxInstance = this.pageMarginBoxInstances[name];
         const boxParam =
-            new PageRuleMasterInstance.SingleBoxMarginBoxSizingParam(
+            new SingleBoxMarginBoxSizingParam(
                 container, boxInstance.style, isHorizontal, scope,
                 clientLayout);
         containers[boxInfo.positionAlongVariableDimension] = container;
@@ -1005,7 +1004,7 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
         const evaluatedMaxSize = (maxSize.evaluate(context) as number);
         if (sizes[name] > evaluatedMaxSize) {
           const p = boxParams[name] =
-              new PageRuleMasterInstance.FixedSizeMarginBoxSizingParam(
+              new FixedSizeMarginBoxSizingParam(
                   containers[name], boxInstances[name].style, isHorizontal,
                   scope, clientLayout, evaluatedMaxSize);
           maxOuterSizes[name] = p.getOuterSize();
@@ -1035,7 +1034,7 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
         const evaluatedMinSize = (minSize.evaluate(context) as number);
         if (sizes[name] < evaluatedMinSize) {
           const p = boxParams[name] =
-              new PageRuleMasterInstance.FixedSizeMarginBoxSizingParam(
+              new FixedSizeMarginBoxSizingParam(
                   containers[name], boxInstances[name].style, isHorizontal,
                   scope, clientLayout, evaluatedMinSize);
           minOuterSizes[name] = p.getOuterSize();
@@ -1086,8 +1085,7 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
 
   private getSizesOfMarginBoxesAlongVariableDimension(
       boxParams: {
-        [key: MarginBoxPositionAlongVariableDimension]: PageRuleMasterInstance
-                                                          .MarginBoxSizingParam
+        [key: MarginBoxPositionAlongVariableDimension]: MarginBoxSizingParam
       },
       availableSize: number):
       {[key: MarginBoxPositionAlongVariableDimension]: number} {
@@ -1111,7 +1109,7 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
     } else {
       const params = [startBoxParam, endBoxParam].filter((p) => p);
       const startEndBoxParam = params.length ?
-          new PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam(params) :
+          new MultipleBoxesMarginBoxSizingParam(params) :
           null;
       const centerSizes = this.distributeAutoMarginBoxSizes(
           centerBoxParam, startEndBoxParam, availableSize);
@@ -1143,8 +1141,8 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
    *     when the size of the corresponding box is 'auto'.
    */
   private distributeAutoMarginBoxSizes(
-      x: PageRuleMasterInstance.MarginBoxSizingParam,
-      y: PageRuleMasterInstance.MarginBoxSizingParam,
+      x: MarginBoxSizingParam,
+      y: MarginBoxSizingParam,
       availableSize: number): {xSize: number|null, ySize: number|null} {
     const result: {xSize: number|null,
                    ySize: number|null} = {xSize: null, ySize: null};
@@ -1227,7 +1225,7 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
 /**
  * Interface used for parameters passed to distributeAutoMarginBoxSizes method.
  */
-PageRuleMasterInstance.MarginBoxSizingParam = interface {
+interface MarginBoxSizingParam {
   hasAutoSize(): boolean;
 
   getOuterMaxContentSize(): number;
@@ -1242,8 +1240,7 @@ PageRuleMasterInstance.MarginBoxSizingParam = interface {
  * @param container A container corresponding to the target margin box.
  * @param style Styles specified to the target margin box.
  */
-PageRuleMasterInstance.SingleBoxMarginBoxSizingParam =
-    class implements PageRuleMasterInstance.MarginBoxSizingParam {
+class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
   private hasAutoSize_: boolean;
   private size: {[key: sizing.Size]: number} = null;
 
@@ -1325,10 +1322,8 @@ PageRuleMasterInstance.SingleBoxMarginBoxSizingParam =
  * multiplied by the number of the boxes.
  * @param params MarginBoxSizingParam's of the target margin boxes.
  */
-PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam =
-    class implements PageRuleMasterInstance.MarginBoxSizingParam {
-  constructor(private readonly params:
-                  PageRuleMasterInstance.MarginBoxSizingParam[]) {}
+class MultipleBoxesMarginBoxSizingParam implements MarginBoxSizingParam {
+  constructor(private readonly params: MarginBoxSizingParam[]) {}
 
   /**
    * @override
@@ -1369,9 +1364,7 @@ PageRuleMasterInstance.MultipleBoxesMarginBoxSizingParam =
  * @param style Styles specified to the target margin box.
  * @param size The fixed size (width or height) along the variable dimension.
  */
-PageRuleMasterInstance.FixedSizeMarginBoxSizingParam =
-    class extends PageRuleMasterInstance
-                      .SingleBoxMarginBoxSizingParam {
+class FixedSizeMarginBoxSizingParam extends SingleBoxMarginBoxSizingParam {
   private fixedSize: any;
 
   constructor(
