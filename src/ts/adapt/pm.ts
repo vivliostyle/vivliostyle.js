@@ -108,12 +108,10 @@ export class PageMasterScope extends expr.LexicalScope {
   pageMaster: any;
 
   private constructor(scope: expr.LexicalScope, pageMaster: PageMaster) {
-    this.pageMaster = pageMaster;
-    const self = this;
     super(scope, function(qualifiedName, isFunc) {
       const r = qualifiedName.match(/^([^.]+)\.([^.]+)$/);
       if (r) {
-        const key = self.pageMaster.keyMap[r[1]];
+        const key = pageMaster.keyMap[r[1]];
         if (key) {
           const holder = (this as InstanceHolder);
           const boxInstance = holder.lookupInstance(key);
@@ -128,6 +126,7 @@ export class PageMasterScope extends expr.LexicalScope {
       }
       return null;
     });
+    this.pageMaster = pageMaster;
   }
 }
 

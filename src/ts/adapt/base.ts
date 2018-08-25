@@ -636,7 +636,7 @@ type Event = {
   target,
   currentTarget,
   preventDefault
-}|Event;
+};
 
 export {Event};
 type EventListener = (p1: Event) => void;
@@ -688,11 +688,11 @@ export class SimpleEventTarget {
     }
   }
 }
-type EventTarget = EventTarget|SimpleEventTarget;
+type EventTarget = SimpleEventTarget;
 
 export {EventTarget};
 
-export const hasLShapeFloatBug: boolean|null = null;
+export let hasLShapeFloatBug: boolean|null = null;
 
 /**
  * Check if there is a bug with L-shape floats overlapping text.
@@ -733,7 +733,7 @@ export const checkLShapeFloatBug = (body: HTMLElement): boolean => {
   return hasLShapeFloatBug;
 };
 
-export const hasVerticalBBoxBug: boolean|null = null;
+export let hasVerticalBBoxBug: boolean|null = null;
 
 /**
  * Check if there is a bug with the bounding boxes of vertical text characters.
@@ -769,7 +769,7 @@ export const checkVerticalBBoxBug = (body: HTMLElement): boolean => {
   return hasVerticalBBoxBug;
 };
 
-export const hasInlineBlockJustificationBug: boolean|null = null;
+export let hasInlineBlockJustificationBug: boolean|null = null;
 
 export const checkInlineBlockJustificationBug =
     (body: HTMLElement): boolean => {
@@ -801,7 +801,7 @@ export const checkInlineBlockJustificationBug =
       return hasInlineBlockJustificationBug;
     };
 
-export const hasSoftWrapOpportunityAfterHyphenBug: boolean|null = null;
+export let hasSoftWrapOpportunityAfterHyphenBug: boolean|null = null;
 
 export const checkSoftWrapOpportunityAfterHyphenBug =
     (body: HTMLElement): boolean => {
@@ -833,7 +833,7 @@ export const checkSoftWrapOpportunityAfterHyphenBug =
       return hasSoftWrapOpportunityAfterHyphenBug;
     };
 
-export const hasSoftWrapOpportunityByWbrBug: boolean|null = null;
+export let hasSoftWrapOpportunityByWbrBug: boolean|null = null;
 
 export const checkSoftWrapOpportunityByWbrBug =
     (body: HTMLElement): boolean => {

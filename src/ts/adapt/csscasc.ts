@@ -674,9 +674,8 @@ export class CheckClassAction extends ChainedAction {
   /**
    * @override
    */
-  getPriority()
+  getPriority() {return 10;}
   // class should be checked after id
-  10
 
   /**
    * @override
@@ -707,9 +706,8 @@ export class CheckIdAction extends ChainedAction {
   /**
    * @override
    */
-  getPriority()
+  getPriority() {return 11;}
   // id should be checked after :root
-  11
 
   /**
    * @override
@@ -739,9 +737,8 @@ export class CheckLocalNameAction extends ChainedAction {
   /**
    * @override
    */
-  getPriority()
+  getPriority() {return 8;}
   // tag is a pretty good thing to check, after epub:type
-  8
 
   /**
    * @override
@@ -772,9 +769,8 @@ export class CheckNSTagAction extends ChainedAction {
   /**
    * @override
    */
-  getPriority()
+  getPriority() {return 8;}
   // tag is a pretty good thing to check, after epub:type
-  8
 
   /**
    * @override
@@ -996,13 +992,12 @@ export class IsRootAction extends ChainedAction {
   /**
    * @override
    */
-  getPriority()
+  getPriority() {return 12;}
   // :root is the first thing to check
-  12
 }
 
 export class IsNthAction extends ChainedAction {
-  private constructor(public readonly a: number, public readonly b: number) {
+  constructor(public readonly a: number, public readonly b: number) {
     super();
   }
 
@@ -3209,7 +3204,7 @@ export class CascadeParserHandler extends
    * @override
    */
   endRule() {
-    supers.endRule();
+    super.endRule();
     this.insideSelectorRule = ParseState.TOP;
   }
 
@@ -3332,7 +3327,7 @@ export const nthSelectorActionClasses:
       'nth-last-of-type': IsNthLastSiblingOfTypeAction
     };
 
-export const conditionCount: number = 0;
+export let conditionCount: number = 0;
 
 export class NotParameterParserHandler extends
     CascadeParserHandler {
