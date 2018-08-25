@@ -776,7 +776,7 @@ export class ListValidator extends PropertyValidator {
 
 export class SpaceListValidator extends ListValidator {
   constructor(group: ValidatingGroup) {
-    super();
+    super(group);
   }
 
   /**

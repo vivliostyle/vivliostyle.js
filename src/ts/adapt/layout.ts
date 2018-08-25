@@ -27,7 +27,7 @@ import {ResolveTextNodeBreakerHook} from '../vivliostyle/plugin';
 import * as plugin from '../vivliostyle/plugin';
 import {ElementsOffset} from '../vivliostyle/repetitiveelements';
 import * as repetitiveelements from '../vivliostyle/repetitiveelements';
-import {processAfterIfContinuesOfAncestors} from '../vivliostyle/selectors';
+import {processAfterIfContinues, processAfterIfContinuesOfAncestors} from '../vivliostyle/selectors';
 import {Size, getSize} from '../vivliostyle/sizing';
 import {resolveNewIndex} from '../vivliostyle/diff';
 import {TableFormattingContext} from '../vivliostyle/table';
@@ -3483,7 +3483,7 @@ export class LayoutRetryer extends
    * @override
    */
   restoreState(nodeContext, column) {
-    superrestoreState(nodeContext, column);
+    super.restoreState(nodeContext, column);
     column.pageBreakType = this.initialPageBreakType;
     column.computedBlockSize = this.initialComputedBlockSize;
     column.overflown = this.initialOverflown;

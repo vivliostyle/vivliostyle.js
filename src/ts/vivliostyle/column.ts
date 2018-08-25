@@ -35,18 +35,15 @@ type ColumnLayoutResult = {
 };
 
 export {ColumnLayoutResult};
-const ColumnLayoutResult = ColumnLayoutResult;
 type ColumnGenerator = () => Result<ColumnLayoutResult|null>;
 
 export {ColumnGenerator};
-const ColumnGenerator = ColumnGenerator;
 
 export class ColumnBalancingTrialResult {
   constructor(
       public readonly layoutResult: ColumnLayoutResult,
       public readonly penalty: number) {}
 }
-const ColumnBalancingTrialResult = ColumnBalancingTrialResult;
 
 function getBlockSize(container: Container): number {
   if (container.vertical) {
@@ -159,7 +156,6 @@ export class ColumnBalancer {
         newLayoutResult.columnPageFloatLayoutContexts);
   }
 }
-const ColumnBalancer = ColumnBalancer;
 const COLUMN_LENGTH_STEP = 1;
 
 export const canReduceContainerSize =
@@ -282,7 +278,6 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
     }
   }
 }
-const BalanceLastColumnBalancer = BalanceLastColumnBalancer;
 
 function isLastColumnLongerThanAnyOtherColumn(columns: Column[]): boolean {
   if (columns.length <= 1) {
@@ -325,7 +320,6 @@ export class BalanceNonLastColumnBalancer extends ColumnBalancer {
     reduceContainerSize(candidates, this.layoutContainer);
   }
 }
-const BalanceNonLastColumnBalancer = BalanceNonLastColumnBalancer;
 
 export const createColumnBalancer =
     (columnCount: number, columnFill: css.Ident,

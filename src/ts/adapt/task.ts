@@ -91,7 +91,7 @@ export interface Result {
 
 export const privateCurrentTask: Task = null;
 
-export const primaryScheduler: Scheduler = null;
+export let primaryScheduler: Scheduler = null;
 
 /**
  * Returns current task.

@@ -40,7 +40,6 @@ export enum FloatReference {
   REGION = 'region',
   PAGE = 'page'
 }
-const FloatReference = FloatReference;
 FloatReference.of = (str: string): FloatReference => {
   switch (str) {
     case 'inline':
@@ -175,7 +174,6 @@ export class PageFloatStore {
     return index >= 0 ? this.floats[index] : null;
   }
 }
-const PageFloatStore = PageFloatStore;
 
 /**
  * @param continues Represents whether the float is fragmented and continues
@@ -233,7 +231,6 @@ export class PageFloatFragment {
     return flowName;
   }
 }
-const PageFloatFragment = PageFloatFragment;
 
 export class PageFloatContinuation {
   constructor(
@@ -251,13 +248,11 @@ export class PageFloatContinuation {
         vtree.isSameNodePosition(this.nodePosition, other.nodePosition);
   }
 }
-const PageFloatContinuation = PageFloatContinuation;
 type PageFloatPlacementCondition = {
   [key: string]: boolean
 };
 
 export {PageFloatPlacementCondition};
-const PageFloatPlacementCondition = PageFloatPlacementCondition;
 
 /**
  * @param generatingNodePosition Source NodePosition generating the context.
@@ -1425,7 +1420,7 @@ export interface PageFloatLayoutStrategy {
 
   forbid(float: PageFloat, pageFloatLayoutContext: PageFloatLayoutContext);
 }
-const PageFloatLayoutStrategy = PageFloatLayoutStrategy;
+
 const pageFloatLayoutStrategies: PageFloatLayoutStrategy[] = [];
 
 export class PageFloatLayoutStrategyResolver {
@@ -1453,7 +1448,6 @@ export class PageFloatLayoutStrategyResolver {
     throw new Error(`No PageFloatLayoutStrategy found for ${float}`);
   }
 }
-const PageFloatLayoutStrategyResolver = PageFloatLayoutStrategyResolver;
 
 export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   /**
@@ -1516,5 +1510,4 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
    */
   forbid(float, pageFloatLayoutContext) {}
 }
-const NormalPageFloatLayoutStrategy = NormalPageFloatLayoutStrategy;
 PageFloatLayoutStrategyResolver.register(new NormalPageFloatLayoutStrategy());

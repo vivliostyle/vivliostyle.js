@@ -28,7 +28,7 @@ export enum LogLevel {
   WARN,
   ERROR
 }
-const LogLevel = LogLevel;
+
 type ErrorInfo = {
   error: Error,
   messages: any[]
@@ -103,7 +103,6 @@ export class Logger {
     this.triggerListeners(LogLevel.ERROR, args);
   }
 }
-const Logger = Logger;
 
 /**
  * @param args

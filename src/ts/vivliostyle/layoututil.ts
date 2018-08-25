@@ -18,10 +18,7 @@
  */
 import * as asserts from '../closure/goog/asserts/asserts';
 
-import {Column} from '../adapt/layout';
-import {LayoutConstraint} from '../adapt/layout';
-import {BreakPositionAndNodeContext} from '../adapt/layout';
-import {BreakPosition} from '../adapt/layout';
+import {BreakPosition, BreakPositionAndNodeContext, Column, EdgeBreakPosition, LayoutConstraint} from '../adapt/layout';
 import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';
 import * as breaks from './break';
@@ -165,7 +162,6 @@ export class LayoutIterator {
     return frame.result();
   }
 }
-const LayoutIterator = LayoutIterator;
 
 export class EdgeSkipper extends LayoutIteratorStrategy {
   constructor(protected readonly leadingEdge: boolean) {
@@ -323,7 +319,7 @@ export class PseudoColumn {
         this.column.footnoteEdge - parentClonedPaddingBorder;
     const pseudoColumn = this;
     this.column.openAllViews = function(position) {
-      return adapt.layout.Column.prototype.openAllViews.call(this, position)
+      return Column.prototype.openAllViews.call(this, position)
           .thenAsync((result) => {
             pseudoColumn.startNodeContexts.push(result.copy());
             return task.newResult(result);
@@ -345,7 +341,7 @@ export class PseudoColumn {
     const p = this.column.findAcceptableBreakPosition();
     if (allowBreakAtStartPosition) {
       const startNodeContext = this.startNodeContexts[0].copy();
-      const bp = new adapt.layout.EdgeBreakPosition(
+      const bp = new EdgeBreakPosition(
           startNodeContext, null, startNodeContext.overflow, 0);
       bp.findAcceptableBreak(this.column, 0);
       if (!p.nodeContext) {
@@ -388,7 +384,6 @@ export class PseudoColumn {
     return this.column;
   }
 }
-const PseudoColumn = PseudoColumn;
 
 /**
  * @abstract
@@ -467,7 +462,6 @@ export class AbstractLayoutRetryer {
     }
   }
 }
-const AbstractLayoutRetryer = AbstractLayoutRetryer;
 
 export interface LayoutMode {
   doLayout(nodeContext: vtree.NodeContext, column: Column):
@@ -479,4 +473,3 @@ export interface LayoutMode {
       positionAfter: vtree.NodeContext, initialPosition: vtree.NodeContext,
       column: Column, accepted: boolean): boolean;
 }
-const LayoutMode = LayoutMode;

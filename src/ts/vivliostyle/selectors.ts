@@ -65,7 +65,6 @@ export class AnyMatcher implements Matcher {
     return this.matchers.some((matcher) => matcher.matches());
   }
 }
-const AnyMatcher = AnyMatcher;
 
 export class AllMatcher implements Matcher {
   constructor(public readonly matchers: Matcher[]) {}
@@ -75,7 +74,6 @@ export class AllMatcher implements Matcher {
     return this.matchers.every((matcher) => matcher.matches());
   }
 }
-const AllMatcher = AllMatcher;
 
 export class MatcherBuilder {
   buildViewConditionMatcher(elementOffset: number, viewCondition: string):
@@ -181,7 +179,6 @@ export class AfterIfContinues {
         this.styler);
   }
 }
-const AfterIfContinues = AfterIfContinues;
 
 export class AfterIfContinuesLayoutConstraint implements
     FragmentLayoutConstraint {
@@ -242,8 +239,6 @@ export class AfterIfContinuesLayoutConstraint implements
   /** @override */
   getPriorityOfFinishBreak() {return 9;}
 }
-const AfterIfContinuesLayoutConstraint = AfterIfContinuesLayoutConstraint;
-
 export class AfterIfContinuesElementsOffset implements ElementsOffset {
   nodeContext: any;
   pseudoElementHeight: any;
@@ -284,7 +279,6 @@ export class AfterIfContinuesElementsOffset implements ElementsOffset {
     return false;
   }
 }
-const AfterIfContinuesElementsOffset = AfterIfContinuesElementsOffset;
 
 function processAfterIfContinuesOfNodeContext(
     nodeContext: NodeContext, column: Column): Result<NodeContext> {

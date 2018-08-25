@@ -279,7 +279,6 @@ export class Viewer {
     return this.adaptViewer.pageSizes;
   }
 }
-const Viewer = Viewer;
 
 function convertSingleDocumentOptions(
     singleDocumentOptions: SingleDocumentOptions|
@@ -323,7 +322,6 @@ export enum Navigation {
   FIRST = 'first',
   LAST = 'last'
 }
-const Navigation = Navigation;
 const ZoomType = viewer.ZoomType;
 const PageViewMode = viewer.PageViewMode;
 namespace.exportSymbol('Viewer', Viewer);

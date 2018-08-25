@@ -736,7 +736,7 @@ export class Viewer {
 
   private cancelRenderingTask() {
     if (this.renderTask) {
-      this.renderTask.interrupt(new Viewer.RenderingCanceledError());
+      this.renderTask.interrupt(new RenderingCanceledError());
     }
     this.renderTask = null;
   }
@@ -792,7 +792,7 @@ export class Viewer {
               });
             },
             (frame, err) => {
-              if (err instanceof Viewer.RenderingCanceledError) {
+              if (err instanceof RenderingCanceledError) {
                 profile.profiler.registerEndTiming(
                     'render (resize)');
                 logging.logger.debug(err.message);
@@ -1045,12 +1045,13 @@ export enum ZoomType {
 /**
  * Error representing that the rendering has been canceled.
  */
-Viewer.RenderingCanceledError = class extends Error {
+class RenderingCanceledError extends Error {
   name: any = 'RenderingCanceledError';
   message: any = 'Page rendering has been canceled';
   stack: any;
 
   private constructor() {
+    super();
     this.stack = (new Error()).stack;
   }
 };

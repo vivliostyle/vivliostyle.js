@@ -86,8 +86,7 @@ export class RepetitiveElementsOwnerFormattingContext implements
   /** @override */
   restoreState(state) {}
 }
-const RepetitiveElementsOwnerFormattingContext =
-    RepetitiveElementsOwnerFormattingContext;
+
 let repetitiveElementsCache: {root: Element, elements: RepetitiveElements}[] =
     [];
 
@@ -100,7 +99,6 @@ export interface ElementsOffset {
 
   calculateMinimumOffset(nodeContext: vtree.NodeContext): number;
 }
-const ElementsOffset = ElementsOffset;
 
 export class RepetitiveElements implements ElementsOffset {
   private headerSourceNode: Element = null;
@@ -374,7 +372,6 @@ export class RepetitiveElements implements ElementsOffset {
     return this.footerSourceNode === node;
   }
 }
-const RepetitiveElements = RepetitiveElements;
 
 /**
  * @abstract
@@ -411,7 +408,6 @@ export class LayoutEntireBlock implements LayoutMode {
     return accepted;
   }
 }
-const LayoutEntireBlock = LayoutEntireBlock;
 
 /**
  * @abstract
@@ -438,7 +434,6 @@ export class LayoutFragmentedBlock implements LayoutMode {
    */
   postLayout(positionAfter, initialPosition, column, accepted) {return accepted;}
 }
-const LayoutFragmentedBlock = LayoutFragmentedBlock;
 
 export class LayoutEntireOwnerBlock extends
     LayoutEntireBlock {
@@ -580,8 +575,6 @@ export class RepetitiveElementsOwnerLayoutConstraint implements
   /** @override */
   getPriorityOfFinishBreak() {return 10;}
 }
-const RepetitiveElementsOwnerLayoutConstraint =
-    RepetitiveElementsOwnerLayoutConstraint;
 
 export class RepetitiveElementsOwnerLayoutRetryer extends
     AbstractLayoutRetryer {

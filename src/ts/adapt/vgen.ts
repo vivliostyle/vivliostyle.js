@@ -43,6 +43,8 @@ import * as xmldoc from './xmldoc';
 
 import * as asserts from '../closure/goog/asserts/asserts';
 
+const namespacePrefixMap = {};
+
 export const frontEdgeBlackListHor: {[key: string]: string} = {
   'text-indent': '0px',
   'margin-top': '0px',
@@ -1433,7 +1435,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
     this.preprocessTextContent().then(() => {
       const offsetInNode = self.offsetInNode || 0;
       const textContent =
-          diff.restoreNewText(self.nodeContext.preprocessedTextContent)
+          restoreNewText(self.nodeContext.preprocessedTextContent)
               .substr(offsetInNode);
       self.viewNode = document.createTextNode(textContent);
       frame.finish(true);
@@ -1466,7 +1468,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
         })
         .then(() => {
           self.nodeContext.preprocessedTextContent =
-              diff.diffChars(originl, textContent);
+              diffChars(originl, textContent);
           frame.finish(true);
         });
     return frame.result();
@@ -1644,7 +1646,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
       // no children - was there text content?
       if (pos.sourceNode.nodeType != 1) {
         const content =
-            diff.restoreNewText(pos.preprocessedTextContent);
+            restoreNewText(pos.preprocessedTextContent);
         boxOffset += content.length - 1 - pos.offsetInNode;
       }
       pos = pos.modify();

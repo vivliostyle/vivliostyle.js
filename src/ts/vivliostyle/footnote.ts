@@ -73,7 +73,6 @@ export class FootnoteFragment extends PageFloatFragment {
     }
   }
 }
-const FootnoteFragment = FootnoteFragment;
 
 export class LineFootnotePolicyLayoutConstraint implements LayoutConstraint {
   constructor(public readonly footnote: Footnote) {}
@@ -84,7 +83,6 @@ export class LineFootnotePolicyLayoutConstraint implements LayoutConstraint {
         nodePosition, this.footnote.nodePosition);
   }
 }
-const LineFootnotePolicyLayoutConstraint = LineFootnotePolicyLayoutConstraint;
 
 export class FootnoteLayoutStrategy implements
     pagefloat.PageFloatLayoutStrategy {
@@ -175,6 +173,5 @@ export class FootnoteLayoutStrategy implements
     }
   }
 }
-const FootnoteLayoutStrategy = FootnoteLayoutStrategy;
 pagefloat.PageFloatLayoutStrategyResolver.register(
     new FootnoteLayoutStrategy());

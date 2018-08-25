@@ -143,7 +143,7 @@ export enum HOOKS {
    */
   POST_LAYOUT_BLOCK = 'POST_LAYOUT_BLOCK'
 }
-const HOOKS = HOOKS;
+
 type PreProcessSingleDocumentHook = (p1: Document) => any;
 
 export {PreProcessSingleDocumentHook};
@@ -177,6 +177,8 @@ type PostLayoutBlockHook = (p1: NodeContext, p2: NodeContext[], p3: Column) =>
     void;
 
 export {PostLayoutBlockHook};
+
+const hooks = {};
 
 /**
  * Register a function to a hook with the specified name.

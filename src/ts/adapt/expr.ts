@@ -108,7 +108,7 @@ export const makeQualifiedName =
       return base.escapeCSSIdent(memberName);
     };
 
-export const nextKeyIndex: number = 0;
+export let nextKeyIndex: number = 0;
 
 /**
  * Lexical scope of the expression.

@@ -108,7 +108,7 @@ export class Profiler {
     return this.registerStartTiming === registerStartTiming;
   }
 }
-const Profiler = Profiler;
+
 
 function noop() {}
 

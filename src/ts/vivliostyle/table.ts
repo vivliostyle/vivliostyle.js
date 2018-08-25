@@ -43,7 +43,6 @@ export class TableRow {
     return Math.min.apply(null, this.cells.map((c) => c.height));
   }
 }
-const TableRow = TableRow;
 
 export class TableCell {
   viewElement: Element|null;
@@ -68,14 +67,12 @@ export class TableCell {
     this.anchorSlot = slot;
   }
 }
-const TableCell = TableCell;
 
 export class TableSlot {
   constructor(
       public readonly rowIndex: number, public readonly columnIndex: number,
       public readonly cell: TableCell) {}
 }
-const TableSlot = TableSlot;
 
 export class TableCellFragment {
   pseudoColumn: any;
@@ -99,13 +96,11 @@ export class TableCellFragment {
     return bp;
   }
 }
-const TableCellFragment = TableCellFragment;
 
 export class TableCaptionView {
   constructor(public readonly viewNode: Element, public readonly side: string) {
   }
 }
-const TableCaptionView = TableCaptionView;
 
 export class BetweenTableRowBreakPosition extends layout.EdgeBreakPosition {
   private formattingContext: any;
@@ -1480,7 +1475,6 @@ export class TableLayoutProcessor implements layout.LayoutProcessor {
         column, parentNodeContext, nodeContext, removeSelf);
   }
 }
-const TableLayoutProcessor = TableLayoutProcessor;
 
 function adjustCellHeight(
     cellFragment: TableCellFragment, formattingContext: TableFormattingContext,
@@ -1776,7 +1770,7 @@ export class TableRowLayoutConstraint extends
           frame.finish(true);
         });
     return frame.result().thenAsync(
-        () => super.finishBreak(this, nodeContext, column)
+        () => super.finishBreak(nodeContext, column)
     );
   }
 

@@ -28,7 +28,7 @@ import * as expr from './expr';
 import {DocumentFaces} from './font';
 import * as vtree from './vtree';
 
-export const keyCount: number = 1;
+export let keyCount: number = 1;
 
 /**
  * Represent an at-rule which creates a page-level CSS box (page-master,
@@ -1329,7 +1329,7 @@ export class RootPageBoxInstance extends PageBoxInstance {
    */
   applyCascadeAndInit(cascade, docElementStyle) {
     super.applyCascadeAndInit(
-        this, cascade, docElementStyle);
+        cascade, docElementStyle);
 
     // Sort page masters using order and specificity.
     const pageMasters = this.children;

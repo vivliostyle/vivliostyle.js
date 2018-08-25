@@ -30,6 +30,7 @@ import * as cssprop from './cssprop';
 import {ValidatorSet, ValueMap} from './cssvalid';
 import * as cssparse from './cssparse';
 import {Context, defaultUnitSizes, LexicalScope} from './expr';
+import * as expr from './expr';
 import * as vtree from './vtree';
 import * as xmldoc from './xmldoc';
 

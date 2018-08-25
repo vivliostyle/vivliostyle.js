@@ -143,7 +143,7 @@ export class Page extends base.SimpleEventTarget {
   constructor(
       public readonly container: HTMLElement,
       public readonly bleedBox: HTMLElement) {
-    base.SimpleEventTarget.call(this);
+    super();
     const self = this;
     this.hrefHandler = (e: Event) => {
       const anchorElement = (e.currentTarget as Element);

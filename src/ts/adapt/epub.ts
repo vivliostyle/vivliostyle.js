@@ -252,7 +252,7 @@ export const getOPFItemId = (item: OPFItem): string|null => item.id;
 
 export const makeDeobfuscator = (uid: string): (p1: Blob) => Result<Blob> => {
   // TODO: use UTF8 of uid
-  const sha1 = sha1.bytesToSHA1Int8(uid);
+  const sha1Sum = sha1.bytesToSHA1Int8(uid);
   return (blob) => {
     const frame = (task.newFrame('deobfuscator') as Frame<Blob>);
     let head;
@@ -268,7 +268,7 @@ export const makeDeobfuscator = (uid: string): (p1: Blob) => Result<Blob> => {
       const dataView = new DataView(buf);
       for (let k = 0; k < dataView.byteLength; k++) {
         let b = dataView.getUint8(k);
-        b ^= sha1[k % 20];
+        b ^= sha1Sum[k % 20];
         dataView.setUint8(k, b);
       }
       frame.finish(net.makeBlob([dataView, tail]));

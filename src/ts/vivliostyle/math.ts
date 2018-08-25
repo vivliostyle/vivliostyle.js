@@ -18,7 +18,6 @@
  */
 export const mean = (array: number[]): number =>
     array.reduce((prev, curr) => prev + curr, 0) / array.length;
-const mean = mean;
 
 export const variance = (array: number[]): number => {
   const meanValue = mean(array);

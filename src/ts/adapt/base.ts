@@ -18,6 +18,9 @@
  * @fileoverview Common utilities.
  */
 import * as logging from '../vivliostyle/logging';
+
+export let emptyObj = {};
+
 type JSON = any;
 
 export {JSON};

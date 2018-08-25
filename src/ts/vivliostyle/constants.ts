@@ -21,7 +21,7 @@ import * as namespace from './namespace';
 /**
  * Debug flag.
  */
-export const isDebug: boolean = false;
+export let isDebug: boolean = false;
 
 /**
  * Page progression direction.
@@ -31,7 +31,6 @@ export enum PageProgression {
   LTR = 'ltr',
   RTL = 'rtl'
 }
-const PageProgression = PageProgression;
 
 /**
  * Return PageProgressino corresponding to the specified string
@@ -59,7 +58,7 @@ export enum PageSide {
   LEFT = 'left',
   RIGHT = 'right'
 }
-const PageSide = PageSide;
+
 namespace.exportSymbol('vivliostyle.constants.PageSide', PageSide);
 goog.exportProperty(PageSide, 'LEFT', PageSide.LEFT);
 goog.exportProperty(PageSide, 'RIGHT', PageSide.RIGHT);
@@ -73,7 +72,7 @@ export enum ReadyState {
   INTERACTIVE = 'interactive',
   COMPLETE = 'complete'
 }
-const ReadyState = ReadyState;
+
 namespace.exportSymbol('vivliostyle.constants.ReadyState', ReadyState);
 goog.exportProperty(ReadyState, 'LOADING', ReadyState.LOADING);
 goog.exportProperty(ReadyState, 'INTERACTIVE', ReadyState.INTERACTIVE);
