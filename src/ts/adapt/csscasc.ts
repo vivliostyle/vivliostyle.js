@@ -416,7 +416,7 @@ export const mergeIn =
       if (viewConditionMatcher) {
         const styleMap = getViewConditionalStyleMap(target);
         target = ({} as ElementStyle);
-        styleMap.push({styles: target, matcher: viewConditionMatcher});
+        styleMap.push({styles: target as ElementStyleMap, matcher: viewConditionMatcher});
       }
       for (const prop in style) {
         if (isMapName(prop)) {
