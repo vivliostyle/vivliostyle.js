@@ -2158,10 +2158,10 @@ export const chineseCounter = (num: number, numbering: ChineseNumbering) => {
   if (num < 10) {
     res.append(numbering.digits.charAt(num));
   } else {
-    if (numbering.informal && num <= 19) {
+    if (!numbering.formal && num <= 19) {
       res.append(numbering.markers.charAt(0));
       if (num != 0) {
-        res.append(numbering.markers.charAt(num - 10));
+        res.append(numbering.digits.charAt(num - 10));
       }
     } else {
       const thousands = Math.floor(num / 1000);
