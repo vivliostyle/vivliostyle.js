@@ -49,14 +49,14 @@ export const getSize =
     (clientLayout: vtree.ClientLayout, element: Element,
      sizes: Size[]): {[key: Size]: number} => {
       const original = {
-        display: element.style.display,
-        position: element.style.position,
-        width: (element.style.width as string),
-        maxWidth: (element.style.maxWidth as string),
-        minWidth: (element.style.minWidth as string),
-        height: (element.style.height as string),
-        maxHeight: (element.style.maxHeight as string),
-        minHeight: (element.style.minHeight as string)
+        display: (element as any).style.display,
+        position: (element as any).style.position,
+        width: ((element as any).style.width as string),
+        maxWidth: ((element as any).style.maxWidth as string),
+        minWidth: ((element as any).style.minWidth as string),
+        height: ((element as any).style.height as string),
+        maxHeight: ((element as any).style.maxHeight as string),
+        minHeight: ((element as any).style.minHeight as string)
       };
       const doc = element.ownerDocument;
       const parent = element.parentNode;

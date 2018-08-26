@@ -1648,11 +1648,11 @@ export class Column extends vtree.Container {
     const spanRect = this.clientLayout.getElementClientRect(span);
     const brRect = this.clientLayout.getElementClientRect(br);
     if (nodeContext.vertical) {
-      br.style.marginRight = `${brRect.right - spanRect.right}px`;
-      br.style.width = '0px';
+      (br as HTMLElement).style.marginRight = `${brRect.right - spanRect.right}px`;
+      (br as HTMLElement).style.width = '0px';
     } else {
-      br.style.marginTop = `${spanRect.top - brRect.top}px`;
-      br.style.height = '0px';
+      (br as HTMLElement).style.marginTop = `${spanRect.top - brRect.top}px`;
+      (br as HTMLElement).style.height = '0px';
     }
     br.setAttribute(vtree.SPECIAL_ATTR, '1');
   }

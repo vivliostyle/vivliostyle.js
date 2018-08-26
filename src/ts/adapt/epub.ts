@@ -1613,7 +1613,7 @@ export class OPFView implements CustomRendererFactory {
         const handlerSrc = this.opf.bindings[mediaType];
         if (handlerSrc) {
           result = this.viewport.document.createElement('iframe');
-          result.style.border = 'none';
+          (result as HTMLElement).style.border = 'none';
           const srcParam = base.lightURLEncode(data);
           const typeParam = base.lightURLEncode(mediaType);
           const sb = new base.StringBuffer();

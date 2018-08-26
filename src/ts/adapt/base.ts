@@ -369,7 +369,7 @@ export const setCSSProperty =
                 break;
             }
           }
-          if (elem && elem.style) {
+          if (elem && (elem as HTMLElement).style) {
             (elem as HTMLElement).style.setProperty(prefixed, value);
           }
         });

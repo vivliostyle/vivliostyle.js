@@ -572,7 +572,7 @@ export class Styler implements AbstractStyler {
   getAttrStyle(elem: Element): csscasc.ElementStyle {
     // skip cases in which elements for XML other than HTML or SVG
     // have 'style' attribute not for CSS declaration
-    if (elem.style instanceof CSSStyleDeclaration) {
+    if ((elem as any).style instanceof CSSStyleDeclaration) {
       const styleAttrValue = elem.getAttribute('style');
       if (styleAttrValue) {
         return csscasc.parseStyleAttribute(
