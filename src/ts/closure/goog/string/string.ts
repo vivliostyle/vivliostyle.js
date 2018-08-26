@@ -1206,7 +1206,7 @@ export function hashCode(str: string): number {
 /**
  * The most recent unique ID. |0 is equivalent to Math.floor in this case.
  */
-export const uniqueStringCounter_: number = Math.random() * 2147483648 | 0;
+export let uniqueStringCounter_: number = Math.random() * 2147483648 | 0;
 
 /**
  * Generates and returns a string which is unique in the current document.

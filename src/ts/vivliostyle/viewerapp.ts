@@ -22,17 +22,17 @@ import * as constants from './constants';
 import * as base from '../adapt/base';
 import * as viewer from '../adapt/viewer';
 
-export const fontSize: number = 16;
+export let fontSize: number = 16;
 
-export const touchActive: boolean = false;
+export let touchActive: boolean = false;
 
-export const touchX: number = 0;
+export let touchX: number = 0;
 
-export const touchY: number = 0;
+export let touchY: number = 0;
 
 export let zoomActive: boolean = false;
 
-export const pinchDist: number = 0;
+export let pinchDist: number = 0;
 
 export let currentPageProgression: constants.PageProgression =
     constants.PageProgression.LTR;

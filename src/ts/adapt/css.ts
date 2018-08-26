@@ -220,8 +220,11 @@ export class Val {
   isIdent(): boolean {return false;}
 
   isSpaceList(): boolean {return false;}
+
+  visit(visitor: any): any {
+    throw new Error('F_ABSTRACT');
+  }
 }
-Val.prototype.visit = goog.abstractMethod;
 
 export class Empty extends Val {
   constructor() {

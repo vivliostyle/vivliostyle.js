@@ -70,7 +70,7 @@ export function DEFAULT_ERROR_HANDLER(e: AssertionError) {
 /**
  * The handler responsible for throwing or logging assertion errors.
  */
-export const errorHandler_: (p1: AssertionError) => any = DEFAULT_ERROR_HANDLER;
+export let errorHandler_: (p1: AssertionError) => any = DEFAULT_ERROR_HANDLER;
 
 /**
  * Throws an exception with the given message and "Assertion failed" prefixed

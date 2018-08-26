@@ -907,7 +907,6 @@ export class Parser {
   ruleStack: string[] = [];
   regionRule: boolean = false;
   pageRule: boolean = false;
-  actions: any;
 
   constructor(
       public actions: Action[], public tokenizer: csstok.Tokenizer,

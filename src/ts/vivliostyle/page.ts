@@ -317,7 +317,7 @@ export const createCornerMark =
       line2.setAttribute('points', points2.map((p) => p.join(',')).join(' '));
       mark.appendChild(line2);
       position.split(' ').forEach((side) => {
-        mark.style[side] = `${offset}px`;
+        (mark as any).style[side] = `${offset}px`;
       });
       return mark;
     };
@@ -382,11 +382,11 @@ export const createCrossMark =
       Object.keys(CrossMarkPosition).forEach((key) => {
         const side = CrossMarkPosition[key];
         if (side === position) {
-          mark.style[side] = `${offset}px`;
+          (mark as any).style[side] = `${offset}px`;
         } else {
           if (side !== opposite) {
-            mark.style[side] = '0';
-            mark.style[`margin-${side}`] = 'auto';
+            (mark as any).style[side] = '0';
+            (mark as any).style[`margin-${side}`] = 'auto';
           }
         }
       });
@@ -973,7 +973,7 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
         const boxInstance = this.pageMarginBoxInstances[name];
         const boxParam =
             new SingleBoxMarginBoxSizingParam(
-                container, boxInstance.style, isHorizontal, scope,
+                container, (boxInstance as any).style, isHorizontal, scope,
                 clientLayout);
         containers[boxInfo.positionAlongVariableDimension] = container;
         boxInstances[boxInfo.positionAlongVariableDimension] = boxInstance;

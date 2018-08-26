@@ -416,7 +416,7 @@ export const mergeIn =
       if (viewConditionMatcher) {
         const styleMap = getViewConditionalStyleMap(target);
         target = ({} as ElementStyle);
-        styleMap.push({styles: target, matcher: viewConditionMatcher});
+        styleMap.push({styles: target as ElementStyleMap, matcher: viewConditionMatcher});
       }
       for (const prop in style) {
         if (isMapName(prop)) {
@@ -2158,10 +2158,10 @@ export const chineseCounter = (num: number, numbering: ChineseNumbering) => {
   if (num < 10) {
     res.append(numbering.digits.charAt(num));
   } else {
-    if (numbering.informal && num <= 19) {
+    if (!numbering.formal && num <= 19) {
       res.append(numbering.markers.charAt(0));
       if (num != 0) {
-        res.append(numbering.markers.charAt(num - 10));
+        res.append(numbering.digits.charAt(num - 10));
       }
     } else {
       const thousands = Math.floor(num / 1000);
@@ -2755,7 +2755,7 @@ export enum ParseState {
 /**
  * Cascade for base User Agent stylesheet.
  */
-export const uaBaseCascade: Cascade = null;
+export let uaBaseCascade: Cascade = null;
 
 //------------- parsing ------------
 export class CascadeParserHandler extends
@@ -2789,7 +2789,7 @@ export class CascadeParserHandler extends
 
   processChain(action: CascadeAction): void {
     const chained = chainActions(this.chain, action);
-    if (chained !== action && chained.makePrimary(this.cascade)) {
+    if (chained !== action && (chained as ChainedAction).makePrimary(this.cascade)) {
       return;
     }
     this.insertNonPrimary(chained);

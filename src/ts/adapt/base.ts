@@ -48,13 +48,13 @@ export const stripFragmentAndQuery = (url: string): string => {
 /**
  * Base URL relative to which URLs of resources are resolved.
  */
-export const baseURL = window.location.href;
+export let baseURL = window.location.href;
 
 /**
  * Base URL relative to which URLs of resources such as validation.txt and
  * user-agent.css are resolved.
  */
-export const resourceBaseURL = window.location.href;
+export let resourceBaseURL = window.location.href;
 
 /**
  * @param relURL relative URL
@@ -369,7 +369,7 @@ export const setCSSProperty =
                 break;
             }
           }
-          if (elem && elem.style) {
+          if (elem && (elem as HTMLElement).style) {
             (elem as HTMLElement).style.setProperty(prefixed, value);
           }
         });
