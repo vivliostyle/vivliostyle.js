@@ -2755,7 +2755,7 @@ export enum ParseState {
 /**
  * Cascade for base User Agent stylesheet.
  */
-export const uaBaseCascade: Cascade = null;
+export let uaBaseCascade: Cascade = null;
 
 //------------- parsing ------------
 export class CascadeParserHandler extends
@@ -2789,7 +2789,7 @@ export class CascadeParserHandler extends
 
   processChain(action: CascadeAction): void {
     const chained = chainActions(this.chain, action);
-    if (chained !== action && chained.makePrimary(this.cascade)) {
+    if (chained !== action && (chained as ChainedAction).makePrimary(this.cascade)) {
       return;
     }
     this.insertNonPrimary(chained);

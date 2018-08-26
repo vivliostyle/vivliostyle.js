@@ -124,6 +124,7 @@ export class LexicalScope {
   values: {[key: string]: Val} = {};
   funcs: {[key: string]: Val} = {};
   builtIns: {[key: string]: (...p1: Result[]) => Result} = {};
+  resolver: (p1: string, p2: boolean) => Val;
 
   constructor(
       parent: LexicalScope, resolver?: (p1: string, p2: boolean) => Val) {
@@ -136,6 +137,7 @@ export class LexicalScope {
     if (parent) {
       parent.children.push(this);
     }
+    this.resolver = resolver;
     if (!parent) {
       // root scope
       const builtIns = this.builtIns;

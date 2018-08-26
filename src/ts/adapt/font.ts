@@ -37,7 +37,7 @@ export const traitProps: {[key: string]: css.Val} = {
 
 export const bogusFontData = `OTTO${(new Date()).valueOf()}`;
 
-export const bogusFontCounter: number = 1;
+export let bogusFontCounter: number = 1;
 
 export const makeFontTraitKey =
     (properties: {[key: string]: css.Val}): string => {

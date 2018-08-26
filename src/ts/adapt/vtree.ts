@@ -249,7 +249,7 @@ export class Page extends base.SimpleEventTarget {
     return this.pageAreaElement || this.container;
   }
 }
-goog.inherits(Page, base.SimpleEventTarget);
+
 type Spread = {
   left: Page,
   right: Page
@@ -1307,7 +1307,7 @@ export class ContentPropertyHandler extends css.Visitor {
       public readonly elem: Element, public readonly context: Context,
       public readonly rootContentValue: css.Val,
       public readonly exprContentListener: ExprContentListener) {
-    css.Visitor.call(this);
+    super();
   }
 
   private visitStrInner(str: string, node?: Node|null) {
@@ -1353,7 +1353,6 @@ export class ContentPropertyHandler extends css.Visitor {
     return null;
   }
 }
-goog.inherits(ContentPropertyHandler, css.Visitor);
 
 export const nonTrivialContent = (val: css.Val): boolean => val != null &&
     val !== css.ident.normal && val !== css.ident.none &&

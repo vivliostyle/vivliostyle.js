@@ -89,7 +89,7 @@ export interface Result {
   get(): T|null;
 }
 
-export const privateCurrentTask: Task = null;
+export let privateCurrentTask: Task = null;
 
 export let primaryScheduler: Scheduler = null;
 

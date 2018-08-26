@@ -42,7 +42,7 @@ export interface Matcher {
   matches(): boolean;
 }
 
-const fragmentIndices = {};
+let fragmentIndices = {};
 
 export class NthFragmentMatcher implements Matcher {
   constructor(
@@ -91,9 +91,9 @@ export class MatcherBuilder {
   buildAllMatcher(matchers: Matcher[]): Matcher {return new AllMatcher(matchers);}
 
   buildAnyMatcher(matchers: Matcher[]): Matcher {return new AnyMatcher(matchers);}
-}
 
-MatcherBuilder.instance = new MatcherBuilder();
+  static instance = new MatcherBuilder();
+}
 
 export const mergeViewConditionalStyles =
     (cascMap: {[key: string]: CascadeValue}, context: Context,
