@@ -122,7 +122,7 @@ export const newScheduler = (opt_timer?: Timer): Scheduler =>
 /**
  * @template T
  */
-export function newResult<T> (opt_value: T): Result<T> {return new SyncResultImpl(opt_value)};
+export function newResult<T> (opt_value: T): Result<T> {return new SyncResultImpl<T>(opt_value)};
 
 /**
  * Creates a new frame and runs code in its context, catching synchronous and
@@ -176,12 +176,12 @@ export class TimerImpl implements Timer {
   /**
    * @override
    */
-  setTimeout(fn, delay) {return setTimeout(fn, delay);}
+  setTimeout(fn: () => void, delay: number) {return setTimeout(fn, delay);}
 
   /**
    * @override
    */
-  clearTimeout(token) {
+  clearTimeout(token: number) {
     clearTimeout(token);
   }
 }
@@ -234,7 +234,7 @@ export class Scheduler {
     if (this.inTimeSlice) {
       return;
     }
-    const nextInQueue = (this.queue.peek() as Continuation);
+    const nextInQueue = (this.queue.peek() as Continuation<any>);
     const newTime = nextInQueue.scheduledTime;
     const now = this.timer.currentTime();
     if (this.timeoutToken != null) {
@@ -257,8 +257,8 @@ export class Scheduler {
     }, timeout);
   }
 
-  private schedule(continuation: Continuation, opt_delay?: number): void {
-    const c = (continuation as Continuation);
+  schedule(continuation: Continuation<any>, opt_delay?: number): void {
+    const c = (continuation as Continuation<any>);
     const now = this.timer.currentTime();
     c.order = this.order++;
     c.scheduledTime = now + (opt_delay || 0);
@@ -300,9 +300,9 @@ export class Scheduler {
     }
   }
 
-  run(func: () => Result, opt_name?: string): Task {
+  run(func: () => Result<any>, opt_name?: string): Task {
     const task = new Task(this, opt_name || '');
-    task.top = new Frame(task, null, 'bootstrap');
+    task.top = new Frame<any>(task, null, 'bootstrap');
     task.top.state = FrameState.ACTIVE;
     task.top.then(() => {
       const done = () => {
@@ -396,14 +396,14 @@ export class Continuation<T> implements base.Comparable {
 /**
  * An asynchronous, time-sliced task.
  */
-export class Task<T> {
+export class Task {
   callbacks: (() => void)[] = [];
   exception: Error | null = null;
   running: boolean = true;
   result: any = null;
   waitTarget: any = null;
-  top: Frame<T> | null = null;
-  continuation: Continuation<T> | null = null;
+  top: Frame<any> | null = null;
+  continuation: Continuation<any> | null = null;
 
   constructor(public scheduler: Scheduler, public name: string) {}
 
@@ -455,8 +455,8 @@ export class Task<T> {
   /**
    * Wait for task to finish (from another task).
    */
-  join(): Result<T> {
-    const frame = newFrame<T>('Task.join');
+  join(): Result<any> {
+    const frame = newFrame<any>('Task.join');
     if (!this.running) {
       frame.finish(this.result);
     } else {
@@ -478,7 +478,7 @@ export class Task<T> {
     while (this.top && !this.top.handler) {
       this.top = this.top.parent;
     }
-    if (this.top) {
+    if (this.top && this.top.handler && this.exception) {
       // found a handler
       const err = this.exception;
       this.exception = null;
@@ -491,7 +491,7 @@ export class Task<T> {
     }
   }
 
-  private raise(err: Error, opt_frame?: Frame): void {
+  raise(err: Error, opt_frame?: Frame<any>): void {
     this.fillStack(err);
     if (opt_frame) {
       let f = this.top;
@@ -540,19 +540,19 @@ export class SyncResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  thenAsync(callback) {
+  thenAsync<T1>(callback: (p1: T) => Result<T1>) {
     return callback(this.value);
   }
 
   /**
    * @override
    */
-  thenReturn(result) {return new SyncResultImpl(result);}
+  thenReturn<T1>(result: T1) {return new SyncResultImpl(result);}
 
   /**
    * @override
    */
-  thenFinish(frame) {
+  thenFinish(frame: Frame<T>) {
     frame.finish(this.value);
   }
 
@@ -585,7 +585,7 @@ export class ResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  thenAsync(callback) {
+  thenAsync<T1>(callback: (p1: T) => Result<T1>) : Result<T1>{
     if (this.isPending()) {
       // thenAsync is special, do the trick with the context
       const frame = new Frame<T>(
@@ -606,7 +606,7 @@ export class ResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  thenReturn(result: any) {
+  thenReturn<T1>(result: T1) {
     if (this.isPending()) {
       return this.thenAsync(() => new SyncResultImpl(result));
     } else {
@@ -617,7 +617,7 @@ export class ResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  thenFinish(frame) {
+  thenFinish(frame: Frame<T>) {
     if (this.isPending()) {
       this.then((res) => {
         frame.finish(res);
@@ -654,9 +654,9 @@ export class Frame<T> {
   res: any = null;
   state: FrameState;
   callback: ((p1: any) => void)|null = null;
-  handler: ((p1: Frame, p2: Error) => void)|null = null;
+  handler: ((p1: Frame<any>, p2: Error) => void)|null = null;
 
-  constructor(public task: Task, public parent: Frame, public name: string) {
+  constructor(public task: Task, public parent: Frame<T>, public name: string) {
     this.state = FrameState.INIT;
   }
 
@@ -679,12 +679,14 @@ export class Frame<T> {
 
   finish(res: T) {
     this.checkEnvironment();
-    if (!privateCurrentTask.exception) {
+    if (privateCurrentTask && !privateCurrentTask.exception) {
       this.res = res;
     }
     this.state = FrameState.FINISHED;
     const frame = this.parent;
-    privateCurrentTask.top = frame;
+    if (privateCurrentTask) {
+      privateCurrentTask.top = frame;
+    }
     if (this.callback) {
       try {
         this.callback(res);
