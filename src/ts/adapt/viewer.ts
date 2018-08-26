@@ -1050,7 +1050,7 @@ class RenderingCanceledError extends Error {
   message: any = 'Page rendering has been canceled';
   stack: any;
 
-  private constructor() {
+  constructor() {
     super();
     this.stack = (new Error()).stack;
   }

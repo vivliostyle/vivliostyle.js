@@ -542,20 +542,13 @@ export const appendBase64 = (sb: StringBuffer, data: string): void => {
 };
 
 /**
- * @template T
- */
-export const identity = (param: T): T => param;
-
-/**
  * Index array using key function. First encountered item wins on collision.
  * Elements with empty and null keys are dropped.
- * @template T
  */
-export const indexArray =
-    (arr: T[], key: (p1: T) => string | null): {[key: string]: T} => {
-      const map = {};
+export function indexArray<T> (arr: T[], key: (p1: T) => string | null): {[key: string]: T} {
+      const map : {[key: string]: T} = {} ;
       for (const v of arr) {
-        const k = key(v);
+        const k: string | null = key(v);
         if (k && !map[k]) {
           map[k] = v;
         }
@@ -579,11 +572,9 @@ export const arrayToSet = (arr: string[]): {[key: string]: boolean} => {
  * Index array using key function. Repeated indices are all combined into
  * arrays. Elements with empty and null keys are dropped. Ordering of the
  * elements in arrays is preserved.
- * @template T
  */
-export const multiIndexArray =
-    (arr: T[], key: (p1: T) => string | null): {[key: string]: T[]} => {
-      const map = {};
+export function multiIndexArray<T> (arr: T[], key: (p1: T) => string | null): {[key: string]: T[]} {
+      const map: {[key: string]: T[]} = {};
       for (const v of arr) {
         const k = key(v);
         if (k) {
@@ -597,27 +588,13 @@ export const multiIndexArray =
       return map;
     };
 
-/**
- * Apply function to each element of the array
- * @template P, R
- * @param fn second parameter is the index
- */
-export const map = (arr: P[], fn: (p1: P, p2: number) => R): R[] => {
-  const res = Array(arr.length);
-  for (let i = 0; i < arr.length; i++) {
-    res[i] = fn(arr[i], i);
-  }
-  return res;
-};
 
 /**
  * Apply function to each value of the object
- * @template P, R
  * @param fn second parameter is the key
  */
-export const mapObj = (obj: {[key: string]: P}, fn: (p1: P, p2: string) => R):
-    {[key: string]: R} => {
-      const res = {};
+export function mapObj<P, R> (obj: {[key: string]: P}, fn: (p1: any, p2: string) => R): {[key: string]: R} {
+      const res: {[key: string]: R} = {};
       for (const n in obj) {
         res[n] = fn(obj[n], n);
       }

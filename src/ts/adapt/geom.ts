@@ -236,15 +236,15 @@ export const unrotateBox = (box: Rect): Rect =>
     new Rect(-box.y2, box.x1, -box.y1, box.x2);
 
 export const rotateShape = (shape: Shape): Shape =>
-    new Shape(base.map(shape.points, rotatePoint));
+    new Shape(shape.points.map(point => rotatePoint(point)));
 
 export const shapesToBands =
     (box: Rect, include: Shape[], exclude: Shape[], granularity: number,
      snapHeight: number, vertical: boolean): Band[] => {
       if (vertical) {
         box = rotateBox(box);
-        include = base.map(include, rotateShape);
-        exclude = base.map(exclude, rotateShape);
+        include = include.map(shape => rotateShape(shape));
+        exclude = exclude.map(shape=> rotateShape(shape));
       }
       const includeCount = include.length;
       const excludeCount = exclude ? exclude.length : 0;

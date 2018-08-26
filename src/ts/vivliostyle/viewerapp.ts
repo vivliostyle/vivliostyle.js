@@ -34,7 +34,7 @@ export let zoomActive: boolean = false;
 
 export const pinchDist: number = 0;
 
-export const currentPageProgression: constants.PageProgression =
+export let currentPageProgression: constants.PageProgression =
     constants.PageProgression.LTR;
 
 export const sendCommand = (cmd: base.JSON) => {

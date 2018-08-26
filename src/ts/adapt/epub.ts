@@ -419,7 +419,7 @@ export const readMetadata = (mroot: xmldoc.NodeList, prefixes: string|null): JSO
       base.multiIndexArray(rawItems, (rawItem) => rawItem.refines);
   const makeMetadata = (map) =>
       base.mapObj(map, (rawItemArr, itemName) => {
-        const result = base.map(rawItemArr, (rawItem) => {
+        const result = rawItemArr.map(rawItem => {
           const entry = {'v': rawItem.value, 'o': rawItem.order};
           if (rawItem.schema) {
             entry['s'] = rawItem.scheme;
@@ -612,8 +612,7 @@ export class OPFDoc {
       }
     }
     const srcToFallbackId = {};
-    this.items = base.map(
-        pkg.child('manifest').child('item').asArray(), (node) => {
+    this.items = pkg.child('manifest').child('item').asArray().map(node => {
           const item = new OPFItem();
           const elem = (node as Element);
           item.initWithElement(elem, opfXML.url);
@@ -647,8 +646,8 @@ export class OPFDoc {
         fallbackSrc = item.src;
       }
     }
-    this.spine = base.map(
-        pkg.child('spine').child('itemref').asArray(), (node, index) => {
+    this.spine = pkg.child('spine').child('itemref').asArray().map(
+        (node, index) => {
           const elem = (node as Element);
           const id = elem.getAttribute('idref');
           const item = self.itemMap[(id as string)];

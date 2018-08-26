@@ -20,7 +20,6 @@
  */
 import * as logging from '../vivliostyle/logging';
 import * as base from './base';
-import {Frame} from './task';
 
 /**
  * External timer. Only needed for testing.
@@ -52,7 +51,7 @@ export interface Timer {
  * some time later. Similar to Deferred.
  * @template T
  */
-export interface Result {
+export interface Result<T> {
   /**
    * Call the given function when asynchronous function is finished. Callback
    * is executed in the task's context.
@@ -64,14 +63,14 @@ export interface Result {
    * finished. Callback is executed in the task's context.
    * @template T1
    */
-  thenAsync(callback: (p1: T) => Result<T1>): Result<T1>;
+  thenAsync<T1>(callback: (p1: T) => Result<T1>): Result<T1>;
 
   /**
    * Produce a Result that resolves to the given value when this Result is
    * resolved.
    * @template T1
    */
-  thenReturn(result: T1): Result<T1>;
+  thenReturn<T1>(result: T1): Result<T1>;
 
   /**
    * Finish given frame with the result value when result becomes ready.
@@ -89,19 +88,19 @@ export interface Result {
   get(): T|null;
 }
 
-export const privateCurrentTask: Task = null;
+export let privateCurrentTask: Task | null = null;
 
-export let primaryScheduler: Scheduler = null;
+export let primaryScheduler: Scheduler | null = null;
 
 /**
  * Returns current task.
  */
-export const currentTask = (): Task => privateCurrentTask;
+export const currentTask = (): Task | null => privateCurrentTask;
 
 /**
  * Create and return a new frame with the given name.
  */
-export const newFrame = (name: string): Frame => {
+export function newFrame<T>(name: string): Frame<T> {
   if (!privateCurrentTask) {
     throw new Error('E_TASK_NO_CONTEXT');
   }
@@ -109,7 +108,7 @@ export const newFrame = (name: string): Frame => {
     privateCurrentTask.name = name;
   }
   const task = privateCurrentTask;
-  const frame = new Frame(task, task.top, name);
+  const frame = new Frame<T>(task, task.top, name);
   task.top = frame;
   frame.state = FrameState.ACTIVE;
   return frame;
@@ -123,20 +122,17 @@ export const newScheduler = (opt_timer?: Timer): Scheduler =>
 /**
  * @template T
  */
-export const newResult = (opt_value: T): Result<T> =>
-    new SyncResultImpl(opt_value);
+export function newResult<T> (opt_value: T): Result<T> {return new SyncResultImpl(opt_value)};
 
 /**
  * Creates a new frame and runs code in its context, catching synchronous and
  * asynchronous errors. If an error occurs, onErr is run (in the context of
  * the same frame). As usual, onErr is supposed either produce a result or raise
  * an exception.
- * @template T
  */
-export const handle =
-    (name, code: (p1: Frame<T>) => void,
-     onErr: (p1: Frame<T>, p2: Error) => void): Result<T> => {
-      const frame = newFrame(name);
+export function handle<T> (name: any, code: (p1: Frame<T>) => void,
+     onErr: (p1: Frame<T>, p2: Error) => void): Result<T> {
+      const frame = newFrame<T>(name);
       frame.handler = onErr;
       try {
         code(frame);
@@ -147,7 +143,7 @@ export const handle =
       return frame.result();
     };
 
-export const start = (func: () => Result, opt_name?: string): Task => {
+export function start<T> (func: () => Result<T>, opt_name?: string): Task {
   const scheduler = privateCurrentTask ? privateCurrentTask.getScheduler() :
                                          primaryScheduler || newScheduler();
   return scheduler.run(func, opt_name);
@@ -203,7 +199,7 @@ export class Scheduler {
   inTimeSlice: boolean = false;
   order: number = 0;
 
-  private constructor(public timer: Timer) {
+  constructor(public timer: Timer) {
     this.queue = new base.PriorityQueue();
     if (!primaryScheduler) {
       primaryScheduler = this;
@@ -341,7 +337,7 @@ export class Scheduler {
  * Task suspension point.
  * @template T
  */
-export class Continuation implements base.Comparable {
+export class Continuation<T> implements base.Comparable {
   scheduledTime: number = 0;
   order: number = 0;
   result: any = null;
@@ -400,16 +396,16 @@ export class Continuation implements base.Comparable {
 /**
  * An asynchronous, time-sliced task.
  */
-export class Task {
+export class Task<T> {
   callbacks: (() => void)[] = [];
-  exception: Error = null;
+  exception: Error | null = null;
   running: boolean = true;
   result: any = null;
   waitTarget: any = null;
-  top: Frame = null;
-  continuation: Continuation = null;
+  top: Frame<T> | null = null;
+  continuation: Continuation<T> | null = null;
 
-  private constructor(public scheduler: Scheduler, public name: string) {}
+  constructor(public scheduler: Scheduler, public name: string) {}
 
   /**
    * @return task name.
@@ -459,8 +455,8 @@ export class Task {
   /**
    * Wait for task to finish (from another task).
    */
-  join(): Result {
-    const frame = newFrame('Task.join');
+  join(): Result<T> {
+    const frame = newFrame<T>('Task.join');
     if (!this.running) {
       frame.finish(this.result);
     } else {
@@ -531,13 +527,13 @@ export class Task {
 /**
  * @template T
  */
-export class SyncResultImpl implements Result<T> {
-  private constructor(public value: T) {}
+export class SyncResultImpl<T> implements Result<T> {
+  constructor(public value: T) {}
 
   /**
    * @override
    */
-  then(callback) {
+  then(callback: (T: any) => void) {
     callback(this.value);
   }
 
@@ -576,7 +572,7 @@ export class SyncResultImpl implements Result<T> {
 /**
  * @template T
  */
-export class ResultImpl implements Result<T> {
+export class ResultImpl<T> implements Result<T> {
   constructor(public readonly frame: Frame<T>) {}
 
   /**
@@ -592,7 +588,7 @@ export class ResultImpl implements Result<T> {
   thenAsync(callback) {
     if (this.isPending()) {
       // thenAsync is special, do the trick with the context
-      const frame = new Frame(
+      const frame = new Frame<T>(
           this.frame.task, this.frame.parent, 'AsyncResult.thenAsync');
       frame.state = FrameState.ACTIVE;
       this.frame.parent = frame;
@@ -610,7 +606,7 @@ export class ResultImpl implements Result<T> {
   /**
    * @override
    */
-  thenReturn(result) {
+  thenReturn(result: any) {
     if (this.isPending()) {
       return this.thenAsync(() => new SyncResultImpl(result));
     } else {
@@ -654,7 +650,7 @@ export class ResultImpl implements Result<T> {
  * invocation.
  * @template T
  */
-export class Frame {
+export class Frame<T> {
   res: any = null;
   state: FrameState;
   callback: ((p1: any) => void)|null = null;
@@ -678,7 +674,7 @@ export class Frame {
    *                              return value.
    */
   result(): Result<T> {
-    return new ResultImpl(this);
+    return new ResultImpl<T>(this);
   }
 
   finish(res: T) {
@@ -716,7 +712,7 @@ export class Frame {
     return this.task.scheduler;
   }
 
-  private then(callback: (p1: T) => void): void {
+  then(callback: (p1: T) => void): void {
     // legal to call when currentTask is null
     switch (this.state) {
       case FrameState.ACTIVE:
@@ -749,7 +745,7 @@ export class Frame {
    * @return holds true
    */
   timeSlice(): Result<boolean> {
-    const frame = newFrame('Frame.timeSlice');
+    const frame = newFrame<boolean>('Frame.timeSlice');
     const scheduler = frame.getScheduler();
     if (scheduler.isTimeSliceOver()) {
       logging.logger.debug('-- time slice --');
@@ -766,7 +762,7 @@ export class Frame {
    * @return holds true
    */
   sleep(delay: number): Result<boolean> {
-    const frame = newFrame('Frame.sleep');
+    const frame = newFrame<boolean>('Frame.sleep');
     frame.suspend().schedule(true, delay);
     return frame.result();
   }
@@ -777,7 +773,7 @@ export class Frame {
    * @return holds true.
    */
   loop(func: () => Result<boolean>): Result<boolean> {
-    const frame = newFrame('Frame.loop');
+    const frame = newFrame<boolean>('Frame.loop');
     const step = (more) => {
       try {
         while (more) {
@@ -835,8 +831,8 @@ export class Frame {
   }
 }
 
-export class LoopBodyFrame extends Frame {
-  constructor(task: Task, parent: Frame) {
+export class LoopBodyFrame<T> extends Frame<T> {
+  constructor(task: Task, parent: Frame<T>) {
     super(task, parent, 'loop');
   }
 
@@ -867,7 +863,7 @@ export class EventSource {
   head: EventItem;
   tail: EventItem;
 
-  private constructor() {
+  constructor() {
     this.head = new EventItem(null);
     this.tail = this.head;
   }

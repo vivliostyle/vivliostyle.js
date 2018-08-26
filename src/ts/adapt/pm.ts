@@ -107,7 +107,7 @@ export class RootPageBox extends PageBox {
 export class PageMasterScope extends expr.LexicalScope {
   pageMaster: any;
 
-  private constructor(scope: expr.LexicalScope, pageMaster: PageMaster) {
+  constructor(scope: expr.LexicalScope, pageMaster: PageMaster) {
     super(scope, function(qualifiedName, isFunc) {
       const r = qualifiedName.match(/^([^.]+)\.([^.]+)$/);
       if (r) {
