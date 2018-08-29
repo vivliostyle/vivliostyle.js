@@ -39,12 +39,16 @@ class Navigation {
 
         const getSpreadContainerElement = () => {
             const viewportElement = document.getElementById("vivliostyle-viewer-viewport");
-            return viewportElement && viewportElement.firstElementChild.firstElementChild;
+            const outerZoomBoxElement = viewportElement && viewportElement.firstElementChild;
+            return outerZoomBoxElement && outerZoomBoxElement.firstElementChild;
         }
 
         this.isNavigateToPreviousDisabled = ko.pureComputed(() => {
             if (navigationDisabled()) {
                 return true;
+            }
+            if (this.viewer_.state.status === undefined) {
+                return false;   // needed for test/spec/viewmodels/navigation-spec.js
             }
             const spreadContainerElement = getSpreadContainerElement();
             const firstPageContainer = spreadContainerElement && spreadContainerElement.firstElementChild;
@@ -55,6 +59,9 @@ class Navigation {
             if (navigationDisabled()) {
                 return true;
             }
+            if (this.viewer_.state.status === undefined) {
+                return false;   // needed for test/spec/viewmodels/navigation-spec.js
+            }
             if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
                 return false;
             }
@@ -64,6 +71,12 @@ class Navigation {
         });
 
         this.isNavigateToLeftDisabled = ko.pureComputed(() => {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (this.viewer_.state.pageProgression === undefined) {
+                return false;   // needed for test/spec/viewmodels/navigation-spec.js
+            }
             if (this.viewer_.state.pageProgression() === vivliostyle.constants.PageProgression.LTR) {
                 return this.isNavigateToPreviousDisabled();
             } else {
@@ -72,6 +85,12 @@ class Navigation {
         });
 
         this.isNavigateToRightDisabled = ko.pureComputed(() => {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (this.viewer_.state.pageProgression === undefined) {
+                return false;   // needed for test/spec/viewmodels/navigation-spec.js
+            }
             if (this.viewer_.state.pageProgression() === vivliostyle.constants.PageProgression.LTR) {
                 return this.isNavigateToNextDisabled();
             } else {
@@ -84,6 +103,9 @@ class Navigation {
         this.isNavigateToLastDisabled = ko.pureComputed(() => {
             if (navigationDisabled()) {
                 return true;
+            }
+            if (this.viewer_.state.status === undefined) {
+                return false;   // needed for test/spec/viewmodels/navigation-spec.js
             }
             if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
                 return true;
