@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -104,28 +105,42 @@ class Viewer {
         }
     }
 
+    afterNavigateToPage() {
+        setTimeout(() => {
+            // Update page navigation disable/enable
+            this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
+            this.state_.status.value(this.viewer_.readyState);
+        }, 1);
+    }
+
     navigateToPrevious() {
         this.viewer_.navigateToPage("previous");
+        this.afterNavigateToPage();
     }
 
     navigateToNext() {
         this.viewer_.navigateToPage("next");
+        this.afterNavigateToPage();
     }
 
     navigateToLeft() {
         this.viewer_.navigateToPage("left");
+        this.afterNavigateToPage();
     }
 
     navigateToRight() {
         this.viewer_.navigateToPage("right");
+        this.afterNavigateToPage();
     }
 
     navigateToFirst() {
         this.viewer_.navigateToPage("first");
+        this.afterNavigateToPage();
     }
 
     navigateToLast() {
         this.viewer_.navigateToPage("last");
+        this.afterNavigateToPage();
     }
 
     queryZoomFactor(type) {
