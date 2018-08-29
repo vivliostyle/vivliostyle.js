@@ -31,8 +31,10 @@
 <!-- MENU BAR -->
 <div id="vivliostyle-menu-bar">
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_move" data-bind="visible: !navigation.hidePageNavigation">
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-first" data-bind="click: navigation.navigateToFirst, css: {'vivliostyle-menu-disabled': navigation.isNavigateToFirstDisabled}"><span class="vivliostyle-menu-icon-button" title="Move: First" data-bind="menuButton: true"></span></li>
 		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-previous" data-bind="click: navigation.navigateToPrevious, css: {'vivliostyle-menu-disabled': navigation.isNavigateToPreviousDisabled}"><span class="vivliostyle-menu-icon-button" title="Move: Previous" data-bind="menuButton: true"></span></li>
 		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-next" data-bind="click: navigation.navigateToNext, css: {'vivliostyle-menu-disabled': navigation.isNavigateToNextDisabled}"><span class="vivliostyle-menu-icon-button" title="Move: Next" data-bind="menuButton: true"></span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-last" data-bind="click: navigation.navigateToLast, css: {'vivliostyle-menu-disabled': navigation.isNavigateToLastDisabled}"><span class="vivliostyle-menu-icon-button" title="Move: Last" data-bind="menuButton: true"></span></li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_zoom" data-bind="visible: !navigation.hideZoom">
 		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-out" data-bind="click: navigation.zoomOut, css: {'vivliostyle-menu-disabled': navigation.isZoomOutDisabled}"><span class="vivliostyle-menu-icon-button" title="Zoom: Out" data-bind="menuButton: true"></span></li>
@@ -116,7 +118,7 @@
 				</div>
 				<div class="vivliostyle-menu-detail-aside">
 					<div><small>Powered by</small> <a href="https://vivliostyle.org"><strong>Vivliostyle</strong></a> </div>
-					<div class="version"><small>(<span>Core: 2018.7.0-pre.20180818153949,</span> <span>UI: 2018.7.0-pre.20180819172237</span>)</small></div>
+					<div class="version"><small>(<span>Core: 2018.7.0-pre.20180818153949,</span> <span>UI: 2018.7.0-pre.20180829132127</span>)</small></div>
 				</div>
 			</div>
 		</li>

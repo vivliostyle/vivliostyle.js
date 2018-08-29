@@ -8068,6 +8068,7 @@ module.exports = exports["default"];
 },{"knockout":1}],19:[function(require,module,exports){
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -8107,8 +8108,14 @@ var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
 
 var _utilsKeyUtil = require("../utils/key-util");
 
+var _modelsVivliostyle = require("../models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
 var Navigation = (function () {
     function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
+        var _this = this;
+
         _classCallCheck(this, Navigation);
 
         this.viewerOptions_ = viewerOptions;
@@ -8116,24 +8123,96 @@ var Navigation = (function () {
         this.settingsPanel_ = settingsPanel;
 
         this.isDisabled = _knockout2["default"].pureComputed(function () {
-            return this.settingsPanel_.opened() || !this.viewer_.state.navigatable();
-        }, this);
+            return _this.settingsPanel_.opened() || !_this.viewer_.state.navigatable();
+        });
 
         var navigationDisabled = _knockout2["default"].pureComputed(function () {
-            return navigationOptions.disablePageNavigation || this.isDisabled();
-        }, this);
+            return navigationOptions.disablePageNavigation || _this.isDisabled();
+        });
 
-        this.isNavigateToPreviousDisabled = navigationDisabled;
-        this.isNavigateToNextDisabled = navigationDisabled;
-        this.isNavigateToLeftDisabled = navigationDisabled;
-        this.isNavigateToRightDisabled = navigationDisabled;
-        this.isNavigateToFirstDisabled = navigationDisabled;
-        this.isNavigateToLastDisabled = navigationDisabled;
+        var getSpreadContainerElement = function getSpreadContainerElement() {
+            var viewportElement = document.getElementById("vivliostyle-viewer-viewport");
+            var outerZoomBoxElement = viewportElement && viewportElement.firstElementChild;
+            return outerZoomBoxElement && outerZoomBoxElement.firstElementChild;
+        };
+
+        this.isNavigateToPreviousDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.status === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            var spreadContainerElement = getSpreadContainerElement();
+            var firstPageContainer = spreadContainerElement && spreadContainerElement.firstElementChild;
+            return !firstPageContainer || firstPageContainer.style.display != "none";
+        });
+
+        this.isNavigateToNextDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.status === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (_this.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
+                return false;
+            }
+            var spreadContainerElement = getSpreadContainerElement();
+            var lastPageContainer = spreadContainerElement && spreadContainerElement.lastElementChild;
+            return !lastPageContainer || lastPageContainer.style.display != "none";
+        });
+
+        this.isNavigateToLeftDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.pageProgression === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (_this.viewer_.state.pageProgression() === _modelsVivliostyle2["default"].constants.PageProgression.LTR) {
+                return _this.isNavigateToPreviousDisabled();
+            } else {
+                return _this.isNavigateToNextDisabled();
+            }
+        });
+
+        this.isNavigateToRightDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.pageProgression === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (_this.viewer_.state.pageProgression() === _modelsVivliostyle2["default"].constants.PageProgression.LTR) {
+                return _this.isNavigateToNextDisabled();
+            } else {
+                return _this.isNavigateToPreviousDisabled();
+            }
+        });
+
+        this.isNavigateToFirstDisabled = this.isNavigateToPreviousDisabled;
+
+        this.isNavigateToLastDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.status === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (_this.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
+                return true;
+            }
+            var spreadContainerElement = getSpreadContainerElement();
+            var lastPageContainer = spreadContainerElement && spreadContainerElement.lastElementChild;
+            return !lastPageContainer || lastPageContainer.style.display != "none";
+        });
+
         this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
 
         var zoomDisabled = _knockout2["default"].pureComputed(function () {
-            return navigationOptions.disableZoom || this.isDisabled();
-        }, this);
+            return navigationOptions.disableZoom || _this.isDisabled();
+        });
 
         this.isZoomOutDisabled = zoomDisabled;
         this.isZoomInDisabled = zoomDisabled;
@@ -8143,11 +8222,11 @@ var Navigation = (function () {
 
         this.fitToScreen = _knockout2["default"].pureComputed(function () {
             return viewerOptions.zoom().fitToScreen;
-        }, this);
+        });
 
         var fontSizeChangeDisabled = _knockout2["default"].pureComputed(function () {
-            return navigationOptions.disableFontSizeChange || this.isDisabled();
-        }, this);
+            return navigationOptions.disableFontSizeChange || _this.isDisabled();
+        });
 
         this.isIncreaseFontSizeDisabled = fontSizeChangeDisabled;
         this.isDecreaseFontSizeDisabled = fontSizeChangeDisabled;
@@ -8155,8 +8234,8 @@ var Navigation = (function () {
         this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
 
         ["navigateToPrevious", "navigateToNext", "navigateToLeft", "navigateToRight", "navigateToFirst", "navigateToLast", "zoomIn", "zoomOut", "zoomToActualSize", "toggleFitToScreen", "increaseFontSize", "decreaseFontSize", "defaultFontSize", "handleKey"].forEach(function (methodName) {
-            this[methodName] = this[methodName].bind(this);
-        }, this);
+            _this[methodName] = _this[methodName].bind(_this);
+        });
     }
 
     _createClass(Navigation, [{
@@ -8332,7 +8411,7 @@ var Navigation = (function () {
 exports["default"] = Navigation;
 module.exports = exports["default"];
 
-},{"../models/viewer-options":11,"../utils/key-util":15,"knockout":1}],20:[function(require,module,exports){
+},{"../models/viewer-options":11,"../models/vivliostyle":12,"../utils/key-util":15,"knockout":1}],20:[function(require,module,exports){
 /*
  * Copyright 2015 Trim-marks Inc.
  *
@@ -8591,6 +8670,7 @@ module.exports = exports["default"];
 },{"../models/document-options":7,"../models/message-queue":8,"../models/viewer-options":11,"../models/vivliostyle":12,"../models/zoom-options":13,"../stores/url-parameters":14,"../utils/key-util":15,"./message-dialog":18,"./navigation":19,"./settings-panel":20,"./viewer":22,"knockout":1}],22:[function(require,module,exports){
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -8645,7 +8725,7 @@ var Viewer = (function () {
         this.viewer_ = new _modelsVivliostyle2["default"].viewer.Viewer(viewerSettings, viewerOptions.toObject());
         var state_ = this.state_ = {
             status: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.ReadyState.LOADING),
-            pageProgression: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.LTR)
+            pageProgression: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.PageProgression.LTR)
         };
         this.state = {
             status: state_.status.getter.extend({
@@ -8681,7 +8761,7 @@ var Viewer = (function () {
             });
             this.viewer_.addListener("readystatechange", function () {
                 var readyState = _this.viewer_.readyState;
-                if (readyState === _modelsVivliostyle2["default"].constants.ReadyState.INTERACTIVE || _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
+                if (readyState === _modelsVivliostyle2["default"].constants.ReadyState.INTERACTIVE || readyState === _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
                     _this.state_.pageProgression.value(_this.viewer_.getCurrentPageProgression());
                 }
                 _this.state_.status.value(readyState);
@@ -8700,6 +8780,7 @@ var Viewer = (function () {
             this.viewer_.addListener("hyperlink", function (payload) {
                 if (payload.internal) {
                     _this.viewer_.navigateToInternalUrl(payload.href);
+                    _this.afterNavigateToPage();
                 } else {
                     window.location.href = payload.href;
                 }
@@ -8728,34 +8809,51 @@ var Viewer = (function () {
             }
         }
     }, {
+        key: "afterNavigateToPage",
+        value: function afterNavigateToPage() {
+            var _this2 = this;
+
+            setTimeout(function () {
+                // Update page navigation disable/enable
+                _this2.state_.status.value(_modelsVivliostyle2["default"].constants.ReadyState.LOADING);
+                _this2.state_.status.value(_this2.viewer_.readyState);
+            }, 1);
+        }
+    }, {
         key: "navigateToPrevious",
         value: function navigateToPrevious() {
             this.viewer_.navigateToPage("previous");
+            this.afterNavigateToPage();
         }
     }, {
         key: "navigateToNext",
         value: function navigateToNext() {
             this.viewer_.navigateToPage("next");
+            this.afterNavigateToPage();
         }
     }, {
         key: "navigateToLeft",
         value: function navigateToLeft() {
             this.viewer_.navigateToPage("left");
+            this.afterNavigateToPage();
         }
     }, {
         key: "navigateToRight",
         value: function navigateToRight() {
             this.viewer_.navigateToPage("right");
+            this.afterNavigateToPage();
         }
     }, {
         key: "navigateToFirst",
         value: function navigateToFirst() {
             this.viewer_.navigateToPage("first");
+            this.afterNavigateToPage();
         }
     }, {
         key: "navigateToLast",
         value: function navigateToLast() {
             this.viewer_.navigateToPage("last");
+            this.afterNavigateToPage();
         }
     }, {
         key: "queryZoomFactor",
