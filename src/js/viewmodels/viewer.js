@@ -79,6 +79,7 @@ class Viewer {
         this.viewer_.addListener("hyperlink", payload => {
             if (payload.internal) {
                 this.viewer_.navigateToInternalUrl(payload.href);
+                this.afterNavigateToPage();
             } else {
                 window.location.href = payload.href;
             }
