@@ -110,6 +110,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 		z-index: 10;
 		float: left;
 		padding-right: 1px;
+		background: rgba(0,0,0,0.4);
 		&:before {
 			content: "";
 			display: block;
