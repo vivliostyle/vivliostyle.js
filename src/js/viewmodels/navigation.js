@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -20,6 +21,7 @@
 import ko from "knockout";
 import ViewerOptions from "../models/viewer-options";
 import {Keys} from "../utils/key-util";
+import vivliostyle from "../models/vivliostyle";
 
 class Navigation {
     constructor(viewerOptions, viewer, settingsPanel, navigationOptions) {
@@ -27,25 +29,97 @@ class Navigation {
         this.viewer_ = viewer;
         this.settingsPanel_ = settingsPanel;
 
-        this.isDisabled = ko.pureComputed(function() {
+        this.isDisabled = ko.pureComputed(() => {
             return this.settingsPanel_.opened() || !this.viewer_.state.navigatable();
-        }, this);
+        });
 
-        const navigationDisabled = ko.pureComputed(function() {
+        const navigationDisabled = ko.pureComputed(() => {
             return navigationOptions.disablePageNavigation || this.isDisabled();
-        }, this);
+        });
 
-        this.isNavigateToPreviousDisabled = navigationDisabled;
-        this.isNavigateToNextDisabled = navigationDisabled;
-        this.isNavigateToLeftDisabled = navigationDisabled;
-        this.isNavigateToRightDisabled = navigationDisabled;
-        this.isNavigateToFirstDisabled = navigationDisabled;
-        this.isNavigateToLastDisabled = navigationDisabled;
+        const getSpreadContainerElement = () => {
+            const viewportElement = document.getElementById("vivliostyle-viewer-viewport");
+            const outerZoomBoxElement = viewportElement && viewportElement.firstElementChild;
+            return outerZoomBoxElement && outerZoomBoxElement.firstElementChild;
+        }
+
+        this.isNavigateToPreviousDisabled = ko.pureComputed(() => {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (this.viewer_.state.status === undefined) {
+                return false;   // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            const spreadContainerElement = getSpreadContainerElement();
+            const firstPageContainer = spreadContainerElement && spreadContainerElement.firstElementChild;
+            return !firstPageContainer || firstPageContainer.style.display != "none";
+        });
+
+        this.isNavigateToNextDisabled = ko.pureComputed(() => {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (this.viewer_.state.status === undefined) {
+                return false;   // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
+                return false;
+            }
+            const spreadContainerElement = getSpreadContainerElement();
+            const lastPageContainer = spreadContainerElement && spreadContainerElement.lastElementChild;
+            return !lastPageContainer || lastPageContainer.style.display != "none";
+        });
+
+        this.isNavigateToLeftDisabled = ko.pureComputed(() => {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (this.viewer_.state.pageProgression === undefined) {
+                return false;   // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (this.viewer_.state.pageProgression() === vivliostyle.constants.PageProgression.LTR) {
+                return this.isNavigateToPreviousDisabled();
+            } else {
+                return this.isNavigateToNextDisabled();
+            }
+        });
+
+        this.isNavigateToRightDisabled = ko.pureComputed(() => {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (this.viewer_.state.pageProgression === undefined) {
+                return false;   // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (this.viewer_.state.pageProgression() === vivliostyle.constants.PageProgression.LTR) {
+                return this.isNavigateToNextDisabled();
+            } else {
+                return this.isNavigateToPreviousDisabled();
+            }
+        });
+
+        this.isNavigateToFirstDisabled = this.isNavigateToPreviousDisabled;
+
+        this.isNavigateToLastDisabled = ko.pureComputed(() => {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (this.viewer_.state.status === undefined) {
+                return false;   // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
+                return true;
+            }
+            const spreadContainerElement = getSpreadContainerElement();
+            const lastPageContainer = spreadContainerElement && spreadContainerElement.lastElementChild;
+            return !lastPageContainer || lastPageContainer.style.display != "none";
+        });
+
         this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
 
-        const zoomDisabled = ko.pureComputed(function() {
+        const zoomDisabled = ko.pureComputed(() => {
             return navigationOptions.disableZoom || this.isDisabled();
-        }, this);
+        });
 
         this.isZoomOutDisabled = zoomDisabled;
         this.isZoomInDisabled = zoomDisabled;
@@ -53,11 +127,11 @@ class Navigation {
         this.isToggleFitToScreenDisabled = zoomDisabled;
         this.hideZoom = !!navigationOptions.disableZoom;
 
-        this.fitToScreen = ko.pureComputed(() => viewerOptions.zoom().fitToScreen, this);
+        this.fitToScreen = ko.pureComputed(() => viewerOptions.zoom().fitToScreen);
 
-        const fontSizeChangeDisabled = ko.pureComputed(function() {
+        const fontSizeChangeDisabled = ko.pureComputed(() => {
             return navigationOptions.disableFontSizeChange || this.isDisabled();
-        }, this);
+        });
 
         this.isIncreaseFontSizeDisabled = fontSizeChangeDisabled;
         this.isDecreaseFontSizeDisabled = fontSizeChangeDisabled;
@@ -79,9 +153,9 @@ class Navigation {
             "decreaseFontSize",
             "defaultFontSize",
             "handleKey"
-        ].forEach(function(methodName) {
+        ].forEach(methodName => {
             this[methodName] = this[methodName].bind(this);
-        }, this);
+        });
     }
 
     navigateToPrevious() {
