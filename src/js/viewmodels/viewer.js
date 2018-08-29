@@ -29,7 +29,7 @@ class Viewer {
         this.viewer_ = new vivliostyle.viewer.Viewer(viewerSettings, viewerOptions.toObject());
         const state_ = this.state_= {
             status: obs.readonlyObservable(vivliostyle.constants.ReadyState.LOADING),
-            pageProgression: obs.readonlyObservable(vivliostyle.constants.LTR)
+            pageProgression: obs.readonlyObservable(vivliostyle.constants.PageProgression.LTR)
         };
         this.state = {
             status: state_.status.getter.extend({
@@ -59,7 +59,7 @@ class Viewer {
         });
         this.viewer_.addListener("readystatechange", () => {
             const readyState = this.viewer_.readyState;
-            if (readyState === vivliostyle.constants.ReadyState.INTERACTIVE || vivliostyle.constants.ReadyState.COMPLETE) {
+            if (readyState === vivliostyle.constants.ReadyState.INTERACTIVE || readyState === vivliostyle.constants.ReadyState.COMPLETE) {
                 this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
             }
             this.state_.status.value(readyState);
