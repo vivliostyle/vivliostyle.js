@@ -28,8 +28,42 @@ Vivliostyle.js can be installed from [npm](https://www.npmjs.com/package/vivlios
 ```
 npm install vivliostyle
 ```
+to have vivliostyle render all pages within a specific element, do something like this:
 
-Developer API documents are coming soon.
+```js
+import {viewer} from vivliostyle
+
+const HTML = "<h1>The title</h1><p>The very first paragraph</p>" // The HTML code you want to process with Vivliostyle.js.
+const Viewer = new viewer.Viewer(
+    {
+      viewportElement: document.getElementById('pages'), // the element into which the rendering should happen
+      userAgentRootURL: `/vivliostyle/resources/` // The URL where it can find the vivliostyle resources folder
+    }
+  )
+
+Viewer.addListener('readystatechange', () => {
+  if (Viewer.readyState === 'complete') {
+    // We need to postprocess if we want to show all pages, as otherwise Vivliostyle will only show the first page.
+    document.querySelectorAll('#pages [data-vivliostyle-page-container]').forEach(node => node.style.display = 'block')
+    console.log('rendering done!')
+  }
+})
+
+Viewer.loadDocument({
+  url: URL.createObjectURL( // We need to create a blob of the HTML and then give the URL of that blob, as loadDocument only allows URLs.
+    new Blob([`<!DOCTYPE html>\n<html><body>${HTML}</body></html>`], {type : 'text/html'})
+  )
+}, {
+  styleSheet: [ // An array of URLs or contents of stylesheets to apply
+    'h1 {background-color: red;}' 
+  ]
+})
+
+
+```
+Look at the [API doc](doc/api.md) for more options.
+
+
 
 ## License
 
