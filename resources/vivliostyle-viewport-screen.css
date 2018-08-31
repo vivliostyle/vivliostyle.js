@@ -72,18 +72,18 @@
 
     [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-page-side=left] {
         margin-right: 1px;
-        transform-origin: right center;
+        transform-origin: right top;
     }
 
     [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-page-side=right] {
         margin-left: 1px;
-        transform-origin: left center;
+        transform-origin: left top;
     }
 
     [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-unpaired-page=true] {
         margin-left: auto;
         margin-right: auto;
-        transform-origin: center center;
+        transform-origin: center top;
     }
 
 }

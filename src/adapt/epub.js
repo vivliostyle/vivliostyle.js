@@ -1946,6 +1946,9 @@ adapt.epub.OPFView.prototype.getPageViewItem = function(spineIndex) {
         const viewportSize = style.sizeViewport(viewport.width, viewport.height, viewport.fontSize);
         if (viewportSize.width != viewport.width || viewportSize.height != viewport.height ||
             viewportSize.fontSize != viewport.fontSize) {
+            if (self.pref.spreadView) {
+                viewportSize.width *= 2;
+            }
             viewport = new adapt.vgen.Viewport(viewport.window, viewportSize.fontSize, viewport.root,
                 viewportSize.width, viewportSize.height);
         }
