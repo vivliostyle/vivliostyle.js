@@ -1813,6 +1813,9 @@ export class OPFView implements CustomRendererFactory {
       if (viewportSize.width != viewport.width ||
           viewportSize.height != viewport.height ||
           viewportSize.fontSize != viewport.fontSize) {
+        if (self.pref.spreadView) {
+          viewportSize.width *= 2;
+        }
         viewport = new Viewport(
             viewport.window, viewportSize.fontSize, viewport.root,
             viewportSize.width, viewportSize.height);
