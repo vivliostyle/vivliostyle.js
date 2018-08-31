@@ -34,6 +34,7 @@ to have vivliostyle render all pages within a specific element, do something lik
 import {viewer} from vivliostyle
 
 const HTML = "<h1>The title</h1><p>The very first paragraph</p>" // The HTML code you want to process with Vivliostyle.js.
+const CSS = "h1 {background-color: red;}" // The CSS you want to apply.
 const Viewer = new viewer.Viewer(
     {
       viewportElement: document.getElementById('pages'), // the element into which the rendering should happen
@@ -51,15 +52,9 @@ Viewer.addListener('readystatechange', () => {
 
 Viewer.loadDocument({
   url: URL.createObjectURL( // We need to create a blob of the HTML and then give the URL of that blob, as loadDocument only allows URLs.
-    new Blob([`<!DOCTYPE html>\n<html><body>${HTML}</body></html>`], {type : 'text/html'})
+    new Blob([`<!DOCTYPE html>\n<html><head><style>${CSS}</style></head><body>${HTML}</body></html>`], {type : 'text/html'})
   )
-}, {
-  styleSheet: [ // An array of URLs or contents of stylesheets to apply
-    'h1 {background-color: red;}' 
-  ]
 })
-
-
 ```
 Look at the [API doc](doc/api.md) for more options.
 
