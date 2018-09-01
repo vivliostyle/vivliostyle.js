@@ -1809,13 +1809,10 @@ export class OPFView implements CustomRendererFactory {
       const customRenderer = self.makeCustomRenderer(xmldoc);
       let viewport = self.viewport;
       const viewportSize = style.sizeViewport(
-          viewport.width, viewport.height, viewport.fontSize);
+          viewport.width, viewport.height, viewport.fontSize, self.pref);
       if (viewportSize.width != viewport.width ||
           viewportSize.height != viewport.height ||
           viewportSize.fontSize != viewport.fontSize) {
-        if (self.pref.spreadView) {
-          viewportSize.width *= 2;
-        }
         viewport = new Viewport(
             viewport.window, viewportSize.fontSize, viewport.root,
             viewportSize.width, viewportSize.height);

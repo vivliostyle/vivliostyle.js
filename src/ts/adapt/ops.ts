@@ -112,7 +112,7 @@ export class Style {
         }, 'page-number'));
   }
 
-  sizeViewport(viewportWidth: number, viewportHeight: number, fontSize: number):
+  sizeViewport(viewportWidth: number, viewportHeight: number, fontSize: number, pref?: expr.Preferences):
       {width: number, height: number, fontSize: number} {
     if (this.viewportProps.length) {
       const context = new expr.Context(
@@ -138,7 +138,8 @@ export class Style {
           const heightVal =
               css.toNumber(height.evaluate(context, 'height'), context);
           if (widthVal > 0 && heightVal > 0) {
-            return {width: widthVal, height: heightVal, fontSize};
+            const spreadWidth = pref && pref.spreadView ? (widthVal + pref.pageBorder) * 2 : widthVal;
+            return {width: spreadWidth, height: heightVal, fontSize};
           }
         }
       }
