@@ -118,9 +118,10 @@ adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
  * @param {number} viewportWidth
  * @param {number} viewportHeight
  * @param {number} fontSize
+ * @param {adapt.expr.Preferences=} pref
  * @return {{width:number, height:number, fontSize:number}}
  */
-adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight, fontSize) {
+adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight, fontSize, pref) {
     if (this.viewportProps.length) {
         const context = new adapt.expr.Context(this.rootScope, viewportWidth,
             viewportHeight, fontSize);
@@ -142,7 +143,8 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
                 const widthVal = adapt.css.toNumber(width.evaluate(context, "width"), context);
                 const heightVal = adapt.css.toNumber(height.evaluate(context, "height"), context);
                 if (widthVal > 0 && heightVal > 0) {
-                    return {width:widthVal, height:heightVal, fontSize};
+                    const spreadWidth = pref && pref.spreadView ? (widthVal + pref.pageBorder) * 2 : widthVal;
+                    return {width:spreadWidth, height:heightVal, fontSize};
                 }
             }
         }
