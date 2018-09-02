@@ -5,6 +5,7 @@
   "scripts": {
     "lint": "eslint src test plugins/*/src plugins/*/test",
     "build": "node tools/build.js",
+    "build-ts": "webpack",
     "typecheck": "node tools/typecheck.js",
     "test": "karma start test/conf/karma-sauce.conf.js",
     "test:local": "karma start test/conf/karma-local.conf.js"
@@ -42,7 +43,10 @@
     "karma-verbose-reporter": "0.0.3",
     "mkdirp": "^0.5.1",
     "mustache": "^2.2.1",
-    "typescript": "^3.0.1"
+    "ts-loader": "^4.5.0",
+    "typescript": "^3.0.1",
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0"
   },
   "dependencies": {
     "clang-format": "^1.2.4",

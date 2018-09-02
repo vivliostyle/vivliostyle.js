@@ -1,4 +1,11 @@
 {
+  "exclude": [
+    "node_modules",
+    //FIXME
+    "src/ts/adapt/**/*",
+    "src/ts/closure/**/*",
+    "src/ts/vivliostyle/**/*"
+  ],
   "compilerOptions": {
     /* Basic Options */
     "target": "ES2018",                          /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017','ES2018' or 'ESNEXT'. */
