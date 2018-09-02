@@ -22,7 +22,9 @@ along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
 Vivliostyle core ${pkg.version}`;
 
 module.exports = {
+  mode: process.env.NODE_ENV === 'production'? 'production' : 'development',
   entry: './src/ts/vivliostyle.ts',
+  devtool: 'source-map',
   output: {
     path: path.join(__dirname, 'lib-ts'),
     filename: 'vivliostyle.min.js',
