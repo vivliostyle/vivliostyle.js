@@ -22,6 +22,8 @@ import * as net from './net';
 import * as task from './task';
 import * as taskutil from './taskutil';
 
+declare var DEBUG: boolean; 
+
 export const ELEMENT_OFFSET_ATTR = 'data-adapt-eloff';
 
 export class XMLDocHolder {
@@ -223,7 +225,7 @@ export class XMLDocHolder {
       if (index == 0) {
         break;
       }
-      if (goog.DEBUG) {
+      if (DEBUG) {
         if (index < children.length) {
           const elemOffset = self.getElementOffset(children[index]);
           if (elemOffset <= offset) {

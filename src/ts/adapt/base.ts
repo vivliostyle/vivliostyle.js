@@ -19,6 +19,8 @@
  */
 import * as logging from '../vivliostyle/logging';
 
+declare var DEBUG: boolean; 
+
 export let emptyObj = {};
 
 type JSON = any;
@@ -486,7 +488,7 @@ export const binarySearch =
       let l = 0;
       let h = high;
       while (true) {
-        if (goog.DEBUG) {
+        if (DEBUG) {
           assert(l <= h);
           assert(l == 0 || !good(l - 1));
           assert(h == high || good(h));

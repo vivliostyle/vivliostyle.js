@@ -51,6 +51,8 @@ import * as breaks from '../vivliostyle/break';
 import * as page from '../vivliostyle/page';
 import * as column from '../vivliostyle/column';
 
+declare var DEBUG: boolean; 
+
 export const uaStylesheetBaseFetcher: Fetcher<boolean> =
     new Fetcher(() => {
       const frame: task.Frame<boolean> = task.newFrame('uaStylesheetBase');
@@ -480,7 +482,7 @@ export class StyleInstance extends expr.Context implements
 
       // E. First enabled page master is used for the next page
       if (!enabled || enabled === css.ident._true) {
-        if (goog.DEBUG) {
+        if (DEBUG) {
           this.dumpLocation(currentPosition);
         }
 

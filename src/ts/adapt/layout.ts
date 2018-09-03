@@ -43,6 +43,8 @@ import * as vtree from './vtree';
 import * as layoututil from '../vivliostyle/layoututil';
 import * as pagefloat from '../vivliostyle/pagefloat';
 
+declare var DEBUG: boolean; 
+
 export const mediaTags = {
   'img': true,
   'svg': true,
@@ -1708,7 +1710,7 @@ export class Column extends vtree.Container {
     const self = this;
     const frame: task.Frame<vtree.NodeContext> =
         task.newFrame('processLineStyling');
-    if (goog.DEBUG) {
+    if (DEBUG) {
       validateCheckPoints(checkPoints);
     }
     let lastCheckPoints = checkPoints.concat([]);
@@ -1764,7 +1766,7 @@ export class Column extends vtree.Container {
         })
         .then(() => {
           Array.prototype.push.apply(checkPoints, lastCheckPoints);
-          if (goog.DEBUG) {
+          if (DEBUG) {
             validateCheckPoints(checkPoints);
           }
           frame.finish(resNodeContext);
@@ -1885,7 +1887,7 @@ export class Column extends vtree.Container {
       linePosition: number, checkPoints: vtree.NodeContext[],
       isUpdateMaxReachedAfterEdge: boolean):
       {nodeContext: vtree.NodeContext, index: number, checkPointIndex: number} {
-    if (goog.DEBUG) {
+    if (DEBUG) {
       validateCheckPoints(checkPoints);
     }
 

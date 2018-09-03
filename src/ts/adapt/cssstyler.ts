@@ -34,6 +34,8 @@ import * as expr from './expr';
 import * as vtree from './vtree';
 import * as xmldoc from './xmldoc';
 
+declare var DEBUG: boolean; 
+
 export class SlipRange {
   endStuckFixed: number;
   endFixed: number;
@@ -621,7 +623,7 @@ export class Styler implements AbstractStyler {
         nodeOffset += node.textContent.length;
       } else {
         const elem = (node as Element);
-        if (goog.DEBUG) {
+        if (DEBUG) {
           if (nodeOffset != this.xmldoc.getElementOffset(elem)) {
             throw new Error('Inconsistent offset');
           }
@@ -872,7 +874,7 @@ export class Styler implements AbstractStyler {
             this.primary = false;
           }
         }
-        if (goog.DEBUG) {
+        if (DEBUG) {
           const offset = this.xmldoc.getElementOffset((this.last as Element));
           if (offset != this.lastOffset) {
             throw new Error('Inconsistent offset');

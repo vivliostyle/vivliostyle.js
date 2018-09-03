@@ -34,6 +34,8 @@ import * as taskutil from './taskutil';
 import {ExprContentListener} from './vtree';
 import {NodeContext} from './vtree';
 
+declare var DEBUG: boolean; 
+
 export const inheritedProps = {
   'azimuth': true,
   'border-collapse': true,
@@ -2300,7 +2302,7 @@ export class CascadeInstance {
     this.currentSiblingTypeCounts = this.siblingTypeCountsStack[0];
     this.followingSiblingOrderStack = [this.currentFollowingSiblingOrder];
     this.currentFollowingSiblingTypeCounts = this.siblingTypeCountsStack[0];
-    if (goog.DEBUG) {
+    if (DEBUG) {
     }
   }
 
@@ -2504,7 +2506,7 @@ export class CascadeInstance {
 
   pushElement(element: Element, baseStyle: ElementStyle, elementOffset: number):
       void {
-    if (goog.DEBUG) {
+    if (DEBUG) {
       this.elementStack.push(element);
     }
 
@@ -2715,7 +2717,7 @@ export class CascadeInstance {
   }
 
   popElement(element: Element): void {
-    if (goog.DEBUG) {
+    if (DEBUG) {
       const e = this.elementStack.pop();
       if (e !== element) {
         throw new Error('Invalid call to popElement');
