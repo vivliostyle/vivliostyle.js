@@ -23,7 +23,7 @@ import {Frame} from '../adapt/task';
 import {LayoutPosition} from '../adapt/vtree';
 import {Container} from '../adapt/vtree';
 import {FlowPosition} from '../adapt/vtree';
-import * as asserts from '../closure/goog/asserts/asserts';
+import * as asserts from './asserts';
 
 import {PageFloatLayoutContext} from './pagefloat';
 import {variance} from './math';

@@ -25,7 +25,7 @@ import {PageFloatArea} from '../adapt/layout';
 import {Column} from '../adapt/layout';
 import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';
-import * as asserts from '../closure/goog/asserts/asserts';
+import * as asserts from './asserts';
 
 import * as logging from './logging';
 import * as logical from './logical';

@@ -17,7 +17,7 @@
  *
  * @fileoverview Deal with META-INF/ and .opf files in EPUB container.
  */
-import * as asserts from '../closure/goog/asserts/asserts';
+import * as asserts from '../vivliostyle/asserts';
 import * as constants from '../vivliostyle/constants';
 import * as counters from '../vivliostyle/counters';
 import * as logging from '../vivliostyle/logging';

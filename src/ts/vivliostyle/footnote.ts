@@ -16,7 +16,7 @@
  *
  * @fileoverview Footnotes
  */
-import * as asserts from '../closure/goog/asserts/asserts';
+import * as asserts from './asserts';
 
 import {Ident, ident} from '../adapt/css';
 import {Numeric} from '../adapt/css';

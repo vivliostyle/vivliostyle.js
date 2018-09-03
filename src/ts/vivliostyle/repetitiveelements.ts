@@ -3,7 +3,7 @@
  * @fileoverview Elements repeated in every fragment by repeat-on-break
  * property.
  */
-import * as asserts from '../closure/goog/asserts/asserts';
+import * as asserts from './asserts';
 
 import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';

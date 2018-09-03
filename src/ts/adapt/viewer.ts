@@ -17,7 +17,7 @@
  *
  * @fileoverview Sample EPUB rendering application.
  */
-import * as asserts from '../closure/goog/asserts/asserts';
+import * as asserts from '../vivliostyle/asserts';
 import * as constants from '../vivliostyle/constants';
 import * as logging from '../vivliostyle/logging';
 import {ConfigurationHook} from '../vivliostyle/plugin';

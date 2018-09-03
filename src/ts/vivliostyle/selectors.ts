@@ -16,7 +16,7 @@
  *
  * @fileoverview Utilities for selectors.
  */
-import * as asserts from '../closure/goog/asserts/asserts';
+import * as asserts from './asserts';
 
 import * as base from '../adapt/base';
 

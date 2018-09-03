@@ -19,7 +19,7 @@
  * communicate with the styling system directly. Instead it goes through the
  * layout interface that gives it one view tree node at a time.
  */
-import * as asserts from '../closure/goog/asserts/asserts';
+import * as asserts from '../vivliostyle/asserts';
 import * as logging from '../vivliostyle/logging';
 import {ResolveLayoutProcessorHook} from '../vivliostyle/plugin';
 import {PostLayoutBlockHook} from '../vivliostyle/plugin';

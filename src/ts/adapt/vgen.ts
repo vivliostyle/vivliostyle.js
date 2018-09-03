@@ -41,7 +41,7 @@ import * as taskutil from './taskutil';
 import * as vtree from './vtree';
 import * as xmldoc from './xmldoc';
 
-import * as asserts from '../closure/goog/asserts/asserts';
+import * as asserts from '../vivliostyle/asserts';
 
 const namespacePrefixMap = {};
 

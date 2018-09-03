@@ -16,7 +16,7 @@
  *
  * @fileoverview Utilities related to layout.
  */
-import * as asserts from '../closure/goog/asserts/asserts';
+import * as asserts from './asserts';
 
 import {BreakPosition, BreakPositionAndNodeContext, Column, EdgeBreakPosition, LayoutConstraint} from '../adapt/layout';
 import * as task from '../adapt/task';

@@ -18,7 +18,7 @@
  * @fileoverview Render EPUB content files by applying page masters, styling and
  * layout.
  */
-import * as asserts from '../closure/goog/asserts/asserts';
+import * as asserts from '../vivliostyle/asserts';
 import * as constants from '../vivliostyle/constants';
 import * as counters from '../vivliostyle/counters';
 import * as logging from '../vivliostyle/logging';

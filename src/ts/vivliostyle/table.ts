@@ -20,7 +20,7 @@ import * as base from '../adapt/base';
 import {ident} from '../adapt/css';
 import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';
-import * as asserts from '../closure/goog/asserts/asserts';
+import * as asserts from './asserts';
 
 import * as plugin from './plugin';
 

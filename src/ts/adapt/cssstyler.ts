@@ -18,7 +18,7 @@
  * @fileoverview Apply CSS cascade to a document incrementally and cache the
  * result.
  */
-import * as asserts from '../closure/goog/asserts/asserts';
+import * as asserts from '../vivliostyle/asserts';
 
 import * as breaks from '../vivliostyle/break';
 import {isBlock} from '../vivliostyle/display';
