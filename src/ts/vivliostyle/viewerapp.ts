@@ -20,7 +20,9 @@
 import * as namespace from './namespace';
 import * as constants from './constants';
 import * as base from '../adapt/base';
-import * as viewer from '../adapt/viewer';
+import * as adaptviewer from '../adapt/viewer';
+
+export namespace viewerapp {
 
 export let fontSize: number = 16;
 
@@ -143,7 +145,7 @@ export const keydown = (evt: KeyboardEvent): void => {
   }
 };
 
-let zoomDist;
+let zoomDist: number;
 
 export const touch = (evt: TouchEvent): void => {
   if (evt.type == 'touchmove') {
@@ -357,7 +359,10 @@ export const main = (arg): void => {
     'pageBorder': 1
   };
   setViewportSize(width, height, size, orientation, config);
-  const viewerInstance = new viewer.Viewer(window, viewportElement, 'main', callback);
+  const viewerInstance = new adaptviewer.Viewer(window, viewportElement, 'main', callback);
   viewerInstance.initEmbed(config);
 };
-namespace.exportSymbol('.main', main);
+
+} // export namespace viewerapp
+// Old exports:
+// vivliostyle.namespace.exportSymbol("vivliostyle.viewerapp.main", vivliostyle.viewerapp.main);

@@ -16,9 +16,9 @@
  *
  * @fileoverview Utility for profiling
  */
-import * as namespace from './namespace';
 import * as logging from './logging';
-import * as profile from './profile';
+
+export namespace profile {
 
 /**
  * Performance profiler measuring execution time of the script.
@@ -169,8 +169,10 @@ const fallbackPerformanceInstance = ({now: Date.now} as Performance);
 const performanceInstance = window && window.performance;
 export const profiler = new Profiler(performanceInstance || fallbackPerformanceInstance);
 profiler.forceRegisterStartTiming('load_vivliostyle');
-namespace.exportSymbol('vivliostyle.profile.profiler', profiler);
-goog.exportProperty(
-    Profiler.prototype, 'printTimings', Profiler.prototype.printTimings);
-goog.exportProperty(Profiler.prototype, 'disable', Profiler.prototype.disable);
-goog.exportProperty(Profiler.prototype, 'enable', Profiler.prototype.enable);
+
+} // export namespace profile
+// Old exports:
+// vivliostyle.namespace.exportSymbol("vivliostyle.profile.profiler", profiler);
+// goog.exportProperty(Profiler.prototype, "printTimings", Profiler.prototype.printTimings);
+// goog.exportProperty(Profiler.prototype, "disable", Profiler.prototype.disable);
+// goog.exportProperty(Profiler.prototype, "enable", Profiler.prototype.enable);
