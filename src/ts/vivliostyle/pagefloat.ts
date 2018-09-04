@@ -91,10 +91,8 @@ export const resolveInlineFloatDirection =
             logical.toLineRelative(physicalValue, writingMode);
         if (lineRelativeValue === 'line-left') {
           floatSide = 'left';
-        } else {
-          if (lineRelativeValue === 'line-right') {
-            floatSide = 'right';
-          }
+        } else if (lineRelativeValue === 'line-right') {
+          floatSide = 'right';
         }
       }
       if (floatSide !== 'left' && floatSide !== 'right') {
@@ -407,11 +405,9 @@ export class PageFloatLayoutContext {
     if (floatReference !== this.floatReference) {
       const parent = this.getParent(floatReference);
       parent.addPageFloatFragment(floatFragment, dontInvalidate);
-    } else {
-      if (!this.floatFragments.includes(floatFragment)) {
-        this.floatFragments.push(floatFragment);
-        this.floatFragments.sort((fr1, fr2) => fr1.getOrder() - fr2.getOrder());
-      }
+    } else if (!this.floatFragments.includes(floatFragment)) {
+      this.floatFragments.push(floatFragment);
+      this.floatFragments.sort((fr1, fr2) => fr1.getOrder() - fr2.getOrder());
     }
     if (!dontInvalidate) {
       this.invalidate();
@@ -526,12 +522,10 @@ export class PageFloatLayoutContext {
             c.float.getOrder() < order && !float.isAllowedToPrecede(c.float));
     if (hasPrecedingFloatsDeferredToNext) {
       return true;
+    } else if (this.parent) {
+      return this.parent.hasPrecedingFloatsDeferredToNext(float, true);
     } else {
-      if (this.parent) {
-        return this.parent.hasPrecedingFloatsDeferredToNext(float, true);
-      } else {
-        return false;
-      }
+      return false;
     }
   }
 
@@ -1121,12 +1115,10 @@ export class PageFloatLayoutContext {
             getSize(area.clientLayout, area.element, [
               Size.FIT_CONTENT_INLINE_SIZE
             ])[Size.FIT_CONTENT_INLINE_SIZE];
+      } else if (area.adjustContentRelativeSize) {
+        inlineSize = area.getContentInlineSize();
       } else {
-        if (area.adjustContentRelativeSize) {
-          inlineSize = area.getContentInlineSize();
-        } else {
-          inlineSize = area.vertical ? area.height : area.width;
-        }
+        inlineSize = area.vertical ? area.height : area.width;
       }
       outerInlineSize = inlineSize + area.getInsetStart() + area.getInsetEnd();
       const availableInlineSize = inlineEnd - inlineStart;
@@ -1258,20 +1250,16 @@ export class PageFloatLayoutContext {
     let logicalSides: string[];
     if (logicalClearSide === 'all') {
       logicalSides = ['block-start', 'block-end', 'inline-start', 'inline-end'];
-    } else {
-      if (logicalClearSide === 'both') {
-        logicalSides = ['inline-start', 'inline-end'];
+    } else if (logicalClearSide === 'both') {
+      logicalSides = ['inline-start', 'inline-end'];
+    } else if (logicalClearSide === 'same') {
+      if (logicalFloatSide === 'snap-block') {
+        logicalSides = ['block-start', 'block-end'];
       } else {
-        if (logicalClearSide === 'same') {
-          if (logicalFloatSide === 'snap-block') {
-            logicalSides = ['block-start', 'block-end'];
-          } else {
-            logicalSides = [logicalFloatSide];
-          }
-        } else {
-          logicalSides = [logicalClearSide];
-        }
+        logicalSides = [logicalFloatSide];
       }
+    } else {
+      logicalSides = [logicalClearSide];
     }
     const floatOrder = float.getOrder();
 

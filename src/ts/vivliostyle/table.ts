@@ -1038,22 +1038,16 @@ export class TableLayoutStrategy extends layoututil.EdgeSkipper {
         repetitiveElements.isHeaderSourceNode(nodeContext.sourceNode)) {
       this.inHeader = true;
       return task.newResult(true);
+    } else if (display === 'table-footer-group' && repetitiveElements &&
+        repetitiveElements.isFooterSourceNode(nodeContext.sourceNode)) {
+      this.inFooter = true;
+      return task.newResult(true);
+    } else if (display === 'table-row') {
+      return this.startTableRow(state);
+    } else if (display === 'table-cell') {
+      return this.startTableCell(state);
     } else {
-      if (display === 'table-footer-group' && repetitiveElements &&
-          repetitiveElements.isFooterSourceNode(nodeContext.sourceNode)) {
-        this.inFooter = true;
-        return task.newResult(true);
-      } else {
-        if (display === 'table-row') {
-          return this.startTableRow(state);
-        } else {
-          if (display === 'table-cell') {
-            return this.startTableCell(state);
-          } else {
-            return task.newResult(true);
-          }
-        }
-      }
+      return task.newResult(true);
     }
   }
 
@@ -1073,8 +1067,8 @@ export class TableLayoutStrategy extends layoututil.EdgeSkipper {
     return task.newResult(true);
   }
 
-  afterNonInlineElementNode(state: layoututil.LayoutIteratorState): undefined
-      |task.Result<boolean> {
+  afterNonInlineElementNode(state: layoututil.LayoutIteratorState):
+      undefined | task.Result<boolean> {
     const nodeContext = state.nodeContext;
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
     const display = nodeContext.display;
@@ -1088,30 +1082,26 @@ export class TableLayoutStrategy extends layoututil.EdgeSkipper {
         base.setCSSProperty(
             (nodeContext.viewNode as Element), 'display', 'table-row-group');
       }
-    } else {
-      if (display === 'table-footer-group') {
-        if (repetitiveElements &&
-            !repetitiveElements.allowInsertRepeatitiveElements &&
-            repetitiveElements.isFooterSourceNode(nodeContext.sourceNode)) {
-          this.inFooter = false;
-          nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
-        } else {
-          base.setCSSProperty(
-              (nodeContext.viewNode as Element), 'display', 'table-row-group');
-        }
+    } else if (display === 'table-footer-group') {
+      if (repetitiveElements &&
+          !repetitiveElements.allowInsertRepeatitiveElements &&
+          repetitiveElements.isFooterSourceNode(nodeContext.sourceNode)) {
+        this.inFooter = false;
+        nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+      } else {
+        base.setCSSProperty(
+            (nodeContext.viewNode as Element), 'display', 'table-row-group');
       }
     }
     if (display && TableLayoutStrategy.ignoreList[display]) {
       nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+    } else if (nodeContext.sourceNode === this.formattingContext.tableSourceNode) {
+      nodeContext.overflow =
+          this.column.checkOverflowAndSaveEdge(nodeContext, null);
+      this.resetColumn();
+      state.break = true;
     } else {
-      if (nodeContext.sourceNode === this.formattingContext.tableSourceNode) {
-        nodeContext.overflow =
-            this.column.checkOverflowAndSaveEdge(nodeContext, null);
-        this.resetColumn();
-        state.break = true;
-      } else {
-        return super.afterNonInlineElementNode(state);
-      }
+      return super.afterNonInlineElementNode(state);
     }
     return task.newResult(true);
   }

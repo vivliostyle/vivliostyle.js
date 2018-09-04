@@ -75,16 +75,12 @@ export const bytesToSHA1Int32 = (bytes: string): number[] => {
     for (i = 0; i < 80; i++) {
       if (i < 20) {
         f = (b & c | ~b & d) + 1518500249;
+      } else if (i < 40) {
+        f = (b ^ c ^ d) + 1859775393;
+      } else if (i < 60) {
+        f = (b & c | b & d | c & d) + 2400959708;
       } else {
-        if (i < 40) {
-          f = (b ^ c ^ d) + 1859775393;
-        } else {
-          if (i < 60) {
-            f = (b & c | b & d | c & d) + 2400959708;
-          } else {
-            f = (b ^ c ^ d) + 3395469782;
-          }
-        }
+        f = (b ^ c ^ d) + 3395469782;
       }
       f += (a << 5 | a >>> 27) + e + w[i];
       e = d;

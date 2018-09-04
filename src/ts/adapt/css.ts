@@ -95,14 +95,12 @@ export class FilterVisitor extends Visitor {
       const after = before.visit(this);
       if (arr) {
         arr[i] = after;
-      } else {
-        if (before !== after) {
-          arr = new Array(values.length);
-          for (let k = 0; k < i; k++) {
-            arr[k] = values[k];
-          }
-          arr[i] = after;
+      } else if (before !== after) {
+        arr = new Array(values.length);
+        for (let k = 0; k < i; k++) {
+          arr[k] = values[k];
         }
+        arr[i] = after;
       }
     }
     return arr || values;

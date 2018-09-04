@@ -74,17 +74,13 @@ export const getComputedDislayValue =
     (display: css.Ident, position: css.Ident, float: css.Ident,
      isRoot: boolean):
         {display: css.Ident, position: css.Ident, float: css.Ident} => {
-          // no need to convert values when 'display' is 'none'
           if (display === css.ident.none) {
-          } else {
-            if (isAbsolutelyPositioned(position)) {
-              float = css.ident.none;
-              display = blockify(display);
-            } else {
-              if (float && float !== css.ident.none || isRoot) {
-                display = blockify(display);
-              }
-            }
+            // no need to convert values when 'display' is 'none'
+          } else if (isAbsolutelyPositioned(position)) {
+            float = css.ident.none;
+            display = blockify(display);
+          } else if (float && float !== css.ident.none || isRoot) {
+            display = blockify(display);
           }
           return {display, position, float};
         };

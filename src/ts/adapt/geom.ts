@@ -295,12 +295,10 @@ export const shapesToBands =
             if (segment.high.y < y2) {
               y2 = Math.max(floor(segment.high.y, snapHeight), y2min);
             }
-          } else {
-            if (segment.low.x != segment.high.x) {
-              // TODO: should we compare y???
-              // slanted (not horizontal)
-              y2 = y2min;
-            }
+          } else if (segment.low.x != segment.high.x) {
+            // TODO: should we compare y???
+            // slanted (not horizontal)
+            y2 = y2min;
           }
         }
         if (y2 > box.y2) {
@@ -484,13 +482,11 @@ export const findBottommostFullyOpenRect =
         band = bands[i];
         if (i === bands.length - 1 && band.y2 < rect.y2) {
           break;
+        } else if (band.y1 < rect.y2 && band.x1 - 0.1 <= rect.x1 &&
+            band.x2 + 0.1 >= rect.x2) {
+          break;
         } else {
-          if (band.y1 < rect.y2 && band.x1 - 0.1 <= rect.x1 &&
-              band.x2 + 0.1 >= rect.x2) {
-            break;
-          } else {
-            bottomEdge = Math.min(bottomEdge, band.y1);
-          }
+          bottomEdge = Math.min(bottomEdge, band.y1);
         }
       }
       let topEdge = Math.min(bottomEdge, band.y2);

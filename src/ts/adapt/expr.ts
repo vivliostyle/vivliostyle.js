@@ -444,10 +444,8 @@ export class Context {
         default:
           return actual == req;
       }
-    } else {
-      if (actual != null && value == null) {
-        return actual !== 0;
-      }
+    } else if (actual != null && value == null) {
+      return actual !== 0;
     }
     return false;
   }
@@ -1116,14 +1114,12 @@ export const expandValArray =
         const p = arr[i].expand(context, params);
         if (arr !== expanded) {
           expanded[i] = p;
-        } else {
-          if (p !== arr[i]) {
-            expanded = Array(arr.length);
-            for (let j = 0; j < i; j++) {
-              expanded[j] = arr[j];
-            }
-            expanded[i] = p;
+        } else if (p !== arr[i]) {
+          expanded = Array(arr.length);
+          for (let j = 0; j < i; j++) {
+            expanded[j] = arr[j];
           }
+          expanded[i] = p;
         }
       }
       return expanded;

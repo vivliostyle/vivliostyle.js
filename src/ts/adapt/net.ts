@@ -74,33 +74,29 @@ export const ajax = (url: string, opt_type?: XMLHttpRequestResponseType,
             request.responseXML.documentElement.localName != 'parsererror') {
           response.responseXML = request.responseXML;
           response.contentType = request.responseXML.contentType;
+        } else if ((!opt_type || opt_type === XMLHttpRequestResponseType.DOCUMENT) &&
+            request.response instanceof HTMLDocument) {
+          response.responseXML = request.response;
+          response.contentType = request.response.contentType;
         } else {
-          if ((!opt_type || opt_type === XMLHttpRequestResponseType.DOCUMENT) &&
-              request.response instanceof HTMLDocument) {
-            response.responseXML = request.response;
-            response.contentType = request.response.contentType;
+          const text = request.response;
+          if ((!opt_type || opt_type === XMLHttpRequestResponseType.TEXT) &&
+              typeof text == 'string') {
+            response.responseText = text;
+          } else if (!text) {
+            logging.logger.warn(
+                'Unexpected empty success response for', url);
           } else {
-            const text = request.response;
-            if ((!opt_type || opt_type === XMLHttpRequestResponseType.TEXT) &&
-                typeof text == 'string') {
-              response.responseText = text;
+            if (typeof text == 'string') {
+              response.responseBlob = makeBlob([text]);
             } else {
-              if (!text) {
-                logging.logger.warn(
-                    'Unexpected empty success response for', url);
-              } else {
-                if (typeof text == 'string') {
-                  response.responseBlob = makeBlob([text]);
-                } else {
-                  response.responseBlob = (text as Blob);
-                }
-              }
+              response.responseBlob = (text as Blob);
             }
-            const contentTypeHeader = request.getResponseHeader('Content-Type');
-            if (contentTypeHeader) {
-              response.contentType =
-                  contentTypeHeader.replace(/(.*);.*$/, '$1');
-            }
+          }
+          const contentTypeHeader = request.getResponseHeader('Content-Type');
+          if (contentTypeHeader) {
+            response.contentType =
+                contentTypeHeader.replace(/(.*);.*$/, '$1');
           }
         }
       }

@@ -558,14 +558,12 @@ export class StyleInstance extends expr.Context implements
           if (pageFloatFragment && pageFloatFragment.hasFloat(float)) {
             loopFrame.continueLoop();
             return;
-          } else {
-            if (pageFloatLayoutContext.isForbidden(float) ||
-                pageFloatLayoutContext.hasPrecedingFloatsDeferredToNext(
-                    float)) {
-              pageFloatLayoutContext.deferPageFloat(continuation);
-              loopFrame.breakLoop();
-              return;
-            }
+          } else if (pageFloatLayoutContext.isForbidden(float) ||
+              pageFloatLayoutContext.hasPrecedingFloatsDeferredToNext(
+                  float)) {
+            pageFloatLayoutContext.deferPageFloat(continuation);
+            loopFrame.breakLoop();
+            return;
           }
           column
               .layoutPageFloatInner(
@@ -580,12 +578,10 @@ export class StyleInstance extends expr.Context implements
                 if (parentInvalidated) {
                   loopFrame.breakLoop();
                   return;
-                } else {
-                  if (pageFloatLayoutContext.isInvalidated() &&
-                      !parentInvalidated) {
-                    invalidated = true;
-                    pageFloatLayoutContext.validate();
-                  }
+                } else if (pageFloatLayoutContext.isInvalidated() &&
+                    !parentInvalidated) {
+                  invalidated = true;
+                  pageFloatLayoutContext.validate();
                 }
                 loopFrame.continueLoop();
               });
@@ -1116,11 +1112,9 @@ export class StyleInstance extends expr.Context implements
         }
         boxInstance.transferContentProps(
             self, layoutContainer, page, self.faces);
-      } else {
-        if (boxInstance.suppressEmptyBoxGeneration) {
-          parentContainer.removeChild(boxContainer);
-          removed = true;
-        }
+      } else if (boxInstance.suppressEmptyBoxGeneration) {
+        parentContainer.removeChild(boxContainer);
+        removed = true;
       }
       if (!removed) {
         boxInstance.finishContainer(
@@ -1128,47 +1122,45 @@ export class StyleInstance extends expr.Context implements
             self.faces);
       }
       cont = task.newResult(true);
-    } else {
-      if (!self.pageBreaks[flowName.toString()]) {
-        const innerFrame: task.Frame<boolean> =
-            task.newFrame('layoutContainer.inner');
-        const flowNameStr = flowName.toString();
+    } else if (!self.pageBreaks[flowName.toString()]) {
+      const innerFrame: task.Frame<boolean> =
+          task.newFrame('layoutContainer.inner');
+      const flowNameStr = flowName.toString();
 
-        // for now only a single column in vertical case
-        const columnCount = boxInstance.getPropAsNumber(self, 'column-count');
-        self.layoutFlowColumnsWithBalancing(
-                page, boxInstance, offsetX, offsetY, exclusions,
-                pagePageFloatLayoutContext, layoutContainer, flowNameStr,
-                columnCount)
-            .then((columns) => {
-              if (!pagePageFloatLayoutContext.isInvalidated()) {
-                const column = columns[0];
-                asserts.assert(column);
-                if (column.element === boxContainer) {
-                  layoutContainer = column;
-                }
-                layoutContainer.computedBlockSize = Math.max.apply(
-                    null, columns.map((c) => c.computedBlockSize));
-                boxInstance.finishContainer(
-                    self, layoutContainer, page, column, columnCount,
-                    self.clientLayout, self.faces);
-                const flowPosition =
-                    self.currentLayoutPosition.flowPositions[flowNameStr];
-                if (flowPosition && flowPosition.breakAfter === 'region') {
-                  flowPosition.breakAfter = null;
-                }
+      // for now only a single column in vertical case
+      const columnCount = boxInstance.getPropAsNumber(self, 'column-count');
+      self.layoutFlowColumnsWithBalancing(
+              page, boxInstance, offsetX, offsetY, exclusions,
+              pagePageFloatLayoutContext, layoutContainer, flowNameStr,
+              columnCount)
+          .then((columns) => {
+            if (!pagePageFloatLayoutContext.isInvalidated()) {
+              const column = columns[0];
+              asserts.assert(column);
+              if (column.element === boxContainer) {
+                layoutContainer = column;
               }
-              innerFrame.finish(true);
-            });
-        cont = innerFrame.result();
-      } else {
-        if (!pagePageFloatLayoutContext.isInvalidated()) {
-          boxInstance.finishContainer(
-              self, layoutContainer, page, null, 1, self.clientLayout,
-              self.faces);
-        }
-        cont = task.newResult(true);
+              layoutContainer.computedBlockSize = Math.max.apply(
+                  null, columns.map((c) => c.computedBlockSize));
+              boxInstance.finishContainer(
+                  self, layoutContainer, page, column, columnCount,
+                  self.clientLayout, self.faces);
+              const flowPosition =
+                  self.currentLayoutPosition.flowPositions[flowNameStr];
+              if (flowPosition && flowPosition.breakAfter === 'region') {
+                flowPosition.breakAfter = null;
+              }
+            }
+            innerFrame.finish(true);
+          });
+      cont = innerFrame.result();
+    } else {
+      if (!pagePageFloatLayoutContext.isInvalidated()) {
+        boxInstance.finishContainer(
+            self, layoutContainer, page, null, 1, self.clientLayout,
+            self.faces);
       }
+      cont = task.newResult(true);
     }
     cont.then(() => {
       if (pagePageFloatLayoutContext.isInvalidated()) {
@@ -1193,12 +1185,10 @@ export class StyleInstance extends expr.Context implements
           // }
           exclusions.push(outerShape);
         }
-      } else {
-        if (boxInstance.children.length == 0) {
-          parentContainer.removeChild(boxContainer);
-          frame.finish(true);
-          return;
-        }
+      } else if (boxInstance.children.length == 0) {
+        parentContainer.removeChild(boxContainer);
+        frame.finish(true);
+        return;
       }
       let i = boxInstance.children.length - 1;
       frame
@@ -1212,10 +1202,8 @@ export class StyleInstance extends expr.Context implements
                 return r.thenAsync(
                     () => task.newResult(
                         !pagePageFloatLayoutContext.isInvalidated()));
-              } else {
-                if (pagePageFloatLayoutContext.isInvalidated()) {
-                  break;
-                }
+              } else if (pagePageFloatLayoutContext.isInvalidated()) {
+                break;
               }
             }
             return task.newResult(false);
@@ -1752,66 +1740,58 @@ export class OPSDocStore extends xmldoc.XMLDocStore {
                 classes: null,
                 media: null
               });
-            } else {
-              if (localName == 'link') {
-                const rel = child.getAttribute('rel');
-                const classes = child.getAttribute('class');
-                const media = child.getAttribute('media');
-                if (rel == 'stylesheet' ||
-                    rel == 'alternate stylesheet' && classes) {
-                  let src = child.getAttribute('href');
-                  src = base.resolveURL(src, url);
-                  sources.push({
-                    url: src,
-                    text: null,
-                    classes,
-                    media,
-                    flavor: cssparse.StylesheetFlavor.AUTHOR
-                  });
-                }
-              } else {
-                if (localName == 'meta' &&
-                    child.getAttribute('name') == 'viewport') {
-                  sources.push({
-                    url,
-                    text: processViewportMeta(child),
-                    flavor: cssparse.StylesheetFlavor.AUTHOR,
-                    classes: null,
-                    media: null
-                  });
-                }
-              }
-            }
-          } else {
-            if (ns == base.NS.FB2) {
-              if (localName == 'stylesheet' &&
-                  child.getAttribute('type') == 'text/css') {
+            } else if (localName == 'link') {
+              const rel = child.getAttribute('rel');
+              const classes = child.getAttribute('class');
+              const media = child.getAttribute('media');
+              if (rel == 'stylesheet' ||
+                  rel == 'alternate stylesheet' && classes) {
+                let src = child.getAttribute('href');
+                src = base.resolveURL(src, url);
                 sources.push({
-                  url,
-                  text: child.textContent,
-                  flavor: cssparse.StylesheetFlavor.AUTHOR,
-                  classes: null,
-                  media: null
+                  url: src,
+                  text: null,
+                  classes,
+                  media,
+                  flavor: cssparse.StylesheetFlavor.AUTHOR
                 });
               }
-            } else {
-              if (ns == base.NS.SSE && localName === 'property') {
-                // look for stylesheet specification like:
-                // <property><name>stylesheet</name><value>style.css</value></property>
-                const name = child.getElementsByTagName('name')[0];
-                if (name && name.textContent === 'stylesheet') {
-                  const value = child.getElementsByTagName('value')[0];
-                  if (value) {
-                    let src = base.resolveURL(value.textContent, url);
-                    sources.push({
-                      url: src,
-                      text: null,
-                      classes: null,
-                      media: null,
-                      flavor: cssparse.StylesheetFlavor.AUTHOR
-                    });
-                  }
-                }
+            } else if (localName == 'meta' &&
+                child.getAttribute('name') == 'viewport') {
+              sources.push({
+                url,
+                text: processViewportMeta(child),
+                flavor: cssparse.StylesheetFlavor.AUTHOR,
+                classes: null,
+                media: null
+              });
+            }
+          } else if (ns == base.NS.FB2) {
+            if (localName == 'stylesheet' &&
+                child.getAttribute('type') == 'text/css') {
+              sources.push({
+                url,
+                text: child.textContent,
+                flavor: cssparse.StylesheetFlavor.AUTHOR,
+                classes: null,
+                media: null
+              });
+            }
+          } else if (ns == base.NS.SSE && localName === 'property') {
+            // look for stylesheet specification like:
+            // <property><name>stylesheet</name><value>style.css</value></property>
+            const name = child.getElementsByTagName('name')[0];
+            if (name && name.textContent === 'stylesheet') {
+              const value = child.getElementsByTagName('value')[0];
+              if (value) {
+                let src = base.resolveURL(value.textContent, url);
+                sources.push({
+                  url: src,
+                  text: null,
+                  classes: null,
+                  media: null,
+                  flavor: cssparse.StylesheetFlavor.AUTHOR
+                });
               }
             }
           }

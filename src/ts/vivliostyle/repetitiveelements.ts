@@ -338,11 +338,9 @@ export class RepetitiveElements implements ElementsOffset {
     if (!this.isSkipFooter && this.enableSkippingFooter &&
         this.footerNodePosition) {
       this.isSkipFooter = true;
-    } else {
-      if (!this.isSkipHeader && this.enableSkippingHeader &&
-          this.headerNodePosition) {
-        this.isSkipHeader = true;
-      }
+    } else if (!this.isSkipHeader && this.enableSkippingHeader &&
+        this.headerNodePosition) {
+      this.isSkipHeader = true;
     }
   }
 
@@ -760,31 +758,22 @@ export class RepetitiveElementsOwnerLayoutProcessor extends
                         nextNodeContext = nodeContextParam;
                         if (column.pageFloatLayoutContext.isInvalidated()) {
                           loopFrame.breakLoop();
+                        } else if (column.pageBreakType) {
+                          loopFrame.breakLoop(); // Loop end
+                        } else if (nextNodeContext &&
+                            column.stopByOverflow(nextNodeContext)) {
+                          loopFrame.breakLoop(); // Loop end
+                        } else if (nextNodeContext && nextNodeContext.after &&
+                            nextNodeContext.sourceNode ==
+                                formattingContext.rootSourceNode) {
+                          loopFrame.breakLoop(); // Loop end
                         } else {
-                          // Loop end
-                          if (column.pageBreakType) {
-                            loopFrame.breakLoop();
+                          if (pending) {
+                            // Sync case
+                            pending = false;
                           } else {
-                            // Loop end
-                            if (nextNodeContext &&
-                                column.stopByOverflow(nextNodeContext)) {
-                              loopFrame.breakLoop();
-                            } else {
-                              // Loop end
-                              if (nextNodeContext && nextNodeContext.after &&
-                                  nextNodeContext.sourceNode ==
-                                      formattingContext.rootSourceNode) {
-                                loopFrame.breakLoop();
-                              } else {
-                                if (pending) {
-                                  // Sync case
-                                  pending = false;
-                                } else {
-                                  // Async case
-                                  loopFrame.continueLoop();
-                                }
-                              }
-                            }
+                            // Async case
+                            loopFrame.continueLoop();
                           }
                         }
                       });

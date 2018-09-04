@@ -1001,17 +1001,15 @@ export class Parser {
             }
             valStack.push(new css.Expr(args[0]));
             return true;
-          } else {
-            if (tok == '(') {
-              // call
-              const name2 = (valStack.pop() as string);
-              const name1 = (valStack.pop() as string | null);
-              val = new expr.Call(
-                  handler.getScope(), expr.makeQualifiedName(name1, name2),
-                  args);
-              op = csstok.TokenType.EOF;
-              continue;
-            }
+          } else if (tok == '(') {
+            // call
+            const name2 = (valStack.pop() as string);
+            const name1 = (valStack.pop() as string | null);
+            val = new expr.Call(
+                handler.getScope(), expr.makeQualifiedName(name1, name2),
+                args);
+            op = csstok.TokenType.EOF;
+            continue;
           }
         }
         if (tok == csstok.TokenType.O_PAR) {
@@ -1033,13 +1031,11 @@ export class Parser {
         // prefix
         if (tok == -csstok.TokenType.BANG) {
           val = new expr.Not(handler.getScope(), val);
+        } else if (tok == -csstok.TokenType.MINUS) {
+          val = new expr.Negate(handler.getScope(), val);
         } else {
-          if (tok == -csstok.TokenType.MINUS) {
-            val = new expr.Negate(handler.getScope(), val);
-          } else {
-            this.exprError('F_UNEXPECTED_STATE', token);
-            return false;
-          }
+          this.exprError('F_UNEXPECTED_STATE', token);
+          return false;
         }
       } else {
         // infix
@@ -1174,13 +1170,11 @@ export class Parser {
       hasLeadingPlus = true;
       this.tokenizer.consume();
       token = this.tokenizer.token();
-    } else {
-      if (token.type === csstok.TokenType.IDENT &&
-          (token.text === 'even' || token.text === 'odd')) {
-        // 'even' or 'odd'
-        this.tokenizer.consume();
-        return [2, token.text === 'odd' ? 1 : 0];
-      }
+    } else if (token.type === csstok.TokenType.IDENT &&
+        (token.text === 'even' || token.text === 'odd')) {
+      // 'even' or 'odd'
+      this.tokenizer.consume();
+      return [2, token.text === 'odd' ? 1 : 0];
     }
     switch (token.type) {
       case csstok.TokenType.NUMERIC:
@@ -1218,80 +1212,70 @@ export class Parser {
           if (token.type === csstok.TokenType.INT) {
             b = token.num;
 
-            // reject 'an + -0', 'an - -0'
             if (1 / b === 1 / -0) {
               // negative zero: 'an -0'
               b = 0;
               if (hasSign) {
-                return null;
+                return null; // reject 'an + -0', 'an - -0'
               }
-            } else {
-              // reject 'an + -b', 'an - -b'
-              if (b < 0) {
-                // negative: 'an -b'
-                if (hasSign) {
-                  return null;
-                }
-              } else {
-                if (b >= 0) {
-                  // positive or positive zero: 'an +b'
-                  if (!hasSign) {
-                    return null;
-                  }
-                }
+            } else if (b < 0) {
+              // negative: 'an -b'
+              if (hasSign) {
+                return null; // reject 'an + -b', 'an - -b'
+              }
+            } else if (b >= 0) {
+              // positive or positive zero: 'an +b'
+              if (!hasSign) {
+                return null;
               }
             }
             this.tokenizer.consume();
-          } else {
-            if (hasSign) {
-              // reject 'an + (non-integer)'
-              return null;
-            }
+          } else if (hasSign) {
+            // reject 'an + (non-integer)'
+            return null;
           }
           return [a, hasMinusSign && b > 0 ? -b : b];
+        } else if (token.text === 'n-' || token.text === '-n-') {
+          // 'an- b', '-n- b'
+          if (hasLeadingPlus && token.precededBySpace) {
+            // reject '+ an- b'
+            return null;
+          }
+          let a = token.text === '-n-' ? -1 : 1;
+          if (token.type === csstok.TokenType.NUMERIC) {
+            a = token.num;
+          }
+          this.tokenizer.consume();
+          token = this.tokenizer.token();
+          if (token.type === csstok.TokenType.INT) {
+            if (token.num < 0 || 1 / token.num === 1 / -0) {
+              // reject 'an- -b', 'an- -0'
+              return null;
+            } else {
+              this.tokenizer.consume();
+              return [a, token.num];
+            }
+          }
         } else {
-          if (token.text === 'n-' || token.text === '-n-') {
-            // 'an- b', '-n- b'
+          let r = token.text.match(/^n(-[0-9]+)$/);
+          if (r) {
+            // 'n-b', 'an-b'
             if (hasLeadingPlus && token.precededBySpace) {
-              // reject '+ an- b'
+              // reject '+ an-b'
               return null;
             }
-            let a = token.text === '-n-' ? -1 : 1;
-            if (token.type === csstok.TokenType.NUMERIC) {
-              a = token.num;
-            }
             this.tokenizer.consume();
-            token = this.tokenizer.token();
-            if (token.type === csstok.TokenType.INT) {
-              if (token.num < 0 || 1 / token.num === 1 / -0) {
-                // reject 'an- -b', 'an- -0'
-                return null;
-              } else {
-                this.tokenizer.consume();
-                return [a, token.num];
-              }
-            }
-          } else {
-            let r = token.text.match(/^n(-[0-9]+)$/);
-            if (r) {
-              // 'n-b', 'an-b'
-              if (hasLeadingPlus && token.precededBySpace) {
-                // reject '+ an-b'
-                return null;
-              }
-              this.tokenizer.consume();
-              return [
-                token.type === csstok.TokenType.NUMERIC ? token.num : 1,
-                parseInt(r[1], 10)
-              ];
-            }
-            r = token.text.match(/^-n(-[0-9]+)$/);
+            return [
+              token.type === csstok.TokenType.NUMERIC ? token.num : 1,
+              parseInt(r[1], 10)
+            ];
+          }
+          r = token.text.match(/^-n(-[0-9]+)$/);
 
-            // '-n-b'
-            if (r) {
-              this.tokenizer.consume();
-              return [-1, parseInt(r[1], 10)];
-            }
+          // '-n-b'
+          if (r) {
+            this.tokenizer.consume();
+            return [-1, parseInt(r[1], 10)];
           }
         }
         return null;
@@ -1687,20 +1671,16 @@ export class Parser {
           if (token.type == csstok.TokenType.IDENT) {
             text = token.text;
             tokenizer.consume();
+          } else if (token.type == csstok.TokenType.STAR) {
+            text = null;
+            tokenizer.consume();
+          } else if (token.type == csstok.TokenType.BAR) {
+            text = '';
           } else {
-            if (token.type == csstok.TokenType.STAR) {
-              text = null;
-              tokenizer.consume();
-            } else {
-              if (token.type == csstok.TokenType.BAR) {
-                text = '';
-              } else {
-                this.actions = actionsErrorSelector;
-                handler.error('E_CSS_ATTR', token);
-                tokenizer.consume();
-                continue;
-              }
-            }
+            this.actions = actionsErrorSelector;
+            handler.error('E_CSS_ATTR', token);
+            tokenizer.consume();
+            continue;
           }
           token = tokenizer.token();
           if (token.type == csstok.TokenType.BAR) {
@@ -1795,13 +1775,11 @@ export class Parser {
           if (this.regionRule) {
             this.ruleStack.push('-epubx-region');
             this.regionRule = false;
+          } else if (this.pageRule) {
+            this.ruleStack.push('page');
+            this.pageRule = false;
           } else {
-            if (this.pageRule) {
-              this.ruleStack.push('page');
-              this.pageRule = false;
-            } else {
-              this.ruleStack.push('[selector]');
-            }
+            this.ruleStack.push('[selector]');
           }
           handler.startRuleBody();
           this.actions = actionsBase;
@@ -2624,12 +2602,10 @@ export const evaluateExprToCSS =
         case 'number':
           if (!takesOnlyNum(propName)) {
             return new css.Numeric(result, 'px');
+          } else if (result == Math.round(result)) {
+            return new css.Int(result);
           } else {
-            if (result == Math.round(result)) {
-              return new css.Int(result);
-            } else {
-              return new css.Num(result);
-            }
+            return new css.Num(result);
           }
         case 'string':
           if (!result) {

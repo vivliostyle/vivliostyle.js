@@ -398,18 +398,16 @@ export const readMetadata = (mroot: xmldoc.NodeList, prefixes: string|null): JSO
           scheme: resolveProperty(node.getAttribute('scheme'))
         };
       }
-    } else {
-      if (node.namespaceURI == base.NS.DC) {
-        return {
-          name: predefinedPrefixes['dcterms'] + node.localName,
-          order: order++,
-          lang: node.getAttribute('xml:lang'),
-          value: node.textContent,
-          id: node.getAttribute('id'),
-          refines: null,
-          scheme: null
-        };
-      }
+    } else if (node.namespaceURI == base.NS.DC) {
+      return {
+        name: predefinedPrefixes['dcterms'] + node.localName,
+        order: order++,
+        lang: node.getAttribute('xml:lang'),
+        value: node.textContent,
+        id: node.getAttribute('id'),
+        refines: null,
+        scheme: null
+      };
     }
     return null;
   });
@@ -1148,26 +1146,22 @@ export class OPFView implements CustomRendererFactory {
             resultPage = viewItem.pages[pageIndex];
             if (resultPage) {
               loopFrame.breakLoop();
-            } else {
-              if (viewItem.complete) {
-                pageIndex = viewItem.layoutPositions.length - 1;
-                resultPage = viewItem.pages[pageIndex];
-                loopFrame.breakLoop();
-              } else {
-                if (sync) {
-                  self.renderPage(normalizedPosition).then((result) => {
-                    if (result) {
-                      resultPage = result.page;
-                    }
-                    loopFrame.breakLoop();
-                  });
-                } else {
-                  // Wait for the layout task and retry
-                  frame.sleep(100).then(() => {
-                    loopFrame.continueLoop();
-                  });
+            } else if (viewItem.complete) {
+              pageIndex = viewItem.layoutPositions.length - 1;
+              resultPage = viewItem.pages[pageIndex];
+              loopFrame.breakLoop();
+            } else if (sync) {
+              self.renderPage(normalizedPosition).then((result) => {
+                if (result) {
+                  resultPage = result.page;
                 }
-              }
+                loopFrame.breakLoop();
+              });
+            } else {
+              // Wait for the layout task and retry
+              frame.sleep(100).then(() => {
+                loopFrame.continueLoop();
+              });
             }
           })
           .then(() => {
@@ -1502,16 +1496,14 @@ export class OPFView implements CustomRendererFactory {
       if (this.opf.opfXML && href.match(/^#epubcfi\(/)) {
         // CFI fragment is "relative" to OPF.
         path = this.opf.getPathFromURL(this.opf.opfXML.url);
-      } else {
-        if (href.charAt(0) === '#') {
-          const restored = this.opf.documentURLTransformer.restoreURL(href);
-          if (this.opf.opfXML) {
-            path = this.opf.getPathFromURL(restored[0]);
-          } else {
-            path = restored[0];
-          }
-          href = path + (restored[1] ? `#${restored[1]}` : '');
+      } else if (href.charAt(0) === '#') {
+        const restored = this.opf.documentURLTransformer.restoreURL(href);
+        if (this.opf.opfXML) {
+          path = this.opf.getPathFromURL(restored[0]);
+        } else {
+          path = restored[0];
         }
+        href = path + (restored[1] ? `#${restored[1]}` : '');
       }
       if (path == null) {
         return task.newResult((null as PageAndPosition | null));
@@ -1541,15 +1533,13 @@ export class OPFView implements CustomRendererFactory {
               offsetInItem: viewItem.xmldoc.getElementOffset(target)
             })
             .thenFinish(frame);
+      } else if (position.spineIndex !== item.spineIndex) {
+        // no fragment, different spine item
+        self.findPage(
+                {spineIndex: item.spineIndex, pageIndex: 0, offsetInItem: -1})
+            .thenFinish(frame);
       } else {
-        if (position.spineIndex !== item.spineIndex) {
-          // no fragment, different spine item
-          self.findPage(
-                  {spineIndex: item.spineIndex, pageIndex: 0, offsetInItem: -1})
-              .thenFinish(frame);
-        } else {
-          frame.finish(null);
-        }
+        frame.finish(null);
       }
     });
     return frame.result();
@@ -1754,20 +1744,14 @@ export class OPFView implements CustomRendererFactory {
       if (srcElem.localName == 'object' &&
           srcElem.namespaceURI == base.NS.XHTML) {
         return self.makeObjectView(xmldoc, srcElem, viewParent, computedStyle);
-      } else {
-        if (srcElem.namespaceURI == base.NS.MATHML) {
-          return self.makeMathJaxView(
-              xmldoc, srcElem, viewParent, computedStyle);
-        } else {
-          if (srcElem.namespaceURI == base.NS.SSE) {
-            return self.makeSSEView(xmldoc, srcElem, viewParent, computedStyle);
-          } else {
-            if (srcElem.dataset && srcElem.dataset['mathTypeset'] == 'true') {
-              return self.makeMathJaxView(
-                  xmldoc, srcElem, viewParent, computedStyle);
-            }
-          }
-        }
+      } else if (srcElem.namespaceURI == base.NS.MATHML) {
+        return self.makeMathJaxView(
+            xmldoc, srcElem, viewParent, computedStyle);
+      } else if (srcElem.namespaceURI == base.NS.SSE) {
+        return self.makeSSEView(xmldoc, srcElem, viewParent, computedStyle);
+      } else if (srcElem.dataset && srcElem.dataset['mathTypeset'] == 'true') {
+        return self.makeMathJaxView(
+            xmldoc, srcElem, viewParent, computedStyle);
       }
       return task.newResult((null as Element));
     };

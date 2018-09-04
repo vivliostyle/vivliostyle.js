@@ -926,15 +926,13 @@ export class EventSource {
           self.head.event = null;
         }
         frame.finish(event);
+      } else if (self.continuation) {
+        throw new Error('E_TASK_EVENT_SOURCE_OTHER_TASK_WAITING');
       } else {
-        if (self.continuation) {
-          throw new Error('E_TASK_EVENT_SOURCE_OTHER_TASK_WAITING');
-        } else {
-          const frameInternal: Frame<boolean> =
-              newFrame('EventSource.nextEventInternal');
-          self.continuation = frameInternal.suspend(self);
-          frameInternal.result().then(readEvent);
-        }
+        const frameInternal: Frame<boolean> =
+            newFrame('EventSource.nextEventInternal');
+        self.continuation = frameInternal.suspend(self);
+        frameInternal.result().then(readEvent);
       }
     };
     readEvent();
