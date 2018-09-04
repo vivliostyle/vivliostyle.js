@@ -137,8 +137,6 @@ export class PseudoelementStyler implements cssstyler.AbstractStyler {
   contentProcessed: {[key: string]: boolean} = {};
 
   // after content: update style
-  style: any;
-  styler: any;
 
   constructor(
       public readonly element: Element, public style: csscasc.ElementStyle,

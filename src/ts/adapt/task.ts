@@ -342,7 +342,6 @@ export class Continuation<T> implements base.Comparable {
   order: number = 0;
   result: any = null;
   canceled: boolean = false;
-  task: any;
 
   constructor(public task: Task) {}
 

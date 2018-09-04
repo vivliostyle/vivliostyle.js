@@ -384,7 +384,6 @@ export class EdgeBreakPosition extends AbstractBreakPosition {
   overflowIfRepetitiveElementsDropped: boolean;
   protected isEdgeUpdated: boolean = false;
   private edge: number = 0;
-  overflows: any;
 
   constructor(
       public readonly position: vtree.NodeContext,

@@ -77,7 +77,6 @@ export class Viewer {
   kick: () => void;
   sendCommand: (p1: JSON|string) => void;
   resizeListener: any;
-  pageReplacedListener: any;
   hyperlinkListener: EventListener;
   pageRuleStyleElement: any;
   pageSheetSizeAlreadySet: boolean = false;

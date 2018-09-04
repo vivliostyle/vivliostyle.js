@@ -1104,7 +1104,6 @@ export class Container {
   snapOffsetX: number = 0;
   snapOffsetY: number = 0;
   vertical: boolean = false;
-  element: any;
 
   constructor(public element: Element) {}
 

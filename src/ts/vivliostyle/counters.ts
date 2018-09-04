@@ -48,7 +48,6 @@ export class TargetCounterReference {
   pageCounters: csscasc.CounterValues = null;
   spineIndex: number = -1;
   pageIndex: number = -1;
-  resolved: boolean;
 
   constructor(public readonly targetId: string, public resolved: boolean) {}
 
