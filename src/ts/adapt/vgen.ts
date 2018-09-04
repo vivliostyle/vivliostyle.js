@@ -19,9 +19,6 @@
  */
 import {restoreNewText, diffChars} from '../vivliostyle/diff';
 import * as display from '../vivliostyle/display';
-import {ResolveFormattingContextHook} from '../vivliostyle/plugin';
-import {PreProcessElementStyleHook} from '../vivliostyle/plugin';
-import {PreProcessTextContentHook} from '../vivliostyle/plugin';
 import * as urls from '../vivliostyle/urls';
 import * as selectors from '../vivliostyle/selectors';
 import {plugin} from '../vivliostyle/plugin';
@@ -565,7 +562,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
   resolveFormattingContext(
       nodeContext: vtree.NodeContext, firstTime: boolean, display: css.Ident,
       position: css.Ident, float: css.Ident, isRoot: boolean) {
-    const hooks: ResolveFormattingContextHook[] =
+    const hooks: plugin.ResolveFormattingContextHook[] =
         plugin.getHooksForName(
             plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT);
     for (let i = 0; i < hooks.length; i++) {
@@ -1311,7 +1308,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
 
   private preprocessElementStyle(computedStyle: {[key: string]: css.Val}) {
     const self = this;
-    const hooks: PreProcessElementStyleHook[] =
+    const hooks: plugin.PreProcessElementStyleHook[] =
         plugin.getHooksForName(
             plugin.HOOKS.PREPROCESS_ELEMENT_STYLE);
     hooks.forEach((hook) => {
@@ -1392,7 +1389,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
     let originl;
     let textContent = originl = self.sourceNode.textContent;
     const frame: task.Frame<boolean> = task.newFrame('preprocessTextContent');
-    const hooks: PreProcessTextContentHook[] =
+    const hooks: plugin.PreProcessTextContentHook[] =
         plugin.getHooksForName(
             plugin.HOOKS.PREPROCESS_TEXT_CONTENT);
     let index = 0;
