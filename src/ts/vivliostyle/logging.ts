@@ -16,7 +16,6 @@
  *
  * @fileoverview Logging utility
  */
-import * as namespace from './namespace';
 
 /**
  * Log level.

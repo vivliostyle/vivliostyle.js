@@ -18,7 +18,7 @@
  */
 import * as css from '../adapt/css';
 
-import * as plugin from './plugin';
+import {plugin} from './plugin';
 
 /**
  * Convert old page-break-* properties to break-* properties with appropriate

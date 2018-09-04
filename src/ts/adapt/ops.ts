@@ -19,12 +19,12 @@
  * layout.
  */
 import * as asserts from '../vivliostyle/asserts';
-import * as constants from '../vivliostyle/constants';
+import {constants} from '../vivliostyle/constants';
 import * as counters from '../vivliostyle/counters';
 import * as logging from '../vivliostyle/logging';
 import * as pagefloat from '../vivliostyle/pagefloat';
 import {PreProcessSingleDocumentHook} from '../vivliostyle/plugin';
-import * as plugin from '../vivliostyle/plugin';
+import {plugin} from '../vivliostyle/plugin';
 
 import {DocumentURLTransformer} from './base';
 import * as base from './base';

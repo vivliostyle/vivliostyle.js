@@ -19,8 +19,6 @@
 
 import * as fastdiff from 'fast-diff';
 
-import * as namespace from './namespace';
-
 type Change = (number|string)[];
 
 export {Change};

@@ -24,7 +24,7 @@ import * as logging from '../vivliostyle/logging';
 import {ResolveLayoutProcessorHook} from '../vivliostyle/plugin';
 import {PostLayoutBlockHook} from '../vivliostyle/plugin';
 import {ResolveTextNodeBreakerHook} from '../vivliostyle/plugin';
-import * as plugin from '../vivliostyle/plugin';
+import {plugin} from '../vivliostyle/plugin';
 import {ElementsOffset} from '../vivliostyle/repetitiveelements';
 import * as repetitiveelements from '../vivliostyle/repetitiveelements';
 import {processAfterIfContinues, processAfterIfContinuesOfAncestors} from '../vivliostyle/selectors';

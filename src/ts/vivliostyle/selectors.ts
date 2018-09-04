@@ -36,8 +36,6 @@ import * as vtree from '../adapt/vtree';
 import {PseudoColumn} from './layoututil';
 import {ElementsOffset} from './repetitiveelements';
 
-import * as namespace from './namespace';
-
 export interface Matcher {
   matches(): boolean;
 }

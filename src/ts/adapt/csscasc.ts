@@ -18,7 +18,7 @@
  * @fileoverview CSS Cascade.
  */
 import * as logging from '../vivliostyle/logging';
-import * as plugin from '../vivliostyle/plugin';
+import {plugin} from '../vivliostyle/plugin';
 import {Matcher} from '../vivliostyle/selectors';
 import * as selectors from '../vivliostyle/selectors';
 

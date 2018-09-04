@@ -26,7 +26,7 @@ import * as pm from '../adapt/pm';
 import * as vtree from '../adapt/vtree';
 import * as asserts from './asserts';
 
-import * as constants from './constants';
+import {constants} from './constants';
 import * as sizing from './sizing';
 
 /**

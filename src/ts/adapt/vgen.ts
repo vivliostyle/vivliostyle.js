@@ -24,7 +24,7 @@ import {PreProcessElementStyleHook} from '../vivliostyle/plugin';
 import {PreProcessTextContentHook} from '../vivliostyle/plugin';
 import * as urls from '../vivliostyle/urls';
 import * as selectors from '../vivliostyle/selectors';
-import * as plugin from '../vivliostyle/plugin';
+import {plugin} from '../vivliostyle/plugin';
 import * as pagefloat from '../vivliostyle/pagefloat';
 import {RepetitiveElementsOwnerFormattingContext} from '../vivliostyle/repetitiveelements';
 
