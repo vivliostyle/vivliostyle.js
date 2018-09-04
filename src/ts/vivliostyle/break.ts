@@ -45,7 +45,7 @@ export const convertPageBreakAliases =
         };
 plugin.registerHook('SIMPLE_PROPERTY', convertPageBreakAliases);
 
-export const forcedBreakValues: {[key: string|null]: boolean|null} = {
+export const forcedBreakValues: {[key: string]: boolean|null} = {
   'page': true,
   'left': true,
   'right': true,
@@ -62,7 +62,7 @@ export const forcedBreakValues: {[key: string|null]: boolean|null} = {
 export const isForcedBreakValue = (value: string|null): boolean =>
     !!forcedBreakValues[value];
 
-export const avoidBreakValues: {[key: string|null]: boolean|null} = {
+export const avoidBreakValues: {[key: string]: boolean|null} = {
   'avoid': true,
   'avoid-page': true,
   'avoid-column': true,

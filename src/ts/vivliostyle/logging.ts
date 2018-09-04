@@ -43,7 +43,7 @@ export class Logger {
   private consoleInfo: any;
   private consoleWarn: any;
   private consoleError: any;
-  private listeners: {[key: LogLevel]: ((p1: ErrorInfo) => void)[]} = {};
+  private listeners = {} as {[key in keyof LogLevel]: ((p1: ErrorInfo) => void)[]};
 
   constructor(opt_console?: Console) {
     const c = opt_console || console;

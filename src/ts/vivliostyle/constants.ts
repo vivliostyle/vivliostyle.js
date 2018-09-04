@@ -32,11 +32,11 @@ export enum PageProgression {
   LTR = 'ltr',
   RTL = 'rtl'
 }
-
+export namespace PageProgression {
 /**
  * Return PageProgressino corresponding to the specified string
  */
-PageProgression.of = (str: string): PageProgression => {
+export const of = (str: string): PageProgression => {
   switch (str) {
     case 'ltr':
       return PageProgression.LTR;
@@ -46,6 +46,7 @@ PageProgression.of = (str: string): PageProgression => {
       throw new Error(`unknown PageProgression: ${str}`);
   }
 };
+}
 
 /**
  * Page side (left/right).

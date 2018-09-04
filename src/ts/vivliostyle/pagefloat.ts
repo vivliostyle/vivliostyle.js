@@ -40,7 +40,8 @@ export enum FloatReference {
   REGION = 'region',
   PAGE = 'page'
 }
-FloatReference.of = (str: string): FloatReference => {
+export namespace FloatReference {
+export const of = (str: string): FloatReference => {
   switch (str) {
     case 'inline':
       return FloatReference.INLINE;
@@ -54,6 +55,7 @@ FloatReference.of = (str: string): FloatReference => {
       throw new Error(`Unknown float-reference: ${str}`);
   }
 };
+}
 
 export const isPageFloat = (floatReference: FloatReference): boolean => {
   switch (floatReference) {
@@ -103,9 +105,11 @@ export const resolveInlineFloatDirection =
       return floatSide;
     };
 
+type PageFloatID = string;
+
 export class PageFloat {
-  private order: number|null = null;
-  private id: PageFloat.ID|null = null;
+  order: number|null = null;
+  id: PageFloatID|null = null;
 
   constructor(
       public readonly nodePosition: vtree.NodePosition,
@@ -121,7 +125,7 @@ export class PageFloat {
     return this.order;
   }
 
-  getId(): PageFloat.ID {
+  getId(): PageFloatID {
     if (!this.id) {
       throw new Error('The page float is not yet added');
     }
@@ -134,8 +138,6 @@ export class PageFloat {
 
   isAllowedToPrecede(other: PageFloat): boolean {return false;}
 }
-const PageFloat = PageFloat;
-type ID = string;
 
 export class PageFloatStore {
   private floats: PageFloat[] = [];
@@ -145,7 +147,7 @@ export class PageFloatStore {
     return this.nextPageFloatIndex++;
   }
 
-  private createPageFloatId(order: number): PageFloat.ID {return `pf${order}`;}
+  private createPageFloatId(order: number): PageFloatID {return `pf${order}`;}
 
   addPageFloat(float: PageFloat) {
     const index = this.floats.findIndex(
@@ -167,7 +169,7 @@ export class PageFloatStore {
     return index >= 0 ? this.floats[index] : null;
   }
 
-  findPageFloatById(id: PageFloat.ID) {
+  findPageFloatById(id: PageFloatID) {
     const index = this.floats.findIndex((f) => f.id === id);
     return index >= 0 ? this.floats[index] : null;
   }
@@ -263,15 +265,14 @@ export class PageFloatLayoutContext {
   direction: Val;
   private invalidated: boolean = false;
   private floatStore: any;
-  private forbiddenFloats: PageFloat.ID[] = [];
+  private forbiddenFloats: PageFloatID[] = [];
   floatFragments: PageFloatFragment[] = [];
   private stashedFloatFragments: PageFloatFragment[] = [];
-  private floatAnchors: {[key: PageFloat.ID]: Node} = {};
+  private floatAnchors: {[key: string]: Node} = {};
   private floatsDeferredToNext: PageFloatContinuation[] = [];
   private floatsDeferredFromPrevious: PageFloatContinuation[];
   private layoutConstraints: LayoutConstraint[] = [];
   private locked: boolean = false;
-  container: any;
 
   constructor(
       public readonly parent: PageFloatLayoutContext,
@@ -478,7 +479,7 @@ export class PageFloatLayoutContext {
         anchors);
   }
 
-  private isAnchorAlreadyAppeared(floatId: PageFloat.ID) {
+  isAnchorAlreadyAppeared(floatId: PageFloatID) {
     const deferredFloats = this.getDeferredPageFloatContinuations();
     if (deferredFloats.some((cont) => cont.float.getId() === floatId)) {
       return true;
@@ -1382,7 +1383,6 @@ export class PageFloatLayoutContext {
     return this.locked;
   }
 }
-const PageFloatLayoutContext = PageFloatLayoutContext;
 
 export interface PageFloatLayoutStrategy {
   appliesToNodeContext(nodeContext: vtree.NodeContext): boolean;

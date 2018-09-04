@@ -944,15 +944,15 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
 
     // prepare parameters
     const scope = this.pageBox.scope;
-    const containers:
-        {[key: MarginBoxPositionAlongVariableDimension]: vtree.Container} = {};
-    const boxInstances: {
-      [key: MarginBoxPositionAlongVariableDimension]:
+    const containers = {} as
+        {[key in keyof MarginBoxPositionAlongVariableDimension]: vtree.Container};
+    const boxInstances = {} as {
+      [key in keyof MarginBoxPositionAlongVariableDimension]:
           PageMarginBoxPartitionInstance
-    } = {};
-    const boxParams: {
-      [key: MarginBoxPositionAlongVariableDimension]: MarginBoxSizingParam
-    } = {};
+    };
+    const boxParams = {} as {
+      [key in keyof MarginBoxPositionAlongVariableDimension]: MarginBoxSizingParam
+    };
     for (const name in marginBoxContainers) {
       const boxInfo = pageMarginBoxes[name];
       if (boxInfo) {
@@ -979,8 +979,8 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
     let needRecalculate: boolean = false;
 
     // Check max-width/max-height
-    const maxOuterSizes:
-        {[key: MarginBoxPositionAlongVariableDimension]: number} = {};
+    const maxOuterSizes = {} as
+        {[key in keyof MarginBoxPositionAlongVariableDimension]: number};
     Object.keys(containers).forEach((n) => {
       const name = (n as MarginBoxPositionAlongVariableDimension);
       const maxSize = pm.toExprAuto(
@@ -1009,8 +1009,8 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
     }
 
     // Check min-width/min-height
-    const minOuterSizes:
-        {[key: MarginBoxPositionAlongVariableDimension]: number} = {};
+    const minOuterSizes = {} as
+        {[key in keyof MarginBoxPositionAlongVariableDimension]: number};
     Object.keys(containers).forEach((n) => {
       const name = (n as MarginBoxPositionAlongVariableDimension);
       const minSize = pm.toExprAuto(
@@ -1072,16 +1072,16 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
 
   private getSizesOfMarginBoxesAlongVariableDimension(
       boxParams: {
-        [key: MarginBoxPositionAlongVariableDimension]: MarginBoxSizingParam
+        [key in keyof MarginBoxPositionAlongVariableDimension]: MarginBoxSizingParam
       },
       availableSize: number):
-      {[key: MarginBoxPositionAlongVariableDimension]: number} {
+      {[key in keyof MarginBoxPositionAlongVariableDimension]: number} {
     const startBoxParam =
         boxParams[MarginBoxPositionAlongVariableDimension.START];
     const centerBoxParam =
         boxParams[MarginBoxPositionAlongVariableDimension.CENTER];
     const endBoxParam = boxParams[MarginBoxPositionAlongVariableDimension.END];
-    const sizes: {[key: MarginBoxPositionAlongVariableDimension]: number} = {};
+    const sizes = {} as {[key in keyof MarginBoxPositionAlongVariableDimension]: number};
     if (!centerBoxParam) {
       const startEndSizes = this.distributeAutoMarginBoxSizes(
           startBoxParam, endBoxParam, availableSize);
@@ -1215,7 +1215,7 @@ interface MarginBoxSizingParam {
  */
 class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
   private hasAutoSize_: boolean;
-  private size: {[key: sizing.Size]: number} = null;
+  private size: {[keykey in keyof sizing.Size]: number} | null = null;
 
   constructor(
       protected readonly container: vtree.Container,
@@ -1234,7 +1234,7 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
     return this.hasAutoSize_;
   }
 
-  private getSize(): {[key: sizing.Size]: number} {
+  private getSize(): {[key in keyof sizing.Size]: number} {
     if (!this.size) {
       const sizes = this.isHorizontal ?
           [sizing.Size.MAX_CONTENT_WIDTH, sizing.Size.MIN_CONTENT_WIDTH] :
