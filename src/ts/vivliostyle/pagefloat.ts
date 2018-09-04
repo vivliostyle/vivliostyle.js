@@ -268,7 +268,7 @@ export class PageFloatLayoutContext {
   private forbiddenFloats: PageFloatID[] = [];
   floatFragments: PageFloatFragment[] = [];
   private stashedFloatFragments: PageFloatFragment[] = [];
-  private floatAnchors: {[key: string]: Node} = {};
+  private floatAnchors: {[key in PageFloatID]: Node} = {};
   private floatsDeferredToNext: PageFloatContinuation[] = [];
   private floatsDeferredFromPrevious: PageFloatContinuation[];
   private layoutConstraints: LayoutConstraint[] = [];

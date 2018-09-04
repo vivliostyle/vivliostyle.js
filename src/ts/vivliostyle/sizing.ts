@@ -47,7 +47,7 @@ export enum Size {
  */
 export const getSize =
     (clientLayout: vtree.ClientLayout, element: Element,
-     sizes: Size[]): {[key in keyof Size]: number} => {
+     sizes: Size[]): {[key in Size]: number} => {
       const original = {
         display: (element as any).style.display,
         position: (element as any).style.position,
@@ -143,7 +143,7 @@ export const getSize =
       function getFillAvailableBlock(): string {
         throw new Error('Getting fill-available block size is not implemented');
       }
-      const result = ({} as {[key in keyof Size]: number});
+      const result = ({} as {[key in Size]: number});
       sizes.forEach((size) => {
         let r: string;
         switch (size) {
