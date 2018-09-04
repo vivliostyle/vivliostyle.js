@@ -74,6 +74,8 @@ export const defaultPreferencesInstance = defaultPreferences();
 export const Special = {
   PENDING: {}
 };
+type Special = typeof Special;
+
 type Result = string|number|boolean|undefined;
 
 export {Result};

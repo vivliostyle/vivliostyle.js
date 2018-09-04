@@ -17,6 +17,7 @@
  *
  * @fileoverview Basic view tree data structures and support utilities.
  */
+import * as asserts from '../vivliostyle/asserts';
 import {constants} from '../vivliostyle/constants';
 import {Change, resolveOriginalIndex} from '../vivliostyle/diff';
 import {FloatReference} from '../vivliostyle/pagefloat';
@@ -1343,7 +1344,7 @@ export class ContentPropertyHandler extends css.Visitor {
     const ex = expr.toExpr();
     const val = ex.evaluate(this.context);
     if (typeof val === 'string') {
-      goog.asserts.assert(this.elem.ownerDocument);
+      asserts.assert(this.elem.ownerDocument);
       const node = this.exprContentListener(ex, val, this.elem.ownerDocument);
       this.visitStrInner(val, node);
     }

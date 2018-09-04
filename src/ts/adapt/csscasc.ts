@@ -17,6 +17,7 @@
  *
  * @fileoverview CSS Cascade.
  */
+import * as asserts from '../vivliostyle/asserts';
 import * as logging from '../vivliostyle/logging';
 import {plugin} from '../vivliostyle/plugin';
 import {Matcher} from '../vivliostyle/selectors';
@@ -488,7 +489,7 @@ export class InheritanceVisitor extends css.FilterVisitor {
    * @override
    */
   visitNumeric(numeric) {
-    goog.asserts.assert(this.context);
+    asserts.assert(this.context);
     if (this.propName === 'font-size') {
       return convertFontSizeToPx(numeric, this.getFontSize(), this.context);
     } else if (numeric.unit == 'em' || numeric.unit == 'ex' ||
@@ -2308,7 +2309,7 @@ export class CascadeInstance {
     const matcherBuilder = selectors.MatcherBuilder.instance;
     let matcher = null;
     if (viewConditionId) {
-      goog.asserts.assert(this.currentElementOffset);
+      asserts.assert(this.currentElementOffset);
       matcher = matcherBuilder.buildViewConditionMatcher(
           this.currentElementOffset, viewConditionId);
     }

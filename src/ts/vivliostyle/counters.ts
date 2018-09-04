@@ -24,6 +24,7 @@ import * as expr from '../adapt/expr';
 import * as layout from '../adapt/layout';
 import {Viewport} from '../adapt/vgen';
 import * as vtree from '../adapt/vtree';
+import * as asserts from '../vivliostyle/asserts';
 
 /**
  * Clone counter values.
@@ -606,7 +607,7 @@ export class CounterStore {
     Array.from(nodes).forEach(function(node) {
       const key = node.getAttribute(PAGES_COUNTER_ATTR);
       const i = this.pagesCounterExprs.findIndex((o) => o.expr.key === key);
-      goog.asserts.assert(i >= 0);
+      asserts.assert(i >= 0);
       node.textContent = this.pagesCounterExprs[i].format([pages]);
     }, this);
   }

@@ -3463,8 +3463,8 @@ export class DefaultLayoutMode implements layoututil.LayoutMode {
   doLayout(nodeContext, column) {
     const frame: task.Frame<vtree.NodeContext> =
         task.newFrame('DefaultLayoutMode.doLayout');
-    selectors
-        .processAfterIfContinuesOfAncestors(nodeContext, column)
+    
+    processAfterIfContinuesOfAncestors(nodeContext, column)
         .then(() => {
           column.doLayout(nodeContext, this.leadingEdge, this.breakAfter)
               .then((result) => {

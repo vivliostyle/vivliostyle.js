@@ -420,11 +420,13 @@ export class TableFormattingContext extends
       return null;
     }
     let tableCell = null;
-    loop: for (let row = 0; row < this.cellFragments.length; row++) {
+    let row = 0;
+    let col = 0
+    loop: for (row = 0; row < this.cellFragments.length; row++) {
       if (!this.cellFragments[row]) {
         continue;
       }
-      for (let col = 0; col < this.cellFragments[row].length; col++) {
+      for (col = 0; col < this.cellFragments[row].length; col++) {
         if (!this.cellFragments[row][col]) {
           continue;
         }
