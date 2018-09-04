@@ -457,24 +457,20 @@ export const validateCheckPoints = (checkPoints: vtree.NodeContext[]) => {
     const cp1 = checkPoints[i];
     if (cp0 === cp1) {
       logging.logger.warn('validateCheckPoints: duplicate entry');
-    } else {
-      if (cp0.boxOffset >= cp1.boxOffset) {
-        logging.logger.warn('validateCheckPoints: incorrect boxOffset');
+    } else if (cp0.boxOffset >= cp1.boxOffset) {
+      logging.logger.warn('validateCheckPoints: incorrect boxOffset');
+    } else if (cp0.sourceNode == cp1.sourceNode) {
+      if (cp1.after) {
+        if (cp0.after) {
+          logging.logger.warn(
+              'validateCheckPoints: duplicate after points');
+        }
       } else {
-        if (cp0.sourceNode == cp1.sourceNode) {
-          if (cp1.after) {
-            if (cp0.after) {
-              logging.logger.warn(
-                  'validateCheckPoints: duplicate after points');
-            }
-          } else {
-            if (!cp0.after) {
-              if (cp1.boxOffset - cp0.boxOffset !=
-                  cp1.offsetInNode - cp0.offsetInNode) {
-                logging.logger.warn(
-                    'validateCheckPoints: boxOffset inconsistent with offsetInNode');
-              }
-            }
+        if (!cp0.after) {
+          if (cp1.boxOffset - cp0.boxOffset !=
+              cp1.offsetInNode - cp0.offsetInNode) {
+            logging.logger.warn(
+                'validateCheckPoints: boxOffset inconsistent with offsetInNode');
           }
         }
       }
@@ -713,14 +709,12 @@ export class Column extends vtree.Container {
                   }
                   bodyFrame.continueLoop();
                 });
+              } else if (!position.inline) {
+                // Exit the loop
+                bodyFrame.breakLoop();
               } else {
-                if (!position.inline) {
-                  // Exit the loop
-                  bodyFrame.breakLoop();
-                } else {
-                  // Continue the loop
-                  bodyFrame.continueLoop();
-                }
+                // Continue the loop
+                bodyFrame.continueLoop();
               }
             });
           });
@@ -787,18 +781,16 @@ export class Column extends vtree.Container {
               position = (positionParam as vtree.NodeContext);
               if (!position || position.sourceNode == sourceNode) {
                 bodyFrame.breakLoop();
-              } else {
-                if (!self.layoutConstraint.allowLayout(position)) {
-                  position = position.modify();
-                  position.overflow = true;
-                  if (self.stopAtOverflow) {
-                    bodyFrame.breakLoop();
-                  } else {
-                    bodyFrame.continueLoop();
-                  }
+              } else if (!self.layoutConstraint.allowLayout(position)) {
+                position = position.modify();
+                position.overflow = true;
+                if (self.stopAtOverflow) {
+                  bodyFrame.breakLoop();
                 } else {
                   bodyFrame.continueLoop();
                 }
+              } else {
+                bodyFrame.continueLoop();
               }
             });
           });
@@ -892,12 +884,10 @@ export class Column extends vtree.Container {
     let edge;
     if (nodeContext && isOrphan(nodeContext.viewNode)) {
       return NaN;
-    } else {
-      if (nodeContext && nodeContext.after && !nodeContext.inline) {
-        edge = calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
-        if (!isNaN(edge)) {
-          return edge;
-        }
+    } else if (nodeContext && nodeContext.after && !nodeContext.inline) {
+      edge = calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
+      if (!isNaN(edge)) {
+        return edge;
       }
     }
     nodeContext = checkPoints[index];
@@ -1353,10 +1343,8 @@ export class Column extends vtree.Container {
     function cancelLayout(floatArea, pageFloatFragment) {
       if (pageFloatFragment) {
         context.removePageFloatFragment(pageFloatFragment, true);
-      } else {
-        if (floatArea) {
-          floatArea.element.parentNode.removeChild(floatArea.element);
-        }
+      } else if (floatArea) {
+        floatArea.element.parentNode.removeChild(floatArea.element);
       }
       context.restoreStashedFragments(float.floatReference);
       context.deferPageFloat(continuation);
@@ -1525,12 +1513,10 @@ export class Column extends vtree.Container {
             frame.finish(floatReference);
           }
         });
+      } else if (columnSpan === ident.all) {
+        frame.finish(pagefloat.FloatReference.REGION);
       } else {
-        if (columnSpan === ident.all) {
-          frame.finish(pagefloat.FloatReference.REGION);
-        } else {
-          frame.finish(floatReference);
-        }
+        frame.finish(floatReference);
       }
     } else {
       frame.finish(floatReference);
@@ -1561,36 +1547,32 @@ export class Column extends vtree.Container {
       if (pageFloatFragment && pageFloatFragment.hasFloat(float)) {
         context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
         return task.newResult((nodeContextAfter as vtree.NodeContext));
+      } else if (context.isForbidden(float) ||
+          context.hasPrecedingFloatsDeferredToNext(float)) {
+        context.deferPageFloat(continuation);
+        context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
+        return task.newResult((nodeContextAfter as vtree.NodeContext));
+      } else if (self.nodeContextOverflowingDueToRepetitiveElements) {
+        return task.newResult(null);
       } else {
-        if (context.isForbidden(float) ||
-            context.hasPrecedingFloatsDeferredToNext(float)) {
-          context.deferPageFloat(continuation);
-          context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
-          return task.newResult((nodeContextAfter as vtree.NodeContext));
+        const edge = calculateEdge(
+            nodeContextAfter, self.clientLayout, 0, self.vertical);
+        if (self.isOverflown(edge)) {
+          return task.newResult(nodeContextAfter);
         } else {
-          if (self.nodeContextOverflowingDueToRepetitiveElements) {
-            return task.newResult(null);
-          } else {
-            const edge = calculateEdge(
-                nodeContextAfter, self.clientLayout, 0, self.vertical);
-            if (self.isOverflown(edge)) {
-              return task.newResult(nodeContextAfter);
-            } else {
-              return self
-                  .layoutPageFloatInner(
-                      continuation, strategy, edge, pageFloatFragment)
-                  .thenAsync((success) => {
-                    asserts.assert(float);
-                    if (!success) {
-                      context.registerPageFloatAnchor(
-                          float, nodeContextAfter.viewNode);
-                      return task.newResult(nodeContextAfter);
-                    } else {
-                      return task.newResult(null);
-                    }
-                  });
-            }
-          }
+          return self
+              .layoutPageFloatInner(
+                  continuation, strategy, edge, pageFloatFragment)
+              .thenAsync((success) => {
+                asserts.assert(float);
+                if (!success) {
+                  context.registerPageFloatAnchor(
+                      float, nodeContextAfter.viewNode);
+                  return task.newResult(nodeContextAfter);
+                } else {
+                  return task.newResult(null);
+                }
+              });
         }
       }
     });
@@ -1993,17 +1975,13 @@ export class Column extends vtree.Container {
             haveStart = true;
           }
           lastGood = node;
+        } else if (wentUp) {
+          wentUp = false;
+        } else if (isSpecial((node as Element))) {
+          // Skip special
+          seekRange = !haveStart;
         } else {
-          if (wentUp) {
-            wentUp = false;
-          } else {
-            if (isSpecial((node as Element))) {
-              // Skip special
-              seekRange = !haveStart;
-            } else {
-              next = node.firstChild;
-            }
-          }
+          next = node.firstChild;
         }
         if (!next) {
           next = node.nextSibling;
@@ -2054,12 +2032,10 @@ export class Column extends vtree.Container {
           const boxSize = Math.max(this.getBoxSize(box), 1);
           if (dir * this.getBeforeEdge(box) < dir * lineBefore) {
             overlap = dir * (this.getAfterEdge(box) - lineBefore) / boxSize;
+          } else if (dir * this.getAfterEdge(box) > dir * lineAfter) {
+            overlap = dir * (lineAfter - this.getBeforeEdge(box)) / boxSize;
           } else {
-            if (dir * this.getAfterEdge(box) > dir * lineAfter) {
-              overlap = dir * (lineAfter - this.getBeforeEdge(box)) / boxSize;
-            } else {
-              overlap = 1;
-            }
+            overlap = 1;
           }
         }
         if (lineLength == 0 || overlap >= MID_OVERLAP ||
@@ -2369,18 +2345,16 @@ export class Column extends vtree.Container {
     if (this.isOverflown(edge + (this.vertical ? -1 : 1) * offsets.current) &&
         !this.nodeContextOverflowingDueToRepetitiveElements) {
       this.nodeContextOverflowingDueToRepetitiveElements = nodeContext;
-    } else {
-      if (trailingEdgeContexts) {
-        // If the edge does not overflow add the trailing margin, which is
-        // truncated to the remaining fragmentainer extent.
-        const marginEdge =
-            edge + this.getTrailingMarginEdgeAdjustment(trailingEdgeContexts);
-        const footnoteEdge =
-            this.footnoteEdge - this.getBoxDir() * offsets.current;
-        edge = this.vertical ?
-            Math.min(edge, Math.max(marginEdge, footnoteEdge)) :
-            Math.max(edge, Math.min(marginEdge, footnoteEdge));
-      }
+    } else if (trailingEdgeContexts) {
+      // If the edge does not overflow add the trailing margin, which is
+      // truncated to the remaining fragmentainer extent.
+      const marginEdge =
+          edge + this.getTrailingMarginEdgeAdjustment(trailingEdgeContexts);
+      const footnoteEdge =
+          this.footnoteEdge - this.getBoxDir() * offsets.current;
+      edge = this.vertical ?
+          Math.min(edge, Math.max(marginEdge, footnoteEdge)) :
+          Math.max(edge, Math.min(marginEdge, footnoteEdge));
     }
     this.updateMaxReachedAfterEdge(edge);
     return overflown;
@@ -2567,18 +2541,16 @@ export class Column extends vtree.Container {
                   // all starting edges of the box
                   if (needForcedBreak()) {
                     processForcedBreak();
+                  } else if (self.checkOverflowAndSaveEdgeAndBreakPosition(
+                          lastAfterNodeContext, null, true, breakAtTheEdge)) {
+                    nodeContext = (self.stopAtOverflow ?
+                                        lastAfterNodeContext || nodeContext :
+                                        nodeContext)
+                                      .modify();
+                    nodeContext.overflow = true;
                   } else {
-                    if (self.checkOverflowAndSaveEdgeAndBreakPosition(
-                            lastAfterNodeContext, null, true, breakAtTheEdge)) {
-                      nodeContext = (self.stopAtOverflow ?
-                                         lastAfterNodeContext || nodeContext :
-                                         nodeContext)
-                                        .modify();
-                      nodeContext.overflow = true;
-                    } else {
-                      nodeContext = nodeContext.modify();
-                      nodeContext.breakBefore = breakAtTheEdge;
-                    }
+                    nodeContext = nodeContext.modify();
+                    nodeContext.breakBefore = breakAtTheEdge;
                   }
                   loopFrame.breakLoop();
                   return;
@@ -2613,17 +2585,15 @@ export class Column extends vtree.Container {
                   // check if a forced break must occur before the block.
                   if (needForcedBreak()) {
                     processForcedBreak();
-                  } else {
-                    if (self.checkOverflowAndSaveEdgeAndBreakPosition(
-                            lastAfterNodeContext, null, true, breakAtTheEdge) ||
-                        !self.layoutConstraint.allowLayout(nodeContext)) {
-                      // overflow
-                      nodeContext = (self.stopAtOverflow ?
-                                         lastAfterNodeContext || nodeContext :
-                                         nodeContext)
-                                        .modify();
-                      nodeContext.overflow = true;
-                    }
+                  } else if (self.checkOverflowAndSaveEdgeAndBreakPosition(
+                          lastAfterNodeContext, null, true, breakAtTheEdge) ||
+                      !self.layoutConstraint.allowLayout(nodeContext)) {
+                    // overflow
+                    nodeContext = (self.stopAtOverflow ?
+                                        lastAfterNodeContext || nodeContext :
+                                        nodeContext)
+                                      .modify();
+                    nodeContext.overflow = true;
                   }
                   loopFrame.breakLoop();
                   return;
@@ -2702,16 +2672,14 @@ export class Column extends vtree.Container {
                   // check if a forced break must occur before the block.
                   if (needForcedBreak()) {
                     processForcedBreak();
-                  } else {
-                    if (self.checkOverflowAndSaveEdgeAndBreakPosition(
-                            lastAfterNodeContext, null, true, breakAtTheEdge)) {
-                      // overflow
-                      nodeContext = (self.stopAtOverflow ?
-                                         lastAfterNodeContext || nodeContext :
-                                         nodeContext)
-                                        .modify();
-                      nodeContext.overflow = true;
-                    }
+                  } else if (self.checkOverflowAndSaveEdgeAndBreakPosition(
+                          lastAfterNodeContext, null, true, breakAtTheEdge)) {
+                    // overflow
+                    nodeContext = (self.stopAtOverflow ?
+                                        lastAfterNodeContext || nodeContext :
+                                        nodeContext)
+                                      .modify();
+                    nodeContext.overflow = true;
                   }
                   loopFrame.breakLoop();
                   return;
@@ -2742,7 +2710,6 @@ export class Column extends vtree.Container {
             }
           }
 
-          // TODO: what to return here??
           if (self.checkOverflowAndSaveEdgeAndBreakPosition(
                   lastAfterNodeContext, trailingEdgeContexts,
                   !self.stopAtOverflow, breakAtTheEdge)) {
@@ -2750,11 +2717,10 @@ export class Column extends vtree.Container {
               nodeContext = lastAfterNodeContext.modify();
               nodeContext.overflow = true;
             } else {
+              // TODO: what to return here??
             }
-          } else {
-            if (breaks.isForcedBreakValue(breakAtTheEdge)) {
-              self.pageBreakType = breakAtTheEdge;
-            }
+          } else if (breaks.isForcedBreakValue(breakAtTheEdge)) {
+            self.pageBreakType = breakAtTheEdge;
           }
           loopFrame.breakLoop();
         })
@@ -3180,32 +3146,26 @@ export class Column extends vtree.Container {
                   }
                   if (self.pageFloatLayoutContext.isInvalidated()) {
                     loopFrame.breakLoop();
+                  } else if (self.pageBreakType) {
+                    // explicit page break
+                    loopFrame.breakLoop(); // Loop end
+                  } else if (nodeContext && self.stopByOverflow(nodeContext)) {
+                    // overflow (implicit page break): back up and find a
+                    // page break
+                    overflownNodeContext = nodeContext;
+                    const bp = self.findAcceptableBreakPosition();
+                    nodeContext = bp.nodeContext;
+                    if (bp.breakPosition) {
+                      bp.breakPosition.breakPositionChosen(self);
+                    }
+                    loopFrame.breakLoop(); // Loop end
                   } else {
-                    // Loop end
-                    if (self.pageBreakType) {
-                      // explicit page break
-                      loopFrame.breakLoop();
+                    if (pending) {
+                      // Sync case
+                      pending = false;
                     } else {
-                      // Loop end
-                      if (nodeContext && self.stopByOverflow(nodeContext)) {
-                        // overflow (implicit page break): back up and find a
-                        // page break
-                        overflownNodeContext = nodeContext;
-                        const bp = self.findAcceptableBreakPosition();
-                        nodeContext = bp.nodeContext;
-                        if (bp.breakPosition) {
-                          bp.breakPosition.breakPositionChosen(self);
-                        }
-                        loopFrame.breakLoop();
-                      } else {
-                        if (pending) {
-                          // Sync case
-                          pending = false;
-                        } else {
-                          // Async case
-                          loopFrame.continueLoop();
-                        }
-                      }
+                      // Async case
+                      loopFrame.continueLoop();
                     }
                   }
                 });
@@ -3559,12 +3519,10 @@ export class BlockLayoutProcessor implements LayoutProcessor {
   layout(nodeContext, column, leadingEdge) {
     if (column.isFloatNodeContext(nodeContext)) {
       return column.layoutFloatOrFootnote(nodeContext);
+    } else if (column.isBreakable(nodeContext)) {
+      return column.layoutBreakableBlock(nodeContext);
     } else {
-      if (column.isBreakable(nodeContext)) {
-        return column.layoutBreakableBlock(nodeContext);
-      } else {
-        return column.layoutUnbreakable(nodeContext);
-      }
+      return column.layoutUnbreakable(nodeContext);
     }
   }
 
@@ -3628,21 +3586,17 @@ plugin.registerHook(
       const parent = nodeContext.parent;
       if (!parent && nodeContext.formattingContext) {
         return null;
+      } else if (parent &&
+          nodeContext.formattingContext !== parent.formattingContext) {
+        return null;
+      } else if (nodeContext.establishesBFC ||
+          !nodeContext.formattingContext &&
+              isBlock(
+                  display, position, floatSide, isRoot)) {
+        return new BlockFormattingContext(
+            parent ? parent.formattingContext : null);
       } else {
-        if (parent &&
-            nodeContext.formattingContext !== parent.formattingContext) {
-          return null;
-        } else {
-          if (nodeContext.establishesBFC ||
-              !nodeContext.formattingContext &&
-                  isBlock(
-                      display, position, floatSide, isRoot)) {
-            return new BlockFormattingContext(
-                parent ? parent.formattingContext : null);
-          } else {
-            return null;
-          }
-        }
+        return null;
       }
     });
 plugin.registerHook(

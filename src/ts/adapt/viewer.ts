@@ -439,10 +439,8 @@ export class Viewer {
       if (spread.left === target || spread.right === target) {
         this.showCurrent(evt.newPage);
       }
-    } else {
-      if (currentPage === evt.target) {
-        this.showCurrent(evt.newPage);
-      }
+    } else if (currentPage === evt.target) {
+      this.showCurrent(evt.newPage);
     }
   }
 
@@ -861,18 +859,14 @@ export class Viewer {
         const m = method;
         method = () => m.call(self.opfView, self.pagePosition);
       }
+    } else if (typeof command['epage'] == 'number') {
+      const epage = (command['epage'] as number);
+      method = () => self.opfView.navigateToEPage(epage);
+    } else if (typeof command['url'] == 'string') {
+      const url = (command['url'] as string);
+      method = () => self.opfView.navigateTo(url, self.pagePosition);
     } else {
-      if (typeof command['epage'] == 'number') {
-        const epage = (command['epage'] as number);
-        method = () => self.opfView.navigateToEPage(epage);
-      } else {
-        if (typeof command['url'] == 'string') {
-          const url = (command['url'] as string);
-          method = () => self.opfView.navigateTo(url, self.pagePosition);
-        } else {
-          return task.newResult(true);
-        }
-      }
+      return task.newResult(true);
     }
     const frame: task.Frame<boolean> = task.newFrame('moveTo');
     method.call(self.opfView).then((result) => {
@@ -988,29 +982,25 @@ export class Viewer {
               viewer.resize().then(() => {
                 loopFrame.continueLoop();
               });
-            } else {
-              if (viewer.needRefresh) {
-                if (viewer.currentPage) {
-                  viewer.showCurrent(viewer.currentPage).then(() => {
-                    loopFrame.continueLoop();
-                  });
-                }
-              } else {
-                if (command) {
-                  const cmd = command;
-                  command = null;
-                  viewer.runCommand(cmd).then(() => {
-                    loopFrame.continueLoop();
-                  });
-                } else {
-                  const frameInternal: task.Frame<boolean> =
-                      task.newFrame('waitForCommand');
-                  continuation = frameInternal.suspend(self);
-                  frameInternal.result().then(() => {
-                    loopFrame.continueLoop();
-                  });
-                }
+            } else if (viewer.needRefresh) {
+              if (viewer.currentPage) {
+                viewer.showCurrent(viewer.currentPage).then(() => {
+                  loopFrame.continueLoop();
+                });
               }
+            } else if (command) {
+              const cmd = command;
+              command = null;
+              viewer.runCommand(cmd).then(() => {
+                loopFrame.continueLoop();
+              });
+            } else {
+              const frameInternal: task.Frame<boolean> =
+                  task.newFrame('waitForCommand');
+              continuation = frameInternal.suspend(self);
+              frameInternal.result().then(() => {
+                loopFrame.continueLoop();
+              });
             }
           })
           .thenFinish(frame);

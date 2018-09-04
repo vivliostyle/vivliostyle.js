@@ -96,47 +96,37 @@ export const resolveEffectiveBreakValue =
     (first: string|null, second: string|null): string|null => {
       if (!first) {
         return second;
+      } else if (!second) {
+        return first;
       } else {
-        if (!second) {
+        const firstIsForcedBreakValue = isForcedBreakValue(first);
+        const secondIsForcedBreakValue = isForcedBreakValue(second);
+        if (firstIsForcedBreakValue && secondIsForcedBreakValue) {
+          switch (second) {
+            case 'column':
+
+              // "column" is the weakest value
+              return first;
+            case 'region':
+
+              // "region" is stronger than "column" but weaker than page
+              // values
+              return first === 'column' ? second : first;
+            default:
+
+              // page values are strongest
+              return second;
+          }
+        } else if (secondIsForcedBreakValue) {
+          return second;
+        } else if (firstIsForcedBreakValue) {
+          return first;
+        } else if (isAvoidBreakValue(second)) {
+          return second;
+        } else if (isAvoidBreakValue(first)) {
           return first;
         } else {
-          const firstIsForcedBreakValue = isForcedBreakValue(first);
-          const secondIsForcedBreakValue = isForcedBreakValue(second);
-          if (firstIsForcedBreakValue && secondIsForcedBreakValue) {
-            switch (second) {
-              case 'column':
-
-                // "column" is the weakest value
-                return first;
-              case 'region':
-
-                // "region" is stronger than "column" but weaker than page
-                // values
-                return first === 'column' ? second : first;
-              default:
-
-                // page values are strongest
-                return second;
-            }
-          } else {
-            if (secondIsForcedBreakValue) {
-              return second;
-            } else {
-              if (firstIsForcedBreakValue) {
-                return first;
-              } else {
-                if (isAvoidBreakValue(second)) {
-                  return second;
-                } else {
-                  if (isAvoidBreakValue(first)) {
-                    return first;
-                  } else {
-                    return second;
-                  }
-                }
-              }
-            }
-          }
+          return second;
         }
       }
     };

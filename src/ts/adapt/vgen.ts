@@ -161,10 +161,8 @@ export class PseudoelementStyler implements cssstyler.AbstractStyler {
       let r;
       if (pseudoName == 'first-letter') {
         nest = 0;
-      } else {
-        if ((r = pseudoName.match(/^first-([0-9]+)-lines$/)) != null) {
-          nest = r[1] - 0;
-        }
+      } else if ((r = pseudoName.match(/^first-([0-9]+)-lines$/)) != null) {
+        nest = r[1] - 0;
       }
       style['x-first-pseudo'] = new csscasc.CascadeValue(new css.Int(nest), 0);
     }
@@ -369,18 +367,16 @@ export class ViewFactory extends base.SimpleEventTarget implements
           let xmldoc = null;
           if (href) {
             xmldoc = shadowContext ? shadowContext.xmldoc : self.xmldoc;
-          } else {
-            if (shadowContext) {
-              if (shadowContext.owner.namespaceURI == base.NS.XHTML) {
-                href = shadowContext.owner.getAttribute('href');
-              } else {
-                href = shadowContext.owner.getAttributeNS(
-                    base.NS.XLINK, 'href');
-              }
-              xmldoc = shadowContext.parentShadow ?
-                  shadowContext.parentShadow.xmldoc :
-                  self.xmldoc;
+          } else if (shadowContext) {
+            if (shadowContext.owner.namespaceURI == base.NS.XHTML) {
+              href = shadowContext.owner.getAttribute('href');
+            } else {
+              href = shadowContext.owner.getAttributeNS(
+                  base.NS.XLINK, 'href');
             }
+            xmldoc = shadowContext.parentShadow ?
+                shadowContext.parentShadow.xmldoc :
+                self.xmldoc;
           }
           if (href) {
             href = base.resolveURL(href, xmldoc.url);
@@ -547,24 +543,20 @@ export class ViewFactory extends base.SimpleEventTarget implements
         if (value) {
           if (value instanceof css.Int) {
             props[name] = (value as css.Int).num;
-          } else {
-            if (value instanceof css.Ident) {
-              props[name] = (value as css.Ident).name;
-            } else {
-              if (value instanceof css.Numeric) {
-                const numericVal = (value as css.Numeric);
-                switch (numericVal.unit) {
-                  case 'dpi':
-                  case 'dpcm':
-                  case 'dppx':
-                    props[name] = numericVal.num *
-                        defaultUnitSizes[numericVal.unit];
-                    break;
-                }
-              } else {
-                props[name] = value;
-              }
+          } else if (value instanceof css.Ident) {
+            props[name] = (value as css.Ident).name;
+          } else if (value instanceof css.Numeric) {
+            const numericVal = (value as css.Numeric);
+            switch (numericVal.unit) {
+              case 'dpi':
+              case 'dpcm':
+              case 'dppx':
+                props[name] = numericVal.num *
+                    defaultUnitSizes[numericVal.unit];
+                break;
             }
+          } else {
+            props[name] = value;
           }
           delete computedStyle[name];
         }
@@ -835,18 +827,12 @@ export class ViewFactory extends base.SimpleEventTarget implements
             if (tag == 'html' || tag == 'body' || tag == 'script' ||
                 tag == 'link' || tag == 'meta') {
               tag = 'div';
-            } else {
-              if (tag == 'vide_') {
-                tag = 'video';
-              } else {
-                if (tag == 'audi_') {
-                  tag = 'audio';
-                } else {
-                  if (tag == 'object') {
-                    custom = !!self.customRenderer;
-                  }
-                }
-              }
+            } else if (tag == 'vide_') {
+              tag = 'video';
+            } else if (tag == 'audi_') {
+              tag = 'audio';
+            } else if (tag == 'object') {
+              custom = !!self.customRenderer;
             }
             if (element.getAttribute(PSEUDO_ATTR)) {
               if (elementStyle['content'] && elementStyle['content'].value &&
@@ -854,82 +840,72 @@ export class ViewFactory extends base.SimpleEventTarget implements
                 tag = 'img';
               }
             }
-          } else {
-            if (ns == base.NS.epub) {
-              tag = 'span';
-              ns = base.NS.XHTML;
-            } else {
-              if (ns == base.NS.FB2) {
-                ns = base.NS.XHTML;
-                if (tag == 'image') {
-                  tag = 'div';
-                  const imageRef =
-                      element.getAttributeNS(base.NS.XLINK, 'href');
-                  if (imageRef && imageRef.charAt(0) == '#') {
-                    const imageBinary = self.xmldoc.getElement(imageRef);
-                    if (imageBinary) {
-                      inner = self.createElement(ns, 'img');
-                      const mediaType =
-                          imageBinary.getAttribute('content-type') ||
-                          'image/jpeg';
-                      const innerSrc = `data:${mediaType};base64,${
-                          imageBinary.textContent.replace(/[ \t\n\t]/g, '')}`;
-                      fetchers.push(taskutil.loadElement(inner, innerSrc));
-                    }
-                  }
-                } else {
-                  tag = fb2Remap[tag];
-                }
-                if (!tag) {
-                  tag = self.nodeContext.inline ? 'span' : 'div';
-                }
-              } else {
-                if (ns == base.NS.NCX) {
-                  ns = base.NS.XHTML;
-                  if (tag == 'ncx' || tag == 'navPoint') {
-                    tag = 'div';
-                  } else {
-                    if (tag == 'navLabel') {
-                      // Cheat here. Translate source to HTML, so it will plug
-                      // in into the rest of the pipeline.
-                      tag = 'span';
-                      const navParent = element.parentNode;
-                      if (navParent) {
-                        // find the content element
-                        let href = null;
-                        for (let c = navParent.firstChild; c;
-                             c = c.nextSibling) {
-                          if (c.nodeType != 1) {
-                            continue;
-                          }
-                          const childElement = (c as Element);
-                          if (childElement.namespaceURI == base.NS.NCX &&
-                              childElement.localName == 'content') {
-                            href = childElement.getAttribute('src');
-                            break;
-                          }
-                        }
-                        if (href) {
-                          tag = 'a';
-                          element =
-                              element.ownerDocument.createElementNS(ns, 'a');
-                          element.setAttribute('href', href);
-                        }
-                      }
-                    } else {
-                      tag = 'span';
-                    }
-                  }
-                } else {
-                  if (ns == base.NS.SHADOW) {
-                    ns = base.NS.XHTML;
-                    tag = self.nodeContext.inline ? 'span' : 'div';
-                  } else {
-                    custom = !!self.customRenderer;
-                  }
+          } else if (ns == base.NS.epub) {
+            tag = 'span';
+            ns = base.NS.XHTML;
+          } else if (ns == base.NS.FB2) {
+            ns = base.NS.XHTML;
+            if (tag == 'image') {
+              tag = 'div';
+              const imageRef =
+                  element.getAttributeNS(base.NS.XLINK, 'href');
+              if (imageRef && imageRef.charAt(0) == '#') {
+                const imageBinary = self.xmldoc.getElement(imageRef);
+                if (imageBinary) {
+                  inner = self.createElement(ns, 'img');
+                  const mediaType =
+                      imageBinary.getAttribute('content-type') ||
+                      'image/jpeg';
+                  const innerSrc = `data:${mediaType};base64,${
+                      imageBinary.textContent.replace(/[ \t\n\t]/g, '')}`;
+                  fetchers.push(taskutil.loadElement(inner, innerSrc));
                 }
               }
+            } else {
+              tag = fb2Remap[tag];
             }
+            if (!tag) {
+              tag = self.nodeContext.inline ? 'span' : 'div';
+            }
+          } else if (ns == base.NS.NCX) {
+            ns = base.NS.XHTML;
+            if (tag == 'ncx' || tag == 'navPoint') {
+              tag = 'div';
+            } else if (tag == 'navLabel') {
+              // Cheat here. Translate source to HTML, so it will plug
+              // in into the rest of the pipeline.
+              tag = 'span';
+              const navParent = element.parentNode;
+              if (navParent) {
+                // find the content element
+                let href = null;
+                for (let c = navParent.firstChild; c;
+                     c = c.nextSibling) {
+                  if (c.nodeType != 1) {
+                    continue;
+                  }
+                  const childElement = (c as Element);
+                  if (childElement.namespaceURI == base.NS.NCX &&
+                      childElement.localName == 'content') {
+                    href = childElement.getAttribute('src');
+                    break;
+                  }
+                }
+                if (href) {
+                  tag = 'a';
+                  element =
+                      element.ownerDocument.createElementNS(ns, 'a');
+                  element.setAttribute('href', href);
+                }
+              }
+            } else {
+              tag = 'span';
+            }
+          } else if (ns == base.NS.SHADOW) {
+            ns = base.NS.XHTML;
+            tag = self.nodeContext.inline ? 'span' : 'div';
+          } else {
+            custom = !!self.customRenderer;
           }
           if (listItem) {
             if (firstTime) {
@@ -939,20 +915,14 @@ export class ViewFactory extends base.SimpleEventTarget implements
               display = css.ident.block;
               computedStyle['display'] = display;
             }
-          } else {
-            if (tag == 'body' || tag == 'li') {
-              tag = 'div';
-            } else {
-              if (tag == 'q') {
-                tag = 'span';
-              } else {
-                if (tag == 'a') {
-                  const hp = computedStyle['hyperlink-processing'];
-                  if (hp && hp.toString() != 'normal') {
-                    tag = 'span';
-                  }
-                }
-              }
+          } else if (tag == 'body' || tag == 'li') {
+            tag = 'div';
+          } else if (tag == 'q') {
+            tag = 'span';
+          } else if (tag == 'a') {
+            const hp = computedStyle['hyperlink-processing'];
+            if (hp && hp.toString() != 'normal') {
+              tag = 'span';
             }
           }
           if (computedStyle['behavior']) {
@@ -1053,13 +1023,11 @@ export class ViewFactory extends base.SimpleEventTarget implements
                       attributeValue = self.documentURLTransformer.transformURL(
                           attributeValue, self.xmldoc.url);
                     }
-                  } else {
-                    if (attributeName == 'srcset') {
-                      attributeValue =
-                          attributeValue.split(',')
-                              .map((value) => self.resolveURL(value.trim()))
-                              .join(',');
-                    }
+                  } else if (attributeName == 'srcset') {
+                    attributeValue =
+                        attributeValue.split(',')
+                            .map((value) => self.resolveURL(value.trim()))
+                            .join(',');
                   }
                   if (attributeName === 'poster' && tag === 'video' &&
                       ns === base.NS.XHTML && hasAutoWidth &&
@@ -1069,16 +1037,11 @@ export class ViewFactory extends base.SimpleEventTarget implements
                     fetchers.push(fetcher);
                     images.push({image, element: result, fetcher});
                   }
-                } else {
-                  // namespace declaration (in Firefox)
-                  if (attributeNS == 'http://www.w3.org/2000/xmlns/') {
-                    continue;
-                  } else {
-                    if (attributeNS == base.NS.XLINK) {
-                      if (attributeName == 'href') {
-                        attributeValue = self.resolveURL(attributeValue);
-                      }
-                    }
+                } else if (attributeNS == 'http://www.w3.org/2000/xmlns/') {
+                  continue; // namespace declaration (in Firefox)
+                } else if (attributeNS == base.NS.XLINK) {
+                  if (attributeName == 'href') {
+                    attributeValue = self.resolveURL(attributeValue);
                   }
                 }
                 if (ns == base.NS.SVG &&
@@ -1105,21 +1068,19 @@ export class ViewFactory extends base.SimpleEventTarget implements
                   // HTML img element should start loading only once all
                   // attributes are assigned.
                   delayedSrc = attributeValue;
+                } else if (attributeName == 'href' && tag == 'image' &&
+                    ns == base.NS.SVG &&
+                    attributeNS == base.NS.XLINK) {
+                  self.page.fetchers.push(
+                      taskutil.loadElement(result, attributeValue));
                 } else {
-                  if (attributeName == 'href' && tag == 'image' &&
-                      ns == base.NS.SVG &&
-                      attributeNS == base.NS.XLINK) {
-                    self.page.fetchers.push(
-                        taskutil.loadElement(result, attributeValue));
+                  // When the document is not XML document (e.g. non-XML HTML)
+                  // attributeNS can be null
+                  if (attributeNS) {
+                    result.setAttributeNS(
+                        attributeNS, attributeName, attributeValue);
                   } else {
-                    // When the document is not XML document (e.g. non-XML HTML)
-                    // attributeNS can be null
-                    if (attributeNS) {
-                      result.setAttributeNS(
-                          attributeNS, attributeName, attributeValue);
-                    } else {
-                      result.setAttribute(attributeName, attributeValue);
-                    }
+                    result.setAttribute(attributeName, attributeValue);
                   }
                 }
               }
@@ -1165,12 +1126,10 @@ export class ViewFactory extends base.SimpleEventTarget implements
                       frontEdgeUnforcedBreakBlackListVert :
                       frontEdgeUnforcedBreakBlackListHor;
                 }
-              } else {
-                if (atUnforcedBreak) {
-                  blackList = self.nodeContext.vertical ?
-                      frontEdgeUnforcedBreakBlackListVert :
-                      frontEdgeUnforcedBreakBlackListHor;
-                }
+              } else if (atUnforcedBreak) {
+                blackList = self.nodeContext.vertical ?
+                    frontEdgeUnforcedBreakBlackListVert :
+                    frontEdgeUnforcedBreakBlackListHor;
               }
               if (blackList) {
                 for (const propName in blackList) {
@@ -1265,98 +1224,84 @@ export class ViewFactory extends base.SimpleEventTarget implements
             const maxHeight = computedStyle['max-height'] || css.ident.none;
             if (maxWidth === css.ident.none && maxHeight === css.ident.none) {
               base.setCSSProperty(elem, 'max-width', `${scaledWidth}px`);
+            } else if (maxWidth !== css.ident.none && maxHeight === css.ident.none) {
+              base.setCSSProperty(elem, 'width', `${scaledWidth}px`);
+            } else if (maxWidth === css.ident.none &&
+                maxHeight !== css.ident.none) {
+              base.setCSSProperty(
+                  elem, 'height', `${scaledHeight}px`);
             } else {
-              if (maxWidth !== css.ident.none && maxHeight === css.ident.none) {
-                base.setCSSProperty(elem, 'width', `${scaledWidth}px`);
+              // maxWidth != none && maxHeight != none
+              asserts.assert(maxWidth.isNumeric());
+              asserts.assert(maxHeight.isNumeric());
+              const numericMaxWidth = (maxWidth as css.Numeric);
+              const numericMaxHeight = (maxHeight as css.Numeric);
+              if (numericMaxWidth.unit !== '%') {
+                base.setCSSProperty(
+                    elem, 'max-width',
+                    `${
+                        Math.min(
+                            scaledWidth,
+                            css.toNumber(
+                                numericMaxWidth, self.context))}px`);
+              } else if (numericMaxHeight.unit !== '%') {
+                base.setCSSProperty(
+                    elem, 'max-height',
+                    `${
+                        Math.min(
+                            scaledHeight,
+                            css.toNumber(
+                                numericMaxHeight, self.context))}px`);
               } else {
-                if (maxWidth === css.ident.none &&
-                    maxHeight !== css.ident.none) {
+                if (isVertical) {
                   base.setCSSProperty(
                       elem, 'height', `${scaledHeight}px`);
                 } else {
-                  // maxWidth != none && maxHeight != none
-                  asserts.assert(maxWidth.isNumeric());
-                  asserts.assert(maxHeight.isNumeric());
-                  const numericMaxWidth = (maxWidth as css.Numeric);
-                  const numericMaxHeight = (maxHeight as css.Numeric);
-                  if (numericMaxWidth.unit !== '%') {
-                    base.setCSSProperty(
-                        elem, 'max-width',
-                        `${
-                            Math.min(
-                                scaledWidth,
-                                css.toNumber(
-                                    numericMaxWidth, self.context))}px`);
-                  } else {
-                    if (numericMaxHeight.unit !== '%') {
-                      base.setCSSProperty(
-                          elem, 'max-height',
-                          `${
-                              Math.min(
-                                  scaledHeight,
-                                  css.toNumber(
-                                      numericMaxHeight, self.context))}px`);
-                    } else {
-                      if (isVertical) {
-                        base.setCSSProperty(
-                            elem, 'height', `${scaledHeight}px`);
-                      } else {
-                        base.setCSSProperty(
-                            elem, 'width', `${scaledWidth}px`);
-                      }
-                    }
-                  }
+                  base.setCSSProperty(
+                      elem, 'width', `${scaledWidth}px`);
                 }
               }
             }
-          } else {
-            if (imageResolution < 1) {
-              const minWidth = computedStyle['min-width'] || css.numericZero;
-              const minHeight = computedStyle['min-height'] || css.numericZero;
-              asserts.assert(minWidth.isNumeric());
-              asserts.assert(minWidth.isNumeric());
-              const numericMinWidth = (minWidth as css.Numeric);
-              const numericMinHeight = (minHeight as css.Numeric);
-              if (numericMinWidth.num === 0 && numericMinHeight.num === 0) {
+          } else if (imageResolution < 1) {
+            const minWidth = computedStyle['min-width'] || css.numericZero;
+            const minHeight = computedStyle['min-height'] || css.numericZero;
+            asserts.assert(minWidth.isNumeric());
+            asserts.assert(minWidth.isNumeric());
+            const numericMinWidth = (minWidth as css.Numeric);
+            const numericMinHeight = (minHeight as css.Numeric);
+            if (numericMinWidth.num === 0 && numericMinHeight.num === 0) {
+              base.setCSSProperty(
+                  elem, 'min-width', `${scaledWidth}px`);
+            } else if (numericMinWidth.num !== 0 && numericMinHeight.num === 0) {
+              base.setCSSProperty(elem, 'width', `${scaledWidth}px`);
+            } else if (numericMinWidth.num === 0 && numericMinHeight.num !== 0) {
+              base.setCSSProperty(
+                  elem, 'height', `${scaledHeight}px`);
+            } else {
+              // minWidth != 0 && minHeight != 0
+              if (numericMinWidth.unit !== '%') {
                 base.setCSSProperty(
-                    elem, 'min-width', `${scaledWidth}px`);
+                    elem, 'min-width',
+                    `${
+                        Math.max(
+                            scaledWidth,
+                            css.toNumber(
+                                numericMinWidth, self.context))}px`);
+              } else if (numericMinHeight.unit !== '%') {
+                base.setCSSProperty(
+                    elem, 'min-height',
+                    `${
+                        Math.max(
+                            scaledHeight,
+                            css.toNumber(
+                                numericMinHeight, self.context))}px`);
               } else {
-                if (numericMinWidth.num !== 0 && numericMinHeight.num === 0) {
-                  base.setCSSProperty(elem, 'width', `${scaledWidth}px`);
+                if (isVertical) {
+                  base.setCSSProperty(
+                      elem, 'height', `${scaledHeight}px`);
                 } else {
-                  if (numericMinWidth.num === 0 && numericMinHeight.num !== 0) {
-                    base.setCSSProperty(
-                        elem, 'height', `${scaledHeight}px`);
-                  } else {
-                    // minWidth != 0 && minHeight != 0
-                    if (numericMinWidth.unit !== '%') {
-                      base.setCSSProperty(
-                          elem, 'min-width',
-                          `${
-                              Math.max(
-                                  scaledWidth,
-                                  css.toNumber(
-                                      numericMinWidth, self.context))}px`);
-                    } else {
-                      if (numericMinHeight.unit !== '%') {
-                        base.setCSSProperty(
-                            elem, 'min-height',
-                            `${
-                                Math.max(
-                                    scaledHeight,
-                                    css.toNumber(
-                                        numericMinHeight, self.context))}px`);
-                      } else {
-                        if (isVertical) {
-                          base.setCSSProperty(
-                              elem, 'height', `${scaledHeight}px`);
-                        } else {
-                          base.setCSSProperty(
-                              elem, 'width', `${scaledWidth}px`);
-                        }
-                      }
-                    }
-                  }
+                  base.setCSSProperty(
+                      elem, 'width', `${scaledWidth}px`);
                 }
               }
             }
@@ -1414,12 +1359,10 @@ export class ViewFactory extends base.SimpleEventTarget implements
       if (repeatOnBreak === css.ident.auto) {
         if (computedStyle['display'] === css.ident.table_header_group) {
           repeatOnBreak = css.ident.header;
+        } else if (computedStyle['display'] === css.ident.table_footer_group) {
+          repeatOnBreak = css.ident.footer;
         } else {
-          if (computedStyle['display'] === css.ident.table_footer_group) {
-            repeatOnBreak = css.ident.footer;
-          } else {
-            repeatOnBreak = css.ident.none;
-          }
+          repeatOnBreak = css.ident.none;
         }
       }
       if (repeatOnBreak && repeatOnBreak !== css.ident.none) {
@@ -1559,17 +1502,13 @@ export class ViewFactory extends base.SimpleEventTarget implements
     if (nextSibling) {
       pos.sourceNode = nextSibling;
       pos.resetView();
+    } else if (pos.shadowSibling) {
+      pos = pos.shadowSibling;
+    } else if (contentNode) {
+      pos = null;
     } else {
-      if (pos.shadowSibling) {
-        pos = pos.shadowSibling;
-      } else {
-        if (contentNode) {
-          pos = null;
-        } else {
-          pos = pos.parent.modify();
-          pos.after = true;
-        }
-      }
+      pos = pos.parent.modify();
+      pos.after = true;
     }
     if (contentNode) {
       const r = new vtree.NodeContext(contentNode, parent, boxOffset);
@@ -1702,11 +1641,9 @@ export class ViewFactory extends base.SimpleEventTarget implements
       for (let i = 0; i < values.length; i++) {
         this.addImageFetchers(values[i]);
       }
-    } else {
-      if (bg instanceof css.URL) {
-        const url = (bg as css.URL).url;
-        this.page.fetchers.push(taskutil.loadElement(new Image(), url));
-      }
+    } else if (bg instanceof css.URL) {
+      const url = (bg as css.URL).url;
+      this.page.fetchers.push(taskutil.loadElement(new Image(), url));
     }
   }
 
@@ -1786,12 +1723,10 @@ export class ViewFactory extends base.SimpleEventTarget implements
       const text = nodeContext.viewNode.textContent;
       nodeContext.viewNode.textContent = text.substr(0, nodeOffset);
       offsetInNode += nodeOffset;
-    } else {
-      if (!after && nodeContext.viewNode && offsetInNode == 0) {
-        const parent = nodeContext.viewNode.parentNode;
-        if (parent) {
-          parent.removeChild(nodeContext.viewNode);
-        }
+    } else if (!after && nodeContext.viewNode && offsetInNode == 0) {
+      const parent = nodeContext.viewNode.parentNode;
+      if (parent) {
+        parent.removeChild(nodeContext.viewNode);
       }
     }
     const boxOffset = nodeContext.boxOffset + nodeOffset;

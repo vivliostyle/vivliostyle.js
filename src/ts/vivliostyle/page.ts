@@ -137,20 +137,17 @@ export const resolvePageSizeAndBleed =
         } else {
           // <page-size> || [ portrait | landscape ]
           const s = pageSizes[(val1 as css.Ident).name.toLowerCase()];
-
-          // portrait or landscape is specified alone. fallback to fit to the
-          // viewport (use default value)
           if (!s) {
+            // portrait or landscape is specified alone. fallback to fit to the
+            // viewport (use default value)
+          } else if (val2 && val2 === css.ident.landscape) {
+            // swap
+            pageSizeAndBleed.width = s.height;
+            pageSizeAndBleed.height = s.width;
           } else {
-            if (val2 && val2 === css.ident.landscape) {
-              // swap
-              pageSizeAndBleed.width = s.height;
-              pageSizeAndBleed.height = s.width;
-            } else {
-              // return {
-              pageSizeAndBleed.width = s.width;
-              pageSizeAndBleed.height = s.height;
-            }
+            // return {
+            pageSizeAndBleed.width = s.width;
+            pageSizeAndBleed.height = s.height;
           }
         }
       }
@@ -173,10 +170,8 @@ export const resolvePageSizeAndBleed =
             pageSizeAndBleed.bleed = new css.Numeric(6, 'pt');
           }
         }
-      } else {
-        if (bleed.value && bleed.value.isNumeric()) {
-          pageSizeAndBleed.bleed = (bleed.value as css.Numeric);
-        }
+      } else if (bleed.value && bleed.value.isNumeric()) {
+        pageSizeAndBleed.bleed = (bleed.value as css.Numeric);
       }
       return pageSizeAndBleed;
     };
@@ -383,11 +378,9 @@ export const createCrossMark =
         const side = CrossMarkPosition[key];
         if (side === position) {
           (mark as any).style[side] = `${offset}px`;
-        } else {
-          if (side !== opposite) {
-            (mark as any).style[side] = '0';
-            (mark as any).style[`margin-${side}`] = 'auto';
-          }
+        } else if (side !== opposite) {
+          (mark as any).style[side] = '0';
+          (mark as any).style[`margin-${side}`] = 'auto';
         }
       });
       return mark;
@@ -409,20 +402,14 @@ export const addPrinterMarks =
           value.values.forEach((v) => {
             if (v === css.ident.crop) {
               crop = true;
-            } else {
-              if (v === css.ident.cross) {
-                cross = true;
-              }
-            }
-          });
-        } else {
-          if (value === css.ident.crop) {
-            crop = true;
-          } else {
-            if (value === css.ident.cross) {
+            } else if (v === css.ident.cross) {
               cross = true;
             }
-          }
+          });
+        } else if (value === css.ident.crop) {
+          crop = true;
+        } else if (value === css.ident.cross) {
+          cross = true;
         }
       }
       if (!crop && !cross) {
@@ -1165,45 +1152,31 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
                   (availableSize - minContentSizeSum) *
                       (xOuterMaxContentSize - xOuterMinContentSize) /
                       (maxContentSizeSum - minContentSizeSum);
-            } else {
-              if (minContentSizeSum > 0) {
-                result.xSize =
-                    availableSize * xOuterMinContentSize / minContentSizeSum;
-              }
+            } else if (minContentSizeSum > 0) {
+              result.xSize =
+                  availableSize * xOuterMinContentSize / minContentSizeSum;
             }
           }
           if (result.xSize > 0) {
             result.ySize = availableSize - result.xSize;
           }
-        } else {
-          if (xOuterMaxContentSize > 0) {
-            result.xSize = availableSize;
-          } else {
-            if (yOuterMaxContentSize > 0) {
-              result.ySize = availableSize;
-            }
-          }
-        }
-      } else {
-        if (x.hasAutoSize()) {
-          result.xSize = Math.max(availableSize - y.getOuterSize(), 0);
-        } else {
-          if (y.hasAutoSize()) {
-            result.ySize = Math.max(availableSize - x.getOuterSize(), 0);
-          }
-        }
-      }
-    } else {
-      if (x) {
-        if (x.hasAutoSize()) {
+        } else if (xOuterMaxContentSize > 0) {
           result.xSize = availableSize;
+        } else if (yOuterMaxContentSize > 0) {
+          result.ySize = availableSize;
         }
-      } else {
-        if (y) {
-          if (y.hasAutoSize()) {
-            result.ySize = availableSize;
-          }
-        }
+      } else if (x.hasAutoSize()) {
+        result.xSize = Math.max(availableSize - y.getOuterSize(), 0);
+      } else if (y.hasAutoSize()) {
+        result.ySize = Math.max(availableSize - x.getOuterSize(), 0);
+      }
+    } else if (x) {
+      if (x.hasAutoSize()) {
+        result.xSize = availableSize;
+      }
+    } else if (y) {
+      if (y.hasAutoSize()) {
+        result.ySize = availableSize;
       }
     }
     return result;
@@ -1525,12 +1498,10 @@ export class PageRulePartitionInstance extends pm.PartitionInstance {
       if (!marginStart && !marginEnd) {
         marginStart = expr.mul(scope, remains, new expr.Const(scope, 0.5));
         marginEnd = marginStart;
+      } else if (marginStart) {
+        marginEnd = expr.sub(scope, remains, marginStart);
       } else {
-        if (marginStart) {
-          marginEnd = expr.sub(scope, remains, marginStart);
-        } else {
-          marginStart = expr.sub(scope, remains, marginEnd);
-        }
+        marginStart = expr.sub(scope, remains, marginEnd);
       }
     }
 
@@ -1595,14 +1566,10 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
     let flexAlign: string|null = null;
     if (verticalAlign === css.getName('middle')) {
       flexAlign = 'center';
-    } else {
-      if (verticalAlign === css.getName('top')) {
-        flexAlign = 'flex-start';
-      } else {
-        if (verticalAlign === css.getName('bottom')) {
-          flexAlign = 'flex-end';
-        }
-      }
+    } else if (verticalAlign === css.getName('top')) {
+      flexAlign = 'flex-start';
+    } else if (verticalAlign === css.getName('bottom')) {
+      flexAlign = 'flex-end';
     }
     if (flexAlign) {
       base.setCSSProperty(
@@ -1633,43 +1600,41 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
     if (this.boxInfo.positionAlongVariableDimension ===
         MarginBoxPositionAlongVariableDimension.START) {
       style[startSide] = new css.Expr(startOffset);
-    } else {
-      if (extent) {
-        const marginStart =
-            pm.toExprZero(scope, style[`margin-${startSide}`], availableExtent);
-        const marginEnd =
-            pm.toExprZero(scope, style[`margin-${endSide}`], availableExtent);
-        const paddingStart = pm.toExprZero(
-            scope, style[`padding-${startSide}`], availableExtent);
-        const paddingEnd =
-            pm.toExprZero(scope, style[`padding-${endSide}`], availableExtent);
-        const borderStartWidth = pm.toExprZeroBorder(
-            scope, style[`border-${startSide}-width`],
-            style[`border-${startSide}-style`], availableExtent);
-        const borderEndWidth = pm.toExprZeroBorder(
-            scope, style[`border-${endSide}-width`],
-            style[`border-${endSide}-style`], availableExtent);
-        const outerExtent = expr.add(
-            scope, extent,
-            expr.add(
-                scope, expr.add(scope, paddingStart, paddingEnd),
-                expr.add(
-                    scope, expr.add(scope, borderStartWidth, borderEndWidth),
-                    expr.add(scope, marginStart, marginEnd))));
-        switch (this.boxInfo.positionAlongVariableDimension) {
-          case MarginBoxPositionAlongVariableDimension.CENTER:
-            style[startSide] = new css.Expr(expr.add(
-                scope, startOffset,
-                expr.div(
-                    scope, expr.sub(scope, availableExtent, outerExtent),
-                    new expr.Const(scope, 2))));
-            break;
-          case MarginBoxPositionAlongVariableDimension.END:
-            style[startSide] = new css.Expr(expr.sub(
-                scope, expr.add(scope, startOffset, availableExtent),
-                outerExtent));
-            break;
-        }
+    } else if (extent) {
+      const marginStart =
+          pm.toExprZero(scope, style[`margin-${startSide}`], availableExtent);
+      const marginEnd =
+          pm.toExprZero(scope, style[`margin-${endSide}`], availableExtent);
+      const paddingStart = pm.toExprZero(
+          scope, style[`padding-${startSide}`], availableExtent);
+      const paddingEnd =
+          pm.toExprZero(scope, style[`padding-${endSide}`], availableExtent);
+      const borderStartWidth = pm.toExprZeroBorder(
+          scope, style[`border-${startSide}-width`],
+          style[`border-${startSide}-style`], availableExtent);
+      const borderEndWidth = pm.toExprZeroBorder(
+          scope, style[`border-${endSide}-width`],
+          style[`border-${endSide}-style`], availableExtent);
+      const outerExtent = expr.add(
+          scope, extent,
+          expr.add(
+              scope, expr.add(scope, paddingStart, paddingEnd),
+              expr.add(
+                  scope, expr.add(scope, borderStartWidth, borderEndWidth),
+                  expr.add(scope, marginStart, marginEnd))));
+      switch (this.boxInfo.positionAlongVariableDimension) {
+        case MarginBoxPositionAlongVariableDimension.CENTER:
+          style[startSide] = new css.Expr(expr.add(
+              scope, startOffset,
+              expr.div(
+                  scope, expr.sub(scope, availableExtent, outerExtent),
+                  new expr.Const(scope, 2))));
+          break;
+        case MarginBoxPositionAlongVariableDimension.END:
+          style[startSide] = new css.Expr(expr.sub(
+              scope, expr.add(scope, startOffset, availableExtent),
+              outerExtent));
+          break;
       }
     }
   }
@@ -1747,26 +1712,20 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
           result.marginOutside !== null) {
         result.extent = pageMarginValue - borderAndPadding -
             result.marginInside - result.marginOutside;
+      } else if (result.extent !== null && result.marginInside === null &&
+          result.marginOutside !== null) {
+        result.marginInside = pageMarginValue - borderAndPadding -
+            result.extent - result.marginOutside;
+      } else if (result.extent !== null && result.marginInside !== null &&
+          result.marginOutside === null) {
+        result.marginOutside = pageMarginValue - borderAndPadding -
+            result.extent - result.marginInside;
+      } else if (result.extent === null) {
+        result.marginInside = result.marginOutside = 0;
+        result.extent = pageMarginValue - borderAndPadding;
       } else {
-        if (result.extent !== null && result.marginInside === null &&
-            result.marginOutside !== null) {
-          result.marginInside = pageMarginValue - borderAndPadding -
-              result.extent - result.marginOutside;
-        } else {
-          if (result.extent !== null && result.marginInside !== null &&
-              result.marginOutside === null) {
-            result.marginOutside = pageMarginValue - borderAndPadding -
-                result.extent - result.marginInside;
-          } else {
-            if (result.extent === null) {
-              result.marginInside = result.marginOutside = 0;
-              result.extent = pageMarginValue - borderAndPadding;
-            } else {
-              result.marginInside = result.marginOutside =
-                  (pageMarginValue - borderAndPadding - result.extent) / 2;
-            }
-          }
-        }
+        result.marginInside = result.marginOutside =
+            (pageMarginValue - borderAndPadding - result.extent) / 2;
       }
       return result;
     }
@@ -1787,11 +1746,9 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
     if (insideName === 'left') {
       style['left'] =
           new css.Expr(expr.add(scope, dim.marginLeft, dim.borderBoxWidth));
-    } else {
-      if (insideName === 'top') {
-        style['top'] =
-            new css.Expr(expr.add(scope, dim.marginTop, dim.borderBoxHeight));
-      }
+    } else if (insideName === 'top') {
+      style['top'] =
+          new css.Expr(expr.add(scope, dim.marginTop, dim.borderBoxHeight));
     }
   }
 
@@ -1805,14 +1762,12 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
     if (this.boxInfo.isInLeftColumn) {
       this.positionAndSizeAlongFixedDimension(
           {inside: 'right', outside: 'left', extent: 'width'}, dim);
+    } else if (this.boxInfo.isInRightColumn) {
+      this.positionAndSizeAlongFixedDimension(
+          {inside: 'left', outside: 'right', extent: 'width'}, dim);
     } else {
-      if (this.boxInfo.isInRightColumn) {
-        this.positionAndSizeAlongFixedDimension(
-            {inside: 'left', outside: 'right', extent: 'width'}, dim);
-      } else {
-        this.positionAlongVariableDimension(
-            {start: 'left', end: 'right', extent: 'width'}, dim);
-      }
+      this.positionAlongVariableDimension(
+          {start: 'left', end: 'right', extent: 'width'}, dim);
     }
   }
 
@@ -1826,14 +1781,12 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
     if (this.boxInfo.isInTopRow) {
       this.positionAndSizeAlongFixedDimension(
           {inside: 'bottom', outside: 'top', extent: 'height'}, dim);
+    } else if (this.boxInfo.isInBottomRow) {
+      this.positionAndSizeAlongFixedDimension(
+          {inside: 'top', outside: 'bottom', extent: 'height'}, dim);
     } else {
-      if (this.boxInfo.isInBottomRow) {
-        this.positionAndSizeAlongFixedDimension(
-            {inside: 'top', outside: 'bottom', extent: 'height'}, dim);
-      } else {
-        this.positionAlongVariableDimension(
-            {start: 'top', end: 'bottom', extent: 'height'}, dim);
-      }
+      this.positionAlongVariableDimension(
+          {start: 'top', end: 'bottom', extent: 'height'}, dim);
     }
   }
 
@@ -1856,20 +1809,14 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
     if (!boxInfo.isInLeftColumn && !boxInfo.isInRightColumn) {
       if (boxInfo.isInTopRow) {
         marginBoxes.top[name] = container;
-      } else {
-        if (boxInfo.isInBottomRow) {
-          marginBoxes.bottom[name] = container;
-        }
+      } else if (boxInfo.isInBottomRow) {
+        marginBoxes.bottom[name] = container;
       }
-    } else {
-      if (!boxInfo.isInTopRow && !boxInfo.isInBottomRow) {
-        if (boxInfo.isInLeftColumn) {
-          marginBoxes.left[name] = container;
-        } else {
-          if (boxInfo.isInRightColumn) {
-            marginBoxes.right[name] = container;
-          }
-        }
+    } else if (!boxInfo.isInTopRow && !boxInfo.isInBottomRow) {
+      if (boxInfo.isInLeftColumn) {
+        marginBoxes.left[name] = container;
+      } else if (boxInfo.isInRightColumn) {
+        marginBoxes.right[name] = container;
       }
     }
   }
@@ -2359,39 +2306,37 @@ export class PageParserHandler extends
       Object.keys(pageProps).forEach((selector) => {
         csscasc.setProp(pageProps[selector], name, cascVal);
       });
-    } else {
-      if (name === 'size') {
-        const noPageSelectorProps = pageProps[''];
-        this.currentPageSelectors.forEach(function(s) {
-          // update specificity to reflect the specificity of the selector
-          let result = new csscasc.CascadeValue(
-              cascVal.value, cascVal.priority + s.specificity);
-          const selector = s.selectors ? s.selectors.join('') : '';
-          let props = pageProps[selector];
-          if (!props) {
-            // since no properties for this selector have been stored before,
-            // we can simply set the 'size', 'bleed' and 'marks' properties.
-            props = pageProps[selector] = ({} as csscasc.ElementStyle);
-            csscasc.setProp(props, name, result);
-            if (noPageSelectorProps) {
-              ['bleed', 'marks'].forEach((n) => {
-                if (noPageSelectorProps[n]) {
-                  csscasc.setProp(props, n, noPageSelectorProps[n]);
-                }
-              }, this);
-            }
-          } else {
-            // consider specificity when setting 'size' property.
-            // we don't have to set 'bleed' and 'marks' since they should have
-            // been already updated.
-            const prevCascVal = csscasc.getProp(props, name);
-            result = prevCascVal ?
-                csscasc.cascadeValues(null, result, prevCascVal) :
-                result;
-            csscasc.setProp(props, name, result);
+    } else if (name === 'size') {
+      const noPageSelectorProps = pageProps[''];
+      this.currentPageSelectors.forEach(function(s) {
+        // update specificity to reflect the specificity of the selector
+        let result = new csscasc.CascadeValue(
+            cascVal.value, cascVal.priority + s.specificity);
+        const selector = s.selectors ? s.selectors.join('') : '';
+        let props = pageProps[selector];
+        if (!props) {
+          // since no properties for this selector have been stored before,
+          // we can simply set the 'size', 'bleed' and 'marks' properties.
+          props = pageProps[selector] = ({} as csscasc.ElementStyle);
+          csscasc.setProp(props, name, result);
+          if (noPageSelectorProps) {
+            ['bleed', 'marks'].forEach((n) => {
+              if (noPageSelectorProps[n]) {
+                csscasc.setProp(props, n, noPageSelectorProps[n]);
+              }
+            }, this);
           }
-        }, this);
-      }
+        } else {
+          // consider specificity when setting 'size' property.
+          // we don't have to set 'bleed' and 'marks' since they should have
+          // been already updated.
+          const prevCascVal = csscasc.getProp(props, name);
+          result = prevCascVal ?
+              csscasc.cascadeValues(null, result, prevCascVal) :
+              result;
+          csscasc.setProp(props, name, result);
+        }
+      }, this);
     }
   }
 

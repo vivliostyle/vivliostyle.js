@@ -936,10 +936,8 @@ export class ChunkPosition {
           return false;
         }
       }
-    } else {
-      if (other.floats) {
-        return false;
-      }
+    } else if (other.floats) {
+      return false;
     }
     return true;
   }

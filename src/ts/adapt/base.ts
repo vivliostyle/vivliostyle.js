@@ -249,13 +249,11 @@ export class PriorityQueue {
                   (this.queue[childIndex] as Comparable)) > 0) {
             childIndex++;
           }
+        } else if (childIndex + 1 < size &&
+            this.queue[childIndex + 1].compare(curr) > 0) {
+          childIndex++;
         } else {
-          if (childIndex + 1 < size &&
-              this.queue[childIndex + 1].compare(curr) > 0) {
-            childIndex++;
-          } else {
-            break;
-          }
+          break;
         }
         this.queue[index] = this.queue[childIndex];
         index = childIndex;

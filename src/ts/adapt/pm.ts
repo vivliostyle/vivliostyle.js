@@ -317,12 +317,10 @@ export const toExprZeroAuto =
     (scope: expr.LexicalScope, val: css.Val, ref: expr.Val): expr.Val => {
       if (!val) {
         return scope.zero;
+      } else if (val === css.ident.auto) {
+        return null;
       } else {
-        if (val === css.ident.auto) {
-          return null;
-        } else {
-          return val.toExpr(scope, ref);
-        }
+        return val.toExpr(scope, ref);
       }
     };
 
@@ -469,16 +467,14 @@ export class PageBoxInstance {
       let altName;
       if (name == 'extent') {
         altName = this.vertical ? 'width' : 'height';
+      } else if (name == 'measure') {
+        altName = this.vertical ? 'height' : 'width';
       } else {
-        if (name == 'measure') {
-          altName = this.vertical ? 'height' : 'width';
-        } else {
-          const map =
-              this.vertical ? csscasc.couplingMapVert : csscasc.couplingMapHor;
-          altName = name;
-          for (const key in map) {
-            altName = altName.replace(key, map[key]);
-          }
+        const map =
+            this.vertical ? csscasc.couplingMapVert : csscasc.couplingMapHor;
+        altName = name;
+        for (const key in map) {
+          altName = altName.replace(key, map[key]);
         }
       }
       if (altName != name) {
@@ -607,15 +603,11 @@ export class PageBoxInstance {
       if (!left && !width) {
         width = this.autoWidth;
         this.isAutoWidth = true;
-      } else {
-        if (!left && !right) {
-          left = scope.zero;
-        } else {
-          if (!width && !right) {
-            width = this.autoWidth;
-            this.isAutoWidth = true;
-          }
-        }
+      } else if (!left && !right) {
+        left = scope.zero;
+      } else if (!width && !right) {
+        width = this.autoWidth;
+        this.isAutoWidth = true;
       }
       const remains = expr.sub(
           scope, parentWidth,
@@ -638,14 +630,10 @@ export class PageBoxInstance {
       }
       if (!left) {
         left = expr.sub(scope, remains, expr.add(scope, right, width));
-      } else {
-        if (!width) {
-          width = expr.sub(scope, remains, expr.add(scope, left, right));
-        } else {
-          if (!right) {
-            right = expr.sub(scope, remains, expr.add(scope, left, width));
-          }
-        }
+      } else if (!width) {
+        width = expr.sub(scope, remains, expr.add(scope, left, right));
+      } else if (!right) {
+        right = expr.sub(scope, remains, expr.add(scope, left, width));
       }
     }
 
@@ -728,15 +716,11 @@ export class PageBoxInstance {
       if (!top && !height) {
         height = this.autoHeight;
         this.isAutoHeight = true;
-      } else {
-        if (!top && !bottom) {
-          top = scope.zero;
-        } else {
-          if (!height && !bottom) {
-            height = this.autoHeight;
-            this.isAutoHeight = true;
-          }
-        }
+      } else if (!top && !bottom) {
+        top = scope.zero;
+      } else if (!height && !bottom) {
+        height = this.autoHeight;
+        this.isAutoHeight = true;
       }
       const remains = expr.sub(
           scope, parentHeight,
@@ -759,14 +743,10 @@ export class PageBoxInstance {
       }
       if (!top) {
         top = expr.sub(scope, remains, expr.add(scope, bottom, height));
-      } else {
-        if (!height) {
-          height = expr.sub(scope, remains, expr.add(scope, bottom, top));
-        } else {
-          if (!bottom) {
-            bottom = expr.sub(scope, remains, expr.add(scope, top, height));
-          }
-        }
+      } else if (!height) {
+        height = expr.sub(scope, remains, expr.add(scope, bottom, top));
+      } else if (!bottom) {
+        bottom = expr.sub(scope, remains, expr.add(scope, top, height));
       }
     }
 

@@ -300,12 +300,10 @@ function convertSingleDocumentOptions(
   }
   if (Array.isArray(singleDocumentOptions)) {
     return singleDocumentOptions.map(convert);
+  } else if (singleDocumentOptions) {
+    return [convert(singleDocumentOptions)];
   } else {
-    if (singleDocumentOptions) {
-      return [convert(singleDocumentOptions)];
-    } else {
-      return null;
-    }
+    return null;
   }
 }
 

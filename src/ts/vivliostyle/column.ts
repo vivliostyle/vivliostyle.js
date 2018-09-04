@@ -245,21 +245,19 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
   hasNextCandidate(candidates) {
     if (candidates.length === 1) {
       return true;
+    } else if (this.foundUpperBound) {
+      return canReduceContainerSize(candidates);
     } else {
-      if (this.foundUpperBound) {
-        return canReduceContainerSize(candidates);
-      } else {
-        const lastCandidate = candidates[candidates.length - 1];
-        if (this.checkPosition(lastCandidate.layoutResult.position)) {
-          if (!isLastColumnLongerThanAnyOtherColumn(
-                  lastCandidate.layoutResult.columns)) {
-            this.foundUpperBound = true;
-            return true;
-          }
+      const lastCandidate = candidates[candidates.length - 1];
+      if (this.checkPosition(lastCandidate.layoutResult.position)) {
+        if (!isLastColumnLongerThanAnyOtherColumn(
+                lastCandidate.layoutResult.columns)) {
+          this.foundUpperBound = true;
+          return true;
         }
-        return getBlockSize(this.layoutContainer) <
-            this.originalContainerBlockSize;
       }
+      return getBlockSize(this.layoutContainer) <
+          this.originalContainerBlockSize;
     }
   }
 
@@ -340,14 +338,12 @@ export const createColumnBalancer =
           return new BalanceLastColumnBalancer(
               columnGenerator, regionPageFloatLayoutContext, layoutContainer,
               columnCount);
+        } else if (columnFill === css.ident.balance_all) {
+          return new BalanceNonLastColumnBalancer(
+              columnGenerator, regionPageFloatLayoutContext, layoutContainer);
         } else {
-          if (columnFill === css.ident.balance_all) {
-            return new BalanceNonLastColumnBalancer(
-                columnGenerator, regionPageFloatLayoutContext, layoutContainer);
-          } else {
-            asserts.assert(columnFill === css.ident.balance);
-            return null;
-          }
+          asserts.assert(columnFill === css.ident.balance);
+          return null;
         }
       }
     };

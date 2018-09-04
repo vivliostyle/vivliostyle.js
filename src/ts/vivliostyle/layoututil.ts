@@ -93,36 +93,34 @@ export class LayoutIterator {
               } else {
                 r = strategy.startNonDisplayableNode(state);
               }
-            } else {
-              if (state.nodeContext.viewNode.nodeType !== 1) {
-                if (vtree.canIgnore(
-                        state.nodeContext.viewNode,
-                        state.nodeContext.whitespace)) {
-                  if (state.nodeContext.after) {
-                    r = strategy.afterIgnoredTextNode(state);
-                  } else {
-                    r = strategy.startIgnoredTextNode(state);
-                  }
+            } else if (state.nodeContext.viewNode.nodeType !== 1) {
+              if (vtree.canIgnore(
+                      state.nodeContext.viewNode,
+                      state.nodeContext.whitespace)) {
+                if (state.nodeContext.after) {
+                  r = strategy.afterIgnoredTextNode(state);
                 } else {
-                  if (state.nodeContext.after) {
-                    r = strategy.afterNonElementNode(state);
-                  } else {
-                    r = strategy.startNonElementNode(state);
-                  }
+                  r = strategy.startIgnoredTextNode(state);
                 }
               } else {
-                if (state.nodeContext.inline) {
-                  if (state.nodeContext.after) {
-                    r = strategy.afterInlineElementNode(state);
-                  } else {
-                    r = strategy.startInlineElementNode(state);
-                  }
+                if (state.nodeContext.after) {
+                  r = strategy.afterNonElementNode(state);
                 } else {
-                  if (state.nodeContext.after) {
-                    r = strategy.afterNonInlineElementNode(state);
-                  } else {
-                    r = strategy.startNonInlineElementNode(state);
-                  }
+                  r = strategy.startNonElementNode(state);
+                }
+              }
+            } else {
+              if (state.nodeContext.inline) {
+                if (state.nodeContext.after) {
+                  r = strategy.afterInlineElementNode(state);
+                } else {
+                  r = strategy.startInlineElementNode(state);
+                }
+              } else {
+                if (state.nodeContext.after) {
+                  r = strategy.afterNonInlineElementNode(state);
+                } else {
+                  r = strategy.startNonInlineElementNode(state);
                 }
               }
             }
@@ -144,13 +142,11 @@ export class LayoutIterator {
                 }
               });
               return;
+            } else if (state.break) {
+              loopFrame.breakLoop();
+              return;
             } else {
-              if (state.break) {
-                loopFrame.breakLoop();
-                return;
-              } else {
-                state.nodeContext = nextResult.get();
-              }
+              state.nodeContext = nextResult.get();
             }
           }
           strategy.finish(state);

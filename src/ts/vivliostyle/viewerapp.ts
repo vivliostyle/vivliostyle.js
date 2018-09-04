@@ -68,80 +68,59 @@ export const keydown = (evt: KeyboardEvent): void => {
   if (key === 'End' || keyIdentifier === 'End') {
     sendCommand({'a': 'moveTo', 'where': 'last'});
     evt.preventDefault();
-  } else {
-    if (key === 'Home' || keyIdentifier === 'Home') {
-      sendCommand({'a': 'moveTo', 'where': 'first'});
-      evt.preventDefault();
-    } else {
-      if (key === 'ArrowUp' || key === 'Up' || keyIdentifier === 'Up') {
-        sendCommand({'a': 'moveTo', 'where': 'previous'});
-        evt.preventDefault();
-      } else {
-        if (key === 'ArrowDown' || key === 'Down' || keyIdentifier === 'Down') {
-          sendCommand({'a': 'moveTo', 'where': 'next'});
-          evt.preventDefault();
-        } else {
-          if (key === 'ArrowRight' || key === 'Right' ||
-              keyIdentifier === 'Right') {
-            navigateToRightPage();
-            evt.preventDefault();
-          } else {
-            if (key === 'ArrowLeft' || key === 'Left' ||
-                keyIdentifier === 'Left') {
-              navigateToLeftPage();
-              evt.preventDefault();
-            } else {
-              /*
-                       } else if (key === "n" || keyIdentifier === "U+004E") {
-                       // N - night toggle
-                       self.pref.nightMode = !self.pref.nightMode;
-                       self.viewport = null;
-                       self.resize().thenFinish(frame);
-                       } else if (key === "v" || keyIdentifier === "U+0056") {
-                       self.pref.horizontal = !self.pref.horizontal;
-                       self.viewport = null;
-                       self.resize().thenFinish(frame);
-                       */
-              if (key === '0' || keyIdentifier === 'U+0030') {
-                sendCommand(
-                    {'a': 'configure', 'fontSize': Math.round(fontSize)});
-                evt.preventDefault();
-              } else {
-                if (key === 't' || keyIdentifier === 'U+0054') {
-                  sendCommand({'a': 'toc', 'v': 'toggle', 'autohide': true});
-                  evt.preventDefault();
-                } else {
-                  /* workaround for Chrome for Windows */
-                  if (key === '+' || key === 'Add' ||
-                      keyIdentifier === 'U+002B' ||
-                      keyIdentifier === 'U+00BB' ||
-                      keyIdentifier === 'U+004B' &&
-                          location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD) {
-                    fontSize *= 1.2;
-                    sendCommand(
-                        {'a': 'configure', 'fontSize': Math.round(fontSize)});
-                    evt.preventDefault();
-                  } else {
-                    /* workaround for Chrome for Windows */
-                    if (key === '-' || key === 'Subtract' ||
-                        keyIdentifier === 'U+002D' ||
-                        keyIdentifier === 'U+00BD' ||
-                        keyIdentifier === 'U+004D' &&
-                            location ===
-                                KeyboardEvent.DOM_KEY_LOCATION_NUMPAD) {
-                      fontSize /= 1.2;
-                      sendCommand(
-                          {'a': 'configure', 'fontSize': Math.round(fontSize)});
-                      evt.preventDefault();
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+  } else if (key === 'Home' || keyIdentifier === 'Home') {
+    sendCommand({'a': 'moveTo', 'where': 'first'});
+    evt.preventDefault();
+  } else if (key === 'ArrowUp' || key === 'Up' || keyIdentifier === 'Up') {
+    sendCommand({'a': 'moveTo', 'where': 'previous'});
+    evt.preventDefault();
+  } else if (key === 'ArrowDown' || key === 'Down' || keyIdentifier === 'Down') {
+    sendCommand({'a': 'moveTo', 'where': 'next'});
+    evt.preventDefault();
+  } else if (key === 'ArrowRight' || key === 'Right' || keyIdentifier === 'Right') {
+    navigateToRightPage();
+    evt.preventDefault();
+  } else if (key === 'ArrowLeft' || key === 'Left' || keyIdentifier === 'Left') {
+    navigateToLeftPage();
+    evt.preventDefault();
+  } else if (key === '0' || keyIdentifier === 'U+0030') {
+    sendCommand(
+        {'a': 'configure', 'fontSize': Math.round(fontSize)});
+    evt.preventDefault();
+  /*
+  } else if (key === "n" || keyIdentifier === "U+004E") {
+  // N - night toggle
+  self.pref.nightMode = !self.pref.nightMode;
+  self.viewport = null;
+  self.resize().thenFinish(frame);
+  } else if (key === "v" || keyIdentifier === "U+0056") {
+  self.pref.horizontal = !self.pref.horizontal;
+  self.viewport = null;
+  self.resize().thenFinish(frame);
+  */
+  } else if (key === 't' || keyIdentifier === 'U+0054') {
+    sendCommand({'a': 'toc', 'v': 'toggle', 'autohide': true});
+    evt.preventDefault();
+  } else if (key === '+' || key === 'Add' ||
+      keyIdentifier === 'U+002B' ||
+      keyIdentifier === 'U+00BB' ||
+      (keyIdentifier === 'U+004B' &&
+          location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD)) {
+    /* workaround for Chrome for Windows */
+    fontSize *= 1.2;
+    sendCommand(
+        {'a': 'configure', 'fontSize': Math.round(fontSize)});
+    evt.preventDefault();
+  } else if (key === '-' || key === 'Subtract' ||
+      keyIdentifier === 'U+002D' ||
+      keyIdentifier === 'U+00BD' ||
+      (keyIdentifier === 'U+004D' &&
+          location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD)) {
+    /* workaround for Chrome for Windows */
+    fontSize /= 1.2;
+    sendCommand(
+        {'a': 'configure', 'fontSize': Math.round(fontSize)});
+    evt.preventDefault();
   }
 };
 
@@ -158,59 +137,51 @@ export const touch = (evt: TouchEvent): void => {
       touchActive = true;
       touchX = x;
       touchY = y;
-    } else {
-      if (touchActive) {
-        const dx = x - touchX;
-        const dy = y - touchY;
-        if (evt.type == 'touchend') {
-          touchActive = false;
-        }
-        if (Math.abs(dy) < 0.5 * Math.abs(dx) && Math.abs(dx) > 15) {
-          touchActive = false;
-          if (dx > 0) {
-            sendCommand({
-              'a': 'moveTo',
-              'where':
-                  currentPageProgression === constants.PageProgression.LTR ?
-                  'previous' :
-                  'next'
-            });
-          } else {
-            sendCommand({
-              'a': 'moveTo',
-              'where':
-                  currentPageProgression === constants.PageProgression.LTR ?
-                  'next' :
-                  'previous'
-            });
-          }
+    } else if (touchActive) {
+      const dx = x - touchX;
+      const dy = y - touchY;
+      if (evt.type == 'touchend') {
+        touchActive = false;
+      }
+      if (Math.abs(dy) < 0.5 * Math.abs(dx) && Math.abs(dx) > 15) {
+        touchActive = false;
+        if (dx > 0) {
+          sendCommand({
+            'a': 'moveTo',
+            'where':
+                currentPageProgression === constants.PageProgression.LTR ?
+                'previous' :
+                'next'
+          });
+        } else {
+          sendCommand({
+            'a': 'moveTo',
+            'where':
+                currentPageProgression === constants.PageProgression.LTR ?
+                'next' :
+                'previous'
+          });
         }
       }
     }
-  } else {
-    if (evt.touches.length == 2) {
-      const px = evt.touches[0].pageX - evt.touches[1].pageX;
-      const py = evt.touches[0].pageY - evt.touches[1].pageY;
-      const pinchDist = Math.sqrt(px * px + py * py);
-      if (evt.type == 'touchstart') {
-        zoomActive = true;
-        zoomDist = pinchDist;
-      } else {
-        if (zoomActive) {
-          if (evt.type == 'touchend') {
-            zoomActive = false;
-          }
-          const scale = pinchDist / zoomDist;
-          if (scale > 1.5) {
-            fontSize *= 1.2;
-            sendCommand({'a': 'configure', 'fontSize': Math.round(fontSize)});
-          } else {
-            if (scale < 1 / 1.5) {
-              fontSize *= 1.2;
-              sendCommand({'a': 'configure', 'fontSize': Math.round(fontSize)});
-            }
-          }
-        }
+  } else if (evt.touches.length == 2) {
+    const px = evt.touches[0].pageX - evt.touches[1].pageX;
+    const py = evt.touches[0].pageY - evt.touches[1].pageY;
+    const pinchDist = Math.sqrt(px * px + py * py);
+    if (evt.type == 'touchstart') {
+      zoomActive = true;
+      zoomDist = pinchDist;
+    } else if (zoomActive) {
+      if (evt.type == 'touchend') {
+        zoomActive = false;
+      }
+      const scale = pinchDist / zoomDist;
+      if (scale > 1.5) {
+        fontSize *= 1.2;
+        sendCommand({'a': 'configure', 'fontSize': Math.round(fontSize)});
+      } else if (scale < 1 / 1.5) {
+        fontSize *= 1.2;
+        sendCommand({'a': 'configure', 'fontSize': Math.round(fontSize)});
       }
     }
   }

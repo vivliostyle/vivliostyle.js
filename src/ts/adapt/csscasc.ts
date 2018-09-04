@@ -491,21 +491,17 @@ export class InheritanceVisitor extends css.FilterVisitor {
     goog.asserts.assert(this.context);
     if (this.propName === 'font-size') {
       return convertFontSizeToPx(numeric, this.getFontSize(), this.context);
-    } else {
-      if (numeric.unit == 'em' || numeric.unit == 'ex' ||
-          numeric.unit == 'rem') {
-        return convertFontRelativeLengthToPx(
-            numeric, this.getFontSize(), this.context);
-      } else {
-        if (numeric.unit == '%') {
-          if (this.propName === 'line-height') {
-            return numeric;
-          }
-          const unit =
-              this.propName.match(/height|^(top|bottom)$/) ? 'vh' : 'vw';
-          return new css.Numeric(numeric.num, unit);
-        }
+    } else if (numeric.unit == 'em' || numeric.unit == 'ex' ||
+        numeric.unit == 'rem') {
+      return convertFontRelativeLengthToPx(
+          numeric, this.getFontSize(), this.context);
+    } else if (numeric.unit == '%') {
+      if (this.propName === 'line-height') {
+        return numeric;
       }
+      const unit =
+          this.propName.match(/height|^(top|bottom)$/) ? 'vh' : 'vw';
+      return new css.Numeric(numeric.num, unit);
     }
     return numeric;
   }
@@ -530,12 +526,10 @@ export const convertFontRelativeLengthToPx =
       if (unit === 'em' || unit === 'ex') {
         const ratio = expr.defaultUnitSizes[unit] / expr.defaultUnitSizes['em'];
         return new css.Numeric(num * ratio * baseFontSize, 'px');
+      } else if (unit === 'rem') {
+        return new css.Numeric(num * context.fontSize(), 'px');
       } else {
-        if (unit === 'rem') {
-          return new css.Numeric(num * context.fontSize(), 'px');
-        } else {
-          return numeric;
-        }
+        return numeric;
       }
     };
 
@@ -547,12 +541,10 @@ export const convertFontSizeToPx = (numeric: css.Numeric,
   const num = numeric.num;
   if (unit === 'px') {
     return numeric;
+  } else if (unit === '%') {
+    return new css.Numeric(num / 100 * parentFontSize, 'px');
   } else {
-    if (unit === '%') {
-      return new css.Numeric(num / 100 * parentFontSize, 'px');
-    } else {
-      return new css.Numeric(num * context.queryUnitSize(unit, false), 'px');
-    }
+    return new css.Numeric(num * context.queryUnitSize(unit, false), 'px');
   }
 };
 type ActionTable = {
@@ -1402,10 +1394,8 @@ export class ChildConditionItem extends
   push(cascade, depth) {
     if (depth == 0) {
       this.increment(cascade);
-    } else {
-      if (depth == 1) {
-        this.decrement(cascade);
-      }
+    } else if (depth == 1) {
+      this.decrement(cascade);
     }
     return false;
   }
@@ -1417,10 +1407,8 @@ export class ChildConditionItem extends
     if (depth == 0) {
       this.decrement(cascade);
       return true;
-    } else {
-      if (depth == 1) {
-        this.increment(cascade);
-      }
+    } else if (depth == 1) {
+      this.increment(cascade);
     }
     return false;
   }
@@ -1497,10 +1485,8 @@ export class FollowingSiblingConditionItem extends
     if (this.fired) {
       if (depth == -1) {
         this.increment(cascade);
-      } else {
-        if (depth == 0) {
-          this.decrement(cascade);
-        }
+      } else if (depth == 0) {
+        this.decrement(cascade);
       }
     }
     return false;
@@ -1514,10 +1500,8 @@ export class FollowingSiblingConditionItem extends
       if (depth == -1) {
         this.decrement(cascade);
         return true;
-      } else {
-        if (depth == 0) {
-          this.increment(cascade);
-        }
+      } else if (depth == 0) {
+        this.increment(cascade);
       }
     } else {
       if (depth == 0) {
@@ -1774,36 +1758,26 @@ export class ContentPropVisitor extends css.FilterVisitor {
     if ((r = type.match(/^upper-(.*)/)) != null) {
       upper = true;
       type = r[1];
-    } else {
-      if ((r = type.match(/^lower-(.*)/)) != null) {
-        lower = true;
-        type = r[1];
-      }
+    } else if ((r = type.match(/^lower-(.*)/)) != null) {
+      lower = true;
+      type = r[1];
     }
     let result = '';
     if (additiveNumbering[type]) {
       result = additiveFormat(additiveNumbering[type], num);
-    } else {
-      if (alphabeticNumbering[type]) {
-        result = alphabeticFormat(alphabeticNumbering[type], num);
-      } else {
-        if (fixed[type] != null) {
-          result = fixed[type];
-        } else {
-          if (type == 'decimal-leading-zero') {
-            result = `${num}`;
-            if (result.length == 1) {
-              result = `0${result}`;
-            }
-          } else {
-            if (type == 'cjk-ideographic' || type == 'trad-chinese-informal') {
-              result = chineseCounter(num, chineseTradInformal);
-            } else {
-              result = `${num}`;
-            }
-          }
-        }
+    } else if (alphabeticNumbering[type]) {
+      result = alphabeticFormat(alphabeticNumbering[type], num);
+    } else if (fixed[type] != null) {
+      result = fixed[type];
+    } else if (type == 'decimal-leading-zero') {
+      result = `${num}`;
+      if (result.length == 1) {
+        result = `0${result}`;
       }
+    } else if (type == 'cjk-ideographic' || type == 'trad-chinese-informal') {
+      result = chineseCounter(num, chineseTradInformal);
+    } else {
+      result = `${num}`;
     }
     if (upper) {
       return result.toUpperCase();
@@ -1949,18 +1923,16 @@ export const roman = (num) => {
     let result = '';
     if (digit == 9) {
       result += digits[offset] + digits[offset + 2];
+    } else if (digit == 4) {
+      result += digits[offset] + digits[offset + 1];
     } else {
-      if (digit == 4) {
-        result += digits[offset] + digits[offset + 1];
-      } else {
-        if (digit >= 5) {
-          result += digits[offset + 1];
-          digit -= 5;
-        }
-        while (digit > 0) {
-          result += digits[offset];
-          digit--;
-        }
+      if (digit >= 5) {
+        result += digits[offset + 1];
+        digit -= 5;
+      }
+      while (digit > 0) {
+        result += digits[offset];
+        digit--;
       }
     }
     acc = result + acc;
@@ -2159,32 +2131,30 @@ export const chineseCounter = (num: number, numbering: ChineseNumbering) => {
   }
   if (num < 10) {
     res.append(numbering.digits.charAt(num));
+  } else if (!numbering.formal && num <= 19) {
+    res.append(numbering.markers.charAt(0));
+    if (num != 0) {
+      res.append(numbering.digits.charAt(num - 10));
+    }
   } else {
-    if (!numbering.formal && num <= 19) {
+    const thousands = Math.floor(num / 1000);
+    if (thousands) {
+      res.append(numbering.digits.charAt(thousands));
+      res.append(numbering.markers.charAt(2));
+    }
+    const hundreds = Math.floor(num / 100) % 10;
+    if (hundreds) {
+      res.append(numbering.digits.charAt(hundreds));
+      res.append(numbering.markers.charAt(1));
+    }
+    const tens = Math.floor(num / 10) % 10;
+    if (tens) {
+      res.append(numbering.digits.charAt(tens));
       res.append(numbering.markers.charAt(0));
-      if (num != 0) {
-        res.append(numbering.digits.charAt(num - 10));
-      }
-    } else {
-      const thousands = Math.floor(num / 1000);
-      if (thousands) {
-        res.append(numbering.digits.charAt(thousands));
-        res.append(numbering.markers.charAt(2));
-      }
-      const hundreds = Math.floor(num / 100) % 10;
-      if (hundreds) {
-        res.append(numbering.digits.charAt(hundreds));
-        res.append(numbering.markers.charAt(1));
-      }
-      const tens = Math.floor(num / 10) % 10;
-      if (tens) {
-        res.append(numbering.digits.charAt(tens));
-        res.append(numbering.markers.charAt(0));
-      }
-      const ones = num % 10;
-      if (ones) {
-        res.append(numbering.digits.charAt(ones));
-      }
+    }
+    const ones = num % 10;
+    if (ones) {
+      res.append(numbering.digits.charAt(ones));
     }
   }
 
@@ -2593,10 +2563,8 @@ export class CascadeInstance {
         itemToPushLast = new QuotesScopeItem(this.quotes);
         if (quotesVal === css.ident.none) {
           this.quotes = [new css.Str(''), new css.Str('')];
-        } else {
-          if (quotesVal instanceof css.SpaceList) {
-            this.quotes = ((quotesVal as css.SpaceList).values as css.Str[]);
-          }
+        } else if (quotesVal instanceof css.SpaceList) {
+          this.quotes = ((quotesVal as css.SpaceList).values as css.Str[]);
         }
       }
     }
@@ -2815,12 +2783,10 @@ export class CascadeParserHandler extends
     this.specificity += 1;
     if (name && ns) {
       this.chain.push(new CheckNSTagAction(ns, name.toLowerCase()));
+    } else if (name) {
+      this.chain.push(new CheckLocalNameAction(name.toLowerCase()));
     } else {
-      if (name) {
-        this.chain.push(new CheckLocalNameAction(name.toLowerCase()));
-      } else {
-        this.chain.push(new CheckNamespaceAction((ns as string)));
-      }
+      this.chain.push(new CheckNamespaceAction((ns as string)));
     }
   }
 

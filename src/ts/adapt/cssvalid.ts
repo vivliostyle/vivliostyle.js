@@ -282,16 +282,14 @@ export class ValidatingGroup {
       for (let i = 0; i < group.nomatch.length; i++) {
         this.match.push(group.nomatch[i] + connectionIndex);
       }
+    } else if (this.emptyHead) {
+      for (let i = 0; i < group.nomatch.length; i++) {
+        this.nomatch.push(group.nomatch[i] + connectionIndex);
+      }
+      this.emptyHead = group.emptyHead;
     } else {
-      if (this.emptyHead) {
-        for (let i = 0; i < group.nomatch.length; i++) {
-          this.nomatch.push(group.nomatch[i] + connectionIndex);
-        }
-        this.emptyHead = group.emptyHead;
-      } else {
-        for (let i = 0; i < group.nomatch.length; i++) {
-          this.error.push(group.nomatch[i] + connectionIndex);
-        }
+      for (let i = 0; i < group.nomatch.length; i++) {
+        this.error.push(group.nomatch[i] + connectionIndex);
       }
     }
     for (let i = 0; i < group.error.length; i++) {
@@ -592,20 +590,16 @@ export class ListValidator extends PropertyValidator {
             alternativeStack = [alternatives];
           }
           alternatives = [];
-        } else {
-          if (current.isEndGroup()) {
-            if (alternativeStack.length > 0) {
-              alternatives = alternativeStack.pop();
-            } else {
-              alternatives = null;
-            }
+        } else if (current.isEndGroup()) {
+          if (alternativeStack.length > 0) {
+            alternatives = alternativeStack.pop();
           } else {
-            if (current.isEndAlternate()) {
-              alternatives[current.getAlternate()] = 'taken';
-            } else {
-              success = alternatives[current.getAlternate()] == null;
-            }
+            alternatives = null;
           }
+        } else if (current.isEndAlternate()) {
+          alternatives[current.getAlternate()] = 'taken';
+        } else {
+          success = alternatives[current.getAlternate()] == null;
         }
         current = success ? current.success : current.failure;
       } else {
@@ -619,20 +613,18 @@ export class ListValidator extends PropertyValidator {
             current = current.success;
             continue;
           }
-        } else {
-          if (index == 0 && !slice &&
-              current.validator instanceof CommaListValidator &&
-              this instanceof SpaceListValidator) {
-            // Special nesting case: validate the input comma list as a whole.
-            outval = (new css.CommaList(arr)).visit(current.validator);
-            if (outval) {
-              index = arr.length;
-              current = current.success;
-              continue;
-            }
-          } else {
-            outval = inval.visit(current.validator);
+        } else if (index == 0 && !slice &&
+            current.validator instanceof CommaListValidator &&
+            this instanceof SpaceListValidator) {
+          // Special nesting case: validate the input comma list as a whole.
+          outval = (new css.CommaList(arr)).visit(current.validator);
+          if (outval) {
+            index = arr.length;
+            current = current.success;
+            continue;
           }
+        } else {
+          outval = inval.visit(current.validator);
         }
         if (!outval) {
           current = current.failure;
@@ -1435,16 +1427,12 @@ export class ValidatorSet {
     let cssval: css.Val;
     if (token.type == csstok.TokenType.NUMERIC) {
       cssval = new css.Numeric(token.num, token.text);
+    } else if (token.type == csstok.TokenType.HASH) {
+      cssval = cssparse.colorFromHash(token.text);
+    } else if (token.type == csstok.TokenType.IDENT) {
+      cssval = css.getName(token.text);
     } else {
-      if (token.type == csstok.TokenType.HASH) {
-        cssval = cssparse.colorFromHash(token.text);
-      } else {
-        if (token.type == csstok.TokenType.IDENT) {
-          cssval = css.getName(token.text);
-        } else {
-          throw new Error('unexpected replacement');
-        }
-      }
+      throw new Error('unexpected replacement');
     }
     if (val.isPrimitive()) {
       const validator = (val.nodes[0].validator as PrimitiveValidator);
@@ -1890,18 +1878,16 @@ export class ValidatorSet {
             if (this.validators[token.text]) {
               syntax.push(shorthandValidator.syntaxNodeForProperty(token.text));
               propList.push(token.text);
+            } else if (this.shorthands[token.text] instanceof
+                InsetsShorthandValidator) {
+              const insetShorthand =
+                  (this.shorthands[token.text] as InsetsShorthandValidator);
+              syntax.push(insetShorthand.createSyntaxNode());
+              propList.push(...insetShorthand.propList);
             } else {
-              if (this.shorthands[token.text] instanceof
-                  InsetsShorthandValidator) {
-                const insetShorthand =
-                    (this.shorthands[token.text] as InsetsShorthandValidator);
-                syntax.push(insetShorthand.createSyntaxNode());
-                propList.push(...insetShorthand.propList);
-              } else {
-                throw new Error(`'${
-                    token
-                        .text}' is neither a simple property nor an inset shorthand`);
-              }
+              throw new Error(`'${
+                  token
+                      .text}' is neither a simple property nor an inset shorthand`);
             }
             break;
           case csstok.TokenType.SLASH:
