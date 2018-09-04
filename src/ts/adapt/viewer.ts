@@ -20,7 +20,6 @@
 import * as asserts from '../vivliostyle/asserts';
 import {constants} from '../vivliostyle/constants';
 import * as logging from '../vivliostyle/logging';
-import {ConfigurationHook} from '../vivliostyle/plugin';
 import {plugin} from '../vivliostyle/plugin';
 import {profile} from '../vivliostyle/profile';
 
@@ -417,7 +416,7 @@ export class Viewer {
   }
 
   configurePlugins(command: JSON) {
-    const hooks: ConfigurationHook[] = plugin.getHooksForName(
+    const hooks: plugin.ConfigurationHook[] = plugin.getHooksForName(
         plugin.HOOKS.CONFIGURATION);
     hooks.forEach((hook) => {
       const result = hook(command);

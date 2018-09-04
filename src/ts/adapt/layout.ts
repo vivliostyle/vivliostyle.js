@@ -21,9 +21,6 @@
  */
 import * as asserts from '../vivliostyle/asserts';
 import * as logging from '../vivliostyle/logging';
-import {ResolveLayoutProcessorHook} from '../vivliostyle/plugin';
-import {PostLayoutBlockHook} from '../vivliostyle/plugin';
-import {ResolveTextNodeBreakerHook} from '../vivliostyle/plugin';
 import {plugin} from '../vivliostyle/plugin';
 import {ElementsOffset} from '../vivliostyle/repetitiveelements';
 import * as repetitiveelements from '../vivliostyle/repetitiveelements';
@@ -203,7 +200,7 @@ export class LayoutProcessorResolver {
    * Find LayoutProcessor corresponding to given formatting context.
    */
   find(formattingContext: vtree.FormattingContext): LayoutProcessor {
-    const hooks: ResolveLayoutProcessorHook[] =
+    const hooks: plugin.ResolveLayoutProcessorHook[] =
         plugin.getHooksForName(
             plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR);
     for (let i = 0; i < hooks.length; i++) {
@@ -1936,7 +1933,7 @@ export class Column extends vtree.Container {
   }
 
   resolveTextNodeBreaker(nodeContext: vtree.NodeContext): TextNodeBreaker {
-    const hooks: ResolveTextNodeBreakerHook[] =
+    const hooks: plugin.ResolveTextNodeBreakerHook[] =
         plugin.getHooksForName(
             plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER);
     return hooks.reduce(

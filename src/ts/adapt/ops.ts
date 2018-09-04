@@ -23,7 +23,6 @@ import {constants} from '../vivliostyle/constants';
 import * as counters from '../vivliostyle/counters';
 import * as logging from '../vivliostyle/logging';
 import * as pagefloat from '../vivliostyle/pagefloat';
-import {PreProcessSingleDocumentHook} from '../vivliostyle/plugin';
 import {plugin} from '../vivliostyle/plugin';
 
 import {DocumentURLTransformer} from './base';
@@ -1685,7 +1684,7 @@ export class OPSDocStore extends xmldoc.XMLDocStore {
         return;
       }
       if (self.triggerSingleDocumentPreprocessing) {
-        const hooks: PreProcessSingleDocumentHook[] =
+        const hooks: plugin.PreProcessSingleDocumentHook[] =
             plugin.getHooksForName(
                 plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT);
         for (let i = 0; i < hooks.length; i++) {
