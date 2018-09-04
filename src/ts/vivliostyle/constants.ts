@@ -16,7 +16,8 @@
  *
  * @fileoverview Constants
  */
-import * as namespace from './namespace';
+
+export namespace constants {
 
 /**
  * Debug flag.
@@ -45,10 +46,6 @@ PageProgression.of = (str: string): PageProgression => {
       throw new Error(`unknown PageProgression: ${str}`);
   }
 };
-namespace.exportSymbol(
-    'vivliostyle.constants.PageProgression', PageProgression);
-goog.exportProperty(PageProgression, 'LTR', PageProgression.LTR);
-goog.exportProperty(PageProgression, 'RTL', PageProgression.RTL);
 
 /**
  * Page side (left/right).
@@ -58,10 +55,6 @@ export enum PageSide {
   LEFT = 'left',
   RIGHT = 'right'
 }
-
-namespace.exportSymbol('vivliostyle.constants.PageSide', PageSide);
-goog.exportProperty(PageSide, 'LEFT', PageSide.LEFT);
-goog.exportProperty(PageSide, 'RIGHT', PageSide.RIGHT);
 
 /**
  * Viewer ready state.
@@ -73,7 +66,15 @@ export enum ReadyState {
   COMPLETE = 'complete'
 }
 
-namespace.exportSymbol('vivliostyle.constants.ReadyState', ReadyState);
-goog.exportProperty(ReadyState, 'LOADING', ReadyState.LOADING);
-goog.exportProperty(ReadyState, 'INTERACTIVE', ReadyState.INTERACTIVE);
-goog.exportProperty(ReadyState, 'COMPLETE', ReadyState.COMPLETE);
+} // export namespace constants
+// Old exports:
+// vivliostyle.namespace.exportSymbol("vivliostyle.constants.PageProgression", PageProgression);
+// goog.exportProperty(PageProgression, "LTR", PageProgression.LTR);
+// goog.exportProperty(PageProgression, "RTL", PageProgression.RTL);
+// vivliostyle.namespace.exportSymbol("vivliostyle.constants.PageSide", PageSide);
+// goog.exportProperty(PageSide, "LEFT", PageSide.LEFT);
+// goog.exportProperty(PageSide, "RIGHT", PageSide.RIGHT);
+// vivliostyle.namespace.exportSymbol("vivliostyle.constants.ReadyState", ReadyState);
+// goog.exportProperty(ReadyState, "LOADING", ReadyState.LOADING);
+// goog.exportProperty(ReadyState, "INTERACTIVE", ReadyState.INTERACTIVE);
+// goog.exportProperty(ReadyState, "COMPLETE", ReadyState.COMPLETE);

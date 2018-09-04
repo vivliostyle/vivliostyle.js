@@ -25,8 +25,9 @@ import {Result} from '../adapt/task';
 import {NodeContext} from '../adapt/vtree';
 import {FormattingContext} from '../adapt/vtree';
 
-import * as namespace from './namespace';
 import * as logging from './logging';
+
+export namespace plugin {
 
 /**
  * Type of implemented hooks.
@@ -144,39 +145,27 @@ export enum HOOKS {
   POST_LAYOUT_BLOCK = 'POST_LAYOUT_BLOCK'
 }
 
-type PreProcessSingleDocumentHook = (p1: Document) => any;
+export type PreProcessSingleDocumentHook = (p1: Document) => any;
 
-export {PreProcessSingleDocumentHook};
-type PreProcessTextContentHook = (p1: NodeContext, p2: string) =>
-    Result<string>;
+export type PreProcessTextContentHook = (p1: NodeContext, p2: string) => Result<string>;
 
-export {PreProcessTextContentHook};
-type PreProcessElementStyleHook = (p1: NodeContext, p2: Object) => void;
+export type PreProcessElementStyleHook = (p1: NodeContext, p2: Object) => void;
 
-export {PreProcessElementStyleHook};
-type PolyfilledInheritedPropsHook = () => string[];
+export type PolyfilledInheritedPropsHook = () => string[];
 
-export {PolyfilledInheritedPropsHook};
-type ConfigurationHook = (p1: JSON) => {
+export type ConfigurationHook = (p1: JSON) => {
   needResize: boolean|null|undefined, needRefresh: boolean|null|undefined
 };
 
-export {ConfigurationHook};
-type ResolveTextNodeBreakerHook = (p1: NodeContext) => TextNodeBreaker;
+export type ResolveTextNodeBreakerHook = (p1: NodeContext) => TextNodeBreaker;
 
-export {ResolveTextNodeBreakerHook};
-type ResolveFormattingContextHook =
+export type ResolveFormattingContextHook =
     (p1: NodeContext, p2: boolean, p3: Ident, p4: Ident, p5: Ident,
      p6: boolean) => FormattingContext;
 
-export {ResolveFormattingContextHook};
-type ResolveLayoutProcessorHook = (p1: FormattingContext) => LayoutProcessor;
+export type ResolveLayoutProcessorHook = (p1: FormattingContext) => LayoutProcessor;
 
-export {ResolveLayoutProcessorHook};
-type PostLayoutBlockHook = (p1: NodeContext, p2: NodeContext[], p3: Column) =>
-    void;
-
-export {PostLayoutBlockHook};
+export type PostLayoutBlockHook = (p1: NodeContext, p2: NodeContext[], p3: Column) => void;
 
 const hooks = {};
 
@@ -230,5 +219,8 @@ export const getHooksForName = (name: string): ((...p1) => any)[] => {
   const hooksForName = hooks[name];
   return hooksForName || [];
 };
-namespace.exportSymbol('vivliostyle.plugin.registerHook', registerHook);
-namespace.exportSymbol('vivliostyle.plugin.removeHook', removeHook);
+
+} // export namespace plugin
+// Old exports:
+// vivliostyle.namespace.exportSymbol("vivliostyle.plugin.registerHook", vivliostyle.plugin.registerHook);
+// vivliostyle.namespace.exportSymbol("vivliostyle.plugin.removeHook", vivliostyle.plugin.removeHook);

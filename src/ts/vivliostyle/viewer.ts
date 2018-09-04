@@ -16,21 +16,23 @@
  *
  * @fileoverview Vivliostyle Viewer class
  */
-import * as namespace from './namespace';
 import * as profile from './profile';
 import * as constants from './constants';
 import * as base from '../adapt/base';
-import * as viewer from '../adapt/viewer';
+import * as adaptviewer from '../adapt/viewer';
+
+export namespace viewer {
+
 const PageProgression = constants.PageProgression;
-type ViewerSettings = {
+
+export type ViewerSettings = {
   userAgentRootURL: string,
   viewportElement: HTMLElement,
   window: Window|undefined,
   debug: boolean
 };
 
-export {ViewerSettings};
-type ViewerOptions = {
+export type ViewerOptions = {
   autoResize: boolean|undefined,
   fontSize: number|undefined,
   pageBorderWidth: number|undefined,
@@ -40,8 +42,6 @@ type ViewerOptions = {
   fitToScreen: boolean|undefined,
   defaultPaperSize: {width: number, height: number}|undefined
 };
-
-export {ViewerOptions};
 
 function getDefaultViewerOptions(): ViewerOptions {
   return {
@@ -73,21 +73,19 @@ function convertViewerOptions(options: ViewerOptions): Object {
   });
   return converted;
 }
-type DocumentOptions = {
+
+export type DocumentOptions = {
   documentObject: Document|undefined,
   fragment: string|undefined,
   styleSheet: {url: string|undefined, text: string|undefined}[]|undefined,
   userStyleSheet: {url: string|undefined, text: string|undefined}[]|undefined
 };
 
-export {DocumentOptions};
-type SingleDocumentOptions = string|{
+export type SingleDocumentOptions = string|{
   url: string,
   startPage: number | undefined,
   skipPagesBefore: number | undefined
 };
-
-export {SingleDocumentOptions};
 
 /**
  * Vivliostyle Viewer class.
@@ -101,7 +99,7 @@ export class Viewer {
   constructor(
       private readonly settings: ViewerSettings, opt_options?: ViewerOptions) {
     constants.isDebug = settings.debug;
-    this.adaptViewer = new viewer.Viewer(
+    this.adaptViewer = new adaptviewer.Viewer(
         settings['window'] || window, settings['viewportElement'], 'main',
         this.dispatcher.bind(this));
     this.options = getDefaultViewerOptions();
@@ -282,7 +280,7 @@ export class Viewer {
 
 function convertSingleDocumentOptions(
     singleDocumentOptions: SingleDocumentOptions|
-    SingleDocumentOptions[]): viewer.SingleDocumentParam[]|null {
+    SingleDocumentOptions[]): adaptviewer.SingleDocumentParam[]|null {
   function toNumberOrNull(num: any): number|null {
     return typeof num === 'number' ? num : null;
   }
@@ -291,13 +289,13 @@ function convertSingleDocumentOptions(
     if (typeof opt === 'string') {
       return (
           {url: opt, startPage: null, skipPagesBefore: null} as
-          viewer.SingleDocumentParam);
+          adaptviewer.SingleDocumentParam);
     } else {
       return ({
         url: opt['url'],
         startPage: toNumberOrNull(opt['startPage']),
         skipPagesBefore: toNumberOrNull(opt['skipPagesBefore'])
-      } as viewer.SingleDocumentParam);
+      } as adaptviewer.SingleDocumentParam);
     }
   }
   if (Array.isArray(singleDocumentOptions)) {
@@ -322,35 +320,31 @@ export enum Navigation {
   FIRST = 'first',
   LAST = 'last'
 }
-const ZoomType = viewer.ZoomType;
-const PageViewMode = viewer.PageViewMode;
-namespace.exportSymbol('Viewer', Viewer);
-goog.exportProperty(
-    Viewer.prototype, 'setOptions', Viewer.prototype.setOptions);
-goog.exportProperty(
-    Viewer.prototype, 'addListener', Viewer.prototype.addListener);
-goog.exportProperty(
-    Viewer.prototype, 'removeListener', Viewer.prototype.removeListener);
-goog.exportProperty(
-    Viewer.prototype, 'loadDocument', Viewer.prototype.loadDocument);
-goog.exportProperty(Viewer.prototype, 'loadEPUB', Viewer.prototype.loadEPUB);
-goog.exportProperty(
-    Viewer.prototype, 'getCurrentPageProgression',
-    Viewer.prototype.getCurrentPageProgression);
-goog.exportProperty(
-    Viewer.prototype, 'navigateToPage', Viewer.prototype.navigateToPage);
-goog.exportProperty(
-    Viewer.prototype, 'navigateToInternalUrl',
-    Viewer.prototype.navigateToInternalUrl);
-goog.exportProperty(
-    Viewer.prototype, 'queryZoomFactor', Viewer.prototype.queryZoomFactor);
-goog.exportProperty(
-    Viewer.prototype, 'getPageSizes', Viewer.prototype.getPageSizes);
-namespace.exportSymbol('ZoomType', ZoomType);
-goog.exportProperty(
-    ZoomType, 'FIT_INSIDE_VIEWPORT', ZoomType.FIT_INSIDE_VIEWPORT);
-namespace.exportSymbol('PageViewMode', PageViewMode);
-goog.exportProperty(PageViewMode, 'SINGLE_PAGE', PageViewMode.SINGLE_PAGE);
-goog.exportProperty(PageViewMode, 'SPREAD', PageViewMode.SPREAD);
-goog.exportProperty(PageViewMode, 'AUTO_SPREAD', PageViewMode.AUTO_SPREAD);
+
+export type ZoomType = adaptviewer.ZoomType;
+export const ZoomType = adaptviewer.ZoomType;
+
+export type PageViewMode = adaptviewer.PageViewMode;
+export const PageViewMode = adaptviewer.PageViewMode;
+
+} // namespace viewer
+// Old exports:
+// vivliostyle.namespace.exportSymbol("vivliostyle.viewer.Viewer", Viewer);
+// goog.exportProperty(Viewer.prototype, "setOptions", Viewer.prototype.setOptions);
+// goog.exportProperty(Viewer.prototype, "addListener", Viewer.prototype.addListener);
+// goog.exportProperty(Viewer.prototype, "removeListener", Viewer.prototype.removeListener);
+// goog.exportProperty(Viewer.prototype, "loadDocument", Viewer.prototype.loadDocument);
+// goog.exportProperty(Viewer.prototype, "loadEPUB", Viewer.prototype.loadEPUB);
+// goog.exportProperty(Viewer.prototype, "getCurrentPageProgression", Viewer.prototype.getCurrentPageProgression);
+// goog.exportProperty(Viewer.prototype, "navigateToPage", Viewer.prototype.navigateToPage);
+// goog.exportProperty(Viewer.prototype, "navigateToInternalUrl", Viewer.prototype.navigateToInternalUrl);
+// goog.exportProperty(Viewer.prototype, "queryZoomFactor", Viewer.prototype.queryZoomFactor);
+// goog.exportProperty(Viewer.prototype, "getPageSizes", Viewer.prototype.getPageSizes);
+// vivliostyle.namespace.exportSymbol("vivliostyle.viewer.ZoomType", ZoomType);
+// goog.exportProperty(ZoomType, "FIT_INSIDE_VIEWPORT", ZoomType.FIT_INSIDE_VIEWPORT);
+// vivliostyle.namespace.exportSymbol("vivliostyle.viewer.PageViewMode", PageViewMode);
+// goog.exportProperty(PageViewMode, "SINGLE_PAGE", PageViewMode.SINGLE_PAGE);
+// goog.exportProperty(PageViewMode, "SPREAD", PageViewMode.SPREAD);
+// goog.exportProperty(PageViewMode, "AUTO_SPREAD", PageViewMode.AUTO_SPREAD);
+
 profile.profiler.forceRegisterEndTiming('load_vivliostyle');
