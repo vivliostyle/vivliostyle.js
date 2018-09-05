@@ -215,7 +215,7 @@ export class OPFItem {
   id: string|null = null;
   src: string = '';
   mediaType: string|null = null;
-  itemRefElement: Element = null;
+  itemRefElement: Element|null = null;
   spineIndex: number = -1;
   compressedSize: number = 0;
   compressed: boolean|null = null;
@@ -1585,7 +1585,7 @@ export class OPFView implements CustomRendererFactory {
       xmldoc: xmldoc.XMLDocHolder, srcElem: Element, viewParent: Element,
       computedStyle): Result<Element> {
     let data = srcElem.getAttribute('data');
-    let result: Element = null;
+    let result: Element|null = null;
     if (data) {
       data = base.resolveURL(data, xmldoc.url);
       let mediaType = srcElem.getAttribute('media-type');

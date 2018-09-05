@@ -46,12 +46,12 @@ export class RepetitiveElementsOwnerFormattingContext implements
     return this.repetitiveElements;
   }
 
-  getRootViewNode(position: vtree.NodeContext): Element {
+  getRootViewNode(position: vtree.NodeContext): Element|null {
     const root = this.getRootNodeContext(position);
     return root ? (root.viewNode as Element) : null;
   }
 
-  getRootNodeContext(nodeContext: vtree.NodeContext): vtree.NodeContext {
+  getRootNodeContext(nodeContext: vtree.NodeContext): vtree.NodeContext|null {
     do {
       if (!nodeContext.belongsTo(this) &&
           nodeContext.sourceNode === this.rootSourceNode) {
@@ -101,10 +101,10 @@ export interface ElementsOffset {
 }
 
 export class RepetitiveElements implements ElementsOffset {
-  private headerSourceNode: Element = null;
-  private footerSourceNode: Element = null;
-  private headerViewNode: Element = null;
-  private footerViewNode: Element = null;
+  private headerSourceNode: Element|null = null;
+  private footerSourceNode: Element|null = null;
+  private headerViewNode: Element|null = null;
+  private footerViewNode: Element|null = null;
   private headerNodePosition: vtree.NodePosition|null = null;
   private footerNodePosition: vtree.NodePosition|null = null;
   private headerHeight: number = 0;
@@ -114,8 +114,8 @@ export class RepetitiveElements implements ElementsOffset {
   enableSkippingFooter: boolean = true;
   enableSkippingHeader: boolean = true;
   doneInitialLayout: boolean = false;
-  firstContentSourceNode: Element = null;
-  lastContentSourceNode: Element = null;
+  firstContentSourceNode: Element|null = null;
+  lastContentSourceNode: Element|null = null;
   private affectedNodeCache: {nodeContext: vtree.NodeContext,
                               result: boolean}[] = [];
   private afterLastContentNodeCache:
@@ -264,7 +264,7 @@ export class RepetitiveElements implements ElementsOffset {
     return this.findResultFromCache(
         nodeContext, this.afterLastContentNodeCache,
         (nc) => this.isAfterNodeContextOf(
-            this.lastContentSourceNode, nodeContext, false));
+            this.lastContentSourceNode as Element, nodeContext, false));
   }
 
   private affectTo(nodeContext: vtree.NodeContext): boolean {
@@ -294,20 +294,20 @@ export class RepetitiveElements implements ElementsOffset {
       node: Element, nodeContext: vtree.NodeContext,
       includeChildren: boolean): boolean {
     const parentsOfNode = [];
-    for (let n = node; n; n = n.parentNode) {
+    for (let n: Node|null = node; n; n = n.parentNode) {
       if (nodeContext.sourceNode === n) {
         return nodeContext.after;
       } else {
         parentsOfNode.push(n);
       }
     }
-    for (let currentParent = nodeContext.sourceNode; currentParent;
+    for (let currentParent: Node|null = nodeContext.sourceNode; currentParent;
          currentParent = currentParent.parentNode) {
       const index = parentsOfNode.indexOf(currentParent);
       if (index >= 0) {
         return includeChildren ? index === 0 : false;
       } else {
-        for (let current = currentParent; current;
+        for (let current: Element|null = currentParent as Element; current;
              current = current.previousElementSibling) {
           if (parentsOfNode.includes(current)) {
             return true;

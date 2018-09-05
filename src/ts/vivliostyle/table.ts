@@ -260,15 +260,15 @@ export class TableFormattingContext extends
   columnCount: number = -1;
   tableWidth: number = 0;
   captions: TableCaptionView[] = [];
-  colGroups: DocumentFragment = null;
-  colWidths: number[] = null;
+  colGroups: DocumentFragment|null = null;
+  colWidths: number[]|null = null;
   inlineBorderSpacing: number = 0;
   rows: TableRow[] = [];
   slots: TableSlot[][] = [];
   cellFragments: TableCellFragment[][] = [];
-  lastRowViewNode: Element = null;
+  lastRowViewNode: Element|null = null;
   cellBreakPositions: BrokenTableCellPosition[] = [];
-  repetitiveElements: repetitiveelements.RepetitiveElements = null;
+  repetitiveElements: repetitiveelements.RepetitiveElements|null = null;
 
   constructor(
       parent: vtree.FormattingContext,
@@ -404,7 +404,7 @@ export class TableFormattingContext extends
   updateCellSizes(clientLayout: vtree.ClientLayout) {
     this.rows.forEach(function(row) {
       row.cells.forEach(function(cell) {
-        const rect = clientLayout.getElementClientRect(cell.viewElement);
+        const rect = clientLayout.getElementClientRect(cell.viewElement as Element);
         cell.viewElement = null;
         cell.setHeight(this.vertical ? rect['width'] : rect['height']);
       }, this);
@@ -666,7 +666,7 @@ export class EntireTableLayoutStrategy extends
     this.postLayoutBlockContents(state);
     if (nodeContext.sourceNode === formattingContext.tableSourceNode) {
       const computedStyle = clientLayout.getElementComputedStyle(
-          formattingContext.getRootViewNode(nodeContext));
+          formattingContext.getRootViewNode(nodeContext) as Element);
       formattingContext.tableWidth = parseFloat(
           computedStyle[formattingContext.vertical ? 'height' : 'width']);
       formattingContext.getRepetitiveElements().lastContentSourceNode =
@@ -1343,7 +1343,7 @@ export class TableLayoutProcessor implements layout.LayoutProcessor {
       task.Result<vtree.NodeContext> {
     const formattingContext =
         getTableFormattingContext(nodeContext.formattingContext);
-    const rootViewNode = formattingContext.getRootViewNode(nodeContext);
+    const rootViewNode = formattingContext.getRootViewNode(nodeContext) as Element;
     const firstChild = rootViewNode.firstChild;
     this.addCaptions(formattingContext, rootViewNode, firstChild);
     this.addColGroups(formattingContext, rootViewNode, firstChild);
@@ -1731,7 +1731,7 @@ export class TableRowLayoutConstraint extends
     if (!allowed) {
       const rootViewNode = formattingContext.getRootViewNode(this.nodeContext);
       (new TableLayoutProcessor())
-          .removeColGroups(formattingContext, rootViewNode);
+          .removeColGroups(formattingContext, rootViewNode as Element);
       this.removeDummyRowNodes(initialPosition);
     }
     super.postLayout(allowed, nodeContext, initialPosition, column);

@@ -97,8 +97,8 @@ export class XMLDocHolder {
         }
       }
     }
-    this.body = body;
-    this.head = head;
+    this.body = body as Element;
+    this.head = head as Element;
     this.last = this.root;
     this.last.setAttribute(ELEMENT_OFFSET_ATTR, '0');
   }
@@ -113,9 +113,9 @@ export class XMLDocHolder {
       return parseInt(offsetStr, 10);
     }
     let offset = this.lastOffset;
-    let last = this.last;
+    let last: Node|null = this.last;
     while (last != element) {
-      let next = last.firstChild;
+      let next: Node|null = last.firstChild;
       if (!next) {
         while (true) {
           next = last.nextSibling;
@@ -134,7 +134,7 @@ export class XMLDocHolder {
         nextElement.setAttribute(ELEMENT_OFFSET_ATTR, offset.toString());
         ++offset;
       } else {
-        offset += next.textContent.length;
+        offset += (next.textContent as string).length;
       }
     }
     this.lastOffset = offset;
@@ -144,8 +144,8 @@ export class XMLDocHolder {
 
   getNodeOffset(srcNode: Node, offsetInNode: number, after: boolean) {
     let extraOffset = 0;
-    let node = srcNode;
-    let prev = null;
+    let node: Node|null = srcNode;
+    let prev: Node|null = null;
     if (node.nodeType == 1) {
       // after = true is only valid for elements
       if (!after) {
@@ -170,7 +170,7 @@ export class XMLDocHolder {
         // empty element
         break;
       }
-      extraOffset += node.textContent.length;
+      extraOffset += (node.textContent as string).length;
       prev = node.previousSibling;
       if (!prev) {
         node = node.parentNode;
@@ -233,9 +233,9 @@ export class XMLDocHolder {
     // Now we have element with offset less than desired. Find following
     // (non-element) node with the right offset.
     let nodeOffset = elementOffset + 1;
-    let node = element;
-    let next = node.firstChild || node.nextSibling;
-    let lastGood = null;
+    let node: Node|null = element;
+    let next: Node|null = node.firstChild || node.nextSibling;
+    let lastGood: Node|null = null;
     while (true) {
       if (next) {
         if (next.nodeType == 1) {
@@ -243,7 +243,7 @@ export class XMLDocHolder {
         }
         node = next;
         lastGood = node;
-        nodeOffset += next.textContent.length;
+        nodeOffset += (next.textContent as string).length;
         if (nodeOffset > offset) {
           break;
         }
@@ -276,7 +276,7 @@ export class XMLDocHolder {
    * Get element by URL in the source document(s). URL must be in either '#id'
    * or 'url#id' form.
    */
-  getElement(url: string): Element {
+  getElement(url: string): Element|null {
     const m = url.match(/([^#]*)#(.+)$/);
     if (!m || m[1] && m[1] != this.url) {
       return null;
@@ -317,7 +317,7 @@ export enum DOMParserSupportedType {
  * If a parse error occurs, return null.
  */
 export const parseAndReturnNullIfError =
-    (str: string, type: string, opt_parser?: DOMParser): Document => {
+    (str: string, type: string, opt_parser?: DOMParser): Document|null => {
       const parser = opt_parser || new DOMParser();
       let doc;
       try {

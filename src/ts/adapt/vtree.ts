@@ -120,7 +120,7 @@ export class Page extends base.SimpleEventTarget {
       'data-vivliostyle-auto-page-width';
   private static AUTO_PAGE_HEIGHT_ATTRIBUTE: string =
       'data-vivliostyle-auto-page-height';
-  pageAreaElement: HTMLElement = null;
+  pageAreaElement: HTMLElement|null = null;
   delayedItems: DelayedItem[] = [];
   hrefHandler: any;
   elementsById: {[key: string]: Element[]} = {};
@@ -486,10 +486,10 @@ export const eachAncestorFormattingContext =
 type NodePositionStep = {
   node: Node,
   shadowType: ShadowType,
-  shadowContext: ShadowContext,
-  nodeShadow: ShadowContext,
-  shadowSibling: NodePositionStep,
-  formattingContext: FormattingContext,
+  shadowContext: ShadowContext|null,
+  nodeShadow: ShadowContext|null,
+  shadowSibling: NodePositionStep|null,
+  formattingContext: FormattingContext|null,
   fragmentIndex: number
 };
 
@@ -538,12 +538,13 @@ export const isSameNodePosition =
     };
 
 export const newNodePositionFromNode = (node: Node): NodePosition => {
-  const step = {
+  const step: NodePositionStep = {
     node,
     shadowType: ShadowType.NONE,
     shadowContext: null,
     nodeShadow: null,
     shadowSibling: null,
+    formattingContext: null,
     fragmentIndex: 0
   };
   return {
@@ -557,12 +558,13 @@ export const newNodePositionFromNode = (node: Node): NodePosition => {
 export const newNodePositionFromNodeContext =
     (nodeContext: NodeContext,
      initialFragmentIndex: number|null): NodePosition => {
-      const step = {
+      const step: NodePositionStep = {
         node: nodeContext.sourceNode,
         shadowType: ShadowType.NONE,
         shadowContext: nodeContext.shadowContext,
         nodeShadow: null,
         shadowSibling: null,
+        formattingContext: null,
         fragmentIndex: initialFragmentIndex != null ? initialFragmentIndex :
                                                       nodeContext.fragmentIndex
       };

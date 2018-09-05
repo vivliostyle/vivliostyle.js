@@ -25,7 +25,12 @@ import * as breaks from './break';
 type LayoutIteratorState = {
   nodeContext: vtree.NodeContext,
   atUnforcedBreak: boolean,
-  break: boolean
+  break: boolean,
+  leadingEdge?: boolean,
+  breakAtTheEdge?: string|null,
+  onStartEdges?: boolean,
+  leadingEdgeContexts?: vtree.NodeContext[],
+  lastAfterNodeContext?: vtree.NodeContext|null
 };
 
 export {LayoutIteratorState};

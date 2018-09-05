@@ -192,15 +192,15 @@ export class ViewFactory extends base.SimpleEventTarget implements
   exprContentListener: any;
 
   // provided by layout
-  nodeContext: vtree.NodeContext = null;
-  viewRoot: Element = null;
+  nodeContext: vtree.NodeContext|null = null;
+  viewRoot: Element|null = null;
   isFootnote: boolean = false;
-  sourceNode: Node = null;
+  sourceNode: Node|null = null;
   offsetInNode: number = 0;
 
   // computed
   // TODO: only set it on NodeContext
-  viewNode: Node = null;
+  viewNode: Node|null = null;
 
   constructor(
       public readonly flowName: string, public readonly context: Context,
@@ -1558,7 +1558,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
     } else {
       // any shadow trees?
       if (pos.nodeShadow) {
-        let shadowNode = pos.nodeShadow.root;
+        let shadowNode: Node|null = pos.nodeShadow.root;
         if (pos.nodeShadow.type == vtree.ShadowType.ROOTLESS) {
           shadowNode = shadowNode.firstChild;
         }
@@ -1857,9 +1857,9 @@ export class ViewFactory extends base.SimpleEventTarget implements
         return false;
       }
       const elem1 = step1.node.nodeType === 1 ? (step1.node as Element) :
-                                                step1.node.parentElement;
+                                                (step1.node.parentElement as Element);
       const elem2 = step2.node.nodeType === 1 ? (step2.node as Element) :
-                                                step2.node.parentElement;
+                                                (step2.node.parentElement as Element);
       return step1.shadowContext.owner === step2.shadowContext.owner &&
           getPseudoName(elem1) === getPseudoName(elem2);
     } else {
