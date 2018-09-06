@@ -7113,8 +7113,12 @@ var DocumentOptions = (function () {
 
         // write fragment back to URL when updated
         this.fragment.subscribe(function (fragment) {
-            var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
-            _storesUrlParameters2["default"].setParameter("f", encoded, true);
+            if (urlOptions.epubUrl ? fragment == 'epubcfi(/6/2!)' : fragment == 'epubcfi(/2!)') {
+                _storesUrlParameters2["default"].removeParameter("f");
+            } else {
+                var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
+                _storesUrlParameters2["default"].setParameter("f", encoded, true);
+            }
         });
     }
 
@@ -7816,6 +7820,27 @@ var URLParameterStore = (function () {
                 updated = url.substring(0, start) + value + url.substring(start + l);
             } else {
                 updated = url + (url.match(/#/) ? "&" : "#") + name + "=" + value;
+            }
+            if (this.history.replaceState) {
+                this.history.replaceState(null, "", updated);
+            } else {
+                this.location.href = updated;
+            }
+        }
+    }, {
+        key: "removeParameter",
+        value: function removeParameter(name) {
+            var url = this.location.href;
+            var updated = undefined;
+            var regexp = getRegExpForParameter(name);
+            var r = regexp.exec(url);
+            if (r) {
+                var end = r.index + r[0].length;
+                if (r[0].charAt(0) == '#') {
+                    updated = url.substring(0, r.index + 1) + url.substring(end + 1);
+                } else {
+                    updated = url.substring(0, r.index) + url.substring(end);
+                }
             }
             if (this.history.replaceState) {
                 this.history.replaceState(null, "", updated);
