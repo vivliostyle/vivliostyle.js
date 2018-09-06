@@ -28,8 +28,6 @@
 ### Changed
 
 - The author is changed from Vivliostyle Inc. to Vivliostyle Foundation (vivliostyle.org)
-  - <https://github.com/vivliostyle/vivliostyle.js/pull/410>, < >
-  - [viewer UI] <https://github.com/vivliostyle/vivliostyle-ui/pull/52>, < >
   - Note: The former company name Vivliostyle Inc. was changed to Trim-marks Inc. and that company holds copyright of the source code developed under the name of Vivliostyle Inc.
 - [viewer UI] Page navigation UI improvement
   - <https://github.com/vivliostyle/vivliostyle-ui/pull/55>, <https://github.com/vivliostyle/vivliostyle-ui/pull/56>
@@ -37,6 +35,8 @@
   - Cmd+Up and Cmd+Down keys for First page and Last page, for Mac, same as Home/End keys on PC
   - Add buttons for move to first/last page
   - Hide the previous/next page arrow when there's no previous/next page.
+- Set the viewer print margin default to 0
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/442>
 - Test platform change: IE11 to Microsoft Edge
   - <https://github.com/vivliostyle/vivliostyle.js/commit/5c71209a>
   - IE11 is no longer supported
