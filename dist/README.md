@@ -4,7 +4,7 @@ Vivliostyle Viewer is a web application displaying and typesetting HTML(XML)/CSS
 This is a bundled package of [Vivliostyle core engine](https://github.com/vivliostyle/vivliostyle.js), [Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui) and other typesetting libraries.
 
 - View samples online: <https://vivliostyle.org/samples/>
-- Download latest release version: <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-2017.6.zip>
+- Download latest release version: <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-2018.9.zip>
 - Download latest development version: <http://vivliostyle.github.io/vivliostyle.js/downloads/vivliostyle-js-latest.zip>
 
 ## How to use
@@ -16,7 +16,7 @@ This is a bundled package of [Vivliostyle core engine](https://github.com/vivlio
 3. Run the following command:
 
   ```
-  (Shell environment like Mac OS X or Linux)
+  (Shell environment like macOS or Linux)
   > ./start-webserver
   (Windows)
   > .\start-webserver
