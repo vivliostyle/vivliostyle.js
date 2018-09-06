@@ -1,9 +1,13 @@
 # Change Log
 
-## Unreleased
+## [2018.9](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.9)
 
 ### Added
 
+- Support CSS Logical properties
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/443>
+  - Spec: [CSS Logical Properties and Values Level 1](https://www.w3.org/TR/css-logical-1/)
+  - [Flow-Relative Box Model Properties](https://www.w3.org/TR/css-logical-1/#box) are supported except the `inset` shorthand property
 - Implement `pages` counter
   - <https://github.com/vivliostyle/vivliostyle.js/pull/367>
   - Spec: [CSS Paged Media Module Level 3 - Page-based counters](https://drafts.csswg.org/css-page/#page-based-counters)
@@ -18,14 +22,37 @@
 - Add support for `break-word` value of `word-break` property
   - <https://github.com/vivliostyle/vivliostyle.js/pull/409>
   - Spec: [CSS Text Module Level 3 - Breaking Rules for Letters: the word-break property](https://www.w3.org/TR/css-text-3/#word-break-property)
+- Add (non-standard) `float-min-wrap-block` property to control text wrapping around page floats
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/382>
 
 ### Changed
 
+- The author is changed from Vivliostyle Inc. to Vivliostyle Foundation (vivliostyle.org)
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/410>, < >
+  - [viewer UI] <https://github.com/vivliostyle/vivliostyle-ui/pull/52>, < >
+  - Note: The former company name Vivliostyle Inc. was changed to Trim-marks Inc. and that company holds copyright of the source code developed under the name of Vivliostyle Inc.
+- [viewer UI] Page navigation UI improvement
+  - <https://github.com/vivliostyle/vivliostyle-ui/pull/55>, <https://github.com/vivliostyle/vivliostyle-ui/pull/56>
+  - Swipe support on touch devices
+  - Cmd+Up and Cmd+Down keys for First page and Last page, for Mac, same as Home/End keys on PC
+  - Add buttons for move to first/last page
+  - Hide the previous/next page arrow when there's no previous/next page.
+- Test platform change: IE11 to Microsoft Edge
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/5c71209a>
+  - IE11 is no longer supported
 - Avoid text wrapping around fragmented page floats
   - <https://github.com/vivliostyle/vivliostyle.js/pull/379>
 
 ### Fixed
 
+- Fix a bug that page spread view is weird when viewport width/height is specified
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/447>
+- Fix a bug that `clear: both` on page floats causes "Error: Unexpected side: both".
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/445>
+- Workaround for Microsoft Edge's `text-justify: inter-ideograph` problem
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/b620148e>
+- [viewer UI] Fix sticky hover effect on touch devices
+  - <https://github.com/vivliostyle/vivliostyle-ui/pull/54>
 - Fix a bug that a bottom margin on a page float is not taken into account when the float has a bottom padding or border
   - <https://github.com/vivliostyle/vivliostyle.js/pull/376>
 - Fix a bug that `box-decoration-break: clone` makes a block incorrectly overflow
@@ -38,6 +65,16 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/388>
 - Fix a bug that a table is occasionally fragmented immediately before the end of it
   - <https://github.com/vivliostyle/vivliostyle.js/pull/397>
+- Avoid printing bug on Gecko
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/385>
+- Avoid printing bug on Blink
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/394>
+- Fix incorrect justification when a positive `text-indent` is specified
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/396>
+- Fix display of `mglyph` element of MathML
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/407>
+- Fix a bug that order of page floats is sometimes incorrect
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/408>
 
 ## [2017.6](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.6) - 2017-6-22
 

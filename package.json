@@ -1,6 +1,6 @@
 {
   "name": "vivliostyle",
-  "version": "2018.7.0-pre",
+  "version": "2018.9.0-pre",
   "description": "Library for web sites with rich paged viewing and EPUB support, shared with Vivliostyle Formatter & Browser",
   "scripts": {
     "lint": "eslint src test plugins/*/src plugins/*/test",
@@ -13,7 +13,7 @@
     "type": "git",
     "url": "https://github.com/vivliostyle/vivliostyle.js.git"
   },
-  "author": "Vivliostyle.org",
+  "author": "Vivliostyle Foundation",
   "bugs": {
     "url": "https://github.com/vivliostyle/vivliostyle.js/issues"
   },
