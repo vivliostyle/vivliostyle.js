@@ -1,6 +1,6 @@
 # Change Log
 
-## [2018.9](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.9)
+## [2018.9](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.9) - 2018-09-07
 
 ### Added
 
@@ -35,6 +35,8 @@
   - Cmd+Up and Cmd+Down keys for First page and Last page, for Mac, same as Home/End keys on PC
   - Add buttons for move to first/last page
   - Hide the previous/next page arrow when there's no previous/next page.
+- [Viewer UI] Omit `&f=epubcfi(/2!)` in URL at first page
+  - <https://github.com/vivliostyle/vivliostyle-ui/pull/58>
 - Set the viewer print margin default to 0
   - <https://github.com/vivliostyle/vivliostyle.js/pull/442>
 - Test platform change: IE11 to Microsoft Edge
