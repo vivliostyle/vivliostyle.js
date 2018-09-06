@@ -155,6 +155,10 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Supported in all browsers
 - [Page-margin boxes (@top-left-corner, @top-left, @top-center, @top-right, @top-right-corner, @left-top, @left-middle, @left-bottom, @right-top, @right-middle, @right-bottom, @bottom-left-corner, @bottom-left, @bottom-center, @bottom-right, @bottom-right-coner)](https://drafts.csswg.org/css-page/#margin-at-rules)
   - Supported in all browsers
+- Page selectors [:left, :right](http://dev.w3.org/csswg/css-page/#spread-pseudos), [:first](http://dev.w3.org/csswg/css-page/#first-pseudo), [:recto, :verso](http://dev.w3.org/csswg/css-logical-props/#logical-page)
+  - Supported in all browsers
+- [Page-based counters (page, pages)](https://drafts.csswg.org/css-page/#page-based-counters)
+  - Supported in all browsers
 
 ### [CSS Fonts 3](https://www.w3.org/TR/css-fonts-3/)
 
