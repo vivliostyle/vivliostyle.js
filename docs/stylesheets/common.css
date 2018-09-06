@@ -1,0 +1,20 @@
+code, input[type=text] {
+    font-family: Consolas, 'Liberation Mono', Menlo, Courier, "游ゴシック", "Yu Gothic", "YuGothic", "ヒラギノ角ゴ ProN W3", "HiraKakuProN-W3", "ヒラギノ角ゴ Pro W3", "HiraKakuPro-W3", "メイリオ", "Meiryo", "ＭＳ ゴシック", "MS Gothic", monospace;
+}
+
+p {
+    margin-bottom: 1em;
+}
+
+code {
+    white-space: pre;
+}
+
+div.code {
+    margin: 1em 3em;
+}
+
+input[type=text] {
+    font-size: 110%;
+    padding: 5px;
+}

@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=yes" />
+    <!-- Always force latest IE rendering engine or request Chrome Frame -->
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <style>
+        html {
+            font-family: "Optima nova W01", "Optima", "游ゴシック", "Yu Gothic", "YuGothic", "ヒラギノ角ゴ ProN W3", "HiraKakuProN-W3", "ヒラギノ角ゴ Pro W3", "HiraKakuPro-W3", "メイリオ", "Meiryo", "ＭＳ ゴシック", "MS Gothic", sans-serif;
+        }
+        quote {
+            font-style: italic;
+        }
+    </style>
+    <title>Features supported by Vivliostyle</title>
+</head>
+<body>
+<h1>Features supported by Vivliostyle</h1>
+
+<p>The Vivliostyle uses a two-layer architecture, with some of its functionality implemented purely in javascript, and some being delegated all or in part to the browser engine on top of which Vivliostyle is running. In the following list <quote>Supported in all browsers</quote> indicates that features implemented in Javascript that will work regardless of the browser engine. Other features’ availability and behavior do vary based on what is supported by the underlying browser engine.</p>
+
+<p>Properties where <quote>Allowed prefixes</quote> is indicated may be used with any of the listed prefixes, or preferably without a prefix, regardless of the underlying browser engine. If Vivliostyle needs to invoke the browser engine, it will internally convert to the appropriate syntax.</p>
+
+<h2>Values</h2>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css-values/#common-keywords">Supported CSS-wide keywords</a>: <code>inherit</code>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li><code>initial</code> and <code>unset</code> are <em>not</em> supported.</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-values/#lengths">Supported length units</a>: <code>em</code>, <code>ex</code>, <code>ch</code>, <code>rem</code>, <code>cm</code>, <code>mm</code>, <code>q</code>, <code>in</code>, <code>pc</code>, <code>pt</code>, <code>px</code>.
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li>Supported color values
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li><a href="https://www.w3.org/TR/css3-color/#html4">Basic color keywords</a></li>
+      <li><a href="https://www.w3.org/TR/css3-color/#rgb-color">RGB color values</a>, <a href="https://www.w3.org/TR/css3-color/#rgba-color">RGBA color values</a></li>
+      <li><a href="https://www.w3.org/TR/css3-color/#transparent">‘transparent’ color keyword</a></li>
+      <li><a href="https://www.w3.org/TR/css3-color/#hsl-color">HSL color values</a>, <a href="https://www.w3.org/TR/css3-color/#hsla-color">HSLA color values</a></li>
+      <li><a href="https://www.w3.org/TR/css3-color/#svg-color">Extended color keywords</a></li>
+      <li><a href="https://www.w3.org/TR/css3-color/#currentcolor">‘currentColor’ color keyword</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-values/#attr-notation">Attribute references: <code>attr()</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Only supported in values of <code>content</code> property.</li>
+      <li>Only ‘string’ and ‘url’ types are supported.</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.csswg.org/css-content/#cross-references">Cross references: <code>target-counter()</code> and <code>target-counters()</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Only supported in values of <code>content</code> property.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2>Selectors</h2>
+
+<h3><a href="https://www.w3.org/TR/CSS2/">CSS 2</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#universal-selector">Universal selector <code>*</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#type-selectors">Type selectors <code>E</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#descendant-selectors">Descendant selectors <code>E F</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#child-selectors">Child selectors <code>E &gt; F</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#adjacent-selectors">Adjacent sibling selectors <code>E + F</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#attribute-selectors">Attribute selectors <code>E[foo]</code>, <code>E[foo="bar"]</code>, <code>E[foo~="bar"]</code>, <code>E[foo|="bar"]</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#class-html">Class selectors <code>E.foo</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#id-selectors">ID selectors <code>E#foo</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#first-child"><code>:first-child</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#link-pseudo-classes">Link pseudo-class <code>E:link</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#lang">Language pseudo-class <code>E:lang(c)</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#first-line-pseudo"><code>:first-line</code> pseudo-element</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Note: there is a bug when used alone or with the universal selector(<code>*</code>). <a href="https://github.com/vivliostyle/vivliostyle.js/issues/133">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#first-letter"><code>:first-letter</code> pseudo-element</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Note: there is a bug when used alone, with the universal selector(<code>*</code>), or with non-ascii characters. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/34">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#before-and-after"><code>:before</code> and <code>:after</code> pseudo-elements</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+</ul>
+
+<h4>Not supported selectors</h4>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#link-pseudo-classes">Link pseudo-class <code>E:visited</code></a></li>
+  <li><a href="https://www.w3.org/TR/CSS2/selector.html#dynamic-pseudo-classes">Dynamic pseudo-classes <code>E:active</code>, <code>E:hover</code>, <code>E:focus</code></a></li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css3-selectors/">Selectors 3</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#typenmsp">Type selectors with namespaces <code>ns|E</code>, <code>*|E</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#univnmsp">Universal selector with namespaces <code>ns|*</code>, <code>*|*</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#attribute-substrings">Substring matching attribute selectors <code>[att^=val]</code>, <code>[att$=val]</code>, <code>[att*=val]</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#attrnmsp">Attribute selectors with namespaces <code>[ns|att]</code>, <code>[|att]</code>, <code>[ns|att=val]</code>, <code>[|att=val]</code>, <code>[ns|att~=val]</code>, <code>[|att~=val]</code>, <code>[ns|att|=val]</code>, <code>[|att|=val]</code>, <code>[ns|att^=val]</code>, <code>[|att^=val]</code>, <code>[ns|att$=val]</code>, <code>[|att$=val]</code>, <code>[ns|att*=val]</code>, <code>[|att*=val]</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#UIstates">The UI element states pseudo-classes <code>:enabled</code>, <code>:disabled</code>, <code>:checked</code>, <code>:indeterminate</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Note that the current implementation can use only initial states of those UI elements. Even if the actual state of the element is toggled by user interaction, the style does not change.</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#root-pseudo"><code>:root</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#nth-child-pseudo"><code>:nth-child()</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#nth-last-child-pseudo"><code>:nth-last-child()</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#nth-of-type-pseudo"><code>:nth-of-type()</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#nth-last-of-type-pseudo"><code>:nth-last-of-type()</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#first-child-pseudo"><code>:first-child</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#last-child-pseudo"><code>:last-child</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#first-of-type-pseudo"><code>:first-of-type</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#last-of-type-pseudo"><code>:last-of-type</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#only-child-pseudo"><code>:only-child</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#only-of-type-pseudo"><code>:only-of-type</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#empty-pseudo"><code>:empty</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#negation"><code>:not()</code> pseudo-class</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#first-line"><code>::first-line</code> pseudo-element</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Note: there is a bug when used alone or with the universal selector(<code>*</code>). <a href="https://github.com/vivliostyle/vivliostyle.js/issues/133">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#first-letter"><code>::first-letter</code> pseudo-element</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Note: there is a bug when used alone, with the universal selector(<code>*</code>), or with non-ascii characters. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/34">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#gen-content"><code>::before</code> and <code>::after</code> pseudo-elements</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#general-sibling-combinators">General sibling combinator <code>E ~ F</code></a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://drafts.csswg.org/css-overflow-4/">CSS Overflow 4</a></h3>
+
+<ul>
+  <li><a href="https://drafts.csswg.org/css-overflow-4/#fragment-pseudo-element"><code>:nth-fragment()</code> pseudo-element</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+</ul>
+
+<h4>Not supported selectors</h4>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#typenmsp">Type selectors without namespaces <code>|E</code></a></li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#univnmsp">Universal selector without namespaces <code>|*</code></a></li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#attrnmsp">Attribute selectors with universal namespace <code>[*|att]</code>, <code>[*|att=val]</code>, <code>[*|att~=val]</code>, <code>[*|att|=val]</code></a></li>
+  <li><a href="https://www.w3.org/TR/css3-selectors/#target-pseudo">Target pseudo-class <code>:target</code></a></li>
+</ul>
+
+<h2>At-rules</h2>
+
+<h3><a href="https://www.w3.org/TR/CSS2/">CSS 2</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/CSS2/syndata.html#charset">@charset</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/cascade.html#at-import">@import</a>
+    <ul>
+      <li><a href="https://www.w3.org/TR/css-cascade-3/#at-import">Also in CSS Cascading and Inheritance 3</a></li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css3-namespace/">CSS Namespaces 3</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css3-namespace/#declaration">@namespace</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css3-conditional/">CSS Conditional Rules 3</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css3-conditional/#atmedia-rule">@media</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://drafts.csswg.org/css-page-3/">CSS Paged Media 3</a></h3>
+
+<ul>
+  <li><a href="https://drafts.csswg.org/css-page/#at-page-rule">@page</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.csswg.org/css-page/#margin-at-rules">Page-margin boxes (@top-left-corner, @top-left, @top-center, @top-right, @top-right-corner, @left-top, @left-middle, @left-bottom, @right-top, @right-middle, @right-bottom, @bottom-left-corner, @bottom-left, @bottom-center, @bottom-right, @bottom-right-coner)</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li>Page selectors <a href="http://dev.w3.org/csswg/css-page/#spread-pseudos">:left, :right</a>, <a href="http://dev.w3.org/csswg/css-page/#first-pseudo">:first</a>, <a href="http://dev.w3.org/csswg/css-logical-props/#logical-page">:recto, :verso</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.csswg.org/css-page/#page-based-counters">Page-based counters (page, pages)</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css-fonts-3/">CSS Fonts 3</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css-fonts-3/#font-face-rule">@font-face</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: <code>font-stretch</code>, <code>unicode-range</code> and <code>font-feature-settings</code> descriptors are currently ignored.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2>Media queries</h2>
+
+<ul>
+  <li>Vivliostyle uses styles specified for <a href="https://www.w3.org/TR/CSS2/media.html#media-types"><code>print</code> media</a> (as well as <code>all</code>).
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li>Supported media features
+    <ul>
+      <li><a href="https://www.w3.org/TR/css3-mediaqueries/#width"><code>(min-|max-)width</code></a>
+        <ul>
+          <li>Supported in all browsers</li>
+        </ul>
+      </li>
+      <li><a href="https://www.w3.org/TR/css3-mediaqueries/#height"><code>(min-|max-)height</code></a>
+        <ul>
+          <li>Supported in all browsers</li>
+        </ul>
+      </li>
+      <li><a href="https://www.w3.org/TR/css3-mediaqueries/#device-width"><code>(min-|max-)device-width</code></a>
+        <ul>
+          <li>Supported in all browsers</li>
+        </ul>
+      </li>
+      <li><a href="https://www.w3.org/TR/css3-mediaqueries/#device-height"><code>(min-|max-)device-height</code></a>
+        <ul>
+          <li>Supported in all browsers</li>
+        </ul>
+      </li>
+      <li><a href="https://www.w3.org/TR/css3-mediaqueries/#color"><code>(min-|max-)color</code></a>
+        <ul>
+          <li>Supported in all browsers</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2>Properties</h2>
+
+<h3><a href="https://www.w3.org/TR/CSS2/">CSS 2</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/CSS2/colors.html#propdef-background">background</a>
+    <ul>
+      <li>Supports <a href="https://www.w3.org/TR/css3-background/#background">CSS Backgrounds 3 syntax</a></li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/colors.html#propdef-background-attachment">background-attachment</a>
+    <ul>
+      <li>Supports <a href="https://www.w3.org/TR/css3-background/#background-attachment">CSS Backgrounds 3 syntax</a></li>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: behavior when used within <code>@page</code> rules is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/22">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/colors.html#propdef-background-color">background-color</a>
+    <ul>
+      <li>Supports <a href="https://www.w3.org/TR/css3-background/#background-color">CSS Backgrounds 3 syntax</a></li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/colors.html#propdef-background-image">background-image</a>
+    <ul>
+      <li>Supports <a href="https://www.w3.org/TR/css3-background/#background-image">CSS Backgrounds 3 syntax</a></li>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: behavior when used within <code>@page</code> rules is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/22">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/colors.html#propdef-background-position">background-position</a>
+    <ul>
+      <li>Supports <a href="https://www.w3.org/TR/css3-background/#background-position">CSS Backgrounds 3 syntax</a></li>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: behavior when used within <code>@page</code> rules is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/22">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/colors.html#propdef-background-repeat">background-repeat</a>
+    <ul>
+      <li>Supports <a href="https://www.w3.org/TR/css3-background/#background-repeat">CSS Backgrounds 3 syntax</a></li>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: behavior when used within <code>@page</code> rules is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/22">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border">border</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-bottom">border-bottom</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-bottom-color">border-bottom-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-bottom-style">border-bottom-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-bottom-width">border-bottom-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/tables.html#propdef-border-collapse">border-collapse</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-color">border-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-left">border-left</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-left-color">border-left-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-left-style">border-left-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-left-width">border-left-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-right">border-right</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-right-color">border-right-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-right-style">border-right-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-right-width">border-right-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/tables.html#propdef-border-spacing">border-spacing</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-style">border-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-top">border-top</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-top-color">border-top-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-top-style">border-top-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-top-width">border-top-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-border-width">border-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visuren.html#propdef-bottom">bottom</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/tables.html#propdef-caption-side">caption-side</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visuren.html#propdef-clear">clear</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visufx.html#propdef-clip">clip</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/colors.html#propdef-color">color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/generate.html#propdef-content">content</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/generate.html#propdef-counter-increment">counter-increment</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/generate.html#propdef-counter-reset">counter-reset</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.csswg.org/css-lists-3/#propdef-counter-set">counter-set</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/ui.html#propdef-cursor">cursor</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visuren.html#propdef-direction">direction</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visuren.html#propdef-display">display</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Supports <a href="https://www.w3.org/TR/css-flexbox-1/#flex-containers"><code>flex</code>, <code>inline-flex</code></a>, <a href="https://www.w3.org/TR/css-ruby-1/#propdef-display"><code>ruby</code>, <code>ruby-base</code>, <code>ruby-text</code>, <code>ruby-base-container</code> and <code>ruby-text-container</code></a> values.</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/tables.html#propdef-empty-cells">empty-cells</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visuren.html#propdef-float">float</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Supports <a href="https://drafts.csswg.org/css-page-floats/#propdef-float"><code>block-start</code>, <code>block-end</code>, <code>inline-start</code>, <code>inline-end</code>, <code>left</code>, <code>right</code>, <code>top</code>, <code>bottom</code> and <code>none</code></a> values.</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/fonts.html#propdef-font">font</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/fonts.html#propdef-font-family">font-family</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/fonts.html#propdef-font-size">font-size</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/fonts.html#propdef-font-style">font-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/fonts.html#propdef-font-variant">font-variant</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/fonts.html#propdef-font-weight">font-weight</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visudet.html#propdef-height">height</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visuren.html#propdef-left">left</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/text.html#propdef-letter-spacing">letter-spacing</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visudet.html#propdef-line-height">line-height</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/generate.html#propdef-list-style">list-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/generate.html#propdef-list-style-image">list-style-image</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/generate.html#propdef-list-style-position">list-style-position</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/generate.html#propdef-list-style-type">list-style-type</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-margin">margin</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-margin-bottom">margin-bottom</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-margin-left">margin-left</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-margin-right">margin-right</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-margin-top">margin-top</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visudet.html#propdef-max-height">max-height</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visudet.html#propdef-max-width">max-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visudet.html#propdef-min-height">min-height</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visudet.html#propdef-min-width">min-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/page.html#propdef-orphans">orphans</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/ui.html#propdef-outline">outline</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/ui.html#propdef-outline-color">outline-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-ui/#propdef-outline-offset">outline-offset</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/ui.html#propdef-outline-style">outline-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/ui.html#propdef-outline-width">outline-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visufx.html#propdef-overflow">overflow</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-padding">padding</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-padding-bottom">padding-bottom</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-padding-left">padding-left</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-padding-right">padding-right</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/box.html#propdef-padding-top">padding-top</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/page.html#propdef-page-break-after">page-break-after</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/page.html#propdef-page-break-before">page-break-before</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/page.html#propdef-page-break-inside">page-break-inside</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visuren.html#propdef-position">position</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/generate.html#propdef-quotes">quotes</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Note: not supported within <code>@page</code> rules. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/43">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visuren.html#propdef-right">right</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/tables.html#propdef-table-layout">table-layout</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/text.html#propdef-text-align">text-align</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/text.html#propdef-text-decoration">text-decoration</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/text.html#propdef-text-indent">text-indent</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/text.html#propdef-text-transform">text-transform</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visuren.html#propdef-top">top</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visuren.html#propdef-unicode-bidi">unicode-bidi</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Supports <a href="https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi">new values (<code>isolate</code>, <code>isolate-override</code>, <code>plaintext</code>) in CSS Writing Modes 3</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visudet.html#propdef-vertical-align">vertical-align</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visufx.html#propdef-visibility">visibility</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/text.html#propdef-white-space">white-space</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/page.html#propdef-widows">widows</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visudet.html#propdef-width">width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/text.html#propdef-word-spacing">word-spacing</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/CSS2/visuren.html#propdef-z-index">z-index</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://drafts.csswg.org/css-page-3/">CSS Paged Media 3</a></h3>
+
+<ul>
+  <li><a href="https://drafts.csswg.org/css-page/#bleed">bleed</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Only effective when specified within an <code>@page</code> rule without page selectors</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.csswg.org/css-page/#marks">marks</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Only effective when specified within an <code>@page</code> rule without page selectors</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.csswg.org/css-page-3/#descdef-page-size">size</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Supports <code>JIS-B5</code> and <code>JIS-B4</code> values in the current editor’s draft.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css3-color/">CSS Color 3</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css3-color/#color0">color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-color/#opacity">opacity</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css3-background/">CSS Backgrounds and Borders 3</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css3-background/#background">background</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#background-attachment">background-attachment</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: behavior when used within <code>@page</code> rules is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/22">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#background-clip">background-clip</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: behavior when used within <code>@page</code> rules is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/22">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#background-color">background-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#background-image">background-image</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: behavior when used within <code>@page</code> rules is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/22">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#background-origin">background-origin</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: behavior when used within <code>@page</code> rules is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/22">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#background-position">background-position</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: behavior when used within <code>@page</code> rules is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/22">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#background-repeat">background-repeat</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: behavior when used within <code>@page</code> rules is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/22">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#background-size">background-size</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: behavior when used within <code>@page</code> rules is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/22">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border">border</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-bottom">border-bottom</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-bottom-color">border-bottom-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-bottom-left-radius">border-bottom-left-radius</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-bottom-right-radius">border-bottom-right-radius</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-bottom-style">border-bottom-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-bottom-width">border-bottom-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-color">border-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-image">border-image</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-image-outset">border-image-outset</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-image-repeat">border-image-repeat</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-image-slice">border-image-slice</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-image-source">border-image-source</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-image-width">border-image-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-left">border-left</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-left-color">border-left-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-left-style">border-left-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-left-width">border-left-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-radius">border-radius</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-right">border-right</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-right-color">border-right-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-right-style">border-right-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-right-width">border-right-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-style">border-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-top">border-top</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-top-color">border-top-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-top-left-radius">border-top-left-radius</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-top-right-radius">border-top-right-radius</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-top-style">border-top-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-top-width">border-top-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#border-width">border-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-background/#box-shadow">box-shadow</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css3-images/">CSS Image Values and Replaced Content 3</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css3-images/#the-image-resolution">image-resolution</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Only <code>&lt;resolution&gt;</code> value is supported.</li>
+      <li>Only supported for content of <code>img</code>, <code>input[type=image]</code> and <code>video</code> (applied to poster images) elements and before/after pseudoelements. Other images such as background images, list images or border images are not supported.</li>
+      <li>The property is applied to vector images such as SVG, as well as raster images. This behavior is different from what the spec specifies.</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-images/#object-fit">object-fit</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-images/#object-position">object-position</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css-fonts-3/">CSS Fonts 3</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css-fonts-3/#propdef-font-family">font-family</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-fonts-3/#propdef-font-feature-settings">font-feature-settings</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-fonts-3/#propdef-font-kerning">font-kerning</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-fonts-3/#propdef-font-size">font-size</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-fonts-3/#propdef-font-size-adjust">font-size-adjust</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-fonts-3/#propdef-font-style">font-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-fonts-3/#propdef-font-variant-east-asian">font-variant-east-asian</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-fonts-3/#propdef-font-weight">font-weight</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-fonts-3/#propdef-font-stretch">font-stretch</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css-text-3/">CSS Text 3</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css-text-3/#hyphens">hyphens</a>
+    <ul>
+      <li>Allowed prefixes: epub, moz, ms, webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-3/#letter-spacing">letter-spacing</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-3/#line-break0">line-break</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Allowed prefixes: ms, webkit</li>
+      <li>Values: <code>auto | loose | normal | strict;</code></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-3/#overflow-wrap">overflow-wrap</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: While the spec states that <code>word-wrap</code> must be treated as if it were a shorthand of <code>overflow-wrap</code>, Vivliostyle treat them for now as different properties and might result in an incorrect cascading behavior when inconsistent values are specified for both of the properties.</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-3/#tab-size">tab-size</a>
+    <ul>
+      <li>Allowed prefixes: moz</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-3/#text-align-last">text-align-last</a>
+    <ul>
+      <li>Allowed prefixes: moz, ms</li>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: While <code>text-align</code> property is a shorthand in CSS Text 3, Vivliostyle treats <code>text-align</code> for now as an independent property (defined in CSS 2.1) rather than a shorthand.</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.csswg.org/css-text-3/#propdef-text-justify">text-justify</a>
+    <ul>
+      <li>Allowed prefixes: ms</li>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: <code>inter-ideograph</code> value as well as values defined in the current editor’s draft is supported since we use it in UA stylesheet to emulate text-justify: auto behavior defined in the spec on IE.</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-3/#white-space">white-space</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-3/#word-break">word-break</a>
+    <ul>
+      <li>Allowed prefixes: ms</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-3/#word-wrap">word-wrap</a>
+    <ul>
+      <li>Allowed prefixes: ms</li>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: While the spec states that <code>word-wrap</code> must be treated as if it were a shorthand of <code>overflow-wrap</code>, Vivliostyle treat them for now as different properties and might result in an incorrect cascading behavior when inconsistent values are specified for both of the properties.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://drafts.csswg.org/css-text-4/">CSS Text 4</a></h3>
+
+<ul>
+  <li><a href="https://drafts.csswg.org/css-text-4/#propdef-hyphenate-character">hyphenate-character</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css-text-decor-3/">CSS Text Decoration 3</a></h3>
+
+<ul>
+  <li>Note: While <code>text-decoration</code> property is a shorthand in CSS Text Decoration 3, Vivliostyle treats <code>text-decoration</code> for now as an independent property defined in CSS Level 2.1.</li>
+  <li><a href="https://www.w3.org/TR/css-text-decor-3/#text-decoration-color">text-decoration-color</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-decor-3/#text-decoration-line">text-decoration-line</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-decor-3/#text-decoration-skip">text-decoration-skip</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-decor-3/#text-decoration-style">text-decoration-style</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-decor-3/#text-emphasis">text-emphasis</a>
+    <ul>
+      <li>Allowed prefixes: epub, webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-decor-3/#text-emphasis-color">text-emphasis-color</a>
+    <ul>
+      <li>Allowed prefixes: epub, webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-decor-3/#text-emphasis-position">text-emphasis-position</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-decor-3/#text-emphasis-style">text-emphasis-style</a>
+    <ul>
+      <li>Allowed prefixes: epub, webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-decor-3/#text-shadow">text-shadow</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-text-decor-3/#text-underline-position">text-underline-position</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Allowed prefixes: ms, webkit</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css3-multicol/">CSS Multi-column Layout 1</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#break-after">break-after</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/129">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#break-before">break-before</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Note: behavior when multiple forced break values coincide at a single break point is not compliant to the spec. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/129">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#break-inside">break-inside</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Note: All of <code>avoid-page</code>, <code>avoid-column</code> and <code>avoid-region</code> values are treated as if they were <code>avoid</code>. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/128">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#column-count">column-count</a>
+    <ul>
+      <li>Allowed prefixes: moz, webkit</li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#column-gap0">column-gap</a>
+    <ul>
+      <li>Allowed prefixes: moz, webkit</li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#column-rule0">column-rule</a>
+    <ul>
+      <li>Allowed prefixes: moz, webkit</li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#column-rule-color">column-rule-color</a>
+    <ul>
+      <li>Allowed prefixes: moz, webkit</li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#column-rule-style">column-rule-style</a>
+    <ul>
+      <li>Allowed prefixes: moz, webkit</li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#column-rule-width">column-rule-width</a>
+    <ul>
+      <li>Allowed prefixes: moz, webkit</li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#column-width">column-width</a>
+    <ul>
+      <li>Allowed prefixes: moz, webkit</li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#columns0">columns</a>
+    <ul>
+      <li>Allowed prefixes: moz, webkit</li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#column-span0">column-span</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Supported in all browsers</li>
+      <li>Note: Currently <code>column-span</code> is effective only when specified on a page float.</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.csswg.org/css-multicol-1/#propdef-column-fill">column-fill</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+</ul>
+
+<h2><a href="https://drafts.csswg.org/css-multicol-2/">CSS Multi-column Layout 2</a></h2>
+
+<ul>
+  <li><a href="https://drafts.csswg.org/css-multicol-2/#propdef-column-span">column-span</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Supported in all browsers</li>
+      <li>Note: Currently <code>column-span</code> is effective only when specified on a page float. When <code>auto</code> value is specified, either a single column or all columns are spanned depending on the min-content inline size of the page float.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css3-ui/">CSS Basic User Interface 3</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css3-ui/#propdef-box-sizing">box-sizing</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-ui/#propdef-outline">outline</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-ui/#propdef-outline-color">outline-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-ui/#propdef-outline-style">outline-style</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-ui/#propdef-outline-width">outline-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-ui/#propdef-text-overflow">text-overflow</a>
+    <ul>
+      <li>Allowed prefixes: ms</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css-writing-modes-3/">CSS Writing Modes 3</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css-writing-modes-3/#propdef-direction">direction</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-writing-modes-3/#propdef-text-combine-upright">text-combine-upright</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/2012/WD-css3-writing-modes-20121115/#text-combine-horizontal0">text-combine-horizontal</a>
+    <ul>
+      <li>This deprecated property is kept for compatibility.</li>
+      <li>Allowed prefixes: epub, ms</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/2011/WD-css3-writing-modes-20110531/#text-combine0">text-combine</a>
+    <ul>
+      <li>This deprecated property is kept for compatibility.</li>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-writing-modes-3/#propdef-text-orientation">text-orientation</a>
+    <ul>
+      <li>Allowed prefixes: epub, webkit</li>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: supported values are <a href="https://www.w3.org/TR/2014/CR-css-writing-modes-3-20140320/#propdef-text-orientation">those defined in 20 March 2014 Candidate Recommendation</a>, not those in the latest spec.</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi">unicode-bidi</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Supports <a href="https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi">new values (<code>isolate</code>, <code>isolate-override</code>, <code>plaintext</code>) in CSS Writing Modes 3</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-writing-modes-3/#propdef-writing-mode">writing-mode</a>
+    <ul>
+      <li>Allowed prefixes: epub, webkit</li>
+      <li>Support depends on browser capabilities</li>
+      <li>Note: supported values are <a href="https://www.w3.org/TR/2014/CR-css-writing-modes-3-20140320/#propdef-writing-mode">those defined in 20 March 2014 Candidate Recommendation</a>, not those in the latest spec.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css-flexbox-1/">CSS Flexible Box Layout 1</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css-flexbox-1/#propdef-align-content">align-content</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-flexbox-1/#propdef-align-items">align-items</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-flexbox-1/#propdef-align-self">align-self</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-flexbox-1/#flex-containers">display</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Supports <a href="https://www.w3.org/TR/css-flexbox-1/#flex-containers"><code>flex</code>, <code>inline-flex</code></a>, <a href="https://www.w3.org/TR/css-ruby-1/#propdef-display"><code>ruby</code>, <code>ruby-base</code>, <code>ruby-text</code>, <code>ruby-base-container</code> and <code>ruby-text-container</code></a> values.</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-flexbox-1/#propdef-flex">flex</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-flexbox-1/#propdef-flex-basis">flex-basis</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-flexbox-1/#propdef-flex-direction">flex-direction</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-flexbox-1/#propdef-flex-flow">flex-flow</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-flexbox-1/#propdef-flex-grow">flex-grow</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-flexbox-1/#propdef-flex-shrink">flex-shrink</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-flexbox-1/#propdef-flex-wrap">flex-wrap</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-flexbox-1/#propdef-justify-content">justify-content</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-flexbox-1/#propdef-order">order</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css3-break/">CSS Fragmentation 3</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css3-break/#propdef-break-after">break-after</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-break/#propdef-break-before">break-before</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-multicol/#break-inside">break-inside</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Note: All of <code>avoid-page</code>, <code>avoid-column</code> and <code>avoid-region</code> values are treated as if they were <code>avoid</code>. <a href="https://github.com/vivliostyle/vivliostyle.js/issues/128">[Issue]</a></li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-break/#propdef-orphans">orphans</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-break/#propdef-widows">widows</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css3-break/#propdef-box-decoration-break">box-decoration-break</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Supported in all browsers</li>
+      <li>Note: Background, box-shadow and border images on inline-start/end borders are always rendered as if <code>box-decoration-break: clone</code> is specified.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css-transforms-1/">CSS Transforms 1</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css-transforms-1/#propdef-backface-visibility">backface-visibility</a>
+    <ul>
+      <li>Allowed prefixes: ms, webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-transforms-1/#propdef-transform">transform</a>
+    <ul>
+      <li>Allowed prefixes: epub, ms</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-transforms-1/#propdef-transform-origin">transform-origin</a>
+    <ul>
+      <li>Allowed prefixes: epub, ms</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/css-ruby-1/">CSS Ruby Layout 1</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/css-ruby-1/#propdef-display">display</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Supports <a href="https://www.w3.org/TR/css-flexbox-1/#flex-containers"><code>flex</code>, <code>inline-flex</code></a>, <a href="https://www.w3.org/TR/css-ruby-1/#propdef-display"><code>ruby</code>, <code>ruby-base</code>, <code>ruby-text</code>, <code>ruby-base-container</code> and <code>ruby-text-container</code></a> values.</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-ruby-1/#propdef-ruby-align">ruby-align</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.csswg.org/css-ruby-1/#propdef-ruby-position">ruby-position</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+      <li>Supports syntax defined in the current editor’s draft.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://drafts.csswg.org/css-size-adjust-1/">CSS Mobile Text Size Adjustment 1</a></h3>
+
+<ul>
+  <li><a href="https://drafts.csswg.org/css-size-adjust-1/#text-size-adjust">text-size-adjust</a>
+    <ul>
+      <li>Allowed prefixes: moz, ms</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h2><a href="https://www.w3.org/TR/compositing-1/">Compositing and Blending 1</a></h2>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/compositing-1/#propdef-background-blend-mode">background-blend-mode</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/compositing-1/#propdef-isolation">isolation</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/compositing-1/#propdef-mix-blend-mode">mix-blend-mode</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/SVG2/">Scalable Vector Graphics (SVG) 2</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#ColorInterpolationProperty">color-interpolation</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#ColorRenderingProperty">color-rendering</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#FillProperty">fill</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#FillOpacityProperty">fill-opacity</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#FillRuleProperty">fill-rule</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/text.html#GlyphOrientationVerticalProperty">glyph-orientation-vertical</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#ImageRenderingProperty">image-rendering</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#MarkerProperty">marker</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#MarkerStartProperty">marker-start</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#MarkerMidProperty">marker-mid</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#MarkerEndProperty">marker-end</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/interact.html#PointerEventsProperty">pointer-events</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#PaintOrderProperty">paint-order</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#ShapeRenderingProperty">shape-rendering</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/pservers.html#StopColorProperty">stop-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/pservers.html#StopOpacityProperty">stop-opacity</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#StrokeProperty">stroke</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#StrokeDasharrayProperty">stroke-dasharray</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#StrokeDashoffsetProperty">stroke-dashoffset</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#StrokeLinecapProperty">stroke-linecap</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#StrokeLinejoinProperty">stroke-linejoin</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#StrokeMiterlimitProperty">stroke-miterlimit</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#StrokeOpacityProperty">stroke-opacity</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#StrokeWidthProperty">stroke-width</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/text.html#TextAnchorProperty">text-anchor</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/painting.html#TextRenderingProperty">text-rendering</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG2/coords.html#VectorEffectProperty">vector-effect</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/SVG11/">Scalable Vector Graphics (SVG) 1.1</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/SVG11/text.html#AlignmentBaselineProperty">alignment-baseline</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG11/text.html#BaselineShiftProperty">baseline-shift</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG11/text.html#DominantBaselineProperty">dominant-baseline</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/SVG11/masking.html#MaskProperty">mask</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://drafts.fxtf.org/css-masking-1/">CSS Masking 1</a></h3>
+
+<ul>
+  <li><a href="https://drafts.fxtf.org/css-masking-1/#the-clip-path">clip-path</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.fxtf.org/css-masking-1/#the-clip-rule">clip-rule</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h2><a href="https://drafts.csswg.org/css-page-floats-3/">CSS Page Floats 3</a></h2>
+<ul>
+  <li><a href="https://drafts.csswg.org/css-page-floats-3/#propdef-clear">clear</a>
+    <ul>
+      <li>Supports <a href="https://drafts.csswg.org/css-page-floats-3/#propdef-clear"><code>none</code>, <code>left</code>, <code>right</code>, <code>top</code>, <code>bottom</code>, <code>both</code>, <code>all</code>, <code>same</code></a> values.</li>
+      <li>When <code>all</code> is specified on a block-level box (not a page float), the block-start edge of the box gets pushed down so that the edge comes after any block-start/block-end page float of which anchors are before the box in the document order.</li>
+      <li>When a <code>clear</code> value is specified on a page float, it is placed so that it comes after any of preceding page floats.</li>
+      <li><code>same</code> value means the same direction as one which the page float is floated to.</li>
+      <li>If a page float with <code>float: snap-block</code> would be placed at the block-start end but a <code>clear</code> value on it forbidden such placement, the float is instead placed at the block-end side (unless the <code>clear</code> value also forbidden such placement).</li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.csswg.org/css-page-floats-3/#propdef-float">float</a>
+    <ul>
+      <li>Supports <a href="https://drafts.csswg.org/css-page-floats/#propdef-float"><code>block-start</code>, <code>block-end</code>, <code>inline-start</code>, <code>inline-end</code>, <code>snap-block</code>, <code>left</code>, <code>right</code>, <code>top</code>, <code>bottom</code> and <code>none</code></a> values.</li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.csswg.org/css-page-floats-3/#propdef-float-reference">float-reference</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+</ul>
+
+<h2><a href="https://www.w3.org/TR/css-gcpm-3/">CSS GCPM 3</a></h2>
+<ul>
+  <li><a href="https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy">footnote-policy</a>
+    <ul>
+      <li>Supports <a href="https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy"><code>auto</code>, <code>line</code></a> values.</li>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+</ul>
+
+<h2><a href="https://www.w3.org/TR/filter-effects-1/">Filter Effects 1</a></h2>
+<ul>
+  <li><a href="https://www.w3.org/TR/filter-effects-1/#propdef-filter">filter</a>
+    <ul>
+      <li>Allowed prefixes: webkit</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/filter-effects-1/#FloodColorProperty">flood-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/filter-effects-1/#propdef-flood-opacity">flood-opacity</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/filter-effects-1/#propdef-lighting-color">lighting-color</a>
+    <ul>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h3><a href="https://www.w3.org/TR/pointerevents/">Pointer Events</a></h3>
+
+<ul>
+  <li><a href="https://www.w3.org/TR/pointerevents/#the-touch-action-css-property">touch-action</a>
+    <ul>
+      <li>Allowed prefixes: ms</li>
+      <li>Support depends on browser capabilities</li>
+    </ul>
+  </li>
+</ul>
+
+<h2><a href="https://www.w3.org/TR/css-logical-1/">CSS Logical Properties and Values 1</a></h2>
+<ul>
+  <li><a href="https://www.w3.org/TR/css-logical-1/#dimension-properties">block-size, inline-size, min-block-size, min-inline-size, max-block-size, max-inline-size</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-logical-1/#margin-properties">margin-block-start, margin-block-end, margin-inline-start, margin-inline-end, margin-block, margin-inline</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-logical-1/#inset-properties">inset-block-start, inset-block-end, inset-inline-start, inset-inline-end, inset-block, inset-inline</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-logical-1/#padding-properties">padding-block-start, padding-block-end, padding-inline-start, padding-inline-end, padding-block, padding-inline</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="https://www.w3.org/TR/css-logical-1/#border-properties">border-block-start-width, border-block-end-width, border-inline-start-width, border-inline-end-width, border-block-width, border-inline-width, border-block-start-style, border-block-end-style, border-inline-start-style, border-inline-end-style, border-block-style, border-inline-style, border-block-start-color, border-block-end-color, border-inline-start-color, border-inline-end-color, border-block-color, border-inline-color, border-block-start, border-block-end, border-inline-start, border-inline-end, border-block, border-inline</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+</ul>
+
+<h2><a href="http://www.idpf.org/epub/pgt/">EPUB Adaptive Layout</a></h2>
+
+<p>Note: This spec is not on a W3C standards track. Future version of Vivliostyle may drop support for this spec.</p>
+
+<h3>At-rules</h3>
+
+<ul>
+  <li><a href="http://www.idpf.org/epub/pgt/#rule-define">@-epubx-define</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#rule-flow">@-epubx-flow</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#rule-page-master">@-epubx-page-master</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#rule-page-template">@-epubx-page-template</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#rule-partition">@-epubx-partition</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#rule-partition-group">@-epubx-partition-group</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#rule-region">@-epubx-region</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#rule-viewport">@-epubx-viewport</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#rule-when">@-epubx-when</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+</ul>
+
+<h3>Properties</h3>
+
+<ul>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-conflicting-partitions">-epubx-conflicting-partitions</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-enabled">-epubx-enabled</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-flow-consume">-epubx-flow-consume</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-flow-from">-epubx-flow-from</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Only effective when specified to EPUB Adaptive Layout partitions.</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-flow-into">-epubx-flow-into</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-flow-linger">-epubx-flow-linger</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-flow-options">-epubx-flow-options</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-flow-priority">-epubx-flow-priority</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-min-page-height">-epubx-min-page-height</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-min-page-width">-epubx-min-page-width</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-required">-epubx-required</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-required-partitions">-epubx-required-partitions</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-shape-outside">-epubx-shape-outside</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Only effective when specified to EPUB Adaptive Layout partitions.</li>
+      <li>Note: only <a href="https://www.w3.org/TR/2012/WD-css3-exclusions-20120503/#supported-svg-shapes">old syntaxes from 3 May 2012 Working Draft</a> are supported.</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-shape-inside">-epubx-shape-inside</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Only effective when specified to EPUB Adaptive Layout partitions.</li>
+      <li>Note: only <a href="https://www.w3.org/TR/2012/WD-css3-exclusions-20120503/#supported-svg-shapes">old syntaxes from 3 May 2012 Working Draft</a> are supported.</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-snap-height">-epubx-snap-height</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-snap-width">-epubx-snap-width</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-text-zoom">-epubx-text-zoom</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-utilization">-epubx-utilization</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+  <li><a href="http://www.idpf.org/epub/pgt/#prop-wrap-flow">-epubx-wrap-flow</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Only effective when specified to EPUB Adaptive Layout partitions.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2><a href="https://specs.rivoal.net/css-repeat/">CSS Repeated Headers and Footers</a></h2>
+
+<p>Note: This spec proposal is not submitted to CSS Working Group yet.</p>
+
+<ul>
+  <li><a href="https://specs.rivoal.net/css-repeat/#propdef-repeat-on-break">repeat-on-break</a>
+    <ul>
+      <li>Supported in all browsers</li>
+    </ul>
+  </li>
+</ul>
+
+</body>
+</html>
