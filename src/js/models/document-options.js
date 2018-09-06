@@ -48,8 +48,12 @@ class DocumentOptions {
 
         // write fragment back to URL when updated
         this.fragment.subscribe(fragment => {
-            const encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
-            urlParameters.setParameter("f", encoded, true);
+            if (urlOptions.epubUrl ? fragment == 'epubcfi(/6/2!)' : fragment == 'epubcfi(/2!)') {
+                urlParameters.removeParameter("f");
+            } else {
+                const encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
+                urlParameters.setParameter("f", encoded, true);
+            }
         });
     }
 

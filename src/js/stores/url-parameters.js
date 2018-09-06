@@ -67,6 +67,26 @@ class URLParameterStore {
             this.location.href = updated;
         }
     }
+
+    removeParameter(name) {
+        const url = this.location.href;
+        let updated;
+        const regexp = getRegExpForParameter(name);
+        const r = regexp.exec(url);
+        if (r) {
+            const end = r.index + r[0].length;
+            if (r[0].charAt(0) == '#') {
+                updated = url.substring(0, r.index + 1) + url.substring(end + 1);
+            } else {
+                updated = url.substring(0, r.index) + url.substring(end);
+            }
+        }
+        if (this.history.replaceState) {
+            this.history.replaceState(null, "", updated);
+        } else {
+            this.location.href = updated;
+        }
+    }
 }
 
 export default new URLParameterStore();
