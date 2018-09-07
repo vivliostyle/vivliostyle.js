@@ -1691,7 +1691,8 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
                         if (rel == "stylesheet" || (rel == "alternate stylesheet" && classes)) {
                             var src = child.getAttribute("href");
                             src = adapt.base.resolveURL(src, url);
-                            sources.push({url:src, text:null, classes, media,
+                            const title = child.getAttribute("title");
+                            sources.push({url:src, text:null, classes: (title ? classes : null), media,
                                 flavor:adapt.cssparse.StylesheetFlavor.AUTHOR});
                         }
                     } else if (localName == "meta" && child.getAttribute("name") == "viewport") {
