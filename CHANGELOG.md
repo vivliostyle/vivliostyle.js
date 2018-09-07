@@ -1,6 +1,6 @@
 # Change Log
 
-## [2018.8.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.8.100) - 2018-09-07
+## [2018.8.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.8.100) - 2018-09-08
 
 ### Added
 
@@ -47,6 +47,8 @@
 
 ### Fixed
 
+- Fix a bug that page spread view becomes incorrect when content doc's writing mode does not match the page-progression-direction in OPF
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/453>
 - Fix a bug that page spread view is weird when viewport width/height is specified
   - <https://github.com/vivliostyle/vivliostyle.js/issues/447>
 - Fix a bug that `clear: both` on page floats causes "Error: Unexpected side: both".
