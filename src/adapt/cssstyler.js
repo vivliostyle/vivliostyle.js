@@ -532,14 +532,12 @@ adapt.cssstyler.columnProps = ["column-count", "column-width", "column-fill"];
  * @return {void}
  */
 adapt.cssstyler.Styler.prototype.postprocessTopStyle = function(elemStyle, isBody) {
-    if (!isBody) {
-        ["writing-mode", "direction"].forEach(function(propName) {
-            if (elemStyle[propName]) {
-                // Copy it over, but keep it at the root element as well.
-                this.rootStyle[propName] = elemStyle[propName];
-            }
-        }, this);
-    }
+    ["writing-mode", "direction"].forEach(propName => {
+        if (elemStyle[propName] && !(isBody && this.rootStyle[propName])) {
+            // Copy it over, but keep it at the root element as well.
+            this.rootStyle[propName] = elemStyle[propName];
+        }
+    });
     if (!this.rootBackgroundAssigned) {
         const backgroundColor = /** @type {adapt.css.Val} */
             (this.hasProp(elemStyle, this.validatorSet.backgroundProps, "background-color") ?
