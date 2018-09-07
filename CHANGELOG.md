@@ -1,6 +1,6 @@
 # Change Log
 
-## [2018.9](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.9) - 2018-09-07
+## [2018.8.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.8.100) - 2018-09-07
 
 ### Added
 
