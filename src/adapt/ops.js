@@ -237,8 +237,8 @@ adapt.ops.StyleInstance.prototype.init = function() {
     self.stylerMap = {};
     self.stylerMap[self.xmldoc.url] = self.styler;
     const docElementStyle = self.styler.getTopContainerStyle();
-    // if (!self.pageProgression)
-    //     self.pageProgression = vivliostyle.page.resolvePageProgression(docElementStyle);
+    if (!self.pageProgression)
+        self.pageProgression = vivliostyle.page.resolvePageProgression(docElementStyle);
     const rootBox = this.style.rootBox;
     this.rootPageBoxInstance = new adapt.pm.RootPageBoxInstance(rootBox);
     const cascadeInstance = this.style.cascade.createInstance(self, counterListener, counterResolver, this.lang);
