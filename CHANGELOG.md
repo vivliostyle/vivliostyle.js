@@ -49,6 +49,10 @@
 
 - Fix a bug that page spread view becomes incorrect when content doc's writing mode does not match the page-progression-direction in OPF
   - <https://github.com/vivliostyle/vivliostyle.js/pull/453>
+- Fix a bug that stylesheet link element is ignored when class attribute exists
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/452>
+- Fix a bug that writing mode specified on body didn't determine the root writing mode
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/451>
 - Fix a bug that page spread view is weird when viewport width/height is specified
   - <https://github.com/vivliostyle/vivliostyle.js/issues/447>
 - Fix a bug that `clear: both` on page floats causes "Error: Unexpected side: both".
