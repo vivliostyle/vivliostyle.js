@@ -1963,7 +1963,7 @@ adapt.epub.OPFView.prototype.getPageViewItem = function(spineIndex) {
 
         const instance = new adapt.ops.StyleInstance(style, xmldoc, self.opf.lang,
             viewport, self.clientLayout, self.fontMapper, customRenderer, self.opf.fallbackMap, pageNumberOffset,
-            self.opf.documentURLTransformer, self.counterStore, self.opf.pageProgression);
+            self.opf.documentURLTransformer, self.counterStore);
 
         instance.pref = self.pref;
         instance.init().then(() => {
