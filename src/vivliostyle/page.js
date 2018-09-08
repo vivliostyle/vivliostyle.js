@@ -1790,7 +1790,9 @@ vivliostyle.page.PageManager.prototype.definePageProgression = function() {
     scope.defineName("recto-page", new adapt.expr.Not(scope, isEvenPage));
     scope.defineName("verso-page", isEvenPage);
 
-    const pageProgression = vivliostyle.page.resolvePageProgression(this.docElementStyle);
+    /** @type {adapt.ops.StyleInstance} */
+    const styleInstance = this.context;
+    const pageProgression = styleInstance.pageProgression || vivliostyle.page.resolvePageProgression(this.docElementStyle);
     if (pageProgression === vivliostyle.constants.PageProgression.LTR) {
         scope.defineName("left-page", isEvenPage);
         scope.defineName("right-page", new adapt.expr.Not(scope, isEvenPage));
