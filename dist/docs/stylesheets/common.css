@@ -18,3 +18,13 @@ input[type=text] {
     font-size: 110%;
     padding: 5px;
 }
+
+.url {
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+img.icon {
+    height: 1.5em;
+    vertical-align: text-bottom;
+}
