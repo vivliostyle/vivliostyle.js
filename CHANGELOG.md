@@ -14,7 +14,7 @@
 - The author is changed from Vivliostyle Inc. (<http://vivliostyle.com>) to Vivliostyle Foundation (<https://vivliostyle.org>)
   - <https://github.com/vivliostyle/vivliostyle.js/pull/410>, <https://github.com/vivliostyle/vivliostyle.js/commit/a3d866d8>, <https://github.com/vivliostyle/vivliostyle.js/commit/bc48f59c>
   - Note: The former company name Vivliostyle Inc. was changed to [Trim-marks Inc.](https://trim-marks.com) and that company holds copyright of the source code developed under the name of Vivliostyle Inc. (~2018.2). This open source Vivliostyle was a subset of the company's proprietary commercial products, which are now named “VersaType”.
-- [viewer UI] Page navigation UI improvement
+- [Viewer UI] Page navigation UI improvement
   - <https://github.com/vivliostyle/vivliostyle-ui/pull/55>, <https://github.com/vivliostyle/vivliostyle-ui/pull/56>
   - Swipe support on touch devices
   - Cmd+Up and Cmd+Down keys for First page and Last page, for Mac, same as Home/End keys on PC
@@ -27,6 +27,9 @@
 - Test platform change: IE11 to Microsoft Edge
   - <https://github.com/vivliostyle/vivliostyle.js/commit/5c71209a>
   - IE11 is no longer supported
+- Update MathJax to 2.7.5
+  - <https://github.com/vivliostyle/vivliostyle-ui/commit/8bdc64bf>
+
 
 ### Fixed
 
@@ -42,7 +45,7 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/445>
 - Workaround for Microsoft Edge's `text-justify: inter-ideograph` problem
   - <https://github.com/vivliostyle/vivliostyle.js/commit/b620148e>
-- [viewer UI] Fix sticky hover effect on touch devices
+- [Viewer UI] Fix sticky hover effect on touch devices
   - <https://github.com/vivliostyle/vivliostyle-ui/pull/54>
 
 ## [2018.2](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.2) - 2018-02-02 (Unreleased)
