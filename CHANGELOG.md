@@ -11,9 +11,9 @@
 
 ### Changed
 
-- The author is changed from Vivliostyle Inc. to Vivliostyle Foundation (vivliostyle.org)
+- The author is changed from Vivliostyle Inc. (<http://vivliostyle.com>) to Vivliostyle Foundation (<https://vivliostyle.org>)
   - <https://github.com/vivliostyle/vivliostyle.js/pull/410>, <https://github.com/vivliostyle/vivliostyle.js/commit/a3d866d8>, <https://github.com/vivliostyle/vivliostyle.js/commit/bc48f59c>
-  - Note: The former company name Vivliostyle Inc. was changed to Trim-marks Inc. and that company holds copyright of the source code developed under the name of Vivliostyle Inc. (~2018.2)
+  - Note: The former company name Vivliostyle Inc. was changed to [Trim-marks Inc.](https://trim-marks.com) and that company holds copyright of the source code developed under the name of Vivliostyle Inc. (~2018.2). This open source Vivliostyle was a subset of the company's proprietary commercial products, which are now named “VersaType”.
 - [viewer UI] Page navigation UI improvement
   - <https://github.com/vivliostyle/vivliostyle-ui/pull/55>, <https://github.com/vivliostyle/vivliostyle-ui/pull/56>
   - Swipe support on touch devices
