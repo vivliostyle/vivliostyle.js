@@ -8145,7 +8145,7 @@ module.exports = exports["default"];
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Vivliostyle core 2018.8.100
+ * Vivliostyle core 2018.8.101-pre.20180911020325
  */
 (function(factory) {
     if (typeof define === "function" && define.amd) {
