@@ -33,8 +33,9 @@ git config user.email "murakami@vivliostyle.org"
 git config user.name "MurakamiShinyu (Travis CI)"
 
 # update gh-pages branch
+cp -R ../vivliostyle-ui/dist/* .
 cp -R ../vivliostyle.js/samples/* samples/
-cp ../vivliostyle.js/doc/supported-features.{md,html} docs/
+cp ../vivliostyle.js/doc/supported-features.{md,html} docs/en/
 cp -R ../vivliostyle-ui/build/* viewer/
 
 zip="../vivliostyle-ui/vivliostyle-js-latest.zip"

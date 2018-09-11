@@ -1,6 +1,54 @@
 # Change Log
 
-## Unreleased
+## [2018.8.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.8.100) - 2018-09-10
+
+### Added
+
+- Support CSS Logical properties
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/443>
+  - Spec: [CSS Logical Properties and Values Level 1](https://www.w3.org/TR/css-logical-1/)
+  - [Flow-Relative Box Model Properties](https://www.w3.org/TR/css-logical-1/#box) are supported except the `inset` shorthand property
+
+### Changed
+
+- The author is changed from Vivliostyle Inc. (<http://vivliostyle.com>) to Vivliostyle Foundation (<https://vivliostyle.org>)
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/410>, <https://github.com/vivliostyle/vivliostyle.js/commit/a3d866d8>, <https://github.com/vivliostyle/vivliostyle.js/commit/bc48f59c>
+  - Note: The former company name Vivliostyle Inc. was changed to [Trim-marks Inc.](https://trim-marks.com) and that company holds copyright of the source code developed under the name of Vivliostyle Inc. (~2018.2). This open source Vivliostyle was a subset of the company's proprietary commercial products, which are now named “VersaType”.
+- [Viewer UI] Page navigation UI improvement
+  - <https://github.com/vivliostyle/vivliostyle-ui/pull/55>, <https://github.com/vivliostyle/vivliostyle-ui/pull/56>
+  - Swipe support on touch devices
+  - Cmd+Up and Cmd+Down keys for First page and Last page, for Mac, same as Home/End keys on PC
+  - Add buttons for move to first/last page
+  - Hide the previous/next page arrow when there's no previous/next page.
+- [Viewer UI] Omit `&f=epubcfi(/2!)` in URL at first page
+  - <https://github.com/vivliostyle/vivliostyle-ui/pull/58>
+- Set the viewer print margin default to 0
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/442>
+- Test platform change: IE11 to Microsoft Edge
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/5c71209a>
+  - IE11 is no longer supported
+- Update MathJax to 2.7.5
+  - <https://github.com/vivliostyle/vivliostyle-ui/commit/8bdc64bf>
+
+
+### Fixed
+
+- Fix a bug that page spread view becomes incorrect when content doc's writing mode does not match the page-progression-direction in OPF
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/453>
+- Fix a bug that stylesheet link element is ignored when class attribute exists
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/452>
+- Fix a bug that writing mode specified on body didn't determine the root writing mode
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/451>
+- Fix a bug that page spread view is weird when viewport width/height is specified
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/447>
+- Fix a bug that `clear: both` on page floats causes "Error: Unexpected side: both".
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/445>
+- Workaround for Microsoft Edge's `text-justify: inter-ideograph` problem
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/b620148e>
+- [Viewer UI] Fix sticky hover effect on touch devices
+  - <https://github.com/vivliostyle/vivliostyle-ui/pull/54>
+
+## [2018.2](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.2) - 2018-02-02 (Unreleased)
 
 ### Added
 
@@ -18,6 +66,8 @@
 - Add support for `break-word` value of `word-break` property
   - <https://github.com/vivliostyle/vivliostyle.js/pull/409>
   - Spec: [CSS Text Module Level 3 - Breaking Rules for Letters: the word-break property](https://www.w3.org/TR/css-text-3/#word-break-property)
+- Add (non-standard) `float-min-wrap-block` property to control text wrapping around page floats
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/382>
 
 ### Changed
 
@@ -38,8 +88,18 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/388>
 - Fix a bug that a table is occasionally fragmented immediately before the end of it
   - <https://github.com/vivliostyle/vivliostyle.js/pull/397>
+- Avoid printing bug on Gecko
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/385>
+- Avoid printing bug on Blink
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/394>
+- Fix incorrect justification when a positive `text-indent` is specified
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/396>
+- Fix display of `mglyph` element of MathML
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/407>
+- Fix a bug that order of page floats is sometimes incorrect
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/408>
 
-## [2017.6](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.6) - 2017-6-22
+## [2017.6](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.6) - 2017-06-22
 
 ### Added
 
@@ -80,7 +140,7 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/361>
   - <https://github.com/vivliostyle/vivliostyle.js/pull/362>
 
-## [2017.2](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.2) - 2017-2-22
+## [2017.2](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.2) - 2017-02-22
 
 ### Added
 

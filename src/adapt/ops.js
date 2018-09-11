@@ -166,6 +166,7 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @param {number} pageNumberOffset
  * @param {!adapt.base.DocumentURLTransformer} documentURLTransformer
  * @param {!vivliostyle.counters.CounterStore} counterStore
+ * @param {?vivliostyle.constants.PageProgression=} pageProgression
  * @constructor
  * @extends {adapt.expr.Context}
  * @implements {adapt.cssstyler.FlowListener}
@@ -173,7 +174,8 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @implements {adapt.vgen.StylerProducer}
  */
 adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientLayout,
-                                   fontMapper, customRenderer, fallbackMap, pageNumberOffset, documentURLTransformer, counterStore) {
+                                   fontMapper, customRenderer, fallbackMap, pageNumberOffset, documentURLTransformer, counterStore,
+                                   pageProgression) {
     adapt.expr.Context.call(this, style.rootScope, viewport.width, viewport.height, viewport.fontSize);
     /** @const */ this.style = style;
     /** @const */ this.xmldoc = xmldoc;
@@ -195,7 +197,7 @@ adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientL
     /** @private @const */ this.rootPageFloatLayoutContext =
         new vivliostyle.pagefloat.PageFloatLayoutContext(null, null, null, null, null, null, null);
     /** @type {!Object.<string,boolean>} */ this.pageBreaks = {};
-    /** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = null;
+    /** @type {?vivliostyle.constants.PageProgression} */ this.pageProgression = pageProgression || null;
     /** @const */ this.customRenderer = customRenderer;
     /** @const */ this.fallbackMap = fallbackMap;
     /** @const @type {number} */ this.pageNumberOffset = pageNumberOffset;
@@ -235,7 +237,8 @@ adapt.ops.StyleInstance.prototype.init = function() {
     self.stylerMap = {};
     self.stylerMap[self.xmldoc.url] = self.styler;
     const docElementStyle = self.styler.getTopContainerStyle();
-    self.pageProgression = vivliostyle.page.resolvePageProgression(docElementStyle);
+    if (!self.pageProgression)
+        self.pageProgression = vivliostyle.page.resolvePageProgression(docElementStyle);
     const rootBox = this.style.rootBox;
     this.rootPageBoxInstance = new adapt.pm.RootPageBoxInstance(rootBox);
     const cascadeInstance = this.style.cascade.createInstance(self, counterListener, counterResolver, this.lang);
@@ -1691,7 +1694,8 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
                         if (rel == "stylesheet" || (rel == "alternate stylesheet" && classes)) {
                             var src = child.getAttribute("href");
                             src = adapt.base.resolveURL(src, url);
-                            sources.push({url:src, text:null, classes, media,
+                            const title = child.getAttribute("title");
+                            sources.push({url:src, text:null, classes: (title ? classes : null), media,
                                 flavor:adapt.cssparse.StylesheetFlavor.AUTHOR});
                         }
                     } else if (localName == "meta" && child.getAttribute("name") == "viewport") {
