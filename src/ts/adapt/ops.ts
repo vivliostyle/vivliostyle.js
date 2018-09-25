@@ -181,7 +181,8 @@ export class StyleInstance extends expr.Context implements
       public readonly fallbackMap: {[key: string]: string},
       public readonly pageNumberOffset: number,
       public readonly documentURLTransformer: DocumentURLTransformer,
-      public readonly counterStore: counters.CounterStore) {
+      public readonly counterStore: counters.CounterStore,
+      pageProgression?: constants.PageProgression) {
     super(
         style.rootScope, viewport.width, viewport.height,
         viewport.fontSize);
@@ -189,6 +190,7 @@ export class StyleInstance extends expr.Context implements
     this.faces = new font.DocumentFaces(this.style.fontDeobfuscator);
     this.rootPageFloatLayoutContext = new pagefloat.PageFloatLayoutContext(
         null, null, null, null, null, null, null);
+    this.pageProgression = pageProgression || null;
     for (const flowName in style.flowProps) {
       const flowStyle = style.flowProps[flowName];
       const consume = csscasc.getProp(flowStyle, 'flow-consume');
@@ -219,7 +221,9 @@ export class StyleInstance extends expr.Context implements
     self.stylerMap = {};
     self.stylerMap[self.xmldoc.url] = self.styler;
     const docElementStyle = self.styler.getTopContainerStyle();
-    self.pageProgression = page.resolvePageProgression(docElementStyle);
+    if (!self.pageProgression) {
+      self.pageProgression = page.resolvePageProgression(docElementStyle);
+    }
     const rootBox = this.style.rootBox;
     this.rootPageBoxInstance = new pm.RootPageBoxInstance(rootBox);
     const cascadeInstance = this.style.cascade.createInstance(
@@ -1747,10 +1751,11 @@ export class OPSDocStore extends xmldoc.XMLDocStore {
                   rel == 'alternate stylesheet' && classes) {
                 let src = child.getAttribute('href');
                 src = base.resolveURL(src, url);
+                const title = child.getAttribute("title");
                 sources.push({
                   url: src,
                   text: null,
-                  classes,
+                  classes: (title ? classes : null),
                   media,
                   flavor: cssparse.StylesheetFlavor.AUTHOR
                 });

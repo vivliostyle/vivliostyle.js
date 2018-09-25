@@ -1850,7 +1850,8 @@ export class PageManager {
         scope.zero);
     scope.defineName('recto-page', new expr.Not(scope, isEvenPage));
     scope.defineName('verso-page', isEvenPage);
-    const pageProgression = resolvePageProgression(this.docElementStyle);
+    const styleInstance: any /* ops.StyleInstance */ = this.context;
+    const pageProgression = styleInstance.pageProgression || resolvePageProgression(this.docElementStyle);
     if (pageProgression === constants.PageProgression.LTR) {
       scope.defineName('left-page', isEvenPage);
       scope.defineName('right-page', new expr.Not(scope, isEvenPage));

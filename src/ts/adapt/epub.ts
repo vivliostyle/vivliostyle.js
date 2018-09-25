@@ -1818,7 +1818,8 @@ export class OPFView implements CustomRendererFactory {
       const instance = new ops.StyleInstance(
           style, xmldoc, self.opf.lang, viewport, self.clientLayout,
           self.fontMapper, customRenderer, self.opf.fallbackMap,
-          pageNumberOffset, self.opf.documentURLTransformer, self.counterStore);
+          pageNumberOffset, self.opf.documentURLTransformer, self.counterStore,
+          self.opf.pageProgression);
       instance.pref = self.pref;
       instance.init().then(() => {
         viewItem = {

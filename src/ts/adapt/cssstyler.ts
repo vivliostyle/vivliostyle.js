@@ -494,14 +494,12 @@ export class Styler implements AbstractStyler {
    * @param elemStyle (source) element style
    */
   postprocessTopStyle(elemStyle: csscasc.ElementStyle, isBody: boolean): void {
-    if (!isBody) {
-      ['writing-mode', 'direction'].forEach(function(propName) {
-        if (elemStyle[propName]) {
-          // Copy it over, but keep it at the root element as well.
-          this.rootStyle[propName] = elemStyle[propName];
+    ["writing-mode", "direction"].forEach(propName => {
+        if (elemStyle[propName] && !(isBody && this.rootStyle[propName])) {
+            // Copy it over, but keep it at the root element as well.
+            this.rootStyle[propName] = elemStyle[propName];
         }
-      }, this);
-    }
+    });
     if (!this.rootBackgroundAssigned) {
       const backgroundColor =
           (this.hasProp(
