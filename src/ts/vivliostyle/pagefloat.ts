@@ -327,7 +327,7 @@ export class PageFloatLayoutContext {
   }
 
   private getPreviousSibling(): PageFloatLayoutContext|null {
-    let child = this;
+    let child: PageFloatLayoutContext = this;
     let parent = this.parent;
     let result;
     while (parent) {
@@ -926,14 +926,14 @@ export class PageFloatLayoutContext {
               if (floatMinWrapBlock && area.left < right) {
                 floatMinWrapBlockStart = resolveLengthPercentage(
                     floatMinWrapBlock, area.rootViewNodes[0],
-                    paddingRect.x2 - paddingRect.x1);
+                    paddingRect.x2 - paddingRect.x1) as number;
               }
               right = Math.min(right, area.left);
             } else {
               if (floatMinWrapBlock && area.top + area.height > top) {
                 floatMinWrapBlockStart = resolveLengthPercentage(
                     floatMinWrapBlock, area.rootViewNodes[0],
-                    paddingRect.y2 - paddingRect.y1);
+                    paddingRect.y2 - paddingRect.y1) as number;
               }
               top = Math.max(top, area.top + area.height);
             }
@@ -950,14 +950,14 @@ export class PageFloatLayoutContext {
               if (floatMinWrapBlock && area.left + area.width > left) {
                 floatMinWrapBlockEnd = resolveLengthPercentage(
                     floatMinWrapBlock, area.rootViewNodes[0],
-                    paddingRect.x2 - paddingRect.x1);
+                    paddingRect.x2 - paddingRect.x1) as number;
               }
               left = Math.max(left, area.left + area.width);
             } else {
               if (floatMinWrapBlock && area.top < bottom) {
                 floatMinWrapBlockEnd = resolveLengthPercentage(
                     floatMinWrapBlock, area.rootViewNodes[0],
-                    paddingRect.y2 - paddingRect.y1);
+                    paddingRect.y2 - paddingRect.y1) as number;
               }
               bottom = Math.min(bottom, area.top);
             }
@@ -1207,7 +1207,7 @@ export class PageFloatLayoutContext {
     }
     const columnRect = column.getPaddingRect();
     const columnBlockEnd = column.vertical ? columnRect.x1 : columnRect.y2;
-    let context = this;
+    let context: PageFloatLayoutContext = this;
     while (context) {
       if (context.floatsDeferredToNext.some(
               isContinuationOfAlreadyAppearedFloat(context))) {
@@ -1320,7 +1320,7 @@ export class PageFloatLayoutContext {
     const layoutContext = column.layoutContext;
     const clientLayout = column.clientLayout;
     asserts.assert(clientLayout);
-    let context = this;
+    let context: PageFloatLayoutContext = this;
     let limits = null;
     while (context && context.container) {
       const l = context.getLimitValuesInner(layoutContext, clientLayout);

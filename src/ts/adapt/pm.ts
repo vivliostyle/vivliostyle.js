@@ -1379,7 +1379,7 @@ export class PartitionInstance extends PageBoxInstance {
         if (list[i] instanceof css.Ident) {
           const qname =
               expr.makeQualifiedName((list[i] as css.Ident).name, 'enabled');
-          let term = new expr.Named(scope, qname);
+          let term: expr.Val = new expr.Named(scope, qname);
           if (conflicting) {
             term = new expr.Not(scope, term);
           }

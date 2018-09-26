@@ -3289,7 +3289,7 @@ export class CascadeParserHandler extends
 }
 
 export const nthSelectorActionClasses:
-    {[key: string]: (p1: number, p2: number) => any} = {
+    {[key: string]: typeof IsNthAction} = {
       'nth-child': IsNthSiblingAction,
       'nth-of-type': IsNthSiblingOfTypeAction,
       'nth-last-child': IsNthLastSiblingAction,

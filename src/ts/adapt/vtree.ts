@@ -802,7 +802,7 @@ export class NodeContext {
   }
 
   copy(): NodeContext {
-    let np = this;
+    let np: NodeContext = this;
     do {
       if (np.shared) {
         break;
@@ -839,7 +839,7 @@ export class NodeContext {
   }
 
   toNodePosition(): NodePosition {
-    let nc = this;
+    let nc: NodeContext = this;
     const steps = [];
     do {
       // We need fully "peeled" path, so don't record first-XXX pseudoelement
@@ -889,7 +889,7 @@ export class NodeContext {
    * each block.
    */
   walkUpBlocks(callback: (p1: NodeContext) => any) {
-    let nodeContext = this;
+    let nodeContext: NodeContext = this;
     while (nodeContext) {
       if (!nodeContext.inline) {
         callback(nodeContext);

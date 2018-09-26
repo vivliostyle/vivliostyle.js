@@ -1397,7 +1397,7 @@ export class FontShorthandValidator extends
   }
 }
 
-export const shorthandValidators: {[key: string]: () => any} = {
+export const shorthandValidators: {[key: string]: typeof ShorthandValidator} = {
   'SIMPLE': SimpleShorthandValidator,
   'INSETS': InsetsShorthandValidator,
   'INSETS_SLASH': InsetsSlashShorthandValidator,
@@ -1419,8 +1419,8 @@ export class ValidatorSet {
   namedValidators: {[key: string]: ValidatingGroup} = {};
   systemFonts: {[key: string]: ValueMap} = {};
   shorthands: {[key: string]: ShorthandValidator} = {};
-  layoutProps: ValueMap = [];
-  backgroundProps: ValueMap = [];
+  layoutProps: ValueMap = {};
+  backgroundProps: ValueMap = {};
 
   private addReplacement(val: ValidatingGroup, token: csstok.Token):
       ValidatingGroup {
@@ -1934,8 +1934,8 @@ export class ValidatorSet {
     ]);
   }
 
-  makePropSet(propList: string[]) {
-    const map = {};
+  makePropSet(propList: string[]): ValueMap {
+    const map: ValueMap = {};
     for (const prop of propList) {
       const shorthand = this.shorthands[prop];
       const list = shorthand ? shorthand.propList : [prop];
