@@ -62,7 +62,7 @@ export const navigateToRightPage = () => {
 
 export const keydown = (evt: KeyboardEvent): void => {
   const key = evt.key;
-  const keyIdentifier = evt.keyIdentifier;
+  const keyIdentifier = (evt as any).keyIdentifier;
   const location = evt.location;
   if (key === 'End' || keyIdentifier === 'End') {
     sendCommand({'a': 'moveTo', 'where': 'last'});

@@ -499,12 +499,12 @@ export class Val {
     return this;
   }
 
-  protected dependCore(
+  dependCore(
       other: Val, context: Context, dependencyCache: DependencyCache): boolean {
     return other === this;
   }
 
-  protected dependOuter(
+  dependOuter(
       other: Val, context: Context, dependencyCache: DependencyCache): boolean {
     const cached = dependencyCache[this.key];
     if (cached != null) {

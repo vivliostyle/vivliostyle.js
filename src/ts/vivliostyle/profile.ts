@@ -26,6 +26,8 @@ export namespace profile {
 export class Profiler {
   timestamps: any = {};
   private registerTiming: (p1: string, p2: string, p3?: number) => any;
+  registerStartTiming: (name: string, timestamp?: number) => any;
+  registerEndTiming: (name: string, timestamp?: number) => any;
 
   constructor(public readonly performanceInstance: Performance) {
     this.registerTiming = noop;

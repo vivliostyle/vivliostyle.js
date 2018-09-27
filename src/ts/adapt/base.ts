@@ -612,7 +612,8 @@ type Event = {
   type: string,
   target,
   currentTarget,
-  preventDefault
+  preventDefault,
+  newPage
 };
 
 export {Event};

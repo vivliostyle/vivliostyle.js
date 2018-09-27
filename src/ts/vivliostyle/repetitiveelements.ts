@@ -220,7 +220,7 @@ export class RepetitiveElements implements ElementsOffset {
     while (from.firstChild) {
       const child = from.firstChild;
       from.removeChild(child);
-      child.setAttribute(vtree.SPECIAL_ATTR, '1');
+      (child as Element).setAttribute(vtree.SPECIAL_ATTR, '1');
       if (firstChild) {
         to.insertBefore(child, firstChild);
       } else {

@@ -401,7 +401,7 @@ export const parseXMLResource = (response: net.Response, store: XMLDocStore):
           doc = parseAndReturnNullIfError(
               text, DOMParserSupportedType.TEXT_HTML, parser);
         } else if (root.localName.toLowerCase() === 'svg' &&
-            doc.contentType !== DOMParserSupportedType.IMAGE_SVG_XML) {
+            (doc as any).contentType !== DOMParserSupportedType.IMAGE_SVG_XML) {
           doc = parseAndReturnNullIfError(
               text, DOMParserSupportedType.IMAGE_SVG_XML, parser);
         }

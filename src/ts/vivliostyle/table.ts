@@ -28,6 +28,7 @@ import * as layout from '../adapt/layout';
 import * as layoututil from './layoututil';
 import * as repetitiveelements from './repetitiveelements';
 import {registerFragmentIndex} from './selectors';
+import { ViewFactory } from '../adapt/vgen';
 
 export class TableRow {
   cells: TableCell[] = [];
@@ -55,8 +56,8 @@ export class TableCell {
       public readonly rowIndex: number, public readonly columnIndex: number,
       viewElement: Element) {
     this.viewElement = viewElement;
-    this.colSpan = viewElement.colSpan || 1;
-    this.rowSpan = viewElement.rowSpan || 1;
+    this.colSpan = (viewElement as HTMLTableCellElement).colSpan || 1;
+    this.rowSpan = (viewElement as HTMLTableCellElement).rowSpan || 1;
   }
 
   setHeight(height: number) {
@@ -899,7 +900,7 @@ export class TableLayoutStrategy extends layoututil.EdgeSkipper {
                     return this
                         .layoutCell(cell, cellNodeContext, breakChunkPosition)
                         .thenAsync(() => {
-                          cellNodeContext.viewNode.rowSpan = cell.rowIndex +
+                          (cellNodeContext.viewNode as HTMLTableCellElement).rowSpan = cell.rowIndex +
                               cell.rowSpan - this.currentRowIndex + rowCount -
                               spanningCellRowIndex;
                           return task.newResult(true);
@@ -969,7 +970,7 @@ export class TableLayoutStrategy extends layoututil.EdgeSkipper {
               cell.anchorSlot.columnIndex) {
         const tdNodeStep = cellBreakPosition.cellNodePosition.steps[0];
         const offset =
-            this.column.layoutContext.xmldoc.getElementOffset(tdNodeStep.node);
+            (this.column.layoutContext as ViewFactory).xmldoc.getElementOffset(tdNodeStep.node as Element);
         registerFragmentIndex(
             offset, tdNodeStep.fragmentIndex + 1, 1);
       }
@@ -1178,13 +1179,13 @@ export class TableLayoutProcessor implements layout.LayoutProcessor {
     const cols = [];
     colGroups.forEach((colGroup) => {
       // Replace colgroup[span=n] with colgroup with n col elements
-      let span = colGroup.span;
+      let span = (colGroup as any).span;
       colGroup.removeAttribute('span');
       let col = colGroup.firstElementChild;
       while (col) {
         if (col.localName === 'col') {
           // Replace col[span=n] with n col elements
-          let s = col.span;
+          let s = (col as any).span;
           col.removeAttribute('span');
           span -= s;
           while (s-- > 1) {
@@ -1428,7 +1429,7 @@ export class TableLayoutProcessor implements layout.LayoutProcessor {
               formattingContext.cellBreakPositions.push(
                   ({cellNodePosition, breakChunkPosition, cell} as
                    BrokenTableCellPosition));
-              const cellViewNode = (cellNodeContext.viewNode as Element);
+              const cellViewNode = (cellNodeContext.viewNode as HTMLTableCellElement);
               cellFragment.column.layoutContext.processFragmentedBlockEdge(
                   cellFragment.cellNodeContext);
               if (rowIndex < cell.rowIndex + cell.rowSpan - 1) {

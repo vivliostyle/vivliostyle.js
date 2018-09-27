@@ -36,7 +36,7 @@ import * as font from './font';
 import * as task from './task';
 import * as taskutil from './taskutil';
 import * as vtree from './vtree';
-import * as xmldoc from './xmldoc';
+import * as xmldocs from './xmldoc';
 
 import * as asserts from '../vivliostyle/asserts';
 
@@ -78,7 +78,7 @@ type CustomRenderer =
 export {CustomRenderer};
 
 export interface CustomRendererFactory {
-  makeCustomRenderer(xmldoc: xmldoc.XMLDocHolder): CustomRenderer;
+  makeCustomRenderer(xmldoc: xmldocs.XMLDocHolder): CustomRenderer;
 }
 
 /**
@@ -103,7 +103,7 @@ export const initIFrame = (iframe: HTMLIFrameElement) => {
 };
 
 export interface StylerProducer {
-  getStylerForDoc(xmldoc: xmldoc.XMLDocHolder): cssstyler.AbstractStyler;
+  getStylerForDoc(xmldoc: xmldocs.XMLDocHolder): cssstyler.AbstractStyler;
 }
 
 export const pseudoelementDoc =
@@ -207,7 +207,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
       public readonly viewport: Viewport,
       public readonly styler: cssstyler.Styler,
       public readonly regionIds: string[],
-      public readonly xmldoc: xmldoc.XMLDocHolder,
+      public readonly xmldoc: xmldocs.XMLDocHolder,
       public readonly docFaces: font.DocumentFaces,
       public readonly footnoteStyle: csscasc.ElementStyle,
       public readonly stylerProducer: StylerProducer,
@@ -321,7 +321,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
     const frame: task.Frame<vtree.ShadowContext> =
         task.newFrame('createRefShadow');
     self.xmldoc.store.load(href).then((refDocParam) => {
-      const refDoc = (refDocParam as xmldoc.XMLDocHolder);
+      const refDoc = (refDocParam as xmldocs.XMLDocHolder);
       if (refDoc) {
         const refElement = refDoc.getElement(href);
         if (refElement) {
@@ -926,7 +926,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
               custom = true;
             }
           }
-          if (element.dataset &&
+          if ((element as HTMLElement).dataset &&
               element.getAttribute('data-math-typeset') === 'true') {
             custom = true;
           }
@@ -1192,8 +1192,8 @@ export class ViewFactory extends base.SimpleEventTarget implements
     images.forEach((param) => {
       if (param.fetcher.get().get() === 'load') {
         const img = param.image;
-        let scaledWidth = img.width / imageResolution;
-        let scaledHeight = img.height / imageResolution;
+        let scaledWidth = (img as HTMLImageElement).width / imageResolution;
+        let scaledHeight = (img as HTMLImageElement).height / imageResolution;
         const elem = param.element;
         if (scaledWidth > 0 && scaledHeight > 0) {
           if (computedStyle['box-sizing'] === css.ident.border_box) {
@@ -1342,8 +1342,8 @@ export class ViewFactory extends base.SimpleEventTarget implements
           new RepetitiveElementsOwnerFormattingContext(
                   parentFormattingContext,
                   (this.nodeContext.sourceNode as Element));
-      this.nodeContext.formattingContext.initializeRepetitiveElements(
-          this.nodeContext.vertical);
+      (this.nodeContext.formattingContext as RepetitiveElementsOwnerFormattingContext)
+          .initializeRepetitiveElements(this.nodeContext.vertical);
       return;
     }
   }
@@ -1657,7 +1657,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
       let value = computedStyle[propName];
       value = value.visit(new UrlTransformVisitor(
           this.xmldoc.url, this.documentURLTransformer));
-      if (value.isNumeric() && needUnitConversion(value.unit)) {
+      if (value.isNumeric() && needUnitConversion((value as css.Numeric).unit)) {
         // font-size for the root element is already converted to px
         value = css.convertNumericToPx(value, this.context);
       }

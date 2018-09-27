@@ -30,9 +30,9 @@ import * as cssprop from './cssprop';
 import {ValidatorSet, ValueMap} from './cssvalid';
 import * as cssparse from './cssparse';
 import {Context, defaultUnitSizes, LexicalScope} from './expr';
-import * as expr from './expr';
+import * as exprs from './expr';
 import * as vtree from './vtree';
-import * as xmldoc from './xmldoc';
+import * as xmldocs from './xmldoc';
 
 declare var DEBUG: boolean; 
 
@@ -435,7 +435,7 @@ export class Styler implements AbstractStyler {
   bodyReached: boolean = true;
 
   constructor(
-      public readonly xmldoc: xmldoc.XMLDocHolder, cascade: csscasc.Cascade,
+      public readonly xmldoc: xmldocs.XMLDocHolder, cascade: csscasc.Cascade,
       public readonly scope: LexicalScope, public readonly context: Context,
       public readonly primaryFlows: {[key: string]: boolean},
       public readonly validatorSet: ValidatorSet,
@@ -541,14 +541,14 @@ export class Styler implements AbstractStyler {
             break;
           case 'ex':
             px *= this.context.initialFontSize *
-                expr.defaultUnitSizes['ex'] /
-                expr.defaultUnitSizes['em'];
+                exprs.defaultUnitSizes['ex'] /
+                exprs.defaultUnitSizes['em'];
             break;
           case '%':
             px *= this.context.initialFontSize / 100;
             break;
           default:
-            const unitSize = expr.defaultUnitSizes[val.unit];
+            const unitSize = exprs.defaultUnitSizes[val.unit];
             if (unitSize) {
               px *= unitSize;
             }

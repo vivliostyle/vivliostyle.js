@@ -38,10 +38,10 @@ import {Result} from './task';
 import {Frame} from './task';
 import {Continuation} from './task';
 import * as task from './task';
-import * as toc from './toc';
+import * as tocs from './toc';
 import {CustomRenderer, CustomRendererFactory, DefaultClientLayout, Viewport} from './vgen';
 import {Page, DelayedItem, LayoutPosition, Spread} from './vtree';
-import * as xmldoc from './xmldoc';
+import * as xmldocs from './xmldoc';
 
 type Position = {
   spineIndex: number,
@@ -57,11 +57,11 @@ export class EPUBDocStore extends ops.OPSDocStore {
   opfByURL: {[key: string]: OPFDoc} = {};
   primaryOPFByEPubURL: {[key: string]: OPFDoc} = {};
   deobfuscators: {[key: string]: (p1: Blob) => Result<Blob>} = {};
-  documents: {[key: string]: Result<xmldoc.XMLDocHolder>} = {};
+  documents: {[key: string]: Result<xmldocs.XMLDocHolder>} = {};
 
   constructor() {
     super(this.makeDeobfuscatorFactory());
-    this.plainXMLStore = xmldoc.newXMLDocStore();
+    this.plainXMLStore = xmldocs.newXMLDocStore();
     this.jsonStore = net.newJSONStore();
   }
 
@@ -74,7 +74,7 @@ export class EPUBDocStore extends ops.OPSDocStore {
   }
 
   loadAsPlainXML(url: string, opt_required?: boolean, opt_message?: string):
-      Result<xmldoc.XMLDocHolder> {
+      Result<xmldocs.XMLDocHolder> {
     return this.plainXMLStore.load(url, opt_required, opt_message);
   }
 
@@ -167,7 +167,7 @@ export class EPUBDocStore extends ops.OPSDocStore {
     const r = this.documents[docURL] = this.parseOPSResource({
       status: 200,
       url: docURL,
-      contentType: doc.contentType,
+      contentType: (doc as any).contentType,
       responseText: null,
       responseXML: doc,
       responseBlob: null
@@ -189,7 +189,7 @@ export class EPUBDocStore extends ops.OPSDocStore {
       r = super(
           docURL, true,
           `Failed to fetch a source document from ${docURL}`);
-      r.then((xmldoc) => {
+      r.then((xmldoc: xmldocs.XMLDocHolder) => {
         if (!xmldoc) {
           logging.logger.error(`Received an empty response for ${
               docURL}. This may be caused by the server not allowing cross origin requests.`);
@@ -347,7 +347,7 @@ export const getMetadataComparator = (term: string, lang: string): (
   };
 };
 
-export const readMetadata = (mroot: xmldoc.NodeList, prefixes: string|null): JSON => {
+export const readMetadata = (mroot: xmldocs.NodeList, prefixes: string|null): JSON => {
   // Parse prefix map (if any)
   let prefixMap;
   if (!prefixes) {
@@ -386,25 +386,25 @@ export const readMetadata = (mroot: xmldoc.NodeList, prefixes: string|null): JSO
   // List of metadata items.
   const rawItems = mroot.childElements().forEachNonNull((node) => {
     if (node.localName == 'meta') {
-      const p = resolveProperty(node.getAttribute('property'));
+      const p = resolveProperty((node as Element).getAttribute('property'));
       if (p) {
         return {
           name: p,
           value: node.textContent,
-          id: node.getAttribute('id'),
+          id: (node as Element).getAttribute('id'),
           order: order++,
-          refines: node.getAttribute('refines'),
+          refines: (node as Element).getAttribute('refines'),
           lang: null,
-          scheme: resolveProperty(node.getAttribute('scheme'))
+          scheme: resolveProperty((node as Element).getAttribute('scheme'))
         };
       }
     } else if (node.namespaceURI == base.NS.DC) {
       return {
         name: predefinedPrefixes['dcterms'] + node.localName,
         order: order++,
-        lang: node.getAttribute('xml:lang'),
+        lang: (node as Element).getAttribute('xml:lang'),
         value: node.textContent,
-        id: node.getAttribute('id'),
+        id: (node as Element).getAttribute('id'),
         refines: null,
         scheme: null
       };
@@ -499,8 +499,8 @@ export const supportedMediaTypes = {
 export const transformedIdPrefix = 'viv-id-';
 
 export class OPFDoc {
-  opfXML: xmldoc.XMLDocHolder = null;
-  encXML: xmldoc.XMLDocHolder = null;
+  opfXML: xmldocs.XMLDocHolder = null;
+  encXML: xmldocs.XMLDocHolder = null;
   items: OPFItem[] = null;
   spine: OPFItem[] = null;
   itemMap: {[key: string]: OPFItem} = null;
@@ -596,7 +596,7 @@ export class OPFDoc {
   }
 
   initWithXMLDoc(
-      opfXML: xmldoc.XMLDocHolder, encXML: xmldoc.XMLDocHolder,
+      opfXML: xmldocs.XMLDocHolder, encXML: xmldocs.XMLDocHolder,
       zipMetadata: JSON, manifestURL: string): Result {
     const self = this;
     this.opfXML = opfXML;
@@ -669,14 +669,14 @@ export class OPFDoc {
         encXML.doc()
             .child('encryption')
             .child('EncryptedData')
-            .predicate(xmldoc.predicate.withChild(
+            .predicate(xmldocs.predicate.withChild(
                 'EncryptionMethod',
-                xmldoc.predicate.withAttribute(
+                xmldocs.predicate.withAttribute(
                     'Algorithm', 'http://www.idpf.org/2008/embedding')))
             .child('CipherData')
             .child('CipherReference')
             .attribute('URI');
-    const mediaTypeElems = pkg.child('bindings').child('mediaType').asArray();
+    const mediaTypeElems = pkg.child('bindings').child('mediaType').asArray() as Element[];
     for (let i = 0; i < mediaTypeElems.length; i++) {
       const handlerId = mediaTypeElems[i].getAttribute('handler');
       let mediaType = mediaTypeElems[i].getAttribute('media-type');
@@ -763,7 +763,7 @@ export class OPFDoc {
     this.spine = this.items;
 
     // create a minimum fake OPF XML for navigation with EPUB CFI
-    const opfXML = this.opfXML = new xmldoc.XMLDocHolder(
+    const opfXML = this.opfXML = new xmldocs.XMLDocHolder(
         null, '',
         (new DOMParser()).parseFromString('<spine></spine>', 'text/xml'));
     params.forEach(function(param) {
@@ -791,7 +791,7 @@ export class OPFDoc {
   getCFI(spineIndex: number, offsetInItem: number): Result<string|null> {
     const item = this.spine[spineIndex];
     const frame: Frame<string|null> = task.newFrame('getCFI');
-    this.store.load(item.src).then((xmldoc) => {
+    this.store.load(item.src).then((xmldoc: xmldocs.XMLDocHolder) => {
       const node = xmldoc.getNodeByOffset(offsetInItem);
       let cfi = null;
       if (node) {
@@ -840,7 +840,7 @@ export class OPFDoc {
               } else {
                 item = self.spine[0];
               }
-              self.store.load(item.src).then((xmldoc) => {
+              self.store.load(item.src).then((xmldoc: xmldocs.XMLDocHolder) => {
                 const nodeNav = fragment.navigate(xmldoc.document);
                 const offset = xmldoc.getNodeOffset(
                     nodeNav.node, nodeNav.offset, nodeNav.after);
@@ -874,7 +874,7 @@ export class OPFDoc {
                     return item.epage + item.epageCount > epage;
                   });
               const item = self.spine[spineIndex];
-              self.store.load(item.src).then((xmldoc) => {
+              self.store.load(item.src).then((xmldoc: xmldocs.XMLDocHolder) => {
                 epage -= item.epage;
                 if (epage > item.epageCount) {
                   epage = item.epageCount;
@@ -903,7 +903,7 @@ export class OPFDoc {
       return task.newResult(item.epage);
     }
     const frame: Frame<number> = task.newFrame('getEPage');
-    this.store.load(item.src).then((xmldoc) => {
+    this.store.load(item.src).then((xmldoc: xmldocs.XMLDocHolder) => {
       const totalOffset = xmldoc.getTotalOffset();
       const offset = Math.min(totalOffset, position.offsetInItem);
       frame.finish(item.epage + offset * item.epageCount / totalOffset);
@@ -926,7 +926,7 @@ export const makePageAndPosition =
     });
 type OPFViewItem = {
   item: OPFItem,
-  xmldoc: xmldoc.XMLDocHolder,
+  xmldoc: xmldocs.XMLDocHolder,
   instance: ops.StyleInstance,
   layoutPositions: LayoutPosition[],
   pages: Page[],
@@ -986,7 +986,7 @@ export class OPFView implements CustomRendererFactory {
       viewItem.instance.viewport.contentContainer.replaceChild(
           page.container, oldPage.container);
       oldPage.dispatchEvent(
-          {type: 'replaced', target: null, currentTarget: null, newPage: page});
+          {type: 'replaced', target: null, currentTarget: null, preventDefault: null, newPage: page});
     } else {
       viewItem.instance.viewport.contentContainer.appendChild(page.container);
     }
@@ -1582,7 +1582,7 @@ export class OPFView implements CustomRendererFactory {
   }
 
   makeObjectView(
-      xmldoc: xmldoc.XMLDocHolder, srcElem: Element, viewParent: Element,
+      xmldoc: xmldocs.XMLDocHolder, srcElem: Element, viewParent: Element,
       computedStyle): Result<Element> {
     let data = srcElem.getAttribute('data');
     let result: Element|null = null;
@@ -1649,7 +1649,7 @@ export class OPFView implements CustomRendererFactory {
   }
 
   makeMathJaxView(
-      xmldoc: xmldoc.XMLDocHolder, srcElem: Element, viewParent: Element,
+      xmldoc: xmldocs.XMLDocHolder, srcElem: Element, viewParent: Element,
       computedStyle): Result<Element> {
     // See if MathJax installed, use it if it is.
     const hub = getMathJaxHub();
@@ -1672,21 +1672,21 @@ export class OPFView implements CustomRendererFactory {
     return task.newResult((null as Element));
   }
 
-  private resolveURLsInMathML(node: Node, xmldoc: xmldoc.XMLDocHolder) {
+  private resolveURLsInMathML(node: Node, xmldoc: xmldocs.XMLDocHolder) {
     if (node == null) {
       return;
     }
-    if (node.nodeType === 1 && node.tagName === 'mglyph') {
-      const attrs = node.attributes;
+    if (node.nodeType === 1 && (node as Element).tagName === 'mglyph') {
+      const attrs = (node as Element).attributes;
       for (const attr of attrs) {
         if (attr.name !== 'src') {
           continue;
         }
         const newUrl = base.resolveURL(attr.nodeValue, xmldoc.url);
         if (attr.namespaceURI) {
-          node.setAttributeNS(attr.namespaceURI, attr.name, newUrl);
+          (node as Element).setAttributeNS(attr.namespaceURI, attr.name, newUrl);
         } else {
-          node.setAttribute(attr.name, newUrl);
+          (node as Element).setAttribute(attr.name, newUrl);
         }
       }
     }
@@ -1704,7 +1704,7 @@ export class OPFView implements CustomRendererFactory {
    * @param computedStyle
    */
   makeSSEView(
-      xmldoc: xmldoc.XMLDocHolder, srcElem: Element, viewParent: Element,
+      xmldoc: xmldocs.XMLDocHolder, srcElem: Element, viewParent: Element,
       computedStyle): Result<Element> {
     const doc = viewParent ? viewParent.ownerDocument : this.viewport.document;
     const srcTagName = srcElem.localName;
@@ -1737,7 +1737,7 @@ export class OPFView implements CustomRendererFactory {
   /**
    * @override
    */
-  makeCustomRenderer(xmldoc: xmldoc.XMLDocHolder): CustomRenderer {
+  makeCustomRenderer(xmldoc: xmldocs.XMLDocHolder): CustomRenderer {
     const self = this;
     return (srcElem: Element, viewParent: Element,
             computedStyle): Result<Element> => {
@@ -1749,7 +1749,7 @@ export class OPFView implements CustomRendererFactory {
             xmldoc, srcElem, viewParent, computedStyle);
       } else if (srcElem.namespaceURI == base.NS.SSE) {
         return self.makeSSEView(xmldoc, srcElem, viewParent, computedStyle);
-      } else if (srcElem.dataset && srcElem.dataset['mathTypeset'] == 'true') {
+      } else if ((srcElem as HTMLElement).dataset && (srcElem as HTMLElement).dataset['mathTypeset'] == 'true') {
         return self.makeMathJaxView(
             xmldoc, srcElem, viewParent, computedStyle);
       }
@@ -1781,7 +1781,7 @@ export class OPFView implements CustomRendererFactory {
     }
     const item = self.opf.spine[spineIndex];
     const store = self.opf.store;
-    store.load(item.src).then((xmldoc) => {
+    store.load(item.src).then((xmldoc: xmldocs.XMLDocHolder) => {
       if (item.epageCount == 0 && self.opf.spine.length == 1) {
         // Single-chapter doc without epages (e.g. FB2).
         // Estimate that offset=2700 roughly corresponds to 1024 bytes of
@@ -1880,7 +1880,7 @@ export class OPFView implements CustomRendererFactory {
     }
     const frame: Frame<Page> = task.newFrame('showTOC');
     if (!this.tocView) {
-      this.tocView = new toc.TOCView(
+      this.tocView = new tocs.TOCView(
           opf.store, toc.src, opf.lang, this.clientLayout, this.fontMapper,
           this.pref, this, opf.fallbackMap, opf.documentURLTransformer,
           this.counterStore);

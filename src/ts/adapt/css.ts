@@ -18,7 +18,7 @@
  * @fileoverview CSS Values and utilities to handle them.
  */
 import * as base from './base';
-import * as expr from './expr';
+import * as exprs from './expr';
 
 export class Visitor {
   /**
@@ -201,7 +201,7 @@ export class Val {
     return buf.toString();
   }
 
-  toExpr(scope: expr.LexicalScope, ref: expr.Val): expr.Val {
+  toExpr(scope: exprs.LexicalScope, ref: exprs.Val): exprs.Val {
     throw new Error('F_ABSTRACT');
   }
 
@@ -235,7 +235,7 @@ export class Empty extends Val {
   /**
    * @override
    */
-  toExpr(scope, ref) {return new expr.Const(scope, '');}
+  toExpr(scope, ref) {return new exprs.Const(scope, '');}
 
   /**
    * @override
@@ -263,7 +263,7 @@ export class Slash extends Val {
   /**
    * @override
    */
-  toExpr(scope, ref) {return new expr.Const(scope, '/');}
+  toExpr(scope, ref) {return new exprs.Const(scope, '/');}
 
   /**
    * @override
@@ -291,7 +291,7 @@ export class Str extends Val {
    * @override
    */
   toExpr(scope, ref) {
-    return new expr.Const(scope, this.str);
+    return new exprs.Const(scope, this.str);
   }
 
   /**
@@ -330,7 +330,7 @@ export class Ident extends Val {
    * @override
    */
   toExpr(scope, ref) {
-    return new expr.Const(scope, this.name);
+    return new exprs.Const(scope, this.name);
   }
 
   /**
@@ -384,10 +384,10 @@ export class Numeric extends Val {
       if (this.num == 100) {
         return ref;
       }
-      return new expr.Multiply(
-          scope, ref, new expr.Const(scope, this.num / 100));
+      return new exprs.Multiply(
+          scope, ref, new exprs.Const(scope, this.num / 100));
     }
-    return new expr.Numeric(scope, this.num, this.unit);
+    return new exprs.Numeric(scope, this.num, this.unit);
   }
 
   /**
@@ -429,7 +429,7 @@ export class Num extends Val {
     if (this.num == 1) {
       return scope.one;
     }
-    return new expr.Const(scope, this.num);
+    return new exprs.Const(scope, this.num);
   }
 
   /**
@@ -590,7 +590,7 @@ export class Func extends Val {
 }
 
 export class Expr extends Val {
-  constructor(public expr: expr.Val) {
+  constructor(public expr: exprs.Val) {
     super();
   }
 
@@ -623,7 +623,7 @@ export class Expr extends Val {
   isExpr() {return true;}
 }
 
-export const toNumber = (val: Val, context: expr.Context): number => {
+export const toNumber = (val: Val, context: exprs.Context): number => {
   if (val) {
     if (val.isNumeric()) {
       const numeric = (val as Numeric);
@@ -639,7 +639,7 @@ export const toNumber = (val: Val, context: expr.Context): number => {
 /**
  * Convert numeric value to px
  */
-export const convertNumericToPx = (val: Val, context: expr.Context): Numeric =>
+export const convertNumericToPx = (val: Val, context: exprs.Context): Numeric =>
     new Numeric(toNumber(val, context), 'px');
 
 export const ident: {[key: string]: Ident} = {

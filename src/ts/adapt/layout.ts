@@ -39,6 +39,7 @@ import * as breaks from '../vivliostyle/break';
 import * as vtree from './vtree';
 import * as layoututil from '../vivliostyle/layoututil';
 import * as pagefloat from '../vivliostyle/pagefloat';
+import {ViewFactory} from './vgen';
 
 declare var DEBUG: boolean; 
 
@@ -3194,7 +3195,7 @@ export class Column extends vtree.Container {
     while (last != this.last) {
       const prev = last.previousSibling;
       if (!(this.element === last.parentNode &&
-            this.layoutContext.isPseudoelement(last))) {
+            (this.layoutContext as ViewFactory).isPseudoelement(last))) {
         this.element.removeChild(last);
       }
       last = prev;
@@ -3346,6 +3347,8 @@ export class TextNodeBreaker {
     nodeContext.breakBefore = null;
     return nodeContext;
   }
+
+  static instance: TextNodeBreaker;
 }
 TextNodeBreaker.instance = new TextNodeBreaker();
 

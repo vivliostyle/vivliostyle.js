@@ -163,7 +163,7 @@ export const loadElement = (elem: Element, src: string): Fetcher<string> => {
       // SVG handlers are not reliable
       setTimeout(handler, 300);
     } else {
-      elem.src = src;
+      (elem as any).src = src;
     }
     return frame.result();
   }, `loadElement ${src}`);

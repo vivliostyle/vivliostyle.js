@@ -28,7 +28,7 @@ import {EventListener} from './base';
 import {Event} from './base';
 import * as base from './base';
 import * as epub from './epub';
-import * as expr from './expr';
+import * as exprs from './expr';
 import {Mapper} from './font';
 import * as task from './task';
 import {waitForFetchers} from './taskutil';
@@ -100,7 +100,7 @@ export class Viewer {
   pageViewMode: PageViewMode;
   waitForLoading: boolean;
   renderAllPages: boolean;
-  pref: expr.Preferences;
+  pref: exprs.Preferences;
   pageSizes: {width: number, height: number}[];
 
   // force relayout
@@ -161,7 +161,7 @@ export class Viewer {
     this.pageViewMode = PageViewMode.SINGLE_PAGE;
     this.waitForLoading = false;
     this.renderAllPages = true;
-    this.pref = expr.defaultPreferences();
+    this.pref = exprs.defaultPreferences();
     this.pageSizes = [];
   }
 
@@ -296,10 +296,10 @@ export class Viewer {
         return value * this.fontSize;
       }
       if (unit === 'ex') {
-        return value * expr.defaultUnitSizes['ex'] * this.fontSize /
-            expr.defaultUnitSizes['em'];
+        return value * exprs.defaultUnitSizes['ex'] * this.fontSize /
+            exprs.defaultUnitSizes['em'];
       }
-      const unitSize = expr.defaultUnitSizes[unit];
+      const unitSize = exprs.defaultUnitSizes[unit];
       if (unitSize) {
         return value * unitSize;
       }

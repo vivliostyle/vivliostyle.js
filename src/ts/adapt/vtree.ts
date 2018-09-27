@@ -31,7 +31,7 @@ import {Val} from './expr';
 import * as geom from './geom';
 import * as task from './task';
 import * as taskutil from './taskutil';
-import * as xmldoc from './xmldoc';
+import * as xmldocs from './xmldoc';
 
 export const delayedProps = {
   'transform': true,
@@ -609,7 +609,7 @@ export class ShadowContext {
 
   constructor(
       public readonly owner: Element, public readonly root: Element,
-      public readonly xmldoc: xmldoc.XMLDocHolder,
+      public readonly xmldoc: xmldocs.XMLDocHolder,
       public readonly parentShadow: ShadowContext, superShadow: ShadowContext,
       public readonly type: ShadowType, public readonly styler: Object) {
     if (superShadow) {
@@ -1325,7 +1325,7 @@ export class ContentPropertyHandler extends css.Visitor {
 
   /** @override */
   visitURL(url) {
-    if (this.rootContentValue.url) {
+    if ((this.rootContentValue as any).url) {
       this.elem.setAttribute('src', url.url);
     } else {
       const img = this.elem.ownerDocument.createElementNS(base.NS.XHTML, 'img');

@@ -21,7 +21,7 @@ import * as css from '../adapt/css';
 import * as csscasc from '../adapt/csscasc';
 import * as cssparse from '../adapt/cssparse';
 import * as cssvalid from '../adapt/cssvalid';
-import * as expr from '../adapt/expr';
+import * as exprs from '../adapt/expr';
 import * as pm from '../adapt/pm';
 import * as vtree from '../adapt/vtree';
 import * as asserts from './asserts';
@@ -124,8 +124,8 @@ export const resolvePageSizeAndBleed =
         let val1;
         let val2;
         if (value.isSpaceList()) {
-          val1 = value.values[0];
-          val2 = value.values[1];
+          val1 = (value as css.SpaceList).values[0];
+          val2 = (value as css.SpaceList).values[1];
         } else {
           val1 = value;
           val2 = null;
@@ -162,7 +162,7 @@ export const resolvePageSizeAndBleed =
         if (marks) {
           let hasCrop = false;
           if (marks.value.isSpaceList()) {
-            hasCrop = marks.value.values.some((v) => v === css.ident.crop);
+            hasCrop = (marks.value as css.SpaceList).values.some((v) => v === css.ident.crop);
           } else {
             hasCrop = marks.value === css.ident.crop;
           }
@@ -191,7 +191,7 @@ export {EvaluatedPageSizeAndBleed};
  */
 export const evaluatePageSizeAndBleed =
     (pageSizeAndBleed: PageSizeAndBleed,
-     context: expr.Context): EvaluatedPageSizeAndBleed => {
+     context: exprs.Context): EvaluatedPageSizeAndBleed => {
       const evaluated = ({} as EvaluatedPageSizeAndBleed);
       const bleed = pageSizeAndBleed.bleed.num *
           context.queryUnitSize(pageSizeAndBleed.bleed.unit, false);
@@ -279,7 +279,7 @@ export const createCornerMark =
       let bleedMarkLineLength = cropMarkLineLength;
 
       // bleed mark line should be longer than bleed + 2mm
-      if (bleedMarkLineLength <= bleed + 2 * expr.defaultUnitSizes['mm']) {
+      if (bleedMarkLineLength <= bleed + 2 * exprs.defaultUnitSizes['mm']) {
         bleedMarkLineLength = bleed + cropMarkLineLength / 2;
       }
       const maxLineLength = Math.max(cropMarkLineLength, bleedMarkLineLength);
@@ -392,7 +392,7 @@ export const createCrossMark =
 export const addPrinterMarks =
     (cascadedPageStyle: csscasc.ElementStyle,
      evaluatedPageSizeAndBleed: EvaluatedPageSizeAndBleed, page: vtree.Page,
-     context: expr.Context) => {
+     context: exprs.Context) => {
       let crop = false;
       let cross = false;
       const marks = cascadedPageStyle['marks'];
@@ -674,7 +674,7 @@ export class PageRuleMaster extends pm.PageMaster {
       ({} as {[key: string]: PageMarginBoxPartition});
 
   constructor(
-      scope: expr.LexicalScope, parent: pm.RootPageBox,
+      scope: exprs.LexicalScope, parent: pm.RootPageBox,
       style: csscasc.ElementStyle) {
     super(scope, null, pageRuleMasterPseudoName, [], parent, null, 0);
     const pageSize = resolvePageSizeAndBleed(style);
@@ -730,7 +730,7 @@ export class PageRuleMaster extends pm.PageMaster {
  */
 export class PageRulePartition extends pm.Partition {
   constructor(
-      scope: expr.LexicalScope, parent: PageRuleMaster,
+      scope: exprs.LexicalScope, parent: PageRuleMaster,
       style: csscasc.ElementStyle, public readonly pageSize: PageSize) {
     super(scope, null, null, [], parent);
     this.specified['z-index'] = new csscasc.CascadeValue(new css.Int(0), 0);
@@ -770,7 +770,7 @@ export class PageRulePartition extends pm.Partition {
  */
 export class PageMarginBoxPartition extends pm.Partition {
   constructor(
-      scope: expr.LexicalScope, parent: PageRuleMaster,
+      scope: exprs.LexicalScope, parent: PageRuleMaster,
       public readonly marginBoxName: string, style: csscasc.ElementStyle) {
     super(scope, null, null, [], parent);
     this.applySpecified(style);
@@ -813,12 +813,12 @@ export class PageMarginBoxPartition extends pm.Partition {
 
 //---------------------------- Instance --------------------------------
 type PageAreaDimension = {
-  borderBoxWidth: expr.Val,
-  borderBoxHeight: expr.Val,
-  marginTop: expr.Val,
-  marginBottom: expr.Val,
-  marginLeft: expr.Val,
-  marginRight: expr.Val
+  borderBoxWidth: exprs.Val,
+  borderBoxHeight: exprs.Val,
+  marginTop: exprs.Val,
+  marginBottom: exprs.Val,
+  marginLeft: exprs.Val,
+  marginRight: exprs.Val
 };
 
 export {PageAreaDimension};
@@ -936,8 +936,8 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
   private sizeMarginBoxesAlongVariableDimension(
       marginBoxContainers: {[key: string]: vtree.Container},
       isHorizontal: boolean,
-      dimensions: {start: expr.Val, end: expr.Val, extent: expr.Val},
-      context: expr.Context, clientLayout: vtree.ClientLayout) {
+      dimensions: {start: exprs.Val, end: exprs.Val, extent: exprs.Val},
+      context: exprs.Context, clientLayout: vtree.ClientLayout) {
     const START = MarginBoxPositionAlongVariableDimension.START;
     const CENTER = MarginBoxPositionAlongVariableDimension.CENTER;
     const END = MarginBoxPositionAlongVariableDimension.END;
@@ -1220,11 +1220,11 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
   constructor(
       protected readonly container: vtree.Container,
       style: {[key: string]: css.Val}, private readonly isHorizontal: boolean,
-      scope: expr.LexicalScope,
+      scope: exprs.LexicalScope,
       private readonly clientLayout: vtree.ClientLayout) {
     this.hasAutoSize_ = !pm.toExprAuto(
         scope, style[isHorizontal ? 'width' : 'height'],
-        new expr.Numeric(scope, 0, 'px'));
+        new exprs.Numeric(scope, 0, 'px'));
   }
 
   /**
@@ -1342,7 +1342,7 @@ class FixedSizeMarginBoxSizingParam extends SingleBoxMarginBoxSizingParam {
 
   constructor(
       container: vtree.Container, style: {[key: string]: css.Val},
-      isHorizontal: boolean, scope: expr.LexicalScope,
+      isHorizontal: boolean, scope: exprs.LexicalScope,
       clientLayout: vtree.ClientLayout, size: number) {
     super(
         container, style, isHorizontal, scope, clientLayout);
@@ -1383,12 +1383,12 @@ class FixedSizeMarginBoxSizingParam extends SingleBoxMarginBoxSizingParam {
 };
 
 export class PageRulePartitionInstance extends pm.PartitionInstance {
-  borderBoxWidth: expr.Val = null;
-  borderBoxHeight: expr.Val = null;
-  marginTop: expr.Val = null;
-  marginRight: expr.Val = null;
-  marginBottom: expr.Val = null;
-  marginLeft: expr.Val = null;
+  borderBoxWidth: exprs.Val = null;
+  borderBoxHeight: exprs.Val = null;
+  marginTop: exprs.Val = null;
+  marginRight: exprs.Val = null;
+  marginBottom: exprs.Val = null;
+  marginLeft: exprs.Val = null;
 
   constructor(
       parentInstance: pm.PageBoxInstance,
@@ -1453,7 +1453,7 @@ export class PageRulePartitionInstance extends pm.PartitionInstance {
    */
   private resolvePageBoxDimensions(
       names: {start: string, end: string, extent: string}):
-      {borderBoxExtent: expr.Val, marginStart: expr.Val, marginEnd: expr.Val} {
+      {borderBoxExtent: exprs.Val, marginStart: exprs.Val, marginEnd: exprs.Val} {
     const style = this.style;
     const pageSize = this.pageBox.pageSize;
     const scope = this.pageBox.scope;
@@ -1476,11 +1476,11 @@ export class PageRulePartitionInstance extends pm.PartitionInstance {
     const borderEndWidth = pm.toExprZeroBorder(
         scope, style[`border-${endSide}-width`],
         style[`border-${endSide}-style`], pageExtent);
-    let remains = expr.sub(
+    let remains = exprs.sub(
         scope, pageExtent,
-        expr.add(
-            scope, expr.add(scope, borderStartWidth, paddingStart),
-            expr.add(scope, borderEndWidth, paddingEnd)));
+        exprs.add(
+            scope, exprs.add(scope, borderStartWidth, paddingStart),
+            exprs.add(scope, borderEndWidth, paddingEnd)));
 
     // The dimensions are calculated as for a non-replaced block element in
     // normal flow (http://www.w3.org/TR/CSS21/visudet.html#blockwidth)
@@ -1492,16 +1492,16 @@ export class PageRulePartitionInstance extends pm.PartitionInstance {
         marginEnd = scope.zero;
       }
       extent =
-          expr.sub(scope, remains, expr.add(scope, marginStart, marginEnd));
+          exprs.sub(scope, remains, exprs.add(scope, marginStart, marginEnd));
     } else {
-      remains = expr.sub(scope, remains, extent);
+      remains = exprs.sub(scope, remains, extent);
       if (!marginStart && !marginEnd) {
-        marginStart = expr.mul(scope, remains, new expr.Const(scope, 0.5));
+        marginStart = exprs.mul(scope, remains, new exprs.Const(scope, 0.5));
         marginEnd = marginStart;
       } else if (marginStart) {
-        marginEnd = expr.sub(scope, remains, marginStart);
+        marginEnd = exprs.sub(scope, remains, marginStart);
       } else {
-        marginStart = expr.sub(scope, remains, marginEnd);
+        marginStart = exprs.sub(scope, remains, marginEnd);
       }
     }
 
@@ -1521,7 +1521,7 @@ export class PageRulePartitionInstance extends pm.PartitionInstance {
     style[`max-${extentName}`] = new css.Expr(extent);
     return {
       borderBoxExtent:
-          expr.sub(scope, pageExtent, expr.add(scope, marginStart, marginEnd)),
+          exprs.sub(scope, pageExtent, exprs.add(scope, marginStart, marginEnd)),
       marginStart,
       marginEnd
     };
@@ -1560,7 +1560,7 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
         context, container, page, docFaces, clientLayout);
   }
 
-  private applyVerticalAlign(context: expr.Context, element: Element) {
+  private applyVerticalAlign(context: exprs.Context, element: Element) {
     base.setCSSProperty(element, 'display', 'flex');
     const verticalAlign: css.Val = this.getProp(context, 'vertical-align');
     let flexAlign: string|null = null;
@@ -1615,24 +1615,24 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
       const borderEndWidth = pm.toExprZeroBorder(
           scope, style[`border-${endSide}-width`],
           style[`border-${endSide}-style`], availableExtent);
-      const outerExtent = expr.add(
+      const outerExtent = exprs.add(
           scope, extent,
-          expr.add(
-              scope, expr.add(scope, paddingStart, paddingEnd),
-              expr.add(
-                  scope, expr.add(scope, borderStartWidth, borderEndWidth),
-                  expr.add(scope, marginStart, marginEnd))));
+          exprs.add(
+              scope, exprs.add(scope, paddingStart, paddingEnd),
+              exprs.add(
+                  scope, exprs.add(scope, borderStartWidth, borderEndWidth),
+                  exprs.add(scope, marginStart, marginEnd))));
       switch (this.boxInfo.positionAlongVariableDimension) {
         case MarginBoxPositionAlongVariableDimension.CENTER:
-          style[startSide] = new css.Expr(expr.add(
+          style[startSide] = new css.Expr(exprs.add(
               scope, startOffset,
-              expr.div(
-                  scope, expr.sub(scope, availableExtent, outerExtent),
-                  new expr.Const(scope, 2))));
+              exprs.div(
+                  scope, exprs.sub(scope, availableExtent, outerExtent),
+                  new exprs.Const(scope, 2))));
           break;
         case MarginBoxPositionAlongVariableDimension.END:
-          style[startSide] = new css.Expr(expr.sub(
-              scope, expr.add(scope, startOffset, availableExtent),
+          style[startSide] = new css.Expr(exprs.sub(
+              scope, exprs.add(scope, startOffset, availableExtent),
               outerExtent));
           break;
       }
@@ -1670,10 +1670,10 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
     const extent = pm.toExprAuto(scope, style[extentName], pageMargin);
     let result = null;
 
-    function getComputedValues(context: expr.Context): {
-      extent: expr.Result|null,
-      marginInside: expr.Result|null,
-      marginOutside: expr.Result|null
+    function getComputedValues(context: exprs.Context): {
+      extent: exprs.Result|null,
+      marginInside: exprs.Result|null,
+      marginOutside: exprs.Result|null
     } {
       if (result) {
         return result;
@@ -1729,26 +1729,26 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
       }
       return result;
     }
-    style[extentName] = new css.Expr(new expr.Native(scope, function() {
+    style[extentName] = new css.Expr(new exprs.Native(scope, function() {
       const value = getComputedValues(this).extent;
       return value === null ? 0 : value;
     }, extentName));
     style[`margin-${insideName}`] =
-        new css.Expr(new expr.Native(scope, function() {
+        new css.Expr(new exprs.Native(scope, function() {
           const value = getComputedValues(this).marginInside;
           return value === null ? 0 : value;
         }, `margin-${insideName}`));
     style[`margin-${outsideName}`] =
-        new css.Expr(new expr.Native(scope, function() {
+        new css.Expr(new exprs.Native(scope, function() {
           const value = getComputedValues(this).marginOutside;
           return value === null ? 0 : value;
         }, `margin-${outsideName}`));
     if (insideName === 'left') {
       style['left'] =
-          new css.Expr(expr.add(scope, dim.marginLeft, dim.borderBoxWidth));
+          new css.Expr(exprs.add(scope, dim.marginLeft, dim.borderBoxWidth));
     } else if (insideName === 'top') {
       style['top'] =
-          new css.Expr(expr.add(scope, dim.marginTop, dim.borderBoxHeight));
+          new css.Expr(exprs.add(scope, dim.marginTop, dim.borderBoxHeight));
     }
   }
 
@@ -1804,7 +1804,7 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
     // page object. (except when it is a corner margin box, because size of a
     // corner margin box does not need to be adjusted after the layout)
     const marginBoxes = page.marginBoxes;
-    const name = this.pageBox.marginBoxName;
+    const name = (this.pageBox as any).marginBoxName;
     const boxInfo = this.boxInfo;
     if (!boxInfo.isInLeftColumn && !boxInfo.isInRightColumn) {
       if (boxInfo.isInTopRow) {
@@ -1830,9 +1830,9 @@ export class PageManager {
 
   constructor(
       private readonly cascadeInstance: csscasc.CascadeInstance,
-      private readonly pageScope: expr.LexicalScope,
+      private readonly pageScope: exprs.LexicalScope,
       private readonly rootPageBoxInstance: pm.RootPageBoxInstance,
-      private readonly context: expr.Context,
+      private readonly context: exprs.Context,
       private readonly docElementStyle: csscasc.ElementStyle) {
     this.definePageProgression();
   }
@@ -1844,19 +1844,19 @@ export class PageManager {
     // TODO If a page break is forced before the root element, recto/verso pages
     // are no longer odd/even pages. left/right are reversed too.
     const scope = this.pageScope;
-    const pageNumber = new expr.Named(scope, 'page-number');
-    const isEvenPage = new expr.Eq(
-        scope, new expr.Modulo(scope, pageNumber, new expr.Const(scope, 2)),
+    const pageNumber = new exprs.Named(scope, 'page-number');
+    const isEvenPage = new exprs.Eq(
+        scope, new exprs.Modulo(scope, pageNumber, new exprs.Const(scope, 2)),
         scope.zero);
-    scope.defineName('recto-page', new expr.Not(scope, isEvenPage));
+    scope.defineName('recto-page', new exprs.Not(scope, isEvenPage));
     scope.defineName('verso-page', isEvenPage);
     const styleInstance: any /* ops.StyleInstance */ = this.context;
     const pageProgression = styleInstance.pageProgression || resolvePageProgression(this.docElementStyle);
     if (pageProgression === constants.PageProgression.LTR) {
       scope.defineName('left-page', isEvenPage);
-      scope.defineName('right-page', new expr.Not(scope, isEvenPage));
+      scope.defineName('right-page', new exprs.Not(scope, isEvenPage));
     } else {
-      scope.defineName('left-page', new expr.Not(scope, isEvenPage));
+      scope.defineName('left-page', new exprs.Not(scope, isEvenPage));
       scope.defineName('right-page', isEvenPage);
     }
   }
@@ -2023,7 +2023,7 @@ export class CheckPageTypeAction extends csscasc.ChainedAction {
 }
 
 export class IsFirstPageAction extends csscasc.ChainedAction {
-  constructor(public readonly scope: expr.LexicalScope) {
+  constructor(public readonly scope: exprs.LexicalScope) {
     super();
   }
 
@@ -2031,7 +2031,7 @@ export class IsFirstPageAction extends csscasc.ChainedAction {
    * @override
    */
   apply(cascadeInstace) {
-    const pageNumber = new expr.Named(this.scope, 'page-number');
+    const pageNumber = new exprs.Named(this.scope, 'page-number');
     if (pageNumber.evaluate(cascadeInstace.context) === 1) {
       this.chained.apply(cascadeInstace);
     }
@@ -2044,7 +2044,7 @@ export class IsFirstPageAction extends csscasc.ChainedAction {
 }
 
 export class IsLeftPageAction extends csscasc.ChainedAction {
-  constructor(public readonly scope: expr.LexicalScope) {
+  constructor(public readonly scope: exprs.LexicalScope) {
     super();
   }
 
@@ -2052,7 +2052,7 @@ export class IsLeftPageAction extends csscasc.ChainedAction {
    * @override
    */
   apply(cascadeInstace) {
-    const leftPage = new expr.Named(this.scope, 'left-page');
+    const leftPage = new exprs.Named(this.scope, 'left-page');
     if (leftPage.evaluate(cascadeInstace.context)) {
       this.chained.apply(cascadeInstace);
     }
@@ -2065,7 +2065,7 @@ export class IsLeftPageAction extends csscasc.ChainedAction {
 }
 
 export class IsRightPageAction extends csscasc.ChainedAction {
-  constructor(public readonly scope: expr.LexicalScope) {
+  constructor(public readonly scope: exprs.LexicalScope) {
     super();
   }
 
@@ -2073,7 +2073,7 @@ export class IsRightPageAction extends csscasc.ChainedAction {
    * @override
    */
   apply(cascadeInstace) {
-    const rightPage = new expr.Named(this.scope, 'right-page');
+    const rightPage = new exprs.Named(this.scope, 'right-page');
     if (rightPage.evaluate(cascadeInstace.context)) {
       this.chained.apply(cascadeInstace);
     }
@@ -2086,7 +2086,7 @@ export class IsRightPageAction extends csscasc.ChainedAction {
 }
 
 export class IsRectoPageAction extends csscasc.ChainedAction {
-  constructor(public readonly scope: expr.LexicalScope) {
+  constructor(public readonly scope: exprs.LexicalScope) {
     super();
   }
 
@@ -2094,7 +2094,7 @@ export class IsRectoPageAction extends csscasc.ChainedAction {
    * @override
    */
   apply(cascadeInstace) {
-    const rectoPage = new expr.Named(this.scope, 'recto-page');
+    const rectoPage = new exprs.Named(this.scope, 'recto-page');
     if (rectoPage.evaluate(cascadeInstace.context)) {
       this.chained.apply(cascadeInstace);
     }
@@ -2107,7 +2107,7 @@ export class IsRectoPageAction extends csscasc.ChainedAction {
 }
 
 export class IsVersoPageAction extends csscasc.ChainedAction {
-  constructor(public readonly scope: expr.LexicalScope) {
+  constructor(public readonly scope: exprs.LexicalScope) {
     super();
   }
 
@@ -2115,7 +2115,7 @@ export class IsVersoPageAction extends csscasc.ChainedAction {
    * @override
    */
   apply(cascadeInstace) {
-    const versoPage = new expr.Named(this.scope, 'verso-page');
+    const versoPage = new exprs.Named(this.scope, 'verso-page');
     if (versoPage.evaluate(cascadeInstace.context)) {
       this.chained.apply(cascadeInstace);
     }
@@ -2151,7 +2151,7 @@ export class ApplyPageRuleAction extends csscasc.ApplyRuleAction {
  * csscasc.mergeIn, which is for element styles.
  */
 export const mergeInPageRule =
-    (context: expr.Context, target: csscasc.ElementStyle,
+    (context: exprs.Context, target: csscasc.ElementStyle,
      style: csscasc.ElementStyle, specificity: number,
      cascadeInstance: csscasc.CascadeInstance) => {
       csscasc.mergeIn(context, target, style, specificity, null, null, null);
@@ -2189,7 +2189,7 @@ export class PageParserHandler extends
   private currentPseudoPageClassSelectors: string[] = [];
 
   constructor(
-      scope: expr.LexicalScope, owner: cssparse.DispatchParserHandler,
+      scope: exprs.LexicalScope, owner: cssparse.DispatchParserHandler,
       parent: csscasc.CascadeParserHandler, validatorSet: cssvalid.ValidatorSet,
       private readonly pageProps: {[key: string]: csscasc.ElementStyle}) {
     super(scope, owner, null, parent, null, validatorSet, false);
@@ -2380,7 +2380,7 @@ export class PageParserHandler extends
 export class PageMarginBoxParserHandler extends
     cssparse.SlaveParserHandler implements cssvalid.PropertyReceiver {
   constructor(
-      scope: expr.LexicalScope, owner: cssparse.DispatchParserHandler,
+      scope: exprs.LexicalScope, owner: cssparse.DispatchParserHandler,
       public readonly validatorSet: cssvalid.ValidatorSet,
       public readonly boxStyle: csscasc.ElementStyle) {
     super(scope, owner, false);

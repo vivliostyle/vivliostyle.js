@@ -60,8 +60,8 @@ export const resolveIndex =
       let diff = 0;
       let current = 0;
       changes.some((change) => {
-        for (let i = 0; i < change[1].length; i++) {
-          switch (change[0] * coef) {
+        for (let i = 0; i < (change[1] as string).length; i++) {
+          switch ((change[0] as number) * coef) {
             case fastdiff.INSERT:
               diff++;
               break;

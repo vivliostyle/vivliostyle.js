@@ -24,7 +24,7 @@ import * as css from './css';
 import {ElementStyle, getProp} from './csscasc';
 import * as cssparse from './cssparse';
 import * as cssprop from './cssprop';
-import * as expr from './expr';
+import * as exprs from './expr';
 import * as net from './net';
 import * as task from './task';
 import * as taskutil from './taskutil';
@@ -58,7 +58,7 @@ export const fillDefaults = (properties: {[key: string]: css.Val}) => {
 };
 
 export const prepareProperties =
-    (properties: ElementStyle, context: expr.Context):
+    (properties: ElementStyle, context: exprs.Context):
         {[key: string]: css.Val} => {
           const result = ({} as {[key: string]: css.Val});
           for (const prop in properties) {

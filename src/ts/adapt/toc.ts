@@ -20,7 +20,7 @@ import * as counters from '../vivliostyle/counters';
 
 import {DocumentURLTransformer} from './base';
 import * as base from './base';
-import * as expr from './expr';
+import * as exprs from './expr';
 import * as font from './font';
 import * as ops from './ops';
 import {Result, newResult, newFrame} from './task';
@@ -46,12 +46,12 @@ export class TOCView implements vgen.CustomRendererFactory {
       public readonly store: ops.OPSDocStore, public readonly url: string,
       public readonly lang: string|null,
       public readonly clientLayout: vtree.ClientLayout,
-      public readonly fontMapper: font.Mapper, pref: expr.Preferences,
+      public readonly fontMapper: font.Mapper, pref: exprs.Preferences,
       public readonly rendererFactory: vgen.CustomRendererFactory,
       public readonly fallbackMap: {[key: string]: string},
       public readonly documentURLTransformer: DocumentURLTransformer,
       public readonly counterStore: counters.CounterStore) {
-    this.pref = expr.clonePreferences(pref);
+    this.pref = exprs.clonePreferences(pref);
   }
 
   setAutoHeight(elem: Element, depth: number): void {

@@ -24,7 +24,7 @@ import * as base from './base';
 import * as css from './css';
 import * as cssparse from './cssparse';
 import * as csstok from './csstok';
-import * as expr from './expr';
+import * as exprs from './expr';
 import * as geom from './geom';
 
 //---------------------- value parsers ----------------------------------
@@ -145,7 +145,7 @@ export class ShapeVisitor extends css.Visitor {
 
   getShape(
       x: number, y: number, width: number, height: number,
-      context: expr.Context): geom.Shape {
+      context: exprs.Context): geom.Shape {
     if (this.coords.length > 0) {
       const numbers: number[] = [];
       this.coords.forEach((coord, i) => {
@@ -195,7 +195,7 @@ export class ShapeVisitor extends css.Visitor {
 }
 
 export const toShape = (val: css.Val, x: number, y: number, width: number,
-                        height: number, context: expr.Context): geom.Shape => {
+                        height: number, context: exprs.Context): geom.Shape => {
   if (val) {
     const visitor = new ShapeVisitor();
     try {

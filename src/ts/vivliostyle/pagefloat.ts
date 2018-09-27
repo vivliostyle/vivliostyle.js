@@ -877,7 +877,8 @@ export class PageFloatLayoutContext {
       layoutContext: vtree.LayoutContext, clientLayout: vtree.ClientLayout,
       condition?:
           (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean):
-      {top: number, left: number, bottom: number, right: number} {
+      {top: number, left: number, bottom: number, right: number, 
+      floatMinWrapBlockStart: number, floatMinWrapBlockEnd: number} {
     asserts.assert(this.container);
     const offsetX = this.container.originX;
     const offsetY = this.container.originY;
@@ -925,14 +926,14 @@ export class PageFloatLayoutContext {
             if (area.vertical) {
               if (floatMinWrapBlock && area.left < right) {
                 floatMinWrapBlockStart = resolveLengthPercentage(
-                    floatMinWrapBlock, area.rootViewNodes[0],
+                    floatMinWrapBlock, (area as any).rootViewNodes[0],
                     paddingRect.x2 - paddingRect.x1) as number;
               }
               right = Math.min(right, area.left);
             } else {
               if (floatMinWrapBlock && area.top + area.height > top) {
                 floatMinWrapBlockStart = resolveLengthPercentage(
-                    floatMinWrapBlock, area.rootViewNodes[0],
+                    floatMinWrapBlock, (area as any).rootViewNodes[0],
                     paddingRect.y2 - paddingRect.y1) as number;
               }
               top = Math.max(top, area.top + area.height);
@@ -949,14 +950,14 @@ export class PageFloatLayoutContext {
             if (area.vertical) {
               if (floatMinWrapBlock && area.left + area.width > left) {
                 floatMinWrapBlockEnd = resolveLengthPercentage(
-                    floatMinWrapBlock, area.rootViewNodes[0],
+                    floatMinWrapBlock, (area as any).rootViewNodes[0],
                     paddingRect.x2 - paddingRect.x1) as number;
               }
               left = Math.max(left, area.left + area.width);
             } else {
               if (floatMinWrapBlock && area.top < bottom) {
                 floatMinWrapBlockEnd = resolveLengthPercentage(
-                    floatMinWrapBlock, area.rootViewNodes[0],
+                    floatMinWrapBlock, (area as any).rootViewNodes[0],
                     paddingRect.y2 - paddingRect.y1) as number;
               }
               bottom = Math.min(bottom, area.top);

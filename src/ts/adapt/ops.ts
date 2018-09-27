@@ -34,7 +34,7 @@ import {toShape} from './cssprop'
 import * as cssstyler from './cssstyler';
 import * as csstok from './csstok';
 import * as cssvalid from './cssvalid';
-import * as expr from './expr';
+import * as exprs from './expr';
 import * as font from './font';
 import * as geom from './geom';
 import * as layout from './layout';
@@ -44,11 +44,11 @@ import * as task from './task';
 import {Fetcher} from './taskutil';
 import * as vgen from './vgen';
 import * as vtree from './vtree';
-import * as xmldoc from './xmldoc';
+import * as xmldocs from './xmldoc';
 
 import * as breaks from '../vivliostyle/break';
-import * as page from '../vivliostyle/page';
-import * as column from '../vivliostyle/column';
+import * as pages from '../vivliostyle/page';
+import * as colums from '../vivliostyle/column';
 
 declare var DEBUG: boolean; 
 
@@ -72,7 +72,7 @@ export const loadUABase = (): task.Result<boolean> =>
     uaStylesheetBaseFetcher.get();
 type FontFace = {
   properties: csscasc.ElementStyle,
-  condition: expr.Val
+  condition: exprs.Val
 };
 
 export {FontFace};
@@ -83,8 +83,8 @@ export class Style {
 
   constructor(
       public readonly store: OPSDocStore,
-      public readonly rootScope: expr.LexicalScope,
-      public readonly pageScope: expr.LexicalScope,
+      public readonly rootScope: exprs.LexicalScope,
+      public readonly pageScope: exprs.LexicalScope,
       public readonly cascade: csscasc.Cascade,
       public readonly rootBox: pm.RootPageBox,
       public readonly fontFaces: FontFace[],
@@ -106,17 +106,17 @@ export class Style {
           !styleInstance.flowChunkIsAfterParentFlowForcedBreak(flowChunk);
     });
     this.pageScope.defineName(
-        'page-number', new expr.Native(this.pageScope, function() {
+        'page-number', new exprs.Native(this.pageScope, function() {
           const styleInstance = (this as StyleInstance);
           return styleInstance.pageNumberOffset +
               styleInstance.currentLayoutPosition.page;
         }, 'page-number'));
   }
 
-  sizeViewport(viewportWidth: number, viewportHeight: number, fontSize: number, pref?: expr.Preferences):
+  sizeViewport(viewportWidth: number, viewportHeight: number, fontSize: number, pref?: exprs.Preferences):
       {width: number, height: number, fontSize: number} {
     if (this.viewportProps.length) {
-      const context = new expr.Context(
+      const context = new exprs.Context(
           this.rootScope, viewportWidth, viewportHeight, fontSize);
       const viewportProps = csscasc.mergeAll(context, this.viewportProps);
       const width = viewportProps['width'];
@@ -124,7 +124,7 @@ export class Style {
       const textZoom = viewportProps['text-zoom'];
       let scaleFactor = 1;
       if (width && height || textZoom) {
-        const defaultFontSize = expr.defaultUnitSizes['em'];
+        const defaultFontSize = exprs.defaultUnitSizes['em'];
         const zoomVal =
             textZoom ? textZoom.evaluate(context, 'text-zoom') : null;
         if (zoomVal === css.ident.scale) {
@@ -150,7 +150,7 @@ export class Style {
 }
 
 //-------------------------------------------------------------------------------
-export class StyleInstance extends expr.Context implements
+export class StyleInstance extends exprs.Context implements
     cssstyler.FlowListener, pm.InstanceHolder, vgen.StylerProducer {
   lang: any;
   primaryFlows: any = ({'body': true} as {[key: string]: boolean});
@@ -162,7 +162,7 @@ export class StyleInstance extends expr.Context implements
   lookupOffset: number = 0;
   faces: any;
   pageBoxInstances: {[key: string]: pm.PageBoxInstance} = {};
-  pageManager: page.PageManager = null;
+  pageManager: pages.PageManager = null;
   private rootPageFloatLayoutContext: any;
   pageBreaks: {[key: string]: boolean} = {};
   pageProgression: constants.PageProgression|null = null;
@@ -173,7 +173,7 @@ export class StyleInstance extends expr.Context implements
   actualPageHeight: any;
 
   constructor(
-      public readonly style: Style, public readonly xmldoc: xmldoc.XMLDocHolder,
+      public readonly style: Style, public readonly xmldoc: xmldocs.XMLDocHolder,
       defaultLang: string|null, public readonly viewport: vgen.Viewport,
       public readonly clientLayout: vtree.ClientLayout,
       public readonly fontMapper: font.Mapper,
@@ -222,7 +222,7 @@ export class StyleInstance extends expr.Context implements
     self.stylerMap[self.xmldoc.url] = self.styler;
     const docElementStyle = self.styler.getTopContainerStyle();
     if (!self.pageProgression) {
-      self.pageProgression = page.resolvePageProgression(docElementStyle);
+      self.pageProgression = pages.resolvePageProgression(docElementStyle);
     }
     const rootBox = this.style.rootBox;
     this.rootPageBoxInstance = new pm.RootPageBoxInstance(rootBox);
@@ -231,7 +231,7 @@ export class StyleInstance extends expr.Context implements
     this.rootPageBoxInstance.applyCascadeAndInit(
         cascadeInstance, docElementStyle);
     this.rootPageBoxInstance.resolveAutoSizing(self);
-    this.pageManager = new page.PageManager(
+    this.pageManager = new pages.PageManager(
         cascadeInstance, this.style.pageScope, this.rootPageBoxInstance, self,
         docElementStyle);
     const srcFaces = ([] as font.Face[]);
@@ -248,8 +248,8 @@ export class StyleInstance extends expr.Context implements
     // Determine page sheet sizes corresponding to page selectors
     const pageProps = self.style.pageProps;
     Object.keys(pageProps).forEach(function(selector) {
-      const pageSizeAndBleed = page.evaluatePageSizeAndBleed(
-          page.resolvePageSizeAndBleed(pageProps[selector]), this);
+      const pageSizeAndBleed = pages.evaluatePageSizeAndBleed(
+          pages.resolvePageSizeAndBleed(pageProps[selector]), this);
       this.pageSheetSize[selector] = {
         width: pageSizeAndBleed.pageWidth + pageSizeAndBleed.cropOffset * 2,
         height: pageSizeAndBleed.pageHeight + pageSizeAndBleed.cropOffset * 2
@@ -268,7 +268,7 @@ export class StyleInstance extends expr.Context implements
 
       // We need a separate content, so that variables can get potentially
       // different values.
-      const context = new expr.Context(
+      const context = new exprs.Context(
           style.rootScope, this.pageWidth(), this.pageHeight(),
           this.initialFontSize);
       const counterListener =
@@ -398,7 +398,7 @@ export class StyleInstance extends expr.Context implements
       case 'recto':
       case 'verso':
         return (
-            (new expr.Named(this.style.pageScope, `${side}-page`))
+            (new exprs.Named(this.style.pageScope, `${side}-page`))
                 .evaluate(this) as boolean);
       default:
         return true;
@@ -449,7 +449,7 @@ export class StyleInstance extends expr.Context implements
       pageMaster = pageMasters[i];
 
       // Skip a page master generated for @page rules
-      if (pageMaster.pageBox.pseudoName === page.pageRuleMasterPseudoName) {
+      if (pageMaster.pageBox.pseudoName === pages.pageRuleMasterPseudoName) {
         continue;
       }
       let coeff = 1;
@@ -891,9 +891,9 @@ export class StyleInstance extends expr.Context implements
   setPagePageFloatLayoutContextContainer(
       pagePageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
       boxInstance: pm.PageBoxInstance, layoutContainer: vtree.Container) {
-    if (boxInstance instanceof page.PageRulePartitionInstance ||
+    if (boxInstance instanceof pages.PageRulePartitionInstance ||
         boxInstance instanceof pm.PageMasterInstance &&
-            !(boxInstance instanceof page.PageRuleMasterInstance)) {
+            !(boxInstance instanceof pages.PageRuleMasterInstance)) {
       pagePageFloatLayoutContext.setContainer(layoutContainer);
     }
   }
@@ -946,11 +946,11 @@ export class StyleInstance extends expr.Context implements
         return task.newResult(generatorResult.columns);
       }
       const columnFill =
-          boxInstance.getProp(self, 'column-fill') || css.ident.balance;
+          boxInstance.getProp(self, 'column-fill') as css.Ident || css.ident.balance;
       const flowPosition =
           self.currentLayoutPosition.flowPositions[flowNameStr];
       asserts.assert(flowPosition);
-      const columnBalancer = column.createColumnBalancer(
+      const columnBalancer = colums.createColumnBalancer(
           columnCount, columnFill, layoutColumns, regionPageFloatLayoutContext,
           layoutContainer, generatorResult.columns, flowPosition);
       if (!columnBalancer) {
@@ -1079,7 +1079,7 @@ export class StyleInstance extends expr.Context implements
     const boxContainer = self.viewport.document.createElement('div');
     const position = boxInstance.getProp(self, 'position');
     base.setCSSProperty(
-        boxContainer, 'position', position ? position.name : 'absolute');
+        boxContainer, 'position', position ? (position as any).name : 'absolute');
     parentContainer.insertBefore(boxContainer, parentContainer.firstChild);
     let layoutContainer = new vtree.Container(boxContainer);
     layoutContainer.vertical = boxInstance.vertical;
@@ -1100,7 +1100,7 @@ export class StyleInstance extends expr.Context implements
       const contentVal = boxInstance.getProp(self, 'content');
       if (contentVal && vtree.nonTrivialContent(contentVal)) {
         let innerContainerTag = 'span';
-        if (contentVal.url) {
+        if ((contentVal as any).url) {
           innerContainerTag = 'img';
         }
         const innerContainer =
@@ -1290,10 +1290,10 @@ export class StyleInstance extends expr.Context implements
     self.counterStore.updatePageCounters(cascadedPageStyle, self);
 
     // setup bleed area and crop marks
-    const evaluatedPageSizeAndBleed = page.evaluatePageSizeAndBleed(
-        page.resolvePageSizeAndBleed(cascadedPageStyle), this);
+    const evaluatedPageSizeAndBleed = pages.evaluatePageSizeAndBleed(
+        pages.resolvePageSizeAndBleed(cascadedPageStyle), this);
     self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
-    page.addPrinterMarks(
+    pages.addPrinterMarks(
         cascadedPageStyle, evaluatedPageSizeAndBleed, page, this);
     const bleedBoxPaddingEdge =
         evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
@@ -1329,7 +1329,7 @@ export class StyleInstance extends expr.Context implements
         .then(() => {
           pageMaster.adjustPageLayout(self, page, self.clientLayout);
           const isLeftPage =
-              new expr.Named(pageMaster.pageBox.scope, 'left-page');
+              new exprs.Named(pageMaster.pageBox.scope, 'left-page');
           page.side = isLeftPage.evaluate(self) ? constants.PageSide.LEFT :
                                                   constants.PageSide.RIGHT;
           self.processLinger();
@@ -1359,7 +1359,7 @@ export class StyleInstance extends expr.Context implements
    * context.
    */
   private setPageSizeAndBleed(
-      evaluatedPageSizeAndBleed: page.EvaluatedPageSizeAndBleed,
+      evaluatedPageSizeAndBleed: pages.EvaluatedPageSizeAndBleed,
       page: vtree.Page) {
     this.actualPageWidth = evaluatedPageSizeAndBleed.pageWidth;
     this.actualPageHeight = evaluatedPageSizeAndBleed.pageHeight;
@@ -1384,7 +1384,7 @@ export class BaseParserHandler extends csscasc.CascadeParserHandler {
   insideRegion: boolean = false;
 
   constructor(
-      public masterHandler: StyleParserHandler, condition: expr.Val,
+      public masterHandler: StyleParserHandler, condition: exprs.Val,
       parent: BaseParserHandler, regionId: string|null) {
     super(
         masterHandler.rootScope, masterHandler, condition, parent,
@@ -1414,7 +1414,7 @@ export class BaseParserHandler extends csscasc.CascadeParserHandler {
   startWhenRule(conditionVal) {
     let condition = conditionVal.expr;
     if (this.condition != null) {
-      condition = expr.and(this.scope, this.condition, condition);
+      condition = exprs.and(this.scope, this.condition, condition);
     }
     this.masterHandler.pushHandler(new BaseParserHandler(
         this.masterHandler, condition, this, this.regionId));
@@ -1492,7 +1492,7 @@ export class BaseParserHandler extends csscasc.CascadeParserHandler {
    * @override
    */
   startPageRule() {
-    const pageHandler = new page.PageParserHandler(
+    const pageHandler = new pages.PageParserHandler(
         this.masterHandler.pageScope, this.masterHandler, this,
         this.validatorSet, this.masterHandler.pageProps);
     this.masterHandler.pushHandler(pageHandler);
@@ -1555,8 +1555,8 @@ export class StyleParserHandler extends cssparse.DispatchParserHandler {
 
   constructor(public readonly validatorSet: cssvalid.ValidatorSet) {
     super();
-    this.rootScope = new expr.LexicalScope(null);
-    this.pageScope = new expr.LexicalScope(this.rootScope);
+    this.rootScope = new exprs.LexicalScope(null);
+    this.pageScope = new exprs.LexicalScope(this.rootScope);
     this.rootBox = new pm.RootPageBox(this.rootScope);
     this.cascadeParserHandler = new BaseParserHandler(this, null, null, null);
     this.slave = this.cascadeParserHandler;
@@ -1580,11 +1580,11 @@ type StyleSource = {
 
 export {StyleSource};
 
-export const parseOPSResource = (response: Response, store: xmldoc.XMLDocStore):
-                                    task.Result<xmldoc.XMLDocHolder> =>
+export const parseOPSResource = (response: Response, store: xmldocs.XMLDocStore):
+                                    task.Result<xmldocs.XMLDocHolder> =>
     (store as OPSDocStore).parseOPSResource(response);
 
-export class OPSDocStore extends xmldoc.XMLDocStore {
+export class OPSDocStore extends xmldocs.XMLDocStore {
   styleByKey: {[key: string]: Style} = {};
   styleFetcherByKey: {[key: string]: Fetcher<Style>} = {};
   styleByDocURL: {[key: string]: Style} = {};
@@ -1621,11 +1621,11 @@ export class OPSDocStore extends xmldoc.XMLDocStore {
     return frame.result();
   }
 
-  getStyleForDoc(xmldoc: xmldoc.XMLDocHolder): Style {
+  getStyleForDoc(xmldoc: xmldocs.XMLDocHolder): Style {
     return this.styleByDocURL[xmldoc.url];
   }
 
-  getTriggersForDoc(xmldoc: xmldoc.XMLDocHolder): vtree.Trigger[] {
+  getTriggersForDoc(xmldoc: xmldocs.XMLDocHolder): vtree.Trigger[] {
     return this.triggersByDocURL[xmldoc.url];
   }
 
@@ -1677,12 +1677,12 @@ export class OPSDocStore extends xmldoc.XMLDocStore {
     });
   }
 
-  parseOPSResource(response: Response): task.Result<xmldoc.XMLDocHolder> {
-    const frame: task.Frame<xmldoc.XMLDocHolder> =
+  parseOPSResource(response: Response): task.Result<xmldocs.XMLDocHolder> {
+    const frame: task.Frame<xmldocs.XMLDocHolder> =
         task.newFrame('OPSDocStore.load');
     const self = this;
     const url = response.url;
-    xmldoc.parseXMLResource(response, self).then((xmldoc) => {
+    xmldocs.parseXMLResource(response, self).then((xmldoc: xmldocs.XMLDocHolder) => {
       if (!xmldoc) {
         frame.finish(null);
         return;

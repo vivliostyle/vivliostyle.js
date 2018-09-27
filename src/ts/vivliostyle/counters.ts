@@ -20,7 +20,7 @@ import * as base from '../adapt/base';
 import * as csscasc from '../adapt/csscasc';
 import {toCounters} from '../adapt/cssprop'
 import * as cssstyler from '../adapt/cssstyler';
-import * as expr from '../adapt/expr';
+import * as exprs from '../adapt/expr';
 import * as layout from '../adapt/layout';
 import {Viewport} from '../adapt/vgen';
 import * as vtree from '../adapt/vtree';
@@ -112,8 +112,8 @@ class CounterResolver implements csscasc.CounterResolver {
   constructor(
       public readonly counterStore: CounterStore,
       public readonly baseURL: string,
-      public readonly rootScope: expr.LexicalScope,
-      public readonly pageScope: expr.LexicalScope) {}
+      public readonly rootScope: exprs.LexicalScope,
+      public readonly pageScope: exprs.LexicalScope) {}
 
   setStyler(styler: cssstyler.Styler) {
     this.styler = styler;
@@ -143,15 +143,15 @@ class CounterResolver implements csscasc.CounterResolver {
       const values = self.counterStore.currentPageCounters[name];
       return values && values.length ? values[values.length - 1] : null;
     }
-    const expression = new expr.Native(
+    const expr = new exprs.Native(
         this.pageScope, () => format(getCounterNumber()),
         `page-counter-${name}`);
 
     function arrayFormat(arr) {
       return format(arr[0]);
     }
-    this.counterStore.registerPageCounterExpr(name, arrayFormat, expression);
-    return expression;
+    this.counterStore.registerPageCounterExpr(name, arrayFormat, expr);
+    return expr;
   }
 
   /**
@@ -163,7 +163,7 @@ class CounterResolver implements csscasc.CounterResolver {
     function getCounterNumbers() {
       return self.counterStore.currentPageCounters[name] || [];
     }
-    const expr = new expr.Native(
+    const expr = new exprs.Native(
         this.pageScope, () => format(getCounterNumbers()),
         `page-counters-${name}`);
     this.counterStore.registerPageCounterExpr(name, format, expr);
@@ -224,12 +224,12 @@ class CounterResolver implements csscasc.CounterResolver {
       // Since an element-based counter is defined, any page-based counter is
       // obscured even if it exists.
       const countersOfName = counters[name];
-      return new expr.Const(
+      return new exprs.Const(
           this.rootScope,
           format(countersOfName[countersOfName.length - 1] || null));
     }
     const self = this;
-    return new expr.Native(
+    return new exprs.Native(
         this.pageScope,
         () => {
           // Since This block is evaluated during layout, lookForElement
@@ -283,7 +283,7 @@ class CounterResolver implements csscasc.CounterResolver {
     const id = this.getFragment(url);
     const transformedId = this.getTransformedId(url);
     const self = this;
-    return new expr.Native(this.pageScope, () => {
+    return new exprs.Native(this.pageScope, () => {
       const pageCounters = self.getTargetPageCounters(transformedId);
 
       // TODO more reasonable placeholder?
@@ -316,7 +316,7 @@ export class CounterStore {
   referencesToSolveStack: TargetCounterReference[][] = [];
   unresolvedReferences: {[key: string]: TargetCounterReference[]} = {};
   resolvedReferences: {[key: string]: TargetCounterReference[]} = {};
-  private pagesCounterExprs: {expr: expr.Val,
+  private pagesCounterExprs: {expr: exprs.Val,
                               format: (p1: number[]) => string}[] = [];
 
   constructor(public readonly documentURLTransformer:
@@ -329,8 +329,8 @@ export class CounterStore {
   }
 
   createCounterResolver(
-      baseURL: string, rootScope: expr.LexicalScope,
-      pageScope: expr.LexicalScope): csscasc.CounterResolver {
+      baseURL: string, rootScope: exprs.LexicalScope,
+      pageScope: exprs.LexicalScope): csscasc.CounterResolver {
     return new CounterResolver(this, baseURL, rootScope, pageScope);
   }
 
@@ -364,7 +364,7 @@ export class CounterStore {
    * page.
    */
   updatePageCounters(
-      cascadedPageStyle: csscasc.ElementStyle, context: expr.Context) {
+      cascadedPageStyle: csscasc.ElementStyle, context: exprs.Context) {
     // Save page counters to previousPageCounters before updating
     this.previousPageCounters = cloneCounterValues(this.currentPageCounters);
     let resetMap;
@@ -579,7 +579,7 @@ export class CounterStore {
   }
 
   registerPageCounterExpr(
-      name: string, format: (p1: number[]) => string, expr: expr.Val) {
+      name: string, format: (p1: number[]) => string, expr: exprs.Val) {
     if (name === 'pages') {
       this.pagesCounterExprs.push({expr, format});
     }

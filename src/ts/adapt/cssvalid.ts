@@ -24,7 +24,6 @@ import * as base from './base';
 import * as css from './css';
 import * as cssparse from './cssparse';
 import * as csstok from './csstok';
-import * as expr from './expr';
 import * as net from './net';
 import * as task from './task';
 import * as taskutil from './taskutil';

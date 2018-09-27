@@ -29,7 +29,7 @@ import * as cssparse from './cssparse';
 import * as cssprop from './cssprop';
 import * as csstok from './csstok';
 import * as cssvalid from './cssvalid';
-import * as expr from './expr';
+import * as exprs from './expr';
 import * as task from './task';
 import * as taskutil from './taskutil';
 import {ExprContentListener} from './vtree';
@@ -256,11 +256,11 @@ export class CascadeValue {
     return new CascadeValue(this.value, this.priority + specificity);
   }
 
-  evaluate(context: expr.Context, propName: string): css.Val {
+  evaluate(context: exprs.Context, propName: string): css.Val {
     return cssparse.evaluateCSSToCSS(context, this.value, propName);
   }
 
-  isEnabled(context: expr.Context): boolean {return true;}
+  isEnabled(context: exprs.Context): boolean {return true;}
 }
 
 /**
@@ -269,7 +269,7 @@ export class CascadeValue {
  */
 export class ConditionalCascadeValue extends CascadeValue {
   constructor(
-      value: css.Val, priority: number, public readonly condition: expr.Val) {
+      value: css.Val, priority: number, public readonly condition: exprs.Val) {
     super(value, priority);
   }
 
@@ -302,7 +302,7 @@ export class ConditionalCascadeValue extends CascadeValue {
         this.value, this.priority + specificity, this.condition);
   }
 
-  isEnabled(context: expr.Context): boolean {
+  isEnabled(context: exprs.Context): boolean {
     return !!this.condition.evaluate(context);
   }
 }
@@ -312,7 +312,7 @@ export class ConditionalCascadeValue extends CascadeValue {
  * @param av cascaded value (can be conditional)
  */
 export const cascadeValues =
-    (context: expr.Context, tv: CascadeValue,
+    (context: exprs.Context, tv: CascadeValue,
      av: CascadeValue): CascadeValue => {
       if ((tv == null || av.priority > tv.priority) && av.isEnabled(context)) {
         return av.getBaseValue();
@@ -399,7 +399,7 @@ export const getMutableSpecial =
     };
 
 export const mergeIn =
-    (context: expr.Context, target: ElementStyle, style: ElementStyle,
+    (context: exprs.Context, target: ElementStyle, style: ElementStyle,
      specificity: number, pseudoelement: string|null, regionId: string|null,
      viewConditionMatcher: Matcher|null): void => {
       const hierarchy = [
@@ -440,7 +440,7 @@ export const mergeIn =
     };
 
 export const mergeAll =
-    (context: expr.Context, styles: ElementStyle[]): ElementStyle => {
+    (context: exprs.Context, styles: ElementStyle[]): ElementStyle => {
       const target = ({} as ElementStyle);
       for (let k = 0; k < styles.length; k++) {
         mergeIn(context, target, styles[k], 0, null, null, null);
@@ -468,7 +468,7 @@ export class InheritanceVisitor extends css.FilterVisitor {
 
   constructor(
       public readonly props: ElementStyle,
-      public readonly context: expr.Context) {
+      public readonly context: exprs.Context) {
     super();
   }
 
@@ -479,10 +479,10 @@ export class InheritanceVisitor extends css.FilterVisitor {
   private getFontSize() {
     const cascval = getProp(this.props, 'font-size');
     const n = (cascval.value as css.Numeric);
-    if (!expr.isAbsoluteLengthUnit(n.unit)) {
+    if (!exprs.isAbsoluteLengthUnit(n.unit)) {
       throw new Error('Unexpected state');
     }
-    return n.num * expr.defaultUnitSizes[n.unit];
+    return n.num * exprs.defaultUnitSizes[n.unit];
   }
 
   /**
@@ -521,11 +521,11 @@ export class InheritanceVisitor extends css.FilterVisitor {
 
 export const convertFontRelativeLengthToPx =
     (numeric: css.Numeric, baseFontSize: number,
-     context: expr.Context): css.Numeric => {
+     context: exprs.Context): css.Numeric => {
       const unit = numeric.unit;
       const num = numeric.num;
       if (unit === 'em' || unit === 'ex') {
-        const ratio = expr.defaultUnitSizes[unit] / expr.defaultUnitSizes['em'];
+        const ratio = exprs.defaultUnitSizes[unit] / exprs.defaultUnitSizes['em'];
         return new css.Numeric(num * ratio * baseFontSize, 'px');
       } else if (unit === 'rem') {
         return new css.Numeric(num * context.fontSize(), 'px');
@@ -536,7 +536,7 @@ export const convertFontRelativeLengthToPx =
 
 export const convertFontSizeToPx = (numeric: css.Numeric,
                                     parentFontSize: number,
-                                    context: expr.Context): css.Numeric => {
+                                    context: exprs.Context): css.Numeric => {
   numeric = convertFontRelativeLengthToPx(numeric, parentFontSize, context);
   const unit = numeric.unit;
   const num = numeric.num;
@@ -1621,17 +1621,17 @@ export interface CounterListener {
 
 export interface CounterResolver {
   /**
-   * Returns an expr.Val, whose value is calculated at the layout time by
+   * Returns an exprs.Val, whose value is calculated at the layout time by
    * retrieving the innermost page-based counter (null if it does not exist) by
    * its name and formatting the value into a string.
    * @param name Name of the page-based counter to be retrieved
    * @param format A function that formats the counter value into a string
    */
   getPageCounterVal(name: string, format: (p1: number|null) => string):
-      expr.Val;
+      exprs.Val;
 
   /**
-   * Returns an expr.Val, whose value is calculated at the layout time by
+   * Returns an exprs.Val, whose value is calculated at the layout time by
    * retrieving the page-based counters by its name and formatting the values
    * into a string.
    * @param name Name of the page-based counters to be retrieved
@@ -1639,13 +1639,15 @@ export interface CounterResolver {
    *     array ordered by the nesting depth with the outermost counter first and
    *     the innermost last) into a string
    */
-  getPageCountersVal(name: string, format: (p1: number[]) => string): expr.Val;
+  getPageCountersVal(name: string, format: (p1: number[]) => string): exprs.Val;
 
   getTargetCounterVal(
-      url: string, name: string, format: (p1: number|null) => string): expr.Val;
+      url: string, name: string, format: (p1: number|null) => string): exprs.Val;
 
   getTargetCountersVal(
-      url: string, name: string, format: (p1: number[]) => string): expr.Val;
+      url: string, name: string, format: (p1: number[]) => string): exprs.Val;
+
+  setStyler(styler: any);
 }
 
 export class AttrValueFilterVisitor extends css.FilterVisitor {
@@ -2214,7 +2216,7 @@ export class Cascade {
   }
 
   createInstance(
-      context: expr.Context, counterListener: CounterListener,
+      context: exprs.Context, counterListener: CounterListener,
       counterResolver: CounterResolver, lang): CascadeInstance {
     return new CascadeInstance(
         this, context, counterListener, counterResolver, lang);
@@ -2262,7 +2264,7 @@ export class CascadeInstance {
   currentDoc: any;
 
   constructor(
-      cascade: Cascade, public readonly context: expr.Context,
+      cascade: Cascade, public readonly context: exprs.Context,
       public readonly counterListener: CounterListener,
       public readonly counterResolver: CounterResolver, lang: string) {
     this.code = cascade;
@@ -2743,8 +2745,8 @@ export class CascadeParserHandler extends
   insideSelectorRule: any;
 
   constructor(
-      scope: expr.LexicalScope, owner: cssparse.DispatchParserHandler,
-      public readonly condition: expr.Val, parent: CascadeParserHandler,
+      scope: exprs.LexicalScope, owner: cssparse.DispatchParserHandler,
+      public readonly condition: exprs.Val, parent: CascadeParserHandler,
       public readonly regionId: string|null,
       public readonly validatorSet: cssvalid.ValidatorSet, topLevel: boolean) {
     super(scope, owner, topLevel);
@@ -3356,7 +3358,7 @@ export class NotParameterParserHandler extends
  * @override
  */
 export class DefineParserHandler extends cssparse.SlaveParserHandler {
-  constructor(scope: expr.LexicalScope, owner: cssparse.DispatchParserHandler) {
+  constructor(scope: exprs.LexicalScope, owner: cssparse.DispatchParserHandler) {
     super(scope, owner, false);
   }
 
@@ -3368,7 +3370,7 @@ export class DefineParserHandler extends cssparse.SlaveParserHandler {
       this.error(`E_CSS_NAME_REDEFINED ${propName}`, this.getCurrentToken());
     } else {
       const unit = propName.match(/height|^(top|bottom)$/) ? 'vh' : 'vw';
-      const dim = new expr.Numeric(this.scope, 100, unit);
+      const dim = new exprs.Numeric(this.scope, 100, unit);
       this.scope.defineName(propName, value.toExpr(this.scope, dim));
     }
   }
@@ -3377,8 +3379,8 @@ export class DefineParserHandler extends cssparse.SlaveParserHandler {
 export class PropSetParserHandler extends
     cssparse.SlaveParserHandler implements cssvalid.PropertyReceiver {
   constructor(
-      scope: expr.LexicalScope, owner: cssparse.DispatchParserHandler,
-      public readonly condition: expr.Val,
+      scope: exprs.LexicalScope, owner: cssparse.DispatchParserHandler,
+      public readonly condition: exprs.Val,
       public readonly elementStyle: ElementStyle,
       public readonly validatorSet: cssvalid.ValidatorSet) {
     super(scope, owner, false);
@@ -3432,7 +3434,7 @@ export class PropertyParserHandler extends
   order: number = 0;
 
   constructor(
-      scope: expr.LexicalScope,
+      scope: exprs.LexicalScope,
       public readonly validatorSet: cssvalid.ValidatorSet) {
     super(scope);
   }
@@ -3474,7 +3476,7 @@ export class PropertyParserHandler extends
 }
 
 export const parseStyleAttribute =
-    (scope: expr.LexicalScope, validatorSet: cssvalid.ValidatorSet,
+    (scope: exprs.LexicalScope, validatorSet: cssvalid.ValidatorSet,
      baseURL: string, styleAttrValue: string): ElementStyle => {
       const handler = new PropertyParserHandler(scope, validatorSet);
       const tokenizer = new csstok.Tokenizer(styleAttrValue, handler);
@@ -3487,7 +3489,7 @@ export const parseStyleAttribute =
     };
 
 export const isVertical =
-    (cascaded: {[key: string]: CascadeValue}, context: expr.Context,
+    (cascaded: {[key: string]: CascadeValue}, context: exprs.Context,
      vertical: boolean): boolean => {
       const writingModeCasc = cascaded['writing-mode'];
       if (writingModeCasc) {
@@ -3500,7 +3502,7 @@ export const isVertical =
     };
 
 export const isRtl =
-    (cascaded: {[key: string]: CascadeValue}, context: expr.Context,
+    (cascaded: {[key: string]: CascadeValue}, context: exprs.Context,
      rtl: boolean): boolean => {
       const directionCasc = cascaded['direction'];
       if (directionCasc) {
@@ -3513,7 +3515,7 @@ export const isRtl =
     };
 
 export const flattenCascadedStyle =
-    (style: ElementStyle, context: expr.Context, regionIds: string[],
+    (style: ElementStyle, context: exprs.Context, regionIds: string[],
      isFootnote: boolean,
      nodeContext: NodeContext): {[key: string]: CascadeValue} => {
       const cascMap = ({} as {[key: string]: CascadeValue});
@@ -3556,7 +3558,7 @@ export const forEachStylesInRegion =
 
 export const mergeStyle =
     (to: {[key: string]: CascadeValue}, from: ElementStyle,
-     context: expr.Context) => {
+     context: exprs.Context) => {
       for (const property in from) {
         if (isPropName(property)) {
           const newVal = getProp(from, property);

@@ -73,11 +73,11 @@ export const ajax = (url: string, opt_type?: XMLHttpRequestResponseType,
             request.responseXML &&
             request.responseXML.documentElement.localName != 'parsererror') {
           response.responseXML = request.responseXML;
-          response.contentType = request.responseXML.contentType;
+          response.contentType = (request.responseXML as any).contentType;
         } else if ((!opt_type || opt_type === XMLHttpRequestResponseType.DOCUMENT) &&
             request.response instanceof HTMLDocument) {
           response.responseXML = request.response;
-          response.contentType = request.response.contentType;
+          response.contentType = (request.response as any).contentType;
         } else {
           const text = request.response;
           if ((!opt_type || opt_type === XMLHttpRequestResponseType.TEXT) &&

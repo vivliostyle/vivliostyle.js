@@ -22,7 +22,7 @@ import * as logging from '../vivliostyle/logging';
 import * as base from './base';
 import * as css from './css';
 import * as csstok from './csstok';
-import * as expr from './expr';
+import * as exprs from './expr';
 import * as net from './net';
 import * as task from './task';
 
@@ -94,13 +94,13 @@ export const colorFromHash = (text: string): css.Color => {
 export class ParserHandler implements csstok.TokenizerHandler {
   flavor: StylesheetFlavor;
 
-  constructor(public scope: expr.LexicalScope) {
+  constructor(public scope: exprs.LexicalScope) {
     this.flavor = StylesheetFlavor.AUTHOR;
   }
 
   getCurrentToken(): csstok.Token {return null;}
 
-  getScope(): expr.LexicalScope {
+  getScope(): exprs.LexicalScope {
     return this.scope;
   }
 
@@ -485,7 +485,7 @@ export class SkippingParserHandler extends ParserHandler {
   flavor: any;
 
   constructor(
-      scope: expr.LexicalScope, public owner: DispatchParserHandler,
+      scope: exprs.LexicalScope, public owner: DispatchParserHandler,
       public readonly topLevel) {
     super(scope);
     if (owner) {
@@ -526,7 +526,7 @@ export class SkippingParserHandler extends ParserHandler {
 
 export class SlaveParserHandler extends SkippingParserHandler {
   constructor(
-      scope: expr.LexicalScope, owner: DispatchParserHandler,
+      scope: exprs.LexicalScope, owner: DispatchParserHandler,
       topLevel: boolean) {
     super(scope, owner, topLevel);
   }
@@ -980,12 +980,12 @@ export class Parser {
   exprStackReduce(op: number, token: csstok.Token): boolean {
     const valStack = this.valStack;
     const handler = this.handler;
-    let val = (valStack.pop() as expr.Val);
-    let val2: expr.Val;
+    let val = (valStack.pop() as exprs.Val);
+    let val2: exprs.Val;
     while (true) {
       let tok = valStack.pop();
       if (op == csstok.TokenType.C_PAR) {
-        const args: expr.Val[] = [val];
+        const args: exprs.Val[] = [val];
         while (tok == csstok.TokenType.COMMA) {
           args.unshift(valStack.pop());
           tok = valStack.pop();
@@ -996,7 +996,7 @@ export class Parser {
             while (args.length >= 2) {
               const e1 = args.shift();
               const e2 = args.shift();
-              const er = new expr.OrMedia(handler.getScope(), e1, e2);
+              const er = new exprs.OrMedia(handler.getScope(), e1, e2);
               args.unshift(er);
             }
             valStack.push(new css.Expr(args[0]));
@@ -1005,8 +1005,8 @@ export class Parser {
             // call
             const name2 = (valStack.pop() as string);
             const name1 = (valStack.pop() as string | null);
-            val = new expr.Call(
-                handler.getScope(), expr.makeQualifiedName(name1, name2),
+            val = new exprs.Call(
+                handler.getScope(), exprs.makeQualifiedName(name1, name2),
                 args);
             op = csstok.TokenType.EOF;
             continue;
@@ -1014,8 +1014,8 @@ export class Parser {
         }
         if (tok == csstok.TokenType.O_PAR) {
           if (val.isMediaName()) {
-            val = new expr.MediaTest(
-                handler.getScope(), (val as expr.MediaName), null);
+            val = new exprs.MediaTest(
+                handler.getScope(), (val as exprs.MediaName), null);
           }
           op = csstok.TokenType.EOF;
           continue;
@@ -1030,9 +1030,9 @@ export class Parser {
       if ((tok as number) < 0) {
         // prefix
         if (tok == -csstok.TokenType.BANG) {
-          val = new expr.Not(handler.getScope(), val);
+          val = new exprs.Not(handler.getScope(), val);
         } else if (tok == -csstok.TokenType.MINUS) {
-          val = new expr.Negate(handler.getScope(), val);
+          val = new exprs.Negate(handler.getScope(), val);
         } else {
           this.exprError('F_UNEXPECTED_STATE', token);
           return false;
@@ -1043,64 +1043,64 @@ export class Parser {
           valStack.push(tok);
           break;
         }
-        val2 = (valStack.pop() as expr.Val);
+        val2 = (valStack.pop() as exprs.Val);
         switch (tok) {
           case csstok.TokenType.AMP_AMP:
-            val = new expr.And(handler.getScope(), val2, val);
+            val = new exprs.And(handler.getScope(), val2, val);
             break;
           case OP_MEDIA_AND:
-            val = new expr.AndMedia(handler.getScope(), val2, val);
+            val = new exprs.AndMedia(handler.getScope(), val2, val);
             break;
           case csstok.TokenType.BAR_BAR:
-            val = new expr.Or(handler.getScope(), val2, val);
+            val = new exprs.Or(handler.getScope(), val2, val);
             break;
           case csstok.TokenType.LT:
-            val = new expr.Lt(handler.getScope(), val2, val);
+            val = new exprs.Lt(handler.getScope(), val2, val);
             break;
           case csstok.TokenType.GT:
-            val = new expr.Gt(handler.getScope(), val2, val);
+            val = new exprs.Gt(handler.getScope(), val2, val);
             break;
           case csstok.TokenType.LT_EQ:
-            val = new expr.Le(handler.getScope(), val2, val);
+            val = new exprs.Le(handler.getScope(), val2, val);
             break;
           case csstok.TokenType.GT_EQ:
-            val = new expr.Ge(handler.getScope(), val2, val);
+            val = new exprs.Ge(handler.getScope(), val2, val);
             break;
           case csstok.TokenType.EQ:
           case csstok.TokenType.EQ_EQ:
-            val = new expr.Eq(handler.getScope(), val2, val);
+            val = new exprs.Eq(handler.getScope(), val2, val);
             break;
           case csstok.TokenType.BANG_EQ:
-            val = new expr.Ne(handler.getScope(), val2, val);
+            val = new exprs.Ne(handler.getScope(), val2, val);
             break;
           case csstok.TokenType.PLUS:
-            val = new expr.Add(handler.getScope(), val2, val);
+            val = new exprs.Add(handler.getScope(), val2, val);
             break;
           case csstok.TokenType.MINUS:
-            val = new expr.Subtract(handler.getScope(), val2, val);
+            val = new exprs.Subtract(handler.getScope(), val2, val);
             break;
           case csstok.TokenType.STAR:
-            val = new expr.Multiply(handler.getScope(), val2, val);
+            val = new exprs.Multiply(handler.getScope(), val2, val);
             break;
           case csstok.TokenType.SLASH:
-            val = new expr.Divide(handler.getScope(), val2, val);
+            val = new exprs.Divide(handler.getScope(), val2, val);
             break;
           case csstok.TokenType.PERCENT:
-            val = new expr.Modulo(handler.getScope(), val2, val);
+            val = new exprs.Modulo(handler.getScope(), val2, val);
             break;
           case csstok.TokenType.COLON:
             if (valStack.length > 1) {
               switch (valStack[valStack.length - 1]) {
                 case csstok.TokenType.QMARK:
                   valStack.pop();
-                  val = new expr.Cond(
-                      handler.getScope(), (valStack.pop() as expr.Val), val2,
+                  val = new exprs.Cond(
+                      handler.getScope(), (valStack.pop() as exprs.Val), val2,
                       val);
                   break;
                 case csstok.TokenType.O_PAR:
                   if (val2.isMediaName()) {
-                    val = new expr.MediaTest(
-                        handler.getScope(), (val2 as expr.MediaName), val);
+                    val = new exprs.MediaTest(
+                        handler.getScope(), (val2 as exprs.MediaName), val);
                   } else {
                     this.exprError('E_CSS_MEDIA_TEST', token);
                     return false;
@@ -1289,7 +1289,7 @@ export class Parser {
     return null;
   }
 
-  makeCondition(classes: string|null, condition: expr.Val): css.Expr {
+  makeCondition(classes: string|null, condition: exprs.Val): css.Expr {
     const scope = this.handler.getScope();
     if (!scope) {
       return null;
@@ -1300,22 +1300,22 @@ export class Parser {
       for (const className of classList) {
         switch (className) {
           case 'vertical':
-            condition = expr.and(
+            condition = exprs.and(
                 scope, condition,
-                new expr.Not(scope, new expr.Named(scope, 'pref-horizontal')));
+                new exprs.Not(scope, new exprs.Named(scope, 'pref-horizontal')));
             break;
           case 'horizontal':
-            condition = expr.and(
-                scope, condition, new expr.Named(scope, 'pref-horizontal'));
+            condition = exprs.and(
+                scope, condition, new exprs.Named(scope, 'pref-horizontal'));
             break;
           case 'day':
-            condition = expr.and(
+            condition = exprs.and(
                 scope, condition,
-                new expr.Not(scope, new expr.Named(scope, 'pref-night-mode')));
+                new exprs.Not(scope, new exprs.Named(scope, 'pref-night-mode')));
             break;
           case 'night':
-            condition = expr.and(
-                scope, condition, new expr.Named(scope, 'pref-night-mode'));
+            condition = exprs.and(
+                scope, condition, new exprs.Named(scope, 'pref-night-mode'));
             break;
           default:
             condition = scope._false;
@@ -1924,9 +1924,9 @@ export class Parser {
               valStack.push(token.text, token1.text, '(');
               tokenizer.consume();
             } else {
-              valStack.push(new expr.Named(
+              valStack.push(new exprs.Named(
                   handler.getScope(),
-                  expr.makeQualifiedName(token.text, token1.text)));
+                  exprs.makeQualifiedName(token.text, token1.text)));
               this.actions = actionsExprOp;
             }
             tokenizer.consume();
@@ -1936,17 +1936,17 @@ export class Parser {
               if (token.text.toLowerCase() == 'not') {
                 tokenizer.consume();
                 valStack.push(
-                    new expr.MediaName(handler.getScope(), true, token1.text));
+                    new exprs.MediaName(handler.getScope(), true, token1.text));
               } else {
                 if (token.text.toLowerCase() == 'only') {
                   tokenizer.consume();
                   token = token1;
                 }
                 valStack.push(
-                    new expr.MediaName(handler.getScope(), false, token.text));
+                    new exprs.MediaName(handler.getScope(), false, token.text));
               }
             } else {
-              valStack.push(new expr.Named(handler.getScope(), token.text));
+              valStack.push(new exprs.Named(handler.getScope(), token.text));
             }
             this.actions = actionsExprOp;
           }
@@ -1957,7 +1957,7 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.EXPR_NUM:
-          valStack.push(new expr.Const(handler.getScope(), token.num));
+          valStack.push(new exprs.Const(handler.getScope(), token.num));
           tokenizer.consume();
           this.actions = actionsExprOp;
           continue;
@@ -1970,12 +1970,12 @@ export class Parser {
               text = 'vw';
             }
           }
-          valStack.push(new expr.Numeric(handler.getScope(), token.num, text));
+          valStack.push(new exprs.Numeric(handler.getScope(), token.num, text));
           tokenizer.consume();
           this.actions = actionsExprOp;
           continue;
         case Action.EXPR_STR:
-          valStack.push(new expr.Const(handler.getScope(), token.text));
+          valStack.push(new exprs.Const(handler.getScope(), token.text));
           tokenizer.consume();
           this.actions = actionsExprOp;
           continue;
@@ -1985,7 +1985,7 @@ export class Parser {
           if (token.type != csstok.TokenType.INT || token.precededBySpace) {
             this.exprError('E_CSS_SYNTAX', token);
           } else {
-            valStack.push(new expr.Param(handler.getScope(), token.num));
+            valStack.push(new exprs.Param(handler.getScope(), token.num));
             tokenizer.consume();
             this.actions = actionsExprOp;
           }
@@ -2436,7 +2436,7 @@ export class Parser {
 
 // Not done yet.
 export class ErrorHandler extends ParserHandler {
-  constructor(public readonly scope: expr.LexicalScope) {
+  constructor(public readonly scope: exprs.LexicalScope) {
     super(null);
   }
 
@@ -2555,7 +2555,7 @@ export const parseStylesheetFromURL = (url: string, handler: ParserHandler,
       frame.finish(true);
     });
 
-export const parseValue = (scope: expr.LexicalScope,
+export const parseValue = (scope: exprs.LexicalScope,
                            tokenizer: csstok.Tokenizer,
                            baseURL: string): css.Val => {
   const parser =
@@ -2596,7 +2596,7 @@ export const takesOnlyNum = (propName: string): boolean => !!numProp[propName];
  * @return val
  */
 export const evaluateExprToCSS =
-    (context: expr.Context, val: expr.Val, propName: string): css.Val => {
+    (context: exprs.Context, val: exprs.Val, propName: string): css.Val => {
       const result = val.evaluate(context);
       switch (typeof result) {
         case 'number':
@@ -2626,7 +2626,7 @@ export const evaluateExprToCSS =
  * @return val
  */
 export const evaluateCSSToCSS =
-    (context: expr.Context, val: css.Val, propName: string): css.Val => {
+    (context: exprs.Context, val: css.Val, propName: string): css.Val => {
       if (val.isExpr()) {
         return evaluateExprToCSS(context, (val as css.Expr).expr, propName);
       }
