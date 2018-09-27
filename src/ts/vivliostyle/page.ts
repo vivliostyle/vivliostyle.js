@@ -882,7 +882,7 @@ export class PageRuleMasterInstance extends pm.PageMasterInstance {
     style['bottom'] = css.numericZero;
   }
 
-  private setPageAreaDimension(dim: PageAreaDimension) {
+  setPageAreaDimension(dim: PageAreaDimension) {
     this.pageAreaDimension = dim;
     const style = this.style;
     style['width'] = new css.Expr(dim.borderBoxWidth);
@@ -1219,7 +1219,7 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
 
   constructor(
       protected readonly container: vtree.Container,
-      style: {[key: string]: css.Val}, private readonly isHorizontal: boolean,
+      style: {[key: string]: css.Val}, protected readonly isHorizontal: boolean,
       scope: exprs.LexicalScope,
       private readonly clientLayout: vtree.ClientLayout) {
     this.hasAutoSize_ = !pm.toExprAuto(

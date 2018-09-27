@@ -1517,7 +1517,7 @@ export class ValidatorSet {
     return this.primitive(validator);
   }
 
-  private initBuiltInValidators(): void {
+  initBuiltInValidators(): void {
     this.namedValidators['HASHCOLOR'] = this.primitive(
         new PrimitiveValidator(ALLOW_COLOR, NO_IDENTS, NO_IDENTS));
     this.namedValidators['POS_INT'] = this.primitive(
@@ -1920,7 +1920,7 @@ export class ValidatorSet {
     }
   }
 
-  private parse(text: string): void {
+  parse(text: string): void {
     // Not as robust as CSS parser.
     const tok = new csstok.Tokenizer(text, null);
     this.parseValidators(tok);

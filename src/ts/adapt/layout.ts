@@ -3387,7 +3387,7 @@ export class LayoutRetryer extends
     layoututil.AbstractLayoutRetryer {
   breakAfter: any;
   private initialPageBreakType: string|null = null;
-  private initialComputedBlockSize: number = 0;
+  initialComputedBlockSize: number = 0;
   private initialOverflown: boolean = false;
   context:
       {overflownNodeContext: vtree.NodeContext} = {overflownNodeContext: null};

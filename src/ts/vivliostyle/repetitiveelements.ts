@@ -740,7 +740,7 @@ export class RepetitiveElementsOwnerLayoutProcessor extends
     return iterator.iterate(nodeContext);
   }
 
-  private doLayout(nodeContext: vtree.NodeContext, column: layout.Column):
+  doLayout(nodeContext: vtree.NodeContext, column: layout.Column):
       task.Result<vtree.NodeContext> {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
         nodeContext.formattingContext);

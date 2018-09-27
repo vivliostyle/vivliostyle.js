@@ -37,7 +37,7 @@ export let keyCount: number = 1;
 export class PageBox {
   // styles specified in the at-rule
   specified: any = ({} as csscasc.ElementStyle);
-  private children: any = ([] as PageBox[]);
+  children: any = ([] as PageBox[]);
   pageMaster: PageMaster = null;
   index: number = 0;
   key: any;

@@ -259,7 +259,7 @@ export class AfterIfContinuesElementsOffset implements ElementsOffset {
     return this.calculateOffset(nodeContext);
   }
 
-  private affectTo(nodeContext: NodeContext): boolean {
+  affectTo(nodeContext: NodeContext): boolean {
     if (!nodeContext) {
       return false;
     }
