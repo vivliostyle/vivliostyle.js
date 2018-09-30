@@ -1,0 +1,43 @@
+{
+  "name": "vivliostyle-print",
+  "version": "0.1.0",
+  "description": "Allows page-layouting using the vivliostyle for printing within a website without destroying the original layout",
+  "main": "dist/index.iife.js",
+  "jsnext:main": "dist/index.es6.js",
+  "module": "dist/index.es6.js",
+  "scripts": {
+    "prebuild": "npm run lint",
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build",
+    "build_demo": "rollup -c rollup.demo.config.js",
+    "prepare": "npm run build",
+    "lint": "eslint src/*",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vivliostyle/vivliostyle-print.git"
+  },
+  "keywords": [
+    "print",
+    "vivliostyle",
+    "layout",
+    "pages"
+  ],
+  "author": "Johannes Wilm",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/vivliostyle/vivliostyle-print/issues"
+  },
+  "homepage": "https://github.com/vivliostyle/vivliostyle-print#readme",
+  "dependencies": {
+    "vivliostyle": "^2018.8.100"
+  },
+  "devDependencies": {
+    "eslint": "^5.6.1",
+    "rollup": "^0.66.2",
+    "rollup-plugin-buble": "^0.19.2",
+    "rollup-plugin-commonjs": "^9.1.8",
+    "rollup-plugin-node-resolve": "^3.4.0"
+  }
+}
