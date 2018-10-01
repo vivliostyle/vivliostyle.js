@@ -3,7 +3,7 @@ Allows page-layouting using the vivliostyle for printing within a website withou
 
 
 How do I use it?
-=====
+======
 
 1. Install vivliostyle-print like this within your browser-based JavaScript project:
 
@@ -38,8 +38,39 @@ vivliostylePrint(htmlDoc, title, resourcesUrl)
 
 You can also take a look at the [demo](/demo).
 
+How do I build and run the demo?
+======
+
+1. Download the repo to your local machine, for example using::
+
+```
+git clone https://github.com/vivliostyle/vivliostyle-print.git
+```
+
+2. Enter the folder::
+
+```
+cd vivliostyle-print
+```
+
+3. Install and build it::
+
+```
+npm install
+npm run build_demo
+```
+
+4. Serve the folder, for example using the simple PHP webserver::
+
+```
+php -S localhost:8000
+```
+
+5. Access the demo from a web browser by navigating to http://localhost:8000/demo/
+
+
 Why would I use this rather than regular Vivliostyle?
-=====
+======
 
 Vivliostyle is somewhat complex to get to work but it gives many more options.
 Vivliostyle-print only gives you what is essential to print within a browser,
@@ -48,7 +79,7 @@ dialog has executed and leaves no artifacts behind. You don't need to worry
 about cleaning up.
 
 What implications does the AGPL license have?
-=====
+======
 
 To be entirely sure, check with a lawyer. In just about all cases, you need to
 share any modifications you have done to Vivliostyle or Vivliostyle-print itself.
