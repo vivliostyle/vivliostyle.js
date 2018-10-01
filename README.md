@@ -36,7 +36,7 @@ vivliostylePrint(htmlDoc, title, resourcesUrl)
 
 ```
 
-You can also take a look at the [demo](/demo).
+You can also take a look at the [demo](https://vivliostyle.github.io/vivliostyle-print/) ([sourcecode](/demo)) .
 
 How do I build and run the demo?
 ======
@@ -60,13 +60,13 @@ npm install
 npm run build_demo
 ```
 
-4. Serve the folder, for example using the simple PHP webserver::
+4. Serve the demo folder, for example using the simple PHP webserver::
 
 ```
-php -S localhost:8000
+php -S localhost:8000 -t demo/
 ```
 
-5. Access the demo from a web browser by navigating to http://localhost:8000/demo/
+5. Access the demo from a web browser by navigating to http://localhost:8000
 
 
 Why would I use this rather than regular Vivliostyle?
