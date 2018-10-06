@@ -2601,11 +2601,11 @@ export const evaluateExprToCSS =
       switch (typeof result) {
         case 'number':
           if (!takesOnlyNum(propName)) {
-            return new css.Numeric(result, 'px');
-          } else if (result == Math.round(result)) {
-            return new css.Int(result);
+            return new css.Numeric(result as number, 'px');
+          } else if (result == Math.round(result as number)) {
+            return new css.Int(result as number);
           } else {
-            return new css.Num(result);
+            return new css.Num(result as number);
           }
         case 'string':
           if (!result) {
@@ -2613,7 +2613,7 @@ export const evaluateExprToCSS =
           }
 
           // TODO: where baseURL should come from???
-          return parseValue(val.scope, new csstok.Tokenizer(result, null), '');
+          return parseValue(val.scope, new csstok.Tokenizer(result  as string, null), '');
         case 'boolean':
           return result ? css.ident._true : css.ident._false;
         case 'undefined':

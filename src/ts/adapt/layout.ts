@@ -2076,7 +2076,7 @@ export class Column extends vtree.Container {
     nodeContext.walkUpBlocks((block) => {
       if (block.inheritedProps['box-decoration-break'] === 'clone') {
         asserts.assert(block.viewNode instanceof Element);
-        const paddingBorders = this.getComputedPaddingBorder(block.viewNode);
+        const paddingBorders = this.getComputedPaddingBorder(block.viewNode as Element);
         clonedPaddingBorder +=
             block.vertical ? -paddingBorders.left : paddingBorders.bottom;
         if (block.display === 'table') {

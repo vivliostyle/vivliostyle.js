@@ -563,7 +563,7 @@ export class Viewer {
   private updateSpreadView(spreadView: boolean) {
     this.pref.spreadView = spreadView;
     this.viewportElement.setAttribute(
-        VIEWPORT_SPREAD_VIEW_ATTRIBUTE, spreadView);
+        VIEWPORT_SPREAD_VIEW_ATTRIBUTE, spreadView.toString());
   }
 
   private sizeIsGood(): boolean {

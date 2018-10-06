@@ -29,7 +29,7 @@ import * as task from './task';
  * @param fetch function that fetches/computes
  *    a resource; it will be run in a separate task.
  */
-export class Fetcher {
+export class Fetcher<T> {
   name: any;
   arrived: boolean = false;
   resource: T = null;

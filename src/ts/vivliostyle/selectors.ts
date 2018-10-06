@@ -168,7 +168,7 @@ export class AfterIfContinues {
       after: false,
       preprocessedTextContent: null
     };
-    return new vtree.ChunkPosition(nodePosition);
+    return new vtree.ChunkPosition(nodePosition as any);
   }
 
   private createShadowContext(root: Element): ShadowContext {

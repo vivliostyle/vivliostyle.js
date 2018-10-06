@@ -677,7 +677,7 @@ export class PageRuleMaster extends pm.PageMaster {
       scope: exprs.LexicalScope, parent: pm.RootPageBox,
       style: csscasc.ElementStyle) {
     super(scope, null, pageRuleMasterPseudoName, [], parent, null, 0);
-    const pageSize = resolvePageSizeAndBleed(style);
+    const pageSize = resolvePageSizeAndBleed(style as any);
     const partition = new PageRulePartition(this.scope, this, style, pageSize);
     this.bodyPartitionKey = partition.key;
     this.createPageMarginBoxes(style);
@@ -1963,7 +1963,7 @@ export class PageManager {
     const pageMasterStyle = newPageMaster.specified;
     const size = style['size'];
     if (size) {
-      const pageSize = resolvePageSizeAndBleed(style);
+      const pageSize = resolvePageSizeAndBleed(style as any);
       const priority = size.priority;
       pageMasterStyle['width'] = csscasc.cascadeValues(
           this.context, pageMasterStyle['width'],

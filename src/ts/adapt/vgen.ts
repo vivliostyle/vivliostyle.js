@@ -965,8 +965,8 @@ export class ViewFactory extends base.SimpleEventTarget implements
                 (self.nodeContext.inheritedProps['image-resolution'] as number |
                  undefined);
             const images: {
-              image: Element,
-              element: Element,
+              image: HTMLElement,
+              element: HTMLElement,
               fetcher: taskutil.Fetcher<string>
             }[] = [];
             const cssWidth = computedStyle['width'];
@@ -1624,7 +1624,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
               nodeContext.inline = true;
             }
           }
-          this.dispatchEvent({type: 'nextInTree', nodeContext});
+          this.dispatchEvent({type: 'nextInTree', nodeContext} as any);
           frame.finish(nodeContext);
         });
     return frame.result();

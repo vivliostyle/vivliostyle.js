@@ -249,7 +249,7 @@ export class StyleInstance extends exprs.Context implements
     const pageProps = self.style.pageProps;
     Object.keys(pageProps).forEach(function(selector) {
       const pageSizeAndBleed = pages.evaluatePageSizeAndBleed(
-          pages.resolvePageSizeAndBleed(pageProps[selector]), this);
+          pages.resolvePageSizeAndBleed(pageProps[selector] as any), this);
       this.pageSheetSize[selector] = {
         width: pageSizeAndBleed.pageWidth + pageSizeAndBleed.cropOffset * 2,
         height: pageSizeAndBleed.pageHeight + pageSizeAndBleed.cropOffset * 2
@@ -1291,7 +1291,7 @@ export class StyleInstance extends exprs.Context implements
 
     // setup bleed area and crop marks
     const evaluatedPageSizeAndBleed = pages.evaluatePageSizeAndBleed(
-        pages.resolvePageSizeAndBleed(cascadedPageStyle), this);
+        pages.resolvePageSizeAndBleed(cascadedPageStyle as any), this);
     self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
     pages.addPrinterMarks(
         cascadedPageStyle, evaluatedPageSizeAndBleed, page, this);
@@ -1604,7 +1604,7 @@ export class OPSDocStore extends xmldocs.XMLDocStore {
       authorStyleSheets: {url: string|null, text: string|null}[]|null,
       userStyleSheets: {url: string|null, text: string|null}[]|
       null): task.Result<boolean> {
-    this.setStyleSheets(authorStyleSheets, userStyleSheets);
+    this.setStyleSheets(authorStyleSheets as any, userStyleSheets as any);
     const userAgentXML =
         base.resolveURL('user-agent.xml', base.resourceBaseURL);
     const frame = task.newFrame('OPSDocStore.init');

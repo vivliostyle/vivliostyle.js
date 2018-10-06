@@ -1548,7 +1548,7 @@ export class OPFView implements CustomRendererFactory {
   makePage(viewItem: OPFViewItem, pos: LayoutPosition): Page {
     const viewport = viewItem.instance.viewport;
     const pageCont = (viewport.document.createElement('div') as HTMLElement);
-    pageCont.setAttribute('data-vivliostyle-page-container', true);
+    pageCont.setAttribute('data-vivliostyle-page-container', 'true');
     pageCont.style.position = 'absolute';
     pageCont.style.top = '0';
     pageCont.style.left = '0';
@@ -1557,7 +1557,7 @@ export class OPFView implements CustomRendererFactory {
     }
     viewport.layoutBox.appendChild(pageCont);
     const bleedBox = (viewport.document.createElement('div') as HTMLElement);
-    bleedBox.setAttribute('data-vivliostyle-bleed-box', true);
+    bleedBox.setAttribute('data-vivliostyle-bleed-box', 'true');
     pageCont.appendChild(bleedBox);
     const page = new Page(pageCont, bleedBox);
     page.spineIndex = viewItem.item.spineIndex;
