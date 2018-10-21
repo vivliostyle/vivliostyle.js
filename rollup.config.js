@@ -17,9 +17,8 @@ const banner = `\
 export default [{
         input: "src/index.js",
         output: {
-            format: "iife",
+            format: "cjs",
             file: pkg.main,
-            name: "lib",
             sourcemap: true,
             banner
         },
