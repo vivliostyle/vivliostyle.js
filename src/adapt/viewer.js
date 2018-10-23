@@ -1,6 +1,7 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -917,6 +918,9 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
             const m = method;
             method = () => m.call(self.opfView, self.pagePosition);
         }
+    } else if (typeof command["nthPage"] == "number") {
+        const nthPage = /** @type {number} */ (command["nthPage"]);
+        method = () => self.opfView.navigateToNthPage(nthPage, self.pagePosition);
     } else if (typeof command["epage"] == "number") {
         const epage = /** @type {number} */ (command["epage"]);
         method = () => self.opfView.navigateToEPage(epage);

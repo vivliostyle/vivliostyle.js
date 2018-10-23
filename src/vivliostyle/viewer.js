@@ -1,5 +1,6 @@
 /**
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -365,6 +366,14 @@ goog.scope(() => {
     };
 
     /**
+     * Navigate to the Nth page.
+     * @param {number} nthPage
+     */
+    Viewer.prototype.navigateToNthPage = function(nthPage) {
+        this.adaptViewer.sendCommand({"a": "moveTo", "nthPage": nthPage});
+    };
+
+    /**
      * Navigate to the specified internal URL.
      * @param {string} url
      */
@@ -407,6 +416,7 @@ goog.scope(() => {
     goog.exportProperty(Viewer.prototype, "loadEPUB", Viewer.prototype.loadEPUB);
     goog.exportProperty(Viewer.prototype, "getCurrentPageProgression", Viewer.prototype.getCurrentPageProgression);
     goog.exportProperty(Viewer.prototype, "navigateToPage", Viewer.prototype.navigateToPage);
+    goog.exportProperty(Viewer.prototype, "navigateToNthPage", Viewer.prototype.navigateToNthPage);
     goog.exportProperty(Viewer.prototype, "navigateToInternalUrl", Viewer.prototype.navigateToInternalUrl);
     goog.exportProperty(Viewer.prototype, "queryZoomFactor", Viewer.prototype.queryZoomFactor);
     goog.exportProperty(Viewer.prototype, "getPageSizes", Viewer.prototype.getPageSizes);
