@@ -37,12 +37,6 @@ class Navigation {
             return navigationOptions.disablePageNavigation || this.isDisabled();
         });
 
-        const getSpreadContainerElement = () => {
-            const viewportElement = document.getElementById("vivliostyle-viewer-viewport");
-            const outerZoomBoxElement = viewportElement && viewportElement.firstElementChild;
-            return outerZoomBoxElement && outerZoomBoxElement.firstElementChild;
-        }
-
         this.isNavigateToPreviousDisabled = ko.pureComputed(() => {
             if (navigationDisabled()) {
                 return true;
@@ -50,7 +44,7 @@ class Navigation {
             if (this.viewer_.state.status === undefined) {
                 return false;   // needed for test/spec/viewmodels/navigation-spec.js
             }
-            const spreadContainerElement = getSpreadContainerElement();
+            const spreadContainerElement = this.viewer_.getSpreadContainerElement();
             const firstPageContainer = spreadContainerElement && spreadContainerElement.firstElementChild;
             return !firstPageContainer || firstPageContainer.style.display != "none";
         });
@@ -65,7 +59,7 @@ class Navigation {
             if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
                 return false;
             }
-            const spreadContainerElement = getSpreadContainerElement();
+            const spreadContainerElement = this.viewer_.getSpreadContainerElement();
             const lastPageContainer = spreadContainerElement && spreadContainerElement.lastElementChild;
             return !lastPageContainer || lastPageContainer.style.display != "none";
         });
@@ -110,7 +104,7 @@ class Navigation {
             if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
                 return true;
             }
-            const spreadContainerElement = getSpreadContainerElement();
+            const spreadContainerElement = this.viewer_.getSpreadContainerElement();
             const lastPageContainer = spreadContainerElement && spreadContainerElement.lastElementChild;
             return !lastPageContainer || lastPageContainer.style.display != "none";
         });
@@ -137,6 +131,32 @@ class Navigation {
         this.isDecreaseFontSizeDisabled = fontSizeChangeDisabled;
         this.isDefaultFontSizeDisabled = fontSizeChangeDisabled;
         this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
+
+        this.pageNumber = ko.pureComputed({
+            read() {
+                this.viewer_.state.status();
+                return this.viewer_.getPageNumber();
+            },
+            write(pageNumber) {
+                let nthPage = parseInt(pageNumber) || 0;
+                const totalPages = this.viewer_.getTotalPages();
+                if (nthPage < 1) {
+                    nthPage = 1;
+                } else if (nthPage > totalPages) {
+                    nthPage = totalPages;
+                }
+                this.viewer_.navigateToNthPage(nthPage);
+                const elem = document.getElementById('vivliostyle-page-number');
+                elem.value = nthPage;
+                elem.blur();
+            },
+            owner: this
+        });
+
+        this.totalPages = ko.pureComputed(() => {
+            this.viewer_.state.status();
+            return this.viewer_.getTotalPages();
+        });
 
         [
             "navigateToPrevious",
@@ -283,14 +303,15 @@ class Navigation {
     }
 
     handleKey(key) {
+        const isInputActive = document.activeElement && document.activeElement.tagName === 'INPUT';
         switch (key) {
             case Keys.ArrowDown:
             case Keys.PageDown:
                 return !this.navigateToNext();
             case Keys.ArrowLeft:
-                return !this.navigateToLeft();
+                return isInputActive || !this.navigateToLeft();
             case Keys.ArrowRight:
-                return !this.navigateToRight();
+                return isInputActive || !this.navigateToRight();
             case Keys.ArrowUp:
             case Keys.PageUp:
                 return !this.navigateToPrevious();
@@ -299,11 +320,15 @@ class Navigation {
             case Keys.End:
                 return !this.navigateToLast();
             case "+":
-                return !this.increaseFontSize();
+                return isInputActive || !this.increaseFontSize();
             case "-":
-                return !this.decreaseFontSize();
+                return isInputActive || !this.decreaseFontSize();
             case "0":
-                return !this.defaultFontSize();
+                return isInputActive || !this.defaultFontSize();
+            case "g":
+            case "G":
+                document.getElementById('vivliostyle-page-number').focus();
+                return false;
             default:
                 return true;
         }

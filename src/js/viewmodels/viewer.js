@@ -34,7 +34,8 @@ class Viewer {
         };
         this.state = {
             status: state_.status.getter.extend({
-                rateLimit: { timeout: 100, method: "notifyWhenChangesStop" }
+                rateLimit: { timeout: 100, method: "notifyWhenChangesStop" },
+                notify: 'always'
             }),
             navigatable: ko.pureComputed(() => state_.status.value() !== vivliostyle.constants.ReadyState.LOADING),
             pageProgression: state_.pageProgression.getter
@@ -46,6 +47,7 @@ class Viewer {
 
     setupViewerEventHandler() {
         const logger = Logger.getLogger();
+        let intervalID = 0;
         this.viewer_.addListener("debug", payload => {
             logger.debug(payload.content);
         });
@@ -60,6 +62,15 @@ class Viewer {
         });
         this.viewer_.addListener("readystatechange", () => {
             const readyState = this.viewer_.readyState;
+            if (intervalID === 0 && readyState === vivliostyle.constants.ReadyState.INTERACTIVE) {
+                intervalID = setInterval(() => {
+                    this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
+                    this.state_.status.value(vivliostyle.constants.ReadyState.INTERACTIVE);
+                }, 200);
+            } else {
+                clearInterval(intervalID);
+                intervalID = 0;
+            }
             if (readyState === vivliostyle.constants.ReadyState.INTERACTIVE || readyState === vivliostyle.constants.ReadyState.COMPLETE) {
                 this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
             }
@@ -78,8 +89,7 @@ class Viewer {
         });
         this.viewer_.addListener("hyperlink", payload => {
             if (payload.internal) {
-                this.viewer_.navigateToInternalUrl(payload.href);
-                this.afterNavigateToPage();
+                this.navigateToInternalUrl(payload.href);
             } else {
                 window.location.href = payload.href;
             }
@@ -111,7 +121,39 @@ class Viewer {
             // Update page navigation disable/enable
             this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
             this.state_.status.value(this.viewer_.readyState);
+            const pageNumberElem = document.getElementById('vivliostyle-page-number');
+            pageNumberElem.value = this.getPageNumber();
         }, 1);
+    }
+
+    getSpreadContainerElement() {
+        const viewportElement = document.getElementById("vivliostyle-viewer-viewport");
+        const outerZoomBoxElement = viewportElement && viewportElement.firstElementChild;
+        return outerZoomBoxElement && outerZoomBoxElement.firstElementChild;
+    }
+
+    getTotalPages() {
+        const spreadContainerElement = this.getSpreadContainerElement();
+        if (!spreadContainerElement) {
+            return 0;
+        }
+        return spreadContainerElement.childElementCount;
+    }
+
+    getPageNumber() {
+        const spreadContainerElement = this.getSpreadContainerElement();
+        if (!spreadContainerElement) {
+            return 0;
+        }
+        const children = spreadContainerElement.children;
+        let pageNumber = 0;
+        for (let i = 0; i < children.length; i++) {
+            if (children.item(i).style.display !== 'none') {
+                pageNumber = i + 1;
+                break;
+            }
+        }
+        return pageNumber;
     }
 
     navigateToPrevious() {
@@ -141,6 +183,16 @@ class Viewer {
 
     navigateToLast() {
         this.viewer_.navigateToPage("last");
+        this.afterNavigateToPage();
+    }
+
+    navigateToNthPage(nthPage) {
+        this.viewer_.navigateToNthPage(nthPage);
+        this.afterNavigateToPage();
+    }
+
+    navigateToInternalUrl(href) {
+        this.viewer_.navigateToInternalUrl(href);
         this.afterNavigateToPage();
     }
 
