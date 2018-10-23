@@ -1,6 +1,7 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -1574,6 +1575,38 @@ adapt.epub.OPFView.prototype.previousSpread = function(position) {
     } else {
         return prev;
     }
+};
+
+/**
+ * Move to the Nth page and render it.
+ * @param {number} nthPage
+ * @param {!adapt.epub.Position} position
+ * @return {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
+ */
+adapt.epub.OPFView.prototype.navigateToNthPage = function(nthPage, position) {
+    if (nthPage < 1) {
+        return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
+    }
+    let countPages = 0;
+    let pageIndex = -1;
+    let spineIndex = 0;
+    for (let item of this.spineItems) {
+        const findPageIndex = nthPage - countPages - 1;
+        if (findPageIndex < item.pages.length) {
+            pageIndex = findPageIndex;
+            break;
+        }
+        countPages += item.pages.length;
+        spineIndex++;
+    }
+    if (pageIndex === -1) {
+        return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
+    }
+    return this.findPage({
+        spineIndex,
+        pageIndex,
+        offsetInItem: -1
+    });
 };
 
 /**
