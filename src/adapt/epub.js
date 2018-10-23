@@ -1635,7 +1635,7 @@ adapt.epub.OPFView.prototype.navigateTo = function(href, position) {
             } else {
                 path = restored[0];
             }
-            href = path + (restored[1] ? `#${restored[1]}` : "");
+            href = restored[0] + (restored[1] ? `#${restored[1]}` : "");
         }
         if (path == null) {
             return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
