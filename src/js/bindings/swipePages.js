@@ -29,10 +29,23 @@ ko.bindingHandlers.swipePages = {
     init(element, valueAccessor) {
         if (supportTouchEvents && ko.unwrap(valueAccessor())) {
             element.addEventListener("touchstart", (event) => {
+                if (event.touches.length > 1) {
+                    return; // multi-touch is not for page swipe
+                }
+                if (window.visualViewport && window.visualViewport.scale > 1) {
+                    return; // disable page swipe when pinch-zoomed
+                }
+                const viewportElement = document.getElementById("vivliostyle-viewer-viewport");
+                if (viewportElement && viewportElement.scrollWidth > viewportElement.clientWidth) {
+                    return; // disable page swipe when horizontal scrollable
+                }
                 xStart = event.touches[0].clientX;                                      
                 yStart = event.touches[0].clientY;                                      
             });
             element.addEventListener("touchmove", (event) => {
+                if (event.touches.length > 1) {
+                    return;
+                }
                 if (xStart !== null && yStart !== null) {
                     let xDiff = event.touches[0].clientX - xStart;
                     let yDiff = event.touches[0].clientY - yStart;
