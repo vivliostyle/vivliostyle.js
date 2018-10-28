@@ -23,7 +23,7 @@ $button-offset: 0;
 	color: rgba(255, 255, 255, 0.00);
 	background: rgba(0, 0, 0, 0.00);
 	&.vivliostyle-menu-enabled {
-		color: rgba(0, 0, 0, 0.50);
+		color: rgba(0, 0, 0, 0.25);
 		background: rgba(0, 0, 0, 0.00);
 		@include transition(.25s ease-out);
 	}
@@ -32,20 +32,20 @@ $button-offset: 0;
 	}
 	&[data-vivliostyle-ui-state="attention"] {
 		color: rgba(255, 255, 255, 0.75);
-		background: rgba(0, 0, 0, 0.25);
+		background: rgba(0, 0, 0, 0.125);
 		@include transition(.25s ease-in);
 	}
 	@media (hover: hover), (-moz-touch-enabled: 0) {
 		&:hover {
 			color: rgba(255, 255, 255, 0.75);
-			background: rgba(0, 0, 0, 0.25);
+			background: rgba(0, 0, 0, 0.125);
 			@include transition(.1s linear !important);
 		}
 	}
 	&.active,
 	&:active {
 		color: rgba(255, 255, 255, 1.00);
-		background: rgba(0, 0, 0, 0.50);
+		background: rgba(0, 0, 0, 0.25);
 		@include transition(.1s linear !important);
 	}
 	&:after {
