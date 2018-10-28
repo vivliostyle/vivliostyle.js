@@ -80,11 +80,11 @@ class URLParameterStore {
             } else {
                 updated = url.substring(0, r.index) + url.substring(end);
             }
-        }
-        if (this.history.replaceState) {
-            this.history.replaceState(null, "", updated);
-        } else {
-            this.location.href = updated;
+            if (this.history.replaceState) {
+                this.history.replaceState(null, "", updated);
+            } else {
+                this.location.href = updated;
+            }
         }
     }
 }
