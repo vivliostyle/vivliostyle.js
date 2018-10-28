@@ -138,7 +138,7 @@ class Navigation {
                 return this.viewer_.getPageNumber();
             },
             write(pageNumber) {
-                let nthPage = parseInt(pageNumber) || 0;
+                let nthPage = parseInt(pageNumber.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))) || 0;
                 const totalPages = this.viewer_.getTotalPages();
                 if (nthPage < 1) {
                     nthPage = 1;
