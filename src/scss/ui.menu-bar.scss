@@ -269,6 +269,16 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					-webkit-filter: grayscale(100%); filter: grayscale(100%);
 				}
 			}
+			&#vivliostyle-menu-item_zoom-to-actual-size {
+				@media screen and (max-width: 390px) {
+					display: none;
+				}
+			}
+			&#vivliostyle-menu-item_zoom-fit-to-screen {
+				@media screen and (max-width: 354px) {
+					display: none;
+				}
+			}
 		}
 	}
 }
