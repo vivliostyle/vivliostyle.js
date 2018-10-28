@@ -808,6 +808,11 @@ adapt.viewer.Viewer.prototype.cancelRenderingTask = function() {
 adapt.viewer.Viewer.prototype.resize = function() {
     this.needResize = false;
     this.needRefresh = false;
+    if (document.activeElement && document.activeElement.tagName.toLowerCase() === "input" &&
+            /Android/.test(navigator.userAgent)) {
+        // prevent resizing when soft keyboard appears on Android
+        return adapt.task.newResult(true);
+    }
     if (this.sizeIsGood()) {
         return adapt.task.newResult(true);
     }
