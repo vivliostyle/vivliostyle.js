@@ -303,7 +303,7 @@ class Navigation {
     }
 
     handleKey(key) {
-        const isInputActive = document.activeElement && document.activeElement.tagName === 'INPUT';
+        const isInputActive = document.activeElement && document.activeElement.tagName.toLowerCase() === 'input';
         switch (key) {
             case Keys.ArrowDown:
             case Keys.PageDown:
