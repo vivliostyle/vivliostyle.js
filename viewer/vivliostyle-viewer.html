@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="google" content="notranslate">
 <title>Vivliostyle viewer</title>
+<script src="https://wicg.github.io/visual-viewport/polyfill/visualViewport.js"></script>
 <script src="resources/mathjax-config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
@@ -31,11 +32,11 @@
 <!-- MENU BAR -->
 <div id="vivliostyle-menu-bar">
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_move" data-bind="visible: !navigation.hidePageNavigation">
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-first" data-bind="click: navigation.navigateToFirst, css: {'vivliostyle-menu-disabled': navigation.isNavigateToFirstDisabled}"><span class="vivliostyle-menu-icon-button" title="First Page" data-bind="menuButton: true"></span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-first" data-bind="click: navigation.navigateToFirst, css: {'vivliostyle-menu-disabled': navigation.isNavigateToFirstDisabled}"><span class="vivliostyle-menu-icon-button" title="First Page (Home)" data-bind="menuButton: true"></span></li>
 		<!-- <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-previous" data-bind="click: navigation.navigateToPrevious, css: {'vivliostyle-menu-disabled': navigation.isNavigateToPreviousDisabled}"><span class="vivliostyle-menu-icon-button" title="Previous Page" data-bind="menuButton: true"></span></li> -->
 		<!-- <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-next" data-bind="click: navigation.navigateToNext, css: {'vivliostyle-menu-disabled': navigation.isNavigateToNextDisabled}"><span class="vivliostyle-menu-icon-button" title="Next Page" data-bind="menuButton: true"></span></li> -->
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-last" data-bind="click: navigation.navigateToLast, css: {'vivliostyle-menu-disabled': navigation.isNavigateToLastDisabled}"><span class="vivliostyle-menu-icon-button" title="Last Page" data-bind="menuButton: true"></span></li>
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_page-number"><input id="vivliostyle-page-number" title="Go to Page…" data-bind="value: navigation.pageNumber" onfocus="this.select()" type="text" /></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-last" data-bind="click: navigation.navigateToLast, css: {'vivliostyle-menu-disabled': navigation.isNavigateToLastDisabled}"><span class="vivliostyle-menu-icon-button" title="Last Page (End)" data-bind="menuButton: true"></span></li>
+		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_page-number"><input id="vivliostyle-page-number" title="Go to Page… (G)" data-bind="value: navigation.pageNumber" onfocus="setTimeout(()=>{this.setSelectionRange(0,this.value.length)},0)" type="text" inputmode="numeric"/></li>
 		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_total-pages"><span id="vivliostyle-total-pages" title="Total Pages" data-bind="text: navigation.totalPages"></span></li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_zoom" data-bind="visible: !navigation.hideZoom">
@@ -45,9 +46,9 @@
 		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-fit-to-screen" data-bind="click: navigation.toggleFitToScreen, css: {'vivliostyle-menu-disabled': navigation.isToggleFitToScreenDisabled, 'on':navigation.fitToScreen }"><span class="vivliostyle-menu-icon-button" title="Zoom: Fit to screen" data-bind="menuButton: true"></span></li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_text-size" data-bind="visible: !navigation.hideFontSizeChange">
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-smaller" data-bind="click: navigation.decreaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isDecreaseFontSizeDisabled}"><span class="vivliostyle-menu-icon-button" title="Text: Smaller" data-bind="menuButton: true"></span></li>
-		<!-- <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-default"><span class="vivliostyle-menu-icon-button" title="Text Size: Default" data-bind="menuButton: true"></span></li> -->
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-larger" data-bind="click: navigation.increaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isIncreaseFontSizeDisabled}"><span class="vivliostyle-menu-icon-button" title="Text: Larger" data-bind="menuButton: true"></span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-smaller" data-bind="click: navigation.decreaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isDecreaseFontSizeDisabled}"><span class="vivliostyle-menu-icon-button" title="Text: Smaller (-)" data-bind="menuButton: true"></span></li>
+		<!-- <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-default"><span class="vivliostyle-menu-icon-button" title="Text Size: Default (0)" data-bind="menuButton: true"></span></li> -->
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-larger" data-bind="click: navigation.increaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isIncreaseFontSizeDisabled}"><span class="vivliostyle-menu-icon-button" title="Text: Larger (+)" data-bind="menuButton: true"></span></li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_misc">
 		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_misc-toggle" data-bind="css: {'vivliostyle-menu-item_detail-opened': settingsPanel.opened}"><span class="vivliostyle-menu-icon-button" title="Setting" data-bind="menuButton: true, click: settingsPanel.toggle"></span>
@@ -120,7 +121,7 @@
 				</div>
 				<div class="vivliostyle-menu-detail-aside">
 					<div><small>Powered by</small> <a href="https://vivliostyle.org"><strong>Vivliostyle</strong></a> </div>
-					<div class="version"><small>(<span>Core: 2018.8.101-pre.20181023235808,</span> <span>UI: 2018.8.101-pre.20181024000248</span>)</small></div>
+					<div class="version"><small>(<span>Core: 2018.10.100-pre.20181029034004,</span> <span>UI: 2018.10.100-pre.20181029034356</span>)</small></div>
 				</div>
 			</div>
 		</li>
