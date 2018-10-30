@@ -602,6 +602,16 @@ adapt.viewer.Viewer.prototype.sizeIsGood = function() {
     if (!spreadViewChanged && viewport.width == this.viewport.width && viewport.height == this.viewport.height) {
         return true;
     }
+
+    if (!spreadViewChanged && viewport.width == this.viewport.width &&
+        viewport.height != this.viewport.height &&
+        (/Android|iPhone|iPad|iPod/).test(navigator.userAgent)) {
+        // On mobile browsers, the viewport height may change unexpectedly
+        // when soft keyboard appears or tab/address bar auto-hide occurs,
+        // so ignore resizing in this condition.
+        return true;
+    }
+
     if (this.opfView && this.opfView.hasPages() && !this.opfView.hasAutoSizedPages()) {
         this.viewport.width = viewport.width;
         this.viewport.height = viewport.height;
@@ -808,11 +818,6 @@ adapt.viewer.Viewer.prototype.cancelRenderingTask = function() {
 adapt.viewer.Viewer.prototype.resize = function() {
     this.needResize = false;
     this.needRefresh = false;
-    if (document.activeElement && document.activeElement.tagName.toLowerCase() === "input" &&
-            (/Android/).test(navigator.userAgent)) {
-        // prevent resizing when soft keyboard appears on Android
-        return adapt.task.newResult(true);
-    }
     if (this.sizeIsGood()) {
         return adapt.task.newResult(true);
     }
