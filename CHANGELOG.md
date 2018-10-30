@@ -1,5 +1,30 @@
 # Change Log
 
+## [2018.10.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.10.100) - 2018-10-30
+
+### Added
+
+- [Viewer UI] Add "Go to Page" (Page number / Total pages) menu item
+  - <https://github.com/vivliostyle/vivliostyle-ui/pull/59>
+- Add navigateToNthPage function
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/459>
+
+### Changed
+
+- [Viewer UI] Navigation UI adjustment
+  - Removed "Move: Previous/Next" navigation buttons
+  - Hide "Zoom: Actual Size/Fit to screen" buttons when screen is narrow
+  - Page left/right navigation UI color
+- [Viewer UI] Disable page swipe when pinch-zoomed or horizontal scrollable
+  - <https://github.com/vivliostyle/vivliostyle-ui/commit/a61688b5>
+- Prevent unexpected page resizing (viewport-height change due to soft keyboard etc.) on Android/iOS
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/00f2be4e>
+
+### Fixed
+
+- Fix bug that EPUB internal link does not work
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/458>
+
 ## [2018.8.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.8.100) - 2018-09-10
 
 ### Added
@@ -29,7 +54,6 @@
   - IE11 is no longer supported
 - Update MathJax to 2.7.5
   - <https://github.com/vivliostyle/vivliostyle-ui/commit/8bdc64bf>
-
 
 ### Fixed
 
