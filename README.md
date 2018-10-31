@@ -15,9 +15,11 @@ Please send them to
 
 ## Using Vivliostyle.js
 
-### Using an all-in-one package
+### Using an all-in-one package (Vivliostyle Viewer)
 
-Download an all-in-one package from <https://vivliostyle.org/download/> and follow the instruction in it.
+Download an all-in-one package (Vivliostyle Viewer) from <https://vivliostyle.org/download/> and follow the instruction in it.
+
+See [Vivliostyle Viewer User’s Guide](https://vivliostyle.github.io/vivliostyle.js/docs/en/)
 
 See <https://github.com/vivliostyle/vivliostyle-ui> for source code of the UI.
 
@@ -29,7 +31,9 @@ Vivliostyle.js can be installed from [npm](https://www.npmjs.com/package/vivlios
 npm install vivliostyle
 ```
 
-Developer API documents are coming soon.
+See [API Reference](https://github.com/vivliostyle/vivliostyle.js/blob/master/doc/api.md).
+
+See [vivliostyle-print](https://github.com/vivliostyle/vivliostyle-print/) for integrating printing with Vivliostyle.
 
 ## License
 

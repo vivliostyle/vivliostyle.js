@@ -111,13 +111,13 @@ goog.scope(() => {
      * Options for the displayed document.
      * - documentObject: Document object for the document. If provided, it is used directly without parsing the source again.
      * - fragment: Fragmentation identifier (EPUB CFI) of the location in the document which is to be displayed.
-     * - styleSheet: An array of author style sheets to be injected after all author style sheets referenced from the document. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
+     * - authorStyleSheet: An array of author style sheets to be injected after all author style sheets referenced from the document. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
      * - userStyleSheet: An array of user style sheets to be injected. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
      * @dict
      * @typedef {{
      *     documentObject: (!Document|undefined),
      *     fragment: (string|undefined),
-     *     styleSheet: (!Array<{url: (string|undefined), text: (string|undefined)}>|undefined),
+     *     authorStyleSheet: (!Array<{url: (string|undefined), text: (string|undefined)}>|undefined),
      *     userStyleSheet: (!Array<{url: (string|undefined), text: (string|undefined)}>|undefined)
      * }}
      */
