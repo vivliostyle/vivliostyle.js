@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/vivliostyle/vivliostyle-print#readme",
   "dependencies": {
-    "vivliostyle": "^2018.8.100"
+    "vivliostyle": "^2018.10.100"
   },
   "devDependencies": {
     "eslint": "^5.6.1",
