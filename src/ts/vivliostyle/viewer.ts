@@ -1,5 +1,6 @@
 /**
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -25,6 +26,13 @@ export namespace viewer {
 
 const PageProgression = constants.PageProgression;
 
+/**
+ * Viewer settings that must be passed to Viewer's constructor.
+ * - userAgentRootURL: URL of a directory from which viewer resource files (under resources/ directory in the source repository) are served.
+ * - viewportElement: An element used as the viewport of the displayed contents.
+ * - window: Window object. If omitted, current `window` is used.
+ * - debug: Debug flag.
+ */
 export type ViewerSettings = {
   userAgentRootURL: string,
   viewportElement: HTMLElement,
@@ -32,6 +40,17 @@ export type ViewerSettings = {
   debug: boolean
 };
 
+/**
+ * Viewer options that can be set after the Viewer object is constructed.
+ * - autoResize: Run layout again when the window is resized. default: true
+ * - fontSize: Default font size (px). default: 16
+ * - pageBorderWidth: Width of a border between two pages in a single spread (px). Effective only in spread view mode. default: 1
+ * - renderAllPages: Render all pages at the document load time. default: true
+ * - pageViewMode: Page view mode (singlePage / spread / autoSpread). default: singlePage
+ * - zoom: Zoom factor with which pages are displayed. default: 1
+ * - fitToScreen: Auto adjust zoom factor to fit the screen. default: false
+ * - defaultPaperSize: Default paper size in px. Effective when @page size is set to auto. default: undefined (means the windows size is used as paper size).
+ */
 export type ViewerOptions = {
   autoResize: boolean|undefined,
   fontSize: number|undefined,
@@ -74,13 +93,26 @@ function convertViewerOptions(options: ViewerOptions): Object {
   return converted;
 }
 
+/**
+ * Options for the displayed document.
+ * - documentObject: Document object for the document. If provided, it is used directly without parsing the source again.
+ * - fragment: Fragmentation identifier (EPUB CFI) of the location in the document which is to be displayed.
+ * - authorStyleSheet: An array of author style sheets to be injected after all author style sheets referenced from the document. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
+ * - userStyleSheet: An array of user style sheets to be injected. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
+ */
 export type DocumentOptions = {
   documentObject: Document|undefined,
   fragment: string|undefined,
-  styleSheet: {url: string|undefined, text: string|undefined}[]|undefined,
+  authorStyleSheet: {url: string|undefined, text: string|undefined}[]|undefined,
   userStyleSheet: {url: string|undefined, text: string|undefined}[]|undefined
 };
 
+/**
+ * Options for a single source document.
+ * - url: URL of the document.
+ * - startPage: If specified, the `page` page-based counter is set to the specified value on the first page of the document. It is equivalent to specifying `counter-reset: page [specified value - 1]` on that page.
+ * - skipPagesBefore: If specified, the `page` page-based counter is incremented by the specified value *before* updating page-based counters on the first page of the document. This option is ignored if `startPageNumber` option is also specified.
+ */
 export type SingleDocumentOptions = string|{
   url: string,
   startPage: number | undefined,
@@ -260,6 +292,13 @@ export class Viewer {
   }
 
   /**
+   * Navigate to the Nth page.
+   */
+  navigateToNthPage(nthPage: number) {
+    this.adaptViewer.sendCommand({"a": "moveTo", "nthPage": nthPage});
+  };
+
+  /**
    * Navigate to the specified internal URL.
    */
   navigateToInternalUrl(url: string) {
@@ -335,6 +374,7 @@ export const PageViewMode = adaptviewer.PageViewMode;
 // goog.exportProperty(Viewer.prototype, "loadEPUB", Viewer.prototype.loadEPUB);
 // goog.exportProperty(Viewer.prototype, "getCurrentPageProgression", Viewer.prototype.getCurrentPageProgression);
 // goog.exportProperty(Viewer.prototype, "navigateToPage", Viewer.prototype.navigateToPage);
+// goog.exportProperty(Viewer.prototype, "navigateToNthPage", Viewer.prototype.navigateToNthPage);
 // goog.exportProperty(Viewer.prototype, "navigateToInternalUrl", Viewer.prototype.navigateToInternalUrl);
 // goog.exportProperty(Viewer.prototype, "queryZoomFactor", Viewer.prototype.queryZoomFactor);
 // goog.exportProperty(Viewer.prototype, "getPageSizes", Viewer.prototype.getPageSizes);

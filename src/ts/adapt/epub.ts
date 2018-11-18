@@ -1,6 +1,7 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -1451,6 +1452,35 @@ export class OPFView implements CustomRendererFactory {
       return prev;
     }
   }
+
+  /**
+   * Move to the Nth page and render it.
+   */
+  navigateToNthPage(nthPage: number, position: Position): Result<PageAndPosition|null> {
+      if (nthPage < 1) {
+          return task.newResult((null as PageAndPosition | null));
+      }
+      let countPages = 0;
+      let pageIndex = -1;
+      let spineIndex = 0;
+      for (let item of this.spineItems) {
+          const findPageIndex = nthPage - countPages - 1;
+          if (findPageIndex < item.pages.length) {
+              pageIndex = findPageIndex;
+              break;
+          }
+          countPages += item.pages.length;
+          spineIndex++;
+      }
+      if (pageIndex === -1) {
+          return task.newResult((null as PageAndPosition | null));
+      }
+      return this.findPage({
+          spineIndex,
+          pageIndex,
+          offsetInItem: -1
+      });
+  };
 
   /**
    * Move to the epage specified by the given number (zero-based) and render it.
