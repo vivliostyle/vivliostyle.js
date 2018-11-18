@@ -1,5 +1,6 @@
 /**
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -110,13 +111,13 @@ goog.scope(() => {
      * Options for the displayed document.
      * - documentObject: Document object for the document. If provided, it is used directly without parsing the source again.
      * - fragment: Fragmentation identifier (EPUB CFI) of the location in the document which is to be displayed.
-     * - styleSheet: An array of author style sheets to be injected after all author style sheets referenced from the document. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
+     * - authorStyleSheet: An array of author style sheets to be injected after all author style sheets referenced from the document. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
      * - userStyleSheet: An array of user style sheets to be injected. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
      * @dict
      * @typedef {{
      *     documentObject: (!Document|undefined),
      *     fragment: (string|undefined),
-     *     styleSheet: (!Array<{url: (string|undefined), text: (string|undefined)}>|undefined),
+     *     authorStyleSheet: (!Array<{url: (string|undefined), text: (string|undefined)}>|undefined),
      *     userStyleSheet: (!Array<{url: (string|undefined), text: (string|undefined)}>|undefined)
      * }}
      */
@@ -365,6 +366,14 @@ goog.scope(() => {
     };
 
     /**
+     * Navigate to the Nth page.
+     * @param {number} nthPage
+     */
+    Viewer.prototype.navigateToNthPage = function(nthPage) {
+        this.adaptViewer.sendCommand({"a": "moveTo", "nthPage": nthPage});
+    };
+
+    /**
      * Navigate to the specified internal URL.
      * @param {string} url
      */
@@ -400,6 +409,7 @@ goog.scope(() => {
     goog.exportProperty(Viewer.prototype, "loadEPUB", Viewer.prototype.loadEPUB);
     goog.exportProperty(Viewer.prototype, "getCurrentPageProgression", Viewer.prototype.getCurrentPageProgression);
     goog.exportProperty(Viewer.prototype, "navigateToPage", Viewer.prototype.navigateToPage);
+    goog.exportProperty(Viewer.prototype, "navigateToNthPage", Viewer.prototype.navigateToNthPage);
     goog.exportProperty(Viewer.prototype, "navigateToInternalUrl", Viewer.prototype.navigateToInternalUrl);
     goog.exportProperty(Viewer.prototype, "queryZoomFactor", Viewer.prototype.queryZoomFactor);
     goog.exportProperty(Viewer.prototype, "getPageSizes", Viewer.prototype.getPageSizes);

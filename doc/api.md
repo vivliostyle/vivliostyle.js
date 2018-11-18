@@ -30,6 +30,7 @@
     - [`loadEPUB(epubUrl, documentOptions, viewerOptions)`](#viewerloadepubepuburl-documentoptions-vieweroptions)
     - [`navigateToInternalUrl()`](#viewernavigatetointernalurl)
     - [`navigateToPage()`](#viewernavigatetopage)
+    - [`navigateToNthPage()`](#viewernavigatetonthpage)
     - [`queryZoomFactor(type)`](#viewerqueryzoomfactortype)
     - [`removeListener(type, listener)`](#viewerremovelistenertype-listener)
     - [`setOptions(options)`](#viewersetoptionsoptions)
@@ -192,6 +193,10 @@ Navigate to the specified internal URL.
 
 Navigate to the specified page.
 
+### `Viewer.navigateToNthPage(nthPage)`
+
+Navigate to the Nth page.
+
 ### `Viewer.queryZoomFactor(type)`
 
 Returns zoom factor corresponding to the specified zoom type.
@@ -229,7 +234,7 @@ Options for the displayed document.
 
 - `documentObject` (Document, optional) — Document object for the document. If provided, it is used directly without parsing the source again.
 - `fragment` (string, optional) — Fragmentation identifier (EPUB CFI) of the location in the document which is to be displayed.
-- `styleSheet` (Array<string>, optional) — An array of author style sheets to be injected after all author style sheets referenced from the document. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
+- `authorStyleSheet` (Array<string>, optional) — An array of author style sheets to be injected after all author style sheets referenced from the document. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
 - `userStyleSheet` (Array<string>, optional) — An array of user style sheets to be injected. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
 
 ### `SingleDocumentOptions`
