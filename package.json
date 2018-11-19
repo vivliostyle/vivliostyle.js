@@ -1,6 +1,6 @@
 {
   "name": "vivliostyle-print",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Allows page-layouting using the vivliostyle for printing within a website without destroying the original layout",
   "main": "dist/index.cjs.js",
   "jsnext:main": "dist/index.es6.js",
