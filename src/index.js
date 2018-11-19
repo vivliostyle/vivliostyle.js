@@ -13,7 +13,7 @@ class VivliostylePrint {
         this.iframe = document.createElement('iframe')
         this.window = window
         this.window.printInstance = this
-        this.iframe.srcdoc="<html><head></head><body onload='parent.printInstance.runInIframe(window)'></body></html>"
+        this.iframe.srcdoc="<html><head><style id='vivliostyle-page-rules'></style></head><body onload='parent.printInstance.runInIframe(window)'></body></html>"
         this.iframe.style.width = 0 // We don't want the iframe to be seen, so we make it zero size with zero border.
         this.iframe.style.height = 0
         this.iframe.style.borderWidth = 0
