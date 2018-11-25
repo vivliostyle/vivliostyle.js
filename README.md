@@ -1,17 +1,16 @@
 # Vivliostyle.js
 
-JavaScript library for web sites with rich paged viewing and EPUB support, shared with Vivliostyle Formatter & Browser.
+JavaScript library for web sites with rich paged viewing and EPUB support.
 
 ## Try Vivliostyle.js
 
-<https://vivliostyle.org/samples/>
+[Vivliostyle Viewer samples](https://vivliostyle.org/samples/)
 
 ## Bug reports & feature requests
 
 Please send them to
 
 - [GitHub Issues](https://github.com/vivliostyle/vivliostyle.js/issues)
-- Mailing list ([English](https://groups.google.com/forum/?hl=ja#!forum/vivliostyle), [Japanese](https://groups.google.com/forum/?hl=ja#!forum/vivliostyle-ja))
 
 ## Using Vivliostyle.js
 
@@ -34,6 +33,10 @@ npm install vivliostyle
 See [API Reference](https://github.com/vivliostyle/vivliostyle.js/blob/master/doc/api.md).
 
 See [vivliostyle-print](https://github.com/vivliostyle/vivliostyle-print/) for integrating printing with Vivliostyle.
+
+## Development
+
+See [Vivliostyle.js Development](https://github.com/vivliostyle/vivliostyle.js/wiki/Development).
 
 ## License
 
