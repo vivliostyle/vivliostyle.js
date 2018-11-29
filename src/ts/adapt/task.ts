@@ -176,7 +176,12 @@ export class TimerImpl implements Timer {
   /**
    * @override
    */
-  setTimeout(fn: () => void, delay: number) {return setTimeout(fn, delay);}
+  setTimeout(fn: () => void, delay: number) {
+    // HACK: casting to unknown type to prevent TypeScript error
+    // [TS2352] Conversion of type 'Timer' to type 'number' may be a mistake because neither type sufficiently overlaps with the other.
+    const timer: unknown = this.setTimeout(fn, delay);
+    return timer as number;
+  }
 
   /**
    * @override
@@ -276,7 +281,7 @@ export class Scheduler {
       let now = this.timer.currentTime();
       this.sliceOverTime = now + this.slice;
       while (this.queue.length()) {
-        const continuation = (this.queue.peek() as Continuation);
+        const continuation = (this.queue.peek() as Continuation<any>);
         if (continuation.scheduledTime > now) {
           break;
         }
@@ -350,7 +355,7 @@ export class Continuation<T> implements base.Comparable {
    */
   compare(otherComp: base.Comparable): number {
     // earlier wins
-    const other = (otherComp as Continuation);
+    const other = (otherComp as Continuation<any>);
     return other.scheduledTime - this.scheduledTime || other.order - this.order;
   }
 
@@ -370,7 +375,7 @@ export class Continuation<T> implements base.Comparable {
     this.task.scheduler.schedule(this, opt_delay);
   }
 
-  private resumeInternal(): boolean {
+  resumeInternal(): boolean {
     const task = this.task;
     this.task = null;
     if (task && task.continuation == this) {
@@ -584,19 +589,19 @@ export class ResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  thenAsync<T1>(callback: (p1: T) => Result<T1>) : Result<T1>{
+  thenAsync<T1>(callback: (p1: T) => Result<T1>): Result<T1>{
     if (this.isPending()) {
       // thenAsync is special, do the trick with the context
-      const frame = new Frame<T>(
+      const frame = new Frame<T | T1>(
           this.frame.task, this.frame.parent, 'AsyncResult.thenAsync');
       frame.state = FrameState.ACTIVE;
-      this.frame.parent = frame;
+      this.frame.parent = frame as Frame<T>;
       this.frame.then((res1) => {
         callback(res1).then((res2) => {
           frame.finish(res2);
         });
       });
-      return frame.result();
+      return frame.result() as Result<T1>;
     } else {
       return callback(this.frame.res);
     }
@@ -832,8 +837,8 @@ export class Frame<T> {
   }
 }
 
-export class LoopBodyFrame<T> extends Frame<T> {
-  constructor(task: Task, parent: Frame<T>) {
+export class LoopBodyFrame extends Frame<boolean> {
+  constructor(task: Task, parent: Frame<boolean>) {
     super(task, parent, 'loop');
   }
 
