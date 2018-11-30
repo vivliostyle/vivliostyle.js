@@ -66,15 +66,16 @@ export const clonePreferences = (pref: Preferences): Preferences => ({
 
 export const defaultPreferencesInstance = defaultPreferences();
 
+interface Pending {};
+type Special = Pending;
+
 /**
  * Special marker value that indicates that the expression result is being
  * calculated.
- * @enum {!Object}
  */
 export const Special = {
-  PENDING: {}
+  PENDING: {} as Pending,
 };
-type Special = typeof Special;
 
 type Result = string|number|boolean|undefined;
 
@@ -588,7 +589,7 @@ export class Prefix extends Val {
     if (val === this.val) {
       return this;
     }
-    const r = new this.constructor(this.scope, val);
+    const r = new Prefix(this.scope, val);
     return r;
   }
 }
@@ -653,7 +654,7 @@ export class Infix extends Val {
     if (lhs === this.lhs && rhs === this.rhs) {
       return this;
     }
-    const r = new this.constructor(this.scope, lhs, rhs);
+    const r = new Infix(this.scope, lhs, rhs);
     return r;
   }
 }
@@ -1035,6 +1036,10 @@ export class Named extends Val {
  * Named value.
  */
 export class MediaName extends Val {
+  // FIXME: This property is added to reduce TypeScript error on `dependCore`
+  // but it is never initialized. Is it really correct code?
+  value: any;
+
   constructor(scope: LexicalScope, public not: boolean, public name: string) {
     super(scope);
   }
