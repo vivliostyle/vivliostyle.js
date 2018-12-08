@@ -98,14 +98,14 @@ export class Fetcher<T> {
 /**
  * Wait for all Fetcher objects in the array to arrive
  */
-export const waitForFetchers = (fetchers: Fetcher[]): task.Result<boolean> => {
+export const waitForFetchers = <T>(fetchers: Fetcher<T>[]): task.Result<boolean> => {
   if (fetchers.length == 0) {
     return task.newResult(true);
   }
   if (fetchers.length == 1) {
     return fetchers[0].get().thenReturn(true);
   }
-  const frame = task.newFrame('waitForFetches');
+  const frame = task.newFrame<boolean>('waitForFetches');
   let i = 0;
   frame
       .loop(() => {
