@@ -437,7 +437,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
     const position = (computedStyle['position'] as css.Ident);
     const float = (computedStyle['float'] as css.Ident);
     const displayValues = display.getComputedDislayValue(
-        computedStyle['display'] || css.ident.inline, position, float,
+        computedStyle['display'] as css.Ident || css.ident.inline, position, float,
         this.sourceNode === this.xmldoc.root);
     ['display', 'position', 'float'].forEach((name) => {
       if (displayValues[name]) {
@@ -874,8 +874,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
               if (navParent) {
                 // find the content element
                 let href = null;
-                for (let c = navParent.firstChild; c;
-                     c = c.nextSibling) {
+                for (let c: Node = navParent.firstChild; c; c = c.nextSibling) {
                   if (c.nodeType != 1) {
                     continue;
                   }
@@ -1318,7 +1317,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
 
   private findAndProcessRepeatingElements(
       element: Element, styler: cssstyler.AbstractStyler) {
-    for (let child = element.firstChild; child; child = child.nextSibling) {
+    for (let child: Node = element.firstChild; child; child = child.nextSibling) {
       if (child.nodeType !== 1) {
         continue;
       }
@@ -1452,7 +1451,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
   /**
    * @override
    */
-  setCurrent(nodeContext, firstTime, atUnforcedBreak) {
+  setCurrent(nodeContext, firstTime, atUnforcedBreak = false) {
     this.nodeContext = nodeContext;
     if (nodeContext) {
       this.sourceNode = nodeContext.sourceNode;
@@ -1983,19 +1982,19 @@ export class Viewport {
     let outerZoomBox = this.root.firstElementChild;
     if (!outerZoomBox) {
       outerZoomBox = this.document.createElement('div');
-      outerZoomBox.setAttribute('data-vivliostyle-outer-zoom-box', true);
+      outerZoomBox.setAttribute('data-vivliostyle-outer-zoom-box', 'true');
       this.root.appendChild(outerZoomBox);
     }
     let contentContainer = outerZoomBox.firstElementChild;
     if (!contentContainer) {
       contentContainer = this.document.createElement('div');
-      contentContainer.setAttribute('data-vivliostyle-spread-container', true);
+      contentContainer.setAttribute('data-vivliostyle-spread-container', 'true');
       outerZoomBox.appendChild(contentContainer);
     }
     let layoutBox = outerZoomBox.nextElementSibling;
     if (!layoutBox) {
       layoutBox = this.document.createElement('div');
-      layoutBox.setAttribute('data-vivliostyle-layout-box', true);
+      layoutBox.setAttribute('data-vivliostyle-layout-box', 'true');
       this.root.appendChild(layoutBox);
     }
     this.outerZoomBox = (outerZoomBox as HTMLElement);
