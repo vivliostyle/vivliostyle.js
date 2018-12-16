@@ -2046,7 +2046,7 @@ export const fixed = {
   'none': ''
 };
 
-export const additiveFormat = (entries: Array, num: number) => {
+export const additiveFormat = (entries: any[], num: number) => {
   const max = (entries[0] as number);
   if (num > max || num <= 0 || num != Math.round(num)) {
     return '';
@@ -3378,12 +3378,15 @@ export class DefineParserHandler extends cssparse.SlaveParserHandler {
 
 export class PropSetParserHandler extends
     cssparse.SlaveParserHandler implements cssvalid.PropertyReceiver {
+  order: number;
+
   constructor(
       scope: exprs.LexicalScope, owner: cssparse.DispatchParserHandler,
       public readonly condition: exprs.Val,
       public readonly elementStyle: ElementStyle,
       public readonly validatorSet: cssvalid.ValidatorSet) {
     super(scope, owner, false);
+    this.order = 0;
   }
 
   /**
@@ -3579,7 +3582,7 @@ export const mergeStyle =
  * @template T
  */
 export const convertToPhysical =
-    (src: {[key: string]: CascadeValue}, dest: {[key: string]: T},
+    <T>(src: {[key: string]: CascadeValue}, dest: {[key: string]: T},
      vertical: boolean, rtl: boolean,
      transform: (p1: string, p2: CascadeValue) => T) => {
       const couplingMap = vertical ?
