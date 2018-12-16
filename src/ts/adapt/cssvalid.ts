@@ -1007,7 +1007,7 @@ export class ShorthandValidator extends css.Visitor {
   }
 
   clone(): ShorthandValidator {
-    const other = (new this.constructor() as ShorthandValidator);
+    const other = new ShorthandValidator();
     other.syntax = this.syntax;
     other.propList = this.propList;
     other.validatorSet = this.validatorSet;
@@ -1679,7 +1679,7 @@ export class ValidatorSet {
               }
               vals.push(builtIn.clone());
             } else {
-              let idents = {};
+              var idents = {};
               idents[token.text.toLowerCase()] = css.getName(token.text);
               vals.push(
                   this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS)));
@@ -1687,7 +1687,7 @@ export class ValidatorSet {
             expectval = false;
             break;
           case csstok.TokenType.INT:
-            let idents = {};
+            var idents = {};
             idents[`${token.num}`] = new css.Int(token.num);
             vals.push(
                 this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS)));
@@ -1719,7 +1719,7 @@ export class ValidatorSet {
             break;
           case csstok.TokenType.C_BRK:
             val = reduce();
-            let open = stack.pop();
+            var open = stack.pop();
             if (open.b != '[') {
               throw new Error('\']\' unexpected');
             }
@@ -1730,7 +1730,7 @@ export class ValidatorSet {
             break;
           case csstok.TokenType.C_PAR:
             val = reduce();
-            let open = stack.pop();
+            var open = stack.pop();
             if (open.b != '(') {
               throw new Error('\')\' unexpected');
             }
