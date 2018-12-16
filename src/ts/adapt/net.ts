@@ -168,7 +168,7 @@ export const createObjectURL = (blob: Blob): string =>
 /**
  * @template Resource
  */
-export class ResourceStore {
+export class ResourceStore<Resource> {
   resources: {[key: string]: Resource} = {};
   fetchers: {[key: string]: Fetcher<Resource>} = {};
 
@@ -231,7 +231,8 @@ export class ResourceStore {
   }
 
   get(url: string): XMLDocHolder {
-    return this.resources[base.stripFragment(url)];
+    const resource: unknown = this.resources[base.stripFragment(url)];
+    return resource as XMLDocHolder;
   }
 
   delete(url: string) {
