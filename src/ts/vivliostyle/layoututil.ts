@@ -44,37 +44,27 @@ export class LayoutIteratorStrategy {
     };
   }
 
-  startNonDisplayableNode(state: LayoutIteratorState): undefined
-      |task.Result<boolean> {}
+  startNonDisplayableNode(state: LayoutIteratorState): void | task.Result<boolean> {}
 
-  afterNonDisplayableNode(state: LayoutIteratorState): undefined
-      |task.Result<boolean> {}
+  afterNonDisplayableNode(state: LayoutIteratorState): void | task.Result<boolean> {}
 
-  startIgnoredTextNode(state: LayoutIteratorState): undefined
-      |task.Result<boolean> {}
+  startIgnoredTextNode(state: LayoutIteratorState): void | task.Result<boolean> {}
 
-  afterIgnoredTextNode(state: LayoutIteratorState): undefined
-      |task.Result<boolean> {}
+  afterIgnoredTextNode(state: LayoutIteratorState): void | task.Result<boolean> {}
 
-  startNonElementNode(state: LayoutIteratorState): undefined
-      |task.Result<boolean> {}
+  startNonElementNode(state: LayoutIteratorState): void | task.Result<boolean> {}
 
-  afterNonElementNode(state: LayoutIteratorState): undefined
-      |task.Result<boolean> {}
+  afterNonElementNode(state: LayoutIteratorState): void | task.Result<boolean> {}
 
-  startInlineElementNode(state: LayoutIteratorState): undefined
-      |task.Result<boolean> {}
+  startInlineElementNode(state: LayoutIteratorState): void | task.Result<boolean> {}
 
-  afterInlineElementNode(state: LayoutIteratorState): undefined
-      |task.Result<boolean> {}
+  afterInlineElementNode(state: LayoutIteratorState): void | task.Result<boolean> {}
 
-  startNonInlineElementNode(state: LayoutIteratorState): undefined
-      |task.Result<boolean> {}
+  startNonInlineElementNode(state: LayoutIteratorState): void | task.Result<boolean> {}
 
-  afterNonInlineElementNode(state: LayoutIteratorState): undefined
-      |task.Result<boolean> {}
+  afterNonInlineElementNode(state: LayoutIteratorState): void | task.Result<boolean> {}
 
-  finish(state: LayoutIteratorState): undefined|task.Result<boolean> {}
+  finish(state: LayoutIteratorState): void | task.Result<boolean> {}
 }
 
 export class LayoutIterator {
@@ -169,13 +159,11 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
       super()
   }
 
-  startNonInlineBox(state: LayoutIteratorState): undefined
-      |task.Result<boolean> {}
+  startNonInlineBox(state: LayoutIteratorState): void | task.Result<boolean> {}
 
-  endEmptyNonInlineBox(state: LayoutIteratorState): undefined
-      |task.Result<boolean> {}
+  endEmptyNonInlineBox(state: LayoutIteratorState): void | task.Result<boolean> {}
 
-  endNonInlineBox(state: LayoutIteratorState): undefined|task.Result<boolean> {}
+  endNonInlineBox(state: LayoutIteratorState): void | task.Result<boolean> {}
 
   initialState(initialNodeContext: vtree.NodeContext): LayoutIteratorState {
     return {
@@ -389,7 +377,7 @@ export class PseudoColumn {
 /**
  * @abstract
  */
-export class AbstractLayoutRetryer {
+export abstract class AbstractLayoutRetryer {
   initialBreakPositions: BreakPosition[] = null;
   initialStateOfFormattingContext: any = null;
   initialPosition: any;
@@ -404,7 +392,7 @@ export class AbstractLayoutRetryer {
   private tryLayout(nodeContext: vtree.NodeContext, column: Column):
       task.Result<vtree.NodeContext> {
     const frame =
-        task.newFrame('vivliostyle.layoututil.AbstractLayoutRetryer.tryLayout');
+        task.newFrame<vtree.NodeContext>('vivliostyle.layoututil.AbstractLayoutRetryer.tryLayout');
     this.saveState(nodeContext, column);
     const mode = this.resolveLayoutMode(nodeContext);
     mode.doLayout(nodeContext, column).then(function(positionAfter) {
@@ -426,7 +414,7 @@ export class AbstractLayoutRetryer {
   /**
    * @abstract
    */
-  resolveLayoutMode(nodeContext: vtree.NodeContext): LayoutMode {}
+  abstract resolveLayoutMode(nodeContext: vtree.NodeContext): LayoutMode;
 
   prepareLayout(nodeContext: vtree.NodeContext, column: Column) {}
 
