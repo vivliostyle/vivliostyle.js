@@ -468,7 +468,7 @@ export class TableFormattingContext extends
           cellFragment.pseudoColumn.getColumn(), repetitiveElements);
       collected.push(cellFragment);
       return repetitiveElements;
-    }, []);
+    }, [] as repetitiveelements.ElementsOffset[]);
   }
 
   collectElementsOffsetOfHighestColumn(): repetitiveelements.ElementsOffset[] {
@@ -546,7 +546,6 @@ export class ElementsOffsetOfTableCell implements
     return maxOffset;
   }
 }
-const ElementsOffsetOfTableCell = ElementsOffsetOfTableCell;
 
 function getTableFormattingContext(formattingContext: vtree.FormattingContext):
     TableFormattingContext {
@@ -601,7 +600,9 @@ export class EntireTableLayoutStrategy extends
 
   constructor(
       public readonly formattingContext: TableFormattingContext,
-      public readonly column: layout.Column) {}
+      public readonly column: layout.Column) {
+        super();
+      }
 
   /**
    * @override
@@ -853,7 +854,7 @@ export class TableLayoutStrategy extends layoututil.EdgeSkipper {
     const layoutContext = this.column.layoutContext;
     const currentRow = state.nodeContext;
     currentRow.viewNode.parentNode.removeChild(currentRow.viewNode);
-    const frame = task.newFrame('layoutRowSpanningCellsFromPreviousFragment');
+    const frame = task.newFrame<boolean>('layoutRowSpanningCellsFromPreviousFragment');
     let cont = task.newResult(true);
     let spanningCellRowIndex = 0;
     const occupiedSlotIndices = [];
@@ -996,7 +997,7 @@ export class TableLayoutStrategy extends layoututil.EdgeSkipper {
     const afterNodeContext = nodeContext.copy().modify();
     afterNodeContext.after = true;
     state.nodeContext = afterNodeContext;
-    const frame = task.newFrame('startTableCell');
+    const frame = task.newFrame<boolean>('startTableCell');
     let cont;
     if (this.hasBrokenCellAtSlot(cell.anchorSlot.columnIndex)) {
       const cellBreakPosition =
@@ -1275,7 +1276,7 @@ export class TableLayoutProcessor implements layout.LayoutProcessor {
     asserts.assert(nodeContext.sourceNode);
     const tableLayoutOption = getTableLayoutOption(nodeContext.sourceNode);
     clearTableLayoutOptionCache(nodeContext.sourceNode);
-    const frame = task.newFrame('TableLayoutProcessor.doInitialLayout');
+    const frame = task.newFrame<vtree.NodeContext>('TableLayoutProcessor.doInitialLayout');
     const initialNodeContext = nodeContext.copy();
     this.layoutEntireTable(nodeContext, column)
         .then(function(nodeContextAfter) {
@@ -1350,7 +1351,7 @@ export class TableLayoutProcessor implements layout.LayoutProcessor {
     this.addColGroups(formattingContext, rootViewNode, firstChild);
     const strategy = new TableLayoutStrategy(formattingContext, column);
     const iterator = new layoututil.LayoutIterator(strategy, column.layoutContext);
-    const frame = task.newFrame('TableFormattingContext.doLayout');
+    const frame = task.newFrame<vtree.NodeContext>('TableFormattingContext.doLayout');
     iterator.iterate(nodeContext).thenFinish(frame);
     return frame.result();
   }
@@ -1408,7 +1409,7 @@ export class TableLayoutProcessor implements layout.LayoutProcessor {
             formattingContext.getRowSpanningCellsOverflowingTheRow(rowIndex);
       }
       if (cells.length) {
-        const frame = task.newFrame('TableLayoutProcessor.finishBreak');
+        const frame = task.newFrame<boolean>('TableLayoutProcessor.finishBreak');
         let i = 0;
         frame
             .loopWithFrame((loopFrame) => {
@@ -1558,7 +1559,6 @@ export class LayoutEntireTable extends
    * @override
    */
   doLayout(nodeContext, column) {
-    super.doLayout(nodeContext, column);
     return this.processor.doInitialLayout(nodeContext, column);
   }
 }

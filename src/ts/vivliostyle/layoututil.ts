@@ -155,7 +155,7 @@ export class LayoutIterator {
 }
 
 export class EdgeSkipper extends LayoutIteratorStrategy {
-  constructor(protected readonly leadingEdge: boolean) {
+  constructor(protected readonly leadingEdge?: boolean) {
       super()
   }
 

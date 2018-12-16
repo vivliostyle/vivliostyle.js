@@ -374,7 +374,7 @@ export class RepetitiveElements implements ElementsOffset {
 /**
  * @abstract
  */
-export class LayoutEntireBlock implements LayoutMode {
+export abstract class LayoutEntireBlock implements LayoutMode {
   formattingContext: any;
 
   constructor(formattingContext: RepetitiveElementsOwnerFormattingContext) {
@@ -384,7 +384,8 @@ export class LayoutEntireBlock implements LayoutMode {
   /**
    * @override
    */
-  doLayout(nodeContext, column) {}
+  abstract doLayout(nodeContext: vtree.NodeContext, column: layout.Column):
+      task.Result<vtree.NodeContext>;
 
   /**
    * @override
@@ -410,7 +411,7 @@ export class LayoutEntireBlock implements LayoutMode {
 /**
  * @abstract
  */
-export class LayoutFragmentedBlock implements LayoutMode {
+export abstract class LayoutFragmentedBlock implements LayoutMode {
   formattingContext: any;
 
   constructor(formattingContext: RepetitiveElementsOwnerFormattingContext) {
@@ -420,7 +421,8 @@ export class LayoutFragmentedBlock implements LayoutMode {
   /**
    * @override
    */
-  doLayout(nodeContext, column) {}
+  abstract doLayout(nodeContext: vtree.NodeContext, column: layout.Column):
+      task.Result<vtree.NodeContext>;
 
   /**
    * @override
@@ -460,7 +462,7 @@ export class LayoutFragmentedOwnerBlock extends
   constructor(
       formattingContext: RepetitiveElementsOwnerFormattingContext,
       public readonly processor: RepetitiveElementsOwnerLayoutProcessor) {
-    LayoutFragmentedBlock.call(this, formattingContext);
+    super(formattingContext);
   }
 
   /**
@@ -609,7 +611,9 @@ export class EntireBlockLayoutStrategy extends
   constructor(
       public readonly formattingContext:
           RepetitiveElementsOwnerFormattingContext,
-      public readonly column: layout.Column) {}
+      public readonly column: layout.Column) {
+    super();
+  }
 
   /**
    * @override
@@ -671,7 +675,9 @@ export class FragmentedBlockLayoutStrategy extends
   constructor(
       public readonly formattingContext:
           RepetitiveElementsOwnerFormattingContext,
-      public readonly column: layout.Column) {}
+      public readonly column: layout.Column) {
+    super();
+  }
 }
 
 export class RepetitiveElementsOwnerLayoutProcessor extends
@@ -725,7 +731,7 @@ export class RepetitiveElementsOwnerLayoutProcessor extends
       task.Result<vtree.NodeContext> {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
         nodeContext.formattingContext);
-    const frame = task.newFrame('BlockLayoutProcessor.doInitialLayout');
+    const frame = task.newFrame<vtree.NodeContext>('BlockLayoutProcessor.doInitialLayout');
     this.layoutEntireBlock(nodeContext, column).thenFinish(frame);
     return frame.result();
   }
