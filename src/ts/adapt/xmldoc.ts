@@ -514,7 +514,7 @@ export class NodeList {
   child(tag: string): NodeList {
     return this.forEachNode((node, add) => {
       for (let c: Node = node.firstChild; c; c = c.nextSibling) {
-        if (c.localName == tag) {
+        if (c.nodeType == 1 && (c as Element).localName == tag) {
           add(c);
         }
       }
