@@ -45,7 +45,7 @@ export class XMLDocHolder {
     let body = null;
     let head = null;
     if (this.root.namespaceURI == base.NS.XHTML) {
-      for (let child = this.root.firstChild; child; child = child.nextSibling) {
+      for (let child: Node = this.root.firstChild; child; child = child.nextSibling) {
         if (child.nodeType != 1) {
           continue;
         }
@@ -64,8 +64,7 @@ export class XMLDocHolder {
       this.lang = this.root.getAttribute('lang');
     } else if (this.root.namespaceURI == base.NS.FB2) {
       head = this.root;
-      for (let child = this.root.firstChild; child;
-           child = child.nextSibling) {
+      for (let child: Node = this.root.firstChild; child; child = child.nextSibling) {
         if (child.nodeType != 1) {
           continue;
         }
@@ -321,7 +320,7 @@ export const parseAndReturnNullIfError =
       const parser = opt_parser || new DOMParser();
       let doc;
       try {
-        doc = parser.parseFromString(str, type);
+        doc = parser.parseFromString(str, type as SupportedType);
       } catch (e) {
       }
       if (!doc) {
@@ -490,7 +489,7 @@ export class NodeList {
   /**
    * @template T
    */
-  forEach(fn: (p1: Node) => T): T[] {
+  forEach<T>(fn: (p1: Node) => T): T[] {
     const arr = [];
     for (let i = 0; i < this.nodes.length; i++) {
       arr.push(fn(this.nodes[i]));
@@ -501,7 +500,7 @@ export class NodeList {
   /**
    * @template T
    */
-  forEachNonNull(fn: (p1: Node) => T): T[] {
+  forEachNonNull<T>(fn: (p1: Node) => T): T[] {
     const arr = [];
     for (let i = 0; i < this.nodes.length; i++) {
       const t = fn(this.nodes[i]);
@@ -514,8 +513,8 @@ export class NodeList {
 
   child(tag: string): NodeList {
     return this.forEachNode((node, add) => {
-      for (let c = node.firstChild; c; c = c.nextSibling) {
-        if (c.localName == tag) {
+      for (let c: Node = node.firstChild; c; c = c.nextSibling) {
+        if (c.nodeType == 1 && (c as Element).localName == tag) {
           add(c);
         }
       }
@@ -524,7 +523,7 @@ export class NodeList {
 
   childElements(): NodeList {
     return this.forEachNode((node, add) => {
-      for (let c = node.firstChild; c; c = c.nextSibling) {
+      for (let c: Node = node.firstChild; c; c = c.nextSibling) {
         if (c.nodeType == 1) {
           add(c);
         }

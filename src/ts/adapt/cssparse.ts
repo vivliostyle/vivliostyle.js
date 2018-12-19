@@ -2534,8 +2534,7 @@ export const parseStylesheetFromURL = (url: string, handler: ParserHandler,
                                           task.Result<boolean> => task.handle(
     'parseStylesheetFromURL',
     (frame) => {
-      net.ajax(url).then((xhrParam) => {
-        const xhr = (xhrParam as XMLHttpRequest);
+      net.ajax(url).then((xhr) => {
         if (!xhr.responseText) {
           frame.finish(true);
         } else {
