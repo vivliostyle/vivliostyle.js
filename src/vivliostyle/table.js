@@ -683,7 +683,18 @@ goog.scope(() => {
         const nodeContext = state.nodeContext;
         const display = nodeContext.display;
         const parentDisplay = nodeContext.parent ? nodeContext.parent.display : null;
-        const isNestedTable =
+
+        // Is inline-table nested in another table?
+        let isNestedInlineTable = false;
+        if (parentDisplay === "inline-table" && !(nodeContext.formattingContext instanceof TableFormattingContext)) {
+            for (let nc = nodeContext.parent; nc; nc = nc.parent) {
+                if (nc.formattingContext instanceof TableFormattingContext) {
+                    isNestedInlineTable = nc.formattingContext === formattingContext;
+                    break;
+                }
+            }
+        }
+        const isNestedTable = isNestedInlineTable ||
             (display === "table-row" && !isValidParentOfTableRow(parentDisplay)) ||
             (display === "table-cell" && parentDisplay !== "table-row" && !isValidParentOfTableRow(parentDisplay)) ||
             (nodeContext.formattingContext instanceof TableFormattingContext &&
