@@ -18,13 +18,36 @@
     </header>
 
     <div class="section-body" id="page-body">
+        <section id="toc">
+            <div class="section-content">
+                <h2>目次</h2>
+                <nav>
+                    <ol>
+                        <li><a href="#guide">Vivliostyle Viewer ユーザーガイド</a>
+                            <ol>
+                                <li><a href="#use">使い方</a></li>
+                                <li><a href="#htmlview">Vivliostyle Viewer で表示するHTMLファイルの指定</a></li>
+                                <li><a href="#epubview">EPUBを表示するには</a></li>
+                                <li><a href="#multihtml">複数のHTMLファイルを指定するには</a></li>
+                                <li><a href="#spread">見開きページ表示を指定するには</a></li>
+                                <li><a href="#addstyle">スタイルシートを指定するには</a></li>
+                                <li><a href="#print">Vivliostyle Viewer から印刷・PDF出力を行うには</a></li>
+                                <li><a href="#features">Vivliostyleがサポートする機能</a></li>
+                                <li><a href="#docs">その他のドキュメント</a></li>
+                            </ol>
+                        </li>
+                        <li><a href="#TestSamples">サンプル</a></li>
+                    </ol>
+                </nav>
+            </div>
+        </section>
         <section>
             <div class="section-content">
-                <h2>Vivliostyle Viewer ユーザーガイド</h2>
+                <h2 id="guide">Vivliostyle Viewer ユーザーガイド</h2>
 
                 <p>Vivliostyle Viewer は、HTML+CSS文書を組版・表示するWebアプリケーションです。</p>
 
-                <h3>使い方</h3>
+                <h3 id="use">使い方</h3>
 
                 <p>Vivliostyle Viewer をローカル環境で利用する場合は、配布パッケージに同梱の <a href="https://github.com/vivliostyle/vivliostyle-ui/blob/master/dist/README.ja.md"><code>README.ja.md</code>（オンラインで読む）</a>に記載の「使い方」の手順にしたがってWebサーバーを起動してください。</p>
 
@@ -32,7 +55,7 @@
 
                 <p><code>viewer</code> フォルダの下の <code>vivliostyle-viewer.html</code> が Vivliostyle Viewer 本体です。このURLに、<code>#x=</code>… のようなフラグメントの形式を付加して、表示するHTMLファイルを指定します。</p>
 
-                <h3>Vivliostyle Viewer で表示するHTMLファイルの指定</h3>
+                <h3 id="htmlview">Vivliostyle Viewer で表示するHTMLファイルの指定</h3>
 
                 <p>HTMLファイルを Vivliostyle Viewer で表示するには、Webサーバーが読み込める場所（上記手順にしたがってWebサーバーを起動している場合は、配布パッケージを展開してできたフォルダの下）にそのファイル（およびそのファイルから読み込まれるCSSや画像ファイル）を置いた上で、次の形式にしたURLをブラウザで開きます:</p>
 
@@ -50,7 +73,7 @@
 
                 <div class="code"><a id="input-file-path-link" class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#x=../samples/gon/index.html"><code class="url"><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#x=<span id="input-file-path-fragment">../samples/gon/index.html</span></code></a></div>
 
-                <h3>EPUBを表示するには</h3>
+                <h3 id="epubview">EPUBを表示するには</h3>
 
                 <p>ZIP展開済みのEPUBファイルを表示することもできます。その場合、 <code>#x=</code>… のかわりに次の形式を指定します:</p>
 
@@ -64,13 +87,13 @@
 
                 <div class="code"><a id="input-epub-path-link" class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#b=../test.epub/"><code class="url"><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=<span id="input-epub-path-fragment">../test.epub/</span></code></a></div>
 
-                <h3>複数のHTMLファイルを指定するには</h3>
+                <h3 id="multihtml">複数のHTMLファイルを指定するには</h3>
 
                 <p>複数のHTMLファイルを Vivliostyle Viewer でまとめて表示するには、EPUBの形式にして上記の方法で指定するか、または、次のように直接複数のHTMLファイルを指定します:</p>
 
                 <div class="code"><code>#x=</code>⟨最初のHTMLファイルのURL⟩<code>&amp;x=</code>⟨2番目のHTMLファイルのURL⟩…<code>&amp;x=</code>⟨n番目のHTMLファイルのURL⟩</div>
 
-                <h3>見開きページ表示を指定するには</h3>
+                <h3 id="spread">見開きページ表示を指定するには</h3>
 
                 <p>Vivliostyle Viewer は、表示領域の横幅が大きいとき（高さの1.45倍以上）、自動的に見開きページ表示にします。これを変えるには次の指定をURLに追加します:</p>
 
@@ -80,7 +103,7 @@
 
                 <p>Vivliostyle Viewer の設定パネル（画面右上のアイコン <img class="icon" src="../images/vivliostyle-icon.png" alt="[Setting]"/> をクリックして開く）でも、ページ表示モードの変更ができます。</p>
 
-                <h3>スタイルシートを指定するには</h3>
+                <h3 id="addstyle">スタイルシートを指定するには</h3>
 
                 <p>HTMLファイルに指定されているスタイルシートに加えて、追加のスタイルシート（CSSファイル）を使うには、次の指定をURLに追加します:</p>
 
@@ -98,15 +121,15 @@
 
                 <div class="code"><code class="url">&amp;style=data:text/css,html{writing-mode:vertical-rl}</code></div>
 
-                <h3>Vivliostyle Viewer から印刷・PDF出力を行うには</h3>
+                <h3 id="print">Vivliostyle Viewer から印刷・PDF出力を行うには</h3>
 
                 <p>ブラウザの印刷・PDF出力機能を利用できます。例えば、Google Chrome で PDF に出力するには、メニューから「印刷」を開き、出力先として「PDFに保存」、背景のグラフィック ON と指定して「保存」します。</p>
 
-                <h3>Vivliostyleがサポートする機能</h3>
+                <h3 id="features">Vivliostyleがサポートする機能</h3>
 
                 <p>VivliostyleがサポートするCSSの機能については <a href="../en/supported-features.html">“Features supported by Vivliostyle”（英語）</a>を参照してください。</p>
 
-                <h3>その他のドキュメント</h3>
+                <h3 id="docs">その他のドキュメント</h3>
 
                 <p>その他のドキュメントは <a href="https://vivliostyle.org/ja/docs/">Vivliostyle ドキュメント</a> にあります。</p>
             </div>
