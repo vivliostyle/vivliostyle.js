@@ -1,5 +1,12 @@
 # Change Log
 
+## Unreleased
+
+### Fixed
+
+- Fix error occurring when inline-table is nested in another table
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/493>
+
 ## [2018.10.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.10.100) - 2018-10-31
 
 ### Added
