@@ -28,3 +28,13 @@ img.icon {
     height: 1.5em;
     vertical-align: text-bottom;
 }
+
+#toc h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5em;
+}
+
+#toc ol {
+    list-style: decimal;
+    margin-left: 2em;
+}
