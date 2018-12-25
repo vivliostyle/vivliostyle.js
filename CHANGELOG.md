@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- Fix bug on epubcfi failing to navigate to beginning of a spine item
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/494> 
 - Fix error occurring when inline-table is nested in another table
   - <https://github.com/vivliostyle/vivliostyle.js/pull/493>
 
