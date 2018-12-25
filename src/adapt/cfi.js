@@ -364,10 +364,8 @@ adapt.cfi.Fragment.prototype.navigate = function(doc) {
     const pos = {node:doc.documentElement, offset:0, after:false, sideBias:null, ref:null};
     for (let i = 0; i < this.steps.length; i++) {
         if (!this.steps[i].applyTo(pos)) {
-            if (++i < this.steps.length) {
-                pos.ref = new adapt.cfi.Fragment();
-                pos.ref.steps = this.steps.slice(i);
-            }
+            pos.ref = new adapt.cfi.Fragment();
+            pos.ref.steps = this.steps.slice(i + 1);
             break;
         }
     }
