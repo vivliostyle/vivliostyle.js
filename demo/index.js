@@ -16,8 +16,13 @@ document.getElementById('print').addEventListener('click', () => {
             const pageCount = iframeWin.document.querySelectorAll('[data-vivliostyle-page-container]').length
             console.log(`page count: ${pageCount}`)
             iframeWin.print()
-            return true
         }
 
-    vivliostylePrint(htmlDoc, {title, resourcesUrl, printCallback})
+    vivliostylePrint(htmlDoc, {
+        title,
+        resourcesUrl,
+        printCallback,
+        hideIframe: true, // Whether to use a hidden iframe (default: true)
+        removeIframe: true // Whether to remove the iframe after use (default: true)
+    })
 })

@@ -36,11 +36,19 @@ class VivliostylePrint {
                 <link rel="stylesheet" href="${this.resourcesUrl}vivliostyle-viewport-screen.css" media="screen"/>
                 <link rel="stylesheet" href="${this.resourcesUrl}vivliostyle-viewport.css"/>
                 <style>
-                    html[data-vivliostyle-paginated],
+                    html[data-vivliostyle-paginated] {
+                        width: 100%;
+                        height: 100%;
+                    }
                     html[data-vivliostyle-paginated] body,
                     html[data-vivliostyle-paginated] [data-vivliostyle-viewer-viewport] {
                         width: 100% !important;
                         height: 100% !important;
+                    }
+                    html[data-vivliostyle-paginated],
+                    html[data-vivliostyle-paginated] body {
+                        margin: 0;
+                        padding: 0;
                     }
                 </style>
                 <style id='vivliostyle-page-rules'></style>
