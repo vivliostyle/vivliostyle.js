@@ -28,15 +28,33 @@ class VivliostylePrint {
         }
         this.window = window
         this.window.printInstance = this
-        this.iframe.srcdoc="<html><head><style id='vivliostyle-page-rules'></style></head><body onload='parent.printInstance.runInIframe(window)'></body></html>"
+        this.iframe.srcdoc=`<!DOCTYPE html>
+        <html data-vivliostyle-paginated="true">
+            <head>
+                <meta charset='utf-8'/>
+                <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+                <link rel="stylesheet" href="${this.resourcesUrl}vivliostyle-viewport-screen.css" media="screen"/>
+                <link rel="stylesheet" href="${this.resourcesUrl}vivliostyle-viewport.css"/>
+                <style>
+                    html[data-vivliostyle-paginated],
+                    html[data-vivliostyle-paginated] body,
+                    html[data-vivliostyle-paginated] [data-vivliostyle-viewer-viewport] {
+                        width: 100% !important;
+                        height: 100% !important;
+                    }
+                </style>
+                <style id='vivliostyle-page-rules'></style>
+            </head>
+            <body onload='parent.printInstance.runInIframe(window)'>
+                <div id="vivliostyle-viewer-viewport"></div>
+            </body>
+        </html>`
         document.body.appendChild(this.iframe)
     }
 
     runInIframe(iframeWin) {
         this.iframeWin = iframeWin
         return this.preparePrint().then(
-            () => this.fixPreparePrint()
-        ).then(
             () => this.browserPrint()
         ).then(
             () => this.cleanUp()
@@ -49,7 +67,7 @@ class VivliostylePrint {
             docURL = URL.createObjectURL(docBlob),
             Viewer = new vivliostyle.viewer.Viewer(
                 {
-                    viewportElement: this.iframeWin.document.body,
+                    viewportElement: this.iframeWin.document.body.firstElementChild,
                     window: this.iframeWin,
                     userAgentRootURL: `${this.resourcesUrl}`
                 }
@@ -62,10 +80,6 @@ class VivliostylePrint {
             })
             Viewer.loadDocument({url: docURL})
         })
-    }
-
-    fixPreparePrint() {
-        this.iframeWin.document.querySelectorAll('[data-vivliostyle-page-container]').forEach(node => node.style.display = 'block')
     }
 
     browserPrint() {

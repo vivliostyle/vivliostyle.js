@@ -11,7 +11,7 @@ document.getElementById('print').addEventListener('click', () => {
             <body>${html}</body>
         </html>`,
         title = 'Vivliostyle-print demo',
-        resourcesUrl = 'resources/',
+        resourcesUrl = '/demo/resources/',
         printCallback = iframeWin => {
             const pageCount = iframeWin.document.querySelectorAll('[data-vivliostyle-page-container]').length
             console.log(`page count: ${pageCount}`)
