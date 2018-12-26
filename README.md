@@ -29,10 +29,13 @@ const htmlDoc = `<!doctype html>
         ... Add your HTML code here ...
     </body>
 </html>`,
-    title = 'my printed page',
-    resourcesUrl = '/node_modules/vivliostyle/resources/'
+    config = {
+        title: 'my printed page',
+        resourcesUrl: '/node_modules/vivliostyle/resources/',
+        printCallback: iframeWin => iframeWin.print() // optional: only needed if calling something other than window.print() for printing.
+    }
 
-vivliostylePrint(htmlDoc, title, resourcesUrl)
+vivliostylePrint(htmlDoc, config)
 
 ```
 
