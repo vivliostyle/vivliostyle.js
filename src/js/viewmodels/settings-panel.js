@@ -78,6 +78,7 @@ class SettingsPanel {
             this.documentOptions_.pageSize.copyFrom(this.state.pageSize);
             this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
         }
+        this.opened(false);
     }
 
     reset() {
