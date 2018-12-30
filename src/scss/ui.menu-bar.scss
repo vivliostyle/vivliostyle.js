@@ -82,12 +82,12 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 		height: $menu-icon-height * 0.5;
 		text-align: center;
 		transition: linear .2s;
-		@media screen and (max-width: 824px) {
+		@media screen and (max-width: 1080px) {
 			right: $menu-icon-width + $menu-icon-offset-x * 4;
 			width: 362px / (80px / ($menu-icon-height * 0.5));
 			text-align: right;
 		}
-		@media screen and (max-width: 512px) {
+		@media screen and (max-width: 612px) {
 			animation: none !important;
 			opacity: 0 !important;
 		}
@@ -122,7 +122,12 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 			background: rgb(64,64,64);
 		}
 		//&:first-child/*, &#vivliostyle-menu_misc*/ { padding-left: 0; &:before { display: none; } }
-		&#vivliostyle-menu_misc { position: absolute; right: 0; }
+		&#vivliostyle-menu_misc {
+			float: right;
+			margin-left: -7px;
+			padding-right: 0;
+			z-index: 11;
+		}
 		li.vivliostyle-menu-item {
 			display: table-cell;
 			position: relative;
@@ -160,10 +165,10 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 				&:after {
 					width: 1em;
 					height: 1em;
-					line-height: $menu-icon-height * 0.25;
+					line-height: $menu-icon-height * 0.28;
 					text-align: center;
 					font-family: Verdana;
-					font-size: $menu-icon-height * 0.25;
+					font-size: $menu-icon-height * 0.28;
 					//font-weight: bold;
 				}
 				&.hover  { &:before, &:after { color: black; } background: rgba(255,255,255,0.75); }
@@ -237,7 +242,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 			&#vivliostyle-menu-item_text-size-larger      >.vivliostyle-menu-icon-button:after  { content: "+"; }
 			&#vivliostyle-menu-item_text-size-smaller     >.vivliostyle-menu-icon-button:after,
 			&#vivliostyle-menu-item_text-size-default     >.vivliostyle-menu-icon-button:after,
-			&#vivliostyle-menu-item_text-size-larger      >.vivliostyle-menu-icon-button:after  {               right: $menu-icon-width * 0.01; top: $menu-icon-height * 0.15; }
+			&#vivliostyle-menu-item_text-size-larger      >.vivliostyle-menu-icon-button:after  { right: $menu-icon-width * 0.05; top: $menu-icon-height * 0.15; }
 		//	&#vivliostyle-menu-item_misc-toggle       >.vivliostyle-menu-icon-button:before { content: $fa-var-bars; }
 		//	&#vivliostyle-menu-item_misc-toggle.vivliostyle-menu-item_detail-opened >.vivliostyle-menu-icon-button:before { content: $fa-var-times; }
 			&#vivliostyle-menu-item_zoom-fit-to-screen.on {
@@ -264,18 +269,28 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					}
 				}
 			}
+			&#vivliostyle-menu-item_text-size-default {
+				@media screen and (max-width: $menu-icon-width * 14 - 4px) {
+					display: none;
+				}
+			}
 			&#vivliostyle-menu-item_misc-toggle.vivliostyle-menu-item_detail-opened {
 				>.vivliostyle-menu-icon-button {
 					-webkit-filter: grayscale(100%); filter: grayscale(100%);
 				}
 			}
+			&#vivliostyle-menu-item_move-previous, &#vivliostyle-menu-item_move-next {
+				@media screen and (max-width: $menu-icon-width * 13 - 4px) {
+					display: none;
+				}
+			}
 			&#vivliostyle-menu-item_zoom-to-actual-size {
-				@media screen and (max-width: 390px) {
+				@media screen and (max-width: $menu-icon-width * 11 - 4px) {
 					display: none;
 				}
 			}
 			&#vivliostyle-menu-item_zoom-fit-to-screen {
-				@media screen and (max-width: 354px) {
+				@media screen and (max-width: $menu-icon-width * 10 - 4px) {
 					display: none;
 				}
 			}
