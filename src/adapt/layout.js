@@ -2181,6 +2181,23 @@ adapt.layout.isSpecialNodeContext = nodeContext => {
 };
 
 /**
+ * @param {string} display
+ * @return {boolean}
+ */
+adapt.layout.isSpecialInlineDisplay = display => {
+    switch (display) {
+        case "ruby":
+        case "inline-block":
+        case "inline-flex":
+        case "inline-grid":
+        case "inline-list-item":
+        case "inline-table":
+            return true;
+    }
+    return false;
+};
+
+/**
  * Read ranges skipping special elments
  * @param {Node} start
  * @param {Node} end
@@ -2218,6 +2235,18 @@ adapt.layout.Column.prototype.getRangeBoxes = function(start, end) {
             } else if (adapt.layout.isSpecial(/** @type {Element} */ (node))) {
                 // Skip special
                 seekRange = !haveStart;
+            } else if (node.localName == "ruby" ||
+                adapt.layout.isSpecialInlineDisplay(this.clientLayout.getElementComputedStyle(/** @type {Element} */ (node)).display)) {
+                // ruby, inline-block, etc.
+                seekRange = !haveStart;
+                if (seekRange) {
+                    range.setStartBefore(node);
+                    haveStart = true;
+                    lastGood = node;
+                }
+                if (node.contains(end)) {
+                    endNotReached = false;
+                }
             } else {
                 next = node.firstChild;
             }
