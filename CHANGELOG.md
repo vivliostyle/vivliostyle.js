@@ -1,6 +1,6 @@
 # Change Log
 
-## [2018.12.102](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.12.102) - 2019-01-03
+## [2018.12.103](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.12.103) - 2019-01-03
 
 ### Fixed
 
@@ -10,6 +10,12 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/494> 
 - Fix error occurring when inline-table is nested in another table
   - <https://github.com/vivliostyle/vivliostyle.js/pull/493>
+
+### Changed
+
+- [Viewer UI] UI adjustment
+  - Setting panel "Apply" button now closes the panel
+  - Enable "Previous Page", "Next Page", and "Text: Default Size" buttons when window is wide enough
 
 ## [2018.10.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.10.100) - 2018-10-31
 
