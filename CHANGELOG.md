@@ -1,9 +1,11 @@
 # Change Log
 
-## Unreleased
+## [2018.12.102](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.12.102) - 2019-01-03
 
 ### Fixed
 
+- Fix bug that ruby causes incorrect pagination
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/495>
 - Fix bug on epubcfi failing to navigate to beginning of a spine item
   - <https://github.com/vivliostyle/vivliostyle.js/pull/494> 
 - Fix error occurring when inline-table is nested in another table
