@@ -637,7 +637,7 @@ export class Styler implements AbstractStyler {
       if (nodeOffset >= this.lastOffset) {
         break;
       }
-      let next = node.firstChild;
+      let next: Node = node.firstChild;
       if (next == null) {
         while (true) {
           next = node.nextSibling;
@@ -775,7 +775,7 @@ export class Styler implements AbstractStyler {
     }
     const context = this.context;
     while (true) {
-      let next = this.last.firstChild;
+      let next: Node = this.last.firstChild;
       if (next == null) {
         while (true) {
           if (this.last.nodeType == 1) {

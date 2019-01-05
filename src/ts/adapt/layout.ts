@@ -285,16 +285,16 @@ export interface BreakPosition {
 /**
  * @abstract
  */
-export class AbstractBreakPosition implements BreakPosition {
+export abstract class AbstractBreakPosition implements BreakPosition {
   /**
    * @abstract
    */
-  findAcceptableBreak(column, penalty) {}
+  abstract findAcceptableBreak(column: Column, penalty: number): vtree.NodeContext;
 
   /**
    * @abstract
    */
-  getMinBreakPenalty() {}
+  abstract getMinBreakPenalty(): number;
 
   calculateOffset(column): {current: number, minimum: number} {
     return calculateOffset(
@@ -837,7 +837,7 @@ export class Column extends vtree.Container {
    * Remove all the exclusion floats.
    */
   killFloats(): void {
-    let c = this.element.firstChild;
+    let c: Node = this.element.firstChild;
     while (c) {
       const nc = c.nextSibling;
       if (c.nodeType == 1) {
@@ -1286,7 +1286,7 @@ export class Column extends vtree.Container {
     if (!floatArea) {
       return task.newResult(result);
     }
-    const frame = task.newFrame('layoutSinglePageFloatFragment');
+    const frame = task.newFrame<SinglePageFloatLayoutResult>('layoutSinglePageFloatFragment');
     let failed = false;
     let i = 0;
     frame
@@ -1396,7 +1396,7 @@ export class Column extends vtree.Container {
     const newFloatAreas = [];
     const newFragments = [];
     let failed = false;
-    const frame = task.newFrame('layoutStashedPageFloats');
+    const frame = task.newFrame<boolean>('layoutStashedPageFloats');
     const self = this;
     let i = 0;
     frame
@@ -1855,7 +1855,7 @@ export class Column extends vtree.Container {
 
   postLayoutBlock(
       nodeContext: vtree.NodeContext, checkPoints: vtree.NodeContext[]) {
-    const hooks: PostLayoutBlockHook[] = plugin.getHooksForName(
+    const hooks: plugin.PostLayoutBlockHook[] = plugin.getHooksForName(
         plugin.HOOKS.POST_LAYOUT_BLOCK);
     hooks.forEach((hook) => {
       hook(nodeContext, checkPoints, this);
@@ -2114,8 +2114,8 @@ export class Column extends vtree.Container {
       orphans = 1;
     } else {
       // Get widows/orphans settings from the block element
-      widows = Math.max((block.inheritedProps['widows'] || 2) - 0, 1);
-      orphans = Math.max((block.inheritedProps['orphans'] || 2) - 0, 1);
+      widows = Math.max((block.inheritedProps['widows'] as number || 2) - 0, 1);
+      orphans = Math.max((block.inheritedProps['orphans'] as number || 2) - 0, 1);
     }
 
     // In case of box-decoration-break: clone, width (or height in vertical
@@ -3191,7 +3191,7 @@ export class Column extends vtree.Container {
    */
   redoLayout(): task.Result<vtree.ChunkPosition> {
     const chunkPositions = this.chunkPositions;
-    let last = this.element.lastChild;
+    let last: Node = this.element.lastChild;
     while (last != this.last) {
       const prev = last.previousSibling;
       if (!(this.element === last.parentNode &&

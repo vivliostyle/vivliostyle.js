@@ -610,10 +610,12 @@ export const mapSize = (obj: Object): number => {
 };
 type Event = {
   type: string,
-  target,
-  currentTarget,
-  preventDefault,
-  newPage
+  target?,
+  currentTarget?,
+  preventDefault?,
+  newPage?,
+  anchorElement?,
+  href?
 };
 
 export {Event};

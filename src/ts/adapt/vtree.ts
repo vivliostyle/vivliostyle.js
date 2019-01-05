@@ -100,7 +100,7 @@ export const actions = {
 };
 
 export const makeListener =
-    (refs: Element[], action: string): Function|null => {
+    (refs: Element[], action: string): EventListener | null => {
       const actionFn = actions[action];
       if (actionFn) {
         return () => {
@@ -133,7 +133,7 @@ export class Page extends base.SimpleEventTarget {
   position: LayoutPosition = null;
   offset: number = -1;
   side: constants.PageSide|null = null;
-  fetchers: taskutil.Fetcher[] = [];
+  fetchers: taskutil.Fetcher<{}>[] = [];
   marginBoxes: {
     top: {[key: string]: Container},
     bottom: {[key: string]: Container},
@@ -169,7 +169,7 @@ export class Page extends base.SimpleEventTarget {
   setAutoPageWidth(isAuto: boolean) {
     this.isAutoPageWidth = isAuto;
     if (isAuto) {
-      this.container.setAttribute(Page.AUTO_PAGE_WIDTH_ATTRIBUTE, true);
+      this.container.setAttribute(Page.AUTO_PAGE_WIDTH_ATTRIBUTE, 'true');
     } else {
       this.container.removeAttribute(Page.AUTO_PAGE_WIDTH_ATTRIBUTE);
     }
@@ -178,7 +178,7 @@ export class Page extends base.SimpleEventTarget {
   setAutoPageHeight(isAuto: boolean) {
     this.isAutoPageHeight = isAuto;
     if (isAuto) {
-      this.container.setAttribute(Page.AUTO_PAGE_HEIGHT_ATTRIBUTE, true);
+      this.container.setAttribute(Page.AUTO_PAGE_HEIGHT_ATTRIBUTE, 'true');
     } else {
       this.container.removeAttribute(Page.AUTO_PAGE_HEIGHT_ATTRIBUTE);
     }
@@ -1012,6 +1012,10 @@ export class LayoutPosition {
    * flowPositions is built up to this offset.
    */
   highestSeenOffset: number = 0;
+
+  // FIXME: This properties seem to be not used
+  highestSeenNode: any;
+  lookupPositionOffset: any;
 
   clone(): LayoutPosition {
     const newcp = new LayoutPosition();

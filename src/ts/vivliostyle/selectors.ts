@@ -20,7 +20,7 @@ import * as asserts from './asserts';
 
 import * as base from '../adapt/base';
 
-import {CascadeValue, ElementStyle, matchANPlusB, mergeStyle, getStyleMap} from '../adapt/csscasc';
+import {CascadeValue, ElementStyle, matchANPlusB, mergeStyle, getViewConditionalStyleMap} from '../adapt/csscasc';
 import {Context} from '../adapt/expr';
 import {Column, getElementHeight} from '../adapt/layout';
 import {FragmentLayoutConstraint} from '../adapt/layout';
@@ -103,7 +103,7 @@ export const mergeViewConditionalStyles =
 
 export const forEachViewConditionalStyles =
     (style: ElementStyle, callback: (p1: ElementStyle) => any) => {
-      const viewConditionalStyles = getStyleMap(style, '_viewConditionalStyles');
+      const viewConditionalStyles = getViewConditionalStyleMap(style);
       if (!viewConditionalStyles) {
         return;
       }
