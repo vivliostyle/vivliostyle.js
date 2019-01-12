@@ -510,12 +510,16 @@ adapt.viewer.Viewer.prototype.showSpread = function(spread) {
         this.showSinglePage(spread.left);
         if (!spread.right) {
             spread.left.container.setAttribute("data-vivliostyle-unpaired-page", true);
+        } else {
+            spread.left.container.removeAttribute("data-vivliostyle-unpaired-page");
         }
     }
     if (spread.right) {
         this.showSinglePage(spread.right);
         if (!spread.left) {
             spread.right.container.setAttribute("data-vivliostyle-unpaired-page", true);
+        } else {
+            spread.right.container.removeAttribute("data-vivliostyle-unpaired-page");
         }
     }
 };
@@ -838,7 +842,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
 
         // With renderAllPages option specified, the rendering is performed after the initial page display,
         // otherwise users are forced to wait the rendering finish in front of a blank page.
-        self.opfView.renderPagesUpto(self.pagePosition).then(result => {
+        self.opfView.renderPagesUpto(self.pagePosition, !self.renderAllPages).then(result => {
             self.pagePosition = result.position;
             self.showCurrent(result.page, true).then(() => {
                 self.reportPosition().then(p => {
@@ -849,7 +853,9 @@ adapt.viewer.Viewer.prototype.resize = function() {
                             self.renderTask = null;
                         }
                         vivliostyle.profile.profiler.registerEndTiming("render (resize)");
-                        self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
+                        if (self.renderAllPages) {
+                            self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
+                        }
                         self.callback({"t":"loaded"});
                         frame.finish(p);
                     });
@@ -904,7 +910,7 @@ adapt.viewer.Viewer.prototype.getCurrentPageProgression = function() {
 adapt.viewer.Viewer.prototype.moveTo = function(command) {
     let method;
     const self = this;
-    if (this.readyState !== vivliostyle.constants.ReadyState.COMPLETE) {
+    if (this.readyState !== vivliostyle.constants.ReadyState.COMPLETE && command["where"] !== "next") {
         this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     }
     if (typeof command["where"] == "string") {
@@ -926,17 +932,17 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
         }
         if (method) {
             const m = method;
-            method = () => m.call(self.opfView, self.pagePosition);
+            method = () => m.call(self.opfView, self.pagePosition, !self.renderAllPages);
         }
     } else if (typeof command["nthPage"] == "number") {
         const nthPage = /** @type {number} */ (command["nthPage"]);
-        method = () => self.opfView.navigateToNthPage(nthPage, self.pagePosition);
+        method = () => self.opfView.navigateToNthPage(nthPage, self.pagePosition, !self.renderAllPages);
     } else if (typeof command["epage"] == "number") {
         const epage = /** @type {number} */ (command["epage"]);
-        method = () => self.opfView.navigateToEPage(epage);
+        method = () => self.opfView.navigateToEPage(epage, self.pagePosition, !self.renderAllPages);
     } else if (typeof command["url"] == "string") {
         const url = /** @type {string} */ (command["url"]);
-        method = () => self.opfView.navigateTo(url, self.pagePosition);
+        method = () => self.opfView.navigateTo(url, self.pagePosition, !self.renderAllPages);
     } else {
         return adapt.task.newResult(true);
     }
@@ -947,7 +953,7 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
             self.pagePosition = result.position;
             /** @type {!adapt.task.Frame<boolean>} */ const innerFrame = adapt.task.newFrame("moveTo.showCurrent");
             cont = innerFrame.result();
-            self.showCurrent(result.page).then(() => {
+            self.showCurrent(result.page, !self.renderAllPages).then(() => {
                 self.reportPosition().thenFinish(innerFrame);
             });
         } else {
