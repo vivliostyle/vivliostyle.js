@@ -63,10 +63,12 @@ class Viewer {
         this.viewer_.addListener("readystatechange", () => {
             const readyState = this.viewer_.readyState;
             if (intervalID === 0 && readyState === vivliostyle.constants.ReadyState.INTERACTIVE) {
-                intervalID = setInterval(() => {
-                    this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
-                    this.state_.status.value(vivliostyle.constants.ReadyState.INTERACTIVE);
-                }, 200);
+                if (this.viewerOptions_.renderAllPages()) {
+                    intervalID = setInterval(() => {
+                        this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
+                        this.state_.status.value(vivliostyle.constants.ReadyState.INTERACTIVE);
+                    }, 200);
+                }
             } else {
                 clearInterval(intervalID);
                 intervalID = 0;
@@ -86,6 +88,7 @@ class Viewer {
             if (cfi) {
                 this.documentOptions_.fragment(cfi);
             }
+            this.afterNavigateToPage();
         });
         this.viewer_.addListener("hyperlink", payload => {
             if (payload.internal) {
@@ -158,42 +161,34 @@ class Viewer {
 
     navigateToPrevious() {
         this.viewer_.navigateToPage("previous");
-        this.afterNavigateToPage();
     }
 
     navigateToNext() {
         this.viewer_.navigateToPage("next");
-        this.afterNavigateToPage();
     }
 
     navigateToLeft() {
         this.viewer_.navigateToPage("left");
-        this.afterNavigateToPage();
     }
 
     navigateToRight() {
         this.viewer_.navigateToPage("right");
-        this.afterNavigateToPage();
     }
 
     navigateToFirst() {
         this.viewer_.navigateToPage("first");
-        this.afterNavigateToPage();
     }
 
     navigateToLast() {
         this.viewer_.navigateToPage("last");
-        this.afterNavigateToPage();
     }
 
     navigateToNthPage(nthPage) {
         this.viewer_.navigateToNthPage(nthPage);
-        this.afterNavigateToPage();
     }
 
     navigateToInternalUrl(href) {
         this.viewer_.navigateToInternalUrl(href);
-        this.afterNavigateToPage();
     }
 
     queryZoomFactor(type) {

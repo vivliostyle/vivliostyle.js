@@ -46,7 +46,8 @@ class Navigation {
             }
             const spreadContainerElement = this.viewer_.getSpreadContainerElement();
             const firstPageContainer = spreadContainerElement && spreadContainerElement.firstElementChild;
-            return !firstPageContainer || firstPageContainer.style.display != "none";
+            return !firstPageContainer || firstPageContainer.style.display != "none" &&
+                firstPageContainer.getAttribute("data-vivliostyle-first-page") === "true";
         });
 
         this.isNavigateToNextDisabled = ko.pureComputed(() => {
@@ -56,12 +57,14 @@ class Navigation {
             if (this.viewer_.state.status === undefined) {
                 return false;   // needed for test/spec/viewmodels/navigation-spec.js
             }
-            if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
+            if (this.viewerOptions_.renderAllPages() &&
+                this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
                 return false;
             }
             const spreadContainerElement = this.viewer_.getSpreadContainerElement();
             const lastPageContainer = spreadContainerElement && spreadContainerElement.lastElementChild;
-            return !lastPageContainer || lastPageContainer.style.display != "none";
+            return !lastPageContainer || lastPageContainer.style.display != "none" &&
+                lastPageContainer.getAttribute("data-vivliostyle-last-page") === "true";
         });
 
         this.isNavigateToLeftDisabled = ko.pureComputed(() => {
@@ -101,12 +104,14 @@ class Navigation {
             if (this.viewer_.state.status === undefined) {
                 return false;   // needed for test/spec/viewmodels/navigation-spec.js
             }
-            if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
+            if (this.viewerOptions_.renderAllPages() &&
+                this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
                 return true;
             }
             const spreadContainerElement = this.viewer_.getSpreadContainerElement();
             const lastPageContainer = spreadContainerElement && spreadContainerElement.lastElementChild;
-            return !lastPageContainer || lastPageContainer.style.display != "none";
+            return !lastPageContainer || lastPageContainer.style.display != "none" &&
+                lastPageContainer.getAttribute("data-vivliostyle-last-page") === "true";
         });
 
         this.hidePageNavigation = !!navigationOptions.disablePageNavigation;

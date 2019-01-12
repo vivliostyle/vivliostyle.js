@@ -23,7 +23,10 @@ import PageViewMode from "./page-view-mode";
 import ZoomOptions from "./zoom-options";
 
 function getViewerOptionsFromURL() {
+    const renderAllPages = urlParameters.getParameter("renderAllPages")[0];
+    const isEpub = urlParameters.getParameter("b").length && !urlParameters.getParameter("x").length;
     return {
+        renderAllPages: (renderAllPages === "true" ? true : renderAllPages === "false" ? false : !isEpub),
         profile: (urlParameters.getParameter("profile")[0] === "true"),
         pageViewMode: PageViewMode.fromSpreadViewString(urlParameters.getParameter("spread")[0])
     };
@@ -40,6 +43,7 @@ function getDefaultValues() {
 
 class ViewerOptions {
     constructor(options) {
+        this.renderAllPages = ko.observable();
         this.fontSize = ko.observable();
         this.profile = ko.observable();
         this.pageViewMode = ko.observable();
@@ -49,6 +53,7 @@ class ViewerOptions {
         } else {
             const defaultValues = getDefaultValues();
             const urlOptions = getViewerOptionsFromURL();
+            this.renderAllPages(urlOptions.renderAllPages);
             this.fontSize(defaultValues.fontSize);
             this.profile(urlOptions.profile || defaultValues.profile);
             this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
@@ -62,6 +67,7 @@ class ViewerOptions {
     }
 
     copyFrom(other) {
+        this.renderAllPages(other.renderAllPages());
         this.fontSize(other.fontSize());
         this.profile(other.profile());
         this.pageViewMode(other.pageViewMode());
@@ -70,6 +76,7 @@ class ViewerOptions {
 
     toObject() {
         return {
+            renderAllPages: this.renderAllPages(),
             fontSize: this.fontSize(),
             pageViewMode: this.pageViewMode().toString(),
             zoom: this.zoom().zoom,
