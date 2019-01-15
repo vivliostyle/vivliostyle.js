@@ -128,7 +128,8 @@ describe("ViewerOptions", function() {
                 fontSize: 20,
                 pageViewMode: vivliostyle.viewer.PageViewMode.SPREAD,
                 zoom: 1.2,
-                fitToScreen: false
+                fitToScreen: false,
+                renderAllPages: true
             });
         });
     });
