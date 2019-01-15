@@ -845,19 +845,34 @@ adapt.viewer.Viewer.prototype.resize = function() {
         self.opfView.renderPagesUpto(self.pagePosition, !self.renderAllPages).then(result => {
             self.pagePosition = result.position;
             self.showCurrent(result.page, true).then(() => {
-                self.reportPosition().then(p => {
-                    self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
-                    const r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
-                    r.then(() => {
-                        if (self.renderTask === task) {
-                            self.renderTask = null;
-                        }
-                        vivliostyle.profile.profiler.registerEndTiming("render (resize)");
-                        if (self.renderAllPages) {
-                            self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
-                        }
-                        self.callback({"t":"loaded"});
-                        frame.finish(p);
+                self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
+
+                self.opf.countPages(self.renderAllPages, epageCount => {
+                    const notification = {
+                        "t": "nav",
+                        "epageCount": epageCount,
+                        "first": self.currentPage.isFirstPage,
+                        "last": self.currentPage.isLastPage
+                    };
+                    if (self.currentPage.isFirstPage || self.pagePosition.pageIndex == 0 &&
+                            self.opf.spine[self.pagePosition.spineIndex].epage) {
+                        notification["epage"] = self.opf.spine[self.pagePosition.spineIndex].epage;
+                    }
+                    self.callback(notification);
+                }).then(() => {
+                    self.reportPosition().then(p => {
+                        const r = self.renderAllPages ? self.opfView.renderAllPages() : adapt.task.newResult(null);
+                        r.then(() => {
+                            if (self.renderTask === task) {
+                                self.renderTask = null;
+                            }
+                            vivliostyle.profile.profiler.registerEndTiming("render (resize)");
+                            if (self.renderAllPages) {
+                                self.setReadyState(vivliostyle.constants.ReadyState.COMPLETE);
+                            }
+                            self.callback({"t":"loaded"});
+                            frame.finish(p);
+                        });
                     });
                 });
             });
@@ -934,9 +949,6 @@ adapt.viewer.Viewer.prototype.moveTo = function(command) {
             const m = method;
             method = () => m.call(self.opfView, self.pagePosition, !self.renderAllPages);
         }
-    } else if (typeof command["nthPage"] == "number") {
-        const nthPage = /** @type {number} */ (command["nthPage"]);
-        method = () => self.opfView.navigateToNthPage(nthPage, self.pagePosition, !self.renderAllPages);
     } else if (typeof command["epage"] == "number") {
         const epage = /** @type {number} */ (command["epage"]);
         method = () => self.opfView.navigateToEPage(epage, self.pagePosition, !self.renderAllPages);
