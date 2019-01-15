@@ -44,10 +44,7 @@ class Navigation {
             if (this.viewer_.state.status === undefined) {
                 return false;   // needed for test/spec/viewmodels/navigation-spec.js
             }
-            const spreadContainerElement = this.viewer_.getSpreadContainerElement();
-            const firstPageContainer = spreadContainerElement && spreadContainerElement.firstElementChild;
-            return !firstPageContainer || firstPageContainer.style.display != "none" &&
-                firstPageContainer.getAttribute("data-vivliostyle-first-page") === "true";
+            return this.viewer_.firstPage();
         });
 
         this.isNavigateToNextDisabled = ko.pureComputed(() => {
@@ -61,10 +58,7 @@ class Navigation {
                 this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
                 return false;
             }
-            const spreadContainerElement = this.viewer_.getSpreadContainerElement();
-            const lastPageContainer = spreadContainerElement && spreadContainerElement.lastElementChild;
-            return !lastPageContainer || lastPageContainer.style.display != "none" &&
-                lastPageContainer.getAttribute("data-vivliostyle-last-page") === "true";
+            return this.viewer_.lastPage();
         });
 
         this.isNavigateToLeftDisabled = ko.pureComputed(() => {
@@ -108,10 +102,7 @@ class Navigation {
                 this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
                 return true;
             }
-            const spreadContainerElement = this.viewer_.getSpreadContainerElement();
-            const lastPageContainer = spreadContainerElement && spreadContainerElement.lastElementChild;
-            return !lastPageContainer || lastPageContainer.style.display != "none" &&
-                lastPageContainer.getAttribute("data-vivliostyle-last-page") === "true";
+            return this.viewer_.lastPage();
         });
 
         this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
@@ -139,28 +130,31 @@ class Navigation {
 
         this.pageNumber = ko.pureComputed({
             read() {
-                this.viewer_.state.status();
-                return this.viewer_.getPageNumber();
+                return this.viewer_.epageToPageNumber(this.viewer_.epage());
             },
-            write(pageNumber) {
-                let nthPage = parseInt(pageNumber.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))) || 0;
-                const totalPages = this.viewer_.getTotalPages();
-                if (nthPage < 1) {
-                    nthPage = 1;
-                } else if (nthPage > totalPages) {
-                    nthPage = totalPages;
+            write(pageNumberText) {
+                // Accept non-integer, convert fullwidth to ascii
+                let pageNumber = parseFloat(pageNumberText.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))) || 0;
+                if (pageNumber < 1) {
+                    pageNumber = 1;
+                } else {
+                    const epageCount = this.viewer_.epageCount();
+                    if (pageNumber > epageCount + 1) {
+                        // Accept "+1" because the last epage may equal epageCount.
+                        pageNumber = epageCount + 1;
+                    }
                 }
-                this.viewer_.navigateToNthPage(nthPage);
                 const elem = document.getElementById('vivliostyle-page-number');
-                elem.value = nthPage;
+                elem.value = pageNumber;
+                this.viewer_.navigateToEPage(this.viewer_.epageFromPageNumber(pageNumber));
+
                 elem.blur();
             },
             owner: this
         });
 
         this.totalPages = ko.pureComputed(() => {
-            this.viewer_.state.status();
-            return this.viewer_.getTotalPages();
+            return this.viewer_.epageCount();
         });
 
         [
