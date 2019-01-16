@@ -40,6 +40,11 @@ class Viewer {
             navigatable: ko.pureComputed(() => state_.status.value() !== vivliostyle.constants.ReadyState.LOADING),
             pageProgression: state_.pageProgression.getter
         };
+        
+        this.epage = ko.observable();
+        this.epageCount = ko.observable();
+        this.firstPage = ko.observable();
+        this.lastPage = ko.observable();
 
         this.setupViewerEventHandler();
         this.setupViewerOptionSubscriptions();
@@ -62,15 +67,6 @@ class Viewer {
         });
         this.viewer_.addListener("readystatechange", () => {
             const readyState = this.viewer_.readyState;
-            if (intervalID === 0 && readyState === vivliostyle.constants.ReadyState.INTERACTIVE) {
-                intervalID = setInterval(() => {
-                    this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
-                    this.state_.status.value(vivliostyle.constants.ReadyState.INTERACTIVE);
-                }, 200);
-            } else {
-                clearInterval(intervalID);
-                intervalID = 0;
-            }
             if (readyState === vivliostyle.constants.ReadyState.INTERACTIVE || readyState === vivliostyle.constants.ReadyState.COMPLETE) {
                 this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
             }
@@ -82,9 +78,21 @@ class Viewer {
             }
         });
         this.viewer_.addListener("nav", payload => {
-            const cfi = payload.cfi;
+            const {cfi, first, last, epage, epageCount} = payload;
             if (cfi) {
                 this.documentOptions_.fragment(cfi);
+            }
+            if (epage !== undefined) {
+                this.epage(epage);
+            }
+            if (epageCount !== undefined) {
+                this.epageCount(epageCount);
+            }
+            if (first !== undefined) {
+                this.firstPage(first);
+            }
+            if (last !== undefined) {
+                this.lastPage(last);
             }
         });
         this.viewer_.addListener("hyperlink", payload => {
@@ -116,88 +124,55 @@ class Viewer {
         }
     }
 
-    afterNavigateToPage() {
-        setTimeout(() => {
-            // Update page navigation disable/enable
-            this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
-            this.state_.status.value(this.viewer_.readyState);
-            const pageNumberElem = document.getElementById('vivliostyle-page-number');
-            pageNumberElem.value = this.getPageNumber();
-        }, 1);
-    }
-
-    getSpreadContainerElement() {
-        const viewportElement = document.getElementById("vivliostyle-viewer-viewport");
-        const outerZoomBoxElement = viewportElement && viewportElement.firstElementChild;
-        return outerZoomBoxElement && outerZoomBoxElement.firstElementChild;
-    }
-
-    getTotalPages() {
-        const spreadContainerElement = this.getSpreadContainerElement();
-        if (!spreadContainerElement) {
-            return 0;
-        }
-        return spreadContainerElement.childElementCount;
-    }
-
-    getPageNumber() {
-        const spreadContainerElement = this.getSpreadContainerElement();
-        if (!spreadContainerElement) {
-            return 0;
-        }
-        const children = spreadContainerElement.children;
-        let pageNumber = 0;
-        for (let i = 0; i < children.length; i++) {
-            if (children.item(i).style.display !== 'none') {
-                pageNumber = i + 1;
-                break;
-            }
-        }
-        return pageNumber;
-    }
-
     navigateToPrevious() {
         this.viewer_.navigateToPage("previous");
-        this.afterNavigateToPage();
     }
 
     navigateToNext() {
         this.viewer_.navigateToPage("next");
-        this.afterNavigateToPage();
     }
 
     navigateToLeft() {
         this.viewer_.navigateToPage("left");
-        this.afterNavigateToPage();
     }
 
     navigateToRight() {
         this.viewer_.navigateToPage("right");
-        this.afterNavigateToPage();
     }
 
     navigateToFirst() {
         this.viewer_.navigateToPage("first");
-        this.afterNavigateToPage();
     }
 
     navigateToLast() {
         this.viewer_.navigateToPage("last");
-        this.afterNavigateToPage();
     }
 
-    navigateToNthPage(nthPage) {
-        this.viewer_.navigateToNthPage(nthPage);
-        this.afterNavigateToPage();
+    navigateToEPage(epage) {
+        this.viewer_.navigateToPage("epage", epage);
     }
 
     navigateToInternalUrl(href) {
         this.viewer_.navigateToInternalUrl(href);
-        this.afterNavigateToPage();
     }
 
     queryZoomFactor(type) {
         return this.viewer_.queryZoomFactor(type);
+    }
+
+    epageToPageNumber(epage) {
+        if (!epage && epage != 0) {
+            return undefined;
+        }
+        let pageNumber = Math.round(epage + 1);
+        return pageNumber;
+    }
+    epageFromPageNumber(pageNumber) {
+        if (!pageNumber && pageNumber != 0) {
+            return undefined;
+        }
+        let epage = pageNumber - 1;
+        return epage;
     }
 }
 
