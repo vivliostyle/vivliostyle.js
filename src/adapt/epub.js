@@ -844,7 +844,10 @@ adapt.epub.OPFDoc.prototype.countPages = function(epageIsRenderedPage, epageCoun
             // According to the old comment,
             // "Estimate that offset=2700 roughly corresponds to 1024 bytes of compressed size."
             // However, it should depend on the language.
-            let offsetPerEPage = 2700;
+            // Further adjustment needed.
+
+            //let offsetPerEPage = 2700;
+            let offsetPerEPage = 1800;
             const lang = xmldoc.lang || this.lang;
             if (lang && lang.match(/^(ja|ko|zh)/)) {
                 offsetPerEPage /= 3;
