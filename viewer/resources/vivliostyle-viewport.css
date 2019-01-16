@@ -20,10 +20,16 @@
     position: absolute;
     left: 0;
     top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
     z-index: -1;
 }
 
 [data-vivliostyle-debug] [data-vivliostyle-layout-box] {
+    right: auto;
+    bottom: auto;
+    overflow: visible;
     z-index: auto;
 }
 
