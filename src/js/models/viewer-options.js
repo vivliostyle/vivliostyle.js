@@ -26,7 +26,8 @@ function getViewerOptionsFromURL() {
     const renderAllPages = urlParameters.getParameter("renderAllPages")[0];
     const isEpub = urlParameters.getParameter("b").length && !urlParameters.getParameter("x").length;
     return {
-        renderAllPages: (renderAllPages === "true" ? true : renderAllPages === "false" ? false : !isEpub),
+        // renderAllPages: (renderAllPages === "true" ? true : renderAllPages === "false" ? false : !isEpub),
+        renderAllPages: (renderAllPages === "true" ? true : renderAllPages === "false" ? false : true),
         profile: (urlParameters.getParameter("profile")[0] === "true"),
         pageViewMode: PageViewMode.fromSpreadViewString(urlParameters.getParameter("spread")[0])
     };
