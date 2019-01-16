@@ -329,6 +329,7 @@ adapt.epub.predefinedPrefixes = {
     "dcterms": "http://purl.org/dc/terms/",
     "marc": "http://id.loc.gov/vocabulary/",
     "media": "http://www.idpf.org/epub/vocab/overlays/#",
+    "rendition": "http://www.idpf.org/vocab/rendition/#",
     "onix":	"http://www.editeur.org/ONIX/book/codelists/current.html#",
     "xsd": "http://www.w3.org/2001/XMLSchema#"
 };
@@ -346,6 +347,7 @@ adapt.epub.metaTerms = {
     language: `${adapt.epub.predefinedPrefixes["dcterms"]}language`,
     title: `${adapt.epub.predefinedPrefixes["dcterms"]}title`,
     creator: `${adapt.epub.predefinedPrefixes["dcterms"]}creator`,
+    layout: `${adapt.epub.predefinedPrefixes["rendition"]}layout`,
     titleType: `${adapt.epub.defaultIRI}title-type`,
     displaySeq: `${adapt.epub.defaultIRI}display-seq`,
     alternateScript: `${adapt.epub.defaultIRI}alternate-script`
@@ -410,7 +412,7 @@ adapt.epub.readMetadata = (mroot, prefixes) => {
         }
         let r;
         // This code permits any non-ASCII characters in the name to avoid bloating the pattern.
-        while ((r = prefixes.match(/(^\s*[A-Z_a-z\u007F-\uFFFF][-.A-Z_a-z0-9\u007F-\uFFFF]*):\s*(\S+)/)) != null) {
+        while ((r = prefixes.match(/^\s*([A-Z_a-z\u007F-\uFFFF][-.A-Z_a-z0-9\u007F-\uFFFF]*):\s*(\S+)/)) != null) {
             prefixes = prefixes.substr(r[0].length);
             prefixMap[r[1]] = r[2];
         }
@@ -423,7 +425,7 @@ adapt.epub.readMetadata = (mroot, prefixes) => {
         if (val) {
             const r = val.match(/^\s*(([^:]*):)?(\S+)\s*$/);
             if (r) {
-                const iri = r[1] ? prefixMap[r[1]] : adapt.epub.defaultIRI;
+                const iri = r[2] ? prefixMap[r[2]] : adapt.epub.defaultIRI;
                 if (iri) {
                     return iri + r[3];
                 }
@@ -553,6 +555,9 @@ adapt.epub.OPFDoc = function(store, epubURL) {
     /** @type {Object.<string,string>} */ this.bindings = {};
     /** @type {?string} */ this.lang = null;
     /** @type {number} */ this.epageCount = 0;
+    /** @type {boolean} */ this.prePaginated = false;
+    /** @type {boolean} */ this.epageIsRenderedPage = false;
+    /** @type {?function(number)} */ this.epageCountCallback = null;
     /** @type {adapt.base.JSON} */ this.metadata = {};
     /** @type {adapt.epub.OPFItem} */ this.ncxToc = null;
     /** @type {adapt.epub.OPFItem} */ this.xhtmlToc = null;
@@ -732,6 +737,10 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
     if (this.metadata[adapt.epub.metaTerms.language]) {
         this.lang = this.metadata[adapt.epub.metaTerms.language][0]["v"];
     }
+    if (this.metadata[adapt.epub.metaTerms.layout]) {
+        this.prePaginated = this.metadata[adapt.epub.metaTerms.layout][0]["v"] === "pre-paginated";
+    }
+
     if (!zipMetadata) {
         if (idpfObfURLs.length > 0 && this.uid) {
             // Have to deobfuscate in JavaScript
@@ -739,6 +748,9 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
             for (var i = 0; i < idpfObfURLs.length; i++) {
                 this.store.deobfuscators[this.epubURL + idpfObfURLs[i]] = deobfuscator;
             }
+        }
+        if (this.prePaginated) {
+            this.assignAutoPages();
         }
         return adapt.task.newResult(true);
     }
@@ -789,13 +801,67 @@ adapt.epub.OPFDoc.prototype.assignAutoPages = function() {
     let epage = 0;
 
     for (const item of this.spine) {
-        const epageCount = Math.ceil(item.compressedSize / 1024);
+        const epageCount = this.prePaginated ? 1 : Math.ceil(item.compressedSize / 1024);
         item.epage = epage;
         item.epageCount = epageCount;
         epage += epageCount;
     }
 
     this.epageCount = epage;
+
+    if (this.epageCountCallback) {
+        this.epageCountCallback(this.epageCount);
+    }
+};
+
+/**
+ * @param {boolean} epageIsRenderedPage
+ * @param {?function(number)} epageCountCallback
+ * @return {!adapt.task.Result.<boolean>}
+ */
+adapt.epub.OPFDoc.prototype.countPages = function(epageIsRenderedPage, epageCountCallback) {
+    this.epageIsRenderedPage = epageIsRenderedPage || this.prePaginated;
+    this.epageCountCallback = epageCountCallback;
+
+    if (this.epageIsRenderedPage) {
+        if (this.epageCount == 0) {
+            this.assignAutoPages();
+        }
+        return adapt.task.newResult(true);
+    }
+
+    let epage = 0;
+    let i = 0;
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("estimatePageCount");
+    frame.loopWithFrame(loopFrame => {
+        if (i === this.spine.length) {
+            loopFrame.breakLoop();
+            return;
+        }
+        const item = this.spine[i++];
+        item.epage = epage;
+        this.store.load(item.src).then(xmldoc => {
+            // According to the old comment,
+            // "Estimate that offset=2700 roughly corresponds to 1024 bytes of compressed size."
+            // However, it should depend on the language.
+            // Further adjustment needed.
+
+            //let offsetPerEPage = 2700;
+            let offsetPerEPage = 1800;
+            const lang = xmldoc.lang || this.lang;
+            if (lang && lang.match(/^(ja|ko|zh)/)) {
+                offsetPerEPage /= 3;
+            }
+            item.epageCount = Math.ceil(xmldoc.getTotalOffset() / offsetPerEPage);
+            epage += item.epageCount;
+            this.epageCount = epage;
+            if (this.epageCountCallback) {
+                this.epageCountCallback(this.epageCount);
+            }
+            loopFrame.continueLoop();
+        });
+    }).thenFinish(frame);
+    return frame.result();
 };
 
 /**
@@ -928,10 +994,25 @@ adapt.epub.OPFDoc.prototype.resolveEPage = function(epage) {
                 frame.finish({spineIndex: 0, offsetInItem: 0, pageIndex: -1});
                 return;
             }
-            const spineIndex = adapt.base.binarySearch(self.spine.length, index => {
+            if (self.epageIsRenderedPage) {
+                let spineIndex = self.spine.findIndex(item => {
+                    return item.epage == 0 && item.epageCount == 0 ||
+                        item.epage <= epage && item.epage + item.epageCount > epage;
+                });
+                let item = self.spine[spineIndex];
+                if (!item || item.epageCount == 0) {
+                    item = self.spine[--spineIndex];
+                }
+                frame.finish({spineIndex, offsetInItem: -1, pageIndex: epage - item.epage});
+                return;
+            }
+            let spineIndex = adapt.base.binarySearch(self.spine.length, index => {
                 const item = self.spine[index];
                 return item.epage + item.epageCount > epage;
             });
+            if (spineIndex == self.spine.length) {
+                spineIndex--;
+            }
             const item = self.spine[spineIndex];
             self.store.load(item.src).then(xmldoc => {
                 epage -= item.epage;
@@ -968,6 +1049,9 @@ adapt.epub.OPFDoc.prototype.getEPageFromPosition = function(position) {
     const item = this.spine[position.spineIndex];
     if (position.offsetInItem <= 0) {
         return adapt.task.newResult(item.epage);
+    }
+    if (this.epageIsRenderedPage) {
+        return adapt.task.newResult(item.epage + position.pageIndex);
     }
     /** @type {!adapt.task.Frame.<number>} */ const frame = adapt.task.newFrame("getEPage");
     this.store.load(item.src).then(xmldoc => {
@@ -1070,6 +1154,20 @@ adapt.epub.OPFView.prototype.finishPageContainer = function(viewItem, page, page
     const oldPage = viewItem.pages[pageIndex];
     page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
     viewItem.pages[pageIndex] = page;
+
+    if (this.opf.epageIsRenderedPage) {
+        if (pageIndex == 0 && viewItem.item.spineIndex > 0) {
+            const prevItem = this.opf.spine[viewItem.item.spineIndex - 1];
+            viewItem.item.epage = prevItem.epage + prevItem.epageCount;
+        }
+        viewItem.item.epageCount = viewItem.pages.length;
+        this.opf.epageCount = this.opf.spine.reduce((count, item) => count + item.epageCount, 0);
+
+        if (this.opf.epageCountCallback) {
+            this.opf.epageCountCallback(this.opf.epageCount);
+        }
+    }
+
     if (oldPage) {
         viewItem.instance.viewport.contentContainer.replaceChild(page.container, oldPage.container);
         oldPage.dispatchEvent({
@@ -1079,7 +1177,20 @@ adapt.epub.OPFView.prototype.finishPageContainer = function(viewItem, page, page
             newPage: page
         });
     } else {
-        viewItem.instance.viewport.contentContainer.appendChild(page.container);
+        // Find insert position in contentContainer.
+        let insertPos = null;
+        if (pageIndex > 0) {
+            insertPos = viewItem.pages[pageIndex - 1].container.nextElementSibling;
+        } else {
+            for (let i = viewItem.item.spineIndex + 1; i < this.spineItems.length; i++) {
+                const item = this.spineItems[i];
+                if (item && item.pages[0]) {
+                    insertPos = item.pages[0].container;
+                    break;
+                }
+            }
+        }
+        viewItem.instance.viewport.contentContainer.insertBefore(page.container, insertPos);
     }
     this.pageSheetSizeReporter({ width: viewItem.instance.pageSheetWidth, height: viewItem.instance.pageSheetHeight },
                                viewItem.instance.pageSheetSize, viewItem.item.spineIndex, viewItem.instance.pageNumberOffset + pageIndex);
@@ -1210,6 +1321,8 @@ adapt.epub.OPFView.prototype.normalizeSeekPosition = (position, viewItem) => {
             // page that contains seekOffset
             pageIndex = seekOffsetPageIndex - 1;
         }
+    } else if (pageIndex === Number.POSITIVE_INFINITY && position.offsetInItem !== -1) {
+        seekOffset = position.offsetInItem;
     }
     return (
         /** @type {!adapt.epub.Position} */ ({
@@ -1224,7 +1337,7 @@ adapt.epub.OPFView.prototype.normalizeSeekPosition = (position, viewItem) => {
  * Find a page corresponding to a specified position among already laid out pages.
  * @private
  * @param {!adapt.epub.Position} position
- * @param {boolean=} sync If true, find the page synchronously (not waiting another rendering task)
+ * @param {boolean} sync If true, find the page synchronously (not waiting another rendering task)
  * @returns {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
  */
 adapt.epub.OPFView.prototype.findPage = function(position, sync) {
@@ -1252,6 +1365,7 @@ adapt.epub.OPFView.prototype.findPage = function(position, sync) {
                 self.renderPage(normalizedPosition).then(result => {
                     if (result) {
                         resultPage = result.page;
+                        pageIndex = result.position.pageIndex;
                     }
                     loopFrame.breakLoop();
                 });
@@ -1350,18 +1464,19 @@ adapt.epub.OPFView.prototype.renderAllPages = function() {
         spineIndex: this.opf.spine.length - 1,
         pageIndex: Number.POSITIVE_INFINITY,
         offsetInItem: -1
-    });
+    }, false);
 };
 
 /**
  * Render pages from (spineIndex=0, pageIndex=0) to the specified (spineIndex, pageIndex).
  * @param {adapt.epub.Position} position
+ * @param {boolean} notAllPages If true, render from biginning of specified spine item.
  * @returns {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
  */
-adapt.epub.OPFView.prototype.renderPagesUpto = function(position) {
+adapt.epub.OPFView.prototype.renderPagesUpto = function(position, notAllPages) {
     const self = this;
     /** @type {!adapt.task.Frame.<?adapt.epub.PageAndPosition>} */ const frame
-        = adapt.task.newFrame("renderAllPages");
+        = adapt.task.newFrame("renderPagesUpto");
 
     if (!position) {
         position = {
@@ -1373,6 +1488,12 @@ adapt.epub.OPFView.prototype.renderPagesUpto = function(position) {
     const spineIndex = position.spineIndex;
     const pageIndex = position.pageIndex;
     let s = 0;
+
+    if (notAllPages) {
+        // Render pages from biginning of specified spine item.
+        s = spineIndex;
+    }
+
     let lastResult;
     frame.loopWithFrame(loopFrame => {
         const pos = {
@@ -1396,26 +1517,30 @@ adapt.epub.OPFView.prototype.renderPagesUpto = function(position) {
 
 /**
  * Move to the first page and render it.
+ * @param {!adapt.epub.Position} position
+ * @param {boolean} sync
  * @return {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
  */
-adapt.epub.OPFView.prototype.firstPage = function() {
+adapt.epub.OPFView.prototype.firstPage = function(position, sync) {
     return this.findPage({
         spineIndex: 0,
         pageIndex: 0,
         offsetInItem: -1
-    });
+    }, sync);
 };
 
 /**
  * Move to the last page and render it.
+ * @param {!adapt.epub.Position} position
+ * @param {boolean} sync
  * @return {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
  */
-adapt.epub.OPFView.prototype.lastPage = function() {
+adapt.epub.OPFView.prototype.lastPage = function(position, sync) {
     return this.findPage({
         spineIndex: this.opf.spine.length - 1,
         pageIndex: Number.POSITIVE_INFINITY,
         offsetInItem: -1
-    });
+    }, sync);
 };
 
 /**
@@ -1457,9 +1582,10 @@ adapt.epub.OPFView.prototype.nextPage = function(position, sync) {
 /**
  * Move to the previous page and render it.
  * @param {!adapt.epub.Position} position
+ * @param {boolean} sync
  * @return {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
  */
-adapt.epub.OPFView.prototype.previousPage = function(position) {
+adapt.epub.OPFView.prototype.previousPage = function(position, sync) {
     let spineIndex = position.spineIndex;
     let pageIndex = position.pageIndex;
     if (pageIndex == 0) {
@@ -1475,7 +1601,7 @@ adapt.epub.OPFView.prototype.previousPage = function(position) {
         spineIndex,
         pageIndex,
         offsetInItem: -1
-    });
+    }, sync);
 };
 
 /**
@@ -1508,16 +1634,24 @@ adapt.epub.OPFView.prototype.getSpread = function(position, sync) {
     const isLeft = page.side === vivliostyle.constants.PageSide.LEFT;
     let other;
     if (this.isRectoPage(page, position)) {
-        other = this.previousPage(position);
+        other = this.previousPage(position, sync);
     } else {
         other = this.nextPage(position, sync);
     }
     other.then(otherPageAndPosition => {
-        const otherPage = otherPageAndPosition && otherPageAndPosition.page;
+        // this page may be replaced during nextPage(), so get thisPage again.
+        const thisPage = this.getPage(position);
+
+        let otherPage = otherPageAndPosition && otherPageAndPosition.page;
+        if (otherPage && otherPage.side === thisPage.side) {
+            // otherPage must not be same side
+            otherPage = null;
+        }
+
         if (isLeft) {
-            frame.finish({left: page, right: otherPage});
+            frame.finish({left: thisPage, right: otherPage});
         } else {
-            frame.finish({left: otherPage, right: page});
+            frame.finish({left: otherPage, right: thisPage});
         }
     });
 
@@ -1527,7 +1661,7 @@ adapt.epub.OPFView.prototype.getSpread = function(position, sync) {
 /**
  * Move to the next spread and render pages.
  * @param {!adapt.epub.Position} position
- * @param {boolean=} sync If true, get the spread synchronously (not waiting another rendering task)
+ * @param {boolean} sync If true, get the spread synchronously (not waiting another rendering task)
  * @returns {!adapt.task.Result.<?adapt.epub.PageAndPosition>} The 'verso' page of the next spread.
  */
 adapt.epub.OPFView.prototype.nextSpread = function(position, sync) {
@@ -1536,14 +1670,18 @@ adapt.epub.OPFView.prototype.nextSpread = function(position, sync) {
         return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
     }
     const isRecto = this.isRectoPage(page, position);
-    const next = this.nextPage(position, !!sync);
+    const next = this.nextPage(position, sync);
     if (isRecto) {
         return next;
     } else {
         const self = this;
         return next.thenAsync(result => {
             if (result) {
-                return self.nextPage(result.position, !!sync);
+                if (result.page.side === page.side) {
+                    // If same side, this is the next spread.
+                    return next;
+                }
+                return self.nextPage(result.position, sync);
             } else {
                 return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
             }
@@ -1554,20 +1692,30 @@ adapt.epub.OPFView.prototype.nextSpread = function(position, sync) {
 /**
  * Move to the previous spread and render pages.
  * @param {!adapt.epub.Position} position
+ * @param {boolean} sync
  * @returns {!adapt.task.Result.<?adapt.epub.PageAndPosition>} The 'recto' page of the previous spread.
  */
-adapt.epub.OPFView.prototype.previousSpread = function(position) {
+adapt.epub.OPFView.prototype.previousSpread = function(position, sync) {
     const page = this.getPage(position);
     if (!page) {
         return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
     }
     const isRecto = this.isRectoPage(page, position);
-    const prev = this.previousPage(position);
+    const prev = this.previousPage(position, sync);
+    const oldPrevPageCont = page.container.previousElementSibling;
     if (isRecto) {
         const self = this;
         return prev.thenAsync(result => {
             if (result) {
-                return self.previousPage(result.position);
+                if (result.page.side === page.side) {
+                    // If same side, this is the previous spread.
+                    return prev;
+                }
+                if (result.page.container !== oldPrevPageCont) {
+                    // If previous page is changed, return it.
+                    return prev;
+                }
+                return self.previousPage(result.position, sync);
             } else {
                 return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
             }
@@ -1578,49 +1726,19 @@ adapt.epub.OPFView.prototype.previousSpread = function(position) {
 };
 
 /**
- * Move to the Nth page and render it.
- * @param {number} nthPage
- * @param {!adapt.epub.Position} position
- * @return {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
- */
-adapt.epub.OPFView.prototype.navigateToNthPage = function(nthPage, position) {
-    if (nthPage < 1) {
-        return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
-    }
-    let countPages = 0;
-    let pageIndex = -1;
-    let spineIndex = 0;
-    for (let item of this.spineItems) {
-        const findPageIndex = nthPage - countPages - 1;
-        if (findPageIndex < item.pages.length) {
-            pageIndex = findPageIndex;
-            break;
-        }
-        countPages += item.pages.length;
-        spineIndex++;
-    }
-    if (pageIndex === -1) {
-        return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
-    }
-    return this.findPage({
-        spineIndex,
-        pageIndex,
-        offsetInItem: -1
-    });
-};
-
-/**
  * Move to the epage specified by the given number (zero-based) and render it.
  * @param {number} epage
+ * @param {!adapt.epub.Position} position
+ * @param {boolean} sync
  * @return {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
  */
-adapt.epub.OPFView.prototype.navigateToEPage = function(epage) {
+adapt.epub.OPFView.prototype.navigateToEPage = function(epage, position, sync) {
     /** @type {!adapt.task.Frame.<?adapt.epub.PageAndPosition>} */ const frame
         = adapt.task.newFrame("navigateToEPage");
     const self = this;
     this.opf.resolveEPage(epage).then(position => {
         if (position) {
-            self.findPage(position).thenFinish(frame);
+            self.findPage(position, sync).thenFinish(frame);
         } else {
             frame.finish(null);
         }
@@ -1631,15 +1749,17 @@ adapt.epub.OPFView.prototype.navigateToEPage = function(epage) {
 /**
  * Move to the page specified by the given CFI and render it.
  * @param {string} fragment
+ * @param {!adapt.epub.Position} position
+ * @param {boolean} sync
  * @return {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
  */
-adapt.epub.OPFView.prototype.navigateToFragment = function(fragment) {
+adapt.epub.OPFView.prototype.navigateToFragment = function(fragment, position, sync) {
     /** @type {!adapt.task.Frame.<?adapt.epub.PageAndPosition>} */ const frame
         = adapt.task.newFrame("navigateToCFI");
     const self = this;
     self.opf.resolveFragment(fragment).then(position => {
         if (position) {
-            self.findPage(position).thenFinish(frame);
+            self.findPage(position, sync).thenFinish(frame);
         } else {
             frame.finish(null);
         }
@@ -1652,9 +1772,10 @@ adapt.epub.OPFView.prototype.navigateToFragment = function(fragment) {
  * Move to the page specified by the given URL and render it.
  * @param {string} href
  * @param {!adapt.epub.Position} position
+ * @param {boolean} sync
  * @return {!adapt.task.Result.<?adapt.epub.PageAndPosition>}
  */
-adapt.epub.OPFView.prototype.navigateTo = function(href, position) {
+adapt.epub.OPFView.prototype.navigateTo = function(href, position, sync) {
     vivliostyle.logging.logger.debug("Navigate to", href);
     let path = this.opf.getPathFromURL(adapt.base.stripFragment(href));
     if (!path) {
@@ -1680,7 +1801,7 @@ adapt.epub.OPFView.prototype.navigateTo = function(href, position) {
             // CFI link?
             const fragmentIndex = href.indexOf("#");
             if (fragmentIndex >= 0) {
-                return this.navigateToFragment(href.substr(fragmentIndex + 1));
+                return this.navigateToFragment(href.substr(fragmentIndex + 1), position, sync);
             }
         }
         return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
@@ -1695,14 +1816,14 @@ adapt.epub.OPFView.prototype.navigateTo = function(href, position) {
                 spineIndex: item.spineIndex,
                 pageIndex: -1,
                 offsetInItem: viewItem.xmldoc.getElementOffset(target)
-            }).thenFinish(frame);
+            }, sync).thenFinish(frame);
         } else if (position.spineIndex !== item.spineIndex) {
             // no fragment, different spine item
             self.findPage({
                 spineIndex: item.spineIndex,
                 pageIndex: 0,
                 offsetInItem: -1
-            }).thenFinish(frame);
+            }, sync).thenFinish(frame);
         } else {
             frame.finish(null);
         }
@@ -1967,12 +2088,6 @@ adapt.epub.OPFView.prototype.getPageViewItem = function(spineIndex) {
     const item = self.opf.spine[spineIndex];
     const store = self.opf.store;
     store.load(item.src).then(xmldoc => {
-        if (item.epageCount == 0 && self.opf.spine.length == 1) {
-            // Single-chapter doc without epages (e.g. FB2).
-            // Estimate that offset=2700 roughly corresponds to 1024 bytes of compressed size.
-            item.epageCount = Math.ceil(xmldoc.getTotalOffset() / 2700);
-            self.opf.epageCount = item.epageCount;
-        }
         const style = store.getStyleForDoc(xmldoc);
         const customRenderer = self.makeCustomRenderer(xmldoc);
         let viewport = self.viewport;
@@ -1987,7 +2102,13 @@ adapt.epub.OPFView.prototype.getPageViewItem = function(spineIndex) {
         if (item.startPage !== null) {
             pageNumberOffset = item.startPage - 1;
         } else {
-            pageNumberOffset = previousViewItem ? previousViewItem.instance.pageNumberOffset + previousViewItem.pages.length : 0;
+            if (spineIndex > 0 && (!previousViewItem || !previousViewItem.complete)) {
+                // When navigate to a new spine item skipping the previous items,
+                // give up calculate pageNumberOffset and use epage (or spineIndex if epage is unset).
+                pageNumberOffset = item.epage || spineIndex;
+            } else {
+                pageNumberOffset = previousViewItem ? previousViewItem.instance.pageNumberOffset + previousViewItem.pages.length : 0;
+            }
             if (item.skipPagesBefore !== null) {
                 pageNumberOffset += item.skipPagesBefore;
             }

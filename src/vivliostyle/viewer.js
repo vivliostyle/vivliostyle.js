@@ -337,7 +337,8 @@ goog.scope(() => {
         LEFT: "left",
         RIGHT: "right",
         FIRST: "first",
-        LAST: "last"
+        LAST: "last",
+        EPAGE: "epage"
     };
     /** @const */ const Navigation = vivliostyle.viewer.Navigation;
 
@@ -360,17 +361,13 @@ goog.scope(() => {
     /**
      * Navigate to the specified page.
      * @param {!vivliostyle.viewer.Navigation} nav
+     * @param {number=} opt_epage
      */
-    Viewer.prototype.navigateToPage = function(nav) {
-        this.adaptViewer.sendCommand({"a": "moveTo", "where": this.resolveNavigation(nav)});
-    };
-
-    /**
-     * Navigate to the Nth page.
-     * @param {number} nthPage
-     */
-    Viewer.prototype.navigateToNthPage = function(nthPage) {
-        this.adaptViewer.sendCommand({"a": "moveTo", "nthPage": nthPage});
+    Viewer.prototype.navigateToPage = function(nav, opt_epage) {
+        if (nav === Navigation.EPAGE)
+            this.adaptViewer.sendCommand({"a": "moveTo", "epage": opt_epage});
+        else
+            this.adaptViewer.sendCommand({"a": "moveTo", "where": this.resolveNavigation(nav)});
     };
 
     /**
@@ -416,7 +413,6 @@ goog.scope(() => {
     goog.exportProperty(Viewer.prototype, "loadEPUB", Viewer.prototype.loadEPUB);
     goog.exportProperty(Viewer.prototype, "getCurrentPageProgression", Viewer.prototype.getCurrentPageProgression);
     goog.exportProperty(Viewer.prototype, "navigateToPage", Viewer.prototype.navigateToPage);
-    goog.exportProperty(Viewer.prototype, "navigateToNthPage", Viewer.prototype.navigateToNthPage);
     goog.exportProperty(Viewer.prototype, "navigateToInternalUrl", Viewer.prototype.navigateToInternalUrl);
     goog.exportProperty(Viewer.prototype, "queryZoomFactor", Viewer.prototype.queryZoomFactor);
     goog.exportProperty(Viewer.prototype, "getPageSizes", Viewer.prototype.getPageSizes);
