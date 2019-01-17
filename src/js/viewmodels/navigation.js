@@ -139,22 +139,44 @@ class Navigation {
                     pageNumber = 1;
                 } else {
                     const epageCount = this.viewer_.epageCount();
-                    if (pageNumber > epageCount + 1) {
+                    if (this.viewerOptions_.renderAllPages()) {
+                        if (pageNumber > epageCount) {
+                            pageNumber = epageCount;
+                        }
+                    } else if (pageNumber > epageCount + 1) {
                         // Accept "+1" because the last epage may equal epageCount.
                         pageNumber = epageCount + 1;
                     }
                 }
+                const epageOld = this.viewer_.epage();
+                const epageNav = this.viewer_.epageFromPageNumber(pageNumber);
                 const elem = document.getElementById('vivliostyle-page-number');
                 elem.value = pageNumber;
-                this.viewer_.navigateToEPage(this.viewer_.epageFromPageNumber(pageNumber));
+                this.viewer_.navigateToEPage(epageNav);
 
-                elem.blur();
+                setTimeout(() => {
+                    if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.LOADING &&
+                        this.viewer_.epage() === epageOld) {
+                        elem.value = this.viewer_.epageToPageNumber(epageOld);
+                    }
+                    elem.blur();
+                }, 10);
             },
             owner: this
         });
 
         this.totalPages = ko.pureComputed(() => {
-            return this.viewer_.epageCount();
+            let totalPages = this.viewer_.epageCount();
+            if (!totalPages) {
+                return totalPages;
+            }
+            const pageNumber = this.pageNumber();
+            if (this.viewer_.lastPage()) {
+                totalPages = pageNumber;
+            } else if (pageNumber === totalPages) {
+                totalPages++;
+            }
+            return totalPages;
         });
 
         [

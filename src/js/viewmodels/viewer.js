@@ -82,17 +82,17 @@ class Viewer {
             if (cfi) {
                 this.documentOptions_.fragment(cfi);
             }
-            if (epage !== undefined) {
-                this.epage(epage);
-            }
-            if (epageCount !== undefined) {
-                this.epageCount(epageCount);
-            }
             if (first !== undefined) {
                 this.firstPage(first);
             }
             if (last !== undefined) {
                 this.lastPage(last);
+            }
+            if (epage !== undefined) {
+                this.epage(epage);
+            }
+            if (epageCount !== undefined) {
+                this.epageCount(epageCount);
             }
         });
         this.viewer_.addListener("hyperlink", payload => {
