@@ -824,7 +824,7 @@ adapt.epub.OPFDoc.prototype.countPages = function(epageIsRenderedPage, epageCoun
     this.epageCountCallback = epageCountCallback;
 
     if (this.epageIsRenderedPage) {
-        if (this.epageCount == 0) {
+        if (this.prePaginated && this.epageCount == 0) {
             this.assignAutoPages();
         }
         return adapt.task.newResult(true);
@@ -1047,11 +1047,16 @@ adapt.epub.OPFDoc.prototype.resolveEPage = function(epage) {
  */
 adapt.epub.OPFDoc.prototype.getEPageFromPosition = function(position) {
     const item = this.spine[position.spineIndex];
+    if (this.epageIsRenderedPage) {
+        const epage = item.epage + position.pageIndex;
+        if (this.epageCount <= epage) {
+            // This may happen when finishPageContainer() is called befre this.epageIsRenderedPage is set.
+            this.epageCount = epage + 1;
+        }
+        return adapt.task.newResult(epage);
+    }
     if (position.offsetInItem <= 0) {
         return adapt.task.newResult(item.epage);
-    }
-    if (this.epageIsRenderedPage) {
-        return adapt.task.newResult(item.epage + position.pageIndex);
     }
     /** @type {!adapt.task.Frame.<number>} */ const frame = adapt.task.newFrame("getEPage");
     this.store.load(item.src).then(xmldoc => {
@@ -1681,7 +1686,14 @@ adapt.epub.OPFView.prototype.nextSpread = function(position, sync) {
                     // If same side, this is the next spread.
                     return next;
                 }
-                return self.nextPage(result.position, sync);
+                const next2 = self.nextPage(result.position, sync);
+                return next2.thenAsync(result2 => {
+                    if (result2) {
+                        return next2;
+                    } else { // If this is tha last spread, move to next page in the same spread.
+                        return next;
+                    }
+                });
             } else {
                 return adapt.task.newResult(/** @type {?adapt.epub.PageAndPosition} */ (null));
             }
