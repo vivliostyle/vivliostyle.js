@@ -1279,6 +1279,10 @@ adapt.epub.OPFView.prototype.renderSinglePage = function(viewItem, pos) {
                     });
                 });
             }).then(() => {
+                if (!page.container.parentElement) {
+                    // page is replaced
+                    page = viewItem.pages[pageIndex];
+                }
                 page.isLastPage = !pos &&
                     (viewItem.item.spineIndex === self.opf.spine.length - 1);
                 if (page.isLastPage) {
