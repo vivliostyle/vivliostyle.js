@@ -840,6 +840,9 @@ adapt.viewer.Viewer.prototype.resize = function() {
             self.pagePosition.pageIndex = -1;
         }
 
+        // epageCount counting depends renderAllPages mode
+        self.opf.setEPageCountMode(self.renderAllPages);
+
         // With renderAllPages option specified, the rendering is performed after the initial page display,
         // otherwise users are forced to wait the rendering finish in front of a blank page.
         self.opfView.renderPagesUpto(self.pagePosition, !self.renderAllPages).then(result => {
@@ -847,7 +850,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
             self.showCurrent(result.page, true).then(() => {
                 self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);
 
-                self.opf.countPages(self.renderAllPages, epageCount => {
+                self.opf.countEPages(epageCount => {
                     const notification = {
                         "t": "nav",
                         "epageCount": epageCount,

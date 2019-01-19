@@ -556,7 +556,7 @@ adapt.epub.OPFDoc = function(store, epubURL) {
     /** @type {?string} */ this.lang = null;
     /** @type {number} */ this.epageCount = 0;
     /** @type {boolean} */ this.prePaginated = false;
-    /** @type {boolean} */ this.epageIsRenderedPage = false;
+    /** @type {boolean} */ this.epageIsRenderedPage = true;
     /** @type {?function(number)} */ this.epageCountCallback = null;
     /** @type {adapt.base.JSON} */ this.metadata = {};
     /** @type {adapt.epub.OPFItem} */ this.ncxToc = null;
@@ -816,11 +816,16 @@ adapt.epub.OPFDoc.prototype.assignAutoPages = function() {
 
 /**
  * @param {boolean} epageIsRenderedPage
+ */
+adapt.epub.OPFDoc.prototype.setEPageCountMode = function(epageIsRenderedPage) {
+    this.epageIsRenderedPage = epageIsRenderedPage || this.prePaginated;
+}
+
+/**
  * @param {?function(number)} epageCountCallback
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.epub.OPFDoc.prototype.countPages = function(epageIsRenderedPage, epageCountCallback) {
-    this.epageIsRenderedPage = epageIsRenderedPage || this.prePaginated;
+adapt.epub.OPFDoc.prototype.countEPages = function(epageCountCallback) {
     this.epageCountCallback = epageCountCallback;
 
     if (this.epageIsRenderedPage) {
@@ -1049,10 +1054,6 @@ adapt.epub.OPFDoc.prototype.getEPageFromPosition = function(position) {
     const item = this.spine[position.spineIndex];
     if (this.epageIsRenderedPage) {
         const epage = item.epage + position.pageIndex;
-        if (this.epageCount <= epage) {
-            // This may happen when finishPageContainer() is called befre this.epageIsRenderedPage is set.
-            this.epageCount = epage + 1;
-        }
         return adapt.task.newResult(epage);
     }
     if (position.offsetInItem <= 0) {
