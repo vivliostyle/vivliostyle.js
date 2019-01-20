@@ -22,7 +22,7 @@
 <style id="vivliostyle-page-rules"></style>
 </head>
 <body data-vivliostyle-viewer-status="loading" data-bind="event: {keydown: handleKey}, attr: {'data-vivliostyle-viewer-status': viewer.state.status}">
-<div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, click: settingsPanel.close, swipePages: true"></div>
+<div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, click: settingsPanel.close, swipePages: true" tabindex="0"></div>
 <span id="vivliostyle-page-navigation-left" title="navigate to left" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToLeftDisabled()}"></span>
 <span id="vivliostyle-page-navigation-right" title="navigate to right" data-bind="click: navigation.navigateToRight, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToRightDisabled()}"></span>
 <div id="vivliostyle-loading-overlay" data-bind="visible: !isDebug">
@@ -32,7 +32,7 @@
 <!-- MENU BAR -->
 <div id="vivliostyle-menu-bar">
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_misc">
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_misc-toggle" data-bind="css: {'vivliostyle-menu-item_detail-opened': settingsPanel.opened}"><span class="vivliostyle-menu-icon-button" title="Setting" data-bind="menuButton: true, click: settingsPanel.toggle"></span>
+		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_misc-toggle" data-bind="css: {'vivliostyle-menu-item_detail-opened': settingsPanel.opened}"><span role="button" tabindex="0" class="vivliostyle-menu-icon-button" title="Settings (S)" data-bind="menuButton: true, click: settingsPanel.toggle"></span>
 			<!-- MENU DETAIL -->
 			<div class="vivliostyle-menu-detail">
 				<div class="vivliostyle-menu-detail-main">
@@ -42,7 +42,7 @@
 							<div class="vivliostyle-menu-detail-group-heading"><span>Page View Mode</span></div>
 							<ul class="vivliostyle-menu-detail-group">
 								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-view-mode" value="autoSpread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Auto</span></label></li>
-								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-view-mode" value="singlePage" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Single page</span></label></li>
+								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-view-mode" value="singlePage" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Single Page</span></label></li>
 								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-view-mode" value="spread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Spread</span></label></li>
 							</ul>
 						</fieldset>
@@ -54,8 +54,8 @@
 									<small>
 										<select name="vivliostyle-misc_paginate_page-size_preset-select" data-bind="foreach: settingsPanel.state.pageSize.PresetSize, value: settingsPanel.state.pageSize.presetSize">
 											<option data-bind="value: $data, text: description"></option>
-										</select>
-										<label><input type="checkbox" name="vivliostyle-misc_paginate_page-size_preset-landscape" data-bind="checked: settingsPanel.state.pageSize.isLandscape" /> - <span>Landscape</span></label>
+										</select>&#x2002;
+										<label><input type="checkbox" name="vivliostyle-misc_paginate_page-size_preset-landscape" data-bind="checked: settingsPanel.state.pageSize.isLandscape" /> <span>Landscape</span></label>
 									</small>
 								</li>
 								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="custom" required data-bind="checked: settingsPanel.state.pageSize.mode" /> <span>Custom</span></label> -
@@ -68,7 +68,10 @@
 						</fieldset>
 					</div>
 					<div class="vivliostyle-menu-detail-group" data-bind="visible: !settingsPanel.isPageSizeChangeDisabled">
-						<div><label><input type="checkbox" name="vivliostyle-misc_paginate_override-document-stylesheets" data-bind="checked: settingsPanel.state.pageSize.isImportant, disable: settingsPanel.isOverrideDocumentStyleSheetDisabled" /> <span>Override Document StyleSheets</span></label></div>
+						<div><label><input type="checkbox" name="vivliostyle-misc_paginate_override-document-stylesheets" data-bind="checked: settingsPanel.state.pageSize.isImportant, disable: settingsPanel.isOverrideDocumentStyleSheetDisabled" /> <span>Override Document Style Sheets</span></label></div>
+					</div>
+					<div class="vivliostyle-menu-detail-group" data-bind="visible: !settingsPanel.isRenderAllPagesChangeDisabled">
+						<div><label><input type="checkbox" name="vivliostyle-misc_render-all-pages" data-bind="checked: settingsPanel.state.renderAllPages, disable: settingsPanel.isRenderAllPagesChangeDisabled" /> <span>Render All Pages</span> <small>(On: for Print, Off: for Read)</small></label></div>
 					</div>
 					<!--
 					<div class="vivliostyle-menu-detail-group">
@@ -96,13 +99,13 @@
 					</div>
 					-->
 					<div class="vivliostyle-menu-detail-group vivliostyle-menu-detail-group-buttons vivliostyle-menu-detail-group-inline">
-						<div><span class="vivliostyle-menu-button vivliostyle-menu-button-positive" id="vivliostyle-menu-button_apply" data-bind="menuButton: true, click: settingsPanel.apply">Apply</span></div>
-						<div><span class="vivliostyle-menu-button vivliostyle-menu-button-negative" id="vivliostyle-menu-button_reset" data-bind="menuButton: true, click: settingsPanel.reset">Reset</span></div>
+						<div><button type="button" class="vivliostyle-menu-button vivliostyle-menu-button-positive" id="vivliostyle-menu-button_apply" data-bind="menuButton: true, click: settingsPanel.apply">Apply</button></div>
+						<div><button type="button" class="vivliostyle-menu-button vivliostyle-menu-button-negative" id="vivliostyle-menu-button_reset" data-bind="menuButton: true, click: settingsPanel.reset">Cancel</button></div>
 					</div>
 				</div>
 				<div class="vivliostyle-menu-detail-aside">
 					<div><small>Powered by</small> <a href="https://vivliostyle.org"><strong>Vivliostyle</strong></a> </div>
-					<div class="version"><small>(<span>Core: 2019.1.100-pre.20190117173859,</span> <span>UI: 2019.1.100-pre.20190117174314</span>)</small></div>
+					<div class="version"><small>(<span>Core: 2019.1.100-pre.20190117173859,</span> <span>UI: 2019.1.100-pre.20190120103847</span>)</small></div>
 				</div>
 			</div>
 		</li>
@@ -112,14 +115,14 @@
 		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-previous" data-bind="click: navigation.navigateToPrevious, css: {'vivliostyle-menu-disabled': navigation.isNavigateToPreviousDisabled}"><span class="vivliostyle-menu-icon-button" title="Previous Page (↑)" data-bind="menuButton: true"></span></li>
 		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-next" data-bind="click: navigation.navigateToNext, css: {'vivliostyle-menu-disabled': navigation.isNavigateToNextDisabled}"><span class="vivliostyle-menu-icon-button" title="Next Page (↓)" data-bind="menuButton: true"></span></li>
 		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-last" data-bind="click: navigation.navigateToLast, css: {'vivliostyle-menu-disabled': navigation.isNavigateToLastDisabled}"><span class="vivliostyle-menu-icon-button" title="Last Page (End)" data-bind="menuButton: true"></span></li>
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_page-number"><input id="vivliostyle-page-number" title="Go to Page… (G)" data-bind="value: navigation.pageNumber" onfocus="setTimeout(()=>{this.setSelectionRange(0,this.value.length)},0)" type="text" inputmode="numeric"/></li>
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_total-pages"><span id="vivliostyle-total-pages" title="Total Pages" data-bind="text: navigation.totalPages"></span></li>
+		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_page-number" data-bind="css: {'vivliostyle-menu-disabled': navigation.isPageNumberDisabled}"><input id="vivliostyle-page-number" title="Go to Page… (G)" data-bind="value: navigation.pageNumber" onfocus="setTimeout(()=>{this.setSelectionRange(0,this.value.length)},0)" type="text" inputmode="numeric" autocomplete="off"/></li>
+		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_total-pages"><span id="vivliostyle-total-pages" data-bind="text: navigation.totalPages"></span></li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_zoom" data-bind="visible: !navigation.hideZoom">
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-out" data-bind="click: navigation.zoomOut, css: {'vivliostyle-menu-disabled': navigation.isZoomOutDisabled}"><span class="vivliostyle-menu-icon-button" title="Zoom: Out" data-bind="menuButton: true"></span></li>
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-in" data-bind="click: navigation.zoomIn, css: {'vivliostyle-menu-disabled': navigation.isZoomInDisabled}"><span class="vivliostyle-menu-icon-button" title="Zoom: In" data-bind="menuButton: true"></span></li>
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-to-actual-size" data-bind="click: navigation.zoomToActualSize, css: {'vivliostyle-menu-disabled': navigation.isZoomToActualSizeDisabled}"><span class="vivliostyle-menu-icon-button" title="Zoom: Actual Size" data-bind="menuButton: true"></span></li>
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-fit-to-screen" data-bind="click: navigation.toggleFitToScreen, css: {'vivliostyle-menu-disabled': navigation.isToggleFitToScreenDisabled, 'on':navigation.fitToScreen }"><span class="vivliostyle-menu-icon-button" title="Zoom: Fit to screen" data-bind="menuButton: true"></span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-out" data-bind="click: navigation.zoomOut, css: {'vivliostyle-menu-disabled': navigation.isZoomOutDisabled}"><span class="vivliostyle-menu-icon-button" title="Zoom: Out (O)" data-bind="menuButton: true"></span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-in" data-bind="click: navigation.zoomIn, css: {'vivliostyle-menu-disabled': navigation.isZoomInDisabled}"><span class="vivliostyle-menu-icon-button" title="Zoom: In (I)" data-bind="menuButton: true"></span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-to-actual-size" data-bind="click: navigation.zoomToActualSize, css: {'vivliostyle-menu-disabled': navigation.isZoomToActualSizeDisabled}"><span class="vivliostyle-menu-icon-button" title="Zoom: Actual Size (1)" data-bind="menuButton: true"></span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-fit-to-screen" data-bind="click: navigation.toggleFitToScreen, css: {'vivliostyle-menu-disabled': navigation.isToggleFitToScreenDisabled, 'on':navigation.fitToScreen }"><span class="vivliostyle-menu-icon-button" title="Zoom: Fit to Screen (F)" data-bind="menuButton: true"></span></li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_text-size" data-bind="visible: !navigation.hideFontSizeChange">
 		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-smaller" data-bind="click: navigation.decreaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isDecreaseFontSizeDisabled}"><span class="vivliostyle-menu-icon-button" title="Text: Smaller (-)" data-bind="menuButton: true"></span></li>
