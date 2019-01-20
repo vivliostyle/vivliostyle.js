@@ -8579,25 +8579,34 @@ var Navigation = (function () {
                 case _utilsKeyUtil.Keys.ArrowRight:
                     return isPageNumberInput || horizontalScrollable || !this.navigateToRight();
                 case _utilsKeyUtil.Keys.ArrowDown:
+                    viewportElement.focus();
                     return verticalScrollable || !this.navigateToNext();
                 case _utilsKeyUtil.Keys.ArrowUp:
+                    viewportElement.focus();
                     return verticalScrollable || !this.navigateToPrevious();
                 case _utilsKeyUtil.Keys.PageDown:
+                    viewportElement.focus();
                     return !this.navigateToNext();
                 case _utilsKeyUtil.Keys.PageUp:
+                    viewportElement.focus();
                     return !this.navigateToPrevious();
                 case _utilsKeyUtil.Keys.Home:
+                    viewportElement.focus();
                     return !this.navigateToFirst();
                 case _utilsKeyUtil.Keys.End:
+                    viewportElement.focus();
                     return !this.navigateToLast();
                 case "o":
                 case "O":
+                    viewportElement.focus();
                     return !this.zoomOut();
                 case "i":
                 case "I":
+                    viewportElement.focus();
                     return !this.zoomIn();
                 case "f":
                 case "F":
+                    viewportElement.focus();
                     return !this.toggleFitToScreen();
                 case "g":
                 case "G":
