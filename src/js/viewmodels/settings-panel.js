@@ -38,6 +38,7 @@ class SettingsPanel {
         this.isPageSizeChangeDisabled = !!settingsPanelOptions.disablePageSizeChange;
         this.isOverrideDocumentStyleSheetDisabled = this.isPageSizeChangeDisabled;
         this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
+        this.isRenderAllPagesChangeDisabled = !!settingsPanelOptions.disableRenderAllPagesChange;
 
         this.opened = ko.observable(false);
         this.state = {
@@ -50,8 +51,19 @@ class SettingsPanel {
                 write: value => {
                     this.state.viewerOptions.pageViewMode(PageViewMode.of(value));
                 }
+            }),
+            renderAllPages: ko.pureComputed({
+                read: () => {
+                    return this.state.viewerOptions.renderAllPages();
+                },
+                write: value => {
+                    this.state.viewerOptions.renderAllPages(value);
+                }
             })
         };
+
+        const settingsParent = document.getElementById("vivliostyle-menu-item_misc-toggle");
+        this.settingsButton = settingsParent && settingsParent.firstElementChild;
 
         ["close", "toggle", "apply", "reset"].forEach(function(methodName) {
             this[methodName] = this[methodName].bind(this);
@@ -64,32 +76,70 @@ class SettingsPanel {
 
     close() {
         this.opened(false);
+        const viewportElement = document.getElementById("vivliostyle-viewer-viewport");
+        if (viewportElement) viewportElement.focus();
         return true;
     }
 
     toggle() {
-        this.opened(!this.opened());
+        let open = !this.opened();
+        if (open) {
+            this.opened(open);
+            if (this.settingsButton) this.settingsButton.focus();
+        } else {
+            this.close();
+        }
     }
 
     apply() {
-        if (this.state.pageSize.equivalentTo(this.documentOptions_.pageSize)) {
+        if (this.state.renderAllPages() === this.viewerOptions_.renderAllPages() &&
+                this.state.pageSize.equivalentTo(this.documentOptions_.pageSize)) {
             this.viewerOptions_.copyFrom(this.state.viewerOptions);
         } else {
             this.documentOptions_.pageSize.copyFrom(this.state.pageSize);
             this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
         }
-        this.opened(false);
+        this.close();
     }
 
     reset() {
         this.state.viewerOptions.copyFrom(this.viewerOptions_);
         this.state.pageSize.copyFrom(this.documentOptions_.pageSize);
+        this.close();
     }
 
     handleKey(key) {
         switch (key) {
             case Keys.Escape:
-                this.close();
+                if (this.opened()) {
+                    this.reset();
+                    return false;
+                }
+                return true;
+            case "s":
+            case "S":
+                if (!this.opened() || document.activeElement === this.settingsButton) {
+                    this.toggle();
+                    return false;
+                }
+                return true;
+            case Keys.Space:
+                if (document.activeElement === this.settingsButton) {
+                    this.toggle();
+                    return false;
+                }
+                return true;
+            case Keys.Enter:
+                if (document.activeElement === this.settingsButton) {
+                    this.toggle();
+                    return false;
+                }
+                if (this.settingsButton && this.settingsButton.parentElement.contains(document.activeElement) &&
+                        document.activeElement.id !== "vivliostyle-menu-button_apply" &&
+                        document.activeElement.id !== "vivliostyle-menu-button_reset") {
+                    document.getElementById("vivliostyle-menu-button_apply").focus();
+                    return false;
+                }
                 return true;
             default:
                 return true;

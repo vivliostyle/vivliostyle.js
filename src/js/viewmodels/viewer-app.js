@@ -47,7 +47,8 @@ function ViewerApp() {
 
     const settingsPanelOptions = {
         disablePageSizeChange: false,
-        disablePageViewModeChange: false
+        disablePageViewModeChange: false,
+        disableRenderAllPagesChange: false
     };
 
     this.settingsPanel = new SettingsPanel(this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog,
@@ -63,6 +64,9 @@ function ViewerApp() {
 
     this.handleKey = (data, event) => {
         const key = keyUtil.identifyKeyFromEvent(event);
+        if (!(key === "Home" || key === "End") && (event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) {
+            return true;
+        }
         let ret = this.settingsPanel.handleKey(key);
         if (ret) {
             ret = this.navigation.handleKey(key);
