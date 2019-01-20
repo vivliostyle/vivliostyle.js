@@ -46,9 +46,47 @@ class PageSize {
         this.customWidth = ko.observable("210mm");
         this.customHeight = ko.observable("297mm");
         this.isImportant = ko.observable(false);
+        
+        const setDisabledElements = (mode) => {
+            const presetSelectElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_preset-select")[0];
+            if (!presetSelectElem) {
+                return;
+            }
+            const presetLandscapeElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_preset-landscape")[0];
+            const customWidthElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_custom-width")[0];
+            const customHeightElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_custom-height")[0];
+
+            switch (mode) {
+                case Mode.AUTO:
+                    presetSelectElem.disabled = true;
+                    presetLandscapeElem.disabled = true;
+                    customWidthElem.disabled = true;
+                    customHeightElem.disabled = true;
+                    break;
+                case Mode.PRESET:
+                    presetSelectElem.disabled = false;
+                    presetLandscapeElem.disabled = false;
+                    customWidthElem.disabled = true;
+                    customHeightElem.disabled = true;
+                    break;
+                case Mode.CUSTOM:
+                    presetSelectElem.disabled = true;
+                    presetLandscapeElem.disabled = true;
+                    customWidthElem.disabled = false;
+                    customHeightElem.disabled = false;
+                    break;
+            }
+        };
+
         if (pageSize) {
             this.copyFrom(pageSize);
         }
+
+        setDisabledElements(this.mode());
+
+        this.mode.subscribe(mode => {
+            setDisabledElements(mode);
+        });
     }
 
     copyFrom(other) {

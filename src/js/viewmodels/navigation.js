@@ -37,6 +37,17 @@ class Navigation {
             return navigationOptions.disablePageNavigation || this.isDisabled();
         });
 
+        navigationDisabled.subscribe(disabled => {
+            const pageNumberElem = document.getElementById("vivliostyle-page-number");
+            if (pageNumberElem) {
+                pageNumberElem.disabled = disabled;
+            }
+        });
+
+        this.isPageNumberDisabled = ko.pureComputed(() => {
+            return navigationDisabled();
+        });
+
         this.isNavigateToPreviousDisabled = ko.pureComputed(() => {
             if (navigationDisabled()) {
                 return true;
@@ -133,8 +144,15 @@ class Navigation {
                 return this.viewer_.epageToPageNumber(this.viewer_.epage());
             },
             write(pageNumberText) {
+                const epageOld = this.viewer_.epage();
+                const pageNumberOld = this.viewer_.epageToPageNumber(epageOld);
+
                 // Accept non-integer, convert fullwidth to ascii
                 let pageNumber = parseFloat(pageNumberText.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))) || 0;
+                if (/^[-+]/.test(pageNumberText)) {
+                    // "+number" and "-number" to relative move.
+                    pageNumber = pageNumberOld + pageNumber;
+                }
                 if (pageNumber < 1) {
                     pageNumber = 1;
                 } else {
@@ -144,22 +162,21 @@ class Navigation {
                             pageNumber = epageCount;
                         }
                     } else if (pageNumber > epageCount + 1) {
-                        // Accept "+1" because the last epage may equal epageCount.
+                        // Accept "epageCount + 1" because the last epage may equal epageCount.
                         pageNumber = epageCount + 1;
                     }
                 }
-                const epageOld = this.viewer_.epage();
                 const epageNav = this.viewer_.epageFromPageNumber(pageNumber);
-                const elem = document.getElementById('vivliostyle-page-number');
-                elem.value = pageNumber;
+                const pageNumberElem = document.getElementById("vivliostyle-page-number");
+                pageNumberElem.value = pageNumber;
                 this.viewer_.navigateToEPage(epageNav);
 
                 setTimeout(() => {
                     if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.LOADING &&
                         this.viewer_.epage() === epageOld) {
-                        elem.value = this.viewer_.epageToPageNumber(epageOld);
+                        pageNumberElem.value = pageNumberOld;
                     }
-                    elem.blur();
+                    pageNumberElem.blur();
                 }, 10);
             },
             owner: this
@@ -173,7 +190,7 @@ class Navigation {
             const pageNumber = this.pageNumber();
             if (this.viewer_.lastPage()) {
                 totalPages = pageNumber;
-            } else if (pageNumber === totalPages) {
+            } else if (pageNumber >= totalPages) {
                 totalPages++;
             }
             return totalPages;
@@ -324,31 +341,58 @@ class Navigation {
     }
 
     handleKey(key) {
-        const isInputActive = document.activeElement && document.activeElement.tagName.toLowerCase() === 'input';
+        if (document.getElementById("vivliostyle-menu_misc").contains(document.activeElement)) {
+            return true;
+        }
+
+        const pageNumberElem = document.getElementById("vivliostyle-page-number");
+        const viewportElement = document.getElementById("vivliostyle-viewer-viewport");
+        const horizontalScrollable = viewportElement.scrollWidth > viewportElement.clientWidth;
+        const verticalScrollable = viewportElement.scrollHeight > viewportElement.clientHeight;
+
+        const isPageNumberInput = pageNumberElem === document.activeElement;
+
+        if (!isPageNumberInput) {
+            viewportElement.focus();
+        }
+
         switch (key) {
+            case "+":
+                return isPageNumberInput || !this.increaseFontSize();
+            case "-":
+                return isPageNumberInput || !this.decreaseFontSize();
+            case "0":
+                return isPageNumberInput || !this.defaultFontSize();
+            case "1":
+                return isPageNumberInput || !this.zoomToActualSize();
+            case Keys.ArrowLeft:
+                return isPageNumberInput || horizontalScrollable || !this.navigateToLeft();
+            case Keys.ArrowRight:
+                return isPageNumberInput || horizontalScrollable || !this.navigateToRight();
             case Keys.ArrowDown:
+                return verticalScrollable || !this.navigateToNext();
+            case Keys.ArrowUp:
+                return verticalScrollable || !this.navigateToPrevious();
             case Keys.PageDown:
                 return !this.navigateToNext();
-            case Keys.ArrowLeft:
-                return isInputActive || !this.navigateToLeft();
-            case Keys.ArrowRight:
-                return isInputActive || !this.navigateToRight();
-            case Keys.ArrowUp:
             case Keys.PageUp:
                 return !this.navigateToPrevious();
             case Keys.Home:
                 return !this.navigateToFirst();
             case Keys.End:
                 return !this.navigateToLast();
-            case "+":
-                return isInputActive || !this.increaseFontSize();
-            case "-":
-                return isInputActive || !this.decreaseFontSize();
-            case "0":
-                return isInputActive || !this.defaultFontSize();
+            case "o":
+            case "O":
+                return !this.zoomOut();
+            case "i":
+            case "I":
+                return !this.zoomIn();
+            case "f":
+            case "F":
+                return !this.toggleFitToScreen();
             case "g":
             case "G":
-                document.getElementById('vivliostyle-page-number').focus();
+                pageNumberElem.focus();
                 return false;
             default:
                 return true;

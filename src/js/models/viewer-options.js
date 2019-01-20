@@ -24,17 +24,17 @@ import ZoomOptions from "./zoom-options";
 
 function getViewerOptionsFromURL() {
     const renderAllPages = urlParameters.getParameter("renderAllPages")[0];
-    const isEpub = urlParameters.getParameter("b").length && !urlParameters.getParameter("x").length;
     return {
-        // renderAllPages: (renderAllPages === "true" ? true : renderAllPages === "false" ? false : !isEpub),
-        renderAllPages: (renderAllPages === "true" ? true : renderAllPages === "false" ? false : true),
+        renderAllPages: (renderAllPages === "true" ? true : renderAllPages === "false" ? false : null),
         profile: (urlParameters.getParameter("profile")[0] === "true"),
         pageViewMode: PageViewMode.fromSpreadViewString(urlParameters.getParameter("spread")[0])
     };
 }
 
 function getDefaultValues() {
+    const isNotEpub = !urlParameters.getParameter("b").length;
     return {
+        renderAllPages: isNotEpub,
         fontSize: 16,
         profile: false,
         pageViewMode: PageViewMode.defaultMode(),
@@ -54,7 +54,8 @@ class ViewerOptions {
         } else {
             const defaultValues = getDefaultValues();
             const urlOptions = getViewerOptionsFromURL();
-            this.renderAllPages(urlOptions.renderAllPages);
+            this.renderAllPages(urlOptions.renderAllPages !== null ?
+                urlOptions.renderAllPages : defaultValues.renderAllPages);
             this.fontSize(defaultValues.fontSize);
             this.profile(urlOptions.profile || defaultValues.profile);
             this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
@@ -62,7 +63,18 @@ class ViewerOptions {
 
             // write spread parameter back to URL when updated
             this.pageViewMode.subscribe(pageViewMode => {
-                urlParameters.setParameter("spread", pageViewMode.toSpreadViewString());
+                if (pageViewMode === defaultValues.pageViewMode) {
+                    urlParameters.removeParameter("spread");
+                } else {
+                    urlParameters.setParameter("spread", pageViewMode.toSpreadViewString());
+                }
+            });
+            this.renderAllPages.subscribe(renderAllPages => {
+                if (renderAllPages === defaultValues.renderAllPages) {
+                    urlParameters.removeParameter("renderAllPages");
+                } else {
+                    urlParameters.setParameter("renderAllPages", renderAllPages.toString());
+                }
             });
         }
     }

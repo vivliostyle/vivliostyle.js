@@ -28,8 +28,8 @@ function getDocumentOptionsFromURL() {
     const style = urlParameters.getParameter("style");
     const userStyle = urlParameters.getParameter("userStyle");
     return {
-        epubUrl: epubUrl[0] || null,
-        url: url.length ? url : null,
+        epubUrl: epubUrl[0] || null, // epubUrl and url are exclusive
+        url: !epubUrl[0] && url.length ? url : null,
         fragment: fragment[0] || null,
         authorStyleSheet: style.length ? style : [],
         userStyleSheet: userStyle.length ? userStyle : []
@@ -48,7 +48,7 @@ class DocumentOptions {
 
         // write fragment back to URL when updated
         this.fragment.subscribe(fragment => {
-            if (urlOptions.epubUrl ? fragment == 'epubcfi(/6/2!)' : fragment == 'epubcfi(/2!)') {
+            if ((urlOptions.epubUrl ? /^epubcfi\(\/[246]\/2!\)/ : /^epubcfi\(\/2!\)/).test(fragment)) {
                 urlParameters.removeParameter("f");
             } else {
                 const encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);

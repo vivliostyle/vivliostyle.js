@@ -167,8 +167,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					height: 1em;
 					line-height: 1;
 					text-align: center;
-					font-family: Verdana;
-					font-size: $menu-icon-height * 0.28;
+					font-size: $menu-icon-height * 0.35;
 					//font-weight: bold;
 				}
 				&.hover  { &:before, &:after { color: black; } background: rgba(255,255,255,0.75); }
@@ -182,6 +181,9 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 			&.vivliostyle-menu-disabled >span {
 				cursor: default;
 				&:before, &:after { color: rgb(128,128,128) !important; } background: transparent !important;
+			}
+			&#vivliostyle-menu-item_page-number.vivliostyle-menu-disabled >#vivliostyle-page-number {
+				background: transparent;
 			}
 		}
 	}
@@ -334,17 +336,19 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					display: inline-block;
 					position: relative;
 					@include box-sizing(border-box);
-					padding: .6em 1.5em 0;
+					padding: .6em 1.5em;
 					border: solid 1px rgb(128,128,128);
 					border-radius: 1.5em;
 					height: 2.5em;
 					line-height: 1em;
 					font-size: 12px;
 					font-weight: bold;
+					min-width: 7em;
 					cursor: pointer;
 					&.vivliostyle-menu-button-positive {
 						color: black;
 						background: white;
+						box-shadow: 0 0 3px 0 black;
 					}
 					&.vivliostyle-menu-button-negative {
 						color: black;
@@ -368,7 +372,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 				}
 				>.vivliostyle-menu-detail-main {
 					overflow-y: auto;
-					height: calc(100% - 2.5em * 12/14);
+					height: calc(100% - 4em * 12/14);
 					font-size: 14px;
 					-webkit-overflow-scrolling: touch;
 					.vivliostyle-menu-detail-group {
