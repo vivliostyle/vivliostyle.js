@@ -1004,11 +1004,15 @@ adapt.epub.OPFDoc.prototype.resolveEPage = function(epage) {
                     return item.epage == 0 && item.epageCount == 0 ||
                         item.epage <= epage && item.epage + item.epageCount > epage;
                 });
+                if (spineIndex == -1) {
+                    spineIndex = self.spine.length - 1;
+                }
                 let item = self.spine[spineIndex];
                 if (!item || item.epageCount == 0) {
                     item = self.spine[--spineIndex];
                 }
-                frame.finish({spineIndex, offsetInItem: -1, pageIndex: epage - item.epage});
+                const pageIndex = Math.floor(epage - item.epage);
+                frame.finish({spineIndex, offsetInItem: -1, pageIndex: pageIndex});
                 return;
             }
             let spineIndex = adapt.base.binarySearch(self.spine.length, index => {
