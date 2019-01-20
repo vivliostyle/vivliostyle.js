@@ -819,7 +819,7 @@ adapt.epub.OPFDoc.prototype.assignAutoPages = function() {
  */
 adapt.epub.OPFDoc.prototype.setEPageCountMode = function(epageIsRenderedPage) {
     this.epageIsRenderedPage = epageIsRenderedPage || this.prePaginated;
-}
+};
 
 /**
  * @param {?function(number)} epageCountCallback
