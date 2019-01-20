@@ -5935,6 +5935,2464 @@ ko.exportSymbol('nativeTemplateEngine', ko.nativeTemplateEngine);
 })();
 
 },{}],2:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var supportTouchEvents = ("ontouchstart" in window);
+
+_knockout2["default"].bindingHandlers.menuButton = {
+    init: function init(element, valueAccessor) {
+        if (_knockout2["default"].unwrap(valueAccessor())) {
+            if (supportTouchEvents) {
+                element.addEventListener("touchstart", function () {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover active", true);
+                });
+                element.addEventListener("touchend", function () {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover active", false);
+                });
+            } else {
+                element.addEventListener("mouseover", function () {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover", true);
+                });
+                element.addEventListener("mousedown", function () {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "active", true);
+                });
+                element.addEventListener("mouseup", function () {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "active", false);
+                });
+                element.addEventListener("mouseout", function () {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover", false);
+                });
+            }
+        }
+    }
+};
+
+},{"knockout":1}],3:[function(require,module,exports){
+/*
+ * Copyright 2018 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var supportTouchEvents = ("ontouchstart" in window);
+
+var xStart = null;
+var yStart = null;
+var arrowButton = null;
+
+_knockout2["default"].bindingHandlers.swipePages = {
+    init: function init(element, valueAccessor) {
+        if (supportTouchEvents && _knockout2["default"].unwrap(valueAccessor())) {
+            element.addEventListener("touchstart", function (event) {
+                if (event.touches.length > 1) {
+                    return; // multi-touch is not for page swipe
+                }
+                if (window.visualViewport && window.visualViewport.scale > 1) {
+                    return; // disable page swipe when pinch-zoomed
+                }
+                var viewportElement = document.getElementById("vivliostyle-viewer-viewport");
+                if (viewportElement && viewportElement.scrollWidth > viewportElement.clientWidth) {
+                    return; // disable page swipe when horizontal scrollable
+                }
+                xStart = event.touches[0].clientX;
+                yStart = event.touches[0].clientY;
+            });
+            element.addEventListener("touchmove", function (event) {
+                if (event.touches.length > 1) {
+                    return;
+                }
+                if (xStart !== null && yStart !== null) {
+                    var xDiff = event.touches[0].clientX - xStart;
+                    var yDiff = event.touches[0].clientY - yStart;
+                    if (Math.abs(xDiff) > Math.abs(yDiff)) {
+                        if (xDiff < 0) {
+                            // swipe to left = go to right
+                            arrowButton = document.getElementById("vivliostyle-page-navigation-right");
+                        } else {
+                            // swipe to right = go to left
+                            arrowButton = document.getElementById("vivliostyle-page-navigation-left");
+                        }
+                    }
+                    if (Math.abs(xDiff) + Math.abs(yDiff) >= 16) {
+                        if (arrowButton) {
+                            arrowButton.click();
+                            _knockout2["default"].utils.toggleDomNodeCssClass(arrowButton, "active", true);
+                        }
+                        xStart = null;
+                        yStart = null;
+                    }
+                }
+            });
+            element.addEventListener("touchend", function (event) {
+                if (arrowButton) {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(arrowButton, "active", false);
+                }
+                arrowButton = null;
+                xStart = null;
+                yStart = null;
+            });
+        }
+    }
+};
+
+},{"knockout":1}],4:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _modelsMessageQueue = require("../models/message-queue");
+
+var _modelsMessageQueue2 = _interopRequireDefault(_modelsMessageQueue);
+
+var LogLevel = {
+    DEBUG: "debug",
+    INFO: "info",
+    WARN: "warn",
+    ERROR: "error"
+};
+
+var Logger = (function () {
+    function Logger() {
+        _classCallCheck(this, Logger);
+
+        this.logLevel = LogLevel.ERROR;
+    }
+
+    _createClass(Logger, [{
+        key: "setLogLevel",
+        value: function setLogLevel(logLevel) {
+            this.logLevel = logLevel;
+        }
+    }, {
+        key: "debug",
+        value: function debug(content) {
+            if (this.logLevel === LogLevel.DEBUG) {
+                _modelsMessageQueue2["default"].push({
+                    type: "debug",
+                    content: content
+                });
+            }
+        }
+    }, {
+        key: "info",
+        value: function info(content) {
+            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO) {
+                _modelsMessageQueue2["default"].push({
+                    type: "info",
+                    content: content
+                });
+            }
+        }
+    }, {
+        key: "warn",
+        value: function warn(content) {
+            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN) {
+                _modelsMessageQueue2["default"].push({
+                    type: "warn",
+                    content: content
+                });
+            }
+        }
+    }, {
+        key: "error",
+        value: function error(content) {
+            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN || this.logLevel === LogLevel.ERROR) {
+                _modelsMessageQueue2["default"].push({
+                    type: "error",
+                    content: content
+                });
+            }
+        }
+    }]);
+
+    return Logger;
+})();
+
+Logger.LogLevel = LogLevel;
+
+var instance = new Logger();
+
+Logger.getLogger = function () {
+    return instance;
+};
+
+exports["default"] = Logger;
+module.exports = exports["default"];
+
+},{"../models/message-queue":7}],5:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _vivliostyle = require("vivliostyle");
+
+var _vivliostyle2 = _interopRequireDefault(_vivliostyle);
+
+var _modelsVivliostyle = require("./models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var _vivliostyleViewer = require("./vivliostyle-viewer");
+
+var _vivliostyleViewer2 = _interopRequireDefault(_vivliostyleViewer);
+
+_modelsVivliostyle2["default"].setInstance(_vivliostyle2["default"]);
+_vivliostyleViewer2["default"].start();
+
+},{"./models/vivliostyle":11,"./vivliostyle-viewer":22,"vivliostyle":23}],6:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var _storesUrlParameters = require("../stores/url-parameters");
+
+var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
+
+var _pageSize = require("./page-size");
+
+var _pageSize2 = _interopRequireDefault(_pageSize);
+
+function getDocumentOptionsFromURL() {
+    var epubUrl = _storesUrlParameters2["default"].getParameter("b");
+    var url = _storesUrlParameters2["default"].getParameter("x");
+    var fragment = _storesUrlParameters2["default"].getParameter("f", true);
+    var style = _storesUrlParameters2["default"].getParameter("style");
+    var userStyle = _storesUrlParameters2["default"].getParameter("userStyle");
+    return {
+        epubUrl: epubUrl[0] || null, // epubUrl and url are exclusive
+        url: !epubUrl[0] && url.length ? url : null,
+        fragment: fragment[0] || null,
+        authorStyleSheet: style.length ? style : [],
+        userStyleSheet: userStyle.length ? userStyle : []
+    };
+}
+
+var DocumentOptions = (function () {
+    function DocumentOptions() {
+        _classCallCheck(this, DocumentOptions);
+
+        var urlOptions = getDocumentOptionsFromURL();
+        this.epubUrl = _knockout2["default"].observable(urlOptions.epubUrl || "");
+        this.url = _knockout2["default"].observable(urlOptions.url || null);
+        this.fragment = _knockout2["default"].observable(urlOptions.fragment || "");
+        this.authorStyleSheet = _knockout2["default"].observable(urlOptions.authorStyleSheet);
+        this.userStyleSheet = _knockout2["default"].observable(urlOptions.userStyleSheet);
+        this.pageSize = new _pageSize2["default"]();
+
+        // write fragment back to URL when updated
+        this.fragment.subscribe(function (fragment) {
+            if ((urlOptions.epubUrl ? /^epubcfi\(\/[246]\/2!\)/ : /^epubcfi\(\/2!\)/).test(fragment)) {
+                _storesUrlParameters2["default"].removeParameter("f");
+            } else {
+                var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
+                _storesUrlParameters2["default"].setParameter("f", encoded, true);
+            }
+        });
+    }
+
+    _createClass(DocumentOptions, [{
+        key: "toObject",
+        value: function toObject() {
+            function convertStyleSheetArray(arr) {
+                return arr.map(function (url) {
+                    return {
+                        url: url
+                    };
+                });
+            }
+            var uss = convertStyleSheetArray(this.userStyleSheet());
+            // Do not include url
+            // (url is a required argument to Viewer.loadDocument, separated from other options)
+            return {
+                fragment: this.fragment(),
+                authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
+                userStyleSheet: [{
+                    text: "@page {" + this.pageSize.toCSSDeclarationString() + "}"
+                }].concat(uss)
+            };
+        }
+    }]);
+
+    return DocumentOptions;
+})();
+
+exports["default"] = DocumentOptions;
+module.exports = exports["default"];
+
+},{"../stores/url-parameters":13,"./page-size":8,"knockout":1}],7:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+function MessageQueue() {
+  return _knockout2["default"].observableArray();
+}
+
+exports["default"] = new MessageQueue();
+module.exports = exports["default"];
+
+},{"knockout":1}],8:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var Mode = {
+    AUTO: "auto",
+    PRESET: "preset",
+    CUSTOM: "custom"
+};
+
+var PresetSize = [{ name: "A5", description: "A5" }, { name: "A4", description: "A4" }, { name: "A3", description: "A3" }, { name: "B5", description: "B5 (ISO)" }, { name: "B4", description: "B4 (ISO)" }, { name: "JIS-B5", description: "B5 (JIS)" }, { name: "JIS-B4", description: "B4 (JIS)" }, { name: "letter", description: "letter" }, { name: "legal", description: "legal" }, { name: "ledger", description: "ledger" }];
+
+var PageSize = (function () {
+    function PageSize(pageSize) {
+        _classCallCheck(this, PageSize);
+
+        this.mode = _knockout2["default"].observable(Mode.AUTO);
+        this.presetSize = _knockout2["default"].observable(PresetSize[0]);
+        this.isLandscape = _knockout2["default"].observable(false);
+        this.customWidth = _knockout2["default"].observable("210mm");
+        this.customHeight = _knockout2["default"].observable("297mm");
+        this.isImportant = _knockout2["default"].observable(false);
+
+        var setDisabledElements = function setDisabledElements(mode) {
+            var presetSelectElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_preset-select")[0];
+            if (!presetSelectElem) {
+                return;
+            }
+            var presetLandscapeElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_preset-landscape")[0];
+            var customWidthElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_custom-width")[0];
+            var customHeightElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_custom-height")[0];
+
+            switch (mode) {
+                case Mode.AUTO:
+                    presetSelectElem.disabled = true;
+                    presetLandscapeElem.disabled = true;
+                    customWidthElem.disabled = true;
+                    customHeightElem.disabled = true;
+                    break;
+                case Mode.PRESET:
+                    presetSelectElem.disabled = false;
+                    presetLandscapeElem.disabled = false;
+                    customWidthElem.disabled = true;
+                    customHeightElem.disabled = true;
+                    break;
+                case Mode.CUSTOM:
+                    presetSelectElem.disabled = true;
+                    presetLandscapeElem.disabled = true;
+                    customWidthElem.disabled = false;
+                    customHeightElem.disabled = false;
+                    break;
+            }
+        };
+
+        if (pageSize) {
+            this.copyFrom(pageSize);
+        }
+
+        setDisabledElements(this.mode());
+
+        this.mode.subscribe(function (mode) {
+            setDisabledElements(mode);
+        });
+    }
+
+    _createClass(PageSize, [{
+        key: "copyFrom",
+        value: function copyFrom(other) {
+            this.mode(other.mode());
+            this.presetSize(other.presetSize());
+            this.isLandscape(other.isLandscape());
+            this.customWidth(other.customWidth());
+            this.customHeight(other.customHeight());
+            this.isImportant(other.isImportant());
+        }
+    }, {
+        key: "equivalentTo",
+        value: function equivalentTo(other) {
+            if (this.isImportant() !== other.isImportant()) {
+                return false;
+            }
+            var mode = this.mode();
+            if (other.mode() === mode) {
+                switch (mode) {
+                    case Mode.AUTO:
+                        return true;
+                    case Mode.PRESET:
+                        return this.presetSize() === other.presetSize() && this.isLandscape() === other.isLandscape();
+                    case Mode.CUSTOM:
+                        return this.customWidth() === other.customWidth() && this.customHeight() === other.customHeight();
+                    default:
+                        throw new Error("Unknown mode " + mode);
+                }
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "toCSSDeclarationString",
+        value: function toCSSDeclarationString() {
+            var declaration = "size: ";
+            switch (this.mode()) {
+                case Mode.AUTO:
+                    declaration += "auto";
+                    break;
+                case Mode.PRESET:
+                    declaration += this.presetSize().name;
+                    if (this.isLandscape()) {
+                        declaration += " landscape";
+                    }
+                    break;
+                case Mode.CUSTOM:
+                    declaration += this.customWidth() + " " + this.customHeight();
+                    break;
+                default:
+                    throw new Error("Unknown mode " + this.mode());
+            }
+
+            if (this.isImportant()) {
+                declaration += " !important";
+            }
+
+            return declaration + ";";
+        }
+    }]);
+
+    return PageSize;
+})();
+
+PageSize.Mode = Mode;
+PageSize.PresetSize = PageSize.prototype.PresetSize = PresetSize;
+
+exports["default"] = PageSize;
+module.exports = exports["default"];
+
+},{"knockout":1}],9:[function(require,module,exports){
+/*
+ * Copyright 2016 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _modelsVivliostyle = require("../models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var PageViewModeInstance = (function () {
+    function PageViewModeInstance() {
+        _classCallCheck(this, PageViewModeInstance);
+    }
+
+    _createClass(PageViewModeInstance, [{
+        key: "toSpreadViewString",
+        value: function toSpreadViewString() {
+            switch (this) {
+                case PageViewMode.SPREAD:
+                    return "true";
+                case PageViewMode.SINGLE_PAGE:
+                    return "false";
+                case PageViewMode.AUTO_SPREAD:
+                    return "auto";
+                default:
+                    throw new Error("Invalid PageViewMode");
+            }
+        }
+    }, {
+        key: "toString",
+        value: function toString() {
+            switch (this) {
+                case PageViewMode.SPREAD:
+                    return "spread"; // vivliostyle.viewer.PageViewMode.SPREAD;
+                case PageViewMode.SINGLE_PAGE:
+                    return "singlePage"; // vivliostyle.viewer.PageViewMode.SINGLE_PAGE;
+                case PageViewMode.AUTO_SPREAD:
+                    return "autoSpread"; // vivliostyle.viewer.PageViewMode.AUTO_SPREAD;
+                default:
+                    throw new Error("Invalid PageViewMode");
+            }
+        }
+    }]);
+
+    return PageViewModeInstance;
+})();
+
+var PageViewMode = {
+    AUTO_SPREAD: new PageViewModeInstance(),
+    SINGLE_PAGE: new PageViewModeInstance(),
+    SPREAD: new PageViewModeInstance(),
+    defaultMode: function defaultMode() {
+        return this.AUTO_SPREAD;
+    },
+    fromSpreadViewString: function fromSpreadViewString(str) {
+        switch (str) {
+            case "true":
+                return this.SPREAD;
+            case "false":
+                return this.SINGLE_PAGE;
+            case "auto":
+            default:
+                return this.AUTO_SPREAD;
+        }
+    },
+    of: function of(name) {
+        switch (name) {
+            case _modelsVivliostyle2["default"].viewer.PageViewMode.SPREAD:
+                return this.SPREAD;
+            case _modelsVivliostyle2["default"].viewer.PageViewMode.SINGLE_PAGE:
+                return this.SINGLE_PAGE;
+            case _modelsVivliostyle2["default"].viewer.PageViewMode.AUTO_SPREAD:
+                return this.AUTO_SPREAD;
+            default:
+                throw new Error("Invalid PageViewMode name: " + name);
+        }
+    }
+};
+
+exports["default"] = PageViewMode;
+module.exports = exports["default"];
+
+},{"../models/vivliostyle":11}],10:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var _storesUrlParameters = require("../stores/url-parameters");
+
+var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
+
+var _pageViewMode = require("./page-view-mode");
+
+var _pageViewMode2 = _interopRequireDefault(_pageViewMode);
+
+var _zoomOptions = require("./zoom-options");
+
+var _zoomOptions2 = _interopRequireDefault(_zoomOptions);
+
+function getViewerOptionsFromURL() {
+    var renderAllPages = _storesUrlParameters2["default"].getParameter("renderAllPages")[0];
+    return {
+        renderAllPages: renderAllPages === "true" ? true : renderAllPages === "false" ? false : null,
+        profile: _storesUrlParameters2["default"].getParameter("profile")[0] === "true",
+        pageViewMode: _pageViewMode2["default"].fromSpreadViewString(_storesUrlParameters2["default"].getParameter("spread")[0])
+    };
+}
+
+function getDefaultValues() {
+    var isNotEpub = !_storesUrlParameters2["default"].getParameter("b").length;
+    return {
+        renderAllPages: isNotEpub,
+        fontSize: 16,
+        profile: false,
+        pageViewMode: _pageViewMode2["default"].defaultMode(),
+        zoom: _zoomOptions2["default"].createDefaultOptions()
+    };
+}
+
+var ViewerOptions = (function () {
+    function ViewerOptions(options) {
+        var _this = this;
+
+        _classCallCheck(this, ViewerOptions);
+
+        this.renderAllPages = _knockout2["default"].observable();
+        this.fontSize = _knockout2["default"].observable();
+        this.profile = _knockout2["default"].observable();
+        this.pageViewMode = _knockout2["default"].observable();
+        this.zoom = _knockout2["default"].observable();
+        if (options) {
+            this.copyFrom(options);
+        } else {
+            (function () {
+                var defaultValues = getDefaultValues();
+                var urlOptions = getViewerOptionsFromURL();
+                _this.renderAllPages(urlOptions.renderAllPages !== null ? urlOptions.renderAllPages : defaultValues.renderAllPages);
+                _this.fontSize(defaultValues.fontSize);
+                _this.profile(urlOptions.profile || defaultValues.profile);
+                _this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
+                _this.zoom(defaultValues.zoom);
+
+                // write spread parameter back to URL when updated
+                _this.pageViewMode.subscribe(function (pageViewMode) {
+                    if (pageViewMode === defaultValues.pageViewMode) {
+                        _storesUrlParameters2["default"].removeParameter("spread");
+                    } else {
+                        _storesUrlParameters2["default"].setParameter("spread", pageViewMode.toSpreadViewString());
+                    }
+                });
+                _this.renderAllPages.subscribe(function (renderAllPages) {
+                    if (renderAllPages === defaultValues.renderAllPages) {
+                        _storesUrlParameters2["default"].removeParameter("renderAllPages");
+                    } else {
+                        _storesUrlParameters2["default"].setParameter("renderAllPages", renderAllPages.toString());
+                    }
+                });
+            })();
+        }
+    }
+
+    _createClass(ViewerOptions, [{
+        key: "copyFrom",
+        value: function copyFrom(other) {
+            this.renderAllPages(other.renderAllPages());
+            this.fontSize(other.fontSize());
+            this.profile(other.profile());
+            this.pageViewMode(other.pageViewMode());
+            this.zoom(other.zoom());
+        }
+    }, {
+        key: "toObject",
+        value: function toObject() {
+            return {
+                renderAllPages: this.renderAllPages(),
+                fontSize: this.fontSize(),
+                pageViewMode: this.pageViewMode().toString(),
+                zoom: this.zoom().zoom,
+                fitToScreen: this.zoom().fitToScreen
+            };
+        }
+    }]);
+
+    return ViewerOptions;
+})();
+
+ViewerOptions.getDefaultValues = getDefaultValues;
+
+exports["default"] = ViewerOptions;
+module.exports = exports["default"];
+
+},{"../stores/url-parameters":13,"./page-view-mode":9,"./zoom-options":12,"knockout":1}],11:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Vivliostyle = (function () {
+    function Vivliostyle() {
+        _classCallCheck(this, Vivliostyle);
+
+        this.viewer = null;
+        this.constants = null;
+        this.profile = null;
+    }
+
+    _createClass(Vivliostyle, [{
+        key: "setInstance",
+        value: function setInstance(vivliostyle) {
+            this.viewer = vivliostyle.viewer;
+            this.constants = vivliostyle.constants;
+            this.profile = vivliostyle.profile;
+        }
+    }]);
+
+    return Vivliostyle;
+})();
+
+exports["default"] = new Vivliostyle();
+module.exports = exports["default"];
+
+},{}],12:[function(require,module,exports){
+/*
+ * Copyright 2016 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _modelsVivliostyle = require("../models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var ZoomOptions = (function () {
+    function ZoomOptions(zoom) {
+        _classCallCheck(this, ZoomOptions);
+
+        this.zoom = zoom;
+    }
+
+    _createClass(ZoomOptions, [{
+        key: "zoomIn",
+        value: function zoomIn(viewer) {
+            return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 1.25);
+        }
+    }, {
+        key: "zoomOut",
+        value: function zoomOut(viewer) {
+            return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 0.8);
+        }
+    }, {
+        key: "zoomToActualSize",
+        value: function zoomToActualSize() {
+            return new FixedZoomFactor(1);
+        }
+    }], [{
+        key: "createDefaultOptions",
+        value: function createDefaultOptions() {
+            return new FitToScreen();
+        }
+    }, {
+        key: "createFromZoomFactor",
+        value: function createFromZoomFactor(zoom) {
+            return new FixedZoomFactor(zoom);
+        }
+    }]);
+
+    return ZoomOptions;
+})();
+
+var FitToScreen = (function (_ZoomOptions) {
+    _inherits(FitToScreen, _ZoomOptions);
+
+    function FitToScreen() {
+        _classCallCheck(this, FitToScreen);
+
+        _get(Object.getPrototypeOf(FitToScreen.prototype), "constructor", this).call(this, 1);
+    }
+
+    _createClass(FitToScreen, [{
+        key: "toggleFitToScreen",
+        value: function toggleFitToScreen() {
+            return new FixedZoomFactor(1);
+        }
+    }, {
+        key: "getCurrentZoomFactor",
+        value: function getCurrentZoomFactor(viewer) {
+            return viewer.queryZoomFactor(_modelsVivliostyle2["default"].viewer.ZoomType.FIT_INSIDE_VIEWPORT);
+        }
+    }, {
+        key: "fitToScreen",
+        get: function get() {
+            return true;
+        }
+    }]);
+
+    return FitToScreen;
+})(ZoomOptions);
+
+var FixedZoomFactor = (function (_ZoomOptions2) {
+    _inherits(FixedZoomFactor, _ZoomOptions2);
+
+    function FixedZoomFactor() {
+        _classCallCheck(this, FixedZoomFactor);
+
+        _get(Object.getPrototypeOf(FixedZoomFactor.prototype), "constructor", this).apply(this, arguments);
+    }
+
+    _createClass(FixedZoomFactor, [{
+        key: "toggleFitToScreen",
+        value: function toggleFitToScreen() {
+            return new FitToScreen();
+        }
+    }, {
+        key: "getCurrentZoomFactor",
+        value: function getCurrentZoomFactor(viewer) {
+            return this.zoom;
+        }
+    }, {
+        key: "fitToScreen",
+        get: function get() {
+            return false;
+        }
+    }]);
+
+    return FixedZoomFactor;
+})(ZoomOptions);
+
+exports["default"] = ZoomOptions;
+module.exports = exports["default"];
+
+},{"../models/vivliostyle":11}],13:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _utilsStringUtil = require("../utils/string-util");
+
+var _utilsStringUtil2 = _interopRequireDefault(_utilsStringUtil);
+
+function getRegExpForParameter(name) {
+    return new RegExp("[#&]" + _utilsStringUtil2["default"].escapeUnicodeString(name) + "=([^&]*)", "g");
+}
+
+var URLParameterStore = (function () {
+    function URLParameterStore() {
+        _classCallCheck(this, URLParameterStore);
+
+        this.history = window ? window.history : {};
+        this.location = window ? window.location : { url: "" };
+    }
+
+    _createClass(URLParameterStore, [{
+        key: "getBaseURL",
+        value: function getBaseURL() {
+            var url = this.location.href;
+            url = url.replace(/#.*$/, "");
+            return url.replace(/\/[^/]*$/, "/");
+        }
+    }, {
+        key: "getParameter",
+        value: function getParameter(name, dontPercentDecode) {
+            var url = this.location.href;
+            var regexp = getRegExpForParameter(name);
+            var results = [];
+            var r = undefined;
+            while (r = regexp.exec(url)) {
+                var value = r[1];
+                if (!dontPercentDecode) value = _utilsStringUtil2["default"].percentDecodeAmpersandAndPercent(value);
+                results.push(value);
+            }
+            return results;
+        }
+    }, {
+        key: "setParameter",
+        value: function setParameter(name, value, dontPercentEncode) {
+            var url = this.location.href;
+            if (!dontPercentEncode) value = _utilsStringUtil2["default"].percentEncodeAmpersandAndPercent(value);
+            var updated = undefined;
+            var regexp = getRegExpForParameter(name);
+            var r = regexp.exec(url);
+            if (r) {
+                var l = r[1].length;
+                var start = r.index + r[0].length - l;
+                updated = url.substring(0, start) + value + url.substring(start + l);
+            } else {
+                updated = url + (url.match(/#/) ? "&" : "#") + name + "=" + value;
+            }
+            if (this.history.replaceState) {
+                this.history.replaceState(null, "", updated);
+            } else {
+                this.location.href = updated;
+            }
+        }
+    }, {
+        key: "removeParameter",
+        value: function removeParameter(name) {
+            var url = this.location.href;
+            var updated = undefined;
+            var regexp = getRegExpForParameter(name);
+            var r = regexp.exec(url);
+            if (r) {
+                var end = r.index + r[0].length;
+                if (r[0].charAt(0) == '#') {
+                    updated = url.substring(0, r.index + 1) + url.substring(end + 1);
+                } else {
+                    updated = url.substring(0, r.index) + url.substring(end);
+                }
+                if (this.history.replaceState) {
+                    this.history.replaceState(null, "", updated);
+                } else {
+                    this.location.href = updated;
+                }
+            }
+        }
+    }]);
+
+    return URLParameterStore;
+})();
+
+exports["default"] = new URLParameterStore();
+module.exports = exports["default"];
+
+},{"../utils/string-util":16}],14:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// cf. http://www.w3.org/TR/DOM-Level-3-Events-key/
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var Keys = {
+    Unidentified: "Unidentified",
+    ArrowDown: "ArrowDown",
+    ArrowLeft: "ArrowLeft",
+    ArrowRight: "ArrowRight",
+    ArrowUp: "ArrowUp",
+    Home: "Home",
+    End: "End",
+    PageDown: "PageDown",
+    PageUp: "PageUp",
+    Escape: "Escape",
+    Enter: "Enter",
+    Space: " "
+};
+
+// CAUTION: This function covers only part of common keys on a keyboard. Keys not covered by the implementation are identified as KeyboardEvent.key, KeyboardEvent.keyIdentifier, or "Unidentified".
+function identifyKeyFromEvent(event) {
+    var key = event.key;
+    var keyIdentifier = event.keyIdentifier;
+    var location = event.location;
+    if (key === Keys.ArrowDown || key === "Down" || keyIdentifier === "Down") {
+        if (event.metaKey) {
+            // Mac Cmd+Down -> End
+            return Keys.End;
+        }
+        return Keys.ArrowDown;
+    } else if (key === Keys.ArrowLeft || key === "Left" || keyIdentifier === "Left") {
+        return Keys.ArrowLeft;
+    } else if (key === Keys.ArrowRight || key === "Right" || keyIdentifier === "Right") {
+        return Keys.ArrowRight;
+    } else if (key === Keys.ArrowUp || key === "Up" || keyIdentifier === "Up") {
+        if (event.metaKey) {
+            // Mac Cmd+Up -> Home
+            return Keys.Home;
+        }
+        return Keys.ArrowUp;
+    } else if (key === Keys.Escape || key === "Esc" || keyIdentifier === "U+001B") {
+        return Keys.Escape;
+    } else if (key === Keys.Enter || keyIdentifier === "Enter") {
+        return Keys.Enter;
+    } else if (key === Keys.Space || keyIdentifier === "U+0020") {
+        return Keys.Space;
+    } else if (key === "0" || keyIdentifier === "U+0030") {
+        return "0";
+    } else if (key === "+" || key === "Add" || keyIdentifier === "U+002B" || keyIdentifier === "U+00BB" || keyIdentifier === "U+004B" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD /* workaround for Chrome for Windows */) {
+            return "+";
+        } else if (key === "-" || key === "Subtract" || keyIdentifier === "U+002D" || keyIdentifier === "U+00BD" || keyIdentifier === "U+004D" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD /* workaround for Chrome for Windows */) {
+            return "-";
+        } else {
+        return key || keyIdentifier || Keys.Unidentified;
+    }
+}
+
+exports["default"] = {
+    Keys: Keys,
+    identifyKeyFromEvent: identifyKeyFromEvent
+};
+module.exports = exports["default"];
+
+},{}],15:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var util = {
+    readonlyObservable: function readonlyObservable(value) {
+        var obs = _knockout2["default"].observable(value);
+        return {
+            getter: _knockout2["default"].pureComputed(function () {
+                return obs();
+            }),
+            value: obs
+        };
+    }
+};
+
+exports["default"] = util;
+module.exports = exports["default"];
+
+},{"knockout":1}],16:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports["default"] = {
+    escapeUnicodeChar: function escapeUnicodeChar(ch) {
+        return "\\u" + (0x10000 | ch.charCodeAt(0)).toString(16).substring(1);
+    },
+    escapeUnicodeString: function escapeUnicodeString(str) {
+        return str.replace(/[^-a-zA-Z0-9_]/g, this.escapeUnicodeChar);
+    },
+    percentEncodeAmpersandAndPercent: function percentEncodeAmpersandAndPercent(str) {
+        return str.replace(/%/g, "%25").replace(/&/g, "%26");
+    },
+    percentDecodeAmpersandAndPercent: function percentDecodeAmpersandAndPercent(str) {
+        return str.replace(/%26/g, "&").replace(/%25/g, "%");
+    }
+};
+module.exports = exports["default"];
+
+},{}],17:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var MessageDialog = (function () {
+    function MessageDialog(queue) {
+        _classCallCheck(this, MessageDialog);
+
+        this.list = queue;
+        this.visible = _knockout2["default"].pureComputed(function () {
+            return queue().length > 0;
+        });
+    }
+
+    _createClass(MessageDialog, [{
+        key: "getDisplayMessage",
+        value: function getDisplayMessage(errorInfo) {
+            var e = errorInfo.error;
+            var msg = e && (e.toString() || e.frameTrace || e.stack);
+            if (msg) {
+                msg = msg.split("\n", 1)[0];
+            }
+            if (!msg) {
+                msg = errorInfo.messages.join("\n");
+            }
+            return msg;
+        }
+    }]);
+
+    return MessageDialog;
+})();
+
+exports["default"] = MessageDialog;
+module.exports = exports["default"];
+
+},{"knockout":1}],18:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var _modelsViewerOptions = require("../models/viewer-options");
+
+var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
+
+var _utilsKeyUtil = require("../utils/key-util");
+
+var _modelsVivliostyle = require("../models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var Navigation = (function () {
+    function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
+        var _this = this;
+
+        _classCallCheck(this, Navigation);
+
+        this.viewerOptions_ = viewerOptions;
+        this.viewer_ = viewer;
+        this.settingsPanel_ = settingsPanel;
+
+        this.isDisabled = _knockout2["default"].pureComputed(function () {
+            return _this.settingsPanel_.opened() || !_this.viewer_.state.navigatable();
+        });
+
+        var navigationDisabled = _knockout2["default"].pureComputed(function () {
+            return navigationOptions.disablePageNavigation || _this.isDisabled();
+        });
+
+        navigationDisabled.subscribe(function (disabled) {
+            var pageNumberElem = document.getElementById("vivliostyle-page-number");
+            if (pageNumberElem) {
+                pageNumberElem.disabled = disabled;
+            }
+        });
+
+        this.isPageNumberDisabled = _knockout2["default"].pureComputed(function () {
+            return navigationDisabled();
+        });
+
+        this.isNavigateToPreviousDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.status === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            return _this.viewer_.firstPage();
+        });
+
+        this.isNavigateToNextDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.status === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (_this.viewerOptions_.renderAllPages() && _this.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
+                return false;
+            }
+            return _this.viewer_.lastPage();
+        });
+
+        this.isNavigateToLeftDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.pageProgression === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (_this.viewer_.state.pageProgression() === _modelsVivliostyle2["default"].constants.PageProgression.LTR) {
+                return _this.isNavigateToPreviousDisabled();
+            } else {
+                return _this.isNavigateToNextDisabled();
+            }
+        });
+
+        this.isNavigateToRightDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.pageProgression === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (_this.viewer_.state.pageProgression() === _modelsVivliostyle2["default"].constants.PageProgression.LTR) {
+                return _this.isNavigateToNextDisabled();
+            } else {
+                return _this.isNavigateToPreviousDisabled();
+            }
+        });
+
+        this.isNavigateToFirstDisabled = this.isNavigateToPreviousDisabled;
+
+        this.isNavigateToLastDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.status === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (_this.viewerOptions_.renderAllPages() && _this.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
+                return true;
+            }
+            return _this.viewer_.lastPage();
+        });
+
+        this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
+
+        var zoomDisabled = _knockout2["default"].pureComputed(function () {
+            return navigationOptions.disableZoom || _this.isDisabled();
+        });
+
+        this.isZoomOutDisabled = zoomDisabled;
+        this.isZoomInDisabled = zoomDisabled;
+        this.isZoomToActualSizeDisabled = zoomDisabled;
+        this.isToggleFitToScreenDisabled = zoomDisabled;
+        this.hideZoom = !!navigationOptions.disableZoom;
+
+        this.fitToScreen = _knockout2["default"].pureComputed(function () {
+            return viewerOptions.zoom().fitToScreen;
+        });
+
+        var fontSizeChangeDisabled = _knockout2["default"].pureComputed(function () {
+            return navigationOptions.disableFontSizeChange || _this.isDisabled();
+        });
+
+        this.isIncreaseFontSizeDisabled = fontSizeChangeDisabled;
+        this.isDecreaseFontSizeDisabled = fontSizeChangeDisabled;
+        this.isDefaultFontSizeDisabled = fontSizeChangeDisabled;
+        this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
+
+        this.pageNumber = _knockout2["default"].pureComputed({
+            read: function read() {
+                return this.viewer_.epageToPageNumber(this.viewer_.epage());
+            },
+            write: function write(pageNumberText) {
+                var _this2 = this;
+
+                var epageOld = this.viewer_.epage();
+                var pageNumberOld = this.viewer_.epageToPageNumber(epageOld);
+
+                // Accept non-integer, convert fullwidth to ascii
+                var pageNumber = parseFloat(pageNumberText.replace(/[０-９]/g, function (s) {
+                    return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+                })) || 0;
+                if (/^[-+]/.test(pageNumberText)) {
+                    // "+number" and "-number" to relative move.
+                    pageNumber = pageNumberOld + pageNumber;
+                }
+                if (pageNumber < 1) {
+                    pageNumber = 1;
+                } else {
+                    var epageCount = this.viewer_.epageCount();
+                    if (this.viewerOptions_.renderAllPages()) {
+                        if (pageNumber > epageCount) {
+                            pageNumber = epageCount;
+                        }
+                    } else if (pageNumber > epageCount + 1) {
+                        // Accept "epageCount + 1" because the last epage may equal epageCount.
+                        pageNumber = epageCount + 1;
+                    }
+                }
+                var epageNav = this.viewer_.epageFromPageNumber(pageNumber);
+                var pageNumberElem = document.getElementById("vivliostyle-page-number");
+                pageNumberElem.value = pageNumber;
+                this.viewer_.navigateToEPage(epageNav);
+
+                setTimeout(function () {
+                    if (_this2.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.LOADING && _this2.viewer_.epage() === epageOld) {
+                        pageNumberElem.value = pageNumberOld;
+                    }
+                    pageNumberElem.blur();
+                }, 10);
+            },
+            owner: this
+        });
+
+        this.totalPages = _knockout2["default"].pureComputed(function () {
+            var totalPages = _this.viewer_.epageCount();
+            if (!totalPages) {
+                return totalPages;
+            }
+            var pageNumber = _this.pageNumber();
+            if (_this.viewer_.lastPage()) {
+                totalPages = pageNumber;
+            } else if (pageNumber >= totalPages) {
+                totalPages++;
+            }
+            return totalPages;
+        });
+
+        ["navigateToPrevious", "navigateToNext", "navigateToLeft", "navigateToRight", "navigateToFirst", "navigateToLast", "zoomIn", "zoomOut", "zoomToActualSize", "toggleFitToScreen", "increaseFontSize", "decreaseFontSize", "defaultFontSize", "handleKey"].forEach(function (methodName) {
+            _this[methodName] = _this[methodName].bind(_this);
+        });
+    }
+
+    _createClass(Navigation, [{
+        key: "navigateToPrevious",
+        value: function navigateToPrevious() {
+            if (!this.isNavigateToPreviousDisabled()) {
+                this.viewer_.navigateToPrevious();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToNext",
+        value: function navigateToNext() {
+            if (!this.isNavigateToNextDisabled()) {
+                this.viewer_.navigateToNext();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToLeft",
+        value: function navigateToLeft() {
+            if (!this.isNavigateToLeftDisabled()) {
+                this.viewer_.navigateToLeft();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToRight",
+        value: function navigateToRight() {
+            if (!this.isNavigateToRightDisabled()) {
+                this.viewer_.navigateToRight();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToFirst",
+        value: function navigateToFirst() {
+            if (!this.isNavigateToFirstDisabled()) {
+                this.viewer_.navigateToFirst();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToLast",
+        value: function navigateToLast() {
+            if (!this.isNavigateToLastDisabled()) {
+                this.viewer_.navigateToLast();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "zoomIn",
+        value: function zoomIn() {
+            if (!this.isZoomInDisabled()) {
+                var zoom = this.viewerOptions_.zoom();
+                this.viewerOptions_.zoom(zoom.zoomIn(this.viewer_));
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "zoomOut",
+        value: function zoomOut() {
+            if (!this.isZoomOutDisabled()) {
+                var zoom = this.viewerOptions_.zoom();
+                this.viewerOptions_.zoom(zoom.zoomOut(this.viewer_));
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "zoomToActualSize",
+        value: function zoomToActualSize() {
+            if (!this.isZoomToActualSizeDisabled()) {
+                var zoom = this.viewerOptions_.zoom();
+                this.viewerOptions_.zoom(zoom.zoomToActualSize());
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "toggleFitToScreen",
+        value: function toggleFitToScreen() {
+            if (!this.isToggleFitToScreenDisabled()) {
+                var zoom = this.viewerOptions_.zoom();
+                this.viewerOptions_.zoom(zoom.toggleFitToScreen());
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "increaseFontSize",
+        value: function increaseFontSize() {
+            if (!this.isIncreaseFontSizeDisabled()) {
+                var fontSize = this.viewerOptions_.fontSize();
+                this.viewerOptions_.fontSize(fontSize * 1.25);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "decreaseFontSize",
+        value: function decreaseFontSize() {
+            if (!this.isDecreaseFontSizeDisabled()) {
+                var fontSize = this.viewerOptions_.fontSize();
+                this.viewerOptions_.fontSize(fontSize * 0.8);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "defaultFontSize",
+        value: function defaultFontSize() {
+            if (!this.isDefaultFontSizeDisabled()) {
+                var fontSize = _modelsViewerOptions2["default"].getDefaultValues().fontSize;
+                this.viewerOptions_.fontSize(fontSize);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "handleKey",
+        value: function handleKey(key) {
+            if (document.getElementById("vivliostyle-menu_misc").contains(document.activeElement)) {
+                return true;
+            }
+
+            var pageNumberElem = document.getElementById("vivliostyle-page-number");
+            var viewportElement = document.getElementById("vivliostyle-viewer-viewport");
+            var horizontalScrollable = viewportElement.scrollWidth > viewportElement.clientWidth;
+            var verticalScrollable = viewportElement.scrollHeight > viewportElement.clientHeight;
+
+            var isPageNumberInput = pageNumberElem === document.activeElement;
+
+            if (!isPageNumberInput) {
+                viewportElement.focus();
+            }
+
+            switch (key) {
+                case "+":
+                    return isPageNumberInput || !this.increaseFontSize();
+                case "-":
+                    return isPageNumberInput || !this.decreaseFontSize();
+                case "0":
+                    return isPageNumberInput || !this.defaultFontSize();
+                case "1":
+                    return isPageNumberInput || !this.zoomToActualSize();
+                case _utilsKeyUtil.Keys.ArrowLeft:
+                    return isPageNumberInput || horizontalScrollable || !this.navigateToLeft();
+                case _utilsKeyUtil.Keys.ArrowRight:
+                    return isPageNumberInput || horizontalScrollable || !this.navigateToRight();
+                case _utilsKeyUtil.Keys.ArrowDown:
+                    viewportElement.focus();
+                    return verticalScrollable || !this.navigateToNext();
+                case _utilsKeyUtil.Keys.ArrowUp:
+                    viewportElement.focus();
+                    return verticalScrollable || !this.navigateToPrevious();
+                case _utilsKeyUtil.Keys.PageDown:
+                    viewportElement.focus();
+                    return !this.navigateToNext();
+                case _utilsKeyUtil.Keys.PageUp:
+                    viewportElement.focus();
+                    return !this.navigateToPrevious();
+                case _utilsKeyUtil.Keys.Home:
+                    viewportElement.focus();
+                    return !this.navigateToFirst();
+                case _utilsKeyUtil.Keys.End:
+                    viewportElement.focus();
+                    return !this.navigateToLast();
+                case "o":
+                case "O":
+                    viewportElement.focus();
+                    return !this.zoomOut();
+                case "i":
+                case "I":
+                    viewportElement.focus();
+                    return !this.zoomIn();
+                case "f":
+                case "F":
+                    viewportElement.focus();
+                    return !this.toggleFitToScreen();
+                case "g":
+                case "G":
+                    pageNumberElem.focus();
+                    return false;
+                default:
+                    return true;
+            }
+        }
+    }]);
+
+    return Navigation;
+})();
+
+exports["default"] = Navigation;
+module.exports = exports["default"];
+
+},{"../models/viewer-options":10,"../models/vivliostyle":11,"../utils/key-util":14,"knockout":1}],19:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var _modelsViewerOptions = require("../models/viewer-options");
+
+var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
+
+var _modelsPageSize = require("../models/page-size");
+
+var _modelsPageSize2 = _interopRequireDefault(_modelsPageSize);
+
+var _modelsPageViewMode = require("../models/page-view-mode");
+
+var _modelsPageViewMode2 = _interopRequireDefault(_modelsPageViewMode);
+
+var _utilsKeyUtil = require("../utils/key-util");
+
+var SettingsPanel = (function () {
+    function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, settingsPanelOptions) {
+        var _this = this;
+
+        _classCallCheck(this, SettingsPanel);
+
+        this.viewerOptions_ = viewerOptions;
+        this.documentOptions_ = documentOptions;
+        this.viewer_ = viewer;
+
+        this.isPageSizeChangeDisabled = !!settingsPanelOptions.disablePageSizeChange;
+        this.isOverrideDocumentStyleSheetDisabled = this.isPageSizeChangeDisabled;
+        this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
+        this.isRenderAllPagesChangeDisabled = !!settingsPanelOptions.disableRenderAllPagesChange;
+
+        this.opened = _knockout2["default"].observable(false);
+        this.state = {
+            viewerOptions: new _modelsViewerOptions2["default"](viewerOptions),
+            pageSize: new _modelsPageSize2["default"](documentOptions.pageSize),
+            pageViewMode: _knockout2["default"].pureComputed({
+                read: function read() {
+                    return _this.state.viewerOptions.pageViewMode().toString();
+                },
+                write: function write(value) {
+                    _this.state.viewerOptions.pageViewMode(_modelsPageViewMode2["default"].of(value));
+                }
+            }),
+            renderAllPages: _knockout2["default"].pureComputed({
+                read: function read() {
+                    return _this.state.viewerOptions.renderAllPages();
+                },
+                write: function write(value) {
+                    _this.state.viewerOptions.renderAllPages(value);
+                }
+            })
+        };
+
+        var settingsParent = document.getElementById("vivliostyle-menu-item_misc-toggle");
+        this.settingsButton = settingsParent && settingsParent.firstElementChild;
+
+        ["close", "toggle", "apply", "reset"].forEach(function (methodName) {
+            this[methodName] = this[methodName].bind(this);
+        }, this);
+
+        messageDialog.visible.subscribe(function (visible) {
+            if (visible) this.close();
+        }, this);
+    }
+
+    _createClass(SettingsPanel, [{
+        key: "close",
+        value: function close() {
+            this.opened(false);
+            var viewportElement = document.getElementById("vivliostyle-viewer-viewport");
+            if (viewportElement) viewportElement.focus();
+            return true;
+        }
+    }, {
+        key: "toggle",
+        value: function toggle() {
+            var open = !this.opened();
+            if (open) {
+                this.opened(open);
+                if (this.settingsButton) this.settingsButton.focus();
+            } else {
+                this.close();
+            }
+        }
+    }, {
+        key: "apply",
+        value: function apply() {
+            if (this.state.renderAllPages() === this.viewerOptions_.renderAllPages() && this.state.pageSize.equivalentTo(this.documentOptions_.pageSize)) {
+                this.viewerOptions_.copyFrom(this.state.viewerOptions);
+            } else {
+                this.documentOptions_.pageSize.copyFrom(this.state.pageSize);
+                this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
+            }
+            this.close();
+        }
+    }, {
+        key: "reset",
+        value: function reset() {
+            this.state.viewerOptions.copyFrom(this.viewerOptions_);
+            this.state.pageSize.copyFrom(this.documentOptions_.pageSize);
+            this.close();
+        }
+    }, {
+        key: "handleKey",
+        value: function handleKey(key) {
+            switch (key) {
+                case _utilsKeyUtil.Keys.Escape:
+                    if (this.opened()) {
+                        this.reset();
+                        return false;
+                    }
+                    return true;
+                case "s":
+                case "S":
+                    if (!this.opened() || document.activeElement === this.settingsButton) {
+                        this.toggle();
+                        return false;
+                    }
+                    return true;
+                case _utilsKeyUtil.Keys.Space:
+                    if (document.activeElement === this.settingsButton) {
+                        this.toggle();
+                        return false;
+                    }
+                    return true;
+                case _utilsKeyUtil.Keys.Enter:
+                    if (document.activeElement === this.settingsButton) {
+                        this.toggle();
+                        return false;
+                    }
+                    if (this.settingsButton && this.settingsButton.parentElement.contains(document.activeElement) && document.activeElement.id !== "vivliostyle-menu-button_apply" && document.activeElement.id !== "vivliostyle-menu-button_reset") {
+                        document.getElementById("vivliostyle-menu-button_apply").focus();
+                        return false;
+                    }
+                    return true;
+                default:
+                    return true;
+            }
+        }
+    }]);
+
+    return SettingsPanel;
+})();
+
+exports["default"] = SettingsPanel;
+module.exports = exports["default"];
+
+},{"../models/page-size":8,"../models/page-view-mode":9,"../models/viewer-options":10,"../utils/key-util":14,"knockout":1}],20:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var _modelsVivliostyle = require("../models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var _modelsDocumentOptions = require("../models/document-options");
+
+var _modelsDocumentOptions2 = _interopRequireDefault(_modelsDocumentOptions);
+
+var _modelsZoomOptions = require("../models/zoom-options");
+
+var _modelsZoomOptions2 = _interopRequireDefault(_modelsZoomOptions);
+
+var _modelsViewerOptions = require("../models/viewer-options");
+
+var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
+
+var _modelsMessageQueue = require("../models/message-queue");
+
+var _modelsMessageQueue2 = _interopRequireDefault(_modelsMessageQueue);
+
+var _viewer = require("./viewer");
+
+var _viewer2 = _interopRequireDefault(_viewer);
+
+var _navigation = require("./navigation");
+
+var _navigation2 = _interopRequireDefault(_navigation);
+
+var _settingsPanel = require("./settings-panel");
+
+var _settingsPanel2 = _interopRequireDefault(_settingsPanel);
+
+var _messageDialog = require("./message-dialog");
+
+var _messageDialog2 = _interopRequireDefault(_messageDialog);
+
+var _utilsKeyUtil = require("../utils/key-util");
+
+var _utilsKeyUtil2 = _interopRequireDefault(_utilsKeyUtil);
+
+var _storesUrlParameters = require("../stores/url-parameters");
+
+var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
+
+function ViewerApp() {
+    var _this = this;
+
+    this.documentOptions = new _modelsDocumentOptions2["default"]();
+    this.viewerOptions = new _modelsViewerOptions2["default"]();
+    if (this.viewerOptions.profile()) {
+        _modelsVivliostyle2["default"].profile.profiler.enable();
+    }
+    this.isDebug = _storesUrlParameters2["default"].getParameter("debug")[0] === "true";
+    this.viewerSettings = {
+        userAgentRootURL: _storesUrlParameters2["default"].getBaseURL() + "resources/",
+        viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
+        debug: this.isDebug
+    };
+    this.viewer = new _viewer2["default"](this.viewerSettings, this.viewerOptions);
+    this.messageDialog = new _messageDialog2["default"](_modelsMessageQueue2["default"]);
+
+    var settingsPanelOptions = {
+        disablePageSizeChange: false,
+        disablePageViewModeChange: false,
+        disableRenderAllPagesChange: false
+    };
+
+    this.settingsPanel = new _settingsPanel2["default"](this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog, settingsPanelOptions);
+
+    var navigationOptions = {
+        disablePageNavigation: false,
+        disableZoom: false,
+        disableFontSizeChange: false
+    };
+
+    this.navigation = new _navigation2["default"](this.viewerOptions, this.viewer, this.settingsPanel, navigationOptions);
+
+    this.handleKey = function (data, event) {
+        var key = _utilsKeyUtil2["default"].identifyKeyFromEvent(event);
+        if (!(key === "Home" || key === "End") && (event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) {
+            return true;
+        }
+        var ret = _this.settingsPanel.handleKey(key);
+        if (ret) {
+            ret = _this.navigation.handleKey(key);
+        }
+        return ret;
+    };
+
+    this.viewer.loadDocument(this.documentOptions);
+}
+
+exports["default"] = ViewerApp;
+module.exports = exports["default"];
+
+},{"../models/document-options":6,"../models/message-queue":7,"../models/viewer-options":10,"../models/vivliostyle":11,"../models/zoom-options":12,"../stores/url-parameters":13,"../utils/key-util":14,"./message-dialog":17,"./navigation":18,"./settings-panel":19,"./viewer":21,"knockout":1}],21:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var _utilsObservableUtil = require("../utils/observable-util");
+
+var _utilsObservableUtil2 = _interopRequireDefault(_utilsObservableUtil);
+
+var _loggingLogger = require("../logging/logger");
+
+var _loggingLogger2 = _interopRequireDefault(_loggingLogger);
+
+var _modelsVivliostyle = require("../models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var Viewer = (function () {
+    function Viewer(viewerSettings, viewerOptions) {
+        _classCallCheck(this, Viewer);
+
+        this.viewerOptions_ = viewerOptions;
+        this.documentOptions_ = null;
+        this.viewer_ = new _modelsVivliostyle2["default"].viewer.Viewer(viewerSettings, viewerOptions.toObject());
+        var state_ = this.state_ = {
+            status: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.ReadyState.LOADING),
+            pageProgression: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.PageProgression.LTR)
+        };
+        this.state = {
+            status: state_.status.getter.extend({
+                rateLimit: { timeout: 100, method: "notifyWhenChangesStop" },
+                notify: 'always'
+            }),
+            navigatable: _knockout2["default"].pureComputed(function () {
+                return state_.status.value() !== _modelsVivliostyle2["default"].constants.ReadyState.LOADING;
+            }),
+            pageProgression: state_.pageProgression.getter
+        };
+
+        this.epage = _knockout2["default"].observable();
+        this.epageCount = _knockout2["default"].observable();
+        this.firstPage = _knockout2["default"].observable();
+        this.lastPage = _knockout2["default"].observable();
+
+        this.setupViewerEventHandler();
+        this.setupViewerOptionSubscriptions();
+    }
+
+    _createClass(Viewer, [{
+        key: "setupViewerEventHandler",
+        value: function setupViewerEventHandler() {
+            var _this = this;
+
+            var logger = _loggingLogger2["default"].getLogger();
+            var intervalID = 0;
+            this.viewer_.addListener("debug", function (payload) {
+                logger.debug(payload.content);
+            });
+            this.viewer_.addListener("info", function (payload) {
+                logger.info(payload.content);
+            });
+            this.viewer_.addListener("warn", function (payload) {
+                logger.warn(payload.content);
+            });
+            this.viewer_.addListener("error", function (payload) {
+                logger.error(payload.content);
+            });
+            this.viewer_.addListener("readystatechange", function () {
+                var readyState = _this.viewer_.readyState;
+                if (readyState === _modelsVivliostyle2["default"].constants.ReadyState.INTERACTIVE || readyState === _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
+                    _this.state_.pageProgression.value(_this.viewer_.getCurrentPageProgression());
+                }
+                _this.state_.status.value(readyState);
+            });
+            this.viewer_.addListener("loaded", function () {
+                if (_this.viewerOptions_.profile()) {
+                    _modelsVivliostyle2["default"].profile.profiler.printTimings();
+                }
+            });
+            this.viewer_.addListener("nav", function (payload) {
+                var cfi = payload.cfi;
+                var first = payload.first;
+                var last = payload.last;
+                var epage = payload.epage;
+                var epageCount = payload.epageCount;
+
+                if (cfi) {
+                    _this.documentOptions_.fragment(cfi);
+                }
+                if (first !== undefined) {
+                    _this.firstPage(first);
+                }
+                if (last !== undefined) {
+                    _this.lastPage(last);
+                }
+                if (epage !== undefined) {
+                    _this.epage(epage);
+                }
+                if (epageCount !== undefined) {
+                    _this.epageCount(epageCount);
+                }
+            });
+            this.viewer_.addListener("hyperlink", function (payload) {
+                if (payload.internal) {
+                    _this.navigateToInternalUrl(payload.href);
+                } else {
+                    window.location.href = payload.href;
+                }
+            });
+        }
+    }, {
+        key: "setupViewerOptionSubscriptions",
+        value: function setupViewerOptionSubscriptions() {
+            _knockout2["default"].computed(function () {
+                var viewerOptions = this.viewerOptions_.toObject();
+                this.viewer_.setOptions(viewerOptions);
+            }, this).extend({ rateLimit: 0 });
+        }
+    }, {
+        key: "loadDocument",
+        value: function loadDocument(documentOptions, viewerOptions) {
+            this.state_.status.value("loading");
+            if (viewerOptions) {
+                this.viewerOptions_.copyFrom(viewerOptions);
+            }
+            this.documentOptions_ = documentOptions;
+            if (documentOptions.url()) {
+                this.viewer_.loadDocument(documentOptions.url(), documentOptions.toObject(), this.viewerOptions_.toObject());
+            } else if (documentOptions.epubUrl()) {
+                this.viewer_.loadEPUB(documentOptions.epubUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+            }
+        }
+    }, {
+        key: "navigateToPrevious",
+        value: function navigateToPrevious() {
+            this.viewer_.navigateToPage("previous");
+        }
+    }, {
+        key: "navigateToNext",
+        value: function navigateToNext() {
+            this.viewer_.navigateToPage("next");
+        }
+    }, {
+        key: "navigateToLeft",
+        value: function navigateToLeft() {
+            this.viewer_.navigateToPage("left");
+        }
+    }, {
+        key: "navigateToRight",
+        value: function navigateToRight() {
+            this.viewer_.navigateToPage("right");
+        }
+    }, {
+        key: "navigateToFirst",
+        value: function navigateToFirst() {
+            this.viewer_.navigateToPage("first");
+        }
+    }, {
+        key: "navigateToLast",
+        value: function navigateToLast() {
+            this.viewer_.navigateToPage("last");
+        }
+    }, {
+        key: "navigateToEPage",
+        value: function navigateToEPage(epage) {
+            this.viewer_.navigateToPage("epage", epage);
+        }
+    }, {
+        key: "navigateToInternalUrl",
+        value: function navigateToInternalUrl(href) {
+            this.viewer_.navigateToInternalUrl(href);
+        }
+    }, {
+        key: "queryZoomFactor",
+        value: function queryZoomFactor(type) {
+            return this.viewer_.queryZoomFactor(type);
+        }
+    }, {
+        key: "epageToPageNumber",
+        value: function epageToPageNumber(epage) {
+            if (!epage && epage != 0) {
+                return undefined;
+            }
+            var pageNumber = Math.round(epage + 1);
+            return pageNumber;
+        }
+    }, {
+        key: "epageFromPageNumber",
+        value: function epageFromPageNumber(pageNumber) {
+            if (!pageNumber && pageNumber != 0) {
+                return undefined;
+            }
+            var epage = pageNumber - 1;
+            return epage;
+        }
+    }]);
+
+    return Viewer;
+})();
+
+exports["default"] = Viewer;
+module.exports = exports["default"];
+
+},{"../logging/logger":4,"../models/vivliostyle":11,"../utils/observable-util":15,"knockout":1}],22:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var _bindingsMenuButtonJs = require("./bindings/menuButton.js");
+
+var _bindingsMenuButtonJs2 = _interopRequireDefault(_bindingsMenuButtonJs);
+
+var _bindingsSwipePagesJs = require("./bindings/swipePages.js");
+
+var _bindingsSwipePagesJs2 = _interopRequireDefault(_bindingsSwipePagesJs);
+
+var _viewmodelsViewerApp = require("./viewmodels/viewer-app");
+
+var _viewmodelsViewerApp2 = _interopRequireDefault(_viewmodelsViewerApp);
+
+exports["default"] = {
+    start: function start() {
+        function startViewer() {
+            _knockout2["default"].applyBindings(new _viewmodelsViewerApp2["default"]());
+        }
+
+        if (window["__loaded"]) startViewer();else window.onload = startViewer;
+    }
+};
+module.exports = exports["default"];
+
+},{"./bindings/menuButton.js":2,"./bindings/swipePages.js":3,"./viewmodels/viewer-app":20,"knockout":1}],23:[function(require,module,exports){
 (function (global){
 /*
  * Copyright 2013 Google, Inc.
@@ -5953,7 +8411,7 @@ ko.exportSymbol('nativeTemplateEngine', ko.nativeTemplateEngine);
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Vivliostyle core 2019.1.100-pre.20190117173859
+ * Vivliostyle core 2019.1.100-pre.20190120174722
  */
 (function(factory) {
     if (typeof define === "function" && define.amd) {
@@ -6609,2617 +9067,160 @@ b,g=(l[eu]||l["http://idpf.org/epub/vocab/package/#alternate-script"])==b,f!=g)?
 function iu(a,b){function c(a){for(var b in a){var d=a[b];d.sort(hu(b,k));for(var e=0;e<d.length;e++){var f=d[e].r;f&&c(f)}}}function d(a){return cb(a,function(a){return bb(a,function(a){var b={v:a.value,o:a.order};a.lh&&(b.s=a.scheme);if(a.id||a.lang){var c=l[a.id];if(c||a.lang)a.lang&&(a={name:eu,value:a.lang,lang:null,id:null,Ke:a.id,scheme:null,order:a.order},c?c.push(a):c=[a]),c=ab(c,function(a){return a.name}),b.r=d(c)}return b})})}function e(a){if(a&&(a=a.match(/^\s*(([^:]*):)?(\S+)\s*$/))){var b=
 a[2]?f[a[2]]:"http://idpf.org/epub/vocab/package/#";if(b)return b+a[3]}return null}var f;if(b){f={};for(var g in du)f[g]=du[g];for(;g=b.match(/^\s*([A-Z_a-z\u007F-\uFFFF][-.A-Z_a-z0-9\u007F-\uFFFF]*):\s*(\S+)/);)b=b.substr(g[0].length),f[g[1]]=g[2]}else f=du;var h=1;g=uk(vk(a),function(a){if("meta"==a.localName){var b=e(a.getAttribute("property"));if(b)return{name:b,value:a.textContent,id:a.getAttribute("id"),order:h++,Ke:a.getAttribute("refines"),lang:null,scheme:e(a.getAttribute("scheme"))}}else if("http://purl.org/dc/elements/1.1/"==
 a.namespaceURI)return{name:du.dcterms+a.localName,order:h++,lang:a.getAttribute("xml:lang"),value:a.textContent,id:a.getAttribute("id"),Ke:null,scheme:null};return null});var l=ab(g,function(a){return a.Ke});g=d(ab(g,function(a){return a.Ke?null:a.name}));var k=null;g[eu]&&(k=g[eu][0].v);c(g);return g}function ju(){var a=window.MathJax;return a?a.Hub:null}var ku={"appliaction/xhtml+xml":!0,"image/jpeg":!0,"image/png":!0,"image/svg+xml":!0,"image/gif":!0,"audio/mp3":!0};
-function Yt(a,b){this.h=a;this.B=this.g=this.b=this.l=this.j=null;this.H=b;this.F=null;this.ba={};this.lang=null;this.f=0;this.G=this.N=!1;this.u=null;this.J={};this.da=this.Y=this.la=null;this.X={};this.O=null;this.C=lu(this);ju()&&(Gh["http://www.w3.org/1998/Math/MathML"]=!0)}
+function Yt(a,b){this.g=a;this.B=this.f=this.b=this.l=this.h=null;this.H=b;this.F=null;this.ba={};this.lang=null;this.j=0;this.N=!1;this.G=!0;this.u=null;this.J={};this.da=this.Y=this.la=null;this.X={};this.O=null;this.C=lu(this);ju()&&(Gh["http://www.w3.org/1998/Math/MathML"]=!0)}
 function lu(a){function b(){}b.prototype.Me=function(a,b){return"viv-id-"+Ea(b+(a?"#"+a:""),":")};b.prototype.ic=function(b,d){var c=b.match(/^([^#]*)#?(.*)$/);if(c){var f=c[1]||d,c=c[2];if(f&&a.l.some(function(a){return a.src===f}))return"#"+this.Me(c,f)}return b};b.prototype.Eg=function(a){"#"===a.charAt(0)&&(a=a.substring(1));a.indexOf("viv-id-")||(a=a.substring(7));return(a=Va(a).match(/^([^#]*)#?(.*)$/))?[a[1],a[2]]:[]};return new b}
 function mu(a,b){return a.H?b.substr(0,a.H.length)==a.H?decodeURI(b.substr(a.H.length)):null:b}
-function Zt(a,b,c,d,e){a.j=b;var f=ck(new dk([b.b]),"package"),g=wk(f,"unique-identifier")[0];g&&(g=jk(b,b.url+"#"+g))&&(a.F=g.textContent.replace(/[ \n\r\t]/g,""));var h={};a.l=bb(ck(ck(f,"manifest"),"item").W,function(c){var d=new au,e=b.url;d.id=c.getAttribute("id");d.src=Aa(c.getAttribute("href"),e);d.g=c.getAttribute("media-type");if(e=c.getAttribute("properties")){for(var e=e.split(/\s+/),f={},g=0;g<e.length;g++)f[e[g]]=!0;d.j=f}(c=c.getAttribute("fallback"))&&!ku[d.g]&&(h[d.src]=c);!a.Y&&d.j.nav&&
-(a.Y=d);!a.da&&d.j["cover-image"]&&(a.da=d);return d});a.g=Za(a.l,bu);a.B=Za(a.l,function(b){return mu(a,b.src)});for(var l in h)for(g=l;;){g=a.g[h[g]];if(!g)break;if(ku[g.g]){a.X[l]=g.src;break}g=g.src}a.b=bb(ck(ck(f,"spine"),"itemref").W,function(b,c){var d=b.getAttribute("idref");if(d=a.g[d])d.h=b,d.R=c;return d});if(l=wk(ck(f,"spine"),"toc")[0])a.la=a.g[l];if(l=wk(ck(f,"spine"),"page-progression-direction")[0]){a:switch(l){case "ltr":l="ltr";break a;case "rtl":l="rtl";break a;default:throw Error("unknown PageProgression: "+
-l);}a.O=l}var g=c?wk(ck(ck(sk(ck(ck(new dk([c.b]),"encryption"),"EncryptedData"),rk()),"CipherData"),"CipherReference"),"URI"):[],k=ck(ck(f,"bindings"),"mediaType").W;for(c=0;c<k.length;c++){var m=k[c].getAttribute("handler");(l=k[c].getAttribute("media-type"))&&m&&a.g[m]&&(a.ba[l]=a.g[m].src)}a.J=iu(ck(f,"metadata"),wk(f,"prefix")[0]);a.J[eu]&&(a.lang=a.J[eu][0].v);a.J[gu]&&(a.N="pre-paginated"===a.J[gu][0].v);if(!d){if(0<g.length&&a.F)for(d=cu(a.F),c=0;c<g.length;c++)a.h.B[a.H+g[c]]=d;a.N&&nu(a);
+function Zt(a,b,c,d,e){a.h=b;var f=ck(new dk([b.b]),"package"),g=wk(f,"unique-identifier")[0];g&&(g=jk(b,b.url+"#"+g))&&(a.F=g.textContent.replace(/[ \n\r\t]/g,""));var h={};a.l=bb(ck(ck(f,"manifest"),"item").W,function(c){var d=new au,e=b.url;d.id=c.getAttribute("id");d.src=Aa(c.getAttribute("href"),e);d.g=c.getAttribute("media-type");if(e=c.getAttribute("properties")){for(var e=e.split(/\s+/),f={},g=0;g<e.length;g++)f[e[g]]=!0;d.j=f}(c=c.getAttribute("fallback"))&&!ku[d.g]&&(h[d.src]=c);!a.Y&&d.j.nav&&
+(a.Y=d);!a.da&&d.j["cover-image"]&&(a.da=d);return d});a.f=Za(a.l,bu);a.B=Za(a.l,function(b){return mu(a,b.src)});for(var l in h)for(g=l;;){g=a.f[h[g]];if(!g)break;if(ku[g.g]){a.X[l]=g.src;break}g=g.src}a.b=bb(ck(ck(f,"spine"),"itemref").W,function(b,c){var d=b.getAttribute("idref");if(d=a.f[d])d.h=b,d.R=c;return d});if(l=wk(ck(f,"spine"),"toc")[0])a.la=a.f[l];if(l=wk(ck(f,"spine"),"page-progression-direction")[0]){a:switch(l){case "ltr":l="ltr";break a;case "rtl":l="rtl";break a;default:throw Error("unknown PageProgression: "+
+l);}a.O=l}var g=c?wk(ck(ck(sk(ck(ck(new dk([c.b]),"encryption"),"EncryptedData"),rk()),"CipherData"),"CipherReference"),"URI"):[],k=ck(ck(f,"bindings"),"mediaType").W;for(c=0;c<k.length;c++){var m=k[c].getAttribute("handler");(l=k[c].getAttribute("media-type"))&&m&&a.f[m]&&(a.ba[l]=a.f[m].src)}a.J=iu(ck(f,"metadata"),wk(f,"prefix")[0]);a.J[eu]&&(a.lang=a.J[eu][0].v);a.J[gu]&&(a.N="pre-paginated"===a.J[gu][0].v);if(!d){if(0<g.length&&a.F)for(d=cu(a.F),c=0;c<g.length;c++)a.g.B[a.H+g[c]]=d;a.N&&nu(a);
 return M(!0)}f=new Pa;k={};if(0<g.length&&a.F)for(l="1040:"+Qt(a.F),c=0;c<g.length;c++)k[g[c]]=l;for(c=0;c<d.length;c++){var p=d[c];if(m=p.n){var q=decodeURI(m),g=a.B[q];l=null;g&&(g.u=0!=p.m,g.l=p.c,g.g&&(l=g.g.replace(/\s+/g,"")));g=k[q];if(l||g)f.append(m),f.append(" "),f.append(l||"application/octet-stream"),g&&(f.append(" "),f.append(g)),f.append("\n")}}nu(a);return sf(e,"","POST",f.toString(),"text/plain")}
-function nu(a){for(var b=0,c=t(a.b),d=c.next();!d.done;d=c.next()){var d=d.value,e=a.N?1:Math.ceil(d.l/1024);d.b=b;d.f=e;b+=e}a.f=b;a.u&&a.u(a.f)}function ou(a,b,c){a.G=b||a.N;a.u=c;if(a.G)return a.N&&!a.f&&nu(a),M(!0);var d=0,e=0;b=L("estimatePageCount");Ce(function(b){if(e===a.b.length)Q(b);else{var c=a.b[e++];c.b=d;a.h.load(c.src).then(function(e){var f=1800,g=e.lang||a.lang;g&&g.match(/^(ja|ko|zh)/)&&(f/=3);c.f=Math.ceil(gk(e)/f);d+=c.f;a.f=d;a.u&&a.u(a.f);P(b)})}}).Ja(b);return b.result()}
-function pu(a,b,c){a.g={};a.B={};a.l=[];a.b=a.l;var d=a.j=new bk(null,"",(new DOMParser).parseFromString("<spine></spine>","text/xml"));b.forEach(function(a){var b=new au;b.R=a.index;b.id="item"+(a.index+1);b.src=a.url;b.ub=a.ub;b.zc=a.zc;var c=d.b.createElement("itemref");c.setAttribute("idref",b.id);d.root.appendChild(c);b.h=c;this.g[b.id]=b;this.B[a.url]=b;this.l.push(b)},a);return c?$t(a.h,b[0].url,c):M(null)}
-function qu(a,b,c){var d=a.b[b],e=L("getCFI");a.h.load(d.src).then(function(a){var b=hk(a,c),f=null;b&&(a=fk(a,b,0,!1),f=new sb,vb(f,b,c-a),d.h&&vb(f,d.h,0),f=f.toString());O(e,f)});return e.result()}
-function ru(a,b){return ke("resolveFragment",function(c){if(b){var d=new sb;tb(d,b);var e;if(a.j){var f=ub(d,a.j.b);if(1!=f.node.nodeType||f.K||!f.ld){O(c,null);return}var g=f.node,h=g.getAttribute("idref");if("itemref"!=g.localName||!h||!a.g[h]){O(c,null);return}e=a.g[h];d=f.ld}else e=a.b[0];a.h.load(e.src).then(function(a){var b=ub(d,a.b);a=fk(a,b.node,b.offset,b.K);O(c,{R:e.R,Da:a,$:-1})})}else O(c,null)},function(a,d){w.b(d,"Cannot resolve fragment:",b);O(a,null)})}
-function su(a,b){return ke("resolveEPage",function(c){if(0>=b)O(c,{R:0,Da:0,$:-1});else if(a.G){var d=a.b.findIndex(function(a){return!a.b&&!a.f||a.b<=b&&a.b+a.f>b}),e=a.b[d];e&&e.f||(e=a.b[--d]);O(c,{R:d,Da:-1,$:b-e.b})}else{var f=Xa(a.b.length,function(c){c=a.b[c];return c.b+c.f>b});f==a.b.length&&f--;var g=a.b[f];a.h.load(g.src).then(function(a){b-=g.b;b>g.f&&(b=g.f);var d=0;0<b&&(a=gk(a),d=Math.round(a*b/g.f),d==a&&d--);O(c,{R:f,Da:d,$:-1})})}},function(a,d){w.b(d,"Cannot resolve epage:",b);O(a,
-null)})}function tu(a,b){var c=a.b[b.R];if(a.G){var d=c.b+b.$;a.f<=d&&(a.f=d+1);return M(d)}if(0>=b.Da)return M(c.b);var e=L("getEPage");a.h.load(c.src).then(function(a){a=gk(a);O(e,c.b+Math.min(a,b.Da)*c.f/a)});return e.result()}function uu(a,b){return{page:a,position:{R:a.R,$:b,Da:a.offset}}}function vu(a,b,c,d,e){this.b=a;this.viewport=b;this.j=c;this.u=e;this.Pb=[];this.l=[];this.Z=xb(d);this.h=new Vr(b);this.f=new Wp(a.C)}function wu(a,b){var c=a.Pb[b.R];return c?c.ab[b.$]:null}n=vu.prototype;
-n.ac=function(a){return this.b.O?this.b.O:(a=this.Pb[a?a.R:0])?a.gb.G:null};
-function xu(a,b,c,d){c.I.style.display="none";c.I.style.visibility="visible";c.I.style.position="";c.I.style.top="";c.I.style.left="";c.I.setAttribute("data-vivliostyle-page-side",c.f);var e=b.ab[d];c.B=!b.item.R&&!d;b.ab[d]=c;if(a.b.G){if(!d&&0<b.item.R){var f=a.b.b[b.item.R-1];b.item.b=f.b+f.f}b.item.f=b.ab.length;a.b.f=a.b.b.reduce(function(a,b){return a+b.f},0);a.b.u&&a.b.u(a.b.f)}if(e)b.gb.viewport.f.replaceChild(c.I,e.I),eb(e,{type:"replaced",target:null,currentTarget:null,Vf:c});else{e=null;
+function nu(a){for(var b=0,c=t(a.b),d=c.next();!d.done;d=c.next()){var d=d.value,e=a.N?1:Math.ceil(d.l/1024);d.b=b;d.f=e;b+=e}a.j=b;a.u&&a.u(a.j)}function ou(a,b){a.G=b||a.N}
+function pu(a,b){a.u=b;if(a.G)return a.N&&!a.j&&nu(a),M(!0);var c=0,d=0,e=L("estimatePageCount");Ce(function(b){if(d===a.b.length)Q(b);else{var e=a.b[d++];e.b=c;a.g.load(e.src).then(function(d){var f=1800,g=d.lang||a.lang;g&&g.match(/^(ja|ko|zh)/)&&(f/=3);e.f=Math.ceil(gk(d)/f);c+=e.f;a.j=c;a.u&&a.u(a.j);P(b)})}}).Ja(e);return e.result()}
+function qu(a,b,c){a.f={};a.B={};a.l=[];a.b=a.l;var d=a.h=new bk(null,"",(new DOMParser).parseFromString("<spine></spine>","text/xml"));b.forEach(function(a){var b=new au;b.R=a.index;b.id="item"+(a.index+1);b.src=a.url;b.ub=a.ub;b.zc=a.zc;var c=d.b.createElement("itemref");c.setAttribute("idref",b.id);d.root.appendChild(c);b.h=c;this.f[b.id]=b;this.B[a.url]=b;this.l.push(b)},a);return c?$t(a.g,b[0].url,c):M(null)}
+function ru(a,b,c){var d=a.b[b],e=L("getCFI");a.g.load(d.src).then(function(a){var b=hk(a,c),f=null;b&&(a=fk(a,b,0,!1),f=new sb,vb(f,b,c-a),d.h&&vb(f,d.h,0),f=f.toString());O(e,f)});return e.result()}
+function su(a,b){return ke("resolveFragment",function(c){if(b){var d=new sb;tb(d,b);var e;if(a.h){var f=ub(d,a.h.b);if(1!=f.node.nodeType||f.K||!f.ld){O(c,null);return}var g=f.node,h=g.getAttribute("idref");if("itemref"!=g.localName||!h||!a.f[h]){O(c,null);return}e=a.f[h];d=f.ld}else e=a.b[0];a.g.load(e.src).then(function(a){var b=ub(d,a.b);a=fk(a,b.node,b.offset,b.K);O(c,{R:e.R,Da:a,$:-1})})}else O(c,null)},function(a,d){w.b(d,"Cannot resolve fragment:",b);O(a,null)})}
+function tu(a,b){return ke("resolveEPage",function(c){if(0>=b)O(c,{R:0,Da:0,$:-1});else if(a.G){var d=a.b.findIndex(function(a){return!a.b&&!a.f||a.b<=b&&a.b+a.f>b});-1==d&&(d=a.b.length-1);var e=a.b[d];e&&e.f||(e=a.b[--d]);O(c,{R:d,Da:-1,$:Math.floor(b-e.b)})}else{var f=Xa(a.b.length,function(c){c=a.b[c];return c.b+c.f>b});f==a.b.length&&f--;var g=a.b[f];a.g.load(g.src).then(function(a){b-=g.b;b>g.f&&(b=g.f);var d=0;0<b&&(a=gk(a),d=Math.round(a*b/g.f),d==a&&d--);O(c,{R:f,Da:d,$:-1})})}},function(a,
+d){w.b(d,"Cannot resolve epage:",b);O(a,null)})}function uu(a,b){var c=a.b[b.R];if(a.G)return M(c.b+b.$);if(0>=b.Da)return M(c.b);var d=L("getEPage");a.g.load(c.src).then(function(a){a=gk(a);O(d,c.b+Math.min(a,b.Da)*c.f/a)});return d.result()}function vu(a,b){return{page:a,position:{R:a.R,$:b,Da:a.offset}}}function wu(a,b,c,d,e){this.b=a;this.viewport=b;this.j=c;this.u=e;this.Pb=[];this.l=[];this.Z=xb(d);this.h=new Vr(b);this.f=new Wp(a.C)}
+function xu(a,b){var c=a.Pb[b.R];return c?c.ab[b.$]:null}n=wu.prototype;n.ac=function(a){return this.b.O?this.b.O:(a=this.Pb[a?a.R:0])?a.gb.G:null};
+function yu(a,b,c,d){c.I.style.display="none";c.I.style.visibility="visible";c.I.style.position="";c.I.style.top="";c.I.style.left="";c.I.setAttribute("data-vivliostyle-page-side",c.f);var e=b.ab[d];c.B=!b.item.R&&!d;b.ab[d]=c;if(a.b.G){if(!d&&0<b.item.R){var f=a.b.b[b.item.R-1];b.item.b=f.b+f.f}b.item.f=b.ab.length;a.b.j=a.b.b.reduce(function(a,b){return a+b.f},0);a.b.u&&a.b.u(a.b.j)}if(e)b.gb.viewport.f.replaceChild(c.I,e.I),eb(e,{type:"replaced",target:null,currentTarget:null,Vf:c});else{e=null;
 if(0<d)e=b.ab[d-1].I.nextElementSibling;else for(f=b.item.R+1;f<a.Pb.length;f++){var g=a.Pb[f];if(g&&g.ab[0]){e=g.ab[0].I;break}}b.gb.viewport.f.insertBefore(c.I,e)}a.u({width:b.gb.la,height:b.gb.da},b.gb.Ca,b.item.R,b.gb.ba+d)}
-function yu(a,b,c){var d=L("renderSinglePage"),e=zu(a,b,c);Dt(b.gb,e,c).then(function(f){var g=(c=f)?c.page-1:b.hb.length-1;xu(a,b,e,g);$p(a.f,e.R,g);f=null;if(c){var h=b.hb[c.page];b.hb[c.page]=c;h&&b.ab[c.page]&&(nl(c,h)||(f=yu(a,b,c)))}f||(f=M(!0));f.then(function(){var f=aq(a.f,e),h=0;Ce(function(b){h++;if(h>f.length)Q(b);else{var c=f[h-1];c.Rd=c.Rd.filter(function(a){return!a.md});c.Rd.length?Au(a,c.R).then(function(d){d?(Zp(a.f,c.Ge),bq(a.f,c.Rd),yu(a,d,d.hb[c.$]).then(function(c){var d=a.f;
-d.b=d.F.pop();d=a.f;d.g=d.H.pop();d=c.Qd.position;d.R===e.R&&d.$===g&&(e=c.Qd.page);P(b)})):P(b)}):P(b)}}).then(function(){e.I.parentElement||(e=b.ab[g]);e.C=!c&&b.item.R===a.b.b.length-1;e.C&&dq(a.f,a.viewport);O(d,{Qd:uu(e,g),Wf:c})})})});return d.result()}
-function Bu(a,b){var c=a.$,d=-1;0>c?(d=a.Da,c=Xa(b.hb.length,function(a){return rt(b.gb,b.hb[a],!0)>d}),c=c===b.hb.length?b.complete?b.hb.length-1:Number.POSITIVE_INFINITY:c-1):c===Number.POSITIVE_INFINITY&&-1!==a.Da&&(d=a.Da);return{R:a.R,$:c,Da:d}}
-function Cu(a,b,c){var d=L("findPage");Au(a,b.R).then(function(e){if(e){var f=null,g;Ce(function(d){var h=Bu(b,e);g=h.$;(f=e.ab[g])?Q(d):e.complete?(g=e.hb.length-1,f=e.ab[g],Q(d)):c?Du(a,h).then(function(a){a&&(f=a.page,g=a.position.$);Q(d)}):Ae(100).then(function(){P(d)})}).then(function(){O(d,uu(f,g))})}else O(d,null)});return d.result()}
-function Du(a,b){var c=L("renderPage");Au(a,b.R).then(function(d){if(d){var e=Bu(b,d),f=e.$,g=e.Da,h=d.ab[f];h?O(c,uu(h,f)):Ce(function(b){if(f<d.hb.length)Q(b);else if(d.complete)f=d.hb.length-1,Q(b);else{var c=d.hb[d.hb.length-1];yu(a,d,c).then(function(a){var e=a.Qd.page;(c=a.Wf)?0<=g&&rt(d.gb,c)>g?(h=e,f=d.hb.length-2,Q(b)):P(b):(h=e,f=a.Qd.position.$,d.complete=!0,Q(b))})}}).then(function(){h=h||d.ab[f];var b=d.hb[f];h?O(c,uu(h,f)):yu(a,d,b).then(function(a){a.Wf||(d.complete=!0);O(c,a.Qd)})})}else O(c,
-null)});return c.result()}n.Jb=function(){return Eu(this,{R:this.b.b.length-1,$:Number.POSITIVE_INFINITY,Da:-1},!1)};function Eu(a,b,c){var d=L("renderPagesUpto");b||(b={R:0,$:0,Da:0});var e=b.R,f=b.$,g=0;c&&(g=e);var h;Ce(function(c){Du(a,{R:g,$:g===e?f:Number.POSITIVE_INFINITY,Da:g===e?b.Da:-1}).then(function(a){h=a;++g>e?Q(c):P(c)})}).then(function(){O(d,h)});return d.result()}n.rg=function(a,b){return Cu(this,{R:0,$:0,Da:-1},b)};
-n.ug=function(a,b){return Cu(this,{R:this.b.b.length-1,$:Number.POSITIVE_INFINITY,Da:-1},b)};n.nextPage=function(a,b){var c=this,d=a.R,e=a.$,f=L("nextPage");Au(c,d).then(function(a){if(a){if(a.complete&&e==a.hb.length-1){if(d>=c.b.b.length-1){O(f,null);return}d++;e=0}else e++;Cu(c,{R:d,$:e,Da:-1},b).Ja(f)}else O(f,null)});return f.result()};n.Je=function(a,b){var c=a.R,d=a.$;if(d)d--;else{if(!c)return M(null);c--;d=Number.POSITIVE_INFINITY}return Cu(this,{R:c,$:d,Da:-1},b)};
-function Fu(a,b,c){b="left"===b.f;a="ltr"===a.ac(c);return!b&&a||b&&!a}function Gu(a,b,c){var d=L("getCurrentSpread"),e=wu(a,b);if(!e)return M({left:null,right:null});var f="left"===e.f;(Fu(a,e,b)?a.Je(b,c):a.nextPage(b,c)).then(function(c){var e=wu(a,b);(c=c&&c.page)&&c.f===e.f&&(c=null);f?O(d,{left:e,right:c}):O(d,{left:c,right:e})});return d.result()}
-n.Ag=function(a,b){var c=wu(this,a);if(!c)return M(null);var d=Fu(this,c,a),e=this.nextPage(a,b);if(d)return e;var f=this;return e.ea(function(a){if(a){if(a.page.f===c.f)return e;var d=f.nextPage(a.position,b);return d.ea(function(a){return a?d:e})}return M(null)})};n.Dg=function(a,b){var c=wu(this,a);if(!c)return M(null);var d=Fu(this,c,a),e=this.Je(a,b),f=c.I.previousElementSibling;if(d){var g=this;return e.ea(function(a){return a?a.page.f===c.f||a.page.I!==f?e:g.Je(a.position,b):M(null)})}return e};
-function Hu(a,b,c){var d=L("navigateToEPage");su(a.b,b).then(function(b){b?Cu(a,b,c).Ja(d):O(d,null)});return d.result()}function Iu(a,b,c){var d=L("navigateToCFI");ru(a.b,b).then(function(b){b?Cu(a,b,c).Ja(d):O(d,null)});return d.result()}
-function Ju(a,b,c,d){w.debug("Navigate to",b);var e=mu(a.b,xa(b));if(!e){if(a.b.j&&b.match(/^#epubcfi\(/))e=mu(a.b,a.b.j.url);else if("#"===b.charAt(0)){var f=a.b.C.Eg(b);a.b.j?e=mu(a.b,f[0]):e=f[0];b=f[0]+(f[1]?"#"+f[1]:"")}if(null==e)return M(null)}var g=a.b.B[e];if(!g)return a.b.j&&e==mu(a.b,a.b.j.url)&&(e=b.indexOf("#"),0<=e)?Iu(a,b.substr(e+1),d):M(null);var h=L("navigateTo");Au(a,g.R).then(function(e){var f=jk(e.ca,b);f?Cu(a,{R:g.R,$:-1,Da:ek(e.ca,f)},d).Ja(h):c.R!==g.R?Cu(a,{R:g.R,$:0,Da:-1},
+function zu(a,b,c){var d=L("renderSinglePage"),e=Au(a,b,c);Dt(b.gb,e,c).then(function(f){var g=(c=f)?c.page-1:b.hb.length-1;yu(a,b,e,g);$p(a.f,e.R,g);f=null;if(c){var h=b.hb[c.page];b.hb[c.page]=c;h&&b.ab[c.page]&&(nl(c,h)||(f=zu(a,b,c)))}f||(f=M(!0));f.then(function(){var f=aq(a.f,e),h=0;Ce(function(b){h++;if(h>f.length)Q(b);else{var c=f[h-1];c.Rd=c.Rd.filter(function(a){return!a.md});c.Rd.length?Bu(a,c.R).then(function(d){d?(Zp(a.f,c.Ge),bq(a.f,c.Rd),zu(a,d,d.hb[c.$]).then(function(c){var d=a.f;
+d.b=d.F.pop();d=a.f;d.g=d.H.pop();d=c.Qd.position;d.R===e.R&&d.$===g&&(e=c.Qd.page);P(b)})):P(b)}):P(b)}}).then(function(){e.I.parentElement||(e=b.ab[g]);e.C=!c&&b.item.R===a.b.b.length-1;e.C&&dq(a.f,a.viewport);O(d,{Qd:vu(e,g),Wf:c})})})});return d.result()}
+function Cu(a,b){var c=a.$,d=-1;0>c?(d=a.Da,c=Xa(b.hb.length,function(a){return rt(b.gb,b.hb[a],!0)>d}),c=c===b.hb.length?b.complete?b.hb.length-1:Number.POSITIVE_INFINITY:c-1):c===Number.POSITIVE_INFINITY&&-1!==a.Da&&(d=a.Da);return{R:a.R,$:c,Da:d}}
+function Du(a,b,c){var d=L("findPage");Bu(a,b.R).then(function(e){if(e){var f=null,g;Ce(function(d){var h=Cu(b,e);g=h.$;(f=e.ab[g])?Q(d):e.complete?(g=e.hb.length-1,f=e.ab[g],Q(d)):c?Eu(a,h).then(function(a){a&&(f=a.page,g=a.position.$);Q(d)}):Ae(100).then(function(){P(d)})}).then(function(){O(d,vu(f,g))})}else O(d,null)});return d.result()}
+function Eu(a,b){var c=L("renderPage");Bu(a,b.R).then(function(d){if(d){var e=Cu(b,d),f=e.$,g=e.Da,h=d.ab[f];h?O(c,vu(h,f)):Ce(function(b){if(f<d.hb.length)Q(b);else if(d.complete)f=d.hb.length-1,Q(b);else{var c=d.hb[d.hb.length-1];zu(a,d,c).then(function(a){var e=a.Qd.page;(c=a.Wf)?0<=g&&rt(d.gb,c)>g?(h=e,f=d.hb.length-2,Q(b)):P(b):(h=e,f=a.Qd.position.$,d.complete=!0,Q(b))})}}).then(function(){h=h||d.ab[f];var b=d.hb[f];h?O(c,vu(h,f)):zu(a,d,b).then(function(a){a.Wf||(d.complete=!0);O(c,a.Qd)})})}else O(c,
+null)});return c.result()}n.Jb=function(){return Fu(this,{R:this.b.b.length-1,$:Number.POSITIVE_INFINITY,Da:-1},!1)};function Fu(a,b,c){var d=L("renderPagesUpto");b||(b={R:0,$:0,Da:0});var e=b.R,f=b.$,g=0;c&&(g=e);var h;Ce(function(c){Eu(a,{R:g,$:g===e?f:Number.POSITIVE_INFINITY,Da:g===e?b.Da:-1}).then(function(a){h=a;++g>e?Q(c):P(c)})}).then(function(){O(d,h)});return d.result()}n.rg=function(a,b){return Du(this,{R:0,$:0,Da:-1},b)};
+n.ug=function(a,b){return Du(this,{R:this.b.b.length-1,$:Number.POSITIVE_INFINITY,Da:-1},b)};n.nextPage=function(a,b){var c=this,d=a.R,e=a.$,f=L("nextPage");Bu(c,d).then(function(a){if(a){if(a.complete&&e==a.hb.length-1){if(d>=c.b.b.length-1){O(f,null);return}d++;e=0}else e++;Du(c,{R:d,$:e,Da:-1},b).Ja(f)}else O(f,null)});return f.result()};n.Je=function(a,b){var c=a.R,d=a.$;if(d)d--;else{if(!c)return M(null);c--;d=Number.POSITIVE_INFINITY}return Du(this,{R:c,$:d,Da:-1},b)};
+function Gu(a,b,c){b="left"===b.f;a="ltr"===a.ac(c);return!b&&a||b&&!a}function Hu(a,b,c){var d=L("getCurrentSpread"),e=xu(a,b);if(!e)return M({left:null,right:null});var f="left"===e.f;(Gu(a,e,b)?a.Je(b,c):a.nextPage(b,c)).then(function(c){var e=xu(a,b);(c=c&&c.page)&&c.f===e.f&&(c=null);f?O(d,{left:e,right:c}):O(d,{left:c,right:e})});return d.result()}
+n.Ag=function(a,b){var c=xu(this,a);if(!c)return M(null);var d=Gu(this,c,a),e=this.nextPage(a,b);if(d)return e;var f=this;return e.ea(function(a){if(a){if(a.page.f===c.f)return e;var d=f.nextPage(a.position,b);return d.ea(function(a){return a?d:e})}return M(null)})};n.Dg=function(a,b){var c=xu(this,a);if(!c)return M(null);var d=Gu(this,c,a),e=this.Je(a,b),f=c.I.previousElementSibling;if(d){var g=this;return e.ea(function(a){return a?a.page.f===c.f||a.page.I!==f?e:g.Je(a.position,b):M(null)})}return e};
+function Iu(a,b,c){var d=L("navigateToEPage");tu(a.b,b).then(function(b){b?Du(a,b,c).Ja(d):O(d,null)});return d.result()}function Ju(a,b,c){var d=L("navigateToCFI");su(a.b,b).then(function(b){b?Du(a,b,c).Ja(d):O(d,null)});return d.result()}
+function Ku(a,b,c,d){w.debug("Navigate to",b);var e=mu(a.b,xa(b));if(!e){if(a.b.h&&b.match(/^#epubcfi\(/))e=mu(a.b,a.b.h.url);else if("#"===b.charAt(0)){var f=a.b.C.Eg(b);a.b.h?e=mu(a.b,f[0]):e=f[0];b=f[0]+(f[1]?"#"+f[1]:"")}if(null==e)return M(null)}var g=a.b.B[e];if(!g)return a.b.h&&e==mu(a.b,a.b.h.url)&&(e=b.indexOf("#"),0<=e)?Ju(a,b.substr(e+1),d):M(null);var h=L("navigateTo");Bu(a,g.R).then(function(e){var f=jk(e.ca,b);f?Du(a,{R:g.R,$:-1,Da:ek(e.ca,f)},d).Ja(h):c.R!==g.R?Du(a,{R:g.R,$:0,Da:-1},
 d).Ja(h):O(h,null)});return h.result()}
-function zu(a,b,c){var d=b.gb.viewport,e=d.b.createElement("div");e.setAttribute("data-vivliostyle-page-container",!0);e.style.position="absolute";e.style.top="0";e.style.left="0";Xj||(e.style.visibility="hidden");d.h.appendChild(e);var f=d.b.createElement("div");f.setAttribute("data-vivliostyle-bleed-box",!0);e.appendChild(f);var g=new Ck(e,f);g.R=b.item.R;g.position=c;g.offset=rt(b.gb,c);g.offset||(b=a.b.C.Me("",b.item.src),f.setAttribute("id",b),Fk(g,f,b));d!==a.viewport&&(a=ig(null,new of(Ab(a.viewport.width,
-a.viewport.height,d.width,d.height),null)),g.u.push(new zk(e,"transform",a)));return g}function Ku(a,b,c,d){var e=ju();if(e){var f=d.ownerDocument,g=f.createElement("span");d.appendChild(g);c=f.importNode(c,!0);Lu(a,c,b);g.appendChild(c);a=e.queue;a.Push(["Typeset",e,g]);var e=L("makeMathJaxView"),h=ue(e);a.Push(function(){h.qb(g)});return e.result()}return M(null)}
-function Lu(a,b,c){if(b){if(1===b.nodeType&&"mglyph"===b.tagName)for(var d=t(b.attributes),e=d.next();!e.done;e=d.next())if(e=e.value,"src"===e.name){var f=Aa(e.nodeValue,c.url);e.namespaceURI?b.setAttributeNS(e.namespaceURI,e.name,f):b.setAttribute(e.name,f)}b.firstChild&&Lu(a,b.firstChild,c);b.nextSibling&&Lu(a,b.nextSibling,c)}}
+function Au(a,b,c){var d=b.gb.viewport,e=d.b.createElement("div");e.setAttribute("data-vivliostyle-page-container",!0);e.style.position="absolute";e.style.top="0";e.style.left="0";Xj||(e.style.visibility="hidden");d.h.appendChild(e);var f=d.b.createElement("div");f.setAttribute("data-vivliostyle-bleed-box",!0);e.appendChild(f);var g=new Ck(e,f);g.R=b.item.R;g.position=c;g.offset=rt(b.gb,c);g.offset||(b=a.b.C.Me("",b.item.src),f.setAttribute("id",b),Fk(g,f,b));d!==a.viewport&&(a=ig(null,new of(Ab(a.viewport.width,
+a.viewport.height,d.width,d.height),null)),g.u.push(new zk(e,"transform",a)));return g}function Lu(a,b,c,d){var e=ju();if(e){var f=d.ownerDocument,g=f.createElement("span");d.appendChild(g);c=f.importNode(c,!0);Mu(a,c,b);g.appendChild(c);a=e.queue;a.Push(["Typeset",e,g]);var e=L("makeMathJaxView"),h=ue(e);a.Push(function(){h.qb(g)});return e.result()}return M(null)}
+function Mu(a,b,c){if(b){if(1===b.nodeType&&"mglyph"===b.tagName)for(var d=t(b.attributes),e=d.next();!e.done;e=d.next())if(e=e.value,"src"===e.name){var f=Aa(e.nodeValue,c.url);e.namespaceURI?b.setAttributeNS(e.namespaceURI,e.name,f):b.setAttribute(e.name,f)}b.firstChild&&Mu(a,b.firstChild,c);b.nextSibling&&Mu(a,b.nextSibling,c)}}
 n.Be=function(a){var b=this;return function(c,d){var e;if("object"==c.localName&&"http://www.w3.org/1999/xhtml"==c.namespaceURI){var f=c.getAttribute("data");e=null;if(f){var f=Aa(f,a.url),g=c.getAttribute("media-type");if(!g){var h=mu(b.b,f);h&&(h=b.b.B[h])&&(g=h.g)}if(g&&(h=b.b.ba[g])){e=b.viewport.b.createElement("iframe");e.style.border="none";var f=Ta(f),l=Ta(g),g=new Pa;g.append(h);g.append("?src=");g.append(f);g.append("&type=");g.append(l);for(h=c.firstChild;h;h=h.nextSibling)1==h.nodeType&&
 (l=h,"param"==l.localName&&"http://www.w3.org/1999/xhtml"==l.namespaceURI&&(f=l.getAttribute("name"),l=l.getAttribute("value"),f&&l&&(g.append("&"),g.append(encodeURIComponent(f)),g.append("="),g.append(encodeURIComponent(l)))));e.setAttribute("src",g.toString());(g=c.getAttribute("width"))&&e.setAttribute("width",g);(g=c.getAttribute("height"))&&e.setAttribute("height",g)}}e||(e=b.viewport.b.createElement("span"),e.setAttribute("data-adapt-process-children","true"));e=M(e)}else if("http://www.w3.org/1998/Math/MathML"==
-c.namespaceURI)e=Ku(b,a,c,d);else if("http://example.com/sse"==c.namespaceURI){e=d?d.ownerDocument:b.viewport.b;g=c.localName;switch(g){case "t":case "tab":case "ec":case "nt":case "fraction":case "comment":case "mark":g="span";break;case "ruby":case "rp":case "rt":break;default:g="div"}e=e.createElement(g);e.setAttribute("data-adapt-process-children","true");e=M(e)}else e=c.dataset&&"true"==c.dataset.mathTypeset?Ku(b,a,c,d):M(null);return e}};
-function Au(a,b){if(b>=a.b.b.length)return M(null);var c=a.Pb[b];if(c)return M(c);var d=L("getPageViewItem"),e=a.l[b];if(e){var f=ue(d);e.push(f);return d.result()}var e=a.l[b]=[],g=a.b.b[b],h=a.b.h;h.load(g.src).then(function(f){var k=h.f[f.url],l=a.Be(f),p=a.viewport,q=nt(k,p.width,p.height,p.fontSize,a.Z);if(q.width!=p.width||q.height!=p.height||q.fontSize!=p.fontSize)p=new Xr(p.window,q.fontSize,p.root,q.width,q.height);q=a.Pb[b-1];null!==g.ub?q=g.ub-1:(q=!(0<b)||q&&q.complete?q?q.gb.ba+q.ab.length:
-0:g.b||b,null!==g.zc&&(q+=g.zc));Xp(a.f,q);var r=new ot(k,f,a.b.lang,p,a.h,a.j,l,a.b.X,q,a.b.C,a.f,a.b.O);r.Z=a.Z;pt(r).then(function(){c={item:g,ca:f,gb:r,hb:[null],ab:[],complete:!1};a.Pb[b]=c;O(d,c);e.forEach(function(a){a.qb(c)})})});return d.result()}function Mu(a){for(var b=t(a.Pb),c=b.next();!c.done;c=b.next())(c=c.value)&&c.ab.splice(0);for(a=a.viewport.root;a.lastChild;)a.removeChild(a.lastChild)}function Nu(a){return a.Pb.some(function(a){return a&&0<a.ab.length})}
-n.Td=function(){var a=this.b,b=a.Y||a.la;if(!b)return M(null);var c=L("showTOC");this.g||(this.g=new Rt(a.h,b.src,a.lang,this.h,this.j,this.Z,this,a.X,a.C,this.f));var a=this.viewport,b=Math.min(350,Math.round(.67*a.width)-16),d=a.height-6,e=a.b.createElement("div");a.root.appendChild(e);e.style.position="absolute";e.style.visibility="hidden";e.style.left="3px";e.style.top="3px";e.style.width=b+10+"px";e.style.maxHeight=d+"px";e.style.overflow="scroll";e.style.overflowX="hidden";e.style.background=
-"#EEE";e.style.border="1px outset #999";e.style.borderRadius="2px";e.style.boxShadow=" 5px 5px rgba(128,128,128,0.3)";this.g.Td(e,a,b,d,this.viewport.fontSize).then(function(a){e.style.visibility="visible";O(c,a)});return c.result()};n.Md=function(){this.g&&this.g.Md()};n.df=function(){return this.g&&this.g.df()};var Ou={Zg:"singlePage",$g:"spread",Pg:"autoSpread"};
-function Pu(a,b,c,d){var e=this;this.window=a;this.be=b;b.setAttribute("data-vivliostyle-viewer-viewport",!0);Xj&&b.setAttribute("data-vivliostyle-debug",!0);b.setAttribute("data-vivliostyle-viewer-status","loading");this.Pa=c;this.Ca=d;a=a.document;this.sa=new tm(a.head,b);this.B="loading";this.N=[];this.h=null;this.cc=this.Xa=!1;this.f=this.j=this.g=this.C=null;this.fontSize=16;this.zoom=1;this.F=!1;this.X="singlePage";this.da=!1;this.Jb=!0;this.Z=wb();this.ba=[];this.J=function(){};this.l=function(){};
-this.Y=function(){e.Xa=!0;e.J()};this.He=this.He.bind(this);this.G=function(){};this.H=a.getElementById("vivliostyle-page-rules");this.O=!1;this.u=null;this.la={loadEPUB:this.lg,loadXML:this.mg,configure:this.Ve,moveTo:this.va,toc:this.Td};Qu(this)}function Qu(a){wa(1,function(b){Ru(a,{t:"debug",content:b})});wa(2,function(b){Ru(a,{t:"info",content:b})});wa(3,function(b){Ru(a,{t:"warn",content:b})});wa(4,function(b){Ru(a,{t:"error",content:b})})}function Ru(a,b){b.i=a.Pa;a.Ca(b)}
-function Su(a,b){a.B!==b&&(a.B=b,a.be.setAttribute("data-vivliostyle-viewer-status",b),Ru(a,{t:"readystatechange"}))}n=Pu.prototype;n.lg=function(a){Tu.f("beforeRender");Su(this,"loading");var b=a.url,c=a.fragment,d=!!a.zipmeta,e=a.authorStyleSheet,f=a.userStyleSheet;this.viewport=null;var g=L("loadEPUB"),h=this;h.Ve(a).then(function(){var a=new Ut;Lt(a,e,f).then(function(){var e=Aa(b,h.window.location.href);h.N=[e];Wt(a,e,d).then(function(a){h.h=a;Uu(h,c).then(function(){O(g,!0)})})})});return g.result()};
-n.mg=function(a){Tu.f("beforeRender");Su(this,"loading");var b=a.url,c=a.document,d=a.fragment,e=a.authorStyleSheet,f=a.userStyleSheet;this.viewport=null;var g=L("loadXML"),h=this;h.Ve(a).then(function(){var a=new Ut;Lt(a,e,f).then(function(){var e=b.map(function(a,b){return{url:Aa(a.url,h.window.location.href),index:b,ub:a.ub,zc:a.zc}});h.N=e.map(function(a){return a.url});h.h=new Yt(a,"");pu(h.h,e,c).then(function(){Uu(h,d).then(function(){O(g,!0)})})})});return g.result()};
-function Uu(a,b){Vu(a);var c;b?c=ru(a.h,b).ea(function(b){a.f=b;return M(!0)}):c=M(!0);return c.ea(function(){Tu.b("beforeRender");return Wu(a)})}function Xu(a,b){var c=parseFloat(b),d=/[a-z]+$/,e;if("string"===typeof b&&(e=b.match(d))){d=e[0];if("em"===d||"rem"===d)return c*a.fontSize;if("ex"===d)return c*Lb.ex*a.fontSize/Lb.em;if(d=Lb[d])return c*d}return c}
-n.Ve=function(a){"boolean"==typeof a.autoresize&&(a.autoresize?(this.C=null,this.window.addEventListener("resize",this.Y,!1),this.Xa=!0):this.window.removeEventListener("resize",this.Y,!1));if("number"==typeof a.fontSize){var b=a.fontSize;5<=b&&72>=b&&this.fontSize!=b&&(this.fontSize=b,this.Xa=!0)}"object"==typeof a.viewport&&a.viewport&&(b=a.viewport,b={marginLeft:Xu(this,b["margin-left"])||0,marginRight:Xu(this,b["margin-right"])||0,marginTop:Xu(this,b["margin-top"])||0,marginBottom:Xu(this,b["margin-bottom"])||
-0,width:Xu(this,b.width)||0,height:Xu(this,b.height)||0},200<=b.width||200<=b.height)&&(this.window.removeEventListener("resize",this.Y,!1),this.C=b,this.Xa=!0);"boolean"==typeof a.hyphenate&&(this.Z.se=a.hyphenate,this.Xa=!0);"boolean"==typeof a.horizontal&&(this.Z.re=a.horizontal,this.Xa=!0);"boolean"==typeof a.nightMode&&(this.Z.De=a.nightMode,this.Xa=!0);"number"==typeof a.lineHeight&&(this.Z.lineHeight=a.lineHeight,this.Xa=!0);"number"==typeof a.columnWidth&&(this.Z.ke=a.columnWidth,this.Xa=
+c.namespaceURI)e=Lu(b,a,c,d);else if("http://example.com/sse"==c.namespaceURI){e=d?d.ownerDocument:b.viewport.b;g=c.localName;switch(g){case "t":case "tab":case "ec":case "nt":case "fraction":case "comment":case "mark":g="span";break;case "ruby":case "rp":case "rt":break;default:g="div"}e=e.createElement(g);e.setAttribute("data-adapt-process-children","true");e=M(e)}else e=c.dataset&&"true"==c.dataset.mathTypeset?Lu(b,a,c,d):M(null);return e}};
+function Bu(a,b){if(b>=a.b.b.length)return M(null);var c=a.Pb[b];if(c)return M(c);var d=L("getPageViewItem"),e=a.l[b];if(e){var f=ue(d);e.push(f);return d.result()}var e=a.l[b]=[],g=a.b.b[b],h=a.b.g;h.load(g.src).then(function(f){var k=h.f[f.url],l=a.Be(f),p=a.viewport,q=nt(k,p.width,p.height,p.fontSize,a.Z);if(q.width!=p.width||q.height!=p.height||q.fontSize!=p.fontSize)p=new Xr(p.window,q.fontSize,p.root,q.width,q.height);q=a.Pb[b-1];null!==g.ub?q=g.ub-1:(q=!(0<b)||q&&q.complete?q?q.gb.ba+q.ab.length:
+0:g.b||b,null!==g.zc&&(q+=g.zc));Xp(a.f,q);var r=new ot(k,f,a.b.lang,p,a.h,a.j,l,a.b.X,q,a.b.C,a.f,a.b.O);r.Z=a.Z;pt(r).then(function(){c={item:g,ca:f,gb:r,hb:[null],ab:[],complete:!1};a.Pb[b]=c;O(d,c);e.forEach(function(a){a.qb(c)})})});return d.result()}function Nu(a){for(var b=t(a.Pb),c=b.next();!c.done;c=b.next())(c=c.value)&&c.ab.splice(0);for(a=a.viewport.root;a.lastChild;)a.removeChild(a.lastChild)}function Ou(a){return a.Pb.some(function(a){return a&&0<a.ab.length})}
+n.Td=function(){var a=this.b,b=a.Y||a.la;if(!b)return M(null);var c=L("showTOC");this.g||(this.g=new Rt(a.g,b.src,a.lang,this.h,this.j,this.Z,this,a.X,a.C,this.f));var a=this.viewport,b=Math.min(350,Math.round(.67*a.width)-16),d=a.height-6,e=a.b.createElement("div");a.root.appendChild(e);e.style.position="absolute";e.style.visibility="hidden";e.style.left="3px";e.style.top="3px";e.style.width=b+10+"px";e.style.maxHeight=d+"px";e.style.overflow="scroll";e.style.overflowX="hidden";e.style.background=
+"#EEE";e.style.border="1px outset #999";e.style.borderRadius="2px";e.style.boxShadow=" 5px 5px rgba(128,128,128,0.3)";this.g.Td(e,a,b,d,this.viewport.fontSize).then(function(a){e.style.visibility="visible";O(c,a)});return c.result()};n.Md=function(){this.g&&this.g.Md()};n.df=function(){return this.g&&this.g.df()};var Pu={Zg:"singlePage",$g:"spread",Pg:"autoSpread"};
+function Qu(a,b,c,d){var e=this;this.window=a;this.be=b;b.setAttribute("data-vivliostyle-viewer-viewport",!0);Xj&&b.setAttribute("data-vivliostyle-debug",!0);b.setAttribute("data-vivliostyle-viewer-status","loading");this.Pa=c;this.Ca=d;a=a.document;this.sa=new tm(a.head,b);this.B="loading";this.N=[];this.h=null;this.cc=this.Xa=!1;this.f=this.j=this.g=this.C=null;this.fontSize=16;this.zoom=1;this.F=!1;this.X="singlePage";this.da=!1;this.Jb=!0;this.Z=wb();this.ba=[];this.J=function(){};this.l=function(){};
+this.Y=function(){e.Xa=!0;e.J()};this.He=this.He.bind(this);this.G=function(){};this.H=a.getElementById("vivliostyle-page-rules");this.O=!1;this.u=null;this.la={loadEPUB:this.lg,loadXML:this.mg,configure:this.Ve,moveTo:this.va,toc:this.Td};Ru(this)}function Ru(a){wa(1,function(b){Su(a,{t:"debug",content:b})});wa(2,function(b){Su(a,{t:"info",content:b})});wa(3,function(b){Su(a,{t:"warn",content:b})});wa(4,function(b){Su(a,{t:"error",content:b})})}function Su(a,b){b.i=a.Pa;a.Ca(b)}
+function Tu(a,b){a.B!==b&&(a.B=b,a.be.setAttribute("data-vivliostyle-viewer-status",b),Su(a,{t:"readystatechange"}))}n=Qu.prototype;n.lg=function(a){Uu.f("beforeRender");Tu(this,"loading");var b=a.url,c=a.fragment,d=!!a.zipmeta,e=a.authorStyleSheet,f=a.userStyleSheet;this.viewport=null;var g=L("loadEPUB"),h=this;h.Ve(a).then(function(){var a=new Ut;Lt(a,e,f).then(function(){var e=Aa(b,h.window.location.href);h.N=[e];Wt(a,e,d).then(function(a){h.h=a;Vu(h,c).then(function(){O(g,!0)})})})});return g.result()};
+n.mg=function(a){Uu.f("beforeRender");Tu(this,"loading");var b=a.url,c=a.document,d=a.fragment,e=a.authorStyleSheet,f=a.userStyleSheet;this.viewport=null;var g=L("loadXML"),h=this;h.Ve(a).then(function(){var a=new Ut;Lt(a,e,f).then(function(){var e=b.map(function(a,b){return{url:Aa(a.url,h.window.location.href),index:b,ub:a.ub,zc:a.zc}});h.N=e.map(function(a){return a.url});h.h=new Yt(a,"");qu(h.h,e,c).then(function(){Vu(h,d).then(function(){O(g,!0)})})})});return g.result()};
+function Vu(a,b){Wu(a);var c;b?c=su(a.h,b).ea(function(b){a.f=b;return M(!0)}):c=M(!0);return c.ea(function(){Uu.b("beforeRender");return Xu(a)})}function Yu(a,b){var c=parseFloat(b),d=/[a-z]+$/,e;if("string"===typeof b&&(e=b.match(d))){d=e[0];if("em"===d||"rem"===d)return c*a.fontSize;if("ex"===d)return c*Lb.ex*a.fontSize/Lb.em;if(d=Lb[d])return c*d}return c}
+n.Ve=function(a){"boolean"==typeof a.autoresize&&(a.autoresize?(this.C=null,this.window.addEventListener("resize",this.Y,!1),this.Xa=!0):this.window.removeEventListener("resize",this.Y,!1));if("number"==typeof a.fontSize){var b=a.fontSize;5<=b&&72>=b&&this.fontSize!=b&&(this.fontSize=b,this.Xa=!0)}"object"==typeof a.viewport&&a.viewport&&(b=a.viewport,b={marginLeft:Yu(this,b["margin-left"])||0,marginRight:Yu(this,b["margin-right"])||0,marginTop:Yu(this,b["margin-top"])||0,marginBottom:Yu(this,b["margin-bottom"])||
+0,width:Yu(this,b.width)||0,height:Yu(this,b.height)||0},200<=b.width||200<=b.height)&&(this.window.removeEventListener("resize",this.Y,!1),this.C=b,this.Xa=!0);"boolean"==typeof a.hyphenate&&(this.Z.se=a.hyphenate,this.Xa=!0);"boolean"==typeof a.horizontal&&(this.Z.re=a.horizontal,this.Xa=!0);"boolean"==typeof a.nightMode&&(this.Z.De=a.nightMode,this.Xa=!0);"number"==typeof a.lineHeight&&(this.Z.lineHeight=a.lineHeight,this.Xa=!0);"number"==typeof a.columnWidth&&(this.Z.ke=a.columnWidth,this.Xa=
 !0);"string"==typeof a.fontFamily&&(this.Z.fontFamily=a.fontFamily,this.Xa=!0);"boolean"==typeof a.load&&(this.da=a.load);"boolean"==typeof a.renderAllPages&&(this.Jb=a.renderAllPages);"string"==typeof a.userAgentRootURL&&(ya=a.userAgentRootURL.replace(/resources\/?$/,""),za=a.userAgentRootURL);"string"==typeof a.rootURL&&(ya=a.rootURL,za=ya+"resources/");"string"==typeof a.pageViewMode&&a.pageViewMode!==this.X&&(this.X=a.pageViewMode,this.Xa=!0);"number"==typeof a.pageBorder&&a.pageBorder!==this.Z.xc&&
-(this.viewport=null,this.Z.xc=a.pageBorder,this.Xa=!0);"number"==typeof a.zoom&&a.zoom!==this.zoom&&(this.zoom=a.zoom,this.cc=!0);"boolean"==typeof a.fitToScreen&&a.fitToScreen!==this.F&&(this.F=a.fitToScreen,this.cc=!0);"object"==typeof a.defaultPaperSize&&"number"==typeof a.defaultPaperSize.width&&"number"==typeof a.defaultPaperSize.height&&(this.viewport=null,this.Z.oc=a.defaultPaperSize,this.Xa=!0);Yu(this,a);return M(!0)};
-function Yu(a,b){ee("CONFIGURATION").forEach(function(c){c=c(b);a.Xa=c.Xa||a.Xa;a.cc=c.cc||a.cc})}n.He=function(a){var b=this.g,c=this.j,d=a.target;c?c.left!==d&&c.right!==d||Zu(this,a.Vf):b===a.target&&Zu(this,a.Vf)};function $u(a,b){var c=[];a.g&&c.push(a.g);a.j&&(c.push(a.j.left),c.push(a.j.right));c.forEach(function(a){a&&b(a)})}function av(a){$u(a,function(b){b.removeEventListener("hyperlink",a.G,!1);b.removeEventListener("replaced",a.He,!1)})}
-function bv(a){av(a);$u(a,function(a){x(a.I,"display","none")});a.g=null;a.j=null}function cv(a,b){b.addEventListener("hyperlink",a.G,!1);b.addEventListener("replaced",a.He,!1);x(b.I,"visibility","visible");x(b.I,"display","block")}function dv(a,b){bv(a);a.g=b;cv(a,b)}function ev(a){var b=L("reportPosition");qu(a.h,a.f.R,a.f.Da).then(function(c){var d=a.g;(a.da&&0<d.l.length?Ge(d.l):M(!0)).then(function(){fv(a,d,c).Ja(b)})});return b.result()}
-function gv(a){var b=a.be;if(a.C){var c=a.C;b.style.marginLeft=c.marginLeft+"px";b.style.marginRight=c.marginRight+"px";b.style.marginTop=c.marginTop+"px";b.style.marginBottom=c.marginBottom+"px";return new Xr(a.window,a.fontSize,b,c.width,c.height)}return new Xr(a.window,a.fontSize,b)}
-function hv(a){var b=gv(a),c;a:switch(a.X){case "singlePage":c=!1;break a;case "spread":c=!0;break a;default:c=1.45<=b.width/b.height&&800<b.width}var d=a.Z.tb!==c;a.Z.tb=c;a.be.setAttribute("data-vivliostyle-spread-view",c);if(a.C||!a.viewport||a.viewport.fontSize!=a.fontSize)return!1;if(!d&&b.width==a.viewport.width&&b.height==a.viewport.height||!d&&b.width==a.viewport.width&&b.height!=a.viewport.height&&/Android|iPhone|iPad|iPod/.test(navigator.userAgent))return!0;if(c=a.b&&Nu(a.b)){a:{c=t(a.b.Pb);
-for(d=c.next();!d.done;d=c.next())if(d=d.value)for(var d=t(d.ab),e=d.next();!e.done;e=d.next())if(e=e.value,e.G&&e.F){c=!0;break a}c=!1}c=!c}return c?(a.viewport.width=b.width,a.viewport.height=b.height,a.cc=!0):!1}n.Fg=function(a,b,c,d){this.ba[d]=a;iv(this,b)};function iv(a,b){if(!a.O&&a.H){var c="";Object.keys(b).forEach(function(a){c+="@page "+a+"{margin:0;size:";a=b[a];c+=a.width+"px "+a.height+"px;}"});a.H.textContent=c;a.O=!0}}function jv(a){a.H&&(a.H.textContent="",a.O=!1)}
-function Zu(a,b,c){a.cc=!1;av(a);if(a.Z.tb)return Gu(a.b,a.f,c).ea(function(c){bv(a);a.j=c;c.left&&(cv(a,c.left),c.right?c.left.I.removeAttribute("data-vivliostyle-unpaired-page"):c.left.I.setAttribute("data-vivliostyle-unpaired-page",!0));c.right&&(cv(a,c.right),c.left?c.right.I.removeAttribute("data-vivliostyle-unpaired-page"):c.right.I.setAttribute("data-vivliostyle-unpaired-page",!0));c=kv(a,c);a.viewport.zoom(c.width,c.height,a.F?lv(a,c):a.zoom);a.g=b;return M(null)});dv(a,b);a.viewport.zoom(b.g.width,
-b.g.height,a.F?lv(a,b.g):a.zoom);a.g=b;return M(null)}function kv(a,b){var c=0,d=0;b.left&&(c+=b.left.g.width,d=b.left.g.height);b.right&&(c+=b.right.g.width,d=Math.max(d,b.right.g.height));b.left&&b.right&&(c+=2*a.Z.xc);return{width:c,height:d}}var mv={Ug:"fit inside viewport"};function lv(a,b){return Math.min(a.viewport.width/b.width,a.viewport.height/b.height)}function nv(){this.name="RenderingCanceledError";this.message="Page rendering has been canceled";this.stack=Error().stack}v(nv,Error);
-function Vu(a){if(a.u){var b=a.u;le(b,new nv);if(b!==fe&&b.b){b.b.g=!0;var c=new ve(b);b.l="interrupt";b.b=c;b.f.qb(c)}}a.u=null}
-function Wu(a){a.Xa=!1;a.cc=!1;if(hv(a))return M(!0);Su(a,"loading");Vu(a);var b=ne(fe.f,function(){return ke("resize",function(c){a.u=b;Tu.f("render (resize)");a.b&&(a.b.Md(),Mu(a.b));jv(a);a.viewport=gv(a);Yr(a.viewport);a.b=new vu(a.h,a.viewport,a.sa,a.Z,a.Fg.bind(a));a.f&&(a.f.$=-1);Eu(a.b,a.f,!a.Jb).then(function(d){a.f=d.position;Zu(a,d.page,!0).then(function(){Su(a,"interactive");ou(a.h,a.Jb,function(b){b={t:"nav",epageCount:b,first:a.g.B,last:a.g.C};if(a.g.B||!a.f.$&&a.h.b[a.f.R].b)b.epage=
-a.h.b[a.f.R].b;Ru(a,b)}).then(function(){ev(a).then(function(d){(a.Jb?a.b.Jb():M(null)).then(function(){a.u===b&&(a.u=null);Tu.b("render (resize)");a.Jb&&Su(a,"complete");Ru(a,{t:"loaded"});O(c,d)})})})})})},function(a,b){if(b instanceof nv)Tu.b("render (resize)"),w.debug(b.message);else throw b;})});return M(!0)}
-function fv(a,b,c){var d=L("sendLocationNotification"),e={t:"nav",first:b.B,last:b.C};tu(a.h,a.f).then(function(b){e.epage=b;e.epageCount=a.h.f;c&&(e.cfi=c);Ru(a,e);O(d,!0)});return d.result()}Pu.prototype.ac=function(){return this.b?this.b.ac(this.f):null};
-Pu.prototype.va=function(a){var b=this;"complete"!==this.B&&"next"!==a.where&&Su(this,"loading");if("string"==typeof a.where){switch(a.where){case "next":a=this.Z.tb?this.b.Ag:this.b.nextPage;break;case "previous":a=this.Z.tb?this.b.Dg:this.b.Je;break;case "last":a=this.b.ug;break;case "first":a=this.b.rg;break;default:return M(!0)}if(a){var c=a;a=function(){return c.call(b.b,b.f,!b.Jb)}}}else if("number"==typeof a.epage){var d=a.epage;a=function(){return Hu(b.b,d,!b.Jb)}}else if("string"==typeof a.url){var e=
-a.url;a=function(){return Ju(b.b,e,b.f,!b.Jb)}}else return M(!0);var f=L("moveTo");a.call(b.b).then(function(a){var c;if(a){b.f=a.position;var d=L("moveTo.showCurrent");c=d.result();Zu(b,a.page,!b.Jb).then(function(){ev(b).Ja(d)})}else c=M(!0);c.then(function(a){"loading"===b.B&&Su(b,"interactive");O(f,a)})});return f.result()};
-Pu.prototype.Td=function(a){var b=!!a.autohide;a=a.v;var c=this.b.df();if(c){if("show"==a)return M(!0)}else if("hide"==a)return M(!0);if(c)return this.b.Md(),M(!0);var d=this,e=L("showTOC");this.b.Td(b).then(function(a){if(a){if(b){var c=function(){d.b.Md()};a.addEventListener("hyperlink",c,!1);a.I.addEventListener("click",c,!1)}a.addEventListener("hyperlink",d.G,!1)}O(e,!0)});return e.result()};
-function ov(a,b){var c=b.a||"";return ke("runCommand",function(d){var e=a.la[c];e?e.call(a,b).then(function(){Ru(a,{t:"done",a:c});O(d,!0)}):(w.error("No such action:",c),O(d,!0))},function(a,b){w.error(b,"Error during action:",c);O(a,!0)})}function pv(a){return"string"==typeof a?JSON.parse(a):a}
-function qv(a,b){var c=pv(b),d=null;me(function(){var b=L("commandLoop"),f=fe.f;a.G=function(b){var c="#"===b.href.charAt(0)||a.N.some(function(a){return b.href.substr(0,a.length)==a});if(c){b.preventDefault();var d={t:"hyperlink",href:b.href,internal:c};ne(f,function(){Ru(a,d);return M(!0)})}};Ce(function(b){if(a.Xa)Wu(a).then(function(){P(b)});else if(a.cc)a.g&&Zu(a,a.g).then(function(){P(b)});else if(c){var e=c;c=null;ov(a,e).then(function(){P(b)})}else e=L("waitForCommand"),d=ue(e,self),e.result().then(function(){P(b)})}).Ja(b);
-return b.result()});a.J=function(){var a=d;a&&(d=null,a.qb())};a.l=function(b){if(c)return!1;c=pv(b);a.J();return!0};a.window.adapt_command=a.l};function Pr(a,b,c){if(a==b)return a?[[0,a]]:[];if(0>c||a.length<c)c=null;var d=rv(a,b),e=a.substring(0,d);a=a.substring(d);b=b.substring(d);var d=sv(a,b),f=a.substring(a.length-d);a=a.substring(0,a.length-d);b=b.substring(0,b.length-d);a=tv(a,b);e&&a.unshift([0,e]);f&&a.push([0,f]);uv(a);null!=c&&(a=vv(a,c));return a=wv(a)}
-function tv(a,b){var c;if(!a)return[[1,b]];if(!b)return[[-1,a]];c=a.length>b.length?a:b;var d=a.length>b.length?b:a,e=c.indexOf(d);if(-1!=e)return c=[[1,c.substring(0,e)],[0,d],[1,c.substring(e+d.length)]],a.length>b.length&&(c[0][0]=c[2][0]=-1),c;if(1==d.length)return[[-1,a],[1,b]];var f=xv(a,b);if(f)return d=f[1],e=f[3],c=f[4],f=Pr(f[0],f[2]),d=Pr(d,e),f.concat([[0,c]],d);a:{c=a.length;for(var d=b.length,e=Math.ceil((c+d)/2),f=2*e,g=Array(f),h=Array(f),l=0;l<f;l++)g[l]=-1,h[l]=-1;g[e+1]=0;h[e+1]=
-0;for(var l=c-d,k=!!(l%2),m=0,p=0,q=0,r=0,z=0;z<e;z++){for(var u=-z+m;u<=z-p;u+=2){var A=e+u,H;H=u==-z||u!=z&&g[A-1]<g[A+1]?g[A+1]:g[A-1]+1;for(var E=H-u;H<c&&E<d&&a.charAt(H)==b.charAt(E);)H++,E++;g[A]=H;if(H>c)p+=2;else if(E>d)m+=2;else if(k&&(A=e+l-u,0<=A&&A<f&&-1!=h[A])){var K=c-h[A];if(H>=K){c=yv(a,b,H,E);break a}}}for(u=-z+q;u<=z-r;u+=2){A=e+u;K=u==-z||u!=z&&h[A-1]<h[A+1]?h[A+1]:h[A-1]+1;for(H=K-u;K<c&&H<d&&a.charAt(c-K-1)==b.charAt(d-H-1);)K++,H++;h[A]=K;if(K>c)r+=2;else if(H>d)q+=2;else if(!k&&
-(A=e+l-u,0<=A&&A<f&&-1!=g[A]&&(H=g[A],E=e+H-A,K=c-K,H>=K))){c=yv(a,b,H,E);break a}}}c=[[-1,a],[1,b]]}return c}function yv(a,b,c,d){var e=a.substring(c),f=b.substring(d);a=Pr(a.substring(0,c),b.substring(0,d));e=Pr(e,f);return a.concat(e)}function rv(a,b){if(!a||!b||a.charAt(0)!=b.charAt(0))return 0;for(var c=0,d=Math.min(a.length,b.length),e=d,f=0;c<e;)a.substring(f,e)==b.substring(f,e)?f=c=e:d=e,e=Math.floor((d-c)/2+c);return e}
-function sv(a,b){if(!a||!b||a.charAt(a.length-1)!=b.charAt(b.length-1))return 0;for(var c=0,d=Math.min(a.length,b.length),e=d,f=0;c<e;)a.substring(a.length-e,a.length-f)==b.substring(b.length-e,b.length-f)?f=c=e:d=e,e=Math.floor((d-c)/2+c);return e}
-function xv(a,b){function c(a,b,c){for(var d=a.substring(c,c+Math.floor(a.length/4)),e=-1,f="",g,h,k,l;-1!=(e=b.indexOf(d,e+1));){var m=rv(a.substring(c),b.substring(e)),K=sv(a.substring(0,c),b.substring(0,e));f.length<K+m&&(f=b.substring(e-K,e)+b.substring(e,e+m),g=a.substring(0,c-K),h=a.substring(c+m),k=b.substring(0,e-K),l=b.substring(e+m))}return 2*f.length>=a.length?[g,h,k,l,f]:null}var d=a.length>b.length?a:b,e=a.length>b.length?b:a;if(4>d.length||2*e.length<d.length)return null;var f=c(d,e,
+(this.viewport=null,this.Z.xc=a.pageBorder,this.Xa=!0);"number"==typeof a.zoom&&a.zoom!==this.zoom&&(this.zoom=a.zoom,this.cc=!0);"boolean"==typeof a.fitToScreen&&a.fitToScreen!==this.F&&(this.F=a.fitToScreen,this.cc=!0);"object"==typeof a.defaultPaperSize&&"number"==typeof a.defaultPaperSize.width&&"number"==typeof a.defaultPaperSize.height&&(this.viewport=null,this.Z.oc=a.defaultPaperSize,this.Xa=!0);Zu(this,a);return M(!0)};
+function Zu(a,b){ee("CONFIGURATION").forEach(function(c){c=c(b);a.Xa=c.Xa||a.Xa;a.cc=c.cc||a.cc})}n.He=function(a){var b=this.g,c=this.j,d=a.target;c?c.left!==d&&c.right!==d||$u(this,a.Vf):b===a.target&&$u(this,a.Vf)};function av(a,b){var c=[];a.g&&c.push(a.g);a.j&&(c.push(a.j.left),c.push(a.j.right));c.forEach(function(a){a&&b(a)})}function bv(a){av(a,function(b){b.removeEventListener("hyperlink",a.G,!1);b.removeEventListener("replaced",a.He,!1)})}
+function cv(a){bv(a);av(a,function(a){x(a.I,"display","none")});a.g=null;a.j=null}function dv(a,b){b.addEventListener("hyperlink",a.G,!1);b.addEventListener("replaced",a.He,!1);x(b.I,"visibility","visible");x(b.I,"display","block")}function ev(a,b){cv(a);a.g=b;dv(a,b)}function fv(a){var b=L("reportPosition");ru(a.h,a.f.R,a.f.Da).then(function(c){var d=a.g;(a.da&&0<d.l.length?Ge(d.l):M(!0)).then(function(){gv(a,d,c).Ja(b)})});return b.result()}
+function hv(a){var b=a.be;if(a.C){var c=a.C;b.style.marginLeft=c.marginLeft+"px";b.style.marginRight=c.marginRight+"px";b.style.marginTop=c.marginTop+"px";b.style.marginBottom=c.marginBottom+"px";return new Xr(a.window,a.fontSize,b,c.width,c.height)}return new Xr(a.window,a.fontSize,b)}
+function iv(a){var b=hv(a),c;a:switch(a.X){case "singlePage":c=!1;break a;case "spread":c=!0;break a;default:c=1.45<=b.width/b.height&&800<b.width}var d=a.Z.tb!==c;a.Z.tb=c;a.be.setAttribute("data-vivliostyle-spread-view",c);if(a.C||!a.viewport||a.viewport.fontSize!=a.fontSize)return!1;if(!d&&b.width==a.viewport.width&&b.height==a.viewport.height||!d&&b.width==a.viewport.width&&b.height!=a.viewport.height&&/Android|iPhone|iPad|iPod/.test(navigator.userAgent))return!0;if(c=a.b&&Ou(a.b)){a:{c=t(a.b.Pb);
+for(d=c.next();!d.done;d=c.next())if(d=d.value)for(var d=t(d.ab),e=d.next();!e.done;e=d.next())if(e=e.value,e.G&&e.F){c=!0;break a}c=!1}c=!c}return c?(a.viewport.width=b.width,a.viewport.height=b.height,a.cc=!0):!1}n.Fg=function(a,b,c,d){this.ba[d]=a;jv(this,b)};function jv(a,b){if(!a.O&&a.H){var c="";Object.keys(b).forEach(function(a){c+="@page "+a+"{margin:0;size:";a=b[a];c+=a.width+"px "+a.height+"px;}"});a.H.textContent=c;a.O=!0}}function kv(a){a.H&&(a.H.textContent="",a.O=!1)}
+function $u(a,b,c){a.cc=!1;bv(a);if(a.Z.tb)return Hu(a.b,a.f,c).ea(function(c){cv(a);a.j=c;c.left&&(dv(a,c.left),c.right?c.left.I.removeAttribute("data-vivliostyle-unpaired-page"):c.left.I.setAttribute("data-vivliostyle-unpaired-page",!0));c.right&&(dv(a,c.right),c.left?c.right.I.removeAttribute("data-vivliostyle-unpaired-page"):c.right.I.setAttribute("data-vivliostyle-unpaired-page",!0));c=lv(a,c);a.viewport.zoom(c.width,c.height,a.F?mv(a,c):a.zoom);a.g=b;return M(null)});ev(a,b);a.viewport.zoom(b.g.width,
+b.g.height,a.F?mv(a,b.g):a.zoom);a.g=b;return M(null)}function lv(a,b){var c=0,d=0;b.left&&(c+=b.left.g.width,d=b.left.g.height);b.right&&(c+=b.right.g.width,d=Math.max(d,b.right.g.height));b.left&&b.right&&(c+=2*a.Z.xc);return{width:c,height:d}}var nv={Ug:"fit inside viewport"};function mv(a,b){return Math.min(a.viewport.width/b.width,a.viewport.height/b.height)}function ov(){this.name="RenderingCanceledError";this.message="Page rendering has been canceled";this.stack=Error().stack}v(ov,Error);
+function Wu(a){if(a.u){var b=a.u;le(b,new ov);if(b!==fe&&b.b){b.b.g=!0;var c=new ve(b);b.l="interrupt";b.b=c;b.f.qb(c)}}a.u=null}
+function Xu(a){a.Xa=!1;a.cc=!1;if(iv(a))return M(!0);Tu(a,"loading");Wu(a);var b=ne(fe.f,function(){return ke("resize",function(c){a.u=b;Uu.f("render (resize)");a.b&&(a.b.Md(),Nu(a.b));kv(a);a.viewport=hv(a);Yr(a.viewport);a.b=new wu(a.h,a.viewport,a.sa,a.Z,a.Fg.bind(a));a.f&&(a.f.$=-1);ou(a.h,a.Jb);Fu(a.b,a.f,!a.Jb).then(function(d){a.f=d.position;$u(a,d.page,!0).then(function(){Tu(a,"interactive");pu(a.h,function(b){b={t:"nav",epageCount:b,first:a.g.B,last:a.g.C};if(a.g.B||!a.f.$&&a.h.b[a.f.R].b)b.epage=
+a.h.b[a.f.R].b;Su(a,b)}).then(function(){fv(a).then(function(d){(a.Jb?a.b.Jb():M(null)).then(function(){a.u===b&&(a.u=null);Uu.b("render (resize)");a.Jb&&Tu(a,"complete");Su(a,{t:"loaded"});O(c,d)})})})})})},function(a,b){if(b instanceof ov)Uu.b("render (resize)"),w.debug(b.message);else throw b;})});return M(!0)}
+function gv(a,b,c){var d=L("sendLocationNotification"),e={t:"nav",first:b.B,last:b.C};uu(a.h,a.f).then(function(b){e.epage=b;e.epageCount=a.h.j;c&&(e.cfi=c);Su(a,e);O(d,!0)});return d.result()}Qu.prototype.ac=function(){return this.b?this.b.ac(this.f):null};
+Qu.prototype.va=function(a){var b=this;"complete"!==this.B&&"next"!==a.where&&Tu(this,"loading");if("string"==typeof a.where){switch(a.where){case "next":a=this.Z.tb?this.b.Ag:this.b.nextPage;break;case "previous":a=this.Z.tb?this.b.Dg:this.b.Je;break;case "last":a=this.b.ug;break;case "first":a=this.b.rg;break;default:return M(!0)}if(a){var c=a;a=function(){return c.call(b.b,b.f,!b.Jb)}}}else if("number"==typeof a.epage){var d=a.epage;a=function(){return Iu(b.b,d,!b.Jb)}}else if("string"==typeof a.url){var e=
+a.url;a=function(){return Ku(b.b,e,b.f,!b.Jb)}}else return M(!0);var f=L("moveTo");a.call(b.b).then(function(a){var c;if(a){b.f=a.position;var d=L("moveTo.showCurrent");c=d.result();$u(b,a.page,!b.Jb).then(function(){fv(b).Ja(d)})}else c=M(!0);c.then(function(a){"loading"===b.B&&Tu(b,"interactive");O(f,a)})});return f.result()};
+Qu.prototype.Td=function(a){var b=!!a.autohide;a=a.v;var c=this.b.df();if(c){if("show"==a)return M(!0)}else if("hide"==a)return M(!0);if(c)return this.b.Md(),M(!0);var d=this,e=L("showTOC");this.b.Td(b).then(function(a){if(a){if(b){var c=function(){d.b.Md()};a.addEventListener("hyperlink",c,!1);a.I.addEventListener("click",c,!1)}a.addEventListener("hyperlink",d.G,!1)}O(e,!0)});return e.result()};
+function pv(a,b){var c=b.a||"";return ke("runCommand",function(d){var e=a.la[c];e?e.call(a,b).then(function(){Su(a,{t:"done",a:c});O(d,!0)}):(w.error("No such action:",c),O(d,!0))},function(a,b){w.error(b,"Error during action:",c);O(a,!0)})}function qv(a){return"string"==typeof a?JSON.parse(a):a}
+function rv(a,b){var c=qv(b),d=null;me(function(){var b=L("commandLoop"),f=fe.f;a.G=function(b){var c="#"===b.href.charAt(0)||a.N.some(function(a){return b.href.substr(0,a.length)==a});if(c){b.preventDefault();var d={t:"hyperlink",href:b.href,internal:c};ne(f,function(){Su(a,d);return M(!0)})}};Ce(function(b){if(a.Xa)Xu(a).then(function(){P(b)});else if(a.cc)a.g&&$u(a,a.g).then(function(){P(b)});else if(c){var e=c;c=null;pv(a,e).then(function(){P(b)})}else e=L("waitForCommand"),d=ue(e,self),e.result().then(function(){P(b)})}).Ja(b);
+return b.result()});a.J=function(){var a=d;a&&(d=null,a.qb())};a.l=function(b){if(c)return!1;c=qv(b);a.J();return!0};a.window.adapt_command=a.l};function Pr(a,b,c){if(a==b)return a?[[0,a]]:[];if(0>c||a.length<c)c=null;var d=sv(a,b),e=a.substring(0,d);a=a.substring(d);b=b.substring(d);var d=tv(a,b),f=a.substring(a.length-d);a=a.substring(0,a.length-d);b=b.substring(0,b.length-d);a=uv(a,b);e&&a.unshift([0,e]);f&&a.push([0,f]);vv(a);null!=c&&(a=wv(a,c));return a=xv(a)}
+function uv(a,b){var c;if(!a)return[[1,b]];if(!b)return[[-1,a]];c=a.length>b.length?a:b;var d=a.length>b.length?b:a,e=c.indexOf(d);if(-1!=e)return c=[[1,c.substring(0,e)],[0,d],[1,c.substring(e+d.length)]],a.length>b.length&&(c[0][0]=c[2][0]=-1),c;if(1==d.length)return[[-1,a],[1,b]];var f=yv(a,b);if(f)return d=f[1],e=f[3],c=f[4],f=Pr(f[0],f[2]),d=Pr(d,e),f.concat([[0,c]],d);a:{c=a.length;for(var d=b.length,e=Math.ceil((c+d)/2),f=2*e,g=Array(f),h=Array(f),l=0;l<f;l++)g[l]=-1,h[l]=-1;g[e+1]=0;h[e+1]=
+0;for(var l=c-d,k=!!(l%2),m=0,p=0,q=0,r=0,z=0;z<e;z++){for(var u=-z+m;u<=z-p;u+=2){var A=e+u,H;H=u==-z||u!=z&&g[A-1]<g[A+1]?g[A+1]:g[A-1]+1;for(var E=H-u;H<c&&E<d&&a.charAt(H)==b.charAt(E);)H++,E++;g[A]=H;if(H>c)p+=2;else if(E>d)m+=2;else if(k&&(A=e+l-u,0<=A&&A<f&&-1!=h[A])){var K=c-h[A];if(H>=K){c=zv(a,b,H,E);break a}}}for(u=-z+q;u<=z-r;u+=2){A=e+u;K=u==-z||u!=z&&h[A-1]<h[A+1]?h[A+1]:h[A-1]+1;for(H=K-u;K<c&&H<d&&a.charAt(c-K-1)==b.charAt(d-H-1);)K++,H++;h[A]=K;if(K>c)r+=2;else if(H>d)q+=2;else if(!k&&
+(A=e+l-u,0<=A&&A<f&&-1!=g[A]&&(H=g[A],E=e+H-A,K=c-K,H>=K))){c=zv(a,b,H,E);break a}}}c=[[-1,a],[1,b]]}return c}function zv(a,b,c,d){var e=a.substring(c),f=b.substring(d);a=Pr(a.substring(0,c),b.substring(0,d));e=Pr(e,f);return a.concat(e)}function sv(a,b){if(!a||!b||a.charAt(0)!=b.charAt(0))return 0;for(var c=0,d=Math.min(a.length,b.length),e=d,f=0;c<e;)a.substring(f,e)==b.substring(f,e)?f=c=e:d=e,e=Math.floor((d-c)/2+c);return e}
+function tv(a,b){if(!a||!b||a.charAt(a.length-1)!=b.charAt(b.length-1))return 0;for(var c=0,d=Math.min(a.length,b.length),e=d,f=0;c<e;)a.substring(a.length-e,a.length-f)==b.substring(b.length-e,b.length-f)?f=c=e:d=e,e=Math.floor((d-c)/2+c);return e}
+function yv(a,b){function c(a,b,c){for(var d=a.substring(c,c+Math.floor(a.length/4)),e=-1,f="",g,h,k,l;-1!=(e=b.indexOf(d,e+1));){var m=sv(a.substring(c),b.substring(e)),K=tv(a.substring(0,c),b.substring(0,e));f.length<K+m&&(f=b.substring(e-K,e)+b.substring(e,e+m),g=a.substring(0,c-K),h=a.substring(c+m),k=b.substring(0,e-K),l=b.substring(e+m))}return 2*f.length>=a.length?[g,h,k,l,f]:null}var d=a.length>b.length?a:b,e=a.length>b.length?b:a;if(4>d.length||2*e.length<d.length)return null;var f=c(d,e,
 Math.ceil(d.length/4)),d=c(d,e,Math.ceil(d.length/2)),g;if(f||d)d?g=f?f[4].length>d[4].length?f:d:d:g=f;else return null;var h;a.length>b.length?(f=g[0],d=g[1],e=g[2],h=g[3]):(e=g[0],h=g[1],f=g[2],d=g[3]);return[f,d,e,h,g[4]]}
-function uv(a){a.push([0,""]);for(var b=0,c=0,d=0,e="",f="",g;b<a.length;)switch(a[b][0]){case 1:d++;f+=a[b][1];b++;break;case -1:c++;e+=a[b][1];b++;break;case 0:if(1<c+d){if(c&&d){if(g=rv(f,e))0<b-c-d&&0==a[b-c-d-1][0]?a[b-c-d-1][1]+=f.substring(0,g):(a.splice(0,0,[0,f.substring(0,g)]),b++),f=f.substring(g),e=e.substring(g);if(g=sv(f,e))a[b][1]=f.substring(f.length-g)+a[b][1],f=f.substring(0,f.length-g),e=e.substring(0,e.length-g)}c?d?a.splice(b-c-d,c+d,[-1,e],[1,f]):a.splice(b-c,c+d,[-1,e]):a.splice(b-
+function vv(a){a.push([0,""]);for(var b=0,c=0,d=0,e="",f="",g;b<a.length;)switch(a[b][0]){case 1:d++;f+=a[b][1];b++;break;case -1:c++;e+=a[b][1];b++;break;case 0:if(1<c+d){if(c&&d){if(g=sv(f,e))0<b-c-d&&0==a[b-c-d-1][0]?a[b-c-d-1][1]+=f.substring(0,g):(a.splice(0,0,[0,f.substring(0,g)]),b++),f=f.substring(g),e=e.substring(g);if(g=tv(f,e))a[b][1]=f.substring(f.length-g)+a[b][1],f=f.substring(0,f.length-g),e=e.substring(0,e.length-g)}c?d?a.splice(b-c-d,c+d,[-1,e],[1,f]):a.splice(b-c,c+d,[-1,e]):a.splice(b-
 d,c+d,[1,f]);b=b-c-d+(c?1:0)+(d?1:0)+1}else b&&0==a[b-1][0]?(a[b-1][1]+=a[b][1],a.splice(b,1)):b++;c=d=0;f=e=""}""===a[a.length-1][1]&&a.pop();c=!1;for(b=1;b<a.length-1;)0==a[b-1][0]&&0==a[b+1][0]&&(a[b][1].substring(a[b][1].length-a[b-1][1].length)==a[b-1][1]?(a[b][1]=a[b-1][1]+a[b][1].substring(0,a[b][1].length-a[b-1][1].length),a[b+1][1]=a[b-1][1]+a[b+1][1],a.splice(b-1,1),c=!0):a[b][1].substring(0,a[b+1][1].length)==a[b+1][1]&&(a[b-1][1]+=a[b+1][1],a[b][1]=a[b][1].substring(a[b+1][1].length)+
-a[b+1][1],a.splice(b+1,1),c=!0)),b++;c&&uv(a)}Pr.f=1;Pr.b=-1;Pr.g=0;
-function vv(a,b){var c;a:{var d=a;if(0===b)c=[0,d];else{var e=0;for(c=0;c<d.length;c++){var f=d[c];if(-1===f[0]||0===f[0]){var g=e+f[1].length;if(b===g){c=[c+1,d];break a}if(b<g){d=d.slice();g=b-e;e=[f[0],f[1].slice(0,g)];f=[f[0],f[1].slice(g)];d.splice(c,1,e,f);c=[c+1,d];break a}e=g}}throw Error("cursor_pos is out of bounds!");}}d=c[1];c=c[0];e=d[c];f=d[c+1];return null==e||0!==e[0]?a:null!=f&&e[1]+f[1]===f[1]+e[1]?(d.splice(c,2,f,e),zv(d,c,2)):null!=f&&0===f[1].indexOf(e[1])?(d.splice(c,2,[f[0],
-e[1]],[0,e[1]]),e=f[1].slice(e[1].length),0<e.length&&d.splice(c+2,0,[f[0],e]),zv(d,c,3)):a}
-function wv(a){function b(a){return 55296<=a.charCodeAt(a.length-1)&&56319>=a.charCodeAt(a.length-1)}function c(a){return 56320<=a.charCodeAt(0)&&57343>=a.charCodeAt(0)}for(var d=!1,e=2;e<a.length;e+=1)0===a[e-2][0]&&b(a[e-2][1])&&-1===a[e-1][0]&&c(a[e-1][1])&&1===a[e][0]&&c(a[e][1])&&(d=!0,a[e-1][1]=a[e-2][1].slice(-1)+a[e-1][1],a[e][1]=a[e-2][1].slice(-1)+a[e][1],a[e-2][1]=a[e-2][1].slice(0,-1));if(!d)return a;d=[];for(e=0;e<a.length;e+=1)0<a[e][1].length&&d.push(a[e]);return d}
-function zv(a,b,c){for(c=b+c-1;0<=c&&c>=b-1;c--)if(c+1<a.length){var d=a[c],e=a[c+1];d[0]===e[1]&&a.splice(c,2,[d[0],d[1]+e[1]])}return a};function Or(a){return a.reduce(function(a,c){return c[0]===Pr.b?a:a+c[1]},"")}function dl(a,b,c){var d=0,e=0;a.some(function(a){for(var f=0;f<a[1].length;f++){switch(a[0]*c){case Pr.f:d++;break;case Pr.b:d--;e++;break;case Pr.g:e++}if(e>b)return!0}return!1});return Math.max(Math.min(b,e-1)+d,0)};function Av(a,b,c,d,e){Vm.call(this,a,b,"block-end",null,c,e);this.g=d}v(Av,Vm);Av.prototype.Ze=function(a){return!(a instanceof Av)};function Bv(a,b,c,d){Ym.call(this,a,"block-end",b,c,d)}v(Bv,Ym);Bv.prototype.Ga=function(){return Infinity};Bv.prototype.f=function(a){return a instanceof Av?!0:this.Ga()<a.Ga()};function Cv(a){this.f=a}Cv.prototype.b=function(a){a=cl(a);return!Rk(a,this.f.b)};function Dv(){}n=Dv.prototype;n.zf=function(a){return"footnote"===a.Aa};
-n.yf=function(a){return a instanceof Av};n.Ff=function(a,b){var c="region",d=gn(b,c);Dn(gn(b,"page"),d)&&(c="page");d=cl(a);c=new Av(d,c,b.h,a.X,a.N);b.ge(c);return M(c)};n.Gf=function(a,b,c,d){return new Bv(a[0].ja.V,a,c,d)};n.rf=function(a,b){return gn(b,a.V).b.filter(function(a){return a instanceof Bv})[0]||null};
+a[b+1][1],a.splice(b+1,1),c=!0)),b++;c&&vv(a)}Pr.f=1;Pr.b=-1;Pr.g=0;
+function wv(a,b){var c;a:{var d=a;if(0===b)c=[0,d];else{var e=0;for(c=0;c<d.length;c++){var f=d[c];if(-1===f[0]||0===f[0]){var g=e+f[1].length;if(b===g){c=[c+1,d];break a}if(b<g){d=d.slice();g=b-e;e=[f[0],f[1].slice(0,g)];f=[f[0],f[1].slice(g)];d.splice(c,1,e,f);c=[c+1,d];break a}e=g}}throw Error("cursor_pos is out of bounds!");}}d=c[1];c=c[0];e=d[c];f=d[c+1];return null==e||0!==e[0]?a:null!=f&&e[1]+f[1]===f[1]+e[1]?(d.splice(c,2,f,e),Av(d,c,2)):null!=f&&0===f[1].indexOf(e[1])?(d.splice(c,2,[f[0],
+e[1]],[0,e[1]]),e=f[1].slice(e[1].length),0<e.length&&d.splice(c+2,0,[f[0],e]),Av(d,c,3)):a}
+function xv(a){function b(a){return 55296<=a.charCodeAt(a.length-1)&&56319>=a.charCodeAt(a.length-1)}function c(a){return 56320<=a.charCodeAt(0)&&57343>=a.charCodeAt(0)}for(var d=!1,e=2;e<a.length;e+=1)0===a[e-2][0]&&b(a[e-2][1])&&-1===a[e-1][0]&&c(a[e-1][1])&&1===a[e][0]&&c(a[e][1])&&(d=!0,a[e-1][1]=a[e-2][1].slice(-1)+a[e-1][1],a[e][1]=a[e-2][1].slice(-1)+a[e][1],a[e-2][1]=a[e-2][1].slice(0,-1));if(!d)return a;d=[];for(e=0;e<a.length;e+=1)0<a[e][1].length&&d.push(a[e]);return d}
+function Av(a,b,c){for(c=b+c-1;0<=c&&c>=b-1;c--)if(c+1<a.length){var d=a[c],e=a[c+1];d[0]===e[1]&&a.splice(c,2,[d[0],d[1]+e[1]])}return a};function Or(a){return a.reduce(function(a,c){return c[0]===Pr.b?a:a+c[1]},"")}function dl(a,b,c){var d=0,e=0;a.some(function(a){for(var f=0;f<a[1].length;f++){switch(a[0]*c){case Pr.f:d++;break;case Pr.b:d--;e++;break;case Pr.g:e++}if(e>b)return!0}return!1});return Math.max(Math.min(b,e-1)+d,0)};function Bv(a,b,c,d,e){Vm.call(this,a,b,"block-end",null,c,e);this.g=d}v(Bv,Vm);Bv.prototype.Ze=function(a){return!(a instanceof Bv)};function Cv(a,b,c,d){Ym.call(this,a,"block-end",b,c,d)}v(Cv,Ym);Cv.prototype.Ga=function(){return Infinity};Cv.prototype.f=function(a){return a instanceof Bv?!0:this.Ga()<a.Ga()};function Dv(a){this.f=a}Dv.prototype.b=function(a){a=cl(a);return!Rk(a,this.f.b)};function Ev(){}n=Ev.prototype;n.zf=function(a){return"footnote"===a.Aa};
+n.yf=function(a){return a instanceof Bv};n.Ff=function(a,b){var c="region",d=gn(b,c);Dn(gn(b,"page"),d)&&(c="page");d=cl(a);c=new Bv(d,c,b.h,a.X,a.N);b.ge(c);return M(c)};n.Gf=function(a,b,c,d){return new Cv(a[0].ja.V,a,c,d)};n.rf=function(a,b){return gn(b,a.V).b.filter(function(a){return a instanceof Cv})[0]||null};
 n.vf=function(a,b,c){a.Uf=!0;a.qe=!1;var d=a.element,e=c.j;b=b.b;var f=c.j.w&&"rtl"===c.j.w.direction,g={},h=e.C._pseudos;b=tr(e,b,f,e.C,g);if(h&&h.before){var l={},k=Fr(e,"http://www.w3.org/1999/xhtml","span");mr(k,"before");d.appendChild(k);tr(e,b,f,h.before,l);delete l.content;Ir(e,k,l)}delete g.content;Ir(e,d,g);a.b=b;Kp(a,d);if(e=Nn(c.f,d))a.marginLeft=X(e.marginLeft),a.Y=X(e.borderLeftWidth),a.H=X(e.paddingLeft),a.marginTop=X(e.marginTop),a.ba=X(e.borderTopWidth),a.J=X(e.paddingTop),a.marginRight=
-X(e.marginRight),a.Pa=X(e.borderRightWidth),a.X=X(e.paddingRight),a.marginBottom=X(e.marginBottom),a.Ca=X(e.borderBottomWidth),a.O=X(e.paddingBottom);if(c=Nn(c.f,d))a.width=X(c.width),a.height=X(c.height)};n.ig=function(a,b){switch(a.g){case xd:Yn(b,new Cv(a),a.V)}};ao.push(new Dv);function Ev(a){return a.reduce(function(a,c){return a+c},0)/a.length}function ht(a){var b=Ev(a);return Ev(a.map(function(a){a-=b;return a*a}))};function Fv(a,b){this.g(a,"end",b)}function Gv(a,b){this.g(a,"start",b)}function Hv(a,b,c){c||(c=this.j.now());var d=this.h[a];d||(d=this.h[a]=[]);var e;for(a=d.length-1;0<=a&&(!(e=d[a])||e[b]);a--)e=null;e||(e={},d.push(e));e[b]=c}function Iv(){}function Jv(a){this.j=a;this.h={};this.registerEndTiming=this.b=this.registerStartTiming=this.f=this.g=Iv}
-Jv.prototype.l=function(){var a=this.h,b="";Object.keys(a).forEach(function(c){for(var d=a[c],e=d.length,f=0;f<e;f++){var g=d[f];b+=c;1<e&&(b+="("+f+")");b+=" => start: "+g.start+", end: "+g.end+", duration: "+(g.end-g.start)+"\n"}});w.g(b)};Jv.prototype.u=function(){this.registerEndTiming=this.b=this.registerStartTiming=this.f=this.g=Iv};Jv.prototype.B=function(){this.g=Hv;this.registerStartTiming=this.f=Gv;this.registerEndTiming=this.b=Fv};
-var Kv={now:Date.now},Tu,Lv=Tu=new Jv(window&&window.performance||Kv);Hv.call(Lv,"load_vivliostyle","start",void 0);na("vivliostyle.profile.profiler",Lv);Jv.prototype.printTimings=Jv.prototype.l;Jv.prototype.disable=Jv.prototype.u;Jv.prototype.enable=Jv.prototype.B;function ro(a){return(a=a.D)&&a instanceof wp?a:null}function Mv(a,b,c){var d=a.b;return d&&!d.vc&&(a=Nv(a,b),a.A)?!d.sc||d.vc?M(!0):Ov(d,d.sc,a,null,c):M(!0)}function Pv(a,b,c){var d=a.b;return d&&(a=Nv(a,b),a.A)?!d.tc||d.wc?M(!0):Ov(d,d.tc,a,a.A.firstChild,c):M(!0)}function Qv(a,b){a&&Rv(a.K?a.parent:a,function(a,d){a instanceof vp||b.B.push(new Sv(d))})}function Rv(a,b){for(var c=a;c;c=c.parent){var d=c.D;d&&d instanceof wp&&!gl(c,d)&&b(d,c)}}
-function wp(a,b){this.parent=a;this.j=b;this.b=null}wp.prototype.Re=function(){return"Repetitive elements owner formatting context (vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext)"};wp.prototype.af=function(a,b){return b};function Tv(a,b){var c=Nv(a,b);return c?c.A:null}function Nv(a,b){do if(!gl(b,a)&&b.M===a.j)return b;while(b=b.parent);return null}
-function Lr(a,b){a.b||Gp.some(function(b){return b.root===a.j?(a.b=b.elements,!0):!1})||(a.b=new Uv(b,a.j),Gp.push({root:a.j,elements:a.b}))}wp.prototype.Te=function(){};wp.prototype.Se=function(){};var Gp=[];function Uv(a,b){this.N=a;this.sc=this.tc=this.u=this.C=this.l=this.B=null;this.G=this.H=0;this.vc=this.wc=!1;this.$c=this.me=!0;this.j=!1;this.Y=b;this.J=this.g=null;this.O=[];this.X=[]}function Vv(a,b){a.tc||(a.tc=Sk(b),a.B=b.M,a.C=b.A)}function Wv(a,b){a.sc||(a.sc=Sk(b),a.l=b.M,a.u=b.A)}
-function Ov(a,b,c,d,e){var f=c.A,g=c.A.ownerDocument.createElement("div");f.appendChild(g);var h=new Fm(e,g,c),l=h.ya.g;h.ya.g=null;a.h=!0;return Im(h,new hl(b)).ea(function(){a.h=!1;f.removeChild(g);if(f)for(;g.firstChild;){var b=g.firstChild;g.removeChild(b);b.setAttribute("data-adapt-spec","1");d?f.insertBefore(b,d):f.appendChild(b)}h.ya.g=l;return M(!0)})}Uv.prototype.b=function(a){var b=0;if(a&&!this.f(a))return b;if(!this.vc||a&&Xv(this,a))b+=this.G;this.wc||(b+=this.H);return b};
-Uv.prototype.F=function(a){var b=0;if(a&&!this.f(a))return b;a&&Xv(this,a)&&(b+=this.G);this.$c||(b+=this.H);return b};function Xv(a,b){return Yv(b,a.X,function(){return Zv(a.J,b,!1)})}Uv.prototype.f=function(a){var b=this;return Yv(a,this.O,function(){return Zv(b.Y,a,!0)})};function Yv(a,b,c){var d=b.filter(function(b){return b.w.M===a.M&&b.w.K===a.K});if(0<d.length)return d[0].result;c=c(a);b.push({w:a,result:c});return c}
-function Zv(a,b,c){for(var d=[];a;a=a.parentNode){if(b.M===a)return b.K;d.push(a)}for(a=b.M;a;a=a.parentNode){var e=d.indexOf(a);if(0<=e)return c?!e:!1;for(e=a;e;e=e.previousElementSibling)if(d.includes(e))return!0}return b.K}function $v(a){return!a.vc&&a.me&&a.sc||!a.wc&&a.$c&&a.tc?!0:!1}function aw(a){this.D=a}aw.prototype.b=function(){};aw.prototype.f=function(a){return!!a};
-aw.prototype.g=function(a,b,c,d){(a=this.D.b)&&!a.j&&(a.C&&(a.H=Lp(a.C,c,a.N),a.C=null),a.u&&(a.G=Lp(a.u,c,a.N),a.u=null),a.j=!0);return d};function bw(a){this.D=a}bw.prototype.b=function(){};bw.prototype.f=function(){return!0};bw.prototype.g=function(a,b,c,d){return d};function cw(a){this.D=a}v(cw,aw);cw.prototype.b=function(a,b){aw.prototype.b.call(this,a,b);var c=L("BlockLayoutProcessor.doInitialLayout");Cm(new Bm(new dw(a.D),b.j),a).Ja(c);return c.result()};cw.prototype.f=function(){return!1};
-function ew(a){this.D=a}v(ew,bw);ew.prototype.b=function(a,b){gl(a,this.D)||a.K||b.B.unshift(new Sv(a));return fw(a,b)};function Sv(a){this.w=Nv(a.D,a)}n=Sv.prototype;n.fe=function(a,b){var c=this.w.D.b;return c&&!Mo(this.w.A)&&$v(c)?b&&!a||a&&a.wa?!1:!0:!0};n.fd=function(){var a=this.w.D.b;return a&&$v(a)?(!a.vc&&a.me&&a.sc?a.vc=!0:!a.wc&&a.$c&&a.tc&&(a.wc=!0),!0):!1};n.Wc=function(a,b,c,d){(c=this.w.D.b)&&a&&d.u&&(!b||Xv(c,b))&&(c.vc=!1,c.me=!1)};
-n.La=function(a,b){var c=this.w.D,d=this.w.D.b;if(!d)return M(!0);var e=this.w;return Pv(c,e,b).ea(function(){return Mv(c,e,b).ea(function(){d.wc=d.vc=!1;d.me=!0;d.$c=!0;return M(!0)})})};n.ne=function(a){return a instanceof Sv?this.w.D===a.w.D:!1};n.pe=function(){return 10};function gw(a){Lm.call(this);this.D=a}v(gw,Lm);gw.prototype.kf=function(a){var b=this.D.b;return gl(a,this.D)||b.j?(gl(a,this.D)||a.K||!b||(b.wc=!1,b.$c=!1),new ew(this.D)):new cw(this.D)};function dw(a){this.D=a}v(dw,Em);
-dw.prototype.ud=function(a){var b=this.D,c=a.w,d=b.b;if(c.parent&&b.j===c.parent.M){switch(c.u){case "header":if(d.tc)c.u="none";else return Vv(d,c),M(!0);break;case "footer":if(d.sc)c.u="none";else return Wv(d,c),M(!0)}d.g||(d.g=c.M)}return Em.prototype.ud.call(this,a)};dw.prototype.mc=function(a){var b=this.D,c=a.w;c.M===b.j&&(b.b.J=a.dd&&a.dd.M,a.Ob=!0);return"header"===c.u||"footer"===c.u?M(!0):Em.prototype.mc.call(this,a)};function hw(){}v(hw,Ip);
-hw.prototype.ee=function(a,b,c){if(uo(b,a))return Eo(b,a);var d=a.D;return Tv(d,a)?(c&&Qv(a.parent,b),gl(a,d)?Ip.prototype.ee.call(this,a,b,c):Mm(new gw(d),a,b)):Go(b,a)};hw.prototype.Ue=function(a){var b=ro(a).b;if(!b)return!1;b.h||b.B!==a.M&&b.l!==a.M||a.A.parentNode.removeChild(a.A);return!1};
-function fw(a,b){var c=a.D,d=L("doLayout"),e=Dm(b.j,a,!1);Fo(e,b).then(function(a){var e=a;Ce(function(a){for(var d={};e;){d.Ma=!0;yp(b,e,!1).then(function(d){return function(f){e=f;Gn(b.l)?Q(a):b.g?Q(a):e&&b.u&&e&&e.wa?Q(a):e&&e.K&&e.M==c.j?Q(a):d.Ma?d.Ma=!1:P(a)}}(d));if(d.Ma){d.Ma=!1;return}d={Ma:d.Ma}}Q(a)}).then(function(){O(d,e)})});return d.result()}hw.prototype.La=function(a,b,c,d){return Ip.prototype.La.call(this,a,b,c,d)};hw.prototype.xd=function(a,b,c,d){Ip.prototype.xd(a,b,c,d)};
-function oo(a){for(var b=[],c=a;c;c=c.Fd)c.B.forEach(function(c){if(c instanceof Sv){var d=c.w.D.b;b.push(d)}c instanceof iw&&(d=new jw(c.w,c.f),b.push(d));c instanceof kw&&lw(c,a).forEach(function(a){b.push(a)})});return b}var mw=new hw;de("RESOLVE_LAYOUT_PROCESSOR",function(a){return a instanceof wp&&!(a instanceof vp)?mw:null});function nw(a,b){if(!a||!a.J||a.K||uo(b,a))return M(a);var c=a.J;return ow(c,b,a).ea(function(d){var e=a.A;e.appendChild(d);var f=Lp(d,b,a.b);e.removeChild(d);b.B.push(new iw(a,c,f));return M(a)})}function pw(a,b,c){this.b=a;this.f=b;this.Gb=c}pw.prototype.matches=function(){var a=qw[this.b];return!!a&&null!=a.Ra&&zi(a.Ra,this.f,this.Gb)};function rj(a){this.b=a}rj.prototype.matches=function(){return this.b.some(function(a){return a.matches()})};function sj(a){this.b=a}sj.prototype.matches=function(){return this.b.every(function(a){return a.matches()})};
-function qj(a,b){var c=b.split("_");if("NFS"==c[0])return new pw(a,parseInt(c[1],10),parseInt(c[2],10));ra("unknown view condition. condition="+b);return null}function Tj(a,b,c){qr(c,function(c){Vj(a,c,b)})}function qr(a,b){var c=a._viewConditionalStyles;c&&c.forEach(function(a){a.wg.matches()&&b(a.Gg)})}function Br(a,b,c){var d=qw;if(!d[a]||d[a].bb<=c)d[a]={Ra:b,bb:c}}var qw={};function Kr(a,b){this.b=b;this.M=a}
-function ow(a,b,c){var d=c.A.ownerDocument.createElement("div"),e=new Fm(b,d,c),f=e.ya.g;e.ya.g=null;return Im(e,rw(a)).ea(function(){a.b.f["after-if-continues"]=!1;e.ya.g=f;var b=d.firstChild;x(b,"display","block");return M(b)})}function rw(a){var b=kr.createElementNS("http://www.w3.org/1999/xhtml","div");mr(b,"after-if-continues");a=new Xk(a.M,b,null,null,null,3,a.b);return new hl({pa:[{node:b,ib:a.type,ua:a,Ha:null,Ea:null}],na:0,K:!1,Oa:null})}function iw(a,b,c){this.w=a;this.b=b;this.f=c}n=iw.prototype;
-n.fe=function(a,b){return b&&!a||a&&a.wa?!1:!0};n.fd=function(){return!1};n.Wc=function(){};n.La=function(a,b){var c=this;return(new jw(this.w,this.f)).f(a)?ow(this.b,b,this.w).ea(function(a){c.w.A.appendChild(a);return M(!0)}):M(!0)};n.ne=function(a){return a instanceof iw?this.b==a.b:!1};n.pe=function(){return 9};function jw(a,b){this.w=a;this.g=b}jw.prototype.b=function(a){return this.f(a)?this.g:0};jw.prototype.F=function(a){return this.b(a)};
-jw.prototype.f=function(a){if(!a)return!1;var b=a.ua?a.ua.oa:a.M;if(b===this.w.M)return!!a.K;for(a=b.parentNode;a;a=a.parentNode)if(a===this.w.M)return!0;return!1};function Fo(a,b){return a.ea(function(a){return nw(a,b)})}function Hp(a,b){var c=L("vivliostyle.selectors.processAfterIfContinuesOfAncestors"),d=a;Be(function(){if(d){var a=nw(d,b);d=d.parent;return a.Cc(!0)}return M(!1)}).then(function(){O(c,!0)});return c.result()};function sw(a){var b=tw.findIndex(function(b){return b.root===a});0<=b&&tw.splice(b,1)}function uw(a){var b=tw.findIndex(function(b){return b.root===a});return(b=tw[b])?b.Ig:null}
-function vw(a,b,c){var d=a.w,e=d.display,f=d.parent?d.parent.display:null,g=!1;if("inline-table"===f&&!(d.D instanceof vp))for(var h=d.parent;h;h=h.parent)if(h.D instanceof vp){g=h.D===b;break}return g||"table-row"===e&&!ww(f)&&"table"!==f&&"inline-table"!==f||"table-cell"===e&&"table-row"!==f&&!ww(f)&&"table"!==f&&"inline-table"!==f||d.D instanceof vp&&d.D!==b?Go(c,d).ea(function(b){a.w=b;return M(!0)}):null}
-function ww(a){return"table-row-group"===a||"table-header-group"===a||"table-footer-group"===a}function xw(a,b){this.rowIndex=a;this.M=b;this.b=[]}function yw(a){return Math.min.apply(null,a.b.map(function(a){return a.height}))}function zw(a,b,c){this.rowIndex=a;this.Qa=b;this.g=c;this.f=c.colSpan||1;this.rowSpan=c.rowSpan||1;this.height=0;this.b=null}function Aw(a,b,c){this.rowIndex=a;this.Qa=b;this.Xb=c}function Bw(a,b,c){this.g=a;this.b=c;this.gc=new Fm(a,b,c);this.f=!1}
-Bw.prototype.$b=function(){var a=this.b.A,b=this.b.Y;"middle"!==b&&"bottom"!==b||x(a,"vertical-align","top");var c=this.gc.$b(!0);x(a,"vertical-align",b);return c};function Cw(a,b){this.A=a;this.b=b}function Dw(a,b,c,d){Km.call(this,a,b,c,d);this.D=a.D;this.rowIndex=this.l=null}v(Dw,Km);Dw.prototype.f=function(a,b){var c=Km.prototype.f.call(this,a,b);return b<this.b()?null:Ew(this).every(function(a){return!!a.w})?c:null};
-Dw.prototype.b=function(){var a=Km.prototype.b.call(this);Ew(this).forEach(function(b){a+=b.Ab.b()});return a};function Ew(a){a.l||(a.l=Fw(a).map(function(a){return a.$b()}));return a.l}function Fw(a){return Gw(a.D,null!=a.rowIndex?a.rowIndex:a.rowIndex=Hw(a.D,a.position.M)).map(a.D.Ld,a.D)}function Iw(a,b,c){this.rowIndex=a;this.j=b;this.D=c;this.h=null}v(Iw,ko);
-Iw.prototype.f=function(a,b){if(b<this.b())return null;var c=Jw(this),d=Kw(this),e=d.every(function(a){return!!a.w})&&d.some(function(a,b){var d=c[b].gc,e=a.w,f=d.nf[0];return!(f.A===e.A&&f.K===e.K&&f.na===e.na)&&!Rk(cl(e),d.ya.xb)});this.j.wa=d.some(function(a){return a.w&&a.w.wa});return e?this.j:null};Iw.prototype.b=function(){var a=this.D,b=0;yw(a.g[this.rowIndex])>a.N/2||(b+=10);Kw(this).forEach(function(a){b+=a.Ab.b()});return b};
-function Kw(a){a.h||(a.h=Jw(a).map(function(a){return a.$b()}));return a.h}function Jw(a){return Lw(a.D,a.rowIndex).map(a.D.Ld,a.D)}function vp(a,b){wp.call(this,a,b);this.F=b;this.u=!1;this.G=-1;this.N=0;this.H=[];this.J=this.B=null;this.O=0;this.g=[];this.l=[];this.f=[];this.C=null;this.h=[];this.b=null}v(vp,wp);n=vp.prototype;n.Re=function(){return"Table formatting context (vivliostyle.table.TableFormattingContext)"};
-n.af=function(a,b){if(!b)return b;switch(a.display){case "table-row":return!this.h.length;case "table-cell":return!this.h.some(function(b){return b.Bd.pa[0].node===a.M});default:return b}};function Mw(a,b){var c=a.l[b];c||(c=a.l[b]=[]);return c}function Hw(a,b){return a.g.findIndex(function(a){return b===a.M})}function Lw(a,b){return Mw(a,b).reduce(function(a,b){return b.Xb!==a[a.length-1]?a.concat(b.Xb):a},[])}function Gw(a,b){return Lw(a,b).filter(function(a){return a.rowIndex+a.rowSpan-1>b})}
-n.Ld=function(a){return this.f[a.rowIndex]&&this.f[a.rowIndex][a.Qa]};function Nw(a){0>a.G&&(a.G=Math.max.apply(null,a.g.map(function(a){return a.b.reduce(function(a,b){return a+b.f},0)})));return a.G}function Ow(a,b){a.g.forEach(function(a){a.b.forEach(function(a){var c=Hk(b,a.g);a.g=null;a.height=this.u?c.width:c.height},this)},a)}
-function Pw(a,b){if(!b)return null;var c=null,d=0;a:for(;d<a.f.length;d++)if(a.f[d])for(var e=0;e<a.f[d].length;e++)if(a.f[d][e]&&b===a.f[d][e].gc.ya){c=a.g[d].b[e];break a}if(!c)return null;for(;d<a.l.length;d++)for(;e<a.l[d].length;e++){var f=a.l[d][e];if(f.Xb===c)return{rowIndex:f.rowIndex,Qa:f.Qa}}return null}function Qw(a,b){var c=[];return a.l.reduce(function(d,e,f){if(f>=b.rowIndex)return d;e=a.Ld(e[b.Qa].Xb);if(!e||c.includes(e))return d;Rw(e.gc.ya,d);c.push(e);return d},[])}
-function Sw(a){var b=[];a.g.forEach(function(c){c.b.forEach(function(c,e){b[e]||(b[e]={Df:[],elements:[]});var d=b[e],g=a.Ld(c);g&&!d.Df.includes(g)&&(Rw(g.gc.ya,d.elements),d.Df.push(g))})});return[new Tw(b.map(function(a){return a.elements}))]}function Rw(a,b){a.B.forEach(function(a){a instanceof Sv&&b.push(a.w.D.b);a instanceof kw&&lw(a,null).forEach(function(a){b.push(a)})})}n.Te=function(){return[].concat(this.h)};n.Se=function(a){this.h=a};function Tw(a){this.f=a}
-Tw.prototype.b=function(a){return Uw(this,a,function(a){return a.current})};Tw.prototype.F=function(a){return Uw(this,a,function(a){return a.Ce})};function Uw(a,b,c){var d=0;a.f.forEach(function(a){a=lo(b,a);d=Math.max(d,c(a))});return d}function Vw(a,b){this.D=a;this.h=b;this.rowIndex=-1;this.Qa=0;this.g=!1;this.f=[]}v(Vw,Em);n=Vw.prototype;
-n.ud=function(a){var b=this.D,c=vw(a,b,this.h);if(c)return c;Ww(this,a);var c=a.w,d=b.b;switch(c.display){case "table":b.O=c.la;break;case "table-caption":b.H.push(new Cw(c.A,c.da));break;case "table-header-group":return d.tc||(this.b=!0,Vv(d,c)),M(!0);case "table-footer-group":return d.sc||(this.b=!0,Wv(d,c)),M(!0);case "table-row":this.b||(this.g=!0,this.rowIndex++,this.Qa=0,b.g[this.rowIndex]=new xw(this.rowIndex,c.M),d.g||(d.g=c.M))}return Em.prototype.ud.call(this,a)};
-n.mc=function(a){var b=this.D,c=a.w,d=c.display,e=this.h.f;Ww(this,a);if(c.M===b.F)d=Nn(e,Tv(b,c)),b.N=parseFloat(d[b.u?"height":"width"]),b.b.J=a.dd&&a.dd.M,a.Ob=!0;else switch(d){case "table-header-group":case "table-footer-group":if(this.b)return this.b=!1,M(!0);break;case "table-row":this.b||(b.C=c.A,this.g=!1);break;case "table-cell":if(!this.b){this.g||(this.rowIndex++,this.Qa=0,this.g=!0);d=this.rowIndex;c=new zw(this.rowIndex,this.Qa,c.A);e=b.g[d];e||(b.g[d]=new xw(d,null),e=b.g[d]);e.b.push(c);
-for(var e=d+c.rowSpan,f=Mw(b,d),g=0;f[g];)g++;for(;d<e;d++)for(var f=Mw(b,d),h=g;h<g+c.f;h++){var l=f[h]=new Aw(d,h,c);c.b||(c.b=l)}this.Qa++}}return Em.prototype.mc.call(this,a)};n.pf=function(a){Xw(this,a)};n.xf=function(a){Xw(this,a)};n.eg=function(a){Xw(this,a)};n.wf=function(a){Xw(this,a)};function Xw(a,b){var c=b.w;c&&c.A&&!Co(c)&&a.f.push(c.clone())}function Ww(a,b){0<a.f.length&&Ho(a.h,b.w,a.f);a.f=[]}
-function Yw(a,b){this.bc=!0;this.D=a;this.f=b;this.l=!1;this.b=-1;this.g=0;this.u=b.u;b.u=!1}v(Yw,Em);var Zw={"table-caption":!0,"table-column-group":!0,"table-column":!0};
-function $w(a,b,c,d){var e=b.rowIndex,f=b.Qa,g=c.A;if(1<b.f){x(g,"box-sizing","border-box");for(var h=a.D.J,l=0,k=0;k<b.f;k++)l+=h[b.b.Qa+k];l+=a.D.O*(b.f-1);x(g,a.D.u?"height":"width",l+"px")}b=g.ownerDocument.createElement("div");g.appendChild(b);c=new Bw(a.f,b,c);a=a.D;(g=a.f[e])||(g=a.f[e]=[]);g[f]=c;1===d.f.pa.length&&d.f.K&&(c.f=!0);return Im(c.gc,d).Cc(!0)}function ax(a,b){var c=a.D.h[0];return c?c.Xb.b.Qa===b:!1}
-function bx(a){var b=a.D.h;if(!b.length)return[];var c=[],d=0;do{var e=b[d],f=e.Xb.rowIndex;if(f<a.b){var g=c[f];g||(g=c[f]=[]);g.push(e);b.splice(d,1)}else d++}while(d<b.length);return c}
-function cx(a,b){var c=a.D,d=bx(a),e=d.reduce(function(a){return a+1},0);if(0===e)return M(!0);var f=a.f.j,g=b.w;g.A.parentNode.removeChild(g.A);var h=L("layoutRowSpanningCellsFromPreviousFragment"),l=M(!0),k=0,m=[];d.forEach(function(a){var b=this;l=l.ea(function(){var d=Uk(a[0].Bd.pa[1],g.parent);return xo(f,d,!1).ea(function(){function g(a){for(;l<a;){if(!m.includes(l)){var b=d.A.ownerDocument.createElement("td");x(b,"padding","0");d.A.appendChild(b)}l++}}var h=M(!0),l=0;a.forEach(function(a){var b=
-this;h=h.ea(function(){var c=a.Xb;g(c.b.Qa);var h=a.Bd,p=Uk(h.pa[0],d);p.na=h.na;p.K=h.K;p.Ra=h.pa[0].Ra+1;return xo(f,p,!1).ea(function(){for(var d=a.Bf,f=0;f<c.f;f++)m.push(l+f);l+=c.f;return $w(b,c,p,d).ea(function(){p.A.rowSpan=c.rowIndex+c.rowSpan-b.b+e-k;return M(!0)})})})},b);return h.ea(function(){g(Nw(c));k++;return M(!0)})})})},a);l.then(function(){xo(f,g,!0,b.yd).then(function(){O(h,!0)})});return h.result()}
-function dx(a,b){if(a.j||a.h)return M(!0);var c=b.w,d=a.D;0>a.b?a.b=Hw(d,c.M):a.b++;a.g=0;a.l=!0;return cx(a,b).ea(function(){ex(a);rp(a.f,b.dd,null,!0,b.Xc)&&!Gw(d,a.b-1).length&&(a.f.u=a.u,c.wa=!0,b.Ob=!0);return M(!0)})}function ex(a){a.D.g[a.b].b.forEach(function(b){var c=a.D.h[b.Qa];c&&c.Xb.b.Qa==b.b.Qa&&(b=c.Bd.pa[0],c=ek(a.f.j.ca,b.node),Br(c,b.Ra+1,1))})}
-function fx(a,b){if(a.j||a.h)return M(!0);var c=b.w;a.l||(0>a.b?a.b=0:a.b++,a.g=0,a.l=!0);var d=a.D.g[a.b].b[a.g],e=Wk(c).modify();e.K=!0;b.w=e;var f=L("startTableCell");ax(a,d.b.Qa)?(e=a.D.h.shift(),c.Ra=e.Bd.pa[0].Ra+1,e=M(e.Bf)):e=Do(a.f,c,b.yd).ea(function(a){a.A&&c.A.removeChild(a.A);return M(new hl(Sk(a)))});e.then(function(e){$w(a,d,c,e).then(function(){a.mc(b);a.g++;O(f,!0)})});return f.result()}
-Yw.prototype.fg=function(a){var b=vw(a,this.D,this.f);if(b)return b;var b=a.w,c=this.D.b,d=b.display;return"table-header-group"===d&&c&&c.B===b.M?(this.j=!0,M(!0)):"table-footer-group"===d&&c&&c.l===b.M?(this.h=!0,M(!0)):"table-row"===d?dx(this,a):"table-cell"===d?fx(this,a):M(!0)};Yw.prototype.Hf=function(a){a=a.w;"table-row"===a.display&&(this.l=!1,this.j||this.h||(a=Wk(a).modify(),a.K=!1,this.f.N.push(new Iw(this.b,a,this.D))));return M(!0)};
-Yw.prototype.mc=function(a){var b=a.w,c=this.D.b,d=b.display;"table-header-group"===d?c&&!c.h&&c.B===b.M?(this.j=!1,b.A.parentNode.removeChild(b.A)):x(b.A,"display","table-row-group"):"table-footer-group"===d&&(c&&!c.h&&c.l===b.M?(this.h=!1,b.A.parentNode.removeChild(b.A)):x(b.A,"display","table-row-group"));if(d&&Zw[d])b.A.parentNode.removeChild(b.A);else if(b.M===this.D.F)b.wa=qp(this.f,b,null),this.f.u=this.u,a.Ob=!0;else return Em.prototype.mc.call(this,a);return M(!0)};var tw=[];
-function gx(){}function hx(a,b,c,d){for(var e=a.ownerDocument,f=e.createElement("tr"),g=[],h=0;h<b;h++){var l=e.createElement("td");f.appendChild(l);g.push(l)}a.parentNode.insertBefore(f,a.nextSibling);b=g.map(function(a){a=Hk(d,a);return c?a.height:a.width});a.parentNode.removeChild(f);return b}function ix(a){var b=[];for(a=a.firstElementChild;a;)"colgroup"===a.localName&&b.push(a),a=a.nextElementSibling;return b}
-function jx(a){var b=[];a.forEach(function(a){var c=a.span;a.removeAttribute("span");for(var e=a.firstElementChild;e;){if("col"===e.localName){var f=e.span;e.removeAttribute("span");for(c-=f;1<f--;){var g=e.cloneNode(!0);a.insertBefore(g,e);b.push(g)}b.push(e)}e=e.nextElementSibling}for(;0<c--;)e=a.ownerDocument.createElement("col"),a.appendChild(e),b.push(e)});return b}
-function kx(a,b,c,d){if(a.length<c){var e=d.ownerDocument.createElement("colgroup");b.push(e);for(b=a.length;b<c;b++){var f=d.ownerDocument.createElement("col");e.appendChild(f);a.push(f)}}}function lx(a,b,c){var d=a.u,e=a.C;if(e){a.C=null;var f=e.ownerDocument.createDocumentFragment(),g=Nw(a);if(0<g){var h=a.J=hx(e,g,d,c.f);c=ix(b);e=jx(c);kx(e,c,g,b);e.forEach(function(a,b){x(a,d?"height":"width",h[b]+"px")});c.forEach(function(a){f.appendChild(a.cloneNode(!0))})}a.B=f}}
-function mx(a,b,c){var d=b.D;d.u=b.b;Lr(d,b.b);var e=uw(b.M);sw(b.M);var f=L("TableLayoutProcessor.doInitialLayout"),g=Wk(b);Cm(new Bm(new Vw(b.D,c),c.j),b).then(function(a){var h=a.A,k=Hk(c.f,h),k=c.b?k.left:k.bottom,k=k+(c.b?-1:1)*lo(b,oo(c)).current;po(c,k)||e&&e.ng?(lx(d,h,c),Ow(d,c.f),O(f,null)):(c.N.push(new nx(g)),O(f,a))}.bind(a));return f.result()}function ox(a,b,c){var d=a.H;d.forEach(function(a,f){a&&(b.insertBefore(a.A,c),"top"===a.b&&(d[f]=null))})}
-function px(a,b){if(a.B&&b){var c=ix(b);c&&c.forEach(function(a){b.removeChild(a)})}}function qx(a,b){var c=a.D,d=Tv(c,a),e=d.firstChild;ox(c,d,e);c.B&&!ix(d).length&&d.insertBefore(c.B.cloneNode(!0),e);c=new Yw(c,b);c=new Bm(c,b.j);d=L("TableFormattingContext.doLayout");Cm(c,a).Ja(d);return d.result()}n=gx.prototype;n.ee=function(a,b,c){var d=a.D;return Tv(d,a)?(c&&Qv(a.parent,b),Mm(new rx(d,this),a,b)):Go(b,a)};n.Ef=function(a,b,c,d){return new Dw(a,b,c,d)};n.Ue=function(){return!1};n.uf=function(){return!1};
-n.La=function(a,b,c,d){var e=b.D;if("table-row"===b.display){var f=Hw(e,b.M);e.h=[];var g;g=b.K?Gw(e,f):Lw(e,f);if(g.length){var h=L("TableLayoutProcessor.finishBreak"),l=0;Ce(function(a){if(l===g.length)Q(a);else{var b=g[l++],c=e.Ld(b),d=c.$b().w,h=c.b,k=cl(h),u=new hl(cl(d));e.h.push({Bd:k,Bf:u,Xb:b});h=h.A;Jp(c.b);f<b.rowIndex+b.rowSpan-1&&(h.rowSpan=f-b.rowIndex+1);c.f?P(a):c.gc.La(d,!1,!0).then(function(){var b=e.b;if(b){var f=e.u,g=c.g,h=c.gc.ya.element,k=c.b.A,l=Hk(g.f,k),k=Oo(g,k);f?(b=l.right-
-g.da-b.b(d)-k.right,x(h,"max-width",b+"px")):(b=g.da-b.b(d)-l.top-k.top,x(h,"max-height",b+"px"));x(h,"overflow","hidden")}P(a)})}}).then(function(){ip(a,b,!1);Jp(b);e.f=[];O(h,!0)});return h.result()}}e.f=[];return mp.La(a,b,c,d)};n.xd=function(a,b,c,d){Ip.prototype.xd(a,b,c,d)};function rx(a,b){Lm.call(this);this.g=b;this.b=a}v(rx,Lm);rx.prototype.kf=function(a){var b=this.b.b;return b&&b.j?(a.M===this.b.F&&!a.K&&b&&(b.wc=!1,b.$c=!1),new sx(this.b)):new tx(this.b,this.g)};
-rx.prototype.Cd=function(a){Lm.prototype.Cd.call(this,a);px(this.b,Tv(this.b,a))};rx.prototype.de=function(a,b){Lm.prototype.de.call(this,a,b);this.b.f=[]};function tx(a,b){this.D=a;this.h=b}v(tx,aw);tx.prototype.b=function(a,b){aw.prototype.b.call(this,a,b);return mx(this.h,a,b)};function nx(a){Km.call(this,a,null,a.wa,0)}v(nx,Km);nx.prototype.b=function(){if(!this.h)throw Error("EdgeBreakPosition.prototype.updateEdge not called");return(this.j?3:0)+(this.position.parent?this.position.parent.j:0)};
-nx.prototype.u=function(a){a.B.push(new ux(this.position.M))};function ux(a){this.b=a}n=ux.prototype;n.fe=function(){return!1};n.fd=function(){return!0};n.Wc=function(a,b){tw.push({root:b.M,Ig:{ng:!0}})};n.La=function(){return M(!0)};n.ne=function(a){return a instanceof ux&&a.b===this.b};n.pe=function(){return 0};function sx(a){this.D=a}v(sx,bw);sx.prototype.b=function(a,b){var c=this.D.b;if(c&&!Xv(c,a)){var d=new kw(a);b.B.some(function(a){return d.ne(a)})||b.B.unshift(d)}return qx(a,b)};
-function kw(a){Sv.call(this,a);this.b=[]}v(kw,Sv);n=kw.prototype;n.fe=function(a,b,c){var d=this.w.D.b;return!d||c.Fd||Mo(this.w.A)||!$v(d)?!0:b&&!a||a&&a.wa?!1:!0};n.fd=function(a){return vx(a,this.w.D).some(function(b){return b.Dd.some(function(b){return b.fd(a)})})?!0:Sv.prototype.fd.call(this,a)};n.Wc=function(a,b,c,d){var e=this.w.D;this.b=vx(b,e);this.b.forEach(function(b){b.Dd.forEach(function(e){e.Wc(a,b.Ab,c,d)})});a||(px(e,Tv(e,this.w)),wx(c));Sv.prototype.Wc.call(this,a,b,c,d)};
-n.La=function(a,b){var c=this,d=L("finishBreak"),e=this.b.reduce(function(a,b){return a.concat(b.Dd.map(function(a){return{pg:a,Ab:b.Ab}}))},[]),f=0;Be(function(){if(f<e.length){var a=e[f++];return a.pg.La(a.Ab,b).Cc(!0)}return M(!1)}).then(function(){O(d,!0)});return d.result().ea(function(){return Sv.prototype.La.call(c,a,b)})};function wx(a){if(a&&"table-row"===a.display&&a.A)for(;a.A.previousElementSibling;){var b=a.A.previousElementSibling;b.parentNode&&b.parentNode.removeChild(b)}}
-function vx(a,b){return xx(a,b).map(function(a){return{Dd:a.sg.gc.ya.B,Ab:a.Ab}})}function xx(a,b){var c=Number.MAX_VALUE;a&&"table-row"===a.display&&(c=Hw(b,a.M)+1);for(var c=Math.min(b.f.length,c),d=[],e=0;e<c;e++)b.f[e]&&b.f[e].forEach(function(a){a&&d.push({sg:a,Ab:a.$b().w})});return d}function lw(a,b){var c=a.w.D,d=Pw(c,b);return d?Qw(c,d):Sw(c)}n.ne=function(a){return a instanceof kw?this.w.D===a.w.D:!1};var yx=new gx;
-de("RESOLVE_FORMATTING_CONTEXT",function(a,b,c){return b?c===Ld?(b=a.parent,new vp(b?b.D:null,a.M)):null:null});de("RESOLVE_LAYOUT_PROCESSOR",function(a){return a instanceof vp?yx:null});Array.from||(Array.from=function(a,b,c){b&&c&&(b=b.bind(c));c=[];for(var d=a.length,e=0;e<d;e++)c[e]=b?b(a[e],e):a[e];return c});
+X(e.marginRight),a.Pa=X(e.borderRightWidth),a.X=X(e.paddingRight),a.marginBottom=X(e.marginBottom),a.Ca=X(e.borderBottomWidth),a.O=X(e.paddingBottom);if(c=Nn(c.f,d))a.width=X(c.width),a.height=X(c.height)};n.ig=function(a,b){switch(a.g){case xd:Yn(b,new Dv(a),a.V)}};ao.push(new Ev);function Fv(a){return a.reduce(function(a,c){return a+c},0)/a.length}function ht(a){var b=Fv(a);return Fv(a.map(function(a){a-=b;return a*a}))};function Gv(a,b){this.g(a,"end",b)}function Hv(a,b){this.g(a,"start",b)}function Iv(a,b,c){c||(c=this.j.now());var d=this.h[a];d||(d=this.h[a]=[]);var e;for(a=d.length-1;0<=a&&(!(e=d[a])||e[b]);a--)e=null;e||(e={},d.push(e));e[b]=c}function Jv(){}function Kv(a){this.j=a;this.h={};this.registerEndTiming=this.b=this.registerStartTiming=this.f=this.g=Jv}
+Kv.prototype.l=function(){var a=this.h,b="";Object.keys(a).forEach(function(c){for(var d=a[c],e=d.length,f=0;f<e;f++){var g=d[f];b+=c;1<e&&(b+="("+f+")");b+=" => start: "+g.start+", end: "+g.end+", duration: "+(g.end-g.start)+"\n"}});w.g(b)};Kv.prototype.u=function(){this.registerEndTiming=this.b=this.registerStartTiming=this.f=this.g=Jv};Kv.prototype.B=function(){this.g=Iv;this.registerStartTiming=this.f=Hv;this.registerEndTiming=this.b=Gv};
+var Lv={now:Date.now},Uu,Mv=Uu=new Kv(window&&window.performance||Lv);Iv.call(Mv,"load_vivliostyle","start",void 0);na("vivliostyle.profile.profiler",Mv);Kv.prototype.printTimings=Kv.prototype.l;Kv.prototype.disable=Kv.prototype.u;Kv.prototype.enable=Kv.prototype.B;function ro(a){return(a=a.D)&&a instanceof wp?a:null}function Nv(a,b,c){var d=a.b;return d&&!d.vc&&(a=Ov(a,b),a.A)?!d.sc||d.vc?M(!0):Pv(d,d.sc,a,null,c):M(!0)}function Qv(a,b,c){var d=a.b;return d&&(a=Ov(a,b),a.A)?!d.tc||d.wc?M(!0):Pv(d,d.tc,a,a.A.firstChild,c):M(!0)}function Rv(a,b){a&&Sv(a.K?a.parent:a,function(a,d){a instanceof vp||b.B.push(new Tv(d))})}function Sv(a,b){for(var c=a;c;c=c.parent){var d=c.D;d&&d instanceof wp&&!gl(c,d)&&b(d,c)}}
+function wp(a,b){this.parent=a;this.j=b;this.b=null}wp.prototype.Re=function(){return"Repetitive elements owner formatting context (vivliostyle.repetitiveelements.RepetitiveElementsOwnerFormattingContext)"};wp.prototype.af=function(a,b){return b};function Uv(a,b){var c=Ov(a,b);return c?c.A:null}function Ov(a,b){do if(!gl(b,a)&&b.M===a.j)return b;while(b=b.parent);return null}
+function Lr(a,b){a.b||Gp.some(function(b){return b.root===a.j?(a.b=b.elements,!0):!1})||(a.b=new Vv(b,a.j),Gp.push({root:a.j,elements:a.b}))}wp.prototype.Te=function(){};wp.prototype.Se=function(){};var Gp=[];function Vv(a,b){this.N=a;this.sc=this.tc=this.u=this.C=this.l=this.B=null;this.G=this.H=0;this.vc=this.wc=!1;this.$c=this.me=!0;this.j=!1;this.Y=b;this.J=this.g=null;this.O=[];this.X=[]}function Wv(a,b){a.tc||(a.tc=Sk(b),a.B=b.M,a.C=b.A)}function Xv(a,b){a.sc||(a.sc=Sk(b),a.l=b.M,a.u=b.A)}
+function Pv(a,b,c,d,e){var f=c.A,g=c.A.ownerDocument.createElement("div");f.appendChild(g);var h=new Fm(e,g,c),l=h.ya.g;h.ya.g=null;a.h=!0;return Im(h,new hl(b)).ea(function(){a.h=!1;f.removeChild(g);if(f)for(;g.firstChild;){var b=g.firstChild;g.removeChild(b);b.setAttribute("data-adapt-spec","1");d?f.insertBefore(b,d):f.appendChild(b)}h.ya.g=l;return M(!0)})}Vv.prototype.b=function(a){var b=0;if(a&&!this.f(a))return b;if(!this.vc||a&&Yv(this,a))b+=this.G;this.wc||(b+=this.H);return b};
+Vv.prototype.F=function(a){var b=0;if(a&&!this.f(a))return b;a&&Yv(this,a)&&(b+=this.G);this.$c||(b+=this.H);return b};function Yv(a,b){return Zv(b,a.X,function(){return $v(a.J,b,!1)})}Vv.prototype.f=function(a){var b=this;return Zv(a,this.O,function(){return $v(b.Y,a,!0)})};function Zv(a,b,c){var d=b.filter(function(b){return b.w.M===a.M&&b.w.K===a.K});if(0<d.length)return d[0].result;c=c(a);b.push({w:a,result:c});return c}
+function $v(a,b,c){for(var d=[];a;a=a.parentNode){if(b.M===a)return b.K;d.push(a)}for(a=b.M;a;a=a.parentNode){var e=d.indexOf(a);if(0<=e)return c?!e:!1;for(e=a;e;e=e.previousElementSibling)if(d.includes(e))return!0}return b.K}function aw(a){return!a.vc&&a.me&&a.sc||!a.wc&&a.$c&&a.tc?!0:!1}function bw(a){this.D=a}bw.prototype.b=function(){};bw.prototype.f=function(a){return!!a};
+bw.prototype.g=function(a,b,c,d){(a=this.D.b)&&!a.j&&(a.C&&(a.H=Lp(a.C,c,a.N),a.C=null),a.u&&(a.G=Lp(a.u,c,a.N),a.u=null),a.j=!0);return d};function cw(a){this.D=a}cw.prototype.b=function(){};cw.prototype.f=function(){return!0};cw.prototype.g=function(a,b,c,d){return d};function dw(a){this.D=a}v(dw,bw);dw.prototype.b=function(a,b){bw.prototype.b.call(this,a,b);var c=L("BlockLayoutProcessor.doInitialLayout");Cm(new Bm(new ew(a.D),b.j),a).Ja(c);return c.result()};dw.prototype.f=function(){return!1};
+function fw(a){this.D=a}v(fw,cw);fw.prototype.b=function(a,b){gl(a,this.D)||a.K||b.B.unshift(new Tv(a));return gw(a,b)};function Tv(a){this.w=Ov(a.D,a)}n=Tv.prototype;n.fe=function(a,b){var c=this.w.D.b;return c&&!Mo(this.w.A)&&aw(c)?b&&!a||a&&a.wa?!1:!0:!0};n.fd=function(){var a=this.w.D.b;return a&&aw(a)?(!a.vc&&a.me&&a.sc?a.vc=!0:!a.wc&&a.$c&&a.tc&&(a.wc=!0),!0):!1};n.Wc=function(a,b,c,d){(c=this.w.D.b)&&a&&d.u&&(!b||Yv(c,b))&&(c.vc=!1,c.me=!1)};
+n.La=function(a,b){var c=this.w.D,d=this.w.D.b;if(!d)return M(!0);var e=this.w;return Qv(c,e,b).ea(function(){return Nv(c,e,b).ea(function(){d.wc=d.vc=!1;d.me=!0;d.$c=!0;return M(!0)})})};n.ne=function(a){return a instanceof Tv?this.w.D===a.w.D:!1};n.pe=function(){return 10};function hw(a){Lm.call(this);this.D=a}v(hw,Lm);hw.prototype.kf=function(a){var b=this.D.b;return gl(a,this.D)||b.j?(gl(a,this.D)||a.K||!b||(b.wc=!1,b.$c=!1),new fw(this.D)):new dw(this.D)};function ew(a){this.D=a}v(ew,Em);
+ew.prototype.ud=function(a){var b=this.D,c=a.w,d=b.b;if(c.parent&&b.j===c.parent.M){switch(c.u){case "header":if(d.tc)c.u="none";else return Wv(d,c),M(!0);break;case "footer":if(d.sc)c.u="none";else return Xv(d,c),M(!0)}d.g||(d.g=c.M)}return Em.prototype.ud.call(this,a)};ew.prototype.mc=function(a){var b=this.D,c=a.w;c.M===b.j&&(b.b.J=a.dd&&a.dd.M,a.Ob=!0);return"header"===c.u||"footer"===c.u?M(!0):Em.prototype.mc.call(this,a)};function iw(){}v(iw,Ip);
+iw.prototype.ee=function(a,b,c){if(uo(b,a))return Eo(b,a);var d=a.D;return Uv(d,a)?(c&&Rv(a.parent,b),gl(a,d)?Ip.prototype.ee.call(this,a,b,c):Mm(new hw(d),a,b)):Go(b,a)};iw.prototype.Ue=function(a){var b=ro(a).b;if(!b)return!1;b.h||b.B!==a.M&&b.l!==a.M||a.A.parentNode.removeChild(a.A);return!1};
+function gw(a,b){var c=a.D,d=L("doLayout"),e=Dm(b.j,a,!1);Fo(e,b).then(function(a){var e=a;Ce(function(a){for(var d={};e;){d.Ma=!0;yp(b,e,!1).then(function(d){return function(f){e=f;Gn(b.l)?Q(a):b.g?Q(a):e&&b.u&&e&&e.wa?Q(a):e&&e.K&&e.M==c.j?Q(a):d.Ma?d.Ma=!1:P(a)}}(d));if(d.Ma){d.Ma=!1;return}d={Ma:d.Ma}}Q(a)}).then(function(){O(d,e)})});return d.result()}iw.prototype.La=function(a,b,c,d){return Ip.prototype.La.call(this,a,b,c,d)};iw.prototype.xd=function(a,b,c,d){Ip.prototype.xd(a,b,c,d)};
+function oo(a){for(var b=[],c=a;c;c=c.Fd)c.B.forEach(function(c){if(c instanceof Tv){var d=c.w.D.b;b.push(d)}c instanceof jw&&(d=new kw(c.w,c.f),b.push(d));c instanceof lw&&mw(c,a).forEach(function(a){b.push(a)})});return b}var nw=new iw;de("RESOLVE_LAYOUT_PROCESSOR",function(a){return a instanceof wp&&!(a instanceof vp)?nw:null});function ow(a,b){if(!a||!a.J||a.K||uo(b,a))return M(a);var c=a.J;return pw(c,b,a).ea(function(d){var e=a.A;e.appendChild(d);var f=Lp(d,b,a.b);e.removeChild(d);b.B.push(new jw(a,c,f));return M(a)})}function qw(a,b,c){this.b=a;this.f=b;this.Gb=c}qw.prototype.matches=function(){var a=rw[this.b];return!!a&&null!=a.Ra&&zi(a.Ra,this.f,this.Gb)};function rj(a){this.b=a}rj.prototype.matches=function(){return this.b.some(function(a){return a.matches()})};function sj(a){this.b=a}sj.prototype.matches=function(){return this.b.every(function(a){return a.matches()})};
+function qj(a,b){var c=b.split("_");if("NFS"==c[0])return new qw(a,parseInt(c[1],10),parseInt(c[2],10));ra("unknown view condition. condition="+b);return null}function Tj(a,b,c){qr(c,function(c){Vj(a,c,b)})}function qr(a,b){var c=a._viewConditionalStyles;c&&c.forEach(function(a){a.wg.matches()&&b(a.Gg)})}function Br(a,b,c){var d=rw;if(!d[a]||d[a].bb<=c)d[a]={Ra:b,bb:c}}var rw={};function Kr(a,b){this.b=b;this.M=a}
+function pw(a,b,c){var d=c.A.ownerDocument.createElement("div"),e=new Fm(b,d,c),f=e.ya.g;e.ya.g=null;return Im(e,sw(a)).ea(function(){a.b.f["after-if-continues"]=!1;e.ya.g=f;var b=d.firstChild;x(b,"display","block");return M(b)})}function sw(a){var b=kr.createElementNS("http://www.w3.org/1999/xhtml","div");mr(b,"after-if-continues");a=new Xk(a.M,b,null,null,null,3,a.b);return new hl({pa:[{node:b,ib:a.type,ua:a,Ha:null,Ea:null}],na:0,K:!1,Oa:null})}function jw(a,b,c){this.w=a;this.b=b;this.f=c}n=jw.prototype;
+n.fe=function(a,b){return b&&!a||a&&a.wa?!1:!0};n.fd=function(){return!1};n.Wc=function(){};n.La=function(a,b){var c=this;return(new kw(this.w,this.f)).f(a)?pw(this.b,b,this.w).ea(function(a){c.w.A.appendChild(a);return M(!0)}):M(!0)};n.ne=function(a){return a instanceof jw?this.b==a.b:!1};n.pe=function(){return 9};function kw(a,b){this.w=a;this.g=b}kw.prototype.b=function(a){return this.f(a)?this.g:0};kw.prototype.F=function(a){return this.b(a)};
+kw.prototype.f=function(a){if(!a)return!1;var b=a.ua?a.ua.oa:a.M;if(b===this.w.M)return!!a.K;for(a=b.parentNode;a;a=a.parentNode)if(a===this.w.M)return!0;return!1};function Fo(a,b){return a.ea(function(a){return ow(a,b)})}function Hp(a,b){var c=L("vivliostyle.selectors.processAfterIfContinuesOfAncestors"),d=a;Be(function(){if(d){var a=ow(d,b);d=d.parent;return a.Cc(!0)}return M(!1)}).then(function(){O(c,!0)});return c.result()};function tw(a){var b=uw.findIndex(function(b){return b.root===a});0<=b&&uw.splice(b,1)}function vw(a){var b=uw.findIndex(function(b){return b.root===a});return(b=uw[b])?b.Ig:null}
+function ww(a,b,c){var d=a.w,e=d.display,f=d.parent?d.parent.display:null,g=!1;if("inline-table"===f&&!(d.D instanceof vp))for(var h=d.parent;h;h=h.parent)if(h.D instanceof vp){g=h.D===b;break}return g||"table-row"===e&&!xw(f)&&"table"!==f&&"inline-table"!==f||"table-cell"===e&&"table-row"!==f&&!xw(f)&&"table"!==f&&"inline-table"!==f||d.D instanceof vp&&d.D!==b?Go(c,d).ea(function(b){a.w=b;return M(!0)}):null}
+function xw(a){return"table-row-group"===a||"table-header-group"===a||"table-footer-group"===a}function yw(a,b){this.rowIndex=a;this.M=b;this.b=[]}function zw(a){return Math.min.apply(null,a.b.map(function(a){return a.height}))}function Aw(a,b,c){this.rowIndex=a;this.Qa=b;this.g=c;this.f=c.colSpan||1;this.rowSpan=c.rowSpan||1;this.height=0;this.b=null}function Bw(a,b,c){this.rowIndex=a;this.Qa=b;this.Xb=c}function Cw(a,b,c){this.g=a;this.b=c;this.gc=new Fm(a,b,c);this.f=!1}
+Cw.prototype.$b=function(){var a=this.b.A,b=this.b.Y;"middle"!==b&&"bottom"!==b||x(a,"vertical-align","top");var c=this.gc.$b(!0);x(a,"vertical-align",b);return c};function Dw(a,b){this.A=a;this.b=b}function Ew(a,b,c,d){Km.call(this,a,b,c,d);this.D=a.D;this.rowIndex=this.l=null}v(Ew,Km);Ew.prototype.f=function(a,b){var c=Km.prototype.f.call(this,a,b);return b<this.b()?null:Fw(this).every(function(a){return!!a.w})?c:null};
+Ew.prototype.b=function(){var a=Km.prototype.b.call(this);Fw(this).forEach(function(b){a+=b.Ab.b()});return a};function Fw(a){a.l||(a.l=Gw(a).map(function(a){return a.$b()}));return a.l}function Gw(a){return Hw(a.D,null!=a.rowIndex?a.rowIndex:a.rowIndex=Iw(a.D,a.position.M)).map(a.D.Ld,a.D)}function Jw(a,b,c){this.rowIndex=a;this.j=b;this.D=c;this.h=null}v(Jw,ko);
+Jw.prototype.f=function(a,b){if(b<this.b())return null;var c=Kw(this),d=Lw(this),e=d.every(function(a){return!!a.w})&&d.some(function(a,b){var d=c[b].gc,e=a.w,f=d.nf[0];return!(f.A===e.A&&f.K===e.K&&f.na===e.na)&&!Rk(cl(e),d.ya.xb)});this.j.wa=d.some(function(a){return a.w&&a.w.wa});return e?this.j:null};Jw.prototype.b=function(){var a=this.D,b=0;zw(a.g[this.rowIndex])>a.N/2||(b+=10);Lw(this).forEach(function(a){b+=a.Ab.b()});return b};
+function Lw(a){a.h||(a.h=Kw(a).map(function(a){return a.$b()}));return a.h}function Kw(a){return Mw(a.D,a.rowIndex).map(a.D.Ld,a.D)}function vp(a,b){wp.call(this,a,b);this.F=b;this.u=!1;this.G=-1;this.N=0;this.H=[];this.J=this.B=null;this.O=0;this.g=[];this.l=[];this.f=[];this.C=null;this.h=[];this.b=null}v(vp,wp);n=vp.prototype;n.Re=function(){return"Table formatting context (vivliostyle.table.TableFormattingContext)"};
+n.af=function(a,b){if(!b)return b;switch(a.display){case "table-row":return!this.h.length;case "table-cell":return!this.h.some(function(b){return b.Bd.pa[0].node===a.M});default:return b}};function Nw(a,b){var c=a.l[b];c||(c=a.l[b]=[]);return c}function Iw(a,b){return a.g.findIndex(function(a){return b===a.M})}function Mw(a,b){return Nw(a,b).reduce(function(a,b){return b.Xb!==a[a.length-1]?a.concat(b.Xb):a},[])}function Hw(a,b){return Mw(a,b).filter(function(a){return a.rowIndex+a.rowSpan-1>b})}
+n.Ld=function(a){return this.f[a.rowIndex]&&this.f[a.rowIndex][a.Qa]};function Ow(a){0>a.G&&(a.G=Math.max.apply(null,a.g.map(function(a){return a.b.reduce(function(a,b){return a+b.f},0)})));return a.G}function Pw(a,b){a.g.forEach(function(a){a.b.forEach(function(a){var c=Hk(b,a.g);a.g=null;a.height=this.u?c.width:c.height},this)},a)}
+function Qw(a,b){if(!b)return null;var c=null,d=0;a:for(;d<a.f.length;d++)if(a.f[d])for(var e=0;e<a.f[d].length;e++)if(a.f[d][e]&&b===a.f[d][e].gc.ya){c=a.g[d].b[e];break a}if(!c)return null;for(;d<a.l.length;d++)for(;e<a.l[d].length;e++){var f=a.l[d][e];if(f.Xb===c)return{rowIndex:f.rowIndex,Qa:f.Qa}}return null}function Rw(a,b){var c=[];return a.l.reduce(function(d,e,f){if(f>=b.rowIndex)return d;e=a.Ld(e[b.Qa].Xb);if(!e||c.includes(e))return d;Sw(e.gc.ya,d);c.push(e);return d},[])}
+function Tw(a){var b=[];a.g.forEach(function(c){c.b.forEach(function(c,e){b[e]||(b[e]={Df:[],elements:[]});var d=b[e],g=a.Ld(c);g&&!d.Df.includes(g)&&(Sw(g.gc.ya,d.elements),d.Df.push(g))})});return[new Uw(b.map(function(a){return a.elements}))]}function Sw(a,b){a.B.forEach(function(a){a instanceof Tv&&b.push(a.w.D.b);a instanceof lw&&mw(a,null).forEach(function(a){b.push(a)})})}n.Te=function(){return[].concat(this.h)};n.Se=function(a){this.h=a};function Uw(a){this.f=a}
+Uw.prototype.b=function(a){return Vw(this,a,function(a){return a.current})};Uw.prototype.F=function(a){return Vw(this,a,function(a){return a.Ce})};function Vw(a,b,c){var d=0;a.f.forEach(function(a){a=lo(b,a);d=Math.max(d,c(a))});return d}function Ww(a,b){this.D=a;this.h=b;this.rowIndex=-1;this.Qa=0;this.g=!1;this.f=[]}v(Ww,Em);n=Ww.prototype;
+n.ud=function(a){var b=this.D,c=ww(a,b,this.h);if(c)return c;Xw(this,a);var c=a.w,d=b.b;switch(c.display){case "table":b.O=c.la;break;case "table-caption":b.H.push(new Dw(c.A,c.da));break;case "table-header-group":return d.tc||(this.b=!0,Wv(d,c)),M(!0);case "table-footer-group":return d.sc||(this.b=!0,Xv(d,c)),M(!0);case "table-row":this.b||(this.g=!0,this.rowIndex++,this.Qa=0,b.g[this.rowIndex]=new yw(this.rowIndex,c.M),d.g||(d.g=c.M))}return Em.prototype.ud.call(this,a)};
+n.mc=function(a){var b=this.D,c=a.w,d=c.display,e=this.h.f;Xw(this,a);if(c.M===b.F)d=Nn(e,Uv(b,c)),b.N=parseFloat(d[b.u?"height":"width"]),b.b.J=a.dd&&a.dd.M,a.Ob=!0;else switch(d){case "table-header-group":case "table-footer-group":if(this.b)return this.b=!1,M(!0);break;case "table-row":this.b||(b.C=c.A,this.g=!1);break;case "table-cell":if(!this.b){this.g||(this.rowIndex++,this.Qa=0,this.g=!0);d=this.rowIndex;c=new Aw(this.rowIndex,this.Qa,c.A);e=b.g[d];e||(b.g[d]=new yw(d,null),e=b.g[d]);e.b.push(c);
+for(var e=d+c.rowSpan,f=Nw(b,d),g=0;f[g];)g++;for(;d<e;d++)for(var f=Nw(b,d),h=g;h<g+c.f;h++){var l=f[h]=new Bw(d,h,c);c.b||(c.b=l)}this.Qa++}}return Em.prototype.mc.call(this,a)};n.pf=function(a){Yw(this,a)};n.xf=function(a){Yw(this,a)};n.eg=function(a){Yw(this,a)};n.wf=function(a){Yw(this,a)};function Yw(a,b){var c=b.w;c&&c.A&&!Co(c)&&a.f.push(c.clone())}function Xw(a,b){0<a.f.length&&Ho(a.h,b.w,a.f);a.f=[]}
+function Zw(a,b){this.bc=!0;this.D=a;this.f=b;this.l=!1;this.b=-1;this.g=0;this.u=b.u;b.u=!1}v(Zw,Em);var $w={"table-caption":!0,"table-column-group":!0,"table-column":!0};
+function ax(a,b,c,d){var e=b.rowIndex,f=b.Qa,g=c.A;if(1<b.f){x(g,"box-sizing","border-box");for(var h=a.D.J,l=0,k=0;k<b.f;k++)l+=h[b.b.Qa+k];l+=a.D.O*(b.f-1);x(g,a.D.u?"height":"width",l+"px")}b=g.ownerDocument.createElement("div");g.appendChild(b);c=new Cw(a.f,b,c);a=a.D;(g=a.f[e])||(g=a.f[e]=[]);g[f]=c;1===d.f.pa.length&&d.f.K&&(c.f=!0);return Im(c.gc,d).Cc(!0)}function bx(a,b){var c=a.D.h[0];return c?c.Xb.b.Qa===b:!1}
+function cx(a){var b=a.D.h;if(!b.length)return[];var c=[],d=0;do{var e=b[d],f=e.Xb.rowIndex;if(f<a.b){var g=c[f];g||(g=c[f]=[]);g.push(e);b.splice(d,1)}else d++}while(d<b.length);return c}
+function dx(a,b){var c=a.D,d=cx(a),e=d.reduce(function(a){return a+1},0);if(0===e)return M(!0);var f=a.f.j,g=b.w;g.A.parentNode.removeChild(g.A);var h=L("layoutRowSpanningCellsFromPreviousFragment"),l=M(!0),k=0,m=[];d.forEach(function(a){var b=this;l=l.ea(function(){var d=Uk(a[0].Bd.pa[1],g.parent);return xo(f,d,!1).ea(function(){function g(a){for(;l<a;){if(!m.includes(l)){var b=d.A.ownerDocument.createElement("td");x(b,"padding","0");d.A.appendChild(b)}l++}}var h=M(!0),l=0;a.forEach(function(a){var b=
+this;h=h.ea(function(){var c=a.Xb;g(c.b.Qa);var h=a.Bd,p=Uk(h.pa[0],d);p.na=h.na;p.K=h.K;p.Ra=h.pa[0].Ra+1;return xo(f,p,!1).ea(function(){for(var d=a.Bf,f=0;f<c.f;f++)m.push(l+f);l+=c.f;return ax(b,c,p,d).ea(function(){p.A.rowSpan=c.rowIndex+c.rowSpan-b.b+e-k;return M(!0)})})})},b);return h.ea(function(){g(Ow(c));k++;return M(!0)})})})},a);l.then(function(){xo(f,g,!0,b.yd).then(function(){O(h,!0)})});return h.result()}
+function ex(a,b){if(a.j||a.h)return M(!0);var c=b.w,d=a.D;0>a.b?a.b=Iw(d,c.M):a.b++;a.g=0;a.l=!0;return dx(a,b).ea(function(){fx(a);rp(a.f,b.dd,null,!0,b.Xc)&&!Hw(d,a.b-1).length&&(a.f.u=a.u,c.wa=!0,b.Ob=!0);return M(!0)})}function fx(a){a.D.g[a.b].b.forEach(function(b){var c=a.D.h[b.Qa];c&&c.Xb.b.Qa==b.b.Qa&&(b=c.Bd.pa[0],c=ek(a.f.j.ca,b.node),Br(c,b.Ra+1,1))})}
+function gx(a,b){if(a.j||a.h)return M(!0);var c=b.w;a.l||(0>a.b?a.b=0:a.b++,a.g=0,a.l=!0);var d=a.D.g[a.b].b[a.g],e=Wk(c).modify();e.K=!0;b.w=e;var f=L("startTableCell");bx(a,d.b.Qa)?(e=a.D.h.shift(),c.Ra=e.Bd.pa[0].Ra+1,e=M(e.Bf)):e=Do(a.f,c,b.yd).ea(function(a){a.A&&c.A.removeChild(a.A);return M(new hl(Sk(a)))});e.then(function(e){ax(a,d,c,e).then(function(){a.mc(b);a.g++;O(f,!0)})});return f.result()}
+Zw.prototype.fg=function(a){var b=ww(a,this.D,this.f);if(b)return b;var b=a.w,c=this.D.b,d=b.display;return"table-header-group"===d&&c&&c.B===b.M?(this.j=!0,M(!0)):"table-footer-group"===d&&c&&c.l===b.M?(this.h=!0,M(!0)):"table-row"===d?ex(this,a):"table-cell"===d?gx(this,a):M(!0)};Zw.prototype.Hf=function(a){a=a.w;"table-row"===a.display&&(this.l=!1,this.j||this.h||(a=Wk(a).modify(),a.K=!1,this.f.N.push(new Jw(this.b,a,this.D))));return M(!0)};
+Zw.prototype.mc=function(a){var b=a.w,c=this.D.b,d=b.display;"table-header-group"===d?c&&!c.h&&c.B===b.M?(this.j=!1,b.A.parentNode.removeChild(b.A)):x(b.A,"display","table-row-group"):"table-footer-group"===d&&(c&&!c.h&&c.l===b.M?(this.h=!1,b.A.parentNode.removeChild(b.A)):x(b.A,"display","table-row-group"));if(d&&$w[d])b.A.parentNode.removeChild(b.A);else if(b.M===this.D.F)b.wa=qp(this.f,b,null),this.f.u=this.u,a.Ob=!0;else return Em.prototype.mc.call(this,a);return M(!0)};var uw=[];
+function hx(){}function ix(a,b,c,d){for(var e=a.ownerDocument,f=e.createElement("tr"),g=[],h=0;h<b;h++){var l=e.createElement("td");f.appendChild(l);g.push(l)}a.parentNode.insertBefore(f,a.nextSibling);b=g.map(function(a){a=Hk(d,a);return c?a.height:a.width});a.parentNode.removeChild(f);return b}function jx(a){var b=[];for(a=a.firstElementChild;a;)"colgroup"===a.localName&&b.push(a),a=a.nextElementSibling;return b}
+function kx(a){var b=[];a.forEach(function(a){var c=a.span;a.removeAttribute("span");for(var e=a.firstElementChild;e;){if("col"===e.localName){var f=e.span;e.removeAttribute("span");for(c-=f;1<f--;){var g=e.cloneNode(!0);a.insertBefore(g,e);b.push(g)}b.push(e)}e=e.nextElementSibling}for(;0<c--;)e=a.ownerDocument.createElement("col"),a.appendChild(e),b.push(e)});return b}
+function lx(a,b,c,d){if(a.length<c){var e=d.ownerDocument.createElement("colgroup");b.push(e);for(b=a.length;b<c;b++){var f=d.ownerDocument.createElement("col");e.appendChild(f);a.push(f)}}}function mx(a,b,c){var d=a.u,e=a.C;if(e){a.C=null;var f=e.ownerDocument.createDocumentFragment(),g=Ow(a);if(0<g){var h=a.J=ix(e,g,d,c.f);c=jx(b);e=kx(c);lx(e,c,g,b);e.forEach(function(a,b){x(a,d?"height":"width",h[b]+"px")});c.forEach(function(a){f.appendChild(a.cloneNode(!0))})}a.B=f}}
+function nx(a,b,c){var d=b.D;d.u=b.b;Lr(d,b.b);var e=vw(b.M);tw(b.M);var f=L("TableLayoutProcessor.doInitialLayout"),g=Wk(b);Cm(new Bm(new Ww(b.D,c),c.j),b).then(function(a){var h=a.A,k=Hk(c.f,h),k=c.b?k.left:k.bottom,k=k+(c.b?-1:1)*lo(b,oo(c)).current;po(c,k)||e&&e.ng?(mx(d,h,c),Pw(d,c.f),O(f,null)):(c.N.push(new ox(g)),O(f,a))}.bind(a));return f.result()}function px(a,b,c){var d=a.H;d.forEach(function(a,f){a&&(b.insertBefore(a.A,c),"top"===a.b&&(d[f]=null))})}
+function qx(a,b){if(a.B&&b){var c=jx(b);c&&c.forEach(function(a){b.removeChild(a)})}}function rx(a,b){var c=a.D,d=Uv(c,a),e=d.firstChild;px(c,d,e);c.B&&!jx(d).length&&d.insertBefore(c.B.cloneNode(!0),e);c=new Zw(c,b);c=new Bm(c,b.j);d=L("TableFormattingContext.doLayout");Cm(c,a).Ja(d);return d.result()}n=hx.prototype;n.ee=function(a,b,c){var d=a.D;return Uv(d,a)?(c&&Rv(a.parent,b),Mm(new sx(d,this),a,b)):Go(b,a)};n.Ef=function(a,b,c,d){return new Ew(a,b,c,d)};n.Ue=function(){return!1};n.uf=function(){return!1};
+n.La=function(a,b,c,d){var e=b.D;if("table-row"===b.display){var f=Iw(e,b.M);e.h=[];var g;g=b.K?Hw(e,f):Mw(e,f);if(g.length){var h=L("TableLayoutProcessor.finishBreak"),l=0;Ce(function(a){if(l===g.length)Q(a);else{var b=g[l++],c=e.Ld(b),d=c.$b().w,h=c.b,k=cl(h),u=new hl(cl(d));e.h.push({Bd:k,Bf:u,Xb:b});h=h.A;Jp(c.b);f<b.rowIndex+b.rowSpan-1&&(h.rowSpan=f-b.rowIndex+1);c.f?P(a):c.gc.La(d,!1,!0).then(function(){var b=e.b;if(b){var f=e.u,g=c.g,h=c.gc.ya.element,k=c.b.A,l=Hk(g.f,k),k=Oo(g,k);f?(b=l.right-
+g.da-b.b(d)-k.right,x(h,"max-width",b+"px")):(b=g.da-b.b(d)-l.top-k.top,x(h,"max-height",b+"px"));x(h,"overflow","hidden")}P(a)})}}).then(function(){ip(a,b,!1);Jp(b);e.f=[];O(h,!0)});return h.result()}}e.f=[];return mp.La(a,b,c,d)};n.xd=function(a,b,c,d){Ip.prototype.xd(a,b,c,d)};function sx(a,b){Lm.call(this);this.g=b;this.b=a}v(sx,Lm);sx.prototype.kf=function(a){var b=this.b.b;return b&&b.j?(a.M===this.b.F&&!a.K&&b&&(b.wc=!1,b.$c=!1),new tx(this.b)):new ux(this.b,this.g)};
+sx.prototype.Cd=function(a){Lm.prototype.Cd.call(this,a);qx(this.b,Uv(this.b,a))};sx.prototype.de=function(a,b){Lm.prototype.de.call(this,a,b);this.b.f=[]};function ux(a,b){this.D=a;this.h=b}v(ux,bw);ux.prototype.b=function(a,b){bw.prototype.b.call(this,a,b);return nx(this.h,a,b)};function ox(a){Km.call(this,a,null,a.wa,0)}v(ox,Km);ox.prototype.b=function(){if(!this.h)throw Error("EdgeBreakPosition.prototype.updateEdge not called");return(this.j?3:0)+(this.position.parent?this.position.parent.j:0)};
+ox.prototype.u=function(a){a.B.push(new vx(this.position.M))};function vx(a){this.b=a}n=vx.prototype;n.fe=function(){return!1};n.fd=function(){return!0};n.Wc=function(a,b){uw.push({root:b.M,Ig:{ng:!0}})};n.La=function(){return M(!0)};n.ne=function(a){return a instanceof vx&&a.b===this.b};n.pe=function(){return 0};function tx(a){this.D=a}v(tx,cw);tx.prototype.b=function(a,b){var c=this.D.b;if(c&&!Yv(c,a)){var d=new lw(a);b.B.some(function(a){return d.ne(a)})||b.B.unshift(d)}return rx(a,b)};
+function lw(a){Tv.call(this,a);this.b=[]}v(lw,Tv);n=lw.prototype;n.fe=function(a,b,c){var d=this.w.D.b;return!d||c.Fd||Mo(this.w.A)||!aw(d)?!0:b&&!a||a&&a.wa?!1:!0};n.fd=function(a){return wx(a,this.w.D).some(function(b){return b.Dd.some(function(b){return b.fd(a)})})?!0:Tv.prototype.fd.call(this,a)};n.Wc=function(a,b,c,d){var e=this.w.D;this.b=wx(b,e);this.b.forEach(function(b){b.Dd.forEach(function(e){e.Wc(a,b.Ab,c,d)})});a||(qx(e,Uv(e,this.w)),xx(c));Tv.prototype.Wc.call(this,a,b,c,d)};
+n.La=function(a,b){var c=this,d=L("finishBreak"),e=this.b.reduce(function(a,b){return a.concat(b.Dd.map(function(a){return{pg:a,Ab:b.Ab}}))},[]),f=0;Be(function(){if(f<e.length){var a=e[f++];return a.pg.La(a.Ab,b).Cc(!0)}return M(!1)}).then(function(){O(d,!0)});return d.result().ea(function(){return Tv.prototype.La.call(c,a,b)})};function xx(a){if(a&&"table-row"===a.display&&a.A)for(;a.A.previousElementSibling;){var b=a.A.previousElementSibling;b.parentNode&&b.parentNode.removeChild(b)}}
+function wx(a,b){return yx(a,b).map(function(a){return{Dd:a.sg.gc.ya.B,Ab:a.Ab}})}function yx(a,b){var c=Number.MAX_VALUE;a&&"table-row"===a.display&&(c=Iw(b,a.M)+1);for(var c=Math.min(b.f.length,c),d=[],e=0;e<c;e++)b.f[e]&&b.f[e].forEach(function(a){a&&d.push({sg:a,Ab:a.$b().w})});return d}function mw(a,b){var c=a.w.D,d=Qw(c,b);return d?Rw(c,d):Tw(c)}n.ne=function(a){return a instanceof lw?this.w.D===a.w.D:!1};var zx=new hx;
+de("RESOLVE_FORMATTING_CONTEXT",function(a,b,c){return b?c===Ld?(b=a.parent,new vp(b?b.D:null,a.M)):null:null});de("RESOLVE_LAYOUT_PROCESSOR",function(a){return a instanceof vp?zx:null});Array.from||(Array.from=function(a,b,c){b&&c&&(b=b.bind(c));c=[];for(var d=a.length,e=0;e<d;e++)c[e]=b?b(a[e],e):a[e];return c});
 Array.prototype.findIndex||Object.defineProperty(Array.prototype,"findIndex",{value:function(a,b){if(null==this)throw new TypeError("Array.prototype.findIndex called on null or undefined");if("function"!==typeof a)throw new TypeError("predicate must be a function");for(var c=Object(this),d=c.length>>>0,e,f=0;f<d;f++)if(e=c[f],a.call(b,e,f,c))return f;return-1},enumerable:!1,configurable:!1,writable:!1});
-Object.assign||(Object.assign=function(a,b){if(!b)return a;Object.keys(b).forEach(function(c){a[c]=b[c]});return a});function zx(a){function b(a){return"number"===typeof a?a:null}function c(a){return"string"===typeof a?{url:a,ub:null,zc:null}:{url:a.url,ub:b(a.startPage),zc:b(a.skipPagesBefore)}}return Array.isArray(a)?a.map(c):a?[c(a)]:null}function Ax(a){var b={};Object.keys(a).forEach(function(c){var d=a[c];switch(c){case "autoResize":b.autoresize=d;break;case "pageBorderWidth":b.pageBorder=d;break;default:b[c]=d}});return b}
-function Bx(a,b){Xj=a.debug;this.g=!1;this.h=a;this.Nb=new Pu(a.window||window,a.viewportElement,"main",this.qg.bind(this));this.f={autoResize:!0,fontSize:16,pageBorderWidth:1,renderAllPages:!0,pageViewMode:"autoSpread",zoom:1,fitToScreen:!1,defaultPaperSize:void 0};b&&this.dg(b);this.b=new db;Object.defineProperty(this,"readyState",{get:function(){return this.Nb.B}})}n=Bx.prototype;n.dg=function(a){var b=Object.assign({a:"configure"},Ax(a));this.Nb.l(b);Object.assign(this.f,a)};
-n.qg=function(a){var b={type:a.t};Object.keys(a).forEach(function(c){"t"!==c&&(b[c]=a[c])});eb(this.b,b)};n.Jg=function(a,b){this.b.addEventListener(a,b,!1)};n.Mg=function(a,b){this.b.removeEventListener(a,b,!1)};n.vg=function(a,b,c){a||eb(this.b,{type:"error",content:"No URL specified"});Cx(this,a,null,b,c)};n.Kg=function(a,b,c){a||eb(this.b,{type:"error",content:"No URL specified"});Cx(this,null,a,b,c)};
-function Cx(a,b,c,d,e){function f(a){if(a)return a.map(function(a){return{url:a.url||null,text:a.text||null}})}d=d||{};var g=f(d.authorStyleSheet),h=f(d.userStyleSheet);e&&Object.assign(a.f,e);b=Object.assign({a:b?"loadXML":"loadEPUB",userAgentRootURL:a.h.userAgentRootURL,url:zx(b)||c,document:d.documentObject,fragment:d.fragment,authorStyleSheet:g,userStyleSheet:h},Ax(a.f));a.g?a.Nb.l(b):(a.g=!0,qv(a.Nb,b))}n.ac=function(){return this.Nb.ac()};
-n.yg=function(a,b){if("epage"===a)this.Nb.l({a:"moveTo",epage:b});else{var c;a:switch(a){case "left":c="ltr"===this.ac()?"previous":"next";break a;case "right":c="ltr"===this.ac()?"next":"previous";break a;default:c=a}this.Nb.l({a:"moveTo",where:c})}};n.xg=function(a){this.Nb.l({a:"moveTo",url:a})};n.Lg=function(a){a:{var b=this.Nb;if(!b.g)throw Error("no page exists.");switch(a){case "fit inside viewport":a=lv(b,b.Z.tb?kv(b,b.j):b.g.g);break a;default:throw Error("unknown zoom type: "+a);}}return a};
-n.tg=function(){return this.Nb.ba};na("vivliostyle.viewer.Viewer",Bx);Bx.prototype.setOptions=Bx.prototype.dg;Bx.prototype.addListener=Bx.prototype.Jg;Bx.prototype.removeListener=Bx.prototype.Mg;Bx.prototype.loadDocument=Bx.prototype.vg;Bx.prototype.loadEPUB=Bx.prototype.Kg;Bx.prototype.getCurrentPageProgression=Bx.prototype.ac;Bx.prototype.navigateToPage=Bx.prototype.yg;Bx.prototype.navigateToInternalUrl=Bx.prototype.xg;Bx.prototype.queryZoomFactor=Bx.prototype.Lg;Bx.prototype.getPageSizes=Bx.prototype.tg;
-na("vivliostyle.viewer.ZoomType",mv);mv.FIT_INSIDE_VIEWPORT="fit inside viewport";na("vivliostyle.viewer.PageViewMode",Ou);Ou.SINGLE_PAGE="singlePage";Ou.SPREAD="spread";Ou.AUTO_SPREAD="autoSpread";Hv.call(Tu,"load_vivliostyle","end",void 0);var Dx=16,Ex="ltr";function Fx(a){window.adapt_command(a)}function Gx(){Fx({a:"moveTo",where:"ltr"===Ex?"previous":"next"})}function Hx(){Fx({a:"moveTo",where:"ltr"===Ex?"next":"previous"})}
-function Ix(a){var b=a.key,c=a.keyIdentifier,d=a.location;if("End"===b||"End"===c)Fx({a:"moveTo",where:"last"}),a.preventDefault();else if("Home"===b||"Home"===c)Fx({a:"moveTo",where:"first"}),a.preventDefault();else if("ArrowUp"===b||"Up"===b||"Up"===c)Fx({a:"moveTo",where:"previous"}),a.preventDefault();else if("ArrowDown"===b||"Down"===b||"Down"===c)Fx({a:"moveTo",where:"next"}),a.preventDefault();else if("ArrowRight"===b||"Right"===b||"Right"===c)Hx(),a.preventDefault();else if("ArrowLeft"===
-b||"Left"===b||"Left"===c)Gx(),a.preventDefault();else if("0"===b||"U+0030"===c)Fx({a:"configure",fontSize:Math.round(Dx)}),a.preventDefault();else if("t"===b||"U+0054"===c)Fx({a:"toc",v:"toggle",autohide:!0}),a.preventDefault();else if("+"===b||"Add"===b||"U+002B"===c||"U+00BB"===c||"U+004B"===c&&d===KeyboardEvent.b)Dx*=1.2,Fx({a:"configure",fontSize:Math.round(Dx)}),a.preventDefault();else if("-"===b||"Subtract"===b||"U+002D"===c||"U+00BD"===c||"U+004D"===c&&d===KeyboardEvent.b)Dx/=1.2,Fx({a:"configure",
-fontSize:Math.round(Dx)}),a.preventDefault()}
-function Jx(a){switch(a.t){case "loaded":a=a.viewer;var b=Ex=a.ac();a.be.setAttribute("data-vivliostyle-page-progression",b);a.be.setAttribute("data-vivliostyle-spread-view",a.Z.tb);window.addEventListener("keydown",Ix,!1);document.body.setAttribute("data-vivliostyle-viewer-status","complete");a=document.getElementById("vivliostyle-page-navigation-left");a.addEventListener("click",Gx,!1);b=document.getElementById("vivliostyle-page-navigation-right");b.addEventListener("click",Hx,!1);[a,b].forEach(function(a){a.setAttribute("data-vivliostyle-ui-state",
-"attention");window.setTimeout(function(){a.removeAttribute("data-vivliostyle-ui-state")},1E3)});break;case "nav":(a=a.cfi)&&location.replace(Fa(location.href,Ta(a||"")));break;case "hyperlink":a.internal&&Fx({a:"moveTo",url:a.href})}}
+Object.assign||(Object.assign=function(a,b){if(!b)return a;Object.keys(b).forEach(function(c){a[c]=b[c]});return a});function Ax(a){function b(a){return"number"===typeof a?a:null}function c(a){return"string"===typeof a?{url:a,ub:null,zc:null}:{url:a.url,ub:b(a.startPage),zc:b(a.skipPagesBefore)}}return Array.isArray(a)?a.map(c):a?[c(a)]:null}function Bx(a){var b={};Object.keys(a).forEach(function(c){var d=a[c];switch(c){case "autoResize":b.autoresize=d;break;case "pageBorderWidth":b.pageBorder=d;break;default:b[c]=d}});return b}
+function Cx(a,b){Xj=a.debug;this.g=!1;this.h=a;this.Nb=new Qu(a.window||window,a.viewportElement,"main",this.qg.bind(this));this.f={autoResize:!0,fontSize:16,pageBorderWidth:1,renderAllPages:!0,pageViewMode:"autoSpread",zoom:1,fitToScreen:!1,defaultPaperSize:void 0};b&&this.dg(b);this.b=new db;Object.defineProperty(this,"readyState",{get:function(){return this.Nb.B}})}n=Cx.prototype;n.dg=function(a){var b=Object.assign({a:"configure"},Bx(a));this.Nb.l(b);Object.assign(this.f,a)};
+n.qg=function(a){var b={type:a.t};Object.keys(a).forEach(function(c){"t"!==c&&(b[c]=a[c])});eb(this.b,b)};n.Jg=function(a,b){this.b.addEventListener(a,b,!1)};n.Mg=function(a,b){this.b.removeEventListener(a,b,!1)};n.vg=function(a,b,c){a||eb(this.b,{type:"error",content:"No URL specified"});Dx(this,a,null,b,c)};n.Kg=function(a,b,c){a||eb(this.b,{type:"error",content:"No URL specified"});Dx(this,null,a,b,c)};
+function Dx(a,b,c,d,e){function f(a){if(a)return a.map(function(a){return{url:a.url||null,text:a.text||null}})}d=d||{};var g=f(d.authorStyleSheet),h=f(d.userStyleSheet);e&&Object.assign(a.f,e);b=Object.assign({a:b?"loadXML":"loadEPUB",userAgentRootURL:a.h.userAgentRootURL,url:Ax(b)||c,document:d.documentObject,fragment:d.fragment,authorStyleSheet:g,userStyleSheet:h},Bx(a.f));a.g?a.Nb.l(b):(a.g=!0,rv(a.Nb,b))}n.ac=function(){return this.Nb.ac()};
+n.yg=function(a,b){if("epage"===a)this.Nb.l({a:"moveTo",epage:b});else{var c;a:switch(a){case "left":c="ltr"===this.ac()?"previous":"next";break a;case "right":c="ltr"===this.ac()?"next":"previous";break a;default:c=a}this.Nb.l({a:"moveTo",where:c})}};n.xg=function(a){this.Nb.l({a:"moveTo",url:a})};n.Lg=function(a){a:{var b=this.Nb;if(!b.g)throw Error("no page exists.");switch(a){case "fit inside viewport":a=mv(b,b.Z.tb?lv(b,b.j):b.g.g);break a;default:throw Error("unknown zoom type: "+a);}}return a};
+n.tg=function(){return this.Nb.ba};na("vivliostyle.viewer.Viewer",Cx);Cx.prototype.setOptions=Cx.prototype.dg;Cx.prototype.addListener=Cx.prototype.Jg;Cx.prototype.removeListener=Cx.prototype.Mg;Cx.prototype.loadDocument=Cx.prototype.vg;Cx.prototype.loadEPUB=Cx.prototype.Kg;Cx.prototype.getCurrentPageProgression=Cx.prototype.ac;Cx.prototype.navigateToPage=Cx.prototype.yg;Cx.prototype.navigateToInternalUrl=Cx.prototype.xg;Cx.prototype.queryZoomFactor=Cx.prototype.Lg;Cx.prototype.getPageSizes=Cx.prototype.tg;
+na("vivliostyle.viewer.ZoomType",nv);nv.FIT_INSIDE_VIEWPORT="fit inside viewport";na("vivliostyle.viewer.PageViewMode",Pu);Pu.SINGLE_PAGE="singlePage";Pu.SPREAD="spread";Pu.AUTO_SPREAD="autoSpread";Iv.call(Uu,"load_vivliostyle","end",void 0);var Ex=16,Fx="ltr";function Gx(a){window.adapt_command(a)}function Hx(){Gx({a:"moveTo",where:"ltr"===Fx?"previous":"next"})}function Ix(){Gx({a:"moveTo",where:"ltr"===Fx?"next":"previous"})}
+function Jx(a){var b=a.key,c=a.keyIdentifier,d=a.location;if("End"===b||"End"===c)Gx({a:"moveTo",where:"last"}),a.preventDefault();else if("Home"===b||"Home"===c)Gx({a:"moveTo",where:"first"}),a.preventDefault();else if("ArrowUp"===b||"Up"===b||"Up"===c)Gx({a:"moveTo",where:"previous"}),a.preventDefault();else if("ArrowDown"===b||"Down"===b||"Down"===c)Gx({a:"moveTo",where:"next"}),a.preventDefault();else if("ArrowRight"===b||"Right"===b||"Right"===c)Ix(),a.preventDefault();else if("ArrowLeft"===
+b||"Left"===b||"Left"===c)Hx(),a.preventDefault();else if("0"===b||"U+0030"===c)Gx({a:"configure",fontSize:Math.round(Ex)}),a.preventDefault();else if("t"===b||"U+0054"===c)Gx({a:"toc",v:"toggle",autohide:!0}),a.preventDefault();else if("+"===b||"Add"===b||"U+002B"===c||"U+00BB"===c||"U+004B"===c&&d===KeyboardEvent.b)Ex*=1.2,Gx({a:"configure",fontSize:Math.round(Ex)}),a.preventDefault();else if("-"===b||"Subtract"===b||"U+002D"===c||"U+00BD"===c||"U+004D"===c&&d===KeyboardEvent.b)Ex/=1.2,Gx({a:"configure",
+fontSize:Math.round(Ex)}),a.preventDefault()}
+function Kx(a){switch(a.t){case "loaded":a=a.viewer;var b=Fx=a.ac();a.be.setAttribute("data-vivliostyle-page-progression",b);a.be.setAttribute("data-vivliostyle-spread-view",a.Z.tb);window.addEventListener("keydown",Jx,!1);document.body.setAttribute("data-vivliostyle-viewer-status","complete");a=document.getElementById("vivliostyle-page-navigation-left");a.addEventListener("click",Hx,!1);b=document.getElementById("vivliostyle-page-navigation-right");b.addEventListener("click",Ix,!1);[a,b].forEach(function(a){a.setAttribute("data-vivliostyle-ui-state",
+"attention");window.setTimeout(function(){a.removeAttribute("data-vivliostyle-ui-state")},1E3)});break;case "nav":(a=a.cfi)&&location.replace(Fa(location.href,Ta(a||"")));break;case "hyperlink":a.internal&&Gx({a:"moveTo",url:a.href})}}
 na("vivliostyle.viewerapp.main",function(a){var b=a&&a.fragment||Ba("f"),c=a&&a.epubURL||Ba("b"),d=a&&a.xmlURL||Ba("x"),e=a&&a.defaultPageWidth||Ba("w"),f=a&&a.defaultPageHeight||Ba("h"),g=a&&a.defaultPageSize||Ba("size"),h=a&&a.orientation||Ba("orientation"),l=Ba("spread"),l=a&&a.spreadView||!!l&&"false"!=l,k=a&&a.viewportElement||document.body;a={a:c?"loadEPUB":"loadXML",url:c||d,autoresize:!0,fragment:b,renderAllPages:!0,userAgentRootURL:a&&a.uaRoot||null,document:a&&a.document||null,userStyleSheet:a&&
 a.userStyleSheet||null,spreadView:l,pageBorder:1};var m;if(e&&f)m=e+" "+f;else{switch(g){case "A5":e="148mm";f="210mm";break;case "A4":e="210mm";f="297mm";break;case "A3":e="297mm";f="420mm";break;case "B5":e="176mm";f="250mm";break;case "B4":e="250mm";f="353mm";break;case "letter":e="8.5in";f="11in";break;case "legal":e="8.5in";f="14in";break;case "ledger":e="11in",f="17in"}e&&f&&(m=g,"landscape"===h&&(m=m?m+" landscape":null,g=e,e=f,f=g))}e&&f&&(a.viewport={width:e,height:f},g=document.createElement("style"),
-g.textContent="@page { size: "+m+"; margin: 0; }",document.head.appendChild(g));qv(new Pu(window,k,"main",Jx),a)});
+g.textContent="@page { size: "+m+"; margin: 0; }",document.head.appendChild(g));rv(new Qu(window,k,"main",Kx),a)});
     return enclosingObject.vivliostyle;
 }.bind(window));
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],3:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var supportTouchEvents = ("ontouchstart" in window);
-
-_knockout2["default"].bindingHandlers.menuButton = {
-    init: function init(element, valueAccessor) {
-        if (_knockout2["default"].unwrap(valueAccessor())) {
-            if (supportTouchEvents) {
-                element.addEventListener("touchstart", function () {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover active", true);
-                });
-                element.addEventListener("touchend", function () {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover active", false);
-                });
-            } else {
-                element.addEventListener("mouseover", function () {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover", true);
-                });
-                element.addEventListener("mousedown", function () {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "active", true);
-                });
-                element.addEventListener("mouseup", function () {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "active", false);
-                });
-                element.addEventListener("mouseout", function () {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover", false);
-                });
-            }
-        }
-    }
-};
-
-},{"knockout":1}],4:[function(require,module,exports){
-/*
- * Copyright 2018 Vivliostyle Foundation
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var supportTouchEvents = ("ontouchstart" in window);
-
-var xStart = null;
-var yStart = null;
-var arrowButton = null;
-
-_knockout2["default"].bindingHandlers.swipePages = {
-    init: function init(element, valueAccessor) {
-        if (supportTouchEvents && _knockout2["default"].unwrap(valueAccessor())) {
-            element.addEventListener("touchstart", function (event) {
-                if (event.touches.length > 1) {
-                    return; // multi-touch is not for page swipe
-                }
-                if (window.visualViewport && window.visualViewport.scale > 1) {
-                    return; // disable page swipe when pinch-zoomed
-                }
-                var viewportElement = document.getElementById("vivliostyle-viewer-viewport");
-                if (viewportElement && viewportElement.scrollWidth > viewportElement.clientWidth) {
-                    return; // disable page swipe when horizontal scrollable
-                }
-                xStart = event.touches[0].clientX;
-                yStart = event.touches[0].clientY;
-            });
-            element.addEventListener("touchmove", function (event) {
-                if (event.touches.length > 1) {
-                    return;
-                }
-                if (xStart !== null && yStart !== null) {
-                    var xDiff = event.touches[0].clientX - xStart;
-                    var yDiff = event.touches[0].clientY - yStart;
-                    if (Math.abs(xDiff) > Math.abs(yDiff)) {
-                        if (xDiff < 0) {
-                            // swipe to left = go to right
-                            arrowButton = document.getElementById("vivliostyle-page-navigation-right");
-                        } else {
-                            // swipe to right = go to left
-                            arrowButton = document.getElementById("vivliostyle-page-navigation-left");
-                        }
-                    }
-                    if (Math.abs(xDiff) + Math.abs(yDiff) >= 16) {
-                        if (arrowButton) {
-                            arrowButton.click();
-                            _knockout2["default"].utils.toggleDomNodeCssClass(arrowButton, "active", true);
-                        }
-                        xStart = null;
-                        yStart = null;
-                    }
-                }
-            });
-            element.addEventListener("touchend", function (event) {
-                if (arrowButton) {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(arrowButton, "active", false);
-                }
-                arrowButton = null;
-                xStart = null;
-                yStart = null;
-            });
-        }
-    }
-};
-
-},{"knockout":1}],5:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _modelsMessageQueue = require("../models/message-queue");
-
-var _modelsMessageQueue2 = _interopRequireDefault(_modelsMessageQueue);
-
-var LogLevel = {
-    DEBUG: "debug",
-    INFO: "info",
-    WARN: "warn",
-    ERROR: "error"
-};
-
-var Logger = (function () {
-    function Logger() {
-        _classCallCheck(this, Logger);
-
-        this.logLevel = LogLevel.ERROR;
-    }
-
-    _createClass(Logger, [{
-        key: "setLogLevel",
-        value: function setLogLevel(logLevel) {
-            this.logLevel = logLevel;
-        }
-    }, {
-        key: "debug",
-        value: function debug(content) {
-            if (this.logLevel === LogLevel.DEBUG) {
-                _modelsMessageQueue2["default"].push({
-                    type: "debug",
-                    content: content
-                });
-            }
-        }
-    }, {
-        key: "info",
-        value: function info(content) {
-            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO) {
-                _modelsMessageQueue2["default"].push({
-                    type: "info",
-                    content: content
-                });
-            }
-        }
-    }, {
-        key: "warn",
-        value: function warn(content) {
-            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN) {
-                _modelsMessageQueue2["default"].push({
-                    type: "warn",
-                    content: content
-                });
-            }
-        }
-    }, {
-        key: "error",
-        value: function error(content) {
-            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN || this.logLevel === LogLevel.ERROR) {
-                _modelsMessageQueue2["default"].push({
-                    type: "error",
-                    content: content
-                });
-            }
-        }
-    }]);
-
-    return Logger;
-})();
-
-Logger.LogLevel = LogLevel;
-
-var instance = new Logger();
-
-Logger.getLogger = function () {
-    return instance;
-};
-
-exports["default"] = Logger;
-module.exports = exports["default"];
-
-},{"../models/message-queue":8}],6:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _vivliostyle = require("vivliostyle");
-
-var _vivliostyle2 = _interopRequireDefault(_vivliostyle);
-
-var _modelsVivliostyle = require("./models/vivliostyle");
-
-var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
-
-var _vivliostyleViewer = require("./vivliostyle-viewer");
-
-var _vivliostyleViewer2 = _interopRequireDefault(_vivliostyleViewer);
-
-_modelsVivliostyle2["default"].setInstance(_vivliostyle2["default"]);
-_vivliostyleViewer2["default"].start();
-
-},{"./models/vivliostyle":12,"./vivliostyle-viewer":23,"vivliostyle":2}],7:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var _storesUrlParameters = require("../stores/url-parameters");
-
-var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
-
-var _pageSize = require("./page-size");
-
-var _pageSize2 = _interopRequireDefault(_pageSize);
-
-function getDocumentOptionsFromURL() {
-    var epubUrl = _storesUrlParameters2["default"].getParameter("b");
-    var url = _storesUrlParameters2["default"].getParameter("x");
-    var fragment = _storesUrlParameters2["default"].getParameter("f", true);
-    var style = _storesUrlParameters2["default"].getParameter("style");
-    var userStyle = _storesUrlParameters2["default"].getParameter("userStyle");
-    return {
-        epubUrl: epubUrl[0] || null, // epubUrl and url are exclusive
-        url: !epubUrl[0] && url.length ? url : null,
-        fragment: fragment[0] || null,
-        authorStyleSheet: style.length ? style : [],
-        userStyleSheet: userStyle.length ? userStyle : []
-    };
-}
-
-var DocumentOptions = (function () {
-    function DocumentOptions() {
-        _classCallCheck(this, DocumentOptions);
-
-        var urlOptions = getDocumentOptionsFromURL();
-        this.epubUrl = _knockout2["default"].observable(urlOptions.epubUrl || "");
-        this.url = _knockout2["default"].observable(urlOptions.url || null);
-        this.fragment = _knockout2["default"].observable(urlOptions.fragment || "");
-        this.authorStyleSheet = _knockout2["default"].observable(urlOptions.authorStyleSheet);
-        this.userStyleSheet = _knockout2["default"].observable(urlOptions.userStyleSheet);
-        this.pageSize = new _pageSize2["default"]();
-
-        // write fragment back to URL when updated
-        this.fragment.subscribe(function (fragment) {
-            if ((urlOptions.epubUrl ? /^epubcfi\(\/[246]\/2!\)/ : /^epubcfi\(\/2!\)/).test(fragment)) {
-                _storesUrlParameters2["default"].removeParameter("f");
-            } else {
-                var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
-                _storesUrlParameters2["default"].setParameter("f", encoded, true);
-            }
-        });
-    }
-
-    _createClass(DocumentOptions, [{
-        key: "toObject",
-        value: function toObject() {
-            function convertStyleSheetArray(arr) {
-                return arr.map(function (url) {
-                    return {
-                        url: url
-                    };
-                });
-            }
-            var uss = convertStyleSheetArray(this.userStyleSheet());
-            // Do not include url
-            // (url is a required argument to Viewer.loadDocument, separated from other options)
-            return {
-                fragment: this.fragment(),
-                authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
-                userStyleSheet: [{
-                    text: "@page {" + this.pageSize.toCSSDeclarationString() + "}"
-                }].concat(uss)
-            };
-        }
-    }]);
-
-    return DocumentOptions;
-})();
-
-exports["default"] = DocumentOptions;
-module.exports = exports["default"];
-
-},{"../stores/url-parameters":14,"./page-size":9,"knockout":1}],8:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-function MessageQueue() {
-  return _knockout2["default"].observableArray();
-}
-
-exports["default"] = new MessageQueue();
-module.exports = exports["default"];
-
-},{"knockout":1}],9:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var Mode = {
-    AUTO: "auto",
-    PRESET: "preset",
-    CUSTOM: "custom"
-};
-
-var PresetSize = [{ name: "A5", description: "A5" }, { name: "A4", description: "A4" }, { name: "A3", description: "A3" }, { name: "B5", description: "B5 (ISO)" }, { name: "B4", description: "B4 (ISO)" }, { name: "JIS-B5", description: "B5 (JIS)" }, { name: "JIS-B4", description: "B4 (JIS)" }, { name: "letter", description: "letter" }, { name: "legal", description: "legal" }, { name: "ledger", description: "ledger" }];
-
-var PageSize = (function () {
-    function PageSize(pageSize) {
-        _classCallCheck(this, PageSize);
-
-        this.mode = _knockout2["default"].observable(Mode.AUTO);
-        this.presetSize = _knockout2["default"].observable(PresetSize[0]);
-        this.isLandscape = _knockout2["default"].observable(false);
-        this.customWidth = _knockout2["default"].observable("210mm");
-        this.customHeight = _knockout2["default"].observable("297mm");
-        this.isImportant = _knockout2["default"].observable(false);
-
-        var setDisabledElements = function setDisabledElements(mode) {
-            var presetSelectElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_preset-select")[0];
-            if (!presetSelectElem) {
-                return;
-            }
-            var presetLandscapeElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_preset-landscape")[0];
-            var customWidthElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_custom-width")[0];
-            var customHeightElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_custom-height")[0];
-
-            switch (mode) {
-                case Mode.AUTO:
-                    presetSelectElem.disabled = true;
-                    presetLandscapeElem.disabled = true;
-                    customWidthElem.disabled = true;
-                    customHeightElem.disabled = true;
-                    break;
-                case Mode.PRESET:
-                    presetSelectElem.disabled = false;
-                    presetLandscapeElem.disabled = false;
-                    customWidthElem.disabled = true;
-                    customHeightElem.disabled = true;
-                    break;
-                case Mode.CUSTOM:
-                    presetSelectElem.disabled = true;
-                    presetLandscapeElem.disabled = true;
-                    customWidthElem.disabled = false;
-                    customHeightElem.disabled = false;
-                    break;
-            }
-        };
-
-        if (pageSize) {
-            this.copyFrom(pageSize);
-        }
-
-        setDisabledElements(this.mode());
-
-        this.mode.subscribe(function (mode) {
-            setDisabledElements(mode);
-        });
-    }
-
-    _createClass(PageSize, [{
-        key: "copyFrom",
-        value: function copyFrom(other) {
-            this.mode(other.mode());
-            this.presetSize(other.presetSize());
-            this.isLandscape(other.isLandscape());
-            this.customWidth(other.customWidth());
-            this.customHeight(other.customHeight());
-            this.isImportant(other.isImportant());
-        }
-    }, {
-        key: "equivalentTo",
-        value: function equivalentTo(other) {
-            if (this.isImportant() !== other.isImportant()) {
-                return false;
-            }
-            var mode = this.mode();
-            if (other.mode() === mode) {
-                switch (mode) {
-                    case Mode.AUTO:
-                        return true;
-                    case Mode.PRESET:
-                        return this.presetSize() === other.presetSize() && this.isLandscape() === other.isLandscape();
-                    case Mode.CUSTOM:
-                        return this.customWidth() === other.customWidth() && this.customHeight() === other.customHeight();
-                    default:
-                        throw new Error("Unknown mode " + mode);
-                }
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "toCSSDeclarationString",
-        value: function toCSSDeclarationString() {
-            var declaration = "size: ";
-            switch (this.mode()) {
-                case Mode.AUTO:
-                    declaration += "auto";
-                    break;
-                case Mode.PRESET:
-                    declaration += this.presetSize().name;
-                    if (this.isLandscape()) {
-                        declaration += " landscape";
-                    }
-                    break;
-                case Mode.CUSTOM:
-                    declaration += this.customWidth() + " " + this.customHeight();
-                    break;
-                default:
-                    throw new Error("Unknown mode " + this.mode());
-            }
-
-            if (this.isImportant()) {
-                declaration += " !important";
-            }
-
-            return declaration + ";";
-        }
-    }]);
-
-    return PageSize;
-})();
-
-PageSize.Mode = Mode;
-PageSize.PresetSize = PageSize.prototype.PresetSize = PresetSize;
-
-exports["default"] = PageSize;
-module.exports = exports["default"];
-
-},{"knockout":1}],10:[function(require,module,exports){
-/*
- * Copyright 2016 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _modelsVivliostyle = require("../models/vivliostyle");
-
-var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
-
-var PageViewModeInstance = (function () {
-    function PageViewModeInstance() {
-        _classCallCheck(this, PageViewModeInstance);
-    }
-
-    _createClass(PageViewModeInstance, [{
-        key: "toSpreadViewString",
-        value: function toSpreadViewString() {
-            switch (this) {
-                case PageViewMode.SPREAD:
-                    return "true";
-                case PageViewMode.SINGLE_PAGE:
-                    return "false";
-                case PageViewMode.AUTO_SPREAD:
-                    return "auto";
-                default:
-                    throw new Error("Invalid PageViewMode");
-            }
-        }
-    }, {
-        key: "toString",
-        value: function toString() {
-            switch (this) {
-                case PageViewMode.SPREAD:
-                    return "spread"; // vivliostyle.viewer.PageViewMode.SPREAD;
-                case PageViewMode.SINGLE_PAGE:
-                    return "singlePage"; // vivliostyle.viewer.PageViewMode.SINGLE_PAGE;
-                case PageViewMode.AUTO_SPREAD:
-                    return "autoSpread"; // vivliostyle.viewer.PageViewMode.AUTO_SPREAD;
-                default:
-                    throw new Error("Invalid PageViewMode");
-            }
-        }
-    }]);
-
-    return PageViewModeInstance;
-})();
-
-var PageViewMode = {
-    AUTO_SPREAD: new PageViewModeInstance(),
-    SINGLE_PAGE: new PageViewModeInstance(),
-    SPREAD: new PageViewModeInstance(),
-    defaultMode: function defaultMode() {
-        return this.AUTO_SPREAD;
-    },
-    fromSpreadViewString: function fromSpreadViewString(str) {
-        switch (str) {
-            case "true":
-                return this.SPREAD;
-            case "false":
-                return this.SINGLE_PAGE;
-            case "auto":
-            default:
-                return this.AUTO_SPREAD;
-        }
-    },
-    of: function of(name) {
-        switch (name) {
-            case _modelsVivliostyle2["default"].viewer.PageViewMode.SPREAD:
-                return this.SPREAD;
-            case _modelsVivliostyle2["default"].viewer.PageViewMode.SINGLE_PAGE:
-                return this.SINGLE_PAGE;
-            case _modelsVivliostyle2["default"].viewer.PageViewMode.AUTO_SPREAD:
-                return this.AUTO_SPREAD;
-            default:
-                throw new Error("Invalid PageViewMode name: " + name);
-        }
-    }
-};
-
-exports["default"] = PageViewMode;
-module.exports = exports["default"];
-
-},{"../models/vivliostyle":12}],11:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var _storesUrlParameters = require("../stores/url-parameters");
-
-var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
-
-var _pageViewMode = require("./page-view-mode");
-
-var _pageViewMode2 = _interopRequireDefault(_pageViewMode);
-
-var _zoomOptions = require("./zoom-options");
-
-var _zoomOptions2 = _interopRequireDefault(_zoomOptions);
-
-function getViewerOptionsFromURL() {
-    var renderAllPages = _storesUrlParameters2["default"].getParameter("renderAllPages")[0];
-    return {
-        renderAllPages: renderAllPages === "true" ? true : renderAllPages === "false" ? false : null,
-        profile: _storesUrlParameters2["default"].getParameter("profile")[0] === "true",
-        pageViewMode: _pageViewMode2["default"].fromSpreadViewString(_storesUrlParameters2["default"].getParameter("spread")[0])
-    };
-}
-
-function getDefaultValues() {
-    var isNotEpub = !_storesUrlParameters2["default"].getParameter("b").length;
-    return {
-        renderAllPages: isNotEpub,
-        fontSize: 16,
-        profile: false,
-        pageViewMode: _pageViewMode2["default"].defaultMode(),
-        zoom: _zoomOptions2["default"].createDefaultOptions()
-    };
-}
-
-var ViewerOptions = (function () {
-    function ViewerOptions(options) {
-        var _this = this;
-
-        _classCallCheck(this, ViewerOptions);
-
-        this.renderAllPages = _knockout2["default"].observable();
-        this.fontSize = _knockout2["default"].observable();
-        this.profile = _knockout2["default"].observable();
-        this.pageViewMode = _knockout2["default"].observable();
-        this.zoom = _knockout2["default"].observable();
-        if (options) {
-            this.copyFrom(options);
-        } else {
-            (function () {
-                var defaultValues = getDefaultValues();
-                var urlOptions = getViewerOptionsFromURL();
-                _this.renderAllPages(urlOptions.renderAllPages !== null ? urlOptions.renderAllPages : defaultValues.renderAllPages);
-                _this.fontSize(defaultValues.fontSize);
-                _this.profile(urlOptions.profile || defaultValues.profile);
-                _this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
-                _this.zoom(defaultValues.zoom);
-
-                // write spread parameter back to URL when updated
-                _this.pageViewMode.subscribe(function (pageViewMode) {
-                    if (pageViewMode === defaultValues.pageViewMode) {
-                        _storesUrlParameters2["default"].removeParameter("spread");
-                    } else {
-                        _storesUrlParameters2["default"].setParameter("spread", pageViewMode.toSpreadViewString());
-                    }
-                });
-                _this.renderAllPages.subscribe(function (renderAllPages) {
-                    if (renderAllPages === defaultValues.renderAllPages) {
-                        _storesUrlParameters2["default"].removeParameter("renderAllPages");
-                    } else {
-                        _storesUrlParameters2["default"].setParameter("renderAllPages", renderAllPages.toString());
-                    }
-                });
-            })();
-        }
-    }
-
-    _createClass(ViewerOptions, [{
-        key: "copyFrom",
-        value: function copyFrom(other) {
-            this.renderAllPages(other.renderAllPages());
-            this.fontSize(other.fontSize());
-            this.profile(other.profile());
-            this.pageViewMode(other.pageViewMode());
-            this.zoom(other.zoom());
-        }
-    }, {
-        key: "toObject",
-        value: function toObject() {
-            return {
-                renderAllPages: this.renderAllPages(),
-                fontSize: this.fontSize(),
-                pageViewMode: this.pageViewMode().toString(),
-                zoom: this.zoom().zoom,
-                fitToScreen: this.zoom().fitToScreen
-            };
-        }
-    }]);
-
-    return ViewerOptions;
-})();
-
-ViewerOptions.getDefaultValues = getDefaultValues;
-
-exports["default"] = ViewerOptions;
-module.exports = exports["default"];
-
-},{"../stores/url-parameters":14,"./page-view-mode":10,"./zoom-options":13,"knockout":1}],12:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Vivliostyle = (function () {
-    function Vivliostyle() {
-        _classCallCheck(this, Vivliostyle);
-
-        this.viewer = null;
-        this.constants = null;
-        this.profile = null;
-    }
-
-    _createClass(Vivliostyle, [{
-        key: "setInstance",
-        value: function setInstance(vivliostyle) {
-            this.viewer = vivliostyle.viewer;
-            this.constants = vivliostyle.constants;
-            this.profile = vivliostyle.profile;
-        }
-    }]);
-
-    return Vivliostyle;
-})();
-
-exports["default"] = new Vivliostyle();
-module.exports = exports["default"];
-
-},{}],13:[function(require,module,exports){
-/*
- * Copyright 2016 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _modelsVivliostyle = require("../models/vivliostyle");
-
-var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
-
-var ZoomOptions = (function () {
-    function ZoomOptions(zoom) {
-        _classCallCheck(this, ZoomOptions);
-
-        this.zoom = zoom;
-    }
-
-    _createClass(ZoomOptions, [{
-        key: "zoomIn",
-        value: function zoomIn(viewer) {
-            return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 1.25);
-        }
-    }, {
-        key: "zoomOut",
-        value: function zoomOut(viewer) {
-            return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 0.8);
-        }
-    }, {
-        key: "zoomToActualSize",
-        value: function zoomToActualSize() {
-            return new FixedZoomFactor(1);
-        }
-    }], [{
-        key: "createDefaultOptions",
-        value: function createDefaultOptions() {
-            return new FitToScreen();
-        }
-    }, {
-        key: "createFromZoomFactor",
-        value: function createFromZoomFactor(zoom) {
-            return new FixedZoomFactor(zoom);
-        }
-    }]);
-
-    return ZoomOptions;
-})();
-
-var FitToScreen = (function (_ZoomOptions) {
-    _inherits(FitToScreen, _ZoomOptions);
-
-    function FitToScreen() {
-        _classCallCheck(this, FitToScreen);
-
-        _get(Object.getPrototypeOf(FitToScreen.prototype), "constructor", this).call(this, 1);
-    }
-
-    _createClass(FitToScreen, [{
-        key: "toggleFitToScreen",
-        value: function toggleFitToScreen() {
-            return new FixedZoomFactor(1);
-        }
-    }, {
-        key: "getCurrentZoomFactor",
-        value: function getCurrentZoomFactor(viewer) {
-            return viewer.queryZoomFactor(_modelsVivliostyle2["default"].viewer.ZoomType.FIT_INSIDE_VIEWPORT);
-        }
-    }, {
-        key: "fitToScreen",
-        get: function get() {
-            return true;
-        }
-    }]);
-
-    return FitToScreen;
-})(ZoomOptions);
-
-var FixedZoomFactor = (function (_ZoomOptions2) {
-    _inherits(FixedZoomFactor, _ZoomOptions2);
-
-    function FixedZoomFactor() {
-        _classCallCheck(this, FixedZoomFactor);
-
-        _get(Object.getPrototypeOf(FixedZoomFactor.prototype), "constructor", this).apply(this, arguments);
-    }
-
-    _createClass(FixedZoomFactor, [{
-        key: "toggleFitToScreen",
-        value: function toggleFitToScreen() {
-            return new FitToScreen();
-        }
-    }, {
-        key: "getCurrentZoomFactor",
-        value: function getCurrentZoomFactor(viewer) {
-            return this.zoom;
-        }
-    }, {
-        key: "fitToScreen",
-        get: function get() {
-            return false;
-        }
-    }]);
-
-    return FixedZoomFactor;
-})(ZoomOptions);
-
-exports["default"] = ZoomOptions;
-module.exports = exports["default"];
-
-},{"../models/vivliostyle":12}],14:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _utilsStringUtil = require("../utils/string-util");
-
-var _utilsStringUtil2 = _interopRequireDefault(_utilsStringUtil);
-
-function getRegExpForParameter(name) {
-    return new RegExp("[#&]" + _utilsStringUtil2["default"].escapeUnicodeString(name) + "=([^&]*)", "g");
-}
-
-var URLParameterStore = (function () {
-    function URLParameterStore() {
-        _classCallCheck(this, URLParameterStore);
-
-        this.history = window ? window.history : {};
-        this.location = window ? window.location : { url: "" };
-    }
-
-    _createClass(URLParameterStore, [{
-        key: "getBaseURL",
-        value: function getBaseURL() {
-            var url = this.location.href;
-            url = url.replace(/#.*$/, "");
-            return url.replace(/\/[^/]*$/, "/");
-        }
-    }, {
-        key: "getParameter",
-        value: function getParameter(name, dontPercentDecode) {
-            var url = this.location.href;
-            var regexp = getRegExpForParameter(name);
-            var results = [];
-            var r = undefined;
-            while (r = regexp.exec(url)) {
-                var value = r[1];
-                if (!dontPercentDecode) value = _utilsStringUtil2["default"].percentDecodeAmpersandAndPercent(value);
-                results.push(value);
-            }
-            return results;
-        }
-    }, {
-        key: "setParameter",
-        value: function setParameter(name, value, dontPercentEncode) {
-            var url = this.location.href;
-            if (!dontPercentEncode) value = _utilsStringUtil2["default"].percentEncodeAmpersandAndPercent(value);
-            var updated = undefined;
-            var regexp = getRegExpForParameter(name);
-            var r = regexp.exec(url);
-            if (r) {
-                var l = r[1].length;
-                var start = r.index + r[0].length - l;
-                updated = url.substring(0, start) + value + url.substring(start + l);
-            } else {
-                updated = url + (url.match(/#/) ? "&" : "#") + name + "=" + value;
-            }
-            if (this.history.replaceState) {
-                this.history.replaceState(null, "", updated);
-            } else {
-                this.location.href = updated;
-            }
-        }
-    }, {
-        key: "removeParameter",
-        value: function removeParameter(name) {
-            var url = this.location.href;
-            var updated = undefined;
-            var regexp = getRegExpForParameter(name);
-            var r = regexp.exec(url);
-            if (r) {
-                var end = r.index + r[0].length;
-                if (r[0].charAt(0) == '#') {
-                    updated = url.substring(0, r.index + 1) + url.substring(end + 1);
-                } else {
-                    updated = url.substring(0, r.index) + url.substring(end);
-                }
-                if (this.history.replaceState) {
-                    this.history.replaceState(null, "", updated);
-                } else {
-                    this.location.href = updated;
-                }
-            }
-        }
-    }]);
-
-    return URLParameterStore;
-})();
-
-exports["default"] = new URLParameterStore();
-module.exports = exports["default"];
-
-},{"../utils/string-util":17}],15:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-// cf. http://www.w3.org/TR/DOM-Level-3-Events-key/
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-var Keys = {
-    Unidentified: "Unidentified",
-    ArrowDown: "ArrowDown",
-    ArrowLeft: "ArrowLeft",
-    ArrowRight: "ArrowRight",
-    ArrowUp: "ArrowUp",
-    Home: "Home",
-    End: "End",
-    PageDown: "PageDown",
-    PageUp: "PageUp",
-    Escape: "Escape",
-    Enter: "Enter",
-    Space: " "
-};
-
-// CAUTION: This function covers only part of common keys on a keyboard. Keys not covered by the implementation are identified as KeyboardEvent.key, KeyboardEvent.keyIdentifier, or "Unidentified".
-function identifyKeyFromEvent(event) {
-    var key = event.key;
-    var keyIdentifier = event.keyIdentifier;
-    var location = event.location;
-    if (key === Keys.ArrowDown || key === "Down" || keyIdentifier === "Down") {
-        if (event.metaKey) {
-            // Mac Cmd+Down -> End
-            return Keys.End;
-        }
-        return Keys.ArrowDown;
-    } else if (key === Keys.ArrowLeft || key === "Left" || keyIdentifier === "Left") {
-        return Keys.ArrowLeft;
-    } else if (key === Keys.ArrowRight || key === "Right" || keyIdentifier === "Right") {
-        return Keys.ArrowRight;
-    } else if (key === Keys.ArrowUp || key === "Up" || keyIdentifier === "Up") {
-        if (event.metaKey) {
-            // Mac Cmd+Up -> Home
-            return Keys.Home;
-        }
-        return Keys.ArrowUp;
-    } else if (key === Keys.Escape || key === "Esc" || keyIdentifier === "U+001B") {
-        return Keys.Escape;
-    } else if (key === Keys.Enter || keyIdentifier === "Enter") {
-        return Keys.Enter;
-    } else if (key === Keys.Space || keyIdentifier === "U+0020") {
-        return Keys.Space;
-    } else if (key === "0" || keyIdentifier === "U+0030") {
-        return "0";
-    } else if (key === "+" || key === "Add" || keyIdentifier === "U+002B" || keyIdentifier === "U+00BB" || keyIdentifier === "U+004B" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD /* workaround for Chrome for Windows */) {
-            return "+";
-        } else if (key === "-" || key === "Subtract" || keyIdentifier === "U+002D" || keyIdentifier === "U+00BD" || keyIdentifier === "U+004D" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD /* workaround for Chrome for Windows */) {
-            return "-";
-        } else {
-        return key || keyIdentifier || Keys.Unidentified;
-    }
-}
-
-exports["default"] = {
-    Keys: Keys,
-    identifyKeyFromEvent: identifyKeyFromEvent
-};
-module.exports = exports["default"];
-
-},{}],16:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var util = {
-    readonlyObservable: function readonlyObservable(value) {
-        var obs = _knockout2["default"].observable(value);
-        return {
-            getter: _knockout2["default"].pureComputed(function () {
-                return obs();
-            }),
-            value: obs
-        };
-    }
-};
-
-exports["default"] = util;
-module.exports = exports["default"];
-
-},{"knockout":1}],17:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports["default"] = {
-    escapeUnicodeChar: function escapeUnicodeChar(ch) {
-        return "\\u" + (0x10000 | ch.charCodeAt(0)).toString(16).substring(1);
-    },
-    escapeUnicodeString: function escapeUnicodeString(str) {
-        return str.replace(/[^-a-zA-Z0-9_]/g, this.escapeUnicodeChar);
-    },
-    percentEncodeAmpersandAndPercent: function percentEncodeAmpersandAndPercent(str) {
-        return str.replace(/%/g, "%25").replace(/&/g, "%26");
-    },
-    percentDecodeAmpersandAndPercent: function percentDecodeAmpersandAndPercent(str) {
-        return str.replace(/%26/g, "&").replace(/%25/g, "%");
-    }
-};
-module.exports = exports["default"];
-
-},{}],18:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var MessageDialog = (function () {
-    function MessageDialog(queue) {
-        _classCallCheck(this, MessageDialog);
-
-        this.list = queue;
-        this.visible = _knockout2["default"].pureComputed(function () {
-            return queue().length > 0;
-        });
-    }
-
-    _createClass(MessageDialog, [{
-        key: "getDisplayMessage",
-        value: function getDisplayMessage(errorInfo) {
-            var e = errorInfo.error;
-            var msg = e && (e.toString() || e.frameTrace || e.stack);
-            if (msg) {
-                msg = msg.split("\n", 1)[0];
-            }
-            if (!msg) {
-                msg = errorInfo.messages.join("\n");
-            }
-            return msg;
-        }
-    }]);
-
-    return MessageDialog;
-})();
-
-exports["default"] = MessageDialog;
-module.exports = exports["default"];
-
-},{"knockout":1}],19:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- * Copyright 2018 Vivliostyle Foundation
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var _modelsViewerOptions = require("../models/viewer-options");
-
-var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
-
-var _utilsKeyUtil = require("../utils/key-util");
-
-var _modelsVivliostyle = require("../models/vivliostyle");
-
-var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
-
-var Navigation = (function () {
-    function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
-        var _this = this;
-
-        _classCallCheck(this, Navigation);
-
-        this.viewerOptions_ = viewerOptions;
-        this.viewer_ = viewer;
-        this.settingsPanel_ = settingsPanel;
-
-        this.isDisabled = _knockout2["default"].pureComputed(function () {
-            return _this.settingsPanel_.opened() || !_this.viewer_.state.navigatable();
-        });
-
-        var navigationDisabled = _knockout2["default"].pureComputed(function () {
-            return navigationOptions.disablePageNavigation || _this.isDisabled();
-        });
-
-        navigationDisabled.subscribe(function (disabled) {
-            var pageNumberElem = document.getElementById("vivliostyle-page-number");
-            if (pageNumberElem) {
-                pageNumberElem.disabled = disabled;
-            }
-        });
-
-        this.isPageNumberDisabled = _knockout2["default"].pureComputed(function () {
-            return navigationDisabled();
-        });
-
-        this.isNavigateToPreviousDisabled = _knockout2["default"].pureComputed(function () {
-            if (navigationDisabled()) {
-                return true;
-            }
-            if (_this.viewer_.state.status === undefined) {
-                return false; // needed for test/spec/viewmodels/navigation-spec.js
-            }
-            return _this.viewer_.firstPage();
-        });
-
-        this.isNavigateToNextDisabled = _knockout2["default"].pureComputed(function () {
-            if (navigationDisabled()) {
-                return true;
-            }
-            if (_this.viewer_.state.status === undefined) {
-                return false; // needed for test/spec/viewmodels/navigation-spec.js
-            }
-            if (_this.viewerOptions_.renderAllPages() && _this.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
-                return false;
-            }
-            return _this.viewer_.lastPage();
-        });
-
-        this.isNavigateToLeftDisabled = _knockout2["default"].pureComputed(function () {
-            if (navigationDisabled()) {
-                return true;
-            }
-            if (_this.viewer_.state.pageProgression === undefined) {
-                return false; // needed for test/spec/viewmodels/navigation-spec.js
-            }
-            if (_this.viewer_.state.pageProgression() === _modelsVivliostyle2["default"].constants.PageProgression.LTR) {
-                return _this.isNavigateToPreviousDisabled();
-            } else {
-                return _this.isNavigateToNextDisabled();
-            }
-        });
-
-        this.isNavigateToRightDisabled = _knockout2["default"].pureComputed(function () {
-            if (navigationDisabled()) {
-                return true;
-            }
-            if (_this.viewer_.state.pageProgression === undefined) {
-                return false; // needed for test/spec/viewmodels/navigation-spec.js
-            }
-            if (_this.viewer_.state.pageProgression() === _modelsVivliostyle2["default"].constants.PageProgression.LTR) {
-                return _this.isNavigateToNextDisabled();
-            } else {
-                return _this.isNavigateToPreviousDisabled();
-            }
-        });
-
-        this.isNavigateToFirstDisabled = this.isNavigateToPreviousDisabled;
-
-        this.isNavigateToLastDisabled = _knockout2["default"].pureComputed(function () {
-            if (navigationDisabled()) {
-                return true;
-            }
-            if (_this.viewer_.state.status === undefined) {
-                return false; // needed for test/spec/viewmodels/navigation-spec.js
-            }
-            if (_this.viewerOptions_.renderAllPages() && _this.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
-                return true;
-            }
-            return _this.viewer_.lastPage();
-        });
-
-        this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
-
-        var zoomDisabled = _knockout2["default"].pureComputed(function () {
-            return navigationOptions.disableZoom || _this.isDisabled();
-        });
-
-        this.isZoomOutDisabled = zoomDisabled;
-        this.isZoomInDisabled = zoomDisabled;
-        this.isZoomToActualSizeDisabled = zoomDisabled;
-        this.isToggleFitToScreenDisabled = zoomDisabled;
-        this.hideZoom = !!navigationOptions.disableZoom;
-
-        this.fitToScreen = _knockout2["default"].pureComputed(function () {
-            return viewerOptions.zoom().fitToScreen;
-        });
-
-        var fontSizeChangeDisabled = _knockout2["default"].pureComputed(function () {
-            return navigationOptions.disableFontSizeChange || _this.isDisabled();
-        });
-
-        this.isIncreaseFontSizeDisabled = fontSizeChangeDisabled;
-        this.isDecreaseFontSizeDisabled = fontSizeChangeDisabled;
-        this.isDefaultFontSizeDisabled = fontSizeChangeDisabled;
-        this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
-
-        this.pageNumber = _knockout2["default"].pureComputed({
-            read: function read() {
-                return this.viewer_.epageToPageNumber(this.viewer_.epage());
-            },
-            write: function write(pageNumberText) {
-                var _this2 = this;
-
-                var epageOld = this.viewer_.epage();
-                var pageNumberOld = this.viewer_.epageToPageNumber(epageOld);
-
-                // Accept non-integer, convert fullwidth to ascii
-                var pageNumber = parseFloat(pageNumberText.replace(/[０-９]/g, function (s) {
-                    return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
-                })) || 0;
-                if (/^[-+]/.test(pageNumberText)) {
-                    // "+number" and "-number" to relative move.
-                    pageNumber = pageNumberOld + pageNumber;
-                }
-                if (pageNumber < 1) {
-                    pageNumber = 1;
-                } else {
-                    var epageCount = this.viewer_.epageCount();
-                    if (this.viewerOptions_.renderAllPages()) {
-                        if (pageNumber > epageCount) {
-                            pageNumber = epageCount;
-                        }
-                    } else if (pageNumber > epageCount + 1) {
-                        // Accept "epageCount + 1" because the last epage may equal epageCount.
-                        pageNumber = epageCount + 1;
-                    }
-                }
-                var epageNav = this.viewer_.epageFromPageNumber(pageNumber);
-                var pageNumberElem = document.getElementById("vivliostyle-page-number");
-                pageNumberElem.value = pageNumber;
-                this.viewer_.navigateToEPage(epageNav);
-
-                setTimeout(function () {
-                    if (_this2.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.LOADING && _this2.viewer_.epage() === epageOld) {
-                        pageNumberElem.value = pageNumberOld;
-                    }
-                    pageNumberElem.blur();
-                }, 10);
-            },
-            owner: this
-        });
-
-        this.totalPages = _knockout2["default"].pureComputed(function () {
-            var totalPages = _this.viewer_.epageCount();
-            if (!totalPages) {
-                return totalPages;
-            }
-            var pageNumber = _this.pageNumber();
-            if (_this.viewer_.lastPage()) {
-                totalPages = pageNumber;
-            } else if (pageNumber >= totalPages) {
-                totalPages++;
-            }
-            return totalPages;
-        });
-
-        ["navigateToPrevious", "navigateToNext", "navigateToLeft", "navigateToRight", "navigateToFirst", "navigateToLast", "zoomIn", "zoomOut", "zoomToActualSize", "toggleFitToScreen", "increaseFontSize", "decreaseFontSize", "defaultFontSize", "handleKey"].forEach(function (methodName) {
-            _this[methodName] = _this[methodName].bind(_this);
-        });
-    }
-
-    _createClass(Navigation, [{
-        key: "navigateToPrevious",
-        value: function navigateToPrevious() {
-            if (!this.isNavigateToPreviousDisabled()) {
-                this.viewer_.navigateToPrevious();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "navigateToNext",
-        value: function navigateToNext() {
-            if (!this.isNavigateToNextDisabled()) {
-                this.viewer_.navigateToNext();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "navigateToLeft",
-        value: function navigateToLeft() {
-            if (!this.isNavigateToLeftDisabled()) {
-                this.viewer_.navigateToLeft();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "navigateToRight",
-        value: function navigateToRight() {
-            if (!this.isNavigateToRightDisabled()) {
-                this.viewer_.navigateToRight();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "navigateToFirst",
-        value: function navigateToFirst() {
-            if (!this.isNavigateToFirstDisabled()) {
-                this.viewer_.navigateToFirst();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "navigateToLast",
-        value: function navigateToLast() {
-            if (!this.isNavigateToLastDisabled()) {
-                this.viewer_.navigateToLast();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "zoomIn",
-        value: function zoomIn() {
-            if (!this.isZoomInDisabled()) {
-                var zoom = this.viewerOptions_.zoom();
-                this.viewerOptions_.zoom(zoom.zoomIn(this.viewer_));
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "zoomOut",
-        value: function zoomOut() {
-            if (!this.isZoomOutDisabled()) {
-                var zoom = this.viewerOptions_.zoom();
-                this.viewerOptions_.zoom(zoom.zoomOut(this.viewer_));
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "zoomToActualSize",
-        value: function zoomToActualSize() {
-            if (!this.isZoomToActualSizeDisabled()) {
-                var zoom = this.viewerOptions_.zoom();
-                this.viewerOptions_.zoom(zoom.zoomToActualSize());
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "toggleFitToScreen",
-        value: function toggleFitToScreen() {
-            if (!this.isToggleFitToScreenDisabled()) {
-                var zoom = this.viewerOptions_.zoom();
-                this.viewerOptions_.zoom(zoom.toggleFitToScreen());
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "increaseFontSize",
-        value: function increaseFontSize() {
-            if (!this.isIncreaseFontSizeDisabled()) {
-                var fontSize = this.viewerOptions_.fontSize();
-                this.viewerOptions_.fontSize(fontSize * 1.25);
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "decreaseFontSize",
-        value: function decreaseFontSize() {
-            if (!this.isDecreaseFontSizeDisabled()) {
-                var fontSize = this.viewerOptions_.fontSize();
-                this.viewerOptions_.fontSize(fontSize * 0.8);
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "defaultFontSize",
-        value: function defaultFontSize() {
-            if (!this.isDefaultFontSizeDisabled()) {
-                var fontSize = _modelsViewerOptions2["default"].getDefaultValues().fontSize;
-                this.viewerOptions_.fontSize(fontSize);
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "handleKey",
-        value: function handleKey(key) {
-            if (document.getElementById("vivliostyle-menu_misc").contains(document.activeElement)) {
-                return true;
-            }
-
-            var pageNumberElem = document.getElementById("vivliostyle-page-number");
-            var viewportElement = document.getElementById("vivliostyle-viewer-viewport");
-            var horizontalScrollable = viewportElement.scrollWidth > viewportElement.clientWidth;
-            var verticalScrollable = viewportElement.scrollHeight > viewportElement.clientHeight;
-
-            var isPageNumberInput = pageNumberElem === document.activeElement;
-
-            if (!isPageNumberInput) {
-                viewportElement.focus();
-            }
-
-            switch (key) {
-                case "+":
-                    return isPageNumberInput || !this.increaseFontSize();
-                case "-":
-                    return isPageNumberInput || !this.decreaseFontSize();
-                case "0":
-                    return isPageNumberInput || !this.defaultFontSize();
-                case "1":
-                    return isPageNumberInput || !this.zoomToActualSize();
-                case _utilsKeyUtil.Keys.ArrowLeft:
-                    return isPageNumberInput || horizontalScrollable || !this.navigateToLeft();
-                case _utilsKeyUtil.Keys.ArrowRight:
-                    return isPageNumberInput || horizontalScrollable || !this.navigateToRight();
-                case _utilsKeyUtil.Keys.ArrowDown:
-                    viewportElement.focus();
-                    return verticalScrollable || !this.navigateToNext();
-                case _utilsKeyUtil.Keys.ArrowUp:
-                    viewportElement.focus();
-                    return verticalScrollable || !this.navigateToPrevious();
-                case _utilsKeyUtil.Keys.PageDown:
-                    viewportElement.focus();
-                    return !this.navigateToNext();
-                case _utilsKeyUtil.Keys.PageUp:
-                    viewportElement.focus();
-                    return !this.navigateToPrevious();
-                case _utilsKeyUtil.Keys.Home:
-                    viewportElement.focus();
-                    return !this.navigateToFirst();
-                case _utilsKeyUtil.Keys.End:
-                    viewportElement.focus();
-                    return !this.navigateToLast();
-                case "o":
-                case "O":
-                    viewportElement.focus();
-                    return !this.zoomOut();
-                case "i":
-                case "I":
-                    viewportElement.focus();
-                    return !this.zoomIn();
-                case "f":
-                case "F":
-                    viewportElement.focus();
-                    return !this.toggleFitToScreen();
-                case "g":
-                case "G":
-                    pageNumberElem.focus();
-                    return false;
-                default:
-                    return true;
-            }
-        }
-    }]);
-
-    return Navigation;
-})();
-
-exports["default"] = Navigation;
-module.exports = exports["default"];
-
-},{"../models/viewer-options":11,"../models/vivliostyle":12,"../utils/key-util":15,"knockout":1}],20:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var _modelsViewerOptions = require("../models/viewer-options");
-
-var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
-
-var _modelsPageSize = require("../models/page-size");
-
-var _modelsPageSize2 = _interopRequireDefault(_modelsPageSize);
-
-var _modelsPageViewMode = require("../models/page-view-mode");
-
-var _modelsPageViewMode2 = _interopRequireDefault(_modelsPageViewMode);
-
-var _utilsKeyUtil = require("../utils/key-util");
-
-var SettingsPanel = (function () {
-    function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, settingsPanelOptions) {
-        var _this = this;
-
-        _classCallCheck(this, SettingsPanel);
-
-        this.viewerOptions_ = viewerOptions;
-        this.documentOptions_ = documentOptions;
-        this.viewer_ = viewer;
-
-        this.isPageSizeChangeDisabled = !!settingsPanelOptions.disablePageSizeChange;
-        this.isOverrideDocumentStyleSheetDisabled = this.isPageSizeChangeDisabled;
-        this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
-        this.isRenderAllPagesChangeDisabled = !!settingsPanelOptions.disableRenderAllPagesChange;
-
-        this.opened = _knockout2["default"].observable(false);
-        this.state = {
-            viewerOptions: new _modelsViewerOptions2["default"](viewerOptions),
-            pageSize: new _modelsPageSize2["default"](documentOptions.pageSize),
-            pageViewMode: _knockout2["default"].pureComputed({
-                read: function read() {
-                    return _this.state.viewerOptions.pageViewMode().toString();
-                },
-                write: function write(value) {
-                    _this.state.viewerOptions.pageViewMode(_modelsPageViewMode2["default"].of(value));
-                }
-            }),
-            renderAllPages: _knockout2["default"].pureComputed({
-                read: function read() {
-                    return _this.state.viewerOptions.renderAllPages();
-                },
-                write: function write(value) {
-                    _this.state.viewerOptions.renderAllPages(value);
-                }
-            })
-        };
-
-        var settingsParent = document.getElementById("vivliostyle-menu-item_misc-toggle");
-        this.settingsButton = settingsParent && settingsParent.firstElementChild;
-
-        ["close", "toggle", "apply", "reset"].forEach(function (methodName) {
-            this[methodName] = this[methodName].bind(this);
-        }, this);
-
-        messageDialog.visible.subscribe(function (visible) {
-            if (visible) this.close();
-        }, this);
-    }
-
-    _createClass(SettingsPanel, [{
-        key: "close",
-        value: function close() {
-            this.opened(false);
-            var viewportElement = document.getElementById("vivliostyle-viewer-viewport");
-            if (viewportElement) viewportElement.focus();
-            return true;
-        }
-    }, {
-        key: "toggle",
-        value: function toggle() {
-            var open = !this.opened();
-            if (open) {
-                this.opened(open);
-                if (this.settingsButton) this.settingsButton.focus();
-            } else {
-                this.close();
-            }
-        }
-    }, {
-        key: "apply",
-        value: function apply() {
-            if (this.state.renderAllPages() === this.viewerOptions_.renderAllPages() && this.state.pageSize.equivalentTo(this.documentOptions_.pageSize)) {
-                this.viewerOptions_.copyFrom(this.state.viewerOptions);
-            } else {
-                this.documentOptions_.pageSize.copyFrom(this.state.pageSize);
-                this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
-            }
-            this.close();
-        }
-    }, {
-        key: "reset",
-        value: function reset() {
-            this.state.viewerOptions.copyFrom(this.viewerOptions_);
-            this.state.pageSize.copyFrom(this.documentOptions_.pageSize);
-            this.close();
-        }
-    }, {
-        key: "handleKey",
-        value: function handleKey(key) {
-            switch (key) {
-                case _utilsKeyUtil.Keys.Escape:
-                    if (this.opened()) {
-                        this.reset();
-                        return false;
-                    }
-                    return true;
-                case "s":
-                case "S":
-                    if (!this.opened() || document.activeElement === this.settingsButton) {
-                        this.toggle();
-                        return false;
-                    }
-                    return true;
-                case _utilsKeyUtil.Keys.Space:
-                    if (document.activeElement === this.settingsButton) {
-                        this.toggle();
-                        return false;
-                    }
-                    return true;
-                case _utilsKeyUtil.Keys.Enter:
-                    if (document.activeElement === this.settingsButton) {
-                        this.toggle();
-                        return false;
-                    }
-                    if (this.settingsButton && this.settingsButton.parentElement.contains(document.activeElement) && document.activeElement.id !== "vivliostyle-menu-button_apply" && document.activeElement.id !== "vivliostyle-menu-button_reset") {
-                        document.getElementById("vivliostyle-menu-button_apply").focus();
-                        return false;
-                    }
-                    return true;
-                default:
-                    return true;
-            }
-        }
-    }]);
-
-    return SettingsPanel;
-})();
-
-exports["default"] = SettingsPanel;
-module.exports = exports["default"];
-
-},{"../models/page-size":9,"../models/page-view-mode":10,"../models/viewer-options":11,"../utils/key-util":15,"knockout":1}],21:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var _modelsVivliostyle = require("../models/vivliostyle");
-
-var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
-
-var _modelsDocumentOptions = require("../models/document-options");
-
-var _modelsDocumentOptions2 = _interopRequireDefault(_modelsDocumentOptions);
-
-var _modelsZoomOptions = require("../models/zoom-options");
-
-var _modelsZoomOptions2 = _interopRequireDefault(_modelsZoomOptions);
-
-var _modelsViewerOptions = require("../models/viewer-options");
-
-var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
-
-var _modelsMessageQueue = require("../models/message-queue");
-
-var _modelsMessageQueue2 = _interopRequireDefault(_modelsMessageQueue);
-
-var _viewer = require("./viewer");
-
-var _viewer2 = _interopRequireDefault(_viewer);
-
-var _navigation = require("./navigation");
-
-var _navigation2 = _interopRequireDefault(_navigation);
-
-var _settingsPanel = require("./settings-panel");
-
-var _settingsPanel2 = _interopRequireDefault(_settingsPanel);
-
-var _messageDialog = require("./message-dialog");
-
-var _messageDialog2 = _interopRequireDefault(_messageDialog);
-
-var _utilsKeyUtil = require("../utils/key-util");
-
-var _utilsKeyUtil2 = _interopRequireDefault(_utilsKeyUtil);
-
-var _storesUrlParameters = require("../stores/url-parameters");
-
-var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
-
-function ViewerApp() {
-    var _this = this;
-
-    this.documentOptions = new _modelsDocumentOptions2["default"]();
-    this.viewerOptions = new _modelsViewerOptions2["default"]();
-    if (this.viewerOptions.profile()) {
-        _modelsVivliostyle2["default"].profile.profiler.enable();
-    }
-    this.isDebug = _storesUrlParameters2["default"].getParameter("debug")[0] === "true";
-    this.viewerSettings = {
-        userAgentRootURL: _storesUrlParameters2["default"].getBaseURL() + "resources/",
-        viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
-        debug: this.isDebug
-    };
-    this.viewer = new _viewer2["default"](this.viewerSettings, this.viewerOptions);
-    this.messageDialog = new _messageDialog2["default"](_modelsMessageQueue2["default"]);
-
-    var settingsPanelOptions = {
-        disablePageSizeChange: false,
-        disablePageViewModeChange: false,
-        disableRenderAllPagesChange: false
-    };
-
-    this.settingsPanel = new _settingsPanel2["default"](this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog, settingsPanelOptions);
-
-    var navigationOptions = {
-        disablePageNavigation: false,
-        disableZoom: false,
-        disableFontSizeChange: false
-    };
-
-    this.navigation = new _navigation2["default"](this.viewerOptions, this.viewer, this.settingsPanel, navigationOptions);
-
-    this.handleKey = function (data, event) {
-        var key = _utilsKeyUtil2["default"].identifyKeyFromEvent(event);
-        if (!(key === "Home" || key === "End") && (event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) {
-            return true;
-        }
-        var ret = _this.settingsPanel.handleKey(key);
-        if (ret) {
-            ret = _this.navigation.handleKey(key);
-        }
-        return ret;
-    };
-
-    this.viewer.loadDocument(this.documentOptions);
-}
-
-exports["default"] = ViewerApp;
-module.exports = exports["default"];
-
-},{"../models/document-options":7,"../models/message-queue":8,"../models/viewer-options":11,"../models/vivliostyle":12,"../models/zoom-options":13,"../stores/url-parameters":14,"../utils/key-util":15,"./message-dialog":18,"./navigation":19,"./settings-panel":20,"./viewer":22,"knockout":1}],22:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- * Copyright 2018 Vivliostyle Foundation
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var _utilsObservableUtil = require("../utils/observable-util");
-
-var _utilsObservableUtil2 = _interopRequireDefault(_utilsObservableUtil);
-
-var _loggingLogger = require("../logging/logger");
-
-var _loggingLogger2 = _interopRequireDefault(_loggingLogger);
-
-var _modelsVivliostyle = require("../models/vivliostyle");
-
-var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
-
-var Viewer = (function () {
-    function Viewer(viewerSettings, viewerOptions) {
-        _classCallCheck(this, Viewer);
-
-        this.viewerOptions_ = viewerOptions;
-        this.documentOptions_ = null;
-        this.viewer_ = new _modelsVivliostyle2["default"].viewer.Viewer(viewerSettings, viewerOptions.toObject());
-        var state_ = this.state_ = {
-            status: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.ReadyState.LOADING),
-            pageProgression: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.PageProgression.LTR)
-        };
-        this.state = {
-            status: state_.status.getter.extend({
-                rateLimit: { timeout: 100, method: "notifyWhenChangesStop" },
-                notify: 'always'
-            }),
-            navigatable: _knockout2["default"].pureComputed(function () {
-                return state_.status.value() !== _modelsVivliostyle2["default"].constants.ReadyState.LOADING;
-            }),
-            pageProgression: state_.pageProgression.getter
-        };
-
-        this.epage = _knockout2["default"].observable();
-        this.epageCount = _knockout2["default"].observable();
-        this.firstPage = _knockout2["default"].observable();
-        this.lastPage = _knockout2["default"].observable();
-
-        this.setupViewerEventHandler();
-        this.setupViewerOptionSubscriptions();
-    }
-
-    _createClass(Viewer, [{
-        key: "setupViewerEventHandler",
-        value: function setupViewerEventHandler() {
-            var _this = this;
-
-            var logger = _loggingLogger2["default"].getLogger();
-            var intervalID = 0;
-            this.viewer_.addListener("debug", function (payload) {
-                logger.debug(payload.content);
-            });
-            this.viewer_.addListener("info", function (payload) {
-                logger.info(payload.content);
-            });
-            this.viewer_.addListener("warn", function (payload) {
-                logger.warn(payload.content);
-            });
-            this.viewer_.addListener("error", function (payload) {
-                logger.error(payload.content);
-            });
-            this.viewer_.addListener("readystatechange", function () {
-                var readyState = _this.viewer_.readyState;
-                if (readyState === _modelsVivliostyle2["default"].constants.ReadyState.INTERACTIVE || readyState === _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
-                    _this.state_.pageProgression.value(_this.viewer_.getCurrentPageProgression());
-                }
-                _this.state_.status.value(readyState);
-            });
-            this.viewer_.addListener("loaded", function () {
-                if (_this.viewerOptions_.profile()) {
-                    _modelsVivliostyle2["default"].profile.profiler.printTimings();
-                }
-            });
-            this.viewer_.addListener("nav", function (payload) {
-                var cfi = payload.cfi;
-                var first = payload.first;
-                var last = payload.last;
-                var epage = payload.epage;
-                var epageCount = payload.epageCount;
-
-                if (cfi) {
-                    _this.documentOptions_.fragment(cfi);
-                }
-                if (first !== undefined) {
-                    _this.firstPage(first);
-                }
-                if (last !== undefined) {
-                    _this.lastPage(last);
-                }
-                if (epage !== undefined) {
-                    _this.epage(epage);
-                }
-                if (epageCount !== undefined) {
-                    _this.epageCount(epageCount);
-                }
-            });
-            this.viewer_.addListener("hyperlink", function (payload) {
-                if (payload.internal) {
-                    _this.navigateToInternalUrl(payload.href);
-                } else {
-                    window.location.href = payload.href;
-                }
-            });
-        }
-    }, {
-        key: "setupViewerOptionSubscriptions",
-        value: function setupViewerOptionSubscriptions() {
-            _knockout2["default"].computed(function () {
-                var viewerOptions = this.viewerOptions_.toObject();
-                this.viewer_.setOptions(viewerOptions);
-            }, this).extend({ rateLimit: 0 });
-        }
-    }, {
-        key: "loadDocument",
-        value: function loadDocument(documentOptions, viewerOptions) {
-            this.state_.status.value("loading");
-            if (viewerOptions) {
-                this.viewerOptions_.copyFrom(viewerOptions);
-            }
-            this.documentOptions_ = documentOptions;
-            if (documentOptions.url()) {
-                this.viewer_.loadDocument(documentOptions.url(), documentOptions.toObject(), this.viewerOptions_.toObject());
-            } else if (documentOptions.epubUrl()) {
-                this.viewer_.loadEPUB(documentOptions.epubUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
-            }
-        }
-    }, {
-        key: "navigateToPrevious",
-        value: function navigateToPrevious() {
-            this.viewer_.navigateToPage("previous");
-        }
-    }, {
-        key: "navigateToNext",
-        value: function navigateToNext() {
-            this.viewer_.navigateToPage("next");
-        }
-    }, {
-        key: "navigateToLeft",
-        value: function navigateToLeft() {
-            this.viewer_.navigateToPage("left");
-        }
-    }, {
-        key: "navigateToRight",
-        value: function navigateToRight() {
-            this.viewer_.navigateToPage("right");
-        }
-    }, {
-        key: "navigateToFirst",
-        value: function navigateToFirst() {
-            this.viewer_.navigateToPage("first");
-        }
-    }, {
-        key: "navigateToLast",
-        value: function navigateToLast() {
-            this.viewer_.navigateToPage("last");
-        }
-    }, {
-        key: "navigateToEPage",
-        value: function navigateToEPage(epage) {
-            this.viewer_.navigateToPage("epage", epage);
-        }
-    }, {
-        key: "navigateToInternalUrl",
-        value: function navigateToInternalUrl(href) {
-            this.viewer_.navigateToInternalUrl(href);
-        }
-    }, {
-        key: "queryZoomFactor",
-        value: function queryZoomFactor(type) {
-            return this.viewer_.queryZoomFactor(type);
-        }
-    }, {
-        key: "epageToPageNumber",
-        value: function epageToPageNumber(epage) {
-            if (!epage && epage != 0) {
-                return undefined;
-            }
-            var pageNumber = Math.round(epage + 1);
-            return pageNumber;
-        }
-    }, {
-        key: "epageFromPageNumber",
-        value: function epageFromPageNumber(pageNumber) {
-            if (!pageNumber && pageNumber != 0) {
-                return undefined;
-            }
-            var epage = pageNumber - 1;
-            return epage;
-        }
-    }]);
-
-    return Viewer;
-})();
-
-exports["default"] = Viewer;
-module.exports = exports["default"];
-
-},{"../logging/logger":5,"../models/vivliostyle":12,"../utils/observable-util":16,"knockout":1}],23:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var _bindingsMenuButtonJs = require("./bindings/menuButton.js");
-
-var _bindingsMenuButtonJs2 = _interopRequireDefault(_bindingsMenuButtonJs);
-
-var _bindingsSwipePagesJs = require("./bindings/swipePages.js");
-
-var _bindingsSwipePagesJs2 = _interopRequireDefault(_bindingsSwipePagesJs);
-
-var _viewmodelsViewerApp = require("./viewmodels/viewer-app");
-
-var _viewmodelsViewerApp2 = _interopRequireDefault(_viewmodelsViewerApp);
-
-exports["default"] = {
-    start: function start() {
-        function startViewer() {
-            _knockout2["default"].applyBindings(new _viewmodelsViewerApp2["default"]());
-        }
-
-        if (window["__loaded"]) startViewer();else window.onload = startViewer;
-    }
-};
-module.exports = exports["default"];
-
-},{"./bindings/menuButton.js":3,"./bindings/swipePages.js":4,"./viewmodels/viewer-app":21,"knockout":1}]},{},[6]);
+},{}]},{},[5]);
