@@ -370,25 +370,34 @@ class Navigation {
             case Keys.ArrowRight:
                 return isPageNumberInput || horizontalScrollable || !this.navigateToRight();
             case Keys.ArrowDown:
+                viewportElement.focus();
                 return verticalScrollable || !this.navigateToNext();
             case Keys.ArrowUp:
+                viewportElement.focus();
                 return verticalScrollable || !this.navigateToPrevious();
             case Keys.PageDown:
+                viewportElement.focus();
                 return !this.navigateToNext();
             case Keys.PageUp:
+                viewportElement.focus();
                 return !this.navigateToPrevious();
             case Keys.Home:
+                viewportElement.focus();
                 return !this.navigateToFirst();
             case Keys.End:
+                viewportElement.focus();
                 return !this.navigateToLast();
             case "o":
             case "O":
+                viewportElement.focus();
                 return !this.zoomOut();
             case "i":
             case "I":
+                viewportElement.focus();
                 return !this.zoomIn();
             case "f":
             case "F":
+                viewportElement.focus();
                 return !this.toggleFitToScreen();
             case "g":
             case "G":
