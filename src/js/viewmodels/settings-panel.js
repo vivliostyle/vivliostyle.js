@@ -85,7 +85,13 @@ class SettingsPanel {
         let open = !this.opened();
         if (open) {
             this.opened(open);
-            if (this.settingsButton) this.settingsButton.focus();
+            if (this.settingsButton) {
+                const inputElem = Array.from(this.settingsButton.parentElement.getElementsByTagName("input"))
+                    .find(e => !e.disabled && e.checked);
+                if (inputElem) {
+                    inputElem.focus();
+                }
+            }
         } else {
             this.close();
         }
@@ -130,10 +136,6 @@ class SettingsPanel {
                 }
                 return true;
             case Keys.Enter:
-                if (document.activeElement === this.settingsButton) {
-                    this.toggle();
-                    return false;
-                }
                 if (this.settingsButton && this.settingsButton.parentElement.contains(document.activeElement) &&
                         document.activeElement.id !== "vivliostyle-menu-button_apply" &&
                         document.activeElement.id !== "vivliostyle-menu-button_reset") {
