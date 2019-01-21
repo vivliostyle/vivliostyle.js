@@ -349,12 +349,7 @@ class Navigation {
         const viewportElement = document.getElementById("vivliostyle-viewer-viewport");
         const horizontalScrollable = viewportElement.scrollWidth > viewportElement.clientWidth;
         const verticalScrollable = viewportElement.scrollHeight > viewportElement.clientHeight;
-
         const isPageNumberInput = pageNumberElem === document.activeElement;
-
-        if (!isPageNumberInput) {
-            viewportElement.focus();
-        }
 
         switch (key) {
             case "+":
@@ -403,6 +398,9 @@ class Navigation {
             case "G":
                 pageNumberElem.focus();
                 return false;
+            case Keys.Escape:
+                viewportElement.focus();
+                return true;
             default:
                 return true;
         }
