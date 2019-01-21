@@ -176,7 +176,7 @@ class Navigation {
                         this.viewer_.epage() === epageOld) {
                         pageNumberElem.value = pageNumberOld;
                     }
-                    pageNumberElem.blur();
+                    document.getElementById("vivliostyle-viewer-viewport").focus();
                 }, 10);
             },
             owner: this
