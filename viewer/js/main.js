@@ -8386,7 +8386,7 @@ var Navigation = (function () {
                     if (_this2.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.LOADING && _this2.viewer_.epage() === epageOld) {
                         pageNumberElem.value = pageNumberOld;
                     }
-                    pageNumberElem.blur();
+                    document.getElementById("vivliostyle-viewer-viewport").focus();
                 }, 10);
             },
             owner: this
