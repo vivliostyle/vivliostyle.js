@@ -1123,6 +1123,7 @@ adapt.epub.OPFView = function(opf, viewport, fontMapper, pref, pageSheetSizeRepo
     /** @const */ this.pref = adapt.expr.clonePreferences(pref);
     /** @const */ this.clientLayout = new adapt.vgen.DefaultClientLayout(viewport);
     /** @const */ this.counterStore = new vivliostyle.counters.CounterStore(opf.documentURLTransformer);
+    /** @const */ this.tocAutohide = false;
 };
 
 /**
@@ -1862,11 +1863,13 @@ adapt.epub.OPFView.prototype.makePage = function(viewItem, pos) {
 
     const pageCont = /** @type {HTMLElement} */ (viewport.document.createElement("div"));
     pageCont.setAttribute("data-vivliostyle-page-container", true);
+    pageCont.setAttribute("role", "region");
     pageCont.style.position = "absolute";
     pageCont.style.top = "0";
     pageCont.style.left = "0";
     if (!vivliostyle.constants.isDebug) {
         pageCont.style.visibility = "hidden";
+        pageCont.setAttribute("aria-hidden", "true");
     }
     viewport.layoutBox.appendChild(pageCont);
 
@@ -2202,8 +2205,16 @@ adapt.epub.OPFView.prototype.hasPages = function() {
 adapt.epub.OPFView.prototype.showTOC = function(autohide) {
     const opf = this.opf;
     const toc = opf.xhtmlToc || opf.ncxToc;
+
+    this.tocAutohide = autohide;
+
     if (!toc) {
         return adapt.task.newResult(/** @type {adapt.vtree.Page} */ (null));
+    }
+    if (this.tocView && this.tocView.page) {
+        this.tocView.page.container.style.visibility = "visible";
+        this.tocView.page.container.setAttribute("aria-hidden", "false");
+        return adapt.task.newResult(/** @type {adapt.vtree.Page} */ (this.tocView.page));
     }
     /** @type {!adapt.task.Frame.<adapt.vtree.Page>} */ const frame
         = adapt.task.newFrame("showTOC");
@@ -2217,20 +2228,24 @@ adapt.epub.OPFView.prototype.showTOC = function(autohide) {
     const tocHeight = viewport.height - 6;
     const pageCont = /** @type {HTMLElement} */ (viewport.document.createElement("div"));
     viewport.root.appendChild(pageCont);
-    pageCont.style.position = "absolute";
+    // pageCont.style.position = "absolute";
     pageCont.style.visibility = "hidden";
-    pageCont.style.left = "3px";
-    pageCont.style.top = "3px";
+    // pageCont.style.left = "3px";
+    // pageCont.style.top = "3px";
     pageCont.style.width = `${tocWidth + 10}px`;
     pageCont.style.maxHeight = `${tocHeight}px`;
-    pageCont.style.overflow = "scroll";
-    pageCont.style.overflowX = "hidden";
-    pageCont.style.background = "#EEE";
-    pageCont.style.border = "1px outset #999";
-    pageCont.style["borderRadius"] = "2px";
-    pageCont.style["boxShadow"] = " 5px 5px rgba(128,128,128,0.3)";
+    // pageCont.style.overflow = "scroll";
+    // pageCont.style.overflowX = "hidden";
+    // pageCont.style.background = "rgba(248,248,248,0.9)";
+    // pageCont.style["borderRadius"] = "2px";
+    // pageCont.style["boxShadow"] = "1px 1px 2px rgba(0,0,0,0.4)";
+
+    pageCont.setAttribute("data-vivliostyle-toc-box", "true");
+    pageCont.setAttribute("role", "navigation");
+
     this.tocView.showTOC(pageCont, viewport, tocWidth, tocHeight, this.viewport.fontSize).then(page => {
         pageCont.style.visibility = "visible";
+        pageCont.setAttribute("aria-hidden", "false");
         frame.finish(page);
     });
     return frame.result();
@@ -2248,7 +2263,7 @@ adapt.epub.OPFView.prototype.hideTOC = function() {
 /**
  * @return {boolean}
  */
-adapt.epub.OPFView.prototype.isTOCVisible = function(autohide) {
-    return this.tocView && this.tocView.isTOCVisible();
+adapt.epub.OPFView.prototype.isTOCVisible = function() {
+    return !!this.tocView && this.tocView.isTOCVisible();
 };
 

@@ -1,6 +1,7 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -58,6 +59,7 @@ adapt.toc.TOCView = function(store, url, lang, clientLayout, fontMapper, pref,
     /** @const */ this.clientLayout = clientLayout;
     /** @const */ this.fontMapper = fontMapper;
     /** @const */ this.pref = adapt.expr.clonePreferences(pref);
+    this.pref.spreadView = false;   // No spred view for TOC box
     /** @const */ this.rendererFactory = rendererFactory;
     /** @const */ this.fallbackMap = fallbackMap;
     /** @const */ this.documentURLTransformer = documentURLTransformer;
@@ -98,6 +100,8 @@ adapt.toc.toggleNodeExpansion = evt => {
     const open = elem.textContent == adapt.toc.bulletClosed;
     elem.textContent = open ? adapt.toc.bulletOpen : adapt.toc.bulletClosed;
     const tocNodeElem = /** @type {Element} */ (elem.parentNode);
+    elem.setAttribute("aria-expanded", open ? "true" : "false");
+    tocNodeElem.setAttribute("aria-expanded", open ? "true" : "false");
     let c = tocNodeElem.firstChild;
     while (c) {
         if (c.nodeType != 1) {
@@ -107,11 +111,20 @@ adapt.toc.toggleNodeExpansion = evt => {
         const ce = /** @type {HTMLElement} */ (c);
         const adaptClass = ce.getAttribute("data-adapt-class");
         if (adaptClass == "toc-container") {
+            ce.setAttribute("aria-hidden", !open ? "true" : "false");
             c = ce.firstChild;
             continue;
         }
         if (ce.getAttribute("data-adapt-class") == "toc-node") {
             ce.style.height = open ? "auto" : "0px";
+
+            // Update enable/disable tab move to the button and anchor.
+            if (ce.children.length >= 3) {
+                ce.children[0].tabIndex = open ? 0 : -1;
+            }
+            if (ce.children.length >= 2) {
+                ce.children[1].tabIndex = open ? 0 : -1;
+            }
         }
         c = c.nextSibling;
     }
@@ -141,6 +154,15 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
                     button.textContent = adapt.toc.bulletClosed;
                     adapt.base.setCSSProperty(button, "cursor", "pointer");
                     button.addEventListener("click", adapt.toc.toggleNodeExpansion, false);
+
+                    button.setAttribute("role", "button");
+                    button.setAttribute("aria-expanded", "false");
+                    viewParent.setAttribute("aria-expanded", "false");
+
+                    // Enable tab move to the button unless hidden.
+                    if (viewParent.style.height !== "0px") {
+                        button.tabIndex = 0;
+                    }
                 }
             }
             const element = viewParent.ownerDocument.createElement("div");
@@ -158,12 +180,25 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
                 element.appendChild(button);
                 adapt.base.setCSSProperty(element, "overflow", "hidden");
                 element.setAttribute("data-adapt-class", "toc-node");
+                element.setAttribute("role", "treeitem");
+
                 if (adaptParentClass == "toc-node" || adaptParentClass == "toc-container") {
                     adapt.base.setCSSProperty(element, "height", "0px");
+
+                    // Prevent tab move to hidden anchor.
+                    const anchorElem = srcElem.firstElementChild;
+                    if (anchorElem && anchorElem.localName === "a") {
+                        anchorElem.tabIndex = -1;
+                    }
                 }
             } else {
                 if (adaptParentClass == "toc-node") {
                     element.setAttribute("data-adapt-class", "toc-container");
+                    element.setAttribute("role", "group");
+                    element.setAttribute("aria-hidden", "true");
+                } else if (adaptParentClass == null) {
+                    // TOC tree root
+                    element.setAttribute("role", "tree");
                 }
             }
             return adapt.task.newResult(/** @type {Element} */ (element));
@@ -213,14 +248,8 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
  */
 adapt.toc.TOCView.prototype.hideTOC = function() {
     if (this.page) {
-        const page = this.page;
-        this.page = null;
-        this.instance = null;
-        adapt.base.setCSSProperty(page.container, "visibility", "none");
-        const parent = page.container.parentNode;
-        if (parent) {
-            parent.removeChild(page.container);
-        }
+        this.page.container.style.visibility = "hidden";
+        this.page.container.setAttribute("aria-hidden", "true");
     }
 };
 
@@ -228,6 +257,6 @@ adapt.toc.TOCView.prototype.hideTOC = function() {
  * @return {boolean}
  */
 adapt.toc.TOCView.prototype.isTOCVisible = function() {
-    return !!this.page;
+    return !!this.page && this.page.container.style.visibility === "visible";
 };
 
