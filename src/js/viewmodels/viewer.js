@@ -45,6 +45,8 @@ class Viewer {
         this.epageCount = ko.observable();
         this.firstPage = ko.observable();
         this.lastPage = ko.observable();
+        this.tocVisible = ko.observable();
+        this.tocPinned = ko.observable();
 
         this.setupViewerEventHandler();
         this.setupViewerOptionSubscriptions();
@@ -94,10 +96,27 @@ class Viewer {
             if (epageCount !== undefined) {
                 this.epageCount(epageCount);
             }
+
+            const tocVisibleOld = this.tocVisible();
+            const tocVisibleNew = this.viewer_.isTOCVisible();
+            if (tocVisibleOld && !tocVisibleNew) {
+                // When resize, TOC box will be regenerated and hidden temporarily.
+                // So keep TOC toggle button status on.
+            } else {
+                this.tocVisible(tocVisibleNew);
+            }
         });
         this.viewer_.addListener("hyperlink", payload => {
             if (payload.internal) {
                 this.navigateToInternalUrl(payload.href);
+
+                // When navigate from TOC, TOC box may or may not become hidden by autohide.
+                // Here set tocVisible false and it may become true again in "nav" event.
+                if (this.tocVisible()) {
+                    this.tocVisible(false);
+                }
+                
+                document.getElementById("vivliostyle-viewer-viewport").focus();
             } else {
                 window.location.href = payload.href;
             }
@@ -173,6 +192,17 @@ class Viewer {
         }
         let epage = pageNumber - 1;
         return epage;
+    }
+
+    showTOC(opt_show, opt_autohide) {
+        if (this.viewer_.isTOCVisible() == null) {
+            // TOC is unavailable
+            return;
+        }
+        const show = opt_show == null ? !this.tocVisible() : opt_show;
+        this.tocVisible(show);
+        this.tocPinned(show ? !opt_autohide : false);
+        this.viewer_.showTOC(show, opt_autohide);
     }
 }
 

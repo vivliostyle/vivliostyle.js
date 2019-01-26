@@ -61,16 +61,15 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 	@include box-shadow($menu-box-shadow);
 	-webkit-font-smoothing: subpixel-antialiased;
 	-webkit-text-size-adjust: 100%;
+	@include user-select(none); // prevent unwanted text selection
 	* {
 		margin: 0;
 		padding: 0;
 		border: none 0;
 	}
-	ul {
-		li {
-			list-style: none outside;
-			display: block;
-		}
+	li {
+		list-style: none outside;
+		display: block;
 	}
 	&:before,
 	&:after {
@@ -82,12 +81,12 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 		height: $menu-icon-height * 0.5;
 		text-align: center;
 		transition: linear .2s;
-		@media screen and (max-width: 1080px) {
+		@media screen and (max-width: 1117px) {
 			right: $menu-icon-width + $menu-icon-offset-x * 4;
 			width: 362px / (80px / ($menu-icon-height * 0.5));
 			text-align: right;
 		}
-		@media screen and (max-width: 612px) {
+		@media screen and (max-width: 649px) {
 			animation: none !important;
 			opacity: 0 !important;
 		}
@@ -105,7 +104,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 // --------------------------------------------------------------------------------
 
 #vivliostyle-menu-bar {
-	ul.vivliostyle-menu {
+	>ul.vivliostyle-menu {
 		position: relative;
 		z-index: 10;
 		float: left;
@@ -128,7 +127,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 			padding-right: 0;
 			z-index: 11;
 		}
-		li.vivliostyle-menu-item {
+		>li.vivliostyle-menu-item {
 			display: table-cell;
 			position: relative;
 			width: $menu-icon-width;
@@ -194,8 +193,9 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 // --------------------------------------------------------------------------------
 
 #vivliostyle-menu-bar {
-	ul.vivliostyle-menu {
-		li.vivliostyle-menu-item {
+	>ul.vivliostyle-menu {
+		>li.vivliostyle-menu-item {
+			&#vivliostyle-menu-item_toc-toggle                   >.vivliostyle-menu-icon-button:before { content: $fa-var-list; top: .05em; }
 		//	&#vivliostyle-menu-item_move-left         >.vivliostyle-menu-icon-button:before { content: $fa-var-arrow-left; }
 			&#vivliostyle-menu-item_move-first            >.vivliostyle-menu-icon-button:before { content: $fa-var-chevron-up; }
 			&#vivliostyle-menu-item_move-previous         >.vivliostyle-menu-icon-button:before { content: $fa-var-chevron-up; }
@@ -230,6 +230,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 				position: absolute;
 				top: 13px;
 				font-size: 85%;
+				@include user-select(text);
 
 				&::before {
 					content: "/\A0";
@@ -247,6 +248,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 			&#vivliostyle-menu-item_text-size-larger      >.vivliostyle-menu-icon-button:after  { right: $menu-icon-width * 0.05; top: $menu-icon-height * 0.15; }
 		//	&#vivliostyle-menu-item_misc-toggle       >.vivliostyle-menu-icon-button:before { content: $fa-var-bars; }
 		//	&#vivliostyle-menu-item_misc-toggle.vivliostyle-menu-item_detail-opened >.vivliostyle-menu-icon-button:before { content: $fa-var-times; }
+			&#vivliostyle-menu-item_toc-toggle.on,
 			&#vivliostyle-menu-item_zoom-fit-to-screen.on {
 				>.vivliostyle-menu-icon-button {
 					&:before, &:after { color: black; }
@@ -254,6 +256,11 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					&.hover {
 						background: rgba(255,255,255,0.75);
 					}
+				}
+			}
+			&#vivliostyle-menu-item_toc-toggle.on.pinned {
+				>.vivliostyle-menu-icon-button {
+					background: rgba(255,255,255,0.85);
 				}
 			}
 			&#vivliostyle-menu-item_misc-toggle {
@@ -269,11 +276,22 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 							-webkit-filter: grayscale(50%); filter: grayscale(50%);
 						}
 					}
-				}
-			}
-			&#vivliostyle-menu-item_text-size-default {
-				@media screen and (max-width: $menu-icon-width * 14 - 4px) {
-					display: none;
+					&::after {
+						content: $fa-var-ellipsis-h;
+						font-size: $menu-icon-height * 0.75;
+						line-height: 0.5em;
+						text-align: right;
+						display: block;
+						position: absolute;
+						width: 100%;
+						height: 0.5em;
+						right: 0;
+						bottom: -0.67em;
+						padding: 0 2px;
+						overflow: hidden;
+						color: rgba(0, 0, 0, 0.25);
+						@include font-icon("FontAwesome");
+					}
 				}
 			}
 			&#vivliostyle-menu-item_misc-toggle.vivliostyle-menu-item_detail-opened {
@@ -281,20 +299,35 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					-webkit-filter: grayscale(100%); filter: grayscale(100%);
 				}
 			}
+			&#vivliostyle-menu-item_misc-toggle.vivliostyle-menu-item_detail-opened.pinned {
+				>.vivliostyle-menu-icon-button {
+					-webkit-filter: grayscale(100%) brightness(150%); filter: grayscale(100%) brightness(150%);
+				}
+			}
+			&#vivliostyle-menu-item_text-size-default {
+				@media screen and (max-width: $menu-icon-width * 15 - 3px) {
+					display: none;
+				}
+			}
 			&#vivliostyle-menu-item_move-previous, &#vivliostyle-menu-item_move-next {
-				@media screen and (max-width: $menu-icon-width * 13 - 4px) {
+				@media screen and (max-width: $menu-icon-width * 14 - 3px) {
 					display: none;
 				}
 			}
 			&#vivliostyle-menu-item_zoom-to-actual-size {
-				@media screen and (max-width: $menu-icon-width * 11 - 4px) {
+				@media screen and (max-width: $menu-icon-width * 12 - 3px) {
 					display: none;
 				}
 			}
 			&#vivliostyle-menu-item_zoom-fit-to-screen {
-				@media screen and (max-width: $menu-icon-width * 10 - 4px) {
+				@media screen and (max-width: $menu-icon-width * 11 - 3px) {
 					display: none;
 				}
+			}
+		}
+		&#vivliostyle-menu_zoom {
+			@media screen and (max-width: $menu-icon-width * 10 - 3px) {
+				display: none;
 			}
 		}
 	}
@@ -321,6 +354,11 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 				color: $menu-fg-color; .vivliostyle-menu-disabled { color: $menu-disabled-fg-color; }
 				background: $menu-bg-color;
 				@include box-shadow($menu-box-shadow);
+				@include user-select(text);
+				&:focus {
+					outline: 1px solid rgba(0,0,0,0.15);
+				}
+
 				input, select {
 					display: inline-block;
 				}
@@ -492,5 +530,25 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 		margin-top: $menu-icon-height;
 		height: calc(100vh - #{$menu-icon-height});
 		width: 100vw;
+	}
+}
+
+// ================================================================================
+// + TOC Box
+// --------------------------------------------------------------------------------
+
+[data-vivliostyle-toc-box] {
+	z-index: 2000;	// need greater than navigation-left button's z-index
+	&:focus {
+		outline: 1px solid rgba(0,0,0,0.15);
+	}
+	:focus {
+	  box-shadow: 0 0 4px 2px #4D90FE;
+		outline: none;
+	}
+	[role=button]:focus {
+		text-shadow: 1px 0 5px #4D90FE, -1px 0 5px #4D90FE;
+		box-shadow: none;
+		outline: none;
 	}
 }

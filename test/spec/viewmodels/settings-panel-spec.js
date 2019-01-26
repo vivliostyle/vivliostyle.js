@@ -60,32 +60,32 @@ describe("SettingsPanel", function() {
         });
     });
 
-    describe("toggle", function() {
-        it("toggles 'opened' property", function() {
-            var settingsPanel = createSettingsPanel();
+    // describe("toggle", function() {
+    //     it("toggles 'opened' property", function() {
+    //         var settingsPanel = createSettingsPanel();
 
-            expect(settingsPanel.opened()).toBe(false);
+    //         expect(settingsPanel.opened()).toBe(false);
 
-            settingsPanel.toggle();
+    //         settingsPanel.toggle();
 
-            expect(settingsPanel.opened()).toBe(true);
+    //         expect(settingsPanel.opened()).toBe(true);
 
-            settingsPanel.toggle();
+    //         settingsPanel.toggle();
 
-            expect(settingsPanel.opened()).toBe(false);
-        });
-    });
+    //         expect(settingsPanel.opened()).toBe(false);
+    //     });
+    // });
 
-    it("closes when the error dialog is visible", function() {
-        var settingsPanel = createSettingsPanel();
-        settingsPanel.toggle();
+    // it("closes when the error dialog is visible", function() {
+    //     var settingsPanel = createSettingsPanel();
+    //     settingsPanel.toggle();
 
-        expect(settingsPanel.opened()).toBe(true);
+    //     expect(settingsPanel.opened()).toBe(true);
 
-        messageDialog.visible(true);
+    //     messageDialog.visible(true);
 
-        expect(settingsPanel.opened()).toBe(false);
-    });
+    //     expect(settingsPanel.opened()).toBe(false);
+    // });
 
     describe("apply", function() {
         it("writes parameters from this.state.viewerOptions to the original ViewerOptions if the page size is not changed", function() {

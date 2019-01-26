@@ -28,9 +28,11 @@ class Navigation {
         this.viewerOptions_ = viewerOptions;
         this.viewer_ = viewer;
         this.settingsPanel_ = settingsPanel;
+        this.justClicked = false;    // double click check
 
         this.isDisabled = ko.pureComputed(() => {
-            return this.settingsPanel_.opened() || !this.viewer_.state.navigatable();
+            return this.settingsPanel_.opened() && !this.settingsPanel_.pinned() ||
+                !this.viewer_.state.navigatable();
         });
 
         const navigationDisabled = ko.pureComputed(() => {
@@ -139,6 +141,11 @@ class Navigation {
         this.isDefaultFontSizeDisabled = fontSizeChangeDisabled;
         this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
 
+        this.isTOCToggleDisabled = ko.pureComputed(() => {
+            return navigationOptions.disableTOCNavigation || this.isDisabled() || this.viewer_.tocVisible() == null;
+        });
+        this.hideTOCNavigation = !!navigationOptions.disableTOCNavigation;
+
         this.pageNumber = ko.pureComputed({
             read() {
                 return this.viewer_.epageToPageNumber(this.viewer_.epage());
@@ -210,7 +217,8 @@ class Navigation {
             "increaseFontSize",
             "decreaseFontSize",
             "defaultFontSize",
-            "handleKey"
+            "onclickViewport",
+            "toggleTOC"
         ].forEach(methodName => {
             this[methodName] = this[methodName].bind(this);
         });
@@ -340,8 +348,154 @@ class Navigation {
         }
     }
 
+    onclickViewport() {
+        if (this.viewer_.tocVisible() && !this.viewer_.tocPinned()) {
+            const tocBox = document.querySelector("[data-vivliostyle-toc-box]");
+            if (tocBox && !tocBox.contains(document.activeElement)) {
+                this.toggleTOC();
+            }
+        }
+        if (this.settingsPanel_.opened() && !this.settingsPanel_.pinned()) {
+            this.settingsPanel_.close();
+        }
+        return true;
+    }
+
+    toggleTOC() {
+        if (!this.isTOCToggleDisabled()) {
+            let intervalID = 0;
+            const tocToggle = document.getElementById("vivliostyle-menu-item_toc-toggle");
+
+            if (!this.viewer_.tocVisible()) {
+                this.viewer_.showTOC(true, true);   // autohide=true
+                this.justClicked = true;
+
+                // Here use timer for two purposes:
+                // - Check double click to make TOC box pinned.
+                // - Move focus to TOC box when TOC box becomes visible.
+                intervalID = setInterval(() => {
+                    const tocBox = document.querySelector("[data-vivliostyle-toc-box]");
+                    if (tocBox && tocBox.style.visibility === "visible") {
+                        tocBox.tabIndex = 0;
+                        tocBox.focus();
+
+                        clearInterval(intervalID);
+                        intervalID = 0;
+                    }
+                    this.justClicked = false;
+                }, 300);
+            } else if (this.justClicked) {
+                // Double click to keep TOC box visible during TOC navigation
+                this.viewer_.showTOC(true, false);   // autohide=false
+                this.justClicked = false;
+            } else {
+                if (intervalID) {
+                    clearInterval(intervalID);
+                    intervalID = 0;
+                }
+                this.viewer_.showTOC(false);
+                document.getElementById("vivliostyle-viewer-viewport").focus();
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    navigateTOC(key) {
+        const selecter = "[data-vivliostyle-toc-box] [tabindex='0'], [data-vivliostyle-toc-box] a:not([tabindex='-1'])";
+        let nodes = Array.from(document.querySelectorAll(selecter));
+        let index = nodes.indexOf(document.activeElement);
+
+        const isButton = (index) => {
+            return nodes[index] && nodes[index].getAttribute("role") === "button";
+        }
+        const isExpanded = (index) => {
+            return nodes[index] && nodes[index].getAttribute("aria-expanded") === "true";
+        }
+
+        switch (key) {
+            case Keys.ArrowLeft:
+                if (index == -1) {
+                    index = nodes.length - 1;
+                    break;
+                }
+                if (!isButton(index) && isButton(index - 1)) {
+                    index--;
+                }
+                if (isButton(index) && isExpanded(index)) {
+                    nodes[index].click();
+                } else {
+                    for (let i = index - 1; i >= 0; i--) {
+                        if (isButton(i) && nodes[i].parentElement.contains(nodes[index])) {
+                            index = i;
+                            break;
+                        }
+                    }
+                }
+                break;
+            case Keys.ArrowRight:
+                if (index == -1) {
+                    index = 0;
+                    break;
+                }
+                if (!isButton(index) && isButton(index - 1)) {
+                    index--;
+                }
+                if (isButton(index)) {
+                    if (isExpanded(index)) {
+                        index += 2;
+                    } else {
+                        nodes[index].click();
+                    }
+                }
+                break;
+            case Keys.ArrowDown:
+                index++;
+                break;
+            case Keys.ArrowUp:
+                if (index == -1) {
+                    index = nodes.length - 1;
+                    break;
+                }
+                if (index > 0) {
+                    if (isButton(--index)) {
+                        index--;
+                    }
+                }
+                break;
+            case Keys.Home:
+                index = 0;
+                break;
+            case Keys.End:
+                index = nodes.length - 1;
+                break;
+            case Keys.Space:
+                if (!isButton(index) && isButton(index - 1)) {
+                    index--;
+                }
+                if (isButton(index)) {
+                    nodes[index].click();
+                }
+                break;
+        }
+
+        if (isButton(index)) {
+            index++;
+        }
+
+        if (nodes[index]) {
+            nodes[index].focus();
+        }
+
+        return true;
+    }
+
     handleKey(key) {
-        if (document.getElementById("vivliostyle-menu_misc").contains(document.activeElement)) {
+        const isSettingsActive = this.settingsPanel_.opened() &&
+            this.settingsPanel_.settingsToggle.contains(document.activeElement);
+
+        if (isSettingsActive) {
             return true;
         }
 
@@ -350,6 +504,7 @@ class Navigation {
         const horizontalScrollable = viewportElement.scrollWidth > viewportElement.clientWidth;
         const verticalScrollable = viewportElement.scrollHeight > viewportElement.clientHeight;
         const isPageNumberInput = pageNumberElem === document.activeElement;
+        const isTOCActive = this.viewer_.tocVisible() && !isPageNumberInput && viewportElement != document.activeElement;
 
         switch (key) {
             case "+":
@@ -361,25 +516,33 @@ class Navigation {
             case "1":
                 return isPageNumberInput || !this.zoomToActualSize();
             case Keys.ArrowLeft:
+                if (isTOCActive) return !this.navigateTOC(key);
                 return isPageNumberInput || horizontalScrollable || !this.navigateToLeft();
             case Keys.ArrowRight:
+                if (isTOCActive) return !this.navigateTOC(key);
                 return isPageNumberInput || horizontalScrollable || !this.navigateToRight();
             case Keys.ArrowDown:
+                if (isTOCActive) return !this.navigateTOC(key);
                 viewportElement.focus();
                 return verticalScrollable || !this.navigateToNext();
             case Keys.ArrowUp:
+                if (isTOCActive) return !this.navigateTOC(key);
                 viewportElement.focus();
                 return verticalScrollable || !this.navigateToPrevious();
             case Keys.PageDown:
+                if (isTOCActive) return true;
                 viewportElement.focus();
                 return !this.navigateToNext();
             case Keys.PageUp:
+                if (isTOCActive) return true;
                 viewportElement.focus();
                 return !this.navigateToPrevious();
             case Keys.Home:
+                if (isTOCActive) return !this.navigateTOC(key);
                 viewportElement.focus();
                 return !this.navigateToFirst();
             case Keys.End:
+                if (isTOCActive) return !this.navigateTOC(key);
                 viewportElement.focus();
                 return !this.navigateToLast();
             case "o":
@@ -398,8 +561,22 @@ class Navigation {
             case "G":
                 pageNumberElem.focus();
                 return false;
-            case Keys.Escape:
+            case "t":
+            case "T":
                 viewportElement.focus();
+                return !this.toggleTOC();
+            case Keys.Escape:
+                if (this.viewer_.tocVisible()) {
+                    return !this.toggleTOC();
+                }
+                viewportElement.focus();
+                return true;
+            case Keys.Space:
+                if (isTOCActive) return !this.navigateTOC(key);
+                if (document.activeElement.getAttribute("role") === "button") {
+                    document.activeElement.click();
+                    return false;
+                }
                 return true;
             default:
                 return true;

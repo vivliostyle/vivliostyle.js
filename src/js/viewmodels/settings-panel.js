@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -40,7 +41,12 @@ class SettingsPanel {
         this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
         this.isRenderAllPagesChangeDisabled = !!settingsPanelOptions.disableRenderAllPagesChange;
 
+        this.justClicked = false;    // double click check
+        this.settingsToggle = document.getElementById("vivliostyle-menu-item_misc-toggle");
+
         this.opened = ko.observable(false);
+        this.pinned = ko.observable(false);
+
         this.state = {
             viewerOptions: new ViewerOptions(viewerOptions),
             pageSize: new PageSize(documentOptions.pageSize),
@@ -62,9 +68,6 @@ class SettingsPanel {
             })
         };
 
-        const settingsParent = document.getElementById("vivliostyle-menu-item_misc-toggle");
-        this.settingsButton = settingsParent && settingsParent.firstElementChild;
-
         ["close", "toggle", "apply", "reset"].forEach(function(methodName) {
             this[methodName] = this[methodName].bind(this);
         }, this);
@@ -76,22 +79,29 @@ class SettingsPanel {
 
     close() {
         this.opened(false);
+        this.pinned(false);
         const viewportElement = document.getElementById("vivliostyle-viewer-viewport");
         if (viewportElement) viewportElement.focus();
         return true;
     }
 
     toggle() {
-        let open = !this.opened();
-        if (open) {
-            this.opened(open);
-            if (this.settingsButton) {
-                const inputElem = Array.from(this.settingsButton.parentElement.getElementsByTagName("input"))
-                    .find(e => !e.disabled && e.checked);
-                if (inputElem) {
-                    inputElem.focus();
-                }
+        if (!this.opened()) {
+            if (!this.viewer_.tocPinned()) {
+                this.viewer_.showTOC(false); // Hide TOC box
             }
+            this.opened(true);
+            this.pinned(false);
+            this.justClicked = true;
+            this.focusToFirstItem();
+
+            setTimeout(() => {
+                this.justClicked = false;
+            }, 300);
+        } else if (this.justClicked) {
+            // Double click to keep Settings panel open when Applay or Reset is clicked.
+            this.justClicked = false;
+            this.pinned(true);
         } else {
             this.close();
         }
@@ -105,7 +115,11 @@ class SettingsPanel {
             this.documentOptions_.pageSize.copyFrom(this.state.pageSize);
             this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
         }
-        this.close();
+        if (this.pinned()) {
+            this.focusToFirstItem();
+        } else {
+            this.close();
+        }
     }
 
     reset() {
@@ -114,29 +128,49 @@ class SettingsPanel {
         this.close();
     }
 
+    focusToFirstItem() {
+        const inputElem = Array.from(this.settingsToggle.getElementsByTagName("input")).find(e => !e.disabled && e.checked);
+        if (inputElem) {
+            inputElem.focus();
+        }
+    }
+
     handleKey(key) {
+        const isSettingsActive = this.opened() && this.settingsToggle.contains(document.activeElement);
+        const isInInput = isSettingsActive && (document.activeElement.type == "text" ||
+                document.activeElement.localName == "select");
+        const isHotKeyEnabled = isSettingsActive && !isInInput;
+
         switch (key) {
             case Keys.Escape:
                 if (this.opened()) {
                     this.reset();
-                    return false;
+                    this.close();
                 }
                 return true;
             case "s":
             case "S":
-                if (!this.opened() || document.activeElement === this.settingsButton) {
+                if (!this.opened() || isHotKeyEnabled || !isSettingsActive) {
                     this.toggle();
                     return false;
                 }
                 return true;
-            case Keys.Space:
-                if (document.activeElement === this.settingsButton) {
-                    this.toggle();
+            case "o":
+            case "O":
+                if (isHotKeyEnabled) {
+                    document.getElementsByName("vivliostyle-misc_paginate_override-document-stylesheets")[0].focus();
+                    return false;
+                }
+                return true;
+            case "r":
+            case "R":
+                if (isHotKeyEnabled) {
+                    document.getElementsByName("vivliostyle-misc_render-all-pages")[0].focus();
                     return false;
                 }
                 return true;
             case Keys.Enter:
-                if (this.settingsButton && this.settingsButton.parentElement.contains(document.activeElement) &&
+                if (isHotKeyEnabled &&
                         document.activeElement.id !== "vivliostyle-menu-button_apply" &&
                         document.activeElement.id !== "vivliostyle-menu-button_reset") {
                     document.getElementById("vivliostyle-menu-button_apply").focus();
