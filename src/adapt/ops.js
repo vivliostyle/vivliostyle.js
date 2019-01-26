@@ -1,6 +1,7 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -1213,6 +1214,10 @@ adapt.ops.StyleInstance.prototype.noMorePrimaryFlows = function(cp) {
  */
 adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     const self = this;
+
+    // TOC box is special page container, no pagination
+    const isTocBox = page.container === page.bleedBox;
+
     self.pageBreaks = {};
     if (cp) {
         self.currentLayoutPosition = cp.clone();
@@ -1230,24 +1235,27 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     self.layoutPositionAtPageStart = cp.clone();
 
     // Resolve page size before page master selection.
-    const cascadedPageStyle = self.pageManager.getCascadedPageStyle();
+    const cascadedPageStyle = isTocBox ? /** @type {adapt.csscasc.ElementStyle} */ ({}) : self.pageManager.getCascadedPageStyle();
     const pageMaster = self.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
         // end of primary content
         return adapt.task.newResult(/** @type {adapt.vtree.LayoutPosition}*/ (null));
     }
 
-    page.setAutoPageWidth(pageMaster.pageBox.specified["width"].value === adapt.css.fullWidth);
-    page.setAutoPageHeight(pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight);
-    self.counterStore.setCurrentPage(page);
-    self.counterStore.updatePageCounters(cascadedPageStyle, self);
+    let bleedBoxPaddingEdge = 0;
+    if (!isTocBox) {
+        page.setAutoPageWidth(pageMaster.pageBox.specified["width"].value === adapt.css.fullWidth);
+        page.setAutoPageHeight(pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight);
+        self.counterStore.setCurrentPage(page);
+        self.counterStore.updatePageCounters(cascadedPageStyle, self);
 
-    // setup bleed area and crop marks
-    const evaluatedPageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(
-        vivliostyle.page.resolvePageSizeAndBleed(cascadedPageStyle), this);
-    self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
-    vivliostyle.page.addPrinterMarks(cascadedPageStyle, evaluatedPageSizeAndBleed, page, this);
-    const bleedBoxPaddingEdge = evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
+        // setup bleed area and crop marks
+        const evaluatedPageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(
+            vivliostyle.page.resolvePageSizeAndBleed(cascadedPageStyle), this);
+        self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
+        vivliostyle.page.addPrinterMarks(cascadedPageStyle, evaluatedPageSizeAndBleed, page, this);
+        bleedBoxPaddingEdge = evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
+    }
 
     const writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
     const direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
@@ -1273,17 +1281,19 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
             });
     }).then(() => {
         pageMaster.adjustPageLayout(self, page, self.clientLayout);
-        const isLeftPage = new adapt.expr.Named(pageMaster.pageBox.scope, "left-page");
-        page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;
-        self.processLinger();
-        cp = self.currentLayoutPosition;
-        Object.keys(cp.flowPositions).forEach(flowName => {
-            const flowPosition = cp.flowPositions[flowName];
-            const breakAfter = flowPosition.breakAfter;
-            if (breakAfter && (breakAfter === "page" || !self.matchPageSide(breakAfter))) {
-                flowPosition.breakAfter = null;
-            }
-        });
+        if (!isTocBox) {
+            const isLeftPage = new adapt.expr.Named(pageMaster.pageBox.scope, "left-page");
+            page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;
+            self.processLinger();
+            cp = self.currentLayoutPosition;
+            Object.keys(cp.flowPositions).forEach(flowName => {
+                const flowPosition = cp.flowPositions[flowName];
+                const breakAfter = flowPosition.breakAfter;
+                if (breakAfter && (breakAfter === "page" || !self.matchPageSide(breakAfter))) {
+                    flowPosition.breakAfter = null;
+                }
+            });
+        }
         self.currentLayoutPosition = self.layoutPositionAtPageStart = null;
         cp.highestSeenOffset = self.styler.getReachedOffset();
         const triggers = self.style.store.getTriggersForDoc(self.xmldoc);

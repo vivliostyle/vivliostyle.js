@@ -8,7 +8,7 @@ script:
 - npm run lint
 - npm run build
 - npm test
-- build/wpt-sauce.sh
+# - build/wpt-sauce.sh
 after_success:
 - build/travis-after-success.sh
 notifications:

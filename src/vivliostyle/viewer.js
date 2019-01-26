@@ -379,6 +379,28 @@ goog.scope(() => {
     };
 
     /**
+     * @returns {?boolean} True if TOC is visible, false if hidden, null if TOC is unavailable
+     */
+    Viewer.prototype.isTOCVisible = function() {
+        if (this.adaptViewer.opfView && this.adaptViewer.opfView.opf &&
+                (this.adaptViewer.opfView.opf.xhtmlToc || this.adaptViewer.opfView.opf.ncxToc)) {
+            return !!this.adaptViewer.opfView.isTOCVisible();
+        } else {
+            return null;
+        }
+    };
+
+    /**
+     * Show or hide TOC box
+     * @param {?boolean=} opt_show      If true show TOC, false hide TOC. If null or undefined toggle TOC.
+     * @param {boolean=} opt_autohide   If true, automatically hide when click TOC item
+     */
+    Viewer.prototype.showTOC = function(opt_show, opt_autohide) {
+        const visibility = opt_show == null ? "toggle" : opt_show ? "show" : "hide";
+        this.adaptViewer.sendCommand({"a": "toc", "v": visibility, "autohide": opt_autohide});
+    };
+
+    /**
      * @enum {string}
      */
     vivliostyle.viewer.ZoomType = adapt.viewer.ZoomType;
@@ -414,6 +436,8 @@ goog.scope(() => {
     goog.exportProperty(Viewer.prototype, "getCurrentPageProgression", Viewer.prototype.getCurrentPageProgression);
     goog.exportProperty(Viewer.prototype, "navigateToPage", Viewer.prototype.navigateToPage);
     goog.exportProperty(Viewer.prototype, "navigateToInternalUrl", Viewer.prototype.navigateToInternalUrl);
+    goog.exportProperty(Viewer.prototype, "isTOCVisible", Viewer.prototype.isTOCVisible);
+    goog.exportProperty(Viewer.prototype, "showTOC", Viewer.prototype.showTOC);
     goog.exportProperty(Viewer.prototype, "queryZoomFactor", Viewer.prototype.queryZoomFactor);
     goog.exportProperty(Viewer.prototype, "getPageSizes", Viewer.prototype.getPageSizes);
     vivliostyle.namespace.exportSymbol("vivliostyle.viewer.ZoomType", ZoomType);

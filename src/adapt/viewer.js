@@ -472,6 +472,7 @@ adapt.viewer.Viewer.prototype.hidePages = function() {
     this.removePageListeners();
     this.forCurrentPages(page => {
         adapt.base.setCSSProperty(page.container, "display", "none");
+        page.container.setAttribute("aria-hidden", "true");
     });
     this.currentPage = null;
     this.currentSpread = null;
@@ -486,6 +487,7 @@ adapt.viewer.Viewer.prototype.showSinglePage = function(page) {
     page.addEventListener("replaced", this.pageReplacedListener, false);
     adapt.base.setCSSProperty(page.container, "visibility", "visible");
     adapt.base.setCSSProperty(page.container, "display", "block");
+    page.container.setAttribute("aria-hidden", "false");
 };
 
 /**
@@ -667,7 +669,11 @@ adapt.viewer.Viewer.prototype.removePageSizePageRules = function() {
  * @return {void}
  */
 adapt.viewer.Viewer.prototype.reset = function() {
+    let tocVisible = false;
+    let tocAutohide = false;
     if (this.opfView) {
+        tocVisible = this.opfView.isTOCVisible();
+        tocAutohide = this.opfView.tocAutohide;
         this.opfView.hideTOC();
         this.opfView.removeRenderedPages();
     }
@@ -676,6 +682,9 @@ adapt.viewer.Viewer.prototype.reset = function() {
     this.viewport.resetZoom();
     this.opfView = new adapt.epub.OPFView(this.opf, this.viewport, this.fontMapper, this.pref,
         this.setPageSize.bind(this));
+    if (tocVisible) {
+        this.sendCommand({"a": "toc", "v": "show", "autohide": tocAutohide});
+    }
 };
 
 /**
@@ -992,8 +1001,9 @@ adapt.viewer.Viewer.prototype.showTOC = function(command) {
     const autohide = !!command["autohide"];
     const visibility = command["v"];
     const currentVisibility = this.opfView.isTOCVisible();
+    const changeAutohide = autohide != this.opfView.tocAutohide && visibility != "hide";
     if (currentVisibility) {
-        if (visibility == "show") {
+        if (visibility == "show" && !changeAutohide) {
             return adapt.task.newResult(true);
         }
     } else {
@@ -1001,7 +1011,7 @@ adapt.viewer.Viewer.prototype.showTOC = function(command) {
             return adapt.task.newResult(true);
         }
     }
-    if (currentVisibility) {
+    if (currentVisibility && visibility != "show") {
         this.opfView.hideTOC();
         return adapt.task.newResult(true);
     } else {
@@ -1009,10 +1019,13 @@ adapt.viewer.Viewer.prototype.showTOC = function(command) {
         /** @type {adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("showTOC");
         this.opfView.showTOC(autohide).then(page => {
             if (page) {
+                if (changeAutohide) {
+                    page.listeners = {};
+                }
                 if (autohide) {
                     const hideTOC = () => {self.opfView.hideTOC();};
                     page.addEventListener("hyperlink", hideTOC, false);
-                    page.container.addEventListener("click", hideTOC, false);
+                    // page.container.addEventListener("click", hideTOC, false);
                 }
                 page.addEventListener("hyperlink", self.hyperlinkListener, false);
             }
