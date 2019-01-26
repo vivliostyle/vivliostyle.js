@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -55,6 +56,7 @@ function ViewerApp() {
         settingsPanelOptions);
 
     const navigationOptions = {
+        disableTOCNavigation: false,
         disablePageNavigation: false,
         disableZoom: false,
         disableFontSizeChange: false

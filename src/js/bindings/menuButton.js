@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -43,6 +44,8 @@ ko.bindingHandlers.menuButton = {
                 });
                 element.addEventListener("mouseout", () => {
                     ko.utils.toggleDomNodeCssClass(element, "hover", false);
+                    ko.utils.toggleDomNodeCssClass(element, "active", false);
+                    window.getSelection().removeAllRanges(); // prevent unwanted text selection
                 });
             }
         }
