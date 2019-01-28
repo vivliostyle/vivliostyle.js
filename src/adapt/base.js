@@ -378,6 +378,29 @@ adapt.base.getPrefixedPropertyNames = prop => {
                 return adapt.base.propNameMap[prop] = ["-webkit-clip-path", "clip-path"];
             }
             break;
+        case "margin-inline-start":
+            if (adapt.base.checkIfPropertySupported("-webkit-", "margin-start")) {
+                adapt.base.propNameMap[prop] = ["-webkit-margin-start"];
+                return ["-webkit-margin-start"];
+            }
+            break;
+        case "margin-inline-end":
+            if (adapt.base.checkIfPropertySupported("-webkit-", "margin-end")) {
+                adapt.base.propNameMap[prop] = ["-webkit-margin-end"];
+                return ["-webkit-margin-end"];
+            }
+        case "padding-inline-start":
+            if (adapt.base.checkIfPropertySupported("-webkit-", "padding-start")) {
+                adapt.base.propNameMap[prop] = ["-webkit-padding-start"];
+                return ["-webkit-padding-start"];
+            }
+            break;
+        case "padding-inline-end":
+            if (adapt.base.checkIfPropertySupported("-webkit-", "padding-end")) {
+                adapt.base.propNameMap[prop] = ["-webkit-padding-end"];
+                return ["-webkit-padding-end"];
+            }
+            break;
     }
 
 

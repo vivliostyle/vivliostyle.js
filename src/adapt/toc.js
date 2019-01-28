@@ -171,10 +171,13 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
                 var button = viewParent.ownerDocument.createElement("div");
                 button.textContent = adapt.toc.bulletEmpty;
                 // TODO: define pseudo-element for the button?
-                adapt.base.setCSSProperty(button, "margin-left", "-1em");
+                adapt.base.setCSSProperty(button, "margin", "0.2em 0 0 -1em");
+                adapt.base.setCSSProperty(button, "margin-inline-start", "-1em");
+                adapt.base.setCSSProperty(button, "margin-inline-end", "0");
                 adapt.base.setCSSProperty(button, "display", "inline-block");
                 adapt.base.setCSSProperty(button, "width", "1em");
-                adapt.base.setCSSProperty(button, "text-align", "left");
+                adapt.base.setCSSProperty(button, "text-align", "center");
+                adapt.base.setCSSProperty(button, "vertical-align", "top");
                 adapt.base.setCSSProperty(button, "cursor", "default");
                 adapt.base.setCSSProperty(button, "font-family", "Menlo,sans-serif");
                 element.appendChild(button);
@@ -223,7 +226,12 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
     const page = new adapt.vtree.Page(elem, elem);
     this.page = page;
     this.store.load(this.url).then(xmldoc => {
-        const style = self.store.getStyleForDoc(xmldoc);
+        let s = self.store.getStyleForDoc(xmldoc);
+        // Abandon using document's style and use uaBaseCascade instead because
+        // vertical writing-mode in TOC causes problem.
+        const style = new adapt.ops.Style(self.store, s.rootScope, s.pageScope,
+            adapt.csscasc.uaBaseCascade.clone(),
+            s.rootBox, s.fontFaces, s.footnoteProps, s.flowProps, s.viewportProps, s.pageProps);
         const viewportSize = style.sizeViewport(width, 100000, fontSize);
         viewport = new adapt.vgen.Viewport(viewport.window, viewportSize.fontSize, viewport.root,
             viewportSize.width, viewportSize.height);

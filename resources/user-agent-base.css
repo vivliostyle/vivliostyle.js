@@ -300,8 +300,15 @@ ncx|ncx {
 ncx|navPoint, nav[epub|type=toc] li {
 	display: block;
 	margin: 0px;
-	padding: 0px 0px 0px 1.25em;
+	padding: 0px;
+    padding-inline-start: 1.25em;
     -adapt-behavior: toc-node;
+}
+
+ncx|navPoint, nav[epub|type=toc] li > *:first-child {
+	display: inline-block;
+    margin: 0.2em;
+    vertical-align: top;
 }
 
 nav[epub|type=toc] ol {
