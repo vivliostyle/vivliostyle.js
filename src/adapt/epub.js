@@ -526,7 +526,7 @@ adapt.epub.checkMathJax = () => {
 
 /** @const */
 adapt.epub.supportedMediaTypes = {
-    "appliaction/xhtml+xml": true,
+    "application/xhtml+xml": true,
     "image/jpeg": true,
     "image/png": true,
     "image/svg+xml": true,
