@@ -147,6 +147,12 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
             if (!behavior || (behavior.toString() != "toc-node" && behavior.toString() != "toc-container")) {
                 return renderer(srcElem, viewParent, computedStyle);
             }
+            // Remove white-space textnode that becomes unwanted space between button and anchor element.
+            const firstChild = srcElem.firstChild;
+            if (firstChild && firstChild.nodeType !== 1 && firstChild.textContent.trim() === "") {
+                // To avoid "Inconsistent offset" error, create a comment node with same white-space text.
+                srcElem.replaceChild(srcElem.ownerDocument.createComment(firstChild.textContent), firstChild);
+            }
             const adaptParentClass = viewParent.getAttribute("data-adapt-class");
             if (adaptParentClass == "toc-node") {
                 var button = /** @type {Element} */ (viewParent.firstChild);
