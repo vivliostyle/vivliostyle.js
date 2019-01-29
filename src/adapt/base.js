@@ -81,6 +81,15 @@ adapt.base.resolveURL = (relURL, baseURL) => {
         if (relURL.toLowerCase().match("^javascript:")) {
             return "#";
         }
+        // Convert special URLs
+        let r;
+        if (r = (/^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/)?(.*)$/).exec(relURL)) {
+            // Convert GitHub URL to GitHub raw URL
+            relURL = `${r[1]}//raw.githubusercontent.com/${r[2]}/${r[3] ? '' : 'master/'}${r[4]}`;
+        } else if (r = (/^(https?:)\/\/www\.aozora\.gr\.jp\/(cards\/[^/]+\/files\/[^/.]+\.html)$/).exec(relURL)) {
+            // Convert Aozorabunko (X)HTML URL to GitHub raw URL
+            relURL = `${r[1]}//raw.githubusercontent.com/aozorabunko/aozorabunko/master/${r[2]}`;
+        }
         return relURL;
     }
     if (baseURL.match(/^\w{2,}:\/\/[^\/]+$/))
