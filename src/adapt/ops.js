@@ -1695,8 +1695,11 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
                 const localName = child.localName;
                 if (ns == adapt.base.NS.XHTML) {
                     if (localName == "style") {
+                        const classes = child.getAttribute("class");
+                        const media = child.getAttribute("media");
+                        const title = child.getAttribute("title");
                         sources.push({url, text:child.textContent,
-                            flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
+                            flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: (title ? classes : null), media});
                     } else if (localName == "link") {
                         const rel = child.getAttribute("rel");
                         const classes = child.getAttribute("class");
