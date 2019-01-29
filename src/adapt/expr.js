@@ -41,7 +41,7 @@ adapt.expr.defaultPreferences = () => ({
     nightMode: false,
     spreadView: false,
     pageBorder: 1,
-    enabledMediaTypes: {"print": true},
+    enabledMediaTypes: {"vivliostyle": true, "print": true},
     defaultPaperSize: undefined
 });
 
