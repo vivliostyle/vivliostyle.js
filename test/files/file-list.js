@@ -3,6 +3,7 @@ module.exports = [
         category: "General",
         files: [
             {file: "print_media/", title: "Print media"},
+            {file: "vivliostyle_media/", title: "'vivliostyle' vs 'screen' media"},
             {file: "running_header_adaptive.html", title: "Running header emulation with Adaptive Layout"},
             {file: "case_sensitivity/html.html", title: "HTML case sensitivity"},
             {file: "attr_selectors.html", title: "Attribute selectors"},
