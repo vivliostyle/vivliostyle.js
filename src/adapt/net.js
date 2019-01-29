@@ -98,8 +98,19 @@ adapt.net.ajax = (url, opt_type, opt_method, opt_data, opt_contentType) => {
             request.send(opt_data);
         }
         else {
-            if (url.match(/file:\/\/.*(\.html$|\.htm$)/))
-                request.overrideMimeType("text/html");
+            if ((/^file:|^https?:\/\/[^/]+\.githubusercontent\.com/).test(url)) {
+                // File or GitHub raw URL
+                if ((/\/aozorabunko\/[^/]+\/cards\/[^/]+\/files\/[^/.]+\.html$/).test(url)) {
+                    // Aozorabunko's (X)HTML support
+                    request.overrideMimeType("text/html; charset=Shift_JIS");
+                } else if ((/\.(html|htm)$/).test(url)) {
+                    request.overrideMimeType("text/html; charset=UTF-8");
+                } else if ((/\.(xhtml|xht|xml|opf)$/).test(url)) {
+                    request.overrideMimeType("application/xml; charset=UTF-8");
+                } else if ((/\.(txt|css)$/).test(url)) {
+                    request.overrideMimeType("text/plain; charset=UTF-8");
+                }
+            }
             request.send(null);
         }
     } catch (e) {
