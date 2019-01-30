@@ -83,7 +83,7 @@ adapt.base.resolveURL = (relURL, baseURL) => {
         }
         // Convert special URLs
         let r;
-        if (r = (/^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/)?(.*)$/).exec(relURL)) {
+        if (r = (/^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/|raw\/)?(.*)$/).exec(relURL)) {
             // Convert GitHub URL to GitHub raw URL
             relURL = `${r[1]}//raw.githubusercontent.com/${r[2]}/${r[3] ? '' : 'master/'}${r[4]}`;
         } else if (r = (/^(https?:)\/\/www\.aozora\.gr\.jp\/(cards\/[^/]+\/files\/[^/.]+\.html)$/).exec(relURL)) {
