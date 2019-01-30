@@ -1583,6 +1583,19 @@ adapt.epub.OPFView.prototype.nextPage = function(position, sync) {
             }
             spineIndex++;
             pageIndex = 0;
+
+            // Remove next viewItem if its first page has same side as the current page
+            // to avoid unpaired page.
+            const nextViewItem = this.spineItems[spineIndex];
+            const nextPage = nextViewItem && nextViewItem.pages[0];
+            const currentPage = viewItem.pages[viewItem.pages.length - 1];
+            if (nextPage && currentPage && nextPage.side == currentPage.side) {
+                nextViewItem.pages.forEach(page => {
+                    if (page.container) page.container.remove();
+                });
+                this.spineItems[spineIndex] = null;
+                this.spineItemLoadingContinuations[spineIndex] = null;
+            }
         } else {
             pageIndex++;
         }
@@ -2132,6 +2145,10 @@ adapt.epub.OPFView.prototype.getPageViewItem = function(spineIndex) {
                 // When navigate to a new spine item skipping the previous items,
                 // give up calculate pageNumberOffset and use epage (or spineIndex if epage is unset).
                 pageNumberOffset = item.epage || spineIndex;
+                if (!self.opf.prePaginated && pageNumberOffset % 2 == 0) {
+                    // Force to odd number to avoid unpaired page. (This is 0 based and even number is recto)
+                    pageNumberOffset++;
+                }
             } else {
                 pageNumberOffset = previousViewItem ? previousViewItem.instance.pageNumberOffset + previousViewItem.pages.length : 0;
             }
