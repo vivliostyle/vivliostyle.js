@@ -31,15 +31,17 @@
     "url": "https://github.com/vivliostyle/vivliostyle-print/issues"
   },
   "homepage": "https://github.com/vivliostyle/vivliostyle-print#readme",
-  "dependencies": {
-    "vivliostyle": "2018.12.101-pre.20181225070216"
-  },
   "devDependencies": {
     "eslint": "^5.6.1",
     "gh-pages": "^2.0.0",
     "rollup": "^0.66.2",
     "rollup-plugin-buble": "^0.19.2",
     "rollup-plugin-commonjs": "^9.1.8",
-    "rollup-plugin-node-resolve": "^3.4.0"
+    "rollup-plugin-node-resolve": "^3.4.0",
+    "rollup-plugin-strip": "^1.2.1",
+    "vivliostyle": "2018.12.103"
+  },
+  "dependencies": {
+    "rollup-plugin-terser": "^4.0.3"
   }
 }

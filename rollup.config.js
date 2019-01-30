@@ -1,6 +1,8 @@
 import buble from "rollup-plugin-buble"
 import nodeResolve from "rollup-plugin-node-resolve"
 import commonJS from "rollup-plugin-commonjs"
+import strip from "rollup-plugin-strip"
+import {terser} from "rollup-plugin-terser"
 import pkg from "./package.json"
 
 const banner = `\
@@ -29,12 +31,11 @@ export default [{
             }),
             commonJS({
                 include: '../**',
-                sourceMap: false
+                sourceMap: true
             }),
-            buble({
-                exclude: "node_modules/**",
-                namedFunctionExpressions: false
-            })
+            strip(),
+            buble(),
+            terser()
         ]
     },
     {
@@ -54,7 +55,9 @@ export default [{
             commonJS({
                 include: '../**',
                 sourceMap: false
-            })
+            }),
+            strip(),
+            terser()
         ]
     }
 ]
