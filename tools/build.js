@@ -4,12 +4,12 @@ const { exec } = require('child_process');
 const mkdirp = require('mkdirp');
 
 const outputDir = 'lib';
-const outputFiles = [
-    'lib/vivliostyle.min.js',
+const inputFiles = [
     'src/closure/goog/base.js',
     'src/closure/goog/*/*.js',
     'src/adapt/*.js',
     'src/vivliostyle/*.js',
+    'src/resources/*.js',
     'plugins/*/src/*.js',
     'node_modules/fast-diff/diff.js'
 ];
@@ -22,7 +22,9 @@ java -jar node_modules/google-closure-compiler/compiler.jar \
 --externs src/externs.js \
 --process_common_js_modules \
 --hide_warnings_for node_modules/fast-diff/diff.js \
---js_output_file ${outputFiles.join(' ')}
+--create_source_map lib/vivliostyle.min.js.map \
+--js_output_file lib/vivliostyle.min.js \
+${inputFiles.join(' ')}
 `;
 
 mkdirp(outputDir, (err) => {
