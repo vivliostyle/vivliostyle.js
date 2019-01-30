@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+goog.provide('resources.xml');
+
+
+resources.xml.userAgent = `<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:s="http://www.pyroxy.com/ns/shadow">
 <head>
 <style><![CDATA[
@@ -20,4 +23,4 @@
 <s:template id="table-cell"><div data-vivliostyle-flow-root="true" class="table-cell-container"><s:content/></div></s:template>
 
 </body>
-</html>
+</html>`;

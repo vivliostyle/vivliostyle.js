@@ -10,6 +10,7 @@ const outputFiles = [
     'src/closure/goog/*/*.js',
     'src/adapt/*.js',
     'src/vivliostyle/*.js',
+    'src/resources/*.js',
     'plugins/*/src/*.js',
     'node_modules/fast-diff/diff.js'
 ];

@@ -43,6 +43,8 @@ goog.require('adapt.font');
 goog.require('vivliostyle.break');
 goog.require('vivliostyle.page');
 goog.require('vivliostyle.column');
+goog.require('resources.css');
+goog.require('resources.xml');
 
 /**
  * @type {adapt.taskutil.Fetcher.<boolean>}
@@ -56,7 +58,7 @@ adapt.ops.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(() => {
             validatorSet, true);
         handler.startStylesheet(adapt.cssparse.StylesheetFlavor.USER_AGENT);
         adapt.csscasc.uaBaseCascade = handler.cascade;
-        adapt.cssparse.parseStylesheetFromURL(url, handler, null, null).thenFinish(frame);
+        adapt.cssparse.parseStylesheetFromText(resources.css.userAgentBase, handler, url, null, null).thenFinish(frame);
     });
     return frame.result();
 }, "uaStylesheetBaseFetcher");
@@ -1573,10 +1575,9 @@ adapt.ops.OPSDocStore.prototype.init = function(authorStyleSheets, userStyleShee
     adapt.cssvalid.loadValidatorSet().then(validatorSet => {
         self.validatorSet = validatorSet;
         adapt.ops.loadUABase().then(() => {
-            self.load(userAgentXML).then(() => {
-                self.triggerSingleDocumentPreprocessing = true;
-                frame.finish(true);
-            });
+            this.resources[userAgentXML] = resources.xml.userAgent;
+            self.triggerSingleDocumentPreprocessing = true;
+            frame.finish(true);
         });
     });
     return frame.result();
@@ -1683,7 +1684,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
         self.triggersByDocURL[url] = triggers;
         const sources = /** @type {Array.<adapt.ops.StyleSource>} */ ([]);
         const userAgentURL = adapt.base.resolveURL("user-agent-page.css", adapt.base.resourceBaseURL);
-        sources.push({url: userAgentURL, text:null,
+        sources.push({url: userAgentURL, text: resources.css.userAgentPage,
             flavor:adapt.cssparse.StylesheetFlavor.USER_AGENT, classes: null, media: null});
         const head = xmldoc.head;
         if (head) {

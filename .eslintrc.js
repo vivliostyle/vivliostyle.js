@@ -25,6 +25,7 @@ module.exports = {
         "adapt": false,
         "goog": false,
         "vivliostyle": false,
+        "resources": false,
         "DataView": false
     },
     // "extends": "eslint:recommended",

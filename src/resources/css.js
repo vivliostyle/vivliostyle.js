@@ -1,3 +1,6 @@
+goog.provide('resources.css');
+
+resources.css.userAgentBase = `
 @namespace html "http://www.w3.org/1999/xhtml";
 
 html|html, html|address, html|blockquote, html|body, html|dd, html|div,
@@ -9,7 +12,7 @@ html|figure, html|figcaption, html|main {
      display: block;
      unicode-bidi: normal;
 }
-html|li { 
+html|li {
     display: list-item;
 }
 html|head {
@@ -122,7 +125,7 @@ html|sub {
 html|sup {
     vertical-align: super;
 }
-html|table { 
+html|table {
     border-spacing: 2px;
 }
 html|thead, html|tbody, html|tfoot {
@@ -145,7 +148,7 @@ html|ol, html|ul, html|dir, html|menu, html|dd {
 	margin: 0px;
     margin-inline-start: 40px;
 }
-html|ol { 
+html|ol {
     list-style-type: decimal;
 }
 html|ol html|ul, html|ul html|ol, html|ul html|ul, html|ol html|ol {
@@ -539,7 +542,7 @@ fb2|a[type="note"] {
 	vertical-align: super;
 	line-height: 0.01;
 	text-decoration: none;
-	-adapt-template: url(user-agent.xml#footnote);	
+	-adapt-template: url(user-agent.xml#footnote);
 }
 
 fb2|body[name="notes"] {
@@ -549,7 +552,7 @@ fb2|body[name="notes"] {
 fb2|body[name="notes"] fb2|title {
 	display: inline;
 	vertical-align: super;
-	line-height: 0.01;	
+	line-height: 0.01;
 	text-align: left;
 	font-size: 0.75em;
 	font-weight: bold;
@@ -577,4 +580,128 @@ fb2|body[name="notes"] fb2|section {
 }
 * {
     text-justify: inherit;
+}`;
+
+
+resources.css.userAgentPage = `
+@namespace html "http://www.w3.org/1999/xhtml";
+@namespace fb2 "http://www.gribuser.ru/xml/fictionbook/2.0";
+
+html|body, fb2|body {
+    hyphens: -epubx-expr(pref-hyphenate?"auto":"manual");
 }
+
+@-adapt-footnote-area {
+	display: block;
+	margin-block-start: 0.5em;
+	margin-block-end: 0.5em;
+}
+
+@-adapt-footnote-area ::before {
+	display: block;
+	border-block-start-width: 1px;
+	border-block-start-style: solid;
+	border-block-start-color: black;
+	margin-block-end: 0.4em;
+	margin-inline-start: 0;
+	margin-inline-end: 60%;
+}
+
+/* default page master */
+@-epubx-page-master :background-host {
+    @-epubx-partition :layout-host {
+        -epubx-flow-from: body;
+        top: -epubx-expr(header.margin-bottom-edge);
+        bottom: -epubx-expr(page-height - footer.margin-top-edge);
+        left: 0px;
+        right: 0px;
+    	column-width: 25em;
+    }
+    @-epubx-partition footer :oeb-page-foot {
+    	writing-mode: horizontal-tb;
+    	-epubx-flow-from: oeb-page-foot;
+    	bottom: 0px;
+    	left: 0px;
+    	right: 0px;
+    }
+    @-epubx-partition header :oeb-page-head {
+    	writing-mode: horizontal-tb;
+    	-epubx-flow-from: oeb-page-head;
+    	top: 0px;
+    	left: 0px;
+    	right: 0px;
+    }
+}
+
+@page {
+	@top-left-corner {
+		text-align: right;
+		vertical-align: middle;
+	}
+	@top-left {
+		text-align: left;
+		vertical-align: middle;
+	}
+	@top-center {
+		text-align: center;
+		vertical-align: middle;
+	}
+	@top-right {
+		text-align: right;
+		vertical-align: middle;
+	}
+	@top-right-corner {
+		text-align: left;
+		vertical-align: middle;
+	}
+	@left-top {
+		text-align: center;
+		vertical-align: top;
+	}
+	@left-middle {
+		text-align: center;
+		vertical-align: middle;
+	}
+	@left-bottom {
+		text-align: center;
+		vertical-align: bottom;
+	}
+	@right-top {
+		text-align: center;
+		vertical-align: top;
+	}
+	@right-middle {
+		text-align: center;
+		vertical-align: middle;
+	}
+	@right-bottom {
+		text-align: center;
+		vertical-align: bottom;
+	}
+	@bottom-left-corner {
+		text-align: right;
+		vertical-align: middle;
+	}
+	@bottom-left {
+		text-align: left;
+		vertical-align: middle;
+	}
+	@bottom-center {
+		text-align: center;
+		vertical-align: middle;
+	}
+	@bottom-right {
+		text-align: right;
+		vertical-align: middle;
+	}
+	@bottom-right-corner {
+		text-align: left;
+		vertical-align: middle;
+	}
+}
+
+@media print {
+	@page {
+		margin: 10%;
+	}
+}`;

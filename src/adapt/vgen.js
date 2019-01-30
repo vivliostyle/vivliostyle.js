@@ -457,6 +457,9 @@ adapt.vgen.ViewFactory.prototype.createShadows = function(element, isRoot, cascS
         cont1.then(shadow => {
             if (computedStyle["display"] === adapt.css.ident.table_cell) {
                 const url = adapt.base.resolveURL("user-agent.xml#table-cell", adapt.base.resourceBaseURL);
+                // FIXME:
+                // What we need here is '<s:template id="table-cell"><div data-vivliostyle-flow-root="true" class="table-cell-container"><s:content/></div></s:template>'
+                // I'm not sure how I can avoid it downloading from the web.
                 cont2 = self.createRefShadow(url, adapt.vtree.ShadowType.ROOTLESS, element, shadowContext, shadow);
             } else {
                 cont2 = adapt.task.newResult(shadow);

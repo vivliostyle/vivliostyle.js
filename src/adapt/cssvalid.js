@@ -28,6 +28,7 @@ goog.require('adapt.css');
 goog.require('adapt.csstok');
 goog.require('adapt.cssparse');
 goog.require('adapt.expr');
+goog.require('resources.txt');
 
 /**
  * @interface
@@ -2227,22 +2228,10 @@ adapt.cssvalid.ValidatorSet.prototype.validatePropertyAndHandleShorthand =
 adapt.cssvalid.validatorFetcher = new adapt.taskutil.Fetcher(() => {
     /** @type {!adapt.task.Frame.<adapt.cssvalid.ValidatorSet>} */ const frame =
         adapt.task.newFrame("loadValidatorSet.load");
-    const url = adapt.base.resolveURL("validation.txt", adapt.base.resourceBaseURL);
-    const result = adapt.net.ajax(url);
     const validatorSet = new adapt.cssvalid.ValidatorSet();
     validatorSet.initBuiltInValidators();
-    result.then(xhr => {
-        try {
-            if (xhr.responseText) {
-                validatorSet.parse(xhr.responseText);
-            } else {
-                vivliostyle.logging.logger.error("Error: missing", url);
-            }
-        } catch (err) {
-            vivliostyle.logging.logger.error(err, "Error:");
-        }
-        frame.finish(validatorSet);
-    });
+    validatorSet.parse(resources.txt.validation);
+    frame.finish(validatorSet);
     return frame.result();
 }, "validatorFetcher");
 

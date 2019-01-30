@@ -20,6 +20,7 @@
     "use strict";
 
     var list = [
+        "resources/css.js",
         "debug-param.js",
 
         "closure/goog/base.js",
