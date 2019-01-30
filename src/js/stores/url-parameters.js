@@ -26,7 +26,8 @@ function getRegExpForParameter(name) {
 class URLParameterStore {
     constructor() {
         this.history = window ? window.history : {};
-        this.location = window ? window.location : {url: ""};
+        this.location = window ? window.location : {href: ""};
+        this.storedUrl = this.location.href;
     }
 
     getBaseURL() {
@@ -66,6 +67,7 @@ class URLParameterStore {
         } else {
             this.location.href = updated;
         }
+        this.storedUrl = updated;
     }
 
     removeParameter(name) {
@@ -86,6 +88,7 @@ class URLParameterStore {
                 this.location.href = updated;
             }
         }
+        this.storedUrl = updated;
     }
 }
 
