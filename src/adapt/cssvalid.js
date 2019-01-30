@@ -2229,4 +2229,4 @@ adapt.cssvalid.getValidatorSet = function() {
     validatorSet.initBuiltInValidators();
     validatorSet.parse(resources.txt.validation);
     return validatorSet;
-}
+};
