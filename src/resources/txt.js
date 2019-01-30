@@ -605,5 +605,4 @@ inset-inline = INSETS inline-start inline-end;
 [adapt,webkit]before = block-start;
 [adapt,webkit]after = block-end;
 [adapt,webkit]start = inline-start;
-[adapt,webkit]end = inline-end;
-`;
+[adapt,webkit]end = inline-end;`;

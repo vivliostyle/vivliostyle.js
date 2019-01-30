@@ -2221,21 +2221,12 @@ adapt.cssvalid.ValidatorSet.prototype.validatePropertyAndHandleShorthand =
         }
     };
 
-
 /**
- * @type {adapt.taskutil.Fetcher.<adapt.cssvalid.ValidatorSet>}
- */
-adapt.cssvalid.validatorFetcher = new adapt.taskutil.Fetcher(() => {
-    /** @type {!adapt.task.Frame.<adapt.cssvalid.ValidatorSet>} */ const frame =
-        adapt.task.newFrame("loadValidatorSet.load");
+* @return {adapt.cssvalid.ValidatorSet}
+*/
+adapt.cssvalid.getValidatorSet = function() {
     const validatorSet = new adapt.cssvalid.ValidatorSet();
     validatorSet.initBuiltInValidators();
     validatorSet.parse(resources.txt.validation);
-    frame.finish(validatorSet);
-    return frame.result();
-}, "validatorFetcher");
-
-/**
- * @return {!adapt.task.Result.<adapt.cssvalid.ValidatorSet>}
- */
-adapt.cssvalid.loadValidatorSet = () => adapt.cssvalid.validatorFetcher.get();
+    return validatorSet;
+}

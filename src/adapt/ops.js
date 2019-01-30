@@ -50,16 +50,15 @@ goog.require('resources.xml');
  * @type {adapt.taskutil.Fetcher.<boolean>}
  */
 adapt.ops.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(() => {
-    /** @type {!adapt.task.Frame.<boolean>} */ const frame =
-        adapt.task.newFrame("uaStylesheetBase");
-    adapt.cssvalid.loadValidatorSet().then(validatorSet => {
-        const url = adapt.base.resolveURL("user-agent-base.css", adapt.base.resourceBaseURL);
-        const handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
-            validatorSet, true);
-        handler.startStylesheet(adapt.cssparse.StylesheetFlavor.USER_AGENT);
-        adapt.csscasc.uaBaseCascade = handler.cascade;
-        adapt.cssparse.parseStylesheetFromText(resources.css.userAgentBase, handler, url, null, null).thenFinish(frame);
-    });
+    /** @type {!adapt.task.Frame.<boolean>} */
+    const frame = adapt.task.newFrame("uaStylesheetBase");
+    const validatorSet = adapt.cssvalid.getValidatorSet();
+    const url = adapt.base.resolveURL("user-agent-base.css", adapt.base.resourceBaseURL);
+    const handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+        validatorSet, true);
+    handler.startStylesheet(adapt.cssparse.StylesheetFlavor.USER_AGENT);
+    adapt.csscasc.uaBaseCascade = handler.cascade;
+    adapt.cssparse.parseStylesheetFromText(resources.css.userAgentBase, handler, url, null, null).thenFinish(frame);
     return frame.result();
 }, "uaStylesheetBaseFetcher");
 
@@ -1571,14 +1570,11 @@ adapt.ops.OPSDocStore.prototype.init = function(authorStyleSheets, userStyleShee
     this.setStyleSheets(authorStyleSheets, userStyleSheets);
     const userAgentXML = adapt.base.resolveURL("user-agent.xml", adapt.base.resourceBaseURL);
     const frame = adapt.task.newFrame("OPSDocStore.init");
-    const self = this;
-    adapt.cssvalid.loadValidatorSet().then(validatorSet => {
-        self.validatorSet = validatorSet;
-        adapt.ops.loadUABase().then(() => {
-            this.resources[userAgentXML] = resources.xml.userAgent;
-            self.triggerSingleDocumentPreprocessing = true;
-            frame.finish(true);
-        });
+    this.validatorSet = adapt.cssvalid.getValidatorSet();
+    adapt.ops.loadUABase().then(() => {
+        this.resources[userAgentXML] = resources.xml.userAgent;
+        this.triggerSingleDocumentPreprocessing = true;
+        frame.finish(true);
     });
     return frame.result();
 };
