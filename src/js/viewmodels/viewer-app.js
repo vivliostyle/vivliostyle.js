@@ -77,6 +77,13 @@ function ViewerApp() {
     };
 
     this.viewer.loadDocument(this.documentOptions);
+
+    window.onhashchange = () => {
+        if (window.location.href != urlParameters.storedUrl) {
+            // Reload when address bar change is detected
+            window.location.reload();
+        }
+    };
 }
 
 export default ViewerApp;
