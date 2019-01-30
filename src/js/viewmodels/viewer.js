@@ -101,7 +101,8 @@ class Viewer {
                 const bookTitle = bookTitles && bookTitles[0] && bookTitles[0]["v"];
                 if (!bookTitle) {
                     document.title = itemTitle;
-                } else if (!itemTitle || itemTitle === bookTitle) {
+                } else if (!itemTitle || itemTitle === bookTitle || this.firstPage() ||
+                        (/\.xhtml$/).test(itemTitle)) { // ignore ugly titles copied from *.xhtml file name
                     document.title = bookTitle;
                 } else {
                     document.title = `${itemTitle} | ${bookTitle}`;
