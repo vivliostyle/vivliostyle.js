@@ -80,7 +80,7 @@ class Viewer {
             }
         });
         this.viewer_.addListener("nav", payload => {
-            const {cfi, first, last, epage, epageCount} = payload;
+            const {cfi, first, last, epage, epageCount, metadata, itemTitle} = payload;
             if (cfi) {
                 this.documentOptions_.fragment(cfi);
             }
@@ -95,6 +95,17 @@ class Viewer {
             }
             if (epageCount !== undefined) {
                 this.epageCount(epageCount);
+            }
+            if (metadata || itemTitle) {
+                const bookTitles = metadata && metadata["http://purl.org/dc/terms/title"];
+                const bookTitle = bookTitles && bookTitles[0] && bookTitles[0]["v"];
+                if (!bookTitle) {
+                    document.title = itemTitle;
+                } else if (!itemTitle || itemTitle === bookTitle) {
+                    document.title = bookTitle;
+                } else {
+                    document.title = `${itemTitle} | ${bookTitle}`;
+                }
             }
 
             const tocVisibleOld = this.tocVisible();
