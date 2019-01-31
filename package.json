@@ -7,7 +7,7 @@
     "module": "dist/index.es6.js",
     "scripts": {
         "prebuild": "npm run lint",
-        "build": "rollup -c",
+        "build": "rollup -c && cp -R node_modules/vivliostyle/resources dist/",
         "prepublishOnly": "npm run build",
         "build_demo": "rollup -c rollup.demo.config.js && cp -R node_modules/vivliostyle/resources demo/",
         "prepare": "npm run build",

@@ -11,7 +11,7 @@ How do I use it?
 npm install vivliostyle-print --save
 ```
 
-2. Make sure you serve the `node_modules/vivliostyle/resources/` folder to the web.
+2. Make sure you serve the `node_modules/vivliostyle-print/dist/resources/` folder to the web.
 
 3. Use it within your project like this:
 
@@ -31,7 +31,7 @@ const htmlDoc = `<!doctype html>
 </html>`,
     config = {
         title: 'my printed page',
-        resourcesUrl: '/node_modules/vivliostyle/resources/',
+        resourcesUrl: '/node_modules/vivliostyle-print/dist/resources/',
         printCallback: iframeWin => iframeWin.print() // optional: only needed if calling something other than window.print() for printing.
     }
 
