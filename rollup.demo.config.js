@@ -24,11 +24,11 @@ export default {
             include: '../**',
             sourceMap: true
         }),
-        buble(),
         strip({
             debugger: false,
             functions: [ 'console.*', 'console.warn.apply', 'console.info.apply', 'console.debug.apply', 'console.error.apply' ]
         }),
+        buble(),
         terser()
     ]
 }
