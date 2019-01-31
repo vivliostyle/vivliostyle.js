@@ -2,6 +2,7 @@ import buble from "rollup-plugin-buble"
 import nodeResolve from "rollup-plugin-node-resolve"
 import commonJS from "rollup-plugin-commonjs"
 import strip from "rollup-plugin-strip"
+import sourcemaps from "rollup-plugin-sourcemaps"
 import {
     terser
 } from "rollup-plugin-terser"
@@ -32,6 +33,7 @@ export default [
                 main: true,
                 browser: true
             }),
+            sourcemaps(),
             commonJS({
                 include: '../**',
                 sourceMap: true
@@ -58,6 +60,7 @@ export default [
                 main: true,
                 browser: true
             }),
+            sourcemaps(),
             commonJS({
                 include: '../**',
                 sourceMap: true
