@@ -8694,7 +8694,7 @@ module.exports = exports["default"];
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Vivliostyle core 2019.1.100-pre.20190131103107
+ * Vivliostyle core 2019.1.100-pre.20190131133439
  */
 (function(factory) {
     if (typeof define === "function" && define.amd) {
@@ -9511,6 +9511,8 @@ a.userStyleSheet||null,spreadView:l,pageBorder:1};var m;if(e&&f)m=e+" "+f;else{s
 g.textContent="@page { size: "+m+"; margin: 0; }",document.head.appendChild(g));pv(new Ou(window,k,"main",Ix),a)});
     return enclosingObject.vivliostyle;
 }.bind(window));
+
+
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
