@@ -53,8 +53,7 @@ goog.scope(() => {
     const Logger = vivliostyle.logging.Logger;
 
     /** @const @private */
-    Logger.prototype.consoleDebug = function(...args) {
-        const msg = args[0];
+    Logger.prototype.consoleDebug = function(msg) {
         if (this.opt_console) {
             if (this.opt_console.debug) {
                 this.opt_console.debug(...msg);
@@ -62,13 +61,12 @@ goog.scope(() => {
                 this.opt_console.log(...msg);
             }
         } else {
-            console.debug(...msg);
+            console.debug(...msg); // eslint-disable-line no-console
         }
     };
 
     /** @const @private */
-    Logger.prototype.consoleInfo = function(...args) {
-        const msg = args[0];
+    Logger.prototype.consoleInfo = function(msg) {
         if (this.opt_console) {
             if (this.opt_console.info) {
                 this.opt_console.info(...msg);
@@ -76,13 +74,12 @@ goog.scope(() => {
                 this.opt_console.log(...msg);
             }
         } else {
-            console.info(...msg);
+            console.info(...msg); // eslint-disable-line no-console
         }
     };
 
     /** @const @private */
-    Logger.prototype.consoleWarn = function(...args) {
-        const msg = args[0];
+    Logger.prototype.consoleWarn = function(msg) {
         if (this.opt_console) {
             if (this.opt_console.warn) {
                 this.opt_console.warn(...msg);
@@ -90,13 +87,12 @@ goog.scope(() => {
                 this.opt_console.log(...msg);
             }
         } else {
-            console.warn(...msg);
+            console.warn(...msg); // eslint-disable-line no-console
         }
     };
 
     /** @const @private */
-    Logger.prototype.consoleError = function(...args) {
-        const msg = args[0];
+    Logger.prototype.consoleError = function(msg) {
         if (this.opt_console) {
             if (this.opt_console.error) {
                 this.opt_console.error(...msg);
@@ -104,7 +100,7 @@ goog.scope(() => {
                 this.opt_console.log(...msg);
             }
         } else {
-            console.error(...msg);
+            console.error(...msg); // eslint-disable-line no-console
         }
     };
 
