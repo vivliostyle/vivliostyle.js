@@ -89,6 +89,9 @@ adapt.base.resolveURL = (relURL, baseURL) => {
         } else if (r = (/^(https?:)\/\/www\.aozora\.gr\.jp\/(cards\/[^/]+\/files\/[^/.]+\.html)$/).exec(relURL)) {
             // Convert Aozorabunko (X)HTML URL to GitHub raw URL
             relURL = `${r[1]}//raw.githubusercontent.com/aozorabunko/aozorabunko/master/${r[2]}`;
+        } else if (r = (/^(https?:)\/\/gist\.github\.com\/([^/]+\/\w+)(\/|$)(raw(\/|$))?(.*)$/).exec(relURL)) {
+            // Convert Gist URL to Gist raw URL
+            relURL = `${r[1]}//gist.githubusercontent.com/${r[2]}/raw/${r[6]}`;
         }
         return relURL;
     }
@@ -472,7 +475,7 @@ adapt.base.getCSSProperty = (elem, prop, opt_value) => {
     try {
         const propertyNames = adapt.base.propNameMap[prop];
         return (/** @type {HTMLElement} */ (elem)).style.getPropertyValue(
-             propertyNames ? propertyNames[0] : prop);
+            propertyNames ? propertyNames[0] : prop);
     } catch (err) {
     }
     return opt_value || "";
@@ -528,7 +531,7 @@ adapt.base.StringBuffer.prototype.toString = function() {
  * @return {string}
  */
 adapt.base.escapeChar = str => // not called for surrogate pairs, no need to worry about them
-`\\${str.charCodeAt(0).toString(16)} `;
+    `\\${str.charCodeAt(0).toString(16)} `;
 
 /**
  * @param {string} name

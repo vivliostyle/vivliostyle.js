@@ -232,11 +232,11 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
         const store = new adapt.epub.EPUBDocStore();
         store.init(authorStyleSheet, userStyleSheet).then(() => {
             /** @type {!Array<!adapt.epub.OPFItemParam>} */ const resolvedParams = params.map((p, index) => ({
-            url: adapt.base.resolveURL(p.url, self.window.location.href),
-            index,
-            startPage: p.startPage,
-            skipPagesBefore: p.skipPagesBefore
-        }));
+                url: adapt.base.resolveURL(p.url, self.window.location.href),
+                index,
+                startPage: p.startPage,
+                skipPagesBefore: p.skipPagesBefore
+            }));
             self.packageURL = resolvedParams.map(p => p.url);
             self.opf = new adapt.epub.OPFDoc(store, "");
             self.opf.initWithChapters(resolvedParams, doc).then(() => {

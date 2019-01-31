@@ -1205,7 +1205,7 @@ adapt.epub.OPFView.prototype.finishPageContainer = function(viewItem, page, page
         viewItem.instance.viewport.contentContainer.insertBefore(page.container, insertPos);
     }
     this.pageSheetSizeReporter({ width: viewItem.instance.pageSheetWidth, height: viewItem.instance.pageSheetHeight },
-                               viewItem.instance.pageSheetSize, viewItem.item.spineIndex, viewItem.instance.pageNumberOffset + pageIndex);
+        viewItem.instance.pageSheetSize, viewItem.item.spineIndex, viewItem.instance.pageNumberOffset + pageIndex);
 };
 
 /**

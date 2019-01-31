@@ -353,7 +353,7 @@ adapt.vtree.Flow = function(flowName, parentFlowName) {
  * @constructor
  */
 adapt.vtree.FlowChunk = function(flowName, element, startOffset,
-                                 priority, linger, exclusive, repeated, last, breakBefore) {
+    priority, linger, exclusive, repeated, last, breakBefore) {
     /** @type {string} */ this.flowName = flowName;
     /** @type {!Element} */ this.element = element;
     /** @type {number} */ this.startOffset = startOffset;
@@ -1584,7 +1584,7 @@ adapt.vtree.ExprContentListener;
  * @extends {adapt.css.Visitor}
  */
 adapt.vtree.ContentPropertyHandler = function(elem, context, rootContentValue,
-                                              exprContentListener) {
+    exprContentListener) {
     adapt.css.Visitor.call(this);
     /** @const */ this.elem = elem;
     /** @const */ this.context = context;

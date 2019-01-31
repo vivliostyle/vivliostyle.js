@@ -52,7 +52,7 @@ adapt.toc.bulletEmpty = "\u25B9";
  * @implements {adapt.vgen.CustomRendererFactory}
  */
 adapt.toc.TOCView = function(store, url, lang, clientLayout, fontMapper, pref,
-                             rendererFactory, fallbackMap, documentURLTransformer, counterStore) {
+    rendererFactory, fallbackMap, documentURLTransformer, counterStore) {
     /** @const */ this.store = store;
     /** @const */ this.url = url;
     /** @const */ this.lang = lang;
