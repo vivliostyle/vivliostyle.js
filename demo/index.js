@@ -1,4 +1,6 @@
-import {vivliostylePrint} from "../src"
+import {
+    vivliostylePrint
+} from "../src"
 
 
 document.getElementById('print').addEventListener('click', () => {

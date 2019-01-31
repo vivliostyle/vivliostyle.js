@@ -1,6 +1,5 @@
 import vivliostyle from "vivliostyle"
 
-
 class VivliostylePrint {
 
     constructor(
@@ -28,7 +27,7 @@ class VivliostylePrint {
         }
         this.window = window
         this.window.printInstance = this
-        this.iframe.srcdoc=`<!DOCTYPE html>
+        this.iframe.srcdoc = `<!DOCTYPE html>
         <html data-vivliostyle-paginated="true">
             <head>
                 <meta charset='utf-8'/>
@@ -71,22 +70,24 @@ class VivliostylePrint {
 
     preparePrint() {
         this.iframeWin.document.title = this.title
-        const docBlob = new Blob([this.htmlDoc], {type : 'text/html'}),
+        const docBlob = new Blob([this.htmlDoc], {
+                type: 'text/html'
+            }),
             docURL = URL.createObjectURL(docBlob),
-            Viewer = new vivliostyle.viewer.Viewer(
-                {
-                    viewportElement: this.iframeWin.document.body.firstElementChild,
-                    window: this.iframeWin,
-                    userAgentRootURL: `${this.resourcesUrl}`
-                }
-            )
+            Viewer = new vivliostyle.viewer.Viewer({
+                viewportElement: this.iframeWin.document.body.firstElementChild,
+                window: this.iframeWin,
+                userAgentRootURL: `${this.resourcesUrl}`
+            })
         return new Promise(resolve => {
             Viewer.addListener('readystatechange', () => {
                 if (Viewer.readyState === 'complete') {
                     resolve()
                 }
             })
-            Viewer.loadDocument({url: docURL})
+            Viewer.loadDocument({
+                url: docURL
+            })
         })
     }
 
