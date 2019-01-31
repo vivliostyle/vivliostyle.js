@@ -53,7 +53,7 @@ goog.scope(() => {
     const Logger = vivliostyle.logging.Logger;
 
     /** @const @private */
-    Logger.prototype.consoleDebug = function(msg) {
+    Logger.prototype.consoleDebug = function(...msg) {
         if (this.opt_console) {
             if (this.opt_console.debug) {
                 this.opt_console.debug(msg);
@@ -66,7 +66,7 @@ goog.scope(() => {
     };
 
     /** @const @private */
-    Logger.prototype.consoleInfo = function(msg) {
+    Logger.prototype.consoleInfo = function(...msg) {
         if (this.opt_console) {
             if (this.opt_console.info) {
                 this.opt_console.info(msg);
@@ -79,7 +79,7 @@ goog.scope(() => {
     };
 
     /** @const @private */
-    Logger.prototype.consoleWarn = function(msg) {
+    Logger.prototype.consoleWarn = function(...msg) {
         if (this.opt_console) {
             if (this.opt_console.warn) {
                 this.opt_console.warn(msg);
@@ -92,7 +92,7 @@ goog.scope(() => {
     };
 
     /** @const @private */
-    Logger.prototype.consoleError = function(msg) {
+    Logger.prototype.consoleError = function(...msg) {
         if (this.opt_console) {
             if (this.opt_console.error) {
                 this.opt_console.error(msg);
