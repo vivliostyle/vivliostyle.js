@@ -24,8 +24,8 @@ java -jar node_modules/google-closure-compiler/compiler.jar \
 --hide_warnings_for node_modules/fast-diff/diff.js \
 --create_source_map lib/vivliostyle.min.js.map \
 --js_output_file lib/vivliostyle.min.js \
-${inputFiles.join(' ')}
-`;
+${inputFiles.join(' ')} && \
+echo "\n//# sourceMappingURL=vivliostyle.min.js.map" >> lib/vivliostyle.min.js`;
 
 mkdirp(outputDir, (err) => {
     if (err) {
