@@ -89,6 +89,9 @@ adapt.base.resolveURL = (relURL, baseURL) => {
         } else if (r = (/^(https?:)\/\/www\.aozora\.gr\.jp\/(cards\/[^/]+\/files\/[^/.]+\.html)$/).exec(relURL)) {
             // Convert Aozorabunko (X)HTML URL to GitHub raw URL
             relURL = `${r[1]}//raw.githubusercontent.com/aozorabunko/aozorabunko/master/${r[2]}`;
+        } else if (r = (/^(https?:)\/\/gist\.github\.com\/([^/]+\/\w+)(\/|$)(raw(\/|$))?(.*)$/).exec(relURL)) {
+            // Convert Gist URL to Gist raw URL
+            relURL = `${r[1]}//gist.githubusercontent.com/${r[2]}/raw/${r[6]}`;
         }
         return relURL;
     }

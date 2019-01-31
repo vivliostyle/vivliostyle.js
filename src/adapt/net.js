@@ -109,6 +109,9 @@ adapt.net.ajax = (url, opt_type, opt_method, opt_data, opt_contentType) => {
                     request.overrideMimeType("application/xml; charset=UTF-8");
                 } else if ((/\.(txt|css)$/).test(url)) {
                     request.overrideMimeType("text/plain; charset=UTF-8");
+                } else {
+                    // fallback to HTML
+                    request.overrideMimeType("text/html; charset=UTF-8");
                 }
             }
             request.send(null);
