@@ -2,3 +2,4 @@
 /node_modules
 /demo/bundle.js
 /demo/resources/
+package-lock.json
