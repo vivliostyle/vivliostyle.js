@@ -53,54 +53,58 @@ goog.scope(() => {
     const Logger = vivliostyle.logging.Logger;
 
     /** @const @private */
-    Logger.prototype.consoleDebug = function(...msg) {
+    Logger.prototype.consoleDebug = function(...args) {
+        const msg = args[0];
         if (this.opt_console) {
             if (this.opt_console.debug) {
-                this.opt_console.debug(msg);
+                this.opt_console.debug(...msg);
             } else {
-                this.opt_console.log(msg);
+                this.opt_console.log(...msg);
             }
         } else {
-            console.debug(msg);
+            console.debug(...msg);
         }
     };
 
     /** @const @private */
-    Logger.prototype.consoleInfo = function(...msg) {
+    Logger.prototype.consoleInfo = function(...args) {
+        const msg = args[0];
         if (this.opt_console) {
             if (this.opt_console.info) {
-                this.opt_console.info(msg);
+                this.opt_console.info(...msg);
             } else {
-                this.opt_console.log(msg);
+                this.opt_console.log(...msg);
             }
         } else {
-            console.info(msg);
+            console.info(...msg);
         }
     };
 
     /** @const @private */
-    Logger.prototype.consoleWarn = function(...msg) {
+    Logger.prototype.consoleWarn = function(...args) {
+        const msg = args[0];
         if (this.opt_console) {
             if (this.opt_console.warn) {
-                this.opt_console.warn(msg);
+                this.opt_console.warn(...msg);
             } else {
-                this.opt_console.log(msg);
+                this.opt_console.log(...msg);
             }
         } else {
-            console.warn(msg);
+            console.warn(...msg);
         }
     };
 
     /** @const @private */
-    Logger.prototype.consoleError = function(...msg) {
+    Logger.prototype.consoleError = function(...args) {
+        const msg = args[0];
         if (this.opt_console) {
             if (this.opt_console.error) {
-                this.opt_console.error(msg);
+                this.opt_console.error(...msg);
             } else {
-                this.opt_console.log(msg);
+                this.opt_console.log(...msg);
             }
         } else {
-            console.error(msg);
+            console.error(...msg);
         }
     };
 
