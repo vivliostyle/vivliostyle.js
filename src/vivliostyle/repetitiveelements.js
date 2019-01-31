@@ -601,9 +601,9 @@ goog.scope(() => {
         const rootNodeContext = this.nodeContext;
         return vivliostyle.repetitiveelements.appendHeader(formattingContext, rootNodeContext, column).thenAsync(() =>
             vivliostyle.repetitiveelements.appendFooter(formattingContext, rootNodeContext, column).thenAsync(() => {
-            repetitiveElements.prepareLayoutFragment();
-            return adapt.task.newResult(true);
-        }));
+                repetitiveElements.prepareLayoutFragment();
+                return adapt.task.newResult(true);
+            }));
     };
 
     RepetitiveElementsOwnerLayoutConstraint.prototype.getRepetitiveElements = function() {
@@ -898,7 +898,7 @@ goog.scope(() => {
         eachAncestorNodeContext(nodeContext.after ? nodeContext.parent : nodeContext, (formattingContext, nc) => {
             if (formattingContext instanceof vivliostyle.table.TableFormattingContext) return;
             column.fragmentLayoutConstraints.push(
-              new RepetitiveElementsOwnerLayoutConstraint(nc));
+                new RepetitiveElementsOwnerLayoutConstraint(nc));
         });
     };
 
