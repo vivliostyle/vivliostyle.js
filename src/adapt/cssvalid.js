@@ -2224,7 +2224,7 @@ adapt.cssvalid.ValidatorSet.prototype.validatePropertyAndHandleShorthand =
 /**
 * @return {adapt.cssvalid.ValidatorSet}
 */
-adapt.cssvalid.getValidatorSet = function() {
+adapt.cssvalid.baseValidatorSet = function() {
     const validatorSet = new adapt.cssvalid.ValidatorSet();
     validatorSet.initBuiltInValidators();
     validatorSet.parse(resources.txt.validation);

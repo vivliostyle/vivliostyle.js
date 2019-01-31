@@ -52,7 +52,7 @@ goog.require('resources.xml');
 adapt.ops.uaStylesheetBaseFetcher = new adapt.taskutil.Fetcher(() => {
     /** @type {!adapt.task.Frame.<boolean>} */
     const frame = adapt.task.newFrame("uaStylesheetBase");
-    const validatorSet = adapt.cssvalid.getValidatorSet();
+    const validatorSet = adapt.cssvalid.baseValidatorSet();
     const url = adapt.base.resolveURL("user-agent-base.css", adapt.base.resourceBaseURL);
     const handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
         validatorSet, true);
@@ -1570,7 +1570,7 @@ adapt.ops.OPSDocStore.prototype.init = function(authorStyleSheets, userStyleShee
     this.setStyleSheets(authorStyleSheets, userStyleSheets);
     const userAgentXML = adapt.base.resolveURL("user-agent.xml", adapt.base.resourceBaseURL);
     const frame = adapt.task.newFrame("OPSDocStore.init");
-    this.validatorSet = adapt.cssvalid.getValidatorSet();
+    this.validatorSet = adapt.cssvalid.baseValidatorSet();
     adapt.ops.loadUABase().then(() => {
         this.resources[userAgentXML] = resources.xml.userAgent;
         this.triggerSingleDocumentPreprocessing = true;
