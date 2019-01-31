@@ -23,7 +23,10 @@ export default {
             sourceMap: true
         }),
         buble(),
-        strip(),
+        strip({
+            debugger: false,
+            functions: [ 'console.*', 'console.warn.apply', 'console.info.apply', 'console.debug.apply', 'console.error.apply' ]
+        }),
         terser()
     ]
 }

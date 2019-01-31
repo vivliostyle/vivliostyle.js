@@ -36,7 +36,10 @@ export default [
                 include: '../**',
                 sourceMap: true
             }),
-            strip(),
+            strip({
+                debugger: false,
+                functions: [ 'console.*', 'console.warn.apply', 'console.info.apply', 'console.debug.apply', 'console.error.apply' ]
+            }),
             buble(),
             terser()
         ]
@@ -57,9 +60,12 @@ export default [
             }),
             commonJS({
                 include: '../**',
-                sourceMap: false
+                sourceMap: true
             }),
-            strip(),
+            strip({
+                debugger: false,
+                functions: [ 'console.*', 'console.warn.apply', 'console.info.apply', 'console.debug.apply', 'console.error.apply' ]
+            }),
             terser()
         ]
     }
