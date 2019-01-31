@@ -87,7 +87,7 @@ adapt.ops.FontFace;
  * @constructor
  */
 adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
-                           fontFaces, footnoteProps, flowProps, viewportProps, pageProps) {
+    fontFaces, footnoteProps, flowProps, viewportProps, pageProps) {
     /** @const */ this.store = store;
     /** @const */ this.rootScope = rootScope;
     /** @const */ this.pageScope = pageScope;
@@ -175,8 +175,8 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @implements {adapt.vgen.StylerProducer}
  */
 adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientLayout,
-                                   fontMapper, customRenderer, fallbackMap, pageNumberOffset, documentURLTransformer, counterStore,
-                                   pageProgression) {
+    fontMapper, customRenderer, fallbackMap, pageNumberOffset, documentURLTransformer, counterStore,
+    pageProgression) {
     adapt.expr.Context.call(this, style.rootScope, viewport.width, viewport.height, viewport.fontSize);
     /** @const */ this.style = style;
     /** @const */ this.xmldoc = xmldoc;
@@ -503,7 +503,7 @@ adapt.ops.StyleInstance.prototype.flowChunkIsAfterParentFlowForcedBreak = functi
             return false;
         }
         const breakOffsetBeforeStartIndex = adapt.base.binarySearch(forcedBreakOffsets.length,
-                i => forcedBreakOffsets[i] > startOffset) - 1;
+            i => forcedBreakOffsets[i] > startOffset) - 1;
         const breakOffsetBeforeStart = forcedBreakOffsets[breakOffsetBeforeStartIndex];
         const parentFlowPosition = this.layoutPositionAtPageStart.flowPositions[parentFlowName];
         const parentStartOffset = this.getConsumedOffset(parentFlowPosition);
@@ -774,10 +774,10 @@ adapt.ops.StyleInstance.prototype.createLayoutConstraint = function(pageFloatLay
  * @returns {!adapt.task.Result.<!adapt.layout.Column>}
  */
 adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, offsetX, offsetY, exclusions,
-                                                                   layoutContainer, currentColumnIndex,
-                                                                   flowNameStr, regionPageFloatLayoutContext,
-                                                                   columnCount, columnGap, columnWidth,
-                                                                   innerShape, layoutContext, forceNonFitting) {
+    layoutContainer, currentColumnIndex,
+    flowNameStr, regionPageFloatLayoutContext,
+    columnCount, columnGap, columnWidth,
+    innerShape, layoutContext, forceNonFitting) {
     const self = this;
     const dontApplyExclusions = boxInstance.vertical
         ? boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth
@@ -906,15 +906,15 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
         return self.layoutFlowColumns(
             page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, regionPageFloatLayoutContext,
             layoutContainer, flowNameStr, columnCount, isFirstTime).thenAsync(columns => {
-                if (columns) {
-                    return adapt.task.newResult({
-                        columns,
-                        position: self.currentLayoutPosition
-                    });
-                } else {
-                    return adapt.task.newResult(null);
-                }
-            });
+            if (columns) {
+                return adapt.task.newResult({
+                    columns,
+                    position: self.currentLayoutPosition
+                });
+            } else {
+                return adapt.task.newResult(null);
+            }
+        });
     }
 
     return layoutColumns().thenAsync(generatorResult => {
@@ -984,46 +984,46 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumns = function(
         self.createAndLayoutColumn(boxInstance, offsetX, offsetY, exclusions, layoutContainer,
             columnIndex++, flowNameStr, regionPageFloatLayoutContext, columnCount, columnGap,
             columnWidth, innerShape, layoutContext, forceNonFitting).then(c => {
-                if (pagePageFloatLayoutContext.isInvalidated()) {
+            if (pagePageFloatLayoutContext.isInvalidated()) {
+                columns = null;
+                loopFrame.breakLoop();
+                return;
+            }
+            const forcedRegionBreak = !!c.pageBreakType && (c.pageBreakType !== "column");
+            if ((forcedRegionBreak || columnIndex === columnCount) &&
+                    !regionPageFloatLayoutContext.isInvalidated()) {
+                regionPageFloatLayoutContext.finish();
+            }
+            if (regionPageFloatLayoutContext.isInvalidated()) {
+                columnIndex = 0;
+                self.currentLayoutPosition = positionAtContainerStart.clone();
+                regionPageFloatLayoutContext.validate();
+                if (regionPageFloatLayoutContext.isLocked()) {
                     columns = null;
                     loopFrame.breakLoop();
-                    return;
-                }
-                const forcedRegionBreak = !!c.pageBreakType && (c.pageBreakType !== "column");
-                if ((forcedRegionBreak || columnIndex === columnCount) &&
-                    !regionPageFloatLayoutContext.isInvalidated()) {
-                    regionPageFloatLayoutContext.finish();
-                }
-                if (regionPageFloatLayoutContext.isInvalidated()) {
-                    columnIndex = 0;
-                    self.currentLayoutPosition = positionAtContainerStart.clone();
-                    regionPageFloatLayoutContext.validate();
-                    if (regionPageFloatLayoutContext.isLocked()) {
-                        columns = null;
-                        loopFrame.breakLoop();
-                    } else {
-                        loopFrame.continueLoop();
-                    }
-                    return;
-                }
-                column = c;
-                columns[columnIndex - 1] = column;
-                if (column.pageBreakType) {
-                    if (column.pageBreakType != "column") {
-                        // skip remaining columns
-                        columnIndex = columnCount;
-                        if (column.pageBreakType != "region") {
-                            // skip remaining regions
-                            self.pageBreaks[flowNameStr] = true;
-                        }
-                    }
-                }
-                if (columnIndex < columnCount) {
-                    loopFrame.continueLoop();
                 } else {
-                    loopFrame.breakLoop();
+                    loopFrame.continueLoop();
                 }
-            });
+                return;
+            }
+            column = c;
+            columns[columnIndex - 1] = column;
+            if (column.pageBreakType) {
+                if (column.pageBreakType != "column") {
+                    // skip remaining columns
+                    columnIndex = columnCount;
+                    if (column.pageBreakType != "region") {
+                        // skip remaining regions
+                        self.pageBreaks[flowNameStr] = true;
+                    }
+                }
+            }
+            if (columnIndex < columnCount) {
+                loopFrame.continueLoop();
+            } else {
+                loopFrame.breakLoop();
+            }
+        });
     }).then(() => {
         frame.finish(columns);
     });
@@ -1041,8 +1041,8 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumns = function(
  * @return {adapt.task.Result.<boolean>} holding true
  */
 adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, parentContainer,
-                                                             offsetX, offsetY, exclusions,
-                                                             pagePageFloatLayoutContext) {
+    offsetX, offsetY, exclusions,
+    pagePageFloatLayoutContext) {
     const self = this;
     boxInstance.reset();
     const enabled = boxInstance.getProp(self, "enabled");
@@ -1268,17 +1268,17 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     frame.loopWithFrame(loopFrame => {
         self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge+1, // Compensate 'top: -1px' on page master
             [], pageFloatLayoutContext).then(() => {
-                if (!pageFloatLayoutContext.isInvalidated()) {
-                    pageFloatLayoutContext.finish();
-                }
-                if (pageFloatLayoutContext.isInvalidated()) {
-                    self.currentLayoutPosition = self.layoutPositionAtPageStart.clone();
-                    pageFloatLayoutContext.validate();
-                    loopFrame.continueLoop();
-                } else {
-                    loopFrame.breakLoop();
-                }
-            });
+            if (!pageFloatLayoutContext.isInvalidated()) {
+                pageFloatLayoutContext.finish();
+            }
+            if (pageFloatLayoutContext.isInvalidated()) {
+                self.currentLayoutPosition = self.layoutPositionAtPageStart.clone();
+                pageFloatLayoutContext.validate();
+                loopFrame.continueLoop();
+            } else {
+                loopFrame.breakLoop();
+            }
+        });
     }).then(() => {
         pageMaster.adjustPageLayout(self, page, self.clientLayout);
         if (!isTocBox) {

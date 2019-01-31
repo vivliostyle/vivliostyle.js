@@ -218,7 +218,7 @@ goog.scope(() => {
      */
     BetweenTableRowBreakPosition.prototype.getCellFragments = function() {
         return this.formattingContext.getRowSpanningCellsOverflowingTheRow(this.getRowIndex()).map(
-                this.formattingContext.getCellFragmentOfCell, this.formattingContext);
+            this.formattingContext.getCellFragmentOfCell, this.formattingContext);
     };
 
     /**
@@ -293,7 +293,7 @@ goog.scope(() => {
      */
     InsideTableRowBreakPosition.prototype.getCellFragments = function() {
         return this.formattingContext.getCellsFallingOnRow(this.rowIndex).map(
-                this.formattingContext.getCellFragmentOfCell, this.formattingContext);
+            this.formattingContext.getCellFragmentOfCell, this.formattingContext);
     };
 
     /**

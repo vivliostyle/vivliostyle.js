@@ -160,7 +160,7 @@ adapt.cssstyler.AbstractStyler.prototype.processContent = (element, styles) => {
  * @constructor
  */
 adapt.cssstyler.Box = function(context, style, offset, isRoot, flowChunk, atBlockStart, atFlowStart,
-                               isParentBoxDisplayed) {
+    isParentBoxDisplayed) {
     /** @const */ this.context = context;
     /** @const */ this.style = style;
     /** @const */ this.offset = offset;

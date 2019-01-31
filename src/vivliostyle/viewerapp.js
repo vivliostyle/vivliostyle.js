@@ -184,9 +184,9 @@ vivliostyle.viewerapp.callback = msg => {
             viewer.viewportElement.setAttribute("data-vivliostyle-spread-view", viewer.pref.spreadView);
 
             window.addEventListener("keydown", /** @type {Function} */ (vivliostyle.viewerapp.keydown), false);
-//        window.addEventListener("touchstart", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
-//        window.addEventListener("touchmove", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
-//        window.addEventListener("touchend", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+            //        window.addEventListener("touchstart", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+            //        window.addEventListener("touchmove", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+            //        window.addEventListener("touchend", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
 
             document.body.setAttribute("data-vivliostyle-viewer-status", "complete");
 

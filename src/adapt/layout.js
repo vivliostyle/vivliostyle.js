@@ -902,7 +902,7 @@ adapt.layout.Column.prototype.buildDeepElementView = function(position) {
  * @return {Element} newly created float element.
  */
 adapt.layout.Column.prototype.createFloat = function(ref, side, width,
-                                                     height) {
+    height) {
     const div = this.viewDocument.createElement("div");
     if (this.vertical) {
         if (height >= this.height) {
@@ -1442,7 +1442,7 @@ adapt.layout.Column.prototype.layoutSinglePageFloatFragment = function(
  * @returns {!adapt.task.Result.<boolean>}
  */
 adapt.layout.Column.prototype.layoutPageFloatInner = function(continuation, strategy,
-                                                              anchorEdge, pageFloatFragment) {
+    anchorEdge, pageFloatFragment) {
     const context = this.pageFloatLayoutContext;
     const float = continuation.float;
     context.stashEndFloatFragments(float);
@@ -2643,7 +2643,7 @@ adapt.layout.Column.prototype.checkOverflowAndSaveEdge = function(nodeContext, t
  * @return {boolean} true if overflows
  */
 adapt.layout.Column.prototype.checkOverflowAndSaveEdgeAndBreakPosition = function(nodeContext,
-                                                                                  trailingEdgeContexts, saveEvenOverflown, breakAtTheEdge) {
+    trailingEdgeContexts, saveEvenOverflown, breakAtTheEdge) {
     if (!nodeContext) {
         return false;
     }
@@ -3222,7 +3222,7 @@ adapt.layout.Column.prototype.layout = function(chunkPosition, leadingEdge, brea
     }
     const self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.ChunkPosition>} */ const frame = adapt.task.newFrame("layout");
-        // ------ start the column -----------
+    // ------ start the column -----------
     self.openAllViews(chunkPosition.primary).then(nodeContext => {
         let initialNodeContext = null;
         if (nodeContext.viewNode) {
@@ -3665,7 +3665,7 @@ vivliostyle.plugin.registerHook(vivliostyle.plugin.HOOKS.RESOLVE_LAYOUT_PROCESSO
  * @extends {adapt.layout.Column}
  */
 adapt.layout.PageFloatArea = function(floatSide, element, layoutContext, clientLayout, layoutConstraint,
-                                      pageFloatLayoutContext, parentContainer) {
+    pageFloatLayoutContext, parentContainer) {
     adapt.layout.Column.call(this, element, layoutContext, clientLayout, layoutConstraint,
         pageFloatLayoutContext);
     /** @const */ this.floatSide = floatSide;
