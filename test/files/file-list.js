@@ -55,7 +55,10 @@ module.exports = [
             {file: "flowchunk_overflow_bug.html", title: "Flowchunk overflow bug"},
             {file: "pages_counter.html", title: "pages counter"},
             {file: "float-in-relative-bug.html", title: "Float in position:relative bug"},
-            {file: "getRangeBoxes_bug.html", title: "getRangeBoxes bug"}
+            {file: "getRangeBoxes_bug.html", title: "getRangeBoxes bug"},
+            {file: "viewport_unit.html", title: "viewport-percentage units"},
+            {file: "viewport_unit_vertical.html", title: "viewport-percentage units (vertical writing-mode)"},
+            {file: "page_viewport_unit.html", title: "page viewport-percentage units with calc()"},
         ]
     },
     {

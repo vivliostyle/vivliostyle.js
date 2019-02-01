@@ -1257,7 +1257,10 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
         bleedBoxPaddingEdge = evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
     }
 
-    const writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
+    const writingMode = !isTocBox && pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
+
+    this.pageVertical = writingMode != adapt.css.ident.horizontal_tb;
+
     const direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
     const pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
         self.rootPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.PAGE, null, null, null,

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>page viewport-percentage units with calc()</title>
+    <style>
+@page {
+  margin: 10%;
+  border: 15px dashed;
+  padding: 15px;
+  background: #FFF;
+}
+
+html {
+  background: #CCC;
+  outline: 1px dotted;
+}
+
+body {
+  margin: 15%;
+  padding: 10%;
+  background: #FFF;
+  outline: 1px dashed;
+}
+
+p {
+  break-before: page;
+  break-inside: avoid;
+  break-after: avoid;
+}
+
+div:nth-of-type(1) {
+  background: aqua;
+  width: 50%;
+}
+div:nth-of-type(2) {
+  background: orange;
+  width: calc(20pvw - 15px);
+}
+div:nth-of-type(3) {
+  background: lime;
+  width: calc(20pvi - 15px);
+}
+
+div:nth-of-type(4) {
+  background: aqua;
+  height: 25pvh;
+  display: inline-block;
+}
+div:nth-of-type(5) {
+  background: orange;
+  height: 25pvb;
+  display: inline-block;
+}
+
+div:nth-of-type(6) {
+  background: aqua;
+  height: 25pvmin;
+  display: inline-block;
+}
+div:nth-of-type(7) {
+  background: orange;
+  height: 25pvmax;
+  display: inline-block;
+}
+    </style>
+</head>
+<body>
+  <p>The following blocks must have same width:</p>
+  <hr>
+  <div>width: 50%</div>
+  <div>width: calc(20pvw - 15px)</div>
+  <div>width: calc(20pvi - 15px)</div>
+  <hr>
+  <p>The following blocks must have same height:</p>
+  <div>height: 25pvh</div>
+  <div>height: 25pvb</div>
+  <p>The next left side block is lower than the right side one, or same height when page is square:</p>
+  <div>height: 25pvmin</div>
+  <div>height: 25pvmax</div>
+</body>
+</html>

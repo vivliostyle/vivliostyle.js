@@ -924,13 +924,13 @@ adapt.css.hundredPercent = new adapt.css.Numeric(100, "%");
  * @const
  * @type {!adapt.css.Numeric}
  */
-adapt.css.fullWidth = new adapt.css.Numeric(100, "vw");
+adapt.css.fullWidth = new adapt.css.Numeric(100, "pvw");
 
 /**
  * @const
  * @type {!adapt.css.Numeric}
  */
-adapt.css.fullHeight = new adapt.css.Numeric(100, "vh");
+adapt.css.fullHeight = new adapt.css.Numeric(100, "pvh");
 
 /**
  * @const
