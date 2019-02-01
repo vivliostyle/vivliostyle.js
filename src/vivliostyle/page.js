@@ -1497,6 +1497,10 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
 vivliostyle.page.PageRulePartitionInstance.prototype.prepareContainer = function(context, container, page, docFaces, clientLayout) {
     adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page, docFaces, clientLayout);
     page.pageAreaElement = /** @type {HTMLElement} */ (container.element);
+
+    // Set page area size for vw/vh unit calculation
+    context.pageAreaWidth = parseFloat(page.pageAreaElement.style.width);
+    context.pageAreaHeight = parseFloat(page.pageAreaElement.style.height);
 };
 
 /**

@@ -2078,7 +2078,12 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 tokenizer.consume();
                 continue;
             case adapt.cssparse.Action.VAL_NUMERIC:
-                valStack.push(new adapt.css.Numeric(token.num, token.text));
+                if (adapt.expr.isViewportRelativeLengthUnit(token.text)) {
+                    // Treat numeric value with viewport unit as numeric in expr.
+                    valStack.push(new adapt.css.Expr(new adapt.expr.Numeric(handler.getScope(), token.num, token.text)));
+                } else {
+                    valStack.push(new adapt.css.Numeric(token.num, token.text));
+                }
                 tokenizer.consume();
                 continue;
             case adapt.cssparse.Action.VAL_STR:
@@ -2100,7 +2105,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 continue;
             case adapt.cssparse.Action.VAL_FUNC:
                 text = token.text.toLowerCase();
-                if (text == "-epubx-expr") {
+                if (text == "-epubx-expr" || text == "calc") {
                     // special case
                     this.actions = adapt.cssparse.actionsExprVal;
                     this.exprContext = adapt.cssparse.ExprContext.PROP;
