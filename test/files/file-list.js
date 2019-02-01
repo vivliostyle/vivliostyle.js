@@ -58,7 +58,7 @@ module.exports = [
             {file: "getRangeBoxes_bug.html", title: "getRangeBoxes bug"},
             {file: "viewport_unit.html", title: "viewport-percentage units"},
             {file: "viewport_unit_vertical.html", title: "viewport-percentage units (vertical writing-mode)"},
-            {file: "page_viewport_unit.html", title: "page viewport-percentage units with calc()"},
+            {file: "page_viewport_unit.html", title: "page viewport-percentage units with calc()"}
         ]
     },
     {
