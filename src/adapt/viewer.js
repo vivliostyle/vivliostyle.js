@@ -199,7 +199,7 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     self.configure(command).then(() => {
         const store = new adapt.epub.EPUBDocStore();
         store.init(authorStyleSheet, userStyleSheet).then(() => {
-            const epubURL = adapt.base.resolveURL(url, self.window.location.href);
+            const epubURL = adapt.base.resolveURL(adapt.base.convertSpecialURL(url), self.window.location.href);
             self.packageURL = [epubURL];
             store.loadEPUBDoc(epubURL, haveZipMetadata).then(opf => {
                 self.opf = opf;
@@ -232,7 +232,7 @@ adapt.viewer.Viewer.prototype.loadXML = function(command) {
         const store = new adapt.epub.EPUBDocStore();
         store.init(authorStyleSheet, userStyleSheet).then(() => {
             /** @type {!Array<!adapt.epub.OPFItemParam>} */ const resolvedParams = params.map((p, index) => ({
-                url: adapt.base.resolveURL(p.url, self.window.location.href),
+                url: adapt.base.resolveURL(adapt.base.convertSpecialURL(p.url), self.window.location.href),
                 index,
                 startPage: p.startPage,
                 skipPagesBefore: p.skipPagesBefore

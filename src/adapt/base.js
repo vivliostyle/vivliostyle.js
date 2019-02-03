@@ -81,21 +81,6 @@ adapt.base.resolveURL = (relURL, baseURL) => {
         if (relURL.toLowerCase().match("^javascript:")) {
             return "#";
         }
-        // Convert special URLs
-        let r;
-        if (r = (/^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/|raw\/)?(.*)$/).exec(relURL)) {
-            // Convert GitHub URL to GitHub raw URL
-            relURL = `${r[1]}//raw.githubusercontent.com/${r[2]}/${r[3] ? '' : 'master/'}${r[4]}`;
-        } else if (r = (/^(https?:)\/\/www\.aozora\.gr\.jp\/(cards\/[^/]+\/files\/[^/.]+\.html)$/).exec(relURL)) {
-            // Convert Aozorabunko (X)HTML URL to GitHub raw URL
-            relURL = `${r[1]}//raw.githubusercontent.com/aozorabunko/aozorabunko/master/${r[2]}`;
-        } else if (r = (/^(https?:)\/\/gist\.github\.com\/([^/]+\/\w+)(\/|$)(raw(\/|$))?(.*)$/).exec(relURL)) {
-            // Convert Gist URL to Gist raw URL
-            relURL = `${r[1]}//gist.githubusercontent.com/${r[2]}/raw/${r[6]}`;
-        } else if (r = (/^(https?:)\/\/([^/.]+\.)?jsbin\.com\/(\w+)((\/\d+)?).*$/).exec(relURL)) {
-            // Convert JS Bin URL to JS Bin output URL
-            relURL = `${r[1]}//output.jsbin.com/${r[3]}${r[4]}/`;
-        }
         return relURL;
     }
     if (baseURL.match(/^\w{2,}:\/\/[^\/]+$/))
@@ -132,6 +117,28 @@ adapt.base.resolveURL = (relURL, baseURL) => {
         url = url.substr(0, j) + url.substr(i + 3);
     }
     return url.replace(/\/(\.\/)+/g, '/');
+};
+
+/**
+ * @param {string} url
+ * @return {string} converted URL
+ */
+adapt.base.convertSpecialURL = url => {
+    let r;
+    if (r = (/^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/|raw\/)?(.*)$/).exec(url)) {
+        // Convert GitHub URL to GitHub raw URL
+        url = `${r[1]}//raw.githubusercontent.com/${r[2]}/${r[3] ? '' : 'master/'}${r[4]}`;
+    } else if (r = (/^(https?:)\/\/www\.aozora\.gr\.jp\/(cards\/[^/]+\/files\/[^/.]+\.html)$/).exec(url)) {
+        // Convert Aozorabunko (X)HTML URL to GitHub raw URL
+        url = `${r[1]}//raw.githubusercontent.com/aozorabunko/aozorabunko/master/${r[2]}`;
+    } else if (r = (/^(https?:)\/\/gist\.github\.com\/([^/]+\/\w+)(\/|$)(raw(\/|$))?(.*)$/).exec(url)) {
+        // Convert Gist URL to Gist raw URL
+        url = `${r[1]}//gist.githubusercontent.com/${r[2]}/raw/${r[6]}`;
+    } else if (r = (/^(https?:)\/\/(?:[^/.]+\.)?jsbin\.com\/(?!(?:blog|help)\b)(\w+)((\/\d+)?).*$/).exec(url)) {
+        // Convert JS Bin URL to JS Bin output URL
+        url = `${r[1]}//output.jsbin.com/${r[2]}${r[3]}/`;
+    }
+    return url;
 };
 
 /**

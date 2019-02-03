@@ -1630,7 +1630,7 @@ adapt.ops.OPSDocStore.prototype.clearStyleSheets = function() {
  */
 adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
     let url = stylesheet.url;
-    if (url) url = adapt.base.resolveURL(url, adapt.base.baseURL);
+    if (url) url = adapt.base.resolveURL(adapt.base.convertSpecialURL(url), adapt.base.baseURL);
     this.styleSheets.push({url, text: stylesheet.text,
         flavor: adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
 };
@@ -1641,7 +1641,7 @@ adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
  */
 adapt.ops.OPSDocStore.prototype.addUserStyleSheet = function(stylesheet) {
     let url = stylesheet.url;
-    if (url) url = adapt.base.resolveURL(url, adapt.base.baseURL);
+    if (url) url = adapt.base.resolveURL(adapt.base.convertSpecialURL(url), adapt.base.baseURL);
     this.styleSheets.push({url, text: stylesheet.text,
         flavor: adapt.cssparse.StylesheetFlavor.USER, classes: null, media: null});
 };
