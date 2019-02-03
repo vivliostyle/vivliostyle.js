@@ -100,7 +100,7 @@ class Viewer {
                 const bookTitles = metadata && metadata["http://purl.org/dc/terms/title"];
                 const bookTitle = bookTitles && bookTitles[0] && bookTitles[0]["v"];
                 if (!bookTitle) {
-                    document.title = itemTitle;
+                    document.title = itemTitle ? itemTitle : "Vivliostyle viewer";
                 } else if (!itemTitle || itemTitle === bookTitle || this.firstPage() ||
                         (/\.xhtml$/).test(itemTitle)) { // ignore ugly titles copied from *.xhtml file name
                     document.title = bookTitle;
