@@ -92,6 +92,9 @@ adapt.base.resolveURL = (relURL, baseURL) => {
         } else if (r = (/^(https?:)\/\/gist\.github\.com\/([^/]+\/\w+)(\/|$)(raw(\/|$))?(.*)$/).exec(relURL)) {
             // Convert Gist URL to Gist raw URL
             relURL = `${r[1]}//gist.githubusercontent.com/${r[2]}/raw/${r[6]}`;
+        } else if (r = (/^(https?:)\/\/([^/.]+\.)?jsbin\.com\/(\w+)((\/\d+)?).*$/).exec(relURL)) {
+            // Convert JS Bin URL to JS Bin output URL
+            relURL = `${r[1]}//output.jsbin.com/${r[3]}${r[4]}/`;
         }
         return relURL;
     }
