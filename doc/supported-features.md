@@ -9,7 +9,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 - [Supported CSS-wide keywords](https://www.w3.org/TR/css-values/#common-keywords): `inherit`
   - Supported in all browsers
   - `initial` and `unset` are *not* supported.
-- [Supported length units](https://www.w3.org/TR/css-values/#lengths): `em`, `ex`, `ch`, `rem`, `cm`, `mm`, `q`, `in`, `pc`, `pt`, `px`.
+- [Supported length units](https://www.w3.org/TR/css-values/#lengths): `em`, `ex`, `ch`, `rem`, `vw`, `vh`, `vmin, vmax`, `vi`, `vb`, `cm`, `mm`, `q`, `in`, `pc`, `pt`, `px`.
   - Supported in all browsers
 - Supported color values
   - Support depends on browser capabilities
@@ -26,6 +26,8 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 - [Cross references: `target-counter()` and `target-counters()`](https://drafts.csswg.org/css-content/#cross-references)
   - Supported in all browsers
   - Only supported in values of `content` property.
+- [`calc()` function](https://www.w3.org/TR/css-values/#funcdef-calc)
+  - Supported in all browsers
 
 ## Selectors
 
