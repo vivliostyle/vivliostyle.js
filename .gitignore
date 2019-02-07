@@ -1,5 +1,8 @@
-node_modules
+## Directory
+node_modules/
+lib-ts/
 
+## Files
 doc/anchors.json
 doc/supported-features.html
 lib/vivliostyle.min.js
