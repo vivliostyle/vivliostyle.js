@@ -44,11 +44,9 @@
     "mkdirp": "^0.5.1",
     "mustache": "^2.2.1",
     "ts-loader": "^4.5.0",
+    "tslint": "^5.12.1",
     "typescript": "^3.0.1",
     "webpack": "^4.17.1",
     "webpack-cli": "^3.1.0"
-  },
-  "dependencies": {
-    "tslint": "^5.11.0"
   }
 }
