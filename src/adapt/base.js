@@ -99,13 +99,24 @@ adapt.base.resolveURL = (relURL, baseURL) => {
         return relURL;
     }
     if (relURL.match(/^\.(\/|$)/))
-        relURL = relURL.substr(1);
+        relURL = relURL.substr(2);  // './foo' => 'foo'
     baseURL = adapt.base.stripFragmentAndQuery(baseURL);
     if (relURL.match(/^\#/))
         return baseURL + relURL;
     let i = baseURL.lastIndexOf('/');
     if (i < 0)
         return relURL;
+    if (i < baseURL.length - 1) {
+        const j = baseURL.lastIndexOf('.');
+        if (j < i) {
+            // Assume the last part without '.' to be a directory name.
+            if (relURL == '') {
+                return baseURL;
+            }
+            baseURL += '/';
+            i = baseURL.length - 1;
+        }
+    }
     let url = baseURL.substr(0, i + 1) + relURL;
     while (true) {
         i = url.indexOf('/../');

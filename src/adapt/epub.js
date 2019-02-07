@@ -89,10 +89,12 @@ adapt.epub.EPUBDocStore.prototype.startLoadingAsPlainXML = function(url) {
 
 /**
  * @param {string} url
+ * @param {boolean=} opt_required
+ * @param {string=} opt_message
  * @return {!adapt.task.Result.<adapt.base.JSON>}
  */
-adapt.epub.EPUBDocStore.prototype.loadAsJSON = function(url) {
-    return this.jsonStore.load(url);
+adapt.epub.EPUBDocStore.prototype.loadAsJSON = function(url, opt_required, opt_message) {
+    return this.jsonStore.load(url, opt_required, opt_message);
 };
 
 /**
@@ -109,34 +111,59 @@ adapt.epub.EPUBDocStore.prototype.startLoadingAsJSON = function(url) {
  * @return {!adapt.task.Result.<adapt.epub.OPFDoc>}
  */
 adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
-    const self = this;
+    let epubUrl = url;
     /** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ const frame
         = adapt.task.newFrame("loadEPUBDoc");
-    if (url.substring(url.length - 1) !== "/") {
-        url = `${url}/`;
+    if (epubUrl.substring(epubUrl.length - 1) !== "/") {
+        epubUrl = `${epubUrl}/`;
     }
     if (haveZipMetadata) {
-        self.startLoadingAsJSON(`${url}?r=list`);
+        this.startLoadingAsJSON(`${epubUrl}?r=list`);
     }
-    self.startLoadingAsPlainXML(`${url}META-INF/encryption.xml`);
-    const containerURL = `${url}META-INF/container.xml`;
-    self.loadAsPlainXML(containerURL, true, `Failed to fetch EPUB container.xml from ${containerURL}`).then(containerXML => {
-        if (!containerXML) {
-            vivliostyle.logging.logger.error(`Received an empty response for EPUB container.xml ${containerURL}. This may be caused by the server not allowing cross origin requests.`);
-        } else {
-            const roots = containerXML.doc().child("container").child("rootfiles")
-                .child("rootfile").attribute("full-path");
 
-            for (const root of roots) {
-                if (root) {
-                    self.loadOPF(url, root, haveZipMetadata).thenFinish(frame);
-                    return;
+    let r;
+    if (r = (/^(.*\/)([^/]+\.opf)$/).exec(url)) {
+        // EPUB OPF
+        epubUrl = r[1];
+        const root = r[2];
+        this.loadOPF(epubUrl, root, haveZipMetadata).thenFinish(frame);
+    } else if ((/\.json(?:ld)?$/).test(url)) {
+        // Web Publication Manifest
+        this.loadAsJSON(url, true).then(manifestObj => {
+            const opf = new adapt.epub.OPFDoc(this, url);
+            opf.initWithWebPubManifest(manifestObj).then(() => {
+                frame.finish(opf);
+            });
+        });
+    } else if ((/\.(x?html|htm|xht)$/).test(url)) {
+        // Web Publication primary entry (X)HTML
+        this.loadWebPub(url).thenFinish(frame);
+    } else {
+        // EPUB or Web Publication (X)HTML
+
+        this.startLoadingAsPlainXML(url);
+
+        this.startLoadingAsPlainXML(`${epubUrl}META-INF/encryption.xml`);
+        const containerURL = `${epubUrl}META-INF/container.xml`;
+        this.loadAsPlainXML(containerURL).then(containerXML => {
+            if (containerXML) {
+                // EPUB
+                const roots = containerXML.doc().child("container").child("rootfiles")
+                    .child("rootfile").attribute("full-path");
+
+                for (const root of roots) {
+                    if (root) {
+                        this.loadOPF(epubUrl, root, haveZipMetadata).thenFinish(frame);
+                        return;
+                    }
                 }
+                frame.finish(null);
+            } else {
+                // Web Publication primary entry (X)HTML
+                this.loadWebPub(url).thenFinish(frame);
             }
-
-            frame.finish(null);
-        }
-    });
+        });
+    }
     return frame.result();
 };
 
@@ -155,7 +182,7 @@ adapt.epub.EPUBDocStore.prototype.loadOPF = function(epubURL, root, haveZipMetad
     }
     /** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ const frame
         = adapt.task.newFrame("loadOPF");
-    self.loadAsPlainXML(url).then(opfXML => {
+    self.loadAsPlainXML(url, true, `Failed to fetch EPUB OPF ${url}`).then(opfXML => {
         if (!opfXML) {
             vivliostyle.logging.logger.error(`Received an empty response for EPUB OPF ${url}. This may be caused by the server not allowing cross origin requests.`);
         } else {
@@ -178,13 +205,71 @@ adapt.epub.EPUBDocStore.prototype.loadOPF = function(epubURL, root, haveZipMetad
 
 /**
  * @param {string} url
+ * @return {!adapt.task.Result.<adapt.epub.OPFDoc>}
+ */
+adapt.epub.EPUBDocStore.prototype.loadWebPub = function(url) {
+    /** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ const frame
+        = adapt.task.newFrame("loadWebPub");
+
+    // Load the primary entry page (X)HTML
+    this.load(url).then(xmldoc => {
+        if (!xmldoc) {
+            vivliostyle.logging.logger.error(`Received an empty response for ${url}. This may be caused by the server not allowing cross origin requests.`);
+        }
+        else {
+            const doc = xmldoc.document;
+            const opf = new adapt.epub.OPFDoc(this, url);
+
+            if (doc.body) {
+                doc.body.setAttribute("data-vivliostyle-primary-entry", true);
+            }
+            // Find manifest, W3C WebPublication or Readium Web Publication Manifest
+            const manifestLink = doc.querySelector("link[rel='publication'],link[rel='manifest'][type='application/webpub+json']");
+            if (manifestLink) {
+                let href = manifestLink.href;
+                if (href.substr(0, url.length) === url && (href.charAt(url.length) === "#" ||
+                        href.charAt(url.length) === "/" && href.charAt(url.length + 1) === "#")) {
+                    href = href.substr(href.charAt(url.length) === "#" ? url.length : url.length + 1);
+                }
+                if ((/^#/).test(href)) {
+                    const manifestObj = adapt.base.stringToJSON(doc.getElementById(href.substr(1)).textContent);
+                    opf.initWithWebPubManifest(manifestObj, doc).then(() => {
+                        frame.finish(opf);
+                    });
+                } else {
+                    this.loadAsJSON(href).then(manifestObj => {
+                        opf.initWithWebPubManifest(manifestObj, doc).then(() => {
+                            frame.finish(opf);
+                        });
+                    });
+                }
+            } else {
+                // No manifest
+                opf.initWithWebPubManifest({}, doc).then(() => {
+                    if (opf.xhtmlToc.src === xmldoc.url) {
+                        // xhtmlToc is the primari entry (X)HTML
+                        if (!doc.querySelector("[role=doc-toc], [role=directory], nav, .toc, #toc")) {
+                            // TOC is not found in the primari entry (X)HTML
+                            opf.xhtmlToc = null;
+                        }
+                    }
+                    frame.finish(opf);
+                });
+            }
+        }
+    });
+    return frame.result();
+};
+
+/**
+ * @param {string} url
  * @param {!Document} doc
  */
 adapt.epub.EPUBDocStore.prototype.addDocument = function(url, doc) {
     const frame = adapt.task.newFrame("EPUBDocStore.load");
     const docURL = adapt.base.stripFragment(url);
     const r = this.documents[docURL] = this.parseOPSResource(
-        {status: 200, url: docURL, contentType: doc.contentType, responseText: null, responseXML: doc, responseBlob: null}
+        {status: 200, statusText: "", url: docURL, contentType: doc.contentType, responseText: null, responseXML: doc, responseBlob: null}
     );
     r.thenFinish(frame);
     return frame.result();
@@ -641,8 +726,15 @@ adapt.epub.OPFDoc.prototype.getMetadata = function() {
  */
 adapt.epub.OPFDoc.prototype.getPathFromURL = function(url) {
     if (this.epubURL) {
-        return url.substr(0, this.epubURL.length) == this.epubURL ?
-            decodeURI(url.substr(this.epubURL.length)) : null;
+        let epubBaseURL = adapt.base.resolveURL("", this.epubURL);
+        if (url === epubBaseURL) {
+            return "";
+        }
+        if (epubBaseURL.charAt(epubBaseURL.length - 1) != "/") {
+            epubBaseURL += "/";
+        }
+        return url.substr(0, epubBaseURL.length) == epubBaseURL ?
+            decodeURI(url.substr(epubBaseURL.length)) : null;
     } else {
         return url;
     }
@@ -838,7 +930,7 @@ adapt.epub.OPFDoc.prototype.countEPages = function(epageCountCallback) {
 
     let epage = 0;
     let i = 0;
-    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("estimatePageCount");
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("countEPages");
     frame.loopWithFrame(loopFrame => {
         if (i === this.spine.length) {
             loopFrame.breakLoop();
@@ -894,7 +986,11 @@ adapt.epub.OPFDoc.prototype.initWithChapters = function(params, doc) {
         item.itemRefElement = itemref;
 
         this.itemMap[item.id] = item;
-        this.itemMapByPath[param.url] = item;
+        let path = this.getPathFromURL(param.url);
+        if (path == null) {
+            path = param.url;
+        }
+        this.itemMapByPath[path] = item;
         this.items.push(item);
     }, this);
 
@@ -903,6 +999,79 @@ adapt.epub.OPFDoc.prototype.initWithChapters = function(params, doc) {
     } else {
         return adapt.task.newResult(null);
     }
+};
+
+/**
+ * @param {Object} manifestObj
+ * @param {Document=} doc
+ * @return {adapt.task.Result}
+ */
+adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) {
+    if (manifestObj.readingProgression) {
+        this.pageProgression = manifestObj.readingProgression;
+    }
+    if (this.metadata === undefined) {
+        this.metadata = {};
+    }
+    const title = doc && doc.title || manifestObj.name || manifestObj.metadata && manifestObj.metadata.title;
+    if (title) {
+        this.metadata[adapt.epub.metaTerms.title] = [{v: title}];
+    }
+    // TODO: other metadata...
+
+    const primaryEntryPath = this.getPathFromURL(this.epubURL);
+    if (!manifestObj.readingOrder && doc)  {
+        manifestObj.readingOrder = [primaryEntryPath];
+
+        // Find TOC in the primary entry (X)HTML
+        const tocElem = doc.querySelector("[role=doc-toc]") || doc.querySelector("[role=directory], nav, .toc, #toc");
+        if (tocElem) {
+            Array.from(tocElem.querySelectorAll("a[href]")).forEach(anchorElem => {
+                const href = anchorElem.href;
+                let path = this.getPathFromURL(adapt.base.stripFragment(href));
+                if (manifestObj.readingOrder.indexOf(path) == -1) {
+                    manifestObj.readingOrder.push(path);
+                }
+            });
+        }
+    }
+
+    const params = [];
+    let itemCount = 0;
+    let tocFound = -1;
+    [manifestObj.readingOrder, manifestObj.resources].forEach(readingOrderOrResources => {
+        if (readingOrderOrResources instanceof Array) {
+            readingOrderOrResources.forEach(itemObj => {
+                const url = typeof itemObj === "string" ? itemObj : (itemObj.url || itemObj.href);
+                if (readingOrderOrResources === manifestObj.readingOrder ||
+                        (/\.(x?html|htm|xht)$/).test(url)) {
+                    const param = {
+                        url: adapt.base.resolveURL(adapt.base.convertSpecialURL(url), this.epubURL),
+                        index: itemCount++,
+                        startPage: null,
+                        skipPagesBefore: null
+                    };
+                    if (itemObj.rel === "contents" && tocFound === -1) {
+                        tocFound = param.index;
+                    }
+                    params.push(param);
+                }
+            });
+        }
+    });
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("initWithWebPubManifest");
+    this.initWithChapters(params).then(() => {
+        if (tocFound !== -1) {
+            this.xhtmlToc = this.items[tocFound];
+        }
+
+        if (!this.xhtmlToc) {
+            this.xhtmlToc = this.itemMapByPath[primaryEntryPath];
+        }
+
+        frame.finish(true);
+    });
+    return frame.result();
 };
 
 /**
@@ -1846,6 +2015,10 @@ adapt.epub.OPFView.prototype.navigateTo = function(href, position, sync) {
         = adapt.task.newFrame("navigateTo");
     const self = this;
     self.getPageViewItem(item.spineIndex).then(viewItem => {
+        if (!viewItem) {
+            frame.finish(null);
+            return;
+        }
         const target = viewItem.xmldoc.getElement(href);
         if (target) {
             self.findPage({
@@ -2103,7 +2276,7 @@ adapt.epub.OPFView.prototype.makeCustomRenderer = function(xmldoc) {
  */
 adapt.epub.OPFView.prototype.getPageViewItem = function(spineIndex) {
     const self = this;
-    if (spineIndex >= self.opf.spine.length) {
+    if (spineIndex === -1 || spineIndex >= self.opf.spine.length) {
         return adapt.task.newResult(/** @type {adapt.epub.OPFViewItem} */ (null));
     }
     let viewItem = self.spineItems[spineIndex];

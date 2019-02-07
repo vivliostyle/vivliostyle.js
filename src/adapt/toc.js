@@ -104,27 +104,29 @@ adapt.toc.toggleNodeExpansion = evt => {
     tocNodeElem.setAttribute("aria-expanded", open ? "true" : "false");
     let c = tocNodeElem.firstChild;
     while (c) {
-        if (c.nodeType != 1) {
-            c = c.nextSibling;
-            continue;
-        }
-        const ce = /** @type {HTMLElement} */ (c);
-        const adaptClass = ce.getAttribute("data-adapt-class");
-        if (adaptClass == "toc-container") {
-            ce.setAttribute("aria-hidden", !open ? "true" : "false");
-            c = ce.firstChild;
-            continue;
-        }
-        if (ce.getAttribute("data-adapt-class") == "toc-node") {
-            ce.style.height = open ? "auto" : "0px";
+        if (c.nodeType === 1) {
+            const ce = /** @type {HTMLElement} */ (c);
+            const adaptClass = ce.getAttribute("data-adapt-class");
+            if (adaptClass === "toc-container") {
+                ce.setAttribute("aria-hidden", !open ? "true" : "false");
+                if (ce.firstChild) {
+                    c = ce.firstChild;
+                    continue;
+                }
+            } else if (adaptClass === "toc-node") {
+                ce.style.height = open ? "auto" : "0px";
 
-            // Update enable/disable tab move to the button and anchor.
-            if (ce.children.length >= 3) {
-                ce.children[0].tabIndex = open ? 0 : -1;
+                // Update enable/disable tab move to the button and anchor.
+                if (ce.children.length >= 3) {
+                    ce.children[0].tabIndex = open ? 0 : -1;
+                }
+                if (ce.children.length >= 2) {
+                    ce.children[1].tabIndex = open ? 0 : -1;
+                }
             }
-            if (ce.children.length >= 2) {
-                ce.children[1].tabIndex = open ? 0 : -1;
-            }
+        }
+        while (!c.nextSibling && c.parentNode !== tocNodeElem) {
+            c = c.parentNode;
         }
         c = c.nextSibling;
     }
@@ -144,6 +146,36 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
          */
         (srcElem, viewParent, computedStyle) => {
             const behavior = computedStyle["behavior"];
+            if (behavior) {
+                switch (behavior.toString()) {
+                    case "body-child":
+                        if (srcElem.parentElement.getAttribute("data-vivliostyle-primary-entry")) {
+                            if (!srcElem.querySelector("[role=doc-toc], [role=directory], nav, .toc, #toc")) {
+                                // When the TOC element is a part of the primaty entry (X)HTML,
+                                // hide elements not containing TOC.
+                                computedStyle.display = adapt.css.ident.none;
+                            }
+                        }
+                        break;
+                    case "toc-node-anchor":
+                        computedStyle.color = adapt.css.ident.inherit;
+                        computedStyle["text-decoration"] = adapt.css.ident.none;
+                        break;
+                    case "toc-node":
+                        computedStyle.display = adapt.css.ident.block;
+                        computedStyle.margin = adapt.css.numericZero;
+                        computedStyle.padding = adapt.css.numericZero;
+                        computedStyle["padding-inline-start"] = new adapt.css.Numeric(1.25, "em");
+                        break;
+                    case "toc-node-first-child":
+                        computedStyle.display = adapt.css.ident.inline_block;
+                        computedStyle.margin = new adapt.css.Numeric(0.2, "em");
+                        computedStyle["vertical-align"] = adapt.css.ident.top;
+                        computedStyle.color = adapt.css.ident.inherit;
+                        computedStyle["text-decoration"] = adapt.css.ident.none;
+                        break;
+                }
+            }
             if (!behavior || (behavior.toString() != "toc-node" && behavior.toString() != "toc-container")) {
                 return renderer(srcElem, viewParent, computedStyle);
             }
