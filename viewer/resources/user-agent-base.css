@@ -297,31 +297,63 @@ ncx|ncx {
     padding-bottom: 10px;
 }
 
-ncx|navPoint, nav[epub|type=toc] li {
-	display: block;
-	margin: 0px;
-	padding: 0px;
-    padding-inline-start: 1.25em;
+ncx|content {
+	display: none;
+}
+
+body > * {
+    -adapt-behavior: body-child;
+}
+
+[role=doc-toc], [role=directory], nav, .toc, #toc {
+    -adapt-behavior: toc-root;
+}
+
+[role=doc-toc] a,
+[role=directory] a,
+nav a,
+.toc a,
+#toc a,
+ncx|navLabel {
+    -adapt-behavior: toc-node-anchor;
+}
+
+[role=doc-toc] li,
+[role=directory] li,
+nav li,
+.toc li,
+#toc li,
+ncx|navPoint {
     -adapt-behavior: toc-node;
 }
 
-ncx|navPoint, nav[epub|type=toc] li > *:first-child {
-	display: inline-block;
-    margin: 0.2em;
-    vertical-align: top;
+[role=doc-toc] li > *:first-child,
+[role=directory] li > *:first-child,
+nav li > *:first-child,
+.toc li > *:first-child,
+#toc li > *:first-child {
+    -adapt-behavior: toc-node-first-child;
 }
 
-nav[epub|type=toc] ol {
+[role=doc-toc] ol,
+[role=directory] ol,
+nav ol,
+.toc ol,
+#toc ol,
+[role=doc-toc] ul,
+[role=directory] ul,
+nav ul,
+.toc ul,
+#toc ul,
+ol[role=doc-toc],
+ol[role=directory],
+ol.toc,
+ol#toc,
+ul[role=doc-toc],
+ul[role=directory],
+ul.toc,
+ul#toc {
     -adapt-behavior: toc-container;
-}
-
-ncx|navLabel, nav[epub|type=toc] a {
-	color: black;
-	text-decoration: none;
-}
-
-ncx|content {
-	display: none;
 }
 
 /*---------------- fb2 ---------------------*/
