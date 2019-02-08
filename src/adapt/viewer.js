@@ -202,10 +202,14 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
             const epubURL = adapt.base.resolveURL(adapt.base.convertSpecialURL(url), self.window.location.href);
             self.packageURL = [epubURL];
             store.loadEPUBDoc(epubURL, haveZipMetadata).then(opf => {
-                self.opf = opf;
-                self.render(fragment).then(() => {
-                    frame.finish(true);
-                });
+                if (opf) {
+                    self.opf = opf;
+                    self.render(fragment).then(() => {
+                        frame.finish(true);
+                    });
+                } else {
+                    frame.finish(false);
+                }
             });
         });
     });
@@ -838,6 +842,10 @@ adapt.viewer.Viewer.prototype.resize = function() {
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     this.cancelRenderingTask();
     const task = adapt.task.currentTask().getScheduler().run(() => adapt.task.handle("resize", frame => {
+        if (!self.opf) {
+            frame.finish(false);
+            return;
+        }
         self.renderTask = task;
         vivliostyle.profile.profiler.registerStartTiming("render (resize)");
         self.reset();
