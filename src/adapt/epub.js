@@ -111,59 +111,59 @@ adapt.epub.EPUBDocStore.prototype.startLoadingAsJSON = function(url) {
  * @return {!adapt.task.Result.<adapt.epub.OPFDoc>}
  */
 adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
-    let epubUrl = url;
     /** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ const frame
         = adapt.task.newFrame("loadEPUBDoc");
-    if (epubUrl.substring(epubUrl.length - 1) !== "/") {
-        epubUrl = `${epubUrl}/`;
-    }
-    if (haveZipMetadata) {
-        this.startLoadingAsJSON(`${epubUrl}?r=list`);
-    }
 
-    let r;
-    if (r = (/^(.*\/)([^/]+\.opf)$/).exec(url)) {
-        // EPUB OPF
-        epubUrl = r[1];
-        const root = r[2];
-        this.loadOPF(epubUrl, root, haveZipMetadata).thenFinish(frame);
-    } else if ((/\.json(?:ld)?$/).test(url)) {
-        // Web Publication Manifest
-        this.loadAsJSON(url, true).then(manifestObj => {
-            const opf = new adapt.epub.OPFDoc(this, url);
-            opf.initWithWebPubManifest(manifestObj).then(() => {
-                frame.finish(opf);
-            });
-        });
-    } else if ((/\.(x?html|htm|xht)$/).test(url)) {
-        // Web Publication primary entry (X)HTML
-        this.loadWebPub(url).thenFinish(frame);
-    } else {
-        // EPUB or Web Publication (X)HTML
+    adapt.net.ajax(url, null, "HEAD").then(response => {
+        if (response.status >= 400) {
+            // This url can be the root of an unzipped EPUB.
+            let epubUrl = url;
+            if (epubUrl.substring(epubUrl.length - 1) !== "/") {
+                epubUrl = `${epubUrl}/`;
+            }
+            if (haveZipMetadata) {
+                this.startLoadingAsJSON(`${epubUrl}?r=list`);
+            }
+            this.startLoadingAsPlainXML(`${epubUrl}META-INF/encryption.xml`);
+            const containerURL = `${epubUrl}META-INF/container.xml`;
+            this.loadAsPlainXML(containerURL).then(containerXML => {
+                if (containerXML) {
+                    const roots = containerXML.doc().child("container").child("rootfiles")
+                        .child("rootfile").attribute("full-path");
 
-        this.startLoadingAsPlainXML(url);
-
-        this.startLoadingAsPlainXML(`${epubUrl}META-INF/encryption.xml`);
-        const containerURL = `${epubUrl}META-INF/container.xml`;
-        this.loadAsPlainXML(containerURL).then(containerXML => {
-            if (containerXML) {
-                // EPUB
-                const roots = containerXML.doc().child("container").child("rootfiles")
-                    .child("rootfile").attribute("full-path");
-
-                for (const root of roots) {
-                    if (root) {
-                        this.loadOPF(epubUrl, root, haveZipMetadata).thenFinish(frame);
-                        return;
+                    for (const root of roots) {
+                        if (root) {
+                            this.loadOPF(epubUrl, root, haveZipMetadata).thenFinish(frame);
+                            return;
+                        }
                     }
                 }
+                vivliostyle.logging.logger.error(`Failed to fetch a source document from ${url} (${response.status}${response.statusText ? ' ' + response.statusText : ''})`);
                 frame.finish(null);
+            });
+        } else {
+            if (response.contentType == "application/oebps-package+xml" || (/\.opf(?:[#?]|$)/).test(url)) {
+                // EPUB OPF
+                const [, epubUrl, root] = url.match(/^((?:.*\/)?)([^/]*)$/);
+                this.loadOPF(epubUrl, root, haveZipMetadata).thenFinish(frame);
+            } else if (response.contentType == "application/ld+json" ||
+                       response.contentType == "application/webpub+json" ||
+                       response.contentType == "application/audiobook+json" ||
+                       response.contentType == "application/json" ||
+                       (/\.json(?:ld)?(?:[#?]|$)/).test(url)) {
+                // Web Publication Manifest
+                this.loadAsJSON(url, true).then(manifestObj => {
+                    const opf = new adapt.epub.OPFDoc(this, url);
+                    opf.initWithWebPubManifest(manifestObj).then(() => {
+                        frame.finish(opf);
+                    });
+                });
             } else {
                 // Web Publication primary entry (X)HTML
                 this.loadWebPub(url).thenFinish(frame);
             }
-        });
-    }
+        }
+    });
     return frame.result();
 };
 
