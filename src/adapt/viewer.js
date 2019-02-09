@@ -863,6 +863,10 @@ adapt.viewer.Viewer.prototype.resize = function() {
         // With renderAllPages option specified, the rendering is performed after the initial page display,
         // otherwise users are forced to wait the rendering finish in front of a blank page.
         self.opfView.renderPagesUpto(self.pagePosition, !self.renderAllPages).then(result => {
+            if (!result) {
+                frame.finish(false);
+                return;
+            }
             self.pagePosition = result.position;
             self.showCurrent(result.page, true).then(() => {
                 self.setReadyState(vivliostyle.constants.ReadyState.INTERACTIVE);

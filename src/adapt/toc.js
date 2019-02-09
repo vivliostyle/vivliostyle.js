@@ -153,25 +153,25 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
                             if (!srcElem.querySelector("[role=doc-toc], [role=directory], nav, .toc, #toc")) {
                                 // When the TOC element is a part of the primaty entry (X)HTML,
                                 // hide elements not containing TOC.
-                                computedStyle.display = adapt.css.ident.none;
+                                computedStyle["display"] = adapt.css.ident.none;
                             }
                         }
                         break;
                     case "toc-node-anchor":
-                        computedStyle.color = adapt.css.ident.inherit;
+                        computedStyle["color"] = adapt.css.ident.inherit;
                         computedStyle["text-decoration"] = adapt.css.ident.none;
                         break;
                     case "toc-node":
-                        computedStyle.display = adapt.css.ident.block;
-                        computedStyle.margin = adapt.css.numericZero;
-                        computedStyle.padding = adapt.css.numericZero;
+                        computedStyle["display"] = adapt.css.ident.block;
+                        computedStyle["margin"] = adapt.css.numericZero;
+                        computedStyle["padding"] = adapt.css.numericZero;
                         computedStyle["padding-inline-start"] = new adapt.css.Numeric(1.25, "em");
                         break;
                     case "toc-node-first-child":
-                        computedStyle.display = adapt.css.ident.inline_block;
-                        computedStyle.margin = new adapt.css.Numeric(0.2, "em");
+                        computedStyle["display"] = adapt.css.ident.inline_block;
+                        computedStyle["margin"] = new adapt.css.Numeric(0.2, "em");
                         computedStyle["vertical-align"] = adapt.css.ident.top;
-                        computedStyle.color = adapt.css.ident.inherit;
+                        computedStyle["color"] = adapt.css.ident.inherit;
                         computedStyle["text-decoration"] = adapt.css.ident.none;
                         break;
                 }

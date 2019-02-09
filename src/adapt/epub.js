@@ -141,6 +141,8 @@ adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
                 vivliostyle.logging.logger.error(`Failed to fetch a source document from ${url} (${response.status}${response.statusText ? ' ' + response.statusText : ''})`);
                 frame.finish(null);
             });
+        } else if (!response.status && !response.responseXML && !response.responseText && !response.responseBlob) {
+            vivliostyle.logging.logger.error(`Received an empty response for ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`);
         } else {
             if (response.contentType == "application/oebps-package+xml" || (/\.opf(?:[#?]|$)/).test(url)) {
                 // EPUB OPF
@@ -184,7 +186,7 @@ adapt.epub.EPUBDocStore.prototype.loadOPF = function(epubURL, root, haveZipMetad
         = adapt.task.newFrame("loadOPF");
     self.loadAsPlainXML(url, true, `Failed to fetch EPUB OPF ${url}`).then(opfXML => {
         if (!opfXML) {
-            vivliostyle.logging.logger.error(`Received an empty response for EPUB OPF ${url}. This may be caused by the server not allowing cross origin requests.`);
+            vivliostyle.logging.logger.error(`Received an empty response for EPUB OPF ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`);
         } else {
             self.loadAsPlainXML(`${epubURL}META-INF/encryption.xml`).then(encXML => {
                 const zipMetadataResult = haveZipMetadata ?
@@ -214,7 +216,7 @@ adapt.epub.EPUBDocStore.prototype.loadWebPub = function(url) {
     // Load the primary entry page (X)HTML
     this.load(url).then(xmldoc => {
         if (!xmldoc) {
-            vivliostyle.logging.logger.error(`Received an empty response for ${url}. This may be caused by the server not allowing cross origin requests.`);
+            vivliostyle.logging.logger.error(`Received an empty response for ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`);
         }
         else {
             const doc = xmldoc.document;
@@ -288,7 +290,7 @@ adapt.epub.EPUBDocStore.prototype.load = function(url) {
         r = adapt.epub.EPUBDocStore.superClass_.load.call(this, docURL, true, `Failed to fetch a source document from ${docURL}`);
         r.then(xmldoc => {
             if (!xmldoc) {
-                vivliostyle.logging.logger.error(`Received an empty response for ${docURL}. This may be caused by the server not allowing cross origin requests.`);
+                vivliostyle.logging.logger.error(`Received an empty response for ${docURL}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`);
             } else {
                 frame.finish(xmldoc);
             }
@@ -1002,26 +1004,26 @@ adapt.epub.OPFDoc.prototype.initWithChapters = function(params, doc) {
 };
 
 /**
- * @param {Object} manifestObj
+ * @param {adapt.base.JSON} manifestObj
  * @param {Document=} doc
  * @return {adapt.task.Result}
  */
 adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) {
-    if (manifestObj.readingProgression) {
-        this.pageProgression = manifestObj.readingProgression;
+    if (manifestObj["readingProgression"]) {
+        this.pageProgression = manifestObj["readingProgression"];
     }
     if (this.metadata === undefined) {
         this.metadata = {};
     }
-    const title = doc && doc.title || manifestObj.name || manifestObj.metadata && manifestObj.metadata.title;
+    const title = doc && doc.title || manifestObj["name"] || manifestObj["metadata"] && manifestObj["metadata"]["title"];
     if (title) {
-        this.metadata[adapt.epub.metaTerms.title] = [{v: title}];
+        this.metadata[adapt.epub.metaTerms.title] = [{"v": title}];
     }
     // TODO: other metadata...
 
     const primaryEntryPath = this.getPathFromURL(this.epubURL);
-    if (!manifestObj.readingOrder && doc)  {
-        manifestObj.readingOrder = [primaryEntryPath];
+    if (!manifestObj["readingOrder"] && doc)  {
+        manifestObj["readingOrder"] = [primaryEntryPath];
 
         // Find TOC in the primary entry (X)HTML
         const tocElem = doc.querySelector("[role=doc-toc]") || doc.querySelector("[role=directory], nav, .toc, #toc");
@@ -1029,8 +1031,8 @@ adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) 
             Array.from(tocElem.querySelectorAll("a[href]")).forEach(anchorElem => {
                 const href = anchorElem.href;
                 let path = this.getPathFromURL(adapt.base.stripFragment(href));
-                if (manifestObj.readingOrder.indexOf(path) == -1) {
-                    manifestObj.readingOrder.push(path);
+                if (manifestObj["readingOrder"].indexOf(path) == -1) {
+                    manifestObj["readingOrder"].push(path);
                 }
             });
         }
@@ -1039,11 +1041,11 @@ adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) 
     const params = [];
     let itemCount = 0;
     let tocFound = -1;
-    [manifestObj.readingOrder, manifestObj.resources].forEach(readingOrderOrResources => {
+    [manifestObj["readingOrder"], manifestObj["resources"]].forEach(readingOrderOrResources => {
         if (readingOrderOrResources instanceof Array) {
             readingOrderOrResources.forEach(itemObj => {
                 const url = typeof itemObj === "string" ? itemObj : (itemObj.url || itemObj.href);
-                if (readingOrderOrResources === manifestObj.readingOrder ||
+                if (readingOrderOrResources === manifestObj["readingOrder"] ||
                         (/\.(x?html|htm|xht)$/).test(url)) {
                     const param = {
                         url: adapt.base.resolveURL(adapt.base.convertSpecialURL(url), this.epubURL),
