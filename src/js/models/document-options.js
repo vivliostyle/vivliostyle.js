@@ -48,7 +48,7 @@ class DocumentOptions {
 
         // write fragment back to URL when updated
         this.fragment.subscribe(fragment => {
-            if ((urlOptions.epubUrl ? /^epubcfi\(\/[246]\/2!\)/ : /^epubcfi\(\/2!\)/).test(fragment)) {
+            if ((/^epubcfi\(\/([246]\/)?2!\)/).test(fragment)) {
                 urlParameters.removeParameter("f");
             } else {
                 const encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);

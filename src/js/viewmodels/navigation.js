@@ -403,7 +403,8 @@ class Navigation {
     }
 
     navigateTOC(key) {
-        const selecter = "[data-vivliostyle-toc-box] [tabindex='0'], [data-vivliostyle-toc-box] a:not([tabindex='-1'])";
+        const selecter = "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) [tabindex='0']," +
+                         "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) a[href]:not([tabindex='-1'])";
         let nodes = Array.from(document.querySelectorAll(selecter));
         let index = nodes.indexOf(document.activeElement);
 
