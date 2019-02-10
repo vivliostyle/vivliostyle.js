@@ -23,14 +23,14 @@ html|tr {
 }
 html|thead {
     display: table-header-group;
-    page-break-after: avoid;
+    break-after: avoid;
 }
 html|tbody {
     display: table-row-group;
 }
 html|tfoot {
     display: table-footer-group;
-    page-break-before: avoid;
+    break-before: avoid;
 }
 html|col {
     display: table-column;
@@ -91,6 +91,9 @@ html|h6 {
 }
 html|h1, html|h2, html|h3, html|h4, html|h5, html|h6, html|b, html|strong {
     font-weight: bolder;
+}
+html|h1, html|h2, html|h3, html|h4, html|h5, html|h6 {
+    break-after: avoid;
 }
 html|blockquote {
     margin-block-start: 0px;
@@ -166,7 +169,7 @@ html|q:after {
 }
 
 html|audio, html|video {
-    page-break-inside: avoid;
+    break-inside: avoid;
 }
 
 html|ruby {
@@ -428,8 +431,8 @@ fb2|title fb2|p {
 fb2|title {
     font-size: 2.2em;
     font-weight: bold;
-    page-break-inside: avoid;
-    page-break-after: avoid;
+    break-inside: avoid;
+    break-after: avoid;
     text-align: center;
     margin: 1em 0px 0.5em 0px;
     display: block;
@@ -512,7 +515,7 @@ fb2|date {
 }
 fb2|stanza {
     margin: 0.5em 0px;
-    page-break-inside: avoid;
+    break-inside: avoid;
     display: block;
 }
 fb2|empty-line {
@@ -531,8 +534,8 @@ fb2|subtitle {
     font-style: italic;
     font-weight: bold;
     margin: 0.5em 2em;
-    page-break-inside: avoid;
-    page-break-after: avoid;
+    break-inside: avoid;
+    break-after: avoid;
     display: block;
 }
 fb2|annotation {
