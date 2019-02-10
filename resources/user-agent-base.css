@@ -605,11 +605,3 @@ fb2|body[name="notes"] fb2|section {
 	line-height: 1.2;
 	font-size: 1.2em;
 }
-
-/* MS Edge bug workaround */
-:root {
-    text-justify: inter-ideograph;
-}
-* {
-    text-justify: inherit;
-}
