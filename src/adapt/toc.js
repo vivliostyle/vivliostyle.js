@@ -231,15 +231,14 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
                     if (anchorElem && anchorElem.localName === "a") {
                         anchorElem.tabIndex = -1;
                     }
+                } else {
+                    viewParent.setAttribute("role", "tree");
                 }
             } else {
                 if (adaptParentClass == "toc-node") {
                     element.setAttribute("data-adapt-class", "toc-container");
                     element.setAttribute("role", "group");
                     element.setAttribute("aria-hidden", "true");
-                } else if (adaptParentClass == null) {
-                    // TOC tree root
-                    element.setAttribute("role", "tree");
                 }
             }
             return adapt.task.newResult(/** @type {Element} */ (element));
@@ -281,6 +280,10 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
         instance.pref = self.pref;
         instance.init().then(() => {
             instance.layoutNextPage(page, null).then(() => {
+                Array.from(page.container.querySelectorAll("[data-vivliostyle-toc-box]>*>*>*>*>*[style*='display: none']")).forEach(bodyChildElem => {
+                    bodyChildElem.setAttribute("aria-hidden", "true");
+                    bodyChildElem.setAttribute("hidden", "hidden");
+                });
                 self.setAutoHeight(elem, 2);
                 frame.finish(page);
             });
