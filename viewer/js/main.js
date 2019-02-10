@@ -6307,7 +6307,7 @@ var DocumentOptions = (function () {
 
         // write fragment back to URL when updated
         this.fragment.subscribe(function (fragment) {
-            if ((urlOptions.epubUrl ? /^epubcfi\(\/[246]\/2!\)/ : /^epubcfi\(\/2!\)/).test(fragment)) {
+            if (/^epubcfi\(\/([246]\/)?2!\)/.test(fragment)) {
                 _storesUrlParameters2["default"].removeParameter("f");
             } else {
                 var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
@@ -7796,7 +7796,7 @@ var Navigation = (function () {
     }, {
         key: "navigateTOC",
         value: function navigateTOC(key) {
-            var selecter = "[data-vivliostyle-toc-box] [tabindex='0'], [data-vivliostyle-toc-box] a:not([tabindex='-1'])";
+            var selecter = "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) [tabindex='0']," + "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) a[href]:not([tabindex='-1'])";
             var nodes = Array.from(document.querySelectorAll(selecter));
             var index = nodes.indexOf(document.activeElement);
 
@@ -8694,7 +8694,7 @@ module.exports = exports["default"];
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Vivliostyle core 2019.1.100-pre.20190210100246
+ * Vivliostyle core 2019.1.100-pre.20190210140347
  */
 (function(factory) {
     if (typeof define === "function" && define.amd) {
@@ -9342,10 +9342,10 @@ function Ut(a){var b=a.target,c="\u25b8"==b.textContent;b.textContent=c?"\u25be"
 c?0:-1),2<=e.children.length&&(e.children[1].tabIndex=c?0:-1))}for(;!b.nextSibling&&b.parentNode!==d;)b=b.parentNode;b=b.nextSibling}a.stopPropagation()}
 St.prototype.Ge=function(a){var b=this.u.Ge(a);return function(a,d,e){var c=e.behavior;if(c)switch(c.toString()){case "body-child":a.parentElement.getAttribute("data-vivliostyle-primary-entry")&&(a.querySelector("[role=doc-toc], [role=directory], nav, .toc, #toc")||(e.display=J));break;case "toc-node-anchor":e.color=sd;e["text-decoration"]=J;break;case "toc-node":e.display=ad;e.margin=ae;e.padding=ae;e["padding-inline-start"]=new F(1.25,"em");break;case "toc-node-first-child":e.display=ud,e.margin=
 new F(.2,"em"),e["vertical-align"]=Sd,e.color=sd,e["text-decoration"]=J}if(!c||"toc-node"!=c.toString()&&"toc-container"!=c.toString())return b(a,d,e);(e=a.firstChild)&&1!==e.nodeType&&""===e.textContent.trim()&&a.replaceChild(a.ownerDocument.createComment(e.textContent),e);var g=d.getAttribute("data-adapt-class");if("toc-node"==g){var h=d.firstChild;"\u25b8"!=h.textContent&&(h.textContent="\u25b8",x(h,"cursor","pointer"),h.addEventListener("click",Ut,!1),h.setAttribute("role","button"),h.setAttribute("aria-expanded",
-"false"),d.setAttribute("aria-expanded","false"),"0px"!==d.style.height&&(h.tabIndex=0))}e=d.ownerDocument.createElement("div");e.setAttribute("data-adapt-process-children","true");if("toc-node"==c.toString()){if(h=d.ownerDocument.createElement("div"),h.textContent="\u25b9",x(h,"margin","0.2em 0 0 -1em"),x(h,"margin-inline-start","-1em"),x(h,"margin-inline-end","0"),x(h,"display","inline-block"),x(h,"width","1em"),x(h,"text-align","center"),x(h,"vertical-align","top"),x(h,"cursor","default"),x(h,
-"font-family","Menlo,sans-serif"),e.appendChild(h),x(e,"overflow","hidden"),e.setAttribute("data-adapt-class","toc-node"),e.setAttribute("role","treeitem"),"toc-node"==g||"toc-container"==g)x(e,"height","0px"),(a=a.firstElementChild)&&"a"===a.localName&&(a.tabIndex=-1)}else"toc-node"==g?(e.setAttribute("data-adapt-class","toc-container"),e.setAttribute("role","group"),e.setAttribute("aria-hidden","true")):null==g&&e.setAttribute("role","tree");return M(e)}};
-St.prototype.Tc=function(a,b,c,d,e){if(this.page)return M(this.page);var f=this,g=L("showTOC"),h=new Ek(a,a);this.page=h;this.b.load(this.url).then(function(d){var k=f.b.f[d.url],k=new lt(f.b,k.f,k.b,Ij.clone(),k.C,k.l,k.u,k.h,k.j,k.A),l=ot(k,c,1E5,e);b=new Zr(b.window,l.fontSize,b.root,l.width,l.height);var p=new pt(k,d,f.lang,b,f.f,f.l,f.Ge(d),f.j,0,f.h,f.g);f.nb=p;p.$=f.$;qt(p).then(function(){Et(p,h,null).then(function(){Tt(f,a,2);O(g,h)})})});return g.result()};
-St.prototype.Td=function(){this.page&&(this.page.I.style.visibility="hidden",this.page.I.setAttribute("aria-hidden","true"))};St.prototype.Qc=function(){return!!this.page&&"visible"===this.page.I.style.visibility};function Vt(){Lt.call(this,Wt(this));this.h=new xf(pk,"document");this.g=new xf(zf,"text");this.G={};this.la={};this.C={};this.F={}}v(Vt,Lt);function Wt(a){return function(b){return a.C[b]}}
+"false"),d.setAttribute("aria-expanded","false"),"0px"!==d.style.height&&(h.tabIndex=0))}e=d.ownerDocument.createElement("div");e.setAttribute("data-adapt-process-children","true");"toc-node"==c.toString()?(h=d.ownerDocument.createElement("div"),h.textContent="\u25b9",x(h,"margin","0.2em 0 0 -1em"),x(h,"margin-inline-start","-1em"),x(h,"margin-inline-end","0"),x(h,"display","inline-block"),x(h,"width","1em"),x(h,"text-align","center"),x(h,"vertical-align","top"),x(h,"cursor","default"),x(h,"font-family",
+"Menlo,sans-serif"),e.appendChild(h),x(e,"overflow","hidden"),e.setAttribute("data-adapt-class","toc-node"),e.setAttribute("role","treeitem"),"toc-node"==g||"toc-container"==g?(x(e,"height","0px"),(a=a.firstElementChild)&&"a"===a.localName&&(a.tabIndex=-1)):d.setAttribute("role","tree")):"toc-node"==g&&(e.setAttribute("data-adapt-class","toc-container"),e.setAttribute("role","group"),e.setAttribute("aria-hidden","true"));return M(e)}};
+St.prototype.Tc=function(a,b,c,d,e){if(this.page)return M(this.page);var f=this,g=L("showTOC"),h=new Ek(a,a);this.page=h;this.b.load(this.url).then(function(d){var k=f.b.f[d.url],k=new lt(f.b,k.f,k.b,Ij.clone(),k.C,k.l,k.u,k.h,k.j,k.A),l=ot(k,c,1E5,e);b=new Zr(b.window,l.fontSize,b.root,l.width,l.height);var p=new pt(k,d,f.lang,b,f.f,f.l,f.Ge(d),f.j,0,f.h,f.g);f.nb=p;p.$=f.$;qt(p).then(function(){Et(p,h,null).then(function(){Array.from(h.I.querySelectorAll("[data-vivliostyle-toc-box]>*>*>*>*>*[style*='display: none']")).forEach(function(a){a.setAttribute("aria-hidden",
+"true");a.setAttribute("hidden","hidden")});Tt(f,a,2);O(g,h)})})});return g.result()};St.prototype.Td=function(){this.page&&(this.page.I.style.visibility="hidden",this.page.I.setAttribute("aria-hidden","true"))};St.prototype.Qc=function(){return!!this.page&&"visible"===this.page.I.style.visibility};function Vt(){Lt.call(this,Wt(this));this.h=new xf(pk,"document");this.g=new xf(zf,"text");this.G={};this.la={};this.C={};this.F={}}v(Vt,Lt);function Wt(a){return function(b){return a.C[b]}}
 function Xt(a,b,c){var d=L("loadEPUBDoc");uf(b,null,"HEAD").then(function(e){if(400<=e.status){var f=b;"/"!==f.substring(f.length-1)&&(f+="/");c&&a.g.fetch(f+"?r=list");a.h.fetch(f+"META-INF/encryption.xml");a.h.load(f+"META-INF/container.xml",void 0,void 0).then(function(g){if(g){g=yk(ek(ek(ek(new fk([g.b]),"container"),"rootfiles"),"rootfile"),"full-path");g=t(g);for(var h=g.next();!h.done;h=g.next())if(h=h.value){Yt(a,f,h,c).Ea(d);return}}w.error("Failed to fetch a source document from "+b+" ("+
 e.status+(e.statusText?" "+e.statusText:"")+")");O(d,null)})}else if(e.status||e.responseXML||e.responseText||e.ud||e.contentType||!/\/[^/.]+(?:[#?]|$)/.test(b)||(b=b.replace(/([#?]|$)/,"/$1")),"application/oebps-package+xml"==e.contentType||/\.opf(?:[#?]|$)/.test(b)){var g=t(b.match(/^((?:.*\/)?)([^/]*)$/));g.next();var h=g.next().value,g=g.next().value;Yt(a,h,g,c).Ea(d)}else"application/ld+json"==e.contentType||"application/webpub+json"==e.contentType||"application/audiobook+json"==e.contentType||
 "application/json"==e.contentType||/\.json(?:ld)?(?:[#?]|$)/.test(b)?a.g.load(b,!0,void 0).then(function(c){if(c){var e=new Zt(a,b);$t(e,c).then(function(){O(d,e)})}else w.error("Received an empty response for "+b+". This may be caused by the server not allowing cross-origin resource sharing (CORS)."),O(d,null)}):au(a,b).Ea(d)});return d.result()}
