@@ -737,7 +737,7 @@ adapt.epub.OPFDoc.prototype.getMetadata = function() {
 adapt.epub.OPFDoc.prototype.getPathFromURL = function(url) {
     if (this.epubURL) {
         let epubBaseURL = adapt.base.resolveURL("", this.epubURL);
-        if (url === epubBaseURL) {
+        if (url === epubBaseURL || url + "/" === epubBaseURL) {
             return "";
         }
         if (epubBaseURL.charAt(epubBaseURL.length - 1) != "/") {
@@ -1030,19 +1030,24 @@ adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) 
     // TODO: other metadata...
 
     const primaryEntryPath = this.getPathFromURL(this.epubURL);
-    if (!manifestObj["readingOrder"] && doc)  {
+    if (!manifestObj["readingOrder"] && doc && primaryEntryPath !== null)  {
         manifestObj["readingOrder"] = [encodeURI(primaryEntryPath)];
 
         // Find TOC in the primary entry (X)HTML
-        const tocElem = doc.querySelector("[role=doc-toc]") || doc.querySelector("[role=directory], nav, .toc, #toc");
-        if (tocElem) {
-            Array.from(tocElem.querySelectorAll("a[href]")).forEach(anchorElem => {
-                const url = encodeURI(this.getPathFromURL(adapt.base.stripFragment(anchorElem.href)));
+        const selector = "[role=doc-toc] a[href]," +
+                         "[role=directory] a[href]," +
+                         "nav a[href]," +
+                         ".toc a[href]," +
+                         "#toc a[href]";
+        Array.from(doc.querySelectorAll(selector)).forEach(anchorElem => {
+            const path = this.getPathFromURL(adapt.base.stripFragment(anchorElem.href));
+            if (path !== null) {
+                const url = encodeURI(path);
                 if (manifestObj["readingOrder"].indexOf(url) == -1) {
                     manifestObj["readingOrder"].push(url);
                 }
-            });
-        }
+            }
+        });
     }
 
     const params = [];
@@ -1053,8 +1058,7 @@ adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) 
             readingOrderOrResources.forEach(itemObj => {
                 const url = typeof itemObj === "string" ? itemObj : (itemObj.url || itemObj.href);
                 const encodingFormat = typeof itemObj === "string" ? "" : (itemObj.encodingFormat || itemObj.href && itemObj.type || "");
-                const inReadingOrder = readingOrderOrResources === manifestObj["readingOrder"];
-                if (inReadingOrder || encodingFormat === "text/html" || encodingFormat === "application/xhtml+xml" ||
+                if (encodingFormat === "text/html" || encodingFormat === "application/xhtml+xml" ||
                         (/(^|\/)([^/]+\.(x?html|htm|xht)|[^/.]*)([#?]|$)/).test(url)) {
                     const param = {
                         url: adapt.base.resolveURL(adapt.base.convertSpecialURL(url), this.epubURL),

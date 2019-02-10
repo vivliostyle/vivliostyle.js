@@ -308,7 +308,8 @@ body > * {
     -adapt-behavior: body-child;
 }
 
-[role=doc-toc], [role=directory], nav, .toc, #toc {
+[role=doc-toc], [role=directory], nav, .toc, #toc,
+#table-of-contents, #contents {
     -adapt-behavior: toc-root;
 }
 

@@ -150,7 +150,7 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
                 switch (behavior.toString()) {
                     case "body-child":
                         if (srcElem.parentElement.getAttribute("data-vivliostyle-primary-entry")) {
-                            if (!srcElem.querySelector("[role=doc-toc], [role=directory], nav, .toc, #toc")) {
+                            if (!srcElem.querySelector("[role=doc-toc], [role=directory], nav li a, .toc, #toc")) {
                                 // When the TOC element is a part of the primaty entry (X)HTML,
                                 // hide elements not containing TOC.
                                 computedStyle["display"] = adapt.css.ident.none;

@@ -81,6 +81,8 @@ adapt.base.resolveURL = (relURL, baseURL) => {
         if (relURL.toLowerCase().match("^javascript:")) {
             return "#";
         }
+        if (relURL.match(/^\w{2,}:\/\/[^\/]+$/))
+            relURL = `${relURL}/`;
         return relURL;
     }
     if (baseURL.match(/^\w{2,}:\/\/[^\/]+$/))
