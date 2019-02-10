@@ -141,9 +141,16 @@ adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
                 vivliostyle.logging.logger.error(`Failed to fetch a source document from ${url} (${response.status}${response.statusText ? ' ' + response.statusText : ''})`);
                 frame.finish(null);
             });
-        } else if (!response.status && !response.responseXML && !response.responseText && !response.responseBlob) {
-            vivliostyle.logging.logger.error(`Received an empty response for ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`);
         } else {
+            if (!response.status && !response.responseXML && !response.responseText && !response.responseBlob && !response.contentType) {
+                // Empty response
+                if ((/\/[^/.]+(?:[#?]|$)/).test(url)) {
+                    // Adding trailing "/" may solve the problem.
+                    url = url.replace(/([#?]|$)/, "/$1");
+                } else {
+                    // Ignore empty response of HEAD request, it may become OK with GET request.
+                }
+            }
             if (response.contentType == "application/oebps-package+xml" || (/\.opf(?:[#?]|$)/).test(url)) {
                 // EPUB OPF
                 const [, epubUrl, root] = url.match(/^((?:.*\/)?)([^/]*)$/);
@@ -155,6 +162,11 @@ adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
                        (/\.json(?:ld)?(?:[#?]|$)/).test(url)) {
                 // Web Publication Manifest
                 this.loadAsJSON(url, true).then(manifestObj => {
+                    if (!manifestObj) {
+                        vivliostyle.logging.logger.error(`Received an empty response for ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`);
+                        frame.finish(null);
+                        return;
+                    }
                     const opf = new adapt.epub.OPFDoc(this, url);
                     opf.initWithWebPubManifest(manifestObj).then(() => {
                         frame.finish(opf);
@@ -228,18 +240,14 @@ adapt.epub.EPUBDocStore.prototype.loadWebPub = function(url) {
             // Find manifest, W3C WebPublication or Readium Web Publication Manifest
             const manifestLink = doc.querySelector("link[rel='publication'],link[rel='manifest'][type='application/webpub+json']");
             if (manifestLink) {
-                let href = manifestLink.href;
-                if (href.substr(0, url.length) === url && (href.charAt(url.length) === "#" ||
-                        href.charAt(url.length) === "/" && href.charAt(url.length + 1) === "#")) {
-                    href = href.substr(href.charAt(url.length) === "#" ? url.length : url.length + 1);
-                }
+                const href = manifestLink.getAttribute("href");
                 if ((/^#/).test(href)) {
                     const manifestObj = adapt.base.stringToJSON(doc.getElementById(href.substr(1)).textContent);
                     opf.initWithWebPubManifest(manifestObj, doc).then(() => {
                         frame.finish(opf);
                     });
                 } else {
-                    this.loadAsJSON(href).then(manifestObj => {
+                    this.loadAsJSON(manifestLink.href).then(manifestObj => {
                         opf.initWithWebPubManifest(manifestObj, doc).then(() => {
                             frame.finish(opf);
                         });
@@ -248,7 +256,7 @@ adapt.epub.EPUBDocStore.prototype.loadWebPub = function(url) {
             } else {
                 // No manifest
                 opf.initWithWebPubManifest({}, doc).then(() => {
-                    if (opf.xhtmlToc.src === xmldoc.url) {
+                    if (opf.xhtmlToc && opf.xhtmlToc.src === xmldoc.url) {
                         // xhtmlToc is the primari entry (X)HTML
                         if (!doc.querySelector("[role=doc-toc], [role=directory], nav, .toc, #toc")) {
                             // TOC is not found in the primari entry (X)HTML
@@ -1023,16 +1031,15 @@ adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) 
 
     const primaryEntryPath = this.getPathFromURL(this.epubURL);
     if (!manifestObj["readingOrder"] && doc)  {
-        manifestObj["readingOrder"] = [primaryEntryPath];
+        manifestObj["readingOrder"] = [encodeURI(primaryEntryPath)];
 
         // Find TOC in the primary entry (X)HTML
         const tocElem = doc.querySelector("[role=doc-toc]") || doc.querySelector("[role=directory], nav, .toc, #toc");
         if (tocElem) {
             Array.from(tocElem.querySelectorAll("a[href]")).forEach(anchorElem => {
-                const href = anchorElem.href;
-                let path = this.getPathFromURL(adapt.base.stripFragment(href));
-                if (manifestObj["readingOrder"].indexOf(path) == -1) {
-                    manifestObj["readingOrder"].push(path);
+                const url = encodeURI(this.getPathFromURL(adapt.base.stripFragment(anchorElem.href)));
+                if (manifestObj["readingOrder"].indexOf(url) == -1) {
+                    manifestObj["readingOrder"].push(url);
                 }
             });
         }
@@ -1045,8 +1052,10 @@ adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) 
         if (readingOrderOrResources instanceof Array) {
             readingOrderOrResources.forEach(itemObj => {
                 const url = typeof itemObj === "string" ? itemObj : (itemObj.url || itemObj.href);
-                if (readingOrderOrResources === manifestObj["readingOrder"] ||
-                        (/\.(x?html|htm|xht)$/).test(url)) {
+                const encodingFormat = typeof itemObj === "string" ? "" : (itemObj.encodingFormat || itemObj.href && itemObj.type || "");
+                const inReadingOrder = readingOrderOrResources === manifestObj["readingOrder"];
+                if (inReadingOrder || encodingFormat === "text/html" || encodingFormat === "application/xhtml+xml" ||
+                        (/(^|\/)([^/]+\.(x?html|htm|xht)|[^/.]*)([#?]|$)/).test(url)) {
                     const param = {
                         url: adapt.base.resolveURL(adapt.base.convertSpecialURL(url), this.epubURL),
                         index: itemCount++,
@@ -1057,6 +1066,8 @@ adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) 
                         tocFound = param.index;
                     }
                     params.push(param);
+
+                    //TODO: items not in readingOrder should be excluded from linear reading but available with internal link navigation.
                 }
             });
         }
