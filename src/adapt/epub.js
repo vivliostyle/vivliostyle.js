@@ -2008,6 +2008,9 @@ adapt.epub.OPFView.prototype.navigateTo = function(href, position, sync) {
             const restored = this.opf.documentURLTransformer.restoreURL(href);
             if (this.opf.opfXML) {
                 path = this.opf.getPathFromURL(restored[0]);
+                if (path == null) {
+                    path = restored[0];
+                }
             } else {
                 path = restored[0];
             }
