@@ -43,6 +43,18 @@ function ViewerApp() {
         viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
         debug: this.isDebug
     };
+
+    // Remove redundant or ineffective URL parameters
+    if (urlParameters.getParameter("b")[0]) {
+        urlParameters.removeParameter("b", true);   // only first one is effective
+        urlParameters.removeParameter("x");         // x= is ineffective when b= is given
+    }
+    urlParameters.removeParameter("f", true);       // only first one is effective
+    urlParameters.removeParameter("spread", true);
+    urlParameters.removeParameter("renderAllPages", true);
+    urlParameters.removeParameter("profile", true);
+    urlParameters.removeParameter("debug", true);
+
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
     this.messageDialog = new MessageDialog(messageQueue);
 

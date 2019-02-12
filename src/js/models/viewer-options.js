@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -32,9 +33,9 @@ function getViewerOptionsFromURL() {
 }
 
 function getDefaultValues() {
-    const isNotEpub = !urlParameters.getParameter("b").length;
+    const isNotBook = !urlParameters.hasParameter("b");
     return {
-        renderAllPages: isNotEpub,
+        renderAllPages: isNotBook,
         fontSize: 16,
         profile: false,
         pageViewMode: PageViewMode.defaultMode(),

@@ -20,7 +20,7 @@
 
 import ko from "knockout";
 import ViewerOptions from "../models/viewer-options";
-import PageSize from "../models/page-size";
+import PageStyle from "../models/page-size";
 import PageViewMode from "../models/page-view-mode";
 import {Keys} from "../utils/key-util";
 
@@ -49,7 +49,7 @@ class SettingsPanel {
 
         this.state = {
             viewerOptions: new ViewerOptions(viewerOptions),
-            pageSize: new PageSize(documentOptions.pageSize),
+            pageStyle: new PageStyle(documentOptions.pageStyle),
             pageViewMode: ko.pureComputed({
                 read: () => {
                     return this.state.viewerOptions.pageViewMode().toString();
@@ -109,10 +109,10 @@ class SettingsPanel {
 
     apply() {
         if (this.state.renderAllPages() === this.viewerOptions_.renderAllPages() &&
-                this.state.pageSize.equivalentTo(this.documentOptions_.pageSize)) {
+                this.state.pageStyle.equivalentTo(this.documentOptions_.pageStyle)) {
             this.viewerOptions_.copyFrom(this.state.viewerOptions);
         } else {
-            this.documentOptions_.pageSize.copyFrom(this.state.pageSize);
+            this.documentOptions_.pageStyle.copyFrom(this.state.pageStyle);
             this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
         }
         if (this.pinned()) {
@@ -124,7 +124,7 @@ class SettingsPanel {
 
     reset() {
         this.state.viewerOptions.copyFrom(this.viewerOptions_);
-        this.state.pageSize.copyFrom(this.documentOptions_.pageSize);
+        this.state.pageStyle.copyFrom(this.documentOptions_.pageStyle);
         this.close();
     }
 

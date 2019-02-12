@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -38,15 +39,40 @@ const PresetSize = [
     {name: "ledger", description: "ledger"}
 ];
 
-class PageSize {
-    constructor(pageSize) {
+const DefaultValue = {
+    customWidth: "210mm",
+    customHeight: "297mm",
+    pageMargin: "10%",
+    rootFontSize: "100%",
+    rootLineHeight: "normal"
+};
+
+class PageStyle {
+    constructor(pageStyle) {
         this.mode = ko.observable(Mode.AUTO);
         this.presetSize = ko.observable(PresetSize[0]);
         this.isLandscape = ko.observable(false);
-        this.customWidth = ko.observable("210mm");
-        this.customHeight = ko.observable("297mm");
-        this.isImportant = ko.observable(false);
-        
+        this.customWidth = ko.observable(DefaultValue.customWidth);
+        this.customHeight = ko.observable(DefaultValue.customHeight);
+        this.pageSizeImportant = ko.observable(false);
+        this.pageMargin = ko.observable(DefaultValue.pageMargin);
+        this.pageMarginImportant = ko.observable(false);
+        this.pageOtherStyle = ko.observable("");
+        this.firstPageMarginZero = ko.observable(false);
+        this.firstPageMarginZeroImportant = ko.observable(false);
+        this.firstPageOtherStyle = ko.observable(false);
+        this.forceHtmlBodyMarginZero = ko.observable(false);
+        this.rootFontSize = ko.observable(DefaultValue.rootFontSize);
+        this.rootFontSizeImportant = ko.observable(false);
+        this.rootLineHeight = ko.observable(DefaultValue.rootLineHeight);
+        this.rootLineHeightImportant = ko.observable(false);
+        this.rootOtherStyle = ko.observable("");
+        this.imageMaxSizeToFitPage = ko.observable(false);
+        this.imageMaxSizeImportant = ko.observable(false);
+        this.otherStyle = ko.observable("");
+        this.allImportant = ko.observable(false);
+        this.cssText = ko.pureComputed(() => this.toCSSText());
+
         const setDisabledElements = (mode) => {
             const presetSelectElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_preset-select")[0];
             if (!presetSelectElem) {
@@ -78,8 +104,8 @@ class PageSize {
             }
         };
 
-        if (pageSize) {
-            this.copyFrom(pageSize);
+        if (pageStyle) {
+            this.copyFrom(pageStyle);
         }
 
         setDisabledElements(this.mode());
@@ -87,6 +113,265 @@ class PageSize {
         this.mode.subscribe(mode => {
             setDisabledElements(mode);
         });
+
+        this.allImportant.subscribe(allImportant => {
+            this.pageSizeImportant(allImportant);
+            this.pageMarginImportant(allImportant);
+            this.firstPageMarginZeroImportant(allImportant);
+            this.rootFontSizeImportant(allImportant);
+            this.rootLineHeightImportant(allImportant);
+            this.imageMaxSizeImportant(allImportant);
+        });
+        
+        this.pageStyleRegExp = new RegExp(/^@page\s*\{\s*/.source +
+            // sizeW, sizeH, sizeImportant,
+            /(?:size:\s*([^\s!;{}]+)(?:\s+([^\s!;{}]+))?\s*(!important)?;?\s*)?/.source +
+
+            // pageMargin, pageMarginImportant,
+            /(?:margin:\s*([^\s!;{}]+(?:\s+[^\s!;{}]+)?(?:\s+[^\s!;{}]+)?(?:\s+[^\s!;{}]+)?)\s*(!important)?;?\s*)?/.source +
+
+            // pageOtherStyle,
+            /((?:[^{}]+|\{[^{}]*\})*)\s*\}\s*/.source +
+
+            // firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
+            /(?:@page\s*:first\s*\{\s*(margin:\s*0(?:\w+|%)?\s*(!important)?;?\s*)?((?:[^{}]+|\{[^{}]*\})*)\}\s*)?/.source +
+
+            // forceHtmlBodyMarginZero,
+            /(html,\s*body\s*\{\s*margin:\s*0(?:\w+|%)?\s*!important;?\s*\}\s*)?/.source +
+
+            // rootFontSize, rootFontSizeImportant, rootLineHeight, rootLineHeightImportant, rootOtherStyle,
+            /(?::root\s*\{\s*(?:font-size:\s*([^\s!;{}]+)\s*(!important)?;?\s*)?(?:line-height:\s*([^\s!;{}]+)\s*(!important)?;?\s*)?([^{}]*)\}\s*)?/.source +
+
+            // forceBodyFontSizeInherit, forceBodyLineHeightInherit,
+            /(?:body\s*\{\s*(font-size:\s*inherit\s*!important;?\s*)?(line-height:\s*inherit\s*!important;?\s*)?\}\s*)?/.source +
+
+            // imageMaxSizeToFitPage, imageMaxSizeImportant,
+            /(img,\s*svg\s*\{\s*max-inline-size:\s*100%\s*(!important)?;\s*max-block-size:\s*100vb\s*(?:!important)?;?\s*\}\s*)?/.source +
+
+            // otherStyle
+            /(.*)$/.source
+        );
+    }
+
+    fromCSSText(cssText) {
+        const r = this.pageStyleRegExp.exec(cssText);
+        if (r) {
+            let [,
+                sizeW, sizeH, sizeImportant,
+                pageMargin, pageMarginImportant,
+                pageOtherStyle,
+                firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
+                forceHtmlBodyMarginZero,
+                rootFontSize, rootFontSizeImportant, rootLineHeight, rootLineHeightImportant, rootOtherStyle,
+                forceBodyFontSizeInherit, forceBodyLineHeightInherit,
+                imageMaxSizeToFitPage, imageMaxSizeImportant,
+                otherStyle
+            ] = r;
+
+            let count = 0;
+            let countImportant = 0;
+            let countNotImportant = 0;
+
+            if (sizeW == "landscape" || sizeW == "portrait") {
+                this.isLandscape(sizeW == "landscape");
+                sizeW = sizeH;
+                sizeH = null;
+            } else if (sizeH == "landscape" || sizeH == "portrait") {
+                this.isLandscape(sizeH == "landscape");
+                sizeH = null;
+            }
+            if (sizeW != null) {
+                if (sizeH == null) {
+                    if (sizeW == "auto") {
+                        this.mode(Mode.AUTO);
+                    } else {
+                        const presetSize = PresetSize.find(presetSize => presetSize.name.toLowerCase() == sizeW.toLowerCase());
+                        if (presetSize) {
+                            this.mode(Mode.PRESET);
+                            this.presetSize(presetSize);
+                        } else {
+                            this.mode(Mode.CUSTOM);
+                            this.customWidth(sizeW);
+                            this.customHeight(sizeW);
+                        }
+                    }
+                } else {
+                    this.mode(Mode.CUSTOM);
+                    this.customWidth(sizeW);
+                    this.customHeight(sizeH);
+                }
+                this.pageSizeImportant(!!sizeImportant);
+                count++;
+                if (sizeImportant)
+                    countImportant++;
+                else
+                    countNotImportant++;
+            }
+            if (pageMargin != null) {
+                this.pageMargin(pageMargin);
+                this.pageMarginImportant(!!pageMarginImportant);
+                count++;
+                if (pageMarginImportant)
+                    countImportant++;
+                else
+                    countNotImportant++;
+            }
+            pageOtherStyle = pageOtherStyle && pageOtherStyle.trim() || "";
+            if (pageOtherStyle) {
+                this.pageOtherStyle(pageOtherStyle);
+                count++;
+            }
+
+            if (firstPageMarginZero) {
+                this.firstPageMarginZero(true);
+                this.pageMarginImportant(!!firstPageMarginZeroImportant);
+                count++;
+                if (firstPageMarginZeroImportant)
+                    countImportant++;
+                else
+                    countNotImportant++;
+            }
+            firstPageOtherStyle = firstPageOtherStyle && firstPageOtherStyle.trim() || "";
+            if (firstPageOtherStyle) {
+                this.pageOtherStyle(firstPageOtherStyle);
+                count++;
+            }
+
+            if (forceHtmlBodyMarginZero) {
+                this.forceHtmlBodyMarginZero(true);
+                count++;
+            }
+
+            if (rootFontSize != null) {
+                this.rootFontSize(rootFontSize);
+                this.rootFontSizeImportant(!!rootFontSizeImportant);
+                count++;
+                if (rootFontSizeImportant)
+                    countImportant++;
+                else
+                    countNotImportant++;
+            }
+            if (rootLineHeight != null) {
+                this.rootLineHeight(rootLineHeight);
+                this.rootLineHeightImportant(!!rootLineHeightImportant);
+                count++;
+                if (rootLineHeightImportant)
+                    countImportant++;
+                else
+                    countNotImportant++;
+            }
+            rootOtherStyle = rootOtherStyle && rootOtherStyle.trim() || "";
+            if (rootOtherStyle) {
+                this.rootOtherStyle(rootOtherStyle);
+                count++;
+            }
+
+            if (forceBodyFontSizeInherit) {
+                // must be same bool value as rootFontSizeImportant
+            }
+            if (forceBodyLineHeightInherit) {
+                // must be same bool value as rootLineHeightImportant
+            }
+
+            if (imageMaxSizeToFitPage) {
+                this.imageMaxSizeToFitPage(true);
+                this.imageMaxSizeImportant(!!imageMaxSizeImportant);
+                count++;
+                if (imageMaxSizeImportant)
+                    countImportant++;
+                else
+                    countNotImportant++;
+            }
+
+            otherStyle = otherStyle && otherStyle.trim() || "";
+            if (otherStyle) {
+                this.otherStyle(otherStyle);
+                count++;
+            }
+
+            this.allImportant(countImportant > 0 && countNotImportant == 0);
+
+        } else {
+            // When not match
+            this.otherStyle(cssText);
+        }
+    }
+
+    toCSSText() {
+        function imp(important) {
+            return important ? "!important" : "";
+        }
+
+        let cssText = "@page{";
+        if (this.mode() != Mode.AUTO || this.pageSizeImportant()) {
+            cssText += "size:";
+
+            switch (this.mode()) {
+                case Mode.AUTO:
+                    cssText += "auto";
+                    break;
+                case Mode.PRESET:
+                    cssText += this.presetSize().name;
+                    if (this.isLandscape()) {
+                        cssText += " landscape";
+                    }
+                    break;
+                case Mode.CUSTOM:
+                    cssText += `${this.customWidth()} ${this.customHeight()}`;
+                    break;
+                default:
+                    throw new Error(`Unknown mode ${this.mode()}`);
+            }
+            cssText += `${imp(this.pageSizeImportant())};`;
+        }
+        if (this.pageMargin() != DefaultValue.pageMargin || this.pageMarginImportant()) {
+            cssText += `margin:${this.pageMargin()}${imp(this.pageMarginImportant())};`;
+        }
+        cssText += this.pageOtherStyle();
+        cssText += "}";
+
+        if (this.firstPageMarginZero() || this.firstPageOtherStyle()) {
+            cssText += "@page:first{";
+            if (this.firstPageMarginZero()) {
+                cssText += `margin:0${imp(this.firstPageMarginZeroImportant())};`;
+            }
+            cssText += this.firstPageOtherStyle();
+            cssText += "}";
+        }
+
+        if (this.forceHtmlBodyMarginZero()) {
+            cssText += "html,body{margin:0!important;}";
+        }
+
+        if (this.rootFontSize() != DefaultValue.rootFontSize || this.rootLineHeight() != DefaultValue.rootLineHeight || this.rootOtherStyle()) {
+            cssText += ":root{";
+            if (this.rootFontSize() != DefaultValue.rootFontSize) {
+                cssText += `font-size:${this.rootFontSize()}${imp(this.rootFontSizeImportant())};`;
+            }
+            if (this.rootLineHeight() != DefaultValue.rootLineHeight) {
+                cssText += `line-height:${this.rootLineHeight()}${imp(this.rootLineHeightImportant())};`;
+            }
+            cssText += this.rootOtherStyle();
+            cssText += "}";
+        }
+        if (this.rootFontSizeImportant() || this.rootLineHeightImportant()) {
+            cssText += `body{`;
+            if (this.rootFontSizeImportant()) {
+                cssText += "font-size:inherit!important;";
+            }
+            if (this.rootLineHeightImportant()) {
+                cssText += "line-height:inherit!important;";
+            }
+            cssText += "}";
+        }
+
+        if (this.imageMaxSizeToFitPage()) {
+            cssText += `img,svg{max-inline-size:100%${imp(this.imageMaxSizeImportant())};max-block-size:100vb${imp(this.imageMaxSizeImportant())};}`;
+        }
+
+        cssText += this.otherStyle();
+
+        return cssText;
     }
 
     copyFrom(other) {
@@ -95,13 +380,44 @@ class PageSize {
         this.isLandscape(other.isLandscape());
         this.customWidth(other.customWidth());
         this.customHeight(other.customHeight());
-        this.isImportant(other.isImportant());
+        this.pageSizeImportant(other.pageSizeImportant());
+        this.pageMargin(other.pageMargin());
+        this.pageMarginImportant(other.pageMarginImportant());
+        this.pageOtherStyle(other.pageOtherStyle());
+        this.firstPageMarginZero(other.firstPageMarginZero());
+        this.firstPageMarginZeroImportant(other.firstPageMarginZeroImportant());
+        this.firstPageOtherStyle(other.firstPageOtherStyle());
+        this.forceHtmlBodyMarginZero(other.forceHtmlBodyMarginZero());
+        this.rootFontSize(other.rootFontSize());
+        this.rootFontSizeImportant(other.rootFontSizeImportant());
+        this.rootLineHeight(other.rootLineHeight());
+        this.rootLineHeightImportant(other.rootLineHeightImportant());
+        this.rootOtherStyle(other.rootOtherStyle());
+        this.imageMaxSizeToFitPage(other.imageMaxSizeToFitPage());
+        this.imageMaxSizeImportant(other.imageMaxSizeImportant());
+        this.otherStyle(other.otherStyle());
+        this.allImportant(other.allImportant());
     }
 
     equivalentTo(other) {
-        if (this.isImportant() !== other.isImportant()) {
-            return false;
-        }
+        if (this.pageSizeImportant() !== other.pageSizeImportant()) return false;
+        if (this.pageMargin() !== other.pageMargin()) return false;
+        if (this.pageMarginImportant() !== other.pageMarginImportant()) return false;
+        if (this.pageOtherStyle() !== other.pageOtherStyle()) return false;
+        if (this.firstPageMarginZero() !== other.firstPageMarginZero()) return false;
+        if (this.firstPageMarginZeroImportant() !== other.firstPageMarginZeroImportant()) return false;
+        if (this.firstPageOtherStyle() !== other.firstPageOtherStyle()) return false;
+        if (this.forceHtmlBodyMarginZero() !== other.forceHtmlBodyMarginZero()) return false;
+        if (this.rootFontSize() !== other.rootFontSize()) return false;
+        if (this.rootFontSizeImportant() !== other.rootFontSizeImportant()) return false;
+        if (this.rootLineHeight() !== other.rootLineHeight()) return false;
+        if (this.rootLineHeightImportant() !== other.rootLineHeightImportant()) return false;
+        if (this.rootOtherStyle() !== other.rootOtherStyle()) return false;
+        if (this.imageMaxSizeToFitPage() !== other.imageMaxSizeToFitPage()) return false;
+        if (this.imageMaxSizeImportant() !== other.imageMaxSizeImportant()) return false;
+        if (this.otherStyle() !== other.otherStyle()) return false;
+        if (this.allImportant() !== other.allImportant()) return false;
+
         const mode = this.mode();
         if (other.mode() === mode) {
             switch (mode) {
@@ -118,35 +434,10 @@ class PageSize {
             return false;
         }
     }
-
-    toCSSDeclarationString() {
-        let declaration = "size: ";
-        switch (this.mode()) {
-            case Mode.AUTO:
-                declaration += "auto";
-                break;
-            case Mode.PRESET:
-                declaration += this.presetSize().name;
-                if (this.isLandscape()) {
-                    declaration += " landscape";
-                }
-                break;
-            case Mode.CUSTOM:
-                declaration += `${this.customWidth()} ${this.customHeight()}`;
-                break;
-            default:
-                throw new Error(`Unknown mode ${this.mode()}`);
-        }
-
-        if (this.isImportant()) {
-            declaration += " !important";
-        }
-
-        return `${declaration};`;
-    }
 }
 
-PageSize.Mode = Mode;
-PageSize.PresetSize = PageSize.prototype.PresetSize = PresetSize;
+PageStyle.Mode = Mode;
+PageStyle.DefaultValue = DefaultValue;
+PageStyle.PresetSize = PageStyle.prototype.PresetSize = PresetSize;
 
-export default PageSize;
+export default PageStyle;
