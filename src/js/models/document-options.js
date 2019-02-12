@@ -63,8 +63,12 @@ class DocumentOptions {
         urlOptions.userStyleSheet.find((userStyle, index) => {
             if (userStyle.startsWith("data:,@page")) {
                 this.dataUserStyleIndex = index;
-                const cssText = decodeURI(userStyle.replace(/^data:,/, ""));
+                const data = userStyle.replace(/^data:,/, "")
+                    // Escape unescaped "%" that causes error in decodeURI()
+                    .replace(/%(?![0-9A-Fa-f]{2})/g, "%25");
+                const cssText = decodeURI(data);
                 this.pageStyle.fromCSSText(cssText);
+                return true;
             }
         });
 

@@ -44,7 +44,10 @@ const DefaultValue = {
     customHeight: "297mm",
     pageMargin: "10%",
     rootFontSize: "100%",
-    rootLineHeight: "normal"
+    rootLineHeight: "normal",
+    widowsOrphans: "2",     // for Page Breaks Between Lines option:
+    widowsOrphans_min: "1",     // Allow all widows/orphans
+    widowsOrphans_max: "9999",  // Never page break inside a paragraph
 };
 
 class PageStyle {
@@ -67,6 +70,8 @@ class PageStyle {
         this.rootLineHeight = ko.observable(DefaultValue.rootLineHeight);
         this.rootLineHeightImportant = ko.observable(false);
         this.rootOtherStyle = ko.observable("");
+        this.widowsOrphans = ko.observable(DefaultValue.widowsOrphans);
+        this.widowsOrphansImportant = ko.observable(false);
         this.imageMaxSizeToFitPage = ko.observable(false);
         this.imageMaxSizeImportant = ko.observable(false);
         this.otherStyle = ko.observable("");
@@ -120,35 +125,39 @@ class PageStyle {
             this.firstPageMarginZeroImportant(allImportant);
             this.rootFontSizeImportant(allImportant);
             this.rootLineHeightImportant(allImportant);
+            this.widowsOrphansImportant(allImportant);
             this.imageMaxSizeImportant(allImportant);
         });
         
         this.pageStyleRegExp = new RegExp(/^@page\s*\{\s*/.source +
-            // sizeW, sizeH, sizeImportant,
+            // 1. sizeW, sizeH, sizeImportant,
             /(?:size:\s*([^\s!;{}]+)(?:\s+([^\s!;{}]+))?\s*(!important)?;?\s*)?/.source +
 
-            // pageMargin, pageMarginImportant,
+            // 4. pageMargin, pageMarginImportant,
             /(?:margin:\s*([^\s!;{}]+(?:\s+[^\s!;{}]+)?(?:\s+[^\s!;{}]+)?(?:\s+[^\s!;{}]+)?)\s*(!important)?;?\s*)?/.source +
 
-            // pageOtherStyle,
+            // 6. pageOtherStyle,
             /((?:[^{}]+|\{[^{}]*\})*)\s*\}\s*/.source +
 
-            // firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
+            // 7. firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
             /(?:@page\s*:first\s*\{\s*(margin:\s*0(?:\w+|%)?\s*(!important)?;?\s*)?((?:[^{}]+|\{[^{}]*\})*)\}\s*)?/.source +
 
-            // forceHtmlBodyMarginZero,
+            // 10. forceHtmlBodyMarginZero,
             /(html,\s*body\s*\{\s*margin:\s*0(?:\w+|%)?\s*!important;?\s*\}\s*)?/.source +
 
-            // rootFontSize, rootFontSizeImportant, rootLineHeight, rootLineHeightImportant, rootOtherStyle,
+            // 11. rootFontSize, rootFontSizeImportant, rootLineHeight, rootLineHeightImportant, rootOtherStyle,
             /(?::root\s*\{\s*(?:font-size:\s*([^\s!;{}]+)\s*(!important)?;?\s*)?(?:line-height:\s*([^\s!;{}]+)\s*(!important)?;?\s*)?([^{}]*)\}\s*)?/.source +
 
-            // forceBodyFontSizeInherit, forceBodyLineHeightInherit,
+            // 16. forceBodyFontSizeInherit, forceBodyLineHeightInherit,
             /(?:body\s*\{\s*(font-size:\s*inherit\s*!important;?\s*)?(line-height:\s*inherit\s*!important;?\s*)?\}\s*)?/.source +
 
-            // imageMaxSizeToFitPage, imageMaxSizeImportant,
-            /(img,\s*svg\s*\{\s*max-inline-size:\s*100%\s*(!important)?;\s*max-block-size:\s*100vb\s*(?:!important)?;?\s*\}\s*)?/.source +
+            // 18. widowsOrphans, widowsOrphansImportant,
+            /(\*\s*\{\s*widows:\s*(1|2|9999)\s*(!important)?;\s*orphans:\s*\18\s*\19;?\s*\}\s*)?/.source +
 
-            // otherStyle
+            // 20. imageMaxSizeToFitPage, imageMaxSizeImportant,
+            /(img,\s*svg\s*\{\s*max-inline-size:\s*100%\s*(!important)?;\s*max-block-size:\s*100vb\s*\21;?\s*\}\s*)?/.source +
+
+            // 22. otherStyle
             /(.*)$/.source
         );
     }
@@ -164,6 +173,7 @@ class PageStyle {
                 forceHtmlBodyMarginZero,
                 rootFontSize, rootFontSizeImportant, rootLineHeight, rootLineHeightImportant, rootOtherStyle,
                 forceBodyFontSizeInherit, forceBodyLineHeightInherit,
+                widowsOrphans, widowsOrphansImportant,
                 imageMaxSizeToFitPage, imageMaxSizeImportant,
                 otherStyle
             ] = r;
@@ -273,6 +283,16 @@ class PageStyle {
                 // must be same bool value as rootLineHeightImportant
             }
 
+            if (widowsOrphans != null) {
+                this.widowsOrphans(widowsOrphans);
+                this.widowsOrphansImportant(!!widowsOrphansImportant);
+                count++;
+                if (widowsOrphansImportant)
+                    countImportant++;
+                else
+                    countNotImportant++;
+            }
+
             if (imageMaxSizeToFitPage) {
                 this.imageMaxSizeToFitPage(true);
                 this.imageMaxSizeImportant(!!imageMaxSizeImportant);
@@ -365,8 +385,18 @@ class PageStyle {
             cssText += "}";
         }
 
+        if (this.widowsOrphans() != DefaultValue.widowsOrphans) {
+            cssText += "*{";
+            cssText += `widows:${this.widowsOrphans()}${imp(this.widowsOrphansImportant())};`;
+            cssText += `orphans:${this.widowsOrphans()}${imp(this.widowsOrphansImportant())};`;
+            cssText += "}";
+        }
+
         if (this.imageMaxSizeToFitPage()) {
-            cssText += `img,svg{max-inline-size:100%${imp(this.imageMaxSizeImportant())};max-block-size:100vb${imp(this.imageMaxSizeImportant())};}`;
+            cssText += "img,svg{";
+            cssText += `max-inline-size:100%${imp(this.imageMaxSizeImportant())};`;
+            cssText += `max-block-size:100vb${imp(this.imageMaxSizeImportant())};`;
+            cssText += "}";
         }
 
         cssText += this.otherStyle();
@@ -393,6 +423,8 @@ class PageStyle {
         this.rootLineHeight(other.rootLineHeight());
         this.rootLineHeightImportant(other.rootLineHeightImportant());
         this.rootOtherStyle(other.rootOtherStyle());
+        this.widowsOrphans(other.widowsOrphans());
+        this.widowsOrphansImportant(other.widowsOrphansImportant());
         this.imageMaxSizeToFitPage(other.imageMaxSizeToFitPage());
         this.imageMaxSizeImportant(other.imageMaxSizeImportant());
         this.otherStyle(other.otherStyle());
@@ -413,6 +445,8 @@ class PageStyle {
         if (this.rootLineHeight() !== other.rootLineHeight()) return false;
         if (this.rootLineHeightImportant() !== other.rootLineHeightImportant()) return false;
         if (this.rootOtherStyle() !== other.rootOtherStyle()) return false;
+        if (this.widowsOrphans() !== other.widowsOrphans()) return false;
+        if (this.widowsOrphansImportant() !== other.widowsOrphansImportant()) return false;
         if (this.imageMaxSizeToFitPage() !== other.imageMaxSizeToFitPage()) return false;
         if (this.imageMaxSizeImportant() !== other.imageMaxSizeImportant()) return false;
         if (this.otherStyle() !== other.otherStyle()) return false;
