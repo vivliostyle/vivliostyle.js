@@ -20,7 +20,7 @@
 
 import ko from "knockout";
 import urlParameters from "../stores/url-parameters";
-import PageStyle from "./page-size";
+import PageStyle from "./page-style";
 import stringUtil from "../utils/string-util";
 
 function getDocumentOptionsFromURL() {
