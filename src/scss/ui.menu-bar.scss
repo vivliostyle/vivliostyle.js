@@ -403,7 +403,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					}
 					@include transition(.15s linear);
 				}
-				small {
+				.small {
 					display: inline-block;
 					font-size: .9em;
 					//opacity: .9;
@@ -487,7 +487,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					background: rgba(255,255,255,.75);
 					font-size: 12px;
 					line-height: 1.2;
-					small {
+					.small {
 						font-size: 10px;
 						letter-spacing: -.05em;
 					}
@@ -502,7 +502,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 								border-bottom-color: black;
 							}
 						}
-						small {
+						.small {
 							letter-spacing: 0;
 						}
 					}

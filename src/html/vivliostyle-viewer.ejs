@@ -52,20 +52,20 @@
 						<fieldset class="vivliostyle-menu-detail-group" data-bind="disable: settingsPanel.isPageSizeChangeDisabled, visible: !settingsPanel.isPageSizeChangeDisabled">
 							<div class="vivliostyle-menu-detail-group-heading"><span>Page Size</span></div>
 							<ul class="vivliostyle-menu-detail-group">
-								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="auto" required data-bind="checked: settingsPanel.state.pageStyle.mode" /> <span>Auto</span> <small>(Use entire window area)</small></label></li>
+								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="auto" required data-bind="checked: settingsPanel.state.pageStyle.mode" /> <span>Auto</span> <span class="small">(Use entire window area)</span></label></li>
 								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="preset" required data-bind="checked: settingsPanel.state.pageStyle.mode" /> <span>Preset</span></label>
-									<small>
+									<span class="small">
 										<select name="vivliostyle-misc_paginate_page-size_preset-select" data-bind="foreach: settingsPanel.state.pageStyle.PresetSize, value: settingsPanel.state.pageStyle.presetSize">
 											<option data-bind="value: $data, text: description"></option>
 										</select>&#x2002;
 										<label><input type="checkbox" name="vivliostyle-misc_paginate_page-size_preset-landscape" data-bind="checked: settingsPanel.state.pageStyle.isLandscape" /> <span>Landscape</span></label>
-									</small>
+									</span>
 								</li>
 								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="custom" required data-bind="checked: settingsPanel.state.pageStyle.mode" /> <span>Custom</span></label> -
-									<small>
+									<span class="small">
 										<label>Width: <input type="text" name="vivliostyle-misc_paginate_page-size_custom-width" data-bind="textInput: settingsPanel.state.pageStyle.customWidth" /></label> /
 										<label>Height: <input type="text" name="vivliostyle-misc_paginate_page-size_custom-height" data-bind="textInput: settingsPanel.state.pageStyle.customHeight" /></label>
-									</small>
+									</span>
 								</li>
 							</ul>
 						</fieldset>
@@ -74,13 +74,13 @@
 						<div><label><input type="checkbox" name="vivliostyle-misc_paginate_override-document-stylesheets" aria-keyshortcuts="O" data-bind="checked: settingsPanel.state.pageStyle.allImportant, disable: settingsPanel.isOverrideDocumentStyleSheetDisabled" /> <span>Override Document Style Sheets</span></label></div>
 					</div>
 					<div class="vivliostyle-menu-detail-group" data-bind="visible: !settingsPanel.isRenderAllPagesChangeDisabled">
-						<div><label><input type="checkbox" name="vivliostyle-misc_render-all-pages" aria-keyshortcuts="R" data-bind="checked: settingsPanel.state.renderAllPages, disable: settingsPanel.isRenderAllPagesChangeDisabled" /> <span>Render All Pages</span> <small>(On: for Print, Off: for Read)</small></label></div>
+						<div><label><input type="checkbox" name="vivliostyle-misc_render-all-pages" aria-keyshortcuts="R" data-bind="checked: settingsPanel.state.renderAllPages, disable: settingsPanel.isRenderAllPagesChangeDisabled" /> <span>Render All Pages</span> <span class="small">(On: for Print, Off: for Read)</span></label></div>
 					</div>
 					<!--
 					<div class="vivliostyle-menu-detail-group">
-						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate_override-xxxx" /> <span>Menu-Detail Item</span> <small>(Sample)</small></label></div>
+						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate_override-xxxx" /> <span>Menu-Detail Item</span> <span class="small">(Sample)</span></label></div>
 						<ul class="vivliostyle-menu-detail-group">
-							<li><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-a" /> <span>Sample A</span> <small>(Abc De Fg.)</small></label></li>
+							<li><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-a" /> <span>Sample A</span> <span class="small">(Abc De Fg.)</span></label></li>
 							<li class="vivliostyle-menu-disabled"><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-b" disabled /> <span>Sample B</span></label>
 								<ul class="vivliostyle-menu-detail-group">
 									<li><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-c" disabled /> <span>Sample C</span></label></li>
@@ -89,9 +89,9 @@
 						</ul>
 					</div>
 					<div class="vivliostyle-menu-detail-group">
-						<div class="vivliostyle-menu-detail-group-heading"><span>Menu-Detail Item</span> <small>(Sample)</small></div>
+						<div class="vivliostyle-menu-detail-group-heading"><span>Menu-Detail Item</span> <span class="small">(Sample)</span></div>
 						<ul class="vivliostyle-menu-detail-group vivliostyle-menu-disabled">
-							<li><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-d" disabled /> <span>Sample D</span> <small>(Abc De Fg.)</small></label></li>
+							<li><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-d" disabled /> <span>Sample D</span> <span class="small">(Abc De Fg.)</span></label></li>
 						</ul>
 					</div>
 					<div class="vivliostyle-menu-detail-group">
@@ -107,8 +107,8 @@
 					</div>
 				</div>
 				<div class="vivliostyle-menu-detail-aside">
-					<div><small>Powered by</small> <a href="https://vivliostyle.org"><strong>Vivliostyle</strong></a> </div>
-					<div class="version"><small>(<span>Core: <%= versions.core %>,</span> <span>UI: <%= versions.ui%></span>)</small></div>
+					<div><span class="small">Powered by</span> <a href="https://vivliostyle.org"><strong>Vivliostyle</strong></a> </div>
+					<div class="version"><span class="small">(<span>Core: <%= versions.core %>,</span> <span>UI: <%= versions.ui%></span>)</span></div>
 				</div>
 			</div>
 		</li>
