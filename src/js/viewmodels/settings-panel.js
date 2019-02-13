@@ -36,8 +36,8 @@ class SettingsPanel {
         this.documentOptions_ = documentOptions;
         this.viewer_ = viewer;
 
-        this.isPageSizeChangeDisabled = !!settingsPanelOptions.disablePageSizeChange;
-        this.isOverrideDocumentStyleSheetDisabled = this.isPageSizeChangeDisabled;
+        this.isPageStyleChangeDisabled = !!settingsPanelOptions.disablePageStyleChange;
+        this.isOverrideDocumentStyleSheetDisabled = this.isPageStyleChangeDisabled;
         this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
         this.isRenderAllPagesChangeDisabled = !!settingsPanelOptions.disableRenderAllPagesChange;
 
@@ -170,7 +170,7 @@ class SettingsPanel {
                 }
                 return true;
             case Keys.Enter:
-                if (isHotKeyEnabled &&
+                if (isInInput || isHotKeyEnabled &&
                         document.activeElement.id !== "vivliostyle-menu-button_apply" &&
                         document.activeElement.id !== "vivliostyle-menu-button_reset") {
                     document.getElementById("vivliostyle-menu-button_apply").focus();

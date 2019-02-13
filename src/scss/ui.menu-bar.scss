@@ -363,7 +363,11 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					display: inline-block;
 				}
 				input[type="text"] {
-					width: 4em;
+					font-size: inherit;
+					color: inherit;
+					&:not([size]) {
+						width: 4em;
+					}
 				}
 				input[type="radio"]:checked + span,
 				input[type="checkbox"]:checked + span {
@@ -434,6 +438,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					>.vivliostyle-menu-detail-group {
 						border-top: solid 1px rgba(255,255,255,1);
 						padding: 15px 8px;
+						line-height: 1.33;
 						 &:first-child { border-top: none 0; }
 						>.vivliostyle-menu-detail-group {
 							font-size: .9em;

@@ -19,6 +19,7 @@
  */
 
 import ko from "knockout";
+import ViewerOptions from "../models/viewer-options";
 
 const Mode = {
     AUTO: "auto",
@@ -63,7 +64,7 @@ class PageStyle {
         this.pageOtherStyle = ko.observable("");
         this.firstPageMarginZero = ko.observable(false);
         this.firstPageMarginZeroImportant = ko.observable(false);
-        this.firstPageOtherStyle = ko.observable(false);
+        this.firstPageOtherStyle = ko.observable("");
         this.forceHtmlBodyMarginZero = ko.observable(false);
         this.rootFontSize = ko.observable(DefaultValue.rootFontSize);
         this.rootFontSizeImportant = ko.observable(false);
@@ -76,7 +77,7 @@ class PageStyle {
         this.imageMaxSizeImportant = ko.observable(false);
         this.otherStyle = ko.observable("");
         this.allImportant = ko.observable(false);
-        this.cssText = ko.pureComputed(() => this.toCSSText());
+        this.cssText = ko.pureComputed(this.toCSSText, this);
 
         const setDisabledElements = (mode) => {
             const presetSelectElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_preset-select")[0];
@@ -234,7 +235,7 @@ class PageStyle {
 
             if (firstPageMarginZero) {
                 this.firstPageMarginZero(true);
-                this.pageMarginImportant(!!firstPageMarginZeroImportant);
+                this.firstPageMarginZeroImportant(!!firstPageMarginZeroImportant);
                 count++;
                 if (firstPageMarginZeroImportant)
                     countImportant++;
@@ -243,7 +244,7 @@ class PageStyle {
             }
             firstPageOtherStyle = firstPageOtherStyle && firstPageOtherStyle.trim() || "";
             if (firstPageOtherStyle) {
-                this.pageOtherStyle(firstPageOtherStyle);
+                this.firstPageOtherStyle(firstPageOtherStyle);
                 count++;
             }
 
@@ -348,7 +349,7 @@ class PageStyle {
             cssText += `margin:${this.pageMargin()}${imp(this.pageMarginImportant())};`;
         }
         cssText += this.pageOtherStyle();
-        cssText += "}";
+        cssText += "}\n";
 
         if (this.firstPageMarginZero() || this.firstPageOtherStyle()) {
             cssText += "@page:first{";
@@ -356,7 +357,7 @@ class PageStyle {
                 cssText += `margin:0${imp(this.firstPageMarginZeroImportant())};`;
             }
             cssText += this.firstPageOtherStyle();
-            cssText += "}";
+            cssText += "}\n";
         }
 
         if (this.forceHtmlBodyMarginZero()) {
@@ -372,31 +373,32 @@ class PageStyle {
                 cssText += `line-height:${this.rootLineHeight()}${imp(this.rootLineHeightImportant())};`;
             }
             cssText += this.rootOtherStyle();
-            cssText += "}";
+            cssText += "}\n";
         }
-        if (this.rootFontSizeImportant() || this.rootLineHeightImportant()) {
+        if (this.rootFontSize() != DefaultValue.rootFontSize && this.rootFontSizeImportant()
+                || this.rootLineHeight() != DefaultValue.rootLineHeight && this.rootLineHeightImportant()) {
             cssText += `body{`;
-            if (this.rootFontSizeImportant()) {
+            if (this.rootFontSize() != DefaultValue.rootFontSize && this.rootFontSizeImportant()) {
                 cssText += "font-size:inherit!important;";
             }
-            if (this.rootLineHeightImportant()) {
+            if (this.rootLineHeight() != DefaultValue.rootLineHeight && this.rootLineHeightImportant()) {
                 cssText += "line-height:inherit!important;";
             }
-            cssText += "}";
+            cssText += "}\n";
         }
 
         if (this.widowsOrphans() != DefaultValue.widowsOrphans) {
             cssText += "*{";
             cssText += `widows:${this.widowsOrphans()}${imp(this.widowsOrphansImportant())};`;
             cssText += `orphans:${this.widowsOrphans()}${imp(this.widowsOrphansImportant())};`;
-            cssText += "}";
+            cssText += "}\n";
         }
 
         if (this.imageMaxSizeToFitPage()) {
             cssText += "img,svg{";
             cssText += `max-inline-size:100%${imp(this.imageMaxSizeImportant())};`;
             cssText += `max-block-size:100vb${imp(this.imageMaxSizeImportant())};`;
-            cssText += "}";
+            cssText += "}\n";
         }
 
         cssText += this.otherStyle();

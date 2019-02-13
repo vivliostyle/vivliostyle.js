@@ -21,7 +21,6 @@
 import ko from "knockout";
 import urlParameters from "../stores/url-parameters";
 import PageStyle from "./page-style";
-import stringUtil from "../utils/string-util";
 
 function getDocumentOptionsFromURL() {
     const bookUrl = urlParameters.getParameter("b", true);
@@ -75,14 +74,16 @@ class DocumentOptions {
         // write cssText back to URL parameter userStyle= when updated
         this.pageStyle.cssText.subscribe(cssText => {
             const userStyleSheet = this.userStyleSheet();
-            if (!cssText || cssText == "@page{}") {
+            if (!cssText || cssText.trim() == "@page{}") {
                 if (userStyleSheet.length <= (this.dataUserStyleIndex == -1 ? 0 : 1)) {
-                    urlParameters.removeParameter("userStyle");
+                    userStyleSheet.pop();
                     this.dataUserStyleIndex = -1;
+                    this.userStyleSheet(userStyleSheet);
+                    urlParameters.removeParameter("userStyle");
                     return;
                 }
             }
-            const dataUserStyle = "data:," + stringUtil.percentEncodeAmpersandAndPercent(cssText);
+            const dataUserStyle = "data:," + encodeURI(cssText);
             if (this.dataUserStyleIndex == -1) {
                 userStyleSheet.push(dataUserStyle);
                 this.dataUserStyleIndex = userStyleSheet.length - 1;

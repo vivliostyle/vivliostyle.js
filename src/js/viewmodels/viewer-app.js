@@ -59,7 +59,7 @@ function ViewerApp() {
     this.messageDialog = new MessageDialog(messageQueue);
 
     const settingsPanelOptions = {
-        disablePageSizeChange: false,
+        disablePageStyleChange: false,
         disablePageViewModeChange: false,
         disableRenderAllPagesChange: false
     };
