@@ -79,47 +79,6 @@ class PageStyle {
         this.allImportant = ko.observable(false);
         this.cssText = ko.pureComputed(this.toCSSText, this);
 
-        const setDisabledElements = (mode) => {
-            const presetSelectElem = document.getElementsByName("vivliostyle-settings_page-size_preset-select")[0];
-            if (!presetSelectElem) {
-                return;
-            }
-            const presetLandscapeElem = document.getElementsByName("vivliostyle-settings_page-size_preset-landscape")[0];
-            const customWidthElem = document.getElementsByName("vivliostyle-settings_page-size_custom-width")[0];
-            const customHeightElem = document.getElementsByName("vivliostyle-settings_page-size_custom-height")[0];
-
-            switch (mode) {
-                case Mode.AUTO:
-                    presetSelectElem.disabled = true;
-                    presetLandscapeElem.disabled = true;
-                    customWidthElem.disabled = true;
-                    customHeightElem.disabled = true;
-                    break;
-                case Mode.PRESET:
-                    presetSelectElem.disabled = false;
-                    presetLandscapeElem.disabled = false;
-                    customWidthElem.disabled = true;
-                    customHeightElem.disabled = true;
-                    break;
-                case Mode.CUSTOM:
-                    presetSelectElem.disabled = true;
-                    presetLandscapeElem.disabled = true;
-                    customWidthElem.disabled = false;
-                    customHeightElem.disabled = false;
-                    break;
-            }
-        };
-
-        if (pageStyle) {
-            this.copyFrom(pageStyle);
-        }
-
-        setDisabledElements(this.mode());
-
-        this.mode.subscribe(mode => {
-            setDisabledElements(mode);
-        });
-
         this.allImportant.subscribe(allImportant => {
             this.pageSizeImportant(allImportant);
             this.pageMarginImportant(allImportant);
