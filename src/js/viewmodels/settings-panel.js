@@ -42,7 +42,7 @@ class SettingsPanel {
         this.isRenderAllPagesChangeDisabled = !!settingsPanelOptions.disableRenderAllPagesChange;
 
         this.justClicked = false;    // double click check
-        this.settingsToggle = document.getElementById("vivliostyle-menu-item_misc-toggle");
+        this.settingsToggle = document.getElementById("vivliostyle-menu-item_settings-toggle");
 
         this.opened = ko.observable(false);
         this.pinned = ko.observable(false);
@@ -158,14 +158,14 @@ class SettingsPanel {
             case "o":
             case "O":
                 if (isHotKeyEnabled) {
-                    document.getElementsByName("vivliostyle-misc_paginate_override-document-stylesheets")[0].focus();
+                    document.getElementsByName("vivliostyle-settings_override-document-stylesheets")[0].focus();
                     return false;
                 }
                 return true;
             case "r":
             case "R":
                 if (isHotKeyEnabled) {
-                    document.getElementsByName("vivliostyle-misc_render-all-pages")[0].focus();
+                    document.getElementsByName("vivliostyle-settings_render-all-pages")[0].focus();
                     return false;
                 }
                 return true;

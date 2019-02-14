@@ -120,8 +120,8 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 			height: $menu-icon-height - 2px;
 			background: rgb(64,64,64);
 		}
-		//&:first-child/*, &#vivliostyle-menu_misc*/ { padding-left: 0; &:before { display: none; } }
-		&#vivliostyle-menu_misc {
+		//&:first-child/*, &#vivliostyle-menu_settings*/ { padding-left: 0; &:before { display: none; } }
+		&#vivliostyle-menu_settings {
 			float: right;
 			margin-left: -7px;
 			padding-right: 0;
@@ -246,8 +246,8 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 			&#vivliostyle-menu-item_text-size-smaller     >.vivliostyle-menu-icon-button:after,
 			&#vivliostyle-menu-item_text-size-default     >.vivliostyle-menu-icon-button:after,
 			&#vivliostyle-menu-item_text-size-larger      >.vivliostyle-menu-icon-button:after  { right: $menu-icon-width * 0.05; top: $menu-icon-height * 0.15; }
-		//	&#vivliostyle-menu-item_misc-toggle       >.vivliostyle-menu-icon-button:before { content: $fa-var-bars; }
-		//	&#vivliostyle-menu-item_misc-toggle.vivliostyle-menu-item_detail-opened >.vivliostyle-menu-icon-button:before { content: $fa-var-times; }
+		//	&#vivliostyle-menu-item_settings-toggle       >.vivliostyle-menu-icon-button:before { content: $fa-var-bars; }
+		//	&#vivliostyle-menu-item_settings-toggle.vivliostyle-menu-item_detail-opened >.vivliostyle-menu-icon-button:before { content: $fa-var-times; }
 			&#vivliostyle-menu-item_toc-toggle.on,
 			&#vivliostyle-menu-item_zoom-fit-to-screen.on {
 				>.vivliostyle-menu-icon-button {
@@ -263,7 +263,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					background: rgba(255,255,255,0.85);
 				}
 			}
-			&#vivliostyle-menu-item_misc-toggle {
+			&#vivliostyle-menu-item_settings-toggle {
 				>.vivliostyle-menu-icon-button {
 					background-image: $vivliostyle-logo-mark;
 					background-repeat: no-repeat;
@@ -294,12 +294,12 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					}
 				}
 			}
-			&#vivliostyle-menu-item_misc-toggle.vivliostyle-menu-item_detail-opened {
+			&#vivliostyle-menu-item_settings-toggle.vivliostyle-menu-item_detail-opened {
 				>.vivliostyle-menu-icon-button {
 					-webkit-filter: grayscale(100%); filter: grayscale(100%);
 				}
 			}
-			&#vivliostyle-menu-item_misc-toggle.vivliostyle-menu-item_detail-opened.pinned {
+			&#vivliostyle-menu-item_settings-toggle.vivliostyle-menu-item_detail-opened.pinned {
 				>.vivliostyle-menu-icon-button {
 					-webkit-filter: grayscale(100%) brightness(150%); filter: grayscale(100%) brightness(150%);
 				}

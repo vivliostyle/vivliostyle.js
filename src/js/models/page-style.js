@@ -80,13 +80,13 @@ class PageStyle {
         this.cssText = ko.pureComputed(this.toCSSText, this);
 
         const setDisabledElements = (mode) => {
-            const presetSelectElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_preset-select")[0];
+            const presetSelectElem = document.getElementsByName("vivliostyle-settings_page-size_preset-select")[0];
             if (!presetSelectElem) {
                 return;
             }
-            const presetLandscapeElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_preset-landscape")[0];
-            const customWidthElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_custom-width")[0];
-            const customHeightElem = document.getElementsByName("vivliostyle-misc_paginate_page-size_custom-height")[0];
+            const presetLandscapeElem = document.getElementsByName("vivliostyle-settings_page-size_preset-landscape")[0];
+            const customWidthElem = document.getElementsByName("vivliostyle-settings_page-size_custom-width")[0];
+            const customHeightElem = document.getElementsByName("vivliostyle-settings_page-size_custom-height")[0];
 
             switch (mode) {
                 case Mode.AUTO:
