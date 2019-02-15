@@ -44,8 +44,8 @@ const DefaultValue = {
     customWidth: "210mm",
     customHeight: "297mm",
     pageMargin: "10%",
-    rootFontSize: "100%",
-    rootLineHeight: "normal",
+    baseFontSize: "100%",
+    baseLineHeight: "normal",
     widowsOrphans: "2",     // for Page Breaks Between Lines option:
     widowsOrphans_min: "1",     // Allow all widows/orphans
     widowsOrphans_max: "9999",  // Never page break inside a paragraph
@@ -66,10 +66,10 @@ class PageStyle {
         this.firstPageMarginZeroImportant = ko.observable(false);
         this.firstPageOtherStyle = ko.observable("");
         this.forceHtmlBodyMarginZero = ko.observable(false);
-        this.rootFontSize = ko.observable(DefaultValue.rootFontSize);
-        this.rootFontSizeImportant = ko.observable(false);
-        this.rootLineHeight = ko.observable(DefaultValue.rootLineHeight);
-        this.rootLineHeightImportant = ko.observable(false);
+        this.baseFontSize = ko.observable(DefaultValue.baseFontSize);
+        this.baseFontSizeImportant = ko.observable(false);
+        this.baseLineHeight = ko.observable(DefaultValue.baseLineHeight);
+        this.baseLineHeightImportant = ko.observable(false);
         this.rootOtherStyle = ko.observable("");
         this.widowsOrphans = ko.observable(DefaultValue.widowsOrphans);
         this.widowsOrphansImportant = ko.observable(false);
@@ -83,8 +83,8 @@ class PageStyle {
             this.pageSizeImportant(allImportant);
             this.pageMarginImportant(allImportant);
             this.firstPageMarginZeroImportant(allImportant);
-            this.rootFontSizeImportant(allImportant);
-            this.rootLineHeightImportant(allImportant);
+            this.baseFontSizeImportant(allImportant);
+            this.baseLineHeightImportant(allImportant);
             this.widowsOrphansImportant(allImportant);
             this.imageMaxSizeImportant(allImportant);
         });
@@ -105,7 +105,7 @@ class PageStyle {
             // 10. forceHtmlBodyMarginZero,
             /(html,\s*body\s*\{\s*margin:\s*0(?:\w+|%)?\s*!important;?\s*\}\s*)?/.source +
 
-            // 11. rootFontSize, rootFontSizeImportant, rootLineHeight, rootLineHeightImportant, rootOtherStyle,
+            // 11. baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, rootOtherStyle,
             /(?::root\s*\{\s*(?:font-size:\s*([^\s!;{}]+)\s*(!important)?;?\s*)?(?:line-height:\s*([^\s!;{}]+)\s*(!important)?;?\s*)?([^{}]*)\}\s*)?/.source +
 
             // 16. forceBodyFontSizeInherit, forceBodyLineHeightInherit,
@@ -131,7 +131,7 @@ class PageStyle {
                 pageOtherStyle,
                 firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
                 forceHtmlBodyMarginZero,
-                rootFontSize, rootFontSizeImportant, rootLineHeight, rootLineHeightImportant, rootOtherStyle,
+                baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, rootOtherStyle,
                 forceBodyFontSizeInherit, forceBodyLineHeightInherit,
                 widowsOrphans, widowsOrphansImportant,
                 imageMaxSizeToFitPage, imageMaxSizeImportant,
@@ -212,20 +212,20 @@ class PageStyle {
                 count++;
             }
 
-            if (rootFontSize != null) {
-                this.rootFontSize(rootFontSize);
-                this.rootFontSizeImportant(!!rootFontSizeImportant);
+            if (baseFontSize != null) {
+                this.baseFontSize(baseFontSize);
+                this.baseFontSizeImportant(!!baseFontSizeImportant);
                 count++;
-                if (rootFontSizeImportant)
+                if (baseFontSizeImportant)
                     countImportant++;
                 else
                     countNotImportant++;
             }
-            if (rootLineHeight != null) {
-                this.rootLineHeight(rootLineHeight);
-                this.rootLineHeightImportant(!!rootLineHeightImportant);
+            if (baseLineHeight != null) {
+                this.baseLineHeight(baseLineHeight);
+                this.baseLineHeightImportant(!!baseLineHeightImportant);
                 count++;
-                if (rootLineHeightImportant)
+                if (baseLineHeightImportant)
                     countImportant++;
                 else
                     countNotImportant++;
@@ -237,10 +237,10 @@ class PageStyle {
             }
 
             if (forceBodyFontSizeInherit) {
-                // must be same bool value as rootFontSizeImportant
+                // must be same bool value as baseFontSizeImportant
             }
             if (forceBodyLineHeightInherit) {
-                // must be same bool value as rootLineHeightImportant
+                // must be same bool value as baseLineHeightImportant
             }
 
             if (widowsOrphans != null) {
@@ -323,24 +323,24 @@ class PageStyle {
             cssText += "html,body{margin:0!important;}";
         }
 
-        if (this.rootFontSize() != DefaultValue.rootFontSize || this.rootLineHeight() != DefaultValue.rootLineHeight || this.rootOtherStyle()) {
+        if (this.baseFontSize() != DefaultValue.baseFontSize || this.baseLineHeight() != DefaultValue.baseLineHeight || this.rootOtherStyle()) {
             cssText += ":root{";
-            if (this.rootFontSize() != DefaultValue.rootFontSize) {
-                cssText += `font-size:${this.rootFontSize()}${imp(this.rootFontSizeImportant())};`;
+            if (this.baseFontSize() != DefaultValue.baseFontSize) {
+                cssText += `font-size:${this.baseFontSize()}${imp(this.baseFontSizeImportant())};`;
             }
-            if (this.rootLineHeight() != DefaultValue.rootLineHeight) {
-                cssText += `line-height:${this.rootLineHeight()}${imp(this.rootLineHeightImportant())};`;
+            if (this.baseLineHeight() != DefaultValue.baseLineHeight) {
+                cssText += `line-height:${this.baseLineHeight()}${imp(this.baseLineHeightImportant())};`;
             }
             cssText += this.rootOtherStyle();
             cssText += "}\n";
         }
-        if (this.rootFontSize() != DefaultValue.rootFontSize && this.rootFontSizeImportant()
-                || this.rootLineHeight() != DefaultValue.rootLineHeight && this.rootLineHeightImportant()) {
+        if (this.baseFontSize() != DefaultValue.baseFontSize && this.baseFontSizeImportant()
+                || this.baseLineHeight() != DefaultValue.baseLineHeight && this.baseLineHeightImportant()) {
             cssText += `body{`;
-            if (this.rootFontSize() != DefaultValue.rootFontSize && this.rootFontSizeImportant()) {
+            if (this.baseFontSize() != DefaultValue.baseFontSize && this.baseFontSizeImportant()) {
                 cssText += "font-size:inherit!important;";
             }
-            if (this.rootLineHeight() != DefaultValue.rootLineHeight && this.rootLineHeightImportant()) {
+            if (this.baseLineHeight() != DefaultValue.baseLineHeight && this.baseLineHeightImportant()) {
                 cssText += "line-height:inherit!important;";
             }
             cssText += "}\n";
@@ -379,10 +379,10 @@ class PageStyle {
         this.firstPageMarginZeroImportant(other.firstPageMarginZeroImportant());
         this.firstPageOtherStyle(other.firstPageOtherStyle());
         this.forceHtmlBodyMarginZero(other.forceHtmlBodyMarginZero());
-        this.rootFontSize(other.rootFontSize());
-        this.rootFontSizeImportant(other.rootFontSizeImportant());
-        this.rootLineHeight(other.rootLineHeight());
-        this.rootLineHeightImportant(other.rootLineHeightImportant());
+        this.baseFontSize(other.baseFontSize());
+        this.baseFontSizeImportant(other.baseFontSizeImportant());
+        this.baseLineHeight(other.baseLineHeight());
+        this.baseLineHeightImportant(other.baseLineHeightImportant());
         this.rootOtherStyle(other.rootOtherStyle());
         this.widowsOrphans(other.widowsOrphans());
         this.widowsOrphansImportant(other.widowsOrphansImportant());
@@ -401,10 +401,10 @@ class PageStyle {
         if (this.firstPageMarginZeroImportant() !== other.firstPageMarginZeroImportant()) return false;
         if (this.firstPageOtherStyle() !== other.firstPageOtherStyle()) return false;
         if (this.forceHtmlBodyMarginZero() !== other.forceHtmlBodyMarginZero()) return false;
-        if (this.rootFontSize() !== other.rootFontSize()) return false;
-        if (this.rootFontSizeImportant() !== other.rootFontSizeImportant()) return false;
-        if (this.rootLineHeight() !== other.rootLineHeight()) return false;
-        if (this.rootLineHeightImportant() !== other.rootLineHeightImportant()) return false;
+        if (this.baseFontSize() !== other.baseFontSize()) return false;
+        if (this.baseFontSizeImportant() !== other.baseFontSizeImportant()) return false;
+        if (this.baseLineHeight() !== other.baseLineHeight()) return false;
+        if (this.baseLineHeightImportant() !== other.baseLineHeightImportant()) return false;
         if (this.rootOtherStyle() !== other.rootOtherStyle()) return false;
         if (this.widowsOrphans() !== other.widowsOrphans()) return false;
         if (this.widowsOrphansImportant() !== other.widowsOrphansImportant()) return false;

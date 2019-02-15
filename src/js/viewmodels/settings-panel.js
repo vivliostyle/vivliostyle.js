@@ -139,7 +139,8 @@ class SettingsPanel {
         const isSettingsActive = this.opened() && this.settingsToggle.contains(document.activeElement);
         const isInInput = isSettingsActive && (document.activeElement.type == "text" ||
                 document.activeElement.localName == "select");
-        const isHotKeyEnabled = isSettingsActive && !isInInput;
+        const isInTextArea = isSettingsActive && document.activeElement.localName == "textarea";
+        const isHotKeyEnabled = isSettingsActive && !isInInput && !isInTextArea;
 
         switch (key) {
             case Keys.Escape:
