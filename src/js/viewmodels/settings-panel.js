@@ -128,9 +128,18 @@ class SettingsPanel {
         this.close();
     }
 
-    focusToFirstItem() {
-        const inputElem = Array.from(this.settingsToggle.getElementsByTagName("input")).find(e => !e.disabled && e.checked);
+    focusToFirstItem(opt_outerElem) {
+        const outerElem = opt_outerElem || this.settingsToggle;
+        const inputElem = ["input", "textarea", "summary"].includes(outerElem.localName) ? outerElem :
+                Array.from(outerElem.getElementsByTagName("input")).find(e => {
+            return !e.disabled && (e.type != "radio" || e.checked);
+        });
         if (inputElem) {
+            for (let e = inputElem.parentElement; e && e != this.settingsToggle; e = e.parentElement) {
+                if (e.localName == "details") {
+                    e.open = true;
+                }
+            }
             inputElem.focus();
         }
     }
@@ -156,17 +165,80 @@ class SettingsPanel {
                     return false;
                 }
                 return true;
-            case "o":
-            case "O":
+            case "p":
+            case "P":
                 if (isHotKeyEnabled) {
-                    document.getElementsByName("vivliostyle-settings_override-document-stylesheets")[0].focus();
+                    this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-view-and-rendering").firstElementChild);
+                    return false;
+                }
+                return true;
+            case "v":
+            case "V":
+                if (isHotKeyEnabled) {
+                    this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-view-mode"));
                     return false;
                 }
                 return true;
             case "r":
             case "R":
                 if (isHotKeyEnabled) {
-                    document.getElementsByName("vivliostyle-settings_render-all-pages")[0].focus();
+                    this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_render-all-pages")[0]);
+                    return false;
+                }
+                return true;
+            case "u":
+            case "U":
+                if (isHotKeyEnabled) {
+                    this.focusToFirstItem(document.getElementById("vivliostyle-settings_user-style").firstElementChild);
+                    return false;
+                }
+                return true;
+            case "z":
+            case "Z":
+                if (isHotKeyEnabled) {
+                    this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-size"));
+                    return false;
+                }
+                return true;
+            case "m":
+            case "M":
+                if (isHotKeyEnabled) {
+                    this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-margin"));
+                    return false;
+                }
+                return true;
+            case "b":
+            case "B":
+                if (isHotKeyEnabled) {
+                    this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-breaks"));
+                    return false;
+                }
+                return true;
+            case "i":
+            case "I":
+                if (isHotKeyEnabled) {
+                    this.focusToFirstItem(document.getElementById("vivliostyle-settings_images"));
+                    return false;
+                }
+                return true;
+            case "t":
+            case "T":
+                if (isHotKeyEnabled) {
+                    this.focusToFirstItem(document.getElementById("vivliostyle-settings_text"));
+                    return false;
+                }
+                return true;
+            case "o":
+            case "O":
+                if (isHotKeyEnabled) {
+                    this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_override-document-stylesheets")[0]);
+                    return false;
+                }
+                return true;
+            case "c":
+            case "C":
+                if (isHotKeyEnabled) {
+                    this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_css-details")[0]);
                     return false;
                 }
                 return true;

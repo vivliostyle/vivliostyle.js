@@ -21,7 +21,7 @@
 import ko from "knockout";
 import ViewerOptions from "../models/viewer-options";
 
-const Mode = {
+const PageSizeMode = {
     AUTO: "auto",
     PRESET: "preset",
     CUSTOM: "custom"
@@ -53,7 +53,7 @@ const DefaultValue = {
 
 class PageStyle {
     constructor(pageStyle) {
-        this.mode = ko.observable(Mode.AUTO);
+        this.pageSizeMode = ko.observable(PageSizeMode.AUTO);
         this.presetSize = ko.observable(PresetSize[0]);
         this.isLandscape = ko.observable(false);
         this.customWidth = ko.observable(DefaultValue.customWidth);
@@ -153,20 +153,20 @@ class PageStyle {
             if (sizeW != null) {
                 if (sizeH == null) {
                     if (sizeW == "auto") {
-                        this.mode(Mode.AUTO);
+                        this.pageSizeMode(PageSizeMode.AUTO);
                     } else {
                         const presetSize = PresetSize.find(presetSize => presetSize.name.toLowerCase() == sizeW.toLowerCase());
                         if (presetSize) {
-                            this.mode(Mode.PRESET);
+                            this.pageSizeMode(PageSizeMode.PRESET);
                             this.presetSize(presetSize);
                         } else {
-                            this.mode(Mode.CUSTOM);
+                            this.pageSizeMode(PageSizeMode.CUSTOM);
                             this.customWidth(sizeW);
                             this.customHeight(sizeW);
                         }
                     }
                 } else {
-                    this.mode(Mode.CUSTOM);
+                    this.pageSizeMode(PageSizeMode.CUSTOM);
                     this.customWidth(sizeW);
                     this.customHeight(sizeH);
                 }
@@ -283,24 +283,24 @@ class PageStyle {
         }
 
         let cssText = "@page{";
-        if (this.mode() != Mode.AUTO || this.pageSizeImportant()) {
+        if (this.pageSizeMode() != PageSizeMode.AUTO || this.pageSizeImportant()) {
             cssText += "size:";
 
-            switch (this.mode()) {
-                case Mode.AUTO:
+            switch (this.pageSizeMode()) {
+                case PageSizeMode.AUTO:
                     cssText += "auto";
                     break;
-                case Mode.PRESET:
+                case PageSizeMode.PRESET:
                     cssText += this.presetSize().name;
                     if (this.isLandscape()) {
                         cssText += " landscape";
                     }
                     break;
-                case Mode.CUSTOM:
+                case PageSizeMode.CUSTOM:
                     cssText += `${this.customWidth()} ${this.customHeight()}`;
                     break;
                 default:
-                    throw new Error(`Unknown mode ${this.mode()}`);
+                    throw new Error(`Unknown pageSizeMode ${this.pageSizeMode()}`);
             }
             cssText += `${imp(this.pageSizeImportant())};`;
         }
@@ -366,7 +366,7 @@ class PageStyle {
     }
 
     copyFrom(other) {
-        this.mode(other.mode());
+        this.pageSizeMode(other.pageSizeMode());
         this.presetSize(other.presetSize());
         this.isLandscape(other.isLandscape());
         this.customWidth(other.customWidth());
@@ -413,17 +413,17 @@ class PageStyle {
         if (this.otherStyle() !== other.otherStyle()) return false;
         if (this.allImportant() !== other.allImportant()) return false;
 
-        const mode = this.mode();
-        if (other.mode() === mode) {
-            switch (mode) {
-                case Mode.AUTO:
+        const pageSizeMode = this.pageSizeMode();
+        if (other.pageSizeMode() === pageSizeMode) {
+            switch (pageSizeMode) {
+                case PageSizeMode.AUTO:
                     return true;
-                case Mode.PRESET:
+                case PageSizeMode.PRESET:
                     return this.presetSize() === other.presetSize() && this.isLandscape() === other.isLandscape();
-                case Mode.CUSTOM:
+                case PageSizeMode.CUSTOM:
                     return this.customWidth() === other.customWidth() && this.customHeight() === other.customHeight();
                 default:
-                    throw new Error(`Unknown mode ${mode}`);
+                    throw new Error(`Unknown pageSizeMode ${pageSizeMode}`);
             }
         } else {
             return false;
@@ -431,7 +431,7 @@ class PageStyle {
     }
 }
 
-PageStyle.Mode = Mode;
+PageStyle.PageSizeMode = PageSizeMode;
 PageStyle.DefaultValue = DefaultValue;
 PageStyle.PresetSize = PageStyle.prototype.PresetSize = PresetSize;
 
