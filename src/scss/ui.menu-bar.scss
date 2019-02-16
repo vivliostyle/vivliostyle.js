@@ -381,6 +381,9 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 						width: 4.5em;
 						text-align: right;
 					}
+					&[disabled] {
+						color: $menu-disabled-fg-color;
+					}
 				}
 				input[type="radio"]:checked + span,
 				input[type="checkbox"]:checked + span {

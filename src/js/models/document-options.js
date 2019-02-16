@@ -60,7 +60,8 @@ class DocumentOptions {
 
         // read userStyle=data:.<cssText> URL parameter
         urlOptions.userStyleSheet.find((userStyle, index) => {
-            if (userStyle.startsWith("data:,@page")) {
+            // Find userStyle parameter that starts with "data:" and contains "/*<viewer>*/".
+            if ((/^data:,.*?\/\*(?:<|%3C)viewer(?:>|%3E)\*\//).test(userStyle)) {
                 this.dataUserStyleIndex = index;
                 const data = userStyle.replace(/^data:,/, "")
                     // Escape unescaped "%" that causes error in decodeURI()
@@ -69,12 +70,18 @@ class DocumentOptions {
                 this.pageStyle.fromCSSText(cssText);
                 return true;
             }
+            else {
+                return false;
+            }
         });
 
         // write cssText back to URL parameter userStyle= when updated
         this.pageStyle.cssText.subscribe(cssText => {
+            // Remove trailing "/*</viewer>*/".
+            let cssData = cssText.replace(/\/\*<\/viewer>\*\/\s*$/, "").trim();
+
             const userStyleSheet = this.userStyleSheet();
-            if (!cssText || cssText.trim() == "@page{}") {
+            if (!cssData || cssData === "/*<viewer>*/") {
                 if (userStyleSheet.length <= (this.dataUserStyleIndex == -1 ? 0 : 1)) {
                     userStyleSheet.pop();
                     this.dataUserStyleIndex = -1;
@@ -83,7 +90,7 @@ class DocumentOptions {
                     return;
                 }
             }
-            const dataUserStyle = "data:," + encodeURI(cssText);
+            const dataUserStyle = "data:," + encodeURI(cssData);
             if (this.dataUserStyleIndex == -1) {
                 userStyleSheet.push(dataUserStyle);
                 this.dataUserStyleIndex = userStyleSheet.length - 1;

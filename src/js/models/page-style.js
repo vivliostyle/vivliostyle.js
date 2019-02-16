@@ -21,10 +21,12 @@
 import ko from "knockout";
 import ViewerOptions from "../models/viewer-options";
 
-const PageSizeMode = {
+const Mode = {
+    DEFAULT: "",
     AUTO: "auto",
     PRESET: "preset",
-    CUSTOM: "custom"
+    CUSTOM: "custom",
+    ZERO: "0"
 };
 
 const PresetSize = [
@@ -40,84 +42,103 @@ const PresetSize = [
     {name: "ledger", description: "ledger"}
 ];
 
-const DefaultValue = {
+const Constants = {
     customWidth: "210mm",
     customHeight: "297mm",
-    pageMargin: "10%",
-    baseFontSize: "100%",
-    baseLineHeight: "normal",
-    widowsOrphans: "2",     // for Page Breaks Between Lines option:
+    customMargin: "10%",
     widowsOrphans_min: "1",     // Allow all widows/orphans
-    widowsOrphans_max: "9999",  // Never page break inside a paragraph
+    widowsOrphans_max: "999",  // Never page break inside a paragraph
 };
 
 class PageStyle {
     constructor(pageStyle) {
-        this.pageSizeMode = ko.observable(PageSizeMode.AUTO);
-        this.presetSize = ko.observable(PresetSize[0]);
+        this.pageSizeMode = ko.observable(Mode.DEFAULT);
+        this.presetSize = ko.observable(PresetSize[1]);
         this.isLandscape = ko.observable(false);
-        this.customWidth = ko.observable(DefaultValue.customWidth);
-        this.customHeight = ko.observable(DefaultValue.customHeight);
+        this.customWidth = ko.observable(Constants.customWidth);
+        this.customHeight = ko.observable(Constants.customHeight);
         this.pageSizeImportant = ko.observable(false);
-        this.pageMargin = ko.observable(DefaultValue.pageMargin);
+        this.pageMarginMode = ko.observable(Mode.DEFAULT);
+        this.customMargin = ko.observable(Constants.customMargin);
         this.pageMarginImportant = ko.observable(false);
-        this.pageOtherStyle = ko.observable("");
         this.firstPageMarginZero = ko.observable(false);
         this.firstPageMarginZeroImportant = ko.observable(false);
-        this.firstPageOtherStyle = ko.observable("");
         this.forceHtmlBodyMarginZero = ko.observable(false);
-        this.baseFontSize = ko.observable(DefaultValue.baseFontSize);
-        this.baseFontSizeImportant = ko.observable(false);
-        this.baseLineHeight = ko.observable(DefaultValue.baseLineHeight);
-        this.baseLineHeightImportant = ko.observable(false);
-        this.rootOtherStyle = ko.observable("");
-        this.widowsOrphans = ko.observable(DefaultValue.widowsOrphans);
+        this.widowsOrphans = ko.observable(Mode.DEFAULT);
         this.widowsOrphansImportant = ko.observable(false);
         this.imageMaxSizeToFitPage = ko.observable(false);
-        this.imageMaxSizeImportant = ko.observable(false);
-        this.otherStyle = ko.observable("");
+        this.imageMaxSizeToFitPageImportant = ko.observable(false);
+        this.imageKeepAspectRatio = ko.observable(false);
+        this.imageKeepAspectRatioImportant = ko.observable(false);
+        this.viewerFontSizePercent = ko.observable(100);
+        this.baseFontSize = ko.observable("");
+        this.baseFontSizeImportant = ko.observable(false);
+        this.baseLineHeight = ko.observable("");
+        this.baseLineHeightImportant = ko.observable(false);
+        this.baseFontFamily = ko.observable("");
+        this.baseFontFamilyImportant = ko.observable(false);
         this.allImportant = ko.observable(false);
-        this.cssText = ko.pureComputed(this.toCSSText, this);
+        this.pageOtherStyle = ko.observable("");
+        this.firstPageOtherStyle = ko.observable("");
+        this.rootOtherStyle = ko.observable("");
+        this.beforeOtherStyle = ko.observable("");
+        this.afterOtherStyle = ko.observable("");
+        
+        this.cssText = ko.pureComputed({
+            read() {
+                return this.toCSSText();
+            },
+            write(cssText) {
+                this.fromCSSText(cssText);
+            },
+            owner: this
+        });
 
         this.allImportant.subscribe(allImportant => {
             this.pageSizeImportant(allImportant);
             this.pageMarginImportant(allImportant);
             this.firstPageMarginZeroImportant(allImportant);
+            this.widowsOrphansImportant(allImportant);
+            this.imageMaxSizeToFitPageImportant(allImportant);
+            this.imageKeepAspectRatioImportant(allImportant);
             this.baseFontSizeImportant(allImportant);
             this.baseLineHeightImportant(allImportant);
-            this.widowsOrphansImportant(allImportant);
-            this.imageMaxSizeImportant(allImportant);
+            this.baseFontFamilyImportant(allImportant);
         });
         
-        this.pageStyleRegExp = new RegExp(/^@page\s*\{\s*/.source +
-            // 1. sizeW, sizeH, sizeImportant,
-            /(?:size:\s*([^\s!;{}]+)(?:\s+([^\s!;{}]+))?\s*(!important)?;?\s*)?/.source +
+        this.pageStyleRegExp = new RegExp(
 
-            // 4. pageMargin, pageMarginImportant,
-            /(?:margin:\s*([^\s!;{}]+(?:\s+[^\s!;{}]+)?(?:\s+[^\s!;{}]+)?(?:\s+[^\s!;{}]+)?)\s*(!important)?;?\s*)?/.source +
+            // 1. beforeOtherStyle, viewerFontSizePercent,
+            /^(.*?)\/\*<viewer>\*\/\s*(?:\/\*(?:[^*]*;)?\s*font-size:\s*([.\d]+)%\s*(?:;[^*]*)?\*\/\s*)?@page\s*\{\s*/.source +
 
-            // 6. pageOtherStyle,
+            // 3. sizeW, sizeH, sizeImportant,
+            /(?:size:\s*([^\s!;{}]+)(?:\s+([^\s!;{}]+))?\s*(!important)?;\s*)?/.source +
+
+            // 6. pageMargin, pageMarginImportant,
+            /(?:margin:\s*([^\s!;{}]+(?:\s+[^\s!;{}]+)?(?:\s+[^\s!;{}]+)?(?:\s+[^\s!;{}]+)?)\s*(!important)?;\s*)?/.source +
+
+            // 8. pageOtherStyle,
             /((?:[^{}]+|\{[^{}]*\})*)\s*\}\s*/.source +
 
-            // 7. firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
-            /(?:@page\s*:first\s*\{\s*(margin:\s*0(?:\w+|%)?\s*(!important)?;?\s*)?((?:[^{}]+|\{[^{}]*\})*)\}\s*)?/.source +
+            // 9. firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
+            /(?:@page\s*:first\s*\{\s*(margin:\s*0(?:\w+|%)?\s*(!important)?;\s*)?((?:[^{}]+|\{[^{}]*\})*)\}\s*)?/.source +
 
-            // 10. forceHtmlBodyMarginZero,
-            /(html,\s*body\s*\{\s*margin:\s*0(?:\w+|%)?\s*!important;?\s*\}\s*)?/.source +
+            // 12. forceHtmlBodyMarginZero,
+            /((?:html|:root),\s*body\s*\{\s*margin:\s*0(?:\w+|%)?\s*!important;\s*\}\s*)?/.source +
 
-            // 11. baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, rootOtherStyle,
-            /(?::root\s*\{\s*(?:font-size:\s*([^\s!;{}]+)\s*(!important)?;?\s*)?(?:line-height:\s*([^\s!;{}]+)\s*(!important)?;?\s*)?([^{}]*)\}\s*)?/.source +
+            // 13. baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, baseFontFamily, baseFontFamilyImportant, rootOtherStyle,
+            /(?:(?:html|:root)\s*\{\s*(?:font-size:\s*([^\s!;{}]+)\s*(!important)?;\s*)?(?:line-height:\s*([^\s!;{}]+)\s*(!important)?;\s*)?(?:font-family:\s*([^\s!;{}]+)\s*(!important)?;\s*)?([^{}]*)\}\s*)?/.source +
 
-            // 16. forceBodyFontSizeInherit, forceBodyLineHeightInherit,
-            /(?:body\s*\{\s*(font-size:\s*inherit\s*!important;?\s*)?(line-height:\s*inherit\s*!important;?\s*)?\}\s*)?/.source +
+            // body {font-size: inherit !important;} etc.
+            /(?:body\s*\{\s*(?:[-\w]+:\s*inherit\s*!important;\s*)+\}\s*)?/.source +
 
-            // 18. widowsOrphans, widowsOrphansImportant,
-            /(\*\s*\{\s*widows:\s*(1|2|9999)\s*(!important)?;\s*orphans:\s*\18\s*\19;?\s*\}\s*)?/.source +
+            // 20. widowsOrphans, widowsOrphansImportant,
+            /(\*\s*\{\s*widows:\s*(1|999)\s*(!important)?;\s*orphans:\s*\20\s*\21;\s*\}\s*)?/.source +
 
-            // 20. imageMaxSizeToFitPage, imageMaxSizeImportant,
-            /(img,\s*svg\s*\{\s*max-inline-size:\s*100%\s*(!important)?;\s*max-block-size:\s*100vb\s*\21;?\s*\}\s*)?/.source +
+            // 22. imageMaxSizeToFitPage, imageMaxSizeToFitPageImportant, imageKeepAspectRatio, imageKeepAspectRatioImportant,
+            /(img,\s*svg\s*\{\s*max-inline-size:\s*100%\s*(!important)?;\s*max-block-size:\s*100vb\s*\23\s*(object-fit:\s*contain\s*(!important)?;\s*)?\}\s*)?/.source +
 
-            // 22. otherStyle
+            // 26. afterOtherStyle
             /(.*)$/.source
         );
     }
@@ -126,21 +147,29 @@ class PageStyle {
         const r = this.pageStyleRegExp.exec(cssText);
         if (r) {
             let [,
+                beforeOtherStyle, viewerFontSizePercent,
                 sizeW, sizeH, sizeImportant,
                 pageMargin, pageMarginImportant,
                 pageOtherStyle,
                 firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
                 forceHtmlBodyMarginZero,
-                baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, rootOtherStyle,
-                forceBodyFontSizeInherit, forceBodyLineHeightInherit,
+                baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, baseFontFamily, baseFontFamilyImportant, rootOtherStyle,
                 widowsOrphans, widowsOrphansImportant,
-                imageMaxSizeToFitPage, imageMaxSizeImportant,
-                otherStyle
+                imageMaxSizeToFitPage, imageMaxSizeToFitPageImportant, imageKeepAspectRatio, imageKeepAspectRatioImportant,
+                afterOtherStyle
             ] = r;
 
-            let count = 0;
             let countImportant = 0;
             let countNotImportant = 0;
+
+            beforeOtherStyle = beforeOtherStyle && beforeOtherStyle.trim() || "";
+            if (beforeOtherStyle) {
+                this.beforeOtherStyle(beforeOtherStyle);
+            }
+
+            if (viewerFontSizePercent) {
+                this.viewerFontSizePercent(viewerFontSizePercent);
+            }
 
             if (sizeW == "landscape" || sizeW == "portrait") {
                 this.isLandscape(sizeW == "landscape");
@@ -153,34 +182,38 @@ class PageStyle {
             if (sizeW != null) {
                 if (sizeH == null) {
                     if (sizeW == "auto") {
-                        this.pageSizeMode(PageSizeMode.AUTO);
+                        this.pageSizeMode(Mode.AUTO);
                     } else {
                         const presetSize = PresetSize.find(presetSize => presetSize.name.toLowerCase() == sizeW.toLowerCase());
                         if (presetSize) {
-                            this.pageSizeMode(PageSizeMode.PRESET);
+                            this.pageSizeMode(Mode.PRESET);
                             this.presetSize(presetSize);
                         } else {
-                            this.pageSizeMode(PageSizeMode.CUSTOM);
+                            this.pageSizeMode(Mode.CUSTOM);
                             this.customWidth(sizeW);
                             this.customHeight(sizeW);
                         }
                     }
                 } else {
-                    this.pageSizeMode(PageSizeMode.CUSTOM);
+                    this.pageSizeMode(Mode.CUSTOM);
                     this.customWidth(sizeW);
                     this.customHeight(sizeH);
                 }
                 this.pageSizeImportant(!!sizeImportant);
-                count++;
                 if (sizeImportant)
                     countImportant++;
                 else
                     countNotImportant++;
             }
             if (pageMargin != null) {
-                this.pageMargin(pageMargin);
+                this.pageMarginMode(pageMargin == "0" ? Mode.ZERO : Mode.CUSTOM);
+                if (pageMargin == "0") {
+                    this.pageMarginMode(Mode.ZERO);
+                } else {
+                    this.pageMarginMode(Mode.CUSTOM);
+                    this.customMargin = pageMargin;
+                }
                 this.pageMarginImportant(!!pageMarginImportant);
-                count++;
                 if (pageMarginImportant)
                     countImportant++;
                 else
@@ -189,13 +222,11 @@ class PageStyle {
             pageOtherStyle = pageOtherStyle && pageOtherStyle.trim() || "";
             if (pageOtherStyle) {
                 this.pageOtherStyle(pageOtherStyle);
-                count++;
             }
 
             if (firstPageMarginZero) {
                 this.firstPageMarginZero(true);
                 this.firstPageMarginZeroImportant(!!firstPageMarginZeroImportant);
-                count++;
                 if (firstPageMarginZeroImportant)
                     countImportant++;
                 else
@@ -204,18 +235,17 @@ class PageStyle {
             firstPageOtherStyle = firstPageOtherStyle && firstPageOtherStyle.trim() || "";
             if (firstPageOtherStyle) {
                 this.firstPageOtherStyle(firstPageOtherStyle);
-                count++;
             }
 
             if (forceHtmlBodyMarginZero) {
                 this.forceHtmlBodyMarginZero(true);
-                count++;
             }
 
             if (baseFontSize != null) {
+                // This may be calc() e.g. "calc(1.25 * 12pt)" when viewer font size is 125%.
+                baseFontSize = baseFontSize.replace(/^\s*calc\([.\d]+\s*\*\s*([.\d]+\w+)\)\s*$/, "$1");
                 this.baseFontSize(baseFontSize);
                 this.baseFontSizeImportant(!!baseFontSizeImportant);
-                count++;
                 if (baseFontSizeImportant)
                     countImportant++;
                 else
@@ -224,8 +254,15 @@ class PageStyle {
             if (baseLineHeight != null) {
                 this.baseLineHeight(baseLineHeight);
                 this.baseLineHeightImportant(!!baseLineHeightImportant);
-                count++;
                 if (baseLineHeightImportant)
+                    countImportant++;
+                else
+                    countNotImportant++;
+            }
+            if (baseFontFamily != null) {
+                this.baseFontSize(baseFontFamily);
+                this.baseFontSizeImportant(!!baseFontFamilyImportant);
+                if (baseFontFamilyImportant)
                     countImportant++;
                 else
                     countNotImportant++;
@@ -233,20 +270,11 @@ class PageStyle {
             rootOtherStyle = rootOtherStyle && rootOtherStyle.trim() || "";
             if (rootOtherStyle) {
                 this.rootOtherStyle(rootOtherStyle);
-                count++;
-            }
-
-            if (forceBodyFontSizeInherit) {
-                // must be same bool value as baseFontSizeImportant
-            }
-            if (forceBodyLineHeightInherit) {
-                // must be same bool value as baseLineHeightImportant
             }
 
             if (widowsOrphans != null) {
                 this.widowsOrphans(widowsOrphans);
                 this.widowsOrphansImportant(!!widowsOrphansImportant);
-                count++;
                 if (widowsOrphansImportant)
                     countImportant++;
                 else
@@ -255,112 +283,162 @@ class PageStyle {
 
             if (imageMaxSizeToFitPage) {
                 this.imageMaxSizeToFitPage(true);
-                this.imageMaxSizeImportant(!!imageMaxSizeImportant);
-                count++;
-                if (imageMaxSizeImportant)
+                this.imageMaxSizeToFitPageImportant(!!imageMaxSizeToFitPageImportant);
+                if (imageMaxSizeToFitPageImportant)
                     countImportant++;
                 else
                     countNotImportant++;
             }
 
-            otherStyle = otherStyle && otherStyle.trim() || "";
-            if (otherStyle) {
-                this.otherStyle(otherStyle);
-                count++;
+            if (imageKeepAspectRatio) {
+                this.imageKeepAspectRatio(true);
+                this.imageKeepAspectRatioImportant(!!imageKeepAspectRatioImportant);
+                if (imageKeepAspectRatioImportant)
+                    countImportant++;
+                else
+                    countNotImportant++;
+            }
+
+            afterOtherStyle = afterOtherStyle && afterOtherStyle.replace(/\/\*<\/viewer>\*\/\s*/, "").trim() || "";
+            if (afterOtherStyle) {
+                this.afterOtherStyle(afterOtherStyle);
             }
 
             this.allImportant(countImportant > 0 && countNotImportant == 0);
 
         } else {
             // When not match
-            this.otherStyle(cssText);
+            this.afterOtherStyle(cssText);
         }
     }
 
     toCSSText() {
         function imp(important) {
-            return important ? "!important" : "";
+            return important ? " !important" : "";
         }
 
-        let cssText = "@page{";
-        if (this.pageSizeMode() != PageSizeMode.AUTO || this.pageSizeImportant()) {
-            cssText += "size:";
+        let cssText = this.beforeOtherStyle();
+        if (cssText) {
+            cssText += "\n";
+        }
+        cssText += "/*<viewer>*/\n";
+        if (this.viewerFontSizePercent() != 100) {
+            cssText += `/*font-size:${this.viewerFontSizePercent()}%;*/`;
+        }
+        if (this.pageSizeMode() != Mode.DEFAULT || this.pageMarginMode() != Mode.DEFAULT || this.pageOtherStyle()) {
+            cssText += "@page { ";
+            if (this.pageSizeMode() != Mode.DEFAULT) {
+                cssText += "size: ";
 
-            switch (this.pageSizeMode()) {
-                case PageSizeMode.AUTO:
-                    cssText += "auto";
-                    break;
-                case PageSizeMode.PRESET:
-                    cssText += this.presetSize().name;
-                    if (this.isLandscape()) {
-                        cssText += " landscape";
-                    }
-                    break;
-                case PageSizeMode.CUSTOM:
-                    cssText += `${this.customWidth()} ${this.customHeight()}`;
-                    break;
-                default:
-                    throw new Error(`Unknown pageSizeMode ${this.pageSizeMode()}`);
+                switch (this.pageSizeMode()) {
+                    case Mode.AUTO:
+                        cssText += "auto";
+                        break;
+                    case Mode.PRESET:
+                        cssText += this.presetSize().name;
+                        if (this.isLandscape()) {
+                            cssText += " landscape";
+                        }
+                        break;
+                    case Mode.CUSTOM:
+                        cssText += `${this.customWidth()} ${this.customHeight()}`;
+                        break;
+                    default:
+                        throw new Error(`Unknown pageSizeMode ${this.pageSizeMode()}`);
+                }
+                cssText += `${imp(this.pageSizeImportant())}; `;
             }
-            cssText += `${imp(this.pageSizeImportant())};`;
+            if (this.pageMarginMode() != Mode.DEFAULT) {
+                cssText += "margin: ";
+
+                switch (this.pageMarginMode()) {
+                    case Mode.AUTO:
+                        cssText += "auto";
+                        break;
+                    case Mode.ZERO:
+                        cssText += "0";
+                        break;
+                    case Mode.CUSTOM:
+                        cssText += `${this.customMargin()}`;
+                        break;
+                    default:
+                        throw new Error(`Unknown pageMarginMode ${this.pageMarginMode()}`);
+                }
+                cssText += `${imp(this.pageMarginImportant())}; `;
+            }
+            cssText += this.pageOtherStyle();
+            cssText += "}\n";
         }
-        if (this.pageMargin() != DefaultValue.pageMargin || this.pageMarginImportant()) {
-            cssText += `margin:${this.pageMargin()}${imp(this.pageMarginImportant())};`;
-        }
-        cssText += this.pageOtherStyle();
-        cssText += "}\n";
 
         if (this.firstPageMarginZero() || this.firstPageOtherStyle()) {
-            cssText += "@page:first{";
+            cssText += "@page :first { ";
             if (this.firstPageMarginZero()) {
-                cssText += `margin:0${imp(this.firstPageMarginZeroImportant())};`;
+                cssText += `margin: 0${imp(this.firstPageMarginZeroImportant())}; `;
             }
             cssText += this.firstPageOtherStyle();
             cssText += "}\n";
         }
 
         if (this.forceHtmlBodyMarginZero()) {
-            cssText += "html,body{margin:0!important;}";
+            cssText += ":root, body { margin: 0 !important; }\n";
         }
 
-        if (this.baseFontSize() != DefaultValue.baseFontSize || this.baseLineHeight() != DefaultValue.baseLineHeight || this.rootOtherStyle()) {
-            cssText += ":root{";
-            if (this.baseFontSize() != DefaultValue.baseFontSize) {
-                cssText += `font-size:${this.baseFontSize()}${imp(this.baseFontSizeImportant())};`;
+        if (this.baseFontSize() || this.baseLineHeight() || this.rootOtherStyle()) {
+            cssText += ":root { ";
+            const baseFontSize = this.baseFontSize();
+            if (baseFontSize) {
+                if (this.viewerFontSizePercent() != 100 && !baseFontSize.endsWith("%")) {
+                    cssText += `font-size: calc(${this.viewerFontSizePercent() / 100} * ${baseFontSize})${imp(this.baseFontSizeImportant())}; `;
+                } else {
+                    cssText += `font-size: ${this.baseFontSize()}${imp(this.baseFontSizeImportant())}; `;
+                }
             }
-            if (this.baseLineHeight() != DefaultValue.baseLineHeight) {
-                cssText += `line-height:${this.baseLineHeight()}${imp(this.baseLineHeightImportant())};`;
+            if (this.baseLineHeight()) {
+                cssText += `line-height: ${this.baseLineHeight()}${imp(this.baseLineHeightImportant())}; `;
+            }
+            if (this.baseFontFamily()) {
+                cssText += `font-family: ${this.baseFontFamily()}${imp(this.baseFontFamilyImportant())}; `;
             }
             cssText += this.rootOtherStyle();
             cssText += "}\n";
         }
-        if (this.baseFontSize() != DefaultValue.baseFontSize && this.baseFontSizeImportant()
-                || this.baseLineHeight() != DefaultValue.baseLineHeight && this.baseLineHeightImportant()) {
-            cssText += `body{`;
-            if (this.baseFontSize() != DefaultValue.baseFontSize && this.baseFontSizeImportant()) {
-                cssText += "font-size:inherit!important;";
+        if (this.baseFontSize() && this.baseFontSizeImportant()
+                || this.baseLineHeight() && this.baseLineHeightImportant()
+                || this.baseFontFamily() && this.baseFontFamilyImportant()) {
+            cssText += "body { ";
+            if (this.baseFontSize() && this.baseFontSizeImportant()) {
+                cssText += "font-size: inherit !important; ";
             }
-            if (this.baseLineHeight() != DefaultValue.baseLineHeight && this.baseLineHeightImportant()) {
-                cssText += "line-height:inherit!important;";
+            if (this.baseLineHeight() && this.baseLineHeightImportant()) {
+                cssText += "line-height: inherit !important; ";
+            }
+            if (this.baseFontFamily() && this.baseFontFamilyImportant()) {
+                cssText += "font-family: inherit !important; ";
             }
             cssText += "}\n";
         }
 
-        if (this.widowsOrphans() != DefaultValue.widowsOrphans) {
-            cssText += "*{";
-            cssText += `widows:${this.widowsOrphans()}${imp(this.widowsOrphansImportant())};`;
-            cssText += `orphans:${this.widowsOrphans()}${imp(this.widowsOrphansImportant())};`;
+        if (this.widowsOrphans()) {
+            cssText += "* { ";
+            cssText += `widows: ${this.widowsOrphans()}${imp(this.widowsOrphansImportant())}; `;
+            cssText += `orphans: ${this.widowsOrphans()}${imp(this.widowsOrphansImportant())}; `;
             cssText += "}\n";
         }
 
-        if (this.imageMaxSizeToFitPage()) {
-            cssText += "img,svg{";
-            cssText += `max-inline-size:100%${imp(this.imageMaxSizeImportant())};`;
-            cssText += `max-block-size:100vb${imp(this.imageMaxSizeImportant())};`;
+        if (this.imageMaxSizeToFitPage() || this.imageKeepAspectRatio()) {
+            cssText += "img, svg { ";
+            if (this.imageMaxSizeToFitPage()) {
+                cssText += `max-inline-size: 100%${imp(this.imageMaxSizeToFitPageImportant())}; `;
+                cssText += `max-block-size: 100vb${imp(this.imageMaxSizeToFitPageImportant())}; `;
+            }
+            if (this.imageKeepAspectRatio()) {
+                cssText += `object-fit: contain${imp(this.imageKeepAspectRatioImportant())}; `;
+            }
             cssText += "}\n";
         }
 
-        cssText += this.otherStyle();
+        cssText += "/*</viewer>*/\n";
+        cssText += this.afterOtherStyle();
 
         return cssText;
     }
@@ -372,67 +450,77 @@ class PageStyle {
         this.customWidth(other.customWidth());
         this.customHeight(other.customHeight());
         this.pageSizeImportant(other.pageSizeImportant());
-        this.pageMargin(other.pageMargin());
+        this.pageMarginMode(other.pageMarginMode());
+        this.customMargin(other.customMargin());
         this.pageMarginImportant(other.pageMarginImportant());
-        this.pageOtherStyle(other.pageOtherStyle());
         this.firstPageMarginZero(other.firstPageMarginZero());
         this.firstPageMarginZeroImportant(other.firstPageMarginZeroImportant());
-        this.firstPageOtherStyle(other.firstPageOtherStyle());
         this.forceHtmlBodyMarginZero(other.forceHtmlBodyMarginZero());
+        this.widowsOrphans(other.widowsOrphans());
+        this.widowsOrphansImportant(other.widowsOrphansImportant());
+        this.imageMaxSizeToFitPage(other.imageMaxSizeToFitPage());
+        this.imageMaxSizeToFitPageImportant(other.imageMaxSizeToFitPageImportant());
+        this.imageKeepAspectRatio(other.imageKeepAspectRatio());
+        this.imageKeepAspectRatioImportant(other.imageKeepAspectRatioImportant());
+        this.viewerFontSizePercent(other.viewerFontSizePercent());
         this.baseFontSize(other.baseFontSize());
         this.baseFontSizeImportant(other.baseFontSizeImportant());
         this.baseLineHeight(other.baseLineHeight());
         this.baseLineHeightImportant(other.baseLineHeightImportant());
-        this.rootOtherStyle(other.rootOtherStyle());
-        this.widowsOrphans(other.widowsOrphans());
-        this.widowsOrphansImportant(other.widowsOrphansImportant());
-        this.imageMaxSizeToFitPage(other.imageMaxSizeToFitPage());
-        this.imageMaxSizeImportant(other.imageMaxSizeImportant());
-        this.otherStyle(other.otherStyle());
+        this.baseFontFamily(other.baseFontFamily());
+        this.baseFontFamilyImportant(other.baseFontFamilyImportant());
         this.allImportant(other.allImportant());
-    }
+        this.pageOtherStyle(other.pageOtherStyle());
+        this.firstPageOtherStyle(other.firstPageOtherStyle());
+        this.rootOtherStyle(other.rootOtherStyle());
+        this.beforeOtherStyle(other.beforeOtherStyle());
+        this.afterOtherStyle(other.afterOtherStyle());
+   }
 
     equivalentTo(other) {
+        if (this.pageSizeMode() !== other.pageSizeMode()) return false;
+        if (this.pageSizeMode() === Mode.PRESET && this.presetSize() !== other.presetSize()) return false;
+        if (this.pageSizeMode() === Mode.PRESET && this.isLandscape() !== other.isLandscape()) return false;
+        if (this.pageSizeMode() === Mode.CUSTOM && this.customWidth() !== other.customWidth()) return false;
+        if (this.pageSizeMode() === Mode.CUSTOM && this.customHeight() !== other.customHeight()) return false;
         if (this.pageSizeImportant() !== other.pageSizeImportant()) return false;
-        if (this.pageMargin() !== other.pageMargin()) return false;
+
+        if (this.pageMarginMode() !== other.pageMarginMode()) return false;
+        if (this.pageMarginMode() === Mode.CUSTOM && this.customMargin() !== other.customMargin()) return false;
         if (this.pageMarginImportant() !== other.pageMarginImportant()) return false;
-        if (this.pageOtherStyle() !== other.pageOtherStyle()) return false;
         if (this.firstPageMarginZero() !== other.firstPageMarginZero()) return false;
         if (this.firstPageMarginZeroImportant() !== other.firstPageMarginZeroImportant()) return false;
-        if (this.firstPageOtherStyle() !== other.firstPageOtherStyle()) return false;
         if (this.forceHtmlBodyMarginZero() !== other.forceHtmlBodyMarginZero()) return false;
+
+        if (this.widowsOrphans() !== other.widowsOrphans()) return false;
+        if (this.widowsOrphansImportant() !== other.widowsOrphansImportant()) return false;
+
+        if (this.imageMaxSizeToFitPage() !== other.imageMaxSizeToFitPage()) return false;
+        if (this.imageMaxSizeToFitPageImportant() !== other.imageMaxSizeToFitPageImportant()) return false;
+        if (this.imageKeepAspectRatio() !== other.imageKeepAspectRatio()) return false;
+        if (this.imageKeepAspectRatioImportant() !== other.imageKeepAspectRatioImportant()) return false;
+
+        if (this.viewerFontSizePercent() !== other.viewerFontSizePercent()) return false;
         if (this.baseFontSize() !== other.baseFontSize()) return false;
         if (this.baseFontSizeImportant() !== other.baseFontSizeImportant()) return false;
         if (this.baseLineHeight() !== other.baseLineHeight()) return false;
         if (this.baseLineHeightImportant() !== other.baseLineHeightImportant()) return false;
-        if (this.rootOtherStyle() !== other.rootOtherStyle()) return false;
-        if (this.widowsOrphans() !== other.widowsOrphans()) return false;
-        if (this.widowsOrphansImportant() !== other.widowsOrphansImportant()) return false;
-        if (this.imageMaxSizeToFitPage() !== other.imageMaxSizeToFitPage()) return false;
-        if (this.imageMaxSizeImportant() !== other.imageMaxSizeImportant()) return false;
-        if (this.otherStyle() !== other.otherStyle()) return false;
-        if (this.allImportant() !== other.allImportant()) return false;
+        if (this.baseFontFamily() !== other.baseFontFamily()) return false;
+        if (this.baseFontFamilyImportant() !== other.baseFontFamilyImportant()) return false;
 
-        const pageSizeMode = this.pageSizeMode();
-        if (other.pageSizeMode() === pageSizeMode) {
-            switch (pageSizeMode) {
-                case PageSizeMode.AUTO:
-                    return true;
-                case PageSizeMode.PRESET:
-                    return this.presetSize() === other.presetSize() && this.isLandscape() === other.isLandscape();
-                case PageSizeMode.CUSTOM:
-                    return this.customWidth() === other.customWidth() && this.customHeight() === other.customHeight();
-                default:
-                    throw new Error(`Unknown pageSizeMode ${pageSizeMode}`);
-            }
-        } else {
-            return false;
-        }
+        if (this.allImportant() !== other.allImportant()) return false;
+        if (this.pageOtherStyle() !== other.pageOtherStyle()) return false;
+        if (this.firstPageOtherStyle() !== other.firstPageOtherStyle()) return false;
+        if (this.rootOtherStyle() !== other.rootOtherStyle()) return false;
+        if (this.beforeOtherStyle() !== other.beforeOtherStyle()) return false;
+        if (this.afterOtherStyle() !== other.afterOtherStyle()) return false;
+
+        return true;
     }
 }
 
-PageStyle.PageSizeMode = PageSizeMode;
-PageStyle.DefaultValue = DefaultValue;
+PageStyle.Mode = Mode;
+PageStyle.Constants = Constants;
 PageStyle.PresetSize = PageStyle.prototype.PresetSize = PresetSize;
 
 export default PageStyle;
