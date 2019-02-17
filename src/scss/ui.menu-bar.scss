@@ -362,8 +362,9 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 				details[open] >summary >span {
 					text-decoration: underline;
 				}
-				input, select {
-					display: inline-block;
+				select {
+					color: inherit;
+					font-size: 12px;
 				}
 				input[type="text"] {
 					color: inherit;
@@ -425,7 +426,8 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 				}
 				small, .small {
 					font-size: .9em;
-					display: inline-block;
+					// display: inline-block;
+					white-space: nowrap;
 					//opacity: .9;
 				}
 				>.vivliostyle-menu-detail-main {

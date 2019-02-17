@@ -148,6 +148,7 @@ class Viewer {
             this.viewerOptions_.copyFrom(viewerOptions);
         }
         this.documentOptions_ = documentOptions;
+
         if (documentOptions.xUrl()) {
             this.viewer_.loadDocument(documentOptions.xUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
         } else if (documentOptions.bookUrl()) {

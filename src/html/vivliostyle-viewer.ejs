@@ -52,8 +52,8 @@
 						<fieldset class="vivliostyle-menu-detail-group">
 							<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_render-all-pages" aria-keyshortcuts="R" data-bind="checked: settingsPanel.state.renderAllPages, disable: settingsPanel.isRenderAllPagesChangeDisabled" /> <span>Render All Pages</span></label>
 							</div>
-							<small>On: for Print (all pages printable, page count works)</small>
-							<small>Off: for Read (quick loading with rough page count)</small>
+							<div><small>On: for Print (all pages printable, page count works)</small></div>
+							<div><small>Off: for Read (quick loading with rough page count)</small></div>
 						</fieldset>
 					</details>
 					<details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_user-style" data-bind="hidden: settingsPanel.isPageStyleChangeDisabled">
@@ -66,8 +66,8 @@
 								<li>
 									<div>
 										<label><input type="radio" name="vivliostyle-settings_page-size" value="preset" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Preset</span></label>
-										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageSizeMode()!='preset'}">
-											<select name="vivliostyle-settings_page-size_preset-select" data-bind="foreach: settingsPanel.state.pageStyle.PresetSize, value: settingsPanel.state.pageStyle.presetSize, disable: settingsPanel.state.pageStyle.pageSizeMode()!='preset'">
+										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageSizeMode()!='preset'}, click: ()=>{settingsPanel.state.pageStyle.pageSizeMode('preset');return true;}">
+											<select name="vivliostyle-settings_page-size_preset-select" data-bind="foreach: settingsPanel.state.pageStyle.PresetSize, value: settingsPanel.state.pageStyle.presetSize, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='preset'?0:-1}">
 												<option data-bind="value: $data, text: description"></option>
 											</select>&#x2002;
 											<label><input type="checkbox" name="vivliostyle-settings_page-size_preset-landscape" data-bind="checked: settingsPanel.state.pageStyle.isLandscape, disable: settingsPanel.state.pageStyle.pageSizeMode()!='preset'" /> <span>Landscape</span></label>
@@ -76,9 +76,9 @@
 								</li>
 								<li>
 									<div>
-										<label><input type="radio" name="vivliostyle-settings_page-size" value="custom" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Custom size</span></label>
-										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageSizeMode()!='custom'}"><label>‣ <span class="small">Width</span>: <input type="text" name="vivliostyle-settings_page-size_custom-width" data-bind="textInput: settingsPanel.state.pageStyle.customWidth, disable: settingsPanel.state.pageStyle.pageSizeMode()!='custom'" /></label>
-											<label>‣ <span class="small">Height</span>: <input type="text" name="vivliostyle-settings_page-size_custom-height" data-bind="textInput: settingsPanel.state.pageStyle.customHeight, disable: settingsPanel.state.pageStyle.pageSizeMode()!='custom'" /></label>
+										<label><input type="radio" name="vivliostyle-settings_page-size" value="custom" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Custom size:</span></label>
+										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageSizeMode()!='custom'}, click: ()=>{settingsPanel.state.pageStyle.pageSizeMode('custom');return true;}"><label>‣ <span class="small">Width</span>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-size_custom-width" data-bind="textInput: settingsPanel.state.pageStyle.customWidth, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='custom'?0:-1}" /></label>
+											<label>‣ <span class="small">Height</span>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-size_custom-height" data-bind="textInput: settingsPanel.state.pageStyle.customHeight, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='custom'?0:-1}" /></label>
 										</span>
 									</div>
 								</li>
@@ -87,16 +87,16 @@
 						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-margin" aria-keyshortcuts="M">
 							<legend class="vivliostyle-menu-detail-group-heading">Page Margins</legend>
 							<ul class="vivliostyle-menu-detail-group">
-								<li><label><input type="radio" value="" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Default</span> <small>(=10% unless specified in document)</small></label></li>
+								<li><label><input type="radio" name="vivliostyle-settings_page-margin" value="" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Default</span> <small>(=10% unless specified in document)</small></label></li>
 								<li><label><input type="radio" name="vivliostyle-settings_page-margin" value="0" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Set page margin to 0</span></label></li>
 								<li>
 									<div>
-										<label><input type="radio" name="vivliostyle-settings_page-margin" value="custom" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Custom margin</span></label>
-										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageMarginMode()!='custom'}"><label>‣ <span class="small">Top/Right/Bottom/Left</span>: <input type="text" name="vivliostyle-settings_page-margin_custom" data-bind="textInput: settingsPanel.state.pageStyle.customMargin, disable: settingsPanel.state.pageStyle.pageMarginMode()!='custom'" /></label></span>
+										<label><input type="radio" name="vivliostyle-settings_page-margin" value="custom" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Custom margin:</span></label>
+										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageMarginMode()!='custom'}, click: ()=>{settingsPanel.state.pageStyle.pageMarginMode('custom');return true;}"><label>‣ <span class="small">Top/Right/Bottom/Left</span>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-margin_custom" data-bind="textInput: settingsPanel.state.pageStyle.customMargin, attr: {tabindex: settingsPanel.state.pageStyle.pageMarginMode()=='custom'?0:-1}" /></label></span>
 									</div>
 								</li>
 								<li><label><input type="checkbox" name="vivliostyle-settings_first-page-margin-zero" data-bind="checked: settingsPanel.state.pageStyle.firstPageMarginZero" /> <span>Set first page margin to 0</span></label>
-								<li><label><input type="checkbox" name="vivliostyle-settings_force-html-body-margin-zero" data-bind="checked: settingsPanel.state.pageStyle.forceHtmlBodyMarginZero" /> <span>Force html/body margin to 0</span> <small>(avoid big page+body margin)</small></label>
+								<li><label><input type="checkbox" name="vivliostyle-settings_force-html-body-margin-zero" data-bind="checked: settingsPanel.state.pageStyle.forceHtmlBodyMarginZero" /> <span>Force html/body margin to 0</span><!--  <small>(avoid big page+body margin)</small> --></label>
 							</ul>
 						</fieldset>
 						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-breaks" aria-keyshortcuts="B">
@@ -121,13 +121,28 @@
 						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_text" aria-keyshortcuts="T">
 							<legend class="vivliostyle-menu-detail-group-heading">Text</legend>
 							<ul class="vivliostyle-menu-detail-group">
-								<li><label><span>Font size:</span> <input type="text" name="vivliostyle-settings_viewer-font-size" inputmode="numeric" data-bind="textInput: settingsPanel.state.pageStyle.viewerFontSizePercent" />%</label>
+								<li><label><span>Font size:</span> <input type="text" inputmode="numeric" autocomplete="off" name="vivliostyle-settings_viewer-font-size" data-bind="textInput: settingsPanel.state.pageStyle.viewerFontSizePercent" />%</label>
 									<ul class="vivliostyle-menu-detail-group">
-										<li><label><span>Base font-size:</span> <input type="text" name="vivliostyle-settings_base-font-size" placeholder="e.g. &quot;12pt&quot;" data-bind="textInput: settingsPanel.state.pageStyle.baseFontSize" /></label></li>
+										<li>
+											<div>
+												<label><input type="checkbox" name="vivliostyle-settings_base-font-size-check" data-bind="checked: settingsPanel.state.pageStyle.baseFontSizeCheck" /> <span>Base font-size:</span></label>
+												<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.baseFontSizeCheck()}, click: ()=>{settingsPanel.state.pageStyle.baseFontSizeCheck(true);return true;}"><input type="text" autocomplete="off" name="vivliostyle-settings_base-font-size" data-bind="textInput: settingsPanel.state.pageStyle.baseFontSize, attr: {tabindex: settingsPanel.state.pageStyle.baseFontSizeCheck()?0:-1}" /></span>
+											</div>
+										</li>
 									</ul>
 								</li>
-								<li><label><span>Base line-height:</span> <input type="text" name="vivliostyle-settings_base-line-height" placeholder="e.g. &quot;1.5&quot;" data-bind="textInput: settingsPanel.state.pageStyle.baseLineHeight" /></label></li>
-								<li><label><span>Base font-family:</span> <input type="text" name="vivliostyle-settings_base-font-family" placeholder="e.g. &quot;Some Font, serif&quot;" data-bind="textInput: settingsPanel.state.pageStyle.baseFontFamily" /></label></li>
+								<li>
+									<div>
+										<label><input type="checkbox" name="vivliostyle-settings_base-line-height-check" data-bind="checked: settingsPanel.state.pageStyle.baseLineHeightCheck" /> <span>Base line-height:</span></label>
+										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.baseLineHeightCheck()}, click: ()=>{settingsPanel.state.pageStyle.baseLineHeightCheck(true);return true;}"><input type="text" autocomplete="off" name="vivliostyle-settings_base-line-height" data-bind="textInput: settingsPanel.state.pageStyle.baseLineHeight, attr: {tabindex: settingsPanel.state.pageStyle.baseLineHeightCheck()?0:-1}" /></span>
+									</div>
+								</li>
+								<li>
+									<div>
+										<label><input type="checkbox" name="vivliostyle-settings_base-font-family-check" data-bind="checked: settingsPanel.state.pageStyle.baseFontFamilyCheck" /> <span>Base font-family:</span></label>
+										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.baseFontFamilyCheck()}, click: ()=>{settingsPanel.state.pageStyle.baseFontFamilyCheck(true);return true;}"><input type="text" name="vivliostyle-settings_base-font-family" data-bind="textInput: settingsPanel.state.pageStyle.baseFontFamily, attr: {tabindex: settingsPanel.state.pageStyle.baseFontFamilyCheck()?0:-1}" /></span>
+									</div>
+								</li>
 							</ul>
 						</fieldset>
 						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_override-document-stylesheets">
@@ -136,7 +151,7 @@
 						<details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_css-details">
 							<summary class="vivliostyle-menu-detail-group-heading"><span>CSS Details</span></summary>
 							<div><small>Don't edit between /*&lt;viewer&gt;*/ and /*&lt;/viewer&gt;*/.</small></div>
-							<textarea name="vivliostyle-settings_css-details" aria-keyshortcuts="C" rows="6" data-bind="textInput: settingsPanel.state.pageStyle.cssText"></textarea>
+							<textarea name="vivliostyle-settings_css-details" autocomplete="off" aria-keyshortcuts="C" rows="10" data-bind="textInput: settingsPanel.state.pageStyle.cssText"></textarea>
 						</details>
 					</details>
 					<!--

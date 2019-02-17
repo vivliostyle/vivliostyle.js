@@ -34,6 +34,9 @@ import urlParameters from "../stores/url-parameters";
 function ViewerApp() {
     this.documentOptions = new DocumentOptions();
     this.viewerOptions = new ViewerOptions();
+
+    this.documentOptions.pageStyle.viewerFontSize = this.viewerOptions.fontSize;
+
     if (this.viewerOptions.profile()) {
         vivliostyle.profile.profiler.enable();
     }
@@ -52,6 +55,7 @@ function ViewerApp() {
     urlParameters.removeParameter("f", true);       // only first one is effective
     urlParameters.removeParameter("spread", true);
     urlParameters.removeParameter("renderAllPages", true);
+    urlParameters.removeParameter("fontSize", true);
     urlParameters.removeParameter("profile", true);
     urlParameters.removeParameter("debug", true);
 

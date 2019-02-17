@@ -25,8 +25,10 @@ import ZoomOptions from "./zoom-options";
 
 function getViewerOptionsFromURL() {
     const renderAllPages = urlParameters.getParameter("renderAllPages")[0];
+    const fontSize = urlParameters.getParameter("fontSize")[0];
     return {
         renderAllPages: (renderAllPages === "true" ? true : renderAllPages === "false" ? false : null),
+        fontSize: fontSize ? parseFloat(fontSize) : null,
         profile: (urlParameters.getParameter("profile")[0] === "true"),
         pageViewMode: PageViewMode.fromSpreadViewString(urlParameters.getParameter("spread")[0])
     };
@@ -57,7 +59,7 @@ class ViewerOptions {
             const urlOptions = getViewerOptionsFromURL();
             this.renderAllPages(urlOptions.renderAllPages !== null ?
                 urlOptions.renderAllPages : defaultValues.renderAllPages);
-            this.fontSize(defaultValues.fontSize);
+            this.fontSize(urlOptions.fontSize || defaultValues.fontSize);
             this.profile(urlOptions.profile || defaultValues.profile);
             this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
             this.zoom(defaultValues.zoom);
@@ -75,6 +77,14 @@ class ViewerOptions {
                     urlParameters.removeParameter("renderAllPages");
                 } else {
                     urlParameters.setParameter("renderAllPages", renderAllPages.toString());
+                }
+            });
+            this.fontSize.subscribe(fontSize => {
+                if (fontSize === defaultValues.fontSize) {
+                    urlParameters.removeParameter("fontSize");
+                } else {
+                    fontSize = parseFloat(fontSize.toPrecision(10));
+                    urlParameters.setParameter("fontSize", `${fontSize}/${defaultValues.fontSize}`);
                 }
             });
         }
