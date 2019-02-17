@@ -67,7 +67,7 @@ class DocumentOptions {
                     // Escape unescaped "%" that causes error in decodeURI()
                     .replace(/%(?![0-9A-Fa-f]{2})/g, "%25");
                 const cssText = decodeURI(data);
-                this.pageStyle.fromCSSText(cssText);
+                this.pageStyle.cssText(cssText);
                 return true;
             }
             else {

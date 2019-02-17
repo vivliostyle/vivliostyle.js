@@ -83,7 +83,7 @@ class PageStyle {
         this.rootOtherStyle = ko.observable("");
         this.beforeOtherStyle = ko.observable("");
         this.afterOtherStyle = ko.observable("");
-        
+
         this.cssText = ko.pureComputed({
             read() {
                 return this.toCSSText();
@@ -109,38 +109,45 @@ class PageStyle {
         this.pageStyleRegExp = new RegExp(
 
             // 1. beforeOtherStyle, viewerFontSizePercent,
-            /^(.*?)\/\*<viewer>\*\/\s*(?:\/\*(?:[^*]*;)?\s*font-size:\s*([.\d]+)%\s*(?:;[^*]*)?\*\/\s*)?@page\s*\{\s*/.source +
+            "^(.*?)\\/\\*<viewer>\\*\\/\\s*(?:\\/\\*(?:[^*]*;)?\\s*font-size:\\s*([.\\d]+)%\\s*(?:;[^*]*)?\\*\\/\\s*)?(?:@page\\s*\\{\\s*" +
 
             // 3. sizeW, sizeH, sizeImportant,
-            /(?:size:\s*([^\s!;{}]+)(?:\s+([^\s!;{}]+))?\s*(!important)?;\s*)?/.source +
+            "(?:size:\\s*([^\\s!;{}]+)(?:\\s+([^\\s!;{}]+))?\\s*(!important)?;\\s*)?" +
 
             // 6. pageMargin, pageMarginImportant,
-            /(?:margin:\s*([^\s!;{}]+(?:\s+[^\s!;{}]+)?(?:\s+[^\s!;{}]+)?(?:\s+[^\s!;{}]+)?)\s*(!important)?;\s*)?/.source +
+            "(?:margin:\\s*([^\\s!;{}]+(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?)\\s*(!important)?;\\s*)?" +
 
             // 8. pageOtherStyle,
-            /((?:[^{}]+|\{[^{}]*\})*)\s*\}\s*/.source +
+            "((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
 
             // 9. firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
-            /(?:@page\s*:first\s*\{\s*(margin:\s*0(?:\w+|%)?\s*(!important)?;\s*)?((?:[^{}]+|\{[^{}]*\})*)\}\s*)?/.source +
+            "(?:@page\\s*:first\\s*\\{\\s*(margin:\\s*0(?:\\w+|%)?\\s*(!important)?;\\s*)?((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
 
             // 12. forceHtmlBodyMarginZero,
-            /((?:html|:root),\s*body\s*\{\s*margin:\s*0(?:\w+|%)?\s*!important;\s*\}\s*)?/.source +
+            "((?:html|:root),\\s*body\\s*\\{\\s*margin:\\s*0(?:\\w+|%)?\\s*!important;\\s*\\}\\s*)?" +
 
             // 13. baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, baseFontFamily, baseFontFamilyImportant, rootOtherStyle,
-            /(?:(?:html|:root)\s*\{\s*(?:font-size:\s*([^\s!;{}]+)\s*(!important)?;\s*)?(?:line-height:\s*([^\s!;{}]+)\s*(!important)?;\s*)?(?:font-family:\s*([^\s!;{}]+)\s*(!important)?;\s*)?([^{}]*)\}\s*)?/.source +
+            "(?:(?:html|:root)\\s*\\{\\s*(?:font-size:\\s*([^\\s!;{}]+)\\s*(!important)?;\\s*)?(?:line-height:\\s*([^\\s!;{}]+)\\s*(!important)?;\\s*)?(?:font-family:\\s*([^\\s!;{}]+)\\s*(!important)?;\\s*)?([^{}]*)\\}\\s*)?" +
 
             // body {font-size: inherit !important;} etc.
-            /(?:body\s*\{\s*(?:[-\w]+:\s*inherit\s*!important;\s*)+\}\s*)?/.source +
+            "(?:body\\s*\\{\\s*(?:[-\\w]+:\\s*inherit\\s*!important;\\s*)+\\}\\s*)?" +
 
             // 20. widowsOrphans, widowsOrphansImportant,
-            /(\*\s*\{\s*widows:\s*(1|999)\s*(!important)?;\s*orphans:\s*\20\s*\21;\s*\}\s*)?/.source +
+            "(?:\\*\\s*\\{\\s*widows:\\s*(1|999)\\s*(!important)?;\\s*orphans:\\s*\\20\\s*\\21;\\s*\\}\\s*)?" +
 
             // 22. imageMaxSizeToFitPage, imageMaxSizeToFitPageImportant, imageKeepAspectRatio, imageKeepAspectRatioImportant,
-            /(img,\s*svg\s*\{\s*max-inline-size:\s*100%\s*(!important)?;\s*max-block-size:\s*100vb\s*\23\s*(object-fit:\s*contain\s*(!important)?;\s*)?\}\s*)?/.source +
+            "(?:img,\\s*svg\\s*\\{\\s*(max-inline-size:\\s*100%\\s*(!important)?;\\s*max-block-size:\\s*100vb\\s*\\23;\\s*)?(object-fit:\\s*contain\\s*(!important)?;\\s*)?\\}\\s*)?" +
 
             // 26. afterOtherStyle
-            /(.*)$/.source
+            "(.*)$",
+
+            // allows "." to match newlines
+            "s"
         );
+
+        if (pageStyle) {
+            this.copyFrom(pageStyle);
+        }
     }
 
     fromCSSText(cssText) {
@@ -162,10 +169,7 @@ class PageStyle {
             let countImportant = 0;
             let countNotImportant = 0;
 
-            beforeOtherStyle = beforeOtherStyle && beforeOtherStyle.trim() || "";
-            if (beforeOtherStyle) {
-                this.beforeOtherStyle(beforeOtherStyle);
-            }
+            this.beforeOtherStyle(beforeOtherStyle);
 
             if (viewerFontSizePercent) {
                 this.viewerFontSizePercent(viewerFontSizePercent);
@@ -211,7 +215,7 @@ class PageStyle {
                     this.pageMarginMode(Mode.ZERO);
                 } else {
                     this.pageMarginMode(Mode.CUSTOM);
-                    this.customMargin = pageMargin;
+                    this.customMargin(pageMargin);
                 }
                 this.pageMarginImportant(!!pageMarginImportant);
                 if (pageMarginImportant)
@@ -219,10 +223,8 @@ class PageStyle {
                 else
                     countNotImportant++;
             }
-            pageOtherStyle = pageOtherStyle && pageOtherStyle.trim() || "";
-            if (pageOtherStyle) {
-                this.pageOtherStyle(pageOtherStyle);
-            }
+            pageOtherStyle = pageOtherStyle || "";
+            this.pageOtherStyle(pageOtherStyle);
 
             if (firstPageMarginZero) {
                 this.firstPageMarginZero(true);
@@ -232,10 +234,8 @@ class PageStyle {
                 else
                     countNotImportant++;
             }
-            firstPageOtherStyle = firstPageOtherStyle && firstPageOtherStyle.trim() || "";
-            if (firstPageOtherStyle) {
-                this.firstPageOtherStyle(firstPageOtherStyle);
-            }
+            firstPageOtherStyle = firstPageOtherStyle || "";
+            this.firstPageOtherStyle(firstPageOtherStyle);
 
             if (forceHtmlBodyMarginZero) {
                 this.forceHtmlBodyMarginZero(true);
@@ -267,10 +267,8 @@ class PageStyle {
                 else
                     countNotImportant++;
             }
-            rootOtherStyle = rootOtherStyle && rootOtherStyle.trim() || "";
-            if (rootOtherStyle) {
-                this.rootOtherStyle(rootOtherStyle);
-            }
+            rootOtherStyle = rootOtherStyle || "";
+            this.rootOtherStyle(rootOtherStyle);
 
             if (widowsOrphans != null) {
                 this.widowsOrphans(widowsOrphans);
@@ -299,16 +297,15 @@ class PageStyle {
                     countNotImportant++;
             }
 
-            afterOtherStyle = afterOtherStyle && afterOtherStyle.replace(/\/\*<\/viewer>\*\/\s*/, "").trim() || "";
-            if (afterOtherStyle) {
-                this.afterOtherStyle(afterOtherStyle);
-            }
+            afterOtherStyle = afterOtherStyle.replace(/\/\*<\/?viewer>\*\/\n?/g, "") || "";
+            this.afterOtherStyle(afterOtherStyle);
 
             this.allImportant(countImportant > 0 && countNotImportant == 0);
 
         } else {
             // When not match
-            this.afterOtherStyle(cssText);
+            const afterOtherStyle = cssText.replace(/\/\*<\/?viewer>\*\/\n?/g, "") || "";
+            this.afterOtherStyle(afterOtherStyle);
         }
     }
 
