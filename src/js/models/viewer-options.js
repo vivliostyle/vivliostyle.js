@@ -80,10 +80,12 @@ class ViewerOptions {
                 }
             });
             this.fontSize.subscribe(fontSize => {
-                if (fontSize === defaultValues.fontSize) {
+                if (typeof fontSize == "number") {
+                    fontSize = fontSize.toPrecision(10).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
+                }
+                if (fontSize == defaultValues.fontSize) {
                     urlParameters.removeParameter("fontSize");
                 } else {
-                    fontSize = parseFloat(fontSize.toPrecision(10));
                     urlParameters.setParameter("fontSize", `${fontSize}/${defaultValues.fontSize}`);
                 }
             });

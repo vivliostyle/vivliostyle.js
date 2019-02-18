@@ -18,10 +18,8 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko from "knockout";
 import vivliostyle from "../models/vivliostyle";
 import DocumentOptions from "../models/document-options";
-import ZoomOptions from "../models/zoom-options";
 import ViewerOptions from "../models/viewer-options";
 import messageQueue from "../models/message-queue";
 import Viewer from "./viewer";
@@ -35,7 +33,7 @@ function ViewerApp() {
     this.documentOptions = new DocumentOptions();
     this.viewerOptions = new ViewerOptions();
 
-    this.documentOptions.pageStyle.viewerFontSize = this.viewerOptions.fontSize;
+    this.documentOptions.pageStyle.setViewerFontSizeObservable(this.viewerOptions.fontSize);
 
     if (this.viewerOptions.profile()) {
         vivliostyle.profile.profiler.enable();

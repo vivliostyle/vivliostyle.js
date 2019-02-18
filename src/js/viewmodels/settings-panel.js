@@ -68,7 +68,11 @@ class SettingsPanel {
             })
         };
 
-        ["close", "toggle", "apply", "reset"].forEach(function(methodName) {
+        this.state.pageStyle.setViewerFontSizeObservable(this.state.viewerOptions.fontSize);
+
+        this.defaultPageStyle = new PageStyle();
+
+        ["close", "toggle", "apply", "cancel", "resetUserStyle"].forEach(function(methodName) {
             this[methodName] = this[methodName].bind(this);
         }, this);
 
@@ -113,6 +117,10 @@ class SettingsPanel {
             this.viewerOptions_.copyFrom(this.state.viewerOptions);
         } else {
             this.documentOptions_.pageStyle.copyFrom(this.state.pageStyle);
+            if (this.documentOptions_.pageStyle.baseFontSizeSpecified()) {
+                // Update userStylesheet when base font-size is specified
+                this.documentOptions_.updateUserStyleSheetFromCSSText();
+            }
             this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
         }
         if (this.pinned()) {
@@ -122,10 +130,19 @@ class SettingsPanel {
         }
     }
 
-    reset() {
+    cancel() {
         this.state.viewerOptions.copyFrom(this.viewerOptions_);
         this.state.pageStyle.copyFrom(this.documentOptions_.pageStyle);
         this.close();
+    }
+
+    resetUserStyle() {
+        this.state.pageStyle.copyFrom(this.defaultPageStyle);
+        setTimeout(() => {
+            const elem = document.getElementsByName("vivliostyle-settings_reset-user-style")[0];
+            elem.checked = false;
+        }, 200);
+        return true;
     }
 
     focusToFirstItem(opt_outerElem) {
@@ -154,7 +171,7 @@ class SettingsPanel {
         switch (key) {
             case Keys.Escape:
                 if (this.opened()) {
-                    this.reset();
+                    this.cancel();
                     this.close();
                 }
                 return true;
@@ -179,8 +196,8 @@ class SettingsPanel {
                     return false;
                 }
                 return true;
-            case "r":
-            case "R":
+            case "a":
+            case "A":
                 if (isHotKeyEnabled) {
                     this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_render-all-pages")[0]);
                     return false;
@@ -239,6 +256,13 @@ class SettingsPanel {
             case "C":
                 if (isHotKeyEnabled) {
                     this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_css-details")[0]);
+                    return false;
+                }
+                return true;
+            case "r":
+            case "R":
+                if (isHotKeyEnabled) {
+                    this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_reset-user-style")[0]);
                     return false;
                 }
                 return true;

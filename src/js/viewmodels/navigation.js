@@ -136,8 +136,25 @@ class Navigation {
             return navigationOptions.disableFontSizeChange || this.isDisabled();
         });
 
-        this.isIncreaseFontSizeDisabled = fontSizeChangeDisabled;
-        this.isDecreaseFontSizeDisabled = fontSizeChangeDisabled;
+        // Font size limit (max:72, min:5) is hard coded in vivliostyle.js/src/adapt/viewer.js.
+        this.isIncreaseFontSizeDisabled = ko.pureComputed(() => {
+            if (fontSizeChangeDisabled()) {
+                return true;
+            }
+            if (this.viewerOptions_.fontSize() >= 72) {
+                return true;
+            }
+            return false;
+        });
+        this.isDecreaseFontSizeDisabled = ko.pureComputed(() => {
+            if (fontSizeChangeDisabled()) {
+                return true;
+            }
+            if (this.viewerOptions_.fontSize() <= 5) {
+                return true;
+            }
+            return false;
+        });
         this.isDefaultFontSizeDisabled = fontSizeChangeDisabled;
         this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
 
@@ -320,8 +337,10 @@ class Navigation {
 
     increaseFontSize() {
         if (!this.isIncreaseFontSizeDisabled()) {
-            const fontSize = this.viewerOptions_.fontSize();
-            this.viewerOptions_.fontSize(fontSize * 1.25);
+            let fontSize = this.viewerOptions_.fontSize();
+            fontSize *= 1.25;
+            this.viewerOptions_.fontSize(fontSize);
+            this.updateFontSizeSettings();
             return true;
         } else {
             return false;
@@ -330,8 +349,10 @@ class Navigation {
 
     decreaseFontSize() {
         if (!this.isDecreaseFontSizeDisabled()) {
-            const fontSize = this.viewerOptions_.fontSize();
-            this.viewerOptions_.fontSize(fontSize * 0.8);
+            let fontSize = this.viewerOptions_.fontSize();
+            fontSize *= 0.8;
+            this.viewerOptions_.fontSize(fontSize);
+            this.updateFontSizeSettings();
             return true;
         } else {
             return false;
@@ -342,9 +363,21 @@ class Navigation {
         if (!this.isDefaultFontSizeDisabled()) {
             const fontSize = ViewerOptions.getDefaultValues().fontSize;
             this.viewerOptions_.fontSize(fontSize);
+            this.updateFontSizeSettings();
             return true;
         } else {
             return false;
+        }
+    }
+
+    updateFontSizeSettings() {
+        // Update setting panel "Font Size".
+        this.settingsPanel_.state.viewerOptions.fontSize(this.viewerOptions_.fontSize());
+
+        if (this.viewer_.documentOptions_.pageStyle.baseFontSizeSpecified()) {
+            // Update userStylesheet when base font-size is specified
+            this.viewer_.documentOptions_.updateUserStyleSheetFromCSSText();
+            this.viewer_.loadDocument(this.viewer_.documentOptions_, this.viewerOptions_);
         }
     }
 

@@ -77,28 +77,7 @@ class DocumentOptions {
 
         // write cssText back to URL parameter userStyle= when updated
         this.pageStyle.cssText.subscribe(cssText => {
-            // Remove trailing "/*</viewer>*/".
-            let cssData = cssText.replace(/\/\*<\/viewer>\*\/\s*$/, "").trim();
-
-            const userStyleSheet = this.userStyleSheet();
-            if (!cssData || cssData === "/*<viewer>*/") {
-                if (userStyleSheet.length <= (this.dataUserStyleIndex == -1 ? 0 : 1)) {
-                    userStyleSheet.pop();
-                    this.dataUserStyleIndex = -1;
-                    this.userStyleSheet(userStyleSheet);
-                    urlParameters.removeParameter("userStyle");
-                    return;
-                }
-            }
-            const dataUserStyle = "data:," + encodeURI(cssData);
-            if (this.dataUserStyleIndex == -1) {
-                userStyleSheet.push(dataUserStyle);
-                this.dataUserStyleIndex = userStyleSheet.length - 1;
-            } else {
-                userStyleSheet[this.dataUserStyleIndex] = dataUserStyle;
-            }
-            this.userStyleSheet(userStyleSheet);
-            urlParameters.setParameter("userStyle", dataUserStyle, true, this.dataUserStyleIndex);
+            this.updateUserStyleSheetFromCSSText(cssText);
         });
     }
 
@@ -115,6 +94,31 @@ class DocumentOptions {
             authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
             userStyleSheet: convertStyleSheetArray(this.userStyleSheet())
         };
+    }
+
+    updateUserStyleSheetFromCSSText(cssText) {
+        if (cssText == undefined) {
+            cssText = this.pageStyle.toCSSText();
+        }
+        const userStyleSheet = this.userStyleSheet();
+        if (!cssText || (/^\s*(\/\*.*?\*\/\s*)*$/).test(cssText)) {
+            if (userStyleSheet.length <= (this.dataUserStyleIndex == -1 ? 0 : 1)) {
+                userStyleSheet.pop();
+                this.dataUserStyleIndex = -1;
+                this.userStyleSheet(userStyleSheet);
+                urlParameters.removeParameter("userStyle");
+                return;
+            }
+        }
+        const dataUserStyle = "data:," + encodeURI(cssText.trim());
+        if (this.dataUserStyleIndex == -1) {
+            userStyleSheet.push(dataUserStyle);
+            this.dataUserStyleIndex = userStyleSheet.length - 1;
+        } else {
+            userStyleSheet[this.dataUserStyleIndex] = dataUserStyle;
+        }
+        this.userStyleSheet(userStyleSheet);
+        urlParameters.setParameter("userStyle", dataUserStyle, true, this.dataUserStyleIndex);
     }
 }
 

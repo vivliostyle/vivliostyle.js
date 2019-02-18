@@ -19,7 +19,6 @@
  */
 
 import ko from "knockout";
-import ViewerOptions from "../models/viewer-options";
 
 const Mode = {
     DEFAULT: "",
@@ -73,13 +72,13 @@ class PageStyle {
         this.imageKeepAspectRatio = ko.observable(false);
         this.imageKeepAspectRatioImportant = ko.observable(false);
         this.baseFontSize = ko.observable(Constants.baseFontSize);
-        this.baseFontSizeCheck = ko.observable(false);
+        this.baseFontSizeSpecified = ko.observable(false);
         this.baseFontSizeImportant = ko.observable(false);
         this.baseLineHeight = ko.observable(Constants.baseLineHeight);
-        this.baseLineHeightCheck = ko.observable(false);
+        this.baseLineHeightSpecified = ko.observable(false);
         this.baseLineHeightImportant = ko.observable(false);
         this.baseFontFamily = ko.observable(Constants.baseFontFamily);
-        this.baseFontFamilyCheck = ko.observable(false);
+        this.baseFontFamilySpecified = ko.observable(false);
         this.baseFontFamilyImportant = ko.observable(false);
         this.allImportant = ko.observable(false);
         this.pageOtherStyle = ko.observable("");
@@ -88,22 +87,37 @@ class PageStyle {
         this.beforeOtherStyle = ko.observable("");
         this.afterOtherStyle = ko.observable("");
 
-        this.viewerFontSize = null; // ko.observable(Constants.viewerFontSize);
+        this.viewerFontSize = null;
+        this.setViewerFontSizeObservable = (viewerFontSizeObservable) => {
+            this.viewerFontSize = viewerFontSizeObservable;
+            const elem = document.getElementsByName("vivliostyle-settings_viewer-font-size")[0];
+            if (elem) {
+                elem.value = this.fontSizePxToPercent(viewerFontSizeObservable(), 100, 5);
+            }
+        };
 
         this.viewerFontSizePercent = ko.pureComputed({
-            read: () => {
-                if (this.viewerFontSize) {
-                    const percent = this.viewerFontSize() / Constants.viewerFontSize * 100;
-                    const rounded = percent.toPrecision(10).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
-                    return 1 * rounded;
-                } else {
+            read() {
+                if (!this.viewerFontSize) {
                     return 100;
                 }
+                const percent = this.fontSizePxToPercent(this.viewerFontSize(), 100, 5);
+                return percent;
             },
-            write: (viewerFontSizePercent) => {
-                if (this.viewerFontSize) {
-                    this.viewerFontSize(viewerFontSizePercent / 100 * Constants.viewerFontSize);
+            write(viewerFontSizePercent) {
+                if (!this.viewerFontSize) {
+                    return;
                 }
+                const percent = parseFloat(viewerFontSizePercent);
+                let fontSize = percent && this.fontSizePercentToPx(percent, 100, 10);
+                if (!fontSize || fontSize < 5 && fontSize > 72) {
+                    const elem = document.getElementsByName("vivliostyle-settings_viewer-font-size")[0];
+                    if (elem) {
+                        elem.value = "100";
+                    }
+                    fontSize = Constants.viewerFontSize;
+                }
+                this.viewerFontSize(fontSize);
             },
             owner: this
         });
@@ -132,31 +146,31 @@ class PageStyle {
             "^(.*?)\\/\\*<viewer>\\*\\/\\s*(?:@page\\s*\\{\\s*" +
 
             // 2. sizeW, sizeH, sizeImportant,
-            "(?:size:\\s*([^\\s!;{}]+)(?:\\s+([^\\s!;{}]+))?\\s*(!important)?;\\s*)?" +
+            "(?:size:\\s*([^\\s!;{}]+)(?:\\s+([^\\s!;{}]+))?\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
 
             // 5. pageMargin, pageMarginImportant,
-            "(?:margin:\\s*([^\\s!;{}]+(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?)\\s*(!important)?;\\s*)?" +
+            "(?:margin:\\s*([^\\s!;{}]+(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
 
             // 7. pageOtherStyle,
             "((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
 
             // 8. firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
-            "(?:@page\\s*:first\\s*\\{\\s*(margin:\\s*0(?:\\w+|%)?\\s*(!important)?;\\s*)?((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
+            "(?:@page\\s*:first\\s*\\{\\s*(margin:\\s*0(?:\\w+|%)?\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
 
             // 11. forceHtmlBodyMarginZero,
-            "((?:html|:root),\\s*body\\s*\\{\\s*margin:\\s*0(?:\\w+|%)?\\s*!important;\\s*\\}\\s*)?" +
+            "((?:html|:root),\\s*body\\s*\\{\\s*margin:\\s*0(?:\\w+|%)?\\s*!important(?:;|(?=[\\s{}]))\\s*\\}\\s*)?" +
 
             // 12. baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, baseFontFamily, baseFontFamilyImportant, rootOtherStyle,
-            "(?:(?:html|:root)\\s*\\{\\s*(?:font-size:\\s*(calc\\([^()]+\\)|[^\\s!;{}]+)\\s*(!important)?;\\s*)?(?:line-height:\\s*([^\\s!;{}]+)\\s*(!important)?;\\s*)?(?:font-family:\\s*([^\\s!;{}]+)\\s*(!important)?;\\s*)?([^{}]*)\\}\\s*)?" +
+            "(?:(?:html|:root)\\s*\\{\\s*(?:font-size:\\s*(calc\\([^()]+\\)|[^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:line-height:\\s*([^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:font-family:\\s*([^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?([^{}]*)\\}\\s*)?" +
 
             // body {font-size: inherit !important;} etc.
-            "(?:body\\s*\\{\\s*(?:[-\\w]+:\\s*inherit\\s*!important;\\s*)+\\}\\s*)?" +
+            "(?:body\\s*\\{\\s*(?:[-\\w]+:\\s*inherit\\s*!important(?:;|(?=[\\s{}]))\\s*)+\\}\\s*)?" +
 
             // 19. widowsOrphans, widowsOrphansImportant,
-            "(?:\\*\\s*\\{\\s*widows:\\s*(1|999)\\s*(!important)?;\\s*orphans:\\s*\\19\\s*\\20;\\s*\\}\\s*)?" +
+            "(?:\\*\\s*\\{\\s*widows:\\s*(1|999)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*orphans:\\s*\\19\\s*\\20(?:;|(?=[\\s{}]))\\s*\\}\\s*)?" +
 
             // 21. imageMaxSizeToFitPage, imageMaxSizeToFitPageImportant, imageKeepAspectRatio, imageKeepAspectRatioImportant,
-            "(?:img,\\s*svg\\s*\\{\\s*(max-inline-size:\\s*100%\\s*(!important)?;\\s*max-block-size:\\s*100vb\\s*\\22;\\s*)?(object-fit:\\s*contain\\s*(!important)?;\\s*)?\\}\\s*)?" +
+            "(?:img,\\s*svg\\s*\\{\\s*(max-inline-size:\\s*100%\\s*(!important)?(?:;|(?=[\\s{}]))\\s*max-block-size:\\s*100vb\\s*\\22(?:;|(?=[\\s{}]))\\s*)?(object-fit:\\s*contain\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?\\}\\s*)?" +
 
             // 25. afterOtherStyle
             "((?:\n|.)*)$"
@@ -164,8 +178,23 @@ class PageStyle {
 
         if (pageStyle) {
             this.copyFrom(pageStyle);
-            this.viewerFontSize = pageStyle.viewerFontSize;
         }
+    }
+
+    fontSizePxToPercent(px, opt_cent, opt_precision) {
+        let percent = px / Constants.viewerFontSize * (opt_cent || 100);
+        if (opt_precision) {
+            percent = percent.toPrecision(opt_precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
+        }
+        return percent;
+    }
+
+    fontSizePercentToPx(percent, opt_cent, opt_precision) {
+        let px = percent / (opt_cent || 100) * Constants.viewerFontSize;
+        if (opt_precision) {
+            px = px.toPrecision(opt_precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
+        }
+        return px;
     }
 
     fromCSSText(cssText) {
@@ -266,7 +295,7 @@ class PageStyle {
             if (baseFontSize != null) {
                 // This may be calc() e.g. "calc(1.25 * 12pt)" when viewer font size is 125%.
                 baseFontSize = baseFontSize.replace(/^\s*calc\([.\d]+\s*\*\s*([.\d]+\w+)\)\s*$/, "$1");
-                this.baseFontSizeCheck(true);
+                this.baseFontSizeSpecified(true);
                 this.baseFontSize(baseFontSize);
                 this.baseFontSizeImportant(!!baseFontSizeImportant);
                 if (baseFontSizeImportant)
@@ -274,10 +303,10 @@ class PageStyle {
                 else
                     countNotImportant++;
             } else {
-                this.baseFontSizeCheck(false);
+                this.baseFontSizeSpecified(false);
             }
             if (baseLineHeight != null) {
-                this.baseLineHeightCheck(true);
+                this.baseLineHeightSpecified(true);
                 this.baseLineHeight(baseLineHeight);
                 this.baseLineHeightImportant(!!baseLineHeightImportant);
                 if (baseLineHeightImportant)
@@ -285,18 +314,18 @@ class PageStyle {
                 else
                     countNotImportant++;
             } else {
-                this.baseLineHeightCheck(false);
+                this.baseLineHeightSpecified(false);
             }
             if (baseFontFamily != null) {
-                this.baseFontSizeCheck(true);
-                this.baseFontSize(baseFontFamily);
-                this.baseFontSizeImportant(!!baseFontFamilyImportant);
+                this.baseFontFamilySpecified(true);
+                this.baseFontFamily(baseFontFamily);
+                this.baseFontFamilyImportant(!!baseFontFamilyImportant);
                 if (baseFontFamilyImportant)
                     countImportant++;
                 else
                     countNotImportant++;
             } else {
-                this.baseFontSizeCheck(false);
+                this.baseFontFamilySpecified(false);
             }
             rootOtherStyle = rootOtherStyle || "";
             this.rootOtherStyle(rootOtherStyle);
@@ -411,36 +440,37 @@ class PageStyle {
             cssText += ":root, body { margin: 0 !important; }\n";
         }
 
-        if (this.baseFontSizeCheck() || this.baseLineHeightCheck() || this.baseFontFamilyCheck() || this.rootOtherStyle()) {
+        if (this.baseFontSizeSpecified() || this.baseLineHeightSpecified() || this.baseFontFamilySpecified() || this.rootOtherStyle()) {
             cssText += ":root { ";
             const baseFontSize = this.baseFontSize();
-            if (this.baseFontSizeCheck()) {
-                if (this.viewerFontSizePercent() != 100 && !baseFontSize.endsWith("%")) {
-                    cssText += `font-size: calc(${this.viewerFontSizePercent() / 100} * ${baseFontSize})${imp(this.baseFontSizeImportant())}; `;
+            if (this.baseFontSizeSpecified()) {
+                if (this.viewerFontSize && this.viewerFontSize() != Constants.viewerFontSize && !baseFontSize.endsWith("%")) {
+                    const perOne = this.fontSizePxToPercent(this.viewerFontSize(), 1, 5);
+                    cssText += `font-size: calc(${perOne} * ${baseFontSize})${imp(this.baseFontSizeImportant())}; `;
                 } else {
                     cssText += `font-size: ${this.baseFontSize()}${imp(this.baseFontSizeImportant())}; `;
                 }
             }
-            if (this.baseLineHeightCheck()) {
+            if (this.baseLineHeightSpecified()) {
                 cssText += `line-height: ${this.baseLineHeight()}${imp(this.baseLineHeightImportant())}; `;
             }
-            if (this.baseFontFamilyCheck()) {
+            if (this.baseFontFamilySpecified()) {
                 cssText += `font-family: ${this.baseFontFamily()}${imp(this.baseFontFamilyImportant())}; `;
             }
             cssText += this.rootOtherStyle();
             cssText += "}\n";
         }
-        if (this.baseFontSizeCheck() && this.baseFontSizeImportant()
-                || this.baseLineHeightCheck() && this.baseLineHeightImportant()
-                || this.baseFontFamilyCheck() && this.baseFontFamilyImportant()) {
+        if (this.baseFontSizeSpecified() && this.baseFontSizeImportant()
+                || this.baseLineHeightSpecified() && this.baseLineHeightImportant()
+                || this.baseFontFamilySpecified() && this.baseFontFamilyImportant()) {
             cssText += "body { ";
-            if (this.baseFontSizeCheck() && this.baseFontSizeImportant()) {
+            if (this.baseFontSizeSpecified() && this.baseFontSizeImportant()) {
                 cssText += "font-size: inherit !important; ";
             }
-            if (this.baseLineHeightCheck() && this.baseLineHeightImportant()) {
+            if (this.baseLineHeightSpecified() && this.baseLineHeightImportant()) {
                 cssText += "line-height: inherit !important; ";
             }
-            if (this.baseFontFamilyCheck() && this.baseFontFamilyImportant()) {
+            if (this.baseFontFamilySpecified() && this.baseFontFamilyImportant()) {
                 cssText += "font-family: inherit !important; ";
             }
             cssText += "}\n";
@@ -491,13 +521,13 @@ class PageStyle {
         this.imageKeepAspectRatio(other.imageKeepAspectRatio());
         this.imageKeepAspectRatioImportant(other.imageKeepAspectRatioImportant());
         this.baseFontSize(other.baseFontSize());
-        this.baseFontSizeCheck(other.baseFontSizeCheck());
+        this.baseFontSizeSpecified(other.baseFontSizeSpecified());
         this.baseFontSizeImportant(other.baseFontSizeImportant());
         this.baseLineHeight(other.baseLineHeight());
-        this.baseLineHeightCheck(other.baseLineHeightCheck());
+        this.baseLineHeightSpecified(other.baseLineHeightSpecified());
         this.baseLineHeightImportant(other.baseLineHeightImportant());
         this.baseFontFamily(other.baseFontFamily());
-        this.baseFontFamilyCheck(other.baseFontFamilyCheck());
+        this.baseFontFamilySpecified(other.baseFontFamilySpecified());
         this.baseFontFamilyImportant(other.baseFontFamilyImportant());
         this.allImportant(other.allImportant());
         this.pageOtherStyle(other.pageOtherStyle());
@@ -506,7 +536,9 @@ class PageStyle {
         this.beforeOtherStyle(other.beforeOtherStyle());
         this.afterOtherStyle(other.afterOtherStyle());
 
-        this.viewerFontSize = other.viewerFontSize;
+        if (this.viewerFontSize && other.viewerFontSize) {
+            this.viewerFontSize(other.viewerFontSize());
+        }
    }
 
     equivalentTo(other) {
@@ -532,14 +564,14 @@ class PageStyle {
         if (this.imageKeepAspectRatio() !== other.imageKeepAspectRatio()) return false;
         if (this.imageKeepAspectRatioImportant() !== other.imageKeepAspectRatioImportant()) return false;
 
-        if (this.baseFontSizeCheck() !== other.baseFontSizeCheck()) return false;
-        if (this.baseFontSizeCheck() && this.baseFontSize() !== other.baseFontSize()) return false;
+        if (this.baseFontSizeSpecified() !== other.baseFontSizeSpecified()) return false;
+        if (this.baseFontSizeSpecified() && this.baseFontSize() !== other.baseFontSize()) return false;
         if (this.baseFontSizeImportant() !== other.baseFontSizeImportant()) return false;
-        if (this.baseLineHeightCheck() !== other.baseLineHeightCheck()) return false;
-        if (this.baseLineHeightCheck() && this.baseLineHeight() !== other.baseLineHeight()) return false;
+        if (this.baseLineHeightSpecified() !== other.baseLineHeightSpecified()) return false;
+        if (this.baseLineHeightSpecified() && this.baseLineHeight() !== other.baseLineHeight()) return false;
         if (this.baseLineHeightImportant() !== other.baseLineHeightImportant()) return false;
-        if (this.baseFontFamilyCheck() !== other.baseFontFamilyCheck()) return false;
-        if (this.baseFontFamilyCheck() && this.baseFontFamily() !== other.baseFontFamily()) return false;
+        if (this.baseFontFamilySpecified() !== other.baseFontFamilySpecified()) return false;
+        if (this.baseFontFamilySpecified() && this.baseFontFamily() !== other.baseFontFamily()) return false;
         if (this.baseFontFamilyImportant() !== other.baseFontFamilyImportant()) return false;
 
         if (this.allImportant() !== other.allImportant()) return false;
@@ -548,6 +580,10 @@ class PageStyle {
         if (this.rootOtherStyle() !== other.rootOtherStyle()) return false;
         if (this.beforeOtherStyle() !== other.beforeOtherStyle()) return false;
         if (this.afterOtherStyle() !== other.afterOtherStyle()) return false;
+
+        if (!this.viewerFontSize !== !other.viewerFontSize ||          
+                this.viewerFontSize && this.viewerFontSize() !== other.viewerFontSize())
+            return false;
 
         return true;
     }
