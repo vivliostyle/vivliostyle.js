@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -24,17 +25,19 @@ import ZoomOptions from "./zoom-options";
 
 function getViewerOptionsFromURL() {
     const renderAllPages = urlParameters.getParameter("renderAllPages")[0];
+    const fontSize = urlParameters.getParameter("fontSize")[0];
     return {
         renderAllPages: (renderAllPages === "true" ? true : renderAllPages === "false" ? false : null),
+        fontSize: fontSize ? parseFloat(fontSize) : null,
         profile: (urlParameters.getParameter("profile")[0] === "true"),
         pageViewMode: PageViewMode.fromSpreadViewString(urlParameters.getParameter("spread")[0])
     };
 }
 
 function getDefaultValues() {
-    const isNotEpub = !urlParameters.getParameter("b").length;
+    const isNotBook = !urlParameters.hasParameter("b");
     return {
-        renderAllPages: isNotEpub,
+        renderAllPages: isNotBook,
         fontSize: 16,
         profile: false,
         pageViewMode: PageViewMode.defaultMode(),
@@ -56,7 +59,7 @@ class ViewerOptions {
             const urlOptions = getViewerOptionsFromURL();
             this.renderAllPages(urlOptions.renderAllPages !== null ?
                 urlOptions.renderAllPages : defaultValues.renderAllPages);
-            this.fontSize(defaultValues.fontSize);
+            this.fontSize(urlOptions.fontSize || defaultValues.fontSize);
             this.profile(urlOptions.profile || defaultValues.profile);
             this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
             this.zoom(defaultValues.zoom);
@@ -74,6 +77,16 @@ class ViewerOptions {
                     urlParameters.removeParameter("renderAllPages");
                 } else {
                     urlParameters.setParameter("renderAllPages", renderAllPages.toString());
+                }
+            });
+            this.fontSize.subscribe(fontSize => {
+                if (typeof fontSize == "number") {
+                    fontSize = fontSize.toPrecision(10).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
+                }
+                if (fontSize == defaultValues.fontSize) {
+                    urlParameters.removeParameter("fontSize");
+                } else {
+                    urlParameters.setParameter("fontSize", `${fontSize}/${defaultValues.fontSize}`);
                 }
             });
         }

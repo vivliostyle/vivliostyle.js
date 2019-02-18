@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -19,17 +20,17 @@
 
 import ko from "knockout";
 import urlParameters from "../stores/url-parameters";
-import PageSize from "./page-size";
+import PageStyle from "./page-style";
 
 function getDocumentOptionsFromURL() {
-    const epubUrl = urlParameters.getParameter("b");
-    const url = urlParameters.getParameter("x");
+    const bookUrl = urlParameters.getParameter("b", true);
+    const xUrl = urlParameters.getParameter("x", true); 
     const fragment = urlParameters.getParameter("f", true);
-    const style = urlParameters.getParameter("style");
-    const userStyle = urlParameters.getParameter("userStyle");
+    const style = urlParameters.getParameter("style", true);
+    const userStyle = urlParameters.getParameter("userStyle", true);
     return {
-        epubUrl: epubUrl[0] || null, // epubUrl and url are exclusive
-        url: !epubUrl[0] && url.length ? url : null,
+        bookUrl: bookUrl[0] || null, // bookUrl and xUrl are exclusive
+        xUrl: !bookUrl[0] && xUrl.length ? xUrl : null,
         fragment: fragment[0] || null,
         authorStyleSheet: style.length ? style : [],
         userStyleSheet: userStyle.length ? userStyle : []
@@ -39,12 +40,13 @@ function getDocumentOptionsFromURL() {
 class DocumentOptions {
     constructor() {
         const urlOptions = getDocumentOptionsFromURL();
-        this.epubUrl = ko.observable(urlOptions.epubUrl || "");
-        this.url = ko.observable(urlOptions.url || null);
+        this.bookUrl = ko.observable(urlOptions.bookUrl || "");
+        this.xUrl = ko.observable(urlOptions.xUrl || null);
         this.fragment = ko.observable(urlOptions.fragment || "");
         this.authorStyleSheet = ko.observable(urlOptions.authorStyleSheet);
         this.userStyleSheet = ko.observable(urlOptions.userStyleSheet);
-        this.pageSize = new PageSize();
+        this.pageStyle = new PageStyle();
+        this.dataUserStyleIndex = -1;
 
         // write fragment back to URL when updated
         this.fragment.subscribe(fragment => {
@@ -55,6 +57,28 @@ class DocumentOptions {
                 urlParameters.setParameter("f", encoded, true);
             }
         });
+
+        // read userStyle=data:.<cssText> URL parameter
+        urlOptions.userStyleSheet.find((userStyle, index) => {
+            // Find userStyle parameter that starts with "data:" and contains "/*<viewer>*/".
+            if ((/^data:,.*?\/\*(?:<|%3C)viewer(?:>|%3E)\*\//).test(userStyle)) {
+                this.dataUserStyleIndex = index;
+                const data = userStyle.replace(/^data:,/, "")
+                    // Escape unescaped "%" that causes error in decodeURI()
+                    .replace(/%(?![0-9A-Fa-f]{2})/g, "%25");
+                const cssText = decodeURI(data);
+                this.pageStyle.cssText(cssText);
+                return true;
+            }
+            else {
+                return false;
+            }
+        });
+
+        // write cssText back to URL parameter userStyle= when updated
+        this.pageStyle.cssText.subscribe(cssText => {
+            this.updateUserStyleSheetFromCSSText(cssText);
+        });
     }
 
     toObject() {
@@ -63,16 +87,38 @@ class DocumentOptions {
                 url
             }));
         }
-        const uss = convertStyleSheetArray(this.userStyleSheet());
         // Do not include url
         // (url is a required argument to Viewer.loadDocument, separated from other options)
         return {
             fragment: this.fragment(),
             authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
-            userStyleSheet: [{
-                text: `@page {${this.pageSize.toCSSDeclarationString()}}`
-            }].concat(uss)
+            userStyleSheet: convertStyleSheetArray(this.userStyleSheet())
         };
+    }
+
+    updateUserStyleSheetFromCSSText(cssText) {
+        if (cssText == undefined) {
+            cssText = this.pageStyle.toCSSText();
+        }
+        const userStyleSheet = this.userStyleSheet();
+        if (!cssText || (/^\s*(\/\*.*?\*\/\s*)*$/).test(cssText)) {
+            if (userStyleSheet.length <= (this.dataUserStyleIndex == -1 ? 0 : 1)) {
+                userStyleSheet.pop();
+                this.dataUserStyleIndex = -1;
+                this.userStyleSheet(userStyleSheet);
+                urlParameters.removeParameter("userStyle");
+                return;
+            }
+        }
+        const dataUserStyle = "data:," + encodeURI(cssText.trim());
+        if (this.dataUserStyleIndex == -1) {
+            userStyleSheet.push(dataUserStyle);
+            this.dataUserStyleIndex = userStyleSheet.length - 1;
+        } else {
+            userStyleSheet[this.dataUserStyleIndex] = dataUserStyle;
+        }
+        this.userStyleSheet(userStyleSheet);
+        urlParameters.setParameter("userStyle", dataUserStyle, true, this.dataUserStyleIndex);
     }
 }
 

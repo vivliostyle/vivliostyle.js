@@ -18,10 +18,8 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko from "knockout";
 import vivliostyle from "../models/vivliostyle";
 import DocumentOptions from "../models/document-options";
-import ZoomOptions from "../models/zoom-options";
 import ViewerOptions from "../models/viewer-options";
 import messageQueue from "../models/message-queue";
 import Viewer from "./viewer";
@@ -34,6 +32,9 @@ import urlParameters from "../stores/url-parameters";
 function ViewerApp() {
     this.documentOptions = new DocumentOptions();
     this.viewerOptions = new ViewerOptions();
+
+    this.documentOptions.pageStyle.setViewerFontSizeObservable(this.viewerOptions.fontSize);
+
     if (this.viewerOptions.profile()) {
         vivliostyle.profile.profiler.enable();
     }
@@ -43,11 +44,24 @@ function ViewerApp() {
         viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
         debug: this.isDebug
     };
+
+    // Remove redundant or ineffective URL parameters
+    if (urlParameters.getParameter("b")[0]) {
+        urlParameters.removeParameter("b", true);   // only first one is effective
+        urlParameters.removeParameter("x");         // x= is ineffective when b= is given
+    }
+    urlParameters.removeParameter("f", true);       // only first one is effective
+    urlParameters.removeParameter("spread", true);
+    urlParameters.removeParameter("renderAllPages", true);
+    urlParameters.removeParameter("fontSize", true);
+    urlParameters.removeParameter("profile", true);
+    urlParameters.removeParameter("debug", true);
+
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
     this.messageDialog = new MessageDialog(messageQueue);
 
     const settingsPanelOptions = {
-        disablePageSizeChange: false,
+        disablePageStyleChange: false,
         disablePageViewModeChange: false,
         disableRenderAllPagesChange: false
     };

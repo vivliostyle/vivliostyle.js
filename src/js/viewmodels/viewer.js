@@ -148,10 +148,11 @@ class Viewer {
             this.viewerOptions_.copyFrom(viewerOptions);
         }
         this.documentOptions_ = documentOptions;
-        if (documentOptions.url()) {
-            this.viewer_.loadDocument(documentOptions.url(), documentOptions.toObject(), this.viewerOptions_.toObject());
-        } else if (documentOptions.epubUrl()) {
-            this.viewer_.loadEPUB(documentOptions.epubUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+
+        if (documentOptions.xUrl()) {
+            this.viewer_.loadDocument(documentOptions.xUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+        } else if (documentOptions.bookUrl()) {
+            this.viewer_.loadEPUB(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
         }
     }
 

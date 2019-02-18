@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -36,6 +37,12 @@ class URLParameterStore {
         return url.replace(/\/[^/]*$/, "/");
     }
 
+    hasParameter(name) {
+        const url = this.location.href;
+        const regexp = getRegExpForParameter(name);
+        return regexp.test(url);
+    }
+
     getParameter(name, dontPercentDecode) {
         const url = this.location.href;
         const regexp = getRegExpForParameter(name);
@@ -49,12 +56,23 @@ class URLParameterStore {
         return results;
     }
 
-    setParameter(name, value, dontPercentEncode) {
+    /**
+     * @param {string} name 
+     * @param {string} value 
+     * @param {boolean=} dontPercentEncode 
+     * @param {number=} opt_index specifies index in multiple parameters with same name.
+     */
+    setParameter(name, value, dontPercentEncode, opt_index) {
         const url = this.location.href;
         if (!dontPercentEncode) value = stringUtil.percentEncodeAmpersandAndPercent(value);
         let updated;
         const regexp = getRegExpForParameter(name);
-        const r = regexp.exec(url);
+        let r = regexp.exec(url);
+        if (r && opt_index) {
+            while (opt_index-- >= 1) {
+                r = regexp.exec(url);
+            }
+        }
         if (r) {
             const l = r[1].length;
             const start = r.index + r[0].length - l;
@@ -70,17 +88,28 @@ class URLParameterStore {
         this.storedUrl = updated;
     }
 
-    removeParameter(name) {
+    /**
+     * @param {string} name 
+     * @param {boolean=} opt_keepFirst If true, not remove the first one in multiple parameters with same name.
+     */
+    removeParameter(name, opt_keepFirst) {
         const url = this.location.href;
         let updated;
         const regexp = getRegExpForParameter(name);
-        const r = regexp.exec(url);
+        let r = regexp.exec(url);
+        if (r && opt_keepFirst) {
+            r = regexp.exec(url);
+        }
         if (r) {
-            const end = r.index + r[0].length;
-            if (r[0].charAt(0) == '#') {
-                updated = url.substring(0, r.index + 1) + url.substring(end + 1);
-            } else {
-                updated = url.substring(0, r.index) + url.substring(end);
+            updated = url;
+            for ( ;r ; r = regexp.exec(updated)) {
+                const end = r.index + r[0].length;
+                if (r[0].charAt(0) == '#') {
+                    updated = updated.substring(0, r.index + 1) + updated.substring(end + 1);
+                } else {
+                    updated = updated.substring(0, r.index) + updated.substring(end);
+                }
+                regexp.lastIndex -= r[0].length;
             }
             if (this.history.replaceState) {
                 this.history.replaceState(null, "", updated);
