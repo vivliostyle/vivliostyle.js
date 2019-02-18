@@ -31,82 +31,168 @@
 
 <!-- MENU BAR -->
 <div role="toolbar" id="vivliostyle-menu-bar">
-	<ul class="vivliostyle-menu" id="vivliostyle-menu_misc">
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_misc-toggle" data-bind="css: {'vivliostyle-menu-item_detail-opened': settingsPanel.opened, 'pinned': settingsPanel.pinned}"><span role="button" tabindex="0" class="vivliostyle-menu-icon-button" title="Settings (S)" aria-keyshortcuts="S" data-bind="menuButton: true, click: settingsPanel.toggle, attr: {'aria-pressed': settingsPanel.opened()?'true':'false', 'aria-expanded': settingsPanel.opened()?'true':'false'}"></span>
+	<ul class="vivliostyle-menu" id="vivliostyle-menu_settings">
+		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_settings-toggle" data-bind="css: {'vivliostyle-menu-item_detail-opened': settingsPanel.opened, 'pinned': settingsPanel.pinned}"><span role="button" tabindex="0" class="vivliostyle-menu-icon-button" title="Settings (S)" aria-keyshortcuts="S" data-bind="menuButton: true, click: settingsPanel.toggle, attr: {'aria-pressed': settingsPanel.opened()?'true':'false', 'aria-expanded': settingsPanel.opened()?'true':'false'}"></span>
 			<!-- MENU DETAIL -->
 			<div role="dialog" aria-label="Settings Panel" class="vivliostyle-menu-detail" tabindex="0" aria-hidden="true" data-bind="attr: {'aria-hidden': !settingsPanel.opened()?'true':'false'}">
 				<div class="vivliostyle-menu-detail-main">
-					<div class="vivliostyle-menu-detail-group">
-						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate" checked disabled /> <span>Paginate</span></label></div>
-						<fieldset class="vivliostyle-menu-detail-group" data-bind="disable: settingsPanel.isPageViewModeChangeDisabled, visible: !settingsPanel.isPageViewModeChangeDisabled">
-							<div class="vivliostyle-menu-detail-group-heading"><span>Page View Mode</span></div>
+					<details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-view-and-rendering" open data-bind="hidden: settingsPanel.isPageViewModeChangeDisabled">
+						<summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="P"><span>Page View and Rendering Mode</span></summary>
+						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-view-mode" aria-keyshortcuts="V">
+							<legend class="vivliostyle-menu-detail-group-heading">Page Spread View</legend>
 							<ul class="vivliostyle-menu-detail-group">
-								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-view-mode" value="autoSpread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Auto</span></label></li>
-								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-view-mode" value="singlePage" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Single Page</span></label></li>
-								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-view-mode" value="spread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Spread</span></label></li>
+								<li><label><input type="radio" name="vivliostyle-settings_page-view-mode" value="autoSpread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Auto</span></label></li>
+								<li><label><input type="radio" name="vivliostyle-settings_page-view-mode" value="singlePage" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Single page</span></label></li>
+								<li><label><input type="radio" name="vivliostyle-settings_page-view-mode" value="spread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Spread</span></label></li>
 							</ul>
 						</fieldset>
-						<fieldset class="vivliostyle-menu-detail-group" data-bind="disable: settingsPanel.isPageSizeChangeDisabled, visible: !settingsPanel.isPageSizeChangeDisabled">
-							<div class="vivliostyle-menu-detail-group-heading"><span>Page Size</span></div>
+						<fieldset class="vivliostyle-menu-detail-group">
+							<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_render-all-pages" aria-keyshortcuts="A" data-bind="checked: settingsPanel.state.renderAllPages, disable: settingsPanel.isRenderAllPagesChangeDisabled" /> <span>Render All Pages</span></label>
+							</div>
+							<div><small>On: for Print (all pages printable, page count works)</small></div>
+							<div><small>Off: for Read (quick loading with rough page count)</small></div>
+						</fieldset>
+					</details>
+					<details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_user-style" data-bind="hidden: settingsPanel.isPageStyleChangeDisabled">
+						<summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="U"><span>User Style Preferences</span></summary>
+						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-size" aria-keyshortcuts="Z">
+							<legend class="vivliostyle-menu-detail-group-heading">Page Size</legend>
 							<ul class="vivliostyle-menu-detail-group">
-								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="auto" required data-bind="checked: settingsPanel.state.pageSize.mode" /> <span>Auto</span> <small>(Use entire window area)</small></label></li>
-								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="preset" required data-bind="checked: settingsPanel.state.pageSize.mode" /> <span>Preset</span></label>
-									<small>
-										<select name="vivliostyle-misc_paginate_page-size_preset-select" data-bind="foreach: settingsPanel.state.pageSize.PresetSize, value: settingsPanel.state.pageSize.presetSize">
-											<option data-bind="value: $data, text: description"></option>
-										</select>&#x2002;
-										<label><input type="checkbox" name="vivliostyle-misc_paginate_page-size_preset-landscape" data-bind="checked: settingsPanel.state.pageSize.isLandscape" /> <span>Landscape</span></label>
-									</small>
+								<li><label><input type="radio" name="vivliostyle-settings_page-size" value="" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Default</span> <small>(=Auto unless specified in document)</small></label></li>
+								<li><label><input type="radio" name="vivliostyle-settings_page-size" value="auto" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Auto</span> <small>(use entire window area)</small></label></li>
+								<li>
+									<div>
+										<label><input type="radio" name="vivliostyle-settings_page-size" value="preset" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Preset</span></label>
+										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageSizeMode()!='preset'}, click: ()=>{settingsPanel.state.pageStyle.pageSizeMode('preset');return true;}">
+											<select name="vivliostyle-settings_page-size_preset-select" data-bind="foreach: settingsPanel.state.pageStyle.PresetSize, value: settingsPanel.state.pageStyle.presetSize, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='preset'?0:-1}">
+												<option data-bind="value: $data, text: description"></option>
+											</select>&#x2002;
+											<label><input type="checkbox" name="vivliostyle-settings_page-size_preset-landscape" data-bind="checked: settingsPanel.state.pageStyle.isLandscape, disable: settingsPanel.state.pageStyle.pageSizeMode()!='preset'" /> <span>Landscape</span></label>
+										</span>
+									</div>
 								</li>
-								<li><label><input type="radio" name="vivliostyle-misc_paginate_page-size" value="custom" required data-bind="checked: settingsPanel.state.pageSize.mode" /> <span>Custom</span></label> -
-									<small>
-										<label>Width: <input type="text" name="vivliostyle-misc_paginate_page-size_custom-width" data-bind="textInput: settingsPanel.state.pageSize.customWidth" /></label> /
-										<label>Height: <input type="text" name="vivliostyle-misc_paginate_page-size_custom-height" data-bind="textInput: settingsPanel.state.pageSize.customHeight" /></label>
-									</small>
+								<li>
+									<div>
+										<label><input type="radio" name="vivliostyle-settings_page-size" value="custom" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Custom size:</span></label>
+										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageSizeMode()!='custom'}, click: ()=>{settingsPanel.state.pageStyle.pageSizeMode('custom');return true;}"><label>‣ <span class="small">Width</span>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-size_custom-width" data-bind="value: settingsPanel.state.pageStyle.customWidth, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='custom'?0:-1}" /></label>
+											<label>‣ <span class="small">Height</span>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-size_custom-height" data-bind="value: settingsPanel.state.pageStyle.customHeight, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='custom'?0:-1}" /></label>
+										</span>
+									</div>
 								</li>
 							</ul>
 						</fieldset>
-					</div>
-					<div class="vivliostyle-menu-detail-group" data-bind="visible: !settingsPanel.isPageSizeChangeDisabled">
-						<div><label><input type="checkbox" name="vivliostyle-misc_paginate_override-document-stylesheets" aria-keyshortcuts="O" data-bind="checked: settingsPanel.state.pageSize.isImportant, disable: settingsPanel.isOverrideDocumentStyleSheetDisabled" /> <span>Override Document Style Sheets</span></label></div>
-					</div>
-					<div class="vivliostyle-menu-detail-group" data-bind="visible: !settingsPanel.isRenderAllPagesChangeDisabled">
-						<div><label><input type="checkbox" name="vivliostyle-misc_render-all-pages" aria-keyshortcuts="R" data-bind="checked: settingsPanel.state.renderAllPages, disable: settingsPanel.isRenderAllPagesChangeDisabled" /> <span>Render All Pages</span> <small>(On: for Print, Off: for Read)</small></label></div>
-					</div>
+						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-margin" aria-keyshortcuts="M">
+							<legend class="vivliostyle-menu-detail-group-heading">Page Margins</legend>
+							<ul class="vivliostyle-menu-detail-group">
+								<li><label><input type="radio" name="vivliostyle-settings_page-margin" value="" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Default</span> <small>(=10% unless specified in document)</small></label></li>
+								<li><label><input type="radio" name="vivliostyle-settings_page-margin" value="0" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Set page margin to 0</span></label></li>
+								<li>
+									<div>
+										<label><input type="radio" name="vivliostyle-settings_page-margin" value="custom" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Custom margin:</span></label>
+										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageMarginMode()!='custom'}, click: ()=>{settingsPanel.state.pageStyle.pageMarginMode('custom');return true;}"><label>‣ <span class="small">Top/Right/Bottom/Left</span>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-margin_custom" data-bind="value: settingsPanel.state.pageStyle.customMargin, attr: {tabindex: settingsPanel.state.pageStyle.pageMarginMode()=='custom'?0:-1}" /></label></span>
+									</div>
+								</li>
+								<li><label><input type="checkbox" name="vivliostyle-settings_first-page-margin-zero" data-bind="checked: settingsPanel.state.pageStyle.firstPageMarginZero" /> <span>Set first page margin to 0</span></label>
+								<li><label><input type="checkbox" name="vivliostyle-settings_force-html-body-margin-zero" data-bind="checked: settingsPanel.state.pageStyle.forceHtmlBodyMarginZero" /> <span>Force html/body margin to 0</span><!--  <small>(avoid big page+body margin)</small> --></label>
+							</ul>
+						</fieldset>
+						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-breaks" aria-keyshortcuts="B">
+							<legend class="vivliostyle-menu-detail-group-heading">Page Breaks</legend>
+							<ul class="vivliostyle-menu-detail-group">
+								<li><label><input type="radio" name="vivliostyle-settings_widows-orphans" value="" required data-bind="checked: settingsPanel.state.pageStyle.widowsOrphans" /> <span>Default widows/orphans control</span></label></li>
+								<li><label><input type="radio" name="vivliostyle-settings_widows-orphans" value="1" required data-bind="checked: settingsPanel.state.pageStyle.widowsOrphans" /> <span>Allow widows and orphans</span></label></li>
+								<li><label><input type="radio" name="vivliostyle-settings_widows-orphans" value="999" required data-bind="checked: settingsPanel.state.pageStyle.widowsOrphans" /> <span>Avoid page break inside paragraph</span></label></li>
+							</ul>
+						</fieldset>
+						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_images" aria-keyshortcuts="I">
+							<legend class="vivliostyle-menu-detail-group-heading">Images</legend>
+							<ul class="vivliostyle-menu-detail-group">
+								<li><label><input type="checkbox" name="vivliostyle-settings_image-max-size-to-fit-page" data-bind="checked: settingsPanel.state.pageStyle.imageMaxSizeToFitPage" /> <span>Set image max-size to fit page</span></label></li>
+								<li>
+									<ul class="vivliostyle-menu-detail-group">
+										<li><label><input type="checkbox" name="vivliostyle-settings_image-keep-aspect-ratio" data-bind="checked: settingsPanel.state.pageStyle.imageKeepAspectRatio" /> <span>Keep aspect ratio</span></label></li>
+									</ul>
+								</li>
+							</ul>
+						</fieldset>
+						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_text" aria-keyshortcuts="T">
+							<legend class="vivliostyle-menu-detail-group-heading">Text</legend>
+							<ul class="vivliostyle-menu-detail-group">
+								<li><label><span>Font size:</span> <input type="text" inputmode="numeric" autocomplete="off" name="vivliostyle-settings_viewer-font-size" data-bind="value: settingsPanel.state.pageStyle.viewerFontSizePercent" />%</label>
+									<ul class="vivliostyle-menu-detail-group">
+										<li>
+											<div>
+												<label><input type="checkbox" name="vivliostyle-settings_base-font-size-specified" data-bind="checked: settingsPanel.state.pageStyle.baseFontSizeSpecified" /> <span>Base font-size:</span></label>
+												<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.baseFontSizeSpecified()}, click: ()=>{settingsPanel.state.pageStyle.baseFontSizeSpecified(true);return true;}"><input type="text" autocomplete="off" name="vivliostyle-settings_base-font-size" data-bind="value: settingsPanel.state.pageStyle.baseFontSize, attr: {tabindex: settingsPanel.state.pageStyle.baseFontSizeSpecified()?0:-1}" /></span>
+											</div>
+										</li>
+									</ul>
+								</li>
+								<li>
+									<div>
+										<label><input type="checkbox" name="vivliostyle-settings_base-line-height-specified" data-bind="checked: settingsPanel.state.pageStyle.baseLineHeightSpecified" /> <span>Base line-height:</span></label>
+										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.baseLineHeightSpecified()}, click: ()=>{settingsPanel.state.pageStyle.baseLineHeightSpecified(true);return true;}"><input type="text" autocomplete="off" name="vivliostyle-settings_base-line-height" data-bind="value: settingsPanel.state.pageStyle.baseLineHeight, attr: {tabindex: settingsPanel.state.pageStyle.baseLineHeightSpecified()?0:-1}" /></span>
+									</div>
+								</li>
+								<li>
+									<div>
+										<label><input type="checkbox" name="vivliostyle-settings_base-font-family-specified" data-bind="checked: settingsPanel.state.pageStyle.baseFontFamilySpecified" /> <span>Base font-family:</span></label>
+										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.baseFontFamilySpecified()}, click: ()=>{settingsPanel.state.pageStyle.baseFontFamilySpecified(true);return true;}"><input type="text" name="vivliostyle-settings_base-font-family" data-bind="value: settingsPanel.state.pageStyle.baseFontFamily, attr: {tabindex: settingsPanel.state.pageStyle.baseFontFamilySpecified()?0:-1}" /></span>
+									</div>
+								</li>
+							</ul>
+						</fieldset>
+						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_override-document-stylesheets">
+							<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_override-document-stylesheets" aria-keyshortcuts="O" data-bind="checked: settingsPanel.state.pageStyle.allImportant, disable: settingsPanel.isOverrideDocumentStyleSheetDisabled" /> <span>Override Document Style Sheets</span></label></div>
+						</fieldset>
+						<details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_css-details">
+							<summary class="vivliostyle-menu-detail-group-heading"><span>CSS Details</span></summary>
+							<div><small>Don't edit between /*&lt;viewer&gt;*/ and /*&lt;/viewer&gt;*/.</small></div>
+							<textarea name="vivliostyle-settings_css-details" autocomplete="off" aria-keyshortcuts="C" rows="10" data-bind="value: settingsPanel.state.pageStyle.cssText"></textarea>
+						</details>
+						<details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_reset-user-style">
+							<summary class="vivliostyle-menu-detail-group-heading"><span>Reset User Style</span></summary>
+							<ul class="vivliostyle-menu-detail-group">
+								<li>
+									<label><input type="checkbox" name="vivliostyle-settings_reset-user-style" aria-keyshortcuts="R" data-bind="click: settingsPanel.resetUserStyle" /> <span>Reset all to default</span></label>
+								</li>
+							</ul>
+						</details>
+					</details>
 					<!--
-					<div class="vivliostyle-menu-detail-group">
-						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate_override-xxxx" /> <span>Menu-Detail Item</span> <small>(Sample)</small></label></div>
+					<fieldset class="vivliostyle-menu-detail-group">
+						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_override-xxxx" /> <span>Menu-Detail Item</span> <small>(Sample)</small></label></div>
 						<ul class="vivliostyle-menu-detail-group">
-							<li><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-a" /> <span>Sample A</span> <small>(Abc De Fg.)</small></label></li>
-							<li class="vivliostyle-menu-disabled"><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-b" disabled /> <span>Sample B</span></label>
+							<li><label><input type="radio" name="vivliostyle-settings_page-yyyy" value="vivliostyle-settings_page-yyyy-a" /> <span>Sample A</span> <small>(Abc De Fg.)</small></label></li>
+							<li class="vivliostyle-menu-disabled"><label><input type="radio" name="vivliostyle-settings_page-yyyy" value="vivliostyle-settings_page-yyyy-b" disabled /> <span>Sample B</span></label>
 								<ul class="vivliostyle-menu-detail-group">
-									<li><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-c" disabled /> <span>Sample C</span></label></li>
+									<li><label><input type="radio" name="vivliostyle-settings_page-yyyy" value="vivliostyle-settings_page-yyyy-c" disabled /> <span>Sample C</span></label></li>
 								</ul>
 							</li>
 						</ul>
-					</div>
-					<div class="vivliostyle-menu-detail-group">
-						<div class="vivliostyle-menu-detail-group-heading"><span>Menu-Detail Item</span> <small>(Sample)</small></div>
+					</fieldset>
+					<fieldset class="vivliostyle-menu-detail-group">
+						<legend class="vivliostyle-menu-detail-group-heading">Menu-Detail Item <small>(Sample)</small></legend> 
 						<ul class="vivliostyle-menu-detail-group vivliostyle-menu-disabled">
-							<li><label><input type="radio" name="vivliostyle-misc_paginate_page-yyyy" value="vivliostyle-misc_paginate_page-yyyy-d" disabled /> <span>Sample D</span> <small>(Abc De Fg.)</small></label></li>
+							<li><label><input type="radio" name="vivliostyle-settings_page-yyyy" value="vivliostyle-settings_page-yyyy-d" disabled /> <span>Sample D</span> <small>(Abc De Fg.)</small></label></li>
 						</ul>
-					</div>
-					<div class="vivliostyle-menu-detail-group">
-						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-misc_paginate" /> <span>Paginate</span></label></div>
+					</fieldset>
+					<fieldset class="vivliostyle-menu-detail-group">
+						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_paginate" /> <span>Paginate</span></label></div>
 						<div class="vivliostyle-menu-detail-group vivliostyle-menu-disabled">
-							<div><label><input type="checkbox" name="vivliostyle-misc_paginate_spread-view" disabled /> <span>Spread View</span></label></div>
+							<div><label><input type="checkbox" name="vivliostyle-settings_spread-view" disabled /> <span>Spread View</span></label></div>
 						</div>
-					</div>
+					</fieldset>
 					-->
 					<div class="vivliostyle-menu-detail-group vivliostyle-menu-detail-group-buttons vivliostyle-menu-detail-group-inline">
 						<div><button type="button" class="vivliostyle-menu-button vivliostyle-menu-button-positive" id="vivliostyle-menu-button_apply" aria-keyshortcuts="Enter" data-bind="menuButton: true, click: settingsPanel.apply">Apply</button></div>
-						<div><button type="button" class="vivliostyle-menu-button vivliostyle-menu-button-negative" id="vivliostyle-menu-button_reset" aria-keyshortcuts="Escape" data-bind="menuButton: true, click: settingsPanel.reset">Cancel</button></div>
+						<div><button type="button" class="vivliostyle-menu-button vivliostyle-menu-button-negative" id="vivliostyle-menu-button_reset" aria-keyshortcuts="Escape" data-bind="menuButton: true, click: settingsPanel.cancel">Cancel</button></div>
 					</div>
 				</div>
-				<div class="vivliostyle-menu-detail-aside">
+				<aside class="vivliostyle-menu-detail-aside">
 					<div><small>Powered by</small> <a href="https://vivliostyle.org"><strong>Vivliostyle</strong></a> </div>
-					<div class="version"><small>(<span>Core: 2019.1.100-pre.20190210171227,</span> <span>UI: 2019.1.100-pre.20190210171358</span>)</small></div>
-				</div>
+					<div class="version"><small>(<span>Core: 2019.1.100-pre.20190210171227,</span> <span>UI: 2019.1.100-pre.20190218152448</span>)</small></div>
+				</aside>
 			</div>
 		</li>
 	</ul>
