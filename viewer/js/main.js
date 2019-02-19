@@ -7403,8 +7403,8 @@ var PageStyle = (function () {
                     return;
                 }
                 var percent = parseFloat(viewerFontSizePercent);
-                var fontSize = percent && this.fontSizePercentToPx(percent, 100, 10);
-                if (!fontSize || fontSize < 5 && fontSize > 72) {
+                var fontSize = percent && this.fontSizePercentToPx(percent);
+                if (!fontSize || fontSize < 5 || fontSize > 72) {
                     var elem = document.getElementsByName("vivliostyle-settings_viewer-font-size")[0];
                     if (elem) {
                         elem.value = "100";
@@ -7474,6 +7474,13 @@ var PageStyle = (function () {
         }
     }
 
+    /**
+     * @param {number} px Font size in px unit
+     * @param {number=} opt_cent When _N_ (e.g. 1) is specified, get "per _N_" value instead of percent
+     * @param {number=} opt_precision When specified, converts result number to string with max _precision_ digits
+     * @returns {number|string} converted percent (or per _N_) value. Returns string when opt_precision is specified.
+     */
+
     _createClass(PageStyle, [{
         key: "fontSizePxToPercent",
         value: function fontSizePxToPercent(px, opt_cent, opt_precision) {
@@ -7483,6 +7490,13 @@ var PageStyle = (function () {
             }
             return percent;
         }
+
+        /**
+         * @param {number} percent Font size in percent (or per _N_) unit
+         * @param {number=} opt_cent When _N_ (e.g. 1) is specified, converts fromg "per _N_" value instead of percent
+         * @param {number=} opt_precision When specified, converts result number to string with max _precision_ digits
+         * @returns {number|string} converted font size in px unit. Returns string when opt_precision is specified.
+         */
     }, {
         key: "fontSizePercentToPx",
         value: function fontSizePercentToPx(percent, opt_cent, opt_precision) {
@@ -9569,6 +9583,7 @@ var SettingsPanel = (function () {
         key: "resetUserStyle",
         value: function resetUserStyle() {
             this.state.pageStyle.copyFrom(this.defaultPageStyle);
+            this.state.viewerOptions.fontSize(_modelsViewerOptions2["default"].getDefaultValues().fontSize);
             setTimeout(function () {
                 var elem = document.getElementsByName("vivliostyle-settings_reset-user-style")[0];
                 elem.checked = false;
