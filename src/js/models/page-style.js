@@ -109,8 +109,8 @@ class PageStyle {
                     return;
                 }
                 const percent = parseFloat(viewerFontSizePercent);
-                let fontSize = percent && this.fontSizePercentToPx(percent, 100, 10);
-                if (!fontSize || fontSize < 5 && fontSize > 72) {
+                let fontSize = percent && this.fontSizePercentToPx(percent);
+                if (!fontSize || fontSize < 5 || fontSize > 72) {
                     const elem = document.getElementsByName("vivliostyle-settings_viewer-font-size")[0];
                     if (elem) {
                         elem.value = "100";
@@ -181,6 +181,12 @@ class PageStyle {
         }
     }
 
+    /**
+     * @param {number} px Font size in px unit
+     * @param {number=} opt_cent When _N_ (e.g. 1) is specified, get "per _N_" value instead of percent
+     * @param {number=} opt_precision When specified, converts result number to string with max _precision_ digits
+     * @returns {number|string} converted percent (or per _N_) value. Returns string when opt_precision is specified.
+     */
     fontSizePxToPercent(px, opt_cent, opt_precision) {
         let percent = px / Constants.viewerFontSize * (opt_cent || 100);
         if (opt_precision) {
@@ -189,6 +195,12 @@ class PageStyle {
         return percent;
     }
 
+    /**
+     * @param {number} percent Font size in percent (or per _N_) unit
+     * @param {number=} opt_cent When _N_ (e.g. 1) is specified, converts fromg "per _N_" value instead of percent
+     * @param {number=} opt_precision When specified, converts result number to string with max _precision_ digits
+     * @returns {number|string} converted font size in px unit. Returns string when opt_precision is specified.
+     */
     fontSizePercentToPx(percent, opt_cent, opt_precision) {
         let px = percent / (opt_cent || 100) * Constants.viewerFontSize;
         if (opt_precision) {

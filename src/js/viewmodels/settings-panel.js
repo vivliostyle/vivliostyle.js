@@ -138,6 +138,7 @@ class SettingsPanel {
 
     resetUserStyle() {
         this.state.pageStyle.copyFrom(this.defaultPageStyle);
+        this.state.viewerOptions.fontSize(ViewerOptions.getDefaultValues().fontSize);
         setTimeout(() => {
             const elem = document.getElementsByName("vivliostyle-settings_reset-user-style")[0];
             elem.checked = false;
