@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="google" content="notranslate">
-<title>Vivliostyle viewer</title>
+<title>Vivliostyle Viewer</title>
 <script src="https://wicg.github.io/visual-viewport/polyfill/visualViewport.js"></script>
 <script src="resources/mathjax-config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
@@ -22,10 +22,52 @@
 <style id="vivliostyle-page-rules"></style>
 </head>
 <body data-vivliostyle-viewer-status="loading" data-bind="event: {keydown: handleKey}, attr: {'data-vivliostyle-viewer-status': viewer.state.status, 'aria-busy': viewer.state.status()=='loading'}">
+<section id="vivliostyle-welcome" hidden data-bind="visible: !viewer.state.status(), attr: {hidden: !!viewer.state.status(), 'aria-hidden': viewer.state.status()?'true':'false'}, click: navigation.onclickViewport, swipePages: true">
+	<h1>Vivliostyle Viewer <small>(Core:&nbsp;2019.1.100-pre.20190210171227, UI:&nbsp;2019.1.100-pre.20190222175355)</small></h1>
+	<input id="vivliostyle-input-url" type="text" placeholder="Input a document URL" data-bind="textInput: viewer.inputUrl">
+	<p><strong>Supported document types:</strong></p>
+	<ul>
+		<li>(X)HTML document, with CSS for paged media</li>
+		<li>Unzipped EPUB: specify URL of OPF file or top directory of the unzipped EPUB files.</li>
+		<li>Web publication (a collection of HTML files): specify URL of the primary entry page or manifest file.</li>
+	</ul>
+	<p>Notes:</p>
+	<ul>
+		<li>GitHub and Gist URLs can be directly specified. Vivliostyle loads raw github/gist content when such URL is specified.</li>
+		<li>⚠️Mixed Content ("http:" URL is specified to "https:" Vivliostyle Viewer) is usually blocked by browser.</li>
+		<li>⚠️Cross-Origin (request to different domain) is usually blocked by browser unless the server is configured to allow Cross-Origin Resource Sharing (CORS).</li>
+	</ul>
+	<p><strong>URL parameter options:</strong></p>
+	<ul>
+		<li><span>#<b>b</b>=&lt;document URL&gt;</span> or <span>#<b>x</b>=&lt;document URL&gt;</span></li>
+			<ul>
+				<li><b>b</b>: Book viewer mode. When (X)HTML document URL is specified, the URL is treated as primary entry page's, and a series of HTML files are automatically loaded.</li>
+				<li><b>x</b>: (X)HTML document is simply loaded. Multiple documents can be specified as #<b>x</b>=&lt;1st HTML&gt;&amp;<b>x</b>=&lt;2nd HTML&gt;...</li>
+			</ul>
+		</li>
+		<li><span>&amp;<b>spread</b>=[<b>true</b> | <b>false</b> | <b>auto</b>]</span>
+			<ul>
+				<li><b>true</b>: Spread view</li>
+				<li><b>false</b>: Single page view</li>
+				<li><b>auto</b>: Auto spread view (default)</li>
+			</ul>
+		</li>
+		<li><span>&amp;<b>renderAllPages</b>=[<b>true</b> | <b>false</b>]</span>
+			<ul>
+				<li><b>true</b>: for Print (all pages printable, page count works)</li>
+				<li><b>false</b>: for Read (quick loading with rough page count)</li>
+			</ul>
+		</li>
+		<li><span>&amp;<b>style</b>=&lt;additional external style sheet URL&gt;</span></li>
+		<li><span>&amp;<b>userStyle</b>=&lt;user style sheet URL&gt;</span></li>
+	</ul>
+	<p>Options can also be set in the <a href="#" data-bind="click: settingsPanel.toggle">Settings</a> panel.</p>
+	<p>For more details, see documentation on <a href="https://vivliostyle.org"><strong>Vivliostyle.org</strong></a>.</p>
+</section>
 <div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" role="main" tabindex="0" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, click: navigation.onclickViewport, swipePages: true"></div>
 <span role="button" id="vivliostyle-page-navigation-left" title="navigate to left" aria-keyshortcuts="ArrowLeft" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToLeftDisabled()}, attr: {'aria-disabled': navigation.isNavigateToLeftDisabled}"></span>
 <span role="button" id="vivliostyle-page-navigation-right" title="navigate to right" aria-keyshortcuts="ArrowRight" data-bind="click: navigation.navigateToRight, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToRightDisabled()}, attr: {'aria-disabled': navigation.isNavigateToRightDisabled}"></span>
-<div id="vivliostyle-loading-overlay" data-bind="visible: !isDebug">
+<div id="vivliostyle-loading-overlay" hidden data-bind="visible: !isDebug, attr: {hidden: !viewer.state.status()}">
 	<div class="vivliostyle-loading-spinner"></div>
 </div>
 
@@ -191,7 +233,7 @@
 				</div>
 				<aside class="vivliostyle-menu-detail-aside">
 					<div><small>Powered by</small> <a href="https://vivliostyle.org"><strong>Vivliostyle</strong></a> </div>
-					<div class="version"><small>(<span>Core: 2019.1.100-pre.20190210171227,</span> <span>UI: 2019.1.100-pre.20190219034158</span>)</small></div>
+					<div class="version"><small>(<span>Core: 2019.1.100-pre.20190210171227,</span> <span>UI: 2019.1.100-pre.20190222175355</span>)</small></div>
 				</aside>
 			</div>
 		</li>
@@ -205,7 +247,7 @@
 		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-next" data-bind="click: navigation.navigateToNext, css: {'vivliostyle-menu-disabled': navigation.isNavigateToNextDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Next Page (↓)" aria-keyshortcuts="ArrowDown PageDown" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isNavigateToNextDisabled}"></span></li>
 		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-last" data-bind="click: navigation.navigateToLast, css: {'vivliostyle-menu-disabled': navigation.isNavigateToLastDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Last Page (End)" aria-keyshortcuts="End Meta+ArrowDown" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isNavigateToLastDisabled}"></span></li>
 		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_page-number" data-bind="css: {'vivliostyle-menu-disabled': navigation.isPageNumberDisabled}"><input aria-label="Page number" id="vivliostyle-page-number" title="Go to Page… (G)" aria-keyshortcuts="G" data-bind="value: navigation.pageNumber, attr: {'aria-disabled': navigation.isPageNumberDisabled}" onfocus="setTimeout(()=>{this.setSelectionRange(0,this.value.length)},0)" type="text" inputmode="numeric" autocomplete="off"/></li>
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_total-pages"><span aria-label="Total pages" id="vivliostyle-total-pages" data-bind="text: navigation.totalPages"></span></li>
+		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_total-pages" data-bind="css: {'vivliostyle-menu-disabled': navigation.isPageNumberDisabled}"><span aria-label="Total pages" id="vivliostyle-total-pages" data-bind="text: navigation.totalPages"></span></li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_zoom" data-bind="visible: !navigation.hideZoom">
 		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-out" data-bind="click: navigation.zoomOut, css: {'vivliostyle-menu-disabled': navigation.isZoomOutDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Zoom: Out (O)" aria-keyshortcuts="O" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isZoomOutDisabled}"></span></li>
