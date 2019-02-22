@@ -78,7 +78,7 @@ class URLParameterStore {
             const start = r.index + r[0].length - l;
             updated = url.substring(0, start) + value + url.substring(start + l);
         } else {
-            updated = `${url + (url.match(/#/) ? "&" : "#") + name}=${value}`;
+            updated = `${url + (url.match(/[#&]$/) ? "" : url.match(/#/) ? "&" : "#") + name}=${value}`;
         }
         if (this.history.replaceState) {
             this.history.replaceState(null, "", updated);
@@ -111,6 +111,7 @@ class URLParameterStore {
                 }
                 regexp.lastIndex -= r[0].length;
             }
+            updated = updated.replace(/^(.*?)[#&]$/, "$1");
             if (this.history.replaceState) {
                 this.history.replaceState(null, "", updated);
             } else {

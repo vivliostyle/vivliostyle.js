@@ -58,6 +58,15 @@ function ViewerApp() {
     urlParameters.removeParameter("debug", true);
 
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
+
+    this.viewer.inputUrl.subscribe(inputUrl => {
+        if (inputUrl != "") {
+            urlParameters.setParameter("b", inputUrl, true);
+        } else {
+            urlParameters.removeParameter("b");
+        }
+    });
+
     this.messageDialog = new MessageDialog(messageQueue);
 
     const settingsPanelOptions = {
@@ -80,6 +89,14 @@ function ViewerApp() {
 
     this.handleKey = (data, event) => {
         const key = keyUtil.identifyKeyFromEvent(event);
+        if (document.activeElement.id === "vivliostyle-input-url") {
+            if (key === "Enter") {
+                this.documentOptions.bookUrl(urlParameters.getParameter("b", true)[0]);
+                this.viewer.loadDocument(this.documentOptions);
+                return false;
+            }
+            return true;
+        }
         if (!(key === "Home" || key === "End") && (event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) {
             return true;
         }
