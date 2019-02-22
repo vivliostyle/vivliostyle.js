@@ -37,7 +37,7 @@ class Viewer {
                 rateLimit: { timeout: 100, method: "notifyWhenChangesStop" },
                 notify: 'always'
             }),
-            navigatable: ko.pureComputed(() => state_.status.value() !== vivliostyle.constants.ReadyState.LOADING),
+            navigatable: ko.pureComputed(() => state_.status.value() && state_.status.value() !== vivliostyle.constants.ReadyState.LOADING),
             pageProgression: state_.pageProgression.getter
         };
         
@@ -47,6 +47,8 @@ class Viewer {
         this.lastPage = ko.observable();
         this.tocVisible = ko.observable();
         this.tocPinned = ko.observable();
+
+        this.inputUrl = ko.observable("");
 
         this.setupViewerEventHandler();
         this.setupViewerOptionSubscriptions();
@@ -100,7 +102,7 @@ class Viewer {
                 const bookTitles = metadata && metadata["http://purl.org/dc/terms/title"];
                 const bookTitle = bookTitles && bookTitles[0] && bookTitles[0]["v"];
                 if (!bookTitle) {
-                    document.title = itemTitle ? itemTitle : "Vivliostyle viewer";
+                    document.title = itemTitle ? itemTitle : "Vivliostyle Viewer";
                 } else if (!itemTitle || itemTitle === bookTitle || this.firstPage() ||
                         (/\.xhtml$/).test(itemTitle)) { // ignore ugly titles copied from *.xhtml file name
                     document.title = bookTitle;
@@ -143,7 +145,7 @@ class Viewer {
     }
 
     loadDocument(documentOptions, viewerOptions) {
-        this.state_.status.value("loading");
+        this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
         if (viewerOptions) {
             this.viewerOptions_.copyFrom(viewerOptions);
         }
@@ -153,6 +155,9 @@ class Viewer {
             this.viewer_.loadDocument(documentOptions.xUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
         } else if (documentOptions.bookUrl()) {
             this.viewer_.loadEPUB(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+        } else {
+            // No document specified, show welcome page
+            this.state_.status.value("");
         }
     }
 

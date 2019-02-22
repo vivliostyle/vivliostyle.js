@@ -1,6 +1,15 @@
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  */
+
+@charset "utf-8";
+
+@import "compass";
+
+@import "./lib/_mixins";
+@import "./lib/_vars";
+
 html[data-vivliostyle-paginated] {
     &, & body {
         margin: 0;
@@ -34,6 +43,72 @@ html[data-vivliostyle-paginated] {
             position: absolute;
             top: 0;
             left: 0;
+        }
+    }
+}
+
+// - Welcome page
+// --------------------------------------------------------------------------------
+
+#vivliostyle-welcome {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 4px 16px;
+    margin-top: $menu-icon-height;
+    background: #F0F0F0;
+    font-family: $sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.5;
+
+    >h1 {
+        font-size: 1.75rem;
+        font-weight: 100;
+        line-height: 1.1;
+        padding: 0 2px;
+        margin: 1rem 0;
+
+        >small {
+            font-size: 0.75rem;
+            font-weight: 400;
+            display: inline-block;
+        }
+    }
+
+    >input {
+        font-size: 1rem;
+        background: white;
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        padding: 4px;
+        border: 2px solid #808080;
+        border-radius: 6px;
+        margin: 1em 0;
+    }
+
+    p {
+        margin: 0.5em 0;
+    }
+
+    ul, ol {
+        margin-top: 0;
+        padding-left: 2em;
+    }
+
+    a {
+        color: rgb(128,128,128);
+        text-decoration: none;
+        border-bottom: solid 1px rgb(192,192,192);
+
+        >strong {
+            font-size: 1.25em;
+            font-weight: 400;
         }
     }
 }

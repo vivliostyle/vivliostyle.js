@@ -30,7 +30,7 @@ function getDocumentOptionsFromURL() {
     const userStyle = urlParameters.getParameter("userStyle", true);
     return {
         bookUrl: bookUrl[0] || null, // bookUrl and xUrl are exclusive
-        xUrl: !bookUrl[0] && xUrl.length ? xUrl : null,
+        xUrl: !bookUrl[0] && xUrl.length && xUrl[0] ? xUrl : null,
         fragment: fragment[0] || null,
         authorStyleSheet: style.length ? style : [],
         userStyleSheet: userStyle.length ? userStyle : []

@@ -35,7 +35,7 @@ function getViewerOptionsFromURL() {
 }
 
 function getDefaultValues() {
-    const isNotBook = !urlParameters.hasParameter("b");
+    const isNotBook = urlParameters.hasParameter("x");
     return {
         renderAllPages: isNotBook,
         fontSize: 16,
