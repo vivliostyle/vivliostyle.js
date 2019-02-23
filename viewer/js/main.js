@@ -4218,7 +4218,7 @@ var Viewer = (function () {
                 var epage = payload.epage;
                 var epageCount = payload.epageCount;
                 var metadata = payload.metadata;
-                var itemTitle = payload.itemTitle;
+                var docTitle = payload.docTitle;
 
                 if (cfi) {
                     _this.documentOptions_.fragment(cfi);
@@ -4235,16 +4235,16 @@ var Viewer = (function () {
                 if (epageCount !== undefined) {
                     _this.epageCount(epageCount);
                 }
-                if (metadata || itemTitle) {
-                    var bookTitles = metadata && metadata["http://purl.org/dc/terms/title"];
-                    var bookTitle = bookTitles && bookTitles[0] && bookTitles[0]["v"];
-                    if (!bookTitle) {
-                        document.title = itemTitle ? itemTitle : "Vivliostyle Viewer";
-                    } else if (!itemTitle || itemTitle === bookTitle || _this.firstPage() || /\.xhtml$/.test(itemTitle)) {
+                if (metadata || docTitle) {
+                    var pubTitles = metadata && metadata["http://purl.org/dc/terms/title"];
+                    var pubTitle = pubTitles && pubTitles[0] && pubTitles[0]["v"];
+                    if (!pubTitle) {
+                        document.title = docTitle ? docTitle : "Vivliostyle Viewer";
+                    } else if (!docTitle || docTitle === pubTitle || _this.firstPage() || /\.xhtml$/.test(docTitle)) {
                         // ignore ugly titles copied from *.xhtml file name
-                        document.title = bookTitle;
+                        document.title = pubTitle;
                     } else {
-                        document.title = itemTitle + " | " + bookTitle;
+                        document.title = docTitle + " | " + pubTitle;
                     }
                 }
 
