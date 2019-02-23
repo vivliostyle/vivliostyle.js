@@ -82,7 +82,7 @@ class Viewer {
             }
         });
         this.viewer_.addListener("nav", payload => {
-            const {cfi, first, last, epage, epageCount, metadata, itemTitle} = payload;
+            const {cfi, first, last, epage, epageCount, metadata, docTitle} = payload;
             if (cfi) {
                 this.documentOptions_.fragment(cfi);
             }
@@ -98,16 +98,16 @@ class Viewer {
             if (epageCount !== undefined) {
                 this.epageCount(epageCount);
             }
-            if (metadata || itemTitle) {
-                const bookTitles = metadata && metadata["http://purl.org/dc/terms/title"];
-                const bookTitle = bookTitles && bookTitles[0] && bookTitles[0]["v"];
-                if (!bookTitle) {
-                    document.title = itemTitle ? itemTitle : "Vivliostyle Viewer";
-                } else if (!itemTitle || itemTitle === bookTitle || this.firstPage() ||
-                        (/\.xhtml$/).test(itemTitle)) { // ignore ugly titles copied from *.xhtml file name
-                    document.title = bookTitle;
+            if (metadata || docTitle) {
+                const pubTitles = metadata && metadata["http://purl.org/dc/terms/title"];
+                const pubTitle = pubTitles && pubTitles[0] && pubTitles[0]["v"];
+                if (!pubTitle) {
+                    document.title = docTitle ? docTitle : "Vivliostyle Viewer";
+                } else if (!docTitle || docTitle === pubTitle || this.firstPage() ||
+                        (/\.xhtml$/).test(docTitle)) { // ignore ugly titles copied from *.xhtml file name
+                    document.title = pubTitle;
                 } else {
-                    document.title = `${itemTitle} | ${bookTitle}`;
+                    document.title = `${docTitle} | ${pubTitle}`;
                 }
             }
 
