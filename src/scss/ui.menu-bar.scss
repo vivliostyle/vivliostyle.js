@@ -349,6 +349,8 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 				padding: 0 2px;
 				width: 100vw;
 				max-width: 320px;
+				max-width: -moz-min-content;
+				max-width: min-content;	// make it resizable with CSS Details textarea
 				height: calc(100% - #{$menu-icon-height});
 				line-height: 1;
 				color: $menu-fg-color; .vivliostyle-menu-disabled { color: $menu-disabled-fg-color; }
@@ -435,6 +437,9 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					height: calc(100% - 4em * 12/14);
 					font-size: 14px;
 					-webkit-overflow-scrolling: touch;
+					@media screen and (min-width: 320px) {
+						min-width: 316px;	// make it resizable with CSS Details textarea
+					}
 					.vivliostyle-menu-detail-group {
 						position: relative;
 						.vivliostyle-menu-detail-group-heading {
