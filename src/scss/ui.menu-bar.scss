@@ -426,11 +426,8 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					}
 					@include transition(.15s linear);
 				}
-				small, .small {
+				small {
 					font-size: .9em;
-					// display: inline-block;
-					white-space: nowrap;
-					//opacity: .9;
 				}
 				>.vivliostyle-menu-detail-main {
 					overflow-y: auto;

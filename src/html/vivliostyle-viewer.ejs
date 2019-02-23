@@ -119,8 +119,8 @@
 								<li>
 									<div>
 										<label><input type="radio" name="vivliostyle-settings_page-size" value="custom" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Custom size:</span></label>
-										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageSizeMode()!='custom'}, click: ()=>{settingsPanel.state.pageStyle.pageSizeMode('custom');return true;}"><label>‣ <span class="small">Width</span>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-size_custom-width" data-bind="value: settingsPanel.state.pageStyle.customWidth, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='custom'?0:-1}" /></label>
-											<label>‣ <span class="small">Height</span>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-size_custom-height" data-bind="value: settingsPanel.state.pageStyle.customHeight, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='custom'?0:-1}" /></label>
+										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageSizeMode()!='custom'}, click: ()=>{settingsPanel.state.pageStyle.pageSizeMode('custom');return true;}"><label>‣ <small>Width</small>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-size_custom-width" data-bind="value: settingsPanel.state.pageStyle.customWidth, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='custom'?0:-1}" /></label>
+											<label>‣ <small>Height</small>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-size_custom-height" data-bind="value: settingsPanel.state.pageStyle.customHeight, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='custom'?0:-1}" /></label>
 										</span>
 									</div>
 								</li>
@@ -134,7 +134,7 @@
 								<li>
 									<div>
 										<label><input type="radio" name="vivliostyle-settings_page-margin" value="custom" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Custom margin:</span></label>
-										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageMarginMode()!='custom'}, click: ()=>{settingsPanel.state.pageStyle.pageMarginMode('custom');return true;}"><label>‣ <span class="small">Top/Right/Bottom/Left</span>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-margin_custom" data-bind="value: settingsPanel.state.pageStyle.customMargin, attr: {tabindex: settingsPanel.state.pageStyle.pageMarginMode()=='custom'?0:-1}" /></label></span>
+										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageMarginMode()!='custom'}, click: ()=>{settingsPanel.state.pageStyle.pageMarginMode('custom');return true;}"><label>‣ <small>Top/Right/Bottom/Left</small>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-margin_custom" data-bind="value: settingsPanel.state.pageStyle.customMargin, attr: {tabindex: settingsPanel.state.pageStyle.pageMarginMode()=='custom'?0:-1}" /></label></span>
 									</div>
 								</li>
 								<li><label><input type="checkbox" name="vivliostyle-settings_first-page-margin-zero" data-bind="checked: settingsPanel.state.pageStyle.firstPageMarginZero" /> <span>Set first page margin to 0</span></label>
