@@ -16,7 +16,7 @@ scripts/update-version.sh
 npm install
 npm install ../vivliostyle.js
 npm run build
-npm run test-sauce
+# npm run test-sauce
 
 # make distribution package
 version=$(grep '^ *"version":' ../vivliostyle.js/package.json | sed -e 's/^.*"\([^"]*\)",$/\1/' | sed -e 's/\.0$//')
