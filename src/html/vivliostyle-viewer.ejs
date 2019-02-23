@@ -26,13 +26,13 @@
 </head>
 <body data-vivliostyle-viewer-status="loading" data-bind="event: {keydown: handleKey}, attr: {'data-vivliostyle-viewer-status': viewer.state.status, 'aria-busy': viewer.state.status()=='loading'}">
 <section id="vivliostyle-welcome" hidden data-bind="visible: !viewer.state.status(), attr: {hidden: !!viewer.state.status(), 'aria-hidden': viewer.state.status()?'true':'false'}, click: navigation.onclickViewport, swipePages: true">
-	<h1>Vivliostyle Viewer <small>(Core:&nbsp;<%= versions.core %>, UI:&nbsp;<%= versions.ui%>)</small></h1>
+	<h1>Vivliostyle Viewer <small>(version:&nbsp;<%= versions.core.replace(/\.\d{14}$/, "") %>)</small></h1>
 	<input id="vivliostyle-input-url" type="text" placeholder="Input a document URL" data-bind="textInput: viewer.inputUrl">
 	<p><strong>Supported document types:</strong></p>
 	<ul>
 		<li>(X)HTML document, with CSS for paged media</li>
 		<li>Unzipped EPUB: specify URL of OPF file or top directory of the unzipped EPUB files.</li>
-		<li>Web publication (a collection of HTML files): specify URL of the primary entry page or manifest file.</li>
+		<li>Web publication (a collection of HTML documents): specify URL of the primary entry page or manifest file.</li>
 	</ul>
 	<p>Notes:</p>
 	<ul>
