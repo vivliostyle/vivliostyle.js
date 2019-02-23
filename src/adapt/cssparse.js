@@ -2105,7 +2105,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 continue;
             case adapt.cssparse.Action.VAL_FUNC:
                 text = token.text.toLowerCase();
-                if (text == "-epubx-expr" || text == "calc") {
+                if (text == "-epubx-expr" || text == "calc" || text == "env") {
                     // special case
                     this.actions = adapt.cssparse.actionsExprVal;
                     this.exprContext = adapt.cssparse.ExprContext.PROP;

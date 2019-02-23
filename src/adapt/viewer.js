@@ -878,7 +878,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
                         "first": self.currentPage.isFirstPage,
                         "last": self.currentPage.isLastPage,
                         "metadata": self.opf.metadata,
-                        "itemTitle": self.opf.spine[self.pagePosition.spineIndex].title
+                        "docTitle": self.opf.spine[self.pagePosition.spineIndex].title
                     };
                     if (self.currentPage.isFirstPage || self.pagePosition.pageIndex == 0 &&
                             self.opf.spine[self.pagePosition.spineIndex].epage) {
@@ -923,7 +923,7 @@ adapt.viewer.Viewer.prototype.resize = function() {
 adapt.viewer.Viewer.prototype.sendLocationNotification = function(page, cfi) {
     /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("sendLocationNotification");
     const notification = {"t": "nav", "first": page.isFirstPage, "last": page.isLastPage,
-        "metadata": this.opf.metadata, "itemTitle": this.opf.spine[page.spineIndex].title};
+        "metadata": this.opf.metadata, "docTitle": this.opf.spine[page.spineIndex].title};
     const self = this;
     this.opf.getEPageFromPosition(/** @type {adapt.epub.Position} */(self.pagePosition)).then(epage => {
         notification["epage"] = epage;

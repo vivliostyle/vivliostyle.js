@@ -176,6 +176,14 @@ adapt.expr.LexicalScope = function(parent, resolver) {
             return this.pref.horizontal;
         });
         this.defineBuiltInName("pref-spread-view", function() { return this.pref.spreadView; });
+
+        // For env(pub-title) and env(doc-title)
+        this.defineBuiltInName("pub-title", function() {
+            return adapt.expr.cssString(this.pubTitle ? this.pubTitle : "");
+        });
+        this.defineBuiltInName("doc-title", function() {
+            return adapt.expr.cssString(this.docTitle ? this.docTitle : "");
+        });
     }
 };
 
