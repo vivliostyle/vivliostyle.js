@@ -431,7 +431,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 				}
 				>.vivliostyle-menu-detail-main {
 					overflow-y: auto;
-					height: calc(100% - 4em * 12/14);
+					height: calc(100% - 56px);
 					font-size: 14px;
 					-webkit-overflow-scrolling: touch;
 					@media screen and (min-width: 320px) {
