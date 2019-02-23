@@ -2356,6 +2356,12 @@ adapt.epub.OPFView.prototype.getPageViewItem = function(spineIndex) {
             self.opf.documentURLTransformer, self.counterStore, self.opf.pageProgression);
 
         instance.pref = self.pref;
+
+        // For env(pub-title) and env(doc-title)
+        const pubTitles = self.opf.metadata && self.opf.metadata[adapt.epub.metaTerms.title];
+        instance.pubTitle = pubTitles && pubTitles[0] && pubTitles[0]["v"] || "";
+        instance.docTitle = item.title || "";
+
         instance.init().then(() => {
             viewItem = {item, xmldoc, instance,
                 layoutPositions: [null], pages: [], complete: false};

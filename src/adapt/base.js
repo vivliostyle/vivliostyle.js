@@ -566,7 +566,7 @@ adapt.base.escapeCSSIdent = name => name.replace(/[^-_a-zA-Z0-9\u0080-\uFFFF]/g,
  * @param {string} str
  * @return {string}
  */
-adapt.base.escapeCSSStr = str => str.replace(/[\u0000-\u001F"]/g, adapt.base.escapeChar);
+adapt.base.escapeCSSStr = str => str.replace(/[\u0000-\u001F"\\]/g, adapt.base.escapeChar);
 
 /**
  * @param {string} str
