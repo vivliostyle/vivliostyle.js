@@ -7,9 +7,11 @@
 </head>
 <body>
     <h1>Vivliostyle-print demo</h1>
-    <p>Edit the HTML and CSS in the two textareas below. Then click the "print"-button. Your browser's print-dialog should show up printing
+    <p>Edit the Title, HTML and CSS in the two textareas below. Then click the "print"-button. Your browser's print-dialog should show up printing
         the HTML with the CSS applied.
     </p>
+    <h2>Title:</h2>
+    <input type="text" value="The Malay Archipelago" id="title">
     <h2>HTML:</h2>
     <textarea rows="15" cols="100" id="html">
 <div class="page-top-float">
@@ -106,6 +108,9 @@ figcaption {
     size: A4;
     @bottom-center {
         content: counter(page);
+    }
+    @top-center {
+        content: env(doc-title);
     }
 }
 .footnote {

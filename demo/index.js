@@ -6,13 +6,16 @@ import {
 document.getElementById('print').addEventListener('click', () => {
     const html = document.getElementById('html').value,
         css = document.getElementById('css').value,
+        title = document.getElementById('title').value,
         htmlDoc = `
         <!doctype html>
         <html>
-            <head><style>${css}</style><head>
+            <head>
+                <title>${title}</title>
+                <style>${css}</style>
+            <head>
             <body>${html}</body>
         </html>`,
-        title = 'Vivliostyle-print demo',
         resourcesUrl = `${window.location.href}resources/`,
         printCallback = iframeWin => {
             const pageCount = iframeWin.document.querySelectorAll('[data-vivliostyle-page-container]').length
