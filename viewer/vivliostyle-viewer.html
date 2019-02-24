@@ -74,7 +74,7 @@
 <!-- MENU BAR -->
 <div role="toolbar" id="vivliostyle-menu-bar">
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_settings">
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_settings-toggle" data-bind="css: {'vivliostyle-menu-item_detail-opened': settingsPanel.opened, 'pinned': settingsPanel.pinned}"><span role="button" tabindex="0" class="vivliostyle-menu-icon-button" title="Settings (S)" aria-keyshortcuts="S" data-bind="menuButton: true, click: settingsPanel.toggle, attr: {'aria-pressed': settingsPanel.opened()?'true':'false', 'aria-expanded': settingsPanel.opened()?'true':'false'}"></span>
+		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_settings-toggle" data-bind="css: {'vivliostyle-menu-item_detail-opened': settingsPanel.opened, 'pinned': settingsPanel.pinned}"><span role="button" tabindex="0" class="vivliostyle-menu-icon-button" title="Settings (S), Double click/type to pin" aria-keyshortcuts="S" data-bind="menuButton: true, click: settingsPanel.toggle, attr: {'aria-pressed': settingsPanel.opened()?'true':'false', 'aria-expanded': settingsPanel.opened()?'true':'false'}"></span>
 			<!-- MENU DETAIL -->
 			<div role="dialog" aria-label="Settings Panel" class="vivliostyle-menu-detail" tabindex="0" aria-hidden="true" data-bind="attr: {'aria-hidden': !settingsPanel.opened()?'true':'false'}">
 				<div class="vivliostyle-menu-detail-main">
@@ -233,13 +233,13 @@
 				</div>
 				<aside class="vivliostyle-menu-detail-aside">
 					<div><small>Powered by</small> <a href="https://vivliostyle.org"><strong>Vivliostyle</strong></a> </div>
-					<div class="version"><small>(<span>Core: 2019.1.100-pre.20190224080415,</span> <span>UI: 2019.1.100-pre.20190224092737</span>)</small></div>
+					<div class="version"><small>(<span>Core: 2019.1.100-pre.20190224080415,</span> <span>UI: 2019.1.100-pre.20190224165942</span>)</small></div>
 				</aside>
 			</div>
 		</li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_toc" data-bind="visible: !navigation.hideTOCNavigation">
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_toc-toggle" data-bind="click: navigation.toggleTOC, css: {'vivliostyle-menu-disabled': navigation.isTOCToggleDisabled, 'on': viewer.tocVisible, 'pinned': viewer.tocPinned}"><span role="button" class="vivliostyle-menu-icon-button" title="Table of Contents (T)" aria-keyshortcuts="T" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isTOCToggleDisabled, 'aria-pressed': viewer.tocVisible()?'true':'false', 'tabindex': !navigation.isTOCToggleDisabled()?'0':false}"></span></li>
+		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_toc-toggle" data-bind="click: navigation.toggleTOC, css: {'vivliostyle-menu-disabled': navigation.isTOCToggleDisabled, 'on': viewer.tocVisible, 'pinned': viewer.tocPinned}"><span role="button" class="vivliostyle-menu-icon-button" title="Table of Contents (T), Double click/type to pin" aria-keyshortcuts="T" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isTOCToggleDisabled, 'aria-pressed': viewer.tocVisible()?'true':'false', 'tabindex': !navigation.isTOCToggleDisabled()?'0':false}"></span></li>
 	</ul>
 	<ul class="vivliostyle-menu" id="vivliostyle-menu_move" data-bind="visible: !navigation.hidePageNavigation">
 		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-first" data-bind="click: navigation.navigateToFirst, css: {'vivliostyle-menu-disabled': navigation.isNavigateToFirstDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="First Page (Home)" aria-keyshortcuts="Home Meta+ArrowUp" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isNavigateToFirstDisabled}"></span></li>

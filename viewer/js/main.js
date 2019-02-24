@@ -3399,9 +3399,13 @@ var Navigation = (function () {
                     var tocToggle = document.getElementById("vivliostyle-menu-item_toc-toggle");
 
                     if (!_this3.viewer_.tocVisible()) {
-                        _this3.viewer_.showTOC(true, true); // autohide=true
-                        _this3.justClicked = true;
-
+                        if (_this3.justClicked) {
+                            _this3.viewer_.showTOC(true, false); // autohide=false
+                            _this3.justClicked = false;
+                        } else {
+                            _this3.viewer_.showTOC(true, true); // autohide=true
+                            _this3.justClicked = true;
+                        }
                         // Here use timer for two purposes:
                         // - Check double click to make TOC box pinned.
                         // - Move focus to TOC box when TOC box becomes visible.
@@ -3426,7 +3430,14 @@ var Navigation = (function () {
                             intervalID = 0;
                         }
                         _this3.viewer_.showTOC(false);
-                        document.getElementById("vivliostyle-viewer-viewport").focus();
+
+                        _this3.justClicked = true;
+                        setTimeout(function () {
+                            if (_this3.justClicked) {
+                                document.getElementById("vivliostyle-viewer-viewport").focus();
+                                _this3.justClicked = false;
+                            }
+                        }, 300);
                     }
                     return {
                         v: true
@@ -3753,19 +3764,29 @@ var SettingsPanel = (function () {
                     this.viewer_.showTOC(false); // Hide TOC box
                 }
                 this.opened(true);
-                this.pinned(false);
-                this.justClicked = true;
-                this.focusToFirstItem();
 
-                setTimeout(function () {
-                    _this2.justClicked = false;
-                }, 300);
+                if (this.justClicked) {
+                    this.justClicked = false;
+                    this.pinned(true);
+                } else {
+                    this.pinned(false);
+                    this.justClicked = true;
+                    this.focusToFirstItem();
+                    setTimeout(function () {
+                        _this2.justClicked = false;
+                    }, 300);
+                }
             } else if (this.justClicked) {
-                // Double click to keep Settings panel open when Applay or Reset is clicked.
+                // Double click to keep Settings panel open when Apply is clicked.
                 this.justClicked = false;
                 this.pinned(true);
             } else {
                 this.close();
+
+                this.justClicked = true;
+                setTimeout(function () {
+                    _this2.justClicked = false;
+                }, 300);
             }
         }
     }, {
