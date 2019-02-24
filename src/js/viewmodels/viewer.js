@@ -154,7 +154,10 @@ class Viewer {
         if (documentOptions.xUrl()) {
             this.viewer_.loadDocument(documentOptions.xUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
         } else if (documentOptions.bookUrl()) {
-            this.viewer_.loadEPUB(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+            if (this.viewer_.loadPublication) // new name
+                this.viewer_.loadPublication(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+            else // old name
+                this.viewer_.loadEPUB(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
         } else {
             // No document specified, show welcome page
             this.state_.status.value("");
