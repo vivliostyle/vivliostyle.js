@@ -24,6 +24,9 @@ export default {
     escapeUnicodeString(str) {
         return str.replace(/[^-a-zA-Z0-9_]/g, this.escapeUnicodeChar);
     },
+    percentEncodeAmpersandAndUnencodedPercent(str) {
+        return str.replace(/%(?![0-9A-Fa-f]{2})/g, "%25").replace(/&/g, "%26");
+    },
     percentEncodeAmpersandAndPercent(str) {
         return str.replace(/%/g, "%25").replace(/&/g, "%26");
     },

@@ -27,6 +27,7 @@ import Navigation from "./navigation";
 import SettingsPanel from "./settings-panel";
 import MessageDialog from "./message-dialog";
 import keyUtil from "../utils/key-util";
+import stringUtil from "../utils/string-util";
 import urlParameters from "../stores/url-parameters";
 
 function ViewerApp() {
@@ -61,6 +62,17 @@ function ViewerApp() {
 
     this.viewer.inputUrl.subscribe(inputUrl => {
         if (inputUrl != "") {
+            if (!urlParameters.hasParameter("b")) {
+                // Push current URL to browser history to enable to go back here when browser Back button is clicked.
+                if (urlParameters.history.pushState)
+                    urlParameters.history.pushState(null, "");
+            }
+            if (inputUrl.startsWith("<")) {
+                // seems start tag, so convert to data url
+                inputUrl = "data:," + encodeURI(inputUrl);
+            } else {
+                inputUrl = stringUtil.percentEncodeAmpersandAndUnencodedPercent(inputUrl);
+            }
             urlParameters.setParameter("b", inputUrl, true);
         } else {
             urlParameters.removeParameter("b");
@@ -91,8 +103,9 @@ function ViewerApp() {
         const key = keyUtil.identifyKeyFromEvent(event);
         if (document.activeElement.id === "vivliostyle-input-url") {
             if (key === "Enter") {
-                this.documentOptions.bookUrl(urlParameters.getParameter("b", true)[0]);
-                this.viewer.loadDocument(this.documentOptions);
+                // this.documentOptions.bookUrl(urlParameters.getParameter("b", true)[0]);
+                // this.viewer.loadDocument(this.documentOptions);
+                window.location.reload();
                 return false;
             }
             return true;

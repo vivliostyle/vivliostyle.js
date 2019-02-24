@@ -50,7 +50,12 @@ class URLParameterStore {
         let r;
         while (r = regexp.exec(url)) {
             let value = r[1];
-            if (!dontPercentDecode) value = stringUtil.percentDecodeAmpersandAndPercent(value);
+            if (!dontPercentDecode) {
+                // It was
+                //   value = stringUtil.percentDecodeAmpersandAndPercent(value);
+                // but why only Ampersand and Percent?
+                value = decodeURI(value);
+            }
             results.push(value);
         }
         return results;
