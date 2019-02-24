@@ -4090,10 +4090,9 @@ function ViewerApp() {
     this.handleKey = function (data, event) {
         var key = _utilsKeyUtil2["default"].identifyKeyFromEvent(event);
         if (document.activeElement.id === "vivliostyle-input-url") {
-            if (key === "Enter") {
-                // this.documentOptions.bookUrl(urlParameters.getParameter("b", true)[0]);
-                // this.viewer.loadDocument(this.documentOptions);
-                window.location.reload();
+            if (key === "Enter" && event.keyCode === 13) {
+                _this.documentOptions.bookUrl(_storesUrlParameters2["default"].getParameter("b", true)[0]);
+                _this.viewer.loadDocument(_this.documentOptions);
                 return false;
             }
             return true;
