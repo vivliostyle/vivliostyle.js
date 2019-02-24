@@ -77,6 +77,9 @@ adapt.base.resourceBaseURL = window.location.href;
  * @return {string} resolved (absolute) URL
  */
 adapt.base.resolveURL = (relURL, baseURL) => {
+    if (baseURL.startsWith("data:")) {
+        return relURL || baseURL;
+    }
     if (!baseURL || relURL.match(/^\w{2,}:/)) {
         if (relURL.toLowerCase().match("^javascript:")) {
             return "#";

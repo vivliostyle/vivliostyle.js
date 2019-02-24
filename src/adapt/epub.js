@@ -735,6 +735,9 @@ adapt.epub.OPFDoc.prototype.getMetadata = function() {
  * @return {?string}
  */
 adapt.epub.OPFDoc.prototype.getPathFromURL = function(url) {
+    if (url.startsWith("data:")) {
+        return (url === this.epubURL) ? "" : url;
+    }
     if (this.epubURL) {
         let epubBaseURL = adapt.base.resolveURL("", this.epubURL);
         if (url === epubBaseURL || url + "/" === epubBaseURL) {
