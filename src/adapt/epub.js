@@ -298,7 +298,13 @@ adapt.epub.EPUBDocStore.prototype.load = function(url) {
         r = adapt.epub.EPUBDocStore.superClass_.load.call(this, docURL, true, `Failed to fetch a source document from ${docURL}`);
         r.then(xmldoc => {
             if (!xmldoc) {
-                vivliostyle.logging.logger.error(`Received an empty response for ${docURL}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`);
+                if (docURL.startsWith("data:")) {
+                    vivliostyle.logging.logger.error(`Failed to load ${docURL}. Invalid data.`);
+                } else if (docURL.startsWith("http:") && adapt.base.baseURL.startsWith("https:")) {
+                    vivliostyle.logging.logger.error(`Failed to load ${docURL}. Mixed Content ("http:" content on "https:" context) is not allowed.`);
+                } else {
+                    vivliostyle.logging.logger.error(`Received an empty response for ${docURL}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`);
+                }
             } else {
                 frame.finish(xmldoc);
             }
