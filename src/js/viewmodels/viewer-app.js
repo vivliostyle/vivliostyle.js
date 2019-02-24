@@ -102,10 +102,9 @@ function ViewerApp() {
     this.handleKey = (data, event) => {
         const key = keyUtil.identifyKeyFromEvent(event);
         if (document.activeElement.id === "vivliostyle-input-url") {
-            if (key === "Enter") {
-                // this.documentOptions.bookUrl(urlParameters.getParameter("b", true)[0]);
-                // this.viewer.loadDocument(this.documentOptions);
-                window.location.reload();
+            if (key === "Enter" && event.keyCode === 13) {
+                this.documentOptions.bookUrl(urlParameters.getParameter("b", true)[0]);
+                this.viewer.loadDocument(this.documentOptions);
                 return false;
             }
             return true;
