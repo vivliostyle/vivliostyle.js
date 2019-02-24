@@ -105,7 +105,7 @@ adapt.viewer.Viewer = function(window, viewportElement, instanceId, callbackFn) 
      * @type {Object.<string, adapt.viewer.Action>}
      */
     this.actions = {
-        "loadEPUB": this.loadEPUB,
+        "loadPublication": this.loadPublication,
         "loadXML": this.loadXML,
         "configure": this.configure,
         "moveTo": this.moveTo,
@@ -184,7 +184,7 @@ adapt.viewer.Viewer.prototype.setReadyState = function(readyState) {
  * @param {adapt.base.JSON} command
  * @return {!adapt.task.Result.<boolean>}
  */
-adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
+adapt.viewer.Viewer.prototype.loadPublication = function(command) {
     vivliostyle.profile.profiler.registerStartTiming("beforeRender");
     this.setReadyState(vivliostyle.constants.ReadyState.LOADING);
     const url = /** @type {string} */ (command["url"]);
@@ -194,14 +194,14 @@ adapt.viewer.Viewer.prototype.loadEPUB = function(command) {
     const userStyleSheet = /** @type {Array.<{url: ?string, text: ?string}>} */ (command["userStyleSheet"]);
     // force relayout
     this.viewport = null;
-    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("loadEPUB");
+    /** @type {!adapt.task.Frame.<boolean>} */ const frame = adapt.task.newFrame("loadPublication");
     const self = this;
     self.configure(command).then(() => {
         const store = new adapt.epub.EPUBDocStore();
         store.init(authorStyleSheet, userStyleSheet).then(() => {
-            const epubURL = adapt.base.resolveURL(adapt.base.convertSpecialURL(url), self.window.location.href);
-            self.packageURL = [epubURL];
-            store.loadEPUBDoc(epubURL, haveZipMetadata).then(opf => {
+            const pubURL = adapt.base.resolveURL(adapt.base.convertSpecialURL(url), self.window.location.href);
+            self.packageURL = [pubURL];
+            store.loadPUBDoc(pubURL, haveZipMetadata).then(opf => {
                 if (opf) {
                     self.opf = opf;
                     self.render(fragment).then(() => {

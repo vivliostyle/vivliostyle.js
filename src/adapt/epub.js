@@ -110,22 +110,22 @@ adapt.epub.EPUBDocStore.prototype.startLoadingAsJSON = function(url) {
  * @param {boolean} haveZipMetadata
  * @return {!adapt.task.Result.<adapt.epub.OPFDoc>}
  */
-adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
+adapt.epub.EPUBDocStore.prototype.loadPUBDoc = function(url, haveZipMetadata) {
     /** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ const frame
-        = adapt.task.newFrame("loadEPUBDoc");
+        = adapt.task.newFrame("loadPUBDoc");
 
     adapt.net.ajax(url, null, "HEAD").then(response => {
         if (response.status >= 400) {
             // This url can be the root of an unzipped EPUB.
-            let epubUrl = url;
-            if (epubUrl.substring(epubUrl.length - 1) !== "/") {
-                epubUrl = `${epubUrl}/`;
+            let pubURL = url;
+            if (pubURL.substring(pubURL.length - 1) !== "/") {
+                pubURL = `${pubURL}/`;
             }
             if (haveZipMetadata) {
-                this.startLoadingAsJSON(`${epubUrl}?r=list`);
+                this.startLoadingAsJSON(`${pubURL}?r=list`);
             }
-            this.startLoadingAsPlainXML(`${epubUrl}META-INF/encryption.xml`);
-            const containerURL = `${epubUrl}META-INF/container.xml`;
+            this.startLoadingAsPlainXML(`${pubURL}META-INF/encryption.xml`);
+            const containerURL = `${pubURL}META-INF/container.xml`;
             this.loadAsPlainXML(containerURL).then(containerXML => {
                 if (containerXML) {
                     const roots = containerXML.doc().child("container").child("rootfiles")
@@ -133,7 +133,7 @@ adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
 
                     for (const root of roots) {
                         if (root) {
-                            this.loadOPF(epubUrl, root, haveZipMetadata).thenFinish(frame);
+                            this.loadOPF(pubURL, root, haveZipMetadata).thenFinish(frame);
                             return;
                         }
                     }
@@ -153,8 +153,8 @@ adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
             }
             if (response.contentType == "application/oebps-package+xml" || (/\.opf(?:[#?]|$)/).test(url)) {
                 // EPUB OPF
-                const [, epubUrl, root] = url.match(/^((?:.*\/)?)([^/]*)$/);
-                this.loadOPF(epubUrl, root, haveZipMetadata).thenFinish(frame);
+                const [, pubURL, root] = url.match(/^((?:.*\/)?)([^/]*)$/);
+                this.loadOPF(pubURL, root, haveZipMetadata).thenFinish(frame);
             } else if (response.contentType == "application/ld+json" ||
                        response.contentType == "application/webpub+json" ||
                        response.contentType == "application/audiobook+json" ||
@@ -182,14 +182,14 @@ adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
 };
 
 /**
- * @param {string} epubURL
+ * @param {string} pubURL
  * @param {string} root
  * @param {boolean} haveZipMetadata
  * @return {!adapt.task.Result.<adapt.epub.OPFDoc>}
  */
-adapt.epub.EPUBDocStore.prototype.loadOPF = function(epubURL, root, haveZipMetadata) {
+adapt.epub.EPUBDocStore.prototype.loadOPF = function(pubURL, root, haveZipMetadata) {
     const self = this;
-    const url = epubURL + root;
+    const url = pubURL + root;
     let opf = self.opfByURL[url];
     if (opf) {
         return adapt.task.newResult(opf);
@@ -200,14 +200,14 @@ adapt.epub.EPUBDocStore.prototype.loadOPF = function(epubURL, root, haveZipMetad
         if (!opfXML) {
             vivliostyle.logging.logger.error(`Received an empty response for EPUB OPF ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`);
         } else {
-            self.loadAsPlainXML(`${epubURL}META-INF/encryption.xml`).then(encXML => {
+            self.loadAsPlainXML(`${pubURL}META-INF/encryption.xml`).then(encXML => {
                 const zipMetadataResult = haveZipMetadata ?
-                    self.loadAsJSON(`${epubURL}?r=list`) : adapt.task.newResult(null);
+                    self.loadAsJSON(`${pubURL}?r=list`) : adapt.task.newResult(null);
                 zipMetadataResult.then(zipMetadata => {
-                    opf = new adapt.epub.OPFDoc(self, epubURL);
-                    opf.initWithXMLDoc(opfXML, encXML, zipMetadata, `${epubURL}?r=manifest`).then(() => {
+                    opf = new adapt.epub.OPFDoc(self, pubURL);
+                    opf.initWithXMLDoc(opfXML, encXML, zipMetadata, `${pubURL}?r=manifest`).then(() => {
                         self.opfByURL[url] = opf;
-                        self.primaryOPFByEPubURL[epubURL] = opf;
+                        self.primaryOPFByEPubURL[pubURL] = opf;
                         frame.finish(opf);
                     });
                 });
@@ -642,9 +642,9 @@ adapt.epub.transformedIdPrefix = "viv-id-";
 /**
  * @constructor
  * @param {adapt.epub.EPUBDocStore} store
- * @param {string} epubURL
+ * @param {string} pubURL
  */
-adapt.epub.OPFDoc = function(store, epubURL) {
+adapt.epub.OPFDoc = function(store, pubURL) {
     /** @const */ this.store = store;
     /** @type {adapt.xmldoc.XMLDocHolder} */ this.opfXML = null;
     /** @type {adapt.xmldoc.XMLDocHolder} */ this.encXML = null;
@@ -652,7 +652,7 @@ adapt.epub.OPFDoc = function(store, epubURL) {
     /** @type {Array.<adapt.epub.OPFItem>} */ this.spine = null;
     /** @type {Object.<string,adapt.epub.OPFItem>} */ this.itemMap = null;
     /** @type {Object.<string,adapt.epub.OPFItem>} */ this.itemMapByPath = null;
-    /** @const */ this.epubURL = epubURL;
+    /** @const */ this.pubURL = pubURL;
     /** @type {?string} */ this.uid = null;
     /** @type {Object.<string,string>} */ this.bindings = {};
     /** @type {?string} */ this.lang = null;
@@ -742,10 +742,10 @@ adapt.epub.OPFDoc.prototype.getMetadata = function() {
  */
 adapt.epub.OPFDoc.prototype.getPathFromURL = function(url) {
     if (url.startsWith("data:")) {
-        return (url === this.epubURL) ? "" : url;
+        return (url === this.pubURL) ? "" : url;
     }
-    if (this.epubURL) {
-        let epubBaseURL = adapt.base.resolveURL("", this.epubURL);
+    if (this.pubURL) {
+        let epubBaseURL = adapt.base.resolveURL("", this.pubURL);
         if (url === epubBaseURL || url + "/" === epubBaseURL) {
             return "";
         }
@@ -858,7 +858,7 @@ adapt.epub.OPFDoc.prototype.initWithXMLDoc = function(opfXML, encXML, zipMetadat
             // Have to deobfuscate in JavaScript
             const deobfuscator = adapt.epub.makeDeobfuscator(this.uid);
             for (var i = 0; i < idpfObfURLs.length; i++) {
-                this.store.deobfuscators[this.epubURL + idpfObfURLs[i]] = deobfuscator;
+                this.store.deobfuscators[this.pubURL + idpfObfURLs[i]] = deobfuscator;
             }
         }
         if (this.prePaginated) {
@@ -1038,7 +1038,7 @@ adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) 
     }
     // TODO: other metadata...
 
-    const primaryEntryPath = this.getPathFromURL(this.epubURL);
+    const primaryEntryPath = this.getPathFromURL(this.pubURL);
     if (!manifestObj["readingOrder"] && doc && primaryEntryPath !== null)  {
         manifestObj["readingOrder"] = [encodeURI(primaryEntryPath)];
 
@@ -1070,7 +1070,7 @@ adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) 
                 if (encodingFormat === "text/html" || encodingFormat === "application/xhtml+xml" ||
                         (/(^|\/)([^/]+\.(x?html|htm|xht)|[^/.]*)([#?]|$)/).test(url)) {
                     const param = {
-                        url: adapt.base.resolveURL(adapt.base.convertSpecialURL(url), this.epubURL),
+                        url: adapt.base.resolveURL(adapt.base.convertSpecialURL(url), this.pubURL),
                         index: itemCount++,
                         startPage: null,
                         skipPagesBefore: null

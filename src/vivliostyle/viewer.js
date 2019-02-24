@@ -217,20 +217,20 @@ goog.scope(() => {
         if (!singleDocumentOptions) {
             this.eventTarget.dispatchEvent({"type": "error", "content": "No URL specified"});
         }
-        this.loadDocumentOrEPUB(singleDocumentOptions, null, opt_documentOptions, opt_viewerOptions);
+        this.loadDocumentOrPublication(singleDocumentOptions, null, opt_documentOptions, opt_viewerOptions);
     };
 
     /**
-     * Load an EPUB document.
-     * @param {string} epubUrl
+     * Load a EPUB/WebPub publication.
+     * @param {string} pubURL
      * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
      */
-    Viewer.prototype.loadEPUB = function(epubUrl, opt_documentOptions, opt_viewerOptions) {
-        if (!epubUrl) {
+    Viewer.prototype.loadPublication = function(pubURL, opt_documentOptions, opt_viewerOptions) {
+        if (!pubURL) {
             this.eventTarget.dispatchEvent({"type": "error", "content": "No URL specified"});
         }
-        this.loadDocumentOrEPUB(null, epubUrl, opt_documentOptions, opt_viewerOptions);
+        this.loadDocumentOrPublication(null, pubURL, opt_documentOptions, opt_viewerOptions);
     };
 
     /**
@@ -272,14 +272,14 @@ goog.scope(() => {
     }
 
     /**
-     * Load an HTML or XML document, or an EPUB document.
+     * Load an HTML or XML document, or an EPUB/WebPub publication.
      * @private
      * @param {?(!vivliostyle.viewer.SingleDocumentOptions|!Array<!vivliostyle.viewer.SingleDocumentOptions>)} singleDocumentOptions
-     * @param {?string} epubUrl
+     * @param {?string} pubURL
      * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
      */
-    Viewer.prototype.loadDocumentOrEPUB = function(singleDocumentOptions, epubUrl, opt_documentOptions, opt_viewerOptions) {
+    Viewer.prototype.loadDocumentOrPublication = function(singleDocumentOptions, pubURL, opt_documentOptions, opt_viewerOptions) {
         const documentOptions = opt_documentOptions || {};
 
         function convertStyleSheetArray(arr) {
@@ -301,11 +301,11 @@ goog.scope(() => {
         }
 
         const command = Object.assign({
-            "a": singleDocumentOptions ? "loadXML" : "loadEPUB",
+            "a": singleDocumentOptions ? "loadXML" : "loadPublication",
 
             "userAgentRootURL": this.settings["userAgentRootURL"],
 
-            "url": convertSingleDocumentOptions(singleDocumentOptions) || epubUrl,
+            "url": convertSingleDocumentOptions(singleDocumentOptions) || pubURL,
             "document": documentOptions["documentObject"],
             "fragment": documentOptions["fragment"],
             "authorStyleSheet": authorStyleSheet,
@@ -432,7 +432,7 @@ goog.scope(() => {
     goog.exportProperty(Viewer.prototype, "addListener", Viewer.prototype.addListener);
     goog.exportProperty(Viewer.prototype, "removeListener", Viewer.prototype.removeListener);
     goog.exportProperty(Viewer.prototype, "loadDocument", Viewer.prototype.loadDocument);
-    goog.exportProperty(Viewer.prototype, "loadEPUB", Viewer.prototype.loadEPUB);
+    goog.exportProperty(Viewer.prototype, "loadPublication", Viewer.prototype.loadPublication);
     goog.exportProperty(Viewer.prototype, "getCurrentPageProgression", Viewer.prototype.getCurrentPageProgression);
     goog.exportProperty(Viewer.prototype, "navigateToPage", Viewer.prototype.navigateToPage);
     goog.exportProperty(Viewer.prototype, "navigateToInternalUrl", Viewer.prototype.navigateToInternalUrl);
