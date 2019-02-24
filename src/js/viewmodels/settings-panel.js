@@ -95,19 +95,29 @@ class SettingsPanel {
                 this.viewer_.showTOC(false); // Hide TOC box
             }
             this.opened(true);
-            this.pinned(false);
-            this.justClicked = true;
-            this.focusToFirstItem();
 
-            setTimeout(() => {
+            if (this.justClicked) {
                 this.justClicked = false;
-            }, 300);
+                this.pinned(true);
+            } else {
+                this.pinned(false);
+                this.justClicked = true;
+                this.focusToFirstItem();
+                setTimeout(() => {
+                    this.justClicked = false;
+                }, 300);
+            }
         } else if (this.justClicked) {
-            // Double click to keep Settings panel open when Applay or Reset is clicked.
+            // Double click to keep Settings panel open when Apply is clicked.
             this.justClicked = false;
             this.pinned(true);
         } else {
             this.close();
+
+            this.justClicked = true;
+            setTimeout(() => {
+                this.justClicked = false;
+            }, 300);
         }
     }
 

@@ -400,9 +400,13 @@ class Navigation {
             const tocToggle = document.getElementById("vivliostyle-menu-item_toc-toggle");
 
             if (!this.viewer_.tocVisible()) {
-                this.viewer_.showTOC(true, true);   // autohide=true
-                this.justClicked = true;
-
+                if (this.justClicked) {
+                    this.viewer_.showTOC(true, false);   // autohide=false
+                    this.justClicked = false;
+                } else {
+                    this.viewer_.showTOC(true, true);   // autohide=true
+                    this.justClicked = true;
+                }
                 // Here use timer for two purposes:
                 // - Check double click to make TOC box pinned.
                 // - Move focus to TOC box when TOC box becomes visible.
@@ -427,7 +431,14 @@ class Navigation {
                     intervalID = 0;
                 }
                 this.viewer_.showTOC(false);
-                document.getElementById("vivliostyle-viewer-viewport").focus();
+
+                this.justClicked = true;
+                setTimeout(() => {
+                    if (this.justClicked) {
+                        document.getElementById("vivliostyle-viewer-viewport").focus();
+                        this.justClicked = false;
+                    }
+                }, 300);
             }
             return true;
         } else {
