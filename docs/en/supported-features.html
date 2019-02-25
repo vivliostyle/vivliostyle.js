@@ -63,6 +63,19 @@
   <li><a href="https://www.w3.org/TR/css-values/#funcdef-calc"><code>calc()</code> function</a>
     <ul>
       <li>Supported in all browsers</li>
+      <li><code>min()</code> and <code>max()</code> functions can be used inside <code>calc()</code> function.</li>
+      <li>Limitation: Percentage value in <code>calc()</code> is not calculated correctly.</li>
+    </ul>
+  </li>
+  <li><a href="https://drafts.csswg.org/css-env/"><code>env()</code> function</a>
+    <ul>
+      <li>Supported in all browsers</li>
+      <li>Implemented only <code>env(pub-title)</code> and <code>env(doc-title)</code> that are not yet defined in the css-env draft spec but useful for making page header.
+        <ul>
+          <li><code>env(pub-title)</code>: publication title = EPUB, Web publication, or primary entry page HTML title.</li>
+          <li><code>env(doc-title)</code>: document title = HTML title, which may be chapter or section title in a publication composed of multiple HTML documents</li>
+        </ul>
+      </li>
     </ul>
   </li>
 </ul>
@@ -370,6 +383,7 @@
   <li>Vivliostyle uses styles specified for <a href="https://www.w3.org/TR/CSS2/media.html#media-types"><code>print</code> media</a> (as well as <code>all</code>).
     <ul>
       <li>Supported in all browsers</li>
+      <li>Vivliostyle specific media type <code>vivliostyle</code> is enabled in addition to <code>print</code> media.</li>
     </ul>
   </li>
   <li>Supported media features

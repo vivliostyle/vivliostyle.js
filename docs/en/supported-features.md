@@ -28,6 +28,13 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Only supported in values of `content` property.
 - [`calc()` function](https://www.w3.org/TR/css-values/#funcdef-calc)
   - Supported in all browsers
+  - `min()` and `max()` functions can be used inside `calc()` function.
+  - Limitation: Percentage value in `calc()` is not calculated correctly.
+- [`env()` function](https://drafts.csswg.org/css-env/)
+  - Supported in all browsers
+  - Implemented only `env(pub-title)` and `env(doc-title)` that are not yet defined in the css-env draft spec but useful for making page header.
+    - `env(pub-title)`: publication title = EPUB, Web publication, or primary entry page HTML title.
+    - `env(doc-title)`: document title = HTML title, which may be chapter or section title in a publication composed of multiple HTML documents
 
 ## Selectors
 
@@ -172,6 +179,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 - Vivliostyle uses styles specified for [`print` media](https://www.w3.org/TR/CSS2/media.html#media-types) (as well as `all`).
   - Supported in all browsers
+  - Vivliostyle specific media type `vivliostyle` is enabled in addition to `print` media.
 - Supported media features
   - [`(min-|max-)width`](https://www.w3.org/TR/css3-mediaqueries/#width)
       - Supported in all browsers
