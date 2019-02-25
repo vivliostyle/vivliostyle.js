@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="google" content="notranslate">
+<meta name="google" content="notranslate"/>
 <title>Vivliostyle Viewer</title>
 <script src="https://wicg.github.io/visual-viewport/polyfill/visualViewport.js"></script>
 <script src="resources/mathjax-config.js"></script>
@@ -27,7 +27,7 @@
 <body data-vivliostyle-viewer-status="loading" data-bind="event: {keydown: handleKey}, attr: {'data-vivliostyle-viewer-status': viewer.state.status, 'aria-busy': viewer.state.status()=='loading'}">
 <section id="vivliostyle-welcome" hidden data-bind="visible: !viewer.state.status(), attr: {hidden: !!viewer.state.status(), 'aria-hidden': viewer.state.status()?'true':'false'}, click: navigation.onclickViewport, swipePages: true">
 	<h1>Vivliostyle Viewer <small>(version:&nbsp;<%= versions.core.replace(/\.\d{14}$/, "") %>)</small></h1>
-	<input id="vivliostyle-input-url" type="text" placeholder="Input a document URL" data-bind="textInput: viewer.inputUrl">
+	<input id="vivliostyle-input-url" type="text" placeholder="Input a document URL" data-bind="textInput: viewer.inputUrl"/>
 	<p><strong>Supported document types:</strong></p>
 	<ul>
 		<li>(X)HTML document, with CSS for paged media</li>
