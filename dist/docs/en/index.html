@@ -28,6 +28,7 @@
                                 <li><a href="#use">How to use</a></li>
                                 <li><a href="#htmlview">Specifying the HTML file to be displayed in Vivliostyle Viewer</a></li>
                                 <li><a href="#epubview">To display an EPUB</a></li>
+                                <li><a href="#webpubview">To display a Web publication</a></li>
                                 <li><a href="#multihtml">To specify multiple HTML files</a></li>
                                 <li><a href="#spread">To specify page spread view mode</a></li>
                                 <li><a href="#addstyle">To specify additional style sheets</a></li>
@@ -51,9 +52,9 @@
 
                 <p>To use the Vivliostyle Viewer in a local environment, start a web server by following the instructions described in the <a href="https://github.com/vivliostyle/vivliostyle-ui/blob/master/dist/README.md"><code>README.md</code> (read online)</a> attached to the distribution package.</p>
 
-                <p>You can also use the public online Vivliostyle Viewer, <code class="url">https://vivliostyle.github.io/vivliostyle.js/viewer/vivliostyle-viewer.html</code>, that has always been updated to the latest development version.</p>
+                <p>You can also use the public online Vivliostyle Viewer, <code class="url"></code><a href="https://vivliostyle.github.io/vivliostyle.js/viewer/vivliostyle-viewer.html">https://vivliostyle.github.io/vivliostyle.js/viewer/vivliostyle-viewer.html</code></a>, that has always been updated to the latest development version.</p>
 
-                <p>The <code>vivliostyle-viewer.html</code> under the <code>viewer</code> folder is the main file of Vivliostyle Viewer. A URL fragment notation <code>#x=</code>… appended to this URL is used to specify the HTML file to be displayed.</p>
+                <p>The <code>vivliostyle-viewer.html</code> under the <code>viewer</code> folder is the main file of Vivliostyle Viewer. A URL fragment notation <code>#x=</code>… or <code>#b=</code>… appended to this URL is used to specify the URL of the document to be displayed.</p>
 
                 <h3 id="htmlview">Specifying the HTML file to be displayed in Vivliostyle Viewer</h3>
 
@@ -75,7 +76,7 @@
 
                 <h3 id="epubview">To display an EPUB</h3>
 
-                <p>You can display an unzipped EPUB file with the Vivliostyle Viewer. In that case, use the following notation instead of <code>#x=</code>… :</p>
+                <p>You can display unzipped EPUB files with the Vivliostyle Viewer. In this case, use the following notation:</p>
 
                 <div class="code"><code>#b=</code>⟨URL of the unzipped EPUB folder (relative to the Vivliostyle Viewer)⟩</div>
 
@@ -87,9 +88,19 @@
 
                 <div class="code"><a id="input-epub-path-link" class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#b=../test.epub/"><code class="url"><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=<span id="input-epub-path-fragment">../test.epub/</span></code></a></div>
 
+                <h3 id="webpubview">To display a Web publication</h3>
+
+                <p>You can display Web publication (a collection of HTML documents) with the Vivliostyle Viewer. In this case, use the following notation:</p>
+
+                <div class="code"><code>#b=</code>⟨URL of the primary entry page HTML document or manifest file (relative to the Vivliostyle Viewer)⟩</div>
+
+                <p>For the format of Web publication manifest, W3C draft <a href="https://w3c.github.io/wpub/">Web Publications</a> and <a href="https://github.com/readium/webpub-manifest/">Readium Web Publication Manifest</a> are supported.</p>
+
+                <p>When Web publication manifest does not exist, and there are links to other HTML documents in the table of contents in the specified HTML document, those documents are loaded automatically. Vivliostyle treats HTML elements that match the following CSS selector as a table of contents element: <code>[role=doc-toc], [role=directory], nav, .toc, #toc</code></p>
+
                 <h3 id="multihtml">To specify multiple HTML files</h3>
 
-                <p>To display multiple HTML files collectively in the Vivliostyle Viewer, make them EPUB format and use the above method, or you can specify multiple HTML files directly as:</p>
+                <p>To display multiple HTML files collectively in the Vivliostyle Viewer, make them Web publication format and use the above method, or you can specify multiple HTML files directly as:</p>
 
                 <div class="code"><code>#x=</code>⟨URL of the 1st HTML file⟩<code>&amp;x=</code>⟨URL of the 2nd HTML file⟩…<code>&amp;x=</code>⟨URL of the Nth HTML file⟩</div>
 
@@ -118,12 +129,16 @@
                 <p>Using multiple <code>&amp;style=</code> and/or <code>&amp;userStyle=</code> you can specify as many style sheets as needed.</p>
                 
                 <p>You can also use data URL. For example:</p>
-                
-                <div class="code"><code class="url">&amp;style=data:text/css,html{writing-mode:vertical-rl}</code></div>
+
+                <div class="code"><code class="url">&amp;style=data:,html{writing-mode:vertical-rl}</code></div>
+
+                <p>User style can also be set in the <strong>User Style Preferences</strong> in the settings panel. You can check the CSS in the <strong>CSS Details</strong> box.</p>
 
                 <h3 id="print">How to Print/Save as PDF from Vivliostyle Viewer</h3>
 
                 <p>Use your browser’s print/save as PDF feature. For example, to save as PDF with Google Chrome, select Print from menu, set Destination to “Save as PDF”, check “Background graphics”, and “Save” to PDF.</p>
+
+                <p><strong>Note:</strong> When you print all pages of a document, check that <strong>Render All Pages</strong> is On in the setting panel. When this is Off, only the pages that have already been displayed can be printed, and the page number will not be output correctly.</p>
 
                 <h3 id="features">Features supported by Vivliostyle</h3>
 
