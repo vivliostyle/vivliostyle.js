@@ -28,6 +28,7 @@
                                 <li><a href="#use">使い方</a></li>
                                 <li><a href="#htmlview">Vivliostyle Viewer で表示するHTMLファイルの指定</a></li>
                                 <li><a href="#epubview">EPUBを表示するには</a></li>
+                                <li><a href="#webpubview">Web出版物を表示するには</a></li>
                                 <li><a href="#multihtml">複数のHTMLファイルを指定するには</a></li>
                                 <li><a href="#spread">見開きページ表示を指定するには</a></li>
                                 <li><a href="#addstyle">スタイルシートを指定するには</a></li>
@@ -51,9 +52,9 @@
 
                 <p>Vivliostyle Viewer をローカル環境で利用する場合は、配布パッケージに同梱の <a href="https://github.com/vivliostyle/vivliostyle-ui/blob/master/dist/README.ja.md"><code>README.ja.md</code>（オンラインで読む）</a>に記載の「使い方」の手順にしたがってWebサーバーを起動してください。</p>
 
-                <p>公開されているオンラインの Vivliostyle Viewer (<code class="url">https://vivliostyle.github.io/vivliostyle.js/viewer/vivliostyle-viewer.html</code>) も利用できます（これは常に開発最新版に更新されてます）。</p>
+                <p>公開されているオンラインの Vivliostyle Viewer (<code class="url"><a href="https://vivliostyle.github.io/vivliostyle.js/viewer/vivliostyle-viewer.html">https://vivliostyle.github.io/vivliostyle.js/viewer/vivliostyle-viewer.html</a></code>) も利用できます（これは常に開発最新版に更新されてます）。</p>
 
-                <p><code>viewer</code> フォルダの下の <code>vivliostyle-viewer.html</code> が Vivliostyle Viewer 本体です。このURLに、<code>#x=</code>… のようなフラグメントの形式を付加して、表示するHTMLファイルを指定します。</p>
+                <p><code>viewer</code> フォルダの下の <code>vivliostyle-viewer.html</code> が Vivliostyle Viewer 本体です。このURLに、<code>#x=</code>… あるいは <code>#b=</code>… のようなフラグメントの形式を付加して、表示する文書のURLを指定します。</p>
 
                 <h3 id="htmlview">Vivliostyle Viewer で表示するHTMLファイルの指定</h3>
 
@@ -75,9 +76,9 @@
 
                 <h3 id="epubview">EPUBを表示するには</h3>
 
-                <p>ZIP展開済みのEPUBファイルを表示することもできます。その場合、 <code>#x=</code>… のかわりに次の形式を指定します:</p>
+                <p>ZIP展開済みのEPUBファイルを表示することもできます。その場合、次の形式を指定します:</p>
 
-                <div class="code"><code>#b=</code>⟨表示する展開済みEPUBフォルダのURL (Vivliostyle Viewer からの相対)⟩<code>/</code></div>
+                <div class="code"><code>#b=</code>⟨表示する展開済みEPUBフォルダのURL (Vivliostyle Viewer からの相対)⟩</div>
 
                 <p>例: <code>test.epub/</code> フォルダに展開済みのEPUBファイルを表示する場合: </p>
 
@@ -87,9 +88,19 @@
 
                 <div class="code"><a id="input-epub-path-link" class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#b=../test.epub/"><code class="url"><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=<span id="input-epub-path-fragment">../test.epub/</span></code></a></div>
 
+                <h3 id="webpubview">Web出版物を表示するには</h3>
+
+                <p>Web出版物（複数のHTML文書の集合）を表示するには、次の形式を指定します:</p>
+
+                <div class="code"><code>#b=</code>⟨主要エントリページであるHTML文書またはmanifestファイルのURL (Vivliostyle Viewer からの相対)⟩</div>
+
+                <p>Web出版物のmanifestファイルの形式は、W3Cドラフトの <a href="https://w3c.github.io/wpub/">Web Publications</a> および <a href="https://github.com/readium/webpub-manifest/">Readium Web Publication Manifest</a> をサポートしています。</p>
+
+                <p>Web出版物のmanifestファイルが存在しなくても、指定したHTML文書内の目次要素内に他のHTML文書へのリンクがある場合は、それらの文書が自動的にロードされます。Vivliostyle はHTML文書内の次のCSSセレクタにマッチする要素を目次要素として扱います: <code>[role=doc-toc], [role=directory], nav, .toc, #toc</code></p>
+
                 <h3 id="multihtml">複数のHTMLファイルを指定するには</h3>
 
-                <p>複数のHTMLファイルを Vivliostyle Viewer でまとめて表示するには、EPUBの形式にして上記の方法で指定するか、または、次のように直接複数のHTMLファイルを指定します:</p>
+                <p>複数のHTMLファイルを Vivliostyle Viewer でまとめて表示するには、Web出版物の形式にして上記の方法で指定するか、または、次のように直接複数のHTMLファイルを指定します:</p>
 
                 <div class="code"><code>#x=</code>⟨最初のHTMLファイルのURL⟩<code>&amp;x=</code>⟨2番目のHTMLファイルのURL⟩…<code>&amp;x=</code>⟨n番目のHTMLファイルのURL⟩</div>
 
@@ -119,11 +130,15 @@
                 
                 <p>データURLも利用できます。例えば:</p>
 
-                <div class="code"><code class="url">&amp;style=data:text/css,html{writing-mode:vertical-rl}</code></div>
+                <div class="code"><code class="url">&amp;style=data:,html{writing-mode:vertical-rl}</code></div>
+
+                <p>ユーザースタイルの設定は、設定パネルの <strong>User Style Preferences</strong> からも行うことができます。設定内容のCSSは <strong>CSS Details</strong> 欄で確認することができます。</p>
 
                 <h3 id="print">Vivliostyle Viewer から印刷・PDF出力を行うには</h3>
 
                 <p>ブラウザの印刷・PDF出力機能を利用できます。例えば、Google Chrome で PDF に出力するには、メニューから「印刷」を開き、出力先として「PDFに保存」、背景のグラフィック ON と指定して「保存」します。</p>
+
+                <p><strong>注意:</strong> 文書の全ページを印刷する場合、設定パネルで <strong>Render All Pages</strong> が On になっていることを確認してください。これが Off の場合、すでに表示されたページしか印刷できず、またページ番号が正しく出力されません。</p>
 
                 <h3 id="features">Vivliostyleがサポートする機能</h3>
 
