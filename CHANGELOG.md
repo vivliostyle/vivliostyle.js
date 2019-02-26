@@ -1,12 +1,12 @@
 # Change Log
 
-## [2019.1.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.100) - 2019-02-25
+## [2019.1.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.100) - 2019-02-27
 
 ### Added
 
-- TOC (Table of Contents) navigation
+- TOC (Table of Contents) navigation is now enabled
   - <https://github.com/vivliostyle/vivliostyle.js/pull/498>, <https://github.com/vivliostyle/vivliostyle.js/pull/511>
-  - TOC box generation is enabled when `#b=` Viewer parameter (= Viewer.loadPublication() function) is used, and the publication has TOC. TOC in HTML document is marked up with `<nav role="doc-toc">`. Vivliostyle recognizes element that is selected with CSS selector `[role=doc-toc], [role=directory], nav, .toc, #toc` as TOC element.
+  - TOC box generation is enabled when `#b=` Viewer parameter (= Viewer.loadPublication() function) is used, and the publication has TOC data. In HTML documents, TOC is marked up with e.g. `<nav role="doc-toc">`. Vivliostyle recognizes element that is selected with CSS selector `[role=doc-toc], [role=directory], nav, .toc, #toc` as a TOC element.
   - [Viewer UI] <https://github.com/vivliostyle/vivliostyle-ui/pull/62>
 - Support Web Publications and similar multi-HTML documents
   - <https://github.com/vivliostyle/vivliostyle.js/pull/511>
@@ -15,7 +15,7 @@
       - URL of the OPF file can be specified as well as the top directory of the unzipped EPUB files.
     - Web publication (a collection of HTML documents with reading order)
       - URL of the primary entry page or manifest file can be specified.
-      - Both W3C draft [Web Publication](https://w3c.github.io/wpub/) manifest and [Readium Web Publication Manifest](https://github.com/readium/webpub-manifest/) formats are supported.
+      - For the format of Web publication manifest, W3C draft [Web Publications](https://w3c.github.io/wpub/) and [Readium Web Publication Manifest](https://github.com/readium/webpub-manifest/) are supported.
     - (X)HTML document
       - When (X)HTML document URL is specified, the URL is treated as primary entry page's, and a series of HTML files are automatically loaded.
         - When the web publication manifest is specified in the primary entry page (X)HTML document, the readingOrder in the manifest is used.
@@ -27,7 +27,7 @@
   - JS Bin URL is converted to JS Bin output URL and can be loaded. This is useful for testing Vivliostyle output from small HTML + CSS code, as well as Gist.
 - Publication title and individual HTML document title are now passed to viewer UI
   - https://github.com/vivliostyle/vivliostyle.js/pull/501
-  - [Viewer UI] Reflects viewing document title to the web page title
+  - [Viewer UI] Reflects viewing document title to the web page title.
     - <https://github.com/vivliostyle/vivliostyle-ui/pull/61>
 - `env(pub-title)` and `env(doc-title)` environment variables for page headers with publication/document titles
   - <https://github.com/vivliostyle/vivliostyle.js/pull/512>
@@ -49,7 +49,7 @@
   - <https://github.com/vivliostyle/vivliostyle-ui/pull/64>
   - New settings: Page Margins, Page Breaks (widows/orphans), Images, Text (base font-size, line-height, font-family)
   - User style CSS code is shown and editable in "CSS Details" box
-  - User style CSS is saved in the URL parameter `userStyle=data:,/*<viewer>*/.../*</viewer>*/` and not disappear when reloading, and can be bookmarked in browser.
+  - User style CSS is saved in the URL parameter `userStyle=data:,/*<viewer>*/`…`/*</viewer>*/` and not disappear when reloading, and can be bookmarked in browser.
   - "Font size (%)" reflects the ViewerOptions.fontSize that can be increase/decrease with "Text: larger/smaller" buttons, and this setting is saved in the new URL parameter `fontSize=`.
 - [Viewer UI] Vivliostyle Viewer start page with document URL input and usage description
   - <https://github.com/vivliostyle/vivliostyle-ui/pull/65>
@@ -64,7 +64,7 @@
   - Off: for Read (quick loading with rough page count) -- This mode is necessary for viewing large publication composed of a lot of HTML documents.
   - [Viewer UI] <https://github.com/vivliostyle/vivliostyle-ui/pull/60>, <https://github.com/vivliostyle/vivliostyle-ui/pull/61>
     - This setting can be specified in setting panel and URL parameter renderAllPages=[true|false].
-    - The default setting is renderAllPages=false for `#b=` (publication viewer mode) and renderAllPages=false for `#x=` (for (X)HTML documents).
+    - The default setting is renderAllPages=false (Off) for `#b=` (Book viewer mode) and renderAllPages=true (On) for `#x=` (for single (X)HTML documents).
 - Enabled 'vivliostyle' media type by default
   - <https://github.com/vivliostyle/vivliostyle.js/pull/500>
   - This can be used like 'print' media type, and useful for distinguish Vivliostyle specific style sheets from general print style sheets.
@@ -72,10 +72,15 @@
   - <https://github.com/vivliostyle/vivliostyle.js/commit/39421943>
 - Removed the workaround for Microsoft Edge's `text-justify: inter-ideograph` problem
   - <https://github.com/vivliostyle/vivliostyle.js/commit/457b5795>
-- Improved error messages when loading failed.
-  - <https://github.com/vivliostyle/vivliostyle.js/commit/c2df75fb>
-- Renamed the function `loadEPUB()` to `loadPublication()` that is now not only for EPUB.
+- Improved error messages when document loading failed.
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/511>, <https://github.com/vivliostyle/vivliostyle.js/commit/c2df75fb>
+- Renamed the function corresponding the `#b=` Viewer parameter, `loadEPUB()` to `loadPublication()`, that is now not only for EPUB.
   - <https://github.com/vivliostyle/vivliostyle.js/commit/7e909f99>
+
+### Fixed
+
+- Fix bug that media attribute is not honored on `<style>` element.
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/35bea5e4>
 
 
 ## [2018.12.103](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.12.103) - 2019-01-03
