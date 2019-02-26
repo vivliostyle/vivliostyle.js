@@ -3377,6 +3377,9 @@ var Navigation = (function () {
     }, {
         key: "onclickViewport",
         value: function onclickViewport() {
+            if (this.settingsPanel_.justClicked) {
+                return true;
+            }
             if (this.viewer_.tocVisible() && !this.viewer_.tocPinned()) {
                 var tocBox = document.querySelector("[data-vivliostyle-toc-box]");
                 if (tocBox && !tocBox.contains(document.activeElement)) {

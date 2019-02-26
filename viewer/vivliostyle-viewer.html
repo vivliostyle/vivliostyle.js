@@ -35,14 +35,14 @@
 	<p>Notes:</p>
 	<ul>
 		<li>GitHub and Gist URLs can be directly specified. Vivliostyle loads raw github/gist content when such URL is specified.</li>
-		<li>⚠️Mixed Content ("http:" URL is specified to "https:" Vivliostyle Viewer) is usually blocked by browser.</li>
+		<li>⚠️Mixed Content (“http:” URL is specified to “https:” Vivliostyle Viewer) is usually blocked by browser.</li>
 		<li>⚠️Cross-Origin (request to different domain) is usually blocked by browser unless the server is configured to allow Cross-Origin Resource Sharing (CORS).</li>
 	</ul>
 	<p><strong>URL parameter options:</strong></p>
 	<ul>
-		<li><span>#<b>b</b>=&lt;document URL&gt;</span> or <span>#<b>x</b>=&lt;document URL&gt;</span></li>
+		<li><span>#<b>b</b>=&lt;document URL&gt;</span> or <span>#<b>x</b>=&lt;document URL&gt;</span>
 			<ul>
-				<li><b>b</b>: Book viewer mode. When (X)HTML document URL is specified, the URL is treated as primary entry page's, and a series of HTML documents are automatically loaded.</li>
+				<li><b>b</b>: Book viewer mode. When (X)HTML document URL is specified, the URL is treated as primary entry page’s, and a series of HTML documents linked from the manifest or TOC (Table of Contents, e.g. marked up with <code>&lt;nav role="doc-toc"&gt;</code>)  are automatically loaded.</li>
 				<li><b>x</b>: (X)HTML document is simply loaded. Multiple documents can be specified as #<b>x</b>=&lt;1st HTML&gt;&amp;<b>x</b>=&lt;2nd HTML&gt;...</li>
 			</ul>
 		</li>
@@ -64,6 +64,10 @@
 	</ul>
 	<p>Options can also be set in the <a href="#" data-bind="click: settingsPanel.toggle">Settings</a> panel.</p>
 	<p>For more details, see documentation on <a href="https://vivliostyle.org"><strong>Vivliostyle.org</strong></a>.</p>
+	<ul>
+		<li><a href="https://vivliostyle.github.io/vivliostyle.js/docs/en/">Vivliostyle Viewer User’s Guide</a></li>
+		<li><a href="https://vivliostyle.github.io/vivliostyle.js/docs/ja/">Vivliostyle Viewer ユーザーガイド (日本語)</a></li>
+	</ul>
 </section>
 <div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" role="main" tabindex="0" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, click: navigation.onclickViewport, swipePages: true"></div>
 <span role="button" id="vivliostyle-page-navigation-left" title="navigate to left" aria-keyshortcuts="ArrowLeft" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToLeftDisabled()}, attr: {'aria-disabled': navigation.isNavigateToLeftDisabled}"></span>
@@ -234,7 +238,7 @@
 				</div>
 				<aside class="vivliostyle-menu-detail-aside">
 					<div><small>Powered by</small> <a href="https://vivliostyle.org"><strong>Vivliostyle</strong></a> </div>
-					<div class="version"><small>(<span>Core: 2019.1.100-pre.20190225195634,</span> <span>UI: 2019.1.100-pre.20190225200216</span>)</small></div>
+					<div class="version"><small>(<span>Core: 2019.1.100-pre.20190225195634,</span> <span>UI: 2019.1.100-pre.20190226133339</span>)</small></div>
 				</aside>
 			</div>
 		</li>
