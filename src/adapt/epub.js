@@ -1045,7 +1045,7 @@ adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) 
         // Find TOC in the primary entry (X)HTML
         const selector = "[role=doc-toc] a[href]," +
                          "[role=directory] a[href]," +
-                         "nav a[href]," +
+                         "nav li a[href]," +
                          ".toc a[href]," +
                          "#toc a[href]";
         Array.from(doc.querySelectorAll(selector)).forEach(anchorElem => {
