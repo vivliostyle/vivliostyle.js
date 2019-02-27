@@ -1,6 +1,6 @@
 # Change Log
 
-## [2019.1.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.100) - 2019-02-27
+## [2019.1.101](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.101) - 2019-02-27
 
 ### Added
 
