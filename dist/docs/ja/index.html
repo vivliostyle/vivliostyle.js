@@ -76,8 +76,8 @@
     <ul>
         <li><span>#<b>b</b>=&lt;文書のURL&gt;</span> または <span>#<b>x</b>=&lt;文書のURL&gt;</span>
             <ul>
-                <li><b>b</b>：出版物閲覧モード。(X)HTML文書のURLが指定された場合、そのURLはプライマリーエントリーページのものとして扱われ、マニフェストまたは目次（<code>&lt;nav role="doc-toc"&gt;</code> などでマークアップ）からリンクされた一連のHTML文書が自動的に読み込まれます。</li>
-                <li><b>x</b>：(X)HTML文書が単純に読み込まれます。複数の文書を #<b>x</b>=&lt;最初のHTML&gt;&amp;<b>x</b>=&lt;2番目のHTML&gt;... のようにして指定することもできます。</li>
+                <li>#<b>b</b>= Book閲覧。(X)HTML文書のURLが指定された場合、そのURLはプライマリーエントリーページのものとして扱われ、マニフェストまたは目次（<code>&lt;nav role="doc-toc"&gt;</code> などでマークアップ）からリンクされた一連のHTML文書が自動的に読み込まれます。</li>
+                <li>#<b>x</b>= (X)HTML文書が単純に読み込まれます。複数の文書を #<b>x</b>=&lt;最初のHTML&gt;&amp;<b>x</b>=&lt;2番目のHTML&gt;... のようにして指定することもできます。</li>
             </ul>
         </li>
         <li><span>&amp;<b>spread</b>=[<b>true</b> | <b>false</b> | <b>auto</b>]</span>
@@ -89,8 +89,8 @@
         </li>
         <li><span>&amp;<b>renderAllPages</b>=[<b>true</b> | <b>false</b>]</span>
             <ul>
-                <li><b>true</b>：印刷用（すべてのページが印刷可能で、ページ番号は期待されるとおりに機能します）</li>
-                <li><b>false</b>：閲覧用（おおまかなページ番号を使って、クイックローディングを行います）</li>
+                <li><b>true</b>：印刷向き（すべてのページが印刷可能で、ページ番号は期待されるとおりに機能します）</li>
+                <li><b>false</b>：閲覧向き（おおまかなページ番号を使って、クイックロード）</li>
             </ul>
         </li>
         <li><span>&amp;<b>style</b>=&lt;追加の外部スタイルシートのURL&gt;</span></li>
@@ -153,7 +153,7 @@
 
                 <p>Web出版物のマニフェストの形式については、W3Cドラフトの <a href="https://w3c.github.io/wpub/">Web Publications</a> および <a href="https://github.com/readium/webpub-manifest/">Readium Web Publication Manifest</a> をサポートしています。</p>
 
-                <p>Web出版物のマニフェストが存在しなくても、指定したHTML文書内の目次要素内に他のHTML文書へのリンクがある場合は、それらの文書が自動的にロードされます。Vivliostyle はHTML文書内の次のCSSセレクタにマッチする要素を目次要素として扱います: <code>[role=doc-toc], [role=directory], nav, .toc, #toc</code></p>
+                <p>Web出版物のマニフェストが存在しなくても、指定したHTML文書内の目次要素内に他のHTML文書へのリンクがある場合は、それらの文書が自動的にロードされます。Vivliostyle はHTML文書内の次のCSSセレクタにマッチする要素を目次要素として扱います: <code>[role=doc-toc], [role=directory], nav li, .toc, #toc</code></p>
 
                 <p>Web上に公開されている複数のHTML文書からなる出版物を表示する例：</p>
                 <ul>
