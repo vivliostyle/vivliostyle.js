@@ -26,14 +26,15 @@
     - [`addListener(type, listener)`](#vieweraddlistenertype-listener)
     - [`getCurrentPageProgression()`](#viewergetcurrentpageprogression)
     - [`getPageSizes()`](#viewergetpagesizes)
+    - [`isTOCVisible()`](#vieweristocvisible)
     - [`loadDocument(singleDocumentOptions, documentOptions, viewerOptions)`](#viewerloaddocumentsingledocumentoptions-documentoptions-vieweroptions)
-    - [`loadEPUB(epubUrl, documentOptions, viewerOptions)`](#viewerloadepubepuburl-documentoptions-vieweroptions)
+    - [`loadPublication(pubURL, documentOptions, viewerOptions)`](#viewerloadpublicationpubURL-documentoptions-vieweroptions)
     - [`navigateToInternalUrl()`](#viewernavigatetointernalurl)
     - [`navigateToPage()`](#viewernavigatetopage)
-    - [`navigateToNthPage()`](#viewernavigatetonthpage)
     - [`queryZoomFactor(type)`](#viewerqueryzoomfactortype)
     - [`removeListener(type, listener)`](#viewerremovelistenertype-listener)
     - [`setOptions(options)`](#viewersetoptionsoptions)
+    - [`showTOC(opt_show, opt_autohide)`](#viewershowtocopt_show-opt_autohide)
 
 - [TypeDefs](#typedefs)
   - [`DocumentOptions`](#documentoptions)
@@ -165,6 +166,10 @@ Returns the current page progression of the viewer. If no document is loaded, re
 
 Array<{width: number, height: number}>
 
+### `Viewer.isTOCVisible()`
+
+Returns true if TOC is visible, false if hidden, null if TOC is unavailable
+
 ### `Viewer.loadDocument(singleDocumentOptions, documentOptions, viewerOptions)`
 
 Load an HTML or XML document(s).
@@ -175,13 +180,13 @@ Load an HTML or XML document(s).
 - `documentOptions` ([DocumentOptions](#documentoptions), optional)
 - `viewerOptions` ([ViewerOptions](#vieweroptions), optional)
 
-### `Viewer.loadEPUB(epubUrl, documentOptions, viewerOptions)`
+### `Viewer.loadPublication(pubURL, documentOptions, viewerOptions)`
 
-Load an EPUB document.
+Load a EPUB/WebPub publication.
 
 ###### Parameters
 
-- `epubUrl` (string)
+- `pubURL` (string)
 - `documentOptions` ([DocumentOptions](#documentoptions), optional)
 - `viewerOptions` ([ViewerOptions](#vieweroptions), optional)
 
@@ -192,10 +197,6 @@ Navigate to the specified internal URL.
 ### `Viewer.navigateToPage()`
 
 Navigate to the specified page.
-
-### `Viewer.navigateToNthPage(nthPage)`
-
-Navigate to the Nth page.
 
 ### `Viewer.queryZoomFactor(type)`
 
@@ -225,6 +226,15 @@ Set ViewerOptions to the viewer.
 ###### Parameters
 
 - `options` ([ViewerOptions](#vieweroptions))
+
+### `Viewer.showTOC(opt_show, opt_autohide)`
+
+Show or hide TOC box
+
+###### Parameters
+
+- `opt_show` (boolean) - If true show TOC, false hide TOC. If null or undefined toggle TOC.
+- `opt_autohide` (boolean) - If true, automatically hide when click TOC item
 
 # TypeDefs
 
